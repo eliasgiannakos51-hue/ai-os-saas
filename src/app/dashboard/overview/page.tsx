@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { ModuleSummaryCard } from "@/components/overview/module-summary-card";
+import { OverviewStats } from "@/components/overview/overview-stats";
 import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
 import type { ModuleRecord } from "@/types/module-record";
 
@@ -16,22 +17,43 @@ export default async function OverviewPage() {
     redirect("/login");
   }
 
+  const sevenDaysAgo = new Date(
+    Date.now() - 7 * 24 * 60 * 60 * 1000
+  ).toISOString();
+
   const summaries = await Promise.all(
     CLASSIFIER_MODULES.map(async (module) => {
-      const { data, count, error } = await supabase
-        .from(module.table)
-        .select("*", { count: "exact" })
-        .order("created_at", { ascending: false })
-        .limit(1);
+      const [latestResult, recentResult] = await Promise.all([
+        supabase
+          .from(module.table)
+          .select("*", { count: "exact" })
+          .order("created_at", { ascending: false })
+          .limit(1),
+        supabase
+          .from(module.table)
+          .select("id", { count: "exact", head: true })
+          .gte("created_at", sevenDaysAgo),
+      ]);
 
       return {
         module,
         href: moduleHref(module.slug),
-        count: count ?? 0,
-        latest: ((data as ModuleRecord[] | null)?.[0] as ModuleRecord | undefined) ?? null,
-        loadError: error?.message,
+        count: latestResult.count ?? 0,
+        recentCount: recentResult.count ?? 0,
+        latest:
+          ((latestResult.data as ModuleRecord[] | null)?.[0] as
+            | ModuleRecord
+            | undefined) ?? null,
+        loadError: latestResult.error?.message ?? recentResult.error?.message,
       };
     })
+  );
+
+  const totalEntries = summaries.reduce((sum, s) => sum + s.count, 0);
+  const recentEntries = summaries.reduce((sum, s) => sum + s.recentCount, 0);
+  const mostActive = summaries.reduce<(typeof summaries)[number] | null>(
+    (max, s) => (s.count > (max?.count ?? -1) ? s : max),
+    null
   );
 
   return (
@@ -47,6 +69,13 @@ export default async function OverviewPage() {
             all 13 modules at a glance.
           </p>
         </div>
+
+        <OverviewStats
+          totalEntries={totalEntries}
+          recentEntries={recentEntries}
+          mostActiveTitle={mostActive ? mostActive.module.title.toLowerCase() : null}
+          mostActiveCount={mostActive?.count ?? 0}
+        />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {summaries.map((summary) => (

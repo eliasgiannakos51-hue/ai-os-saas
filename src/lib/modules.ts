@@ -187,3 +187,5 @@ export const NAV_ITEMS: { href: string; label: string }[] = [
   { href: "/dashboard", label: "Ideas" },
   ...MODULES.map((m) => ({ href: `/dashboard/${m.slug}`, label: m.title })),
 ];
+
+export const CREATE_NAV_ITEM = { href: "/dashboard/create", label: "Create" };

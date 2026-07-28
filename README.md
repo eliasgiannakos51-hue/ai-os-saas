@@ -12,6 +12,13 @@ sidebar on `/dashboard`:
   driven by a shared config (`src/lib/modules.ts`) and generic list/form
   components (`src/components/modules/`), so every module gets the exact
   same list/form/RLS pattern as Ideas without 12 near-duplicate files.
+- **Create Anything** (`/dashboard/create`) — a single free-text box. It
+  posts to `/api/create`, a server-only route that calls the Claude API
+  (`ANTHROPIC_API_KEY`, never exposed to the client) with a forced tool call
+  to classify the message into one of the 13 modules and extract that
+  table's fields, then inserts it via the same RLS-scoped pattern as every
+  other module. If nothing matches clearly, it explains the available
+  modules instead of guessing.
 
 ## Setup
 
@@ -41,9 +48,13 @@ sidebar on `/dashboard`:
    ```
    NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   ANTHROPIC_API_KEY=your-anthropic-api-key
    ```
 
    `.env.local` is gitignored — never commit real credentials.
+   `ANTHROPIC_API_KEY` has no `NEXT_PUBLIC_` prefix on purpose — it's only
+   read server-side, in `/api/create`. Without it, every other module still
+   works; only Create Anything (`/dashboard/create`) needs it.
 
 5. **Email confirmation.** By default Supabase requires email confirmation
    before a new user can log in. For local testing you can disable this
@@ -70,19 +81,23 @@ src/
       layout.tsx               # auth guard + sidebar shell (wraps every module)
       page.tsx                 # Ideas module (hand-built)
       [module]/page.tsx        # the other 12 modules, driven by lib/modules.ts
+      create/page.tsx          # Create Anything
+    api/create/route.ts        # server-only: calls Claude, inserts into the right table
     layout.tsx
     globals.css
   components/
     logout-button.tsx
-    dashboard/sidebar.tsx      # nav links for all 13 modules
+    dashboard/sidebar.tsx      # nav links for all 13 modules + Create
     ideas/
       add-idea-form.tsx
       ideas-list.tsx
     modules/
       generic-add-form.tsx     # config-driven add form used by the 12 modules
       generic-list.tsx         # config-driven list used by the 12 modules
+    create/create-chat.tsx     # Create Anything's input + result UI
   lib/
     modules.ts                 # per-module table/field config + nav items
+    classifier-modules.ts      # all 13 modules' fields, for /api/create's system prompt
     supabase/
       client.ts                # browser client
       server.ts                 # server component / route handler client

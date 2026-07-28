@@ -1,5 +1,6 @@
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
+import { DeleteButton } from "@/components/delete-button";
 
 export function GenericList({
   module,
@@ -67,9 +68,16 @@ export function GenericList({
             );
           })}
 
-          <p className="mt-3 text-[10px] text-muted">
-            logged {new Date(record.created_at).toLocaleString()}
-          </p>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <p className="text-[10px] text-muted">
+              logged {new Date(record.created_at).toLocaleString()}
+            </p>
+            <DeleteButton
+              table={module.table}
+              id={record.id}
+              label={module.title.toLowerCase()}
+            />
+          </div>
         </div>
       ))}
     </div>

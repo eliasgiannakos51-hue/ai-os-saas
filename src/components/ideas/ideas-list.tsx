@@ -1,4 +1,5 @@
 import type { Idea } from "@/types/ideas";
+import { DeleteButton } from "@/components/delete-button";
 
 function verdictClasses(verdict: string | null) {
   const v = (verdict ?? "").toLowerCase();
@@ -80,9 +81,12 @@ export function IdeasList({ ideas }: { ideas: Idea[] }) {
             </p>
           )}
 
-          <p className="mt-3 text-[10px] text-muted">
-            logged {new Date(idea.created_at).toLocaleString()}
-          </p>
+          <div className="mt-3 flex items-center justify-between gap-2">
+            <p className="text-[10px] text-muted">
+              logged {new Date(idea.created_at).toLocaleString()}
+            </p>
+            <DeleteButton table="ideas" id={idea.id} label="idea" />
+          </div>
         </div>
       ))}
     </div>

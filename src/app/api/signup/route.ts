@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { sendWelcomeEmail } from "@/lib/email/send-welcome-email";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,10 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
+
+  // Best-effort welcome email — sendWelcomeEmail never throws, so a failed
+  // send (missing RESEND_API_KEY, Resend outage, etc.) never blocks signup.
+  await sendWelcomeEmail(email);
 
   // Sign in on the same (cookie-aware) server client so the session lands
   // on this response and the browser is authenticated right away.

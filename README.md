@@ -34,6 +34,10 @@ notifications on every mutation, and loading/error states.
   modules instead of guessing.
 - **Settings** (`/dashboard/settings`) — shows the logged-in user's email
   and a password-change form (`auth.updateUser`).
+- **Email** — a welcome email (via [Resend](https://resend.com),
+  `RESEND_API_KEY`) goes out right after signup, introducing the 13
+  modules. A weekly digest template and route (`/api/weekly-digest`) exist
+  but aren't scheduled yet — see [Email](#email) below.
 
 The whole app is responsive (sidebar collapses to a hamburger overlay on
 small screens, 44px minimum touch targets) and works identically on mobile
@@ -69,13 +73,19 @@ and desktop.
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
    ANTHROPIC_API_KEY=your-anthropic-api-key
    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   RESEND_API_KEY=your-resend-api-key
+   RESEND_FROM_EMAIL="AI_OS <onboarding@resend.dev>"
    ```
 
    `.env.local` is gitignored — never commit real credentials.
-   `ANTHROPIC_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` have no
-   `NEXT_PUBLIC_` prefix on purpose — they're only read server-side (in
-   `/api/create` and `/api/signup` respectively) and are never sent to the
-   browser.
+   `ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and `RESEND_API_KEY`
+   have no `NEXT_PUBLIC_` prefix on purpose — they're only read server-side
+   (`ANTHROPIC_API_KEY` in `/api/create`; `SUPABASE_SERVICE_ROLE_KEY` in
+   `/api/signup`; `RESEND_API_KEY` in `/api/signup` and
+   `/api/weekly-digest`) and are never sent to the browser. `RESEND_FROM_EMAIL`
+   is optional — it falls back to Resend's shared sandbox address, which
+   only delivers to the email on your own Resend account, so set it to a
+   verified sending address before real users sign up.
 
 5. **Email confirmation is auto-skipped for now.** Signup goes through
    `/api/signup`, which creates the user, immediately marks their email
@@ -95,6 +105,23 @@ and desktop.
    redirected to `/login`. Sign up, then you'll land on `/dashboard/overview`
    with a sidebar to reach every module.
 
+## Email
+
+Transactional email is sent via [Resend](https://resend.com).
+
+- **Welcome email** — sent from `/api/signup` right after a new user's
+  email is auto-confirmed, introducing the 13 modules. It's fire-and-forget
+  by design: `sendWelcomeEmail` catches and logs its own errors, so a
+  misconfigured `RESEND_API_KEY` or a Resend outage never blocks signup —
+  the user can always log in even if the email didn't go out.
+- **Weekly digest** — `/api/weekly-digest` computes, per user, how many
+  entries were logged in each module over the last 7 days and emails a
+  summary. It's a placeholder: nothing in the app calls it yet. To go live,
+  point a scheduler (Vercel Cron, a GitHub Action, etc.) at it on a weekly
+  interval. If you set `CRON_SECRET`, the route only responds to requests
+  carrying `Authorization: Bearer <CRON_SECRET>` — set that before exposing
+  it in production, since an unauthenticated hit emails every user.
+
 ## Project structure
 
 ```
@@ -113,7 +140,8 @@ src/
       settings/page.tsx          # account email + password change
     api/
       create/route.ts            # server-only: calls Claude, inserts into the right table
-      signup/route.ts            # server-only: signup + auto-confirm email + auto sign-in
+      signup/route.ts            # server-only: signup + auto-confirm email + auto sign-in + welcome email
+      weekly-digest/route.ts     # server-only: placeholder, not yet scheduled — see Email below
     layout.tsx
     globals.css
   components/
@@ -153,10 +181,15 @@ src/
     csv.ts                         # CSV generation + download (export.csv())
     format-time.ts                # human-readable relative timestamps ("2 days ago")
     use-sort-and-paginate.ts     # shared sort + pagination hook
+    resend.ts                      # server-only Resend client factory
+    email/
+      templates.ts                 # welcome + weekly-digest HTML (table-based, inline styles)
+      send-welcome-email.ts        # best-effort send, never blocks signup
+      send-weekly-digest-email.ts  # best-effort send, used by /api/weekly-digest
     supabase/
       client.ts                   # browser client
       server.ts                    # server component / route handler client
-      admin.ts                     # service-role client — server-only, used only by /api/signup
+      admin.ts                     # service-role client — server-only, used by /api/signup and /api/weekly-digest
   middleware.ts                    # session refresh + route protection
   types/
     ideas.ts
@@ -167,6 +200,6 @@ supabase_schema.sql
 ## Deploy
 
 Any Next.js host works (e.g. [Vercel](https://vercel.com/new)). Set the same
-four environment variables listed above in your hosting provider's
-dashboard, and make sure `supabase_schema.sql` has been run against the
-Supabase project you point it at.
+environment variables listed above in your hosting provider's dashboard,
+and make sure `supabase_schema.sql` has been run against the Supabase
+project you point it at.

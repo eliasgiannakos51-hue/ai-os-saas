@@ -66,7 +66,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded border border-amber-800 bg-amber-950/20 px-4 py-2 text-sm text-amber-400 transition-colors hover:border-amber-500"
+        className="inline-flex min-h-[44px] items-center justify-center rounded border border-amber-800 bg-amber-950/20 px-4 py-2 text-sm text-amber-400 transition-colors hover:border-amber-500 sm:min-h-0"
       >
         + new_{module.slug}()
       </button>
@@ -83,7 +83,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="text-xs text-muted hover:text-foreground"
+          className="inline-flex min-h-[44px] items-center px-2 text-xs text-muted hover:text-foreground sm:min-h-0 sm:px-0"
         >
           cancel
         </button>
@@ -146,7 +146,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
       <button
         type="submit"
         disabled={loading}
-        className="rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50 sm:min-h-0 sm:w-auto"
       >
         {loading ? "saving..." : `save_${module.slug}()`}
       </button>

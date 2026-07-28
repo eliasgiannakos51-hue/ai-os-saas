@@ -75,7 +75,7 @@ export function CreateChat() {
         <button
           type="submit"
           disabled={loading || !input.trim()}
-          className="w-full rounded bg-amber-500 px-4 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {loading ? "thinking..." : "run create()"}
         </button>
@@ -92,7 +92,7 @@ export function CreateChat() {
               <p className="mt-1 text-foreground/90">{result.message}</p>
               <Link
                 href={result.href}
-                className="mt-3 inline-block rounded border border-emerald-800 px-3 py-1.5 text-xs text-emerald-400 transition-colors hover:border-emerald-500"
+                className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded border border-emerald-800 px-3 py-1.5 text-xs text-emerald-400 transition-colors hover:border-emerald-500 sm:min-h-0"
               >
                 view {result.moduleTitle.toLowerCase()} →
               </Link>
@@ -107,7 +107,7 @@ export function CreateChat() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className="rounded border border-border px-2 py-1 text-xs text-muted transition-colors hover:border-amber-500 hover:text-amber-400"
+                    className="inline-flex min-h-[44px] items-center justify-center rounded border border-border px-3 py-1 text-xs text-muted transition-colors hover:border-amber-500 hover:text-amber-400 sm:min-h-0 sm:px-2"
                   >
                     {item.label.toLowerCase()}
                   </Link>

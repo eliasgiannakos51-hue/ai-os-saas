@@ -91,7 +91,7 @@ export function GenericRecordRow({
           <button
             type="button"
             onClick={cancelEditing}
-            className="text-xs text-muted hover:text-foreground"
+            className="inline-flex min-h-[44px] items-center px-2 text-xs text-muted hover:text-foreground sm:min-h-0 sm:px-0"
           >
             cancel()
           </button>
@@ -154,7 +154,7 @@ export function GenericRecordRow({
         <button
           type="submit"
           disabled={loading}
-          className="rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50 sm:min-h-0 sm:w-auto"
         >
           {loading ? "saving..." : "save()"}
         </button>
@@ -205,7 +205,7 @@ export function GenericRecordRow({
         );
       })}
 
-      <div className="mt-3 flex items-center justify-between gap-2">
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
         <p className="text-[10px] text-muted">
           logged {new Date(record.created_at).toLocaleString()}
         </p>
@@ -213,7 +213,7 @@ export function GenericRecordRow({
           <button
             type="button"
             onClick={startEditing}
-            className="shrink-0 rounded border border-border px-2 py-0.5 text-[11px] text-muted transition-colors hover:border-amber-500 hover:text-amber-400"
+            className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded border border-border px-3 py-0.5 text-[11px] text-muted transition-colors hover:border-amber-500 hover:text-amber-400 sm:min-h-0 sm:px-2"
           >
             edit()
           </button>

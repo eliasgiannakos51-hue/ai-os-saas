@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { LogoutButton } from "@/components/logout-button";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { CreateChat } from "@/components/create/create-chat";
 
 export default async function CreatePage() {
@@ -16,20 +16,9 @@ export default async function CreatePage() {
 
   return (
     <main className="min-h-screen bg-background font-mono">
-      <header className="flex items-center justify-between border-b border-border px-6 py-4">
-        <div>
-          <p className="text-xs tracking-widest text-amber-500">AI_OS //</p>
-          <h1 className="text-lg font-bold text-foreground">dashboard</h1>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="hidden text-xs text-muted sm:inline">
-            {user.email}
-          </span>
-          <LogoutButton />
-        </div>
-      </header>
+      <DashboardHeader email={user.email ?? ""} />
 
-      <div className="flex min-h-[calc(100vh-73px)] items-center justify-center px-6 py-12">
+      <div className="flex min-h-[calc(100vh-73px)] items-center justify-center px-4 py-12 sm:px-6">
         <CreateChat />
       </div>
     </main>

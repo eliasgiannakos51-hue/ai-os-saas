@@ -52,17 +52,22 @@ sidebar on `/dashboard`:
    NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
    ANTHROPIC_API_KEY=your-anthropic-api-key
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
    ```
 
    `.env.local` is gitignored — never commit real credentials.
-   `ANTHROPIC_API_KEY` has no `NEXT_PUBLIC_` prefix on purpose — it's only
-   read server-side, in `/api/create`. Without it, every other module still
-   works; only Create Anything (`/dashboard/create`) needs it.
+   `ANTHROPIC_API_KEY` and `SUPABASE_SERVICE_ROLE_KEY` have no
+   `NEXT_PUBLIC_` prefix on purpose — they're only read server-side (in
+   `/api/create` and `/api/signup` respectively) and are never sent to the
+   browser.
 
-5. **Email confirmation.** By default Supabase requires email confirmation
-   before a new user can log in. For local testing you can disable this
-   under Authentication → Providers → Email → "Confirm email", or just
-   confirm the account from your inbox.
+5. **Email confirmation is auto-skipped for now.** Signup goes through
+   `/api/signup`, which creates the user, immediately marks their email
+   confirmed via the Supabase Admin API (`SUPABASE_SERVICE_ROLE_KEY`), and
+   signs them in — so new users land straight on `/dashboard/overview` with
+   no inbox step. This is intentional for early development; re-enable real
+   email confirmation (drop the `email_confirm: true` admin call in
+   `/api/signup/route.ts`) before shipping to real users.
 
 6. **Run the dev server**
 
@@ -86,7 +91,9 @@ src/
       [module]/page.tsx        # the other 12 modules, driven by lib/modules.ts
       create/page.tsx          # Create Anything
       overview/page.tsx        # Overview — default post-login landing
-    api/create/route.ts        # server-only: calls Claude, inserts into the right table
+    api/
+      create/route.ts          # server-only: calls Claude, inserts into the right table
+      signup/route.ts          # server-only: signup + auto-confirm email + auto sign-in
     layout.tsx
     globals.css
   components/
@@ -106,6 +113,7 @@ src/
     supabase/
       client.ts                # browser client
       server.ts                 # server component / route handler client
+      admin.ts                  # service-role client — server-only, used only by /api/signup
   middleware.ts                 # session refresh + route protection
   types/
     ideas.ts

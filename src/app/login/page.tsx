@@ -14,13 +14,11 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    setInfo(null);
     setLoading(true);
 
     if (mode === "login") {
@@ -33,14 +31,19 @@ export default function LoginPage() {
       router.push("/dashboard/overview");
       router.refresh();
     } else {
-      const { error } = await supabase.auth.signUp({ email, password });
+      const res = await fetch("/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
       setLoading(false);
-      if (error) {
-        setError(error.message);
+      if (!res.ok || !data.ok) {
+        setError(data.error ?? "Signup failed.");
         return;
       }
-      setInfo("Account created. Check your inbox to confirm your email, then log in.");
-      setMode("login");
+      router.push("/dashboard/overview");
+      router.refresh();
     }
   }
 
@@ -61,7 +64,6 @@ export default function LoginPage() {
               onClick={() => {
                 setMode("login");
                 setError(null);
-                setInfo(null);
               }}
               className={`flex-1 px-4 py-3 transition-colors ${
                 mode === "login"
@@ -76,7 +78,6 @@ export default function LoginPage() {
               onClick={() => {
                 setMode("signup");
                 setError(null);
-                setInfo(null);
               }}
               className={`flex-1 px-4 py-3 transition-colors ${
                 mode === "signup"
@@ -125,11 +126,6 @@ export default function LoginPage() {
             {error && (
               <p className="rounded border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
                 error: {error}
-              </p>
-            )}
-            {info && (
-              <p className="rounded border border-amber-800 bg-amber-950/20 px-3 py-2 text-xs text-amber-400">
-                {info}
               </p>
             )}
 

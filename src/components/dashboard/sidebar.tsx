@@ -50,10 +50,10 @@ export function Sidebar() {
           <Link
             href={OVERVIEW_NAV_ITEM.href}
             onClick={closeOnMobile}
-            className={`flex min-h-[44px] items-center rounded px-3 py-2 text-sm transition-colors sm:min-h-0 ${
+            className={`flex min-h-[44px] items-center rounded border-l-2 py-2 text-sm transition-colors sm:min-h-0 ${
               overviewActive
-                ? "border border-amber-800 bg-amber-950/20 text-amber-400"
-                : "text-muted hover:bg-black/30 hover:text-foreground"
+                ? "border-amber-500 bg-amber-950/25 pl-[10px] pr-3 font-medium text-amber-400"
+                : "border-transparent px-3 text-muted hover:bg-black/30 hover:text-foreground"
             }`}
           >
             overview
@@ -84,10 +84,10 @@ export function Sidebar() {
                 key={item.href}
                 href={item.href}
                 onClick={closeOnMobile}
-                className={`flex min-h-[44px] items-center rounded px-3 py-2 text-sm transition-colors sm:min-h-0 ${
+                className={`flex min-h-[44px] items-center rounded border-l-2 py-2 text-sm transition-colors sm:min-h-0 ${
                   active
-                    ? "border border-amber-800 bg-amber-950/20 text-amber-400"
-                    : "text-muted hover:bg-black/30 hover:text-foreground"
+                    ? "border-amber-500 bg-amber-950/25 pl-[10px] pr-3 font-medium text-amber-400"
+                    : "border-transparent px-3 text-muted hover:bg-black/30 hover:text-foreground"
                 }`}
               >
                 {item.label.toLowerCase()}
@@ -99,10 +99,10 @@ export function Sidebar() {
           <Link
             href={SETTINGS_NAV_ITEM.href}
             onClick={closeOnMobile}
-            className={`flex min-h-[44px] items-center rounded px-3 py-2 text-sm transition-colors sm:min-h-0 ${
+            className={`flex min-h-[44px] items-center rounded border-l-2 py-2 text-sm transition-colors sm:min-h-0 ${
               settingsActive
-                ? "border border-amber-800 bg-amber-950/20 text-amber-400"
-                : "text-muted hover:bg-black/30 hover:text-foreground"
+                ? "border-amber-500 bg-amber-950/25 pl-[10px] pr-3 font-medium text-amber-400"
+                : "border-transparent px-3 text-muted hover:bg-black/30 hover:text-foreground"
             }`}
           >
             settings

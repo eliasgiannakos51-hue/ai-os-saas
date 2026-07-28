@@ -7,6 +7,7 @@ import { toCSV, downloadCSV, todayForFilename } from "@/lib/csv";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";
+import { EmptyState } from "@/components/empty-state";
 
 const CSV_HEADERS = [
   "name",
@@ -68,11 +69,11 @@ export function IdeasList({ ideas }: { ideas: Idea[] }) {
 
   if (ideas.length === 0) {
     return (
-      <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted">
+      <EmptyState>
         no ideas yet — run{" "}
         <span className="text-amber-500">ideas.insert()</span> to log your
         first one.
-      </div>
+      </EmptyState>
     );
   }
 
@@ -100,12 +101,10 @@ export function IdeasList({ ideas }: { ideas: Idea[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted">
-          no matches for &apos;{query}&apos;
-        </div>
+        <EmptyState icon="×">no matches for &apos;{query}&apos;</EmptyState>
       ) : (
         <>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {paginated.map((idea) => (
               <IdeaRow key={idea.id} idea={idea} />
             ))}

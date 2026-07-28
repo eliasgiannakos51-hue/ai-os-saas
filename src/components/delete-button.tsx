@@ -51,7 +51,7 @@ export function DeleteButton({
         {loading ? "deleting..." : "delete()"}
       </button>
       {error && (
-        <p className="max-w-[16rem] text-right text-[10px] text-red-400">
+        <p className="max-w-[16rem] text-right text-xs text-red-400">
           error: {error}
         </p>
       )}

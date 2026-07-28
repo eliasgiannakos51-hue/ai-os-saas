@@ -8,6 +8,7 @@ import { toCSV, downloadCSV, todayForFilename } from "@/lib/csv";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";
+import { EmptyState } from "@/components/empty-state";
 
 function searchableText(module: ModuleConfig, record: ModuleRecord): string {
   return module.fields
@@ -48,11 +49,11 @@ export function GenericList({
 
   if (records.length === 0) {
     return (
-      <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted">
+      <EmptyState>
         no entries yet — run{" "}
         <span className="text-amber-500">{module.table}.insert()</span> to
         log your first one.
-      </div>
+      </EmptyState>
     );
   }
 
@@ -80,12 +81,10 @@ export function GenericList({
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted">
-          no matches for &apos;{query}&apos;
-        </div>
+        <EmptyState icon="×">no matches for &apos;{query}&apos;</EmptyState>
       ) : (
         <>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {paginated.map((record) => (
               <GenericRecordRow key={record.id} module={module} record={record} />
             ))}

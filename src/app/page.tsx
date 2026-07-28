@@ -14,12 +14,12 @@ export default function Home() {
       <h1 className="mt-2 text-4xl font-bold text-foreground sm:text-5xl">
         AI_OS
       </h1>
-      <p className="mt-4 max-w-md text-sm text-muted">
+      <p className="mt-5 max-w-md text-sm leading-relaxed text-muted">
         your personal AI operating system — ideas, metrics, and every part of
         your business, run from one dark terminal-styled dashboard.
       </p>
 
-      <div className="mt-8 flex w-full max-w-xs flex-col gap-3 sm:w-auto sm:flex-row">
+      <div className="mt-10 flex w-full max-w-xs flex-col gap-3 sm:w-auto sm:flex-row">
         <Link
           href="/login"
           className="inline-flex min-h-[44px] items-center justify-center rounded border border-border px-6 py-2 text-sm text-foreground transition-colors hover:border-amber-500 hover:text-amber-400 sm:min-h-0"

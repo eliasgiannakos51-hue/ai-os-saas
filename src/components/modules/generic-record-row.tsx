@@ -7,6 +7,7 @@ import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { DeleteButton } from "@/components/delete-button";
 import { useToast } from "@/components/toast/toast-context";
+import { formatRelativeTime } from "@/lib/format-time";
 
 function formStateFor(module: ModuleConfig, record: ModuleRecord): Record<string, string> {
   return Object.fromEntries(
@@ -172,7 +173,7 @@ export function GenericRecordRow({
   );
 
   return (
-    <div className="rounded-md border border-border bg-panel p-4">
+    <div className="rounded-md border border-border bg-panel p-4 transition-colors hover:border-amber-900/50">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <h3 className="text-base font-semibold text-foreground">
           {record[module.headlineKey] ?? "untitled"}
@@ -210,8 +211,12 @@ export function GenericRecordRow({
       })}
 
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-        <p className="text-[10px] text-muted">
-          logged {new Date(record.created_at).toLocaleString()}
+        <p
+          className="text-xs text-muted"
+          title={new Date(record.created_at).toLocaleString()}
+          suppressHydrationWarning
+        >
+          logged {formatRelativeTime(record.created_at)}
         </p>
         <div className="flex items-center gap-2">
           <button

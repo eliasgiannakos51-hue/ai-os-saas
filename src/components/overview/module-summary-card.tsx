@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
+import { formatRelativeTime } from "@/lib/format-time";
 
 export function ModuleSummaryCard({
   module,
@@ -36,8 +37,12 @@ export function ModuleSummaryCard({
       ) : latest ? (
         <div className="min-w-0">
           <p className="truncate text-sm text-foreground/90">{headline}</p>
-          <p className="mt-1 text-[10px] text-muted">
-            {new Date(latest.created_at).toLocaleDateString()}
+          <p
+            className="mt-1 text-xs text-muted"
+            title={new Date(latest.created_at).toLocaleString()}
+            suppressHydrationWarning
+          >
+            {formatRelativeTime(latest.created_at)}
           </p>
         </div>
       ) : (

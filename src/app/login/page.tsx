@@ -50,7 +50,7 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 font-mono">
       <div className="w-full max-w-md">
-        <div className="mb-6 text-center">
+        <div className="mb-8 text-center">
           <p className="text-sm tracking-widest text-amber-500">AI_OS //</p>
           <h1 className="mt-1 text-2xl font-bold text-foreground">
             {mode === "login" ? "authenticate" : "create_account"}

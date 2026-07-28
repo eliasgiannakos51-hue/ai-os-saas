@@ -14,7 +14,11 @@ export function ToastContainer() {
           key={toast.id}
           role="status"
           onClick={() => dismissToast(toast.id)}
-          className={`cursor-pointer rounded-md border px-3 py-2 text-xs shadow-lg backdrop-blur-sm transition-colors ${
+          className={`cursor-pointer rounded-md border px-3 py-2 text-xs shadow-lg backdrop-blur-sm transition-all duration-200 hover:opacity-90 ${
+            toast.leaving
+              ? "translate-y-1 opacity-0"
+              : "animate-fade-in translate-y-0 opacity-100"
+          } ${
             toast.type === "error"
               ? "border-red-800 bg-red-950/90 text-red-300"
               : "border-amber-800 bg-black/90 text-amber-400"

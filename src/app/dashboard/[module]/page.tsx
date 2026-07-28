@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { ErrorMessage } from "@/components/error-message";
 import { GenericAddForm } from "@/components/modules/generic-add-form";
 import { GenericList } from "@/components/modules/generic-list";
 import { getModule } from "@/lib/modules";
@@ -48,9 +49,7 @@ export default async function ModulePage({
         </div>
 
         {error && (
-          <p className="mb-4 rounded border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
-            error loading {moduleConfig.table}: {error.message}
-          </p>
+          <ErrorMessage message={`loading ${moduleConfig.table}: ${error.message}`} />
         )}
 
         <GenericList

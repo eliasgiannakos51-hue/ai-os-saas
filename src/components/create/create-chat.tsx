@@ -39,14 +39,15 @@ export function CreateChat() {
           href: data.href,
           message: data.message,
         });
+        setInput("");
       } else {
         setResult({ type: "unmatched", message: data.message });
+        setInput("");
       }
     } catch {
       setResult({ type: "error", message: "Network error — please try again." });
     } finally {
       setLoading(false);
-      setInput("");
     }
   }
 

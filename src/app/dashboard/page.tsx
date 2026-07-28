@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { ErrorMessage } from "@/components/error-message";
 import { AddIdeaForm } from "@/components/ideas/add-idea-form";
 import { IdeasList } from "@/components/ideas/ideas-list";
 import type { Idea } from "@/types/ideas";
@@ -36,11 +37,7 @@ export default async function DashboardPage() {
           <AddIdeaForm />
         </div>
 
-        {error && (
-          <p className="mb-4 rounded border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
-            error loading ideas: {error.message}
-          </p>
-        )}
+        {error && <ErrorMessage message={`loading ideas: ${error.message}`} />}
 
         <IdeasList ideas={(ideas as Idea[]) ?? []} />
       </div>

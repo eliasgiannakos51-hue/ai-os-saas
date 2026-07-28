@@ -1,27 +1,43 @@
 # AI OS
 
-Next.js 14 (App Router) + Supabase MVP. Dark, amber-accented, monospace UI.
+A personal "operating system" for running a startup — 13 structured data
+modules (ideas, competitors, research, finance, learning, trading,
+decisions, products, content, sales, feedback, analytics, automation) plus
+an AI-powered free-text inbox that files anything you throw at it into the
+right module. Next.js 14 (App Router) + Supabase. Dark, amber-accented,
+monospace UI.
 
-Currently implemented: email/password auth and all 13 modules, each with a
-list (RLS-scoped to the logged-in user) and an add form, reachable from a
-sidebar on `/dashboard`:
+There's a public landing page at `/`, then everything else lives behind
+email/password auth on `/dashboard`. Every module gets the same feature
+set: create, inline edit, delete (all RLS-scoped to the logged-in user),
+live search, newest/oldest sorting with pagination, CSV export, toast
+notifications on every mutation, and loading/error states.
 
 - **Overview** (`/dashboard/overview`) — the default landing page after
-  login. A card per module showing its entry count and most recent entry
-  (RLS-scoped), linking through to the module.
+  login. A header with totals across all modules (entry count, entries in
+  the last 7 days, most-active module) plus a card per module showing its
+  entry count and most recent entry (RLS-scoped), linking through to the
+  module.
 - **Ideas** (`/dashboard`) — hand-built, the original module.
 - **Competitors, Research, Finance, Learning, Trading, Decisions, Products,
   Content, Sales, Feedback, Analytics, Automation** (`/dashboard/<slug>`) —
   driven by a shared config (`src/lib/modules.ts`) and generic list/form
   components (`src/components/modules/`), so every module gets the exact
   same list/form/RLS pattern as Ideas without 12 near-duplicate files.
-- **Create Anything** (`/dashboard/create`) — a single free-text box. It
-  posts to `/api/create`, a server-only route that calls the Claude API
+- **Create Anything** (`/dashboard/create`) — a single free-text box,
+  reachable from anywhere in the dashboard with Cmd+K / Ctrl+K. It posts to
+  `/api/create`, a server-only route that calls the Claude API
   (`ANTHROPIC_API_KEY`, never exposed to the client) with a forced tool call
   to classify the message into one of the 13 modules and extract that
   table's fields, then inserts it via the same RLS-scoped pattern as every
   other module. If nothing matches clearly, it explains the available
   modules instead of guessing.
+- **Settings** (`/dashboard/settings`) — shows the logged-in user's email
+  and a password-change form (`auth.updateUser`).
+
+The whole app is responsive (sidebar collapses to a hamburger overlay on
+small screens, 44px minimum touch targets) and works identically on mobile
+and desktop.
 
 ## Setup
 
@@ -84,37 +100,64 @@ sidebar on `/dashboard`:
 ```
 src/
   app/
-    login/page.tsx           # email+password login/signup
+    page.tsx                    # public landing page ("/")
+    login/page.tsx               # email+password login/signup
     dashboard/
-      layout.tsx               # auth guard + sidebar shell (wraps every module)
-      page.tsx                 # Ideas module (hand-built)
-      [module]/page.tsx        # the other 12 modules, driven by lib/modules.ts
-      create/page.tsx          # Create Anything
-      overview/page.tsx        # Overview — default post-login landing
+      layout.tsx                 # auth guard + sidebar shell (wraps every module)
+      loading.tsx                 # shared loading state for every dashboard route
+      error.tsx                   # shared error boundary for every dashboard route
+      page.tsx                    # Ideas module (hand-built)
+      [module]/page.tsx          # the other 12 modules, driven by lib/modules.ts
+      create/page.tsx            # Create Anything
+      overview/page.tsx          # Overview — default post-login landing
+      settings/page.tsx          # account email + password change
     api/
-      create/route.ts          # server-only: calls Claude, inserts into the right table
-      signup/route.ts          # server-only: signup + auto-confirm email + auto sign-in
+      create/route.ts            # server-only: calls Claude, inserts into the right table
+      signup/route.ts            # server-only: signup + auto-confirm email + auto sign-in
     layout.tsx
     globals.css
   components/
     logout-button.tsx
-    dashboard/sidebar.tsx      # nav links: Overview, Create, then all 13 modules
+    delete-button.tsx            # shared delete-with-confirm, used by every module
+    empty-state.tsx              # shared "no records" / "no matches" placeholder
+    error-message.tsx            # shared inline error box with retry
+    loading-state.tsx            # shared full-page loading indicator
+    pagination-controls.tsx      # shared prev/next pager (20 records per page)
+    sort-toggle.tsx               # shared newest/oldest sort toggle
+    dashboard/
+      sidebar.tsx                 # nav links: Overview, Create, all 13 modules, Settings
+      sidebar-context.tsx        # mobile sidebar open/close state
+      menu-button.tsx             # mobile hamburger trigger
+      dashboard-header.tsx        # top bar (email + logout + mobile menu button)
+      page-header.tsx              # eyebrow + title used at the top of every page
+      keyboard-shortcuts.tsx      # global Cmd+K / Ctrl+K → focuses Create Anything
+    toast/
+      toast-context.tsx           # toast state/provider (used on every create/update/delete)
+      toast-container.tsx        # renders active toasts, bottom-right
     ideas/
       add-idea-form.tsx
       ideas-list.tsx
+      idea-row.tsx                # view/edit/delete for a single idea
     modules/
-      generic-add-form.tsx     # config-driven add form used by the 12 modules
-      generic-list.tsx         # config-driven list used by the 12 modules
-    create/create-chat.tsx     # Create Anything's input + result UI
-    overview/module-summary-card.tsx  # per-module count + latest-entry card
+      generic-add-form.tsx       # config-driven add form used by the 12 modules
+      generic-list.tsx            # config-driven list used by the 12 modules
+      generic-record-row.tsx     # config-driven view/edit/delete row
+    create/create-chat.tsx       # Create Anything's input + result UI
+    overview/
+      module-summary-card.tsx    # per-module count + latest-entry card
+      overview-stats.tsx          # totals / last-7-days / most-active-module header
+    settings/password-change-form.tsx
   lib/
-    modules.ts                 # per-module table/field config + nav items
-    classifier-modules.ts      # all 13 modules' fields, for /api/create's system prompt
+    modules.ts                    # per-module table/field config + nav items
+    classifier-modules.ts        # all 13 modules' fields, for /api/create's system prompt
+    csv.ts                         # CSV generation + download (export.csv())
+    format-time.ts                # human-readable relative timestamps ("2 days ago")
+    use-sort-and-paginate.ts     # shared sort + pagination hook
     supabase/
-      client.ts                # browser client
-      server.ts                 # server component / route handler client
-      admin.ts                  # service-role client — server-only, used only by /api/signup
-  middleware.ts                 # session refresh + route protection
+      client.ts                   # browser client
+      server.ts                    # server component / route handler client
+      admin.ts                     # service-role client — server-only, used only by /api/signup
+  middleware.ts                    # session refresh + route protection
   types/
     ideas.ts
     module-record.ts
@@ -124,4 +167,6 @@ supabase_schema.sql
 ## Deploy
 
 Any Next.js host works (e.g. [Vercel](https://vercel.com/new)). Set the same
-two environment variables in your hosting provider's dashboard.
+four environment variables listed above in your hosting provider's
+dashboard, and make sure `supabase_schema.sql` has been run against the
+Supabase project you point it at.

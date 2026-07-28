@@ -2,9 +2,27 @@
 -- AI OS — Supabase schema
 -- 13 tables, each scoped to the owning user via RLS (user_id = auth.uid()).
 -- Run this once in the Supabase SQL editor (or via `supabase db push`).
+--
+-- NOTE: the 12 non-`ideas` tables below were redefined to match the exact
+-- field set each dashboard module needs. The DROP TABLE statements make this
+-- safe to re-run even if an earlier version of this schema already created
+-- them with different columns — `ideas` is never dropped.
 -- ============================================================================
 
 create extension if not exists "pgcrypto";
+
+drop table if exists public.competitors cascade;
+drop table if exists public.research cascade;
+drop table if exists public.finance_entries cascade;
+drop table if exists public.learning_entries cascade;
+drop table if exists public.trades cascade;
+drop table if exists public.decisions cascade;
+drop table if exists public.products cascade;
+drop table if exists public.content cascade;
+drop table if exists public.leads cascade;
+drop table if exists public.feedback cascade;
+drop table if exists public.metrics cascade;
+drop table if exists public.automations cascade;
 
 -- ----------------------------------------------------------------------------
 -- 1. ideas
@@ -27,17 +45,16 @@ create table if not exists public.ideas (
 -- ----------------------------------------------------------------------------
 -- 2. competitors
 -- ----------------------------------------------------------------------------
-create table if not exists public.competitors (
+create table public.competitors (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  idea_id uuid references public.ideas(id) on delete set null,
-  name text not null,
+  company text not null,
   product text,
   pricing text,
+  customers text,
+  marketing text,
   strengths text,
   weaknesses text,
-  url text,
-  notes text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -45,15 +62,11 @@ create table if not exists public.competitors (
 -- ----------------------------------------------------------------------------
 -- 3. research
 -- ----------------------------------------------------------------------------
-create table if not exists public.research (
+create table public.research (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  idea_id uuid references public.ideas(id) on delete set null,
   topic text not null,
-  source text,
   summary text,
-  url text,
-  tags text[],
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -61,15 +74,12 @@ create table if not exists public.research (
 -- ----------------------------------------------------------------------------
 -- 4. finance_entries
 -- ----------------------------------------------------------------------------
-create table if not exists public.finance_entries (
+create table public.finance_entries (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
+  description text not null,
   type text not null check (type in ('income', 'expense')),
-  category text,
   amount numeric(14, 2) not null,
-  currency text not null default 'USD',
-  description text,
-  entry_date date not null default current_date,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -77,14 +87,12 @@ create table if not exists public.finance_entries (
 -- ----------------------------------------------------------------------------
 -- 5. learning_entries
 -- ----------------------------------------------------------------------------
-create table if not exists public.learning_entries (
+create table public.learning_entries (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  title text not null,
-  source text,
-  category text,
-  notes text,
-  entry_date date not null default current_date,
+  topic text not null,
+  resources text,
+  quiz text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -92,17 +100,14 @@ create table if not exists public.learning_entries (
 -- ----------------------------------------------------------------------------
 -- 6. trades
 -- ----------------------------------------------------------------------------
-create table if not exists public.trades (
+create table public.trades (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   symbol text not null,
-  side text check (side in ('long', 'short')),
-  entry_price numeric(18, 6),
-  exit_price numeric(18, 6),
-  quantity numeric(18, 6),
+  direction text,
+  result text,
   pnl numeric(18, 2),
   notes text,
-  trade_date date not null default current_date,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -110,16 +115,12 @@ create table if not exists public.trades (
 -- ----------------------------------------------------------------------------
 -- 7. decisions
 -- ----------------------------------------------------------------------------
-create table if not exists public.decisions (
+create table public.decisions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  idea_id uuid references public.ideas(id) on delete set null,
-  title text not null,
-  context text,
-  options text,
-  decision text,
-  rationale text,
-  decided_at timestamptz,
+  idea_names text not null,
+  ranking text,
+  recommendation text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -127,15 +128,17 @@ create table if not exists public.decisions (
 -- ----------------------------------------------------------------------------
 -- 8. products
 -- ----------------------------------------------------------------------------
-create table if not exists public.products (
+create table public.products (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  idea_id uuid references public.ideas(id) on delete set null,
-  name text not null,
-  description text,
-  status text,
-  price numeric(14, 2),
-  url text,
+  product_name text not null,
+  mvp_features text,
+  roadmap text,
+  pricing text,
+  target_audience text,
+  user_journey text,
+  risks text,
+  launch_plan text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -143,15 +146,14 @@ create table if not exists public.products (
 -- ----------------------------------------------------------------------------
 -- 9. content
 -- ----------------------------------------------------------------------------
-create table if not exists public.content (
+create table public.content (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  title text not null,
-  platform text,
-  type text,
-  status text,
-  url text,
-  published_at timestamptz,
+  topic text not null,
+  caption text,
+  twitter_thread text,
+  hashtags text,
+  content_ideas text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -159,15 +161,14 @@ create table if not exists public.content (
 -- ----------------------------------------------------------------------------
 -- 10. leads
 -- ----------------------------------------------------------------------------
-create table if not exists public.leads (
+create table public.leads (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  name text not null,
-  email text,
-  company text,
-  source text,
-  status text,
-  notes text,
+  lead_name text not null,
+  score integer,
+  cold_email text,
+  follow_up_email text,
+  next_steps text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -175,13 +176,14 @@ create table if not exists public.leads (
 -- ----------------------------------------------------------------------------
 -- 11. feedback
 -- ----------------------------------------------------------------------------
-create table if not exists public.feedback (
+create table public.feedback (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  source text,
-  content text not null,
+  summary text not null,
   sentiment text,
-  related_item text,
+  category text,
+  suggested_response text,
+  priority text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -189,14 +191,12 @@ create table if not exists public.feedback (
 -- ----------------------------------------------------------------------------
 -- 12. metrics
 -- ----------------------------------------------------------------------------
-create table if not exists public.metrics (
+create table public.metrics (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  name text not null,
+  metric_name text not null,
   value numeric(18, 4),
-  unit text,
-  period text,
-  recorded_at timestamptz not null default now(),
+  notes text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -204,14 +204,14 @@ create table if not exists public.metrics (
 -- ----------------------------------------------------------------------------
 -- 13. automations
 -- ----------------------------------------------------------------------------
-create table if not exists public.automations (
+create table public.automations (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  name text not null,
-  trigger_event text,
-  action_type text,
-  status text,
-  notes text,
+  task_name text not null,
+  idea text,
+  tools_needed text,
+  suggested_workflow text,
+  time_saved text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

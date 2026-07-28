@@ -5,6 +5,9 @@ import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { GenericRecordRow } from "@/components/modules/generic-record-row";
 import { toCSV, downloadCSV, todayForFilename } from "@/lib/csv";
+import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
+import { SortToggle } from "@/components/sort-toggle";
+import { PaginationControls } from "@/components/pagination-controls";
 
 function searchableText(module: ModuleConfig, record: ModuleRecord): string {
   return module.fields
@@ -30,9 +33,12 @@ export function GenericList({
     return records.filter((record) => searchableText(module, record).includes(q));
   }, [module, records, query]);
 
+  const { sortOrder, setSortOrder, page, setPage, totalPages, sorted, paginated } =
+    useSortAndPaginate(filtered, query);
+
   function handleExport() {
     const headers = [...module.fields.map((f) => f.label), "created_at"];
-    const rows = filtered.map((record) => [
+    const rows = sorted.map((record) => [
       ...module.fields.map((f) => record[f.key]),
       record.created_at,
     ]);
@@ -52,7 +58,7 @@ export function GenericList({
 
   return (
     <div>
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="mb-4 space-y-3">
         <input
           type="text"
           value={query}
@@ -60,14 +66,17 @@ export function GenericList({
           placeholder="search.filter()..."
           className="input"
         />
-        <button
-          type="button"
-          onClick={handleExport}
-          disabled={filtered.length === 0}
-          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded border border-border px-4 py-2 text-sm text-muted transition-colors hover:border-amber-500 hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
-        >
-          export.csv()
-        </button>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <SortToggle sortOrder={sortOrder} onChange={setSortOrder} />
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={filtered.length === 0}
+            className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded border border-border px-4 py-2 text-sm text-muted transition-colors hover:border-amber-500 hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+          >
+            export.csv()
+          </button>
+        </div>
       </div>
 
       {filtered.length === 0 ? (
@@ -75,11 +84,14 @@ export function GenericList({
           no matches for &apos;{query}&apos;
         </div>
       ) : (
-        <div className="space-y-3">
-          {filtered.map((record) => (
-            <GenericRecordRow key={record.id} module={module} record={record} />
-          ))}
-        </div>
+        <>
+          <div className="space-y-3">
+            {paginated.map((record) => (
+              <GenericRecordRow key={record.id} module={module} record={record} />
+            ))}
+          </div>
+          <PaginationControls page={page} totalPages={totalPages} onChange={setPage} />
+        </>
       )}
     </div>
   );

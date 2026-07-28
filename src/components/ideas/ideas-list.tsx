@@ -4,6 +4,9 @@ import { useMemo, useState } from "react";
 import type { Idea } from "@/types/ideas";
 import { IdeaRow } from "@/components/ideas/idea-row";
 import { toCSV, downloadCSV, todayForFilename } from "@/lib/csv";
+import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
+import { SortToggle } from "@/components/sort-toggle";
+import { PaginationControls } from "@/components/pagination-controls";
 
 const CSV_HEADERS = [
   "name",
@@ -55,8 +58,11 @@ export function IdeasList({ ideas }: { ideas: Idea[] }) {
     return ideas.filter((idea) => searchableText(idea).includes(q));
   }, [ideas, query]);
 
+  const { sortOrder, setSortOrder, page, setPage, totalPages, sorted, paginated } =
+    useSortAndPaginate(filtered, query);
+
   function handleExport() {
-    const csv = toCSV(CSV_HEADERS, filtered.map(toCSVRow));
+    const csv = toCSV(CSV_HEADERS, sorted.map(toCSVRow));
     downloadCSV(`ideas_export_${todayForFilename()}.csv`, csv);
   }
 
@@ -72,7 +78,7 @@ export function IdeasList({ ideas }: { ideas: Idea[] }) {
 
   return (
     <div>
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div className="mb-4 space-y-3">
         <input
           type="text"
           value={query}
@@ -80,14 +86,17 @@ export function IdeasList({ ideas }: { ideas: Idea[] }) {
           placeholder="search.filter()..."
           className="input"
         />
-        <button
-          type="button"
-          onClick={handleExport}
-          disabled={filtered.length === 0}
-          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded border border-border px-4 py-2 text-sm text-muted transition-colors hover:border-amber-500 hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
-        >
-          export.csv()
-        </button>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <SortToggle sortOrder={sortOrder} onChange={setSortOrder} />
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={filtered.length === 0}
+            className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded border border-border px-4 py-2 text-sm text-muted transition-colors hover:border-amber-500 hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+          >
+            export.csv()
+          </button>
+        </div>
       </div>
 
       {filtered.length === 0 ? (
@@ -95,11 +104,14 @@ export function IdeasList({ ideas }: { ideas: Idea[] }) {
           no matches for &apos;{query}&apos;
         </div>
       ) : (
-        <div className="space-y-3">
-          {filtered.map((idea) => (
-            <IdeaRow key={idea.id} idea={idea} />
-          ))}
-        </div>
+        <>
+          <div className="space-y-3">
+            {paginated.map((idea) => (
+              <IdeaRow key={idea.id} idea={idea} />
+            ))}
+          </div>
+          <PaginationControls page={page} totalPages={totalPages} onChange={setPage} />
+        </>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { ModuleConfig } from "@/lib/modules";
+import { useToast } from "@/components/toast/toast-context";
 
 function emptyFormFor(module: ModuleConfig): Record<string, string> {
   return Object.fromEntries(module.fields.map((f) => [f.key, ""]));
@@ -12,6 +13,7 @@ function emptyFormFor(module: ModuleConfig): Record<string, string> {
 export function GenericAddForm({ module }: { module: ModuleConfig }) {
   const router = useRouter();
   const supabase = createClient();
+  const { addToast } = useToast();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Record<string, string>>(() => emptyFormFor(module));
   const [error, setError] = useState<string | null>(null);
@@ -53,11 +55,13 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
 
     if (error) {
       setError(error.message);
+      addToast(`✗ error: ${error.message}`, "error");
       return;
     }
 
     setForm(emptyFormFor(module));
     setOpen(false);
+    addToast("✓ created");
     router.refresh();
   }
 

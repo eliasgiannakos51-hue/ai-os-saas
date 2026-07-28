@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { Idea } from "@/types/ideas";
 import { DeleteButton } from "@/components/delete-button";
+import { useToast } from "@/components/toast/toast-context";
 
 function verdictClasses(verdict: string | null) {
   const v = (verdict ?? "").toLowerCase();
@@ -45,6 +46,7 @@ function toFormState(idea: Idea): FormState {
 export function IdeaRow({ idea }: { idea: Idea }) {
   const router = useRouter();
   const supabase = createClient();
+  const { addToast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<FormState>(() => toFormState(idea));
   const [error, setError] = useState<string | null>(null);
@@ -90,10 +92,12 @@ export function IdeaRow({ idea }: { idea: Idea }) {
 
     if (error) {
       setError(error.message);
+      addToast(`✗ error: ${error.message}`, "error");
       return;
     }
 
     setIsEditing(false);
+    addToast("✓ updated");
     router.refresh();
   }
 

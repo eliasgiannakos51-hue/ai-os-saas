@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { NAV_ITEMS } from "@/lib/modules";
 
@@ -13,6 +13,19 @@ export function CreateChat() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const isModK = (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k";
+      if (!isModK) return;
+      e.preventDefault();
+      textareaRef.current?.focus();
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -66,6 +79,7 @@ export function CreateChat() {
 
       <form onSubmit={handleSubmit} className="space-y-3">
         <textarea
+          ref={textareaRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="describe what you want to create or log..."

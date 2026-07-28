@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { DeleteButton } from "@/components/delete-button";
+import { useToast } from "@/components/toast/toast-context";
 
 function formStateFor(module: ModuleConfig, record: ModuleRecord): Record<string, string> {
   return Object.fromEntries(
@@ -25,6 +26,7 @@ export function GenericRecordRow({
 }) {
   const router = useRouter();
   const supabase = createClient();
+  const { addToast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<Record<string, string>>(() =>
     formStateFor(module, record)
@@ -73,10 +75,12 @@ export function GenericRecordRow({
 
     if (error) {
       setError(error.message);
+      addToast(`✗ error: ${error.message}`, "error");
       return;
     }
 
     setIsEditing(false);
+    addToast("✓ updated");
     router.refresh();
   }
 

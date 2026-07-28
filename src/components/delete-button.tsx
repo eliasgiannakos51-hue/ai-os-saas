@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useToast } from "@/components/toast/toast-context";
 
 export function DeleteButton({
   table,
@@ -15,6 +16,7 @@ export function DeleteButton({
 }) {
   const router = useRouter();
   const supabase = createClient();
+  const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,9 +32,11 @@ export function DeleteButton({
 
     if (error) {
       setError(error.message);
+      addToast(`✗ error: ${error.message}`, "error");
       return;
     }
 
+    addToast("✓ deleted");
     router.refresh();
   }
 

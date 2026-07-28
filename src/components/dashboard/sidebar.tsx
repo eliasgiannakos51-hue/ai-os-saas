@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_ITEMS, CREATE_NAV_ITEM, OVERVIEW_NAV_ITEM } from "@/lib/modules";
+import {
+  NAV_ITEMS,
+  CREATE_NAV_ITEM,
+  OVERVIEW_NAV_ITEM,
+  SETTINGS_NAV_ITEM,
+} from "@/lib/modules";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
 
 export function Sidebar() {
@@ -10,6 +15,7 @@ export function Sidebar() {
   const { open, setOpen } = useSidebar();
   const overviewActive = pathname?.startsWith(OVERVIEW_NAV_ITEM.href);
   const createActive = pathname?.startsWith(CREATE_NAV_ITEM.href);
+  const settingsActive = pathname?.startsWith(SETTINGS_NAV_ITEM.href);
   const closeOnMobile = () => setOpen(false);
 
   return (
@@ -89,6 +95,19 @@ export function Sidebar() {
             );
           })}
         </nav>
+        <div className="border-t border-border p-3">
+          <Link
+            href={SETTINGS_NAV_ITEM.href}
+            onClick={closeOnMobile}
+            className={`flex min-h-[44px] items-center rounded px-3 py-2 text-sm transition-colors sm:min-h-0 ${
+              settingsActive
+                ? "border border-amber-800 bg-amber-950/20 text-amber-400"
+                : "text-muted hover:bg-black/30 hover:text-foreground"
+            }`}
+          >
+            settings
+          </Link>
+        </div>
       </aside>
     </>
   );

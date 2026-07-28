@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { useToast } from "@/components/toast/toast-context";
 
 const EMPTY_FORM = {
   name: "",
@@ -18,6 +19,7 @@ const EMPTY_FORM = {
 export function AddIdeaForm() {
   const router = useRouter();
   const supabase = createClient();
+  const { addToast } = useToast();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
@@ -59,11 +61,13 @@ export function AddIdeaForm() {
 
     if (error) {
       setError(error.message);
+      addToast(`✗ error: ${error.message}`, "error");
       return;
     }
 
     setForm(EMPTY_FORM);
     setOpen(false);
+    addToast("✓ created");
     router.refresh();
   }
 

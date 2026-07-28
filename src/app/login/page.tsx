@@ -30,7 +30,7 @@ export default function LoginPage() {
         setError(error.message);
         return;
       }
-      router.push("/dashboard");
+      router.push("/dashboard/overview");
       router.refresh();
     } else {
       const { error } = await supabase.auth.signUp({ email, password });

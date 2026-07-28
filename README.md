@@ -6,6 +6,9 @@ Currently implemented: email/password auth and all 13 modules, each with a
 list (RLS-scoped to the logged-in user) and an add form, reachable from a
 sidebar on `/dashboard`:
 
+- **Overview** (`/dashboard/overview`) — the default landing page after
+  login. A card per module showing its entry count and most recent entry
+  (RLS-scoped), linking through to the module.
 - **Ideas** (`/dashboard`) — hand-built, the original module.
 - **Competitors, Research, Finance, Learning, Trading, Decisions, Products,
   Content, Sales, Feedback, Analytics, Automation** (`/dashboard/<slug>`) —
@@ -68,8 +71,8 @@ sidebar on `/dashboard`:
    ```
 
    Open [http://localhost:3000](http://localhost:3000) — you'll be
-   redirected to `/login`. Sign up, then you'll land on `/dashboard` with
-   the Ideas module and a sidebar to reach the other 12.
+   redirected to `/login`. Sign up, then you'll land on `/dashboard/overview`
+   with a sidebar to reach every module.
 
 ## Project structure
 
@@ -82,12 +85,13 @@ src/
       page.tsx                 # Ideas module (hand-built)
       [module]/page.tsx        # the other 12 modules, driven by lib/modules.ts
       create/page.tsx          # Create Anything
+      overview/page.tsx        # Overview — default post-login landing
     api/create/route.ts        # server-only: calls Claude, inserts into the right table
     layout.tsx
     globals.css
   components/
     logout-button.tsx
-    dashboard/sidebar.tsx      # nav links for all 13 modules + Create
+    dashboard/sidebar.tsx      # nav links: Overview, Create, then all 13 modules
     ideas/
       add-idea-form.tsx
       ideas-list.tsx
@@ -95,6 +99,7 @@ src/
       generic-add-form.tsx     # config-driven add form used by the 12 modules
       generic-list.tsx         # config-driven list used by the 12 modules
     create/create-chat.tsx     # Create Anything's input + result UI
+    overview/module-summary-card.tsx  # per-module count + latest-entry card
   lib/
     modules.ts                 # per-module table/field config + nav items
     classifier-modules.ts      # all 13 modules' fields, for /api/create's system prompt

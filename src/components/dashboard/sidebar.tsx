@@ -2,16 +2,29 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_ITEMS, CREATE_NAV_ITEM } from "@/lib/modules";
+import { NAV_ITEMS, CREATE_NAV_ITEM, OVERVIEW_NAV_ITEM } from "@/lib/modules";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const overviewActive = pathname?.startsWith(OVERVIEW_NAV_ITEM.href);
   const createActive = pathname?.startsWith(CREATE_NAV_ITEM.href);
 
   return (
     <aside className="w-56 shrink-0 border-r border-border bg-panel font-mono">
       <div className="border-b border-border px-4 py-4">
         <p className="text-xs tracking-widest text-amber-500">AI_OS //</p>
+      </div>
+      <div className="border-b border-border p-3">
+        <Link
+          href={OVERVIEW_NAV_ITEM.href}
+          className={`block rounded px-3 py-2 text-sm transition-colors ${
+            overviewActive
+              ? "border border-amber-800 bg-amber-950/20 text-amber-400"
+              : "text-muted hover:bg-black/30 hover:text-foreground"
+          }`}
+        >
+          overview
+        </Link>
       </div>
       <div className="border-b border-border p-3">
         <Link

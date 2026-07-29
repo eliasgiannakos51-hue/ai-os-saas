@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
+import { PasswordInput } from "@/components/ui/password-input";
 
 export function PasswordChangeForm() {
   const supabase = createClient();
@@ -47,8 +48,7 @@ export function PasswordChangeForm() {
         <span className="mb-1 block">
           <span className="text-amber-500">$</span> new password
         </span>
-        <input
-          type="password"
+        <PasswordInput
           required
           minLength={6}
           value={newPassword}
@@ -63,8 +63,7 @@ export function PasswordChangeForm() {
         <span className="mb-1 block">
           <span className="text-amber-500">$</span> confirm password
         </span>
-        <input
-          type="password"
+        <PasswordInput
           required
           minLength={6}
           value={confirmPassword}

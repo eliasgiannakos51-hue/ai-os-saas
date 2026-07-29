@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { PasswordInput } from "@/components/ui/password-input";
 
 type Status = "checking" | "ready" | "invalid";
 
@@ -211,9 +212,8 @@ export function ResetPasswordForm() {
                 <label htmlFor="password" className="mb-1 block text-xs text-muted">
                   <span className="text-amber-500">$</span> new password
                 </label>
-                <input
+                <PasswordInput
                   id="password"
-                  type="password"
                   required
                   minLength={6}
                   autoComplete="new-password"
@@ -228,9 +228,8 @@ export function ResetPasswordForm() {
                 <label htmlFor="confirmPassword" className="mb-1 block text-xs text-muted">
                   <span className="text-amber-500">$</span> confirm password
                 </label>
-                <input
+                <PasswordInput
                   id="confirmPassword"
-                  type="password"
                   required
                   minLength={6}
                   autoComplete="new-password"

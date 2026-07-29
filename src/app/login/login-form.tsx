@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { PasswordInput } from "@/components/ui/password-input";
 
 type Mode = "login" | "signup";
 
@@ -135,9 +136,8 @@ export function LoginForm() {
               <label htmlFor="password" className="mb-1 block text-xs text-muted">
                 <span className="text-amber-500">$</span> password
               </label>
-              <input
+              <PasswordInput
                 id="password"
-                type="password"
                 required
                 minLength={6}
                 autoComplete={mode === "login" ? "current-password" : "new-password"}

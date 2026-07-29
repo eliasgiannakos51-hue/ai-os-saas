@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 type Mode = "login" | "signup";
@@ -15,6 +16,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("reset") === "success") {
+      setResetSuccess(true);
+    }
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -56,6 +64,12 @@ export default function LoginPage() {
             {mode === "login" ? "authenticate" : "create_account"}
           </h1>
         </div>
+
+        {resetSuccess && (
+          <p className="mb-4 rounded border border-emerald-800 bg-emerald-950/30 px-3 py-2 text-center text-xs text-emerald-400">
+            password updated — sign in with your new password.
+          </p>
+        )}
 
         <div className="rounded-md border border-border bg-panel shadow-[0_0_0_1px_rgba(245,158,11,0.05)]">
           <div className="flex border-b border-border text-sm">
@@ -153,6 +167,17 @@ export default function LoginPage() {
             {mode === "login" ? "sign_up" : "login"}
           </button>
         </p>
+
+        {mode === "login" && (
+          <p className="mt-2 text-center text-xs text-muted">
+            <Link
+              href="/forgot-password"
+              className="text-amber-500 underline underline-offset-2"
+            >
+              forgot_password()
+            </Link>
+          </p>
+        )}
       </div>
     </main>
   );

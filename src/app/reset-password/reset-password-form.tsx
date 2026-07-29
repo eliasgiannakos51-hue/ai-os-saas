@@ -9,8 +9,8 @@ import { getErrorMessage } from "@/lib/get-error-message";
 type Status = "checking" | "ready" | "invalid";
 
 // detectSessionInUrl is turned off for this client so it never races the
-// explicit exchange below for the same one-time-use PKCE code — see the
-// verifyRecoveryLink() comment.
+// explicit verification below for the same one-time-use recovery token — see
+// the verifyRecoveryLink() comment.
 function createResetPasswordClient() {
   return createClient({ auth: { detectSessionInUrl: false } });
 }
@@ -29,40 +29,38 @@ export function ResetPasswordForm() {
   const [loading, setLoading] = useState(false);
 
   // Guards against React 18 Strict Mode's development-only double-invoke of
-  // effects (mount -> cleanup -> mount again). Without this, the exchange
-  // below — which consumes a single-use PKCE code — would run twice: the
-  // first (real) exchange succeeds and consumes the code, but Strict Mode's
+  // effects (mount -> cleanup -> mount again). Without this, the verification
+  // below — which consumes a single-use recovery token — would run twice: the
+  // first (real) call succeeds and consumes the token, but Strict Mode's
   // simulated "unmount" discards that result before it reaches state; the
-  // second run then retries with the now-already-used code and legitimately
-  // fails, which is what actually renders. Symptom: even a genuinely fresh
-  // link shows "invalid or has expired" in `next dev`. A ref (not a plain
-  // closure variable) is required because it survives that cleanup+rerun
-  // cycle. reactStrictMode isn't set in next.config.mjs, so the App Router
-  // enables it by default in development — see Next.js's define-env-plugin.
+  // second run then retries with the now-already-used token and legitimately
+  // fails, which is what actually renders. A ref (not a plain closure
+  // variable) is required because it survives that cleanup+rerun cycle.
+  // reactStrictMode isn't set in next.config.mjs, so the App Router enables
+  // it by default in development — see Next.js's define-env-plugin.
   const hasVerifiedRef = useRef(false);
 
   useEffect(() => {
     if (hasVerifiedRef.current) return;
     hasVerifiedRef.current = true;
 
-    // TEMPORARY — logs the exact URL Supabase's email link redirected to,
-    // so we can confirm whether this project's auth flow is PKCE (?code=)
-    // or implicit (#access_token=...&type=recovery). Remove once confirmed.
-    // eslint-disable-next-line no-console
-    console.log("[reset-password debug] full URL:", window.location.href);
-    // eslint-disable-next-line no-console
-    console.log("[reset-password debug] search params:", window.location.search);
-    // eslint-disable-next-line no-console
-    console.log("[reset-password debug] hash:", window.location.hash);
-
-    // Supabase's reset-password email links land here in one of two shapes,
-    // depending on the project's auth flow setting:
+    // Supabase's reset-password email links can land here in a few shapes:
+    //   - token_hash: /reset-password?token_hash=xxxxx&type=recovery
+    //     Verified via verifyOtp(), which checks the token server-side with
+    //     no dependency on local browser storage — this is the only shape
+    //     that works cross-device (e.g. request on a laptop, open on a
+    //     phone), so it's tried first. Requires the Supabase email template
+    //     to link with {{ .TokenHash }} instead of {{ .ConfirmationURL }}.
     //   - PKCE:     /reset-password?code=xxxxx
+    //     Requires a code_verifier stored by the SAME browser that made the
+    //     request, so this fails with "code challenge does not match" if
+    //     opened on a different device/browser. Kept as a fallback for
+    //     projects still using the default email template.
     //   - implicit: /reset-password#access_token=xxx&refresh_token=yyy&type=recovery
-    // Either way, we need to read it out of the URL ourselves and turn it
-    // into a session before allowing a password change — the Supabase
-    // client's own automatic URL detection is disabled above specifically
-    // so there's only ever one consumer of the (single-use) code/tokens.
+    // Either way, we read it out of the URL ourselves and turn it into a
+    // session before allowing a password change — the Supabase client's own
+    // automatic URL detection is disabled above specifically so there's only
+    // ever one consumer of the (single-use) token/code.
     async function verifyRecoveryLink() {
       try {
         const url = new URL(window.location.href);
@@ -79,10 +77,24 @@ export function ResetPasswordForm() {
           return;
         }
 
+        const tokenHash = url.searchParams.get("token_hash");
+        const otpType = url.searchParams.get("type") || hashParams.get("type");
+        if (tokenHash && otpType === "recovery") {
+          const { error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type: "recovery",
+          });
+          if (error) {
+            setInvalidReason(getErrorMessage(error));
+            setStatus("invalid");
+          } else {
+            setStatus("ready");
+          }
+          return;
+        }
+
         const code = url.searchParams.get("code");
         if (code) {
-          // eslint-disable-next-line no-console
-          console.log("[reset-password debug] detected PKCE flow (?code=)");
           const { error } = await supabase.auth.exchangeCodeForSession(code);
           if (error) {
             setInvalidReason(getErrorMessage(error));
@@ -95,12 +107,7 @@ export function ResetPasswordForm() {
 
         const accessToken = hashParams.get("access_token");
         const refreshToken = hashParams.get("refresh_token");
-        const type = hashParams.get("type") || url.searchParams.get("type");
-        if (accessToken && refreshToken && type === "recovery") {
-          // eslint-disable-next-line no-console
-          console.log(
-            "[reset-password debug] detected implicit flow (#access_token=...&type=recovery)"
-          );
+        if (accessToken && refreshToken && otpType === "recovery") {
           const { error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,

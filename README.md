@@ -105,6 +105,26 @@ and desktop.
    redirected to `/login`. Sign up, then you'll land on `/dashboard/overview`
    with a sidebar to reach every module.
 
+## Testing
+
+`tests/smoke.spec.ts` is a [Playwright](https://playwright.dev) suite that
+objectively checks every module has create/search/sort/export, that
+sidebar links resolve, and that login/signup, Overview, Settings, the
+Cmd+K shortcut, and the mobile sidebar all work — rather than relying on
+reading the code. Run it against your local dev server:
+
+```bash
+npx playwright install chromium   # first time only
+npm run test:e2e
+```
+
+It starts `npm run dev` for you if it isn't already running. The three
+"public pages" checks need nothing extra, but everything under
+"authenticated dashboard" signs up a throwaway test account through the
+real signup flow, so it needs a working `.env.local` with real Supabase
+credentials (see Setup above) — if signup can't reach Supabase, those
+tests report as **skipped** with the reason, not failed.
+
 ## Email
 
 Transactional email is sent via [Resend](https://resend.com).
@@ -194,6 +214,9 @@ src/
   types/
     ideas.ts
     module-record.ts
+tests/
+  smoke.spec.ts                       # Playwright smoke suite — see Testing above
+playwright.config.ts
 supabase_schema.sql
 ```
 

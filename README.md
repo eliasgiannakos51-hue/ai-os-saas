@@ -74,7 +74,7 @@ and desktop.
    ANTHROPIC_API_KEY=your-anthropic-api-key
    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
    RESEND_API_KEY=your-resend-api-key
-   RESEND_FROM_EMAIL="AI_OS <onboarding@resend.dev>"
+   RESEND_FROM_EMAIL="Nexa AI <onboarding@resend.dev>"
    ```
 
    `.env.local` is gitignored — never commit real credentials.

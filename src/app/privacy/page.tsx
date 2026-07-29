@@ -4,7 +4,7 @@ import { LegalSection } from "@/components/legal/legal-section";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Privacy Policy for AI_OS.",
+  description: "Privacy Policy for Nexa AI.",
 };
 
 export default function PrivacyPage() {
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
         <p>
           We collect the email address you sign up with, the password you
           choose (stored hashed, never in plain text), and whatever you
-          enter into AI_OS&apos;s modules or the &quot;Create Anything&quot;
+          enter into Nexa AI&apos;s modules or the &quot;Create Anything&quot;
           box — ideas, notes, metrics, and similar content you choose to
           log. We don&apos;t collect data beyond what&apos;s needed to run
           the Service.
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
 
       <LegalSection title="2. Data Use">
         <p>
-          Your data is used to operate AI_OS for you: authenticating your
+          Your data is used to operate Nexa AI for you: authenticating your
           account, displaying and searching your entries, generating the
           Overview summary, and — when you use &quot;Create Anything&quot; —
           classifying your free-text message into the right module. We do
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
 
       <LegalSection title="4. Third-party Services">
         <p>
-          AI_OS uses a small number of third-party services to function:
+          Nexa AI uses a small number of third-party services to function:
         </p>
         <ul className="list-disc space-y-1 pl-5">
           <li>

@@ -37,7 +37,7 @@ export default async function SettingsPage() {
         <PasswordChangeForm />
 
         <div className="mb-6 mt-6 space-y-3 rounded-md border border-border bg-panel p-5">
-          <h2 className="text-sm text-amber-500">$ export.all_data()</h2>
+          <h2 className="text-sm text-amber-500">export.all_data()</h2>
           <p className="text-xs text-muted">
             Download everything you&apos;ve logged across all 13 modules as a
             single JSON file.

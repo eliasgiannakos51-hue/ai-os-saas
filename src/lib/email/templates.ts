@@ -5,7 +5,7 @@ import "server-only";
 // desktop) strip or ignore most modern CSS, so everything here is written
 // to degrade gracefully rather than rely on it.
 
-const BG = "#0a0a0a";
+const BG = "#090909";
 const PANEL = "#141414";
 const BORDER = "#2a2a2a";
 const AMBER = "#f59e0b";
@@ -19,7 +19,7 @@ function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AI_OS</title>
+    <title>Nexa AI</title>
   </head>
   <body style="margin:0; padding:0; background-color:${BG}; font-family:${MONO_STACK};">
     <div style="display:none; max-height:0; overflow:hidden; opacity:0;">${preheader}</div>
@@ -29,7 +29,7 @@ function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
             <tr>
               <td style="padding-bottom:24px;">
-                <span style="color:${AMBER}; font-size:13px; letter-spacing:2px;">AI_OS //</span>
+                <span style="color:${AMBER}; font-size:13px; letter-spacing:2px;">Nexa AI //</span>
               </td>
             </tr>
             <tr>
@@ -40,7 +40,7 @@ function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }
             <tr>
               <td style="padding-top:24px;">
                 <span style="color:${MUTED}; font-size:11px;">
-                  You're receiving this because you have an AI_OS account.
+                  You're receiving this because you have a Nexa AI account.
                 </span>
               </td>
             </tr>
@@ -80,11 +80,11 @@ export function welcomeEmailHtml({ email }: { email: string }): string {
   ).join("");
 
   const bodyHtml = `
-    <span style="color:${MUTED}; font-size:12px;">$ signup --email=${email}</span>
-    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">welcome to AI_OS</h1>
+    <span style="color:${MUTED}; font-size:12px;">signup · ${email}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">welcome to Nexa AI</h1>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
       Your account is ready — no email confirmation needed, you can log in right
-      away. AI_OS is 13 modules for running a startup, plus a free-text inbox
+      away. Nexa AI is 13 modules for running a startup, plus a free-text inbox
       that files anything you type into the right one.
     </p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
@@ -97,7 +97,7 @@ export function welcomeEmailHtml({ email }: { email: string }): string {
     </p>
   `;
 
-  return layout({ preheader: "Your AI_OS account is ready.", bodyHtml });
+  return layout({ preheader: "Your Nexa AI account is ready.", bodyHtml });
 }
 
 export function weeklyDigestEmailHtml({
@@ -123,8 +123,8 @@ export function weeklyDigestEmailHtml({
     .join("");
 
   const bodyHtml = `
-    <span style="color:${MUTED}; font-size:12px;">$ digest --range=${periodLabel}</span>
-    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">your week on AI_OS</h1>
+    <span style="color:${MUTED}; font-size:12px;">digest · ${periodLabel}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">your week on Nexa AI</h1>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
       ${total} new ${total === 1 ? "entry" : "entries"} logged for ${email} this week.
     </p>
@@ -133,5 +133,5 @@ export function weeklyDigestEmailHtml({
     </table>
   `;
 
-  return layout({ preheader: `Your AI_OS weekly digest — ${total} new entries.`, bodyHtml });
+  return layout({ preheader: `Your Nexa AI weekly digest — ${total} new entries.`, bodyHtml });
 }

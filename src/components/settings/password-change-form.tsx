@@ -42,11 +42,11 @@ export function PasswordChangeForm() {
       onSubmit={handleSubmit}
       className="space-y-4 rounded-md border border-border bg-panel p-5"
     >
-      <h2 className="text-sm text-amber-500">$ auth.updateUser()</h2>
+      <h2 className="text-sm text-amber-500">auth.updateUser()</h2>
 
       <label className="block text-xs text-muted">
         <span className="mb-1 block">
-          <span className="text-amber-500">$</span> new password
+          new password
         </span>
         <PasswordInput
           required
@@ -61,7 +61,7 @@ export function PasswordChangeForm() {
 
       <label className="block text-xs text-muted">
         <span className="mb-1 block">
-          <span className="text-amber-500">$</span> confirm password
+          confirm password
         </span>
         <PasswordInput
           required
@@ -83,7 +83,7 @@ export function PasswordChangeForm() {
       <button
         type="submit"
         disabled={loading}
-        className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50 sm:min-h-0 sm:w-auto"
+        className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
       >
         {loading ? "updating..." : "update_password()"}
       </button>

@@ -109,7 +109,7 @@ export function IdeaRow({ idea }: { idea: Idea }) {
         className="space-y-4 rounded-md border border-border bg-panel p-4"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-sm text-amber-500">$ ideas.update()</h2>
+          <h2 className="text-sm text-amber-500">ideas.update()</h2>
           <button
             type="button"
             onClick={cancelEditing}
@@ -206,7 +206,7 @@ export function IdeaRow({ idea }: { idea: Idea }) {
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50 sm:min-h-0 sm:w-auto"
+          className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
         >
           {loading ? "saving..." : "save()"}
         </button>
@@ -304,7 +304,7 @@ function Field({
   return (
     <label className={`block text-xs text-muted ${full ? "sm:col-span-2" : ""}`}>
       <span className="mb-1 block">
-        <span className="text-amber-500">$</span> {label}
+        {label}
         {required && <span className="text-red-400"> *</span>}
       </span>
       {children}

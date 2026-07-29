@@ -7,7 +7,7 @@ export function DashboardHeader({ email }: { email: string }) {
       <div className="flex min-w-0 items-center gap-3">
         <MenuButton />
         <div className="min-w-0">
-          <p className="text-xs tracking-widest text-amber-500">AI_OS //</p>
+          <p className="text-xs tracking-widest text-amber-500">Nexa AI //</p>
           <h1 className="text-lg font-bold text-foreground">dashboard</h1>
         </div>
       </div>

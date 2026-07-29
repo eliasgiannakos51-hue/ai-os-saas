@@ -51,7 +51,7 @@ export function DangerZone({ email }: { email: string }) {
 
   return (
     <div className="rounded-md border border-red-900 bg-red-950/10 p-5">
-      <h2 className="text-sm text-red-400">$ danger_zone</h2>
+      <h2 className="text-sm text-red-400">Danger Zone</h2>
       <p className="mt-2 text-xs text-muted">
         Permanently delete your account and every record you&apos;ve logged
         across all 13 modules. This can&apos;t be undone.
@@ -92,7 +92,7 @@ export function DangerZone({ email }: { email: string }) {
             <button
               type="submit"
               disabled={loading || !confirmed}
-              className="inline-flex min-h-[44px] items-center justify-center rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0"
+              className="inline-flex min-h-[44px] items-center justify-center rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(220,38,38,0.35)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-none sm:min-h-0"
             >
               {loading ? "deleting..." : "permanently delete my account"}
             </button>

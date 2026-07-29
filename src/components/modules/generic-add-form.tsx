@@ -83,7 +83,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
       className="space-y-4 rounded-md border border-border bg-panel p-5"
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-sm text-amber-500">$ {module.table}.insert()</h2>
+        <h2 className="text-sm text-amber-500">{module.table}.insert()</h2>
         <button
           type="button"
           onClick={() => setOpen(false)}
@@ -100,7 +100,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
             className={`block text-xs text-muted ${field.full ? "sm:col-span-2" : ""}`}
           >
             <span className="mb-1 block">
-              <span className="text-amber-500">$</span> {field.label}
+              {field.label}
               {field.required && <span className="text-red-400"> *</span>}
             </span>
             {field.type === "textarea" ? (
@@ -150,7 +150,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
       <button
         type="submit"
         disabled={loading}
-        className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50 sm:min-h-0 sm:w-auto"
+        className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
       >
         {loading ? "saving..." : `save_${module.slug}()`}
       </button>

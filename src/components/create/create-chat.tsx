@@ -67,7 +67,7 @@ export function CreateChat() {
   return (
     <div className="w-full max-w-2xl">
       <div className="mb-8 text-center">
-        <p className="text-sm tracking-widest text-amber-500">AI_OS //</p>
+        <p className="text-sm tracking-widest text-amber-500">Nexa AI //</p>
         <h1 className="mt-1 text-2xl font-bold text-foreground">
           create_anything()
         </h1>
@@ -90,7 +90,7 @@ export function CreateChat() {
         <button
           type="submit"
           disabled={loading || !input.trim()}
-          className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-3 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-3 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] disabled:opacity-50"
         >
           {loading ? "thinking..." : "run create()"}
         </button>

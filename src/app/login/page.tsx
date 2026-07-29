@@ -3,7 +3,7 @@ import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = {
   title: "Log In",
-  description: "Log in or sign up for AI_OS.",
+  description: "Log in or sign up for Nexa AI.",
 };
 
 export default function LoginPage() {

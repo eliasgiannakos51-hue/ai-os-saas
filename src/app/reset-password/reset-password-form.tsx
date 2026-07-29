@@ -181,7 +181,7 @@ export function ResetPasswordForm() {
     <main className="flex min-h-screen items-center justify-center bg-background px-4 font-mono">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <p className="text-sm tracking-widest text-amber-500">AI_OS //</p>
+          <p className="text-sm tracking-widest text-amber-500">Nexa AI //</p>
           <h1 className="mt-1 text-2xl font-bold text-foreground">
             set_new_password
           </h1>
@@ -199,7 +199,7 @@ export function ResetPasswordForm() {
               <p className="text-sm text-red-400">{invalidReason}</p>
               <Link
                 href="/forgot-password"
-                className="inline-flex min-h-[44px] items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-90 sm:min-h-0"
+                className="inline-flex min-h-[44px] items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] sm:min-h-0"
               >
                 request a new link
               </Link>
@@ -210,7 +210,7 @@ export function ResetPasswordForm() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="password" className="mb-1 block text-xs text-muted">
-                  <span className="text-amber-500">$</span> new password
+                  new password
                 </label>
                 <PasswordInput
                   id="password"
@@ -226,7 +226,7 @@ export function ResetPasswordForm() {
 
               <div>
                 <label htmlFor="confirmPassword" className="mb-1 block text-xs text-muted">
-                  <span className="text-amber-500">$</span> confirm password
+                  confirm password
                 </label>
                 <PasswordInput
                   id="confirmPassword"
@@ -249,7 +249,7 @@ export function ResetPasswordForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+                className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] disabled:opacity-50"
               >
                 {loading ? "saving..." : "run reset()"}
               </button>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { PasswordInput } from "@/components/ui/password-input";
+import { LoginSplash } from "@/components/auth/login-splash";
 
 type Mode = "login" | "signup";
 
@@ -19,6 +20,7 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
+  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -42,8 +44,7 @@ export function LoginForm() {
           setError(getErrorMessage(error));
           return;
         }
-        router.push("/dashboard/overview");
-        router.refresh();
+        setAuthenticated(true);
       } else {
         const res = await fetch("/api/signup", {
           method: "POST",
@@ -55,8 +56,7 @@ export function LoginForm() {
           setError(getErrorMessage(data.error, "Signup failed."));
           return;
         }
-        router.push("/dashboard/overview");
-        router.refresh();
+        setAuthenticated(true);
       }
     } catch (err) {
       setError(getErrorMessage(err));
@@ -65,11 +65,20 @@ export function LoginForm() {
     }
   }
 
+  function goToDashboard() {
+    router.push("/dashboard/overview");
+    router.refresh();
+  }
+
+  if (authenticated) {
+    return <LoginSplash onDone={goToDashboard} />;
+  }
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 font-mono">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <p className="text-sm tracking-widest text-amber-500">AI_OS //</p>
+          <p className="text-sm tracking-widest text-amber-500">Nexa AI //</p>
           <h1 className="mt-1 text-2xl font-bold text-foreground">
             {mode === "login" ? "authenticate" : "create_account"}
           </h1>
@@ -118,7 +127,7 @@ export function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-4 p-6">
             <div>
               <label htmlFor="email" className="mb-1 block text-xs text-muted">
-                <span className="text-amber-500">$</span> email
+                email
               </label>
               <input
                 id="email"
@@ -134,7 +143,7 @@ export function LoginForm() {
 
             <div>
               <label htmlFor="password" className="mb-1 block text-xs text-muted">
-                <span className="text-amber-500">$</span> password
+                password
               </label>
               <PasswordInput
                 id="password"
@@ -157,7 +166,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] disabled:opacity-50"
             >
               {loading
                 ? "working..."

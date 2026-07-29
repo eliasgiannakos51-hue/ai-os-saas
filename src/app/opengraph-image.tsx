@@ -14,12 +14,12 @@ export default function OpengraphImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "#0a0a0a",
+          background: "#090909",
           fontFamily: "monospace",
         }}
       >
         <div style={{ fontSize: 28, letterSpacing: 6, color: "#f59e0b" }}>
-          AI_OS //
+          Nexa AI //
         </div>
         <div
           style={{
@@ -29,7 +29,7 @@ export default function OpengraphImage() {
             color: "#e5e5e5",
           }}
         >
-          AI_OS
+          Nexa AI
         </div>
         <div
           style={{
@@ -40,7 +40,7 @@ export default function OpengraphImage() {
             textAlign: "center",
           }}
         >
-          your personal AI operating system
+          One platform. Every AI capability.
         </div>
       </div>
     ),

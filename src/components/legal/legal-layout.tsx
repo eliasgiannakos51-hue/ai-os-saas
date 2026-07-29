@@ -17,7 +17,7 @@ export function LegalLayout({
           href="/"
           className="text-sm tracking-widest text-amber-500 transition-colors hover:text-amber-400"
         >
-          AI_OS //
+          Nexa AI //
         </Link>
         <h1 className="mt-4 text-2xl font-bold text-foreground sm:text-3xl">
           {title}
@@ -26,7 +26,7 @@ export function LegalLayout({
 
         <div className="mt-4 rounded border border-amber-900 bg-amber-950/20 px-4 py-3 text-xs leading-relaxed text-amber-200/80">
           This is placeholder text for early development, not reviewed legal
-          copy. It will be replaced with the real thing before AI_OS is
+          copy. It will be replaced with the real thing before Nexa AI is
           offered to real users.
         </div>
 
@@ -37,7 +37,7 @@ export function LegalLayout({
             href="/"
             className="text-xs text-amber-500 underline underline-offset-2"
           >
-            ← back to AI_OS
+            ← back to Nexa AI
           </Link>
         </div>
       </div>

@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "AI_OS pricing — Free, Pro, and Enterprise plans.",
+  description: "Nexa AI pricing — Free, Pro, and Enterprise plans.",
 };
 
 type Plan = {
@@ -21,7 +21,7 @@ const PLANS: Plan[] = [
   {
     name: "Free",
     price: "$0",
-    description: "Everything you need to try AI_OS.",
+    description: "Everything you need to try Nexa AI.",
     features: [
       "all 13 modules",
       "20 Create Anything requests / month",
@@ -34,7 +34,7 @@ const PLANS: Plan[] = [
     name: "Pro",
     price: "$15",
     period: "/month",
-    description: "For running your work through AI_OS day to day.",
+    description: "For running your work through Nexa AI day to day.",
     features: [
       "everything in Free",
       "unlimited Create Anything",
@@ -67,7 +67,7 @@ export default function PricingPage() {
             href="/"
             className="text-sm tracking-widest text-amber-500 transition-colors hover:text-amber-400"
           >
-            AI_OS //
+            Nexa AI //
           </Link>
           <h1 className="mt-4 text-3xl font-bold text-foreground sm:text-4xl">
             pricing
@@ -113,10 +113,10 @@ export default function PricingPage() {
 
               <Link
                 href={plan.href}
-                className={`mt-6 inline-flex min-h-[44px] items-center justify-center rounded px-4 py-2 text-sm font-semibold transition-opacity hover:opacity-90 sm:min-h-0 ${
+                className={`mt-6 inline-flex min-h-[44px] items-center justify-center rounded px-4 py-2 text-sm font-semibold transition-all duration-200 sm:min-h-0 ${
                   plan.highlighted
-                    ? "bg-amber-500 text-black"
-                    : "border border-border text-foreground transition-colors hover:border-amber-500 hover:text-amber-400"
+                    ? "bg-amber-500 text-black hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)]"
+                    : "border border-border text-foreground hover:border-amber-500 hover:text-amber-400"
                 }`}
               >
                 {plan.cta}
@@ -130,7 +130,7 @@ export default function PricingPage() {
             href="/"
             className="text-xs text-amber-500 underline underline-offset-2"
           >
-            ← back to AI_OS
+            ← back to Nexa AI
           </Link>
         </div>
       </div>

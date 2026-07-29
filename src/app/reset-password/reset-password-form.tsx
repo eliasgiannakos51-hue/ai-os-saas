@@ -7,11 +7,21 @@ import { createClient } from "@/lib/supabase/client";
 
 type Status = "checking" | "ready" | "invalid";
 
+// detectSessionInUrl is turned off for this client so it never races the
+// explicit exchange below for the same one-time-use PKCE code — see the
+// verifyRecoveryLink() comment.
+function createResetPasswordClient() {
+  return createClient({ auth: { detectSessionInUrl: false } });
+}
+
 export function ResetPasswordForm() {
   const router = useRouter();
-  const [supabase] = useState(() => createClient());
+  const [supabase] = useState(createResetPasswordClient);
 
   const [status, setStatus] = useState<Status>("checking");
+  const [invalidReason, setInvalidReason] = useState(
+    "This reset link is invalid or has expired."
+  );
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -20,34 +30,78 @@ export function ResetPasswordForm() {
   useEffect(() => {
     let active = true;
 
-    // The reset link lands here with a recovery session already applied by
-    // the Supabase client (it parses the URL on load). "PASSWORD_RECOVERY"
-    // is the documented signal that it succeeded; getSession() is a
-    // fallback in case that event fired before this listener attached.
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" && active) {
-        setStatus("ready");
-      }
-    });
+    // Supabase's reset-password email links land here in one of two shapes,
+    // depending on the project's auth flow setting:
+    //   - PKCE:     /reset-password?code=xxxxx
+    //   - implicit: /reset-password#access_token=xxx&refresh_token=yyy&type=recovery
+    // Either way, we need to read it out of the URL ourselves and turn it
+    // into a session before allowing a password change — the Supabase
+    // client's own automatic URL detection is disabled above specifically
+    // so there's only ever one consumer of the (single-use) code/tokens.
+    async function verifyRecoveryLink() {
+      const url = new URL(window.location.href);
+      const hashParams = new URLSearchParams(
+        url.hash.startsWith("#") ? url.hash.slice(1) : ""
+      );
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (active && session) {
-        setStatus("ready");
+      const errorDescription =
+        url.searchParams.get("error_description") ||
+        hashParams.get("error_description");
+      if (errorDescription) {
+        if (active) {
+          setInvalidReason(errorDescription);
+          setStatus("invalid");
+        }
+        return;
       }
-    });
 
-    const timeout = setTimeout(() => {
+      const code = url.searchParams.get("code");
+      if (code) {
+        const { error } = await supabase.auth.exchangeCodeForSession(code);
+        if (!active) return;
+        if (error) {
+          setInvalidReason(error.message);
+          setStatus("invalid");
+        } else {
+          setStatus("ready");
+        }
+        return;
+      }
+
+      const accessToken = hashParams.get("access_token");
+      const refreshToken = hashParams.get("refresh_token");
+      const type = hashParams.get("type") || url.searchParams.get("type");
+      if (accessToken && refreshToken && type === "recovery") {
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        if (!active) return;
+        if (error) {
+          setInvalidReason(error.message);
+          setStatus("invalid");
+        } else {
+          setStatus("ready");
+        }
+        return;
+      }
+
+      // No recognizable reset token in the URL at all — most likely the
+      // redirectTo passed to resetPasswordForEmail() isn't on this Supabase
+      // project's allowed redirect list, so Supabase sent the user to the
+      // default Site URL instead of here.
       if (active) {
-        setStatus((current) => (current === "checking" ? "invalid" : current));
+        setInvalidReason(
+          "No reset token was found in this link. It may have already been used, or the link may be malformed."
+        );
+        setStatus("invalid");
       }
-    }, 5000);
+    }
+
+    verifyRecoveryLink();
 
     return () => {
       active = false;
-      subscription.unsubscribe();
-      clearTimeout(timeout);
     };
   }, [supabase]);
 
@@ -93,9 +147,7 @@ export function ResetPasswordForm() {
 
           {status === "invalid" && (
             <div className="space-y-4 text-center">
-              <p className="text-sm text-red-400">
-                This reset link is invalid or has expired.
-              </p>
+              <p className="text-sm text-red-400">{invalidReason}</p>
               <Link
                 href="/forgot-password"
                 className="inline-flex min-h-[44px] items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-opacity hover:opacity-90 sm:min-h-0"

@@ -11,6 +11,9 @@ import type { FieldConfig } from "@/lib/modules";
 export const dynamic = "force-dynamic";
 
 const MODEL = "claude-sonnet-4-6";
+const MAX_MESSAGE_LENGTH = 2000;
+const RATE_LIMIT = 20;
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 function buildSystemPrompt(): string {
   const moduleDocs = CLASSIFIER_MODULES.map((m) => {
@@ -110,6 +113,16 @@ export async function POST(request: Request) {
     );
   }
 
+  if (message.length > MAX_MESSAGE_LENGTH) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error: `Message is too long (${message.length}/${MAX_MESSAGE_LENGTH} characters) — please shorten it and try again.`,
+      },
+      { status: 400 }
+    );
+  }
+
   const supabase = createClient();
   const {
     data: { user },
@@ -120,6 +133,34 @@ export async function POST(request: Request) {
       { ok: false, error: "Not authenticated." },
       { status: 401 }
     );
+  }
+
+  // Rate limit: max RATE_LIMIT calls per user per rolling hour, tracked via
+  // the create_requests log table (RLS-scoped, same as every other table).
+  // A failure to check/log usage is logged and otherwise ignored rather than
+  // blocking the request — this is cost protection, not a security boundary.
+  const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
+  const { count: recentRequestCount, error: usageCheckError } = await supabase
+    .from("create_requests")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .gte("created_at", windowStart);
+
+  if (usageCheckError) {
+    console.error("create_requests usage check failed", usageCheckError);
+  } else if ((recentRequestCount ?? 0) >= RATE_LIMIT) {
+    return NextResponse.json({
+      ok: true,
+      matched: false,
+      message: `You've hit the hourly limit for Create Anything (${RATE_LIMIT} requests/hour) — try again in a bit.`,
+    });
+  }
+
+  const { error: usageLogError } = await supabase
+    .from("create_requests")
+    .insert({ user_id: user.id });
+  if (usageLogError) {
+    console.error("create_requests usage logging failed", usageLogError);
   }
 
   const anthropic = new Anthropic({ apiKey });

@@ -1,6 +1,7 @@
 -- ============================================================================
 -- AI OS — Supabase schema
--- 13 tables, each scoped to the owning user via RLS (user_id = auth.uid()).
+-- 13 module tables, each scoped to the owning user via RLS (user_id =
+-- auth.uid()), plus create_requests (a rate-limit log for /api/create).
 -- Run this once in the Supabase SQL editor (or via `supabase db push`).
 --
 -- NOTE: the 12 non-`ideas` tables below were redefined to match the exact
@@ -23,6 +24,7 @@ drop table if exists public.leads cascade;
 drop table if exists public.feedback cascade;
 drop table if exists public.metrics cascade;
 drop table if exists public.automations cascade;
+drop table if exists public.create_requests cascade;
 
 -- ----------------------------------------------------------------------------
 -- 1. ideas
@@ -215,6 +217,30 @@ create table public.automations (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- ----------------------------------------------------------------------------
+-- create_requests — not one of the 13 modules. Append-only log used to rate
+-- limit /api/create (max 20 Claude API calls per user per rolling hour).
+-- No update/delete policies or updated_at trigger — rows are never modified.
+-- ----------------------------------------------------------------------------
+create table public.create_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists create_requests_user_id_created_at_idx
+  on public.create_requests (user_id, created_at);
+
+alter table public.create_requests enable row level security;
+
+drop policy if exists "select_own_create_requests" on public.create_requests;
+create policy "select_own_create_requests" on public.create_requests
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_create_requests" on public.create_requests;
+create policy "insert_own_create_requests" on public.create_requests
+  for insert with check (auth.uid() = user_id);
 
 -- ============================================================================
 -- Row Level Security

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -28,8 +28,32 @@ export function ResetPasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Guards against React 18 Strict Mode's development-only double-invoke of
+  // effects (mount -> cleanup -> mount again). Without this, the exchange
+  // below — which consumes a single-use PKCE code — would run twice: the
+  // first (real) exchange succeeds and consumes the code, but Strict Mode's
+  // simulated "unmount" discards that result before it reaches state; the
+  // second run then retries with the now-already-used code and legitimately
+  // fails, which is what actually renders. Symptom: even a genuinely fresh
+  // link shows "invalid or has expired" in `next dev`. A ref (not a plain
+  // closure variable) is required because it survives that cleanup+rerun
+  // cycle. reactStrictMode isn't set in next.config.mjs, so the App Router
+  // enables it by default in development — see Next.js's define-env-plugin.
+  const hasVerifiedRef = useRef(false);
+
   useEffect(() => {
-    let active = true;
+    if (hasVerifiedRef.current) return;
+    hasVerifiedRef.current = true;
+
+    // TEMPORARY — logs the exact URL Supabase's email link redirected to,
+    // so we can confirm whether this project's auth flow is PKCE (?code=)
+    // or implicit (#access_token=...&type=recovery). Remove once confirmed.
+    // eslint-disable-next-line no-console
+    console.log("[reset-password debug] full URL:", window.location.href);
+    // eslint-disable-next-line no-console
+    console.log("[reset-password debug] search params:", window.location.search);
+    // eslint-disable-next-line no-console
+    console.log("[reset-password debug] hash:", window.location.hash);
 
     // Supabase's reset-password email links land here in one of two shapes,
     // depending on the project's auth flow setting:
@@ -50,17 +74,16 @@ export function ResetPasswordForm() {
           url.searchParams.get("error_description") ||
           hashParams.get("error_description");
         if (errorDescription) {
-          if (active) {
-            setInvalidReason(errorDescription);
-            setStatus("invalid");
-          }
+          setInvalidReason(errorDescription);
+          setStatus("invalid");
           return;
         }
 
         const code = url.searchParams.get("code");
         if (code) {
+          // eslint-disable-next-line no-console
+          console.log("[reset-password debug] detected PKCE flow (?code=)");
           const { error } = await supabase.auth.exchangeCodeForSession(code);
-          if (!active) return;
           if (error) {
             setInvalidReason(getErrorMessage(error));
             setStatus("invalid");
@@ -74,11 +97,14 @@ export function ResetPasswordForm() {
         const refreshToken = hashParams.get("refresh_token");
         const type = hashParams.get("type") || url.searchParams.get("type");
         if (accessToken && refreshToken && type === "recovery") {
+          // eslint-disable-next-line no-console
+          console.log(
+            "[reset-password debug] detected implicit flow (#access_token=...&type=recovery)"
+          );
           const { error } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
           });
-          if (!active) return;
           if (error) {
             setInvalidReason(getErrorMessage(error));
             setStatus("invalid");
@@ -92,25 +118,17 @@ export function ResetPasswordForm() {
         // redirectTo passed to resetPasswordForEmail() isn't on this
         // Supabase project's allowed redirect list, so Supabase sent the
         // user to the default Site URL instead of here.
-        if (active) {
-          setInvalidReason(
-            "No reset token was found in this link. It may have already been used, or the link may be malformed."
-          );
-          setStatus("invalid");
-        }
+        setInvalidReason(
+          "No reset token was found in this link. It may have already been used, or the link may be malformed."
+        );
+        setStatus("invalid");
       } catch (err) {
-        if (active) {
-          setInvalidReason(getErrorMessage(err));
-          setStatus("invalid");
-        }
+        setInvalidReason(getErrorMessage(err));
+        setStatus("invalid");
       }
     }
 
     verifyRecoveryLink();
-
-    return () => {
-      active = false;
-    };
   }, [supabase]);
 
   async function handleSubmit(e: FormEvent) {

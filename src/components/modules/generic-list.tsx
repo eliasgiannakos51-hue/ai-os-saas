@@ -47,16 +47,6 @@ export function GenericList({
     downloadCSV(`${module.slug}_export_${todayForFilename()}.csv`, csv);
   }
 
-  if (records.length === 0) {
-    return (
-      <EmptyState>
-        no entries yet — run{" "}
-        <span className="text-amber-500">{module.table}.insert()</span> to
-        log your first one.
-      </EmptyState>
-    );
-  }
-
   return (
     <div>
       <div className="mb-4 space-y-3">
@@ -80,7 +70,13 @@ export function GenericList({
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {records.length === 0 ? (
+        <EmptyState>
+          no entries yet — run{" "}
+          <span className="text-amber-500">{module.table}.insert()</span> to
+          log your first one.
+        </EmptyState>
+      ) : filtered.length === 0 ? (
         <EmptyState icon="×">no matches for &apos;{query}&apos;</EmptyState>
       ) : (
         <>

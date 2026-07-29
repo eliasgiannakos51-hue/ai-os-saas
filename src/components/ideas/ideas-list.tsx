@@ -67,16 +67,6 @@ export function IdeasList({ ideas }: { ideas: Idea[] }) {
     downloadCSV(`ideas_export_${todayForFilename()}.csv`, csv);
   }
 
-  if (ideas.length === 0) {
-    return (
-      <EmptyState>
-        no ideas yet — run{" "}
-        <span className="text-amber-500">ideas.insert()</span> to log your
-        first one.
-      </EmptyState>
-    );
-  }
-
   return (
     <div>
       <div className="mb-4 space-y-3">
@@ -100,7 +90,13 @@ export function IdeasList({ ideas }: { ideas: Idea[] }) {
         </div>
       </div>
 
-      {filtered.length === 0 ? (
+      {ideas.length === 0 ? (
+        <EmptyState>
+          no ideas yet — run{" "}
+          <span className="text-amber-500">ideas.insert()</span> to log your
+          first one.
+        </EmptyState>
+      ) : filtered.length === 0 ? (
         <EmptyState icon="×">no matches for &apos;{query}&apos;</EmptyState>
       ) : (
         <>

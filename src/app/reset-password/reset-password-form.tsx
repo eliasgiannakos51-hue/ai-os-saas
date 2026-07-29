@@ -10,9 +10,19 @@ type Status = "checking" | "ready" | "invalid";
 
 // detectSessionInUrl is turned off for this client so it never races the
 // explicit verification below for the same one-time-use recovery token — see
-// the verifyRecoveryLink() comment.
+// the verifyRecoveryLink() comment. isSingleton: false guarantees that
+// override actually takes effect: createBrowserClient() caches and reuses
+// the FIRST client ever created in the browser tab regardless of the
+// options passed to later calls, so if any other page (login,
+// forgot-password) already created the default singleton earlier in this
+// tab's session, a plain createClient() call here would silently get that
+// cached instance back — with detectSessionInUrl still on — instead of
+// this one.
 function createResetPasswordClient() {
-  return createClient({ auth: { detectSessionInUrl: false } });
+  return createClient({
+    auth: { detectSessionInUrl: false },
+    isSingleton: false,
+  });
 }
 
 export function ResetPasswordForm() {

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { DeletedAccountBanner } from "@/components/landing/deleted-account-banner";
 
 export const metadata: Metadata = {
   title: "AI_OS — your personal AI operating system",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 font-mono text-center">
+      <DeletedAccountBanner />
       <p className="text-sm tracking-widest text-amber-500">AI_OS //</p>
       <h1 className="mt-2 text-4xl font-bold text-foreground sm:text-5xl">
         AI_OS

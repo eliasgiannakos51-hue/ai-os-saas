@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { CreateChat } from "@/components/create/create-chat";
+
+export const metadata: Metadata = {
+  title: "Create Anything",
+};
 
 export default async function CreatePage() {
   const supabase = createClient();

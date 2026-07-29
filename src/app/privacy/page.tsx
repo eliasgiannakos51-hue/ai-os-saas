@@ -3,7 +3,7 @@ import { LegalLayout } from "@/components/legal/legal-layout";
 import { LegalSection } from "@/components/legal/legal-section";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy — AI_OS",
+  title: "Privacy Policy",
   description: "Privacy Policy for AI_OS.",
 };
 

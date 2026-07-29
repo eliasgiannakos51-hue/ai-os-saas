@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -5,6 +6,10 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { PasswordChangeForm } from "@/components/settings/password-change-form";
 import { ExportDataButton } from "@/components/settings/export-data-button";
 import { DangerZone } from "@/components/settings/danger-zone";
+
+export const metadata: Metadata = {
+  title: "Settings",
+};
 
 export default async function SettingsPage() {
   const supabase = createClient();

@@ -15,6 +15,7 @@ export function PaginationControls({
         type="button"
         onClick={() => onChange(page - 1)}
         disabled={page <= 1}
+        aria-label="Previous page"
         className="inline-flex min-h-[44px] items-center justify-center rounded border border-border px-3 transition-colors hover:border-amber-500 hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 sm:py-1.5"
       >
         ← prev
@@ -26,6 +27,7 @@ export function PaginationControls({
         type="button"
         onClick={() => onChange(page + 1)}
         disabled={page >= totalPages}
+        aria-label="Next page"
         className="inline-flex min-h-[44px] items-center justify-center rounded border border-border px-3 transition-colors hover:border-amber-500 hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 sm:py-1.5"
       >
         next →

@@ -16,6 +16,7 @@ export function SortToggle({
             key={order}
             type="button"
             onClick={() => onChange(order)}
+            aria-pressed={sortOrder === order}
             className={`min-h-[44px] px-3 py-1.5 transition-colors sm:min-h-0 ${
               sortOrder === order
                 ? "bg-amber-950/30 text-amber-400"

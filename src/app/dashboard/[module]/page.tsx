@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -7,6 +8,15 @@ import { GenericAddForm } from "@/components/modules/generic-add-form";
 import { GenericList } from "@/components/modules/generic-list";
 import { getModule } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
+
+export function generateMetadata({
+  params,
+}: {
+  params: { module: string };
+}): Metadata {
+  const moduleConfig = getModule(params.module);
+  return { title: moduleConfig?.title ?? "Not Found" };
+}
 
 export default async function ModulePage({
   params,

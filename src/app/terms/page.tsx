@@ -3,7 +3,7 @@ import { LegalLayout } from "@/components/legal/legal-layout";
 import { LegalSection } from "@/components/legal/legal-section";
 
 export const metadata: Metadata = {
-  title: "Terms of Service — AI_OS",
+  title: "Terms of Service",
   description: "Terms of Service for AI_OS.",
 };
 

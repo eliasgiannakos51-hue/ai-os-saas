@@ -171,6 +171,7 @@ export function GenericRecordRow({
   const bodyFields = module.fields.filter(
     (f) => f.key !== module.headlineKey && !f.badge
   );
+  const headline = String(record[module.headlineKey] ?? "untitled");
 
   return (
     <div className="rounded-md border border-border bg-panel p-4 transition-colors hover:border-amber-900/50">
@@ -222,6 +223,7 @@ export function GenericRecordRow({
           <button
             type="button"
             onClick={startEditing}
+            aria-label={`Edit ${module.title.toLowerCase()}: ${headline}`}
             className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded border border-border px-3 py-0.5 text-[11px] text-muted transition-colors hover:border-amber-500 hover:text-amber-400 sm:min-h-0 sm:px-2"
           >
             edit()
@@ -230,6 +232,7 @@ export function GenericRecordRow({
             table={module.table}
             id={record.id}
             label={module.title.toLowerCase()}
+            itemName={headline}
           />
         </div>
       </div>

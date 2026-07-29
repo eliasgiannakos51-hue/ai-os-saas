@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -6,6 +7,10 @@ import { ModuleSummaryCard } from "@/components/overview/module-summary-card";
 import { OverviewStats } from "@/components/overview/overview-stats";
 import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
 import type { ModuleRecord } from "@/types/module-record";
+
+export const metadata: Metadata = {
+  title: "Overview",
+};
 
 export default async function OverviewPage() {
   const supabase = createClient();

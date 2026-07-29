@@ -278,11 +278,12 @@ export function IdeaRow({ idea }: { idea: Idea }) {
           <button
             type="button"
             onClick={startEditing}
+            aria-label={`Edit idea: ${idea.name}`}
             className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded border border-border px-3 py-0.5 text-[11px] text-muted transition-colors hover:border-amber-500 hover:text-amber-400 sm:min-h-0 sm:px-2"
           >
             edit()
           </button>
-          <DeleteButton table="ideas" id={idea.id} label="idea" />
+          <DeleteButton table="ideas" id={idea.id} label="idea" itemName={idea.name} />
         </div>
       </div>
     </div>

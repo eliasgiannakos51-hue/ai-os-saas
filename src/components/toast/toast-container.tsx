@@ -13,8 +13,16 @@ export function ToastContainer() {
         <div
           key={toast.id}
           role="status"
+          tabIndex={0}
           onClick={() => dismissToast(toast.id)}
-          className={`cursor-pointer rounded-md border px-3 py-2 text-xs shadow-lg backdrop-blur-sm transition-all duration-200 hover:opacity-90 ${
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              dismissToast(toast.id);
+            }
+          }}
+          aria-label={`${toast.message} — press Enter to dismiss`}
+          className={`cursor-pointer rounded-md border px-3 py-2 text-xs shadow-lg backdrop-blur-sm transition-all duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500/70 ${
             toast.leaving
               ? "translate-y-1 opacity-0"
               : "animate-fade-in translate-y-0 opacity-100"

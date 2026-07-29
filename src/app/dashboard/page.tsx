@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -6,6 +7,10 @@ import { ErrorMessage } from "@/components/error-message";
 import { AddIdeaForm } from "@/components/ideas/add-idea-form";
 import { IdeasList } from "@/components/ideas/ideas-list";
 import type { Idea } from "@/types/ideas";
+
+export const metadata: Metadata = {
+  title: "Ideas",
+};
 
 export default async function DashboardPage() {
   const supabase = createClient();

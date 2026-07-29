@@ -2,10 +2,24 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { DeletedAccountBanner } from "@/components/landing/deleted-account-banner";
 
+const TITLE = "AI_OS — your personal AI operating system";
+const DESCRIPTION =
+  "Log ideas, track metrics, and run every part of your business from one dark, terminal-styled dashboard.";
+
 export const metadata: Metadata = {
-  title: "AI_OS — your personal AI operating system",
-  description:
-    "Log ideas, track metrics, and run every part of your business from one dark, terminal-styled dashboard.",
+  title: { absolute: TITLE },
+  description: DESCRIPTION,
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    type: "website",
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+  },
 };
 
 export default function Home() {
@@ -37,6 +51,15 @@ export default function Home() {
       </div>
 
       <footer className="mt-16 flex flex-col items-center gap-2 border-t border-border pt-6 text-xs text-muted sm:flex-row sm:gap-4">
+        <Link
+          href="/pricing"
+          className="transition-colors hover:text-amber-400"
+        >
+          pricing
+        </Link>
+        <span className="hidden sm:inline" aria-hidden="true">
+          ·
+        </span>
         <Link
           href="/terms"
           className="transition-colors hover:text-amber-400"

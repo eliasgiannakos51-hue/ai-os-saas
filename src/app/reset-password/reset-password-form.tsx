@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { getErrorMessage } from "@/lib/get-error-message";
 
 type Status = "checking" | "ready" | "invalid";
 
@@ -39,62 +40,69 @@ export function ResetPasswordForm() {
     // client's own automatic URL detection is disabled above specifically
     // so there's only ever one consumer of the (single-use) code/tokens.
     async function verifyRecoveryLink() {
-      const url = new URL(window.location.href);
-      const hashParams = new URLSearchParams(
-        url.hash.startsWith("#") ? url.hash.slice(1) : ""
-      );
-
-      const errorDescription =
-        url.searchParams.get("error_description") ||
-        hashParams.get("error_description");
-      if (errorDescription) {
-        if (active) {
-          setInvalidReason(errorDescription);
-          setStatus("invalid");
-        }
-        return;
-      }
-
-      const code = url.searchParams.get("code");
-      if (code) {
-        const { error } = await supabase.auth.exchangeCodeForSession(code);
-        if (!active) return;
-        if (error) {
-          setInvalidReason(error.message);
-          setStatus("invalid");
-        } else {
-          setStatus("ready");
-        }
-        return;
-      }
-
-      const accessToken = hashParams.get("access_token");
-      const refreshToken = hashParams.get("refresh_token");
-      const type = hashParams.get("type") || url.searchParams.get("type");
-      if (accessToken && refreshToken && type === "recovery") {
-        const { error } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-        if (!active) return;
-        if (error) {
-          setInvalidReason(error.message);
-          setStatus("invalid");
-        } else {
-          setStatus("ready");
-        }
-        return;
-      }
-
-      // No recognizable reset token in the URL at all — most likely the
-      // redirectTo passed to resetPasswordForEmail() isn't on this Supabase
-      // project's allowed redirect list, so Supabase sent the user to the
-      // default Site URL instead of here.
-      if (active) {
-        setInvalidReason(
-          "No reset token was found in this link. It may have already been used, or the link may be malformed."
+      try {
+        const url = new URL(window.location.href);
+        const hashParams = new URLSearchParams(
+          url.hash.startsWith("#") ? url.hash.slice(1) : ""
         );
-        setStatus("invalid");
+
+        const errorDescription =
+          url.searchParams.get("error_description") ||
+          hashParams.get("error_description");
+        if (errorDescription) {
+          if (active) {
+            setInvalidReason(errorDescription);
+            setStatus("invalid");
+          }
+          return;
+        }
+
+        const code = url.searchParams.get("code");
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (!active) return;
+          if (error) {
+            setInvalidReason(getErrorMessage(error));
+            setStatus("invalid");
+          } else {
+            setStatus("ready");
+          }
+          return;
+        }
+
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
+        const type = hashParams.get("type") || url.searchParams.get("type");
+        if (accessToken && refreshToken && type === "recovery") {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (!active) return;
+          if (error) {
+            setInvalidReason(getErrorMessage(error));
+            setStatus("invalid");
+          } else {
+            setStatus("ready");
+          }
+          return;
+        }
+
+        // No recognizable reset token in the URL at all — most likely the
+        // redirectTo passed to resetPasswordForEmail() isn't on this
+        // Supabase project's allowed redirect list, so Supabase sent the
+        // user to the default Site URL instead of here.
+        if (active) {
+          setInvalidReason(
+            "No reset token was found in this link. It may have already been used, or the link may be malformed."
+          );
+          setStatus("invalid");
+        }
+      } catch (err) {
+        if (active) {
+          setInvalidReason(getErrorMessage(err));
+          setStatus("invalid");
+        }
       }
     }
 
@@ -115,17 +123,22 @@ export function ResetPasswordForm() {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    setLoading(false);
+    try {
+      const { error } = await supabase.auth.updateUser({ password });
 
-    if (error) {
-      setError(error.message);
-      return;
+      if (error) {
+        setError(getErrorMessage(error));
+        return;
+      }
+
+      await supabase.auth.signOut();
+      router.push("/login?reset=success");
+      router.refresh();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
     }
-
-    await supabase.auth.signOut();
-    router.push("/login?reset=success");
-    router.refresh();
   }
 
   return (

@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { getErrorMessage } from "@/lib/get-error-message";
 
 export function ForgotPasswordForm() {
   const supabase = createClient();
@@ -17,18 +18,22 @@ export function ForgotPasswordForm() {
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
 
-    setLoading(false);
+      if (error) {
+        setError(getErrorMessage(error));
+        return;
+      }
 
-    if (error) {
-      setError(error.message);
-      return;
+      setSent(true);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
     }
-
-    setSent(true);
   }
 
   return (

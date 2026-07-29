@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { getErrorMessage } from "@/lib/get-error-message";
 
 type Mode = "login" | "signup";
 
@@ -33,29 +34,33 @@ export function LoginForm() {
     setError(null);
     setLoading(true);
 
-    if (mode === "login") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      setLoading(false);
-      if (error) {
-        setError(error.message);
-        return;
+    try {
+      if (mode === "login") {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          setError(getErrorMessage(error));
+          return;
+        }
+        router.push("/dashboard/overview");
+        router.refresh();
+      } else {
+        const res = await fetch("/api/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          setError(getErrorMessage(data.error, "Signup failed."));
+          return;
+        }
+        router.push("/dashboard/overview");
+        router.refresh();
       }
-      router.push("/dashboard/overview");
-      router.refresh();
-    } else {
-      const res = await fetch("/api/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
       setLoading(false);
-      if (!res.ok || !data.ok) {
-        setError(data.error ?? "Signup failed.");
-        return;
-      }
-      router.push("/dashboard/overview");
-      router.refresh();
     }
   }
 

@@ -35,6 +35,24 @@ export default function Home() {
           sign_up()
         </Link>
       </div>
+
+      <footer className="mt-16 flex flex-col items-center gap-2 border-t border-border pt-6 text-xs text-muted sm:flex-row sm:gap-4">
+        <Link
+          href="/terms"
+          className="transition-colors hover:text-amber-400"
+        >
+          terms_of_service
+        </Link>
+        <span className="hidden sm:inline" aria-hidden="true">
+          ·
+        </span>
+        <Link
+          href="/privacy"
+          className="transition-colors hover:text-amber-400"
+        >
+          privacy_policy
+        </Link>
+      </footer>
     </main>
   );
 }

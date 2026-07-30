@@ -35,7 +35,7 @@ export function ExportDataButton() {
       payload[r.title] = r.data ?? [];
     }
 
-    downloadJSON(`ai_os_export_${todayForFilename()}.json`, payload);
+    downloadJSON(`veron_export_${todayForFilename()}.json`, payload);
     addToast("✓ export downloaded");
   }
 

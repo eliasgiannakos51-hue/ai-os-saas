@@ -1,5 +1,5 @@
 -- ============================================================================
--- AI OS — Supabase schema
+-- Veron AI — Supabase schema
 -- 13 module tables, each scoped to the owning user via RLS (user_id =
 -- auth.uid()), plus create_requests (a rate-limit log for /api/create).
 -- Run this once in the Supabase SQL editor (or via `supabase db push`).

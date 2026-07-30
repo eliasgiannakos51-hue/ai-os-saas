@@ -4,7 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 import { OVERVIEW_NAV_ITEM, CHAT_NAV_ITEM, SETTINGS_NAV_ITEM } from "@/lib/modules";
-import { MODULE_ICONS, OVERVIEW_ICON, CHAT_ICON, SETTINGS_ICON } from "@/lib/module-icons";
+import {
+  MODULE_ICONS,
+  OVERVIEW_ICON,
+  CHAT_ICON,
+  SETTINGS_ICON,
+  MARKETPLACE_ICON,
+  TEAM_ICON,
+} from "@/lib/module-icons";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
 import { Logo } from "@/components/logo";
 import type { LucideIcon } from "lucide-react";
@@ -22,6 +29,16 @@ const SIDEBAR_GROUPS: { heading: string; items: SidebarItem[] }[] = [
     items: [
       { href: OVERVIEW_NAV_ITEM.href, label: "Home", icon: OVERVIEW_ICON },
       { href: CHAT_NAV_ITEM.href, label: "Veron Chat", icon: CHAT_ICON },
+    ],
+  },
+  {
+    heading: "Build",
+    items: [
+      { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents },
+      { href: "/dashboard/websites", label: "Websites", icon: MODULE_ICONS.websites },
+      { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps },
+      { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images },
+      { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos },
     ],
   },
   {
@@ -52,6 +69,12 @@ const SIDEBAR_GROUPS: { heading: string; items: SidebarItem[] }[] = [
       { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation },
     ],
   },
+  {
+    heading: "Marketplace",
+    items: [
+      { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON },
+    ],
+  },
 ];
 
 function isActive(pathname: string | null, href: string) {
@@ -63,6 +86,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const { open, setOpen } = useSidebar();
   const settingsActive = isActive(pathname, SETTINGS_NAV_ITEM.href);
+  const teamActive = isActive(pathname, "/dashboard/team");
   const closeOnMobile = () => setOpen(false);
 
   return (
@@ -150,6 +174,23 @@ export function Sidebar() {
               aria-hidden="true"
             />
             <span>Settings</span>
+          </Link>
+          <Link
+            href="/dashboard/team"
+            onClick={closeOnMobile}
+            className={`flex min-h-[40px] items-center gap-2.5 rounded-lg border-l-2 py-2 pl-2.5 pr-3 text-sm transition-colors duration-150 ${
+              teamActive
+                ? "border-orange-500 bg-orange-500/10 font-medium text-orange-400"
+                : "border-transparent text-muted hover:bg-panel-hover hover:text-foreground"
+            }`}
+          >
+            <TEAM_ICON
+              className={`h-4 w-4 shrink-0 transition-colors duration-150 ${
+                teamActive ? "text-orange-400" : "text-orange-500/40"
+              }`}
+              aria-hidden="true"
+            />
+            <span>Team</span>
           </Link>
         </div>
       </aside>

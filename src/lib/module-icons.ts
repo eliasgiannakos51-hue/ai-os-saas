@@ -17,6 +17,12 @@ import {
   Home,
   Sparkles,
   Settings,
+  Bot,
+  Globe,
+  Smartphone,
+  Image as ImageIcon,
+  Video,
+  Store,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -37,9 +43,16 @@ export const MODULE_ICONS: Record<string, LucideIcon> = {
   feedback: MessageSquare,
   analytics: BarChart3,
   automation: Zap,
+  agents: Bot,
+  websites: Globe,
+  apps: Smartphone,
+  images: ImageIcon,
+  videos: Video,
 };
 
 export const OVERVIEW_ICON: LucideIcon = Home;
 export const CREATE_ICON: LucideIcon = Sparkles;
 export const CHAT_ICON: LucideIcon = MessageCircle;
 export const SETTINGS_ICON: LucideIcon = Settings;
+export const MARKETPLACE_ICON: LucideIcon = Store;
+export const TEAM_ICON: LucideIcon = Users;

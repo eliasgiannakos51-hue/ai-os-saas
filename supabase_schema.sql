@@ -441,3 +441,115 @@ create policy "update_own_team_members" on public.team_members
 drop policy if exists "delete_own_team_members" on public.team_members;
 create policy "delete_own_team_members" on public.team_members
   for delete using (auth.uid() = owner_id);
+
+-- ============================================================================
+-- "Build" modules — AI Agents, Websites, Apps, Images, Videos. Same
+-- owner-only RLS pattern as the 13 business modules above; these are purely
+-- tracking/log tables for now (no real AI generation happens yet — see
+-- src/lib/build-modules.ts). Kept out of the do-loops above on purpose,
+-- since those loops are scoped to the original 13-module table list.
+-- ============================================================================
+
+drop table if exists public.ai_agents cascade;
+drop table if exists public.ai_websites cascade;
+drop table if exists public.ai_apps cascade;
+drop table if exists public.ai_images cascade;
+drop table if exists public.ai_videos cascade;
+
+create table public.ai_agents (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  description text,
+  status text check (status in ('planned', 'active', 'paused', 'archived')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.ai_websites (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  description text,
+  url text,
+  status text check (status in ('planned', 'in progress', 'live', 'archived')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.ai_apps (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  description text,
+  platform text check (platform in ('ios', 'android', 'web', 'desktop', 'cross-platform')),
+  status text check (status in ('planned', 'in progress', 'live', 'archived')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.ai_images (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  prompt text not null,
+  description text,
+  status text check (status in ('requested', 'in progress', 'done')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.ai_videos (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  prompt text not null,
+  description text,
+  status text check (status in ('requested', 'in progress', 'done')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+do $$
+declare
+  t text;
+begin
+  for t in
+    select unnest(array[
+      'ai_agents', 'ai_websites', 'ai_apps', 'ai_images', 'ai_videos'
+    ])
+  loop
+    execute format('alter table public.%I enable row level security;', t);
+
+    execute format(
+      'drop policy if exists "select_own_%1$s" on public.%1$s;', t
+    );
+    execute format(
+      'create policy "select_own_%1$s" on public.%1$s for select using (auth.uid() = user_id);', t
+    );
+
+    execute format(
+      'drop policy if exists "insert_own_%1$s" on public.%1$s;', t
+    );
+    execute format(
+      'create policy "insert_own_%1$s" on public.%1$s for insert with check (auth.uid() = user_id);', t
+    );
+
+    execute format(
+      'drop policy if exists "update_own_%1$s" on public.%1$s;', t
+    );
+    execute format(
+      'create policy "update_own_%1$s" on public.%1$s for update using (auth.uid() = user_id) with check (auth.uid() = user_id);', t
+    );
+
+    execute format(
+      'drop policy if exists "delete_own_%1$s" on public.%1$s;', t
+    );
+    execute format(
+      'create policy "delete_own_%1$s" on public.%1$s for delete using (auth.uid() = user_id);', t
+    );
+
+    execute format('drop trigger if exists set_updated_at on public.%I;', t);
+    execute format(
+      'create trigger set_updated_at before update on public.%I for each row execute function public.set_updated_at();', t
+    );
+  end loop;
+end $$;

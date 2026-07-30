@@ -8,9 +8,11 @@ import { CREATE_NAV_ITEM, OVERVIEW_NAV_ITEM } from "@/lib/modules";
 import { MenuButton } from "@/components/dashboard/menu-button";
 import { LogoutButton } from "@/components/logout-button";
 import { Logo } from "@/components/logo";
+import { useCommandPalette } from "@/components/dashboard/command-palette-context";
 
 export function TopNav({ email }: { email: string }) {
   const router = useRouter();
+  const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   const [notifOpen, setNotifOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -36,7 +38,7 @@ export function TopNav({ email }: { email: string }) {
 
       <button
         type="button"
-        onClick={openCreate}
+        onClick={() => setCommandPaletteOpen(true)}
         className="mx-auto hidden max-w-md flex-1 items-center gap-2 rounded-full border border-border bg-panel px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-foreground sm:flex"
       >
         <Search className="h-4 w-4 shrink-0" aria-hidden="true" />

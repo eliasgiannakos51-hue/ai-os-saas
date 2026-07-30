@@ -1,0 +1,186 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Search } from "lucide-react";
+import { CREATE_NAV_ITEM } from "@/lib/modules";
+import { CREATE_ICON } from "@/lib/module-icons";
+import { ALL_SIDEBAR_GROUPS, type SidebarItem } from "@/lib/sidebar-nav";
+import { useCommandPalette } from "@/components/dashboard/command-palette-context";
+
+// Create Anything isn't a sidebar link (it's reached via this palette or the
+// "New" quick action), but it was Cmd+K's sole destination before this
+// palette existed — keep it searchable so that behavior isn't lost.
+const PALETTE_ITEMS: SidebarItem[] = [
+  { href: CREATE_NAV_ITEM.href, label: "Create Anything", icon: CREATE_ICON },
+  ...ALL_SIDEBAR_GROUPS.flatMap((group) => group.items),
+];
+
+// Subsequence match — every character of the query appears in the target,
+// in order, not necessarily contiguous. A plain substring match is just a
+// contiguous special case of this, so "fin" matches "Finance" either way.
+function isFuzzyMatch(query: string, target: string): boolean {
+  let qi = 0;
+  for (let ti = 0; ti < target.length && qi < query.length; ti++) {
+    if (target[ti] === query[qi]) qi++;
+  }
+  return qi === query.length;
+}
+
+function filterAndRankItems(items: SidebarItem[], rawQuery: string): SidebarItem[] {
+  const query = rawQuery.trim().toLowerCase();
+  if (!query) return items;
+
+  const substringMatches: { item: SidebarItem; index: number }[] = [];
+  const fuzzyOnlyMatches: SidebarItem[] = [];
+
+  for (const item of items) {
+    const label = item.label.toLowerCase();
+    const index = label.indexOf(query);
+    if (index !== -1) {
+      substringMatches.push({ item, index });
+    } else if (isFuzzyMatch(query, label)) {
+      fuzzyOnlyMatches.push(item);
+    }
+  }
+
+  substringMatches.sort((a, b) => a.index - b.index);
+  return [...substringMatches.map((m) => m.item), ...fuzzyOnlyMatches];
+}
+
+export function CommandPalette() {
+  const router = useRouter();
+  const { open, setOpen } = useCommandPalette();
+  const [query, setQuery] = useState("");
+  const [activeIndex, setActiveIndex] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const results = useMemo(() => filterAndRankItems(PALETTE_ITEMS, query), [query]);
+
+  function close() {
+    setOpen(false);
+    setQuery("");
+    setActiveIndex(0);
+  }
+
+  function go(item: SidebarItem) {
+    close();
+    router.push(item.href);
+  }
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const isModK = (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k";
+      if (isModK) {
+        e.preventDefault();
+        setOpen(!open);
+        return;
+      }
+      if (e.key === "Escape" && open) {
+        e.preventDefault();
+        close();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  useEffect(() => {
+    if (open) {
+      setQuery("");
+      setActiveIndex(0);
+      // Wait a tick for the modal to mount before focusing.
+      requestAnimationFrame(() => inputRef.current?.focus());
+    }
+  }, [open]);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [query]);
+
+  function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.min(i + 1, results.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const selected = results[activeIndex];
+      if (selected) go(selected);
+    }
+  }
+
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-start justify-center px-4 pt-[12vh]">
+      <div
+        onClick={close}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+        aria-hidden="true"
+      />
+
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Command palette"
+        className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-panel shadow-[0_0_0_1px_rgba(249,115,22,0.05)]"
+      >
+        <div className="relative border-b border-border">
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleInputKeyDown}
+            placeholder="Jump to a module or page..."
+            className="w-full bg-transparent py-4 pl-11 pr-4 text-sm text-foreground outline-none placeholder:text-muted"
+          />
+        </div>
+
+        <div className="max-h-80 overflow-y-auto p-2">
+          {results.length === 0 ? (
+            <p className="px-3 py-6 text-center text-sm text-muted">
+              No matches for &apos;{query}&apos;
+            </p>
+          ) : (
+            results.map((item, index) => {
+              const Icon = item.icon;
+              const active = index === activeIndex;
+              return (
+                <button
+                  key={item.href}
+                  type="button"
+                  onClick={() => go(item)}
+                  onMouseEnter={() => setActiveIndex(index)}
+                  className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors duration-150 ${
+                    active
+                      ? "bg-orange-500/10 text-orange-400"
+                      : "text-foreground hover:bg-panel-hover"
+                  }`}
+                >
+                  <Icon
+                    className={`h-4 w-4 shrink-0 ${active ? "text-orange-400" : "text-orange-500/40"}`}
+                    aria-hidden="true"
+                  />
+                  {item.label}
+                </button>
+              );
+            })
+          )}
+        </div>
+
+        <div className="flex items-center justify-between border-t border-border px-4 py-2.5 text-[11px] text-muted">
+          <span>↑↓ navigate</span>
+          <span>↵ select</span>
+          <span>esc close</span>
+        </div>
+      </div>
+    </div>
+  );
+}

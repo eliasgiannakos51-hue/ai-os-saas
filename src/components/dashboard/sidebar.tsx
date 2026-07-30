@@ -1,108 +1,152 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { X } from "lucide-react";
-import { OVERVIEW_NAV_ITEM, CHAT_NAV_ITEM, SETTINGS_NAV_ITEM } from "@/lib/modules";
+import { ChevronRight, X } from "lucide-react";
+import { OVERVIEW_NAV_ITEM } from "@/lib/modules";
 import {
-  MODULE_ICONS,
-  OVERVIEW_ICON,
-  CHAT_ICON,
-  SETTINGS_ICON,
-  MARKETPLACE_ICON,
-  TEAM_ICON,
-  MEMORY_ICON,
-} from "@/lib/module-icons";
+  ALL_SIDEBAR_GROUPS,
+  MAIN_SIDEBAR_GROUPS,
+  SETTINGS_GROUP,
+  type SidebarGroupConfig,
+} from "@/lib/sidebar-nav";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
 import { Logo } from "@/components/logo";
-import type { LucideIcon } from "lucide-react";
-
-// Sidebar-only grouping + label overrides. Routes are the single source of
-// truth from lib/modules.ts (MODULES/NAV_ITEMS) — this just changes how
-// links are grouped, labeled, and iconified here, so renaming a group
-// heading or a label below never touches a URL, a page title, or any other
-// consumer of MODULES (overview cards, export-data, the create classifier).
-type SidebarItem = { href: string; label: string; icon: LucideIcon };
-
-const SIDEBAR_GROUPS: { heading: string; items: SidebarItem[] }[] = [
-  {
-    heading: "Workspace",
-    items: [
-      { href: OVERVIEW_NAV_ITEM.href, label: "Home", icon: OVERVIEW_ICON },
-      { href: CHAT_NAV_ITEM.href, label: "Veron Chat", icon: CHAT_ICON },
-      { href: "/dashboard/memory", label: "AI Memory", icon: MEMORY_ICON },
-    ],
-  },
-  {
-    heading: "Build",
-    items: [
-      { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents },
-      { href: "/dashboard/websites", label: "Websites", icon: MODULE_ICONS.websites },
-      { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps },
-      { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images },
-      { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos },
-      { href: "/dashboard/coding", label: "AI Coding", icon: MODULE_ICONS.coding },
-      {
-        href: "/dashboard/data-analysis",
-        label: "Data Analysis",
-        icon: MODULE_ICONS["data-analysis"],
-      },
-      { href: "/dashboard/documents", label: "Documents", icon: MODULE_ICONS.documents },
-      {
-        href: "/dashboard/presentations",
-        label: "Presentations",
-        icon: MODULE_ICONS.presentations,
-      },
-      { href: "/dashboard/campaigns", label: "Campaigns", icon: MODULE_ICONS.campaigns },
-    ],
-  },
-  {
-    heading: "Business",
-    items: [
-      { href: "/dashboard/analytics", label: "Analytics", icon: MODULE_ICONS.analytics },
-      { href: "/dashboard/finance", label: "Finance", icon: MODULE_ICONS.finance },
-      { href: "/dashboard/content", label: "Marketing", icon: MODULE_ICONS.content },
-      { href: "/dashboard/sales", label: "CRM", icon: MODULE_ICONS.sales },
-      { href: "/dashboard/products", label: "Products", icon: MODULE_ICONS.products },
-      { href: "/dashboard/research", label: "Knowledge", icon: MODULE_ICONS.research },
-      { href: "/dashboard/learning", label: "Learning", icon: MODULE_ICONS.learning },
-    ],
-  },
-  {
-    heading: "Strategy",
-    items: [
-      { href: "/dashboard", label: "Ideas", icon: MODULE_ICONS.ideas },
-      { href: "/dashboard/competitors", label: "Competitors", icon: MODULE_ICONS.competitors },
-      { href: "/dashboard/decisions", label: "Decisions", icon: MODULE_ICONS.decisions },
-      { href: "/dashboard/feedback", label: "Feedback", icon: MODULE_ICONS.feedback },
-    ],
-  },
-  {
-    heading: "Operations",
-    items: [
-      { href: "/dashboard/trading", label: "Trading", icon: MODULE_ICONS.trading },
-      { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation },
-    ],
-  },
-  {
-    heading: "Marketplace",
-    items: [
-      { href: "/dashboard/marketplace", label: "Marketplace", icon: MARKETPLACE_ICON },
-    ],
-  },
-];
 
 function isActive(pathname: string | null, href: string) {
   if (href === "/dashboard") return pathname === "/dashboard";
   return pathname?.startsWith(href) ?? false;
 }
 
+function groupContainsActive(group: SidebarGroupConfig, pathname: string | null) {
+  return group.items.some((item) => isActive(pathname, item.href));
+}
+
+function defaultExpanded(group: SidebarGroupConfig, pathname: string | null) {
+  return !group.collapsible || groupContainsActive(group, pathname);
+}
+
+function storageKey(heading: string) {
+  return `veron:sidebar-group:${heading}`;
+}
+
 export function Sidebar() {
   const pathname = usePathname();
   const { open, setOpen } = useSidebar();
-  const settingsActive = isActive(pathname, SETTINGS_NAV_ITEM.href);
-  const teamActive = isActive(pathname, "/dashboard/team");
   const closeOnMobile = () => setOpen(false);
+
+  // Explicit overrides only — a group with no entry here falls back to
+  // defaultExpanded() below, which is pure/deterministic from pathname
+  // alone, so server and client render identically on first paint. The
+  // effect below then layers in localStorage + the "active group always
+  // starts expanded" rule once we're on the client.
+  const [expandedOverrides, setExpandedOverrides] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    setExpandedOverrides((prev) => {
+      const next = { ...prev };
+      let changed = false;
+
+      for (const group of ALL_SIDEBAR_GROUPS) {
+        if (!group.collapsible) continue;
+
+        if (groupContainsActive(group, pathname)) {
+          if (next[group.heading] !== true) {
+            next[group.heading] = true;
+            changed = true;
+          }
+          continue;
+        }
+
+        if (next[group.heading] === undefined) {
+          const stored = window.localStorage.getItem(storageKey(group.heading));
+          if (stored !== null) {
+            next[group.heading] = stored === "true";
+            changed = true;
+          }
+        }
+      }
+
+      return changed ? next : prev;
+    });
+  }, [pathname]);
+
+  function toggleGroup(group: SidebarGroupConfig) {
+    if (!group.collapsible) return;
+    setExpandedOverrides((prev) => {
+      const current = prev[group.heading] ?? defaultExpanded(group, pathname);
+      const next = !current;
+      window.localStorage.setItem(storageKey(group.heading), String(next));
+      return { ...prev, [group.heading]: next };
+    });
+  }
+
+  function renderGroup(group: SidebarGroupConfig) {
+    const expanded = group.collapsible
+      ? expandedOverrides[group.heading] ?? defaultExpanded(group, pathname)
+      : true;
+
+    return (
+      <div key={group.heading}>
+        {group.collapsible ? (
+          <button
+            type="button"
+            onClick={() => toggleGroup(group)}
+            aria-expanded={expanded}
+            className="flex w-full items-center justify-between rounded-lg px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted transition-colors duration-150 hover:text-foreground"
+          >
+            <span>{group.heading}</span>
+            <ChevronRight
+              className={`h-3 w-3 shrink-0 transition-transform duration-200 ${
+                expanded ? "rotate-90" : "rotate-0"
+              }`}
+              aria-hidden="true"
+            />
+          </button>
+        ) : (
+          <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
+            {group.heading}
+          </p>
+        )}
+
+        <div
+          className={`grid transition-[grid-template-rows] duration-200 ease-in-out ${
+            expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+          }`}
+        >
+          <div className="min-h-0 overflow-hidden">
+            <div className="space-y-0.5 pb-0.5">
+              {group.items.map((item) => {
+                const active = isActive(pathname, item.href);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={closeOnMobile}
+                    className={`flex min-h-[40px] items-center gap-2.5 rounded-lg border-l-2 py-2 pl-2.5 pr-3 text-sm transition-colors duration-150 ${
+                      active
+                        ? "border-orange-500 bg-orange-500/10 font-medium text-orange-400"
+                        : "border-transparent text-muted hover:bg-panel-hover hover:text-foreground"
+                    }`}
+                  >
+                    <Icon
+                      className={`h-4 w-4 shrink-0 transition-colors duration-150 ${
+                        active ? "text-orange-400" : "text-orange-500/40"
+                      }`}
+                      aria-hidden="true"
+                    />
+                    <span className="truncate">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -133,81 +177,9 @@ export function Sidebar() {
           </button>
         </div>
 
-        <nav className="space-y-5 p-3">
-          {SIDEBAR_GROUPS.map((group) => (
-            <div key={group.heading}>
-              <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
-                {group.heading}
-              </p>
-              <div className="space-y-0.5">
-                {group.items.map((item) => {
-                  const active = isActive(pathname, item.href);
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={closeOnMobile}
-                      className={`flex min-h-[40px] items-center gap-2.5 rounded-lg border-l-2 py-2 pl-2.5 pr-3 text-sm transition-colors duration-150 ${
-                        active
-                          ? "border-orange-500 bg-orange-500/10 font-medium text-orange-400"
-                          : "border-transparent text-muted hover:bg-panel-hover hover:text-foreground"
-                      }`}
-                    >
-                      <Icon
-                        className={`h-4 w-4 shrink-0 transition-colors duration-150 ${
-                          active ? "text-orange-400" : "text-orange-500/40"
-                        }`}
-                        aria-hidden="true"
-                      />
-                      <span className="truncate">{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </nav>
+        <nav className="space-y-5 p-3">{MAIN_SIDEBAR_GROUPS.map(renderGroup)}</nav>
 
-        <div className="border-t border-border p-3">
-          <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
-            Settings
-          </p>
-          <Link
-            href={SETTINGS_NAV_ITEM.href}
-            onClick={closeOnMobile}
-            className={`flex min-h-[40px] items-center gap-2.5 rounded-lg border-l-2 py-2 pl-2.5 pr-3 text-sm transition-colors duration-150 ${
-              settingsActive
-                ? "border-orange-500 bg-orange-500/10 font-medium text-orange-400"
-                : "border-transparent text-muted hover:bg-panel-hover hover:text-foreground"
-            }`}
-          >
-            <SETTINGS_ICON
-              className={`h-4 w-4 shrink-0 transition-colors duration-150 ${
-                settingsActive ? "text-orange-400" : "text-orange-500/40"
-              }`}
-              aria-hidden="true"
-            />
-            <span>Settings</span>
-          </Link>
-          <Link
-            href="/dashboard/team"
-            onClick={closeOnMobile}
-            className={`flex min-h-[40px] items-center gap-2.5 rounded-lg border-l-2 py-2 pl-2.5 pr-3 text-sm transition-colors duration-150 ${
-              teamActive
-                ? "border-orange-500 bg-orange-500/10 font-medium text-orange-400"
-                : "border-transparent text-muted hover:bg-panel-hover hover:text-foreground"
-            }`}
-          >
-            <TEAM_ICON
-              className={`h-4 w-4 shrink-0 transition-colors duration-150 ${
-                teamActive ? "text-orange-400" : "text-orange-500/40"
-              }`}
-              aria-hidden="true"
-            />
-            <span>Team</span>
-          </Link>
-        </div>
+        <div className="border-t border-border p-3">{renderGroup(SETTINGS_GROUP)}</div>
       </aside>
     </>
   );

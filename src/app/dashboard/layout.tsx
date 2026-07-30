@@ -4,7 +4,8 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import { SidebarProvider } from "@/components/dashboard/sidebar-context";
 import { ToastProvider } from "@/components/toast/toast-context";
 import { ToastContainer } from "@/components/toast/toast-container";
-import { KeyboardShortcuts } from "@/components/dashboard/keyboard-shortcuts";
+import { CommandPalette } from "@/components/dashboard/command-palette";
+import { CommandPaletteProvider } from "@/components/dashboard/command-palette-context";
 import { TopNav } from "@/components/dashboard/top-nav";
 import { acceptPendingTeamInvite } from "@/lib/team/accept-pending-invite";
 
@@ -31,15 +32,17 @@ export default async function DashboardLayout({
   return (
     <ToastProvider>
       <SidebarProvider>
-        <div className="flex min-h-screen bg-background">
-          <Sidebar />
-          <div className="flex min-w-0 flex-1 flex-col">
-            <TopNav email={user.email ?? ""} />
-            <div className="flex-1">{children}</div>
+        <CommandPaletteProvider>
+          <div className="flex min-h-screen bg-background">
+            <Sidebar />
+            <div className="flex min-w-0 flex-1 flex-col">
+              <TopNav email={user.email ?? ""} />
+              <div className="flex-1">{children}</div>
+            </div>
           </div>
-        </div>
-        <ToastContainer />
-        <KeyboardShortcuts />
+          <ToastContainer />
+          <CommandPalette />
+        </CommandPaletteProvider>
       </SidebarProvider>
     </ToastProvider>
   );

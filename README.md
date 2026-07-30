@@ -74,18 +74,30 @@ and desktop.
    ANTHROPIC_API_KEY=your-anthropic-api-key
    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
    RESEND_API_KEY=your-resend-api-key
-   RESEND_FROM_EMAIL="Nexa AI <onboarding@resend.dev>"
+   RESEND_FROM_EMAIL="Veron AI <onboarding@resend.dev>"
+   NEXT_PUBLIC_SITE_URL=http://localhost:3000
+   STRIPE_SECRET_KEY=your-stripe-secret-key
+   STRIPE_WEBHOOK_SECRET=your-stripe-webhook-signing-secret
+   STRIPE_PRICE_STARTER=price_...
+   STRIPE_PRICE_GROWTH=price_...
+   STRIPE_PRICE_PROFESSIONAL=price_...
+   STRIPE_PRICE_ULTIMATE=price_...
+   STRIPE_PRICE_TEAM_SEAT=price_...
    ```
 
    `.env.local` is gitignored — never commit real credentials.
-   `ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, and `RESEND_API_KEY`
-   have no `NEXT_PUBLIC_` prefix on purpose — they're only read server-side
-   (`ANTHROPIC_API_KEY` in `/api/create`; `SUPABASE_SERVICE_ROLE_KEY` in
-   `/api/signup`; `RESEND_API_KEY` in `/api/signup` and
-   `/api/weekly-digest`) and are never sent to the browser. `RESEND_FROM_EMAIL`
-   is optional — it falls back to Resend's shared sandbox address, which
-   only delivers to the email on your own Resend account, so set it to a
-   verified sending address before real users sign up.
+   `ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, and
+   the `STRIPE_*` vars have no `NEXT_PUBLIC_` prefix on purpose — they're
+   only read server-side (`ANTHROPIC_API_KEY` in `/api/create`;
+   `SUPABASE_SERVICE_ROLE_KEY` in `/api/signup`, `/api/webhooks/stripe`,
+   and the team-invite auto-accept check; `RESEND_API_KEY` in `/api/signup`,
+   `/api/weekly-digest`, and `/api/team/invite`; the `STRIPE_*` vars in
+   `/api/checkout`, `/api/billing-portal`, and `/api/webhooks/stripe`) and
+   are never sent to the browser. `RESEND_FROM_EMAIL` is optional — it falls
+   back to Resend's shared sandbox address, which only delivers to the
+   email on your own Resend account, so set it to a verified sending
+   address before real users sign up. See [Billing](#billing) below for how
+   the Stripe vars are used and how to create the five Price IDs.
 
 5. **Email confirmation is auto-skipped for now.** Signup goes through
    `/api/signup`, which creates the user, immediately marks their email
@@ -141,6 +153,54 @@ Transactional email is sent via [Resend](https://resend.com).
   interval. If you set `CRON_SECRET`, the route only responds to requests
   carrying `Authorization: Bearer <CRON_SECRET>` — set that before exposing
   it in production, since an unauthenticated hit emails every user.
+
+## Billing
+
+Subscriptions run through [Stripe](https://stripe.com) Checkout + the
+Billing Portal — no card data ever touches this app's servers.
+
+- **Plans** (`src/lib/billing/plans.ts`) — Free, Starter ($20), Growth
+  ($50), Professional ($100), Ultimate ($200), shown on `/pricing`. Every
+  paid plan also offers a $20/month **team seat** add-on with an
+  adjustable quantity (starts at 0 in Checkout, changed later from the
+  Billing Portal).
+- **Stripe setup** — create 5 recurring Prices in the Stripe Dashboard (one
+  per paid plan, plus one shared "Team seat" price used by every plan) and
+  set their IDs as `STRIPE_PRICE_STARTER` / `STRIPE_PRICE_GROWTH` /
+  `STRIPE_PRICE_PROFESSIONAL` / `STRIPE_PRICE_ULTIMATE` /
+  `STRIPE_PRICE_TEAM_SEAT`. Then add a webhook endpoint pointed at
+  `<your-domain>/api/webhooks/stripe` subscribed to
+  `checkout.session.completed`, `customer.subscription.updated`, and
+  `customer.subscription.deleted`, and set its signing secret as
+  `STRIPE_WEBHOOK_SECRET`.
+- **Flow** — `/pricing`'s paid-plan buttons POST to `/api/checkout`, which
+  creates (or reuses) a Stripe Customer for the logged-in user and a
+  subscription-mode Checkout Session, then the browser is redirected to
+  the session's own `url`. (Older Stripe.js versions had a client-side
+  `redirectToCheckout()` helper for this — it's been removed from
+  `@stripe/stripe-js`, so this app doesn't depend on the library or a
+  publishable key at all; a plain redirect to the session URL is Stripe's
+  current recommended approach.) `/api/webhooks/stripe` re-derives the
+  user's `subscription_tier` and `seat_count` from the live subscription
+  on every relevant event and writes them to that user's
+  `auth.users.raw_user_meta_data` via the service-role client — nothing
+  else in the app reads Stripe directly.
+- **Team seats** (`/dashboard/team`, owners on a paid plan only) — invites
+  live in the `team_members` table (see `supabase_schema.sql`); inviting
+  someone sends them an email (via Resend) and creates an `invited` row.
+  When that email address next logs in, `dashboard/layout.tsx` calls
+  `acceptPendingTeamInvite`, which — if the owner is still on a paid
+  plan — marks the invite `active` and copies the owner's
+  `subscription_tier` onto the new member's own `user_metadata`. Note that
+  no part of the app currently branches its *behavior* on
+  `subscription_tier` (every module, and the existing hourly rate limits
+  on `/api/create`/`/api/chat`, are unchanged) — this turn wires up the
+  billing/records plumbing, not tier-gated features or monthly quota
+  enforcement.
+- **Settings** (`/dashboard/settings`) shows the current plan/seat count
+  and a "Manage Billing" button that opens a Stripe Billing Portal session
+  (`/api/billing-portal`) for anyone with a `stripe_customer_id` already
+  on file.
 
 ## Project structure
 

@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { PasswordChangeForm } from "@/components/settings/password-change-form";
 import { ExportDataButton } from "@/components/settings/export-data-button";
 import { DangerZone } from "@/components/settings/danger-zone";
+import { BillingSummary } from "@/components/settings/billing-summary";
 
 export const metadata: Metadata = {
   title: "Settings",
@@ -22,6 +23,10 @@ export default async function SettingsPage() {
     redirect("/login");
   }
 
+  const tier = (user.user_metadata?.subscription_tier as string | undefined) ?? "free";
+  const seatCount = (user.user_metadata?.seat_count as number | undefined) ?? 0;
+  const hasSubscription = Boolean(user.user_metadata?.stripe_customer_id);
+
   return (
     <main className="min-h-full bg-background">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
@@ -31,6 +36,8 @@ export default async function SettingsPage() {
           <p className="text-xs text-muted">Signed in as</p>
           <p className="mt-1 text-sm text-foreground">{user.email}</p>
         </div>
+
+        <BillingSummary tier={tier} seatCount={seatCount} hasSubscription={hasSubscription} />
 
         <PasswordChangeForm />
 

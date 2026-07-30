@@ -395,3 +395,49 @@ create policy "delete_own_chat_messages" on public.chat_messages
 drop trigger if exists set_updated_at on public.chat_conversations;
 create trigger set_updated_at before update on public.chat_conversations
   for each row execute function public.set_updated_at();
+
+-- ============================================================================
+-- Team members — invite/membership records for the team-seat billing
+-- add-on. Access level itself (subscription_tier) still lives on
+-- auth.users.raw_user_meta_data, set by /api/webhooks/stripe for owners and
+-- by the accept-pending-invite check (on login) for members — this table is
+-- just the relational "who invited whom, and did they join yet" record,
+-- which user_metadata alone can't answer.
+-- ============================================================================
+
+drop table if exists public.team_members cascade;
+
+create table public.team_members (
+  id uuid primary key default gen_random_uuid(),
+  owner_id uuid not null references auth.users(id) on delete cascade,
+  member_email text not null,
+  member_user_id uuid references auth.users(id) on delete set null,
+  status text not null default 'invited' check (status in ('invited', 'active')),
+  invited_at timestamptz not null default now(),
+  joined_at timestamptz,
+  unique (owner_id, member_email)
+);
+
+create index if not exists team_members_owner_id_idx
+  on public.team_members (owner_id);
+
+create index if not exists team_members_member_email_idx
+  on public.team_members (member_email);
+
+alter table public.team_members enable row level security;
+
+drop policy if exists "select_own_team_members" on public.team_members;
+create policy "select_own_team_members" on public.team_members
+  for select using (auth.uid() = owner_id);
+
+drop policy if exists "insert_own_team_members" on public.team_members;
+create policy "insert_own_team_members" on public.team_members
+  for insert with check (auth.uid() = owner_id);
+
+drop policy if exists "update_own_team_members" on public.team_members;
+create policy "update_own_team_members" on public.team_members
+  for update using (auth.uid() = owner_id) with check (auth.uid() = owner_id);
+
+drop policy if exists "delete_own_team_members" on public.team_members;
+create policy "delete_own_team_members" on public.team_members
+  for delete using (auth.uid() = owner_id);

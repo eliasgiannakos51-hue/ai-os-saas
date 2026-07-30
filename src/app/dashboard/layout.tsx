@@ -6,6 +6,7 @@ import { ToastProvider } from "@/components/toast/toast-context";
 import { ToastContainer } from "@/components/toast/toast-container";
 import { KeyboardShortcuts } from "@/components/dashboard/keyboard-shortcuts";
 import { TopNav } from "@/components/dashboard/top-nav";
+import { acceptPendingTeamInvite } from "@/lib/team/accept-pending-invite";
 
 export default async function DashboardLayout({
   children,
@@ -21,6 +22,11 @@ export default async function DashboardLayout({
   if (!user) {
     redirect("/login");
   }
+
+  // Fire-and-forget: if this email has a pending team invite, join it now.
+  // Any effect lands on the user's *next* request (this one already fetched
+  // `user` above), which is fine for a low-frequency, best-effort check.
+  void acceptPendingTeamInvite(user.id, user.email ?? "");
 
   return (
     <ToastProvider>

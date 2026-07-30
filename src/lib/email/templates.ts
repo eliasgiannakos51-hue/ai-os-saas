@@ -100,6 +100,42 @@ export function welcomeEmailHtml({ email }: { email: string }): string {
   return layout({ preheader: "Your Veron AI account is ready.", bodyHtml });
 }
 
+export function teamInviteEmailHtml({
+  inviterEmail,
+  planName,
+  signupUrl,
+}: {
+  inviterEmail: string;
+  planName: string;
+  signupUrl: string;
+}): string {
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">team invite</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">you've been invited to Veron AI</h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      <span style="color:${FOREGROUND};">${inviterEmail}</span> added you to their
+      team on the <span style="color:${ORANGE};">${planName}</span> plan. Sign up
+      (or log in, if you already have an account with this email) and you'll
+      automatically get full access at their plan's tier — no separate
+      payment needed.
+    </p>
+    <p style="margin:0 0 20px;">
+      <a href="${signupUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        Accept invite
+      </a>
+    </p>
+    <p style="color:${MUTED}; font-size:12px; line-height:1.6; margin:0;">
+      Use this exact email address when you sign up — that's how we match
+      your account to the invite.
+    </p>
+  `;
+
+  return layout({
+    preheader: `${inviterEmail} invited you to their Veron AI team.`,
+    bodyHtml,
+  });
+}
+
 export function weeklyDigestEmailHtml({
   email,
   moduleCounts,

@@ -122,7 +122,7 @@ export function IdeaRow({ idea }: { idea: Idea }) {
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="name" required>
+          <Field label="Name" required>
             <input
               required
               value={form.name}
@@ -132,7 +132,7 @@ export function IdeaRow({ idea }: { idea: Idea }) {
             />
           </Field>
 
-          <Field label="customer">
+          <Field label="Customer">
             <input
               value={form.customer}
               onChange={update("customer")}
@@ -141,7 +141,7 @@ export function IdeaRow({ idea }: { idea: Idea }) {
             />
           </Field>
 
-          <Field label="problem" full>
+          <Field label="Problem" full>
             <textarea
               value={form.problem}
               onChange={update("problem")}
@@ -150,7 +150,7 @@ export function IdeaRow({ idea }: { idea: Idea }) {
             />
           </Field>
 
-          <Field label="competitors" full>
+          <Field label="Competitors" full>
             <textarea
               value={form.competitors}
               onChange={update("competitors")}
@@ -159,7 +159,7 @@ export function IdeaRow({ idea }: { idea: Idea }) {
             />
           </Field>
 
-          <Field label="market_size">
+          <Field label="Market Size">
             <input
               value={form.market_size}
               onChange={update("market_size")}
@@ -168,7 +168,7 @@ export function IdeaRow({ idea }: { idea: Idea }) {
             />
           </Field>
 
-          <Field label="score (0-100)">
+          <Field label="Score (0-100)">
             <input
               type="number"
               min={0}
@@ -180,7 +180,7 @@ export function IdeaRow({ idea }: { idea: Idea }) {
             />
           </Field>
 
-          <Field label="mvp" full>
+          <Field label="MVP" full>
             <textarea
               value={form.mvp}
               onChange={update("mvp")}
@@ -189,7 +189,7 @@ export function IdeaRow({ idea }: { idea: Idea }) {
             />
           </Field>
 
-          <Field label="verdict" full>
+          <Field label="Verdict" full>
             <input
               value={form.verdict}
               onChange={update("verdict")}
@@ -230,7 +230,7 @@ export function IdeaRow({ idea }: { idea: Idea }) {
         <div className="flex items-center gap-2">
           {idea.score !== null && (
             <span className="rounded-md border border-border bg-black/30 px-2 py-0.5 text-xs text-foreground">
-              score: {idea.score}
+              Score: {idea.score}
             </span>
           )}
           {idea.verdict && (
@@ -247,24 +247,24 @@ export function IdeaRow({ idea }: { idea: Idea }) {
 
       {idea.problem && (
         <p className="mt-3 text-sm text-foreground/90">
-          <span className="text-orange-500">problem:</span> {idea.problem}
+          <span className="text-orange-500">Problem:</span> {idea.problem}
         </p>
       )}
       {idea.competitors && (
         <p className="mt-1 text-sm text-foreground/90">
-          <span className="text-orange-500">competitors:</span>{" "}
+          <span className="text-orange-500">Competitors:</span>{" "}
           {idea.competitors}
         </p>
       )}
       {idea.market_size && (
         <p className="mt-1 text-sm text-foreground/90">
-          <span className="text-orange-500">market_size:</span>{" "}
+          <span className="text-orange-500">Market Size:</span>{" "}
           {idea.market_size}
         </p>
       )}
       {idea.mvp && (
         <p className="mt-1 text-sm text-foreground/90">
-          <span className="text-orange-500">mvp:</span> {idea.mvp}
+          <span className="text-orange-500">MVP:</span> {idea.mvp}
         </p>
       )}
 

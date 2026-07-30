@@ -12,7 +12,7 @@ export function PageHeader({
   return (
     <div className="mb-6 flex items-center gap-3">
       {Icon && (
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
           <Icon className="h-5 w-5" aria-hidden="true" />
         </span>
       )}

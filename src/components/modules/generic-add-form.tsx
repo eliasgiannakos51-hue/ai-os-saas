@@ -71,7 +71,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-orange-500/30 bg-orange-500/5 px-4 py-2 text-sm font-medium text-orange-400 transition-colors duration-150 hover:border-orange-500/60 hover:bg-orange-500/10 sm:min-h-0"
+        className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
       >
         <Plus className="h-4 w-4" /> New {module.title}
       </button>

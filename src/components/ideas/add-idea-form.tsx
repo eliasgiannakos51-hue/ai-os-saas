@@ -77,7 +77,7 @@ export function AddIdeaForm() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-orange-500/30 bg-orange-500/5 px-4 py-2 text-sm font-medium text-orange-400 transition-colors duration-150 hover:border-orange-500/60 hover:bg-orange-500/10 sm:min-h-0"
+        className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
       >
         <Plus className="h-4 w-4" /> New Idea
       </button>
@@ -102,7 +102,7 @@ export function AddIdeaForm() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Field label="name" required>
+        <Field label="Name" required>
           <input
             required
             value={form.name}
@@ -112,7 +112,7 @@ export function AddIdeaForm() {
           />
         </Field>
 
-        <Field label="customer">
+        <Field label="Customer">
           <input
             value={form.customer}
             onChange={update("customer")}
@@ -121,7 +121,7 @@ export function AddIdeaForm() {
           />
         </Field>
 
-        <Field label="problem" full>
+        <Field label="Problem" full>
           <textarea
             value={form.problem}
             onChange={update("problem")}
@@ -130,7 +130,7 @@ export function AddIdeaForm() {
           />
         </Field>
 
-        <Field label="competitors" full>
+        <Field label="Competitors" full>
           <textarea
             value={form.competitors}
             onChange={update("competitors")}
@@ -139,7 +139,7 @@ export function AddIdeaForm() {
           />
         </Field>
 
-        <Field label="market_size">
+        <Field label="Market Size">
           <input
             value={form.market_size}
             onChange={update("market_size")}
@@ -148,7 +148,7 @@ export function AddIdeaForm() {
           />
         </Field>
 
-        <Field label="score (0-100)">
+        <Field label="Score (0-100)">
           <input
             type="number"
             min={0}
@@ -160,7 +160,7 @@ export function AddIdeaForm() {
           />
         </Field>
 
-        <Field label="mvp" full>
+        <Field label="MVP" full>
           <textarea
             value={form.mvp}
             onChange={update("mvp")}
@@ -169,7 +169,7 @@ export function AddIdeaForm() {
           />
         </Field>
 
-        <Field label="verdict" full>
+        <Field label="Verdict" full>
           <input
             value={form.verdict}
             onChange={update("verdict")}

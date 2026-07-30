@@ -1,8 +1,8 @@
 export function LoadingState() {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 font-mono">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
-        <p className="mb-6 text-center text-xs tracking-widest text-amber-500">
+        <p className="mb-6 text-center text-xs tracking-widest text-orange-500">
           Nexa AI //
         </p>
         <div className="space-y-3" aria-label="Loading" role="status">

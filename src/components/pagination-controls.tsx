@@ -1,3 +1,5 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
+
 export function PaginationControls({
   page,
   totalPages,
@@ -16,21 +18,21 @@ export function PaginationControls({
         onClick={() => onChange(page - 1)}
         disabled={page <= 1}
         aria-label="Previous page"
-        className="inline-flex min-h-[44px] items-center justify-center rounded border border-border px-3 transition-colors hover:border-amber-500 hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 sm:py-1.5"
+        className="inline-flex min-h-[40px] items-center justify-center gap-1 rounded-lg border border-border px-3 transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 sm:py-1.5"
       >
-        ← prev
+        <ChevronLeft className="h-3.5 w-3.5" /> Prev
       </button>
       <span>
-        page {page} / {totalPages}
+        Page {page} / {totalPages}
       </span>
       <button
         type="button"
         onClick={() => onChange(page + 1)}
         disabled={page >= totalPages}
         aria-label="Next page"
-        className="inline-flex min-h-[44px] items-center justify-center rounded border border-border px-3 transition-colors hover:border-amber-500 hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 sm:py-1.5"
+        className="inline-flex min-h-[40px] items-center justify-center gap-1 rounded-lg border border-border px-3 transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 sm:py-1.5"
       >
-        next →
+        Next <ChevronRight className="h-3.5 w-3.5" />
       </button>
     </div>
   );

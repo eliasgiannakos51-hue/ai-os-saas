@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { Pencil, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
@@ -89,16 +90,17 @@ export function GenericRecordRow({
     return (
       <form
         onSubmit={handleSave}
-        className="space-y-4 rounded-md border border-border bg-panel p-4"
+        className="space-y-4 rounded-2xl border border-border bg-panel p-4"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-sm text-amber-500">{module.table}.update()</h2>
+          <h2 className="text-sm font-semibold text-foreground">Edit {module.title}</h2>
           <button
             type="button"
             onClick={cancelEditing}
-            className="inline-flex min-h-[44px] items-center px-2 text-xs text-muted hover:text-foreground sm:min-h-0 sm:px-0"
+            aria-label="Cancel"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
-            cancel()
+            <X className="h-4 w-4" />
           </button>
         </div>
 
@@ -151,7 +153,7 @@ export function GenericRecordRow({
         </div>
 
         {error && (
-          <p className="rounded border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+          <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
             error: {error}
           </p>
         )}
@@ -159,9 +161,9 @@ export function GenericRecordRow({
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
+          className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
         >
-          {loading ? "saving..." : "save()"}
+          {loading ? "Saving..." : "Save"}
         </button>
       </form>
     );
@@ -174,7 +176,7 @@ export function GenericRecordRow({
   const headline = String(record[module.headlineKey] ?? "untitled");
 
   return (
-    <div className="rounded-md border border-border bg-panel p-4 transition-colors hover:border-amber-900/50">
+    <div className="group rounded-2xl border border-border bg-panel p-4 transition-colors duration-150 hover:border-orange-500/30">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <h3 className="text-base font-semibold text-foreground">
           {record[module.headlineKey] ?? "untitled"}
@@ -189,7 +191,7 @@ export function GenericRecordRow({
               return (
                 <span
                   key={field.key}
-                  className="rounded border border-border bg-black/30 px-2 py-0.5 text-xs text-foreground"
+                  className="rounded-md border border-border bg-black/30 px-2 py-0.5 text-xs text-foreground"
                 >
                   {field.label}: {value}
                 </span>
@@ -206,7 +208,7 @@ export function GenericRecordRow({
         }
         return (
           <p key={field.key} className="mt-1 text-sm text-foreground/90">
-            <span className="text-amber-500">{field.label}:</span> {value}
+            <span className="text-orange-500">{field.label}:</span> {value}
           </p>
         );
       })}
@@ -217,16 +219,17 @@ export function GenericRecordRow({
           title={new Date(record.created_at).toLocaleString()}
           suppressHydrationWarning
         >
-          logged {formatRelativeTime(record.created_at)}
+          Logged {formatRelativeTime(record.created_at)}
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={startEditing}
             aria-label={`Edit ${module.title.toLowerCase()}: ${headline}`}
-            className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded border border-border px-3 py-0.5 text-[11px] text-muted transition-colors hover:border-amber-500 hover:text-amber-400 sm:min-h-0 sm:px-2"
+            title="Edit"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-orange-500/10 hover:text-orange-400"
           >
-            edit()
+            <Pencil className="h-4 w-4" />
           </button>
           <DeleteButton
             table={module.table}

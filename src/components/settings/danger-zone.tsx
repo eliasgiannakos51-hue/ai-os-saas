@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { AlertTriangle, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
 
@@ -50,8 +51,10 @@ export function DangerZone({ email }: { email: string }) {
   }
 
   return (
-    <div className="rounded-md border border-red-900 bg-red-950/10 p-5">
-      <h2 className="text-sm text-red-400">Danger Zone</h2>
+    <div className="rounded-2xl border border-red-900/50 bg-red-500/[0.03] p-5">
+      <h2 className="flex items-center gap-2 text-sm font-semibold text-red-400">
+        <AlertTriangle className="h-4 w-4" /> Danger Zone
+      </h2>
       <p className="mt-2 text-xs text-muted">
         Permanently delete your account and every record you&apos;ve logged
         across all 13 modules. This can&apos;t be undone.
@@ -61,9 +64,9 @@ export function DangerZone({ email }: { email: string }) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded border border-red-800 px-4 py-2 text-sm text-red-400 transition-colors hover:border-red-500 hover:bg-red-950/30 sm:min-h-0"
+          className="mt-4 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-red-800 px-4 py-2 text-sm text-red-400 transition-colors duration-150 hover:border-red-500 hover:bg-red-950/30 sm:min-h-0"
         >
-          delete_account()
+          <Trash2 className="h-4 w-4" /> Delete Account
         </button>
       ) : (
         <form onSubmit={handleDelete} className="mt-4 space-y-3">
@@ -76,14 +79,14 @@ export function DangerZone({ email }: { email: string }) {
               required
               value={confirmEmail}
               onChange={(e) => setConfirmEmail(e.target.value)}
-              className="w-full rounded border border-red-900 bg-black/40 px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-red-500"
+              className="w-full rounded-lg border border-red-900 bg-black/40 px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 focus:border-red-500"
               placeholder={email}
               autoComplete="off"
             />
           </label>
 
           {error && (
-            <p className="rounded border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+            <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
               error: {error}
             </p>
           )}
@@ -92,17 +95,17 @@ export function DangerZone({ email }: { email: string }) {
             <button
               type="submit"
               disabled={loading || !confirmed}
-              className="inline-flex min-h-[44px] items-center justify-center rounded bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(220,38,38,0.35)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-none sm:min-h-0"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(220,38,38,0.35)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-none sm:min-h-0"
             >
-              {loading ? "deleting..." : "permanently delete my account"}
+              {loading ? "Deleting..." : "Permanently delete my account"}
             </button>
             <button
               type="button"
               onClick={cancel}
               disabled={loading}
-              className="inline-flex min-h-[44px] items-center justify-center rounded border border-border px-4 py-2 text-sm text-muted transition-colors hover:border-amber-500 hover:text-amber-400 disabled:opacity-50 sm:min-h-0"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:opacity-50 sm:min-h-0"
             >
-              cancel
+              Cancel
             </button>
           </div>
         </form>

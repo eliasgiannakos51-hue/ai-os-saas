@@ -40,9 +40,9 @@ export function PasswordChangeForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 rounded-md border border-border bg-panel p-5"
+      className="space-y-4 rounded-2xl border border-border bg-panel p-5"
     >
-      <h2 className="text-sm text-amber-500">auth.updateUser()</h2>
+      <h2 className="text-sm font-semibold text-foreground">Change Password</h2>
 
       <label className="block text-xs text-muted">
         <span className="mb-1 block">
@@ -75,7 +75,7 @@ export function PasswordChangeForm() {
       </label>
 
       {error && (
-        <p className="rounded border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+        <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
           error: {error}
         </p>
       )}
@@ -83,9 +83,9 @@ export function PasswordChangeForm() {
       <button
         type="submit"
         disabled={loading}
-        className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
+        className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
       >
-        {loading ? "updating..." : "update_password()"}
+        {loading ? "Updating..." : "Update Password"}
       </button>
     </form>
   );

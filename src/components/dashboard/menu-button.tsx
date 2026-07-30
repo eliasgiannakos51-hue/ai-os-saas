@@ -1,5 +1,6 @@
 "use client";
 
+import { Menu } from "lucide-react";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
 
 export function MenuButton() {
@@ -10,11 +11,9 @@ export function MenuButton() {
       type="button"
       onClick={toggle}
       aria-label="Toggle menu"
-      className="flex h-11 w-11 shrink-0 items-center justify-center rounded border border-border text-foreground transition-colors hover:border-amber-500 hover:text-amber-400 md:hidden"
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground md:hidden"
     >
-      <span className="text-lg leading-none" aria-hidden="true">
-        ☰
-      </span>
+      <Menu className="h-[18px] w-[18px]" />
     </button>
   );
 }

@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
-import { CreateChat } from "@/components/create/create-chat";
+import { AssistantChat } from "@/components/create/assistant-chat";
 
 export const metadata: Metadata = {
-  title: "Create Anything",
+  title: "AI Assistant",
 };
 
 export default async function CreatePage() {
@@ -19,13 +18,11 @@ export default async function CreatePage() {
     redirect("/login");
   }
 
-  return (
-    <main className="min-h-screen bg-background font-mono">
-      <DashboardHeader email={user.email ?? ""} />
+  const userInitial = (user.email?.[0] ?? "?").toUpperCase();
 
-      <div className="flex min-h-[calc(100vh-73px)] items-center justify-center px-4 py-12 sm:px-6">
-        <CreateChat />
-      </div>
+  return (
+    <main className="h-[calc(100vh-4rem)] bg-background">
+      <AssistantChat userInitial={userInitial} />
     </main>
   );
 }

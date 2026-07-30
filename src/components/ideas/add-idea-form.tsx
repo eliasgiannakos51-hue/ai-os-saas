@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { Plus, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
 
@@ -76,9 +77,9 @@ export function AddIdeaForm() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex min-h-[44px] items-center justify-center rounded border border-amber-800 bg-amber-950/20 px-4 py-2 text-sm text-amber-400 transition-colors hover:border-amber-500 sm:min-h-0"
+        className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-orange-500/30 bg-orange-500/5 px-4 py-2 text-sm font-medium text-orange-400 transition-colors duration-150 hover:border-orange-500/60 hover:bg-orange-500/10 sm:min-h-0"
       >
-        + new_idea()
+        <Plus className="h-4 w-4" /> New Idea
       </button>
     );
   }
@@ -86,16 +87,17 @@ export function AddIdeaForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-4 rounded-md border border-border bg-panel p-5"
+      className="space-y-4 rounded-2xl border border-border bg-panel p-5"
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-sm text-amber-500">ideas.insert()</h2>
+        <h2 className="text-sm font-semibold text-foreground">New Idea</h2>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="inline-flex min-h-[44px] items-center px-2 text-xs text-muted hover:text-foreground sm:min-h-0 sm:px-0"
+          aria-label="Cancel"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
         >
-          cancel
+          <X className="h-4 w-4" />
         </button>
       </div>
 
@@ -178,7 +180,7 @@ export function AddIdeaForm() {
       </div>
 
       {error && (
-        <p className="rounded border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+        <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
           error: {error}
         </p>
       )}
@@ -186,9 +188,9 @@ export function AddIdeaForm() {
       <button
         type="submit"
         disabled={loading}
-        className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
+        className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
       >
-        {loading ? "saving..." : "save_idea()"}
+        {loading ? "Saving..." : "Save"}
       </button>
     </form>
   );

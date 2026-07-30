@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { Settings as SettingsIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { PasswordChangeForm } from "@/components/settings/password-change-form";
 import { ExportDataButton } from "@/components/settings/export-data-button";
@@ -23,21 +23,19 @@ export default async function SettingsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background font-mono">
-      <DashboardHeader email={user.email ?? ""} />
-
+    <main className="min-h-full bg-background">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
-        <PageHeader eyebrow="dashboard" title="Settings" />
+        <PageHeader icon={SettingsIcon} title="Settings" />
 
-        <div className="mb-6 rounded-md border border-border bg-panel p-5">
-          <p className="text-xs text-muted">signed in as</p>
+        <div className="mb-6 rounded-2xl border border-border bg-panel p-5">
+          <p className="text-xs text-muted">Signed in as</p>
           <p className="mt-1 text-sm text-foreground">{user.email}</p>
         </div>
 
         <PasswordChangeForm />
 
-        <div className="mb-6 mt-6 space-y-3 rounded-md border border-border bg-panel p-5">
-          <h2 className="text-sm text-amber-500">export.all_data()</h2>
+        <div className="mb-6 mt-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
+          <h2 className="text-sm font-semibold text-foreground">Export Data</h2>
           <p className="text-xs text-muted">
             Download everything you&apos;ve logged across all 13 modules as a
             single JSON file.

@@ -1,15 +1,16 @@
+import { Inbox } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
 export function EmptyState({
-  icon = "∅",
+  icon: Icon = Inbox,
   children,
 }: {
-  icon?: string;
+  icon?: LucideIcon;
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-md border border-dashed border-border p-8 text-center text-sm text-muted">
-      <div className="mb-2 text-2xl text-border" aria-hidden="true">
-        {icon}
-      </div>
+    <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted">
+      <Icon className="mx-auto mb-3 h-6 w-6 text-muted/60" aria-hidden="true" />
       <div>{children}</div>
     </div>
   );

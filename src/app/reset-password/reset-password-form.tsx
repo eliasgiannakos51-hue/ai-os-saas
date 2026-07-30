@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -178,19 +179,26 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 font-mono">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <p className="text-sm tracking-widest text-amber-500">Nexa AI //</p>
-          <h1 className="mt-1 text-2xl font-bold text-foreground">
-            set_new_password
+          <div className="mb-4 flex items-center justify-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/15 text-orange-400">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            <span className="text-lg font-bold tracking-tight text-foreground">
+              NEXA
+            </span>
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">
+            Set new password
           </h1>
         </div>
 
-        <div className="rounded-md border border-border bg-panel p-6 shadow-[0_0_0_1px_rgba(245,158,11,0.05)]">
+        <div className="rounded-2xl border border-border bg-panel p-6 shadow-[0_0_0_1px_rgba(249,115,22,0.05)]">
           {status === "checking" && (
             <p className="animate-pulse text-center text-sm text-muted">
-              verifying reset link...
+              Verifying reset link...
             </p>
           )}
 
@@ -199,9 +207,9 @@ export function ResetPasswordForm() {
               <p className="text-sm text-red-400">{invalidReason}</p>
               <Link
                 href="/forgot-password"
-                className="inline-flex min-h-[44px] items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] sm:min-h-0"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
               >
-                request a new link
+                Request a new link
               </Link>
             </div>
           )}
@@ -210,7 +218,7 @@ export function ResetPasswordForm() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="password" className="mb-1 block text-xs text-muted">
-                  new password
+                  New password
                 </label>
                 <PasswordInput
                   id="password"
@@ -219,14 +227,14 @@ export function ResetPasswordForm() {
                   autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full rounded border border-border bg-black/40 px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-amber-500"
+                  className="w-full rounded-xl border border-border bg-black/40 px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500"
                   placeholder="••••••••"
                 />
               </div>
 
               <div>
                 <label htmlFor="confirmPassword" className="mb-1 block text-xs text-muted">
-                  confirm password
+                  Confirm password
                 </label>
                 <PasswordInput
                   id="confirmPassword"
@@ -235,23 +243,23 @@ export function ResetPasswordForm() {
                   autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full rounded border border-border bg-black/40 px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-amber-500"
+                  className="w-full rounded-xl border border-border bg-black/40 px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500"
                   placeholder="••••••••"
                 />
               </div>
 
               {error && (
-                <p className="rounded border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
-                  error: {error}
+                <p className="rounded-xl border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+                  {error}
                 </p>
               )}
 
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] disabled:opacity-50"
+                className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50"
               >
-                {loading ? "saving..." : "run reset()"}
+                {loading ? "Saving..." : "Save new password"}
               </button>
             </form>
           )}

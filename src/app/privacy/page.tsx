@@ -40,7 +40,7 @@ export default function PrivacyPage() {
             href="https://supabase.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-amber-400 underline underline-offset-2"
+            className="text-orange-400 underline underline-offset-2"
           >
             Supabase
           </a>

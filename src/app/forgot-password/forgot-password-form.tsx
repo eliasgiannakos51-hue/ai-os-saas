@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 
@@ -82,28 +83,35 @@ export function ForgotPasswordForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 font-mono">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <p className="text-sm tracking-widest text-amber-500">Nexa AI //</p>
-          <h1 className="mt-1 text-2xl font-bold text-foreground">
-            reset_password
+          <div className="mb-4 flex items-center justify-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/15 text-orange-400">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            <span className="text-lg font-bold tracking-tight text-foreground">
+              NEXA
+            </span>
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">
+            Reset password
           </h1>
         </div>
 
-        <div className="rounded-md border border-border bg-panel p-6 shadow-[0_0_0_1px_rgba(245,158,11,0.05)]">
+        <div className="rounded-2xl border border-border bg-panel p-6 shadow-[0_0_0_1px_rgba(249,115,22,0.05)]">
           {sent ? (
             <div className="space-y-4 text-center">
               <p className="text-sm text-foreground/90">
                 If an account exists for{" "}
-                <span className="text-amber-400">{email}</span>, a password
+                <span className="text-orange-400">{email}</span>, a password
                 reset link is on its way. Check your inbox.
               </p>
               <Link
                 href="/login"
-                className="inline-flex min-h-[44px] items-center justify-center rounded border border-border px-4 py-2 text-sm text-muted transition-colors hover:border-amber-500 hover:text-amber-400 sm:min-h-0"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
               >
-                back to login
+                Back to login
               </Link>
             </div>
           ) : (
@@ -115,7 +123,7 @@ export function ForgotPasswordForm() {
 
               <div>
                 <label htmlFor="email" className="mb-1 block text-xs text-muted">
-                  email
+                  Email
                 </label>
                 <input
                   id="email"
@@ -124,23 +132,23 @@ export function ForgotPasswordForm() {
                   autoComplete="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded border border-border bg-black/40 px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-amber-500"
+                  className="w-full rounded-xl border border-border bg-black/40 px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500"
                   placeholder="you@domain.com"
                 />
               </div>
 
               {error && (
-                <p className="rounded border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
-                  error: {error}
+                <p className="rounded-xl border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+                  {error}
                 </p>
               )}
 
               {debugDump && (
-                <div className="rounded border border-amber-800 bg-amber-950/20 p-3">
-                  <p className="mb-2 text-[10px] uppercase tracking-wide text-amber-500">
+                <div className="rounded-xl border border-orange-800 bg-orange-950/20 p-3">
+                  <p className="mb-2 text-[10px] uppercase tracking-wide text-orange-500">
                     temporary debug info — copy/paste this to Claude
                   </p>
-                  <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all text-[10px] leading-relaxed text-amber-200/90">
+                  <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all text-[10px] leading-relaxed text-orange-200/90">
                     {debugDump}
                   </pre>
                 </div>
@@ -149,9 +157,9 @@ export function ForgotPasswordForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] disabled:opacity-50"
+                className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50"
               >
-                {loading ? "sending..." : "send_reset()"}
+                {loading ? "Sending..." : "Send reset link"}
               </button>
             </form>
           )}
@@ -159,12 +167,12 @@ export function ForgotPasswordForm() {
 
         {!sent && (
           <p className="mt-4 text-center text-xs text-muted">
-            remembered it?{" "}
+            Remembered it?{" "}
             <Link
               href="/login"
-              className="text-amber-500 underline underline-offset-2"
+              className="text-orange-400 underline underline-offset-2"
             >
-              login
+              Log in
             </Link>
           </p>
         )}

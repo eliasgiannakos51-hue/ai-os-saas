@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Search, SearchX, Download } from "lucide-react";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { GenericRecordRow } from "@/components/modules/generic-record-row";
@@ -50,37 +51,38 @@ export function GenericList({
   return (
     <div>
       <div className="mb-4 space-y-3">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="search.filter()..."
-          className="input"
-        />
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search..."
+            className="input pl-10"
+          />
+        </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <SortToggle sortOrder={sortOrder} onChange={setSortOrder} />
           <button
             type="button"
             onClick={handleExport}
             disabled={filtered.length === 0}
-            className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded border border-border px-4 py-2 text-sm text-muted transition-colors hover:border-amber-500 hover:text-amber-400 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+            className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
           >
-            export.csv()
+            <Download className="h-4 w-4" /> Export CSV
           </button>
         </div>
       </div>
 
       {records.length === 0 ? (
         <EmptyState>
-          no entries yet — run{" "}
-          <span className="text-amber-500">{module.table}.insert()</span> to
-          log your first one.
+          No entries yet — use the button above to log your first one.
         </EmptyState>
       ) : filtered.length === 0 ? (
-        <EmptyState icon="×">no matches for &apos;{query}&apos;</EmptyState>
+        <EmptyState icon={SearchX}>No matches for &apos;{query}&apos;</EmptyState>
       ) : (
         <>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {paginated.map((record) => (
               <GenericRecordRow key={record.id} module={module} record={record} />
             ))}

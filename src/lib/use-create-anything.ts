@@ -1,0 +1,46 @@
+"use client";
+
+import { useState } from "react";
+
+export type CreateResult =
+  | { type: "matched"; moduleTitle: string; href: string; message: string }
+  | { type: "unmatched"; message: string }
+  | { type: "error"; message: string };
+
+// Shared submit logic for the "Create Anything" classifier, used by both
+// the lightweight home-page composer (CreateChat) and the full chat-thread
+// AI Assistant page (AssistantChat) — same /api/create contract, two UIs.
+export function useCreateAnything() {
+  const [loading, setLoading] = useState(false);
+
+  async function submit(message: string): Promise<CreateResult> {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        return { type: "error", message: data.error ?? "Something went wrong." };
+      }
+      if (data.matched) {
+        return {
+          type: "matched",
+          moduleTitle: data.moduleTitle,
+          href: data.href,
+          message: data.message,
+        };
+      }
+      return { type: "unmatched", message: data.message };
+    } catch {
+      return { type: "error", message: "Network error — please try again." };
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return { submit, loading };
+}

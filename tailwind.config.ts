@@ -9,13 +9,24 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#090909",
-        panel: "#111111",
-        border: "#262626",
+        background: "#0a0a0a",
+        panel: "#141414",
+        "panel-hover": "#1a1a1a",
+        border: "#242424",
         foreground: "#e5e5e5",
         muted: "#8a8a8a",
       },
       fontFamily: {
+        sans: [
+          "'Inter'",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "'Segoe UI'",
+          "Roboto",
+          "Helvetica",
+          "Arial",
+          "sans-serif",
+        ],
         mono: [
           "'JetBrains Mono'",
           "'Fira Code'",
@@ -25,6 +36,9 @@ const config: Config = {
           "Consolas",
           "monospace",
         ],
+      },
+      borderRadius: {
+        card: "14px",
       },
       keyframes: {
         "fade-in": {

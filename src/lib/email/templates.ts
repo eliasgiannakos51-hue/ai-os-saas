@@ -8,7 +8,7 @@ import "server-only";
 const BG = "#090909";
 const PANEL = "#141414";
 const BORDER = "#2a2a2a";
-const AMBER = "#f59e0b";
+const ORANGE = "#f97316";
 const FOREGROUND = "#f5f5f5";
 const MUTED = "#a3a3a3";
 const MONO_STACK = "'Courier New', Courier, monospace";
@@ -29,7 +29,7 @@ function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
             <tr>
               <td style="padding-bottom:24px;">
-                <span style="color:${AMBER}; font-size:13px; letter-spacing:2px;">Nexa AI //</span>
+                <span style="color:${ORANGE}; font-size:13px; letter-spacing:2px;">Nexa AI //</span>
               </td>
             </tr>
             <tr>
@@ -73,7 +73,7 @@ export function welcomeEmailHtml({ email }: { email: string }): string {
     ({ title, blurb }) => `
               <tr>
                 <td style="padding:6px 0; border-bottom:1px solid ${BORDER};">
-                  <span style="color:${AMBER}; font-size:13px;">${title}</span><br />
+                  <span style="color:${ORANGE}; font-size:13px;">${title}</span><br />
                   <span style="color:${MUTED}; font-size:12px;">${blurb}</span>
                 </td>
               </tr>`
@@ -91,7 +91,7 @@ export function welcomeEmailHtml({ email }: { email: string }): string {
       ${moduleRows}
     </table>
     <p style="color:${MUTED}; font-size:12px; line-height:1.6; margin:20px 0 0;">
-      Tip: on <span style="color:${AMBER};">/dashboard/create</span> you can just
+      Tip: on <span style="color:${ORANGE};">/dashboard/create</span> you can just
       describe what happened in plain English and it'll land in the right module
       automatically.
     </p>
@@ -117,7 +117,7 @@ export function weeklyDigestEmailHtml({
       (m) => `
               <tr>
                 <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${FOREGROUND}; font-size:13px;">${m.title}</td>
-                <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${AMBER}; font-size:13px; text-align:right;">${m.count}</td>
+                <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${ORANGE}; font-size:13px; text-align:right;">${m.count}</td>
               </tr>`
     )
     .join("");

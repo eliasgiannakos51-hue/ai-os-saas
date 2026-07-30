@@ -18,7 +18,7 @@ export default function OpengraphImage() {
           fontFamily: "monospace",
         }}
       >
-        <div style={{ fontSize: 28, letterSpacing: 6, color: "#f59e0b" }}>
+        <div style={{ fontSize: 28, letterSpacing: 6, color: "#f97316" }}>
           Nexa AI //
         </div>
         <div

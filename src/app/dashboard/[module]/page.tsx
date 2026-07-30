@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
 import { GenericAddForm } from "@/components/modules/generic-add-form";
 import { GenericList } from "@/components/modules/generic-list";
 import { getModule } from "@/lib/modules";
+import { MODULE_ICONS } from "@/lib/module-icons";
 import type { ModuleRecord } from "@/types/module-record";
 
 export function generateMetadata({
@@ -45,11 +45,9 @@ export default async function ModulePage({
     .order("created_at", { ascending: false });
 
   return (
-    <main className="min-h-screen bg-background font-mono">
-      <DashboardHeader email={user.email ?? ""} />
-
+    <main className="min-h-full bg-background">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader eyebrow="dashboard" title={moduleConfig.title} />
+        <PageHeader icon={MODULE_ICONS[moduleConfig.slug]} title={moduleConfig.title} />
 
         <div className="mb-6">
           <GenericAddForm module={moduleConfig} />

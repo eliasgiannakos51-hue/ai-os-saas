@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Check, Sparkles } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -23,11 +24,11 @@ const PLANS: Plan[] = [
     price: "$0",
     description: "Everything you need to try Nexa AI.",
     features: [
-      "all 13 modules",
+      "All 13 modules",
       "20 Create Anything requests / month",
       "CSV + JSON export",
     ],
-    cta: "sign_up()",
+    cta: "Sign Up",
     href: "/login?mode=signup",
   },
   {
@@ -36,41 +37,46 @@ const PLANS: Plan[] = [
     period: "/month",
     description: "For running your work through Nexa AI day to day.",
     features: [
-      "everything in Free",
-      "unlimited Create Anything",
-      "priority support",
+      "Everything in Free",
+      "Unlimited Create Anything",
+      "Priority support",
     ],
-    cta: "sign_up()",
+    cta: "Sign Up",
     href: "/login?mode=signup",
     highlighted: true,
   },
   {
     name: "Enterprise",
-    price: "contact us",
+    price: "Contact us",
     description: "Custom limits, SSO, and support for teams.",
     features: [
-      "everything in Pro",
-      "custom rate limits",
-      "dedicated support",
+      "Everything in Pro",
+      "Custom rate limits",
+      "Dedicated support",
     ],
-    cta: "contact_us()",
+    cta: "Contact Us",
     href: "/login?mode=signup",
   },
 ];
 
 export default function PricingPage() {
   return (
-    <main className="min-h-screen bg-background px-4 py-16 font-mono text-foreground sm:px-6">
+    <main className="min-h-screen bg-background px-4 py-16 text-foreground sm:px-6">
       <div className="mx-auto max-w-5xl">
         <div className="text-center">
           <Link
             href="/"
-            className="text-sm tracking-widest text-amber-500 transition-colors hover:text-amber-400"
+            className="inline-flex items-center gap-2 transition-colors duration-150 hover:text-orange-400"
           >
-            Nexa AI //
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500/15 text-orange-400">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            <span className="text-base font-bold tracking-tight text-foreground">
+              NEXA
+            </span>
           </Link>
-          <h1 className="mt-4 text-3xl font-bold text-foreground sm:text-4xl">
-            pricing
+          <h1 className="mt-6 text-3xl font-bold text-foreground sm:text-4xl">
+            Pricing
           </h1>
           <p className="mt-3 text-sm text-muted">
             Billing isn&apos;t live yet — sign up free while we finish it.
@@ -81,13 +87,13 @@ export default function PricingPage() {
           {PLANS.map((plan) => (
             <div
               key={plan.name}
-              className={`flex flex-col rounded-md border p-6 ${
+              className={`flex flex-col rounded-2xl border p-6 ${
                 plan.highlighted
-                  ? "border-amber-500 bg-amber-950/10 shadow-[0_0_0_1px_rgba(245,158,11,0.15)]"
+                  ? "border-orange-500/60 bg-orange-500/[0.04] shadow-[0_0_24px_rgba(249,115,22,0.12)]"
                   : "border-border bg-panel"
               }`}
             >
-              <h2 className="text-sm font-semibold text-amber-500">
+              <h2 className="text-sm font-semibold text-orange-400">
                 {plan.name}
               </h2>
               <p className="mt-3 text-2xl font-bold text-foreground">
@@ -103,9 +109,7 @@ export default function PricingPage() {
               <ul className="mt-6 flex-1 space-y-2 text-sm text-muted">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-2">
-                    <span className="text-amber-500" aria-hidden="true">
-                      ✓
-                    </span>
+                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-400" aria-hidden="true" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -113,10 +117,10 @@ export default function PricingPage() {
 
               <Link
                 href={plan.href}
-                className={`mt-6 inline-flex min-h-[44px] items-center justify-center rounded px-4 py-2 text-sm font-semibold transition-all duration-200 sm:min-h-0 ${
+                className={`mt-6 inline-flex min-h-[44px] items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 sm:min-h-0 ${
                   plan.highlighted
-                    ? "bg-amber-500 text-black hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)]"
-                    : "border border-border text-foreground hover:border-amber-500 hover:text-amber-400"
+                    ? "bg-orange-500 text-black hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
+                    : "border border-border text-foreground hover:border-orange-500 hover:text-orange-400"
                 }`}
               >
                 {plan.cta}
@@ -128,9 +132,9 @@ export default function PricingPage() {
         <div className="mt-12 text-center">
           <Link
             href="/"
-            className="text-xs text-amber-500 underline underline-offset-2"
+            className="text-xs text-orange-400 underline underline-offset-2"
           >
-            ← back to Nexa AI
+            ← Back to Nexa AI
           </Link>
         </div>
       </div>

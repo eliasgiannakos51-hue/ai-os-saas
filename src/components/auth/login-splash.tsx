@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Sparkles } from "lucide-react";
 
 const MESSAGES = ["Loading workspace...", "Syncing data...", "Ready."];
 const STEP_MS = 380;
@@ -22,10 +23,12 @@ export function LoginSplash({ onDone }: { onDone: () => void }) {
   }, [step, onDone]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 bg-background font-mono">
-      <p className="text-sm tracking-widest text-amber-500">Nexa AI //</p>
+    <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 bg-background">
+      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/15 text-orange-400">
+        <Sparkles className="h-5 w-5" />
+      </span>
       <div
-        className="h-8 w-8 animate-spin rounded-full border-2 border-amber-500/25 border-t-amber-500"
+        className="h-8 w-8 animate-spin rounded-full border-2 border-orange-500/25 border-t-orange-500"
         aria-hidden="true"
       />
       <p className="text-sm text-muted transition-opacity duration-200" aria-live="polite">

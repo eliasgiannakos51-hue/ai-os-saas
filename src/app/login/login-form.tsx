@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -75,23 +76,30 @@ export function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4 font-mono">
+    <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <p className="text-sm tracking-widest text-amber-500">Nexa AI //</p>
-          <h1 className="mt-1 text-2xl font-bold text-foreground">
-            {mode === "login" ? "authenticate" : "create_account"}
+          <div className="mb-4 flex items-center justify-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/15 text-orange-400">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            <span className="text-lg font-bold tracking-tight text-foreground">
+              NEXA
+            </span>
+          </div>
+          <h1 className="text-2xl font-bold text-foreground">
+            {mode === "login" ? "Welcome back" : "Create your account"}
           </h1>
         </div>
 
         {resetSuccess && (
-          <p className="mb-4 rounded border border-emerald-800 bg-emerald-950/30 px-3 py-2 text-center text-xs text-emerald-400">
-            password updated — sign in with your new password.
+          <p className="mb-4 rounded-xl border border-emerald-800 bg-emerald-950/30 px-3 py-2 text-center text-xs text-emerald-400">
+            Password updated — sign in with your new password.
           </p>
         )}
 
-        <div className="rounded-md border border-border bg-panel shadow-[0_0_0_1px_rgba(245,158,11,0.05)]">
-          <div className="flex border-b border-border text-sm">
+        <div className="rounded-2xl border border-border bg-panel shadow-[0_0_0_1px_rgba(249,115,22,0.05)]">
+          <div className="flex border-b border-border p-1.5 text-sm">
             <button
               type="button"
               onClick={() => {
@@ -99,13 +107,13 @@ export function LoginForm() {
                 setError(null);
               }}
               aria-pressed={mode === "login"}
-              className={`flex-1 px-4 py-3 transition-colors ${
+              className={`flex-1 rounded-lg px-4 py-2.5 font-medium transition-colors duration-150 ${
                 mode === "login"
-                  ? "bg-black/30 text-amber-400"
+                  ? "bg-orange-500/10 text-orange-400"
                   : "text-muted hover:text-foreground"
               }`}
             >
-              login
+              Log In
             </button>
             <button
               type="button"
@@ -114,20 +122,20 @@ export function LoginForm() {
                 setError(null);
               }}
               aria-pressed={mode === "signup"}
-              className={`flex-1 px-4 py-3 transition-colors ${
+              className={`flex-1 rounded-lg px-4 py-2.5 font-medium transition-colors duration-150 ${
                 mode === "signup"
-                  ? "bg-black/30 text-amber-400"
+                  ? "bg-orange-500/10 text-orange-400"
                   : "text-muted hover:text-foreground"
               }`}
             >
-              sign_up
+              Sign Up
             </button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4 p-6">
             <div>
               <label htmlFor="email" className="mb-1 block text-xs text-muted">
-                email
+                Email
               </label>
               <input
                 id="email"
@@ -136,14 +144,14 @@ export function LoginForm() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded border border-border bg-black/40 px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-amber-500"
+                className="w-full rounded-xl border border-border bg-black/40 px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500"
                 placeholder="you@domain.com"
               />
             </div>
 
             <div>
               <label htmlFor="password" className="mb-1 block text-xs text-muted">
-                password
+                Password
               </label>
               <PasswordInput
                 id="password"
@@ -152,39 +160,39 @@ export function LoginForm() {
                 autoComplete={mode === "login" ? "current-password" : "new-password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded border border-border bg-black/40 px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-amber-500"
+                className="w-full rounded-xl border border-border bg-black/40 px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500"
                 placeholder="••••••••"
               />
             </div>
 
             {error && (
-              <p className="rounded border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
-                error: {error}
+              <p className="rounded-xl border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+                {error}
               </p>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] disabled:opacity-50"
+              className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50"
             >
               {loading
-                ? "working..."
+                ? "Working..."
                 : mode === "login"
-                  ? "run login()"
-                  : "run signup()"}
+                  ? "Log In"
+                  : "Sign Up"}
             </button>
           </form>
         </div>
 
         <p className="mt-4 text-center text-xs text-muted">
-          {mode === "login" ? "no account yet? " : "already have one? "}
+          {mode === "login" ? "No account yet? " : "Already have one? "}
           <button
             type="button"
             onClick={() => setMode(mode === "login" ? "signup" : "login")}
-            className="text-amber-500 underline underline-offset-2"
+            className="text-orange-400 underline underline-offset-2"
           >
-            {mode === "login" ? "sign_up" : "login"}
+            {mode === "login" ? "Sign up" : "Log in"}
           </button>
         </p>
 
@@ -192,9 +200,9 @@ export function LoginForm() {
           <p className="mt-2 text-center text-xs text-muted">
             <Link
               href="/forgot-password"
-              className="text-amber-500 underline underline-offset-2"
+              className="text-orange-400 underline underline-offset-2"
             >
-              forgot_password()
+              Forgot password?
             </Link>
           </p>
         )}

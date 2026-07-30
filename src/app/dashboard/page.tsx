@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
 import { AddIdeaForm } from "@/components/ideas/add-idea-form";
 import { IdeasList } from "@/components/ideas/ideas-list";
+import { MODULE_ICONS } from "@/lib/module-icons";
 import type { Idea } from "@/types/ideas";
 
 export const metadata: Metadata = {
@@ -29,11 +29,9 @@ export default async function DashboardPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <main className="min-h-screen bg-background font-mono">
-      <DashboardHeader email={user.email ?? ""} />
-
+    <main className="min-h-full bg-background">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader eyebrow="dashboard" title="Ideas" />
+        <PageHeader icon={MODULE_ICONS.ideas} title="Ideas" />
 
         <div className="mb-6">
           <AddIdeaForm />

@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { Pencil, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Idea } from "@/types/ideas";
 import { DeleteButton } from "@/components/delete-button";
@@ -16,7 +17,7 @@ function verdictClasses(verdict: string | null) {
   if (v.includes("kill") || v.includes("no")) {
     return "border-red-900 bg-red-950/30 text-red-400";
   }
-  if (v) return "border-amber-800 bg-amber-950/30 text-amber-400";
+  if (v) return "border-orange-800 bg-orange-950/30 text-orange-400";
   return "border-border bg-black/30 text-muted";
 }
 
@@ -106,16 +107,17 @@ export function IdeaRow({ idea }: { idea: Idea }) {
     return (
       <form
         onSubmit={handleSave}
-        className="space-y-4 rounded-md border border-border bg-panel p-4"
+        className="space-y-4 rounded-2xl border border-border bg-panel p-4"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-sm text-amber-500">ideas.update()</h2>
+          <h2 className="text-sm font-semibold text-foreground">Edit Idea</h2>
           <button
             type="button"
             onClick={cancelEditing}
-            className="inline-flex min-h-[44px] items-center px-2 text-xs text-muted hover:text-foreground sm:min-h-0 sm:px-0"
+            aria-label="Cancel"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
-            cancel()
+            <X className="h-4 w-4" />
           </button>
         </div>
 
@@ -198,7 +200,7 @@ export function IdeaRow({ idea }: { idea: Idea }) {
         </div>
 
         {error && (
-          <p className="rounded border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+          <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
             error: {error}
           </p>
         )}
@@ -206,16 +208,16 @@ export function IdeaRow({ idea }: { idea: Idea }) {
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex min-h-[44px] w-full items-center justify-center rounded bg-amber-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(245,158,11,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
+          className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
         >
-          {loading ? "saving..." : "save()"}
+          {loading ? "Saving..." : "Save"}
         </button>
       </form>
     );
   }
 
   return (
-    <div className="rounded-md border border-border bg-panel p-4 transition-colors hover:border-amber-900/50">
+    <div className="rounded-2xl border border-border bg-panel p-4 transition-colors duration-150 hover:border-orange-500/30">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="text-base font-semibold text-foreground">
@@ -227,13 +229,13 @@ export function IdeaRow({ idea }: { idea: Idea }) {
         </div>
         <div className="flex items-center gap-2">
           {idea.score !== null && (
-            <span className="rounded border border-border bg-black/30 px-2 py-0.5 text-xs text-foreground">
+            <span className="rounded-md border border-border bg-black/30 px-2 py-0.5 text-xs text-foreground">
               score: {idea.score}
             </span>
           )}
           {idea.verdict && (
             <span
-              className={`rounded border px-2 py-0.5 text-xs ${verdictClasses(
+              className={`rounded-md border px-2 py-0.5 text-xs ${verdictClasses(
                 idea.verdict
               )}`}
             >
@@ -245,24 +247,24 @@ export function IdeaRow({ idea }: { idea: Idea }) {
 
       {idea.problem && (
         <p className="mt-3 text-sm text-foreground/90">
-          <span className="text-amber-500">problem:</span> {idea.problem}
+          <span className="text-orange-500">problem:</span> {idea.problem}
         </p>
       )}
       {idea.competitors && (
         <p className="mt-1 text-sm text-foreground/90">
-          <span className="text-amber-500">competitors:</span>{" "}
+          <span className="text-orange-500">competitors:</span>{" "}
           {idea.competitors}
         </p>
       )}
       {idea.market_size && (
         <p className="mt-1 text-sm text-foreground/90">
-          <span className="text-amber-500">market_size:</span>{" "}
+          <span className="text-orange-500">market_size:</span>{" "}
           {idea.market_size}
         </p>
       )}
       {idea.mvp && (
         <p className="mt-1 text-sm text-foreground/90">
-          <span className="text-amber-500">mvp:</span> {idea.mvp}
+          <span className="text-orange-500">mvp:</span> {idea.mvp}
         </p>
       )}
 
@@ -272,16 +274,17 @@ export function IdeaRow({ idea }: { idea: Idea }) {
           title={new Date(idea.created_at).toLocaleString()}
           suppressHydrationWarning
         >
-          logged {formatRelativeTime(idea.created_at)}
+          Logged {formatRelativeTime(idea.created_at)}
         </p>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={startEditing}
             aria-label={`Edit idea: ${idea.name}`}
-            className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded border border-border px-3 py-0.5 text-[11px] text-muted transition-colors hover:border-amber-500 hover:text-amber-400 sm:min-h-0 sm:px-2"
+            title="Edit"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-orange-500/10 hover:text-orange-400"
           >
-            edit()
+            <Pencil className="h-4 w-4" />
           </button>
           <DeleteButton table="ideas" id={idea.id} label="idea" itemName={idea.name} />
         </div>

@@ -13,12 +13,19 @@ const RATE_LIMIT = 20;
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 const SYSTEM_PROMPT =
-  "Είσαι ο Veron, ένας γενικού σκοπού AI βοηθός με ευρεία γνώση, παρόμοιος με το Claude ή το ChatGPT. Απάντησε φυσικά, εξυπηρετικά, σε οποιοδήποτε θέμα ρωτηθείς — όχι μόνο για τα modules του Veron AI. Χρησιμοποίησε το ιστορικό της συνομιλίας για context.";
+  "Είσαι ο Veron, ένας εξελιγμένος AI βοηθός γενικής χρήσης. Έχεις ευρεία γνώση σε όλα τα θέματα (επιστήμη, ιστορία, προγραμματισμός, μαθηματικά, δημιουργική γραφή, επιχειρήσεις, καθημερινές ερωτήσεις, κ.λπ.) και μπορείς να βοηθήσεις με οτιδήποτε χρειαστεί ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος — ελληνικά, αγγλικά, ή οποιαδήποτε άλλη γλώσσα). Δώσε λεπτομερείς, χρήσιμες, ακριβείς απαντήσεις. Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.";
 
 function truncateTitle(message: string, maxLen = 40): string {
   const trimmed = message.trim().replace(/\s+/g, " ");
   if (trimmed.length <= maxLen) return trimmed;
   return `${trimmed.slice(0, maxLen).trimEnd()}…`;
+}
+
+// Newline-delimited JSON: each line is one event. Chosen over SSE's
+// "data: " framing since it needs no extra parsing on the client beyond
+// splitting on "\n" — a plain fetch() + ReadableStream reader is enough.
+function ndjsonLine(event: Record<string, unknown>): Uint8Array {
+  return new TextEncoder().encode(`${JSON.stringify(event)}\n`);
 }
 
 export async function POST(request: Request) {
@@ -102,6 +109,7 @@ export async function POST(request: Request) {
     // via RLS — a stranger's id simply won't be found) or start a new one,
     // titled from this first message so it doesn't need a second write.
     let isNewConversation = false;
+    let newConversationTitle: string | undefined;
     if (conversationId) {
       const { data: existing, error: convError } = await supabase
         .from("chat_conversations")
@@ -123,9 +131,10 @@ export async function POST(request: Request) {
         );
       }
     } else {
+      newConversationTitle = truncateTitle(message);
       const { data: newConversation, error: createConvError } = await supabase
         .from("chat_conversations")
-        .insert({ user_id: user.id, title: truncateTitle(message) })
+        .insert({ user_id: user.id, title: newConversationTitle })
         .select("id")
         .single();
 
@@ -180,71 +189,84 @@ export async function POST(request: Request) {
     }
 
     const anthropic = new Anthropic({ apiKey });
+    const finalConversationId = conversationId;
 
-    let assistantText: string;
-    try {
-      const response = await anthropic.messages.create({
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        system: SYSTEM_PROMPT,
-        messages: [
-          ...history.map((m) => ({ role: m.role, content: m.content })),
-          { role: "user" as const, content: message },
-        ],
-      });
-
-      assistantText = response.content
-        .filter((block): block is Anthropic.TextBlock => block.type === "text")
-        .map((block) => block.text)
-        .join("\n\n")
-        .trim();
-
-      if (!assistantText) {
-        return NextResponse.json(
-          { ok: false, error: "The model did not return a response.", conversationId },
-          { status: 502 }
+    const stream = new ReadableStream({
+      async start(controller) {
+        controller.enqueue(
+          ndjsonLine({
+            type: "meta",
+            conversationId: finalConversationId,
+            isNewConversation,
+            title: newConversationTitle,
+          })
         );
-      }
-    } catch (err) {
-      logApiError("/api/chat", err, { stage: "anthropic_call" });
-      const errMessage = err instanceof Error ? err.message : "Chat request failed.";
-      return NextResponse.json(
-        { ok: false, error: errMessage, conversationId },
-        { status: 502 }
-      );
-    }
 
-    const { error: assistantMessageError } = await supabase.from("chat_messages").insert({
-      conversation_id: conversationId,
-      user_id: user.id,
-      role: "assistant",
-      content: assistantText,
+        let assistantText = "";
+        try {
+          const claudeStream = anthropic.messages.stream({
+            model: MODEL,
+            max_tokens: MAX_TOKENS,
+            system: SYSTEM_PROMPT,
+            messages: [
+              ...history.map((m) => ({ role: m.role, content: m.content })),
+              { role: "user" as const, content: message },
+            ],
+          });
+
+          claudeStream.on("text", (delta) => {
+            assistantText += delta;
+            controller.enqueue(ndjsonLine({ type: "delta", text: delta }));
+          });
+
+          await claudeStream.finalMessage();
+        } catch (err) {
+          logApiError("/api/chat", err, { stage: "anthropic_stream" });
+          const errMessage = err instanceof Error ? err.message : "Chat request failed.";
+          controller.enqueue(ndjsonLine({ type: "error", error: errMessage }));
+          controller.close();
+          return;
+        }
+
+        if (!assistantText.trim()) {
+          controller.enqueue(
+            ndjsonLine({ type: "error", error: "The model did not return a response." })
+          );
+          controller.close();
+          return;
+        }
+
+        const { error: assistantMessageError } = await supabase.from("chat_messages").insert({
+          conversation_id: finalConversationId,
+          user_id: user.id,
+          role: "assistant",
+          content: assistantText,
+        });
+        if (assistantMessageError) {
+          logApiError("/api/chat", assistantMessageError, { stage: "save_assistant_message" });
+        }
+
+        // Touches updated_at via the set_updated_at trigger so the
+        // conversation resorts to the top of the list; harmless no-op on a
+        // brand-new conversation, whose updated_at is already "now".
+        const { error: touchError } = await supabase
+          .from("chat_conversations")
+          .update({ updated_at: new Date().toISOString() })
+          .eq("id", finalConversationId);
+        if (touchError) {
+          logApiError("/api/chat", touchError, { stage: "touch_conversation" });
+        }
+
+        controller.enqueue(ndjsonLine({ type: "done" }));
+        controller.close();
+      },
     });
 
-    if (assistantMessageError) {
-      logApiError("/api/chat", assistantMessageError, { stage: "save_assistant_message" });
-    }
-
-    // Touches updated_at via the set_updated_at trigger so the conversation
-    // resorts to the top of the list; harmless no-op on a brand-new
-    // conversation, whose updated_at is already "now" from its insert.
-    const { data: conversationRow, error: touchError } = await supabase
-      .from("chat_conversations")
-      .update({ updated_at: new Date().toISOString() })
-      .eq("id", conversationId)
-      .select("title")
-      .single();
-
-    if (touchError) {
-      logApiError("/api/chat", touchError, { stage: "touch_conversation" });
-    }
-
-    return NextResponse.json({
-      ok: true,
-      conversationId,
-      isNewConversation,
-      title: conversationRow?.title ?? undefined,
-      message: assistantText,
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "application/x-ndjson; charset=utf-8",
+        "Cache-Control": "no-cache",
+      },
     });
   } catch (err) {
     logApiError("/api/chat", err);

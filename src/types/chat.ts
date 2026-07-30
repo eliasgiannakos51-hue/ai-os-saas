@@ -3,6 +3,7 @@ export type ChatRole = "user" | "assistant";
 export type ChatConversation = {
   id: string;
   title: string;
+  is_pinned: boolean;
   created_at: string;
   updated_at: string;
 };

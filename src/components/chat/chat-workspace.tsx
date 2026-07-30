@@ -1,16 +1,45 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 import { ArrowUp, MessageCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
+import { MessageContent } from "@/components/chat/message-content";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
 
 let localIdCounter = 0;
 function nextLocalId(prefix: string) {
   localIdCounter += 1;
   return `${prefix}-${localIdCounter}`;
+}
+
+function TypingDots() {
+  return (
+    <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-3.5">
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted [animation-delay:-0.3s]" />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted [animation-delay:-0.15s]" />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted" />
+    </div>
+  );
+}
+
+function AssistantAvatar() {
+  return (
+    <span
+      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-500/10 text-orange-400"
+      aria-hidden="true"
+    >
+      <MessageCircle className="h-4 w-4" />
+    </span>
+  );
 }
 
 export function ChatWorkspace({
@@ -25,6 +54,7 @@ export function ChatWorkspace({
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [streamingText, setStreamingText] = useState<string | null>(null);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRateLimitNotice, setIsRateLimitNotice] = useState(false);
@@ -37,7 +67,7 @@ export function ChatWorkspace({
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, streamingText]);
 
   async function loadMessages(conversationId: string) {
     const token = ++requestTokenRef.current;
@@ -83,6 +113,69 @@ export function ChatWorkspace({
     textareaRef.current?.focus();
   }
 
+  async function togglePin(id: string) {
+    const target = conversations.find((c) => c.id === id);
+    if (!target) return;
+    const nextPinned = !target.is_pinned;
+    setConversations((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, is_pinned: nextPinned } : c))
+    );
+    const supabase = createClient();
+    const { error: pinError } = await supabase
+      .from("chat_conversations")
+      .update({ is_pinned: nextPinned })
+      .eq("id", id);
+    if (pinError) {
+      setConversations((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, is_pinned: !nextPinned } : c))
+      );
+      setError(getErrorMessage(pinError, "Could not update pin."));
+    }
+  }
+
+  async function renameConversation(id: string, title: string) {
+    const previousTitle = conversations.find((c) => c.id === id)?.title;
+    setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)));
+    const supabase = createClient();
+    const { error: renameError } = await supabase
+      .from("chat_conversations")
+      .update({ title })
+      .eq("id", id);
+    if (renameError && previousTitle !== undefined) {
+      setConversations((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, title: previousTitle } : c))
+      );
+      setError(getErrorMessage(renameError, "Could not rename conversation."));
+    }
+  }
+
+  async function deleteConversation(id: string) {
+    const previous = conversations;
+    setConversations((prev) => prev.filter((c) => c.id !== id));
+    if (activeId === id) {
+      requestTokenRef.current += 1;
+      setActiveId(null);
+      setMessages([]);
+      setLoadingMessages(false);
+    }
+    const supabase = createClient();
+    const { error: deleteError } = await supabase
+      .from("chat_conversations")
+      .delete()
+      .eq("id", id);
+    if (deleteError) {
+      setConversations(previous);
+      setError(getErrorMessage(deleteError, "Could not delete conversation."));
+    }
+  }
+
+  function handleTextareaInput(e: ChangeEvent<HTMLTextAreaElement>) {
+    setInput(e.target.value);
+    const el = e.target;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }
+
   async function handleSend(e: FormEvent) {
     e.preventDefault();
     const text = input.trim();
@@ -91,78 +184,119 @@ export function ChatWorkspace({
     setError(null);
     setIsRateLimitNotice(false);
     setInput("");
+    if (textareaRef.current) textareaRef.current.style.height = "auto";
+
+    const sentFromId = activeId;
     setMessages((m) => [
       ...m,
       {
         id: nextLocalId("optimistic-user"),
-        conversation_id: activeId ?? "",
+        conversation_id: sentFromId ?? "",
         role: "user",
         content: text,
         created_at: new Date().toISOString(),
       },
     ]);
     setSending(true);
+    setStreamingText(null);
 
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId: activeId, message: text }),
+        body: JSON.stringify({ conversationId: sentFromId, message: text }),
       });
-      const data = await res.json();
 
-      if (!res.ok || !data.ok) {
-        setError(getErrorMessage(data.error, "Something went wrong."));
-        return;
-      }
-
-      if (data.rateLimited) {
-        setIsRateLimitNotice(true);
-        setError(data.message);
-        return;
-      }
-
-      const conversationId: string = data.conversationId;
-      const nowIso = new Date().toISOString();
-
-      setMessages((m) => [
-        ...m,
-        {
-          id: nextLocalId("assistant"),
-          conversation_id: conversationId,
-          role: "assistant",
-          content: data.message,
-          created_at: nowIso,
-        },
-      ]);
-
-      setConversations((prev) => {
-        const existingIndex = prev.findIndex((c) => c.id === conversationId);
-        if (existingIndex === -1) {
-          const newConversation: ChatConversation = {
-            id: conversationId,
-            title: data.title ?? text.slice(0, 40),
-            created_at: nowIso,
-            updated_at: nowIso,
-          };
-          return [newConversation, ...prev];
+      const contentType = res.headers.get("content-type") ?? "";
+      if (!contentType.includes("application/x-ndjson") || !res.body) {
+        const data = await res.json().catch(() => null);
+        if (data?.rateLimited) {
+          setIsRateLimitNotice(true);
+          setError(data.message);
+        } else {
+          setError(getErrorMessage(data?.error, "Something went wrong."));
         }
-        const updated = [...prev];
-        const [conversation] = updated.splice(existingIndex, 1);
-        updated.unshift({
-          ...conversation,
-          updated_at: nowIso,
-          title: data.title ?? conversation.title,
-        });
-        return updated;
-      });
+        return;
+      }
 
-      if (activeId !== conversationId) {
-        setActiveId(conversationId);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let resolvedConversationId: string | null = sentFromId;
+      let accumulatedText = "";
+      let streamError: string | null = null;
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex = buffer.indexOf("\n");
+        while (newlineIndex !== -1) {
+          const line = buffer.slice(0, newlineIndex);
+          buffer = buffer.slice(newlineIndex + 1);
+          newlineIndex = buffer.indexOf("\n");
+          if (!line.trim()) continue;
+
+          const event = JSON.parse(line);
+          if (event.type === "meta") {
+            resolvedConversationId = event.conversationId;
+            if (event.conversationId && event.conversationId !== sentFromId) {
+              setActiveId(event.conversationId);
+            }
+            if (event.isNewConversation) {
+              const nowIso = new Date().toISOString();
+              setConversations((prev) => [
+                {
+                  id: event.conversationId,
+                  title: event.title ?? text.slice(0, 40),
+                  is_pinned: false,
+                  created_at: nowIso,
+                  updated_at: nowIso,
+                },
+                ...prev,
+              ]);
+            }
+          } else if (event.type === "delta") {
+            accumulatedText += event.text;
+            setStreamingText(accumulatedText);
+          } else if (event.type === "error") {
+            streamError = event.error;
+          }
+        }
+      }
+
+      if (accumulatedText) {
+        setMessages((m) => [
+          ...m,
+          {
+            id: nextLocalId("assistant"),
+            conversation_id: resolvedConversationId ?? "",
+            role: "assistant",
+            content: accumulatedText,
+            created_at: new Date().toISOString(),
+          },
+        ]);
+        if (resolvedConversationId) {
+          const nowIso = new Date().toISOString();
+          setConversations((prev) => {
+            const idx = prev.findIndex((c) => c.id === resolvedConversationId);
+            if (idx === -1) return prev;
+            const updated = [...prev];
+            const [conversation] = updated.splice(idx, 1);
+            updated.unshift({ ...conversation, updated_at: nowIso });
+            return updated;
+          });
+        }
+      }
+
+      if (streamError) {
+        setError(streamError);
       }
     } catch {
       setError("Network error — please try again.");
     } finally {
+      setStreamingText(null);
       setSending(false);
     }
   }
@@ -181,6 +315,9 @@ export function ChatWorkspace({
         activeId={activeId}
         onSelect={selectConversation}
         onNewChat={startNewChat}
+        onTogglePin={togglePin}
+        onRename={renameConversation}
+        onDelete={deleteConversation}
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -189,7 +326,7 @@ export function ChatWorkspace({
             <div className="flex h-full items-center justify-center text-sm text-muted">
               Loading...
             </div>
-          ) : messages.length === 0 ? (
+          ) : messages.length === 0 && !sending ? (
             <div className="mx-auto flex h-full max-w-md flex-col items-center justify-center text-center">
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-400">
                 <MessageCircle className="h-6 w-6" aria-hidden="true" />
@@ -217,18 +354,27 @@ export function ChatWorkspace({
                   </div>
                 ) : (
                   <div key={msg.id} className="flex items-start gap-2">
-                    <span
-                      className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-500/10 text-orange-400"
-                      aria-hidden="true"
-                    >
-                      <MessageCircle className="h-4 w-4" />
-                    </span>
-                    <div className="max-w-[80%] whitespace-pre-wrap rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-2.5 text-sm text-foreground/90">
-                      {msg.content}
+                    <AssistantAvatar />
+                    <div className="max-w-[80%] rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-2.5 text-foreground/90">
+                      <MessageContent content={msg.content} />
                     </div>
                   </div>
                 )
               )}
+
+              {sending && (
+                <div className="flex items-start gap-2">
+                  <AssistantAvatar />
+                  {streamingText !== null ? (
+                    <div className="max-w-[80%] rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-2.5 text-foreground/90">
+                      <MessageContent content={streamingText} />
+                    </div>
+                  ) : (
+                    <TypingDots />
+                  )}
+                </div>
+              )}
+
               <div ref={bottomRef} />
             </div>
           )}
@@ -252,11 +398,11 @@ export function ChatWorkspace({
                 <textarea
                   ref={textareaRef}
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={handleTextareaInput}
                   onKeyDown={handleTextareaKeyDown}
                   placeholder="Message Veron..."
                   rows={1}
-                  className="max-h-40 min-h-[52px] w-full resize-none rounded-2xl border border-border bg-panel px-4 py-3.5 pr-14 text-sm text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-orange-500/60"
+                  className="max-h-40 min-h-[52px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-panel px-4 py-3.5 pr-14 text-sm text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-orange-500/60"
                   autoFocus
                 />
                 <button

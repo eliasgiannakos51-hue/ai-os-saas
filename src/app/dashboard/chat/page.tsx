@@ -21,7 +21,7 @@ export default async function ChatPage() {
 
   const { data: conversations } = await supabase
     .from("chat_conversations")
-    .select("id, title, created_at, updated_at")
+    .select("id, title, is_pinned, created_at, updated_at")
     .order("updated_at", { ascending: false });
 
   const userInitial = (user.email?.[0] ?? "?").toUpperCase();

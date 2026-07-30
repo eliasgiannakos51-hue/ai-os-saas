@@ -8,10 +8,10 @@ export function GreetingHeader({ email }: { email: string }) {
 
   return (
     <div className="mb-6">
-      <p className="text-sm text-muted" suppressHydrationWarning>
+      <p className="text-base text-muted sm:text-lg" suppressHydrationWarning>
         {text}, {name} {emoji}
       </p>
-      <h1 className="mt-1 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+      <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
         What do you want to build today?
       </h1>
     </div>

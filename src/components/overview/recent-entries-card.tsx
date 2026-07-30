@@ -13,11 +13,11 @@ export type RecentEntry = {
 export function RecentEntriesCard({ entries }: { entries: RecentEntry[] }) {
   return (
     <div className="rounded-2xl border border-border bg-panel p-5 sm:col-span-2 lg:col-span-1">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted">
-          <Clock className="h-4 w-4" aria-hidden="true" />
-          Recent Entries
-        </div>
+      <div className="flex items-center gap-3">
+        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
+          <Clock className="h-5 w-5" aria-hidden="true" />
+        </span>
+        <p className="text-[15px] font-semibold text-foreground">Recent Entries</p>
       </div>
 
       {entries.length === 0 ? (
@@ -26,7 +26,7 @@ export function RecentEntriesCard({ entries }: { entries: RecentEntry[] }) {
           No entries yet.
         </div>
       ) : (
-        <ul className="mt-3 space-y-3">
+        <ul className="mt-4 space-y-3">
           {entries.map((entry) => (
             <li key={entry.id}>
               <Link

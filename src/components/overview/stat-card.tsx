@@ -13,12 +13,12 @@ export function StatCard({
 }) {
   return (
     <div className="rounded-2xl border border-border bg-panel p-5">
-      <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted">
-        <Icon className="h-4 w-4" aria-hidden="true" />
-        {label}
-      </div>
+      <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
+        <Icon className="h-5 w-5" aria-hidden="true" />
+      </span>
       <p className="mt-3 truncate text-2xl font-bold text-foreground">{value}</p>
-      {sublabel && <p className="mt-1 text-xs text-muted">{sublabel}</p>}
+      <p className="mt-1 text-xs uppercase tracking-wide text-muted">{label}</p>
+      {sublabel && <p className="mt-0.5 text-[13px] text-muted/80">{sublabel}</p>}
     </div>
   );
 }

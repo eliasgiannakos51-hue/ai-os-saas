@@ -57,7 +57,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Describe your idea in detail..."
             rows={4}
-            className="min-h-32 w-full resize-none rounded-2xl border border-border bg-panel px-4 py-4 pr-16 text-base text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-orange-500/60"
+            className="min-h-32 w-full resize-none rounded-2xl border border-border bg-panel px-4 py-4 pr-16 text-base text-foreground outline-none transition-all duration-200 placeholder:text-muted focus:border-orange-500/60 focus:shadow-[0_0_0_4px_rgba(249,115,22,0.08)]"
             autoFocus
           />
           <button

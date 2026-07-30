@@ -23,6 +23,12 @@ import {
   Image as ImageIcon,
   Video,
   Store,
+  Code2,
+  Database,
+  FileText,
+  Presentation,
+  Megaphone,
+  Brain,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -48,6 +54,11 @@ export const MODULE_ICONS: Record<string, LucideIcon> = {
   apps: Smartphone,
   images: ImageIcon,
   videos: Video,
+  coding: Code2,
+  "data-analysis": Database,
+  documents: FileText,
+  presentations: Presentation,
+  campaigns: Megaphone,
 };
 
 export const OVERVIEW_ICON: LucideIcon = Home;
@@ -56,3 +67,4 @@ export const CHAT_ICON: LucideIcon = MessageCircle;
 export const SETTINGS_ICON: LucideIcon = Settings;
 export const MARKETPLACE_ICON: LucideIcon = Store;
 export const TEAM_ICON: LucideIcon = Users;
+export const MEMORY_ICON: LucideIcon = Brain;

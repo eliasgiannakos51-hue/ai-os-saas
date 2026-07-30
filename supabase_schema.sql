@@ -553,3 +553,121 @@ begin
     );
   end loop;
 end $$;
+
+-- ============================================================================
+-- More "Build" modules — AI Coding, Data Analysis, Documents, Presentations,
+-- Marketing Campaigns. Same owner-only RLS pattern and tracking-only intent
+-- as the ai_agents/ai_websites/ai_apps/ai_images/ai_videos tables above.
+-- AI Memory (/dashboard/memory) needs no table of its own — it reads across
+-- every table listed here plus every table earlier in this file.
+-- ============================================================================
+
+drop table if exists public.ai_coding_requests cascade;
+drop table if exists public.ai_data_analysis_requests cascade;
+drop table if exists public.ai_documents cascade;
+drop table if exists public.ai_presentations cascade;
+drop table if exists public.ai_campaigns cascade;
+
+create table public.ai_coding_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null,
+  description text,
+  language text,
+  status text check (status in ('requested', 'in progress', 'done', 'archived')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.ai_data_analysis_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null,
+  description text,
+  data_source text,
+  findings text,
+  status text check (status in ('requested', 'in progress', 'done', 'archived')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.ai_documents (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null,
+  description text,
+  doc_type text check (doc_type in ('memo', 'report', 'proposal', 'spec', 'other')),
+  status text check (status in ('draft', 'in review', 'final', 'archived')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.ai_presentations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null,
+  description text,
+  slide_count integer,
+  status text check (status in ('draft', 'in review', 'final', 'archived')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table public.ai_campaigns (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  description text,
+  channel text check (channel in ('email', 'social', 'paid ads', 'content', 'seo', 'event', 'other')),
+  budget numeric(14, 2),
+  status text check (status in ('planned', 'active', 'paused', 'completed')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+do $$
+declare
+  t text;
+begin
+  for t in
+    select unnest(array[
+      'ai_coding_requests', 'ai_data_analysis_requests', 'ai_documents',
+      'ai_presentations', 'ai_campaigns'
+    ])
+  loop
+    execute format('alter table public.%I enable row level security;', t);
+
+    execute format(
+      'drop policy if exists "select_own_%1$s" on public.%1$s;', t
+    );
+    execute format(
+      'create policy "select_own_%1$s" on public.%1$s for select using (auth.uid() = user_id);', t
+    );
+
+    execute format(
+      'drop policy if exists "insert_own_%1$s" on public.%1$s;', t
+    );
+    execute format(
+      'create policy "insert_own_%1$s" on public.%1$s for insert with check (auth.uid() = user_id);', t
+    );
+
+    execute format(
+      'drop policy if exists "update_own_%1$s" on public.%1$s;', t
+    );
+    execute format(
+      'create policy "update_own_%1$s" on public.%1$s for update using (auth.uid() = user_id) with check (auth.uid() = user_id);', t
+    );
+
+    execute format(
+      'drop policy if exists "delete_own_%1$s" on public.%1$s;', t
+    );
+    execute format(
+      'create policy "delete_own_%1$s" on public.%1$s for delete using (auth.uid() = user_id);', t
+    );
+
+    execute format('drop trigger if exists set_updated_at on public.%I;', t);
+    execute format(
+      'create trigger set_updated_at before update on public.%I for each row execute function public.set_updated_at();', t
+    );
+  end loop;
+end $$;

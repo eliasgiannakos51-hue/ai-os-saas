@@ -11,6 +11,7 @@ import {
   SETTINGS_ICON,
   MARKETPLACE_ICON,
   TEAM_ICON,
+  MEMORY_ICON,
 } from "@/lib/module-icons";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
 import { Logo } from "@/components/logo";
@@ -29,6 +30,7 @@ const SIDEBAR_GROUPS: { heading: string; items: SidebarItem[] }[] = [
     items: [
       { href: OVERVIEW_NAV_ITEM.href, label: "Home", icon: OVERVIEW_ICON },
       { href: CHAT_NAV_ITEM.href, label: "Veron Chat", icon: CHAT_ICON },
+      { href: "/dashboard/memory", label: "AI Memory", icon: MEMORY_ICON },
     ],
   },
   {
@@ -39,6 +41,19 @@ const SIDEBAR_GROUPS: { heading: string; items: SidebarItem[] }[] = [
       { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps },
       { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images },
       { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos },
+      { href: "/dashboard/coding", label: "AI Coding", icon: MODULE_ICONS.coding },
+      {
+        href: "/dashboard/data-analysis",
+        label: "Data Analysis",
+        icon: MODULE_ICONS["data-analysis"],
+      },
+      { href: "/dashboard/documents", label: "Documents", icon: MODULE_ICONS.documents },
+      {
+        href: "/dashboard/presentations",
+        label: "Presentations",
+        icon: MODULE_ICONS.presentations,
+      },
+      { href: "/dashboard/campaigns", label: "Campaigns", icon: MODULE_ICONS.campaigns },
     ],
   },
   {

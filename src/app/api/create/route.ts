@@ -192,7 +192,7 @@ export async function POST(request: Request) {
       toolInput = toolUse.input as RouteEntryInput;
     } catch (err) {
       logApiError("/api/create", err, { stage: "anthropic_call" });
-      const errMessage = err instanceof Error ? err.message : "Claude API request failed.";
+      const errMessage = err instanceof Error ? err.message : "AI classification request failed.";
       return NextResponse.json({ ok: false, error: errMessage }, { status: 502 });
     }
 

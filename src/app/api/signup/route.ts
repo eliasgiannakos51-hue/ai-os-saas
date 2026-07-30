@@ -10,10 +10,12 @@ export async function POST(request: Request) {
   try {
     let email: string;
     let password: string;
+    let termsAccepted: boolean;
     try {
       const body = await request.json();
       email = typeof body?.email === "string" ? body.email.trim() : "";
       password = typeof body?.password === "string" ? body.password : "";
+      termsAccepted = body?.termsAccepted === true;
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -28,11 +30,21 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!termsAccepted) {
+      return NextResponse.json(
+        { ok: false, error: "You must agree to the Terms of Service and Privacy Policy." },
+        { status: 400 }
+      );
+    }
+
     const supabase = createClient();
 
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: { terms_accepted_at: new Date().toISOString() },
+      },
     });
 
     if (signUpError) {

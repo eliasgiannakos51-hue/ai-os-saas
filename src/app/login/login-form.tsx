@@ -18,6 +18,7 @@ export function LoginForm() {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
@@ -36,6 +37,12 @@ export function LoginForm() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (mode === "signup" && !termsAccepted) {
+      setError("You must agree to the Terms of Service and Privacy Policy to create an account.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -50,7 +57,7 @@ export function LoginForm() {
         const res = await fetch("/api/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ email, password, termsAccepted }),
         });
         const data = await res.json();
         if (!res.ok || !data.ok) {
@@ -160,6 +167,38 @@ export function LoginForm() {
               />
             </div>
 
+            {mode === "signup" && (
+              <label className="flex items-start gap-2.5 text-xs text-muted">
+                <input
+                  type="checkbox"
+                  required
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-border bg-black/40 text-orange-500 accent-orange-500 outline-none focus:ring-2 focus:ring-orange-500/40"
+                />
+                <span>
+                  I agree to the{" "}
+                  <Link
+                    href="/terms"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-orange-400 underline underline-offset-2"
+                  >
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link
+                    href="/privacy"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-orange-400 underline underline-offset-2"
+                  >
+                    Privacy Policy
+                  </Link>
+                </span>
+              </label>
+            )}
+
             {error && (
               <p className="rounded-xl border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
                 {error}
@@ -168,7 +207,7 @@ export function LoginForm() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || (mode === "signup" && !termsAccepted)}
               className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50"
             >
               {loading

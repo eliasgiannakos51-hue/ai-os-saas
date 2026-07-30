@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalLayout title="privacy_policy" updated="2026-07-29">
+    <LegalLayout title="privacy_policy" updated="2026-07-30">
       <LegalSection title="1. Data Collection">
         <p>
           We collect the email address you sign up with, the password you
@@ -32,39 +32,39 @@ export default function PrivacyPage() {
         </p>
       </LegalSection>
 
-      <LegalSection title="3. Data Storage — Supabase">
+      <LegalSection title="3. Data Storage">
         <p>
-          All account data and module entries are stored in a Postgres
-          database hosted by{" "}
-          <a
-            href="https://supabase.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-orange-400 underline underline-offset-2"
-          >
-            Supabase
-          </a>
-          . Row-level security policies scope every table so a user can only
-          ever read, write, or delete their own rows.
+          Your account data and module entries are stored in a managed
+          database with row-level security policies that scope every table
+          so you can only ever read, write, or delete your own records.
         </p>
       </LegalSection>
 
-      <LegalSection title="4. Third-party Services">
+      <LegalSection title="4. Sub-processors">
         <p>
-          Veron AI uses a small number of third-party services to function:
+          We use trusted third-party service providers to operate Veron AI,
+          including cloud infrastructure providers, AI model providers, and
+          email delivery services. These providers process data solely to
+          provide the Service and are contractually bound to protect your
+          information.
         </p>
         <ul className="list-disc space-y-1 pl-5">
           <li>
-            <span className="text-foreground/90">Anthropic (Claude API)</span>{" "}
-            — the free-text message you submit to &quot;Create Anything&quot;
-            is sent to Anthropic&apos;s API to classify it into a module and
-            extract structured fields.
+            <span className="text-foreground/90">Supabase</span> — database
+            hosting and authentication infrastructure.
           </li>
           <li>
-            <span className="text-foreground/90">Resend</span> — used to
-            send transactional email (currently a welcome email on signup).
-            Your email address is shared with Resend only to deliver that
-            email.
+            <span className="text-foreground/90">Vercel</span> — application
+            hosting and content delivery.
+          </li>
+          <li>
+            <span className="text-foreground/90">Anthropic</span> — AI model
+            provider used to classify &quot;Create Anything&quot; submissions
+            into the right module and extract structured fields.
+          </li>
+          <li>
+            <span className="text-foreground/90">Resend</span> — transactional
+            email delivery (e.g. the welcome email sent on signup).
           </li>
         </ul>
       </LegalSection>

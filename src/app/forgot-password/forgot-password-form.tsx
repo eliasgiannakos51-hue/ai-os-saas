@@ -141,7 +141,7 @@ export function ForgotPasswordForm() {
               {debugDump && (
                 <div className="rounded-xl border border-orange-800 bg-orange-950/20 p-3">
                   <p className="mb-2 text-[10px] uppercase tracking-wide text-orange-500">
-                    temporary debug info — copy/paste this to Claude
+                    temporary debug info — include this in your bug report
                   </p>
                   <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all text-[10px] leading-relaxed text-orange-200/90">
                     {debugDump}

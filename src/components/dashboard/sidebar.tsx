@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
-import { OVERVIEW_NAV_ITEM, CREATE_NAV_ITEM, SETTINGS_NAV_ITEM } from "@/lib/modules";
-import { MODULE_ICONS, OVERVIEW_ICON, CREATE_ICON, SETTINGS_ICON } from "@/lib/module-icons";
+import { OVERVIEW_NAV_ITEM, CHAT_NAV_ITEM, SETTINGS_NAV_ITEM } from "@/lib/modules";
+import { MODULE_ICONS, OVERVIEW_ICON, CHAT_ICON, SETTINGS_ICON } from "@/lib/module-icons";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
 import { Logo } from "@/components/logo";
 import type { LucideIcon } from "lucide-react";
@@ -21,7 +21,7 @@ const SIDEBAR_GROUPS: { heading: string; items: SidebarItem[] }[] = [
     heading: "Workspace",
     items: [
       { href: OVERVIEW_NAV_ITEM.href, label: "Home", icon: OVERVIEW_ICON },
-      { href: CREATE_NAV_ITEM.href, label: "AI Assistant", icon: CREATE_ICON },
+      { href: CHAT_NAV_ITEM.href, label: "Veron Chat", icon: CHAT_ICON },
     ],
   },
   {

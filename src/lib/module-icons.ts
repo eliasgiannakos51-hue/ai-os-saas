@@ -11,6 +11,7 @@ import {
   PenTool,
   Users,
   MessageSquare,
+  MessageCircle,
   BarChart3,
   Zap,
   Home,
@@ -40,4 +41,5 @@ export const MODULE_ICONS: Record<string, LucideIcon> = {
 
 export const OVERVIEW_ICON: LucideIcon = Home;
 export const CREATE_ICON: LucideIcon = Sparkles;
+export const CHAT_ICON: LucideIcon = MessageCircle;
 export const SETTINGS_ICON: LucideIcon = Settings;

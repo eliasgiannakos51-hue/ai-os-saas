@@ -182,7 +182,7 @@ export function ResetPasswordForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-background px-4">
+    <main className="flex min-h-screen items-center justify-center overflow-x-hidden bg-background px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mb-4 flex items-center justify-center">

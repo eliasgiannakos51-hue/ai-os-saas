@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { isAdminEmail } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -87,6 +88,9 @@ export async function POST(request: Request) {
     // same technique as /api/create's create_requests check, but scoped to
     // chat_messages so Veron Chat and Create Anything have independent
     // budgets instead of sharing one counter.
+    // Admin-listed accounts (see lib/admin.ts) skip the limit entirely —
+    // treated as unlimited Ultimate-tier requests.
+    const isAdmin = isAdminEmail(user.email);
     const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
     const { count: recentMessageCount, error: usageCheckError } = await supabase
       .from("chat_messages")
@@ -97,7 +101,7 @@ export async function POST(request: Request) {
 
     if (usageCheckError) {
       logApiError("/api/chat", usageCheckError, { stage: "usage_check" });
-    } else if ((recentMessageCount ?? 0) >= RATE_LIMIT) {
+    } else if (!isAdmin && (recentMessageCount ?? 0) >= RATE_LIMIT) {
       return NextResponse.json({
         ok: true,
         rateLimited: true,

@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { InviteForm } from "@/components/team/invite-form";
 import { TeamMembersList, type TeamMember } from "@/components/team/team-members-list";
 import { getPlan } from "@/lib/billing/plans";
+import { isAdminEmail } from "@/lib/admin";
 
 export const metadata: Metadata = {
   title: "Team",
@@ -22,8 +23,11 @@ export default async function TeamPage() {
     redirect("/login");
   }
 
-  const tier = user.user_metadata?.subscription_tier as string | undefined;
-  const ownsSubscription = Boolean(user.user_metadata?.stripe_subscription_id);
+  // Admin-listed accounts (see lib/admin.ts) get full Ultimate-tier access,
+  // including team management, without a real Stripe subscription.
+  const isAdmin = isAdminEmail(user.email);
+  const tier = isAdmin ? "ultimate" : (user.user_metadata?.subscription_tier as string | undefined);
+  const ownsSubscription = isAdmin || Boolean(user.user_metadata?.stripe_subscription_id);
 
   // Team management is for plan owners only — a team member who joined via
   // invite has subscription_tier set too, but no stripe_subscription_id of

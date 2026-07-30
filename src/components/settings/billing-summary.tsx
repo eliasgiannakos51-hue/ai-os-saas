@@ -6,10 +6,12 @@ export function BillingSummary({
   tier,
   seatCount,
   hasSubscription,
+  isAdmin = false,
 }: {
   tier: string;
   seatCount: number;
   hasSubscription: boolean;
+  isAdmin?: boolean;
 }) {
   const plan = getPlan(tier) ?? getPlan("free")!;
 
@@ -27,7 +29,11 @@ export function BillingSummary({
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          {hasSubscription ? (
+          {isAdmin ? (
+            <span className="inline-flex items-center rounded-full border border-orange-800 bg-orange-950/30 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-orange-400">
+              Owner Access
+            </span>
+          ) : hasSubscription ? (
             <ManageBillingButton />
           ) : (
             <Link
@@ -37,7 +43,7 @@ export function BillingSummary({
               Upgrade Plan
             </Link>
           )}
-          {hasSubscription && tier !== "free" && (
+          {(hasSubscription || isAdmin) && tier !== "free" && (
             <Link
               href="/dashboard/team"
               className="inline-flex min-h-[40px] items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"

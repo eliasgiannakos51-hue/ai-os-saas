@@ -8,6 +8,7 @@ import {
 } from "@/lib/classifier-modules";
 import type { FieldConfig } from "@/lib/modules";
 import { logApiError } from "@/lib/log-error";
+import { isAdminEmail } from "@/lib/admin";
 
 export const dynamic = "force-dynamic";
 
@@ -141,6 +142,9 @@ export async function POST(request: Request) {
     // the create_requests log table (RLS-scoped, same as every other table).
     // A failure to check/log usage is logged and otherwise ignored rather than
     // blocking the request — this is cost protection, not a security boundary.
+    // Admin-listed accounts (see lib/admin.ts) skip the limit entirely —
+    // treated as unlimited Ultimate-tier requests.
+    const isAdmin = isAdminEmail(user.email);
     const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
     const { count: recentRequestCount, error: usageCheckError } = await supabase
       .from("create_requests")
@@ -150,7 +154,7 @@ export async function POST(request: Request) {
 
     if (usageCheckError) {
       logApiError("/api/create", usageCheckError, { stage: "usage_check" });
-    } else if ((recentRequestCount ?? 0) >= RATE_LIMIT) {
+    } else if (!isAdmin && (recentRequestCount ?? 0) >= RATE_LIMIT) {
       return NextResponse.json({
         ok: true,
         matched: false,

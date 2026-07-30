@@ -5,7 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { isPasswordStrong } from "@/lib/password-strength";
 import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordStrengthChecklist } from "@/components/auth/password-strength-checklist";
+import { GeneratePasswordButton } from "@/components/auth/generate-password-button";
 import { Logo } from "@/components/logo";
 
 type Status = "checking" | "ready" | "invalid";
@@ -212,19 +215,30 @@ export function ResetPasswordForm() {
           {status === "ready" && (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="password" className="mb-1 block text-xs text-muted">
-                  New password
-                </label>
+                <div className="mb-1 flex items-center justify-between gap-2">
+                  <label htmlFor="password" className="block text-xs text-muted">
+                    New password
+                  </label>
+                  <GeneratePasswordButton
+                    onGenerate={(generated) => {
+                      setPassword(generated);
+                      setConfirmPassword(generated);
+                    }}
+                  />
+                </div>
                 <PasswordInput
                   id="password"
                   required
-                  minLength={6}
+                  minLength={8}
                   autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full rounded-xl border border-border bg-black/40 px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500"
                   placeholder="••••••••"
                 />
+                <div className="mt-2">
+                  <PasswordStrengthChecklist password={password} />
+                </div>
               </div>
 
               <div>
@@ -234,7 +248,7 @@ export function ResetPasswordForm() {
                 <PasswordInput
                   id="confirmPassword"
                   required
-                  minLength={6}
+                  minLength={8}
                   autoComplete="new-password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
@@ -251,7 +265,7 @@ export function ResetPasswordForm() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !isPasswordStrong(password)}
                 className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50"
               >
                 {loading ? "Saving..." : "Save new password"}

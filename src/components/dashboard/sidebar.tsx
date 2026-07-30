@@ -115,7 +115,15 @@ export function Sidebar() {
                           : "border-transparent text-muted hover:bg-panel-hover hover:text-foreground"
                       }`}
                     >
-                      <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      <span
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors duration-150 ${
+                          active
+                            ? "bg-orange-500/20 text-orange-400"
+                            : "bg-orange-500/10 text-muted"
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" aria-hidden="true" />
+                      </span>
                       <span className="truncate">{item.label}</span>
                     </Link>
                   );
@@ -138,7 +146,15 @@ export function Sidebar() {
                 : "border-transparent text-muted hover:bg-panel-hover hover:text-foreground"
             }`}
           >
-            <SETTINGS_ICON className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span
+              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors duration-150 ${
+                settingsActive
+                  ? "bg-orange-500/20 text-orange-400"
+                  : "bg-orange-500/10 text-muted"
+              }`}
+            >
+              <SETTINGS_ICON className="h-4 w-4" aria-hidden="true" />
+            </span>
             <span>Settings</span>
           </Link>
         </div>

@@ -3,10 +3,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Bell, Plus, Sparkles } from "lucide-react";
+import { Search, Bell, Plus } from "lucide-react";
 import { CREATE_NAV_ITEM, OVERVIEW_NAV_ITEM } from "@/lib/modules";
 import { MenuButton } from "@/components/dashboard/menu-button";
 import { LogoutButton } from "@/components/logout-button";
+import { Logo } from "@/components/logo";
 
 export function TopNav({ email }: { email: string }) {
   const router = useRouter();
@@ -27,11 +28,9 @@ export function TopNav({ email }: { email: string }) {
         href={OVERVIEW_NAV_ITEM.href}
         className="flex shrink-0 items-center gap-2"
       >
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500/15 text-orange-400">
-          <Sparkles className="h-4 w-4" />
-        </span>
+        <Logo iconOnly className="h-6 w-6" />
         <span className="text-base font-bold tracking-tight text-foreground">
-          NEXA
+          VERON
         </span>
       </Link>
 

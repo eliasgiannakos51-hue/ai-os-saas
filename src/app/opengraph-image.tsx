@@ -19,7 +19,7 @@ export default function OpengraphImage() {
         }}
       >
         <div style={{ fontSize: 28, letterSpacing: 6, color: "#f97316" }}>
-          Nexa AI //
+          Veron AI //
         </div>
         <div
           style={{
@@ -29,7 +29,7 @@ export default function OpengraphImage() {
             color: "#e5e5e5",
           }}
         >
-          Nexa AI
+          Veron AI
         </div>
         <div
           style={{

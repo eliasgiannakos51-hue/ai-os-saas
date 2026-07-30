@@ -2,7 +2,7 @@ import "server-only";
 import { createResendClient } from "@/lib/resend";
 import { weeklyDigestEmailHtml } from "@/lib/email/templates";
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Nexa AI <onboarding@resend.dev>";
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Veron AI <onboarding@resend.dev>";
 
 // Best-effort, same pattern as sendWelcomeEmail — never throws, just logs.
 export async function sendWeeklyDigestEmail({
@@ -19,7 +19,7 @@ export async function sendWeeklyDigestEmail({
     const { error } = await resend.emails.send({
       from: FROM_ADDRESS,
       to: email,
-      subject: "your week on Nexa AI",
+      subject: "your week on Veron AI",
       html: weeklyDigestEmailHtml({ email, moduleCounts, periodLabel }),
     });
 

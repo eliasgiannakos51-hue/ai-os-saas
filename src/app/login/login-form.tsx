@@ -3,11 +3,11 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { PasswordInput } from "@/components/ui/password-input";
 import { LoginSplash } from "@/components/auth/login-splash";
+import { Logo } from "@/components/logo";
 
 type Mode = "login" | "signup";
 
@@ -79,13 +79,8 @@ export function LoginForm() {
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <div className="mb-4 flex items-center justify-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/15 text-orange-400">
-              <Sparkles className="h-4 w-4" />
-            </span>
-            <span className="text-lg font-bold tracking-tight text-foreground">
-              NEXA
-            </span>
+          <div className="mb-4 flex items-center justify-center">
+            <Logo className="h-14 w-auto" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">
             {mode === "login" ? "Welcome back" : "Create your account"}

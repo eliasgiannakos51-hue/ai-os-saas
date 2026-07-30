@@ -15,13 +15,16 @@ export function RecentEntriesCard({ entries }: { entries: RecentEntry[] }) {
     <div className="rounded-2xl border border-border bg-panel p-5 sm:col-span-2 lg:col-span-1">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted">
-          <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+          <Clock className="h-4 w-4" aria-hidden="true" />
           Recent Entries
         </div>
       </div>
 
       {entries.length === 0 ? (
-        <p className="mt-4 text-sm text-muted">No entries yet.</p>
+        <div className="mt-4 flex items-center gap-2 text-sm text-muted">
+          <Clock className="h-4 w-4 shrink-0 text-muted/80" aria-hidden="true" />
+          No entries yet.
+        </div>
       ) : (
         <ul className="mt-3 space-y-3">
           {entries.map((entry) => (

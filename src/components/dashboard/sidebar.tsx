@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { OVERVIEW_NAV_ITEM, CREATE_NAV_ITEM, SETTINGS_NAV_ITEM } from "@/lib/modules";
 import { MODULE_ICONS, OVERVIEW_ICON, CREATE_ICON, SETTINGS_ICON } from "@/lib/module-icons";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
+import { Logo } from "@/components/logo";
 import type { LucideIcon } from "lucide-react";
 
 // Sidebar-only grouping + label overrides. Routes are the single source of
@@ -79,12 +80,15 @@ export function Sidebar() {
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-end px-3 py-3 md:hidden">
+        <div className="flex items-center justify-between px-4 py-3">
+          <Link href={OVERVIEW_NAV_ITEM.href} onClick={closeOnMobile} className="flex items-center">
+            <Logo className="h-14 w-auto" />
+          </Link>
           <button
             type="button"
             onClick={closeOnMobile}
             aria-label="Close menu"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground md:hidden"
           >
             <X className="h-4 w-4" />
           </button>
@@ -93,7 +97,7 @@ export function Sidebar() {
         <nav className="space-y-5 p-3">
           {SIDEBAR_GROUPS.map((group) => (
             <div key={group.heading}>
-              <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted/70">
+              <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
                 {group.heading}
               </p>
               <div className="space-y-0.5">
@@ -122,7 +126,7 @@ export function Sidebar() {
         </nav>
 
         <div className="border-t border-border p-3">
-          <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted/70">
+          <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
             Settings
           </p>
           <Link

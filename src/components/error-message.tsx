@@ -16,7 +16,7 @@ export function ErrorMessage({ message }: { message: string }) {
         onClick={() => router.refresh()}
         className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-red-900/60 px-3 text-[11px] text-red-300 transition-colors duration-150 hover:border-red-500 hover:text-red-100 sm:min-h-0 sm:py-1"
       >
-        <RotateCw className="h-3 w-3" /> Retry
+        <RotateCw className="h-4 w-4" /> Retry
       </button>
     </div>
   );

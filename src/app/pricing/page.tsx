@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check, Sparkles } from "lucide-react";
+import { Check } from "lucide-react";
+import { Logo } from "@/components/logo";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Nexa AI pricing — Free, Pro, and Enterprise plans.",
+  description: "Veron AI pricing — Free, Pro, and Enterprise plans.",
 };
 
 type Plan = {
@@ -22,7 +23,7 @@ const PLANS: Plan[] = [
   {
     name: "Free",
     price: "$0",
-    description: "Everything you need to try Nexa AI.",
+    description: "Everything you need to try Veron AI.",
     features: [
       "All 13 modules",
       "20 Create Anything requests / month",
@@ -35,7 +36,7 @@ const PLANS: Plan[] = [
     name: "Pro",
     price: "$15",
     period: "/month",
-    description: "For running your work through Nexa AI day to day.",
+    description: "For running your work through Veron AI day to day.",
     features: [
       "Everything in Free",
       "Unlimited Create Anything",
@@ -68,11 +69,9 @@ export default function PricingPage() {
             href="/"
             className="inline-flex items-center gap-2 transition-colors duration-150 hover:text-orange-400"
           >
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500/15 text-orange-400">
-              <Sparkles className="h-4 w-4" />
-            </span>
+            <Logo iconOnly className="h-6 w-6" />
             <span className="text-base font-bold tracking-tight text-foreground">
-              NEXA
+              VERON
             </span>
           </Link>
           <h1 className="mt-6 text-3xl font-bold text-foreground sm:text-4xl">
@@ -109,7 +108,7 @@ export default function PricingPage() {
               <ul className="mt-6 flex-1 space-y-2 text-sm text-muted">
                 {plan.features.map((feature) => (
                   <li key={feature} className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-400" aria-hidden="true" />
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -134,7 +133,7 @@ export default function PricingPage() {
             href="/"
             className="text-xs text-orange-400 underline underline-offset-2"
           >
-            ← Back to Nexa AI
+            ← Back to Veron AI
           </Link>
         </div>
       </div>

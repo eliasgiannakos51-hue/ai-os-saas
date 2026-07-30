@@ -1,10 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { Sparkles } from "lucide-react";
 import { DeletedAccountBanner } from "@/components/landing/deleted-account-banner";
 import { GlowOrb } from "@/components/ui/glow-orb";
+import { Logo } from "@/components/logo";
 
-const TITLE = "Nexa AI — One platform. Every AI capability.";
+const TITLE = "Veron AI — One platform. Every AI capability.";
 const DESCRIPTION =
   "Create anything with AI. From ideas and research to trading, finance, product planning and business decisions — organized in one intelligent workspace.";
 
@@ -32,13 +32,8 @@ export default function Home() {
       <div className="relative">
         <DeletedAccountBanner />
 
-        <div className="mb-6 flex items-center justify-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/15 text-orange-400">
-            <Sparkles className="h-4 w-4" />
-          </span>
-          <span className="text-lg font-bold tracking-tight text-foreground">
-            NEXA
-          </span>
+        <div className="mb-6 flex items-center justify-center">
+          <Logo className="h-16 w-auto" />
         </div>
 
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">

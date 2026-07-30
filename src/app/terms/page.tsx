@@ -4,7 +4,7 @@ import { LegalSection } from "@/components/legal/legal-section";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "Terms of Service for Nexa AI.",
+  description: "Terms of Service for Veron AI.",
 };
 
 export default function TermsPage() {
@@ -12,7 +12,7 @@ export default function TermsPage() {
     <LegalLayout title="terms_of_service" updated="2026-07-29">
       <LegalSection title="1. Acceptance of Terms">
         <p>
-          By creating an account or otherwise using Nexa AI (&quot;the
+          By creating an account or otherwise using Veron AI (&quot;the
           Service&quot;), you agree to be bound by these Terms of Service. If
           you do not agree, do not use the Service. We may update these
           terms from time to time; continued use after an update means you
@@ -22,7 +22,7 @@ export default function TermsPage() {
 
       <LegalSection title="2. Use of Service">
         <p>
-          Nexa AI gives you a set of modules for logging and organizing
+          Veron AI gives you a set of modules for logging and organizing
           information about your work — ideas, competitors, research,
           finance, and so on — plus an AI-assisted &quot;Create Anything&quot;
           feature that files free-text entries into the right module. You
@@ -35,7 +35,7 @@ export default function TermsPage() {
 
       <LegalSection title="3. User Data">
         <p>
-          You own the content you create in Nexa AI. We store it on your
+          You own the content you create in Veron AI. We store it on your
           behalf so the Service can function, scoped to your account via
           row-level security so other users cannot read or modify it. You
           can export a full copy of your data or permanently delete your
@@ -45,7 +45,7 @@ export default function TermsPage() {
 
       <LegalSection title="4. Limitation of Liability">
         <p>
-          Nexa AI is provided &quot;as is,&quot; without warranties of any
+          Veron AI is provided &quot;as is,&quot; without warranties of any
           kind, express or implied. To the fullest extent permitted by law,
           we are not liable for any indirect, incidental, or consequential
           damages arising from your use of the Service, including data loss
@@ -57,7 +57,7 @@ export default function TermsPage() {
         <p>
           We may revise these Terms of Service as the Service evolves.
           Material changes will be reflected by updating the &quot;last
-          updated&quot; date above. Your continued use of Nexa AI after a
+          updated&quot; date above. Your continued use of Veron AI after a
           change constitutes acceptance of the updated terms.
         </p>
       </LegalSection>

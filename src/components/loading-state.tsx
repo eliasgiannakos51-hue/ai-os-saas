@@ -3,7 +3,7 @@ export function LoadingState() {
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         <p className="mb-6 text-center text-xs tracking-widest text-orange-500">
-          Nexa AI //
+          Veron AI //
         </p>
         <div className="space-y-3" aria-label="Loading" role="status">
           <div className="h-4 w-1/3 animate-pulse rounded bg-white/5" />

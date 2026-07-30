@@ -14,7 +14,7 @@ export function StatCard({
   return (
     <div className="rounded-2xl border border-border bg-panel p-5">
       <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted">
-        <Icon className="h-3.5 w-3.5" aria-hidden="true" />
+        <Icon className="h-4 w-4" aria-hidden="true" />
         {label}
       </div>
       <p className="mt-3 truncate text-2xl font-bold text-foreground">{value}</p>

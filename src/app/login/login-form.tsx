@@ -96,6 +96,11 @@ export function LoginForm() {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
+          // eslint-disable-next-line no-console
+          console.error(
+            "LOGIN ERROR:",
+            JSON.stringify(error, Object.getOwnPropertyNames(error || {}))
+          );
           dumpErrorForDebugging("signInWithPassword returned error", error);
           setError(getErrorMessage(error));
           return;

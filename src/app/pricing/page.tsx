@@ -36,12 +36,17 @@ export default function PricingPage() {
           {PLANS.map((plan) => (
             <div
               key={plan.slug}
-              className={`flex flex-col rounded-2xl border p-6 ${
+              className={`relative flex flex-col rounded-2xl border p-6 ${
                 plan.highlighted
                   ? "border-orange-500/60 bg-orange-500/[0.04] shadow-[0_0_24px_rgba(249,115,22,0.12)]"
                   : "border-border bg-panel"
               }`}
             >
+              {plan.highlighted && (
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center rounded-full bg-orange-500 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-black">
+                  Most Popular
+                </span>
+              )}
               <h2 className="text-sm font-semibold text-orange-400">{plan.name}</h2>
               <p className="mt-3 text-2xl font-bold text-foreground">
                 ${plan.price}

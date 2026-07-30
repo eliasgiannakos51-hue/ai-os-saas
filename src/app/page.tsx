@@ -67,6 +67,12 @@ export default function Home() {
           <span className="hidden sm:inline" aria-hidden="true">
             ·
           </span>
+          <Link href="/roadmap" className="transition-colors duration-150 hover:text-orange-400">
+            Roadmap
+          </Link>
+          <span className="hidden sm:inline" aria-hidden="true">
+            ·
+          </span>
           <Link href="/terms" className="transition-colors duration-150 hover:text-orange-400">
             Terms of Service
           </Link>

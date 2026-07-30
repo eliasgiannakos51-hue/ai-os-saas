@@ -20,9 +20,52 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [debugDump, setDebugDump] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
+
+  // TEMPORARY — diagnosing a report that this flow shows "error: {}" even
+  // though getErrorMessage() is already in use here. Dumps every own
+  // property of the raw error (enumerable or not) so we can see its real
+  // shape instead of guessing. Same pattern as forgot-password-form.tsx.
+  // Remove dumpErrorForDebugging() and the debugDump state/UI once the
+  // real cause is identified.
+  function dumpErrorForDebugging(label: string, raw: unknown) {
+    const info = {
+      label,
+      typeofRaw: typeof raw,
+      isErrorInstance: raw instanceof Error,
+      constructorName:
+        raw && typeof raw === "object" ? raw.constructor?.name : undefined,
+      keysEnumerable: raw && typeof raw === "object" ? Object.keys(raw) : [],
+      allOwnProps:
+        raw && typeof raw === "object"
+          ? Object.getOwnPropertyNames(raw)
+          : [],
+      jsonStringifyPlain: (() => {
+        try {
+          return JSON.stringify(raw);
+        } catch {
+          return "<threw>";
+        }
+      })(),
+      jsonStringifyAllProps: (() => {
+        try {
+          return raw && typeof raw === "object"
+            ? JSON.stringify(raw, Object.getOwnPropertyNames(raw))
+            : String(raw);
+        } catch {
+          return "<threw>";
+        }
+      })(),
+    };
+    // eslint-disable-next-line no-console
+    console.error(`[login debug] ${label}:`, raw);
+    // eslint-disable-next-line no-console
+    console.error(`[login debug] ${label} (all props):`, info);
+    setDebugDump(JSON.stringify(info, null, 2));
+  }
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -37,6 +80,7 @@ export function LoginForm() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setDebugDump(null);
 
     if (mode === "signup" && !termsAccepted) {
       setError("You must agree to the Terms of Service and Privacy Policy to create an account.");
@@ -49,6 +93,7 @@ export function LoginForm() {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
+          dumpErrorForDebugging("signInWithPassword returned error", error);
           setError(getErrorMessage(error));
           return;
         }
@@ -61,12 +106,14 @@ export function LoginForm() {
         });
         const data = await res.json();
         if (!res.ok || !data.ok) {
+          dumpErrorForDebugging("/api/signup returned error", data.error);
           setError(getErrorMessage(data.error, "Signup failed."));
           return;
         }
         setAuthenticated(true);
       }
     } catch (err) {
+      dumpErrorForDebugging(`${mode} threw`, err);
       setError(getErrorMessage(err));
     } finally {
       setLoading(false);
@@ -107,6 +154,7 @@ export function LoginForm() {
               onClick={() => {
                 setMode("login");
                 setError(null);
+                setDebugDump(null);
               }}
               aria-pressed={mode === "login"}
               className={`flex-1 rounded-lg px-4 py-2.5 font-medium transition-colors duration-150 ${
@@ -122,6 +170,7 @@ export function LoginForm() {
               onClick={() => {
                 setMode("signup");
                 setError(null);
+                setDebugDump(null);
               }}
               aria-pressed={mode === "signup"}
               className={`flex-1 rounded-lg px-4 py-2.5 font-medium transition-colors duration-150 ${
@@ -203,6 +252,17 @@ export function LoginForm() {
               <p className="rounded-xl border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
                 {error}
               </p>
+            )}
+
+            {debugDump && (
+              <div className="rounded-xl border border-orange-800 bg-orange-950/20 p-3">
+                <p className="mb-2 text-[10px] uppercase tracking-wide text-orange-500">
+                  temporary debug info — include this in your bug report
+                </p>
+                <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all text-[10px] leading-relaxed text-orange-200/90">
+                  {debugDump}
+                </pre>
+              </div>
             )}
 
             <button

@@ -6,8 +6,10 @@ import { ToastProvider } from "@/components/toast/toast-context";
 import { ToastContainer } from "@/components/toast/toast-container";
 import { CommandPalette } from "@/components/dashboard/command-palette";
 import { CommandPaletteProvider } from "@/components/dashboard/command-palette-context";
+import { CreditsProvider } from "@/components/credits/credits-context";
 import { TopNav } from "@/components/dashboard/top-nav";
 import { acceptPendingTeamInvite } from "@/lib/team/accept-pending-invite";
+import { getOrInitCredits, resolvePlan } from "@/lib/billing/credits";
 
 export default async function DashboardLayout({
   children,
@@ -29,19 +31,24 @@ export default async function DashboardLayout({
   // `user` above), which is fine for a low-frequency, best-effort check.
   void acceptPendingTeamInvite(user.id, user.email ?? "");
 
+  const plan = resolvePlan(user);
+  const credits = await getOrInitCredits(user.id, plan);
+
   return (
     <ToastProvider>
       <SidebarProvider>
         <CommandPaletteProvider>
-          <div className="flex min-h-screen bg-background">
-            <Sidebar />
-            <div className="flex min-w-0 flex-1 flex-col">
-              <TopNav email={user.email ?? ""} />
-              <div className="flex-1">{children}</div>
+          <CreditsProvider initialCredits={credits.credits_remaining}>
+            <div className="flex min-h-screen bg-background">
+              <Sidebar />
+              <div className="flex min-w-0 flex-1 flex-col">
+                <TopNav email={user.email ?? ""} />
+                <div className="flex-1">{children}</div>
+              </div>
             </div>
-          </div>
-          <ToastContainer />
-          <CommandPalette />
+            <ToastContainer />
+            <CommandPalette />
+          </CreditsProvider>
         </CommandPaletteProvider>
       </SidebarProvider>
     </ToastProvider>

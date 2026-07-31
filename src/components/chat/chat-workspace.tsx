@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { MessageContent } from "@/components/chat/message-content";
+import { useCredits } from "@/components/credits/credits-context";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
 
 let localIdCounter = 0;
@@ -49,6 +50,7 @@ export function ChatWorkspace({
   initialConversations: ChatConversation[];
   userInitial: string;
 }) {
+  const { refresh: refreshCredits } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -293,6 +295,8 @@ export function ChatWorkspace({
       if (streamError) {
         setError(streamError);
       }
+
+      void refreshCredits();
     } catch {
       setError("Network error — please try again.");
     } finally {

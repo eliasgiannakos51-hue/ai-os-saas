@@ -4,6 +4,7 @@ import { createStripeClient } from "@/lib/stripe/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanSlugFromPriceId, getTeamSeatPriceId } from "@/lib/billing/price-ids";
 import type { PlanSlug } from "@/lib/billing/plans";
+import { grantCredits, syncCreditsForPlan } from "@/lib/billing/credits";
 import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
@@ -80,6 +81,36 @@ async function syncSubscriptionToUser(
   if (updateError) {
     logApiError("/api/webhooks/stripe", updateError, { stage: "update_user", supabaseUserId });
   }
+
+  // Resets the credit balance to the (new) plan's monthly allotment — same
+  // call on a brand-new subscription, a plan change, a cancellation (falls
+  // back to Free's allotment since planSlug is "free" when !isActive), and
+  // a recurring renewal (see the invoice.paid handler below).
+  try {
+    await syncCreditsForPlan(supabaseUserId, planSlug, `Subscription ${isActive ? "active" : "ended"}: ${planSlug} plan`);
+  } catch (err) {
+    logApiError("/api/webhooks/stripe", err, { stage: "sync_credits", supabaseUserId });
+  }
+}
+
+// One-time credit pack purchase (api/credits/checkout, mode: "payment") —
+// grants credits from the session's own metadata rather than re-deriving
+// anything from a subscription, since a credit pack purchase isn't one.
+async function grantPurchasedCredits(session: Stripe.Checkout.Session) {
+  const supabaseUserId = session.metadata?.supabase_user_id;
+  const creditAmount = Number(session.metadata?.credit_amount);
+  const packId = session.metadata?.credit_pack_id ?? "unknown_pack";
+
+  if (!supabaseUserId || !Number.isFinite(creditAmount) || creditAmount <= 0) {
+    logApiError(
+      "/api/webhooks/stripe",
+      new Error("checkout.session.completed (payment) missing/invalid credit metadata"),
+      { sessionId: session.id }
+    );
+    return;
+  }
+
+  await grantCredits(supabaseUserId, creditAmount, "purchase", `Purchased ${packId} credit pack`);
 }
 
 export async function POST(request: Request) {
@@ -111,6 +142,8 @@ export async function POST(request: Request) {
               ? session.subscription
               : session.subscription.id;
           await syncSubscriptionToUser(stripe, subscriptionId);
+        } else if (session.mode === "payment") {
+          await grantPurchasedCredits(session);
         }
         break;
       }
@@ -118,6 +151,18 @@ export async function POST(request: Request) {
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
         await syncSubscriptionToUser(stripe, subscription.id, subscription);
+        break;
+      }
+      case "invoice.paid": {
+        // Recurring monthly renewal — a normal billing-cycle rollover
+        // doesn't fire customer.subscription.updated, so this is the event
+        // that actually resets credits for an unchanged subscription.
+        const invoice = event.data.object as Stripe.Invoice;
+        const subscriptionRef = invoice.parent?.subscription_details?.subscription;
+        const subscriptionId = typeof subscriptionRef === "string" ? subscriptionRef : subscriptionRef?.id;
+        if (subscriptionId) {
+          await syncSubscriptionToUser(stripe, subscriptionId);
+        }
         break;
       }
       default:

@@ -38,13 +38,18 @@ export function SignupFlow() {
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
 
+  // Enterprise is Contact Sales only (custom pricing, no Stripe price to
+  // self-serve checkout with) — never selectable here.
+  const selectablePlans = PLANS.filter((p) => p.slug !== "enterprise");
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const planParam = params.get("plan");
-    if (planParam && PLANS.some((p) => p.slug === planParam)) {
+    if (planParam && selectablePlans.some((p) => p.slug === planParam)) {
       setSelectedPlan(planParam as PlanSlug);
       setStep(2);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Logs the EXACT raw HTTP response — status + body text — before any
@@ -141,9 +146,9 @@ export function SignupFlow() {
       // documented in src/lib/billing/price-ids.ts / the README's Billing
       // section; /api/checkout returns "Billing is not configured yet." if
       // they aren't set.
-      // TODO: Price ID needed here — confirm STRIPE_PRICE_STARTER /
-      // STRIPE_PRICE_GROWTH / STRIPE_PRICE_PROFESSIONAL / STRIPE_PRICE_ULTIMATE
-      // are set before this path can complete a real checkout.
+      // TODO: Price ID needed here — confirm STRIPE_PRICE_PRO /
+      // STRIPE_PRICE_CREATOR / STRIPE_PRICE_PROFESSIONAL are set before
+      // this path can complete a real checkout.
       const checkoutRes = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -212,7 +217,7 @@ export function SignupFlow() {
         {step === 1 && (
           <div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {PLANS.map((p) => {
+              {selectablePlans.map((p) => {
                 const selected = p.slug === selectedPlan;
                 return (
                   <button
@@ -236,13 +241,15 @@ export function SignupFlow() {
                       {selected && <Check className="h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />}
                     </div>
                     <p className="mt-1 text-lg font-bold text-foreground">
-                      ${p.price}
-                      {p.price > 0 && <span className="text-xs font-normal text-muted">/mo</span>}
+                      ${typeof p.price === "number" ? p.price : p.price}
+                      {typeof p.price === "number" && p.price > 0 && (
+                        <span className="text-xs font-normal text-muted">/mo</span>
+                      )}
                     </p>
                     <p className="mt-1 text-xs text-muted">
-                      {p.aiRequestsPerMonth === "unlimited"
-                        ? "Unlimited AI requests"
-                        : `${p.aiRequestsPerMonth.toLocaleString()} AI requests/mo`}
+                      {p.monthlyCredits === "custom"
+                        ? "Custom credits"
+                        : `${p.monthlyCredits.toLocaleString()} credits/mo`}
                     </p>
                   </button>
                 );

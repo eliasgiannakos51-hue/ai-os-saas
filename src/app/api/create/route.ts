@@ -9,7 +9,7 @@ import {
 import type { FieldConfig } from "@/lib/modules";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
-import { buildUsageLimitMessage, getMonthlyUsageCount, resolvePlan } from "@/lib/billing/usage";
+import { CREDIT_COSTS, deductCredits, insufficientCreditsMessage } from "@/lib/billing/credits";
 
 export const dynamic = "force-dynamic";
 
@@ -137,35 +137,28 @@ export async function POST(request: Request) {
       );
     }
 
-    // Plan-based monthly quota, tracked via the create_requests log table
-    // (RLS-scoped, same as every other table) combined with chat_messages —
-    // Create Anything and Veron Chat share one "AI requests/month" budget
-    // per the plan the user is on (see lib/billing/plans.ts). A failure to
-    // check/log usage is logged and otherwise ignored rather than blocking
-    // the request — this is cost protection, not a security boundary.
-    // Admin-listed accounts (see lib/admin.ts) skip the limit entirely —
-    // treated as unlimited Ultimate-tier requests.
+    // Credits: 1 credit per Create Anything request, deducted from
+    // user_credits (see lib/billing/credits.ts). Admin-listed accounts
+    // (see lib/admin.ts) skip this entirely — treated as unlimited.
     const isAdmin = isAdminEmail(user.email);
-    const plan = resolvePlan(user);
-    const { count: monthlyUsageCount, error: usageCheckError } = await getMonthlyUsageCount(
-      supabase,
-      user.id
-    );
-
-    if (usageCheckError) {
-      logApiError("/api/create", usageCheckError, { stage: "usage_check" });
-    } else if (
-      !isAdmin &&
-      plan.aiRequestsPerMonth !== "unlimited" &&
-      monthlyUsageCount >= plan.aiRequestsPerMonth
-    ) {
-      return NextResponse.json({
-        ok: true,
-        matched: false,
-        message: buildUsageLimitMessage(plan),
-      });
+    if (!isAdmin) {
+      const deduction = await deductCredits(
+        user.id,
+        CREDIT_COSTS.createAnything,
+        "create_anything",
+        "Create Anything request"
+      );
+      if (!deduction.ok) {
+        return NextResponse.json({
+          ok: true,
+          matched: false,
+          message: insufficientCreditsMessage(),
+        });
+      }
     }
 
+    // create_requests keeps a per-request log for history/debugging — no
+    // longer used for gating (credits above are the actual limit now).
     const { error: usageLogError } = await supabase
       .from("create_requests")
       .insert({ user_id: user.id });

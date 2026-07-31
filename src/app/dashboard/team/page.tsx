@@ -23,16 +23,18 @@ export default async function TeamPage() {
     redirect("/login");
   }
 
-  // Admin-listed accounts (see lib/admin.ts) get full Ultimate-tier access,
-  // including team management, without a real Stripe subscription.
+  // Admin-listed accounts (see lib/admin.ts) get full Enterprise-tier
+  // access, including team management, without a real Stripe subscription.
   const isAdmin = isAdminEmail(user.email);
-  const tier = isAdmin ? "ultimate" : (user.user_metadata?.subscription_tier as string | undefined);
+  const tier = isAdmin ? "enterprise" : (user.user_metadata?.subscription_tier as string | undefined);
   const ownsSubscription = isAdmin || Boolean(user.user_metadata?.stripe_subscription_id);
 
-  // Team management is for plan owners only — a team member who joined via
-  // invite has subscription_tier set too, but no stripe_subscription_id of
-  // their own, so this correctly excludes them.
-  if (!ownsSubscription || !tier || tier === "free") {
+  // Team collaboration is a Professional+ capability (see
+  // lib/billing/plans.ts's PlanCapabilities.teamCollaboration) and for plan
+  // owners only — a team member who joined via invite has subscription_tier
+  // set too, but no stripe_subscription_id of their own, so this correctly
+  // excludes them.
+  if (!ownsSubscription || !tier || !getPlan(tier)?.capabilities.teamCollaboration) {
     redirect("/dashboard/settings");
   }
 

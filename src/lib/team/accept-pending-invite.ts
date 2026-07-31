@@ -1,5 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getPlan } from "@/lib/billing/plans";
 import { logApiError } from "@/lib/log-error";
 
 // Best-effort, called on every dashboard page load (see dashboard/layout.tsx)
@@ -26,7 +27,7 @@ export async function acceptPendingTeamInvite(userId: string, email: string): Pr
       pending.owner_id
     );
     const ownerTier = ownerData?.user?.user_metadata?.subscription_tier as string | undefined;
-    if (ownerError || !ownerTier || ownerTier === "free") return;
+    if (ownerError || !ownerTier || !getPlan(ownerTier)?.capabilities.teamCollaboration) return;
 
     const { error: updateInviteError } = await admin
       .from("team_members")

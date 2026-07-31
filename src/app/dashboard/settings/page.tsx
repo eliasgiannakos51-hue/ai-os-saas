@@ -7,6 +7,8 @@ import { PasswordChangeForm } from "@/components/settings/password-change-form";
 import { ExportDataButton } from "@/components/settings/export-data-button";
 import { DangerZone } from "@/components/settings/danger-zone";
 import { BillingSummary } from "@/components/settings/billing-summary";
+import { BuyCredits } from "@/components/settings/buy-credits";
+import { CreditHistory, type CreditTransaction } from "@/components/settings/credit-history";
 import { isAdminEmail } from "@/lib/admin";
 
 export const metadata: Metadata = {
@@ -26,10 +28,17 @@ export default async function SettingsPage() {
 
   const isAdmin = isAdminEmail(user.email);
   const tier = isAdmin
-    ? "ultimate"
+    ? "enterprise"
     : (user.user_metadata?.subscription_tier as string | undefined) ?? "free";
   const seatCount = (user.user_metadata?.seat_count as number | undefined) ?? 0;
   const hasSubscription = Boolean(user.user_metadata?.stripe_customer_id);
+
+  const { data: transactions } = await supabase
+    .from("credit_transactions")
+    .select("id, amount, action_type, description, created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(20);
 
   return (
     <main className="min-h-full bg-background">
@@ -47,6 +56,10 @@ export default async function SettingsPage() {
           hasSubscription={hasSubscription}
           isAdmin={isAdmin}
         />
+
+        <BuyCredits />
+
+        <CreditHistory transactions={(transactions as CreditTransaction[] | null) ?? []} />
 
         <PasswordChangeForm />
 

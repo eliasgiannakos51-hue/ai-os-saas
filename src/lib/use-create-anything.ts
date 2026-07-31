@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useCredits } from "@/components/credits/credits-context";
 
 export type CreateResult =
   | { type: "matched"; moduleTitle: string; href: string; message: string }
@@ -12,6 +13,7 @@ export type CreateResult =
 // AI Assistant page (AssistantChat) — same /api/create contract, two UIs.
 export function useCreateAnything() {
   const [loading, setLoading] = useState(false);
+  const { refresh: refreshCredits } = useCredits();
 
   async function submit(message: string): Promise<CreateResult> {
     setLoading(true);
@@ -26,6 +28,9 @@ export function useCreateAnything() {
       if (!res.ok || !data.ok) {
         return { type: "error", message: data.error ?? "Something went wrong." };
       }
+
+      void refreshCredits();
+
       if (data.matched) {
         return {
           type: "matched",

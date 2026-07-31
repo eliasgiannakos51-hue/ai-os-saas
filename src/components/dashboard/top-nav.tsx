@@ -3,16 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, Bell, Plus } from "lucide-react";
+import { Search, Bell, Plus, Zap } from "lucide-react";
 import { CREATE_NAV_ITEM, OVERVIEW_NAV_ITEM } from "@/lib/modules";
 import { MenuButton } from "@/components/dashboard/menu-button";
 import { LogoutButton } from "@/components/logout-button";
 import { Logo } from "@/components/logo";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
+import { useCredits } from "@/components/credits/credits-context";
 
 export function TopNav({ email }: { email: string }) {
   const router = useRouter();
   const { setOpen: setCommandPaletteOpen } = useCommandPalette();
+  const { credits } = useCredits();
   const [notifOpen, setNotifOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -68,6 +70,15 @@ export function TopNav({ email }: { email: string }) {
             </div>
           )}
         </div>
+
+        <Link
+          href="/dashboard/settings#buy-credits"
+          className="hidden items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-400 sm:inline-flex"
+          title="Credits remaining — buy more in Settings"
+        >
+          <Zap className="h-3.5 w-3.5 text-orange-400" aria-hidden="true" />
+          {credits === null ? "…" : credits.toLocaleString()}
+        </Link>
 
         <button
           type="button"

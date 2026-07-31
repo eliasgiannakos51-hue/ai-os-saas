@@ -1,3 +1,5 @@
+import type { PlanSlug } from "@/lib/billing/plans";
+
 export type FieldType = "text" | "textarea" | "number" | "select";
 
 export type FieldConfig = {
@@ -17,6 +19,16 @@ export type ModuleConfig = {
   table: string;
   headlineKey: string;
   fields: FieldConfig[];
+  // Credits system (see lib/billing/credits.ts). creditCost, when set,
+  // routes GenericAddForm through /api/modules/create instead of a direct
+  // client insert, so the cost can be checked/deducted server-side.
+  // minPlanSlug, when set, gates the whole page (BuildModulePage only) —
+  // below that plan, the page shows an "Upgrade Required" prompt instead
+  // of its normal content. maxAiAgentsCap is a hard per-plan record count
+  // ceiling, special-cased for the "agents" module only.
+  creditCost?: number;
+  minPlanSlug?: PlanSlug;
+  countCapCapability?: "maxAiAgents";
 };
 
 export const MODULES: ModuleConfig[] = [
@@ -169,6 +181,7 @@ export const MODULES: ModuleConfig[] = [
     title: "Automation",
     table: "automations",
     headlineKey: "task_name",
+    creditCost: 50,
     fields: [
       { key: "task_name", label: "Task Name", type: "text", required: true },
       { key: "time_saved", label: "Time Saved", type: "text", badge: true },

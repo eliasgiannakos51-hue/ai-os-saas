@@ -1,16 +1,43 @@
-// Plan metadata for display (pricing page, Settings). No Stripe price IDs
-// here on purpose — this file is imported by client components, and price
-// IDs are a server-only concern (see price-ids.ts).
-export type PlanSlug = "free" | "starter" | "growth" | "professional" | "ultimate";
-export type PaidPlanSlug = Exclude<PlanSlug, "free">;
+// Plan metadata for display (pricing page, Settings) and for the real
+// entitlement checks enforced server-side (credit costs in
+// lib/billing/credits.ts, page/creation gating driven by `capabilities`
+// below). No Stripe price IDs here on purpose — this file is imported by
+// client components, and price IDs are a server-only concern (see
+// price-ids.ts).
+export type PlanSlug = "free" | "pro" | "creator" | "professional" | "enterprise";
+
+// Every plan except Enterprise has a real Stripe Price ID and can start a
+// self-serve Checkout session — Enterprise is "Contact Sales" only (custom
+// pricing, no fixed price to charge). Kept as `PaidPlanSlug` too since
+// that's the name existing call sites (subscribe-button.tsx, api/checkout,
+// signup-flow.tsx) already import for "can this slug start a self-serve
+// Stripe checkout".
+export type SelfServePlanSlug = Exclude<PlanSlug, "free" | "enterprise">;
+export type PaidPlanSlug = SelfServePlanSlug;
 
 export type PlanFeature = { text: string; comingSoon?: boolean };
+
+// Real, enforced entitlements for this plan — checked server-side wherever
+// the corresponding feature/page/action actually exists. Fields that don't
+// have a real feature to gate yet (AI Team Generator, AI Knowledge Base,
+// analytics dashboard, API access, marketplace publishing, SSO, audit
+// logs) are NOT represented here — they only appear as "Coming Soon"
+// bullets in `features` below until those features are actually built.
+export type PlanCapabilities = {
+  maxAiAgents: number | "unlimited";
+  websiteBuilder: boolean;
+  mobileSaasBuilder: boolean;
+  imageVideoGeneration: boolean;
+  aiMemory: boolean;
+  teamCollaboration: boolean;
+};
 
 export type Plan = {
   slug: PlanSlug;
   name: string;
-  price: number; // USD/month, 0 for Free
-  aiRequestsPerMonth: number | "unlimited";
+  price: number | "custom"; // USD/month, 0 for Free, "custom" for Enterprise
+  monthlyCredits: number | "custom";
+  capabilities: PlanCapabilities;
   features: PlanFeature[];
   hasTeamSeats: boolean;
   highlighted?: boolean;
@@ -23,75 +50,158 @@ export const PLANS: Plan[] = [
     slug: "free",
     name: "Free",
     price: 0,
-    aiRequestsPerMonth: 20,
+    monthlyCredits: 100,
     hasTeamSeats: false,
+    capabilities: {
+      maxAiAgents: 2,
+      websiteBuilder: false,
+      mobileSaasBuilder: false,
+      imageVideoGeneration: false,
+      aiMemory: false,
+      teamCollaboration: false,
+    },
     features: [
-      { text: "Access to all 13 modules" },
-      { text: "20 AI requests/month (Create Anything + Veron Chat combined)" },
-      { text: "Veron Chat history: 7 days" },
+      { text: "1 workspace, 3 projects" },
+      { text: "2 AI agents" },
+      { text: "Basic AI chat" },
+      { text: "100 credits/month" },
+      { text: "Marketplace: install only" },
+      { text: "Community support" },
     ],
   },
   {
-    slug: "starter",
-    name: "Starter",
+    slug: "pro",
+    name: "Pro",
     price: 20,
-    aiRequestsPerMonth: 200,
-    hasTeamSeats: true,
+    monthlyCredits: 1000,
+    hasTeamSeats: false,
+    capabilities: {
+      maxAiAgents: 20,
+      websiteBuilder: true,
+      mobileSaasBuilder: false,
+      imageVideoGeneration: true,
+      aiMemory: true,
+      teamCollaboration: false,
+    },
     features: [
-      { text: "Everything in Free" },
-      { text: "200 AI requests/month" },
-      { text: "CSV export on every module" },
-      { text: "Unlimited Veron Chat history + pinned conversations" },
+      { text: "Unlimited projects" },
+      { text: "Up to 20 AI agents" },
+      { text: "AI Memory" },
+      { text: "Website & Automation Builder access" },
+      { text: "Image & video generation access" },
+      { text: "1,000 credits/month" },
+      { text: "Email support" },
     ],
   },
   {
-    slug: "growth",
-    name: "Growth",
+    slug: "creator",
+    name: "Creator",
     price: 50,
-    aiRequestsPerMonth: 750,
-    hasTeamSeats: true,
+    monthlyCredits: 3000,
+    hasTeamSeats: false,
     highlighted: true,
+    capabilities: {
+      maxAiAgents: 100,
+      websiteBuilder: true,
+      mobileSaasBuilder: true,
+      imageVideoGeneration: true,
+      aiMemory: true,
+      teamCollaboration: false,
+    },
     features: [
-      { text: "Everything in Starter" },
-      { text: "750 AI requests/month" },
-      { text: "Full data export (JSON, all modules)" },
-      { text: "Automation Builder", comingSoon: true },
+      { text: "Everything in Pro" },
+      { text: "Up to 100 AI agents" },
+      { text: "AI Team Generator", comingSoon: true },
+      { text: "Mobile & SaaS Builder access" },
+      { text: "Advanced automations", comingSoon: true },
+      { text: "AI Knowledge Base", comingSoon: true },
+      { text: "3,000 credits/month" },
+      { text: "Priority processing" },
     ],
   },
   {
     slug: "professional",
     name: "Professional",
     price: 100,
-    aiRequestsPerMonth: 2500,
+    monthlyCredits: 10000,
     hasTeamSeats: true,
+    capabilities: {
+      maxAiAgents: "unlimited",
+      websiteBuilder: true,
+      mobileSaasBuilder: true,
+      imageVideoGeneration: true,
+      aiMemory: true,
+      teamCollaboration: true,
+    },
     features: [
-      { text: "Everything in Growth" },
-      { text: "2,500 AI requests/month" },
-      { text: "Priority email support" },
-      { text: "AI Agent Builder", comingSoon: true },
-      { text: "Website Builder", comingSoon: true },
+      { text: "Everything in Creator" },
+      { text: "Unlimited AI agents & teams" },
+      { text: "Team collaboration" },
+      { text: "Shared AI memory" },
+      { text: "Analytics dashboard", comingSoon: true },
+      { text: "API access", comingSoon: true },
+      { text: "Marketplace publishing", comingSoon: true },
+      { text: "10,000 credits/month" },
+      { text: "Priority support" },
     ],
   },
   {
-    slug: "ultimate",
-    name: "Ultimate",
-    price: 200,
-    aiRequestsPerMonth: "unlimited",
+    slug: "enterprise",
+    name: "Enterprise",
+    price: "custom",
+    monthlyCredits: "custom",
     hasTeamSeats: true,
+    capabilities: {
+      maxAiAgents: "unlimited",
+      websiteBuilder: true,
+      mobileSaasBuilder: true,
+      imageVideoGeneration: true,
+      aiMemory: true,
+      teamCollaboration: true,
+    },
     features: [
       { text: "Everything in Professional" },
-      { text: "Unlimited AI requests" },
+      { text: "Unlimited members" },
+      { text: "SSO", comingSoon: true },
+      { text: "Audit logs", comingSoon: true },
       { text: "Dedicated support" },
-      { text: "Video/Image Studio", comingSoon: true },
-      { text: "Marketplace access", comingSoon: true },
+      { text: "SLA", comingSoon: true },
+      { text: "Custom integrations", comingSoon: true },
+      { text: "Custom credits" },
     ],
   },
 ];
+
+// Ordinal rank for "does this plan meet the minimum tier" checks (page
+// gating, feature gating) — index in this array, higher is better.
+const PLAN_RANK: PlanSlug[] = ["free", "pro", "creator", "professional", "enterprise"];
 
 export function getPlan(slug: string): Plan | undefined {
   return PLANS.find((p) => p.slug === slug);
 }
 
 export function isPaidPlanSlug(slug: string): slug is PaidPlanSlug {
-  return slug !== "free" && PLANS.some((p) => p.slug === slug);
+  return PLANS.some((p) => p.slug === slug && p.slug !== "free" && p.slug !== "enterprise");
+}
+
+export function planMeetsMinimum(tier: string, minimum: PlanSlug): boolean {
+  const tierRank = PLAN_RANK.indexOf(tier as PlanSlug);
+  const minRank = PLAN_RANK.indexOf(minimum);
+  return tierRank >= 0 && tierRank >= minRank;
+}
+
+// One-time credit packs (mode: "payment", not a subscription) — display
+// metadata only, client-safe. Stripe Price IDs live in price-ids.ts
+// (server-only) keyed by the same `id`.
+export type CreditPackId = "credits_10" | "credits_25" | "credits_50" | "credits_100";
+
+export const CREDIT_PACKS: { id: CreditPackId; usd: number; credits: number }[] = [
+  { id: "credits_10", usd: 10, credits: 500 },
+  { id: "credits_25", usd: 25, credits: 1250 },
+  { id: "credits_50", usd: 50, credits: 2500 },
+  { id: "credits_100", usd: 100, credits: 5000 },
+];
+
+export function getCreditPack(id: string): { id: CreditPackId; usd: number; credits: number } | undefined {
+  return CREDIT_PACKS.find((p) => p.id === id);
 }

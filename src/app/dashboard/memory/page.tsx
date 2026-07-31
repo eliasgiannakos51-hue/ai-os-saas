@@ -6,8 +6,12 @@ import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
 import { BUILD_MODULES } from "@/lib/build-modules";
 import { MEMORY_ICON } from "@/lib/module-icons";
 import { MemorySearch, type MemoryResult } from "@/components/memory/memory-search";
+import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
+import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
+import { resolvePlanSlug } from "@/lib/billing/credits";
+import { isAdminEmail } from "@/lib/admin";
 
 export const metadata: Metadata = {
   title: "AI Memory",
@@ -47,6 +51,20 @@ export default async function MemoryPage() {
 
   if (!user) {
     redirect("/login");
+  }
+
+  const isAdmin = isAdminEmail(user.email);
+  const planSlug = resolvePlanSlug(user);
+
+  if (!isAdmin && !planMeetsMinimum(planSlug, "pro")) {
+    return (
+      <main className="min-h-full bg-background">
+        <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+          <PageHeader icon={MEMORY_ICON} title="AI Memory" />
+          <UpgradeRequired featureName="AI Memory" planName={getPlan("pro")?.name ?? "Pro"} />
+        </div>
+      </main>
+    );
   }
 
   const perModule = await Promise.all(

@@ -4,6 +4,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { sendWelcomeEmail } from "@/lib/email/send-welcome-email";
 import { logApiError } from "@/lib/log-error";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { grantCredits } from "@/lib/billing/credits";
+import { getPlan } from "@/lib/billing/plans";
 
 export const dynamic = "force-dynamic";
 
@@ -97,6 +99,20 @@ export async function POST(request: Request) {
     }
 
     const supabase = createClient();
+
+    // Grant the Free plan's monthly credits so user_credits exists from
+    // the moment the account does — everything downstream (api/create,
+    // api/chat, api/modules/create) reads that row directly.
+    const freePlan = getPlan("free")!;
+    const freeCredits = typeof freePlan.monthlyCredits === "number" ? freePlan.monthlyCredits : 0;
+    try {
+      await grantCredits(createData.user.id, freeCredits, "signup_grant", "Free plan signup credits", {
+        setTotal: freeCredits,
+        setPlanTier: "free",
+      });
+    } catch (err) {
+      logApiError("/api/signup", err, { stage: "grant_credits" });
+    }
 
     // Best-effort welcome email — sendWelcomeEmail never throws, so a failed
     // send (missing RESEND_API_KEY, Resend outage, etc.) never blocks signup.

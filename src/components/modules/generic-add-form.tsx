@@ -2,22 +2,36 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Plus, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { ModuleConfig } from "@/lib/modules";
 import { useToast } from "@/components/toast/toast-context";
+import { useCredits } from "@/components/credits/credits-context";
 
 function emptyFormFor(module: ModuleConfig): Record<string, string> {
   return Object.fromEntries(module.fields.map((f) => [f.key, ""]));
+}
+
+// Modules with a creditCost, minPlanSlug, or countCapCapability set (see
+// lib/modules.ts / lib/build-modules.ts) go through the gated
+// /api/modules/create endpoint instead of inserting directly — that's the
+// only way a credit deduction or a plan/count check can be trusted, since
+// a direct client insert can't be. Every other module keeps the original
+// direct-insert path below unchanged.
+function isGatedModule(module: ModuleConfig): boolean {
+  return Boolean(module.creditCost || module.minPlanSlug || module.countCapCapability);
 }
 
 export function GenericAddForm({ module }: { module: ModuleConfig }) {
   const router = useRouter();
   const supabase = createClient();
   const { addToast } = useToast();
+  const { refresh: refreshCredits } = useCredits();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Record<string, string>>(() => emptyFormFor(module));
   const [error, setError] = useState<string | null>(null);
+  const [upgradeRequired, setUpgradeRequired] = useState(false);
   const [loading, setLoading] = useState(false);
 
   function update(key: string) {
@@ -28,7 +42,39 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setUpgradeRequired(false);
     setLoading(true);
+
+    if (isGatedModule(module)) {
+      try {
+        const res = await fetch("/api/modules/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ moduleSlug: module.slug, fields: form }),
+        });
+        const data = await res.json();
+
+        setLoading(false);
+
+        if (!res.ok || !data.ok) {
+          const message = data.error ?? "Something went wrong.";
+          setError(message);
+          setUpgradeRequired(Boolean(data.upgradeRequired || data.insufficientCredits));
+          addToast(`✗ ${message}`, "error");
+          return;
+        }
+
+        setForm(emptyFormFor(module));
+        setOpen(false);
+        addToast("✓ created");
+        void refreshCredits();
+        router.refresh();
+      } catch {
+        setLoading(false);
+        setError("Network error — please try again.");
+      }
+      return;
+    }
 
     const {
       data: { user },
@@ -146,6 +192,14 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
       {error && (
         <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
           error: {error}
+          {upgradeRequired && (
+            <>
+              {" "}
+              <Link href="/pricing" className="underline underline-offset-2">
+                View plans
+              </Link>
+            </>
+          )}
         </p>
       )}
 

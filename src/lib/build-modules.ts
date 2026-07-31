@@ -14,6 +14,8 @@ export const BUILD_MODULES: ModuleConfig[] = [
     title: "AI Agents",
     table: "ai_agents",
     headlineKey: "name",
+    creditCost: 40,
+    countCapCapability: "maxAiAgents",
     fields: [
       { key: "name", label: "Name", type: "text", required: true },
       { key: "description", label: "Goal / Description", type: "textarea", full: true },
@@ -31,6 +33,8 @@ export const BUILD_MODULES: ModuleConfig[] = [
     title: "Websites",
     table: "ai_websites",
     headlineKey: "name",
+    creditCost: 100,
+    minPlanSlug: "pro",
     fields: [
       { key: "name", label: "Name", type: "text", required: true },
       { key: "description", label: "Description", type: "textarea", full: true },
@@ -49,6 +53,8 @@ export const BUILD_MODULES: ModuleConfig[] = [
     title: "Apps",
     table: "ai_apps",
     headlineKey: "name",
+    creditCost: 300,
+    minPlanSlug: "creator",
     fields: [
       { key: "name", label: "Name", type: "text", required: true },
       { key: "description", label: "Description", type: "textarea", full: true },
@@ -73,6 +79,7 @@ export const BUILD_MODULES: ModuleConfig[] = [
     title: "Images",
     table: "ai_images",
     headlineKey: "prompt",
+    minPlanSlug: "pro",
     fields: [
       { key: "prompt", label: "Prompt", type: "text", required: true },
       { key: "description", label: "Notes", type: "textarea", full: true },
@@ -90,6 +97,7 @@ export const BUILD_MODULES: ModuleConfig[] = [
     title: "Videos",
     table: "ai_videos",
     headlineKey: "prompt",
+    minPlanSlug: "pro",
     fields: [
       { key: "prompt", label: "Prompt", type: "text", required: true },
       { key: "description", label: "Notes", type: "textarea", full: true },

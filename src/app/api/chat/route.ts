@@ -3,7 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
-import { buildUsageLimitMessage, getMonthlyUsageCount, resolvePlan } from "@/lib/billing/usage";
+import { CREDIT_COSTS, deductCredits, insufficientCreditsMessage } from "@/lib/billing/credits";
 
 export const dynamic = "force-dynamic";
 
@@ -83,31 +83,25 @@ export async function POST(request: Request) {
       );
     }
 
-    // Plan-based monthly quota, shared with /api/create via
-    // getMonthlyUsageCount — Veron Chat and Create Anything draw from one
-    // "AI requests/month" budget per the plan the user is on (see
-    // lib/billing/plans.ts), not independent per-route counters.
-    // Admin-listed accounts (see lib/admin.ts) skip the limit entirely —
-    // treated as unlimited Ultimate-tier requests.
+    // Credits: 1 credit per Veron Chat message, deducted from user_credits
+    // (see lib/billing/credits.ts), the same shared budget Create Anything
+    // draws from. Admin-listed accounts (see lib/admin.ts) skip this
+    // entirely — treated as unlimited.
     const isAdmin = isAdminEmail(user.email);
-    const plan = resolvePlan(user);
-    const { count: monthlyUsageCount, error: usageCheckError } = await getMonthlyUsageCount(
-      supabase,
-      user.id
-    );
-
-    if (usageCheckError) {
-      logApiError("/api/chat", usageCheckError, { stage: "usage_check" });
-    } else if (
-      !isAdmin &&
-      plan.aiRequestsPerMonth !== "unlimited" &&
-      monthlyUsageCount >= plan.aiRequestsPerMonth
-    ) {
-      return NextResponse.json({
-        ok: true,
-        rateLimited: true,
-        message: buildUsageLimitMessage(plan),
-      });
+    if (!isAdmin) {
+      const deduction = await deductCredits(
+        user.id,
+        CREDIT_COSTS.chatMessage,
+        "chat_message",
+        "Veron Chat message"
+      );
+      if (!deduction.ok) {
+        return NextResponse.json({
+          ok: true,
+          rateLimited: true,
+          message: insufficientCreditsMessage(),
+        });
+      }
     }
 
     // Resolve the conversation: reuse an existing one (verifying ownership

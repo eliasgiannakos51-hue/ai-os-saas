@@ -35,14 +35,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
-    // Admin-listed accounts (see lib/admin.ts) get full Ultimate-tier access,
-    // including team invites, without a real Stripe subscription.
+    // Admin-listed accounts (see lib/admin.ts) get full Enterprise-tier
+    // access, including team invites, without a real Stripe subscription.
     const isAdmin = isAdminEmail(user.email);
-    const tier = isAdmin ? "ultimate" : (user.user_metadata?.subscription_tier as string | undefined);
+    const tier = isAdmin ? "enterprise" : (user.user_metadata?.subscription_tier as string | undefined);
     const ownsSubscription = isAdmin || Boolean(user.user_metadata?.stripe_subscription_id);
-    if (!ownsSubscription || !tier || tier === "free") {
+    // Team collaboration is a Professional+ capability (see
+    // lib/billing/plans.ts's PlanCapabilities.teamCollaboration).
+    if (!ownsSubscription || !tier || !getPlan(tier)?.capabilities.teamCollaboration) {
       return NextResponse.json(
-        { ok: false, error: "Team invites require an active paid plan." },
+        { ok: false, error: "Team invites require the Professional plan or higher." },
         { status: 403 }
       );
     }

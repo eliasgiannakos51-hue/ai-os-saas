@@ -2,12 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Check, Clock, X } from "lucide-react";
 import { Logo } from "@/components/logo";
-import { PLANS, TEAM_SEAT_PRICE_USD, type Plan, type PaidPlanSlug } from "@/lib/billing/plans";
+import {
+  PLANS,
+  TEAM_SEAT_PRICE_USD,
+  planMeetsMinimum,
+  type Plan,
+  type PaidPlanSlug,
+  type PlanSlug,
+} from "@/lib/billing/plans";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Veron AI pricing — Free, Starter, Growth, Professional, and Ultimate plans.",
+  description: "Veron AI pricing — Free, Pro, Creator, Professional, and Enterprise plans.",
 };
 
 type ComparisonCell =
@@ -16,70 +23,43 @@ type ComparisonCell =
   | { type: "cross" }
   | { type: "soon" };
 
-// Mirrors the cumulative "Everything in X" feature lists in
-// src/lib/billing/plans.ts as a flat, per-plan matrix — kept here rather
-// than restructuring PLANS itself, since that array is also consumed
-// elsewhere (Settings, Team page) in its current cumulative-bullet shape.
+function soonFrom(minimum: PlanSlug): (plan: Plan) => ComparisonCell {
+  return (plan) => (planMeetsMinimum(plan.slug, minimum) ? { type: "soon" } : { type: "cross" });
+}
+
+// Real, enforced capabilities (lib/billing/plans.ts's PlanCapabilities) map
+// straight to a check/cross row; the "Coming Soon" rows below mirror the
+// comingSoon-flagged bullets in each plan's `features` list — not enforced
+// anywhere yet, shown for the same reason those bullets exist there.
 const COMPARISON_ROWS: { label: string; cell: (plan: Plan) => ComparisonCell }[] = [
   {
-    label: "AI requests / month",
+    label: "Credits / month",
     cell: (p) => ({
       type: "value",
-      text: p.aiRequestsPerMonth === "unlimited" ? "Unlimited" : p.aiRequestsPerMonth.toLocaleString(),
+      text: p.monthlyCredits === "custom" ? "Custom" : p.monthlyCredits.toLocaleString(),
     }),
   },
-  { label: "Access to all 13 modules", cell: () => ({ type: "check" }) },
   {
-    label: "Veron Chat history",
-    cell: (p) => ({ type: "value", text: p.slug === "free" ? "7 days" : "Unlimited" }),
+    label: "AI agents",
+    cell: (p) => ({
+      type: "value",
+      text: p.capabilities.maxAiAgents === "unlimited" ? "Unlimited" : String(p.capabilities.maxAiAgents),
+    }),
   },
-  {
-    label: "Pinned conversations",
-    cell: (p) => (p.slug === "free" ? { type: "cross" } : { type: "check" }),
-  },
-  {
-    label: "CSV export (every module)",
-    cell: (p) => (p.slug === "free" ? { type: "cross" } : { type: "check" }),
-  },
-  {
-    label: "Full data export (JSON, all modules)",
-    cell: (p) => (p.slug === "free" || p.slug === "starter" ? { type: "cross" } : { type: "check" }),
-  },
-  {
-    label: "Team seats",
-    cell: (p) => (p.hasTeamSeats ? { type: "check" } : { type: "cross" }),
-  },
-  {
-    label: "Priority email support",
-    cell: (p) => (p.slug === "professional" || p.slug === "ultimate" ? { type: "check" } : { type: "cross" }),
-  },
-  {
-    label: "Dedicated support",
-    cell: (p) => (p.slug === "ultimate" ? { type: "check" } : { type: "cross" }),
-  },
-  {
-    label: "Automation Builder",
-    cell: (p) =>
-      p.slug === "growth" || p.slug === "professional" || p.slug === "ultimate"
-        ? { type: "soon" }
-        : { type: "cross" },
-  },
-  {
-    label: "AI Agent Builder",
-    cell: (p) => (p.slug === "professional" || p.slug === "ultimate" ? { type: "soon" } : { type: "cross" }),
-  },
-  {
-    label: "Website Builder",
-    cell: (p) => (p.slug === "professional" || p.slug === "ultimate" ? { type: "soon" } : { type: "cross" }),
-  },
-  {
-    label: "Video/Image Studio",
-    cell: (p) => (p.slug === "ultimate" ? { type: "soon" } : { type: "cross" }),
-  },
-  {
-    label: "Marketplace access",
-    cell: (p) => (p.slug === "ultimate" ? { type: "soon" } : { type: "cross" }),
-  },
+  { label: "Website & Automation Builder", cell: (p) => (p.capabilities.websiteBuilder ? { type: "check" } : { type: "cross" }) },
+  { label: "Mobile & SaaS Builder", cell: (p) => (p.capabilities.mobileSaasBuilder ? { type: "check" } : { type: "cross" }) },
+  { label: "Image & video generation", cell: (p) => (p.capabilities.imageVideoGeneration ? { type: "check" } : { type: "cross" }) },
+  { label: "AI Memory", cell: (p) => (p.capabilities.aiMemory ? { type: "check" } : { type: "cross" }) },
+  { label: "Team collaboration", cell: (p) => (p.capabilities.teamCollaboration ? { type: "check" } : { type: "cross" }) },
+  { label: "Team seats add-on", cell: (p) => (p.hasTeamSeats ? { type: "check" } : { type: "cross" }) },
+  { label: "AI Team Generator", cell: soonFrom("creator") },
+  { label: "Advanced automations", cell: soonFrom("creator") },
+  { label: "AI Knowledge Base", cell: soonFrom("creator") },
+  { label: "Analytics dashboard", cell: soonFrom("professional") },
+  { label: "API access", cell: soonFrom("professional") },
+  { label: "Marketplace publishing", cell: soonFrom("professional") },
+  { label: "SSO", cell: soonFrom("enterprise") },
+  { label: "Audit logs", cell: soonFrom("enterprise") },
 ];
 
 function ComparisonCellContent({ cell }: { cell: ComparisonCell }) {
@@ -117,7 +97,7 @@ export default function PricingPage() {
             Pricing
           </h1>
           <p className="mt-3 text-sm text-muted">
-            Start free. Upgrade whenever you need more AI requests or team seats.
+            Start free. Upgrade whenever you need more credits, AI agents, or team seats.
           </p>
         </div>
 
@@ -138,15 +118,19 @@ export default function PricingPage() {
               )}
               <h2 className="text-sm font-semibold text-orange-400">{plan.name}</h2>
               <p className="mt-3 text-2xl font-bold text-foreground">
-                ${plan.price}
-                {plan.price > 0 && (
-                  <span className="text-sm font-normal text-muted">/month</span>
+                {typeof plan.price === "number" ? (
+                  <>
+                    ${plan.price}
+                    {plan.price > 0 && <span className="text-sm font-normal text-muted">/month</span>}
+                  </>
+                ) : (
+                  "Custom"
                 )}
               </p>
               <p className="mt-2 text-xs text-muted">
-                {plan.aiRequestsPerMonth === "unlimited"
-                  ? "Unlimited AI requests/month"
-                  : `${plan.aiRequestsPerMonth.toLocaleString()} AI requests/month`}
+                {plan.monthlyCredits === "custom"
+                  ? "Custom credits/month"
+                  : `${plan.monthlyCredits.toLocaleString()} credits/month`}
               </p>
 
               <ul className="mt-6 flex-1 space-y-2.5 text-sm text-muted">
@@ -187,6 +171,13 @@ export default function PricingPage() {
                   >
                     Sign Up
                   </Link>
+                ) : plan.slug === "enterprise" ? (
+                  <a
+                    href="mailto:sales@veron.ai?subject=Veron%20AI%20Enterprise"
+                    className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
+                  >
+                    Contact Sales
+                  </a>
                 ) : (
                   <SubscribeButton
                     plan={plan.slug as PaidPlanSlug}
@@ -206,8 +197,8 @@ export default function PricingPage() {
         <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-border bg-panel p-6 text-center">
           <h2 className="text-sm font-semibold text-orange-400">Need it for your team?</h2>
           <p className="mt-2 text-sm text-muted">
-            Add members to any paid plan for +${TEAM_SEAT_PRICE_USD}/member/month — everyone
-            gets full access at your plan&apos;s tier.
+            Add members to any Professional+ plan for +${TEAM_SEAT_PRICE_USD}/member/month —
+            everyone gets full access at your plan&apos;s tier.
           </p>
         </div>
 

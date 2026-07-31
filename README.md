@@ -87,11 +87,15 @@ touch targets) and works identically on mobile and desktop.
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
    STRIPE_SECRET_KEY=your-stripe-secret-key
    STRIPE_WEBHOOK_SECRET=your-stripe-webhook-signing-secret
-   STRIPE_PRICE_STARTER=price_...
-   STRIPE_PRICE_GROWTH=price_...
+   STRIPE_PRICE_PRO=price_...
+   STRIPE_PRICE_CREATOR=price_...
    STRIPE_PRICE_PROFESSIONAL=price_...
-   STRIPE_PRICE_ULTIMATE=price_...
    STRIPE_PRICE_TEAM_SEAT=price_...
+   STRIPE_PRICE_CREDITS_10=price_...
+   STRIPE_PRICE_CREDITS_25=price_...
+   STRIPE_PRICE_CREDITS_50=price_...
+   STRIPE_PRICE_CREDITS_100=price_...
+   CRON_SECRET=your-cron-secret
    ADMIN_EMAILS=owner@example.com,cofounder@example.com
    ```
 
@@ -169,22 +173,30 @@ Transactional email is sent via [Resend](https://resend.com).
 Subscriptions run through [Stripe](https://stripe.com) Checkout + the
 Billing Portal — no card data ever touches this app's servers.
 
-- **Plans** (`src/lib/billing/plans.ts`) — Free, Starter ($20), Growth
-  ($50), Professional ($100), Ultimate ($200), shown on `/pricing`. Every
-  paid plan also offers a $20/month **team seat** add-on with an
-  adjustable quantity (starts at 0 in Checkout, changed later from the
-  Billing Portal). Checkout has `allow_promotion_codes: true`, so Stripe's
-  hosted page shows an "Add promotion code" field — coupons are created and
-  managed entirely in the Stripe Dashboard, no app code involved.
-- **Stripe setup** — create 5 recurring Prices in the Stripe Dashboard (one
-  per paid plan, plus one shared "Team seat" price used by every plan) and
-  set their IDs as `STRIPE_PRICE_STARTER` / `STRIPE_PRICE_GROWTH` /
-  `STRIPE_PRICE_PROFESSIONAL` / `STRIPE_PRICE_ULTIMATE` /
-  `STRIPE_PRICE_TEAM_SEAT`. Then add a webhook endpoint pointed at
+- **Plans** (`src/lib/billing/plans.ts`) — Free, Pro ($20), Creator ($50),
+  Professional ($100), Enterprise (custom, Contact Sales only), shown on
+  `/pricing`. Each plan carries a `capabilities` object (max AI agents,
+  Website/Automation Builder, Mobile/SaaS Builder, image/video generation,
+  AI Memory, team collaboration) enforced server-side wherever the
+  corresponding page or action exists, and a `monthlyCredits` allotment —
+  see **Credits** below. Professional and Enterprise also offer a
+  $20/month **team seat** add-on with an adjustable quantity (starts at 0
+  in Checkout, changed later from the Billing Portal). Checkout has
+  `allow_promotion_codes: true`, so Stripe's hosted page shows an "Add
+  promotion code" field — coupons are created and managed entirely in the
+  Stripe Dashboard, no app code involved.
+- **Stripe setup** — create 3 recurring Prices in the Stripe Dashboard (one
+  per self-serve paid plan — Enterprise has none, it's Contact Sales only),
+  plus one shared "Team seat" price, plus 4 one-time Prices for the credit
+  packs (see **Credits** below), and set their IDs as `STRIPE_PRICE_PRO` /
+  `STRIPE_PRICE_CREATOR` / `STRIPE_PRICE_PROFESSIONAL` /
+  `STRIPE_PRICE_TEAM_SEAT` / `STRIPE_PRICE_CREDITS_10` /
+  `STRIPE_PRICE_CREDITS_25` / `STRIPE_PRICE_CREDITS_50` /
+  `STRIPE_PRICE_CREDITS_100`. Then add a webhook endpoint pointed at
   `<your-domain>/api/webhooks/stripe` subscribed to
-  `checkout.session.completed`, `customer.subscription.updated`, and
-  `customer.subscription.deleted`, and set its signing secret as
-  `STRIPE_WEBHOOK_SECRET`.
+  `checkout.session.completed`, `customer.subscription.updated`,
+  `customer.subscription.deleted`, and `invoice.paid`, and set its signing
+  secret as `STRIPE_WEBHOOK_SECRET`.
 - **Flow** — `/pricing`'s paid-plan buttons POST to `/api/checkout`, which
   creates (or reuses) a Stripe Customer for the logged-in user and a
   subscription-mode Checkout Session, then the browser is redirected to
@@ -193,30 +205,62 @@ Billing Portal — no card data ever touches this app's servers.
   relevant event and writes them to that user's `auth.users.raw_user_meta_data`
   via the service-role client — nothing else in the app reads Stripe
   directly.
-- **Team seats** (`/dashboard/team`, owners on a paid plan only) — invites
-  live in the `team_members` table; inviting someone sends them an email
-  (via Resend) and creates an `invited` row. When that email address next
-  logs in, `dashboard/layout.tsx` calls `acceptPendingTeamInvite`, which —
-  if the owner is still on a paid plan — marks the invite `active` and
+- **Team seats** (`/dashboard/team`, owners on Professional/Enterprise
+  only — the `teamCollaboration` capability) — invites live in the
+  `team_members` table; inviting someone sends them an email (via Resend)
+  and creates an `invited` row. When that email address next logs in,
+  `dashboard/layout.tsx` calls `acceptPendingTeamInvite`, which — if the
+  owner still has team collaboration — marks the invite `active` and
   copies the owner's `subscription_tier` onto the new member's own
   `user_metadata`.
-- **Settings** (`/dashboard/settings`) shows the current plan/seat count
-  and a "Manage Billing" button that opens a Stripe Billing Portal session
+- **Settings** (`/dashboard/settings`) shows the current plan/seat count,
+  a "Manage Billing" button that opens a Stripe Billing Portal session
   (`/api/billing-portal`) for anyone with a `stripe_customer_id` already
-  on file.
+  on file, a "Buy Credits" section, and the last 20 credit transactions.
+
+## Credits
+
+Every AI action spends credits from `user_credits.credits_remaining`
+(`src/lib/billing/credits.ts`) instead of a flat rate limit — 1 credit per
+Create Anything request or Veron Chat message, 40 for an AI agent, 50 for
+an automation, 100 for a website, 300 for an app. An action is blocked
+with "Not enough credits..." if the balance is too low; every
+grant/spend/purchase is logged to `credit_transactions` (run
+`supabase_credits_schema.sql` once, after `supabase_schema.sql`, to create
+both tables — additive only, RLS grants users read-only access to their
+own rows, every write goes through the service-role client).
+
+- **Monthly allotment** — set at signup (`api/signup`) for Free, and
+  re-synced by `/api/webhooks/stripe` on `checkout.session.completed`,
+  `customer.subscription.updated/deleted`, and `invoice.paid` (the event
+  that actually fires on a normal monthly renewal). `/api/cron/reset-credits`
+  is a placeholder, not yet wired to a scheduler (same pattern as
+  `/api/weekly-digest`) — point a monthly Vercel Cron/GitHub Action at it,
+  with `CRON_SECRET` set, as a safety net for accounts whose credits
+  didn't get reset by a Stripe event that cycle (Free accounts never touch
+  Stripe at all).
+- **Buying more credits** — Settings → Buy Credits sells 4 one-time packs
+  ($10=500, $25=1250, $50=2500, $100=5000 credits) via `/api/credits/checkout`
+  (Stripe Checkout, `mode: "payment"`, not a subscription); credits are
+  granted on `checkout.session.completed` for that payment-mode session,
+  from the session's own metadata.
+- **Live display** — `CreditsProvider` (`components/credits/credits-context.tsx`)
+  seeds the top-nav balance from a server-fetched value in
+  `dashboard/layout.tsx`, then every credit-spending action calls
+  `refresh()` afterward so the number updates without a page reload.
 
 ## Admin access
 
 `src/lib/admin.ts` defines an `ADMIN_EMAILS` allowlist (the founder account
 is hardcoded there; extend it via the `ADMIN_EMAILS` env var). Any signed-in
-user whose email is on that list is treated as Ultimate tier with unlimited
-AI requests everywhere the app would otherwise check `subscription_tier` or
-enforce the hourly rate limit — no real Stripe subscription required. This
-is resolved server-side per request from the caller's own session; it's
-never bundled into client JavaScript and never shown to, or inferable by,
-any other user. The only visible trace is a "Owner Access" badge on
-`/dashboard/settings`, shown only to the admin account itself in place of
-the normal billing button.
+user whose email is on that list is treated as Enterprise tier with
+unlimited credits and full plan capabilities everywhere the app would
+otherwise check `subscription_tier` or a credit balance — no real Stripe
+subscription required. This is resolved server-side per request from the
+caller's own session; it's never bundled into client JavaScript and never
+shown to, or inferable by, any other user. The only visible trace is a
+"Owner Access" badge on `/dashboard/settings`, shown only to the admin
+account itself in place of the normal billing button.
 
 ## Project structure
 

@@ -4,6 +4,7 @@ import { Settings as SettingsIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { PasswordChangeForm } from "@/components/settings/password-change-form";
+import { ChatMemorySettings } from "@/components/settings/chat-memory-settings";
 import { ExportDataButton } from "@/components/settings/export-data-button";
 import { DangerZone } from "@/components/settings/danger-zone";
 import { BillingSummary } from "@/components/settings/billing-summary";
@@ -40,6 +41,12 @@ export default async function SettingsPage() {
     .order("created_at", { ascending: false })
     .limit(20);
 
+  const chatMemoryEnabled = user.user_metadata?.chat_memory_enabled !== false;
+  const { count: chatMemoryCount } = await supabase
+    .from("chat_memory")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id);
+
   return (
     <main className="min-h-full bg-background">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
@@ -62,6 +69,14 @@ export default async function SettingsPage() {
         <CreditHistory transactions={(transactions as CreditTransaction[] | null) ?? []} />
 
         <PasswordChangeForm />
+
+        <div className="mt-6">
+          <ChatMemorySettings
+            userId={user.id}
+            initialEnabled={chatMemoryEnabled}
+            initialCount={chatMemoryCount ?? 0}
+          />
+        </div>
 
         <div className="mb-6 mt-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
           <h2 className="text-sm font-semibold text-foreground">Export Data</h2>

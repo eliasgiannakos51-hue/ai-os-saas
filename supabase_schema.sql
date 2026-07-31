@@ -702,3 +702,39 @@ create index if not exists account_deletion_requests_user_id_idx
   on public.account_deletion_requests (user_id);
 
 alter table public.account_deletion_requests enable row level security;
+
+-- ============================================================================
+-- Chat memory — durable, cross-conversation facts/preferences extracted
+-- from Ionexa Chat exchanges (see src/lib/chat/memory.ts). Same owner-only
+-- RLS pattern as every table above. Entries are append/delete-only (never
+-- edited), so there's no update policy. Toggled on/off via
+-- user_metadata.chat_memory_enabled (defaults to on when unset) — that's a
+-- user preference on auth.users itself, not a column here.
+-- ============================================================================
+
+drop table if exists public.chat_memory cascade;
+
+create table public.chat_memory (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  memory_text text not null,
+  source_conversation_id uuid references public.chat_conversations(id) on delete set null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists chat_memory_user_id_created_at_idx
+  on public.chat_memory (user_id, created_at desc);
+
+alter table public.chat_memory enable row level security;
+
+drop policy if exists "select_own_chat_memory" on public.chat_memory;
+create policy "select_own_chat_memory" on public.chat_memory
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_chat_memory" on public.chat_memory;
+create policy "insert_own_chat_memory" on public.chat_memory
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_chat_memory" on public.chat_memory;
+create policy "delete_own_chat_memory" on public.chat_memory
+  for delete using (auth.uid() = user_id);

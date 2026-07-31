@@ -4,6 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { CREDIT_COSTS, deductCredits, insufficientCreditsMessage } from "@/lib/billing/credits";
+import {
+  extractAndStoreMemory,
+  loadRecentMemories,
+  buildMemoryPromptAddition,
+  isChatMemoryEnabled,
+} from "@/lib/chat/memory";
 
 export const dynamic = "force-dynamic";
 
@@ -82,6 +88,12 @@ export async function POST(request: Request) {
         { status: 401 }
       );
     }
+
+    // Cross-conversation memory (see lib/chat/memory.ts) — off entirely
+    // when the user has disabled it in Settings.
+    const memoryEnabled = isChatMemoryEnabled(user);
+    const memories = memoryEnabled ? await loadRecentMemories(supabase, user.id) : [];
+    const systemPrompt = SYSTEM_PROMPT + buildMemoryPromptAddition(memories);
 
     // Credits: 1 credit per Ionexa Chat message, deducted from user_credits
     // (see lib/billing/credits.ts), the same shared budget Create Anything
@@ -206,7 +218,7 @@ export async function POST(request: Request) {
           const claudeStream = anthropic.messages.stream({
             model: MODEL,
             max_tokens: MAX_TOKENS,
-            system: SYSTEM_PROMPT,
+            system: systemPrompt,
             messages: [
               ...history.map((m) => ({ role: m.role, content: m.content })),
               { role: "user" as const, content: message },
@@ -254,6 +266,20 @@ export async function POST(request: Request) {
           .eq("id", finalConversationId);
         if (touchError) {
           logApiError("/api/chat", touchError, { stage: "touch_conversation" });
+        }
+
+        // Best-effort, awaited so it reliably finishes before the response
+        // stream closes (see lib/chat/memory.ts) — adds a little latency
+        // after the visible reply has already fully streamed in, not before.
+        if (memoryEnabled) {
+          await extractAndStoreMemory({
+            apiKey,
+            supabase,
+            userId: user.id,
+            conversationId: finalConversationId!,
+            userMessage: message,
+            assistantMessage: assistantText,
+          });
         }
 
         controller.enqueue(ndjsonLine({ type: "done" }));

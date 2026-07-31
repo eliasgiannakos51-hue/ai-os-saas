@@ -1,0 +1,80 @@
+{
+  "common": {
+    "search": "Search anything...",
+    "notifications": "Notifications",
+    "noNotifications": "No new notifications.",
+    "newProject": "New Project",
+    "signOut": "Sign out",
+    "jumpToPage": "Jump to a module or page...",
+    "noMatches": "No matches for '{query}'",
+    "createAnything": "Create Anything"
+  },
+  "sidebar": {
+    "groups": {
+      "workspace": "Workspace",
+      "build": "Build",
+      "business": "Business",
+      "strategy": "Strategy",
+      "operations": "Operations",
+      "marketplace": "Marketplace",
+      "settings": "Settings"
+    },
+    "items": {
+      "home": "Home",
+      "chat": "Ionexa Chat",
+      "memory": "AI Memory",
+      "settings": "Settings",
+      "team": "Team"
+    }
+  },
+  "landing": {
+    "hero": "The energy behind everything you build.",
+    "description": "Create anything with AI. From ideas and research to trading, finance, product planning and business decisions — organized in one intelligent workspace.",
+    "logIn": "Log In",
+    "signUp": "Sign Up",
+    "footer": {
+      "pricing": "Pricing",
+      "roadmap": "Roadmap",
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy"
+    }
+  },
+  "pricing": {
+    "title": "Pricing",
+    "subtitle": "Start free. Upgrade whenever you need more credits, AI agents, or team seats.",
+    "perMonth": "/month",
+    "custom": "Custom",
+    "mostPopular": "Most Popular",
+    "comingSoon": "Coming Soon",
+    "soon": "Soon",
+    "signUp": "Sign Up",
+    "contactSales": "Contact Sales",
+    "getPlan": "Get {plan}",
+    "teamBannerTitle": "Need it for your team?",
+    "teamBannerBody": "Add members to any Professional+ plan for +{price}/member/month — everyone gets full access at your plan's tier.",
+    "comparePlans": "Compare plans",
+    "feature": "Feature",
+    "backToHome": "← Back to Ionexa AI",
+    "rows": {
+      "creditsPerMonth": "Credits / month",
+      "aiAgents": "AI agents",
+      "websiteBuilder": "Website & Automation Builder",
+      "mobileSaasBuilder": "Mobile & SaaS Builder",
+      "imageVideo": "Image & video generation",
+      "aiMemory": "AI Memory",
+      "teamCollaboration": "Team collaboration",
+      "teamSeatsAddOn": "Team seats add-on",
+      "aiTeamGenerator": "AI Team Generator",
+      "advancedAutomations": "Advanced automations",
+      "aiKnowledgeBase": "AI Knowledge Base",
+      "analyticsDashboard": "Analytics dashboard",
+      "apiAccess": "API access",
+      "marketplacePublishing": "Marketplace publishing",
+      "sso": "SSO",
+      "auditLogs": "Audit logs"
+    }
+  },
+  "language": {
+    "label": "Language"
+  }
+}

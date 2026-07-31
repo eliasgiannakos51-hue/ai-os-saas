@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Search, Bell, Plus, Zap } from "lucide-react";
 import { CREATE_NAV_ITEM, OVERVIEW_NAV_ITEM } from "@/lib/modules";
 import { MenuButton } from "@/components/dashboard/menu-button";
@@ -10,9 +11,12 @@ import { LogoutButton } from "@/components/logout-button";
 import { Logo } from "@/components/logo";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
 import { useCredits } from "@/components/credits/credits-context";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { LanguageSelector } from "@/components/i18n/language-selector";
 
 export function TopNav({ email }: { email: string }) {
   const router = useRouter();
+  const t = useTranslations("common");
   const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   const { credits } = useCredits();
   const [notifOpen, setNotifOpen] = useState(false);
@@ -44,13 +48,16 @@ export function TopNav({ email }: { email: string }) {
         className="mx-auto hidden max-w-md flex-1 items-center gap-2 rounded-full border border-border bg-panel px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-foreground sm:flex"
       >
         <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
-        <span className="flex-1 text-left">Search anything...</span>
-        <kbd className="rounded border border-border bg-black/30 px-1.5 py-0.5 text-[10px] font-medium text-muted">
+        <span className="flex-1 text-left">{t("search")}</span>
+        <kbd className="rounded border border-border bg-input px-1.5 py-0.5 text-[10px] font-medium text-muted">
           ⌘K
         </kbd>
       </button>
 
       <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-3">
+        <LanguageSelector />
+        <ThemeToggle />
+
         <div className="relative">
           <button
             type="button"
@@ -58,7 +65,7 @@ export function TopNav({ email }: { email: string }) {
               setNotifOpen((v) => !v);
               setUserMenuOpen(false);
             }}
-            aria-label="Notifications"
+            aria-label={t("notifications")}
             aria-expanded={notifOpen}
             className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"
           >
@@ -66,7 +73,7 @@ export function TopNav({ email }: { email: string }) {
           </button>
           {notifOpen && (
             <div className="absolute right-0 top-11 w-56 rounded-xl border border-border bg-panel p-3 text-xs text-muted shadow-lg">
-              No new notifications.
+              {t("noNotifications")}
             </div>
           )}
         </div>
@@ -86,7 +93,7 @@ export function TopNav({ email }: { email: string }) {
           className="inline-flex items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:px-3.5"
         >
           <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">New Project</span>
+          <span className="hidden sm:inline">{t("newProject")}</span>
         </button>
 
         <div className="relative">

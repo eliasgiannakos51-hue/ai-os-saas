@@ -1,0 +1,80 @@
+{
+  "common": {
+    "search": "Αναζήτηση...",
+    "notifications": "Ειδοποιήσεις",
+    "noNotifications": "Δεν υπάρχουν νέες ειδοποιήσεις.",
+    "newProject": "Νέο Project",
+    "signOut": "Αποσύνδεση",
+    "jumpToPage": "Μετάβαση σε module ή σελίδα...",
+    "noMatches": "Δεν βρέθηκαν αποτελέσματα για '{query}'",
+    "createAnything": "Create Anything"
+  },
+  "sidebar": {
+    "groups": {
+      "workspace": "Χώρος εργασίας",
+      "build": "Δημιουργία",
+      "business": "Επιχείρηση",
+      "strategy": "Στρατηγική",
+      "operations": "Λειτουργίες",
+      "marketplace": "Marketplace",
+      "settings": "Ρυθμίσεις"
+    },
+    "items": {
+      "home": "Αρχική",
+      "chat": "Ionexa Chat",
+      "memory": "AI Μνήμη",
+      "settings": "Ρυθμίσεις",
+      "team": "Ομάδα"
+    }
+  },
+  "landing": {
+    "hero": "Η ενέργεια πίσω από ό,τι χτίζεις.",
+    "description": "Δημιούργησε οτιδήποτε με AI. Από ιδέες και έρευνα μέχρι trading, οικονομικά, σχεδιασμό προϊόντος και επιχειρηματικές αποφάσεις — οργανωμένα σε έναν ενιαίο, έξυπνο χώρο εργασίας.",
+    "logIn": "Σύνδεση",
+    "signUp": "Εγγραφή",
+    "footer": {
+      "pricing": "Τιμολόγηση",
+      "roadmap": "Roadmap",
+      "terms": "Όροι Χρήσης",
+      "privacy": "Πολιτική Απορρήτου"
+    }
+  },
+  "pricing": {
+    "title": "Τιμολόγηση",
+    "subtitle": "Ξεκίνα δωρεάν. Αναβάθμισε όποτε χρειαστείς περισσότερα credits, AI agents ή θέσεις ομάδας.",
+    "perMonth": "/μήνα",
+    "custom": "Κατόπιν συνεννόησης",
+    "mostPopular": "Πιο Δημοφιλές",
+    "comingSoon": "Έρχεται Σύντομα",
+    "soon": "Σύντομα",
+    "signUp": "Εγγραφή",
+    "contactSales": "Επικοινωνία με Πωλήσεις",
+    "getPlan": "Επίλεξε {plan}",
+    "teamBannerTitle": "Το χρειάζεσαι για την ομάδα σου;",
+    "teamBannerBody": "Πρόσθεσε μέλη σε οποιοδήποτε πλάνο Professional+ για +{price}/μέλος/μήνα — όλοι αποκτούν πλήρη πρόσβαση στο επίπεδο του πλάνου σου.",
+    "comparePlans": "Σύγκριση πλάνων",
+    "feature": "Χαρακτηριστικό",
+    "backToHome": "← Πίσω στο Ionexa AI",
+    "rows": {
+      "creditsPerMonth": "Credits / μήνα",
+      "aiAgents": "AI Agents",
+      "websiteBuilder": "Website & Automation Builder",
+      "mobileSaasBuilder": "Mobile & SaaS Builder",
+      "imageVideo": "Δημιουργία εικόνας & βίντεο",
+      "aiMemory": "AI Μνήμη",
+      "teamCollaboration": "Συνεργασία ομάδας",
+      "teamSeatsAddOn": "Πρόσθετες θέσεις ομάδας",
+      "aiTeamGenerator": "AI Team Generator",
+      "advancedAutomations": "Προηγμένοι αυτοματισμοί",
+      "aiKnowledgeBase": "Βάση Γνώσης AI",
+      "analyticsDashboard": "Πίνακας Αναλυτικών",
+      "apiAccess": "Πρόσβαση API",
+      "marketplacePublishing": "Δημοσίευση στο Marketplace",
+      "sso": "SSO",
+      "auditLogs": "Αρχεία Ελέγχου"
+    }
+  },
+  "language": {
+    "label": "Γλώσσα"
+  }
+}

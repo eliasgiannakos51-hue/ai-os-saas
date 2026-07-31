@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { ChevronRight, X } from "lucide-react";
 import { OVERVIEW_NAV_ITEM } from "@/lib/modules";
 import {
@@ -13,6 +14,7 @@ import {
 } from "@/lib/sidebar-nav";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
 import { Logo } from "@/components/logo";
+import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 
 function isActive(pathname: string | null, href: string) {
   if (href === "/dashboard") return pathname === "/dashboard";
@@ -33,8 +35,19 @@ function storageKey(heading: string) {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const t = useTranslations("sidebar");
   const { open, setOpen } = useSidebar();
   const closeOnMobile = () => setOpen(false);
+
+  function translatedHeading(heading: string): string {
+    const key = GROUP_HEADING_KEYS[heading];
+    return key ? t(`groups.${key}`) : heading;
+  }
+
+  function translatedLabel(label: string): string {
+    const key = ITEM_LABEL_KEYS[label];
+    return key ? t(`items.${key}`) : label;
+  }
 
   // Explicit overrides only — a group with no entry here falls back to
   // defaultExpanded() below, which is pure/deterministic from pathname
@@ -96,7 +109,7 @@ export function Sidebar() {
             aria-expanded={expanded}
             className="flex w-full items-center justify-between rounded-lg px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted transition-colors duration-150 hover:text-foreground"
           >
-            <span>{group.heading}</span>
+            <span>{translatedHeading(group.heading)}</span>
             <ChevronRight
               className={`h-3 w-3 shrink-0 transition-transform duration-200 ${
                 expanded ? "rotate-90" : "rotate-0"
@@ -106,7 +119,7 @@ export function Sidebar() {
           </button>
         ) : (
           <p className="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
-            {group.heading}
+            {translatedHeading(group.heading)}
           </p>
         )}
 
@@ -137,7 +150,7 @@ export function Sidebar() {
                       }`}
                       aria-hidden="true"
                     />
-                    <span className="truncate">{item.label}</span>
+                    <span className="truncate">{translatedLabel(item.label)}</span>
                   </Link>
                 );
               })}

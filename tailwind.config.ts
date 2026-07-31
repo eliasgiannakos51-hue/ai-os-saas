@@ -9,12 +9,18 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#0a0a0a",
-        panel: "#141414",
-        "panel-hover": "#1a1a1a",
-        border: "#242424",
-        foreground: "#e5e5e5",
-        muted: "#8a8a8a",
+        // Theme-aware — resolve to CSS custom properties (globals.css)
+        // instead of fixed hex, so the dark/light toggle only has to swap
+        // variable values, not every component's color classes. `input`
+        // is the shared "recessed surface" used by every input/textarea/
+        // select/code block/kbd badge (previously hardcoded bg-black/NN).
+        background: "var(--background)",
+        panel: "var(--panel)",
+        "panel-hover": "var(--panel-hover)",
+        border: "var(--border)",
+        foreground: "var(--foreground)",
+        muted: "var(--muted)",
+        input: "var(--input-bg)",
       },
       fontFamily: {
         sans: [

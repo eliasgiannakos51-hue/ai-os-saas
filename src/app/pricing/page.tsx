@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { Check, Clock, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import {
@@ -33,38 +34,39 @@ function soonFrom(minimum: PlanSlug): (plan: Plan) => ComparisonCell {
 // straight to a check/cross row; the "Coming Soon" rows below mirror the
 // comingSoon-flagged bullets in each plan's `features` list — not enforced
 // anywhere yet, shown for the same reason those bullets exist there.
-const COMPARISON_ROWS: { label: string; cell: (plan: Plan) => ComparisonCell }[] = [
+// labelKey looks up messages/*.json's pricing.rows.<key> for the row name.
+const COMPARISON_ROWS: { labelKey: string; cell: (plan: Plan) => ComparisonCell }[] = [
   {
-    label: "Credits / month",
+    labelKey: "creditsPerMonth",
     cell: (p) => ({
       type: "value",
       text: p.monthlyCredits === "custom" ? "Custom" : p.monthlyCredits.toLocaleString(),
     }),
   },
   {
-    label: "AI agents",
+    labelKey: "aiAgents",
     cell: (p) => ({
       type: "value",
       text: p.capabilities.maxAiAgents === "unlimited" ? "Unlimited" : String(p.capabilities.maxAiAgents),
     }),
   },
-  { label: "Website & Automation Builder", cell: (p) => (p.capabilities.websiteBuilder ? { type: "check" } : { type: "cross" }) },
-  { label: "Mobile & SaaS Builder", cell: (p) => (p.capabilities.mobileSaasBuilder ? { type: "check" } : { type: "cross" }) },
-  { label: "Image & video generation", cell: (p) => (p.capabilities.imageVideoGeneration ? { type: "check" } : { type: "cross" }) },
-  { label: "AI Memory", cell: (p) => (p.capabilities.aiMemory ? { type: "check" } : { type: "cross" }) },
-  { label: "Team collaboration", cell: (p) => (p.capabilities.teamCollaboration ? { type: "check" } : { type: "cross" }) },
-  { label: "Team seats add-on", cell: (p) => (p.hasTeamSeats ? { type: "check" } : { type: "cross" }) },
-  { label: "AI Team Generator", cell: soonFrom("growth") },
-  { label: "Advanced automations", cell: soonFrom("growth") },
-  { label: "AI Knowledge Base", cell: soonFrom("growth") },
-  { label: "Analytics dashboard", cell: soonFrom("professional") },
-  { label: "API access", cell: soonFrom("professional") },
-  { label: "Marketplace publishing", cell: soonFrom("professional") },
-  { label: "SSO", cell: soonFrom("enterprise") },
-  { label: "Audit logs", cell: soonFrom("enterprise") },
+  { labelKey: "websiteBuilder", cell: (p) => (p.capabilities.websiteBuilder ? { type: "check" } : { type: "cross" }) },
+  { labelKey: "mobileSaasBuilder", cell: (p) => (p.capabilities.mobileSaasBuilder ? { type: "check" } : { type: "cross" }) },
+  { labelKey: "imageVideo", cell: (p) => (p.capabilities.imageVideoGeneration ? { type: "check" } : { type: "cross" }) },
+  { labelKey: "aiMemory", cell: (p) => (p.capabilities.aiMemory ? { type: "check" } : { type: "cross" }) },
+  { labelKey: "teamCollaboration", cell: (p) => (p.capabilities.teamCollaboration ? { type: "check" } : { type: "cross" }) },
+  { labelKey: "teamSeatsAddOn", cell: (p) => (p.hasTeamSeats ? { type: "check" } : { type: "cross" }) },
+  { labelKey: "aiTeamGenerator", cell: soonFrom("growth") },
+  { labelKey: "advancedAutomations", cell: soonFrom("growth") },
+  { labelKey: "aiKnowledgeBase", cell: soonFrom("growth") },
+  { labelKey: "analyticsDashboard", cell: soonFrom("professional") },
+  { labelKey: "apiAccess", cell: soonFrom("professional") },
+  { labelKey: "marketplacePublishing", cell: soonFrom("professional") },
+  { labelKey: "sso", cell: soonFrom("enterprise") },
+  { labelKey: "auditLogs", cell: soonFrom("enterprise") },
 ];
 
-function ComparisonCellContent({ cell }: { cell: ComparisonCell }) {
+function ComparisonCellContent({ cell, soonLabel }: { cell: ComparisonCell; soonLabel: string }) {
   if (cell.type === "value") {
     return <span className="text-sm text-foreground">{cell.text}</span>;
   }
@@ -74,14 +76,16 @@ function ComparisonCellContent({ cell }: { cell: ComparisonCell }) {
   if (cell.type === "soon") {
     return (
       <span className="inline-flex items-center rounded-full border border-orange-500/40 bg-orange-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-orange-400">
-        Soon
+        {soonLabel}
       </span>
     );
   }
   return <X className="mx-auto h-4 w-4 text-muted/50" aria-hidden="true" />;
 }
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const t = await getTranslations("pricing");
+
   return (
     <main className="min-h-screen bg-background px-4 py-16 text-foreground sm:px-6">
       <div className="mx-auto max-w-6xl">
@@ -96,11 +100,9 @@ export default function PricingPage() {
             </span>
           </Link>
           <h1 className="mt-6 text-3xl font-bold text-foreground sm:text-4xl">
-            Pricing
+            {t("title")}
           </h1>
-          <p className="mt-3 text-sm text-muted">
-            Start free. Upgrade whenever you need more credits, AI agents, or team seats.
-          </p>
+          <p className="mt-3 text-sm text-muted">{t("subtitle")}</p>
         </div>
 
         <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
@@ -115,7 +117,7 @@ export default function PricingPage() {
             >
               {plan.highlighted && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center rounded-full bg-orange-500 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-black">
-                  Most Popular
+                  {t("mostPopular")}
                 </span>
               )}
               <h2 className="text-sm font-semibold text-orange-400">{plan.name}</h2>
@@ -124,15 +126,17 @@ export default function PricingPage() {
                   <>
                     {CURRENCY_SYMBOL}
                     {plan.price}
-                    {plan.price > 0 && <span className="text-sm font-normal text-muted">/month</span>}
+                    {plan.price > 0 && (
+                      <span className="text-sm font-normal text-muted">{t("perMonth")}</span>
+                    )}
                   </>
                 ) : (
-                  "Custom"
+                  t("custom")
                 )}
               </p>
               <p className="mt-2 text-xs text-muted">
                 {plan.monthlyCredits === "custom"
-                  ? "Custom credits/month"
+                  ? `${t("custom")} credits/month`
                   : `${plan.monthlyCredits.toLocaleString()} credits/month`}
               </p>
 
@@ -151,7 +155,7 @@ export default function PricingPage() {
                       {feature.text}
                       {feature.comingSoon && (
                         <span className="ml-1.5 inline-flex items-center rounded-full border border-orange-500/40 bg-orange-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange-400">
-                          Coming Soon
+                          {t("comingSoon")}
                         </span>
                       )}
                     </span>
@@ -172,19 +176,19 @@ export default function PricingPage() {
                     href="/signup?plan=free"
                     className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
                   >
-                    Sign Up
+                    {t("signUp")}
                   </Link>
                 ) : plan.slug === "enterprise" ? (
                   <a
                     href="mailto:sales@ionexa.ai?subject=Ionexa%20AI%20Enterprise"
                     className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
                   >
-                    Contact Sales
+                    {t("contactSales")}
                   </a>
                 ) : (
                   <SubscribeButton
                     plan={plan.slug as PaidPlanSlug}
-                    label={`Get ${plan.name}`}
+                    label={t("getPlan", { plan: plan.name })}
                     className={`inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-0 ${
                       plan.highlighted
                         ? "bg-orange-500 text-black hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
@@ -198,22 +202,21 @@ export default function PricingPage() {
         </div>
 
         <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-border bg-panel p-6 text-center">
-          <h2 className="text-sm font-semibold text-orange-400">Need it for your team?</h2>
+          <h2 className="text-sm font-semibold text-orange-400">{t("teamBannerTitle")}</h2>
           <p className="mt-2 text-sm text-muted">
-            Add members to any Professional+ plan for +{CURRENCY_SYMBOL}{TEAM_SEAT_PRICE}/member/month —
-            everyone gets full access at your plan&apos;s tier.
+            {t("teamBannerBody", { price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}` })}
           </p>
         </div>
 
         <div className="mt-16">
           <h2 className="mb-5 text-center text-xl font-bold text-foreground">
-            Compare plans
+            {t("comparePlans")}
           </h2>
           <div className="overflow-x-auto rounded-2xl border border-border">
             <table className="w-full min-w-[720px] border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border bg-panel">
-                  <th className="px-4 py-3 text-left font-semibold text-muted">Feature</th>
+                  <th className="px-4 py-3 text-left font-semibold text-muted">{t("feature")}</th>
                   {PLANS.map((plan) => (
                     <th
                       key={plan.slug}
@@ -229,15 +232,15 @@ export default function PricingPage() {
               <tbody>
                 {COMPARISON_ROWS.map((row, index) => (
                   <tr
-                    key={row.label}
+                    key={row.labelKey}
                     className={`border-b border-border last:border-b-0 ${
                       index % 2 === 1 ? "bg-panel/40" : ""
                     }`}
                   >
-                    <td className="px-4 py-3 text-left text-muted">{row.label}</td>
+                    <td className="px-4 py-3 text-left text-muted">{t(`rows.${row.labelKey}`)}</td>
                     {PLANS.map((plan) => (
                       <td key={plan.slug} className="px-4 py-3 text-center">
-                        <ComparisonCellContent cell={row.cell(plan)} />
+                        <ComparisonCellContent cell={row.cell(plan)} soonLabel={t("soon")} />
                       </td>
                     ))}
                   </tr>
@@ -252,7 +255,7 @@ export default function PricingPage() {
             href="/"
             className="text-xs text-orange-400 underline underline-offset-2"
           >
-            ← Back to Ionexa AI
+            {t("backToHome")}
           </Link>
         </div>
       </div>

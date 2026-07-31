@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import { CREATE_NAV_ITEM } from "@/lib/modules";
 import { CREATE_ICON } from "@/lib/module-icons";
 import { ALL_SIDEBAR_GROUPS, type SidebarItem } from "@/lib/sidebar-nav";
+import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
 
 // Create Anything isn't a sidebar link (it's reached via this palette or the
@@ -50,10 +52,18 @@ function filterAndRankItems(items: SidebarItem[], rawQuery: string): SidebarItem
 
 export function CommandPalette() {
   const router = useRouter();
+  const tCommon = useTranslations("common");
+  const tSidebar = useTranslations("sidebar");
   const { open, setOpen } = useCommandPalette();
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  function translatedLabel(label: string): string {
+    if (label === "Create Anything") return tCommon("createAnything");
+    const key = ITEM_LABEL_KEYS[label];
+    return key ? tSidebar(`items.${key}`) : label;
+  }
 
   const results = useMemo(() => filterAndRankItems(PALETTE_ITEMS, query), [query]);
 
@@ -138,7 +148,7 @@ export function CommandPalette() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleInputKeyDown}
-            placeholder="Jump to a module or page..."
+            placeholder={tCommon("jumpToPage")}
             className="w-full bg-transparent py-4 pl-11 pr-4 text-sm text-foreground outline-none placeholder:text-muted"
           />
         </div>
@@ -146,7 +156,7 @@ export function CommandPalette() {
         <div className="max-h-80 overflow-y-auto p-2">
           {results.length === 0 ? (
             <p className="px-3 py-6 text-center text-sm text-muted">
-              No matches for &apos;{query}&apos;
+              {tCommon("noMatches", { query })}
             </p>
           ) : (
             results.map((item, index) => {
@@ -168,7 +178,7 @@ export function CommandPalette() {
                     className={`h-4 w-4 shrink-0 ${active ? "text-orange-400" : "text-orange-500/40"}`}
                     aria-hidden="true"
                   />
-                  {item.label}
+                  {translatedLabel(item.label)}
                 </button>
               );
             })

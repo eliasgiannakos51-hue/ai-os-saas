@@ -103,7 +103,7 @@ export function ConversationSidebar({
                           }
                           if (e.key === "Escape") setRenamingId(null);
                         }}
-                        className="w-full rounded-lg border border-orange-500/60 bg-black/40 px-2.5 py-[7px] text-sm text-foreground outline-none"
+                        className="w-full rounded-lg border border-orange-500/60 bg-input px-2.5 py-[7px] text-sm text-foreground outline-none"
                       />
                     );
                   }

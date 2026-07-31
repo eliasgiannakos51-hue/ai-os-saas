@@ -18,7 +18,7 @@ function verdictClasses(verdict: string | null) {
     return "border-red-900 bg-red-950/30 text-red-400";
   }
   if (v) return "border-orange-800 bg-orange-950/30 text-orange-400";
-  return "border-border bg-black/30 text-muted";
+  return "border-border bg-input text-muted";
 }
 
 type FormState = {
@@ -229,7 +229,7 @@ export function IdeaRow({ idea }: { idea: Idea }) {
         </div>
         <div className="flex items-center gap-2">
           {idea.score !== null && (
-            <span className="rounded-md border border-border bg-black/30 px-2 py-0.5 text-xs text-foreground">
+            <span className="rounded-md border border-border bg-input px-2 py-0.5 text-xs text-foreground">
               Score: {idea.score}
             </span>
           )}

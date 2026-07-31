@@ -191,7 +191,7 @@ export function GenericRecordRow({
               return (
                 <span
                   key={field.key}
-                  className="rounded-md border border-border bg-black/30 px-2 py-0.5 text-xs text-foreground"
+                  className="rounded-md border border-border bg-input px-2 py-0.5 text-xs text-foreground"
                 >
                   {field.label}: {value}
                 </span>

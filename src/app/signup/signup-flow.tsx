@@ -14,7 +14,7 @@ import { LoginSplash } from "@/components/auth/login-splash";
 import { Logo } from "@/components/logo";
 
 const FIELD_CLASS =
-  "w-full rounded-xl border border-border bg-black/40 px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500";
+  "w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500";
 
 type Step = 1 | 2;
 
@@ -344,7 +344,7 @@ export function SignupFlow() {
                   required
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-border bg-black/40 text-orange-500 accent-orange-500 outline-none focus:ring-2 focus:ring-orange-500/40"
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-border bg-input text-orange-500 accent-orange-500 outline-none focus:ring-2 focus:ring-orange-500/40"
                 />
                 <span>
                   I agree to the{" "}

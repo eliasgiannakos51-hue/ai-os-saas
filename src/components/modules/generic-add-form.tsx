@@ -14,6 +14,13 @@ function emptyFormFor(module: ModuleConfig): Record<string, string> {
   return Object.fromEntries(module.fields.map((f) => [f.key, ""]));
 }
 
+// Matches the caps enforced server-side for gated modules
+// (api/modules/create/route.ts) — applied here too so direct-insert
+// modules get the same basic guard against a single field writing an
+// unbounded amount of text into a row.
+const MAX_TEXT_LENGTH = 500;
+const MAX_TEXTAREA_LENGTH = 10000;
+
 // Modules with a creditCost, minPlanSlug, or countCapCapability set (see
 // lib/modules.ts / lib/build-modules.ts) go through the gated
 // /api/modules/create endpoint instead of inserting directly — that's the
@@ -95,7 +102,8 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
       if (field.type === "number") {
         payload[field.key] = raw === "" ? null : Number(raw);
       } else {
-        payload[field.key] = raw === "" ? null : raw;
+        const max = field.type === "textarea" ? MAX_TEXTAREA_LENGTH : MAX_TEXT_LENGTH;
+        payload[field.key] = raw === "" ? null : raw.slice(0, max);
       }
     }
 
@@ -163,6 +171,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
                 onChange={update(field.key)}
                 className="input min-h-16"
                 placeholder={field.placeholder}
+                maxLength={MAX_TEXTAREA_LENGTH}
               />
             ) : field.type === "select" ? (
               <select
@@ -188,6 +197,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
                 onChange={update(field.key)}
                 className="input"
                 placeholder={field.placeholder}
+                maxLength={field.type === "number" ? undefined : MAX_TEXT_LENGTH}
               />
             )}
           </label>

@@ -4,17 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { parseUserAgent } from "@/lib/parse-user-agent";
 import { sendNewDeviceLoginEmail } from "@/lib/email/send-new-device-login-email";
+import { getClientIp } from "@/lib/get-client-ip";
 
 export const dynamic = "force-dynamic";
-
-function getClientIp(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) return first;
-  }
-  return request.headers.get("x-real-ip") ?? "unknown";
-}
 
 function computeFingerprint(ip: string, userAgent: string): string {
   return createHash("sha256").update(`${ip}|${userAgent}`).digest("hex");

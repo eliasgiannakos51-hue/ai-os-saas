@@ -9,13 +9,20 @@ import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
 
+// Generous but bounded — enough for any real form entry, small enough to
+// stop a single field from writing megabytes into a row.
+const MAX_TEXT_LENGTH = 500;
+const MAX_TEXTAREA_LENGTH = 10000;
+
 function coerceFieldValue(field: FieldConfig, raw: unknown): string | number | null {
   if (raw === undefined || raw === null || raw === "") return null;
   if (field.type === "number") {
     const num = typeof raw === "number" ? raw : Number(raw);
     return Number.isFinite(num) ? num : null;
   }
-  return String(raw);
+  const str = String(raw);
+  const max = field.type === "textarea" ? MAX_TEXTAREA_LENGTH : MAX_TEXT_LENGTH;
+  return str.length > max ? str.slice(0, max) : str;
 }
 
 // Shared gated-creation endpoint for the handful of modules that have a

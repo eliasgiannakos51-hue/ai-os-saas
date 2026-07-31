@@ -5,8 +5,12 @@ import { createStripeClient } from "@/lib/stripe/server";
 import { getCreditPack } from "@/lib/billing/plans";
 import { getCreditPackPriceId } from "@/lib/billing/price-ids";
 import { logApiError } from "@/lib/log-error";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
+
+const CREDITS_CHECKOUT_MAX_ATTEMPTS = 10;
+const CREDITS_CHECKOUT_WINDOW_MINUTES = 60;
 
 // One-time credit pack purchase — mode: "payment", not a subscription.
 // Credits are granted on the "checkout.session.completed" webhook event
@@ -42,6 +46,19 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+    }
+
+    const { allowed } = await checkRateLimit({
+      scope: "credits_checkout",
+      identifier: user.id,
+      maxAttempts: CREDITS_CHECKOUT_MAX_ATTEMPTS,
+      windowMinutes: CREDITS_CHECKOUT_WINDOW_MINUTES,
+    });
+    if (!allowed) {
+      return NextResponse.json(
+        { ok: false, error: "Too many checkout attempts. Please try again later." },
+        { status: 429 }
+      );
     }
 
     const stripe = createStripeClient();

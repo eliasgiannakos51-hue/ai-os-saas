@@ -782,3 +782,27 @@ create policy "update_own_known_devices" on public.known_devices
 drop policy if exists "delete_own_known_devices" on public.known_devices;
 create policy "delete_own_known_devices" on public.known_devices
   for delete using (auth.uid() = user_id);
+
+-- ============================================================================
+-- Rate limit log — generic per-scope attempt counter backing
+-- src/lib/rate-limit.ts, used to throttle abuse-prone unauthenticated/
+-- low-cost endpoints (signup by IP, checkout by user id) on a serverless
+-- platform with no shared in-memory state between invocations. Service-role
+-- only, same pattern as account_deletion_requests: RLS is enabled with no
+-- policies at all, since every read/write goes through the admin client
+-- inside checkRateLimit(), never the anon/browser client.
+-- ============================================================================
+
+drop table if exists public.rate_limit_log cascade;
+
+create table public.rate_limit_log (
+  id uuid primary key default gen_random_uuid(),
+  scope text not null,
+  identifier text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists rate_limit_log_scope_identifier_created_at_idx
+  on public.rate_limit_log (scope, identifier, created_at desc);
+
+alter table public.rate_limit_log enable row level security;

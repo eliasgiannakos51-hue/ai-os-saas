@@ -6,11 +6,30 @@ import { logApiError } from "@/lib/log-error";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { grantCredits } from "@/lib/billing/credits";
 import { getPlan } from "@/lib/billing/plans";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-client-ip";
 
 export const dynamic = "force-dynamic";
 
+const SIGNUP_MAX_ATTEMPTS = 10;
+const SIGNUP_WINDOW_MINUTES = 60;
+
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const { allowed } = await checkRateLimit({
+      scope: "signup",
+      identifier: ip,
+      maxAttempts: SIGNUP_MAX_ATTEMPTS,
+      windowMinutes: SIGNUP_WINDOW_MINUTES,
+    });
+    if (!allowed) {
+      return NextResponse.json(
+        { ok: false, error: "Too many signup attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     let email: string;
     let password: string;
     let termsAccepted: boolean;
@@ -29,6 +48,20 @@ export async function POST(request: Request) {
     if (!email || !password) {
       return NextResponse.json(
         { ok: false, error: "Email and password are required." },
+        { status: 400 }
+      );
+    }
+
+    if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json(
+        { ok: false, error: "Enter a valid email address." },
+        { status: 400 }
+      );
+    }
+
+    if (password.length < 8 || password.length > 128) {
+      return NextResponse.json(
+        { ok: false, error: "Password must be between 8 and 128 characters." },
         { status: 400 }
       );
     }

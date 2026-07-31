@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
 
-    if (!email || !EMAIL_RE.test(email)) {
+    if (!email || email.length > 254 || !EMAIL_RE.test(email)) {
       return NextResponse.json(
         { ok: false, error: "Enter a valid email address." },
         { status: 400 }

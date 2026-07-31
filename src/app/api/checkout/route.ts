@@ -5,8 +5,12 @@ import { createStripeClient } from "@/lib/stripe/server";
 import { getPlan, isPaidPlanSlug } from "@/lib/billing/plans";
 import { getPlanPriceId, getTeamSeatPriceId } from "@/lib/billing/price-ids";
 import { logApiError } from "@/lib/log-error";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
+
+const CHECKOUT_MAX_ATTEMPTS = 10;
+const CHECKOUT_WINDOW_MINUTES = 60;
 
 // "MISSING" / "EMPTY" / "set (len=N, prefix='price_12…')" — never the full
 // value, safe for production logs.
@@ -24,7 +28,8 @@ export async function POST(request: Request) {
     try {
       const body = await request.json();
       plan = typeof body?.plan === "string" ? body.plan : "";
-      discountCode = typeof body?.discountCode === "string" ? body.discountCode.trim() : "";
+      discountCode =
+        typeof body?.discountCode === "string" ? body.discountCode.trim().slice(0, 100) : "";
       successPath =
         typeof body?.successPath === "string" && body.successPath.startsWith("/")
           ? body.successPath
@@ -47,6 +52,19 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+    }
+
+    const { allowed } = await checkRateLimit({
+      scope: "checkout",
+      identifier: user.id,
+      maxAttempts: CHECKOUT_MAX_ATTEMPTS,
+      windowMinutes: CHECKOUT_WINDOW_MINUTES,
+    });
+    if (!allowed) {
+      return NextResponse.json(
+        { ok: false, error: "Too many checkout attempts. Please try again later." },
+        { status: 429 }
+      );
     }
 
     const planDefinition = getPlan(plan);

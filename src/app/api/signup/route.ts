@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendWelcomeEmail } from "@/lib/email/send-welcome-email";
 import { logApiError } from "@/lib/log-error";
+import { getErrorMessage } from "@/lib/get-error-message";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,10 @@ export async function POST(request: Request) {
       );
       logApiError("/api/signup", signUpError, { stage: "signUp" });
       return NextResponse.json(
-        { ok: false, error: signUpError.message || "Could not create your account. Please try again." },
+        {
+          ok: false,
+          error: getErrorMessage(signUpError, "Could not create your account. Please try again."),
+        },
         { status: 400 }
       );
     }
@@ -106,7 +110,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           ok: false,
-          error: confirmError.message || "Could not confirm your account. Please try again.",
+          error: getErrorMessage(confirmError, "Could not confirm your account. Please try again."),
         },
         { status: 500 }
       );
@@ -128,7 +132,10 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           ok: false,
-          error: signInError.message || "Account created, but sign-in failed. Please log in manually.",
+          error: getErrorMessage(
+            signInError,
+            "Account created, but sign-in failed. Please log in manually."
+          ),
         },
         { status: 500 }
       );
@@ -138,7 +145,7 @@ export async function POST(request: Request) {
   } catch (err) {
     logApiError("/api/signup", err);
     return NextResponse.json(
-      { ok: false, error: "Something went wrong. Please try again." },
+      { ok: false, error: getErrorMessage(err, "Something went wrong. Please try again.") },
       { status: 500 }
     );
   }

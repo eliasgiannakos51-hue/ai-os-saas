@@ -738,3 +738,47 @@ create policy "insert_own_chat_memory" on public.chat_memory
 drop policy if exists "delete_own_chat_memory" on public.chat_memory;
 create policy "delete_own_chat_memory" on public.chat_memory
   for delete using (auth.uid() = user_id);
+
+-- ============================================================================
+-- Known devices — "new sign-in" security email (see
+-- src/app/api/auth/device-check/route.ts). device_fingerprint is a
+-- SHA-256 hash of IP + User-Agent, computed server-side — good enough to
+-- recognize "have we seen this browser/network combination before" without
+-- real device fingerprinting. Same owner-only RLS pattern as every table
+-- above; unlike most, it's also self-service update/delete (touching
+-- last_seen, removing an entry from Settings > Login Activity).
+-- ============================================================================
+
+drop table if exists public.known_devices cascade;
+
+create table public.known_devices (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  device_fingerprint text not null,
+  user_agent text,
+  ip_address text,
+  first_seen timestamptz not null default now(),
+  last_seen timestamptz not null default now(),
+  unique (user_id, device_fingerprint)
+);
+
+create index if not exists known_devices_user_id_idx
+  on public.known_devices (user_id);
+
+alter table public.known_devices enable row level security;
+
+drop policy if exists "select_own_known_devices" on public.known_devices;
+create policy "select_own_known_devices" on public.known_devices
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_known_devices" on public.known_devices;
+create policy "insert_own_known_devices" on public.known_devices
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "update_own_known_devices" on public.known_devices;
+create policy "update_own_known_devices" on public.known_devices
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_known_devices" on public.known_devices;
+create policy "delete_own_known_devices" on public.known_devices
+  for delete using (auth.uid() = user_id);

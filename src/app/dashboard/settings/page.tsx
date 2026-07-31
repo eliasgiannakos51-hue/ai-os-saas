@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { PasswordChangeForm } from "@/components/settings/password-change-form";
 import { ChatMemorySettings } from "@/components/settings/chat-memory-settings";
+import { LoginActivity, type KnownDevice } from "@/components/settings/login-activity";
 import { ExportDataButton } from "@/components/settings/export-data-button";
 import { DangerZone } from "@/components/settings/danger-zone";
 import { BillingSummary } from "@/components/settings/billing-summary";
@@ -47,6 +48,12 @@ export default async function SettingsPage() {
     .select("id", { count: "exact", head: true })
     .eq("user_id", user.id);
 
+  const { data: knownDevices } = await supabase
+    .from("known_devices")
+    .select("id, user_agent, ip_address, last_seen")
+    .eq("user_id", user.id)
+    .order("last_seen", { ascending: false });
+
   return (
     <main className="min-h-full bg-background">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
@@ -78,7 +85,9 @@ export default async function SettingsPage() {
           />
         </div>
 
-        <div className="mb-6 mt-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
+        <LoginActivity devices={(knownDevices as KnownDevice[] | null) ?? []} />
+
+        <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
           <h2 className="text-sm font-semibold text-foreground">Export Data</h2>
           <p className="text-xs text-muted">
             Download everything you&apos;ve logged across all 13 modules as a

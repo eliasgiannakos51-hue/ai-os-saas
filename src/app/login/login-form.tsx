@@ -40,6 +40,16 @@ export function LoginForm() {
         setError(getErrorMessage(error));
         return;
       }
+
+      // New-device security email (see api/auth/device-check) — best-effort,
+      // must never block getting into the dashboard.
+      try {
+        await fetch("/api/auth/device-check", { method: "POST" });
+      } catch (deviceCheckErr) {
+        // eslint-disable-next-line no-console
+        console.error("Device check failed:", deviceCheckErr);
+      }
+
       setAuthenticated(true);
     } catch (err) {
       // eslint-disable-next-line no-console

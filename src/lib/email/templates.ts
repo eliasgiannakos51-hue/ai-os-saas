@@ -167,6 +167,57 @@ export function deleteAccountConfirmationEmailHtml({
   });
 }
 
+export function newDeviceLoginEmailHtml({
+  email,
+  deviceLabel,
+  ipAddress,
+  dateLabel,
+  forgotPasswordUrl,
+}: {
+  email: string;
+  deviceLabel: string;
+  ipAddress: string;
+  dateLabel: string;
+  forgotPasswordUrl: string;
+}): string {
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">security · ${email}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">new sign-in to your account</h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      We noticed a sign-in to your Ionexa AI account from a device or
+      browser we haven't seen before.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+      <tr>
+        <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${MUTED}; font-size:12px;">When</td>
+        <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${FOREGROUND}; font-size:12px; text-align:right;">${dateLabel}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${MUTED}; font-size:12px;">Device</td>
+        <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${FOREGROUND}; font-size:12px; text-align:right;">${deviceLabel}</td>
+      </tr>
+      <tr>
+        <td style="padding:6px 0; color:${MUTED}; font-size:12px;">IP address</td>
+        <td style="padding:6px 0; color:${FOREGROUND}; font-size:12px; text-align:right;">${ipAddress}</td>
+      </tr>
+    </table>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      If this was you, no action is needed. If you don't recognize this
+      sign-in, please reset your password immediately.
+    </p>
+    <p style="margin:0;">
+      <a href="${forgotPasswordUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        Reset password
+      </a>
+    </p>
+  `;
+
+  return layout({
+    preheader: `New sign-in to your Ionexa AI account from ${deviceLabel}.`,
+    bodyHtml,
+  });
+}
+
 export function weeklyDigestEmailHtml({
   email,
   moduleCounts,

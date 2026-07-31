@@ -11,9 +11,16 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   try {
     let plan: string;
+    let discountCode: string;
+    let successPath: string;
     try {
       const body = await request.json();
       plan = typeof body?.plan === "string" ? body.plan : "";
+      discountCode = typeof body?.discountCode === "string" ? body.discountCode.trim() : "";
+      successPath =
+        typeof body?.successPath === "string" && body.successPath.startsWith("/")
+          ? body.successPath
+          : "/dashboard/settings?checkout=success";
     } catch {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
@@ -68,10 +75,30 @@ export async function POST(request: Request) {
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
+    // Stripe's own "Add promotion code" field (allow_promotion_codes) and a
+    // pre-applied discount (discounts) are mutually exclusive on a Checkout
+    // Session — a code typed in the signup flow resolves to a Stripe
+    // promotion_code id and pre-applies it; with no code, fall back to
+    // letting Stripe show its own entry field, same as before this existed.
+    let discounts: { promotion_code: string }[] | undefined;
+    if (discountCode) {
+      const matches = await stripe.promotionCodes.list({
+        code: discountCode,
+        active: true,
+        limit: 1,
+      });
+      const promo = matches.data[0];
+      if (promo) {
+        discounts = [{ promotion_code: promo.id }];
+      }
+      // An unrecognized code is ignored rather than failing checkout — the
+      // user can still enter it manually via allow_promotion_codes below.
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: customerId,
-      allow_promotion_codes: true,
+      ...(discounts ? { discounts } : { allow_promotion_codes: true }),
       line_items: [
         { price: planPriceId, quantity: 1 },
         {
@@ -80,7 +107,7 @@ export async function POST(request: Request) {
           adjustable_quantity: { enabled: true, minimum: 0, maximum: 50 },
         },
       ],
-      success_url: `${siteUrl}/dashboard/settings?checkout=success`,
+      success_url: `${siteUrl}${successPath}`,
       cancel_url: `${siteUrl}/pricing?checkout=cancelled`,
       metadata: { supabase_user_id: user.id, plan },
       subscription_data: {

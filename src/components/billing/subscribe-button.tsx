@@ -32,7 +32,7 @@ export function SubscribeButton({
       });
 
       if (res.status === 401) {
-        router.push("/login?mode=signup");
+        router.push(`/signup?plan=${plan}`);
         return;
       }
 

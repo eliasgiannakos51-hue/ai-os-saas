@@ -93,7 +93,7 @@ export default function PricingPage() {
               <div className="mt-6">
                 {plan.slug === "free" ? (
                   <Link
-                    href="/login?mode=signup"
+                    href="/signup?plan=free"
                     className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
                   >
                     Sign Up

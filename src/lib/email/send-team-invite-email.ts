@@ -26,7 +26,11 @@ export async function sendTeamInviteEmail({
       html: teamInviteEmailHtml({
         inviterEmail,
         planName,
-        signupUrl: `${siteUrl}/login?mode=signup`,
+        // plan=free skips straight to account details (step 2) with no
+        // plan-selection screen — invited members get full access at the
+        // owner's tier automatically (see acceptPendingTeamInvite), so they
+        // must never be routed into picking/paying for a plan themselves.
+        signupUrl: `${siteUrl}/signup?plan=free`,
       }),
     });
 

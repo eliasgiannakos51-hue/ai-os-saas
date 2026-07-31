@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Check, ChevronLeft } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { isPasswordStrong } from "@/lib/password-strength";
-import { PLANS, isPaidPlanSlug, type PlanSlug } from "@/lib/billing/plans";
+import { PLANS, CURRENCY_SYMBOL, isPaidPlanSlug, type PlanSlug } from "@/lib/billing/plans";
 import { PasswordInput } from "@/components/ui/password-input";
 import { PasswordStrengthChecklist } from "@/components/auth/password-strength-checklist";
 import { GeneratePasswordButton } from "@/components/auth/generate-password-button";
@@ -146,9 +146,9 @@ export function SignupFlow() {
       // documented in src/lib/billing/price-ids.ts / the README's Billing
       // section; /api/checkout returns "Billing is not configured yet." if
       // they aren't set.
-      // TODO: Price ID needed here — confirm STRIPE_PRICE_PRO /
-      // STRIPE_PRICE_CREATOR / STRIPE_PRICE_PROFESSIONAL are set before
-      // this path can complete a real checkout.
+      // TODO: Price ID needed here — confirm STRIPE_PRICE_STARTER /
+      // STRIPE_PRICE_GROWTH / STRIPE_PRICE_PROFESSIONAL / STRIPE_PRICE_ULTIMATE
+      // are set before this path can complete a real checkout.
       const checkoutRes = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -241,7 +241,7 @@ export function SignupFlow() {
                       {selected && <Check className="h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />}
                     </div>
                     <p className="mt-1 text-lg font-bold text-foreground">
-                      ${typeof p.price === "number" ? p.price : p.price}
+                      {typeof p.price === "number" ? `${CURRENCY_SYMBOL}${p.price}` : "Custom"}
                       {typeof p.price === "number" && p.price > 0 && (
                         <span className="text-xs font-normal text-muted">/mo</span>
                       )}

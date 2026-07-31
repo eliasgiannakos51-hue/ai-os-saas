@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CREDIT_PACKS } from "@/lib/billing/plans";
+import { CREDIT_PACKS, CURRENCY_SYMBOL } from "@/lib/billing/plans";
 
 export function BuyCredits() {
   const [loadingId, setLoadingId] = useState<string | null>(null);
@@ -49,7 +49,10 @@ export function BuyCredits() {
             disabled={loadingId !== null}
             className="flex min-h-[64px] flex-col items-center justify-center gap-1 rounded-xl border border-border px-3 py-3 text-center transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <span className="text-sm font-bold text-foreground">${pack.usd}</span>
+            <span className="text-sm font-bold text-foreground">
+              {CURRENCY_SYMBOL}
+              {pack.price}
+            </span>
             <span className="text-[11px] text-muted">
               {loadingId === pack.id ? "Loading..." : `${pack.credits.toLocaleString()} credits`}
             </span>

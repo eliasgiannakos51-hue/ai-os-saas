@@ -56,12 +56,12 @@ export default async function MemoryPage() {
   const isAdmin = isAdminEmail(user.email);
   const planSlug = resolvePlanSlug(user);
 
-  if (!isAdmin && !planMeetsMinimum(planSlug, "pro")) {
+  if (!isAdmin && !planMeetsMinimum(planSlug, "starter")) {
     return (
       <main className="min-h-full bg-background">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader icon={MEMORY_ICON} title="AI Memory" />
-          <UpgradeRequired featureName="AI Memory" planName={getPlan("pro")?.name ?? "Pro"} />
+          <UpgradeRequired featureName="AI Memory" planName={getPlan("starter")?.name ?? "Starter"} />
         </div>
       </main>
     );

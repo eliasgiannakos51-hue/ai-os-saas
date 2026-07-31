@@ -46,11 +46,11 @@ touch targets) and works identically on mobile and desktop.
   history, and a full-data JSON export.
 - **Team** (`/dashboard/team`) — Professional/Enterprise plan owners can
   invite teammates by email; invited members get full access at the
-  owner's plan for a flat $20/month/seat.
-- **Pricing** (`/pricing`) — five tiers (Free, Pro, Creator, Professional,
-  Enterprise), each with a monthly credit allotment, a set of plan
-  capabilities, and a team-seat add-on on Professional+. Checkout supports
-  Stripe promotion codes.
+  owner's plan for a flat €20/month/seat.
+- **Pricing** (`/pricing`) — six tiers (Free, Starter, Growth, Professional,
+  Ultimate, Enterprise), each with a monthly credit allotment (EUR pricing)
+  and a set of plan capabilities, plus a team-seat add-on on Professional+.
+  Checkout supports Stripe promotion codes.
 - **Roadmap** (`/roadmap`) — a public, purely informational page laying out
   what's live today, what's coming next, and the longer-term product
   vision. No interactive elements by design.
@@ -89,9 +89,10 @@ touch targets) and works identically on mobile and desktop.
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
    STRIPE_SECRET_KEY=your-stripe-secret-key
    STRIPE_WEBHOOK_SECRET=your-stripe-webhook-signing-secret
-   STRIPE_PRICE_PRO=price_...
-   STRIPE_PRICE_CREATOR=price_...
+   STRIPE_PRICE_STARTER=price_...
+   STRIPE_PRICE_GROWTH=price_...
    STRIPE_PRICE_PROFESSIONAL=price_...
+   STRIPE_PRICE_ULTIMATE=price_...
    STRIPE_PRICE_TEAM_SEAT=price_...
    STRIPE_PRICE_CREDITS_10=price_...
    STRIPE_PRICE_CREDITS_25=price_...
@@ -176,30 +177,32 @@ Transactional email is sent via [Resend](https://resend.com).
 Subscriptions run through [Stripe](https://stripe.com) Checkout + the
 Billing Portal — no card data ever touches this app's servers.
 
-- **Plans** (`src/lib/billing/plans.ts`) — Free, Pro ($20), Creator ($50),
-  Professional ($100), Enterprise (custom, Contact Sales only), shown on
-  `/pricing`. Each plan carries a `capabilities` object (max AI agents,
+- **Plans** (`src/lib/billing/plans.ts`) — Free, Starter (€20), Growth
+  (€50), Professional (€100), Ultimate (€200), Enterprise (custom, Contact
+  Sales only), shown on `/pricing`. All pricing is EUR
+  (`CURRENCY_SYMBOL`) — every Stripe Product backing this app was created
+  in EUR. Each plan carries a `capabilities` object (max AI agents,
   Website/Automation Builder, Mobile/SaaS Builder, image/video generation,
   AI Memory, team collaboration) enforced server-side wherever the
   corresponding page or action exists, and a `monthlyCredits` allotment —
-  see **Credits** below. Professional and Enterprise also offer a
-  $20/month **team seat** add-on with an adjustable quantity (starts at 0
-  in Checkout, changed later from the Billing Portal). Checkout has
-  `allow_promotion_codes: true`, so Stripe's hosted page shows an "Add
-  promotion code" field — coupons are created and managed entirely in the
-  Stripe Dashboard, no app code involved.
-- **Stripe setup** — create 3 recurring Prices in the Stripe Dashboard (one
+  see **Credits** below. Professional, Ultimate, and Enterprise also offer
+  a €20/month **team seat** add-on (`TEAM_SEAT_PRICE`) with an adjustable
+  quantity (starts at 0 in Checkout, changed later from the Billing
+  Portal). Checkout has `allow_promotion_codes: true`, so Stripe's hosted
+  page shows an "Add promotion code" field — coupons are created and
+  managed entirely in the Stripe Dashboard, no app code involved.
+- **Stripe setup** — create 4 recurring Prices in the Stripe Dashboard (one
   per self-serve paid plan — Enterprise has none, it's Contact Sales only),
   plus one shared "Team seat" price, plus 4 one-time Prices for the credit
-  packs (see **Credits** below), and set their IDs as `STRIPE_PRICE_PRO` /
-  `STRIPE_PRICE_CREATOR` / `STRIPE_PRICE_PROFESSIONAL` /
-  `STRIPE_PRICE_TEAM_SEAT` / `STRIPE_PRICE_CREDITS_10` /
-  `STRIPE_PRICE_CREDITS_25` / `STRIPE_PRICE_CREDITS_50` /
-  `STRIPE_PRICE_CREDITS_100`. Then add a webhook endpoint pointed at
-  `<your-domain>/api/webhooks/stripe` subscribed to
-  `checkout.session.completed`, `customer.subscription.updated`,
-  `customer.subscription.deleted`, and `invoice.paid`, and set its signing
-  secret as `STRIPE_WEBHOOK_SECRET`.
+  packs (see **Credits** below), and set their IDs as `STRIPE_PRICE_STARTER`
+  / `STRIPE_PRICE_GROWTH` / `STRIPE_PRICE_PROFESSIONAL` /
+  `STRIPE_PRICE_ULTIMATE` / `STRIPE_PRICE_TEAM_SEAT` /
+  `STRIPE_PRICE_CREDITS_10` / `STRIPE_PRICE_CREDITS_25` /
+  `STRIPE_PRICE_CREDITS_50` / `STRIPE_PRICE_CREDITS_100`. Then add a
+  webhook endpoint pointed at `<your-domain>/api/webhooks/stripe`
+  subscribed to `checkout.session.completed`,
+  `customer.subscription.updated`, `customer.subscription.deleted`, and
+  `invoice.paid`, and set its signing secret as `STRIPE_WEBHOOK_SECRET`.
 - **Flow** — `/pricing`'s paid-plan buttons POST to `/api/checkout`, which
   creates (or reuses) a Stripe Customer for the logged-in user and a
   subscription-mode Checkout Session, then the browser is redirected to
@@ -208,12 +211,12 @@ Billing Portal — no card data ever touches this app's servers.
   relevant event and writes them to that user's `auth.users.raw_user_meta_data`
   via the service-role client — nothing else in the app reads Stripe
   directly.
-- **Team seats** (`/dashboard/team`, owners on Professional/Enterprise
-  only — the `teamCollaboration` capability) — invites live in the
-  `team_members` table; inviting someone sends them an email (via Resend)
-  and creates an `invited` row. When that email address next logs in,
-  `dashboard/layout.tsx` calls `acceptPendingTeamInvite`, which — if the
-  owner still has team collaboration — marks the invite `active` and
+- **Team seats** (`/dashboard/team`, owners on Professional/Ultimate/
+  Enterprise only — the `teamCollaboration` capability) — invites live in
+  the `team_members` table; inviting someone sends them an email (via
+  Resend) and creates an `invited` row. When that email address next logs
+  in, `dashboard/layout.tsx` calls `acceptPendingTeamInvite`, which — if
+  the owner still has team collaboration — marks the invite `active` and
   copies the owner's `subscription_tier` onto the new member's own
   `user_metadata`.
 - **Settings** (`/dashboard/settings`) shows the current plan/seat count,
@@ -243,7 +246,7 @@ own rows, every write goes through the service-role client).
   didn't get reset by a Stripe event that cycle (Free accounts never touch
   Stripe at all).
 - **Buying more credits** — Settings → Buy Credits sells 4 one-time packs
-  ($10=500, $25=1250, $50=2500, $100=5000 credits) via `/api/credits/checkout`
+  (€10=500, €25=1500, €50=3500, €100=8000 credits) via `/api/credits/checkout`
   (Stripe Checkout, `mode: "payment"`, not a subscription); credits are
   granted on `checkout.session.completed` for that payment-mode session,
   from the session's own metadata.

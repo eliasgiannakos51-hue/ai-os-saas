@@ -4,7 +4,7 @@
 // below). No Stripe price IDs here on purpose — this file is imported by
 // client components, and price IDs are a server-only concern (see
 // price-ids.ts).
-export type PlanSlug = "free" | "pro" | "creator" | "professional" | "enterprise";
+export type PlanSlug = "free" | "starter" | "growth" | "professional" | "ultimate" | "enterprise";
 
 // Every plan except Enterprise has a real Stripe Price ID and can start a
 // self-serve Checkout session — Enterprise is "Contact Sales" only (custom
@@ -14,6 +14,10 @@ export type PlanSlug = "free" | "pro" | "creator" | "professional" | "enterprise
 // Stripe checkout".
 export type SelfServePlanSlug = Exclude<PlanSlug, "free" | "enterprise">;
 export type PaidPlanSlug = SelfServePlanSlug;
+
+// All prices (plans and credit packs) are in EUR — every Stripe Product
+// backing this app was created in EUR.
+export const CURRENCY_SYMBOL = "€";
 
 export type PlanFeature = { text: string; comingSoon?: boolean };
 
@@ -35,7 +39,7 @@ export type PlanCapabilities = {
 export type Plan = {
   slug: PlanSlug;
   name: string;
-  price: number | "custom"; // USD/month, 0 for Free, "custom" for Enterprise
+  price: number | "custom"; // EUR/month, 0 for Free, "custom" for Enterprise
   monthlyCredits: number | "custom";
   capabilities: PlanCapabilities;
   features: PlanFeature[];
@@ -43,7 +47,7 @@ export type Plan = {
   highlighted?: boolean;
 };
 
-export const TEAM_SEAT_PRICE_USD = 20;
+export const TEAM_SEAT_PRICE = 20;
 
 export const PLANS: Plan[] = [
   {
@@ -70,8 +74,8 @@ export const PLANS: Plan[] = [
     ],
   },
   {
-    slug: "pro",
-    name: "Pro",
+    slug: "starter",
+    name: "Starter",
     price: 20,
     monthlyCredits: 1000,
     hasTeamSeats: false,
@@ -94,8 +98,8 @@ export const PLANS: Plan[] = [
     ],
   },
   {
-    slug: "creator",
-    name: "Creator",
+    slug: "growth",
+    name: "Growth",
     price: 50,
     monthlyCredits: 3000,
     hasTeamSeats: false,
@@ -109,7 +113,7 @@ export const PLANS: Plan[] = [
       teamCollaboration: false,
     },
     features: [
-      { text: "Everything in Pro" },
+      { text: "Everything in Starter" },
       { text: "Up to 100 AI agents" },
       { text: "AI Team Generator", comingSoon: true },
       { text: "Mobile & SaaS Builder access" },
@@ -134,7 +138,7 @@ export const PLANS: Plan[] = [
       teamCollaboration: true,
     },
     features: [
-      { text: "Everything in Creator" },
+      { text: "Everything in Growth" },
       { text: "Unlimited AI agents & teams" },
       { text: "Team collaboration" },
       { text: "Shared AI memory" },
@@ -143,6 +147,28 @@ export const PLANS: Plan[] = [
       { text: "Marketplace publishing", comingSoon: true },
       { text: "10,000 credits/month" },
       { text: "Priority support" },
+    ],
+  },
+  {
+    slug: "ultimate",
+    name: "Ultimate",
+    price: 200,
+    monthlyCredits: 25000,
+    hasTeamSeats: true,
+    capabilities: {
+      maxAiAgents: "unlimited",
+      websiteBuilder: true,
+      mobileSaasBuilder: true,
+      imageVideoGeneration: true,
+      aiMemory: true,
+      teamCollaboration: true,
+    },
+    features: [
+      { text: "Everything in Professional" },
+      { text: "25,000 credits/month" },
+      { text: "Highest priority processing" },
+      { text: "Dedicated account support" },
+      { text: "Early access to new features", comingSoon: true },
     ],
   },
   {
@@ -160,7 +186,7 @@ export const PLANS: Plan[] = [
       teamCollaboration: true,
     },
     features: [
-      { text: "Everything in Professional" },
+      { text: "Everything in Ultimate" },
       { text: "Unlimited members" },
       { text: "SSO", comingSoon: true },
       { text: "Audit logs", comingSoon: true },
@@ -174,7 +200,7 @@ export const PLANS: Plan[] = [
 
 // Ordinal rank for "does this plan meet the minimum tier" checks (page
 // gating, feature gating) — index in this array, higher is better.
-const PLAN_RANK: PlanSlug[] = ["free", "pro", "creator", "professional", "enterprise"];
+const PLAN_RANK: PlanSlug[] = ["free", "starter", "growth", "professional", "ultimate", "enterprise"];
 
 export function getPlan(slug: string): Plan | undefined {
   return PLANS.find((p) => p.slug === slug);
@@ -192,16 +218,17 @@ export function planMeetsMinimum(tier: string, minimum: PlanSlug): boolean {
 
 // One-time credit packs (mode: "payment", not a subscription) — display
 // metadata only, client-safe. Stripe Price IDs live in price-ids.ts
-// (server-only) keyed by the same `id`.
+// (server-only) keyed by the same `id`. Amounts/prices match the actual
+// Stripe Products created for this app (EUR).
 export type CreditPackId = "credits_10" | "credits_25" | "credits_50" | "credits_100";
 
-export const CREDIT_PACKS: { id: CreditPackId; usd: number; credits: number }[] = [
-  { id: "credits_10", usd: 10, credits: 500 },
-  { id: "credits_25", usd: 25, credits: 1250 },
-  { id: "credits_50", usd: 50, credits: 2500 },
-  { id: "credits_100", usd: 100, credits: 5000 },
+export const CREDIT_PACKS: { id: CreditPackId; price: number; credits: number }[] = [
+  { id: "credits_10", price: 10, credits: 500 },
+  { id: "credits_25", price: 25, credits: 1500 },
+  { id: "credits_50", price: 50, credits: 3500 },
+  { id: "credits_100", price: 100, credits: 8000 },
 ];
 
-export function getCreditPack(id: string): { id: CreditPackId; usd: number; credits: number } | undefined {
+export function getCreditPack(id: string): { id: CreditPackId; price: number; credits: number } | undefined {
   return CREDIT_PACKS.find((p) => p.id === id);
 }

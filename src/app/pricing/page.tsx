@@ -4,7 +4,8 @@ import { Check, Clock, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import {
   PLANS,
-  TEAM_SEAT_PRICE_USD,
+  TEAM_SEAT_PRICE,
+  CURRENCY_SYMBOL,
   planMeetsMinimum,
   type Plan,
   type PaidPlanSlug,
@@ -14,7 +15,8 @@ import { SubscribeButton } from "@/components/billing/subscribe-button";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Ionexa AI pricing — Free, Pro, Creator, Professional, and Enterprise plans.",
+  description:
+    "Ionexa AI pricing — Free, Starter, Growth, Professional, Ultimate, and Enterprise plans.",
 };
 
 type ComparisonCell =
@@ -52,9 +54,9 @@ const COMPARISON_ROWS: { label: string; cell: (plan: Plan) => ComparisonCell }[]
   { label: "AI Memory", cell: (p) => (p.capabilities.aiMemory ? { type: "check" } : { type: "cross" }) },
   { label: "Team collaboration", cell: (p) => (p.capabilities.teamCollaboration ? { type: "check" } : { type: "cross" }) },
   { label: "Team seats add-on", cell: (p) => (p.hasTeamSeats ? { type: "check" } : { type: "cross" }) },
-  { label: "AI Team Generator", cell: soonFrom("creator") },
-  { label: "Advanced automations", cell: soonFrom("creator") },
-  { label: "AI Knowledge Base", cell: soonFrom("creator") },
+  { label: "AI Team Generator", cell: soonFrom("growth") },
+  { label: "Advanced automations", cell: soonFrom("growth") },
+  { label: "AI Knowledge Base", cell: soonFrom("growth") },
   { label: "Analytics dashboard", cell: soonFrom("professional") },
   { label: "API access", cell: soonFrom("professional") },
   { label: "Marketplace publishing", cell: soonFrom("professional") },
@@ -101,7 +103,7 @@ export default function PricingPage() {
           </p>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {PLANS.map((plan) => (
             <div
               key={plan.slug}
@@ -120,7 +122,8 @@ export default function PricingPage() {
               <p className="mt-3 text-2xl font-bold text-foreground">
                 {typeof plan.price === "number" ? (
                   <>
-                    ${plan.price}
+                    {CURRENCY_SYMBOL}
+                    {plan.price}
                     {plan.price > 0 && <span className="text-sm font-normal text-muted">/month</span>}
                   </>
                 ) : (
@@ -158,7 +161,7 @@ export default function PricingPage() {
 
               {plan.hasTeamSeats && (
                 <p className="mt-4 border-t border-border pt-4 text-[11px] leading-relaxed text-muted">
-                  + ${TEAM_SEAT_PRICE_USD}/month per team member — each member
+                  + {CURRENCY_SYMBOL}{TEAM_SEAT_PRICE}/month per team member — each member
                   gets full access at your plan&apos;s tier
                 </p>
               )}
@@ -197,7 +200,7 @@ export default function PricingPage() {
         <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-border bg-panel p-6 text-center">
           <h2 className="text-sm font-semibold text-orange-400">Need it for your team?</h2>
           <p className="mt-2 text-sm text-muted">
-            Add members to any Professional+ plan for +${TEAM_SEAT_PRICE_USD}/member/month —
+            Add members to any Professional+ plan for +{CURRENCY_SYMBOL}{TEAM_SEAT_PRICE}/member/month —
             everyone gets full access at your plan&apos;s tier.
           </p>
         </div>

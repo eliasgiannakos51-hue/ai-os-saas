@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { InviteForm } from "@/components/team/invite-form";
 import { TeamMembersList, type TeamMember } from "@/components/team/team-members-list";
-import { getPlan } from "@/lib/billing/plans";
+import { getPlan, TEAM_SEAT_PRICE, CURRENCY_SYMBOL } from "@/lib/billing/plans";
 import { isAdminEmail } from "@/lib/admin";
 
 export const metadata: Metadata = {
@@ -52,7 +52,7 @@ export default async function TeamPage() {
         <PageHeader
           icon={Users}
           title="Team"
-          description={`On the ${plan?.name ?? tier} plan — invited members get full access at this tier, at $20/month per seat.`}
+          description={`On the ${plan?.name ?? tier} plan — invited members get full access at this tier, at ${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}/month per seat.`}
         />
 
         <div className="mb-6">

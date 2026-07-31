@@ -6,9 +6,10 @@ import { CREDIT_PACKS, type CreditPackId, type PaidPlanSlug, type PlanSlug } fro
 // are a server-only concern. Enterprise has no entry — it's Contact Sales
 // only, never a self-serve Checkout session.
 const PLAN_PRICE_ENV: Record<PaidPlanSlug, string | undefined> = {
-  pro: process.env.STRIPE_PRICE_PRO,
-  creator: process.env.STRIPE_PRICE_CREATOR,
+  starter: process.env.STRIPE_PRICE_STARTER,
+  growth: process.env.STRIPE_PRICE_GROWTH,
   professional: process.env.STRIPE_PRICE_PROFESSIONAL,
+  ultimate: process.env.STRIPE_PRICE_ULTIMATE,
 };
 
 export function getPlanPriceId(slug: PaidPlanSlug): string | undefined {
@@ -27,9 +28,10 @@ export function getTeamSeatPriceId(): string | undefined {
 }
 
 // Stripe Price IDs for the credit packs defined in plans.ts (CREDIT_PACKS)
-// — $1 buys 50 credits at every tier ($10 = 500, per the spec's own
-// example), sold via api/credits/checkout and granted on the
-// "checkout.session.completed" webhook event for a payment-mode session.
+// — €10=500, €25=1500, €50=3500, €100=8000 credits, matching the actual
+// Stripe Products created for this app. Sold via api/credits/checkout and
+// granted on the "checkout.session.completed" webhook event for a
+// payment-mode session.
 const CREDIT_PACK_PRICE_ENV: Record<CreditPackId, string | undefined> = {
   credits_10: process.env.STRIPE_PRICE_CREDITS_10,
   credits_25: process.env.STRIPE_PRICE_CREDITS_25,

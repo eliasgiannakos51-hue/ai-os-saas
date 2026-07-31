@@ -7,7 +7,16 @@
     "signOut": "Αποσύνδεση",
     "jumpToPage": "Μετάβαση σε module ή σελίδα...",
     "noMatches": "Δεν βρέθηκαν αποτελέσματα για '{query}'",
-    "createAnything": "Create Anything"
+    "createAnything": "Create Anything",
+    "cancel": "Ακύρωση",
+    "save": "Αποθήκευση",
+    "saving": "Αποθήκευση...",
+    "remove": "Αφαίρεση",
+    "continue": "Συνέχεια",
+    "backToHome": "← Πίσω στο Ionexa AI",
+    "loading": "Φόρτωση...",
+    "error": "σφάλμα",
+    "viewPlans": "Δες τα πλάνα"
   },
   "sidebar": {
     "groups": {
@@ -24,7 +33,31 @@
       "chat": "Ionexa Chat",
       "memory": "AI Μνήμη",
       "settings": "Ρυθμίσεις",
-      "team": "Ομάδα"
+      "team": "Ομάδα",
+      "agents": "AI Agents",
+      "websites": "Ιστοσελίδες",
+      "apps": "Εφαρμογές",
+      "images": "Εικόνες",
+      "videos": "Βίντεο",
+      "coding": "AI Προγραμματισμός",
+      "dataAnalysis": "Ανάλυση Δεδομένων",
+      "documents": "Έγγραφα",
+      "presentations": "Παρουσιάσεις",
+      "campaigns": "Καμπάνιες",
+      "analytics": "Αναλυτικά",
+      "finance": "Οικονομικά",
+      "content": "Marketing",
+      "sales": "CRM",
+      "products": "Προϊόντα",
+      "research": "Γνώση",
+      "learning": "Εκμάθηση",
+      "ideas": "Ιδέες",
+      "competitors": "Ανταγωνιστές",
+      "decisions": "Αποφάσεις",
+      "feedback": "Ανατροφοδότηση",
+      "trading": "Trading",
+      "automation": "Αυτοματισμοί",
+      "marketplace": "Marketplace"
     }
   },
   "landing": {
@@ -73,6 +106,180 @@
       "sso": "SSO",
       "auditLogs": "Αρχεία Ελέγχου"
     }
+  },
+  "roadmap": {
+    "title": "Roadmap",
+    "subtitle": "Το Ionexa AI χτίζεται σε φάσεις. Δες τι είναι διαθέσιμο σήμερα, τι έρχεται σύντομα, και προς τα πού κατευθυνόμαστε.",
+    "backToHome": "← Πίσω στο Ionexa AI",
+    "sections": {
+      "available": "Διαθέσιμο Τώρα",
+      "soon": "Έρχεται Σύντομα",
+      "future": "Μελλοντικό Όραμα"
+    },
+    "items": {
+      "modules": { "title": "13 Επιχειρηματικά Modules", "description": "Ιδέες, Ανταγωνιστές, Έρευνα, Οικονομικά, Εκμάθηση, Trading, Αποφάσεις, Προϊόντα, Content, Πωλήσεις/CRM, Ανατροφοδότηση, Αναλυτικά, και σημειώσεις Αυτοματισμού." },
+      "createAnything": { "title": "Create Anything", "description": "Περιέγραψε οτιδήποτε σε απλό κείμενο και το AI το καταχωρεί αυτόματα στο σωστό module." },
+      "chat": { "title": "Ionexa Chat", "description": "Ένας AI βοηθός γενικής χρήσης για οποιαδήποτε ερώτηση — όχι δεμένος σε συγκεκριμένο module." },
+      "export": { "title": "Εξαγωγή Δεδομένων", "description": "Εξαγωγή CSV ανά module, καθώς και πλήρης εξαγωγή JSON όλων όσων έχεις καταγράψει." },
+      "team": { "title": "Συνεργασία Ομάδας", "description": "Προσκάλεσε συνεργάτες και δώσε τους πλήρη πρόσβαση στο επίπεδο του πλάνου σου." },
+      "agentBuilder": { "title": "AI Agent Builder", "description": "Περίγραψε έναν στόχο και απόκτησε έναν λειτουργικό αυτόνομο agent που τον επιδιώκει." },
+      "websiteBuilder": { "title": "Website Builder", "description": "Ιστοσελίδες που δημιουργούνται από AI με ένα μόνο prompt." },
+      "automationBuilder": { "title": "Πραγματικός Automation Builder", "description": "Πραγματικός αυτοματισμός ροών εργασίας που εκτελείται — όχι απλά καταγεγραμμένες ιδέες." },
+      "aiMemory": { "title": "AI Μνήμη", "description": "Context και ανάκληση μεταξύ projects, ώστε το AI να θυμάται τι έχει σημασία." },
+      "mobileApps": { "title": "Εφαρμογές Mobile & Desktop", "description": "Native εφαρμογές για iOS, Android, macOS και Windows." },
+      "imageGeneration": { "title": "AI Δημιουργία Εικόνας", "description": "Δημιούργησε εικόνες απευθείας μέσα στον χώρο εργασίας σου." },
+      "videoGeneration": { "title": "AI Δημιουργία & Επεξεργασία Βίντεο", "description": "Δημιούργησε και επεξεργάσου βίντεο με AI." },
+      "presentations": { "title": "AI Παρουσιάσεις & Έγγραφα", "description": "Δημιούργησε γυαλισμένες παρουσιάσεις και έγγραφα από τα δεδομένα σου." },
+      "marketingBuilder": { "title": "AI Marketing Campaign Builder", "description": "Σχεδίασε και δημιούργησε πλήρεις καμπάνιες μάρκετινγκ." },
+      "coding": { "title": "AI Βοηθός Προγραμματισμού", "description": "Πλήρης δημιουργία εφαρμογών, όχι μόνο αποσπάσματα κώδικα." },
+      "dataAnalysis": { "title": "AI Ανάλυση Δεδομένων", "description": "Βαθιά ανάλυση και εξαγωγή insights από τα δεδομένα σου." },
+      "teamGenerator": { "title": "AI Team Generator", "description": "Πολλαπλοί συντονισμένοι agents που συνεργάζονται για έναν κοινό στόχο." },
+      "projectManager": { "title": "AI Project Manager", "description": "Αυτόματη ανάλυση εργασιών και παρακολούθηση για κάθε project." },
+      "ceoAdvisor": { "title": "AI Σύμβουλος CEO", "description": "Ένας σύμβουλος επιχειρηματικού σχεδιασμού, πάντα διαθέσιμος." },
+      "marketplace": { "title": "Marketplace", "description": "Αγόρασε και πούλησε agents, αυτοματισμούς και templates." },
+      "router": { "title": "Universal AI Router", "description": "Αυτόματη επιλογή μεταξύ πολλαπλών AI providers για το καλύτερο αποτέλεσμα." },
+      "sync": { "title": "Συγχρονισμός Cross-Platform", "description": "Ενιαία εμπειρία σε web, mobile και desktop." }
+    }
+  },
+  "auth": {
+    "login": {
+      "welcomeBack": "Καλώς ήρθες πίσω",
+      "email": "Email",
+      "password": "Κωδικός",
+      "logIn": "Σύνδεση",
+      "working": "Επεξεργασία...",
+      "noAccount": "Δεν έχεις λογαριασμό;",
+      "signUp": "Εγγραφή",
+      "forgotPassword": "Ξέχασες τον κωδικό;",
+      "resetSuccess": "Ο κωδικός ενημερώθηκε — συνδέσου με τον νέο σου κωδικό."
+    },
+    "signup": {
+      "chooseYourPlan": "Επίλεξε το πλάνο σου",
+      "createYourAccount": "Δημιούργησε τον λογαριασμό σου",
+      "step": "Βήμα {step} από 2",
+      "continue": "Συνέχεια",
+      "alreadyHaveAccount": "Έχεις ήδη λογαριασμό;",
+      "logIn": "Σύνδεση",
+      "change": "αλλαγή",
+      "email": "Email",
+      "password": "Κωδικός",
+      "discountCode": "Κωδικός έκπτωσης",
+      "discountCodePlaceholder": "Κωδικός έκπτωσης (προαιρετικό)",
+      "agreeTerms": "Συμφωνώ με τους",
+      "termsOfService": "Όρους Χρήσης",
+      "and": "και",
+      "privacyPolicy": "την Πολιτική Απορρήτου",
+      "working": "Επεξεργασία...",
+      "continueToPayment": "Συνέχεια στην Πληρωμή",
+      "createAccount": "Δημιουργία Λογαριασμού",
+      "mostPopular": "Πιο Δημοφιλές"
+    },
+    "forgotPassword": {
+      "title": "Επαναφορά κωδικού",
+      "instructions": "Εισήγαγε το email του λογαριασμού σου και θα σου στείλουμε ένα link για επαναφορά του κωδικού.",
+      "email": "Email",
+      "sendResetLink": "Αποστολή link επαναφοράς",
+      "sending": "Αποστολή...",
+      "checkInbox": "Αν υπάρχει λογαριασμός για <highlight>{emailAddress}</highlight>, ένα link επαναφοράς κωδικού είναι καθ' οδόν. Έλεγξε τα εισερχόμενά σου.",
+      "backToLogin": "Πίσω στη σύνδεση",
+      "rememberedIt": "Το θυμήθηκες;",
+      "logIn": "Σύνδεση"
+    },
+    "resetPassword": {
+      "title": "Ορισμός νέου κωδικού",
+      "verifying": "Επαλήθευση link επαναφοράς...",
+      "requestNewLink": "Ζήτησε νέο link",
+      "newPassword": "Νέος κωδικός",
+      "confirmPassword": "Επιβεβαίωση κωδικού",
+      "saveNewPassword": "Αποθήκευση νέου κωδικού",
+      "saving": "Αποθήκευση..."
+    }
+  },
+  "settings": {
+    "title": "Ρυθμίσεις",
+    "signedInAs": "Συνδεδεμένος ως",
+    "changePassword": {
+      "title": "Αλλαγή Κωδικού",
+      "newPassword": "νέος κωδικός",
+      "confirmPassword": "επιβεβαίωση κωδικού",
+      "updatePassword": "Ενημέρωση Κωδικού",
+      "updating": "Ενημέρωση..."
+    },
+    "chatMemory": {
+      "title": "Μνήμη Chat",
+      "toggleLabel": "Διατήρηση context μεταξύ συνομιλιών",
+      "toggleDescription": "Το Ionexa Chat συγκρατεί μόνιμα χρήσιμα γεγονότα και προτιμήσεις από τις συνομιλίες σου και τα θυμάται σε μελλοντικές.",
+      "thingsRemembered": "{count, plural, one {# απομνημονευμένο στοιχείο} other {# απομνημονευμένα στοιχεία}}",
+      "clearAll": "Διαγραφή όλης της μνήμης",
+      "clearing": "Διαγραφή..."
+    },
+    "loginActivity": {
+      "title": "Δραστηριότητα Σύνδεσης",
+      "description": "Συσκευές και browsers που έχουν συνδεθεί στον λογαριασμό σου. Σου στέλνουμε email όποτε εμφανιστεί μια νέα εδώ.",
+      "noDevices": "Δεν έχουν καταγραφεί συσκευές ακόμα.",
+      "lastSeen": "Τελευταία εμφάνιση {time}"
+    },
+    "exportData": {
+      "title": "Εξαγωγή Δεδομένων",
+      "description": "Κατέβασε όλα όσα έχεις καταγράψει σε όλα τα 13 modules σε ένα ενιαίο αρχείο JSON.",
+      "exportAll": "Εξαγωγή Όλων των Δεδομένων",
+      "exporting": "Εξαγωγή..."
+    },
+    "dangerZone": {
+      "title": "Επικίνδυνη Ζώνη",
+      "description": "Διέγραψε μόνιμα τον λογαριασμό σου και κάθε εγγραφή που έχεις καταγράψει σε όλα τα 13 modules. Αυτό δεν αναιρείται.",
+      "deleteAccount": "Διαγραφή Λογαριασμού",
+      "typeToConfirm": "πληκτρολόγησε <highlight>{email}</highlight> για επιβεβαίωση",
+      "sendConfirmationEmail": "Αποστολή email επιβεβαίωσης διαγραφής",
+      "sending": "Αποστολή...",
+      "checkEmail": "Έλεγξε το email σου για να επιβεβαιώσεις τη διαγραφή — στείλαμε ένα link στο <highlight>{email}</highlight>. Λήγει σε 1 ώρα· τίποτα δεν διαγράφεται μέχρι να το πατήσεις."
+    }
+  },
+  "dashboard": {
+    "overview": {
+      "mostActiveModule": "Πιο Ενεργό Module",
+      "totalEntriesThisWeek": "Σύνολο Εγγραφών Αυτή την Εβδομάδα",
+      "acrossAllModules": "σε όλα τα modules",
+      "entry": "{count, plural, one {# εγγραφή} other {# εγγραφές}}"
+    },
+    "team": {
+      "title": "Ομάδα",
+      "description": "Στο πλάνο {plan} — τα προσκεκλημένα μέλη αποκτούν πλήρη πρόσβαση σε αυτό το επίπεδο, για {price}/μήνα ανά θέση.",
+      "inviteTitle": "Προσκάλεσε μέλος ομάδας",
+      "emailPlaceholder": "colleague@company.com",
+      "sendInvite": "Αποστολή Πρόσκλησης",
+      "sending": "Αποστολή...",
+      "noMembers": "Δεν υπάρχουν μέλη ομάδας ακόμα — προσκάλεσε κάποιον παραπάνω.",
+      "inviteSent": "Η πρόσκληση στάλθηκε στο {email}.",
+      "inviteFailed": "Δεν ήταν δυνατή η αποστολή της πρόσκλησης.",
+      "active": "Ενεργό",
+      "invited": "Προσκεκλημένο",
+      "invitedAt": "Προσκλήθηκε {time}",
+      "joined": "Εντάχθηκε {time}",
+      "removeConfirm": "Αφαίρεση του {email} από την ομάδα σου; Θα χάσει αμέσως την πρόσβαση στο πλάνο σου.",
+      "removeLabel": "Αφαίρεση {email}",
+      "removeTitle": "Αφαίρεση μέλους"
+    },
+    "memory": {
+      "title": "AI Μνήμη",
+      "description": "Αναζήτησε όλα όσα έχεις καταγράψει, σε κάθε module — δεν χρειάζεται να θυμάσαι πού το έβαλες."
+    },
+    "chat": {
+      "title": "Ionexa Chat"
+    },
+    "create": {
+      "title": "AI Assistant"
+    }
+  },
+  "module": {
+    "searchPlaceholder": "Αναζήτηση...",
+    "exportCsv": "Εξαγωγή CSV",
+    "noEntries": "Δεν υπάρχουν εγγραφές ακόμα — χρησιμοποίησε το κουμπί παραπάνω για να καταγράψεις την πρώτη σου.",
+    "noMatches": "Δεν βρέθηκαν αποτελέσματα για '{query}'",
+    "new": "Νέο {title}",
+    "selectPlaceholder": "επίλεξε...",
+    "save": "Αποθήκευση",
+    "saving": "Αποθήκευση..."
   },
   "language": {
     "label": "Γλώσσα"

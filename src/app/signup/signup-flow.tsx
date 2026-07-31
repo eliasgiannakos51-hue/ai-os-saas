@@ -3,7 +3,8 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Check, ChevronLeft, X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Check, ChevronLeft, Clock, X } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { isPasswordStrong } from "@/lib/password-strength";
 import { PLANS, CURRENCY_SYMBOL, isPaidPlanSlug, type Plan, type PlanSlug } from "@/lib/billing/plans";
@@ -20,13 +21,17 @@ type Step = 1 | 2;
 
 // Same capability set the /pricing comparison table checks — condensed to a
 // quick-scan ✓/✗ list under each plan card here instead of a full table row
-// per capability.
+// per capability. Only real, server-enforced capabilities go here (see
+// lib/billing/plans.ts's PlanCapabilities comment) — things like chat
+// memory and data export aren't plan-gated anywhere in the app, so they're
+// deliberately not listed as a differentiator here either.
 const CAPABILITY_ROWS: { label: string; included: (p: Plan) => boolean }[] = [
   { label: "Website & Automation Builder", included: (p) => p.capabilities.websiteBuilder },
   { label: "Mobile & SaaS Builder", included: (p) => p.capabilities.mobileSaasBuilder },
   { label: "Image & video generation", included: (p) => p.capabilities.imageVideoGeneration },
   { label: "AI Memory", included: (p) => p.capabilities.aiMemory },
   { label: "Team collaboration", included: (p) => p.capabilities.teamCollaboration },
+  { label: "Team seats add-on", included: (p) => p.hasTeamSeats },
 ];
 
 // New accounts start on plan selection instead of being asked to upgrade
@@ -37,6 +42,8 @@ const CAPABILITY_ROWS: { label: string; included: (p: Plan) => boolean }[] = [
 // Suspense boundary, same pattern as login-form.tsx's ?mode= handling.
 export function SignupFlow() {
   const router = useRouter();
+  const t = useTranslations("auth.signup");
+  const tPricing = useTranslations("pricing");
 
   const [step, setStep] = useState<Step>(1);
   const [selectedPlan, setSelectedPlan] = useState<PlanSlug>("free");
@@ -181,7 +188,7 @@ export function SignupFlow() {
             <Logo className="h-14 w-auto" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">
-            {step === 1 ? "Choose your plan" : "Create your account"}
+            {step === 1 ? t("chooseYourPlan") : t("createYourAccount")}
           </h1>
         </div>
 
@@ -190,7 +197,7 @@ export function SignupFlow() {
             <div className="h-1 flex-1 rounded-full bg-orange-500" />
             <div className={`h-1 flex-1 rounded-full ${step >= 2 ? "bg-orange-500" : "bg-border"}`} />
           </div>
-          <p className="mt-2 text-center text-xs text-muted">Step {step} of 2</p>
+          <p className="mt-2 text-center text-xs text-muted">{t("step", { step })}</p>
         </div>
 
         {step === 1 && (
@@ -212,7 +219,7 @@ export function SignupFlow() {
                   >
                     {p.highlighted && (
                       <span className="absolute -top-2.5 right-3 inline-flex items-center rounded-full bg-orange-500 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-black">
-                        Most Popular
+                        {t("mostPopular")}
                       </span>
                     )}
                     <div className="flex w-full items-center justify-between gap-2">
@@ -220,14 +227,14 @@ export function SignupFlow() {
                       {selected && <Check className="h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />}
                     </div>
                     <p className="mt-1 text-lg font-bold text-foreground">
-                      {typeof p.price === "number" ? `${CURRENCY_SYMBOL}${p.price}` : "Custom"}
+                      {typeof p.price === "number" ? `${CURRENCY_SYMBOL}${p.price}` : tPricing("custom")}
                       {typeof p.price === "number" && p.price > 0 && (
-                        <span className="text-xs font-normal text-muted">/mo</span>
+                        <span className="text-xs font-normal text-muted">{tPricing("perMonth")}</span>
                       )}
                     </p>
                     <p className="mt-1 text-xs text-muted">
                       {p.monthlyCredits === "custom"
-                        ? "Custom credits"
+                        ? `${tPricing("custom")} credits`
                         : `${p.monthlyCredits.toLocaleString()} credits/mo`}
                     </p>
 
@@ -251,6 +258,31 @@ export function SignupFlow() {
                         );
                       })}
                     </ul>
+
+                    <ul className="mt-3 w-full space-y-1.5 border-t border-border pt-3">
+                      {p.features.map((feature) => (
+                        <li
+                          key={feature.text}
+                          className={`flex items-start gap-1.5 text-[11px] ${
+                            feature.comingSoon ? "text-muted/60" : "text-foreground/80"
+                          }`}
+                        >
+                          {feature.comingSoon ? (
+                            <Clock className="mt-0.5 h-3 w-3 shrink-0 text-muted" aria-hidden="true" />
+                          ) : (
+                            <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" aria-hidden="true" />
+                          )}
+                          <span>
+                            {feature.text}
+                            {feature.comingSoon && (
+                              <span className="ml-1 inline-flex items-center rounded-full border border-orange-500/40 bg-orange-500/10 px-1 py-0 text-[8px] font-semibold uppercase tracking-wide text-orange-400">
+                                {tPricing("soon")}
+                              </span>
+                            )}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
                   </button>
                 );
               })}
@@ -261,13 +293,13 @@ export function SignupFlow() {
               onClick={() => setStep(2)}
               className="mt-6 inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
             >
-              Continue
+              {t("continue")}
             </button>
 
             <p className="mt-4 text-center text-xs text-muted">
-              Already have an account?{" "}
+              {t("alreadyHaveAccount")}{" "}
               <Link href="/login" className="text-orange-400 underline underline-offset-2">
-                Log in
+                {t("logIn")}
               </Link>
             </p>
           </div>
@@ -281,13 +313,13 @@ export function SignupFlow() {
               className="mb-4 inline-flex items-center gap-1 text-xs text-muted transition-colors duration-150 hover:text-foreground"
             >
               <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
-              {plan?.name ?? "Free"} plan — change
+              {plan?.name ?? "Free"} plan — {t("change")}
             </button>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="email" className="mb-1 block text-xs text-muted">
-                  Email
+                  {t("email")}
                 </label>
                 <input
                   id="email"
@@ -304,7 +336,7 @@ export function SignupFlow() {
               <div>
                 <div className="mb-1 flex items-center justify-between gap-2">
                   <label htmlFor="password" className="block text-xs text-muted">
-                    Password
+                    {t("password")}
                   </label>
                   <GeneratePasswordButton onGenerate={setPassword} />
                 </div>
@@ -325,7 +357,7 @@ export function SignupFlow() {
 
               <div>
                 <label htmlFor="discountCode" className="mb-1 block text-xs text-muted">
-                  Discount code
+                  {t("discountCode")}
                 </label>
                 <input
                   id="discountCode"
@@ -334,7 +366,7 @@ export function SignupFlow() {
                   value={discountCode}
                   onChange={(e) => setDiscountCode(e.target.value)}
                   className={FIELD_CLASS}
-                  placeholder="Discount code (optional)"
+                  placeholder={t("discountCodePlaceholder")}
                 />
               </div>
 
@@ -347,23 +379,23 @@ export function SignupFlow() {
                   className="mt-0.5 h-4 w-4 shrink-0 rounded border-border bg-input text-orange-500 accent-orange-500 outline-none focus:ring-2 focus:ring-orange-500/40"
                 />
                 <span>
-                  I agree to the{" "}
+                  {t("agreeTerms")}{" "}
                   <Link
                     href="/terms"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-orange-400 underline underline-offset-2"
                   >
-                    Terms of Service
+                    {t("termsOfService")}
                   </Link>{" "}
-                  and{" "}
+                  {t("and")}{" "}
                   <Link
                     href="/privacy"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-orange-400 underline underline-offset-2"
                   >
-                    Privacy Policy
+                    {t("privacyPolicy")}
                   </Link>
                 </span>
               </label>
@@ -380,10 +412,10 @@ export function SignupFlow() {
                 className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50"
               >
                 {loading
-                  ? "Working..."
+                  ? t("working")
                   : isPaidPlanSlug(selectedPlan)
-                    ? "Continue to Payment"
-                    : "Create Account"}
+                    ? t("continueToPayment")
+                    : t("createAccount")}
               </button>
             </form>
           </div>

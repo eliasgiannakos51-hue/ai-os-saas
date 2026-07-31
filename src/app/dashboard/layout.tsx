@@ -10,6 +10,7 @@ import { CreditsProvider } from "@/components/credits/credits-context";
 import { TopNav } from "@/components/dashboard/top-nav";
 import { acceptPendingTeamInvite } from "@/lib/team/accept-pending-invite";
 import { getOrInitCredits, resolvePlan } from "@/lib/billing/credits";
+import { isAdminEmail } from "@/lib/admin";
 
 export default async function DashboardLayout({
   children,
@@ -33,12 +34,13 @@ export default async function DashboardLayout({
 
   const plan = resolvePlan(user);
   const credits = await getOrInitCredits(user.id, plan);
+  const isAdmin = isAdminEmail(user.email);
 
   return (
     <ToastProvider>
       <SidebarProvider>
         <CommandPaletteProvider>
-          <CreditsProvider initialCredits={credits.credits_remaining}>
+          <CreditsProvider initialCredits={credits.credits_remaining} isAdmin={isAdmin}>
             <div className="flex min-h-screen bg-background">
               <Sidebar />
               <div className="flex min-w-0 flex-1 flex-col">

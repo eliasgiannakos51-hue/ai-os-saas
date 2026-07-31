@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ShieldCheck, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
@@ -15,6 +16,7 @@ export type KnownDevice = {
 };
 
 export function LoginActivity({ devices: initialDevices }: { devices: KnownDevice[] }) {
+  const t = useTranslations("settings.loginActivity");
   const supabase = createClient();
   const { addToast } = useToast();
   const [devices, setDevices] = useState(initialDevices);
@@ -42,15 +44,12 @@ export function LoginActivity({ devices: initialDevices }: { devices: KnownDevic
   return (
     <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <ShieldCheck className="h-4 w-4 text-orange-400" /> Login Activity
+        <ShieldCheck className="h-4 w-4 text-orange-400" /> {t("title")}
       </h2>
-      <p className="text-xs text-muted">
-        Devices and browsers that have signed in to your account. We email
-        you whenever a new one shows up here.
-      </p>
+      <p className="text-xs text-muted">{t("description")}</p>
 
       {devices.length === 0 ? (
-        <p className="text-xs text-muted">No devices recorded yet.</p>
+        <p className="text-xs text-muted">{t("noDevices")}</p>
       ) : (
         <div className="space-y-2">
           {devices.map((device) => {
@@ -67,7 +66,7 @@ export function LoginActivity({ devices: initialDevices }: { devices: KnownDevic
                     title={new Date(device.last_seen).toLocaleString()}
                     suppressHydrationWarning
                   >
-                    Last seen {formatRelativeTime(device.last_seen)}
+                    {t("lastSeen", { time: formatRelativeTime(device.last_seen) })}
                     {device.ip_address ? ` · ${device.ip_address}` : ""}
                   </p>
                 </div>

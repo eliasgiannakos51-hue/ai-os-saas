@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Settings as SettingsIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
 };
 
 export default async function SettingsPage() {
+  const t = await getTranslations("settings");
   const supabase = createClient();
 
   const {
@@ -57,10 +59,10 @@ export default async function SettingsPage() {
   return (
     <main className="min-h-full bg-background">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
-        <PageHeader icon={SettingsIcon} title="Settings" />
+        <PageHeader icon={SettingsIcon} title={t("title")} />
 
         <div className="mb-6 rounded-2xl border border-border bg-panel p-5">
-          <p className="text-xs text-muted">Signed in as</p>
+          <p className="text-xs text-muted">{t("signedInAs")}</p>
           <p className="mt-1 text-sm text-foreground">{user.email}</p>
         </div>
 
@@ -88,11 +90,8 @@ export default async function SettingsPage() {
         <LoginActivity devices={(knownDevices as KnownDevice[] | null) ?? []} />
 
         <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
-          <h2 className="text-sm font-semibold text-foreground">Export Data</h2>
-          <p className="text-xs text-muted">
-            Download everything you&apos;ve logged across all 13 modules as a
-            single JSON file.
-          </p>
+          <h2 className="text-sm font-semibold text-foreground">{t("exportData.title")}</h2>
+          <p className="text-xs text-muted">{t("exportData.description")}</p>
           <ExportDataButton />
         </div>
 

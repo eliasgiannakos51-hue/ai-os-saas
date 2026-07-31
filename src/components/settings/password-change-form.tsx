@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -9,6 +10,7 @@ import { isPasswordStrong } from "@/lib/password-strength";
 import { getErrorMessage } from "@/lib/get-error-message";
 
 export function PasswordChangeForm() {
+  const t = useTranslations("settings.changePassword");
   const supabase = createClient();
   const { addToast } = useToast();
   const [newPassword, setNewPassword] = useState("");
@@ -59,11 +61,11 @@ export function PasswordChangeForm() {
       onSubmit={handleSubmit}
       className="space-y-4 rounded-2xl border border-border bg-panel p-5"
     >
-      <h2 className="text-sm font-semibold text-foreground">Change Password</h2>
+      <h2 className="text-sm font-semibold text-foreground">{t("title")}</h2>
 
       <label className="block text-xs text-muted">
         <span className="mb-1 block">
-          new password
+          {t("newPassword")}
         </span>
         <PasswordInput
           required
@@ -82,7 +84,7 @@ export function PasswordChangeForm() {
 
       <label className="block text-xs text-muted">
         <span className="mb-1 block">
-          confirm password
+          {t("confirmPassword")}
         </span>
         <PasswordInput
           required
@@ -103,10 +105,10 @@ export function PasswordChangeForm() {
 
       <button
         type="submit"
-        disabled={loading || !isPasswordStrong(newPassword) || newPassword !== confirmPassword}
+        disabled={loading}
         className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0 sm:w-auto"
       >
-        {loading ? "Updating..." : "Update Password"}
+        {loading ? t("updating") : t("updatePassword")}
       </button>
     </form>
   );

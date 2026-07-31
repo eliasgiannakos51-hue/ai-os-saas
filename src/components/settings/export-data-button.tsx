@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
@@ -8,6 +9,7 @@ import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { downloadJSON, todayForFilename } from "@/lib/csv";
 
 export function ExportDataButton() {
+  const t = useTranslations("settings.exportData");
   const supabase = createClient();
   const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -46,7 +48,7 @@ export function ExportDataButton() {
       disabled={loading}
       className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
     >
-      <Download className="h-4 w-4" /> {loading ? "Exporting..." : "Export All Data"}
+      <Download className="h-4 w-4" /> {loading ? t("exporting") : t("exportAll")}
     </button>
   );
 }

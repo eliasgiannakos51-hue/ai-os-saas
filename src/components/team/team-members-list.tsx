@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Users, Clock, CheckCircle2, Trash2 } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { formatRelativeTime } from "@/lib/format-time";
-import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
+import { getErrorMessage } from "@/lib/get-error-message";
 
 export type TeamMember = {
   id: string;
@@ -16,43 +17,50 @@ export type TeamMember = {
 };
 
 export function TeamMembersList({ members: initialMembers }: { members: TeamMember[] }) {
-  const supabase = createClient();
+  const t = useTranslations("dashboard.team");
   const { addToast } = useToast();
   const [members, setMembers] = useState(initialMembers);
   const [removingId, setRemovingId] = useState<string | null>(null);
 
   async function removeMember(member: TeamMember) {
-    if (
-      !window.confirm(
-        `Remove ${member.member_email} from your team? They'll immediately lose access to your plan.`
-      )
-    ) {
+    if (!window.confirm(t("removeConfirm", { email: member.member_email }))) {
       return;
     }
 
     setRemovingId(member.id);
-    // team_members has an owner-only RLS delete policy (auth.uid() =
-    // owner_id) — this only ever succeeds for rows this account owns.
-    const { error } = await supabase.from("team_members").delete().eq("id", member.id);
-    setRemovingId(null);
+    // Goes through a server route (not a direct client-side delete) — only
+    // the admin client can also reset the removed member's OWN
+    // subscription_tier back to "free" (their access is a copy made at
+    // accept-time, not looked up live), which a plain RLS-scoped delete
+    // from the browser has no way to do.
+    try {
+      const res = await fetch("/api/team/remove", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ memberId: member.id }),
+      });
+      const data = await res.json();
 
-    if (error) {
+      if (!res.ok || !data.ok) {
+        // eslint-disable-next-line no-console
+        console.error("Remove team member error:", data.error);
+        addToast(`✗ ${getErrorMessage(data.error, "could not remove member")}`, "error");
+        return;
+      }
+
+      setMembers((prev) => prev.filter((m) => m.id !== member.id));
+      addToast("✓ member removed");
+    } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("Remove team member error:", error);
+      console.error("Remove team member threw:", err);
       addToast("✗ could not remove member", "error");
-      return;
+    } finally {
+      setRemovingId(null);
     }
-
-    setMembers((prev) => prev.filter((m) => m.id !== member.id));
-    addToast("✓ member removed");
   }
 
   if (members.length === 0) {
-    return (
-      <EmptyState icon={Users}>
-        No team members yet — invite someone above.
-      </EmptyState>
-    );
+    return <EmptyState icon={Users}>{t("noMembers")}</EmptyState>;
   }
 
   return (
@@ -72,8 +80,8 @@ export function TeamMembersList({ members: initialMembers }: { members: TeamMemb
               suppressHydrationWarning
             >
               {member.status === "active"
-                ? `Joined ${formatRelativeTime(member.joined_at ?? member.invited_at)}`
-                : `Invited ${formatRelativeTime(member.invited_at)}`}
+                ? t("joined", { time: formatRelativeTime(member.joined_at ?? member.invited_at) })
+                : t("invitedAt", { time: formatRelativeTime(member.invited_at) })}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -89,14 +97,14 @@ export function TeamMembersList({ members: initialMembers }: { members: TeamMemb
               ) : (
                 <Clock className="h-3 w-3" aria-hidden="true" />
               )}
-              {member.status === "active" ? "Active" : "Invited"}
+              {member.status === "active" ? t("active") : t("invited")}
             </span>
             <button
               type="button"
               onClick={() => removeMember(member)}
               disabled={removingId === member.id}
-              aria-label={`Remove ${member.member_email}`}
-              title="Remove member"
+              aria-label={t("removeLabel", { email: member.member_email })}
+              title={t("removeTitle")}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-red-400/70 transition-colors duration-150 hover:bg-red-950/30 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Trash2 className="h-4 w-4" aria-hidden="true" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Search, SearchX, Download } from "lucide-react";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
@@ -27,6 +28,7 @@ export function GenericList({
   module: ModuleConfig;
   records: ModuleRecord[];
 }) {
+  const t = useTranslations("module");
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -57,7 +59,7 @@ export function GenericList({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search..."
+            placeholder={t("searchPlaceholder")}
             className="input pl-10"
           />
         </div>
@@ -69,17 +71,15 @@ export function GenericList({
             disabled={filtered.length === 0}
             className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
           >
-            <Download className="h-4 w-4" /> Export CSV
+            <Download className="h-4 w-4" /> {t("exportCsv")}
           </button>
         </div>
       </div>
 
       {records.length === 0 ? (
-        <EmptyState>
-          No entries yet — use the button above to log your first one.
-        </EmptyState>
+        <EmptyState>{t("noEntries")}</EmptyState>
       ) : filtered.length === 0 ? (
-        <EmptyState icon={SearchX}>No matches for &apos;{query}&apos;</EmptyState>
+        <EmptyState icon={SearchX}>{t("noMatches", { query })}</EmptyState>
       ) : (
         <>
           <div className="space-y-3">

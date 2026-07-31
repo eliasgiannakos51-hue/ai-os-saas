@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -12,6 +13,7 @@ import { Logo } from "@/components/logo";
 export function LoginForm() {
   const router = useRouter();
   const supabase = createClient();
+  const t = useTranslations("auth.login");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -76,12 +78,12 @@ export function LoginForm() {
           <div className="mb-4 flex items-center justify-center">
             <Logo className="h-[168px] w-auto max-w-full" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
+          <h1 className="text-2xl font-bold text-foreground">{t("welcomeBack")}</h1>
         </div>
 
         {resetSuccess && (
           <p className="mb-4 rounded-xl border border-emerald-800 bg-emerald-950/30 px-3 py-2 text-center text-xs text-emerald-400">
-            Password updated — sign in with your new password.
+            {t("resetSuccess")}
           </p>
         )}
 
@@ -89,7 +91,7 @@ export function LoginForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="email" className="mb-1 block text-xs text-muted">
-                Email
+                {t("email")}
               </label>
               <input
                 id="email"
@@ -105,7 +107,7 @@ export function LoginForm() {
 
             <div>
               <label htmlFor="password" className="mb-1 block text-xs text-muted">
-                Password
+                {t("password")}
               </label>
               <PasswordInput
                 id="password"
@@ -130,21 +132,21 @@ export function LoginForm() {
               disabled={loading}
               className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50"
             >
-              {loading ? "Working..." : "Log In"}
+              {loading ? t("working") : t("logIn")}
             </button>
           </form>
         </div>
 
         <p className="mt-4 text-center text-xs text-muted">
-          No account yet?{" "}
+          {t("noAccount")}{" "}
           <Link href="/signup" className="text-orange-400 underline underline-offset-2">
-            Sign up
+            {t("signUp")}
           </Link>
         </p>
 
         <p className="mt-2 text-center text-xs text-muted">
           <Link href="/forgot-password" className="text-orange-400 underline underline-offset-2">
-            Forgot password?
+            {t("forgotPassword")}
           </Link>
         </p>
       </div>

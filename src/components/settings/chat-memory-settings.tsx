@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Brain, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
@@ -14,6 +15,7 @@ export function ChatMemorySettings({
   initialEnabled: boolean;
   initialCount: number;
 }) {
+  const t = useTranslations("settings.chatMemory");
   const supabase = createClient();
   const { addToast } = useToast();
   const [enabled, setEnabled] = useState(initialEnabled);
@@ -70,22 +72,21 @@ export function ChatMemorySettings({
   return (
     <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <Brain className="h-4 w-4 text-orange-400" /> Chat Memory
+        <Brain className="h-4 w-4 text-orange-400" /> {t("title")}
       </h2>
 
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-sm text-foreground">Remember context across conversations</p>
+          <p className="text-sm text-foreground">{t("toggleLabel")}</p>
           <p className="mt-0.5 text-xs text-muted">
-            Ionexa Chat picks up durable facts and preferences from your
-            conversations and recalls them in future ones.
+            {t("toggleDescription")}
           </p>
         </div>
         <button
           type="button"
           role="switch"
           aria-checked={enabled}
-          aria-label="Remember context across conversations"
+          aria-label={t("toggleLabel")}
           onClick={handleToggle}
           disabled={updating}
           className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
@@ -102,7 +103,7 @@ export function ChatMemorySettings({
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
         <p className="text-xs text-muted">
-          {count} {count === 1 ? "thing" : "things"} remembered
+          {t("thingsRemembered", { count })}
         </p>
         <button
           type="button"
@@ -110,7 +111,7 @@ export function ChatMemorySettings({
           disabled={clearing || count === 0}
           className="inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-red-500 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0"
         >
-          <Trash2 className="h-3.5 w-3.5" /> {clearing ? "Clearing..." : "Clear all memory"}
+          <Trash2 className="h-3.5 w-3.5" /> {clearing ? t("clearing") : t("clearAll")}
         </button>
       </div>
     </div>

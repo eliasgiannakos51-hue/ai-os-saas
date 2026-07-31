@@ -167,8 +167,10 @@ export const PLANS: Plan[] = [
       { text: "Everything in Professional" },
       { text: "25,000 credits/month" },
       { text: "Highest priority processing" },
-      { text: "Dedicated account support" },
-      { text: "Early access to new features", comingSoon: true },
+      { text: "Dedicated account manager" },
+      { text: "Custom integrations request" },
+      { text: "Early access to new features" },
+      { text: "Priority onboarding & migration support" },
     ],
   },
   {

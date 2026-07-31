@@ -2,12 +2,14 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { Logo } from "@/components/logo";
 
 export function ForgotPasswordForm() {
   const supabase = createClient();
+  const t = useTranslations("auth.forgotPassword");
 
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -49,7 +51,7 @@ export function ForgotPasswordForm() {
             <Logo className="h-14 w-auto" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">
-            Reset password
+            {t("title")}
           </h1>
         </div>
 
@@ -57,27 +59,25 @@ export function ForgotPasswordForm() {
           {sent ? (
             <div className="space-y-4 text-center">
               <p className="text-sm text-foreground/90">
-                If an account exists for{" "}
-                <span className="text-orange-400">{email}</span>, a password
-                reset link is on its way. Check your inbox.
+                {t.rich("checkInbox", {
+                  highlight: (chunks) => <span className="text-orange-400">{chunks}</span>,
+                  emailAddress: email,
+                })}
               </p>
               <Link
                 href="/login"
                 className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
               >
-                Back to login
+                {t("backToLogin")}
               </Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
-              <p className="text-xs text-muted">
-                Enter the email on your account and we&apos;ll send you a
-                link to reset your password.
-              </p>
+              <p className="text-xs text-muted">{t("instructions")}</p>
 
               <div>
                 <label htmlFor="email" className="mb-1 block text-xs text-muted">
-                  Email
+                  {t("email")}
                 </label>
                 <input
                   id="email"
@@ -102,7 +102,7 @@ export function ForgotPasswordForm() {
                 disabled={loading}
                 className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50"
               >
-                {loading ? "Sending..." : "Send reset link"}
+                {loading ? t("sending") : t("sendResetLink")}
               </button>
             </form>
           )}
@@ -110,12 +110,12 @@ export function ForgotPasswordForm() {
 
         {!sent && (
           <p className="mt-4 text-center text-xs text-muted">
-            Remembered it?{" "}
+            {t("rememberedIt")}{" "}
             <Link
               href="/login"
               className="text-orange-400 underline underline-offset-2"
             >
-              Log in
+              {t("logIn")}
             </Link>
           </p>
         )}

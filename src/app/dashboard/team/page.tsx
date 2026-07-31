@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function TeamPage() {
+  const t = await getTranslations("dashboard.team");
   const supabase = createClient();
 
   const {
@@ -51,8 +53,11 @@ export default async function TeamPage() {
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
         <PageHeader
           icon={Users}
-          title="Team"
-          description={`On the ${plan?.name ?? tier} plan — invited members get full access at this tier, at ${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}/month per seat.`}
+          title={t("title")}
+          description={t("description", {
+            plan: plan?.name ?? tier,
+            price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}`,
+          })}
         />
 
         <div className="mb-6">

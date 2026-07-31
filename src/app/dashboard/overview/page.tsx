@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { GreetingHeader } from "@/components/overview/greeting-header";
 import { CreateChat } from "@/components/create/create-chat";
@@ -27,6 +28,7 @@ const QUICK_ACTIONS = [
 ] as const;
 
 export default async function OverviewPage() {
+  const t = await getTranslations("dashboard.overview");
   const supabase = createClient();
 
   const {
@@ -108,20 +110,20 @@ export default async function OverviewPage() {
 
           <StatCard
             icon={Layers}
-            label="Most Active Module"
+            label={t("mostActiveModule")}
             value={mostActive && mostActive.count > 0 ? mostActive.module.title : "—"}
             sublabel={
               mostActive && mostActive.count > 0
-                ? `${mostActive.count} ${mostActive.count === 1 ? "entry" : "entries"}`
+                ? t("entry", { count: mostActive.count })
                 : undefined
             }
           />
 
           <StatCard
             icon={TrendingUp}
-            label="Total Entries This Week"
+            label={t("totalEntriesThisWeek")}
             value={String(totalThisWeek)}
-            sublabel="across all modules"
+            sublabel={t("acrossAllModules")}
           />
         </div>
       </div>

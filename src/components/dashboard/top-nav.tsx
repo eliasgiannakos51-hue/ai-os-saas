@@ -18,7 +18,7 @@ export function TopNav({ email }: { email: string }) {
   const router = useRouter();
   const t = useTranslations("common");
   const { setOpen: setCommandPaletteOpen } = useCommandPalette();
-  const { credits } = useCredits();
+  const { credits, isAdmin } = useCredits();
   const [notifOpen, setNotifOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -81,10 +81,10 @@ export function TopNav({ email }: { email: string }) {
         <Link
           href="/dashboard/settings#buy-credits"
           className="hidden items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-400 sm:inline-flex"
-          title="Credits remaining — buy more in Settings"
+          title={isAdmin ? "Owner access — unlimited credits" : "Credits remaining — buy more in Settings"}
         >
           <Zap className="h-3.5 w-3.5 text-orange-400" aria-hidden="true" />
-          {credits === null ? "…" : credits.toLocaleString()}
+          {isAdmin ? "Unlimited" : credits === null ? "…" : credits.toLocaleString()}
         </Link>
 
         <button

@@ -5,6 +5,7 @@ import { createContext, useCallback, useContext, useState, type ReactNode } from
 type CreditsContextValue = {
   credits: number | null;
   refresh: () => Promise<void>;
+  isAdmin: boolean;
 };
 
 const CreditsContext = createContext<CreditsContextValue | null>(null);
@@ -14,11 +15,20 @@ const CreditsContext = createContext<CreditsContextValue | null>(null);
 // called by every credit-consuming action (chat send, create anything,
 // gated module creation) so the displayed number updates live without a
 // full page reload.
+//
+// isAdmin is display-only here — admin-listed accounts (lib/admin.ts)
+// never actually have credits deducted (api/chat, api/create both skip
+// deductCredits for them), but /api/credits/balance and this row's
+// credits_remaining were never plumbed to know that, so without this flag
+// the top nav would show a plain, static, misleadingly-low number instead
+// of reflecting their real unlimited access.
 export function CreditsProvider({
   initialCredits,
+  isAdmin = false,
   children,
 }: {
   initialCredits: number | null;
+  isAdmin?: boolean;
   children: ReactNode;
 }) {
   const [credits, setCredits] = useState<number | null>(initialCredits);
@@ -36,7 +46,9 @@ export function CreditsProvider({
     }
   }, []);
 
-  return <CreditsContext.Provider value={{ credits, refresh }}>{children}</CreditsContext.Provider>;
+  return (
+    <CreditsContext.Provider value={{ credits, refresh, isAdmin }}>{children}</CreditsContext.Provider>
+  );
 }
 
 export function useCredits(): CreditsContextValue {

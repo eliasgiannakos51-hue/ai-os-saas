@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Plus, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { ModuleConfig } from "@/lib/modules";
@@ -25,6 +26,8 @@ function isGatedModule(module: ModuleConfig): boolean {
 
 export function GenericAddForm({ module }: { module: ModuleConfig }) {
   const router = useRouter();
+  const t = useTranslations("module");
+  const tCommon = useTranslations("common");
   const supabase = createClient();
   const { addToast } = useToast();
   const { refresh: refreshCredits } = useCredits();
@@ -119,7 +122,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
         onClick={() => setOpen(true)}
         className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
       >
-        <Plus className="h-4 w-4" /> New {module.title}
+        <Plus className="h-4 w-4" /> {t("new", { title: module.title })}
       </button>
     );
   }
@@ -130,7 +133,9 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
       className="space-y-4 rounded-2xl border border-border bg-panel p-5"
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-foreground">New {module.title}</h2>
+        <h2 className="text-sm font-semibold text-foreground">
+          {t("new", { title: module.title })}
+        </h2>
         <button
           type="button"
           onClick={() => setOpen(false)}
@@ -167,7 +172,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
                 className="input"
               >
                 <option value="" disabled>
-                  select...
+                  {t("selectPlaceholder")}
                 </option>
                 {field.options?.map((option) => (
                   <option key={option} value={option}>
@@ -191,12 +196,12 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
 
       {error && (
         <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
-          error: {error}
+          {tCommon("error")}: {error}
           {upgradeRequired && (
             <>
               {" "}
               <Link href="/pricing" className="underline underline-offset-2">
-                View plans
+                {tCommon("viewPlans")}
               </Link>
             </>
           )}
@@ -208,7 +213,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
         disabled={loading}
         className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
       >
-        {loading ? "Saving..." : "Save"}
+        {loading ? t("saving") : t("save")}
       </button>
     </form>
   );

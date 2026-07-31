@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import type { LucideIcon } from "lucide-react";
 import {
   LayoutGrid,
@@ -34,16 +35,17 @@ export const metadata: Metadata = {
 
 type RoadmapStatus = "available" | "soon" | "future";
 
+// `key` looks up roadmap.items.<key>.title/.description in messages/*.json
+// — the icon/status/grouping stays here in code, only the display text is
+// translated.
 type RoadmapItem = {
   icon: LucideIcon;
-  title: string;
-  description: string;
+  key: string;
 };
 
 type RoadmapSection = {
   status: RoadmapStatus;
   emoji: string;
-  label: string;
   items: RoadmapItem[];
 };
 
@@ -66,140 +68,48 @@ const SECTIONS: RoadmapSection[] = [
   {
     status: "available",
     emoji: "✅",
-    label: "Available Now",
     items: [
-      {
-        icon: LayoutGrid,
-        title: "13 Business Modules",
-        description:
-          "Ideas, Competitors, Research, Finance, Learning, Trading, Decisions, Products, Content, Sales/CRM, Feedback, Analytics, and Automation notes.",
-      },
-      {
-        icon: Sparkles,
-        title: "Create Anything",
-        description:
-          "Describe anything in plain text and AI files it into the right module automatically.",
-      },
-      {
-        icon: MessageCircle,
-        title: "Ionexa Chat",
-        description:
-          "A general-purpose AI assistant for any question — not tied to a specific module.",
-      },
-      {
-        icon: Download,
-        title: "Data Export",
-        description: "CSV export per module, plus a full JSON export of everything you've logged.",
-      },
-      {
-        icon: Users,
-        title: "Team Collaboration",
-        description: "Invite teammates and give them full access at your plan's tier.",
-      },
+      { icon: LayoutGrid, key: "modules" },
+      { icon: Sparkles, key: "createAnything" },
+      { icon: MessageCircle, key: "chat" },
+      { icon: Download, key: "export" },
+      { icon: Users, key: "team" },
     ],
   },
   {
     status: "soon",
     emoji: "🔜",
-    label: "Coming Soon",
     items: [
-      {
-        icon: Bot,
-        title: "AI Agent Builder",
-        description: "Describe a goal and get a working autonomous agent that pursues it.",
-      },
-      {
-        icon: Globe,
-        title: "Website Builder",
-        description: "AI-generated websites from a single prompt.",
-      },
-      {
-        icon: Workflow,
-        title: "Real Automation Builder",
-        description: "Actual workflow automation that runs — not just logged ideas.",
-      },
-      {
-        icon: Brain,
-        title: "AI Memory",
-        description: "Cross-project context and recall, so AI remembers what matters.",
-      },
+      { icon: Bot, key: "agentBuilder" },
+      { icon: Globe, key: "websiteBuilder" },
+      { icon: Workflow, key: "automationBuilder" },
+      { icon: Brain, key: "aiMemory" },
     ],
   },
   {
     status: "future",
     emoji: "🔮",
-    label: "Future Vision",
     items: [
-      {
-        icon: Smartphone,
-        title: "Mobile & Desktop Apps",
-        description: "Native apps for iOS, Android, macOS, and Windows.",
-      },
-      {
-        icon: ImageIcon,
-        title: "AI Image Generation",
-        description: "Generate images directly inside your workspace.",
-      },
-      {
-        icon: Video,
-        title: "AI Video Generation & Editing",
-        description: "Create and edit video with AI.",
-      },
-      {
-        icon: FileText,
-        title: "AI Presentations & Documents",
-        description: "Generate polished decks and documents from your data.",
-      },
-      {
-        icon: Megaphone,
-        title: "AI Marketing Campaign Builder",
-        description: "Plan and generate full marketing campaigns.",
-      },
-      {
-        icon: Code2,
-        title: "AI Coding Assistant",
-        description: "Full app generation, not just snippets.",
-      },
-      {
-        icon: LineChart,
-        title: "AI Data Analysis",
-        description: "Deep analysis and insight generation across your data.",
-      },
-      {
-        icon: UsersRound,
-        title: "AI Team Generator",
-        description: "Multiple coordinated agents working together on a single goal.",
-      },
-      {
-        icon: ClipboardList,
-        title: "AI Project Manager",
-        description: "Automatic task breakdown and tracking for any project.",
-      },
-      {
-        icon: Briefcase,
-        title: "AI CEO Advisor",
-        description: "A business planning consultant, always available.",
-      },
-      {
-        icon: Store,
-        title: "Marketplace",
-        description: "Buy and sell agents, automations, and templates.",
-      },
-      {
-        icon: Shuffle,
-        title: "Universal AI Router",
-        description: "Automatic selection across multiple AI providers for the best result.",
-      },
-      {
-        icon: RefreshCw,
-        title: "Cross-Platform Sync",
-        description: "A unified experience across web, mobile, and desktop.",
-      },
+      { icon: Smartphone, key: "mobileApps" },
+      { icon: ImageIcon, key: "imageGeneration" },
+      { icon: Video, key: "videoGeneration" },
+      { icon: FileText, key: "presentations" },
+      { icon: Megaphone, key: "marketingBuilder" },
+      { icon: Code2, key: "coding" },
+      { icon: LineChart, key: "dataAnalysis" },
+      { icon: UsersRound, key: "teamGenerator" },
+      { icon: ClipboardList, key: "projectManager" },
+      { icon: Briefcase, key: "ceoAdvisor" },
+      { icon: Store, key: "marketplace" },
+      { icon: Shuffle, key: "router" },
+      { icon: RefreshCw, key: "sync" },
     ],
   },
 ];
 
-export default function RoadmapPage() {
+export default async function RoadmapPage() {
+  const t = await getTranslations("roadmap");
+
   return (
     <main className="min-h-screen bg-background px-4 py-16 text-foreground sm:px-6">
       <div className="mx-auto max-w-5xl">
@@ -211,26 +121,26 @@ export default function RoadmapPage() {
             <Logo iconOnly className="h-6 w-6" />
             <span className="text-base font-bold tracking-tight text-foreground">IONEXA</span>
           </Link>
-          <h1 className="mt-6 text-3xl font-bold text-foreground sm:text-4xl">Roadmap</h1>
+          <h1 className="mt-6 text-3xl font-bold text-foreground sm:text-4xl">{t("title")}</h1>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted">
-            Ionexa AI is being built in phases. Here&apos;s what&apos;s live today, what&apos;s
-            coming next, and where we&apos;re headed.
+            {t("subtitle")}
           </p>
         </div>
 
         <div className="mt-14 space-y-14">
           {SECTIONS.map((section) => {
             const styles = STATUS_STYLES[section.status];
+            const sectionLabel = t(`sections.${section.status}`);
             return (
-              <section key={section.label}>
+              <section key={section.status}>
                 <h2 className="mb-5 flex items-center gap-2 text-lg font-bold text-foreground">
                   <span aria-hidden="true">{section.emoji}</span>
-                  {section.label}
+                  {sectionLabel}
                 </h2>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {section.items.map((item) => (
                     <div
-                      key={item.title}
+                      key={item.key}
                       className="flex flex-col rounded-2xl border border-border bg-panel p-5"
                     >
                       <div className="flex items-start justify-between gap-2">
@@ -242,12 +152,14 @@ export default function RoadmapPage() {
                         <span
                           className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${styles.badge}`}
                         >
-                          {section.label}
+                          {sectionLabel}
                         </span>
                       </div>
-                      <h3 className="mt-4 text-sm font-semibold text-foreground">{item.title}</h3>
+                      <h3 className="mt-4 text-sm font-semibold text-foreground">
+                        {t(`items.${item.key}.title`)}
+                      </h3>
                       <p className="mt-1.5 text-xs leading-relaxed text-muted">
-                        {item.description}
+                        {t(`items.${item.key}.description`)}
                       </p>
                     </div>
                   ))}
@@ -259,7 +171,7 @@ export default function RoadmapPage() {
 
         <div className="mt-16 text-center">
           <Link href="/" className="text-xs text-orange-400 underline underline-offset-2">
-            ← Back to Ionexa AI
+            {t("backToHome")}
           </Link>
         </div>
       </div>

@@ -8,6 +8,14 @@ import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
 
+// "MISSING" / "EMPTY" / "set (len=N, prefix='price_12…')" — never the full
+// value, safe for production logs.
+function maskEnvVar(value: string | undefined): string {
+  if (value === undefined) return "MISSING (env var not set)";
+  if (value.trim() === "") return "EMPTY (env var set to empty string)";
+  return `set (len=${value.length}, prefix='${value.slice(0, 8)}…')`;
+}
+
 export async function POST(request: Request) {
   try {
     let plan: string;
@@ -49,6 +57,25 @@ export async function POST(request: Request) {
     // never use it.
     const teamSeatPriceId = planDefinition?.hasTeamSeats ? getTeamSeatPriceId() : undefined;
     if (!planPriceId || (planDefinition?.hasTeamSeats && !teamSeatPriceId)) {
+      // Masked (never the real value) so this is safe to leave in
+      // production logs — tells you exactly which env var is the problem
+      // without needing to reproduce with real Stripe keys locally.
+      // eslint-disable-next-line no-console
+      console.error(
+        "[checkout] Billing is not configured yet. — env var check:",
+        JSON.stringify({
+          plan,
+          hasTeamSeats: planDefinition?.hasTeamSeats ?? null,
+          STRIPE_SECRET_KEY: maskEnvVar(process.env.STRIPE_SECRET_KEY),
+          STRIPE_PRICE_STARTER: maskEnvVar(process.env.STRIPE_PRICE_STARTER),
+          STRIPE_PRICE_GROWTH: maskEnvVar(process.env.STRIPE_PRICE_GROWTH),
+          STRIPE_PRICE_PROFESSIONAL: maskEnvVar(process.env.STRIPE_PRICE_PROFESSIONAL),
+          STRIPE_PRICE_ULTIMATE: maskEnvVar(process.env.STRIPE_PRICE_ULTIMATE),
+          STRIPE_PRICE_TEAM_SEAT: maskEnvVar(process.env.STRIPE_PRICE_TEAM_SEAT),
+          resolvedPlanPriceId: maskEnvVar(planPriceId),
+          resolvedTeamSeatPriceId: maskEnvVar(teamSeatPriceId),
+        })
+      );
       logApiError("/api/checkout", new Error("Missing Stripe price id env var"), { plan });
       return NextResponse.json(
         { ok: false, error: "Billing is not configured yet." },

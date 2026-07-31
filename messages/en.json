@@ -7,7 +7,16 @@
     "signOut": "Sign out",
     "jumpToPage": "Jump to a module or page...",
     "noMatches": "No matches for '{query}'",
-    "createAnything": "Create Anything"
+    "createAnything": "Create Anything",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "remove": "Remove",
+    "continue": "Continue",
+    "backToHome": "← Back to Ionexa AI",
+    "loading": "Loading...",
+    "error": "error",
+    "viewPlans": "View plans"
   },
   "sidebar": {
     "groups": {
@@ -24,7 +33,31 @@
       "chat": "Ionexa Chat",
       "memory": "AI Memory",
       "settings": "Settings",
-      "team": "Team"
+      "team": "Team",
+      "agents": "AI Agents",
+      "websites": "Websites",
+      "apps": "Apps",
+      "images": "Images",
+      "videos": "Videos",
+      "coding": "AI Coding",
+      "dataAnalysis": "Data Analysis",
+      "documents": "Documents",
+      "presentations": "Presentations",
+      "campaigns": "Campaigns",
+      "analytics": "Analytics",
+      "finance": "Finance",
+      "content": "Marketing",
+      "sales": "CRM",
+      "products": "Products",
+      "research": "Knowledge",
+      "learning": "Learning",
+      "ideas": "Ideas",
+      "competitors": "Competitors",
+      "decisions": "Decisions",
+      "feedback": "Feedback",
+      "trading": "Trading",
+      "automation": "Automation",
+      "marketplace": "Marketplace"
     }
   },
   "landing": {
@@ -73,6 +106,180 @@
       "sso": "SSO",
       "auditLogs": "Audit logs"
     }
+  },
+  "roadmap": {
+    "title": "Roadmap",
+    "subtitle": "Ionexa AI is being built in phases. Here's what's live today, what's coming next, and where we're headed.",
+    "backToHome": "← Back to Ionexa AI",
+    "sections": {
+      "available": "Available Now",
+      "soon": "Coming Soon",
+      "future": "Future Vision"
+    },
+    "items": {
+      "modules": { "title": "13 Business Modules", "description": "Ideas, Competitors, Research, Finance, Learning, Trading, Decisions, Products, Content, Sales/CRM, Feedback, Analytics, and Automation notes." },
+      "createAnything": { "title": "Create Anything", "description": "Describe anything in plain text and AI files it into the right module automatically." },
+      "chat": { "title": "Ionexa Chat", "description": "A general-purpose AI assistant for any question — not tied to a specific module." },
+      "export": { "title": "Data Export", "description": "CSV export per module, plus a full JSON export of everything you've logged." },
+      "team": { "title": "Team Collaboration", "description": "Invite teammates and give them full access at your plan's tier." },
+      "agentBuilder": { "title": "AI Agent Builder", "description": "Describe a goal and get a working autonomous agent that pursues it." },
+      "websiteBuilder": { "title": "Website Builder", "description": "AI-generated websites from a single prompt." },
+      "automationBuilder": { "title": "Real Automation Builder", "description": "Actual workflow automation that runs — not just logged ideas." },
+      "aiMemory": { "title": "AI Memory", "description": "Cross-project context and recall, so AI remembers what matters." },
+      "mobileApps": { "title": "Mobile & Desktop Apps", "description": "Native apps for iOS, Android, macOS, and Windows." },
+      "imageGeneration": { "title": "AI Image Generation", "description": "Generate images directly inside your workspace." },
+      "videoGeneration": { "title": "AI Video Generation & Editing", "description": "Create and edit video with AI." },
+      "presentations": { "title": "AI Presentations & Documents", "description": "Generate polished decks and documents from your data." },
+      "marketingBuilder": { "title": "AI Marketing Campaign Builder", "description": "Plan and generate full marketing campaigns." },
+      "coding": { "title": "AI Coding Assistant", "description": "Full app generation, not just snippets." },
+      "dataAnalysis": { "title": "AI Data Analysis", "description": "Deep analysis and insight generation across your data." },
+      "teamGenerator": { "title": "AI Team Generator", "description": "Multiple coordinated agents working together on a single goal." },
+      "projectManager": { "title": "AI Project Manager", "description": "Automatic task breakdown and tracking for any project." },
+      "ceoAdvisor": { "title": "AI CEO Advisor", "description": "A business planning consultant, always available." },
+      "marketplace": { "title": "Marketplace", "description": "Buy and sell agents, automations, and templates." },
+      "router": { "title": "Universal AI Router", "description": "Automatic selection across multiple AI providers for the best result." },
+      "sync": { "title": "Cross-Platform Sync", "description": "A unified experience across web, mobile, and desktop." }
+    }
+  },
+  "auth": {
+    "login": {
+      "welcomeBack": "Welcome back",
+      "email": "Email",
+      "password": "Password",
+      "logIn": "Log In",
+      "working": "Working...",
+      "noAccount": "No account yet?",
+      "signUp": "Sign up",
+      "forgotPassword": "Forgot password?",
+      "resetSuccess": "Password updated — sign in with your new password."
+    },
+    "signup": {
+      "chooseYourPlan": "Choose your plan",
+      "createYourAccount": "Create your account",
+      "step": "Step {step} of 2",
+      "continue": "Continue",
+      "alreadyHaveAccount": "Already have an account?",
+      "logIn": "Log in",
+      "change": "change",
+      "email": "Email",
+      "password": "Password",
+      "discountCode": "Discount code",
+      "discountCodePlaceholder": "Discount code (optional)",
+      "agreeTerms": "I agree to the",
+      "termsOfService": "Terms of Service",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy",
+      "working": "Working...",
+      "continueToPayment": "Continue to Payment",
+      "createAccount": "Create Account",
+      "mostPopular": "Most Popular"
+    },
+    "forgotPassword": {
+      "title": "Reset password",
+      "instructions": "Enter the email on your account and we'll send you a link to reset your password.",
+      "email": "Email",
+      "sendResetLink": "Send reset link",
+      "sending": "Sending...",
+      "checkInbox": "If an account exists for <highlight>{emailAddress}</highlight>, a password reset link is on its way. Check your inbox.",
+      "backToLogin": "Back to login",
+      "rememberedIt": "Remembered it?",
+      "logIn": "Log in"
+    },
+    "resetPassword": {
+      "title": "Set new password",
+      "verifying": "Verifying reset link...",
+      "requestNewLink": "Request a new link",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password",
+      "saveNewPassword": "Save new password",
+      "saving": "Saving..."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "signedInAs": "Signed in as",
+    "changePassword": {
+      "title": "Change Password",
+      "newPassword": "new password",
+      "confirmPassword": "confirm password",
+      "updatePassword": "Update Password",
+      "updating": "Updating..."
+    },
+    "chatMemory": {
+      "title": "Chat Memory",
+      "toggleLabel": "Remember context across conversations",
+      "toggleDescription": "Ionexa Chat picks up durable facts and preferences from your conversations and recalls them in future ones.",
+      "thingsRemembered": "{count, plural, one {# thing} other {# things}} remembered",
+      "clearAll": "Clear all memory",
+      "clearing": "Clearing..."
+    },
+    "loginActivity": {
+      "title": "Login Activity",
+      "description": "Devices and browsers that have signed in to your account. We email you whenever a new one shows up here.",
+      "noDevices": "No devices recorded yet.",
+      "lastSeen": "Last seen {time}"
+    },
+    "exportData": {
+      "title": "Export Data",
+      "description": "Download everything you've logged across all 13 modules as a single JSON file.",
+      "exportAll": "Export All Data",
+      "exporting": "Exporting..."
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "Permanently delete your account and every record you've logged across all 13 modules. This can't be undone.",
+      "deleteAccount": "Delete Account",
+      "typeToConfirm": "type <highlight>{email}</highlight> to confirm",
+      "sendConfirmationEmail": "Send deletion confirmation email",
+      "sending": "Sending...",
+      "checkEmail": "Check your email to confirm deletion — we sent a link to <highlight>{email}</highlight>. It expires in 1 hour; nothing is deleted until you click it."
+    }
+  },
+  "dashboard": {
+    "overview": {
+      "mostActiveModule": "Most Active Module",
+      "totalEntriesThisWeek": "Total Entries This Week",
+      "acrossAllModules": "across all modules",
+      "entry": "{count, plural, one {# entry} other {# entries}}"
+    },
+    "team": {
+      "title": "Team",
+      "description": "On the {plan} plan — invited members get full access at this tier, at {price}/month per seat.",
+      "inviteTitle": "Invite a team member",
+      "emailPlaceholder": "teammate@company.com",
+      "sendInvite": "Send Invite",
+      "sending": "Sending...",
+      "noMembers": "No team members yet — invite someone above.",
+      "inviteSent": "Invite sent to {email}.",
+      "inviteFailed": "Could not send the invite.",
+      "active": "Active",
+      "invited": "Invited",
+      "invitedAt": "Invited {time}",
+      "joined": "Joined {time}",
+      "removeConfirm": "Remove {email} from your team? They'll immediately lose access to your plan.",
+      "removeLabel": "Remove {email}",
+      "removeTitle": "Remove member"
+    },
+    "memory": {
+      "title": "AI Memory",
+      "description": "Search everything you've logged, across every module — no need to remember where you put it."
+    },
+    "chat": {
+      "title": "Ionexa Chat"
+    },
+    "create": {
+      "title": "AI Assistant"
+    }
+  },
+  "module": {
+    "searchPlaceholder": "Search...",
+    "exportCsv": "Export CSV",
+    "noEntries": "No entries yet — use the button above to log your first one.",
+    "noMatches": "No matches for '{query}'",
+    "new": "New {title}",
+    "selectPlaceholder": "select...",
+    "save": "Save",
+    "saving": "Saving..."
   },
   "language": {
     "label": "Language"

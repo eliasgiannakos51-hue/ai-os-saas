@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
@@ -43,6 +44,7 @@ function buildSnippet(config: ModuleConfig, record: ModuleRecord): string {
 }
 
 export default async function MemoryPage() {
+  const t = await getTranslations("dashboard.memory");
   const supabase = createClient();
 
   const {
@@ -60,8 +62,8 @@ export default async function MemoryPage() {
     return (
       <main className="min-h-full bg-background">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={MEMORY_ICON} title="AI Memory" />
-          <UpgradeRequired featureName="AI Memory" planName={getPlan("starter")?.name ?? "Starter"} />
+          <PageHeader icon={MEMORY_ICON} title={t("title")} />
+          <UpgradeRequired featureName={t("title")} planName={getPlan("starter")?.name ?? "Starter"} />
         </div>
       </main>
     );
@@ -95,8 +97,8 @@ export default async function MemoryPage() {
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader
           icon={MEMORY_ICON}
-          title="AI Memory"
-          description="Search everything you've logged, across every module — no need to remember where you put it."
+          title={t("title")}
+          description={t("description")}
         />
 
         <MemorySearch results={results} />

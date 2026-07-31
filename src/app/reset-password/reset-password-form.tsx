@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { isPasswordStrong } from "@/lib/password-strength";
@@ -32,6 +33,7 @@ function createResetPasswordClient() {
 
 export function ResetPasswordForm() {
   const router = useRouter();
+  const t = useTranslations("auth.resetPassword");
   const [supabase] = useState(createResetPasswordClient);
 
   const [status, setStatus] = useState<Status>("checking");
@@ -189,14 +191,14 @@ export function ResetPasswordForm() {
             <Logo className="h-14 w-auto" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">
-            Set new password
+            {t("title")}
           </h1>
         </div>
 
         <div className="rounded-2xl border border-border bg-panel p-6 shadow-[0_0_0_1px_rgba(249,115,22,0.05)]">
           {status === "checking" && (
             <p className="animate-pulse text-center text-sm text-muted">
-              Verifying reset link...
+              {t("verifying")}
             </p>
           )}
 
@@ -207,7 +209,7 @@ export function ResetPasswordForm() {
                 href="/forgot-password"
                 className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
               >
-                Request a new link
+                {t("requestNewLink")}
               </Link>
             </div>
           )}
@@ -217,7 +219,7 @@ export function ResetPasswordForm() {
               <div>
                 <div className="mb-1 flex items-center justify-between gap-2">
                   <label htmlFor="password" className="block text-xs text-muted">
-                    New password
+                    {t("newPassword")}
                   </label>
                   <GeneratePasswordButton
                     onGenerate={(generated) => {
@@ -243,7 +245,7 @@ export function ResetPasswordForm() {
 
               <div>
                 <label htmlFor="confirmPassword" className="mb-1 block text-xs text-muted">
-                  Confirm password
+                  {t("confirmPassword")}
                 </label>
                 <PasswordInput
                   id="confirmPassword"
@@ -268,7 +270,7 @@ export function ResetPasswordForm() {
                 disabled={loading || !isPasswordStrong(password)}
                 className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50"
               >
-                {loading ? "Saving..." : "Save new password"}
+                {loading ? t("saving") : t("saveNewPassword")}
               </button>
             </form>
           )}

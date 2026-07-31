@@ -9,13 +9,12 @@ import {
 import type { FieldConfig } from "@/lib/modules";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
+import { buildUsageLimitMessage, getMonthlyUsageCount, resolvePlan } from "@/lib/billing/usage";
 
 export const dynamic = "force-dynamic";
 
 const MODEL = "claude-sonnet-4-6";
 const MAX_MESSAGE_LENGTH = 2000;
-const RATE_LIMIT = 20;
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 function buildSystemPrompt(): string {
   const moduleDocs = CLASSIFIER_MODULES.map((m) => {
@@ -138,27 +137,32 @@ export async function POST(request: Request) {
       );
     }
 
-    // Rate limit: max RATE_LIMIT calls per user per rolling hour, tracked via
-    // the create_requests log table (RLS-scoped, same as every other table).
-    // A failure to check/log usage is logged and otherwise ignored rather than
-    // blocking the request — this is cost protection, not a security boundary.
+    // Plan-based monthly quota, tracked via the create_requests log table
+    // (RLS-scoped, same as every other table) combined with chat_messages —
+    // Create Anything and Veron Chat share one "AI requests/month" budget
+    // per the plan the user is on (see lib/billing/plans.ts). A failure to
+    // check/log usage is logged and otherwise ignored rather than blocking
+    // the request — this is cost protection, not a security boundary.
     // Admin-listed accounts (see lib/admin.ts) skip the limit entirely —
     // treated as unlimited Ultimate-tier requests.
     const isAdmin = isAdminEmail(user.email);
-    const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
-    const { count: recentRequestCount, error: usageCheckError } = await supabase
-      .from("create_requests")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .gte("created_at", windowStart);
+    const plan = resolvePlan(user);
+    const { count: monthlyUsageCount, error: usageCheckError } = await getMonthlyUsageCount(
+      supabase,
+      user.id
+    );
 
     if (usageCheckError) {
       logApiError("/api/create", usageCheckError, { stage: "usage_check" });
-    } else if (!isAdmin && (recentRequestCount ?? 0) >= RATE_LIMIT) {
+    } else if (
+      !isAdmin &&
+      plan.aiRequestsPerMonth !== "unlimited" &&
+      monthlyUsageCount >= plan.aiRequestsPerMonth
+    ) {
       return NextResponse.json({
         ok: true,
         matched: false,
-        message: `You've hit the hourly limit for Create Anything (${RATE_LIMIT} requests/hour) — try again in a bit.`,
+        message: buildUsageLimitMessage(plan),
       });
     }
 

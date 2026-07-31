@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
+import { buildUsageLimitMessage, getMonthlyUsageCount, resolvePlan } from "@/lib/billing/usage";
 
 export const dynamic = "force-dynamic";
 
@@ -10,8 +11,6 @@ const MODEL = "claude-sonnet-4-6";
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_TOKENS = 2048;
 const HISTORY_LIMIT = 20;
-const RATE_LIMIT = 20;
-const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
 
 const SYSTEM_PROMPT =
   "Είσαι ο Veron, ένας εξελιγμένος AI βοηθός γενικής χρήσης. Έχεις ευρεία γνώση σε όλα τα θέματα (επιστήμη, ιστορία, προγραμματισμός, μαθηματικά, δημιουργική γραφή, επιχειρήσεις, καθημερινές ερωτήσεις, κ.λπ.) και μπορείς να βοηθήσεις με οτιδήποτε χρειαστεί ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος — ελληνικά, αγγλικά, ή οποιαδήποτε άλλη γλώσσα). Δώσε λεπτομερείς, χρήσιμες, ακριβείς απαντήσεις. Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.";
@@ -84,28 +83,30 @@ export async function POST(request: Request) {
       );
     }
 
-    // Rate limit: max RATE_LIMIT user messages per user per rolling hour —
-    // same technique as /api/create's create_requests check, but scoped to
-    // chat_messages so Veron Chat and Create Anything have independent
-    // budgets instead of sharing one counter.
+    // Plan-based monthly quota, shared with /api/create via
+    // getMonthlyUsageCount — Veron Chat and Create Anything draw from one
+    // "AI requests/month" budget per the plan the user is on (see
+    // lib/billing/plans.ts), not independent per-route counters.
     // Admin-listed accounts (see lib/admin.ts) skip the limit entirely —
     // treated as unlimited Ultimate-tier requests.
     const isAdmin = isAdminEmail(user.email);
-    const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
-    const { count: recentMessageCount, error: usageCheckError } = await supabase
-      .from("chat_messages")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .eq("role", "user")
-      .gte("created_at", windowStart);
+    const plan = resolvePlan(user);
+    const { count: monthlyUsageCount, error: usageCheckError } = await getMonthlyUsageCount(
+      supabase,
+      user.id
+    );
 
     if (usageCheckError) {
       logApiError("/api/chat", usageCheckError, { stage: "usage_check" });
-    } else if (!isAdmin && (recentMessageCount ?? 0) >= RATE_LIMIT) {
+    } else if (
+      !isAdmin &&
+      plan.aiRequestsPerMonth !== "unlimited" &&
+      monthlyUsageCount >= plan.aiRequestsPerMonth
+    ) {
       return NextResponse.json({
         ok: true,
         rateLimited: true,
-        message: `You've hit the hourly limit for Veron Chat (${RATE_LIMIT} messages/hour) — try again in a bit.`,
+        message: buildUsageLimitMessage(plan),
       });
     }
 

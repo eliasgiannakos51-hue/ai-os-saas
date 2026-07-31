@@ -51,7 +51,17 @@ export async function POST(request: Request) {
       email,
       password,
       email_confirm: true,
-      user_metadata: { terms_accepted_at: new Date().toISOString() },
+      // subscription_tier/seat_count mirror the shape the Stripe webhook
+      // writes on checkout (see api/webhooks/stripe/route.ts) — every
+      // account gets an explicit "free" tier from the moment it exists,
+      // rather than relying on that webhook (which never fires for a Free
+      // signup) or a fallback default sprinkled across every place that
+      // reads user_metadata.subscription_tier.
+      user_metadata: {
+        terms_accepted_at: new Date().toISOString(),
+        subscription_tier: "free",
+        seat_count: 0,
+      },
     });
 
     if (createError) {

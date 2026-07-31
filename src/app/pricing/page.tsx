@@ -1,14 +1,103 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Check, Clock } from "lucide-react";
+import { Check, Clock, X } from "lucide-react";
 import { Logo } from "@/components/logo";
-import { PLANS, TEAM_SEAT_PRICE_USD, type PaidPlanSlug } from "@/lib/billing/plans";
+import { PLANS, TEAM_SEAT_PRICE_USD, type Plan, type PaidPlanSlug } from "@/lib/billing/plans";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
 
 export const metadata: Metadata = {
   title: "Pricing",
   description: "Veron AI pricing — Free, Starter, Growth, Professional, and Ultimate plans.",
 };
+
+type ComparisonCell =
+  | { type: "value"; text: string }
+  | { type: "check" }
+  | { type: "cross" }
+  | { type: "soon" };
+
+// Mirrors the cumulative "Everything in X" feature lists in
+// src/lib/billing/plans.ts as a flat, per-plan matrix — kept here rather
+// than restructuring PLANS itself, since that array is also consumed
+// elsewhere (Settings, Team page) in its current cumulative-bullet shape.
+const COMPARISON_ROWS: { label: string; cell: (plan: Plan) => ComparisonCell }[] = [
+  {
+    label: "AI requests / month",
+    cell: (p) => ({
+      type: "value",
+      text: p.aiRequestsPerMonth === "unlimited" ? "Unlimited" : p.aiRequestsPerMonth.toLocaleString(),
+    }),
+  },
+  { label: "Access to all 13 modules", cell: () => ({ type: "check" }) },
+  {
+    label: "Veron Chat history",
+    cell: (p) => ({ type: "value", text: p.slug === "free" ? "7 days" : "Unlimited" }),
+  },
+  {
+    label: "Pinned conversations",
+    cell: (p) => (p.slug === "free" ? { type: "cross" } : { type: "check" }),
+  },
+  {
+    label: "CSV export (every module)",
+    cell: (p) => (p.slug === "free" ? { type: "cross" } : { type: "check" }),
+  },
+  {
+    label: "Full data export (JSON, all modules)",
+    cell: (p) => (p.slug === "free" || p.slug === "starter" ? { type: "cross" } : { type: "check" }),
+  },
+  {
+    label: "Team seats",
+    cell: (p) => (p.hasTeamSeats ? { type: "check" } : { type: "cross" }),
+  },
+  {
+    label: "Priority email support",
+    cell: (p) => (p.slug === "professional" || p.slug === "ultimate" ? { type: "check" } : { type: "cross" }),
+  },
+  {
+    label: "Dedicated support",
+    cell: (p) => (p.slug === "ultimate" ? { type: "check" } : { type: "cross" }),
+  },
+  {
+    label: "Automation Builder",
+    cell: (p) =>
+      p.slug === "growth" || p.slug === "professional" || p.slug === "ultimate"
+        ? { type: "soon" }
+        : { type: "cross" },
+  },
+  {
+    label: "AI Agent Builder",
+    cell: (p) => (p.slug === "professional" || p.slug === "ultimate" ? { type: "soon" } : { type: "cross" }),
+  },
+  {
+    label: "Website Builder",
+    cell: (p) => (p.slug === "professional" || p.slug === "ultimate" ? { type: "soon" } : { type: "cross" }),
+  },
+  {
+    label: "Video/Image Studio",
+    cell: (p) => (p.slug === "ultimate" ? { type: "soon" } : { type: "cross" }),
+  },
+  {
+    label: "Marketplace access",
+    cell: (p) => (p.slug === "ultimate" ? { type: "soon" } : { type: "cross" }),
+  },
+];
+
+function ComparisonCellContent({ cell }: { cell: ComparisonCell }) {
+  if (cell.type === "value") {
+    return <span className="text-sm text-foreground">{cell.text}</span>;
+  }
+  if (cell.type === "check") {
+    return <Check className="mx-auto h-4 w-4 text-emerald-400" aria-hidden="true" />;
+  }
+  if (cell.type === "soon") {
+    return (
+      <span className="inline-flex items-center rounded-full border border-orange-500/40 bg-orange-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-orange-400">
+        Soon
+      </span>
+    );
+  }
+  return <X className="mx-auto h-4 w-4 text-muted/50" aria-hidden="true" />;
+}
 
 export default function PricingPage() {
   return (
@@ -112,6 +201,56 @@ export default function PricingPage() {
               </div>
             </div>
           ))}
+        </div>
+
+        <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-border bg-panel p-6 text-center">
+          <h2 className="text-sm font-semibold text-orange-400">Need it for your team?</h2>
+          <p className="mt-2 text-sm text-muted">
+            Add members to any paid plan for +${TEAM_SEAT_PRICE_USD}/member/month — everyone
+            gets full access at your plan&apos;s tier.
+          </p>
+        </div>
+
+        <div className="mt-16">
+          <h2 className="mb-5 text-center text-xl font-bold text-foreground">
+            Compare plans
+          </h2>
+          <div className="overflow-x-auto rounded-2xl border border-border">
+            <table className="w-full min-w-[720px] border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-border bg-panel">
+                  <th className="px-4 py-3 text-left font-semibold text-muted">Feature</th>
+                  {PLANS.map((plan) => (
+                    <th
+                      key={plan.slug}
+                      className={`px-4 py-3 text-center font-semibold ${
+                        plan.highlighted ? "text-orange-400" : "text-foreground"
+                      }`}
+                    >
+                      {plan.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARISON_ROWS.map((row, index) => (
+                  <tr
+                    key={row.label}
+                    className={`border-b border-border last:border-b-0 ${
+                      index % 2 === 1 ? "bg-panel/40" : ""
+                    }`}
+                  >
+                    <td className="px-4 py-3 text-left text-muted">{row.label}</td>
+                    {PLANS.map((plan) => (
+                      <td key={plan.slug} className="px-4 py-3 text-center">
+                        <ComparisonCellContent cell={row.cell(plan)} />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div className="mt-12 text-center">

@@ -47,6 +47,32 @@ export function SignupFlow() {
     }
   }, []);
 
+  // Logs the EXACT raw HTTP response — status + body text — before any
+  // JSON.parse runs, then parses it. If a report says the UI shows a raw
+  // "{}" string, this is what proves (or disproves) whether that came from
+  // the network layer itself rather than from how the parsed object was
+  // later handled.
+  async function readRawResponse(res: Response, label: string): Promise<unknown> {
+    const rawText = await res.text();
+    // eslint-disable-next-line no-console
+    console.error(
+      `[signup raw response] ${label}:`,
+      JSON.stringify({ status: res.status, statusText: res.statusText, rawBody: rawText })
+    );
+    try {
+      return JSON.parse(rawText);
+    } catch (parseErr) {
+      dumpErrorForDebugging(`${label} — response body was not valid JSON`, {
+        status: res.status,
+        rawBody: rawText,
+        parseError: parseErr instanceof Error ? parseErr.message : String(parseErr),
+      });
+      throw new Error(
+        `Server returned an unexpected response (status ${res.status}). Please try again.`
+      );
+    }
+  }
+
   // Same debug pattern used in login-form.tsx / forgot-password-form.tsx —
   // dumps every own property of the raw error so a real failure shows its
   // full shape instead of a guess.
@@ -94,7 +120,10 @@ export function SignupFlow() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, termsAccepted }),
       });
-      const signupData = await signupRes.json();
+      const signupData = (await readRawResponse(signupRes, "/api/signup")) as {
+        ok?: boolean;
+        error?: unknown;
+      };
       if (!signupRes.ok || !signupData.ok) {
         dumpErrorForDebugging("/api/signup returned error", signupData.error);
         setError(getErrorMessage(signupData.error, "Signup failed."));
@@ -124,8 +153,12 @@ export function SignupFlow() {
           successPath: "/dashboard/overview",
         }),
       });
-      const checkoutData = await checkoutRes.json();
-      if (!checkoutRes.ok || !checkoutData.ok) {
+      const checkoutData = (await readRawResponse(checkoutRes, "/api/checkout")) as {
+        ok?: boolean;
+        error?: unknown;
+        url?: string;
+      };
+      if (!checkoutRes.ok || !checkoutData.ok || !checkoutData.url) {
         dumpErrorForDebugging("/api/checkout returned error", checkoutData.error);
         setError(
           getErrorMessage(
@@ -285,7 +318,7 @@ export function SignupFlow() {
 
               <div>
                 <label htmlFor="discountCode" className="mb-1 block text-xs text-muted">
-                  Discount code <span className="text-muted/70">(optional)</span>
+                  Discount code
                 </label>
                 <input
                   id="discountCode"
@@ -294,7 +327,7 @@ export function SignupFlow() {
                   value={discountCode}
                   onChange={(e) => setDiscountCode(e.target.value)}
                   className={FIELD_CLASS}
-                  placeholder="e.g. WELCOME20"
+                  placeholder="Discount code (optional)"
                 />
               </div>
 

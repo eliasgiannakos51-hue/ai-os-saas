@@ -48,16 +48,42 @@ export async function POST(request: Request) {
     });
 
     if (signUpError) {
+      // eslint-disable-next-line no-console
+      console.error(
+        "SIGNUP - signUp() error:",
+        JSON.stringify(signUpError, Object.getOwnPropertyNames(signUpError || {}))
+      );
+      logApiError("/api/signup", signUpError, { stage: "signUp" });
       return NextResponse.json(
-        { ok: false, error: signUpError.message },
+        { ok: false, error: signUpError.message || "Could not create your account. Please try again." },
         { status: 400 }
       );
     }
 
     if (!signUpData.user) {
+      logApiError("/api/signup", new Error("signUp returned no user"), { stage: "signUp" });
       return NextResponse.json(
-        { ok: false, error: "Signup did not return a user." },
+        { ok: false, error: "Signup did not return a user. Please try again." },
         { status: 500 }
+      );
+    }
+
+    // Supabase's anti-enumeration behavior: signUp() against an email that
+    // already has a CONFIRMED account returns success (no signUpError) with
+    // a user object whose identities array is empty, instead of an error —
+    // so this has to be checked explicitly or the flow silently continues
+    // with a stranger's account, only to fail confusingly at the
+    // signInWithPassword step below (wrong password for that existing
+    // account). Every account in this app is auto-confirmed at signup (see
+    // the admin.auth.admin.updateUserById call below), so this check always
+    // fires for a genuine duplicate rather than an unconfirmed-user edge case.
+    if (signUpData.user.identities && signUpData.user.identities.length === 0) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "An account with this email already exists. Try logging in instead.",
+        },
+        { status: 409 }
       );
     }
 
@@ -71,8 +97,17 @@ export async function POST(request: Request) {
     );
 
     if (confirmError) {
+      // eslint-disable-next-line no-console
+      console.error(
+        "SIGNUP - admin confirm error:",
+        JSON.stringify(confirmError, Object.getOwnPropertyNames(confirmError || {}))
+      );
+      logApiError("/api/signup", confirmError, { stage: "admin_confirm" });
       return NextResponse.json(
-        { ok: false, error: confirmError.message },
+        {
+          ok: false,
+          error: confirmError.message || "Could not confirm your account. Please try again.",
+        },
         { status: 500 }
       );
     }
@@ -89,8 +124,12 @@ export async function POST(request: Request) {
     });
 
     if (signInError) {
+      logApiError("/api/signup", signInError, { stage: "signInWithPassword" });
       return NextResponse.json(
-        { ok: false, error: signInError.message },
+        {
+          ok: false,
+          error: signInError.message || "Account created, but sign-in failed. Please log in manually.",
+        },
         { status: 500 }
       );
     }

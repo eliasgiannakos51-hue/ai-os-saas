@@ -38,83 +38,55 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = createClient();
-
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    // Create the user directly via the Admin API instead of the client-side
+    // supabase.auth.signUp(). signUp() has Supabase's GoTrue server send a
+    // confirmation email as part of the same request, before our code ever
+    // runs — with Resend's sender restriction, that send fails and takes
+    // the whole signup down with it (500, "user_confirmation_requested" in
+    // the Supabase logs). admin.auth.admin.createUser() with
+    // email_confirm: true creates an already-confirmed user in one step,
+    // server-side, and does not trigger any auth email at all.
+    const admin = createAdminClient();
+    const { data: createData, error: createError } = await admin.auth.admin.createUser({
       email,
       password,
-      options: {
-        data: { terms_accepted_at: new Date().toISOString() },
-      },
+      email_confirm: true,
+      user_metadata: { terms_accepted_at: new Date().toISOString() },
     });
 
-    if (signUpError) {
+    if (createError) {
       // eslint-disable-next-line no-console
       console.error(
-        "SIGNUP - signUp() error:",
-        JSON.stringify(signUpError, Object.getOwnPropertyNames(signUpError || {}))
+        "SIGNUP - admin.createUser() error:",
+        JSON.stringify(createError, Object.getOwnPropertyNames(createError || {}))
       );
-      logApiError("/api/signup", signUpError, { stage: "signUp" });
+      logApiError("/api/signup", createError, { stage: "admin_createUser" });
+      const isDuplicate =
+        createError.code === "email_exists" ||
+        createError.code === "user_already_exists" ||
+        /already.*(registered|exists)/i.test(createError.message || "");
       return NextResponse.json(
         {
           ok: false,
-          error: getErrorMessage(signUpError, "Could not create your account. Please try again."),
+          error: isDuplicate
+            ? "An account with this email already exists. Try logging in instead."
+            : getErrorMessage(createError, "Could not create your account. Please try again."),
         },
-        { status: 400 }
+        { status: isDuplicate ? 409 : 400 }
       );
     }
 
-    if (!signUpData.user) {
-      logApiError("/api/signup", new Error("signUp returned no user"), { stage: "signUp" });
+    if (!createData.user) {
+      logApiError("/api/signup", new Error("admin.createUser returned no user"), {
+        stage: "admin_createUser",
+      });
       return NextResponse.json(
         { ok: false, error: "Signup did not return a user. Please try again." },
         { status: 500 }
       );
     }
 
-    // Supabase's anti-enumeration behavior: signUp() against an email that
-    // already has a CONFIRMED account returns success (no signUpError) with
-    // a user object whose identities array is empty, instead of an error —
-    // so this has to be checked explicitly or the flow silently continues
-    // with a stranger's account, only to fail confusingly at the
-    // signInWithPassword step below (wrong password for that existing
-    // account). Every account in this app is auto-confirmed at signup (see
-    // the admin.auth.admin.updateUserById call below), so this check always
-    // fires for a genuine duplicate rather than an unconfirmed-user edge case.
-    if (signUpData.user.identities && signUpData.user.identities.length === 0) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: "An account with this email already exists. Try logging in instead.",
-        },
-        { status: 409 }
-      );
-    }
-
-    // Auto-confirm the email so the user can sign in immediately. Real email
-    // confirmation gets re-enabled before shipping to real users — until then
-    // this is the only place SUPABASE_SERVICE_ROLE_KEY is used.
-    const admin = createAdminClient();
-    const { error: confirmError } = await admin.auth.admin.updateUserById(
-      signUpData.user.id,
-      { email_confirm: true }
-    );
-
-    if (confirmError) {
-      // eslint-disable-next-line no-console
-      console.error(
-        "SIGNUP - admin confirm error:",
-        JSON.stringify(confirmError, Object.getOwnPropertyNames(confirmError || {}))
-      );
-      logApiError("/api/signup", confirmError, { stage: "admin_confirm" });
-      return NextResponse.json(
-        {
-          ok: false,
-          error: getErrorMessage(confirmError, "Could not confirm your account. Please try again."),
-        },
-        { status: 500 }
-      );
-    }
+    const supabase = createClient();
 
     // Best-effort welcome email — sendWelcomeEmail never throws, so a failed
     // send (missing RESEND_API_KEY, Resend outage, etc.) never blocks signup.

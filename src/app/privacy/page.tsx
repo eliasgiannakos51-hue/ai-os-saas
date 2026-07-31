@@ -4,7 +4,7 @@ import { LegalSection } from "@/components/legal/legal-section";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Privacy Policy for Veron AI.",
+  description: "Privacy Policy for Ionexa AI.",
 };
 
 export default function PrivacyPage() {
@@ -14,7 +14,7 @@ export default function PrivacyPage() {
         <p>
           We collect the email address you sign up with, the password you
           choose (stored hashed, never in plain text), and whatever you
-          enter into Veron AI&apos;s modules or the &quot;Create Anything&quot;
+          enter into Ionexa AI&apos;s modules or the &quot;Create Anything&quot;
           box — ideas, notes, metrics, and similar content you choose to
           log. We don&apos;t collect data beyond what&apos;s needed to run
           the Service.
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
 
       <LegalSection title="2. Data Use">
         <p>
-          Your data is used to operate Veron AI for you: authenticating your
+          Your data is used to operate Ionexa AI for you: authenticating your
           account, displaying and searching your entries, generating the
           Overview summary, and — when you use &quot;Create Anything&quot; —
           classifying your free-text message into the right module. We do
@@ -42,7 +42,7 @@ export default function PrivacyPage() {
 
       <LegalSection title="4. Sub-processors">
         <p>
-          We use trusted third-party service providers to operate Veron AI,
+          We use trusted third-party service providers to operate Ionexa AI,
           including cloud infrastructure providers, AI model providers, and
           email delivery services. These providers process data solely to
           provide the Service and are contractually bound to protect your

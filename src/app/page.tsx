@@ -4,7 +4,7 @@ import { DeletedAccountBanner } from "@/components/landing/deleted-account-banne
 import { GlowOrb } from "@/components/ui/glow-orb";
 import { Logo } from "@/components/logo";
 
-const TITLE = "Veron AI — One platform. Every AI capability.";
+const TITLE = "Ionexa AI — The energy behind everything you build.";
 const DESCRIPTION =
   "Create anything with AI. From ideas and research to trading, finance, product planning and business decisions — organized in one intelligent workspace.";
 
@@ -37,7 +37,7 @@ export default function Home() {
         </div>
 
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-          One platform. Every AI capability.
+          The energy behind everything you build.
         </h1>
         <p className="mx-auto mt-5 max-w-md text-sm leading-relaxed text-muted">
           Create anything with AI. From ideas and research to trading,

@@ -203,7 +203,7 @@ export const NAV_ITEMS: { href: string; label: string }[] = [
 
 export const CREATE_NAV_ITEM = { href: "/dashboard/create", label: "Create" };
 
-export const CHAT_NAV_ITEM = { href: "/dashboard/chat", label: "Veron Chat" };
+export const CHAT_NAV_ITEM = { href: "/dashboard/chat", label: "Ionexa Chat" };
 
 export const OVERVIEW_NAV_ITEM = { href: "/dashboard/overview", label: "Overview" };
 

@@ -1,5 +1,5 @@
 -- ============================================================================
--- Veron AI — Supabase schema
+-- Ionexa AI — Supabase schema
 -- 13 module tables, each scoped to the owning user via RLS (user_id =
 -- auth.uid()), plus create_requests (a rate-limit log for /api/create).
 -- Run this once in the Supabase SQL editor (or via `supabase db push`).
@@ -321,7 +321,7 @@ begin
 end $$;
 
 -- ============================================================================
--- Veron Chat — general-purpose AI chatbot, separate from Create Anything.
+-- Ionexa Chat — general-purpose AI chatbot, separate from Create Anything.
 -- chat_conversations is the thread list; chat_messages holds each turn.
 -- Same owner-only RLS pattern as every table above (user_id = auth.uid()),
 -- and the same updated_at auto-touch trigger on chat_conversations.

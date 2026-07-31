@@ -1,5 +1,5 @@
 -- ============================================================================
--- Veron AI — Credits system schema
+-- Ionexa AI — Credits system schema
 -- Run this once in the Supabase SQL editor, AFTER supabase_schema.sql, on
 -- the same project. Additive only — does not touch or drop any existing
 -- table.

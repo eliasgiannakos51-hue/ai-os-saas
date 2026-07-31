@@ -19,7 +19,7 @@ function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Veron AI</title>
+    <title>Ionexa AI</title>
   </head>
   <body style="margin:0; padding:0; background-color:${BG}; font-family:${MONO_STACK};">
     <div style="display:none; max-height:0; overflow:hidden; opacity:0;">${preheader}</div>
@@ -29,7 +29,7 @@ function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
             <tr>
               <td style="padding-bottom:24px;">
-                <span style="color:${ORANGE}; font-size:13px; letter-spacing:2px;">Veron AI //</span>
+                <span style="color:${ORANGE}; font-size:13px; letter-spacing:2px;">Ionexa AI //</span>
               </td>
             </tr>
             <tr>
@@ -40,7 +40,7 @@ function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }
             <tr>
               <td style="padding-top:24px;">
                 <span style="color:${MUTED}; font-size:11px;">
-                  You're receiving this because you have a Veron AI account.
+                  You're receiving this because you have a Ionexa AI account.
                 </span>
               </td>
             </tr>
@@ -81,10 +81,10 @@ export function welcomeEmailHtml({ email }: { email: string }): string {
 
   const bodyHtml = `
     <span style="color:${MUTED}; font-size:12px;">signup · ${email}</span>
-    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">welcome to Veron AI</h1>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">welcome to Ionexa AI</h1>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
       Your account is ready — no email confirmation needed, you can log in right
-      away. Veron AI is 13 modules for running a startup, plus a free-text inbox
+      away. Ionexa AI is 13 modules for running a startup, plus a free-text inbox
       that files anything you type into the right one.
     </p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
@@ -97,7 +97,7 @@ export function welcomeEmailHtml({ email }: { email: string }): string {
     </p>
   `;
 
-  return layout({ preheader: "Your Veron AI account is ready.", bodyHtml });
+  return layout({ preheader: "Your Ionexa AI account is ready.", bodyHtml });
 }
 
 export function teamInviteEmailHtml({
@@ -111,7 +111,7 @@ export function teamInviteEmailHtml({
 }): string {
   const bodyHtml = `
     <span style="color:${MUTED}; font-size:12px;">team invite</span>
-    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">you've been invited to Veron AI</h1>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">you've been invited to Ionexa AI</h1>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
       <span style="color:${FOREGROUND};">${inviterEmail}</span> added you to their
       team on the <span style="color:${ORANGE};">${planName}</span> plan. Sign up
@@ -131,7 +131,7 @@ export function teamInviteEmailHtml({
   `;
 
   return layout({
-    preheader: `${inviterEmail} invited you to their Veron AI team.`,
+    preheader: `${inviterEmail} invited you to their Ionexa AI team.`,
     bodyHtml,
   });
 }
@@ -160,7 +160,7 @@ export function weeklyDigestEmailHtml({
 
   const bodyHtml = `
     <span style="color:${MUTED}; font-size:12px;">digest · ${periodLabel}</span>
-    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">your week on Veron AI</h1>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">your week on Ionexa AI</h1>
     <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
       ${total} new ${total === 1 ? "entry" : "entries"} logged for ${email} this week.
     </p>
@@ -169,5 +169,5 @@ export function weeklyDigestEmailHtml({
     </table>
   `;
 
-  return layout({ preheader: `Your Veron AI weekly digest — ${total} new entries.`, bodyHtml });
+  return layout({ preheader: `Your Ionexa AI weekly digest — ${total} new entries.`, bodyHtml });
 }

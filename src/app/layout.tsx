@@ -8,8 +8,8 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
   title: {
-    default: "Veron AI — One platform. Every AI capability.",
-    template: "%s — Veron AI",
+    default: "Ionexa AI — The energy behind everything you build.",
+    template: "%s — Ionexa AI",
   },
   description:
     "Create anything with AI. From ideas and research to trading, finance, product planning and business decisions — organized in one intelligent workspace.",

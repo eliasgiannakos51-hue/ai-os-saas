@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     const plan = getPlan(tier);
     await sendTeamInviteEmail({
       to: email,
-      inviterEmail: user.email ?? "a Veron AI user",
+      inviterEmail: user.email ?? "a Ionexa AI user",
       planName: plan?.name ?? tier,
     });
 

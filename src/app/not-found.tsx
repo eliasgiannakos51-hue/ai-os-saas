@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background px-4 text-center">
-      <p className="text-sm tracking-widest text-orange-500">Veron AI //</p>
+      <p className="text-sm tracking-widest text-orange-500">Ionexa AI //</p>
       <h1 className="mt-2 text-6xl font-bold text-foreground sm:text-7xl">
         404
       </h1>

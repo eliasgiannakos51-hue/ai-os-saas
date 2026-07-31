@@ -19,7 +19,7 @@ export default function OpengraphImage() {
         }}
       >
         <div style={{ fontSize: 28, letterSpacing: 6, color: "#f97316" }}>
-          Veron AI //
+          Ionexa AI //
         </div>
         <div
           style={{
@@ -29,7 +29,7 @@ export default function OpengraphImage() {
             color: "#e5e5e5",
           }}
         >
-          Veron AI
+          Ionexa AI
         </div>
         <div
           style={{
@@ -40,7 +40,7 @@ export default function OpengraphImage() {
             textAlign: "center",
           }}
         >
-          One platform. Every AI capability.
+          The energy behind everything you build.
         </div>
       </div>
     ),

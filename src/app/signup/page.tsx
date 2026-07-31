@@ -3,7 +3,7 @@ import { SignupFlow } from "./signup-flow";
 
 export const metadata: Metadata = {
   title: "Sign Up",
-  description: "Choose a plan and create your Veron AI account.",
+  description: "Choose a plan and create your Ionexa AI account.",
 };
 
 export default function SignupPage() {

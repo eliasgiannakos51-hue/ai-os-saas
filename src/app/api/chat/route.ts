@@ -13,7 +13,7 @@ const MAX_TOKENS = 2048;
 const HISTORY_LIMIT = 20;
 
 const SYSTEM_PROMPT =
-  "Είσαι ο Veron, ένας εξελιγμένος AI βοηθός γενικής χρήσης. Έχεις ευρεία γνώση σε όλα τα θέματα (επιστήμη, ιστορία, προγραμματισμός, μαθηματικά, δημιουργική γραφή, επιχειρήσεις, καθημερινές ερωτήσεις, κ.λπ.) και μπορείς να βοηθήσεις με οτιδήποτε χρειαστεί ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος — ελληνικά, αγγλικά, ή οποιαδήποτε άλλη γλώσσα). Δώσε λεπτομερείς, χρήσιμες, ακριβείς απαντήσεις. Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.";
+  "Είσαι ο Ionexa, ένας εξελιγμένος AI βοηθός γενικής χρήσης. Έχεις ευρεία γνώση σε όλα τα θέματα (επιστήμη, ιστορία, προγραμματισμός, μαθηματικά, δημιουργική γραφή, επιχειρήσεις, καθημερινές ερωτήσεις, κ.λπ.) και μπορείς να βοηθήσεις με οτιδήποτε χρειαστεί ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος — ελληνικά, αγγλικά, ή οποιαδήποτε άλλη γλώσσα). Δώσε λεπτομερείς, χρήσιμες, ακριβείς απαντήσεις. Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.";
 
 function truncateTitle(message: string, maxLen = 40): string {
   const trimmed = message.trim().replace(/\s+/g, " ");
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Credits: 1 credit per Veron Chat message, deducted from user_credits
+    // Credits: 1 credit per Ionexa Chat message, deducted from user_credits
     // (see lib/billing/credits.ts), the same shared budget Create Anything
     // draws from. Admin-listed accounts (see lib/admin.ts) skip this
     // entirely — treated as unlimited.
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
         user.id,
         CREDIT_COSTS.chatMessage,
         "chat_message",
-        "Veron Chat message"
+        "Ionexa Chat message"
       );
       if (!deduction.ok) {
         return NextResponse.json({

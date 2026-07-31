@@ -29,7 +29,7 @@ import { Logo } from "@/components/logo";
 
 export const metadata: Metadata = {
   title: "Roadmap",
-  description: "What's live in Veron AI today, what's coming next, and where we're headed.",
+  description: "What's live in Ionexa AI today, what's coming next, and where we're headed.",
 };
 
 type RoadmapStatus = "available" | "soon" | "future";
@@ -82,7 +82,7 @@ const SECTIONS: RoadmapSection[] = [
       },
       {
         icon: MessageCircle,
-        title: "Veron Chat",
+        title: "Ionexa Chat",
         description:
           "A general-purpose AI assistant for any question — not tied to a specific module.",
       },
@@ -209,11 +209,11 @@ export default function RoadmapPage() {
             className="inline-flex items-center gap-2 transition-colors duration-150 hover:text-orange-400"
           >
             <Logo iconOnly className="h-6 w-6" />
-            <span className="text-base font-bold tracking-tight text-foreground">VERON</span>
+            <span className="text-base font-bold tracking-tight text-foreground">IONEXA</span>
           </Link>
           <h1 className="mt-6 text-3xl font-bold text-foreground sm:text-4xl">Roadmap</h1>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-muted">
-            Veron AI is being built in phases. Here&apos;s what&apos;s live today, what&apos;s
+            Ionexa AI is being built in phases. Here&apos;s what&apos;s live today, what&apos;s
             coming next, and where we&apos;re headed.
           </p>
         </div>
@@ -259,7 +259,7 @@ export default function RoadmapPage() {
 
         <div className="mt-16 text-center">
           <Link href="/" className="text-xs text-orange-400 underline underline-offset-2">
-            ← Back to Veron AI
+            ← Back to Ionexa AI
           </Link>
         </div>
       </div>

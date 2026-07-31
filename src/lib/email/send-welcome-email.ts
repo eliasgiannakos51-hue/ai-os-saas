@@ -2,7 +2,7 @@ import "server-only";
 import { createResendClient } from "@/lib/resend";
 import { welcomeEmailHtml } from "@/lib/email/templates";
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Veron AI <onboarding@resend.dev>";
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
 
 // Best-effort — never throws. Signup must succeed even if the email fails
 // to send (missing/invalid RESEND_API_KEY, Resend outage, unverified
@@ -14,7 +14,7 @@ export async function sendWelcomeEmail(email: string): Promise<void> {
     const { error } = await resend.emails.send({
       from: FROM_ADDRESS,
       to: email,
-      subject: "welcome to Veron AI",
+      subject: "welcome to Ionexa AI",
       html: welcomeEmailHtml({ email }),
     });
 

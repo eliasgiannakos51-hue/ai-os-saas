@@ -17,7 +17,7 @@ export type SidebarItem = { href: string; label: string; icon: LucideIcon };
 export type SidebarGroupConfig = {
   heading: string;
   items: SidebarItem[];
-  // Workspace holds the core always-visible nav (Home, Veron Chat, AI
+  // Workspace holds the core always-visible nav (Home, Ionexa Chat, AI
   // Memory) and is never collapsed — every other group can be toggled.
   collapsible: boolean;
 };
@@ -28,7 +28,7 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     collapsible: false,
     items: [
       { href: OVERVIEW_NAV_ITEM.href, label: "Home", icon: OVERVIEW_ICON },
-      { href: CHAT_NAV_ITEM.href, label: "Veron Chat", icon: CHAT_ICON },
+      { href: CHAT_NAV_ITEM.href, label: "Ionexa Chat", icon: CHAT_ICON },
       { href: "/dashboard/memory", label: "AI Memory", icon: MEMORY_ICON },
     ],
   },

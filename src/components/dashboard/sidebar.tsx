@@ -28,7 +28,7 @@ function defaultExpanded(group: SidebarGroupConfig, pathname: string | null) {
 }
 
 function storageKey(heading: string) {
-  return `veron:sidebar-group:${heading}`;
+  return `ionexa:sidebar-group:${heading}`;
 }
 
 export function Sidebar() {

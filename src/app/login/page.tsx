@@ -3,7 +3,7 @@ import { LoginForm } from "./login-form";
 
 export const metadata: Metadata = {
   title: "Log In",
-  description: "Log in to Veron AI.",
+  description: "Log in to Ionexa AI.",
 };
 
 export default function LoginPage() {

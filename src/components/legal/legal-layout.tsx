@@ -17,7 +17,7 @@ export function LegalLayout({
           href="/"
           className="text-sm tracking-widest text-orange-500 transition-colors hover:text-orange-400"
         >
-          Veron AI //
+          Ionexa AI //
         </Link>
         <h1 className="mt-4 text-2xl font-bold text-foreground sm:text-3xl">
           {title}
@@ -26,7 +26,7 @@ export function LegalLayout({
 
         <div className="mt-4 rounded border border-orange-900 bg-orange-950/20 px-4 py-3 text-xs leading-relaxed text-orange-200/80">
           This is placeholder text for early development, not reviewed legal
-          copy. It will be replaced with the real thing before Veron AI is
+          copy. It will be replaced with the real thing before Ionexa AI is
           offered to real users.
         </div>
 
@@ -37,7 +37,7 @@ export function LegalLayout({
             href="/"
             className="text-xs text-orange-500 underline underline-offset-2"
           >
-            ← back to Veron AI
+            ← back to Ionexa AI
           </Link>
         </div>
       </div>

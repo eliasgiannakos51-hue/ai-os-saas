@@ -2,7 +2,7 @@ import "server-only";
 import { createResendClient } from "@/lib/resend";
 import { teamInviteEmailHtml } from "@/lib/email/templates";
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Veron AI <onboarding@resend.dev>";
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
 
 // Best-effort — never throws, mirroring sendWelcomeEmail. The invite row is
 // already saved by the time this runs, so a Resend outage means the invitee
@@ -22,7 +22,7 @@ export async function sendTeamInviteEmail({
     const { error } = await resend.emails.send({
       from: FROM_ADDRESS,
       to,
-      subject: `${inviterEmail} invited you to their Veron AI team`,
+      subject: `${inviterEmail} invited you to their Ionexa AI team`,
       html: teamInviteEmailHtml({
         inviterEmail,
         planName,

@@ -1,7 +1,7 @@
-# Veron AI
+# Ionexa AI
 
-**Veron AI** is "one platform, every AI capability" — a personal operating
-system for running a startup. It combines 13 structured business modules,
+**Ionexa AI** — "the energy behind everything you build" — is a personal
+operating system for running a startup. It combines 13 structured business modules,
 an AI-powered free-text inbox that files anything you throw at it into the
 right module, and a general-purpose AI assistant, all in one dark,
 amber-accented workspace. Next.js 14 (App Router) + Supabase + the Claude
@@ -37,18 +37,20 @@ touch targets) and works identically on mobile and desktop.
   table's fields, then inserts it via the same RLS-scoped pattern as every
   other module. If nothing matches clearly, it explains the available
   modules instead of guessing.
-- **Veron Chat** (`/dashboard/chat`) — a separate, general-purpose AI
+- **Ionexa Chat** (`/dashboard/chat`) — a separate, general-purpose AI
   assistant (not tied to any module) with real token-by-token streaming,
   markdown-rendered replies, and a conversation sidebar (pin, rename,
   delete, grouped by recency). Backed by `/api/chat`.
 - **Settings** (`/dashboard/settings`) — account email, password change,
-  current plan + billing management, and a full-data JSON export.
-- **Team** (`/dashboard/team`) — plan owners on a paid tier can invite
-  teammates by email; invited members get full access at the owner's plan
-  for a flat $20/month/seat.
-- **Pricing** (`/pricing`) — five tiers (Free, Starter, Growth,
-  Professional, Ultimate), each with a monthly AI-request allowance and a
-  team-seat add-on. Checkout supports Stripe promotion codes.
+  current plan + billing management, Buy Credits, credit transaction
+  history, and a full-data JSON export.
+- **Team** (`/dashboard/team`) — Professional/Enterprise plan owners can
+  invite teammates by email; invited members get full access at the
+  owner's plan for a flat $20/month/seat.
+- **Pricing** (`/pricing`) — five tiers (Free, Pro, Creator, Professional,
+  Enterprise), each with a monthly credit allotment, a set of plan
+  capabilities, and a team-seat add-on on Professional+. Checkout supports
+  Stripe promotion codes.
 - **Roadmap** (`/roadmap`) — a public, purely informational page laying out
   what's live today, what's coming next, and the longer-term product
   vision. No interactive elements by design.
@@ -83,7 +85,7 @@ touch targets) and works identically on mobile and desktop.
    ANTHROPIC_API_KEY=your-anthropic-api-key
    SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
    RESEND_API_KEY=your-resend-api-key
-   RESEND_FROM_EMAIL="Veron AI <onboarding@resend.dev>"
+   RESEND_FROM_EMAIL="Ionexa AI <onboarding@resend.dev>"
    NEXT_PUBLIC_SITE_URL=http://localhost:3000
    STRIPE_SECRET_KEY=your-stripe-secret-key
    STRIPE_WEBHOOK_SECRET=your-stripe-webhook-signing-secret
@@ -108,8 +110,9 @@ touch targets) and works identically on mobile and desktop.
    Resend account, so set it to a verified sending address before real
    users sign up. `ADMIN_EMAILS` is optional and additive to the founder
    account already hardcoded in `src/lib/admin.ts` — see
-   [Admin access](#admin-access) below. See [Billing](#billing) below for
-   how the Stripe vars are used and how to create the five Price IDs.
+   [Admin access](#admin-access) below. See [Billing](#billing) and
+   [Credits](#credits) below for how the Stripe vars are used and how to
+   create the required Price IDs.
 
 5. **Email confirmation is auto-skipped for now.** Signup goes through
    `/api/signup`, which creates the user, immediately marks their email
@@ -222,7 +225,7 @@ Billing Portal — no card data ever touches this app's servers.
 
 Every AI action spends credits from `user_credits.credits_remaining`
 (`src/lib/billing/credits.ts`) instead of a flat rate limit — 1 credit per
-Create Anything request or Veron Chat message, 40 for an AI agent, 50 for
+Create Anything request or Ionexa Chat message, 40 for an AI agent, 50 for
 an automation, 100 for a website, 300 for an app. An action is blocked
 with "Not enough credits..." if the balance is too low; every
 grant/spend/purchase is logged to `credit_transactions` (run
@@ -279,7 +282,7 @@ src/
       page.tsx                      # Ideas module (hand-built)
       [module]/page.tsx             # the other 12 modules, driven by lib/modules.ts
       create/page.tsx               # Create Anything
-      chat/page.tsx                 # Veron Chat
+      chat/page.tsx                 # Ionexa Chat
       overview/page.tsx             # Overview — default post-login landing
       settings/page.tsx             # account, billing summary, data export
       team/page.tsx                 # team seat management (paid plans only)
@@ -292,11 +295,11 @@ src/
       weekly-digest/route.ts        # placeholder, not yet scheduled — see Email above
     layout.tsx, globals.css
   components/
-    logo.tsx                        # Veron AI wordmark + icon-only mark (SVG)
+    logo.tsx                        # Ionexa AI wordmark + icon-only mark (SVG)
     dashboard/                      # sidebar, top nav, page header, keyboard shortcuts
     modules/, ideas/                # generic + hand-built module list/form/row components
     create/                         # Create Anything chat UI
-    chat/                           # Veron Chat workspace, conversation sidebar, markdown rendering
+    chat/                           # Ionexa Chat workspace, conversation sidebar, markdown rendering
     overview/                       # Overview cards/stats
     settings/                       # billing summary, export, danger zone, password change
     team/                           # invite form + member list

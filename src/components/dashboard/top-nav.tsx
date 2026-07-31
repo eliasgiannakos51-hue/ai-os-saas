@@ -34,7 +34,7 @@ export function TopNav({ email }: { email: string }) {
       >
         <Logo iconOnly className="h-6 w-6" />
         <span className="text-base font-bold tracking-tight text-foreground">
-          VERON
+          IONEXA
         </span>
       </Link>
 

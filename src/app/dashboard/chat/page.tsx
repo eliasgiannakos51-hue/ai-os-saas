@@ -5,7 +5,7 @@ import { ChatWorkspace } from "@/components/chat/chat-workspace";
 import type { ChatConversation } from "@/types/chat";
 
 export const metadata: Metadata = {
-  title: "Veron Chat",
+  title: "Ionexa Chat",
 };
 
 export default async function ChatPage() {

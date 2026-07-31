@@ -29,7 +29,7 @@ function buildSystemPrompt(): string {
     return `- "${m.slug}" (table: ${m.table})\n${fieldDocs}`;
   }).join("\n\n");
 
-  return `You are the routing brain for "Veron AI", a personal operating system with 13 modules, each backed by a Postgres table. A user will describe something in free text. Your job: figure out which single module it belongs to (or none), and extract the structured fields for that module's table.
+  return `You are the routing brain for "Ionexa AI", a personal operating system with 13 modules, each backed by a Postgres table. A user will describe something in free text. Your job: figure out which single module it belongs to (or none), and extract the structured fields for that module's table.
 
 Available modules and their fields:
 
@@ -47,7 +47,7 @@ Rules:
 const ROUTE_ENTRY_TOOL: Anthropic.Tool = {
   name: "route_entry",
   description:
-    "Classify the user's message into exactly one Veron AI module (or none) and extract the structured fields for that module's table.",
+    "Classify the user's message into exactly one Ionexa AI module (or none) and extract the structured fields for that module's table.",
   input_schema: {
     type: "object",
     properties: {

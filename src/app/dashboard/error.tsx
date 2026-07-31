@@ -16,7 +16,7 @@ export default function DashboardError({
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-md rounded-md border border-red-900 bg-red-950/20 p-6 text-center">
-        <p className="text-xs tracking-widest text-orange-500">Veron AI //</p>
+        <p className="text-xs tracking-widest text-orange-500">Ionexa AI //</p>
         <h1 className="mt-2 text-lg font-bold text-foreground">
           something went wrong
         </h1>

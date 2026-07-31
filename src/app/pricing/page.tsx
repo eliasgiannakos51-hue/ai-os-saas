@@ -14,7 +14,7 @@ import { SubscribeButton } from "@/components/billing/subscribe-button";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Veron AI pricing — Free, Pro, Creator, Professional, and Enterprise plans.",
+  description: "Ionexa AI pricing — Free, Pro, Creator, Professional, and Enterprise plans.",
 };
 
 type ComparisonCell =
@@ -90,7 +90,7 @@ export default function PricingPage() {
           >
             <Logo iconOnly className="h-6 w-6" />
             <span className="text-base font-bold tracking-tight text-foreground">
-              VERON
+              IONEXA
             </span>
           </Link>
           <h1 className="mt-6 text-3xl font-bold text-foreground sm:text-4xl">
@@ -173,7 +173,7 @@ export default function PricingPage() {
                   </Link>
                 ) : plan.slug === "enterprise" ? (
                   <a
-                    href="mailto:sales@veron.ai?subject=Veron%20AI%20Enterprise"
+                    href="mailto:sales@ionexa.ai?subject=Ionexa%20AI%20Enterprise"
                     className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
                   >
                     Contact Sales
@@ -249,7 +249,7 @@ export default function PricingPage() {
             href="/"
             className="text-xs text-orange-400 underline underline-offset-2"
           >
-            ← Back to Veron AI
+            ← Back to Ionexa AI
           </Link>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { ForgotPasswordForm } from "./forgot-password-form";
 
 export const metadata: Metadata = {
   title: "Forgot Password",
-  description: "Reset your Veron AI account password.",
+  description: "Reset your Ionexa AI account password.",
 };
 
 export default function ForgotPasswordPage() {

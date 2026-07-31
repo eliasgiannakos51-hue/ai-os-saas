@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Globe, Check } from "lucide-react";
 import { LANGUAGES } from "@/lib/languages";
-import { LOCALE_COOKIE } from "@/i18n/constants";
+import { LOCALE_COOKIE, SUPPORTED_LOCALES } from "@/i18n/constants";
 
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
@@ -54,6 +54,7 @@ export function LanguageSelector({ className }: { className?: string }) {
           <div className="absolute right-0 top-11 z-50 max-h-80 w-48 overflow-y-auto rounded-xl border border-border bg-panel p-1.5 shadow-lg">
             {LANGUAGES.map((lang) => {
               const selected = lang.code === locale;
+              const translated = (SUPPORTED_LOCALES as readonly string[]).includes(lang.code);
               return (
                 <button
                   key={lang.code}
@@ -66,7 +67,14 @@ export function LanguageSelector({ className }: { className?: string }) {
                       : "text-foreground hover:bg-panel-hover"
                   }`}
                 >
-                  <span>{lang.label}</span>
+                  <span className="flex items-center gap-1.5">
+                    {lang.label}
+                    {!translated && (
+                      <span className="rounded-full border border-border px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wide text-muted">
+                        soon
+                      </span>
+                    )}
+                  </span>
                   {selected && <Check className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
                 </button>
               );

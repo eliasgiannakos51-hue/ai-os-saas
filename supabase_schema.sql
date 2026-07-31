@@ -671,3 +671,34 @@ begin
     );
   end loop;
 end $$;
+
+-- ============================================================================
+-- Account deletion confirmation tokens — "Delete Account" no longer deletes
+-- immediately after the typed-email check. Instead it sends an emailed link
+-- (via Resend) with a random token; the account is only actually deleted
+-- when that link is opened and confirmed. Only the token's SHA-256 hash is
+-- stored (never the raw token — that only ever exists in the emailed URL),
+-- and it expires after 1 hour. Service-role only: RLS is enabled with no
+-- policies at all, since every read/write goes through
+-- /api/delete-account/request and /api/delete-account/confirm, both of
+-- which use the admin (service-role) client, never the anon/browser client.
+-- ============================================================================
+
+drop table if exists public.account_deletion_requests cascade;
+
+create table public.account_deletion_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  token_hash text not null,
+  expires_at timestamptz not null,
+  used_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists account_deletion_requests_token_hash_idx
+  on public.account_deletion_requests (token_hash);
+
+create index if not exists account_deletion_requests_user_id_idx
+  on public.account_deletion_requests (user_id);
+
+alter table public.account_deletion_requests enable row level security;

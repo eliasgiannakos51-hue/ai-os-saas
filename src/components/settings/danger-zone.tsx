@@ -1,20 +1,18 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
-import { AlertTriangle, Trash2 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { AlertTriangle, Trash2, MailCheck } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
+import { getErrorMessage } from "@/lib/get-error-message";
 
 export function DangerZone({ email }: { email: string }) {
-  const router = useRouter();
-  const supabase = createClient();
   const { addToast } = useToast();
 
   const [open, setOpen] = useState(false);
   const [confirmEmail, setConfirmEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [requested, setRequested] = useState(false);
 
   const confirmed = confirmEmail.trim().toLowerCase() === email.toLowerCase();
 
@@ -34,20 +32,25 @@ export function DangerZone({ email }: { email: string }) {
     }
 
     setLoading(true);
-    const res = await fetch("/api/delete-account", { method: "POST" });
-    const data = await res.json();
+    try {
+      const res = await fetch("/api/delete-account/request", { method: "POST" });
+      const data = await res.json();
 
-    if (!res.ok || !data.ok) {
+      if (!res.ok || !data.ok) {
+        setError(getErrorMessage(data.error, "Failed to start account deletion."));
+        addToast("✗ could not start account deletion", "error");
+        return;
+      }
+
+      setRequested(true);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Delete account request threw:", err);
+      setError(getErrorMessage(err));
+      addToast("✗ could not start account deletion", "error");
+    } finally {
       setLoading(false);
-      const message = data.error ?? "Failed to delete account.";
-      setError(message);
-      addToast(`✗ error: ${message}`, "error");
-      return;
     }
-
-    await supabase.auth.signOut();
-    router.push("/?deleted=success");
-    router.refresh();
   }
 
   return (
@@ -60,7 +63,14 @@ export function DangerZone({ email }: { email: string }) {
         across all 13 modules. This can&apos;t be undone.
       </p>
 
-      {!open ? (
+      {requested ? (
+        <p className="mt-4 flex items-start gap-2 rounded-lg border border-emerald-800 bg-emerald-950/30 px-3 py-2.5 text-xs text-emerald-400">
+          <MailCheck className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
+          Check your email to confirm deletion — we sent a link to{" "}
+          <span className="text-emerald-300">{email}</span>. It expires in 1
+          hour; nothing is deleted until you click it.
+        </p>
+      ) : !open ? (
         <button
           type="button"
           onClick={() => setOpen(true)}
@@ -97,7 +107,7 @@ export function DangerZone({ email }: { email: string }) {
               disabled={loading || !confirmed}
               className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(220,38,38,0.35)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-none sm:min-h-0"
             >
-              {loading ? "Deleting..." : "Permanently delete my account"}
+              {loading ? "Sending..." : "Send deletion confirmation email"}
             </button>
             <button
               type="button"

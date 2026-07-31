@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createStripeClient } from "@/lib/stripe/server";
-import { isPaidPlanSlug } from "@/lib/billing/plans";
+import { getPlan, isPaidPlanSlug } from "@/lib/billing/plans";
 import { getPlanPriceId, getTeamSeatPriceId } from "@/lib/billing/price-ids";
 import { logApiError } from "@/lib/log-error";
 
@@ -41,9 +41,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
+    const planDefinition = getPlan(plan);
     const planPriceId = getPlanPriceId(plan);
-    const teamSeatPriceId = getTeamSeatPriceId();
-    if (!planPriceId || !teamSeatPriceId) {
+    // Team seats are only a real add-on for plans that support team
+    // collaboration (professional/ultimate) — Starter/Growth checkouts must
+    // not fail just because STRIPE_PRICE_TEAM_SEAT isn't set, since they
+    // never use it.
+    const teamSeatPriceId = planDefinition?.hasTeamSeats ? getTeamSeatPriceId() : undefined;
+    if (!planPriceId || (planDefinition?.hasTeamSeats && !teamSeatPriceId)) {
       logApiError("/api/checkout", new Error("Missing Stripe price id env var"), { plan });
       return NextResponse.json(
         { ok: false, error: "Billing is not configured yet." },
@@ -101,11 +106,15 @@ export async function POST(request: Request) {
       ...(discounts ? { discounts } : { allow_promotion_codes: true }),
       line_items: [
         { price: planPriceId, quantity: 1 },
-        {
-          price: teamSeatPriceId,
-          quantity: 0,
-          adjustable_quantity: { enabled: true, minimum: 0, maximum: 50 },
-        },
+        ...(teamSeatPriceId
+          ? [
+              {
+                price: teamSeatPriceId,
+                quantity: 0,
+                adjustable_quantity: { enabled: true, minimum: 0, maximum: 50 },
+              },
+            ]
+          : []),
       ],
       success_url: `${siteUrl}${successPath}`,
       cancel_url: `${siteUrl}/pricing?checkout=cancelled`,

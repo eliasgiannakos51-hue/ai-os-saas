@@ -136,6 +136,37 @@ export function teamInviteEmailHtml({
   });
 }
 
+export function deleteAccountConfirmationEmailHtml({
+  email,
+  confirmUrl,
+}: {
+  email: string;
+  confirmUrl: string;
+}): string {
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">account deletion · ${email}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">confirm account deletion</h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      We received a request to permanently delete your Ionexa AI account and
+      every record logged across all modules. This can't be undone.
+    </p>
+    <p style="margin:0 0 20px;">
+      <a href="${confirmUrl}" style="display:inline-block; background-color:#dc2626; color:#fff; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        Confirm deletion
+      </a>
+    </p>
+    <p style="color:${MUTED}; font-size:12px; line-height:1.6; margin:0;">
+      This link expires in 1 hour. If you didn't request this, ignore this
+      email and your account will stay exactly as it is.
+    </p>
+  `;
+
+  return layout({
+    preheader: "Confirm permanent deletion of your Ionexa AI account.",
+    bodyHtml,
+  });
+}
+
 export function weeklyDigestEmailHtml({
   email,
   moduleCounts,

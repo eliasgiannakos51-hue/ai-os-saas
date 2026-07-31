@@ -176,15 +176,15 @@ export function Sidebar() {
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="relative flex items-center justify-center px-4 py-3">
           <Link href={OVERVIEW_NAV_ITEM.href} onClick={closeOnMobile} className="flex items-center">
-            <Logo className="h-14 w-auto" />
+            <Logo className="h-auto w-[200px] max-w-full" />
           </Link>
           <button
             type="button"
             onClick={closeOnMobile}
             aria-label="Close menu"
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground md:hidden"
+            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground md:hidden"
           >
             <X className="h-4 w-4" />
           </button>

@@ -3,10 +3,10 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Check, ChevronLeft } from "lucide-react";
+import { Check, ChevronLeft, X } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { isPasswordStrong } from "@/lib/password-strength";
-import { PLANS, CURRENCY_SYMBOL, isPaidPlanSlug, type PlanSlug } from "@/lib/billing/plans";
+import { PLANS, CURRENCY_SYMBOL, isPaidPlanSlug, type Plan, type PlanSlug } from "@/lib/billing/plans";
 import { PasswordInput } from "@/components/ui/password-input";
 import { PasswordStrengthChecklist } from "@/components/auth/password-strength-checklist";
 import { GeneratePasswordButton } from "@/components/auth/generate-password-button";
@@ -17,6 +17,17 @@ const FIELD_CLASS =
   "w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500";
 
 type Step = 1 | 2;
+
+// Same capability set the /pricing comparison table checks — condensed to a
+// quick-scan ✓/✗ list under each plan card here instead of a full table row
+// per capability.
+const CAPABILITY_ROWS: { label: string; included: (p: Plan) => boolean }[] = [
+  { label: "Website & Automation Builder", included: (p) => p.capabilities.websiteBuilder },
+  { label: "Mobile & SaaS Builder", included: (p) => p.capabilities.mobileSaasBuilder },
+  { label: "Image & video generation", included: (p) => p.capabilities.imageVideoGeneration },
+  { label: "AI Memory", included: (p) => p.capabilities.aiMemory },
+  { label: "Team collaboration", included: (p) => p.capabilities.teamCollaboration },
+];
 
 // New accounts start on plan selection instead of being asked to upgrade
 // afterward. A ?plan=<slug> query param (used by pricing page's per-plan
@@ -34,7 +45,6 @@ export function SignupFlow() {
   const [discountCode, setDiscountCode] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [debugDump, setDebugDump] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
 
@@ -59,15 +69,11 @@ export function SignupFlow() {
   // later handled.
   async function readRawResponse(res: Response, label: string): Promise<unknown> {
     const rawText = await res.text();
-    // eslint-disable-next-line no-console
-    console.error(
-      `[signup raw response] ${label}:`,
-      JSON.stringify({ status: res.status, statusText: res.statusText, rawBody: rawText })
-    );
     try {
       return JSON.parse(rawText);
     } catch (parseErr) {
-      dumpErrorForDebugging(`${label} — response body was not valid JSON`, {
+      // eslint-disable-next-line no-console
+      console.error(`${label} — response body was not valid JSON`, {
         status: res.status,
         rawBody: rawText,
         parseError: parseErr instanceof Error ? parseErr.message : String(parseErr),
@@ -78,36 +84,9 @@ export function SignupFlow() {
     }
   }
 
-  // Same debug pattern used in login-form.tsx / forgot-password-form.tsx —
-  // dumps every own property of the raw error so a real failure shows its
-  // full shape instead of a guess.
-  function dumpErrorForDebugging(label: string, raw: unknown) {
-    const info = {
-      label,
-      typeofRaw: typeof raw,
-      isErrorInstance: raw instanceof Error,
-      constructorName: raw && typeof raw === "object" ? raw.constructor?.name : undefined,
-      keysEnumerable: raw && typeof raw === "object" ? Object.keys(raw) : [],
-      allOwnProps: raw && typeof raw === "object" ? Object.getOwnPropertyNames(raw) : [],
-      jsonStringifyAllProps: (() => {
-        try {
-          return raw && typeof raw === "object"
-            ? JSON.stringify(raw, Object.getOwnPropertyNames(raw))
-            : String(raw);
-        } catch {
-          return "<threw>";
-        }
-      })(),
-    };
-    // eslint-disable-next-line no-console
-    console.error(`[signup debug] ${label}:`, raw);
-    setDebugDump(JSON.stringify(info, null, 2));
-  }
-
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    setDebugDump(null);
 
     if (!termsAccepted) {
       setError("You must agree to the Terms of Service and Privacy Policy to create an account.");
@@ -130,7 +109,8 @@ export function SignupFlow() {
         error?: unknown;
       };
       if (!signupRes.ok || !signupData.ok) {
-        dumpErrorForDebugging("/api/signup returned error", signupData.error);
+        // eslint-disable-next-line no-console
+        console.error("/api/signup returned error:", signupData.error);
         setError(getErrorMessage(signupData.error, "Signup failed."));
         return;
       }
@@ -146,9 +126,6 @@ export function SignupFlow() {
       // documented in src/lib/billing/price-ids.ts / the README's Billing
       // section; /api/checkout returns "Billing is not configured yet." if
       // they aren't set.
-      // TODO: Price ID needed here — confirm STRIPE_PRICE_STARTER /
-      // STRIPE_PRICE_GROWTH / STRIPE_PRICE_PROFESSIONAL / STRIPE_PRICE_ULTIMATE
-      // are set before this path can complete a real checkout.
       const checkoutRes = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -164,7 +141,8 @@ export function SignupFlow() {
         url?: string;
       };
       if (!checkoutRes.ok || !checkoutData.ok || !checkoutData.url) {
-        dumpErrorForDebugging("/api/checkout returned error", checkoutData.error);
+        // eslint-disable-next-line no-console
+        console.error("/api/checkout returned error:", checkoutData.error);
         setError(
           getErrorMessage(
             checkoutData.error,
@@ -176,7 +154,8 @@ export function SignupFlow() {
 
       window.location.href = checkoutData.url;
     } catch (err) {
-      dumpErrorForDebugging("signup flow threw", err);
+      // eslint-disable-next-line no-console
+      console.error("Signup flow threw:", err);
       setError(getErrorMessage(err));
     } finally {
       setLoading(false);
@@ -251,6 +230,27 @@ export function SignupFlow() {
                         ? "Custom credits"
                         : `${p.monthlyCredits.toLocaleString()} credits/mo`}
                     </p>
+
+                    <ul className="mt-3 w-full space-y-1.5 border-t border-border pt-3">
+                      {CAPABILITY_ROWS.map((row) => {
+                        const included = row.included(p);
+                        return (
+                          <li
+                            key={row.label}
+                            className={`flex items-center gap-1.5 text-[11px] ${
+                              included ? "text-foreground/80" : "text-muted/60"
+                            }`}
+                          >
+                            {included ? (
+                              <Check className="h-3 w-3 shrink-0 text-emerald-400" aria-hidden="true" />
+                            ) : (
+                              <X className="h-3 w-3 shrink-0 text-muted/50" aria-hidden="true" />
+                            )}
+                            {row.label}
+                          </li>
+                        );
+                      })}
+                    </ul>
                   </button>
                 );
               })}
@@ -372,17 +372,6 @@ export function SignupFlow() {
                 <p className="rounded-xl border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
                   {error}
                 </p>
-              )}
-
-              {debugDump && (
-                <div className="rounded-xl border border-orange-800 bg-orange-950/20 p-3">
-                  <p className="mb-2 text-[10px] uppercase tracking-wide text-orange-500">
-                    temporary debug info — include this in your bug report
-                  </p>
-                  <pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all text-[10px] leading-relaxed text-orange-200/90">
-                    {debugDump}
-                  </pre>
-                </div>
               )}
 
               <button

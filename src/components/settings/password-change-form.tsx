@@ -4,6 +4,9 @@ import { useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
 import { PasswordInput } from "@/components/ui/password-input";
+import { PasswordStrengthChecklist } from "@/components/auth/password-strength-checklist";
+import { isPasswordStrong } from "@/lib/password-strength";
+import { getErrorMessage } from "@/lib/get-error-message";
 
 export function PasswordChangeForm() {
   const supabase = createClient();
@@ -17,24 +20,38 @@ export function PasswordChangeForm() {
     e.preventDefault();
     setError(null);
 
+    if (!isPasswordStrong(newPassword)) {
+      setError("Please choose a password that meets every requirement below.");
+      return;
+    }
     if (newPassword !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    setLoading(false);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
 
-    if (error) {
-      setError(error.message);
-      addToast(`✗ error: ${error.message}`, "error");
-      return;
+      if (error) {
+        // eslint-disable-next-line no-console
+        console.error("Password change error:", error);
+        setError(getErrorMessage(error));
+        addToast("✗ could not update password", "error");
+        return;
+      }
+
+      setNewPassword("");
+      setConfirmPassword("");
+      addToast("✓ password updated");
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("Password change threw:", err);
+      setError(getErrorMessage(err));
+      addToast("✗ could not update password", "error");
+    } finally {
+      setLoading(false);
     }
-
-    setNewPassword("");
-    setConfirmPassword("");
-    addToast("✓ password updated");
   }
 
   return (
@@ -50,7 +67,7 @@ export function PasswordChangeForm() {
         </span>
         <PasswordInput
           required
-          minLength={6}
+          minLength={8}
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
           className="input"
@@ -59,13 +76,17 @@ export function PasswordChangeForm() {
         />
       </label>
 
+      {newPassword && (
+        <PasswordStrengthChecklist password={newPassword} />
+      )}
+
       <label className="block text-xs text-muted">
         <span className="mb-1 block">
           confirm password
         </span>
         <PasswordInput
           required
-          minLength={6}
+          minLength={8}
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           className="input"
@@ -82,8 +103,8 @@ export function PasswordChangeForm() {
 
       <button
         type="submit"
-        disabled={loading}
-        className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
+        disabled={loading || !isPasswordStrong(newPassword) || newPassword !== confirmPassword}
+        className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0 sm:w-auto"
       >
         {loading ? "Updating..." : "Update Password"}
       </button>

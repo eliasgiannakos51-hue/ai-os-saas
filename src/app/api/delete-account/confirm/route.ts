@@ -2,15 +2,37 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { hashDeleteAccountToken } from "@/lib/delete-account-token";
 import { logApiError } from "@/lib/log-error";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-client-ip";
 
 export const dynamic = "force-dynamic";
+
+const DELETE_CONFIRM_MAX_ATTEMPTS = 10;
+const DELETE_CONFIRM_WINDOW_MINUTES = 60;
 
 // Step 2 of account deletion: the token from the emailed link IS the proof
 // of authorization here — deliberately does not require an active session,
 // since the link may be opened on a different device/browser than the one
-// that requested it (same reasoning as password-reset links).
+// that requested it (same reasoning as password-reset links). The token
+// itself is 256 bits of randomness (see lib/delete-account-token.ts), so
+// brute-forcing it is already infeasible — this is defense-in-depth
+// against scripted hammering of the endpoint, not a real brute-force gate.
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const { allowed } = await checkRateLimit({
+      scope: "delete_account_confirm",
+      identifier: ip,
+      maxAttempts: DELETE_CONFIRM_MAX_ATTEMPTS,
+      windowMinutes: DELETE_CONFIRM_WINDOW_MINUTES,
+    });
+    if (!allowed) {
+      return NextResponse.json(
+        { ok: false, error: "Too many attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     let token: string;
     try {
       const body = await request.json();

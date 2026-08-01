@@ -1,4 +1,5 @@
 import "server-only";
+import { getSiteUrl } from "@/lib/site-url";
 
 // Plain, table-based HTML with inline styles only — no <style> blocks, no
 // flexbox/grid, no CSS variables. Email clients (especially Outlook
@@ -18,7 +19,7 @@ const MONO_STACK = "'Courier New', Courier, monospace";
 // touch icons) — email clients need a fully-qualified, actually-hosted
 // image URL, so this reuses that route instead of inlining the SVG (most
 // clients, Outlook especially, don't render inline/embedded SVG).
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const SITE_URL = getSiteUrl();
 const LOGO_URL = `${SITE_URL}/apple-icon`;
 
 function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }) {

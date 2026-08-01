@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
+import { getSiteUrl } from "@/lib/site-url";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const BASE_URL = getSiteUrl();
 
 // Only the public pages meant to be indexed — dashboard/auth routes are
 // excluded (see robots.ts) since they require a session either way.

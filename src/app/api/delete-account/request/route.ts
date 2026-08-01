@@ -5,6 +5,7 @@ import { generateDeleteAccountToken, DELETE_ACCOUNT_TOKEN_TTL_MS } from "@/lib/d
 import { sendDeleteAccountConfirmationEmail } from "@/lib/email/send-delete-account-confirmation-email";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
@@ -61,7 +62,7 @@ export async function POST() {
       );
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const siteUrl = getSiteUrl();
     const confirmUrl = `${siteUrl}/delete-account/confirm?token=${token}`;
 
     const { ok: emailOk } = await sendDeleteAccountConfirmationEmail(user.email, confirmUrl);

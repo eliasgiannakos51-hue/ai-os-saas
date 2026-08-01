@@ -6,6 +6,7 @@ import { getCreditPack } from "@/lib/billing/plans";
 import { getCreditPackPriceId } from "@/lib/billing/price-ids";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    const siteUrl = getSiteUrl();
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",

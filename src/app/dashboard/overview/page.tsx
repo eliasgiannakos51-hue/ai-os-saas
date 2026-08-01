@@ -199,19 +199,19 @@ export default async function OverviewPage() {
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <HomeStatCard
-            icon={Database}
+            icon={<Database className="h-4 w-4" aria-hidden="true" />}
             label={t("statRow.totalEntries")}
             value={totalEntries.toLocaleString()}
             trend={weeklySparkline}
           />
           <HomeStatCard
-            icon={TrendingUp}
+            icon={<TrendingUp className="h-4 w-4" aria-hidden="true" />}
             label={t("statRow.thisWeek")}
             value={totalThisWeek.toLocaleString()}
             trend={weeklySparkline}
           />
           <HomeStatCard
-            icon={Layers}
+            icon={<Layers className="h-4 w-4" aria-hidden="true" />}
             label={t("statRow.mostActive")}
             value={mostActive && mostActive.count > 0 ? mostActive.module.title : "—"}
           />

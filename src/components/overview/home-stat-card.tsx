@@ -1,6 +1,6 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import { ResponsiveContainer, LineChart, Line } from "recharts";
 
 // Compact stat card for the top-of-Home strip (see overview/page.tsx) —
@@ -9,13 +9,20 @@ import { ResponsiveContainer, LineChart, Line } from "recharts";
 // every module, bucketed into rolling 24h windows. Cards with no real
 // history to show (Most Active, Credits Remaining) simply omit `trend`
 // and render the number alone rather than a fabricated line.
+//
+// `icon` takes an already-rendered element (`<Database className="..." />`),
+// not a component reference (`Database`) — this card is a Client Component
+// (needs recharts), and its Server Component callers can't pass a bare
+// component reference across that boundary (React can serialize rendered
+// output, not a function/component value), which is exactly the "Functions
+// cannot be passed directly to Client Components" crash this shape avoids.
 export function HomeStatCard({
-  icon: Icon,
+  icon,
   label,
   value,
   trend,
 }: {
-  icon: LucideIcon;
+  icon: ReactNode;
   label: string;
   value: string;
   trend?: number[];
@@ -28,7 +35,7 @@ export function HomeStatCard({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500/10 text-orange-400">
-            <Icon className="h-4 w-4" aria-hidden="true" />
+            {icon}
           </span>
           <p className="mt-2.5 truncate text-xl font-bold text-foreground">{value}</p>
           <p className="mt-0.5 truncate text-[11px] uppercase tracking-wide text-muted">{label}</p>

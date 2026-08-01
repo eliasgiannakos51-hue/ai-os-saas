@@ -13,7 +13,7 @@ export function CreditsHomeStat({ label }: { label: string }) {
 
   return (
     <HomeStatCard
-      icon={Zap}
+      icon={<Zap className="h-4 w-4" aria-hidden="true" />}
       label={label}
       value={isAdmin ? "∞" : credits === null ? "…" : credits.toLocaleString()}
     />

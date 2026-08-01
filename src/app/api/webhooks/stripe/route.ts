@@ -13,10 +13,24 @@ export const dynamic = "force-dynamic";
 // (rather than trusting the specific event payload) so
 // checkout.session.completed and every later subscription.updated event
 // converge on the same result regardless of what changed.
+//
+// `fallbackSupabaseUserId` covers a real gap: the Stripe Customer only
+// gets `metadata.supabase_user_id` set at the moment api/checkout CREATES
+// a brand-new customer. Any customer created before that convention
+// existed, or by any other path, has no such metadata — so a
+// checkout.session.completed for that customer would silently no-op here
+// forever, with the payment succeeding on Stripe's side but the user's
+// plan never updating, and no error visible anywhere except a server log.
+// The Checkout Session itself always carries supabase_user_id in its own
+// metadata (set every time in api/checkout), so that's passed through as
+// a fallback specifically for the checkout.session.completed case below,
+// and backfilled onto the customer so later events for the same
+// subscription (renewals, plan changes) don't hit the same gap.
 async function syncSubscriptionToUser(
   stripe: Stripe,
   subscriptionId: string,
-  subscriptionHint?: Stripe.Subscription
+  subscriptionHint?: Stripe.Subscription,
+  fallbackSupabaseUserId?: string
 ) {
   const subscription =
     subscriptionHint ?? (await stripe.subscriptions.retrieve(subscriptionId));
@@ -32,7 +46,17 @@ async function syncSubscriptionToUser(
     return;
   }
 
-  const supabaseUserId = customer.metadata?.supabase_user_id;
+  let supabaseUserId = customer.metadata?.supabase_user_id;
+  if (!supabaseUserId && fallbackSupabaseUserId) {
+    supabaseUserId = fallbackSupabaseUserId;
+    try {
+      await stripe.customers.update(customerId, {
+        metadata: { ...customer.metadata, supabase_user_id: fallbackSupabaseUserId },
+      });
+    } catch (err) {
+      logApiError("/api/webhooks/stripe", err, { stage: "backfill_customer_metadata", customerId });
+    }
+  }
   if (!supabaseUserId) {
     logApiError(
       "/api/webhooks/stripe",
@@ -141,7 +165,12 @@ export async function POST(request: Request) {
             typeof session.subscription === "string"
               ? session.subscription
               : session.subscription.id;
-          await syncSubscriptionToUser(stripe, subscriptionId);
+          await syncSubscriptionToUser(
+            stripe,
+            subscriptionId,
+            undefined,
+            session.metadata?.supabase_user_id
+          );
         } else if (session.mode === "payment") {
           await grantPurchasedCredits(session);
         }

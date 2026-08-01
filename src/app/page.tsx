@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { DeletedAccountBanner } from "@/components/landing/deleted-account-banner";
 import { GlowOrb } from "@/components/ui/glow-orb";
+import { AuthBackground } from "@/components/auth/auth-background";
 import { Logo } from "@/components/logo";
 
 const TITLE = "Ionexa AI — The energy behind everything you build.";
@@ -30,9 +31,16 @@ export default async function Home() {
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 text-center">
+      {/* Same rotating wireframe globe used on /login and /signup (see
+          auth-background.tsx) — the landing page previously only had
+          GlowOrb's warm accent glow, which read as a different, less
+          striking background than the auth pages right next to it.
+          GlowOrb stays layered on top as a subtle color accent near the
+          hero; the globe sits behind everything. */}
+      <AuthBackground />
       <GlowOrb className="left-1/2 top-0 h-[32rem] w-[32rem] -translate-x-1/2 -translate-y-1/3" />
 
-      <div className="relative">
+      <div className="relative z-10">
         <DeletedAccountBanner />
 
         <div className="mb-6 flex items-center justify-center">

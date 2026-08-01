@@ -13,6 +13,14 @@ const FOREGROUND = "#f5f5f5";
 const MUTED = "#a3a3a3";
 const MONO_STACK = "'Courier New', Courier, monospace";
 
+// /apple-icon is a real, hosted PNG (see src/app/apple-icon.tsx — the
+// icon-only brand mark on a dark background, already generated for Apple
+// touch icons) — email clients need a fully-qualified, actually-hosted
+// image URL, so this reuses that route instead of inlining the SVG (most
+// clients, Outlook especially, don't render inline/embedded SVG).
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const LOGO_URL = `${SITE_URL}/apple-icon`;
+
 function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }) {
   return `<!doctype html>
 <html>
@@ -29,6 +37,7 @@ function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
             <tr>
               <td style="padding-bottom:24px;">
+                <img src="${LOGO_URL}" width="32" height="32" alt="Ionexa AI" style="display:block; border-radius:7px; margin-bottom:12px;" />
                 <span style="color:${ORANGE}; font-size:13px; letter-spacing:2px;">Ionexa AI //</span>
               </td>
             </tr>

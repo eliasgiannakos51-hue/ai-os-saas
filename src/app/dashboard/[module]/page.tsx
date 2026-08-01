@@ -45,7 +45,7 @@ export default async function ModulePage({
     .order("created_at", { ascending: false });
 
   return (
-    <main className="min-h-full bg-background">
+    <main className="min-h-full">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader icon={MODULE_ICONS[moduleConfig.slug]} title={moduleConfig.title} />
 

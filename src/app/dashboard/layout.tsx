@@ -12,6 +12,7 @@ import { acceptPendingTeamInvite } from "@/lib/team/accept-pending-invite";
 import { getOrInitCredits, resolvePlan } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/admin";
 import { logApiError } from "@/lib/log-error";
+import { AuthBackground } from "@/components/auth/auth-background";
 
 export default async function DashboardLayout({
   children,
@@ -59,7 +60,17 @@ export default async function DashboardLayout({
       <SidebarProvider>
         <CommandPaletteProvider>
           <CreditsProvider initialCredits={credits.credits_remaining} isAdmin={isAdmin}>
-            <div className="flex min-h-screen bg-background">
+            {/* Same wireframe globe as login/signup/landing, now behind every
+                dashboard page for visual continuity with the auth pages —
+                fixed to the viewport, z-0. The whole app shell below is
+                explicitly `relative z-10` (one wrap here, not per-page) so
+                it stacks above the globe as a unit: Sidebar/TopNav's own
+                z-index values (z-50/z-30) still order correctly *within*
+                that shell, and every page's content, opaque or not, paints
+                on top of the globe by default instead of needing its own
+                stacking fix. */}
+            <AuthBackground opacity={0.18} />
+            <div className="relative z-10 flex min-h-screen">
               <Sidebar />
               <div className="flex min-w-0 flex-1 flex-col">
                 <TopNav email={user.email ?? ""} />

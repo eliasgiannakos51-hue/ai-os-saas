@@ -71,7 +71,7 @@ export default async function MarketplacePage() {
   }
 
   return (
-    <main className="min-h-full bg-background">
+    <main className="min-h-full">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
         <PageHeader
           icon={MARKETPLACE_ICON}

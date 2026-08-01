@@ -13,7 +13,6 @@ import { HomeStatCard } from "@/components/overview/home-stat-card";
 import { CreditsHomeStat } from "@/components/overview/credits-home-stat";
 import { BetaFeedbackBanner } from "@/components/overview/beta-feedback-banner";
 import { GlowOrb } from "@/components/ui/glow-orb";
-import { AuthBackground } from "@/components/auth/auth-background";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
 import { isBetaTester } from "@/lib/beta";
@@ -190,14 +189,8 @@ export default async function OverviewPage() {
         ].join(". ");
 
   return (
-    <main className="relative min-h-full bg-background">
-      {/* Same wireframe globe as login/signup/landing, at a fraction of the
-          opacity — ambient continuity with the auth pages rather than a
-          competing visual. Everything else on this page sits in its own
-          `relative z-10` wrapper below so the globe only ever shows through
-          the transparent gaps around/between opaque cards, never under text. */}
-      <AuthBackground opacity={0.06} />
-      <div className="relative z-10 mx-auto max-w-5xl px-4 py-10 sm:px-6">
+    <main className="min-h-full">
+      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
         <div className="relative flex flex-wrap items-start justify-between gap-3">
           <GlowOrb className="-left-10 -top-20 -z-10 h-56 w-56" />
           <GreetingHeader email={user.email ?? ""} />

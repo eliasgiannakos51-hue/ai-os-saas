@@ -17,6 +17,7 @@ const DELETE_REQUEST_WINDOW_MINUTES = 60;
 // account is only actually deleted when that link is opened and confirmed
 // via /api/delete-account/confirm.
 export async function POST() {
+  let userId: string | undefined;
   try {
     const supabase = createClient();
     const {
@@ -26,6 +27,7 @@ export async function POST() {
     if (!user || !user.email) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
+    userId = user.id;
 
     // By user id, not IP — bounds how many deletion-confirmation emails a
     // single account can be sent (email-bombing an inbox), same rationale
@@ -44,7 +46,16 @@ export async function POST() {
       );
     }
 
-    const { token, tokenHash } = generateDeleteAccountToken();
+    let token: string, tokenHash: string;
+    try {
+      ({ token, tokenHash } = generateDeleteAccountToken());
+    } catch (err) {
+      logApiError("/api/delete-account/request", err, { stage: "generate_token", userId: user.id });
+      return NextResponse.json(
+        { ok: false, error: "Could not start account deletion. Please try again." },
+        { status: 500 }
+      );
+    }
     const expiresAt = new Date(Date.now() + DELETE_ACCOUNT_TOKEN_TTL_MS).toISOString();
 
     const admin = createAdminClient();
@@ -55,7 +66,10 @@ export async function POST() {
     });
 
     if (insertError) {
-      logApiError("/api/delete-account/request", insertError);
+      logApiError("/api/delete-account/request", insertError, {
+        stage: "insert_deletion_request",
+        userId: user.id,
+      });
       return NextResponse.json(
         { ok: false, error: "Could not start account deletion. Please try again." },
         { status: 500 }
@@ -67,6 +81,18 @@ export async function POST() {
 
     const { ok: emailOk } = await sendDeleteAccountConfirmationEmail(user.email, confirmUrl);
     if (!emailOk) {
+      // sendDeleteAccountConfirmationEmail already console.errors the
+      // underlying Resend/network failure itself — this just marks, in the
+      // structured log for this endpoint specifically, that the deletion
+      // request row WAS created but the email step is what actually failed,
+      // so the two failure modes ("Could not start" vs "Could not send")
+      // are distinguishable in Runtime Logs without needing to correlate
+      // timestamps across two different log lines.
+      logApiError(
+        "/api/delete-account/request",
+        new Error("sendDeleteAccountConfirmationEmail returned ok:false"),
+        { stage: "send_email", userId: user.id }
+      );
       return NextResponse.json(
         { ok: false, error: "Could not send the confirmation email. Please try again." },
         { status: 500 }
@@ -75,7 +101,7 @@ export async function POST() {
 
     return NextResponse.json({ ok: true });
   } catch (err) {
-    logApiError("/api/delete-account/request", err);
+    logApiError("/api/delete-account/request", err, { stage: "unhandled", userId });
     return NextResponse.json(
       { ok: false, error: "Something went wrong. Please try again." },
       { status: 500 }

@@ -16,6 +16,7 @@ import { GlowOrb } from "@/components/ui/glow-orb";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
 import { isBetaTester } from "@/lib/beta";
+import { logApiError } from "@/lib/log-error";
 import { Database, TrendingUp, Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
 
@@ -56,42 +57,68 @@ export default async function OverviewPage() {
 
   const now = Date.now();
   const oneDayAgoMs = now - 24 * 60 * 60 * 1000;
-  const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const sevenDaysAgoMs = now - 7 * 24 * 60 * 60 * 1000;
   const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-  const summaries = await Promise.all(
-    CLASSIFIER_MODULES.map(async (module) => {
-      // A single 30-day created_at list (timestamps only, cheap) covers
-      // "today"/"this month" for the Progress card below by filtering
-      // client-side, instead of firing yet another head-count query per
-      // module — "this week" still reuses recentCountResult exactly as
-      // before (the stat card + AI Coach digest already depend on it).
-      const [recentRowsResult, recentCountResult, last30DaysResult] = await Promise.all([
-        supabase
-          .from(module.table)
-          .select("*", { count: "exact" })
-          .order("created_at", { ascending: false })
-          .limit(5),
-        supabase
-          .from(module.table)
-          .select("id", { count: "exact", head: true })
-          .gte("created_at", sevenDaysAgo),
-        supabase.from(module.table).select("created_at").gte("created_at", thirtyDaysAgo),
-      ]);
+  type ModuleSummary = {
+    module: (typeof CLASSIFIER_MODULES)[number];
+    href: string;
+    count: number;
+    recentCount: number;
+    todayCount: number;
+    monthCount: number;
+    last30DaysMs: number[];
+    rows: ModuleRecord[];
+  };
 
-      const last30DaysTimestamps = (last30DaysResult.data as { created_at: string }[] | null) ?? [];
-      const last30DaysMs = last30DaysTimestamps.map((r) => new Date(r.created_at).getTime());
+  // Each module's summary is wrapped in its own try/catch — a single
+  // table erroring (RLS hiccup, transient network issue, whatever) used
+  // to reject the whole Promise.all and take the entire Home page down
+  // with it. Now that module just renders as zero-activity instead of
+  // crashing the render for every other module too.
+  const summaries: ModuleSummary[] = await Promise.all(
+    CLASSIFIER_MODULES.map(async (module): Promise<ModuleSummary> => {
+      try {
+        // A single 30-day created_at list (timestamps only, cheap) covers
+        // "today"/"this week"/"this month" for the stat row and Progress
+        // card by filtering client-side — one query per module instead of
+        // three, both cheaper and less surface area for a single
+        // module's query to fail.
+        const [recentRowsResult, last30DaysResult] = await Promise.all([
+          supabase
+            .from(module.table)
+            .select("*", { count: "exact" })
+            .order("created_at", { ascending: false })
+            .limit(5),
+          supabase.from(module.table).select("created_at").gte("created_at", thirtyDaysAgo),
+        ]);
 
-      return {
-        module,
-        href: moduleHref(module.slug),
-        count: recentRowsResult.count ?? 0,
-        recentCount: recentCountResult.count ?? 0,
-        todayCount: last30DaysMs.filter((ms) => ms >= oneDayAgoMs).length,
-        monthCount: last30DaysMs.length,
-        last30DaysMs,
-        rows: (recentRowsResult.data as ModuleRecord[] | null) ?? [],
-      };
+        const last30DaysTimestamps = (last30DaysResult.data as { created_at: string }[] | null) ?? [];
+        const last30DaysMs = last30DaysTimestamps.map((r) => new Date(r.created_at).getTime());
+
+        return {
+          module,
+          href: moduleHref(module.slug),
+          count: recentRowsResult.count ?? 0,
+          recentCount: last30DaysMs.filter((ms) => ms >= sevenDaysAgoMs).length,
+          todayCount: last30DaysMs.filter((ms) => ms >= oneDayAgoMs).length,
+          monthCount: last30DaysMs.length,
+          last30DaysMs,
+          rows: (recentRowsResult.data as ModuleRecord[] | null) ?? [],
+        };
+      } catch (err) {
+        logApiError("/dashboard/overview", err, { stage: "module_summary", moduleSlug: module.slug });
+        return {
+          module,
+          href: moduleHref(module.slug),
+          count: 0,
+          recentCount: 0,
+          todayCount: 0,
+          monthCount: 0,
+          last30DaysMs: [],
+          rows: [],
+        };
+      }
     })
   );
 

@@ -270,6 +270,12 @@
       "totalEntriesThisWeek": "本周总记录数",
       "acrossAllModules": "涵盖所有模块",
       "entry": "{count} 条记录",
+      "statRow": {
+        "totalEntries": "总记录数",
+        "thisWeek": "本周",
+        "mostActive": "最活跃",
+        "creditsRemaining": "剩余额度"
+      },
       "progress": {
         "title": "进度",
         "today": "今天",

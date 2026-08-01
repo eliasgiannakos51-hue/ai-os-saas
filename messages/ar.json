@@ -270,6 +270,12 @@
       "totalEntriesThisWeek": "إجمالي الإدخالات هذا الأسبوع",
       "acrossAllModules": "عبر جميع الوحدات",
       "entry": "{count, plural, one {إدخال واحد} other {# إدخال}}",
+      "statRow": {
+        "totalEntries": "إجمالي الإدخالات",
+        "thisWeek": "هذا الأسبوع",
+        "mostActive": "الأكثر نشاطًا",
+        "creditsRemaining": "الرصيد المتبقي"
+      },
       "progress": {
         "title": "التقدم",
         "today": "اليوم",

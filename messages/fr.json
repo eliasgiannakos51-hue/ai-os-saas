@@ -270,6 +270,12 @@
       "totalEntriesThisWeek": "Total des entrées cette semaine",
       "acrossAllModules": "tous modules confondus",
       "entry": "{count, plural, one {# entrée} other {# entrées}}",
+      "statRow": {
+        "totalEntries": "Total des Entrées",
+        "thisWeek": "Cette Semaine",
+        "mostActive": "Le Plus Actif",
+        "creditsRemaining": "Crédits Restants"
+      },
       "progress": {
         "title": "Progression",
         "today": "Aujourd'hui",

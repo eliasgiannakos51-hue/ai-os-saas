@@ -270,6 +270,12 @@
       "totalEntriesThisWeek": "今週の合計エントリー数",
       "acrossAllModules": "全モジュール合計",
       "entry": "{count} 件のエントリー",
+      "statRow": {
+        "totalEntries": "合計エントリー数",
+        "thisWeek": "今週",
+        "mostActive": "最も活発",
+        "creditsRemaining": "残りクレジット"
+      },
       "progress": {
         "title": "進捗",
         "today": "今日",

@@ -223,10 +223,10 @@ export function IdeaRow({ idea }: { idea: Idea }) {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-panel p-4 transition-colors duration-150 hover:border-orange-500/30">
+    <div className="rounded-2xl border border-border bg-[linear-gradient(160deg,var(--panel)_0%,var(--panel)_65%,rgba(249,115,22,0.035)_100%)] p-4 transition-all duration-200 hover:border-orange-500/40 hover:shadow-[0_14px_32px_-18px_rgba(249,115,22,0.3)]">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h3 className="text-base font-semibold text-foreground">
+          <h3 className="text-[15px] font-semibold tracking-tight text-foreground">
             {idea.name}
           </h3>
           {idea.customer && (

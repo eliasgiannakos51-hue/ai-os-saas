@@ -270,6 +270,12 @@
       "totalEntriesThisWeek": "Voci totali questa settimana",
       "acrossAllModules": "in tutti i moduli",
       "entry": "{count, plural, one {# voce} other {# voci}}",
+      "statRow": {
+        "totalEntries": "Voci Totali",
+        "thisWeek": "Questa Settimana",
+        "mostActive": "Più Attivo",
+        "creditsRemaining": "Crediti Rimanenti"
+      },
       "progress": {
         "title": "Progressi",
         "today": "Oggi",

@@ -270,6 +270,12 @@
       "totalEntriesThisWeek": "Σύνολο Εγγραφών Αυτή την Εβδομάδα",
       "acrossAllModules": "σε όλα τα modules",
       "entry": "{count, plural, one {# εγγραφή} other {# εγγραφές}}",
+      "statRow": {
+        "totalEntries": "Σύνολο Εγγραφών",
+        "thisWeek": "Αυτή την Εβδομάδα",
+        "mostActive": "Πιο Ενεργό",
+        "creditsRemaining": "Credits που Απομένουν"
+      },
       "progress": {
         "title": "Πρόοδος",
         "today": "Σήμερα",

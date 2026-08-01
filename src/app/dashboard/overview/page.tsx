@@ -5,14 +5,16 @@ import { createClient } from "@/lib/supabase/server";
 import { GreetingHeader } from "@/components/overview/greeting-header";
 import { CreateChat } from "@/components/create/create-chat";
 import { QuickActionCard } from "@/components/overview/quick-action-card";
-import { StatCard } from "@/components/overview/stat-card";
 import { RecentEntriesCard, type RecentEntry } from "@/components/overview/recent-entries-card";
 import { AiCoachCard } from "@/components/overview/ai-coach-card";
 import { QuickStartButton } from "@/components/overview/quick-start-button";
 import { ProgressCard } from "@/components/overview/progress-card";
+import { HomeStatCard } from "@/components/overview/home-stat-card";
+import { CreditsHomeStat } from "@/components/overview/credits-home-stat";
+import { GlowOrb } from "@/components/ui/glow-orb";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
-import { Layers } from "lucide-react";
+import { Database, TrendingUp, Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
 
 export const metadata: Metadata = {
@@ -68,19 +70,40 @@ export default async function OverviewPage() {
       ]);
 
       const last30DaysTimestamps = (last30DaysResult.data as { created_at: string }[] | null) ?? [];
+      const last30DaysMs = last30DaysTimestamps.map((r) => new Date(r.created_at).getTime());
 
       return {
         module,
         href: moduleHref(module.slug),
         count: recentRowsResult.count ?? 0,
         recentCount: recentCountResult.count ?? 0,
-        todayCount: last30DaysTimestamps.filter((r) => new Date(r.created_at).getTime() >= oneDayAgoMs)
-          .length,
-        monthCount: last30DaysTimestamps.length,
+        todayCount: last30DaysMs.filter((ms) => ms >= oneDayAgoMs).length,
+        monthCount: last30DaysMs.length,
+        last30DaysMs,
         rows: (recentRowsResult.data as ModuleRecord[] | null) ?? [],
       };
     })
   );
+
+  // Real daily-entry counts for the last 7 days, across every module —
+  // powers the sparkline on the Total Entries / This Week stat cards
+  // (StatCardWithTrend). Rolling 24h buckets anchored to "now" rather than
+  // calendar days, same reasoning as oneDayAgoMs/sevenDaysAgo above: no
+  // reliable per-user timezone available server-side. No synthetic data —
+  // a module with zero activity in a given bucket is just 0.
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const SPARKLINE_DAYS = 7;
+  const weeklySparkline: number[] = new Array(SPARKLINE_DAYS).fill(0);
+  for (const summary of summaries) {
+    for (const ms of summary.last30DaysMs) {
+      const ageMs = now - ms;
+      if (ageMs < 0 || ageMs >= SPARKLINE_DAYS * DAY_MS) continue;
+      const bucketIndex = SPARKLINE_DAYS - 1 - Math.floor(ageMs / DAY_MS);
+      if (bucketIndex >= 0 && bucketIndex < SPARKLINE_DAYS) {
+        weeklySparkline[bucketIndex] += 1;
+      }
+    }
+  }
 
   const recentEntries: RecentEntry[] = summaries
     .flatMap((summary) =>
@@ -98,6 +121,7 @@ export default async function OverviewPage() {
   const totalThisWeek = summaries.reduce((sum, s) => sum + s.recentCount, 0);
   const totalToday = summaries.reduce((sum, s) => sum + s.todayCount, 0);
   const totalThisMonth = summaries.reduce((sum, s) => sum + s.monthCount, 0);
+  const totalEntries = summaries.reduce((sum, s) => sum + s.count, 0);
   const mostActive = summaries.reduce<(typeof summaries)[number] | null>(
     (max, s) => (s.count > (max?.count ?? -1) ? s : max),
     null
@@ -124,9 +148,31 @@ export default async function OverviewPage() {
   return (
     <main className="min-h-full bg-background">
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="relative flex flex-wrap items-start justify-between gap-3">
+          <GlowOrb className="-left-10 -top-20 -z-10 h-56 w-56" />
           <GreetingHeader email={user.email ?? ""} />
           <QuickStartButton />
+        </div>
+
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <HomeStatCard
+            icon={Database}
+            label={t("statRow.totalEntries")}
+            value={totalEntries.toLocaleString()}
+            trend={weeklySparkline}
+          />
+          <HomeStatCard
+            icon={TrendingUp}
+            label={t("statRow.thisWeek")}
+            value={totalThisWeek.toLocaleString()}
+            trend={weeklySparkline}
+          />
+          <HomeStatCard
+            icon={Layers}
+            label={t("statRow.mostActive")}
+            value={mostActive && mostActive.count > 0 ? mostActive.module.title : "—"}
+          />
+          <CreditsHomeStat label={t("statRow.creditsRemaining")} />
         </div>
 
         <AiCoachCard title={t("aiCoach.title")} summary={aiCoachSummary} />
@@ -147,19 +193,8 @@ export default async function OverviewPage() {
           ))}
         </div>
 
-        <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
           <RecentEntriesCard entries={recentEntries} />
-
-          <StatCard
-            icon={Layers}
-            label={t("mostActiveModule")}
-            value={mostActive && mostActive.count > 0 ? mostActive.module.title : "—"}
-            sublabel={
-              mostActive && mostActive.count > 0
-                ? t("entry", { count: mostActive.count })
-                : undefined
-            }
-          />
 
           <ProgressCard
             title={t("progress.title")}

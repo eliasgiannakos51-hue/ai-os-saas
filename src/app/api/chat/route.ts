@@ -3,7 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
-import { CREDIT_COSTS, deductCredits, insufficientCreditsMessage } from "@/lib/billing/credits";
+import { CREDIT_COSTS, deductCredits, insufficientCreditsMessage, resolvePlan } from "@/lib/billing/credits";
 import {
   extractAndStoreMemory,
   loadRecentMemories,
@@ -17,9 +17,14 @@ const MODEL = "claude-sonnet-4-6";
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_TOKENS = 2048;
 const HISTORY_LIMIT = 20;
+const MAX_PERSONA_NAME_LENGTH = 40;
 
-const SYSTEM_PROMPT =
-  "Είσαι ο Ionexa, ένας εξελιγμένος AI βοηθός γενικής χρήσης. Έχεις ευρεία γνώση σε όλα τα θέματα (επιστήμη, ιστορία, προγραμματισμός, μαθηματικά, δημιουργική γραφή, επιχειρήσεις, καθημερινές ερωτήσεις, κ.λπ.) και μπορείς να βοηθήσεις με οτιδήποτε χρειαστεί ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος — ελληνικά, αγγλικά, ή οποιαδήποτε άλλη γλώσσα). Δώσε λεπτομερείς, χρήσιμες, ακριβείς απαντήσεις. Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.";
+// {name} is "Ionexa" by default — swapped for the account's custom
+// persona name on plans with capabilities.customAiPersona (Ultimate+,
+// see Settings > AI Persona and lib/billing/plans.ts).
+function buildSystemPrompt(personaName: string): string {
+  return `Είσαι ο/η ${personaName}, ένας εξελιγμένος AI βοηθός γενικής χρήσης. Έχεις ευρεία γνώση σε όλα τα θέματα (επιστήμη, ιστορία, προγραμματισμός, μαθηματικά, δημιουργική γραφή, επιχειρήσεις, καθημερινές ερωτήσεις, κ.λπ.) και μπορείς να βοηθήσεις με οτιδήποτε χρειαστεί ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος — ελληνικά, αγγλικά, ή οποιαδήποτε άλλη γλώσσα). Δώσε λεπτομερείς, χρήσιμες, ακριβείς απαντήσεις. Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.`;
+}
 
 function truncateTitle(message: string, maxLen = 40): string {
   const trimmed = message.trim().replace(/\s+/g, " ");
@@ -89,11 +94,28 @@ export async function POST(request: Request) {
       );
     }
 
+    const plan = resolvePlan(user);
+
     // Cross-conversation memory (see lib/chat/memory.ts) — off entirely
-    // when the user has disabled it in Settings.
+    // when the user has disabled it in Settings. Retention length is
+    // plan-driven (capabilities.chatMemoryLimit — Ultimate+ keep more).
     const memoryEnabled = isChatMemoryEnabled(user);
-    const memories = memoryEnabled ? await loadRecentMemories(supabase, user.id) : [];
-    const systemPrompt = SYSTEM_PROMPT + buildMemoryPromptAddition(memories);
+    const memories = memoryEnabled
+      ? await loadRecentMemories(supabase, user.id, plan.capabilities.chatMemoryLimit)
+      : [];
+
+    // Custom AI persona name (Ultimate+, see Settings > AI Persona) —
+    // falls back to "Ionexa" for everyone else, or if the plan doesn't
+    // include the capability even when a name is still saved from a
+    // previous higher-tier subscription.
+    const rawPersonaName = user.user_metadata?.ai_persona_name;
+    const personaName =
+      plan.capabilities.customAiPersona &&
+      typeof rawPersonaName === "string" &&
+      rawPersonaName.trim()
+        ? rawPersonaName.trim().slice(0, MAX_PERSONA_NAME_LENGTH)
+        : "Ionexa";
+    const systemPrompt = buildSystemPrompt(personaName) + buildMemoryPromptAddition(memories);
 
     // Credits: 1 credit per Ionexa Chat message, deducted from user_credits
     // (see lib/billing/credits.ts), the same shared budget Create Anything

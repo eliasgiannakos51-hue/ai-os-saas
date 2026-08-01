@@ -2,8 +2,26 @@
 // with an offset elliptical orbit) plus the "ionexa" / "ai" wordmark in
 // the brand's amber (#f5a623). `iconOnly` renders just the mark, cropped
 // to its own square viewBox, for small contexts (sidebar header, favicon
-// source) — both share the same 0 0 680 360 coordinate system as the
-// source SVG, just cropped/backgrounded differently per context.
+// source) — both share the same source coordinate system (circle/ellipse
+// centered on 340,165; wordmark baseline at y=270), just cropped/
+// backgrounded differently per context.
+//
+// THE ROOT CAUSE of "the logo won't get bigger no matter what I set the
+// container to": the full (non-iconOnly) SVG's viewBox used to be
+// "0 0 680 360" — the original source canvas — but the actual drawn
+// content (circle + orbit + "ionexa ai" text) only occupies roughly
+// x:[281,454] y:[117,270] of that, under 15% of the canvas AREA. Every
+// previous "make the logo 3x bigger" pass bumped the container's
+// className width/height, which scales the whole 680x360 box including
+// all that invisible empty space — so the actual glyph grew by the same
+// factor the box did, just from a much smaller effective starting point,
+// making the visible change far less dramatic than the container number
+// suggested. Cropping the viewBox tightly to the real content (below)
+// means every pixel of the container is now the glyph, so container-size
+// changes translate directly into visible-size changes, and every page
+// using this component (sidebar, login, signup, forgot/reset-password,
+// delete-account confirm) gets a real ~2-2.7x visible-size jump from this
+// fix alone, with zero className changes anywhere.
 export function Logo({
   className = "h-8 w-auto",
   iconOnly = false,
@@ -37,7 +55,7 @@ export function Logo({
   }
 
   return (
-    <svg viewBox="0 0 680 360" role="img" aria-label="Ionexa AI" className={className}>
+    <svg viewBox="265 100 205 185" role="img" aria-label="Ionexa AI" className={className}>
       <title>Ionexa AI</title>
       <circle cx="340" cy="165" r="42" fill="none" stroke="#f5a623" strokeWidth="3" />
       <circle cx="340" cy="123" r="6" fill="#f5a623" />

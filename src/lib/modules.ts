@@ -201,7 +201,7 @@ export const NAV_ITEMS: { href: string; label: string }[] = [
   ...MODULES.map((m) => ({ href: `/dashboard/${m.slug}`, label: m.title })),
 ];
 
-export const CREATE_NAV_ITEM = { href: "/dashboard/create", label: "Create" };
+export const CREATE_NAV_ITEM = { href: "/dashboard/create", label: "Create Anything" };
 
 export const CHAT_NAV_ITEM = { href: "/dashboard/chat", label: "Ionexa Chat" };
 

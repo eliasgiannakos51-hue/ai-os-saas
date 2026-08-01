@@ -24,7 +24,9 @@ test.describe("public pages", () => {
   test("landing page loads for logged-out users", async ({ page }) => {
     const response = await page.goto("/");
     expect(response?.status()).toBe(200);
-    await expect(page.getByRole("heading", { name: "AI_OS" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "The energy behind everything you build." })
+    ).toBeVisible();
     await expect(page.getByRole("link", { name: "login()" })).toBeVisible();
     await expect(page.getByRole("link", { name: "sign_up()" })).toBeVisible();
   });

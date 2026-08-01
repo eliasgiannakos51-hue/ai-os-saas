@@ -4,19 +4,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Search, MessageCircle, FileText } from "lucide-react";
-import { CREATE_NAV_ITEM } from "@/lib/modules";
-import { CREATE_ICON } from "@/lib/module-icons";
 import { ALL_SIDEBAR_GROUPS, type SidebarItem } from "@/lib/sidebar-nav";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
 
-// Create Anything isn't a sidebar link (it's reached via this palette or the
-// "New" quick action), but it was Cmd+K's sole destination before this
-// palette existed — keep it searchable so that behavior isn't lost.
-const PALETTE_ITEMS: SidebarItem[] = [
-  { href: CREATE_NAV_ITEM.href, label: "Create Anything", icon: CREATE_ICON },
-  ...ALL_SIDEBAR_GROUPS.flatMap((group) => group.items),
-];
+// Every sidebar link (including Create Anything, part of the Workspace
+// group — see lib/sidebar-nav.ts) is searchable here too, flattened out of
+// its groups.
+const PALETTE_ITEMS: SidebarItem[] = ALL_SIDEBAR_GROUPS.flatMap((group) => group.items);
 
 type ContentResult = {
   id: string;

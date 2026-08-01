@@ -1,17 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { Check, Clock, X } from "lucide-react";
+import { Check, X } from "lucide-react";
 import { Logo } from "@/components/logo";
-import {
-  PLANS,
-  TEAM_SEAT_PRICE,
-  CURRENCY_SYMBOL,
-  planMeetsMinimum,
-  type Plan,
-  type PaidPlanSlug,
-  type PlanSlug,
-} from "@/lib/billing/plans";
+import { PLANS, TEAM_SEAT_PRICE, CURRENCY_SYMBOL, type Plan, type PaidPlanSlug } from "@/lib/billing/plans";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
 
 export const metadata: Metadata = {
@@ -20,21 +12,12 @@ export const metadata: Metadata = {
     "Ionexa AI pricing — Free, Starter, Growth, Professional, Ultimate, and Enterprise plans.",
 };
 
-type ComparisonCell =
-  | { type: "value"; text: string }
-  | { type: "check" }
-  | { type: "cross" }
-  | { type: "soon" };
+type ComparisonCell = { type: "value"; text: string } | { type: "check" } | { type: "cross" };
 
-function soonFrom(minimum: PlanSlug): (plan: Plan) => ComparisonCell {
-  return (plan) => (planMeetsMinimum(plan.slug, minimum) ? { type: "soon" } : { type: "cross" });
-}
-
-// Real, enforced capabilities (lib/billing/plans.ts's PlanCapabilities) map
-// straight to a check/cross row; the "Coming Soon" rows below mirror the
-// comingSoon-flagged bullets in each plan's `features` list — not enforced
-// anywhere yet, shown for the same reason those bullets exist there.
-// labelKey looks up messages/*.json's pricing.rows.<key> for the row name.
+// Every row here maps straight to a real, enforced capability
+// (lib/billing/plans.ts's PlanCapabilities/hasTeamSeats/teamSeatsIncluded)
+// — nothing pending/unbuilt is listed. labelKey looks up
+// messages/*.json's pricing.rows.<key> for the row name.
 const COMPARISON_ROWS: { labelKey: string; cell: (plan: Plan) => ComparisonCell }[] = [
   {
     labelKey: "creditsPerMonth",
@@ -55,30 +38,22 @@ const COMPARISON_ROWS: { labelKey: string; cell: (plan: Plan) => ComparisonCell 
   { labelKey: "imageVideo", cell: (p) => (p.capabilities.imageVideoGeneration ? { type: "check" } : { type: "cross" }) },
   { labelKey: "aiMemory", cell: (p) => (p.capabilities.aiMemory ? { type: "check" } : { type: "cross" }) },
   { labelKey: "teamCollaboration", cell: (p) => (p.capabilities.teamCollaboration ? { type: "check" } : { type: "cross" }) },
-  { labelKey: "teamSeatsAddOn", cell: (p) => (p.hasTeamSeats ? { type: "check" } : { type: "cross" }) },
-  { labelKey: "aiTeamGenerator", cell: soonFrom("growth") },
-  { labelKey: "advancedAutomations", cell: soonFrom("growth") },
-  { labelKey: "aiKnowledgeBase", cell: soonFrom("growth") },
-  { labelKey: "analyticsDashboard", cell: soonFrom("professional") },
-  { labelKey: "apiAccess", cell: soonFrom("professional") },
-  { labelKey: "marketplacePublishing", cell: soonFrom("professional") },
-  { labelKey: "sso", cell: soonFrom("enterprise") },
-  { labelKey: "auditLogs", cell: soonFrom("enterprise") },
+  {
+    labelKey: "teamSeatsAddOn",
+    cell: (p) => {
+      if (!p.hasTeamSeats) return { type: "cross" };
+      if (p.teamSeatsIncluded) return { type: "value", text: "Included" };
+      return { type: "value", text: `+${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}/seat` };
+    },
+  },
 ];
 
-function ComparisonCellContent({ cell, soonLabel }: { cell: ComparisonCell; soonLabel: string }) {
+function ComparisonCellContent({ cell }: { cell: ComparisonCell }) {
   if (cell.type === "value") {
     return <span className="text-sm text-foreground">{cell.text}</span>;
   }
   if (cell.type === "check") {
     return <Check className="mx-auto h-4 w-4 text-emerald-400" aria-hidden="true" />;
-  }
-  if (cell.type === "soon") {
-    return (
-      <span className="inline-flex items-center rounded-full border border-orange-500/40 bg-orange-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-orange-400">
-        {soonLabel}
-      </span>
-    );
   }
   return <X className="mx-auto h-4 w-4 text-muted/50" aria-hidden="true" />;
 }
@@ -143,30 +118,17 @@ export default async function PricingPage() {
               <ul className="mt-6 flex-1 space-y-2.5 text-sm text-muted">
                 {plan.features.map((feature) => (
                   <li key={feature.text} className="flex items-start gap-2">
-                    {feature.comingSoon ? (
-                      <Clock className="mt-0.5 h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
-                    ) : (
-                      <Check
-                        className="mt-0.5 h-4 w-4 shrink-0 text-orange-400"
-                        aria-hidden="true"
-                      />
-                    )}
-                    <span className={feature.comingSoon ? "text-muted" : undefined}>
-                      {feature.text}
-                      {feature.comingSoon && (
-                        <span className="ml-1.5 inline-flex items-center rounded-full border border-orange-500/40 bg-orange-500/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange-400">
-                          {t("comingSoon")}
-                        </span>
-                      )}
-                    </span>
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />
+                    <span>{feature.text}</span>
                   </li>
                 ))}
               </ul>
 
               {plan.hasTeamSeats && (
                 <p className="mt-4 border-t border-border pt-4 text-[11px] leading-relaxed text-muted">
-                  + {CURRENCY_SYMBOL}{TEAM_SEAT_PRICE}/month per team member — each member
-                  gets full access at your plan&apos;s tier
+                  {plan.teamSeatsIncluded
+                    ? "Unlimited team seats included — no per-member charge"
+                    : `+ ${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}/month per team member — each member gets full access at your plan's tier`}
                 </p>
               )}
 
@@ -240,7 +202,7 @@ export default async function PricingPage() {
                     <td className="px-4 py-3 text-left text-muted">{t(`rows.${row.labelKey}`)}</td>
                     {PLANS.map((plan) => (
                       <td key={plan.slug} className="px-4 py-3 text-center">
-                        <ComparisonCellContent cell={row.cell(plan)} soonLabel={t("soon")} />
+                        <ComparisonCellContent cell={row.cell(plan)} />
                       </td>
                     ))}
                   </tr>

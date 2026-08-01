@@ -69,12 +69,15 @@ export async function POST(request: Request) {
 
     const planDefinition = getPlan(plan);
     const planPriceId = getPlanPriceId(plan);
-    // Team seats are only a real add-on for plans that support team
-    // collaboration (professional/ultimate) — Starter/Growth checkouts must
-    // not fail just because STRIPE_PRICE_TEAM_SEAT isn't set, since they
-    // never use it.
-    const teamSeatPriceId = planDefinition?.hasTeamSeats ? getTeamSeatPriceId() : undefined;
-    if (!planPriceId || (planDefinition?.hasTeamSeats && !teamSeatPriceId)) {
+    // Team seats are only a paid, purchasable add-on for plans that both
+    // support team collaboration AND don't already include seats for free
+    // (Professional: pay-per-seat; Ultimate/Enterprise: teamSeatsIncluded,
+    // no line item needed at all — see lib/billing/plans.ts). Starter/
+    // Growth checkouts must not fail just because STRIPE_PRICE_TEAM_SEAT
+    // isn't set, since they never use it either.
+    const needsPaidTeamSeats = Boolean(planDefinition?.hasTeamSeats && !planDefinition.teamSeatsIncluded);
+    const teamSeatPriceId = needsPaidTeamSeats ? getTeamSeatPriceId() : undefined;
+    if (!planPriceId || (needsPaidTeamSeats && !teamSeatPriceId)) {
       // Masked (never the real value) so this is safe to leave in
       // production logs — tells you exactly which env var is the problem
       // without needing to reproduce with real Stripe keys locally.

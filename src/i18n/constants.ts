@@ -4,12 +4,9 @@
 // bundle.
 export const LOCALE_COOKIE = "NEXT_LOCALE";
 
-// Only these two have a real messages/<locale>.json file. Every other
-// language in the selector's list is a real, clickable option (so the
-// full 10-language list the product wants is genuinely there) but falls
-// back to English content until it gets translated.
-// TODO: add messages/es.json, fr.json, de.json, it.json, pt.json, zh.json,
-// ja.json, ar.json and add each locale below as real translations land.
+// Every locale with a real messages/<locale>.json file — kept in sync
+// with lib/languages.ts's LANGUAGES list (the selector only ever shows
+// locales that are actually translated; see that file's comment for why).
 export const SUPPORTED_LOCALES = ["en", "el"] as const;
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 export const DEFAULT_LOCALE: SupportedLocale = "en";

@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Check, ChevronLeft, Clock, X } from "lucide-react";
+import { Check, ChevronLeft, X } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { isPasswordStrong } from "@/lib/password-strength";
 import { PLANS, CURRENCY_SYMBOL, isPaidPlanSlug, type Plan, type PlanSlug } from "@/lib/billing/plans";
@@ -33,7 +33,13 @@ const CAPABILITY_ROWS: { label: string; included: (p: Plan) => boolean }[] = [
   { label: "Image & video generation", included: (p) => p.capabilities.imageVideoGeneration },
   { label: "AI Memory", included: (p) => p.capabilities.aiMemory },
   { label: "Team collaboration", included: (p) => p.capabilities.teamCollaboration },
-  { label: "Team seats add-on", included: (p) => p.hasTeamSeats },
+  {
+    label: "Team seats",
+    included: (p) => p.hasTeamSeats,
+  },
+  { label: "Team seats included free", included: (p) => Boolean(p.teamSeatsIncluded) },
+  { label: "Extended chat memory retention", included: (p) => p.capabilities.chatMemoryLimit > 20 },
+  { label: "Custom AI persona name", included: (p) => p.capabilities.customAiPersona },
 ];
 
 // New accounts start on plan selection instead of being asked to upgrade
@@ -267,23 +273,10 @@ export function SignupFlow() {
                       {p.features.map((feature) => (
                         <li
                           key={feature.text}
-                          className={`flex items-start gap-1.5 text-[11px] ${
-                            feature.comingSoon ? "text-muted/60" : "text-foreground/80"
-                          }`}
+                          className="flex items-start gap-1.5 text-[11px] text-foreground/80"
                         >
-                          {feature.comingSoon ? (
-                            <Clock className="mt-0.5 h-3 w-3 shrink-0 text-muted" aria-hidden="true" />
-                          ) : (
-                            <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" aria-hidden="true" />
-                          )}
-                          <span>
-                            {feature.text}
-                            {feature.comingSoon && (
-                              <span className="ml-1 inline-flex items-center rounded-full border border-orange-500/40 bg-orange-500/10 px-1 py-0 text-[8px] font-semibold uppercase tracking-wide text-orange-400">
-                                {tPricing("soon")}
-                              </span>
-                            )}
-                          </span>
+                          <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" aria-hidden="true" />
+                          <span>{feature.text}</span>
                         </li>
                       ))}
                     </ul>

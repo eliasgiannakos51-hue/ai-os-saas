@@ -36,6 +36,7 @@ function storageKey(heading: string) {
 export function Sidebar() {
   const pathname = usePathname();
   const t = useTranslations("sidebar");
+  const tCommon = useTranslations("common");
   const { open, setOpen } = useSidebar();
   const closeOnMobile = () => setOpen(false);
 
@@ -45,6 +46,10 @@ export function Sidebar() {
   }
 
   function translatedLabel(label: string): string {
+    // Lives under "common" (shared with command-palette.tsx's identical
+    // special case) rather than sidebar.items, since Create Anything is
+    // also referenced by that non-sidebar name elsewhere in the app.
+    if (label === "Create Anything") return tCommon("createAnything");
     const key = ITEM_LABEL_KEYS[label];
     return key ? t(`items.${key}`) : label;
   }

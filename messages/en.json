@@ -78,13 +78,11 @@
     "perMonth": "/month",
     "custom": "Custom",
     "mostPopular": "Most Popular",
-    "comingSoon": "Coming Soon",
-    "soon": "Soon",
     "signUp": "Sign Up",
     "contactSales": "Contact Sales",
     "getPlan": "Get {plan}",
-    "teamBannerTitle": "Need it for your team?",
-    "teamBannerBody": "Add members to any Professional+ plan for +{price}/member/month — everyone gets full access at your plan's tier.",
+    "teamBannerTitle": "Building with a team?",
+    "teamBannerBody": "Professional adds members for +{price}/member/month. Ultimate and Enterprise include unlimited team seats at no extra charge — everyone gets full access at your plan's tier.",
     "comparePlans": "Compare plans",
     "feature": "Feature",
     "backToHome": "← Back to Ionexa AI",
@@ -96,15 +94,7 @@
       "imageVideo": "Image & video generation",
       "aiMemory": "AI Memory",
       "teamCollaboration": "Team collaboration",
-      "teamSeatsAddOn": "Team seats add-on",
-      "aiTeamGenerator": "AI Team Generator",
-      "advancedAutomations": "Advanced automations",
-      "aiKnowledgeBase": "AI Knowledge Base",
-      "analyticsDashboard": "Analytics dashboard",
-      "apiAccess": "API access",
-      "marketplacePublishing": "Marketplace publishing",
-      "sso": "SSO",
-      "auditLogs": "Audit logs"
+      "teamSeatsAddOn": "Team seats"
     }
   },
   "roadmap": {

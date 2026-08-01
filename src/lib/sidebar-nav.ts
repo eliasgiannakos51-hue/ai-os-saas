@@ -1,9 +1,10 @@
 import type { LucideIcon } from "lucide-react";
-import { CHAT_NAV_ITEM, OVERVIEW_NAV_ITEM, SETTINGS_NAV_ITEM } from "@/lib/modules";
+import { CHAT_NAV_ITEM, CREATE_NAV_ITEM, OVERVIEW_NAV_ITEM, SETTINGS_NAV_ITEM } from "@/lib/modules";
 import {
   MODULE_ICONS,
   OVERVIEW_ICON,
   CHAT_ICON,
+  CREATE_ICON,
   SETTINGS_ICON,
   MARKETPLACE_ICON,
   TEAM_ICON,
@@ -28,6 +29,7 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     collapsible: false,
     items: [
       { href: OVERVIEW_NAV_ITEM.href, label: "Home", icon: OVERVIEW_ICON },
+      { href: CREATE_NAV_ITEM.href, label: CREATE_NAV_ITEM.label, icon: CREATE_ICON },
       { href: CHAT_NAV_ITEM.href, label: "Ionexa Chat", icon: CHAT_ICON },
       { href: "/dashboard/memory", label: "AI Memory", icon: MEMORY_ICON },
     ],

@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 const MEMORY_MODEL = "claude-sonnet-4-6";
 const MEMORY_MAX_TOKENS = 150;
-const MEMORY_LOAD_LIMIT = 20;
+const DEFAULT_MEMORY_LOAD_LIMIT = 20;
 
 const EXTRACTION_SYSTEM_PROMPT =
   "Εξάγεις σημαντικά, μόνιμα-χρήσιμα γεγονότα ή προτιμήσεις για τον χρήστη από μία ανταλλαγή μηνυμάτων με έναν AI βοηθό. Απάντα με 1-2 σύντομες προτάσεις — μόνο πράγματα που αξίζει να θυμάται ο βοηθός σε ΜΕΛΛΟΝΤΙΚΕΣ, διαφορετικές συνομιλίες (π.χ. όνομα, επάγγελμα, μόνιμες προτιμήσεις/context). Αν δεν υπάρχει τίποτα αξιόλογο, απάντα ΑΚΡΙΒΩΣ: NONE. Μην εξηγείς, μην προσθέτεις τίποτα άλλο εκτός από τις 1-2 προτάσεις ή το NONE.";
@@ -66,14 +66,15 @@ export async function extractAndStoreMemory({
 
 export async function loadRecentMemories(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
+  limit: number = DEFAULT_MEMORY_LOAD_LIMIT
 ): Promise<string[]> {
   const { data, error } = await supabase
     .from("chat_memory")
     .select("memory_text")
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
-    .limit(MEMORY_LOAD_LIMIT);
+    .limit(limit);
 
   if (error) {
     console.error("loadRecentMemories: query failed", error);

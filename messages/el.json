@@ -78,13 +78,11 @@
     "perMonth": "/μήνα",
     "custom": "Κατόπιν συνεννόησης",
     "mostPopular": "Πιο Δημοφιλές",
-    "comingSoon": "Έρχεται Σύντομα",
-    "soon": "Σύντομα",
     "signUp": "Εγγραφή",
     "contactSales": "Επικοινωνία με Πωλήσεις",
     "getPlan": "Επίλεξε {plan}",
-    "teamBannerTitle": "Το χρειάζεσαι για την ομάδα σου;",
-    "teamBannerBody": "Πρόσθεσε μέλη σε οποιοδήποτε πλάνο Professional+ για +{price}/μέλος/μήνα — όλοι αποκτούν πλήρη πρόσβαση στο επίπεδο του πλάνου σου.",
+    "teamBannerTitle": "Χτίζεις με ομάδα;",
+    "teamBannerBody": "Το Professional προσθέτει μέλη για +{price}/μέλος/μήνα. Τα Ultimate και Enterprise περιλαμβάνουν απεριόριστες θέσεις ομάδας χωρίς επιπλέον χρέωση — όλοι αποκτούν πλήρη πρόσβαση στο επίπεδο του πλάνου σου.",
     "comparePlans": "Σύγκριση πλάνων",
     "feature": "Χαρακτηριστικό",
     "backToHome": "← Πίσω στο Ionexa AI",
@@ -96,15 +94,7 @@
       "imageVideo": "Δημιουργία εικόνας & βίντεο",
       "aiMemory": "AI Μνήμη",
       "teamCollaboration": "Συνεργασία ομάδας",
-      "teamSeatsAddOn": "Πρόσθετες θέσεις ομάδας",
-      "aiTeamGenerator": "AI Team Generator",
-      "advancedAutomations": "Προηγμένοι αυτοματισμοί",
-      "aiKnowledgeBase": "Βάση Γνώσης AI",
-      "analyticsDashboard": "Πίνακας Αναλυτικών",
-      "apiAccess": "Πρόσβαση API",
-      "marketplacePublishing": "Δημοσίευση στο Marketplace",
-      "sso": "SSO",
-      "auditLogs": "Αρχεία Ελέγχου"
+      "teamSeatsAddOn": "Θέσεις ομάδας"
     }
   },
   "roadmap": {

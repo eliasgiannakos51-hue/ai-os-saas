@@ -14,9 +14,11 @@ import { BillingSummary } from "@/components/settings/billing-summary";
 import { BuyCredits } from "@/components/settings/buy-credits";
 import { CreditHistory, type CreditTransaction } from "@/components/settings/credit-history";
 import { AiUsageSettings } from "@/components/settings/ai-usage-settings";
+import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
 import { isAdminEmail } from "@/lib/admin";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { BUILD_MODULES } from "@/lib/build-modules";
+import { getPlan } from "@/lib/billing/plans";
 
 export const metadata: Metadata = {
   title: "Settings",
@@ -40,6 +42,8 @@ export default async function SettingsPage() {
     : (user.user_metadata?.subscription_tier as string | undefined) ?? "free";
   const seatCount = (user.user_metadata?.seat_count as number | undefined) ?? 0;
   const hasSubscription = Boolean(user.user_metadata?.stripe_customer_id);
+  const hasCustomAiPersona = getPlan(tier)?.capabilities.customAiPersona ?? false;
+  const aiPersonaName = (user.user_metadata?.ai_persona_name as string | undefined) ?? "";
 
   const { data: transactions } = await supabase
     .from("credit_transactions")
@@ -98,6 +102,27 @@ export default async function SettingsPage() {
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
         <PageHeader icon={SettingsIcon} title={t("title")} />
 
+        <nav aria-label="Jump to section" className="mb-6 flex flex-wrap gap-2 text-xs">
+          <a
+            href="#accessibility"
+            className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+          >
+            Accessibility
+          </a>
+          <a
+            href="#ai-usage"
+            className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+          >
+            AI Usage
+          </a>
+          <a
+            href="#buy-credits"
+            className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+          >
+            Billing
+          </a>
+        </nav>
+
         <div className="mb-6 rounded-2xl border border-border bg-panel p-5">
           <p className="text-xs text-muted">{t("signedInAs")}</p>
           <p className="mt-1 text-sm text-foreground">{user.email}</p>
@@ -125,6 +150,8 @@ export default async function SettingsPage() {
         </div>
 
         <LoginActivity devices={(knownDevices as KnownDevice[] | null) ?? []} />
+
+        {hasCustomAiPersona && <AiPersonaSettings initialName={aiPersonaName} />}
 
         <AccessibilitySettings />
 

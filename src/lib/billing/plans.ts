@@ -19,14 +19,13 @@ export type PaidPlanSlug = SelfServePlanSlug;
 // backing this app was created in EUR.
 export const CURRENCY_SYMBOL = "€";
 
-export type PlanFeature = { text: string; comingSoon?: boolean };
+export type PlanFeature = { text: string };
 
 // Real, enforced entitlements for this plan — checked server-side wherever
-// the corresponding feature/page/action actually exists. Fields that don't
-// have a real feature to gate yet (AI Team Generator, AI Knowledge Base,
-// analytics dashboard, API access, marketplace publishing, SSO, audit
-// logs) are NOT represented here — they only appear as "Coming Soon"
-// bullets in `features` below until those features are actually built.
+// the corresponding feature/page/action actually exists. Every plan's
+// `features` list below only ever lists things that are actually live
+// today — nothing marked "Coming Soon"/pending; if a feature isn't real
+// yet, it simply isn't listed anywhere on this plan.
 export type PlanCapabilities = {
   maxAiAgents: number | "unlimited";
   websiteBuilder: boolean;
@@ -34,6 +33,14 @@ export type PlanCapabilities = {
   imageVideoGeneration: boolean;
   aiMemory: boolean;
   teamCollaboration: boolean;
+  // How many chat_memory entries (see lib/chat/memory.ts) get loaded as
+  // context on each Ionexa Chat message — Ultimate's "extended chat
+  // memory retention" differentiator vs Professional.
+  chatMemoryLimit: number;
+  // Lets the account rename the assistant persona in Ionexa Chat (see
+  // Settings > AI Persona, wired into api/chat's system prompt) — one of
+  // Ultimate's real differentiators vs Professional.
+  customAiPersona: boolean;
 };
 
 export type Plan = {
@@ -44,6 +51,11 @@ export type Plan = {
   capabilities: PlanCapabilities;
   features: PlanFeature[];
   hasTeamSeats: boolean;
+  // true when team seats are included at no extra charge (Ultimate,
+  // Enterprise) rather than the +€20/member/month add-on Professional
+  // charges — see api/checkout/route.ts, which skips the team-seat Stripe
+  // line item entirely for these plans.
+  teamSeatsIncluded?: boolean;
   highlighted?: boolean;
 };
 
@@ -63,6 +75,8 @@ export const PLANS: Plan[] = [
       imageVideoGeneration: false,
       aiMemory: false,
       teamCollaboration: false,
+      chatMemoryLimit: 0,
+      customAiPersona: false,
     },
     features: [
       { text: "1 workspace, 3 projects" },
@@ -86,6 +100,8 @@ export const PLANS: Plan[] = [
       imageVideoGeneration: true,
       aiMemory: true,
       teamCollaboration: false,
+      chatMemoryLimit: 20,
+      customAiPersona: false,
     },
     features: [
       { text: "Unlimited projects" },
@@ -111,14 +127,13 @@ export const PLANS: Plan[] = [
       imageVideoGeneration: true,
       aiMemory: true,
       teamCollaboration: false,
+      chatMemoryLimit: 20,
+      customAiPersona: false,
     },
     features: [
       { text: "Everything in Starter" },
       { text: "Up to 100 AI agents" },
-      { text: "AI Team Generator", comingSoon: true },
       { text: "Mobile & SaaS Builder access" },
-      { text: "Advanced automations", comingSoon: true },
-      { text: "AI Knowledge Base", comingSoon: true },
       { text: "3,000 credits/month" },
       { text: "Priority processing" },
     ],
@@ -136,15 +151,14 @@ export const PLANS: Plan[] = [
       imageVideoGeneration: true,
       aiMemory: true,
       teamCollaboration: true,
+      chatMemoryLimit: 20,
+      customAiPersona: false,
     },
     features: [
       { text: "Everything in Growth" },
       { text: "Unlimited AI agents & teams" },
       { text: "Team collaboration" },
       { text: "Shared AI memory" },
-      { text: "Analytics dashboard", comingSoon: true },
-      { text: "API access", comingSoon: true },
-      { text: "Marketplace publishing", comingSoon: true },
       { text: "10,000 credits/month" },
       { text: "Priority support" },
     ],
@@ -155,6 +169,7 @@ export const PLANS: Plan[] = [
     price: 200,
     monthlyCredits: 25000,
     hasTeamSeats: true,
+    teamSeatsIncluded: true,
     capabilities: {
       maxAiAgents: "unlimited",
       websiteBuilder: true,
@@ -162,15 +177,16 @@ export const PLANS: Plan[] = [
       imageVideoGeneration: true,
       aiMemory: true,
       teamCollaboration: true,
+      chatMemoryLimit: 100,
+      customAiPersona: true,
     },
     features: [
       { text: "Everything in Professional" },
+      { text: "Unlimited team seats included — no per-member charge" },
+      { text: "Extended chat memory retention (100 vs 20 recent facts)" },
+      { text: "Custom AI persona name in Ionexa Chat" },
       { text: "25,000 credits/month" },
       { text: "Highest priority processing" },
-      { text: "Dedicated account manager" },
-      { text: "Custom integrations request" },
-      { text: "Early access to new features" },
-      { text: "Priority onboarding & migration support" },
     ],
   },
   {
@@ -179,6 +195,7 @@ export const PLANS: Plan[] = [
     price: "custom",
     monthlyCredits: "custom",
     hasTeamSeats: true,
+    teamSeatsIncluded: true,
     capabilities: {
       maxAiAgents: "unlimited",
       websiteBuilder: true,
@@ -186,15 +203,13 @@ export const PLANS: Plan[] = [
       imageVideoGeneration: true,
       aiMemory: true,
       teamCollaboration: true,
+      chatMemoryLimit: 100,
+      customAiPersona: true,
     },
     features: [
       { text: "Everything in Ultimate" },
       { text: "Unlimited members" },
-      { text: "SSO", comingSoon: true },
-      { text: "Audit logs", comingSoon: true },
       { text: "Dedicated support" },
-      { text: "SLA", comingSoon: true },
-      { text: "Custom integrations", comingSoon: true },
       { text: "Custom credits" },
     ],
   },

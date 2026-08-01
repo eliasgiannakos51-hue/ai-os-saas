@@ -84,17 +84,27 @@ export function Logo({
         opacity="0.5"
         transform="rotate(-20 340 165)"
       />
+      {/* Hand-drawn "i" (stem + dot) instead of relying on the browser's own
+          "Arial, sans-serif" fallback glyph — measured pixel-for-pixel
+          against this exact render, that glyph's tittle came out at only
+          ~1.4 units radius, easy to misread as a lowercase "l" at small
+          sizes. Drawing it ourselves sidesteps font-fallback variance
+          across browsers/OSes entirely and lets the dot be reliably bigger
+          (r=2.6). "onexa" keeps the identical x-start (263.9) the second
+          half of "ionexa" already had, so nothing else in the wordmark
+          shifts. */}
+      <rect x="255.6" y="252" width="2.9" height="18" rx="1" fill="#f5f5f5" />
+      <circle cx="257.05" cy="246.6" r="2.6" fill="#f5f5f5" />
       <text
-        x="312.43"
+        x="263.9"
         y="270"
-        textAnchor="middle"
         fontFamily="Arial, sans-serif"
         fontSize="34"
         fontWeight="400"
         fill="#f5f5f5"
         letterSpacing="3"
       >
-        ionexa
+        onexa
       </text>
       <text
         x="312.43"

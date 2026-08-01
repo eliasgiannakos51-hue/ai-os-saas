@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
+import { isBetaTester } from "@/lib/beta";
 import { CREDIT_COSTS, deductCredits, insufficientCreditsMessage, resolvePlan } from "@/lib/billing/credits";
 import {
   extractAndStoreMemory,
@@ -119,10 +120,10 @@ export async function POST(request: Request) {
 
     // Credits: 1 credit per Ionexa Chat message, deducted from user_credits
     // (see lib/billing/credits.ts), the same shared budget Create Anything
-    // draws from. Admin-listed accounts (see lib/admin.ts) skip this
-    // entirely — treated as unlimited.
+    // draws from. Admin-listed accounts (see lib/admin.ts) and beta
+    // testers (see lib/beta.ts) skip this entirely — treated as unlimited.
     const isAdmin = isAdminEmail(user.email);
-    if (!isAdmin) {
+    if (!isAdmin && !isBetaTester(user)) {
       const deduction = await deductCredits(
         user.id,
         CREDIT_COSTS.chatMessage,

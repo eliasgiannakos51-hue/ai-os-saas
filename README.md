@@ -100,18 +100,22 @@ touch targets) and works identically on mobile and desktop.
    STRIPE_PRICE_CREDITS_100=price_...
    CRON_SECRET=your-cron-secret
    ADMIN_EMAILS=owner@example.com,cofounder@example.com
+   BETA_INVITE_CODE=your-beta-invite-code
+   BETA_FEEDBACK_URL=mailto:feedback@yourdomain.com
    ```
 
    `.env.local` is gitignored — never commit real credentials.
    `ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, the
-   `STRIPE_*` vars, and `ADMIN_EMAILS` have no `NEXT_PUBLIC_` prefix on
-   purpose — they're only read server-side and are never sent to the
-   browser. `RESEND_FROM_EMAIL` is optional — it falls back to Resend's
-   shared sandbox address, which only delivers to the email on your own
-   Resend account, so set it to a verified sending address before real
-   users sign up. `ADMIN_EMAILS` is optional and additive to the founder
-   account already hardcoded in `src/lib/admin.ts` — see
-   [Admin access](#admin-access) below. See [Billing](#billing) and
+   `STRIPE_*` vars, `ADMIN_EMAILS`, and `BETA_INVITE_CODE` have no
+   `NEXT_PUBLIC_` prefix on purpose — they're only read server-side and are
+   never sent to the browser. `RESEND_FROM_EMAIL` is optional — it falls
+   back to Resend's shared sandbox address, which only delivers to the
+   email on your own Resend account, so set it to a verified sending
+   address before real users sign up. `ADMIN_EMAILS` is optional and
+   additive to the founder account already hardcoded in
+   `src/lib/admin.ts` — see [Admin access](#admin-access) below.
+   `BETA_INVITE_CODE`/`BETA_FEEDBACK_URL` are optional — see
+   [Beta testers](#beta-testers) below. See [Billing](#billing) and
    [Credits](#credits) below for how the Stripe vars are used and how to
    create the required Price IDs.
 
@@ -267,6 +271,31 @@ caller's own session; it's never bundled into client JavaScript and never
 shown to, or inferable by, any other user. The only visible trace is a
 "Owner Access" badge on `/dashboard/settings`, shown only to the admin
 account itself in place of the normal billing button.
+
+## Beta testers
+
+A separate, independent system from [Admin access](#admin-access) above —
+the two never overlap and one can be reconfigured without touching the
+other. Set `BETA_INVITE_CODE` to any string; entering that exact code
+(case-sensitive) in the optional "Invite code" field at signup grants the
+new account full Ultimate-tier access (`subscription_tier: "ultimate"`,
+`is_beta_tester: true` in `user_metadata`, 25,000 credits granted, and —
+same mechanism as admin — every credit deduction in `api/chat`,
+`api/create`, `api/modules/create`, and `api/text-actions` skipped
+entirely) with no Stripe subscription. Leaving the field blank, or typing
+the wrong code, never blocks signup — the account is just created on the
+normal Free plan, same as today.
+
+If `BETA_INVITE_CODE` is unset, the field still appears but can never grant
+anything (every signup falls through to Free) — safe to deploy without
+configuring it.
+
+Visible traces: a "Beta Tester" badge on `/dashboard/settings` (in place of
+the "Upgrade Plan"/billing-portal button, alongside a working "Manage
+Team" link since Ultimate includes team seats), and — starting 3 days
+after the account's `created_at` — a small dismissible banner on Home
+thanking them and linking to `BETA_FEEDBACK_URL` (falls back to a
+`mailto:` placeholder if unset).
 
 ## Project structure
 

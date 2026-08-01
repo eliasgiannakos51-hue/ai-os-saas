@@ -59,6 +59,7 @@ export function SignupFlow() {
   const [password, setPassword] = useState("");
   const [country, setCountry] = useState("");
   const [discountCode, setDiscountCode] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -118,7 +119,13 @@ export function SignupFlow() {
       const signupRes = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, termsAccepted, country: country || undefined }),
+        body: JSON.stringify({
+          email,
+          password,
+          termsAccepted,
+          country: country || undefined,
+          inviteCode: inviteCode.trim() || undefined,
+        }),
       });
       const signupData = (await readRawResponse(signupRes, "/api/signup")) as {
         ok?: boolean;
@@ -383,6 +390,21 @@ export function SignupFlow() {
                   onChange={(e) => setDiscountCode(e.target.value)}
                   className={FIELD_CLASS}
                   placeholder={t("discountCodePlaceholder")}
+                />
+              </div>
+
+              <div>
+                <label htmlFor="inviteCode" className="mb-1 block text-xs text-muted">
+                  {t("inviteCode")}
+                </label>
+                <input
+                  id="inviteCode"
+                  type="text"
+                  autoComplete="off"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value)}
+                  className={FIELD_CLASS}
+                  placeholder={t("inviteCodePlaceholder")}
                 />
               </div>
 

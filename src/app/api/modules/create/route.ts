@@ -5,6 +5,7 @@ import { getBuildModule } from "@/lib/build-modules";
 import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
 import { deductCredits, insufficientCreditsMessage, resolvePlanSlug } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/admin";
+import { isBetaTester } from "@/lib/beta";
 import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
@@ -94,7 +95,7 @@ export async function POST(request: Request) {
       }
     }
 
-    if (!isAdmin && moduleConfig.creditCost) {
+    if (!isAdmin && !isBetaTester(user) && moduleConfig.creditCost) {
       const deduction = await deductCredits(
         user.id,
         moduleConfig.creditCost,

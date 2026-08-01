@@ -9,6 +9,7 @@ import {
 import type { FieldConfig } from "@/lib/modules";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
+import { isBetaTester } from "@/lib/beta";
 import { CREDIT_COSTS, deductCredits, insufficientCreditsMessage } from "@/lib/billing/credits";
 
 export const dynamic = "force-dynamic";
@@ -139,9 +140,10 @@ export async function POST(request: Request) {
 
     // Credits: 1 credit per Create Anything request, deducted from
     // user_credits (see lib/billing/credits.ts). Admin-listed accounts
-    // (see lib/admin.ts) skip this entirely — treated as unlimited.
+    // (see lib/admin.ts) and beta testers (see lib/beta.ts) skip this
+    // entirely — treated as unlimited.
     const isAdmin = isAdminEmail(user.email);
-    if (!isAdmin) {
+    if (!isAdmin && !isBetaTester(user)) {
       const deduction = await deductCredits(
         user.id,
         CREDIT_COSTS.createAnything,

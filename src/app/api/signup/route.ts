@@ -35,6 +35,7 @@ export async function POST(request: Request) {
     let password: string;
     let termsAccepted: boolean;
     let country: string | null;
+    let inviteCode: string;
     try {
       const body = await request.json();
       email = typeof body?.email === "string" ? body.email.trim() : "";
@@ -44,6 +45,7 @@ export async function POST(request: Request) {
         typeof body?.country === "string" && COUNTRIES.includes(body.country)
           ? body.country
           : null;
+      inviteCode = typeof body?.inviteCode === "string" ? body.inviteCode.trim().slice(0, 100) : "";
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -79,6 +81,13 @@ export async function POST(request: Request) {
       );
     }
 
+    // Never blocks signup — an empty, missing, or wrong code just means no
+    // beta bonus, same as if the field were never shown at all. Only
+    // grants anything when BETA_INVITE_CODE is actually configured server
+    // side, so this is a safe no-op in any environment that hasn't set it.
+    const betaCode = process.env.BETA_INVITE_CODE;
+    const isValidBetaCode = Boolean(betaCode && inviteCode && inviteCode === betaCode);
+
     // Create the user directly via the Admin API instead of the client-side
     // supabase.auth.signUp(). signUp() has Supabase's GoTrue server send a
     // confirmation email as part of the same request, before our code ever
@@ -97,11 +106,19 @@ export async function POST(request: Request) {
       // account gets an explicit "free" tier from the moment it exists,
       // rather than relying on that webhook (which never fires for a Free
       // signup) or a fallback default sprinkled across every place that
-      // reads user_metadata.subscription_tier.
+      // reads user_metadata.subscription_tier. A valid beta invite code
+      // sets tier straight to "ultimate" instead — every existing
+      // capability/minPlanSlug check already reads this same field, so
+      // that alone unlocks every feature with zero changes anywhere else;
+      // is_beta_tester is the separate flag lib/beta.ts checks to also
+      // skip credit deduction entirely (see api/chat, api/create,
+      // api/modules/create, api/text-actions) and to show the Settings
+      // badge / Home feedback banner.
       user_metadata: {
         terms_accepted_at: new Date().toISOString(),
-        subscription_tier: "free",
+        subscription_tier: isValidBetaCode ? "ultimate" : "free",
         seat_count: 0,
+        ...(isValidBetaCode ? { is_beta_tester: true } : {}),
         ...(country ? { country } : {}),
       },
     });
@@ -140,16 +157,24 @@ export async function POST(request: Request) {
 
     const supabase = createClient();
 
-    // Grant the Free plan's monthly credits so user_credits exists from
+    // Grant the signup plan's monthly credits so user_credits exists from
     // the moment the account does — everything downstream (api/create,
-    // api/chat, api/modules/create) reads that row directly.
-    const freePlan = getPlan("free")!;
-    const freeCredits = typeof freePlan.monthlyCredits === "number" ? freePlan.monthlyCredits : 0;
+    // api/chat, api/modules/create) reads that row directly. Beta testers
+    // get Ultimate's allotment for display consistency with their
+    // subscription_tier above, but — same as admin — never actually have
+    // it deducted (see lib/beta.ts's isBetaTester bypass at every credit
+    // call site), so this number is really just a starting display value,
+    // not a real cap.
+    const signupPlan = getPlan(isValidBetaCode ? "ultimate" : "free")!;
+    const signupCredits = typeof signupPlan.monthlyCredits === "number" ? signupPlan.monthlyCredits : 0;
     try {
-      await grantCredits(createData.user.id, freeCredits, "signup_grant", "Free plan signup credits", {
-        setTotal: freeCredits,
-        setPlanTier: "free",
-      });
+      await grantCredits(
+        createData.user.id,
+        signupCredits,
+        "signup_grant",
+        isValidBetaCode ? "Beta tester signup credits" : "Free plan signup credits",
+        { setTotal: signupCredits, setPlanTier: signupPlan.slug }
+      );
     } catch (err) {
       logApiError("/api/signup", err, { stage: "grant_credits" });
     }

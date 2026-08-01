@@ -17,6 +17,7 @@ import { CreditHistory, type CreditTransaction } from "@/components/settings/cre
 import { AiUsageSettings } from "@/components/settings/ai-usage-settings";
 import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
 import { isAdminEmail } from "@/lib/admin";
+import { isBetaTester } from "@/lib/beta";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { BUILD_MODULES } from "@/lib/build-modules";
 import { getPlan } from "@/lib/billing/plans";
@@ -38,6 +39,12 @@ export default async function SettingsPage() {
   }
 
   const isAdmin = isAdminEmail(user.email);
+  // Mutually exclusive with isAdmin by construction — an admin account is
+  // never also flagged is_beta_tester (see lib/beta.ts), but this makes
+  // that guarantee explicit here too rather than relying on the flag
+  // alone, since this is exactly the display logic the "don't touch admin
+  // access" instruction is protecting.
+  const isBeta = !isAdmin && isBetaTester(user);
   const tier = isAdmin
     ? "enterprise"
     : (user.user_metadata?.subscription_tier as string | undefined) ?? "free";
@@ -134,6 +141,7 @@ export default async function SettingsPage() {
           seatCount={seatCount}
           hasSubscription={hasSubscription}
           isAdmin={isAdmin}
+          isBetaTester={isBeta}
         />
 
         <BuyCredits />

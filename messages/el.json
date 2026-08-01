@@ -157,6 +157,8 @@
       "countryPlaceholder": "Επίλεξε τη χώρα σου (προαιρετικό)",
       "discountCode": "Κωδικός έκπτωσης",
       "discountCodePlaceholder": "Κωδικός έκπτωσης (προαιρετικό)",
+      "inviteCode": "Κωδικός πρόσκλησης",
+      "inviteCodePlaceholder": "Κωδικός πρόσκλησης (προαιρετικό)",
       "agreeTerms": "Συμφωνώ με τους",
       "termsOfService": "Όρους Χρήσης",
       "and": "και",
@@ -275,6 +277,10 @@
         "thisWeek": "Αυτή την Εβδομάδα",
         "mostActive": "Πιο Ενεργό",
         "creditsRemaining": "Credits που Απομένουν"
+      },
+      "betaFeedback": {
+        "message": "Ευχαριστούμε που δοκιμάζεις το Ionexa AI! Θα εκτιμούσαμε πολύ τα σχόλιά σου.",
+        "linkLabel": "Στείλε feedback"
       },
       "progress": {
         "title": "Πρόοδος",

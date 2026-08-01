@@ -157,6 +157,8 @@
       "countryPlaceholder": "Select your country (optional)",
       "discountCode": "Discount code",
       "discountCodePlaceholder": "Discount code (optional)",
+      "inviteCode": "Invite code",
+      "inviteCodePlaceholder": "Invite code (optional)",
       "agreeTerms": "I agree to the",
       "termsOfService": "Terms of Service",
       "and": "and",
@@ -275,6 +277,10 @@
         "thisWeek": "This Week",
         "mostActive": "Most Active",
         "creditsRemaining": "Credits Remaining"
+      },
+      "betaFeedback": {
+        "message": "Thanks for testing Ionexa AI! I'd love your feedback.",
+        "linkLabel": "Share feedback"
       },
       "progress": {
         "title": "Progress",

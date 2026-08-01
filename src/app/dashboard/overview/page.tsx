@@ -11,9 +11,11 @@ import { QuickStartButton } from "@/components/overview/quick-start-button";
 import { ProgressCard } from "@/components/overview/progress-card";
 import { HomeStatCard } from "@/components/overview/home-stat-card";
 import { CreditsHomeStat } from "@/components/overview/credits-home-stat";
+import { BetaFeedbackBanner } from "@/components/overview/beta-feedback-banner";
 import { GlowOrb } from "@/components/ui/glow-orb";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
+import { isBetaTester } from "@/lib/beta";
 import { Database, TrendingUp, Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
 
@@ -43,6 +45,14 @@ export default async function OverviewPage() {
   if (!user) {
     redirect("/login");
   }
+
+  // Real account age (auth user's own created_at, not a separate stored
+  // field) — 3 days is a threshold, not a stored flag, so it just
+  // naturally stops applying once the account is old enough regardless of
+  // when this code runs.
+  const accountAgeMs = Date.now() - new Date(user.created_at).getTime();
+  const showBetaFeedbackBanner = isBetaTester(user) && accountAgeMs >= 3 * 24 * 60 * 60 * 1000;
+  const betaFeedbackUrl = process.env.BETA_FEEDBACK_URL || "mailto:feedback@ionexa.ai";
 
   const now = Date.now();
   const oneDayAgoMs = now - 24 * 60 * 60 * 1000;
@@ -174,6 +184,14 @@ export default async function OverviewPage() {
           />
           <CreditsHomeStat label={t("statRow.creditsRemaining")} />
         </div>
+
+        {showBetaFeedbackBanner && (
+          <BetaFeedbackBanner
+            message={t("betaFeedback.message")}
+            linkLabel={t("betaFeedback.linkLabel")}
+            feedbackUrl={betaFeedbackUrl}
+          />
+        )}
 
         <AiCoachCard title={t("aiCoach.title")} summary={aiCoachSummary} />
 

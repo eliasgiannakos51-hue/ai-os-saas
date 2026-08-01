@@ -157,6 +157,8 @@
       "countryPlaceholder": "国を選択（任意）",
       "discountCode": "割引コード",
       "discountCodePlaceholder": "割引コード（任意）",
+      "inviteCode": "招待コード",
+      "inviteCodePlaceholder": "招待コード（任意）",
       "agreeTerms": "同意します：",
       "termsOfService": "利用規約",
       "and": "および",
@@ -275,6 +277,10 @@
         "thisWeek": "今週",
         "mostActive": "最も活発",
         "creditsRemaining": "残りクレジット"
+      },
+      "betaFeedback": {
+        "message": "Ionexa AI をお試しいただきありがとうございます！ぜひご意見をお聞かせください。",
+        "linkLabel": "フィードバックを送る"
       },
       "progress": {
         "title": "進捗",

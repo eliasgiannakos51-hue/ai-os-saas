@@ -157,6 +157,8 @@
       "countryPlaceholder": "اختر دولتك (اختياري)",
       "discountCode": "رمز الخصم",
       "discountCodePlaceholder": "رمز الخصم (اختياري)",
+      "inviteCode": "رمز الدعوة",
+      "inviteCodePlaceholder": "رمز الدعوة (اختياري)",
       "agreeTerms": "أوافق على",
       "termsOfService": "شروط الخدمة",
       "and": "و",
@@ -275,6 +277,10 @@
         "thisWeek": "هذا الأسبوع",
         "mostActive": "الأكثر نشاطًا",
         "creditsRemaining": "الرصيد المتبقي"
+      },
+      "betaFeedback": {
+        "message": "شكرًا لتجربتك Ionexa AI! يسعدنا سماع رأيك.",
+        "linkLabel": "إرسال ملاحظات"
       },
       "progress": {
         "title": "التقدم",

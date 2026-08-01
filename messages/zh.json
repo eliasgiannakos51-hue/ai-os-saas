@@ -157,6 +157,8 @@
       "countryPlaceholder": "选择你的国家/地区（可选）",
       "discountCode": "优惠码",
       "discountCodePlaceholder": "优惠码（可选）",
+      "inviteCode": "邀请码",
+      "inviteCodePlaceholder": "邀请码（可选）",
       "agreeTerms": "我同意",
       "termsOfService": "服务条款",
       "and": "和",
@@ -275,6 +277,10 @@
         "thisWeek": "本周",
         "mostActive": "最活跃",
         "creditsRemaining": "剩余额度"
+      },
+      "betaFeedback": {
+        "message": "感谢你测试 Ionexa AI！我们很想听听你的反馈。",
+        "linkLabel": "提交反馈"
       },
       "progress": {
         "title": "进度",

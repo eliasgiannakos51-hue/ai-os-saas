@@ -157,6 +157,8 @@
       "countryPlaceholder": "Selecciona tu país (opcional)",
       "discountCode": "Código de descuento",
       "discountCodePlaceholder": "Código de descuento (opcional)",
+      "inviteCode": "Código de invitación",
+      "inviteCodePlaceholder": "Código de invitación (opcional)",
       "agreeTerms": "Acepto los",
       "termsOfService": "Términos del servicio",
       "and": "y",
@@ -275,6 +277,10 @@
         "thisWeek": "Esta Semana",
         "mostActive": "Más Activo",
         "creditsRemaining": "Créditos Restantes"
+      },
+      "betaFeedback": {
+        "message": "¡Gracias por probar Ionexa AI! Nos encantaría conocer tu opinión.",
+        "linkLabel": "Enviar comentarios"
       },
       "progress": {
         "title": "Progreso",

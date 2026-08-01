@@ -11,6 +11,7 @@ import { TopNav } from "@/components/dashboard/top-nav";
 import { acceptPendingTeamInvite } from "@/lib/team/accept-pending-invite";
 import { getOrInitCredits, resolvePlan } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/admin";
+import { logApiError } from "@/lib/log-error";
 
 export default async function DashboardLayout({
   children,
@@ -33,8 +34,25 @@ export default async function DashboardLayout({
   void acceptPendingTeamInvite(user.id, user.email ?? "");
 
   const plan = resolvePlan(user);
-  const credits = await getOrInitCredits(user.id, plan);
   const isAdmin = isAdminEmail(user.email);
+
+  // getOrInitCredits creates a service-role Supabase client under the hood
+  // (see lib/supabase/admin.ts), which throws synchronously if
+  // SUPABASE_SERVICE_ROLE_KEY (or the Supabase URL) isn't set in this
+  // environment — and since this layout wraps every dashboard route, an
+  // unhandled throw here takes down the entire dashboard, not just one
+  // page, and does it before dashboard/error.tsx's boundary can catch it
+  // (a layout can't be caught by its own segment's error boundary). Degrade
+  // to a zero balance instead so the shell still renders; admins are
+  // unaffected since CreditsProvider treats isAdmin as unlimited regardless
+  // of the numeric balance.
+  let credits: { credits_remaining: number };
+  try {
+    credits = await getOrInitCredits(user.id, plan);
+  } catch (err) {
+    logApiError("/dashboard (layout)", err, { stage: "get_or_init_credits", userId: user.id });
+    credits = { credits_remaining: 0 };
+  }
 
   return (
     <ToastProvider>

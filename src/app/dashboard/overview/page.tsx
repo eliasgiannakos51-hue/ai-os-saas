@@ -75,50 +75,56 @@ export default async function OverviewPage() {
   // table erroring (RLS hiccup, transient network issue, whatever) used
   // to reject the whole Promise.all and take the entire Home page down
   // with it. Now that module just renders as zero-activity instead of
-  // crashing the render for every other module too.
+  // crashing the render for every other module too. The two queries below
+  // are also caught individually (not as a pair) so a Runtime Log failure
+  // names the exact query that failed, not just "something in this module".
   const summaries: ModuleSummary[] = await Promise.all(
     CLASSIFIER_MODULES.map(async (module): Promise<ModuleSummary> => {
+      const base = { module, href: moduleHref(module.slug) };
+
+      let count = 0;
+      let rows: ModuleRecord[] = [];
       try {
-        // A single 30-day created_at list (timestamps only, cheap) covers
-        // "today"/"this week"/"this month" for the stat row and Progress
-        // card by filtering client-side — one query per module instead of
-        // three, both cheaper and less surface area for a single
-        // module's query to fail.
-        const [recentRowsResult, last30DaysResult] = await Promise.all([
-          supabase
-            .from(module.table)
-            .select("*", { count: "exact" })
-            .order("created_at", { ascending: false })
-            .limit(5),
-          supabase.from(module.table).select("created_at").gte("created_at", thirtyDaysAgo),
-        ]);
-
-        const last30DaysTimestamps = (last30DaysResult.data as { created_at: string }[] | null) ?? [];
-        const last30DaysMs = last30DaysTimestamps.map((r) => new Date(r.created_at).getTime());
-
-        return {
-          module,
-          href: moduleHref(module.slug),
-          count: recentRowsResult.count ?? 0,
-          recentCount: last30DaysMs.filter((ms) => ms >= sevenDaysAgoMs).length,
-          todayCount: last30DaysMs.filter((ms) => ms >= oneDayAgoMs).length,
-          monthCount: last30DaysMs.length,
-          last30DaysMs,
-          rows: (recentRowsResult.data as ModuleRecord[] | null) ?? [],
-        };
+        const recentRowsResult = await supabase
+          .from(module.table)
+          .select("*", { count: "exact" })
+          .order("created_at", { ascending: false })
+          .limit(5);
+        count = recentRowsResult.count ?? 0;
+        rows = (recentRowsResult.data as ModuleRecord[] | null) ?? [];
       } catch (err) {
-        logApiError("/dashboard/overview", err, { stage: "module_summary", moduleSlug: module.slug });
-        return {
-          module,
-          href: moduleHref(module.slug),
-          count: 0,
-          recentCount: 0,
-          todayCount: 0,
-          monthCount: 0,
-          last30DaysMs: [],
-          rows: [],
-        };
+        logApiError("/dashboard/overview", err, {
+          stage: "recent_rows_query",
+          moduleSlug: module.slug,
+          table: module.table,
+        });
       }
+
+      let last30DaysMs: number[] = [];
+      try {
+        const last30DaysResult = await supabase
+          .from(module.table)
+          .select("created_at")
+          .gte("created_at", thirtyDaysAgo);
+        const last30DaysTimestamps = (last30DaysResult.data as { created_at: string }[] | null) ?? [];
+        last30DaysMs = last30DaysTimestamps.map((r) => new Date(r.created_at).getTime());
+      } catch (err) {
+        logApiError("/dashboard/overview", err, {
+          stage: "last_30_days_query",
+          moduleSlug: module.slug,
+          table: module.table,
+        });
+      }
+
+      return {
+        ...base,
+        count,
+        recentCount: last30DaysMs.filter((ms) => ms >= sevenDaysAgoMs).length,
+        todayCount: last30DaysMs.filter((ms) => ms >= oneDayAgoMs).length,
+        monthCount: last30DaysMs.length,
+        last30DaysMs,
+        rows,
+      };
     })
   );
 

@@ -162,6 +162,7 @@ export async function syncCreditsForPlan(userId: string, planSlug: PlanSlug, rea
 export const CREDIT_COSTS = {
   chatMessage: 1,
   createAnything: 1,
+  textAction: 1,
   agentCreate: 40,
   automationCreate: 50,
   websiteCreate: 100,

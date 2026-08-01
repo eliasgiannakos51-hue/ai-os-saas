@@ -8,6 +8,7 @@ import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { DeleteButton } from "@/components/delete-button";
 import { AskAiButton } from "@/components/records/ask-ai-button";
+import { TextActionsTextarea } from "@/components/text-actions/text-actions-textarea";
 import { useToast } from "@/components/toast/toast-context";
 import { formatRelativeTime } from "@/lib/format-time";
 
@@ -40,6 +41,10 @@ export function GenericRecordRow({
   function update(key: string) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
       setForm((f) => ({ ...f, [key]: e.target.value }));
+  }
+
+  function updateValue(key: string, value: string) {
+    setForm((f) => ({ ...f, [key]: value }));
   }
 
   function startEditing() {
@@ -116,10 +121,10 @@ export function GenericRecordRow({
                 {field.required && <span className="text-red-400"> *</span>}
               </span>
               {field.type === "textarea" ? (
-                <textarea
+                <TextActionsTextarea
                   required={field.required}
                   value={form[field.key]}
-                  onChange={update(field.key)}
+                  onChange={(v) => updateValue(field.key, v)}
                   className="input min-h-16"
                   placeholder={field.placeholder}
                 />

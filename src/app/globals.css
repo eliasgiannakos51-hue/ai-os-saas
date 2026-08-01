@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Gentle vertical bob for EmptyState's icon (components/empty-state.tsx),
+   referenced via Tailwind's animate-[float_3s_...] arbitrary value. */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
 /* Dark is the default and matches the original (only) theme exactly —
    selecting light only ever overrides these via [data-theme="light"]
    below. The `data-theme` attribute is set on <html> by the inline

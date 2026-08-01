@@ -5,12 +5,23 @@ import Link from "next/link";
 import { ArrowUp, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/modules";
 import { useCreateAnything, type CreateResult } from "@/lib/use-create-anything";
+import { useSmartSuggestions } from "@/lib/use-smart-suggestions";
+import { SmartSuggestions } from "@/components/create/smart-suggestions";
 
 export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
   const { submit, loading } = useCreateAnything();
   const [input, setInput] = useState("");
   const [result, setResult] = useState<CreateResult | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const suggestions = useSmartSuggestions(input);
+
+  // Prefixes rather than replaces — the suggestion only ever appears once
+  // there's already text in the box, so overwriting it would destroy what
+  // the user typed.
+  function applySuggestion(phrase: string) {
+    setInput((prev) => (prev.startsWith(phrase) ? prev : phrase + prev));
+    textareaRef.current?.focus();
+  }
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -74,6 +85,12 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
           </button>
         </div>
       </form>
+
+      <SmartSuggestions
+        modules={suggestions.modules}
+        visible={suggestions.visible}
+        onPick={applySuggestion}
+      />
 
       {result && (
         <div className="mt-4">

@@ -163,6 +163,8 @@
       "change": "change",
       "email": "Email",
       "password": "Password",
+      "country": "Country",
+      "countryPlaceholder": "Select your country (optional)",
       "discountCode": "Discount code",
       "discountCodePlaceholder": "Discount code (optional)",
       "agreeTerms": "I agree to the",
@@ -219,6 +221,12 @@
       "noDevices": "No devices recorded yet.",
       "lastSeen": "Last seen {time}"
     },
+    "aiUsage": {
+      "title": "AI Usage",
+      "creditsUsed": "Credits Used",
+      "totalEntries": "Total Entries",
+      "mostActiveModule": "Most Active Module"
+    },
     "accessibility": {
       "title": "Accessibility",
       "fontSize": {
@@ -261,7 +269,13 @@
       "mostActiveModule": "Most Active Module",
       "totalEntriesThisWeek": "Total Entries This Week",
       "acrossAllModules": "across all modules",
-      "entry": "{count, plural, one {# entry} other {# entries}}"
+      "entry": "{count, plural, one {# entry} other {# entries}}",
+      "aiCoach": {
+        "title": "AI Coach",
+        "noActivity": "No activity yet this week — log something to get started.",
+        "entryCount": "{count, plural, one {# new {module} entry} other {# new {module} entries}}",
+        "mostActiveIn": "Most active in {module}"
+      }
     },
     "team": {
       "title": "Team",

@@ -7,6 +7,7 @@ import "@fontsource/inter/600.css";
 import "@fontsource/inter/700.css";
 import "./globals.css";
 import { GlobalControls } from "@/components/global-controls";
+import { CookieConsentBanner } from "@/components/cookie-consent-banner";
 import {
   FONT_SIZE_STORAGE_KEY,
   HIGH_CONTRAST_STORAGE_KEY,
@@ -61,6 +62,7 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
           <GlobalControls />
+          <CookieConsentBanner />
         </NextIntlClientProvider>
       </body>
     </html>

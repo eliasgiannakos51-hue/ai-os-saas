@@ -13,7 +13,10 @@ import { DangerZone } from "@/components/settings/danger-zone";
 import { BillingSummary } from "@/components/settings/billing-summary";
 import { BuyCredits } from "@/components/settings/buy-credits";
 import { CreditHistory, type CreditTransaction } from "@/components/settings/credit-history";
+import { AiUsageSettings } from "@/components/settings/ai-usage-settings";
 import { isAdminEmail } from "@/lib/admin";
+import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
+import { BUILD_MODULES } from "@/lib/build-modules";
 
 export const metadata: Metadata = {
   title: "Settings",
@@ -57,6 +60,39 @@ export default async function SettingsPage() {
     .eq("user_id", user.id)
     .order("last_seen", { ascending: false });
 
+  // AI Usage — credits spent lifetime (soft-capped at 5000 rows; a simple
+  // sum, not a running ledger balance, good enough for a usage summary)
+  // plus a per-module entry count across every module with a ModuleConfig
+  // (same 23-table union the AI Memory page searches — see
+  // dashboard/memory/page.tsx), computed in parallel.
+  const usageModules = [...CLASSIFIER_MODULES, ...BUILD_MODULES];
+  const [{ data: usedTransactions }, moduleUsage] = await Promise.all([
+    supabase
+      .from("credit_transactions")
+      .select("amount")
+      .eq("user_id", user.id)
+      .lt("amount", 0)
+      .limit(5000),
+    Promise.all(
+      usageModules.map(async (module) => {
+        const { count } = await supabase
+          .from(module.table)
+          .select("id", { count: "exact", head: true });
+        return { title: module.title, count: count ?? 0 };
+      })
+    ),
+  ]);
+
+  const totalCreditsUsed = (usedTransactions ?? []).reduce(
+    (sum, tx) => sum + Math.abs(tx.amount),
+    0
+  );
+  const totalEntries = moduleUsage.reduce((sum, m) => sum + m.count, 0);
+  const mostActiveModule = moduleUsage.reduce<(typeof moduleUsage)[number] | null>(
+    (max, m) => (m.count > (max?.count ?? -1) ? m : max),
+    null
+  );
+
   return (
     <main className="min-h-full bg-background">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
@@ -91,6 +127,15 @@ export default async function SettingsPage() {
         <LoginActivity devices={(knownDevices as KnownDevice[] | null) ?? []} />
 
         <AccessibilitySettings />
+
+        <AiUsageSettings
+          totalCreditsUsed={totalCreditsUsed}
+          totalEntries={totalEntries}
+          mostActiveModuleTitle={
+            mostActiveModule && mostActiveModule.count > 0 ? mostActiveModule.title : null
+          }
+          moduleUsage={moduleUsage}
+        />
 
         <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
           <h2 className="text-sm font-semibold text-foreground">{t("exportData.title")}</h2>

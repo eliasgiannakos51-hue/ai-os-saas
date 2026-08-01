@@ -54,7 +54,7 @@ export function ConfirmDeleteAccountForm() {
     <main className="flex min-h-screen items-center justify-center overflow-x-hidden bg-background px-4">
       <div className="w-full max-w-md text-center">
         <div className="mb-6 flex items-center justify-center">
-          <Logo className="h-14 w-auto" />
+          <Logo className="h-[168px] w-auto max-w-full" />
         </div>
 
         <div className="rounded-2xl border border-red-900/50 bg-red-500/[0.03] p-6">

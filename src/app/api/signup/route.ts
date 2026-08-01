@@ -8,6 +8,7 @@ import { grantCredits } from "@/lib/billing/credits";
 import { getPlan } from "@/lib/billing/plans";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-client-ip";
+import { COUNTRIES } from "@/lib/countries";
 
 export const dynamic = "force-dynamic";
 
@@ -33,11 +34,16 @@ export async function POST(request: Request) {
     let email: string;
     let password: string;
     let termsAccepted: boolean;
+    let country: string | null;
     try {
       const body = await request.json();
       email = typeof body?.email === "string" ? body.email.trim() : "";
       password = typeof body?.password === "string" ? body.password : "";
       termsAccepted = body?.termsAccepted === true;
+      country =
+        typeof body?.country === "string" && COUNTRIES.includes(body.country)
+          ? body.country
+          : null;
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -96,6 +102,7 @@ export async function POST(request: Request) {
         terms_accepted_at: new Date().toISOString(),
         subscription_tier: "free",
         seat_count: 0,
+        ...(country ? { country } : {}),
       },
     });
 

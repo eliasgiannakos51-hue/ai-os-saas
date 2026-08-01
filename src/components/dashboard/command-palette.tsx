@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Search } from "lucide-react";
+import { Search, MessageCircle, FileText } from "lucide-react";
 import { CREATE_NAV_ITEM } from "@/lib/modules";
 import { CREATE_ICON } from "@/lib/module-icons";
 import { ALL_SIDEBAR_GROUPS, type SidebarItem } from "@/lib/sidebar-nav";
@@ -17,6 +17,26 @@ const PALETTE_ITEMS: SidebarItem[] = [
   { href: CREATE_NAV_ITEM.href, label: "Create Anything", icon: CREATE_ICON },
   ...ALL_SIDEBAR_GROUPS.flatMap((group) => group.items),
 ];
+
+type ContentResult = {
+  id: string;
+  type: "module" | "chat";
+  title: string;
+  subtitle: string;
+  href: string;
+};
+
+// One shape both page-nav items and content search results render as, so
+// keyboard nav (arrow up/down, enter) walks a single flat list regardless
+// of which section an entry came from.
+type PaletteEntry = {
+  key: string;
+  href: string;
+  label: string;
+  sublabel?: string;
+  badge?: string;
+  render: (active: boolean) => React.ReactNode;
+};
 
 // Subsequence match — every character of the query appears in the target,
 // in order, not necessarily contiguous. A plain substring match is just a
@@ -57,7 +77,10 @@ export function CommandPalette() {
   const { open, setOpen } = useCommandPalette();
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [contentResults, setContentResults] = useState<ContentResult[]>([]);
+  const [searching, setSearching] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const searchTokenRef = useRef(0);
 
   function translatedLabel(label: string): string {
     if (label === "Create Anything") return tCommon("createAnything");
@@ -65,18 +88,89 @@ export function CommandPalette() {
     return key ? tSidebar(`items.${key}`) : label;
   }
 
-  const results = useMemo(() => filterAndRankItems(PALETTE_ITEMS, query), [query]);
+  const pageResults = useMemo(() => filterAndRankItems(PALETTE_ITEMS, query), [query]);
+
+  // Content search (entries inside modules + chat conversation titles) —
+  // debounced so it doesn't fire a request per keystroke, and only once
+  // the query is long enough to be worth a round trip.
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 2) {
+      setContentResults([]);
+      setSearching(false);
+      return;
+    }
+
+    setSearching(true);
+    const token = ++searchTokenRef.current;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        if (token !== searchTokenRef.current) return;
+        setContentResults(res.ok && data.ok ? data.results : []);
+      } catch {
+        if (token === searchTokenRef.current) setContentResults([]);
+      } finally {
+        if (token === searchTokenRef.current) setSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [query]);
 
   function close() {
     setOpen(false);
     setQuery("");
     setActiveIndex(0);
+    setContentResults([]);
   }
 
-  function go(item: SidebarItem) {
+  function goTo(href: string) {
     close();
-    router.push(item.href);
+    router.push(href);
   }
+
+  const entries: PaletteEntry[] = useMemo(() => {
+    const pageEntries: PaletteEntry[] = pageResults.map((item) => ({
+      key: `page-${item.href}`,
+      href: item.href,
+      label: translatedLabel(item.label),
+      render: (active) => {
+        const Icon = item.icon;
+        return (
+          <>
+            <Icon
+              className={`h-4 w-4 shrink-0 ${active ? "text-orange-400" : "text-orange-500/40"}`}
+              aria-hidden="true"
+            />
+            {translatedLabel(item.label)}
+          </>
+        );
+      },
+    }));
+
+    const contentEntries: PaletteEntry[] = contentResults.map((result) => ({
+      key: `content-${result.id}`,
+      href: result.href,
+      label: result.title,
+      render: () => {
+        const Icon = result.type === "chat" ? MessageCircle : FileText;
+        return (
+          <>
+            <Icon className="h-4 w-4 shrink-0 text-orange-500/40" aria-hidden="true" />
+            <span className="min-w-0 flex-1 truncate">{result.title}</span>
+            <span className="shrink-0 rounded-full border border-border px-1.5 py-0.5 text-[10px] text-muted">
+              {result.subtitle}
+            </span>
+          </>
+        );
+      },
+    }));
+
+    return [...pageEntries, ...contentEntries];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageResults, contentResults]);
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -113,14 +207,14 @@ export function CommandPalette() {
   function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setActiveIndex((i) => Math.min(i + 1, results.length - 1));
+      setActiveIndex((i) => Math.min(i + 1, entries.length - 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setActiveIndex((i) => Math.max(i - 1, 0));
     } else if (e.key === "Enter") {
       e.preventDefault();
-      const selected = results[activeIndex];
-      if (selected) go(selected);
+      const selected = entries[activeIndex];
+      if (selected) goTo(selected.href);
     }
   }
 
@@ -153,20 +247,19 @@ export function CommandPalette() {
           />
         </div>
 
-        <div className="max-h-80 overflow-y-auto p-2">
-          {results.length === 0 ? (
+        <div className="max-h-96 overflow-y-auto p-2">
+          {entries.length === 0 ? (
             <p className="px-3 py-6 text-center text-sm text-muted">
-              {tCommon("noMatches", { query })}
+              {searching ? tCommon("loading") : tCommon("noMatches", { query })}
             </p>
           ) : (
-            results.map((item, index) => {
-              const Icon = item.icon;
+            entries.map((entry, index) => {
               const active = index === activeIndex;
               return (
                 <button
-                  key={item.href}
+                  key={entry.key}
                   type="button"
-                  onClick={() => go(item)}
+                  onClick={() => goTo(entry.href)}
                   onMouseEnter={() => setActiveIndex(index)}
                   className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors duration-150 ${
                     active
@@ -174,11 +267,7 @@ export function CommandPalette() {
                       : "text-foreground hover:bg-panel-hover"
                   }`}
                 >
-                  <Icon
-                    className={`h-4 w-4 shrink-0 ${active ? "text-orange-400" : "text-orange-500/40"}`}
-                    aria-hidden="true"
-                  />
-                  {translatedLabel(item.label)}
+                  {entry.render(active)}
                 </button>
               );
             })

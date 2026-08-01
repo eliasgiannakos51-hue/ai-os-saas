@@ -163,6 +163,8 @@
       "change": "αλλαγή",
       "email": "Email",
       "password": "Κωδικός",
+      "country": "Χώρα",
+      "countryPlaceholder": "Επίλεξε τη χώρα σου (προαιρετικό)",
       "discountCode": "Κωδικός έκπτωσης",
       "discountCodePlaceholder": "Κωδικός έκπτωσης (προαιρετικό)",
       "agreeTerms": "Συμφωνώ με τους",
@@ -219,6 +221,12 @@
       "noDevices": "Δεν έχουν καταγραφεί συσκευές ακόμα.",
       "lastSeen": "Τελευταία εμφάνιση {time}"
     },
+    "aiUsage": {
+      "title": "Χρήση AI",
+      "creditsUsed": "Credits που Χρησιμοποιήθηκαν",
+      "totalEntries": "Σύνολο Εγγραφών",
+      "mostActiveModule": "Πιο Ενεργό Module"
+    },
     "accessibility": {
       "title": "Προσβασιμότητα",
       "fontSize": {
@@ -261,7 +269,13 @@
       "mostActiveModule": "Πιο Ενεργό Module",
       "totalEntriesThisWeek": "Σύνολο Εγγραφών Αυτή την Εβδομάδα",
       "acrossAllModules": "σε όλα τα modules",
-      "entry": "{count, plural, one {# εγγραφή} other {# εγγραφές}}"
+      "entry": "{count, plural, one {# εγγραφή} other {# εγγραφές}}",
+      "aiCoach": {
+        "title": "AI Coach",
+        "noActivity": "Καμία δραστηριότητα ακόμα αυτή την εβδομάδα — καταχώρησε κάτι για να ξεκινήσεις.",
+        "entryCount": "{count, plural, one {# νέα εγγραφή στο {module}} other {# νέες εγγραφές στο {module}}}",
+        "mostActiveIn": "Πιο ενεργό/ή στο {module}"
+      }
     },
     "team": {
       "title": "Ομάδα",

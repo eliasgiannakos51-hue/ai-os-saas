@@ -7,6 +7,8 @@ import { CreateChat } from "@/components/create/create-chat";
 import { QuickActionCard } from "@/components/overview/quick-action-card";
 import { StatCard } from "@/components/overview/stat-card";
 import { RecentEntriesCard, type RecentEntry } from "@/components/overview/recent-entries-card";
+import { AiCoachCard } from "@/components/overview/ai-coach-card";
+import { QuickStartButton } from "@/components/overview/quick-start-button";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
 import { Layers, TrendingUp } from "lucide-react";
@@ -86,12 +88,37 @@ export default async function OverviewPage() {
     null
   );
 
+  // "AI Coach" digest — same recentCount numbers as the stat cards below,
+  // just reframed as a sentence. Top 3 modules with activity this week,
+  // ranked by how much of it happened there.
+  const topModulesThisWeek = summaries
+    .filter((s) => s.recentCount > 0)
+    .sort((a, b) => b.recentCount - a.recentCount)
+    .slice(0, 3);
+
+  const aiCoachSummary =
+    topModulesThisWeek.length === 0
+      ? t("aiCoach.noActivity")
+      : [
+          topModulesThisWeek
+            .map((s) => t("aiCoach.entryCount", { count: s.recentCount, module: s.module.title }))
+            .join(", "),
+          t("aiCoach.mostActiveIn", { module: topModulesThisWeek[0].module.title }),
+        ].join(". ");
+
   return (
     <main className="min-h-full bg-background">
       <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
-        <GreetingHeader email={user.email ?? ""} />
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <GreetingHeader email={user.email ?? ""} />
+          <QuickStartButton />
+        </div>
 
-        <CreateChat showHeading={false} />
+        <AiCoachCard title={t("aiCoach.title")} summary={aiCoachSummary} />
+
+        <div className="mt-6">
+          <CreateChat showHeading={false} />
+        </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {QUICK_ACTIONS.map((action) => (

@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { ModuleConfig } from "@/lib/modules";
 import { useToast } from "@/components/toast/toast-context";
 import { useCredits } from "@/components/credits/credits-context";
+import { TextActionsTextarea } from "@/components/text-actions/text-actions-textarea";
 
 function emptyFormFor(module: ModuleConfig): Record<string, string> {
   return Object.fromEntries(module.fields.map((f) => [f.key, ""]));
@@ -47,6 +48,10 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
   function update(key: string) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
       setForm((f) => ({ ...f, [key]: e.target.value }));
+  }
+
+  function updateValue(key: string, value: string) {
+    setForm((f) => ({ ...f, [key]: value }));
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -165,13 +170,12 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
               {field.required && <span className="text-red-400"> *</span>}
             </span>
             {field.type === "textarea" ? (
-              <textarea
+              <TextActionsTextarea
                 required={field.required}
                 value={form[field.key]}
-                onChange={update(field.key)}
+                onChange={(v) => updateValue(field.key, v.slice(0, MAX_TEXTAREA_LENGTH))}
                 className="input min-h-16"
                 placeholder={field.placeholder}
-                maxLength={MAX_TEXTAREA_LENGTH}
               />
             ) : field.type === "select" ? (
               <select

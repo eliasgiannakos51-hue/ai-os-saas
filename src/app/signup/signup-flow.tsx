@@ -13,6 +13,8 @@ import { PasswordStrengthChecklist } from "@/components/auth/password-strength-c
 import { GeneratePasswordButton } from "@/components/auth/generate-password-button";
 import { LoginSplash } from "@/components/auth/login-splash";
 import { Logo } from "@/components/logo";
+import { AuthBackground } from "@/components/auth/auth-background";
+import { COUNTRIES } from "@/lib/countries";
 
 const FIELD_CLASS =
   "w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500";
@@ -49,6 +51,7 @@ export function SignupFlow() {
   const [selectedPlan, setSelectedPlan] = useState<PlanSlug>("free");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [country, setCountry] = useState("");
   const [discountCode, setDiscountCode] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -109,7 +112,7 @@ export function SignupFlow() {
       const signupRes = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, termsAccepted }),
+        body: JSON.stringify({ email, password, termsAccepted, country: country || undefined }),
       });
       const signupData = (await readRawResponse(signupRes, "/api/signup")) as {
         ok?: boolean;
@@ -181,11 +184,12 @@ export function SignupFlow() {
   const plan = PLANS.find((p) => p.slug === selectedPlan);
 
   return (
-    <main className="flex min-h-screen items-center justify-center overflow-x-hidden bg-background px-4 py-10">
-      <div className={`w-full ${step === 1 ? "max-w-3xl" : "max-w-md"}`}>
+    <main className="relative flex min-h-screen items-center justify-center overflow-x-hidden bg-background px-4 py-10">
+      <AuthBackground />
+      <div className={`relative z-10 w-full ${step === 1 ? "max-w-3xl" : "max-w-md"}`}>
         <div className="mb-8 text-center">
           <div className="mb-4 flex items-center justify-center">
-            <Logo className="h-14 w-auto" />
+            <Logo className="h-[168px] w-auto max-w-full" />
           </div>
           <h1 className="text-2xl font-bold text-foreground">
             {step === 1 ? t("chooseYourPlan") : t("createYourAccount")}
@@ -353,6 +357,25 @@ export function SignupFlow() {
                 <div className="mt-2">
                   <PasswordStrengthChecklist password={password} />
                 </div>
+              </div>
+
+              <div>
+                <label htmlFor="country" className="mb-1 block text-xs text-muted">
+                  {t("country")}
+                </label>
+                <select
+                  id="country"
+                  value={country}
+                  onChange={(e) => setCountry(e.target.value)}
+                  className={FIELD_CLASS}
+                >
+                  <option value="">{t("countryPlaceholder")}</option>
+                  {COUNTRIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>

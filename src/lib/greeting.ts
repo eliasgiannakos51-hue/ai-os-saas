@@ -1,5 +1,21 @@
-export function timeOfDayGreeting(date: Date = new Date()): { text: string; emoji: string } {
-  const hour = date.getHours();
+// timeZone is an IANA identifier (e.g. "Europe/Athens") — when given, the
+// greeting reflects the hour in THAT zone rather than wherever this code
+// happens to execute. Server-rendered output has no way to know the
+// visitor's zone (Node's own local time isn't it), so callers resolve
+// Intl.DateTimeFormat().resolvedOptions().timeZone client-side and pass it
+// in; omitting it falls back to the executing environment's local time,
+// same behavior as before this existed.
+export function timeOfDayGreeting(
+  date: Date = new Date(),
+  timeZone?: string
+): { text: string; emoji: string } {
+  const hour = timeZone
+    ? Number(
+        new Intl.DateTimeFormat("en-US", { hour: "numeric", hourCycle: "h23", timeZone }).format(
+          date
+        )
+      )
+    : date.getHours();
   if (hour < 12) return { text: "Good morning", emoji: "☀️" };
   if (hour < 18) return { text: "Good afternoon", emoji: "🌤️" };
   return { text: "Good evening", emoji: "🌙" };

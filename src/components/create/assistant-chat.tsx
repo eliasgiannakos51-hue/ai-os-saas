@@ -5,6 +5,8 @@ import Link from "next/link";
 import { ArrowUp, CheckCircle2, AlertCircle, XCircle, Sparkles } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/modules";
 import { useCreateAnything, type CreateResult } from "@/lib/use-create-anything";
+import { useSmartSuggestions } from "@/lib/use-smart-suggestions";
+import { SmartSuggestions } from "@/components/create/smart-suggestions";
 
 type Turn = { id: number; userMessage: string; result: CreateResult };
 
@@ -21,6 +23,15 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const suggestions = useSmartSuggestions(input);
+
+  // Prefixes rather than replaces — the suggestion only ever appears once
+  // there's already text in the box, so overwriting it would destroy what
+  // the user typed.
+  function applySuggestion(phrase: string) {
+    setInput((prev) => (prev.startsWith(phrase) ? prev : phrase + prev));
+    textareaRef.current?.focus();
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -128,6 +139,11 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
               )}
             </button>
           </div>
+          <SmartSuggestions
+            modules={suggestions.modules}
+            visible={suggestions.visible}
+            onPick={applySuggestion}
+          />
         </form>
       </div>
     </div>

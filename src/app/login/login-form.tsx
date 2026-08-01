@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { PasswordInput } from "@/components/ui/password-input";
 import { LoginSplash } from "@/components/auth/login-splash";
+import { AuthBackground } from "@/components/auth/auth-background";
 import { Logo } from "@/components/logo";
 
 export function LoginForm() {
@@ -72,8 +73,9 @@ export function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center overflow-x-hidden bg-background px-4">
-      <div className="w-full max-w-md">
+    <main className="relative flex min-h-screen items-center justify-center overflow-x-hidden bg-background px-4">
+      <AuthBackground />
+      <div className="relative z-10 w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mb-4 flex items-center justify-center">
             <Logo className="h-[168px] w-auto max-w-full" />

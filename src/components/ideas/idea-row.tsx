@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { Idea } from "@/types/ideas";
 import { DeleteButton } from "@/components/delete-button";
 import { AskAiButton } from "@/components/records/ask-ai-button";
+import { TextActionsTextarea } from "@/components/text-actions/text-actions-textarea";
 import { useToast } from "@/components/toast/toast-context";
 import { formatRelativeTime } from "@/lib/format-time";
 
@@ -58,6 +59,10 @@ export function IdeaRow({ idea }: { idea: Idea }) {
   function update(field: keyof FormState) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((f) => ({ ...f, [field]: e.target.value }));
+  }
+
+  function updateValue(field: keyof FormState, value: string) {
+    setForm((f) => ({ ...f, [field]: value }));
   }
 
   function startEditing() {
@@ -143,18 +148,18 @@ export function IdeaRow({ idea }: { idea: Idea }) {
           </Field>
 
           <Field label="Problem" full>
-            <textarea
+            <TextActionsTextarea
               value={form.problem}
-              onChange={update("problem")}
+              onChange={(v) => updateValue("problem", v)}
               className="input min-h-16"
               placeholder="what problem does this solve?"
             />
           </Field>
 
           <Field label="Competitors" full>
-            <textarea
+            <TextActionsTextarea
               value={form.competitors}
-              onChange={update("competitors")}
+              onChange={(v) => updateValue("competitors", v)}
               className="input min-h-16"
               placeholder="known competitors"
             />
@@ -182,9 +187,9 @@ export function IdeaRow({ idea }: { idea: Idea }) {
           </Field>
 
           <Field label="MVP" full>
-            <textarea
+            <TextActionsTextarea
               value={form.mvp}
-              onChange={update("mvp")}
+              onChange={(v) => updateValue("mvp", v)}
               className="input min-h-16"
               placeholder="what does the MVP look like?"
             />

@@ -217,6 +217,16 @@
       "totalEntries": "Entrées totales",
       "mostActiveModule": "Module le plus actif"
     },
+    "theme": {
+      "title": "Thème",
+      "description": "Choisissez une palette de couleurs pour toute l'application — la mise en page et la couleur d'accent restent identiques.",
+      "options": {
+        "dark": "Sombre",
+        "light": "Clair",
+        "midnight": "Midnight",
+        "carbon": "Carbon"
+      }
+    },
     "accessibility": {
       "title": "Accessibilité",
       "fontSize": {
@@ -260,6 +270,12 @@
       "totalEntriesThisWeek": "Total des entrées cette semaine",
       "acrossAllModules": "tous modules confondus",
       "entry": "{count, plural, one {# entrée} other {# entrées}}",
+      "progress": {
+        "title": "Progression",
+        "today": "Aujourd'hui",
+        "thisWeek": "Cette semaine",
+        "thisMonth": "Ce mois-ci"
+      },
       "aiCoach": {
         "title": "AI Coach",
         "noActivity": "Aucune activité cette semaine — enregistrez quelque chose pour commencer.",

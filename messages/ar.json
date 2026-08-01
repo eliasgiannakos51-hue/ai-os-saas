@@ -217,6 +217,16 @@
       "totalEntries": "إجمالي الإدخالات",
       "mostActiveModule": "الوحدة الأكثر نشاطًا"
     },
+    "theme": {
+      "title": "السمة",
+      "description": "اختر لوحة ألوان للتطبيق بالكامل — يبقى التخطيط ولون التمييز كما هما.",
+      "options": {
+        "dark": "داكن",
+        "light": "فاتح",
+        "midnight": "Midnight",
+        "carbon": "Carbon"
+      }
+    },
     "accessibility": {
       "title": "إمكانية الوصول",
       "fontSize": {
@@ -260,6 +270,12 @@
       "totalEntriesThisWeek": "إجمالي الإدخالات هذا الأسبوع",
       "acrossAllModules": "عبر جميع الوحدات",
       "entry": "{count, plural, one {إدخال واحد} other {# إدخال}}",
+      "progress": {
+        "title": "التقدم",
+        "today": "اليوم",
+        "thisWeek": "هذا الأسبوع",
+        "thisMonth": "هذا الشهر"
+      },
       "aiCoach": {
         "title": "مدرّب الذكاء الاصطناعي",
         "noActivity": "لا يوجد نشاط بعد هذا الأسبوع — سجّل شيئًا للبدء.",

@@ -9,9 +9,10 @@ import { StatCard } from "@/components/overview/stat-card";
 import { RecentEntriesCard, type RecentEntry } from "@/components/overview/recent-entries-card";
 import { AiCoachCard } from "@/components/overview/ai-coach-card";
 import { QuickStartButton } from "@/components/overview/quick-start-button";
+import { ProgressCard } from "@/components/overview/progress-card";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
-import { Layers, TrendingUp } from "lucide-react";
+import { Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
 
 export const metadata: Metadata = {
@@ -41,13 +42,19 @@ export default async function OverviewPage() {
     redirect("/login");
   }
 
-  const sevenDaysAgo = new Date(
-    Date.now() - 7 * 24 * 60 * 60 * 1000
-  ).toISOString();
+  const now = Date.now();
+  const oneDayAgoMs = now - 24 * 60 * 60 * 1000;
+  const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
 
   const summaries = await Promise.all(
     CLASSIFIER_MODULES.map(async (module) => {
-      const [recentRowsResult, recentCountResult] = await Promise.all([
+      // A single 30-day created_at list (timestamps only, cheap) covers
+      // "today"/"this month" for the Progress card below by filtering
+      // client-side, instead of firing yet another head-count query per
+      // module — "this week" still reuses recentCountResult exactly as
+      // before (the stat card + AI Coach digest already depend on it).
+      const [recentRowsResult, recentCountResult, last30DaysResult] = await Promise.all([
         supabase
           .from(module.table)
           .select("*", { count: "exact" })
@@ -57,13 +64,19 @@ export default async function OverviewPage() {
           .from(module.table)
           .select("id", { count: "exact", head: true })
           .gte("created_at", sevenDaysAgo),
+        supabase.from(module.table).select("created_at").gte("created_at", thirtyDaysAgo),
       ]);
+
+      const last30DaysTimestamps = (last30DaysResult.data as { created_at: string }[] | null) ?? [];
 
       return {
         module,
         href: moduleHref(module.slug),
         count: recentRowsResult.count ?? 0,
         recentCount: recentCountResult.count ?? 0,
+        todayCount: last30DaysTimestamps.filter((r) => new Date(r.created_at).getTime() >= oneDayAgoMs)
+          .length,
+        monthCount: last30DaysTimestamps.length,
         rows: (recentRowsResult.data as ModuleRecord[] | null) ?? [],
       };
     })
@@ -83,6 +96,8 @@ export default async function OverviewPage() {
     .slice(0, 5);
 
   const totalThisWeek = summaries.reduce((sum, s) => sum + s.recentCount, 0);
+  const totalToday = summaries.reduce((sum, s) => sum + s.todayCount, 0);
+  const totalThisMonth = summaries.reduce((sum, s) => sum + s.monthCount, 0);
   const mostActive = summaries.reduce<(typeof summaries)[number] | null>(
     (max, s) => (s.count > (max?.count ?? -1) ? s : max),
     null
@@ -146,11 +161,13 @@ export default async function OverviewPage() {
             }
           />
 
-          <StatCard
-            icon={TrendingUp}
-            label={t("totalEntriesThisWeek")}
-            value={String(totalThisWeek)}
-            sublabel={t("acrossAllModules")}
+          <ProgressCard
+            title={t("progress.title")}
+            stats={[
+              { label: t("progress.today"), value: totalToday },
+              { label: t("progress.thisWeek"), value: totalThisWeek },
+              { label: t("progress.thisMonth"), value: totalThisMonth },
+            ]}
           />
         </div>
       </div>

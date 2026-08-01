@@ -7,6 +7,7 @@ import { NAV_ITEMS } from "@/lib/modules";
 import { useCreateAnything, type CreateResult } from "@/lib/use-create-anything";
 import { useSmartSuggestions } from "@/lib/use-smart-suggestions";
 import { SmartSuggestions } from "@/components/create/smart-suggestions";
+import { NextStepSuggestion } from "@/components/create/next-step-suggestion";
 
 export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
   const { submit, loading } = useCreateAnything();
@@ -109,6 +110,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
                 >
                   View {result.moduleTitle.toLowerCase()} →
                 </Link>
+                <NextStepSuggestion sourceHref={result.href} />
               </div>
             </div>
           )}

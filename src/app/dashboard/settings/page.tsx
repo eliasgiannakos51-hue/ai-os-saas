@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { PasswordChangeForm } from "@/components/settings/password-change-form";
 import { ChatMemorySettings } from "@/components/settings/chat-memory-settings";
 import { AccessibilitySettings } from "@/components/settings/accessibility-settings";
+import { ThemeSettings } from "@/components/settings/theme-settings";
 import { LoginActivity, type KnownDevice } from "@/components/settings/login-activity";
 import { ExportDataButton } from "@/components/settings/export-data-button";
 import { DangerZone } from "@/components/settings/danger-zone";
@@ -152,6 +153,8 @@ export default async function SettingsPage() {
         <LoginActivity devices={(knownDevices as KnownDevice[] | null) ?? []} />
 
         {hasCustomAiPersona && <AiPersonaSettings initialName={aiPersonaName} />}
+
+        <ThemeSettings />
 
         <AccessibilitySettings />
 

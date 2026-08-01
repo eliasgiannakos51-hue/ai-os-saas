@@ -217,6 +217,16 @@
       "totalEntries": "总记录数",
       "mostActiveModule": "最活跃模块"
     },
+    "theme": {
+      "title": "主题",
+      "description": "为整个应用选择配色方案——布局和强调色保持不变。",
+      "options": {
+        "dark": "深色",
+        "light": "浅色",
+        "midnight": "午夜蓝",
+        "carbon": "石墨灰"
+      }
+    },
     "accessibility": {
       "title": "无障碍功能",
       "fontSize": {
@@ -260,6 +270,12 @@
       "totalEntriesThisWeek": "本周总记录数",
       "acrossAllModules": "涵盖所有模块",
       "entry": "{count} 条记录",
+      "progress": {
+        "title": "进度",
+        "today": "今天",
+        "thisWeek": "本周",
+        "thisMonth": "本月"
+      },
       "aiCoach": {
         "title": "AI 教练",
         "noActivity": "本周还没有活动——记录点什么开始吧。",

@@ -217,6 +217,16 @@
       "totalEntries": "合計エントリー数",
       "mostActiveModule": "最もアクティブなモジュール"
     },
+    "theme": {
+      "title": "テーマ",
+      "description": "アプリ全体の配色を選択できます — レイアウトとアクセントカラーは変わりません。",
+      "options": {
+        "dark": "ダーク",
+        "light": "ライト",
+        "midnight": "ミッドナイト",
+        "carbon": "カーボン"
+      }
+    },
     "accessibility": {
       "title": "アクセシビリティ",
       "fontSize": {
@@ -260,6 +270,12 @@
       "totalEntriesThisWeek": "今週の合計エントリー数",
       "acrossAllModules": "全モジュール合計",
       "entry": "{count} 件のエントリー",
+      "progress": {
+        "title": "進捗",
+        "today": "今日",
+        "thisWeek": "今週",
+        "thisMonth": "今月"
+      },
       "aiCoach": {
         "title": "AI コーチ",
         "noActivity": "今週はまだアクティビティがありません — 何か記録して始めましょう。",

@@ -41,6 +41,33 @@
   color-scheme: light;
 }
 
+/* Premium theme variants (settings/theme-settings.tsx) — same variable
+   set as dark/light above, just a different base palette. The amber
+   accent (orange-500 etc, used directly via Tailwind classes rather than
+   a variable) deliberately isn't part of this system, so it stays
+   identical across every theme for brand consistency. */
+[data-theme="midnight"] {
+  --background: #05070f;
+  --panel: #0d1220;
+  --panel-hover: #131a2c;
+  --border: #1f2740;
+  --foreground: #e6e9f5;
+  --muted: #8188a8;
+  --input-bg: rgba(5, 10, 25, 0.5);
+  color-scheme: dark;
+}
+
+[data-theme="carbon"] {
+  --background: #1a1a1c;
+  --panel: #232326;
+  --panel-hover: #2a2a2e;
+  --border: #38383c;
+  --foreground: #eeeeef;
+  --muted: #9c9ca3;
+  --input-bg: rgba(255, 255, 255, 0.04);
+  color-scheme: dark;
+}
+
 /* Accessibility: font size — set on <html> via data-font-size (see
    accessibility-prefs.ts / accessibility-settings.tsx). Everything in the
    app is sized in rem via Tailwind's default scale, so changing the root
@@ -138,6 +165,27 @@ body {
   select:focus-visible {
     outline: 2px solid rgba(249, 115, 22, 0.55);
     outline-offset: 2px;
+  }
+}
+
+/* Subtle universal press feedback for every enabled button, applied once
+   here rather than repeated as `active:scale-[0.98]` on every individual
+   button className across the app (there are hundreds). Being in `base`
+   means any component that sets its own `transform`/`scale` utility still
+   wins the cascade (utilities layer loads after base), so this is purely
+   a fallback default, not an override. Disabled buttons are excluded —
+   pressing something inert shouldn't visibly react. Reduce-motion already
+   collapses `transition-duration` to ~0 globally (see the
+   html[data-motion="reduce"] rule above), so the scale still applies
+   there, just instantly instead of animated. */
+@layer base {
+  button:not(:disabled) {
+    transition-property: color, background-color, border-color, opacity, transform, box-shadow;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+  button:not(:disabled):active {
+    transform: scale(0.98);
   }
 }
 

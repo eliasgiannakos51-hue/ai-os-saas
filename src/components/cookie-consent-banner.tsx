@@ -68,28 +68,37 @@ export function CookieConsentBanner() {
           </button>
         </div>
 
-        {expanded && (
-          <div className="mt-3 space-y-1.5 border-t border-border pt-3 text-xs text-muted">
-            <p>
-              <span className="font-medium text-foreground">Essential session cookie</span> — set
-              by Supabase Auth when you log in, so the app knows you&apos;re signed in on later
-              requests. Without it, you&apos;d be signed out on every page load. Cleared
-              automatically when it expires or when you sign out.
-            </p>
-            <p>
-              <span className="font-medium text-foreground">Local preferences</span> — theme,
-              language, accessibility settings, and this cookie-consent choice are stored in your
-              browser&apos;s local storage, not sent anywhere.
-            </p>
-            <p>
-              No advertising or third-party tracking cookies are used. See our{" "}
-              <a href="/privacy" className="text-orange-400 underline underline-offset-2">
-                Privacy Policy
-              </a>{" "}
-              for details.
-            </p>
+        {/* grid-template-rows 0fr->1fr, not conditional rendering — same
+            technique sidebar.tsx's group collapse uses, so this expands/
+            collapses smoothly instead of popping in and out instantly. */}
+        <div
+          className={`grid transition-[grid-template-rows] duration-200 ease-in-out ${
+            expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+          }`}
+        >
+          <div className="min-h-0 overflow-hidden">
+            <div className="mt-3 space-y-1.5 border-t border-border pt-3 text-xs text-muted">
+              <p>
+                <span className="font-medium text-foreground">Essential session cookie</span> —
+                set by Supabase Auth when you log in, so the app knows you&apos;re signed in on
+                later requests. Without it, you&apos;d be signed out on every page load. Cleared
+                automatically when it expires or when you sign out.
+              </p>
+              <p>
+                <span className="font-medium text-foreground">Local preferences</span> — theme,
+                language, accessibility settings, and this cookie-consent choice are stored in
+                your browser&apos;s local storage, not sent anywhere.
+              </p>
+              <p>
+                No advertising or third-party tracking cookies are used. See our{" "}
+                <a href="/privacy" className="text-orange-400 underline underline-offset-2">
+                  Privacy Policy
+                </a>{" "}
+                for details.
+              </p>
+            </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

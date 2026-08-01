@@ -217,6 +217,16 @@
       "totalEntries": "Einträge insgesamt",
       "mostActiveModule": "Aktivstes Modul"
     },
+    "theme": {
+      "title": "Design",
+      "description": "Wähle eine Farbpalette für die gesamte App — Layout und Akzentfarbe bleiben gleich.",
+      "options": {
+        "dark": "Dunkel",
+        "light": "Hell",
+        "midnight": "Midnight",
+        "carbon": "Carbon"
+      }
+    },
     "accessibility": {
       "title": "Barrierefreiheit",
       "fontSize": {
@@ -260,6 +270,12 @@
       "totalEntriesThisWeek": "Einträge insgesamt diese Woche",
       "acrossAllModules": "über alle Module hinweg",
       "entry": "{count, plural, one {# Eintrag} other {# Einträge}}",
+      "progress": {
+        "title": "Fortschritt",
+        "today": "Heute",
+        "thisWeek": "Diese Woche",
+        "thisMonth": "Diesen Monat"
+      },
       "aiCoach": {
         "title": "AI Coach",
         "noActivity": "Diese Woche noch keine Aktivität — erfasse etwas, um loszulegen.",

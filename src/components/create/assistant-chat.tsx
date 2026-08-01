@@ -7,6 +7,7 @@ import { NAV_ITEMS } from "@/lib/modules";
 import { useCreateAnything, type CreateResult } from "@/lib/use-create-anything";
 import { useSmartSuggestions } from "@/lib/use-smart-suggestions";
 import { SmartSuggestions } from "@/components/create/smart-suggestions";
+import { NextStepSuggestion } from "@/components/create/next-step-suggestion";
 
 type Turn = { id: number; userMessage: string; result: CreateResult };
 
@@ -165,6 +166,7 @@ function ResultBubble({ result }: { result: CreateResult }) {
         >
           View {result.moduleTitle.toLowerCase()} →
         </Link>
+        <NextStepSuggestion sourceHref={result.href} />
       </div>
     );
   }

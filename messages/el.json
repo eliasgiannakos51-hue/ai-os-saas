@@ -217,6 +217,16 @@
       "totalEntries": "Σύνολο Εγγραφών",
       "mostActiveModule": "Πιο Ενεργό Module"
     },
+    "theme": {
+      "title": "Θέμα",
+      "description": "Επίλεξε χρωματική παλέτα για όλη την εφαρμογή — το layout και το χρώμα accent παραμένουν ίδια.",
+      "options": {
+        "dark": "Σκοτεινό",
+        "light": "Φωτεινό",
+        "midnight": "Midnight",
+        "carbon": "Carbon"
+      }
+    },
     "accessibility": {
       "title": "Προσβασιμότητα",
       "fontSize": {
@@ -260,6 +270,12 @@
       "totalEntriesThisWeek": "Σύνολο Εγγραφών Αυτή την Εβδομάδα",
       "acrossAllModules": "σε όλα τα modules",
       "entry": "{count, plural, one {# εγγραφή} other {# εγγραφές}}",
+      "progress": {
+        "title": "Πρόοδος",
+        "today": "Σήμερα",
+        "thisWeek": "Αυτή την εβδομάδα",
+        "thisMonth": "Αυτόν τον μήνα"
+      },
       "aiCoach": {
         "title": "AI Coach",
         "noActivity": "Καμία δραστηριότητα ακόμα αυτή την εβδομάδα — καταχώρησε κάτι για να ξεκινήσεις.",

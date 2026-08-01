@@ -281,6 +281,15 @@
     "save": "Save",
     "saving": "Saving..."
   },
+  "askAi": {
+    "buttonLabel": "Ask AI",
+    "title": "Ask AI about this {title}",
+    "subtitle": "The AI already knows this entry's data — just ask.",
+    "placeholder": "Ask anything about this entry...",
+    "emptyState": "Ask a question about this entry — no need to explain the context, the AI already has it.",
+    "send": "Send",
+    "close": "Close"
+  },
   "language": {
     "label": "Language"
   }

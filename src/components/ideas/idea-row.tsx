@@ -6,6 +6,7 @@ import { Pencil, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Idea } from "@/types/ideas";
 import { DeleteButton } from "@/components/delete-button";
+import { AskAiButton } from "@/components/records/ask-ai-button";
 import { useToast } from "@/components/toast/toast-context";
 import { formatRelativeTime } from "@/lib/format-time";
 
@@ -277,6 +278,12 @@ export function IdeaRow({ idea }: { idea: Idea }) {
           Logged {formatRelativeTime(idea.created_at)}
         </p>
         <div className="flex items-center gap-1">
+          <AskAiButton
+            moduleSlug="ideas"
+            moduleTitle="Ideas"
+            recordId={idea.id}
+            recordHeadline={idea.name}
+          />
           <button
             type="button"
             onClick={startEditing}

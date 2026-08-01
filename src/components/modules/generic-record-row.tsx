@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { DeleteButton } from "@/components/delete-button";
+import { AskAiButton } from "@/components/records/ask-ai-button";
 import { useToast } from "@/components/toast/toast-context";
 import { formatRelativeTime } from "@/lib/format-time";
 
@@ -222,6 +223,12 @@ export function GenericRecordRow({
           Logged {formatRelativeTime(record.created_at)}
         </p>
         <div className="flex items-center gap-1">
+          <AskAiButton
+            moduleSlug={module.slug}
+            moduleTitle={module.title}
+            recordId={record.id}
+            recordHeadline={headline}
+          />
           <button
             type="button"
             onClick={startEditing}

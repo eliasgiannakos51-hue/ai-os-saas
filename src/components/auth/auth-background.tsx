@@ -14,7 +14,13 @@
 // "connection point" markers at chosen coordinates — not data-driven, no
 // meaning beyond visual texture (per explicit instruction: nothing here
 // should look like it's reporting real activity).
-export function AuthBackground() {
+//
+// `opacity` defaults to the original login/signup/landing intensity —
+// dashboard/overview passes a much lower value (~0.06) so the same globe
+// reads as ambient texture behind real content/data instead of a
+// competing visual, giving the dashboard visual continuity with the auth
+// pages without affecting readability.
+export function AuthBackground({ opacity = 0.28 }: { opacity?: number }) {
   return (
     <div
       aria-hidden="true"
@@ -22,7 +28,8 @@ export function AuthBackground() {
     >
       <svg
         viewBox="0 0 400 400"
-        className="h-[140vmin] w-[140vmin] animate-[spin_180s_linear_infinite] opacity-[0.28]"
+        className="h-[140vmin] w-[140vmin] animate-[spin_180s_linear_infinite]"
+        style={{ opacity }}
         fill="none"
       >
         <defs>

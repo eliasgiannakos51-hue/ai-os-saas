@@ -9,7 +9,7 @@ export function GlowOrb({ className = "" }: { className?: string }) {
       className={`pointer-events-none absolute rounded-full blur-3xl ${className}`}
       style={{
         background:
-          "radial-gradient(circle, rgba(249,115,22,0.35) 0%, rgba(220,38,38,0.12) 45%, transparent 75%)",
+          "radial-gradient(circle, rgba(249,115,22,0.45) 0%, rgba(220,38,38,0.18) 45%, transparent 75%)",
       }}
     />
   );

@@ -1,6 +1,7 @@
 import "server-only";
 import { createResendClient } from "@/lib/resend";
 import { welcomeEmailHtml } from "@/lib/email/templates";
+import { logApiError } from "@/lib/log-error";
 
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
 
@@ -19,9 +20,9 @@ export async function sendWelcomeEmail(email: string): Promise<void> {
     });
 
     if (error) {
-      console.error("sendWelcomeEmail: Resend returned an error", error);
+      logApiError("email:send-welcome", error, { stage: "resend_error" });
     }
   } catch (err) {
-    console.error("sendWelcomeEmail: failed to send", err);
+    logApiError("email:send-welcome", err, { stage: "unhandled" });
   }
 }

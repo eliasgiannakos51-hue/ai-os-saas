@@ -1,6 +1,7 @@
 import "server-only";
 import { createResendClient } from "@/lib/resend";
 import { deleteAccountConfirmationEmailHtml } from "@/lib/email/templates";
+import { logApiError } from "@/lib/log-error";
 
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
 
@@ -18,12 +19,12 @@ export async function sendDeleteAccountConfirmationEmail(
     });
 
     if (error) {
-      console.error("sendDeleteAccountConfirmationEmail: Resend returned an error", error);
+      logApiError("email:send-delete-account-confirmation", error, { stage: "resend_error" });
       return { ok: false };
     }
     return { ok: true };
   } catch (err) {
-    console.error("sendDeleteAccountConfirmationEmail: failed to send", err);
+    logApiError("email:send-delete-account-confirmation", err, { stage: "unhandled" });
     return { ok: false };
   }
 }

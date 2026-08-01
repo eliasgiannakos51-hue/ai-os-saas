@@ -60,7 +60,7 @@ export default async function MemoryPage() {
 
   if (!isAdmin && !planMeetsMinimum(planSlug, "starter")) {
     return (
-      <main className="min-h-full">
+      <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader icon={MEMORY_ICON} title={t("title")} />
           <UpgradeRequired featureName={t("title")} planName={getPlan("starter")?.name ?? "Starter"} />
@@ -93,7 +93,7 @@ export default async function MemoryPage() {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   return (
-    <main className="min-h-full">
+    <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader
           icon={MEMORY_ICON}

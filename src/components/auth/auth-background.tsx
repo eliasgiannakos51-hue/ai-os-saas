@@ -15,12 +15,13 @@
 // meaning beyond visual texture (per explicit instruction: nothing here
 // should look like it's reporting real activity).
 //
-// `opacity` defaults to the original login/signup/landing intensity —
-// dashboard/overview passes a much lower value (~0.06) so the same globe
-// reads as ambient texture behind real content/data instead of a
-// competing visual, giving the dashboard visual continuity with the auth
-// pages without affecting readability.
-export function AuthBackground({ opacity = 0.28 }: { opacity?: number }) {
+// `opacity` defaults to 0.18 — clearly visible (not a faint texture) but
+// still low enough that it never competes with foreground text, and is
+// deliberately the SAME value on every page that renders this (auth pages,
+// landing, pricing, roadmap, every dashboard page via dashboard/layout.tsx)
+// for consistent visual intensity across the whole app rather than the
+// auth pages reading "richer" than everywhere else.
+export function AuthBackground({ opacity = 0.18 }: { opacity?: number }) {
   return (
     <div
       aria-hidden="true"

@@ -1,6 +1,7 @@
 import "server-only";
 import { createResendClient } from "@/lib/resend";
 import { weeklyDigestEmailHtml } from "@/lib/email/templates";
+import { logApiError } from "@/lib/log-error";
 
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
 
@@ -24,9 +25,9 @@ export async function sendWeeklyDigestEmail({
     });
 
     if (error) {
-      console.error("sendWeeklyDigestEmail: Resend returned an error", error);
+      logApiError("email:send-weekly-digest", error, { stage: "resend_error" });
     }
   } catch (err) {
-    console.error("sendWeeklyDigestEmail: failed to send", err);
+    logApiError("email:send-weekly-digest", err, { stage: "unhandled" });
   }
 }

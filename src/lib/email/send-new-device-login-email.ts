@@ -2,6 +2,7 @@ import "server-only";
 import { createResendClient } from "@/lib/resend";
 import { newDeviceLoginEmailHtml } from "@/lib/email/templates";
 import { getSiteUrl } from "@/lib/site-url";
+import { logApiError } from "@/lib/log-error";
 
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
 
@@ -38,9 +39,9 @@ export async function sendNewDeviceLoginEmail(
     });
 
     if (error) {
-      console.error("sendNewDeviceLoginEmail: Resend returned an error", error);
+      logApiError("email:send-new-device-login", error, { stage: "resend_error" });
     }
   } catch (err) {
-    console.error("sendNewDeviceLoginEmail: failed to send", err);
+    logApiError("email:send-new-device-login", err, { stage: "unhandled" });
   }
 }

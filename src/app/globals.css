@@ -202,3 +202,14 @@ input:-webkit-autofill:focus {
   -webkit-box-shadow: 0 0 0px 1000px var(--panel) inset;
   transition: background-color 5000s ease-in-out 0s;
 }
+
+/* Very faint dot-grid texture for module/list pages — purely decorative,
+   fixed 24px spacing so it doesn't shift/moiré with page content, dot
+   opacity low enough (0.05) that it reads as paper texture rather than a
+   visible pattern. Used instead of leaving large empty page regions flat
+   black; never applied where it would sit under body text (list pages
+   only, and cards/panels paint their own opaque background over it). */
+.bg-dot-grid {
+  background-image: radial-gradient(rgba(245, 166, 35, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+}

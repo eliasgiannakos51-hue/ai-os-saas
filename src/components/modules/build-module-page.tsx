@@ -45,7 +45,7 @@ export async function BuildModulePage({
   if (!isAdmin && config.minPlanSlug && !planMeetsMinimum(planSlug, config.minPlanSlug)) {
     const requiredPlan = getPlan(config.minPlanSlug);
     return (
-      <main className="min-h-full">
+      <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
           <PageHeader icon={icon} title={config.title} />
           <UpgradeRequired
@@ -63,7 +63,7 @@ export async function BuildModulePage({
     .order("created_at", { ascending: false });
 
   return (
-    <main className="min-h-full">
+    <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader icon={icon} title={config.title} />
 

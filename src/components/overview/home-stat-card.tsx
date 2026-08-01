@@ -31,7 +31,7 @@ export function HomeStatCard({
   const hasTrend = chartData && chartData.length > 1 && chartData.some((d) => d.count > 0);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-[linear-gradient(160deg,var(--panel)_0%,var(--panel)_65%,rgba(249,115,22,0.035)_100%)] p-4 transition-colors duration-150 hover:border-orange-500/30">
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-[linear-gradient(160deg,var(--panel)_0%,var(--panel)_65%,rgba(249,115,22,0.035)_100%)] p-4 transition-all duration-150 hover:border-orange-500/50 hover:shadow-[0_0_0_1px_rgba(249,115,22,0.15),0_8px_28px_-8px_rgba(249,115,22,0.45)]">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500/10 text-orange-400">

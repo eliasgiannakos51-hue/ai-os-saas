@@ -5,6 +5,7 @@ import { Check, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { PLANS, TEAM_SEAT_PRICE, CURRENCY_SYMBOL, type Plan, type PaidPlanSlug } from "@/lib/billing/plans";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
+import { AuthBackground } from "@/components/auth/auth-background";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -62,8 +63,9 @@ export default async function PricingPage() {
   const t = await getTranslations("pricing");
 
   return (
-    <main className="min-h-screen bg-background px-4 py-16 text-foreground sm:px-6">
-      <div className="mx-auto max-w-6xl">
+    <main className="relative min-h-screen px-4 py-16 text-foreground sm:px-6">
+      <AuthBackground />
+      <div className="relative z-10 mx-auto max-w-6xl">
         <div className="text-center">
           <Link
             href="/"

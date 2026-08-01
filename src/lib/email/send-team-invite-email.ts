@@ -2,6 +2,7 @@ import "server-only";
 import { createResendClient } from "@/lib/resend";
 import { teamInviteEmailHtml } from "@/lib/email/templates";
 import { getSiteUrl } from "@/lib/site-url";
+import { logApiError } from "@/lib/log-error";
 
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
 
@@ -36,9 +37,9 @@ export async function sendTeamInviteEmail({
     });
 
     if (error) {
-      console.error("sendTeamInviteEmail: Resend returned an error", error);
+      logApiError("email:send-team-invite", error, { stage: "resend_error" });
     }
   } catch (err) {
-    console.error("sendTeamInviteEmail: failed to send", err);
+    logApiError("email:send-team-invite", err, { stage: "unhandled" });
   }
 }

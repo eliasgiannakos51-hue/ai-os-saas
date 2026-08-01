@@ -35,7 +35,7 @@ export function LegalLayout({
         <div className="mt-12 border-t border-border pt-6">
           <Link
             href="/"
-            className="text-xs text-orange-500 underline underline-offset-2"
+            className="text-xs tracking-wide text-orange-500 underline underline-offset-2"
           >
             ← back to Ionexa AI
           </Link>

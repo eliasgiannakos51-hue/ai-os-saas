@@ -335,7 +335,7 @@ export function ChatWorkspace({
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-400">
                 <MessageCircle className="h-6 w-6" aria-hidden="true" />
               </span>
-              <h1 className="mt-4 text-xl font-bold text-foreground">Ionexa Chat</h1>
+              <h1 className="mt-4 text-xl font-bold tracking-wide text-foreground">Ionexa Chat</h1>
               <p className="mt-2 text-sm text-muted">
                 Ask anything — general knowledge, brainstorming, writing help,
                 or just a conversation. Not tied to any Ionexa AI module.

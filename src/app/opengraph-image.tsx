@@ -26,6 +26,7 @@ export default function OpengraphImage() {
             marginTop: 16,
             fontSize: 96,
             fontWeight: 700,
+            letterSpacing: 2,
             color: "#e5e5e5",
           }}
         >

@@ -155,7 +155,17 @@ export function Sidebar() {
                       }`}
                       aria-hidden="true"
                     />
-                    <span className="truncate">{translatedLabel(item.label)}</span>
+                    {/* "Ionexa" specifically gets a touch of extra tracking — at
+                        this label's small size, a lone capital "I" can read as
+                        a lowercase "l" ("lonexa"); the app's other standalone
+                        brand-name renderings already lean on wider letter-
+                        spacing for the same reason (see loading-state.tsx,
+                        not-found.tsx). */}
+                    <span
+                      className={`truncate ${item.label === "Ionexa Chat" ? "tracking-wide" : ""}`}
+                    >
+                      {translatedLabel(item.label)}
+                    </span>
                   </Link>
                 );
               })}

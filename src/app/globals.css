@@ -29,6 +29,71 @@
   color-scheme: light;
 }
 
+/* Accessibility: font size — set on <html> via data-font-size (see
+   accessibility-prefs.ts / accessibility-settings.tsx). Everything in the
+   app is sized in rem via Tailwind's default scale, so changing the root
+   font-size scales all text at once, no per-component work needed. Applied
+   through a variable (rather than setting `font-size` directly per
+   selector) since the user-facing spec asked for a CSS root font-size
+   variable specifically, and it keeps every level's value in one place. */
+:root {
+  --app-font-size: 16px;
+}
+html[data-font-size="small"] {
+  --app-font-size: 14px;
+}
+html[data-font-size="medium"] {
+  --app-font-size: 16px;
+}
+html[data-font-size="large"] {
+  --app-font-size: 18px;
+}
+html[data-font-size="xl"] {
+  --app-font-size: 20px;
+}
+html {
+  font-size: var(--app-font-size);
+}
+
+/* Accessibility: high contrast — set on <html> via data-contrast="high".
+   Pushes foreground/background to near-pure black/white and darkens/
+   lightens the "muted" gray (used everywhere for secondary text) so it
+   reads closer to full-strength text instead of a low-contrast hint.
+   Combined with data-theme since both live on <html> at once. */
+html[data-contrast="high"] {
+  --foreground: #ffffff;
+  --muted: #d4d4d4;
+  --border: #4a4a4a;
+  --background: #000000;
+  --panel: #0a0a0a;
+  --panel-hover: #1c1c1c;
+}
+html[data-theme="light"][data-contrast="high"] {
+  --foreground: #000000;
+  --muted: #3f3f46;
+  --border: #a1a1aa;
+  --background: #ffffff;
+  --panel: #ffffff;
+  --panel-hover: #ececee;
+}
+
+/* Accessibility: reduce motion — set on <html> via data-motion="reduce".
+   Collapses every animation/transition to effectively instant rather than
+   removing them outright, so elements still end up in their final state
+   (and anything listening for transitionend/animationend still fires)
+   without the motion itself being visible. Same technique the
+   prefers-reduced-motion media query normally drives, just gated by our
+   own toggle instead so it also works for users who haven't set that at
+   the OS level. */
+html[data-motion="reduce"] *,
+html[data-motion="reduce"] *::before,
+html[data-motion="reduce"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
 * {
   box-sizing: border-box;
 }

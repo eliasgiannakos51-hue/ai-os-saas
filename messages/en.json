@@ -219,6 +219,27 @@
       "noDevices": "No devices recorded yet.",
       "lastSeen": "Last seen {time}"
     },
+    "accessibility": {
+      "title": "Accessibility",
+      "fontSize": {
+        "label": "Font size",
+        "description": "Changes text size across the whole app.",
+        "options": {
+          "small": "Small",
+          "medium": "Medium",
+          "large": "Large",
+          "xl": "Extra Large"
+        }
+      },
+      "highContrast": {
+        "label": "High contrast mode",
+        "description": "Stronger black/white and less muted gray text, for easier reading."
+      },
+      "reduceMotion": {
+        "label": "Reduce motion",
+        "description": "Turns off animations and transitions across the app."
+      }
+    },
     "exportData": {
       "title": "Export Data",
       "description": "Download everything you've logged across all 13 modules as a single JSON file.",

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { PasswordChangeForm } from "@/components/settings/password-change-form";
 import { ChatMemorySettings } from "@/components/settings/chat-memory-settings";
+import { AccessibilitySettings } from "@/components/settings/accessibility-settings";
 import { LoginActivity, type KnownDevice } from "@/components/settings/login-activity";
 import { ExportDataButton } from "@/components/settings/export-data-button";
 import { DangerZone } from "@/components/settings/danger-zone";
@@ -88,6 +89,8 @@ export default async function SettingsPage() {
         </div>
 
         <LoginActivity devices={(knownDevices as KnownDevice[] | null) ?? []} />
+
+        <AccessibilitySettings />
 
         <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
           <h2 className="text-sm font-semibold text-foreground">{t("exportData.title")}</h2>

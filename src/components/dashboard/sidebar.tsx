@@ -183,7 +183,7 @@ export function Sidebar() {
       >
         <div className="relative flex items-center justify-center px-4 py-3">
           <Link href={OVERVIEW_NAV_ITEM.href} onClick={closeOnMobile} className="flex items-center">
-            <Logo className="h-auto w-[200px] max-w-full" />
+            <Logo className="h-auto w-[130px] max-w-full" />
           </Link>
           <button
             type="button"

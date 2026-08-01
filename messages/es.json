@@ -1,0 +1,321 @@
+{
+  "common": {
+    "search": "Buscar cualquier cosa...",
+    "notifications": "Notificaciones",
+    "noNotifications": "No hay notificaciones nuevas.",
+    "newProject": "Nuevo Proyecto",
+    "signOut": "Cerrar sesión",
+    "jumpToPage": "Ir a un módulo o página...",
+    "noMatches": "Sin resultados para '{query}'",
+    "createAnything": "Crear Cualquier Cosa",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "remove": "Quitar",
+    "continue": "Continuar",
+    "backToHome": "← Volver a Ionexa AI",
+    "loading": "Cargando...",
+    "error": "error",
+    "viewPlans": "Ver planes"
+  },
+  "sidebar": {
+    "groups": {
+      "workspace": "Espacio de trabajo",
+      "build": "Construir",
+      "business": "Negocio",
+      "strategy": "Estrategia",
+      "operations": "Operaciones",
+      "marketplace": "Mercado",
+      "settings": "Configuración"
+    },
+    "items": {
+      "home": "Inicio",
+      "chat": "Ionexa Chat",
+      "memory": "Memoria AI",
+      "settings": "Configuración",
+      "team": "Equipo",
+      "agents": "Agentes AI",
+      "websites": "Sitios web",
+      "apps": "Apps",
+      "images": "Imágenes",
+      "videos": "Videos",
+      "coding": "Programación AI",
+      "dataAnalysis": "Análisis de Datos",
+      "documents": "Documentos",
+      "presentations": "Presentaciones",
+      "campaigns": "Campañas",
+      "analytics": "Analítica",
+      "finance": "Finanzas",
+      "content": "Marketing",
+      "sales": "CRM",
+      "products": "Productos",
+      "research": "Conocimiento",
+      "learning": "Aprendizaje",
+      "ideas": "Ideas",
+      "competitors": "Competidores",
+      "decisions": "Decisiones",
+      "feedback": "Comentarios",
+      "trading": "Trading",
+      "automation": "Automatización",
+      "marketplace": "Mercado"
+    }
+  },
+  "landing": {
+    "hero": "La energía detrás de todo lo que creas.",
+    "description": "Crea cualquier cosa con IA. Desde ideas e investigación hasta trading, finanzas, planificación de producto y decisiones de negocio — todo organizado en un espacio de trabajo inteligente.",
+    "logIn": "Iniciar sesión",
+    "signUp": "Regístrate",
+    "footer": {
+      "pricing": "Precios",
+      "roadmap": "Hoja de ruta",
+      "terms": "Términos del servicio",
+      "privacy": "Política de privacidad"
+    }
+  },
+  "pricing": {
+    "title": "Precios",
+    "subtitle": "Empieza gratis. Mejora tu plan cuando necesites más créditos, agentes AI o puestos de equipo.",
+    "perMonth": "/mes",
+    "custom": "Personalizado",
+    "mostPopular": "Más popular",
+    "signUp": "Regístrate",
+    "contactSales": "Contactar ventas",
+    "getPlan": "Obtener {plan}",
+    "teamBannerTitle": "¿Trabajas en equipo?",
+    "teamBannerBody": "Invita a tus compañeros a trabajar directamente dentro de tu espacio de trabajo — cada miembro obtiene acceso completo al nivel de tu plan, no una vista de invitado limitada. En Professional, añade miembros por +{price}/miembro/mes, facturado mensualmente por puesto. Ultimate y Enterprise incluyen puestos de equipo ilimitados sin coste extra, así que todo tu equipo se une gratis. Gestiona las invitaciones y revoca el acceso cuando quieras desde la página de Equipo en Configuración.",
+    "comparePlans": "Comparar planes",
+    "feature": "Función",
+    "backToHome": "← Volver a Ionexa AI",
+    "rows": {
+      "creditsPerMonth": "Créditos / mes",
+      "aiAgents": "Agentes AI",
+      "websiteBuilder": "Creador de sitios web y automatización",
+      "mobileSaasBuilder": "Creador de apps móviles y SaaS",
+      "imageVideo": "Generación de imágenes y video",
+      "aiMemory": "Memoria AI",
+      "teamCollaboration": "Colaboración en equipo",
+      "teamSeatsAddOn": "Puestos de equipo"
+    }
+  },
+  "roadmap": {
+    "title": "Hoja de ruta",
+    "subtitle": "Ionexa AI se está construyendo por fases. Esto es lo que ya está disponible, lo que viene y hacia dónde vamos.",
+    "backToHome": "← Volver a Ionexa AI",
+    "sections": {
+      "available": "Disponible ahora",
+      "soon": "Próximamente",
+      "future": "Visión futura"
+    },
+    "items": {
+      "modules": { "title": "13 módulos de negocio", "description": "Ideas, Competidores, Investigación, Finanzas, Aprendizaje, Trading, Decisiones, Productos, Contenido, Ventas/CRM, Comentarios, Analítica y notas de Automatización." },
+      "createAnything": { "title": "Crear Cualquier Cosa", "description": "Describe cualquier cosa en texto y la IA la clasifica automáticamente en el módulo correcto." },
+      "chat": { "title": "Ionexa Chat", "description": "Un asistente de IA de propósito general para cualquier pregunta — no ligado a un módulo específico." },
+      "export": { "title": "Exportación de datos", "description": "Exportación CSV por módulo, además de una exportación JSON completa de todo lo registrado." },
+      "team": { "title": "Colaboración en equipo", "description": "Invita a compañeros y dales acceso completo al nivel de tu plan." },
+      "agentBuilder": { "title": "Creador de Agentes AI", "description": "Describe un objetivo y obtén un agente autónomo funcional que lo persigue." },
+      "websiteBuilder": { "title": "Creador de sitios web", "description": "Sitios web generados por IA a partir de un solo prompt." },
+      "automationBuilder": { "title": "Creador de automatización real", "description": "Automatización de flujos de trabajo real que se ejecuta — no solo ideas registradas." },
+      "aiMemory": { "title": "Memoria AI", "description": "Contexto y memoria entre proyectos, para que la IA recuerde lo importante." },
+      "mobileApps": { "title": "Apps móviles y de escritorio", "description": "Apps nativas para iOS, Android, macOS y Windows." },
+      "imageGeneration": { "title": "Generación de imágenes con IA", "description": "Genera imágenes directamente dentro de tu espacio de trabajo." },
+      "videoGeneration": { "title": "Generación y edición de video con IA", "description": "Crea y edita video con IA." },
+      "presentations": { "title": "Presentaciones y documentos con IA", "description": "Genera presentaciones y documentos pulidos a partir de tus datos." },
+      "marketingBuilder": { "title": "Creador de campañas de marketing con IA", "description": "Planifica y genera campañas de marketing completas." },
+      "coding": { "title": "Asistente de programación con IA", "description": "Generación de apps completas, no solo fragmentos." },
+      "dataAnalysis": { "title": "Análisis de datos con IA", "description": "Análisis profundo y generación de insights en todos tus datos." },
+      "teamGenerator": { "title": "Generador de equipos AI", "description": "Múltiples agentes coordinados trabajando juntos en un mismo objetivo." },
+      "projectManager": { "title": "Gestor de proyectos AI", "description": "Desglose y seguimiento automático de tareas para cualquier proyecto." },
+      "ceoAdvisor": { "title": "Asesor CEO AI", "description": "Un consultor de planificación de negocio, siempre disponible." },
+      "marketplace": { "title": "Mercado", "description": "Compra y vende agentes, automatizaciones y plantillas." },
+      "router": { "title": "Router Universal de IA", "description": "Selección automática entre varios proveedores de IA para el mejor resultado." },
+      "sync": { "title": "Sincronización multiplataforma", "description": "Una experiencia unificada en web, móvil y escritorio." }
+    }
+  },
+  "auth": {
+    "login": {
+      "welcomeBack": "Bienvenido de nuevo",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "logIn": "Iniciar sesión",
+      "working": "Procesando...",
+      "noAccount": "¿No tienes cuenta?",
+      "signUp": "Regístrate",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "resetSuccess": "Contraseña actualizada — inicia sesión con tu nueva contraseña."
+    },
+    "signup": {
+      "chooseYourPlan": "Elige tu plan",
+      "createYourAccount": "Crea tu cuenta",
+      "step": "Paso {step} de 2",
+      "continue": "Continuar",
+      "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+      "logIn": "Inicia sesión",
+      "change": "cambiar",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "country": "País",
+      "countryPlaceholder": "Selecciona tu país (opcional)",
+      "discountCode": "Código de descuento",
+      "discountCodePlaceholder": "Código de descuento (opcional)",
+      "agreeTerms": "Acepto los",
+      "termsOfService": "Términos del servicio",
+      "and": "y",
+      "privacyPolicy": "Política de privacidad",
+      "working": "Procesando...",
+      "continueToPayment": "Continuar al pago",
+      "createAccount": "Crear cuenta",
+      "mostPopular": "Más popular"
+    },
+    "forgotPassword": {
+      "title": "Restablecer contraseña",
+      "instructions": "Introduce el correo de tu cuenta y te enviaremos un enlace para restablecer tu contraseña.",
+      "email": "Correo electrónico",
+      "sendResetLink": "Enviar enlace",
+      "sending": "Enviando...",
+      "checkInbox": "Si existe una cuenta para <highlight>{emailAddress}</highlight>, un enlace de restablecimiento está en camino. Revisa tu bandeja de entrada.",
+      "backToLogin": "Volver al inicio de sesión",
+      "rememberedIt": "¿La recordaste?",
+      "logIn": "Inicia sesión"
+    },
+    "resetPassword": {
+      "title": "Establecer nueva contraseña",
+      "verifying": "Verificando enlace...",
+      "requestNewLink": "Solicitar un nuevo enlace",
+      "newPassword": "Nueva contraseña",
+      "confirmPassword": "Confirmar contraseña",
+      "saveNewPassword": "Guardar nueva contraseña",
+      "saving": "Guardando..."
+    }
+  },
+  "settings": {
+    "title": "Configuración",
+    "signedInAs": "Sesión iniciada como",
+    "changePassword": {
+      "title": "Cambiar contraseña",
+      "newPassword": "nueva contraseña",
+      "confirmPassword": "confirmar contraseña",
+      "updatePassword": "Actualizar contraseña",
+      "updating": "Actualizando..."
+    },
+    "chatMemory": {
+      "title": "Memoria de chat",
+      "toggleLabel": "Recordar contexto entre conversaciones",
+      "toggleDescription": "Ionexa Chat retiene datos y preferencias duraderas de tus conversaciones y las recuerda en futuras.",
+      "thingsRemembered": "{count, plural, one {# elemento recordado} other {# elementos recordados}}",
+      "clearAll": "Borrar toda la memoria",
+      "clearing": "Borrando..."
+    },
+    "loginActivity": {
+      "title": "Actividad de inicio de sesión",
+      "description": "Dispositivos y navegadores que han iniciado sesión en tu cuenta. Te avisamos por correo cuando aparece uno nuevo.",
+      "noDevices": "Todavía no hay dispositivos registrados.",
+      "lastSeen": "Visto por última vez {time}"
+    },
+    "aiUsage": {
+      "title": "Uso de IA",
+      "creditsUsed": "Créditos usados",
+      "totalEntries": "Entradas totales",
+      "mostActiveModule": "Módulo más activo"
+    },
+    "accessibility": {
+      "title": "Accesibilidad",
+      "fontSize": {
+        "label": "Tamaño de fuente",
+        "description": "Cambia el tamaño del texto en toda la app.",
+        "options": {
+          "small": "Pequeño",
+          "medium": "Mediano",
+          "large": "Grande",
+          "xl": "Extra grande"
+        }
+      },
+      "highContrast": {
+        "label": "Modo de alto contraste",
+        "description": "Blanco/negro más marcado y menos gris apagado, para facilitar la lectura."
+      },
+      "reduceMotion": {
+        "label": "Reducir movimiento",
+        "description": "Desactiva animaciones y transiciones en toda la app."
+      }
+    },
+    "exportData": {
+      "title": "Exportar datos",
+      "description": "Descarga todo lo registrado en los 13 módulos como un único archivo JSON.",
+      "exportAll": "Exportar todos los datos",
+      "exporting": "Exportando..."
+    },
+    "dangerZone": {
+      "title": "Zona de peligro",
+      "description": "Elimina permanentemente tu cuenta y cada registro que hayas guardado en los 13 módulos. Esto no se puede deshacer.",
+      "deleteAccount": "Eliminar cuenta",
+      "typeToConfirm": "escribe <highlight>{email}</highlight> para confirmar",
+      "sendConfirmationEmail": "Enviar correo de confirmación de eliminación",
+      "sending": "Enviando...",
+      "checkEmail": "Revisa tu correo para confirmar la eliminación — enviamos un enlace a <highlight>{email}</highlight>. Caduca en 1 hora; nada se elimina hasta que hagas clic en él."
+    }
+  },
+  "dashboard": {
+    "overview": {
+      "mostActiveModule": "Módulo más activo",
+      "totalEntriesThisWeek": "Entradas totales esta semana",
+      "acrossAllModules": "en todos los módulos",
+      "entry": "{count, plural, one {# entrada} other {# entradas}}",
+      "aiCoach": {
+        "title": "AI Coach",
+        "noActivity": "Sin actividad todavía esta semana — registra algo para empezar.",
+        "entryCount": "{count, plural, one {# entrada nueva en {module}} other {# entradas nuevas en {module}}}",
+        "mostActiveIn": "Más activo en {module}"
+      }
+    },
+    "team": {
+      "title": "Equipo",
+      "description": "En el plan {plan} — los miembros invitados obtienen acceso completo a este nivel, por {price}/mes por puesto.",
+      "inviteTitle": "Invitar a un miembro del equipo",
+      "emailPlaceholder": "compañero@empresa.com",
+      "sendInvite": "Enviar invitación",
+      "sending": "Enviando...",
+      "noMembers": "Todavía no hay miembros en el equipo — invita a alguien arriba.",
+      "inviteSent": "Invitación enviada a {email}.",
+      "inviteFailed": "No se pudo enviar la invitación.",
+      "active": "Activo",
+      "invited": "Invitado",
+      "invitedAt": "Invitado {time}",
+      "joined": "Se unió {time}",
+      "removeConfirm": "¿Quitar a {email} de tu equipo? Perderá el acceso a tu plan de inmediato.",
+      "removeLabel": "Quitar a {email}",
+      "removeTitle": "Quitar miembro"
+    },
+    "memory": {
+      "title": "Memoria AI",
+      "description": "Busca todo lo que has registrado, en todos los módulos — sin necesidad de recordar dónde lo guardaste."
+    },
+    "chat": {
+      "title": "Ionexa Chat"
+    },
+    "create": {
+      "title": "Crear Cualquier Cosa"
+    }
+  },
+  "module": {
+    "searchPlaceholder": "Buscar...",
+    "exportCsv": "Exportar CSV",
+    "noEntries": "Todavía no hay entradas — usa el botón de arriba para registrar la primera.",
+    "noMatches": "Sin resultados para '{query}'",
+    "new": "Nuevo {title}",
+    "selectPlaceholder": "seleccionar...",
+    "save": "Guardar",
+    "saving": "Guardando..."
+  },
+  "askAi": {
+    "buttonLabel": "Preguntar a la IA",
+    "title": "Pregunta a la IA sobre este {title}",
+    "subtitle": "La IA ya conoce los datos de esta entrada — solo pregunta.",
+    "placeholder": "Pregunta cualquier cosa sobre esta entrada...",
+    "emptyState": "Haz una pregunta sobre esta entrada — no hace falta explicar el contexto, la IA ya lo tiene.",
+    "send": "Enviar",
+    "close": "Cerrar"
+  },
+  "language": {
+    "label": "Idioma"
+  }
+}

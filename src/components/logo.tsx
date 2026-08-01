@@ -22,6 +22,20 @@
 // using this component (sidebar, login, signup, forgot/reset-password,
 // delete-account confirm) gets a real ~2-2.7x visible-size jump from this
 // fix alone, with zero className changes anywhere.
+//
+// A second, separate bug from that same crop: the wordmark's <text>
+// elements were left anchored at x="340" (the icon's own center) with
+// the "ai" word tacked on via dx="98" — so the icon (bbox center x=340,
+// measured via getBBox) and the "ionexa ai" wordmark (bbox center
+// x≈367.6, wider because of the "ai" offset) were centered on two
+// different points. Once the viewBox was tightened around their combined
+// bounding box, that ~27.6-unit mismatch became visible as the icon
+// sitting off-center to the left of the wordmark beneath it (reported as
+// the logo "not being straight" on /login, where it renders large enough
+// to notice). Fix: shift both <text> x positions left by that same
+// measured offset (340 → 312.43, dx staying relative at 98) so the
+// wordmark's bbox center lands on 340 too — verified via SVG
+// getBBox() in a headless render, not eyeballed.
 export function Logo({
   className = "h-8 w-auto",
   iconOnly = false,
@@ -55,7 +69,7 @@ export function Logo({
   }
 
   return (
-    <svg viewBox="265 100 205 185" role="img" aria-label="Ionexa AI" className={className}>
+    <svg viewBox="239 102 202 190" role="img" aria-label="Ionexa AI" className={className}>
       <title>Ionexa AI</title>
       <circle cx="340" cy="165" r="42" fill="none" stroke="#f5a623" strokeWidth="3" />
       <circle cx="340" cy="123" r="6" fill="#f5a623" />
@@ -71,7 +85,7 @@ export function Logo({
         transform="rotate(-20 340 165)"
       />
       <text
-        x="340"
+        x="312.43"
         y="270"
         textAnchor="middle"
         fontFamily="Arial, sans-serif"
@@ -83,7 +97,7 @@ export function Logo({
         ionexa
       </text>
       <text
-        x="340"
+        x="312.43"
         y="270"
         dx="98"
         textAnchor="middle"

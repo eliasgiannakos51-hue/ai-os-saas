@@ -1,6 +1,6 @@
 // Purely decorative wireframe-globe backdrop for the login/signup pages —
 // a plain SVG (no 3D library) slowly rotating via a CSS animation, kept
-// monochrome and very low-opacity so it reads as ambient texture, not a
+// monochrome and low-opacity so it reads as ambient texture, not a
 // competing visual element. `animate-[spin_180s_linear_infinite]` reuses
 // Tailwind's built-in `spin` keyframe at a much slower custom duration.
 // Like every other animation in the app, this collapses to static under
@@ -15,7 +15,7 @@ export function AuthBackground() {
     >
       <svg
         viewBox="0 0 400 400"
-        className="h-[140vmin] w-[140vmin] animate-[spin_180s_linear_infinite] text-foreground opacity-[0.05]"
+        className="h-[140vmin] w-[140vmin] animate-[spin_180s_linear_infinite] text-foreground opacity-[0.22]"
         fill="none"
       >
         <circle cx="200" cy="200" r="170" stroke="currentColor" strokeWidth="0.75" />

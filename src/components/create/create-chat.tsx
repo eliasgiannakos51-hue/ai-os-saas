@@ -52,7 +52,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
     <div className="w-full">
       {showHeading && (
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-foreground">AI Assistant</h1>
+          <h1 className="text-2xl font-bold text-foreground">Create Anything</h1>
           <p className="mt-2 text-sm text-muted">
             Describe anything — a product idea, a trade, feedback from a user,
             a metric — and it lands in the right module automatically.

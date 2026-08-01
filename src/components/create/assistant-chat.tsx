@@ -75,7 +75,7 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
             <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-400">
               <Sparkles className="h-6 w-6" aria-hidden="true" />
             </span>
-            <h1 className="mt-4 text-xl font-bold text-foreground">AI Assistant</h1>
+            <h1 className="mt-4 text-xl font-bold text-foreground">Create Anything</h1>
             <p className="mt-2 text-sm text-muted">
               Describe anything — a product idea, a trade, feedback from a
               user, a metric — and it lands in the right module

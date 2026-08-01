@@ -1,0 +1,321 @@
+{
+  "common": {
+    "search": "Alles durchsuchen...",
+    "notifications": "Benachrichtigungen",
+    "noNotifications": "Keine neuen Benachrichtigungen.",
+    "newProject": "Neues Projekt",
+    "signOut": "Abmelden",
+    "jumpToPage": "Zu einem Modul oder einer Seite springen...",
+    "noMatches": "Keine Treffer für '{query}'",
+    "createAnything": "Alles Erstellen",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "saving": "Wird gespeichert...",
+    "remove": "Entfernen",
+    "continue": "Weiter",
+    "backToHome": "← Zurück zu Ionexa AI",
+    "loading": "Wird geladen...",
+    "error": "Fehler",
+    "viewPlans": "Pläne ansehen"
+  },
+  "sidebar": {
+    "groups": {
+      "workspace": "Arbeitsbereich",
+      "build": "Erstellen",
+      "business": "Business",
+      "strategy": "Strategie",
+      "operations": "Betrieb",
+      "marketplace": "Marktplatz",
+      "settings": "Einstellungen"
+    },
+    "items": {
+      "home": "Start",
+      "chat": "Ionexa Chat",
+      "memory": "KI-Gedächtnis",
+      "settings": "Einstellungen",
+      "team": "Team",
+      "agents": "KI-Agenten",
+      "websites": "Websites",
+      "apps": "Apps",
+      "images": "Bilder",
+      "videos": "Videos",
+      "coding": "KI-Coding",
+      "dataAnalysis": "Datenanalyse",
+      "documents": "Dokumente",
+      "presentations": "Präsentationen",
+      "campaigns": "Kampagnen",
+      "analytics": "Analytik",
+      "finance": "Finanzen",
+      "content": "Marketing",
+      "sales": "CRM",
+      "products": "Produkte",
+      "research": "Wissen",
+      "learning": "Lernen",
+      "ideas": "Ideen",
+      "competitors": "Wettbewerber",
+      "decisions": "Entscheidungen",
+      "feedback": "Feedback",
+      "trading": "Trading",
+      "automation": "Automatisierung",
+      "marketplace": "Marktplatz"
+    }
+  },
+  "landing": {
+    "hero": "Die Energie hinter allem, was du baust.",
+    "description": "Erschaffe alles mit KI. Von Ideen und Recherche bis zu Trading, Finanzen, Produktplanung und Geschäftsentscheidungen — organisiert in einem intelligenten Arbeitsbereich.",
+    "logIn": "Anmelden",
+    "signUp": "Registrieren",
+    "footer": {
+      "pricing": "Preise",
+      "roadmap": "Roadmap",
+      "terms": "Nutzungsbedingungen",
+      "privacy": "Datenschutzerklärung"
+    }
+  },
+  "pricing": {
+    "title": "Preise",
+    "subtitle": "Starte kostenlos. Upgrade jederzeit, wenn du mehr Credits, KI-Agenten oder Team-Plätze brauchst.",
+    "perMonth": "/Monat",
+    "custom": "Individuell",
+    "mostPopular": "Am beliebtesten",
+    "signUp": "Registrieren",
+    "contactSales": "Vertrieb kontaktieren",
+    "getPlan": "{plan} wählen",
+    "teamBannerTitle": "Arbeitest du im Team?",
+    "teamBannerBody": "Lade Teammitglieder ein, direkt in deinem Arbeitsbereich mitzuarbeiten — jedes Mitglied erhält vollen Zugriff auf der Stufe deines Plans, keine eingeschränkte Gast-Ansicht. Bei Professional fügst du Mitglieder für +{price}/Mitglied/Monat hinzu, monatlich pro Platz abgerechnet. Ultimate und Enterprise enthalten unbegrenzte Team-Plätze ohne Aufpreis, sodass dein ganzes Team kostenlos beitritt. Verwalte Einladungen und entziehe den Zugriff jederzeit über die Team-Seite in den Einstellungen.",
+    "comparePlans": "Pläne vergleichen",
+    "feature": "Funktion",
+    "backToHome": "← Zurück zu Ionexa AI",
+    "rows": {
+      "creditsPerMonth": "Credits / Monat",
+      "aiAgents": "KI-Agenten",
+      "websiteBuilder": "Website- & Automatisierungs-Builder",
+      "mobileSaasBuilder": "Mobile- & SaaS-Builder",
+      "imageVideo": "Bild- & Videogenerierung",
+      "aiMemory": "KI-Gedächtnis",
+      "teamCollaboration": "Teamzusammenarbeit",
+      "teamSeatsAddOn": "Team-Plätze"
+    }
+  },
+  "roadmap": {
+    "title": "Roadmap",
+    "subtitle": "Ionexa AI wird in Phasen entwickelt. Hier siehst du, was heute schon läuft, was als Nächstes kommt und wohin die Reise geht.",
+    "backToHome": "← Zurück zu Ionexa AI",
+    "sections": {
+      "available": "Jetzt verfügbar",
+      "soon": "Demnächst",
+      "future": "Zukunftsvision"
+    },
+    "items": {
+      "modules": { "title": "13 Business-Module", "description": "Ideen, Wettbewerber, Recherche, Finanzen, Lernen, Trading, Entscheidungen, Produkte, Content, Vertrieb/CRM, Feedback, Analytik und Automatisierungsnotizen." },
+      "createAnything": { "title": "Alles Erstellen", "description": "Beschreibe alles in Klartext und die KI ordnet es automatisch dem richtigen Modul zu." },
+      "chat": { "title": "Ionexa Chat", "description": "Ein universeller KI-Assistent für jede Frage — nicht an ein bestimmtes Modul gebunden." },
+      "export": { "title": "Datenexport", "description": "CSV-Export pro Modul sowie ein vollständiger JSON-Export von allem, was du erfasst hast." },
+      "team": { "title": "Teamzusammenarbeit", "description": "Lade Teammitglieder ein und gib ihnen vollen Zugriff auf der Stufe deines Plans." },
+      "agentBuilder": { "title": "KI-Agenten-Builder", "description": "Beschreibe ein Ziel und erhalte einen funktionierenden autonomen Agenten, der es verfolgt." },
+      "websiteBuilder": { "title": "Website-Builder", "description": "KI-generierte Websites aus einem einzigen Prompt." },
+      "automationBuilder": { "title": "Echter Automatisierungs-Builder", "description": "Echte Workflow-Automatisierung, die tatsächlich läuft — nicht nur notierte Ideen." },
+      "aiMemory": { "title": "KI-Gedächtnis", "description": "Projektübergreifender Kontext und Erinnerung, damit die KI sich das Wichtige merkt." },
+      "mobileApps": { "title": "Mobile- & Desktop-Apps", "description": "Native Apps für iOS, Android, macOS und Windows." },
+      "imageGeneration": { "title": "KI-Bildgenerierung", "description": "Erzeuge Bilder direkt in deinem Arbeitsbereich." },
+      "videoGeneration": { "title": "KI-Videogenerierung & -bearbeitung", "description": "Erstelle und bearbeite Videos mit KI." },
+      "presentations": { "title": "KI-Präsentationen & Dokumente", "description": "Erzeuge ausgefeilte Präsentationen und Dokumente aus deinen Daten." },
+      "marketingBuilder": { "title": "KI-Marketingkampagnen-Builder", "description": "Plane und erzeuge vollständige Marketingkampagnen." },
+      "coding": { "title": "KI-Coding-Assistent", "description": "Vollständige App-Generierung, nicht nur Code-Schnipsel." },
+      "dataAnalysis": { "title": "KI-Datenanalyse", "description": "Tiefgehende Analyse und Insight-Generierung über all deine Daten." },
+      "teamGenerator": { "title": "KI-Team-Generator", "description": "Mehrere koordinierte Agenten, die gemeinsam an einem Ziel arbeiten." },
+      "projectManager": { "title": "KI-Projektmanager", "description": "Automatische Aufgabenaufteilung und -verfolgung für jedes Projekt." },
+      "ceoAdvisor": { "title": "KI-CEO-Berater", "description": "Ein immer verfügbarer Berater für Geschäftsplanung." },
+      "marketplace": { "title": "Marktplatz", "description": "Kaufe und verkaufe Agenten, Automatisierungen und Vorlagen." },
+      "router": { "title": "Universeller KI-Router", "description": "Automatische Auswahl unter mehreren KI-Anbietern für das beste Ergebnis." },
+      "sync": { "title": "Plattformübergreifende Synchronisierung", "description": "Ein einheitliches Erlebnis über Web, Mobile und Desktop." }
+    }
+  },
+  "auth": {
+    "login": {
+      "welcomeBack": "Willkommen zurück",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "logIn": "Anmelden",
+      "working": "Wird bearbeitet...",
+      "noAccount": "Noch kein Konto?",
+      "signUp": "Registrieren",
+      "forgotPassword": "Passwort vergessen?",
+      "resetSuccess": "Passwort aktualisiert — melde dich mit deinem neuen Passwort an."
+    },
+    "signup": {
+      "chooseYourPlan": "Wähle deinen Plan",
+      "createYourAccount": "Erstelle dein Konto",
+      "step": "Schritt {step} von 2",
+      "continue": "Weiter",
+      "alreadyHaveAccount": "Schon ein Konto?",
+      "logIn": "Anmelden",
+      "change": "ändern",
+      "email": "E-Mail",
+      "password": "Passwort",
+      "country": "Land",
+      "countryPlaceholder": "Wähle dein Land (optional)",
+      "discountCode": "Rabattcode",
+      "discountCodePlaceholder": "Rabattcode (optional)",
+      "agreeTerms": "Ich stimme den",
+      "termsOfService": "Nutzungsbedingungen",
+      "and": "und der",
+      "privacyPolicy": "Datenschutzerklärung zu",
+      "working": "Wird bearbeitet...",
+      "continueToPayment": "Weiter zur Zahlung",
+      "createAccount": "Konto erstellen",
+      "mostPopular": "Am beliebtesten"
+    },
+    "forgotPassword": {
+      "title": "Passwort zurücksetzen",
+      "instructions": "Gib die E-Mail-Adresse deines Kontos ein, und wir senden dir einen Link zum Zurücksetzen deines Passworts.",
+      "email": "E-Mail",
+      "sendResetLink": "Link senden",
+      "sending": "Wird gesendet...",
+      "checkInbox": "Falls ein Konto für <highlight>{emailAddress}</highlight> existiert, ist ein Link zum Zurücksetzen unterwegs. Prüfe dein Postfach.",
+      "backToLogin": "Zurück zur Anmeldung",
+      "rememberedIt": "Erinnert?",
+      "logIn": "Anmelden"
+    },
+    "resetPassword": {
+      "title": "Neues Passwort festlegen",
+      "verifying": "Link wird überprüft...",
+      "requestNewLink": "Neuen Link anfordern",
+      "newPassword": "Neues Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "saveNewPassword": "Neues Passwort speichern",
+      "saving": "Wird gespeichert..."
+    }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "signedInAs": "Angemeldet als",
+    "changePassword": {
+      "title": "Passwort ändern",
+      "newPassword": "neues Passwort",
+      "confirmPassword": "Passwort bestätigen",
+      "updatePassword": "Passwort aktualisieren",
+      "updating": "Wird aktualisiert..."
+    },
+    "chatMemory": {
+      "title": "Chat-Gedächtnis",
+      "toggleLabel": "Kontext über Gespräche hinweg merken",
+      "toggleDescription": "Ionexa Chat merkt sich dauerhafte Fakten und Vorlieben aus deinen Gesprächen und ruft sie in künftigen wieder ab.",
+      "thingsRemembered": "{count, plural, one {# gemerkte Sache} other {# gemerkte Sachen}}",
+      "clearAll": "Gesamtes Gedächtnis löschen",
+      "clearing": "Wird gelöscht..."
+    },
+    "loginActivity": {
+      "title": "Anmeldeaktivität",
+      "description": "Geräte und Browser, die sich bei deinem Konto angemeldet haben. Wir informieren dich per E-Mail, sobald ein neues auftaucht.",
+      "noDevices": "Noch keine Geräte erfasst.",
+      "lastSeen": "Zuletzt gesehen {time}"
+    },
+    "aiUsage": {
+      "title": "KI-Nutzung",
+      "creditsUsed": "Verwendete Credits",
+      "totalEntries": "Einträge insgesamt",
+      "mostActiveModule": "Aktivstes Modul"
+    },
+    "accessibility": {
+      "title": "Barrierefreiheit",
+      "fontSize": {
+        "label": "Schriftgröße",
+        "description": "Ändert die Textgröße in der gesamten App.",
+        "options": {
+          "small": "Klein",
+          "medium": "Mittel",
+          "large": "Groß",
+          "xl": "Extra groß"
+        }
+      },
+      "highContrast": {
+        "label": "Hochkontrastmodus",
+        "description": "Kräftigeres Schwarz/Weiß und weniger gedämpftes Grau für leichteres Lesen."
+      },
+      "reduceMotion": {
+        "label": "Bewegung reduzieren",
+        "description": "Schaltet Animationen und Übergänge in der gesamten App aus."
+      }
+    },
+    "exportData": {
+      "title": "Daten exportieren",
+      "description": "Lade alles, was du in allen 13 Modulen erfasst hast, als einzelne JSON-Datei herunter.",
+      "exportAll": "Alle Daten exportieren",
+      "exporting": "Wird exportiert..."
+    },
+    "dangerZone": {
+      "title": "Gefahrenzone",
+      "description": "Löscht dein Konto und jeden Eintrag, den du in allen 13 Modulen erfasst hast, endgültig. Dies kann nicht rückgängig gemacht werden.",
+      "deleteAccount": "Konto löschen",
+      "typeToConfirm": "gib <highlight>{email}</highlight> ein, um zu bestätigen",
+      "sendConfirmationEmail": "Bestätigungs-E-Mail zum Löschen senden",
+      "sending": "Wird gesendet...",
+      "checkEmail": "Prüfe deine E-Mail, um die Löschung zu bestätigen — wir haben einen Link an <highlight>{email}</highlight> gesendet. Er läuft in 1 Stunde ab; nichts wird gelöscht, bis du darauf klickst."
+    }
+  },
+  "dashboard": {
+    "overview": {
+      "mostActiveModule": "Aktivstes Modul",
+      "totalEntriesThisWeek": "Einträge insgesamt diese Woche",
+      "acrossAllModules": "über alle Module hinweg",
+      "entry": "{count, plural, one {# Eintrag} other {# Einträge}}",
+      "aiCoach": {
+        "title": "AI Coach",
+        "noActivity": "Diese Woche noch keine Aktivität — erfasse etwas, um loszulegen.",
+        "entryCount": "{count, plural, one {# neuer Eintrag in {module}} other {# neue Einträge in {module}}}",
+        "mostActiveIn": "Am aktivsten in {module}"
+      }
+    },
+    "team": {
+      "title": "Team",
+      "description": "Im Plan {plan} — eingeladene Mitglieder erhalten vollen Zugriff auf dieser Stufe, für {price}/Monat pro Platz.",
+      "inviteTitle": "Teammitglied einladen",
+      "emailPlaceholder": "kollege@firma.com",
+      "sendInvite": "Einladung senden",
+      "sending": "Wird gesendet...",
+      "noMembers": "Noch keine Teammitglieder — lade oben jemanden ein.",
+      "inviteSent": "Einladung an {email} gesendet.",
+      "inviteFailed": "Einladung konnte nicht gesendet werden.",
+      "active": "Aktiv",
+      "invited": "Eingeladen",
+      "invitedAt": "Eingeladen {time}",
+      "joined": "Beigetreten {time}",
+      "removeConfirm": "{email} aus deinem Team entfernen? Der Zugriff auf deinen Plan geht sofort verloren.",
+      "removeLabel": "{email} entfernen",
+      "removeTitle": "Mitglied entfernen"
+    },
+    "memory": {
+      "title": "KI-Gedächtnis",
+      "description": "Durchsuche alles, was du erfasst hast, über alle Module hinweg — ohne dich erinnern zu müssen, wo du es abgelegt hast."
+    },
+    "chat": {
+      "title": "Ionexa Chat"
+    },
+    "create": {
+      "title": "Alles Erstellen"
+    }
+  },
+  "module": {
+    "searchPlaceholder": "Suchen...",
+    "exportCsv": "CSV exportieren",
+    "noEntries": "Noch keine Einträge — nutze den Button oben, um deinen ersten zu erfassen.",
+    "noMatches": "Keine Treffer für '{query}'",
+    "new": "Neu: {title}",
+    "selectPlaceholder": "auswählen...",
+    "save": "Speichern",
+    "saving": "Wird gespeichert..."
+  },
+  "askAi": {
+    "buttonLabel": "KI fragen",
+    "title": "Frag die KI zu diesem {title}",
+    "subtitle": "Die KI kennt die Daten dieses Eintrags bereits — frag einfach.",
+    "placeholder": "Frag irgendetwas zu diesem Eintrag...",
+    "emptyState": "Stell eine Frage zu diesem Eintrag — du musst den Kontext nicht erklären, die KI hat ihn bereits.",
+    "send": "Senden",
+    "close": "Schließen"
+  },
+  "language": {
+    "label": "Sprache"
+  }
+}

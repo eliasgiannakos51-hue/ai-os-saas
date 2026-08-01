@@ -10,7 +10,7 @@ export type CreateResult =
 
 // Shared submit logic for the "Create Anything" classifier, used by both
 // the lightweight home-page composer (CreateChat) and the full chat-thread
-// AI Assistant page (AssistantChat) — same /api/create contract, two UIs.
+// Create Anything page (AssistantChat) — same /api/create contract, two UIs.
 export function useCreateAnything() {
   const [loading, setLoading] = useState(false);
   const { refresh: refreshCredits } = useCredits();

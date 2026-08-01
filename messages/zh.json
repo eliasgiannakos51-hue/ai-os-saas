@@ -1,0 +1,321 @@
+{
+  "common": {
+    "search": "搜索任何内容...",
+    "notifications": "通知",
+    "noNotifications": "没有新通知。",
+    "newProject": "新建项目",
+    "signOut": "退出登录",
+    "jumpToPage": "跳转到模块或页面...",
+    "noMatches": "没有找到与 '{query}' 匹配的结果",
+    "createAnything": "创建任何内容",
+    "cancel": "取消",
+    "save": "保存",
+    "saving": "保存中...",
+    "remove": "移除",
+    "continue": "继续",
+    "backToHome": "← 返回 Ionexa AI",
+    "loading": "加载中...",
+    "error": "错误",
+    "viewPlans": "查看方案"
+  },
+  "sidebar": {
+    "groups": {
+      "workspace": "工作区",
+      "build": "构建",
+      "business": "业务",
+      "strategy": "策略",
+      "operations": "运营",
+      "marketplace": "市场",
+      "settings": "设置"
+    },
+    "items": {
+      "home": "主页",
+      "chat": "Ionexa 对话",
+      "memory": "AI 记忆",
+      "settings": "设置",
+      "team": "团队",
+      "agents": "AI 智能体",
+      "websites": "网站",
+      "apps": "应用",
+      "images": "图像",
+      "videos": "视频",
+      "coding": "AI 编程",
+      "dataAnalysis": "数据分析",
+      "documents": "文档",
+      "presentations": "演示文稿",
+      "campaigns": "营销活动",
+      "analytics": "数据统计",
+      "finance": "财务",
+      "content": "营销",
+      "sales": "客户管理",
+      "products": "产品",
+      "research": "知识库",
+      "learning": "学习",
+      "ideas": "创意",
+      "competitors": "竞争对手",
+      "decisions": "决策",
+      "feedback": "反馈",
+      "trading": "交易",
+      "automation": "自动化",
+      "marketplace": "市场"
+    }
+  },
+  "landing": {
+    "hero": "驱动你所创造一切的能量。",
+    "description": "用 AI 创造一切。从创意与调研，到交易、财务、产品规划与业务决策——统一组织在一个智能工作区中。",
+    "logIn": "登录",
+    "signUp": "注册",
+    "footer": {
+      "pricing": "定价",
+      "roadmap": "路线图",
+      "terms": "服务条款",
+      "privacy": "隐私政策"
+    }
+  },
+  "pricing": {
+    "title": "定价",
+    "subtitle": "免费开始使用。当你需要更多额度、AI 智能体或团队席位时随时升级。",
+    "perMonth": "/月",
+    "custom": "定制",
+    "mostPopular": "最受欢迎",
+    "signUp": "注册",
+    "contactSales": "联系销售",
+    "getPlan": "选择 {plan}",
+    "teamBannerTitle": "和团队一起使用？",
+    "teamBannerBody": "邀请队友直接在你的工作区中协作——每位成员都能获得你所在方案等级的完整权限，而不是受限的访客视图。在 Professional 方案中，可按 +{price}/成员/月 添加成员，按席位按月计费。Ultimate 和 Enterprise 方案包含无限团队席位，不收取额外费用，因此你的整个团队都能免费加入。你可以随时在「设置」的「团队」页面管理邀请和移除访问权限。",
+    "comparePlans": "对比方案",
+    "feature": "功能",
+    "backToHome": "← 返回 Ionexa AI",
+    "rows": {
+      "creditsPerMonth": "每月额度",
+      "aiAgents": "AI 智能体",
+      "websiteBuilder": "网站与自动化构建器",
+      "mobileSaasBuilder": "移动端与 SaaS 构建器",
+      "imageVideo": "图像与视频生成",
+      "aiMemory": "AI 记忆",
+      "teamCollaboration": "团队协作",
+      "teamSeatsAddOn": "团队席位"
+    }
+  },
+  "roadmap": {
+    "title": "路线图",
+    "subtitle": "Ionexa AI 正在分阶段构建。以下是目前已上线的功能、即将推出的功能，以及我们的未来方向。",
+    "backToHome": "← 返回 Ionexa AI",
+    "sections": {
+      "available": "现已上线",
+      "soon": "即将推出",
+      "future": "未来愿景"
+    },
+    "items": {
+      "modules": { "title": "13 个业务模块", "description": "创意、竞争对手、调研、财务、学习、交易、决策、产品、内容、销售/CRM、反馈、数据统计和自动化笔记。" },
+      "createAnything": { "title": "创建任何内容", "description": "用自然语言描述任何内容，AI 会自动将其归档到正确的模块。" },
+      "chat": { "title": "Ionexa 对话", "description": "适用于任何问题的通用 AI 助手——不绑定特定模块。" },
+      "export": { "title": "数据导出", "description": "支持按模块导出 CSV，也可将所有记录一次性导出为完整的 JSON 文件。" },
+      "team": { "title": "团队协作", "description": "邀请团队成员，并让他们获得你所在方案等级的完整权限。" },
+      "agentBuilder": { "title": "AI 智能体构建器", "description": "描述一个目标，即可获得一个可自主执行该目标的智能体。" },
+      "websiteBuilder": { "title": "网站构建器", "description": "根据单条提示词由 AI 生成网站。" },
+      "automationBuilder": { "title": "真正的自动化构建器", "description": "真实可运行的工作流自动化——而不仅仅是记录下来的想法。" },
+      "aiMemory": { "title": "AI 记忆", "description": "跨项目的上下文与记忆，让 AI 记住重要信息。" },
+      "mobileApps": { "title": "移动端与桌面应用", "description": "适用于 iOS、Android、macOS 和 Windows 的原生应用。" },
+      "imageGeneration": { "title": "AI 图像生成", "description": "直接在你的工作区中生成图像。" },
+      "videoGeneration": { "title": "AI 视频生成与剪辑", "description": "用 AI 创建并剪辑视频。" },
+      "presentations": { "title": "AI 演示文稿与文档", "description": "根据你的数据生成精美的演示文稿和文档。" },
+      "marketingBuilder": { "title": "AI 营销活动构建器", "description": "规划并生成完整的营销活动方案。" },
+      "coding": { "title": "AI 编程助手", "description": "生成完整应用，而不只是代码片段。" },
+      "dataAnalysis": { "title": "AI 数据分析", "description": "对你的数据进行深度分析并生成洞察。" },
+      "teamGenerator": { "title": "AI 团队生成器", "description": "多个协同工作的智能体共同实现同一目标。" },
+      "projectManager": { "title": "AI 项目经理", "description": "为任何项目自动拆分并跟踪任务。" },
+      "ceoAdvisor": { "title": "AI CEO 顾问", "description": "随时待命的业务规划顾问。" },
+      "marketplace": { "title": "市场", "description": "买卖智能体、自动化方案和模板。" },
+      "router": { "title": "通用 AI 路由器", "description": "在多个 AI 提供商之间自动选择以获得最佳结果。" },
+      "sync": { "title": "跨平台同步", "description": "在网页、移动端和桌面端获得统一的使用体验。" }
+    }
+  },
+  "auth": {
+    "login": {
+      "welcomeBack": "欢迎回来",
+      "email": "邮箱",
+      "password": "密码",
+      "logIn": "登录",
+      "working": "处理中...",
+      "noAccount": "还没有账户？",
+      "signUp": "注册",
+      "forgotPassword": "忘记密码？",
+      "resetSuccess": "密码已更新——请使用新密码登录。"
+    },
+    "signup": {
+      "chooseYourPlan": "选择你的方案",
+      "createYourAccount": "创建账户",
+      "step": "第 {step} 步，共 2 步",
+      "continue": "继续",
+      "alreadyHaveAccount": "已有账户？",
+      "logIn": "登录",
+      "change": "更改",
+      "email": "邮箱",
+      "password": "密码",
+      "country": "国家/地区",
+      "countryPlaceholder": "选择你的国家/地区（可选）",
+      "discountCode": "优惠码",
+      "discountCodePlaceholder": "优惠码（可选）",
+      "agreeTerms": "我同意",
+      "termsOfService": "服务条款",
+      "and": "和",
+      "privacyPolicy": "隐私政策",
+      "working": "处理中...",
+      "continueToPayment": "继续支付",
+      "createAccount": "创建账户",
+      "mostPopular": "最受欢迎"
+    },
+    "forgotPassword": {
+      "title": "重置密码",
+      "instructions": "输入你账户的邮箱地址，我们会发送一个重置密码的链接给你。",
+      "email": "邮箱",
+      "sendResetLink": "发送重置链接",
+      "sending": "发送中...",
+      "checkInbox": "如果 <highlight>{emailAddress}</highlight> 存在对应账户，重置链接即将发出。请查看你的收件箱。",
+      "backToLogin": "返回登录",
+      "rememberedIt": "想起密码了？",
+      "logIn": "登录"
+    },
+    "resetPassword": {
+      "title": "设置新密码",
+      "verifying": "正在验证链接...",
+      "requestNewLink": "请求新链接",
+      "newPassword": "新密码",
+      "confirmPassword": "确认密码",
+      "saveNewPassword": "保存新密码",
+      "saving": "保存中..."
+    }
+  },
+  "settings": {
+    "title": "设置",
+    "signedInAs": "当前登录账户",
+    "changePassword": {
+      "title": "修改密码",
+      "newPassword": "新密码",
+      "confirmPassword": "确认密码",
+      "updatePassword": "更新密码",
+      "updating": "更新中..."
+    },
+    "chatMemory": {
+      "title": "对话记忆",
+      "toggleLabel": "在对话之间记住上下文",
+      "toggleDescription": "Ionexa 对话会从你的对话中提取持久的事实与偏好，并在未来的对话中回忆起它们。",
+      "thingsRemembered": "已记住 {count} 项内容",
+      "clearAll": "清除全部记忆",
+      "clearing": "清除中..."
+    },
+    "loginActivity": {
+      "title": "登录活动",
+      "description": "登录过你账户的设备和浏览器。每当出现新设备时，我们都会发邮件通知你。",
+      "noDevices": "目前还没有记录到设备。",
+      "lastSeen": "最后一次活跃于 {time}"
+    },
+    "aiUsage": {
+      "title": "AI 使用情况",
+      "creditsUsed": "已用额度",
+      "totalEntries": "总记录数",
+      "mostActiveModule": "最活跃模块"
+    },
+    "accessibility": {
+      "title": "无障碍功能",
+      "fontSize": {
+        "label": "字体大小",
+        "description": "更改整个应用中的文字大小。",
+        "options": {
+          "small": "小",
+          "medium": "中",
+          "large": "大",
+          "xl": "特大"
+        }
+      },
+      "highContrast": {
+        "label": "高对比度模式",
+        "description": "更强烈的黑白对比、更淡的灰色文字，便于阅读。"
+      },
+      "reduceMotion": {
+        "label": "减少动效",
+        "description": "关闭整个应用中的动画和过渡效果。"
+      }
+    },
+    "exportData": {
+      "title": "导出数据",
+      "description": "将你在全部 13 个模块中记录的所有内容下载为单个 JSON 文件。",
+      "exportAll": "导出全部数据",
+      "exporting": "导出中..."
+    },
+    "dangerZone": {
+      "title": "危险操作区",
+      "description": "永久删除你的账户以及你在全部 13 个模块中记录的每一条数据。此操作无法撤销。",
+      "deleteAccount": "删除账户",
+      "typeToConfirm": "输入 <highlight>{email}</highlight> 以确认",
+      "sendConfirmationEmail": "发送删除确认邮件",
+      "sending": "发送中...",
+      "checkEmail": "请查看你的邮箱以确认删除——我们已向 <highlight>{email}</highlight> 发送了一个链接。该链接将在 1 小时后过期；在你点击之前不会删除任何内容。"
+    }
+  },
+  "dashboard": {
+    "overview": {
+      "mostActiveModule": "最活跃模块",
+      "totalEntriesThisWeek": "本周总记录数",
+      "acrossAllModules": "涵盖所有模块",
+      "entry": "{count} 条记录",
+      "aiCoach": {
+        "title": "AI 教练",
+        "noActivity": "本周还没有活动——记录点什么开始吧。",
+        "entryCount": "{module} 中新增 {count} 条记录",
+        "mostActiveIn": "在 {module} 中最活跃"
+      }
+    },
+    "team": {
+      "title": "团队",
+      "description": "当前方案为 {plan} —— 受邀成员可获得此等级的完整权限，每个席位 {price}/月。",
+      "inviteTitle": "邀请团队成员",
+      "emailPlaceholder": "teammate@company.com",
+      "sendInvite": "发送邀请",
+      "sending": "发送中...",
+      "noMembers": "目前还没有团队成员——在上方邀请一位吧。",
+      "inviteSent": "邀请已发送至 {email}。",
+      "inviteFailed": "邀请发送失败。",
+      "active": "活跃",
+      "invited": "已邀请",
+      "invitedAt": "邀请于 {time}",
+      "joined": "加入于 {time}",
+      "removeConfirm": "确定要将 {email} 从团队中移除吗？对方将立即失去对你方案的访问权限。",
+      "removeLabel": "移除 {email}",
+      "removeTitle": "移除成员"
+    },
+    "memory": {
+      "title": "AI 记忆",
+      "description": "在所有模块中搜索你记录过的一切——无需记得存放在哪里。"
+    },
+    "chat": {
+      "title": "Ionexa 对话"
+    },
+    "create": {
+      "title": "创建任何内容"
+    }
+  },
+  "module": {
+    "searchPlaceholder": "搜索...",
+    "exportCsv": "导出 CSV",
+    "noEntries": "目前还没有记录——使用上方按钮记录第一条。",
+    "noMatches": "没有找到与 '{query}' 匹配的结果",
+    "new": "新建 {title}",
+    "selectPlaceholder": "请选择...",
+    "save": "保存",
+    "saving": "保存中..."
+  },
+  "askAi": {
+    "buttonLabel": "问 AI",
+    "title": "就这条 {title} 询问 AI",
+    "subtitle": "AI 已经了解这条记录的数据——直接提问即可。",
+    "placeholder": "询问关于这条记录的任何问题...",
+    "emptyState": "就这条记录提出一个问题——无需解释背景，AI 已经掌握了。",
+    "send": "发送",
+    "close": "关闭"
+  },
+  "language": {
+    "label": "语言"
+  }
+}

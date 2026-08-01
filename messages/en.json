@@ -82,7 +82,7 @@
     "contactSales": "Contact Sales",
     "getPlan": "Get {plan}",
     "teamBannerTitle": "Building with a team?",
-    "teamBannerBody": "Professional adds members for +{price}/member/month. Ultimate and Enterprise include unlimited team seats at no extra charge — everyone gets full access at your plan's tier.",
+    "teamBannerBody": "Invite teammates to work directly inside your workspace — every member gets full access at your plan's tier, not a limited guest view. On Professional, add members for +{price}/member/month, billed monthly per seat. Ultimate and Enterprise include unlimited team seats at no extra charge, so your whole team joins for free. Manage invites and remove access anytime from the Team page in Settings.",
     "comparePlans": "Compare plans",
     "feature": "Feature",
     "backToHome": "← Back to Ionexa AI",
@@ -293,7 +293,7 @@
       "title": "Ionexa Chat"
     },
     "create": {
-      "title": "AI Assistant"
+      "title": "Create Anything"
     }
   },
   "module": {

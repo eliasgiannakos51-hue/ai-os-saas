@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AssistantChat } from "@/components/create/assistant-chat";
 
 export const metadata: Metadata = {
-  title: "AI Assistant",
+  title: "Create Anything",
 };
 
 export default async function CreatePage() {

@@ -1,0 +1,321 @@
+{
+  "common": {
+    "search": "何でも検索...",
+    "notifications": "通知",
+    "noNotifications": "新しい通知はありません。",
+    "newProject": "新規プロジェクト",
+    "signOut": "サインアウト",
+    "jumpToPage": "モジュールやページに移動...",
+    "noMatches": "'{query}' に一致する結果はありません",
+    "createAnything": "何でも作成",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "saving": "保存中...",
+    "remove": "削除",
+    "continue": "続ける",
+    "backToHome": "← Ionexa AI に戻る",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "viewPlans": "プランを見る"
+  },
+  "sidebar": {
+    "groups": {
+      "workspace": "ワークスペース",
+      "build": "ビルド",
+      "business": "ビジネス",
+      "strategy": "戦略",
+      "operations": "オペレーション",
+      "marketplace": "マーケットプレイス",
+      "settings": "設定"
+    },
+    "items": {
+      "home": "ホーム",
+      "chat": "Ionexa Chat",
+      "memory": "AI メモリー",
+      "settings": "設定",
+      "team": "チーム",
+      "agents": "AI エージェント",
+      "websites": "ウェブサイト",
+      "apps": "アプリ",
+      "images": "画像",
+      "videos": "動画",
+      "coding": "AI コーディング",
+      "dataAnalysis": "データ分析",
+      "documents": "ドキュメント",
+      "presentations": "プレゼンテーション",
+      "campaigns": "キャンペーン",
+      "analytics": "アナリティクス",
+      "finance": "財務",
+      "content": "マーケティング",
+      "sales": "CRM",
+      "products": "プロダクト",
+      "research": "ナレッジ",
+      "learning": "学習",
+      "ideas": "アイデア",
+      "competitors": "競合",
+      "decisions": "意思決定",
+      "feedback": "フィードバック",
+      "trading": "トレーディング",
+      "automation": "自動化",
+      "marketplace": "マーケットプレイス"
+    }
+  },
+  "landing": {
+    "hero": "あなたが創るすべての原動力。",
+    "description": "AI で何でも創ろう。アイデアやリサーチからトレーディング、財務、プロダクト計画、経営判断まで — ひとつのインテリジェントなワークスペースにまとめて管理。",
+    "logIn": "ログイン",
+    "signUp": "新規登録",
+    "footer": {
+      "pricing": "料金",
+      "roadmap": "ロードマップ",
+      "terms": "利用規約",
+      "privacy": "プライバシーポリシー"
+    }
+  },
+  "pricing": {
+    "title": "料金",
+    "subtitle": "無料で始めて、クレジット・AIエージェント・チームシートが必要になったらいつでもアップグレード。",
+    "perMonth": "/月",
+    "custom": "カスタム",
+    "mostPopular": "一番人気",
+    "signUp": "新規登録",
+    "contactSales": "営業に問い合わせる",
+    "getPlan": "{plan} を選択",
+    "teamBannerTitle": "チームで利用しますか？",
+    "teamBannerBody": "チームメンバーを招待して、あなたのワークスペース内で直接一緒に作業できます — 各メンバーは制限されたゲスト表示ではなく、あなたのプランと同じレベルの完全なアクセス権を得られます。Professional プランでは +{price}/メンバー/月 でメンバーを追加でき、シートごとに毎月請求されます。Ultimate と Enterprise プランは追加料金なしで無制限のチームシートが含まれるため、チーム全員が無料で参加できます。招待の管理やアクセスの削除は、設定内のチームページからいつでも行えます。",
+    "comparePlans": "プランを比較",
+    "feature": "機能",
+    "backToHome": "← Ionexa AI に戻る",
+    "rows": {
+      "creditsPerMonth": "クレジット / 月",
+      "aiAgents": "AI エージェント",
+      "websiteBuilder": "ウェブサイト＆自動化ビルダー",
+      "mobileSaasBuilder": "モバイル＆SaaSビルダー",
+      "imageVideo": "画像・動画生成",
+      "aiMemory": "AI メモリー",
+      "teamCollaboration": "チームコラボレーション",
+      "teamSeatsAddOn": "チームシート"
+    }
+  },
+  "roadmap": {
+    "title": "ロードマップ",
+    "subtitle": "Ionexa AI は段階的に構築されています。現在利用可能な機能、今後追加される機能、そして目指す方向性をご紹介します。",
+    "backToHome": "← Ionexa AI に戻る",
+    "sections": {
+      "available": "現在利用可能",
+      "soon": "近日公開",
+      "future": "将来のビジョン"
+    },
+    "items": {
+      "modules": { "title": "13のビジネスモジュール", "description": "アイデア、競合、リサーチ、財務、学習、トレーディング、意思決定、プロダクト、コンテンツ、営業/CRM、フィードバック、アナリティクス、自動化メモ。" },
+      "createAnything": { "title": "何でも作成", "description": "自然な文章で何でも説明するだけで、AI が自動的に適切なモジュールに振り分けます。" },
+      "chat": { "title": "Ionexa Chat", "description": "特定のモジュールに縛られない、あらゆる質問に対応する汎用 AI アシスタント。" },
+      "export": { "title": "データエクスポート", "description": "モジュールごとの CSV エクスポートに加え、記録したすべてのデータを JSON で一括エクスポート。" },
+      "team": { "title": "チームコラボレーション", "description": "チームメンバーを招待し、あなたのプランと同じレベルの完全なアクセス権を付与。" },
+      "agentBuilder": { "title": "AI エージェントビルダー", "description": "目標を説明するだけで、それを遂行する自律型エージェントが完成。" },
+      "websiteBuilder": { "title": "ウェブサイトビルダー", "description": "ひとつのプロンプトから AI がウェブサイトを生成。" },
+      "automationBuilder": { "title": "本格的な自動化ビルダー", "description": "記録されたアイデアだけでなく、実際に動作するワークフロー自動化。" },
+      "aiMemory": { "title": "AI メモリー", "description": "プロジェクトをまたいだコンテキストと記憶で、AI が重要なことを覚えている。" },
+      "mobileApps": { "title": "モバイル＆デスクトップアプリ", "description": "iOS、Android、macOS、Windows 向けのネイティブアプリ。" },
+      "imageGeneration": { "title": "AI 画像生成", "description": "ワークスペース内で直接画像を生成。" },
+      "videoGeneration": { "title": "AI 動画生成・編集", "description": "AI で動画を作成・編集。" },
+      "presentations": { "title": "AI プレゼンテーション＆ドキュメント", "description": "データから洗練されたプレゼンテーションやドキュメントを生成。" },
+      "marketingBuilder": { "title": "AI マーケティングキャンペーンビルダー", "description": "完全なマーケティングキャンペーンを計画・生成。" },
+      "coding": { "title": "AI コーディングアシスタント", "description": "コード断片だけでなく、アプリ全体を生成。" },
+      "dataAnalysis": { "title": "AI データ分析", "description": "データ全体を深く分析しインサイトを生成。" },
+      "teamGenerator": { "title": "AI チームジェネレーター", "description": "複数の連携したエージェントがひとつの目標に向けて協働。" },
+      "projectManager": { "title": "AI プロジェクトマネージャー", "description": "あらゆるプロジェクトのタスクを自動で分解・追跡。" },
+      "ceoAdvisor": { "title": "AI CEO アドバイザー", "description": "常に利用できる経営計画コンサルタント。" },
+      "marketplace": { "title": "マーケットプレイス", "description": "エージェント、自動化、テンプレートを売買。" },
+      "router": { "title": "ユニバーサル AI ルーター", "description": "複数の AI プロバイダーの中から最適な結果を自動で選択。" },
+      "sync": { "title": "クロスプラットフォーム同期", "description": "ウェブ・モバイル・デスクトップで統一された体験。" }
+    }
+  },
+  "auth": {
+    "login": {
+      "welcomeBack": "おかえりなさい",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "logIn": "ログイン",
+      "working": "処理中...",
+      "noAccount": "アカウントをお持ちでないですか？",
+      "signUp": "新規登録",
+      "forgotPassword": "パスワードをお忘れですか？",
+      "resetSuccess": "パスワードを更新しました — 新しいパスワードでログインしてください。"
+    },
+    "signup": {
+      "chooseYourPlan": "プランを選択",
+      "createYourAccount": "アカウントを作成",
+      "step": "ステップ {step}/2",
+      "continue": "続ける",
+      "alreadyHaveAccount": "既にアカウントをお持ちですか？",
+      "logIn": "ログイン",
+      "change": "変更",
+      "email": "メールアドレス",
+      "password": "パスワード",
+      "country": "国",
+      "countryPlaceholder": "国を選択（任意）",
+      "discountCode": "割引コード",
+      "discountCodePlaceholder": "割引コード（任意）",
+      "agreeTerms": "同意します：",
+      "termsOfService": "利用規約",
+      "and": "および",
+      "privacyPolicy": "プライバシーポリシー",
+      "working": "処理中...",
+      "continueToPayment": "支払いに進む",
+      "createAccount": "アカウントを作成",
+      "mostPopular": "一番人気"
+    },
+    "forgotPassword": {
+      "title": "パスワードをリセット",
+      "instructions": "アカウントのメールアドレスを入力すると、パスワードリセット用のリンクをお送りします。",
+      "email": "メールアドレス",
+      "sendResetLink": "リセットリンクを送信",
+      "sending": "送信中...",
+      "checkInbox": "<highlight>{emailAddress}</highlight> のアカウントが存在する場合、リセットリンクを送信しています。受信トレイをご確認ください。",
+      "backToLogin": "ログインに戻る",
+      "rememberedIt": "思い出しましたか？",
+      "logIn": "ログイン"
+    },
+    "resetPassword": {
+      "title": "新しいパスワードを設定",
+      "verifying": "リンクを確認中...",
+      "requestNewLink": "新しいリンクをリクエスト",
+      "newPassword": "新しいパスワード",
+      "confirmPassword": "パスワードの確認",
+      "saveNewPassword": "新しいパスワードを保存",
+      "saving": "保存中..."
+    }
+  },
+  "settings": {
+    "title": "設定",
+    "signedInAs": "ログイン中のアカウント",
+    "changePassword": {
+      "title": "パスワードを変更",
+      "newPassword": "新しいパスワード",
+      "confirmPassword": "パスワードの確認",
+      "updatePassword": "パスワードを更新",
+      "updating": "更新中..."
+    },
+    "chatMemory": {
+      "title": "チャットメモリー",
+      "toggleLabel": "会話間でコンテキストを記憶する",
+      "toggleDescription": "Ionexa Chat はあなたの会話から永続的な事実や好みを取り込み、今後の会話で思い出します。",
+      "thingsRemembered": "{count} 件記憶されています",
+      "clearAll": "すべての記憶を消去",
+      "clearing": "消去中..."
+    },
+    "loginActivity": {
+      "title": "ログインアクティビティ",
+      "description": "あなたのアカウントにログインしたデバイスとブラウザです。新しいものが表示されるたびにメールでお知らせします。",
+      "noDevices": "まだ記録されたデバイスはありません。",
+      "lastSeen": "最終アクセス {time}"
+    },
+    "aiUsage": {
+      "title": "AI 利用状況",
+      "creditsUsed": "使用クレジット",
+      "totalEntries": "合計エントリー数",
+      "mostActiveModule": "最もアクティブなモジュール"
+    },
+    "accessibility": {
+      "title": "アクセシビリティ",
+      "fontSize": {
+        "label": "文字サイズ",
+        "description": "アプリ全体のテキストサイズを変更します。",
+        "options": {
+          "small": "小",
+          "medium": "中",
+          "large": "大",
+          "xl": "特大"
+        }
+      },
+      "highContrast": {
+        "label": "ハイコントラストモード",
+        "description": "白黒のコントラストを強め、灰色を抑えて読みやすくします。"
+      },
+      "reduceMotion": {
+        "label": "モーションを減らす",
+        "description": "アプリ全体のアニメーションとトランジションをオフにします。"
+      }
+    },
+    "exportData": {
+      "title": "データをエクスポート",
+      "description": "13 のモジュールすべてで記録した内容を、単一の JSON ファイルとしてダウンロードします。",
+      "exportAll": "すべてのデータをエクスポート",
+      "exporting": "エクスポート中..."
+    },
+    "dangerZone": {
+      "title": "危険な操作",
+      "description": "アカウントと、13 のモジュールすべてに記録したすべてのデータを完全に削除します。この操作は取り消せません。",
+      "deleteAccount": "アカウントを削除",
+      "typeToConfirm": "確認のため <highlight>{email}</highlight> と入力してください",
+      "sendConfirmationEmail": "削除確認メールを送信",
+      "sending": "送信中...",
+      "checkEmail": "削除を確認するにはメールをご確認ください — <highlight>{email}</highlight> にリンクを送信しました。1時間で期限切れになります。クリックするまで何も削除されません。"
+    }
+  },
+  "dashboard": {
+    "overview": {
+      "mostActiveModule": "最もアクティブなモジュール",
+      "totalEntriesThisWeek": "今週の合計エントリー数",
+      "acrossAllModules": "全モジュール合計",
+      "entry": "{count} 件のエントリー",
+      "aiCoach": {
+        "title": "AI コーチ",
+        "noActivity": "今週はまだアクティビティがありません — 何か記録して始めましょう。",
+        "entryCount": "{module} に {count} 件の新しいエントリー",
+        "mostActiveIn": "{module} で最もアクティブ"
+      }
+    },
+    "team": {
+      "title": "チーム",
+      "description": "{plan} プランを利用中 — 招待されたメンバーはこのレベルの完全なアクセス権を、1シートあたり {price}/月 で取得できます。",
+      "inviteTitle": "チームメンバーを招待",
+      "emailPlaceholder": "teammate@company.com",
+      "sendInvite": "招待を送信",
+      "sending": "送信中...",
+      "noMembers": "まだチームメンバーがいません — 上のボタンから招待しましょう。",
+      "inviteSent": "{email} に招待を送信しました。",
+      "inviteFailed": "招待を送信できませんでした。",
+      "active": "アクティブ",
+      "invited": "招待済み",
+      "invitedAt": "{time} に招待",
+      "joined": "{time} に参加",
+      "removeConfirm": "{email} をチームから削除しますか？ 直ちにあなたのプランへのアクセス権を失います。",
+      "removeLabel": "{email} を削除",
+      "removeTitle": "メンバーを削除"
+    },
+    "memory": {
+      "title": "AI メモリー",
+      "description": "どこに記録したか覚えていなくても、全モジュールを横断して記録したすべてを検索できます。"
+    },
+    "chat": {
+      "title": "Ionexa Chat"
+    },
+    "create": {
+      "title": "何でも作成"
+    }
+  },
+  "module": {
+    "searchPlaceholder": "検索...",
+    "exportCsv": "CSV をエクスポート",
+    "noEntries": "まだエントリーがありません — 上のボタンから最初のエントリーを記録しましょう。",
+    "noMatches": "'{query}' に一致する結果はありません",
+    "new": "新規 {title}",
+    "selectPlaceholder": "選択してください...",
+    "save": "保存",
+    "saving": "保存中..."
+  },
+  "askAi": {
+    "buttonLabel": "AI に質問",
+    "title": "この{title}について AI に質問",
+    "subtitle": "AI はこのエントリーのデータを既に把握しています — そのまま質問してください。",
+    "placeholder": "このエントリーについて何でも質問してください...",
+    "emptyState": "このエントリーについて質問してください — 背景を説明する必要はありません。AI は既に把握しています。",
+    "send": "送信",
+    "close": "閉じる"
+  },
+  "language": {
+    "label": "言語"
+  }
+}

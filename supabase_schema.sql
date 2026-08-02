@@ -911,8 +911,10 @@ create trigger set_updated_at before update on public.ai_missions
 -- Distinct from the existing "Websites" Build module (ai_websites table,
 -- see the Build modules section above), which is a plain idea/status
 -- tracker that never calls AI. Same owner-only RLS pattern as every table
--- above; append/delete-only (a regenerated site is a new row, never an
--- edit), so there's no update policy.
+-- above. html_content is a denormalized "current version" pointer, kept in
+-- sync on every edit (api/websites/edit/route.ts) so existing preview/
+-- download code needs no changes; the update policy below is what makes
+-- that possible — full version history lives in website_versions.
 -- ============================================================================
 
 drop table if exists public.user_websites cascade;
@@ -938,9 +940,48 @@ drop policy if exists "insert_own_user_websites" on public.user_websites;
 create policy "insert_own_user_websites" on public.user_websites
   for insert with check (auth.uid() = user_id);
 
+drop policy if exists "update_own_user_websites" on public.user_websites;
+create policy "update_own_user_websites" on public.user_websites
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
 drop policy if exists "delete_own_user_websites" on public.user_websites;
 create policy "delete_own_user_websites" on public.user_websites
   for delete using (auth.uid() = user_id);
+
+-- ============================================================================
+-- Website Builder version history — website_versions
+-- Every generate (version 1) and every AI edit (version 2, 3, ...) appends
+-- a row here, so a user can see what changed over time. user_id is
+-- denormalized (not derived via a join on user_websites) to stay
+-- consistent with every other table's simple auth.uid() = user_id RLS
+-- policy in this schema. Append-only — no update/delete policy, since a
+-- version is a permanent historical record once written.
+-- ============================================================================
+
+drop table if exists public.website_versions cascade;
+
+create table public.website_versions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  website_id uuid not null references public.user_websites(id) on delete cascade,
+  version_number int not null,
+  html_content text not null,
+  change_description text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists website_versions_website_id_version_idx
+  on public.website_versions (website_id, version_number desc);
+
+alter table public.website_versions enable row level security;
+
+drop policy if exists "select_own_website_versions" on public.website_versions;
+create policy "select_own_website_versions" on public.website_versions
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_website_versions" on public.website_versions;
+create policy "insert_own_website_versions" on public.website_versions
+  for insert with check (auth.uid() = user_id);
 
 -- ============================================================================
 -- Energy check-ins — "AI Life Context" (see src/lib/user-context.ts) needs

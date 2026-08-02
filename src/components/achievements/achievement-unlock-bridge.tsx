@@ -3,7 +3,23 @@
 import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useToast } from "@/components/toast/toast-context";
-import { achievementDisplayForKey } from "@/lib/achievement-metadata";
+import { achievementDisplayForKey, type AchievementDisplay } from "@/lib/achievement-metadata";
+
+// Shared with AchievementsSection below — every achievement kind resolves
+// to a translation key under the "achievements" namespace, keyed by kind.
+const ACHIEVEMENT_TITLE_KEYS: Record<AchievementDisplay["kind"], string> = {
+  firstEntry: "firstEntry.title",
+  firstMission: "firstMission.title",
+  streak: "streak.title",
+  firstWebsite: "firstWebsite.title",
+  firstWebsiteEdit: "firstWebsiteEdit.title",
+  firstEntityLink: "firstEntityLink.title",
+  tenEntityLinks: "tenEntityLinks.title",
+  firstEnergyCheckin: "firstEnergyCheckin.title",
+  firstReflection: "firstReflection.title",
+  thirtyDayStreak: "thirtyDayStreak.title",
+  fiftyEntries: "fiftyEntries.title",
+};
 
 // Server → client bridge: dashboard/layout.tsx runs
 // checkAndUnlockAchievements (lib/achievements.ts) on every navigation and
@@ -30,9 +46,7 @@ export function AchievementUnlockBridge({ unlockedKeys }: { unlockedKeys: string
       const title =
         display.kind === "firstEntry"
           ? t("firstEntry.title", { module: display.moduleTitle })
-          : display.kind === "firstMission"
-            ? t("firstMission.title")
-            : t("streak.title");
+          : t(ACHIEVEMENT_TITLE_KEYS[display.kind]);
       addToast(`🏆 ${t("unlockedToast", { achievement: title })}`);
     }
   }, [unlockedKeys, t, addToast]);

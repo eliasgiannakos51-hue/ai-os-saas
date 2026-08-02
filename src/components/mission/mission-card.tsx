@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, Circle, ClipboardCheck, Clock, Loader2, Sparkles } from "lucide-react";
+import { CheckCircle2, Circle, ClipboardCheck, Clock, Loader2, RotateCw, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -38,6 +38,12 @@ const AGENT_ROLE_LABEL_KEYS: Record<AgentRole, string> = {
   research: "agentRole.research",
 };
 
+// Mission Control retry cap — a step that fails this many times shows a
+// permanent failure message instead of a retry button. attempts is
+// persisted on the step itself (types/mission.ts) so the cap survives
+// page reloads.
+const MAX_ATTEMPTS = 3;
+
 // Builder step (per-step "Create with AI") and Reviewer step both live
 // here. Builder calls the EXISTING /api/create (Create Anything) with the
 // step's own text — its classifier decides the module, this component
@@ -64,10 +70,37 @@ export function MissionCard({ mission }: { mission: Mission }) {
 
   const allCompleted = steps.length > 0 && steps.every((s) => s.status === "completed");
 
+  // Mission Control retry: persists the step's incremented attempt count
+  // on failure (previously failures were purely ephemeral, never written
+  // back) so the 3-attempt cap survives a page reload.
+  async function persistStepFailure(index: number) {
+    const nextSteps = steps.map((s, i) =>
+      i === index ? { ...s, attempts: (s.attempts ?? 0) + 1 } : s
+    );
+    const { error: updateError } = await supabase
+      .from("ai_missions")
+      .update({ plan_steps: { ...mission.plan_steps, steps: nextSteps } })
+      .eq("id", mission.id);
+    if (!updateError) {
+      router.refresh();
+    }
+  }
+
   async function buildStep(index: number) {
     const step = steps[index];
     if (!step || step.status === "completed" || buildingIndex !== null) return;
-    const agentRole = stepAgentRoles[index] ?? "general";
+    if ((step.attempts ?? 0) >= MAX_ATTEMPTS) return;
+    const agentRole = stepAgentRoles[index] ?? step.agentRole ?? "general";
+
+    // "AI Company" real collaboration — every earlier completed step's
+    // output (see types/mission.ts) is handed to this step as context, so
+    // e.g. a Finance Agent step can see numbers a prior Marketing Agent
+    // step actually produced instead of re-deriving them.
+    const priorContext = steps
+      .slice(0, index)
+      .filter((s) => s.status === "completed" && s.output)
+      .map((s) => `- ${s.text} → ${s.output}`)
+      .join("\n");
 
     setBuildingIndex(index);
     setError(null);
@@ -75,16 +108,22 @@ export function MissionCard({ mission }: { mission: Mission }) {
       const res = await fetch("/api/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: step.text, agentRole }),
+        body: JSON.stringify({
+          message: step.text,
+          agentRole,
+          ...(priorContext ? { context: priorContext } : {}),
+        }),
       });
       const data = await res.json();
       void refreshCredits();
 
       if (!res.ok || !data.ok) {
+        await persistStepFailure(index);
         setError(getErrorMessage(data?.error, "Could not create this entry."));
         return;
       }
       if (!data.matched) {
+        await persistStepFailure(index);
         setError(data.message ?? "Couldn't route this step to a module — try rephrasing it.");
         return;
       }
@@ -98,6 +137,7 @@ export function MissionCard({ mission }: { mission: Mission }) {
               moduleTitle: data.moduleTitle,
               href: data.href,
               agentRole,
+              output: typeof data.outputSummary === "string" ? data.outputSummary : undefined,
             }
           : s
       );
@@ -117,6 +157,7 @@ export function MissionCard({ mission }: { mission: Mission }) {
 
       router.refresh();
     } catch {
+      await persistStepFailure(index);
       setError("Network error — please try again.");
     } finally {
       setBuildingIndex(null);
@@ -209,40 +250,57 @@ export function MissionCard({ mission }: { mission: Mission }) {
                     {t("builtByAgent", { agent: t(AGENT_ROLE_LABEL_KEYS[step.agentRole]) })}
                   </p>
                 )}
+                {step.status === "completed" && step.output && (
+                  <p className="mt-1 line-clamp-2 text-[11px] text-muted/80">{step.output}</p>
+                )}
               </div>
               {step.status !== "completed" && (
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
-                  <select
-                    value={stepAgentRoles[index] ?? "general"}
-                    onChange={(e) =>
-                      setStepAgentRoles((prev) => ({
-                        ...prev,
-                        [index]: e.target.value as AgentRole,
-                      }))
-                    }
-                    disabled={buildingIndex !== null}
-                    aria-label={t("agentRoleLabel")}
-                    className="rounded-lg border border-border bg-input px-2 py-1 text-[11px] text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {AGENT_ROLES.map((role) => (
-                      <option key={role} value={role}>
-                        {t(AGENT_ROLE_LABEL_KEYS[role])}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => buildStep(index)}
-                    disabled={buildingIndex !== null}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {buildingIndex === index ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-                    ) : (
-                      <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                    )}
-                    {buildingIndex === index ? t("creating") : t("createWithAi")}
-                  </button>
+                  {(step.attempts ?? 0) >= MAX_ATTEMPTS ? (
+                    <p className="max-w-[160px] text-right text-[11px] text-red-400">
+                      {t("stepFailedMax", { max: MAX_ATTEMPTS })}
+                    </p>
+                  ) : (
+                    <>
+                      <select
+                        value={stepAgentRoles[index] ?? step.agentRole ?? "general"}
+                        onChange={(e) =>
+                          setStepAgentRoles((prev) => ({
+                            ...prev,
+                            [index]: e.target.value as AgentRole,
+                          }))
+                        }
+                        disabled={buildingIndex !== null}
+                        aria-label={t("agentRoleLabel")}
+                        className="rounded-lg border border-border bg-input px-2 py-1 text-[11px] text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {AGENT_ROLES.map((role) => (
+                          <option key={role} value={role}>
+                            {t(AGENT_ROLE_LABEL_KEYS[role])}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => buildStep(index)}
+                        disabled={buildingIndex !== null}
+                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {buildingIndex === index ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                        ) : (step.attempts ?? 0) > 0 ? (
+                          <RotateCw className="h-3.5 w-3.5" aria-hidden="true" />
+                        ) : (
+                          <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                        )}
+                        {buildingIndex === index
+                          ? t("creating")
+                          : (step.attempts ?? 0) > 0
+                            ? t("retry", { attempts: step.attempts ?? 0, max: MAX_ATTEMPTS })
+                            : t("createWithAi")}
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </li>

@@ -95,6 +95,29 @@ function coerceFieldValue(field: FieldConfig, raw: unknown): string | number | n
   return String(raw);
 }
 
+// "AI Company" real collaboration — a short, plain-text summary of what a
+// mission step actually created, stored on the step (see
+// types/mission.ts's MissionStep.output) and fed back as context to every
+// later step in the same mission. Deliberately a fresh helper rather than
+// reusing entity-link-suggestions.ts's private textFor() — that one is
+// tied to Smart Search and shouldn't be touched for this.
+function buildOutputSummary(
+  moduleConfig: { title: string; fields: FieldConfig[] },
+  record: Record<string, unknown>,
+  aiMessage: string
+): string {
+  const fieldSummary = moduleConfig.fields
+    .map((f) => {
+      const value = record[f.key];
+      if (value === null || value === undefined || value === "") return null;
+      return `${f.label}: ${value}`;
+    })
+    .filter((s): s is string => s !== null)
+    .join(", ");
+
+  return `Created a ${moduleConfig.title} entry — ${fieldSummary || "(no details)"}. ${aiMessage}`;
+}
+
 export async function POST(request: Request) {
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -107,10 +130,12 @@ export async function POST(request: Request) {
 
     let message: string;
     let agentRole: AgentRole;
+    let priorStepsContext: string;
     try {
       const body = await request.json();
       message = typeof body?.message === "string" ? body.message.trim() : "";
       agentRole = isAgentRole(body?.agentRole) ? body.agentRole : "general";
+      priorStepsContext = typeof body?.context === "string" ? body.context.trim() : "";
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -195,10 +220,15 @@ export async function POST(request: Request) {
 
     let toolInput: RouteEntryInput;
     try {
+      const missionContextAddition = priorStepsContext
+        ? `\n\nContext from earlier steps already completed in this same AI Company mission (use any relevant numbers/facts from these, don't re-derive them):\n${priorStepsContext}`
+        : "";
+
       const response = await anthropic.messages.create({
         model: MODEL,
         max_tokens: 1024,
-        system: buildSystemPrompt() + agentRoleSystemPromptAddition(agentRole) + userContext,
+        system:
+          buildSystemPrompt() + agentRoleSystemPromptAddition(agentRole) + userContext + missionContextAddition,
         messages: [{ role: "user", content: message }],
         tools: [ROUTE_ENTRY_TOOL],
         tool_choice: { type: "tool", name: "route_entry" },
@@ -255,9 +285,11 @@ export async function POST(request: Request) {
       });
     }
 
-    const { error: insertError } = await supabase
+    const { data: insertedRecord, error: insertError } = await supabase
       .from(moduleConfig.table)
-      .insert(payload);
+      .insert(payload)
+      .select()
+      .single();
 
     if (insertError) {
       return NextResponse.json(
@@ -273,6 +305,7 @@ export async function POST(request: Request) {
       moduleTitle: moduleConfig.title,
       href: moduleHref(moduleConfig.slug),
       message: toolInput.message,
+      outputSummary: buildOutputSummary(moduleConfig, insertedRecord as Record<string, unknown>, toolInput.message),
     });
   } catch (err) {
     logApiError("/api/create", err);

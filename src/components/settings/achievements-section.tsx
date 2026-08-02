@@ -2,9 +2,25 @@
 
 import { Award, Lock } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { allAchievementDisplays } from "@/lib/achievement-metadata";
+import { allAchievementDisplays, type AchievementDisplay } from "@/lib/achievement-metadata";
 
 export type UnlockedAchievementInfo = { achievementKey: string; unlockedAt: string };
+
+// Every achievement kind resolves to a "{kind}.title" / "{kind}.description"
+// pair under the "achievements" namespace — firstEntry is the one
+// exception, since it also needs the module name interpolated.
+const ACHIEVEMENT_KIND_KEYS: Record<Exclude<AchievementDisplay["kind"], "firstEntry">, string> = {
+  firstMission: "firstMission",
+  streak: "streak",
+  firstWebsite: "firstWebsite",
+  firstWebsiteEdit: "firstWebsiteEdit",
+  firstEntityLink: "firstEntityLink",
+  tenEntityLinks: "tenEntityLinks",
+  firstEnergyCheckin: "firstEnergyCheckin",
+  firstReflection: "firstReflection",
+  thirtyDayStreak: "thirtyDayStreak",
+  fiftyEntries: "fiftyEntries",
+};
 
 // Gamification badge board — lists every achievement (see
 // lib/achievement-metadata.ts), locked or not. Data comes from
@@ -33,15 +49,11 @@ export function AchievementsSection({ unlocked }: { unlocked: UnlockedAchievemen
           const title =
             display.kind === "firstEntry"
               ? t("firstEntry.title", { module: display.moduleTitle })
-              : display.kind === "firstMission"
-                ? t("firstMission.title")
-                : t("streak.title");
+              : t(`${ACHIEVEMENT_KIND_KEYS[display.kind]}.title`);
           const description =
             display.kind === "firstEntry"
               ? t("firstEntry.description", { module: display.moduleTitle })
-              : display.kind === "firstMission"
-                ? t("firstMission.description")
-                : t("streak.description");
+              : t(`${ACHIEVEMENT_KIND_KEYS[display.kind]}.description`);
 
           return (
             <li

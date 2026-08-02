@@ -399,7 +399,9 @@
         "finance": "Finanz-Agent",
         "research": "Recherche-Agent"
       },
-      "builtByAgent": "Erstellt von {agent}"
+      "builtByAgent": "Erstellt von {agent}",
+      "retry": "Wiederholen ({attempts}/{max})",
+      "stepFailedMax": "{max}x fehlgeschlagen — wird nicht automatisch wiederholt. Formuliere den Schritt um oder erstelle ihn manuell."
     },
     "reflection": {
       "title": "Wöchentliche Reflexion",
@@ -418,7 +420,11 @@
         "title": "Muster-Insight",
         "noTrades": "Erfasse einen Trade, um hier Muster zu sehen.",
         "notEnoughData": "Noch nicht genug Trade-Historie, um ein Muster zu erkennen — erfasse noch ein paar Trades.",
-        "pattern": "Von deinen letzten {analyzedCount} Trades waren {lossesAfterLoss} von {pairsAfterLoss} Trades nach einem Verlust ebenfalls Verluste ({ratePercent}%)."
+        "pattern": "Von deinen letzten {analyzedCount} Trades waren {lossesAfterLoss} von {pairsAfterLoss} Trades nach einem Verlust ebenfalls Verluste ({ratePercent}%).",
+        "hourOfDay": "Trades gegen {hour}:00 Uhr haben deine höchste Trefferquote ({ratePercent}%), bei {sampleSize} Trades in dieser Stunde.",
+        "byDayOfWeek": "{day} ist dein bester Handelstag — {ratePercent}% Trefferquote bei {sampleSize} Trades.",
+        "bySymbol": "{symbol} ist dein bestperformendes Symbol — {ratePercent}% Trefferquote bei {sampleSize} Trades.",
+        "dayName": "{day, select, 0 {Sonntag} 1 {Montag} 2 {Dienstag} 3 {Mittwoch} 4 {Donnerstag} 5 {Freitag} 6 {Samstag} other {day}}"
       },
       "mentorButton": "Trading Mentor",
       "mentorButtonDescription": "Öffne Ionexa Chat im Mentor-Modus mit deinen letzten 20 Trades bereits als Kontext geladen.",
@@ -454,7 +460,19 @@
       "downloadButton": "HTML Herunterladen",
       "deleteButton": "Löschen",
       "deleted": "Website gelöscht",
-      "emptyState": "Noch keine Websites — beschreibe oben eine, um deine erste zu generieren."
+      "emptyState": "Noch keine Websites — beschreibe oben eine, um deine erste zu generieren.",
+      "editLabel": "Änderung anfordern",
+      "editPlaceholder": "z. B. Mach den Hero-Bereich größer oder ändere die Farben zu Blau.",
+      "editButton": "Änderungen anwenden",
+      "editApplying": "Wird angewendet...",
+      "editApplied": "Änderung angewendet",
+      "historyButton": "Verlauf",
+      "historyLoading": "Versionen werden geladen...",
+      "historyEmpty": "Noch kein Versionsverlauf.",
+      "versionLabel": "v{number}",
+      "versionOriginal": "Ursprüngliche Erstellung",
+      "viewingOldVersion": "Ansicht v{number} (schreibgeschützt).",
+      "backToLatest": "Zurück zur neuesten Version"
     },
     "marketplace": {
       "title": "Marketplace",
@@ -515,6 +533,38 @@
     "streak": {
       "title": "Beständigkeits-Champion",
       "description": "Erfasse 7 Tage in Folge Aktivität."
+    },
+    "firstWebsite": {
+      "title": "Website-Baumeister",
+      "description": "Erstelle deine erste Website mit dem Website-Builder."
+    },
+    "firstWebsiteEdit": {
+      "title": "Feinschliff",
+      "description": "Wende deine erste KI-Änderung auf eine generierte Website an."
+    },
+    "firstEntityLink": {
+      "title": "Verbinder",
+      "description": "Verknüpfe zwei Einträge im Knowledge Graph."
+    },
+    "tenEntityLinks": {
+      "title": "Netzwerk-Baumeister",
+      "description": "Verknüpfe 10 Einträge über verschiedene Module hinweg."
+    },
+    "firstEnergyCheckin": {
+      "title": "Check-In",
+      "description": "Erfasse deinen ersten Energie-Check-in."
+    },
+    "firstReflection": {
+      "title": "Reflektiert",
+      "description": "Erstelle deine erste Wochenreflexion."
+    },
+    "thirtyDayStreak": {
+      "title": "Unaufhaltsam",
+      "description": "Erfasse 30 Tage in Folge Aktivität."
+    },
+    "fiftyEntries": {
+      "title": "Power-User",
+      "description": "Erfasse 50 Einträge über alle Module hinweg."
     }
   }
 }

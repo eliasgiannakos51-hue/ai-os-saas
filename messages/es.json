@@ -399,7 +399,9 @@
         "finance": "Agente de Finanzas",
         "research": "Agente de Investigación"
       },
-      "builtByAgent": "Creado por {agent}"
+      "builtByAgent": "Creado por {agent}",
+      "retry": "Reintentar ({attempts}/{max})",
+      "stepFailedMax": "Falló {max} veces — no se reintentará automáticamente. Intenta reformular el paso o crearlo manualmente."
     },
     "reflection": {
       "title": "Reflexión Semanal",
@@ -418,7 +420,11 @@
         "title": "Insight de Patrón",
         "noTrades": "Registra una operación para empezar a ver patrones aquí.",
         "notEnoughData": "Aún no hay suficiente historial de operaciones para detectar un patrón — registra algunas operaciones más.",
-        "pattern": "De tus últimas {analyzedCount} operaciones, {lossesAfterLoss} de {pairsAfterLoss} operaciones tras una pérdida también fueron pérdidas ({ratePercent}%)."
+        "pattern": "De tus últimas {analyzedCount} operaciones, {lossesAfterLoss} de {pairsAfterLoss} operaciones tras una pérdida también fueron pérdidas ({ratePercent}%).",
+        "hourOfDay": "Las operaciones alrededor de las {hour}:00 tienen tu mayor tasa de acierto ({ratePercent}%), sobre {sampleSize} operaciones en esa hora.",
+        "byDayOfWeek": "{day} es tu mejor día de trading — {ratePercent}% de acierto sobre {sampleSize} operaciones.",
+        "bySymbol": "{symbol} es tu símbolo con mejor rendimiento — {ratePercent}% de acierto sobre {sampleSize} operaciones.",
+        "dayName": "{day, select, 0 {domingo} 1 {lunes} 2 {martes} 3 {miércoles} 4 {jueves} 5 {viernes} 6 {sábado} other {day}}"
       },
       "mentorButton": "Trading Mentor",
       "mentorButtonDescription": "Abre Ionexa Chat en Modo Mentor con tus últimas 20 operaciones ya cargadas como contexto.",
@@ -454,7 +460,19 @@
       "downloadButton": "Descargar HTML",
       "deleteButton": "Eliminar",
       "deleted": "Sitio eliminado",
-      "emptyState": "Aún no hay sitios — describe uno arriba para generar el primero."
+      "emptyState": "Aún no hay sitios — describe uno arriba para generar el primero.",
+      "editLabel": "Solicitar un cambio",
+      "editPlaceholder": "ej. Haz la sección hero más grande, o cambia los colores a azul.",
+      "editButton": "Aplicar cambios",
+      "editApplying": "Aplicando...",
+      "editApplied": "Cambio aplicado",
+      "historyButton": "Historial",
+      "historyLoading": "Cargando versiones...",
+      "historyEmpty": "Aún no hay historial de versiones.",
+      "versionLabel": "v{number}",
+      "versionOriginal": "Generación original",
+      "viewingOldVersion": "Viendo v{number} (solo lectura).",
+      "backToLatest": "Volver a la última versión"
     },
     "marketplace": {
       "title": "Marketplace",
@@ -515,6 +533,38 @@
     "streak": {
       "title": "Campeón de la Consistencia",
       "description": "Registra actividad 7 días seguidos."
+    },
+    "firstWebsite": {
+      "title": "Constructor de Sitios",
+      "description": "Genera tu primer sitio con Website Builder."
+    },
+    "firstWebsiteEdit": {
+      "title": "Ajustador Fino",
+      "description": "Aplica tu primera edición con IA a un sitio generado."
+    },
+    "firstEntityLink": {
+      "title": "Conector",
+      "description": "Enlaza dos registros en el Knowledge Graph."
+    },
+    "tenEntityLinks": {
+      "title": "Constructor de Red",
+      "description": "Enlaza 10 registros entre distintos módulos."
+    },
+    "firstEnergyCheckin": {
+      "title": "Check-In",
+      "description": "Registra tu primer check-in de energía."
+    },
+    "firstReflection": {
+      "title": "Reflexivo",
+      "description": "Genera tu primera Reflexión Semanal."
+    },
+    "thirtyDayStreak": {
+      "title": "Imparable",
+      "description": "Registra actividad 30 días seguidos."
+    },
+    "fiftyEntries": {
+      "title": "Usuario Avanzado",
+      "description": "Registra 50 entradas en todos los módulos."
     }
   }
 }

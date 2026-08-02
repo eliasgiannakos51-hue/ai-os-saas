@@ -106,6 +106,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: insertError.message }, { status: 500 });
     }
 
+    // Version history — this generation is always version 1 for a brand
+    // new website. Best-effort: the website itself is already saved above,
+    // so a failure here shouldn't fail the whole request.
+    const { error: versionError } = await supabase.from("website_versions").insert({
+      user_id: user.id,
+      website_id: record.id,
+      version_number: 1,
+      html_content: htmlContent,
+    });
+    if (versionError) {
+      logApiError("/api/websites/generate", versionError, { stage: "insert_version" });
+    }
+
     return NextResponse.json({ ok: true, generated: true, record });
   } catch (err) {
     logApiError("/api/websites/generate", err);

@@ -399,7 +399,9 @@
         "finance": "Finance Agent",
         "research": "Research Agent"
       },
-      "builtByAgent": "Built by {agent}"
+      "builtByAgent": "Built by {agent}",
+      "retry": "Retry ({attempts}/{max})",
+      "stepFailedMax": "Failed {max}x — won't retry automatically. Try rephrasing the step or building it manually."
     },
     "reflection": {
       "title": "Weekly Reflection",
@@ -418,7 +420,11 @@
         "title": "Pattern Insight",
         "noTrades": "Log a trade to start seeing patterns here.",
         "notEnoughData": "Not enough trade history yet to detect a pattern — log a few more trades.",
-        "pattern": "Of your last {analyzedCount} trades, {lossesAfterLoss} of {pairsAfterLoss} trades following a loss were also losses ({ratePercent}%)."
+        "pattern": "Of your last {analyzedCount} trades, {lossesAfterLoss} of {pairsAfterLoss} trades following a loss were also losses ({ratePercent}%).",
+        "hourOfDay": "Trades placed around {hour}:00 have your highest win rate ({ratePercent}%), over {sampleSize} trades in that hour.",
+        "byDayOfWeek": "{day} is your best trading day — {ratePercent}% win rate over {sampleSize} trades.",
+        "bySymbol": "{symbol} is your best-performing symbol — {ratePercent}% win rate over {sampleSize} trades.",
+        "dayName": "{day, select, 0 {Sunday} 1 {Monday} 2 {Tuesday} 3 {Wednesday} 4 {Thursday} 5 {Friday} 6 {Saturday} other {day}}"
       },
       "mentorButton": "Trading Mentor",
       "mentorButtonDescription": "Open Ionexa Chat in Mentor Mode with your last 20 trades already loaded as context.",
@@ -454,7 +460,19 @@
       "downloadButton": "Download HTML",
       "deleteButton": "Delete",
       "deleted": "Website deleted",
-      "emptyState": "No websites yet — describe one above to generate your first."
+      "emptyState": "No websites yet — describe one above to generate your first.",
+      "editLabel": "Request a change",
+      "editPlaceholder": "e.g. Make the hero section bigger, or change the colors to blue.",
+      "editButton": "Apply changes",
+      "editApplying": "Applying...",
+      "editApplied": "Change applied",
+      "historyButton": "History",
+      "historyLoading": "Loading versions...",
+      "historyEmpty": "No version history yet.",
+      "versionLabel": "v{number}",
+      "versionOriginal": "Original generation",
+      "viewingOldVersion": "Viewing v{number} (read-only).",
+      "backToLatest": "Back to latest"
     },
     "marketplace": {
       "title": "Marketplace",
@@ -515,6 +533,38 @@
     "streak": {
       "title": "Consistency Champion",
       "description": "Log activity 7 days in a row."
+    },
+    "firstWebsite": {
+      "title": "Site Builder",
+      "description": "Generate your first website with Website Builder."
+    },
+    "firstWebsiteEdit": {
+      "title": "Fine Tuner",
+      "description": "Apply your first AI edit to a generated website."
+    },
+    "firstEntityLink": {
+      "title": "Connector",
+      "description": "Link two records together in the Knowledge Graph."
+    },
+    "tenEntityLinks": {
+      "title": "Network Builder",
+      "description": "Link 10 records together across modules."
+    },
+    "firstEnergyCheckin": {
+      "title": "Check-In",
+      "description": "Log your first energy check-in."
+    },
+    "firstReflection": {
+      "title": "Reflective",
+      "description": "Generate your first Weekly Reflection."
+    },
+    "thirtyDayStreak": {
+      "title": "Unstoppable",
+      "description": "Log activity 30 days in a row."
+    },
+    "fiftyEntries": {
+      "title": "Power User",
+      "description": "Log 50 entries across every module."
     }
   }
 }

@@ -399,7 +399,9 @@
         "finance": "ファイナンスエージェント",
         "research": "リサーチエージェント"
       },
-      "builtByAgent": "{agent}が作成"
+      "builtByAgent": "{agent}が作成",
+      "retry": "再試行 ({attempts}/{max})",
+      "stepFailedMax": "{max}回失敗しました — 自動的には再試行されません。ステップの言い方を変えるか、手動で作成してください。"
     },
     "reflection": {
       "title": "週次振り返り",
@@ -418,7 +420,11 @@
         "title": "パターンインサイト",
         "noTrades": "トレードを記録すると、ここにパターンが表示され始めます。",
         "notEnoughData": "パターンを検出するにはまだ十分なトレード履歴がありません — もう少しトレードを記録してください。",
-        "pattern": "直近の{analyzedCount}件のトレードのうち、損失の後に続いた{pairsAfterLoss}件中{lossesAfterLoss}件も損失でした({ratePercent}%)。"
+        "pattern": "直近の{analyzedCount}件のトレードのうち、損失の後に続いた{pairsAfterLoss}件中{lossesAfterLoss}件も損失でした({ratePercent}%)。",
+        "hourOfDay": "{hour}:00頃のトレードが最も高い勝率です（{ratePercent}%）、その時間帯の{sampleSize}件のトレードのうち。",
+        "byDayOfWeek": "{day}はあなたの最も成績の良い曜日です — {sampleSize}件のトレードのうち勝率{ratePercent}%。",
+        "bySymbol": "{symbol}はあなたの最も成績の良い銘柄です — {sampleSize}件のトレードのうち勝率{ratePercent}%。",
+        "dayName": "{day, select, 0 {日曜日} 1 {月曜日} 2 {火曜日} 3 {水曜日} 4 {木曜日} 5 {金曜日} 6 {土曜日} other {day}}"
       },
       "mentorButton": "トレーディングメンター",
       "mentorButtonDescription": "直近20件のトレードをコンテキストとして読み込んだ状態で、Ionexa Chatをメンターモードで開きます。",
@@ -454,7 +460,19 @@
       "downloadButton": "HTMLをダウンロード",
       "deleteButton": "削除",
       "deleted": "ウェブサイトを削除しました",
-      "emptyState": "まだウェブサイトがありません — 上で説明して最初のサイトを生成しましょう。"
+      "emptyState": "まだウェブサイトがありません — 上で説明して最初のサイトを生成しましょう。",
+      "editLabel": "変更をリクエスト",
+      "editPlaceholder": "例：ヒーローセクションを大きくして、または色を青に変更して。",
+      "editButton": "変更を適用",
+      "editApplying": "適用中...",
+      "editApplied": "変更が適用されました",
+      "historyButton": "履歴",
+      "historyLoading": "バージョンを読み込み中...",
+      "historyEmpty": "まだバージョン履歴がありません。",
+      "versionLabel": "v{number}",
+      "versionOriginal": "初回生成",
+      "viewingOldVersion": "v{number} を表示中（読み取り専用）。",
+      "backToLatest": "最新版に戻る"
     },
     "marketplace": {
       "title": "マーケットプレイス",
@@ -515,6 +533,38 @@
     "streak": {
       "title": "継続チャンピオン",
       "description": "7日連続で活動を記録しましょう。"
+    },
+    "firstWebsite": {
+      "title": "サイトビルダー",
+      "description": "ウェブサイトビルダーで初めてのサイトを生成しよう。"
+    },
+    "firstWebsiteEdit": {
+      "title": "微調整師",
+      "description": "生成したウェブサイトに初めてAI編集を適用しよう。"
+    },
+    "firstEntityLink": {
+      "title": "コネクター",
+      "description": "ナレッジグラフで2つのレコードをリンクしよう。"
+    },
+    "tenEntityLinks": {
+      "title": "ネットワークビルダー",
+      "description": "モジュール間で10件のレコードをリンクしよう。"
+    },
+    "firstEnergyCheckin": {
+      "title": "チェックイン",
+      "description": "初めてのエネルギーチェックインを記録しよう。"
+    },
+    "firstReflection": {
+      "title": "内省的",
+      "description": "初めての週次振り返りを生成しよう。"
+    },
+    "thirtyDayStreak": {
+      "title": "止まらない",
+      "description": "30日連続で活動を記録しよう。"
+    },
+    "fiftyEntries": {
+      "title": "パワーユーザー",
+      "description": "全モジュールで合計50件のエントリーを記録しよう。"
     }
   }
 }

@@ -399,7 +399,9 @@
         "finance": "财务代理",
         "research": "研究代理"
       },
-      "builtByAgent": "由{agent}创建"
+      "builtByAgent": "由{agent}创建",
+      "retry": "重试 ({attempts}/{max})",
+      "stepFailedMax": "已失败 {max} 次——不会自动重试。请尝试重新表述该步骤或手动创建。"
     },
     "reflection": {
       "title": "每周回顾",
@@ -418,7 +420,11 @@
         "title": "模式洞察",
         "noTrades": "记录一笔交易即可在此查看模式。",
         "notEnoughData": "交易历史还不够,无法检测出模式 — 请再记录几笔交易。",
-        "pattern": "在你最近的{analyzedCount}笔交易中,亏损之后的{pairsAfterLoss}笔交易里有{lossesAfterLoss}笔也是亏损({ratePercent}%)。"
+        "pattern": "在你最近的{analyzedCount}笔交易中,亏损之后的{pairsAfterLoss}笔交易里有{lossesAfterLoss}笔也是亏损({ratePercent}%)。",
+        "hourOfDay": "在{hour}:00左右下的交易胜率最高（{ratePercent}%），该时段共有{sampleSize}笔交易。",
+        "byDayOfWeek": "{day}是你交易表现最好的一天——{sampleSize}笔交易中胜率为{ratePercent}%。",
+        "bySymbol": "{symbol}是你表现最好的品种——{sampleSize}笔交易中胜率为{ratePercent}%。",
+        "dayName": "{day, select, 0 {周日} 1 {周一} 2 {周二} 3 {周三} 4 {周四} 5 {周五} 6 {周六} other {day}}"
       },
       "mentorButton": "交易导师",
       "mentorButtonDescription": "以导师模式打开 Ionexa Chat,并已加载你最近20笔交易作为上下文。",
@@ -454,7 +460,19 @@
       "downloadButton": "下载 HTML",
       "deleteButton": "删除",
       "deleted": "网站已删除",
-      "emptyState": "还没有网站 — 在上方描述一个来生成你的第一个网站。"
+      "emptyState": "还没有网站 — 在上方描述一个来生成你的第一个网站。",
+      "editLabel": "请求修改",
+      "editPlaceholder": "例如：把主视觉区域放大，或把颜色改成蓝色。",
+      "editButton": "应用更改",
+      "editApplying": "应用中...",
+      "editApplied": "更改已应用",
+      "historyButton": "历史记录",
+      "historyLoading": "正在加载版本...",
+      "historyEmpty": "暂无版本历史。",
+      "versionLabel": "v{number}",
+      "versionOriginal": "初始生成",
+      "viewingOldVersion": "正在查看 v{number}（只读）。",
+      "backToLatest": "返回最新版本"
     },
     "marketplace": {
       "title": "市场",
@@ -515,6 +533,38 @@
     "streak": {
       "title": "坚持冠军",
       "description": "连续7天记录活动。"
+    },
+    "firstWebsite": {
+      "title": "网站建造者",
+      "description": "使用网站生成器生成你的第一个网站。"
+    },
+    "firstWebsiteEdit": {
+      "title": "精细调整者",
+      "description": "对已生成的网站应用第一次 AI 修改。"
+    },
+    "firstEntityLink": {
+      "title": "连接者",
+      "description": "在知识图谱中链接两条记录。"
+    },
+    "tenEntityLinks": {
+      "title": "网络构建者",
+      "description": "跨模块链接10条记录。"
+    },
+    "firstEnergyCheckin": {
+      "title": "签到",
+      "description": "记录你的第一次能量签到。"
+    },
+    "firstReflection": {
+      "title": "反思者",
+      "description": "生成你的第一份每周反思。"
+    },
+    "thirtyDayStreak": {
+      "title": "势不可挡",
+      "description": "连续30天记录活动。"
+    },
+    "fiftyEntries": {
+      "title": "高级用户",
+      "description": "在所有模块中记录50条条目。"
     }
   }
 }

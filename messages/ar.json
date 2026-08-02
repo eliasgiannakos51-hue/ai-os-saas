@@ -399,7 +399,9 @@
         "finance": "وكيل المالية",
         "research": "وكيل البحث"
       },
-      "builtByAgent": "تم الإنشاء بواسطة {agent}"
+      "builtByAgent": "تم الإنشاء بواسطة {agent}",
+      "retry": "إعادة المحاولة ({attempts}/{max})",
+      "stepFailedMax": "فشلت {max} مرات — لن تتم إعادة المحاولة تلقائيًا. حاول إعادة صياغة الخطوة أو أنشئها يدويًا."
     },
     "reflection": {
       "title": "التأمل الأسبوعي",
@@ -418,7 +420,11 @@
         "title": "رؤية النمط",
         "noTrades": "سجّل صفقة لتبدأ برؤية الأنماط هنا.",
         "notEnoughData": "لا يوجد سجل صفقات كافٍ بعد لاكتشاف نمط — سجّل المزيد من الصفقات.",
-        "pattern": "من بين آخر {analyzedCount} صفقة لك، كانت {lossesAfterLoss} من أصل {pairsAfterLoss} صفقة تلت خسارة خاسرة أيضًا ({ratePercent}%)."
+        "pattern": "من بين آخر {analyzedCount} صفقة لك، كانت {lossesAfterLoss} من أصل {pairsAfterLoss} صفقة تلت خسارة خاسرة أيضًا ({ratePercent}%).",
+        "hourOfDay": "الصفقات المنفذة حوالي الساعة {hour}:00 لديها أعلى معدل ربح لك ({ratePercent}٪)، من أصل {sampleSize} صفقة في تلك الساعة.",
+        "byDayOfWeek": "{day} هو أفضل يوم تداول لك — معدل ربح {ratePercent}٪ من أصل {sampleSize} صفقة.",
+        "bySymbol": "{symbol} هو أفضل رمز أداءً لديك — معدل ربح {ratePercent}٪ من أصل {sampleSize} صفقة.",
+        "dayName": "{day, select, 0 {الأحد} 1 {الاثنين} 2 {الثلاثاء} 3 {الأربعاء} 4 {الخميس} 5 {الجمعة} 6 {السبت} other {day}}"
       },
       "mentorButton": "موجّه التداول",
       "mentorButtonDescription": "افتح Ionexa Chat في وضع الموجّه مع تحميل آخر 20 صفقة لك مسبقًا كسياق.",
@@ -454,7 +460,19 @@
       "downloadButton": "تنزيل HTML",
       "deleteButton": "حذف",
       "deleted": "تم حذف الموقع",
-      "emptyState": "لا توجد مواقع بعد — صف موقعًا أعلاه لإنشاء أول موقع لك."
+      "emptyState": "لا توجد مواقع بعد — صف موقعًا أعلاه لإنشاء أول موقع لك.",
+      "editLabel": "اطلب تغييرًا",
+      "editPlaceholder": "مثال: اجعل قسم البطل أكبر، أو غيّر الألوان إلى الأزرق.",
+      "editButton": "تطبيق التغييرات",
+      "editApplying": "جارٍ التطبيق...",
+      "editApplied": "تم تطبيق التغيير",
+      "historyButton": "السجل",
+      "historyLoading": "جارٍ تحميل الإصدارات...",
+      "historyEmpty": "لا يوجد سجل إصدارات بعد.",
+      "versionLabel": "الإصدار {number}",
+      "versionOriginal": "الإنشاء الأصلي",
+      "viewingOldVersion": "عرض الإصدار {number} (للقراءة فقط).",
+      "backToLatest": "العودة إلى الأحدث"
     },
     "marketplace": {
       "title": "المتجر",
@@ -515,6 +533,38 @@
     "streak": {
       "title": "بطل الاستمرارية",
       "description": "سجّل نشاطًا لمدة 7 أيام متتالية."
+    },
+    "firstWebsite": {
+      "title": "منشئ المواقع",
+      "description": "أنشئ أول موقع لك باستخدام منشئ المواقع."
+    },
+    "firstWebsiteEdit": {
+      "title": "الضابط الدقيق",
+      "description": "طبّق أول تعديل بالذكاء الاصطناعي على موقع تم إنشاؤه."
+    },
+    "firstEntityLink": {
+      "title": "الرابط",
+      "description": "اربط سجلّين معًا في رسم المعرفة."
+    },
+    "tenEntityLinks": {
+      "title": "بنّاء الشبكة",
+      "description": "اربط 10 سجلات معًا عبر الوحدات."
+    },
+    "firstEnergyCheckin": {
+      "title": "تسجيل الحضور",
+      "description": "سجّل أول تسجيل طاقة لك."
+    },
+    "firstReflection": {
+      "title": "المتأمل",
+      "description": "أنشئ أول تأمل أسبوعي لك."
+    },
+    "thirtyDayStreak": {
+      "title": "لا يُوقَف",
+      "description": "سجّل نشاطًا لمدة 30 يومًا متتاليًا."
+    },
+    "fiftyEntries": {
+      "title": "مستخدم فائق",
+      "description": "سجّل 50 إدخالاً عبر جميع الوحدات."
     }
   }
 }

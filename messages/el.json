@@ -399,7 +399,9 @@
         "finance": "Πράκτορας Οικονομικών",
         "research": "Πράκτορας Έρευνας"
       },
-      "builtByAgent": "Χτίστηκε από {agent}"
+      "builtByAgent": "Χτίστηκε από {agent}",
+      "retry": "Επανάληψη ({attempts}/{max})",
+      "stepFailedMax": "Απέτυχε {max} φορές — δεν θα ξαναδοκιμάσει αυτόματα. Δοκίμασε να το διατυπώσεις διαφορετικά ή να το φτιάξεις χειροκίνητα."
     },
     "reflection": {
       "title": "Εβδομαδιαία Αναστοχασμός",
@@ -418,7 +420,11 @@
         "title": "Insight Μοτίβου",
         "noTrades": "Κατέγραψε ένα trade για να αρχίσεις να βλέπεις μοτίβα εδώ.",
         "notEnoughData": "Δεν υπάρχει ακόμα αρκετό ιστορικό trades για εντοπισμό μοτίβου — κατέγραψε λίγα ακόμα trades.",
-        "pattern": "Από τα τελευταία {analyzedCount} trades σου, {lossesAfterLoss} από τα {pairsAfterLoss} trades μετά από ζημιά ήταν επίσης ζημιογόνα ({ratePercent}%)."
+        "pattern": "Από τα τελευταία {analyzedCount} trades σου, {lossesAfterLoss} από τα {pairsAfterLoss} trades μετά από ζημιά ήταν επίσης ζημιογόνα ({ratePercent}%).",
+        "hourOfDay": "Οι συναλλαγές γύρω στις {hour}:00 έχουν το υψηλότερο ποσοστό επιτυχίας σου ({ratePercent}%), σε {sampleSize} trades εκείνη την ώρα.",
+        "byDayOfWeek": "Η {day} είναι η καλύτερή σου μέρα για trading — {ratePercent}% ποσοστό επιτυχίας σε {sampleSize} trades.",
+        "bySymbol": "Το {symbol} είναι το πιο αποδοτικό σου σύμβολο — {ratePercent}% ποσοστό επιτυχίας σε {sampleSize} trades.",
+        "dayName": "{day, select, 0 {Κυριακή} 1 {Δευτέρα} 2 {Τρίτη} 3 {Τετάρτη} 4 {Πέμπτη} 5 {Παρασκευή} 6 {Σάββατο} other {day}}"
       },
       "mentorButton": "Trading Mentor",
       "mentorButtonDescription": "Άνοιξε το Ionexa Chat σε Mentor Mode με τα τελευταία 20 trades σου ήδη φορτωμένα ως context.",
@@ -454,7 +460,19 @@
       "downloadButton": "Λήψη HTML",
       "deleteButton": "Διαγραφή",
       "deleted": "Η ιστοσελίδα διαγράφηκε",
-      "emptyState": "Δεν υπάρχουν ιστοσελίδες ακόμα — περιέγραψε μία παραπάνω για να δημιουργήσεις την πρώτη σου."
+      "emptyState": "Δεν υπάρχουν ιστοσελίδες ακόμα — περιέγραψε μία παραπάνω για να δημιουργήσεις την πρώτη σου.",
+      "editLabel": "Ζήτησε μια αλλαγή",
+      "editPlaceholder": "π.χ. Κάνε το hero section πιο μεγάλο, ή άλλαξε τα χρώματα σε μπλε.",
+      "editButton": "Εφαρμογή αλλαγών",
+      "editApplying": "Εφαρμογή...",
+      "editApplied": "Η αλλαγή εφαρμόστηκε",
+      "historyButton": "Ιστορικό",
+      "historyLoading": "Φόρτωση εκδόσεων...",
+      "historyEmpty": "Δεν υπάρχει ιστορικό εκδόσεων ακόμα.",
+      "versionLabel": "v{number}",
+      "versionOriginal": "Αρχική δημιουργία",
+      "viewingOldVersion": "Προβολή v{number} (μόνο ανάγνωση).",
+      "backToLatest": "Επιστροφή στην τελευταία"
     },
     "marketplace": {
       "title": "Marketplace",
@@ -515,6 +533,38 @@
     "streak": {
       "title": "Πρωταθλητής Συνέπειας",
       "description": "Κατέγραψε δραστηριότητα 7 συνεχόμενες μέρες."
+    },
+    "firstWebsite": {
+      "title": "Δημιουργός Ιστοσελίδων",
+      "description": "Δημιούργησε την πρώτη σου ιστοσελίδα με το Website Builder."
+    },
+    "firstWebsiteEdit": {
+      "title": "Ρυθμιστής",
+      "description": "Εφάρμοσε την πρώτη σου αλλαγή με AI σε μια ιστοσελίδα."
+    },
+    "firstEntityLink": {
+      "title": "Συνδέτης",
+      "description": "Σύνδεσε δύο εγγραφές μεταξύ τους στον Χάρτη Γνώσης."
+    },
+    "tenEntityLinks": {
+      "title": "Δικτυωτής",
+      "description": "Σύνδεσε 10 εγγραφές μεταξύ διαφορετικών modules."
+    },
+    "firstEnergyCheckin": {
+      "title": "Check-In",
+      "description": "Κατέγραψε το πρώτο σου energy check-in."
+    },
+    "firstReflection": {
+      "title": "Στοχαστικός",
+      "description": "Δημιούργησε το πρώτο σου Weekly Reflection."
+    },
+    "thirtyDayStreak": {
+      "title": "Ασταμάτητος",
+      "description": "Κατέγραψε δραστηριότητα 30 συνεχόμενες μέρες."
+    },
+    "fiftyEntries": {
+      "title": "Power User",
+      "description": "Κατέγραψε 50 εγγραφές σε όλα τα modules."
     }
   }
 }

@@ -399,7 +399,9 @@
         "finance": "Agent Finance",
         "research": "Agent Recherche"
       },
-      "builtByAgent": "Créé par {agent}"
+      "builtByAgent": "Créé par {agent}",
+      "retry": "Réessayer ({attempts}/{max})",
+      "stepFailedMax": "Échec {max}x — ne réessaiera pas automatiquement. Essayez de reformuler l’étape ou de la créer manuellement."
     },
     "reflection": {
       "title": "Bilan Hebdomadaire",
@@ -418,7 +420,11 @@
         "title": "Aperçu du Pattern",
         "noTrades": "Enregistrez un trade pour commencer à voir des tendances ici.",
         "notEnoughData": "Pas encore assez d'historique de trades pour détecter une tendance — enregistrez quelques trades de plus.",
-        "pattern": "Sur vos {analyzedCount} derniers trades, {lossesAfterLoss} des {pairsAfterLoss} trades suivant une perte étaient également perdants ({ratePercent}%)."
+        "pattern": "Sur vos {analyzedCount} derniers trades, {lossesAfterLoss} des {pairsAfterLoss} trades suivant une perte étaient également perdants ({ratePercent}%).",
+        "hourOfDay": "Les trades passés vers {hour}:00 ont votre meilleur taux de réussite ({ratePercent}%), sur {sampleSize} trades à cette heure.",
+        "byDayOfWeek": "{day} est votre meilleur jour de trading — {ratePercent}% de réussite sur {sampleSize} trades.",
+        "bySymbol": "{symbol} est votre symbole le plus performant — {ratePercent}% de réussite sur {sampleSize} trades.",
+        "dayName": "{day, select, 0 {dimanche} 1 {lundi} 2 {mardi} 3 {mercredi} 4 {jeudi} 5 {vendredi} 6 {samedi} other {day}}"
       },
       "mentorButton": "Trading Mentor",
       "mentorButtonDescription": "Ouvrez Ionexa Chat en Mode Mentor avec vos 20 derniers trades déjà chargés en contexte.",
@@ -454,7 +460,19 @@
       "downloadButton": "Télécharger le HTML",
       "deleteButton": "Supprimer",
       "deleted": "Site supprimé",
-      "emptyState": "Aucun site pour l'instant — décrivez-en un ci-dessus pour générer le premier."
+      "emptyState": "Aucun site pour l'instant — décrivez-en un ci-dessus pour générer le premier.",
+      "editLabel": "Demander une modification",
+      "editPlaceholder": "ex. Agrandis la section hero, ou change les couleurs en bleu.",
+      "editButton": "Appliquer les modifications",
+      "editApplying": "Application...",
+      "editApplied": "Modification appliquée",
+      "historyButton": "Historique",
+      "historyLoading": "Chargement des versions...",
+      "historyEmpty": "Pas encore d'historique de versions.",
+      "versionLabel": "v{number}",
+      "versionOriginal": "Génération initiale",
+      "viewingOldVersion": "Affichage de la v{number} (lecture seule).",
+      "backToLatest": "Retour à la dernière version"
     },
     "marketplace": {
       "title": "Marketplace",
@@ -515,6 +533,38 @@
     "streak": {
       "title": "Champion de Régularité",
       "description": "Enregistrez une activité 7 jours d'affilée."
+    },
+    "firstWebsite": {
+      "title": "Créateur de Site",
+      "description": "Générez votre premier site avec Website Builder."
+    },
+    "firstWebsiteEdit": {
+      "title": "Ajusteur Précis",
+      "description": "Appliquez votre première modification IA à un site généré."
+    },
+    "firstEntityLink": {
+      "title": "Connecteur",
+      "description": "Reliez deux enregistrements dans le Knowledge Graph."
+    },
+    "tenEntityLinks": {
+      "title": "Bâtisseur de Réseau",
+      "description": "Reliez 10 enregistrements entre différents modules."
+    },
+    "firstEnergyCheckin": {
+      "title": "Enregistrement",
+      "description": "Enregistrez votre premier bilan d'énergie."
+    },
+    "firstReflection": {
+      "title": "Réfléchi",
+      "description": "Générez votre première Réflexion Hebdomadaire."
+    },
+    "thirtyDayStreak": {
+      "title": "Inarrêtable",
+      "description": "Enregistrez une activité 30 jours d'affilée."
+    },
+    "fiftyEntries": {
+      "title": "Utilisateur Expert",
+      "description": "Enregistrez 50 entrées dans tous les modules."
     }
   }
 }

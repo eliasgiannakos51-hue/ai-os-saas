@@ -286,6 +286,11 @@ export const CREDIT_COSTS = {
   // generation call, distinct from websiteCreate above (the existing
   // "Websites" Build module's plain CRUD tracker, which never calls AI).
   websiteGenerate: 100,
+  // Website Builder post-generation editing (api/websites/edit) — a
+  // smaller Claude call than a full generation (it starts from the
+  // existing HTML rather than building from scratch), priced at half of
+  // websiteGenerate.
+  websiteEdit: 50,
 } as const;
 
 // TEMPORARY diagnostic: shows the exact numbers deductCredits compared,

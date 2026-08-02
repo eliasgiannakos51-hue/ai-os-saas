@@ -7,6 +7,7 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import {
   CREDIT_COSTS,
   deductCredits,
+  hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
@@ -182,20 +183,21 @@ export async function POST(request: Request) {
     // (see lib/billing/credits.ts), the same shared budget Create Anything
     // draws from. Admin-listed accounts (see lib/admin.ts) and beta
     // testers (see lib/beta.ts) skip this entirely — treated as unlimited.
+    // Only a READ-ONLY check happens here (reject early, before even
+    // creating/touching the conversation, if obviously insufficient); the
+    // actual DEDUCT happens inside the stream below, only once Claude has
+    // confirmed-successfully returned a real reply — see the
+    // deductCredits call right after claudeStream.finalMessage(). If the
+    // stream throws or the model returns nothing, no deduction ever runs.
     const isAdmin = isAdminEmail(user.email);
-    if (!isAdmin && !(await hasActiveBetaBypass(user))) {
-      const deduction = await deductCredits(
-        user.id,
-        CREDIT_COSTS.chatMessage,
-        "chat_message",
-        "Ionexa Chat message",
-        plan
-      );
-      if (!deduction.ok) {
+    const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+    if (!bypassCredits) {
+      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.chatMessage, plan);
+      if (!check.ok) {
         return NextResponse.json({
           ok: true,
           rateLimited: true,
-          message: insufficientCreditsMessage(deduction.remaining, CREDIT_COSTS.chatMessage),
+          message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.chatMessage),
         });
       }
     }
@@ -318,17 +320,44 @@ export async function POST(request: Request) {
         } catch (err) {
           logApiError("/api/chat", err, { stage: "anthropic_stream" });
           const errMessage = err instanceof Error ? err.message : "Chat request failed.";
-          controller.enqueue(ndjsonLine({ type: "error", error: errMessage }));
+          controller.enqueue(
+            ndjsonLine({ type: "error", error: `${errMessage} No credits were charged — please try again.` })
+          );
           controller.close();
           return;
         }
 
         if (!assistantText.trim()) {
           controller.enqueue(
-            ndjsonLine({ type: "error", error: "The model did not return a response." })
+            ndjsonLine({
+              type: "error",
+              error: "The model did not return a response. No credits were charged — please try again.",
+            })
           );
           controller.close();
           return;
+        }
+
+        // Confirmed success — a real reply streamed all the way through,
+        // so this is the one place the message actually gets charged.
+        if (!bypassCredits) {
+          const deduction = await deductCredits(
+            user.id,
+            CREDIT_COSTS.chatMessage,
+            "chat_message",
+            "Ionexa Chat message",
+            plan
+          );
+          if (!deduction.ok) {
+            // Balance changed between the pre-check above and now — log
+            // it, but still deliver the reply already streamed to the
+            // user (see the same tolerance documented on
+            // deductCredits/edit/generate).
+            logApiError("/api/chat", "credit deduction failed after successful reply", {
+              userId: user.id,
+              conversationId: finalConversationId,
+            });
+          }
         }
 
         const { error: assistantMessageError } = await supabase.from("chat_messages").insert({

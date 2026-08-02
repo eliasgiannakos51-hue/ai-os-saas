@@ -16,6 +16,7 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import {
   CREDIT_COSTS,
   deductCredits,
+  hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
@@ -153,22 +154,25 @@ export async function POST(request: Request) {
     // Credits: 1 credit per Create Anything request, deducted from
     // user_credits (see lib/billing/credits.ts). Admin-listed accounts
     // (see lib/admin.ts) and beta testers (see lib/beta.ts) skip this
-    // entirely — treated as unlimited.
+    // entirely — treated as unlimited. Only a READ-ONLY check happens
+    // here (reject early if obviously insufficient); the actual DEDUCT
+    // happens further below, only once the Anthropic call has
+    // confirmed-successfully returned a classification — see the
+    // deductCredits call right after the try/catch around
+    // anthropic.messages.create. If that call throws (network error,
+    // timeout, API error, anything), the catch block returns without
+    // ever calling deductCredits, so zero credits are charged.
     const isAdmin = isAdminEmail(user.email);
-    if (!isAdmin && !(await hasActiveBetaBypass(user))) {
-      const plan = await resolveEffectivePlan(user);
-      const deduction = await deductCredits(
-        user.id,
-        CREDIT_COSTS.createAnything,
-        "create_anything",
-        "Create Anything request",
-        plan
-      );
-      if (!deduction.ok) {
+    const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+    let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
+    if (!bypassCredits) {
+      plan = await resolveEffectivePlan(user);
+      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.createAnything, plan);
+      if (!check.ok) {
         return NextResponse.json({
           ok: true,
           matched: false,
-          message: insufficientCreditsMessage(deduction.remaining, CREDIT_COSTS.createAnything),
+          message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.createAnything),
         });
       }
     }
@@ -225,7 +229,30 @@ export async function POST(request: Request) {
     } catch (err) {
       logApiError("/api/create", err, { stage: "anthropic_call" });
       const errMessage = err instanceof Error ? err.message : "AI classification request failed.";
-      return NextResponse.json({ ok: false, error: errMessage }, { status: 502 });
+      return NextResponse.json(
+        { ok: false, error: `${errMessage} No credits were charged — please try again.` },
+        { status: 502 }
+      );
+    }
+
+    // Confirmed success — a real classification came back, so this is
+    // the one place the request actually gets charged.
+    if (!bypassCredits && plan) {
+      const deduction = await deductCredits(
+        user.id,
+        CREDIT_COSTS.createAnything,
+        "create_anything",
+        "Create Anything request",
+        plan
+      );
+      if (!deduction.ok) {
+        // Balance changed between the pre-check above and now — log it,
+        // but still deliver the result (see the same tolerance
+        // documented on deductCredits/edit/generate).
+        logApiError("/api/create", "credit deduction failed after successful classification", {
+          userId: user.id,
+        });
+      }
     }
 
     if (!toolInput.module || toolInput.module === "none") {

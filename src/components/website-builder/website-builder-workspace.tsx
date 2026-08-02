@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { AlertTriangle, Download, History, Image as ImageIcon, Layout, Loader2, Sparkles, Trash2, Wand2, X } from "lucide-react";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { useTranslations } from "next-intl";
@@ -19,11 +19,18 @@ import {
   MAX_REFERENCE_IMAGES,
   REFERENCE_IMAGE_BUCKET,
 } from "@/lib/website-reference-image";
+import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 10000;
 const MAX_CHANGE_REQUEST_LENGTH = 10000;
+
+// How often the client polls /api/websites/status for a website still
+// "pending"/"processing" — see pollWebsiteStatus below. Short enough to
+// feel responsive, long enough not to hammer the DB during a generation
+// that can legitimately take minutes.
+const POLL_INTERVAL_MS = 2500;
 
 // Thumbnail preview for each list row — a real, live scaled-down render
 // of the site's own html_content (not a fake icon), so visually distinct
@@ -38,6 +45,27 @@ const THUMB_DISPLAY_HEIGHT = 40;
 const THUMB_SCALE = THUMB_DISPLAY_WIDTH / THUMB_SOURCE_WIDTH;
 
 function WebsiteThumbnail({ website }: { website: UserWebsite }) {
+  // A pending/processing row has no real html_content yet — rendering an
+  // empty iframe would just look like a blank/broken thumbnail. A failed
+  // row's stale (empty) content shouldn't render either. Show a status
+  // icon instead in both cases; only a completed row gets the real,
+  // live-rendered preview.
+  if (website.status !== "completed") {
+    return (
+      <div
+        className="flex shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-input"
+        style={{ width: THUMB_DISPLAY_WIDTH, height: THUMB_DISPLAY_HEIGHT }}
+        aria-hidden="true"
+      >
+        {website.status === "failed" ? (
+          <AlertTriangle className="h-4 w-4 text-red-400" />
+        ) : (
+          <Loader2 className="h-4 w-4 animate-spin text-muted" />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
       className="shrink-0 overflow-hidden rounded-md border border-border bg-white"
@@ -112,6 +140,84 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
   const [loadingVersionsFor, setLoadingVersionsFor] = useState<string | null>(null);
   const [historyOpenFor, setHistoryOpenFor] = useState<string | null>(null);
   const [viewingVersion, setViewingVersion] = useState<WebsiteVersion | null>(null);
+
+  // Guards every poll's setState against firing after this component has
+  // unmounted (e.g. the user navigated to a different dashboard page
+  // while a generation was still in flight).
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  // Polls /api/websites/status every POLL_INTERVAL_MS for one website
+  // until it leaves "pending"/"processing" — a recursive setTimeout
+  // rather than setInterval, so a slow poll response never overlaps with
+  // the next one. Used both right after starting a new generation and
+  // (via the effect below) to resume watching any website that was still
+  // processing when this page loaded — e.g. the user started a
+  // generation, closed the tab, and came back later: the server-side
+  // work (see api/websites/generate/process/route.ts) already finished
+  // or is still running entirely independently of whether anyone was
+  // watching, so this just catches the UI up to whatever the database
+  // already says.
+  function pollWebsiteStatus(id: string) {
+    async function tick() {
+      let record: UserWebsite;
+      try {
+        const res = await fetch(`/api/websites/status?id=${id}`);
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          if (mountedRef.current) setTimeout(tick, POLL_INTERVAL_MS);
+          return;
+        }
+        record = data.record as UserWebsite;
+      } catch {
+        // A transient network hiccup while polling isn't the same as the
+        // generation failing — just retry on the next tick.
+        if (mountedRef.current) setTimeout(tick, POLL_INTERVAL_MS);
+        return;
+      }
+
+      if (!mountedRef.current) return;
+      setWebsites((prev) => prev.map((w) => (w.id === id ? record : w)));
+
+      if (record.status === "pending" || record.status === "processing") {
+        setTimeout(tick, POLL_INTERVAL_MS);
+        return;
+      }
+
+      void refreshCredits();
+      if (record.status === "completed") {
+        addToast(t("generated"));
+      } else if (record.status === "failed") {
+        addToast(`✗ ${record.error_message ?? t("generateFailed")}`, "error");
+      }
+    }
+    void tick();
+  }
+
+  // On mount, resume polling for anything that was still in flight when
+  // this page was loaded (fresh load, or the user came back after
+  // closing the tab mid-generation) — no click required, per the above.
+  const resumedPollsRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    for (const website of initialWebsites) {
+      if (
+        (website.status === "pending" || website.status === "processing") &&
+        !resumedPollsRef.current.has(website.id)
+      ) {
+        resumedPollsRef.current.add(website.id);
+        pollWebsiteStatus(website.id);
+      }
+    }
+    // Only ever run this reconciliation against the server-rendered
+    // initial list — polling loops track their own completion and don't
+    // need to be re-triggered when `websites` itself changes client-side.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialWebsites]);
 
   function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(e.target.files ?? []);
@@ -193,16 +299,19 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
         referenceImagePaths = uploadResults.map((r) => r.path);
       }
 
+      // Step 1/2: create the "pending" row and get its id back — this
+      // request is deliberately fast (no AI call in it), so it can never
+      // itself be mistaken for a hung/timed-out request no matter how
+      // long the actual generation ends up taking.
       const res = await fetch("/api/websites/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: trimmedName, description: trimmedDescription, referenceImagePaths }),
       });
       const data = await res.json();
-      void refreshCredits();
 
       if (!res.ok || !data.ok) {
-        setError(getErrorMessage(data?.error, "Could not generate the website."));
+        setError(getErrorMessage(data?.error, "Something went wrong — no credits were charged. Please try again."));
         return;
       }
       if (!data.generated) {
@@ -216,9 +325,37 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
       setName("");
       setDescription("");
       setReferenceImageFiles([]);
-      addToast(t("generated"));
-    } catch {
-      setError("Network error — please try again.");
+
+      // Step 2/2: kick off the actual generation as a second, independent
+      // request. Deliberately NOT awaited: `keepalive: true` tells the
+      // browser to still deliver this request even if the user navigates
+      // away or closes this tab moments after clicking Generate, so the
+      // server-side work — and the credit charge, which only ever
+      // happens there, only after confirmed success — survives regardless
+      // of whether this tab stays open to see the result. Progress from
+      // here on is entirely tracked via polling (pollWebsiteStatus), not
+      // this request's response.
+      void fetch("/api/websites/generate/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({ websiteId: record.id, description: trimmedDescription, referenceImagePaths }),
+      });
+
+      pollWebsiteStatus(record.id);
+    } catch (err) {
+      // A fetch() throwing at all (as opposed to resolving with a non-ok
+      // response) means the request never reached the server — a real
+      // network-level failure (offline, DNS, connection refused), not a
+      // slow response. That distinction is meaningful now: step 1 above
+      // is always fast, so nothing here can be a disguised "the AI call
+      // is just taking a while" timeout the way the single-request flow
+      // used to produce.
+      setError(
+        err instanceof TypeError
+          ? "Network error — please check your connection and try again."
+          : getErrorMessage(err, "Something went wrong — no credits were charged. Please try again.")
+      );
     } finally {
       setGenerating(false);
     }
@@ -330,6 +467,18 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
   // truncation check below existed) — shows a clear message instead.
   const displayedHtmlIsComplete = looksLikeCompleteHtmlDocument(displayedHtml);
 
+  // Live estimated credit cost — recomputed on every render from the
+  // current form state (lib/website-generation-cost.ts), so it updates
+  // as the user types/attaches images, before they ever click Generate.
+  // This is an ESTIMATE: the real, final charge (computed and deducted
+  // server-side only after generation actually succeeds — see
+  // api/websites/generate/process/route.ts) also factors in the real
+  // generated HTML length, which isn't known yet at this point.
+  const estimatedCost = estimateWebsiteGenerationCost({
+    descriptionLength: description.trim().length,
+    imageCount: referenceImageFiles.length,
+  });
+
   // Pagination — same shared pattern/page size as every module list
   // (lib/use-sort-and-paginate.ts), so a user with 10+ generated sites
   // gets a bounded, navigable list instead of an ever-growing one.
@@ -415,6 +564,12 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
           {imageError && <p className="mt-1 text-[11px] text-red-400">{imageError}</p>}
         </div>
 
+        {description.trim().length > 0 && (
+          <p className="rounded-lg border border-border bg-input px-3 py-2 text-xs text-muted">
+            {t("estimatedCost", { count: estimatedCost })}
+          </p>
+        )}
+
         {error && (
           <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
             {error}
@@ -453,7 +608,8 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
               <button
                 type="button"
                 onClick={() => downloadHtml(previewWebsite)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+                disabled={previewWebsite.status !== "completed"}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 <Download className="h-3.5 w-3.5" aria-hidden="true" />
                 {t("downloadButton")}
@@ -514,7 +670,21 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
             </p>
           )}
 
-          {displayedHtmlIsComplete ? (
+          {!viewingVersion && (previewWebsite.status === "pending" || previewWebsite.status === "processing") ? (
+            <div className="mt-3 flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-border bg-input px-6 text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-orange-400" aria-hidden="true" />
+              <p className="text-sm font-medium text-foreground">{t("generatingTitle")}</p>
+              <p className="max-w-md text-xs text-muted">{t("generatingBody")}</p>
+            </div>
+          ) : !viewingVersion && previewWebsite.status === "failed" ? (
+            <div className="mt-3 flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-red-800 bg-red-950/20 px-6 text-center">
+              <AlertTriangle className="h-8 w-8 text-red-400" aria-hidden="true" />
+              <p className="text-sm font-medium text-red-300">{t("generationFailedTitle")}</p>
+              <p className="max-w-md text-xs text-red-300/80">
+                {previewWebsite.error_message ?? t("generateFailed")}
+              </p>
+            </div>
+          ) : displayedHtmlIsComplete ? (
             <iframe
               key={`${previewWebsite.id}:${viewingVersion?.id ?? "latest"}`}
               srcDoc={displayedHtml}
@@ -530,7 +700,7 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
             </div>
           )}
 
-          {!viewingVersion && (
+          {!viewingVersion && previewWebsite.status === "completed" && (
             <form onSubmit={handleEdit} className="mt-4 space-y-2 border-t border-border pt-4">
               <label htmlFor="website-edit" className="block text-xs text-muted">
                 {t("editLabel")}
@@ -586,7 +756,18 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
                 >
                   <WebsiteThumbnail website={website} />
                   <span className="min-w-0">
-                    <p className="truncate text-sm font-medium text-foreground">{website.name}</p>
+                    <p className="flex items-center gap-1.5 truncate text-sm font-medium text-foreground">
+                      <span className="truncate">{website.name}</span>
+                      {website.status === "pending" || website.status === "processing" ? (
+                        <span className="shrink-0 rounded-full bg-orange-500/10 px-1.5 py-0.5 text-[10px] font-medium text-orange-400">
+                          {t("statusGenerating")}
+                        </span>
+                      ) : website.status === "failed" ? (
+                        <span className="shrink-0 rounded-full bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
+                          {t("statusFailed")}
+                        </span>
+                      ) : null}
+                    </p>
                     <p className="text-xs text-muted" title={new Date(website.created_at).toLocaleString()} suppressHydrationWarning>
                       {formatRelativeTime(website.created_at)}
                     </p>

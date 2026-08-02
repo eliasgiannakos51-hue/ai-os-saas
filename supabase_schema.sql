@@ -928,9 +928,26 @@ create table public.user_websites (
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
   html_content text not null,
+  -- Background-job status (see api/websites/generate/route.ts +
+  -- api/websites/generate/process/route.ts): a row is created with
+  -- status 'pending' and html_content '' the instant generation is
+  -- requested, so the client gets a real row/id back immediately instead
+  -- of blocking on the AI call. The actual generation runs as a second,
+  -- independent request (client-issued, not server-continued) that flips
+  -- this to 'processing' then 'completed' (with the real html_content) or
+  -- 'failed' (with error_message set). Defaults to 'completed' so it's a
+  -- no-op for every row that already existed before this column did.
+  status text not null default 'completed',
+  error_message text,
   reference_image_url text,
   created_at timestamptz not null default now()
 );
+
+alter table public.user_websites
+  drop constraint if exists user_websites_status_check;
+alter table public.user_websites
+  add constraint user_websites_status_check
+  check (status in ('pending', 'processing', 'completed', 'failed'));
 
 create index if not exists user_websites_user_id_created_at_idx
   on public.user_websites (user_id, created_at desc);

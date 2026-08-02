@@ -7,6 +7,7 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import {
   CREDIT_COSTS,
   deductCredits,
+  hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
@@ -72,22 +73,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Website not found." }, { status: 404 });
     }
 
+    // Credits: checked (read-only) BEFORE the AI call so an obviously
+    // insufficient balance is rejected early without ever calling Claude,
+    // but only actually DEDUCTED after that call has confirmed-
+    // successfully returned an updated website — see the deductCredits
+    // call further below. If editWebsiteHtml throws (network error,
+    // timeout, API error, anything), the catch block returns without
+    // ever calling deductCredits, so zero credits are charged.
     const isAdmin = isAdminEmail(user.email);
-    if (!isAdmin && !(await hasActiveBetaBypass(user))) {
-      const plan = await resolveEffectivePlan(user);
-      const deduction = await deductCredits(
-        user.id,
-        CREDIT_COSTS.websiteEdit,
-        "website_edit",
-        "Website Builder edit",
-        plan
-      );
-      if (!deduction.ok) {
+    const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+    let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
+    if (!bypassCredits) {
+      plan = await resolveEffectivePlan(user);
+      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.websiteEdit, plan);
+      if (!check.ok) {
         return NextResponse.json({
           ok: true,
           edited: false,
           rateLimited: true,
-          message: insufficientCreditsMessage(deduction.remaining, CREDIT_COSTS.websiteEdit),
+          message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.websiteEdit),
         });
       }
     }
@@ -98,7 +102,10 @@ export async function POST(request: Request) {
     } catch (err) {
       logApiError("/api/websites/edit", err, { stage: "anthropic_call" });
       const errMessage = err instanceof Error ? err.message : "The website edit request failed.";
-      return NextResponse.json({ ok: false, error: errMessage }, { status: 502 });
+      return NextResponse.json(
+        { ok: false, error: `${errMessage} No credits were charged — please try again.` },
+        { status: 502 }
+      );
     }
 
     const { count: existingVersionCount } = await supabase
@@ -116,7 +123,32 @@ export async function POST(request: Request) {
 
     if (updateError) {
       logApiError("/api/websites/edit", updateError, { stage: "update" });
-      return NextResponse.json({ ok: false, error: updateError.message }, { status: 500 });
+      return NextResponse.json(
+        { ok: false, error: `${updateError.message} No credits were charged — please try again.` },
+        { status: 500 }
+      );
+    }
+
+    // Only now — the AI call succeeded AND the result is durably saved —
+    // is this confirmed a success worth charging for.
+    if (!bypassCredits && plan) {
+      const deduction = await deductCredits(
+        user.id,
+        CREDIT_COSTS.websiteEdit,
+        "website_edit",
+        "Website Builder edit",
+        plan
+      );
+      if (!deduction.ok) {
+        // Balance changed between the pre-check above and now — log it,
+        // but still deliver the edit: the AI cost is already spent, and
+        // taking the finished result away would be worse than the missed
+        // charge (see the same tolerance documented on deductCredits).
+        logApiError("/api/websites/edit", "credit deduction failed after successful edit", {
+          userId: user.id,
+          websiteId,
+        });
+      }
     }
 
     const { error: versionError } = await supabase.from("website_versions").insert({

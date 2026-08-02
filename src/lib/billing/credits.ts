@@ -100,6 +100,23 @@ export async function getOrInitCredits(userId: string, plan: Plan): Promise<Cred
   );
 }
 
+// Read-only balance check — no write, no transaction log. Used to gate an
+// expensive AI call BEFORE it starts (reject early with a clear "not
+// enough credits" message, same as before) while the actual deduction
+// (see deductCredits) happens only once that call has confirmed-
+// successfully completed — see api/websites/generate/route.ts,
+// api/create/route.ts and api/chat/route.ts for the two-step pattern this
+// enables: check-then-call-then-deduct, instead of the old deduct-then-
+// call (which charged the user even when the call itself failed).
+export async function hasEnoughCredits(
+  userId: string,
+  amount: number,
+  plan: Plan
+): Promise<{ ok: boolean; remaining: number }> {
+  const row = await getOrInitCredits(userId, plan);
+  return { ok: row.credits_remaining >= amount, remaining: row.credits_remaining };
+}
+
 // Deducts `amount` credits and logs the transaction. Read-then-write, not
 // a single atomic SQL expression — the same "cost protection, not a
 // security boundary" tolerance the old hourly rate limiter documented, not
@@ -285,6 +302,11 @@ export const CREDIT_COSTS = {
   // Website Builder (api/websites/generate) — a real Claude HTML/CSS
   // generation call, distinct from websiteCreate above (the existing
   // "Websites" Build module's plain CRUD tracker, which never calls AI).
+  // No longer the actual charge: generation cost is now dynamic (see
+  // lib/website-generation-cost.ts, used by
+  // api/websites/generate/process/route.ts), based on description
+  // length, reference image count, and real generated HTML length. Kept
+  // here only as an approximate reference point for other code/docs.
   websiteGenerate: 100,
   // Website Builder post-generation editing (api/websites/edit) — a
   // smaller Claude call than a full generation (it starts from the

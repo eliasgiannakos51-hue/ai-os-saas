@@ -1,8 +1,19 @@
+// 'pending': row just created, generation not started yet server-side.
+// 'processing': the background generation call is actually running.
+// 'completed': html_content holds the real, finished website.
+// 'failed': generation errored — error_message holds why; html_content is
+// empty and must not be rendered. Existing rows from before this column
+// existed default to 'completed' (see the migration) since they already
+// have real html_content.
+export type UserWebsiteStatus = "pending" | "processing" | "completed" | "failed";
+
 export type UserWebsite = {
   id: string;
   user_id: string;
   name: string;
   html_content: string;
+  status: UserWebsiteStatus;
+  error_message: string | null;
   // Superseded by website_reference_images (below) — no longer written by
   // the app, kept only because the column still exists on already-created
   // rows. See WebsiteReferenceImage for the current multi-image model.

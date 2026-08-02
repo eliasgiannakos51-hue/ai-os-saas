@@ -17,6 +17,7 @@ import {
   isChatMemoryEnabled,
 } from "@/lib/chat/memory";
 import { findMentionedEntities, buildEntityMentionPromptAddition } from "@/lib/chat/entity-mentions";
+import { loadMentorContext } from "@/lib/chat/mentor-context";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,15 @@ const MAX_PERSONA_NAME_LENGTH = 40;
 // see Settings > AI Persona and lib/billing/plans.ts).
 function buildSystemPrompt(personaName: string): string {
   return `Είσαι ο/η ${personaName}, ένας εξελιγμένος AI βοηθός γενικής χρήσης. Έχεις ευρεία γνώση σε όλα τα θέματα (επιστήμη, ιστορία, προγραμματισμός, μαθηματικά, δημιουργική γραφή, επιχειρήσεις, καθημερινές ερωτήσεις, κ.λπ.) και μπορείς να βοηθήσεις με οτιδήποτε χρειαστεί ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος — ελληνικά, αγγλικά, ή οποιαδήποτε άλλη γλώσσα). Δώσε λεπτομερείς, χρήσιμες, ακριβείς απαντήσεις — προτίμησε μια ελαφρώς πιο εκτενή, ουσιαστική απάντηση αντί για μια πολύ σύντομη, χωρίς όμως να γίνεσαι φλύαρος ή να επαναλαμβάνεσαι. Όπου έχει νόημα για το ερώτημα (εξηγήσεις εννοιών, τεχνικά θέματα, "πώς κάνω Χ"), συμπλήρωσε τον ορισμό/την εξήγηση με ένα σύντομο πρακτικό παράδειγμα ή use case, όχι μόνο θεωρία — αλλά μην το κάνεις αυτό όταν ο χρήστης ζητάει ρητά κάτι σύντομο (π.χ. ναι/όχι, ένας αριθμός, μια γρήγορη μετάφραση) ή όταν ένα παράδειγμα δεν έχει φυσικό νόημα. Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.`;
+}
+
+// Mentor Mode (toggled client-side, see chat-workspace.tsx's "Mentor Mode"
+// button) — an alternative persona for when the user wants strategic
+// pushback instead of a straight, executional answer. Only ever swapped in
+// for that one request's system prompt; the default persona/behavior above
+// is untouched otherwise.
+function buildMentorSystemPrompt(personaName: string): string {
+  return `Είσαι ο/η ${personaName} Mentor — δεν δίνεις μόνο απαντήσεις, δίνεις επιχειρηματική/στρατηγική καθοδήγηση. Όταν ο χρήστης περιγράφει ένα σχέδιο/ιδέα, ΜΗΝ απαντάς μόνο εκτελεστικά — επισήμανε πιθανά ρίσκα, ρώτησε διευκρινιστικές ερωτήσεις που θα ρωτούσε ένας έμπειρος σύμβουλος, και πρότεινε εναλλακτικές όπου έχει νόημα. Χρησιμοποίησε τα δεδομένα του χρήστη (modules/entries) ως context όταν είναι σχετικό. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος). Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.`;
 }
 
 function truncateTitle(message: string, maxLen = 40): string {
@@ -58,6 +68,7 @@ export async function POST(request: Request) {
 
     let message: string;
     let conversationId: string | null;
+    let mentorMode: boolean;
     try {
       const body = await request.json();
       message = typeof body?.message === "string" ? body.message.trim() : "";
@@ -65,6 +76,7 @@ export async function POST(request: Request) {
         typeof body?.conversationId === "string" && body.conversationId
           ? body.conversationId
           : null;
+      mentorMode = body?.mentorMode === true;
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -129,10 +141,15 @@ export async function POST(request: Request) {
     // are surfaced here so the AI already "knows" the relationship without
     // being told again.
     const mentionedEntities = await findMentionedEntities(supabase, user.id, message);
+    // Mentor Mode's proactive cross-module summary (lib/chat/mentor-context.ts)
+    // only loads when the toggle is on — the default chat pays nothing extra
+    // for it, per the brief.
+    const mentorContext = mentorMode ? await loadMentorContext(supabase, user.id) : "";
     const systemPrompt =
-      buildSystemPrompt(personaName) +
+      (mentorMode ? buildMentorSystemPrompt(personaName) : buildSystemPrompt(personaName)) +
       buildMemoryPromptAddition(memories) +
-      buildEntityMentionPromptAddition(mentionedEntities);
+      buildEntityMentionPromptAddition(mentionedEntities) +
+      mentorContext;
 
     // Credits: 1 credit per Ionexa Chat message, deducted from user_credits
     // (see lib/billing/credits.ts), the same shared budget Create Anything

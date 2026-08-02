@@ -8,7 +8,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
-import { ArrowUp, MessageCircle } from "lucide-react";
+import { ArrowUp, Compass, MessageCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
@@ -55,6 +55,10 @@ export function ChatWorkspace({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
+  // Not persisted per conversation on purpose — a runtime toggle for the
+  // NEXT message sent, same as the API route treating it as a per-request
+  // flag (see api/chat/route.ts) rather than conversation state.
+  const [mentorMode, setMentorMode] = useState(false);
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState<string | null>(null);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -206,7 +210,7 @@ export function ChatWorkspace({
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId: sentFromId, message: text }),
+        body: JSON.stringify({ conversationId: sentFromId, message: text, mentorMode }),
       });
 
       const contentType = res.headers.get("content-type") ?? "";
@@ -386,6 +390,22 @@ export function ChatWorkspace({
 
         <div className="border-t border-border p-4 sm:p-6">
           <div className="mx-auto max-w-2xl">
+            <div className="mb-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setMentorMode((v) => !v)}
+                aria-pressed={mentorMode}
+                title="Mentor Mode: strategic guidance instead of just answers — flags risks, asks clarifying questions, suggests alternatives, and uses your logged data as context."
+                className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 ${
+                  mentorMode
+                    ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
+                    : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
+                }`}
+              >
+                <Compass className="h-3.5 w-3.5" aria-hidden="true" />
+                Mentor Mode
+              </button>
+            </div>
             {error && (
               <p
                 className={`mb-3 rounded-xl border px-3 py-2 text-xs ${

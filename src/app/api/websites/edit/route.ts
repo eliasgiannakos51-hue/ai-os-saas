@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { editWebsiteHtml } from "@/lib/website-builder";
+import { nextVersionNumber } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import {
@@ -104,7 +105,7 @@ export async function POST(request: Request) {
       .from("website_versions")
       .select("id", { count: "exact", head: true })
       .eq("website_id", websiteId);
-    const nextVersionNumber = (existingVersionCount ?? 0) + 1;
+    const versionNumber = nextVersionNumber(existingVersionCount ?? 0);
 
     const { data: updatedRecord, error: updateError } = await supabase
       .from("user_websites")
@@ -121,7 +122,7 @@ export async function POST(request: Request) {
     const { error: versionError } = await supabase.from("website_versions").insert({
       user_id: user.id,
       website_id: websiteId,
-      version_number: nextVersionNumber,
+      version_number: versionNumber,
       html_content: updatedHtml,
       change_description: changeRequest,
     });

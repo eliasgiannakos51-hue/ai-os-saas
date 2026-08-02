@@ -9,6 +9,7 @@ import {
 import type { FieldConfig } from "@/lib/modules";
 import { isAgentRole, agentRoleSystemPromptAddition, type AgentRole } from "@/lib/agent-roles";
 import { getUserFullContext, buildUserContextPromptAdditionEnglish } from "@/lib/user-context";
+import { buildOutputSummary, buildMissionContextSystemPromptAddition } from "@/lib/mission-context";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -93,29 +94,6 @@ function coerceFieldValue(field: FieldConfig, raw: unknown): string | number | n
     return Number.isFinite(num) ? num : null;
   }
   return String(raw);
-}
-
-// "AI Company" real collaboration — a short, plain-text summary of what a
-// mission step actually created, stored on the step (see
-// types/mission.ts's MissionStep.output) and fed back as context to every
-// later step in the same mission. Deliberately a fresh helper rather than
-// reusing entity-link-suggestions.ts's private textFor() — that one is
-// tied to Smart Search and shouldn't be touched for this.
-function buildOutputSummary(
-  moduleConfig: { title: string; fields: FieldConfig[] },
-  record: Record<string, unknown>,
-  aiMessage: string
-): string {
-  const fieldSummary = moduleConfig.fields
-    .map((f) => {
-      const value = record[f.key];
-      if (value === null || value === undefined || value === "") return null;
-      return `${f.label}: ${value}`;
-    })
-    .filter((s): s is string => s !== null)
-    .join(", ");
-
-  return `Created a ${moduleConfig.title} entry — ${fieldSummary || "(no details)"}. ${aiMessage}`;
 }
 
 export async function POST(request: Request) {
@@ -220,9 +198,7 @@ export async function POST(request: Request) {
 
     let toolInput: RouteEntryInput;
     try {
-      const missionContextAddition = priorStepsContext
-        ? `\n\nContext from earlier steps already completed in this same AI Company mission (use any relevant numbers/facts from these, don't re-derive them):\n${priorStepsContext}`
-        : "";
+      const missionContextAddition = buildMissionContextSystemPromptAddition(priorStepsContext);
 
       const response = await anthropic.messages.create({
         model: MODEL,

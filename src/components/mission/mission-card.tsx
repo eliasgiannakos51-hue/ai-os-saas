@@ -11,6 +11,7 @@ import { formatRelativeTime } from "@/lib/format-time";
 import { useCredits } from "@/components/credits/credits-context";
 import { MessageContent } from "@/components/chat/message-content";
 import { getStuckStep } from "@/lib/mission-progress";
+import { buildPriorStepsContext } from "@/lib/mission-context";
 import { AGENT_ROLES, type AgentRole } from "@/lib/agent-roles";
 import type { Mission, MissionStatus } from "@/types/mission";
 
@@ -96,11 +97,7 @@ export function MissionCard({ mission }: { mission: Mission }) {
     // output (see types/mission.ts) is handed to this step as context, so
     // e.g. a Finance Agent step can see numbers a prior Marketing Agent
     // step actually produced instead of re-deriving them.
-    const priorContext = steps
-      .slice(0, index)
-      .filter((s) => s.status === "completed" && s.output)
-      .map((s) => `- ${s.text} → ${s.output}`)
-      .join("\n");
+    const priorContext = buildPriorStepsContext(steps, index);
 
     setBuildingIndex(index);
     setError(null);

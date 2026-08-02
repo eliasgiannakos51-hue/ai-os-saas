@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWebsiteHtml } from "@/lib/website-builder";
+import { FIRST_VERSION_NUMBER } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import {
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
     const { error: versionError } = await supabase.from("website_versions").insert({
       user_id: user.id,
       website_id: record.id,
-      version_number: 1,
+      version_number: FIRST_VERSION_NUMBER,
       html_content: htmlContent,
     });
     if (versionError) {

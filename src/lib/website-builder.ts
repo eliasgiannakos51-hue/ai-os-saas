@@ -103,18 +103,60 @@ function stripCodeFence(text: string): string {
   return fenceMatch ? fenceMatch[1].trim() : trimmed;
 }
 
+// Reference image (Website Builder's optional "attach a logo/screenshot
+// for style inspiration" upload — see api/websites/generate/route.ts).
+// Only jpeg/png are accepted client-side and server-side, matching what
+// Claude's vision input supports well and what the upload form allows.
+export type ReferenceImageMediaType = "image/jpeg" | "image/png";
+export type ReferenceImage = { base64: string; mediaType: ReferenceImageMediaType };
+
+// Validates a stored file's content-type is one of the two types the
+// upload form accepts — used server-side after downloading from Storage,
+// so a file that somehow bypassed the client-side check (or was uploaded
+// by another client entirely) never reaches the vision API mislabeled.
+export function isSupportedReferenceImageMediaType(contentType: string): contentType is ReferenceImageMediaType {
+  return contentType === "image/jpeg" || contentType === "image/png";
+}
+
+// Appended to SYSTEM_PROMPT only when a reference image is actually
+// attached — worded exactly as specified: the image informs color
+// palette/style (and logo placement, described in words) but is never
+// embedded into the generated HTML itself, since that would need separate
+// image hosting (a deliberately out-of-scope, future step — see the
+// route's own comment).
+const IMAGE_SYSTEM_PROMPT_ADDITION = `
+
+Ο χρήστης έχει επισυνάψει εικόνα αναφοράς. Χρησιμοποίησέ την για να εμπνευστείς το χρωματικό παλέτα/στυλ του website. Αν είναι λογότυπο, ενσωμάτωσέ το νοητά στο header (περιέγραψε πού θα πήγαινε, μιας και δεν μπορείς να το εισάγεις κυριολεκτικά ως εικόνα στο παραγόμενο HTML χωρίς να το ανεβάσουμε ξεχωριστά).`;
+
 // Website Builder (see api/websites/generate/route.ts) — a real Claude
 // call that returns a complete, standalone HTML document, not a tracked
 // "idea" like the existing Websites Build module (ai_websites table,
-// lib/build-modules.ts) which never calls AI at all.
-export async function generateWebsiteHtml(apiKey: string, description: string): Promise<string> {
+// lib/build-modules.ts) which never calls AI at all. `referenceImage`
+// is optional — when present, it's sent as a real vision input block
+// alongside the text description (not just described in words), so
+// Claude actually sees the uploaded logo/photo/screenshot.
+export async function generateWebsiteHtml(
+  apiKey: string,
+  description: string,
+  referenceImage?: ReferenceImage
+): Promise<string> {
   const anthropic = new Anthropic({ apiKey });
+
+  const content: Anthropic.MessageParam["content"] = referenceImage
+    ? [
+        {
+          type: "image",
+          source: { type: "base64", media_type: referenceImage.mediaType, data: referenceImage.base64 },
+        },
+        { type: "text", text: description },
+      ]
+    : description;
 
   const response = await anthropic.messages.create({
     model: MODEL,
     max_tokens: MAX_TOKENS,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: "user", content: description }],
+    system: referenceImage ? SYSTEM_PROMPT + IMAGE_SYSTEM_PROMPT_ADDITION : SYSTEM_PROMPT,
+    messages: [{ role: "user", content }],
   });
 
   const textBlock = response.content.find(

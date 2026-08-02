@@ -915,6 +915,10 @@ create trigger set_updated_at before update on public.ai_missions
 -- sync on every edit (api/websites/edit/route.ts) so existing preview/
 -- download code needs no changes; the update policy below is what makes
 -- that possible — full version history lives in website_versions.
+-- reference_image_url: optional storage path (bucket "website-references",
+-- see below) to a reference image the user uploaded at generation time —
+-- Claude's vision input uses it to inform colors/style, it is NOT
+-- embedded into the generated html_content itself (see lib/website-builder.ts).
 -- ============================================================================
 
 drop table if exists public.user_websites cascade;
@@ -924,6 +928,7 @@ create table public.user_websites (
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
   html_content text not null,
+  reference_image_url text,
   created_at timestamptz not null default now()
 );
 
@@ -982,6 +987,39 @@ create policy "select_own_website_versions" on public.website_versions
 drop policy if exists "insert_own_website_versions" on public.website_versions;
 create policy "insert_own_website_versions" on public.website_versions
   for insert with check (auth.uid() = user_id);
+
+-- ============================================================================
+-- Website Builder reference images — Storage bucket "website-references"
+-- Private bucket; files are stored under a `${auth.uid()}/...` path prefix,
+-- which is what the RLS policies below check (storage.foldername(name))[1]
+-- against — the standard per-user-folder Supabase Storage pattern, same
+-- ownership model as every table above, just expressed on storage.objects
+-- instead of a public.* table. Read server-side (service role) when
+-- generating so the reference image can be sent to Claude's vision input;
+-- never made public.
+-- ============================================================================
+
+insert into storage.buckets (id, name, public)
+values ('website-references', 'website-references', false)
+on conflict (id) do nothing;
+
+drop policy if exists "select_own_website_references" on storage.objects;
+create policy "select_own_website_references" on storage.objects
+  for select using (
+    bucket_id = 'website-references' and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+drop policy if exists "insert_own_website_references" on storage.objects;
+create policy "insert_own_website_references" on storage.objects
+  for insert with check (
+    bucket_id = 'website-references' and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+drop policy if exists "delete_own_website_references" on storage.objects;
+create policy "delete_own_website_references" on storage.objects
+  for delete using (
+    bucket_id = 'website-references' and auth.uid()::text = (storage.foldername(name))[1]
+  );
 
 -- ============================================================================
 -- Energy check-ins — "AI Life Context" (see src/lib/user-context.ts) needs

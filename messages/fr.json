@@ -472,7 +472,12 @@
       "versionLabel": "v{number}",
       "versionOriginal": "Génération initiale",
       "viewingOldVersion": "Affichage de la v{number} (lecture seule).",
-      "backToLatest": "Retour à la dernière version"
+      "backToLatest": "Retour à la dernière version",
+      "imageLabel": "Image de référence (facultatif)",
+      "imageHelp": "Un logo, une photo de produit, ou une capture d'écran d'un style que vous aimez — JPG ou PNG, jusqu'à 5 Mo. Utilisée uniquement pour inspirer les couleurs/le style, elle ne sera pas intégrée au site généré.",
+      "imageRemove": "Retirer l'image",
+      "imageInvalidType": "Seules les images JPG ou PNG sont prises en charge.",
+      "imageTooLarge": "Image trop volumineuse — veuillez choisir un fichier de moins de 5 Mo."
     },
     "marketplace": {
       "title": "Marketplace",

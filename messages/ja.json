@@ -472,7 +472,12 @@
       "versionLabel": "v{number}",
       "versionOriginal": "初回生成",
       "viewingOldVersion": "v{number} を表示中（読み取り専用）。",
-      "backToLatest": "最新版に戻る"
+      "backToLatest": "最新版に戻る",
+      "imageLabel": "参考画像（任意）",
+      "imageHelp": "ロゴ、製品写真、または好きなスタイルのスクリーンショット — JPGまたはPNG、最大5MB。色/スタイルのインスピレーションにのみ使用され、生成されたサイトには埋め込まれません。",
+      "imageRemove": "画像を削除",
+      "imageInvalidType": "JPGまたはPNG画像のみサポートされています。",
+      "imageTooLarge": "画像が大きすぎます — 5MB未満のファイルを選択してください。"
     },
     "marketplace": {
       "title": "マーケットプレイス",

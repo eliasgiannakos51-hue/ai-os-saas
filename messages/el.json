@@ -472,7 +472,12 @@
       "versionLabel": "v{number}",
       "versionOriginal": "Αρχική δημιουργία",
       "viewingOldVersion": "Προβολή v{number} (μόνο ανάγνωση).",
-      "backToLatest": "Επιστροφή στην τελευταία"
+      "backToLatest": "Επιστροφή στην τελευταία",
+      "imageLabel": "Εικόνα αναφοράς (προαιρετικό)",
+      "imageHelp": "Λογότυπο, φωτογραφία προϊόντος, ή screenshot ενός στυλ που σου αρέσει — JPG ή PNG, έως 5MB. Χρησιμοποιείται μόνο για έμπνευση χρωμάτων/στυλ, δεν θα ενσωματωθεί στην παραγόμενη ιστοσελίδα.",
+      "imageRemove": "Αφαίρεση εικόνας",
+      "imageInvalidType": "Υποστηρίζονται μόνο εικόνες JPG ή PNG.",
+      "imageTooLarge": "Η εικόνα είναι πολύ μεγάλη — επίλεξε αρχείο κάτω από 5MB."
     },
     "marketplace": {
       "title": "Marketplace",

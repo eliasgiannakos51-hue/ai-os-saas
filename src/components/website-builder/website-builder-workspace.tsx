@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { Download, History, Layout, Loader2, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { Download, History, Image as ImageIcon, Layout, Loader2, Sparkles, Trash2, Wand2, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -11,11 +11,53 @@ import { useToast } from "@/components/toast/toast-context";
 import { EmptyState } from "@/components/empty-state";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { PaginationControls } from "@/components/pagination-controls";
+import {
+  ACCEPTED_REFERENCE_IMAGE_TYPES,
+  buildReferenceImagePath,
+  MAX_REFERENCE_IMAGE_BYTES,
+  REFERENCE_IMAGE_BUCKET,
+} from "@/lib/website-reference-image";
 import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 2000;
 const MAX_CHANGE_REQUEST_LENGTH = 1000;
+
+// Thumbnail preview for each list row — a real, live scaled-down render
+// of the site's own html_content (not a fake icon), so visually distinct
+// sites are actually recognizable at a glance without opening each one.
+// Renders the iframe at a normal desktop viewport size, then scales the
+// whole thing down with a CSS transform — the standard no-server-render
+// way to get a thumbnail from HTML the browser can already render itself.
+const THUMB_SOURCE_WIDTH = 1280;
+const THUMB_SOURCE_HEIGHT = 800;
+const THUMB_DISPLAY_WIDTH = 56;
+const THUMB_DISPLAY_HEIGHT = 40;
+const THUMB_SCALE = THUMB_DISPLAY_WIDTH / THUMB_SOURCE_WIDTH;
+
+function WebsiteThumbnail({ website }: { website: UserWebsite }) {
+  return (
+    <div
+      className="shrink-0 overflow-hidden rounded-md border border-border bg-white"
+      style={{ width: THUMB_DISPLAY_WIDTH, height: THUMB_DISPLAY_HEIGHT }}
+      aria-hidden="true"
+    >
+      <iframe
+        srcDoc={website.html_content}
+        sandbox=""
+        tabIndex={-1}
+        title=""
+        style={{
+          width: THUMB_SOURCE_WIDTH,
+          height: THUMB_SOURCE_HEIGHT,
+          transform: `scale(${THUMB_SCALE})`,
+          transformOrigin: "top left",
+          pointerEvents: "none",
+        }}
+      />
+    </div>
+  );
+}
 
 function downloadHtml(website: UserWebsite) {
   const blob = new Blob([website.html_content], { type: "text/html" });
@@ -46,6 +88,14 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
   const [previewId, setPreviewId] = useState<string | null>(initialWebsites[0]?.id ?? null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  // Optional reference image (logo/product photo/screenshot) — uploaded to
+  // Supabase Storage right before generation, then sent to Claude's vision
+  // input (see api/websites/generate/route.ts). Never embedded into the
+  // generated HTML itself — only informs color palette/style.
+  const [referenceImageFile, setReferenceImageFile] = useState<File | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
   // Post-generation editing — a second, separate AI call that takes the
   // website's existing html_content as context (see api/websites/edit)
   // instead of generating from scratch.
@@ -60,6 +110,28 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
   const [historyOpenFor, setHistoryOpenFor] = useState<string | null>(null);
   const [viewingVersion, setViewingVersion] = useState<WebsiteVersion | null>(null);
 
+  function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] ?? null;
+    e.target.value = ""; // allow re-selecting the same file after removing it
+    if (!file) return;
+
+    if (!ACCEPTED_REFERENCE_IMAGE_TYPES.includes(file.type as (typeof ACCEPTED_REFERENCE_IMAGE_TYPES)[number])) {
+      setImageError(t("imageInvalidType"));
+      return;
+    }
+    if (file.size > MAX_REFERENCE_IMAGE_BYTES) {
+      setImageError(t("imageTooLarge"));
+      return;
+    }
+    setImageError(null);
+    setReferenceImageFile(file);
+  }
+
+  function removeReferenceImage() {
+    setReferenceImageFile(null);
+    setImageError(null);
+  }
+
   async function handleGenerate(e: FormEvent) {
     e.preventDefault();
     const trimmedName = name.trim();
@@ -69,10 +141,30 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
     setGenerating(true);
     setError(null);
     try {
+      let referenceImagePath: string | null = null;
+      if (referenceImageFile) {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+          setError("Not authenticated.");
+          return;
+        }
+        const path = buildReferenceImagePath(user.id, referenceImageFile.name);
+        const { error: uploadError } = await supabase.storage
+          .from(REFERENCE_IMAGE_BUCKET)
+          .upload(path, referenceImageFile, { contentType: referenceImageFile.type });
+        if (uploadError) {
+          setError(getErrorMessage(uploadError, "Could not upload the reference image."));
+          return;
+        }
+        referenceImagePath = path;
+      }
+
       const res = await fetch("/api/websites/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: trimmedName, description: trimmedDescription }),
+        body: JSON.stringify({ name: trimmedName, description: trimmedDescription, referenceImagePath }),
       });
       const data = await res.json();
       void refreshCredits();
@@ -91,6 +183,7 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
       setPreviewId(record.id);
       setName("");
       setDescription("");
+      setReferenceImageFile(null);
       addToast(t("generated"));
     } catch {
       setError("Network error — please try again.");
@@ -243,6 +336,38 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
             placeholder={t("descriptionPlaceholder")}
             className="input min-h-24"
           />
+        </div>
+
+        <div>
+          <label htmlFor="website-reference-image" className="mb-1 block text-xs text-muted">
+            {t("imageLabel")}
+          </label>
+          {referenceImageFile ? (
+            <div className="flex items-center gap-2 rounded-lg border border-border bg-input px-3 py-2">
+              <ImageIcon className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
+              <span className="min-w-0 flex-1 truncate text-sm text-foreground">{referenceImageFile.name}</span>
+              <button
+                type="button"
+                onClick={removeReferenceImage}
+                aria-label={t("imageRemove")}
+                title={t("imageRemove")}
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            </div>
+          ) : (
+            <input
+              id="website-reference-image"
+              ref={imageInputRef}
+              type="file"
+              accept={ACCEPTED_REFERENCE_IMAGE_TYPES.join(",")}
+              onChange={handleImageChange}
+              className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border file:border-border file:bg-input file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-foreground hover:file:border-orange-500 hover:file:text-orange-400"
+            />
+          )}
+          <p className="mt-1 text-[11px] text-muted">{t("imageHelp")}</p>
+          {imageError && <p className="mt-1 text-[11px] text-red-400">{imageError}</p>}
         </div>
 
         {error && (
@@ -404,12 +529,15 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
                 <button
                   type="button"
                   onClick={() => selectWebsite(website.id)}
-                  className="min-w-0 flex-1 text-left"
+                  className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
                 >
-                  <p className="truncate text-sm font-medium text-foreground">{website.name}</p>
-                  <p className="text-xs text-muted" title={new Date(website.created_at).toLocaleString()} suppressHydrationWarning>
-                    {formatRelativeTime(website.created_at)}
-                  </p>
+                  <WebsiteThumbnail website={website} />
+                  <span className="min-w-0">
+                    <p className="truncate text-sm font-medium text-foreground">{website.name}</p>
+                    <p className="text-xs text-muted" title={new Date(website.created_at).toLocaleString()} suppressHydrationWarning>
+                      {formatRelativeTime(website.created_at)}
+                    </p>
+                  </span>
                 </button>
                 <div className="flex shrink-0 items-center gap-1">
                   <button

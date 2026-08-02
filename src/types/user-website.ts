@@ -3,6 +3,11 @@ export type UserWebsite = {
   user_id: string;
   name: string;
   html_content: string;
+  // Storage path (bucket "website-references"), not a public URL — the
+  // bucket is private. Null when the site was generated without a
+  // reference image. Only informs generation style/colors; never
+  // embedded into html_content itself (see lib/website-builder.ts).
+  reference_image_url: string | null;
   created_at: string;
 };
 

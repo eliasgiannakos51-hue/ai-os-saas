@@ -472,7 +472,12 @@
       "versionLabel": "الإصدار {number}",
       "versionOriginal": "الإنشاء الأصلي",
       "viewingOldVersion": "عرض الإصدار {number} (للقراءة فقط).",
-      "backToLatest": "العودة إلى الأحدث"
+      "backToLatest": "العودة إلى الأحدث",
+      "imageLabel": "صورة مرجعية (اختياري)",
+      "imageHelp": "شعار، صورة منتج، أو لقطة شاشة لأسلوب يعجبك — JPG أو PNG، حتى 5 ميجابايت. تُستخدم فقط لإلهام الألوان/الأسلوب، ولن يتم تضمينها في الموقع الناتج.",
+      "imageRemove": "إزالة الصورة",
+      "imageInvalidType": "يتم دعم صور JPG أو PNG فقط.",
+      "imageTooLarge": "الصورة كبيرة جدًا — يرجى اختيار ملف أقل من 5 ميجابايت."
     },
     "marketplace": {
       "title": "المتجر",

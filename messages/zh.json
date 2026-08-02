@@ -472,7 +472,12 @@
       "versionLabel": "v{number}",
       "versionOriginal": "初始生成",
       "viewingOldVersion": "正在查看 v{number}（只读）。",
-      "backToLatest": "返回最新版本"
+      "backToLatest": "返回最新版本",
+      "imageLabel": "参考图片（可选）",
+      "imageHelp": "标志、产品照片，或你喜欢的风格截图——JPG 或 PNG，最大 5MB。仅用于启发配色/风格，不会嵌入到生成的网站中。",
+      "imageRemove": "移除图片",
+      "imageInvalidType": "仅支持 JPG 或 PNG 图片。",
+      "imageTooLarge": "图片太大——请选择小于 5MB 的文件。"
     },
     "marketplace": {
       "title": "市场",

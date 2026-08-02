@@ -472,7 +472,12 @@
       "versionLabel": "v{number}",
       "versionOriginal": "Geração original",
       "viewingOldVersion": "Visualizando v{number} (somente leitura).",
-      "backToLatest": "Voltar para a mais recente"
+      "backToLatest": "Voltar para a mais recente",
+      "imageLabel": "Imagem de referência (opcional)",
+      "imageHelp": "Um logotipo, foto de produto, ou screenshot de um estilo que você gosta — JPG ou PNG, até 5MB. Usada apenas para inspirar cores/estilo, não será incorporada ao site gerado.",
+      "imageRemove": "Remover imagem",
+      "imageInvalidType": "Apenas imagens JPG ou PNG são suportadas.",
+      "imageTooLarge": "Imagem muito grande — escolha um arquivo com menos de 5MB."
     },
     "marketplace": {
       "title": "Marketplace",

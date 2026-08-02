@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { classifyWebsiteDescription, generateWebsiteHtml } from "@/lib/website-builder";
+import {
+  classifyWebsiteDescription,
+  generateWebsiteHtml,
+  isSupportedReferenceImageMediaType,
+  type ReferenceImage,
+} from "@/lib/website-builder";
+import { MAX_REFERENCE_IMAGE_BYTES, REFERENCE_IMAGE_BUCKET } from "@/lib/website-reference-image";
 import { FIRST_VERSION_NUMBER } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -34,10 +40,12 @@ export async function POST(request: Request) {
 
     let name: string;
     let description: string;
+    let referenceImagePath: string | null;
     try {
       const body = await request.json();
       name = typeof body?.name === "string" ? body.name.trim().slice(0, MAX_NAME_LENGTH) : "";
       description = typeof body?.description === "string" ? body.description.trim() : "";
+      referenceImagePath = typeof body?.referenceImagePath === "string" ? body.referenceImagePath : null;
     } catch {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
@@ -102,9 +110,43 @@ export async function POST(request: Request) {
       }
     }
 
+    // Reference image (optional) — downloaded via the request-scoped
+    // client, so Storage's RLS policies (supabase_schema.sql) already
+    // confirm this path belongs to the caller before anything is read.
+    // Best-effort: a broken/missing image should degrade to a normal
+    // text-only generation, not fail the whole request.
+    let referenceImage: ReferenceImage | undefined;
+    if (referenceImagePath) {
+      try {
+        const { data: imageBlob, error: downloadError } = await supabase.storage
+          .from(REFERENCE_IMAGE_BUCKET)
+          .download(referenceImagePath);
+
+        if (downloadError || !imageBlob) {
+          logApiError("/api/websites/generate", downloadError, { stage: "reference_image_download" });
+        } else if (imageBlob.size > MAX_REFERENCE_IMAGE_BYTES) {
+          logApiError("/api/websites/generate", "reference image exceeds size limit after upload", {
+            stage: "reference_image_size",
+          });
+        } else if (!isSupportedReferenceImageMediaType(imageBlob.type)) {
+          logApiError("/api/websites/generate", `unsupported reference image type: ${imageBlob.type}`, {
+            stage: "reference_image_type",
+          });
+        } else {
+          const arrayBuffer = await imageBlob.arrayBuffer();
+          referenceImage = {
+            base64: Buffer.from(arrayBuffer).toString("base64"),
+            mediaType: imageBlob.type,
+          };
+        }
+      } catch (err) {
+        logApiError("/api/websites/generate", err, { stage: "reference_image_download" });
+      }
+    }
+
     let htmlContent: string;
     try {
-      htmlContent = await generateWebsiteHtml(apiKey, description);
+      htmlContent = await generateWebsiteHtml(apiKey, description, referenceImage);
     } catch (err) {
       logApiError("/api/websites/generate", err, { stage: "anthropic_call" });
       const errMessage = err instanceof Error ? err.message : "The website generation request failed.";
@@ -113,7 +155,12 @@ export async function POST(request: Request) {
 
     const { data: record, error: insertError } = await supabase
       .from("user_websites")
-      .insert({ user_id: user.id, name, html_content: htmlContent })
+      .insert({
+        user_id: user.id,
+        name,
+        html_content: htmlContent,
+        reference_image_url: referenceImage ? referenceImagePath : null,
+      })
       .select()
       .single();
 

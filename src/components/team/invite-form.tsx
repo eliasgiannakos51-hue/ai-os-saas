@@ -6,10 +6,13 @@ import { useTranslations } from "next-intl";
 import { UserPlus } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
 
+const ROLE_OPTIONS = ["Marketing", "Developer", "Finance", "Sales", "Operations", "Other"];
+
 export function InviteForm() {
   const router = useRouter();
   const t = useTranslations("dashboard.team");
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -24,7 +27,7 @@ export function InviteForm() {
       const res = await fetch("/api/team/invite", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, role }),
       });
       const data = await res.json();
 
@@ -35,6 +38,7 @@ export function InviteForm() {
 
       setSuccess(t("inviteSent", { email }));
       setEmail("");
+      setRole("");
       router.refresh();
     } catch {
       setError("Network error — please try again.");
@@ -46,6 +50,7 @@ export function InviteForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-border bg-panel p-5">
       <h2 className="text-sm font-semibold text-foreground">{t("inviteTitle")}</h2>
+      <p className="text-xs leading-relaxed text-muted">{t("workUseDisclaimer")}</p>
       <div className="flex flex-col gap-2 sm:flex-row">
         <input
           type="email"
@@ -55,6 +60,22 @@ export function InviteForm() {
           placeholder={t("emailPlaceholder")}
           className="input flex-1"
         />
+        <select
+          required
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          aria-label={t("roleLabel")}
+          className="input sm:w-44"
+        >
+          <option value="" disabled>
+            {t("rolePlaceholder")}
+          </option>
+          {ROLE_OPTIONS.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
         <button
           type="submit"
           disabled={loading}

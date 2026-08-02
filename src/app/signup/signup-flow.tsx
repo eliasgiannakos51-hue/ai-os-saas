@@ -55,6 +55,15 @@ export function SignupFlow() {
 
   const [step, setStep] = useState<Step>(1);
   const [selectedPlan, setSelectedPlan] = useState<PlanSlug>("free");
+  // Where to send Stripe's checkout success redirect once this brand-new
+  // account's own checkout call (below) completes — read from ?successPath=
+  // so SubscribeButton's 401-redirect-to-signup path (see
+  // components/billing/subscribe-button.tsx) can carry a caller-specific
+  // destination (e.g. the "Set Up Team" pricing card sending new signups
+  // straight to /dashboard/team) through account creation. Falls back to
+  // the existing default when absent, so every other entry into signup is
+  // unaffected.
+  const [successPath, setSuccessPath] = useState<string | undefined>(undefined);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [country, setCountry] = useState("");
@@ -75,6 +84,10 @@ export function SignupFlow() {
     if (planParam && selectablePlans.some((p) => p.slug === planParam)) {
       setSelectedPlan(planParam as PlanSlug);
       setStep(2);
+    }
+    const successPathParam = params.get("successPath");
+    if (successPathParam) {
+      setSuccessPath(successPathParam);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -155,7 +168,7 @@ export function SignupFlow() {
         body: JSON.stringify({
           plan: selectedPlan,
           discountCode: discountCode.trim() || undefined,
-          successPath: "/dashboard/overview",
+          successPath: successPath ?? "/dashboard/overview",
         }),
       });
       const checkoutData = (await readRawResponse(checkoutRes, "/api/checkout")) as {

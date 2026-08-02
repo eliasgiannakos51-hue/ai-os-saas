@@ -95,7 +95,11 @@
       "aiMemory": "Memória IA",
       "teamCollaboration": "Colaboração em equipe",
       "teamSeatsAddOn": "Vagas de equipe"
-    }
+    },
+    "businessTitle": "Business",
+    "businessSubtitle": "Para equipes que constroem juntas",
+    "businessExplanation": "Escolha Professional ou Ultimate como seu plano base — ambos desbloqueiam a colaboração em equipe. Depois convide membros da equipe: cada um recebe acesso completo ao nível do seu plano, por +{price}/membro/mês no Professional, ou incluído gratuitamente no Ultimate.",
+    "setUpTeam": "Configurar Equipe"
   },
   "roadmap": {
     "title": "Roteiro",
@@ -311,7 +315,13 @@
       "joined": "Entrou {time}",
       "removeConfirm": "Remover {email} da sua equipe? A pessoa perderá o acesso ao seu plano imediatamente.",
       "removeLabel": "Remover {email}",
-      "removeTitle": "Remover membro"
+      "removeTitle": "Remover membro",
+      "descriptionIncluded": "No plano {plan} — os membros convidados recebem acesso completo a este nível, incluído sem custo adicional.",
+      "setupSuccessTitle": "Sua equipe está pronta!",
+      "setupSuccessBody": "Convide seu primeiro membro de equipe abaixo.",
+      "roleLabel": "Função / Cargo",
+      "rolePlaceholder": "O que essa pessoa faz?",
+      "workUseDisclaimer": "As vagas de equipe destinam-se a funcionários ou colaboradores reais que trabalham no seu negócio — não para uso pessoal/familiar. Ao convidar um membro, você confirma que ele faz parte do trabalho da sua equipe."
     },
     "memory": {
       "title": "Memória IA",

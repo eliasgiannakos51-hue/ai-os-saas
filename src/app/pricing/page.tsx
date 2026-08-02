@@ -3,9 +3,11 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Check, X } from "lucide-react";
 import { Logo } from "@/components/logo";
-import { PLANS, TEAM_SEAT_PRICE, CURRENCY_SYMBOL, type Plan, type PaidPlanSlug } from "@/lib/billing/plans";
+import { PLANS, TEAM_SEAT_PRICE, CURRENCY_SYMBOL, getPlan, type Plan, type PaidPlanSlug } from "@/lib/billing/plans";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
 import { AuthBackground } from "@/components/auth/auth-background";
+import { createClient } from "@/lib/supabase/server";
+import { isAdminEmail } from "@/lib/admin";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -61,6 +63,20 @@ function ComparisonCellContent({ cell }: { cell: ComparisonCell }) {
 
 export default async function PricingPage() {
   const t = await getTranslations("pricing");
+
+  // Determines whether "Set Up Team" below can skip straight to
+  // /dashboard/team, or needs to route through checkout first — mirrors
+  // the exact gate dashboard/team/page.tsx and api/team/invite/route.ts
+  // already enforce server-side (Professional+ owned subscription), so
+  // this is purely a UX shortcut, not a new access rule.
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isAdmin = isAdminEmail(user?.email);
+  const tier = isAdmin ? "enterprise" : (user?.user_metadata?.subscription_tier as string | undefined);
+  const ownsSubscription = isAdmin || Boolean(user?.user_metadata?.stripe_subscription_id);
+  const hasTeamCapablePlan = Boolean(ownsSubscription && tier && getPlan(tier)?.capabilities.teamCollaboration);
 
   return (
     <main className="relative min-h-screen px-4 py-16 text-foreground sm:px-6">
@@ -163,6 +179,37 @@ export default async function PricingPage() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Business "card" — same visual language as the 6 plan cards above,
+            kept in its own grid row (same wrapper classes) instead of a 7th
+            slot in the xl:grid-cols-6 grid so that grid's column math for
+            the existing 6 plans isn't disturbed. */}
+        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <div className="relative flex flex-col rounded-2xl border border-border bg-panel p-6">
+            <h2 className="text-sm font-semibold text-orange-400">{t("businessTitle")}</h2>
+            <p className="mt-3 text-lg font-bold text-foreground">{t("businessSubtitle")}</p>
+            <p className="mt-3 flex-1 text-xs leading-relaxed text-muted">
+              {t("businessExplanation", { price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}` })}
+            </p>
+            <div className="mt-6">
+              {hasTeamCapablePlan ? (
+                <Link
+                  href="/dashboard/team"
+                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
+                >
+                  {t("setUpTeam")}
+                </Link>
+              ) : (
+                <SubscribeButton
+                  plan="professional"
+                  label={t("setUpTeam")}
+                  successPath="/dashboard/team?setup=success"
+                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-0"
+                />
+              )}
+            </div>
+          </div>
         </div>
 
         <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-border bg-panel p-6 text-center">

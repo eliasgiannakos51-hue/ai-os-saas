@@ -95,7 +95,11 @@
       "aiMemory": "AI 记忆",
       "teamCollaboration": "团队协作",
       "teamSeatsAddOn": "团队席位"
-    }
+    },
+    "businessTitle": "商业版",
+    "businessSubtitle": "为共同打造的团队而生",
+    "businessExplanation": "选择 Professional 或 Ultimate 作为您的基础方案 — 两者都可解锁团队协作。然后邀请团队成员:每位成员都可获得与您方案同等级别的完整访问权限,Professional 方案每位成员每月 +{price},Ultimate 方案则免费包含。",
+    "setUpTeam": "设置团队"
   },
   "roadmap": {
     "title": "路线图",
@@ -311,7 +315,13 @@
       "joined": "加入于 {time}",
       "removeConfirm": "确定要将 {email} 从团队中移除吗？对方将立即失去对你方案的访问权限。",
       "removeLabel": "移除 {email}",
-      "removeTitle": "移除成员"
+      "removeTitle": "移除成员",
+      "descriptionIncluded": "在 {plan} 方案下 — 受邀成员可获得该等级的完整访问权限,无需额外付费。",
+      "setupSuccessTitle": "您的团队已准备就绪!",
+      "setupSuccessBody": "在下方邀请您的第一位团队成员。",
+      "roleLabel": "角色 / 职位",
+      "rolePlaceholder": "此人负责什么工作?",
+      "workUseDisclaimer": "团队席位仅供实际在您企业工作的员工或合作者使用 — 不可用于个人/家庭用途。邀请成员即表示您确认其为团队工作的一部分。"
     },
     "memory": {
       "title": "AI 记忆",

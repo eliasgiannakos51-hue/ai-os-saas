@@ -95,7 +95,11 @@
       "aiMemory": "AI Memory",
       "teamCollaboration": "Team collaboration",
       "teamSeatsAddOn": "Team seats"
-    }
+    },
+    "businessTitle": "Business",
+    "businessSubtitle": "For teams building together",
+    "businessExplanation": "Choose Professional or Ultimate as your base plan — both unlock team collaboration. Then invite team members: each one gets full access at your plan's tier, for +{price}/member/month on Professional, or included free on Ultimate.",
+    "setUpTeam": "Set Up Team"
   },
   "roadmap": {
     "title": "Roadmap",
@@ -311,7 +315,13 @@
       "joined": "Joined {time}",
       "removeConfirm": "Remove {email} from your team? They'll immediately lose access to your plan.",
       "removeLabel": "Remove {email}",
-      "removeTitle": "Remove member"
+      "removeTitle": "Remove member",
+      "descriptionIncluded": "On the {plan} plan — invited members get full access at this tier, included at no extra charge.",
+      "setupSuccessTitle": "Your team is ready!",
+      "setupSuccessBody": "Invite your first team member below.",
+      "roleLabel": "Role / Position",
+      "rolePlaceholder": "What does this person do?",
+      "workUseDisclaimer": "Team seats are intended for actual employees or collaborators working on your business — not personal/family use. By inviting a member, you confirm they are part of your team's work."
     },
     "memory": {
       "title": "AI Memory",

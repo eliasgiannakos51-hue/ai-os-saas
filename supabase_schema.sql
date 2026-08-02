@@ -413,6 +413,11 @@ create table public.team_members (
   member_email text not null,
   member_user_id uuid references auth.users(id) on delete set null,
   status text not null default 'invited' check (status in ('invited', 'active')),
+  -- What this person does on the team (e.g. "Marketing", "Developer") —
+  -- collected at invite time (see components/team/invite-form.tsx) as part
+  -- of confirming the seat is for real work, not personal/family use.
+  -- Nullable since invites sent before this field existed have none.
+  role text,
   invited_at timestamptz not null default now(),
   joined_at timestamptz,
   unique (owner_id, member_email)

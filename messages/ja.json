@@ -95,7 +95,11 @@
       "aiMemory": "AI メモリー",
       "teamCollaboration": "チームコラボレーション",
       "teamSeatsAddOn": "チームシート"
-    }
+    },
+    "businessTitle": "ビジネス",
+    "businessSubtitle": "チームで共に構築する",
+    "businessExplanation": "ベースプランとしてProfessionalまたはUltimateを選択してください — どちらもチームコラボレーションを利用できます。その後チームメンバーを招待しましょう。各メンバーはあなたのプランと同じ機能に完全アクセスでき、Professionalでは+{price}/メンバー/月、Ultimateでは無料で利用できます。",
+    "setUpTeam": "チームを設定"
   },
   "roadmap": {
     "title": "ロードマップ",
@@ -311,7 +315,13 @@
       "joined": "{time} に参加",
       "removeConfirm": "{email} をチームから削除しますか？ 直ちにあなたのプランへのアクセス権を失います。",
       "removeLabel": "{email} を削除",
-      "removeTitle": "メンバーを削除"
+      "removeTitle": "メンバーを削除",
+      "descriptionIncluded": "{plan}プランでは、招待されたメンバーはこの階層に追加料金なしで完全アクセスできます。",
+      "setupSuccessTitle": "チームの準備ができました!",
+      "setupSuccessBody": "以下から最初のチームメンバーを招待してください。",
+      "roleLabel": "役割 / 職種",
+      "rolePlaceholder": "この人は何をしますか?",
+      "workUseDisclaimer": "チームシートは、実際にビジネスに従事する従業員または協力者のためのものです — 個人・家族用ではありません。メンバーを招待することで、その人がチームの業務の一員であることを確認したものとみなされます。"
     },
     "memory": {
       "title": "AI メモリー",

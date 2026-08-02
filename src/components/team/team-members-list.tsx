@@ -12,6 +12,7 @@ export type TeamMember = {
   id: string;
   member_email: string;
   status: "invited" | "active";
+  role: string | null;
   invited_at: string;
   joined_at: string | null;
 };
@@ -73,6 +74,9 @@ export function TeamMembersList({ members: initialMembers }: { members: TeamMemb
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-foreground">
               {member.member_email}
+              {member.role && (
+                <span className="ml-2 text-xs font-normal text-muted">— {member.role}</span>
+              )}
             </p>
             <p
               className="text-xs text-muted"

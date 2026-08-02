@@ -95,7 +95,11 @@
       "aiMemory": "Mémoire IA",
       "teamCollaboration": "Collaboration d'équipe",
       "teamSeatsAddOn": "Sièges d'équipe"
-    }
+    },
+    "businessTitle": "Business",
+    "businessSubtitle": "Pour les équipes qui construisent ensemble",
+    "businessExplanation": "Choisissez Professional ou Ultimate comme plan de base — les deux débloquent la collaboration d'équipe. Invitez ensuite des membres : chacun obtient un accès complet au niveau de votre plan, pour +{price}/membre/mois sur Professional, ou inclus gratuitement sur Ultimate.",
+    "setUpTeam": "Configurer l'équipe"
   },
   "roadmap": {
     "title": "Feuille de route",
@@ -311,7 +315,13 @@
       "joined": "A rejoint {time}",
       "removeConfirm": "Retirer {email} de votre équipe ? Il/elle perdra immédiatement l'accès à votre forfait.",
       "removeLabel": "Retirer {email}",
-      "removeTitle": "Retirer le membre"
+      "removeTitle": "Retirer le membre",
+      "descriptionIncluded": "Sur le plan {plan} — les membres invités obtiennent un accès complet à ce niveau, inclus sans frais supplémentaires.",
+      "setupSuccessTitle": "Votre équipe est prête !",
+      "setupSuccessBody": "Invitez votre premier membre d'équipe ci-dessous.",
+      "roleLabel": "Rôle / Poste",
+      "rolePlaceholder": "Que fait cette personne ?",
+      "workUseDisclaimer": "Les sièges d'équipe sont destinés aux employés ou collaborateurs réels travaillant sur votre activité — pas à un usage personnel/familial. En invitant un membre, vous confirmez qu'il fait partie du travail de votre équipe."
     },
     "memory": {
       "title": "Mémoire IA",

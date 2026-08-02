@@ -95,7 +95,11 @@
       "aiMemory": "KI-Gedächtnis",
       "teamCollaboration": "Teamzusammenarbeit",
       "teamSeatsAddOn": "Team-Plätze"
-    }
+    },
+    "businessTitle": "Business",
+    "businessSubtitle": "Für Teams, die gemeinsam aufbauen",
+    "businessExplanation": "Wähle Professional oder Ultimate als Basisplan — beide schalten die Teamzusammenarbeit frei. Lade dann Teammitglieder ein: Jedes Mitglied erhält vollen Zugriff auf der Stufe deines Plans, für +{price}/Mitglied/Monat bei Professional, oder kostenlos inklusive bei Ultimate.",
+    "setUpTeam": "Team einrichten"
   },
   "roadmap": {
     "title": "Roadmap",
@@ -311,7 +315,13 @@
       "joined": "Beigetreten {time}",
       "removeConfirm": "{email} aus deinem Team entfernen? Der Zugriff auf deinen Plan geht sofort verloren.",
       "removeLabel": "{email} entfernen",
-      "removeTitle": "Mitglied entfernen"
+      "removeTitle": "Mitglied entfernen",
+      "descriptionIncluded": "Im {plan}-Plan erhalten eingeladene Mitglieder vollen Zugriff auf dieser Stufe, ohne zusätzliche Kosten.",
+      "setupSuccessTitle": "Dein Team ist bereit!",
+      "setupSuccessBody": "Lade unten dein erstes Teammitglied ein.",
+      "roleLabel": "Rolle / Position",
+      "rolePlaceholder": "Was macht diese Person?",
+      "workUseDisclaimer": "Teamplätze sind für tatsächliche Mitarbeiter oder Mitarbeitende gedacht, die an deinem Unternehmen arbeiten — nicht für den persönlichen/familiären Gebrauch. Mit der Einladung eines Mitglieds bestätigst du, dass es Teil der Arbeit deines Teams ist."
     },
     "memory": {
       "title": "KI-Gedächtnis",

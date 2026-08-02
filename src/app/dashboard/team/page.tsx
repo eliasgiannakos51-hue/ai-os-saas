@@ -13,7 +13,11 @@ export const metadata: Metadata = {
   title: "Team",
 };
 
-export default async function TeamPage() {
+export default async function TeamPage({
+  searchParams,
+}: {
+  searchParams: { setup?: string };
+}) {
   const t = await getTranslations("dashboard.team");
   const supabase = createClient();
 
@@ -31,22 +35,32 @@ export default async function TeamPage() {
   const tier = isAdmin ? "enterprise" : (user.user_metadata?.subscription_tier as string | undefined);
   const ownsSubscription = isAdmin || Boolean(user.user_metadata?.stripe_subscription_id);
 
+  // Arriving here straight from a successful "Set Up Team" checkout
+  // (pricing page's Business card) — the Stripe webhook that writes
+  // subscription_tier/stripe_subscription_id onto user_metadata may not
+  // have landed yet by the time Stripe redirects the browser back, so the
+  // strict gate below is bypassed for this one visit. /api/team/invite
+  // enforces the real access check server-side regardless, so a user whose
+  // webhook is unusually slow just sees "try again in a moment" there
+  // instead of being bounced to Settings right after paying.
+  const justSetUp = searchParams?.setup === "success";
+
   // Team collaboration is a Professional+ capability (see
   // lib/billing/plans.ts's PlanCapabilities.teamCollaboration) and for plan
   // owners only — a team member who joined via invite has subscription_tier
   // set too, but no stripe_subscription_id of their own, so this correctly
   // excludes them.
-  if (!ownsSubscription || !tier || !getPlan(tier)?.capabilities.teamCollaboration) {
+  if (!justSetUp && (!ownsSubscription || !tier || !getPlan(tier)?.capabilities.teamCollaboration)) {
     redirect("/dashboard/settings");
   }
 
   const { data: members } = await supabase
     .from("team_members")
-    .select("id, member_email, status, invited_at, joined_at")
+    .select("id, member_email, status, role, invited_at, joined_at")
     .eq("owner_id", user.id)
     .order("invited_at", { ascending: false });
 
-  const plan = getPlan(tier);
+  const plan = tier ? getPlan(tier) : undefined;
 
   return (
     <main className="min-h-full bg-dot-grid">
@@ -54,11 +68,22 @@ export default async function TeamPage() {
         <PageHeader
           icon={Users}
           title={t("title")}
-          description={t("description", {
-            plan: plan?.name ?? tier,
-            price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}`,
-          })}
+          description={
+            plan?.teamSeatsIncluded
+              ? t("descriptionIncluded", { plan: plan?.name ?? tier ?? "" })
+              : t("description", {
+                  plan: plan?.name ?? tier ?? "",
+                  price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}`,
+                })
+          }
         />
+
+        {justSetUp && (
+          <div className="mb-6 rounded-2xl border border-emerald-800 bg-emerald-950/30 px-4 py-3 text-sm text-emerald-400">
+            <p className="font-semibold">{t("setupSuccessTitle")}</p>
+            <p className="mt-1 text-xs text-emerald-400/80">{t("setupSuccessBody")}</p>
+          </div>
+        )}
 
         <div className="mb-6">
           <InviteForm />

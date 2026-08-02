@@ -12,10 +12,17 @@ export function SubscribeButton({
   plan,
   label,
   className,
+  successPath,
 }: {
   plan: PaidPlanSlug;
   label: string;
   className: string;
+  // Where Stripe sends the browser back after a successful payment —
+  // omit to keep the existing default (/dashboard/settings?checkout=success,
+  // set server-side in api/checkout). Forwarded to /signup's own checkout
+  // call too when the user isn't logged in yet (see the ?successPath= read
+  // in signup-flow.tsx), so the destination survives account creation.
+  successPath?: string;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -28,11 +35,13 @@ export function SubscribeButton({
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ plan, ...(successPath ? { successPath } : {}) }),
       });
 
       if (res.status === 401) {
-        router.push(`/signup?plan=${plan}`);
+        const params = new URLSearchParams({ plan });
+        if (successPath) params.set("successPath", successPath);
+        router.push(`/signup?${params.toString()}`);
         return;
       }
 

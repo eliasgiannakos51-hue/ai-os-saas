@@ -95,7 +95,11 @@
       "aiMemory": "Memoria AI",
       "teamCollaboration": "Colaboración en equipo",
       "teamSeatsAddOn": "Puestos de equipo"
-    }
+    },
+    "businessTitle": "Business",
+    "businessSubtitle": "Para equipos que construyen juntos",
+    "businessExplanation": "Elige Professional o Ultimate como tu plan base — ambos desbloquean la colaboración en equipo. Luego invita a miembros del equipo: cada uno obtiene acceso completo al nivel de tu plan, por +{price}/miembro/mes en Professional, o incluido gratis en Ultimate.",
+    "setUpTeam": "Configurar Equipo"
   },
   "roadmap": {
     "title": "Hoja de ruta",
@@ -311,7 +315,13 @@
       "joined": "Se unió {time}",
       "removeConfirm": "¿Quitar a {email} de tu equipo? Perderá el acceso a tu plan de inmediato.",
       "removeLabel": "Quitar a {email}",
-      "removeTitle": "Quitar miembro"
+      "removeTitle": "Quitar miembro",
+      "descriptionIncluded": "En el plan {plan} — los miembros invitados obtienen acceso completo a este nivel, incluido sin cargo adicional.",
+      "setupSuccessTitle": "¡Tu equipo está listo!",
+      "setupSuccessBody": "Invita a tu primer miembro del equipo a continuación.",
+      "roleLabel": "Rol / Puesto",
+      "rolePlaceholder": "¿Qué hace esta persona?",
+      "workUseDisclaimer": "Los puestos de equipo están destinados a empleados o colaboradores reales que trabajan en tu negocio, no para uso personal/familiar. Al invitar a un miembro, confirmas que forma parte del trabajo de tu equipo."
     },
     "memory": {
       "title": "Memoria AI",

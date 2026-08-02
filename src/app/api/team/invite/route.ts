@@ -12,9 +12,11 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export async function POST(request: Request) {
   try {
     let email: string;
+    let role: string;
     try {
       const body = await request.json();
       email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
+      role = typeof body?.role === "string" ? body.role.trim().slice(0, 100) : "";
     } catch {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
@@ -22,6 +24,16 @@ export async function POST(request: Request) {
     if (!email || email.length > 254 || !EMAIL_RE.test(email)) {
       return NextResponse.json(
         { ok: false, error: "Enter a valid email address." },
+        { status: 400 }
+      );
+    }
+
+    // Required — see invite-form.tsx's work-use disclaimer shown right
+    // above this field: naming a real role/position is the (non-technical)
+    // confirmation that the seat is for actual team work, not personal use.
+    if (!role) {
+      return NextResponse.json(
+        { ok: false, error: "Please select what this person does on your team." },
         { status: 400 }
       );
     }
@@ -58,7 +70,7 @@ export async function POST(request: Request) {
 
     const { error: insertError } = await supabase
       .from("team_members")
-      .insert({ owner_id: user.id, member_email: email });
+      .insert({ owner_id: user.id, member_email: email, role });
 
     if (insertError) {
       // Unique violation on (owner_id, member_email) — already invited.

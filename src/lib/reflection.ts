@@ -41,7 +41,6 @@ export type WeeklyReflectionStats = {
 // runs.
 export async function loadWeeklyReflectionStats(
   supabase: SupabaseClient,
-  userId: string,
   // Trading Workflow's "Trading Reflection" (see
   // reflection-generator.tsx's `scope` prop) restricts which modules get
   // scanned — undefined (every other caller) scans every LINKABLE_MODULES

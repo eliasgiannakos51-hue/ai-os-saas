@@ -76,7 +76,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const stats = await loadWeeklyReflectionStats(supabase, user.id, tableFilter);
+    const stats = await loadWeeklyReflectionStats(supabase, tableFilter);
     const userMessage = buildReflectionUserMessage(stats);
 
     let reflection: string;

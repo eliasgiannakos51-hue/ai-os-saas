@@ -374,6 +374,7 @@
     },
     "mission": {
       "title": "مركز التحكم بالمهام",
+      "started": "بدأت {time}",
       "description": "Planner ← Builder ← Reviewer — صف هدفًا، احصل على خطة، ثم ابنِها خطوة بخطوة بالذكاء الاصطناعي.",
       "goalLabel": "ما هو هدفك؟",
       "goalPlaceholder": "مثال: أريد بدء متجر إلكتروني للمجوهرات اليدوية",

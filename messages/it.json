@@ -49,11 +49,11 @@
       "presentations": "Presentazioni",
       "campaigns": "Campagne",
       "analytics": "Analytics",
-      "finance": "Finanza",
+        "finance": "Agente Finanza",
       "content": "Marketing",
       "sales": "CRM",
       "products": "Prodotti",
-      "research": "Conoscenza",
+        "research": "Agente Ricerca",
       "learning": "Apprendimento",
       "ideas": "Idee",
       "competitors": "Concorrenti",
@@ -374,6 +374,7 @@
     },
     "mission": {
       "title": "Centro Missioni",
+      "started": "Iniziato {time}",
       "description": "Planner → Builder → Reviewer — descrivi un obiettivo, ottieni un piano, poi costruiscilo passo dopo passo con l'AI.",
       "goalLabel": "Qual è il tuo obiettivo?",
       "goalPlaceholder": "es. Voglio avviare un negozio online di gioielli fatti a mano",
@@ -394,9 +395,9 @@
       "agentRoleLabel": "Ruolo agent",
       "agentRole": {
         "general": "Generale",
-        "marketing": "Marketing Agent",
-        "finance": "Finance Agent",
-        "research": "Research Agent"
+        "marketing": "Agente Marketing",
+        "finance": "Agente Finanza",
+        "research": "Agente Ricerca"
       },
       "builtByAgent": "Creato da {agent}"
     },

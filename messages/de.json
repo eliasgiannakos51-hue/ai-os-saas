@@ -374,6 +374,7 @@
     },
     "mission": {
       "title": "Missionskontrolle",
+      "started": "Gestartet {time}",
       "description": "Planner → Builder → Reviewer — beschreibe ein Ziel, erhalte einen Plan und baue ihn dann Schritt für Schritt mit KI auf.",
       "goalLabel": "Was ist dein Ziel?",
       "goalPlaceholder": "z. B. Ich möchte einen Online-Shop für handgefertigten Schmuck starten",

@@ -374,6 +374,7 @@
     },
     "mission": {
       "title": "Mission Control",
+      "started": "Started {time}",
       "description": "Planner → Builder → Reviewer — describe a goal, get a plan, then build it step by step with AI.",
       "goalLabel": "What's your goal?",
       "goalPlaceholder": "e.g. I want to start an online store for handmade jewelry",

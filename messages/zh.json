@@ -374,6 +374,7 @@
     },
     "mission": {
       "title": "任务控制中心",
+      "started": "开始于 {time}",
       "description": "Planner → Builder → Reviewer — 描述一个目标,获取计划,然后用 AI 逐步构建。",
       "goalLabel": "你的目标是什么?",
       "goalPlaceholder": "例如:我想开一家手工珠宝在线商店",

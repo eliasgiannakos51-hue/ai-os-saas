@@ -159,7 +159,7 @@ export function MissionCard({ mission }: { mission: Mission }) {
         <div className="min-w-0">
           <h3 className="text-sm font-semibold text-foreground">{mission.goal}</h3>
           <p className="mt-0.5 text-xs text-muted" title={new Date(mission.created_at).toLocaleString()} suppressHydrationWarning>
-            Started {formatRelativeTime(mission.created_at)}
+            {t("started", { time: formatRelativeTime(mission.created_at) })}
           </p>
         </div>
         <span

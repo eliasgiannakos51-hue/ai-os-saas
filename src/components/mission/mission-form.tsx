@@ -2,10 +2,11 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Rocket } from "lucide-react";
+import { Loader2, Rocket } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useCredits } from "@/components/credits/credits-context";
+import { useToast } from "@/components/toast/toast-context";
 
 const MAX_GOAL_LENGTH = 500;
 
@@ -18,6 +19,7 @@ export function MissionForm() {
   const t = useTranslations("dashboard.mission");
   const router = useRouter();
   const { refresh: refreshCredits } = useCredits();
+  const { addToast } = useToast();
   const [goal, setGoal] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,21 +38,28 @@ export function MissionForm() {
         body: JSON.stringify({ goal: trimmed }),
       });
       const data = await res.json();
+      void refreshCredits();
 
       if (!res.ok || !data.ok) {
-        setError(getErrorMessage(data?.error, "Could not create a plan."));
+        const message = getErrorMessage(data?.error, "Could not create a plan.");
+        setError(message);
+        addToast(`✗ ${message}`, "error");
         return;
       }
       if (!data.planned) {
-        setError(data.message ?? "Could not create a plan.");
+        const message = data.message ?? "Could not create a plan.";
+        setError(message);
+        addToast(`✗ ${message}`, "error");
         return;
       }
 
       setGoal("");
-      void refreshCredits();
+      addToast(`✓ ${t("createPlan")}`);
       router.refresh();
     } catch {
-      setError("Network error — please try again.");
+      const message = "Network error — please try again.";
+      setError(message);
+      addToast(`✗ ${message}`, "error");
     } finally {
       setLoading(false);
     }
@@ -77,7 +86,11 @@ export function MissionForm() {
           disabled={loading || !goal.trim()}
           className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
         >
-          <Rocket className="h-4 w-4" />
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+          ) : (
+            <Rocket className="h-4 w-4" aria-hidden="true" />
+          )}
           {loading ? t("planning") : t("createPlan")}
         </button>
       </div>

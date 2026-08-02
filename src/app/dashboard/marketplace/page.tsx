@@ -35,15 +35,24 @@ export default async function MarketplacePage() {
 
         <EmptyState icon={Store}>
           <p>{t("emptyState")}</p>
-          <button
-            type="button"
-            disabled
-            title={t("comingSoon")}
-            aria-disabled="true"
-            className="mt-4 inline-flex min-h-[44px] cursor-not-allowed items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-muted opacity-60 sm:min-h-0"
-          >
-            {t("publishButton")}
-          </button>
+          <div className="mt-4 flex flex-col items-center gap-2">
+            <button
+              type="button"
+              disabled
+              title={t("comingSoon")}
+              aria-disabled="true"
+              className="inline-flex min-h-[44px] cursor-not-allowed items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-muted opacity-60 sm:min-h-0"
+            >
+              {t("publishButton")}
+            </button>
+            {/* Redundant with the button's `title` tooltip on purpose — a
+                hover-only tooltip is invisible on touch devices, so the
+                reason it's disabled needs to be visible without a hover
+                for mobile users too. */}
+            <span className="inline-flex items-center rounded-full border border-orange-500/40 bg-orange-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange-400">
+              {t("comingSoon")}
+            </span>
+          </div>
         </EmptyState>
       </div>
     </main>

@@ -374,6 +374,7 @@
     },
     "mission": {
       "title": "Centro de Misión",
+      "started": "Iniciado {time}",
       "description": "Planner → Builder → Reviewer — describe un objetivo, obtén un plan y luego constrúyelo paso a paso con IA.",
       "goalLabel": "¿Cuál es tu objetivo?",
       "goalPlaceholder": "ej. Quiero abrir una tienda online de joyería artesanal",

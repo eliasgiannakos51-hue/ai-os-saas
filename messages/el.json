@@ -49,11 +49,11 @@
       "presentations": "Παρουσιάσεις",
       "campaigns": "Καμπάνιες",
       "analytics": "Αναλυτικά",
-      "finance": "Οικονομικά",
+        "finance": "Πράκτορας Οικονομικών",
       "content": "Marketing",
       "sales": "CRM",
       "products": "Προϊόντα",
-      "research": "Γνώση",
+        "research": "Πράκτορας Έρευνας",
       "learning": "Εκμάθηση",
       "ideas": "Ιδέες",
       "competitors": "Ανταγωνιστές",
@@ -374,6 +374,7 @@
     },
     "mission": {
       "title": "Κέντρο Αποστολών",
+      "started": "Ξεκίνησε {time}",
       "description": "Planner → Builder → Reviewer — περίγραψε έναν στόχο, πάρε ένα σχέδιο, μετά χτίσε το βήμα-βήμα με AI.",
       "goalLabel": "Ποιος είναι ο στόχος σου;",
       "goalPlaceholder": "π.χ. Θέλω να ξεκινήσω online store για χειροποίητα κοσμήματα",
@@ -394,9 +395,9 @@
       "agentRoleLabel": "Ρόλος agent",
       "agentRole": {
         "general": "Γενικός",
-        "marketing": "Marketing Agent",
-        "finance": "Finance Agent",
-        "research": "Research Agent"
+        "marketing": "Πράκτορας Μάρκετινγκ",
+        "finance": "Πράκτορας Οικονομικών",
+        "research": "Πράκτορας Έρευνας"
       },
       "builtByAgent": "Χτίστηκε από {agent}"
     },

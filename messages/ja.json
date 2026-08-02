@@ -374,6 +374,7 @@
     },
     "mission": {
       "title": "ミッションコントロール",
+      "started": "開始: {time}",
       "description": "Planner → Builder → Reviewer — 目標を記述すると計画が作成され、AIで一歩ずつ構築できます。",
       "goalLabel": "あなたの目標は?",
       "goalPlaceholder": "例: 手作りジュエリーのオンラインストアを始めたい",

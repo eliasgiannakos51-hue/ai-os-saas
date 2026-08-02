@@ -374,6 +374,7 @@
     },
     "mission": {
       "title": "Controle de Missão",
+      "started": "Iniciado {time}",
       "description": "Planner → Builder → Reviewer — descreva um objetivo, receba um plano e depois construa-o passo a passo com IA.",
       "goalLabel": "Qual é o seu objetivo?",
       "goalPlaceholder": "ex. Quero abrir uma loja online de joias artesanais",

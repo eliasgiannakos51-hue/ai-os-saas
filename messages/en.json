@@ -311,6 +311,19 @@
         "revisitLink": "You linked \"{source}\" to \"{target}\" a few days ago — worth revisiting?",
         "startNew": "No new activity in the last 3 days — ready to start something new?",
         "cta": "Go there →"
+      },
+      "healthScore": {
+        "title": "Business Health Score",
+        "justStarting": "Just getting started",
+        "buildingMomentum": "Building momentum",
+        "strongProgress": "Strong progress",
+        "excellentConsistency": "Excellent consistency",
+        "suggestion": {
+          "recency": "You haven't logged anything in a while — add a new entry to pick things back up.",
+          "coverage": "Try exploring a module you haven't used yet.",
+          "missionSteps": "Complete a mission step to keep your momentum going.",
+          "consistency": "Try logging something every day this week."
+        }
       }
     },
     "team": {

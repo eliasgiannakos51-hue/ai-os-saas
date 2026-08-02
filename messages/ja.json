@@ -311,6 +311,19 @@
         "revisitLink": "数日前に \"{source}\" を \"{target}\" にリンクしました — 見直す価値があるかも?",
         "startNew": "過去3日間新しい活動がありません — 何か新しいことを始めませんか?",
         "cta": "移動する →"
+      },
+      "healthScore": {
+        "title": "ビジネスヘルススコア",
+        "justStarting": "始めたばかり",
+        "buildingMomentum": "勢いがついてきた",
+        "strongProgress": "順調に進行中",
+        "excellentConsistency": "優れた継続性",
+        "suggestion": {
+          "recency": "しばらく記録がありません — 新しいエントリを追加して再開しましょう。",
+          "coverage": "まだ使っていないモジュールを試してみましょう。",
+          "missionSteps": "ミッションのステップを完了して勢いを維持しましょう。",
+          "consistency": "今週は毎日何かを記録してみましょう。"
+        }
       }
     },
     "team": {

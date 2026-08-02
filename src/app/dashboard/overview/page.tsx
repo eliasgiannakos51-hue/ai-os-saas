@@ -22,6 +22,8 @@ import { isBetaTester, getBetaDaysRemaining } from "@/lib/beta";
 import { logApiError } from "@/lib/log-error";
 import { isActiveMission, missionProgressPercent } from "@/lib/mission-progress";
 import { computeNextAction } from "@/lib/next-action";
+import { computeHealthScore } from "@/lib/health-score";
+import { HealthScoreCard } from "@/components/overview/health-score-card";
 import { Database, TrendingUp, Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
 import type { Mission } from "@/types/mission";
@@ -73,6 +75,7 @@ export default async function OverviewPage() {
   const oneDayAgoMs = now - 24 * 60 * 60 * 1000;
   const sevenDaysAgoMs = now - 7 * 24 * 60 * 60 * 1000;
   const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const fourteenDaysAgo = new Date(now - 14 * 24 * 60 * 60 * 1000).toISOString();
 
   type ModuleSummary = {
     module: (typeof CLASSIFIER_MODULES)[number];
@@ -211,6 +214,61 @@ export default async function OverviewPage() {
     nextActionMessage = t("nextAction.startNew");
   }
 
+  // Business Health Score — pure calculation (lib/health-score.ts), no AI
+  // call. Mission-steps-completed-recently is an approximation: ai_missions
+  // has no per-step completed_at, but its updated_at trigger (see
+  // supabase_schema.sql) bumps every time a step is marked completed
+  // (mission-card.tsx's buildStep), so "missions touched in the last 14
+  // days" is the closest real signal available without a schema change.
+  let missionStepsCompletedRecent = 0;
+  try {
+    const { data: recentMissionRows, error: recentMissionError } = await supabase
+      .from("ai_missions")
+      .select("plan_steps")
+      .gte("updated_at", fourteenDaysAgo);
+    if (recentMissionError) {
+      logApiError("/dashboard/overview", recentMissionError, { stage: "recent_mission_steps_query" });
+    } else {
+      missionStepsCompletedRecent = ((recentMissionRows as Mission[] | null) ?? []).reduce(
+        (sum, m) => sum + (m.plan_steps?.steps ?? []).filter((s) => s.status === "completed").length,
+        0
+      );
+    }
+  } catch (err) {
+    logApiError("/dashboard/overview", err, { stage: "recent_mission_steps_query_unhandled" });
+  }
+
+  const lastActivityMs = summaries.reduce<number | null>((latest, s) => {
+    const rowMs = s.rows[0] ? new Date(s.rows[0].created_at).getTime() : null;
+    if (rowMs === null) return latest;
+    return latest === null || rowMs > latest ? rowMs : latest;
+  }, null);
+
+  const healthScore = computeHealthScore({
+    lastActivityMs,
+    modulesWithActivity: summaries.filter((s) => s.count > 0).length,
+    totalModules: CLASSIFIER_MODULES.length,
+    missionStepsCompletedRecent,
+    activeDaysThisWeek: weeklySparkline.filter((count) => count > 0).length,
+  });
+
+  const healthScoreRangeLabel =
+    healthScore.label === "justStarting"
+      ? t("healthScore.justStarting")
+      : healthScore.label === "buildingMomentum"
+        ? t("healthScore.buildingMomentum")
+        : healthScore.label === "strongProgress"
+          ? t("healthScore.strongProgress")
+          : t("healthScore.excellentConsistency");
+  const healthScoreSuggestion: string =
+    healthScore.weakestFactor === "recency"
+      ? t("healthScore.suggestion.recency")
+      : healthScore.weakestFactor === "coverage"
+        ? t("healthScore.suggestion.coverage")
+        : healthScore.weakestFactor === "missionSteps"
+          ? t("healthScore.suggestion.missionSteps")
+          : t("healthScore.suggestion.consistency");
+
   const totalThisWeek = summaries.reduce((sum, s) => sum + s.recentCount, 0);
   const totalToday = summaries.reduce((sum, s) => sum + s.todayCount, 0);
   const totalThisMonth = summaries.reduce((sum, s) => sum + s.monthCount, 0);
@@ -267,6 +325,13 @@ export default async function OverviewPage() {
           />
           <CreditsHomeStat label={t("statRow.creditsRemaining")} />
         </div>
+
+        <HealthScoreCard
+          title={t("healthScore.title")}
+          score={healthScore.score}
+          rangeLabel={healthScoreRangeLabel}
+          suggestion={healthScoreSuggestion}
+        />
 
         {nextAction && nextActionMessage && (
           <NextActionCard

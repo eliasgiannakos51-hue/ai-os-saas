@@ -311,6 +311,19 @@
         "revisitLink": "你几天前把\"{source}\"关联到了\"{target}\" — 值得重新看看吗?",
         "startNew": "过去3天没有新活动 — 准备好开始新的事情了吗?",
         "cta": "前往 →"
+      },
+      "healthScore": {
+        "title": "业务健康分数",
+        "justStarting": "刚刚起步",
+        "buildingMomentum": "势头正在增长",
+        "strongProgress": "进展强劲",
+        "excellentConsistency": "非常稳定",
+        "suggestion": {
+          "recency": "你有一段时间没有记录任何内容了 — 添加一条新条目继续前进。",
+          "coverage": "试试探索一个你还没用过的模块。",
+          "missionSteps": "完成一个任务步骤以保持你的势头。",
+          "consistency": "试着这周每天都记录一些内容。"
+        }
       }
     },
     "team": {

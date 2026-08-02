@@ -311,6 +311,19 @@
         "revisitLink": "Vous avez lié \"{source}\" à \"{target}\" il y a quelques jours — ça vaut le coup d'y revenir ?",
         "startNew": "Aucune nouvelle activité depuis 3 jours — prêt à commencer quelque chose de nouveau ?",
         "cta": "Y aller →"
+      },
+      "healthScore": {
+        "title": "Score de Santé de l'Entreprise",
+        "justStarting": "Vous débutez",
+        "buildingMomentum": "Vous prenez de l'élan",
+        "strongProgress": "Bons progrès",
+        "excellentConsistency": "Excellente régularité",
+        "suggestion": {
+          "recency": "Vous n'avez rien enregistré depuis un moment — ajoutez une entrée pour reprendre.",
+          "coverage": "Essayez d'explorer un module que vous n'avez pas encore utilisé.",
+          "missionSteps": "Terminez une étape de mission pour garder votre élan.",
+          "consistency": "Essayez d'enregistrer quelque chose chaque jour cette semaine."
+        }
       }
     },
     "team": {

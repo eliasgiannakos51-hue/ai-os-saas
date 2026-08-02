@@ -7,6 +7,8 @@ import {
   moduleHref,
 } from "@/lib/classifier-modules";
 import type { FieldConfig } from "@/lib/modules";
+import { isAgentRole, agentRoleSystemPromptAddition, type AgentRole } from "@/lib/agent-roles";
+import { getUserFullContext, buildUserContextPromptAdditionEnglish } from "@/lib/user-context";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -104,9 +106,11 @@ export async function POST(request: Request) {
     }
 
     let message: string;
+    let agentRole: AgentRole;
     try {
       const body = await request.json();
       message = typeof body?.message === "string" ? body.message.trim() : "";
+      agentRole = isAgentRole(body?.agentRole) ? body.agentRole : "general";
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -175,6 +179,18 @@ export async function POST(request: Request) {
       logApiError("/api/create", usageLogError, { stage: "usage_log" });
     }
 
+    // "AI Life Context" — same consolidated user picture used by
+    // api/chat/route.ts (see lib/user-context.ts), appended here too so
+    // Create Anything's classification/field-extraction isn't limited to
+    // just the one message it was given. Best-effort, same as chat's.
+    let userContext = "";
+    try {
+      const fullContext = await getUserFullContext(supabase, user.id);
+      userContext = buildUserContextPromptAdditionEnglish(fullContext);
+    } catch (err) {
+      logApiError("/api/create", err, { stage: "user_full_context" });
+    }
+
     const anthropic = new Anthropic({ apiKey });
 
     let toolInput: RouteEntryInput;
@@ -182,7 +198,7 @@ export async function POST(request: Request) {
       const response = await anthropic.messages.create({
         model: MODEL,
         max_tokens: 1024,
-        system: buildSystemPrompt(),
+        system: buildSystemPrompt() + agentRoleSystemPromptAddition(agentRole) + userContext,
         messages: [{ role: "user", content: message }],
         tools: [ROUTE_ENTRY_TOOL],
         tool_choice: { type: "tool", name: "route_entry" },

@@ -33,6 +33,7 @@ import {
   Rocket,
   CalendarClock,
   LineChart,
+  Layout,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -78,3 +79,7 @@ export const REFLECTION_ICON: LucideIcon = CalendarClock;
 // Distinct from MODULE_ICONS.trading (TrendingUp) — this is the unified
 // Trading Workflow page, not the raw Trading module list.
 export const TRADING_WORKFLOW_ICON: LucideIcon = LineChart;
+// Distinct from MODULE_ICONS.websites (Globe) — this is the real AI
+// generator (dashboard/website-builder), not the "Websites" Build
+// module's plain idea tracker.
+export const WEBSITE_BUILDER_ICON: LucideIcon = Layout;

@@ -1,3 +1,5 @@
+import type { AgentRole } from "@/lib/agent-roles";
+
 export type MissionStatus = "planning" | "in_progress" | "completed" | "failed";
 
 export type MissionStepStatus = "pending" | "completed";
@@ -11,6 +13,11 @@ export type MissionStep = {
   module?: string;
   moduleTitle?: string;
   href?: string;
+  // "AI Company" — which agent role (see lib/agent-roles.ts) this step was
+  // built under, chosen per-step in mission-card.tsx before "Create with
+  // AI". Absent (or "general") means the default classifier behavior, same
+  // as every step before this feature existed.
+  agentRole?: AgentRole;
 };
 
 // The ai_missions.plan_steps jsonb column's shape — an object (steps +

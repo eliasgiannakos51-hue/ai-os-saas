@@ -39,6 +39,7 @@
       "team": "Team",
       "agents": "AI Agents",
       "websites": "Websites",
+      "websiteBuilder": "Website Builder",
       "apps": "Apps",
       "images": "Images",
       "videos": "Videos",
@@ -389,7 +390,15 @@
       "statusInProgress": "In Progress",
       "statusCompleted": "Completed",
       "statusFailed": "Failed",
-      "stillWorkingOn": "Still working on: {step}. Need help breaking it down further?"
+      "stillWorkingOn": "Still working on: {step}. Need help breaking it down further?",
+      "agentRoleLabel": "Agent role",
+      "agentRole": {
+        "general": "General",
+        "marketing": "Marketing Agent",
+        "finance": "Finance Agent",
+        "research": "Research Agent"
+      },
+      "builtByAgent": "Built by {agent}"
     },
     "reflection": {
       "title": "Weekly Reflection",
@@ -421,6 +430,37 @@
       "viewFullTimeline": "View full timeline →",
       "reflectionTitle": "Trading Reflection",
       "tradesTitle": "Trades"
+    },
+    "energyCheckIn": {
+      "title": "Energy Check-In",
+      "prompt": "How's your energy today?",
+      "checkedInToday": "Today's energy: {level}/5.",
+      "logAgain": "Log again",
+      "notePlaceholder": "Optional note...",
+      "logged": "Energy logged",
+      "levelLabel": "Energy level {level}"
+    },
+    "websiteBuilder": {
+      "title": "Website Builder",
+      "description": "Describe what you want, and AI generates a real, complete website — instant preview, download the HTML.",
+      "nameLabel": "Name",
+      "namePlaceholder": "e.g. Coaching Landing Page",
+      "descriptionLabel": "Describe your website",
+      "descriptionPlaceholder": "e.g. A landing page for my coaching business, warm and professional, with a hero section, testimonials, and a contact form.",
+      "generateButton": "Generate Website",
+      "generating": "Generating...",
+      "generated": "Website generated",
+      "downloadButton": "Download HTML",
+      "deleteButton": "Delete",
+      "deleted": "Website deleted",
+      "emptyState": "No websites yet — describe one above to generate your first."
+    },
+    "marketplace": {
+      "title": "Marketplace",
+      "description": "Buy and sell agents, automations, and templates — coming soon.",
+      "emptyState": "No listings yet — be the first to publish.",
+      "comingSoon": "Coming soon",
+      "publishButton": "Publish a Template"
     }
   },
   "module": {
@@ -457,5 +497,23 @@
   },
   "language": {
     "label": "Language"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "unlockedOn": "Unlocked {date}",
+    "locked": "Locked",
+    "unlockedToast": "Achievement unlocked: {achievement}",
+    "firstEntry": {
+      "title": "First {module} Entry",
+      "description": "Log your first entry in {module}."
+    },
+    "firstMission": {
+      "title": "Mission Accomplished",
+      "description": "Complete your first AI mission."
+    },
+    "streak": {
+      "title": "Consistency Champion",
+      "description": "Log activity 7 days in a row."
+    }
   }
 }

@@ -16,6 +16,8 @@ import { BuyCredits } from "@/components/settings/buy-credits";
 import { CreditHistory, type CreditTransaction } from "@/components/settings/credit-history";
 import { AiUsageSettings } from "@/components/settings/ai-usage-settings";
 import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
+import { AchievementsSection } from "@/components/settings/achievements-section";
+import { loadUnlockedAchievements } from "@/lib/achievements";
 import { isAdminEmail } from "@/lib/admin";
 import { isBetaTester, getBetaDaysRemaining } from "@/lib/beta";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
@@ -59,6 +61,8 @@ export default async function SettingsPage() {
   const hasSubscription = Boolean(user.user_metadata?.stripe_customer_id);
   const hasCustomAiPersona = getPlan(tier)?.capabilities.customAiPersona ?? false;
   const aiPersonaName = (user.user_metadata?.ai_persona_name as string | undefined) ?? "";
+
+  const unlockedAchievements = await loadUnlockedAchievements(supabase, user.id);
 
   const { data: transactions } = await supabase
     .from("credit_transactions")
@@ -136,6 +140,12 @@ export default async function SettingsPage() {
           >
             Billing
           </a>
+          <a
+            href="#achievements"
+            className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+          >
+            Achievements
+          </a>
         </nav>
 
         <div className="mb-6 rounded-2xl border border-border bg-panel p-5">
@@ -182,6 +192,8 @@ export default async function SettingsPage() {
           }
           moduleUsage={moduleUsage}
         />
+
+        <AchievementsSection unlocked={unlockedAchievements} />
 
         <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
           <h2 className="text-sm font-semibold text-foreground">{t("exportData.title")}</h2>

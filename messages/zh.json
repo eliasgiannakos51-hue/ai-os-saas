@@ -39,6 +39,7 @@
       "team": "团队",
       "agents": "AI 智能体",
       "websites": "网站",
+      "websiteBuilder": "网站生成器",
       "apps": "应用",
       "images": "图像",
       "videos": "视频",
@@ -389,7 +390,15 @@
       "statusInProgress": "进行中",
       "statusCompleted": "已完成",
       "statusFailed": "失败",
-      "stillWorkingOn": "仍在处理:{step}。需要帮助把它进一步拆分吗?"
+      "stillWorkingOn": "仍在处理:{step}。需要帮助把它进一步拆分吗?",
+      "agentRoleLabel": "代理角色",
+      "agentRole": {
+        "general": "通用",
+        "marketing": "营销代理",
+        "finance": "财务代理",
+        "research": "研究代理"
+      },
+      "builtByAgent": "由{agent}创建"
     },
     "reflection": {
       "title": "每周回顾",
@@ -421,6 +430,37 @@
       "viewFullTimeline": "查看完整时间线 →",
       "reflectionTitle": "交易回顾",
       "tradesTitle": "交易记录"
+    },
+    "energyCheckIn": {
+      "title": "能量签到",
+      "prompt": "你今天的能量如何?",
+      "checkedInToday": "今天的能量:{level}/5。",
+      "logAgain": "再次记录",
+      "notePlaceholder": "可选备注...",
+      "logged": "能量已记录",
+      "levelLabel": "能量等级 {level}"
+    },
+    "websiteBuilder": {
+      "title": "网站生成器",
+      "description": "描述你想要的内容,AI 会生成一个真实、完整的网站 — 即时预览,下载 HTML。",
+      "nameLabel": "名称",
+      "namePlaceholder": "例如:教练业务落地页",
+      "descriptionLabel": "描述你的网站",
+      "descriptionPlaceholder": "例如:为我的教练业务设计一个落地页,温暖专业,包含主视觉区、客户评价和联系表单。",
+      "generateButton": "生成网站",
+      "generating": "生成中...",
+      "generated": "网站已生成",
+      "downloadButton": "下载 HTML",
+      "deleteButton": "删除",
+      "deleted": "网站已删除",
+      "emptyState": "还没有网站 — 在上方描述一个来生成你的第一个网站。"
+    },
+    "marketplace": {
+      "title": "市场",
+      "description": "买卖代理、自动化和模板 — 即将推出。",
+      "emptyState": "还没有商品 — 成为第一个发布的人。",
+      "comingSoon": "即将推出",
+      "publishButton": "发布模板"
     }
   },
   "module": {
@@ -457,5 +497,23 @@
   },
   "language": {
     "label": "语言"
+  },
+  "achievements": {
+    "title": "成就",
+    "unlockedOn": "于{date}解锁",
+    "locked": "未解锁",
+    "unlockedToast": "成就已解锁:{achievement}",
+    "firstEntry": {
+      "title": "{module}的首次记录",
+      "description": "在{module}中记录你的第一条条目。"
+    },
+    "firstMission": {
+      "title": "任务完成",
+      "description": "完成你的第一个AI任务。"
+    },
+    "streak": {
+      "title": "坚持冠军",
+      "description": "连续7天记录活动。"
+    }
   }
 }

@@ -39,6 +39,7 @@
       "team": "Ομάδα",
       "agents": "AI Agents",
       "websites": "Ιστοσελίδες",
+      "websiteBuilder": "Δημιουργός Ιστοσελίδων",
       "apps": "Εφαρμογές",
       "images": "Εικόνες",
       "videos": "Βίντεο",
@@ -389,7 +390,15 @@
       "statusInProgress": "Σε Εξέλιξη",
       "statusCompleted": "Ολοκληρώθηκε",
       "statusFailed": "Απέτυχε",
-      "stillWorkingOn": "Ακόμα δουλεύεις: {step}. Θέλεις βοήθεια να το σπάσεις σε μικρότερα κομμάτια;"
+      "stillWorkingOn": "Ακόμα δουλεύεις: {step}. Θέλεις βοήθεια να το σπάσεις σε μικρότερα κομμάτια;",
+      "agentRoleLabel": "Ρόλος agent",
+      "agentRole": {
+        "general": "Γενικός",
+        "marketing": "Marketing Agent",
+        "finance": "Finance Agent",
+        "research": "Research Agent"
+      },
+      "builtByAgent": "Χτίστηκε από {agent}"
     },
     "reflection": {
       "title": "Εβδομαδιαία Αναστοχασμός",
@@ -421,6 +430,37 @@
       "viewFullTimeline": "Δες όλο το timeline →",
       "reflectionTitle": "Trading Reflection",
       "tradesTitle": "Trades"
+    },
+    "energyCheckIn": {
+      "title": "Energy Check-In",
+      "prompt": "Πώς είναι η ενέργειά σου σήμερα;",
+      "checkedInToday": "Σημερινή ενέργεια: {level}/5.",
+      "logAgain": "Καταγραφή ξανά",
+      "notePlaceholder": "Προαιρετική σημείωση...",
+      "logged": "Η ενέργεια καταγράφηκε",
+      "levelLabel": "Επίπεδο ενέργειας {level}"
+    },
+    "websiteBuilder": {
+      "title": "Δημιουργός Ιστοσελίδων",
+      "description": "Περιέγραψε τι θέλεις και το AI δημιουργεί μια πραγματική, πλήρη ιστοσελίδα — άμεση προεπισκόπηση, κατέβασε το HTML.",
+      "nameLabel": "Όνομα",
+      "namePlaceholder": "π.χ. Landing Page Coaching",
+      "descriptionLabel": "Περιέγραψε την ιστοσελίδα σου",
+      "descriptionPlaceholder": "π.χ. Μια landing page για την επιχείρηση coaching μου, ζεστή και επαγγελματική, με hero section, testimonials και φόρμα επικοινωνίας.",
+      "generateButton": "Δημιουργία Ιστοσελίδας",
+      "generating": "Δημιουργία...",
+      "generated": "Η ιστοσελίδα δημιουργήθηκε",
+      "downloadButton": "Λήψη HTML",
+      "deleteButton": "Διαγραφή",
+      "deleted": "Η ιστοσελίδα διαγράφηκε",
+      "emptyState": "Δεν υπάρχουν ιστοσελίδες ακόμα — περιέγραψε μία παραπάνω για να δημιουργήσεις την πρώτη σου."
+    },
+    "marketplace": {
+      "title": "Marketplace",
+      "description": "Αγόρασε και πούλησε agents, automations και templates — έρχεται σύντομα.",
+      "emptyState": "Δεν υπάρχουν καταχωρήσεις ακόμα — γίνε ο πρώτος που θα δημοσιεύσει.",
+      "comingSoon": "Έρχεται σύντομα",
+      "publishButton": "Δημοσίευση Template"
     }
   },
   "module": {
@@ -457,5 +497,23 @@
   },
   "language": {
     "label": "Γλώσσα"
+  },
+  "achievements": {
+    "title": "Επιτεύγματα",
+    "unlockedOn": "Ξεκλειδώθηκε {date}",
+    "locked": "Κλειδωμένο",
+    "unlockedToast": "Ξεκλειδώθηκε επίτευγμα: {achievement}",
+    "firstEntry": {
+      "title": "Πρώτη Εγγραφή σε {module}",
+      "description": "Κατέγραψε την πρώτη σου εγγραφή στο {module}."
+    },
+    "firstMission": {
+      "title": "Αποστολή Ολοκληρώθηκε",
+      "description": "Ολοκλήρωσε την πρώτη σου AI αποστολή."
+    },
+    "streak": {
+      "title": "Πρωταθλητής Συνέπειας",
+      "description": "Κατέγραψε δραστηριότητα 7 συνεχόμενες μέρες."
+    }
   }
 }

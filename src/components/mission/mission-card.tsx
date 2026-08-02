@@ -11,6 +11,7 @@ import { formatRelativeTime } from "@/lib/format-time";
 import { useCredits } from "@/components/credits/credits-context";
 import { MessageContent } from "@/components/chat/message-content";
 import { getStuckStep } from "@/lib/mission-progress";
+import { AGENT_ROLES, type AgentRole } from "@/lib/agent-roles";
 import type { Mission, MissionStatus } from "@/types/mission";
 
 const STATUS_COLORS: Record<MissionStatus, string> = {
@@ -25,6 +26,16 @@ const STATUS_LABEL_KEYS: Record<MissionStatus, string> = {
   in_progress: "statusInProgress",
   completed: "statusCompleted",
   failed: "statusFailed",
+};
+
+// "AI Company" — translation key per agent role (see lib/agent-roles.ts),
+// used both for the per-step picker options and the "Built by X" badge on
+// completed steps.
+const AGENT_ROLE_LABEL_KEYS: Record<AgentRole, string> = {
+  general: "agentRole.general",
+  marketing: "agentRole.marketing",
+  finance: "agentRole.finance",
+  research: "agentRole.research",
 };
 
 // Builder step (per-step "Create with AI") and Reviewer step both live
@@ -46,12 +57,17 @@ export function MissionCard({ mission }: { mission: Mission }) {
   const [buildingIndex, setBuildingIndex] = useState<number | null>(null);
   const [reviewing, setReviewing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // "AI Company" — per-step agent role picker (lib/agent-roles.ts), keyed
+  // by step index. Defaults to "general" (today's exact behavior) until
+  // the user picks something else for that step.
+  const [stepAgentRoles, setStepAgentRoles] = useState<Record<number, AgentRole>>({});
 
   const allCompleted = steps.length > 0 && steps.every((s) => s.status === "completed");
 
   async function buildStep(index: number) {
     const step = steps[index];
     if (!step || step.status === "completed" || buildingIndex !== null) return;
+    const agentRole = stepAgentRoles[index] ?? "general";
 
     setBuildingIndex(index);
     setError(null);
@@ -59,7 +75,7 @@ export function MissionCard({ mission }: { mission: Mission }) {
       const res = await fetch("/api/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: step.text }),
+        body: JSON.stringify({ message: step.text, agentRole }),
       });
       const data = await res.json();
       void refreshCredits();
@@ -81,6 +97,7 @@ export function MissionCard({ mission }: { mission: Mission }) {
               module: data.module,
               moduleTitle: data.moduleTitle,
               href: data.href,
+              agentRole,
             }
           : s
       );
@@ -187,21 +204,46 @@ export function MissionCard({ mission }: { mission: Mission }) {
                     {t("viewIn", { module: step.moduleTitle ?? step.module ?? "" })}
                   </Link>
                 )}
+                {step.status === "completed" && step.agentRole && step.agentRole !== "general" && (
+                  <p className="mt-0.5 text-[11px] text-muted">
+                    {t("builtByAgent", { agent: t(AGENT_ROLE_LABEL_KEYS[step.agentRole]) })}
+                  </p>
+                )}
               </div>
               {step.status !== "completed" && (
-                <button
-                  type="button"
-                  onClick={() => buildStep(index)}
-                  disabled={buildingIndex !== null}
-                  className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {buildingIndex === index ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-                  ) : (
-                    <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-                  )}
-                  {buildingIndex === index ? t("creating") : t("createWithAi")}
-                </button>
+                <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  <select
+                    value={stepAgentRoles[index] ?? "general"}
+                    onChange={(e) =>
+                      setStepAgentRoles((prev) => ({
+                        ...prev,
+                        [index]: e.target.value as AgentRole,
+                      }))
+                    }
+                    disabled={buildingIndex !== null}
+                    aria-label={t("agentRoleLabel")}
+                    className="rounded-lg border border-border bg-input px-2 py-1 text-[11px] text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {AGENT_ROLES.map((role) => (
+                      <option key={role} value={role}>
+                        {t(AGENT_ROLE_LABEL_KEYS[role])}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => buildStep(index)}
+                    disabled={buildingIndex !== null}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {buildingIndex === index ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                    ) : (
+                      <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+                    )}
+                    {buildingIndex === index ? t("creating") : t("createWithAi")}
+                  </button>
+                </div>
               )}
             </li>
           ))}

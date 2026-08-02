@@ -19,6 +19,7 @@ import {
 import { findMentionedEntities, buildEntityMentionPromptAddition } from "@/lib/chat/entity-mentions";
 import { loadMentorContext } from "@/lib/chat/mentor-context";
 import { loadTradingMentorContext } from "@/lib/chat/trading-mentor-context";
+import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
 
 export const dynamic = "force-dynamic";
 
@@ -156,12 +157,26 @@ export async function POST(request: Request) {
       mentorMode && mentorPreset === "trading"
         ? await loadTradingMentorContext(supabase, user.id)
         : "";
+    // "AI Life Context" — a consolidated view of the user (recent entries
+    // across every module, active missions, latest energy check-in,
+    // Business Health Score, Knowledge Graph link counts — see
+    // lib/user-context.ts) appended to EVERY chat request, not just Mentor
+    // Mode, per the brief. Best-effort: a failure here degrades to no
+    // extra context rather than breaking the chat request.
+    let userContext = "";
+    try {
+      const fullContext = await getUserFullContext(supabase, user.id);
+      userContext = buildUserContextPromptAdditionGreek(fullContext);
+    } catch (err) {
+      logApiError("/api/chat", err, { stage: "user_full_context" });
+    }
     const systemPrompt =
       (mentorMode ? buildMentorSystemPrompt(personaName) : buildSystemPrompt(personaName)) +
       buildMemoryPromptAddition(memories) +
       buildEntityMentionPromptAddition(mentionedEntities) +
       mentorContext +
-      tradingMentorContext;
+      tradingMentorContext +
+      userContext;
 
     // Credits: 1 credit per Ionexa Chat message, deducted from user_credits
     // (see lib/billing/credits.ts), the same shared budget Create Anything

@@ -24,6 +24,7 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Team: "team",
   "AI Agents": "agents",
   Websites: "websites",
+  "Website Builder": "websiteBuilder",
   Apps: "apps",
   Images: "images",
   Videos: "videos",

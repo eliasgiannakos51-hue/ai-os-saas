@@ -21,6 +21,7 @@ import {
   MISSION_ICON,
   REFLECTION_ICON,
   TRADING_WORKFLOW_ICON,
+  WEBSITE_BUILDER_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -55,6 +56,11 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     items: [
       { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents },
       { href: "/dashboard/websites", label: "Websites", icon: MODULE_ICONS.websites },
+      {
+        href: "/dashboard/website-builder",
+        label: "Website Builder",
+        icon: WEBSITE_BUILDER_ICON,
+      },
       { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps },
       { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images },
       { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos },

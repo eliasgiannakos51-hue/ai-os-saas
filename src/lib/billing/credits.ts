@@ -282,6 +282,10 @@ export const CREDIT_COSTS = {
   // Weekly Reflection (api/reflection/generate) — on-demand, so this is
   // paid only when the user actually clicks "Generate Weekly Reflection".
   weeklyReflection: 2,
+  // Website Builder (api/websites/generate) — a real Claude HTML/CSS
+  // generation call, distinct from websiteCreate above (the existing
+  // "Websites" Build module's plain CRUD tracker, which never calls AI).
+  websiteGenerate: 100,
 } as const;
 
 // TEMPORARY diagnostic: shows the exact numbers deductCredits compared,

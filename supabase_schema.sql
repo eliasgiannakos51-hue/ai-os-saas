@@ -904,3 +904,104 @@ create policy "delete_own_ai_missions" on public.ai_missions
 drop trigger if exists set_updated_at on public.ai_missions;
 create trigger set_updated_at before update on public.ai_missions
   for each row execute function public.set_updated_at();
+
+-- ============================================================================
+-- Website Builder — real Claude-generated single-file HTML/CSS sites (see
+-- src/lib/website-builder.ts, src/app/api/websites/generate/route.ts).
+-- Distinct from the existing "Websites" Build module (ai_websites table,
+-- see the Build modules section above), which is a plain idea/status
+-- tracker that never calls AI. Same owner-only RLS pattern as every table
+-- above; append/delete-only (a regenerated site is a new row, never an
+-- edit), so there's no update policy.
+-- ============================================================================
+
+drop table if exists public.user_websites cascade;
+
+create table public.user_websites (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  html_content text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists user_websites_user_id_created_at_idx
+  on public.user_websites (user_id, created_at desc);
+
+alter table public.user_websites enable row level security;
+
+drop policy if exists "select_own_user_websites" on public.user_websites;
+create policy "select_own_user_websites" on public.user_websites
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_user_websites" on public.user_websites;
+create policy "insert_own_user_websites" on public.user_websites
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_user_websites" on public.user_websites;
+create policy "delete_own_user_websites" on public.user_websites
+  for delete using (auth.uid() = user_id);
+
+-- ============================================================================
+-- Energy check-ins — "AI Life Context" (see src/lib/user-context.ts) needs
+-- a "recent energy check-in" input; this is the small, real feature that
+-- creates one (src/components/overview/energy-checkin-widget.tsx). Same
+-- owner-only RLS pattern as every table above; append-only log, no
+-- update/delete UI exists for it.
+-- ============================================================================
+
+drop table if exists public.user_energy_checkins cascade;
+
+create table public.user_energy_checkins (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  energy_level smallint not null check (energy_level between 1 and 5),
+  note text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists user_energy_checkins_user_id_created_at_idx
+  on public.user_energy_checkins (user_id, created_at desc);
+
+alter table public.user_energy_checkins enable row level security;
+
+drop policy if exists "select_own_user_energy_checkins" on public.user_energy_checkins;
+create policy "select_own_user_energy_checkins" on public.user_energy_checkins
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_user_energy_checkins" on public.user_energy_checkins;
+create policy "insert_own_user_energy_checkins" on public.user_energy_checkins
+  for insert with check (auth.uid() = user_id);
+
+-- ============================================================================
+-- Gamification — real, earned achievements (see src/lib/achievements.ts,
+-- src/lib/achievement-metadata.ts). Reconciled opportunistically from
+-- dashboard/layout.tsx on every navigation (no cron/background worker in
+-- this app). The unique constraint is what makes the unlock upsert's
+-- ignoreDuplicates safe against re-earning the same achievement twice.
+-- Same owner-only RLS pattern as every table above; permanent once
+-- unlocked, so only select/insert policies exist.
+-- ============================================================================
+
+drop table if exists public.user_achievements cascade;
+
+create table public.user_achievements (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  achievement_key text not null,
+  unlocked_at timestamptz not null default now(),
+  unique (user_id, achievement_key)
+);
+
+create index if not exists user_achievements_user_id_idx
+  on public.user_achievements (user_id);
+
+alter table public.user_achievements enable row level security;
+
+drop policy if exists "select_own_user_achievements" on public.user_achievements;
+create policy "select_own_user_achievements" on public.user_achievements
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_user_achievements" on public.user_achievements;
+create policy "insert_own_user_achievements" on public.user_achievements
+  for insert with check (auth.uid() = user_id);

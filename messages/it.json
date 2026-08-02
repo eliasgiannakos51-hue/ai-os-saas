@@ -39,6 +39,7 @@
       "team": "Team",
       "agents": "Agenti AI",
       "websites": "Siti web",
+      "websiteBuilder": "Generatore di Siti",
       "apps": "App",
       "images": "Immagini",
       "videos": "Video",
@@ -389,7 +390,15 @@
       "statusInProgress": "In Corso",
       "statusCompleted": "Completata",
       "statusFailed": "Fallita",
-      "stillWorkingOn": "Ancora al lavoro su: {step}. Serve aiuto a suddividerlo ulteriormente?"
+      "stillWorkingOn": "Ancora al lavoro su: {step}. Serve aiuto a suddividerlo ulteriormente?",
+      "agentRoleLabel": "Ruolo agent",
+      "agentRole": {
+        "general": "Generale",
+        "marketing": "Marketing Agent",
+        "finance": "Finance Agent",
+        "research": "Research Agent"
+      },
+      "builtByAgent": "Creato da {agent}"
     },
     "reflection": {
       "title": "Riflessione Settimanale",
@@ -421,6 +430,37 @@
       "viewFullTimeline": "Vedi la timeline completa →",
       "reflectionTitle": "Riflessione sul Trading",
       "tradesTitle": "Operazioni"
+    },
+    "energyCheckIn": {
+      "title": "Check-In Energia",
+      "prompt": "Come va la tua energia oggi?",
+      "checkedInToday": "Energia di oggi: {level}/5.",
+      "logAgain": "Registra di nuovo",
+      "notePlaceholder": "Nota opzionale...",
+      "logged": "Energia registrata",
+      "levelLabel": "Livello di energia {level}"
+    },
+    "websiteBuilder": {
+      "title": "Generatore di Siti",
+      "description": "Descrivi cosa vuoi e l'AI genera un sito web reale e completo — anteprima immediata, scarica l'HTML.",
+      "nameLabel": "Nome",
+      "namePlaceholder": "es. Landing Page Coaching",
+      "descriptionLabel": "Descrivi il tuo sito",
+      "descriptionPlaceholder": "es. Una landing page per la mia attività di coaching, calda e professionale, con una sezione hero, testimonianze e un modulo di contatto.",
+      "generateButton": "Genera Sito",
+      "generating": "Generazione...",
+      "generated": "Sito generato",
+      "downloadButton": "Scarica HTML",
+      "deleteButton": "Elimina",
+      "deleted": "Sito eliminato",
+      "emptyState": "Nessun sito ancora — descrivine uno sopra per generare il primo."
+    },
+    "marketplace": {
+      "title": "Marketplace",
+      "description": "Compra e vendi agent, automazioni e template — in arrivo.",
+      "emptyState": "Nessun annuncio ancora — sii il primo a pubblicare.",
+      "comingSoon": "In arrivo",
+      "publishButton": "Pubblica un Template"
     }
   },
   "module": {
@@ -457,5 +497,23 @@
   },
   "language": {
     "label": "Lingua"
+  },
+  "achievements": {
+    "title": "Obiettivi",
+    "unlockedOn": "Sbloccato il {date}",
+    "locked": "Bloccato",
+    "unlockedToast": "Obiettivo sbloccato: {achievement}",
+    "firstEntry": {
+      "title": "Prima Voce in {module}",
+      "description": "Registra la tua prima voce in {module}."
+    },
+    "firstMission": {
+      "title": "Missione Compiuta",
+      "description": "Completa la tua prima missione AI."
+    },
+    "streak": {
+      "title": "Campione di Costanza",
+      "description": "Registra attività per 7 giorni di fila."
+    }
   }
 }

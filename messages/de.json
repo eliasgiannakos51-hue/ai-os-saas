@@ -39,6 +39,7 @@
       "team": "Team",
       "agents": "KI-Agenten",
       "websites": "Websites",
+      "websiteBuilder": "Website-Builder",
       "apps": "Apps",
       "images": "Bilder",
       "videos": "Videos",
@@ -389,7 +390,15 @@
       "statusInProgress": "In Bearbeitung",
       "statusCompleted": "Abgeschlossen",
       "statusFailed": "Fehlgeschlagen",
-      "stillWorkingOn": "Noch in Arbeit: {step}. Brauchst du Hilfe, es weiter aufzuteilen?"
+      "stillWorkingOn": "Noch in Arbeit: {step}. Brauchst du Hilfe, es weiter aufzuteilen?",
+      "agentRoleLabel": "Agentenrolle",
+      "agentRole": {
+        "general": "Allgemein",
+        "marketing": "Marketing-Agent",
+        "finance": "Finanz-Agent",
+        "research": "Recherche-Agent"
+      },
+      "builtByAgent": "Erstellt von {agent}"
     },
     "reflection": {
       "title": "Wöchentliche Reflexion",
@@ -421,6 +430,37 @@
       "viewFullTimeline": "Vollständige Timeline ansehen →",
       "reflectionTitle": "Trading-Reflexion",
       "tradesTitle": "Trades"
+    },
+    "energyCheckIn": {
+      "title": "Energie-Check-In",
+      "prompt": "Wie ist deine Energie heute?",
+      "checkedInToday": "Heutige Energie: {level}/5.",
+      "logAgain": "Erneut eintragen",
+      "notePlaceholder": "Optionale Notiz...",
+      "logged": "Energie erfasst",
+      "levelLabel": "Energielevel {level}"
+    },
+    "websiteBuilder": {
+      "title": "Website-Builder",
+      "description": "Beschreibe, was du willst, und die KI generiert eine echte, vollständige Website — sofortige Vorschau, HTML herunterladen.",
+      "nameLabel": "Name",
+      "namePlaceholder": "z. B. Coaching-Landingpage",
+      "descriptionLabel": "Beschreibe deine Website",
+      "descriptionPlaceholder": "z. B. Eine Landingpage für mein Coaching-Business, warm und professionell, mit Hero-Bereich, Testimonials und Kontaktformular.",
+      "generateButton": "Website Generieren",
+      "generating": "Generierung...",
+      "generated": "Website generiert",
+      "downloadButton": "HTML Herunterladen",
+      "deleteButton": "Löschen",
+      "deleted": "Website gelöscht",
+      "emptyState": "Noch keine Websites — beschreibe oben eine, um deine erste zu generieren."
+    },
+    "marketplace": {
+      "title": "Marketplace",
+      "description": "Kaufe und verkaufe Agents, Automatisierungen und Vorlagen — bald verfügbar.",
+      "emptyState": "Noch keine Angebote — sei der Erste, der veröffentlicht.",
+      "comingSoon": "Bald verfügbar",
+      "publishButton": "Vorlage Veröffentlichen"
     }
   },
   "module": {
@@ -457,5 +497,23 @@
   },
   "language": {
     "label": "Sprache"
+  },
+  "achievements": {
+    "title": "Erfolge",
+    "unlockedOn": "Freigeschaltet am {date}",
+    "locked": "Gesperrt",
+    "unlockedToast": "Erfolg freigeschaltet: {achievement}",
+    "firstEntry": {
+      "title": "Erster Eintrag in {module}",
+      "description": "Erfasse deinen ersten Eintrag in {module}."
+    },
+    "firstMission": {
+      "title": "Mission Erfüllt",
+      "description": "Schließe deine erste KI-Mission ab."
+    },
+    "streak": {
+      "title": "Beständigkeits-Champion",
+      "description": "Erfasse 7 Tage in Folge Aktivität."
+    }
   }
 }

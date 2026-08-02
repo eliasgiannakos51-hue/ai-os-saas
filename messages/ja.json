@@ -39,6 +39,7 @@
       "team": "チーム",
       "agents": "AI エージェント",
       "websites": "ウェブサイト",
+      "websiteBuilder": "ウェブサイトビルダー",
       "apps": "アプリ",
       "images": "画像",
       "videos": "動画",
@@ -389,7 +390,15 @@
       "statusInProgress": "進行中",
       "statusCompleted": "完了",
       "statusFailed": "失敗",
-      "stillWorkingOn": "まだ作業中: {step}。さらに細かく分解するのを手伝いましょうか?"
+      "stillWorkingOn": "まだ作業中: {step}。さらに細かく分解するのを手伝いましょうか?",
+      "agentRoleLabel": "エージェントの役割",
+      "agentRole": {
+        "general": "一般",
+        "marketing": "マーケティングエージェント",
+        "finance": "ファイナンスエージェント",
+        "research": "リサーチエージェント"
+      },
+      "builtByAgent": "{agent}が作成"
     },
     "reflection": {
       "title": "週次振り返り",
@@ -421,6 +430,37 @@
       "viewFullTimeline": "完全なタイムラインを見る →",
       "reflectionTitle": "トレーディング振り返り",
       "tradesTitle": "トレード"
+    },
+    "energyCheckIn": {
+      "title": "エネルギーチェックイン",
+      "prompt": "今日のエネルギーはどうですか?",
+      "checkedInToday": "今日のエネルギー: {level}/5。",
+      "logAgain": "もう一度記録",
+      "notePlaceholder": "任意のメモ...",
+      "logged": "エネルギーを記録しました",
+      "levelLabel": "エネルギーレベル {level}"
+    },
+    "websiteBuilder": {
+      "title": "ウェブサイトビルダー",
+      "description": "作りたいものを説明すると、AIが本物の完全なウェブサイトを生成します — 即座にプレビューでき、HTMLをダウンロードできます。",
+      "nameLabel": "名前",
+      "namePlaceholder": "例: コーチングのランディングページ",
+      "descriptionLabel": "ウェブサイトを説明してください",
+      "descriptionPlaceholder": "例: コーチングビジネス向けのランディングページ、温かみがありプロフェッショナルな雰囲気で、ヒーローセクション、お客様の声、お問い合わせフォームを含む。",
+      "generateButton": "ウェブサイトを生成",
+      "generating": "生成中...",
+      "generated": "ウェブサイトが生成されました",
+      "downloadButton": "HTMLをダウンロード",
+      "deleteButton": "削除",
+      "deleted": "ウェブサイトを削除しました",
+      "emptyState": "まだウェブサイトがありません — 上で説明して最初のサイトを生成しましょう。"
+    },
+    "marketplace": {
+      "title": "マーケットプレイス",
+      "description": "エージェント、オートメーション、テンプレートを売買 — 近日公開。",
+      "emptyState": "まだ出品がありません — 最初に公開してみましょう。",
+      "comingSoon": "近日公開",
+      "publishButton": "テンプレートを公開"
     }
   },
   "module": {
@@ -457,5 +497,23 @@
   },
   "language": {
     "label": "言語"
+  },
+  "achievements": {
+    "title": "実績",
+    "unlockedOn": "{date}に解除",
+    "locked": "ロック中",
+    "unlockedToast": "実績を解除しました: {achievement}",
+    "firstEntry": {
+      "title": "{module}への初エントリー",
+      "description": "{module}に最初のエントリーを記録しましょう。"
+    },
+    "firstMission": {
+      "title": "ミッション達成",
+      "description": "最初のAIミッションを完了しましょう。"
+    },
+    "streak": {
+      "title": "継続チャンピオン",
+      "description": "7日連続で活動を記録しましょう。"
+    }
   }
 }

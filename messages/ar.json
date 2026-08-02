@@ -39,6 +39,7 @@
       "team": "الفريق",
       "agents": "وكلاء الذكاء الاصطناعي",
       "websites": "المواقع الإلكترونية",
+      "websiteBuilder": "منشئ المواقع",
       "apps": "التطبيقات",
       "images": "الصور",
       "videos": "الفيديوهات",
@@ -389,7 +390,15 @@
       "statusInProgress": "قيد التنفيذ",
       "statusCompleted": "مكتملة",
       "statusFailed": "فشلت",
-      "stillWorkingOn": "لا تزال تعمل على: {step}. هل تحتاج مساعدة لتقسيمه إلى أجزاء أصغر؟"
+      "stillWorkingOn": "لا تزال تعمل على: {step}. هل تحتاج مساعدة لتقسيمه إلى أجزاء أصغر؟",
+      "agentRoleLabel": "دور الوكيل",
+      "agentRole": {
+        "general": "عام",
+        "marketing": "وكيل التسويق",
+        "finance": "وكيل المالية",
+        "research": "وكيل البحث"
+      },
+      "builtByAgent": "تم الإنشاء بواسطة {agent}"
     },
     "reflection": {
       "title": "التأمل الأسبوعي",
@@ -421,6 +430,37 @@
       "viewFullTimeline": "عرض الجدول الزمني الكامل ←",
       "reflectionTitle": "مراجعة التداول",
       "tradesTitle": "الصفقات"
+    },
+    "energyCheckIn": {
+      "title": "تسجيل الطاقة",
+      "prompt": "كيف هي طاقتك اليوم؟",
+      "checkedInToday": "طاقة اليوم: {level}/5.",
+      "logAgain": "سجّل مرة أخرى",
+      "notePlaceholder": "ملاحظة اختيارية...",
+      "logged": "تم تسجيل الطاقة",
+      "levelLabel": "مستوى الطاقة {level}"
+    },
+    "websiteBuilder": {
+      "title": "منشئ المواقع",
+      "description": "صف ما تريده، ويقوم الذكاء الاصطناعي بإنشاء موقع ويب حقيقي وكامل — معاينة فورية، وتنزيل ملف HTML.",
+      "nameLabel": "الاسم",
+      "namePlaceholder": "مثال: صفحة هبوط للتدريب",
+      "descriptionLabel": "صف موقعك",
+      "descriptionPlaceholder": "مثال: صفحة هبوط لأعمال التدريب الخاصة بي، دافئة واحترافية، تحتوي على قسم رئيسي وآراء العملاء ونموذج تواصل.",
+      "generateButton": "إنشاء الموقع",
+      "generating": "جارٍ الإنشاء...",
+      "generated": "تم إنشاء الموقع",
+      "downloadButton": "تنزيل HTML",
+      "deleteButton": "حذف",
+      "deleted": "تم حذف الموقع",
+      "emptyState": "لا توجد مواقع بعد — صف موقعًا أعلاه لإنشاء أول موقع لك."
+    },
+    "marketplace": {
+      "title": "المتجر",
+      "description": "بيع وشراء الوكلاء والأتمتة والقوالب — قريبًا.",
+      "emptyState": "لا توجد قوائم بعد — كن أول من ينشر.",
+      "comingSoon": "قريبًا",
+      "publishButton": "نشر قالب"
     }
   },
   "module": {
@@ -457,5 +497,23 @@
   },
   "language": {
     "label": "اللغة"
+  },
+  "achievements": {
+    "title": "الإنجازات",
+    "unlockedOn": "تم الفتح في {date}",
+    "locked": "مغلق",
+    "unlockedToast": "تم فتح إنجاز: {achievement}",
+    "firstEntry": {
+      "title": "أول إدخال في {module}",
+      "description": "سجّل أول إدخال لك في {module}."
+    },
+    "firstMission": {
+      "title": "أُنجزت المهمة",
+      "description": "أكمل أول مهمة ذكاء اصطناعي لك."
+    },
+    "streak": {
+      "title": "بطل الاستمرارية",
+      "description": "سجّل نشاطًا لمدة 7 أيام متتالية."
+    }
   }
 }

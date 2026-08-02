@@ -13,6 +13,8 @@ import { getOrInitCredits, resolveEffectivePlan } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/admin";
 import { logApiError } from "@/lib/log-error";
 import { DashboardBackground } from "@/components/dashboard/dashboard-background";
+import { checkAndUnlockAchievements } from "@/lib/achievements";
+import { AchievementUnlockBridge } from "@/components/achievements/achievement-unlock-bridge";
 
 export default async function DashboardLayout({
   children,
@@ -55,6 +57,18 @@ export default async function DashboardLayout({
     credits = { credits_remaining: 0 };
   }
 
+  // Gamification — no cron/background worker in this app, so achievements
+  // are reconciled opportunistically on every dashboard navigation (see
+  // lib/achievements.ts; it fast-paths to one query once everything is
+  // unlocked). Best-effort: a failure here just means no toast fires this
+  // request, not a broken dashboard.
+  let newlyUnlockedAchievements: string[] = [];
+  try {
+    newlyUnlockedAchievements = await checkAndUnlockAchievements(supabase, user.id);
+  } catch (err) {
+    logApiError("/dashboard (layout)", err, { stage: "check_achievements", userId: user.id });
+  }
+
   return (
     <ToastProvider>
       <SidebarProvider>
@@ -80,6 +94,7 @@ export default async function DashboardLayout({
               </div>
             </div>
             <ToastContainer />
+            <AchievementUnlockBridge unlockedKeys={newlyUnlockedAchievements} />
             <CommandPalette />
           </CreditsProvider>
         </CommandPaletteProvider>

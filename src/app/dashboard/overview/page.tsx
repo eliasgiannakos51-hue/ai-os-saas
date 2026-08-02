@@ -24,6 +24,8 @@ import { isActiveMission, missionProgressPercent } from "@/lib/mission-progress"
 import { computeNextAction } from "@/lib/next-action";
 import { computeHealthScore } from "@/lib/health-score";
 import { HealthScoreCard } from "@/components/overview/health-score-card";
+import { loadLatestEnergyCheckIn } from "@/lib/energy-checkins";
+import { EnergyCheckinWidget } from "@/components/overview/energy-checkin-widget";
 import { Database, TrendingUp, Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
 import type { Mission } from "@/types/mission";
@@ -252,6 +254,11 @@ export default async function OverviewPage() {
     activeDaysThisWeek: weeklySparkline.filter((count) => count > 0).length,
   });
 
+  // "AI Life Context" — feeds lib/user-context.ts's getUserFullContext, so
+  // every AI-calling endpoint can reference the user's latest energy
+  // check-in. This widget is the only place a check-in gets created.
+  const latestEnergyCheckIn = await loadLatestEnergyCheckIn(supabase, user.id);
+
   const healthScoreRangeLabel =
     healthScore.label === "justStarting"
       ? t("healthScore.justStarting")
@@ -332,6 +339,8 @@ export default async function OverviewPage() {
           rangeLabel={healthScoreRangeLabel}
           suggestion={healthScoreSuggestion}
         />
+
+        <EnergyCheckinWidget initialCheckIn={latestEnergyCheckIn} />
 
         {nextAction && nextActionMessage && (
           <NextActionCard

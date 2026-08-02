@@ -29,6 +29,15 @@ create table if not exists public.user_credits (
   updated_at timestamptz not null default now()
 );
 
+-- beta_expires_at: set only for accounts that signed up with a valid beta
+-- invite code (see api/signup/route.ts, lib/beta.ts) — 30 days out from
+-- signup. null for everyone else. Ultimate-tier access granted by a beta
+-- code is only actually in effect while this is still in the future
+-- (resolveEffectivePlanSlug / hasActiveBetaBypass in
+-- lib/billing/credits.ts and lib/beta.ts); once it passes, those accounts
+-- fall back to Free automatically, with no manual/cron step required.
+alter table public.user_credits add column if not exists beta_expires_at timestamptz;
+
 alter table public.user_credits enable row level security;
 
 drop policy if exists "select_own_user_credits" on public.user_credits;

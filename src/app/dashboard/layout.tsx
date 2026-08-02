@@ -9,7 +9,7 @@ import { CommandPaletteProvider } from "@/components/dashboard/command-palette-c
 import { CreditsProvider } from "@/components/credits/credits-context";
 import { TopNav } from "@/components/dashboard/top-nav";
 import { acceptPendingTeamInvite } from "@/lib/team/accept-pending-invite";
-import { getOrInitCredits, resolvePlan } from "@/lib/billing/credits";
+import { getOrInitCredits, resolveEffectivePlan } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/admin";
 import { logApiError } from "@/lib/log-error";
 import { DashboardBackground } from "@/components/dashboard/dashboard-background";
@@ -34,7 +34,7 @@ export default async function DashboardLayout({
   // `user` above), which is fine for a low-frequency, best-effort check.
   void acceptPendingTeamInvite(user.id, user.email ?? "");
 
-  const plan = resolvePlan(user);
+  const plan = await resolveEffectivePlan(user);
   const isAdmin = isAdminEmail(user.email);
 
   // getOrInitCredits creates a service-role Supabase client under the hood

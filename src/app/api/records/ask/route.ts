@@ -7,7 +7,12 @@ import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
-import { CREDIT_COSTS, deductCredits, insufficientCreditsMessage, resolvePlan } from "@/lib/billing/credits";
+import {
+  CREDIT_COSTS,
+  deductCredits,
+  insufficientCreditsMessage,
+  resolveEffectivePlan,
+} from "@/lib/billing/credits";
 
 export const dynamic = "force-dynamic";
 
@@ -133,7 +138,7 @@ export async function POST(request: Request) {
     // lib/admin.ts) skip it entirely.
     const isAdmin = isAdminEmail(user.email);
     if (!isAdmin) {
-      const plan = resolvePlan(user);
+      const plan = await resolveEffectivePlan(user);
       const deduction = await deductCredits(
         user.id,
         CREDIT_COSTS.chatMessage,

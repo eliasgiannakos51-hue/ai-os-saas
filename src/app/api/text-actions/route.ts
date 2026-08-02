@@ -3,8 +3,13 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
-import { isBetaTester } from "@/lib/beta";
-import { CREDIT_COSTS, deductCredits, insufficientCreditsMessage, resolvePlan } from "@/lib/billing/credits";
+import { hasActiveBetaBypass } from "@/lib/beta";
+import {
+  CREDIT_COSTS,
+  deductCredits,
+  insufficientCreditsMessage,
+  resolveEffectivePlan,
+} from "@/lib/billing/credits";
 
 export const dynamic = "force-dynamic";
 
@@ -87,8 +92,8 @@ export async function POST(request: Request) {
     }
 
     const isAdmin = isAdminEmail(user.email);
-    if (!isAdmin && !isBetaTester(user)) {
-      const plan = resolvePlan(user);
+    if (!isAdmin && !(await hasActiveBetaBypass(user))) {
+      const plan = await resolveEffectivePlan(user);
       const deduction = await deductCredits(
         user.id,
         CREDIT_COSTS.textAction,

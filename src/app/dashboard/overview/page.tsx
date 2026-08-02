@@ -12,10 +12,11 @@ import { ProgressCard } from "@/components/overview/progress-card";
 import { HomeStatCard } from "@/components/overview/home-stat-card";
 import { CreditsHomeStat } from "@/components/overview/credits-home-stat";
 import { BetaFeedbackBanner } from "@/components/overview/beta-feedback-banner";
+import { BetaExpiryBanner } from "@/components/overview/beta-expiry-banner";
 import { GlowOrb } from "@/components/ui/glow-orb";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
-import { isBetaTester } from "@/lib/beta";
+import { isBetaTester, getBetaDaysRemaining } from "@/lib/beta";
 import { logApiError } from "@/lib/log-error";
 import { Database, TrendingUp, Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
@@ -54,6 +55,14 @@ export default async function OverviewPage() {
   const accountAgeMs = Date.now() - new Date(user.created_at).getTime();
   const showBetaFeedbackBanner = isBetaTester(user) && accountAgeMs >= 3 * 24 * 60 * 60 * 1000;
   const betaFeedbackUrl = process.env.BETA_FEEDBACK_URL || "mailto:feedback@ionexa.ai";
+
+  // "Expires soon" banner — only in the final 3 days of an active beta
+  // window (0 already-expired accounts fall back to Free elsewhere and
+  // have nothing to warn about here). getBetaDaysRemaining reads the real
+  // beta_expires_at, so this stays correct without any manual upkeep.
+  const betaDaysRemaining = isBetaTester(user) ? await getBetaDaysRemaining(user.id) : null;
+  const showBetaExpiryBanner =
+    betaDaysRemaining !== null && betaDaysRemaining > 0 && betaDaysRemaining <= 3;
 
   const now = Date.now();
   const oneDayAgoMs = now - 24 * 60 * 60 * 1000;
@@ -217,6 +226,13 @@ export default async function OverviewPage() {
           />
           <CreditsHomeStat label={t("statRow.creditsRemaining")} />
         </div>
+
+        {showBetaExpiryBanner && betaDaysRemaining !== null && (
+          <BetaExpiryBanner
+            daysRemaining={betaDaysRemaining}
+            expiresAtKey={String(betaDaysRemaining)}
+          />
+        )}
 
         {showBetaFeedbackBanner && (
           <BetaFeedbackBanner

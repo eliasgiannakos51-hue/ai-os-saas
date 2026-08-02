@@ -9,6 +9,7 @@ import { getPlan } from "@/lib/billing/plans";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-client-ip";
 import { COUNTRIES } from "@/lib/countries";
+import { getBetaInviteCode, computeBetaExpiresAt } from "@/lib/beta";
 
 export const dynamic = "force-dynamic";
 
@@ -82,11 +83,11 @@ export async function POST(request: Request) {
     }
 
     // Never blocks signup — an empty, missing, or wrong code just means no
-    // beta bonus, same as if the field were never shown at all. Only
-    // grants anything when BETA_INVITE_CODE is actually configured server
-    // side, so this is a safe no-op in any environment that hasn't set it.
-    const betaCode = process.env.BETA_INVITE_CODE;
-    const isValidBetaCode = Boolean(betaCode && inviteCode && inviteCode === betaCode);
+    // beta bonus, same as if the field were never shown at all.
+    // getBetaInviteCode() falls back to a hardcoded default ("IONEXA200")
+    // so this works even without BETA_INVITE_CODE configured.
+    const betaCode = getBetaInviteCode();
+    const isValidBetaCode = Boolean(inviteCode && inviteCode === betaCode);
 
     // Create the user directly via the Admin API instead of the client-side
     // supabase.auth.signUp(). signUp() has Supabase's GoTrue server send a
@@ -113,7 +114,11 @@ export async function POST(request: Request) {
       // is_beta_tester is the separate flag lib/beta.ts checks to also
       // skip credit deduction entirely (see api/chat, api/create,
       // api/modules/create, api/text-actions) and to show the Settings
-      // badge / Home feedback banner.
+      // badge / Home feedback banner. is_beta_tester itself never expires
+      // (historical record) — the actual 30-day access window lives in
+      // user_credits.beta_expires_at (set below via grantCredits), and
+      // resolveEffectivePlanSlug/hasActiveBetaBypass (lib/billing/credits.ts,
+      // lib/beta.ts) are what collapse this back to "free" once it passes.
       user_metadata: {
         terms_accepted_at: new Date().toISOString(),
         subscription_tier: isValidBetaCode ? "ultimate" : "free",
@@ -161,10 +166,11 @@ export async function POST(request: Request) {
     // the moment the account does — everything downstream (api/create,
     // api/chat, api/modules/create) reads that row directly. Beta testers
     // get Ultimate's allotment for display consistency with their
-    // subscription_tier above, but — same as admin — never actually have
-    // it deducted (see lib/beta.ts's isBetaTester bypass at every credit
-    // call site), so this number is really just a starting display value,
-    // not a real cap.
+    // subscription_tier above, and — same as admin — never actually have
+    // it deducted (see lib/beta.ts's hasActiveBetaBypass at every credit
+    // call site) for as long as beta_expires_at (set here, 30 days out) is
+    // still in the future; this number is really just a starting display
+    // value, not a real cap, until that window closes.
     const signupPlan = getPlan(isValidBetaCode ? "ultimate" : "free")!;
     const signupCredits = typeof signupPlan.monthlyCredits === "number" ? signupPlan.monthlyCredits : 0;
     try {
@@ -173,7 +179,11 @@ export async function POST(request: Request) {
         signupCredits,
         "signup_grant",
         isValidBetaCode ? "Beta tester signup credits" : "Free plan signup credits",
-        { setTotal: signupCredits, setPlanTier: signupPlan.slug }
+        {
+          setTotal: signupCredits,
+          setPlanTier: signupPlan.slug,
+          ...(isValidBetaCode ? { setBetaExpiresAt: computeBetaExpiresAt() } : {}),
+        }
       );
     } catch (err) {
       logApiError("/api/signup", err, { stage: "grant_credits" });

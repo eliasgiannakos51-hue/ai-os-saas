@@ -17,7 +17,8 @@ import { CreditHistory, type CreditTransaction } from "@/components/settings/cre
 import { AiUsageSettings } from "@/components/settings/ai-usage-settings";
 import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
 import { isAdminEmail } from "@/lib/admin";
-import { isBetaTester } from "@/lib/beta";
+import { isBetaTester, getBetaDaysRemaining } from "@/lib/beta";
+import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { BUILD_MODULES } from "@/lib/build-modules";
 import { getPlan } from "@/lib/billing/plans";
@@ -44,10 +45,16 @@ export default async function SettingsPage() {
   // that guarantee explicit here too rather than relying on the flag
   // alone, since this is exactly the display logic the "don't touch admin
   // access" instruction is protecting.
-  const isBeta = !isAdmin && isBetaTester(user);
-  const tier = isAdmin
-    ? "enterprise"
-    : (user.user_metadata?.subscription_tier as string | undefined) ?? "free";
+  //
+  // betaDaysRemaining is only computed for accounts that were ever granted
+  // beta access — null means "never a beta tester" (most accounts), so the
+  // badge doesn't show at all. Once the 30-day window closes this goes
+  // negative/zero, at which point isBeta below is false and `tier` (via
+  // resolveEffectivePlanSlug) has already collapsed back to "free" — the
+  // badge simply stops appearing rather than showing a stale "0 days left".
+  const betaDaysRemaining = !isAdmin && isBetaTester(user) ? await getBetaDaysRemaining(user.id) : null;
+  const isBeta = !isAdmin && betaDaysRemaining !== null && betaDaysRemaining > 0;
+  const tier = isAdmin ? "enterprise" : await resolveEffectivePlanSlug(user);
   const seatCount = (user.user_metadata?.seat_count as number | undefined) ?? 0;
   const hasSubscription = Boolean(user.user_metadata?.stripe_customer_id);
   const hasCustomAiPersona = getPlan(tier)?.capabilities.customAiPersona ?? false;
@@ -142,6 +149,7 @@ export default async function SettingsPage() {
           hasSubscription={hasSubscription}
           isAdmin={isAdmin}
           isBetaTester={isBeta}
+          betaDaysRemaining={isBeta ? betaDaysRemaining : null}
         />
 
         <BuyCredits />

@@ -11,7 +11,7 @@ import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
-import { resolvePlanSlug } from "@/lib/billing/credits";
+import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/admin";
 
 export const metadata: Metadata = {
@@ -56,7 +56,7 @@ export default async function MemoryPage() {
   }
 
   const isAdmin = isAdminEmail(user.email);
-  const planSlug = resolvePlanSlug(user);
+  const planSlug = await resolveEffectivePlanSlug(user);
 
   if (!isAdmin && !planMeetsMinimum(planSlug, "starter")) {
     return (

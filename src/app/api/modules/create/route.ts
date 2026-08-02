@@ -3,9 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { getModule, type FieldConfig } from "@/lib/modules";
 import { getBuildModule } from "@/lib/build-modules";
 import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
-import { deductCredits, insufficientCreditsMessage, resolvePlanSlug } from "@/lib/billing/credits";
+import { deductCredits, insufficientCreditsMessage, resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/admin";
-import { isBetaTester } from "@/lib/beta";
+import { hasActiveBetaBypass } from "@/lib/beta";
 import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     }
 
     const isAdmin = isAdminEmail(user.email);
-    const planSlug = resolvePlanSlug(user);
+    const planSlug = await resolveEffectivePlanSlug(user);
     const plan = getPlan(planSlug) ?? getPlan("free")!;
 
     if (!isAdmin && moduleConfig.minPlanSlug && !planMeetsMinimum(planSlug, moduleConfig.minPlanSlug)) {
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
       }
     }
 
-    if (!isAdmin && !isBetaTester(user) && moduleConfig.creditCost) {
+    if (!isAdmin && !(await hasActiveBetaBypass(user)) && moduleConfig.creditCost) {
       const deduction = await deductCredits(
         user.id,
         moduleConfig.creditCost,

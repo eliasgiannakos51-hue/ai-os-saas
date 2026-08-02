@@ -8,12 +8,17 @@ export function BillingSummary({
   hasSubscription,
   isAdmin = false,
   isBetaTester = false,
+  betaDaysRemaining = null,
 }: {
   tier: string;
   seatCount: number;
   hasSubscription: boolean;
   isAdmin?: boolean;
   isBetaTester?: boolean;
+  // Whole days left in the beta window (see lib/beta.ts's daysRemaining) —
+  // only meaningful while isBetaTester is true. null just falls back to a
+  // plain "Beta Tester" label instead of an expiry count.
+  betaDaysRemaining?: number | null;
 }) {
   const plan = getPlan(tier) ?? getPlan("free")!;
 
@@ -37,7 +42,9 @@ export function BillingSummary({
             </span>
           ) : isBetaTester ? (
             <span className="inline-flex items-center rounded-full border border-emerald-800 bg-emerald-950/30 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-emerald-400">
-              Beta Tester
+              {typeof betaDaysRemaining === "number"
+                ? `Beta Tester — expires in ${betaDaysRemaining} day${betaDaysRemaining === 1 ? "" : "s"}`
+                : "Beta Tester"}
             </span>
           ) : hasSubscription ? (
             <ManageBillingButton />

@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
+import { hasActiveBetaBypass, isBetaTester } from "@/lib/beta";
 import { getPlan, type Plan, type PlanSlug } from "./plans";
 
 // The plan a user is on lives in user_metadata.subscription_tier, written
@@ -8,6 +9,14 @@ import { getPlan, type Plan, type PlanSlug } from "./plans";
 // api/webhooks/stripe/route.ts) or set to "free" directly at signup. Falls
 // back to "free" for anything missing or unrecognized — same default
 // dashboard/settings/page.tsx already uses to display the current plan.
+//
+// This is the RAW tier only — it does not know about beta access expiring.
+// A beta grant sets subscription_tier: "ultimate" at signup and nothing
+// ever writes it back to "free" when the 30-day window closes, so this
+// alone would keep reporting "ultimate" forever. Anywhere that resolved
+// plan actually gates a feature or a credit cost should use
+// resolveEffectivePlanSlug/resolveEffectivePlan below instead, which layer
+// the live beta-expiry check on top of this.
 export function resolvePlanSlug(
   user: { user_metadata?: Record<string, unknown> | null } | null | undefined
 ): PlanSlug {
@@ -21,7 +30,36 @@ export function resolvePlan(
   return getPlan(resolvePlanSlug(user)) ?? getPlan("free")!;
 }
 
-type CreditsRow = { credits_remaining: number; credits_total: number; plan_tier: string };
+// The tier actually in effect right now — same as resolvePlanSlug, except
+// a beta-granted tier collapses to "free" once beta_expires_at (see
+// lib/beta.ts, user_credits.beta_expires_at) has passed. A beta tester who
+// has since become a real paying subscriber (has a Stripe customer id) is
+// left untouched — Stripe's webhook owns their tier from that point on,
+// regardless of whether their old beta window is still open.
+export async function resolveEffectivePlanSlug(
+  user: { id: string; user_metadata?: Record<string, unknown> | null } | null | undefined
+): Promise<PlanSlug> {
+  const baseSlug = resolvePlanSlug(user);
+  if (!user || baseSlug === "free") return baseSlug;
+  if (user.user_metadata?.stripe_customer_id) return baseSlug;
+  if (!isBetaTester(user)) return baseSlug;
+
+  const active = await hasActiveBetaBypass(user);
+  return active ? baseSlug : "free";
+}
+
+export async function resolveEffectivePlan(
+  user: { id: string; user_metadata?: Record<string, unknown> | null } | null | undefined
+): Promise<Plan> {
+  return getPlan(await resolveEffectivePlanSlug(user)) ?? getPlan("free")!;
+}
+
+type CreditsRow = {
+  credits_remaining: number;
+  credits_total: number;
+  plan_tier: string;
+  beta_expires_at: string | null;
+};
 
 function planMonthlyCredits(plan: Plan): number {
   return plan.monthlyCredits === "custom" ? 0 : plan.monthlyCredits;
@@ -34,7 +72,7 @@ export async function getOrInitCredits(userId: string, plan: Plan): Promise<Cred
   const admin = createAdminClient();
   const { data } = await admin
     .from("user_credits")
-    .select("credits_remaining, credits_total, plan_tier")
+    .select("credits_remaining, credits_total, plan_tier, beta_expires_at")
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -49,11 +87,16 @@ export async function getOrInitCredits(userId: string, plan: Plan): Promise<Cred
       credits_total: initial,
       plan_tier: plan.slug,
     })
-    .select("credits_remaining, credits_total, plan_tier")
+    .select("credits_remaining, credits_total, plan_tier, beta_expires_at")
     .single();
 
   return (
-    (inserted as CreditsRow) ?? { credits_remaining: initial, credits_total: initial, plan_tier: plan.slug }
+    (inserted as CreditsRow) ?? {
+      credits_remaining: initial,
+      credits_total: initial,
+      plan_tier: plan.slug,
+      beta_expires_at: null,
+    }
   );
 }
 
@@ -147,17 +190,21 @@ export async function deductCredits(
 // Grants credits (purchase, plan renewal/upgrade, signup) — adds to
 // credits_remaining; setTotal/setPlanTier additionally overwrite those
 // columns for a plan-driven grant (a purchase leaves them as-is).
+// setBetaExpiresAt is only ever passed by a beta-code signup (see
+// api/signup/route.ts) — omitted, it leaves the existing value (or null
+// for a brand-new row) untouched, so a normal credit-pack purchase or plan
+// renewal never accidentally clears or extends someone's beta window.
 export async function grantCredits(
   userId: string,
   amount: number,
   actionType: string,
   description: string,
-  options?: { setTotal?: number; setPlanTier?: PlanSlug }
+  options?: { setTotal?: number; setPlanTier?: PlanSlug; setBetaExpiresAt?: string }
 ): Promise<void> {
   const admin = createAdminClient();
   const { data: row } = await admin
     .from("user_credits")
-    .select("credits_remaining, credits_total, plan_tier")
+    .select("credits_remaining, credits_total, plan_tier, beta_expires_at")
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -168,6 +215,7 @@ export async function grantCredits(
       credits_remaining: nextRemaining,
       credits_total: options?.setTotal ?? row?.credits_total ?? amount,
       plan_tier: options?.setPlanTier ?? row?.plan_tier ?? "free",
+      beta_expires_at: options?.setBetaExpiresAt ?? row?.beta_expires_at ?? null,
     },
     { onConflict: "user_id" }
   );

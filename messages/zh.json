@@ -33,6 +33,7 @@
       "chat": "Ionexa 对话",
       "memory": "AI 记忆",
       "timeline": "时间线",
+      "missionControl": "任务控制中心",
       "settings": "设置",
       "team": "团队",
       "agents": "AI 智能体",
@@ -343,6 +344,25 @@
       "rangeMonth": "本月",
       "rangeAll": "所有时间",
       "emptyState": "此时间段内暂无记录。"
+    },
+    "mission": {
+      "title": "任务控制中心",
+      "description": "Planner → Builder → Reviewer — 描述一个目标,获取计划,然后用 AI 逐步构建。",
+      "goalLabel": "你的目标是什么?",
+      "goalPlaceholder": "例如:我想开一家手工珠宝在线商店",
+      "createPlan": "创建计划",
+      "planning": "规划中...",
+      "emptyState": "还没有任务 — 在上方描述一个目标以获取你的第一个计划。",
+      "createWithAi": "用 AI 创建",
+      "creating": "创建中...",
+      "viewIn": "在{module}中查看",
+      "reviewMission": "评估任务",
+      "reviewing": "评估中...",
+      "reviewerLabel": "Reviewer",
+      "statusPlanning": "规划中",
+      "statusInProgress": "进行中",
+      "statusCompleted": "已完成",
+      "statusFailed": "失败"
     }
   },
   "module": {

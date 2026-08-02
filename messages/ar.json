@@ -33,6 +33,7 @@
       "chat": "Ionexa Chat",
       "memory": "ذاكرة الذكاء الاصطناعي",
       "timeline": "الجدول الزمني",
+      "missionControl": "مركز التحكم بالمهام",
       "settings": "الإعدادات",
       "team": "الفريق",
       "agents": "وكلاء الذكاء الاصطناعي",
@@ -343,6 +344,25 @@
       "rangeMonth": "هذا الشهر",
       "rangeAll": "كل الوقت",
       "emptyState": "لا توجد إدخالات في هذه الفترة بعد."
+    },
+    "mission": {
+      "title": "مركز التحكم بالمهام",
+      "description": "Planner ← Builder ← Reviewer — صف هدفًا، احصل على خطة، ثم ابنِها خطوة بخطوة بالذكاء الاصطناعي.",
+      "goalLabel": "ما هو هدفك؟",
+      "goalPlaceholder": "مثال: أريد بدء متجر إلكتروني للمجوهرات اليدوية",
+      "createPlan": "إنشاء خطة",
+      "planning": "جارٍ التخطيط...",
+      "emptyState": "لا توجد مهام بعد — صف هدفًا أعلاه للحصول على أول خطة لك.",
+      "createWithAi": "إنشاء بالذكاء الاصطناعي",
+      "creating": "جارٍ الإنشاء...",
+      "viewIn": "عرض في {module}",
+      "reviewMission": "تقييم المهمة",
+      "reviewing": "جارٍ التقييم...",
+      "reviewerLabel": "Reviewer",
+      "statusPlanning": "التخطيط",
+      "statusInProgress": "قيد التنفيذ",
+      "statusCompleted": "مكتملة",
+      "statusFailed": "فشلت"
     }
   },
   "module": {

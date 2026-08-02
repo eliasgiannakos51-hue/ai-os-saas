@@ -33,6 +33,7 @@
       "chat": "Ionexa Chat",
       "memory": "KI-Gedächtnis",
       "timeline": "Zeitleiste",
+      "missionControl": "Missionskontrolle",
       "settings": "Einstellungen",
       "team": "Team",
       "agents": "KI-Agenten",
@@ -343,6 +344,25 @@
       "rangeMonth": "Diesen Monat",
       "rangeAll": "Gesamter Zeitraum",
       "emptyState": "Noch keine Einträge in diesem Zeitraum."
+    },
+    "mission": {
+      "title": "Missionskontrolle",
+      "description": "Planner → Builder → Reviewer — beschreibe ein Ziel, erhalte einen Plan und baue ihn dann Schritt für Schritt mit KI auf.",
+      "goalLabel": "Was ist dein Ziel?",
+      "goalPlaceholder": "z. B. Ich möchte einen Online-Shop für handgefertigten Schmuck starten",
+      "createPlan": "Plan Erstellen",
+      "planning": "Planung...",
+      "emptyState": "Noch keine Missionen — beschreibe oben ein Ziel für deinen ersten Plan.",
+      "createWithAi": "Mit KI Erstellen",
+      "creating": "Erstellen...",
+      "viewIn": "In {module} anzeigen",
+      "reviewMission": "Mission Bewerten",
+      "reviewing": "Bewertung...",
+      "reviewerLabel": "Reviewer",
+      "statusPlanning": "Planung",
+      "statusInProgress": "In Bearbeitung",
+      "statusCompleted": "Abgeschlossen",
+      "statusFailed": "Fehlgeschlagen"
     }
   },
   "module": {

@@ -274,6 +274,11 @@ export const CREDIT_COSTS = {
   // Not wired to any UI yet — no "SaaS Project" builder exists in the app.
   // Defined so the cost is ready the moment that module ships.
   saasProjectCreate: 700,
+  // Mission Control's Planner/Reviewer agents (api/mission/plan,
+  // api/mission/review) — each step's own "Create with AI" click is a
+  // separate, already-costed createAnything call, not covered by these.
+  missionPlan: 2,
+  missionReview: 2,
 } as const;
 
 // TEMPORARY diagnostic: shows the exact numbers deductCredits compared,

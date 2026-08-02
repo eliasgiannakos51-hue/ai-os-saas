@@ -1,0 +1,53 @@
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { createClient } from "@/lib/supabase/server";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { ErrorMessage } from "@/components/error-message";
+import { MissionForm } from "@/components/mission/mission-form";
+import { MissionList } from "@/components/mission/mission-list";
+import { MISSION_ICON } from "@/lib/module-icons";
+import type { Mission } from "@/types/mission";
+
+export const metadata: Metadata = { title: "Mission Control" };
+
+// "AI Company" concept, deliberately kept to 3 agents (Planner, Builder,
+// Reviewer) and user-driven at every step — not autonomous. Planner runs
+// server-side in /api/mission/plan (lib/mission-agents.ts); Builder is just
+// the ALREADY-EXISTING /api/create ("Create Anything"), called once per
+// step from mission-card.tsx when the user clicks "Create with AI";
+// Reviewer runs server-side in /api/mission/review once every step is
+// done. Nothing here runs on its own.
+export default async function MissionPage() {
+  const t = await getTranslations("dashboard.mission");
+  const supabase = createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: missions, error } = await supabase
+    .from("ai_missions")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  return (
+    <main className="min-h-full bg-dot-grid">
+      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+        <PageHeader icon={MISSION_ICON} title={t("title")} description={t("description")} />
+
+        <div className="mb-6">
+          <MissionForm />
+        </div>
+
+        {error && <ErrorMessage message={`loading missions: ${error.message}`} />}
+
+        <MissionList missions={(missions as Mission[] | null) ?? []} />
+      </div>
+    </main>
+  );
+}

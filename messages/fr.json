@@ -33,6 +33,7 @@
       "chat": "Ionexa Chat",
       "memory": "Mémoire IA",
       "timeline": "Chronologie",
+      "missionControl": "Contrôle de Mission",
       "settings": "Paramètres",
       "team": "Équipe",
       "agents": "Agents IA",
@@ -343,6 +344,25 @@
       "rangeMonth": "Ce mois-ci",
       "rangeAll": "Toute la période",
       "emptyState": "Aucune entrée sur cette période pour l'instant."
+    },
+    "mission": {
+      "title": "Contrôle de Mission",
+      "description": "Planner → Builder → Reviewer — décrivez un objectif, obtenez un plan, puis construisez-le étape par étape avec l'IA.",
+      "goalLabel": "Quel est votre objectif ?",
+      "goalPlaceholder": "ex. Je veux lancer une boutique en ligne de bijoux faits main",
+      "createPlan": "Créer le Plan",
+      "planning": "Planification...",
+      "emptyState": "Aucune mission pour l'instant — décrivez un objectif ci-dessus pour obtenir votre premier plan.",
+      "createWithAi": "Créer avec l'IA",
+      "creating": "Création...",
+      "viewIn": "Voir dans {module}",
+      "reviewMission": "Évaluer la Mission",
+      "reviewing": "Évaluation...",
+      "reviewerLabel": "Reviewer",
+      "statusPlanning": "Planification",
+      "statusInProgress": "En Cours",
+      "statusCompleted": "Terminée",
+      "statusFailed": "Échouée"
     }
   },
   "module": {

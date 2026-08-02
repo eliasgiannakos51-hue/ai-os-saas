@@ -30,6 +30,7 @@ import {
   Megaphone,
   Brain,
   History,
+  Rocket,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -70,3 +71,4 @@ export const MARKETPLACE_ICON: LucideIcon = Store;
 export const TEAM_ICON: LucideIcon = Users;
 export const MEMORY_ICON: LucideIcon = Brain;
 export const TIMELINE_ICON: LucideIcon = History;
+export const MISSION_ICON: LucideIcon = Rocket;

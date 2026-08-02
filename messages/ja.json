@@ -33,6 +33,7 @@
       "chat": "Ionexa Chat",
       "memory": "AI メモリー",
       "timeline": "タイムライン",
+      "missionControl": "ミッションコントロール",
       "settings": "設定",
       "team": "チーム",
       "agents": "AI エージェント",
@@ -343,6 +344,25 @@
       "rangeMonth": "今月",
       "rangeAll": "すべての期間",
       "emptyState": "この期間にはまだ記録がありません。"
+    },
+    "mission": {
+      "title": "ミッションコントロール",
+      "description": "Planner → Builder → Reviewer — 目標を記述すると計画が作成され、AIで一歩ずつ構築できます。",
+      "goalLabel": "あなたの目標は?",
+      "goalPlaceholder": "例: 手作りジュエリーのオンラインストアを始めたい",
+      "createPlan": "計画を作成",
+      "planning": "計画中...",
+      "emptyState": "ミッションはまだありません — 上に目標を記述して最初の計画を作成してください。",
+      "createWithAi": "AIで作成",
+      "creating": "作成中...",
+      "viewIn": "{module}で表示",
+      "reviewMission": "ミッションを評価",
+      "reviewing": "評価中...",
+      "reviewerLabel": "Reviewer",
+      "statusPlanning": "計画中",
+      "statusInProgress": "進行中",
+      "statusCompleted": "完了",
+      "statusFailed": "失敗"
     }
   },
   "module": {

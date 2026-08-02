@@ -855,3 +855,52 @@ create policy "insert_own_entity_links" on public.entity_links
 drop policy if exists "delete_own_entity_links" on public.entity_links;
 create policy "delete_own_entity_links" on public.entity_links
   for delete using (auth.uid() = user_id);
+
+-- ============================================================================
+-- Mission Control ("AI Company" concept, v1): Planner -> Builder -> Reviewer.
+-- One row per mission. plan_steps holds { steps: [{ text, status,
+-- module?, moduleTitle?, href? }], review? } — an object rather than a
+-- bare array so the Reviewer Agent's output has somewhere to live without
+-- needing a column beyond what's defined here (see src/types/mission.ts).
+-- Builder is the ALREADY-EXISTING /api/create (Create Anything), called
+-- once per step by the user — nothing in this table implies autonomous
+-- execution.
+-- ============================================================================
+
+drop table if exists public.ai_missions cascade;
+
+create table public.ai_missions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  goal text not null,
+  status text not null default 'planning' check (status in ('planning',
+    'in_progress', 'completed', 'failed')),
+  plan_steps jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists ai_missions_user_id_created_at_idx
+  on public.ai_missions (user_id, created_at desc);
+
+alter table public.ai_missions enable row level security;
+
+drop policy if exists "select_own_ai_missions" on public.ai_missions;
+create policy "select_own_ai_missions" on public.ai_missions
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_ai_missions" on public.ai_missions;
+create policy "insert_own_ai_missions" on public.ai_missions
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "update_own_ai_missions" on public.ai_missions;
+create policy "update_own_ai_missions" on public.ai_missions
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_ai_missions" on public.ai_missions;
+create policy "delete_own_ai_missions" on public.ai_missions
+  for delete using (auth.uid() = user_id);
+
+drop trigger if exists set_updated_at on public.ai_missions;
+create trigger set_updated_at before update on public.ai_missions
+  for each row execute function public.set_updated_at();

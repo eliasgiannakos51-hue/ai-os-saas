@@ -1,0 +1,91 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { Rocket } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { getErrorMessage } from "@/lib/get-error-message";
+import { useCredits } from "@/components/credits/credits-context";
+
+const MAX_GOAL_LENGTH = 500;
+
+// Planner step's entry point — POSTs to /api/mission/plan, which calls the
+// Planner Agent (lib/mission-agents.ts) and creates the new ai_missions
+// row. router.refresh() afterward re-fetches the mission list server-side
+// (dashboard/mission/page.tsx), same pattern as every other add-form in
+// this app.
+export function MissionForm() {
+  const t = useTranslations("dashboard.mission");
+  const router = useRouter();
+  const { refresh: refreshCredits } = useCredits();
+  const [goal, setGoal] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    const trimmed = goal.trim();
+    if (!trimmed || loading) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/mission/plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ goal: trimmed }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        setError(getErrorMessage(data?.error, "Could not create a plan."));
+        return;
+      }
+      if (!data.planned) {
+        setError(data.message ?? "Could not create a plan.");
+        return;
+      }
+
+      setGoal("");
+      void refreshCredits();
+      router.refresh();
+    } catch {
+      setError("Network error — please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-border bg-panel p-5">
+      <label htmlFor="mission-goal" className="block text-sm font-semibold text-foreground">
+        {t("goalLabel")}
+      </label>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          id="mission-goal"
+          type="text"
+          required
+          maxLength={MAX_GOAL_LENGTH}
+          value={goal}
+          onChange={(e) => setGoal(e.target.value)}
+          placeholder={t("goalPlaceholder")}
+          className="input flex-1"
+        />
+        <button
+          type="submit"
+          disabled={loading || !goal.trim()}
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+        >
+          <Rocket className="h-4 w-4" />
+          {loading ? t("planning") : t("createPlan")}
+        </button>
+      </div>
+      {error && (
+        <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+          {error}
+        </p>
+      )}
+    </form>
+  );
+}

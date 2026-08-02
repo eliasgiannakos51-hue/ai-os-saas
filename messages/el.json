@@ -33,6 +33,7 @@
       "chat": "Ionexa Chat",
       "memory": "AI Μνήμη",
       "timeline": "Χρονολόγιο",
+      "missionControl": "Κέντρο Αποστολών",
       "settings": "Ρυθμίσεις",
       "team": "Ομάδα",
       "agents": "AI Agents",
@@ -343,6 +344,25 @@
       "rangeMonth": "Αυτόν τον μήνα",
       "rangeAll": "Όλο το διάστημα",
       "emptyState": "Δεν υπάρχουν εγγραφές σε αυτό το διάστημα ακόμα."
+    },
+    "mission": {
+      "title": "Κέντρο Αποστολών",
+      "description": "Planner → Builder → Reviewer — περίγραψε έναν στόχο, πάρε ένα σχέδιο, μετά χτίσε το βήμα-βήμα με AI.",
+      "goalLabel": "Ποιος είναι ο στόχος σου;",
+      "goalPlaceholder": "π.χ. Θέλω να ξεκινήσω online store για χειροποίητα κοσμήματα",
+      "createPlan": "Δημιουργία Σχεδίου",
+      "planning": "Σχεδιασμός...",
+      "emptyState": "Δεν υπάρχουν αποστολές ακόμα — περίγραψε έναν στόχο παραπάνω για το πρώτο σου σχέδιο.",
+      "createWithAi": "Δημιουργία με AI",
+      "creating": "Δημιουργία...",
+      "viewIn": "Προβολή στο {module}",
+      "reviewMission": "Αξιολόγηση Αποστολής",
+      "reviewing": "Αξιολόγηση...",
+      "reviewerLabel": "Reviewer",
+      "statusPlanning": "Σχεδιασμός",
+      "statusInProgress": "Σε Εξέλιξη",
+      "statusCompleted": "Ολοκληρώθηκε",
+      "statusFailed": "Απέτυχε"
     }
   },
   "module": {

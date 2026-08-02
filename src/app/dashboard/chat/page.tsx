@@ -27,7 +27,7 @@ export default async function ChatPage() {
   const userInitial = (user.email?.[0] ?? "?").toUpperCase();
 
   return (
-    <main className="h-[calc(100vh-4rem)] bg-background">
+    <main className="h-[calc(100vh-4rem)]">
       <ChatWorkspace
         initialConversations={(conversations as ChatConversation[] | null) ?? []}
         userInitial={userInitial}

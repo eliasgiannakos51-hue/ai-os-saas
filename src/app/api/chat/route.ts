@@ -128,7 +128,8 @@ export async function POST(request: Request) {
         user.id,
         CREDIT_COSTS.chatMessage,
         "chat_message",
-        "Ionexa Chat message"
+        "Ionexa Chat message",
+        plan
       );
       if (!deduction.ok) {
         return NextResponse.json({

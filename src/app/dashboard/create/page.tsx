@@ -21,7 +21,7 @@ export default async function CreatePage() {
   const userInitial = (user.email?.[0] ?? "?").toUpperCase();
 
   return (
-    <main className="h-[calc(100vh-4rem)] bg-background">
+    <main className="h-[calc(100vh-4rem)]">
       <AssistantChat userInitial={userInitial} />
     </main>
   );

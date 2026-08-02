@@ -100,7 +100,8 @@ export async function POST(request: Request) {
         user.id,
         moduleConfig.creditCost,
         `${moduleConfig.slug}_create`,
-        `${moduleConfig.title} created`
+        `${moduleConfig.title} created`,
+        plan
       );
       if (!deduction.ok) {
         return NextResponse.json(

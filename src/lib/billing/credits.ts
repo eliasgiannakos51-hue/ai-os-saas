@@ -1,5 +1,6 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { logApiError } from "@/lib/log-error";
 import { getPlan, type Plan, type PlanSlug } from "./plans";
 
 // The plan a user is on lives in user_metadata.subscription_tier, written
@@ -61,29 +62,84 @@ export async function getOrInitCredits(userId: string, plan: Plan): Promise<Cred
 // security boundary" tolerance the old hourly rate limiter documented, not
 // a hard financial ledger. Returns ok:false (no deduction, no log) if the
 // balance is insufficient.
+//
+// `plan` is required so a row that doesn't exist yet gets initialized at
+// the account's real entitlement (same as getOrInitCredits, used by
+// /api/credits/balance and the dashboard layout) instead of silently
+// falling back to a hard 0 balance — the old fallback here meant any
+// caller that raced ahead of the row's first initialization would get
+// blocked with "not enough credits" regardless of the account's actual
+// plan. The initial select/insert/update/transaction-insert errors are all
+// now checked and logged (previously unchecked) — an update that silently
+// failed used to still return ok:true with a `remaining` that was never
+// actually persisted, which reads to the caller as a successful deduction
+// that never happened.
 export async function deductCredits(
   userId: string,
   amount: number,
   actionType: string,
-  description: string
+  description: string,
+  plan: Plan
 ): Promise<{ ok: boolean; remaining: number }> {
   const admin = createAdminClient();
-  const { data: row } = await admin
+  const { data: row, error: selectError } = await admin
     .from("user_credits")
     .select("credits_remaining")
     .eq("user_id", userId)
     .maybeSingle();
 
-  const remaining = row?.credits_remaining ?? 0;
+  if (selectError) {
+    logApiError("deductCredits", selectError, { userId, actionType, stage: "select" });
+  }
+
+  let remaining: number;
+  if (row) {
+    remaining = row.credits_remaining;
+  } else {
+    const initial = planMonthlyCredits(plan);
+    const { error: insertError } = await admin.from("user_credits").insert({
+      user_id: userId,
+      credits_remaining: initial,
+      credits_total: initial,
+      plan_tier: plan.slug,
+    });
+    if (insertError) {
+      logApiError("deductCredits", insertError, { userId, actionType, stage: "init_insert" });
+    }
+    remaining = initial;
+  }
+
+  const comparisonResult = remaining >= amount ? "sufficient" : "insufficient";
+  console.error("CREDITS CHECK:", {
+    userId,
+    actionType,
+    userCredits: remaining,
+    actionCost: amount,
+    comparisonResult,
+  });
+
   if (remaining < amount) {
     return { ok: false, remaining };
   }
 
   const nextRemaining = remaining - amount;
-  await admin.from("user_credits").update({ credits_remaining: nextRemaining }).eq("user_id", userId);
-  await admin
+  const { error: updateError } = await admin
+    .from("user_credits")
+    .update({ credits_remaining: nextRemaining })
+    .eq("user_id", userId);
+
+  if (updateError) {
+    logApiError("deductCredits", updateError, { userId, actionType, stage: "update" });
+    return { ok: false, remaining };
+  }
+
+  const { error: insertTxError } = await admin
     .from("credit_transactions")
     .insert({ user_id: userId, amount: -amount, action_type: actionType, description });
+
+  if (insertTxError) {
+    logApiError("deductCredits", insertTxError, { userId, actionType, stage: "insert_transaction" });
+  }
 
   return { ok: true, remaining: nextRemaining };
 }

@@ -12,7 +12,7 @@ import { acceptPendingTeamInvite } from "@/lib/team/accept-pending-invite";
 import { getOrInitCredits, resolvePlan } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/admin";
 import { logApiError } from "@/lib/log-error";
-import { AuthBackground } from "@/components/auth/auth-background";
+import { DashboardBackground } from "@/components/dashboard/dashboard-background";
 
 export default async function DashboardLayout({
   children,
@@ -68,8 +68,10 @@ export default async function DashboardLayout({
                 z-index values (z-50/z-30) still order correctly *within*
                 that shell, and every page's content, opaque or not, paints
                 on top of the globe by default instead of needing its own
-                stacking fix. */}
-            <AuthBackground opacity={0.18} />
+                stacking fix. DashboardBackground (not AuthBackground
+                directly) picks the opacity per-route, since Chat/Create
+                need a higher one — see its own comment for why. */}
+            <DashboardBackground />
             <div className="relative z-10 flex min-h-screen">
               <Sidebar />
               <div className="flex min-w-0 flex-1 flex-col">

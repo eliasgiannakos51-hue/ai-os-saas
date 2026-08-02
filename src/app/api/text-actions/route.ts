@@ -98,7 +98,11 @@ export async function POST(request: Request) {
       );
       if (!deduction.ok) {
         return NextResponse.json(
-          { ok: false, insufficientCredits: true, error: insufficientCreditsMessage() },
+          {
+            ok: false,
+            insufficientCredits: true,
+            error: insufficientCreditsMessage(deduction.remaining, CREDIT_COSTS.textAction),
+          },
           { status: 402 }
         );
       }

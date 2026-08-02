@@ -145,7 +145,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
           ok: true,
           rateLimited: true,
-          message: insufficientCreditsMessage(),
+          message: insufficientCreditsMessage(deduction.remaining, CREDIT_COSTS.chatMessage),
         });
       }
     }

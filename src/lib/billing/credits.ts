@@ -228,6 +228,17 @@ export const CREDIT_COSTS = {
   saasProjectCreate: 700,
 } as const;
 
-export function insufficientCreditsMessage(): string {
-  return "Not enough credits. Upgrade your plan or purchase more credits.";
+// TEMPORARY diagnostic: shows the exact numbers deductCredits compared,
+// directly in the user-facing message — added because the generic message
+// gave no way to tell, from the outside, whether a report of "not enough
+// credits" despite a real balance was actually a low `remaining` value or
+// something else. Remove the "(you have: X, need: Y)" clause once the
+// underlying cause is confirmed and this is no longer needed for
+// diagnosis.
+export function insufficientCreditsMessage(remaining?: number, cost?: number): string {
+  const detail =
+    typeof remaining === "number" && typeof cost === "number"
+      ? ` (you have: ${remaining}, need: ${cost})`
+      : "";
+  return `Not enough credits${detail}. Upgrade your plan or purchase more credits.`;
 }

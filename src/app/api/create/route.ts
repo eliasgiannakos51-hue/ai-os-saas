@@ -156,7 +156,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
           ok: true,
           matched: false,
-          message: insufficientCreditsMessage(),
+          message: insufficientCreditsMessage(deduction.remaining, CREDIT_COSTS.createAnything),
         });
       }
     }

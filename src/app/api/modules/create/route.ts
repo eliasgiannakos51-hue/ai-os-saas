@@ -105,7 +105,11 @@ export async function POST(request: Request) {
       );
       if (!deduction.ok) {
         return NextResponse.json(
-          { ok: false, insufficientCredits: true, error: insufficientCreditsMessage() },
+          {
+            ok: false,
+            insufficientCredits: true,
+            error: insufficientCreditsMessage(deduction.remaining, moduleConfig.creditCost),
+          },
           { status: 402 }
         );
       }

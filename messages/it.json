@@ -353,6 +353,15 @@
     "send": "Invia",
     "close": "Chiudi"
   },
+  "entityLinks": {
+    "buttonLabel": "Collega a...",
+    "modalTitle": "Collega a...",
+    "linkedToLabel": "Collegato a:",
+    "pickModulePrompt": "A quale modulo vuoi collegarti?",
+    "searchPlaceholder": "Cerca in {module}...",
+    "searching": "Ricerca...",
+    "noMatches": "Nessun risultato."
+  },
   "language": {
     "label": "Lingua"
   }

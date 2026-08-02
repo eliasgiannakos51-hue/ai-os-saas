@@ -8,6 +8,7 @@ import { GenericList } from "@/components/modules/generic-list";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
+import { loadLinkedEntities } from "@/lib/entity-links";
 import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/admin";
@@ -62,6 +63,13 @@ export async function BuildModulePage({
     .select("*")
     .order("created_at", { ascending: false });
 
+  const linkedEntities = await loadLinkedEntities(
+    supabase,
+    user.id,
+    config.table,
+    (records as ModuleRecord[] | null)?.map((r) => r.id) ?? []
+  );
+
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
@@ -73,7 +81,11 @@ export async function BuildModulePage({
 
         {error && <ErrorMessage message={`loading ${config.table}: ${error.message}`} />}
 
-        <GenericList module={config} records={(records as ModuleRecord[]) ?? []} />
+        <GenericList
+          module={config}
+          records={(records as ModuleRecord[]) ?? []}
+          linkedEntities={linkedEntities}
+        />
       </div>
     </main>
   );

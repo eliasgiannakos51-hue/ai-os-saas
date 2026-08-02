@@ -353,6 +353,15 @@
     "send": "送信",
     "close": "閉じる"
   },
+  "entityLinks": {
+    "buttonLabel": "リンク...",
+    "modalTitle": "リンク先を選択",
+    "linkedToLabel": "リンク先:",
+    "pickModulePrompt": "どのモジュールにリンクしますか?",
+    "searchPlaceholder": "{module}を検索...",
+    "searching": "検索中...",
+    "noMatches": "一致するものがありません。"
+  },
   "language": {
     "label": "言語"
   }

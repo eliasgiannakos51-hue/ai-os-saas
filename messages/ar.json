@@ -353,6 +353,15 @@
     "send": "إرسال",
     "close": "إغلاق"
   },
+  "entityLinks": {
+    "buttonLabel": "ربط بـ...",
+    "modalTitle": "ربط بـ...",
+    "linkedToLabel": "مرتبط بـ:",
+    "pickModulePrompt": "بأي وحدة تريد الربط؟",
+    "searchPlaceholder": "البحث في {module}...",
+    "searching": "جارٍ البحث...",
+    "noMatches": "لا توجد نتائج مطابقة."
+  },
   "language": {
     "label": "اللغة"
   }

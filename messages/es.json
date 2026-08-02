@@ -353,6 +353,15 @@
     "send": "Enviar",
     "close": "Cerrar"
   },
+  "entityLinks": {
+    "buttonLabel": "Vincular a...",
+    "modalTitle": "Vincular a...",
+    "linkedToLabel": "Vinculado a:",
+    "pickModulePrompt": "¿A qué módulo quieres vincular?",
+    "searchPlaceholder": "Buscar en {module}...",
+    "searching": "Buscando...",
+    "noMatches": "Sin resultados."
+  },
   "language": {
     "label": "Idioma"
   }

@@ -353,6 +353,15 @@
     "send": "Αποστολή",
     "close": "Κλείσιμο"
   },
+  "entityLinks": {
+    "buttonLabel": "Σύνδεση με...",
+    "modalTitle": "Σύνδεση με...",
+    "linkedToLabel": "Συνδεδεμένο με:",
+    "pickModulePrompt": "Σε ποια ενότητα θέλεις να συνδέσεις;",
+    "searchPlaceholder": "Αναζήτηση σε {module}...",
+    "searching": "Αναζήτηση...",
+    "noMatches": "Δεν βρέθηκαν αποτελέσματα."
+  },
   "language": {
     "label": "Γλώσσα"
   }

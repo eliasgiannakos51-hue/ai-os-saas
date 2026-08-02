@@ -353,6 +353,15 @@
     "send": "Senden",
     "close": "Schließen"
   },
+  "entityLinks": {
+    "buttonLabel": "Verknüpfen mit...",
+    "modalTitle": "Verknüpfen mit...",
+    "linkedToLabel": "Verknüpft mit:",
+    "pickModulePrompt": "Mit welchem Modul möchtest du verknüpfen?",
+    "searchPlaceholder": "{module} durchsuchen...",
+    "searching": "Suche...",
+    "noMatches": "Keine Treffer."
+  },
   "language": {
     "label": "Sprache"
   }

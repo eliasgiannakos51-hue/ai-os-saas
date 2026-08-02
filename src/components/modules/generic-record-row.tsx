@@ -8,9 +8,12 @@ import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { DeleteButton } from "@/components/delete-button";
 import { AskAiButton } from "@/components/records/ask-ai-button";
+import { LinkToButton } from "@/components/entity-links/link-to-button";
+import { LinkedEntities } from "@/components/entity-links/linked-entities";
 import { TextActionsTextarea } from "@/components/text-actions/text-actions-textarea";
 import { useToast } from "@/components/toast/toast-context";
 import { formatRelativeTime } from "@/lib/format-time";
+import type { LinkedEntity } from "@/lib/entity-links";
 
 function formStateFor(module: ModuleConfig, record: ModuleRecord): Record<string, string> {
   return Object.fromEntries(
@@ -24,9 +27,11 @@ function formStateFor(module: ModuleConfig, record: ModuleRecord): Record<string
 export function GenericRecordRow({
   module,
   record,
+  linkedEntities = [],
 }: {
   module: ModuleConfig;
   record: ModuleRecord;
+  linkedEntities?: LinkedEntity[];
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -219,6 +224,8 @@ export function GenericRecordRow({
         );
       })}
 
+      <LinkedEntities entities={linkedEntities} />
+
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
         <p
           className="text-xs text-muted"
@@ -234,6 +241,7 @@ export function GenericRecordRow({
             recordId={record.id}
             recordHeadline={headline}
           />
+          <LinkToButton sourceTable={module.table} sourceId={record.id} sourceHeadline={headline} />
           <button
             type="button"
             onClick={startEditing}

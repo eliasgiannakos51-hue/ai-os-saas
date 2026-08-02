@@ -811,3 +811,47 @@ create index if not exists rate_limit_log_scope_identifier_created_at_idx
   on public.rate_limit_log (scope, identifier, created_at desc);
 
 alter table public.rate_limit_log enable row level security;
+
+-- ============================================================================
+-- Knowledge graph: links between records across different modules (e.g. an
+-- Idea linked to a Product), so Ionexa Chat can see relationships without
+-- the user re-explaining them every time (see src/lib/entity-links.ts,
+-- src/lib/chat/entity-mentions.ts, src/components/entity-links/*).
+-- source_table/target_table hold a module's table name (e.g. "ideas",
+-- "products") — polymorphic by design, so no FK is possible on
+-- source_id/target_id; ownership of the linked records is enforced by
+-- each of those tables' own RLS at read time, not by a constraint here.
+-- ============================================================================
+
+drop table if exists public.entity_links cascade;
+
+create table public.entity_links (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  source_table text not null,
+  source_id uuid not null,
+  target_table text not null,
+  target_id uuid not null,
+  relationship_type text not null default 'related',
+  created_at timestamptz not null default now()
+);
+
+create index if not exists entity_links_user_source_idx
+  on public.entity_links (user_id, source_table, source_id);
+
+create index if not exists entity_links_user_target_idx
+  on public.entity_links (user_id, target_table, target_id);
+
+alter table public.entity_links enable row level security;
+
+drop policy if exists "select_own_entity_links" on public.entity_links;
+create policy "select_own_entity_links" on public.entity_links
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_entity_links" on public.entity_links;
+create policy "insert_own_entity_links" on public.entity_links
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_entity_links" on public.entity_links;
+create policy "delete_own_entity_links" on public.entity_links
+  for delete using (auth.uid() = user_id);

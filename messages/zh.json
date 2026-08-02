@@ -353,6 +353,15 @@
     "send": "发送",
     "close": "关闭"
   },
+  "entityLinks": {
+    "buttonLabel": "关联到...",
+    "modalTitle": "关联到...",
+    "linkedToLabel": "关联到:",
+    "pickModulePrompt": "要关联到哪个模块?",
+    "searchPlaceholder": "搜索{module}...",
+    "searching": "搜索中...",
+    "noMatches": "未找到匹配项。"
+  },
   "language": {
     "label": "语言"
   }

@@ -8,6 +8,7 @@ import { GenericList } from "@/components/modules/generic-list";
 import { getModule } from "@/lib/modules";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import type { ModuleRecord } from "@/types/module-record";
+import { loadLinkedEntities } from "@/lib/entity-links";
 
 export function generateMetadata({
   params,
@@ -44,6 +45,13 @@ export default async function ModulePage({
     .select("*")
     .order("created_at", { ascending: false });
 
+  const linkedEntities = await loadLinkedEntities(
+    supabase,
+    user.id,
+    moduleConfig.table,
+    (records as ModuleRecord[] | null)?.map((r) => r.id) ?? []
+  );
+
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
@@ -60,6 +68,7 @@ export default async function ModulePage({
         <GenericList
           module={moduleConfig}
           records={(records as ModuleRecord[]) ?? []}
+          linkedEntities={linkedEntities}
         />
       </div>
     </main>

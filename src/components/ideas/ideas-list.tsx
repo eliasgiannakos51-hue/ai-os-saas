@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Search, SearchX, Download } from "lucide-react";
 import type { Idea } from "@/types/ideas";
+import type { LinkedEntity } from "@/lib/entity-links";
 import { IdeaRow } from "@/components/ideas/idea-row";
 import { toCSV, downloadCSV, todayForFilename } from "@/lib/csv";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
@@ -51,7 +52,13 @@ function searchableText(idea: Idea): string {
     .toLowerCase();
 }
 
-export function IdeasList({ ideas }: { ideas: Idea[] }) {
+export function IdeasList({
+  ideas,
+  linkedEntities = {},
+}: {
+  ideas: Idea[];
+  linkedEntities?: Record<string, LinkedEntity[]>;
+}) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -104,7 +111,7 @@ export function IdeasList({ ideas }: { ideas: Idea[] }) {
         <>
           <div className="space-y-3">
             {paginated.map((idea) => (
-              <IdeaRow key={idea.id} idea={idea} />
+              <IdeaRow key={idea.id} idea={idea} linkedEntities={linkedEntities[idea.id]} />
             ))}
           </div>
           <PaginationControls page={page} totalPages={totalPages} onChange={setPage} />

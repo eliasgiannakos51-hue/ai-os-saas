@@ -16,6 +16,7 @@ import {
   buildMemoryPromptAddition,
   isChatMemoryEnabled,
 } from "@/lib/chat/memory";
+import { findMentionedEntities, buildEntityMentionPromptAddition } from "@/lib/chat/entity-mentions";
 
 export const dynamic = "force-dynamic";
 
@@ -121,7 +122,17 @@ export async function POST(request: Request) {
       rawPersonaName.trim()
         ? rawPersonaName.trim().slice(0, MAX_PERSONA_NAME_LENGTH)
         : "Ionexa";
-    const systemPrompt = buildSystemPrompt(personaName) + buildMemoryPromptAddition(memories);
+    // Knowledge graph: simple case-insensitive substring matching against
+    // every module's headline field (see lib/chat/entity-mentions.ts) —
+    // when the user mentions something they've already logged (e.g. an
+    // Idea or Product by name), its linked entities (lib/entity-links.ts)
+    // are surfaced here so the AI already "knows" the relationship without
+    // being told again.
+    const mentionedEntities = await findMentionedEntities(supabase, user.id, message);
+    const systemPrompt =
+      buildSystemPrompt(personaName) +
+      buildMemoryPromptAddition(memories) +
+      buildEntityMentionPromptAddition(mentionedEntities);
 
     // Credits: 1 credit per Ionexa Chat message, deducted from user_credits
     // (see lib/billing/credits.ts), the same shared budget Create Anything

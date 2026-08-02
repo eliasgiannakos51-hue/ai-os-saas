@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Search, SearchX, Download } from "lucide-react";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
+import type { LinkedEntity } from "@/lib/entity-links";
 import { GenericRecordRow } from "@/components/modules/generic-record-row";
 import { toCSV, downloadCSV, todayForFilename } from "@/lib/csv";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
@@ -24,9 +25,11 @@ function searchableText(module: ModuleConfig, record: ModuleRecord): string {
 export function GenericList({
   module,
   records,
+  linkedEntities = {},
 }: {
   module: ModuleConfig;
   records: ModuleRecord[];
+  linkedEntities?: Record<string, LinkedEntity[]>;
 }) {
   const t = useTranslations("module");
   const [query, setQuery] = useState("");
@@ -84,7 +87,12 @@ export function GenericList({
         <>
           <div className="space-y-3">
             {paginated.map((record) => (
-              <GenericRecordRow key={record.id} module={module} record={record} />
+              <GenericRecordRow
+                key={record.id}
+                module={module}
+                record={record}
+                linkedEntities={linkedEntities[record.id]}
+              />
             ))}
           </div>
           <PaginationControls page={page} totalPages={totalPages} onChange={setPage} />

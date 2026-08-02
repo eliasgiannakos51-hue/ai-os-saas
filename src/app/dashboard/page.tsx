@@ -7,6 +7,7 @@ import { AddIdeaForm } from "@/components/ideas/add-idea-form";
 import { IdeasList } from "@/components/ideas/ideas-list";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import type { Idea } from "@/types/ideas";
+import { loadLinkedEntities } from "@/lib/entity-links";
 
 export const metadata: Metadata = {
   title: "Ideas",
@@ -28,6 +29,13 @@ export default async function DashboardPage() {
     .select("*")
     .order("created_at", { ascending: false });
 
+  const linkedEntities = await loadLinkedEntities(
+    supabase,
+    user.id,
+    "ideas",
+    (ideas as Idea[] | null)?.map((i) => i.id) ?? []
+  );
+
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
@@ -39,7 +47,7 @@ export default async function DashboardPage() {
 
         {error && <ErrorMessage message={`loading ideas: ${error.message}`} />}
 
-        <IdeasList ideas={(ideas as Idea[]) ?? []} />
+        <IdeasList ideas={(ideas as Idea[]) ?? []} linkedEntities={linkedEntities} />
       </div>
     </main>
   );

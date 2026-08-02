@@ -353,6 +353,15 @@
     "send": "Envoyer",
     "close": "Fermer"
   },
+  "entityLinks": {
+    "buttonLabel": "Lier à...",
+    "modalTitle": "Lier à...",
+    "linkedToLabel": "Lié à :",
+    "pickModulePrompt": "À quel module voulez-vous lier ?",
+    "searchPlaceholder": "Rechercher dans {module}...",
+    "searching": "Recherche...",
+    "noMatches": "Aucun résultat."
+  },
   "language": {
     "label": "Langue"
   }

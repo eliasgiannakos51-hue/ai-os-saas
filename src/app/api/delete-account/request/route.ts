@@ -51,6 +51,10 @@ export async function POST() {
       ({ token, tokenHash } = generateDeleteAccountToken());
     } catch (err) {
       logApiError("/api/delete-account/request", err, { stage: "generate_token", userId: user.id });
+      console.error(
+        "DELETE ACCOUNT STEP 1 (generate_token):",
+        JSON.stringify(err, Object.getOwnPropertyNames(err || {}))
+      );
       return NextResponse.json(
         { ok: false, error: "Could not start account deletion. Please try again." },
         { status: 500 }
@@ -70,6 +74,10 @@ export async function POST() {
         stage: "insert_deletion_request",
         userId: user.id,
       });
+      console.error(
+        "DELETE ACCOUNT STEP 2 (insert_deletion_request):",
+        JSON.stringify(insertError, Object.getOwnPropertyNames(insertError || {}))
+      );
       return NextResponse.json(
         { ok: false, error: "Could not start account deletion. Please try again." },
         { status: 500 }
@@ -79,7 +87,10 @@ export async function POST() {
     const siteUrl = getSiteUrl();
     const confirmUrl = `${siteUrl}/delete-account/confirm?token=${token}`;
 
-    const { ok: emailOk } = await sendDeleteAccountConfirmationEmail(user.email, confirmUrl);
+    const { ok: emailOk, error: emailError } = await sendDeleteAccountConfirmationEmail(
+      user.email,
+      confirmUrl
+    );
     if (!emailOk) {
       // sendDeleteAccountConfirmationEmail already console.errors the
       // underlying Resend/network failure itself — this just marks, in the
@@ -93,6 +104,10 @@ export async function POST() {
         new Error("sendDeleteAccountConfirmationEmail returned ok:false"),
         { stage: "send_email", userId: user.id }
       );
+      console.error(
+        "DELETE ACCOUNT STEP 3 (send_email):",
+        JSON.stringify(emailError, Object.getOwnPropertyNames(emailError || {}))
+      );
       return NextResponse.json(
         { ok: false, error: "Could not send the confirmation email. Please try again." },
         { status: 500 }
@@ -102,6 +117,10 @@ export async function POST() {
     return NextResponse.json({ ok: true });
   } catch (err) {
     logApiError("/api/delete-account/request", err, { stage: "unhandled", userId });
+    console.error(
+      "DELETE ACCOUNT STEP 4 (unhandled):",
+      JSON.stringify(err, Object.getOwnPropertyNames(err || {}))
+    );
     return NextResponse.json(
       { ok: false, error: "Something went wrong. Please try again." },
       { status: 500 }

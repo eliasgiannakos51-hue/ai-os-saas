@@ -8,7 +8,7 @@ const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@res
 export async function sendDeleteAccountConfirmationEmail(
   email: string,
   confirmUrl: string
-): Promise<{ ok: boolean }> {
+): Promise<{ ok: boolean; error?: unknown }> {
   try {
     const resend = createResendClient();
     const { error } = await resend.emails.send({
@@ -20,11 +20,11 @@ export async function sendDeleteAccountConfirmationEmail(
 
     if (error) {
       logApiError("email:send-delete-account-confirmation", error, { stage: "resend_error" });
-      return { ok: false };
+      return { ok: false, error };
     }
     return { ok: true };
   } catch (err) {
     logApiError("email:send-delete-account-confirmation", err, { stage: "unhandled" });
-    return { ok: false };
+    return { ok: false, error: err };
   }
 }

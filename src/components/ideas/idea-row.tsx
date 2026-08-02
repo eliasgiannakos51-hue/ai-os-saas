@@ -160,7 +160,7 @@ export function IdeaRow({
             <TextActionsTextarea
               value={form.problem}
               onChange={(v) => updateValue("problem", v)}
-              className="input min-h-16"
+              className="input min-h-32 resize-y"
               placeholder="what problem does this solve?"
             />
           </Field>
@@ -169,7 +169,7 @@ export function IdeaRow({
             <TextActionsTextarea
               value={form.competitors}
               onChange={(v) => updateValue("competitors", v)}
-              className="input min-h-16"
+              className="input min-h-32 resize-y"
               placeholder="known competitors"
             />
           </Field>
@@ -199,7 +199,7 @@ export function IdeaRow({
             <TextActionsTextarea
               value={form.mvp}
               onChange={(v) => updateValue("mvp", v)}
-              className="input min-h-16"
+              className="input min-h-32 resize-y"
               placeholder="what does the MVP look like?"
             />
           </Field>

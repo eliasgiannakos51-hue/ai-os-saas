@@ -473,11 +473,14 @@
       "versionOriginal": "Generación original",
       "viewingOldVersion": "Viendo v{number} (solo lectura).",
       "backToLatest": "Volver a la última versión",
-      "imageLabel": "Imagen de referencia (opcional)",
-      "imageHelp": "Un logo, foto de producto, o captura de pantalla de un estilo que te guste — JPG o PNG, hasta 5MB. Se usa solo para inspirar colores/estilo, no se incrustará en el sitio generado.",
+      "previewIncompleteTitle": "Vista previa no disponible",
+      "previewIncompleteBody": "Esta página generada parece incompleta o se cortó, por lo que no se puede mostrar de forma segura. Intenta generarla de nuevo con una descripción más corta, o edítala otra vez.",
+      "imageLabel": "Imágenes de referencia ({count}/{max}, opcional)",
+      "imageHelp": "Hasta {max} imágenes: un logo, fotos de productos o una captura de estilo de referencia. JPG o PNG, hasta 5MB cada una. Solo se usan para inspirar los colores/estilo, no se incrustan en el sitio generado.",
       "imageRemove": "Eliminar imagen",
       "imageInvalidType": "Solo se admiten imágenes JPG o PNG.",
-      "imageTooLarge": "La imagen es demasiado grande — elige un archivo de menos de 5MB."
+      "imageTooLarge": "La imagen es demasiado grande — elige un archivo de menos de 5MB.",
+      "imageTooMany": "Puedes añadir hasta {max} imágenes."
     },
     "marketplace": {
       "title": "Marketplace",

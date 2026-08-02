@@ -188,7 +188,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
                     required={field.required}
                     value={form[field.key]}
                     onChange={(v) => updateValue(field.key, v.slice(0, MAX_TEXTAREA_LENGTH))}
-                    className="input min-h-16"
+                    className="input min-h-32 resize-y"
                     placeholder={field.placeholder}
                   />
                 ) : field.type === "select" ? (

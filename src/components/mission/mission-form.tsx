@@ -8,7 +8,7 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { useCredits } from "@/components/credits/credits-context";
 import { useToast } from "@/components/toast/toast-context";
 
-const MAX_GOAL_LENGTH = 500;
+const MAX_GOAL_LENGTH = 5000;
 
 // Planner step's entry point — POSTs to /api/mission/plan, which calls the
 // Planner Agent (lib/mission-agents.ts) and creates the new ai_missions
@@ -70,21 +70,20 @@ export function MissionForm() {
       <label htmlFor="mission-goal" className="block text-sm font-semibold text-foreground">
         {t("goalLabel")}
       </label>
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <input
+      <div className="flex flex-col gap-2">
+        <textarea
           id="mission-goal"
-          type="text"
           required
           maxLength={MAX_GOAL_LENGTH}
           value={goal}
           onChange={(e) => setGoal(e.target.value)}
           placeholder={t("goalPlaceholder")}
-          className="input flex-1"
+          className="input min-h-24 resize-y"
         />
         <button
           type="submit"
           disabled={loading || !goal.trim()}
-          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 self-start rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />

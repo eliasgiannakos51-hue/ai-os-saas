@@ -24,7 +24,7 @@ import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/u
 export const dynamic = "force-dynamic";
 
 const MODEL = "claude-sonnet-4-6";
-const MAX_MESSAGE_LENGTH = 4000;
+const MAX_MESSAGE_LENGTH = 5000;
 const MAX_TOKENS = 2048;
 const HISTORY_LIMIT = 20;
 const MAX_PERSONA_NAME_LENGTH = 40;

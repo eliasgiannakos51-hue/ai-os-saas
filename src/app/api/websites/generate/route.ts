@@ -6,7 +6,11 @@ import {
   isSupportedReferenceImageMediaType,
   type ReferenceImage,
 } from "@/lib/website-builder";
-import { MAX_REFERENCE_IMAGE_BYTES, REFERENCE_IMAGE_BUCKET } from "@/lib/website-reference-image";
+import {
+  MAX_REFERENCE_IMAGE_BYTES,
+  MAX_REFERENCE_IMAGES,
+  REFERENCE_IMAGE_BUCKET,
+} from "@/lib/website-reference-image";
 import { FIRST_VERSION_NUMBER } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -17,11 +21,51 @@ import {
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
 import { logApiError } from "@/lib/log-error";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
 const MAX_NAME_LENGTH = 100;
-const MAX_DESCRIPTION_LENGTH = 2000;
+const MAX_DESCRIPTION_LENGTH = 5000;
+
+// Downloads one reference image via the request-scoped client (Storage's
+// RLS policies — supabase_schema.sql — already confirm this path belongs
+// to the caller before anything is read) and validates it. Returns null
+// on any problem rather than throwing — one bad image among several
+// should never take down the other, valid ones.
+async function downloadReferenceImage(
+  supabase: SupabaseClient,
+  path: string
+): Promise<ReferenceImage | null> {
+  try {
+    const { data: imageBlob, error: downloadError } = await supabase.storage
+      .from(REFERENCE_IMAGE_BUCKET)
+      .download(path);
+
+    if (downloadError || !imageBlob) {
+      logApiError("/api/websites/generate", downloadError, { stage: "reference_image_download" });
+      return null;
+    }
+    if (imageBlob.size > MAX_REFERENCE_IMAGE_BYTES) {
+      logApiError("/api/websites/generate", "reference image exceeds size limit after upload", {
+        stage: "reference_image_size",
+      });
+      return null;
+    }
+    if (!isSupportedReferenceImageMediaType(imageBlob.type)) {
+      logApiError("/api/websites/generate", `unsupported reference image type: ${imageBlob.type}`, {
+        stage: "reference_image_type",
+      });
+      return null;
+    }
+
+    const arrayBuffer = await imageBlob.arrayBuffer();
+    return { base64: Buffer.from(arrayBuffer).toString("base64"), mediaType: imageBlob.type };
+  } catch (err) {
+    logApiError("/api/websites/generate", err, { stage: "reference_image_download" });
+    return null;
+  }
+}
 
 // Website Builder — real Claude generation (lib/website-builder.ts), saved
 // to user_websites. Distinct from /api/modules/create's "websites" Build
@@ -40,12 +84,14 @@ export async function POST(request: Request) {
 
     let name: string;
     let description: string;
-    let referenceImagePath: string | null;
+    let referenceImagePaths: string[];
     try {
       const body = await request.json();
       name = typeof body?.name === "string" ? body.name.trim().slice(0, MAX_NAME_LENGTH) : "";
       description = typeof body?.description === "string" ? body.description.trim() : "";
-      referenceImagePath = typeof body?.referenceImagePath === "string" ? body.referenceImagePath : null;
+      referenceImagePaths = Array.isArray(body?.referenceImagePaths)
+        ? body.referenceImagePaths.filter((p: unknown): p is string => typeof p === "string").slice(0, MAX_REFERENCE_IMAGES)
+        : [];
     } catch {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
@@ -110,43 +156,25 @@ export async function POST(request: Request) {
       }
     }
 
-    // Reference image (optional) — downloaded via the request-scoped
-    // client, so Storage's RLS policies (supabase_schema.sql) already
-    // confirm this path belongs to the caller before anything is read.
-    // Best-effort: a broken/missing image should degrade to a normal
-    // text-only generation, not fail the whole request.
-    let referenceImage: ReferenceImage | undefined;
-    if (referenceImagePath) {
-      try {
-        const { data: imageBlob, error: downloadError } = await supabase.storage
-          .from(REFERENCE_IMAGE_BUCKET)
-          .download(referenceImagePath);
-
-        if (downloadError || !imageBlob) {
-          logApiError("/api/websites/generate", downloadError, { stage: "reference_image_download" });
-        } else if (imageBlob.size > MAX_REFERENCE_IMAGE_BYTES) {
-          logApiError("/api/websites/generate", "reference image exceeds size limit after upload", {
-            stage: "reference_image_size",
-          });
-        } else if (!isSupportedReferenceImageMediaType(imageBlob.type)) {
-          logApiError("/api/websites/generate", `unsupported reference image type: ${imageBlob.type}`, {
-            stage: "reference_image_type",
-          });
-        } else {
-          const arrayBuffer = await imageBlob.arrayBuffer();
-          referenceImage = {
-            base64: Buffer.from(arrayBuffer).toString("base64"),
-            mediaType: imageBlob.type,
-          };
-        }
-      } catch (err) {
-        logApiError("/api/websites/generate", err, { stage: "reference_image_download" });
+    // Reference images (optional, up to MAX_REFERENCE_IMAGES) — downloaded
+    // in parallel; each one is independently best-effort, so one bad
+    // image never blocks the others or the generation itself.
+    const downloadedImages = await Promise.all(
+      referenceImagePaths.map((path) => downloadReferenceImage(supabase, path))
+    );
+    const successfulPaths: string[] = [];
+    const referenceImages: ReferenceImage[] = [];
+    referenceImagePaths.forEach((path, i) => {
+      const image = downloadedImages[i];
+      if (image) {
+        successfulPaths.push(path);
+        referenceImages.push(image);
       }
-    }
+    });
 
     let htmlContent: string;
     try {
-      htmlContent = await generateWebsiteHtml(apiKey, description, referenceImage);
+      htmlContent = await generateWebsiteHtml(apiKey, description, referenceImages);
     } catch (err) {
       logApiError("/api/websites/generate", err, { stage: "anthropic_call" });
       const errMessage = err instanceof Error ? err.message : "The website generation request failed.";
@@ -155,12 +183,7 @@ export async function POST(request: Request) {
 
     const { data: record, error: insertError } = await supabase
       .from("user_websites")
-      .insert({
-        user_id: user.id,
-        name,
-        html_content: htmlContent,
-        reference_image_url: referenceImage ? referenceImagePath : null,
-      })
+      .insert({ user_id: user.id, name, html_content: htmlContent })
       .select()
       .single();
 
@@ -180,6 +203,22 @@ export async function POST(request: Request) {
     });
     if (versionError) {
       logApiError("/api/websites/generate", versionError, { stage: "insert_version" });
+    }
+
+    // Reference image rows — one per successfully-downloaded image, linked
+    // to the now-existing website row. Best-effort, same reasoning as the
+    // version-history insert above.
+    if (successfulPaths.length > 0) {
+      const { error: imagesError } = await supabase.from("website_reference_images").insert(
+        successfulPaths.map((imageUrl) => ({
+          user_id: user.id,
+          website_id: record.id,
+          image_url: imageUrl,
+        }))
+      );
+      if (imagesError) {
+        logApiError("/api/websites/generate", imagesError, { stage: "insert_reference_images" });
+      }
     }
 
     return NextResponse.json({ ok: true, generated: true, record });

@@ -473,11 +473,14 @@
       "versionOriginal": "初回生成",
       "viewingOldVersion": "v{number} を表示中（読み取り専用）。",
       "backToLatest": "最新版に戻る",
-      "imageLabel": "参考画像（任意）",
-      "imageHelp": "ロゴ、製品写真、または好きなスタイルのスクリーンショット — JPGまたはPNG、最大5MB。色/スタイルのインスピレーションにのみ使用され、生成されたサイトには埋め込まれません。",
+      "previewIncompleteTitle": "プレビューを表示できません",
+      "previewIncompleteBody": "生成されたページが不完全、または途中で切れているため、安全に表示できません。説明を短くして再生成するか、もう一度編集してください。",
+      "imageLabel": "参考画像（{count}/{max}、任意）",
+      "imageHelp": "最大{max}枚まで — ロゴ、商品写真、スタイル参考のスクリーンショットなど。JPGまたはPNG、各5MBまで。色やスタイルの参考にのみ使用され、生成されたサイトには埋め込まれません。",
       "imageRemove": "画像を削除",
       "imageInvalidType": "JPGまたはPNG画像のみサポートされています。",
-      "imageTooLarge": "画像が大きすぎます — 5MB未満のファイルを選択してください。"
+      "imageTooLarge": "画像が大きすぎます — 5MB未満のファイルを選択してください。",
+      "imageTooMany": "画像は最大{max}枚まで追加できます。"
     },
     "marketplace": {
       "title": "マーケットプレイス",

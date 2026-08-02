@@ -8,6 +8,12 @@ export const ACCEPTED_REFERENCE_IMAGE_TYPES = ["image/jpeg", "image/png"] as con
 
 export const MAX_REFERENCE_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
 
+// Up to this many reference images per website generation (logo, product
+// photos, a style-reference screenshot, ...) — re-exported by
+// lib/website-builder.ts (server-only) so there's one source of truth,
+// since this file is what the client can actually import.
+export const MAX_REFERENCE_IMAGES = 5;
+
 // Storage path convention: `${userId}/${uniqueSuffix}-${sanitizedFilename}`
 // — the RLS policies on storage.objects (supabase_schema.sql) check that
 // the first path segment matches auth.uid(), same per-user-folder pattern

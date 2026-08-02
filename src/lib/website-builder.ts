@@ -1,8 +1,18 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
+import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
+import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 
 const MODEL = "claude-sonnet-4-6";
-const MAX_TOKENS = 8192;
+const CLASSIFY_MAX_TOKENS = 300;
+// A single-file website (all CSS inline, real copy for every section) can
+// run long — much longer than a chat reply. This used to share a much
+// smaller ceiling more suited to conversational output; a sufficiently
+// long, detailed description could push generation past that budget,
+// truncating the response mid-document. See looksLikeCompleteHtmlDocument
+// below and its call sites for how that's now caught instead of silently
+// shipping broken HTML.
+const WEBSITE_MAX_TOKENS = 32000;
 
 // Off-topic guard — without this, a request like "write me a poem" had no
 // way to be rejected: generateWebsiteHtml's system prompt is a strong,
@@ -64,7 +74,7 @@ export async function classifyWebsiteDescription(
   const anthropic = new Anthropic({ apiKey });
   const response = await anthropic.messages.create({
     model: MODEL,
-    max_tokens: 300,
+    max_tokens: CLASSIFY_MAX_TOKENS,
     system: CLASSIFY_SYSTEM_PROMPT,
     messages: [{ role: "user", content: description }],
     tools: [CLASSIFY_TOOL],
@@ -103,10 +113,35 @@ function stripCodeFence(text: string): string {
   return fenceMatch ? fenceMatch[1].trim() : trimmed;
 }
 
-// Reference image (Website Builder's optional "attach a logo/screenshot
-// for style inspiration" upload — see api/websites/generate/route.ts).
-// Only jpeg/png are accepted client-side and server-side, matching what
-// Claude's vision input supports well and what the upload form allows.
+// Guards against the "white/blank page" bug: a sufficiently long, detailed
+// description can push a full single-file website's generation right up
+// against (or past) WEBSITE_MAX_TOKENS, cutting the response off mid-
+// document — often mid-<style>, before any real <body> content is ever
+// written. Browsers render that as a near-blank page instead of a clear
+// error. Checking response.stop_reason catches the common case directly;
+// looksLikeCompleteHtmlDocument is a second, independent check (structural
+// completeness of the actual text) so a truncation that doesn't surface as
+// stop_reason "max_tokens" for some other reason is still caught before
+// ever being saved or rendered.
+function assertCompleteHtmlResponse(
+  stopReason: string | null,
+  html: string,
+  action: "generated" | "updated"
+): void {
+  if (stopReason === "max_tokens" || !looksLikeCompleteHtmlDocument(html)) {
+    throw new Error(
+      action === "generated"
+        ? "The generated website was too large and got cut off before finishing — try a shorter or simpler description."
+        : "The updated website was too large and got cut off before finishing — try a smaller change."
+    );
+  }
+}
+
+// Reference images (Website Builder's optional "attach up to 5 reference
+// images — logo, product photos, a style screenshot" upload — see
+// api/websites/generate/route.ts). Only jpeg/png are accepted client-side
+// and server-side, matching what Claude's vision input supports well and
+// what the upload form allows.
 export type ReferenceImageMediaType = "image/jpeg" | "image/png";
 export type ReferenceImage = { base64: string; mediaType: ReferenceImageMediaType };
 
@@ -118,56 +153,72 @@ export function isSupportedReferenceImageMediaType(contentType: string): content
   return contentType === "image/jpeg" || contentType === "image/png";
 }
 
-// Appended to SYSTEM_PROMPT only when a reference image is actually
-// attached — worded exactly as specified: the image informs color
-// palette/style (and logo placement, described in words) but is never
+// Appended to SYSTEM_PROMPT only when at least one reference image is
+// actually attached — worded per spec: the image(s) inform color
+// palette/style (and logo placement, described in words) but are never
 // embedded into the generated HTML itself, since that would need separate
 // image hosting (a deliberately out-of-scope, future step — see the
-// route's own comment).
-const IMAGE_SYSTEM_PROMPT_ADDITION = `
+// route's own comment). Pluralized when more than one image is attached,
+// since a single set of images might mix a logo with product photos and a
+// style-reference screenshot.
+function buildImageSystemPromptAddition(imageCount: number): string {
+  if (imageCount <= 1) {
+    return `
 
 Ο χρήστης έχει επισυνάψει εικόνα αναφοράς. Χρησιμοποίησέ την για να εμπνευστείς το χρωματικό παλέτα/στυλ του website. Αν είναι λογότυπο, ενσωμάτωσέ το νοητά στο header (περιέγραψε πού θα πήγαινε, μιας και δεν μπορείς να το εισάγεις κυριολεκτικά ως εικόνα στο παραγόμενο HTML χωρίς να το ανεβάσουμε ξεχωριστά).`;
+  }
+  return `
+
+Ο χρήστης έχει επισυνάψει ${imageCount} εικόνες αναφοράς (π.χ. λογότυπο, φωτογραφίες προϊόντων, screenshot στυλ). Χρησιμοποίησέ τις ΟΛΕΣ μαζί για να εμπνευστείς το χρωματικό παλέτα/στυλ του website. Αν κάποια είναι λογότυπο, ενσωμάτωσέ το νοητά στο header (περιέγραψε πού θα πήγαινε, μιας και δεν μπορείς να το εισάγεις κυριολεκτικά ως εικόνα στο παραγόμενο HTML χωρίς να το ανεβάσουμε ξεχωριστά).`;
+}
 
 // Website Builder (see api/websites/generate/route.ts) — a real Claude
 // call that returns a complete, standalone HTML document, not a tracked
 // "idea" like the existing Websites Build module (ai_websites table,
-// lib/build-modules.ts) which never calls AI at all. `referenceImage`
-// is optional — when present, it's sent as a real vision input block
-// alongside the text description (not just described in words), so
-// Claude actually sees the uploaded logo/photo/screenshot.
+// lib/build-modules.ts) which never calls AI at all. `referenceImages`
+// is optional — when present, EVERY image is sent as a real vision input
+// block alongside the text description (not just described in words), so
+// Claude actually sees all of the uploaded logo/photos/screenshot, not
+// just the first one.
 export async function generateWebsiteHtml(
   apiKey: string,
   description: string,
-  referenceImage?: ReferenceImage
+  referenceImages?: ReferenceImage[]
 ): Promise<string> {
   const anthropic = new Anthropic({ apiKey });
+  const images = referenceImages?.slice(0, MAX_REFERENCE_IMAGES) ?? [];
 
-  const content: Anthropic.MessageParam["content"] = referenceImage
-    ? [
-        {
-          type: "image",
-          source: { type: "base64", media_type: referenceImage.mediaType, data: referenceImage.base64 },
-        },
-        { type: "text", text: description },
-      ]
-    : description;
+  const content: Anthropic.MessageParam["content"] =
+    images.length > 0
+      ? [
+          ...images.map(
+            (image): Anthropic.ImageBlockParam => ({
+              type: "image",
+              source: { type: "base64", media_type: image.mediaType, data: image.base64 },
+            })
+          ),
+          { type: "text", text: description },
+        ]
+      : description;
 
   const response = await anthropic.messages.create({
     model: MODEL,
-    max_tokens: MAX_TOKENS,
-    system: referenceImage ? SYSTEM_PROMPT + IMAGE_SYSTEM_PROMPT_ADDITION : SYSTEM_PROMPT,
+    max_tokens: WEBSITE_MAX_TOKENS,
+    system: images.length > 0 ? SYSTEM_PROMPT + buildImageSystemPromptAddition(images.length) : SYSTEM_PROMPT,
     messages: [{ role: "user", content }],
   });
 
   const textBlock = response.content.find(
     (block): block is Anthropic.TextBlock => block.type === "text"
   );
-  const text = textBlock?.text.trim();
-  if (!text) {
+  const rawText = textBlock?.text.trim();
+  if (!rawText) {
     throw new Error("The model did not return a website.");
   }
 
-  return stripCodeFence(text);
+  const html = stripCodeFence(rawText);
+  assertCompleteHtmlResponse(response.stop_reason, html, "generated");
+  return html;
 }
 
 const EDIT_SYSTEM_PROMPT = `You edit an existing complete single-file website's HTML, applying only the specific change the user asks for.
@@ -194,7 +245,7 @@ export async function editWebsiteHtml(
 
   const response = await anthropic.messages.create({
     model: MODEL,
-    max_tokens: MAX_TOKENS,
+    max_tokens: WEBSITE_MAX_TOKENS,
     system: EDIT_SYSTEM_PROMPT,
     messages: [
       {
@@ -207,10 +258,12 @@ export async function editWebsiteHtml(
   const textBlock = response.content.find(
     (block): block is Anthropic.TextBlock => block.type === "text"
   );
-  const text = textBlock?.text.trim();
-  if (!text) {
+  const rawText = textBlock?.text.trim();
+  if (!rawText) {
     throw new Error("The model did not return an updated website.");
   }
 
-  return stripCodeFence(text);
+  const html = stripCodeFence(rawText);
+  assertCompleteHtmlResponse(response.stop_reason, html, "updated");
+  return html;
 }

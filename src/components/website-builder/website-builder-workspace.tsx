@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { Download, History, Image as ImageIcon, Layout, Loader2, Sparkles, Trash2, Wand2, X } from "lucide-react";
+import { AlertTriangle, Download, History, Image as ImageIcon, Layout, Loader2, Sparkles, Trash2, Wand2, X } from "lucide-react";
+import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -15,13 +16,14 @@ import {
   ACCEPTED_REFERENCE_IMAGE_TYPES,
   buildReferenceImagePath,
   MAX_REFERENCE_IMAGE_BYTES,
+  MAX_REFERENCE_IMAGES,
   REFERENCE_IMAGE_BUCKET,
 } from "@/lib/website-reference-image";
 import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 
 const MAX_NAME_LENGTH = 100;
-const MAX_DESCRIPTION_LENGTH = 2000;
-const MAX_CHANGE_REQUEST_LENGTH = 1000;
+const MAX_DESCRIPTION_LENGTH = 5000;
+const MAX_CHANGE_REQUEST_LENGTH = 5000;
 
 // Thumbnail preview for each list row — a real, live scaled-down render
 // of the site's own html_content (not a fake icon), so visually distinct
@@ -88,11 +90,12 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
   const [previewId, setPreviewId] = useState<string | null>(initialWebsites[0]?.id ?? null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Optional reference image (logo/product photo/screenshot) — uploaded to
-  // Supabase Storage right before generation, then sent to Claude's vision
-  // input (see api/websites/generate/route.ts). Never embedded into the
-  // generated HTML itself — only informs color palette/style.
-  const [referenceImageFile, setReferenceImageFile] = useState<File | null>(null);
+  // Optional reference images (logo/product photos/style screenshot, up
+  // to MAX_REFERENCE_IMAGES) — uploaded to Supabase Storage right before
+  // generation, then ALL sent together to Claude's vision input (see
+  // api/websites/generate/route.ts). Never embedded into the generated
+  // HTML itself — only informs color palette/style.
+  const [referenceImageFiles, setReferenceImageFiles] = useState<File[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
@@ -111,24 +114,43 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
   const [viewingVersion, setViewingVersion] = useState<WebsiteVersion | null>(null);
 
   function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0] ?? null;
-    e.target.value = ""; // allow re-selecting the same file after removing it
-    if (!file) return;
+    const selected = Array.from(e.target.files ?? []);
+    e.target.value = ""; // allow re-selecting the same file(s) after removing them
+    if (selected.length === 0) return;
 
-    if (!ACCEPTED_REFERENCE_IMAGE_TYPES.includes(file.type as (typeof ACCEPTED_REFERENCE_IMAGE_TYPES)[number])) {
-      setImageError(t("imageInvalidType"));
-      return;
-    }
-    if (file.size > MAX_REFERENCE_IMAGE_BYTES) {
-      setImageError(t("imageTooLarge"));
-      return;
-    }
-    setImageError(null);
-    setReferenceImageFile(file);
+    setReferenceImageFiles((prev) => {
+      const remainingSlots = MAX_REFERENCE_IMAGES - prev.length;
+      if (remainingSlots <= 0) {
+        setImageError(t("imageTooMany", { max: MAX_REFERENCE_IMAGES }));
+        return prev;
+      }
+
+      const accepted: File[] = [];
+      let rejected: "type" | "size" | null = null;
+      for (const file of selected) {
+        if (accepted.length >= remainingSlots) break;
+        if (!ACCEPTED_REFERENCE_IMAGE_TYPES.includes(file.type as (typeof ACCEPTED_REFERENCE_IMAGE_TYPES)[number])) {
+          rejected = "type";
+          continue;
+        }
+        if (file.size > MAX_REFERENCE_IMAGE_BYTES) {
+          rejected = rejected ?? "size";
+          continue;
+        }
+        accepted.push(file);
+      }
+
+      if (rejected === "type") setImageError(t("imageInvalidType"));
+      else if (rejected === "size") setImageError(t("imageTooLarge"));
+      else if (selected.length > remainingSlots) setImageError(t("imageTooMany", { max: MAX_REFERENCE_IMAGES }));
+      else setImageError(null);
+
+      return accepted.length > 0 ? [...prev, ...accepted] : prev;
+    });
   }
 
-  function removeReferenceImage() {
-    setReferenceImageFile(null);
+  function removeReferenceImage(index: number) {
+    setReferenceImageFiles((prev) => prev.filter((_, i) => i !== index));
     setImageError(null);
   }
 
@@ -141,8 +163,8 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
     setGenerating(true);
     setError(null);
     try {
-      let referenceImagePath: string | null = null;
-      if (referenceImageFile) {
+      let referenceImagePaths: string[] = [];
+      if (referenceImageFiles.length > 0) {
         const {
           data: { user },
         } = await supabase.auth.getUser();
@@ -150,21 +172,31 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
           setError("Not authenticated.");
           return;
         }
-        const path = buildReferenceImagePath(user.id, referenceImageFile.name);
-        const { error: uploadError } = await supabase.storage
-          .from(REFERENCE_IMAGE_BUCKET)
-          .upload(path, referenceImageFile, { contentType: referenceImageFile.type });
-        if (uploadError) {
-          setError(getErrorMessage(uploadError, "Could not upload the reference image."));
+
+        // Upload every selected image before calling generate — if ANY
+        // upload fails, abort rather than generate with a partial/wrong
+        // set of images silently.
+        const uploadResults = await Promise.all(
+          referenceImageFiles.map(async (file) => {
+            const path = buildReferenceImagePath(user.id, file.name);
+            const { error: uploadError } = await supabase.storage
+              .from(REFERENCE_IMAGE_BUCKET)
+              .upload(path, file, { contentType: file.type });
+            return { path, uploadError };
+          })
+        );
+        const firstFailure = uploadResults.find((r) => r.uploadError);
+        if (firstFailure) {
+          setError(getErrorMessage(firstFailure.uploadError, "Could not upload the reference images."));
           return;
         }
-        referenceImagePath = path;
+        referenceImagePaths = uploadResults.map((r) => r.path);
       }
 
       const res = await fetch("/api/websites/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: trimmedName, description: trimmedDescription, referenceImagePath }),
+        body: JSON.stringify({ name: trimmedName, description: trimmedDescription, referenceImagePaths }),
       });
       const data = await res.json();
       void refreshCredits();
@@ -183,7 +215,7 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
       setPreviewId(record.id);
       setName("");
       setDescription("");
-      setReferenceImageFile(null);
+      setReferenceImageFiles([]);
       addToast(t("generated"));
     } catch {
       setError("Network error — please try again.");
@@ -293,6 +325,10 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
   const previewWebsite = websites.find((w) => w.id === previewId) ?? null;
   const activeVersions = previewWebsite ? versionsByWebsite[previewWebsite.id] : undefined;
   const displayedHtml = viewingVersion?.html_content ?? previewWebsite?.html_content ?? "";
+  // Guards the iframe against rendering a blank/broken page for content
+  // that's somehow incomplete (e.g. a row saved before the server-side
+  // truncation check below existed) — shows a clear message instead.
+  const displayedHtmlIsComplete = looksLikeCompleteHtmlDocument(displayedHtml);
 
   // Pagination — same shared pattern/page size as every module list
   // (lib/use-sort-and-paginate.ts), so a user with 10+ generated sites
@@ -334,39 +370,48 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
             value={description}
             onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_LENGTH))}
             placeholder={t("descriptionPlaceholder")}
-            className="input min-h-24"
+            className="input min-h-32 resize-y"
           />
         </div>
 
         <div>
           <label htmlFor="website-reference-image" className="mb-1 block text-xs text-muted">
-            {t("imageLabel")}
+            {t("imageLabel", { count: referenceImageFiles.length, max: MAX_REFERENCE_IMAGES })}
           </label>
-          {referenceImageFile ? (
-            <div className="flex items-center gap-2 rounded-lg border border-border bg-input px-3 py-2">
-              <ImageIcon className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
-              <span className="min-w-0 flex-1 truncate text-sm text-foreground">{referenceImageFile.name}</span>
-              <button
-                type="button"
-                onClick={removeReferenceImage}
-                aria-label={t("imageRemove")}
-                title={t("imageRemove")}
-                className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
-              >
-                <X className="h-3.5 w-3.5" aria-hidden="true" />
-              </button>
-            </div>
-          ) : (
+          {referenceImageFiles.length > 0 && (
+            <ul className="mb-2 space-y-1.5">
+              {referenceImageFiles.map((file, index) => (
+                <li
+                  key={`${file.name}-${index}`}
+                  className="flex items-center gap-2 rounded-lg border border-border bg-input px-3 py-2"
+                >
+                  <ImageIcon className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
+                  <span className="min-w-0 flex-1 truncate text-sm text-foreground">{file.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeReferenceImage(index)}
+                    aria-label={t("imageRemove")}
+                    title={t("imageRemove")}
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                  >
+                    <X className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {referenceImageFiles.length < MAX_REFERENCE_IMAGES && (
             <input
               id="website-reference-image"
               ref={imageInputRef}
               type="file"
+              multiple
               accept={ACCEPTED_REFERENCE_IMAGE_TYPES.join(",")}
               onChange={handleImageChange}
               className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border file:border-border file:bg-input file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-foreground hover:file:border-orange-500 hover:file:text-orange-400"
             />
           )}
-          <p className="mt-1 text-[11px] text-muted">{t("imageHelp")}</p>
+          <p className="mt-1 text-[11px] text-muted">{t("imageHelp", { max: MAX_REFERENCE_IMAGES })}</p>
           {imageError && <p className="mt-1 text-[11px] text-red-400">{imageError}</p>}
         </div>
 
@@ -469,13 +514,21 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
             </p>
           )}
 
-          <iframe
-            key={`${previewWebsite.id}:${viewingVersion?.id ?? "latest"}`}
-            srcDoc={displayedHtml}
-            sandbox=""
-            title={previewWebsite.name}
-            className="mt-3 h-[500px] w-full rounded-xl border border-border bg-white"
-          />
+          {displayedHtmlIsComplete ? (
+            <iframe
+              key={`${previewWebsite.id}:${viewingVersion?.id ?? "latest"}`}
+              srcDoc={displayedHtml}
+              sandbox=""
+              title={previewWebsite.name}
+              className="mt-3 h-[500px] w-full rounded-xl border border-border bg-white"
+            />
+          ) : (
+            <div className="mt-3 flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-red-800 bg-red-950/20 px-6 text-center">
+              <AlertTriangle className="h-8 w-8 text-red-400" aria-hidden="true" />
+              <p className="text-sm font-medium text-red-300">{t("previewIncompleteTitle")}</p>
+              <p className="max-w-md text-xs text-red-300/80">{t("previewIncompleteBody")}</p>
+            </div>
+          )}
 
           {!viewingVersion && (
             <form onSubmit={handleEdit} className="mt-4 space-y-2 border-t border-border pt-4">
@@ -488,7 +541,7 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
                 value={editText}
                 onChange={(e) => setEditText(e.target.value.slice(0, MAX_CHANGE_REQUEST_LENGTH))}
                 placeholder={t("editPlaceholder")}
-                className="input min-h-16"
+                className="input min-h-28 resize-y"
               />
               {editError && (
                 <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">

@@ -130,7 +130,7 @@ export function GenericRecordRow({
                   required={field.required}
                   value={form[field.key]}
                   onChange={(v) => updateValue(field.key, v)}
-                  className="input min-h-16"
+                  className="input min-h-32 resize-y"
                   placeholder={field.placeholder}
                 />
               ) : field.type === "select" ? (

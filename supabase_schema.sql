@@ -1022,6 +1022,50 @@ create policy "delete_own_website_references" on storage.objects
   );
 
 -- ============================================================================
+-- Website Builder reference images — website_reference_images
+-- Up to MAX_REFERENCE_IMAGES (5, see src/lib/website-builder.ts) rows per
+-- website — a logo, product photos, a style-reference screenshot, etc.,
+-- all sent together to Claude's vision input at generation time. Replaces
+-- user_websites.reference_image_url (a single-path column from an earlier
+-- pass) as the source of truth going forward — that column is left in
+-- place, unused, rather than dropped, since dropping a column is
+-- destructive and not needed to ship this. user_id is denormalized here
+-- (not derived via a join on user_websites) for the same reason as
+-- website_versions: staying consistent with this schema's simple
+-- auth.uid() = user_id RLS pattern everywhere else. image_url stores the
+-- Storage path (bucket "website-references" above), not a public URL.
+-- Append/delete-only — no update policy, since a reference image is
+-- swapped by removing and re-adding, not edited in place.
+-- ============================================================================
+
+drop table if exists public.website_reference_images cascade;
+
+create table public.website_reference_images (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  website_id uuid not null references public.user_websites(id) on delete cascade,
+  image_url text not null,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists website_reference_images_website_id_idx
+  on public.website_reference_images (website_id);
+
+alter table public.website_reference_images enable row level security;
+
+drop policy if exists "select_own_website_reference_images" on public.website_reference_images;
+create policy "select_own_website_reference_images" on public.website_reference_images
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_website_reference_images" on public.website_reference_images;
+create policy "insert_own_website_reference_images" on public.website_reference_images
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_website_reference_images" on public.website_reference_images;
+create policy "delete_own_website_reference_images" on public.website_reference_images
+  for delete using (auth.uid() = user_id);
+
+-- ============================================================================
 -- Energy check-ins — "AI Life Context" (see src/lib/user-context.ts) needs
 -- a "recent energy check-in" input; this is the small, real feature that
 -- creates one (src/components/overview/energy-checkin-widget.tsx). Same

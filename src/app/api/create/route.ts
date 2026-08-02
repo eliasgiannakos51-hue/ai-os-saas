@@ -23,7 +23,7 @@ import {
 export const dynamic = "force-dynamic";
 
 const MODEL = "claude-sonnet-4-6";
-const MAX_MESSAGE_LENGTH = 2000;
+const MAX_MESSAGE_LENGTH = 5000;
 
 function buildSystemPrompt(): string {
   const moduleDocs = CLASSIFIER_MODULES.map((m) => {

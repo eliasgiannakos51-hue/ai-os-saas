@@ -135,7 +135,7 @@ export function AddIdeaForm() {
               <textarea
                 value={form.problem}
                 onChange={update("problem")}
-                className="input min-h-16"
+                className="input min-h-32 resize-y"
                 placeholder="what problem does this solve?"
               />
             </Field>
@@ -144,7 +144,7 @@ export function AddIdeaForm() {
               <textarea
                 value={form.competitors}
                 onChange={update("competitors")}
-                className="input min-h-16"
+                className="input min-h-32 resize-y"
                 placeholder="known competitors"
               />
             </Field>
@@ -174,7 +174,7 @@ export function AddIdeaForm() {
               <textarea
                 value={form.mvp}
                 onChange={update("mvp")}
-                className="input min-h-16"
+                className="input min-h-32 resize-y"
                 placeholder="what does the MVP look like?"
               />
             </Field>

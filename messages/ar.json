@@ -414,7 +414,11 @@
     "pickModulePrompt": "بأي وحدة تريد الربط؟",
     "searchPlaceholder": "البحث في {module}...",
     "searching": "جارٍ البحث...",
-    "noMatches": "لا توجد نتائج مطابقة."
+    "noMatches": "لا توجد نتائج مطابقة.",
+    "mightBeRelated": "قد يكون هذا مرتبطًا بـ: {titles}. هل تريد ربطها؟",
+    "yes": "نعم",
+    "no": "لا",
+    "linked": "تم الربط"
   },
   "language": {
     "label": "اللغة"

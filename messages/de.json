@@ -414,7 +414,11 @@
     "pickModulePrompt": "Mit welchem Modul möchtest du verknüpfen?",
     "searchPlaceholder": "{module} durchsuchen...",
     "searching": "Suche...",
-    "noMatches": "Keine Treffer."
+    "noMatches": "Keine Treffer.",
+    "mightBeRelated": "Das könnte mit {titles} zusammenhängen. Verknüpfen?",
+    "yes": "Ja",
+    "no": "Nein",
+    "linked": "Verknüpft"
   },
   "language": {
     "label": "Sprache"

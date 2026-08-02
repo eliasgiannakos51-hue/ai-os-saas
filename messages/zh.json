@@ -414,7 +414,11 @@
     "pickModulePrompt": "要关联到哪个模块?",
     "searchPlaceholder": "搜索{module}...",
     "searching": "搜索中...",
-    "noMatches": "未找到匹配项。"
+    "noMatches": "未找到匹配项。",
+    "mightBeRelated": "这可能与以下内容相关: {titles}。要关联吗?",
+    "yes": "是",
+    "no": "否",
+    "linked": "已关联"
   },
   "language": {
     "label": "语言"

@@ -414,7 +414,11 @@
     "pickModulePrompt": "¿A qué módulo quieres vincular?",
     "searchPlaceholder": "Buscar en {module}...",
     "searching": "Buscando...",
-    "noMatches": "Sin resultados."
+    "noMatches": "Sin resultados.",
+    "mightBeRelated": "Esto podría estar relacionado con: {titles}. ¿Vincular?",
+    "yes": "Sí",
+    "no": "No",
+    "linked": "Vinculado"
   },
   "language": {
     "label": "Idioma"

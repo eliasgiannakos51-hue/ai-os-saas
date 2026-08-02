@@ -414,7 +414,11 @@
     "pickModulePrompt": "Σε ποια ενότητα θέλεις να συνδέσεις;",
     "searchPlaceholder": "Αναζήτηση σε {module}...",
     "searching": "Αναζήτηση...",
-    "noMatches": "Δεν βρέθηκαν αποτελέσματα."
+    "noMatches": "Δεν βρέθηκαν αποτελέσματα.",
+    "mightBeRelated": "Ίσως σχετίζεται με: {titles}. Να τα συνδέσω;",
+    "yes": "Ναι",
+    "no": "Όχι",
+    "linked": "Συνδέθηκε"
   },
   "language": {
     "label": "Γλώσσα"

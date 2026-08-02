@@ -414,7 +414,11 @@
     "pickModulePrompt": "Which module do you want to link to?",
     "searchPlaceholder": "Search {module}...",
     "searching": "Searching...",
-    "noMatches": "No matches."
+    "noMatches": "No matches.",
+    "mightBeRelated": "This might be related to: {titles}. Link them?",
+    "yes": "Yes",
+    "no": "No",
+    "linked": "Linked"
   },
   "language": {
     "label": "Language"

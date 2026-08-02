@@ -414,7 +414,11 @@
     "pickModulePrompt": "À quel module voulez-vous lier ?",
     "searchPlaceholder": "Rechercher dans {module}...",
     "searching": "Recherche...",
-    "noMatches": "Aucun résultat."
+    "noMatches": "Aucun résultat.",
+    "mightBeRelated": "Cela pourrait être lié à : {titles}. Les lier ?",
+    "yes": "Oui",
+    "no": "Non",
+    "linked": "Lié"
   },
   "language": {
     "label": "Langue"

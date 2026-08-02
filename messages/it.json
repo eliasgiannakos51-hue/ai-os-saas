@@ -414,7 +414,11 @@
     "pickModulePrompt": "A quale modulo vuoi collegarti?",
     "searchPlaceholder": "Cerca in {module}...",
     "searching": "Ricerca...",
-    "noMatches": "Nessun risultato."
+    "noMatches": "Nessun risultato.",
+    "mightBeRelated": "Potrebbe essere collegato a: {titles}. Vuoi collegarli?",
+    "yes": "Sì",
+    "no": "No",
+    "linked": "Collegato"
   },
   "language": {
     "label": "Lingua"

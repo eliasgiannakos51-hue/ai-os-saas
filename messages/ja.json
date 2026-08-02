@@ -414,7 +414,11 @@
     "pickModulePrompt": "どのモジュールにリンクしますか?",
     "searchPlaceholder": "{module}を検索...",
     "searching": "検索中...",
-    "noMatches": "一致するものがありません。"
+    "noMatches": "一致するものがありません。",
+    "mightBeRelated": "関連している可能性があります: {titles}。リンクしますか?",
+    "yes": "はい",
+    "no": "いいえ",
+    "linked": "リンク済み"
   },
   "language": {
     "label": "言語"

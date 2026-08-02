@@ -61,8 +61,8 @@
     }
   },
   "landing": {
-    "hero": "L'énergie derrière tout ce que vous créez.",
-    "description": "Créez tout avec l'IA. Des idées et de la recherche au trading, à la finance, à la planification produit et aux décisions d'entreprise — organisé dans un seul espace de travail intelligent.",
+    "hero": "Votre entreprise, organisée — avec une IA qui aide vraiment.",
+    "description": "Suivez vos idées, finances, trading, recherches, décisions et plus encore — le tout au même endroit, avec un assistant IA qui comprend vos données et vous aide à y voir clair. Fini les notes éparpillées, les tableurs et les fenêtres de chat.",
     "logIn": "Connexion",
     "signUp": "Inscription",
     "footer": {

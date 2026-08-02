@@ -6,9 +6,9 @@ import { GlowOrb } from "@/components/ui/glow-orb";
 import { AuthBackground } from "@/components/auth/auth-background";
 import { Logo } from "@/components/logo";
 
-const TITLE = "Ionexa AI — The energy behind everything you build.";
+const TITLE = "Ionexa AI — Your business, organized with AI that actually helps.";
 const DESCRIPTION =
-  "Create anything with AI. From ideas and research to trading, finance, product planning and business decisions — organized in one intelligent workspace.";
+  "Track ideas, finance, trading, research, decisions and more — all in one place, with an AI assistant that understands your data and helps you think it through.";
 
 export const metadata: Metadata = {
   title: { absolute: TITLE },

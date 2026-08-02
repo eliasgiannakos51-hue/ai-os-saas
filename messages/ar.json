@@ -32,6 +32,7 @@
       "home": "الرئيسية",
       "chat": "Ionexa Chat",
       "memory": "ذاكرة الذكاء الاصطناعي",
+      "timeline": "الجدول الزمني",
       "settings": "الإعدادات",
       "team": "الفريق",
       "agents": "وكلاء الذكاء الاصطناعي",
@@ -332,6 +333,16 @@
     },
     "create": {
       "title": "إنشاء أي شيء"
+    },
+    "timeline": {
+      "title": "الجدول الزمني",
+      "allModules": "جميع الوحدات",
+      "showOnly": "عرض فقط: {module}",
+      "rangeToday": "اليوم",
+      "rangeWeek": "هذا الأسبوع",
+      "rangeMonth": "هذا الشهر",
+      "rangeAll": "كل الوقت",
+      "emptyState": "لا توجد إدخالات في هذه الفترة بعد."
     }
   },
   "module": {

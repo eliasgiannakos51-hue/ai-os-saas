@@ -1,5 +1,11 @@
 import type { LucideIcon } from "lucide-react";
-import { CHAT_NAV_ITEM, CREATE_NAV_ITEM, OVERVIEW_NAV_ITEM, SETTINGS_NAV_ITEM } from "@/lib/modules";
+import {
+  CHAT_NAV_ITEM,
+  CREATE_NAV_ITEM,
+  OVERVIEW_NAV_ITEM,
+  SETTINGS_NAV_ITEM,
+  TIMELINE_NAV_ITEM,
+} from "@/lib/modules";
 import {
   MODULE_ICONS,
   OVERVIEW_ICON,
@@ -9,6 +15,7 @@ import {
   MARKETPLACE_ICON,
   TEAM_ICON,
   MEMORY_ICON,
+  TIMELINE_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -31,6 +38,7 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: OVERVIEW_NAV_ITEM.href, label: "Home", icon: OVERVIEW_ICON },
       { href: CREATE_NAV_ITEM.href, label: CREATE_NAV_ITEM.label, icon: CREATE_ICON },
       { href: CHAT_NAV_ITEM.href, label: "Ionexa Chat", icon: CHAT_ICON },
+      { href: TIMELINE_NAV_ITEM.href, label: TIMELINE_NAV_ITEM.label, icon: TIMELINE_ICON },
       { href: "/dashboard/memory", label: "AI Memory", icon: MEMORY_ICON },
     ],
   },

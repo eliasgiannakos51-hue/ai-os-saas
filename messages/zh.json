@@ -32,6 +32,7 @@
       "home": "主页",
       "chat": "Ionexa 对话",
       "memory": "AI 记忆",
+      "timeline": "时间线",
       "settings": "设置",
       "team": "团队",
       "agents": "AI 智能体",
@@ -332,6 +333,16 @@
     },
     "create": {
       "title": "创建任何内容"
+    },
+    "timeline": {
+      "title": "时间线",
+      "allModules": "所有模块",
+      "showOnly": "仅显示:{module}",
+      "rangeToday": "今天",
+      "rangeWeek": "本周",
+      "rangeMonth": "本月",
+      "rangeAll": "所有时间",
+      "emptyState": "此时间段内暂无记录。"
     }
   },
   "module": {

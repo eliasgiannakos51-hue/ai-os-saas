@@ -205,6 +205,8 @@ export const CREATE_NAV_ITEM = { href: "/dashboard/create", label: "Create Anyth
 
 export const CHAT_NAV_ITEM = { href: "/dashboard/chat", label: "Ionexa Chat" };
 
+export const TIMELINE_NAV_ITEM = { href: "/dashboard/timeline", label: "Timeline" };
+
 export const OVERVIEW_NAV_ITEM = { href: "/dashboard/overview", label: "Overview" };
 
 export const SETTINGS_NAV_ITEM = { href: "/dashboard/settings", label: "Settings" };

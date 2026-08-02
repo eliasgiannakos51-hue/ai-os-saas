@@ -32,6 +32,7 @@
       "home": "Home",
       "chat": "Ionexa Chat",
       "memory": "Memoria AI",
+      "timeline": "Cronologia",
       "settings": "Impostazioni",
       "team": "Team",
       "agents": "Agenti AI",
@@ -332,6 +333,16 @@
     },
     "create": {
       "title": "Crea Qualsiasi Cosa"
+    },
+    "timeline": {
+      "title": "Cronologia",
+      "allModules": "Tutti i moduli",
+      "showOnly": "Mostra solo: {module}",
+      "rangeToday": "Oggi",
+      "rangeWeek": "Questa settimana",
+      "rangeMonth": "Questo mese",
+      "rangeAll": "Sempre",
+      "emptyState": "Nessuna voce in questo intervallo."
     }
   },
   "module": {

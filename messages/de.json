@@ -32,6 +32,7 @@
       "home": "Start",
       "chat": "Ionexa Chat",
       "memory": "KI-Gedächtnis",
+      "timeline": "Zeitleiste",
       "settings": "Einstellungen",
       "team": "Team",
       "agents": "KI-Agenten",
@@ -332,6 +333,16 @@
     },
     "create": {
       "title": "Alles Erstellen"
+    },
+    "timeline": {
+      "title": "Zeitleiste",
+      "allModules": "Alle Module",
+      "showOnly": "Nur anzeigen: {module}",
+      "rangeToday": "Heute",
+      "rangeWeek": "Diese Woche",
+      "rangeMonth": "Diesen Monat",
+      "rangeAll": "Gesamter Zeitraum",
+      "emptyState": "Noch keine Einträge in diesem Zeitraum."
     }
   },
   "module": {

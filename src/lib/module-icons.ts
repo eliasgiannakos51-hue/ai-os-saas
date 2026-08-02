@@ -29,6 +29,7 @@ import {
   Presentation,
   Megaphone,
   Brain,
+  History,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -68,3 +69,4 @@ export const SETTINGS_ICON: LucideIcon = Settings;
 export const MARKETPLACE_ICON: LucideIcon = Store;
 export const TEAM_ICON: LucideIcon = Users;
 export const MEMORY_ICON: LucideIcon = Brain;
+export const TIMELINE_ICON: LucideIcon = History;

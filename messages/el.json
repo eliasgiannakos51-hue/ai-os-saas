@@ -32,6 +32,7 @@
       "home": "Αρχική",
       "chat": "Ionexa Chat",
       "memory": "AI Μνήμη",
+      "timeline": "Χρονολόγιο",
       "settings": "Ρυθμίσεις",
       "team": "Ομάδα",
       "agents": "AI Agents",
@@ -332,6 +333,16 @@
     },
     "create": {
       "title": "Δημιουργία Οτιδήποτε"
+    },
+    "timeline": {
+      "title": "Χρονολόγιο",
+      "allModules": "Όλες οι ενότητες",
+      "showOnly": "Εμφάνιση μόνο: {module}",
+      "rangeToday": "Σήμερα",
+      "rangeWeek": "Αυτή την εβδομάδα",
+      "rangeMonth": "Αυτόν τον μήνα",
+      "rangeAll": "Όλο το διάστημα",
+      "emptyState": "Δεν υπάρχουν εγγραφές σε αυτό το διάστημα ακόμα."
     }
   },
   "module": {

@@ -32,6 +32,7 @@
       "home": "ホーム",
       "chat": "Ionexa Chat",
       "memory": "AI メモリー",
+      "timeline": "タイムライン",
       "settings": "設定",
       "team": "チーム",
       "agents": "AI エージェント",
@@ -332,6 +333,16 @@
     },
     "create": {
       "title": "何でも作成"
+    },
+    "timeline": {
+      "title": "タイムライン",
+      "allModules": "すべてのモジュール",
+      "showOnly": "表示: {module}のみ",
+      "rangeToday": "今日",
+      "rangeWeek": "今週",
+      "rangeMonth": "今月",
+      "rangeAll": "すべての期間",
+      "emptyState": "この期間にはまだ記録がありません。"
     }
   },
   "module": {

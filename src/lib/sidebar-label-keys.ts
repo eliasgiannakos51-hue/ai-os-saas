@@ -16,6 +16,7 @@ export const GROUP_HEADING_KEYS: Record<string, string> = {
 export const ITEM_LABEL_KEYS: Record<string, string> = {
   Home: "home",
   "Ionexa Chat": "chat",
+  Timeline: "timeline",
   "AI Memory": "memory",
   Settings: "settings",
   Team: "team",

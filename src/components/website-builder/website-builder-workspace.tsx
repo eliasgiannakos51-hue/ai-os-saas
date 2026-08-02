@@ -9,6 +9,8 @@ import { formatRelativeTime } from "@/lib/format-time";
 import { useCredits } from "@/components/credits/credits-context";
 import { useToast } from "@/components/toast/toast-context";
 import { EmptyState } from "@/components/empty-state";
+import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
+import { PaginationControls } from "@/components/pagination-controls";
 import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 
 const MAX_NAME_LENGTH = 100;
@@ -199,6 +201,14 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
   const activeVersions = previewWebsite ? versionsByWebsite[previewWebsite.id] : undefined;
   const displayedHtml = viewingVersion?.html_content ?? previewWebsite?.html_content ?? "";
 
+  // Pagination — same shared pattern/page size as every module list
+  // (lib/use-sort-and-paginate.ts), so a user with 10+ generated sites
+  // gets a bounded, navigable list instead of an ever-growing one.
+  const { page, setPage, totalPages, paginated: paginatedWebsites } = useSortAndPaginate(
+    websites,
+    websites.length
+  );
+
   return (
     <div className="space-y-6">
       <form
@@ -380,50 +390,53 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
       {websites.length === 0 ? (
         <EmptyState icon={Layout}>{t("emptyState")}</EmptyState>
       ) : (
-        <ul className="space-y-2">
-          {websites.map((website) => (
-            <li
-              key={website.id}
-              className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 transition-colors duration-150 ${
-                website.id === previewId
-                  ? "border-orange-500/40 bg-orange-500/[0.03]"
-                  : "border-border bg-input"
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() => selectWebsite(website.id)}
-                className="min-w-0 flex-1 text-left"
+        <>
+          <ul className="space-y-2">
+            {paginatedWebsites.map((website) => (
+              <li
+                key={website.id}
+                className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 transition-colors duration-150 ${
+                  website.id === previewId
+                    ? "border-orange-500/40 bg-orange-500/[0.03]"
+                    : "border-border bg-input"
+                }`}
               >
-                <p className="truncate text-sm font-medium text-foreground">{website.name}</p>
-                <p className="text-xs text-muted" title={new Date(website.created_at).toLocaleString()} suppressHydrationWarning>
-                  {formatRelativeTime(website.created_at)}
-                </p>
-              </button>
-              <div className="flex shrink-0 items-center gap-1">
                 <button
                   type="button"
-                  onClick={() => downloadHtml(website)}
-                  aria-label={t("downloadButton")}
-                  title={t("downloadButton")}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                  onClick={() => selectWebsite(website.id)}
+                  className="min-w-0 flex-1 text-left"
                 >
-                  <Download className="h-3.5 w-3.5" aria-hidden="true" />
+                  <p className="truncate text-sm font-medium text-foreground">{website.name}</p>
+                  <p className="text-xs text-muted" title={new Date(website.created_at).toLocaleString()} suppressHydrationWarning>
+                    {formatRelativeTime(website.created_at)}
+                  </p>
                 </button>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(website.id)}
-                  disabled={deletingId === website.id}
-                  aria-label={t("deleteButton")}
-                  title={t("deleteButton")}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-red-950/40 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+                <div className="flex shrink-0 items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => downloadHtml(website)}
+                    aria-label={t("downloadButton")}
+                    title={t("downloadButton")}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                  >
+                    <Download className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(website.id)}
+                    disabled={deletingId === website.id}
+                    aria-label={t("deleteButton")}
+                    title={t("deleteButton")}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-red-950/40 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <PaginationControls page={page} totalPages={totalPages} onChange={setPage} />
+        </>
       )}
     </div>
   );

@@ -10,28 +10,87 @@ const MAX_STEPS = 8;
 // EXISTING /api/create classifier (see mission-card.tsx's "Create with AI"),
 // which independently decides which module it belongs to — one classifier,
 // not two disagreeing ones.
-const PLANNER_SYSTEM_PROMPT = `Είσαι ο Planner Agent. Ανάλυσε τον στόχο του χρήστη και δημιούργησε λίστα ${MIN_STEPS}-${MAX_STEPS} συγκεκριμένων βημάτων που χρειάζονται για να επιτευχθεί. Κάθε βήμα να είναι διατυπωμένο σαν μία συγκεκριμένη, καταγράψιμη ενέργεια που θα μπορούσε να γίνει μία εγγραφή σε ένα από τα ήδη υπάρχοντα modules του χρήστη (Ideas, Research, Finance, Products, Content, Sales, Decisions, κ.λπ.) όπου έχει νόημα. Κάθε βήμα μία σύντομη πρόταση, χωρίς αρίθμηση ή markdown.`;
+//
+// Vague-goal handling: a forced tool call with a required steps array used
+// to leave the Planner no way to react to a goal like "θέλω να πετύχω" (I
+// want to succeed) except inventing 4-8 generic, made-up steps — the tool
+// schema gave it no other option. clarificationNeeded/clarificationQuestion
+// give it one: for a goal too vague to break into REAL concrete actions,
+// it asks a short follow-up question instead of fabricating filler steps.
+const PLANNER_SYSTEM_PROMPT = `Είσαι ο Planner Agent. Ανάλυσε τον στόχο του χρήστη.
+
+Αν ο στόχος είναι ΑΡΚΕΤΑ συγκεκριμένος ώστε να αναλυθεί σε πραγματικές, καταγράψιμες ενέργειες (π.χ. "θέλω να ξεκινήσω online κατάστημα με χειροποίητα κοσμήματα"), δημιούργησε λίστα ${MIN_STEPS}-${MAX_STEPS} συγκεκριμένων βημάτων. Κάθε βήμα να είναι διατυπωμένο σαν μία συγκεκριμένη, καταγράψιμη ενέργεια που θα μπορούσε να γίνει μία εγγραφή σε ένα από τα ήδη υπάρχοντα modules του χρήστη (Ideas, Research, Finance, Products, Content, Sales, Decisions, κ.λπ.) όπου έχει νόημα. Κάθε βήμα μία σύντομη πρόταση, χωρίς αρίθμηση ή markdown.
+
+Αν ο στόχος είναι ΤΟΣΟ γενικός/ασαφής (π.χ. "θέλω να πετύχω", "θέλω να γίνω πλούσιος", "καλύτερη ζωή") που δεν μπορείς να τον αναλύσεις σε πραγματικά, συγκεκριμένα βήματα χωρίς να επινοήσεις γενικόλογα/κενά βήματα, ΜΗΝ επινοήσεις βήματα — αντ' αυτού ζήτησε μία σύντομη, φιλική διευκρίνιση για το τι συγκεκριμένα θέλει να πετύχει.`;
 
 const PLAN_MISSION_TOOL: Anthropic.Tool = {
   name: "create_plan",
-  description: `Break the user's goal down into ${MIN_STEPS}-${MAX_STEPS} concrete, actionable steps.`,
+  description: `Break the user's goal down into ${MIN_STEPS}-${MAX_STEPS} concrete, actionable steps — or, if the goal is too vague for that, ask a short clarifying question instead.`,
   input_schema: {
     type: "object",
     properties: {
+      clarificationNeeded: {
+        type: "boolean",
+        description:
+          "True if the goal is too vague/broad to break into real, concrete steps without inventing generic filler ones.",
+      },
+      clarificationQuestion: {
+        type: "string",
+        description:
+          "If clarificationNeeded is true: a short, friendly question asking what specifically the user wants to achieve. Empty string otherwise.",
+      },
       steps: {
         type: "array",
         items: { type: "string" },
-        minItems: MIN_STEPS,
         maxItems: MAX_STEPS,
         description:
-          "Concrete steps, each phrased as one specific, loggable action — no numbering, no markdown.",
+          "If clarificationNeeded is false: concrete steps, each phrased as one specific, loggable action — no numbering, no markdown. Empty array if clarificationNeeded is true.",
       },
     },
-    required: ["steps"],
+    required: ["clarificationNeeded", "clarificationQuestion", "steps"],
   },
 };
 
-export async function planMission(apiKey: string, goal: string): Promise<string[]> {
+export type PlanMissionResult =
+  | { clarificationNeeded: false; steps: string[] }
+  | { clarificationNeeded: true; clarificationQuestion: string };
+
+const DEFAULT_CLARIFICATION_QUESTION =
+  "Could you share a bit more detail about what you'd specifically like to achieve?";
+
+// Pure, deterministic interpretation of the Planner's tool_use input —
+// pulled out of planMission() below so the vague-goal/clarification
+// decision (and the "model claimed no clarification needed but returned
+// no usable steps either" fallback) can be unit tested against
+// hand-constructed inputs without a live Anthropic call.
+export function parsePlanMissionToolInput(input: {
+  clarificationNeeded?: unknown;
+  clarificationQuestion?: unknown;
+  steps?: unknown;
+}): PlanMissionResult {
+  if (input.clarificationNeeded === true) {
+    const question =
+      typeof input.clarificationQuestion === "string" && input.clarificationQuestion.trim()
+        ? input.clarificationQuestion.trim()
+        : DEFAULT_CLARIFICATION_QUESTION;
+    return { clarificationNeeded: true, clarificationQuestion: question };
+  }
+
+  const steps = Array.isArray(input.steps)
+    ? input.steps.filter((s): s is string => typeof s === "string" && s.trim().length > 0)
+    : [];
+
+  if (steps.length === 0) {
+    // The model said it didn't need clarification but returned no usable
+    // steps either — treat it the same as an explicit clarification
+    // request rather than creating an empty, useless mission.
+    return { clarificationNeeded: true, clarificationQuestion: DEFAULT_CLARIFICATION_QUESTION };
+  }
+
+  return { clarificationNeeded: false, steps: steps.slice(0, MAX_STEPS).map((s) => s.trim()) };
+}
+
+export async function planMission(apiKey: string, goal: string): Promise<PlanMissionResult> {
   const anthropic = new Anthropic({ apiKey });
   const response = await anthropic.messages.create({
     model: MISSION_MODEL,
@@ -49,16 +108,9 @@ export async function planMission(apiKey: string, goal: string): Promise<string[
     throw new Error("The Planner did not return a plan.");
   }
 
-  const input = toolUse.input as { steps?: unknown };
-  const steps = Array.isArray(input.steps)
-    ? input.steps.filter((s): s is string => typeof s === "string" && s.trim().length > 0)
-    : [];
-
-  if (steps.length === 0) {
-    throw new Error("The Planner returned an empty plan.");
-  }
-
-  return steps.slice(0, MAX_STEPS).map((s) => s.trim());
+  return parsePlanMissionToolInput(
+    toolUse.input as { clarificationNeeded?: unknown; clarificationQuestion?: unknown; steps?: unknown }
+  );
 }
 
 // Reviewer Agent — looks at what was actually built for a mission (not

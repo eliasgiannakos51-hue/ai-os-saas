@@ -4,6 +4,84 @@ import Anthropic from "@anthropic-ai/sdk";
 const MODEL = "claude-sonnet-4-6";
 const MAX_TOKENS = 8192;
 
+// Off-topic guard — without this, a request like "write me a poem" had no
+// way to be rejected: generateWebsiteHtml's system prompt is a strong,
+// unconditional directive to always output a complete HTML document, so
+// it would likely just wrap the poem in a page instead of explaining that
+// Website Builder generates websites. This is a small, cheap, forced-tool
+// classification call (same pattern as api/create's classifier) run
+// BEFORE the expensive generation call and BEFORE credits are deducted
+// (see api/websites/generate/route.ts), so an off-topic request costs the
+// user nothing and gets a real, helpful message instead of garbage HTML.
+const CLASSIFY_SYSTEM_PROMPT = `You determine whether a message actually describes a WEBSITE the user wants built (a page for a business, product, portfolio, event, landing page, personal site, etc.) — as opposed to an unrelated request that has nothing to do with building a website (e.g. "write me a poem", "tell me a joke", a recipe, a general question, small talk).`;
+
+const CLASSIFY_TOOL: Anthropic.Tool = {
+  name: "classify_website_request",
+  description: "Decide whether the given message is actually describing a website to generate.",
+  input_schema: {
+    type: "object",
+    properties: {
+      isWebsiteRequest: {
+        type: "boolean",
+        description: "True if this message describes a website/page the user wants built.",
+      },
+      message: {
+        type: "string",
+        description:
+          "If isWebsiteRequest is false: a short, friendly message explaining that Website Builder generates websites, and asking them to describe one. Empty string otherwise.",
+      },
+    },
+    required: ["isWebsiteRequest", "message"],
+  },
+};
+
+const DEFAULT_OFF_TOPIC_MESSAGE =
+  "Website Builder generates real websites from a description — try describing the site you want (e.g. its purpose, sections, and style) instead.";
+
+export type WebsiteDescriptionClassification =
+  | { isWebsiteRequest: true }
+  | { isWebsiteRequest: false; message: string };
+
+// Pure, deterministic interpretation of the classifier's tool_use input —
+// separated from the Anthropic call itself so it can be unit tested
+// against hand-constructed inputs without a live API call.
+export function parseWebsiteClassification(input: {
+  isWebsiteRequest?: unknown;
+  message?: unknown;
+}): WebsiteDescriptionClassification {
+  if (input.isWebsiteRequest === false) {
+    const message =
+      typeof input.message === "string" && input.message.trim() ? input.message.trim() : DEFAULT_OFF_TOPIC_MESSAGE;
+    return { isWebsiteRequest: false, message };
+  }
+  return { isWebsiteRequest: true };
+}
+
+export async function classifyWebsiteDescription(
+  apiKey: string,
+  description: string
+): Promise<WebsiteDescriptionClassification> {
+  const anthropic = new Anthropic({ apiKey });
+  const response = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 300,
+    system: CLASSIFY_SYSTEM_PROMPT,
+    messages: [{ role: "user", content: description }],
+    tools: [CLASSIFY_TOOL],
+    tool_choice: { type: "tool", name: "classify_website_request" },
+  });
+
+  const toolUse = response.content.find(
+    (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
+  );
+  // Fail open (treat as a real website request) on a malformed response —
+  // same "best-effort, don't block the real feature" tolerance as every
+  // other best-effort AI helper in this app (e.g. lib/user-context.ts).
+  if (!toolUse) return { isWebsiteRequest: true };
+
+  return parseWebsiteClassification(toolUse.input as { isWebsiteRequest?: unknown; message?: unknown });
+}
+
 const SYSTEM_PROMPT = `You generate complete, production-ready single-file websites from a plain-text description.
 
 Rules:

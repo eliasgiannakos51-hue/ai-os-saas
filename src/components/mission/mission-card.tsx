@@ -11,7 +11,7 @@ import { formatRelativeTime } from "@/lib/format-time";
 import { useCredits } from "@/components/credits/credits-context";
 import { MessageContent } from "@/components/chat/message-content";
 import { getStuckStep } from "@/lib/mission-progress";
-import { buildPriorStepsContext } from "@/lib/mission-context";
+import { buildPriorStepsContext, MAX_STEP_ATTEMPTS, stepAttemptsExhausted } from "@/lib/mission-context";
 import { AGENT_ROLES, type AgentRole } from "@/lib/agent-roles";
 import type { Mission, MissionStatus } from "@/types/mission";
 
@@ -38,12 +38,6 @@ const AGENT_ROLE_LABEL_KEYS: Record<AgentRole, string> = {
   finance: "agentRole.finance",
   research: "agentRole.research",
 };
-
-// Mission Control retry cap — a step that fails this many times shows a
-// permanent failure message instead of a retry button. attempts is
-// persisted on the step itself (types/mission.ts) so the cap survives
-// page reloads.
-const MAX_ATTEMPTS = 3;
 
 // Builder step (per-step "Create with AI") and Reviewer step both live
 // here. Builder calls the EXISTING /api/create (Create Anything) with the
@@ -90,7 +84,7 @@ export function MissionCard({ mission }: { mission: Mission }) {
   async function buildStep(index: number) {
     const step = steps[index];
     if (!step || step.status === "completed" || buildingIndex !== null) return;
-    if ((step.attempts ?? 0) >= MAX_ATTEMPTS) return;
+    if (stepAttemptsExhausted(step.attempts)) return;
     const agentRole = stepAgentRoles[index] ?? step.agentRole ?? "general";
 
     // "AI Company" real collaboration — every earlier completed step's
@@ -253,9 +247,9 @@ export function MissionCard({ mission }: { mission: Mission }) {
               </div>
               {step.status !== "completed" && (
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
-                  {(step.attempts ?? 0) >= MAX_ATTEMPTS ? (
+                  {stepAttemptsExhausted(step.attempts) ? (
                     <p className="max-w-[160px] text-right text-[11px] text-red-400">
-                      {t("stepFailedMax", { max: MAX_ATTEMPTS })}
+                      {t("stepFailedMax", { max: MAX_STEP_ATTEMPTS })}
                     </p>
                   ) : (
                     <>
@@ -293,7 +287,7 @@ export function MissionCard({ mission }: { mission: Mission }) {
                         {buildingIndex === index
                           ? t("creating")
                           : (step.attempts ?? 0) > 0
-                            ? t("retry", { attempts: step.attempts ?? 0, max: MAX_ATTEMPTS })
+                            ? t("retry", { attempts: step.attempts ?? 0, max: MAX_STEP_ATTEMPTS })
                             : t("createWithAi")}
                       </button>
                     </>

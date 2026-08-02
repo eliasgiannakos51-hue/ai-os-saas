@@ -49,3 +49,13 @@ export function buildMissionContextSystemPromptAddition(priorStepsContext: strin
     ? `\n\nContext from earlier steps already completed in this same AI Company mission (use any relevant numbers/facts from these, don't re-derive them):\n${priorStepsContext}`
     : "";
 }
+
+// Mission Control retry cap — a step that fails this many times shows a
+// permanent failure message instead of a retry button (mission-card.tsx).
+// Exported as a single source of truth for both the "can this step still
+// be retried" decision and the UI's exhausted-state message.
+export const MAX_STEP_ATTEMPTS = 3;
+
+export function stepAttemptsExhausted(attempts: number | undefined): boolean {
+  return (attempts ?? 0) >= MAX_STEP_ATTEMPTS;
+}

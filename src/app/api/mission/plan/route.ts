@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { planMission } from "@/lib/mission-agents";
+import { planMission, type PlanMissionResult } from "@/lib/mission-agents";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -81,17 +81,30 @@ export async function POST(request: Request) {
       }
     }
 
-    let steps: string[];
+    let planResult: PlanMissionResult;
     try {
-      steps = await planMission(apiKey, goal);
+      planResult = await planMission(apiKey, goal);
     } catch (err) {
       logApiError("/api/mission/plan", err, { stage: "planner_call" });
       const errMessage = err instanceof Error ? err.message : "The Planner request failed.";
       return NextResponse.json({ ok: false, error: errMessage }, { status: 502 });
     }
 
+    // Vague goal (e.g. "θέλω να πετύχω") — the Planner asked for
+    // clarification instead of inventing generic filler steps. No mission
+    // is created; the credit already charged above still reflects the
+    // real AI call that happened, same as api/create's "not matched"
+    // path never refunding either.
+    if (planResult.clarificationNeeded) {
+      return NextResponse.json({
+        ok: true,
+        planned: false,
+        message: planResult.clarificationQuestion,
+      });
+    }
+
     const planSteps: MissionPlan = {
-      steps: steps.map((text) => ({ text, status: "pending" as const })),
+      steps: planResult.steps.map((text) => ({ text, status: "pending" as const })),
     };
 
     const { data: mission, error: insertError } = await supabase

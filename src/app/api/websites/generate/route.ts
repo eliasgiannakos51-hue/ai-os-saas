@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { generateWebsiteHtml } from "@/lib/website-builder";
+import { classifyWebsiteDescription, generateWebsiteHtml } from "@/lib/website-builder";
 import { FIRST_VERSION_NUMBER } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -65,6 +65,21 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+    }
+
+    // Off-topic guard — a cheap classification call BEFORE any credits are
+    // deducted, so a request like "write me a poem" costs the user
+    // nothing and gets a real, helpful message instead of an AI call that
+    // just wraps the poem in an HTML page (see lib/website-builder.ts).
+    try {
+      const classification = await classifyWebsiteDescription(apiKey, description);
+      if (!classification.isWebsiteRequest) {
+        return NextResponse.json({ ok: true, generated: false, message: classification.message });
+      }
+    } catch (err) {
+      // Best-effort: a classifier hiccup shouldn't block a real website
+      // request, so fall through to normal generation.
+      logApiError("/api/websites/generate", err, { stage: "classify_call" });
     }
 
     const isAdmin = isAdminEmail(user.email);

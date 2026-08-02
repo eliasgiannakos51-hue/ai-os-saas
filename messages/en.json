@@ -59,6 +59,7 @@
       "decisions": "Decisions",
       "feedback": "Feedback",
       "trading": "Trading",
+      "tradingWorkflow": "Trading Workflow",
       "automation": "Automation",
       "marketplace": "Marketplace"
     }
@@ -399,6 +400,27 @@
       "noModuleActivity": "No activity in any module in the last two weeks.",
       "missionStepsLabel": "{completed} mission steps completed, {pending} still pending",
       "reflectionLabel": "Reflection"
+    },
+    "tradingWorkflow": {
+      "title": "Trading Workflow",
+      "description": "Everything trading in one place — your trades, Knowledge Graph links, Timeline, Mentor, Missions, and Reflection.",
+      "insight": {
+        "title": "Pattern Insight",
+        "noTrades": "Log a trade to start seeing patterns here.",
+        "notEnoughData": "Not enough trade history yet to detect a pattern — log a few more trades.",
+        "pattern": "Of your last {analyzedCount} trades, {lossesAfterLoss} of {pairsAfterLoss} trades following a loss were also losses ({ratePercent}%)."
+      },
+      "mentorButton": "Trading Mentor",
+      "mentorButtonDescription": "Open Ionexa Chat in Mentor Mode with your last 20 trades already loaded as context.",
+      "mentorChatPrefill": "Analyze my recent trades and give me feedback to improve my win rate.",
+      "missionButton": "Start a Trading Goal",
+      "missionButtonDescription": "Create an AI mission plan to improve your trading, e.g. this month's win rate.",
+      "missionButtonCreating": "Creating...",
+      "missionGoal": "Improve my trading win rate this month",
+      "timelineTitle": "Trading Timeline",
+      "viewFullTimeline": "View full timeline →",
+      "reflectionTitle": "Trading Reflection",
+      "tradesTitle": "Trades"
     }
   },
   "module": {

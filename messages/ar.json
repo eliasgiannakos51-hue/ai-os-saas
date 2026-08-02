@@ -59,6 +59,7 @@
       "decisions": "القرارات",
       "feedback": "الملاحظات",
       "trading": "التداول",
+      "tradingWorkflow": "سير عمل التداول",
       "automation": "الأتمتة",
       "marketplace": "المتجر"
     }
@@ -399,6 +400,27 @@
       "noModuleActivity": "لا يوجد نشاط في أي وحدة خلال الأسبوعين الماضيين.",
       "missionStepsLabel": "اكتملت {completed} خطوات مهمة، ولا تزال {pending} معلقة",
       "reflectionLabel": "التأمل"
+    },
+    "tradingWorkflow": {
+      "title": "سير عمل التداول",
+      "description": "كل ما يخص التداول في مكان واحد — صفقاتك، روابط رسم المعرفة، الجدول الزمني، الموجّه، المهام، والمراجعة الأسبوعية.",
+      "insight": {
+        "title": "رؤية النمط",
+        "noTrades": "سجّل صفقة لتبدأ برؤية الأنماط هنا.",
+        "notEnoughData": "لا يوجد سجل صفقات كافٍ بعد لاكتشاف نمط — سجّل المزيد من الصفقات.",
+        "pattern": "من بين آخر {analyzedCount} صفقة لك، كانت {lossesAfterLoss} من أصل {pairsAfterLoss} صفقة تلت خسارة خاسرة أيضًا ({ratePercent}%)."
+      },
+      "mentorButton": "موجّه التداول",
+      "mentorButtonDescription": "افتح Ionexa Chat في وضع الموجّه مع تحميل آخر 20 صفقة لك مسبقًا كسياق.",
+      "mentorChatPrefill": "حلّل صفقاتي الأخيرة وأعطني ملاحظات لتحسين معدل فوزي.",
+      "missionButton": "ابدأ هدف تداول",
+      "missionButtonDescription": "أنشئ خطة مهمة بالذكاء الاصطناعي لتحسين تداولك، مثل معدل الفوز هذا الشهر.",
+      "missionButtonCreating": "جارٍ الإنشاء...",
+      "missionGoal": "تحسين معدل فوزي في التداول هذا الشهر",
+      "timelineTitle": "الجدول الزمني للتداول",
+      "viewFullTimeline": "عرض الجدول الزمني الكامل ←",
+      "reflectionTitle": "مراجعة التداول",
+      "tradesTitle": "الصفقات"
     }
   },
   "module": {

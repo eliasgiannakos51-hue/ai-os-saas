@@ -59,6 +59,7 @@
       "decisions": "Decisioni",
       "feedback": "Feedback",
       "trading": "Trading",
+      "tradingWorkflow": "Flusso Trading",
       "automation": "Automazione",
       "marketplace": "Marketplace"
     }
@@ -399,6 +400,27 @@
       "noModuleActivity": "Nessuna attività in nessun modulo nelle ultime due settimane.",
       "missionStepsLabel": "{completed} passaggi missione completati, {pending} ancora in sospeso",
       "reflectionLabel": "Riflessione"
+    },
+    "tradingWorkflow": {
+      "title": "Flusso di Lavoro Trading",
+      "description": "Tutto il trading in un unico posto — le tue operazioni, i collegamenti del Knowledge Graph, la Timeline, il Mentor, le Missioni e la Riflessione Settimanale.",
+      "insight": {
+        "title": "Insight sul Pattern",
+        "noTrades": "Registra un'operazione per iniziare a vedere i pattern qui.",
+        "notEnoughData": "Non c'è ancora abbastanza storico per rilevare un pattern — registra qualche altra operazione.",
+        "pattern": "Delle tue ultime {analyzedCount} operazioni, {lossesAfterLoss} su {pairsAfterLoss} operazioni successive a una perdita sono state anch'esse in perdita ({ratePercent}%)."
+      },
+      "mentorButton": "Trading Mentor",
+      "mentorButtonDescription": "Apri Ionexa Chat in Modalità Mentor con le tue ultime 20 operazioni già caricate come contesto.",
+      "mentorChatPrefill": "Analizza le mie operazioni recenti e dammi un feedback per migliorare il mio win rate.",
+      "missionButton": "Avvia un Obiettivo di Trading",
+      "missionButtonDescription": "Crea un piano missione AI per migliorare il tuo trading, ad es. il win rate di questo mese.",
+      "missionButtonCreating": "Creazione...",
+      "missionGoal": "Migliora il mio win rate di trading questo mese",
+      "timelineTitle": "Timeline Trading",
+      "viewFullTimeline": "Vedi la timeline completa →",
+      "reflectionTitle": "Riflessione sul Trading",
+      "tradesTitle": "Operazioni"
     }
   },
   "module": {

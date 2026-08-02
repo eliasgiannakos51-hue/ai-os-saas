@@ -59,6 +59,7 @@
       "decisions": "决策",
       "feedback": "反馈",
       "trading": "交易",
+      "tradingWorkflow": "交易工作流",
       "automation": "自动化",
       "marketplace": "市场"
     }
@@ -399,6 +400,27 @@
       "noModuleActivity": "过去两周内所有模块均无活动。",
       "missionStepsLabel": "已完成 {completed} 个任务步骤,{pending} 个仍待处理",
       "reflectionLabel": "回顾"
+    },
+    "tradingWorkflow": {
+      "title": "交易工作流",
+      "description": "把交易记录、知识图谱链接、时间线、导师、任务和每周回顾整合在一个地方。",
+      "insight": {
+        "title": "模式洞察",
+        "noTrades": "记录一笔交易即可在此查看模式。",
+        "notEnoughData": "交易历史还不够,无法检测出模式 — 请再记录几笔交易。",
+        "pattern": "在你最近的{analyzedCount}笔交易中,亏损之后的{pairsAfterLoss}笔交易里有{lossesAfterLoss}笔也是亏损({ratePercent}%)。"
+      },
+      "mentorButton": "交易导师",
+      "mentorButtonDescription": "以导师模式打开 Ionexa Chat,并已加载你最近20笔交易作为上下文。",
+      "mentorChatPrefill": "分析我最近的交易,并给我反馈以提高我的胜率。",
+      "missionButton": "开始一个交易目标",
+      "missionButtonDescription": "创建一个AI任务计划来改善你的交易,例如本月的胜率。",
+      "missionButtonCreating": "创建中...",
+      "missionGoal": "本月提高我的交易胜率",
+      "timelineTitle": "交易时间线",
+      "viewFullTimeline": "查看完整时间线 →",
+      "reflectionTitle": "交易回顾",
+      "tradesTitle": "交易记录"
     }
   },
   "module": {

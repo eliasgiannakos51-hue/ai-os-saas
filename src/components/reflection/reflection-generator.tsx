@@ -11,7 +11,13 @@ import type { WeeklyReflectionStats } from "@/lib/reflection";
 // On-demand only — no auto-generation on page load, since this is a paid
 // Claude call (CREDIT_COSTS.weeklyReflection) and nothing is persisted, so
 // there's nothing to show until the user actually clicks the button.
-export function ReflectionGenerator() {
+//
+// `scope`, when set, is Trading Workflow's "Trading Reflection" — passed
+// through to the API as { scope } so it only scans trading-related
+// modules (see api/reflection/generate/route.ts). Every existing caller
+// (just dashboard/reflection/page.tsx) omits it, so the request stays a
+// bare bodyless POST exactly as before — zero change to default behavior.
+export function ReflectionGenerator({ scope }: { scope?: "trading" } = {}) {
   const t = useTranslations("dashboard.reflection");
   const { refresh: refreshCredits } = useCredits();
   const [loading, setLoading] = useState(false);
@@ -23,7 +29,12 @@ export function ReflectionGenerator() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/reflection/generate", { method: "POST" });
+      const res = await fetch("/api/reflection/generate", {
+        method: "POST",
+        ...(scope
+          ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify({ scope }) }
+          : {}),
+      });
       const data = await res.json();
       void refreshCredits();
 

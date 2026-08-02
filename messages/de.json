@@ -59,6 +59,7 @@
       "decisions": "Entscheidungen",
       "feedback": "Feedback",
       "trading": "Trading",
+      "tradingWorkflow": "Trading-Workflow",
       "automation": "Automatisierung",
       "marketplace": "Marktplatz"
     }
@@ -399,6 +400,27 @@
       "noModuleActivity": "Keine Aktivität in einem Modul in den letzten zwei Wochen.",
       "missionStepsLabel": "{completed} Missionsschritte abgeschlossen, {pending} noch offen",
       "reflectionLabel": "Reflexion"
+    },
+    "tradingWorkflow": {
+      "title": "Trading-Workflow",
+      "description": "Alles rund ums Trading an einem Ort — deine Trades, Knowledge-Graph-Verknüpfungen, Timeline, Mentor, Missionen und wöchentliche Reflexion.",
+      "insight": {
+        "title": "Muster-Insight",
+        "noTrades": "Erfasse einen Trade, um hier Muster zu sehen.",
+        "notEnoughData": "Noch nicht genug Trade-Historie, um ein Muster zu erkennen — erfasse noch ein paar Trades.",
+        "pattern": "Von deinen letzten {analyzedCount} Trades waren {lossesAfterLoss} von {pairsAfterLoss} Trades nach einem Verlust ebenfalls Verluste ({ratePercent}%)."
+      },
+      "mentorButton": "Trading Mentor",
+      "mentorButtonDescription": "Öffne Ionexa Chat im Mentor-Modus mit deinen letzten 20 Trades bereits als Kontext geladen.",
+      "mentorChatPrefill": "Analysiere meine letzten Trades und gib mir Feedback, um meine Gewinnquote zu verbessern.",
+      "missionButton": "Trading-Ziel Starten",
+      "missionButtonDescription": "Erstelle einen KI-Missionsplan, um dein Trading zu verbessern, z. B. die Gewinnquote diesen Monat.",
+      "missionButtonCreating": "Wird erstellt...",
+      "missionGoal": "Meine Trading-Gewinnquote diesen Monat verbessern",
+      "timelineTitle": "Trading-Timeline",
+      "viewFullTimeline": "Vollständige Timeline ansehen →",
+      "reflectionTitle": "Trading-Reflexion",
+      "tradesTitle": "Trades"
     }
   },
   "module": {

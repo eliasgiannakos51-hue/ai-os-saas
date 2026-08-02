@@ -59,6 +59,7 @@
       "decisions": "意思決定",
       "feedback": "フィードバック",
       "trading": "トレーディング",
+      "tradingWorkflow": "トレーディングワークフロー",
       "automation": "自動化",
       "marketplace": "マーケットプレイス"
     }
@@ -399,6 +400,27 @@
       "noModuleActivity": "過去2週間、どのモジュールにも活動がありません。",
       "missionStepsLabel": "ミッションステップ {completed} 件完了、{pending} 件保留中",
       "reflectionLabel": "振り返り"
+    },
+    "tradingWorkflow": {
+      "title": "トレーディングワークフロー",
+      "description": "トレードの記録、ナレッジグラフのリンク、タイムライン、メンター、ミッション、週次振り返りをすべて一箇所に。",
+      "insight": {
+        "title": "パターンインサイト",
+        "noTrades": "トレードを記録すると、ここにパターンが表示され始めます。",
+        "notEnoughData": "パターンを検出するにはまだ十分なトレード履歴がありません — もう少しトレードを記録してください。",
+        "pattern": "直近の{analyzedCount}件のトレードのうち、損失の後に続いた{pairsAfterLoss}件中{lossesAfterLoss}件も損失でした({ratePercent}%)。"
+      },
+      "mentorButton": "トレーディングメンター",
+      "mentorButtonDescription": "直近20件のトレードをコンテキストとして読み込んだ状態で、Ionexa Chatをメンターモードで開きます。",
+      "mentorChatPrefill": "最近のトレードを分析して、勝率を改善するためのフィードバックをください。",
+      "missionButton": "トレーディング目標を開始",
+      "missionButtonDescription": "トレードを改善するためのAIミッションプラン(例:今月の勝率)を作成します。",
+      "missionButtonCreating": "作成中...",
+      "missionGoal": "今月のトレーディング勝率を改善する",
+      "timelineTitle": "トレーディングタイムライン",
+      "viewFullTimeline": "完全なタイムラインを見る →",
+      "reflectionTitle": "トレーディング振り返り",
+      "tradesTitle": "トレード"
     }
   },
   "module": {

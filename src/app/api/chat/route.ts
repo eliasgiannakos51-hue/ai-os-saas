@@ -18,6 +18,7 @@ import {
 } from "@/lib/chat/memory";
 import { findMentionedEntities, buildEntityMentionPromptAddition } from "@/lib/chat/entity-mentions";
 import { loadMentorContext } from "@/lib/chat/mentor-context";
+import { loadTradingMentorContext } from "@/lib/chat/trading-mentor-context";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +70,7 @@ export async function POST(request: Request) {
     let message: string;
     let conversationId: string | null;
     let mentorMode: boolean;
+    let mentorPreset: string | null;
     try {
       const body = await request.json();
       message = typeof body?.message === "string" ? body.message.trim() : "";
@@ -77,6 +79,7 @@ export async function POST(request: Request) {
           ? body.conversationId
           : null;
       mentorMode = body?.mentorMode === true;
+      mentorPreset = typeof body?.mentorPreset === "string" ? body.mentorPreset : null;
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -145,11 +148,20 @@ export async function POST(request: Request) {
     // only loads when the toggle is on — the default chat pays nothing extra
     // for it, per the brief.
     const mentorContext = mentorMode ? await loadMentorContext(supabase, user.id) : "";
+    // Trading Workflow's "Trading Mentor" preset (see
+    // trading-mentor-button.tsx) — only loaded when the client explicitly
+    // opted into it via mentorPreset, on top of Mentor Mode already being
+    // on. Every other chat request is unaffected.
+    const tradingMentorContext =
+      mentorMode && mentorPreset === "trading"
+        ? await loadTradingMentorContext(supabase, user.id)
+        : "";
     const systemPrompt =
       (mentorMode ? buildMentorSystemPrompt(personaName) : buildSystemPrompt(personaName)) +
       buildMemoryPromptAddition(memories) +
       buildEntityMentionPromptAddition(mentionedEntities) +
-      mentorContext;
+      mentorContext +
+      tradingMentorContext;
 
     // Credits: 1 credit per Ionexa Chat message, deducted from user_credits
     // (see lib/billing/credits.ts), the same shared budget Create Anything

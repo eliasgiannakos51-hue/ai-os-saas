@@ -41,13 +41,22 @@ export type WeeklyReflectionStats = {
 // runs.
 export async function loadWeeklyReflectionStats(
   supabase: SupabaseClient,
-  userId: string
+  userId: string,
+  // Trading Workflow's "Trading Reflection" (see
+  // reflection-generator.tsx's `scope` prop) restricts which modules get
+  // scanned — undefined (every other caller) scans every LINKABLE_MODULES
+  // table exactly as before.
+  tableFilter?: string[]
 ): Promise<WeeklyReflectionStats> {
   const now = Date.now();
   const twoWeeksAgoIso = new Date(now - 2 * WEEK_MS).toISOString();
 
+  const modules = tableFilter
+    ? LINKABLE_MODULES.filter((m) => tableFilter.includes(m.table))
+    : LINKABLE_MODULES;
+
   const moduleStats: ModuleWeeklyStat[] = await Promise.all(
-    LINKABLE_MODULES.map(async (config) => {
+    modules.map(async (config) => {
       const { data, error } = await supabase
         .from(config.table)
         .select("created_at")

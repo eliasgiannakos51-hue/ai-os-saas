@@ -8,7 +8,11 @@ export const metadata: Metadata = {
   title: "Ionexa Chat",
 };
 
-export default async function ChatPage() {
+export default async function ChatPage({
+  searchParams,
+}: {
+  searchParams: { preset?: string };
+}) {
   const supabase = createClient();
 
   const {
@@ -25,12 +29,14 @@ export default async function ChatPage() {
     .order("updated_at", { ascending: false });
 
   const userInitial = (user.email?.[0] ?? "?").toUpperCase();
+  const initialMentorPreset = searchParams.preset === "trading" ? "trading" : undefined;
 
   return (
     <main className="h-[calc(100vh-4rem)]">
       <ChatWorkspace
         initialConversations={(conversations as ChatConversation[] | null) ?? []}
         userInitial={userInitial}
+        initialMentorPreset={initialMentorPreset}
       />
     </main>
   );

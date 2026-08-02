@@ -59,6 +59,7 @@
       "decisions": "Αποφάσεις",
       "feedback": "Ανατροφοδότηση",
       "trading": "Trading",
+      "tradingWorkflow": "Ροή Εργασίας Trading",
       "automation": "Αυτοματισμοί",
       "marketplace": "Marketplace"
     }
@@ -399,6 +400,27 @@
       "noModuleActivity": "Καμία δραστηριότητα σε κανένα module τις τελευταίες δύο βδομάδες.",
       "missionStepsLabel": "{completed} βήματα missions ολοκληρώθηκαν, {pending} παραμένουν σε εκκρεμότητα",
       "reflectionLabel": "Αναστοχασμός"
+    },
+    "tradingWorkflow": {
+      "title": "Ροή Εργασίας Trading",
+      "description": "Όλο το trading σε ένα σημείο — τα trades σου, συνδέσεις Knowledge Graph, Timeline, Mentor, Missions και Weekly Reflection.",
+      "insight": {
+        "title": "Insight Μοτίβου",
+        "noTrades": "Κατέγραψε ένα trade για να αρχίσεις να βλέπεις μοτίβα εδώ.",
+        "notEnoughData": "Δεν υπάρχει ακόμα αρκετό ιστορικό trades για εντοπισμό μοτίβου — κατέγραψε λίγα ακόμα trades.",
+        "pattern": "Από τα τελευταία {analyzedCount} trades σου, {lossesAfterLoss} από τα {pairsAfterLoss} trades μετά από ζημιά ήταν επίσης ζημιογόνα ({ratePercent}%)."
+      },
+      "mentorButton": "Trading Mentor",
+      "mentorButtonDescription": "Άνοιξε το Ionexa Chat σε Mentor Mode με τα τελευταία 20 trades σου ήδη φορτωμένα ως context.",
+      "mentorChatPrefill": "Ανάλυσε τα πρόσφατα trades μου και δώσε μου feedback για να βελτιώσω το win rate μου.",
+      "missionButton": "Ξεκίνα Trading Στόχο",
+      "missionButtonDescription": "Δημιούργησε ένα AI mission plan για να βελτιώσεις το trading σου, π.χ. το win rate αυτού του μήνα.",
+      "missionButtonCreating": "Δημιουργία...",
+      "missionGoal": "Βελτίωσε το win rate μου στο trading αυτόν τον μήνα",
+      "timelineTitle": "Timeline Trading",
+      "viewFullTimeline": "Δες όλο το timeline →",
+      "reflectionTitle": "Trading Reflection",
+      "tradesTitle": "Trades"
     }
   },
   "module": {

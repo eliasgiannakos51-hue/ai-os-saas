@@ -14,13 +14,31 @@ import {
 
 export const dynamic = "force-dynamic";
 
+// Module tables scoped to Trading Workflow's "Trading Reflection" (see
+// reflection-generator.tsx's `scope` prop) — trading itself plus the two
+// modules most likely to be linked to a trade via the Knowledge Graph.
+const TRADING_SCOPE_TABLES = ["trades", "finance_entries", "decisions"];
+
 // On-demand Weekly Reflection: computes real this-week-vs-last-week stats
 // (lib/reflection.ts) across every module and every mission, then hands
 // them to the Reflection Agent (lib/reflection-agent.ts) for a short,
-// honest synthesis. No request body — every call reflects the account's
-// current data as of right now, nothing is persisted.
-export async function POST() {
+// honest synthesis. Request body is optional — an empty body (every
+// caller except Trading Reflection) reflects the account's current data
+// across every module, exactly as before; nothing is persisted either way.
+export async function POST(request: Request) {
   try {
+    let scope: string | null = null;
+    try {
+      const raw = await request.text();
+      if (raw) {
+        const body = JSON.parse(raw);
+        scope = typeof body?.scope === "string" ? body.scope : null;
+      }
+    } catch {
+      scope = null;
+    }
+    const tableFilter = scope === "trading" ? TRADING_SCOPE_TABLES : undefined;
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       return NextResponse.json(
@@ -58,7 +76,7 @@ export async function POST() {
       }
     }
 
-    const stats = await loadWeeklyReflectionStats(supabase, user.id);
+    const stats = await loadWeeklyReflectionStats(supabase, user.id, tableFilter);
     const userMessage = buildReflectionUserMessage(stats);
 
     let reflection: string;

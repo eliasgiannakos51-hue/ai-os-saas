@@ -32,6 +32,7 @@ import {
   History,
   Rocket,
   CalendarClock,
+  LineChart,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -74,3 +75,6 @@ export const MEMORY_ICON: LucideIcon = Brain;
 export const TIMELINE_ICON: LucideIcon = History;
 export const MISSION_ICON: LucideIcon = Rocket;
 export const REFLECTION_ICON: LucideIcon = CalendarClock;
+// Distinct from MODULE_ICONS.trading (TrendingUp) — this is the unified
+// Trading Workflow page, not the raw Trading module list.
+export const TRADING_WORKFLOW_ICON: LucideIcon = LineChart;

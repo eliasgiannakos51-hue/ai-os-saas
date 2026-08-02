@@ -20,6 +20,7 @@ import {
   TIMELINE_ICON,
   MISSION_ICON,
   REFLECTION_ICON,
+  TRADING_WORKFLOW_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -100,6 +101,11 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     collapsible: true,
     items: [
       { href: "/dashboard/trading", label: "Trading", icon: MODULE_ICONS.trading },
+      {
+        href: "/dashboard/trading-workflow",
+        label: "Trading Workflow",
+        icon: TRADING_WORKFLOW_ICON,
+      },
       { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation },
     ],
   },

@@ -9,6 +9,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { ArrowUp, Compass, MessageCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
@@ -46,19 +47,31 @@ function AssistantAvatar() {
 export function ChatWorkspace({
   initialConversations,
   userInitial,
+  initialMentorPreset,
 }: {
   initialConversations: ChatConversation[];
   userInitial: string;
+  // Trading Workflow's "Trading Mentor" button links here with
+  // ?preset=trading (see dashboard/chat/page.tsx) — when set, Mentor Mode
+  // starts pre-enabled with the input pre-filled, and every message this
+  // session tells the API to load trading-specific context (see
+  // api/chat/route.ts's mentorPreset). Omitted entirely by every other
+  // entry point into this page, so default chat behavior is untouched.
+  initialMentorPreset?: "trading";
 }) {
+  const t = useTranslations("dashboard.tradingWorkflow");
   const { refresh: refreshCredits } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(() =>
+    initialMentorPreset === "trading" ? t("mentorChatPrefill") : ""
+  );
+  const [mentorPreset] = useState<"trading" | null>(initialMentorPreset ?? null);
   // Not persisted per conversation on purpose — a runtime toggle for the
   // NEXT message sent, same as the API route treating it as a per-request
   // flag (see api/chat/route.ts) rather than conversation state.
-  const [mentorMode, setMentorMode] = useState(false);
+  const [mentorMode, setMentorMode] = useState(initialMentorPreset != null);
   const [sending, setSending] = useState(false);
   const [streamingText, setStreamingText] = useState<string | null>(null);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -210,7 +223,12 @@ export function ChatWorkspace({
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ conversationId: sentFromId, message: text, mentorMode }),
+        body: JSON.stringify({
+          conversationId: sentFromId,
+          message: text,
+          mentorMode,
+          ...(mentorPreset ? { mentorPreset } : {}),
+        }),
       });
 
       const contentType = res.headers.get("content-type") ?? "";

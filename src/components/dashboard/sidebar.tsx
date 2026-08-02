@@ -18,7 +18,11 @@ import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 
 function isActive(pathname: string | null, href: string) {
   if (href === "/dashboard") return pathname === "/dashboard";
-  return pathname?.startsWith(href) ?? false;
+  if (!pathname) return false;
+  // Segment-boundary match, not a raw prefix — otherwise "/dashboard/trading"
+  // would also light up on "/dashboard/trading-workflow" (and any other
+  // href that happens to be a string prefix of a sibling route).
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
 function groupContainsActive(group: SidebarGroupConfig, pathname: string | null) {

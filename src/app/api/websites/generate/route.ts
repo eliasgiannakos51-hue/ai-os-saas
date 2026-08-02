@@ -26,7 +26,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export const dynamic = "force-dynamic";
 
 const MAX_NAME_LENGTH = 100;
-const MAX_DESCRIPTION_LENGTH = 5000;
+const MAX_DESCRIPTION_LENGTH = 10000;
 
 // Downloads one reference image via the request-scoped client (Storage's
 // RLS policies — supabase_schema.sql — already confirm this path belongs

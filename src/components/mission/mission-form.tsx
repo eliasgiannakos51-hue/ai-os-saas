@@ -8,7 +8,7 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { useCredits } from "@/components/credits/credits-context";
 import { useToast } from "@/components/toast/toast-context";
 
-const MAX_GOAL_LENGTH = 5000;
+const MAX_GOAL_LENGTH = 10000;
 
 // Planner step's entry point — POSTs to /api/mission/plan, which calls the
 // Planner Agent (lib/mission-agents.ts) and creates the new ai_missions

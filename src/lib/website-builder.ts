@@ -201,12 +201,20 @@ export async function generateWebsiteHtml(
         ]
       : description;
 
-  const response = await anthropic.messages.create({
+  // Streamed rather than a single blocking call: at WEBSITE_MAX_TOKENS
+  // (32000) a non-streaming request risks the Anthropic SDK's own
+  // "Streaming is required for operations that may take longer than 10
+  // minutes" error/timeout on a large, detailed generation — streaming
+  // removes that ceiling entirely. finalMessage() still hands back the
+  // same Message shape (content, stop_reason) as a non-streaming
+  // response, so nothing below this call needs to change.
+  const stream = anthropic.messages.stream({
     model: MODEL,
     max_tokens: WEBSITE_MAX_TOKENS,
     system: images.length > 0 ? SYSTEM_PROMPT + buildImageSystemPromptAddition(images.length) : SYSTEM_PROMPT,
     messages: [{ role: "user", content }],
   });
+  const response = await stream.finalMessage();
 
   const textBlock = response.content.find(
     (block): block is Anthropic.TextBlock => block.type === "text"
@@ -243,7 +251,10 @@ export async function editWebsiteHtml(
 ): Promise<string> {
   const anthropic = new Anthropic({ apiKey });
 
-  const response = await anthropic.messages.create({
+  // Streamed for the same reason as generateWebsiteHtml above — WEBSITE_MAX_TOKENS
+  // is large enough that a non-streaming call risks the SDK's own long-request
+  // guard. finalMessage() gives back the same Message shape either way.
+  const stream = anthropic.messages.stream({
     model: MODEL,
     max_tokens: WEBSITE_MAX_TOKENS,
     system: EDIT_SYSTEM_PROMPT,
@@ -254,6 +265,7 @@ export async function editWebsiteHtml(
       },
     ],
   });
+  const response = await stream.finalMessage();
 
   const textBlock = response.content.find(
     (block): block is Anthropic.TextBlock => block.type === "text"

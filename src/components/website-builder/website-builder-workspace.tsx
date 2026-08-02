@@ -22,8 +22,8 @@ import {
 import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 
 const MAX_NAME_LENGTH = 100;
-const MAX_DESCRIPTION_LENGTH = 5000;
-const MAX_CHANGE_REQUEST_LENGTH = 5000;
+const MAX_DESCRIPTION_LENGTH = 10000;
+const MAX_CHANGE_REQUEST_LENGTH = 10000;
 
 // Thumbnail preview for each list row — a real, live scaled-down render
 // of the site's own html_content (not a fake icon), so visually distinct

@@ -14,7 +14,7 @@ import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
 
-const MAX_CHANGE_REQUEST_LENGTH = 5000;
+const MAX_CHANGE_REQUEST_LENGTH = 10000;
 
 // Website Builder post-generation editing — takes the website's own
 // current html_content as context (RLS-scoped read, not trusted from the

@@ -12,7 +12,7 @@ export const MAX_REFERENCE_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
 // photos, a style-reference screenshot, ...) — re-exported by
 // lib/website-builder.ts (server-only) so there's one source of truth,
 // since this file is what the client can actually import.
-export const MAX_REFERENCE_IMAGES = 5;
+export const MAX_REFERENCE_IMAGES = 10;
 
 // Storage path convention: `${userId}/${uniqueSuffix}-${sanitizedFilename}`
 // — the RLS policies on storage.objects (supabase_schema.sql) check that

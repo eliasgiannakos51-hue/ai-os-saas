@@ -299,6 +299,10 @@
         "noActivity": "لا يوجد نشاط بعد هذا الأسبوع — سجّل شيئًا للبدء.",
         "entryCount": "{count, plural, one {إدخال جديد واحد في {module}} other {# إدخال جديد في {module}}}",
         "mostActiveIn": "الأكثر نشاطًا في {module}"
+      },
+      "activeMission": {
+        "title": "مهمة نشطة",
+        "stepsLabel": "اكتمل {completed}/{total} خطوات"
       }
     },
     "team": {
@@ -362,7 +366,8 @@
       "statusPlanning": "التخطيط",
       "statusInProgress": "قيد التنفيذ",
       "statusCompleted": "مكتملة",
-      "statusFailed": "فشلت"
+      "statusFailed": "فشلت",
+      "stillWorkingOn": "لا تزال تعمل على: {step}. هل تحتاج مساعدة لتقسيمه إلى أجزاء أصغر؟"
     }
   },
   "module": {

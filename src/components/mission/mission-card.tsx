@@ -3,13 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, Circle, ClipboardCheck, Loader2, Sparkles } from "lucide-react";
+import { CheckCircle2, Circle, ClipboardCheck, Clock, Loader2, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { formatRelativeTime } from "@/lib/format-time";
 import { useCredits } from "@/components/credits/credits-context";
 import { MessageContent } from "@/components/chat/message-content";
+import { getStuckStep } from "@/lib/mission-progress";
 import type { Mission, MissionStatus } from "@/types/mission";
 
 const STATUS_COLORS: Record<MissionStatus, string> = {
@@ -41,6 +42,7 @@ export function MissionCard({ mission }: { mission: Mission }) {
   const { refresh: refreshCredits } = useCredits();
   const steps = mission.plan_steps?.steps ?? [];
   const review = mission.plan_steps?.review;
+  const stuckStep = getStuckStep(mission);
   const [buildingIndex, setBuildingIndex] = useState<number | null>(null);
   const [reviewing, setReviewing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -149,6 +151,13 @@ export function MissionCard({ mission }: { mission: Mission }) {
           {t(STATUS_LABEL_KEYS[mission.status])}
         </span>
       </div>
+
+      {stuckStep && (
+        <div className="mt-3 flex items-start gap-2.5 rounded-xl border border-amber-800/50 bg-amber-500/5 px-3 py-2.5 text-xs text-amber-300">
+          <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          <p>{t("stillWorkingOn", { step: stuckStep.text })}</p>
+        </div>
+      )}
 
       {steps.length > 0 && (
         <ul className="mt-4 space-y-2">

@@ -7,6 +7,7 @@ import { CreateChat } from "@/components/create/create-chat";
 import { QuickActionCard } from "@/components/overview/quick-action-card";
 import { RecentEntriesCard, type RecentEntry } from "@/components/overview/recent-entries-card";
 import { AiCoachCard } from "@/components/overview/ai-coach-card";
+import { ActiveMissionCard } from "@/components/overview/active-mission-card";
 import { QuickStartButton } from "@/components/overview/quick-start-button";
 import { ProgressCard } from "@/components/overview/progress-card";
 import { HomeStatCard } from "@/components/overview/home-stat-card";
@@ -18,8 +19,10 @@ import { MODULE_ICONS } from "@/lib/module-icons";
 import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
 import { isBetaTester, getBetaDaysRemaining } from "@/lib/beta";
 import { logApiError } from "@/lib/log-error";
+import { isActiveMission, missionProgressPercent } from "@/lib/mission-progress";
 import { Database, TrendingUp, Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
+import type { Mission } from "@/types/mission";
 
 export const metadata: Metadata = {
   title: "Overview",
@@ -170,6 +173,23 @@ export default async function OverviewPage() {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
 
+  // Active Missions widget — most recently created mission that's still
+  // "planning" or "in_progress" (see lib/mission-progress.ts). Reads the
+  // exact same ai_missions data Mission Control itself uses; nothing here
+  // mutates a mission or changes its status.
+  const { data: activeMissionRows, error: activeMissionError } = await supabase
+    .from("ai_missions")
+    .select("*")
+    .in("status", ["planning", "in_progress"])
+    .order("created_at", { ascending: false })
+    .limit(1);
+  if (activeMissionError) {
+    logApiError("/dashboard/overview", activeMissionError, { stage: "active_mission_query" });
+  }
+  const activeMission =
+    ((activeMissionRows as Mission[] | null) ?? []).find(isActiveMission) ?? null;
+  const activeMissionSteps = activeMission?.plan_steps?.steps ?? [];
+
   const totalThisWeek = summaries.reduce((sum, s) => sum + s.recentCount, 0);
   const totalToday = summaries.reduce((sum, s) => sum + s.todayCount, 0);
   const totalThisMonth = summaries.reduce((sum, s) => sum + s.monthCount, 0);
@@ -243,6 +263,19 @@ export default async function OverviewPage() {
         )}
 
         <AiCoachCard title={t("aiCoach.title")} summary={aiCoachSummary} />
+
+        {activeMission && (
+          <ActiveMissionCard
+            title={t("activeMission.title")}
+            goal={activeMission.goal}
+            progressPercent={missionProgressPercent(activeMission)}
+            stepsLabel={t("activeMission.stepsLabel", {
+              completed: activeMissionSteps.filter((s) => s.status === "completed").length,
+              total: activeMissionSteps.length,
+            })}
+            href="/dashboard/mission"
+          />
+        )}
 
         <div className="mt-6">
           <CreateChat showHeading={false} />

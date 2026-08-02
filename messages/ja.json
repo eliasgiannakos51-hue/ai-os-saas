@@ -299,6 +299,10 @@
         "noActivity": "今週はまだアクティビティがありません — 何か記録して始めましょう。",
         "entryCount": "{module} に {count} 件の新しいエントリー",
         "mostActiveIn": "{module} で最もアクティブ"
+      },
+      "activeMission": {
+        "title": "進行中のミッション",
+        "stepsLabel": "{completed}/{total} ステップ完了"
       }
     },
     "team": {
@@ -362,7 +366,8 @@
       "statusPlanning": "計画中",
       "statusInProgress": "進行中",
       "statusCompleted": "完了",
-      "statusFailed": "失敗"
+      "statusFailed": "失敗",
+      "stillWorkingOn": "まだ作業中: {step}。さらに細かく分解するのを手伝いましょうか?"
     }
   },
   "module": {

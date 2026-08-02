@@ -299,6 +299,10 @@
         "noActivity": "Aucune activité cette semaine — enregistrez quelque chose pour commencer.",
         "entryCount": "{count, plural, one {# nouvelle entrée dans {module}} other {# nouvelles entrées dans {module}}}",
         "mostActiveIn": "Le plus actif dans {module}"
+      },
+      "activeMission": {
+        "title": "Mission Active",
+        "stepsLabel": "{completed}/{total} étapes terminées"
       }
     },
     "team": {
@@ -362,7 +366,8 @@
       "statusPlanning": "Planification",
       "statusInProgress": "En Cours",
       "statusCompleted": "Terminée",
-      "statusFailed": "Échouée"
+      "statusFailed": "Échouée",
+      "stillWorkingOn": "Toujours en cours : {step}. Besoin d'aide pour le découper davantage ?"
     }
   },
   "module": {

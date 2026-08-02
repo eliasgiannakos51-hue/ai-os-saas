@@ -299,6 +299,10 @@
         "noActivity": "本周还没有活动——记录点什么开始吧。",
         "entryCount": "{module} 中新增 {count} 条记录",
         "mostActiveIn": "在 {module} 中最活跃"
+      },
+      "activeMission": {
+        "title": "进行中的任务",
+        "stepsLabel": "已完成 {completed}/{total} 步"
       }
     },
     "team": {
@@ -362,7 +366,8 @@
       "statusPlanning": "规划中",
       "statusInProgress": "进行中",
       "statusCompleted": "已完成",
-      "statusFailed": "失败"
+      "statusFailed": "失败",
+      "stillWorkingOn": "仍在处理:{step}。需要帮助把它进一步拆分吗?"
     }
   },
   "module": {

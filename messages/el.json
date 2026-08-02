@@ -299,6 +299,10 @@
         "noActivity": "Καμία δραστηριότητα ακόμα αυτή την εβδομάδα — καταχώρησε κάτι για να ξεκινήσεις.",
         "entryCount": "{count, plural, one {# νέα εγγραφή στο {module}} other {# νέες εγγραφές στο {module}}}",
         "mostActiveIn": "Πιο ενεργό/ή στο {module}"
+      },
+      "activeMission": {
+        "title": "Ενεργή Αποστολή",
+        "stepsLabel": "{completed}/{total} βήματα ολοκληρώθηκαν"
       }
     },
     "team": {
@@ -362,7 +366,8 @@
       "statusPlanning": "Σχεδιασμός",
       "statusInProgress": "Σε Εξέλιξη",
       "statusCompleted": "Ολοκληρώθηκε",
-      "statusFailed": "Απέτυχε"
+      "statusFailed": "Απέτυχε",
+      "stillWorkingOn": "Ακόμα δουλεύεις: {step}. Θέλεις βοήθεια να το σπάσεις σε μικρότερα κομμάτια;"
     }
   },
   "module": {

@@ -299,6 +299,10 @@
         "noActivity": "No activity yet this week — log something to get started.",
         "entryCount": "{count, plural, one {# new {module} entry} other {# new {module} entries}}",
         "mostActiveIn": "Most active in {module}"
+      },
+      "activeMission": {
+        "title": "Active Mission",
+        "stepsLabel": "{completed}/{total} steps completed"
       }
     },
     "team": {
@@ -362,7 +366,8 @@
       "statusPlanning": "Planning",
       "statusInProgress": "In Progress",
       "statusCompleted": "Completed",
-      "statusFailed": "Failed"
+      "statusFailed": "Failed",
+      "stillWorkingOn": "Still working on: {step}. Need help breaking it down further?"
     }
   },
   "module": {

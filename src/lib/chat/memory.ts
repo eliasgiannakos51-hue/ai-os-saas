@@ -1,6 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { logApiError } from "@/lib/log-error";
 
 const MEMORY_MODEL = "claude-sonnet-4-6";
 const MEMORY_MAX_TOKENS = 150;
@@ -57,10 +58,10 @@ export async function extractAndStoreMemory({
       source_conversation_id: conversationId,
     });
     if (error) {
-      console.error("extractAndStoreMemory: insert failed", error);
+      logApiError("chat:extractAndStoreMemory", error, { stage: "insert", userId });
     }
   } catch (err) {
-    console.error("extractAndStoreMemory: failed", err);
+    logApiError("chat:extractAndStoreMemory", err, { stage: "unhandled", userId });
   }
 }
 
@@ -77,7 +78,7 @@ export async function loadRecentMemories(
     .limit(limit);
 
   if (error) {
-    console.error("loadRecentMemories: query failed", error);
+    logApiError("chat:loadRecentMemories", error, { userId });
     return [];
   }
 

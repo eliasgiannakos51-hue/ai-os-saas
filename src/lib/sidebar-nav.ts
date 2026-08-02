@@ -6,6 +6,7 @@ import {
   SETTINGS_NAV_ITEM,
   TIMELINE_NAV_ITEM,
   MISSION_NAV_ITEM,
+  REFLECTION_NAV_ITEM,
 } from "@/lib/modules";
 import {
   MODULE_ICONS,
@@ -18,6 +19,7 @@ import {
   MEMORY_ICON,
   TIMELINE_ICON,
   MISSION_ICON,
+  REFLECTION_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -42,6 +44,7 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: CHAT_NAV_ITEM.href, label: "Ionexa Chat", icon: CHAT_ICON },
       { href: TIMELINE_NAV_ITEM.href, label: TIMELINE_NAV_ITEM.label, icon: TIMELINE_ICON },
       { href: MISSION_NAV_ITEM.href, label: MISSION_NAV_ITEM.label, icon: MISSION_ICON },
+      { href: REFLECTION_NAV_ITEM.href, label: REFLECTION_NAV_ITEM.label, icon: REFLECTION_ICON },
       { href: "/dashboard/memory", label: "AI Memory", icon: MEMORY_ICON },
     ],
   },

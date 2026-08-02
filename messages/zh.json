@@ -34,6 +34,7 @@
       "memory": "AI 记忆",
       "timeline": "时间线",
       "missionControl": "任务控制中心",
+      "reflection": "每周回顾",
       "settings": "设置",
       "team": "团队",
       "agents": "AI 智能体",
@@ -368,6 +369,16 @@
       "statusCompleted": "已完成",
       "statusFailed": "失败",
       "stillWorkingOn": "仍在处理:{step}。需要帮助把它进一步拆分吗?"
+    },
+    "reflection": {
+      "title": "每周回顾",
+      "description": "查看你本周实际完成的内容与计划的对比 — 真实数据,没有粉饰。",
+      "generateButton": "生成每周回顾",
+      "generating": "生成中...",
+      "entriesTitle": "新记录(本周 / 上周)",
+      "noModuleActivity": "过去两周内所有模块均无活动。",
+      "missionStepsLabel": "已完成 {completed} 个任务步骤,{pending} 个仍待处理",
+      "reflectionLabel": "回顾"
     }
   },
   "module": {

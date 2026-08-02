@@ -34,6 +34,7 @@
       "memory": "Memoria AI",
       "timeline": "Cronologia",
       "missionControl": "Centro Missioni",
+      "reflection": "Riflessione Settimanale",
       "settings": "Impostazioni",
       "team": "Team",
       "agents": "Agenti AI",
@@ -368,6 +369,16 @@
       "statusCompleted": "Completata",
       "statusFailed": "Fallita",
       "stillWorkingOn": "Ancora al lavoro su: {step}. Serve aiuto a suddividerlo ulteriormente?"
+    },
+    "reflection": {
+      "title": "Riflessione Settimanale",
+      "description": "Scopri cosa hai davvero completato questa settimana rispetto a quanto pianificato — dati reali, senza abbellimenti.",
+      "generateButton": "Genera Riflessione Settimanale",
+      "generating": "Generazione...",
+      "entriesTitle": "Nuove voci (questa settimana / la scorsa)",
+      "noModuleActivity": "Nessuna attività in nessun modulo nelle ultime due settimane.",
+      "missionStepsLabel": "{completed} passaggi missione completati, {pending} ancora in sospeso",
+      "reflectionLabel": "Riflessione"
     }
   },
   "module": {

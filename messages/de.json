@@ -34,6 +34,7 @@
       "memory": "KI-Gedächtnis",
       "timeline": "Zeitleiste",
       "missionControl": "Missionskontrolle",
+      "reflection": "Wöchentliche Reflexion",
       "settings": "Einstellungen",
       "team": "Team",
       "agents": "KI-Agenten",
@@ -368,6 +369,16 @@
       "statusCompleted": "Abgeschlossen",
       "statusFailed": "Fehlgeschlagen",
       "stillWorkingOn": "Noch in Arbeit: {step}. Brauchst du Hilfe, es weiter aufzuteilen?"
+    },
+    "reflection": {
+      "title": "Wöchentliche Reflexion",
+      "description": "Sieh, was du diese Woche wirklich erledigt hast im Vergleich zu dem, was geplant war — echte Daten, ohne Schönfärberei.",
+      "generateButton": "Wöchentliche Reflexion Erstellen",
+      "generating": "Erstellen...",
+      "entriesTitle": "Neue Einträge (diese Woche / letzte Woche)",
+      "noModuleActivity": "Keine Aktivität in einem Modul in den letzten zwei Wochen.",
+      "missionStepsLabel": "{completed} Missionsschritte abgeschlossen, {pending} noch offen",
+      "reflectionLabel": "Reflexion"
     }
   },
   "module": {

@@ -34,6 +34,7 @@
       "memory": "AI Memory",
       "timeline": "Timeline",
       "missionControl": "Mission Control",
+      "reflection": "Weekly Reflection",
       "settings": "Settings",
       "team": "Team",
       "agents": "AI Agents",
@@ -368,6 +369,16 @@
       "statusCompleted": "Completed",
       "statusFailed": "Failed",
       "stillWorkingOn": "Still working on: {step}. Need help breaking it down further?"
+    },
+    "reflection": {
+      "title": "Weekly Reflection",
+      "description": "See what you actually finished this week vs what you planned — real data, no spin.",
+      "generateButton": "Generate Weekly Reflection",
+      "generating": "Generating...",
+      "entriesTitle": "New entries (this week / last week)",
+      "noModuleActivity": "No activity in any module in the last two weeks.",
+      "missionStepsLabel": "{completed} mission steps completed, {pending} still pending",
+      "reflectionLabel": "Reflection"
     }
   },
   "module": {

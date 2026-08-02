@@ -34,6 +34,7 @@
       "memory": "Mémoire IA",
       "timeline": "Chronologie",
       "missionControl": "Contrôle de Mission",
+      "reflection": "Bilan Hebdomadaire",
       "settings": "Paramètres",
       "team": "Équipe",
       "agents": "Agents IA",
@@ -368,6 +369,16 @@
       "statusCompleted": "Terminée",
       "statusFailed": "Échouée",
       "stillWorkingOn": "Toujours en cours : {step}. Besoin d'aide pour le découper davantage ?"
+    },
+    "reflection": {
+      "title": "Bilan Hebdomadaire",
+      "description": "Voyez ce que vous avez vraiment accompli cette semaine par rapport à ce qui était prévu — données réelles, sans enjolivement.",
+      "generateButton": "Générer le Bilan Hebdomadaire",
+      "generating": "Génération...",
+      "entriesTitle": "Nouvelles entrées (cette semaine / la précédente)",
+      "noModuleActivity": "Aucune activité dans aucun module ces deux dernières semaines.",
+      "missionStepsLabel": "{completed} étapes de mission terminées, {pending} encore en attente",
+      "reflectionLabel": "Bilan"
     }
   },
   "module": {

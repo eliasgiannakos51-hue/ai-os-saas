@@ -209,6 +209,8 @@ export const TIMELINE_NAV_ITEM = { href: "/dashboard/timeline", label: "Timeline
 
 export const MISSION_NAV_ITEM = { href: "/dashboard/mission", label: "Mission Control" };
 
+export const REFLECTION_NAV_ITEM = { href: "/dashboard/reflection", label: "Weekly Reflection" };
+
 export const OVERVIEW_NAV_ITEM = { href: "/dashboard/overview", label: "Overview" };
 
 export const SETTINGS_NAV_ITEM = { href: "/dashboard/settings", label: "Settings" };

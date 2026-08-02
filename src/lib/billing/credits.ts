@@ -279,6 +279,9 @@ export const CREDIT_COSTS = {
   // separate, already-costed createAnything call, not covered by these.
   missionPlan: 2,
   missionReview: 2,
+  // Weekly Reflection (api/reflection/generate) — on-demand, so this is
+  // paid only when the user actually clicks "Generate Weekly Reflection".
+  weeklyReflection: 2,
 } as const;
 
 // TEMPORARY diagnostic: shows the exact numbers deductCredits compared,

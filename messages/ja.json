@@ -34,6 +34,7 @@
       "memory": "AI メモリー",
       "timeline": "タイムライン",
       "missionControl": "ミッションコントロール",
+      "reflection": "週次振り返り",
       "settings": "設定",
       "team": "チーム",
       "agents": "AI エージェント",
@@ -368,6 +369,16 @@
       "statusCompleted": "完了",
       "statusFailed": "失敗",
       "stillWorkingOn": "まだ作業中: {step}。さらに細かく分解するのを手伝いましょうか?"
+    },
+    "reflection": {
+      "title": "週次振り返り",
+      "description": "今週実際に完了したことと計画していたことを比較 — 実データのみ、誇張なし。",
+      "generateButton": "週次振り返りを生成",
+      "generating": "生成中...",
+      "entriesTitle": "新規エントリー(今週 / 先週)",
+      "noModuleActivity": "過去2週間、どのモジュールにも活動がありません。",
+      "missionStepsLabel": "ミッションステップ {completed} 件完了、{pending} 件保留中",
+      "reflectionLabel": "振り返り"
     }
   },
   "module": {

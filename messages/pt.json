@@ -34,6 +34,7 @@
       "memory": "Memória IA",
       "timeline": "Linha do Tempo",
       "missionControl": "Controle de Missão",
+      "reflection": "Reflexão Semanal",
       "settings": "Configurações",
       "team": "Equipe",
       "agents": "Agentes IA",
@@ -368,6 +369,16 @@
       "statusCompleted": "Concluída",
       "statusFailed": "Falhou",
       "stillWorkingOn": "Ainda trabalhando em: {step}. Precisa de ajuda para dividir mais?"
+    },
+    "reflection": {
+      "title": "Reflexão Semanal",
+      "description": "Veja o que você realmente concluiu esta semana em comparação com o que planejou — dados reais, sem enfeites.",
+      "generateButton": "Gerar Reflexão Semanal",
+      "generating": "Gerando...",
+      "entriesTitle": "Novas entradas (esta semana / semana passada)",
+      "noModuleActivity": "Nenhuma atividade em nenhum módulo nas últimas duas semanas.",
+      "missionStepsLabel": "{completed} etapas de missão concluídas, {pending} ainda pendentes",
+      "reflectionLabel": "Reflexão"
     }
   },
   "module": {

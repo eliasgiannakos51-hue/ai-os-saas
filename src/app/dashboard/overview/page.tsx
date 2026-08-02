@@ -8,6 +8,7 @@ import { QuickActionCard } from "@/components/overview/quick-action-card";
 import { RecentEntriesCard, type RecentEntry } from "@/components/overview/recent-entries-card";
 import { AiCoachCard } from "@/components/overview/ai-coach-card";
 import { ActiveMissionCard } from "@/components/overview/active-mission-card";
+import { NextActionCard } from "@/components/overview/next-action-card";
 import { QuickStartButton } from "@/components/overview/quick-start-button";
 import { ProgressCard } from "@/components/overview/progress-card";
 import { HomeStatCard } from "@/components/overview/home-stat-card";
@@ -20,6 +21,7 @@ import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
 import { isBetaTester, getBetaDaysRemaining } from "@/lib/beta";
 import { logApiError } from "@/lib/log-error";
 import { isActiveMission, missionProgressPercent } from "@/lib/mission-progress";
+import { computeNextAction } from "@/lib/next-action";
 import { Database, TrendingUp, Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
 import type { Mission } from "@/types/mission";
@@ -190,6 +192,25 @@ export default async function OverviewPage() {
     ((activeMissionRows as Mission[] | null) ?? []).find(isActiveMission) ?? null;
   const activeMissionSteps = activeMission?.plan_steps?.steps ?? [];
 
+  // "What's Next?" — pure data-driven priority ladder (lib/next-action.ts),
+  // no AI call. Reuses the activeMission already fetched above instead of
+  // querying ai_missions again.
+  const nextAction = await computeNextAction(supabase, user.id, activeMission);
+  let nextActionMessage: string | null = null;
+  if (nextAction?.kind === "mission_step") {
+    nextActionMessage = t("nextAction.continueMission", {
+      step: nextAction.stepText,
+      goal: nextAction.missionGoal,
+    });
+  } else if (nextAction?.kind === "revisit_link") {
+    nextActionMessage = t("nextAction.revisitLink", {
+      source: nextAction.sourceHeadline,
+      target: nextAction.targetHeadline,
+    });
+  } else if (nextAction?.kind === "start_new") {
+    nextActionMessage = t("nextAction.startNew");
+  }
+
   const totalThisWeek = summaries.reduce((sum, s) => sum + s.recentCount, 0);
   const totalToday = summaries.reduce((sum, s) => sum + s.todayCount, 0);
   const totalThisMonth = summaries.reduce((sum, s) => sum + s.monthCount, 0);
@@ -246,6 +267,15 @@ export default async function OverviewPage() {
           />
           <CreditsHomeStat label={t("statRow.creditsRemaining")} />
         </div>
+
+        {nextAction && nextActionMessage && (
+          <NextActionCard
+            title={t("nextAction.title")}
+            message={nextActionMessage}
+            href={nextAction.href}
+            ctaLabel={t("nextAction.cta")}
+          />
+        )}
 
         {showBetaExpiryBanner && betaDaysRemaining !== null && (
           <BetaExpiryBanner

@@ -304,6 +304,13 @@
       "activeMission": {
         "title": "Aktive Mission",
         "stepsLabel": "{completed}/{total} Schritte abgeschlossen"
+      },
+      "nextAction": {
+        "title": "Was Kommt Als Nächstes?",
+        "continueMission": "Weiter: {step} aus deiner Mission \"{goal}\"",
+        "revisitLink": "Du hast \"{source}\" vor ein paar Tagen mit \"{target}\" verknüpft — lohnt sich ein erneuter Blick?",
+        "startNew": "Keine neue Aktivität in den letzten 3 Tagen — bereit, etwas Neues zu starten?",
+        "cta": "Los geht's →"
       }
     },
     "team": {

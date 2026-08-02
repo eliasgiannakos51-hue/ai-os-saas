@@ -304,6 +304,13 @@
       "activeMission": {
         "title": "進行中のミッション",
         "stepsLabel": "{completed}/{total} ステップ完了"
+      },
+      "nextAction": {
+        "title": "次にすべきこと",
+        "continueMission": "続ける: \"{goal}\" ミッションの {step}",
+        "revisitLink": "数日前に \"{source}\" を \"{target}\" にリンクしました — 見直す価値があるかも?",
+        "startNew": "過去3日間新しい活動がありません — 何か新しいことを始めませんか?",
+        "cta": "移動する →"
       }
     },
     "team": {

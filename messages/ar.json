@@ -304,6 +304,13 @@
       "activeMission": {
         "title": "مهمة نشطة",
         "stepsLabel": "اكتمل {completed}/{total} خطوات"
+      },
+      "nextAction": {
+        "title": "ما التالي؟",
+        "continueMission": "تابع: {step} من مهمة \"{goal}\"",
+        "revisitLink": "قمت بربط \"{source}\" بـ \"{target}\" قبل بضعة أيام — هل يستحق إعادة النظر؟",
+        "startNew": "لا يوجد نشاط جديد في آخر 3 أيام — مستعد لبدء شيء جديد؟",
+        "cta": "اذهب إلى هناك ←"
       }
     },
     "team": {

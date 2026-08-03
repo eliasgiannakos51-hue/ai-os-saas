@@ -13,6 +13,7 @@ import { MessageContent } from "@/components/chat/message-content";
 import { getStuckStep } from "@/lib/mission-progress";
 import { buildPriorStepsContext, MAX_STEP_ATTEMPTS, stepAttemptsExhausted } from "@/lib/mission-context";
 import { AGENT_ROLES, type AgentRole } from "@/lib/agent-roles";
+import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
 import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import type { Mission, MissionStatus } from "@/types/mission";
 
@@ -263,6 +264,9 @@ export function MissionCard({
           <p className="mt-0.5 text-xs text-muted" title={new Date(mission.created_at).toLocaleString()} suppressHydrationWarning>
             {t("started", { time: formatRelativeTime(mission.created_at) })}
           </p>
+          <div className="mt-1.5">
+            <SecurityCheckedBadge resourceType="mission_plan" resourceId={mission.id} />
+          </div>
         </div>
         <span
           className={`shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium ${STATUS_COLORS[mission.status]}`}

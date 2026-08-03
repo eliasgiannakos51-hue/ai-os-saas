@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { planMission, type PlanMissionResult } from "@/lib/mission-agents";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
+import { logSecurityCheck } from "@/lib/security-check-log";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -146,6 +147,13 @@ export async function POST(request: Request) {
       });
     }
 
+    // AI Output Protection Layer — the plan step-filtering (too-short/
+    // duplicate steps dropped, see lib/mission-agents.ts's
+    // parsePlanMissionToolInput) already ran as part of planMission()
+    // above; this just records that it happened. resourceId is set once
+    // the mission row exists below, since that's the id the badge
+    // (components/security/security-checked-badge.tsx) looks up by.
+
     const planSteps: MissionPlan = {
       steps: planResult.steps.map((text) => ({ text, status: "pending" as const })),
     };
@@ -163,6 +171,17 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    void logSecurityCheck(supabase, {
+      userId: user.id,
+      resourceType: "mission_plan",
+      resourceId: mission.id,
+      result: {
+        passed: true,
+        checks: ["plan step validation (length + duplicate filtering)"],
+        issues: [],
+      },
+    });
 
     // Only now — the Planner succeeded AND the mission is durably saved —
     // is this confirmed a success worth charging for.

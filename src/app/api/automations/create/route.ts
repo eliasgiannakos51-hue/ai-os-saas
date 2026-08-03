@@ -12,6 +12,7 @@ import {
 } from "@/lib/billing/credits";
 import { checkNeedsClarification } from "@/lib/clarification";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
+import { logSecurityCheck } from "@/lib/security-check-log";
 import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
@@ -79,6 +80,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
+    // AI Output Protection Layer — tracks whether the harmful-automation
+    // safety check (lib/clarification.ts's SAFETY CHECK section) actually
+    // ran and passed this request, for the security_check_log entry
+    // written once the automation is actually created below. Starts
+    // false; only the try block on a successful, non-clarification-
+    // needed check result flips it true — every other path (skipped via
+    // skipClarification, missing API key, breaker-blocked, unaffordable,
+    // or a call failure) leaves it false, and that's logged honestly
+    // rather than claimed.
+    let safetyCheckRan = false;
+
     if (!skipClarification) {
       const apiKey = process.env.ANTHROPIC_API_KEY;
       // Best-effort only: unlike Website Builder/Mission Control, this
@@ -122,6 +134,7 @@ export async function POST(request: Request) {
                 questions: clarification.questions,
               });
             }
+            safetyCheckRan = true;
           } catch (err) {
             // Best-effort: a clarification-check hiccup shouldn't block
             // a real automation from being created — fall through,
@@ -192,6 +205,19 @@ export async function POST(request: Request) {
       logApiError("/api/automations/create", insertError, { stage: "insert" });
       return NextResponse.json({ ok: false, error: insertError.message }, { status: 500 });
     }
+
+    void logSecurityCheck(supabase, {
+      userId: user.id,
+      resourceType: "automation",
+      resourceId: automation.id,
+      result: {
+        passed: true,
+        checks: safetyCheckRan
+          ? ["harmful/unsupervised-automation safety check"]
+          : ["harmful/unsupervised-automation safety check (skipped — answered on an earlier submission)"],
+        issues: [],
+      },
+    });
 
     return NextResponse.json({ ok: true, automation });
   } catch (err) {

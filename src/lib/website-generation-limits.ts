@@ -56,7 +56,7 @@ export function isLargeGenerationRequest(descriptionLength: number, imageCount: 
 // clock or wait for real time to pass. api/websites/status calls this
 // with real values; tests call it with constructed ones.
 export function isGenerationJobStale(
-  status: "pending" | "processing" | "completed" | "failed",
+  status: "pending" | "processing" | "completed" | "failed" | "flagged",
   createdAt: string,
   now: Date,
   hasReferenceImages: boolean,

@@ -8,6 +8,7 @@ import { useToast } from "@/components/toast/toast-context";
 import { useCredits } from "@/components/credits/credits-context";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
+import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import type { ModuleRecord } from "@/types/module-record";
 import type { AutomationFrequency } from "@/lib/automation-schedule";
 
@@ -103,7 +104,11 @@ function RealizeForm({
   async function submitAutomation(finalDescription: string, skipClarification: boolean) {
     setSubmitting(true);
     try {
-      const res = await fetch("/api/automations/create", {
+      // fetchWithAuthRetry (not plain fetch): skipClarification===true
+      // means this is the resubmission after a clarifying-questions
+      // pause, where a user's access token can realistically expire
+      // while they compose real answers. See lib/fetch-with-auth-retry.ts.
+      const res = await fetchWithAuthRetry("/api/automations/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -233,6 +233,7 @@ export async function POST(request: Request) {
       .insert({
         user_id: user.id,
         name,
+        description,
         html_content: "",
         status: "pending",
         has_reference_images: referenceImagePaths.length > 0,

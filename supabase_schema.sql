@@ -1440,3 +1440,66 @@ create policy "update_own_user_automations" on public.user_automations
 drop policy if exists "delete_own_user_automations" on public.user_automations;
 create policy "delete_own_user_automations" on public.user_automations
   for delete using (auth.uid() = user_id);
+
+-- ============================================================================
+-- AI Output Protection Layer — security_check_log
+-- One row per security/output-protection check actually run: Website
+-- Builder's static HTML scan + AI content-safety review (generate AND
+-- edit), Mission Control's plan step-filtering, Automations' harmful-
+-- automation safety check. Written every time a check runs, pass or
+-- fail — this is the independent, owner-inspectable record (Supabase
+-- Table Editor) that the checks are really happening, not just an
+-- unverifiable in-app claim. check_result is a small JSON summary
+-- (lib/security-check-log.ts's SecurityCheckResult shape); resource_id
+-- is text (not a uuid FK) since it points at rows across several
+-- different tables depending on resource_type.
+-- ============================================================================
+
+create table if not exists public.security_check_log (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  resource_type text not null,
+  resource_id text not null,
+  check_result jsonb not null,
+  checked_at timestamptz not null default now()
+);
+
+create index if not exists security_check_log_user_id_idx
+  on public.security_check_log (user_id);
+create index if not exists security_check_log_resource_idx
+  on public.security_check_log (resource_type, resource_id, checked_at desc);
+
+alter table public.security_check_log enable row level security;
+
+drop policy if exists "select_own_security_check_log" on public.security_check_log;
+create policy "select_own_security_check_log" on public.security_check_log
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_security_check_log" on public.security_check_log;
+create policy "insert_own_security_check_log" on public.security_check_log
+  for insert with check (auth.uid() = user_id);
+
+-- ============================================================================
+-- Website Builder — 'flagged' status + one free no-charge regenerate
+-- 'flagged': the AI Output Protection Layer (static scan and/or AI
+-- content-safety review — see lib/website-security-review.ts) found a
+-- real issue in the generated HTML. The website WAS generated and IS
+-- charged (the generation itself happened and cost real tokens), but
+-- html_content is not shown/downloadable as normal — error_message
+-- holds a user-facing summary of what was flagged. free_retry_used
+-- tracks whether this specific row's one complimentary re-generation
+-- (see api/websites/generate/route.ts) has already been spent, so a
+-- user can't chain unlimited free retries off a single flagged row.
+-- ============================================================================
+
+alter table public.user_websites
+  add column if not exists free_retry_used boolean not null default false;
+
+-- Original generation description — needed so the free flagged-website
+-- regenerate (api/websites/[id]/regenerate/route.ts) can re-run
+-- generation server-side without the client having to keep the
+-- description in memory indefinitely / resend it. Nullable: rows created
+-- before this column existed simply can't offer a free regenerate (there
+-- is nothing to regenerate FROM), which the UI accounts for.
+alter table public.user_websites
+  add column if not exists description text;

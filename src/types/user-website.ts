@@ -5,7 +5,12 @@
 // empty and must not be rendered. Existing rows from before this column
 // existed default to 'completed' (see the migration) since they already
 // have real html_content.
-export type UserWebsiteStatus = "pending" | "processing" | "completed" | "failed";
+// 'flagged': the AI Output Protection Layer (lib/website-html-security-scan.ts
+// + lib/website-security-review.ts) found a real issue in the generated
+// HTML — generation happened and was charged, but html_content is not
+// shown/downloadable as normal; error_message holds what was flagged.
+// See free_retry_used below for the one complimentary re-generation.
+export type UserWebsiteStatus = "pending" | "processing" | "completed" | "failed" | "flagged";
 
 export type UserWebsite = {
   id: string;
@@ -26,6 +31,13 @@ export type UserWebsite = {
   // without re-deriving it (the description/image count aren't otherwise
   // available at poll time).
   is_large_request: boolean;
+  // Whether this row's one complimentary, no-extra-charge re-generation
+  // (offered when status is 'flagged' — see api/websites/generate/route.ts)
+  // has already been used. False for every website that was never flagged.
+  free_retry_used: boolean;
+  // The original generation description — null for rows created before
+  // this column existed. See api/websites/[id]/regenerate/route.ts.
+  description: string | null;
   created_at: string;
 };
 

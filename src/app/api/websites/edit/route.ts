@@ -4,7 +4,13 @@ import { editWebsiteHtml } from "@/lib/website-builder";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { downloadReferenceImages } from "@/lib/website-reference-image-server";
 import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
-import { scanWebsiteHtmlForSecurityIssues, stripDisallowedExternalScripts } from "@/lib/website-html-security-scan";
+import {
+  describeSecurityScanIssue,
+  scanWebsiteHtmlForSecurityIssues,
+  stripDisallowedExternalScripts,
+} from "@/lib/website-html-security-scan";
+import { reviewWebsiteContentSafety } from "@/lib/website-security-review";
+import { logSecurityCheck } from "@/lib/security-check-log";
 import { getSiteUrl } from "@/lib/site-url";
 import { nextVersionNumber } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/admin";
@@ -188,12 +194,44 @@ export async function POST(request: Request) {
       void recordAiCallForDailySpend(CREDIT_COSTS.websiteEdit);
       updatedHtml = await editWebsiteHtml(apiKey, website.html_content, changeRequest, referenceImages, formEndpointUrl);
       updatedHtml = await resolveWebsiteImagePlaceholders(updatedHtml);
+
+      // AI Output Protection Layer — same two-layer check as generation
+      // (see api/websites/generate/process/route.ts's file comment for
+      // why): a free static scan, then a small AI content-safety review
+      // folded into this SAME already-charged edit call. Unlike a fresh
+      // generation, an edit always has a known-good PREVIOUS version to
+      // fall back to, so a flagged edit is simply rejected outright
+      // (html_content stays unchanged, nothing charged) rather than
+      // shipped with a warning.
       updatedHtml = stripDisallowedExternalScripts(updatedHtml);
       const securityIssues = scanWebsiteHtmlForSecurityIssues(updatedHtml);
-      if (securityIssues.length > 0) {
-        logApiError("/api/websites/edit", "edited HTML flagged by security scan", {
+      const contentReview = await reviewWebsiteContentSafety(apiKey, updatedHtml);
+      const allIssueDescriptions = [
+        ...securityIssues.map(describeSecurityScanIssue),
+        ...contentReview.concerns,
+      ];
+
+      void logSecurityCheck(supabase, {
+        userId: user.id,
+        resourceType: "website",
+        resourceId: websiteId,
+        result: {
+          passed: allIssueDescriptions.length === 0,
+          checks: ["static HTML scan (script/iframe/handler/form/eval)", "AI content-safety review"],
+          issues: allIssueDescriptions,
+        },
+      });
+
+      if (allIssueDescriptions.length > 0) {
+        logApiError("/api/websites/edit", "edited HTML flagged by AI Output Protection Layer", {
           websiteId,
-          issues: JSON.stringify(securityIssues),
+          issues: allIssueDescriptions.join("; "),
+        });
+        return NextResponse.json({
+          ok: true,
+          edited: false,
+          flagged: true,
+          message: `This edit was blocked by our safety review and wasn't applied: ${allIssueDescriptions.join("; ")}. No credits were charged — your website is unchanged.`,
         });
       }
     } catch (err) {

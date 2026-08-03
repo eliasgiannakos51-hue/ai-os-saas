@@ -11,7 +11,13 @@ import { computeWebsiteGenerationCost, estimateWebsiteGenerationCost } from "@/l
 import { MAX_GENERATION_ATTEMPTS } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
-import { scanWebsiteHtmlForSecurityIssues, stripDisallowedExternalScripts } from "@/lib/website-html-security-scan";
+import {
+  describeSecurityScanIssue,
+  scanWebsiteHtmlForSecurityIssues,
+  stripDisallowedExternalScripts,
+} from "@/lib/website-html-security-scan";
+import { reviewWebsiteContentSafety } from "@/lib/website-security-review";
+import { logSecurityCheck } from "@/lib/security-check-log";
 import { getSiteUrl } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
 
@@ -217,6 +223,8 @@ export async function POST(request: Request) {
     const formEndpointUrl = `${getSiteUrl()}/api/websites/${websiteId}/submit-form`;
 
     let htmlContent: string;
+    let isFlagged = false;
+    let flaggedSummary = "";
     try {
       void recordAiCallForDailySpend(
         estimateWebsiteGenerationCost({ descriptionLength: description.length, imageCount: referenceImages.length })
@@ -227,17 +235,48 @@ export async function POST(request: Request) {
       // the model didn't emit any PLACEHOLDER:<slug> images, which is the
       // common case for a description that didn't ask for real photos.
       htmlContent = await resolveWebsiteImagePlaceholders(htmlContent);
-      // Defense in depth beyond the sandboxed preview iframe — strips any
-      // external <script src> the model might have emitted despite the
-      // system prompt forbidding it (see
-      // lib/website-html-security-scan.ts), and logs (non-blocking) any
-      // other structural issue found for visibility.
+
+      // AI Output Protection Layer — defense in depth beyond the
+      // sandboxed preview iframe (sandbox="", the strictest possible
+      // setting: no scripts, no same-origin, nothing executes there
+      // regardless of HTML content). This matters for the DOWNLOADED
+      // file, which a user can host anywhere with no sandbox at all.
+      // Layer 1 (free, no AI call): strips any external <script src> the
+      // model might have emitted despite the system prompt forbidding
+      // it, then scans the result for anything else structurally
+      // disallowed (lib/website-html-security-scan.ts). Layer 2 (small,
+      // cheap AI call, folded into this SAME already-charged generation
+      // — never a separate credit charge): a semantic review for
+      // phishing/impersonation/deceptive content the regex scan cannot
+      // detect (lib/website-security-review.ts). Both layers run every
+      // single generation, unconditionally — this is not an opt-in
+      // toggle.
       htmlContent = stripDisallowedExternalScripts(htmlContent);
       const securityIssues = scanWebsiteHtmlForSecurityIssues(htmlContent);
-      if (securityIssues.length > 0) {
-        logApiError("/api/websites/generate/process", "generated HTML flagged by security scan", {
+      const contentReview = await reviewWebsiteContentSafety(apiKey, htmlContent);
+
+      const allIssueDescriptions = [
+        ...securityIssues.map(describeSecurityScanIssue),
+        ...contentReview.concerns,
+      ];
+      isFlagged = allIssueDescriptions.length > 0;
+      flaggedSummary = allIssueDescriptions.join("; ");
+
+      void logSecurityCheck(supabase, {
+        userId: user.id,
+        resourceType: "website",
+        resourceId: websiteId,
+        result: {
+          passed: !isFlagged,
+          checks: ["static HTML scan (script/iframe/handler/form/eval)", "AI content-safety review"],
+          issues: allIssueDescriptions,
+        },
+      });
+
+      if (isFlagged) {
+        logApiError("/api/websites/generate/process", "generated HTML flagged by AI Output Protection Layer", {
           websiteId,
-          issues: JSON.stringify(securityIssues),
+          issues: flaggedSummary,
         });
       }
     } catch (err) {
@@ -253,9 +292,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, failed: true });
     }
 
+    // A flagged website still WAS generated (real tokens spent, real
+    // output produced) — it just doesn't pass the AI Output Protection
+    // Layer, so it's saved with status 'flagged' rather than 'completed'
+    // and html_content is not rendered as a normal finished site.
+    // error_message carries a user-facing summary of what was found, and
+    // (see api/websites/generate/route.ts) the user gets exactly one
+    // free, no-extra-charge regenerate attempt for this row.
     const { data: updatedRecord, error: updateError } = await supabase
       .from("user_websites")
-      .update({ html_content: htmlContent, status: "completed", error_message: null })
+      .update({
+        html_content: htmlContent,
+        status: isFlagged ? "flagged" : "completed",
+        error_message: isFlagged
+          ? `This website was flagged by our safety review and can't be published as-is: ${flaggedSummary}. You can regenerate it once at no extra charge.`
+          : null,
+      })
       .eq("id", websiteId)
       .select()
       .single();

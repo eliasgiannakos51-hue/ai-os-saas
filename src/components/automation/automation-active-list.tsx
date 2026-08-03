@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Repeat, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
 import type { UserAutomation } from "@/types/user-automation";
 
 // "Active Automations" — every user_automations row, regardless of
@@ -68,6 +69,9 @@ export function AutomationActiveList({ automations }: { automations: UserAutomat
               <p className="mt-0.5 text-[11px] text-muted">
                 {frequencyLabel(automation)} · {t("nextRun", { date: new Date(automation.next_run_at).toLocaleDateString() })}
               </p>
+              <div className="mt-1">
+                <SecurityCheckedBadge resourceType="automation" resourceId={automation.id} />
+              </div>
             </div>
             <button
               type="button"

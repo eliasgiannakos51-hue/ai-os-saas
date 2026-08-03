@@ -5,6 +5,7 @@ import { AlertTriangle, Download, History, Image as ImageIcon, Layout, Loader2, 
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
+import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { formatRelativeTime } from "@/lib/format-time";
 import { useCredits } from "@/components/credits/credits-context";
@@ -23,6 +24,7 @@ import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
+import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
 import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 
 const MAX_NAME_LENGTH = 100;
@@ -73,6 +75,8 @@ function WebsiteThumbnail({ website }: { website: UserWebsite }) {
       >
         {website.status === "failed" ? (
           <AlertTriangle className="h-4 w-4 text-red-400" />
+        ) : website.status === "flagged" ? (
+          <AlertTriangle className="h-4 w-4 text-amber-400" />
         ) : (
           <Loader2 className="h-4 w-4 animate-spin text-muted" />
         )}
@@ -227,9 +231,45 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
         addToast(t("generated"));
       } else if (record.status === "failed") {
         addToast(`✗ ${record.error_message ?? t("generateFailed")}`, "error");
+      } else if (record.status === "flagged") {
+        addToast(`⚠ ${record.error_message ?? "This website was flagged by our safety review."}`, "error");
       }
     }
     void tick();
+  }
+
+  // AI Output Protection Layer — one complimentary, no-extra-charge
+  // regenerate for a website flagged by the safety review (see
+  // api/websites/[id]/regenerate/route.ts). The route itself only resets
+  // the row and hands back the original description/image paths; this
+  // fires the exact same two-request flow (process + poll) a fresh
+  // generation uses.
+  const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
+  async function handleRegenerateFlagged(id: string) {
+    setRegeneratingId(id);
+    try {
+      const res = await fetchWithAuthRetry(`/api/websites/${id}/regenerate`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        addToast(`✗ ${getErrorMessage(data?.error, "Could not regenerate this website.")}`, "error");
+        return;
+      }
+      void fetch("/api/websites/generate/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({
+          websiteId: data.websiteId,
+          description: data.description,
+          referenceImagePaths: data.referenceImagePaths ?? [],
+        }),
+      });
+      pollWebsiteStatus(id);
+    } catch {
+      addToast("✗ Network error — please try again.", "error");
+    } finally {
+      setRegeneratingId(null);
+    }
   }
 
   // On mount, resume polling for anything that was still in flight when
@@ -360,7 +400,11 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
       // clarification/off-topic classifiers), so it can never itself be
       // mistaken for a hung/timed-out request no matter how long the
       // actual generation ends up taking.
-      const res = await fetch("/api/websites/generate", {
+      // fetchWithAuthRetry (not plain fetch): this is the resubmission
+      // after a clarifying-questions pause on skipClarification===true —
+      // exactly the scenario where a user's access token can expire while
+      // they compose real answers. See lib/fetch-with-auth-retry.ts.
+      const res = await fetchWithAuthRetry("/api/websites/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -849,9 +893,14 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
       {previewWebsite && (
         <div className="rounded-2xl border border-border bg-panel p-5">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="min-w-0 truncate text-sm font-semibold text-foreground">
-              {previewWebsite.name}
-            </p>
+            <div className="flex min-w-0 items-center gap-2">
+              <p className="min-w-0 truncate text-sm font-semibold text-foreground">
+                {previewWebsite.name}
+              </p>
+              {(previewWebsite.status === "completed" || previewWebsite.status === "flagged") && (
+                <SecurityCheckedBadge resourceType="website" resourceId={previewWebsite.id} />
+              )}
+            </div>
             <div className="flex shrink-0 items-center gap-1.5">
               <button
                 type="button"
@@ -956,6 +1005,27 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
               <p className="max-w-md text-xs text-red-300/80">
                 {previewWebsite.error_message ?? t("generateFailed")}
               </p>
+            </div>
+          ) : !viewingVersion && previewWebsite.status === "flagged" ? (
+            <div className="mt-3 flex h-[500px] w-full flex-col items-center justify-center gap-3 rounded-xl border border-amber-800 bg-amber-950/20 px-6 text-center">
+              <AlertTriangle className="h-8 w-8 text-amber-400" aria-hidden="true" />
+              <p className="text-sm font-medium text-amber-300">Flagged by our safety review</p>
+              <p className="max-w-md text-xs text-amber-300/80">{previewWebsite.error_message}</p>
+              {!previewWebsite.free_retry_used && previewWebsite.description && (
+                <button
+                  type="button"
+                  onClick={() => handleRegenerateFlagged(previewWebsite.id)}
+                  disabled={regeneratingId === previewWebsite.id}
+                  className="inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-lg bg-amber-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {regeneratingId === previewWebsite.id ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Wand2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  )}
+                  Regenerate (free)
+                </button>
+              )}
             </div>
           ) : displayedHtmlIsComplete ? (
             <iframe
@@ -1079,6 +1149,10 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
                       ) : website.status === "failed" ? (
                         <span className="shrink-0 rounded-full bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
                           {t("statusFailed")}
+                        </span>
+                      ) : website.status === "flagged" ? (
+                        <span className="shrink-0 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-400">
+                          Flagged
                         </span>
                       ) : null}
                     </p>

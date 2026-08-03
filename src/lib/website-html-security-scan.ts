@@ -18,13 +18,25 @@
 export type SecurityScanIssue =
   | { type: "external_script"; src: string }
   | { type: "inline_event_handler"; attribute: string }
-  | { type: "external_form_target"; action: string };
+  | { type: "external_form_target"; action: string }
+  | { type: "external_iframe"; src: string }
+  | { type: "dynamic_code_execution"; snippet: string };
 
 const ALLOWED_FORM_ACTION_SUBSTRING = "/api/websites/";
 
 const SCRIPT_SRC_RE = /<script\b[^>]*\bsrc="([^"]*)"[^>]*>/gi;
 const INLINE_HANDLER_RE = /\son(?:click|load|error|mouseover|mouseenter|focus|blur|submit|change|input)\s*=/gi;
 const FORM_ACTION_RE = /<form\b[^>]*\baction="([^"]*)"[^>]*>/gi;
+// A generated page has no legitimate reason to embed another site via
+// <iframe> — this app's system prompt never asks for one (unlike
+// <script src>, which at least has legitimate CDN-font use cases the
+// scan intentionally still just flags-not-strips).
+const IFRAME_SRC_RE = /<iframe\b[^>]*\bsrc="([^"]*)"[^>]*>/gi;
+// eval(...) / new Function(...) — no legitimate use in a static
+// marketing/business site's generated JS, and both are classic vectors
+// for obfuscated/dynamically-assembled malicious payloads that would
+// evade the other, more literal checks above.
+const DYNAMIC_CODE_RE = /\b(?:eval\s*\(|new\s+Function\s*\()/g;
 
 export function scanWebsiteHtmlForSecurityIssues(html: string): SecurityScanIssue[] {
   const issues: SecurityScanIssue[] = [];
@@ -48,7 +60,36 @@ export function scanWebsiteHtmlForSecurityIssues(html: string): SecurityScanIssu
     }
   }
 
+  IFRAME_SRC_RE.lastIndex = 0;
+  while ((match = IFRAME_SRC_RE.exec(html))) {
+    issues.push({ type: "external_iframe", src: match[1] });
+  }
+
+  DYNAMIC_CODE_RE.lastIndex = 0;
+  while ((match = DYNAMIC_CODE_RE.exec(html))) {
+    issues.push({ type: "dynamic_code_execution", snippet: match[0] });
+  }
+
   return issues;
+}
+
+// One short, human-readable line per issue — used both for the
+// error_message shown to the user on a flagged website and for the
+// security_check_log entry (lib/security-check-log.ts), so the same
+// wording appears in both places.
+export function describeSecurityScanIssue(issue: SecurityScanIssue): string {
+  switch (issue.type) {
+    case "external_script":
+      return `External script tag pointing to an unknown domain (${issue.src || "no src"})`;
+    case "inline_event_handler":
+      return `Inline event handler attribute (${issue.attribute})`;
+    case "external_form_target":
+      return `Form submitting to an external, non-Ionexa-AI URL (${issue.action})`;
+    case "external_iframe":
+      return `Iframe embedding an external domain (${issue.src || "no src"})`;
+    case "dynamic_code_execution":
+      return `Dynamic code execution (${issue.snippet})`;
+  }
 }
 
 // Actively strips any <script src="..."> tag pointing outside this app's

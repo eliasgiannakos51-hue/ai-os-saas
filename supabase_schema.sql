@@ -1066,18 +1066,21 @@ create policy "insert_own_website_versions" on public.website_versions
 
 -- ============================================================================
 -- Website Builder reference images — Storage bucket "website-references"
--- Private bucket; files are stored under a `${auth.uid()}/...` path prefix,
--- which is what the RLS policies below check (storage.foldername(name))[1]
--- against — the standard per-user-folder Supabase Storage pattern, same
--- ownership model as every table above, just expressed on storage.objects
--- instead of a public.* table. Read server-side (service role) when
--- generating so the reference image can be sent to Claude's vision input;
--- never made public.
+-- PUBLIC bucket (changed from private): a generated website can embed a
+-- reference image directly via <img src="..."> (see
+-- src/lib/website-builder.ts's IMAGE_RULES_HEADER) and that generated
+-- HTML is meant to be downloaded and hosted anywhere — a private bucket's
+-- signed URLs would expire and break the image once the site is actually
+-- published elsewhere. Uploads/deletes are still write-restricted to the
+-- owner via the `${auth.uid()}/...` path-prefix RLS policies below
+-- (storage.foldername(name))[1]) — only READS are now unauthenticated,
+-- which is the intended trade-off: these images are uploaded specifically
+-- to become part of a public website.
 -- ============================================================================
 
 insert into storage.buckets (id, name, public)
-values ('website-references', 'website-references', false)
-on conflict (id) do nothing;
+values ('website-references', 'website-references', true)
+on conflict (id) do update set public = true;
 
 drop policy if exists "select_own_website_references" on storage.objects;
 create policy "select_own_website_references" on storage.objects
@@ -1140,6 +1143,75 @@ create policy "insert_own_website_reference_images" on public.website_reference_
 drop policy if exists "delete_own_website_reference_images" on public.website_reference_images;
 create policy "delete_own_website_reference_images" on public.website_reference_images
   for delete using (auth.uid() = user_id);
+
+-- ============================================================================
+-- Create Anything attachment images — Storage bucket "create-attachments"
+-- Private bucket, same per-user-folder RLS pattern as "website-references"
+-- above. Optional images attached to a Create Anything entry (or, via the
+-- same /api/create endpoint, a Mission Control "Create with AI" step —
+-- see src/lib/create-attachment-image.ts, src/app/api/create/route.ts).
+-- Used purely as Claude vision CONTEXT for classification/field
+-- extraction — never embedded in any generated output — so unlike
+-- "website-references" this stays private; there's no "published page"
+-- use case here.
+-- ============================================================================
+
+insert into storage.buckets (id, name, public)
+values ('create-attachments', 'create-attachments', false)
+on conflict (id) do nothing;
+
+drop policy if exists "select_own_create_attachments" on storage.objects;
+create policy "select_own_create_attachments" on storage.objects
+  for select using (
+    bucket_id = 'create-attachments' and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+drop policy if exists "insert_own_create_attachments" on storage.objects;
+create policy "insert_own_create_attachments" on storage.objects
+  for insert with check (
+    bucket_id = 'create-attachments' and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+drop policy if exists "delete_own_create_attachments" on storage.objects;
+create policy "delete_own_create_attachments" on storage.objects
+  for delete using (
+    bucket_id = 'create-attachments' and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- ============================================================================
+-- Website form submissions — website_form_submissions
+-- Real contact/booking-form submissions from a PUBLISHED, downloaded
+-- website's generated HTML (see src/app/api/websites/[id]/submit-form/
+-- route.ts + src/lib/website-builder.ts's FUNCTIONAL_ELEMENTS_SECTION) —
+-- the "functional, not decorative" contact form feature. Inserted only
+-- via the service-role admin client (an anonymous site visitor has no
+-- Ionexa AI session), so there is deliberately NO insert policy for
+-- authenticated users below — normal authenticated clients can read their
+-- own submissions but can never insert/forge one directly. classification
+-- is the lead-intelligence tag (src/lib/lead-classification.ts):
+-- 'genuine_interest' | 'question' | 'spam' | 'unclear', or null if the
+-- classification call failed/was skipped.
+-- ============================================================================
+
+create table if not exists public.website_form_submissions (
+  id uuid primary key default gen_random_uuid(),
+  website_id uuid not null references public.user_websites(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  fields jsonb not null,
+  classification text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists website_form_submissions_website_id_idx
+  on public.website_form_submissions (website_id);
+create index if not exists website_form_submissions_website_id_created_at_idx
+  on public.website_form_submissions (website_id, created_at);
+
+alter table public.website_form_submissions enable row level security;
+
+drop policy if exists "select_own_website_form_submissions" on public.website_form_submissions;
+create policy "select_own_website_form_submissions" on public.website_form_submissions
+  for select using (auth.uid() = user_id);
 
 -- ============================================================================
 -- Energy check-ins — "AI Life Context" (see src/lib/user-context.ts) needs

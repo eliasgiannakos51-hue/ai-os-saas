@@ -15,18 +15,22 @@ export type CreateResult =
 // skipClarification is only ever true on the resubmission after the
 // caller has already shown "needsClarification" questions and the user
 // answered or explicitly skipped (see lib/clarification.ts) — never set
-// on a genuinely first submission.
+// on a genuinely first submission. imagePaths (optional, up to
+// MAX_ATTACHMENT_IMAGES) are already-uploaded Storage paths — see
+// lib/create-attachment-image.ts — sent as real vision context to the
+// classifier, same mechanism mission-card.tsx's "Create with AI" inherits
+// for free since it calls this same endpoint.
 export function useCreateAnything() {
   const [loading, setLoading] = useState(false);
   const { refresh: refreshCredits } = useCredits();
 
-  async function submit(message: string, skipClarification = false): Promise<CreateResult> {
+  async function submit(message: string, skipClarification = false, imagePaths: string[] = []): Promise<CreateResult> {
     setLoading(true);
     try {
       const res = await fetch("/api/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, skipClarification }),
+        body: JSON.stringify({ message, skipClarification, imagePaths }),
       });
       const data = await res.json();
 

@@ -22,6 +22,8 @@ import {
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
 import { checkNeedsClarification } from "@/lib/clarification";
+import { MAX_ATTACHMENT_IMAGES } from "@/lib/create-attachment-image";
+import { downloadAttachmentImages } from "@/lib/attachment-image-server";
 
 export const dynamic = "force-dynamic";
 
@@ -113,12 +115,16 @@ export async function POST(request: Request) {
     let agentRole: AgentRole;
     let priorStepsContext: string;
     let skipClarification: boolean;
+    let imagePaths: string[];
     try {
       const body = await request.json();
       message = typeof body?.message === "string" ? body.message.trim() : "";
       agentRole = isAgentRole(body?.agentRole) ? body.agentRole : "general";
       priorStepsContext = typeof body?.context === "string" ? body.context.trim() : "";
       skipClarification = body?.skipClarification === true;
+      imagePaths = Array.isArray(body?.imagePaths)
+        ? body.imagePaths.filter((p: unknown): p is string => typeof p === "string").slice(0, MAX_ATTACHMENT_IMAGES)
+        : [];
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -264,17 +270,37 @@ export async function POST(request: Request) {
 
     const anthropic = new Anthropic({ apiKey });
 
+    // Optional attached image(s) (see lib/create-attachment-image.ts) —
+    // real vision context for the classifier, e.g. a photo of a product
+    // alongside "log this as a new product idea". Independently best-
+    // effort per image; a bad/missing one never blocks the classification
+    // itself, it's just excluded from the vision input.
+    const attachmentImages = imagePaths.length > 0 ? await downloadAttachmentImages(supabase, imagePaths, "/api/create") : [];
+
     let toolInput: RouteEntryInput;
     try {
       const missionContextAddition = buildMissionContextSystemPromptAddition(priorStepsContext);
 
       void recordAiCallForDailySpend(CREDIT_COSTS.createAnything);
+      const userContent: Anthropic.MessageParam["content"] =
+        attachmentImages.length > 0
+          ? [
+              ...attachmentImages.map(
+                (image): Anthropic.ImageBlockParam => ({
+                  type: "image",
+                  source: { type: "base64", media_type: image.mediaType, data: image.base64 },
+                })
+              ),
+              { type: "text", text: message },
+            ]
+          : message;
+
       const response = await anthropic.messages.create({
         model: MODEL,
         max_tokens: 1024,
         system:
           buildSystemPrompt() + agentRoleSystemPromptAddition(agentRole) + userContext + missionContextAddition,
-        messages: [{ role: "user", content: message }],
+        messages: [{ role: "user", content: userContent }],
         tools: [ROUTE_ENTRY_TOOL],
         tool_choice: { type: "tool", name: "route_entry" },
       });

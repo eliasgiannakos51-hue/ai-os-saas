@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowUp, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
+import { ArrowUp, CheckCircle2, AlertCircle, XCircle, Paperclip, X } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/modules";
 import { useCreateAnything, type CreateResult } from "@/lib/use-create-anything";
 import { useSmartSuggestions } from "@/lib/use-smart-suggestions";
@@ -10,6 +10,13 @@ import { SmartSuggestions } from "@/components/create/smart-suggestions";
 import { NextStepSuggestion } from "@/components/create/next-step-suggestion";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
+import { createClient } from "@/lib/supabase/client";
+import {
+  ACCEPTED_ATTACHMENT_IMAGE_TYPES,
+  buildAttachmentImagePath,
+  CREATE_ATTACHMENT_BUCKET,
+  MAX_ATTACHMENT_IMAGES,
+} from "@/lib/create-attachment-image";
 
 export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
   const { submit, loading } = useCreateAnything();
@@ -17,6 +24,47 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
   const [result, setResult] = useState<CreateResult | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const suggestions = useSmartSuggestions(input);
+  const supabase = createClient();
+
+  // Optional attached image(s) — real vision context for the classifier
+  // (see lib/create-attachment-image.ts, api/create/route.ts), e.g. a
+  // photo of a product alongside "log this as a new idea". Uploaded right
+  // before submit, same pattern as Website Builder's reference images.
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
+    const selected = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (selected.length === 0) return;
+    setImageFiles((prev) => {
+      const remainingSlots = MAX_ATTACHMENT_IMAGES - prev.length;
+      const accepted = selected
+        .filter((f) => ACCEPTED_ATTACHMENT_IMAGE_TYPES.includes(f.type as (typeof ACCEPTED_ATTACHMENT_IMAGE_TYPES)[number]))
+        .slice(0, remainingSlots);
+      return accepted.length > 0 ? [...prev, ...accepted] : prev;
+    });
+  }
+
+  function removeImage(index: number) {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  async function uploadAttachedImages(): Promise<string[]> {
+    if (imageFiles.length === 0) return [];
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return [];
+    const results = await Promise.all(
+      imageFiles.map(async (file) => {
+        const path = buildAttachmentImagePath(user.id, file.name);
+        const { error } = await supabase.storage.from(CREATE_ATTACHMENT_BUCKET).upload(path, file, { contentType: file.type });
+        return error ? null : path;
+      })
+    );
+    return results.filter((p): p is string => p !== null);
+  }
 
   // Prefixes rather than replaces — the suggestion only ever appears once
   // there's already text in the box, so overwriting it would destroy what
@@ -49,13 +97,15 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
     if (!message) return;
 
     setResult(null);
-    const outcome = await submit(message);
+    const imagePaths = await uploadAttachedImages();
+    const outcome = await submit(message, false, imagePaths);
     setResult(outcome);
     if (outcome.type === "needsClarification") {
       setPendingMessage(message);
     }
     if (outcome.type !== "error") {
       setInput("");
+      setImageFiles([]);
     }
   }
 
@@ -87,7 +137,30 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
       )}
 
       <form onSubmit={handleSubmit}>
+        {imageFiles.length > 0 && (
+          <ul className="mb-2 flex flex-wrap gap-1.5">
+            {imageFiles.map((file, index) => (
+              <li
+                key={`${file.name}-${index}`}
+                className="flex items-center gap-1.5 rounded-lg border border-border bg-input px-2 py-1 text-xs text-foreground"
+              >
+                <span className="max-w-[140px] truncate">{file.name}</span>
+                <button type="button" onClick={() => removeImage(index)} aria-label="Remove image" className="text-muted hover:text-foreground">
+                  <X className="h-3 w-3" aria-hidden="true" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
         <div className="relative">
+          <input
+            ref={imageInputRef}
+            type="file"
+            multiple
+            accept={ACCEPTED_ATTACHMENT_IMAGE_TYPES.join(",")}
+            onChange={handleImageChange}
+            className="hidden"
+          />
           <textarea
             ref={textareaRef}
             value={input}
@@ -95,9 +168,20 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
             placeholder="Describe your idea in detail..."
             rows={4}
             maxLength={20000}
-            className="min-h-32 max-h-[60vh] w-full resize-y rounded-2xl border border-border bg-panel px-4 py-4 pr-16 text-base text-foreground outline-none transition-all duration-200 placeholder:text-muted focus:border-orange-500/60 focus:shadow-[0_0_0_4px_rgba(249,115,22,0.08)]"
+            className="min-h-32 max-h-[60vh] w-full resize-y rounded-2xl border border-border bg-panel px-4 py-4 pr-28 text-base text-foreground outline-none transition-all duration-200 placeholder:text-muted focus:border-orange-500/60 focus:shadow-[0_0_0_4px_rgba(249,115,22,0.08)]"
             autoFocus
           />
+          {imageFiles.length < MAX_ATTACHMENT_IMAGES && (
+            <button
+              type="button"
+              onClick={() => imageInputRef.current?.click()}
+              aria-label="Attach image"
+              title="Attach image"
+              className="absolute bottom-3 right-16 flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            >
+              <Paperclip className="h-4 w-4" aria-hidden="true" />
+            </button>
+          )}
           <button
             type="submit"
             disabled={loading || !input.trim()}

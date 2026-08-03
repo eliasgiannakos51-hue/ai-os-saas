@@ -1,16 +1,8 @@
 import { NextResponse } from "next/server";
-import sharp from "sharp";
 import { createClient } from "@/lib/supabase/server";
-import {
-  generateWebsiteHtml,
-  isSupportedReferenceImageMediaType,
-  type ReferenceImage,
-} from "@/lib/website-builder";
-import {
-  MAX_REFERENCE_IMAGE_BYTES,
-  MAX_REFERENCE_IMAGES,
-  REFERENCE_IMAGE_BUCKET,
-} from "@/lib/website-reference-image";
+import { generateWebsiteHtml, type ReferenceImage } from "@/lib/website-builder";
+import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
+import { downloadReferenceImage } from "@/lib/website-reference-image-server";
 import { FIRST_VERSION_NUMBER } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -18,8 +10,10 @@ import { deductCredits, resolveEffectivePlan } from "@/lib/billing/credits";
 import { computeWebsiteGenerationCost, estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import { MAX_GENERATION_ATTEMPTS } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
+import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
+import { scanWebsiteHtmlForSecurityIssues, stripDisallowedExternalScripts } from "@/lib/website-html-security-scan";
+import { getSiteUrl } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
-import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
 
@@ -62,78 +56,6 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 800;
 
 const MAX_DESCRIPTION_LENGTH = 20000;
-
-// Claude's vision input internally downsamples any image above roughly
-// this size before analyzing it (Anthropic docs: ~1.15 megapixels, i.e.
-// long-edge around 1568px for a typical aspect ratio) — sending a full
-// multi-thousand-pixel phone photo doesn't improve style/color analysis
-// quality beyond that point, it only adds base64-encoding size, network
-// transfer time, and vision-input processing time before Claude ever
-// starts generating the actual website. Shrinking here (dimensions only,
-// same format, no extra lossy re-compression) speeds up the request with
-// no loss to what the model can actually see.
-const REFERENCE_IMAGE_MAX_DIMENSION = 1568;
-
-// Resizes only if the image is actually larger than the target — never
-// upscales a smaller image (withoutEnlargement), and any resize failure
-// (corrupt file, unsupported edge case) falls back to the original,
-// unresized buffer rather than dropping the image entirely.
-async function resizeReferenceImageIfNeeded(buffer: Buffer): Promise<Buffer> {
-  try {
-    const resized = await sharp(buffer)
-      .resize({
-        width: REFERENCE_IMAGE_MAX_DIMENSION,
-        height: REFERENCE_IMAGE_MAX_DIMENSION,
-        fit: "inside",
-        withoutEnlargement: true,
-      })
-      .toBuffer();
-    return resized;
-  } catch (err) {
-    logApiError("/api/websites/generate/process", err, { stage: "reference_image_resize" });
-    return buffer;
-  }
-}
-
-// Downloads one reference image via the request-scoped client (Storage's
-// RLS policies — supabase_schema.sql — already confirm this path belongs
-// to the caller before anything is read) and validates it. Returns null
-// on any problem rather than throwing — one bad image among several
-// should never take down the other, valid ones.
-async function downloadReferenceImage(
-  supabase: SupabaseClient,
-  path: string
-): Promise<ReferenceImage | null> {
-  try {
-    const { data: imageBlob, error: downloadError } = await supabase.storage
-      .from(REFERENCE_IMAGE_BUCKET)
-      .download(path);
-
-    if (downloadError || !imageBlob) {
-      logApiError("/api/websites/generate/process", downloadError, { stage: "reference_image_download" });
-      return null;
-    }
-    if (imageBlob.size > MAX_REFERENCE_IMAGE_BYTES) {
-      logApiError("/api/websites/generate/process", "reference image exceeds size limit after upload", {
-        stage: "reference_image_size",
-      });
-      return null;
-    }
-    if (!isSupportedReferenceImageMediaType(imageBlob.type)) {
-      logApiError("/api/websites/generate/process", `unsupported reference image type: ${imageBlob.type}`, {
-        stage: "reference_image_type",
-      });
-      return null;
-    }
-
-    const arrayBuffer = await imageBlob.arrayBuffer();
-    const resizedBuffer = await resizeReferenceImageIfNeeded(Buffer.from(arrayBuffer));
-    return { base64: resizedBuffer.toString("base64"), mediaType: imageBlob.type };
-  } catch (err) {
-    logApiError("/api/websites/generate/process", err, { stage: "reference_image_download" });
-    return null;
-  }
-}
 
 // Website Builder — job WORKER. This is the second of two requests the
 // client makes for one generation (see api/websites/generate/route.ts,
@@ -257,7 +179,7 @@ export async function POST(request: Request) {
     // in parallel; each one is independently best-effort, so one bad
     // image never blocks the others or the generation itself.
     const downloadedImages = await Promise.all(
-      referenceImagePaths.map((path) => downloadReferenceImage(supabase, path))
+      referenceImagePaths.map((path) => downloadReferenceImage(supabase, path, "/api/websites/generate/process"))
     );
     const successfulPaths: string[] = [];
     const referenceImages: ReferenceImage[] = [];
@@ -287,12 +209,37 @@ export async function POST(request: Request) {
       void supabase.from("user_websites").update({ html_content: accumulatedText }).eq("id", websiteId);
     };
 
+    // The form submission endpoint for THIS website — always resolvable
+    // at this point since the row (and therefore its id) already exists
+    // (see api/websites/generate/route.ts, which creates it before this
+    // route ever runs). See lib/website-builder.ts's
+    // FUNCTIONAL_ELEMENTS_SECTION for how the model uses it.
+    const formEndpointUrl = `${getSiteUrl()}/api/websites/${websiteId}/submit-form`;
+
     let htmlContent: string;
     try {
       void recordAiCallForDailySpend(
         estimateWebsiteGenerationCost({ descriptionLength: description.length, imageCount: referenceImages.length })
       );
-      htmlContent = await generateWebsiteHtml(apiKey, description, referenceImages, onDelta);
+      htmlContent = await generateWebsiteHtml(apiKey, description, referenceImages, onDelta, formEndpointUrl);
+      // Real-photo placeholder resolution (Unsplash if configured, else
+      // picsum.photos) — see lib/website-image-resolver.ts. A no-op when
+      // the model didn't emit any PLACEHOLDER:<slug> images, which is the
+      // common case for a description that didn't ask for real photos.
+      htmlContent = await resolveWebsiteImagePlaceholders(htmlContent);
+      // Defense in depth beyond the sandboxed preview iframe — strips any
+      // external <script src> the model might have emitted despite the
+      // system prompt forbidding it (see
+      // lib/website-html-security-scan.ts), and logs (non-blocking) any
+      // other structural issue found for visibility.
+      htmlContent = stripDisallowedExternalScripts(htmlContent);
+      const securityIssues = scanWebsiteHtmlForSecurityIssues(htmlContent);
+      if (securityIssues.length > 0) {
+        logApiError("/api/websites/generate/process", "generated HTML flagged by security scan", {
+          websiteId,
+          issues: JSON.stringify(securityIssues),
+        });
+      }
     } catch (err) {
       logApiError("/api/websites/generate/process", err, { stage: "anthropic_call" });
       const errMessage = err instanceof Error ? err.message : "The website generation request failed.";

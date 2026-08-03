@@ -156,10 +156,16 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
 
   // Post-generation editing — a second, separate AI call that takes the
   // website's existing html_content as context (see api/websites/edit)
-  // instead of generating from scratch.
+  // instead of generating from scratch. Reference images here work the
+  // same way as at initial generation (handleImageChange/removeReferenceImage
+  // above) — a separate File[] state so attaching an image to an edit
+  // request never touches the (unrelated) initial-generation form.
   const [editText, setEditText] = useState("");
   const [editing, setEditing] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+  const [editImageFiles, setEditImageFiles] = useState<File[]>([]);
+  const [editImageError, setEditImageError] = useState<string | null>(null);
+  const editImageInputRef = useRef<HTMLInputElement>(null);
 
   // Version history — lazy-loaded per website (only fetched once "History"
   // is opened for a given site), keyed by website_id.
@@ -285,6 +291,51 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
   function removeReferenceImage(index: number) {
     setReferenceImageFiles((prev) => prev.filter((_, i) => i !== index));
     setImageError(null);
+  }
+
+  // Mirrors handleImageChange/removeReferenceImage above exactly, just
+  // targeting the edit form's own separate image state — see the
+  // editImageFiles comment above for why these are kept separate rather
+  // than shared.
+  function handleEditImageChange(e: ChangeEvent<HTMLInputElement>) {
+    const selected = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (selected.length === 0) return;
+
+    setEditImageFiles((prev) => {
+      const remainingSlots = MAX_REFERENCE_IMAGES - prev.length;
+      if (remainingSlots <= 0) {
+        setEditImageError(t("imageTooMany", { max: MAX_REFERENCE_IMAGES }));
+        return prev;
+      }
+
+      const accepted: File[] = [];
+      let rejected: "type" | "size" | null = null;
+      for (const file of selected) {
+        if (accepted.length >= remainingSlots) break;
+        if (!ACCEPTED_REFERENCE_IMAGE_TYPES.includes(file.type as (typeof ACCEPTED_REFERENCE_IMAGE_TYPES)[number])) {
+          rejected = "type";
+          continue;
+        }
+        if (file.size > MAX_REFERENCE_IMAGE_BYTES) {
+          rejected = rejected ?? "size";
+          continue;
+        }
+        accepted.push(file);
+      }
+
+      if (rejected === "type") setEditImageError(t("imageInvalidType"));
+      else if (rejected === "size") setEditImageError(t("imageTooLarge"));
+      else if (selected.length > remainingSlots) setEditImageError(t("imageTooMany", { max: MAX_REFERENCE_IMAGES }));
+      else setEditImageError(null);
+
+      return accepted.length > 0 ? [...prev, ...accepted] : prev;
+    });
+  }
+
+  function removeEditReferenceImage(index: number) {
+    setEditImageFiles((prev) => prev.filter((_, i) => i !== index));
+    setEditImageError(null);
   }
 
   // Shared by the initial submit and by answering/skipping a
@@ -492,6 +543,8 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
     setViewingVersion(null);
     setEditText("");
     setEditError(null);
+    setEditImageFiles([]);
+    setEditImageError(null);
   }
 
   async function handleEdit(e: FormEvent) {
@@ -503,10 +556,36 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
     setEditing(true);
     setEditError(null);
     try {
+      let referenceImagePaths: string[] = [];
+      if (editImageFiles.length > 0) {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) {
+          setEditError("Not authenticated.");
+          return;
+        }
+        const uploadResults = await Promise.all(
+          editImageFiles.map(async (file) => {
+            const path = buildReferenceImagePath(user.id, file.name);
+            const { error: uploadError } = await supabase.storage
+              .from(REFERENCE_IMAGE_BUCKET)
+              .upload(path, file, { contentType: file.type });
+            return { path, uploadError };
+          })
+        );
+        const firstFailure = uploadResults.find((r) => r.uploadError);
+        if (firstFailure) {
+          setEditError(getErrorMessage(firstFailure.uploadError, "Could not upload the reference images."));
+          return;
+        }
+        referenceImagePaths = uploadResults.map((r) => r.path);
+      }
+
       const res = await fetch("/api/websites/edit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ websiteId, changeRequest: trimmedChangeRequest }),
+        body: JSON.stringify({ websiteId, changeRequest: trimmedChangeRequest, referenceImagePaths }),
       });
       const data = await res.json();
       void refreshCredits();
@@ -523,6 +602,7 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
       const record = data.record as UserWebsite;
       setWebsites((prev) => prev.map((w) => (w.id === record.id ? record : w)));
       setEditText("");
+      setEditImageFiles([]);
       setViewingVersion(null);
       // The new version is now newer than whatever's cached — drop it so
       // the next "History" open re-fetches instead of showing stale data.
@@ -891,6 +971,47 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
                 placeholder={t("editPlaceholder")}
                 className="input min-h-28 resize-y"
               />
+
+              <div>
+                <label htmlFor="website-edit-image" className="mb-1 block text-xs text-muted">
+                  {t("imageLabel", { count: editImageFiles.length, max: MAX_REFERENCE_IMAGES })}
+                </label>
+                {editImageFiles.length > 0 && (
+                  <ul className="mb-2 space-y-1.5">
+                    {editImageFiles.map((file, index) => (
+                      <li
+                        key={`${file.name}-${index}`}
+                        className="flex items-center gap-2 rounded-lg border border-border bg-input px-3 py-2"
+                      >
+                        <ImageIcon className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
+                        <span className="min-w-0 flex-1 truncate text-sm text-foreground">{file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeEditReferenceImage(index)}
+                          aria-label={t("imageRemove")}
+                          title={t("imageRemove")}
+                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                        >
+                          <X className="h-3.5 w-3.5" aria-hidden="true" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {editImageFiles.length < MAX_REFERENCE_IMAGES && (
+                  <input
+                    id="website-edit-image"
+                    ref={editImageInputRef}
+                    type="file"
+                    multiple
+                    accept={ACCEPTED_REFERENCE_IMAGE_TYPES.join(",")}
+                    onChange={handleEditImageChange}
+                    className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border file:border-border file:bg-input file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-foreground hover:file:border-orange-500 hover:file:text-orange-400"
+                  />
+                )}
+                {editImageError && <p className="mt-1 text-[11px] text-red-400">{editImageError}</p>}
+              </div>
+
               {editError && (
                 <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
                   {editError}

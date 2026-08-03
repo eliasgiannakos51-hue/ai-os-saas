@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { editWebsiteHtml } from "@/lib/website-builder";
+import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
+import { downloadReferenceImages } from "@/lib/website-reference-image-server";
+import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
+import { scanWebsiteHtmlForSecurityIssues, stripDisallowedExternalScripts } from "@/lib/website-html-security-scan";
+import { getSiteUrl } from "@/lib/site-url";
 import { nextVersionNumber } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -37,6 +42,7 @@ export async function POST(request: Request) {
 
     let websiteId: string;
     let changeRequest: string;
+    let referenceImagePaths: string[];
     try {
       const body = await request.json();
       websiteId = typeof body?.websiteId === "string" ? body.websiteId : "";
@@ -44,6 +50,9 @@ export async function POST(request: Request) {
         typeof body?.changeRequest === "string"
           ? body.changeRequest.trim().slice(0, MAX_CHANGE_REQUEST_LENGTH)
           : "";
+      referenceImagePaths = Array.isArray(body?.referenceImagePaths)
+        ? body.referenceImagePaths.filter((p: unknown): p is string => typeof p === "string").slice(0, MAX_REFERENCE_IMAGES)
+        : [];
     } catch {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
@@ -107,10 +116,30 @@ export async function POST(request: Request) {
       }
     }
 
+    // New reference images attached to THIS edit request (e.g. "add this
+    // photo to the hero section") — same download/resize/public-url
+    // pipeline as initial generation (lib/website-reference-image-server.ts),
+    // reused rather than duplicated. Independently best-effort: one bad
+    // image never blocks the edit itself.
+    const referenceImages =
+      referenceImagePaths.length > 0
+        ? await downloadReferenceImages(supabase, referenceImagePaths, "/api/websites/edit")
+        : [];
+    const formEndpointUrl = `${getSiteUrl()}/api/websites/${websiteId}/submit-form`;
+
     let updatedHtml: string;
     try {
       void recordAiCallForDailySpend(CREDIT_COSTS.websiteEdit);
-      updatedHtml = await editWebsiteHtml(apiKey, website.html_content, changeRequest);
+      updatedHtml = await editWebsiteHtml(apiKey, website.html_content, changeRequest, referenceImages, formEndpointUrl);
+      updatedHtml = await resolveWebsiteImagePlaceholders(updatedHtml);
+      updatedHtml = stripDisallowedExternalScripts(updatedHtml);
+      const securityIssues = scanWebsiteHtmlForSecurityIssues(updatedHtml);
+      if (securityIssues.length > 0) {
+        logApiError("/api/websites/edit", "edited HTML flagged by security scan", {
+          websiteId,
+          issues: JSON.stringify(securityIssues),
+        });
+      }
     } catch (err) {
       logApiError("/api/websites/edit", err, { stage: "anthropic_call" });
       const errMessage = err instanceof Error ? err.message : "The website edit request failed.";

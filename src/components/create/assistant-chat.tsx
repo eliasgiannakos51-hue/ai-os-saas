@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
-import { ArrowUp, CheckCircle2, AlertCircle, XCircle, Sparkles } from "lucide-react";
+import { ArrowUp, CheckCircle2, AlertCircle, XCircle, Sparkles, Paperclip, X } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/modules";
 import { useCreateAnything, type CreateResult } from "@/lib/use-create-anything";
 import { useSmartSuggestions } from "@/lib/use-smart-suggestions";
@@ -10,6 +10,13 @@ import { SmartSuggestions } from "@/components/create/smart-suggestions";
 import { NextStepSuggestion } from "@/components/create/next-step-suggestion";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
+import { createClient } from "@/lib/supabase/client";
+import {
+  ACCEPTED_ATTACHMENT_IMAGE_TYPES,
+  buildAttachmentImagePath,
+  CREATE_ATTACHMENT_BUCKET,
+  MAX_ATTACHMENT_IMAGES,
+} from "@/lib/create-attachment-image";
 
 type Turn = { id: number; userMessage: string; result: CreateResult };
 
@@ -27,6 +34,45 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const suggestions = useSmartSuggestions(input);
+  const supabase = createClient();
+
+  // Optional attached image(s) — same mechanism as create-chat.tsx (see
+  // lib/create-attachment-image.ts).
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
+    const selected = Array.from(e.target.files ?? []);
+    e.target.value = "";
+    if (selected.length === 0) return;
+    setImageFiles((prev) => {
+      const remainingSlots = MAX_ATTACHMENT_IMAGES - prev.length;
+      const accepted = selected
+        .filter((f) => ACCEPTED_ATTACHMENT_IMAGE_TYPES.includes(f.type as (typeof ACCEPTED_ATTACHMENT_IMAGE_TYPES)[number]))
+        .slice(0, remainingSlots);
+      return accepted.length > 0 ? [...prev, ...accepted] : prev;
+    });
+  }
+
+  function removeImage(index: number) {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  async function uploadAttachedImages(): Promise<string[]> {
+    if (imageFiles.length === 0) return [];
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return [];
+    const results = await Promise.all(
+      imageFiles.map(async (file) => {
+        const path = buildAttachmentImagePath(user.id, file.name);
+        const { error } = await supabase.storage.from(CREATE_ATTACHMENT_BUCKET).upload(path, file, { contentType: file.type });
+        return error ? null : path;
+      })
+    );
+    return results.filter((p): p is string => p !== null);
+  }
 
   // Prefixes rather than replaces — the suggestion only ever appears once
   // there's already text in the box, so overwriting it would destroy what
@@ -58,7 +104,9 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
     if (!message || loading) return;
 
     setInput("");
-    const result = await submit(message);
+    const imagePaths = await uploadAttachedImages();
+    setImageFiles([]);
+    const result = await submit(message, false, imagePaths);
     turnIdCounter += 1;
     setTurns((t) => [...t, { id: turnIdCounter, userMessage: message, result }]);
   }
@@ -141,7 +189,30 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
 
       <div className="border-t border-border p-4 sm:p-6">
         <form onSubmit={handleSubmit} className="mx-auto max-w-2xl">
+          {imageFiles.length > 0 && (
+            <ul className="mb-2 flex flex-wrap gap-1.5">
+              {imageFiles.map((file, index) => (
+                <li
+                  key={`${file.name}-${index}`}
+                  className="flex items-center gap-1.5 rounded-lg border border-border bg-input px-2 py-1 text-xs text-foreground"
+                >
+                  <span className="max-w-[140px] truncate">{file.name}</span>
+                  <button type="button" onClick={() => removeImage(index)} aria-label="Remove image" className="text-muted hover:text-foreground">
+                    <X className="h-3 w-3" aria-hidden="true" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
           <div className="relative">
+            <input
+              ref={imageInputRef}
+              type="file"
+              multiple
+              accept={ACCEPTED_ATTACHMENT_IMAGE_TYPES.join(",")}
+              onChange={handleImageChange}
+              className="hidden"
+            />
             <textarea
               ref={textareaRef}
               value={input}
@@ -149,9 +220,20 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
               onKeyDown={handleTextareaKeyDown}
               placeholder="Ask me anything..."
               rows={1}
-              className="max-h-40 min-h-[52px] w-full resize-none rounded-2xl border border-border bg-panel px-4 py-3.5 pr-14 text-sm text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-orange-500/60"
+              className="max-h-40 min-h-[52px] w-full resize-none rounded-2xl border border-border bg-panel px-4 py-3.5 pr-24 text-sm text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-orange-500/60"
               autoFocus
             />
+            {imageFiles.length < MAX_ATTACHMENT_IMAGES && (
+              <button
+                type="button"
+                onClick={() => imageInputRef.current?.click()}
+                aria-label="Attach image"
+                title="Attach image"
+                className="absolute bottom-2 right-12 flex h-9 w-9 items-center justify-center rounded-full text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              >
+                <Paperclip className="h-4 w-4" aria-hidden="true" />
+              </button>
+            )}
             <button
               type="submit"
               disabled={loading || !input.trim()}

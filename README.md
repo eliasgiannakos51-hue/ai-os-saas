@@ -176,6 +176,25 @@ Transactional email is sent via [Resend](https://resend.com).
   carrying `Authorization: Bearer <CRON_SECRET>` — set that before exposing
   it in production, since an unauthenticated hit emails every user.
 
+## Website Builder photos
+
+When a generated website needs a real photo (a room, food, a product, a
+team) and no reference image was uploaded for it, Website Builder emits a
+placeholder marker that a post-processing step (`src/lib/website-image-resolver.ts`)
+resolves to an actual, working photo URL — never a broken or invented link.
+
+- **With `UNSPLASH_ACCESS_KEY` set** — resolves to a real Unsplash photo
+  matched to what the site actually needs (e.g. "modern hotel room
+  interior"), via Unsplash's Search API. See `.env.local.example` for
+  step-by-step instructions on getting a free key from
+  [unsplash.com/developers](https://unsplash.com/developers).
+- **Without it** — falls back to [picsum.photos](https://picsum.photos), a
+  real, working photo service, seeded deterministically by the photo's
+  description so the same request always resolves to the same image.
+
+Both paths are real, legal, functioning images — this app never scrapes
+Google Images or hotlinks an unlicensed photo.
+
 ## Billing
 
 Subscriptions run through [Stripe](https://stripe.com) Checkout + the

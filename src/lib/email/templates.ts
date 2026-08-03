@@ -315,3 +315,65 @@ export function scheduledRunCompleteEmailHtml({
     bodyHtml,
   });
 }
+
+// Lead-classification badge shown at the top of a website form submission
+// email (see api/websites/[id]/submit-form/route.ts + lib/lead-classification.ts)
+// — null (classification unavailable/failed) renders no badge at all
+// rather than a misleading default.
+const LEAD_BADGES: Record<string, { emoji: string; label: string; color: string }> = {
+  genuine_interest: { emoji: "🟢", label: "Likely genuine lead", color: "#4ade80" },
+  question: { emoji: "🔵", label: "General question", color: "#60a5fa" },
+  spam: { emoji: "🔴", label: "Possible spam", color: "#f87171" },
+  unclear: { emoji: "⚪", label: "Unclear", color: "#a3a3a3" },
+};
+
+export function websiteFormSubmissionEmailHtml({
+  websiteName,
+  fields,
+  classification,
+  dashboardUrl,
+}: {
+  websiteName: string;
+  fields: Record<string, string>;
+  classification: string | null;
+  dashboardUrl: string;
+}): string {
+  const safeWebsiteName = escapeHtml(websiteName);
+  const badge = classification ? LEAD_BADGES[classification] : null;
+
+  const fieldRows = Object.entries(fields)
+    .filter(([key]) => key !== "_hp")
+    .map(
+      ([key, value]) => `
+    <tr>
+      <td style="padding:8px 0; color:${MUTED}; font-size:12px; vertical-align:top; width:110px;">${escapeHtml(key)}</td>
+      <td style="padding:8px 0; color:${FOREGROUND}; font-size:14px; line-height:1.5;">${escapeHtml(value)}</td>
+    </tr>`
+    )
+    .join("");
+
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">new form submission</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 8px;">
+      Someone contacted you via "${safeWebsiteName}"
+    </h1>
+    ${
+      badge
+        ? `<p style="margin:0 0 16px;"><span style="display:inline-block; background-color:#1a1a1a; border:1px solid ${BORDER}; border-radius:999px; padding:4px 12px; font-size:12px; color:${badge.color};">${badge.emoji} ${badge.label}</span></p>`
+        : ""
+    }
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-top:1px solid ${BORDER}; margin:8px 0 20px;">
+      ${fieldRows}
+    </table>
+    <p style="margin:0;">
+      <a href="${dashboardUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        View your websites
+      </a>
+    </p>
+  `;
+
+  return layout({
+    preheader: `New form submission on ${websiteName}`,
+    bodyHtml,
+  });
+}

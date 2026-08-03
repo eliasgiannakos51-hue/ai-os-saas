@@ -92,16 +92,127 @@ export async function classifyWebsiteDescription(
   return parseWebsiteClassification(toolUse.input as { isWebsiteRequest?: unknown; message?: unknown });
 }
 
+// A curated list of real, verified Google Fonts spanning sans body faces,
+// display/heading faces, and serif faces — given to the model BY NAME so
+// it recognizes a user's specific request ("use Poppins", "something like
+// Playfair Display") and can also pick a fitting one itself when the user
+// only describes a vibe ("something elegant" -> a serif display face,
+// "something modern" -> a geometric sans). Every name here is loadable
+// via the exact fonts.googleapis.com/css2?family=... convention shown
+// below.
+const GOOGLE_FONTS_LIST = [
+  "Inter", "Poppins", "Montserrat", "Playfair Display", "Raleway", "Lora",
+  "Roboto", "Open Sans", "Nunito", "Work Sans", "DM Sans", "Space Grotesk",
+  "Manrope", "Outfit", "Plus Jakarta Sans", "Sora", "Cormorant Garamond",
+  "Libre Baskerville", "Merriweather", "Crimson Pro", "Bodoni Moda",
+  "Fraunces", "Archivo", "Josefin Sans", "Quicksand", "Karla",
+  "Source Sans 3", "IBM Plex Sans", "Urbanist", "Epilogue", "Rubik",
+  "Barlow", "Oswald", "Prata", "Cormorant", "Abril Fatface", "Bebas Neue",
+  "Domine", "Zilla Slab", "Spectral",
+].join(", ");
+
+const FONTS_SECTION = `
+FONTS (Google Fonts):
+Available named fonts you recognize and can use exactly by this name: ${GOOGLE_FONTS_LIST}.
+- If the user names a specific one of these (or something close/misspelled), use that exact font.
+- If the user names a font NOT in this list, use the closest visual match from the list instead (never invent a fake font-family name).
+- If the user only describes a vibe, pick a fitting pair from the list: e.g. "elegant/luxury" -> a serif display face (Playfair Display, Cormorant Garamond, Fraunces) for headings + a clean sans (Inter, Karla) for body; "modern/tech/startup" -> a geometric sans (Space Grotesk, Manrope, Outfit) for both; "warm/friendly" -> a rounded sans (Nunito, Quicksand, Rubik).
+- To actually load a font, add BOTH of these to <head> (this is the one and only external-resource exception in this document — see the rules above):
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=FONT+NAME:wght@400;600;700&display=swap" rel="stylesheet">
+  (replace spaces in FONT NAME with + in the URL, e.g. "Playfair Display" -> family=Playfair+Display)
+- Then reference it in CSS: font-family: 'Font Name', sans-serif; (or serif, matching the font's actual category).`;
+
+const ANIMATIONS_SECTION = `
+ANIMATIONS (pure CSS, reproduce these patterns consistently rather than inventing new ones each time):
+
+1) Scroll-reveal fade-in — add class="reveal" to a section, plus this CSS and this exact tiny script (the ONLY two purposes an inline <script> may ever be used for in this document are this effect and the contact-form handler described below):
+   CSS:
+     .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
+     .reveal.is-visible { opacity: 1; transform: translateY(0); }
+   Script (place once, right before </body>):
+     <script>
+       var revealEls = document.querySelectorAll('.reveal');
+       var io = new IntersectionObserver(function(entries){
+         entries.forEach(function(entry){ if (entry.isIntersecting) entry.target.classList.add('is-visible'); });
+       }, { threshold: 0.15 });
+       revealEls.forEach(function(el){ io.observe(el); });
+     </script>
+
+2) Parallax-style background movement — a section with a background photo:
+     .parallax-section { background-image: url('...'); background-attachment: fixed; background-size: cover; background-position: center; }
+
+3) Smooth hover transforms — cards, buttons, images:
+     .card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+     .card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+
+4) Animated gradient background — hero sections, CTAs:
+     .gradient-bg { background: linear-gradient(-45deg, #ff7e5f, #feb47b, #6a11cb, #2575fc); background-size: 400% 400%; animation: gradientShift 12s ease infinite; }
+     @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+   (pick colors that fit the site's actual palette — the above is a structural example, not literal colors to always use)
+
+5) Staggered list-item entrance:
+     .stagger-item { opacity: 0; animation: fadeInUp 0.6s ease forwards; }
+     .stagger-item:nth-child(1) { animation-delay: 0.1s; }
+     .stagger-item:nth-child(2) { animation-delay: 0.2s; }
+     .stagger-item:nth-child(3) { animation-delay: 0.3s; }
+     @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+Use these when the description asks for "impressive"/"modern"/"animated" or similar — don't overdo it on a simple/minimal request.`;
+
+const FUNCTIONAL_ELEMENTS_SECTION = `
+FUNCTIONAL CONTACT ELEMENTS (not decorative — these must actually work):
+- Every phone number given in the description must be rendered as a real link: <a href="tel:+<digits, include country code if given>">display text</a>.
+- Every email address given must be rendered as: <a href="mailto:the@address">display text</a>.
+- Never show a phone/email as plain unlinked text if one was actually given.
+
+CONTACT / BOOKING FORMS (only when the description implies one — not every site needs a form):
+- Every input needs a real, meaningful name attribute (name="name", name="email", name="phone", name="message", etc.) — never an unnamed input.
+- Add one hidden honeypot input, exactly: <input type="text" name="_hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;" aria-hidden="true">
+- Do not set a form action attribute.
+FORM_ENDPOINT_PLACEHOLDER`;
+
+// Filled in per-call with the real submit endpoint when one is available
+// (see generateWebsiteHtml/editWebsiteHtml below) — kept as a separate
+// constant rather than string-interpolated directly into
+// FUNCTIONAL_ELEMENTS_SECTION so the "no endpoint available" branch stays
+// readable.
+function buildFormEndpointInstruction(formEndpointUrl: string | undefined): string {
+  if (!formEndpointUrl) {
+    return `- No submission endpoint is available for this generation — build the form visually complete (all fields, honeypot, a submit button) but do NOT add a fetch/submission script, and add an HTML comment near it: <!-- Form is not yet wired to a backend -->.`;
+  }
+  return `- Add exactly one inline <script> block (placed once, right before </body>) that: listens for the form's 'submit' event, calls preventDefault(), collects every named field (including _hp) into a plain object, and POSTs it as JSON { "fields": { ... } } via fetch to EXACTLY this URL: ${formEndpointUrl}
+  On a successful response, replace the form's contents with a clear confirmation message (e.g. "Thanks — we'll be in touch soon."). On failure, show a clear inline retry message near the form. Never use alert() or confirm().`;
+}
+
+const IMAGE_RULES_HEADER = `
+IMAGES:
+- If REFERENCE IMAGES are listed below with exact URLs, use them directly via <img src="EXACT_URL"> wherever they fit (hero photo, gallery, a logo in the header, etc. — infer which image is which from context). Never alter the given URL, and never fabricate additional reference-image URLs beyond what's listed.
+- For any OTHER real photo the site should show (a product shot, a room, food, a team photo, an interior/exterior) that no reference image already covers, output exactly: <img src="PLACEHOLDER:short-slug" data-image-query="concise English search phrase describing exactly what the photo should show" alt="...">  — a short slug unique within this document, and a real, specific search phrase (e.g. "modern boutique hotel room interior", not just "room"). A post-processing step automatically replaces this with a real, working photo.
+- NEVER invent a fake external image URL yourself (no made-up unsplash.com/cdn/placeholder links) — the ONLY two ways to include a photo are a listed reference-image URL, or the PLACEHOLDER convention above.
+- Purely decorative graphics (icons, simple shapes, dividers) should still be built with CSS/inline SVG as before, not the PLACEHOLDER convention — that's reserved for actual photos.`;
+
+const PLACEHOLDER_DATA_SECTION = `
+DO NOT INVENT CRITICAL FACTS:
+- Never invent specific real-world facts that were not given and matter (exact prices, addresses, phone numbers, opening hours, specific named products/services) — a request needing such facts should already have been asked about before generation ever reaches you.
+- The ONE exception: if the description explicitly says the user was asked and answered with something like "use whatever"/"I don't care"/"make it up" (look for this in any "Additional details: Q/A" section appended to the description), you may invent plausible placeholder facts — but you MUST mark them: wrap each invented fact in an HTML comment right before it, e.g. <!-- PLACEHOLDER: replace with your real price -->, AND add one small, visible banner just under the header reading "Sample content — edit before publishing" (subtle styling, not alarming). Only include this banner when placeholder data is actually present in the page.`;
+
 const SYSTEM_PROMPT = `You generate complete, production-ready single-file websites from a plain-text description.
 
-Rules:
+CORE RULES:
 - Output ONE complete HTML document: <!DOCTYPE html> through </html>. Nothing else — no explanation, no markdown code fences, no commentary before or after.
-- All CSS must be inline in a single <style> tag in <head>. No external stylesheets, fonts, scripts, or images from external URLs (no <link>, no CDN references) — everything must render standalone from the HTML alone.
-- Do not include any <script> tags or JavaScript — this must be a static page.
+- All CSS must be inline in a single <style> tag in <head>. The ONLY external resources ever allowed are Google Fonts links (see FONTS below) and photo URLs (see IMAGES below) — no other external stylesheets, no external JS libraries/CDNs, no icon fonts from a CDN.
+- No <script> tags EXCEPT the two specific, narrow exceptions described in ANIMATIONS (scroll-reveal) and the contact-form handler described in FUNCTIONAL CONTACT ELEMENTS below — nothing else may use JavaScript. Everything else must be a static page.
 - Must be responsive: include a <meta name="viewport"> tag and use relative units / flexbox / grid / media queries so it looks good on both mobile and desktop.
 - Use semantic HTML5 (header, nav, main, section, footer, etc.) and a real, polished visual design (not a bare unstyled page) — sensible typography, spacing, and a coherent color scheme that fits what was described.
-- Use placeholder text/content that fits the description where specific content wasn't given — never leave Lorem Ipsum, always write real-sounding copy relevant to the request.
-- Fill in a <title> tag that fits the description.`;
+- Use placeholder text/content that fits the description where specific non-critical content wasn't given — never leave Lorem Ipsum, always write real-sounding copy relevant to the request. See DO NOT INVENT CRITICAL FACTS below for the difference between ordinary filler copy (fine) and specific real-world facts (not fine unless explicitly authorized).
+- Fill in a <title> tag that fits the description.
+${FONTS_SECTION}
+${ANIMATIONS_SECTION}
+${IMAGE_RULES_HEADER}
+${FUNCTIONAL_ELEMENTS_SECTION}
+${PLACEHOLDER_DATA_SECTION}`;
 
 // Strips a leading/trailing markdown code fence if the model wrapped its
 // output in one despite the system prompt saying not to — Claude does this
@@ -137,13 +248,18 @@ function assertCompleteHtmlResponse(
   }
 }
 
-// Reference images (Website Builder's optional "attach up to 5 reference
+// Reference images (Website Builder's optional "attach up to 20 reference
 // images — logo, product photos, a style screenshot" upload — see
-// api/websites/generate/route.ts). Only jpeg/png are accepted client-side
-// and server-side, matching what Claude's vision input supports well and
-// what the upload form allows.
+// api/websites/generate/route.ts and api/websites/edit/route.ts). Only
+// jpeg/png are accepted client-side and server-side, matching what
+// Claude's vision input supports well and what the upload form allows.
+// `url`, when present, is this image's real, hotlinkable Storage public
+// URL — passed to the model as literal text alongside the vision input so
+// it can embed the image FOR REAL via <img src="url"> in the generated
+// HTML (see IMAGE_RULES_HEADER above), not just use it as style
+// inspiration.
 export type ReferenceImageMediaType = "image/jpeg" | "image/png";
-export type ReferenceImage = { base64: string; mediaType: ReferenceImageMediaType };
+export type ReferenceImage = { base64: string; mediaType: ReferenceImageMediaType; url?: string };
 
 // Validates a stored file's content-type is one of the two types the
 // upload form accepts — used server-side after downloading from Storage,
@@ -153,49 +269,48 @@ export function isSupportedReferenceImageMediaType(contentType: string): content
   return contentType === "image/jpeg" || contentType === "image/png";
 }
 
-// Appended to SYSTEM_PROMPT only when at least one reference image is
-// actually attached — worded per spec: the image(s) inform color
-// palette/style (and logo placement, described in words) but are never
-// embedded into the generated HTML itself, since that would need separate
-// image hosting (a deliberately out-of-scope, future step — see the
-// route's own comment). Pluralized when more than one image is attached,
-// since a single set of images might mix a logo with product photos and a
-// style-reference screenshot.
-function buildImageSystemPromptAddition(imageCount: number): string {
-  if (imageCount <= 1) {
-    return `
-
-Ο χρήστης έχει επισυνάψει εικόνα αναφοράς. Χρησιμοποίησέ την για να εμπνευστείς το χρωματικό παλέτα/στυλ του website. Αν είναι λογότυπο, ενσωμάτωσέ το νοητά στο header (περιέγραψε πού θα πήγαινε, μιας και δεν μπορείς να το εισάγεις κυριολεκτικά ως εικόνα στο παραγόμενο HTML χωρίς να το ανεβάσουμε ξεχωριστά).`;
+// Builds the text block describing each reference image's real URL to the
+// model, in the same order as the vision image blocks that precede it —
+// so "reference image 1" in the text matches the first image block Claude
+// actually sees. Images without a resolved url (a download succeeded but
+// getPublicUrl somehow didn't) are still sent as vision input for style
+// context, just not offered as an embeddable URL.
+function buildReferenceImageUrlList(images: ReferenceImage[]): string {
+  if (images.length === 0) return "";
+  const lines = images
+    .map((image, i) => (image.url ? `Reference image ${i + 1}: ${image.url}` : null))
+    .filter((line): line is string => line !== null);
+  if (lines.length === 0) {
+    return "\n\nThe user attached reference image(s) for style/color inspiration only — no embeddable URLs are available for them, so do not use the PLACEHOLDER or reference-image <img> conventions for these; treat them purely as visual style reference.";
   }
-  return `
+  return `\n\nREFERENCE IMAGES (use these exact URLs per the IMAGES rules above):\n${lines.join("\n")}`;
+}
 
-Ο χρήστης έχει επισυνάψει ${imageCount} εικόνες αναφοράς (π.χ. λογότυπο, φωτογραφίες προϊόντων, screenshot στυλ). Χρησιμοποίησέ τις ΟΛΕΣ μαζί για να εμπνευστείς το χρωματικό παλέτα/στυλ του website. Αν κάποια είναι λογότυπο, ενσωμάτωσέ το νοητά στο header (περιέγραψε πού θα πήγαινε, μιας και δεν μπορείς να το εισάγεις κυριολεκτικά ως εικόνα στο παραγόμενο HTML χωρίς να το ανεβάσουμε ξεχωριστά).`;
+function buildFormEndpointSystemAddition(formEndpointUrl: string | undefined): string {
+  return SYSTEM_PROMPT.replace("FORM_ENDPOINT_PLACEHOLDER", buildFormEndpointInstruction(formEndpointUrl));
 }
 
 // Website Builder (see api/websites/generate/route.ts) — a real Claude
 // call that returns a complete, standalone HTML document, not a tracked
 // "idea" like the existing Websites Build module (ai_websites table,
-// lib/build-modules.ts) which never calls AI at all. `referenceImages`
-// is optional — when present, EVERY image is sent as a real vision input
+// lib/build-modules.ts) which never calls AI at all. `referenceImages` is
+// optional — when present, EVERY image is sent as a real vision input
 // block alongside the text description (not just described in words), so
-// Claude actually sees all of the uploaded logo/photos/screenshot, not
-// just the first one.
+// Claude actually sees all of the uploaded logo/photos/screenshot, and
+// (when a public url is available) can embed it for real. `formEndpointUrl`,
+// when given, is this website's real /api/websites/[id]/submit-form URL —
+// see FUNCTIONAL_ELEMENTS_SECTION.
 export async function generateWebsiteHtml(
   apiKey: string,
   description: string,
   referenceImages?: ReferenceImage[],
-  // Fired with the raw accumulated text every time a new chunk arrives —
-  // lets a caller (api/websites/generate/process/route.ts) persist a
-  // progressively-growing preview of the in-flight generation so the
-  // client can render it "being written" live, without changing this
-  // function's own contract (it still only returns once the full,
-  // stripped/validated HTML is ready). Optional and best-effort: this
-  // function's own success/failure never depends on it.
-  onDelta?: (accumulatedText: string) => void
+  onDelta?: (accumulatedText: string) => void,
+  formEndpointUrl?: string
 ): Promise<string> {
   const anthropic = new Anthropic({ apiKey });
   const images = referenceImages?.slice(0, MAX_REFERENCE_IMAGES) ?? [];
 
+  const userText = description + buildReferenceImageUrlList(images);
   const content: Anthropic.MessageParam["content"] =
     images.length > 0
       ? [
@@ -205,9 +320,9 @@ export async function generateWebsiteHtml(
               source: { type: "base64", media_type: image.mediaType, data: image.base64 },
             })
           ),
-          { type: "text", text: description },
+          { type: "text", text: userText },
         ]
-      : description;
+      : userText;
 
   // Streamed rather than a single blocking call: at WEBSITE_MAX_TOKENS
   // (32000) a non-streaming request risks the Anthropic SDK's own
@@ -219,7 +334,7 @@ export async function generateWebsiteHtml(
   const stream = anthropic.messages.stream({
     model: MODEL,
     max_tokens: WEBSITE_MAX_TOKENS,
-    system: images.length > 0 ? SYSTEM_PROMPT + buildImageSystemPromptAddition(images.length) : SYSTEM_PROMPT,
+    system: buildFormEndpointSystemAddition(formEndpointUrl),
     messages: [{ role: "user", content }],
   });
 
@@ -248,25 +363,55 @@ export async function generateWebsiteHtml(
 
 const EDIT_SYSTEM_PROMPT = `You edit an existing complete single-file website's HTML, applying only the specific change the user asks for.
 
-Rules:
+CORE RULES:
 - You will be given the website's CURRENT complete HTML document, followed by a plain-text change request.
 - Output the FULL, updated HTML document: <!DOCTYPE html> through </html>. Nothing else — no explanation, no markdown code fences, no commentary before or after.
 - Apply ONLY the requested change. Keep every other section, all copy, and the overall structure and design exactly as they were unless the change necessarily affects them.
-- Keep following the same rules the original site was built under: all CSS inline in a single <style> tag, no external stylesheets/fonts/scripts/images, no <script> tags, responsive with a viewport meta tag, semantic HTML5.`;
+- Keep following the same rules the original site was built under: all CSS inline in a single <style> tag, no external stylesheets/fonts/scripts except the specific exceptions below, responsive with a viewport meta tag, semantic HTML5.
+${FONTS_SECTION}
+${ANIMATIONS_SECTION}
+${IMAGE_RULES_HEADER}
+${FUNCTIONAL_ELEMENTS_SECTION}
+${PLACEHOLDER_DATA_SECTION}
+If the change request asks to add a photo, a font, an animation, contact info, or a form, apply the same rules above as if generating fresh — e.g. a newly-requested photo still uses the PLACEHOLDER convention (or a newly-attached reference image's real URL) rather than an invented link.`;
+
+function buildEditSystemPrompt(formEndpointUrl: string | undefined): string {
+  return EDIT_SYSTEM_PROMPT.replace("FORM_ENDPOINT_PLACEHOLDER", buildFormEndpointInstruction(formEndpointUrl));
+}
 
 // Website Builder post-generation editing — takes the CURRENT html_content
 // as context plus a free-text change request ("make the hero bigger",
-// "change the colors to blue") and returns a full updated HTML document.
-// A second, separate Claude call from generateWebsiteHtml above (not a
-// continuation of the same conversation) — the entire current HTML is
-// re-sent as context every time, same one-shot pattern as every other AI
-// call in this app.
+// "change the colors to blue", "add a photo of the storefront") and
+// returns a full updated HTML document. A second, separate Claude call
+// from generateWebsiteHtml above (not a continuation of the same
+// conversation) — the entire current HTML is re-sent as context every
+// time, same one-shot pattern as every other AI call in this app.
+// `referenceImages`/`formEndpointUrl` mirror generateWebsiteHtml's — an
+// edit can attach new reference images or need to (re)establish the form
+// endpoint just like the original generation.
 export async function editWebsiteHtml(
   apiKey: string,
   currentHtml: string,
-  changeRequest: string
+  changeRequest: string,
+  referenceImages?: ReferenceImage[],
+  formEndpointUrl?: string
 ): Promise<string> {
   const anthropic = new Anthropic({ apiKey });
+  const images = referenceImages?.slice(0, MAX_REFERENCE_IMAGES) ?? [];
+
+  const userText = `CURRENT HTML:\n\n${currentHtml}\n\nCHANGE REQUEST: ${changeRequest}${buildReferenceImageUrlList(images)}`;
+  const content: Anthropic.MessageParam["content"] =
+    images.length > 0
+      ? [
+          ...images.map(
+            (image): Anthropic.ImageBlockParam => ({
+              type: "image",
+              source: { type: "base64", media_type: image.mediaType, data: image.base64 },
+            })
+          ),
+          { type: "text", text: userText },
+        ]
+      : userText;
 
   // Streamed for the same reason as generateWebsiteHtml above — WEBSITE_MAX_TOKENS
   // is large enough that a non-streaming call risks the SDK's own long-request
@@ -274,13 +419,8 @@ export async function editWebsiteHtml(
   const stream = anthropic.messages.stream({
     model: MODEL,
     max_tokens: WEBSITE_MAX_TOKENS,
-    system: EDIT_SYSTEM_PROMPT,
-    messages: [
-      {
-        role: "user",
-        content: `CURRENT HTML:\n\n${currentHtml}\n\nCHANGE REQUEST: ${changeRequest}`,
-      },
-    ],
+    system: buildEditSystemPrompt(formEndpointUrl),
+    messages: [{ role: "user", content }],
   });
   const response = await stream.finalMessage();
 

@@ -214,9 +214,11 @@ export default async function PricingPage() {
 
         <div
           className="mx-auto mt-8 max-w-3xl rounded-2xl border border-border bg-panel p-6 text-center"
-          data-deploy-marker="team-banner-20260803"
+          data-deploy-marker="team-banner-live-check-40217"
         >
-          <h2 className="text-sm font-semibold text-orange-400">{t("teamBannerTitle")}</h2>
+          <h2 className="text-sm font-semibold text-orange-400">
+            {t("teamBannerTitle")} <span className="text-muted">[TEAM-BANNER-TEST-40217]</span>
+          </h2>
           <p className="mt-2 text-sm text-muted">
             {t("teamBannerBody", { price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}` })}
           </p>

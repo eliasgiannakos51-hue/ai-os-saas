@@ -2,6 +2,7 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
+import { applyExactReplace } from "@/lib/website-patch";
 
 const MODEL = "claude-sonnet-4-6";
 const CLASSIFY_MAX_TOKENS = 300;
@@ -171,18 +172,20 @@ CONTACT / BOOKING FORMS (only when the description implies one — not every sit
 - Every input needs a real, meaningful name attribute (name="name", name="email", name="phone", name="message", etc.) — never an unnamed input.
 - Add one hidden honeypot input, exactly: <input type="text" name="_hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;" aria-hidden="true">
 - Do not set a form action attribute.
-FORM_ENDPOINT_PLACEHOLDER`;
+- For exactly how to wire up the form's submission (the endpoint URL and the script that calls it), see the FORM SUBMISSION INSTRUCTIONS given as a separate block after this system prompt.`;
 
-// Filled in per-call with the real submit endpoint when one is available
-// (see generateWebsiteHtml/editWebsiteHtml below) — kept as a separate
-// constant rather than string-interpolated directly into
-// FUNCTIONAL_ELEMENTS_SECTION so the "no endpoint available" branch stays
-// readable.
+// Kept as a SEPARATE trailing content block (not interpolated into
+// SYSTEM_PROMPT/EDIT_SYSTEM_PROMPT above) specifically so those prompts
+// stay 100% identical across every call — this is the one piece of the
+// whole system prompt that legitimately differs per website (the submit
+// endpoint URL embeds the website's own id). Splitting it out is what
+// makes prompt caching on the (much larger, fully static) rest of the
+// system prompt actually work: see buildSystemBlocks below.
 function buildFormEndpointInstruction(formEndpointUrl: string | undefined): string {
   if (!formEndpointUrl) {
-    return `- No submission endpoint is available for this generation — build the form visually complete (all fields, honeypot, a submit button) but do NOT add a fetch/submission script, and add an HTML comment near it: <!-- Form is not yet wired to a backend -->.`;
+    return `FORM SUBMISSION INSTRUCTIONS:\n- No submission endpoint is available for this generation — build the form visually complete (all fields, honeypot, a submit button) but do NOT add a fetch/submission script, and add an HTML comment near it: <!-- Form is not yet wired to a backend -->.`;
   }
-  return `- Add exactly one inline <script> block (placed once, right before </body>) that: listens for the form's 'submit' event, calls preventDefault(), collects every named field (including _hp) into a plain object, and POSTs it as JSON { "fields": { ... } } via fetch to EXACTLY this URL: ${formEndpointUrl}
+  return `FORM SUBMISSION INSTRUCTIONS:\n- Add exactly one inline <script> block (placed once, right before </body>) that: listens for the form's 'submit' event, calls preventDefault(), collects every named field (including _hp) into a plain object, and POSTs it as JSON { "fields": { ... } } via fetch to EXACTLY this URL: ${formEndpointUrl}
   On a successful response, replace the form's contents with a clear confirmation message (e.g. "Thanks — we'll be in touch soon."). On failure, show a clear inline retry message near the form. Never use alert() or confirm().`;
 }
 
@@ -286,8 +289,22 @@ function buildReferenceImageUrlList(images: ReferenceImage[]): string {
   return `\n\nREFERENCE IMAGES (use these exact URLs per the IMAGES rules above):\n${lines.join("\n")}`;
 }
 
-function buildFormEndpointSystemAddition(formEndpointUrl: string | undefined): string {
-  return SYSTEM_PROMPT.replace("FORM_ENDPOINT_PLACEHOLDER", buildFormEndpointInstruction(formEndpointUrl));
+// Prompt caching (Anthropic's cache_control): SYSTEM_PROMPT is now a
+// large, fully static block — identical bytes on EVERY generate call,
+// for every user, every website, forever, since the one part that used
+// to vary per-website (the form endpoint URL) was moved out to its own
+// trailing block above. Marking it with cache_control means any generate
+// call within the cache's TTL of a previous one (any website, any user)
+// pays the full price for the system prompt tokens only once — every
+// subsequent hit is billed at Anthropic's cached-read rate (a small
+// fraction of the normal input price) instead of full price again. The
+// small, per-website form-endpoint block is NOT cached (it's cheap and
+// different every time, so caching it would never hit anyway).
+function buildGenerateSystemBlocks(formEndpointUrl: string | undefined): Anthropic.TextBlockParam[] {
+  return [
+    { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
+    { type: "text", text: buildFormEndpointInstruction(formEndpointUrl) },
+  ];
 }
 
 // Website Builder (see api/websites/generate/route.ts) — a real Claude
@@ -334,7 +351,7 @@ export async function generateWebsiteHtml(
   const stream = anthropic.messages.stream({
     model: MODEL,
     max_tokens: WEBSITE_MAX_TOKENS,
-    system: buildFormEndpointSystemAddition(formEndpointUrl),
+    system: buildGenerateSystemBlocks(formEndpointUrl),
     messages: [{ role: "user", content }],
   });
 
@@ -375,8 +392,91 @@ ${FUNCTIONAL_ELEMENTS_SECTION}
 ${PLACEHOLDER_DATA_SECTION}
 If the change request asks to add a photo, a font, an animation, contact info, or a form, apply the same rules above as if generating fresh — e.g. a newly-requested photo still uses the PLACEHOLDER convention (or a newly-attached reference image's real URL) rather than an invented link.`;
 
-function buildEditSystemPrompt(formEndpointUrl: string | undefined): string {
-  return EDIT_SYSTEM_PROMPT.replace("FORM_ENDPOINT_PLACEHOLDER", buildFormEndpointInstruction(formEndpointUrl));
+// Same prompt-caching split as buildGenerateSystemBlocks above — the
+// (large, fully static) EDIT_SYSTEM_PROMPT gets its own cache_control
+// breakpoint, separate from the small per-website form-endpoint block.
+function buildEditSystemBlocks(formEndpointUrl: string | undefined): Anthropic.TextBlockParam[] {
+  return [
+    { type: "text", text: EDIT_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
+    { type: "text", text: buildFormEndpointInstruction(formEndpointUrl) },
+  ];
+}
+
+const PATCH_MAX_TOKENS = 4000;
+
+const APPLY_EDIT_TOOL: Anthropic.Tool = {
+  name: "apply_website_edit",
+  description:
+    "Decide whether this change request can be applied as a small, unambiguous find-and-replace within the current HTML, or whether it requires regenerating the whole document.",
+  input_schema: {
+    type: "object",
+    properties: {
+      isSimpleChange: {
+        type: "boolean",
+        description:
+          "True ONLY if the change is a small, well-defined edit expressible as replacing ONE exact, contiguous substring of the current HTML with new text — e.g. a color value, a specific piece of visible text, a single CSS property, one attribute. False for anything structural (a new section, reorganizing layout, adding a feature, anything touching multiple unrelated places) or in any way ambiguous.",
+      },
+      findText: {
+        type: "string",
+        description:
+          "The EXACT, verbatim substring to find in the current HTML — copy it character-for-character, including whitespace, from the given document. Must be specific enough to appear in the document exactly once. Empty string if isSimpleChange is false.",
+      },
+      replaceText: {
+        type: "string",
+        description: "The exact replacement text for findText. Empty string if isSimpleChange is false.",
+      },
+    },
+    required: ["isSimpleChange", "findText", "replaceText"],
+  },
+};
+
+// Cost optimization for small, targeted edits ("change the colors to
+// blue", "change the heading to say X") — instead of ALWAYS asking Claude
+// to regenerate and return the entire document (potentially tens of
+// thousands of output tokens for a one-word change), this first asks a
+// cheap yes/no-shaped question: can this be expressed as one exact find-
+// and-replace? If so, the actual substitution is applied programmatically
+// (a plain string replace, zero AI cost) instead of paying for a second,
+// full-document generation call — the biggest lever available here,
+// since output tokens (not input) dominate a full-HTML edit's cost. Still
+// sends the full currentHtml as INPUT (Claude needs to see it to quote an
+// exact substring), so this doesn't reduce input cost — only the far
+// larger output cost for the common "small change" case.
+//
+// Deliberately conservative: returns null (meaning "fall back to full
+// regeneration") whenever isSimpleChange is false, findText is empty, OR
+// findText doesn't match the current HTML EXACTLY ONCE — an ambiguous or
+// missing match is never applied silently, since a wrong or no-op patch
+// would be worse than the extra cost of a full regeneration. Images/forms/
+// fonts are excluded implicitly: those all require the fuller reasoning
+// (embedding a URL, restructuring a form) that this tool's schema isn't
+// meant to express, so the model naturally reports isSimpleChange=false
+// for them per the tool description above.
+async function tryApplySimpleEdit(
+  apiKey: string,
+  currentHtml: string,
+  changeRequest: string
+): Promise<string | null> {
+  const anthropic = new Anthropic({ apiKey });
+  const response = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: PATCH_MAX_TOKENS,
+    system: [{ type: "text", text: currentHtml, cache_control: { type: "ephemeral" } }],
+    messages: [{ role: "user", content: `CHANGE REQUEST: ${changeRequest}` }],
+    tools: [APPLY_EDIT_TOOL],
+    tool_choice: { type: "tool", name: "apply_website_edit" },
+  });
+
+  const toolUse = response.content.find(
+    (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
+  );
+  if (!toolUse) return null;
+
+  const input = toolUse.input as { isSimpleChange?: unknown; findText?: unknown; replaceText?: unknown };
+  if (input.isSimpleChange !== true) return null;
+  if (typeof input.findText !== "string" || typeof input.replaceText !== "string") return null;
+
+  return applyExactReplace(currentHtml, input.findText, input.replaceText);
 }
 
 // Website Builder post-generation editing — takes the CURRENT html_content
@@ -389,6 +489,12 @@ function buildEditSystemPrompt(formEndpointUrl: string | undefined): string {
 // `referenceImages`/`formEndpointUrl` mirror generateWebsiteHtml's — an
 // edit can attach new reference images or need to (re)establish the form
 // endpoint just like the original generation.
+//
+// Tries the cheap find-and-replace patch path first (tryApplySimpleEdit)
+// whenever there are no new reference images attached (an image-attach
+// edit always needs the fuller reasoning) — only falls through to the
+// full, expensive regeneration below when that path declines (structural/
+// ambiguous change) or fails for any reason.
 export async function editWebsiteHtml(
   apiKey: string,
   currentHtml: string,
@@ -396,8 +502,23 @@ export async function editWebsiteHtml(
   referenceImages?: ReferenceImage[],
   formEndpointUrl?: string
 ): Promise<string> {
-  const anthropic = new Anthropic({ apiKey });
   const images = referenceImages?.slice(0, MAX_REFERENCE_IMAGES) ?? [];
+
+  if (images.length === 0) {
+    try {
+      const patched = await tryApplySimpleEdit(apiKey, currentHtml, changeRequest);
+      if (patched) {
+        assertCompleteHtmlResponse(null, patched, "updated");
+        return patched;
+      }
+    } catch {
+      // Best-effort: any failure in the cheap-patch path (network hiccup,
+      // malformed tool response) falls straight through to the normal,
+      // proven full-regeneration path below rather than failing the edit.
+    }
+  }
+
+  const anthropic = new Anthropic({ apiKey });
 
   const userText = `CURRENT HTML:\n\n${currentHtml}\n\nCHANGE REQUEST: ${changeRequest}${buildReferenceImageUrlList(images)}`;
   const content: Anthropic.MessageParam["content"] =
@@ -419,7 +540,7 @@ export async function editWebsiteHtml(
   const stream = anthropic.messages.stream({
     model: MODEL,
     max_tokens: WEBSITE_MAX_TOKENS,
-    system: buildEditSystemPrompt(formEndpointUrl),
+    system: buildEditSystemBlocks(formEndpointUrl),
     messages: [{ role: "user", content }],
   });
   const response = await stream.finalMessage();

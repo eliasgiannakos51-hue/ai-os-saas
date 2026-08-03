@@ -117,11 +117,19 @@ export async function hasEnoughCredits(
   return { ok: row.credits_remaining >= amount, remaining: row.credits_remaining };
 }
 
-// Deducts `amount` credits and logs the transaction. Read-then-write, not
-// a single atomic SQL expression — the same "cost protection, not a
-// security boundary" tolerance the old hourly rate limiter documented, not
-// a hard financial ledger. Returns ok:false (no deduction, no log) if the
-// balance is insufficient.
+// Deducts `amount` credits and logs the transaction. Atomic — calls
+// deduct_credits_atomic (supabase_credits_schema.sql), a single Postgres
+// UPDATE whose WHERE clause and SET expression both reference the
+// row's CURRENT value, evaluated under Postgres's own row-level lock.
+// This is a real fix for a genuine race condition the previous
+// SELECT-then-check-then-UPDATE implementation had: two concurrent
+// requests (two tabs, two fast clicks) could both read the same balance,
+// both pass the "enough credits?" check in application code, and both
+// write — silently losing one of the two deductions. A single atomic SQL
+// statement makes that literally impossible: Postgres serializes any two
+// concurrent UPDATEs to the same row, so the second one always sees the
+// first one's already-decremented value. Returns ok:false (no deduction,
+// no log) if the balance is insufficient.
 //
 // `plan` is required so a row that doesn't exist yet gets initialized at
 // the account's real entitlement (same as getOrInitCredits, used by
@@ -129,11 +137,10 @@ export async function hasEnoughCredits(
 // falling back to a hard 0 balance — the old fallback here meant any
 // caller that raced ahead of the row's first initialization would get
 // blocked with "not enough credits" regardless of the account's actual
-// plan. The initial select/insert/update/transaction-insert errors are all
-// now checked and logged (previously unchecked) — an update that silently
-// failed used to still return ok:true with a `remaining` that was never
-// actually persisted, which reads to the caller as a successful deduction
-// that never happened.
+// plan. deduct_credits_atomic does that same first-time initialization
+// (an upsert) INSIDE the same atomic statement, so two concurrent
+// first-ever deductions for a brand-new account can't race each other
+// either.
 export async function deductCredits(
   userId: string,
   amount: number,
@@ -142,54 +149,33 @@ export async function deductCredits(
   plan: Plan
 ): Promise<{ ok: boolean; remaining: number }> {
   const admin = createAdminClient();
-  const { data: row, error: selectError } = await admin
-    .from("user_credits")
-    .select("credits_remaining")
-    .eq("user_id", userId)
-    .maybeSingle();
+  const initial = planMonthlyCredits(plan);
 
-  if (selectError) {
-    logApiError("deductCredits", selectError, { userId, actionType, stage: "select" });
+  const { data, error: rpcError } = await admin.rpc("deduct_credits_atomic", {
+    p_user_id: userId,
+    p_amount: amount,
+    p_initial_credits: initial,
+    p_plan_tier: plan.slug,
+  });
+
+  if (rpcError) {
+    logApiError("deductCredits", rpcError, { userId, actionType, stage: "rpc" });
+    return { ok: false, remaining: 0 };
   }
 
-  let remaining: number;
-  if (row) {
-    remaining = row.credits_remaining;
-  } else {
-    const initial = planMonthlyCredits(plan);
-    const { error: insertError } = await admin.from("user_credits").insert({
-      user_id: userId,
-      credits_remaining: initial,
-      credits_total: initial,
-      plan_tier: plan.slug,
-    });
-    if (insertError) {
-      logApiError("deductCredits", insertError, { userId, actionType, stage: "init_insert" });
-    }
-    remaining = initial;
-  }
+  const result = Array.isArray(data) ? data[0] : data;
+  const ok = Boolean(result?.ok);
+  const remaining = typeof result?.remaining === "number" ? result.remaining : 0;
 
-  const comparisonResult = remaining >= amount ? "sufficient" : "insufficient";
   console.error("CREDITS CHECK:", {
     userId,
     actionType,
-    userCredits: remaining,
     actionCost: amount,
-    comparisonResult,
+    comparisonResult: ok ? "sufficient" : "insufficient",
+    remainingAfter: remaining,
   });
 
-  if (remaining < amount) {
-    return { ok: false, remaining };
-  }
-
-  const nextRemaining = remaining - amount;
-  const { error: updateError } = await admin
-    .from("user_credits")
-    .update({ credits_remaining: nextRemaining })
-    .eq("user_id", userId);
-
-  if (updateError) {
-    logApiError("deductCredits", updateError, { userId, actionType, stage: "update" });
+  if (!ok) {
     return { ok: false, remaining };
   }
 
@@ -201,7 +187,7 @@ export async function deductCredits(
     logApiError("deductCredits", insertTxError, { userId, actionType, stage: "insert_transaction" });
   }
 
-  return { ok: true, remaining: nextRemaining };
+  return { ok: true, remaining };
 }
 
 // Grants credits (purchase, plan renewal/upgrade, signup) — adds to

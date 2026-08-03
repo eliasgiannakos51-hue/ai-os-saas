@@ -67,3 +67,52 @@ alter table public.credit_transactions enable row level security;
 drop policy if exists "select_own_credit_transactions" on public.credit_transactions;
 create policy "select_own_credit_transactions" on public.credit_transactions
   for select using (auth.uid() = user_id);
+
+-- ============================================================================
+-- deduct_credits_atomic — fixes a real credits race condition: the
+-- previous deductCredits() implementation (lib/billing/credits.ts) did a
+-- plain SELECT credits_remaining, checked it in application code, then a
+-- separate UPDATE — two concurrent requests (two tabs, two fast clicks
+-- across different features) could both SELECT the same balance, both
+-- pass the "enough credits?" check, and both UPDATE, silently losing one
+-- of the two deductions (or letting the balance go negative depending on
+-- exact timing). A single UPDATE statement whose WHERE clause and SET
+-- expression both reference the CURRENT row value is atomic under
+-- Postgres's row-level locking — two concurrent calls for the same user
+-- are serialized by the database itself, so this is a genuine fix, not
+-- just a narrower race window. Also atomically initializes a first-time
+-- user's row (upsert-then-decrement) so the same race can't occur on
+-- account creation either.
+-- ============================================================================
+
+create or replace function public.deduct_credits_atomic(
+  p_user_id uuid,
+  p_amount integer,
+  p_initial_credits integer,
+  p_plan_tier text
+)
+returns table(ok boolean, remaining integer)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_remaining integer;
+begin
+  insert into public.user_credits (user_id, credits_remaining, credits_total, plan_tier)
+  values (p_user_id, p_initial_credits, p_initial_credits, p_plan_tier)
+  on conflict (user_id) do nothing;
+
+  update public.user_credits
+  set credits_remaining = credits_remaining - p_amount
+  where user_id = p_user_id and credits_remaining >= p_amount
+  returning credits_remaining into v_remaining;
+
+  if v_remaining is null then
+    select credits_remaining into v_remaining from public.user_credits where user_id = p_user_id;
+    return query select false, coalesce(v_remaining, 0);
+  else
+    return query select true, v_remaining;
+  end if;
+end;
+$$;

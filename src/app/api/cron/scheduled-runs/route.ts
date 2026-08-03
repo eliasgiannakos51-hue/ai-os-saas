@@ -16,6 +16,23 @@ import type { UserAutomation } from "@/types/user-automation";
 
 export const dynamic = "force-dynamic";
 
+// TIMEZONE, confirmed and documented explicitly (re-verified this pass):
+// vercel.json's cron schedule ("0 9 * * *") fires this route once per
+// calendar day at 09:00 UTC, hard-coded — cron expressions have no
+// concept of a per-user timezone, and this app does not collect or store
+// one (the signup Country field is used for display/pricing context
+// only, never for scheduling). Every user's Automations and Scheduled
+// Agent Runs execute at the same absolute UTC instant regardless of
+// where they are: 09:00 UTC is late morning in Europe, but the middle of
+// the night for US Pacific time (01:00) — a real, disclosed limitation,
+// not a bug to silently work around. lib/automation-schedule.ts's
+// computeNextRunAt is UTC throughout for the same reason (already
+// documented there). Adding real per-user scheduling would mean
+// collecting/storing an IANA timezone per account and computing each
+// automation's next_run_at against it — a genuine feature addition, out
+// of scope for this pass; this comment exists so the behavior is
+// explicit rather than silently assumed.
+//
 // Safety cap, per the brief: at most this many scheduled runs are actually
 // EXECUTED per user per cron invocation (once/day). Anything beyond that
 // stays 'pending' — created_at ordering means it's simply first in line
@@ -451,6 +468,25 @@ export async function GET(request: Request) {
           .eq("id", website.id);
         stuckNotified++;
       }
+    }
+
+    // Housekeeping — rate_limit_log has no foreign key to auth.users
+    // (identifier is a generic text field: sometimes an IP, sometimes a
+    // user id, see lib/rate-limit.ts and api/auth/login/route.ts), so it
+    // can never be cleaned up via ON DELETE CASCADE the way every other
+    // user-scoped table is. A row referencing a since-deleted user's id
+    // would otherwise sit in this table indefinitely — harmless (no real
+    // PII, just a scope+identifier+timestamp) but genuinely orphaned, and
+    // the table itself would grow unbounded regardless. Every rate-limit
+    // window this app uses is well under an hour, so a 24h retention
+    // window is always safe to delete past.
+    const rateLimitCleanupCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { error: rateLimitCleanupError } = await admin
+      .from("rate_limit_log")
+      .delete()
+      .lt("created_at", rateLimitCleanupCutoff);
+    if (rateLimitCleanupError) {
+      logApiError("/api/cron/scheduled-runs", rateLimitCleanupError, { stage: "cleanup_rate_limit_log" });
     }
 
     return NextResponse.json({

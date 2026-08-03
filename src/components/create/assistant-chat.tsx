@@ -11,6 +11,8 @@ import { NextStepSuggestion } from "@/components/create/next-step-suggestion";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { createClient } from "@/lib/supabase/client";
+import { getErrorMessage } from "@/lib/get-error-message";
+import { useToast } from "@/components/toast/toast-context";
 import {
   ACCEPTED_ATTACHMENT_IMAGE_TYPES,
   buildAttachmentImagePath,
@@ -35,6 +37,7 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const suggestions = useSmartSuggestions(input);
   const supabase = createClient();
+  const { addToast } = useToast();
 
   // Optional attached image(s) — same mechanism as create-chat.tsx (see
   // lib/create-attachment-image.ts).
@@ -68,10 +71,16 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
       imageFiles.map(async (file) => {
         const path = buildAttachmentImagePath(user.id, file.name);
         const { error } = await supabase.storage.from(CREATE_ATTACHMENT_BUCKET).upload(path, file, { contentType: file.type });
-        return error ? null : path;
+        return { path, error };
       })
     );
-    return results.filter((p): p is string => p !== null);
+    // A failed upload (e.g. Supabase Storage quota exceeded) used to be
+    // silently dropped here — see create-chat.tsx's identical fix for why.
+    const failures = results.filter((r) => r.error);
+    if (failures.length > 0) {
+      addToast(`✗ ${getErrorMessage(failures[0].error, "Could not upload one or more images.")}`, "error");
+    }
+    return results.filter((r) => !r.error).map((r) => r.path);
   }
 
   // Prefixes rather than replaces — the suggestion only ever appears once

@@ -11,6 +11,8 @@ import { NextStepSuggestion } from "@/components/create/next-step-suggestion";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { createClient } from "@/lib/supabase/client";
+import { getErrorMessage } from "@/lib/get-error-message";
+import { useToast } from "@/components/toast/toast-context";
 import {
   ACCEPTED_ATTACHMENT_IMAGE_TYPES,
   buildAttachmentImagePath,
@@ -25,6 +27,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const suggestions = useSmartSuggestions(input);
   const supabase = createClient();
+  const { addToast } = useToast();
 
   // Optional attached image(s) — real vision context for the classifier
   // (see lib/create-attachment-image.ts, api/create/route.ts), e.g. a
@@ -60,10 +63,20 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
       imageFiles.map(async (file) => {
         const path = buildAttachmentImagePath(user.id, file.name);
         const { error } = await supabase.storage.from(CREATE_ATTACHMENT_BUCKET).upload(path, file, { contentType: file.type });
-        return error ? null : path;
+        return { path, error };
       })
     );
-    return results.filter((p): p is string => p !== null);
+    // A failed upload (e.g. Supabase Storage quota exceeded) used to be
+    // silently dropped here — the request would still submit, just
+    // without the image, with no indication anything went wrong. Still
+    // proceeds best-effort with whatever DID upload (a request with a
+    // partial set of images is still useful), but now actually tells the
+    // user which image(s) failed and why, instead of a silent gap.
+    const failures = results.filter((r) => r.error);
+    if (failures.length > 0) {
+      addToast(`✗ ${getErrorMessage(failures[0].error, "Could not upload one or more images.")}`, "error");
+    }
+    return results.filter((r) => !r.error).map((r) => r.path);
   }
 
   // Prefixes rather than replaces — the suggestion only ever appears once

@@ -1,15 +1,15 @@
 -- ============================================================================
--- Ionexa AI — V2 CONSOLIDATED SCHEMA (full backup, regenerated as part of
--- the SECTION 1 final V2 audit)
+-- Ionexa AI — V2 CONSOLIDATED SCHEMA (full backup, last regenerated as part
+-- of the SECTION 8 final wrap-up — includes everything through Real
+-- Automations)
 --
 -- Every table/column/policy/bucket added while building the V2 feature
 -- set, byte-accurate with what's live in supabase_schema.sql +
 -- supabase_credits_schema.sql as of this pass (regenerated fresh from
 -- those two files rather than hand-patched, specifically so this backup
 -- can't silently drift from what's actually deployed — the previous
--- version of this file predated the Website Builder background-job
--- status/error_message columns and the reference-images
--- table/bucket/policies, both added in later passes).
+-- version of this file predated Scheduled Agent Runs and Real
+-- Automations, added in this same round of work).
 --
 -- Feature -> schema-object map:
 --   1.  Knowledge Graph     -> entity_links
@@ -28,6 +28,9 @@
 --  12.  Gamification        -> user_achievements
 --  13.  Billing/Credits     -> user_credits, credit_transactions (read/written by
 --                              nearly every AI-calling V2 endpoint above)
+--  14.  Product Workflow    -> (reuses products + entity_links + ai_missions, no new object)
+--  15.  Scheduled Agent Runs -> scheduled_agent_runs
+--  16.  Real Automations    -> user_automations
 --
 -- Run this AFTER the base supabase_schema.sql's first ~250 lines (13
 -- module tables + auth.users) — every object below either lives in
@@ -361,12 +364,123 @@ create policy "select_own_credit_transactions" on public.credit_transactions
   for select using (auth.uid() = user_id);
 
 -- ============================================================================
+-- 10. Scheduled Agent Runs — "Schedule for tomorrow" on a Mission Control
+-- step (see components/mission/mission-card.tsx). A controlled, explicit-
+-- approval-only precursor to full autonomous agents (deliberately NOT
+-- that): the user always picks exactly what runs, just delayed by one day
+-- and executed by a daily cron job (api/cron/scheduled-runs/route.ts)
+-- instead of live in the browser. step_index/step_text are denormalized
+-- copies — Mission Control's steps live inside ai_missions.plan_steps
+-- (jsonb), not as separate rows, so without them the cron job would have
+-- no way to know which step to write the result back to, or what to
+-- actually build. Same owner-only RLS pattern as every table above, except
+-- there is no update policy for regular users — only the cron job's
+-- service-role (admin) client is ever meant to change status/result/
+-- executed_at, matching account_deletion_requests' "no anon-client writes
+-- beyond insert" convention elsewhere in this schema.
+-- ============================================================================
+
+drop table if exists public.scheduled_agent_runs cascade;
+
+create table public.scheduled_agent_runs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  mission_id uuid not null references public.ai_missions(id) on delete cascade,
+  step_index int not null,
+  step_text text not null,
+  agent_role text not null default 'general' check (agent_role in ('general', 'marketing', 'finance', 'research')),
+  status text not null default 'pending' check (status in ('pending', 'completed', 'failed')),
+  result text,
+  scheduled_for date not null,
+  executed_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists scheduled_agent_runs_user_id_scheduled_for_idx
+  on public.scheduled_agent_runs (user_id, scheduled_for);
+
+create index if not exists scheduled_agent_runs_status_scheduled_for_idx
+  on public.scheduled_agent_runs (status, scheduled_for);
+
+alter table public.scheduled_agent_runs enable row level security;
+
+drop policy if exists "select_own_scheduled_agent_runs" on public.scheduled_agent_runs;
+create policy "select_own_scheduled_agent_runs" on public.scheduled_agent_runs
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_scheduled_agent_runs" on public.scheduled_agent_runs;
+create policy "insert_own_scheduled_agent_runs" on public.scheduled_agent_runs
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_scheduled_agent_runs" on public.scheduled_agent_runs;
+create policy "delete_own_scheduled_agent_runs" on public.scheduled_agent_runs
+  for delete using (auth.uid() = user_id);
+
+-- ============================================================================
+-- 11. Real Automations — "Make this real" on an Automation module idea (see
+-- components/automation/automation-realize-list.tsx), built on top of
+-- Scheduled Agent Runs' infrastructure: the SAME daily cron
+-- (api/cron/scheduled-runs/route.ts) that executes scheduled mission steps
+-- also processes due rows here. Unlike a scheduled_agent_runs row (a
+-- single one-off action), a user_automations row repeats indefinitely on
+-- its own frequency until the user turns it off — next_run_at is
+-- recomputed after every execution instead of the row being consumed.
+-- Same owner-only RLS pattern as every table above; is_active/next_run_at
+-- ARE user-updatable (the toggle switch, see automation-active-list.tsx)
+-- unlike scheduled_agent_runs, since there's no execution result to
+-- protect from being tampered with mid-flight the way status/result are.
+-- ============================================================================
+
+drop table if exists public.user_automations cascade;
+
+create table public.user_automations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  description text not null,
+  frequency text not null check (frequency in ('daily', 'weekly', 'monthly')),
+  -- Only one of these is meaningful, depending on frequency: day_of_week
+  -- (0=Sunday..6=Saturday) for 'weekly', day_of_month (1-28, capped so it
+  -- exists in every month) for 'monthly'. Both null for 'daily'.
+  day_of_week smallint check (day_of_week between 0 and 6),
+  day_of_month smallint check (day_of_month between 1 and 28),
+  is_active boolean not null default true,
+  last_run_at timestamptz,
+  next_run_at timestamptz not null default now(),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists user_automations_user_id_idx
+  on public.user_automations (user_id);
+
+create index if not exists user_automations_active_next_run_idx
+  on public.user_automations (is_active, next_run_at);
+
+alter table public.user_automations enable row level security;
+
+drop policy if exists "select_own_user_automations" on public.user_automations;
+create policy "select_own_user_automations" on public.user_automations
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_user_automations" on public.user_automations;
+create policy "insert_own_user_automations" on public.user_automations
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "update_own_user_automations" on public.user_automations;
+create policy "update_own_user_automations" on public.user_automations
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_user_automations" on public.user_automations;
+create policy "delete_own_user_automations" on public.user_automations
+  for delete using (auth.uid() = user_id);
+
+-- ============================================================================
 -- End of V2 consolidated schema.
 --
 -- Tables: entity_links, ai_missions, user_websites, website_versions,
 -- website_reference_images, user_energy_checkins, user_achievements,
--- user_credits, credit_transactions (9 total) + the "website-references"
--- Storage bucket and its 3 RLS policies.
+-- user_credits, credit_transactions, scheduled_agent_runs, user_automations
+-- (11 total) + the "website-references" Storage bucket and its 3 RLS
+-- policies.
 --
 -- Requires: the base 13-module schema + auth.users (supabase_schema.sql's
 -- first ~250 lines) for the auth.users(id) foreign keys above, and

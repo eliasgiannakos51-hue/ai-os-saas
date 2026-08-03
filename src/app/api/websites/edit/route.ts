@@ -11,6 +11,7 @@ import {
   insufficientCreditsMessage,
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
+import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
@@ -63,6 +64,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
+    // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts).
+    const breakerCheck = await checkAiCallAllowed(
+      user.id,
+      "website_edit",
+      fingerprintRequest(websiteId, changeRequest)
+    );
+    if (!breakerCheck.allowed) {
+      return NextResponse.json({ ok: true, edited: false, rateLimited: true, message: breakerCheck.reason });
+    }
+
     const { data: website, error: fetchError } = await supabase
       .from("user_websites")
       .select("id, html_content")
@@ -98,6 +109,7 @@ export async function POST(request: Request) {
 
     let updatedHtml: string;
     try {
+      void recordAiCallForDailySpend(CREDIT_COSTS.websiteEdit);
       updatedHtml = await editWebsiteHtml(apiKey, website.html_content, changeRequest);
     } catch (err) {
       logApiError("/api/websites/edit", err, { stage: "anthropic_call" });

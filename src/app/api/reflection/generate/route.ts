@@ -5,6 +5,7 @@ import { buildReflectionUserMessage, generateWeeklyReflection } from "@/lib/refl
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
+import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
   CREDIT_COSTS,
   deductCredits,
@@ -63,6 +64,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
+    // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts).
+    const breakerCheck = await checkAiCallAllowed(user.id, "reflection_generate", fingerprintRequest(scope));
+    if (!breakerCheck.allowed) {
+      return NextResponse.json({ ok: true, generated: false, rateLimited: true, message: breakerCheck.reason });
+    }
+
     // Credits: read-only check first, actual deduct only after
     // generateWeeklyReflection() has confirmed-successfully returned —
     // nothing is persisted for this feature either way (see the comment
@@ -88,6 +95,7 @@ export async function POST(request: Request) {
 
     let reflection: string;
     try {
+      void recordAiCallForDailySpend(CREDIT_COSTS.weeklyReflection);
       reflection = await generateWeeklyReflection(apiKey, userMessage);
     } catch (err) {
       logApiError("/api/reflection/generate", err, { stage: "reflection_call" });

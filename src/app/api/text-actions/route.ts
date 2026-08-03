@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
+import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
   CREDIT_COSTS,
   deductCredits,
@@ -92,6 +93,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
+    // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts).
+    const breakerCheck = await checkAiCallAllowed(user.id, "text_action", fingerprintRequest(action, text));
+    if (!breakerCheck.allowed) {
+      return NextResponse.json({ ok: false, error: breakerCheck.reason }, { status: 429 });
+    }
+
     // Credits: read-only check first, actual deduct only after the
     // Anthropic call has confirmed-successfully returned real text —
     // nothing is persisted server-side for this feature (the client
@@ -118,6 +125,7 @@ export async function POST(request: Request) {
     const anthropic = new Anthropic({ apiKey });
 
     try {
+      void recordAiCallForDailySpend(CREDIT_COSTS.textAction);
       const response = await anthropic.messages.create({
         model: MODEL,
         max_tokens: MAX_TOKENS,

@@ -4,6 +4,7 @@ import { planMission, type PlanMissionResult } from "@/lib/mission-agents";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
+import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
   CREDIT_COSTS,
   deductCredits,
@@ -62,6 +63,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
+    // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts).
+    const breakerCheck = await checkAiCallAllowed(user.id, "mission_plan", fingerprintRequest(goal));
+    if (!breakerCheck.allowed) {
+      return NextResponse.json({ ok: true, planned: false, rateLimited: true, message: breakerCheck.reason });
+    }
+
     // Credits: read-only check first (reject early, no AI call made at
     // all), the actual deduct only happens after confirmed success below
     // — either the Planner's clarification response, or a successfully
@@ -87,6 +94,7 @@ export async function POST(request: Request) {
 
     let planResult: PlanMissionResult;
     try {
+      void recordAiCallForDailySpend(CREDIT_COSTS.missionPlan);
       planResult = await planMission(apiKey, goal);
     } catch (err) {
       logApiError("/api/mission/plan", err, { stage: "planner_call" });

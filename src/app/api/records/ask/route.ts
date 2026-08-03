@@ -7,6 +7,7 @@ import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
+import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
   CREDIT_COSTS,
   deductCredits,
@@ -134,6 +135,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
+    // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts).
+    const breakerCheck = await checkAiCallAllowed(
+      user.id,
+      "records_ask",
+      fingerprintRequest(moduleSlug, recordId, message)
+    );
+    if (!breakerCheck.allowed) {
+      return NextResponse.json({ ok: true, rateLimited: true, message: breakerCheck.reason });
+    }
+
     // Same credits-based gate as Ionexa Chat (api/chat) and Create Anything
     // (api/create) — 1 credit per message, admin-listed accounts (see
     // lib/admin.ts) skip it entirely. Read-only check here; the actual
@@ -182,6 +193,7 @@ export async function POST(request: Request) {
       async start(controller) {
         let assistantText = "";
         try {
+          void recordAiCallForDailySpend(CREDIT_COSTS.chatMessage);
           const claudeStream = anthropic.messages.stream({
             model: MODEL,
             max_tokens: MAX_TOKENS,

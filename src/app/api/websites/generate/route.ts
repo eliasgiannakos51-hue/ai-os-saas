@@ -6,6 +6,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { hasEnoughCredits, insufficientCreditsMessage, resolveEffectivePlan } from "@/lib/billing/credits";
 import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
+import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
@@ -83,12 +84,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
+    // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts).
+    const breakerCheck = await checkAiCallAllowed(user.id, "website_generate", fingerprintRequest(name, description));
+    if (!breakerCheck.allowed) {
+      return NextResponse.json({ ok: true, generated: false, rateLimited: true, message: breakerCheck.reason });
+    }
+
     // Off-topic guard — a cheap classification call BEFORE any credits are
     // touched or any row is created, so a request like "write me a poem"
     // costs the user nothing and gets a real, helpful message instead of
     // an AI call that just wraps the poem in an HTML page (see
     // lib/website-builder.ts).
     try {
+      void recordAiCallForDailySpend(1);
       const classification = await classifyWebsiteDescription(apiKey, description);
       if (!classification.isWebsiteRequest) {
         return NextResponse.json({ ok: true, generated: false, message: classification.message });

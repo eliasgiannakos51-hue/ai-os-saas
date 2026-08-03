@@ -2,6 +2,7 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logApiError } from "@/lib/log-error";
+import { recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 
 const MEMORY_MODEL = "claude-sonnet-4-6";
 const MEMORY_MAX_TOKENS = 150;
@@ -32,6 +33,13 @@ export async function extractAndStoreMemory({
   assistantMessage: string;
 }): Promise<void> {
   try {
+    // No separate circuit-breaker check here — this only ever runs once
+    // per successful api/chat reply, which already passed that route's
+    // own checkAiCallAllowed before the main reply was even generated;
+    // gating it again here would just double-reject the same request.
+    // Still recorded for daily spend visibility (see
+    // lib/ai-circuit-breaker.ts), since it IS a second real Claude call.
+    void recordAiCallForDailySpend(1);
     const anthropic = new Anthropic({ apiKey });
     const result = await anthropic.messages.create({
       model: MEMORY_MODEL,

@@ -813,6 +813,31 @@ create index if not exists rate_limit_log_scope_identifier_created_at_idx
 alter table public.rate_limit_log enable row level security;
 
 -- ============================================================================
+-- Platform-wide daily AI spend tracking — one row per UTC calendar date,
+-- incremented on every single Claude API call across the whole app (see
+-- lib/ai-circuit-breaker.ts's recordAiCallForDailySpend, called from every
+-- AI-calling route after a call is allowed to proceed). Backs the
+-- MAX_DAILY_AI_CALLS platform-wide circuit breaker: once total_calls for
+-- today reaches that env var's value, every new AI call anywhere in the
+-- app is rejected with a clear message until the date rolls over.
+-- estimated_cost is tracked alongside call count purely for visibility
+-- (not itself gated on) — a rough running total in credits.
+-- Same "no owner, admin-client-only" access pattern as rate_limit_log:
+-- RLS enabled, no policies, so only the service-role client can read or
+-- write it — there is no legitimate reason for any single user's session
+-- to see or touch the platform-wide total.
+-- ============================================================================
+
+create table if not exists public.daily_ai_spend_tracking (
+  date date primary key,
+  total_calls integer not null default 0,
+  estimated_cost numeric not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.daily_ai_spend_tracking enable row level security;
+
+-- ============================================================================
 -- Knowledge graph: links between records across different modules (e.g. an
 -- Idea linked to a Product), so Ionexa Chat can see relationships without
 -- the user re-explaining them every time (see src/lib/entity-links.ts,

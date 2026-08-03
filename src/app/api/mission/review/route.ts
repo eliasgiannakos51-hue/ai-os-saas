@@ -4,6 +4,7 @@ import { reviewMission } from "@/lib/mission-agents";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
+import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
   CREDIT_COSTS,
   deductCredits,
@@ -77,6 +78,12 @@ export async function POST(request: Request) {
       );
     }
 
+    // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts).
+    const breakerCheck = await checkAiCallAllowed(user.id, "mission_review", fingerprintRequest(missionId));
+    if (!breakerCheck.allowed) {
+      return NextResponse.json({ ok: true, reviewed: false, rateLimited: true, message: breakerCheck.reason });
+    }
+
     // Credits: read-only check first, actual deduct only after the
     // Reviewer call succeeds AND its result is durably saved — never
     // before. Same pattern as api/mission/plan and every other
@@ -99,6 +106,7 @@ export async function POST(request: Request) {
 
     let reviewText: string;
     try {
+      void recordAiCallForDailySpend(CREDIT_COSTS.missionReview);
       reviewText = await reviewMission(
         apiKey,
         typedMission.goal,

@@ -6,6 +6,7 @@ import { CREDIT_COSTS, deductCredits, hasEnoughCredits, resolveEffectivePlan } f
 import { runMissionStepForUser } from "@/lib/mission-step-runner";
 import { buildPriorStepsContext } from "@/lib/mission-context";
 import { computeNextRunAt } from "@/lib/automation-schedule";
+import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { sendScheduledRunCompleteEmail } from "@/lib/email/send-scheduled-run-complete-email";
 import { logApiError } from "@/lib/log-error";
 import type { Mission } from "@/types/mission";
@@ -149,7 +150,31 @@ export async function GET(request: Request) {
           continue;
         }
 
+        // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts)
+        // — a cron-triggered AI call is just as capable of runaway volume
+        // as a live user request, so it's gated the same way.
+        const breakerCheck = await checkAiCallAllowed(
+          userId,
+          "scheduled_run",
+          fingerprintRequest(run.mission_id, run.step_index, run.step_text)
+        );
+        if (!breakerCheck.allowed) {
+          await admin
+            .from("scheduled_agent_runs")
+            .update({ status: "failed", result: breakerCheck.reason, executed_at: new Date().toISOString() })
+            .eq("id", run.id);
+          failed++;
+          void sendScheduledRunCompleteEmail({
+            email: user.email ?? "",
+            stepText: run.step_text,
+            succeeded: false,
+            detail: breakerCheck.reason,
+          });
+          continue;
+        }
+
         const priorContext = buildPriorStepsContext(steps, run.step_index);
+        void recordAiCallForDailySpend(CREDIT_COSTS.createAnything);
         const result = await runMissionStepForUser(apiKey, admin, userId, run.step_text, run.agent_role, priorContext);
 
         if (!result.ok) {
@@ -291,6 +316,28 @@ export async function GET(request: Request) {
           }
         }
 
+        // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts).
+        const breakerCheck = await checkAiCallAllowed(
+          userId,
+          "automation_run",
+          fingerprintRequest(automation.id, automation.description)
+        );
+        if (!breakerCheck.allowed) {
+          await admin
+            .from("user_automations")
+            .update({ next_run_at: advancedNextRunAt })
+            .eq("id", automation.id);
+          automationsFailed++;
+          void sendScheduledRunCompleteEmail({
+            email: user.email ?? "",
+            stepText: automation.description,
+            succeeded: false,
+            detail: breakerCheck.reason,
+          });
+          continue;
+        }
+
+        void recordAiCallForDailySpend(CREDIT_COSTS.createAnything);
         const result = await runMissionStepForUser(apiKey, admin, userId, automation.description, "general", "");
 
         if (!result.ok || !result.matched) {

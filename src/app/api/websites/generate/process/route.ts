@@ -15,8 +15,9 @@ import { FIRST_VERSION_NUMBER } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { deductCredits, resolveEffectivePlan } from "@/lib/billing/credits";
-import { computeWebsiteGenerationCost } from "@/lib/website-generation-cost";
+import { computeWebsiteGenerationCost, estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import { MAX_GENERATION_ATTEMPTS } from "@/lib/website-generation-limits";
+import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -172,6 +173,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
+    // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts)
+    // — the actual expensive AI call in this route, so this is checked
+    // here too, not just in the start route (api/websites/generate).
+    const breakerCheck = await checkAiCallAllowed(user.id, "website_generate_process", fingerprintRequest(websiteId));
+    if (!breakerCheck.allowed) {
+      await supabase
+        .from("user_websites")
+        .update({ status: "failed", error_message: breakerCheck.reason })
+        .eq("id", websiteId)
+        .eq("status", "pending");
+      return NextResponse.json({ ok: true, failed: true });
+    }
+
     // RLS (select_own_user_websites) already scopes this to the caller's
     // own row — a stranger's websiteId simply won't be found.
     const { data: website, error: fetchError } = await supabase
@@ -254,6 +268,9 @@ export async function POST(request: Request) {
 
     let htmlContent: string;
     try {
+      void recordAiCallForDailySpend(
+        estimateWebsiteGenerationCost({ descriptionLength: description.length, imageCount: referenceImages.length })
+      );
       htmlContent = await generateWebsiteHtml(apiKey, description, referenceImages, onDelta);
     } catch (err) {
       logApiError("/api/websites/generate/process", err, { stage: "anthropic_call" });

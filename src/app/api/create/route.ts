@@ -13,6 +13,7 @@ import { buildOutputSummary, buildMissionContextSystemPromptAddition } from "@/l
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
+import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
   CREDIT_COSTS,
   deductCredits,
@@ -151,6 +152,15 @@ export async function POST(request: Request) {
       );
     }
 
+    // Circuit breaker: independent of credits, catches abuse/bugs (a
+    // runaway client loop, a scripted spammer) by volume rather than
+    // balance — see lib/ai-circuit-breaker.ts. Checked before the credit
+    // check since it's cheaper and should reject first.
+    const breakerCheck = await checkAiCallAllowed(user.id, "create", fingerprintRequest(message));
+    if (!breakerCheck.allowed) {
+      return NextResponse.json({ ok: true, matched: false, message: breakerCheck.reason });
+    }
+
     // Credits: 1 credit per Create Anything request, deducted from
     // user_credits (see lib/billing/credits.ts). Admin-listed accounts
     // (see lib/admin.ts) and beta testers (see lib/beta.ts) skip this
@@ -201,6 +211,7 @@ export async function POST(request: Request) {
     try {
       const missionContextAddition = buildMissionContextSystemPromptAddition(priorStepsContext);
 
+      void recordAiCallForDailySpend(CREDIT_COSTS.createAnything);
       const response = await anthropic.messages.create({
         model: MODEL,
         max_tokens: 1024,

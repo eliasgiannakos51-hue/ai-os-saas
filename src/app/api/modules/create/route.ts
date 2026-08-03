@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getModule, type FieldConfig } from "@/lib/modules";
 import { getBuildModule } from "@/lib/build-modules";
 import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
-import { deductCredits, insufficientCreditsMessage, resolveEffectivePlanSlug } from "@/lib/billing/credits";
+import { deductCredits, hasEnoughCredits, insufficientCreditsMessage, resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { logApiError } from "@/lib/log-error";
@@ -95,20 +95,20 @@ export async function POST(request: Request) {
       }
     }
 
-    if (!isAdmin && !(await hasActiveBetaBypass(user)) && moduleConfig.creditCost) {
-      const deduction = await deductCredits(
-        user.id,
-        moduleConfig.creditCost,
-        `${moduleConfig.slug}_create`,
-        `${moduleConfig.title} created`,
-        plan
-      );
-      if (!deduction.ok) {
+    // Credits: read-only check first (reject early, nothing written yet),
+    // the actual deduct only happens after the row is durably saved below
+    // — never before. Matches the "deduct only after confirmed success"
+    // pattern used by every AI-calling route in this app; here "success"
+    // is the DB insert itself, since this route makes no AI call.
+    const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+    if (!bypassCredits && moduleConfig.creditCost) {
+      const check = await hasEnoughCredits(user.id, moduleConfig.creditCost, plan);
+      if (!check.ok) {
         return NextResponse.json(
           {
             ok: false,
             insufficientCredits: true,
-            error: insufficientCreditsMessage(deduction.remaining, moduleConfig.creditCost),
+            error: insufficientCreditsMessage(check.remaining, moduleConfig.creditCost),
           },
           { status: 402 }
         );
@@ -138,7 +138,16 @@ export async function POST(request: Request) {
 
     if (insertError) {
       logApiError("/api/modules/create", insertError, { stage: "insert", moduleSlug });
-      return NextResponse.json({ ok: false, error: insertError.message }, { status: 500 });
+      return NextResponse.json(
+        { ok: false, error: `${insertError.message} No credits were charged — please try again.` },
+        { status: 500 }
+      );
+    }
+
+    // Only now — the row is durably saved — is this confirmed a success
+    // worth charging for.
+    if (!bypassCredits && moduleConfig.creditCost) {
+      await deductCredits(user.id, moduleConfig.creditCost, `${moduleConfig.slug}_create`, `${moduleConfig.title} created`, plan);
     }
 
     return NextResponse.json({ ok: true, record });

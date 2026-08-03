@@ -7,6 +7,7 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import {
   CREDIT_COSTS,
   deductCredits,
+  hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
@@ -76,22 +77,22 @@ export async function POST(request: Request) {
       );
     }
 
+    // Credits: read-only check first, actual deduct only after the
+    // Reviewer call succeeds AND its result is durably saved — never
+    // before. Same pattern as api/mission/plan and every other
+    // AI-calling route in this app.
     const isAdmin = isAdminEmail(user.email);
-    if (!isAdmin && !(await hasActiveBetaBypass(user))) {
-      const plan = await resolveEffectivePlan(user);
-      const deduction = await deductCredits(
-        user.id,
-        CREDIT_COSTS.missionReview,
-        "mission_review",
-        "Mission Control: Reviewer Agent",
-        plan
-      );
-      if (!deduction.ok) {
+    const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+    let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
+    if (!bypassCredits) {
+      plan = await resolveEffectivePlan(user);
+      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.missionReview, plan);
+      if (!check.ok) {
         return NextResponse.json({
           ok: true,
           reviewed: false,
           rateLimited: true,
-          message: insufficientCreditsMessage(deduction.remaining, CREDIT_COSTS.missionReview),
+          message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.missionReview),
         });
       }
     }
@@ -106,7 +107,10 @@ export async function POST(request: Request) {
     } catch (err) {
       logApiError("/api/mission/review", err, { stage: "reviewer_call" });
       const errMessage = err instanceof Error ? err.message : "The Reviewer request failed.";
-      return NextResponse.json({ ok: false, error: errMessage }, { status: 502 });
+      return NextResponse.json(
+        { ok: false, error: `${errMessage} No credits were charged — please try again.` },
+        { status: 502 }
+      );
     }
 
     const nextPlanSteps: MissionPlan = { steps, review: reviewText };
@@ -121,9 +125,15 @@ export async function POST(request: Request) {
     if (updateError || !updated) {
       logApiError("/api/mission/review", updateError, { stage: "update_mission" });
       return NextResponse.json(
-        { ok: false, error: "Review generated, but could not save it." },
+        { ok: false, error: "Review generated, but could not save it. No credits were charged — please try again." },
         { status: 500 }
       );
+    }
+
+    // Only now — the Reviewer succeeded AND the mission is durably saved —
+    // is this confirmed a success worth charging for.
+    if (!bypassCredits && plan) {
+      await deductCredits(user.id, CREDIT_COSTS.missionReview, "mission_review", "Mission Control: Reviewer Agent", plan);
     }
 
     return NextResponse.json({ ok: true, reviewed: true, mission: updated });

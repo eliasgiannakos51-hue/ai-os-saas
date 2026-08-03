@@ -7,6 +7,7 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import {
   CREDIT_COSTS,
   deductCredits,
+  hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
@@ -91,22 +92,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
+    // Credits: read-only check first, actual deduct only after the
+    // Anthropic call has confirmed-successfully returned real text —
+    // nothing is persisted server-side for this feature (the client
+    // accepts/rejects the result itself), so a successful, non-empty
+    // response IS the confirmed success here.
     const isAdmin = isAdminEmail(user.email);
-    if (!isAdmin && !(await hasActiveBetaBypass(user))) {
-      const plan = await resolveEffectivePlan(user);
-      const deduction = await deductCredits(
-        user.id,
-        CREDIT_COSTS.textAction,
-        "text_action",
-        `Text action — ${action}`,
-        plan
-      );
-      if (!deduction.ok) {
+    const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+    let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
+    if (!bypassCredits) {
+      plan = await resolveEffectivePlan(user);
+      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.textAction, plan);
+      if (!check.ok) {
         return NextResponse.json(
           {
             ok: false,
             insufficientCredits: true,
-            error: insufficientCreditsMessage(deduction.remaining, CREDIT_COSTS.textAction),
+            error: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.textAction),
           },
           { status: 402 }
         );
@@ -130,16 +132,23 @@ export async function POST(request: Request) {
 
       if (!result) {
         return NextResponse.json(
-          { ok: false, error: "The model did not return a result." },
+          { ok: false, error: "The model did not return a result. No credits were charged — please try again." },
           { status: 502 }
         );
+      }
+
+      if (!bypassCredits && plan) {
+        await deductCredits(user.id, CREDIT_COSTS.textAction, "text_action", `Text action — ${action}`, plan);
       }
 
       return NextResponse.json({ ok: true, result });
     } catch (err) {
       logApiError("/api/text-actions", err, { stage: "anthropic_call", action });
       const errMessage = err instanceof Error ? err.message : "Request failed.";
-      return NextResponse.json({ ok: false, error: errMessage }, { status: 502 });
+      return NextResponse.json(
+        { ok: false, error: `${errMessage} No credits were charged — please try again.` },
+        { status: 502 }
+      );
     }
   } catch (err) {
     logApiError("/api/text-actions", err);

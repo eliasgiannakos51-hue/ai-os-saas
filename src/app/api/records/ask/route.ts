@@ -10,6 +10,7 @@ import { isAdminEmail } from "@/lib/admin";
 import {
   CREDIT_COSTS,
   deductCredits,
+  hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
@@ -135,22 +136,19 @@ export async function POST(request: Request) {
 
     // Same credits-based gate as Ionexa Chat (api/chat) and Create Anything
     // (api/create) — 1 credit per message, admin-listed accounts (see
-    // lib/admin.ts) skip it entirely.
+    // lib/admin.ts) skip it entirely. Read-only check here; the actual
+    // deduct happens inside the stream below, only after the model has
+    // confirmed-successfully returned a real response — never before.
     const isAdmin = isAdminEmail(user.email);
+    let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
     if (!isAdmin) {
-      const plan = await resolveEffectivePlan(user);
-      const deduction = await deductCredits(
-        user.id,
-        CREDIT_COSTS.chatMessage,
-        "ask_ai_record",
-        `Ask AI — ${moduleConfig.title}`,
-        plan
-      );
-      if (!deduction.ok) {
+      plan = await resolveEffectivePlan(user);
+      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.chatMessage, plan);
+      if (!check.ok) {
         return NextResponse.json({
           ok: true,
           rateLimited: true,
-          message: insufficientCreditsMessage(deduction.remaining, CREDIT_COSTS.chatMessage),
+          message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.chatMessage),
         });
       }
     }
@@ -203,17 +201,28 @@ export async function POST(request: Request) {
         } catch (err) {
           logApiError("/api/records/ask", err, { stage: "anthropic_stream", moduleSlug });
           const errMessage = err instanceof Error ? err.message : "Request failed.";
-          controller.enqueue(ndjsonLine({ type: "error", error: errMessage }));
+          controller.enqueue(
+            ndjsonLine({ type: "error", error: `${errMessage} No credits were charged — please try again.` })
+          );
           controller.close();
           return;
         }
 
         if (!assistantText.trim()) {
           controller.enqueue(
-            ndjsonLine({ type: "error", error: "The model did not return a response." })
+            ndjsonLine({
+              type: "error",
+              error: "The model did not return a response. No credits were charged — please try again.",
+            })
           );
           controller.close();
           return;
+        }
+
+        // Only now — a real, non-empty response was confirmed — is this
+        // worth charging for.
+        if (!isAdmin && plan) {
+          await deductCredits(user.id, CREDIT_COSTS.chatMessage, "ask_ai_record", `Ask AI — ${moduleConfig.title}`, plan);
         }
 
         controller.enqueue(ndjsonLine({ type: "done" }));

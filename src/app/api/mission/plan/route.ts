@@ -7,6 +7,7 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import {
   CREDIT_COSTS,
   deductCredits,
+  hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
@@ -61,22 +62,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
+    // Credits: read-only check first (reject early, no AI call made at
+    // all), the actual deduct only happens after confirmed success below
+    // — either the Planner's clarification response, or a successfully
+    // saved mission — never before the call. If planMission() throws
+    // (network error, timeout, API error, anything), nothing below ever
+    // runs and zero credits are charged. Same pattern as api/create,
+    // api/chat, api/websites/edit, api/websites/generate/process.
     const isAdmin = isAdminEmail(user.email);
-    if (!isAdmin && !(await hasActiveBetaBypass(user))) {
-      const plan = await resolveEffectivePlan(user);
-      const deduction = await deductCredits(
-        user.id,
-        CREDIT_COSTS.missionPlan,
-        "mission_plan",
-        "Mission Control: Planner Agent",
-        plan
-      );
-      if (!deduction.ok) {
+    const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+    let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
+    if (!bypassCredits) {
+      plan = await resolveEffectivePlan(user);
+      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.missionPlan, plan);
+      if (!check.ok) {
         return NextResponse.json({
           ok: true,
           planned: false,
           rateLimited: true,
-          message: insufficientCreditsMessage(deduction.remaining, CREDIT_COSTS.missionPlan),
+          message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.missionPlan),
         });
       }
     }
@@ -87,15 +91,25 @@ export async function POST(request: Request) {
     } catch (err) {
       logApiError("/api/mission/plan", err, { stage: "planner_call" });
       const errMessage = err instanceof Error ? err.message : "The Planner request failed.";
-      return NextResponse.json({ ok: false, error: errMessage }, { status: 502 });
+      return NextResponse.json(
+        { ok: false, error: `${errMessage} No credits were charged — please try again.` },
+        { status: 502 }
+      );
+    }
+
+    async function chargeMissionPlan() {
+      if (!bypassCredits && plan) {
+        await deductCredits(user!.id, CREDIT_COSTS.missionPlan, "mission_plan", "Mission Control: Planner Agent", plan);
+      }
     }
 
     // Vague goal (e.g. "θέλω να πετύχω") — the Planner asked for
     // clarification instead of inventing generic filler steps. No mission
-    // is created; the credit already charged above still reflects the
-    // real AI call that happened, same as api/create's "not matched"
-    // path never refunding either.
+    // is created, but a real, useful AI response was still returned to
+    // the user — charged now, same as api/create's "not matched"
+    // classification path (a real Anthropic call happened either way).
     if (planResult.clarificationNeeded) {
+      await chargeMissionPlan();
       return NextResponse.json({
         ok: true,
         planned: false,
@@ -116,10 +130,14 @@ export async function POST(request: Request) {
     if (insertError || !mission) {
       logApiError("/api/mission/plan", insertError, { stage: "insert_mission" });
       return NextResponse.json(
-        { ok: false, error: "Could not save the mission plan." },
+        { ok: false, error: "Could not save the mission plan. No credits were charged — please try again." },
         { status: 500 }
       );
     }
+
+    // Only now — the Planner succeeded AND the mission is durably saved —
+    // is this confirmed a success worth charging for.
+    await chargeMissionPlan();
 
     return NextResponse.json({ ok: true, planned: true, mission });
   } catch (err) {

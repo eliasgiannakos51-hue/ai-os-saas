@@ -263,3 +263,55 @@ export function weeklyDigestEmailHtml({
 
   return layout({ preheader: `Your Ionexa AI weekly digest — ${total} new entries.`, bodyHtml });
 }
+
+// Basic escaping for stepText/detail below — unlike this file's other
+// templates (device labels, IP addresses, module titles — all inherently
+// bounded/parsed strings), a mission step's text and an AI-generated
+// result summary are genuinely freeform user/AI content, so this one
+// actually needs it before interpolating into HTML.
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+export function scheduledRunCompleteEmailHtml({
+  stepText,
+  succeeded,
+  detail,
+  missionUrl,
+}: {
+  stepText: string;
+  succeeded: boolean;
+  detail: string;
+  missionUrl: string;
+}): string {
+  const safeStepText = escapeHtml(stepText);
+  const safeDetail = escapeHtml(detail);
+
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">scheduled agent run</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">
+      ${succeeded ? "your scheduled task is done" : "your scheduled task couldn't run"}
+    </h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 12px;">
+      "<span style="color:${FOREGROUND};">${safeStepText}</span>"
+    </p>
+    <p style="color:${succeeded ? MUTED : "#f87171"}; font-size:13px; line-height:1.6; margin:0 0 20px;">
+      ${safeDetail}
+    </p>
+    <p style="margin:0;">
+      <a href="${missionUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        View in Mission Control
+      </a>
+    </p>
+  `;
+
+  return layout({
+    preheader: succeeded ? `Your scheduled task "${stepText}" is done.` : `Your scheduled task "${stepText}" couldn't run.`,
+    bodyHtml,
+  });
+}

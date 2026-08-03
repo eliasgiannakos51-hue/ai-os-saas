@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, Circle, ClipboardCheck, Clock, Loader2, RotateCw, Sparkles } from "lucide-react";
+import { CalendarClock, CheckCircle2, Circle, ClipboardCheck, Clock, Loader2, RotateCw, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -62,7 +62,16 @@ const AGENT_ROLE_LABEL_KEYS: Record<AgentRole, string> = {
 // chat-workspace.tsx's togglePin/renameConversation), then
 // router.refresh() reloads the mission from the server so this card is
 // always rendering real, persisted state rather than a hand-mirrored copy.
-export function MissionCard({ mission }: { mission: Mission }) {
+export function MissionCard({
+  mission,
+  scheduledStepIndices = [],
+}: {
+  mission: Mission;
+  // Indices of steps that already have a pending scheduled_agent_runs row
+  // for this mission (see dashboard/mission/page.tsx) — used to show
+  // "Scheduled" instead of offering to schedule the same step twice.
+  scheduledStepIndices?: number[];
+}) {
   const t = useTranslations("dashboard.mission");
   const router = useRouter();
   const supabase = createClient();
@@ -71,6 +80,7 @@ export function MissionCard({ mission }: { mission: Mission }) {
   const review = mission.plan_steps?.review;
   const stuckStep = getStuckStep(mission);
   const [buildingIndex, setBuildingIndex] = useState<number | null>(null);
+  const [schedulingIndex, setSchedulingIndex] = useState<number | null>(null);
   const [reviewing, setReviewing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // "AI Company" — per-step agent role picker (lib/agent-roles.ts), keyed
@@ -167,6 +177,39 @@ export function MissionCard({ mission }: { mission: Mission }) {
       setError("Network error — please try again.");
     } finally {
       setBuildingIndex(null);
+    }
+  }
+
+  // "Schedule for tomorrow" — records the user's explicit approval to run
+  // this exact step a day later via the daily cron
+  // (api/cron/scheduled-runs/route.ts), instead of building it live right
+  // now. No credit check or AI call happens here — that's entirely the
+  // cron job's responsibility once the scheduled day arrives.
+  async function scheduleStep(index: number) {
+    const step = steps[index];
+    if (!step || step.status === "completed" || schedulingIndex !== null) return;
+    const agentRole = stepAgentRoles[index] ?? step.agentRole ?? "general";
+
+    setSchedulingIndex(index);
+    setError(null);
+    try {
+      const res = await fetch("/api/mission/schedule-step", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ missionId: mission.id, stepIndex: index, agentRole }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        setError(getErrorMessage(data?.error, "Could not schedule this step."));
+        return;
+      }
+
+      router.refresh();
+    } catch {
+      setError("Network error — please try again.");
+    } finally {
+      setSchedulingIndex(null);
     }
   }
 
@@ -314,6 +357,26 @@ export function MissionCard({ mission }: { mission: Mission }) {
                             ? t("retry", { attempts: step.attempts ?? 0, max: MAX_STEP_ATTEMPTS })
                             : t("createWithAi")}
                       </button>
+                      {scheduledStepIndices.includes(index) ? (
+                        <p className="inline-flex items-center gap-1.5 text-[11px] text-muted">
+                          <CalendarClock className="h-3 w-3" aria-hidden="true" />
+                          {t("scheduledForTomorrow")}
+                        </p>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => scheduleStep(index)}
+                          disabled={buildingIndex !== null || schedulingIndex !== null}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {schedulingIndex === index ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                          ) : (
+                            <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" />
+                          )}
+                          {schedulingIndex === index ? t("scheduling") : t("scheduleForTomorrow")}
+                        </button>
+                      )}
                     </>
                   )}
                 </div>

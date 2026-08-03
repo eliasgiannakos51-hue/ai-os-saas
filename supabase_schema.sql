@@ -1145,3 +1145,56 @@ create policy "select_own_user_achievements" on public.user_achievements
 drop policy if exists "insert_own_user_achievements" on public.user_achievements;
 create policy "insert_own_user_achievements" on public.user_achievements
   for insert with check (auth.uid() = user_id);
+
+-- ============================================================================
+-- Scheduled Agent Runs — "Schedule for tomorrow" on a Mission Control step
+-- (see components/mission/mission-card.tsx). A controlled, explicit-
+-- approval-only precursor to full autonomous agents (deliberately NOT
+-- that): the user always picks exactly what runs, just delayed by one day
+-- and executed by a daily cron job (api/cron/scheduled-runs/route.ts)
+-- instead of live in the browser. step_index/step_text are denormalized
+-- copies — Mission Control's steps live inside ai_missions.plan_steps
+-- (jsonb), not as separate rows, so without them the cron job would have
+-- no way to know which step to write the result back to, or what to
+-- actually build. Same owner-only RLS pattern as every table above, except
+-- there is no update policy for regular users — only the cron job's
+-- service-role (admin) client is ever meant to change status/result/
+-- executed_at, matching account_deletion_requests' "no anon-client writes
+-- beyond insert" convention elsewhere in this schema.
+-- ============================================================================
+
+drop table if exists public.scheduled_agent_runs cascade;
+
+create table public.scheduled_agent_runs (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  mission_id uuid not null references public.ai_missions(id) on delete cascade,
+  step_index int not null,
+  step_text text not null,
+  agent_role text not null default 'general' check (agent_role in ('general', 'marketing', 'finance', 'research')),
+  status text not null default 'pending' check (status in ('pending', 'completed', 'failed')),
+  result text,
+  scheduled_for date not null,
+  executed_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists scheduled_agent_runs_user_id_scheduled_for_idx
+  on public.scheduled_agent_runs (user_id, scheduled_for);
+
+create index if not exists scheduled_agent_runs_status_scheduled_for_idx
+  on public.scheduled_agent_runs (status, scheduled_for);
+
+alter table public.scheduled_agent_runs enable row level security;
+
+drop policy if exists "select_own_scheduled_agent_runs" on public.scheduled_agent_runs;
+create policy "select_own_scheduled_agent_runs" on public.scheduled_agent_runs
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_scheduled_agent_runs" on public.scheduled_agent_runs;
+create policy "insert_own_scheduled_agent_runs" on public.scheduled_agent_runs
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_scheduled_agent_runs" on public.scheduled_agent_runs;
+create policy "delete_own_scheduled_agent_runs" on public.scheduled_agent_runs
+  for delete using (auth.uid() = user_id);

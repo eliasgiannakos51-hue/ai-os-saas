@@ -18,7 +18,16 @@ import type { Mission } from "@/types/mission";
 // on a single ever-growing page.
 const MISSIONS_PER_PAGE = 5;
 
-export function MissionList({ missions }: { missions: Mission[] }) {
+export function MissionList({
+  missions,
+  scheduledStepIndicesByMission = {},
+}: {
+  missions: Mission[];
+  // Keyed by mission id — see dashboard/mission/page.tsx, passed straight
+  // through to each MissionCard so it can show "Scheduled" instead of the
+  // schedule button for a step that already has one pending.
+  scheduledStepIndicesByMission?: Record<string, number[]>;
+}) {
   const t = useTranslations("dashboard.mission");
   const [page, setPage] = useState(1);
 
@@ -47,7 +56,11 @@ export function MissionList({ missions }: { missions: Mission[] }) {
     <div>
       <div className="space-y-4">
         {paginated.map((mission) => (
-          <MissionCard key={mission.id} mission={mission} />
+          <MissionCard
+            key={mission.id}
+            mission={mission}
+            scheduledStepIndices={scheduledStepIndicesByMission[mission.id] ?? []}
+          />
         ))}
       </div>
       <PaginationControls page={currentPage} totalPages={totalPages} onChange={setPage} />

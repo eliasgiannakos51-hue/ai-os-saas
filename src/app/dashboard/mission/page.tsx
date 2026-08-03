@@ -6,8 +6,10 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
 import { MissionForm } from "@/components/mission/mission-form";
 import { MissionList } from "@/components/mission/mission-list";
+import { ScheduledRunsList } from "@/components/mission/scheduled-runs-list";
 import { MISSION_ICON } from "@/lib/module-icons";
 import type { Mission } from "@/types/mission";
+import type { ScheduledAgentRun } from "@/types/scheduled-agent-run";
 
 export const metadata: Metadata = { title: "Mission Control" };
 
@@ -30,10 +32,22 @@ export default async function MissionPage() {
     redirect("/login");
   }
 
-  const { data: missions, error } = await supabase
-    .from("ai_missions")
-    .select("*")
-    .order("created_at", { ascending: false });
+  const [{ data: missions, error }, { data: scheduledRuns }] = await Promise.all([
+    supabase.from("ai_missions").select("*").order("created_at", { ascending: false }),
+    supabase
+      .from("scheduled_agent_runs")
+      .select("*")
+      .eq("status", "pending")
+      .order("scheduled_for", { ascending: true }),
+  ]);
+
+  const pendingRuns = (scheduledRuns as ScheduledAgentRun[] | null) ?? [];
+  const scheduledStepIndicesByMission: Record<string, number[]> = {};
+  for (const run of pendingRuns) {
+    const list = scheduledStepIndicesByMission[run.mission_id] ?? [];
+    list.push(run.step_index);
+    scheduledStepIndicesByMission[run.mission_id] = list;
+  }
 
   return (
     <main className="min-h-full bg-dot-grid">
@@ -44,9 +58,14 @@ export default async function MissionPage() {
           <MissionForm />
         </div>
 
+        <ScheduledRunsList runs={pendingRuns} />
+
         {error && <ErrorMessage message={`loading missions: ${error.message}`} />}
 
-        <MissionList missions={(missions as Mission[] | null) ?? []} />
+        <MissionList
+          missions={(missions as Mission[] | null) ?? []}
+          scheduledStepIndicesByMission={scheduledStepIndicesByMission}
+        />
       </div>
     </main>
   );

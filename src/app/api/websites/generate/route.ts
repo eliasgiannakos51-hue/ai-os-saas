@@ -4,7 +4,14 @@ import { classifyWebsiteDescription } from "@/lib/website-builder";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
-import { hasEnoughCredits, insufficientCreditsMessage, resolveEffectivePlan } from "@/lib/billing/credits";
+import {
+  CREDIT_COSTS,
+  deductCredits,
+  hasEnoughCredits,
+  insufficientCreditsMessage,
+  resolveEffectivePlan,
+} from "@/lib/billing/credits";
+import { checkNeedsClarification } from "@/lib/clarification";
 import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
@@ -49,6 +56,7 @@ export async function POST(request: Request) {
     let name: string;
     let description: string;
     let referenceImagePaths: string[];
+    let skipClarification: boolean;
     try {
       const body = await request.json();
       name = typeof body?.name === "string" ? body.name.trim().slice(0, MAX_NAME_LENGTH) : "";
@@ -56,6 +64,7 @@ export async function POST(request: Request) {
       referenceImagePaths = Array.isArray(body?.referenceImagePaths)
         ? body.referenceImagePaths.filter((p: unknown): p is string => typeof p === "string").slice(0, MAX_REFERENCE_IMAGES)
         : [];
+      skipClarification = body?.skipClarification === true;
     } catch {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
@@ -91,6 +100,59 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, generated: false, rateLimited: true, message: breakerCheck.reason });
     }
 
+    const isAdmin = isAdminEmail(user.email);
+    const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+
+    // Clarifying-questions pre-check (see lib/clarification.ts) — runs
+    // BEFORE the off-topic classifier and BEFORE any row is created, but
+    // only on the user's first submission: skipClarification is true on
+    // the resubmission after they've answered (or explicitly skipped),
+    // so this never runs twice, and never blocks a request that's
+    // already clear. Charged (1 credit) as soon as a real answer comes
+    // back from Claude, regardless of the verdict — same "charge on
+    // confirmed success" timing as every other AI call in this app,
+    // where "success" here means a real classification was returned, not
+    // a database write.
+    if (!skipClarification) {
+      const clarificationPlan = bypassCredits ? null : await resolveEffectivePlan(user);
+      if (clarificationPlan) {
+        const check = await hasEnoughCredits(user.id, CREDIT_COSTS.clarificationCheck, clarificationPlan);
+        if (!check.ok) {
+          return NextResponse.json({
+            ok: true,
+            generated: false,
+            rateLimited: true,
+            message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.clarificationCheck),
+          });
+        }
+      }
+      try {
+        void recordAiCallForDailySpend(1);
+        const clarification = await checkNeedsClarification(apiKey, "website", description);
+        if (clarificationPlan) {
+          await deductCredits(
+            user.id,
+            CREDIT_COSTS.clarificationCheck,
+            "clarification_check",
+            "Website Builder — clarifying-questions check",
+            clarificationPlan
+          );
+        }
+        if (clarification.needsClarification) {
+          return NextResponse.json({
+            ok: true,
+            generated: false,
+            needsClarification: true,
+            questions: clarification.questions,
+          });
+        }
+      } catch (err) {
+        // Best-effort: a clarification-check hiccup shouldn't block a
+        // real request — fall through to normal generation, uncharged.
+        logApiError("/api/websites/generate", err, { stage: "clarification_check" });
+      }
+    }
+
     // Off-topic guard — a cheap classification call BEFORE any credits are
     // touched or any row is created, so a request like "write me a poem"
     // costs the user nothing and gets a real, helpful message instead of
@@ -114,8 +176,6 @@ export async function POST(request: Request) {
     // computed and deducted in the process route below, only after the
     // website has actually, successfully finished generating — never
     // here, and never if that call fails.
-    const isAdmin = isAdminEmail(user.email);
-    const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
     if (!bypassCredits) {
       const plan = await resolveEffectivePlan(user);
       const estimatedCost = estimateWebsiteGenerationCost({

@@ -21,6 +21,8 @@ import {
 } from "@/lib/website-reference-image";
 import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
+import { appendClarificationAnswers } from "@/lib/clarification-client";
+import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 
 const MAX_NAME_LENGTH = 100;
@@ -138,6 +140,19 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
   const [referenceImageFiles, setReferenceImageFiles] = useState<File[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+
+  // Clarifying-questions pre-check (see lib/clarification.ts,
+  // api/websites/generate/route.ts) — set when the server's first-pass
+  // check on a submission comes back needing more detail. Holds
+  // everything the original submit already computed (name, description,
+  // already-uploaded reference image paths) so answering/skipping
+  // resubmits without re-uploading images or losing the original text.
+  const [pendingClarification, setPendingClarification] = useState<{
+    questions: string[];
+    name: string;
+    description: string;
+    referenceImagePaths: string[];
+  } | null>(null);
 
   // Post-generation editing — a second, separate AI call that takes the
   // website's existing html_content as context (see api/websites/edit)
@@ -272,6 +287,102 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
     setImageError(null);
   }
 
+  // Shared by the initial submit and by answering/skipping a
+  // clarification prompt — the ONLY difference between those call sites
+  // is skipClarification and whether description already has the user's
+  // answers folded in (see lib/clarification.ts's
+  // appendClarificationAnswers, used by handleClarificationAnswer
+  // below). Reference images are uploaded once, by the caller, and their
+  // already-uploaded paths are passed in here — never re-uploaded on a
+  // clarification resubmission.
+  async function submitGeneration(
+    trimmedName: string,
+    finalDescription: string,
+    referenceImagePaths: string[],
+    skipClarification: boolean
+  ) {
+    setGenerating(true);
+    setError(null);
+    try {
+      // Step 1/2: create the "pending" row and get its id back — this
+      // request is deliberately fast (no AI call in it beyond the small
+      // clarification/off-topic classifiers), so it can never itself be
+      // mistaken for a hung/timed-out request no matter how long the
+      // actual generation ends up taking.
+      const res = await fetch("/api/websites/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: trimmedName,
+          description: finalDescription,
+          referenceImagePaths,
+          skipClarification,
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.ok) {
+        setError(getErrorMessage(data?.error, "Something went wrong — no credits were charged. Please try again."));
+        return;
+      }
+      if (data.needsClarification) {
+        setPendingClarification({
+          questions: data.questions as string[],
+          name: trimmedName,
+          description: finalDescription,
+          referenceImagePaths,
+        });
+        void refreshCredits();
+        return;
+      }
+      if (!data.generated) {
+        setError(data.message ?? "Could not generate the website.");
+        return;
+      }
+
+      const record = data.record as UserWebsite;
+      setWebsites((prev) => [record, ...prev]);
+      setPreviewId(record.id);
+      setName("");
+      setDescription("");
+      setReferenceImageFiles([]);
+      setPendingClarification(null);
+
+      // Step 2/2: kick off the actual generation as a second, independent
+      // request. Deliberately NOT awaited: `keepalive: true` tells the
+      // browser to still deliver this request even if the user navigates
+      // away or closes this tab moments after clicking Generate, so the
+      // server-side work — and the credit charge, which only ever
+      // happens there, only after confirmed success — survives regardless
+      // of whether this tab stays open to see the result. Progress from
+      // here on is entirely tracked via polling (pollWebsiteStatus), not
+      // this request's response.
+      void fetch("/api/websites/generate/process", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({ websiteId: record.id, description: finalDescription, referenceImagePaths }),
+      });
+
+      pollWebsiteStatus(record.id);
+    } catch (err) {
+      // A fetch() throwing at all (as opposed to resolving with a non-ok
+      // response) means the request never reached the server — a real
+      // network-level failure (offline, DNS, connection refused), not a
+      // slow response. That distinction is meaningful now: step 1 above
+      // is always fast, so nothing here can be a disguised "the AI call
+      // is just taking a while" timeout the way the single-request flow
+      // used to produce.
+      setError(
+        err instanceof TypeError
+          ? "Network error — please check your connection and try again."
+          : getErrorMessage(err, "Something went wrong — no credits were charged. Please try again.")
+      );
+    } finally {
+      setGenerating(false);
+    }
+  }
+
   async function handleGenerate(e: FormEvent) {
     e.preventDefault();
     const trimmedName = name.trim();
@@ -306,71 +417,46 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
         const firstFailure = uploadResults.find((r) => r.uploadError);
         if (firstFailure) {
           setError(getErrorMessage(firstFailure.uploadError, "Could not upload the reference images."));
+          setGenerating(false);
           return;
         }
         referenceImagePaths = uploadResults.map((r) => r.path);
       }
 
-      // Step 1/2: create the "pending" row and get its id back — this
-      // request is deliberately fast (no AI call in it), so it can never
-      // itself be mistaken for a hung/timed-out request no matter how
-      // long the actual generation ends up taking.
-      const res = await fetch("/api/websites/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: trimmedName, description: trimmedDescription, referenceImagePaths }),
-      });
-      const data = await res.json();
-
-      if (!res.ok || !data.ok) {
-        setError(getErrorMessage(data?.error, "Something went wrong — no credits were charged. Please try again."));
-        return;
-      }
-      if (!data.generated) {
-        setError(data.message ?? "Could not generate the website.");
-        return;
-      }
-
-      const record = data.record as UserWebsite;
-      setWebsites((prev) => [record, ...prev]);
-      setPreviewId(record.id);
-      setName("");
-      setDescription("");
-      setReferenceImageFiles([]);
-
-      // Step 2/2: kick off the actual generation as a second, independent
-      // request. Deliberately NOT awaited: `keepalive: true` tells the
-      // browser to still deliver this request even if the user navigates
-      // away or closes this tab moments after clicking Generate, so the
-      // server-side work — and the credit charge, which only ever
-      // happens there, only after confirmed success — survives regardless
-      // of whether this tab stays open to see the result. Progress from
-      // here on is entirely tracked via polling (pollWebsiteStatus), not
-      // this request's response.
-      void fetch("/api/websites/generate/process", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        keepalive: true,
-        body: JSON.stringify({ websiteId: record.id, description: trimmedDescription, referenceImagePaths }),
-      });
-
-      pollWebsiteStatus(record.id);
+      await submitGeneration(trimmedName, trimmedDescription, referenceImagePaths, false);
     } catch (err) {
-      // A fetch() throwing at all (as opposed to resolving with a non-ok
-      // response) means the request never reached the server — a real
-      // network-level failure (offline, DNS, connection refused), not a
-      // slow response. That distinction is meaningful now: step 1 above
-      // is always fast, so nothing here can be a disguised "the AI call
-      // is just taking a while" timeout the way the single-request flow
-      // used to produce.
       setError(
         err instanceof TypeError
           ? "Network error — please check your connection and try again."
           : getErrorMessage(err, "Something went wrong — no credits were charged. Please try again.")
       );
-    } finally {
       setGenerating(false);
     }
+  }
+
+  function handleClarificationAnswer(answers: string[]) {
+    if (!pendingClarification) return;
+    const enrichedDescription = appendClarificationAnswers(
+      pendingClarification.description,
+      pendingClarification.questions,
+      answers
+    );
+    void submitGeneration(
+      pendingClarification.name,
+      enrichedDescription,
+      pendingClarification.referenceImagePaths,
+      true
+    );
+  }
+
+  function handleClarificationSkip() {
+    if (!pendingClarification) return;
+    void submitGeneration(
+      pendingClarification.name,
+      pendingClarification.description,
+      pendingClarification.referenceImagePaths,
+      true
+    );
   }
 
   async function handleDelete(id: string) {
@@ -632,18 +718,31 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={generating || !name.trim() || !description.trim()}
-          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
-        >
-          {generating ? (
-            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-          ) : (
-            <Sparkles className="h-4 w-4" aria-hidden="true" />
-          )}
-          {generating ? t("generating") : t("generateButton")}
-        </button>
+        {pendingClarification ? (
+          <ClarificationQuestions
+            questions={pendingClarification.questions}
+            onAnswer={handleClarificationAnswer}
+            onSkip={handleClarificationSkip}
+            submitting={generating}
+            title={t("clarificationTitle")}
+            skipLabel={t("clarificationSkip")}
+            continueLabel={t("clarificationContinue")}
+            answerPlaceholder={t("clarificationAnswerPlaceholder")}
+          />
+        ) : (
+          <button
+            type="submit"
+            disabled={generating || !name.trim() || !description.trim()}
+            className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+          >
+            {generating ? (
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+            ) : (
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
+            )}
+            {generating ? t("generating") : t("generateButton")}
+          </button>
+        )}
       </form>
 
       {previewWebsite && (

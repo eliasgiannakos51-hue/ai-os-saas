@@ -313,6 +313,15 @@ export const CREDIT_COSTS = {
   // existing HTML rather than building from scratch), priced at half of
   // websiteGenerate.
   websiteEdit: 50,
+  // The "does this request need clarifying questions first?" check (see
+  // lib/clarification.ts) — a small, cheap, forced-tool-use call that
+  // runs before Website Builder, Mission Control, Automations, and
+  // Create Anything's real generation call. Charged once per user
+  // submission regardless of the verdict (needs clarification or not),
+  // shown to the user explicitly before they submit. Never charged twice
+  // for the same request — the resubmission after answering skips this
+  // check entirely (see each route's skipClarification flag).
+  clarificationCheck: 1,
 } as const;
 
 // TEMPORARY diagnostic: shows the exact numbers deductCredits compared,

@@ -6,13 +6,14 @@ import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { hasEnoughCredits, insufficientCreditsMessage, resolveEffectivePlan } from "@/lib/billing/credits";
 import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
+import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
 
 const MAX_NAME_LENGTH = 100;
-const MAX_DESCRIPTION_LENGTH = 10000;
+const MAX_DESCRIPTION_LENGTH = 20000;
 
 // Website Builder — job START. Deliberately fast: validates the request,
 // runs the (small, ~300-token) off-topic classifier, checks the user has
@@ -140,6 +141,7 @@ export async function POST(request: Request) {
         html_content: "",
         status: "pending",
         has_reference_images: referenceImagePaths.length > 0,
+        is_large_request: isLargeGenerationRequest(description.length, referenceImagePaths.length),
       })
       .select()
       .single();

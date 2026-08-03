@@ -59,7 +59,15 @@ export async function GET(request: Request) {
     // status flips to 'completed' (see the process route), so a row that
     // never left pending/processing structurally can't have been charged.
     const typedRecord = record as UserWebsite;
-    if (isGenerationJobStale(typedRecord.status, typedRecord.created_at, new Date(), typedRecord.has_reference_images)) {
+    if (
+      isGenerationJobStale(
+        typedRecord.status,
+        typedRecord.created_at,
+        new Date(),
+        typedRecord.has_reference_images,
+        typedRecord.is_large_request
+      )
+    ) {
       const { data: failedRecord, error: staleUpdateError } = await supabase
         .from("user_websites")
         .update({

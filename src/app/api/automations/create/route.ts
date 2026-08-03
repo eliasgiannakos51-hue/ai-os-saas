@@ -5,7 +5,7 @@ import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
 
-const MAX_DESCRIPTION_LENGTH = 2000;
+const MAX_DESCRIPTION_LENGTH = 20000;
 // Safety cap, per the brief: prevents unbounded recurring-cost
 // accumulation — each active automation calls Claude on its own
 // schedule, indefinitely, with no further approval per run.

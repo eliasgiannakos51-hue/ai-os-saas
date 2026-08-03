@@ -129,9 +129,9 @@ function RealizeForm({
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          maxLength={2000}
+          maxLength={20000}
           rows={3}
-          className="input resize-none text-sm"
+          className="input resize-y text-sm"
           placeholder={t("whatShouldHappenPlaceholder")}
         />
       </div>

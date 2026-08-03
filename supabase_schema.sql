@@ -982,6 +982,14 @@ create table public.user_websites (
   -- so it's a no-op for every row that already existed before this
   -- column did.
   has_reference_images boolean not null default false,
+  -- Computed once at creation from description length (>5000 chars) or
+  -- reference image count (>=10) — see isLargeGenerationRequest in
+  -- lib/website-generation-limits.ts. Large requests get an even longer
+  -- (25 min) stale-job grace period than has_reference_images alone
+  -- provides, since a very long brief or a big batch of images both
+  -- measurably slow generation. Defaults to false so it's a no-op for
+  -- every row that already existed before this column did.
+  is_large_request boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -996,6 +1004,9 @@ alter table public.user_websites
 
 alter table public.user_websites
   add column if not exists attempt_count integer not null default 0;
+
+alter table public.user_websites
+  add column if not exists is_large_request boolean not null default false;
 
 create index if not exists user_websites_user_id_created_at_idx
   on public.user_websites (user_id, created_at desc);

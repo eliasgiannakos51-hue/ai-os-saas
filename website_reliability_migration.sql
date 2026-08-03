@@ -16,10 +16,17 @@
 -- working. has_reference_images lets api/websites/status apply a longer
 -- grace period specifically for image-attached generations.
 --
+-- Part 3 (is_large_request) extends that further for genuinely large
+-- requests — description > 5000 chars, or 10+ reference images — which
+-- get a 25-minute stale-job grace period (up from 12), since input
+-- limits were raised app-wide (description/change-request maxLength now
+-- 20,000 chars, reference images now up to 20 per site) specifically so
+-- large, detailed briefs wouldn't be artificially capped.
+--
 -- Run this once against your live Supabase project. Safe to run on a
 -- project with existing data — additive/idempotent (ADD COLUMN IF NOT
 -- EXISTS), nothing here drops a table, drops a column, or deletes
--- existing rows. Both new columns default to values that are a no-op for
+-- existing rows. All new columns default to values that are a no-op for
 -- every row that already existed before they did.
 -- ============================================================================
 
@@ -28,3 +35,6 @@ alter table public.user_websites
 
 alter table public.user_websites
   add column if not exists has_reference_images boolean not null default false;
+
+alter table public.user_websites
+  add column if not exists is_large_request boolean not null default false;

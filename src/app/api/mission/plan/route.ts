@@ -16,7 +16,7 @@ import type { MissionPlan } from "@/types/mission";
 
 export const dynamic = "force-dynamic";
 
-const MAX_GOAL_LENGTH = 10000;
+const MAX_GOAL_LENGTH = 20000;
 
 // Planner Agent entry point (see lib/mission-agents.ts) — Mission
 // Control's first step. Creates a new ai_missions row with a freshly

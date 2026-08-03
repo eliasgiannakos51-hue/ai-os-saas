@@ -488,6 +488,7 @@
       "generated": "Site gerado",
       "estimatedCost": "Custo estimado: {count} créditos",
       "estimatedTimeWithImages": "Sites complexos com imagens podem levar mais de 10 minutos para serem gerados — você pode sair desta página.",
+      "estimatedTimeLargeRequest": "Solicitações muito grandes ou detalhadas (descrição longa ou mais de 10 imagens) podem levar de 20 a 30 minutos para serem geradas — você pode sair desta página, continuará funcionando.",
       "generatingTitle": "A gerar o teu site…",
       "generatingBody": "Isto pode demorar um pouco para descrições detalhadas ou várias imagens — podes sair desta página, ela estará aqui quando voltares.",
       "progressStep1": "A analisar os teus requisitos…",

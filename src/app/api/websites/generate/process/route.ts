@@ -37,20 +37,31 @@ export const dynamic = "force-dynamic";
 // backstop. Raising this reduces how often that backstop needs to fire
 // in the first place.
 //
-// 600s (10 min) requires a hosting tier that supports long-running
-// serverless functions — on Vercel this means Pro or Enterprise with
-// Fluid Compute; the previous 300s value hit exactly this ceiling on
-// complex, image-attached generations in production (confirmed via the
-// "stale website generation job force-failed" log line, WITHOUT any
-// credit being charged — the safety net worked, it just fired too
-// early). STALE_JOB_TIMEOUT_WITH_IMAGES_MS in
-// lib/website-generation-limits.ts is set with headroom above this, so
-// this route's own timeout is what kills a truly stuck job first; the
-// stale-job check is purely the client-visible backstop for on the rare
-// chance even that fails to run its course.
-export const maxDuration = 600;
+// 800s (~13.3 min) is Vercel's documented practical ceiling for a single
+// Fluid Compute function invocation on Pro (Enterprise can configure
+// higher with a custom limit) — raised here from 600s specifically for
+// "large request" jobs (see is_large_request / LARGE_REQUEST_* in
+// lib/website-generation-limits.ts: description > 5000 chars or 10+
+// reference images), which legitimately need more processing time than
+// a typical generation.
+//
+// IMPORTANT, HONEST LIMITATION: this does NOT make a genuinely 20-30
+// minute generation reliably completable. STALE_JOB_TIMEOUT_LARGE_REQUEST_MS
+// (25 min) in lib/website-generation-limits.ts is headroom for the
+// client-visible backstop, not a claim that this route itself can run
+// that long — a single Vercel serverless invocation realistically caps
+// out well under 25-30 minutes on any commonly-available plan. If a
+// specific generation genuinely needs that much wall-clock time, the
+// function will still be killed by the platform before then, and the
+// stale-job check is what eventually surfaces that as a clean "failed"
+// state (no credits charged) rather than an infinite spinner — it is a
+// safety net for that scenario, not a fix for it. Reliably supporting
+// true 20-30 minute single-request generations would need a different
+// execution model (a queue + long-running worker, or chunked/resumable
+// generation) — a real architecture change, out of scope here.
+export const maxDuration = 800;
 
-const MAX_DESCRIPTION_LENGTH = 10000;
+const MAX_DESCRIPTION_LENGTH = 20000;
 
 // Claude's vision input internally downsamples any image above roughly
 // this size before analyzing it (Anthropic docs: ~1.15 megapixels, i.e.

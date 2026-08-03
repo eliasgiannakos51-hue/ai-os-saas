@@ -488,6 +488,7 @@
       "generated": "Website generiert",
       "estimatedCost": "Geschätzte Kosten: {count} Credits",
       "estimatedTimeWithImages": "Komplexe Websites mit Bildern können 10+ Minuten zur Erstellung benötigen — du kannst diese Seite ruhig verlassen.",
+      "estimatedTimeLargeRequest": "Sehr umfangreiche oder detaillierte Anfragen (lange Beschreibung oder 10+ Bilder) können 20-30 Minuten zur Erstellung benötigen — du kannst diese Seite ruhig verlassen, es läuft im Hintergrund weiter.",
       "generatingTitle": "Deine Website wird erstellt…",
       "generatingBody": "Das kann bei detaillierten Beschreibungen oder mehreren Bildern etwas dauern — du kannst diese Seite verlassen, sie ist da, wenn du zurückkommst.",
       "progressStep1": "Anforderungen werden analysiert…",

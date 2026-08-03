@@ -19,6 +19,13 @@ export type UserWebsite = {
   // rows. See WebsiteReferenceImage for the current multi-image model.
   reference_image_url: string | null;
   has_reference_images: boolean;
+  // Computed once at creation (description length > 5000 chars, or 10+
+  // reference images) — see lib/website-generation-limits.ts's
+  // isLargeGenerationRequest, whose result this stores so
+  // api/websites/status can apply the right stale-job grace period
+  // without re-deriving it (the description/image count aren't otherwise
+  // available at poll time).
+  is_large_request: boolean;
   created_at: string;
 };
 

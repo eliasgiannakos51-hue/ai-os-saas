@@ -20,11 +20,12 @@ import {
   REFERENCE_IMAGE_BUCKET,
 } from "@/lib/website-reference-image";
 import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
+import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 
 const MAX_NAME_LENGTH = 100;
-const MAX_DESCRIPTION_LENGTH = 10000;
-const MAX_CHANGE_REQUEST_LENGTH = 10000;
+const MAX_DESCRIPTION_LENGTH = 20000;
+const MAX_CHANGE_REQUEST_LENGTH = 20000;
 
 // How often the client polls /api/websites/status for a website still
 // "pending"/"processing" — see pollWebsiteStatus below. Short enough to
@@ -613,10 +614,16 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
           </p>
         )}
 
-        {referenceImageFiles.length > 0 && (
+        {isLargeGenerationRequest(description.length, referenceImageFiles.length) ? (
           <p className="rounded-lg border border-amber-800/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-300">
-            {t("estimatedTimeWithImages")}
+            {t("estimatedTimeLargeRequest")}
           </p>
+        ) : (
+          referenceImageFiles.length > 0 && (
+            <p className="rounded-lg border border-amber-800/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-300">
+              {t("estimatedTimeWithImages")}
+            </p>
+          )
         )}
 
         {error && (

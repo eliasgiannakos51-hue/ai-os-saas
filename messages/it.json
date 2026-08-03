@@ -425,7 +425,7 @@
       "title": "Flusso di Lavoro Trading",
       "description": "Tutto il trading in un unico posto — le tue operazioni, i collegamenti del Knowledge Graph, la Timeline, il Mentor, le Missioni e la Riflessione Settimanale.",
       "insight": {
-        "title": "Insight sul Pattern",
+        "title": "Insight sul Pattern di Trading",
         "noTrades": "Registra un'operazione per iniziare a vedere i pattern qui.",
         "notEnoughData": "Non c'è ancora abbastanza storico per rilevare un pattern — registra qualche altra operazione.",
         "pattern": "Delle tue ultime {analyzedCount} operazioni, {lossesAfterLoss} su {pairsAfterLoss} operazioni successive a una perdita sono state anch'esse in perdita ({ratePercent}%).",
@@ -450,7 +450,7 @@
       "title": "Flusso di Lavoro Prodotto",
       "description": "Tutto il lancio del prodotto in un unico posto — i tuoi prodotti, i collegamenti del Knowledge Graph, la Timeline, il Mentor, le Missioni e la Riflessione Settimanale.",
       "insight": {
-        "title": "Insight sul Pattern",
+        "title": "Insight sul Pattern di Prodotto",
         "noProducts": "Aggiungi un prodotto per iniziare a vedere i pattern qui.",
         "notEnoughData": "Non c'è ancora abbastanza storico di prodotti per rilevare un pattern — aggiungi qualche altro prodotto.",
         "detailPattern": "I prodotti con una pianificazione più dettagliata (funzionalità, roadmap, piano di lancio, pubblico) hanno in media {detailedAvg} voci collegate su {detailedCount} prodotti, contro {briefAvg} per quelli meno dettagliati su {briefCount} prodotti."

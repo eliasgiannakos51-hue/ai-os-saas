@@ -425,7 +425,7 @@
       "title": "Trading Workflow",
       "description": "Everything trading in one place — your trades, Knowledge Graph links, Timeline, Mentor, Missions, and Reflection.",
       "insight": {
-        "title": "Pattern Insight",
+        "title": "Trading Pattern Insight",
         "noTrades": "Log a trade to start seeing patterns here.",
         "notEnoughData": "Not enough trade history yet to detect a pattern — log a few more trades.",
         "pattern": "Of your last {analyzedCount} trades, {lossesAfterLoss} of {pairsAfterLoss} trades following a loss were also losses ({ratePercent}%).",
@@ -450,7 +450,7 @@
       "title": "Product Workflow",
       "description": "Everything product launch in one place — your products, Knowledge Graph links, Timeline, Mentor, Missions, and Reflection.",
       "insight": {
-        "title": "Pattern Insight",
+        "title": "Product Pattern Insight",
         "noProducts": "Add a product to start seeing patterns here.",
         "notEnoughData": "Not enough product history yet to detect a pattern — add a few more products.",
         "detailPattern": "Products with more detailed planning (features, roadmap, launch plan, audience) average {detailedAvg} linked entries over {detailedCount} products, vs {briefAvg} for less detailed ones over {briefCount} products."

@@ -425,7 +425,7 @@
       "title": "交易工作流",
       "description": "把交易记录、知识图谱链接、时间线、导师、任务和每周回顾整合在一个地方。",
       "insight": {
-        "title": "模式洞察",
+        "title": "交易模式洞察",
         "noTrades": "记录一笔交易即可在此查看模式。",
         "notEnoughData": "交易历史还不够,无法检测出模式 — 请再记录几笔交易。",
         "pattern": "在你最近的{analyzedCount}笔交易中,亏损之后的{pairsAfterLoss}笔交易里有{lossesAfterLoss}笔也是亏损({ratePercent}%)。",
@@ -450,7 +450,7 @@
       "title": "产品工作流",
       "description": "把产品发布记录、知识图谱链接、时间线、导师、任务和每周回顾整合在一个地方。",
       "insight": {
-        "title": "模式洞察",
+        "title": "产品模式洞察",
         "noProducts": "添加一个产品即可在此查看模式。",
         "notEnoughData": "产品历史还不够,无法检测出模式 — 请再添加几个产品。",
         "detailPattern": "规划更详细（功能、路线图、发布计划、目标受众）的产品在{detailedCount}个产品中平均有{detailedAvg}条关联记录,而规划较简略的产品在{briefCount}个中平均只有{briefAvg}条。"

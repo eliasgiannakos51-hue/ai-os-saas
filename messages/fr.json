@@ -425,7 +425,7 @@
       "title": "Flux de Travail Trading",
       "description": "Tout le trading au même endroit — vos trades, les liens du Knowledge Graph, la Timeline, le Mentor, les Missions et la Réflexion Hebdomadaire.",
       "insight": {
-        "title": "Aperçu du Pattern",
+        "title": "Aperçu du Pattern de Trading",
         "noTrades": "Enregistrez un trade pour commencer à voir des tendances ici.",
         "notEnoughData": "Pas encore assez d'historique de trades pour détecter une tendance — enregistrez quelques trades de plus.",
         "pattern": "Sur vos {analyzedCount} derniers trades, {lossesAfterLoss} des {pairsAfterLoss} trades suivant une perte étaient également perdants ({ratePercent}%).",
@@ -450,7 +450,7 @@
       "title": "Flux de Travail Produit",
       "description": "Tout le lancement de produit au même endroit — vos produits, les liens du Knowledge Graph, la Timeline, le Mentor, les Missions et la Réflexion Hebdomadaire.",
       "insight": {
-        "title": "Aperçu du Pattern",
+        "title": "Aperçu du Pattern Produit",
         "noProducts": "Ajoutez un produit pour commencer à voir des tendances ici.",
         "notEnoughData": "Pas encore assez d'historique de produits pour détecter une tendance — ajoutez quelques produits de plus.",
         "detailPattern": "Les produits avec une planification plus détaillée (fonctionnalités, roadmap, plan de lancement, audience) ont en moyenne {detailedAvg} entrées liées sur {detailedCount} produits, contre {briefAvg} pour les moins détaillés sur {briefCount} produits."

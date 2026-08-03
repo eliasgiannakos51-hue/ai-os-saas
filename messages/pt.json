@@ -425,7 +425,7 @@
       "title": "Fluxo de Trabalho de Trading",
       "description": "Todo o trading em um só lugar — suas operações, links do Knowledge Graph, Timeline, Mentor, Missões e Reflexão Semanal.",
       "insight": {
-        "title": "Insight de Padrão",
+        "title": "Insight de Padrão de Trading",
         "noTrades": "Registre uma operação para começar a ver padrões aqui.",
         "notEnoughData": "Ainda não há histórico suficiente de operações para detectar um padrão — registre mais algumas operações.",
         "pattern": "Das suas últimas {analyzedCount} operações, {lossesAfterLoss} de {pairsAfterLoss} operações após uma perda também foram perdas ({ratePercent}%).",
@@ -450,7 +450,7 @@
       "title": "Fluxo de Trabalho de Produto",
       "description": "Todo o lançamento de produto em um só lugar — seus produtos, links do Knowledge Graph, Timeline, Mentor, Missões e Reflexão Semanal.",
       "insight": {
-        "title": "Insight de Padrão",
+        "title": "Insight de Padrão de Produto",
         "noProducts": "Adicione um produto para começar a ver padrões aqui.",
         "notEnoughData": "Ainda não há histórico suficiente de produtos para detectar um padrão — adicione mais alguns produtos.",
         "detailPattern": "Produtos com planejamento mais detalhado (funcionalidades, roadmap, plano de lançamento, público) têm em média {detailedAvg} entradas vinculadas em {detailedCount} produtos, contra {briefAvg} para os menos detalhados em {briefCount} produtos."

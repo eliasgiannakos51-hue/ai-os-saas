@@ -425,7 +425,7 @@
       "title": "Trading-Workflow",
       "description": "Alles rund ums Trading an einem Ort — deine Trades, Knowledge-Graph-Verknüpfungen, Timeline, Mentor, Missionen und wöchentliche Reflexion.",
       "insight": {
-        "title": "Muster-Insight",
+        "title": "Trading-Muster-Insight",
         "noTrades": "Erfasse einen Trade, um hier Muster zu sehen.",
         "notEnoughData": "Noch nicht genug Trade-Historie, um ein Muster zu erkennen — erfasse noch ein paar Trades.",
         "pattern": "Von deinen letzten {analyzedCount} Trades waren {lossesAfterLoss} von {pairsAfterLoss} Trades nach einem Verlust ebenfalls Verluste ({ratePercent}%).",
@@ -450,7 +450,7 @@
       "title": "Produkt-Workflow",
       "description": "Alles rund um den Produktstart an einem Ort — deine Produkte, Knowledge-Graph-Verknüpfungen, Timeline, Mentor, Missionen und wöchentliche Reflexion.",
       "insight": {
-        "title": "Muster-Insight",
+        "title": "Produkt-Muster-Insight",
         "noProducts": "Füge ein Produkt hinzu, um hier Muster zu sehen.",
         "notEnoughData": "Noch nicht genug Produkt-Historie, um ein Muster zu erkennen — füge noch ein paar Produkte hinzu.",
         "detailPattern": "Produkte mit detaillierterer Planung (Features, Roadmap, Launch-Plan, Zielgruppe) haben im Schnitt {detailedAvg} verknüpfte Einträge bei {detailedCount} Produkten, gegenüber {briefAvg} bei weniger detaillierten bei {briefCount} Produkten."

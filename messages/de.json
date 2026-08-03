@@ -117,28 +117,94 @@
       "future": "Zukunftsvision"
     },
     "items": {
-      "modules": { "title": "13 Business-Module", "description": "Ideen, Wettbewerber, Recherche, Finanzen, Lernen, Trading, Entscheidungen, Produkte, Content, Vertrieb/CRM, Feedback, Analytik und Automatisierungsnotizen." },
-      "createAnything": { "title": "Alles Erstellen", "description": "Beschreibe alles in Klartext und die KI ordnet es automatisch dem richtigen Modul zu." },
-      "chat": { "title": "Ionexa Chat", "description": "Ein universeller KI-Assistent für jede Frage — nicht an ein bestimmtes Modul gebunden." },
-      "export": { "title": "Datenexport", "description": "CSV-Export pro Modul sowie ein vollständiger JSON-Export von allem, was du erfasst hast." },
-      "team": { "title": "Teamzusammenarbeit", "description": "Lade Teammitglieder ein und gib ihnen vollen Zugriff auf der Stufe deines Plans." },
-      "agentBuilder": { "title": "KI-Agenten-Builder", "description": "Beschreibe ein Ziel und erhalte einen funktionierenden autonomen Agenten, der es verfolgt." },
-      "websiteBuilder": { "title": "Website-Builder", "description": "KI-generierte Websites aus einem einzigen Prompt." },
-      "automationBuilder": { "title": "Echter Automatisierungs-Builder", "description": "Echte Workflow-Automatisierung, die tatsächlich läuft — nicht nur notierte Ideen." },
-      "aiMemory": { "title": "KI-Gedächtnis", "description": "Projektübergreifender Kontext und Erinnerung, damit die KI sich das Wichtige merkt." },
-      "mobileApps": { "title": "Mobile- & Desktop-Apps", "description": "Native Apps für iOS, Android, macOS und Windows." },
-      "imageGeneration": { "title": "KI-Bildgenerierung", "description": "Erzeuge Bilder direkt in deinem Arbeitsbereich." },
-      "videoGeneration": { "title": "KI-Videogenerierung & -bearbeitung", "description": "Erstelle und bearbeite Videos mit KI." },
-      "presentations": { "title": "KI-Präsentationen & Dokumente", "description": "Erzeuge ausgefeilte Präsentationen und Dokumente aus deinen Daten." },
-      "marketingBuilder": { "title": "KI-Marketingkampagnen-Builder", "description": "Plane und erzeuge vollständige Marketingkampagnen." },
-      "coding": { "title": "KI-Coding-Assistent", "description": "Vollständige App-Generierung, nicht nur Code-Schnipsel." },
-      "dataAnalysis": { "title": "KI-Datenanalyse", "description": "Tiefgehende Analyse und Insight-Generierung über all deine Daten." },
-      "teamGenerator": { "title": "KI-Team-Generator", "description": "Mehrere koordinierte Agenten, die gemeinsam an einem Ziel arbeiten." },
-      "projectManager": { "title": "KI-Projektmanager", "description": "Automatische Aufgabenaufteilung und -verfolgung für jedes Projekt." },
-      "ceoAdvisor": { "title": "KI-CEO-Berater", "description": "Ein immer verfügbarer Berater für Geschäftsplanung." },
-      "marketplace": { "title": "Marktplatz", "description": "Kaufe und verkaufe Agenten, Automatisierungen und Vorlagen." },
-      "router": { "title": "Universeller KI-Router", "description": "Automatische Auswahl unter mehreren KI-Anbietern für das beste Ergebnis." },
-      "sync": { "title": "Plattformübergreifende Synchronisierung", "description": "Ein einheitliches Erlebnis über Web, Mobile und Desktop." }
+      "modules": {
+        "title": "13 Business-Module",
+        "description": "Ideen, Wettbewerber, Recherche, Finanzen, Lernen, Trading, Entscheidungen, Produkte, Content, Vertrieb/CRM, Feedback, Analytik und Automatisierungsnotizen."
+      },
+      "createAnything": {
+        "title": "Alles Erstellen",
+        "description": "Beschreibe alles in Klartext und die KI ordnet es automatisch dem richtigen Modul zu."
+      },
+      "chat": {
+        "title": "Ionexa Chat",
+        "description": "Ein universeller KI-Assistent für jede Frage — nicht an ein bestimmtes Modul gebunden."
+      },
+      "export": {
+        "title": "Datenexport",
+        "description": "CSV-Export pro Modul sowie ein vollständiger JSON-Export von allem, was du erfasst hast."
+      },
+      "team": {
+        "title": "Teamzusammenarbeit",
+        "description": "Lade Teammitglieder ein und gib ihnen vollen Zugriff auf der Stufe deines Plans."
+      },
+      "agentBuilder": {
+        "title": "KI-Agenten-Builder",
+        "description": "Beschreibe ein Ziel und erhalte einen funktionierenden autonomen Agenten, der es verfolgt."
+      },
+      "websiteBuilder": {
+        "title": "Website-Builder",
+        "description": "KI-generierte Websites aus einem einzigen Prompt."
+      },
+      "automationBuilder": {
+        "title": "Echter Automatisierungs-Builder",
+        "description": "Echte Workflow-Automatisierung, die tatsächlich läuft — nicht nur notierte Ideen."
+      },
+      "aiMemory": {
+        "title": "KI-Gedächtnis",
+        "description": "Projektübergreifender Kontext und Erinnerung, damit die KI sich das Wichtige merkt."
+      },
+      "mobileApps": {
+        "title": "Mobile- & Desktop-Apps",
+        "description": "Native Apps für iOS, Android, macOS und Windows."
+      },
+      "imageGeneration": {
+        "title": "KI-Bildgenerierung",
+        "description": "Erzeuge Bilder direkt in deinem Arbeitsbereich."
+      },
+      "videoGeneration": {
+        "title": "KI-Videogenerierung & -bearbeitung",
+        "description": "Erstelle und bearbeite Videos mit KI."
+      },
+      "presentations": {
+        "title": "KI-Präsentationen & Dokumente",
+        "description": "Erzeuge ausgefeilte Präsentationen und Dokumente aus deinen Daten."
+      },
+      "marketingBuilder": {
+        "title": "KI-Marketingkampagnen-Builder",
+        "description": "Plane und erzeuge vollständige Marketingkampagnen."
+      },
+      "coding": {
+        "title": "KI-Coding-Assistent",
+        "description": "Vollständige App-Generierung, nicht nur Code-Schnipsel."
+      },
+      "dataAnalysis": {
+        "title": "KI-Datenanalyse",
+        "description": "Tiefgehende Analyse und Insight-Generierung über all deine Daten."
+      },
+      "teamGenerator": {
+        "title": "KI-Team-Generator",
+        "description": "Mehrere koordinierte Agenten, die gemeinsam an einem Ziel arbeiten."
+      },
+      "projectManager": {
+        "title": "KI-Projektmanager",
+        "description": "Automatische Aufgabenaufteilung und -verfolgung für jedes Projekt."
+      },
+      "ceoAdvisor": {
+        "title": "KI-CEO-Berater",
+        "description": "Ein immer verfügbarer Berater für Geschäftsplanung."
+      },
+      "marketplace": {
+        "title": "Marktplatz",
+        "description": "Kaufe und verkaufe Agenten, Automatisierungen und Vorlagen."
+      },
+      "router": {
+        "title": "Universeller KI-Router",
+        "description": "Automatische Auswahl unter mehreren KI-Anbietern für das beste Ergebnis."
+      },
+      "sync": {
+        "title": "Plattformübergreifende Synchronisierung",
+        "description": "Ein einheitliches Erlebnis über Web, Mobile und Desktop."
+      }
     }
   },
   "auth": {
@@ -347,6 +413,7 @@
       "removeLabel": "{email} entfernen",
       "removeTitle": "Mitglied entfernen",
       "descriptionIncluded": "Im {plan}-Plan erhalten eingeladene Mitglieder vollen Zugriff auf dieser Stufe, ohne zusätzliche Kosten.",
+      "seatsUsed": "{used} von {total} Plätzen belegt",
       "setupSuccessTitle": "Dein Team ist bereit!",
       "setupSuccessBody": "Lade unten dein erstes Teammitglied ein.",
       "roleLabel": "Rolle / Position",

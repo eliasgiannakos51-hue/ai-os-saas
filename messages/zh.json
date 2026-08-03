@@ -117,28 +117,94 @@
       "future": "未来愿景"
     },
     "items": {
-      "modules": { "title": "13 个业务模块", "description": "创意、竞争对手、调研、财务、学习、交易、决策、产品、内容、销售/CRM、反馈、数据统计和自动化笔记。" },
-      "createAnything": { "title": "创建任何内容", "description": "用自然语言描述任何内容，AI 会自动将其归档到正确的模块。" },
-      "chat": { "title": "Ionexa 对话", "description": "适用于任何问题的通用 AI 助手——不绑定特定模块。" },
-      "export": { "title": "数据导出", "description": "支持按模块导出 CSV，也可将所有记录一次性导出为完整的 JSON 文件。" },
-      "team": { "title": "团队协作", "description": "邀请团队成员，并让他们获得你所在方案等级的完整权限。" },
-      "agentBuilder": { "title": "AI 智能体构建器", "description": "描述一个目标，即可获得一个可自主执行该目标的智能体。" },
-      "websiteBuilder": { "title": "网站构建器", "description": "根据单条提示词由 AI 生成网站。" },
-      "automationBuilder": { "title": "真正的自动化构建器", "description": "真实可运行的工作流自动化——而不仅仅是记录下来的想法。" },
-      "aiMemory": { "title": "AI 记忆", "description": "跨项目的上下文与记忆，让 AI 记住重要信息。" },
-      "mobileApps": { "title": "移动端与桌面应用", "description": "适用于 iOS、Android、macOS 和 Windows 的原生应用。" },
-      "imageGeneration": { "title": "AI 图像生成", "description": "直接在你的工作区中生成图像。" },
-      "videoGeneration": { "title": "AI 视频生成与剪辑", "description": "用 AI 创建并剪辑视频。" },
-      "presentations": { "title": "AI 演示文稿与文档", "description": "根据你的数据生成精美的演示文稿和文档。" },
-      "marketingBuilder": { "title": "AI 营销活动构建器", "description": "规划并生成完整的营销活动方案。" },
-      "coding": { "title": "AI 编程助手", "description": "生成完整应用，而不只是代码片段。" },
-      "dataAnalysis": { "title": "AI 数据分析", "description": "对你的数据进行深度分析并生成洞察。" },
-      "teamGenerator": { "title": "AI 团队生成器", "description": "多个协同工作的智能体共同实现同一目标。" },
-      "projectManager": { "title": "AI 项目经理", "description": "为任何项目自动拆分并跟踪任务。" },
-      "ceoAdvisor": { "title": "AI CEO 顾问", "description": "随时待命的业务规划顾问。" },
-      "marketplace": { "title": "市场", "description": "买卖智能体、自动化方案和模板。" },
-      "router": { "title": "通用 AI 路由器", "description": "在多个 AI 提供商之间自动选择以获得最佳结果。" },
-      "sync": { "title": "跨平台同步", "description": "在网页、移动端和桌面端获得统一的使用体验。" }
+      "modules": {
+        "title": "13 个业务模块",
+        "description": "创意、竞争对手、调研、财务、学习、交易、决策、产品、内容、销售/CRM、反馈、数据统计和自动化笔记。"
+      },
+      "createAnything": {
+        "title": "创建任何内容",
+        "description": "用自然语言描述任何内容，AI 会自动将其归档到正确的模块。"
+      },
+      "chat": {
+        "title": "Ionexa 对话",
+        "description": "适用于任何问题的通用 AI 助手——不绑定特定模块。"
+      },
+      "export": {
+        "title": "数据导出",
+        "description": "支持按模块导出 CSV，也可将所有记录一次性导出为完整的 JSON 文件。"
+      },
+      "team": {
+        "title": "团队协作",
+        "description": "邀请团队成员，并让他们获得你所在方案等级的完整权限。"
+      },
+      "agentBuilder": {
+        "title": "AI 智能体构建器",
+        "description": "描述一个目标，即可获得一个可自主执行该目标的智能体。"
+      },
+      "websiteBuilder": {
+        "title": "网站构建器",
+        "description": "根据单条提示词由 AI 生成网站。"
+      },
+      "automationBuilder": {
+        "title": "真正的自动化构建器",
+        "description": "真实可运行的工作流自动化——而不仅仅是记录下来的想法。"
+      },
+      "aiMemory": {
+        "title": "AI 记忆",
+        "description": "跨项目的上下文与记忆，让 AI 记住重要信息。"
+      },
+      "mobileApps": {
+        "title": "移动端与桌面应用",
+        "description": "适用于 iOS、Android、macOS 和 Windows 的原生应用。"
+      },
+      "imageGeneration": {
+        "title": "AI 图像生成",
+        "description": "直接在你的工作区中生成图像。"
+      },
+      "videoGeneration": {
+        "title": "AI 视频生成与剪辑",
+        "description": "用 AI 创建并剪辑视频。"
+      },
+      "presentations": {
+        "title": "AI 演示文稿与文档",
+        "description": "根据你的数据生成精美的演示文稿和文档。"
+      },
+      "marketingBuilder": {
+        "title": "AI 营销活动构建器",
+        "description": "规划并生成完整的营销活动方案。"
+      },
+      "coding": {
+        "title": "AI 编程助手",
+        "description": "生成完整应用，而不只是代码片段。"
+      },
+      "dataAnalysis": {
+        "title": "AI 数据分析",
+        "description": "对你的数据进行深度分析并生成洞察。"
+      },
+      "teamGenerator": {
+        "title": "AI 团队生成器",
+        "description": "多个协同工作的智能体共同实现同一目标。"
+      },
+      "projectManager": {
+        "title": "AI 项目经理",
+        "description": "为任何项目自动拆分并跟踪任务。"
+      },
+      "ceoAdvisor": {
+        "title": "AI CEO 顾问",
+        "description": "随时待命的业务规划顾问。"
+      },
+      "marketplace": {
+        "title": "市场",
+        "description": "买卖智能体、自动化方案和模板。"
+      },
+      "router": {
+        "title": "通用 AI 路由器",
+        "description": "在多个 AI 提供商之间自动选择以获得最佳结果。"
+      },
+      "sync": {
+        "title": "跨平台同步",
+        "description": "在网页、移动端和桌面端获得统一的使用体验。"
+      }
     }
   },
   "auth": {
@@ -347,6 +413,7 @@
       "removeLabel": "移除 {email}",
       "removeTitle": "移除成员",
       "descriptionIncluded": "在 {plan} 方案下 — 受邀成员可获得该等级的完整访问权限,无需额外付费。",
+      "seatsUsed": "已使用 {used} / {total} 个席位",
       "setupSuccessTitle": "您的团队已准备就绪!",
       "setupSuccessBody": "在下方邀请您的第一位团队成员。",
       "roleLabel": "角色 / 职位",

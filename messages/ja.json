@@ -117,28 +117,94 @@
       "future": "将来のビジョン"
     },
     "items": {
-      "modules": { "title": "13のビジネスモジュール", "description": "アイデア、競合、リサーチ、財務、学習、トレーディング、意思決定、プロダクト、コンテンツ、営業/CRM、フィードバック、アナリティクス、自動化メモ。" },
-      "createAnything": { "title": "何でも作成", "description": "自然な文章で何でも説明するだけで、AI が自動的に適切なモジュールに振り分けます。" },
-      "chat": { "title": "Ionexa Chat", "description": "特定のモジュールに縛られない、あらゆる質問に対応する汎用 AI アシスタント。" },
-      "export": { "title": "データエクスポート", "description": "モジュールごとの CSV エクスポートに加え、記録したすべてのデータを JSON で一括エクスポート。" },
-      "team": { "title": "チームコラボレーション", "description": "チームメンバーを招待し、あなたのプランと同じレベルの完全なアクセス権を付与。" },
-      "agentBuilder": { "title": "AI エージェントビルダー", "description": "目標を説明するだけで、それを遂行する自律型エージェントが完成。" },
-      "websiteBuilder": { "title": "ウェブサイトビルダー", "description": "ひとつのプロンプトから AI がウェブサイトを生成。" },
-      "automationBuilder": { "title": "本格的な自動化ビルダー", "description": "記録されたアイデアだけでなく、実際に動作するワークフロー自動化。" },
-      "aiMemory": { "title": "AI メモリー", "description": "プロジェクトをまたいだコンテキストと記憶で、AI が重要なことを覚えている。" },
-      "mobileApps": { "title": "モバイル＆デスクトップアプリ", "description": "iOS、Android、macOS、Windows 向けのネイティブアプリ。" },
-      "imageGeneration": { "title": "AI 画像生成", "description": "ワークスペース内で直接画像を生成。" },
-      "videoGeneration": { "title": "AI 動画生成・編集", "description": "AI で動画を作成・編集。" },
-      "presentations": { "title": "AI プレゼンテーション＆ドキュメント", "description": "データから洗練されたプレゼンテーションやドキュメントを生成。" },
-      "marketingBuilder": { "title": "AI マーケティングキャンペーンビルダー", "description": "完全なマーケティングキャンペーンを計画・生成。" },
-      "coding": { "title": "AI コーディングアシスタント", "description": "コード断片だけでなく、アプリ全体を生成。" },
-      "dataAnalysis": { "title": "AI データ分析", "description": "データ全体を深く分析しインサイトを生成。" },
-      "teamGenerator": { "title": "AI チームジェネレーター", "description": "複数の連携したエージェントがひとつの目標に向けて協働。" },
-      "projectManager": { "title": "AI プロジェクトマネージャー", "description": "あらゆるプロジェクトのタスクを自動で分解・追跡。" },
-      "ceoAdvisor": { "title": "AI CEO アドバイザー", "description": "常に利用できる経営計画コンサルタント。" },
-      "marketplace": { "title": "マーケットプレイス", "description": "エージェント、自動化、テンプレートを売買。" },
-      "router": { "title": "ユニバーサル AI ルーター", "description": "複数の AI プロバイダーの中から最適な結果を自動で選択。" },
-      "sync": { "title": "クロスプラットフォーム同期", "description": "ウェブ・モバイル・デスクトップで統一された体験。" }
+      "modules": {
+        "title": "13のビジネスモジュール",
+        "description": "アイデア、競合、リサーチ、財務、学習、トレーディング、意思決定、プロダクト、コンテンツ、営業/CRM、フィードバック、アナリティクス、自動化メモ。"
+      },
+      "createAnything": {
+        "title": "何でも作成",
+        "description": "自然な文章で何でも説明するだけで、AI が自動的に適切なモジュールに振り分けます。"
+      },
+      "chat": {
+        "title": "Ionexa Chat",
+        "description": "特定のモジュールに縛られない、あらゆる質問に対応する汎用 AI アシスタント。"
+      },
+      "export": {
+        "title": "データエクスポート",
+        "description": "モジュールごとの CSV エクスポートに加え、記録したすべてのデータを JSON で一括エクスポート。"
+      },
+      "team": {
+        "title": "チームコラボレーション",
+        "description": "チームメンバーを招待し、あなたのプランと同じレベルの完全なアクセス権を付与。"
+      },
+      "agentBuilder": {
+        "title": "AI エージェントビルダー",
+        "description": "目標を説明するだけで、それを遂行する自律型エージェントが完成。"
+      },
+      "websiteBuilder": {
+        "title": "ウェブサイトビルダー",
+        "description": "ひとつのプロンプトから AI がウェブサイトを生成。"
+      },
+      "automationBuilder": {
+        "title": "本格的な自動化ビルダー",
+        "description": "記録されたアイデアだけでなく、実際に動作するワークフロー自動化。"
+      },
+      "aiMemory": {
+        "title": "AI メモリー",
+        "description": "プロジェクトをまたいだコンテキストと記憶で、AI が重要なことを覚えている。"
+      },
+      "mobileApps": {
+        "title": "モバイル＆デスクトップアプリ",
+        "description": "iOS、Android、macOS、Windows 向けのネイティブアプリ。"
+      },
+      "imageGeneration": {
+        "title": "AI 画像生成",
+        "description": "ワークスペース内で直接画像を生成。"
+      },
+      "videoGeneration": {
+        "title": "AI 動画生成・編集",
+        "description": "AI で動画を作成・編集。"
+      },
+      "presentations": {
+        "title": "AI プレゼンテーション＆ドキュメント",
+        "description": "データから洗練されたプレゼンテーションやドキュメントを生成。"
+      },
+      "marketingBuilder": {
+        "title": "AI マーケティングキャンペーンビルダー",
+        "description": "完全なマーケティングキャンペーンを計画・生成。"
+      },
+      "coding": {
+        "title": "AI コーディングアシスタント",
+        "description": "コード断片だけでなく、アプリ全体を生成。"
+      },
+      "dataAnalysis": {
+        "title": "AI データ分析",
+        "description": "データ全体を深く分析しインサイトを生成。"
+      },
+      "teamGenerator": {
+        "title": "AI チームジェネレーター",
+        "description": "複数の連携したエージェントがひとつの目標に向けて協働。"
+      },
+      "projectManager": {
+        "title": "AI プロジェクトマネージャー",
+        "description": "あらゆるプロジェクトのタスクを自動で分解・追跡。"
+      },
+      "ceoAdvisor": {
+        "title": "AI CEO アドバイザー",
+        "description": "常に利用できる経営計画コンサルタント。"
+      },
+      "marketplace": {
+        "title": "マーケットプレイス",
+        "description": "エージェント、自動化、テンプレートを売買。"
+      },
+      "router": {
+        "title": "ユニバーサル AI ルーター",
+        "description": "複数の AI プロバイダーの中から最適な結果を自動で選択。"
+      },
+      "sync": {
+        "title": "クロスプラットフォーム同期",
+        "description": "ウェブ・モバイル・デスクトップで統一された体験。"
+      }
     }
   },
   "auth": {
@@ -347,6 +413,7 @@
       "removeLabel": "{email} を削除",
       "removeTitle": "メンバーを削除",
       "descriptionIncluded": "{plan}プランでは、招待されたメンバーはこの階層に追加料金なしで完全アクセスできます。",
+      "seatsUsed": "{used} / {total} 席使用中",
       "setupSuccessTitle": "チームの準備ができました!",
       "setupSuccessBody": "以下から最初のチームメンバーを招待してください。",
       "roleLabel": "役割 / 職種",

@@ -49,11 +49,11 @@
       "presentations": "Παρουσιάσεις",
       "campaigns": "Καμπάνιες",
       "analytics": "Αναλυτικά",
-        "finance": "Πράκτορας Οικονομικών",
+      "finance": "Πράκτορας Οικονομικών",
       "content": "Marketing",
       "sales": "CRM",
       "products": "Προϊόντα",
-        "research": "Πράκτορας Έρευνας",
+      "research": "Πράκτορας Έρευνας",
       "learning": "Εκμάθηση",
       "ideas": "Ιδέες",
       "competitors": "Ανταγωνιστές",
@@ -117,28 +117,94 @@
       "future": "Μελλοντικό Όραμα"
     },
     "items": {
-      "modules": { "title": "13 Επιχειρηματικά Modules", "description": "Ιδέες, Ανταγωνιστές, Έρευνα, Οικονομικά, Εκμάθηση, Trading, Αποφάσεις, Προϊόντα, Content, Πωλήσεις/CRM, Ανατροφοδότηση, Αναλυτικά, και σημειώσεις Αυτοματισμού." },
-      "createAnything": { "title": "Create Anything", "description": "Περιέγραψε οτιδήποτε σε απλό κείμενο και το AI το καταχωρεί αυτόματα στο σωστό module." },
-      "chat": { "title": "Ionexa Chat", "description": "Ένας AI βοηθός γενικής χρήσης για οποιαδήποτε ερώτηση — όχι δεμένος σε συγκεκριμένο module." },
-      "export": { "title": "Εξαγωγή Δεδομένων", "description": "Εξαγωγή CSV ανά module, καθώς και πλήρης εξαγωγή JSON όλων όσων έχεις καταγράψει." },
-      "team": { "title": "Συνεργασία Ομάδας", "description": "Προσκάλεσε συνεργάτες και δώσε τους πλήρη πρόσβαση στο επίπεδο του πλάνου σου." },
-      "agentBuilder": { "title": "AI Agent Builder", "description": "Περίγραψε έναν στόχο και απόκτησε έναν λειτουργικό αυτόνομο agent που τον επιδιώκει." },
-      "websiteBuilder": { "title": "Website Builder", "description": "Ιστοσελίδες που δημιουργούνται από AI με ένα μόνο prompt." },
-      "automationBuilder": { "title": "Πραγματικός Automation Builder", "description": "Πραγματικός αυτοματισμός ροών εργασίας που εκτελείται — όχι απλά καταγεγραμμένες ιδέες." },
-      "aiMemory": { "title": "AI Μνήμη", "description": "Context και ανάκληση μεταξύ projects, ώστε το AI να θυμάται τι έχει σημασία." },
-      "mobileApps": { "title": "Εφαρμογές Mobile & Desktop", "description": "Native εφαρμογές για iOS, Android, macOS και Windows." },
-      "imageGeneration": { "title": "AI Δημιουργία Εικόνας", "description": "Δημιούργησε εικόνες απευθείας μέσα στον χώρο εργασίας σου." },
-      "videoGeneration": { "title": "AI Δημιουργία & Επεξεργασία Βίντεο", "description": "Δημιούργησε και επεξεργάσου βίντεο με AI." },
-      "presentations": { "title": "AI Παρουσιάσεις & Έγγραφα", "description": "Δημιούργησε γυαλισμένες παρουσιάσεις και έγγραφα από τα δεδομένα σου." },
-      "marketingBuilder": { "title": "AI Marketing Campaign Builder", "description": "Σχεδίασε και δημιούργησε πλήρεις καμπάνιες μάρκετινγκ." },
-      "coding": { "title": "AI Βοηθός Προγραμματισμού", "description": "Πλήρης δημιουργία εφαρμογών, όχι μόνο αποσπάσματα κώδικα." },
-      "dataAnalysis": { "title": "AI Ανάλυση Δεδομένων", "description": "Βαθιά ανάλυση και εξαγωγή insights από τα δεδομένα σου." },
-      "teamGenerator": { "title": "AI Team Generator", "description": "Πολλαπλοί συντονισμένοι agents που συνεργάζονται για έναν κοινό στόχο." },
-      "projectManager": { "title": "AI Project Manager", "description": "Αυτόματη ανάλυση εργασιών και παρακολούθηση για κάθε project." },
-      "ceoAdvisor": { "title": "AI Σύμβουλος CEO", "description": "Ένας σύμβουλος επιχειρηματικού σχεδιασμού, πάντα διαθέσιμος." },
-      "marketplace": { "title": "Marketplace", "description": "Αγόρασε και πούλησε agents, αυτοματισμούς και templates." },
-      "router": { "title": "Universal AI Router", "description": "Αυτόματη επιλογή μεταξύ πολλαπλών AI providers για το καλύτερο αποτέλεσμα." },
-      "sync": { "title": "Συγχρονισμός Cross-Platform", "description": "Ενιαία εμπειρία σε web, mobile και desktop." }
+      "modules": {
+        "title": "13 Επιχειρηματικά Modules",
+        "description": "Ιδέες, Ανταγωνιστές, Έρευνα, Οικονομικά, Εκμάθηση, Trading, Αποφάσεις, Προϊόντα, Content, Πωλήσεις/CRM, Ανατροφοδότηση, Αναλυτικά, και σημειώσεις Αυτοματισμού."
+      },
+      "createAnything": {
+        "title": "Create Anything",
+        "description": "Περιέγραψε οτιδήποτε σε απλό κείμενο και το AI το καταχωρεί αυτόματα στο σωστό module."
+      },
+      "chat": {
+        "title": "Ionexa Chat",
+        "description": "Ένας AI βοηθός γενικής χρήσης για οποιαδήποτε ερώτηση — όχι δεμένος σε συγκεκριμένο module."
+      },
+      "export": {
+        "title": "Εξαγωγή Δεδομένων",
+        "description": "Εξαγωγή CSV ανά module, καθώς και πλήρης εξαγωγή JSON όλων όσων έχεις καταγράψει."
+      },
+      "team": {
+        "title": "Συνεργασία Ομάδας",
+        "description": "Προσκάλεσε συνεργάτες και δώσε τους πλήρη πρόσβαση στο επίπεδο του πλάνου σου."
+      },
+      "agentBuilder": {
+        "title": "AI Agent Builder",
+        "description": "Περίγραψε έναν στόχο και απόκτησε έναν λειτουργικό αυτόνομο agent που τον επιδιώκει."
+      },
+      "websiteBuilder": {
+        "title": "Website Builder",
+        "description": "Ιστοσελίδες που δημιουργούνται από AI με ένα μόνο prompt."
+      },
+      "automationBuilder": {
+        "title": "Πραγματικός Automation Builder",
+        "description": "Πραγματικός αυτοματισμός ροών εργασίας που εκτελείται — όχι απλά καταγεγραμμένες ιδέες."
+      },
+      "aiMemory": {
+        "title": "AI Μνήμη",
+        "description": "Context και ανάκληση μεταξύ projects, ώστε το AI να θυμάται τι έχει σημασία."
+      },
+      "mobileApps": {
+        "title": "Εφαρμογές Mobile & Desktop",
+        "description": "Native εφαρμογές για iOS, Android, macOS και Windows."
+      },
+      "imageGeneration": {
+        "title": "AI Δημιουργία Εικόνας",
+        "description": "Δημιούργησε εικόνες απευθείας μέσα στον χώρο εργασίας σου."
+      },
+      "videoGeneration": {
+        "title": "AI Δημιουργία & Επεξεργασία Βίντεο",
+        "description": "Δημιούργησε και επεξεργάσου βίντεο με AI."
+      },
+      "presentations": {
+        "title": "AI Παρουσιάσεις & Έγγραφα",
+        "description": "Δημιούργησε γυαλισμένες παρουσιάσεις και έγγραφα από τα δεδομένα σου."
+      },
+      "marketingBuilder": {
+        "title": "AI Marketing Campaign Builder",
+        "description": "Σχεδίασε και δημιούργησε πλήρεις καμπάνιες μάρκετινγκ."
+      },
+      "coding": {
+        "title": "AI Βοηθός Προγραμματισμού",
+        "description": "Πλήρης δημιουργία εφαρμογών, όχι μόνο αποσπάσματα κώδικα."
+      },
+      "dataAnalysis": {
+        "title": "AI Ανάλυση Δεδομένων",
+        "description": "Βαθιά ανάλυση και εξαγωγή insights από τα δεδομένα σου."
+      },
+      "teamGenerator": {
+        "title": "AI Team Generator",
+        "description": "Πολλαπλοί συντονισμένοι agents που συνεργάζονται για έναν κοινό στόχο."
+      },
+      "projectManager": {
+        "title": "AI Project Manager",
+        "description": "Αυτόματη ανάλυση εργασιών και παρακολούθηση για κάθε project."
+      },
+      "ceoAdvisor": {
+        "title": "AI Σύμβουλος CEO",
+        "description": "Ένας σύμβουλος επιχειρηματικού σχεδιασμού, πάντα διαθέσιμος."
+      },
+      "marketplace": {
+        "title": "Marketplace",
+        "description": "Αγόρασε και πούλησε agents, αυτοματισμούς και templates."
+      },
+      "router": {
+        "title": "Universal AI Router",
+        "description": "Αυτόματη επιλογή μεταξύ πολλαπλών AI providers για το καλύτερο αποτέλεσμα."
+      },
+      "sync": {
+        "title": "Συγχρονισμός Cross-Platform",
+        "description": "Ενιαία εμπειρία σε web, mobile και desktop."
+      }
     }
   },
   "auth": {
@@ -347,6 +413,7 @@
       "removeLabel": "Αφαίρεση {email}",
       "removeTitle": "Αφαίρεση μέλους",
       "descriptionIncluded": "Στο πλάνο {plan} — τα προσκεκλημένα μέλη αποκτούν πλήρη πρόσβαση σε αυτό το επίπεδο, χωρίς επιπλέον χρέωση.",
+      "seatsUsed": "{used} από {total} θέσεις σε χρήση",
       "setupSuccessTitle": "Η ομάδα σου είναι έτοιμη!",
       "setupSuccessBody": "Προσκάλεσε το πρώτο σου μέλος ομάδας παρακάτω.",
       "roleLabel": "Ρόλος / Θέση",

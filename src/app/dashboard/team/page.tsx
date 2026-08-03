@@ -61,6 +61,13 @@ export default async function TeamPage({
     .order("invited_at", { ascending: false });
 
   const plan = tier ? getPlan(tier) : undefined;
+  // Real seat usage vs. purchased count (see api/team/invite's new
+  // seat-limit enforcement) — shown so a Professional-tier owner can see
+  // how many seats they've used BEFORE hitting the limit, not just after
+  // a rejected invite. Only meaningful for pay-per-seat plans; Ultimate/
+  // Enterprise's "included, unlimited" copy already covers that case.
+  const seatCount = typeof user.user_metadata?.seat_count === "number" ? user.user_metadata.seat_count : 0;
+  const activeMemberCount = members?.length ?? 0;
 
   return (
     <main className="min-h-full bg-dot-grid">
@@ -77,6 +84,12 @@ export default async function TeamPage({
                 })
           }
         />
+
+        {!isAdmin && !plan?.teamSeatsIncluded && (
+          <p className="mb-6 text-xs text-muted">
+            {t("seatsUsed", { used: activeMemberCount, total: seatCount })}
+          </p>
+        )}
 
         {justSetUp && (
           <div className="mb-6 rounded-2xl border border-emerald-800 bg-emerald-950/30 px-4 py-3 text-sm text-emerald-400">

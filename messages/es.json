@@ -117,28 +117,94 @@
       "future": "Visión futura"
     },
     "items": {
-      "modules": { "title": "13 módulos de negocio", "description": "Ideas, Competidores, Investigación, Finanzas, Aprendizaje, Trading, Decisiones, Productos, Contenido, Ventas/CRM, Comentarios, Analítica y notas de Automatización." },
-      "createAnything": { "title": "Crear Cualquier Cosa", "description": "Describe cualquier cosa en texto y la IA la clasifica automáticamente en el módulo correcto." },
-      "chat": { "title": "Ionexa Chat", "description": "Un asistente de IA de propósito general para cualquier pregunta — no ligado a un módulo específico." },
-      "export": { "title": "Exportación de datos", "description": "Exportación CSV por módulo, además de una exportación JSON completa de todo lo registrado." },
-      "team": { "title": "Colaboración en equipo", "description": "Invita a compañeros y dales acceso completo al nivel de tu plan." },
-      "agentBuilder": { "title": "Creador de Agentes AI", "description": "Describe un objetivo y obtén un agente autónomo funcional que lo persigue." },
-      "websiteBuilder": { "title": "Creador de sitios web", "description": "Sitios web generados por IA a partir de un solo prompt." },
-      "automationBuilder": { "title": "Creador de automatización real", "description": "Automatización de flujos de trabajo real que se ejecuta — no solo ideas registradas." },
-      "aiMemory": { "title": "Memoria AI", "description": "Contexto y memoria entre proyectos, para que la IA recuerde lo importante." },
-      "mobileApps": { "title": "Apps móviles y de escritorio", "description": "Apps nativas para iOS, Android, macOS y Windows." },
-      "imageGeneration": { "title": "Generación de imágenes con IA", "description": "Genera imágenes directamente dentro de tu espacio de trabajo." },
-      "videoGeneration": { "title": "Generación y edición de video con IA", "description": "Crea y edita video con IA." },
-      "presentations": { "title": "Presentaciones y documentos con IA", "description": "Genera presentaciones y documentos pulidos a partir de tus datos." },
-      "marketingBuilder": { "title": "Creador de campañas de marketing con IA", "description": "Planifica y genera campañas de marketing completas." },
-      "coding": { "title": "Asistente de programación con IA", "description": "Generación de apps completas, no solo fragmentos." },
-      "dataAnalysis": { "title": "Análisis de datos con IA", "description": "Análisis profundo y generación de insights en todos tus datos." },
-      "teamGenerator": { "title": "Generador de equipos AI", "description": "Múltiples agentes coordinados trabajando juntos en un mismo objetivo." },
-      "projectManager": { "title": "Gestor de proyectos AI", "description": "Desglose y seguimiento automático de tareas para cualquier proyecto." },
-      "ceoAdvisor": { "title": "Asesor CEO AI", "description": "Un consultor de planificación de negocio, siempre disponible." },
-      "marketplace": { "title": "Mercado", "description": "Compra y vende agentes, automatizaciones y plantillas." },
-      "router": { "title": "Router Universal de IA", "description": "Selección automática entre varios proveedores de IA para el mejor resultado." },
-      "sync": { "title": "Sincronización multiplataforma", "description": "Una experiencia unificada en web, móvil y escritorio." }
+      "modules": {
+        "title": "13 módulos de negocio",
+        "description": "Ideas, Competidores, Investigación, Finanzas, Aprendizaje, Trading, Decisiones, Productos, Contenido, Ventas/CRM, Comentarios, Analítica y notas de Automatización."
+      },
+      "createAnything": {
+        "title": "Crear Cualquier Cosa",
+        "description": "Describe cualquier cosa en texto y la IA la clasifica automáticamente en el módulo correcto."
+      },
+      "chat": {
+        "title": "Ionexa Chat",
+        "description": "Un asistente de IA de propósito general para cualquier pregunta — no ligado a un módulo específico."
+      },
+      "export": {
+        "title": "Exportación de datos",
+        "description": "Exportación CSV por módulo, además de una exportación JSON completa de todo lo registrado."
+      },
+      "team": {
+        "title": "Colaboración en equipo",
+        "description": "Invita a compañeros y dales acceso completo al nivel de tu plan."
+      },
+      "agentBuilder": {
+        "title": "Creador de Agentes AI",
+        "description": "Describe un objetivo y obtén un agente autónomo funcional que lo persigue."
+      },
+      "websiteBuilder": {
+        "title": "Creador de sitios web",
+        "description": "Sitios web generados por IA a partir de un solo prompt."
+      },
+      "automationBuilder": {
+        "title": "Creador de automatización real",
+        "description": "Automatización de flujos de trabajo real que se ejecuta — no solo ideas registradas."
+      },
+      "aiMemory": {
+        "title": "Memoria AI",
+        "description": "Contexto y memoria entre proyectos, para que la IA recuerde lo importante."
+      },
+      "mobileApps": {
+        "title": "Apps móviles y de escritorio",
+        "description": "Apps nativas para iOS, Android, macOS y Windows."
+      },
+      "imageGeneration": {
+        "title": "Generación de imágenes con IA",
+        "description": "Genera imágenes directamente dentro de tu espacio de trabajo."
+      },
+      "videoGeneration": {
+        "title": "Generación y edición de video con IA",
+        "description": "Crea y edita video con IA."
+      },
+      "presentations": {
+        "title": "Presentaciones y documentos con IA",
+        "description": "Genera presentaciones y documentos pulidos a partir de tus datos."
+      },
+      "marketingBuilder": {
+        "title": "Creador de campañas de marketing con IA",
+        "description": "Planifica y genera campañas de marketing completas."
+      },
+      "coding": {
+        "title": "Asistente de programación con IA",
+        "description": "Generación de apps completas, no solo fragmentos."
+      },
+      "dataAnalysis": {
+        "title": "Análisis de datos con IA",
+        "description": "Análisis profundo y generación de insights en todos tus datos."
+      },
+      "teamGenerator": {
+        "title": "Generador de equipos AI",
+        "description": "Múltiples agentes coordinados trabajando juntos en un mismo objetivo."
+      },
+      "projectManager": {
+        "title": "Gestor de proyectos AI",
+        "description": "Desglose y seguimiento automático de tareas para cualquier proyecto."
+      },
+      "ceoAdvisor": {
+        "title": "Asesor CEO AI",
+        "description": "Un consultor de planificación de negocio, siempre disponible."
+      },
+      "marketplace": {
+        "title": "Mercado",
+        "description": "Compra y vende agentes, automatizaciones y plantillas."
+      },
+      "router": {
+        "title": "Router Universal de IA",
+        "description": "Selección automática entre varios proveedores de IA para el mejor resultado."
+      },
+      "sync": {
+        "title": "Sincronización multiplataforma",
+        "description": "Una experiencia unificada en web, móvil y escritorio."
+      }
     }
   },
   "auth": {
@@ -347,6 +413,7 @@
       "removeLabel": "Quitar a {email}",
       "removeTitle": "Quitar miembro",
       "descriptionIncluded": "En el plan {plan} — los miembros invitados obtienen acceso completo a este nivel, incluido sin cargo adicional.",
+      "seatsUsed": "{used} de {total} asientos usados",
       "setupSuccessTitle": "¡Tu equipo está listo!",
       "setupSuccessBody": "Invita a tu primer miembro del equipo a continuación.",
       "roleLabel": "Rol / Puesto",

@@ -1527,6 +1527,17 @@ create policy "insert_own_security_check_log" on public.security_check_log
 -- user can't chain unlimited free retries off a single flagged row.
 -- ============================================================================
 
+-- The original user_websites_status_check constraint (defined earlier in
+-- this file, before this 'flagged' status existed) only allows
+-- 'pending'/'processing'/'completed'/'failed' — widen it here rather than
+-- editing the original create-table block in place, consistent with this
+-- file's append-only pattern for post-creation schema changes.
+alter table public.user_websites
+  drop constraint if exists user_websites_status_check;
+alter table public.user_websites
+  add constraint user_websites_status_check
+  check (status in ('pending', 'processing', 'completed', 'failed', 'flagged'));
+
 alter table public.user_websites
   add column if not exists free_retry_used boolean not null default false;
 

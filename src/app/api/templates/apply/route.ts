@@ -36,18 +36,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
-    let appliedCount = 0;
-    for (const entry of template.entries) {
-      const { error } = await supabase
-        .from(entry.table)
-        .insert({ ...entry.payload, user_id: user.id });
+    // Parallelized (each entry writes to its own table, or an independent
+    // row of the same table, so there's no ordering dependency between
+    // them) — same best-effort semantics as before (one failed insert
+    // never blocks the others), just without paying each insert's latency
+    // sequentially.
+    const results = await Promise.all(
+      template.entries.map(async (entry) => {
+        const { error } = await supabase
+          .from(entry.table)
+          .insert({ ...entry.payload, user_id: user.id });
 
-      if (error) {
-        logApiError("/api/templates/apply", error, { stage: "insert", table: entry.table });
-        continue;
-      }
-      appliedCount += 1;
-    }
+        if (error) {
+          logApiError("/api/templates/apply", error, { stage: "insert", table: entry.table });
+          return false;
+        }
+        return true;
+      })
+    );
+    const appliedCount = results.filter(Boolean).length;
 
     if (appliedCount === 0) {
       return NextResponse.json(

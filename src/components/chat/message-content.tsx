@@ -1,3 +1,4 @@
+import { memo } from "react";
 import ReactMarkdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -47,7 +48,13 @@ const markdownComponents: Components = {
   ),
 };
 
-export function MessageContent({ content }: { content: string }) {
+// Memoized: depends only on `content` (a plain string, compared by value),
+// so a re-render of the parent list (e.g. chat-workspace.tsx's
+// streamingText updating once per streamed delta chunk) no longer forces
+// every ALREADY-FINISHED message to re-parse its markdown — only the one
+// message whose `content` actually changed does. Pure performance win,
+// same rendered output either way.
+export const MessageContent = memo(function MessageContent({ content }: { content: string }) {
   return (
     <div className="text-sm leading-relaxed">
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
@@ -55,4 +62,4 @@ export function MessageContent({ content }: { content: string }) {
       </ReactMarkdown>
     </div>
   );
-}
+});

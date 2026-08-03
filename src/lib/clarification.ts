@@ -52,11 +52,29 @@ const CLARIFICATION_TOOL: Anthropic.Tool = {
   },
 };
 
+// Appended to every kind below — a request can otherwise read as
+// perfectly clear (a real subject, a real goal) while still logically
+// requiring specific real-world FACTS that were never given: exact
+// prices, a real address/phone number, business hours, or the name of a
+// specific product/service. Without this, the downstream generation step
+// would have to either invent plausible-looking fake data (bad — the
+// user might publish/act on it without noticing) or silently omit it.
+// This check exists specifically to catch that case and ask directly,
+// even when the request is otherwise unambiguous. If the user answers a
+// question like this with something like "use whatever"/"I don't care",
+// the generation step itself (not this check) is responsible for
+// visibly marking whatever it invents as placeholder data — see
+// lib/website-builder.ts's PLACEHOLDER_DATA_SECTION for the website
+// case.
+const CRITICAL_FACTS_INSTRUCTION = `
+
+CRITICAL REAL FACTS: separately from the above, if actually fulfilling this request would obviously require specific real-world facts that are NOT given — exact prices, a real address, a phone number, exact opening/business hours, or the name of a specific product/service being described — treat that as needing clarification too, even if the request otherwise reads as clear. Ask directly for exactly the missing fact(s) (e.g. "What are your prices/menu items?", "What's the business address and phone number?"). Do NOT ask for facts that don't matter for a reasonable, generic-but-usable result (e.g. an exact tagline, a specific font, or minor content the request doesn't imply is essential) — this is only for facts a real person would need to know before the output could be considered accurate rather than made up.`;
+
 const SYSTEM_PROMPTS: Record<ClarificationKind, string> = {
-  website: `You review a description of a website someone wants built, before it's sent to generation. Ask clarifying questions ONLY if genuinely important details are missing — the kind that would produce a noticeably worse or generic-looking site without them: what the site/business actually is, what sections or content it needs, or a style/color direction if none is implied. Do NOT ask about things a reasonable default already covers (fonts, exact spacing, minor copy). A description naming a real subject with some concrete detail (e.g. a location, an industry, a stated purpose) is already good enough — do not ask anything.`,
-  mission: `You review a goal for an AI-planned multi-step project plan, before it's sent to planning. Ask clarifying questions ONLY if the goal is so vague a useful step-by-step plan can't be built from it — missing what's actually being pursued, or a critical constraint (timeline, scope, or target outcome) that would materially change the plan. A goal that names a real, specific objective is already good enough — do not ask anything just to gather more nice-to-have detail.`,
-  automation: `You review a description of a recurring automation someone wants set up, before it's sent to creation. Ask clarifying questions ONLY if the exact intended outcome is genuinely ambiguous — e.g. it's unclear what action should actually happen, or which module/record type it applies to. Do NOT ask about frequency/scheduling — that is a separate, already-required field the user fills in directly, never ask about it here. A description that says what should happen is already good enough.`,
-  create: `You review a free-text entry for "Create Anything" (an AI classifier that routes plain-text descriptions into the right business-tracking module — an idea, a trade, a decision, feedback, etc.), before it's classified and saved. Ask clarifying questions ONLY if the entry is so vague or ambiguous that it's genuinely unclear what it is or which module it belongs in. Most entries, even short ones, are already clear enough (e.g. a single trade, a one-line idea, a short note) — do not ask anything for those.`,
+  website: `You review a description of a website someone wants built, before it's sent to generation. Ask clarifying questions ONLY if genuinely important details are missing — the kind that would produce a noticeably worse or generic-looking site without them: what the site/business actually is, what sections or content it needs, or a style/color direction if none is implied. Do NOT ask about things a reasonable default already covers (fonts, exact spacing, minor copy). A description naming a real subject with some concrete detail (e.g. a location, an industry, a stated purpose) is already good enough — do not ask anything.${CRITICAL_FACTS_INSTRUCTION}`,
+  mission: `You review a goal for an AI-planned multi-step project plan, before it's sent to planning. Ask clarifying questions ONLY if the goal is so vague a useful step-by-step plan can't be built from it — missing what's actually being pursued, or a critical constraint (timeline, scope, or target outcome) that would materially change the plan. A goal that names a real, specific objective is already good enough — do not ask anything just to gather more nice-to-have detail.${CRITICAL_FACTS_INSTRUCTION}`,
+  automation: `You review a description of a recurring automation someone wants set up, before it's sent to creation. Ask clarifying questions ONLY if the exact intended outcome is genuinely ambiguous — e.g. it's unclear what action should actually happen, or which module/record type it applies to. Do NOT ask about frequency/scheduling — that is a separate, already-required field the user fills in directly, never ask about it here. A description that says what should happen is already good enough.${CRITICAL_FACTS_INSTRUCTION}`,
+  create: `You review a free-text entry for "Create Anything" (an AI classifier that routes plain-text descriptions into the right business-tracking module — an idea, a trade, a decision, feedback, etc.), before it's classified and saved. Ask clarifying questions ONLY if the entry is so vague or ambiguous that it's genuinely unclear what it is or which module it belongs in. Most entries, even short ones, are already clear enough (e.g. a single trade, a one-line idea, a short note) — do not ask anything for those.${CRITICAL_FACTS_INSTRUCTION}`,
 };
 
 export async function checkNeedsClarification(

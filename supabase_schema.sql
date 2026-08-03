@@ -1001,6 +1001,13 @@ create table public.user_websites (
   -- race in application code. Defaults to null so it's a no-op for every
   -- row that already existed before this column did.
   editing_started_at timestamptz,
+  -- "Stuck work" detection (api/cron/scheduled-runs's daily cron) — set
+  -- once an email has been sent telling the user a generation has been
+  -- stuck in pending/processing for over 24h, so the SAME stuck job
+  -- doesn't re-notify them every single day the cron runs. Defaults to
+  -- null so it's a no-op for every row that already existed before this
+  -- column did.
+  stuck_notified_at timestamptz,
   created_at timestamptz not null default now()
 );
 
@@ -1021,6 +1028,9 @@ alter table public.user_websites
 
 alter table public.user_websites
   add column if not exists editing_started_at timestamptz;
+
+alter table public.user_websites
+  add column if not exists stuck_notified_at timestamptz;
 
 -- Idempotency guard for INITIAL generation (api/websites/generate/
 -- route.ts) — a genuine DB-level constraint (not just an application-
@@ -1389,11 +1399,26 @@ create table public.user_automations (
   is_active boolean not null default true,
   last_run_at timestamptz,
   next_run_at timestamptz not null default now(),
+  -- Idempotency/state-persistence guard for api/cron/scheduled-runs — a
+  -- real gap found in this pass's V2 reliability audit: the cron's "due"
+  -- query (is_active AND next_run_at <= now()) selects automations
+  -- BEFORE next_run_at is advanced, so two overlapping cron invocations
+  -- (a manual trigger during a scheduled run, a platform retry) could
+  -- both pick up and actually run the SAME automation. Claimed via an
+  -- atomic conditional UPDATE right before running (same pattern as
+  -- user_websites.editing_started_at), released after, with a stale-
+  -- claim self-expiry so a crashed run can't permanently stick an
+  -- automation. Defaults to null so it's a no-op for every row that
+  -- already existed before this column did.
+  processing_started_at timestamptz,
   created_at timestamptz not null default now()
 );
 
 create index if not exists user_automations_user_id_idx
   on public.user_automations (user_id);
+
+alter table public.user_automations
+  add column if not exists processing_started_at timestamptz;
 
 create index if not exists user_automations_active_next_run_idx
   on public.user_automations (is_active, next_run_at);

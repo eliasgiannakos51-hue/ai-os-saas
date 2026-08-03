@@ -8,6 +8,7 @@ import { buildPriorStepsContext } from "@/lib/mission-context";
 import { computeNextRunAt } from "@/lib/automation-schedule";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { sendScheduledRunCompleteEmail } from "@/lib/email/send-scheduled-run-complete-email";
+import { sendStuckGenerationEmail } from "@/lib/email/send-stuck-generation-email";
 import { logApiError } from "@/lib/log-error";
 import type { Mission } from "@/types/mission";
 import type { ScheduledAgentRun } from "@/types/scheduled-agent-run";
@@ -291,6 +292,26 @@ export async function GET(request: Request) {
       const plan = bypassCredits ? null : await resolveEffectivePlan(user);
 
       for (const automation of dueForUser) {
+        // Atomic claim (see supabase_schema.sql's processing_started_at
+        // comment) — guards against two overlapping cron invocations
+        // both running the SAME due automation before next_run_at is
+        // advanced. A 10-minute stale window is generous relative to
+        // this route's own maxDuration, so a genuinely still-running
+        // claim is never stolen out from under it, while a crashed
+        // invocation's claim still self-expires instead of sticking
+        // forever.
+        const staleClaimCutoff = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+        const { data: claimedAutomationRows } = await admin
+          .from("user_automations")
+          .update({ processing_started_at: new Date().toISOString() })
+          .eq("id", automation.id)
+          .or(`processing_started_at.is.null,processing_started_at.lt.${staleClaimCutoff}`)
+          .select("id");
+        if (!claimedAutomationRows || claimedAutomationRows.length === 0) {
+          continue; // another concurrent invocation already claimed this one
+        }
+
+        try {
         const advancedNextRunAt = computeNextRunAt(
           automation.frequency,
           new Date(),
@@ -373,6 +394,62 @@ export async function GET(request: Request) {
           succeeded: true,
           detail: result.outputSummary,
         });
+        } finally {
+          // Release the claim regardless of outcome — every exit path
+          // above (early `continue` or the success fall-through) still
+          // runs this. Best-effort: if this update itself fails, the
+          // claim still self-expires after 10 minutes via the
+          // staleClaimCutoff check above.
+          const { error: releaseAutomationClaimError } = await admin
+            .from("user_automations")
+            .update({ processing_started_at: null })
+            .eq("id", automation.id);
+          if (releaseAutomationClaimError) {
+            logApiError("/api/cron/scheduled-runs", releaseAutomationClaimError, {
+              stage: "release_automation_claim",
+              automationId: automation.id,
+            });
+          }
+        }
+      }
+    }
+
+    // Phase 3 — "Stuck work" detection. Website Builder is the only V2
+    // feature with a genuine background-job architecture (pending ->
+    // processing -> completed/failed, running independently of whether
+    // anyone is watching) that can actually get stuck: Mission Control
+    // steps only ever change state synchronously from a user click
+    // (never "stuck" — there's no background job to lose), and
+    // Automations always advance next_run_at regardless of outcome (see
+    // Phase 2 above), so a failed run reschedules itself rather than
+    // getting stuck. A row still pending/processing after 24h is almost
+    // certainly dead (the serverless function that was running it got
+    // killed without ever reaching a terminal status) — email the owner
+    // once (stuck_notified_at guards against re-notifying on every
+    // subsequent daily run for the same stuck row).
+    let stuckNotified = 0;
+    const stuckCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: stuckWebsites, error: stuckWebsitesError } = await admin
+      .from("user_websites")
+      .select("id, user_id, name")
+      .in("status", ["pending", "processing"])
+      .lt("created_at", stuckCutoff)
+      .is("stuck_notified_at", null);
+
+    if (stuckWebsitesError) {
+      logApiError("/api/cron/scheduled-runs", stuckWebsitesError, { stage: "load_stuck_websites" });
+    } else {
+      for (const website of stuckWebsites ?? []) {
+        const { data: ownerAuth } = await admin.auth.admin.getUserById(website.user_id);
+        const ownerEmail = ownerAuth?.user?.email;
+        if (ownerEmail) {
+          void sendStuckGenerationEmail({ email: ownerEmail, websiteName: website.name });
+        }
+        await admin
+          .from("user_websites")
+          .update({ stuck_notified_at: new Date().toISOString() })
+          .eq("id", website.id);
+        stuckNotified++;
       }
     }
 
@@ -383,6 +460,7 @@ export async function GET(request: Request) {
       deferred,
       automationsCompleted,
       automationsFailed,
+      stuckNotified,
     });
   } catch (err) {
     logApiError("/api/cron/scheduled-runs", err);

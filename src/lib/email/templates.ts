@@ -327,6 +327,43 @@ const LEAD_BADGES: Record<string, { emoji: string; label: string; color: string 
   unclear: { emoji: "⚪", label: "Unclear", color: "#a3a3a3" },
 };
 
+// "Stuck work" detection (api/cron/scheduled-runs's daily cron) — a
+// Website Builder generation/edit that's been sitting in pending/
+// processing for over 24h, almost certainly because the serverless
+// function that was running it got killed by the platform without ever
+// reaching a terminal status (see lib/website-generation-limits.ts's
+// stale-job detection, which only fires when someone happens to be
+// polling that specific website — this is the proactive version, sent
+// even if the user never comes back to check).
+export function stuckGenerationEmailHtml({
+  websiteName,
+  dashboardUrl,
+}: {
+  websiteName: string;
+  dashboardUrl: string;
+}): string {
+  const safeWebsiteName = escapeHtml(websiteName);
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">website builder</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">
+      "${safeWebsiteName}" seems stuck
+    </h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      This generation has been running for over 24 hours without finishing — that's not normal, and it's likely stuck rather than still working. No credits were charged for it. Open it below to retry or delete it.
+    </p>
+    <p style="margin:0;">
+      <a href="${dashboardUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        Open Website Builder
+      </a>
+    </p>
+  `;
+
+  return layout({
+    preheader: `"${websiteName}" has been stuck generating for over 24 hours.`,
+    bodyHtml,
+  });
+}
+
 export function websiteFormSubmissionEmailHtml({
   websiteName,
   fields,

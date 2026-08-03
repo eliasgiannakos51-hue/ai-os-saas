@@ -387,7 +387,13 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
     e.preventDefault();
     const trimmedName = name.trim();
     const trimmedDescription = description.trim();
-    if (!trimmedName || !trimmedDescription || generating) return;
+    // pendingClarification blocks a second submission specifically
+    // because the Website Name <input type="text"> isn't disabled while
+    // the clarification prompt is showing — pressing Enter in it (a
+    // plain text input, unlike the textarea, submits its form by
+    // default) would otherwise silently start a second, independent
+    // generation attempt and abandon the pending one's questions.
+    if (!trimmedName || !trimmedDescription || generating || pendingClarification) return;
 
     setGenerating(true);
     setError(null);

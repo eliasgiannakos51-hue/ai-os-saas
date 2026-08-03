@@ -19,6 +19,11 @@ export const dynamic = "force-dynamic";
 // reflection-generator.tsx's `scope` prop) — trading itself plus the two
 // modules most likely to be linked to a trade via the Knowledge Graph.
 const TRADING_SCOPE_TABLES = ["trades", "finance_entries", "decisions"];
+// Product Workflow's "Product Reflection" scope (see
+// components/reflection/reflection-generator.tsx's `scope` prop) —
+// products plus the two modules most likely to be linked to a product via
+// the Knowledge Graph.
+const PRODUCT_SCOPE_TABLES = ["products", "content", "leads"];
 
 // On-demand Weekly Reflection: computes real this-week-vs-last-week stats
 // (lib/reflection.ts) across every module and every mission, then hands
@@ -38,7 +43,8 @@ export async function POST(request: Request) {
     } catch {
       scope = null;
     }
-    const tableFilter = scope === "trading" ? TRADING_SCOPE_TABLES : undefined;
+    const tableFilter =
+      scope === "trading" ? TRADING_SCOPE_TABLES : scope === "product" ? PRODUCT_SCOPE_TABLES : undefined;
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {

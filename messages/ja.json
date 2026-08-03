@@ -61,6 +61,7 @@
       "feedback": "フィードバック",
       "trading": "トレーディング",
       "tradingWorkflow": "トレーディングワークフロー",
+      "productWorkflow": "プロダクトワークフロー",
       "automation": "自動化",
       "marketplace": "マーケットプレイス"
     }
@@ -383,6 +384,7 @@
       "emptyState": "ミッションはまだありません — 上に目標を記述して最初の計画を作成してください。",
       "createWithAi": "AIで作成",
       "creating": "作成中...",
+      "openWebsiteBuilder": "Website Builderを開く",
       "viewIn": "{module}で表示",
       "reviewMission": "ミッションを評価",
       "reviewing": "評価中...",
@@ -437,6 +439,27 @@
       "viewFullTimeline": "完全なタイムラインを見る →",
       "reflectionTitle": "トレーディング振り返り",
       "tradesTitle": "トレード"
+    },
+    "productWorkflow": {
+      "title": "プロダクトワークフロー",
+      "description": "製品の記録、ナレッジグラフのリンク、タイムライン、メンター、ミッション、週次振り返りをすべて一箇所に。",
+      "insight": {
+        "title": "パターンインサイト",
+        "noProducts": "製品を追加すると、ここにパターンが表示され始めます。",
+        "notEnoughData": "パターンを検出するにはまだ十分な製品履歴がありません — もう少し製品を追加してください。",
+        "detailPattern": "より詳細な計画（機能、ロードマップ、ローンチプラン、ターゲット層）を持つ製品は、{detailedCount}件の製品で平均{detailedAvg}件のリンクされたエントリがあり、詳細度の低い製品（{briefCount}件）では平均{briefAvg}件です。"
+      },
+      "mentorButton": "プロダクトメンター",
+      "mentorButtonDescription": "直近20件の製品をコンテキストとして読み込んだ状態で、Ionexa Chatをメンターモードで開きます。",
+      "mentorChatPrefill": "私の製品計画を確認して、ローンチ前に不足している点についてフィードバックをください。",
+      "missionButton": "新製品をローンチ",
+      "missionButtonDescription": "新製品をローンチするためのAIミッションプラン(ターゲット層、価格設定、ランディングページなど)を作成します。",
+      "missionButtonCreating": "作成中...",
+      "missionGoal": "新製品をローンチする：ターゲット層を定義し、価格を設定し、ランディングページを作成する",
+      "timelineTitle": "プロダクトタイムライン",
+      "viewFullTimeline": "完全なタイムラインを見る →",
+      "reflectionTitle": "プロダクト振り返り",
+      "productsTitle": "製品"
     },
     "energyCheckIn": {
       "title": "エネルギーチェックイン",

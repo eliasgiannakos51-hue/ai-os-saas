@@ -61,6 +61,7 @@
       "feedback": "反馈",
       "trading": "交易",
       "tradingWorkflow": "交易工作流",
+      "productWorkflow": "产品工作流",
       "automation": "自动化",
       "marketplace": "市场"
     }
@@ -383,6 +384,7 @@
       "emptyState": "还没有任务 — 在上方描述一个目标以获取你的第一个计划。",
       "createWithAi": "用 AI 创建",
       "creating": "创建中...",
+      "openWebsiteBuilder": "打开网站构建器",
       "viewIn": "在{module}中查看",
       "reviewMission": "评估任务",
       "reviewing": "评估中...",
@@ -437,6 +439,27 @@
       "viewFullTimeline": "查看完整时间线 →",
       "reflectionTitle": "交易回顾",
       "tradesTitle": "交易记录"
+    },
+    "productWorkflow": {
+      "title": "产品工作流",
+      "description": "把产品发布记录、知识图谱链接、时间线、导师、任务和每周回顾整合在一个地方。",
+      "insight": {
+        "title": "模式洞察",
+        "noProducts": "添加一个产品即可在此查看模式。",
+        "notEnoughData": "产品历史还不够,无法检测出模式 — 请再添加几个产品。",
+        "detailPattern": "规划更详细（功能、路线图、发布计划、目标受众）的产品在{detailedCount}个产品中平均有{detailedAvg}条关联记录,而规划较简略的产品在{briefCount}个中平均只有{briefAvg}条。"
+      },
+      "mentorButton": "产品导师",
+      "mentorButtonDescription": "以导师模式打开 Ionexa Chat,并已加载你最近20个产品作为上下文。",
+      "mentorChatPrefill": "审查我的产品计划,并就发布前还缺少什么给我反馈。",
+      "missionButton": "启动一个新产品",
+      "missionButtonDescription": "创建一个AI任务计划来发布新产品——目标受众、定价、落地页等。",
+      "missionButtonCreating": "创建中...",
+      "missionGoal": "发布一个新产品：确定目标受众、设定价格并创建落地页",
+      "timelineTitle": "产品时间线",
+      "viewFullTimeline": "查看完整时间线 →",
+      "reflectionTitle": "产品回顾",
+      "productsTitle": "产品"
     },
     "energyCheckIn": {
       "title": "能量签到",

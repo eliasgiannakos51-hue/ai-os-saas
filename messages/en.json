@@ -61,6 +61,7 @@
       "feedback": "Feedback",
       "trading": "Trading",
       "tradingWorkflow": "Trading Workflow",
+      "productWorkflow": "Product Workflow",
       "automation": "Automation",
       "marketplace": "Marketplace"
     }
@@ -383,6 +384,7 @@
       "emptyState": "No missions yet — describe a goal above to get your first plan.",
       "createWithAi": "Create with AI",
       "creating": "Creating...",
+      "openWebsiteBuilder": "Open Website Builder",
       "viewIn": "View in {module}",
       "reviewMission": "Review Mission",
       "reviewing": "Reviewing...",
@@ -437,6 +439,27 @@
       "viewFullTimeline": "View full timeline →",
       "reflectionTitle": "Trading Reflection",
       "tradesTitle": "Trades"
+    },
+    "productWorkflow": {
+      "title": "Product Workflow",
+      "description": "Everything product launch in one place — your products, Knowledge Graph links, Timeline, Mentor, Missions, and Reflection.",
+      "insight": {
+        "title": "Pattern Insight",
+        "noProducts": "Add a product to start seeing patterns here.",
+        "notEnoughData": "Not enough product history yet to detect a pattern — add a few more products.",
+        "detailPattern": "Products with more detailed planning (features, roadmap, launch plan, audience) average {detailedAvg} linked entries over {detailedCount} products, vs {briefAvg} for less detailed ones over {briefCount} products."
+      },
+      "mentorButton": "Product Mentor",
+      "mentorButtonDescription": "Open Ionexa Chat in Mentor Mode with your last 20 products already loaded as context.",
+      "mentorChatPrefill": "Review my product plans and give me feedback on what's missing before launch.",
+      "missionButton": "Launch a New Product",
+      "missionButtonDescription": "Create an AI mission plan to launch a new product — audience, pricing, landing page, and more.",
+      "missionButtonCreating": "Creating...",
+      "missionGoal": "Launch a new product: define the target audience, set pricing, and create a landing page",
+      "timelineTitle": "Product Timeline",
+      "viewFullTimeline": "View full timeline →",
+      "reflectionTitle": "Product Reflection",
+      "productsTitle": "Products"
     },
     "energyCheckIn": {
       "title": "Energy Check-In",

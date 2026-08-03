@@ -29,7 +29,8 @@ export default async function ChatPage({
     .order("updated_at", { ascending: false });
 
   const userInitial = (user.email?.[0] ?? "?").toUpperCase();
-  const initialMentorPreset = searchParams.preset === "trading" ? "trading" : undefined;
+  const initialMentorPreset =
+    searchParams.preset === "trading" ? "trading" : searchParams.preset === "product" ? "product" : undefined;
 
   return (
     <main className="h-[calc(100vh-4rem)]">

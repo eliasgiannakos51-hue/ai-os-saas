@@ -51,23 +51,29 @@ export function ChatWorkspace({
 }: {
   initialConversations: ChatConversation[];
   userInitial: string;
-  // Trading Workflow's "Trading Mentor" button links here with
-  // ?preset=trading (see dashboard/chat/page.tsx) — when set, Mentor Mode
-  // starts pre-enabled with the input pre-filled, and every message this
-  // session tells the API to load trading-specific context (see
-  // api/chat/route.ts's mentorPreset). Omitted entirely by every other
-  // entry point into this page, so default chat behavior is untouched.
-  initialMentorPreset?: "trading";
+  // Trading Workflow's "Trading Mentor" and Product Workflow's "Product
+  // Mentor" buttons link here with ?preset=trading / ?preset=product (see
+  // dashboard/chat/page.tsx) — when set, Mentor Mode starts pre-enabled
+  // with the input pre-filled, and every message this session tells the
+  // API to load workflow-specific context (see api/chat/route.ts's
+  // mentorPreset). Omitted entirely by every other entry point into this
+  // page, so default chat behavior is untouched.
+  initialMentorPreset?: "trading" | "product";
 }) {
-  const t = useTranslations("dashboard.tradingWorkflow");
+  const tTrading = useTranslations("dashboard.tradingWorkflow");
+  const tProduct = useTranslations("dashboard.productWorkflow");
   const { refresh: refreshCredits } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState(() =>
-    initialMentorPreset === "trading" ? t("mentorChatPrefill") : ""
+    initialMentorPreset === "trading"
+      ? tTrading("mentorChatPrefill")
+      : initialMentorPreset === "product"
+        ? tProduct("mentorChatPrefill")
+        : ""
   );
-  const [mentorPreset] = useState<"trading" | null>(initialMentorPreset ?? null);
+  const [mentorPreset] = useState<"trading" | "product" | null>(initialMentorPreset ?? null);
   // Not persisted per conversation on purpose — a runtime toggle for the
   // NEXT message sent, same as the API route treating it as a per-request
   // flag (see api/chat/route.ts) rather than conversation state.

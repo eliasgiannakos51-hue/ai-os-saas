@@ -61,6 +61,7 @@
       "feedback": "Retours",
       "trading": "Trading",
       "tradingWorkflow": "Flux Trading",
+      "productWorkflow": "Flux Produit",
       "automation": "Automatisation",
       "marketplace": "Marketplace"
     }
@@ -383,6 +384,7 @@
       "emptyState": "Aucune mission pour l'instant — décrivez un objectif ci-dessus pour obtenir votre premier plan.",
       "createWithAi": "Créer avec l'IA",
       "creating": "Création...",
+      "openWebsiteBuilder": "Ouvrir Website Builder",
       "viewIn": "Voir dans {module}",
       "reviewMission": "Évaluer la Mission",
       "reviewing": "Évaluation...",
@@ -437,6 +439,27 @@
       "viewFullTimeline": "Voir la timeline complète →",
       "reflectionTitle": "Réflexion Trading",
       "tradesTitle": "Trades"
+    },
+    "productWorkflow": {
+      "title": "Flux de Travail Produit",
+      "description": "Tout le lancement de produit au même endroit — vos produits, les liens du Knowledge Graph, la Timeline, le Mentor, les Missions et la Réflexion Hebdomadaire.",
+      "insight": {
+        "title": "Aperçu du Pattern",
+        "noProducts": "Ajoutez un produit pour commencer à voir des tendances ici.",
+        "notEnoughData": "Pas encore assez d'historique de produits pour détecter une tendance — ajoutez quelques produits de plus.",
+        "detailPattern": "Les produits avec une planification plus détaillée (fonctionnalités, roadmap, plan de lancement, audience) ont en moyenne {detailedAvg} entrées liées sur {detailedCount} produits, contre {briefAvg} pour les moins détaillés sur {briefCount} produits."
+      },
+      "mentorButton": "Product Mentor",
+      "mentorButtonDescription": "Ouvrez Ionexa Chat en Mode Mentor avec vos 20 derniers produits déjà chargés en contexte.",
+      "mentorChatPrefill": "Passe en revue mes plans produit et donne-moi un retour sur ce qui manque avant le lancement.",
+      "missionButton": "Lancer un Nouveau Produit",
+      "missionButtonDescription": "Créez un plan de mission IA pour lancer un nouveau produit — audience, tarification, landing page et plus.",
+      "missionButtonCreating": "Création...",
+      "missionGoal": "Lancer un nouveau produit : définir l'audience cible, fixer le prix et créer une landing page",
+      "timelineTitle": "Timeline Produit",
+      "viewFullTimeline": "Voir la timeline complète →",
+      "reflectionTitle": "Réflexion Produit",
+      "productsTitle": "Produits"
     },
     "energyCheckIn": {
       "title": "Suivi d'Énergie",

@@ -46,6 +46,7 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Feedback: "feedback",
   Trading: "trading",
   "Trading Workflow": "tradingWorkflow",
+  "Product Workflow": "productWorkflow",
   Automation: "automation",
   Marketplace: "marketplace",
 };

@@ -22,6 +22,7 @@ import {
   REFLECTION_ICON,
   TRADING_WORKFLOW_ICON,
   WEBSITE_BUILDER_ICON,
+  PRODUCT_WORKFLOW_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -111,6 +112,11 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         href: "/dashboard/trading-workflow",
         label: "Trading Workflow",
         icon: TRADING_WORKFLOW_ICON,
+      },
+      {
+        href: "/dashboard/product-workflow",
+        label: "Product Workflow",
+        icon: PRODUCT_WORKFLOW_ICON,
       },
       { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation },
     ],

@@ -12,12 +12,13 @@ import type { WeeklyReflectionStats } from "@/lib/reflection";
 // Claude call (CREDIT_COSTS.weeklyReflection) and nothing is persisted, so
 // there's nothing to show until the user actually clicks the button.
 //
-// `scope`, when set, is Trading Workflow's "Trading Reflection" — passed
-// through to the API as { scope } so it only scans trading-related
-// modules (see api/reflection/generate/route.ts). Every existing caller
-// (just dashboard/reflection/page.tsx) omits it, so the request stays a
-// bare bodyless POST exactly as before — zero change to default behavior.
-export function ReflectionGenerator({ scope }: { scope?: "trading" } = {}) {
+// `scope`, when set, is Trading Workflow's "Trading Reflection" or
+// Product Workflow's "Product Reflection" — passed through to the API as
+// { scope } so it only scans workflow-related modules (see
+// api/reflection/generate/route.ts). Every existing caller (just
+// dashboard/reflection/page.tsx) omits it, so the request stays a bare
+// bodyless POST exactly as before — zero change to default behavior.
+export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" } = {}) {
   const t = useTranslations("dashboard.reflection");
   const { refresh: refreshCredits } = useCredits();
   const [loading, setLoading] = useState(false);

@@ -61,6 +61,7 @@
       "feedback": "Ανατροφοδότηση",
       "trading": "Trading",
       "tradingWorkflow": "Ροή Εργασίας Trading",
+      "productWorkflow": "Ροή Εργασίας Product",
       "automation": "Αυτοματισμοί",
       "marketplace": "Marketplace"
     }
@@ -383,6 +384,7 @@
       "emptyState": "Δεν υπάρχουν αποστολές ακόμα — περίγραψε έναν στόχο παραπάνω για το πρώτο σου σχέδιο.",
       "createWithAi": "Δημιουργία με AI",
       "creating": "Δημιουργία...",
+      "openWebsiteBuilder": "Άνοιγμα Website Builder",
       "viewIn": "Προβολή στο {module}",
       "reviewMission": "Αξιολόγηση Αποστολής",
       "reviewing": "Αξιολόγηση...",
@@ -437,6 +439,27 @@
       "viewFullTimeline": "Δες όλο το timeline →",
       "reflectionTitle": "Trading Reflection",
       "tradesTitle": "Trades"
+    },
+    "productWorkflow": {
+      "title": "Ροή Εργασίας Product",
+      "description": "Όλα όσα αφορούν το launch προϊόντος σε ένα σημείο — τα products σου, συνδέσεις Knowledge Graph, Timeline, Mentor, Missions και Weekly Reflection.",
+      "insight": {
+        "title": "Insight Μοτίβου",
+        "noProducts": "Πρόσθεσε ένα product για να αρχίσεις να βλέπεις μοτίβα εδώ.",
+        "notEnoughData": "Δεν υπάρχει ακόμα αρκετό ιστορικό products για εντοπισμό μοτίβου — πρόσθεσε λίγα ακόμα products.",
+        "detailPattern": "Τα products με πιο λεπτομερή σχεδιασμό (features, roadmap, launch plan, target audience) έχουν κατά μέσο όρο {detailedAvg} συνδεδεμένες καταχωρήσεις σε {detailedCount} products, έναντι {briefAvg} για λιγότερο λεπτομερή σε {briefCount} products."
+      },
+      "mentorButton": "Product Mentor",
+      "mentorButtonDescription": "Άνοιξε το Ionexa Chat σε Mentor Mode με τα τελευταία 20 products σου ήδη φορτωμένα ως context.",
+      "mentorChatPrefill": "Έλεγξε τα product plans μου και δώσε μου feedback για το τι λείπει πριν το launch.",
+      "missionButton": "Launch Νέου Product",
+      "missionButtonDescription": "Δημιούργησε ένα AI mission plan για να λανσάρεις ένα νέο product — target audience, pricing, landing page και άλλα.",
+      "missionButtonCreating": "Δημιουργία...",
+      "missionGoal": "Λάνσαρε ένα νέο product: όρισε το target audience, όρισε το pricing, και δημιούργησε μια landing page",
+      "timelineTitle": "Timeline Product",
+      "viewFullTimeline": "Δες όλο το timeline →",
+      "reflectionTitle": "Product Reflection",
+      "productsTitle": "Products"
     },
     "energyCheckIn": {
       "title": "Energy Check-In",

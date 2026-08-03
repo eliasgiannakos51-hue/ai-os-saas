@@ -13,6 +13,7 @@ import { MessageContent } from "@/components/chat/message-content";
 import { getStuckStep } from "@/lib/mission-progress";
 import { buildPriorStepsContext, MAX_STEP_ATTEMPTS, stepAttemptsExhausted } from "@/lib/mission-context";
 import { AGENT_ROLES, type AgentRole } from "@/lib/agent-roles";
+import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import type { Mission, MissionStatus } from "@/types/mission";
 
 const STATUS_COLORS: Record<MissionStatus, string> = {
@@ -28,6 +29,20 @@ const STATUS_LABEL_KEYS: Record<MissionStatus, string> = {
   completed: "statusCompleted",
   failed: "statusFailed",
 };
+
+// A step whose text is clearly about building a website/landing page
+// can never be classified into any of the 13 business modules "Create
+// with AI"'s classifier knows about — Website Builder is a separate real
+// AI generator (api/websites/generate), not one of api/create's
+// CLASSIFIER_MODULES. Offers a direct link there instead, alongside
+// "Create with AI", so a plan step like Product Workflow's launch
+// mission's "Create a landing page" is actually actionable, not just
+// descriptive text nothing here can act on.
+const WEBSITE_STEP_KEYWORDS = ["landing page", "landing σελίδα", "σελίδα προορισμού", "website", "ιστοσελίδα"];
+function looksLikeWebsiteStep(text: string): boolean {
+  const lower = text.toLowerCase();
+  return WEBSITE_STEP_KEYWORDS.some((keyword) => lower.includes(keyword));
+}
 
 // "AI Company" — translation key per agent role (see lib/agent-roles.ts),
 // used both for the per-step picker options and the "Built by X" badge on
@@ -253,6 +268,15 @@ export function MissionCard({ mission }: { mission: Mission }) {
                     </p>
                   ) : (
                     <>
+                      {looksLikeWebsiteStep(step.text) && (
+                        <Link
+                          href="/dashboard/website-builder"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-orange-500/40 px-2.5 py-1.5 text-xs font-medium text-orange-400 transition-colors duration-150 hover:bg-orange-500/10"
+                        >
+                          <WEBSITE_BUILDER_ICON className="h-3.5 w-3.5" aria-hidden="true" />
+                          {t("openWebsiteBuilder")}
+                        </Link>
+                      )}
                       <select
                         value={stepAgentRoles[index] ?? step.agentRole ?? "general"}
                         onChange={(e) =>

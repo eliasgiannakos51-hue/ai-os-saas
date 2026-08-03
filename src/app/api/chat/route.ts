@@ -20,6 +20,7 @@ import {
 import { findMentionedEntities, buildEntityMentionPromptAddition } from "@/lib/chat/entity-mentions";
 import { loadMentorContext } from "@/lib/chat/mentor-context";
 import { loadTradingMentorContext } from "@/lib/chat/trading-mentor-context";
+import { loadProductMentorContext } from "@/lib/chat/product-mentor-context";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
 
 export const dynamic = "force-dynamic";
@@ -158,6 +159,13 @@ export async function POST(request: Request) {
       mentorMode && mentorPreset === "trading"
         ? await loadTradingMentorContext(supabase, user.id)
         : "";
+    // Product Workflow's "Product Mentor" preset (see
+    // product-mentor-button.tsx) — same on-demand-only pattern as trading
+    // above, over the products table instead.
+    const productMentorContext =
+      mentorMode && mentorPreset === "product"
+        ? await loadProductMentorContext(supabase, user.id)
+        : "";
     // "AI Life Context" — a consolidated view of the user (recent entries
     // across every module, active missions, latest energy check-in,
     // Business Health Score, Knowledge Graph link counts — see
@@ -177,6 +185,7 @@ export async function POST(request: Request) {
       buildEntityMentionPromptAddition(mentionedEntities) +
       mentorContext +
       tradingMentorContext +
+      productMentorContext +
       userContext;
 
     // Credits: 1 credit per Ionexa Chat message, deducted from user_credits

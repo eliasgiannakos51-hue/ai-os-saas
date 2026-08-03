@@ -61,6 +61,7 @@
       "feedback": "Comentarios",
       "trading": "Trading",
       "tradingWorkflow": "Flujo de Trading",
+      "productWorkflow": "Flujo de Producto",
       "automation": "Automatización",
       "marketplace": "Mercado"
     }
@@ -383,6 +384,7 @@
       "emptyState": "Aún no hay misiones — describe un objetivo arriba para obtener tu primer plan.",
       "createWithAi": "Crear con IA",
       "creating": "Creando...",
+      "openWebsiteBuilder": "Abrir Website Builder",
       "viewIn": "Ver en {module}",
       "reviewMission": "Evaluar Misión",
       "reviewing": "Evaluando...",
@@ -437,6 +439,27 @@
       "viewFullTimeline": "Ver timeline completo →",
       "reflectionTitle": "Reflexión de Trading",
       "tradesTitle": "Operaciones"
+    },
+    "productWorkflow": {
+      "title": "Flujo de Trabajo de Producto",
+      "description": "Todo el lanzamiento de producto en un solo lugar — tus productos, enlaces del Knowledge Graph, Timeline, Mentor, Misiones y Reflexión Semanal.",
+      "insight": {
+        "title": "Insight de Patrón",
+        "noProducts": "Añade un producto para empezar a ver patrones aquí.",
+        "notEnoughData": "Aún no hay suficiente historial de productos para detectar un patrón — añade algunos productos más.",
+        "detailPattern": "Los productos con una planificación más detallada (funciones, roadmap, plan de lanzamiento, audiencia) tienen en promedio {detailedAvg} entradas vinculadas sobre {detailedCount} productos, frente a {briefAvg} para los menos detallados sobre {briefCount} productos."
+      },
+      "mentorButton": "Product Mentor",
+      "mentorButtonDescription": "Abre Ionexa Chat en Modo Mentor con tus últimos 20 productos ya cargados como contexto.",
+      "mentorChatPrefill": "Revisa mis planes de producto y dame feedback sobre lo que falta antes del lanzamiento.",
+      "missionButton": "Lanzar un Nuevo Producto",
+      "missionButtonDescription": "Crea un plan de misión de IA para lanzar un nuevo producto — audiencia, precios, landing page y más.",
+      "missionButtonCreating": "Creando...",
+      "missionGoal": "Lanzar un nuevo producto: definir la audiencia objetivo, fijar el precio y crear una landing page",
+      "timelineTitle": "Timeline de Producto",
+      "viewFullTimeline": "Ver timeline completo →",
+      "reflectionTitle": "Reflexión de Producto",
+      "productsTitle": "Productos"
     },
     "energyCheckIn": {
       "title": "Registro de Energía",

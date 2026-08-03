@@ -27,6 +27,19 @@ import { downloadAttachmentImages } from "@/lib/attachment-image-server";
 
 export const dynamic = "force-dynamic";
 
+// Explicit execution-time budget — without this the platform's own
+// default function timeout applies (as low as 10s on some tiers), which
+// is the real root cause of the "Network error" symptom users saw on a
+// slower-than-usual AI call: the platform kills the connection mid-
+// request, and the browser reports that as a generic network failure,
+// not a clean HTTP error — misleading, since nothing was actually wrong
+// with the user's connection. This route can run up to 2 sequential
+// Claude calls in one request (the clarification pre-check, ~500 tokens,
+// then the real classification, 1024 tokens) plus AI Life Context/
+// mission-context lookups, so 120s is comfortable headroom over the
+// realistic worst case, not a guess.
+export const maxDuration = 120;
+
 const MODEL = "claude-sonnet-4-6";
 const MAX_MESSAGE_LENGTH = 20000;
 

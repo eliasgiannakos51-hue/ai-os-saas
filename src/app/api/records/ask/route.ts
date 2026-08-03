@@ -18,6 +18,11 @@ import {
 
 export const dynamic = "force-dynamic";
 
+// Same reasoning as api/chat/route.ts — streaming, but still bounded by
+// the platform's maxDuration. 120s is ample for this route's smaller
+// 1024-token replies.
+export const maxDuration = 120;
+
 const MODEL = "claude-sonnet-4-6";
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_TOKENS = 1024;

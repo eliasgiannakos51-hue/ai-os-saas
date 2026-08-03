@@ -16,6 +16,12 @@ import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
 
+// Same reasoning as api/create/route.ts — this route's only AI call is
+// the clarification pre-check (small, ~500 tokens), but a real platform
+// timeout mid-request produces the same misleading "Network error" the
+// user saw elsewhere. 60s is ample for a single small classifier call.
+export const maxDuration = 60;
+
 const MAX_DESCRIPTION_LENGTH = 20000;
 // Safety cap, per the brief: prevents unbounded recurring-cost
 // accumulation — each active automation calls Claude on its own

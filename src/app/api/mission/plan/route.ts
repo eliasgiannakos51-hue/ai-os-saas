@@ -16,6 +16,11 @@ import type { MissionPlan } from "@/types/mission";
 
 export const dynamic = "force-dynamic";
 
+// See api/create/route.ts's comment — same platform-timeout root cause
+// behind the misleading "Network error" symptom. planMission (1024
+// tokens) is this route's only AI call; 90s is ample headroom.
+export const maxDuration = 90;
+
 const MAX_GOAL_LENGTH = 20000;
 
 // Planner Agent entry point (see lib/mission-agents.ts) — Mission

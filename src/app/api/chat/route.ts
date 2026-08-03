@@ -26,6 +26,15 @@ import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/u
 
 export const dynamic = "force-dynamic";
 
+// Streaming already avoids the worst version of the platform-timeout
+// problem (partial text reaches the client immediately instead of the
+// connection going silent then dying), but the function itself is still
+// bounded by maxDuration regardless of streaming — a long Mentor Mode
+// reply with a lot of context (memory + entity mentions + AI Life
+// Context) plus the trailing memory-extraction call could otherwise
+// still hit a low platform default. 180s covers a realistic worst case.
+export const maxDuration = 180;
+
 const MODEL = "claude-sonnet-4-6";
 const MAX_MESSAGE_LENGTH = 10000;
 const MAX_TOKENS = 2048;

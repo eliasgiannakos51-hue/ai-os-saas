@@ -15,6 +15,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
+// Same platform-timeout reasoning as api/create/route.ts.
+export const maxDuration = 60;
+
 const MODEL = "claude-sonnet-4-6";
 const MAX_TEXT_LENGTH = 4000;
 const MAX_TOKENS = 2048;

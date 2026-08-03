@@ -21,6 +21,23 @@ import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
 
+// Unlike api/websites/generate, this route is NOT split into a fast
+// "start" request + background "process" request — the client awaits
+// this single request directly, so it had NO explicit maxDuration at
+// all before this (silently inheriting the platform default, as low as
+// 10s on some tiers) despite calling editWebsiteHtml with the same
+// WEBSITE_MAX_TOKENS (32000) ceiling as full generation, now also
+// potentially downloading/resizing new reference images and resolving
+// image placeholders afterward. This was the single biggest real gap
+// found in this pass's timeout audit — a large edit (long change
+// request, several new reference images) was genuinely at risk of the
+// exact "Network error" symptom already fixed for generation. 300s
+// (5 min) is the floor requested for AI-calling endpoints generally;
+// full parity with generation's background-job architecture (which
+// allows up to 800s) would need the same fast-start-then-process split,
+// a larger change out of scope for this pass.
+export const maxDuration = 300;
+
 const MAX_CHANGE_REQUEST_LENGTH = 20000;
 
 // Website Builder post-generation editing — takes the website's own

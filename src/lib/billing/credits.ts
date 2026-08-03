@@ -322,6 +322,15 @@ export const CREDIT_COSTS = {
   // for the same request — the resubmission after answering skips this
   // check entirely (see each route's skipClarification flag).
   clarificationCheck: 1,
+  // Anthropic's native web_search_20250305 server tool (api/chat/route.ts,
+  // api/records/ask/route.ts) — small extra cost ON TOP OF the normal
+  // chatMessage charge, added ONLY when the model actually performed at
+  // least one real search for that reply (response.usage.server_tool_use
+  // .web_search_requests > 0 — offering the tool costs nothing by itself,
+  // Anthropic only bills for searches actually executed). Charged once
+  // per search performed, not once per message, since a single reply can
+  // trigger multiple searches.
+  webSearchPerQuery: 1,
 } as const;
 
 // TEMPORARY diagnostic: shows the exact numbers deductCredits compared,

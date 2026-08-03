@@ -71,12 +71,28 @@ function formatRecordForPrompt(moduleConfig: ModuleConfig, record: ModuleRecord)
   return lines.join("\n");
 }
 
+// Native web search tool (see api/chat/route.ts for the fuller comment) —
+// wired in here too since this is the actual per-record AI Q&A feature
+// used across every module including Research, and a question about a
+// Research record ("what's the current market rate for X") is exactly
+// the case that needs real, current data instead of a guessed number.
+// Same copyright safeguard: paraphrase, don't quote sources verbatim.
+const WEB_SEARCH_INSTRUCTION = `
+
+Έχεις πρόσβαση σε εργαλείο αναζήτησης στο διαδίκτυο (web search). Χρησιμοποίησέ το όταν ο χρήστης ζητάει πραγματικά, τρέχοντα στοιχεία που δεν μπορείς να ξέρεις με σιγουριά μόνος/η σου (τρέχουσες τιμές, στατιστικά, πρόσφατα γεγονότα). ΜΗΝ χρησιμοποιείς αναζήτηση για γενικές ερωτήσεις γνώσης. ΣΗΜΑΝΤΙΚΟ (πνευματικά δικαιώματα): ΠΑΡΑΦΡΑΣΕ τα ευρήματα με δικά σου λόγια — ΜΗΝ αντιγράφεις κείμενο αυτούσιο από τις πηγές.`;
+
+const WEB_SEARCH_TOOL: Anthropic.WebSearchTool20250305 = {
+  type: "web_search_20250305",
+  name: "web_search",
+  max_uses: 3,
+};
+
 function buildSystemPrompt(moduleConfig: ModuleConfig, record: ModuleRecord): string {
   return `Έχεις πρόσβαση στα ακόλουθα δεδομένα μιας συγκεκριμένης καταγραφής (module: ${moduleConfig.title}):
 
 ${formatRecordForPrompt(moduleConfig, record)}
 
-Δώσε αντικειμενική, ειλικρινή γνώμη/ανάλυση όταν ρωτηθείς, χωρίς να επιβεβαιώνεις αυτόματα ό,τι λέει ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος). Μείνε εστιασμένος/η σε αυτή τη συγκεκριμένη καταγραφή, εκτός αν ο χρήστης ζητήσει ρητά κάτι άσχετο με αυτήν.`;
+Δώσε αντικειμενική, ειλικρινή γνώμη/ανάλυση όταν ρωτηθείς, χωρίς να επιβεβαιώνεις αυτόματα ό,τι λέει ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος). Μείνε εστιασμένος/η σε αυτή τη συγκεκριμένη καταγραφή, εκτός αν ο χρήστης ζητήσει ρητά κάτι άσχετο με αυτήν.${WEB_SEARCH_INSTRUCTION}`;
 }
 
 export async function POST(request: Request) {
@@ -192,6 +208,7 @@ export async function POST(request: Request) {
     const stream = new ReadableStream({
       async start(controller) {
         let assistantText = "";
+        let webSearchCount = 0;
         try {
           void recordAiCallForDailySpend(CREDIT_COSTS.chatMessage);
           const claudeStream = anthropic.messages.stream({
@@ -202,6 +219,7 @@ export async function POST(request: Request) {
               ...history.map((m) => ({ role: m.role, content: m.content })),
               { role: "user" as const, content: message },
             ],
+            tools: [WEB_SEARCH_TOOL],
           });
 
           claudeStream.on("text", (delta) => {
@@ -209,7 +227,8 @@ export async function POST(request: Request) {
             controller.enqueue(ndjsonLine({ type: "delta", text: delta }));
           });
 
-          await claudeStream.finalMessage();
+          const finalResponse = await claudeStream.finalMessage();
+          webSearchCount = finalResponse.usage.server_tool_use?.web_search_requests ?? 0;
         } catch (err) {
           logApiError("/api/records/ask", err, { stage: "anthropic_stream", moduleSlug });
           const errMessage = err instanceof Error ? err.message : "Request failed.";
@@ -235,6 +254,15 @@ export async function POST(request: Request) {
         // worth charging for.
         if (!isAdmin && plan) {
           await deductCredits(user.id, CREDIT_COSTS.chatMessage, "ask_ai_record", `Ask AI — ${moduleConfig.title}`, plan);
+          if (webSearchCount > 0) {
+            await deductCredits(
+              user.id,
+              CREDIT_COSTS.webSearchPerQuery * webSearchCount,
+              "web_search",
+              `Ask AI (${moduleConfig.title}) — ${webSearchCount} web search${webSearchCount > 1 ? "es" : ""}`,
+              plan
+            );
+          }
         }
 
         controller.enqueue(ndjsonLine({ type: "done" }));

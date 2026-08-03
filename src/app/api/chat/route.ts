@@ -35,8 +35,32 @@ const MAX_PERSONA_NAME_LENGTH = 40;
 // {name} is "Ionexa" by default — swapped for the account's custom
 // persona name on plans with capabilities.customAiPersona (Ultimate+,
 // see Settings > AI Persona and lib/billing/plans.ts).
+// Appended to both personas below — the native web_search tool (see
+// WEB_SEARCH_TOOL) lets the model look up real, current information
+// instead of guessing/hallucinating numbers it can't actually know
+// (prices, statistics, current events, "what's the average X in Y right
+// now"). This instruction is the copyright/plagiarism safeguard: search
+// results must be READ and paraphrased in the model's own words, never
+// quoted/reproduced verbatim at length.
+const WEB_SEARCH_INSTRUCTION = `
+
+Έχεις πρόσβαση σε εργαλείο αναζήτησης στο διαδίκτυο (web search). Χρησιμοποίησέ το όταν ο χρήστης ζητάει πραγματικά, τρέχοντα στοιχεία που δεν μπορείς να ξέρεις με σιγουριά μόνος/η σου (τρέχουσες τιμές, στατιστικά, πρόσφατα γεγονότα, "ποια είναι η μέση τιμή X σε Y σήμερα"). ΜΗΝ χρησιμοποιείς αναζήτηση για γενικές ερωτήσεις γνώσης που ήδη ξέρεις καλά. ΣΗΜΑΝΤΙΚΟ (πνευματικά δικαιώματα): όταν χρησιμοποιείς αποτελέσματα αναζήτησης, ΠΑΡΑΦΡΑΣΕ τα ευρήματα με δικά σου λόγια — ΜΗΝ αντιγράφεις κείμενο αυτούσιο από τις πηγές. Ανέφερε την πηγή (π.χ. όνομα site) όταν είναι χρήσιμο, αλλά η απάντηση πρέπει να είναι δική σου σύνοψη, όχι αντιγραφή.`;
+
+// Anthropic's native server-side web search tool — the model decides
+// autonomously whether a given message actually needs a real search
+// (offering the tool costs nothing by itself; Anthropic only bills for
+// searches actually performed — see CREDIT_COSTS.webSearchPerQuery,
+// charged below only when response.usage.server_tool_use
+// .web_search_requests > 0). max_uses caps it at 3 real searches per
+// single chat reply, so one message can't trigger unbounded search cost.
+const WEB_SEARCH_TOOL: Anthropic.WebSearchTool20250305 = {
+  type: "web_search_20250305",
+  name: "web_search",
+  max_uses: 3,
+};
+
 function buildSystemPrompt(personaName: string): string {
-  return `Είσαι ο/η ${personaName}, ένας εξελιγμένος AI βοηθός γενικής χρήσης. Έχεις ευρεία γνώση σε όλα τα θέματα (επιστήμη, ιστορία, προγραμματισμός, μαθηματικά, δημιουργική γραφή, επιχειρήσεις, καθημερινές ερωτήσεις, κ.λπ.) και μπορείς να βοηθήσεις με οτιδήποτε χρειαστεί ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος — ελληνικά, αγγλικά, ή οποιαδήποτε άλλη γλώσσα). Δώσε λεπτομερείς, χρήσιμες, ακριβείς απαντήσεις — προτίμησε μια ελαφρώς πιο εκτενή, ουσιαστική απάντηση αντί για μια πολύ σύντομη, χωρίς όμως να γίνεσαι φλύαρος ή να επαναλαμβάνεσαι. Όπου έχει νόημα για το ερώτημα (εξηγήσεις εννοιών, τεχνικά θέματα, "πώς κάνω Χ"), συμπλήρωσε τον ορισμό/την εξήγηση με ένα σύντομο πρακτικό παράδειγμα ή use case, όχι μόνο θεωρία — αλλά μην το κάνεις αυτό όταν ο χρήστης ζητάει ρητά κάτι σύντομο (π.χ. ναι/όχι, ένας αριθμός, μια γρήγορη μετάφραση) ή όταν ένα παράδειγμα δεν έχει φυσικό νόημα. Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.`;
+  return `Είσαι ο/η ${personaName}, ένας εξελιγμένος AI βοηθός γενικής χρήσης. Έχεις ευρεία γνώση σε όλα τα θέματα (επιστήμη, ιστορία, προγραμματισμός, μαθηματικά, δημιουργική γραφή, επιχειρήσεις, καθημερινές ερωτήσεις, κ.λπ.) και μπορείς να βοηθήσεις με οτιδήποτε χρειαστεί ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος — ελληνικά, αγγλικά, ή οποιαδήποτε άλλη γλώσσα). Δώσε λεπτομερείς, χρήσιμες, ακριβείς απαντήσεις — προτίμησε μια ελαφρώς πιο εκτενή, ουσιαστική απάντηση αντί για μια πολύ σύντομη, χωρίς όμως να γίνεσαι φλύαρος ή να επαναλαμβάνεσαι. Όπου έχει νόημα για το ερώτημα (εξηγήσεις εννοιών, τεχνικά θέματα, "πώς κάνω Χ"), συμπλήρωσε τον ορισμό/την εξήγηση με ένα σύντομο πρακτικό παράδειγμα ή use case, όχι μόνο θεωρία — αλλά μην το κάνεις αυτό όταν ο χρήστης ζητάει ρητά κάτι σύντομο (π.χ. ναι/όχι, ένας αριθμός, μια γρήγορη μετάφραση) ή όταν ένα παράδειγμα δεν έχει φυσικό νόημα. Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.${WEB_SEARCH_INSTRUCTION}`;
 }
 
 // Mentor Mode (toggled client-side, see chat-workspace.tsx's "Mentor Mode"
@@ -45,7 +69,7 @@ function buildSystemPrompt(personaName: string): string {
 // for that one request's system prompt; the default persona/behavior above
 // is untouched otherwise.
 function buildMentorSystemPrompt(personaName: string): string {
-  return `Είσαι ο/η ${personaName} Mentor — δεν δίνεις μόνο απαντήσεις, δίνεις επιχειρηματική/στρατηγική καθοδήγηση. Όταν ο χρήστης περιγράφει ένα σχέδιο/ιδέα, ΜΗΝ απαντάς μόνο εκτελεστικά — επισήμανε πιθανά ρίσκα, ρώτησε διευκρινιστικές ερωτήσεις που θα ρωτούσε ένας έμπειρος σύμβουλος, και πρότεινε εναλλακτικές όπου έχει νόημα. Χρησιμοποίησε τα δεδομένα του χρήστη (modules/entries) ως context όταν είναι σχετικό. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος). Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.`;
+  return `Είσαι ο/η ${personaName} Mentor — δεν δίνεις μόνο απαντήσεις, δίνεις επιχειρηματική/στρατηγική καθοδήγηση. Όταν ο χρήστης περιγράφει ένα σχέδιο/ιδέα, ΜΗΝ απαντάς μόνο εκτελεστικά — επισήμανε πιθανά ρίσκα, ρώτησε διευκρινιστικές ερωτήσεις που θα ρωτούσε ένας έμπειρος σύμβουλος, και πρότεινε εναλλακτικές όπου έχει νόημα. Χρησιμοποίησε τα δεδομένα του χρήστη (modules/entries) ως context όταν είναι σχετικό. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος). Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.${WEB_SEARCH_INSTRUCTION}`;
 }
 
 function truncateTitle(message: string, maxLen = 40): string {
@@ -320,6 +344,7 @@ export async function POST(request: Request) {
         );
 
         let assistantText = "";
+        let webSearchCount = 0;
         try {
           void recordAiCallForDailySpend(CREDIT_COSTS.chatMessage);
           const claudeStream = anthropic.messages.stream({
@@ -330,6 +355,7 @@ export async function POST(request: Request) {
               ...history.map((m) => ({ role: m.role, content: m.content })),
               { role: "user" as const, content: message },
             ],
+            tools: [WEB_SEARCH_TOOL],
           });
 
           claudeStream.on("text", (delta) => {
@@ -337,7 +363,8 @@ export async function POST(request: Request) {
             controller.enqueue(ndjsonLine({ type: "delta", text: delta }));
           });
 
-          await claudeStream.finalMessage();
+          const finalResponse = await claudeStream.finalMessage();
+          webSearchCount = finalResponse.usage.server_tool_use?.web_search_requests ?? 0;
         } catch (err) {
           logApiError("/api/chat", err, { stage: "anthropic_stream" });
           const errMessage = err instanceof Error ? err.message : "Chat request failed.";
@@ -378,6 +405,18 @@ export async function POST(request: Request) {
               userId: user.id,
               conversationId: finalConversationId,
             });
+          }
+          // Extra charge only if the model actually performed a real web
+          // search for this reply — never charged just for the tool
+          // being offered (see WEB_SEARCH_TOOL/CREDIT_COSTS.webSearchPerQuery).
+          if (webSearchCount > 0) {
+            await deductCredits(
+              user.id,
+              CREDIT_COSTS.webSearchPerQuery * webSearchCount,
+              "web_search",
+              `Ionexa Chat — ${webSearchCount} web search${webSearchCount > 1 ? "es" : ""}`,
+              plan
+            );
           }
         }
 

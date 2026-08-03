@@ -486,6 +486,7 @@
       "generateButton": "ウェブサイトを生成",
       "generating": "生成中...",
       "generated": "ウェブサイトが生成されました",
+      "duplicateGenerationSuppressed": "これに対する生成はすでに進行中です — 新しく開始する代わりに現在の進捗を表示しています。",
       "estimatedCost": "推定コスト：{count} クレジット",
       "estimatedTimeWithImages": "画像付きの複雑なウェブサイトは生成に10分以上かかることがあります — このページを離れても大丈夫です。",
       "estimatedTimeLargeRequest": "非常に大きい、または詳細なリクエスト（長い説明文または10枚以上の画像）は生成に20〜30分かかることがあります — このページを離れても処理は続行されます。",

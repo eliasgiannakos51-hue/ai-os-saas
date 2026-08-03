@@ -486,6 +486,7 @@
       "generateButton": "Generar Sitio",
       "generating": "Generando...",
       "generated": "Sitio generado",
+      "duplicateGenerationSuppressed": "Ya hay una generación en curso para esto — se muestra su progreso actual en lugar de iniciar una nueva.",
       "estimatedCost": "Costo estimado: {count} créditos",
       "estimatedTimeWithImages": "Los sitios web complejos con imágenes pueden tardar más de 10 minutos en generarse — puedes salir de esta página.",
       "estimatedTimeLargeRequest": "Las solicitudes muy grandes o detalladas (descripción larga o más de 10 imágenes) pueden tardar entre 20 y 30 minutos en generarse — puedes salir de esta página, seguirá funcionando.",

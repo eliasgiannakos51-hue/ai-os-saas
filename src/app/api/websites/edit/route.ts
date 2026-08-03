@@ -110,6 +110,45 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Website not found." }, { status: 404 });
     }
 
+    // Idempotency guard — a real, atomic DB-level claim, not a check-
+    // then-act race: this single UPDATE only succeeds (returns a row) if
+    // no OTHER edit is currently in flight for this website (or the
+    // previous one is stale — over 2 minutes old, presumably crashed/
+    // abandoned without clearing itself, see the finally-equivalent
+    // release below). Two concurrent edit requests for the same website
+    // both reach this UPDATE; Postgres serializes them, and whichever
+    // loses sees zero rows returned — genuinely impossible for both to
+    // proceed to the real AI call below, unlike a SELECT-then-UPDATE
+    // check in application code.
+    const staleClaimCutoff = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+    const { data: claimedRows, error: claimError } = await supabase
+      .from("user_websites")
+      .update({ editing_started_at: new Date().toISOString() })
+      .eq("id", websiteId)
+      .or(`editing_started_at.is.null,editing_started_at.lt.${staleClaimCutoff}`)
+      .select("id");
+
+    if (claimError) {
+      logApiError("/api/websites/edit", claimError, { stage: "claim_edit_lock" });
+      return NextResponse.json({ ok: false, error: "Something went wrong. Please try again." }, { status: 500 });
+    }
+    if (!claimedRows || claimedRows.length === 0) {
+      return NextResponse.json({
+        ok: true,
+        edited: false,
+        message: "A generation is already in progress for this — please wait for it to finish.",
+      });
+    }
+
+    // Every return path from here on MUST release the claim — otherwise
+    // a genuinely failed edit would leave the website locked out of
+    // editing for the full 2-minute stale window for no reason. A plain
+    // try/finally around the rest of the handler guarantees that: a
+    // `return` inside the try below still runs this finally block before
+    // actually returning, so every existing early-return further down
+    // releases the claim automatically without needing to touch each one
+    // individually.
+    try {
     // Credits: checked (read-only) BEFORE the AI call so an obviously
     // insufficient balance is rejected early without ever calling Claude,
     // but only actually DEDUCTED after that call has confirmed-
@@ -221,6 +260,20 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ ok: true, edited: true, record: updatedRecord });
+    } finally {
+      // Release the claim regardless of how the try block above exits —
+      // success, an early return, or an exception. Best-effort: if this
+      // update itself fails, the claim still self-expires after 2
+      // minutes via the staleClaimCutoff check above, so it can never
+      // lock a website out of editing forever.
+      const { error: releaseError } = await supabase
+        .from("user_websites")
+        .update({ editing_started_at: null })
+        .eq("id", websiteId);
+      if (releaseError) {
+        logApiError("/api/websites/edit", releaseError, { stage: "release_edit_lock" });
+      }
+    }
   } catch (err) {
     logApiError("/api/websites/edit", err);
     return NextResponse.json(

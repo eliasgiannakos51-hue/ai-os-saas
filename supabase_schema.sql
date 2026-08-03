@@ -990,6 +990,17 @@ create table public.user_websites (
   -- measurably slow generation. Defaults to false so it's a no-op for
   -- every row that already existed before this column did.
   is_large_request boolean not null default false,
+  -- Idempotency guard for post-generation editing (api/websites/edit/
+  -- route.ts) — claimed via an atomic conditional UPDATE
+  -- (`WHERE editing_started_at IS NULL OR editing_started_at < now() -
+  -- interval '2 minutes'`) right before calling the AI, and cleared
+  -- (set back to null) once that call finishes, success or failure. A
+  -- second, concurrent edit request for the SAME website within that
+  -- window has its UPDATE match zero rows and is rejected before ever
+  -- calling Claude — a real DB-level race guard, not a check-then-act
+  -- race in application code. Defaults to null so it's a no-op for every
+  -- row that already existed before this column did.
+  editing_started_at timestamptz,
   created_at timestamptz not null default now()
 );
 
@@ -1007,6 +1018,24 @@ alter table public.user_websites
 
 alter table public.user_websites
   add column if not exists is_large_request boolean not null default false;
+
+alter table public.user_websites
+  add column if not exists editing_started_at timestamptz;
+
+-- Idempotency guard for INITIAL generation (api/websites/generate/
+-- route.ts) — a genuine DB-level constraint (not just an application-
+-- level check) that makes it impossible for two concurrent requests to
+-- both successfully insert a second "pending" row for the same
+-- user+name while the first is still pending: the second INSERT hits a
+-- unique-violation, which the route catches and treats as "this is the
+-- same request", returning the already-created row instead of starting
+-- a duplicate, real, billed generation. Partial (only on status =
+-- 'pending') so it never blocks a user from later generating a NEW site
+-- reusing a name whose PREVIOUS attempt already completed or failed.
+drop index if exists user_websites_pending_dedup_idx;
+create unique index user_websites_pending_dedup_idx
+  on public.user_websites (user_id, name)
+  where status = 'pending';
 
 create index if not exists user_websites_user_id_created_at_idx
   on public.user_websites (user_id, created_at desc);

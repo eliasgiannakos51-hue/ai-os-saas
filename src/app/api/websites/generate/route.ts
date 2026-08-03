@@ -193,6 +193,41 @@ export async function POST(request: Request) {
       }
     }
 
+    // Idempotency guard — a fast double-submit (double-click, or a retry
+    // fired while the first request is still in flight) would otherwise
+    // create TWO separate "pending" rows for what's really the same
+    // request, each independently kicking off its own real, billed
+    // generation. Since this route's own job is only ever a few hundred
+    // milliseconds (see the file comment above), a genuine duplicate
+    // submission lands here within seconds of the first — so an existing
+    // pending row for this exact user+name within the last 2 minutes is
+    // treated as the SAME request: its record is returned as-is instead
+    // of creating a second one. This is a fast-path check (name is the
+    // only field this table stores from the original request — the full
+    // description isn't persisted here); the unique index added below is
+    // the real, race-proof backstop for the case where two requests land
+    // close enough together that this SELECT alone wouldn't catch it.
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+    const { data: recentDuplicate } = await supabase
+      .from("user_websites")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("name", name)
+      .eq("status", "pending")
+      .gte("created_at", twoMinutesAgo)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (recentDuplicate) {
+      return NextResponse.json({
+        ok: true,
+        generated: true,
+        pending: true,
+        record: recentDuplicate,
+        duplicateSuppressed: true,
+      });
+    }
+
     const { data: record, error: insertError } = await supabase
       .from("user_websites")
       .insert({
@@ -207,6 +242,34 @@ export async function POST(request: Request) {
       .single();
 
     if (insertError) {
+      // Postgres unique-violation (23505) on user_websites_pending_dedup_idx
+      // (user_id, name) where status = 'pending' — see supabase_schema.sql.
+      // This is the real, DB-level idempotency guarantee: it means a
+      // concurrent request won the race and already inserted the pending
+      // row for this exact user+name in the tiny window between the
+      // SELECT above and this INSERT. Treat it exactly like the fast-path
+      // duplicate above rather than surfacing an error the user didn't
+      // cause — fetch and return that row instead of failing the request.
+      if (insertError.code === "23505") {
+        const { data: winningRow } = await supabase
+          .from("user_websites")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("name", name)
+          .eq("status", "pending")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (winningRow) {
+          return NextResponse.json({
+            ok: true,
+            generated: true,
+            pending: true,
+            record: winningRow,
+            duplicateSuppressed: true,
+          });
+        }
+      }
       logApiError("/api/websites/generate", insertError, { stage: "insert" });
       return NextResponse.json({ ok: false, error: insertError.message }, { status: 500 });
     }

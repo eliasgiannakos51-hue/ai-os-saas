@@ -152,6 +152,26 @@ export async function POST(request: Request) {
       );
     }
 
+    // Idempotency guard — a fast double-submit of "Make this real" would
+    // otherwise create two identical, separately-scheduled automations
+    // both firing forever. An exact description+frequency match for this
+    // user created in the last 2 minutes is treated as the same
+    // submission and returned as-is instead of creating a duplicate.
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
+    const { data: recentDuplicate } = await supabase
+      .from("user_automations")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("description", description)
+      .eq("frequency", frequency)
+      .gte("created_at", twoMinutesAgo)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (recentDuplicate) {
+      return NextResponse.json({ ok: true, automation: recentDuplicate, duplicateSuppressed: true });
+    }
+
     const nextRunAt = computeNextRunAt(frequency, new Date(), dayOfWeek, dayOfMonth);
 
     const { data: automation, error: insertError } = await supabase

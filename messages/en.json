@@ -486,6 +486,7 @@
       "generateButton": "Generate Website",
       "generating": "Generating...",
       "generated": "Website generated",
+      "duplicateGenerationSuppressed": "A generation is already in progress for this — showing its current progress instead of starting a new one.",
       "estimatedCost": "Estimated cost: {count} credits",
       "estimatedTimeWithImages": "Complex websites with images may take 10+ minutes to generate — feel free to leave this page.",
       "estimatedTimeLargeRequest": "Very large or detailed requests (long description or 10+ images) can take 20-30 minutes to generate — feel free to leave this page, it'll keep working.",

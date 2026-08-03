@@ -486,6 +486,7 @@
       "generateButton": "Website Generieren",
       "generating": "Generierung...",
       "generated": "Website generiert",
+      "duplicateGenerationSuppressed": "Für dieses Element läuft bereits eine Generierung — der aktuelle Fortschritt wird angezeigt, anstatt eine neue zu starten.",
       "estimatedCost": "Geschätzte Kosten: {count} Credits",
       "estimatedTimeWithImages": "Komplexe Websites mit Bildern können 10+ Minuten zur Erstellung benötigen — du kannst diese Seite ruhig verlassen.",
       "estimatedTimeLargeRequest": "Sehr umfangreiche oder detaillierte Anfragen (lange Beschreibung oder 10+ Bilder) können 20-30 Minuten zur Erstellung benötigen — du kannst diese Seite ruhig verlassen, es läuft im Hintergrund weiter.",

@@ -392,12 +392,27 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
       }
 
       const record = data.record as UserWebsite;
-      setWebsites((prev) => [record, ...prev]);
       setPreviewId(record.id);
       setName("");
       setDescription("");
       setReferenceImageFiles([]);
       setPendingClarification(null);
+
+      // Idempotency guard (see api/websites/generate/route.ts) — a fast
+      // double-submit resolves to the SAME already-created pending row
+      // instead of a new one. That row is already in `websites`/already
+      // has its own process call in flight (or about to), so this branch
+      // must NOT add a duplicate list entry or fire a second real,
+      // billed generation request for it — just resume watching it and
+      // tell the user plainly what happened.
+      if (data.duplicateSuppressed) {
+        setWebsites((prev) => (prev.some((w) => w.id === record.id) ? prev : [record, ...prev]));
+        addToast(t("duplicateGenerationSuppressed"));
+        pollWebsiteStatus(record.id);
+        return;
+      }
+
+      setWebsites((prev) => [record, ...prev]);
 
       // Step 2/2: kick off the actual generation as a second, independent
       // request. Deliberately NOT awaited: `keepalive: true` tells the

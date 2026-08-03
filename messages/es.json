@@ -529,6 +529,38 @@
       "emptyState": "Aún no hay anuncios — sé el primero en publicar.",
       "comingSoon": "Próximamente",
       "publishButton": "Publicar una Plantilla"
+    },
+    "automation": {
+      "realizeSectionTitle": "Hacer realidad una idea",
+      "makeThisReal": "Hacerlo realidad",
+      "cancel": "Cancelar",
+      "untitledIdea": "Idea sin título",
+      "whatShouldHappen": "¿Qué debería pasar?",
+      "whatShouldHappenPlaceholder": "p. ej. Cada lunes, analiza las operaciones de la semana pasada y dame un resumen",
+      "howOften": "¿Con qué frecuencia?",
+      "whichDay": "¿Qué día?",
+      "whichDayOfMonth": "¿Qué día del mes?",
+      "frequencyDaily": "Diaria",
+      "frequencyWeekly": "Semanal",
+      "frequencyMonthly": "Mensual",
+      "realizing": "Configurando...",
+      "confirmMakeReal": "Hacerlo realidad",
+      "realizeSuccess": "Automatización creada — se ejecutará según el programa a partir de ahora.",
+      "realizeError": "No se pudo crear la automatización. Inténtalo de nuevo.",
+      "activeSectionTitle": "Automatizaciones activas",
+      "nextRun": "Próxima ejecución {date}",
+      "toggleActive": "Activar/desactivar",
+      "deleteAutomation": "Eliminar",
+      "confirmDelete": "¿Eliminar esta automatización? No se puede deshacer.",
+      "weekday": {
+        "sunday": "Domingo",
+        "monday": "Lunes",
+        "tuesday": "Martes",
+        "wednesday": "Miércoles",
+        "thursday": "Jueves",
+        "friday": "Viernes",
+        "saturday": "Sábado"
+      }
     }
   },
   "module": {

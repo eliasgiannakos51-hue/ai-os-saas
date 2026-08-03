@@ -1198,3 +1198,60 @@ create policy "insert_own_scheduled_agent_runs" on public.scheduled_agent_runs
 drop policy if exists "delete_own_scheduled_agent_runs" on public.scheduled_agent_runs;
 create policy "delete_own_scheduled_agent_runs" on public.scheduled_agent_runs
   for delete using (auth.uid() = user_id);
+
+-- ============================================================================
+-- Real Automations — "Make this real" on an Automation module idea (see
+-- components/automation/automation-realize-panel.tsx), built on top of
+-- Scheduled Agent Runs' infrastructure: the SAME daily cron
+-- (api/cron/scheduled-runs/route.ts) that executes scheduled mission steps
+-- also processes due rows here. Unlike a scheduled_agent_runs row (a
+-- single one-off action), a user_automations row repeats indefinitely on
+-- its own frequency until the user turns it off — next_run_at is
+-- recomputed after every execution instead of the row being consumed.
+-- Same owner-only RLS pattern as every table above; is_active/next_run_at
+-- ARE user-updatable (the toggle switch, see automation-active-list.tsx)
+-- unlike scheduled_agent_runs, since there's no execution result to
+-- protect from being tampered with mid-flight the way status/result are.
+-- ============================================================================
+
+drop table if exists public.user_automations cascade;
+
+create table public.user_automations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  description text not null,
+  frequency text not null check (frequency in ('daily', 'weekly', 'monthly')),
+  -- Only one of these is meaningful, depending on frequency: day_of_week
+  -- (0=Sunday..6=Saturday) for 'weekly', day_of_month (1-28, capped so it
+  -- exists in every month) for 'monthly'. Both null for 'daily'.
+  day_of_week smallint check (day_of_week between 0 and 6),
+  day_of_month smallint check (day_of_month between 1 and 28),
+  is_active boolean not null default true,
+  last_run_at timestamptz,
+  next_run_at timestamptz not null default now(),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists user_automations_user_id_idx
+  on public.user_automations (user_id);
+
+create index if not exists user_automations_active_next_run_idx
+  on public.user_automations (is_active, next_run_at);
+
+alter table public.user_automations enable row level security;
+
+drop policy if exists "select_own_user_automations" on public.user_automations;
+create policy "select_own_user_automations" on public.user_automations
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_user_automations" on public.user_automations;
+create policy "insert_own_user_automations" on public.user_automations
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "update_own_user_automations" on public.user_automations;
+create policy "update_own_user_automations" on public.user_automations
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_user_automations" on public.user_automations;
+create policy "delete_own_user_automations" on public.user_automations
+  for delete using (auth.uid() = user_id);

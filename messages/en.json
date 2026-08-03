@@ -529,6 +529,38 @@
       "emptyState": "No listings yet — be the first to publish.",
       "comingSoon": "Coming soon",
       "publishButton": "Publish a Template"
+    },
+    "automation": {
+      "realizeSectionTitle": "Make an idea real",
+      "makeThisReal": "Make this real",
+      "cancel": "Cancel",
+      "untitledIdea": "Untitled idea",
+      "whatShouldHappen": "What should happen?",
+      "whatShouldHappenPlaceholder": "e.g. Every Monday, analyze last week's trades and give me a summary",
+      "howOften": "How often?",
+      "whichDay": "Which day?",
+      "whichDayOfMonth": "Which day of the month?",
+      "frequencyDaily": "Daily",
+      "frequencyWeekly": "Weekly",
+      "frequencyMonthly": "Monthly",
+      "realizing": "Setting up...",
+      "confirmMakeReal": "Make it real",
+      "realizeSuccess": "Automation created — it'll run on schedule from now on.",
+      "realizeError": "Could not create the automation. Please try again.",
+      "activeSectionTitle": "Active Automations",
+      "nextRun": "Next run {date}",
+      "toggleActive": "Turn on/off",
+      "deleteAutomation": "Delete",
+      "confirmDelete": "Delete this automation? This can't be undone.",
+      "weekday": {
+        "sunday": "Sunday",
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday"
+      }
     }
   },
   "module": {

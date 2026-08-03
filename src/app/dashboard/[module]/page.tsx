@@ -9,6 +9,9 @@ import { getModule } from "@/lib/modules";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import type { ModuleRecord } from "@/types/module-record";
 import { loadLinkedEntities } from "@/lib/entity-links";
+import { AutomationRealizeList } from "@/components/automation/automation-realize-list";
+import { AutomationActiveList } from "@/components/automation/automation-active-list";
+import type { UserAutomation } from "@/types/user-automation";
 
 export function generateMetadata({
   params,
@@ -52,6 +55,20 @@ export default async function ModulePage({
     (records as ModuleRecord[] | null)?.map((r) => r.id) ?? []
   );
 
+  // Real Automations — only the "automation" module gets these two extra
+  // sections (Active Automations + "Make this real"), built on top of the
+  // shared GenericList rather than inside it, so the other 12 modules are
+  // untouched.
+  const isAutomationModule = moduleConfig.slug === "automation";
+  let userAutomations: UserAutomation[] = [];
+  if (isAutomationModule) {
+    const { data: automationRows } = await supabase
+      .from("user_automations")
+      .select("*")
+      .order("created_at", { ascending: false });
+    userAutomations = (automationRows as UserAutomation[] | null) ?? [];
+  }
+
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
@@ -64,6 +81,9 @@ export default async function ModulePage({
         {error && (
           <ErrorMessage message={`loading ${moduleConfig.table}: ${error.message}`} />
         )}
+
+        {isAutomationModule && <AutomationActiveList automations={userAutomations} />}
+        {isAutomationModule && <AutomationRealizeList records={(records as ModuleRecord[]) ?? []} />}
 
         <GenericList
           module={moduleConfig}

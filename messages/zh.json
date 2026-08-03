@@ -529,6 +529,38 @@
       "emptyState": "还没有商品 — 成为第一个发布的人。",
       "comingSoon": "即将推出",
       "publishButton": "发布模板"
+    },
+    "automation": {
+      "realizeSectionTitle": "将想法变为现实",
+      "makeThisReal": "变为现实",
+      "cancel": "取消",
+      "untitledIdea": "未命名的想法",
+      "whatShouldHappen": "应该发生什么？",
+      "whatShouldHappenPlaceholder": "例如：每周一，分析上周的交易并给我一份摘要",
+      "howOften": "多久一次？",
+      "whichDay": "哪一天？",
+      "whichDayOfMonth": "每月的哪一天？",
+      "frequencyDaily": "每天",
+      "frequencyWeekly": "每周",
+      "frequencyMonthly": "每月",
+      "realizing": "设置中...",
+      "confirmMakeReal": "变为现实",
+      "realizeSuccess": "自动化已创建——此后将按计划运行。",
+      "realizeError": "无法创建自动化，请重试。",
+      "activeSectionTitle": "已启用的自动化",
+      "nextRun": "下次运行 {date}",
+      "toggleActive": "开启/关闭",
+      "deleteAutomation": "删除",
+      "confirmDelete": "删除此自动化？此操作无法撤销。",
+      "weekday": {
+        "sunday": "星期日",
+        "monday": "星期一",
+        "tuesday": "星期二",
+        "wednesday": "星期三",
+        "thursday": "星期四",
+        "friday": "星期五",
+        "saturday": "星期六"
+      }
     }
   },
   "module": {

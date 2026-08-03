@@ -529,6 +529,38 @@
       "emptyState": "Aucune annonce pour l'instant — soyez le premier à publier.",
       "comingSoon": "Bientôt disponible",
       "publishButton": "Publier un Modèle"
+    },
+    "automation": {
+      "realizeSectionTitle": "Concrétiser une idée",
+      "makeThisReal": "Rendre réel",
+      "cancel": "Annuler",
+      "untitledIdea": "Idée sans titre",
+      "whatShouldHappen": "Que doit-il se passer ?",
+      "whatShouldHappenPlaceholder": "ex. Chaque lundi, analyse les trades de la semaine dernière et donne-moi un résumé",
+      "howOften": "À quelle fréquence ?",
+      "whichDay": "Quel jour ?",
+      "whichDayOfMonth": "Quel jour du mois ?",
+      "frequencyDaily": "Quotidienne",
+      "frequencyWeekly": "Hebdomadaire",
+      "frequencyMonthly": "Mensuelle",
+      "realizing": "Configuration...",
+      "confirmMakeReal": "Rendre réel",
+      "realizeSuccess": "Automatisation créée — elle s'exécutera désormais selon le planning.",
+      "realizeError": "Impossible de créer l'automatisation. Veuillez réessayer.",
+      "activeSectionTitle": "Automatisations actives",
+      "nextRun": "Prochaine exécution {date}",
+      "toggleActive": "Activer/désactiver",
+      "deleteAutomation": "Supprimer",
+      "confirmDelete": "Supprimer cette automatisation ? Action irréversible.",
+      "weekday": {
+        "sunday": "Dimanche",
+        "monday": "Lundi",
+        "tuesday": "Mardi",
+        "wednesday": "Mercredi",
+        "thursday": "Jeudi",
+        "friday": "Vendredi",
+        "saturday": "Samedi"
+      }
     }
   },
   "module": {

@@ -529,6 +529,38 @@
       "emptyState": "لا توجد قوائم بعد — كن أول من ينشر.",
       "comingSoon": "قريبًا",
       "publishButton": "نشر قالب"
+    },
+    "automation": {
+      "realizeSectionTitle": "حوّل فكرة إلى واقع",
+      "makeThisReal": "اجعلها حقيقية",
+      "cancel": "إلغاء",
+      "untitledIdea": "فكرة بلا عنوان",
+      "whatShouldHappen": "ما الذي يجب أن يحدث؟",
+      "whatShouldHappenPlaceholder": "مثال: كل يوم اثنين، حلّل صفقات الأسبوع الماضي وأعطني ملخصًا",
+      "howOften": "كم مرة؟",
+      "whichDay": "أي يوم؟",
+      "whichDayOfMonth": "أي يوم من الشهر؟",
+      "frequencyDaily": "يوميًا",
+      "frequencyWeekly": "أسبوعيًا",
+      "frequencyMonthly": "شهريًا",
+      "realizing": "جارٍ الإعداد...",
+      "confirmMakeReal": "اجعلها حقيقية",
+      "realizeSuccess": "تم إنشاء الأتمتة — ستُنفَّذ من الآن وفقًا للجدول الزمني.",
+      "realizeError": "تعذّر إنشاء الأتمتة. حاول مرة أخرى.",
+      "activeSectionTitle": "الأتمتة النشطة",
+      "nextRun": "التشغيل التالي {date}",
+      "toggleActive": "تشغيل/إيقاف",
+      "deleteAutomation": "حذف",
+      "confirmDelete": "حذف هذه الأتمتة؟ لا يمكن التراجع عن هذا الإجراء.",
+      "weekday": {
+        "sunday": "الأحد",
+        "monday": "الاثنين",
+        "tuesday": "الثلاثاء",
+        "wednesday": "الأربعاء",
+        "thursday": "الخميس",
+        "friday": "الجمعة",
+        "saturday": "السبت"
+      }
     }
   },
   "module": {

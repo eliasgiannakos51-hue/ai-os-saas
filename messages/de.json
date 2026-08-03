@@ -529,6 +529,38 @@
       "emptyState": "Noch keine Angebote — sei der Erste, der veröffentlicht.",
       "comingSoon": "Bald verfügbar",
       "publishButton": "Vorlage Veröffentlichen"
+    },
+    "automation": {
+      "realizeSectionTitle": "Eine Idee real machen",
+      "makeThisReal": "Real machen",
+      "cancel": "Abbrechen",
+      "untitledIdea": "Idee ohne Titel",
+      "whatShouldHappen": "Was soll passieren?",
+      "whatShouldHappenPlaceholder": "z. B. Analysiere jeden Montag die Trades der letzten Woche und gib mir eine Zusammenfassung",
+      "howOften": "Wie oft?",
+      "whichDay": "Welcher Tag?",
+      "whichDayOfMonth": "Welcher Tag im Monat?",
+      "frequencyDaily": "Täglich",
+      "frequencyWeekly": "Wöchentlich",
+      "frequencyMonthly": "Monatlich",
+      "realizing": "Wird eingerichtet...",
+      "confirmMakeReal": "Real machen",
+      "realizeSuccess": "Automatisierung erstellt — sie läuft ab jetzt nach Zeitplan.",
+      "realizeError": "Automatisierung konnte nicht erstellt werden. Bitte erneut versuchen.",
+      "activeSectionTitle": "Aktive Automatisierungen",
+      "nextRun": "Nächster Lauf {date}",
+      "toggleActive": "Ein-/Ausschalten",
+      "deleteAutomation": "Löschen",
+      "confirmDelete": "Diese Automatisierung löschen? Das kann nicht rückgängig gemacht werden.",
+      "weekday": {
+        "sunday": "Sonntag",
+        "monday": "Montag",
+        "tuesday": "Dienstag",
+        "wednesday": "Mittwoch",
+        "thursday": "Donnerstag",
+        "friday": "Freitag",
+        "saturday": "Samstag"
+      }
     }
   },
   "module": {

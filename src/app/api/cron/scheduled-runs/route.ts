@@ -5,10 +5,12 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import { CREDIT_COSTS, deductCredits, hasEnoughCredits, resolveEffectivePlan } from "@/lib/billing/credits";
 import { runMissionStepForUser } from "@/lib/mission-step-runner";
 import { buildPriorStepsContext } from "@/lib/mission-context";
+import { computeNextRunAt } from "@/lib/automation-schedule";
 import { sendScheduledRunCompleteEmail } from "@/lib/email/send-scheduled-run-complete-email";
 import { logApiError } from "@/lib/log-error";
 import type { Mission } from "@/types/mission";
 import type { ScheduledAgentRun } from "@/types/scheduled-agent-run";
+import type { UserAutomation } from "@/types/user-automation";
 
 export const dynamic = "force-dynamic";
 
@@ -223,7 +225,118 @@ export async function GET(request: Request) {
       }
     }
 
-    return NextResponse.json({ ok: true, completed, failed, deferred });
+    // Phase 2 — Real Automations (user_automations). Same cron invocation,
+    // deliberately not a separate cron job (the brief is explicit: extend
+    // the existing one). Unlike scheduled_agent_runs, these are recurring —
+    // every automation ends this loop with a fresh next_run_at instead of
+    // being consumed, whatever the outcome, so it always re-enters next
+    // cycle rather than getting stuck retrying the same day.
+    const nowIso = new Date().toISOString();
+    const { data: dueAutomations, error: dueAutomationsError } = await admin
+      .from("user_automations")
+      .select("*")
+      .eq("is_active", true)
+      .lte("next_run_at", nowIso)
+      .order("created_at", { ascending: true });
+
+    if (dueAutomationsError) {
+      logApiError("/api/cron/scheduled-runs", dueAutomationsError, { stage: "load_due_automations" });
+      return NextResponse.json({ ok: true, completed, failed, deferred });
+    }
+
+    const automationsByUser = new Map<string, UserAutomation[]>();
+    for (const automation of (dueAutomations as UserAutomation[] | null) ?? []) {
+      const list = automationsByUser.get(automation.user_id) ?? [];
+      list.push(automation);
+      automationsByUser.set(automation.user_id, list);
+    }
+
+    let automationsCompleted = 0;
+    let automationsFailed = 0;
+
+    for (const [userId, dueForUser] of automationsByUser) {
+      const { data: authUser, error: authUserError } = await admin.auth.admin.getUserById(userId);
+      if (authUserError || !authUser?.user) {
+        logApiError("/api/cron/scheduled-runs", authUserError, { stage: "load_auth_user_automation", userId });
+        continue;
+      }
+      const user = authUser.user;
+      const isAdmin = isAdminEmail(user.email);
+      const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+      const plan = bypassCredits ? null : await resolveEffectivePlan(user);
+
+      for (const automation of dueForUser) {
+        const advancedNextRunAt = computeNextRunAt(
+          automation.frequency,
+          new Date(),
+          automation.day_of_week,
+          automation.day_of_month
+        ).toISOString();
+
+        if (!bypassCredits && plan) {
+          const check = await hasEnoughCredits(userId, CREDIT_COSTS.createAnything, plan);
+          if (!check.ok) {
+            await admin
+              .from("user_automations")
+              .update({ next_run_at: advancedNextRunAt })
+              .eq("id", automation.id);
+            automationsFailed++;
+            void sendScheduledRunCompleteEmail({
+              email: user.email ?? "",
+              stepText: automation.description,
+              succeeded: false,
+              detail: "Not enough credits — top up or upgrade your plan. This automation will try again next cycle.",
+            });
+            continue;
+          }
+        }
+
+        const result = await runMissionStepForUser(apiKey, admin, userId, automation.description, "general", "");
+
+        if (!result.ok || !result.matched) {
+          await admin
+            .from("user_automations")
+            .update({ next_run_at: advancedNextRunAt })
+            .eq("id", automation.id);
+          automationsFailed++;
+          void sendScheduledRunCompleteEmail({
+            email: user.email ?? "",
+            stepText: automation.description,
+            succeeded: false,
+            detail: result.ok ? result.message : result.error,
+          });
+          continue;
+        }
+
+        // Confirmed success — runMissionStepForUser already durably saved
+        // the record, so credits are deducted after that, then the
+        // automation is advanced to its next cycle.
+        if (!bypassCredits && plan) {
+          await deductCredits(userId, CREDIT_COSTS.createAnything, "create_anything", "Automation run", plan);
+        }
+
+        await admin
+          .from("user_automations")
+          .update({ last_run_at: new Date().toISOString(), next_run_at: advancedNextRunAt })
+          .eq("id", automation.id);
+        automationsCompleted++;
+        void sendScheduledRunCompleteEmail({
+          email: user.email ?? "",
+          stepText: automation.description,
+          succeeded: true,
+          detail: result.outputSummary,
+        });
+      }
+    }
+
+    return NextResponse.json({
+      ok: true,
+      completed,
+      failed,
+      deferred,
+      automationsCompleted,
+      automationsFailed,
+    });
   } catch (err) {
     logApiError("/api/cron/scheduled-runs", err);
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });

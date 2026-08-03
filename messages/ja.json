@@ -529,6 +529,38 @@
       "emptyState": "まだ出品がありません — 最初に公開してみましょう。",
       "comingSoon": "近日公開",
       "publishButton": "テンプレートを公開"
+    },
+    "automation": {
+      "realizeSectionTitle": "アイデアを実現する",
+      "makeThisReal": "実現する",
+      "cancel": "キャンセル",
+      "untitledIdea": "無題のアイデア",
+      "whatShouldHappen": "何を実行しますか？",
+      "whatShouldHappenPlaceholder": "例：毎週月曜日、先週の取引を分析してサマリーを作成する",
+      "howOften": "頻度は？",
+      "whichDay": "曜日は？",
+      "whichDayOfMonth": "月の何日？",
+      "frequencyDaily": "毎日",
+      "frequencyWeekly": "毎週",
+      "frequencyMonthly": "毎月",
+      "realizing": "設定中...",
+      "confirmMakeReal": "実現する",
+      "realizeSuccess": "オートメーションを作成しました — 今後はスケジュール通りに実行されます。",
+      "realizeError": "オートメーションを作成できませんでした。もう一度お試しください。",
+      "activeSectionTitle": "有効なオートメーション",
+      "nextRun": "次回実行 {date}",
+      "toggleActive": "オン/オフ切り替え",
+      "deleteAutomation": "削除",
+      "confirmDelete": "このオートメーションを削除しますか？元に戻せません。",
+      "weekday": {
+        "sunday": "日曜日",
+        "monday": "月曜日",
+        "tuesday": "火曜日",
+        "wednesday": "水曜日",
+        "thursday": "木曜日",
+        "friday": "金曜日",
+        "saturday": "土曜日"
+      }
     }
   },
   "module": {

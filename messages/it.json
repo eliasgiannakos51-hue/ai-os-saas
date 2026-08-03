@@ -529,6 +529,38 @@
       "emptyState": "Nessun annuncio ancora — sii il primo a pubblicare.",
       "comingSoon": "In arrivo",
       "publishButton": "Pubblica un Template"
+    },
+    "automation": {
+      "realizeSectionTitle": "Rendi reale un'idea",
+      "makeThisReal": "Rendi reale",
+      "cancel": "Annulla",
+      "untitledIdea": "Idea senza titolo",
+      "whatShouldHappen": "Cosa dovrebbe succedere?",
+      "whatShouldHappenPlaceholder": "es. Ogni lunedì, analizza le operazioni della settimana scorsa e dammi un riepilogo",
+      "howOften": "Con quale frequenza?",
+      "whichDay": "Quale giorno?",
+      "whichDayOfMonth": "Quale giorno del mese?",
+      "frequencyDaily": "Giornaliera",
+      "frequencyWeekly": "Settimanale",
+      "frequencyMonthly": "Mensile",
+      "realizing": "Configurazione...",
+      "confirmMakeReal": "Rendi reale",
+      "realizeSuccess": "Automazione creata — d'ora in poi verrà eseguita secondo il programma.",
+      "realizeError": "Impossibile creare l'automazione. Riprova.",
+      "activeSectionTitle": "Automazioni attive",
+      "nextRun": "Prossima esecuzione {date}",
+      "toggleActive": "Attiva/disattiva",
+      "deleteAutomation": "Elimina",
+      "confirmDelete": "Eliminare questa automazione? L'azione non è reversibile.",
+      "weekday": {
+        "sunday": "Domenica",
+        "monday": "Lunedì",
+        "tuesday": "Martedì",
+        "wednesday": "Mercoledì",
+        "thursday": "Giovedì",
+        "friday": "Venerdì",
+        "saturday": "Sabato"
+      }
     }
   },
   "module": {

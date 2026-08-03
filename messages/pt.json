@@ -529,6 +529,38 @@
       "emptyState": "Nenhum anúncio ainda — seja o primeiro a publicar.",
       "comingSoon": "Em breve",
       "publishButton": "Publicar um Template"
+    },
+    "automation": {
+      "realizeSectionTitle": "Torne uma ideia real",
+      "makeThisReal": "Tornar real",
+      "cancel": "Cancelar",
+      "untitledIdea": "Ideia sem título",
+      "whatShouldHappen": "O que deve acontecer?",
+      "whatShouldHappenPlaceholder": "ex. Toda segunda-feira, analise as negociações da semana passada e me dê um resumo",
+      "howOften": "Com que frequência?",
+      "whichDay": "Qual dia?",
+      "whichDayOfMonth": "Qual dia do mês?",
+      "frequencyDaily": "Diária",
+      "frequencyWeekly": "Semanal",
+      "frequencyMonthly": "Mensal",
+      "realizing": "Configurando...",
+      "confirmMakeReal": "Tornar real",
+      "realizeSuccess": "Automação criada — a partir de agora será executada conforme o cronograma.",
+      "realizeError": "Não foi possível criar a automação. Tente novamente.",
+      "activeSectionTitle": "Automações ativas",
+      "nextRun": "Próxima execução {date}",
+      "toggleActive": "Ativar/desativar",
+      "deleteAutomation": "Excluir",
+      "confirmDelete": "Excluir esta automação? Isso não pode ser desfeito.",
+      "weekday": {
+        "sunday": "Domingo",
+        "monday": "Segunda-feira",
+        "tuesday": "Terça-feira",
+        "wednesday": "Quarta-feira",
+        "thursday": "Quinta-feira",
+        "friday": "Sexta-feira",
+        "saturday": "Sábado"
+      }
     }
   },
   "module": {

@@ -102,6 +102,7 @@ touch targets) and works identically on mobile and desktop.
    ADMIN_EMAILS=owner@example.com,cofounder@example.com
    BETA_INVITE_CODE=your-beta-invite-code
    BETA_FEEDBACK_URL=mailto:feedback@yourdomain.com
+   UNSPLASH_ACCESS_KEY=your-unsplash-access-key
    ```
 
    `.env.local` is gitignored — never commit real credentials.
@@ -115,7 +116,10 @@ touch targets) and works identically on mobile and desktop.
    additive to the founder account already hardcoded in
    `src/lib/admin.ts` — see [Admin access](#admin-access) below.
    `BETA_INVITE_CODE`/`BETA_FEEDBACK_URL` are optional — see
-   [Beta testers](#beta-testers) below. See [Billing](#billing) and
+   [Beta testers](#beta-testers) below. `UNSPLASH_ACCESS_KEY` is optional —
+   see [Website Builder photos](#website-builder-photos) below; without it,
+   image resolution falls back to a solid-color placeholder instead of a
+   real photo. See [Billing](#billing) and
    [Credits](#credits) below for how the Stripe vars are used and how to
    create the required Price IDs.
 

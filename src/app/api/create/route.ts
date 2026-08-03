@@ -156,12 +156,9 @@ export async function POST(request: Request) {
     // (see lib/admin.ts) and beta testers (see lib/beta.ts) skip this
     // entirely — treated as unlimited. Only a READ-ONLY check happens
     // here (reject early if obviously insufficient); the actual DEDUCT
-    // happens further below, only once the Anthropic call has
-    // confirmed-successfully returned a classification — see the
-    // deductCredits call right after the try/catch around
-    // anthropic.messages.create. If that call throws (network error,
-    // timeout, API error, anything), the catch block returns without
-    // ever calling deductCredits, so zero credits are charged.
+    // happens via chargeForClassification() below, called only once each
+    // branch's terminal outcome is known — a thrown Anthropic call never
+    // reaches it, and a matched module's failed DB insert doesn't either.
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
     let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
@@ -235,11 +232,18 @@ export async function POST(request: Request) {
       );
     }
 
-    // Confirmed success — a real classification came back, so this is
-    // the one place the request actually gets charged.
-    if (!bypassCredits && plan) {
+    // Confirmed success is charged here — but "confirmed" means the
+    // classification's terminal outcome is actually known, not just that
+    // the Anthropic call returned. A matched module still needs its DB
+    // insert to succeed before this is chargeable; charging before that
+    // (the previous behavior) meant a DB insert failure left the user
+    // charged with nothing saved. chargeForClassification() is called at
+    // every terminal branch below, once that branch's outcome is final.
+    const userId = user.id;
+    async function chargeForClassification() {
+      if (bypassCredits || !plan) return;
       const deduction = await deductCredits(
-        user.id,
+        userId,
         CREDIT_COSTS.createAnything,
         "create_anything",
         "Create Anything request",
@@ -250,12 +254,13 @@ export async function POST(request: Request) {
         // but still deliver the result (see the same tolerance
         // documented on deductCredits/edit/generate).
         logApiError("/api/create", "credit deduction failed after successful classification", {
-          userId: user.id,
+          userId,
         });
       }
     }
 
     if (!toolInput.module || toolInput.module === "none") {
+      await chargeForClassification();
       return NextResponse.json({
         ok: true,
         matched: false,
@@ -265,6 +270,7 @@ export async function POST(request: Request) {
 
     const moduleConfig = getClassifierModule(toolInput.module);
     if (!moduleConfig) {
+      await chargeForClassification();
       return NextResponse.json({
         ok: true,
         matched: false,
@@ -281,6 +287,7 @@ export async function POST(request: Request) {
       (f) => f.required && (payload[f.key] === null || payload[f.key] === undefined)
     );
     if (missingRequired) {
+      await chargeForClassification();
       return NextResponse.json({
         ok: true,
         matched: false,
@@ -295,11 +302,15 @@ export async function POST(request: Request) {
       .single();
 
     if (insertError) {
+      // Insert failed — nothing was saved, so nothing is charged, same
+      // "no credits were charged" guarantee api/modules/create gives.
       return NextResponse.json(
-        { ok: false, error: insertError.message },
+        { ok: false, error: `${insertError.message} No credits were charged — please try again.` },
         { status: 500 }
       );
     }
+
+    await chargeForClassification();
 
     return NextResponse.json({
       ok: true,

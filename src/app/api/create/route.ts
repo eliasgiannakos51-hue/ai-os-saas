@@ -21,6 +21,7 @@ import {
   insufficientCreditsMessage,
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
+import { checkNeedsClarification } from "@/lib/clarification";
 
 export const dynamic = "force-dynamic";
 
@@ -111,11 +112,13 @@ export async function POST(request: Request) {
     let message: string;
     let agentRole: AgentRole;
     let priorStepsContext: string;
+    let skipClarification: boolean;
     try {
       const body = await request.json();
       message = typeof body?.message === "string" ? body.message.trim() : "";
       agentRole = isAgentRole(body?.agentRole) ? body.agentRole : "general";
       priorStepsContext = typeof body?.context === "string" ? body.context.trim() : "";
+      skipClarification = body?.skipClarification === true;
     } catch {
       return NextResponse.json(
         { ok: false, error: "Invalid request body." },
@@ -159,6 +162,60 @@ export async function POST(request: Request) {
     const breakerCheck = await checkAiCallAllowed(user.id, "create", fingerprintRequest(message));
     if (!breakerCheck.allowed) {
       return NextResponse.json({ ok: true, matched: false, message: breakerCheck.reason });
+    }
+
+    // Clarifying-questions pre-check (see lib/clarification.ts) — same
+    // shape as Website Builder/Automations: a small, cheap, forced-tool-
+    // use call before the real (module-routing) classification, only on
+    // the first submission (priorStepsContext-driven Mission Control
+    // step calls and the resubmission after answering both set
+    // skipClarification: true). Most Create Anything entries are already
+    // clear enough that this never fires — it's specifically for the
+    // genuinely ambiguous ones.
+    let clarificationBypassCredits = false;
+    let clarificationPlanForCheck: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
+    if (!skipClarification) {
+      clarificationBypassCredits = isAdminEmail(user.email) || (await hasActiveBetaBypass(user));
+      clarificationPlanForCheck = clarificationBypassCredits ? null : await resolveEffectivePlan(user);
+      if (clarificationPlanForCheck) {
+        const affordabilityCheck = await hasEnoughCredits(
+          user.id,
+          CREDIT_COSTS.clarificationCheck,
+          clarificationPlanForCheck
+        );
+        if (!affordabilityCheck.ok) {
+          return NextResponse.json({
+            ok: true,
+            matched: false,
+            message: insufficientCreditsMessage(affordabilityCheck.remaining, CREDIT_COSTS.clarificationCheck),
+          });
+        }
+      }
+      try {
+        void recordAiCallForDailySpend(1);
+        const clarification = await checkNeedsClarification(apiKey, "create", message);
+        if (clarificationPlanForCheck) {
+          await deductCredits(
+            user.id,
+            CREDIT_COSTS.clarificationCheck,
+            "clarification_check",
+            "Create Anything — clarifying-questions check",
+            clarificationPlanForCheck
+          );
+        }
+        if (clarification.needsClarification) {
+          return NextResponse.json({
+            ok: true,
+            matched: false,
+            needsClarification: true,
+            questions: clarification.questions,
+          });
+        }
+      } catch (err) {
+        // Best-effort: a clarification-check hiccup shouldn't block a
+        // real entry from being classified — fall through, uncharged.
+        logApiError("/api/create", err, { stage: "clarification_check" });
+      }
     }
 
     // Credits: 1 credit per Create Anything request, deducted from

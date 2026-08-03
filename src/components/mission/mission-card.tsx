@@ -127,6 +127,18 @@ export function MissionCard({
         body: JSON.stringify({
           message: step.text,
           agentRole,
+          // The Planner Agent already refuses to create vague filler
+          // steps (see clarificationNeeded in lib/mission-agents.ts) —
+          // step.text is always a concrete, specific action by the time
+          // it reaches here, so api/create's own clarifying-questions
+          // pre-check (lib/clarification.ts) would essentially never
+          // fire for it. Explicitly skipped rather than left to chance:
+          // this card has no inline UI for answering clarification
+          // questions, and a needsClarification response here would
+          // otherwise be misread as a real failure (see the !data.matched
+          // branch below), wrongly burning one of this step's limited
+          // attempts.
+          skipClarification: true,
           ...(priorContext ? { context: priorContext } : {}),
         }),
       });

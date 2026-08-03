@@ -8,6 +8,8 @@ import { useCreateAnything, type CreateResult } from "@/lib/use-create-anything"
 import { useSmartSuggestions } from "@/lib/use-smart-suggestions";
 import { SmartSuggestions } from "@/components/create/smart-suggestions";
 import { NextStepSuggestion } from "@/components/create/next-step-suggestion";
+import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
+import { appendClarificationAnswers } from "@/lib/clarification-client";
 
 export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
   const { submit, loading } = useCreateAnything();
@@ -36,6 +38,11 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Kept separately from `input` (which is cleared right after
+  // submitting) so a needsClarification follow-up still has the original
+  // message to append answers to.
+  const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     const message = input.trim();
@@ -44,9 +51,27 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
     setResult(null);
     const outcome = await submit(message);
     setResult(outcome);
+    if (outcome.type === "needsClarification") {
+      setPendingMessage(message);
+    }
     if (outcome.type !== "error") {
       setInput("");
     }
+  }
+
+  async function handleClarificationAnswer(questions: string[], answers: string[]) {
+    if (!pendingMessage) return;
+    const enriched = appendClarificationAnswers(pendingMessage, questions, answers);
+    const outcome = await submit(enriched, true);
+    setResult(outcome);
+    setPendingMessage(null);
+  }
+
+  async function handleClarificationSkip() {
+    if (!pendingMessage) return;
+    const outcome = await submit(pendingMessage, true);
+    setResult(outcome);
+    setPendingMessage(null);
   }
 
   return (
@@ -96,6 +121,19 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
 
       {result && (
         <div className="mt-4">
+          {result.type === "needsClarification" && (
+            <ClarificationQuestions
+              questions={result.questions}
+              onAnswer={(answers) => handleClarificationAnswer(result.questions, answers)}
+              onSkip={handleClarificationSkip}
+              submitting={loading}
+              title="A couple of quick questions:"
+              skipLabel="Skip, log it anyway"
+              continueLabel="Continue"
+              answerPlaceholder="Your answer..."
+            />
+          )}
+
           {result.type === "matched" && (
             <div className="flex items-start gap-3 rounded-2xl border border-emerald-900/60 bg-emerald-500/5 p-4 text-sm">
               <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />

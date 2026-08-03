@@ -1,6 +1,17 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { computeNextRunAt, isAutomationFrequency } from "@/lib/automation-schedule";
+import { isAdminEmail } from "@/lib/admin";
+import { hasActiveBetaBypass } from "@/lib/beta";
+import {
+  CREDIT_COSTS,
+  deductCredits,
+  hasEnoughCredits,
+  insufficientCreditsMessage,
+  resolveEffectivePlan,
+} from "@/lib/billing/credits";
+import { checkNeedsClarification } from "@/lib/clarification";
+import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
@@ -13,21 +24,29 @@ const MAX_ACTIVE_AUTOMATIONS = 10;
 
 // "Make this real" (see components/automation/automation-realize-form.tsx)
 // — turns an Automation module idea into an actually-scheduled, repeating
-// automation. No AI call and no credit charge here; this route only ever
-// creates a 'pending-for-its-first-run' row. api/cron/scheduled-runs is
-// solely responsible for actually executing it once next_run_at arrives.
+// automation. No AI call and no credit charge for the automation ITSELF
+// here; this route only ever creates a 'pending-for-its-first-run' row —
+// api/cron/scheduled-runs is solely responsible for actually executing
+// it once next_run_at arrives. The ONE exception is the clarifying-
+// questions pre-check below (lib/clarification.ts), the first AI call
+// this route makes: a small, cheap check for whether the description is
+// genuinely too ambiguous to act on later, charged separately and
+// minimally (CREDIT_COSTS.clarificationCheck) from the automation's own
+// (currently free) creation.
 export async function POST(request: Request) {
   try {
     let description: string;
     let frequency: string;
     let dayOfWeek: number | null;
     let dayOfMonth: number | null;
+    let skipClarification: boolean;
     try {
       const body = await request.json();
       description = typeof body?.description === "string" ? body.description.trim() : "";
       frequency = typeof body?.frequency === "string" ? body.frequency : "";
       dayOfWeek = typeof body?.dayOfWeek === "number" ? body.dayOfWeek : null;
       dayOfMonth = typeof body?.dayOfMonth === "number" ? body.dayOfMonth : null;
+      skipClarification = body?.skipClarification === true;
     } catch {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
@@ -52,6 +71,59 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+    }
+
+    if (!skipClarification) {
+      const apiKey = process.env.ANTHROPIC_API_KEY;
+      // Best-effort only: unlike Website Builder/Mission Control, this
+      // route has never required ANTHROPIC_API_KEY to function (creating
+      // an automation itself makes no AI call) — a missing key here
+      // should never block automation creation, just skip the check.
+      if (apiKey) {
+        const breakerCheck = await checkAiCallAllowed(user.id, "automation_clarify", fingerprintRequest(description));
+        if (breakerCheck.allowed) {
+          const isAdmin = isAdminEmail(user.email);
+          const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+          const clarificationPlan = bypassCredits ? null : await resolveEffectivePlan(user);
+          const affordabilityCheck = clarificationPlan
+            ? await hasEnoughCredits(user.id, CREDIT_COSTS.clarificationCheck, clarificationPlan)
+            : { ok: true, remaining: 0 };
+          if (!affordabilityCheck.ok) {
+            return NextResponse.json({
+              ok: true,
+              created: false,
+              rateLimited: true,
+              message: insufficientCreditsMessage(affordabilityCheck.remaining, CREDIT_COSTS.clarificationCheck),
+            });
+          }
+          try {
+            void recordAiCallForDailySpend(1);
+            const clarification = await checkNeedsClarification(apiKey, "automation", description);
+            if (clarificationPlan) {
+              await deductCredits(
+                user.id,
+                CREDIT_COSTS.clarificationCheck,
+                "clarification_check",
+                "Automations — clarifying-questions check",
+                clarificationPlan
+              );
+            }
+            if (clarification.needsClarification) {
+              return NextResponse.json({
+                ok: true,
+                created: false,
+                needsClarification: true,
+                questions: clarification.questions,
+              });
+            }
+          } catch (err) {
+            // Best-effort: a clarification-check hiccup shouldn't block
+            // a real automation from being created — fall through,
+            // uncharged.
+            logApiError("/api/automations/create", err, { stage: "clarification_check" });
+          }
+        }
+      }
     }
 
     const { count, error: countError } = await supabase

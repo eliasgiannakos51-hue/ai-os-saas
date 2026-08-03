@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Sparkles } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
+import { useCredits } from "@/components/credits/credits-context";
+import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
+import { appendClarificationAnswers } from "@/lib/clarification-client";
 import type { ModuleRecord } from "@/types/module-record";
 import type { AutomationFrequency } from "@/lib/automation-schedule";
 
@@ -88,6 +91,8 @@ function RealizeForm({
   const [dayOfWeek, setDayOfWeek] = useState<number | "">("");
   const [dayOfMonth, setDayOfMonth] = useState<number | "">("");
   const [submitting, setSubmitting] = useState(false);
+  const [pendingClarification, setPendingClarification] = useState<{ questions: string[] } | null>(null);
+  const { refresh: refreshCredits } = useCredits();
 
   const isComplete =
     description.trim().length > 0 &&
@@ -95,18 +100,18 @@ function RealizeForm({
     (frequency !== "weekly" || dayOfWeek !== "") &&
     (frequency !== "monthly" || dayOfMonth !== "");
 
-  async function handleSubmit() {
-    if (submitting || !isComplete) return;
+  async function submitAutomation(finalDescription: string, skipClarification: boolean) {
     setSubmitting(true);
     try {
       const res = await fetch("/api/automations/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          description: description.trim(),
+          description: finalDescription,
           frequency,
           dayOfWeek: frequency === "weekly" ? dayOfWeek : null,
           dayOfMonth: frequency === "monthly" ? dayOfMonth : null,
+          skipClarification,
         }),
       });
       const data = await res.json();
@@ -114,12 +119,33 @@ function RealizeForm({
         onDone(false, data.error ?? t("realizeError"));
         return;
       }
+      if (data.needsClarification) {
+        setPendingClarification({ questions: data.questions as string[] });
+        void refreshCredits();
+        return;
+      }
+      setPendingClarification(null);
       onDone(true, t("realizeSuccess"));
     } catch {
       onDone(false, t("realizeError"));
     } finally {
       setSubmitting(false);
     }
+  }
+
+  async function handleSubmit() {
+    if (submitting || !isComplete) return;
+    await submitAutomation(description.trim(), false);
+  }
+
+  function handleClarificationAnswer(answers: string[]) {
+    if (!pendingClarification) return;
+    const enriched = appendClarificationAnswers(description.trim(), pendingClarification.questions, answers);
+    void submitAutomation(enriched, true);
+  }
+
+  function handleClarificationSkip() {
+    void submitAutomation(description.trim(), true);
   }
 
   return (
@@ -190,14 +216,27 @@ function RealizeForm({
           </div>
         )}
       </div>
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={submitting || !isComplete}
-        className="inline-flex min-h-[36px] items-center justify-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {submitting ? t("realizing") : t("confirmMakeReal")}
-      </button>
+      {pendingClarification ? (
+        <ClarificationQuestions
+          questions={pendingClarification.questions}
+          onAnswer={handleClarificationAnswer}
+          onSkip={handleClarificationSkip}
+          submitting={submitting}
+          title={t("clarificationTitle")}
+          skipLabel={t("clarificationSkip")}
+          continueLabel={t("clarificationContinue")}
+          answerPlaceholder={t("clarificationAnswerPlaceholder")}
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={submitting || !isComplete}
+          className="inline-flex min-h-[36px] items-center justify-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {submitting ? t("realizing") : t("confirmMakeReal")}
+        </button>
+      )}
     </div>
   );
 }

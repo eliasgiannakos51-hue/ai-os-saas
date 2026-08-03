@@ -8,6 +8,8 @@ import { useCreateAnything, type CreateResult } from "@/lib/use-create-anything"
 import { useSmartSuggestions } from "@/lib/use-smart-suggestions";
 import { SmartSuggestions } from "@/components/create/smart-suggestions";
 import { NextStepSuggestion } from "@/components/create/next-step-suggestion";
+import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
+import { appendClarificationAnswers } from "@/lib/clarification-client";
 
 type Turn = { id: number; userMessage: string; result: CreateResult };
 
@@ -61,6 +63,22 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
     setTurns((t) => [...t, { id: turnIdCounter, userMessage: message, result }]);
   }
 
+  // Answering (or skipping) a "needsClarification" turn resubmits the
+  // SAME turn in place — updating its result — rather than appending a
+  // new one, since it's a continuation of that one request, not a fresh
+  // message. skipClarification: true always, since the check already ran
+  // once for this turn's original message.
+  async function handleClarificationAnswer(turnId: number, originalMessage: string, questions: string[], answers: string[]) {
+    const enriched = appendClarificationAnswers(originalMessage, questions, answers);
+    const result = await submit(enriched, true);
+    setTurns((t) => t.map((turn) => (turn.id === turnId ? { ...turn, result } : turn)));
+  }
+
+  async function handleClarificationSkip(turnId: number, originalMessage: string) {
+    const result = await submit(originalMessage, true);
+    setTurns((t) => t.map((turn) => (turn.id === turnId ? { ...turn, result } : turn)));
+  }
+
   function handleTextareaKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -105,7 +123,14 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
                   >
                     <Sparkles className="h-4 w-4" />
                   </span>
-                  <ResultBubble result={turn.result} />
+                  <ResultBubble
+                    result={turn.result}
+                    loading={loading}
+                    onAnswerClarification={(questions, answers) =>
+                      handleClarificationAnswer(turn.id, turn.userMessage, questions, answers)
+                    }
+                    onSkipClarification={() => handleClarificationSkip(turn.id, turn.userMessage)}
+                  />
                 </div>
               </div>
             ))}
@@ -151,7 +176,34 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
   );
 }
 
-function ResultBubble({ result }: { result: CreateResult }) {
+function ResultBubble({
+  result,
+  loading,
+  onAnswerClarification,
+  onSkipClarification,
+}: {
+  result: CreateResult;
+  loading: boolean;
+  onAnswerClarification: (questions: string[], answers: string[]) => void;
+  onSkipClarification: () => void;
+}) {
+  if (result.type === "needsClarification") {
+    return (
+      <div className="max-w-[80%]">
+        <ClarificationQuestions
+          questions={result.questions}
+          onAnswer={(answers) => onAnswerClarification(result.questions, answers)}
+          onSkip={onSkipClarification}
+          submitting={loading}
+          title="A couple of quick questions:"
+          skipLabel="Skip, log it anyway"
+          continueLabel="Continue"
+          answerPlaceholder="Your answer..."
+        />
+      </div>
+    );
+  }
+
   if (result.type === "matched") {
     return (
       <div className="max-w-[80%] rounded-2xl rounded-tl-sm border border-emerald-900/60 bg-emerald-500/5 px-4 py-3 text-sm">

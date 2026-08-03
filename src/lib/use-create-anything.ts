@@ -6,22 +6,27 @@ import { useCredits } from "@/components/credits/credits-context";
 export type CreateResult =
   | { type: "matched"; moduleTitle: string; href: string; message: string }
   | { type: "unmatched"; message: string }
-  | { type: "error"; message: string };
+  | { type: "error"; message: string }
+  | { type: "needsClarification"; questions: string[] };
 
 // Shared submit logic for the "Create Anything" classifier, used by both
 // the lightweight home-page composer (CreateChat) and the full chat-thread
 // Create Anything page (AssistantChat) — same /api/create contract, two UIs.
+// skipClarification is only ever true on the resubmission after the
+// caller has already shown "needsClarification" questions and the user
+// answered or explicitly skipped (see lib/clarification.ts) — never set
+// on a genuinely first submission.
 export function useCreateAnything() {
   const [loading, setLoading] = useState(false);
   const { refresh: refreshCredits } = useCredits();
 
-  async function submit(message: string): Promise<CreateResult> {
+  async function submit(message: string, skipClarification = false): Promise<CreateResult> {
     setLoading(true);
     try {
       const res = await fetch("/api/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message, skipClarification }),
       });
       const data = await res.json();
 
@@ -30,6 +35,10 @@ export function useCreateAnything() {
       }
 
       void refreshCredits();
+
+      if (data.needsClarification) {
+        return { type: "needsClarification", questions: data.questions as string[] };
+      }
 
       if (data.matched) {
         return {

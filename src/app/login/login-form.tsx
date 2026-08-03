@@ -4,7 +4,6 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { PasswordInput } from "@/components/ui/password-input";
 import { LoginSplash } from "@/components/auth/login-splash";
@@ -13,7 +12,6 @@ import { Logo } from "@/components/logo";
 
 export function LoginForm() {
   const router = useRouter();
-  const supabase = createClient();
   const t = useTranslations("auth.login");
 
   const [email, setEmail] = useState("");
@@ -36,11 +34,26 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
+      // Routed through /api/auth/login (server-side) instead of calling
+      // supabase.auth.signInWithPassword directly — see that route's file
+      // comment for why: repeated-failed-attempt rate limiting can only
+      // be a real security boundary when enforced server-side. The
+      // session cookie is set via this fetch's own Set-Cookie response
+      // headers (applied to the browser's cookie store automatically,
+      // same-origin), which is what goToDashboard's router.refresh()
+      // below actually needs — a fresh server render re-reads those
+      // cookies directly, independent of this component's own client-side
+      // supabase instance.
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
         // eslint-disable-next-line no-console
-        console.error("Login error:", error);
-        setError(getErrorMessage(error));
+        console.error("Login error:", data?.error);
+        setError(getErrorMessage(data?.error));
         return;
       }
 

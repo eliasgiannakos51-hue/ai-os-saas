@@ -15,24 +15,11 @@ import {
 } from "@/lib/accessibility-prefs";
 import { getSiteUrl } from "@/lib/site-url";
 
-// TEMPORARY diagnostic marker (see this pass's PR/commit description) —
-// the user reported the live production tab title doesn't show "Ionexa
-// AI" as expected, and this sandbox cannot reach the live production URL
-// to verify directly (confirmed blocked — HTTPS_PROXY policy denial and
-// WebFetch 403, 3 separate attempts). This unique suffix on the DEFAULT
-// title lets the user check the live tab title after this commit
-// deploys and report back exactly what they see, which tells us whether
-// (a) the code never actually reaches production (cache/deployment
-// issue — this marker also won't show), or (b) it does reach production
-// and "Ionexa AI" is genuinely correct there (marker shows). REMOVE this
-// suffix once that's confirmed — it's not meant to ship long-term.
-const TITLE_TEST_MARKER = " [TITLE-TEST-40217]";
-
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
-    default: `Ionexa AI — The energy behind everything you build.${TITLE_TEST_MARKER}`,
-    template: `%s — Ionexa AI${TITLE_TEST_MARKER}`,
+    default: "Ionexa AI — The energy behind everything you build.",
+    template: "%s — Ionexa AI",
   },
   description:
     "Create anything with AI. From ideas and research to trading, finance, product planning and business decisions — organized in one intelligent workspace.",

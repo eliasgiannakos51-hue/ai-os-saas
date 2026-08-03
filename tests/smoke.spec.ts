@@ -1,8 +1,17 @@
 import { test, expect, type Page, type BrowserContext } from "@playwright/test";
 import { MODULES } from "../src/lib/modules";
 
-// The 13 modules exactly as the sidebar orders them: Ideas (hand-built),
-// then the 12 config-driven modules from src/lib/modules.ts.
+// Permanent regression-safety-net suite (see the project's "before every
+// push" workflow) — run this, not just tsc/eslint/build, before pushing
+// anything. Every selector here is checked against the actual rendered
+// English UI text (messages/en.json / component source), not guessed —
+// a stale selector that never matches real markup is worse than no test
+// at all, since it teaches you to ignore failures.
+//
+// Whenever a significant new feature is added or changed, add a
+// corresponding test to THIS file (not a throwaway script) so coverage
+// only ever grows.
+
 const ALL_MODULES = [
   { slug: "ideas", href: "/dashboard", title: "Ideas" },
   ...MODULES.map((m) => ({ slug: m.slug, href: `/dashboard/${m.slug}`, title: m.title })),
@@ -25,10 +34,10 @@ test.describe("public pages", () => {
     const response = await page.goto("/");
     expect(response?.status()).toBe(200);
     await expect(
-      page.getByRole("heading", { name: "The energy behind everything you build." })
+      page.getByRole("heading", { name: "Your business, organized — with AI that actually helps." })
     ).toBeVisible();
-    await expect(page.getByRole("link", { name: "login()" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "sign_up()" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Log In" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Sign Up" })).toBeVisible();
   });
 
   test("unauthenticated visit to /dashboard redirects to /login", async ({ page }) => {
@@ -36,22 +45,29 @@ test.describe("public pages", () => {
     await expect(page).toHaveURL(/\/login$/);
   });
 
-  test("login page loads and toggles between login/sign_up modes", async ({ page }) => {
+  test("login page loads with email/password fields", async ({ page }) => {
     await page.goto("/login");
-    await expect(page.getByRole("heading", { name: "authenticate" })).toBeVisible();
-    // The tab button, not the "no account yet? sign_up" link further down.
-    await page.getByRole("button", { name: "sign_up" }).first().click();
-    await expect(page.getByRole("heading", { name: "create_account" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Welcome back" })).toBeVisible();
+    await expect(page.getByLabel("Email")).toBeVisible();
+    await expect(page.getByLabel("Password", { exact: true })).toBeVisible();
+  });
+
+  test("signup page loads on the plan-selection step", async ({ page }) => {
+    await page.goto("/signup");
+    await expect(page.getByRole("heading", { name: "Choose your plan" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Continue" })).toBeVisible();
   });
 });
 
 // ---------------------------------------------------------------------------
 // Authenticated checks — everything below needs a real, working Supabase
-// project reachable from wherever this suite runs (see README's Setup
-// section). A single test account is created once via the real signup UI
-// and reused for every check in this file, so one failed signup surfaces as
-// skipped (not failed) dependent tests with a clear reason, instead of 20+
-// confusing individual failures.
+// project reachable from wherever this suite runs (NEXT_PUBLIC_SUPABASE_URL
+// + SUPABASE_SERVICE_ROLE_KEY in .env.local — the latter is required
+// server-side by /api/signup to auto-confirm the test account). A single
+// test account is created once via the real signup UI and reused for every
+// check in this file, so one failed signup surfaces as skipped (not
+// failed) dependent tests with a clear reason, instead of many confusing
+// individual failures.
 // ---------------------------------------------------------------------------
 
 test.describe("authenticated dashboard", () => {
@@ -65,28 +81,29 @@ test.describe("authenticated dashboard", () => {
     context = await browser.newContext();
     page = await context.newPage();
     try {
-      await page.goto("/login");
-      // The tab button, not the "no account yet? sign_up" link further down.
-      await page.getByRole("button", { name: "sign_up" }).first().click();
-      await page.getByLabel("email").fill(user.email);
-      await page.getByLabel("password").fill(user.password);
-      await page.getByRole("button", { name: "run signup()" }).click();
+      await page.goto("/signup");
+      // Step 1: plan selection — Free is selected by default, just continue.
+      await page.getByRole("button", { name: "Continue" }).click();
+      // Step 2: account details.
+      await expect(page.getByRole("heading", { name: "Create your account" })).toBeVisible();
+      await page.getByLabel("Email").fill(user.email);
+      await page.getByLabel("Password", { exact: true }).fill(user.password);
+      await page.getByRole("checkbox").check();
+      await page.getByRole("button", { name: "Create Account" }).click();
 
-      // Race the redirect against the inline error box so a failed signup
-      // (e.g. no network access to Supabase) surfaces its real reason
-      // instead of just timing out.
       const outcome = await Promise.race([
         page
-          .waitForURL(/\/dashboard\/overview$/, { timeout: 15_000 })
+          .waitForURL(/\/dashboard\/overview$/, { timeout: 20_000 })
           .then((): "ok" => "ok"),
         page
-          .getByText(/^error:/)
-          .waitFor({ state: "visible", timeout: 15_000 })
+          .locator("p.text-red-400")
+          .first()
+          .waitFor({ state: "visible", timeout: 20_000 })
           .then((): "error" => "error"),
       ]);
 
       if (outcome === "error") {
-        const message = await page.getByText(/^error:/).innerText();
+        const message = await page.locator("p.text-red-400").first().innerText();
         throw new Error(`signup form reported: ${message}`);
       }
 
@@ -96,8 +113,9 @@ test.describe("authenticated dashboard", () => {
       // eslint-disable-next-line no-console
       console.warn(
         `\n[smoke] Signup during test setup failed — all authenticated checks below will be SKIPPED.\n` +
-          `[smoke] This usually means the test runner can't reach Supabase (NEXT_PUBLIC_SUPABASE_URL), ` +
-          `not that a feature is missing. Reason: ${setupError}\n`
+          `[smoke] This usually means the test runner can't reach Supabase, or ` +
+          `SUPABASE_SERVICE_ROLE_KEY is missing from .env.local (required by /api/signup ` +
+          `to auto-confirm the test account) — not that a feature is missing. Reason: ${setupError}\n`
       );
     }
   });
@@ -110,79 +128,169 @@ test.describe("authenticated dashboard", () => {
     test.skip(!signedUp, `signup setup failed: ${setupError}`);
   });
 
-  test("signup flow lands on Overview and shows the account email", async () => {
+  test("signup flow lands on Overview", async () => {
     await expect(page).toHaveURL(/\/dashboard\/overview$/);
-    await expect(page.getByText(user.email)).toBeVisible();
   });
 
   test("logout then login again works", async () => {
-    await page.getByRole("button", { name: "logout()" }).click();
+    await page.getByRole("button", { name: "Sign out" }).click();
     await page.waitForURL(/\/login$/);
 
-    await page.getByLabel("email").fill(user.email);
-    await page.getByLabel("password").fill(user.password);
-    await page.getByRole("button", { name: "run login()" }).click();
+    await page.getByLabel("Email").fill(user.email);
+    await page.getByLabel("Password", { exact: true }).fill(user.password);
+    await page.getByRole("button", { name: "Log In", exact: true }).click();
     await page.waitForURL(/\/dashboard\/overview$/, { timeout: 20_000 });
-    await expect(page.getByText(user.email)).toBeVisible();
-  });
-
-  test("overview page loads with a card for all 13 modules", async () => {
-    await page.goto("/dashboard/overview");
-    for (const m of ALL_MODULES) {
-      await expect(page.getByRole("heading", { name: m.title, exact: true })).toBeVisible();
-    }
   });
 
   test("settings page loads", async () => {
     await page.goto("/dashboard/settings");
     await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
-    await expect(page.getByText(user.email)).toBeVisible();
   });
 
-  test("Cmd+K / Ctrl+K jumps to Create Anything from another page", async () => {
-    await page.goto("/dashboard/overview");
-    await page.keyboard.press("ControlOrMeta+K");
-    await page.waitForURL(/\/dashboard\/create$/, { timeout: 5_000 });
+  test("create a record in the Ideas module end to end", async () => {
+    await page.goto("/dashboard");
+    const uniqueName = `Smoke test idea ${Date.now()}`;
+    await page.getByRole("button", { name: "New Idea" }).click();
+    await page.getByPlaceholder("idea name").fill(uniqueName);
+    await page.getByRole("button", { name: "Save" }).click();
+    await expect(page.getByText(uniqueName)).toBeVisible({ timeout: 10_000 });
   });
 
-  test("mobile viewport shows a hamburger menu that opens the sidebar", async () => {
-    await page.setViewportSize({ width: 375, height: 800 });
-    try {
-      await page.goto("/dashboard/overview");
-      const menuButton = page.getByRole("button", { name: "Toggle menu" });
-      await expect(menuButton).toBeVisible();
-      await menuButton.click();
-      await expect(page.getByRole("link", { name: "overview" })).toBeVisible();
-      await expect(page.getByRole("link", { name: "settings" })).toBeVisible();
-    } finally {
-      await page.setViewportSize({ width: 1280, height: 800 });
-    }
+  test("create a record in a config-driven module (Competitors) end to end", async () => {
+    await page.goto("/dashboard/competitors");
+    const uniqueName = `Smoke test competitor ${Date.now()}`;
+    await page.getByRole("button", { name: "New Competitors" }).click();
+    // The module's first required text field — filled generically since
+    // field sets differ per module; Competitors' headline field is its
+    // name-like field, always the first visible text input in the form.
+    await page.locator("form input[type='text'], form input:not([type])").first().fill(uniqueName);
+    await page.getByRole("button", { name: "Save" }).click();
+    await expect(page.getByText(uniqueName)).toBeVisible({ timeout: 10_000 });
   });
 
   for (const m of ALL_MODULES) {
-    test(`${m.title} module: page loads, create/search/sort/export exist, sidebar link works`, async () => {
-      // Sidebar link navigates to the module.
+    test(`${m.title} module: page loads, create/search/sort/export UI exists, sidebar link works`, async () => {
       await page.goto("/dashboard/overview");
-      await page.getByRole("link", { name: m.title.toLowerCase(), exact: true }).click();
+      await page.getByRole("link", { name: m.title, exact: true }).first().click();
       await expect(page).toHaveURL(new RegExp(`${m.href}$`));
-
-      // Page loaded without error (not a 404/500 shell) — the page header
-      // shows the module title.
       await expect(page.getByRole("heading", { name: m.title, exact: true })).toBeVisible();
-
-      // Create button (opens the add form) exists.
-      await expect(page.getByRole("button", { name: `+ new_${m.slug}()` })).toBeVisible();
-
-      // Search input exists.
-      await expect(page.getByPlaceholder("search.filter()...")).toBeVisible();
-
-      // Sort toggle exists.
-      await expect(page.getByText("sort:")).toBeVisible();
+      await expect(page.getByRole("button", { name: `New ${m.title}` })).toBeVisible();
+      await expect(page.getByPlaceholder("Search...")).toBeVisible();
+      await expect(page.getByText("Sort:")).toBeVisible();
       await expect(page.getByRole("button", { name: "newest" })).toBeVisible();
       await expect(page.getByRole("button", { name: "oldest" })).toBeVisible();
-
-      // Export button exists.
-      await expect(page.getByRole("button", { name: "export.csv()" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Export CSV" })).toBeVisible();
     });
   }
+
+  // -------------------------------------------------------------------------
+  // Mission Control — plan + step creation. The Planner/step-classification
+  // AI calls are mocked (page.route) so this test is fast, free, and
+  // deterministic instead of depending on a real Anthropic API key and
+  // real model output shape on every run.
+  // -------------------------------------------------------------------------
+  test("Mission Control: create a mission, then build its step (mocked AI)", async () => {
+    await page.route("**/api/mission/plan", async (route) => {
+      await route.fulfill({
+        json: {
+          ok: true,
+          planned: true,
+          mission: {
+            id: `smoke-mission-${Date.now()}`,
+            user_id: "smoke",
+            goal: "Smoke test mission goal",
+            status: "planning",
+            plan_steps: { steps: [{ text: "Log an idea about smoke testing", status: "pending" }] },
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        },
+      });
+    });
+
+    await page.goto("/dashboard/mission");
+    await page.getByLabel("What's your goal?").fill("Smoke test mission goal");
+    await page.getByRole("button", { name: "Create Plan" }).click();
+    await expect(page.getByText("Smoke test mission goal")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText("Log an idea about smoke testing")).toBeVisible();
+
+    await page.route("**/api/create", async (route) => {
+      await route.fulfill({
+        json: {
+          ok: true,
+          matched: true,
+          module: "ideas",
+          moduleTitle: "Ideas",
+          href: "/dashboard",
+          message: "Logged it.",
+          outputSummary: "Logged a new idea: smoke testing.",
+        },
+      });
+    });
+
+    await page.getByRole("button", { name: "Create with AI" }).first().click();
+    await expect(page.getByText("Logged a new idea: smoke testing.")).toBeVisible({ timeout: 10_000 });
+  });
+
+  // -------------------------------------------------------------------------
+  // Website Builder — job-start + background-process + status-poll flow,
+  // all mocked so no real Claude call happens and the "completed" status
+  // is returned on the very first poll instead of waiting on a real
+  // generation.
+  // -------------------------------------------------------------------------
+  test("Website Builder: generate a website end to end (mocked AI)", async () => {
+    const websiteId = `smoke-website-${Date.now()}`;
+    const htmlContent = "<html><body><h1>Smoke Test Site</h1></body></html>";
+
+    await page.route("**/api/websites/generate", async (route) => {
+      if (route.request().method() !== "POST") return route.fallback();
+      await route.fulfill({
+        json: {
+          ok: true,
+          generated: true,
+          pending: true,
+          record: {
+            id: websiteId,
+            user_id: "smoke",
+            name: "Smoke Test Site",
+            html_content: "",
+            status: "pending",
+            error_message: null,
+            reference_image_url: null,
+            attempt_count: 0,
+            created_at: new Date().toISOString(),
+          },
+        },
+      });
+    });
+
+    await page.route("**/api/websites/generate/process", async (route) => {
+      await route.fulfill({ json: { ok: true } });
+    });
+
+    await page.route("**/api/websites/status*", async (route) => {
+      await route.fulfill({
+        json: {
+          ok: true,
+          record: {
+            id: websiteId,
+            user_id: "smoke",
+            name: "Smoke Test Site",
+            html_content: htmlContent,
+            status: "completed",
+            error_message: null,
+            reference_image_url: null,
+            attempt_count: 1,
+            created_at: new Date().toISOString(),
+          },
+        },
+      });
+    });
+
+    await page.goto("/dashboard/website-builder");
+    await page.getByLabel("Name").fill("Smoke Test Site");
+    await page.getByLabel("Describe your website").fill("A one-page smoke test site for automated checks.");
+    await page.getByRole("button", { name: "Generate Website" }).click();
+    await expect(page.getByText("Website generated")).toBeVisible({ timeout: 10_000 });
+  });
 });

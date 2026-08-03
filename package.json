@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:e2e": "playwright test"
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "verify": "npm run test:e2e && npm run typecheck && npm run lint && npm run build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

@@ -183,7 +183,15 @@ function buildImageSystemPromptAddition(imageCount: number): string {
 export async function generateWebsiteHtml(
   apiKey: string,
   description: string,
-  referenceImages?: ReferenceImage[]
+  referenceImages?: ReferenceImage[],
+  // Fired with the raw accumulated text every time a new chunk arrives —
+  // lets a caller (api/websites/generate/process/route.ts) persist a
+  // progressively-growing preview of the in-flight generation so the
+  // client can render it "being written" live, without changing this
+  // function's own contract (it still only returns once the full,
+  // stripped/validated HTML is ready). Optional and best-effort: this
+  // function's own success/failure never depends on it.
+  onDelta?: (accumulatedText: string) => void
 ): Promise<string> {
   const anthropic = new Anthropic({ apiKey });
   const images = referenceImages?.slice(0, MAX_REFERENCE_IMAGES) ?? [];
@@ -214,6 +222,15 @@ export async function generateWebsiteHtml(
     system: images.length > 0 ? SYSTEM_PROMPT + buildImageSystemPromptAddition(images.length) : SYSTEM_PROMPT,
     messages: [{ role: "user", content }],
   });
+
+  if (onDelta) {
+    let accumulated = "";
+    stream.on("text", (delta) => {
+      accumulated += delta;
+      onDelta(accumulated);
+    });
+  }
+
   const response = await stream.finalMessage();
 
   const textBlock = response.content.find(

@@ -32,6 +32,17 @@ const MAX_CHANGE_REQUEST_LENGTH = 10000;
 // that can legitimately take minutes.
 const POLL_INTERVAL_MS = 2500;
 
+// Rotating "still working on it" messages shown while a website is
+// pending/processing — see the previewIsGenerating effect below.
+const PROGRESS_MESSAGE_KEYS = ["progressStep1", "progressStep2", "progressStep3", "progressStep4"] as const;
+const PROGRESS_MESSAGE_INTERVAL_MS = 17000;
+
+// Below this many characters of partial html_content, the progressive
+// live preview isn't worth rendering yet (barely any real markup exists,
+// so an iframe would just show blank/near-blank — the spinner view reads
+// better until there's something actually visible to show).
+const LIVE_PREVIEW_MIN_CHARS = 200;
+
 // Thumbnail preview for each list row — a real, live scaled-down render
 // of the site's own html_content (not a fake icon), so visually distinct
 // sites are actually recognizable at a glance without opening each one.
@@ -467,6 +478,38 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
   // truncation check below existed) — shows a clear message instead.
   const displayedHtmlIsComplete = looksLikeCompleteHtmlDocument(displayedHtml);
 
+  // Rotating progress messages for the pending/processing preview panel —
+  // cycles through PROGRESS_MESSAGE_KEYS every PROGRESS_MESSAGE_INTERVAL_MS
+  // so a long generation reads as active progress instead of a single
+  // frozen "loading" state. Not tied to any real server-side phase (the
+  // backend doesn't expose discrete phases) — a perceived-progress
+  // affordance only, same spirit as other AI tools' rotating "thinking"
+  // messages.
+  const previewIsGenerating = previewWebsite?.status === "pending" || previewWebsite?.status === "processing";
+  const [progressMessageIndex, setProgressMessageIndex] = useState(0);
+  useEffect(() => {
+    if (!previewIsGenerating) {
+      setProgressMessageIndex(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setProgressMessageIndex((i) => (i + 1) % PROGRESS_MESSAGE_KEYS.length);
+    }, PROGRESS_MESSAGE_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [previewIsGenerating]);
+
+  // Progressive live preview: while still pending/processing, the server
+  // (api/websites/generate/process/route.ts) periodically saves the
+  // in-flight generation's partial HTML to html_content, which the
+  // client already picks up via normal polling — so once there's enough
+  // of it to look like real markup, render it live instead of only a
+  // spinner, same "watch it being written" effect a streaming chat UI
+  // gives, without needing this component to hold its own connection to
+  // the generation (which would defeat the whole point of the background
+  // job architecture — see pollWebsiteStatus above).
+  const livePreviewHtml = previewWebsite?.status === "processing" ? previewWebsite.html_content : "";
+  const hasLivePreviewContent = livePreviewHtml.trim().length > LIVE_PREVIEW_MIN_CHARS;
+
   // Live estimated credit cost — recomputed on every render from the
   // current form state (lib/website-generation-cost.ts), so it updates
   // as the user types/attaches images, before they ever click Generate.
@@ -670,11 +713,28 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
             </p>
           )}
 
-          {!viewingVersion && (previewWebsite.status === "pending" || previewWebsite.status === "processing") ? (
+          {!viewingVersion && previewIsGenerating && hasLivePreviewContent ? (
+            <div className="relative mt-3 h-[500px] w-full">
+              <iframe
+                key={previewWebsite.id}
+                srcDoc={livePreviewHtml}
+                sandbox=""
+                title={previewWebsite.name}
+                className="h-full w-full rounded-xl border border-border bg-white"
+              />
+              <div className="absolute left-1/2 top-3 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-orange-500/40 bg-black/80 px-3 py-1.5 text-xs font-medium text-orange-300 shadow-lg backdrop-blur">
+                <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                {t("livePreviewBadge")}
+              </div>
+            </div>
+          ) : !viewingVersion && previewIsGenerating ? (
             <div className="mt-3 flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-border bg-input px-6 text-center">
               <Loader2 className="h-8 w-8 animate-spin text-orange-400" aria-hidden="true" />
               <p className="text-sm font-medium text-foreground">{t("generatingTitle")}</p>
               <p className="max-w-md text-xs text-muted">{t("generatingBody")}</p>
+              <p className="text-xs text-orange-400/80" aria-live="polite">
+                {t(PROGRESS_MESSAGE_KEYS[progressMessageIndex])}
+              </p>
             </div>
           ) : !viewingVersion && previewWebsite.status === "failed" ? (
             <div className="mt-3 flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-red-800 bg-red-950/20 px-6 text-center">

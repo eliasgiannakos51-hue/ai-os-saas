@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import sharp from "sharp";
 import { createClient } from "@/lib/supabase/server";
 import {
   generateWebsiteHtml,
@@ -21,6 +22,38 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export const dynamic = "force-dynamic";
 
 const MAX_DESCRIPTION_LENGTH = 10000;
+
+// Claude's vision input internally downsamples any image above roughly
+// this size before analyzing it (Anthropic docs: ~1.15 megapixels, i.e.
+// long-edge around 1568px for a typical aspect ratio) — sending a full
+// multi-thousand-pixel phone photo doesn't improve style/color analysis
+// quality beyond that point, it only adds base64-encoding size, network
+// transfer time, and vision-input processing time before Claude ever
+// starts generating the actual website. Shrinking here (dimensions only,
+// same format, no extra lossy re-compression) speeds up the request with
+// no loss to what the model can actually see.
+const REFERENCE_IMAGE_MAX_DIMENSION = 1568;
+
+// Resizes only if the image is actually larger than the target — never
+// upscales a smaller image (withoutEnlargement), and any resize failure
+// (corrupt file, unsupported edge case) falls back to the original,
+// unresized buffer rather than dropping the image entirely.
+async function resizeReferenceImageIfNeeded(buffer: Buffer): Promise<Buffer> {
+  try {
+    const resized = await sharp(buffer)
+      .resize({
+        width: REFERENCE_IMAGE_MAX_DIMENSION,
+        height: REFERENCE_IMAGE_MAX_DIMENSION,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .toBuffer();
+    return resized;
+  } catch (err) {
+    logApiError("/api/websites/generate/process", err, { stage: "reference_image_resize" });
+    return buffer;
+  }
+}
 
 // Downloads one reference image via the request-scoped client (Storage's
 // RLS policies — supabase_schema.sql — already confirm this path belongs
@@ -54,7 +87,8 @@ async function downloadReferenceImage(
     }
 
     const arrayBuffer = await imageBlob.arrayBuffer();
-    return { base64: Buffer.from(arrayBuffer).toString("base64"), mediaType: imageBlob.type };
+    const resizedBuffer = await resizeReferenceImageIfNeeded(Buffer.from(arrayBuffer));
+    return { base64: resizedBuffer.toString("base64"), mediaType: imageBlob.type };
   } catch (err) {
     logApiError("/api/websites/generate/process", err, { stage: "reference_image_download" });
     return null;
@@ -159,9 +193,27 @@ export async function POST(request: Request) {
       }
     });
 
+    // Progressive live preview: throttled to at most once every 1.5s (a
+    // DB write per streamed token would be wasteful and unnecessary — the
+    // client only polls /api/websites/status every 2.5s anyway, see
+    // website-builder-workspace.tsx) so the polling client can render the
+    // HTML "being written" in real time instead of staring at a static
+    // spinner for however long a large generation takes. Best-effort and
+    // fire-and-forget: a dropped/overlapping partial write here can never
+    // fail the actual generation, and the next tick's write simply
+    // overwrites it with more complete text.
+    const PARTIAL_SAVE_THROTTLE_MS = 1500;
+    let lastPartialSaveAt = 0;
+    const onDelta = (accumulatedText: string) => {
+      const now = Date.now();
+      if (now - lastPartialSaveAt < PARTIAL_SAVE_THROTTLE_MS) return;
+      lastPartialSaveAt = now;
+      void supabase.from("user_websites").update({ html_content: accumulatedText }).eq("id", websiteId);
+    };
+
     let htmlContent: string;
     try {
-      htmlContent = await generateWebsiteHtml(apiKey, description, referenceImages);
+      htmlContent = await generateWebsiteHtml(apiKey, description, referenceImages, onDelta);
     } catch (err) {
       logApiError("/api/websites/generate/process", err, { stage: "anthropic_call" });
       const errMessage = err instanceof Error ? err.message : "The website generation request failed.";

@@ -1,4 +1,75 @@
 -- ============================================================================
+-- IONEXA AI — FULL PROJECT DATABASE SCHEMA (CONSOLIDATED BACKUP)
+-- Generated: 2026-08-03
+--
+-- WHAT THIS FILE IS
+-- Every table, column, index, RLS policy, trigger, function, and storage
+-- bucket/policy this project has ever shipped, from the original 13-module
+-- MVP schema through every V2 feature built since (Knowledge Graph,
+-- Mission Control / AI Company, Website Builder + reference images +
+-- reliability hardening, Gamification, Scheduled Agent Runs, Real
+-- Automations, the AI cost circuit breaker, and the credits system) — in
+-- one file, in the order features were actually built, each section
+-- carrying the same explanatory comments as the source files it was
+-- assembled from. This is a documentation/backup artifact, not a new
+-- migration path: it is the union of every *.sql file in the repo root as
+-- of this date, not a replacement for any of them.
+--
+-- HOW TO USE THIS FILE
+-- Every statement in this file is idempotent (create table IF NOT EXISTS,
+-- add column IF NOT EXISTS, drop-policy-then-create, drop-constraint-then-
+-- add) EXCEPT the unconditional "create table" statements inherited
+-- verbatim from the original supabase_schema.sql for the tables that were
+-- always meant to be fully re-created on every run of that file (the 12
+-- non-"ideas" original modules, chat_conversations/messages, team_members,
+-- the Build-module tables, ai_coding_requests and friends,
+-- account_deletion_requests, chat_memory, known_devices, rate_limit_log,
+-- entity_links, ai_missions, user_websites, website_versions,
+-- website_reference_images, user_energy_checkins, user_achievements,
+-- scheduled_agent_runs, user_automations) — each of those is preceded by
+-- its own "drop table if exists ... cascade", exactly as in the original
+-- files. That was a safe, deliberate design choice on a project with no
+-- production data yet (see the original file's own header comment); on a
+-- project that now holds real user data, do NOT run this file wholesale
+-- against production without first confirming you're fine with those
+-- specific tables being dropped and recreated empty. If you only need the
+-- tables you don't already have, run the individual dedicated migration
+-- file for that feature instead (listed below) — every one of those is
+-- purely additive (IF NOT EXISTS / ADD COLUMN IF NOT EXISTS) with no drops
+-- at all.
+--
+-- SOURCE FILES THIS WAS ASSEMBLED FROM (all still present in the repo
+-- root, none deleted by creating this file):
+--   1. supabase_schema.sql              — base schema, kept continuously
+--                                          up to date; this file's backbone
+--   2. supabase_credits_schema.sql      — credits system (folded in below,
+--                                          previously never merged into
+--                                          supabase_schema.sql itself)
+--   3. supabase_v2_consolidated.sql     — an earlier partial consolidation
+--                                          (Knowledge Graph through Real
+--                                          Automations) — fully superseded
+--                                          by this file, kept for history
+--   4. website_status_migration.sql     — Website Builder background-job
+--                                          status/error_message columns
+--   5. website_reference_images_migration.sql — multi reference images
+--   6. website_reliability_migration.sql — attempt_count +
+--                                          has_reference_images columns
+--   7. scheduled_agent_runs_migration.sql
+--   8. user_automations_migration.sql
+--   9. daily_ai_spend_tracking_migration.sql — AI cost circuit breaker
+--
+-- FEATURES WITH NO SCHEMA — CONFIRMED NEVER BUILT, NOT AN OMISSION
+-- Two features do not appear anywhere in this file because no code for
+-- them exists anywhere in the app (confirmed by a full-repo search, not
+-- assumed): a "Daily Briefing" cron/widget, and a real Marketplace
+-- publish/listing flow (the Marketplace page is an intentional, honest
+-- empty state with a disabled "Coming Soon" button — see
+-- src/app/dashboard/marketplace/page.tsx — not a broken feature that
+-- regressed). If either of these gets built for real, its migration
+-- belongs in a new section appended to this file.
+-- ============================================================================
+
+-- ============================================================================
 -- Ionexa AI — Supabase schema
 -- 13 module tables, each scoped to the owning user via RLS (user_id =
 -- auth.uid()), plus create_requests (a rate-limit log for /api/create).
@@ -838,6 +909,81 @@ create table if not exists public.daily_ai_spend_tracking (
 alter table public.daily_ai_spend_tracking enable row level security;
 
 -- ============================================================================
+-- Credits system — user_credits (current balance) + credit_transactions
+-- (append-only ledger). Originally shipped as a standalone file,
+-- supabase_credits_schema.sql (run once, after the base schema, on the
+-- same project) — folded into this consolidated file verbatim so this one
+-- file is a complete backup. That standalone file still exists in the repo
+-- and is safe to keep running on its own; every statement below is
+-- idempotent, so running it here or there (or both) is a no-op on a
+-- project that already has it.
+--
+-- user_credits: one row per user, the current balance. credits_remaining
+-- decreases as actions are taken (see api/create, api/chat,
+-- api/modules/create) and is reset to credits_total on plan
+-- renewal/upgrade or by the monthly cron reset (api/cron/reset-credits).
+--
+-- credit_transactions: append-only ledger — every grant (signup, purchase,
+-- plan renewal) and every debit (an AI action) gets a row here. Never
+-- updated or deleted.
+--
+-- Both tables are writable ONLY via the service-role key (see
+-- lib/supabase/admin.ts) — RLS below intentionally grants authenticated
+-- users SELECT on their own rows only, no INSERT/UPDATE/DELETE. Every
+-- credit mutation happens server-side, inside an API route that has
+-- already verified the action it's charging for, so the client can never
+-- award or spend its own credits directly.
+-- ============================================================================
+
+create table if not exists public.user_credits (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  credits_remaining integer not null default 0,
+  credits_total integer not null default 0,
+  plan_tier text not null default 'free',
+  updated_at timestamptz not null default now()
+);
+
+-- beta_expires_at: set only for accounts that signed up with a valid beta
+-- invite code (see api/signup/route.ts, lib/beta.ts) — 30 days out from
+-- signup. null for everyone else. Ultimate-tier access granted by a beta
+-- code is only actually in effect while this is still in the future
+-- (resolveEffectivePlanSlug / hasActiveBetaBypass in
+-- lib/billing/credits.ts and lib/beta.ts); once it passes, those accounts
+-- fall back to Free automatically, with no manual/cron step required.
+alter table public.user_credits add column if not exists beta_expires_at timestamptz;
+
+alter table public.user_credits enable row level security;
+
+drop policy if exists "select_own_user_credits" on public.user_credits;
+create policy "select_own_user_credits" on public.user_credits
+  for select using (auth.uid() = user_id);
+
+drop trigger if exists set_updated_at on public.user_credits;
+create trigger set_updated_at before update on public.user_credits
+  for each row execute function public.set_updated_at();
+
+create table if not exists public.credit_transactions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  amount integer not null, -- negative = debit (an action), positive = credit (grant/purchase)
+  action_type text not null, -- e.g. 'chat_message', 'create_anything', 'agent_create',
+                              -- 'website_create', 'app_create', 'automation_create',
+                              -- 'signup_grant', 'plan_renewal', 'purchase', 'admin_adjustment'
+  description text not null default '',
+  created_at timestamptz not null default now()
+);
+
+create index if not exists credit_transactions_user_id_created_at_idx
+  on public.credit_transactions (user_id, created_at desc);
+
+alter table public.credit_transactions enable row level security;
+
+drop policy if exists "select_own_credit_transactions" on public.credit_transactions;
+create policy "select_own_credit_transactions" on public.credit_transactions
+  for select using (auth.uid() = user_id);
+
+
+-- ============================================================================
 -- Knowledge graph: links between records across different modules (e.g. an
 -- Idea linked to a Product), so Ionexa Chat can see relationships without
 -- the user re-explaining them every time (see src/lib/entity-links.ts,
@@ -1303,3 +1449,43 @@ create policy "update_own_user_automations" on public.user_automations
 drop policy if exists "delete_own_user_automations" on public.user_automations;
 create policy "delete_own_user_automations" on public.user_automations
   for delete using (auth.uid() = user_id);
+
+-- ============================================================================
+-- COVERAGE CHECKLIST — every table in this file, grouped by feature/date,
+-- so this doubles as a manifest. Cross-checked against every table name
+-- referenced anywhere in src/ via Supabase's .from("...") calls — nothing
+-- found in the codebase is missing from this list.
+--
+-- Original MVP (13 modules):
+--   ideas, competitors, research, finance_entries, learning_entries,
+--   trades, decisions, products, content, leads, feedback, metrics,
+--   automations, create_requests
+-- Ionexa Chat:
+--   chat_conversations, chat_messages, chat_memory
+-- Team / billing:
+--   team_members, user_credits, credit_transactions
+-- "Build" modules (idea/status trackers, no AI generation):
+--   ai_agents, ai_websites, ai_apps, ai_images, ai_videos,
+--   ai_coding_requests, ai_data_analysis_requests, ai_documents,
+--   ai_presentations, ai_campaigns
+-- Account security / infra:
+--   account_deletion_requests, known_devices, rate_limit_log,
+--   daily_ai_spend_tracking
+-- V2 — Knowledge Graph:
+--   entity_links
+-- V2 — Mission Control / AI Company:
+--   ai_missions
+-- V2 — Website Builder:
+--   user_websites (+ status/error_message, attempt_count,
+--   has_reference_images columns), website_versions,
+--   website_reference_images, storage bucket "website-references"
+-- V2 — AI Life Context:
+--   user_energy_checkins
+-- V2 — Gamification:
+--   user_achievements
+-- V2 — Scheduled Agent Runs / Real Automations:
+--   scheduled_agent_runs, user_automations
+--
+-- Tables that are intentionally NOT here because they were never built:
+--   any "daily_briefings" table, any "marketplace_listings" table.
+-- ============================================================================

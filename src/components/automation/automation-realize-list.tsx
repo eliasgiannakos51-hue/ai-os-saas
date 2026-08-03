@@ -77,13 +77,26 @@ function RealizeForm({
 }) {
   const t = useTranslations("dashboard.automation");
   const [description, setDescription] = useState(initialDescription);
-  const [frequency, setFrequency] = useState<AutomationFrequency>("weekly");
-  const [dayOfWeek, setDayOfWeek] = useState(1);
-  const [dayOfMonth, setDayOfMonth] = useState(1);
+  // Starts unset (not pre-filled with "weekly") specifically so a user who
+  // only types a description and hits submit — without ever opening this
+  // dropdown — can't silently create an automation on a frequency they
+  // never actually chose. Same reasoning extends dayOfWeek/dayOfMonth:
+  // each only becomes relevant once its frequency is picked, so each
+  // starts unset too, and the form is genuinely incomplete (not just
+  // "defaulted") until the user explicitly picks every field it needs.
+  const [frequency, setFrequency] = useState<AutomationFrequency | "">("");
+  const [dayOfWeek, setDayOfWeek] = useState<number | "">("");
+  const [dayOfMonth, setDayOfMonth] = useState<number | "">("");
   const [submitting, setSubmitting] = useState(false);
 
+  const isComplete =
+    description.trim().length > 0 &&
+    frequency !== "" &&
+    (frequency !== "weekly" || dayOfWeek !== "") &&
+    (frequency !== "monthly" || dayOfMonth !== "");
+
   async function handleSubmit() {
-    if (submitting || !description.trim()) return;
+    if (submitting || !isComplete) return;
     setSubmitting(true);
     try {
       const res = await fetch("/api/automations/create", {
@@ -130,6 +143,9 @@ function RealizeForm({
             onChange={(e) => setFrequency(e.target.value as AutomationFrequency)}
             className="input text-sm"
           >
+            <option value="" disabled>
+              {t("selectFrequency")}
+            </option>
             <option value="daily">{t("frequencyDaily")}</option>
             <option value="weekly">{t("frequencyWeekly")}</option>
             <option value="monthly">{t("frequencyMonthly")}</option>
@@ -143,6 +159,9 @@ function RealizeForm({
               onChange={(e) => setDayOfWeek(Number(e.target.value))}
               className="input text-sm"
             >
+              <option value="" disabled>
+                {t("selectDay")}
+              </option>
               {WEEKDAY_KEYS.map((key, index) => (
                 <option key={key} value={index}>
                   {t(`weekday.${key}`)}
@@ -159,6 +178,9 @@ function RealizeForm({
               onChange={(e) => setDayOfMonth(Number(e.target.value))}
               className="input text-sm"
             >
+              <option value="" disabled>
+                {t("selectDay")}
+              </option>
               {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => (
                 <option key={day} value={day}>
                   {day}
@@ -171,7 +193,7 @@ function RealizeForm({
       <button
         type="button"
         onClick={handleSubmit}
-        disabled={submitting || !description.trim()}
+        disabled={submitting || !isComplete}
         className="inline-flex min-h-[36px] items-center justify-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {submitting ? t("realizing") : t("confirmMakeReal")}

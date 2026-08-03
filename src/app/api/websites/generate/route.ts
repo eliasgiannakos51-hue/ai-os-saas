@@ -134,7 +134,13 @@ export async function POST(request: Request) {
 
     const { data: record, error: insertError } = await supabase
       .from("user_websites")
-      .insert({ user_id: user.id, name, html_content: "", status: "pending" })
+      .insert({
+        user_id: user.id,
+        name,
+        html_content: "",
+        status: "pending",
+        has_reference_images: referenceImagePaths.length > 0,
+      })
       .select()
       .single();
 

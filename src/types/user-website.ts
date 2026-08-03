@@ -18,6 +18,7 @@ export type UserWebsite = {
   // the app, kept only because the column still exists on already-created
   // rows. See WebsiteReferenceImage for the current multi-image model.
   reference_image_url: string | null;
+  has_reference_images: boolean;
   created_at: string;
 };
 

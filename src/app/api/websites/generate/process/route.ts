@@ -25,8 +25,8 @@ export const dynamic = "force-dynamic";
 
 // Explicit execution-time budget for this route. Without this, the
 // platform's own default function timeout applies — which, for a
-// streaming Claude call that can legitimately run 30-90+ seconds
-// (a full site with several reference images), is the most likely
+// streaming Claude call that can legitimately run several minutes for a
+// complex site with multiple reference images, is the most likely
 // real-world cause of a website getting silently killed mid-generation:
 // the row is already 'processing' by the time the platform kills the
 // function, no catch block ever runs, no terminal status is ever
@@ -35,10 +35,20 @@ export const dynamic = "force-dynamic";
 // exactly the "stuck forever" symptom this migration's attempt_count
 // column and api/websites/status's stale-job cleanup exist to catch as a
 // backstop. Raising this reduces how often that backstop needs to fire
-// in the first place. 300s is the practical ceiling on most serverless
-// hosts without a paid "long-running function" tier; raise further only
-// if the hosting plan explicitly supports it.
-export const maxDuration = 300;
+// in the first place.
+//
+// 600s (10 min) requires a hosting tier that supports long-running
+// serverless functions — on Vercel this means Pro or Enterprise with
+// Fluid Compute; the previous 300s value hit exactly this ceiling on
+// complex, image-attached generations in production (confirmed via the
+// "stale website generation job force-failed" log line, WITHOUT any
+// credit being charged — the safety net worked, it just fired too
+// early). STALE_JOB_TIMEOUT_WITH_IMAGES_MS in
+// lib/website-generation-limits.ts is set with headroom above this, so
+// this route's own timeout is what kills a truly stuck job first; the
+// stale-job check is purely the client-visible backstop for on the rare
+// chance even that fails to run its course.
+export const maxDuration = 600;
 
 const MAX_DESCRIPTION_LENGTH = 10000;
 

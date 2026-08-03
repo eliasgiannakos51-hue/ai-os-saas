@@ -31,7 +31,8 @@ export async function GET(request: Request) {
     const { data: usersData, error: usersError } = await admin.auth.admin.listUsers();
 
     if (usersError) {
-      return NextResponse.json({ ok: false, error: usersError.message }, { status: 500 });
+      logApiError("/api/weekly-digest", usersError, { stage: "list_users" });
+      return NextResponse.json({ ok: false, error: "Could not load users." }, { status: 500 });
     }
 
     const since = new Date(Date.now() - SEVEN_DAYS_MS).toISOString();

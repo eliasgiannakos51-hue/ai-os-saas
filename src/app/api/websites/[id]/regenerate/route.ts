@@ -86,7 +86,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
     if (claimError) {
       logApiError("/api/websites/[id]/regenerate", claimError, { stage: "claim" });
-      return NextResponse.json({ ok: false, error: claimError.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: "Could not start the regenerate. Please try again." }, { status: 500 });
     }
     if (!claimedRows || claimedRows.length === 0) {
       return NextResponse.json(

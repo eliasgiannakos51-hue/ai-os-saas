@@ -314,7 +314,7 @@ export async function POST(request: Request) {
 
     if (updateError) {
       logApiError("/api/websites/generate/process", updateError, { stage: "update" });
-      return NextResponse.json({ ok: false, error: updateError.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: "Could not save the generated website. Please try again." }, { status: 500 });
     }
 
     // Only now — the AI call succeeded AND the result is durably saved —

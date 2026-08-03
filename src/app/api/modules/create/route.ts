@@ -139,7 +139,7 @@ export async function POST(request: Request) {
     if (insertError) {
       logApiError("/api/modules/create", insertError, { stage: "insert", moduleSlug });
       return NextResponse.json(
-        { ok: false, error: `${insertError.message} No credits were charged — please try again.` },
+        { ok: false, error: "Could not save the entry. No credits were charged — please try again." },
         { status: 500 }
       );
     }

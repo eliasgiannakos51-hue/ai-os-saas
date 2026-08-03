@@ -272,7 +272,7 @@ export async function POST(request: Request) {
         }
       }
       logApiError("/api/websites/generate", insertError, { stage: "insert" });
-      return NextResponse.json({ ok: false, error: insertError.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: "Could not start generation. Please try again." }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true, generated: true, pending: true, record });

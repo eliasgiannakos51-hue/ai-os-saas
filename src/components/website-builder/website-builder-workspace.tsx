@@ -641,7 +641,7 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
         referenceImagePaths = uploadResults.map((r) => r.path);
       }
 
-      const res = await fetch("/api/websites/edit", {
+      const res = await fetchWithAuthRetry("/api/websites/edit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ websiteId, changeRequest: trimmedChangeRequest, referenceImagePaths }),

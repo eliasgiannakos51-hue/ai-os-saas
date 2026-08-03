@@ -269,7 +269,7 @@ export async function POST(request: Request) {
     if (updateError) {
       logApiError("/api/websites/edit", updateError, { stage: "update" });
       return NextResponse.json(
-        { ok: false, error: `${updateError.message} No credits were charged — please try again.` },
+        { ok: false, error: "Could not save the edit. No credits were charged — please try again." },
         { status: 500 }
       );
     }

@@ -12,6 +12,8 @@ import { useCredits } from "@/components/credits/credits-context";
 import { MessageContent } from "@/components/chat/message-content";
 import { getStuckStep } from "@/lib/mission-progress";
 import { buildPriorStepsContext, MAX_STEP_ATTEMPTS, stepAttemptsExhausted } from "@/lib/mission-context";
+import { updateMissionPlanSteps } from "@/lib/mission-plan-steps";
+import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { AGENT_ROLES, type AgentRole } from "@/lib/agent-roles";
 import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
 import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
@@ -95,14 +97,15 @@ export function MissionCard({
   // on failure (previously failures were purely ephemeral, never written
   // back) so the 3-attempt cap survives a page reload.
   async function persistStepFailure(index: number) {
-    const nextSteps = steps.map((s, i) =>
-      i === index ? { ...s, attempts: (s.attempts ?? 0) + 1 } : s
-    );
-    const { error: updateError } = await supabase
-      .from("ai_missions")
-      .update({ plan_steps: { ...mission.plan_steps, steps: nextSteps } })
-      .eq("id", mission.id);
-    if (!updateError) {
+    const result = await updateMissionPlanSteps(supabase, mission.id, ({ planSteps }) => ({
+      planSteps: {
+        ...planSteps,
+        steps: (planSteps.steps ?? []).map((s, i) =>
+          i === index ? { ...s, attempts: (s.attempts ?? 0) + 1 } : s
+        ),
+      },
+    }));
+    if (result.ok) {
       router.refresh();
     }
   }
@@ -122,7 +125,7 @@ export function MissionCard({
     setBuildingIndex(index);
     setError(null);
     try {
-      const res = await fetch("/api/create", {
+      const res = await fetchWithAuthRetry("/api/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -157,30 +160,33 @@ export function MissionCard({
         return;
       }
 
-      const nextSteps = steps.map((s, i) =>
-        i === index
-          ? {
-              ...s,
-              status: "completed" as const,
-              module: data.module,
-              moduleTitle: data.moduleTitle,
-              href: data.href,
-              agentRole,
-              output: typeof data.outputSummary === "string" ? data.outputSummary : undefined,
-            }
-          : s
-      );
+      const result = await updateMissionPlanSteps(supabase, mission.id, ({ planSteps, status }) => ({
+        planSteps: {
+          ...planSteps,
+          steps: (planSteps.steps ?? []).map((s, i) =>
+            i === index
+              ? {
+                  ...s,
+                  status: "completed" as const,
+                  module: data.module,
+                  moduleTitle: data.moduleTitle,
+                  href: data.href,
+                  agentRole,
+                  output: typeof data.outputSummary === "string" ? data.outputSummary : undefined,
+                }
+              : s
+          ),
+        },
+        extraFields: { status: status === "planning" ? "in_progress" : status },
+      }));
 
-      const { error: updateError } = await supabase
-        .from("ai_missions")
-        .update({
-          plan_steps: { ...mission.plan_steps, steps: nextSteps },
-          status: mission.status === "planning" ? "in_progress" : mission.status,
-        })
-        .eq("id", mission.id);
-
-      if (updateError) {
-        setError(getErrorMessage(updateError, "Entry created, but couldn't update the mission."));
+      if (!result.ok) {
+        if (result.conflict) {
+          setError("This mission was updated elsewhere just now — refreshing to show the latest state.");
+          router.refresh();
+        } else {
+          setError(getErrorMessage(result.error, "Entry created, but couldn't update the mission."));
+        }
         return;
       }
 
@@ -206,7 +212,7 @@ export function MissionCard({
     setSchedulingIndex(index);
     setError(null);
     try {
-      const res = await fetch("/api/mission/schedule-step", {
+      const res = await fetchWithAuthRetry("/api/mission/schedule-step", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ missionId: mission.id, stepIndex: index, agentRole }),
@@ -231,7 +237,7 @@ export function MissionCard({
     setReviewing(true);
     setError(null);
     try {
-      const res = await fetch("/api/mission/review", {
+      const res = await fetchWithAuthRetry("/api/mission/review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ missionId: mission.id }),

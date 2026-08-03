@@ -54,11 +54,44 @@ export async function POST(request: Request) {
     const ownsSubscription = isAdmin || Boolean(user.user_metadata?.stripe_subscription_id);
     // Team collaboration is a Professional+ capability (see
     // lib/billing/plans.ts's PlanCapabilities.teamCollaboration).
-    if (!ownsSubscription || !tier || !getPlan(tier)?.capabilities.teamCollaboration) {
+    const plan = getPlan(tier ?? "");
+    if (!ownsSubscription || !tier || !plan?.capabilities.teamCollaboration) {
       return NextResponse.json(
         { ok: false, error: "Team invites require the Professional plan or higher." },
         { status: 403 }
       );
+    }
+
+    // Professional pays €20/member/month as a real Stripe subscription
+    // line item (see api/checkout's team-seat item, api/webhooks/stripe
+    // which writes the paid quantity to user_metadata.seat_count). Without
+    // this check, nothing server-side stopped an account from calling this
+    // route past however many seats were actually purchased — a real,
+    // repeatable free-seat bypass. Ultimate/Enterprise (teamSeatsIncluded)
+    // have no per-seat charge at all, so they're exempt entirely (isAdmin
+    // is granted Enterprise-equivalent access above and is exempt too).
+    if (!isAdmin && !plan.teamSeatsIncluded) {
+      const seatCount = typeof user.user_metadata?.seat_count === "number" ? user.user_metadata.seat_count : 0;
+      const { count: activeMemberCount, error: countError } = await supabase
+        .from("team_members")
+        .select("id", { count: "exact", head: true })
+        .eq("owner_id", user.id);
+      if (countError) {
+        logApiError("/api/team/invite", countError, { stage: "count_seats" });
+        return NextResponse.json({ ok: false, error: "Could not verify seat availability." }, { status: 500 });
+      }
+      if ((activeMemberCount ?? 0) >= seatCount) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error:
+              seatCount === 0
+                ? "Add a paid team seat (+€20/member/month) in Settings before inviting anyone."
+                : `You've used all ${seatCount} purchased team seat${seatCount === 1 ? "" : "s"}. Add another seat in Settings to invite more people.`,
+          },
+          { status: 403 }
+        );
+      }
     }
 
     if (email === user.email?.toLowerCase()) {
@@ -87,7 +120,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const plan = getPlan(tier);
     await sendTeamInviteEmail({
       to: email,
       inviterEmail: user.email ?? "a Ionexa AI user",

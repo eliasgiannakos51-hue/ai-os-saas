@@ -152,7 +152,7 @@ export async function POST(request: Request) {
 
     if (countError) {
       logApiError("/api/automations/create", countError, { stage: "count_active" });
-      return NextResponse.json({ ok: false, error: countError.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: "Could not check your automation limit." }, { status: 500 });
     }
     if ((count ?? 0) >= MAX_ACTIVE_AUTOMATIONS) {
       return NextResponse.json(
@@ -203,7 +203,7 @@ export async function POST(request: Request) {
 
     if (insertError) {
       logApiError("/api/automations/create", insertError, { stage: "insert" });
-      return NextResponse.json({ ok: false, error: insertError.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: "Could not save the automation. Please try again." }, { status: 500 });
     }
 
     void logSecurityCheck(supabase, {

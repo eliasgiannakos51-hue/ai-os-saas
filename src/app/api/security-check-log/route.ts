@@ -42,7 +42,7 @@ export async function GET(request: Request) {
 
     if (error) {
       logApiError("/api/security-check-log", error);
-      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: "Could not load the security check." }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true, log: data });

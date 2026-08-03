@@ -411,8 +411,9 @@ export async function POST(request: Request) {
     if (insertError) {
       // Insert failed — nothing was saved, so nothing is charged, same
       // "no credits were charged" guarantee api/modules/create gives.
+      logApiError("/api/create", insertError, { stage: "insert" });
       return NextResponse.json(
-        { ok: false, error: `${insertError.message} No credits were charged — please try again.` },
+        { ok: false, error: "Could not save the entry. No credits were charged — please try again." },
         { status: 500 }
       );
     }

@@ -5,6 +5,7 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import { CREDIT_COSTS, deductCredits, hasEnoughCredits, resolveEffectivePlan } from "@/lib/billing/credits";
 import { runMissionStepForUser } from "@/lib/mission-step-runner";
 import { buildPriorStepsContext } from "@/lib/mission-context";
+import { updateMissionPlanSteps } from "@/lib/mission-plan-steps";
 import { computeNextRunAt } from "@/lib/automation-schedule";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { sendScheduledRunCompleteEmail } from "@/lib/email/send-scheduled-run-complete-email";
@@ -229,26 +230,34 @@ export async function GET(request: Request) {
         // completed step back into the mission first, THEN deduct
         // credits, same "deduct only after the durable save succeeded"
         // standard as every other AI-calling route in this app.
-        const nextSteps = steps.map((s, i) =>
-          i === run.step_index
-            ? {
-                ...s,
-                status: "completed" as const,
-                module: result.module,
-                moduleTitle: result.moduleTitle,
-                href: result.href,
-                agentRole: run.agent_role,
-                output: result.outputSummary,
-              }
-            : s
-        );
-        await admin
-          .from("ai_missions")
-          .update({
-            plan_steps: { ...typedMission.plan_steps, steps: nextSteps },
-            status: typedMission.status === "planning" ? "in_progress" : typedMission.status,
-          })
-          .eq("id", run.mission_id);
+        //
+        // Uses updateMissionPlanSteps rather than a blind overwrite of
+        // the plan_steps read at the top of this loop: runMissionStepForUser
+        // above is a real AI call that can take many seconds, during which
+        // a user could complete a DIFFERENT step of this same mission live
+        // in another tab — a blind overwrite here would silently erase
+        // that. This re-reads plan_steps immediately before writing and
+        // guards on its version, so a lost race surfaces instead of
+        // corrupting data.
+        await updateMissionPlanSteps(admin, run.mission_id, ({ planSteps, status }) => ({
+          planSteps: {
+            ...planSteps,
+            steps: (planSteps.steps ?? []).map((s, i) =>
+              i === run.step_index
+                ? {
+                    ...s,
+                    status: "completed" as const,
+                    module: result.module,
+                    moduleTitle: result.moduleTitle,
+                    href: result.href,
+                    agentRole: run.agent_role,
+                    output: result.outputSummary,
+                  }
+                : s
+            ),
+          },
+          extraFields: { status: status === "planning" ? "in_progress" : status },
+        }));
 
         if (!bypassCredits && plan) {
           await deductCredits(userId, CREDIT_COSTS.createAnything, "create_anything", "Scheduled agent run", plan);

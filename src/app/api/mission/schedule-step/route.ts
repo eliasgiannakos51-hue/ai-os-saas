@@ -89,7 +89,7 @@ export async function POST(request: Request) {
 
     if (insertError) {
       logApiError("/api/mission/schedule-step", insertError, { stage: "insert" });
-      return NextResponse.json({ ok: false, error: insertError.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: "Could not schedule this step. Please try again." }, { status: 500 });
     }
 
     return NextResponse.json({ ok: true, run });

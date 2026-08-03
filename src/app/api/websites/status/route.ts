@@ -40,7 +40,7 @@ export async function GET(request: Request) {
 
     if (error) {
       logApiError("/api/websites/status", error, { stage: "select" });
-      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: "Could not check generation status." }, { status: 500 });
     }
     if (!record) {
       return NextResponse.json({ ok: false, error: "Website not found." }, { status: 404 });

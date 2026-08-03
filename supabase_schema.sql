@@ -8,6 +8,22 @@
 -- field set each dashboard module needs. The DROP TABLE statements make this
 -- safe to re-run even if an earlier version of this schema already created
 -- them with different columns — `ideas` is never dropped.
+--
+-- *** CRITICAL — DO NOT RE-RUN THIS FILE AGAINST A LIVE PRODUCTION
+-- DATABASE ***. Many `drop table if exists ... cascade` statements below
+-- (and further down: chat_conversations, ai_missions, user_websites,
+-- website_versions, user_achievements, scheduled_agent_runs,
+-- user_automations, and more) target tables that hold real user data
+-- once the app is live — re-running this file after initial setup would
+-- PERMANENTLY DELETE all of it. This file is a "run once, on a brand-new
+-- project" script. Every schema change made AFTER initial setup in this
+-- project's history was instead shipped as its own small, additive,
+-- idempotent `alter table ... add column if not exists` block (see the
+-- many examples throughout this file, e.g. plan_steps_version below,
+-- free_retry_used near the end) — that is the safe pattern to follow for
+-- any future change to a table that already has production data. Only
+-- run this whole file end-to-end on a fresh Supabase project that has
+-- none of these tables yet.
 -- ============================================================================
 
 create extension if not exists "pgcrypto";
@@ -929,6 +945,25 @@ create policy "delete_own_ai_missions" on public.ai_missions
 drop trigger if exists set_updated_at on public.ai_missions;
 create trigger set_updated_at before update on public.ai_missions
   for each row execute function public.set_updated_at();
+
+-- Mission Control: optimistic-concurrency version counter for plan_steps
+-- writes (see lib/mission-plan-steps.ts) — fixes a real race where two
+-- writers for the same mission (two tabs both open on the same mission,
+-- or a live "Create with AI" click racing the daily cron's execution of
+-- an already-scheduled step for the same mission) could each read
+-- plan_steps once, run a many-second AI call, then blindly overwrite
+-- plan_steps with their own stale snapshot — whichever write landed
+-- second silently erased the first's completed step. Every write now
+-- re-reads plan_steps immediately before writing and guards the UPDATE
+-- with the version it just read; a write that lost the race gets 0 rows
+-- affected (surfaced to the caller as a conflict) instead of corrupting
+-- data. Idempotent add — safe whether this runs as part of a fresh
+-- create or as an incremental patch against a live database that
+-- already has this table (see the NEVER RE-RUN warning at the top of
+-- this file for why the `drop table` above must not be re-executed
+-- against production).
+alter table public.ai_missions
+  add column if not exists plan_steps_version integer not null default 0;
 
 -- ============================================================================
 -- Website Builder — real Claude-generated single-file HTML/CSS sites (see

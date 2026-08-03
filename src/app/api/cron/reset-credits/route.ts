@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
     if (error) {
       logApiError("/api/cron/reset-credits", error);
-      return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+      return NextResponse.json({ ok: false, error: "Could not load user credits." }, { status: 500 });
     }
 
     let reset = 0;

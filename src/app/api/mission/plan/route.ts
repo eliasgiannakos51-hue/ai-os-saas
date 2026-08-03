@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { planMission, type PlanMissionResult } from "@/lib/mission-agents";
+import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -97,10 +98,25 @@ export async function POST(request: Request) {
       }
     }
 
+    // "AI Life Context" — same consolidated user picture used by
+    // api/chat/route.ts and api/create/route.ts (see lib/user-context.ts),
+    // so the Planner grounds its steps in the user's real existing
+    // modules/missions/products instead of the goal text in isolation.
+    // Greek variant, matching PLANNER_SYSTEM_PROMPT's own language.
+    // Best-effort: a lookup failure just means planning falls back to the
+    // goal alone, same as before this was added.
+    let userContext = "";
+    try {
+      const fullContext = await getUserFullContext(supabase, user.id);
+      userContext = buildUserContextPromptAdditionGreek(fullContext);
+    } catch (err) {
+      logApiError("/api/mission/plan", err, { stage: "user_full_context" });
+    }
+
     let planResult: PlanMissionResult;
     try {
       void recordAiCallForDailySpend(CREDIT_COSTS.missionPlan);
-      planResult = await planMission(apiKey, goal);
+      planResult = await planMission(apiKey, goal, userContext);
     } catch (err) {
       logApiError("/api/mission/plan", err, { stage: "planner_call" });
       const errMessage = err instanceof Error ? err.message : "The Planner request failed.";

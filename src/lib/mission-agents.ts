@@ -114,12 +114,18 @@ export function parsePlanMissionToolInput(input: {
   return { clarificationNeeded: false, steps: steps.slice(0, MAX_STEPS).map((s) => s.trim()) };
 }
 
-export async function planMission(apiKey: string, goal: string): Promise<PlanMissionResult> {
+// `userContext` — "AI Life Context" (see lib/user-context.ts), appended
+// to the Planner's system prompt when the caller has it available (see
+// api/mission/plan/route.ts) so planning is grounded in the user's real
+// existing modules/missions/products instead of a goal considered in
+// isolation. Optional and additive: omitting it just means a plan built
+// from the goal text alone, same as before this was added.
+export async function planMission(apiKey: string, goal: string, userContext = ""): Promise<PlanMissionResult> {
   const anthropic = new Anthropic({ apiKey });
   const response = await anthropic.messages.create({
     model: MISSION_MODEL,
     max_tokens: 1024,
-    system: PLANNER_SYSTEM_PROMPT,
+    system: PLANNER_SYSTEM_PROMPT + userContext,
     messages: [{ role: "user", content: goal }],
     tools: [PLAN_MISSION_TOOL],
     tool_choice: { type: "tool", name: "create_plan" },

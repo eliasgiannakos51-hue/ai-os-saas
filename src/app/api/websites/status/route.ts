@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { isGenerationJobStale } from "@/lib/website-generation-limits";
 import { logApiError } from "@/lib/log-error";
+import type { UserWebsite } from "@/types/user-website";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +44,54 @@ export async function GET(request: Request) {
     }
     if (!record) {
       return NextResponse.json({ ok: false, error: "Website not found." }, { status: 404 });
+    }
+
+    // Stale-job cleanup — the fix for a generation getting stuck in
+    // "pending"/"processing" forever with the client polling endlessly.
+    // A row still in flight this long after created_at almost certainly
+    // means the worker request (api/websites/generate/process) died
+    // without ever reaching a terminal status — most likely the
+    // platform's function execution timeout killing it mid-stream, which
+    // skips every catch block and every status update this route relies
+    // on. Every poll checks this, so the very next tick after a job goes
+    // stale, the client sees 'failed' instead of spinning indefinitely.
+    // No credits to refund here: deductCredits only ever runs AFTER
+    // status flips to 'completed' (see the process route), so a row that
+    // never left pending/processing structurally can't have been charged.
+    const typedRecord = record as UserWebsite;
+    if (isGenerationJobStale(typedRecord.status, typedRecord.created_at, new Date())) {
+      const { data: failedRecord, error: staleUpdateError } = await supabase
+        .from("user_websites")
+        .update({
+          status: "failed",
+          error_message: "Something went wrong generating your website — please try again. No credits were charged.",
+        })
+        // Conditioned on the status we just read, not just the id, so
+        // this can never clobber a legitimate 'completed'/'failed'
+        // written by the worker in the small window between our SELECT
+        // above and this UPDATE.
+        .eq("id", id)
+        .eq("status", typedRecord.status)
+        .select()
+        .maybeSingle();
+
+      if (staleUpdateError) {
+        logApiError("/api/websites/status", staleUpdateError, { stage: "stale_job_update" });
+      } else if (failedRecord) {
+        logApiError("/api/websites/status", "stale website generation job force-failed", {
+          websiteId: id,
+          createdAt: typedRecord.created_at,
+        });
+        return NextResponse.json({ ok: true, record: failedRecord });
+      }
+      // failedRecord === null means the worker won the race and already
+      // moved the row to a terminal status between our SELECT and this
+      // UPDATE — the copy we read above is now stale, so re-fetch instead
+      // of trusting it.
+      const { data: freshRecord } = await supabase.from("user_websites").select("*").eq("id", id).maybeSingle();
+      if (freshRecord) {
+        return NextResponse.json({ ok: true, record: freshRecord });
+      }
     }
 
     return NextResponse.json({ ok: true, record });

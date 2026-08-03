@@ -940,6 +940,15 @@ create table public.user_websites (
   status text not null default 'completed',
   error_message text,
   reference_image_url text,
+  -- Hard circuit-breaker backstop against ANY scenario (client bug,
+  -- double-submit race, retried keepalive request) that could cause
+  -- api/websites/generate/process to run more than once for the same
+  -- row — incremented at the start of every processing attempt; once it
+  -- would exceed MAX_GENERATION_ATTEMPTS the route refuses to call the
+  -- AI at all and forces status='failed' immediately. Defaults to 0 so
+  -- it's a no-op for every row that already existed before this column
+  -- did.
+  attempt_count integer not null default 0,
   created_at timestamptz not null default now()
 );
 
@@ -948,6 +957,9 @@ alter table public.user_websites
 alter table public.user_websites
   add constraint user_websites_status_check
   check (status in ('pending', 'processing', 'completed', 'failed'));
+
+alter table public.user_websites
+  add column if not exists attempt_count integer not null default 0;
 
 create index if not exists user_websites_user_id_created_at_idx
   on public.user_websites (user_id, created_at desc);

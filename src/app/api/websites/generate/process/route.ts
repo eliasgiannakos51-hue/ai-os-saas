@@ -16,10 +16,28 @@ import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { deductCredits, resolveEffectivePlan } from "@/lib/billing/credits";
 import { computeWebsiteGenerationCost } from "@/lib/website-generation-cost";
+import { MAX_GENERATION_ATTEMPTS } from "@/lib/website-generation-limits";
 import { logApiError } from "@/lib/log-error";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const dynamic = "force-dynamic";
+
+// Explicit execution-time budget for this route. Without this, the
+// platform's own default function timeout applies — which, for a
+// streaming Claude call that can legitimately run 30-90+ seconds
+// (a full site with several reference images), is the most likely
+// real-world cause of a website getting silently killed mid-generation:
+// the row is already 'processing' by the time the platform kills the
+// function, no catch block ever runs, no terminal status is ever
+// written, and the client's poll loop (pollWebsiteStatus in
+// website-builder-workspace.tsx) has no way to know the job is dead —
+// exactly the "stuck forever" symptom this migration's attempt_count
+// column and api/websites/status's stale-job cleanup exist to catch as a
+// backstop. Raising this reduces how often that backstop needs to fire
+// in the first place. 300s is the practical ceiling on most serverless
+// hosts without a paid "long-running function" tier; raise further only
+// if the hosting plan explicitly supports it.
+export const maxDuration = 300;
 
 const MAX_DESCRIPTION_LENGTH = 10000;
 
@@ -158,7 +176,7 @@ export async function POST(request: Request) {
     // own row — a stranger's websiteId simply won't be found.
     const { data: website, error: fetchError } = await supabase
       .from("user_websites")
-      .select("id, status")
+      .select("id, status, attempt_count")
       .eq("id", websiteId)
       .maybeSingle();
 
@@ -172,7 +190,30 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, alreadyHandled: true });
     }
 
-    await supabase.from("user_websites").update({ status: "processing" }).eq("id", websiteId);
+    // Hard circuit-breaker backstop (see lib/website-generation-limits.ts)
+    // — this route has no auto-retry today, so in normal operation this
+    // never fires; it exists purely so nothing (a client bug, a
+    // double-submit race, a manually replayed request) can ever push a
+    // single row's real AI-call count past a fixed ceiling.
+    if (website.attempt_count >= MAX_GENERATION_ATTEMPTS) {
+      await supabase
+        .from("user_websites")
+        .update({
+          status: "failed",
+          error_message: "Something went wrong generating your website — please try again. No credits were charged.",
+        })
+        .eq("id", websiteId);
+      logApiError("/api/websites/generate/process", "generation attempt cap reached", {
+        websiteId,
+        attemptCount: website.attempt_count,
+      });
+      return NextResponse.json({ ok: true, failed: true, attemptCapReached: true });
+    }
+
+    await supabase
+      .from("user_websites")
+      .update({ status: "processing", attempt_count: website.attempt_count + 1 })
+      .eq("id", websiteId);
 
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));

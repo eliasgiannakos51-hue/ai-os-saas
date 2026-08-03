@@ -4,6 +4,12 @@ import Anthropic from "@anthropic-ai/sdk";
 const MISSION_MODEL = "claude-sonnet-4-6";
 const MIN_STEPS = 4;
 const MAX_STEPS = 8;
+// AI Output Protection Layer thresholds (see parsePlanMissionToolInput
+// below) — a step shorter than this can't realistically be a real,
+// specific action ("Do it" is 5 chars); a plan with fewer than this many
+// valid steps left after filtering is treated as unusable.
+const MIN_STEP_LENGTH = 8;
+const MIN_VALID_STEPS_AFTER_FILTERING = 2;
 
 // Planner Agent — breaks a goal into concrete steps. Deliberately doesn't
 // assign a module per step itself: each step's text is later handed to the
@@ -78,14 +84,30 @@ export function parsePlanMissionToolInput(input: {
     return { clarificationNeeded: true, clarificationQuestion: question };
   }
 
+  // AI Output Protection Layer (same general pattern as Website Builder's
+  // HTML security scan — a cheap, deterministic sanity check on the
+  // model's own output before it's ever shown to the user or saved):
+  // drop steps that are empty, too short to be a real action (under 8
+  // characters — "Do it", "Start" aren't usable plan steps), or exact
+  // case-insensitive duplicates of an earlier step in the same plan.
+  const seen = new Set<string>();
   const steps = Array.isArray(input.steps)
-    ? input.steps.filter((s): s is string => typeof s === "string" && s.trim().length > 0)
+    ? input.steps.filter((s): s is string => {
+        if (typeof s !== "string") return false;
+        const trimmed = s.trim();
+        if (trimmed.length < MIN_STEP_LENGTH) return false;
+        const key = trimmed.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      })
     : [];
 
-  if (steps.length === 0) {
-    // The model said it didn't need clarification but returned no usable
-    // steps either — treat it the same as an explicit clarification
-    // request rather than creating an empty, useless mission.
+  if (steps.length < MIN_VALID_STEPS_AFTER_FILTERING) {
+    // Either the model returned no usable steps, or what it returned was
+    // mostly empty/duplicate/too-vague filler — treat this the same as
+    // an explicit clarification request rather than shipping a degraded,
+    // low-quality plan the user would have to notice and fix themselves.
     return { clarificationNeeded: true, clarificationQuestion: DEFAULT_CLARIFICATION_QUESTION };
   }
 

@@ -495,13 +495,24 @@ async function tryApplySimpleEdit(
 // edit always needs the fuller reasoning) — only falls through to the
 // full, expensive regeneration below when that path declines (structural/
 // ambiguous change) or fails for any reason.
+export type EditWebsiteResult = {
+  html: string;
+  // Whether the cheap find-replace patch path (tryApplySimpleEdit) was
+  // used instead of a full regeneration — the caller (api/websites/edit/
+  // route.ts) uses this to charge dynamically: a patch is a tiny
+  // forced-tool-use classification call, wildly cheaper in real tokens
+  // than a full HTML regeneration, so billing the same flat amount for
+  // both (the previous behavior) was a real pricing inconsistency.
+  usedCheapPatch: boolean;
+};
+
 export async function editWebsiteHtml(
   apiKey: string,
   currentHtml: string,
   changeRequest: string,
   referenceImages?: ReferenceImage[],
   formEndpointUrl?: string
-): Promise<string> {
+): Promise<EditWebsiteResult> {
   const images = referenceImages?.slice(0, MAX_REFERENCE_IMAGES) ?? [];
 
   if (images.length === 0) {
@@ -509,7 +520,7 @@ export async function editWebsiteHtml(
       const patched = await tryApplySimpleEdit(apiKey, currentHtml, changeRequest);
       if (patched) {
         assertCompleteHtmlResponse(null, patched, "updated");
-        return patched;
+        return { html: patched, usedCheapPatch: true };
       }
     } catch {
       // Best-effort: any failure in the cheap-patch path (network hiccup,
@@ -555,5 +566,5 @@ export async function editWebsiteHtml(
 
   const html = stripCodeFence(rawText);
   assertCompleteHtmlResponse(response.stop_reason, html, "updated");
-  return html;
+  return { html, usedCheapPatch: false };
 }

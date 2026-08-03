@@ -11,12 +11,12 @@ import {
 } from "@/lib/website-html-security-scan";
 import { reviewWebsiteContentSafety } from "@/lib/website-security-review";
 import { logSecurityCheck } from "@/lib/security-check-log";
+import { computeWebsiteEditCost, estimateWebsiteEditCost } from "@/lib/website-edit-cost";
 import { getSiteUrl } from "@/lib/site-url";
 import { nextVersionNumber } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import {
-  CREDIT_COSTS,
   deductCredits,
   hasEnoughCredits,
   insufficientCreditsMessage,
@@ -164,16 +164,23 @@ export async function POST(request: Request) {
     // ever calling deductCredits, so zero credits are charged.
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+    // Dynamic pricing (lib/website-edit-cost.ts) — replaces the old flat
+    // CREDIT_COSTS.websiteEdit (50 credits regardless of real cost). The
+    // pre-check here conservatively estimates the more expensive full-
+    // regeneration case, since whether the cheap-patch path will apply
+    // isn't known until editWebsiteHtml actually runs below; the REAL,
+    // final (and often much smaller) charge is computed after.
+    const estimatedEditCost = estimateWebsiteEditCost(website.html_content.length);
     let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
     if (!bypassCredits) {
       plan = await resolveEffectivePlan(user);
-      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.websiteEdit, plan);
+      const check = await hasEnoughCredits(user.id, estimatedEditCost, plan);
       if (!check.ok) {
         return NextResponse.json({
           ok: true,
           edited: false,
           rateLimited: true,
-          message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.websiteEdit),
+          message: insufficientCreditsMessage(check.remaining, estimatedEditCost),
         });
       }
     }
@@ -190,9 +197,12 @@ export async function POST(request: Request) {
     const formEndpointUrl = `${getSiteUrl()}/api/websites/${websiteId}/submit-form`;
 
     let updatedHtml: string;
+    let usedCheapPatch = false;
     try {
-      void recordAiCallForDailySpend(CREDIT_COSTS.websiteEdit);
-      updatedHtml = await editWebsiteHtml(apiKey, website.html_content, changeRequest, referenceImages, formEndpointUrl);
+      void recordAiCallForDailySpend(estimatedEditCost);
+      const editResult = await editWebsiteHtml(apiKey, website.html_content, changeRequest, referenceImages, formEndpointUrl);
+      updatedHtml = editResult.html;
+      usedCheapPatch = editResult.usedCheapPatch;
       updatedHtml = await resolveWebsiteImagePlaceholders(updatedHtml);
 
       // AI Output Protection Layer — same two-layer check as generation
@@ -265,13 +275,19 @@ export async function POST(request: Request) {
     }
 
     // Only now — the AI call succeeded AND the result is durably saved —
-    // is this confirmed a success worth charging for.
+    // is this confirmed a success worth charging for. The REAL, final
+    // cost (lib/website-edit-cost.ts) reflects which path was actually
+    // taken: the cheap patch (usedCheapPatch) is charged a small flat
+    // amount; a full regeneration is priced the same way as fresh
+    // generation output, by real output length — never the old flat
+    // CREDIT_COSTS.websiteEdit regardless of which happened.
+    const realEditCost = computeWebsiteEditCost({ usedCheapPatch, outputHtmlLength: updatedHtml.length });
     if (!bypassCredits && plan) {
       const deduction = await deductCredits(
         user.id,
-        CREDIT_COSTS.websiteEdit,
+        realEditCost,
         "website_edit",
-        "Website Builder edit",
+        `Website Builder edit — ${realEditCost} credits (${usedCheapPatch ? "cheap patch" : `full regeneration, output ${updatedHtml.length} chars`})`,
         plan
       );
       if (!deduction.ok) {

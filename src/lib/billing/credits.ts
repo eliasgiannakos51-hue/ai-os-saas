@@ -308,10 +308,13 @@ export const CREDIT_COSTS = {
   // length, reference image count, and real generated HTML length. Kept
   // here only as an approximate reference point for other code/docs.
   websiteGenerate: 100,
-  // Website Builder post-generation editing (api/websites/edit) — a
-  // smaller Claude call than a full generation (it starts from the
-  // existing HTML rather than building from scratch), priced at half of
-  // websiteGenerate.
+  // Website Builder post-generation editing (api/websites/edit). No
+  // longer the actual charge: like websiteGenerate above, edit cost is
+  // now dynamic (see lib/website-edit-cost.ts) — a cheap find-replace
+  // patch and a full regeneration have wildly different real costs, so
+  // billing them the same flat amount (this constant) was a genuine
+  // pricing inconsistency this pass fixed. Kept only as a reference
+  // point for other code/docs.
   websiteEdit: 50,
   // The "does this request need clarifying questions first?" check (see
   // lib/clarification.ts) — a small, cheap, forced-tool-use call that

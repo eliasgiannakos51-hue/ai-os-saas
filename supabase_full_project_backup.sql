@@ -1497,6 +1497,77 @@ create trigger set_updated_at before update on public.user_documents
   for each row execute function public.set_updated_at();
 
 -- ============================================================================
+-- Email notification preferences + daily send cap
+-- (settings/email-notification-settings.tsx, lib/email/email-gate.ts)
+-- ============================================================================
+
+-- One row per user, created lazily the first time they toggle anything in
+-- Settings. NO row means "all defaults on" — the gate treats a missing row
+-- and an all-true row identically, so nothing has to backfill this for
+-- existing accounts.
+--
+-- Only the OPTIONAL email types get a column. Account-lifecycle and
+-- security-confirmation mail (welcome, delete-account confirmation, team
+-- invites addressed to a third party) is deliberately not switchable, and
+-- lib/email/email-gate.ts enforces that server-side regardless of what is
+-- stored here.
+create table if not exists public.user_email_preferences (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  new_device_login boolean not null default true,
+  weekly_digest boolean not null default true,
+  scheduled_run_complete boolean not null default true,
+  stuck_generation boolean not null default true,
+  website_form_submission boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.user_email_preferences enable row level security;
+
+drop policy if exists "select_own_user_email_preferences" on public.user_email_preferences;
+create policy "select_own_user_email_preferences" on public.user_email_preferences
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_user_email_preferences" on public.user_email_preferences;
+create policy "insert_own_user_email_preferences" on public.user_email_preferences
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "update_own_user_email_preferences" on public.user_email_preferences;
+create policy "update_own_user_email_preferences" on public.user_email_preferences
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop trigger if exists set_updated_at on public.user_email_preferences;
+create trigger set_updated_at before update on public.user_email_preferences
+  for each row execute function public.set_updated_at();
+
+-- Append-only record of every email actually handed to Resend. Read by
+-- checkEmailAllowed to count a user's sends in the trailing 24h and stop
+-- at MAX_EMAILS_PER_DAY (20) — a rolling window rather than "since local
+-- midnight", because this app's users span many timezones and there is no
+-- single correct reset hour.
+create table if not exists public.email_send_log (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  email_type text not null,
+  sent_at timestamptz not null default now()
+);
+
+-- The exact shape of the cap query: filter by user_id, range-scan sent_at.
+create index if not exists email_send_log_user_id_sent_at_idx
+  on public.email_send_log (user_id, sent_at desc);
+
+alter table public.email_send_log enable row level security;
+
+-- Read-only to the owner (so "what did you send me?" is answerable from
+-- the client). There is deliberately NO insert/update/delete policy: only
+-- the service-role client writes here, and service role bypasses RLS. A
+-- user who could insert rows here could also silence their own cap, and a
+-- user who could delete them could bypass it entirely.
+drop policy if exists "select_own_email_send_log" on public.email_send_log;
+create policy "select_own_email_send_log" on public.email_send_log
+  for select using (auth.uid() = user_id);
+
+-- ============================================================================
 -- COVERAGE CHECKLIST — every table in this file, grouped by feature/date,
 -- so this doubles as a manifest. Cross-checked against every table name
 -- referenced anywhere in src/ via Supabase's .from("...") calls — nothing
@@ -1535,6 +1606,8 @@ create trigger set_updated_at before update on public.user_documents
 -- Build-module placeholder at the same /dashboard/documents route —
 -- ai_documents itself still exists in the DB, just unreferenced now):
 --   user_documents
+-- Email notification preferences + per-user daily send cap:
+--   user_email_preferences, email_send_log
 --
 -- Tables that are intentionally NOT here because they were never built:
 --   any "daily_briefings" table, any "marketplace_listings" table.

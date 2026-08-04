@@ -351,6 +351,36 @@
       "sendConfirmationEmail": "削除確認メールを送信",
       "sending": "送信中...",
       "checkEmail": "削除を確認するにはメールをご確認ください — <highlight>{email}</highlight> にリンクを送信しました。1時間で期限切れになります。クリックするまで何も削除されません。"
+    },
+    "emailNotifications": {
+      "title": "メール通知",
+      "description": "受け取りたいメールを選べます。アカウントとセキュリティのメールは常に送信されます。",
+      "saveError": "保存できませんでした。もう一度お試しください。",
+      "enabled": "メールをオンにしました",
+      "disabled": "メールをオフにしました",
+      "dailyCap": "受信トレイが埋まらないよう、これらのメールは1日最大{max}通までにしています。",
+      "types": {
+        "new_device_login": {
+          "label": "新しいサインインの通知",
+          "description": "見覚えのない端末でアカウントが使われたとき。"
+        },
+        "weekly_digest": {
+          "label": "週次ダイジェスト",
+          "description": "各モジュールに追加した内容の短いまとめ。"
+        },
+        "scheduled_run_complete": {
+          "label": "予約タスクの結果",
+          "description": "予約したタスクが完了した、または実行できなかったとき。"
+        },
+        "stuck_generation": {
+          "label": "生成が停滞した際の通知",
+          "description": "ウェブサイトの生成が想定よりはるかに長引いているとき。"
+        },
+        "website_form_submission": {
+          "label": "サイトのフォーム送信",
+          "description": "訪問者があなたのサイトの問い合わせフォームを送信したとき。"
+        }
+      }
     }
   },
   "dashboard": {

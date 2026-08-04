@@ -52,7 +52,7 @@ export async function GET(request: Request) {
         })
       );
 
-      await sendWeeklyDigestEmail({ email: user.email, moduleCounts, periodLabel: "7d" });
+      await sendWeeklyDigestEmail({ email: user.email, userId: user.id, moduleCounts, periodLabel: "7d" });
       sent++;
     }
 

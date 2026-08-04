@@ -351,6 +351,36 @@
       "sendConfirmationEmail": "Envoyer l'e-mail de confirmation de suppression",
       "sending": "Envoi...",
       "checkEmail": "Vérifiez votre e-mail pour confirmer la suppression — un lien a été envoyé à <highlight>{email}</highlight>. Il expire dans 1 heure ; rien n'est supprimé tant que vous ne cliquez pas dessus."
+    },
+    "emailNotifications": {
+      "title": "Notifications par e-mail",
+      "description": "Choisissez les e-mails que vous souhaitez recevoir. Les e-mails de compte et de sécurité sont toujours envoyés.",
+      "saveError": "Enregistrement impossible — réessayez.",
+      "enabled": "E-mail activé",
+      "disabled": "E-mail désactivé",
+      "dailyCap": "Pour préserver votre boîte de réception, nous envoyons au maximum {max} de ces e-mails par jour.",
+      "types": {
+        "new_device_login": {
+          "label": "Alertes de nouvelle connexion",
+          "description": "Quand votre compte est utilisé sur un appareil inconnu."
+        },
+        "weekly_digest": {
+          "label": "Résumé hebdomadaire",
+          "description": "Un bref récapitulatif de ce que vous avez ajouté dans vos modules."
+        },
+        "scheduled_run_complete": {
+          "label": "Résultats des tâches planifiées",
+          "description": "Quand une tâche planifiée se termine — ou n'a pas pu s'exécuter."
+        },
+        "stuck_generation": {
+          "label": "Alertes de génération bloquée",
+          "description": "Quand la génération d'un site dure bien plus longtemps que prévu."
+        },
+        "website_form_submission": {
+          "label": "Envois de formulaire",
+          "description": "Quand un visiteur remplit un formulaire de contact sur l'un de vos sites."
+        }
+      }
     }
   },
   "dashboard": {

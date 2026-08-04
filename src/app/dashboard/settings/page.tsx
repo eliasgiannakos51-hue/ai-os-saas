@@ -16,6 +16,7 @@ import { BuyCredits } from "@/components/settings/buy-credits";
 import { CreditHistory, type CreditTransaction } from "@/components/settings/credit-history";
 import { AiUsageSettings } from "@/components/settings/ai-usage-settings";
 import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
+import { EmailNotificationSettings } from "@/components/settings/email-notification-settings";
 import { AchievementsSection } from "@/components/settings/achievements-section";
 import { loadUnlockedAchievements } from "@/lib/achievements";
 import { isAdminEmail } from "@/lib/admin";
@@ -63,6 +64,15 @@ export default async function SettingsPage() {
   const aiPersonaName = (user.user_metadata?.ai_persona_name as string | undefined) ?? "";
 
   const unlockedAchievements = await loadUnlockedAchievements(supabase, user.id);
+
+  // No row until the user actually toggles something (see the panel's
+  // upsert) — an empty object means "all defaults on", the same thing
+  // lib/email/email-gate.ts concludes server-side for a missing row.
+  const { data: emailPrefs } = await supabase
+    .from("user_email_preferences")
+    .select("*")
+    .eq("user_id", user.id)
+    .maybeSingle();
 
   const { data: transactions } = await supabase
     .from("credit_transactions")
@@ -177,6 +187,11 @@ export default async function SettingsPage() {
         </div>
 
         <LoginActivity devices={(knownDevices as KnownDevice[] | null) ?? []} />
+
+        <EmailNotificationSettings
+          userId={user.id}
+          initialPrefs={(emailPrefs as Record<string, boolean> | null) ?? {}}
+        />
 
         {hasCustomAiPersona && <AiPersonaSettings initialName={aiPersonaName} />}
 

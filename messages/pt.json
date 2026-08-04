@@ -351,6 +351,36 @@
       "sendConfirmationEmail": "Enviar e-mail de confirmação de exclusão",
       "sending": "Enviando...",
       "checkEmail": "Verifique seu e-mail para confirmar a exclusão — enviamos um link para <highlight>{email}</highlight>. Ele expira em 1 hora; nada será excluído até que você clique nele."
+    },
+    "emailNotifications": {
+      "title": "Notificações por e-mail",
+      "description": "Escolha quais e-mails quer receber. E-mails de conta e segurança são sempre enviados.",
+      "saveError": "Não foi possível guardar — tente novamente.",
+      "enabled": "E-mail ativado",
+      "disabled": "E-mail desativado",
+      "dailyCap": "Para não encher a sua caixa de entrada, enviamos no máximo {max} destes e-mails por dia.",
+      "types": {
+        "new_device_login": {
+          "label": "Alertas de novo início de sessão",
+          "description": "Quando a sua conta é usada num dispositivo desconhecido."
+        },
+        "weekly_digest": {
+          "label": "Resumo semanal",
+          "description": "Um breve resumo do que adicionou nos seus módulos."
+        },
+        "scheduled_run_complete": {
+          "label": "Resultados de tarefas agendadas",
+          "description": "Quando uma tarefa agendada termina — ou não conseguiu correr."
+        },
+        "stuck_generation": {
+          "label": "Alertas de geração presa",
+          "description": "Quando a geração de um site demora muito mais do que devia."
+        },
+        "website_form_submission": {
+          "label": "Submissões de formulário",
+          "description": "Quando um visitante preenche um formulário de contacto num dos seus sites."
+        }
+      }
     }
   },
   "dashboard": {

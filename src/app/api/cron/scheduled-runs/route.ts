@@ -129,6 +129,7 @@ export async function GET(request: Request) {
               .eq("id", run.id);
             failed++;
             void sendScheduledRunCompleteEmail({
+              userId: user.id,
               email: user.email ?? "",
               stepText: run.step_text,
               succeeded: false,
@@ -184,6 +185,7 @@ export async function GET(request: Request) {
             .eq("id", run.id);
           failed++;
           void sendScheduledRunCompleteEmail({
+            userId: user.id,
             email: user.email ?? "",
             stepText: run.step_text,
             succeeded: false,
@@ -203,6 +205,7 @@ export async function GET(request: Request) {
             .eq("id", run.id);
           failed++;
           void sendScheduledRunCompleteEmail({
+            userId: user.id,
             email: user.email ?? "",
             stepText: run.step_text,
             succeeded: false,
@@ -218,6 +221,7 @@ export async function GET(request: Request) {
             .eq("id", run.id);
           failed++;
           void sendScheduledRunCompleteEmail({
+            userId: user.id,
             email: user.email ?? "",
             stepText: run.step_text,
             succeeded: false,
@@ -269,6 +273,7 @@ export async function GET(request: Request) {
           .eq("id", run.id);
         completed++;
         void sendScheduledRunCompleteEmail({
+          userId: user.id,
           email: user.email ?? "",
           stepText: run.step_text,
           succeeded: true,
@@ -354,6 +359,7 @@ export async function GET(request: Request) {
               .eq("id", automation.id);
             automationsFailed++;
             void sendScheduledRunCompleteEmail({
+              userId: user.id,
               email: user.email ?? "",
               stepText: automation.description,
               succeeded: false,
@@ -376,6 +382,7 @@ export async function GET(request: Request) {
             .eq("id", automation.id);
           automationsFailed++;
           void sendScheduledRunCompleteEmail({
+            userId: user.id,
             email: user.email ?? "",
             stepText: automation.description,
             succeeded: false,
@@ -394,6 +401,7 @@ export async function GET(request: Request) {
             .eq("id", automation.id);
           automationsFailed++;
           void sendScheduledRunCompleteEmail({
+            userId: user.id,
             email: user.email ?? "",
             stepText: automation.description,
             succeeded: false,
@@ -415,6 +423,7 @@ export async function GET(request: Request) {
           .eq("id", automation.id);
         automationsCompleted++;
         void sendScheduledRunCompleteEmail({
+          userId: user.id,
           email: user.email ?? "",
           stepText: automation.description,
           succeeded: true,
@@ -469,7 +478,7 @@ export async function GET(request: Request) {
         const { data: ownerAuth } = await admin.auth.admin.getUserById(website.user_id);
         const ownerEmail = ownerAuth?.user?.email;
         if (ownerEmail) {
-          void sendStuckGenerationEmail({ email: ownerEmail, websiteName: website.name });
+          void sendStuckGenerationEmail({ email: ownerEmail, userId: website.user_id, websiteName: website.name });
         }
         await admin
           .from("user_websites")

@@ -351,6 +351,36 @@
       "sendConfirmationEmail": "Bestätigungs-E-Mail zum Löschen senden",
       "sending": "Wird gesendet...",
       "checkEmail": "Prüfe deine E-Mail, um die Löschung zu bestätigen — wir haben einen Link an <highlight>{email}</highlight> gesendet. Er läuft in 1 Stunde ab; nichts wird gelöscht, bis du darauf klickst."
+    },
+    "emailNotifications": {
+      "title": "E-Mail-Benachrichtigungen",
+      "description": "Wähle aus, welche E-Mails du erhalten möchtest. Konto- und Sicherheits-E-Mails werden immer gesendet.",
+      "saveError": "Konnte nicht gespeichert werden — bitte erneut versuchen.",
+      "enabled": "E-Mail aktiviert",
+      "disabled": "E-Mail deaktiviert",
+      "dailyCap": "Damit dein Postfach übersichtlich bleibt, senden wir höchstens {max} dieser E-Mails pro Tag.",
+      "types": {
+        "new_device_login": {
+          "label": "Warnungen bei neuer Anmeldung",
+          "description": "Wenn dein Konto auf einem unbekannten Gerät verwendet wird."
+        },
+        "weekly_digest": {
+          "label": "Wochenrückblick",
+          "description": "Eine kurze Zusammenfassung dessen, was du in deinen Modulen ergänzt hast."
+        },
+        "scheduled_run_complete": {
+          "label": "Ergebnisse geplanter Aufgaben",
+          "description": "Wenn eine geplante Aufgabe fertig ist — oder nicht laufen konnte."
+        },
+        "stuck_generation": {
+          "label": "Warnungen bei hängender Generierung",
+          "description": "Wenn eine Website-Generierung deutlich länger läuft als vorgesehen."
+        },
+        "website_form_submission": {
+          "label": "Formular-Einsendungen",
+          "description": "Wenn ein Besucher ein Kontaktformular auf einer deiner Seiten ausfüllt."
+        }
+      }
     }
   },
   "dashboard": {

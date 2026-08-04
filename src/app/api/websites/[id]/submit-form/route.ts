@@ -137,6 +137,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     if (ownerEmail) {
       void sendWebsiteFormSubmissionEmail({
         email: ownerEmail,
+        userId: website.user_id,
         websiteName: website.name,
         fields,
         classification,

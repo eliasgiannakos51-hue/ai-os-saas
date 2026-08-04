@@ -351,6 +351,36 @@
       "sendConfirmationEmail": "Enviar correo de confirmación de eliminación",
       "sending": "Enviando...",
       "checkEmail": "Revisa tu correo para confirmar la eliminación — enviamos un enlace a <highlight>{email}</highlight>. Caduca en 1 hora; nada se elimina hasta que hagas clic en él."
+    },
+    "emailNotifications": {
+      "title": "Notificaciones por correo",
+      "description": "Elige qué correos quieres recibir. Los correos de cuenta y seguridad siempre se envían.",
+      "saveError": "No se pudo guardar: inténtalo de nuevo.",
+      "enabled": "Correo activado",
+      "disabled": "Correo desactivado",
+      "dailyCap": "Para no saturar tu bandeja, enviamos como máximo {max} de estos correos al día.",
+      "types": {
+        "new_device_login": {
+          "label": "Alertas de nuevo inicio de sesión",
+          "description": "Cuando se usa tu cuenta en un dispositivo que no habíamos visto."
+        },
+        "weekly_digest": {
+          "label": "Resumen semanal",
+          "description": "Un breve repaso de lo que añadiste en tus módulos."
+        },
+        "scheduled_run_complete": {
+          "label": "Resultados de tareas programadas",
+          "description": "Cuando una tarea que programaste termina, o no pudo ejecutarse."
+        },
+        "stuck_generation": {
+          "label": "Alertas de generación atascada",
+          "description": "Cuando la generación de un sitio lleva mucho más tiempo del debido."
+        },
+        "website_form_submission": {
+          "label": "Envíos de formulario",
+          "description": "Cuando un visitante rellena un formulario de contacto en uno de tus sitios."
+        }
+      }
     }
   },
   "dashboard": {

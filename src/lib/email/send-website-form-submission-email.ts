@@ -3,6 +3,7 @@ import { createResendClient } from "@/lib/resend";
 import { websiteFormSubmissionEmailHtml } from "@/lib/email/templates";
 import { getSiteUrl } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
+import { checkEmailAllowed, recordEmailSend } from "@/lib/email/email-gate";
 
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
 
@@ -15,17 +16,22 @@ const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@res
 // throws, just logs.
 export async function sendWebsiteFormSubmissionEmail({
   email,
+  userId,
   websiteName,
   fields,
   classification,
 }: {
   email: string;
+  userId: string;
   websiteName: string;
   fields: Record<string, string>;
   classification: string | null;
 }): Promise<void> {
   if (!email) return;
   try {
+    const gate = await checkEmailAllowed(userId, "website_form_submission");
+    if (!gate.allowed) return;
+
     const resend = createResendClient();
     const { error } = await resend.emails.send({
       from: FROM_ADDRESS,
@@ -41,6 +47,8 @@ export async function sendWebsiteFormSubmissionEmail({
 
     if (error) {
       logApiError("email:send-website-form-submission", error, { stage: "resend_error" });
+    } else {
+      await recordEmailSend(userId, "website_form_submission");
     }
   } catch (err) {
     logApiError("email:send-website-form-submission", err, { stage: "unhandled" });

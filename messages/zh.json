@@ -351,6 +351,36 @@
       "sendConfirmationEmail": "发送删除确认邮件",
       "sending": "发送中...",
       "checkEmail": "请查看你的邮箱以确认删除——我们已向 <highlight>{email}</highlight> 发送了一个链接。该链接将在 1 小时后过期；在你点击之前不会删除任何内容。"
+    },
+    "emailNotifications": {
+      "title": "邮件通知",
+      "description": "选择你想收到的邮件。账户和安全类邮件始终会发送。",
+      "saveError": "保存失败，请重试。",
+      "enabled": "已开启该邮件",
+      "disabled": "已关闭该邮件",
+      "dailyCap": "为了不塞满你的收件箱，这类邮件每天最多发送 {max} 封。",
+      "types": {
+        "new_device_login": {
+          "label": "新登录提醒",
+          "description": "当有陌生设备使用你的账户时。"
+        },
+        "weekly_digest": {
+          "label": "每周摘要",
+          "description": "简要回顾你在各模块中新增的内容。"
+        },
+        "scheduled_run_complete": {
+          "label": "定时任务结果",
+          "description": "当你安排的任务完成，或未能运行时。"
+        },
+        "stuck_generation": {
+          "label": "生成卡住提醒",
+          "description": "当网站生成用时远超预期时。"
+        },
+        "website_form_submission": {
+          "label": "网站表单提交",
+          "description": "当访客在你的网站上填写联系表单时。"
+        }
+      }
     }
   },
   "dashboard": {

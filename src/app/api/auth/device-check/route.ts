@@ -74,6 +74,7 @@ export async function POST(request: Request) {
 
     const { label } = parseUserAgent(userAgent);
     await sendNewDeviceLoginEmail(user.email, {
+      userId: user.id,
       deviceLabel: label,
       ipAddress,
       signedInAt: nowIso,

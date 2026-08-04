@@ -351,6 +351,36 @@
       "sendConfirmationEmail": "Send deletion confirmation email",
       "sending": "Sending...",
       "checkEmail": "Check your email to confirm deletion — we sent a link to <highlight>{email}</highlight>. It expires in 1 hour; nothing is deleted until you click it."
+    },
+    "emailNotifications": {
+      "title": "Email notifications",
+      "description": "Choose which emails you'd like to receive. Account and security emails are always sent.",
+      "saveError": "Couldn't save that — try again.",
+      "enabled": "Email turned on",
+      "disabled": "Email turned off",
+      "dailyCap": "To keep your inbox sane, we send at most {max} of these emails per day.",
+      "types": {
+        "new_device_login": {
+          "label": "New sign-in alerts",
+          "description": "When your account is used on a device we haven't seen before."
+        },
+        "weekly_digest": {
+          "label": "Weekly digest",
+          "description": "A short recap of what you added across your modules."
+        },
+        "scheduled_run_complete": {
+          "label": "Scheduled task results",
+          "description": "When a task you scheduled finishes — or couldn't run."
+        },
+        "stuck_generation": {
+          "label": "Stuck generation alerts",
+          "description": "When a website generation has been running far longer than it should."
+        },
+        "website_form_submission": {
+          "label": "Website form submissions",
+          "description": "When a visitor fills in a contact form on one of your sites."
+        }
+      }
     }
   },
   "dashboard": {

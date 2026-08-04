@@ -13,7 +13,25 @@ const CLASSIFY_MAX_TOKENS = 300;
 // truncating the response mid-document. See looksLikeCompleteHtmlDocument
 // below and its call sites for how that's now caught instead of silently
 // shipping broken HTML.
-const WEBSITE_MAX_TOKENS = 32000;
+//
+// 64000 (not the model's full 128000 streaming ceiling) is a deliberate
+// middle ground: this route already has a separate, real Vercel execution-
+// time ceiling to work within (see api/websites/generate/process/route.ts's
+// maxDuration), and raising the token budget also raises how long a single
+// generation can legitimately run — going all the way to 128000 would
+// trade "cut off for being too large" for "cut off for taking too long",
+// which is not a net improvement. For the rare description complex enough
+// to still exceed even this, streamHtmlToCompletion below adds real
+// continuation logic instead of just failing.
+const WEBSITE_MAX_TOKENS = 64000;
+// How many extra "continue where you left off" calls to allow after the
+// first one hits WEBSITE_MAX_TOKENS. Each round is a full extra model call
+// (extra latency + cost), so this stays small — 2 extra rounds covers
+// genuinely large sites without turning a single generation into an
+// unbounded loop.
+const MAX_CONTINUATION_ROUNDS = 2;
+const CONTINUATION_INSTRUCTION =
+  "Continue the HTML document EXACTLY where you left off — do not repeat anything you already wrote, do not restart the document, and do not add any commentary or markdown code fences. Output only the raw continuation of the HTML from the exact point it was cut off.";
 
 // Off-topic guard — without this, a request like "write me a poem" had no
 // way to be rejected: generateWebsiteHtml's system prompt is a strong,
@@ -317,6 +335,61 @@ function buildGenerateSystemBlocks(formEndpointUrl: string | undefined): Anthrop
 // (when a public url is available) can embed it for real. `formEndpointUrl`,
 // when given, is this website's real /api/websites/[id]/submit-form URL —
 // see FUNCTIONAL_ELEMENTS_SECTION.
+// Streams a generate/edit call to completion, automatically continuing
+// (up to MAX_CONTINUATION_ROUNDS extra calls) when the model runs out of
+// output tokens mid-document instead of failing outright. Each round's raw
+// text is appended verbatim (no per-round code-fence stripping — a
+// truncated round never has a closing fence to strip anyway); the fence
+// check runs once on the fully assembled text at the end, in the caller.
+async function streamHtmlToCompletion(
+  anthropic: Anthropic,
+  system: Anthropic.TextBlockParam[],
+  initialUserContent: Anthropic.MessageParam["content"],
+  onDelta?: (accumulatedText: string) => void
+): Promise<{ rawText: string; stopReason: string | null }> {
+  const messages: Anthropic.MessageParam[] = [{ role: "user", content: initialUserContent }];
+  let combined = "";
+  let stopReason: string | null = null;
+
+  for (let round = 0; round <= MAX_CONTINUATION_ROUNDS; round++) {
+    const stream = anthropic.messages.stream({
+      model: MODEL,
+      max_tokens: WEBSITE_MAX_TOKENS,
+      system,
+      messages,
+    });
+
+    let roundText = "";
+    if (onDelta) {
+      stream.on("text", (delta) => {
+        roundText += delta;
+        onDelta(combined + roundText);
+      });
+    }
+
+    const response = await stream.finalMessage();
+    if (!onDelta) {
+      const textBlock = response.content.find(
+        (block): block is Anthropic.TextBlock => block.type === "text"
+      );
+      roundText = textBlock?.text ?? "";
+    }
+    combined += roundText;
+    stopReason = response.stop_reason;
+
+    const doneOrExhausted =
+      stopReason !== "max_tokens" ||
+      looksLikeCompleteHtmlDocument(stripCodeFence(combined.trim())) ||
+      round === MAX_CONTINUATION_ROUNDS;
+    if (doneOrExhausted) break;
+
+    messages.push({ role: "assistant", content: roundText });
+    messages.push({ role: "user", content: CONTINUATION_INSTRUCTION });
+  }
+
+  return { rawText: combined.trim(), stopReason };
+}
+
 export async function generateWebsiteHtml(
   apiKey: string,
   description: string,
@@ -341,40 +414,25 @@ export async function generateWebsiteHtml(
         ]
       : userText;
 
-  // Streamed rather than a single blocking call: at WEBSITE_MAX_TOKENS
-  // (32000) a non-streaming request risks the Anthropic SDK's own
-  // "Streaming is required for operations that may take longer than 10
-  // minutes" error/timeout on a large, detailed generation — streaming
-  // removes that ceiling entirely. finalMessage() still hands back the
-  // same Message shape (content, stop_reason) as a non-streaming
-  // response, so nothing below this call needs to change.
-  const stream = anthropic.messages.stream({
-    model: MODEL,
-    max_tokens: WEBSITE_MAX_TOKENS,
-    system: buildGenerateSystemBlocks(formEndpointUrl),
-    messages: [{ role: "user", content }],
-  });
-
-  if (onDelta) {
-    let accumulated = "";
-    stream.on("text", (delta) => {
-      accumulated += delta;
-      onDelta(accumulated);
-    });
-  }
-
-  const response = await stream.finalMessage();
-
-  const textBlock = response.content.find(
-    (block): block is Anthropic.TextBlock => block.type === "text"
+  // Streamed rather than a single blocking call: at WEBSITE_MAX_TOKENS a
+  // non-streaming request risks the Anthropic SDK's own "Streaming is
+  // required for operations that may take longer than 10 minutes"
+  // error/timeout on a large, detailed generation — streaming removes
+  // that ceiling entirely. streamHtmlToCompletion also transparently
+  // continues the generation (up to MAX_CONTINUATION_ROUNDS extra calls)
+  // if a single call's output alone isn't enough.
+  const { rawText, stopReason } = await streamHtmlToCompletion(
+    anthropic,
+    buildGenerateSystemBlocks(formEndpointUrl),
+    content,
+    onDelta
   );
-  const rawText = textBlock?.text.trim();
   if (!rawText) {
     throw new Error("The model did not return a website.");
   }
 
   const html = stripCodeFence(rawText);
-  assertCompleteHtmlResponse(response.stop_reason, html, "generated");
+  assertCompleteHtmlResponse(stopReason, html, "generated");
   return html;
 }
 
@@ -545,26 +603,18 @@ export async function editWebsiteHtml(
         ]
       : userText;
 
-  // Streamed for the same reason as generateWebsiteHtml above — WEBSITE_MAX_TOKENS
-  // is large enough that a non-streaming call risks the SDK's own long-request
-  // guard. finalMessage() gives back the same Message shape either way.
-  const stream = anthropic.messages.stream({
-    model: MODEL,
-    max_tokens: WEBSITE_MAX_TOKENS,
-    system: buildEditSystemBlocks(formEndpointUrl),
-    messages: [{ role: "user", content }],
-  });
-  const response = await stream.finalMessage();
-
-  const textBlock = response.content.find(
-    (block): block is Anthropic.TextBlock => block.type === "text"
+  // Streamed for the same reason as generateWebsiteHtml above, and same
+  // continuation logic via streamHtmlToCompletion.
+  const { rawText, stopReason } = await streamHtmlToCompletion(
+    anthropic,
+    buildEditSystemBlocks(formEndpointUrl),
+    content
   );
-  const rawText = textBlock?.text.trim();
   if (!rawText) {
     throw new Error("The model did not return an updated website.");
   }
 
   const html = stripCodeFence(rawText);
-  assertCompleteHtmlResponse(response.stop_reason, html, "updated");
+  assertCompleteHtmlResponse(stopReason, html, "updated");
   return { html, usedCheapPatch: false };
 }

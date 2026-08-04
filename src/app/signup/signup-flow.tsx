@@ -7,7 +7,14 @@ import { useTranslations } from "next-intl";
 import { Check, ChevronLeft, X } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { isPasswordStrong } from "@/lib/password-strength";
-import { PLANS, CURRENCY_SYMBOL, isPaidPlanSlug, type Plan, type PlanSlug } from "@/lib/billing/plans";
+import {
+  PLANS,
+  CURRENCY_SYMBOL,
+  TEAM_SEAT_PRICE,
+  isPaidPlanSlug,
+  type Plan,
+  type PlanSlug,
+} from "@/lib/billing/plans";
 import { PasswordInput } from "@/components/ui/password-input";
 import { PasswordStrengthChecklist } from "@/components/auth/password-strength-checklist";
 import { GeneratePasswordButton } from "@/components/auth/generate-password-button";
@@ -55,6 +62,14 @@ export function SignupFlow() {
 
   const [step, setStep] = useState<Step>(1);
   const [selectedPlan, setSelectedPlan] = useState<PlanSlug>("free");
+  // "Business" isn't a real plan slug (see lib/billing/plans.ts — team
+  // collaboration is a Professional+ capability, not a 7th tier), so this
+  // doesn't add a new PlanSlug. Picking it just aliases selectedPlan to
+  // "professional" (the cheapest team-capable plan) and remembers the
+  // intent, so checkout can route straight into team setup afterward —
+  // same "Set Up Team" concept /pricing already has, now reachable during
+  // signup itself instead of only after the fact.
+  const [wantsTeamSetup, setWantsTeamSetup] = useState(false);
   // Where to send Stripe's checkout success redirect once this brand-new
   // account's own checkout call (below) completes — read from ?successPath=
   // so SubscribeButton's 401-redirect-to-signup path (see
@@ -168,7 +183,11 @@ export function SignupFlow() {
         body: JSON.stringify({
           plan: selectedPlan,
           discountCode: discountCode.trim() || undefined,
-          successPath: successPath ?? "/dashboard/overview",
+          // Same successPath the pricing page's "Set Up Team" button uses
+          // (see components/billing/subscribe-button.tsx), so picking
+          // Business here lands the new account straight on team setup
+          // instead of the plain dashboard overview.
+          successPath: successPath ?? (wantsTeamSetup ? "/dashboard/team?setup=success" : "/dashboard/overview"),
         }),
       });
       const checkoutData = (await readRawResponse(checkoutRes, "/api/checkout")) as {
@@ -239,10 +258,13 @@ export function SignupFlow() {
                   <button
                     key={p.slug}
                     type="button"
-                    onClick={() => setSelectedPlan(p.slug)}
-                    aria-pressed={selected}
+                    onClick={() => {
+                      setSelectedPlan(p.slug);
+                      setWantsTeamSetup(false);
+                    }}
+                    aria-pressed={selected && !wantsTeamSetup}
                     className={`relative flex flex-col items-start rounded-2xl border p-4 text-left transition-all duration-150 ${
-                      selected
+                      selected && !wantsTeamSetup
                         ? "border-orange-500 bg-orange-500/[0.04] shadow-[0_0_16px_rgba(249,115,22,0.12)]"
                         : "border-border bg-panel hover:border-orange-500/40"
                     }`}
@@ -305,6 +327,40 @@ export function SignupFlow() {
               })}
             </div>
 
+            {/* "Business" — same option /pricing offers via its Business
+                card + "Set Up Team" flow, now reachable during signup
+                itself instead of only after the fact. Not a 7th plan slug
+                (see wantsTeamSetup's own comment above): selecting it
+                aliases selectedPlan to "professional" and remembers the
+                intent so checkout can route straight into team setup. */}
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedPlan("professional");
+                setWantsTeamSetup(true);
+              }}
+              aria-pressed={wantsTeamSetup}
+              className={`mt-3 flex w-full flex-col items-start rounded-2xl border p-4 text-left transition-all duration-150 sm:flex-row sm:items-center sm:justify-between sm:gap-4 ${
+                wantsTeamSetup
+                  ? "border-orange-500 bg-orange-500/[0.04] shadow-[0_0_16px_rgba(249,115,22,0.12)]"
+                  : "border-border bg-panel hover:border-orange-500/40"
+              }`}
+            >
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-semibold text-orange-400">
+                    {tPricing("businessTitle")}
+                  </span>
+                  {wantsTeamSetup && (
+                    <Check className="h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />
+                  )}
+                </div>
+                <p className="mt-0.5 text-xs text-muted">
+                  {tPricing("businessExplanation", { price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}` })}
+                </p>
+              </div>
+            </button>
+
             <button
               type="button"
               onClick={() => setStep(2)}
@@ -330,7 +386,7 @@ export function SignupFlow() {
               className="mb-4 inline-flex items-center gap-1 text-xs text-muted transition-colors duration-150 hover:text-foreground"
             >
               <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
-              {plan?.name ?? "Free"} plan — {t("change")}
+              {wantsTeamSetup ? tPricing("businessTitle") : (plan?.name ?? "Free")} plan — {t("change")}
             </button>
 
             <form onSubmit={handleSubmit} className="space-y-4">

@@ -237,3 +237,21 @@ export function achievedMarginOnAccount(
     (creditsCharged * effectiveCreditPriceEurForAccount(plan, purchasedPackPriceEur, c)) / realCostEur
   );
 }
+
+/**
+ * The charge for a real cost against an explicit euro-per-credit rate.
+ * The shared primitive behind both settlement (which resolves the rate
+ * from the account's plan and packs) and the pre-action estimate (which
+ * is handed the same rate) — so the two cannot drift into charging and
+ * quoting on different divisors.
+ */
+export function creditsForRealCostOnRate(
+  realCostEur: number,
+  creditPriceEur: number,
+  config?: PricingConfig
+): number {
+  const c = config ?? resolvePricingConfig();
+  if (!Number.isFinite(realCostEur) || realCostEur <= 0) return 0;
+  const price = Number.isFinite(creditPriceEur) && creditPriceEur > 0 ? creditPriceEur : c.creditPriceEur;
+  return Math.ceil((realCostEur * c.marginMultiplier) / price);
+}

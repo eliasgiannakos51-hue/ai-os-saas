@@ -20,7 +20,9 @@ import {
   MAX_REFERENCE_IMAGES,
   REFERENCE_IMAGE_BUCKET,
 } from "@/lib/website-reference-image";
-import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
+import { DEFAULTS } from "@/lib/billing/pricing-config";
 import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
@@ -743,16 +745,30 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
   const hasLivePreviewContent = livePreviewHtml.trim().length > LIVE_PREVIEW_MIN_CHARS;
 
   // Live estimated credit cost — recomputed on every render from the
-  // current form state (lib/website-generation-cost.ts), so it updates
-  // as the user types/attaches images, before they ever click Generate.
-  // This is an ESTIMATE: the real, final charge (computed and deducted
-  // server-side only after generation actually succeeds — see
-  // api/websites/generate/process/route.ts) also factors in the real
-  // generated HTML length, which isn't known yet at this point.
-  const estimatedCost = estimateWebsiteGenerationCost({
-    descriptionLength: description.trim().length,
-    imageCount: referenceImageFiles.length,
-  });
+  // current form state, so it updates as the user types/attaches images,
+  // before they ever click Generate.
+  //
+  // Deliberately the SAME estimator the server reserves against
+  // (lib/billing/estimate.ts, ACTION_PROFILES.websiteGenerate), so the
+  // number shown here and the number actually held are the same
+  // calculation on the same inputs rather than two formulas that can
+  // drift apart. It is still an ESTIMATE: settlement charges the real
+  // measured cost of every sub-call and releases the rest of the hold.
+  //
+  // DEFAULTS, not resolvePricingConfig(): this runs in the browser, where
+  // the server-only pricing env vars are not readable. An operator who
+  // overrides CREDIT_MARGIN_MULTIPLIER / CREDIT_PRICE_EUR moves the real
+  // charge but not this preview, so those overrides would need a
+  // NEXT_PUBLIC_ mirror to show up here.
+  const estimatedCost = estimateForAction(
+    "websiteGenerate",
+    {
+      model: WEBSITE_BUILDER_MODEL,
+      inputChars: description.trim().length,
+      imageCount: referenceImageFiles.length,
+    },
+    DEFAULTS
+  ).estimatedCredits;
 
   // Pagination — same shared pattern/page size as every module list
   // (lib/use-sort-and-paginate.ts), so a user with 10+ generated sites

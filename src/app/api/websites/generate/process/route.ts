@@ -1,13 +1,18 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { generateWebsiteHtml, type ReferenceImage } from "@/lib/website-builder";
+import { generateWebsiteHtml, WEBSITE_MODEL, type ReferenceImage } from "@/lib/website-builder";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { downloadReferenceImage } from "@/lib/website-reference-image-server";
 import { FIRST_VERSION_NUMBER } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
-import { deductCredits, resolveEffectivePlan } from "@/lib/billing/credits";
-import { computeWebsiteGenerationCost, estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
+import { resolveEffectivePlan, getPurchasedPackCreditPriceEur } from "@/lib/billing/credits";
+import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
+import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import { MAX_GENERATION_ATTEMPTS } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
@@ -20,6 +25,7 @@ import { reviewWebsiteContentSafety } from "@/lib/website-security-review";
 import { logSecurityCheck } from "@/lib/security-check-log";
 import { getSiteUrl } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
+import { diagLog } from "@/lib/diag";
 
 export const dynamic = "force-dynamic";
 
@@ -76,14 +82,15 @@ const MAX_DESCRIPTION_LENGTH = 20000;
 // read the response — there is no separate "background job runtime"
 // involved, just an ordinary request the UI chooses not to wait for.
 //
-// Credits are deducted HERE, and ONLY after generateWebsiteHtml has
-// actually, successfully returned a complete website — never before, and
-// never if it throws. This is the fix for the bug where a failed
-// generation (network error, timeout, API error) still charged the user:
-// previously the deduction ran in the same request as the AI call, before
-// the call — see the removed deductCredits() call that used to sit above
-// the try/catch around generateWebsiteHtml in the old single-request
-// version of this route.
+// Credits are RESERVED here before the first AI call and SETTLED here
+// after the website is durably saved — the three-phase flow in
+// lib/billing/reservations.ts. The hold means a second concurrent
+// generation sees a balance that already excludes this one; settlement
+// then charges the REAL measured cost of every sub-call (generation
+// stream, each continuation round, the AI security review) and releases
+// the rest of the hold. A generation that throws releases the hold in
+// full and charges nothing, which is the behaviour the failure messages
+// have always promised.
 export async function POST(request: Request) {
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -181,6 +188,53 @@ export async function POST(request: Request) {
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
 
+    // RESERVE -> EXECUTE -> SETTLE. The reservation is taken here, in the
+    // same execution as the AI calls, rather than in the start route: the
+    // two are separate requests, so a hold created there would have to be
+    // carried through the user_websites row and could be stranded by a
+    // process invocation that never runs. Holding it here still closes the
+    // race the reservation exists for, because it is taken before the
+    // first token is generated.
+    const pricingConfig = resolvePricingConfig();
+    const plan = await resolveEffectivePlan(user);
+    const costs = new CostAccumulator();
+
+    // Same rate settlement will divide by, so the hold is sized in the
+    // same currency as the charge.
+    const packPriceEur = await getPurchasedPackCreditPriceEur(user.id);
+    const accountCreditPriceEur = effectiveCreditPriceEurForAccount(plan, packPriceEur, pricingConfig);
+    const estimate = estimateForAction(
+      "websiteGenerate",
+      {
+        model: WEBSITE_MODEL,
+        inputChars: description.length,
+        imageCount: Math.min(referenceImagePaths.length, MAX_REFERENCE_IMAGES),
+      },
+      pricingConfig,
+      accountCreditPriceEur
+    );
+
+    let reservationId = "";
+    if (!bypassCredits) {
+      const reservation = await reserveCredits(user.id, estimate.reserveCredits, "website_generate", {
+        websiteId,
+        descriptionLength: description.length,
+        estimatedCredits: estimate.estimatedCredits,
+      });
+      if (!reservation.ok) {
+        const message =
+          reservation.reason === "insufficient"
+            ? `Not enough credits to generate this website (you have ${reservation.available}, this needs about ${estimate.reserveCredits}). No credits were charged.`
+            : "Could not reserve credits for this generation. No credits were charged — please try again.";
+        await supabase
+          .from("user_websites")
+          .update({ status: "failed", error_message: message })
+          .eq("id", websiteId);
+        return NextResponse.json({ ok: true, failed: true, insufficientCredits: true });
+      }
+      reservationId = reservation.reservationId;
+    }
+
     // Reference images (optional, up to MAX_REFERENCE_IMAGES) — downloaded
     // in parallel; each one is independently best-effort, so one bad
     // image never blocks the others or the generation itself.
@@ -229,7 +283,14 @@ export async function POST(request: Request) {
       void recordAiCallForDailySpend(
         estimateWebsiteGenerationCost({ descriptionLength: description.length, imageCount: referenceImages.length })
       );
-      htmlContent = await generateWebsiteHtml(apiKey, description, referenceImages, onDelta, formEndpointUrl);
+      htmlContent = await generateWebsiteHtml(
+        apiKey,
+        description,
+        referenceImages,
+        onDelta,
+        formEndpointUrl,
+        costs
+      );
       // Real-photo placeholder resolution (Unsplash if configured, else
       // picsum.photos) — see lib/website-image-resolver.ts. A no-op when
       // the model didn't emit any PLACEHOLDER:<slug> images, which is the
@@ -253,7 +314,7 @@ export async function POST(request: Request) {
       // toggle.
       htmlContent = stripDisallowedExternalScripts(htmlContent);
       const securityIssues = scanWebsiteHtmlForSecurityIssues(htmlContent);
-      const contentReview = await reviewWebsiteContentSafety(apiKey, htmlContent);
+      const contentReview = await reviewWebsiteContentSafety(apiKey, htmlContent, costs);
 
       const allIssueDescriptions = [
         ...securityIssues.map(describeSecurityScanIssue),
@@ -281,6 +342,11 @@ export async function POST(request: Request) {
       }
     } catch (err) {
       logApiError("/api/websites/generate/process", err, { stage: "anthropic_call" });
+      // Release, not settle: the route's user-facing promise on a failed
+      // generation has always been "No credits were charged", and the old
+      // deductCredits call was likewise never reached on this path. The
+      // hold goes straight back to the balance.
+      await releaseReservation(user.id, reservationId);
       const errMessage = err instanceof Error ? err.message : "The website generation request failed.";
       await supabase
         .from("user_websites")
@@ -314,6 +380,7 @@ export async function POST(request: Request) {
 
     if (updateError) {
       logApiError("/api/websites/generate/process", updateError, { stage: "update" });
+      await releaseReservation(user.id, reservationId);
       return NextResponse.json({ ok: false, error: "Could not save the generated website. Please try again." }, { status: 500 });
     }
 
@@ -322,35 +389,46 @@ export async function POST(request: Request) {
     // cost is computed from what actually happened (real description
     // length, real successfully-sent image count, real generated HTML
     // length — see lib/website-generation-cost.ts).
-    if (!bypassCredits) {
-      const plan = await resolveEffectivePlan(user);
-      const cost = computeWebsiteGenerationCost({
+    // Settlement replaces the old computeWebsiteGenerationCost() charge,
+    // which priced the action from proxies (description length, image
+    // count, output length) rather than from what it really cost. Every
+    // sub-call is now in `costs`: the generation stream and each of its
+    // continuation rounds, plus the AI security review. The charge is
+    // ceil(real_cost x margin / effective_credit_price), so the multiplier
+    // holds no matter how the generation actually went.
+    //
+    // Settlement also runs for bypass accounts (admins, beta testers) with
+    // bypassCharge — they charge nothing, but their real spend still lands
+    // in the cost log, which is the only way the margin report reflects
+    // total AI spend rather than only billed spend.
+    const settlement = await settleReservation({
+      userId: user.id,
+      reservationId,
+      feature: "website_generate",
+      costs,
+      plan,
+      bypassCharge: bypassCredits,
+      metadata: {
+        websiteId,
         descriptionLength: description.length,
         imageCount: referenceImages.length,
         outputHtmlLength: htmlContent.length,
-      });
-      const deduction = await deductCredits(
-        user.id,
-        cost,
-        "website_generate",
-        `Website Builder generation — ${cost} credits (description ${description.length} chars, ${referenceImages.length} image(s), output ${htmlContent.length} chars)`,
-        plan
-      );
-      if (!deduction.ok) {
-        // Balance changed between the pre-check in the start route and
-        // now (e.g. a concurrent request) — log it, but still deliver the
-        // website: the AI cost is already spent, and the user did not
-        // cause this race, so taking the finished site away from them
-        // would be worse than the missed charge. Matches this codebase's
-        // established "cost protection, not a hard financial ledger"
-        // tolerance (see lib/billing/credits.ts's deductCredits comment).
-        logApiError("/api/websites/generate/process", "credit deduction failed after successful generation", {
-          userId: user.id,
-          websiteId,
-          cost,
-        });
-      }
-    }
+        estimatedCredits: estimate.estimatedCredits,
+        reservedCredits: bypassCredits ? 0 : estimate.reserveCredits,
+        flagged: isFlagged,
+      },
+    });
+    diagLog(
+      `[billing] website_generate settled: ${JSON.stringify({
+        userId: user.id,
+        websiteId,
+        aiCalls: costs.callCount,
+        realCostUsd: settlement.realCostUsd,
+        creditsCharged: settlement.creditsCharged,
+        achievedMargin: settlement.achievedMargin,
+        estimatedCredits: estimate.estimatedCredits,
+      })}`
+    );
 
     // Version history — this generation is always version 1 for a brand
     // new website. Best-effort: the website itself is already saved above,

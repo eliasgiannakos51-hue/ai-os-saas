@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { classifyWebsiteDescription } from "@/lib/website-builder";
+import { classifyWebsiteDescription, WEBSITE_MODEL } from "@/lib/website-builder";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -10,9 +12,10 @@ import {
   hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
+  getPurchasedPackCreditPriceEur,
 } from "@/lib/billing/credits";
+import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { checkNeedsClarification } from "@/lib/clarification";
-import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
@@ -214,10 +217,27 @@ export async function POST(request: Request) {
     // here, and never if that call fails.
     if (!bypassCredits) {
       const plan = await resolveEffectivePlan(user);
-      const estimatedCost = estimateWebsiteGenerationCost({
-        descriptionLength: description.length,
-        imageCount: referenceImagePaths.length,
-      });
+      // Deliberately the SAME estimate the process route reserves against
+      // (lib/billing/estimate.ts), not a second independent formula. When
+      // these two disagree, the user is told they have enough credits here
+      // and then blocked by the reservation seconds later, with a website
+      // row already created — a confusing failure that only exists because
+      // two numbers were computed different ways.
+      const pricingConfig = resolvePricingConfig();
+      const estimatedCost = estimateForAction(
+        "websiteGenerate",
+        {
+          model: WEBSITE_MODEL,
+          inputChars: description.length,
+          imageCount: referenceImagePaths.length,
+        },
+        pricingConfig,
+        effectiveCreditPriceEurForAccount(
+          plan,
+          await getPurchasedPackCreditPriceEur(user.id),
+          pricingConfig
+        )
+      ).reserveCredits;
       const check = await hasEnoughCredits(user.id, estimatedCost, plan);
       if (!check.ok) {
         return NextResponse.json({

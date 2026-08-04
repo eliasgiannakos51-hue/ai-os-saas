@@ -1,5 +1,6 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
+import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 
 const MODEL = "claude-sonnet-4-6";
 // Small and cheap on purpose — this reviews already-generated HTML for
@@ -78,7 +79,8 @@ export function parseContentSafetyReviewInput(input: {
 // opinion on top of it, not a single point of failure.
 export async function reviewWebsiteContentSafety(
   apiKey: string,
-  html: string
+  html: string,
+  costs?: CostAccumulator
 ): Promise<ContentSafetyReviewResult> {
   try {
     const anthropic = new Anthropic({ apiKey });
@@ -91,6 +93,11 @@ export async function reviewWebsiteContentSafety(
       tools: [REVIEW_TOOL],
       tool_choice: { type: "tool", name: "review_content_safety" },
     });
+
+    // Recorded before the parse: this review is a real billed call whose
+    // cost the user's action incurred whether or not the response came
+    // back in a shape we could use.
+    costs?.record("security_review", response.usage, MODEL);
 
     const toolUse = response.content.find(
       (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

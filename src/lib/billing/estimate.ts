@@ -1,5 +1,5 @@
 import { pricingForModel, WEB_SEARCH_USD_PER_QUERY } from "@/lib/billing/model-pricing";
-import { creditsForRealCostUsd, reserveAmount } from "@/lib/billing/credit-formula";
+import { creditsForRealCostOnRate, reserveAmount, usdToEur } from "@/lib/billing/credit-formula";
 import type { PricingConfig } from "@/lib/billing/pricing-config";
 
 // Pre-action cost estimation, in the same units the settlement uses, so
@@ -43,6 +43,18 @@ export type EstimateInput = {
   auxiliaryCalls?: { inputTokens: number; outputTokens: number }[];
   /** Web searches the model may run, if the tool is wired in. */
   expectedWebSearches?: number;
+  /**
+   * Extra "continue where you left off" rounds the action may need when a
+   * single call's output ceiling isn't enough (Website Builder allows
+   * MAX_CONTINUATION_ROUNDS = 2, see lib/website-builder.ts).
+   *
+   * These are not free repeats of the first call — each round re-sends
+   * everything written so far as INPUT, so the input cost grows with each
+   * round while the output is split across them. Ignoring them is what
+   * made the first version of this estimator hold far less than the
+   * generation went on to cost, which defeats the point of reserving.
+   */
+  continuationRounds?: number;
 };
 
 export type CostEstimate = {
@@ -52,7 +64,17 @@ export type CostEstimate = {
   reserveCredits: number;
 };
 
-export function estimateActionCost(input: EstimateInput, config: PricingConfig): CostEstimate {
+export function estimateActionCost(
+  input: EstimateInput,
+  config: PricingConfig,
+  // What a credit is worth for THIS account (plan rate, or the cheapest
+  // credit-pack rate they bought — see effectiveCreditPriceEurForAccount).
+  // Settlement divides the real cost by this, so the estimate has to as
+  // well: dividing by the list price here while charging at the plan rate
+  // made an Ultimate estimate read 61 credits for a generation that then
+  // charged 658, and reserved far less than it went on to cost.
+  effectiveCreditPriceEur?: number
+): CostEstimate {
   const p = pricingForModel(input.model);
 
   const userInputTokens = Math.ceil(Math.max(0, input.inputChars) / CHARS_PER_TOKEN);
@@ -62,8 +84,24 @@ export function estimateActionCost(input: EstimateInput, config: PricingConfig):
   const auxInput = (input.auxiliaryCalls ?? []).reduce((s, c) => s + Math.max(0, c.inputTokens), 0);
   const auxOutput = (input.auxiliaryCalls ?? []).reduce((s, c) => s + Math.max(0, c.outputTokens), 0);
 
-  const totalInputTokens =
+  const firstCallInputTokens =
     userInputTokens + imageTokens + Math.max(0, input.systemPromptTokens) + auxInput;
+
+  // Continuation rounds. Round k re-sends the first call's input PLUS
+  // everything generated so far, and the output is split across the
+  // rounds. Modelling the extra input as (round share of the output)
+  // accumulating is what makes a large generation's estimate track the
+  // real cost instead of pricing it as though it were a single call.
+  const rounds = Math.max(0, Math.floor(input.continuationRounds ?? 0));
+  let continuationInputTokens = 0;
+  if (rounds > 0) {
+    const perRoundOutput = outputTokens / (rounds + 1);
+    for (let k = 1; k <= rounds; k++) {
+      continuationInputTokens += firstCallInputTokens + perRoundOutput * k;
+    }
+  }
+
+  const totalInputTokens = firstCallInputTokens + Math.ceil(continuationInputTokens);
   const totalOutputTokens = outputTokens + auxOutput;
 
   const estimatedUsd =
@@ -71,7 +109,11 @@ export function estimateActionCost(input: EstimateInput, config: PricingConfig):
     (totalOutputTokens / 1_000_000) * p.outputPerMTok +
     Math.max(0, input.expectedWebSearches ?? 0) * WEB_SEARCH_USD_PER_QUERY;
 
-  const estimatedCredits = creditsForRealCostUsd(estimatedUsd, config);
+  const estimatedCredits = creditsForRealCostOnRate(
+    usdToEur(estimatedUsd, config),
+    effectiveCreditPriceEur ?? config.creditPriceEur,
+    config
+  );
 
   return {
     estimatedUsd,
@@ -97,11 +139,19 @@ export const ACTION_PROFILES = {
       { inputTokens: 500, outputTokens: 80 },
       { inputTokens: 4000, outputTokens: 300 },
     ],
-    // Generated single-file sites in this app run ~20k-60k characters.
-    // The estimate uses the low end and scales with description length,
-    // since settlement corrects it either way.
-    baseOutputChars: 22000,
-    outputCharsPerInputChar: 6,
+    // Generated single-file sites in this app run ~20k-60k characters,
+    // and a detailed description reliably lands at the top of that range
+    // rather than the bottom. The earlier low-end figures made the RESERVE
+    // smaller than what settlement then charged — measured at 22 held vs
+    // 26 charged on a simple site and 61 held vs 264 charged on a complex
+    // one — which is precisely the case a hold exists to prevent. Sized
+    // from the upper end instead: over-holding costs the user nothing
+    // (the remainder is released at settlement), under-holding lets a
+    // balance go negative.
+    baseOutputChars: 34000,
+    outputCharsPerInputChar: 9,
+    // MAX_CONTINUATION_ROUNDS in lib/website-builder.ts.
+    continuationRounds: 2,
   },
   websiteEdit: {
     systemPromptTokens: 2900,
@@ -139,7 +189,8 @@ export type ActionProfileKey = keyof typeof ACTION_PROFILES;
 export function estimateForAction(
   action: ActionProfileKey,
   params: { model: string; inputChars: number; imageCount?: number; expectedWebSearches?: number },
-  config: PricingConfig
+  config: PricingConfig,
+  effectiveCreditPriceEur?: number
 ): CostEstimate {
   const profile = ACTION_PROFILES[action];
   return estimateActionCost(
@@ -152,7 +203,9 @@ export function estimateForAction(
       expectedOutputChars:
         profile.baseOutputChars + params.inputChars * profile.outputCharsPerInputChar,
       expectedWebSearches: params.expectedWebSearches,
+      continuationRounds: "continuationRounds" in profile ? profile.continuationRounds : 0,
     },
-    config
+    config,
+    effectiveCreditPriceEur
   );
 }

@@ -4,8 +4,13 @@ import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { applyExactReplace } from "@/lib/website-patch";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
+import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
+import type { CostAccumulator, CostStage } from "@/lib/billing/cost-accumulator";
 
-const MODEL = "claude-sonnet-4-6";
+const MODEL = WEBSITE_BUILDER_MODEL;
+// Re-exported so the route's billing estimate prices the same model this
+// file actually calls, without the route reaching for a raw string.
+export const WEBSITE_MODEL = MODEL;
 const CLASSIFY_MAX_TOKENS = 300;
 // A single-file website (all CSS inline, real copy for every section) can
 // run long — much longer than a chat reply. This used to share a much
@@ -102,7 +107,8 @@ export function parseWebsiteClassification(input: {
 
 export async function classifyWebsiteDescription(
   apiKey: string,
-  description: string
+  description: string,
+  costs?: CostAccumulator
 ): Promise<WebsiteDescriptionClassification> {
   const anthropic = new Anthropic({ apiKey });
   const response = await anthropic.messages.create({
@@ -113,6 +119,8 @@ export async function classifyWebsiteDescription(
     tools: [CLASSIFY_TOOL],
     tool_choice: { type: "tool", name: "classify_website_request" },
   });
+
+  costs?.record("classification", response.usage, MODEL);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
@@ -388,7 +396,13 @@ async function streamHtmlToCompletion(
   anthropic: Anthropic,
   system: Anthropic.TextBlockParam[],
   initialUserContent: Anthropic.MessageParam["content"],
-  onDelta?: (accumulatedText: string) => void
+  onDelta?: (accumulatedText: string) => void,
+  // Every round is a separately-billed API call, so each one is recorded
+  // individually. Recording only the last round — or only the first —
+  // would silently undercount a continued generation by however many
+  // rounds it took, which is exactly the case where the cost is highest.
+  costs?: CostAccumulator,
+  stage: CostStage = "generation"
 ): Promise<{ rawText: string; stopReason: string | null }> {
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: initialUserContent }];
   let combined = "";
@@ -412,6 +426,7 @@ async function streamHtmlToCompletion(
     }
 
     const response = await stream.finalMessage();
+    costs?.record(round === 0 ? stage : "retry", response.usage, MODEL);
     if (!onDelta) {
       const textBlock = response.content.find(
         (block): block is Anthropic.TextBlock => block.type === "text"
@@ -439,7 +454,8 @@ export async function generateWebsiteHtml(
   description: string,
   referenceImages?: ReferenceImage[],
   onDelta?: (accumulatedText: string) => void,
-  formEndpointUrl?: string
+  formEndpointUrl?: string,
+  costs?: CostAccumulator
 ): Promise<string> {
   const anthropic = new Anthropic({ apiKey });
   const images = referenceImages?.slice(0, MAX_REFERENCE_IMAGES) ?? [];
@@ -469,7 +485,9 @@ export async function generateWebsiteHtml(
     anthropic,
     buildGenerateSystemBlocks(formEndpointUrl),
     content,
-    onDelta
+    onDelta,
+    costs,
+    "generation"
   );
   if (!rawText) {
     throw new Error("The model did not return a website.");

@@ -65,6 +65,18 @@ function filterAndRankItems(items: SidebarItem[], rawQuery: string): SidebarItem
   return [...substringMatches.map((m) => m.item), ...fuzzyOnlyMatches];
 }
 
+// True when the keystroke landed somewhere the user is composing text, in
+// which case a printable shortcut like "/" must be left alone. Covers
+// <input>/<textarea>/<select>, anything with contentEditable (the
+// Documents editor), and any explicit role="textbox".
+function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+  const tag = target.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
+  if (target.isContentEditable) return true;
+  return target.getAttribute("role") === "textbox";
+}
+
 export function CommandPalette() {
   const router = useRouter();
   const tCommon = useTranslations("common");
@@ -175,6 +187,19 @@ export function CommandPalette() {
         setOpen(!open);
         return;
       }
+
+      // "/" opens search too — the convention users bring from GitHub,
+      // Slack, Linear et al. Unlike Cmd+K it's a printable character, so
+      // it must be ignored whenever the user is actually typing, or it
+      // would hijack every forward slash in a note, a URL, or a date.
+      // That means: any field-like element, and anything contentEditable
+      // (the Documents editor), plus the palette's own input when open.
+      if (e.key === "/" && !open && !isTypingTarget(e.target)) {
+        e.preventDefault();
+        setOpen(true);
+        return;
+      }
+
       if (e.key === "Escape" && open) {
         e.preventDefault();
         close();

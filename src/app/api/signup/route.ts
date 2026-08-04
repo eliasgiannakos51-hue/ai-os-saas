@@ -217,8 +217,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   } catch (err) {
     logApiError("/api/signup", err);
+    // Deliberately NOT getErrorMessage(err) here. This is the catch-all
+    // for anything unexpected, so the message is whatever some library
+    // happened to throw — a real signup attempt against an environment
+    // missing SUPABASE_SERVICE_ROLE_KEY renders "supabaseKey is required."
+    // straight onto the signup form, which tells a stranger which of our
+    // secrets is unset. Every failure this route can actually explain is
+    // already handled above with its own specific, deliberate message;
+    // whatever reaches here is by definition not one of those.
     return NextResponse.json(
-      { ok: false, error: getErrorMessage(err, "Something went wrong. Please try again.") },
+      { ok: false, error: "Something went wrong. Please try again." },
       { status: 500 }
     );
   }

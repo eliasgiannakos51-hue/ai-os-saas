@@ -138,15 +138,15 @@ export function Sidebar() {
                     key={item.href}
                     href={item.href}
                     onClick={closeOnMobile}
-                    className={`flex min-h-[40px] items-center gap-2.5 rounded-lg border-l-2 py-2 pl-2.5 pr-3 text-sm transition-colors duration-150 ${
+                    className={`group flex min-h-[40px] items-center gap-2.5 rounded-lg border-l-2 py-2 pl-2.5 pr-3 text-sm transition-all duration-150 ${
                       active
                         ? "border-orange-500 bg-orange-500/10 font-medium text-orange-400"
-                        : "border-transparent text-muted hover:bg-panel-hover hover:text-foreground"
+                        : "border-transparent text-muted hover:border-orange-500/30 hover:bg-orange-500/[0.06] hover:text-foreground hover:shadow-[0_0_12px_-2px_rgba(249,115,22,0.25)]"
                     }`}
                   >
                     <Icon
-                      className={`h-4 w-4 shrink-0 transition-colors duration-150 ${
-                        active ? "text-orange-400" : "text-orange-500/40"
+                      className={`h-4 w-4 shrink-0 transition-all duration-150 group-hover:scale-105 ${
+                        active ? "text-orange-400" : "text-orange-500/40 group-hover:text-orange-400/70"
                       }`}
                       aria-hidden="true"
                     />

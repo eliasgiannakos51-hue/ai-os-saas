@@ -1549,3 +1549,39 @@ alter table public.user_websites
 -- is nothing to regenerate FROM), which the UI accounts for.
 alter table public.user_websites
   add column if not exists description text;
+
+-- ============================================================================
+-- Favorites — user_favorites
+-- One row per (user, table, record) a user has starred, across any
+-- linkable module (see lib/knowledge-graph.ts's LINKABLE_MODULES — the
+-- same registry entity_links uses, so "linkable" and "favoritable" are the
+-- same set of tables by design). unique(user_id, table_name, record_id)
+-- makes toggling idempotent from the API route's perspective (insert once,
+-- delete on un-favorite, never duplicate rows for the same record).
+-- ============================================================================
+
+create table if not exists public.user_favorites (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  table_name text not null,
+  record_id uuid not null,
+  created_at timestamptz not null default now(),
+  unique (user_id, table_name, record_id)
+);
+
+create index if not exists user_favorites_user_id_created_at_idx
+  on public.user_favorites (user_id, created_at desc);
+
+alter table public.user_favorites enable row level security;
+
+drop policy if exists "select_own_user_favorites" on public.user_favorites;
+create policy "select_own_user_favorites" on public.user_favorites
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_user_favorites" on public.user_favorites;
+create policy "insert_own_user_favorites" on public.user_favorites
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_user_favorites" on public.user_favorites;
+create policy "delete_own_user_favorites" on public.user_favorites
+  for delete using (auth.uid() = user_id);

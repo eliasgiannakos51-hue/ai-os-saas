@@ -13,6 +13,16 @@ import type { ScheduledAgentRun } from "@/types/scheduled-agent-run";
 
 export const metadata: Metadata = { title: "Mission Control" };
 
+// Explicit, not just implicit-via-cookies(): Next.js App Router's fetch
+// Data Cache can, in some versions/edge cases, still cache a GET request
+// made by a library (like supabase-js) even inside a route that's
+// otherwise dynamically rendered. This route reads real, frequently-
+// changing ai_missions rows, so it must never serve a cached result —
+// force-dynamic removes any ambiguity rather than relying on cookies()
+// alone to imply it.
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 // "AI Company" concept, deliberately kept to 3 agents (Planner, Builder,
 // Reviewer) and user-driven at every step — not autonomous. Planner runs
 // server-side in /api/mission/plan (lib/mission-agents.ts); Builder is just

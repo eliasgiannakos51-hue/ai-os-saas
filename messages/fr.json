@@ -33,6 +33,7 @@
       "chat": "Ionexa Chat",
       "memory": "Mémoire IA",
       "timeline": "Chronologie",
+      "favorites": "Favoris",
       "missionControl": "Contrôle de Mission",
       "reflection": "Bilan Hebdomadaire",
       "settings": "Paramètres",
@@ -440,6 +441,11 @@
       "rangeAll": "Toute la période",
       "emptyState": "Aucune entrée sur cette période pour l'instant."
     },
+    "favorites": {
+      "title": "Favoris",
+      "description": "Tout ce que vous avez marqué d'une étoile, dans tous les modules, au même endroit.",
+      "emptyState": "Rien en favori pour l'instant — appuyez sur l'étoile d'une entrée pour l'enregistrer ici."
+    },
     "mission": {
       "title": "Contrôle de Mission",
       "started": "Démarré {time}",
@@ -674,6 +680,10 @@
     "yes": "Oui",
     "no": "Non",
     "linked": "Lié"
+  },
+  "favorites": {
+    "add": "Ajouter aux favoris",
+    "remove": "Retirer des favoris"
   },
   "language": {
     "label": "Langue"

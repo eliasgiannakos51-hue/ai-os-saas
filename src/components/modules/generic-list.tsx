@@ -26,10 +26,12 @@ export function GenericList({
   module,
   records,
   linkedEntities = {},
+  favoritedIds,
 }: {
   module: ModuleConfig;
   records: ModuleRecord[];
   linkedEntities?: Record<string, LinkedEntity[]>;
+  favoritedIds?: Set<string>;
 }) {
   const t = useTranslations("module");
   const [query, setQuery] = useState("");
@@ -92,6 +94,7 @@ export function GenericList({
                 module={module}
                 record={record}
                 linkedEntities={linkedEntities[record.id]}
+                isFavorited={favoritedIds?.has(record.id) ?? false}
               />
             ))}
           </div>

@@ -33,6 +33,7 @@
       "chat": "Ionexa Chat",
       "memory": "KI-Gedächtnis",
       "timeline": "Zeitleiste",
+      "favorites": "Favoriten",
       "missionControl": "Missionskontrolle",
       "reflection": "Wöchentliche Reflexion",
       "settings": "Einstellungen",
@@ -440,6 +441,11 @@
       "rangeAll": "Gesamter Zeitraum",
       "emptyState": "Noch keine Einträge in diesem Zeitraum."
     },
+    "favorites": {
+      "title": "Favoriten",
+      "description": "Alles, was du markiert hast, aus allen Modulen, an einem Ort.",
+      "emptyState": "Noch nichts favorisiert — tippe auf den Stern eines Eintrags, um ihn hier zu speichern."
+    },
     "mission": {
       "title": "Missionskontrolle",
       "started": "Gestartet {time}",
@@ -674,6 +680,10 @@
     "yes": "Ja",
     "no": "Nein",
     "linked": "Verknüpft"
+  },
+  "favorites": {
+    "add": "Zu Favoriten hinzufügen",
+    "remove": "Aus Favoriten entfernen"
   },
   "language": {
     "label": "Sprache"

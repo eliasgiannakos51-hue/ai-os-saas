@@ -29,8 +29,13 @@ function groupContainsActive(group: SidebarGroupConfig, pathname: string | null)
   return group.items.some((item) => isActive(pathname, item.href));
 }
 
-function defaultExpanded(group: SidebarGroupConfig, pathname: string | null) {
-  return !group.collapsible || groupContainsActive(group, pathname);
+// Pure function of pathname alone (no localStorage read) so server and
+// client agree on which group is open before hydration's effect runs.
+function defaultOpenHeading(pathname: string | null): string | null {
+  return (
+    ALL_SIDEBAR_GROUPS.find((g) => g.collapsible && groupContainsActive(g, pathname))?.heading ??
+    null
+  );
 }
 
 function storageKey(heading: string) {
@@ -58,56 +63,42 @@ export function Sidebar() {
     return key ? t(`items.${key}`) : label;
   }
 
-  // Explicit overrides only — a group with no entry here falls back to
-  // defaultExpanded() below, which is pure/deterministic from pathname
-  // alone, so server and client render identically on first paint. The
-  // effect below then layers in localStorage + the "active group always
-  // starts expanded" rule once we're on the client.
-  const [expandedOverrides, setExpandedOverrides] = useState<Record<string, boolean>>({});
+  // Accordion: at most ONE collapsible group open at a time (Workspace is
+  // always-open, excluded from this). undefined = "not yet decided on the
+  // client" — renderGroup falls back to defaultOpenHeading(pathname) in
+  // that case, a pure function of pathname alone, so server and client
+  // render identically on first paint. The effect below then layers in
+  // localStorage once we're on the client, and re-forces the active
+  // page's own group open on every navigation (overriding any manually
+  // collapsed state), matching the previous per-group behavior.
+  const [openGroup, setOpenGroup] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {
-    setExpandedOverrides((prev) => {
-      const next = { ...prev };
-      let changed = false;
-
-      for (const group of ALL_SIDEBAR_GROUPS) {
-        if (!group.collapsible) continue;
-
-        if (groupContainsActive(group, pathname)) {
-          if (next[group.heading] !== true) {
-            next[group.heading] = true;
-            changed = true;
-          }
-          continue;
-        }
-
-        if (next[group.heading] === undefined) {
-          const stored = window.localStorage.getItem(storageKey(group.heading));
-          if (stored !== null) {
-            next[group.heading] = stored === "true";
-            changed = true;
-          }
-        }
-      }
-
-      return changed ? next : prev;
+    const activeHeading = defaultOpenHeading(pathname);
+    if (activeHeading) {
+      setOpenGroup(activeHeading);
+      return;
+    }
+    setOpenGroup((prev) => {
+      if (prev !== undefined) return prev;
+      const stored = window.localStorage.getItem(storageKey("__open__"));
+      return stored ? stored : null;
     });
   }, [pathname]);
 
   function toggleGroup(group: SidebarGroupConfig) {
     if (!group.collapsible) return;
-    setExpandedOverrides((prev) => {
-      const current = prev[group.heading] ?? defaultExpanded(group, pathname);
-      const next = !current;
-      window.localStorage.setItem(storageKey(group.heading), String(next));
-      return { ...prev, [group.heading]: next };
+    setOpenGroup((prev) => {
+      const currentlyOpen = prev ?? defaultOpenHeading(pathname);
+      const next = currentlyOpen === group.heading ? null : group.heading;
+      window.localStorage.setItem(storageKey("__open__"), next ?? "");
+      return next;
     });
   }
 
   function renderGroup(group: SidebarGroupConfig) {
-    const expanded = group.collapsible
-      ? expandedOverrides[group.heading] ?? defaultExpanded(group, pathname)
-      : true;
+    const currentlyOpen = openGroup === undefined ? defaultOpenHeading(pathname) : openGroup;
+    const expanded = group.collapsible ? currentlyOpen === group.heading : true;
 
     return (
       <div key={group.heading}>

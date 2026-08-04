@@ -11,6 +11,11 @@ import { loadTimelineEntries, TIMELINE_RANGES, type TimelineRange } from "@/lib/
 
 export const metadata: Metadata = { title: "Timeline" };
 
+// See dashboard/mission/page.tsx for why this is explicit — this page
+// merges live data from every linkable module's table on every load.
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 function resolveRange(value: string | undefined): TimelineRange {
   return (TIMELINE_RANGES as string[]).includes(value ?? "") ? (value as TimelineRange) : "all";
 }

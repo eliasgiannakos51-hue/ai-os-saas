@@ -33,6 +33,7 @@
       "chat": "Ionexa 对话",
       "memory": "AI 记忆",
       "timeline": "时间线",
+      "favorites": "收藏",
       "missionControl": "任务控制中心",
       "reflection": "每周回顾",
       "settings": "设置",
@@ -440,6 +441,11 @@
       "rangeAll": "所有时间",
       "emptyState": "此时间段内暂无记录。"
     },
+    "favorites": {
+      "title": "收藏",
+      "description": "所有模块中你加星标的内容，都在这里集中展示。",
+      "emptyState": "还没有收藏 — 点击任意条目的星标即可保存到这里。"
+    },
     "mission": {
       "title": "任务控制中心",
       "started": "开始于 {time}",
@@ -674,6 +680,10 @@
     "yes": "是",
     "no": "否",
     "linked": "已关联"
+  },
+  "favorites": {
+    "add": "添加到收藏",
+    "remove": "从收藏中移除"
   },
   "language": {
     "label": "语言"

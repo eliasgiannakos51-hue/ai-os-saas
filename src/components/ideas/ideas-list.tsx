@@ -55,9 +55,11 @@ function searchableText(idea: Idea): string {
 export function IdeasList({
   ideas,
   linkedEntities = {},
+  favoritedIds,
 }: {
   ideas: Idea[];
   linkedEntities?: Record<string, LinkedEntity[]>;
+  favoritedIds?: Set<string>;
 }) {
   const [query, setQuery] = useState("");
 
@@ -111,7 +113,12 @@ export function IdeasList({
         <>
           <div className="space-y-3">
             {paginated.map((idea) => (
-              <IdeaRow key={idea.id} idea={idea} linkedEntities={linkedEntities[idea.id]} />
+              <IdeaRow
+                key={idea.id}
+                idea={idea}
+                linkedEntities={linkedEntities[idea.id]}
+                isFavorited={favoritedIds?.has(idea.id) ?? false}
+              />
             ))}
           </div>
           <PaginationControls page={page} totalPages={totalPages} onChange={setPage} />

@@ -34,6 +34,12 @@ export const metadata: Metadata = {
   title: "Overview",
 };
 
+// See dashboard/mission/page.tsx for why this is explicit rather than
+// relying only on cookies() to imply it — this page's Active Missions
+// widget reads the same frequently-changing ai_missions data.
+export const dynamic = "force-dynamic";
+export const fetchCache = "force-no-store";
+
 const QUICK_ACTIONS = [
   { slug: "ideas", label: "Idea", description: "Capture a new idea" },
   { slug: "research", label: "Research", description: "Log research notes" },

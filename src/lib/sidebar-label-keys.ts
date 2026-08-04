@@ -17,6 +17,7 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Home: "home",
   "Ionexa Chat": "chat",
   Timeline: "timeline",
+  Favorites: "favorites",
   "Mission Control": "missionControl",
   "Weekly Reflection": "reflection",
   "AI Memory": "memory",

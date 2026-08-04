@@ -10,6 +10,7 @@ import { DeleteButton } from "@/components/delete-button";
 import { AskAiButton } from "@/components/records/ask-ai-button";
 import { LinkToButton } from "@/components/entity-links/link-to-button";
 import { LinkedEntities } from "@/components/entity-links/linked-entities";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { TextActionsTextarea } from "@/components/text-actions/text-actions-textarea";
 import { useToast } from "@/components/toast/toast-context";
 import { formatRelativeTime } from "@/lib/format-time";
@@ -28,10 +29,12 @@ export function GenericRecordRow({
   module,
   record,
   linkedEntities = [],
+  isFavorited = false,
 }: {
   module: ModuleConfig;
   record: ModuleRecord;
   linkedEntities?: LinkedEntity[];
+  isFavorited?: boolean;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -240,6 +243,12 @@ export function GenericRecordRow({
             moduleTitle={module.title}
             recordId={record.id}
             recordHeadline={headline}
+          />
+          <FavoriteButton
+            table={module.table}
+            recordId={record.id}
+            headline={headline}
+            initialFavorited={isFavorited}
           />
           <LinkToButton sourceTable={module.table} sourceId={record.id} sourceHeadline={headline} />
           <button

@@ -33,6 +33,7 @@
       "chat": "Ionexa Chat",
       "memory": "AI メモリー",
       "timeline": "タイムライン",
+      "favorites": "お気に入り",
       "missionControl": "ミッションコントロール",
       "reflection": "週次振り返り",
       "settings": "設定",
@@ -440,6 +441,11 @@
       "rangeAll": "すべての期間",
       "emptyState": "この期間にはまだ記録がありません。"
     },
+    "favorites": {
+      "title": "お気に入り",
+      "description": "すべてのモジュールでスター付けした項目を1か所にまとめて表示します。",
+      "emptyState": "まだお気に入りはありません — 項目のスターをタップして保存してください。"
+    },
     "mission": {
       "title": "ミッションコントロール",
       "started": "開始: {time}",
@@ -674,6 +680,10 @@
     "yes": "はい",
     "no": "いいえ",
     "linked": "リンク済み"
+  },
+  "favorites": {
+    "add": "お気に入りに追加",
+    "remove": "お気に入りから削除"
   },
   "language": {
     "label": "言語"

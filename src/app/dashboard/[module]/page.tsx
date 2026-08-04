@@ -9,6 +9,7 @@ import { getModule } from "@/lib/modules";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import type { ModuleRecord } from "@/types/module-record";
 import { loadLinkedEntities } from "@/lib/entity-links";
+import { loadFavoriteIds } from "@/lib/favorites";
 import { AutomationRealizeList } from "@/components/automation/automation-realize-list";
 import { AutomationActiveList } from "@/components/automation/automation-active-list";
 import type { UserAutomation } from "@/types/user-automation";
@@ -48,12 +49,11 @@ export default async function ModulePage({
     .select("*")
     .order("created_at", { ascending: false });
 
-  const linkedEntities = await loadLinkedEntities(
-    supabase,
-    user.id,
-    moduleConfig.table,
-    (records as ModuleRecord[] | null)?.map((r) => r.id) ?? []
-  );
+  const recordIds = (records as ModuleRecord[] | null)?.map((r) => r.id) ?? [];
+  const [linkedEntities, favoritedIds] = await Promise.all([
+    loadLinkedEntities(supabase, user.id, moduleConfig.table, recordIds),
+    loadFavoriteIds(supabase, user.id, moduleConfig.table, recordIds),
+  ]);
 
   // Real Automations — only the "automation" module gets these two extra
   // sections (Active Automations + "Make this real"), built on top of the
@@ -89,6 +89,7 @@ export default async function ModulePage({
           module={moduleConfig}
           records={(records as ModuleRecord[]) ?? []}
           linkedEntities={linkedEntities}
+          favoritedIds={favoritedIds}
         />
       </div>
     </main>

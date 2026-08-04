@@ -9,6 +9,7 @@ import { DeleteButton } from "@/components/delete-button";
 import { AskAiButton } from "@/components/records/ask-ai-button";
 import { LinkToButton } from "@/components/entity-links/link-to-button";
 import { LinkedEntities } from "@/components/entity-links/linked-entities";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { TextActionsTextarea } from "@/components/text-actions/text-actions-textarea";
 import { useToast } from "@/components/toast/toast-context";
 import { formatRelativeTime } from "@/lib/format-time";
@@ -53,9 +54,11 @@ function toFormState(idea: Idea): FormState {
 export function IdeaRow({
   idea,
   linkedEntities = [],
+  isFavorited = false,
 }: {
   idea: Idea;
   linkedEntities?: LinkedEntity[];
+  isFavorited?: boolean;
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -299,6 +302,12 @@ export function IdeaRow({
             moduleTitle="Ideas"
             recordId={idea.id}
             recordHeadline={idea.name}
+          />
+          <FavoriteButton
+            table="ideas"
+            recordId={idea.id}
+            headline={idea.name}
+            initialFavorited={isFavorited}
           />
           <LinkToButton sourceTable="ideas" sourceId={idea.id} sourceHeadline={idea.name} />
           <button

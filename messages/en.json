@@ -33,6 +33,7 @@
       "chat": "Ionexa Chat",
       "memory": "AI Memory",
       "timeline": "Timeline",
+      "favorites": "Favorites",
       "missionControl": "Mission Control",
       "reflection": "Weekly Reflection",
       "settings": "Settings",
@@ -440,6 +441,11 @@
       "rangeAll": "All Time",
       "emptyState": "No entries in this range yet."
     },
+    "favorites": {
+      "title": "Favorites",
+      "description": "Everything you've starred, across every module, in one place.",
+      "emptyState": "Nothing starred yet — tap the star on any entry to save it here."
+    },
     "mission": {
       "title": "Mission Control",
       "started": "Started {time}",
@@ -674,6 +680,10 @@
     "yes": "Yes",
     "no": "No",
     "linked": "Linked"
+  },
+  "favorites": {
+    "add": "Add to favorites",
+    "remove": "Remove from favorites"
   },
   "language": {
     "label": "Language"

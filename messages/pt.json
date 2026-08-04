@@ -33,6 +33,7 @@
       "chat": "Ionexa Chat",
       "memory": "Memória IA",
       "timeline": "Linha do Tempo",
+      "favorites": "Favoritos",
       "missionControl": "Controle de Missão",
       "reflection": "Reflexão Semanal",
       "settings": "Configurações",
@@ -440,6 +441,11 @@
       "rangeAll": "Todo o período",
       "emptyState": "Nenhuma entrada neste período ainda."
     },
+    "favorites": {
+      "title": "Favoritos",
+      "description": "Tudo o que você marcou com estrela, em todos os módulos, em um só lugar.",
+      "emptyState": "Nada favoritado ainda — toque na estrela de qualquer item para salvá-lo aqui."
+    },
     "mission": {
       "title": "Controle de Missão",
       "started": "Iniciado {time}",
@@ -674,6 +680,10 @@
     "yes": "Sim",
     "no": "Não",
     "linked": "Vinculado"
+  },
+  "favorites": {
+    "add": "Adicionar aos favoritos",
+    "remove": "Remover dos favoritos"
   },
   "language": {
     "label": "Idioma"

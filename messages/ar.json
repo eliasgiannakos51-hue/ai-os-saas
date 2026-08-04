@@ -269,6 +269,11 @@
       "confirmPassword": "تأكيد كلمة المرور",
       "saveNewPassword": "حفظ كلمة المرور الجديدة",
       "saving": "جارٍ الحفظ..."
+    },
+    "social": {
+      "continueWithGoogle": "المتابعة باستخدام Google",
+      "orContinueWithEmail": "أو المتابعة بالبريد الإلكتروني",
+      "genericError": "تعذر بدء تسجيل الدخول عبر Google. يرجى المحاولة مرة أخرى."
     }
   },
   "settings": {

@@ -269,6 +269,11 @@
       "confirmPassword": "Επιβεβαίωση κωδικού",
       "saveNewPassword": "Αποθήκευση νέου κωδικού",
       "saving": "Αποθήκευση..."
+    },
+    "social": {
+      "continueWithGoogle": "Συνέχεια με Google",
+      "orContinueWithEmail": "ή συνέχεια με email",
+      "genericError": "Δεν ήταν δυνατή η σύνδεση με Google. Δοκίμασε ξανά."
     }
   },
   "settings": {

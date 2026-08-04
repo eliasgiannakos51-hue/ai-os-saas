@@ -269,6 +269,11 @@
       "confirmPassword": "パスワードの確認",
       "saveNewPassword": "新しいパスワードを保存",
       "saving": "保存中..."
+    },
+    "social": {
+      "continueWithGoogle": "Googleで続行",
+      "orContinueWithEmail": "またはメールで続行",
+      "genericError": "Googleサインインを開始できませんでした。もう一度お試しください。"
     }
   },
   "settings": {

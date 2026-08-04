@@ -8,6 +8,7 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { PasswordInput } from "@/components/ui/password-input";
 import { LoginSplash } from "@/components/auth/login-splash";
 import { AuthBackground } from "@/components/auth/auth-background";
+import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { Logo } from "@/components/logo";
 
 export function LoginForm() {
@@ -103,6 +104,8 @@ export function LoginForm() {
         )}
 
         <div className="rounded-2xl border border-border bg-panel p-6 shadow-[0_0_0_1px_rgba(249,115,22,0.05)]">
+          <SocialAuthButtons />
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="email" className="mb-1 block text-xs text-muted">

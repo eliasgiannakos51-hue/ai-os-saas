@@ -269,6 +269,11 @@
       "confirmPassword": "Passwort bestätigen",
       "saveNewPassword": "Neues Passwort speichern",
       "saving": "Wird gespeichert..."
+    },
+    "social": {
+      "continueWithGoogle": "Weiter mit Google",
+      "orContinueWithEmail": "oder weiter mit E-Mail",
+      "genericError": "Google-Anmeldung konnte nicht gestartet werden. Bitte erneut versuchen."
     }
   },
   "settings": {

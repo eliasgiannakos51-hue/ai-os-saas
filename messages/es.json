@@ -269,6 +269,11 @@
       "confirmPassword": "Confirmar contraseña",
       "saveNewPassword": "Guardar nueva contraseña",
       "saving": "Guardando..."
+    },
+    "social": {
+      "continueWithGoogle": "Continuar con Google",
+      "orContinueWithEmail": "o continuar con correo",
+      "genericError": "No se pudo iniciar sesión con Google. Inténtalo de nuevo."
     }
   },
   "settings": {

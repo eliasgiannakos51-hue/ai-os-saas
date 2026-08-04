@@ -269,6 +269,11 @@
       "confirmPassword": "Confirmer le mot de passe",
       "saveNewPassword": "Enregistrer le nouveau mot de passe",
       "saving": "Enregistrement..."
+    },
+    "social": {
+      "continueWithGoogle": "Continuer avec Google",
+      "orContinueWithEmail": "ou continuer avec l'e-mail",
+      "genericError": "Impossible de démarrer la connexion Google. Veuillez réessayer."
     }
   },
   "settings": {

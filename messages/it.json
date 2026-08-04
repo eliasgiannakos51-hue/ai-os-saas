@@ -269,6 +269,11 @@
       "confirmPassword": "Conferma password",
       "saveNewPassword": "Salva nuova password",
       "saving": "Salvataggio..."
+    },
+    "social": {
+      "continueWithGoogle": "Continua con Google",
+      "orContinueWithEmail": "o continua con email",
+      "genericError": "Impossibile avviare l'accesso con Google. Riprova."
     }
   },
   "settings": {

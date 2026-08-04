@@ -21,6 +21,7 @@ import { GeneratePasswordButton } from "@/components/auth/generate-password-butt
 import { LoginSplash } from "@/components/auth/login-splash";
 import { Logo } from "@/components/logo";
 import { AuthBackground } from "@/components/auth/auth-background";
+import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { COUNTRIES } from "@/lib/countries";
 
 const FIELD_CLASS =
@@ -428,6 +429,17 @@ export function SignupFlow() {
               <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
               {wantsTeamSetup ? tPricing("businessTitle") : (plan?.name ?? "Free")} plan — {t("change")}
             </button>
+
+            {/* Social sign-in always creates a FREE account (see
+                app/auth/callback/route.ts's bootstrap): a paid plan needs a
+                Stripe Checkout session, which needs an account to attach a
+                customer to, so it can only ever happen after the account
+                exists. That's the same ordering the email/password path
+                uses — it just runs both steps back-to-back in
+                handleSubmit. A social signup that picked a paid plan
+                therefore lands on Free and upgrades from Settings > Billing,
+                rather than being silently charged or silently downgraded. */}
+            <SocialAuthButtons />
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>

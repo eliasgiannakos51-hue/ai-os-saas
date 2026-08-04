@@ -269,6 +269,11 @@
       "confirmPassword": "确认密码",
       "saveNewPassword": "保存新密码",
       "saving": "保存中..."
+    },
+    "social": {
+      "continueWithGoogle": "使用 Google 继续",
+      "orContinueWithEmail": "或使用邮箱继续",
+      "genericError": "无法启动 Google 登录,请重试。"
     }
   },
   "settings": {

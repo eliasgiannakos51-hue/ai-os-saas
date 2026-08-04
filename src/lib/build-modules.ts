@@ -159,30 +159,6 @@ export const BUILD_MODULES: ModuleConfig[] = [
     ],
   },
   {
-    slug: "documents",
-    title: "Documents",
-    table: "ai_documents",
-    headlineKey: "title",
-    fields: [
-      { key: "title", label: "Title", type: "text", required: true },
-      { key: "description", label: "Description", type: "textarea", full: true },
-      {
-        key: "doc_type",
-        label: "Document Type",
-        type: "select",
-        badge: true,
-        options: ["memo", "report", "proposal", "spec", "other"],
-      },
-      {
-        key: "status",
-        label: "Status",
-        type: "select",
-        badge: true,
-        options: ["draft", "in review", "final", "archived"],
-      },
-    ],
-  },
-  {
     slug: "presentations",
     title: "Presentations",
     table: "ai_presentations",

@@ -106,6 +106,11 @@
     "businessTitle": "Business",
     "businessSubtitle": "For teams building together",
     "businessExplanation": "Choose Professional or Ultimate as your base plan — both unlock team collaboration. Then invite team members: each one gets full access at your plan's tier, for +{price}/member/month on Professional, or included free on Ultimate.",
+    "businessCardDescription": "Start with any plan as your team's base, then invite members for +{price}/month each — everyone gets full access at your plan's tier. Perfect for teams working together.",
+    "businessFeatureBase": "Choose Professional or Ultimate as your base plan",
+    "businessFeatureFullAccess": "Every member gets full access at your plan's tier",
+    "businessFeatureFreeOnUltimate": "Team seats included free on Ultimate",
+    "businessFeatureManage": "Manage seats anytime from Team settings",
     "setUpTeam": "Set Up Team"
   },
   "roadmap": {
@@ -424,6 +429,26 @@
     "memory": {
       "title": "AI Memory",
       "description": "Search everything you've logged, across every module — no need to remember where you put it."
+    },
+    "documents": {
+      "title": "Documents",
+      "description": "Freeform notes and documents — write anything, it saves as you go.",
+      "newDocument": "New Document",
+      "emptyTitle": "No documents yet",
+      "emptyHint": "Create your first document to start writing.",
+      "untitled": "Untitled",
+      "titlePlaceholder": "Untitled document",
+      "contentPlaceholder": "Start writing…",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "saveError": "Couldn't save",
+      "backToDocuments": "Documents",
+      "deleteLabel": "document",
+      "bold": "Bold",
+      "italic": "Italic",
+      "heading1": "Heading 1",
+      "heading2": "Heading 2",
+      "bulletList": "Bullet list"
     },
     "chat": {
       "title": "Ionexa Chat"

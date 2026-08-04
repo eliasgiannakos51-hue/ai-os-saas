@@ -106,6 +106,11 @@
     "businessTitle": "Business",
     "businessSubtitle": "Für Teams, die gemeinsam aufbauen",
     "businessExplanation": "Wähle Professional oder Ultimate als Basisplan — beide schalten die Teamzusammenarbeit frei. Lade dann Teammitglieder ein: Jedes Mitglied erhält vollen Zugriff auf der Stufe deines Plans, für +{price}/Mitglied/Monat bei Professional, oder kostenlos inklusive bei Ultimate.",
+    "businessCardDescription": "Starte mit jedem beliebigen Plan als Basis für dein Team, lade dann Mitglieder für je +{price}/Monat ein — jeder erhält vollen Zugriff auf der Stufe deines Plans. Perfekt für Teams, die zusammenarbeiten.",
+    "businessFeatureBase": "Wähle Professional oder Ultimate als Basisplan",
+    "businessFeatureFullAccess": "Jedes Mitglied erhält vollen Zugriff auf der Stufe deines Plans",
+    "businessFeatureFreeOnUltimate": "Team-Plätze bei Ultimate kostenlos inklusive",
+    "businessFeatureManage": "Verwalte Plätze jederzeit in den Team-Einstellungen",
     "setUpTeam": "Team einrichten"
   },
   "roadmap": {
@@ -424,6 +429,26 @@
     "memory": {
       "title": "KI-Gedächtnis",
       "description": "Durchsuche alles, was du erfasst hast, über alle Module hinweg — ohne dich erinnern zu müssen, wo du es abgelegt hast."
+    },
+    "documents": {
+      "title": "Dokumente",
+      "description": "Freie Notizen und Dokumente — schreib einfach los, wird automatisch gespeichert.",
+      "newDocument": "Neues Dokument",
+      "emptyTitle": "Noch keine Dokumente",
+      "emptyHint": "Erstelle dein erstes Dokument, um mit dem Schreiben zu beginnen.",
+      "untitled": "Unbenannt",
+      "titlePlaceholder": "Unbenanntes Dokument",
+      "contentPlaceholder": "Beginn zu schreiben…",
+      "saving": "Speichern…",
+      "saved": "Gespeichert",
+      "saveError": "Speichern fehlgeschlagen",
+      "backToDocuments": "Dokumente",
+      "deleteLabel": "Dokument",
+      "bold": "Fett",
+      "italic": "Kursiv",
+      "heading1": "Überschrift 1",
+      "heading2": "Überschrift 2",
+      "bulletList": "Aufzählungsliste"
     },
     "chat": {
       "title": "Ionexa Chat"

@@ -51,6 +51,7 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: MISSION_NAV_ITEM.href, label: MISSION_NAV_ITEM.label, icon: MISSION_ICON },
       { href: REFLECTION_NAV_ITEM.href, label: REFLECTION_NAV_ITEM.label, icon: REFLECTION_ICON },
       { href: "/dashboard/memory", label: "AI Memory", icon: MEMORY_ICON },
+      { href: "/dashboard/documents", label: "Documents", icon: MODULE_ICONS.documents },
     ],
   },
   {
@@ -73,7 +74,6 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         label: "Data Analysis",
         icon: MODULE_ICONS["data-analysis"],
       },
-      { href: "/dashboard/documents", label: "Documents", icon: MODULE_ICONS.documents },
       {
         href: "/dashboard/presentations",
         label: "Presentations",

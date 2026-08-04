@@ -213,3 +213,39 @@ input:-webkit-autofill:focus {
   background-image: radial-gradient(rgba(245, 166, 35, 0.12) 1px, transparent 1px);
   background-size: 24px 24px;
 }
+
+/* Documents module editor (components/documents/document-editor.tsx) — a
+   plain contentEditable region, so it gets none of Tailwind's Typography
+   plugin defaults for the handful of tags document.execCommand can
+   produce (h1/h2/ul/li/b/i). Scoped to this one class rather than a
+   global `prose`-style reset, since nothing else in the app uses
+   contentEditable. The placeholder is CSS-only (`:empty:before`) because
+   contentEditable elements have no `::placeholder` pseudo-element. */
+.document-editor-content:empty:before {
+  content: attr(data-placeholder);
+  color: var(--muted);
+  pointer-events: none;
+}
+.document-editor-content h1 {
+  margin: 0.6em 0 0.3em;
+  font-size: 1.5em;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.document-editor-content h2 {
+  margin: 0.6em 0 0.3em;
+  font-size: 1.2em;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.document-editor-content p {
+  margin: 0.4em 0;
+}
+.document-editor-content ul {
+  margin: 0.4em 0;
+  padding-left: 1.5em;
+  list-style: disc;
+}
+.document-editor-content li {
+  margin: 0.2em 0;
+}

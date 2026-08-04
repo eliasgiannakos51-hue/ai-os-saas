@@ -106,6 +106,11 @@
     "businessTitle": "ビジネス",
     "businessSubtitle": "チームで共に構築する",
     "businessExplanation": "ベースプランとしてProfessionalまたはUltimateを選択してください — どちらもチームコラボレーションを利用できます。その後チームメンバーを招待しましょう。各メンバーはあなたのプランと同じ機能に完全アクセスでき、Professionalでは+{price}/メンバー/月、Ultimateでは無料で利用できます。",
+    "businessCardDescription": "どのプランでもチームのベースとして始められます。その後、メンバーを1人あたり+{price}/月で招待できます — 全員があなたのプランと同じレベルの完全アクセスを得られます。共同作業をするチームに最適です。",
+    "businessFeatureBase": "ベースプランとしてProfessionalまたはUltimateを選択",
+    "businessFeatureFullAccess": "各メンバーはあなたのプランと同じレベルの完全アクセスを取得",
+    "businessFeatureFreeOnUltimate": "Ultimateではチームシートが無料付帯",
+    "businessFeatureManage": "チーム設定からいつでもシートを管理可能",
     "setUpTeam": "チームを設定"
   },
   "roadmap": {
@@ -424,6 +429,26 @@
     "memory": {
       "title": "AI メモリー",
       "description": "どこに記録したか覚えていなくても、全モジュールを横断して記録したすべてを検索できます。"
+    },
+    "documents": {
+      "title": "ドキュメント",
+      "description": "自由形式のメモとドキュメント — 何でも書けて、自動的に保存されます。",
+      "newDocument": "新規ドキュメント",
+      "emptyTitle": "まだドキュメントがありません",
+      "emptyHint": "最初のドキュメントを作成して書き始めましょう。",
+      "untitled": "無題",
+      "titlePlaceholder": "無題のドキュメント",
+      "contentPlaceholder": "書き始める…",
+      "saving": "保存中…",
+      "saved": "保存済み",
+      "saveError": "保存できませんでした",
+      "backToDocuments": "ドキュメント",
+      "deleteLabel": "ドキュメント",
+      "bold": "太字",
+      "italic": "斜体",
+      "heading1": "見出し1",
+      "heading2": "見出し2",
+      "bulletList": "箇条書き"
     },
     "chat": {
       "title": "Ionexa Chat"

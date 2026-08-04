@@ -106,6 +106,11 @@
     "businessTitle": "Business",
     "businessSubtitle": "Pour les équipes qui construisent ensemble",
     "businessExplanation": "Choisissez Professional ou Ultimate comme plan de base — les deux débloquent la collaboration d'équipe. Invitez ensuite des membres : chacun obtient un accès complet au niveau de votre plan, pour +{price}/membre/mois sur Professional, ou inclus gratuitement sur Ultimate.",
+    "businessCardDescription": "Commencez avec n'importe quel plan comme base pour votre équipe, puis invitez des membres pour +{price}/mois chacun — tout le monde obtient un accès complet au niveau de votre plan. Parfait pour les équipes qui travaillent ensemble.",
+    "businessFeatureBase": "Choisissez Professional ou Ultimate comme plan de base",
+    "businessFeatureFullAccess": "Chaque membre obtient un accès complet au niveau de votre plan",
+    "businessFeatureFreeOnUltimate": "Sièges d'équipe inclus gratuitement avec Ultimate",
+    "businessFeatureManage": "Gérez les sièges à tout moment depuis les paramètres d'équipe",
     "setUpTeam": "Configurer l'équipe"
   },
   "roadmap": {
@@ -424,6 +429,26 @@
     "memory": {
       "title": "Mémoire IA",
       "description": "Recherchez tout ce que vous avez enregistré, dans tous les modules — sans avoir à vous souvenir d'où vous l'avez mis."
+    },
+    "documents": {
+      "title": "Documents",
+      "description": "Notes et documents libres — écrivez ce que vous voulez, ça s'enregistre au fur et à mesure.",
+      "newDocument": "Nouveau document",
+      "emptyTitle": "Aucun document pour l'instant",
+      "emptyHint": "Créez votre premier document pour commencer à écrire.",
+      "untitled": "Sans titre",
+      "titlePlaceholder": "Document sans titre",
+      "contentPlaceholder": "Commencez à écrire…",
+      "saving": "Enregistrement…",
+      "saved": "Enregistré",
+      "saveError": "Échec de l'enregistrement",
+      "backToDocuments": "Documents",
+      "deleteLabel": "document",
+      "bold": "Gras",
+      "italic": "Italique",
+      "heading1": "Titre 1",
+      "heading2": "Titre 2",
+      "bulletList": "Liste à puces"
     },
     "chat": {
       "title": "Ionexa Chat"

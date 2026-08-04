@@ -1451,6 +1451,52 @@ create policy "delete_own_user_automations" on public.user_automations
   for delete using (auth.uid() = user_id);
 
 -- ============================================================================
+-- Documents module — freeform Notion-lite notes/documents. Not an AI-
+-- generated artifact (no credit cost, no AI call, unlike the "Build"
+-- modules below), so it's its own table rather than living in
+-- ai_documents (the old Build-module placeholder at this same
+-- /dashboard/documents route, replaced by this — ai_documents itself is
+-- left in place, unused, rather than dropped, since dropping it isn't
+-- needed to ship this and a DROP TABLE is not something to do lightly).
+-- content is jsonb ({ html: string } today, from the contentEditable
+-- editor) so the shape can grow later without another migration.
+-- ============================================================================
+
+create table public.user_documents (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null default 'Untitled',
+  content jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists user_documents_user_id_updated_at_idx
+  on public.user_documents (user_id, updated_at desc);
+
+alter table public.user_documents enable row level security;
+
+drop policy if exists "select_own_user_documents" on public.user_documents;
+create policy "select_own_user_documents" on public.user_documents
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_user_documents" on public.user_documents;
+create policy "insert_own_user_documents" on public.user_documents
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "update_own_user_documents" on public.user_documents;
+create policy "update_own_user_documents" on public.user_documents
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_user_documents" on public.user_documents;
+create policy "delete_own_user_documents" on public.user_documents
+  for delete using (auth.uid() = user_id);
+
+drop trigger if exists set_updated_at on public.user_documents;
+create trigger set_updated_at before update on public.user_documents
+  for each row execute function public.set_updated_at();
+
+-- ============================================================================
 -- COVERAGE CHECKLIST — every table in this file, grouped by feature/date,
 -- so this doubles as a manifest. Cross-checked against every table name
 -- referenced anywhere in src/ via Supabase's .from("...") calls — nothing
@@ -1485,6 +1531,10 @@ create policy "delete_own_user_automations" on public.user_automations
 --   user_achievements
 -- V2 — Scheduled Agent Runs / Real Automations:
 --   scheduled_agent_runs, user_automations
+-- Documents module (Notion-lite notes, replaces the old ai_documents
+-- Build-module placeholder at the same /dashboard/documents route —
+-- ai_documents itself still exists in the DB, just unreferenced now):
+--   user_documents
 --
 -- Tables that are intentionally NOT here because they were never built:
 --   any "daily_briefings" table, any "marketplace_listings" table.

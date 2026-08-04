@@ -325,29 +325,32 @@ export function SignupFlow() {
                   </button>
                 );
               })}
-            </div>
 
-            {/* "Business" — same option /pricing offers via its Business
-                card + "Set Up Team" flow, now reachable during signup
-                itself instead of only after the fact. Not a 7th plan slug
-                (see wantsTeamSetup's own comment above): selecting it
-                aliases selectedPlan to "professional" and remembers the
-                intent so checkout can route straight into team setup. */}
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedPlan("professional");
-                setWantsTeamSetup(true);
-              }}
-              aria-pressed={wantsTeamSetup}
-              className={`mt-3 flex w-full flex-col items-start rounded-2xl border p-4 text-left transition-all duration-150 sm:flex-row sm:items-center sm:justify-between sm:gap-4 ${
-                wantsTeamSetup
-                  ? "border-orange-500 bg-orange-500/[0.04] shadow-[0_0_16px_rgba(249,115,22,0.12)]"
-                  : "border-border bg-panel hover:border-orange-500/40"
-              }`}
-            >
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
+              {/* "Business" — same option /pricing offers via its Business
+                  card + "Set Up Team" flow, now reachable during signup
+                  itself instead of only after the fact. Not a 7th plan
+                  slug (see wantsTeamSetup's own comment above): selecting
+                  it aliases selectedPlan to "professional" and remembers
+                  the intent so checkout can route straight into team
+                  setup. Lives as the 6th card in the SAME grid as the 5
+                  real plans (so on lg's 3-column layout it lands directly
+                  beside Ultimate, same row) with matching size/structure —
+                  a first-class choice from the start, not a secondary
+                  add-on underneath. */}
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedPlan("professional");
+                  setWantsTeamSetup(true);
+                }}
+                aria-pressed={wantsTeamSetup}
+                className={`relative flex flex-col items-start rounded-2xl border p-4 text-left transition-all duration-150 ${
+                  wantsTeamSetup
+                    ? "border-orange-500 bg-orange-500/[0.04] shadow-[0_0_16px_rgba(249,115,22,0.12)]"
+                    : "border-border bg-panel hover:border-orange-500/40"
+                }`}
+              >
+                <div className="flex w-full items-center justify-between gap-2">
                   <span className="text-sm font-semibold text-orange-400">
                     {tPricing("businessTitle")}
                   </span>
@@ -355,11 +358,37 @@ export function SignupFlow() {
                     <Check className="h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />
                   )}
                 </div>
-                <p className="mt-0.5 text-xs text-muted">
-                  {tPricing("businessExplanation", { price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}` })}
+                <p className="mt-1 text-lg font-bold text-foreground">
+                  +{CURRENCY_SYMBOL}
+                  {TEAM_SEAT_PRICE}
+                  <span className="text-xs font-normal text-muted">{tPricing("perMonth")}</span>
                 </p>
-              </div>
-            </button>
+                <p className="mt-1 text-xs text-muted">{tPricing("businessSubtitle")}</p>
+
+                <p className="mt-3 w-full border-t border-border pt-3 text-[11px] text-foreground/80">
+                  {tPricing("businessCardDescription", {
+                    price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}`,
+                  })}
+                </p>
+
+                <ul className="mt-3 w-full space-y-1.5 border-t border-border pt-3">
+                  {[
+                    tPricing("businessFeatureBase"),
+                    tPricing("businessFeatureFullAccess"),
+                    tPricing("businessFeatureFreeOnUltimate"),
+                    tPricing("businessFeatureManage"),
+                  ].map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-start gap-1.5 text-[11px] text-foreground/80"
+                    >
+                      <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" aria-hidden="true" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </button>
+            </div>
 
             <button
               type="button"

@@ -106,6 +106,11 @@
     "businessTitle": "商业版",
     "businessSubtitle": "为共同打造的团队而生",
     "businessExplanation": "选择 Professional 或 Ultimate 作为您的基础方案 — 两者都可解锁团队协作。然后邀请团队成员:每位成员都可获得与您方案同等级别的完整访问权限,Professional 方案每位成员每月 +{price},Ultimate 方案则免费包含。",
+    "businessCardDescription": "选择任意方案作为团队的基础方案,然后以每位成员 +{price}/月 的价格邀请成员 — 每个人都能获得与您方案同等级别的完整访问权限。非常适合共同协作的团队。",
+    "businessFeatureBase": "选择 Professional 或 Ultimate 作为基础方案",
+    "businessFeatureFullAccess": "每位成员都能获得与您方案同等级别的完整访问权限",
+    "businessFeatureFreeOnUltimate": "Ultimate 方案免费包含团队席位",
+    "businessFeatureManage": "随时在团队设置中管理席位",
     "setUpTeam": "设置团队"
   },
   "roadmap": {
@@ -424,6 +429,26 @@
     "memory": {
       "title": "AI 记忆",
       "description": "在所有模块中搜索你记录过的一切——无需记得存放在哪里。"
+    },
+    "documents": {
+      "title": "文档",
+      "description": "自由形式的笔记和文档 — 随意书写,边写边自动保存。",
+      "newDocument": "新建文档",
+      "emptyTitle": "还没有文档",
+      "emptyHint": "创建你的第一个文档,开始写作。",
+      "untitled": "无标题",
+      "titlePlaceholder": "无标题文档",
+      "contentPlaceholder": "开始写作…",
+      "saving": "保存中…",
+      "saved": "已保存",
+      "saveError": "保存失败",
+      "backToDocuments": "文档",
+      "deleteLabel": "文档",
+      "bold": "加粗",
+      "italic": "斜体",
+      "heading1": "标题 1",
+      "heading2": "标题 2",
+      "bulletList": "项目符号列表"
     },
     "chat": {
       "title": "Ionexa 对话"

@@ -106,6 +106,11 @@
     "businessTitle": "Business",
     "businessSubtitle": "Per team che costruiscono insieme",
     "businessExplanation": "Scegli Professional o Ultimate come piano base — entrambi sbloccano la collaborazione in team. Poi invita i membri del team: ognuno ottiene accesso completo al livello del tuo piano, per +{price}/membro/mese su Professional, o incluso gratuitamente su Ultimate.",
+    "businessCardDescription": "Inizia con qualsiasi piano come base per il tuo team, poi invita membri per +{price}/mese ciascuno — tutti ottengono accesso completo al livello del tuo piano. Perfetto per i team che lavorano insieme.",
+    "businessFeatureBase": "Scegli Professional o Ultimate come piano base",
+    "businessFeatureFullAccess": "Ogni membro ottiene accesso completo al livello del tuo piano",
+    "businessFeatureFreeOnUltimate": "Posti team inclusi gratuitamente con Ultimate",
+    "businessFeatureManage": "Gestisci i posti in qualsiasi momento dalle impostazioni Team",
     "setUpTeam": "Configura Team"
   },
   "roadmap": {
@@ -424,6 +429,26 @@
     "memory": {
       "title": "Memoria AI",
       "description": "Cerca tutto ciò che hai registrato, in ogni modulo — senza dover ricordare dove l'hai messo."
+    },
+    "documents": {
+      "title": "Documenti",
+      "description": "Note e documenti liberi — scrivi quello che vuoi, si salva mentre scrivi.",
+      "newDocument": "Nuovo Documento",
+      "emptyTitle": "Nessun documento ancora",
+      "emptyHint": "Crea il tuo primo documento per iniziare a scrivere.",
+      "untitled": "Senza titolo",
+      "titlePlaceholder": "Documento senza titolo",
+      "contentPlaceholder": "Inizia a scrivere…",
+      "saving": "Salvataggio…",
+      "saved": "Salvato",
+      "saveError": "Salvataggio non riuscito",
+      "backToDocuments": "Documenti",
+      "deleteLabel": "documento",
+      "bold": "Grassetto",
+      "italic": "Corsivo",
+      "heading1": "Titolo 1",
+      "heading2": "Titolo 2",
+      "bulletList": "Elenco puntato"
     },
     "chat": {
       "title": "Ionexa Chat"

@@ -1,4 +1,5 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { diagLog } from "@/lib/diag";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
@@ -42,12 +43,9 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   if (isDashboardPath) {
-    // eslint-disable-next-line no-console
-    console.error(
-      `[middleware-diag] ${request.nextUrl.pathname} at ${new Date().toISOString()} -> user=${
+    diagLog(`[middleware-diag] ${request.nextUrl.pathname} at ${new Date().toISOString()} -> user=${
         user?.id ?? "null"
-      } error=${middlewareUserError?.message ?? "none"} cookieRefreshed=${cookieRefreshHappened}`
-    );
+      } error=${middlewareUserError?.message ?? "none"} cookieRefreshed=${cookieRefreshHappened}`);
   }
 
   const isAuthRoute =

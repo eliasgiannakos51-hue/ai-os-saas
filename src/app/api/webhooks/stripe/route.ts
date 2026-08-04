@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { diagLog } from "@/lib/diag";
 import type Stripe from "stripe";
 import { createStripeClient } from "@/lib/stripe/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -51,10 +52,7 @@ async function syncSubscriptionToUser(
   // Stripe/Supabase to reproduce a real webhook delivery directly, so this
   // traces exactly what the live webhook resolves once deployed. Safe to
   // remove once confirmed.
-  // eslint-disable-next-line no-console
-  console.error(
-    `[webhook-diag] syncSubscriptionToUser start subscriptionId=${subscriptionId} customerId=${customerId} customerMetadataUserId=${customer.metadata?.supabase_user_id ?? "none"} fallbackSupabaseUserId=${fallbackSupabaseUserId ?? "none"}`
-  );
+  diagLog(`[webhook-diag] syncSubscriptionToUser start subscriptionId=${subscriptionId} customerId=${customerId} customerMetadataUserId=${customer.metadata?.supabase_user_id ?? "none"} fallbackSupabaseUserId=${fallbackSupabaseUserId ?? "none"}`);
 
   let supabaseUserId = customer.metadata?.supabase_user_id;
   if (!supabaseUserId && fallbackSupabaseUserId) {
@@ -115,10 +113,7 @@ async function syncSubscriptionToUser(
   if (updateError) {
     logApiError("/api/webhooks/stripe", updateError, { stage: "update_user", supabaseUserId });
   }
-  // eslint-disable-next-line no-console
-  console.error(
-    `[webhook-diag] syncSubscriptionToUser result supabaseUserId=${supabaseUserId} planSlug=${planSlug} isActive=${isActive} seatCount=${seatCount} updateError=${updateError?.message ?? "none"}`
-  );
+  diagLog(`[webhook-diag] syncSubscriptionToUser result supabaseUserId=${supabaseUserId} planSlug=${planSlug} isActive=${isActive} seatCount=${seatCount} updateError=${updateError?.message ?? "none"}`);
 
   // Resets the credit balance to the (new) plan's monthly allotment — same
   // call on a brand-new subscription, a plan change, a cancellation (falls
@@ -160,10 +155,7 @@ export async function POST(request: Request) {
   // dashboard webhook-URL/deploy config issue), which would explain "the
   // whole flow doesn't work" far more broadly than anything in this
   // route's own logic could.
-  // eslint-disable-next-line no-console
-  console.error(
-    `[webhook-diag] POST received hasSecret=${Boolean(webhookSecret)} hasSignature=${Boolean(signature)}`
-  );
+  diagLog(`[webhook-diag] POST received hasSecret=${Boolean(webhookSecret)} hasSignature=${Boolean(signature)}`);
 
   if (!webhookSecret || !signature) {
     return NextResponse.json({ error: "Webhook not configured." }, { status: 500 });
@@ -180,8 +172,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid signature." }, { status: 400 });
   }
 
-  // eslint-disable-next-line no-console
-  console.error(`[webhook-diag] event verified type=${event.type} id=${event.id}`);
+  diagLog(`[webhook-diag] event verified type=${event.type} id=${event.id}`);
 
   try {
     switch (event.type) {

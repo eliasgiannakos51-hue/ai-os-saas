@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { diagLog } from "@/lib/diag";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createStripeClient } from "@/lib/stripe/server";
@@ -110,10 +111,7 @@ export async function POST(request: Request) {
     // shape right before Stripe is called, since this sandbox has no
     // network path to api.stripe.com to reproduce it directly. Safe to
     // remove once confirmed live.
-    // eslint-disable-next-line no-console
-    console.error(
-      `[checkout-diag] plan=${plan} userId=${user.id} successPath=${successPath} needsPaidTeamSeats=${needsPaidTeamSeats} teamSeatPriceId=${maskEnvVar(teamSeatPriceId)} planPriceId=${maskEnvVar(planPriceId)}`
-    );
+    diagLog(`[checkout-diag] plan=${plan} userId=${user.id} successPath=${successPath} needsPaidTeamSeats=${needsPaidTeamSeats} teamSeatPriceId=${maskEnvVar(teamSeatPriceId)} planPriceId=${maskEnvVar(planPriceId)}`);
 
     const stripe = createStripeClient();
 
@@ -183,10 +181,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // eslint-disable-next-line no-console
-    console.error(
-      `[checkout-diag] session created id=${session.id} url=${session.url ? "present" : "MISSING"} success_url=${session.success_url}`
-    );
+    diagLog(`[checkout-diag] session created id=${session.id} url=${session.url ? "present" : "MISSING"} success_url=${session.success_url}`);
 
     if (!session.url) {
       logApiError("/api/checkout", new Error("Checkout session has no url"), { plan });

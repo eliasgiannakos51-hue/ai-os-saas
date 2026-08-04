@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { diagLog } from "@/lib/diag";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
@@ -40,22 +41,17 @@ export default async function MissionPage() {
   // logs. Safe to remove once the root cause (see next.config.mjs's
   // staleTimes comment) is confirmed live and no longer reproduces.
   const reqId = Math.random().toString(36).slice(2, 8);
-  // eslint-disable-next-line no-console
-  console.error(`[mission-diag ${reqId}] request start at ${new Date().toISOString()}`);
+  diagLog(`[mission-diag ${reqId}] request start at ${new Date().toISOString()}`);
 
   const {
     data: { user },
     error: userError,
   } = await supabase.auth.getUser();
 
-  // eslint-disable-next-line no-console
-  console.error(
-    `[mission-diag ${reqId}] auth.getUser() -> user=${user?.id ?? "null"} error=${userError?.message ?? "none"}`
-  );
+  diagLog(`[mission-diag ${reqId}] auth.getUser() -> user=${user?.id ?? "null"} error=${userError?.message ?? "none"}`);
 
   if (!user) {
-    // eslint-disable-next-line no-console
-    console.error(`[mission-diag ${reqId}] no user, redirecting to /login`);
+    diagLog(`[mission-diag ${reqId}] no user, redirecting to /login`);
     redirect("/login");
   }
 
@@ -68,12 +64,9 @@ export default async function MissionPage() {
       .order("scheduled_for", { ascending: true }),
   ]);
 
-  // eslint-disable-next-line no-console
-  console.error(
-    `[mission-diag ${reqId}] ai_missions query -> rows=${missions?.length ?? "null"} error=${error?.message ?? "none"} ids=${
+  diagLog(`[mission-diag ${reqId}] ai_missions query -> rows=${missions?.length ?? "null"} error=${error?.message ?? "none"} ids=${
       (missions as Mission[] | null)?.map((m) => m.id.slice(0, 8)).join(",") ?? "-"
-    }`
-  );
+    }`);
 
   const pendingRuns = (scheduledRuns as ScheduledAgentRun[] | null) ?? [];
   const scheduledStepIndicesByMission: Record<string, number[]> = {};

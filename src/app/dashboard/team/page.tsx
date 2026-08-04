@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { diagLog } from "@/lib/diag";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Users } from "lucide-react";
@@ -50,10 +51,7 @@ export default async function TeamPage({
   // Stripe/Supabase to reproduce the real redirect, so this traces exactly
   // what state this page sees on each load once deployed. Safe to remove
   // once confirmed.
-  // eslint-disable-next-line no-console
-  console.error(
-    `[team-page-diag] userId=${user.id} setupParam=${searchParams?.setup ?? "none"} justSetUp=${justSetUp} tier=${tier ?? "none"} ownsSubscription=${ownsSubscription} teamCollaboration=${tier ? Boolean(getPlan(tier)?.capabilities.teamCollaboration) : "n/a"}`
-  );
+  diagLog(`[team-page-diag] userId=${user.id} setupParam=${searchParams?.setup ?? "none"} justSetUp=${justSetUp} tier=${tier ?? "none"} ownsSubscription=${ownsSubscription} teamCollaboration=${tier ? Boolean(getPlan(tier)?.capabilities.teamCollaboration) : "n/a"}`);
 
   // Team collaboration is a Professional+ capability (see
   // lib/billing/plans.ts's PlanCapabilities.teamCollaboration) and for plan
@@ -61,8 +59,7 @@ export default async function TeamPage({
   // set too, but no stripe_subscription_id of their own, so this correctly
   // excludes them.
   if (!justSetUp && (!ownsSubscription || !tier || !getPlan(tier)?.capabilities.teamCollaboration)) {
-    // eslint-disable-next-line no-console
-    console.error(`[team-page-diag] userId=${user.id} REDIRECTING to /dashboard/settings (gate failed)`);
+    diagLog(`[team-page-diag] userId=${user.id} REDIRECTING to /dashboard/settings (gate failed)`);
     redirect("/dashboard/settings");
   }
 

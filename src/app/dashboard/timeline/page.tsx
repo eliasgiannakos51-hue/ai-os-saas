@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { diagLog } from "@/lib/diag";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
@@ -31,22 +32,17 @@ export default async function TimelinePage({
   // TEMPORARY diagnostic logging — see dashboard/mission/page.tsx for why
   // (same "disappears after refresh" investigation, same query shape).
   const reqId = Math.random().toString(36).slice(2, 8);
-  // eslint-disable-next-line no-console
-  console.error(`[timeline-diag ${reqId}] request start at ${new Date().toISOString()}`);
+  diagLog(`[timeline-diag ${reqId}] request start at ${new Date().toISOString()}`);
 
   const {
     data: { user },
     error: userError,
   } = await supabase.auth.getUser();
 
-  // eslint-disable-next-line no-console
-  console.error(
-    `[timeline-diag ${reqId}] auth.getUser() -> user=${user?.id ?? "null"} error=${userError?.message ?? "none"}`
-  );
+  diagLog(`[timeline-diag ${reqId}] auth.getUser() -> user=${user?.id ?? "null"} error=${userError?.message ?? "none"}`);
 
   if (!user) {
-    // eslint-disable-next-line no-console
-    console.error(`[timeline-diag ${reqId}] no user, redirecting to /login`);
+    diagLog(`[timeline-diag ${reqId}] no user, redirecting to /login`);
     redirect("/login");
   }
 
@@ -60,10 +56,7 @@ export default async function TimelinePage({
     range,
   });
 
-  // eslint-disable-next-line no-console
-  console.error(
-    `[timeline-diag ${reqId}] loadTimelineEntries -> entries=${entries.length} moduleSlug=${moduleSlug} range=${range}`
-  );
+  diagLog(`[timeline-diag ${reqId}] loadTimelineEntries -> entries=${entries.length} moduleSlug=${moduleSlug} range=${range}`);
 
   return (
     <main className="min-h-full bg-dot-grid">

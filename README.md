@@ -103,6 +103,7 @@ touch targets) and works identically on mobile and desktop.
    BETA_INVITE_CODE=your-beta-invite-code
    BETA_FEEDBACK_URL=mailto:feedback@yourdomain.com
    UNSPLASH_ACCESS_KEY=your-unsplash-access-key
+- `IONEXA_DIAG` — optional. Set to `1` to enable verbose request tracing for the auth middleware, Stripe checkout/webhook, the team-page gate, and the Mission Control/Timeline data loads (see `src/lib/diag.ts`). Off by default: middleware runs on every request, so leaving this on writes a log line per page view. Turn it on, redeploy, reproduce the issue, read the logs, turn it off again.
    ```
 
    `.env.local` is gitignored — never commit real credentials.

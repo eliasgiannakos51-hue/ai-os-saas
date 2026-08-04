@@ -148,7 +148,7 @@ export function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-orange-500 px-4 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50"
+              className="cta-amber inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold text-black disabled:opacity-50"
             >
               {loading ? t("working") : t("logIn")}
             </button>

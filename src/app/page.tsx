@@ -63,7 +63,7 @@ export default async function Home() {
           </Link>
           <Link
             href="/signup"
-            className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-orange-500 px-6 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_20px_rgba(249,115,22,0.4)] sm:min-h-0"
+            className="cta-amber inline-flex min-h-[44px] items-center justify-center rounded-xl px-6 py-2.5 text-sm font-semibold text-black sm:min-h-0"
           >
             {t("signUp")}
           </Link>

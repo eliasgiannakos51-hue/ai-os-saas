@@ -15,13 +15,16 @@
 // meaning beyond visual texture (per explicit instruction: nothing here
 // should look like it's reporting real activity).
 //
-// `opacity` defaults to 0.18 — clearly visible (not a faint texture) but
-// still low enough that it never competes with foreground text, and is
-// deliberately the SAME value on every page that renders this (auth pages,
-// landing, pricing, roadmap, every dashboard page via dashboard/layout.tsx)
-// for consistent visual intensity across the whole app rather than the
-// auth pages reading "richer" than everywhere else.
-export function AuthBackground({ opacity = 0.18 }: { opacity?: number }) {
+// `opacity` defaults to 0.28 — raised from 0.18 so the globe is a real,
+// legible part of the page rather than a texture you have to look for,
+// while still staying well below the point where it competes with
+// foreground text (the wireframe strokes are sub-pixel-width and the
+// gradient fades to fully transparent at the rim, so even at 0.28 the
+// densest region is far dimmer than body copy). Deliberately the SAME
+// value on every page that renders this (auth pages, landing, pricing,
+// roadmap, every dashboard page via dashboard/layout.tsx) for consistent
+// visual intensity across the whole app.
+export function AuthBackground({ opacity = 0.28 }: { opacity?: number }) {
   return (
     <div
       aria-hidden="true"
@@ -54,6 +57,18 @@ export function AuthBackground({ opacity = 0.18 }: { opacity?: number }) {
             <stop offset="65%" stopColor="#f5a623" stopOpacity="0.45" />
             <stop offset="100%" stopColor="#f5a623" stopOpacity="0" />
           </radialGradient>
+
+          {/* Soft bloom around the connection dots. stdDeviation is in
+              the SVG's own 400x400 user space, so it scales with the
+              globe rather than being a fixed pixel blur — the dots keep
+              the same relative halo at every viewport size. */}
+          <filter id="globeDotGlow" x="-200%" y="-200%" width="500%" height="500%">
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
         </defs>
 
         <circle cx="200" cy="200" r="170" stroke="url(#globeGradient)" strokeWidth="0.75" />
@@ -127,7 +142,10 @@ export function AuthBackground({ opacity = 0.18 }: { opacity?: number }) {
         <line x1="200" y1="30" x2="200" y2="370" stroke="url(#globeGradient)" strokeWidth="0.5" />
 
         {/* Decorative "connection" nodes — fixed points, gentle staggered
-            pulse, no data behind them. */}
+            pulse, no data behind them. Radius raised 2.5 -> 4 and given a
+            gaussian bloom so they read as glowing nodes on the wireframe
+            rather than stray specks; that plus the higher globe opacity is
+            what makes the backdrop actually noticeable. */}
         {[
           { cx: 200, cy: 32, delay: "0s" },
           { cx: 322, cy: 140, delay: "0.6s" },
@@ -142,8 +160,9 @@ export function AuthBackground({ opacity = 0.18 }: { opacity?: number }) {
             key={`${dot.cx}-${dot.cy}`}
             cx={dot.cx}
             cy={dot.cy}
-            r="2.5"
+            r="4"
             fill="#f5a623"
+            filter="url(#globeDotGlow)"
             className="animate-pulse"
             style={{ animationDelay: dot.delay, animationDuration: "3.5s" }}
           />

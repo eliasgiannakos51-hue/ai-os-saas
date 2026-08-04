@@ -15,6 +15,7 @@ import { logApiError } from "@/lib/log-error";
 import { DashboardBackground } from "@/components/dashboard/dashboard-background";
 import { checkAndUnlockAchievements } from "@/lib/achievements";
 import { AchievementUnlockBridge } from "@/components/achievements/achievement-unlock-bridge";
+import { PageTransition } from "@/components/page-transition";
 
 export default async function DashboardLayout({
   children,
@@ -90,7 +91,12 @@ export default async function DashboardLayout({
               <Sidebar />
               <div className="flex min-w-0 flex-1 flex-col">
                 <TopNav email={user.email ?? ""} />
-                <div className="flex-1">{children}</div>
+                {/* Wraps only the page body, not the Sidebar/TopNav —
+                    the chrome must stay visually fixed while the content
+                    beneath it fades/slides in on each navigation. */}
+                <div className="flex-1">
+                  <PageTransition>{children}</PageTransition>
+                </div>
               </div>
             </div>
             <ToastContainer />

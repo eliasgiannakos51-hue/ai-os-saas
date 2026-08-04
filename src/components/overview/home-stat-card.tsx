@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { ResponsiveContainer, LineChart, Line } from "recharts";
+import { useCountUp, splitLeadingNumber } from "@/hooks/use-count-up";
 
 // Compact stat card for the top-of-Home strip (see overview/page.tsx) —
 // `trend`, when provided, is a real daily-count series (not synthetic):
@@ -31,13 +32,15 @@ export function HomeStatCard({
   const hasTrend = chartData && chartData.length > 1 && chartData.some((d) => d.count > 0);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-[linear-gradient(160deg,var(--panel)_0%,var(--panel)_65%,rgba(249,115,22,0.035)_100%)] p-4 transition-all duration-150 hover:border-orange-500/50 hover:shadow-[0_0_0_1px_rgba(249,115,22,0.15),0_8px_28px_-8px_rgba(249,115,22,0.45)]">
+    <div className="card-lift relative overflow-hidden rounded-2xl border border-border bg-[linear-gradient(160deg,var(--panel)_0%,var(--panel)_65%,rgba(249,115,22,0.035)_100%)] p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500/10 text-orange-400">
             {icon}
           </span>
-          <p className="mt-2.5 truncate text-xl font-bold text-foreground">{value}</p>
+          <p className="mt-2.5 truncate text-xl font-bold text-foreground">
+            <CountUpValue value={value} />
+          </p>
           <p className="mt-0.5 truncate text-[11px] uppercase tracking-wide text-muted">{label}</p>
         </div>
         {hasTrend && (
@@ -58,5 +61,22 @@ export function HomeStatCard({
         )}
       </div>
     </div>
+  );
+}
+
+// Counts the numeric part of an already-formatted stat up from zero on
+// mount. Values with no leading integer ("Ideas", "—", "n/a") render
+// verbatim — splitLeadingNumber returns null for those, and the hook is
+// still called unconditionally above it to keep hook order stable.
+function CountUpValue({ value }: { value: string }) {
+  const parts = splitLeadingNumber(value);
+  const animated = useCountUp(parts?.number ?? 0);
+  if (!parts) return <>{value}</>;
+  return (
+    <>
+      {parts.prefix}
+      {animated.toLocaleString()}
+      {parts.suffix}
+    </>
   );
 }

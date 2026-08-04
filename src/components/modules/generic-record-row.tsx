@@ -190,7 +190,7 @@ export function GenericRecordRow({
   const headline = String(record[module.headlineKey] ?? "untitled");
 
   return (
-    <div className="group rounded-2xl border border-border bg-[linear-gradient(160deg,var(--panel)_0%,var(--panel)_65%,rgba(249,115,22,0.035)_100%)] p-4 transition-all duration-200 hover:border-orange-500/40 hover:shadow-[0_14px_32px_-18px_rgba(249,115,22,0.3)]">
+    <div className="card-lift card-lift-row group rounded-2xl border border-border bg-[linear-gradient(160deg,var(--panel)_0%,var(--panel)_65%,rgba(249,115,22,0.035)_100%)] p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <h3 className="text-[15px] font-semibold tracking-tight text-foreground">
           {record[module.headlineKey] ?? "untitled"}

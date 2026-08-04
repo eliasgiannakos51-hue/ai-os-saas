@@ -203,6 +203,128 @@ input:-webkit-autofill:focus {
   transition: background-color 5000s ease-in-out 0s;
 }
 
+/* ---------------------------------------------------------------------
+   Motion / depth primitives
+   ---------------------------------------------------------------------
+   Defined once here (rather than repeated as long arbitrary-value
+   Tailwind strings across ~40 components) so the app's "visual intensity"
+   is a handful of values in one file. Every rule below is purely
+   decorative — no layout, no functionality — and all of it collapses to
+   static under html[data-motion="reduce"], which zeroes animation and
+   transition durations globally via the `*` rule above.
+   --------------------------------------------------------------------- */
+
+/* Route-level entrance: 300ms fade + 20px rise. Applied by
+   components/page-transition.tsx, which remounts on every pathname
+   change so the animation actually re-runs per navigation (a CSS
+   animation only plays on mount, not when props change). */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.page-enter {
+  animation: page-enter 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Skeleton loading shimmer — a light band sweeping left-to-right across
+   the placeholder block. Replaces the flat `animate-pulse` opacity fade
+   used previously: a pulse reads as "something is broken and blinking",
+   a sweep reads as "content is on its way". The base color is a
+   translucent white/amber so it works on every theme's panel color
+   without needing a per-theme variant. */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -180% 0;
+  }
+  100% {
+    background-position: 180% 0;
+  }
+}
+.skeleton {
+  background-color: rgba(255, 255, 255, 0.045);
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(249, 115, 22, 0.09) 45%,
+    rgba(255, 255, 255, 0.11) 50%,
+    rgba(249, 115, 22, 0.09) 55%,
+    transparent 100%
+  );
+  background-size: 180% 100%;
+  background-repeat: no-repeat;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+[data-theme="light"] .skeleton {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Card hover lift — the single shared "this is interactive" affordance
+   for every entry/record/stat card. scale(1.02) is deliberately larger
+   than the 1.015 used before, and the shadow is a real amber glow rather
+   than a neutral drop shadow, so hovering reads as the brand accent
+   lighting the card rather than just a generic elevation change.
+   `will-change: transform` keeps the scale on the compositor so a long
+   list of cards doesn't repaint on hover. */
+.card-lift {
+  transition-property: transform, box-shadow, border-color, background-color;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  transition-duration: 200ms;
+}
+.card-lift:hover {
+  transform: scale(1.02);
+  border-color: rgba(249, 115, 22, 0.5);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.25), 0 14px 36px -12px rgba(249, 115, 22, 0.55);
+  will-change: transform;
+}
+/* Rows inside a dense list scale less — a full 1.02 on a full-width row
+   visibly overlaps its neighbours. Same glow, smaller displacement. */
+.card-lift-row:hover {
+  transform: scale(1.008);
+}
+
+/* Primary call-to-action: amber to a deeper orange, plus a permanent
+   soft glow that intensifies on hover. Used for the highest-intent
+   button on a page (Log In, Create account, hero CTA) — deliberately NOT
+   every orange button, so "the gradient one" stays meaningful. */
+.cta-amber {
+  background-image: linear-gradient(135deg, #fbbf24 0%, #f97316 55%, #ea580c 100%);
+  box-shadow: 0 4px 18px -4px rgba(249, 115, 22, 0.45);
+  transition-property: box-shadow, transform, filter;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  transition-duration: 200ms;
+}
+.cta-amber:hover:not(:disabled) {
+  box-shadow: 0 6px 28px -4px rgba(249, 115, 22, 0.7);
+  filter: brightness(1.06);
+}
+
+/* Success confirmation flash — a one-shot green-into-amber ring pulse
+   for "it worked" moments (a saved record, a completed action). One
+   shot only: a repeating success indicator becomes noise. */
+@keyframes success-flash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55);
+  }
+  45% {
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+  46% {
+    box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 10px rgba(249, 115, 22, 0);
+  }
+}
+.success-flash {
+  animation: success-flash 900ms ease-out 1;
+}
+
 /* Very faint dot-grid texture for module/list pages — purely decorative,
    fixed 24px spacing so it doesn't shift/moiré with page content, dot
    opacity low enough (0.05) that it reads as paper texture rather than a

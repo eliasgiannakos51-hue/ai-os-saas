@@ -1,5 +1,6 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
+import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 
 const MISSION_MODEL = "claude-sonnet-4-6";
 const MIN_STEPS = 4;
@@ -29,7 +30,8 @@ const PLANNER_SYSTEM_PROMPT = `Είσαι ο Planner Agent. Ανάλυσε το�
 
 Αν ο στόχος είναι ΤΟΣΟ γενικός/ασαφής (π.χ. "θέλω να πετύχω", "θέλω να γίνω πλούσιος", "καλύτερη ζωή") που δεν μπορείς να τον αναλύσεις σε πραγματικά, συγκεκριμένα βήματα χωρίς να επινοήσεις γενικόλογα/κενά βήματα, ΜΗΝ επινοήσεις βήματα — αντ' αυτού ζήτησε μία σύντομη, φιλική διευκρίνιση για το τι συγκεκριμένα θέλει να πετύχει.
 
-ΜΗΝ επινοείς συγκεκριμένα πραγματικά στοιχεία (ακριβή νούμερα, ημερομηνίες, τιμές, ονόματα) που δεν δόθηκαν από τον χρήστη και δεν προκύπτουν λογικά από τον στόχο — αν ένα βήμα χρειάζεται τέτοιο στοιχείο, διατύπωσέ το ως ενέργεια απόφασης/έρευνας (π.χ. "Καθόρισε τον προϋπολογισμό εκκίνησης" αντί για ένα εφευρημένο ποσό).`;
+ΜΗΝ επινοείς συγκεκριμένα πραγματικά στοιχεία (ακριβή νούμερα, ημερομηνίες, τιμές, ονόματα) που δεν δόθηκαν από τον χρήστη και δεν προκύπτουν λογικά από τον στόχο — αν ένα βήμα χρειάζεται τέτοιο στοιχείο, διατύπωσέ το ως ενέργεια απόφασης/έρευνας (π.χ. "Καθόρισε τον προϋπολογισμό εκκίνησης" αντί για ένα εφευρημένο ποσό).
+${AI_QUALITY_CHECKLIST_EL}`;
 
 const PLAN_MISSION_TOOL: Anthropic.Tool = {
   name: "create_plan",
@@ -146,7 +148,8 @@ export async function planMission(apiKey: string, goal: string, userContext = ""
 // Reviewer Agent — looks at what was actually built for a mission (not
 // just the plan) and gives a short, plain-text evaluation. No tool use
 // needed here since the output is prose, not structured data.
-const REVIEWER_SYSTEM_PROMPT = `Είσαι ο Reviewer Agent. Θα σου δοθεί ο στόχος ενός χρήστη και τα βήματα/εγγραφές που δημιουργήθηκαν γι' αυτόν. Δώσε σύντομη αξιολόγηση (3-5 προτάσεις ή σύντομα bullet points): τι πήγε καλά, τι λείπει, και ποιο είναι το επόμενο λογικό βήμα. Απάντα στην ίδια γλώσσα που είναι γραμμένος ο στόχος. Χρησιμοποίησε markdown formatting (λίστες, bold) όπου βοηθάει.`;
+const REVIEWER_SYSTEM_PROMPT = `Είσαι ο Reviewer Agent. Θα σου δοθεί ο στόχος ενός χρήστη και τα βήματα/εγγραφές που δημιουργήθηκαν γι' αυτόν. Δώσε σύντομη αξιολόγηση (3-5 προτάσεις ή σύντομα bullet points): τι πήγε καλά, τι λείπει, και ποιο είναι το επόμενο λογικό βήμα. Απάντα στην ίδια γλώσσα που είναι γραμμένος ο στόχος. Χρησιμοποίησε markdown formatting (λίστες, bold) όπου βοηθάει.
+${AI_QUALITY_CHECKLIST_EL}`;
 
 export async function reviewMission(
   apiKey: string,

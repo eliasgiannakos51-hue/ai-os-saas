@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { applyExactReplace } from "@/lib/website-patch";
+import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 
 const MODEL = "claude-sonnet-4-6";
 const CLASSIFY_MAX_TOKENS = 300;
@@ -243,6 +244,12 @@ You have access to a real web search tool. Use it when the description implies t
 // moved on while writing everything else. This is the LAST section in
 // the system prompt on purpose — it's meant to be the last instruction
 // in context right before the model starts producing its final answer.
+// Layered on top of (not a replacement for) AI_QUALITY_CHECKLIST_EN
+// below, which is the same shared instruction every other AI-generation
+// feature in this app also gets — this section is the website-specific
+// elaboration of that same checklist's rule 1 (sections/photos/colors/
+// copy/contact details are exactly the kinds of "specific things asked
+// for" a website description tends to contain).
 const FINAL_SELF_CHECK_SECTION = `
 FINAL SELF-CHECK (do this before you output anything):
 Before returning the final HTML, re-read the user's original description line by line and confirm every specific thing it asked for is actually present in what you're about to output — every named section, every specific requested photo (see IMAGES above), every color/style preference, every specific piece of text/copy given verbatim, every named contact detail. If anything is missing, add it now before returning your answer. Do not return a final answer you haven't checked this way.`;
@@ -268,7 +275,8 @@ ${IMAGE_RULES_HEADER}
 ${WEB_SEARCH_SECTION}
 ${FUNCTIONAL_ELEMENTS_SECTION}
 ${PLACEHOLDER_DATA_SECTION}
-${FINAL_SELF_CHECK_SECTION}`;
+${FINAL_SELF_CHECK_SECTION}
+${AI_QUALITY_CHECKLIST_EN}`;
 
 // Strips a leading/trailing markdown code fence if the model wrapped its
 // output in one despite the system prompt saying not to — Claude does this
@@ -486,7 +494,8 @@ ${WEB_SEARCH_SECTION}
 ${FUNCTIONAL_ELEMENTS_SECTION}
 ${PLACEHOLDER_DATA_SECTION}
 If the change request asks to add a photo, a font, an animation, contact info, or a form, apply the same rules above as if generating fresh — e.g. a newly-requested photo still uses the PLACEHOLDER convention (or a newly-attached reference image's real URL) rather than an invented link.
-${FINAL_SELF_CHECK_SECTION}`;
+${FINAL_SELF_CHECK_SECTION}
+${AI_QUALITY_CHECKLIST_EN}`;
 
 // Same prompt-caching split as buildGenerateSystemBlocks above — the
 // (large, fully static) EDIT_SYSTEM_PROMPT gets its own cache_control

@@ -4,8 +4,8 @@ import type Stripe from "stripe";
 import { createStripeClient } from "@/lib/stripe/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getPlanSlugFromPriceId, getTeamSeatPriceId } from "@/lib/billing/price-ids";
-import type { PlanSlug } from "@/lib/billing/plans";
-import { grantCredits, syncCreditsForPlan } from "@/lib/billing/credits";
+import { getCreditPack, creditPackPriceEurPerCredit, type PlanSlug } from "@/lib/billing/plans";
+import { grantCredits, syncCreditsForPlan, recordPackPurchaseRate } from "@/lib/billing/credits";
 import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
@@ -144,6 +144,16 @@ async function grantPurchasedCredits(session: Stripe.Checkout.Session) {
   }
 
   await grantCredits(supabaseUserId, creditAmount, "purchase", `Purchased ${packId} credit pack`);
+
+  // Packs sell credits below list price (€100 / 8,000 = €0.0125 each).
+  // Persist the rate so settlement charges against what was actually paid
+  // instead of the €0.02 list price — otherwise the 4x multiplier collapses
+  // to 2.5x on the biggest pack. Derived from the pack catalogue, not from
+  // the session amount, so a Stripe-side price edit can't silently move it.
+  const pack = getCreditPack(packId);
+  if (pack) {
+    await recordPackPurchaseRate(supabaseUserId, creditPackPriceEurPerCredit(pack));
+  }
 }
 
 export async function POST(request: Request) {

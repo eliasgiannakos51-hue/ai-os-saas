@@ -2,6 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { hasActiveBetaBypass, isBetaTester } from "@/lib/beta";
+import { diagLog } from "@/lib/diag";
 import { getPlan, type Plan, type PlanSlug } from "./plans";
 
 // The plan a user is on lives in user_metadata.subscription_tier, written
@@ -167,13 +168,15 @@ export async function deductCredits(
   const ok = Boolean(result?.ok);
   const remaining = typeof result?.remaining === "number" ? result.remaining : 0;
 
-  console.error("CREDITS CHECK:", {
-    userId,
-    actionType,
-    actionCost: amount,
-    comparisonResult: ok ? "sufficient" : "insufficient",
-    remainingAfter: remaining,
-  });
+  diagLog(
+    `CREDITS CHECK: ${JSON.stringify({
+      userId,
+      actionType,
+      actionCost: amount,
+      comparisonResult: ok ? "sufficient" : "insufficient",
+      remainingAfter: remaining,
+    })}`
+  );
 
   if (!ok) {
     return { ok: false, remaining };
@@ -226,6 +229,62 @@ export async function grantCredits(
   await admin
     .from("credit_transactions")
     .insert({ user_id: userId, amount, action_type: actionType, description });
+}
+
+// The cheapest euro-per-credit rate this account has ever bought a credit
+// pack at, or null if it has never bought one. Settlement divides by
+// min(list price, plan rate, this) so the margin multiplier holds against
+// what the customer actually paid — see credit-formula.ts.
+//
+// Both of these degrade to a no-op rather than throwing if the column is
+// missing (the migration hasn't been applied yet): a settlement that falls
+// back to the plan rate charges the pre-existing amount, which is the
+// current behaviour, whereas a thrown error would break billing outright.
+export async function getPurchasedPackCreditPriceEur(userId: string): Promise<number | null> {
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin
+      .from("user_credits")
+      .select("min_pack_credit_price_eur")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error) {
+      logApiError("getPurchasedPackCreditPriceEur", error, { userId });
+      return null;
+    }
+    const raw = (data as { min_pack_credit_price_eur?: number | string | null } | null)
+      ?.min_pack_credit_price_eur;
+    const value = typeof raw === "string" ? Number(raw) : raw;
+    return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
+  } catch (err) {
+    logApiError("getPurchasedPackCreditPriceEur", err, { userId, stage: "unhandled" });
+    return null;
+  }
+}
+
+/**
+ * Records the rate of a pack the user just bought, keeping the running
+ * MINIMUM. Minimum, not latest: buying a small pack after a big one must
+ * not erase the cheap credits the big one already put in the balance —
+ * credits are fungible, so the cheapest rate in play is the only safe
+ * basis for the charge.
+ */
+export async function recordPackPurchaseRate(userId: string, pricePerCreditEur: number): Promise<void> {
+  if (!Number.isFinite(pricePerCreditEur) || pricePerCreditEur <= 0) return;
+  try {
+    const existing = await getPurchasedPackCreditPriceEur(userId);
+    const next = existing === null ? pricePerCreditEur : Math.min(existing, pricePerCreditEur);
+    if (existing !== null && next === existing) return;
+
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from("user_credits")
+      .update({ min_pack_credit_price_eur: next })
+      .eq("user_id", userId);
+    if (error) logApiError("recordPackPurchaseRate", error, { userId, pricePerCreditEur });
+  } catch (err) {
+    logApiError("recordPackPurchaseRate", err, { userId, stage: "unhandled" });
+  }
 }
 
 // Resets credits_remaining back to credits_total — used by the monthly

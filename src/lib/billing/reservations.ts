@@ -3,11 +3,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import {
-  creditsForRealCostOnPlan,
   usdToEur,
-  achievedMarginOnPlan,
-  effectiveCreditPriceEur,
+  creditsForRealCostOnAccount,
+  achievedMarginOnAccount,
+  effectiveCreditPriceEurForAccount,
 } from "@/lib/billing/credit-formula";
+import { getPurchasedPackCreditPriceEur } from "@/lib/billing/credits";
 import type { Plan } from "@/lib/billing/plans";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 
@@ -126,8 +127,21 @@ export async function settleReservation(params: {
   const totals = costs.totals();
   const realCostUsd = totals.usdCost;
   const realCostEur = usdToEur(realCostUsd, config);
-  const creditsCharged = bypassCharge ? 0 : creditsForRealCostOnPlan(realCostEur, plan, config);
-  const margin = bypassCharge ? null : achievedMarginOnPlan(creditsCharged, realCostEur, plan, config);
+
+  // A one-time credit pack sells credits below both the list price AND the
+  // plan rate (€100 / 8,000 = €0.0125 each), so an account that bought one
+  // has to be charged against THAT rate or the multiplier silently drops to
+  // 2.5x. Null for every account that never bought a pack, which leaves the
+  // plan-only behaviour exactly as it was.
+  const packPriceEur = bypassCharge ? null : await getPurchasedPackCreditPriceEur(userId);
+  const effectivePrice = effectiveCreditPriceEurForAccount(plan, packPriceEur, config);
+
+  const creditsCharged = bypassCharge
+    ? 0
+    : creditsForRealCostOnAccount(realCostEur, plan, packPriceEur, config);
+  const margin = bypassCharge
+    ? null
+    : achievedMarginOnAccount(creditsCharged, realCostEur, plan, packPriceEur, config);
 
   try {
     const admin = createAdminClient();
@@ -149,7 +163,12 @@ export async function settleReservation(params: {
       p_margin_multiplier: config.marginMultiplier,
       p_achieved_margin: margin,
       p_stage_breakdown: costs.breakdownByStage(),
-      p_metadata: { ...metadata, planSlug: plan?.slug ?? null, effectiveCreditPriceEur: effectiveCreditPriceEur(plan, config) },
+      p_metadata: {
+        ...metadata,
+        planSlug: plan?.slug ?? null,
+        effectiveCreditPriceEur: effectivePrice,
+        packCreditPriceEur: packPriceEur,
+      },
     });
     if (error) {
       logApiError("billing:settleReservation", error, { userId, feature, creditsCharged });

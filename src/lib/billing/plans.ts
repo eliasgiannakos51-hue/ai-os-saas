@@ -249,3 +249,15 @@ export const CREDIT_PACKS: { id: CreditPackId; price: number; credits: number }[
 export function getCreditPack(id: string): { id: CreditPackId; price: number; credits: number } | undefined {
   return CREDIT_PACKS.find((p) => p.id === id);
 }
+
+/**
+ * What one credit from this pack actually cost the buyer, in EUR. Settlement
+ * divides by this (via effectiveCreditPriceEurForAccount) instead of the
+ * €0.02 list price, so the margin multiplier holds on the money that was
+ * really paid — the bulk discount on the big packs is otherwise taken
+ * straight out of margin. See credit-formula.ts for the full derivation.
+ */
+export function creditPackPriceEurPerCredit(pack: { price: number; credits: number }): number {
+  if (pack.credits <= 0) return 0;
+  return pack.price / pack.credits;
+}

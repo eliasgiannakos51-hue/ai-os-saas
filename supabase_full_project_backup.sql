@@ -952,6 +952,20 @@ create table if not exists public.user_credits (
 -- fall back to Free automatically, with no manual/cron step required.
 alter table public.user_credits add column if not exists beta_expires_at timestamptz;
 
+-- The cheapest euro-per-credit rate this account has ever bought a ONE-TIME
+-- CREDIT PACK at, or null if it never bought one. Packs are sold in bulk
+-- below the €0.02 list price (€100 / 8,000 credits = €0.0125 each), so
+-- charging an action at the list price would silently drop the margin
+-- multiplier from 4.00x to 2.50x for anyone holding pack credits.
+-- Settlement divides by min(list price, plan rate, this) — see
+-- effectiveCreditPriceEurForAccount in lib/billing/credit-formula.ts.
+-- Written by recordPackPurchaseRate (lib/billing/credits.ts) from the
+-- Stripe webhook's pack grant, kept as a running MINIMUM because credits
+-- are fungible once granted: a later small pack must not erase the cheap
+-- credits an earlier big pack already put in the balance.
+alter table public.user_credits
+  add column if not exists min_pack_credit_price_eur numeric(12, 8);
+
 alter table public.user_credits enable row level security;
 
 drop policy if exists "select_own_user_credits" on public.user_credits;

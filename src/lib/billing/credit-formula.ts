@@ -146,3 +146,94 @@ export function achievedMarginOnPlan(
   if (!Number.isFinite(realCostEur) || realCostEur <= 0) return null;
   return (creditsCharged * effectiveCreditPriceEur(plan, c)) / realCostEur;
 }
+
+// ---------------------------------------------------------------------
+// One-time credit packs — the same leak as plans, through a second door.
+// ---------------------------------------------------------------------
+//
+// The plan fix above closed the subscription side. Credit packs reopen it,
+// because they are also sold in bulk below the list price:
+//
+//   credits_10      500 credits / €10   = €0.0200 per credit  -> 4.00x
+//   credits_25    1,500 credits / €25   = €0.0167 per credit  -> 3.33x
+//   credits_50    3,500 credits / €50   = €0.0143 per credit  -> 2.86x
+//   credits_100   8,000 credits / €100  = €0.0125 per credit  -> 2.50x
+//
+// A Free user who buys the €100 pack holds 8,000 credits that cost them
+// €0.0125 each. Charging them `cost x M / 0.02` yields a nominal 4x and a
+// real 2.5x — money lost on every action, exactly as on Ultimate before.
+//
+// The rule is the same one that fixed plans, applied to whichever source
+// the credits could have come from: divide by the CHEAPEST euro-per-credit
+// rate the account has access to. Cheapest, not "most recent", because
+// credits are fungible once granted — the balance is one number, and there
+// is no lot accounting that could tell a plan credit from a pack credit at
+// spend time. Taking the minimum is the only choice that cannot
+// under-charge, whichever credits the user is actually burning.
+
+/** Euro-per-credit of any bulk source (a plan month, a one-time pack). */
+export function perCreditPriceEur(
+  source: { price: number | "custom"; credits: number | "custom" } | null | undefined
+): number | null {
+  if (!source) return null;
+  if (typeof source.price !== "number" || typeof source.credits !== "number") return null;
+  if (source.price <= 0 || source.credits <= 0) return null;
+  if (!Number.isFinite(source.price) || !Number.isFinite(source.credits)) return null;
+  return source.price / source.credits;
+}
+
+/**
+ * The rate settlement must divide by for a given account: the minimum of
+ * the list price, the plan's own rate, and the rate of the cheapest pack
+ * the account has bought.
+ *
+ * `purchasedPackPriceEur` is the persisted running minimum over that
+ * account's pack purchases (user_credits.min_pack_credit_price_eur, written
+ * by grantCredits on every pack grant). Null/absent for the overwhelming
+ * majority of accounts, which never buy a pack — they fall through to
+ * exactly the plan behaviour that already shipped.
+ */
+export function effectiveCreditPriceEurForAccount(
+  plan: { price: number | "custom"; monthlyCredits: number | "custom" } | null | undefined,
+  purchasedPackPriceEur: number | null | undefined,
+  config?: PricingConfig
+): number {
+  const c = config ?? resolvePricingConfig();
+  const planRate = effectiveCreditPriceEur(plan, c);
+  if (
+    typeof purchasedPackPriceEur !== "number" ||
+    !Number.isFinite(purchasedPackPriceEur) ||
+    purchasedPackPriceEur <= 0
+  ) {
+    return planRate;
+  }
+  return Math.min(planRate, purchasedPackPriceEur);
+}
+
+export function creditsForRealCostOnAccount(
+  realCostEur: number,
+  plan: { price: number | "custom"; monthlyCredits: number | "custom" } | null | undefined,
+  purchasedPackPriceEur: number | null | undefined,
+  config?: PricingConfig
+): number {
+  const c = config ?? resolvePricingConfig();
+  if (!Number.isFinite(realCostEur) || realCostEur <= 0) return 0;
+  return Math.ceil(
+    (realCostEur * c.marginMultiplier) /
+      effectiveCreditPriceEurForAccount(plan, purchasedPackPriceEur, c)
+  );
+}
+
+export function achievedMarginOnAccount(
+  creditsCharged: number,
+  realCostEur: number,
+  plan: { price: number | "custom"; monthlyCredits: number | "custom" } | null | undefined,
+  purchasedPackPriceEur: number | null | undefined,
+  config?: PricingConfig
+): number | null {
+  const c = config ?? resolvePricingConfig();
+  if (!Number.isFinite(realCostEur) || realCostEur <= 0) return null;
+  return (
+    (creditsCharged * effectiveCreditPriceEurForAccount(plan, purchasedPackPriceEur, c)) / realCostEur
+  );
+}

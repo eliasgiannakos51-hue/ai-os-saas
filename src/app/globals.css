@@ -496,3 +496,192 @@ input:-webkit-autofill:focus {
 .celebration-pop {
   animation: celebration-pop 900ms cubic-bezier(0.22, 1, 0.36, 1) 1;
 }
+
+/* ---------------------------------------------------------------------
+   V6 "premium" primitives
+   ---------------------------------------------------------------------
+   Amber is the brand accent and stays dominant; violet is a SECONDARY
+   accent used only in gradients, never alone, so the palette reads as
+   one family rather than two competing brands.
+--------------------------------------------------------------------- */
+
+/* Hero headline: white through amber into violet. background-clip:text
+   needs a transparent fill to show through, and -webkit- prefixes are
+   still required for Safari/iOS. */
+.hero-gradient-text {
+  background-image: linear-gradient(100deg, #ffffff 0%, #ffd9a0 28%, #f97316 58%, #a855f7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+/* Light theme needs a darker first stop or the left of the headline
+   disappears into the page. */
+[data-theme="light"] .hero-gradient-text {
+  background-image: linear-gradient(100deg, #18181b 0%, #b45309 32%, #ea580c 62%, #7e22ce 100%);
+}
+
+/* Premium glass card. The gradient border is a ::before ring drawn with
+   `mask` compositing rather than `border-image`: border-image can't do
+   rounded corners, and a plain 1px border can only be one flat color.
+   The two masks (one padding-box, one border-box) subtract the inner
+   area, leaving only the 1px rim painted with the gradient. */
+.glass-card {
+  position: relative;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.018) 55%, rgba(249, 115, 22, 0.05) 100%);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  box-shadow: 0 10px 34px -18px rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
+  transition-property: transform, box-shadow, background;
+  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  transition-duration: 250ms;
+}
+.glass-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(140deg, rgba(249, 115, 22, 0.55) 0%, rgba(255, 255, 255, 0.09) 42%, rgba(168, 85, 247, 0.42) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  transition: opacity 250ms ease;
+  opacity: 0.75;
+}
+.glass-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 18px 46px -18px rgba(249, 115, 22, 0.5), 0 0 30px -6px rgba(168, 85, 247, 0.22),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.07);
+}
+.glass-card:hover::before {
+  opacity: 1;
+}
+[data-theme="light"] .glass-card {
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.72) 100%);
+  box-shadow: 0 10px 30px -20px rgba(0, 0, 0, 0.35);
+}
+
+/* Non-interactive glass — same surface, no hover lift. For panels that
+   aren't clickable, where a scale on hover would imply an affordance
+   that isn't there. */
+.glass-panel {
+  position: relative;
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.016) 60%, rgba(249, 115, 22, 0.04) 100%);
+  backdrop-filter: blur(14px) saturate(130%);
+  -webkit-backdrop-filter: blur(14px) saturate(130%);
+  box-shadow: 0 10px 34px -18px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+}
+.glass-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(140deg, rgba(249, 115, 22, 0.4) 0%, rgba(255, 255, 255, 0.07) 45%, rgba(168, 85, 247, 0.3) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+[data-theme="light"] .glass-panel {
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.75) 100%);
+}
+
+/* The main prompt box. Idle: a slowly drifting amber/violet rim. Active
+   (`data-active="true"`, set by the component when the field has focus
+   or content): the gradient speeds up, brightens, and gains an outer
+   halo — the page's single brightest element while you're typing.
+   The rim is again a masked ::before ring so it can be a gradient AND
+   follow the rounded corners. */
+@keyframes prompt-border-drift {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+.prompt-glow {
+  position: relative;
+  border-radius: 1rem;
+  transition: box-shadow 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 0 22px -8px rgba(249, 115, 22, 0.5);
+}
+.prompt-glow::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(90deg, #f97316, #fbbf24, #a855f7, #f97316);
+  background-size: 200% 100%;
+  animation: prompt-border-drift 9s linear infinite;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.62;
+  transition: opacity 300ms ease;
+}
+.prompt-glow[data-active="true"] {
+  box-shadow: 0 0 46px -6px rgba(249, 115, 22, 0.65), 0 0 70px -14px rgba(168, 85, 247, 0.45);
+}
+.prompt-glow[data-active="true"]::before {
+  opacity: 1;
+  animation-duration: 3.5s;
+}
+
+/* Ambient corner lighting for the app shell — four soft radial pools
+   that keep the corners from reading as dead black. Fixed, behind
+   everything, never interactive. */
+.ambient-corners {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(60rem 40rem at 0% 0%, rgba(249, 115, 22, 0.09), transparent 60%),
+    radial-gradient(55rem 38rem at 100% 0%, rgba(168, 85, 247, 0.075), transparent 60%),
+    radial-gradient(55rem 38rem at 0% 100%, rgba(168, 85, 247, 0.055), transparent 60%),
+    radial-gradient(60rem 40rem at 100% 100%, rgba(249, 115, 22, 0.07), transparent 60%);
+}
+
+/* Sparklines draw themselves in on mount by animating the dash offset
+   from "fully hidden" to zero. `pathLength="1"` on the <path> normalises
+   the geometry so one keyframe works for any line shape. */
+@keyframes draw-line {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.draw-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw-line 1100ms cubic-bezier(0.22, 1, 0.36, 1) 120ms forwards;
+}
+
+/* "Thinking" indicator — three dots that rise in sequence. Used only
+   where real work is in flight. */
+@keyframes thinking-dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+.thinking-dot {
+  animation: thinking-dot 1.2s ease-in-out infinite;
+}

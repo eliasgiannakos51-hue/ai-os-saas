@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { DeletedAccountBanner } from "@/components/landing/deleted-account-banner";
 import { GlowOrb } from "@/components/ui/glow-orb";
-import { AuthBackground } from "@/components/auth/auth-background";
+import { AppBackground } from "@/components/ui/app-background";
 import { Logo } from "@/components/logo";
 
 const TITLE = "Ionexa AI — Your business, organized with AI that actually helps.";
@@ -37,7 +37,7 @@ export default async function Home() {
           striking background than the auth pages right next to it.
           GlowOrb stays layered on top as a subtle color accent near the
           hero; the globe sits behind everything. */}
-      <AuthBackground />
+      <AppBackground />
       <GlowOrb className="left-1/2 top-0 h-[32rem] w-[32rem] -translate-x-1/2 -translate-y-1/3" />
 
       <div className="relative z-10">

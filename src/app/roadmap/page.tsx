@@ -27,7 +27,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
-import { AuthBackground } from "@/components/auth/auth-background";
+import { AppBackground } from "@/components/ui/app-background";
 
 export const metadata: Metadata = {
   title: "Roadmap",
@@ -113,7 +113,7 @@ export default async function RoadmapPage() {
 
   return (
     <main className="relative min-h-screen px-4 py-16 text-foreground sm:px-6">
-      <AuthBackground />
+      <AppBackground />
       <div className="relative z-10 mx-auto max-w-5xl">
         <div className="text-center">
           <Link

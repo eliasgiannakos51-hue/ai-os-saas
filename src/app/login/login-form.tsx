@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { PasswordInput } from "@/components/ui/password-input";
 import { LoginSplash } from "@/components/auth/login-splash";
-import { AuthBackground } from "@/components/auth/auth-background";
+import { AppBackground } from "@/components/ui/app-background";
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { Logo } from "@/components/logo";
 
@@ -88,7 +88,7 @@ export function LoginForm() {
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-x-hidden bg-background px-4">
-      <AuthBackground />
+      <AppBackground />
       <div className="relative z-10 w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mb-4 flex items-center justify-center">

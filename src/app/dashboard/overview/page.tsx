@@ -40,15 +40,16 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
+// Four, not eight. Every one of these modules is also one click away in
+// the sidebar, so a second eight-item grid on the Home page was just
+// duplicating the nav and crowding the page — the point of this row is a
+// handful of obvious starting points, not full coverage. Each gets its
+// own accent so the row scans as four distinct destinations.
 const QUICK_ACTIONS = [
-  { slug: "ideas", label: "Idea", description: "Capture a new idea" },
-  { slug: "research", label: "Research", description: "Log research notes" },
-  { slug: "finance", label: "Finance", description: "Track income & expenses" },
-  { slug: "trading", label: "Trading", description: "Log a trade" },
-  { slug: "products", label: "Product Plan", description: "Plan a new product" },
-  { slug: "content", label: "Content", description: "Draft content ideas" },
-  { slug: "decisions", label: "Decision", description: "Weigh your options" },
-  { slug: "automation", label: "Automation", description: "Save time automating" },
+  { slug: "ideas", label: "Idea", description: "Capture a new idea", tone: "amber" },
+  { slug: "research", label: "Research", description: "Log research notes", tone: "violet" },
+  { slug: "finance", label: "Finance", description: "Track income & expenses", tone: "sky" },
+  { slug: "trading", label: "Trading", description: "Log a trade", tone: "emerald" },
 ] as const;
 
 export default async function OverviewPage() {
@@ -344,6 +345,7 @@ export default async function OverviewPage() {
           score={healthScore.score}
           rangeLabel={healthScoreRangeLabel}
           suggestion={healthScoreSuggestion}
+          trend={weeklySparkline}
         />
 
         <EnergyCheckinWidget initialCheckIn={latestEnergyCheckIn} />
@@ -399,6 +401,7 @@ export default async function OverviewPage() {
               icon={MODULE_ICONS[action.slug]}
               label={action.label}
               description={action.description}
+              tone={action.tone}
             />
           ))}
         </div>

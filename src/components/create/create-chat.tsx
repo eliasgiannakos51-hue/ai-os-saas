@@ -25,6 +25,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
   const t = useTranslations("dashboard.createAnything");
   const { submit, loading } = useCreateAnything();
   const [input, setInput] = useState("");
+  const [focused, setFocused] = useState(false);
   const [result, setResult] = useState<CreateResult | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const suggestions = useSmartSuggestions(input);
@@ -167,7 +168,12 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
             ))}
           </ul>
         )}
-        <div className="relative">
+        {/* `data-active` drives the animated rim in globals.css: the
+            gradient speeds up and the halo brightens while the user is
+            actually engaged with the box (focused OR mid-sentence), so it
+            reacts to real intent rather than pulsing at full strength all
+            the time. */}
+        <div className="prompt-glow relative" data-active={focused || input.trim().length > 0}>
           <input
             ref={imageInputRef}
             type="file"
@@ -183,7 +189,9 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
             placeholder={t("describePlaceholder")}
             rows={4}
             maxLength={20000}
-            className="min-h-32 max-h-[60vh] w-full resize-y rounded-2xl border border-border bg-panel px-4 py-4 pr-28 text-base text-foreground outline-none transition-all duration-200 placeholder:text-muted focus:border-orange-500/60 focus:shadow-[0_0_0_4px_rgba(249,115,22,0.08)]"
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            className="relative z-[1] min-h-32 max-h-[60vh] w-full resize-y rounded-2xl border-0 bg-panel/85 px-4 py-4 pr-28 text-base text-foreground outline-none backdrop-blur-sm transition-all duration-200 placeholder:text-muted"
             autoFocus
           />
           {imageFiles.length < MAX_ATTACHMENT_IMAGES && (
@@ -192,7 +200,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
               onClick={() => imageInputRef.current?.click()}
               aria-label={t("attachImage")}
               title={t("attachImage")}
-              className="absolute bottom-3 right-16 flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              className="absolute bottom-3 right-16 z-[2] flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
             >
               <Paperclip className="h-4 w-4" aria-hidden="true" />
             </button>
@@ -201,7 +209,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
             type="submit"
             disabled={loading || !input.trim()}
             aria-label={t("send")}
-            className="absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+            className="absolute bottom-3 right-3 z-[2] flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fcd34d_0%,#f97316_60%,#dc4a04_100%)] text-black shadow-[0_4px_18px_-4px_rgba(249,115,22,0.7)] transition-all duration-200 hover:brightness-110 hover:shadow-[0_6px_26px_-4px_rgba(249,115,22,0.9)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
           >
             {loading ? (
               <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />

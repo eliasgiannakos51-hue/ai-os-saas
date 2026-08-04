@@ -5,7 +5,7 @@ import { Check, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { PLANS, TEAM_SEAT_PRICE, CURRENCY_SYMBOL, getPlan, type Plan, type PaidPlanSlug } from "@/lib/billing/plans";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
-import { AuthBackground } from "@/components/auth/auth-background";
+import { AppBackground } from "@/components/ui/app-background";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 
@@ -80,7 +80,7 @@ export default async function PricingPage() {
 
   return (
     <main className="relative min-h-screen px-4 py-16 text-foreground sm:px-6">
-      <AuthBackground />
+      <AppBackground />
       <div className="relative z-10 mx-auto max-w-6xl">
         <div className="text-center">
           <Link

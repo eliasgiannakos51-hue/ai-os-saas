@@ -20,7 +20,7 @@ import { PasswordStrengthChecklist } from "@/components/auth/password-strength-c
 import { GeneratePasswordButton } from "@/components/auth/generate-password-button";
 import { LoginSplash } from "@/components/auth/login-splash";
 import { Logo } from "@/components/logo";
-import { AuthBackground } from "@/components/auth/auth-background";
+import { AppBackground } from "@/components/ui/app-background";
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { COUNTRIES } from "@/lib/countries";
 
@@ -231,7 +231,7 @@ export function SignupFlow() {
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-x-hidden bg-background px-4 py-10">
-      <AuthBackground />
+      <AppBackground />
       <div className={`relative z-10 w-full ${step === 1 ? "max-w-3xl" : "max-w-md"}`}>
         <div className="mb-8 text-center">
           <div className="mb-4 flex items-center justify-center">

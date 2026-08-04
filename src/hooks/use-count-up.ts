@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+
+// useLayoutEffect on the client, useEffect on the server. React logs a
+// warning if useLayoutEffect runs during SSR (it can't, there is no
+// layout), and this hook needs the layout variant on the client — see
+// the comment in useCountUp for why.
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 // Animates a number from 0 up to `target` over `durationMs`, driven by
 // requestAnimationFrame rather than a setInterval tick — rAF is already
@@ -19,15 +25,27 @@ import { useEffect, useRef, useState } from "react";
 const EASE_OUT_CUBIC = (t: number) => 1 - Math.pow(1 - t, 3);
 
 export function useCountUp(target: number, durationMs = 900): number {
-  const [value, setValue] = useState(() => (prefersReducedMotion() ? target : 0));
+  // Initial state is the TARGET, not zero, and that is deliberate: it is
+  // the one value the server and the client's first render can both
+  // produce. Seeding it from prefersReducedMotion() (as this did
+  // originally) gave `target` on the server — where `window` is
+  // undefined — and `0` on the client, so every animated stat hydrated
+  // with mismatched text and React threw away the server HTML for the
+  // whole subtree ("Text content does not match server-rendered HTML").
+  const [value, setValue] = useState(target);
   const frameRef = useRef<number | null>(null);
 
-  useEffect(() => {
+  // Layout effect, not a passive one: this resets the display to 0 before
+  // starting the count. A passive useEffect runs AFTER paint, so the user
+  // would see the final number for one frame and then watch it snap back
+  // to zero and climb again.
+  useIsomorphicLayoutEffect(() => {
     if (!Number.isFinite(target) || target === 0 || prefersReducedMotion()) {
       setValue(target);
       return;
     }
 
+    setValue(0);
     const start = performance.now();
     const tick = (now: number) => {
       const progress = Math.min((now - start) / durationMs, 1);
@@ -47,7 +65,10 @@ export function useCountUp(target: number, durationMs = 900): number {
 }
 
 function prefersReducedMotion(): boolean {
-  if (typeof window === "undefined") return true; // SSR: render the final value
+  // Never called during SSR any more (the only caller is a client-side
+  // layout effect), but kept safe for it regardless: with no window there
+  // is no motion to reduce and no animation to run.
+  if (typeof window === "undefined") return true;
   if (document.documentElement.dataset.motion === "reduce") return true;
   return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 }

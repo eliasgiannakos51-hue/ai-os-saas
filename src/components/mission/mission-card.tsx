@@ -8,6 +8,7 @@ import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { CelebrationBurst } from "@/components/celebration/celebration-burst";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { formatRelativeTime } from "@/lib/format-time";
 import { useCredits } from "@/components/credits/credits-context";
 import { MessageContent } from "@/components/chat/message-content";
@@ -391,6 +392,14 @@ export function MissionCard({
                             ? t("retry", { attempts: step.attempts ?? 0, max: MAX_STEP_ATTEMPTS })
                             : t("createWithAi")}
                       </button>
+                      {/* Real in-flight AI work — this only renders while
+                          buildStep's request for THIS step is actually
+                          open (buildingIndex is cleared in its finally
+                          block), so it can never show without work
+                          behind it. */}
+                      {buildingIndex === index && (
+                        <ThinkingIndicator label={t("creating")} />
+                      )}
                       {scheduledStepIndices.includes(index) ? (
                         <p className="inline-flex items-center gap-1.5 text-[11px] text-muted">
                           <CalendarClock className="h-3 w-3" aria-hidden="true" />

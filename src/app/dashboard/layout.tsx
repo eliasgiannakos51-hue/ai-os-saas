@@ -88,7 +88,7 @@ export default async function DashboardLayout({
                 need a higher one — see its own comment for why. */}
             <DashboardBackground />
             <div className="relative z-10 flex min-h-screen">
-              <Sidebar />
+              <Sidebar email={user.email ?? ""} planName={plan.name} />
               <div className="flex min-w-0 flex-1 flex-col">
                 <TopNav email={user.email ?? ""} />
                 {/* Wraps only the page body, not the Sidebar/TopNav —

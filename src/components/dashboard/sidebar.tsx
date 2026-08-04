@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { displayNameFromEmail } from "@/lib/greeting";
 import { ChevronRight, X } from "lucide-react";
 import { OVERVIEW_NAV_ITEM } from "@/lib/modules";
 import {
@@ -42,7 +43,25 @@ function storageKey(heading: string) {
   return `ionexa:sidebar-group:${heading}`;
 }
 
-export function Sidebar() {
+// One resting tint per sidebar section, so the nav reads as grouped at a
+// glance instead of as one long amber list. Active items ignore this and
+// go full amber — the current page should never be ambiguous.
+// Returns whole Tailwind class strings (not an interpolated color name)
+// so the JIT compiler can actually see them.
+function groupTone(heading: string): string {
+  switch (heading) {
+    case "Workspace":
+      return "text-orange-400/55";
+    case "Build":
+      return "text-purple-400/55";
+    case "Business":
+      return "text-sky-400/55";
+    default:
+      return "text-emerald-400/50";
+  }
+}
+
+export function Sidebar({ email = "", planName = "" }: { email?: string; planName?: string }) {
   const pathname = usePathname();
   const t = useTranslations("sidebar");
   const tCommon = useTranslations("common");
@@ -138,15 +157,23 @@ export function Sidebar() {
                     key={item.href}
                     href={item.href}
                     onClick={closeOnMobile}
-                    className={`group flex min-h-[40px] items-center gap-2.5 rounded-lg border-l-2 py-2 pl-2.5 pr-3 text-sm transition-all duration-150 ${
+                    className={`group relative flex min-h-[40px] items-center gap-2.5 overflow-hidden rounded-xl py-2 pl-2.5 pr-3 text-sm transition-all duration-200 ${
                       active
-                        ? "border-orange-500 bg-orange-500/10 font-medium text-orange-400"
-                        : "border-transparent text-muted hover:border-orange-500/30 hover:bg-orange-500/[0.06] hover:text-foreground hover:shadow-[0_0_12px_-2px_rgba(249,115,22,0.25)]"
+                        ? "bg-[linear-gradient(100deg,rgba(249,115,22,0.22)_0%,rgba(168,85,247,0.13)_100%)] font-semibold text-orange-200 shadow-[inset_0_0_0_1px_rgba(249,115,22,0.45),0_0_18px_-6px_rgba(249,115,22,0.7)]"
+                        : "text-muted hover:bg-white/[0.045] hover:text-foreground hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.18)]"
                     }`}
                   >
+                    {active && (
+                      <span
+                        aria-hidden="true"
+                        className="absolute inset-y-1.5 left-0 w-[3px] rounded-r-full bg-gradient-to-b from-amber-300 to-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.8)]"
+                      />
+                    )}
                     <Icon
-                      className={`h-4 w-4 shrink-0 transition-all duration-150 group-hover:scale-105 ${
-                        active ? "text-orange-400" : "text-orange-500/40 group-hover:text-orange-400/70"
+                      className={`h-4 w-4 shrink-0 transition-all duration-200 group-hover:scale-110 ${
+                        active
+                          ? "text-orange-300 drop-shadow-[0_0_6px_rgba(249,115,22,0.8)]"
+                          : `${groupTone(group.heading)} group-hover:text-orange-300`
                       }`}
                       aria-hidden="true"
                     />
@@ -182,7 +209,7 @@ export function Sidebar() {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform overflow-y-auto border-r border-border bg-panel transition-transform duration-200 ease-in-out md:sticky md:top-0 md:z-auto md:h-screen md:w-60 md:shrink-0 md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 transform overflow-y-auto border-r border-white/[0.07] bg-panel/80 backdrop-blur-xl transition-transform duration-200 ease-in-out md:sticky md:top-0 md:z-auto md:h-screen md:w-60 md:shrink-0 md:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -202,7 +229,36 @@ export function Sidebar() {
 
         <nav className="space-y-5 p-3">{MAIN_SIDEBAR_GROUPS.map(renderGroup)}</nav>
 
-        <div className="border-t border-border p-3">{renderGroup(SETTINGS_GROUP)}</div>
+        <div className="border-t border-white/[0.07] p-3">{renderGroup(SETTINGS_GROUP)}</div>
+
+        {/* Account card. Both values come from the already-loaded session
+            in dashboard/layout.tsx — no extra query, and nothing is
+            rendered at all if the layout couldn't supply them. */}
+        {email && (
+          <div className="border-t border-white/[0.07] p-3">
+            <Link
+              href="/dashboard/settings"
+              onClick={closeOnMobile}
+              className="group flex items-center gap-2.5 rounded-xl px-2 py-2 transition-colors duration-200 hover:bg-white/[0.05]"
+            >
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fbbf24_0%,#f97316_55%,#a855f7_100%)] text-sm font-bold text-black">
+                {displayNameFromEmail(email).charAt(0).toUpperCase()}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[13px] font-medium text-foreground">
+                  {displayNameFromEmail(email)}
+                </span>
+                {planName && (
+                  <span className="block truncate text-[11px] text-muted">{planName}</span>
+                )}
+              </span>
+              <ChevronRight
+                className="h-3.5 w-3.5 shrink-0 text-muted transition-transform duration-200 group-hover:translate-x-0.5"
+                aria-hidden="true"
+              />
+            </Link>
+          </div>
+        )}
       </aside>
     </>
   );

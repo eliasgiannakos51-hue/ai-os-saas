@@ -28,11 +28,25 @@ export default async function TimelinePage({
   const t = await getTranslations("dashboard.timeline");
   const supabase = createClient();
 
+  // TEMPORARY diagnostic logging — see dashboard/mission/page.tsx for why
+  // (same "disappears after refresh" investigation, same query shape).
+  const reqId = Math.random().toString(36).slice(2, 8);
+  // eslint-disable-next-line no-console
+  console.error(`[timeline-diag ${reqId}] request start at ${new Date().toISOString()}`);
+
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
 
+  // eslint-disable-next-line no-console
+  console.error(
+    `[timeline-diag ${reqId}] auth.getUser() -> user=${user?.id ?? "null"} error=${userError?.message ?? "none"}`
+  );
+
   if (!user) {
+    // eslint-disable-next-line no-console
+    console.error(`[timeline-diag ${reqId}] no user, redirecting to /login`);
     redirect("/login");
   }
 
@@ -45,6 +59,11 @@ export default async function TimelinePage({
     moduleSlug: moduleSlug === "all" ? null : moduleSlug,
     range,
   });
+
+  // eslint-disable-next-line no-console
+  console.error(
+    `[timeline-diag ${reqId}] loadTimelineEntries -> entries=${entries.length} moduleSlug=${moduleSlug} range=${range}`
+  );
 
   return (
     <main className="min-h-full bg-dot-grid">

@@ -34,11 +34,28 @@ export default async function MissionPage() {
   const t = await getTranslations("dashboard.mission");
   const supabase = createClient();
 
+  // TEMPORARY diagnostic logging for the "missions disappear on refresh"
+  // investigation — every request to this page logs its own auth + query
+  // outcome so a real refresh-loop can be traced from Vercel's function
+  // logs. Safe to remove once the root cause (see next.config.mjs's
+  // staleTimes comment) is confirmed live and no longer reproduces.
+  const reqId = Math.random().toString(36).slice(2, 8);
+  // eslint-disable-next-line no-console
+  console.error(`[mission-diag ${reqId}] request start at ${new Date().toISOString()}`);
+
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser();
 
+  // eslint-disable-next-line no-console
+  console.error(
+    `[mission-diag ${reqId}] auth.getUser() -> user=${user?.id ?? "null"} error=${userError?.message ?? "none"}`
+  );
+
   if (!user) {
+    // eslint-disable-next-line no-console
+    console.error(`[mission-diag ${reqId}] no user, redirecting to /login`);
     redirect("/login");
   }
 
@@ -50,6 +67,13 @@ export default async function MissionPage() {
       .eq("status", "pending")
       .order("scheduled_for", { ascending: true }),
   ]);
+
+  // eslint-disable-next-line no-console
+  console.error(
+    `[mission-diag ${reqId}] ai_missions query -> rows=${missions?.length ?? "null"} error=${error?.message ?? "none"} ids=${
+      (missions as Mission[] | null)?.map((m) => m.id.slice(0, 8)).join(",") ?? "-"
+    }`
+  );
 
   const pendingRuns = (scheduledRuns as ScheduledAgentRun[] | null) ?? [];
   const scheduledStepIndicesByMission: Record<string, number[]> = {};

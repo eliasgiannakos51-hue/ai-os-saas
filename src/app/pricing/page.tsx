@@ -212,7 +212,18 @@ export default async function PricingPage() {
           </div>
         </div>
 
-        <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-border bg-panel p-6 text-center">
+        {/* data-deploy-check below is a temporary, invisible-in-UI marker
+            (renders into the HTML attribute, unlike a JSX comment, which
+            compiles away entirely) — confirms whether the LIVE deployment
+            is actually running this commit. View-source or curl the live
+            /pricing page and search for "deploy-check-a2ac56f"; if it's
+            absent, the live site isn't serving this branch's code at all
+            (a deployment/production-branch config issue, not a code bug)
+            — remove this attribute once verified. */}
+        <div
+          data-deploy-check="deploy-check-a2ac56f"
+          className="mx-auto mt-8 max-w-3xl rounded-2xl border border-border bg-panel p-6 text-center"
+        >
           <h2 className="text-sm font-semibold text-orange-400">{t("teamBannerTitle")}</h2>
           <p className="mt-2 text-sm text-muted">
             {t("teamBannerBody", { price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}` })}

@@ -336,9 +336,20 @@ export function SignupFlow() {
                   real plans (so on lg's 3-column layout it lands directly
                   beside Ultimate, same row) with matching size/structure —
                   a first-class choice from the start, not a secondary
-                  add-on underneath. */}
+                  add-on underneath.
+
+                  data-deploy-check below is a TEMPORARY, invisible-in-UI
+                  marker (renders into the HTML attribute, unlike a JSX
+                  comment) — proves whether a given deployment is actually
+                  running this exact commit. View-source (or curl) the
+                  live /signup page and search for
+                  "deploy-check-business-grid-v2"; if it's absent, that
+                  deployment predates this fix and isn't a code bug —
+                  remove this attribute once verified. See /pricing's own
+                  Business card for the same pattern used earlier. */}
               <button
                 type="button"
+                data-deploy-check="deploy-check-business-grid-v2"
                 onClick={() => {
                   setSelectedPlan("professional");
                   setWantsTeamSetup(true);

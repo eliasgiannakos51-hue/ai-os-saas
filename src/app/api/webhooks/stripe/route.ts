@@ -46,6 +46,16 @@ async function syncSubscriptionToUser(
     return;
   }
 
+  // TEMPORARY diagnostic logging for the "Business signup flow doesn't
+  // work end-to-end" investigation — this sandbox has no network path to
+  // Stripe/Supabase to reproduce a real webhook delivery directly, so this
+  // traces exactly what the live webhook resolves once deployed. Safe to
+  // remove once confirmed.
+  // eslint-disable-next-line no-console
+  console.error(
+    `[webhook-diag] syncSubscriptionToUser start subscriptionId=${subscriptionId} customerId=${customerId} customerMetadataUserId=${customer.metadata?.supabase_user_id ?? "none"} fallbackSupabaseUserId=${fallbackSupabaseUserId ?? "none"}`
+  );
+
   let supabaseUserId = customer.metadata?.supabase_user_id;
   if (!supabaseUserId && fallbackSupabaseUserId) {
     supabaseUserId = fallbackSupabaseUserId;
@@ -105,6 +115,10 @@ async function syncSubscriptionToUser(
   if (updateError) {
     logApiError("/api/webhooks/stripe", updateError, { stage: "update_user", supabaseUserId });
   }
+  // eslint-disable-next-line no-console
+  console.error(
+    `[webhook-diag] syncSubscriptionToUser result supabaseUserId=${supabaseUserId} planSlug=${planSlug} isActive=${isActive} seatCount=${seatCount} updateError=${updateError?.message ?? "none"}`
+  );
 
   // Resets the credit balance to the (new) plan's monthly allotment — same
   // call on a brand-new subscription, a plan change, a cancellation (falls
@@ -141,6 +155,16 @@ export async function POST(request: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const signature = request.headers.get("stripe-signature");
 
+  // TEMPORARY diagnostic — if this line never appears in production logs
+  // at all after a real checkout, Stripe isn't reaching this endpoint (a
+  // dashboard webhook-URL/deploy config issue), which would explain "the
+  // whole flow doesn't work" far more broadly than anything in this
+  // route's own logic could.
+  // eslint-disable-next-line no-console
+  console.error(
+    `[webhook-diag] POST received hasSecret=${Boolean(webhookSecret)} hasSignature=${Boolean(signature)}`
+  );
+
   if (!webhookSecret || !signature) {
     return NextResponse.json({ error: "Webhook not configured." }, { status: 500 });
   }
@@ -155,6 +179,9 @@ export async function POST(request: Request) {
     logApiError("/api/webhooks/stripe", err, { stage: "verify_signature" });
     return NextResponse.json({ error: "Invalid signature." }, { status: 400 });
   }
+
+  // eslint-disable-next-line no-console
+  console.error(`[webhook-diag] event verified type=${event.type} id=${event.id}`);
 
   try {
     switch (event.type) {

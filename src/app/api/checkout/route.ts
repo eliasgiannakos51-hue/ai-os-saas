@@ -105,6 +105,16 @@ export async function POST(request: Request) {
       );
     }
 
+    // TEMPORARY diagnostic logging for the "Business signup flow doesn't
+    // work end-to-end" investigation — logs the exact resolved checkout
+    // shape right before Stripe is called, since this sandbox has no
+    // network path to api.stripe.com to reproduce it directly. Safe to
+    // remove once confirmed live.
+    // eslint-disable-next-line no-console
+    console.error(
+      `[checkout-diag] plan=${plan} userId=${user.id} successPath=${successPath} needsPaidTeamSeats=${needsPaidTeamSeats} teamSeatPriceId=${maskEnvVar(teamSeatPriceId)} planPriceId=${maskEnvVar(planPriceId)}`
+    );
+
     const stripe = createStripeClient();
 
     // Reuse the Stripe customer already linked to this user (set the first
@@ -172,6 +182,11 @@ export async function POST(request: Request) {
         metadata: { supabase_user_id: user.id, plan },
       },
     });
+
+    // eslint-disable-next-line no-console
+    console.error(
+      `[checkout-diag] session created id=${session.id} url=${session.url ? "present" : "MISSING"} success_url=${session.success_url}`
+    );
 
     if (!session.url) {
       logApiError("/api/checkout", new Error("Checkout session has no url"), { plan });

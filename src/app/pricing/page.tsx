@@ -184,12 +184,21 @@ export default async function PricingPage() {
         {/* Business "card" — same visual language as the 6 plan cards above,
             kept in its own grid row (same wrapper classes) instead of a 7th
             slot in the xl:grid-cols-6 grid so that grid's column math for
-            the existing 6 plans isn't disturbed. */}
+            the existing 6 plans isn't disturbed — Enterprise already sits
+            immediately right of Ultimate in that grid, so a literal "right
+            of Ultimate" placement here would mean displacing a real plan
+            tier, not adding a UI-only extra like on /signup (which has no
+            Enterprise tier and is where this positioning request actually
+            applies — see signup-flow.tsx, where Business is the 6th card
+            in the SAME grid as the 5 real plans, directly beside Ultimate). */}
         <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           <div className="relative flex flex-col rounded-2xl border border-border bg-panel p-6">
             <h2 className="text-sm font-semibold text-orange-400">{t("businessTitle")}</h2>
             <p className="mt-3 text-lg font-bold text-foreground">{t("businessSubtitle")}</p>
-            <p className="mt-3 flex-1 text-xs leading-relaxed text-muted">
+            <p className="mt-3 text-xs leading-relaxed text-muted">
+              {t("businessCardDescription", { price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}` })}
+            </p>
+            <p className="mt-2 flex-1 text-xs leading-relaxed text-muted">
               {t("businessExplanation", { price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}` })}
             </p>
             <div className="mt-6">

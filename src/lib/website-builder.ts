@@ -33,6 +33,19 @@ const MAX_CONTINUATION_ROUNDS = 2;
 const CONTINUATION_INSTRUCTION =
   "Continue the HTML document EXACTLY where you left off — do not repeat anything you already wrote, do not restart the document, and do not add any commentary or markdown code fences. Output only the raw continuation of the HTML from the exact point it was cut off.";
 
+// Same native, server-executed tool used by api/chat/route.ts — was
+// missing here entirely before this fix: streamHtmlToCompletion's
+// anthropic.messages.stream() call never passed a `tools` array at all,
+// so the model had no way to actually search the web no matter what the
+// system prompt said to do, for either a fresh generation or an edit
+// (both go through this same function). max_uses caps it at 3 real
+// searches per generation/edit call, matching chat's same per-call limit.
+const WEB_SEARCH_TOOL: Anthropic.WebSearchTool20250305 = {
+  type: "web_search_20250305",
+  name: "web_search",
+  max_uses: 3,
+};
+
 // Off-topic guard — without this, a request like "write me a poem" had no
 // way to be rejected: generateWebsiteHtml's system prompt is a strong,
 // unconditional directive to always output a complete HTML document, so
@@ -211,8 +224,28 @@ const IMAGE_RULES_HEADER = `
 IMAGES:
 - If REFERENCE IMAGES are listed below with exact URLs, use them directly via <img src="EXACT_URL"> wherever they fit (hero photo, gallery, a logo in the header, etc. — infer which image is which from context). Never alter the given URL, and never fabricate additional reference-image URLs beyond what's listed.
 - For any OTHER real photo the site should show (a product shot, a room, food, a team photo, an interior/exterior) that no reference image already covers, output exactly: <img src="PLACEHOLDER:short-slug" data-image-query="concise English search phrase describing exactly what the photo should show" alt="...">  — a short slug unique within this document, and a real, specific search phrase (e.g. "modern boutique hotel room interior", not just "room"). A post-processing step automatically replaces this with a real, working photo.
+- IMPORTANT — if the description names or lists SPECIFIC photos to include (e.g. "photos of the rooms", "a picture of the pool", "show our 3 menu items", "team photos"), each one of those, individually, MUST get its own PLACEHOLDER tag with a query specific to THAT exact item — never fewer PLACEHOLDER tags than the number of specific photos actually requested, and never a single generic PLACEHOLDER standing in for several distinct requested photos. Before moving on from the IMAGES step, mentally list every specific photo the description asked for and confirm each one has its own tag.
 - NEVER invent a fake external image URL yourself (no made-up unsplash.com/cdn/placeholder links) — the ONLY two ways to include a photo are a listed reference-image URL, or the PLACEHOLDER convention above.
 - Purely decorative graphics (icons, simple shapes, dividers) should still be built with CSS/inline SVG as before, not the PLACEHOLDER convention — that's reserved for actual photos.`;
+
+// Was previously described to the model in prose but never actually
+// wired up (streamHtmlToCompletion's stream() call had no `tools` at
+// all) — see WEB_SEARCH_TOOL below. Mirrors api/chat/route.ts's own
+// instruction/tool pairing.
+const WEB_SEARCH_SECTION = `
+WEB SEARCH:
+You have access to a real web search tool. Use it when the description implies the site should reflect real, current facts you can't already know for certain — e.g. it asks for realistic/typical/current pricing for a named industry or service, current statistics, a real business's actual details, or anything else time-sensitive. Do NOT search for things you already know well or that are being explicitly given to you in the description (never search to "double check" content the user already supplied). When you do use search results, paraphrase them in your own words into the page's copy — never paste search-result text verbatim into the HTML.`;
+
+// Requested explicitly as a final compliance pass: catches the common
+// failure mode of a long, multi-part description where one or two
+// specific asks (a named section, a specific requested photo, a color,
+// a piece of text) get dropped simply because the model's attention
+// moved on while writing everything else. This is the LAST section in
+// the system prompt on purpose — it's meant to be the last instruction
+// in context right before the model starts producing its final answer.
+const FINAL_SELF_CHECK_SECTION = `
+FINAL SELF-CHECK (do this before you output anything):
+Before returning the final HTML, re-read the user's original description line by line and confirm every specific thing it asked for is actually present in what you're about to output — every named section, every specific requested photo (see IMAGES above), every color/style preference, every specific piece of text/copy given verbatim, every named contact detail. If anything is missing, add it now before returning your answer. Do not return a final answer you haven't checked this way.`;
 
 const PLACEHOLDER_DATA_SECTION = `
 DO NOT INVENT CRITICAL FACTS:
@@ -232,8 +265,10 @@ CORE RULES:
 ${FONTS_SECTION}
 ${ANIMATIONS_SECTION}
 ${IMAGE_RULES_HEADER}
+${WEB_SEARCH_SECTION}
 ${FUNCTIONAL_ELEMENTS_SECTION}
-${PLACEHOLDER_DATA_SECTION}`;
+${PLACEHOLDER_DATA_SECTION}
+${FINAL_SELF_CHECK_SECTION}`;
 
 // Strips a leading/trailing markdown code fence if the model wrapped its
 // output in one despite the system prompt saying not to — Claude does this
@@ -356,6 +391,7 @@ async function streamHtmlToCompletion(
       model: MODEL,
       max_tokens: WEBSITE_MAX_TOKENS,
       system,
+      tools: [WEB_SEARCH_TOOL],
       messages,
     });
 
@@ -446,9 +482,11 @@ CORE RULES:
 ${FONTS_SECTION}
 ${ANIMATIONS_SECTION}
 ${IMAGE_RULES_HEADER}
+${WEB_SEARCH_SECTION}
 ${FUNCTIONAL_ELEMENTS_SECTION}
 ${PLACEHOLDER_DATA_SECTION}
-If the change request asks to add a photo, a font, an animation, contact info, or a form, apply the same rules above as if generating fresh — e.g. a newly-requested photo still uses the PLACEHOLDER convention (or a newly-attached reference image's real URL) rather than an invented link.`;
+If the change request asks to add a photo, a font, an animation, contact info, or a form, apply the same rules above as if generating fresh — e.g. a newly-requested photo still uses the PLACEHOLDER convention (or a newly-attached reference image's real URL) rather than an invented link.
+${FINAL_SELF_CHECK_SECTION}`;
 
 // Same prompt-caching split as buildGenerateSystemBlocks above — the
 // (large, fully static) EDIT_SYSTEM_PROMPT gets its own cache_control

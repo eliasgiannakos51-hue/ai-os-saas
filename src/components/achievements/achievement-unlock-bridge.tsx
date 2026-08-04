@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useToast } from "@/components/toast/toast-context";
 import { achievementDisplayForKey, type AchievementDisplay } from "@/lib/achievement-metadata";
+import { CelebrationBurst } from "@/components/celebration/celebration-burst";
 
 // Shared with AchievementsSection below — every achievement kind resolves
 // to a translation key under the "achievements" namespace, keyed by kind.
@@ -33,12 +34,17 @@ export function AchievementUnlockBridge({ unlockedKeys }: { unlockedKeys: string
   const t = useTranslations("achievements");
   const { addToast } = useToast();
   const firedRef = useRef<string>("");
+  const [celebrating, setCelebrating] = useState(false);
 
   useEffect(() => {
     if (unlockedKeys.length === 0) return;
     const signature = unlockedKeys.join(",");
     if (firedRef.current === signature) return;
     firedRef.current = signature;
+
+    // Earning an achievement is the single most "well done" moment the
+    // app has — it gets the full confetti burst, not just a toast.
+    setCelebrating(true);
 
     for (const key of unlockedKeys) {
       const display = achievementDisplayForKey(key);
@@ -51,5 +57,15 @@ export function AchievementUnlockBridge({ unlockedKeys }: { unlockedKeys: string
     }
   }, [unlockedKeys, t, addToast]);
 
-  return null;
+  if (!celebrating) return null;
+
+  // Fixed and centred over the viewport rather than anchored to a card:
+  // an achievement isn't tied to any one element on screen, and the
+  // toast that names it renders separately in the corner. inset-0 makes
+  // this the positioning parent CelebrationBurst needs.
+  return (
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[70]">
+      <CelebrationBurst trigger={celebrating} onDone={() => setCelebrating(false)} />
+    </div>
+  );
 }

@@ -707,6 +707,18 @@
         "friday": "Freitag",
         "saturday": "Samstag"
       }
+    },
+    "createAnything": {
+      "uploadError": "Ein oder mehrere Bilder konnten nicht hochgeladen werden.",
+      "removeImage": "Bild entfernen",
+      "attachImage": "Bild anhängen",
+      "send": "Senden",
+      "describePlaceholder": "Beschreibe deine Idee ausführlich...",
+      "askPlaceholder": "Frag mich alles...",
+      "clarifyTitle": "Zwei kurze Fragen:",
+      "clarifySkip": "Überspringen und trotzdem speichern",
+      "clarifyContinue": "Weiter",
+      "clarifyAnswerPlaceholder": "Deine Antwort..."
     }
   },
   "module": {

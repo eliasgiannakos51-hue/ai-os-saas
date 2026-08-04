@@ -17,7 +17,7 @@ export function LegalLayout({
           href="/"
           className="text-sm tracking-widest text-orange-500 transition-colors hover:text-orange-400"
         >
-          Ionexa AI //
+          Ionexa AI
         </Link>
         <h1 className="mt-4 text-2xl font-bold text-foreground sm:text-3xl">
           {title}

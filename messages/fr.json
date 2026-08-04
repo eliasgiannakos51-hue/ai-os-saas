@@ -707,6 +707,18 @@
         "friday": "Vendredi",
         "saturday": "Samedi"
       }
+    },
+    "createAnything": {
+      "uploadError": "Impossible d'envoyer une ou plusieurs images.",
+      "removeImage": "Retirer l'image",
+      "attachImage": "Joindre une image",
+      "send": "Envoyer",
+      "describePlaceholder": "Décrivez votre idée en détail...",
+      "askPlaceholder": "Posez-moi n'importe quelle question...",
+      "clarifyTitle": "Deux questions rapides :",
+      "clarifySkip": "Ignorer et enregistrer quand même",
+      "clarifyContinue": "Continuer",
+      "clarifyAnswerPlaceholder": "Votre réponse..."
     }
   },
   "module": {

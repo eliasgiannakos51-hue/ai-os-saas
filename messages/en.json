@@ -707,6 +707,18 @@
         "friday": "Friday",
         "saturday": "Saturday"
       }
+    },
+    "createAnything": {
+      "uploadError": "Could not upload one or more images.",
+      "removeImage": "Remove image",
+      "attachImage": "Attach image",
+      "send": "Send",
+      "describePlaceholder": "Describe your idea in detail...",
+      "askPlaceholder": "Ask me anything...",
+      "clarifyTitle": "A couple of quick questions:",
+      "clarifySkip": "Skip, log it anyway",
+      "clarifyContinue": "Continue",
+      "clarifyAnswerPlaceholder": "Your answer..."
     }
   },
   "module": {

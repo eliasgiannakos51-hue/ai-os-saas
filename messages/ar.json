@@ -707,6 +707,18 @@
         "friday": "الجمعة",
         "saturday": "السبت"
       }
+    },
+    "createAnything": {
+      "uploadError": "تعذّر رفع صورة أو أكثر.",
+      "removeImage": "إزالة الصورة",
+      "attachImage": "إرفاق صورة",
+      "send": "إرسال",
+      "describePlaceholder": "صف فكرتك بالتفصيل...",
+      "askPlaceholder": "اسألني أي شيء...",
+      "clarifyTitle": "سؤالان سريعان:",
+      "clarifySkip": "تخطَّ وسجّلها على أي حال",
+      "clarifyContinue": "متابعة",
+      "clarifyAnswerPlaceholder": "إجابتك..."
     }
   },
   "module": {

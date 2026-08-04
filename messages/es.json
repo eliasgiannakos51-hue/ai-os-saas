@@ -707,6 +707,18 @@
         "friday": "Viernes",
         "saturday": "Sábado"
       }
+    },
+    "createAnything": {
+      "uploadError": "No se pudieron subir una o más imágenes.",
+      "removeImage": "Quitar imagen",
+      "attachImage": "Adjuntar imagen",
+      "send": "Enviar",
+      "describePlaceholder": "Describe tu idea en detalle...",
+      "askPlaceholder": "Pregúntame lo que quieras...",
+      "clarifyTitle": "Un par de preguntas rápidas:",
+      "clarifySkip": "Omitir y registrarlo igualmente",
+      "clarifyContinue": "Continuar",
+      "clarifyAnswerPlaceholder": "Tu respuesta..."
     }
   },
   "module": {

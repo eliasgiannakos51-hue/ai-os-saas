@@ -707,6 +707,18 @@
         "friday": "Παρασκευή",
         "saturday": "Σάββατο"
       }
+    },
+    "createAnything": {
+      "uploadError": "Δεν ήταν δυνατή η μεταφόρτωση μίας ή περισσότερων εικόνων.",
+      "removeImage": "Αφαίρεση εικόνας",
+      "attachImage": "Επισύναψη εικόνας",
+      "send": "Αποστολή",
+      "describePlaceholder": "Περίγραψε την ιδέα σου αναλυτικά...",
+      "askPlaceholder": "Ρώτησέ με οτιδήποτε...",
+      "clarifyTitle": "Δύο γρήγορες ερωτήσεις:",
+      "clarifySkip": "Παράλειψη, καταγράψτε το ούτως ή άλλως",
+      "clarifyContinue": "Συνέχεια",
+      "clarifyAnswerPlaceholder": "Η απάντησή σου..."
     }
   },
   "module": {

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent, type KeyboardEvent } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowUp, CheckCircle2, AlertCircle, XCircle, Sparkles, Paperclip, X } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/modules";
 import { useCreateAnything, type CreateResult } from "@/lib/use-create-anything";
@@ -30,6 +31,7 @@ let turnIdCounter = 0;
 // for rate-limiting, not message content), so the thread is scoped to the
 // current visit, same as the underlying feature always worked.
 export function AssistantChat({ userInitial }: { userInitial: string }) {
+  const t = useTranslations("dashboard.createAnything");
   const { submit, loading } = useCreateAnything();
   const [input, setInput] = useState("");
   const [turns, setTurns] = useState<Turn[]>([]);
@@ -78,7 +80,7 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
     // silently dropped here — see create-chat.tsx's identical fix for why.
     const failures = results.filter((r) => r.error);
     if (failures.length > 0) {
-      addToast(`✗ ${getErrorMessage(failures[0].error, "Could not upload one or more images.")}`, "error");
+      addToast(`✗ ${getErrorMessage(failures[0].error, t("uploadError"))}`, "error");
     }
     return results.filter((r) => !r.error).map((r) => r.path);
   }
@@ -206,7 +208,7 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
                   className="flex items-center gap-1.5 rounded-lg border border-border bg-input px-2 py-1 text-xs text-foreground"
                 >
                   <span className="max-w-[140px] truncate">{file.name}</span>
-                  <button type="button" onClick={() => removeImage(index)} aria-label="Remove image" className="text-muted hover:text-foreground">
+                  <button type="button" onClick={() => removeImage(index)} aria-label={t("removeImage")} className="text-muted hover:text-foreground">
                     <X className="h-3 w-3" aria-hidden="true" />
                   </button>
                 </li>
@@ -227,7 +229,7 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleTextareaKeyDown}
-              placeholder="Ask me anything..."
+              placeholder={t("askPlaceholder")}
               rows={1}
               className="max-h-40 min-h-[52px] w-full resize-none rounded-2xl border border-border bg-panel px-4 py-3.5 pr-24 text-sm text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-orange-500/60"
               autoFocus
@@ -236,8 +238,8 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
               <button
                 type="button"
                 onClick={() => imageInputRef.current?.click()}
-                aria-label="Attach image"
-                title="Attach image"
+                aria-label={t("attachImage")}
+                title={t("attachImage")}
                 className="absolute bottom-2 right-12 flex h-9 w-9 items-center justify-center rounded-full text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
               >
                 <Paperclip className="h-4 w-4" aria-hidden="true" />
@@ -246,7 +248,7 @@ export function AssistantChat({ userInitial }: { userInitial: string }) {
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              aria-label="Send"
+              aria-label={t("send")}
               className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
             >
               {loading ? (
@@ -278,6 +280,8 @@ function ResultBubble({
   onAnswerClarification: (questions: string[], answers: string[]) => void;
   onSkipClarification: () => void;
 }) {
+  const t = useTranslations("dashboard.createAnything");
+
   if (result.type === "needsClarification") {
     return (
       <div className="max-w-[80%]">
@@ -286,10 +290,10 @@ function ResultBubble({
           onAnswer={(answers) => onAnswerClarification(result.questions, answers)}
           onSkip={onSkipClarification}
           submitting={loading}
-          title="A couple of quick questions:"
-          skipLabel="Skip, log it anyway"
-          continueLabel="Continue"
-          answerPlaceholder="Your answer..."
+          title={t("clarifyTitle")}
+          skipLabel={t("clarifySkip")}
+          continueLabel={t("clarifyContinue")}
+          answerPlaceholder={t("clarifyAnswerPlaceholder")}
         />
       </div>
     );

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
+import { AI_QUALITY_CYCLE_TRANSFORM_EN } from "@/lib/ai-quality-checklist";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -44,6 +45,16 @@ const SYSTEM_PROMPTS: Record<TextAction, string> = {
   explain:
     "Explain the given text in simple, plain language, in the same language it's written in. Return ONLY the explanation — no preamble, no quotes.",
 };
+
+// Same shared quality discipline as every other AI feature, in the
+// output-preserving variant — see the comment on the export for why this
+// endpoint can't take the full five-step cycle.
+const SYSTEM_PROMPTS_WITH_QUALITY_CYCLE: Record<TextAction, string> = Object.fromEntries(
+  Object.entries(SYSTEM_PROMPTS).map(([action, prompt]) => [
+    action,
+    prompt + AI_QUALITY_CYCLE_TRANSFORM_EN,
+  ])
+) as Record<TextAction, string>;
 
 // Selection-triggered text actions (see components/text-actions/) for
 // notes/description fields across the modules. Same credits-based gate as
@@ -132,7 +143,7 @@ export async function POST(request: Request) {
       const response = await anthropic.messages.create({
         model: MODEL,
         max_tokens: MAX_TOKENS,
-        system: SYSTEM_PROMPTS[action],
+        system: SYSTEM_PROMPTS_WITH_QUALITY_CYCLE[action],
         messages: [{ role: "user", content: text }],
       });
 

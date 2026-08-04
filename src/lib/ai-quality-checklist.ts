@@ -11,24 +11,52 @@ import "server-only";
 // Anything's user-facing "message" field) — each call site appends
 // whichever variant matches its own prompt's language.
 //
-// Rules 2 and 3 (web search, real images) are phrased as conditional on
-// actually having that capability wired into the call ("whenever you
-// have access to such a tool/convention") rather than an unconditional
-// command — several of this checklist's call sites (the Create
-// Anything/Automations classifier, Mission Control's Planner/Reviewer)
-// don't have a web_search tool or an image convention wired in at all,
-// and an unconditional "always search"/"always use a real image"
-// instruction would be actively misleading there.
+// This is a five-step CYCLE, not a checklist of independent tips, and
+// that shape is deliberate: steps 1-2 produce the work, step 3 re-reads
+// the request against the produced work, step 4 is an explicit
+// instruction to GO BACK and fix rather than to caveat, and step 5 is a
+// final safety gate. The closing line ("do not return a result that
+// hasn't passed all five") is what makes step 3 mean something — without
+// it, a model reliably treats self-review as optional narration.
+//
+// Steps 2 and 3's tool clauses are phrased as conditional on actually
+// having that capability wired into the call ("whenever such a tool is
+// available to you") rather than as unconditional commands — several of
+// this checklist's call sites (the Create Anything/Automations
+// classifier, Mission Control's Planner/Reviewer) have no web_search tool
+// and no image convention wired in at all, and an unconditional "always
+// search"/"always use a real image" instruction would be actively
+// misleading there, pushing the model to claim it searched when it
+// could not.
 export const AI_QUALITY_CHECKLIST_EN = `
-FINAL QUALITY CHECK (do this before returning your final answer):
-1. Re-read the user's request line by line — does your answer actually include EVERY specific thing that was asked for (images, numbers, names, details)? If anything is missing, add it before answering.
-2. If the request genuinely needs real, current information (prices, facts, statistics) and you have a web search tool available to you, always use it instead of guessing or relying on old training knowledge.
-3. If real photos are needed and you have a way to include one (e.g. the PLACEHOLDER/Unsplash convention, where available to you), always use that instead of a placeholder with no real image.
-4. Never invent specific, real-world facts belonging to the user (product prices, addresses, phone numbers, etc.) that weren't given to you — ask instead if something like that is missing and actually needed.`;
+MANDATORY QUALITY CYCLE before you return anything:
+1. DO exactly what was asked — every single detail, nothing skipped, nothing quietly simplified.
+2. SEARCH the internet for EVERY number, price, statistic or current fact, and for EVERY image that is needed — never guess, and never fall back on old training knowledge when a search tool is available to you. (If no search tool is available in this call, say plainly which figures you could not verify instead of inventing them.)
+3. CHECK your own result: re-read the request sentence by sentence and confirm that EACH requested item is genuinely present in your output — not merely mentioned or promised, but actually there.
+4. If anything is missing, wrong, or weaker than asked for, FIX it before answering. Go back and produce the corrected version — do not deliver an incomplete result with an apology or a caveat attached.
+5. Confirm the result is SAFE: no malicious or harmful element, no misleading claim, no invented fact presented as real. Specific real-world details belonging to the user (product prices, addresses, phone numbers, opening hours) must never be fabricated — ask for them, or mark them clearly as placeholders.
+DO NOT return a result that has not passed all five steps.`;
 
 export const AI_QUALITY_CHECKLIST_EL = `
-ΤΕΛΙΚΟΣ ΕΛΕΓΧΟΣ ΠΟΙΟΤΗΤΑΣ (κάν' το πριν επιστρέψεις την τελική απάντηση):
-1. Έλεγξε ΞΑΝΑ το αίτημα του χρήστη γραμμή-γραμμή — η απάντησή σου περιλαμβάνει πραγματικά ΚΑΘΕ συγκεκριμένο στοιχείο που ζητήθηκε (εικόνες, αριθμούς, ονόματα, λεπτομέρειες); Αν κάτι λείπει, πρόσθεσέ το πριν απαντήσεις.
-2. Αν το αίτημα χρειάζεται πραγματικά, τρέχοντα στοιχεία (τιμές, γεγονότα, στατιστικά) και έχεις διαθέσιμο εργαλείο web search, χρησιμοποίησέ το ΠΑΝΤΑ αντί να μαντεύεις ή να βασίζεσαι σε παλιά γνώση.
-3. Αν χρειάζονται πραγματικές φωτογραφίες και έχεις τρόπο να συμπεριλάβεις μία (π.χ. τη σύμβαση PLACEHOLDER/Unsplash, όπου είναι διαθέσιμη σε εσένα), χρησιμοποίησέ την ΠΑΝΤΑ αντί για placeholder χωρίς πραγματική εικόνα.
-4. ΜΗΝ εφευρίσκεις συγκεκριμένα, πραγματικά στοιχεία του χρήστη (τιμές προϊόντων, διευθύνσεις, τηλέφωνα κ.λπ.) που δεν σου δόθηκαν — ρώτησε αντ' αυτού αν κάτι τέτοιο λείπει και χρειάζεται πραγματικά.`;
+ΥΠΟΧΡΕΩΤΙΚΟΣ ΚΥΚΛΟΣ ΠΟΙΟΤΗΤΑΣ πριν επιστρέψεις οτιδήποτε:
+1. ΚΑΝΕ ό,τι ζητήθηκε — κάθε λεπτομέρεια, χωρίς παραλείψεις, χωρίς σιωπηλές απλοποιήσεις.
+2. ΨΑΞΕ στο internet για ΚΑΘΕ αριθμό/τιμή/στατιστικό/τρέχον στοιχείο και για ΚΑΘΕ εικόνα που χρειάζεται — μη μαντεύεις ποτέ και μη βασίζεσαι σε παλιά γνώση όταν έχεις διαθέσιμο εργαλείο αναζήτησης. (Αν δεν υπάρχει διαθέσιμο εργαλείο αναζήτησης σε αυτή την κλήση, πες καθαρά ποια νούμερα δεν μπόρεσες να επαληθεύσεις αντί να τα επινοήσεις.)
+3. ΕΛΕΓΞΕ το αποτέλεσμά σου: διάβασε ξανά το αίτημα πρόταση-πρόταση και επιβεβαίωσε ότι ΚΑΘΕ ζητούμενο υπάρχει πραγματικά στο output σου — όχι απλώς αναφερμένο ή υποσχεμένο, αλλά όντως εκεί.
+4. Αν κάτι λείπει, είναι λάθος ή πιο φτωχό απ' ό,τι ζητήθηκε, ΔΙΟΡΘΩΣΕ το πριν απαντήσεις. Γύρνα πίσω και παρήγαγε τη διορθωμένη έκδοση — μην παραδίδεις ημιτελές αποτέλεσμα με μια συγγνώμη ή μια επιφύλαξη από δίπλα.
+5. Επιβεβαίωσε ότι το αποτέλεσμα είναι ΑΣΦΑΛΕΣ: κανένα κακόβουλο ή επιβλαβές στοιχείο, καμία παραπλανητική δήλωση, κανένα εφευρημένο στοιχείο παρουσιασμένο ως πραγματικό. Συγκεκριμένα πραγματικά στοιχεία του χρήστη (τιμές προϊόντων, διευθύνσεις, τηλέφωνα, ώρες λειτουργίας) δεν επιτρέπεται ΠΟΤΕ να επινοηθούν — ζήτησέ τα, ή σημείωσέ τα καθαρά ως placeholder.
+ΜΗΝ επιστρέψεις αποτέλεσμα που δεν έχει περάσει και τα πέντε βήματα.`;
+
+// Compact variant for the short, format-constrained transformations in
+// api/text-actions (rewrite / translate / improve / explain).
+//
+// Those prompts end with a hard "Return ONLY the rewritten text — no
+// preamble, no explanation" contract, and the UI splices the reply
+// straight back into the user's field. The full cycle above would fight
+// that contract: its step 2 tells the model to state which figures it
+// could not verify, which is exactly the kind of extra prose that would
+// land inside a note. This keeps the two steps that DO apply to a
+// text transformation — do the whole thing, invent nothing — and drops
+// the ones that don't (no search tool and no images are wired into that
+// endpoint).
+export const AI_QUALITY_CYCLE_TRANSFORM_EN = `
+BEFORE RETURNING: re-read the input and confirm you transformed ALL of it (nothing dropped, no section skipped, meaning preserved), and that you added no fact, number or detail that was not already in the input. If either is wrong, redo it. Then return only the transformed text, with no commentary about this check.`;

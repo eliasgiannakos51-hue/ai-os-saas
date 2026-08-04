@@ -707,6 +707,18 @@
         "friday": "星期五",
         "saturday": "星期六"
       }
+    },
+    "createAnything": {
+      "uploadError": "有一张或多张图片上传失败。",
+      "removeImage": "移除图片",
+      "attachImage": "附加图片",
+      "send": "发送",
+      "describePlaceholder": "详细描述你的想法...",
+      "askPlaceholder": "问我任何问题...",
+      "clarifyTitle": "几个简短的问题：",
+      "clarifySkip": "跳过，仍然记录",
+      "clarifyContinue": "继续",
+      "clarifyAnswerPlaceholder": "你的回答..."
     }
   },
   "module": {

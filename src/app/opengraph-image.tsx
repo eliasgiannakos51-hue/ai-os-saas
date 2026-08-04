@@ -19,7 +19,7 @@ export default function OpengraphImage() {
         }}
       >
         <div style={{ fontSize: 28, letterSpacing: 6, color: "#f97316" }}>
-          Ionexa AI //
+          Ionexa AI
         </div>
         <div
           style={{

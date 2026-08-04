@@ -707,6 +707,18 @@
         "friday": "金曜日",
         "saturday": "土曜日"
       }
+    },
+    "createAnything": {
+      "uploadError": "1枚以上の画像をアップロードできませんでした。",
+      "removeImage": "画像を削除",
+      "attachImage": "画像を添付",
+      "send": "送信",
+      "describePlaceholder": "アイデアを詳しく書いてください...",
+      "askPlaceholder": "何でも聞いてください...",
+      "clarifyTitle": "簡単な質問がいくつかあります:",
+      "clarifySkip": "スキップしてこのまま記録",
+      "clarifyContinue": "続ける",
+      "clarifyAnswerPlaceholder": "あなたの回答..."
     }
   },
   "module": {

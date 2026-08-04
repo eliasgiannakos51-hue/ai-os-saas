@@ -15,7 +15,7 @@
 // meaning beyond visual texture (per explicit instruction: nothing here
 // should look like it's reporting real activity).
 //
-// `opacity` defaults to 0.28 — raised from 0.18 so the globe is a real,
+// `opacity` defaults to 0.38 — raised twice (0.18 -> 0.28 -> 0.38) so the globe is a real,
 // legible part of the page rather than a texture you have to look for,
 // while still staying well below the point where it competes with
 // foreground text (the wireframe strokes are sub-pixel-width and the
@@ -24,7 +24,7 @@
 // value on every page that renders this (auth pages, landing, pricing,
 // roadmap, every dashboard page via dashboard/layout.tsx) for consistent
 // visual intensity across the whole app.
-export function AuthBackground({ opacity = 0.28 }: { opacity?: number }) {
+export function AuthBackground({ opacity = 0.38 }: { opacity?: number }) {
   return (
     <div
       aria-hidden="true"
@@ -63,7 +63,7 @@ export function AuthBackground({ opacity = 0.28 }: { opacity?: number }) {
               globe rather than being a fixed pixel blur — the dots keep
               the same relative halo at every viewport size. */}
           <filter id="globeDotGlow" x="-200%" y="-200%" width="500%" height="500%">
-            <feGaussianBlur stdDeviation="2.5" result="blur" />
+            <feGaussianBlur stdDeviation="4.5" result="blur" />
             <feMerge>
               <feMergeNode in="blur" />
               <feMergeNode in="SourceGraphic" />
@@ -71,15 +71,15 @@ export function AuthBackground({ opacity = 0.28 }: { opacity?: number }) {
           </filter>
         </defs>
 
-        <circle cx="200" cy="200" r="170" stroke="url(#globeGradient)" strokeWidth="0.75" />
+        <circle cx="200" cy="200" r="170" stroke="url(#globeGradient)" strokeWidth="1.4" />
 
         {/* Latitude bands — horizontal ellipses at increasing "tilt" toward
             the poles, same technique as before, just denser. */}
-        <ellipse cx="200" cy="200" rx="170" ry="35" stroke="url(#globeGradient)" strokeWidth="0.4" />
-        <ellipse cx="200" cy="200" rx="170" ry="60" stroke="url(#globeGradient)" strokeWidth="0.5" />
-        <ellipse cx="200" cy="200" rx="170" ry="85" stroke="url(#globeGradient)" strokeWidth="0.4" />
-        <ellipse cx="200" cy="200" rx="170" ry="110" stroke="url(#globeGradient)" strokeWidth="0.5" />
-        <ellipse cx="200" cy="200" rx="170" ry="140" stroke="url(#globeGradient)" strokeWidth="0.4" />
+        <ellipse cx="200" cy="200" rx="170" ry="35" stroke="url(#globeGradient)" strokeWidth="0.8" />
+        <ellipse cx="200" cy="200" rx="170" ry="60" stroke="url(#globeGradient)" strokeWidth="0.95" />
+        <ellipse cx="200" cy="200" rx="170" ry="85" stroke="url(#globeGradient)" strokeWidth="0.8" />
+        <ellipse cx="200" cy="200" rx="170" ry="110" stroke="url(#globeGradient)" strokeWidth="0.95" />
+        <ellipse cx="200" cy="200" rx="170" ry="140" stroke="url(#globeGradient)" strokeWidth="0.8" />
 
         {/* Meridian lines — vertical ellipses rotated around the center,
             more of them than before for a "fuller" sphere. */}
@@ -89,7 +89,7 @@ export function AuthBackground({ opacity = 0.28 }: { opacity?: number }) {
           rx="60"
           ry="170"
           stroke="url(#globeGradient)"
-          strokeWidth="0.5"
+          strokeWidth="0.95"
           transform="rotate(30 200 200)"
         />
         <ellipse
@@ -98,7 +98,7 @@ export function AuthBackground({ opacity = 0.28 }: { opacity?: number }) {
           rx="110"
           ry="170"
           stroke="url(#globeGradient)"
-          strokeWidth="0.5"
+          strokeWidth="0.95"
           transform="rotate(30 200 200)"
         />
         <ellipse
@@ -107,7 +107,7 @@ export function AuthBackground({ opacity = 0.28 }: { opacity?: number }) {
           rx="60"
           ry="170"
           stroke="url(#globeGradient)"
-          strokeWidth="0.5"
+          strokeWidth="0.95"
           transform="rotate(-30 200 200)"
         />
         <ellipse
@@ -116,7 +116,7 @@ export function AuthBackground({ opacity = 0.28 }: { opacity?: number }) {
           rx="110"
           ry="170"
           stroke="url(#globeGradient)"
-          strokeWidth="0.4"
+          strokeWidth="0.8"
           transform="rotate(-30 200 200)"
         />
         <ellipse
@@ -125,7 +125,7 @@ export function AuthBackground({ opacity = 0.28 }: { opacity?: number }) {
           rx="85"
           ry="170"
           stroke="url(#globeGradient)"
-          strokeWidth="0.4"
+          strokeWidth="0.8"
           transform="rotate(60 200 200)"
         />
         <ellipse
@@ -134,16 +134,16 @@ export function AuthBackground({ opacity = 0.28 }: { opacity?: number }) {
           rx="85"
           ry="170"
           stroke="url(#globeGradient)"
-          strokeWidth="0.4"
+          strokeWidth="0.8"
           transform="rotate(-60 200 200)"
         />
 
-        <line x1="30" y1="200" x2="370" y2="200" stroke="url(#globeGradient)" strokeWidth="0.5" />
-        <line x1="200" y1="30" x2="200" y2="370" stroke="url(#globeGradient)" strokeWidth="0.5" />
+        <line x1="30" y1="200" x2="370" y2="200" stroke="url(#globeGradient)" strokeWidth="0.95" />
+        <line x1="200" y1="30" x2="200" y2="370" stroke="url(#globeGradient)" strokeWidth="0.95" />
 
         {/* Decorative "connection" nodes — fixed points, gentle staggered
             pulse, no data behind them. Radius raised 2.5 -> 4 and given a
-            gaussian bloom so they read as glowing nodes on the wireframe
+            gaussian bloom (r 2.5 -> 6) so they read as glowing nodes on the wireframe
             rather than stray specks; that plus the higher globe opacity is
             what makes the backdrop actually noticeable. */}
         {[
@@ -160,7 +160,7 @@ export function AuthBackground({ opacity = 0.28 }: { opacity?: number }) {
             key={`${dot.cx}-${dot.cy}`}
             cx={dot.cx}
             cy={dot.cy}
-            r="4"
+            r="6"
             fill="#f5a623"
             filter="url(#globeDotGlow)"
             className="animate-pulse"

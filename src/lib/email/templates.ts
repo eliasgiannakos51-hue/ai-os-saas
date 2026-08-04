@@ -14,13 +14,18 @@ const FOREGROUND = "#f5f5f5";
 const MUTED = "#a3a3a3";
 const MONO_STACK = "'Courier New', Courier, monospace";
 
-// /apple-icon is a real, hosted PNG (see src/app/apple-icon.tsx — the
-// icon-only brand mark on a dark background, already generated for Apple
-// touch icons) — email clients need a fully-qualified, actually-hosted
-// image URL, so this reuses that route instead of inlining the SVG (most
-// clients, Outlook especially, don't render inline/embedded SVG).
+// /email-logo is a real, hosted PNG (see src/app/email-logo/route.tsx) —
+// email clients need a fully-qualified, actually-hosted image URL, and
+// most of them (Outlook especially) won't render inline or linked SVG at
+// all, so the mark can't simply be dropped in as markup here.
+//
+// Deliberately NOT /apple-icon, which this used to point at: that route
+// is drawn for a home-screen tile (thin 2-3px strokes on a 180px canvas)
+// and renders as a barely-visible hairline once an inbox scales it down.
+// /email-logo draws the same mark with ~3x heavier strokes on a tighter
+// canvas so it stays legible at the size below.
 const SITE_URL = getSiteUrl();
-const LOGO_URL = `${SITE_URL}/apple-icon`;
+const LOGO_URL = `${SITE_URL}/email-logo`;
 
 function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }) {
   return `<!doctype html>
@@ -38,8 +43,8 @@ function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
             <tr>
               <td style="padding-bottom:24px;">
-                <img src="${LOGO_URL}" width="32" height="32" alt="Ionexa AI" style="display:block; border-radius:7px; margin-bottom:12px;" />
-                <span style="color:${ORANGE}; font-size:13px; letter-spacing:2px;">Ionexa AI //</span>
+                <img src="${LOGO_URL}" width="56" height="56" alt="Ionexa AI" style="display:block; border:0; outline:none; text-decoration:none; border-radius:12px; margin-bottom:10px;" />
+                <span style="color:${ORANGE}; font-size:15px; letter-spacing:2px; font-weight:bold;">Ionexa AI</span>
               </td>
             </tr>
             <tr>

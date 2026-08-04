@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowUp, CheckCircle2, AlertCircle, XCircle, Paperclip, X } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/modules";
 import { useCreateAnything, type CreateResult } from "@/lib/use-create-anything";
@@ -21,6 +22,7 @@ import {
 } from "@/lib/create-attachment-image";
 
 export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
+  const t = useTranslations("dashboard.createAnything");
   const { submit, loading } = useCreateAnything();
   const [input, setInput] = useState("");
   const [result, setResult] = useState<CreateResult | null>(null);
@@ -74,7 +76,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
     // user which image(s) failed and why, instead of a silent gap.
     const failures = results.filter((r) => r.error);
     if (failures.length > 0) {
-      addToast(`✗ ${getErrorMessage(failures[0].error, "Could not upload one or more images.")}`, "error");
+      addToast(`✗ ${getErrorMessage(failures[0].error, t("uploadError"))}`, "error");
     }
     return results.filter((r) => !r.error).map((r) => r.path);
   }
@@ -158,7 +160,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
                 className="flex items-center gap-1.5 rounded-lg border border-border bg-input px-2 py-1 text-xs text-foreground"
               >
                 <span className="max-w-[140px] truncate">{file.name}</span>
-                <button type="button" onClick={() => removeImage(index)} aria-label="Remove image" className="text-muted hover:text-foreground">
+                <button type="button" onClick={() => removeImage(index)} aria-label={t("removeImage")} className="text-muted hover:text-foreground">
                   <X className="h-3 w-3" aria-hidden="true" />
                 </button>
               </li>
@@ -178,7 +180,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
             ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Describe your idea in detail..."
+            placeholder={t("describePlaceholder")}
             rows={4}
             maxLength={20000}
             className="min-h-32 max-h-[60vh] w-full resize-y rounded-2xl border border-border bg-panel px-4 py-4 pr-28 text-base text-foreground outline-none transition-all duration-200 placeholder:text-muted focus:border-orange-500/60 focus:shadow-[0_0_0_4px_rgba(249,115,22,0.08)]"
@@ -188,8 +190,8 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
             <button
               type="button"
               onClick={() => imageInputRef.current?.click()}
-              aria-label="Attach image"
-              title="Attach image"
+              aria-label={t("attachImage")}
+              title={t("attachImage")}
               className="absolute bottom-3 right-16 flex h-10 w-10 items-center justify-center rounded-full text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
             >
               <Paperclip className="h-4 w-4" aria-hidden="true" />
@@ -198,7 +200,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
           <button
             type="submit"
             disabled={loading || !input.trim()}
-            aria-label="Send"
+            aria-label={t("send")}
             className="absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
           >
             {loading ? (
@@ -224,10 +226,10 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
               onAnswer={(answers) => handleClarificationAnswer(result.questions, answers)}
               onSkip={handleClarificationSkip}
               submitting={loading}
-              title="A couple of quick questions:"
-              skipLabel="Skip, log it anyway"
-              continueLabel="Continue"
-              answerPlaceholder="Your answer..."
+              title={t("clarifyTitle")}
+              skipLabel={t("clarifySkip")}
+              continueLabel={t("clarifyContinue")}
+              answerPlaceholder={t("clarifyAnswerPlaceholder")}
             />
           )}
 

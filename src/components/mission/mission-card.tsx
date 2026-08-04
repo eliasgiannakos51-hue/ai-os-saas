@@ -7,6 +7,7 @@ import { CalendarClock, CheckCircle2, Circle, ClipboardCheck, Clock, Loader2, Ro
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { CelebrationBurst } from "@/components/celebration/celebration-burst";
 import { formatRelativeTime } from "@/lib/format-time";
 import { useCredits } from "@/components/credits/credits-context";
 import { MessageContent } from "@/components/chat/message-content";
@@ -83,6 +84,10 @@ export function MissionCard({
   const review = mission.plan_steps?.review;
   const stuckStep = getStuckStep(mission);
   const [buildingIndex, setBuildingIndex] = useState<number | null>(null);
+  // Index of the step that JUST completed — drives the confetti burst
+  // and the pop on that one row. Cleared by the burst's onDone so a
+  // later completion can fire it again.
+  const [celebratingIndex, setCelebratingIndex] = useState<number | null>(null);
   const [schedulingIndex, setSchedulingIndex] = useState<number | null>(null);
   const [reviewing, setReviewing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -190,6 +195,7 @@ export function MissionCard({
         return;
       }
 
+      setCelebratingIndex(index);
       router.refresh();
     } catch {
       await persistStepFailure(index);
@@ -293,8 +299,14 @@ export function MissionCard({
           {steps.map((step, index) => (
             <li
               key={index}
-              className="flex items-start gap-2.5 rounded-xl border border-border bg-input px-3 py-2.5"
+              className={`relative flex items-start gap-2.5 rounded-xl border border-border bg-input px-3 py-2.5 ${
+                celebratingIndex === index ? "celebration-pop" : ""
+              }`}
             >
+              <CelebrationBurst
+                trigger={celebratingIndex === index}
+                onDone={() => setCelebratingIndex(null)}
+              />
               {step.status === "completed" ? (
                 <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
               ) : (

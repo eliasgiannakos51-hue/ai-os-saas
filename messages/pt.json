@@ -707,6 +707,18 @@
         "friday": "Sexta-feira",
         "saturday": "Sábado"
       }
+    },
+    "createAnything": {
+      "uploadError": "Não foi possível carregar uma ou mais imagens.",
+      "removeImage": "Remover imagem",
+      "attachImage": "Anexar imagem",
+      "send": "Enviar",
+      "describePlaceholder": "Descreva a sua ideia em detalhe...",
+      "askPlaceholder": "Pergunte-me o que quiser...",
+      "clarifyTitle": "Duas perguntas rápidas:",
+      "clarifySkip": "Ignorar e registar mesmo assim",
+      "clarifyContinue": "Continuar",
+      "clarifyAnswerPlaceholder": "A sua resposta..."
     }
   },
   "module": {

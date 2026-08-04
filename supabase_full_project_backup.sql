@@ -1568,6 +1568,267 @@ create policy "select_own_email_send_log" on public.email_send_log
   for select using (auth.uid() = user_id);
 
 -- ============================================================================
+-- Margin-guaranteed credit billing: cost log + reservations + atomic RPCs
+-- (lib/billing/pricing-config.ts, credit-formula.ts, reservations.ts)
+-- ============================================================================
+
+-- Every billable AI action, with the REAL measured cost of every sub-call
+-- that made it up — not just the main generation call. This is what makes
+-- the margin claim checkable against reality instead of assumed.
+create table if not exists public.ai_cost_log (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  feature text not null,
+
+  -- Measured usage, summed across every sub-call of the action.
+  input_tokens integer not null default 0,
+  output_tokens integer not null default 0,
+  cache_write_tokens integer not null default 0,
+  cache_read_tokens integer not null default 0,
+  web_searches integer not null default 0,
+  ai_calls integer not null default 0,
+
+  -- numeric, never float: these are money. Binary floating point cannot
+  -- represent most decimal fractions exactly, and summing thousands of
+  -- rows of drifting values to report margin would compound the error.
+  -- 18,8 comfortably holds sub-cent per-action costs.
+  real_cost_usd numeric(18, 8) not null default 0,
+  real_cost_eur numeric(18, 8) not null default 0,
+
+  credits_charged integer not null default 0,
+
+  -- The multiplier CONFIGURED at the time of the action, and the margin
+  -- ACTUALLY achieved. Storing both means a later change to
+  -- CREDIT_MARGIN_MULTIPLIER never rewrites history, and the two can be
+  -- compared to catch a feature whose real margin drifts from target.
+  margin_multiplier numeric(6, 2),
+  achieved_margin numeric(12, 4),
+
+  -- Per-stage USD, so an expensive action can be traced to the sub-call
+  -- responsible (generation vs security review vs retries).
+  stage_breakdown jsonb not null default '{}'::jsonb,
+  metadata jsonb not null default '{}'::jsonb,
+
+  created_at timestamptz not null default now()
+);
+
+-- The margin report groups by feature over a trailing window; this index
+-- matches that access pattern exactly.
+create index if not exists ai_cost_log_feature_created_at_idx
+  on public.ai_cost_log (feature, created_at desc);
+create index if not exists ai_cost_log_user_id_created_at_idx
+  on public.ai_cost_log (user_id, created_at desc);
+
+alter table public.ai_cost_log enable row level security;
+
+-- Read-only to the owner. No insert/update/delete policy at all: only the
+-- service-role client writes here, and a user who could edit their own
+-- cost rows could rewrite the billing record.
+drop policy if exists "select_own_ai_cost_log" on public.ai_cost_log;
+create policy "select_own_ai_cost_log" on public.ai_cost_log
+  for select using (auth.uid() = user_id);
+
+
+-- Credits held for an action that is currently running. A row exists only
+-- between reserve and settle.
+create table if not exists public.credit_reservations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  action text not null,
+  credits integer not null check (credits > 0),
+  status text not null default 'active' check (status in ('active', 'settled', 'released', 'expired')),
+  metadata jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  expires_at timestamptz not null,
+  resolved_at timestamptz
+);
+
+-- Partial index: the hot query is "sum active holds for this user", and
+-- settled/released rows are dead weight in it.
+create index if not exists credit_reservations_active_idx
+  on public.credit_reservations (user_id) where status = 'active';
+create index if not exists credit_reservations_expiry_idx
+  on public.credit_reservations (expires_at) where status = 'active';
+
+alter table public.credit_reservations enable row level security;
+
+drop policy if exists "select_own_credit_reservations" on public.credit_reservations;
+create policy "select_own_credit_reservations" on public.credit_reservations
+  for select using (auth.uid() = user_id);
+
+
+-- ----------------------------------------------------------------------------
+-- reserve_credits: atomically check available balance and place a hold.
+--
+-- "Available" is credits_remaining MINUS everything already held. Doing
+-- that check in application code and inserting afterwards leaves a window
+-- where two concurrent actions both see the full balance and both pass.
+-- The row lock below closes it: the second call blocks until the first
+-- has committed its reservation, then re-reads and sees the reduced
+-- availability.
+-- ----------------------------------------------------------------------------
+create or replace function public.reserve_credits(
+  p_user_id uuid,
+  p_credits integer,
+  p_action text,
+  p_expires_at timestamptz,
+  p_metadata jsonb default '{}'::jsonb
+)
+returns table (reservation_id uuid, available integer)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_remaining integer;
+  v_held integer;
+  v_available integer;
+  v_id uuid;
+begin
+  -- FOR UPDATE serialises concurrent reservations for this one user.
+  select credits_remaining into v_remaining
+    from public.user_credits
+    where user_id = p_user_id
+    for update;
+
+  if v_remaining is null then
+    return query select null::uuid, 0;
+    return;
+  end if;
+
+  -- Expired holds are treated as already gone, so an abandoned action
+  -- can't lock a user out until the sweeper next runs.
+  select coalesce(sum(credits), 0) into v_held
+    from public.credit_reservations
+    where user_id = p_user_id and status = 'active' and expires_at > now();
+
+  v_available := v_remaining - v_held;
+
+  if v_available < p_credits then
+    return query select null::uuid, v_available;
+    return;
+  end if;
+
+  insert into public.credit_reservations (user_id, action, credits, expires_at, metadata)
+    values (p_user_id, p_action, p_credits, p_expires_at, p_metadata)
+    returning id into v_id;
+
+  return query select v_id, v_available;
+end;
+$$;
+
+
+-- ----------------------------------------------------------------------------
+-- settle_reservation: charge the real cost, release the hold, log it.
+--
+-- All three happen in one function so they share a transaction — a
+-- partial failure that charged without releasing would silently double
+-- count against the user's balance.
+-- ----------------------------------------------------------------------------
+create or replace function public.settle_reservation(
+  p_user_id uuid,
+  p_reservation_id uuid,
+  p_credits_to_charge integer,
+  p_feature text,
+  p_input_tokens integer,
+  p_output_tokens integer,
+  p_cache_write_tokens integer,
+  p_cache_read_tokens integer,
+  p_web_searches integer,
+  p_ai_calls integer,
+  p_real_cost_usd numeric,
+  p_real_cost_eur numeric,
+  p_margin_multiplier numeric,
+  p_achieved_margin numeric,
+  p_stage_breakdown jsonb default '{}'::jsonb,
+  p_metadata jsonb default '{}'::jsonb
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if p_reservation_id is not null then
+    update public.credit_reservations
+      set status = 'settled', resolved_at = now()
+      where id = p_reservation_id and user_id = p_user_id and status = 'active';
+  end if;
+
+  if p_credits_to_charge > 0 then
+    -- greatest(...,0) so a settlement can never drive the balance
+    -- negative, even if a reservation expired mid-action and was swept
+    -- before this ran.
+    update public.user_credits
+      set credits_remaining = greatest(credits_remaining - p_credits_to_charge, 0),
+          updated_at = now()
+      where user_id = p_user_id;
+
+    insert into public.credit_transactions (user_id, amount, action_type, description)
+      values (p_user_id, -p_credits_to_charge, p_feature, 'AI usage (settled at real cost)');
+  end if;
+
+  insert into public.ai_cost_log (
+    user_id, feature, input_tokens, output_tokens, cache_write_tokens, cache_read_tokens,
+    web_searches, ai_calls, real_cost_usd, real_cost_eur, credits_charged,
+    margin_multiplier, achieved_margin, stage_breakdown, metadata
+  ) values (
+    p_user_id, p_feature, p_input_tokens, p_output_tokens, p_cache_write_tokens,
+    p_cache_read_tokens, p_web_searches, p_ai_calls, p_real_cost_usd, p_real_cost_eur,
+    p_credits_to_charge, p_margin_multiplier, p_achieved_margin, p_stage_breakdown, p_metadata
+  );
+end;
+$$;
+
+
+-- Release a hold for an action that failed before costing anything.
+create or replace function public.release_reservation(p_user_id uuid, p_reservation_id uuid)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.credit_reservations
+    set status = 'released', resolved_at = now()
+    where id = p_reservation_id and user_id = p_user_id and status = 'active';
+end;
+$$;
+
+
+-- Sweeper for holds whose action died mid-flight. Called by the daily cron.
+create or replace function public.release_expired_reservations()
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_count integer;
+begin
+  update public.credit_reservations
+    set status = 'expired', resolved_at = now()
+    where status = 'active' and expires_at <= now();
+  get diagnostics v_count = row_count;
+  return v_count;
+end;
+$$;
+
+
+-- These run as service-role only (called from lib/billing/reservations.ts
+-- with the admin client). Revoking the default PUBLIC execute grant stops
+-- a logged-in user from calling them directly with the anon key and
+-- settling their own reservation for zero.
+revoke all on function public.reserve_credits(uuid, integer, text, timestamptz, jsonb) from public;
+revoke all on function public.settle_reservation(uuid, uuid, integer, text, integer, integer, integer, integer, integer, integer, numeric, numeric, numeric, numeric, jsonb, jsonb) from public;
+revoke all on function public.release_reservation(uuid, uuid) from public;
+revoke all on function public.release_expired_reservations() from public;
+grant execute on function public.reserve_credits(uuid, integer, text, timestamptz, jsonb) to service_role;
+grant execute on function public.settle_reservation(uuid, uuid, integer, text, integer, integer, integer, integer, integer, integer, numeric, numeric, numeric, numeric, jsonb, jsonb) to service_role;
+grant execute on function public.release_reservation(uuid, uuid) to service_role;
+grant execute on function public.release_expired_reservations() to service_role;
+
+-- ============================================================================
 -- COVERAGE CHECKLIST — every table in this file, grouped by feature/date,
 -- so this doubles as a manifest. Cross-checked against every table name
 -- referenced anywhere in src/ via Supabase's .from("...") calls — nothing
@@ -1608,6 +1869,10 @@ create policy "select_own_email_send_log" on public.email_send_log
 --   user_documents
 -- Email notification preferences + per-user daily send cap:
 --   user_email_preferences, email_send_log
+-- Margin-guaranteed credit billing:
+--   ai_cost_log, credit_reservations
+--   (+ RPCs reserve_credits, settle_reservation, release_reservation,
+--      release_expired_reservations)
 --
 -- Tables that are intentionally NOT here because they were never built:
 --   any "daily_briefings" table, any "marketplace_listings" table.

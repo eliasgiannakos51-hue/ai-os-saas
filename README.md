@@ -104,6 +104,11 @@ touch targets) and works identically on mobile and desktop.
    BETA_FEEDBACK_URL=mailto:feedback@yourdomain.com
    UNSPLASH_ACCESS_KEY=your-unsplash-access-key
 - `IONEXA_DIAG` — optional. Set to `1` to enable verbose request tracing for the auth middleware, Stripe checkout/webhook, the team-page gate, and the Mission Control/Timeline data loads (see `src/lib/diag.ts`). Off by default: middleware runs on every request, so leaving this on writes a log line per page view. Turn it on, redeploy, reproduce the issue, read the logs, turn it off again.
+- `CREDIT_MARGIN_MULTIPLIER` — optional, default `4`, allowed range `4`-`10`. Multiplier applied to an action's real API cost before converting to credits. Anything outside the range (or unparseable) is ignored with a logged warning and the default is used.
+- `CREDIT_PRICE_EUR` — optional, default `0.02`. List price of one credit, in EUR.
+- `USD_TO_EUR_RATE` — optional, default `0.92`. Anthropic bills in USD; credits are priced in EUR.
+- `LARGE_ACTION_CONFIRM_THRESHOLD` — optional, default `50`. Estimates above this many credits require explicit user confirmation before the action starts.
+- `RESERVE_BUFFER_PERCENT` — optional, default `10`. Extra percentage held (not charged) when reserving credits, released at settlement.
    ```
 
    `.env.local` is gitignored — never commit real credentials.

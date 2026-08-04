@@ -235,7 +235,16 @@ export function IdeaRow({
   }
 
   return (
-    <div className="card-lift card-lift-row rounded-2xl border border-border bg-[linear-gradient(160deg,var(--panel)_0%,var(--panel)_65%,rgba(249,115,22,0.035)_100%)] p-4">
+    <div className="card-lift card-lift-row relative rounded-2xl border border-border bg-[linear-gradient(160deg,var(--panel)_0%,var(--panel)_65%,rgba(249,115,22,0.035)_100%)] p-4">
+      {/* Pinned to the card corner, not buried in the bottom
+          action row — see favorite-button.tsx for what that
+          position cost. The card root is `relative` for this. */}
+      <FavoriteButton
+        table="ideas"
+        recordId={idea.id}
+        headline={idea.name}
+        initialFavorited={isFavorited}
+      />
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h3 className="text-[15px] font-semibold tracking-tight text-foreground">
@@ -302,12 +311,6 @@ export function IdeaRow({
             moduleTitle="Ideas"
             recordId={idea.id}
             recordHeadline={idea.name}
-          />
-          <FavoriteButton
-            table="ideas"
-            recordId={idea.id}
-            headline={idea.name}
-            initialFavorited={isFavorited}
           />
           <LinkToButton sourceTable="ideas" sourceId={idea.id} sourceHeadline={idea.name} />
           <button

@@ -650,7 +650,9 @@
       "nextStep": "Prossimo: {step}",
       "noSteps": "Questa missione non ha ancora passaggi di piano.",
       "reviewNotRunYet": "Tutti i passaggi sono completati: esegui il Revisore per un riepilogo.",
-      "reviewLocked": "Il Revisore parte quando tutti i passaggi sono completati."
+      "reviewLocked": "Il Revisore parte quando tutti i passaggi sono completati.",
+      "stepMinutes": "~{count} min",
+      "updatedElsewhere": "Questa missione è appena stata aggiornata altrove: ricarico per mostrare lo stato più recente."
     },
     "reflection": {
       "title": "Riflessione Settimanale",

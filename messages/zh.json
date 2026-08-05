@@ -650,7 +650,9 @@
       "nextStep": "下一步：{step}",
       "noSteps": "此任务尚无计划步骤。",
       "reviewNotRunYet": "所有步骤已完成——运行评审员以获取总结。",
-      "reviewLocked": "所有步骤完成后评审员才会运行。"
+      "reviewLocked": "所有步骤完成后评审员才会运行。",
+      "stepMinutes": "约 {count} 分钟",
+      "updatedElsewhere": "该任务刚刚在别处被更新——正在刷新以显示最新状态。"
     },
     "reflection": {
       "title": "每周回顾",

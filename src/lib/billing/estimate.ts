@@ -172,10 +172,21 @@ export const ACTION_PROFILES = {
     outputCharsPerInputChar: 1,
   },
   missionPlan: {
-    systemPromptTokens: 700,
-    auxiliaryCalls: [{ inputTokens: 700, outputTokens: 150 }],
-    baseOutputChars: 900,
-    outputCharsPerInputChar: 1,
+    systemPromptTokens: 1400,
+    auxiliaryCalls: [
+      // clarification pre-check
+      { inputTokens: 700, outputTokens: 150 },
+      // the Research Agent pass that now runs before planning (see
+      // lib/mission-agents.ts's researchGoal) — its own prompt plus the
+      // search results it reads back. The searches themselves are priced
+      // separately via expectedWebSearches at the call site, since
+      // Anthropic bills those per query rather than per token.
+      { inputTokens: 3000, outputTokens: 400 },
+    ],
+    // Steps carry an outcome, a time estimate and up to 4 sub-steps each
+    // now, so a plan is several times the text it used to be.
+    baseOutputChars: 2600,
+    outputCharsPerInputChar: 2,
   },
   // Create Studio's type detection: one small forced-tool-use call that
   // returns a type, a title and a one-sentence restatement — nothing

@@ -650,7 +650,9 @@
       "nextStep": "Suivant : {step}",
       "noSteps": "Cette mission n'a pas encore d'étapes de plan.",
       "reviewNotRunYet": "Toutes les étapes sont terminées — lancez l'Évaluateur pour obtenir une synthèse.",
-      "reviewLocked": "L'Évaluateur se lance une fois toutes les étapes terminées."
+      "reviewLocked": "L'Évaluateur se lance une fois toutes les étapes terminées.",
+      "stepMinutes": "~{count} min",
+      "updatedElsewhere": "Cette mission vient d'être mise à jour ailleurs — actualisation pour afficher l'état le plus récent."
     },
     "reflection": {
       "title": "Bilan Hebdomadaire",

@@ -73,6 +73,12 @@ const LOCALE_ALLOWED = new Set([
   // "Status" is the German word, spelled identically.
   "de:dashboard.websiteBuilder.statusLabel",
   "de:dashboard.mission.statusFilterLabel",
+  // "min" is the standard minute abbreviation in every Romance language
+  // too — the SI symbol, not an untranslated English word.
+  "es:dashboard.mission.stepMinutes",
+  "fr:dashboard.mission.stepMinutes",
+  "it:dashboard.mission.stepMinutes",
+  "pt:dashboard.mission.stepMinutes",
   // Create Studio: genuine cognates and loanwords, not skipped work.
   // "credits" is used verbatim in Greek throughout this UI already (see
   // el:credits.estimate.approx above); "Type"/"Mission"/"Document" are

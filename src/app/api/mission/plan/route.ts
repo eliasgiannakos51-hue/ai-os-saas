@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { MISSION_AGENT_MODEL, planMission, type PlanMissionResult } from "@/lib/mission-agents";
+import {
+  MISSION_AGENT_MODEL,
+  planMission,
+  researchGoal,
+  type PlanMissionResult,
+} from "@/lib/mission-agents";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
 import { logSecurityCheck } from "@/lib/security-check-log";
 import { logApiError } from "@/lib/log-error";
@@ -27,7 +32,10 @@ export const dynamic = "force-dynamic";
 // See api/create/route.ts's comment — same platform-timeout root cause
 // behind the misleading "Network error" symptom. planMission (1024
 // tokens) is this route's only AI call; 90s is ample headroom.
-export const maxDuration = 90;
+// Two sequential Claude calls now, and the first can run up to three real
+// web searches before it answers. 90s was comfortable for one call and is
+// not for this.
+export const maxDuration = 180;
 
 const MAX_GOAL_LENGTH = 20000;
 
@@ -105,7 +113,14 @@ export async function POST(request: Request) {
         );
     const estimate = estimateForAction(
       "missionPlan",
-      { model: MISSION_AGENT_MODEL, inputChars: goal.length },
+      {
+        model: MISSION_AGENT_MODEL,
+        inputChars: goal.length,
+        // MAX_USES on the research pass's web_search tool. Held for
+        // whether or not they run — an unused hold is released at
+        // settlement, an absent one is a hole in the margin.
+        expectedWebSearches: 3,
+      },
       pricingConfig,
       accountCreditPriceEur
     );
@@ -161,7 +176,12 @@ export async function POST(request: Request) {
     let planResult: PlanMissionResult;
     try {
       void recordAiCallForDailySpend(estimate.estimatedCredits);
-      planResult = await planMission(apiKey, goal, userContext, costs);
+      // Research first, plan second. Best-effort and self-limiting: it
+      // searches only when the goal actually depends on external facts,
+      // caps itself at 3 searches, and returns nothing on any failure —
+      // in which case planning runs on the goal alone, exactly as before.
+      const research = await researchGoal(apiKey, goal, costs);
+      planResult = await planMission(apiKey, goal, userContext, costs, research.findings);
     } catch (err) {
       logApiError("/api/mission/plan", err, { stage: "planner_call" });
       await releaseReservation(user.id, reservationId);
@@ -222,7 +242,17 @@ export async function POST(request: Request) {
     // (components/security/security-checked-badge.tsx) looks up by.
 
     const planSteps: MissionPlan = {
-      steps: planResult.steps.map((text) => ({ text, status: "pending" as const })),
+      steps: planResult.steps.map((step) => ({
+        text: step.text,
+        status: "pending" as const,
+        // Only written when the Planner actually supplied them, so a plan
+        // without sub-steps stores exactly the shape it always did.
+        ...(step.outcome ? { outcome: step.outcome } : {}),
+        ...(step.estimatedMinutes ? { estimatedMinutes: step.estimatedMinutes } : {}),
+        ...(step.substeps
+          ? { substeps: step.substeps.map((text) => ({ text, status: "pending" as const })) }
+          : {}),
+      })),
     };
 
     const { data: mission, error: insertError } = await supabase

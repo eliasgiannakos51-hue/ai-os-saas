@@ -848,5 +848,27 @@
       "title": "Usuário Avançado",
       "description": "Registre 50 entradas em todos os módulos."
     }
+  },
+  "credits": {
+    "outOfCredits": {
+      "title": "Ficaste sem créditos",
+      "detail": "Esta ação precisa de mais créditos do que tens. Compra um pacote ou muda de plano para continuares.",
+      "detailWithNumbers": "Restam-te {available} créditos e isto precisa de cerca de {needed}. Compra um pacote ou muda de plano.",
+      "buyCredits": "Comprar créditos",
+      "upgradePlan": "Mudar de plano"
+    },
+    "low": {
+      "remaining": "Restam {count} créditos este mês",
+      "none": "Sem créditos este mês",
+      "hint": "recarrega agora para nada te interromper.",
+      "topUp": "Recarregar"
+    },
+    "estimate": {
+      "approx": "~{count} créditos",
+      "confirmTitle": "Esta é uma ação grande",
+      "confirmBody": "Isto custará cerca de {count} créditos. Podes continuar ou reduzir o teu pedido.",
+      "cancel": "Cancelar",
+      "continue": "Continuar"
+    }
   }
 }

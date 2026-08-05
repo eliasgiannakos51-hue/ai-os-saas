@@ -848,5 +848,27 @@
       "title": "Power User",
       "description": "Log 50 entries across every module."
     }
+  },
+  "credits": {
+    "outOfCredits": {
+      "title": "You're out of credits",
+      "detail": "This action needs more credits than you have left. Buy a credit pack or upgrade your plan to continue.",
+      "detailWithNumbers": "You have {available} credits left and this needs about {needed}. Buy a credit pack or upgrade your plan to continue.",
+      "buyCredits": "Buy credits",
+      "upgradePlan": "Upgrade plan"
+    },
+    "low": {
+      "remaining": "{count} credits left this month",
+      "none": "No credits left this month",
+      "hint": "top up now so nothing interrupts you.",
+      "topUp": "Top up"
+    },
+    "estimate": {
+      "approx": "~{count} credits",
+      "confirmTitle": "This is a large action",
+      "confirmBody": "This will cost about {count} credits. You can continue, or edit your request to make it smaller.",
+      "cancel": "Cancel",
+      "continue": "Continue"
+    }
   }
 }

@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { GreetingHeader } from "@/components/overview/greeting-header";
 import { CreateChat } from "@/components/create/create-chat";
 import { QuickActionCard } from "@/components/overview/quick-action-card";
+import { LowCreditsBanner } from "@/components/credits/low-credits-banner";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { RecentEntriesCard, type RecentEntry } from "@/components/overview/recent-entries-card";
 import { AiCoachCard } from "@/components/overview/ai-coach-card";
@@ -331,6 +332,7 @@ export default async function OverviewPage() {
         <div className="relative flex flex-wrap items-start justify-between gap-3">
           <GlowOrb className="-left-10 -top-20 -z-10 h-56 w-56" />
           <GreetingHeader email={user.email ?? ""} />
+        <LowCreditsBanner />
           <QuickStartButton />
         </div>
 

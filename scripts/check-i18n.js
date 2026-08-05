@@ -36,6 +36,9 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // "credits" is used verbatim in Greek — the same loanword the rest of the
+  // Greek UI already uses ("Αγορά Credits", "Ιστορικό Credits").
+  "el:credits.estimate.approx",
   "es:sidebar.items.trading",
   "es:sidebar.items.sales",
   "fr:sidebar.items.trading",

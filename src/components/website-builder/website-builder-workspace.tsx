@@ -129,7 +129,7 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.websiteBuilder");
   const supabase = createClient();
-  const { refresh: refreshCredits } = useCredits();
+  const { refresh: refreshCredits, accountCreditPriceEur } = useCredits();
   const { addToast } = useToast();
 
   const [websites, setWebsites] = useState<UserWebsite[]>(initialWebsites);
@@ -762,6 +762,10 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
   // overrides CREDIT_MARGIN_MULTIPLIER / CREDIT_PRICE_EUR moves the real
   // charge but not this preview, so those overrides would need a
   // NEXT_PUBLIC_ mirror to show up here.
+  // accountCreditPriceEur (served by /api/credits/balance) rather than the
+  // list price: the same generation charges 26 credits on Free and 64 on
+  // Ultimate, so estimating at list price showed Ultimate users less than
+  // half of what they would actually be billed.
   const estimatedCost = estimateForAction(
     "websiteGenerate",
     {
@@ -769,7 +773,8 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
       inputChars: description.trim().length,
       imageCount: referenceImageFiles.length,
     },
-    DEFAULTS
+    DEFAULTS,
+    accountCreditPriceEur ?? undefined
   ).estimatedCredits;
 
   // Pagination — same shared pattern/page size as every module list

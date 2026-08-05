@@ -848,5 +848,27 @@
       "title": "Utente Esperto",
       "description": "Registra 50 voci in tutti i moduli."
     }
+  },
+  "credits": {
+    "outOfCredits": {
+      "title": "Hai esaurito i crediti",
+      "detail": "Questa azione richiede più crediti di quelli rimasti. Acquista un pacchetto o passa a un piano superiore per continuare.",
+      "detailWithNumbers": "Ti restano {available} crediti e questo ne richiede circa {needed}. Acquista un pacchetto o passa a un piano superiore.",
+      "buyCredits": "Acquista crediti",
+      "upgradePlan": "Cambia piano"
+    },
+    "low": {
+      "remaining": "{count} crediti rimasti questo mese",
+      "none": "Nessun credito rimasto questo mese",
+      "hint": "ricarica ora per non interromperti.",
+      "topUp": "Ricarica"
+    },
+    "estimate": {
+      "approx": "~{count} crediti",
+      "confirmTitle": "Questa è un'azione impegnativa",
+      "confirmBody": "Questo costerà circa {count} crediti. Puoi continuare o ridurre la richiesta.",
+      "cancel": "Annulla",
+      "continue": "Continua"
+    }
   }
 }

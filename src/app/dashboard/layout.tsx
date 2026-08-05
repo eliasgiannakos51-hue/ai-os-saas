@@ -9,7 +9,9 @@ import { CommandPaletteProvider } from "@/components/dashboard/command-palette-c
 import { CreditsProvider } from "@/components/credits/credits-context";
 import { TopNav } from "@/components/dashboard/top-nav";
 import { acceptPendingTeamInvite } from "@/lib/team/accept-pending-invite";
-import { getOrInitCredits, resolveEffectivePlan } from "@/lib/billing/credits";
+import { getOrInitCredits, resolveEffectivePlan, getPurchasedPackCreditPriceEur } from "@/lib/billing/credits";
+import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { isAdminEmail } from "@/lib/admin";
 import { logApiError } from "@/lib/log-error";
 import { DashboardBackground } from "@/components/dashboard/dashboard-background";
@@ -50,12 +52,12 @@ export default async function DashboardLayout({
   // to a zero balance instead so the shell still renders; admins are
   // unaffected since CreditsProvider treats isAdmin as unlimited regardless
   // of the numeric balance.
-  let credits: { credits_remaining: number };
+  let credits: { credits_remaining: number; credits_total: number };
   try {
     credits = await getOrInitCredits(user.id, plan);
   } catch (err) {
     logApiError("/dashboard (layout)", err, { stage: "get_or_init_credits", userId: user.id });
-    credits = { credits_remaining: 0 };
+    credits = { credits_remaining: 0, credits_total: 0 };
   }
 
   // Gamification — no cron/background worker in this app, so achievements
@@ -74,7 +76,16 @@ export default async function DashboardLayout({
     <ToastProvider>
       <SidebarProvider>
         <CommandPaletteProvider>
-          <CreditsProvider initialCredits={credits.credits_remaining} isAdmin={isAdmin}>
+          <CreditsProvider
+            initialCredits={credits.credits_remaining}
+            initialTotal={credits.credits_total}
+            initialCreditPriceEur={effectiveCreditPriceEurForAccount(
+              plan,
+              await getPurchasedPackCreditPriceEur(user.id),
+              resolvePricingConfig()
+            )}
+            isAdmin={isAdmin}
+          >
             {/* Same wireframe globe as login/signup/landing, now behind every
                 dashboard page for visual continuity with the auth pages —
                 fixed to the viewport, z-0. The whole app shell below is

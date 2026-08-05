@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { ArrowUp, CheckCircle2, AlertCircle, XCircle, Paperclip, X } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/modules";
 import { useCreateAnything, type CreateResult } from "@/lib/use-create-anything";
+import { OutOfCreditsNotice } from "@/components/credits/out-of-credits-notice";
 import { useSmartSuggestions } from "@/lib/use-smart-suggestions";
 import { SmartSuggestions } from "@/components/create/smart-suggestions";
 import { NextStepSuggestion } from "@/components/create/next-step-suggestion";
@@ -260,6 +261,8 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
               </div>
             </div>
           )}
+
+          {result.type === "outOfCredits" && <OutOfCreditsNotice className="mt-3" />}
 
           {result.type === "unmatched" && (
             <div className="flex items-start gap-3 rounded-2xl border border-orange-900/50 bg-orange-500/5 p-4 text-sm">

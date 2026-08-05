@@ -8,6 +8,12 @@ export type CreateResult =
   | { type: "matched"; moduleTitle: string; href: string; message: string }
   | { type: "unmatched"; message: string }
   | { type: "error"; message: string }
+  // Distinct from "error" on purpose: running out of credits is not a
+  // failure to be retried, it is a state with two specific recovery
+  // actions. Collapsing it into "error" is why the routes' outOfCredits
+  // flag had no visible effect — the UI showed the same red text as a
+  // network drop.
+  | { type: "outOfCredits"; message: string }
   | { type: "needsClarification"; questions: string[] };
 
 // Shared submit logic for the "Create Anything" classifier, used by both
@@ -44,6 +50,10 @@ export function useCreateAnything() {
       }
 
       void refreshCredits();
+
+      if (data.outOfCredits) {
+        return { type: "outOfCredits", message: data.message ?? "" };
+      }
 
       if (data.needsClarification) {
         return { type: "needsClarification", questions: data.questions as string[] };

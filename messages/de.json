@@ -848,5 +848,27 @@
       "title": "Power-User",
       "description": "Erfasse 50 Einträge über alle Module hinweg."
     }
+  },
+  "credits": {
+    "outOfCredits": {
+      "title": "Deine Credits sind aufgebraucht",
+      "detail": "Diese Aktion braucht mehr Credits, als dir bleiben. Kaufe ein Paket oder wechsle den Tarif, um fortzufahren.",
+      "detailWithNumbers": "Dir bleiben {available} Credits, benötigt werden etwa {needed}. Kaufe ein Paket oder wechsle den Tarif.",
+      "buyCredits": "Credits kaufen",
+      "upgradePlan": "Tarif wechseln"
+    },
+    "low": {
+      "remaining": "Noch {count} Credits diesen Monat",
+      "none": "Keine Credits mehr diesen Monat",
+      "hint": "jetzt aufladen, damit nichts stockt.",
+      "topUp": "Aufladen"
+    },
+    "estimate": {
+      "approx": "~{count} Credits",
+      "confirmTitle": "Das ist eine große Aktion",
+      "confirmBody": "Das kostet etwa {count} Credits. Du kannst fortfahren oder deine Anfrage verkleinern.",
+      "cancel": "Abbrechen",
+      "continue": "Fortfahren"
+    }
   }
 }

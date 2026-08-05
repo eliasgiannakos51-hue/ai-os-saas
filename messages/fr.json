@@ -848,5 +848,27 @@
       "title": "Utilisateur Expert",
       "description": "Enregistrez 50 entrées dans tous les modules."
     }
+  },
+  "credits": {
+    "outOfCredits": {
+      "title": "Vous n'avez plus de crédits",
+      "detail": "Cette action demande plus de crédits qu'il ne vous en reste. Achetez un pack ou passez à un forfait supérieur pour continuer.",
+      "detailWithNumbers": "Il vous reste {available} crédits et ceci en demande environ {needed}. Achetez un pack ou passez à un forfait supérieur.",
+      "buyCredits": "Acheter des crédits",
+      "upgradePlan": "Changer de forfait"
+    },
+    "low": {
+      "remaining": "{count} crédits restants ce mois-ci",
+      "none": "Plus de crédits ce mois-ci",
+      "hint": "rechargez maintenant pour ne pas être interrompu.",
+      "topUp": "Recharger"
+    },
+    "estimate": {
+      "approx": "~{count} crédits",
+      "confirmTitle": "Ceci est une action importante",
+      "confirmBody": "Ceci coûtera environ {count} crédits. Vous pouvez continuer ou réduire votre demande.",
+      "cancel": "Annuler",
+      "continue": "Continuer"
+    }
   }
 }

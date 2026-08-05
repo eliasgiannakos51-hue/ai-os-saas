@@ -4,6 +4,15 @@ import { createContext, useCallback, useContext, useState, type ReactNode } from
 
 type CreditsContextValue = {
   credits: number | null;
+  /** The plan's monthly allowance, so consumers can compute a percentage.
+   *  Without it a "20% left" warning is impossible — 200 credits is nearly
+   *  everything on Free and nearly nothing on Ultimate. */
+  total: number | null;
+  /** What one credit is worth on THIS account (plan rate, or the cheapest
+   *  credit-pack rate they bought). The pre-submit estimate must divide by
+   *  the same number settlement does, or an Ultimate user is quoted less
+   *  than half what they will actually be charged. */
+  accountCreditPriceEur: number | null;
   refresh: () => Promise<void>;
   isAdmin: boolean;
 };
@@ -24,14 +33,20 @@ const CreditsContext = createContext<CreditsContextValue | null>(null);
 // of reflecting their real unlimited access.
 export function CreditsProvider({
   initialCredits,
+  initialTotal = null,
+  initialCreditPriceEur = null,
   isAdmin = false,
   children,
 }: {
   initialCredits: number | null;
+  initialTotal?: number | null;
+  initialCreditPriceEur?: number | null;
   isAdmin?: boolean;
   children: ReactNode;
 }) {
   const [credits, setCredits] = useState<number | null>(initialCredits);
+  const [total, setTotal] = useState<number | null>(initialTotal);
+  const [accountCreditPriceEur, setRate] = useState<number | null>(initialCreditPriceEur);
 
   const refresh = useCallback(async () => {
     try {
@@ -39,6 +54,8 @@ export function CreditsProvider({
       const data = await res.json();
       if (res.ok && data?.ok && typeof data.credits === "number") {
         setCredits(data.credits);
+        if (typeof data.total === "number") setTotal(data.total);
+        if (typeof data.creditPriceEur === "number") setRate(data.creditPriceEur);
       }
     } catch {
       // Best-effort — a failed refresh just leaves the last known balance
@@ -47,7 +64,7 @@ export function CreditsProvider({
   }, []);
 
   return (
-    <CreditsContext.Provider value={{ credits, refresh, isAdmin }}>{children}</CreditsContext.Provider>
+    <CreditsContext.Provider value={{ credits, total, accountCreditPriceEur, refresh, isAdmin }}>{children}</CreditsContext.Provider>
   );
 }
 

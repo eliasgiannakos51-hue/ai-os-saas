@@ -11,6 +11,7 @@ import { LogoutButton } from "@/components/logout-button";
 import { Logo } from "@/components/logo";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
 import { useCredits } from "@/components/credits/credits-context";
+import { LowCreditsBanner } from "@/components/credits/low-credits-banner";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { LanguageSelector } from "@/components/i18n/language-selector";
 
@@ -86,6 +87,12 @@ export function TopNav({ email }: { email: string }) {
           <Zap className="h-3.5 w-3.5 text-orange-400" aria-hidden="true" />
           {isAdmin ? "Unlimited" : credits === null ? "…" : credits.toLocaleString()}
         </Link>
+
+        {/* Only renders below 20% of the monthly allowance — see
+            LowCreditsBanner. Sits next to the raw number because the number
+            alone carries no sense of scale: 200 left is nearly everything on
+            Free and nearly nothing on Ultimate. */}
+        <LowCreditsBanner variant="inline" />
 
         <button
           type="button"

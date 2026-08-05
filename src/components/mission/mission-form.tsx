@@ -6,6 +6,8 @@ import { Loader2, Rocket } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useCredits } from "@/components/credits/credits-context";
+import { CostEstimateHint, LargeActionConfirm, useCostEstimate } from "@/components/credits/cost-estimate";
+import { OutOfCreditsNotice } from "@/components/credits/out-of-credits-notice";
 import { useToast } from "@/components/toast/toast-context";
 
 const MAX_GOAL_LENGTH = 20000;
@@ -21,6 +23,13 @@ export function MissionForm() {
   const { refresh: refreshCredits } = useCredits();
   const { addToast } = useToast();
   const [goal, setGoal] = useState("");
+  const [outOfCredits, setOutOfCredits] = useState(false);
+  const [pendingConfirm, setPendingConfirm] = useState(false);
+  // Live estimate from the SAME estimator the server reserves against, at
+  // this account's own per-credit rate.
+  const { credits: estimatedCredits, needsConfirmation } = useCostEstimate("missionPlan", {
+    inputChars: goal.trim().length,
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,8 +38,17 @@ export function MissionForm() {
     const trimmed = goal.trim();
     if (!trimmed || loading) return;
 
+    // Above the large-action threshold, ask first. An undoable charge of
+    // this size deserves an explicit yes rather than a surprise.
+    if (needsConfirmation && !pendingConfirm) {
+      setPendingConfirm(true);
+      return;
+    }
+    setPendingConfirm(false);
+
     setLoading(true);
     setError(null);
+    setOutOfCredits(false);
     try {
       const res = await fetch("/api/mission/plan", {
         method: "POST",
@@ -44,6 +62,10 @@ export function MissionForm() {
         const message = getErrorMessage(data?.error, "Could not create a plan.");
         setError(message);
         addToast(`✗ ${message}`, "error");
+        return;
+      }
+      if (data.outOfCredits) {
+        setOutOfCredits(true);
         return;
       }
       if (!data.planned) {
@@ -66,6 +88,17 @@ export function MissionForm() {
   }
 
   return (
+    <>
+    {pendingConfirm && (
+      <LargeActionConfirm
+        credits={estimatedCredits}
+        onConfirm={() => {
+          setPendingConfirm(false);
+          void handleSubmit(new Event("submit") as unknown as FormEvent);
+        }}
+        onCancel={() => setPendingConfirm(false)}
+      />
+    )}
     <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-border bg-panel p-5">
       <label htmlFor="mission-goal" className="block text-sm font-semibold text-foreground">
         {t("goalLabel")}
@@ -93,11 +126,19 @@ export function MissionForm() {
           {loading ? t("planning") : t("createPlan")}
         </button>
       </div>
+
+      {/* Shown before submit, not after — the whole point is that the cost
+          is never a surprise. */}
+      <CostEstimateHint credits={estimatedCredits} />
+
+      {outOfCredits && <OutOfCreditsNotice />}
+
       {error && (
         <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
           {error}
         </p>
       )}
     </form>
+    </>
   );
 }

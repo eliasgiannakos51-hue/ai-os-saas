@@ -848,5 +848,27 @@
       "title": "高级用户",
       "description": "在所有模块中记录50条条目。"
     }
+  },
+  "credits": {
+    "outOfCredits": {
+      "title": "您的积分已用完",
+      "detail": "此操作所需积分超过您的余额。购买积分包或升级方案即可继续。",
+      "detailWithNumbers": "您还剩 {available} 积分，此操作约需 {needed}。请购买积分包或升级方案。",
+      "buyCredits": "购买积分",
+      "upgradePlan": "升级方案"
+    },
+    "low": {
+      "remaining": "本月剩余 {count} 积分",
+      "none": "本月积分已用完",
+      "hint": "立即充值，避免中断。",
+      "topUp": "充值"
+    },
+    "estimate": {
+      "approx": "约 {count} 积分",
+      "confirmTitle": "这是一次大型操作",
+      "confirmBody": "此操作约需 {count} 积分。您可以继续，或缩减请求内容。",
+      "cancel": "取消",
+      "continue": "继续"
+    }
   }
 }

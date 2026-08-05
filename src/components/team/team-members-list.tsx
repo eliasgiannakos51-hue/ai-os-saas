@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Users, Clock, CheckCircle2, Trash2 } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
-import { formatRelativeTime } from "@/lib/format-time";
+import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { useToast } from "@/components/toast/toast-context";
 import { getErrorMessage } from "@/lib/get-error-message";
 
@@ -18,6 +18,7 @@ export type TeamMember = {
 };
 
 export function TeamMembersList({ members: initialMembers }: { members: TeamMember[] }) {
+  const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.team");
   const { addToast } = useToast();
   const [members, setMembers] = useState(initialMembers);

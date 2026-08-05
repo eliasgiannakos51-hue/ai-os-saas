@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { CelebrationBurst } from "@/components/celebration/celebration-burst";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
-import { formatRelativeTime } from "@/lib/format-time";
+import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { useCredits } from "@/components/credits/credits-context";
 import { MessageContent } from "@/components/chat/message-content";
 import { getStuckStep } from "@/lib/mission-progress";
@@ -77,6 +77,7 @@ export function MissionCard({
   // "Scheduled" instead of offering to schedule the same step twice.
   scheduledStepIndices?: number[];
 }) {
+  const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.mission");
   const router = useRouter();
   const supabase = createClient();

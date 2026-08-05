@@ -16,7 +16,10 @@
     "backToHome": "← Voltar para Ionexa AI",
     "loading": "Carregando...",
     "error": "erro",
-    "viewPlans": "Ver planos"
+    "viewPlans": "Ver planos",
+    "chooseFiles": "Escolher ficheiros",
+    "noFileChosen": "Nenhum ficheiro escolhido",
+    "filesSelected": "{count} selecionados"
   },
   "sidebar": {
     "groups": {
@@ -25,12 +28,12 @@
       "business": "Negócio",
       "strategy": "Estratégia",
       "operations": "Operações",
-      "marketplace": "Marketplace",
+      "marketplace": "Mercado",
       "settings": "Configurações"
     },
     "items": {
       "home": "Início",
-      "chat": "Ionexa Chat",
+      "chat": "Ionexa Conversa",
       "memory": "Memória IA",
       "timeline": "Linha do Tempo",
       "favorites": "Favoritos",
@@ -38,7 +41,7 @@
       "reflection": "Reflexão Semanal",
       "settings": "Configurações",
       "team": "Equipe",
-      "agents": "Agentes IA",
+      "agents": "Agentes de IA",
       "websites": "Sites",
       "websiteBuilder": "Gerador de Sites",
       "apps": "Aplicativos",
@@ -64,7 +67,7 @@
       "tradingWorkflow": "Fluxo de Trading",
       "productWorkflow": "Fluxo de Produto",
       "automation": "Automação",
-      "marketplace": "Marketplace"
+      "marketplace": "Mercado"
     }
   },
   "landing": {
@@ -381,6 +384,18 @@
           "description": "Quando um visitante preenche um formulário de contacto num dos seus sites."
         }
       }
+    },
+    "aiPersona": {
+      "title": "Persona de IA",
+      "description": "Dá ao assistente um nome personalizado."
+    },
+    "billing": {
+      "title": "Faturação",
+      "currentPlan": "Plano atual",
+      "buyCredits": "Comprar Créditos",
+      "creditHistory": "Histórico de Créditos",
+      "manageTeam": "Gerir Equipa",
+      "ownerAccess": "Acesso de Proprietário"
     }
   },
   "dashboard": {
@@ -406,7 +421,7 @@
         "thisMonth": "Este mês"
       },
       "aiCoach": {
-        "title": "AI Coach",
+        "title": "Treinador de IA",
         "noActivity": "Nenhuma atividade ainda esta semana — registre algo para começar.",
         "entryCount": "{count, plural, one {# nova entrada em {module}} other {# novas entradas em {module}}}",
         "mostActiveIn": "Mais ativo em {module}"
@@ -433,6 +448,29 @@
           "coverage": "Tente explorar um módulo que ainda não usou.",
           "missionSteps": "Conclua uma etapa da missão para manter seu ritmo.",
           "consistency": "Tente registrar algo todos os dias desta semana."
+        }
+      },
+      "heroQuestion": "O que queres construir hoje?",
+      "recentEntries": {
+        "title": "Entradas Recentes",
+        "empty": "Ainda sem entradas."
+      },
+      "quickActions": {
+        "ideas": {
+          "label": "Ideia",
+          "description": "Captura uma nova ideia"
+        },
+        "research": {
+          "label": "Pesquisa",
+          "description": "Regista notas de pesquisa"
+        },
+        "finance": {
+          "label": "Finanças",
+          "description": "Acompanha receitas e despesas"
+        },
+        "trading": {
+          "label": "Trading",
+          "description": "Regista uma operação"
         }
       }
     },
@@ -486,7 +524,7 @@
       "bulletList": "Lista com marcadores"
     },
     "chat": {
-      "title": "Ionexa Chat"
+      "title": "Ionexa Conversa"
     },
     "create": {
       "title": "Criar Qualquer Coisa"
@@ -601,7 +639,7 @@
       "productsTitle": "Produtos"
     },
     "energyCheckIn": {
-      "title": "Check-In de Energia",
+      "title": "Registo de Energia",
       "prompt": "Como está sua energia hoje?",
       "checkedInToday": "Energia de hoje: {level}/5.",
       "logAgain": "Registrar novamente",
@@ -664,7 +702,7 @@
       "imageTooMany": "Podes adicionar até {max} imagens."
     },
     "marketplace": {
-      "title": "Marketplace",
+      "title": "Mercado",
       "description": "Compre e venda agentes, automações e templates — em breve.",
       "emptyState": "Nenhum anúncio ainda — seja o primeiro a publicar.",
       "comingSoon": "Em breve",

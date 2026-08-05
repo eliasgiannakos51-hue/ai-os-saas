@@ -13,7 +13,7 @@ import { LinkedEntities } from "@/components/entity-links/linked-entities";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { TextActionsTextarea } from "@/components/text-actions/text-actions-textarea";
 import { useToast } from "@/components/toast/toast-context";
-import { formatRelativeTime } from "@/lib/format-time";
+import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import type { LinkedEntity } from "@/lib/entity-links";
 
 function formStateFor(module: ModuleConfig, record: ModuleRecord): Record<string, string> {
@@ -36,6 +36,7 @@ export function GenericRecordRow({
   linkedEntities?: LinkedEntity[];
   isFavorited?: boolean;
 }) {
+  const formatRelativeTime = useFormatRelativeTime();
   const router = useRouter();
   const supabase = createClient();
   const { addToast } = useToast();

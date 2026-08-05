@@ -7,7 +7,7 @@
     "signOut": "Αποσύνδεση",
     "jumpToPage": "Μετάβαση σε module ή σελίδα...",
     "noMatches": "Δεν βρέθηκαν αποτελέσματα για '{query}'",
-    "createAnything": "Create Anything",
+    "createAnything": "Δημιούργησε Οτιδήποτε",
     "cancel": "Ακύρωση",
     "save": "Αποθήκευση",
     "saving": "Αποθήκευση...",
@@ -16,7 +16,10 @@
     "backToHome": "← Πίσω στο Ionexa AI",
     "loading": "Φόρτωση...",
     "error": "σφάλμα",
-    "viewPlans": "Δες τα πλάνα"
+    "viewPlans": "Δες τα πλάνα",
+    "chooseFiles": "Επιλογή αρχείων",
+    "noFileChosen": "Δεν επιλέχθηκε αρχείο",
+    "filesSelected": "{count} επιλεγμένα"
   },
   "sidebar": {
     "groups": {
@@ -25,12 +28,12 @@
       "business": "Επιχείρηση",
       "strategy": "Στρατηγική",
       "operations": "Λειτουργίες",
-      "marketplace": "Marketplace",
+      "marketplace": "Αγορά",
       "settings": "Ρυθμίσεις"
     },
     "items": {
       "home": "Αρχική",
-      "chat": "Ionexa Chat",
+      "chat": "Ionexa Συνομιλία",
       "memory": "AI Μνήμη",
       "timeline": "Χρονολόγιο",
       "favorites": "Αγαπημένα",
@@ -38,7 +41,7 @@
       "reflection": "Εβδομαδιαία Αναστοχασμός",
       "settings": "Ρυθμίσεις",
       "team": "Ομάδα",
-      "agents": "AI Agents",
+      "agents": "AI Πράκτορες",
       "websites": "Ιστοσελίδες",
       "websiteBuilder": "Δημιουργός Ιστοσελίδων",
       "apps": "Εφαρμογές",
@@ -52,7 +55,7 @@
       "analytics": "Αναλυτικά",
       "finance": "Πράκτορας Οικονομικών",
       "content": "Marketing",
-      "sales": "CRM",
+      "sales": "CRM Πελατών",
       "products": "Προϊόντα",
       "research": "Πράκτορας Έρευνας",
       "learning": "Εκμάθηση",
@@ -60,11 +63,11 @@
       "competitors": "Ανταγωνιστές",
       "decisions": "Αποφάσεις",
       "feedback": "Ανατροφοδότηση",
-      "trading": "Trading",
+      "trading": "Συναλλαγές",
       "tradingWorkflow": "Ροή Εργασίας Trading",
       "productWorkflow": "Ροή Εργασίας Product",
       "automation": "Αυτοματισμοί",
-      "marketplace": "Marketplace"
+      "marketplace": "Αγορά"
     }
   },
   "landing": {
@@ -381,6 +384,18 @@
           "description": "Όταν κάποιος επισκέπτης συμπληρώνει φόρμα επικοινωνίας σε ένα site σου."
         }
       }
+    },
+    "aiPersona": {
+      "title": "Προσωπικότητα AI",
+      "description": "Δώσε στον βοηθό ένα δικό σου όνομα."
+    },
+    "billing": {
+      "title": "Χρεώσεις",
+      "currentPlan": "Τρέχον πλάνο",
+      "buyCredits": "Αγορά Credits",
+      "creditHistory": "Ιστορικό Credits",
+      "manageTeam": "Διαχείριση Ομάδας",
+      "ownerAccess": "Πρόσβαση Ιδιοκτήτη"
     }
   },
   "dashboard": {
@@ -406,7 +421,7 @@
         "thisMonth": "Αυτόν τον μήνα"
       },
       "aiCoach": {
-        "title": "AI Coach",
+        "title": "AI Προπονητής",
         "noActivity": "Καμία δραστηριότητα ακόμα αυτή την εβδομάδα — καταχώρησε κάτι για να ξεκινήσεις.",
         "entryCount": "{count, plural, one {# νέα εγγραφή στο {module}} other {# νέες εγγραφές στο {module}}}",
         "mostActiveIn": "Πιο ενεργό/ή στο {module}"
@@ -433,6 +448,29 @@
           "coverage": "Δοκίμασε να εξερευνήσεις μια ενότητα που δεν έχεις χρησιμοποιήσει ακόμα.",
           "missionSteps": "Ολοκλήρωσε ένα βήμα αποστολής για να διατηρήσεις τη φόρα σου.",
           "consistency": "Δοκίμασε να καταγράφεις κάτι κάθε μέρα αυτή την εβδομάδα."
+        }
+      },
+      "heroQuestion": "Τι θέλεις να φτιάξεις σήμερα;",
+      "recentEntries": {
+        "title": "Πρόσφατες Καταχωρήσεις",
+        "empty": "Καμία καταχώρηση ακόμα."
+      },
+      "quickActions": {
+        "ideas": {
+          "label": "Ιδέα",
+          "description": "Κατέγραψε μια νέα ιδέα"
+        },
+        "research": {
+          "label": "Έρευνα",
+          "description": "Κατέγραψε σημειώσεις έρευνας"
+        },
+        "finance": {
+          "label": "Οικονομικά",
+          "description": "Παρακολούθησε έσοδα & έξοδα"
+        },
+        "trading": {
+          "label": "Συναλλαγές",
+          "description": "Κατέγραψε μια συναλλαγή"
         }
       }
     },
@@ -486,7 +524,7 @@
       "bulletList": "Λίστα με κουκκίδες"
     },
     "chat": {
-      "title": "Ionexa Chat"
+      "title": "Ionexa Συνομιλία"
     },
     "create": {
       "title": "Δημιουργία Οτιδήποτε"
@@ -601,7 +639,7 @@
       "productsTitle": "Products"
     },
     "energyCheckIn": {
-      "title": "Energy Check-In",
+      "title": "Έλεγχος Ενέργειας",
       "prompt": "Πώς είναι η ενέργειά σου σήμερα;",
       "checkedInToday": "Σημερινή ενέργεια: {level}/5.",
       "logAgain": "Καταγραφή ξανά",
@@ -664,7 +702,7 @@
       "imageTooMany": "Μπορείς να προσθέσεις έως {max} εικόνες."
     },
     "marketplace": {
-      "title": "Marketplace",
+      "title": "Αγορά",
       "description": "Αγόρασε και πούλησε agents, automations και templates — έρχεται σύντομα.",
       "emptyState": "Δεν υπάρχουν καταχωρήσεις ακόμα — γίνε ο πρώτος που θα δημοσιεύσει.",
       "comingSoon": "Έρχεται σύντομα",

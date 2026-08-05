@@ -1,9 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useState } from "react";
 import { CREDIT_PACKS, CURRENCY_SYMBOL } from "@/lib/billing/plans";
 
 export function BuyCredits() {
+  const t = useTranslations("settings.billing");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,7 +39,7 @@ export function BuyCredits() {
       id="buy-credits"
       className="mb-6 scroll-mt-20 space-y-3 rounded-2xl border border-border bg-panel p-5"
     >
-      <h2 className="text-sm font-semibold text-foreground">Buy Credits</h2>
+      <h2 className="text-sm font-semibold text-foreground">{t("buyCredits")}</h2>
       <p className="text-xs text-muted">
         Need more credits this month? Buy a one-time top-up — no subscription change.
       </p>

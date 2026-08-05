@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Clock } from "lucide-react";
 import { formatRelativeTime } from "@/lib/format-time";
 
@@ -10,20 +11,23 @@ export type RecentEntry = {
   createdAt: string;
 };
 
-export function RecentEntriesCard({ entries }: { entries: RecentEntry[] }) {
+export async function RecentEntriesCard({ entries }: { entries: RecentEntry[] }) {
+  const t = await getTranslations("dashboard.overview.recentEntries");
+  const locale = await getLocale();
+
   return (
     <div className="rounded-2xl border border-border bg-panel p-5 sm:col-span-2 lg:col-span-1">
       <div className="flex items-center gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400">
           <Clock className="h-5 w-5" aria-hidden="true" />
         </span>
-        <p className="text-[15px] font-semibold text-foreground">Recent Entries</p>
+        <p className="text-[15px] font-semibold text-foreground">{t("title")}</p>
       </div>
 
       {entries.length === 0 ? (
         <div className="mt-4 flex items-center gap-2 text-sm text-muted">
           <Clock className="h-4 w-4 shrink-0 text-muted/80" aria-hidden="true" />
-          No entries yet.
+          {t("empty")}
         </div>
       ) : (
         <ul className="mt-4 space-y-3">
@@ -39,10 +43,10 @@ export function RecentEntriesCard({ entries }: { entries: RecentEntry[] }) {
                 </div>
                 <span
                   className="shrink-0 text-xs text-muted"
-                  title={new Date(entry.createdAt).toLocaleString()}
+                  title={new Date(entry.createdAt).toLocaleString(locale)}
                   suppressHydrationWarning
                 >
-                  {formatRelativeTime(entry.createdAt)}
+                  {formatRelativeTime(entry.createdAt, locale)}
                 </span>
               </Link>
             </li>

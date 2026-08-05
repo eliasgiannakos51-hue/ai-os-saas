@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -23,6 +23,7 @@ export const fetchCache = "force-no-store";
 
 export default async function DocumentsPage() {
   const t = await getTranslations("dashboard.documents");
+  const locale = await getLocale();
   const supabase = createClient();
 
   const {
@@ -78,7 +79,7 @@ export default async function DocumentsPage() {
                       {doc.title || t("untitled")}
                     </span>
                     <span className="block text-xs text-muted" suppressHydrationWarning>
-                      {formatRelativeTime(doc.updated_at)}
+                      {formatRelativeTime(doc.updated_at, locale)}
                     </span>
                   </span>
                 </Link>

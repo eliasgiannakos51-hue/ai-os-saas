@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ShieldCheck, ShieldAlert, X } from "lucide-react";
-import { formatRelativeTime } from "@/lib/format-time";
+import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import type { SecurityCheckResourceType, SecurityCheckResult } from "@/lib/security-check-log";
 
 type SecurityCheckLogRow = {
@@ -24,6 +24,7 @@ export function SecurityCheckedBadge({
   resourceType: SecurityCheckResourceType;
   resourceId: string;
 }) {
+  const formatRelativeTime = useFormatRelativeTime();
   const [log, setLog] = useState<SecurityCheckLogRow | null>(null);
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);

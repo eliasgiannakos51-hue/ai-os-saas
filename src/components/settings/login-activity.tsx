@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { ShieldCheck, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
-import { formatRelativeTime } from "@/lib/format-time";
+import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { parseUserAgent } from "@/lib/parse-user-agent";
 
 export type KnownDevice = {
@@ -16,6 +16,7 @@ export type KnownDevice = {
 };
 
 export function LoginActivity({ devices: initialDevices }: { devices: KnownDevice[] }) {
+  const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("settings.loginActivity");
   const supabase = createClient();
   const { addToast } = useToast();

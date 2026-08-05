@@ -32,6 +32,7 @@ export const metadata: Metadata = {
 
 export default async function SettingsPage() {
   const t = await getTranslations("settings");
+  const tBilling = await getTranslations("settings.billing");
   const supabase = createClient();
 
   const {
@@ -148,7 +149,7 @@ export default async function SettingsPage() {
             href="#buy-credits"
             className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
           >
-            Billing
+            {tBilling("title")}
           </a>
           <a
             href="#achievements"

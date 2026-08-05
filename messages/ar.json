@@ -7,7 +7,7 @@
     "signOut": "تسجيل الخروج",
     "jumpToPage": "الانتقال إلى وحدة أو صفحة...",
     "noMatches": "لا توجد نتائج لـ '{query}'",
-    "createAnything": "إنشاء أي شيء",
+    "createAnything": "أنشئ أي شيء",
     "cancel": "إلغاء",
     "save": "حفظ",
     "saving": "جارٍ الحفظ...",
@@ -16,7 +16,10 @@
     "backToHome": "← العودة إلى Ionexa AI",
     "loading": "جارٍ التحميل...",
     "error": "خطأ",
-    "viewPlans": "عرض الخطط"
+    "viewPlans": "عرض الخطط",
+    "chooseFiles": "اختر الملفات",
+    "noFileChosen": "لم يتم اختيار ملف",
+    "filesSelected": "{count} محدد"
   },
   "sidebar": {
     "groups": {
@@ -25,12 +28,12 @@
       "business": "الأعمال",
       "strategy": "الاستراتيجية",
       "operations": "العمليات",
-      "marketplace": "المتجر",
+      "marketplace": "السوق",
       "settings": "الإعدادات"
     },
     "items": {
       "home": "الرئيسية",
-      "chat": "Ionexa Chat",
+      "chat": "محادثة Ionexa",
       "memory": "ذاكرة الذكاء الاصطناعي",
       "timeline": "الجدول الزمني",
       "favorites": "المفضلة",
@@ -64,7 +67,7 @@
       "tradingWorkflow": "سير عمل التداول",
       "productWorkflow": "سير عمل المنتج",
       "automation": "الأتمتة",
-      "marketplace": "المتجر"
+      "marketplace": "السوق"
     }
   },
   "landing": {
@@ -381,6 +384,18 @@
           "description": "عندما يملأ زائر نموذج تواصل في أحد مواقعك."
         }
       }
+    },
+    "aiPersona": {
+      "title": "شخصية الذكاء الاصطناعي",
+      "description": "امنح المساعد اسمًا مخصصًا."
+    },
+    "billing": {
+      "title": "الفوترة",
+      "currentPlan": "الخطة الحالية",
+      "buyCredits": "شراء أرصدة",
+      "creditHistory": "سجل الأرصدة",
+      "manageTeam": "إدارة الفريق",
+      "ownerAccess": "وصول المالك"
     }
   },
   "dashboard": {
@@ -406,7 +421,7 @@
         "thisMonth": "هذا الشهر"
       },
       "aiCoach": {
-        "title": "مدرّب الذكاء الاصطناعي",
+        "title": "مدرب الذكاء الاصطناعي",
         "noActivity": "لا يوجد نشاط بعد هذا الأسبوع — سجّل شيئًا للبدء.",
         "entryCount": "{count, plural, one {إدخال جديد واحد في {module}} other {# إدخال جديد في {module}}}",
         "mostActiveIn": "الأكثر نشاطًا في {module}"
@@ -433,6 +448,29 @@
           "coverage": "جرّب استكشاف وحدة لم تستخدمها بعد.",
           "missionSteps": "أكمل خطوة من المهمة للحفاظ على زخمك.",
           "consistency": "حاول تسجيل شيء ما كل يوم هذا الأسبوع."
+        }
+      },
+      "heroQuestion": "ماذا تريد أن تبني اليوم؟",
+      "recentEntries": {
+        "title": "الإدخالات الأخيرة",
+        "empty": "لا توجد إدخالات بعد."
+      },
+      "quickActions": {
+        "ideas": {
+          "label": "فكرة",
+          "description": "سجّل فكرة جديدة"
+        },
+        "research": {
+          "label": "بحث",
+          "description": "سجّل ملاحظات البحث"
+        },
+        "finance": {
+          "label": "المالية",
+          "description": "تتبّع الدخل والمصروفات"
+        },
+        "trading": {
+          "label": "التداول",
+          "description": "سجّل صفقة"
         }
       }
     },
@@ -486,7 +524,7 @@
       "bulletList": "قائمة نقطية"
     },
     "chat": {
-      "title": "Ionexa Chat"
+      "title": "محادثة Ionexa"
     },
     "create": {
       "title": "إنشاء أي شيء"
@@ -664,7 +702,7 @@
       "imageTooMany": "يمكنك إضافة حتى {max} صور."
     },
     "marketplace": {
-      "title": "المتجر",
+      "title": "السوق",
       "description": "بيع وشراء الوكلاء والأتمتة والقوالب — قريبًا.",
       "emptyState": "لا توجد قوائم بعد — كن أول من ينشر.",
       "comingSoon": "قريبًا",

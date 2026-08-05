@@ -16,7 +16,10 @@
     "backToHome": "← 返回 Ionexa AI",
     "loading": "加载中...",
     "error": "错误",
-    "viewPlans": "查看方案"
+    "viewPlans": "查看方案",
+    "chooseFiles": "选择文件",
+    "noFileChosen": "未选择文件",
+    "filesSelected": "已选择 {count} 个"
   },
   "sidebar": {
     "groups": {
@@ -30,7 +33,7 @@
     },
     "items": {
       "home": "主页",
-      "chat": "Ionexa 对话",
+      "chat": "Ionexa 聊天",
       "memory": "AI 记忆",
       "timeline": "时间线",
       "favorites": "收藏",
@@ -381,6 +384,18 @@
           "description": "当访客在你的网站上填写联系表单时。"
         }
       }
+    },
+    "aiPersona": {
+      "title": "AI 人格",
+      "description": "为助手设置自定义名称。"
+    },
+    "billing": {
+      "title": "账单",
+      "currentPlan": "当前方案",
+      "buyCredits": "购买积分",
+      "creditHistory": "积分记录",
+      "manageTeam": "管理团队",
+      "ownerAccess": "所有者权限"
     }
   },
   "dashboard": {
@@ -434,6 +449,29 @@
           "missionSteps": "完成一个任务步骤以保持你的势头。",
           "consistency": "试着这周每天都记录一些内容。"
         }
+      },
+      "heroQuestion": "你今天想构建什么？",
+      "recentEntries": {
+        "title": "最近条目",
+        "empty": "还没有条目。"
+      },
+      "quickActions": {
+        "ideas": {
+          "label": "想法",
+          "description": "记录一个新想法"
+        },
+        "research": {
+          "label": "研究",
+          "description": "记录研究笔记"
+        },
+        "finance": {
+          "label": "财务",
+          "description": "跟踪收入与支出"
+        },
+        "trading": {
+          "label": "交易",
+          "description": "记录一笔交易"
+        }
       }
     },
     "team": {
@@ -486,7 +524,7 @@
       "bulletList": "项目符号列表"
     },
     "chat": {
-      "title": "Ionexa 对话"
+      "title": "Ionexa 聊天"
     },
     "create": {
       "title": "创建任何内容"

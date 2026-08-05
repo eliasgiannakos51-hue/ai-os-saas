@@ -1,3 +1,4 @@
+import { getLocale, getTranslations } from "next-intl/server";
 import { formatRelativeTime } from "@/lib/format-time";
 
 export type CreditTransaction = {
@@ -8,10 +9,12 @@ export type CreditTransaction = {
   created_at: string;
 };
 
-export function CreditHistory({ transactions }: { transactions: CreditTransaction[] }) {
+export async function CreditHistory({ transactions }: { transactions: CreditTransaction[] }) {
+  const locale = await getLocale();
+  const t = await getTranslations("settings.billing");
   return (
     <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
-      <h2 className="text-sm font-semibold text-foreground">Credit History</h2>
+      <h2 className="text-sm font-semibold text-foreground">{t("creditHistory")}</h2>
       {transactions.length === 0 ? (
         <p className="text-xs text-muted">No credit activity yet.</p>
       ) : (
@@ -24,7 +27,7 @@ export function CreditHistory({ transactions }: { transactions: CreditTransactio
                   className="mt-0.5 text-muted"
                   suppressHydrationWarning
                 >
-                  {formatRelativeTime(tx.created_at)}
+                  {formatRelativeTime(tx.created_at, locale)}
                 </p>
               </div>
               <span

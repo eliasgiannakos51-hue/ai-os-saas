@@ -7,7 +7,7 @@
     "signOut": "Cerrar sesión",
     "jumpToPage": "Ir a un módulo o página...",
     "noMatches": "Sin resultados para '{query}'",
-    "createAnything": "Crear Cualquier Cosa",
+    "createAnything": "Crea Cualquier Cosa",
     "cancel": "Cancelar",
     "save": "Guardar",
     "saving": "Guardando...",
@@ -16,7 +16,10 @@
     "backToHome": "← Volver a Ionexa AI",
     "loading": "Cargando...",
     "error": "error",
-    "viewPlans": "Ver planes"
+    "viewPlans": "Ver planes",
+    "chooseFiles": "Elegir archivos",
+    "noFileChosen": "Ningún archivo seleccionado",
+    "filesSelected": "{count} seleccionados"
   },
   "sidebar": {
     "groups": {
@@ -38,7 +41,7 @@
       "reflection": "Reflexión Semanal",
       "settings": "Configuración",
       "team": "Equipo",
-      "agents": "Agentes AI",
+      "agents": "Agentes IA",
       "websites": "Sitios web",
       "websiteBuilder": "Generador de Sitios",
       "apps": "Apps",
@@ -381,6 +384,18 @@
           "description": "Cuando un visitante rellena un formulario de contacto en uno de tus sitios."
         }
       }
+    },
+    "aiPersona": {
+      "title": "Persona de IA",
+      "description": "Dale al asistente un nombre personalizado."
+    },
+    "billing": {
+      "title": "Facturación",
+      "currentPlan": "Plan actual",
+      "buyCredits": "Comprar Créditos",
+      "creditHistory": "Historial de Créditos",
+      "manageTeam": "Gestionar Equipo",
+      "ownerAccess": "Acceso de Propietario"
     }
   },
   "dashboard": {
@@ -406,7 +421,7 @@
         "thisMonth": "Este mes"
       },
       "aiCoach": {
-        "title": "AI Coach",
+        "title": "Entrenador IA",
         "noActivity": "Sin actividad todavía esta semana — registra algo para empezar.",
         "entryCount": "{count, plural, one {# entrada nueva en {module}} other {# entradas nuevas en {module}}}",
         "mostActiveIn": "Más activo en {module}"
@@ -433,6 +448,29 @@
           "coverage": "Prueba a explorar un módulo que aún no hayas usado.",
           "missionSteps": "Completa un paso de la misión para mantener tu impulso.",
           "consistency": "Intenta registrar algo todos los días esta semana."
+        }
+      },
+      "heroQuestion": "¿Qué quieres construir hoy?",
+      "recentEntries": {
+        "title": "Entradas Recientes",
+        "empty": "Aún no hay entradas."
+      },
+      "quickActions": {
+        "ideas": {
+          "label": "Idea",
+          "description": "Captura una nueva idea"
+        },
+        "research": {
+          "label": "Investigación",
+          "description": "Registra notas de investigación"
+        },
+        "finance": {
+          "label": "Finanzas",
+          "description": "Controla ingresos y gastos"
+        },
+        "trading": {
+          "label": "Trading",
+          "description": "Registra una operación"
         }
       }
     },
@@ -664,7 +702,7 @@
       "imageTooMany": "Puedes añadir hasta {max} imágenes."
     },
     "marketplace": {
-      "title": "Marketplace",
+      "title": "Mercado",
       "description": "Compra y vende agentes, automatizaciones y plantillas — próximamente.",
       "emptyState": "Aún no hay anuncios — sé el primero en publicar.",
       "comingSoon": "Próximamente",

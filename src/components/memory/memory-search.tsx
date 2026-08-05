@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Search, SearchX } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
-import { formatRelativeTime } from "@/lib/format-time";
+import { useFormatRelativeTime } from "@/lib/use-relative-time";
 
 export type MemoryResult = {
   id: string;
@@ -23,6 +23,7 @@ function matches(result: MemoryResult, query: string): boolean {
 }
 
 export function MemorySearch({ results }: { results: MemoryResult[] }) {
+  const formatRelativeTime = useFormatRelativeTime();
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {

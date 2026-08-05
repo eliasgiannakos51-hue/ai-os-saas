@@ -16,7 +16,10 @@
     "backToHome": "← Torna a Ionexa AI",
     "loading": "Caricamento...",
     "error": "errore",
-    "viewPlans": "Vedi i piani"
+    "viewPlans": "Vedi i piani",
+    "chooseFiles": "Scegli file",
+    "noFileChosen": "Nessun file selezionato",
+    "filesSelected": "{count} selezionati"
   },
   "sidebar": {
     "groups": {
@@ -25,7 +28,7 @@
       "business": "Business",
       "strategy": "Strategia",
       "operations": "Operazioni",
-      "marketplace": "Marketplace",
+      "marketplace": "Mercato",
       "settings": "Impostazioni"
     },
     "items": {
@@ -38,7 +41,7 @@
       "reflection": "Riflessione Settimanale",
       "settings": "Impostazioni",
       "team": "Team",
-      "agents": "Agenti AI",
+      "agents": "Agenti IA",
       "websites": "Siti web",
       "websiteBuilder": "Generatore di Siti",
       "apps": "App",
@@ -64,7 +67,7 @@
       "tradingWorkflow": "Flusso Trading",
       "productWorkflow": "Flusso Prodotto",
       "automation": "Automazione",
-      "marketplace": "Marketplace"
+      "marketplace": "Mercato"
     }
   },
   "landing": {
@@ -381,6 +384,18 @@
           "description": "Quando un visitatore compila un modulo di contatto su un tuo sito."
         }
       }
+    },
+    "aiPersona": {
+      "title": "Persona IA",
+      "description": "Dai all'assistente un nome personalizzato."
+    },
+    "billing": {
+      "title": "Fatturazione",
+      "currentPlan": "Piano attuale",
+      "buyCredits": "Acquista Crediti",
+      "creditHistory": "Cronologia Crediti",
+      "manageTeam": "Gestisci Team",
+      "ownerAccess": "Accesso Proprietario"
     }
   },
   "dashboard": {
@@ -406,7 +421,7 @@
         "thisMonth": "Questo mese"
       },
       "aiCoach": {
-        "title": "AI Coach",
+        "title": "Coach IA",
         "noActivity": "Nessuna attività questa settimana — registra qualcosa per iniziare.",
         "entryCount": "{count, plural, one {# nuova voce in {module}} other {# nuove voci in {module}}}",
         "mostActiveIn": "Più attivo in {module}"
@@ -433,6 +448,29 @@
           "coverage": "Prova a esplorare un modulo che non hai ancora usato.",
           "missionSteps": "Completa un passo della missione per mantenere lo slancio.",
           "consistency": "Prova a registrare qualcosa ogni giorno questa settimana."
+        }
+      },
+      "heroQuestion": "Cosa vuoi creare oggi?",
+      "recentEntries": {
+        "title": "Voci Recenti",
+        "empty": "Nessuna voce ancora."
+      },
+      "quickActions": {
+        "ideas": {
+          "label": "Idea",
+          "description": "Cattura una nuova idea"
+        },
+        "research": {
+          "label": "Ricerca",
+          "description": "Registra note di ricerca"
+        },
+        "finance": {
+          "label": "Finanze",
+          "description": "Monitora entrate e uscite"
+        },
+        "trading": {
+          "label": "Trading",
+          "description": "Registra un'operazione"
         }
       }
     },
@@ -601,7 +639,7 @@
       "productsTitle": "Prodotti"
     },
     "energyCheckIn": {
-      "title": "Check-In Energia",
+      "title": "Controllo Energia",
       "prompt": "Come va la tua energia oggi?",
       "checkedInToday": "Energia di oggi: {level}/5.",
       "logAgain": "Registra di nuovo",
@@ -664,7 +702,7 @@
       "imageTooMany": "Puoi aggiungere fino a {max} immagini."
     },
     "marketplace": {
-      "title": "Marketplace",
+      "title": "Mercato",
       "description": "Compra e vendi agent, automazioni e template — in arrivo.",
       "emptyState": "Nessun annuncio ancora — sii il primo a pubblicare.",
       "comingSoon": "In arrivo",

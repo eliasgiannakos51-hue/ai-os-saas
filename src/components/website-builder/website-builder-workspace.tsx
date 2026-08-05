@@ -7,7 +7,8 @@ import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { getErrorMessage } from "@/lib/get-error-message";
-import { formatRelativeTime } from "@/lib/format-time";
+import { useFormatRelativeTime } from "@/lib/use-relative-time";
+import { FilePicker } from "@/components/ui/file-picker";
 import { useCredits } from "@/components/credits/credits-context";
 import { useToast } from "@/components/toast/toast-context";
 import { EmptyState } from "@/components/empty-state";
@@ -125,6 +126,7 @@ function downloadHtml(website: UserWebsite) {
 // as chat-workspace.tsx: it's all one interaction, no benefit to splitting
 // state across multiple components that'd just need to stay in sync).
 export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: UserWebsite[] }) {
+  const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.websiteBuilder");
   const supabase = createClient();
   const { refresh: refreshCredits } = useCredits();
@@ -841,14 +843,13 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
             </ul>
           )}
           {referenceImageFiles.length < MAX_REFERENCE_IMAGES && (
-            <input
+            <FilePicker
               id="website-reference-image"
-              ref={imageInputRef}
-              type="file"
+              inputRef={imageInputRef}
               multiple
               accept={ACCEPTED_REFERENCE_IMAGE_TYPES.join(",")}
+              selectedCount={referenceImageFiles.length}
               onChange={handleImageChange}
-              className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border file:border-border file:bg-input file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-foreground hover:file:border-orange-500 hover:file:text-orange-400"
             />
           )}
           <p className="mt-1 text-[11px] text-muted">{t("imageHelp", { max: MAX_REFERENCE_IMAGES })}</p>
@@ -1100,14 +1101,13 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
                   </ul>
                 )}
                 {editImageFiles.length < MAX_REFERENCE_IMAGES && (
-                  <input
+                  <FilePicker
                     id="website-edit-image"
-                    ref={editImageInputRef}
-                    type="file"
+                    inputRef={editImageInputRef}
                     multiple
                     accept={ACCEPTED_REFERENCE_IMAGE_TYPES.join(",")}
+                    selectedCount={editImageFiles.length}
                     onChange={handleEditImageChange}
-                    className="block w-full text-sm text-muted file:mr-3 file:rounded-lg file:border file:border-border file:bg-input file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-foreground hover:file:border-orange-500 hover:file:text-orange-400"
                   />
                 )}
                 {editImageError && <p className="mt-1 text-[11px] text-red-400">{editImageError}</p>}

@@ -16,7 +16,10 @@
     "backToHome": "← Ionexa AI に戻る",
     "loading": "読み込み中...",
     "error": "エラー",
-    "viewPlans": "プランを見る"
+    "viewPlans": "プランを見る",
+    "chooseFiles": "ファイルを選択",
+    "noFileChosen": "ファイルが選択されていません",
+    "filesSelected": "{count} 件選択済み"
   },
   "sidebar": {
     "groups": {
@@ -30,7 +33,7 @@
     },
     "items": {
       "home": "ホーム",
-      "chat": "Ionexa Chat",
+      "chat": "Ionexa チャット",
       "memory": "AI メモリー",
       "timeline": "タイムライン",
       "favorites": "お気に入り",
@@ -381,6 +384,18 @@
           "description": "訪問者があなたのサイトの問い合わせフォームを送信したとき。"
         }
       }
+    },
+    "aiPersona": {
+      "title": "AI ペルソナ",
+      "description": "アシスタントに好きな名前を付けましょう。"
+    },
+    "billing": {
+      "title": "請求",
+      "currentPlan": "現在のプラン",
+      "buyCredits": "クレジット購入",
+      "creditHistory": "クレジット履歴",
+      "manageTeam": "チーム管理",
+      "ownerAccess": "オーナーアクセス"
     }
   },
   "dashboard": {
@@ -434,6 +449,29 @@
           "missionSteps": "ミッションのステップを完了して勢いを維持しましょう。",
           "consistency": "今週は毎日何かを記録してみましょう。"
         }
+      },
+      "heroQuestion": "今日は何を作りますか？",
+      "recentEntries": {
+        "title": "最近の項目",
+        "empty": "まだ項目がありません。"
+      },
+      "quickActions": {
+        "ideas": {
+          "label": "アイデア",
+          "description": "新しいアイデアを記録"
+        },
+        "research": {
+          "label": "リサーチ",
+          "description": "リサーチメモを記録"
+        },
+        "finance": {
+          "label": "財務",
+          "description": "収入と支出を記録"
+        },
+        "trading": {
+          "label": "トレーディング",
+          "description": "取引を記録"
+        }
       }
     },
     "team": {
@@ -486,7 +524,7 @@
       "bulletList": "箇条書き"
     },
     "chat": {
-      "title": "Ionexa Chat"
+      "title": "Ionexa チャット"
     },
     "create": {
       "title": "何でも作成"

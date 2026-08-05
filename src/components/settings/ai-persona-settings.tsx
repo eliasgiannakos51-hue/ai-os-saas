@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -14,6 +16,7 @@ const MAX_PERSONA_NAME_LENGTH = 40;
 export function AiPersonaSettings({ initialName }: { initialName: string }) {
   const supabase = createClient();
   const { addToast } = useToast();
+  const t = useTranslations("settings.aiPersona");
   const [name, setName] = useState(initialName);
   const [saving, setSaving] = useState(false);
 
@@ -40,14 +43,13 @@ export function AiPersonaSettings({ initialName }: { initialName: string }) {
   return (
     <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-        <Sparkles className="h-4 w-4 text-orange-400" /> AI Persona
+        <Sparkles className="h-4 w-4 text-orange-400" /> {t("title")}
         <span className="rounded-full border border-orange-500/40 bg-orange-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange-400">
           Ultimate
         </span>
       </h2>
       <p className="text-xs text-muted">
-        Give the assistant a custom name in Ionexa Chat — leave blank to keep the default
-        &quot;Ionexa&quot;.
+        {t("description")}
       </p>
       <form onSubmit={handleSave} className="flex flex-col gap-2 sm:flex-row">
         <input

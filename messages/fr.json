@@ -16,7 +16,10 @@
     "backToHome": "← Retour à Ionexa AI",
     "loading": "Chargement...",
     "error": "erreur",
-    "viewPlans": "Voir les offres"
+    "viewPlans": "Voir les offres",
+    "chooseFiles": "Choisir des fichiers",
+    "noFileChosen": "Aucun fichier choisi",
+    "filesSelected": "{count} sélectionnés"
   },
   "sidebar": {
     "groups": {
@@ -25,12 +28,12 @@
       "business": "Entreprise",
       "strategy": "Stratégie",
       "operations": "Opérations",
-      "marketplace": "Marketplace",
+      "marketplace": "Place de marché",
       "settings": "Paramètres"
     },
     "items": {
       "home": "Accueil",
-      "chat": "Ionexa Chat",
+      "chat": "Ionexa Discussion",
       "memory": "Mémoire IA",
       "timeline": "Chronologie",
       "favorites": "Favoris",
@@ -64,7 +67,7 @@
       "tradingWorkflow": "Flux Trading",
       "productWorkflow": "Flux Produit",
       "automation": "Automatisation",
-      "marketplace": "Marketplace"
+      "marketplace": "Place de marché"
     }
   },
   "landing": {
@@ -381,6 +384,18 @@
           "description": "Quand un visiteur remplit un formulaire de contact sur l'un de vos sites."
         }
       }
+    },
+    "aiPersona": {
+      "title": "Personnalité IA",
+      "description": "Donnez un nom personnalisé à l'assistant."
+    },
+    "billing": {
+      "title": "Facturation",
+      "currentPlan": "Forfait actuel",
+      "buyCredits": "Acheter des Crédits",
+      "creditHistory": "Historique des Crédits",
+      "manageTeam": "Gérer l'Équipe",
+      "ownerAccess": "Accès Propriétaire"
     }
   },
   "dashboard": {
@@ -406,7 +421,7 @@
         "thisMonth": "Ce mois-ci"
       },
       "aiCoach": {
-        "title": "AI Coach",
+        "title": "Coach IA",
         "noActivity": "Aucune activité cette semaine — enregistrez quelque chose pour commencer.",
         "entryCount": "{count, plural, one {# nouvelle entrée dans {module}} other {# nouvelles entrées dans {module}}}",
         "mostActiveIn": "Le plus actif dans {module}"
@@ -433,6 +448,29 @@
           "coverage": "Essayez d'explorer un module que vous n'avez pas encore utilisé.",
           "missionSteps": "Terminez une étape de mission pour garder votre élan.",
           "consistency": "Essayez d'enregistrer quelque chose chaque jour cette semaine."
+        }
+      },
+      "heroQuestion": "Que voulez-vous créer aujourd'hui ?",
+      "recentEntries": {
+        "title": "Entrées Récentes",
+        "empty": "Aucune entrée pour l'instant."
+      },
+      "quickActions": {
+        "ideas": {
+          "label": "Idée",
+          "description": "Capturez une nouvelle idée"
+        },
+        "research": {
+          "label": "Recherche",
+          "description": "Consignez des notes de recherche"
+        },
+        "finance": {
+          "label": "Finances",
+          "description": "Suivez revenus et dépenses"
+        },
+        "trading": {
+          "label": "Trading",
+          "description": "Consignez une opération"
         }
       }
     },
@@ -486,7 +524,7 @@
       "bulletList": "Liste à puces"
     },
     "chat": {
-      "title": "Ionexa Chat"
+      "title": "Ionexa Discussion"
     },
     "create": {
       "title": "Créer N'importe Quoi"
@@ -601,7 +639,7 @@
       "productsTitle": "Produits"
     },
     "energyCheckIn": {
-      "title": "Suivi d'Énergie",
+      "title": "Bilan d'Énergie",
       "prompt": "Comment est votre énergie aujourd'hui ?",
       "checkedInToday": "Énergie du jour : {level}/5.",
       "logAgain": "Enregistrer à nouveau",
@@ -664,7 +702,7 @@
       "imageTooMany": "Vous pouvez ajouter jusqu'à {max} images."
     },
     "marketplace": {
-      "title": "Marketplace",
+      "title": "Place de marché",
       "description": "Achetez et vendez des agents, automatisations et modèles — bientôt disponible.",
       "emptyState": "Aucune annonce pour l'instant — soyez le premier à publier.",
       "comingSoon": "Bientôt disponible",

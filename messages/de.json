@@ -16,7 +16,10 @@
     "backToHome": "← Zurück zu Ionexa AI",
     "loading": "Wird geladen...",
     "error": "Fehler",
-    "viewPlans": "Pläne ansehen"
+    "viewPlans": "Pläne ansehen",
+    "chooseFiles": "Dateien auswählen",
+    "noFileChosen": "Keine Datei ausgewählt",
+    "filesSelected": "{count} ausgewählt"
   },
   "sidebar": {
     "groups": {
@@ -381,6 +384,18 @@
           "description": "Wenn ein Besucher ein Kontaktformular auf einer deiner Seiten ausfüllt."
         }
       }
+    },
+    "aiPersona": {
+      "title": "KI-Persona",
+      "description": "Gib dem Assistenten einen eigenen Namen."
+    },
+    "billing": {
+      "title": "Abrechnung",
+      "currentPlan": "Aktueller Tarif",
+      "buyCredits": "Credits Kaufen",
+      "creditHistory": "Credit-Verlauf",
+      "manageTeam": "Team Verwalten",
+      "ownerAccess": "Inhaber-Zugang"
     }
   },
   "dashboard": {
@@ -406,7 +421,7 @@
         "thisMonth": "Diesen Monat"
       },
       "aiCoach": {
-        "title": "AI Coach",
+        "title": "KI-Coach",
         "noActivity": "Diese Woche noch keine Aktivität — erfasse etwas, um loszulegen.",
         "entryCount": "{count, plural, one {# neuer Eintrag in {module}} other {# neue Einträge in {module}}}",
         "mostActiveIn": "Am aktivsten in {module}"
@@ -433,6 +448,29 @@
           "coverage": "Probiere ein Modul aus, das du noch nicht genutzt hast.",
           "missionSteps": "Schließe einen Missionsschritt ab, um deinen Schwung zu halten.",
           "consistency": "Versuche, diese Woche jeden Tag etwas einzutragen."
+        }
+      },
+      "heroQuestion": "Was möchtest du heute bauen?",
+      "recentEntries": {
+        "title": "Letzte Einträge",
+        "empty": "Noch keine Einträge."
+      },
+      "quickActions": {
+        "ideas": {
+          "label": "Idee",
+          "description": "Neue Idee festhalten"
+        },
+        "research": {
+          "label": "Recherche",
+          "description": "Recherchenotizen erfassen"
+        },
+        "finance": {
+          "label": "Finanzen",
+          "description": "Einnahmen & Ausgaben verfolgen"
+        },
+        "trading": {
+          "label": "Trading",
+          "description": "Einen Trade erfassen"
         }
       }
     },
@@ -601,7 +639,7 @@
       "productsTitle": "Produkte"
     },
     "energyCheckIn": {
-      "title": "Energie-Check-In",
+      "title": "Energie-Check",
       "prompt": "Wie ist deine Energie heute?",
       "checkedInToday": "Heutige Energie: {level}/5.",
       "logAgain": "Erneut eintragen",
@@ -664,7 +702,7 @@
       "imageTooMany": "Du kannst bis zu {max} Bilder hinzufügen."
     },
     "marketplace": {
-      "title": "Marketplace",
+      "title": "Marktplatz",
       "description": "Kaufe und verkaufe Agents, Automatisierungen und Vorlagen — bald verfügbar.",
       "emptyState": "Noch keine Angebote — sei der Erste, der veröffentlicht.",
       "comingSoon": "Bald verfügbar",

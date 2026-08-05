@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { GreetingHeader } from "@/components/overview/greeting-header";
 import { CreateChat } from "@/components/create/create-chat";
 import { QuickActionCard } from "@/components/overview/quick-action-card";
+import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { RecentEntriesCard, type RecentEntry } from "@/components/overview/recent-entries-card";
 import { AiCoachCard } from "@/components/overview/ai-coach-card";
 import { ActiveMissionCard } from "@/components/overview/active-mission-card";
@@ -45,15 +46,24 @@ export const fetchCache = "force-no-store";
 // duplicating the nav and crowding the page — the point of this row is a
 // handful of obvious starting points, not full coverage. Each gets its
 // own accent so the row scans as four distinct destinations.
+// Only the slug and the accent live here. Label and description are looked
+// up per render from dashboard.overview.quickActions.<slug>, because
+// literals in this array were rendered verbatim and stayed English in every
+// language — one of the reported i18n bugs.
 const QUICK_ACTIONS = [
-  { slug: "ideas", label: "Idea", description: "Capture a new idea", tone: "amber" },
-  { slug: "research", label: "Research", description: "Log research notes", tone: "violet" },
-  { slug: "finance", label: "Finance", description: "Track income & expenses", tone: "sky" },
-  { slug: "trading", label: "Trading", description: "Log a trade", tone: "emerald" },
+  { slug: "ideas", tone: "amber" },
+  { slug: "research", tone: "violet" },
+  { slug: "finance", tone: "sky" },
+  { slug: "trading", tone: "emerald" },
 ] as const;
 
 export default async function OverviewPage() {
   const t = await getTranslations("dashboard.overview");
+  const tSidebar = await getTranslations("sidebar.items");
+  const translateModuleTitle = (title: string) => {
+    const key = ITEM_LABEL_KEYS[title];
+    return key ? tSidebar(key) : title;
+  };
   const supabase = createClient();
 
   const {
@@ -179,7 +189,12 @@ export default async function OverviewPage() {
       summary.rows.map((row) => ({
         id: `${summary.module.slug}-${row.id}`,
         title: String(row[summary.module.headlineKey] ?? "untitled"),
-        moduleTitle: summary.module.title,
+        // module.title is the raw English title from lib/modules.ts (a data
+        // definition, not UI copy), so rendering it directly kept module
+        // names English in every language. ITEM_LABEL_KEYS maps it onto the
+        // same sidebar.items.* message the sidebar already uses, so a module
+        // reads identically in both places.
+        moduleTitle: translateModuleTitle(summary.module.title),
         href: summary.href,
         createdAt: row.created_at,
       }))
@@ -399,8 +414,8 @@ export default async function OverviewPage() {
               key={action.slug}
               href={moduleHref(action.slug)}
               icon={MODULE_ICONS[action.slug]}
-              label={action.label}
-              description={action.description}
+              label={t(`quickActions.${action.slug}.label`)}
+              description={t(`quickActions.${action.slug}.description`)}
               tone={action.tone}
             />
           ))}

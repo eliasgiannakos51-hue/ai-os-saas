@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { timeOfDayGreeting, displayNameFromEmail } from "@/lib/greeting";
 
 export function GreetingHeader({ email }: { email: string }) {
@@ -11,6 +12,7 @@ export function GreetingHeader({ email }: { email: string }) {
   // executing environment happens to have. Only relevant for travelers
   // whose OS timezone lags their real location; for everyone else the two
   // give the same answer.
+  const t = useTranslations("dashboard.overview");
   const [greeting, setGreeting] = useState(() => timeOfDayGreeting());
   const name = displayNameFromEmail(email);
 
@@ -29,7 +31,7 @@ export function GreetingHeader({ email }: { email: string }) {
         {greeting.text}, {name} {greeting.emoji}
       </p>
       <h1 className="hero-gradient-text mt-2 text-4xl font-bold leading-[1.12] tracking-tight sm:text-5xl lg:text-[3.4rem]">
-        What do you want to build today?
+        {t("heroQuestion")}
       </h1>
     </div>
   );

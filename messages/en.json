@@ -16,7 +16,10 @@
     "backToHome": "← Back to Ionexa AI",
     "loading": "Loading...",
     "error": "error",
-    "viewPlans": "View plans"
+    "viewPlans": "View plans",
+    "chooseFiles": "Choose files",
+    "noFileChosen": "No file chosen",
+    "filesSelected": "{count} selected"
   },
   "sidebar": {
     "groups": {
@@ -381,6 +384,18 @@
           "description": "When a visitor fills in a contact form on one of your sites."
         }
       }
+    },
+    "aiPersona": {
+      "title": "AI Persona",
+      "description": "Give the assistant a custom name."
+    },
+    "billing": {
+      "title": "Billing",
+      "currentPlan": "Current plan",
+      "buyCredits": "Buy Credits",
+      "creditHistory": "Credit History",
+      "manageTeam": "Manage Team",
+      "ownerAccess": "Owner Access"
     }
   },
   "dashboard": {
@@ -433,6 +448,29 @@
           "coverage": "Try exploring a module you haven't used yet.",
           "missionSteps": "Complete a mission step to keep your momentum going.",
           "consistency": "Try logging something every day this week."
+        }
+      },
+      "heroQuestion": "What do you want to build today?",
+      "recentEntries": {
+        "title": "Recent Entries",
+        "empty": "No entries yet."
+      },
+      "quickActions": {
+        "ideas": {
+          "label": "Idea",
+          "description": "Capture a new idea"
+        },
+        "research": {
+          "label": "Research",
+          "description": "Log research notes"
+        },
+        "finance": {
+          "label": "Finance",
+          "description": "Track income & expenses"
+        },
+        "trading": {
+          "label": "Trading",
+          "description": "Log a trade"
         }
       }
     },

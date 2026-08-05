@@ -4,12 +4,13 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { EmptyState } from "@/components/empty-state";
-import { formatRelativeTime } from "@/lib/format-time";
+import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { moduleBadgeColor } from "@/lib/module-colors";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import type { FavoriteEntry } from "@/lib/favorites";
 
 export function FavoritesList({ entries }: { entries: FavoriteEntry[] }) {
+  const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.favorites");
 
   if (entries.length === 0) {

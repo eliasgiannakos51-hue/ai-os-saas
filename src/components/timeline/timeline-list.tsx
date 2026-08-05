@@ -6,13 +6,14 @@ import { Link2, History } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { PaginationControls } from "@/components/pagination-controls";
 import { EmptyState } from "@/components/empty-state";
-import { formatRelativeTime } from "@/lib/format-time";
+import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { moduleBadgeColor } from "@/lib/module-colors";
 import type { TimelineEntry } from "@/lib/timeline";
 
 const PAGE_SIZE = 20;
 
 export function TimelineList({ entries }: { entries: TimelineEntry[] }) {
+  const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.timeline");
   const [page, setPage] = useState(1);
 

@@ -8,7 +8,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
-import { ArrowUp, Compass, Gift, MessageCircle } from "lucide-react";
+import { ArrowUp, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -16,6 +16,12 @@ import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { MessageContent } from "@/components/chat/message-content";
 import { useCredits } from "@/components/credits/credits-context";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
+
+// Remembered across visits, per the focus-mode toggle below.
+const CHAT_SIDEBAR_STORAGE_KEY = "chat-sidebar";
+// Tailwind's `md`. Only used for the FIRST-visit default, never for
+// layout — the layout itself is done with real md: classes.
+const SIDEBAR_BREAKPOINT_PX = 768;
 
 let localIdCounter = 0;
 function nextLocalId(prefix: string) {
@@ -66,6 +72,7 @@ export function ChatWorkspace({
   const tTrading = useTranslations("dashboard.tradingWorkflow");
   const tProduct = useTranslations("dashboard.productWorkflow");
   const tFree = useTranslations("credits.freeChat");
+  const t = useTranslations("dashboard.chat");
   const { refresh: refreshCredits } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -96,6 +103,48 @@ export function ChatWorkspace({
   const [isRateLimitNotice, setIsRateLimitNotice] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Focus mode: hides the conversation list so the thread gets the full
+  // width, the way ChatGPT and Claude do it.
+  //
+  // Starts CLOSED on the very first render and is opened by the effect
+  // below rather than defaulting to open. That order matters: the server
+  // has no idea how wide the viewport is, and a 256px sidebar rendered
+  // into a 375px phone before hydration is a visible, ugly flash of a
+  // layout that immediately disappears. Closed-then-open is invisible on
+  // desktop and correct on mobile.
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarResolved, setSidebarResolved] = useState(false);
+
+  useEffect(() => {
+    let stored: string | null = null;
+    try {
+      stored = window.localStorage.getItem(CHAT_SIDEBAR_STORAGE_KEY);
+    } catch {
+      // Private browsing / storage disabled — fall through to the
+      // width-based default rather than failing to render a sidebar.
+    }
+    if (stored === "open" || stored === "closed") {
+      setSidebarOpen(stored === "open");
+    } else {
+      // No stored preference: open on a desktop-width viewport, closed on
+      // a phone, where it would otherwise cover most of the thread.
+      setSidebarOpen(window.innerWidth >= SIDEBAR_BREAKPOINT_PX);
+    }
+    setSidebarResolved(true);
+  }, []);
+
+  function toggleSidebar() {
+    setSidebarOpen((open) => {
+      const next = !open;
+      try {
+        window.localStorage.setItem(CHAT_SIDEBAR_STORAGE_KEY, next ? "open" : "closed");
+      } catch {
+        // Preference just won't persist; the toggle still works.
+      }
+      return next;
+    });
+  }
   // Guards against a slow/stale loadMessages() response landing after the
   // user has already switched to a different conversation (or "New Chat")
   // — only the request whose token still matches gets to apply its result.
@@ -355,18 +404,66 @@ export function ChatWorkspace({
   }
 
   return (
-    <div className="flex h-full">
-      <ConversationSidebar
-        conversations={conversations}
-        activeId={activeId}
-        onSelect={selectConversation}
-        onNewChat={startNewChat}
-        onTogglePin={togglePin}
-        onRename={renameConversation}
-        onDelete={deleteConversation}
-      />
+    <div className="relative flex h-full overflow-hidden">
+      {/* On md+ the sidebar is a real in-flow column. Below md it is an
+          overlay drawer: at 375px a 256px in-flow sidebar left the thread
+          119px wide, which is not a layout, it is a squeeze. */}
+      <div
+        className={`absolute inset-y-0 left-0 z-30 md:relative md:z-auto ${
+          sidebarOpen ? "flex" : "hidden"
+        }`}
+      >
+        <ConversationSidebar
+          conversations={conversations}
+          activeId={activeId}
+          onSelect={(id) => {
+            selectConversation(id);
+            if (window.innerWidth < SIDEBAR_BREAKPOINT_PX) toggleSidebar();
+          }}
+          onNewChat={() => {
+            startNewChat();
+            if (window.innerWidth < SIDEBAR_BREAKPOINT_PX) toggleSidebar();
+          }}
+          onTogglePin={togglePin}
+          onRename={renameConversation}
+          onDelete={deleteConversation}
+        />
+      </div>
+
+      {/* Tap-anywhere-else to close, phones only — the desktop column has
+          nothing to dismiss. */}
+      {sidebarOpen && (
+        <button
+          type="button"
+          aria-label={t("hideConversations")}
+          onClick={toggleSidebar}
+          className="absolute inset-0 z-20 bg-black/50 md:hidden"
+        />
+      )}
 
       <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex items-center gap-2 border-b border-border px-2 py-1.5">
+          <button
+            type="button"
+            onClick={toggleSidebar}
+            aria-expanded={sidebarOpen}
+            aria-label={sidebarOpen ? t("hideConversations") : t("showConversations")}
+            title={sidebarOpen ? t("hideConversations") : t("showConversations")}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+          >
+            {sidebarOpen ? (
+              <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />
+            ) : (
+              <PanelLeftOpen className="h-[18px] w-[18px]" aria-hidden="true" />
+            )}
+          </button>
+          {/* Rendered only once the stored preference has been read, so the
+              label can never briefly contradict the sidebar beside it. */}
+          {sidebarResolved && !sidebarOpen && (
+            <span className="truncate text-xs text-muted">{t("focusMode")}</span>
+          )}
+        </div>
+
         <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
           {loadingMessages ? (
             <div className="flex h-full items-center justify-center text-sm text-muted">
@@ -464,7 +561,11 @@ export function ChatWorkspace({
                   onKeyDown={handleTextareaKeyDown}
                   placeholder="Message Ionexa..."
                   rows={1}
-                  className="focus-glow max-h-40 min-h-[52px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-panel px-4 py-3.5 pr-14 text-sm text-foreground outline-none placeholder:text-muted focus:border-orange-500/60"
+                  // max-h-40 (160px) was the whole complaint: a long message scrolled
+                  // inside a box a quarter the height of the thread above it. A
+                  // viewport-relative cap grows with the screen instead of
+                  // pinning the composer to one small absolute size.
+                  className="focus-glow max-h-[45vh] min-h-[60px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-panel px-4 py-3.5 pr-14 text-sm text-foreground outline-none placeholder:text-muted focus:border-orange-500/60"
                   autoFocus
                 />
                 <button

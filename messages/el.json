@@ -536,7 +536,10 @@
       "updatedAt": "Επεξεργάστηκε {when}"
     },
     "chat": {
-      "title": "Ionexa Συνομιλία"
+      "title": "Ionexa Συνομιλία",
+      "hideConversations": "Απόκρυψη συνομιλιών",
+      "showConversations": "Εμφάνιση συνομιλιών",
+      "focusMode": "Λειτουργία εστίασης"
     },
     "create": {
       "title": "Δημιουργία Οτιδήποτε"

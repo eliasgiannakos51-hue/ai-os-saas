@@ -536,7 +536,10 @@
       "updatedAt": "Modifié {when}"
     },
     "chat": {
-      "title": "Ionexa Discussion"
+      "title": "Ionexa Discussion",
+      "hideConversations": "Masquer les conversations",
+      "showConversations": "Afficher les conversations",
+      "focusMode": "Mode concentration"
     },
     "create": {
       "title": "Créer N'importe Quoi"

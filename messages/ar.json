@@ -536,7 +536,10 @@
       "updatedAt": "عُدّل {when}"
     },
     "chat": {
-      "title": "محادثة Ionexa"
+      "title": "محادثة Ionexa",
+      "hideConversations": "إخفاء المحادثات",
+      "showConversations": "إظهار المحادثات",
+      "focusMode": "وضع التركيز"
     },
     "create": {
       "title": "إنشاء أي شيء"

@@ -1,7 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { BarChart3, Zap, Layers, Database } from "lucide-react";
+import { formatNumber } from "@/lib/format-number";
 import {
   ResponsiveContainer,
   BarChart,
@@ -46,6 +47,7 @@ export function AiUsageSettings({
   moduleUsage: ModuleUsage[];
 }) {
   const t = useTranslations("settings.aiUsage");
+  const locale = useLocale();
   // Top 8 by count, ascending, so the biggest bar ends up at the top of a
   // horizontal chart — keeps a ~23-module fan-out readable instead of a
   // wall of thin bars.
@@ -62,8 +64,8 @@ export function AiUsageSettings({
       </h2>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatTile icon={Zap} label={t("creditsUsed")} value={totalCreditsUsed.toLocaleString()} />
-        <StatTile icon={Database} label={t("totalEntries")} value={totalEntries.toLocaleString()} />
+        <StatTile icon={Zap} label={t("creditsUsed")} value={formatNumber(totalCreditsUsed, locale)} />
+        <StatTile icon={Database} label={t("totalEntries")} value={formatNumber(totalEntries, locale)} />
         <StatTile
           icon={Layers}
           label={t("mostActiveModule")}

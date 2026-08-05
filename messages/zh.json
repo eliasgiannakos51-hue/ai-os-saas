@@ -19,7 +19,12 @@
     "viewPlans": "查看方案",
     "chooseFiles": "选择文件",
     "noFileChosen": "未选择文件",
-    "filesSelected": "已选择 {count} 个"
+    "filesSelected": "已选择 {count} 个",
+    "networkError": "网络错误——请重试。",
+    "notAuthenticated": "未登录。",
+    "created": "✓ 已创建",
+    "updated": "✓ 已更新",
+    "linked": "✓ 已关联"
   },
   "sidebar": {
     "groups": {
@@ -166,7 +171,39 @@
     "businessFeatureFullAccess": "每位成员都能获得与您方案同等级别的完整访问权限",
     "businessFeatureFreeOnUltimate": "Ultimate 方案免费包含团队席位",
     "businessFeatureManage": "随时在团队设置中管理席位",
-    "setUpTeam": "设置团队"
+    "setUpTeam": "设置团队",
+    "features": {
+      "1Workspace3Projects": "1 个工作区，3 个项目",
+      "2AiAgents": "2 个 AI 智能体",
+      "basicAiChat": "基础 AI 聊天",
+      "creditsPerMonth": "{count} 积分/月",
+      "marketplaceInstallOnly": "市场：仅可安装",
+      "communitySupport": "社区支持",
+      "unlimitedProjects": "无限项目",
+      "upTo20AiAgents": "最多 20 个 AI 智能体",
+      "aiMemory": "AI 记忆",
+      "websiteAutomationBuilderAccess": "网站与自动化构建器访问权限",
+      "imageVideoGenerationAccess": "图像与视频生成访问权限",
+      "emailSupport": "邮件支持",
+      "everythingInStarter": "包含 Starter 的全部功能",
+      "upTo100AiAgents": "最多 100 个 AI 智能体",
+      "mobileSaasBuilderAccess": "移动端与 SaaS 构建器访问权限",
+      "priorityProcessing": "优先处理",
+      "everythingInGrowth": "包含 Growth 的全部功能",
+      "unlimitedAiAgentsTeams": "无限 AI 智能体与团队",
+      "teamCollaboration": "团队协作",
+      "sharedAiMemory": "共享 AI 记忆",
+      "prioritySupport": "优先支持",
+      "everythingInProfessional": "包含 Professional 的全部功能",
+      "unlimitedTeamSeatsIncludedNoPerMemberCharge": "包含无限团队席位——不按成员收费",
+      "extendedChatMemoryRetention100Vs20RecentFact": "扩展的聊天记忆保留（100 条对比 20 条近期信息）",
+      "customAiPersonaNameInIonexaChat": "在 Ionexa Chat 中自定义 AI 名称",
+      "highestPriorityProcessing": "最高优先级处理",
+      "everythingInUltimate": "包含 Ultimate 的全部功能",
+      "unlimitedMembers": "无限成员",
+      "dedicatedSupport": "专属支持",
+      "customCredits": "定制积分"
+    }
   },
   "roadmap": {
     "title": "路线图",
@@ -303,7 +340,9 @@
       "working": "处理中...",
       "continueToPayment": "继续支付",
       "createAccount": "创建账户",
-      "mostPopular": "最受欢迎"
+      "mostPopular": "最受欢迎",
+      "mustAgreeToTerms": "您必须同意服务条款和隐私政策才能创建账户。",
+      "passwordRequirementsNotMet": "请选择满足以上所有要求的密码。"
     },
     "forgotPassword": {
       "title": "重置密码",
@@ -323,7 +362,8 @@
       "newPassword": "新密码",
       "confirmPassword": "确认密码",
       "saveNewPassword": "保存新密码",
-      "saving": "保存中..."
+      "saving": "保存中...",
+      "passwordsDoNotMatch": "两次输入的密码不一致。"
     },
     "social": {
       "continueWithGoogle": "使用 Google 继续",
@@ -339,7 +379,11 @@
       "newPassword": "新密码",
       "confirmPassword": "确认密码",
       "updatePassword": "更新密码",
-      "updating": "更新中..."
+      "updating": "更新中...",
+      "requirementsNotMet": "请选择满足以下所有要求的密码。",
+      "passwordsDoNotMatch": "两次输入的密码不一致。",
+      "couldNotUpdate": "✗ 无法更新密码",
+      "passwordUpdated": "✓ 密码已更新"
     },
     "chatMemory": {
       "title": "对话记忆",
@@ -347,13 +391,18 @@
       "toggleDescription": "Ionexa 对话会从你的对话中提取持久的事实与偏好，并在未来的对话中回忆起它们。",
       "thingsRemembered": "已记住 {count} 项内容",
       "clearAll": "清除全部记忆",
-      "clearing": "清除中..."
+      "clearing": "清除中...",
+      "couldNotUpdatePreference": "✗ 无法更新偏好设置",
+      "couldNotClearMemory": "✗ 无法清除记忆",
+      "memoryCleared": "✓ 记忆已清除"
     },
     "loginActivity": {
       "title": "登录活动",
       "description": "登录过你账户的设备和浏览器。每当出现新设备时，我们都会发邮件通知你。",
       "noDevices": "目前还没有记录到设备。",
-      "lastSeen": "最后一次活跃于 {time}"
+      "lastSeen": "最后一次活跃于 {time}",
+      "couldNotRemoveDevice": "✗ 无法移除设备",
+      "deviceRemoved": "✓ 已移除设备"
     },
     "aiUsage": {
       "title": "AI 使用情况",
@@ -396,7 +445,8 @@
       "title": "导出数据",
       "description": "将你在全部 13 个模块中记录的所有内容下载为单个 JSON 文件。",
       "exportAll": "导出全部数据",
-      "exporting": "导出中..."
+      "exporting": "导出中...",
+      "exportDownloaded": "✓ 已下载导出文件"
     },
     "dangerZone": {
       "title": "危险操作区",
@@ -405,7 +455,9 @@
       "typeToConfirm": "输入 <highlight>{email}</highlight> 以确认",
       "sendConfirmationEmail": "发送删除确认邮件",
       "sending": "发送中...",
-      "checkEmail": "请查看你的邮箱以确认删除——我们已向 <highlight>{email}</highlight> 发送了一个链接。该链接将在 1 小时后过期；在你点击之前不会删除任何内容。"
+      "checkEmail": "请查看你的邮箱以确认删除——我们已向 <highlight>{email}</highlight> 发送了一个链接。该链接将在 1 小时后过期；在你点击之前不会删除任何内容。",
+      "emailDoesNotMatch": "电子邮件地址不匹配。",
+      "couldNotStartDeletion": "✗ 无法开始删除账户"
     },
     "emailNotifications": {
       "title": "邮件通知",
@@ -439,7 +491,8 @@
     },
     "aiPersona": {
       "title": "AI 人格",
-      "description": "为助手设置自定义名称。"
+      "description": "为助手设置自定义名称。",
+      "personaUpdated": "✓ 助手名称已更新"
     },
     "billing": {
       "title": "账单",
@@ -560,7 +613,9 @@
       "setupSuccessBody": "在下方邀请您的第一位团队成员。",
       "roleLabel": "角色 / 职位",
       "rolePlaceholder": "此人负责什么工作?",
-      "workUseDisclaimer": "团队席位仅供实际在您企业工作的员工或合作者使用 — 不可用于个人/家庭用途。邀请成员即表示您确认其为团队工作的一部分。"
+      "workUseDisclaimer": "团队席位仅供实际在您企业工作的员工或合作者使用 — 不可用于个人/家庭用途。邀请成员即表示您确认其为团队工作的一部分。",
+      "memberRemoved": "✓ 已移除成员",
+      "couldNotRemoveMember": "✗ 无法移除成员"
     },
     "memory": {
       "title": "AI 记忆",

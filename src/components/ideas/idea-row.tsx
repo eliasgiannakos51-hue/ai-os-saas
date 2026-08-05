@@ -14,6 +14,8 @@ import { TextActionsTextarea } from "@/components/text-actions/text-actions-text
 import { useToast } from "@/components/toast/toast-context";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import type { LinkedEntity } from "@/lib/entity-links";
+import { useTranslations, useLocale } from "next-intl";
+import { formatDateTime } from "@/lib/format-number";
 
 function verdictClasses(verdict: string | null) {
   const v = (verdict ?? "").toLowerCase();
@@ -64,6 +66,8 @@ export function IdeaRow({
   const router = useRouter();
   const supabase = createClient();
   const { addToast } = useToast();
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<FormState>(() => toFormState(idea));
   const [error, setError] = useState<string | null>(null);
@@ -118,7 +122,7 @@ export function IdeaRow({
     }
 
     setIsEditing(false);
-    addToast("✓ updated");
+    addToast(tCommon("updated"));
     router.refresh();
   }
 
@@ -301,7 +305,7 @@ export function IdeaRow({
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
         <p
           className="text-xs text-muted"
-          title={new Date(idea.created_at).toLocaleString()}
+          title={formatDateTime(idea.created_at, locale)}
           suppressHydrationWarning
         >
           Logged {formatRelativeTime(idea.created_at)}

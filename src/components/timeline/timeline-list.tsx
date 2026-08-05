@@ -3,13 +3,14 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Link2, History } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { PaginationControls } from "@/components/pagination-controls";
 import { EmptyState } from "@/components/empty-state";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { moduleBadgeColor } from "@/lib/module-colors";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import type { TimelineEntry } from "@/lib/timeline";
+import { formatDateTime } from "@/lib/format-number";
 
 const PAGE_SIZE = 20;
 
@@ -24,6 +25,7 @@ export function TimelineList({
 }) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.timeline");
+  const locale = useLocale();
   const [page, setPage] = useState(1);
   const favoritedSet = useMemo(() => new Set(favoritedKeys), [favoritedKeys]);
 
@@ -73,7 +75,7 @@ export function TimelineList({
             </div>
             <p
               className="shrink-0 text-xs text-muted"
-              title={new Date(entry.createdAt).toLocaleString()}
+              title={formatDateTime(entry.createdAt, locale)}
               suppressHydrationWarning
             >
               {formatRelativeTime(entry.createdAt)}

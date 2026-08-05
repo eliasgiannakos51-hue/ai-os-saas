@@ -17,7 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -49,6 +49,7 @@ import { ListLayout } from "@/components/ui/list-layout";
 import { SortToggle } from "@/components/sort-toggle";
 import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
+import { formatDateTime } from "@/lib/format-number";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 20000;
@@ -183,6 +184,7 @@ export function WebsiteBuilderWorkspace({
 }) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.websiteBuilder");
+  const locale = useLocale();
   const tCommon = useTranslations("common");
   const tModule = useTranslations("module");
   const supabase = createClient();
@@ -334,7 +336,7 @@ export function WebsiteBuilderWorkspace({
       });
       pollWebsiteStatus(id);
     } catch {
-      addToast("✗ Network error — please try again.", "error");
+      addToast(tCommon("networkError"), "error");
     } finally {
       setRegeneratingId(null);
     }
@@ -603,7 +605,7 @@ export function WebsiteBuilderWorkspace({
           data: { user },
         } = await supabase.auth.getUser();
         if (!user) {
-          setError("Not authenticated.");
+          setError(tCommon("notAuthenticated"));
           return;
         }
 
@@ -898,7 +900,7 @@ export function WebsiteBuilderWorkspace({
           title={previewWebsite.name}
           subtitle={
             <span
-              title={new Date(previewWebsite.created_at).toLocaleString()}
+              title={formatDateTime(previewWebsite.created_at, locale)}
               suppressHydrationWarning
             >
               {formatRelativeTime(previewWebsite.created_at)}
@@ -1088,7 +1090,7 @@ export function WebsiteBuilderWorkspace({
                         {version.change_description ?? t("versionOriginal")}
                         <span
                           className="ml-1.5 text-muted"
-                          title={new Date(version.created_at).toLocaleString()}
+                          title={formatDateTime(version.created_at, locale)}
                           suppressHydrationWarning
                         >
                           ({formatRelativeTime(version.created_at)})

@@ -3,6 +3,7 @@
 import { useState, type ChangeEvent } from "react";
 import { Wand2, Languages, Sparkles, HelpCircle, Check, X, Loader2 } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { useTranslations } from "next-intl";
 
 const ACTIONS = [
   { id: "rewrite", label: "Rewrite", icon: Wand2 },
@@ -33,6 +34,7 @@ export function TextActionsTextarea({
   placeholder?: string;
   required?: boolean;
 }) {
+  const tCommon = useTranslations("common");
   const [selection, setSelection] = useState<{ start: number; end: number; text: string } | null>(
     null
   );
@@ -84,7 +86,7 @@ export function TextActionsTextarea({
 
       setResult(data.result);
     } catch {
-      setError("Network error — please try again.");
+      setError(tCommon("networkError"));
     } finally {
       setPendingAction(null);
     }

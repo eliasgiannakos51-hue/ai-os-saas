@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import { ResponsiveContainer, LineChart, Line } from "recharts";
 import { useCountUp, splitLeadingNumber } from "@/hooks/use-count-up";
 import { usePulseOnChange } from "@/hooks/use-pulse-on-change";
+import { formatNumber } from "@/lib/format-number";
+import { useLocale } from "next-intl";
 
 // Compact stat card for the top-of-Home strip (see overview/page.tsx) —
 // `trend`, when provided, is a real daily-count series (not synthetic):
@@ -80,6 +82,7 @@ export function HomeStatCard({
 // verbatim — splitLeadingNumber returns null for those, and the hook is
 // still called unconditionally above it to keep hook order stable.
 function CountUpValue({ value }: { value: string }) {
+  const locale = useLocale();
   const parts = splitLeadingNumber(value);
   const animated = useCountUp(parts?.number ?? 0);
   // Pulses when the number MOVES, not when the page loads — the count-up
@@ -90,7 +93,7 @@ function CountUpValue({ value }: { value: string }) {
   return (
     <span key={pulseKey} className={pulseKey > 0 ? "stat-pulse" : undefined}>
       {parts.prefix}
-      {animated.toLocaleString()}
+      {formatNumber(animated, locale)}
       {parts.suffix}
     </span>
   );

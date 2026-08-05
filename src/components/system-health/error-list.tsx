@@ -4,6 +4,8 @@ import { useState } from "react";
 import { CheckCircle2, ChevronDown, ShieldCheck } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
+import { formatDateTime } from "@/lib/format-number";
+import { useLocale } from "next-intl";
 
 export type ProductionErrorRow = {
   id: string;
@@ -18,6 +20,7 @@ export type ProductionErrorRow = {
 };
 
 export function ErrorList({ rows }: { rows: ProductionErrorRow[] }) {
+  const locale = useLocale();
   const formatRelativeTime = useFormatRelativeTime();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [resolving, setResolving] = useState<string | null>(null);
@@ -63,7 +66,7 @@ export function ErrorList({ rows }: { rows: ProductionErrorRow[] }) {
                     {row.occurrenceCount}x
                     {row.affectedUsers > 0 && ` · ${row.affectedUsers} user${row.affectedUsers === 1 ? "" : "s"}`}
                   </span>
-                  <span suppressHydrationWarning title={new Date(row.occurredAt).toLocaleString()}>
+                  <span suppressHydrationWarning title={formatDateTime(row.occurredAt, locale)}>
                     last {formatRelativeTime(row.occurredAt)}
                   </span>
                 </p>

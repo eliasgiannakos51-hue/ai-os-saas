@@ -38,7 +38,7 @@ export function ChatMemorySettings({
       // eslint-disable-next-line no-console
       console.error("Chat memory toggle error:", error);
       setEnabled(!next);
-      addToast("✗ could not update preference", "error");
+      addToast(t("couldNotUpdatePreference"), "error");
       return;
     }
 
@@ -61,12 +61,12 @@ export function ChatMemorySettings({
     if (error) {
       // eslint-disable-next-line no-console
       console.error("Clear chat memory error:", error);
-      addToast("✗ could not clear memory", "error");
+      addToast(t("couldNotClearMemory"), "error");
       return;
     }
 
     setCount(0);
-    addToast("✓ memory cleared");
+    addToast(t("memoryCleared"));
   }
 
   return (

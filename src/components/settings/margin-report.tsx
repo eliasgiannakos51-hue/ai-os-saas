@@ -1,7 +1,8 @@
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { TrendingUp } from "lucide-react";
+import { formatNumber } from "@/lib/format-number";
 import {
   aggregateMarginRows,
   MARGIN_REPORT_WINDOW_DAYS,
@@ -62,6 +63,7 @@ export async function MarginReportView({
   failed: boolean;
 }) {
   const t = await getTranslations("settings.marginReport");
+  const locale = await getLocale();
 
   return (
     <section id="margin-report" className="mb-6 rounded-2xl border border-border bg-panel p-5">
@@ -93,7 +95,7 @@ export async function MarginReportView({
               {rows.map((row) => (
                 <tr key={row.feature} className="border-b border-border/50 last:border-0">
                   <td className="py-2 pr-3 text-foreground">{row.feature}</td>
-                  <td className="py-2 pr-3 text-right text-muted">{row.calls.toLocaleString()}</td>
+                  <td className="py-2 pr-3 text-right text-muted">{formatNumber(row.calls, locale)}</td>
                   <td className="py-2 pr-3 text-right">
                     {row.averageMargin === null ? (
                       <span className="text-muted">—</span>

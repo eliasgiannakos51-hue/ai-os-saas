@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { ShieldCheck, ShieldAlert, X } from "lucide-react";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import type { SecurityCheckResourceType, SecurityCheckResult } from "@/lib/security-check-log";
+import { formatDateTime } from "@/lib/format-number";
+import { useLocale } from "next-intl";
 
 type SecurityCheckLogRow = {
   id: string;
@@ -24,6 +26,7 @@ export function SecurityCheckedBadge({
   resourceType: SecurityCheckResourceType;
   resourceId: string;
 }) {
+  const locale = useLocale();
   const formatRelativeTime = useFormatRelativeTime();
   const [log, setLog] = useState<SecurityCheckLogRow | null>(null);
   const [open, setOpen] = useState(false);
@@ -110,7 +113,7 @@ export function SecurityCheckedBadge({
             </button>
           </div>
           <p className="mb-2 text-[11px] text-muted">
-            Checked {new Date(log.checked_at).toLocaleString()}
+            Checked {formatDateTime(log.checked_at, locale)}
           </p>
           <p className="mb-1 text-[11px] font-medium text-foreground">What was checked:</p>
           <ul className="mb-2 list-inside list-disc space-y-0.5 text-[11px] text-muted">

@@ -53,6 +53,7 @@ export function AskAiModal({
   recordHeadline: string;
 }) {
   const t = useTranslations("askAi");
+  const tCommon = useTranslations("common");
   const { refresh: refreshCredits } = useCredits();
   const [messages, setMessages] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
@@ -147,7 +148,7 @@ export function AskAiModal({
 
       void refreshCredits();
     } catch {
-      setError("Network error — please try again.");
+      setError(tCommon("networkError"));
     } finally {
       setStreamingText(null);
       setSending(false);

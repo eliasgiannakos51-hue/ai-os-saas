@@ -30,7 +30,7 @@ export function DangerZone({ email }: { email: string }) {
     setError(null);
 
     if (!confirmed) {
-      setError("Email doesn't match.");
+      setError(t("emailDoesNotMatch"));
       return;
     }
 
@@ -41,7 +41,7 @@ export function DangerZone({ email }: { email: string }) {
 
       if (!res.ok || !data.ok) {
         setError(getErrorMessage(data.error, "Failed to start account deletion."));
-        addToast("✗ could not start account deletion", "error");
+        addToast(t("couldNotStartDeletion"), "error");
         return;
       }
 
@@ -50,7 +50,7 @@ export function DangerZone({ email }: { email: string }) {
       // eslint-disable-next-line no-console
       console.error("Delete account request threw:", err);
       setError(getErrorMessage(err));
-      addToast("✗ could not start account deletion", "error");
+      addToast(t("couldNotStartDeletion"), "error");
     } finally {
       setLoading(false);
     }

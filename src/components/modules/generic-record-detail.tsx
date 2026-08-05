@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { FileText, Link2, Pencil, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { iconForSlug } from "@/lib/module-icons";
@@ -19,6 +19,7 @@ import { detailFieldsFor, headlineFor } from "@/lib/module-card-fields";
 import type { LinkedEntity } from "@/lib/entity-links";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
+import { formatDateTime } from "@/lib/format-number";
 
 export type RecordDetailTab = "details" | "edit" | "links";
 
@@ -60,6 +61,7 @@ export function GenericRecordDetail({
   onClose: () => void;
 }) {
   const t = useTranslations("module");
+  const locale = useLocale();
   const tCommon = useTranslations("common");
   const formatRelativeTime = useFormatRelativeTime();
   const router = useRouter();
@@ -136,7 +138,7 @@ export function GenericRecordDetail({
       accentSlug={module.slug}
       title={headline}
       subtitle={
-        <span title={new Date(record.created_at).toLocaleString()} suppressHydrationWarning>
+        <span title={formatDateTime(record.created_at, locale)} suppressHydrationWarning>
           {t("loggedAt", { when: formatRelativeTime(record.created_at) })}
         </span>
       }

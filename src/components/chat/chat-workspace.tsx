@@ -71,6 +71,7 @@ export function ChatWorkspace({
   initialFreeChatRemaining?: number;
 }) {
   const tTrading = useTranslations("dashboard.tradingWorkflow");
+  const tCommon = useTranslations("common");
   const tProduct = useTranslations("dashboard.productWorkflow");
   const tFree = useTranslations("credits.freeChat");
   const t = useTranslations("dashboard.chat");
@@ -389,7 +390,7 @@ export function ChatWorkspace({
 
       void refreshCredits();
     } catch {
-      setError("Network error — please try again.");
+      setError(tCommon("networkError"));
     } finally {
       setStreamingText(null);
       setSending(false);

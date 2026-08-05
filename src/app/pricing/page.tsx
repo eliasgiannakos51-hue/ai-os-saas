@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Check, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { PLANS, TEAM_SEAT_PRICE, CURRENCY_SYMBOL, getPlan, type Plan, type PaidPlanSlug } from "@/lib/billing/plans";
@@ -8,6 +8,7 @@ import { SubscribeButton } from "@/components/billing/subscribe-button";
 import { AppBackground } from "@/components/ui/app-background";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
+import { formatNumber } from "@/lib/format-number";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -21,12 +22,12 @@ type ComparisonCell = { type: "value"; text: string } | { type: "check" } | { ty
 // (lib/billing/plans.ts's PlanCapabilities/hasTeamSeats/teamSeatsIncluded)
 // — nothing pending/unbuilt is listed. labelKey looks up
 // messages/*.json's pricing.rows.<key> for the row name.
-const COMPARISON_ROWS: { labelKey: string; cell: (plan: Plan) => ComparisonCell }[] = [
+const COMPARISON_ROWS: { labelKey: string; cell: (plan: Plan, locale: string) => ComparisonCell }[] = [
   {
     labelKey: "creditsPerMonth",
-    cell: (p) => ({
+    cell: (p, locale) => ({
       type: "value",
-      text: p.monthlyCredits === "custom" ? "Custom" : p.monthlyCredits.toLocaleString(),
+      text: p.monthlyCredits === "custom" ? "Custom" : formatNumber(p.monthlyCredits, locale),
     }),
   },
   {
@@ -63,6 +64,7 @@ function ComparisonCellContent({ cell }: { cell: ComparisonCell }) {
 
 export default async function PricingPage() {
   const t = await getTranslations("pricing");
+  const locale = await getLocale();
 
   // Determines whether "Set Up Team" below can skip straight to
   // /dashboard/team, or needs to route through checkout first — mirrors
@@ -129,15 +131,26 @@ export default async function PricingPage() {
               </p>
               <p className="mt-2 text-xs text-muted">
                 {plan.monthlyCredits === "custom"
-                  ? `${t("custom")} credits/month`
-                  : `${plan.monthlyCredits.toLocaleString()} credits/month`}
+                  ? t("features.customCredits")
+                  : t("features.creditsPerMonth", { count: formatNumber(plan.monthlyCredits, locale) })}
               </p>
 
               <ul className="mt-6 flex-1 space-y-2.5 text-sm text-muted">
                 {plan.features.map((feature) => (
-                  <li key={feature.text} className="flex items-start gap-2">
+                  <li key={feature.textKey} className="flex items-start gap-2">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />
-                    <span>{feature.text}</span>
+                    {/* `count` is only consumed by the creditsPerMonth key;
+                        next-intl ignores unused params, and passing it here
+                        means the number is formatted for the reader's
+                        locale by the same code path as every other. */}
+                    <span>
+                      {t(`features.${feature.textKey}`, {
+                        count:
+                          plan.monthlyCredits === "custom"
+                            ? ""
+                            : formatNumber(plan.monthlyCredits, locale),
+                      })}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -264,7 +277,7 @@ export default async function PricingPage() {
                     <td className="px-4 py-3 text-left text-muted">{t(`rows.${row.labelKey}`)}</td>
                     {PLANS.map((plan) => (
                       <td key={plan.slug} className="px-4 py-3 text-center">
-                        <ComparisonCellContent cell={row.cell(plan)} />
+                        <ComparisonCellContent cell={row.cell(plan, locale)} />
                       </td>
                     ))}
                   </tr>

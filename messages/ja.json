@@ -19,7 +19,12 @@
     "viewPlans": "プランを見る",
     "chooseFiles": "ファイルを選択",
     "noFileChosen": "ファイルが選択されていません",
-    "filesSelected": "{count} 件選択済み"
+    "filesSelected": "{count} 件選択済み",
+    "networkError": "ネットワークエラー — もう一度お試しください。",
+    "notAuthenticated": "認証されていません。",
+    "created": "✓ 作成しました",
+    "updated": "✓ 更新しました",
+    "linked": "✓ リンクしました"
   },
   "sidebar": {
     "groups": {
@@ -166,7 +171,39 @@
     "businessFeatureFullAccess": "各メンバーはあなたのプランと同じレベルの完全アクセスを取得",
     "businessFeatureFreeOnUltimate": "Ultimateではチームシートが無料付帯",
     "businessFeatureManage": "チーム設定からいつでもシートを管理可能",
-    "setUpTeam": "チームを設定"
+    "setUpTeam": "チームを設定",
+    "features": {
+      "1Workspace3Projects": "ワークスペース1つ、プロジェクト3つ",
+      "2AiAgents": "AIエージェント2体",
+      "basicAiChat": "基本のAIチャット",
+      "creditsPerMonth": "{count} クレジット/月",
+      "marketplaceInstallOnly": "マーケットプレイス：インストールのみ",
+      "communitySupport": "コミュニティサポート",
+      "unlimitedProjects": "プロジェクト無制限",
+      "upTo20AiAgents": "AIエージェント最大20体",
+      "aiMemory": "AIメモリ",
+      "websiteAutomationBuilderAccess": "ウェブサイト＆自動化ビルダーへのアクセス",
+      "imageVideoGenerationAccess": "画像・動画生成へのアクセス",
+      "emailSupport": "メールサポート",
+      "everythingInStarter": "Starterのすべて",
+      "upTo100AiAgents": "AIエージェント最大100体",
+      "mobileSaasBuilderAccess": "モバイル＆SaaSビルダーへのアクセス",
+      "priorityProcessing": "優先処理",
+      "everythingInGrowth": "Growthのすべて",
+      "unlimitedAiAgentsTeams": "AIエージェント・チーム無制限",
+      "teamCollaboration": "チームコラボレーション",
+      "sharedAiMemory": "共有AIメモリ",
+      "prioritySupport": "優先サポート",
+      "everythingInProfessional": "Professionalのすべて",
+      "unlimitedTeamSeatsIncludedNoPerMemberCharge": "チーム席数無制限（メンバーごとの追加料金なし）",
+      "extendedChatMemoryRetention100Vs20RecentFact": "チャットメモリの保持拡張（直近100件、通常は20件）",
+      "customAiPersonaNameInIonexaChat": "Ionexa ChatでのAIペルソナ名のカスタマイズ",
+      "highestPriorityProcessing": "最優先の処理",
+      "everythingInUltimate": "Ultimateのすべて",
+      "unlimitedMembers": "メンバー無制限",
+      "dedicatedSupport": "専任サポート",
+      "customCredits": "カスタムクレジット"
+    }
   },
   "roadmap": {
     "title": "ロードマップ",
@@ -303,7 +340,9 @@
       "working": "処理中...",
       "continueToPayment": "支払いに進む",
       "createAccount": "アカウントを作成",
-      "mostPopular": "一番人気"
+      "mostPopular": "一番人気",
+      "mustAgreeToTerms": "アカウントを作成するには、利用規約とプライバシーポリシーに同意する必要があります。",
+      "passwordRequirementsNotMet": "上記のすべての条件を満たすパスワードを選んでください。"
     },
     "forgotPassword": {
       "title": "パスワードをリセット",
@@ -323,7 +362,8 @@
       "newPassword": "新しいパスワード",
       "confirmPassword": "パスワードの確認",
       "saveNewPassword": "新しいパスワードを保存",
-      "saving": "保存中..."
+      "saving": "保存中...",
+      "passwordsDoNotMatch": "パスワードが一致しません。"
     },
     "social": {
       "continueWithGoogle": "Googleで続行",
@@ -339,7 +379,11 @@
       "newPassword": "新しいパスワード",
       "confirmPassword": "パスワードの確認",
       "updatePassword": "パスワードを更新",
-      "updating": "更新中..."
+      "updating": "更新中...",
+      "requirementsNotMet": "以下のすべての条件を満たすパスワードを選んでください。",
+      "passwordsDoNotMatch": "パスワードが一致しません。",
+      "couldNotUpdate": "✗ パスワードを更新できませんでした",
+      "passwordUpdated": "✓ パスワードを更新しました"
     },
     "chatMemory": {
       "title": "チャットメモリー",
@@ -347,13 +391,18 @@
       "toggleDescription": "Ionexa Chat はあなたの会話から永続的な事実や好みを取り込み、今後の会話で思い出します。",
       "thingsRemembered": "{count} 件記憶されています",
       "clearAll": "すべての記憶を消去",
-      "clearing": "消去中..."
+      "clearing": "消去中...",
+      "couldNotUpdatePreference": "✗ 設定を更新できませんでした",
+      "couldNotClearMemory": "✗ メモリを消去できませんでした",
+      "memoryCleared": "✓ メモリを消去しました"
     },
     "loginActivity": {
       "title": "ログインアクティビティ",
       "description": "あなたのアカウントにログインしたデバイスとブラウザです。新しいものが表示されるたびにメールでお知らせします。",
       "noDevices": "まだ記録されたデバイスはありません。",
-      "lastSeen": "最終アクセス {time}"
+      "lastSeen": "最終アクセス {time}",
+      "couldNotRemoveDevice": "✗ デバイスを削除できませんでした",
+      "deviceRemoved": "✓ デバイスを削除しました"
     },
     "aiUsage": {
       "title": "AI 利用状況",
@@ -396,7 +445,8 @@
       "title": "データをエクスポート",
       "description": "13 のモジュールすべてで記録した内容を、単一の JSON ファイルとしてダウンロードします。",
       "exportAll": "すべてのデータをエクスポート",
-      "exporting": "エクスポート中..."
+      "exporting": "エクスポート中...",
+      "exportDownloaded": "✓ エクスポートをダウンロードしました"
     },
     "dangerZone": {
       "title": "危険な操作",
@@ -405,7 +455,9 @@
       "typeToConfirm": "確認のため <highlight>{email}</highlight> と入力してください",
       "sendConfirmationEmail": "削除確認メールを送信",
       "sending": "送信中...",
-      "checkEmail": "削除を確認するにはメールをご確認ください — <highlight>{email}</highlight> にリンクを送信しました。1時間で期限切れになります。クリックするまで何も削除されません。"
+      "checkEmail": "削除を確認するにはメールをご確認ください — <highlight>{email}</highlight> にリンクを送信しました。1時間で期限切れになります。クリックするまで何も削除されません。",
+      "emailDoesNotMatch": "メールアドレスが一致しません。",
+      "couldNotStartDeletion": "✗ アカウント削除を開始できませんでした"
     },
     "emailNotifications": {
       "title": "メール通知",
@@ -439,7 +491,8 @@
     },
     "aiPersona": {
       "title": "AI ペルソナ",
-      "description": "アシスタントに好きな名前を付けましょう。"
+      "description": "アシスタントに好きな名前を付けましょう。",
+      "personaUpdated": "✓ アシスタント名を更新しました"
     },
     "billing": {
       "title": "請求",
@@ -560,7 +613,9 @@
       "setupSuccessBody": "以下から最初のチームメンバーを招待してください。",
       "roleLabel": "役割 / 職種",
       "rolePlaceholder": "この人は何をしますか?",
-      "workUseDisclaimer": "チームシートは、実際にビジネスに従事する従業員または協力者のためのものです — 個人・家族用ではありません。メンバーを招待することで、その人がチームの業務の一員であることを確認したものとみなされます。"
+      "workUseDisclaimer": "チームシートは、実際にビジネスに従事する従業員または協力者のためのものです — 個人・家族用ではありません。メンバーを招待することで、その人がチームの業務の一員であることを確認したものとみなされます。",
+      "memberRemoved": "✓ メンバーを削除しました",
+      "couldNotRemoveMember": "✗ メンバーを削除できませんでした"
     },
     "memory": {
       "title": "AI メモリー",
@@ -662,7 +717,7 @@
       "reviewNotRunYet": "すべてのステップが完了しました。レビュアーを実行して要約を取得してください。",
       "reviewLocked": "レビュアーはすべてのステップ完了後に実行されます。",
       "stepMinutes": "約 {count} 分",
-      "updatedElsewhere": "このミッションは別の場所で更新されました。最新の状態を表示するため再読み込みします。"
+      "updatedElsewhere": "このミッションは別の場所で更新されました — 最新の状態を表示するために再読み込みします。"
     },
     "reflection": {
       "title": "週次振り返り",

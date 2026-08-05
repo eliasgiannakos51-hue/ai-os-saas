@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Flag } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useCredits } from "@/components/credits/credits-context";
+import { useTranslations } from "next-intl";
 
 // Mission Control preset: posts a fixed, product-launch-focused goal
 // straight to the existing Planner (/api/mission/plan, same endpoint +
@@ -25,6 +26,7 @@ export function ProductMissionButton({
 }) {
   const router = useRouter();
   const { refresh: refreshCredits } = useCredits();
+  const tCommon = useTranslations("common");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,7 +54,7 @@ export function ProductMissionButton({
 
       router.push("/dashboard/mission");
     } catch {
-      setError("Network error — please try again.");
+      setError(tCommon("networkError"));
     } finally {
       setLoading(false);
     }

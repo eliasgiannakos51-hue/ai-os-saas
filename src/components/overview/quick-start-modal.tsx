@@ -6,10 +6,12 @@ import { X, Rocket, Check } from "lucide-react";
 import { WORKSPACE_TEMPLATES } from "@/lib/workspace-templates";
 import { useToast } from "@/components/toast/toast-context";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { useTranslations } from "next-intl";
 
 export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const router = useRouter();
   const { addToast } = useToast();
+  const tCommon = useTranslations("common");
   const [applyingId, setApplyingId] = useState<string | null>(null);
 
   async function apply(templateId: string) {
@@ -31,7 +33,7 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
       onClose();
       router.refresh();
     } catch {
-      addToast("✗ network error — please try again", "error");
+      addToast(tCommon("networkError"), "error");
     } finally {
       setApplyingId(null);
     }

@@ -160,7 +160,7 @@ export function ResetPasswordForm() {
     setError(null);
 
     if (password !== confirmPassword) {
-      setError("Passwords don't match.");
+      setError(t("passwordsDoNotMatch"));
       return;
     }
 

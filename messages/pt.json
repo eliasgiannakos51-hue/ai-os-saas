@@ -19,7 +19,12 @@
     "viewPlans": "Ver planos",
     "chooseFiles": "Escolher ficheiros",
     "noFileChosen": "Nenhum ficheiro escolhido",
-    "filesSelected": "{count} selecionados"
+    "filesSelected": "{count} selecionados",
+    "networkError": "Erro de rede — tente novamente.",
+    "notAuthenticated": "Não autenticado.",
+    "created": "✓ criado",
+    "updated": "✓ atualizado",
+    "linked": "✓ associado"
   },
   "sidebar": {
     "groups": {
@@ -166,7 +171,39 @@
     "businessFeatureFullAccess": "Cada membro recebe acesso completo ao nível do seu plano",
     "businessFeatureFreeOnUltimate": "Vagas de equipe incluídas gratuitamente no Ultimate",
     "businessFeatureManage": "Gerencie as vagas a qualquer momento nas configurações da Equipe",
-    "setUpTeam": "Configurar Equipe"
+    "setUpTeam": "Configurar Equipe",
+    "features": {
+      "1Workspace3Projects": "1 espaço de trabalho, 3 projetos",
+      "2AiAgents": "2 agentes de IA",
+      "basicAiChat": "Chat de IA básico",
+      "creditsPerMonth": "{count} créditos/mês",
+      "marketplaceInstallOnly": "Marketplace: apenas instalação",
+      "communitySupport": "Apoio da comunidade",
+      "unlimitedProjects": "Projetos ilimitados",
+      "upTo20AiAgents": "Até 20 agentes de IA",
+      "aiMemory": "Memória de IA",
+      "websiteAutomationBuilderAccess": "Acesso ao Website & Automation Builder",
+      "imageVideoGenerationAccess": "Acesso à geração de imagem e vídeo",
+      "emailSupport": "Apoio por e-mail",
+      "everythingInStarter": "Tudo o que o Starter inclui",
+      "upTo100AiAgents": "Até 100 agentes de IA",
+      "mobileSaasBuilderAccess": "Acesso ao Mobile & SaaS Builder",
+      "priorityProcessing": "Processamento prioritário",
+      "everythingInGrowth": "Tudo o que o Growth inclui",
+      "unlimitedAiAgentsTeams": "Agentes de IA e equipas ilimitados",
+      "teamCollaboration": "Colaboração em equipa",
+      "sharedAiMemory": "Memória de IA partilhada",
+      "prioritySupport": "Apoio prioritário",
+      "everythingInProfessional": "Tudo o que o Professional inclui",
+      "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Lugares de equipa ilimitados incluídos — sem custo por membro",
+      "extendedChatMemoryRetention100Vs20RecentFact": "Retenção alargada da memória de conversa (100 em vez de 20 factos recentes)",
+      "customAiPersonaNameInIonexaChat": "Nome personalizado do assistente no Ionexa Chat",
+      "highestPriorityProcessing": "Processamento de prioridade máxima",
+      "everythingInUltimate": "Tudo o que o Ultimate inclui",
+      "unlimitedMembers": "Membros ilimitados",
+      "dedicatedSupport": "Apoio dedicado",
+      "customCredits": "Créditos personalizados"
+    }
   },
   "roadmap": {
     "title": "Roteiro",
@@ -303,7 +340,9 @@
       "working": "Processando...",
       "continueToPayment": "Continuar para o pagamento",
       "createAccount": "Criar conta",
-      "mostPopular": "Mais popular"
+      "mostPopular": "Mais popular",
+      "mustAgreeToTerms": "Tem de aceitar os Termos de Serviço e a Política de Privacidade para criar uma conta.",
+      "passwordRequirementsNotMet": "Escolha uma palavra-passe que cumpra todos os requisitos acima."
     },
     "forgotPassword": {
       "title": "Redefinir senha",
@@ -323,7 +362,8 @@
       "newPassword": "Nova senha",
       "confirmPassword": "Confirmar senha",
       "saveNewPassword": "Salvar nova senha",
-      "saving": "Salvando..."
+      "saving": "Salvando...",
+      "passwordsDoNotMatch": "As palavras-passe não coincidem."
     },
     "social": {
       "continueWithGoogle": "Continuar com Google",
@@ -339,7 +379,11 @@
       "newPassword": "nova senha",
       "confirmPassword": "confirmar senha",
       "updatePassword": "Atualizar senha",
-      "updating": "Atualizando..."
+      "updating": "Atualizando...",
+      "requirementsNotMet": "Escolha uma palavra-passe que cumpra todos os requisitos abaixo.",
+      "passwordsDoNotMatch": "As palavras-passe não coincidem.",
+      "couldNotUpdate": "✗ não foi possível atualizar a palavra-passe",
+      "passwordUpdated": "✓ palavra-passe atualizada"
     },
     "chatMemory": {
       "title": "Memória do chat",
@@ -347,13 +391,18 @@
       "toggleDescription": "O Ionexa Chat retém fatos e preferências duradouras das suas conversas e as recorda em conversas futuras.",
       "thingsRemembered": "{count, plural, one {# item lembrado} other {# itens lembrados}}",
       "clearAll": "Limpar toda a memória",
-      "clearing": "Limpando..."
+      "clearing": "Limpando...",
+      "couldNotUpdatePreference": "✗ não foi possível atualizar a preferência",
+      "couldNotClearMemory": "✗ não foi possível limpar a memória",
+      "memoryCleared": "✓ memória limpa"
     },
     "loginActivity": {
       "title": "Atividade de login",
       "description": "Dispositivos e navegadores que fizeram login na sua conta. Enviamos um e-mail sempre que um novo aparece aqui.",
       "noDevices": "Nenhum dispositivo registrado ainda.",
-      "lastSeen": "Visto pela última vez {time}"
+      "lastSeen": "Visto pela última vez {time}",
+      "couldNotRemoveDevice": "✗ não foi possível remover o dispositivo",
+      "deviceRemoved": "✓ dispositivo removido"
     },
     "aiUsage": {
       "title": "Uso de IA",
@@ -396,7 +445,8 @@
       "title": "Exportar dados",
       "description": "Baixe tudo que você registrou nos 13 módulos como um único arquivo JSON.",
       "exportAll": "Exportar todos os dados",
-      "exporting": "Exportando..."
+      "exporting": "Exportando...",
+      "exportDownloaded": "✓ exportação transferida"
     },
     "dangerZone": {
       "title": "Zona de perigo",
@@ -405,7 +455,9 @@
       "typeToConfirm": "digite <highlight>{email}</highlight> para confirmar",
       "sendConfirmationEmail": "Enviar e-mail de confirmação de exclusão",
       "sending": "Enviando...",
-      "checkEmail": "Verifique seu e-mail para confirmar a exclusão — enviamos um link para <highlight>{email}</highlight>. Ele expira em 1 hora; nada será excluído até que você clique nele."
+      "checkEmail": "Verifique seu e-mail para confirmar a exclusão — enviamos um link para <highlight>{email}</highlight>. Ele expira em 1 hora; nada será excluído até que você clique nele.",
+      "emailDoesNotMatch": "O e-mail não corresponde.",
+      "couldNotStartDeletion": "✗ não foi possível iniciar a eliminação da conta"
     },
     "emailNotifications": {
       "title": "Notificações por e-mail",
@@ -439,7 +491,8 @@
     },
     "aiPersona": {
       "title": "Persona de IA",
-      "description": "Dá ao assistente um nome personalizado."
+      "description": "Dá ao assistente um nome personalizado.",
+      "personaUpdated": "✓ nome do assistente atualizado"
     },
     "billing": {
       "title": "Faturação",
@@ -560,7 +613,9 @@
       "setupSuccessBody": "Convide seu primeiro membro de equipe abaixo.",
       "roleLabel": "Função / Cargo",
       "rolePlaceholder": "O que essa pessoa faz?",
-      "workUseDisclaimer": "As vagas de equipe destinam-se a funcionários ou colaboradores reais que trabalham no seu negócio — não para uso pessoal/familiar. Ao convidar um membro, você confirma que ele faz parte do trabalho da sua equipe."
+      "workUseDisclaimer": "As vagas de equipe destinam-se a funcionários ou colaboradores reais que trabalham no seu negócio — não para uso pessoal/familiar. Ao convidar um membro, você confirma que ele faz parte do trabalho da sua equipe.",
+      "memberRemoved": "✓ membro removido",
+      "couldNotRemoveMember": "✗ não foi possível remover o membro"
     },
     "memory": {
       "title": "Memória IA",
@@ -662,7 +717,7 @@
       "reviewNotRunYet": "Todos os passos estão concluídos — execute o Revisor para obter um resumo.",
       "reviewLocked": "O Revisor corre assim que todos os passos estiverem concluídos.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "Esta missão acabou de ser atualizada noutro sítio — a recarregar para mostrar o estado mais recente."
+      "updatedElsewhere": "Esta missão foi atualizada noutro local agora mesmo — a recarregar para mostrar o estado mais recente."
     },
     "reflection": {
       "title": "Reflexão Semanal",

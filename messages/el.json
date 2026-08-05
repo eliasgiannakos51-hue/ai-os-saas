@@ -19,7 +19,12 @@
     "viewPlans": "Δες τα πλάνα",
     "chooseFiles": "Επιλογή αρχείων",
     "noFileChosen": "Δεν επιλέχθηκε αρχείο",
-    "filesSelected": "{count} επιλεγμένα"
+    "filesSelected": "{count} επιλεγμένα",
+    "networkError": "Σφάλμα δικτύου — δοκιμάστε ξανά.",
+    "notAuthenticated": "Δεν έχετε συνδεθεί.",
+    "created": "✓ δημιουργήθηκε",
+    "updated": "✓ ενημερώθηκε",
+    "linked": "✓ συνδέθηκε"
   },
   "sidebar": {
     "groups": {
@@ -166,7 +171,39 @@
     "businessFeatureFullAccess": "Κάθε μέλος αποκτά πλήρη πρόσβαση στο επίπεδο του πλάνου σου",
     "businessFeatureFreeOnUltimate": "Θέσεις ομάδας δωρεάν στο Ultimate",
     "businessFeatureManage": "Διαχειρίσου τις θέσεις όποτε θέλεις από τις ρυθμίσεις Ομάδας",
-    "setUpTeam": "Δημιουργία Ομάδας"
+    "setUpTeam": "Δημιουργία Ομάδας",
+    "features": {
+      "1Workspace3Projects": "1 χώρος εργασίας, 3 έργα",
+      "2AiAgents": "2 πράκτορες AI",
+      "basicAiChat": "Βασική συνομιλία AI",
+      "creditsPerMonth": "{count} credits/μήνα",
+      "marketplaceInstallOnly": "Marketplace: μόνο εγκατάσταση",
+      "communitySupport": "Υποστήριξη κοινότητας",
+      "unlimitedProjects": "Απεριόριστα έργα",
+      "upTo20AiAgents": "Έως 20 πράκτορες AI",
+      "aiMemory": "Μνήμη AI",
+      "websiteAutomationBuilderAccess": "Πρόσβαση σε Website & Automation Builder",
+      "imageVideoGenerationAccess": "Πρόσβαση σε δημιουργία εικόνας & βίντεο",
+      "emailSupport": "Υποστήριξη μέσω email",
+      "everythingInStarter": "Ό,τι περιλαμβάνει το Starter",
+      "upTo100AiAgents": "Έως 100 πράκτορες AI",
+      "mobileSaasBuilderAccess": "Πρόσβαση σε Mobile & SaaS Builder",
+      "priorityProcessing": "Επεξεργασία κατά προτεραιότητα",
+      "everythingInGrowth": "Ό,τι περιλαμβάνει το Growth",
+      "unlimitedAiAgentsTeams": "Απεριόριστοι πράκτορες AI & ομάδες",
+      "teamCollaboration": "Συνεργασία ομάδας",
+      "sharedAiMemory": "Κοινόχρηστη μνήμη AI",
+      "prioritySupport": "Υποστήριξη κατά προτεραιότητα",
+      "everythingInProfessional": "Ό,τι περιλαμβάνει το Professional",
+      "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Απεριόριστες θέσεις ομάδας — χωρίς χρέωση ανά μέλος",
+      "extendedChatMemoryRetention100Vs20RecentFact": "Εκτεταμένη διατήρηση μνήμης συνομιλίας (100 έναντι 20 πρόσφατων στοιχείων)",
+      "customAiPersonaNameInIonexaChat": "Προσαρμοσμένο όνομα AI στο Ionexa Chat",
+      "highestPriorityProcessing": "Επεξεργασία με την υψηλότερη προτεραιότητα",
+      "everythingInUltimate": "Ό,τι περιλαμβάνει το Ultimate",
+      "unlimitedMembers": "Απεριόριστα μέλη",
+      "dedicatedSupport": "Αποκλειστική υποστήριξη",
+      "customCredits": "Προσαρμοσμένα credits"
+    }
   },
   "roadmap": {
     "title": "Roadmap",
@@ -303,7 +340,9 @@
       "working": "Επεξεργασία...",
       "continueToPayment": "Συνέχεια στην Πληρωμή",
       "createAccount": "Δημιουργία Λογαριασμού",
-      "mostPopular": "Πιο Δημοφιλές"
+      "mostPopular": "Πιο Δημοφιλές",
+      "mustAgreeToTerms": "Πρέπει να αποδεχτείτε τους Όρους Χρήσης και την Πολιτική Απορρήτου για να δημιουργήσετε λογαριασμό.",
+      "passwordRequirementsNotMet": "Επιλέξτε κωδικό που πληροί όλες τις παραπάνω προϋποθέσεις."
     },
     "forgotPassword": {
       "title": "Επαναφορά κωδικού",
@@ -323,7 +362,8 @@
       "newPassword": "Νέος κωδικός",
       "confirmPassword": "Επιβεβαίωση κωδικού",
       "saveNewPassword": "Αποθήκευση νέου κωδικού",
-      "saving": "Αποθήκευση..."
+      "saving": "Αποθήκευση...",
+      "passwordsDoNotMatch": "Οι κωδικοί δεν ταιριάζουν."
     },
     "social": {
       "continueWithGoogle": "Συνέχεια με Google",
@@ -339,7 +379,11 @@
       "newPassword": "νέος κωδικός",
       "confirmPassword": "επιβεβαίωση κωδικού",
       "updatePassword": "Ενημέρωση Κωδικού",
-      "updating": "Ενημέρωση..."
+      "updating": "Ενημέρωση...",
+      "requirementsNotMet": "Επιλέξτε κωδικό που πληροί όλες τις παρακάτω προϋποθέσεις.",
+      "passwordsDoNotMatch": "Οι κωδικοί δεν ταιριάζουν.",
+      "couldNotUpdate": "✗ δεν ήταν δυνατή η ενημέρωση του κωδικού",
+      "passwordUpdated": "✓ ο κωδικός ενημερώθηκε"
     },
     "chatMemory": {
       "title": "Μνήμη Chat",
@@ -347,13 +391,18 @@
       "toggleDescription": "Το Ionexa Chat συγκρατεί μόνιμα χρήσιμα γεγονότα και προτιμήσεις από τις συνομιλίες σου και τα θυμάται σε μελλοντικές.",
       "thingsRemembered": "{count, plural, one {# απομνημονευμένο στοιχείο} other {# απομνημονευμένα στοιχεία}}",
       "clearAll": "Διαγραφή όλης της μνήμης",
-      "clearing": "Διαγραφή..."
+      "clearing": "Διαγραφή...",
+      "couldNotUpdatePreference": "✗ δεν ήταν δυνατή η ενημέρωση της προτίμησης",
+      "couldNotClearMemory": "✗ δεν ήταν δυνατή η εκκαθάριση της μνήμης",
+      "memoryCleared": "✓ η μνήμη εκκαθαρίστηκε"
     },
     "loginActivity": {
       "title": "Δραστηριότητα Σύνδεσης",
       "description": "Συσκευές και browsers που έχουν συνδεθεί στον λογαριασμό σου. Σου στέλνουμε email όποτε εμφανιστεί μια νέα εδώ.",
       "noDevices": "Δεν έχουν καταγραφεί συσκευές ακόμα.",
-      "lastSeen": "Τελευταία εμφάνιση {time}"
+      "lastSeen": "Τελευταία εμφάνιση {time}",
+      "couldNotRemoveDevice": "✗ δεν ήταν δυνατή η αφαίρεση της συσκευής",
+      "deviceRemoved": "✓ η συσκευή αφαιρέθηκε"
     },
     "aiUsage": {
       "title": "Χρήση AI",
@@ -396,7 +445,8 @@
       "title": "Εξαγωγή Δεδομένων",
       "description": "Κατέβασε όλα όσα έχεις καταγράψει σε όλα τα 13 modules σε ένα ενιαίο αρχείο JSON.",
       "exportAll": "Εξαγωγή Όλων των Δεδομένων",
-      "exporting": "Εξαγωγή..."
+      "exporting": "Εξαγωγή...",
+      "exportDownloaded": "✓ η εξαγωγή ολοκληρώθηκε"
     },
     "dangerZone": {
       "title": "Επικίνδυνη Ζώνη",
@@ -405,7 +455,9 @@
       "typeToConfirm": "πληκτρολόγησε <highlight>{email}</highlight> για επιβεβαίωση",
       "sendConfirmationEmail": "Αποστολή email επιβεβαίωσης διαγραφής",
       "sending": "Αποστολή...",
-      "checkEmail": "Έλεγξε το email σου για να επιβεβαιώσεις τη διαγραφή — στείλαμε ένα link στο <highlight>{email}</highlight>. Λήγει σε 1 ώρα· τίποτα δεν διαγράφεται μέχρι να το πατήσεις."
+      "checkEmail": "Έλεγξε το email σου για να επιβεβαιώσεις τη διαγραφή — στείλαμε ένα link στο <highlight>{email}</highlight>. Λήγει σε 1 ώρα· τίποτα δεν διαγράφεται μέχρι να το πατήσεις.",
+      "emailDoesNotMatch": "Το email δεν ταιριάζει.",
+      "couldNotStartDeletion": "✗ δεν ήταν δυνατή η έναρξη διαγραφής λογαριασμού"
     },
     "emailNotifications": {
       "title": "Ειδοποιήσεις email",
@@ -439,7 +491,8 @@
     },
     "aiPersona": {
       "title": "Προσωπικότητα AI",
-      "description": "Δώσε στον βοηθό ένα δικό σου όνομα."
+      "description": "Δώσε στον βοηθό ένα δικό σου όνομα.",
+      "personaUpdated": "✓ το όνομα του βοηθού ενημερώθηκε"
     },
     "billing": {
       "title": "Χρεώσεις",
@@ -560,7 +613,9 @@
       "setupSuccessBody": "Προσκάλεσε το πρώτο σου μέλος ομάδας παρακάτω.",
       "roleLabel": "Ρόλος / Θέση",
       "rolePlaceholder": "Τι κάνει αυτό το άτομο;",
-      "workUseDisclaimer": "Οι θέσεις ομάδας προορίζονται για πραγματικούς υπαλλήλους ή συνεργάτες που εργάζονται στην επιχείρησή σου — όχι για προσωπική/οικογενειακή χρήση. Προσκαλώντας ένα μέλος, επιβεβαιώνεις ότι είναι μέρος της εργασίας της ομάδας σου."
+      "workUseDisclaimer": "Οι θέσεις ομάδας προορίζονται για πραγματικούς υπαλλήλους ή συνεργάτες που εργάζονται στην επιχείρησή σου — όχι για προσωπική/οικογενειακή χρήση. Προσκαλώντας ένα μέλος, επιβεβαιώνεις ότι είναι μέρος της εργασίας της ομάδας σου.",
+      "memberRemoved": "✓ το μέλος αφαιρέθηκε",
+      "couldNotRemoveMember": "✗ δεν ήταν δυνατή η αφαίρεση του μέλους"
     },
     "memory": {
       "title": "AI Μνήμη",
@@ -662,7 +717,7 @@
       "reviewNotRunYet": "Όλα τα βήματα ολοκληρώθηκαν — τρέξτε τον Αξιολογητή για σύνοψη.",
       "reviewLocked": "Ο Αξιολογητής τρέχει μόλις ολοκληρωθούν όλα τα βήματα.",
       "stepMinutes": "~{count} λεπτά",
-      "updatedElsewhere": "Αυτή η αποστολή μόλις ενημερώθηκε αλλού — ανανέωση για την πιο πρόσφατη κατάσταση."
+      "updatedElsewhere": "Αυτή η αποστολή ενημερώθηκε αλλού μόλις τώρα — ανανέωση για την τελευταία κατάσταση."
     },
     "reflection": {
       "title": "Εβδομαδιαία Αναστοχασμός",

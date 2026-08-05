@@ -87,7 +87,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
 
         setForm(emptyFormFor(module));
         setOpen(false);
-        addToast("✓ created");
+        addToast(tCommon("created"));
         void refreshCredits();
         router.refresh();
         if (data.record?.id) {
@@ -95,7 +95,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
         }
       } catch {
         setLoading(false);
-        setError("Network error — please try again.");
+        setError(tCommon("networkError"));
       }
       return;
     }
@@ -105,7 +105,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      setError("not authenticated");
+      setError(tCommon("notAuthenticated"));
       setLoading(false);
       return;
     }
@@ -137,7 +137,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
 
     setForm(emptyFormFor(module));
     setOpen(false);
-    addToast("✓ created");
+    addToast(tCommon("created"));
     router.refresh();
     if (inserted?.id) {
       setNewlyCreated({ table: module.table, id: String(inserted.id) });

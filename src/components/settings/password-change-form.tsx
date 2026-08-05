@@ -23,11 +23,11 @@ export function PasswordChangeForm() {
     setError(null);
 
     if (!isPasswordStrong(newPassword)) {
-      setError("Please choose a password that meets every requirement below.");
+      setError(t("requirementsNotMet"));
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(t("passwordsDoNotMatch"));
       return;
     }
 
@@ -39,18 +39,18 @@ export function PasswordChangeForm() {
         // eslint-disable-next-line no-console
         console.error("Password change error:", error);
         setError(getErrorMessage(error));
-        addToast("✗ could not update password", "error");
+        addToast(t("couldNotUpdate"), "error");
         return;
       }
 
       setNewPassword("");
       setConfirmPassword("");
-      addToast("✓ password updated");
+      addToast(t("passwordUpdated"));
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Password change threw:", err);
       setError(getErrorMessage(err));
-      addToast("✗ could not update password", "error");
+      addToast(t("couldNotUpdate"), "error");
     } finally {
       setLoading(false);
     }

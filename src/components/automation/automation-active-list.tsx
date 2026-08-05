@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Repeat, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
 import type { UserAutomation } from "@/types/user-automation";
+import { formatDate } from "@/lib/format-number";
 
 // "Active Automations" — every user_automations row, regardless of
 // is_active, so a toggled-off automation stays visible (and re-toggleable)
@@ -16,6 +17,7 @@ import type { UserAutomation } from "@/types/user-automation";
 // restricts both to the owning user.
 export function AutomationActiveList({ automations }: { automations: UserAutomation[] }) {
   const t = useTranslations("dashboard.automation");
+  const locale = useLocale();
   const router = useRouter();
   const supabase = createClient();
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -67,7 +69,7 @@ export function AutomationActiveList({ automations }: { automations: UserAutomat
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm text-foreground">{automation.description}</p>
               <p className="mt-0.5 text-[11px] text-muted">
-                {frequencyLabel(automation)} · {t("nextRun", { date: new Date(automation.next_run_at).toLocaleDateString() })}
+                {frequencyLabel(automation)} · {t("nextRun", { date: formatDate(automation.next_run_at, locale) })}
               </p>
               <div className="mt-1">
                 <SecurityCheckedBadge resourceType="automation" resourceId={automation.id} />

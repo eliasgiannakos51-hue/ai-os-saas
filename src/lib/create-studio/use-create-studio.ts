@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useCredits } from "@/components/credits/credits-context";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -46,6 +47,7 @@ const POLL_INTERVAL_MS = 2500;
  * without this file knowing about any of them.
  */
 export function useCreateStudio() {
+  const tCommon = useTranslations("common");
   const { refresh: refreshCredits } = useCredits();
   const [steps, setSteps] = useState<StudioProgressStep[]>([]);
   const [result, setResult] = useState<StudioResult | null>(null);
@@ -278,12 +280,12 @@ export function useCreateStudio() {
           }
         }
       } catch {
-        setError("Network error — please try again.");
+        setError(tCommon("networkError"));
       } finally {
         setRunning(false);
       }
     },
-    [finishStep, pollWebsite, pushStep, refreshCredits]
+    [finishStep, pollWebsite, pushStep, refreshCredits, tCommon]
   );
 
   return { create, reset, steps, result, error, running, setError, mountedRef };

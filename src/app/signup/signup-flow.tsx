@@ -3,7 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Check, ChevronLeft, X } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { isPasswordStrong } from "@/lib/password-strength";
@@ -23,6 +23,7 @@ import { Logo } from "@/components/logo";
 import { AppBackground } from "@/components/ui/app-background";
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { COUNTRIES } from "@/lib/countries";
+import { formatNumber } from "@/lib/format-number";
 
 const FIELD_CLASS =
   "w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500";
@@ -59,6 +60,7 @@ const CAPABILITY_ROWS: { label: string; included: (p: Plan) => boolean }[] = [
 export function SignupFlow() {
   const router = useRouter();
   const t = useTranslations("auth.signup");
+  const locale = useLocale();
   const tPricing = useTranslations("pricing");
 
   const [step, setStep] = useState<Step>(1);
@@ -135,11 +137,11 @@ export function SignupFlow() {
     setError(null);
 
     if (!termsAccepted) {
-      setError("You must agree to the Terms of Service and Privacy Policy to create an account.");
+      setError(t("mustAgreeToTerms"));
       return;
     }
     if (!isPasswordStrong(password)) {
-      setError("Please choose a password that meets every requirement above.");
+      setError(t("passwordRequirementsNotMet"));
       return;
     }
 
@@ -287,8 +289,8 @@ export function SignupFlow() {
                     </p>
                     <p className="mt-1 text-xs text-muted">
                       {p.monthlyCredits === "custom"
-                        ? `${tPricing("custom")} credits`
-                        : `${p.monthlyCredits.toLocaleString()} credits/mo`}
+                        ? tPricing("features.customCredits")
+                        : tPricing("features.creditsPerMonth", { count: formatNumber(p.monthlyCredits, locale) })}
                     </p>
 
                     <ul className="mt-3 w-full space-y-1.5 border-t border-border pt-3">
@@ -315,11 +317,18 @@ export function SignupFlow() {
                     <ul className="mt-3 w-full space-y-1.5 border-t border-border pt-3">
                       {p.features.map((feature) => (
                         <li
-                          key={feature.text}
+                          key={feature.textKey}
                           className="flex items-start gap-1.5 text-[11px] text-foreground/80"
                         >
                           <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" aria-hidden="true" />
-                          <span>{feature.text}</span>
+                          <span>
+                            {tPricing(`features.${feature.textKey}`, {
+                              count:
+                                p.monthlyCredits === "custom"
+                                  ? ""
+                                  : formatNumber(p.monthlyCredits, locale),
+                            })}
+                          </span>
                         </li>
                       ))}
                     </ul>

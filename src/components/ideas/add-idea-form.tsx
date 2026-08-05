@@ -6,6 +6,7 @@ import { Plus, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
 import { SuggestedLinksPrompt } from "@/components/entity-links/suggested-links-prompt";
+import { useTranslations } from "next-intl";
 
 const EMPTY_FORM = {
   name: "",
@@ -22,6 +23,7 @@ export function AddIdeaForm() {
   const router = useRouter();
   const supabase = createClient();
   const { addToast } = useToast();
+  const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +48,7 @@ export function AddIdeaForm() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      setError("not authenticated");
+      setError(tCommon("notAuthenticated"));
       setLoading(false);
       return;
     }
@@ -77,7 +79,7 @@ export function AddIdeaForm() {
 
     setForm(EMPTY_FORM);
     setOpen(false);
-    addToast("✓ created");
+    addToast(tCommon("created"));
     router.refresh();
     if (inserted?.id) {
       setNewlyCreated({ table: "ideas", id: String(inserted.id) });

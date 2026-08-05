@@ -20,6 +20,7 @@ import type { WeeklyReflectionStats } from "@/lib/reflection";
 // bodyless POST exactly as before — zero change to default behavior.
 export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" } = {}) {
   const t = useTranslations("dashboard.reflection");
+  const tCommon = useTranslations("common");
   const { refresh: refreshCredits } = useCredits();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +52,7 @@ export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" }
       setReflection(data.reflection);
       setStats(data.stats);
     } catch {
-      setError("Network error — please try again.");
+      setError(tCommon("networkError"));
     } finally {
       setLoading(false);
     }

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { ShieldCheck, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { parseUserAgent } from "@/lib/parse-user-agent";
+import { formatDateTime } from "@/lib/format-number";
 
 export type KnownDevice = {
   id: string;
@@ -18,6 +19,7 @@ export type KnownDevice = {
 export function LoginActivity({ devices: initialDevices }: { devices: KnownDevice[] }) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("settings.loginActivity");
+  const locale = useLocale();
   const supabase = createClient();
   const { addToast } = useToast();
   const [devices, setDevices] = useState(initialDevices);
@@ -34,12 +36,12 @@ export function LoginActivity({ devices: initialDevices }: { devices: KnownDevic
     if (error) {
       // eslint-disable-next-line no-console
       console.error("Remove known device error:", error);
-      addToast("✗ could not remove device", "error");
+      addToast(t("couldNotRemoveDevice"), "error");
       return;
     }
 
     setDevices((prev) => prev.filter((d) => d.id !== device.id));
-    addToast("✓ device removed");
+    addToast(t("deviceRemoved"));
   }
 
   return (
@@ -64,7 +66,7 @@ export function LoginActivity({ devices: initialDevices }: { devices: KnownDevic
                   <p className="truncate text-sm text-foreground">{label}</p>
                   <p
                     className="text-xs text-muted"
-                    title={new Date(device.last_seen).toLocaleString()}
+                    title={formatDateTime(device.last_seen, locale)}
                     suppressHydrationWarning
                   >
                     {t("lastSeen", { time: formatRelativeTime(device.last_seen) })}

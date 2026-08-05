@@ -111,8 +111,16 @@
       "memory": "Was die KI sich über dich merkt.",
       "favorites": "Alles, was du markiert hast.",
       "marketplace": "Setups teilen und entdecken — noch nicht offen.",
-      "team": "Lade Leute in deinen Arbeitsbereich ein."
-    }
+      "team": "Lade Leute in deinen Arbeitsbereich ein.",
+      "apps": "Beschreibe eine App und bekomme sie wirklich gebaut. Noch nicht fertig.",
+      "images": "Bilder aus einer Beschreibung erzeugen. Noch nicht fertig.",
+      "videos": "Video aus einer Beschreibung erzeugen. Noch nicht fertig.",
+      "coding": "Beschreibe, was du brauchst, und bekomme funktionierenden Code. Noch nicht fertig.",
+      "presentations": "Aus einem Briefing eine fertige Präsentation machen. Noch nicht fertig."
+    },
+    "comingSoon": "Demnächst",
+    "comingSoonToast": "{name} ist noch nicht verfügbar — steht auf der Roadmap.",
+    "comingSoonBadge": "Bald"
   },
   "landing": {
     "hero": "Dein Unternehmen, organisiert — mit KI, die wirklich hilft.",

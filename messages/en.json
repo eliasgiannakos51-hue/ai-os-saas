@@ -111,8 +111,16 @@
       "memory": "What the AI remembers about you.",
       "favorites": "Everything you've starred.",
       "marketplace": "Share and discover setups — not open yet.",
-      "team": "Invite people to your workspace."
-    }
+      "team": "Invite people to your workspace.",
+      "apps": "Describe an app and get a real one built. Not ready yet.",
+      "images": "Generate images from a prompt. Not ready yet.",
+      "videos": "Generate video from a prompt. Not ready yet.",
+      "coding": "Describe what you need and get working code. Not ready yet.",
+      "presentations": "Turn a brief into a finished deck. Not ready yet."
+    },
+    "comingSoon": "Coming soon",
+    "comingSoonToast": "{name} isn't available yet — it's on the roadmap.",
+    "comingSoonBadge": "Soon"
   },
   "landing": {
     "hero": "Your business, organized — with AI that actually helps.",

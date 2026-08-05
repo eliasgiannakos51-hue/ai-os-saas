@@ -111,8 +111,16 @@
       "memory": "Cosa l'IA ricorda di te.",
       "favorites": "Tutto quello che hai messo tra i preferiti.",
       "marketplace": "Condividi e scopri configurazioni — non ancora aperto.",
-      "team": "Invita persone nel tuo spazio."
-    }
+      "team": "Invita persone nel tuo spazio.",
+      "apps": "Descrivi un'app e ottienila davvero. Non ancora pronto.",
+      "images": "Genera immagini da una descrizione. Non ancora pronto.",
+      "videos": "Genera video da una descrizione. Non ancora pronto.",
+      "coding": "Descrivi cosa ti serve e ottieni codice funzionante. Non ancora pronto.",
+      "presentations": "Trasforma un brief in una presentazione finita. Non ancora pronto."
+    },
+    "comingSoon": "In arrivo",
+    "comingSoonToast": "{name} non è ancora disponibile: è nella roadmap.",
+    "comingSoonBadge": "Presto"
   },
   "landing": {
     "hero": "Il tuo business, organizzato — con un'IA che aiuta davvero.",

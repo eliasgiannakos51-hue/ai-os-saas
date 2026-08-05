@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Search, Bell, Plus, Zap } from "lucide-react";
 import { CREATE_NAV_ITEM, OVERVIEW_NAV_ITEM } from "@/lib/modules";
 import { MenuButton } from "@/components/dashboard/menu-button";
@@ -14,10 +14,12 @@ import { useCredits } from "@/components/credits/credits-context";
 import { LowCreditsBanner } from "@/components/credits/low-credits-banner";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { LanguageSelector } from "@/components/i18n/language-selector";
+import { formatNumber } from "@/lib/format-number";
 
 export function TopNav({ email }: { email: string }) {
   const router = useRouter();
   const t = useTranslations("common");
+  const locale = useLocale();
   const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   const { credits, isAdmin } = useCredits();
   const [notifOpen, setNotifOpen] = useState(false);
@@ -85,7 +87,7 @@ export function TopNav({ email }: { email: string }) {
           title={isAdmin ? "Owner access — unlimited credits" : "Credits remaining — buy more in Settings"}
         >
           <Zap className="h-3.5 w-3.5 text-orange-400" aria-hidden="true" />
-          {isAdmin ? "Unlimited" : credits === null ? "…" : credits.toLocaleString()}
+          {isAdmin ? "Unlimited" : credits === null ? "…" : formatNumber(credits, locale)}
         </Link>
 
         {/* Only renders below 20% of the monthly allowance — see

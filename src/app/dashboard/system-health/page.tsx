@@ -7,6 +7,8 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { isAdminEmail } from "@/lib/admin";
 import { logApiError } from "@/lib/log-error";
 import { ErrorList, type ProductionErrorRow } from "@/components/system-health/error-list";
+import { formatNumber } from "@/lib/format-number";
+import { getLocale } from "next-intl/server";
 
 export const metadata: Metadata = { title: "System Health" };
 export const dynamic = "force-dynamic";
@@ -15,6 +17,7 @@ export const fetchCache = "force-no-store";
 const RECENT_LIMIT = 100;
 
 export default async function SystemHealthPage() {
+  const locale = await getLocale();
   const supabase = createClient();
   const {
     data: { user },
@@ -96,7 +99,7 @@ export default async function SystemHealthPage() {
   );
 }
 
-function Stat({
+async function Stat({
   label,
   value,
   tone = "neutral",
@@ -105,6 +108,7 @@ function Stat({
   value: number;
   tone?: "good" | "bad" | "neutral";
 }) {
+  const locale = await getLocale();
   return (
     <div className="rounded-2xl border border-border bg-panel p-4">
       <p className="text-[11px] uppercase tracking-wider text-muted">{label}</p>
@@ -113,7 +117,7 @@ function Stat({
           tone === "bad" ? "text-red-400" : tone === "good" ? "text-emerald-400" : "text-foreground"
         }`}
       >
-        {value.toLocaleString()}
+        {formatNumber(value, locale)}
       </p>
     </div>
   );

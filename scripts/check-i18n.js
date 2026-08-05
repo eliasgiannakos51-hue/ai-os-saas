@@ -16,8 +16,18 @@
  *      "12h ago").
  *   4. Browser-owned text (<input type="file">), which is not ours at all.
  *
- * This script catches (1) and (2). (3) and (4) are structural and are fixed
- * in lib/format-time.ts and components/ui/file-picker.tsx respectively.
+ * This script catches (1). It does NOT catch (2), despite an earlier
+ * version of this comment claiming it did — it reads messages/*.json and
+ * never opens a source file, so a literal in JSX is invisible to it by
+ * construction. That stale claim is exactly why the gap went unnoticed:
+ * 46 hardcoded English strings across 26 components shipped while both
+ * i18n checks passed. (2) is now covered from the source side by
+ * scripts/tests/i18n-coverage.test.mjs, which also catches the mirror
+ * problem — a t("key") call whose key does not exist, which next-intl
+ * renders to the user as the raw key path without failing any build.
+ *
+ * (3) and (4) are structural and are fixed in lib/format-time.ts and
+ * components/ui/file-picker.tsx respectively.
  *
  * Run: node scripts/check-i18n.js
  */

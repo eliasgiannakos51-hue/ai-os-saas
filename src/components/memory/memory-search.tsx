@@ -5,6 +5,8 @@ import Link from "next/link";
 import { Search, SearchX } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
+import { formatDateTime } from "@/lib/format-number";
+import { useLocale } from "next-intl";
 
 export type MemoryResult = {
   id: string;
@@ -23,6 +25,7 @@ function matches(result: MemoryResult, query: string): boolean {
 }
 
 export function MemorySearch({ results }: { results: MemoryResult[] }) {
+  const locale = useLocale();
   const formatRelativeTime = useFormatRelativeTime();
   const [query, setQuery] = useState("");
 
@@ -84,7 +87,7 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
 
                 <p
                   className="mt-2 text-xs text-muted"
-                  title={new Date(result.createdAt).toLocaleString()}
+                  title={formatDateTime(result.createdAt, locale)}
                   suppressHydrationWarning
                 >
                   Logged {formatRelativeTime(result.createdAt)}

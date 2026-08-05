@@ -19,7 +19,12 @@
     "viewPlans": "View plans",
     "chooseFiles": "Choose files",
     "noFileChosen": "No file chosen",
-    "filesSelected": "{count} selected"
+    "filesSelected": "{count} selected",
+    "networkError": "Network error — please try again.",
+    "notAuthenticated": "Not authenticated.",
+    "created": "✓ created",
+    "updated": "✓ updated",
+    "linked": "✓ linked"
   },
   "sidebar": {
     "groups": {
@@ -166,7 +171,39 @@
     "businessFeatureFullAccess": "Every member gets full access at your plan's tier",
     "businessFeatureFreeOnUltimate": "Team seats included free on Ultimate",
     "businessFeatureManage": "Manage seats anytime from Team settings",
-    "setUpTeam": "Set Up Team"
+    "setUpTeam": "Set Up Team",
+    "features": {
+      "1Workspace3Projects": "1 workspace, 3 projects",
+      "2AiAgents": "2 AI agents",
+      "basicAiChat": "Basic AI chat",
+      "creditsPerMonth": "{count} credits/month",
+      "marketplaceInstallOnly": "Marketplace: install only",
+      "communitySupport": "Community support",
+      "unlimitedProjects": "Unlimited projects",
+      "upTo20AiAgents": "Up to 20 AI agents",
+      "aiMemory": "AI Memory",
+      "websiteAutomationBuilderAccess": "Website & Automation Builder access",
+      "imageVideoGenerationAccess": "Image & video generation access",
+      "emailSupport": "Email support",
+      "everythingInStarter": "Everything in Starter",
+      "upTo100AiAgents": "Up to 100 AI agents",
+      "mobileSaasBuilderAccess": "Mobile & SaaS Builder access",
+      "priorityProcessing": "Priority processing",
+      "everythingInGrowth": "Everything in Growth",
+      "unlimitedAiAgentsTeams": "Unlimited AI agents & teams",
+      "teamCollaboration": "Team collaboration",
+      "sharedAiMemory": "Shared AI memory",
+      "prioritySupport": "Priority support",
+      "everythingInProfessional": "Everything in Professional",
+      "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Unlimited team seats included — no per-member charge",
+      "extendedChatMemoryRetention100Vs20RecentFact": "Extended chat memory retention (100 vs 20 recent facts)",
+      "customAiPersonaNameInIonexaChat": "Custom AI persona name in Ionexa Chat",
+      "highestPriorityProcessing": "Highest priority processing",
+      "everythingInUltimate": "Everything in Ultimate",
+      "unlimitedMembers": "Unlimited members",
+      "dedicatedSupport": "Dedicated support",
+      "customCredits": "Custom credits"
+    }
   },
   "roadmap": {
     "title": "Roadmap",
@@ -303,7 +340,9 @@
       "working": "Working...",
       "continueToPayment": "Continue to Payment",
       "createAccount": "Create Account",
-      "mostPopular": "Most Popular"
+      "mostPopular": "Most Popular",
+      "mustAgreeToTerms": "You must agree to the Terms of Service and Privacy Policy to create an account.",
+      "passwordRequirementsNotMet": "Please choose a password that meets every requirement above."
     },
     "forgotPassword": {
       "title": "Reset password",
@@ -323,7 +362,8 @@
       "newPassword": "New password",
       "confirmPassword": "Confirm password",
       "saveNewPassword": "Save new password",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "passwordsDoNotMatch": "Passwords don't match."
     },
     "social": {
       "continueWithGoogle": "Continue with Google",
@@ -339,7 +379,11 @@
       "newPassword": "new password",
       "confirmPassword": "confirm password",
       "updatePassword": "Update Password",
-      "updating": "Updating..."
+      "updating": "Updating...",
+      "requirementsNotMet": "Please choose a password that meets every requirement below.",
+      "passwordsDoNotMatch": "Passwords do not match.",
+      "couldNotUpdate": "✗ could not update password",
+      "passwordUpdated": "✓ password updated"
     },
     "chatMemory": {
       "title": "Chat Memory",
@@ -347,13 +391,18 @@
       "toggleDescription": "Ionexa Chat picks up durable facts and preferences from your conversations and recalls them in future ones.",
       "thingsRemembered": "{count, plural, one {# thing} other {# things}} remembered",
       "clearAll": "Clear all memory",
-      "clearing": "Clearing..."
+      "clearing": "Clearing...",
+      "couldNotUpdatePreference": "✗ could not update preference",
+      "couldNotClearMemory": "✗ could not clear memory",
+      "memoryCleared": "✓ memory cleared"
     },
     "loginActivity": {
       "title": "Login Activity",
       "description": "Devices and browsers that have signed in to your account. We email you whenever a new one shows up here.",
       "noDevices": "No devices recorded yet.",
-      "lastSeen": "Last seen {time}"
+      "lastSeen": "Last seen {time}",
+      "couldNotRemoveDevice": "✗ could not remove device",
+      "deviceRemoved": "✓ device removed"
     },
     "aiUsage": {
       "title": "AI Usage",
@@ -396,7 +445,8 @@
       "title": "Export Data",
       "description": "Download everything you've logged across all 13 modules as a single JSON file.",
       "exportAll": "Export All Data",
-      "exporting": "Exporting..."
+      "exporting": "Exporting...",
+      "exportDownloaded": "✓ export downloaded"
     },
     "dangerZone": {
       "title": "Danger Zone",
@@ -405,7 +455,9 @@
       "typeToConfirm": "type <highlight>{email}</highlight> to confirm",
       "sendConfirmationEmail": "Send deletion confirmation email",
       "sending": "Sending...",
-      "checkEmail": "Check your email to confirm deletion — we sent a link to <highlight>{email}</highlight>. It expires in 1 hour; nothing is deleted until you click it."
+      "checkEmail": "Check your email to confirm deletion — we sent a link to <highlight>{email}</highlight>. It expires in 1 hour; nothing is deleted until you click it.",
+      "emailDoesNotMatch": "Email doesn't match.",
+      "couldNotStartDeletion": "✗ could not start account deletion"
     },
     "emailNotifications": {
       "title": "Email notifications",
@@ -439,7 +491,8 @@
     },
     "aiPersona": {
       "title": "AI Persona",
-      "description": "Give the assistant a custom name."
+      "description": "Give the assistant a custom name.",
+      "personaUpdated": "✓ persona name updated"
     },
     "billing": {
       "title": "Billing",
@@ -560,7 +613,9 @@
       "setupSuccessBody": "Invite your first team member below.",
       "roleLabel": "Role / Position",
       "rolePlaceholder": "What does this person do?",
-      "workUseDisclaimer": "Team seats are intended for actual employees or collaborators working on your business — not personal/family use. By inviting a member, you confirm they are part of your team's work."
+      "workUseDisclaimer": "Team seats are intended for actual employees or collaborators working on your business — not personal/family use. By inviting a member, you confirm they are part of your team's work.",
+      "memberRemoved": "✓ member removed",
+      "couldNotRemoveMember": "✗ could not remove member"
     },
     "memory": {
       "title": "AI Memory",

@@ -19,7 +19,13 @@ export type PaidPlanSlug = SelfServePlanSlug;
 // backing this app was created in EUR.
 export const CURRENCY_SYMBOL = "€";
 
-export type PlanFeature = { text: string };
+// i18n key under pricing.features.<textKey>. Was a raw English `text`
+// string until the V1+V2 audit: these render on /pricing and /signup,
+// the two pages a non-English visitor is most likely to see FIRST, and
+// every one of them stayed English in all ten locales. The pre-formatted
+// numbers in them ("1,000 credits/month") also carried English digit
+// grouping into Greek and German pages.
+export type PlanFeature = { textKey: string };
 
 // Real, enforced entitlements for this plan — checked server-side wherever
 // the corresponding feature/page/action actually exists. Every plan's
@@ -79,12 +85,12 @@ export const PLANS: Plan[] = [
       customAiPersona: false,
     },
     features: [
-      { text: "1 workspace, 3 projects" },
-      { text: "2 AI agents" },
-      { text: "Basic AI chat" },
-      { text: "100 credits/month" },
-      { text: "Marketplace: install only" },
-      { text: "Community support" },
+      { textKey: "1Workspace3Projects" },
+      { textKey: "2AiAgents" },
+      { textKey: "basicAiChat" },
+      { textKey: "creditsPerMonth" },
+      { textKey: "marketplaceInstallOnly" },
+      { textKey: "communitySupport" },
     ],
   },
   {
@@ -104,13 +110,13 @@ export const PLANS: Plan[] = [
       customAiPersona: false,
     },
     features: [
-      { text: "Unlimited projects" },
-      { text: "Up to 20 AI agents" },
-      { text: "AI Memory" },
-      { text: "Website & Automation Builder access" },
-      { text: "Image & video generation access" },
-      { text: "1,000 credits/month" },
-      { text: "Email support" },
+      { textKey: "unlimitedProjects" },
+      { textKey: "upTo20AiAgents" },
+      { textKey: "aiMemory" },
+      { textKey: "websiteAutomationBuilderAccess" },
+      { textKey: "imageVideoGenerationAccess" },
+      { textKey: "creditsPerMonth" },
+      { textKey: "emailSupport" },
     ],
   },
   {
@@ -131,11 +137,11 @@ export const PLANS: Plan[] = [
       customAiPersona: false,
     },
     features: [
-      { text: "Everything in Starter" },
-      { text: "Up to 100 AI agents" },
-      { text: "Mobile & SaaS Builder access" },
-      { text: "3,000 credits/month" },
-      { text: "Priority processing" },
+      { textKey: "everythingInStarter" },
+      { textKey: "upTo100AiAgents" },
+      { textKey: "mobileSaasBuilderAccess" },
+      { textKey: "creditsPerMonth" },
+      { textKey: "priorityProcessing" },
     ],
   },
   {
@@ -155,12 +161,12 @@ export const PLANS: Plan[] = [
       customAiPersona: false,
     },
     features: [
-      { text: "Everything in Growth" },
-      { text: "Unlimited AI agents & teams" },
-      { text: "Team collaboration" },
-      { text: "Shared AI memory" },
-      { text: "10,000 credits/month" },
-      { text: "Priority support" },
+      { textKey: "everythingInGrowth" },
+      { textKey: "unlimitedAiAgentsTeams" },
+      { textKey: "teamCollaboration" },
+      { textKey: "sharedAiMemory" },
+      { textKey: "creditsPerMonth" },
+      { textKey: "prioritySupport" },
     ],
   },
   {
@@ -181,12 +187,12 @@ export const PLANS: Plan[] = [
       customAiPersona: true,
     },
     features: [
-      { text: "Everything in Professional" },
-      { text: "Unlimited team seats included — no per-member charge" },
-      { text: "Extended chat memory retention (100 vs 20 recent facts)" },
-      { text: "Custom AI persona name in Ionexa Chat" },
-      { text: "25,000 credits/month" },
-      { text: "Highest priority processing" },
+      { textKey: "everythingInProfessional" },
+      { textKey: "unlimitedTeamSeatsIncludedNoPerMemberCharge" },
+      { textKey: "extendedChatMemoryRetention100Vs20RecentFact" },
+      { textKey: "customAiPersonaNameInIonexaChat" },
+      { textKey: "creditsPerMonth" },
+      { textKey: "highestPriorityProcessing" },
     ],
   },
   {
@@ -207,10 +213,10 @@ export const PLANS: Plan[] = [
       customAiPersona: true,
     },
     features: [
-      { text: "Everything in Ultimate" },
-      { text: "Unlimited members" },
-      { text: "Dedicated support" },
-      { text: "Custom credits" },
+      { textKey: "everythingInUltimate" },
+      { textKey: "unlimitedMembers" },
+      { textKey: "dedicatedSupport" },
+      { textKey: "customCredits" },
     ],
   },
 ];

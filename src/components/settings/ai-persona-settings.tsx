@@ -37,7 +37,7 @@ export function AiPersonaSettings({ initialName }: { initialName: string }) {
     }
 
     setName(trimmed);
-    addToast("✓ persona name updated");
+    addToast(t("personaUpdated"));
   }
 
   return (

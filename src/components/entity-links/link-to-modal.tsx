@@ -38,6 +38,7 @@ export function LinkToModal({
   sourceHeadline: string;
 }) {
   const t = useTranslations("entityLinks");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const supabase = createClient();
   const { addToast } = useToast();
@@ -106,7 +107,7 @@ export function LinkToModal({
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      setError("Not authenticated.");
+      setError(tCommon("notAuthenticated"));
       setLinkingId(null);
       return;
     }
@@ -127,7 +128,7 @@ export function LinkToModal({
       return;
     }
 
-    addToast("✓ linked");
+    addToast(tCommon("linked"));
     onClose();
     router.refresh();
   }

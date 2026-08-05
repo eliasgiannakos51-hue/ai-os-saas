@@ -1,12 +1,15 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 import { useState } from "react";
 import { CREDIT_PACKS, CURRENCY_SYMBOL } from "@/lib/billing/plans";
+import { formatNumber } from "@/lib/format-number";
 
 export function BuyCredits() {
   const t = useTranslations("settings.billing");
+  const locale = useLocale();
+  const tCommon = useTranslations("common");
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +32,7 @@ export function BuyCredits() {
 
       window.location.href = data.url;
     } catch {
-      setError("Network error — please try again.");
+      setError(tCommon("networkError"));
       setLoadingId(null);
     }
   }
@@ -57,7 +60,7 @@ export function BuyCredits() {
               {pack.price}
             </span>
             <span className="text-[11px] text-muted">
-              {loadingId === pack.id ? "Loading..." : `${pack.credits.toLocaleString()} credits`}
+              {loadingId === pack.id ? "Loading..." : `${formatNumber(pack.credits, locale)} credits`}
             </span>
           </button>
         ))}

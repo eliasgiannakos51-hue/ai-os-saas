@@ -15,7 +15,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { CelebrationBurst } from "@/components/celebration/celebration-burst";
@@ -33,6 +33,7 @@ import { MISSION_ICON, WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import { DetailPanel, type DetailTab } from "@/components/ui/detail-panel";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import type { Mission } from "@/types/mission";
+import { formatDateTime } from "@/lib/format-number";
 
 // A step whose text is clearly about building a website/landing page
 // can never be classified into any of the 13 business modules "Create
@@ -88,6 +89,7 @@ export function MissionDetail({
 }) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.mission");
+  const locale = useLocale();
   const tCommon = useTranslations("common");
   const router = useRouter();
   const supabase = createClient();
@@ -245,7 +247,7 @@ export function MissionDetail({
 
       if (!result.ok) {
         if (result.conflict) {
-          setError("This mission was updated elsewhere just now — refreshing to show the latest state.");
+          setError(t("updatedElsewhere"));
           router.refresh();
         } else {
           setError(getErrorMessage(result.error, "Entry created, but couldn't update the mission."));
@@ -257,7 +259,7 @@ export function MissionDetail({
       router.refresh();
     } catch {
       await persistStepFailure(index);
-      setError("Network error — please try again.");
+      setError(tCommon("networkError"));
     } finally {
       setBuildingIndex(null);
     }
@@ -290,7 +292,7 @@ export function MissionDetail({
 
       router.refresh();
     } catch {
-      setError("Network error — please try again.");
+      setError(tCommon("networkError"));
     } finally {
       setSchedulingIndex(null);
     }
@@ -320,7 +322,7 @@ export function MissionDetail({
 
       router.refresh();
     } catch {
-      setError("Network error — please try again.");
+      setError(tCommon("networkError"));
     } finally {
       setReviewing(false);
     }
@@ -339,7 +341,7 @@ export function MissionDetail({
       title={mission.goal}
       subtitle={
         <span
-          title={new Date(mission.created_at).toLocaleString()}
+          title={formatDateTime(mission.created_at, locale)}
           suppressHydrationWarning
         >
           {t("started", { time: formatRelativeTime(mission.created_at) })}

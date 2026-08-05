@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { GreetingHeader } from "@/components/overview/greeting-header";
 import { CreateChat } from "@/components/create/create-chat";
@@ -31,6 +31,7 @@ import { EnergyCheckinWidget } from "@/components/overview/energy-checkin-widget
 import { Database, TrendingUp, Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
 import type { Mission } from "@/types/mission";
+import { formatNumber } from "@/lib/format-number";
 
 export const metadata: Metadata = {
   title: "Overview",
@@ -60,6 +61,7 @@ const QUICK_ACTIONS = [
 
 export default async function OverviewPage() {
   const t = await getTranslations("dashboard.overview");
+  const locale = await getLocale();
   const tSidebar = await getTranslations("sidebar.items");
   const translateModuleTitle = (title: string) => {
     const key = ITEM_LABEL_KEYS[title];
@@ -340,13 +342,13 @@ export default async function OverviewPage() {
           <HomeStatCard
             icon={<Database className="h-4 w-4" aria-hidden="true" />}
             label={t("statRow.totalEntries")}
-            value={totalEntries.toLocaleString()}
+            value={formatNumber(totalEntries, locale)}
             trend={weeklySparkline}
           />
           <HomeStatCard
             icon={<TrendingUp className="h-4 w-4" aria-hidden="true" />}
             label={t("statRow.thisWeek")}
-            value={totalThisWeek.toLocaleString()}
+            value={formatNumber(totalThisWeek, locale)}
             trend={weeklySparkline}
           />
           <HomeStatCard

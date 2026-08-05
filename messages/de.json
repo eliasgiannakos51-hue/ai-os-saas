@@ -19,7 +19,12 @@
     "viewPlans": "Pläne ansehen",
     "chooseFiles": "Dateien auswählen",
     "noFileChosen": "Keine Datei ausgewählt",
-    "filesSelected": "{count} ausgewählt"
+    "filesSelected": "{count} ausgewählt",
+    "networkError": "Netzwerkfehler — bitte erneut versuchen.",
+    "notAuthenticated": "Nicht angemeldet.",
+    "created": "✓ erstellt",
+    "updated": "✓ aktualisiert",
+    "linked": "✓ verknüpft"
   },
   "sidebar": {
     "groups": {
@@ -166,7 +171,39 @@
     "businessFeatureFullAccess": "Jedes Mitglied erhält vollen Zugriff auf der Stufe deines Plans",
     "businessFeatureFreeOnUltimate": "Team-Plätze bei Ultimate kostenlos inklusive",
     "businessFeatureManage": "Verwalte Plätze jederzeit in den Team-Einstellungen",
-    "setUpTeam": "Team einrichten"
+    "setUpTeam": "Team einrichten",
+    "features": {
+      "1Workspace3Projects": "1 Arbeitsbereich, 3 Projekte",
+      "2AiAgents": "2 KI-Agenten",
+      "basicAiChat": "Basis-KI-Chat",
+      "creditsPerMonth": "{count} Credits/Monat",
+      "marketplaceInstallOnly": "Marketplace: nur Installation",
+      "communitySupport": "Community-Support",
+      "unlimitedProjects": "Unbegrenzte Projekte",
+      "upTo20AiAgents": "Bis zu 20 KI-Agenten",
+      "aiMemory": "KI-Gedächtnis",
+      "websiteAutomationBuilderAccess": "Zugang zum Website- & Automation-Builder",
+      "imageVideoGenerationAccess": "Zugang zur Bild- & Videogenerierung",
+      "emailSupport": "E-Mail-Support",
+      "everythingInStarter": "Alles aus Starter",
+      "upTo100AiAgents": "Bis zu 100 KI-Agenten",
+      "mobileSaasBuilderAccess": "Zugang zum Mobile- & SaaS-Builder",
+      "priorityProcessing": "Vorrangige Verarbeitung",
+      "everythingInGrowth": "Alles aus Growth",
+      "unlimitedAiAgentsTeams": "Unbegrenzte KI-Agenten & Teams",
+      "teamCollaboration": "Team-Zusammenarbeit",
+      "sharedAiMemory": "Gemeinsames KI-Gedächtnis",
+      "prioritySupport": "Vorrangiger Support",
+      "everythingInProfessional": "Alles aus Professional",
+      "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Unbegrenzte Team-Plätze inklusive — keine Gebühr pro Mitglied",
+      "extendedChatMemoryRetention100Vs20RecentFact": "Erweiterte Chat-Speicherdauer (100 statt 20 aktuelle Fakten)",
+      "customAiPersonaNameInIonexaChat": "Individueller KI-Name im Ionexa Chat",
+      "highestPriorityProcessing": "Verarbeitung mit höchster Priorität",
+      "everythingInUltimate": "Alles aus Ultimate",
+      "unlimitedMembers": "Unbegrenzte Mitglieder",
+      "dedicatedSupport": "Dedizierter Support",
+      "customCredits": "Individuelle Credits"
+    }
   },
   "roadmap": {
     "title": "Roadmap",
@@ -303,7 +340,9 @@
       "working": "Wird bearbeitet...",
       "continueToPayment": "Weiter zur Zahlung",
       "createAccount": "Konto erstellen",
-      "mostPopular": "Am beliebtesten"
+      "mostPopular": "Am beliebtesten",
+      "mustAgreeToTerms": "Sie müssen den Nutzungsbedingungen und der Datenschutzerklärung zustimmen, um ein Konto zu erstellen.",
+      "passwordRequirementsNotMet": "Bitte wählen Sie ein Passwort, das alle oben genannten Anforderungen erfüllt."
     },
     "forgotPassword": {
       "title": "Passwort zurücksetzen",
@@ -323,7 +362,8 @@
       "newPassword": "Neues Passwort",
       "confirmPassword": "Passwort bestätigen",
       "saveNewPassword": "Neues Passwort speichern",
-      "saving": "Wird gespeichert..."
+      "saving": "Wird gespeichert...",
+      "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein."
     },
     "social": {
       "continueWithGoogle": "Weiter mit Google",
@@ -339,7 +379,11 @@
       "newPassword": "neues Passwort",
       "confirmPassword": "Passwort bestätigen",
       "updatePassword": "Passwort aktualisieren",
-      "updating": "Wird aktualisiert..."
+      "updating": "Wird aktualisiert...",
+      "requirementsNotMet": "Bitte wählen Sie ein Passwort, das alle folgenden Anforderungen erfüllt.",
+      "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein.",
+      "couldNotUpdate": "✗ Passwort konnte nicht aktualisiert werden",
+      "passwordUpdated": "✓ Passwort aktualisiert"
     },
     "chatMemory": {
       "title": "Chat-Gedächtnis",
@@ -347,13 +391,18 @@
       "toggleDescription": "Ionexa Chat merkt sich dauerhafte Fakten und Vorlieben aus deinen Gesprächen und ruft sie in künftigen wieder ab.",
       "thingsRemembered": "{count, plural, one {# gemerkte Sache} other {# gemerkte Sachen}}",
       "clearAll": "Gesamtes Gedächtnis löschen",
-      "clearing": "Wird gelöscht..."
+      "clearing": "Wird gelöscht...",
+      "couldNotUpdatePreference": "✗ Einstellung konnte nicht aktualisiert werden",
+      "couldNotClearMemory": "✗ Speicher konnte nicht gelöscht werden",
+      "memoryCleared": "✓ Speicher gelöscht"
     },
     "loginActivity": {
       "title": "Anmeldeaktivität",
       "description": "Geräte und Browser, die sich bei deinem Konto angemeldet haben. Wir informieren dich per E-Mail, sobald ein neues auftaucht.",
       "noDevices": "Noch keine Geräte erfasst.",
-      "lastSeen": "Zuletzt gesehen {time}"
+      "lastSeen": "Zuletzt gesehen {time}",
+      "couldNotRemoveDevice": "✗ Gerät konnte nicht entfernt werden",
+      "deviceRemoved": "✓ Gerät entfernt"
     },
     "aiUsage": {
       "title": "KI-Nutzung",
@@ -396,7 +445,8 @@
       "title": "Daten exportieren",
       "description": "Lade alles, was du in allen 13 Modulen erfasst hast, als einzelne JSON-Datei herunter.",
       "exportAll": "Alle Daten exportieren",
-      "exporting": "Wird exportiert..."
+      "exporting": "Wird exportiert...",
+      "exportDownloaded": "✓ Export heruntergeladen"
     },
     "dangerZone": {
       "title": "Gefahrenzone",
@@ -405,7 +455,9 @@
       "typeToConfirm": "gib <highlight>{email}</highlight> ein, um zu bestätigen",
       "sendConfirmationEmail": "Bestätigungs-E-Mail zum Löschen senden",
       "sending": "Wird gesendet...",
-      "checkEmail": "Prüfe deine E-Mail, um die Löschung zu bestätigen — wir haben einen Link an <highlight>{email}</highlight> gesendet. Er läuft in 1 Stunde ab; nichts wird gelöscht, bis du darauf klickst."
+      "checkEmail": "Prüfe deine E-Mail, um die Löschung zu bestätigen — wir haben einen Link an <highlight>{email}</highlight> gesendet. Er läuft in 1 Stunde ab; nichts wird gelöscht, bis du darauf klickst.",
+      "emailDoesNotMatch": "Die E-Mail stimmt nicht überein.",
+      "couldNotStartDeletion": "✗ Kontolöschung konnte nicht gestartet werden"
     },
     "emailNotifications": {
       "title": "E-Mail-Benachrichtigungen",
@@ -439,7 +491,8 @@
     },
     "aiPersona": {
       "title": "KI-Persona",
-      "description": "Gib dem Assistenten einen eigenen Namen."
+      "description": "Gib dem Assistenten einen eigenen Namen.",
+      "personaUpdated": "✓ Name des Assistenten aktualisiert"
     },
     "billing": {
       "title": "Abrechnung",
@@ -560,7 +613,9 @@
       "setupSuccessBody": "Lade unten dein erstes Teammitglied ein.",
       "roleLabel": "Rolle / Position",
       "rolePlaceholder": "Was macht diese Person?",
-      "workUseDisclaimer": "Teamplätze sind für tatsächliche Mitarbeiter oder Mitarbeitende gedacht, die an deinem Unternehmen arbeiten — nicht für den persönlichen/familiären Gebrauch. Mit der Einladung eines Mitglieds bestätigst du, dass es Teil der Arbeit deines Teams ist."
+      "workUseDisclaimer": "Teamplätze sind für tatsächliche Mitarbeiter oder Mitarbeitende gedacht, die an deinem Unternehmen arbeiten — nicht für den persönlichen/familiären Gebrauch. Mit der Einladung eines Mitglieds bestätigst du, dass es Teil der Arbeit deines Teams ist.",
+      "memberRemoved": "✓ Mitglied entfernt",
+      "couldNotRemoveMember": "✗ Mitglied konnte nicht entfernt werden"
     },
     "memory": {
       "title": "KI-Gedächtnis",
@@ -662,7 +717,7 @@
       "reviewNotRunYet": "Alle Schritte sind erledigt — starte den Reviewer für eine Zusammenfassung.",
       "reviewLocked": "Der Reviewer läuft, sobald alle Schritte abgeschlossen sind.",
       "stepMinutes": "~{count} Min.",
-      "updatedElsewhere": "Diese Mission wurde gerade anderswo aktualisiert — wird neu geladen, um den aktuellen Stand zu zeigen."
+      "updatedElsewhere": "Diese Mission wurde soeben anderswo aktualisiert — wird neu geladen, um den aktuellen Stand zu zeigen."
     },
     "reflection": {
       "title": "Wöchentliche Reflexion",

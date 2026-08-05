@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export function ManageBillingButton() {
+  const tCommon = useTranslations("common");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,7 +20,7 @@ export function ManageBillingButton() {
       }
       window.location.href = data.url;
     } catch {
-      setError("Network error — please try again.");
+      setError(tCommon("networkError"));
     } finally {
       setLoading(false);
     }

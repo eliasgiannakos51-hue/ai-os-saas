@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Users, Clock, CheckCircle2, Trash2 } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { useToast } from "@/components/toast/toast-context";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { formatDateTime } from "@/lib/format-number";
 
 export type TeamMember = {
   id: string;
@@ -20,6 +21,7 @@ export type TeamMember = {
 export function TeamMembersList({ members: initialMembers }: { members: TeamMember[] }) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.team");
+  const locale = useLocale();
   const { addToast } = useToast();
   const [members, setMembers] = useState(initialMembers);
   const [removingId, setRemovingId] = useState<string | null>(null);
@@ -51,11 +53,11 @@ export function TeamMembersList({ members: initialMembers }: { members: TeamMemb
       }
 
       setMembers((prev) => prev.filter((m) => m.id !== member.id));
-      addToast("✓ member removed");
+      addToast(t("memberRemoved"));
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Remove team member threw:", err);
-      addToast("✗ could not remove member", "error");
+      addToast(t("couldNotRemoveMember"), "error");
     } finally {
       setRemovingId(null);
     }
@@ -81,7 +83,7 @@ export function TeamMembersList({ members: initialMembers }: { members: TeamMemb
             </p>
             <p
               className="text-xs text-muted"
-              title={new Date(member.invited_at).toLocaleString()}
+              title={formatDateTime(member.invited_at, locale)}
               suppressHydrationWarning
             >
               {member.status === "active"

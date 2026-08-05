@@ -11,6 +11,7 @@ const ROLE_OPTIONS = ["Marketing", "Developer", "Finance", "Sales", "Operations"
 export function InviteForm() {
   const router = useRouter();
   const t = useTranslations("dashboard.team");
+  const tCommon = useTranslations("common");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,7 +42,7 @@ export function InviteForm() {
       setRole("");
       router.refresh();
     } catch {
-      setError("Network error — please try again.");
+      setError(tCommon("networkError"));
     } finally {
       setLoading(false);
     }

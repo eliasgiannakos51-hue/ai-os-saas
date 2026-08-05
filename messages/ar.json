@@ -19,7 +19,12 @@
     "viewPlans": "عرض الخطط",
     "chooseFiles": "اختر الملفات",
     "noFileChosen": "لم يتم اختيار ملف",
-    "filesSelected": "{count} محدد"
+    "filesSelected": "{count} محدد",
+    "networkError": "خطأ في الشبكة — يرجى المحاولة مرة أخرى.",
+    "notAuthenticated": "غير مُصادَق عليه.",
+    "created": "✓ تم الإنشاء",
+    "updated": "✓ تم التحديث",
+    "linked": "✓ تم الربط"
   },
   "sidebar": {
     "groups": {
@@ -166,7 +171,39 @@
     "businessFeatureFullAccess": "يحصل كل عضو على وصول كامل بمستوى خطتك",
     "businessFeatureFreeOnUltimate": "مقاعد الفريق مجانية ضمن Ultimate",
     "businessFeatureManage": "أدر المقاعد في أي وقت من إعدادات الفريق",
-    "setUpTeam": "إعداد الفريق"
+    "setUpTeam": "إعداد الفريق",
+    "features": {
+      "1Workspace3Projects": "مساحة عمل واحدة، 3 مشاريع",
+      "2AiAgents": "وكيلان بالذكاء الاصطناعي",
+      "basicAiChat": "محادثة ذكاء اصطناعي أساسية",
+      "creditsPerMonth": "{count} رصيد/شهر",
+      "marketplaceInstallOnly": "المتجر: التثبيت فقط",
+      "communitySupport": "دعم المجتمع",
+      "unlimitedProjects": "مشاريع غير محدودة",
+      "upTo20AiAgents": "حتى 20 وكيلاً ذكياً",
+      "aiMemory": "ذاكرة الذكاء الاصطناعي",
+      "websiteAutomationBuilderAccess": "الوصول إلى منشئ المواقع والأتمتة",
+      "imageVideoGenerationAccess": "الوصول إلى توليد الصور والفيديو",
+      "emailSupport": "الدعم عبر البريد الإلكتروني",
+      "everythingInStarter": "كل ما في باقة Starter",
+      "upTo100AiAgents": "حتى 100 وكيل ذكي",
+      "mobileSaasBuilderAccess": "الوصول إلى منشئ تطبيقات الجوال وSaaS",
+      "priorityProcessing": "معالجة ذات أولوية",
+      "everythingInGrowth": "كل ما في باقة Growth",
+      "unlimitedAiAgentsTeams": "وكلاء ذكاء اصطناعي وفرق غير محدودة",
+      "teamCollaboration": "تعاون الفريق",
+      "sharedAiMemory": "ذاكرة ذكاء اصطناعي مشتركة",
+      "prioritySupport": "دعم ذو أولوية",
+      "everythingInProfessional": "كل ما في باقة Professional",
+      "unlimitedTeamSeatsIncludedNoPerMemberCharge": "مقاعد فريق غير محدودة مشمولة — دون رسوم لكل عضو",
+      "extendedChatMemoryRetention100Vs20RecentFact": "احتفاظ موسّع بذاكرة المحادثة (100 مقابل 20 معلومة حديثة)",
+      "customAiPersonaNameInIonexaChat": "اسم مخصص للمساعد في Ionexa Chat",
+      "highestPriorityProcessing": "معالجة بأعلى أولوية",
+      "everythingInUltimate": "كل ما في باقة Ultimate",
+      "unlimitedMembers": "أعضاء غير محدودين",
+      "dedicatedSupport": "دعم مخصص",
+      "customCredits": "أرصدة مخصصة"
+    }
   },
   "roadmap": {
     "title": "خارطة الطريق",
@@ -303,7 +340,9 @@
       "working": "جارٍ المعالجة...",
       "continueToPayment": "المتابعة إلى الدفع",
       "createAccount": "إنشاء الحساب",
-      "mostPopular": "الأكثر شيوعًا"
+      "mostPopular": "الأكثر شيوعًا",
+      "mustAgreeToTerms": "يجب الموافقة على شروط الخدمة وسياسة الخصوصية لإنشاء حساب.",
+      "passwordRequirementsNotMet": "يرجى اختيار كلمة مرور تستوفي جميع الشروط أعلاه."
     },
     "forgotPassword": {
       "title": "إعادة تعيين كلمة المرور",
@@ -323,7 +362,8 @@
       "newPassword": "كلمة المرور الجديدة",
       "confirmPassword": "تأكيد كلمة المرور",
       "saveNewPassword": "حفظ كلمة المرور الجديدة",
-      "saving": "جارٍ الحفظ..."
+      "saving": "جارٍ الحفظ...",
+      "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين."
     },
     "social": {
       "continueWithGoogle": "المتابعة باستخدام Google",
@@ -339,7 +379,11 @@
       "newPassword": "كلمة المرور الجديدة",
       "confirmPassword": "تأكيد كلمة المرور",
       "updatePassword": "تحديث كلمة المرور",
-      "updating": "جارٍ التحديث..."
+      "updating": "جارٍ التحديث...",
+      "requirementsNotMet": "يرجى اختيار كلمة مرور تستوفي جميع الشروط أدناه.",
+      "passwordsDoNotMatch": "كلمتا المرور غير متطابقتين.",
+      "couldNotUpdate": "✗ تعذّر تحديث كلمة المرور",
+      "passwordUpdated": "✓ تم تحديث كلمة المرور"
     },
     "chatMemory": {
       "title": "ذاكرة المحادثة",
@@ -347,13 +391,18 @@
       "toggleDescription": "يلتقط Ionexa Chat الحقائق والتفضيلات الدائمة من محادثاتك ويتذكرها في المحادثات المستقبلية.",
       "thingsRemembered": "{count, plural, one {عنصر واحد محفوظ} other {# عنصر محفوظ}}",
       "clearAll": "مسح كل الذاكرة",
-      "clearing": "جارٍ المسح..."
+      "clearing": "جارٍ المسح...",
+      "couldNotUpdatePreference": "✗ تعذّر تحديث التفضيل",
+      "couldNotClearMemory": "✗ تعذّر مسح الذاكرة",
+      "memoryCleared": "✓ تم مسح الذاكرة"
     },
     "loginActivity": {
       "title": "نشاط تسجيل الدخول",
       "description": "الأجهزة والمتصفحات التي سجّلت الدخول إلى حسابك. نرسل لك بريدًا إلكترونيًا عند ظهور جهاز جديد.",
       "noDevices": "لا توجد أجهزة مسجّلة حتى الآن.",
-      "lastSeen": "آخر ظهور {time}"
+      "lastSeen": "آخر ظهور {time}",
+      "couldNotRemoveDevice": "✗ تعذّرت إزالة الجهاز",
+      "deviceRemoved": "✓ تمت إزالة الجهاز"
     },
     "aiUsage": {
       "title": "استخدام الذكاء الاصطناعي",
@@ -396,7 +445,8 @@
       "title": "تصدير البيانات",
       "description": "نزّل كل ما سجّلته عبر الوحدات الـ13 كملف JSON واحد.",
       "exportAll": "تصدير جميع البيانات",
-      "exporting": "جارٍ التصدير..."
+      "exporting": "جارٍ التصدير...",
+      "exportDownloaded": "✓ تم تنزيل التصدير"
     },
     "dangerZone": {
       "title": "منطقة الخطر",
@@ -405,7 +455,9 @@
       "typeToConfirm": "اكتب <highlight>{email}</highlight> للتأكيد",
       "sendConfirmationEmail": "إرسال بريد تأكيد الحذف",
       "sending": "جارٍ الإرسال...",
-      "checkEmail": "تحقق من بريدك الإلكتروني لتأكيد الحذف — أرسلنا رابطًا إلى <highlight>{email}</highlight>. تنتهي صلاحيته خلال ساعة واحدة؛ لن يُحذف شيء حتى تنقر عليه."
+      "checkEmail": "تحقق من بريدك الإلكتروني لتأكيد الحذف — أرسلنا رابطًا إلى <highlight>{email}</highlight>. تنتهي صلاحيته خلال ساعة واحدة؛ لن يُحذف شيء حتى تنقر عليه.",
+      "emailDoesNotMatch": "البريد الإلكتروني غير مطابق.",
+      "couldNotStartDeletion": "✗ تعذّر بدء حذف الحساب"
     },
     "emailNotifications": {
       "title": "إشعارات البريد الإلكتروني",
@@ -439,7 +491,8 @@
     },
     "aiPersona": {
       "title": "شخصية الذكاء الاصطناعي",
-      "description": "امنح المساعد اسمًا مخصصًا."
+      "description": "امنح المساعد اسمًا مخصصًا.",
+      "personaUpdated": "✓ تم تحديث اسم المساعد"
     },
     "billing": {
       "title": "الفوترة",
@@ -560,7 +613,9 @@
       "setupSuccessBody": "ادعُ أول عضو في فريقك أدناه.",
       "roleLabel": "الدور / المنصب",
       "rolePlaceholder": "ماذا يفعل هذا الشخص؟",
-      "workUseDisclaimer": "مقاعد الفريق مخصصة للموظفين أو المتعاونين الفعليين الذين يعملون في نشاطك التجاري — وليس للاستخدام الشخصي/العائلي. بدعوتك لعضو، فإنك تؤكد أنه جزء من عمل فريقك."
+      "workUseDisclaimer": "مقاعد الفريق مخصصة للموظفين أو المتعاونين الفعليين الذين يعملون في نشاطك التجاري — وليس للاستخدام الشخصي/العائلي. بدعوتك لعضو، فإنك تؤكد أنه جزء من عمل فريقك.",
+      "memberRemoved": "✓ تمت إزالة العضو",
+      "couldNotRemoveMember": "✗ تعذّرت إزالة العضو"
     },
     "memory": {
       "title": "ذاكرة الذكاء الاصطناعي",
@@ -662,7 +717,7 @@
       "reviewNotRunYet": "اكتملت كل الخطوات — شغّل المراجِع للحصول على ملخص.",
       "reviewLocked": "يعمل المراجِع بمجرد اكتمال جميع الخطوات.",
       "stepMinutes": "~{count} دقيقة",
-      "updatedElsewhere": "جرى تحديث هذه المهمة في مكان آخر للتو — يجري التحديث لعرض أحدث حالة."
+      "updatedElsewhere": "تم تحديث هذه المهمة في مكان آخر للتو — يتم التحديث لعرض أحدث حالة."
     },
     "reflection": {
       "title": "التأمل الأسبوعي",

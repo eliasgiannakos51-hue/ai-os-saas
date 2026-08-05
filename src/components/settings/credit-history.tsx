@@ -1,5 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { formatRelativeTime } from "@/lib/format-time";
+import { formatNumber } from "@/lib/format-number";
 
 export type CreditTransaction = {
   id: string;
@@ -34,7 +35,7 @@ export async function CreditHistory({ transactions }: { transactions: CreditTran
                 className={`shrink-0 font-semibold ${tx.amount < 0 ? "text-red-400" : "text-emerald-400"}`}
               >
                 {tx.amount > 0 ? "+" : ""}
-                {tx.amount.toLocaleString()}
+                {formatNumber(tx.amount, locale)}
               </span>
             </li>
           ))}

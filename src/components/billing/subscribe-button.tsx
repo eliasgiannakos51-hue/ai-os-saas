@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { PaidPlanSlug } from "@/lib/billing/plans";
+import { useTranslations } from "next-intl";
 
 // Redirects to the Stripe-hosted Checkout Session URL returned by
 // /api/checkout. Stripe removed client-side redirectToCheckout() from
@@ -25,6 +26,7 @@ export function SubscribeButton({
   successPath?: string;
 }) {
   const router = useRouter();
+  const tCommon = useTranslations("common");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,7 +55,7 @@ export function SubscribeButton({
 
       window.location.href = data.url;
     } catch {
-      setError("Network error — please try again.");
+      setError(tCommon("networkError"));
     } finally {
       setLoading(false);
     }

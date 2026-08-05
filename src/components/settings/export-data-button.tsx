@@ -38,7 +38,7 @@ export function ExportDataButton() {
     }
 
     downloadJSON(`ionexa_export_${todayForFilename()}.json`, payload);
-    addToast("✓ export downloaded");
+    addToast(t("exportDownloaded"));
   }
 
   return (

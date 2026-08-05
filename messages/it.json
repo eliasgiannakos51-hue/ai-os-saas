@@ -19,7 +19,12 @@
     "viewPlans": "Vedi i piani",
     "chooseFiles": "Scegli file",
     "noFileChosen": "Nessun file selezionato",
-    "filesSelected": "{count} selezionati"
+    "filesSelected": "{count} selezionati",
+    "networkError": "Errore di rete — riprova.",
+    "notAuthenticated": "Non autenticato.",
+    "created": "✓ creato",
+    "updated": "✓ aggiornato",
+    "linked": "✓ collegato"
   },
   "sidebar": {
     "groups": {
@@ -166,7 +171,39 @@
     "businessFeatureFullAccess": "Ogni membro ottiene accesso completo al livello del tuo piano",
     "businessFeatureFreeOnUltimate": "Posti team inclusi gratuitamente con Ultimate",
     "businessFeatureManage": "Gestisci i posti in qualsiasi momento dalle impostazioni Team",
-    "setUpTeam": "Configura Team"
+    "setUpTeam": "Configura Team",
+    "features": {
+      "1Workspace3Projects": "1 area di lavoro, 3 progetti",
+      "2AiAgents": "2 agenti IA",
+      "basicAiChat": "Chat IA di base",
+      "creditsPerMonth": "{count} crediti/mese",
+      "marketplaceInstallOnly": "Marketplace: solo installazione",
+      "communitySupport": "Supporto della community",
+      "unlimitedProjects": "Progetti illimitati",
+      "upTo20AiAgents": "Fino a 20 agenti IA",
+      "aiMemory": "Memoria IA",
+      "websiteAutomationBuilderAccess": "Accesso a Website & Automation Builder",
+      "imageVideoGenerationAccess": "Accesso alla generazione di immagini e video",
+      "emailSupport": "Supporto via email",
+      "everythingInStarter": "Tutto ciò che include Starter",
+      "upTo100AiAgents": "Fino a 100 agenti IA",
+      "mobileSaasBuilderAccess": "Accesso a Mobile & SaaS Builder",
+      "priorityProcessing": "Elaborazione prioritaria",
+      "everythingInGrowth": "Tutto ciò che include Growth",
+      "unlimitedAiAgentsTeams": "Agenti IA e team illimitati",
+      "teamCollaboration": "Collaborazione in team",
+      "sharedAiMemory": "Memoria IA condivisa",
+      "prioritySupport": "Supporto prioritario",
+      "everythingInProfessional": "Tutto ciò che include Professional",
+      "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Postazioni team illimitate incluse — nessun costo per membro",
+      "extendedChatMemoryRetention100Vs20RecentFact": "Conservazione estesa della memoria chat (100 contro 20 fatti recenti)",
+      "customAiPersonaNameInIonexaChat": "Nome personalizzato dell'assistente in Ionexa Chat",
+      "highestPriorityProcessing": "Elaborazione a massima priorità",
+      "everythingInUltimate": "Tutto ciò che include Ultimate",
+      "unlimitedMembers": "Membri illimitati",
+      "dedicatedSupport": "Supporto dedicato",
+      "customCredits": "Crediti personalizzati"
+    }
   },
   "roadmap": {
     "title": "Roadmap",
@@ -303,7 +340,9 @@
       "working": "Elaborazione...",
       "continueToPayment": "Continua al pagamento",
       "createAccount": "Crea account",
-      "mostPopular": "Più popolare"
+      "mostPopular": "Più popolare",
+      "mustAgreeToTerms": "Devi accettare i Termini di servizio e l'Informativa sulla privacy per creare un account.",
+      "passwordRequirementsNotMet": "Scegli una password che soddisfi tutti i requisiti sopra indicati."
     },
     "forgotPassword": {
       "title": "Reimposta password",
@@ -323,7 +362,8 @@
       "newPassword": "Nuova password",
       "confirmPassword": "Conferma password",
       "saveNewPassword": "Salva nuova password",
-      "saving": "Salvataggio..."
+      "saving": "Salvataggio...",
+      "passwordsDoNotMatch": "Le password non coincidono."
     },
     "social": {
       "continueWithGoogle": "Continua con Google",
@@ -339,7 +379,11 @@
       "newPassword": "nuova password",
       "confirmPassword": "conferma password",
       "updatePassword": "Aggiorna password",
-      "updating": "Aggiornamento..."
+      "updating": "Aggiornamento...",
+      "requirementsNotMet": "Scegli una password che soddisfi tutti i requisiti seguenti.",
+      "passwordsDoNotMatch": "Le password non coincidono.",
+      "couldNotUpdate": "✗ impossibile aggiornare la password",
+      "passwordUpdated": "✓ password aggiornata"
     },
     "chatMemory": {
       "title": "Memoria chat",
@@ -347,13 +391,18 @@
       "toggleDescription": "Ionexa Chat raccoglie fatti e preferenze durature dalle tue conversazioni e le ricorda in quelle future.",
       "thingsRemembered": "{count, plural, one {# elemento ricordato} other {# elementi ricordati}}",
       "clearAll": "Cancella tutta la memoria",
-      "clearing": "Cancellazione..."
+      "clearing": "Cancellazione...",
+      "couldNotUpdatePreference": "✗ impossibile aggiornare la preferenza",
+      "couldNotClearMemory": "✗ impossibile cancellare la memoria",
+      "memoryCleared": "✓ memoria cancellata"
     },
     "loginActivity": {
       "title": "Attività di accesso",
       "description": "Dispositivi e browser che hanno effettuato l'accesso al tuo account. Ti avvisiamo via email ogni volta che ne compare uno nuovo.",
       "noDevices": "Nessun dispositivo registrato finora.",
-      "lastSeen": "Ultimo accesso {time}"
+      "lastSeen": "Ultimo accesso {time}",
+      "couldNotRemoveDevice": "✗ impossibile rimuovere il dispositivo",
+      "deviceRemoved": "✓ dispositivo rimosso"
     },
     "aiUsage": {
       "title": "Utilizzo AI",
@@ -396,7 +445,8 @@
       "title": "Esporta dati",
       "description": "Scarica tutto ciò che hai registrato nei 13 moduli come un unico file JSON.",
       "exportAll": "Esporta tutti i dati",
-      "exporting": "Esportazione..."
+      "exporting": "Esportazione...",
+      "exportDownloaded": "✓ esportazione scaricata"
     },
     "dangerZone": {
       "title": "Zona pericolosa",
@@ -405,7 +455,9 @@
       "typeToConfirm": "digita <highlight>{email}</highlight> per confermare",
       "sendConfirmationEmail": "Invia email di conferma eliminazione",
       "sending": "Invio...",
-      "checkEmail": "Controlla la tua email per confermare l'eliminazione — abbiamo inviato un link a <highlight>{email}</highlight>. Scade tra 1 ora; nulla verrà eliminato finché non ci clicchi sopra."
+      "checkEmail": "Controlla la tua email per confermare l'eliminazione — abbiamo inviato un link a <highlight>{email}</highlight>. Scade tra 1 ora; nulla verrà eliminato finché non ci clicchi sopra.",
+      "emailDoesNotMatch": "L'email non corrisponde.",
+      "couldNotStartDeletion": "✗ impossibile avviare l'eliminazione dell'account"
     },
     "emailNotifications": {
       "title": "Notifiche email",
@@ -439,7 +491,8 @@
     },
     "aiPersona": {
       "title": "Persona IA",
-      "description": "Dai all'assistente un nome personalizzato."
+      "description": "Dai all'assistente un nome personalizzato.",
+      "personaUpdated": "✓ nome dell'assistente aggiornato"
     },
     "billing": {
       "title": "Fatturazione",
@@ -560,7 +613,9 @@
       "setupSuccessBody": "Invita il tuo primo membro del team qui sotto.",
       "roleLabel": "Ruolo / Posizione",
       "rolePlaceholder": "Cosa fa questa persona?",
-      "workUseDisclaimer": "I posti team sono destinati a dipendenti o collaboratori reali che lavorano nella tua attività — non per uso personale/familiare. Invitando un membro, confermi che fa parte del lavoro del tuo team."
+      "workUseDisclaimer": "I posti team sono destinati a dipendenti o collaboratori reali che lavorano nella tua attività — non per uso personale/familiare. Invitando un membro, confermi che fa parte del lavoro del tuo team.",
+      "memberRemoved": "✓ membro rimosso",
+      "couldNotRemoveMember": "✗ impossibile rimuovere il membro"
     },
     "memory": {
       "title": "Memoria AI",
@@ -662,7 +717,7 @@
       "reviewNotRunYet": "Tutti i passaggi sono completati: esegui il Revisore per un riepilogo.",
       "reviewLocked": "Il Revisore parte quando tutti i passaggi sono completati.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "Questa missione è appena stata aggiornata altrove: ricarico per mostrare lo stato più recente."
+      "updatedElsewhere": "Questa missione è stata appena aggiornata altrove — aggiornamento per mostrare lo stato più recente."
     },
     "reflection": {
       "title": "Riflessione Settimanale",

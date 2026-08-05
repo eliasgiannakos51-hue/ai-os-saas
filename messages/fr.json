@@ -19,7 +19,12 @@
     "viewPlans": "Voir les offres",
     "chooseFiles": "Choisir des fichiers",
     "noFileChosen": "Aucun fichier choisi",
-    "filesSelected": "{count} sélectionnés"
+    "filesSelected": "{count} sélectionnés",
+    "networkError": "Erreur réseau — veuillez réessayer.",
+    "notAuthenticated": "Non authentifié.",
+    "created": "✓ créé",
+    "updated": "✓ mis à jour",
+    "linked": "✓ lié"
   },
   "sidebar": {
     "groups": {
@@ -166,7 +171,39 @@
     "businessFeatureFullAccess": "Chaque membre obtient un accès complet au niveau de votre plan",
     "businessFeatureFreeOnUltimate": "Sièges d'équipe inclus gratuitement avec Ultimate",
     "businessFeatureManage": "Gérez les sièges à tout moment depuis les paramètres d'équipe",
-    "setUpTeam": "Configurer l'équipe"
+    "setUpTeam": "Configurer l'équipe",
+    "features": {
+      "1Workspace3Projects": "1 espace de travail, 3 projets",
+      "2AiAgents": "2 agents IA",
+      "basicAiChat": "Chat IA basique",
+      "creditsPerMonth": "{count} crédits/mois",
+      "marketplaceInstallOnly": "Marketplace : installation uniquement",
+      "communitySupport": "Assistance communautaire",
+      "unlimitedProjects": "Projets illimités",
+      "upTo20AiAgents": "Jusqu'à 20 agents IA",
+      "aiMemory": "Mémoire IA",
+      "websiteAutomationBuilderAccess": "Accès à Website & Automation Builder",
+      "imageVideoGenerationAccess": "Accès à la génération d'images et de vidéos",
+      "emailSupport": "Assistance par e-mail",
+      "everythingInStarter": "Tout ce que contient Starter",
+      "upTo100AiAgents": "Jusqu'à 100 agents IA",
+      "mobileSaasBuilderAccess": "Accès à Mobile & SaaS Builder",
+      "priorityProcessing": "Traitement prioritaire",
+      "everythingInGrowth": "Tout ce que contient Growth",
+      "unlimitedAiAgentsTeams": "Agents IA et équipes illimités",
+      "teamCollaboration": "Collaboration d'équipe",
+      "sharedAiMemory": "Mémoire IA partagée",
+      "prioritySupport": "Assistance prioritaire",
+      "everythingInProfessional": "Tout ce que contient Professional",
+      "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Sièges d'équipe illimités inclus — sans frais par membre",
+      "extendedChatMemoryRetention100Vs20RecentFact": "Rétention de mémoire de conversation étendue (100 contre 20 faits récents)",
+      "customAiPersonaNameInIonexaChat": "Nom d'assistant IA personnalisé dans Ionexa Chat",
+      "highestPriorityProcessing": "Traitement en priorité maximale",
+      "everythingInUltimate": "Tout ce que contient Ultimate",
+      "unlimitedMembers": "Membres illimités",
+      "dedicatedSupport": "Assistance dédiée",
+      "customCredits": "Crédits personnalisés"
+    }
   },
   "roadmap": {
     "title": "Feuille de route",
@@ -303,7 +340,9 @@
       "working": "Traitement...",
       "continueToPayment": "Continuer vers le paiement",
       "createAccount": "Créer le compte",
-      "mostPopular": "Le plus populaire"
+      "mostPopular": "Le plus populaire",
+      "mustAgreeToTerms": "Vous devez accepter les Conditions d'utilisation et la Politique de confidentialité pour créer un compte.",
+      "passwordRequirementsNotMet": "Choisissez un mot de passe qui remplit toutes les conditions ci-dessus."
     },
     "forgotPassword": {
       "title": "Réinitialiser le mot de passe",
@@ -323,7 +362,8 @@
       "newPassword": "Nouveau mot de passe",
       "confirmPassword": "Confirmer le mot de passe",
       "saveNewPassword": "Enregistrer le nouveau mot de passe",
-      "saving": "Enregistrement..."
+      "saving": "Enregistrement...",
+      "passwordsDoNotMatch": "Les mots de passe ne correspondent pas."
     },
     "social": {
       "continueWithGoogle": "Continuer avec Google",
@@ -339,7 +379,11 @@
       "newPassword": "nouveau mot de passe",
       "confirmPassword": "confirmer le mot de passe",
       "updatePassword": "Mettre à jour le mot de passe",
-      "updating": "Mise à jour..."
+      "updating": "Mise à jour...",
+      "requirementsNotMet": "Choisissez un mot de passe qui remplit toutes les conditions ci-dessous.",
+      "passwordsDoNotMatch": "Les mots de passe ne correspondent pas.",
+      "couldNotUpdate": "✗ impossible de mettre à jour le mot de passe",
+      "passwordUpdated": "✓ mot de passe mis à jour"
     },
     "chatMemory": {
       "title": "Mémoire de chat",
@@ -347,13 +391,18 @@
       "toggleDescription": "Ionexa Chat retient les faits et préférences durables de vos conversations et s'en souvient dans les suivantes.",
       "thingsRemembered": "{count, plural, one {# élément mémorisé} other {# éléments mémorisés}}",
       "clearAll": "Effacer toute la mémoire",
-      "clearing": "Effacement..."
+      "clearing": "Effacement...",
+      "couldNotUpdatePreference": "✗ impossible de mettre à jour la préférence",
+      "couldNotClearMemory": "✗ impossible d'effacer la mémoire",
+      "memoryCleared": "✓ mémoire effacée"
     },
     "loginActivity": {
       "title": "Activité de connexion",
       "description": "Appareils et navigateurs connectés à votre compte. Nous vous envoyons un e-mail à chaque nouvelle connexion.",
       "noDevices": "Aucun appareil enregistré pour l'instant.",
-      "lastSeen": "Vu pour la dernière fois {time}"
+      "lastSeen": "Vu pour la dernière fois {time}",
+      "couldNotRemoveDevice": "✗ impossible de supprimer l'appareil",
+      "deviceRemoved": "✓ appareil supprimé"
     },
     "aiUsage": {
       "title": "Utilisation IA",
@@ -396,7 +445,8 @@
       "title": "Exporter les données",
       "description": "Téléchargez tout ce que vous avez enregistré dans les 13 modules sous forme d'un seul fichier JSON.",
       "exportAll": "Exporter toutes les données",
-      "exporting": "Export en cours..."
+      "exporting": "Export en cours...",
+      "exportDownloaded": "✓ export téléchargé"
     },
     "dangerZone": {
       "title": "Zone de danger",
@@ -405,7 +455,9 @@
       "typeToConfirm": "tapez <highlight>{email}</highlight> pour confirmer",
       "sendConfirmationEmail": "Envoyer l'e-mail de confirmation de suppression",
       "sending": "Envoi...",
-      "checkEmail": "Vérifiez votre e-mail pour confirmer la suppression — un lien a été envoyé à <highlight>{email}</highlight>. Il expire dans 1 heure ; rien n'est supprimé tant que vous ne cliquez pas dessus."
+      "checkEmail": "Vérifiez votre e-mail pour confirmer la suppression — un lien a été envoyé à <highlight>{email}</highlight>. Il expire dans 1 heure ; rien n'est supprimé tant que vous ne cliquez pas dessus.",
+      "emailDoesNotMatch": "L'e-mail ne correspond pas.",
+      "couldNotStartDeletion": "✗ impossible de lancer la suppression du compte"
     },
     "emailNotifications": {
       "title": "Notifications par e-mail",
@@ -439,7 +491,8 @@
     },
     "aiPersona": {
       "title": "Personnalité IA",
-      "description": "Donnez un nom personnalisé à l'assistant."
+      "description": "Donnez un nom personnalisé à l'assistant.",
+      "personaUpdated": "✓ nom de l'assistant mis à jour"
     },
     "billing": {
       "title": "Facturation",
@@ -560,7 +613,9 @@
       "setupSuccessBody": "Invitez votre premier membre d'équipe ci-dessous.",
       "roleLabel": "Rôle / Poste",
       "rolePlaceholder": "Que fait cette personne ?",
-      "workUseDisclaimer": "Les sièges d'équipe sont destinés aux employés ou collaborateurs réels travaillant sur votre activité — pas à un usage personnel/familial. En invitant un membre, vous confirmez qu'il fait partie du travail de votre équipe."
+      "workUseDisclaimer": "Les sièges d'équipe sont destinés aux employés ou collaborateurs réels travaillant sur votre activité — pas à un usage personnel/familial. En invitant un membre, vous confirmez qu'il fait partie du travail de votre équipe.",
+      "memberRemoved": "✓ membre retiré",
+      "couldNotRemoveMember": "✗ impossible de retirer le membre"
     },
     "memory": {
       "title": "Mémoire IA",

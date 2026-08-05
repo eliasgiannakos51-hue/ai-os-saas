@@ -1,8 +1,9 @@
 "use client";
 
 import { Award, Lock } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { allAchievementDisplays, type AchievementDisplay } from "@/lib/achievement-metadata";
+import { formatDate } from "@/lib/format-number";
 
 export type UnlockedAchievementInfo = { achievementKey: string; unlockedAt: string };
 
@@ -29,6 +30,7 @@ const ACHIEVEMENT_KIND_KEYS: Record<Exclude<AchievementDisplay["kind"], "firstEn
 // dashboard/layout.tsx's checkAndUnlockAchievements.
 export function AchievementsSection({ unlocked }: { unlocked: UnlockedAchievementInfo[] }) {
   const t = useTranslations("achievements");
+  const locale = useLocale();
   const unlockedByKey = new Map(unlocked.map((u) => [u.achievementKey, u.unlockedAt]));
   const displays = allAchievementDisplays();
   const unlockedCount = displays.filter((d) => unlockedByKey.has(d.key)).length;
@@ -80,7 +82,7 @@ export function AchievementsSection({ unlocked }: { unlocked: UnlockedAchievemen
                 <p className="mt-0.5 text-[11px] text-muted">{description}</p>
                 <p className="mt-1 text-[10px] uppercase tracking-wide text-muted">
                   {isUnlocked
-                    ? t("unlockedOn", { date: new Date(unlockedAt).toLocaleDateString() })
+                    ? t("unlockedOn", { date: formatDate(unlockedAt, locale) })
                     : t("locked")}
                 </p>
               </div>

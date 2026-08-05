@@ -650,7 +650,9 @@
       "nextStep": "次: {step}",
       "noSteps": "このミッションにはまだ計画ステップがありません。",
       "reviewNotRunYet": "すべてのステップが完了しました。レビュアーを実行して要約を取得してください。",
-      "reviewLocked": "レビュアーはすべてのステップ完了後に実行されます。"
+      "reviewLocked": "レビュアーはすべてのステップ完了後に実行されます。",
+      "stepMinutes": "約 {count} 分",
+      "updatedElsewhere": "このミッションは別の場所で更新されました。最新の状態を表示するため再読み込みします。"
     },
     "reflection": {
       "title": "週次振り返り",

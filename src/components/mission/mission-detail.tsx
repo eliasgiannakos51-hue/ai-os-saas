@@ -133,6 +133,46 @@ export function MissionDetail({
     }
   }
 
+  // Sub-steps are ticked by hand — no AI call, no credits. Persisted the
+  // same optimistic-concurrency way every other plan mutation is, so two
+  // tabs can't clobber each other's ticks.
+  const [togglingSubstep, setTogglingSubstep] = useState<string | null>(null);
+  async function toggleSubstep(stepIndex: number, substepIndex: number) {
+    const key = `${stepIndex}:${substepIndex}`;
+    if (togglingSubstep) return;
+    setTogglingSubstep(key);
+    const result = await updateMissionPlanSteps(supabase, mission.id, ({ planSteps }) => ({
+      planSteps: {
+        ...planSteps,
+        steps: (planSteps.steps ?? []).map((step, i) =>
+          i !== stepIndex
+            ? step
+            : {
+                ...step,
+                substeps: (step.substeps ?? []).map((sub, j) =>
+                  j !== substepIndex
+                    ? sub
+                    : { ...sub, status: sub.status === "completed" ? "pending" : "completed" }
+                ),
+              }
+        ),
+      },
+    }));
+    setTogglingSubstep(null);
+    if (result.ok) {
+      router.refresh();
+      return;
+    }
+    // Same two failure shapes every other plan mutation handles: another
+    // tab won the write (conflict), or the write itself failed.
+    if (result.conflict) {
+      setError(t("updatedElsewhere"));
+      router.refresh();
+      return;
+    }
+    setError(getErrorMessage(result.error, "Could not update that sub-step."));
+  }
+
   async function buildStep(index: number) {
     const step = steps[index];
     if (!step || step.status === "completed" || buildingIndex !== null) return;
@@ -406,6 +446,62 @@ export function MissionDetail({
                     )}
                     {step.status === "completed" && step.output && (
                       <p className="mt-1 line-clamp-2 text-[11px] text-muted/80">{step.output}</p>
+                    )}
+
+                    {/* What you will have when it's done, and roughly how
+                        long it takes — both come from the Planner, and both
+                        are simply absent on missions planned before they
+                        existed. */}
+                    {(step.outcome || step.estimatedMinutes) && (
+                      <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted">
+                        {step.outcome && (
+                          <span>
+                            <span className="text-emerald-400/80">→</span> {step.outcome}
+                          </span>
+                        )}
+                        {step.estimatedMinutes ? (
+                          <span className="inline-flex items-center gap-1 text-muted/80">
+                            <Clock className="h-3 w-3" aria-hidden="true" />
+                            {t("stepMinutes", { count: step.estimatedMinutes })}
+                          </span>
+                        ) : null}
+                      </p>
+                    )}
+
+                    {step.substeps && step.substeps.length > 0 && (
+                      <ul className="mt-2 space-y-1 border-l border-border pl-3">
+                        {step.substeps.map((sub, subIndex) => {
+                          const done = sub.status === "completed";
+                          return (
+                            <li key={subIndex}>
+                              <button
+                                type="button"
+                                onClick={() => toggleSubstep(index, subIndex)}
+                                disabled={togglingSubstep !== null}
+                                aria-pressed={done}
+                                className="flex w-full items-start gap-2 rounded-md px-1 py-0.5 text-left transition-colors duration-150 hover:bg-panel-hover disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                {done ? (
+                                  <CheckCircle2
+                                    className="mt-[3px] h-3.5 w-3.5 shrink-0 text-emerald-400"
+                                    aria-hidden="true"
+                                  />
+                                ) : (
+                                  <Circle
+                                    className="mt-[3px] h-3.5 w-3.5 shrink-0 text-muted"
+                                    aria-hidden="true"
+                                  />
+                                )}
+                                <span
+                                  className={`text-xs ${done ? "text-muted line-through" : "text-foreground/90"}`}
+                                >
+                                  {sub.text}
+                                </span>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
                     )}
                   </div>
                   {step.status !== "completed" && (

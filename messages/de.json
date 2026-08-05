@@ -650,7 +650,9 @@
       "nextStep": "Als Nächstes: {step}",
       "noSteps": "Diese Mission hat noch keine Planschritte.",
       "reviewNotRunYet": "Alle Schritte sind erledigt — starte den Reviewer für eine Zusammenfassung.",
-      "reviewLocked": "Der Reviewer läuft, sobald alle Schritte abgeschlossen sind."
+      "reviewLocked": "Der Reviewer läuft, sobald alle Schritte abgeschlossen sind.",
+      "stepMinutes": "~{count} Min.",
+      "updatedElsewhere": "Diese Mission wurde gerade anderswo aktualisiert — wird neu geladen, um den aktuellen Stand zu zeigen."
     },
     "reflection": {
       "title": "Wöchentliche Reflexion",

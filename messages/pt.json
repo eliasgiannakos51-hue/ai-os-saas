@@ -650,7 +650,9 @@
       "nextStep": "Seguinte: {step}",
       "noSteps": "Esta missão ainda não tem passos de plano.",
       "reviewNotRunYet": "Todos os passos estão concluídos — execute o Revisor para obter um resumo.",
-      "reviewLocked": "O Revisor corre assim que todos os passos estiverem concluídos."
+      "reviewLocked": "O Revisor corre assim que todos os passos estiverem concluídos.",
+      "stepMinutes": "~{count} min",
+      "updatedElsewhere": "Esta missão acabou de ser atualizada noutro sítio — a recarregar para mostrar o estado mais recente."
     },
     "reflection": {
       "title": "Reflexão Semanal",

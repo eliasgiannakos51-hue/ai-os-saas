@@ -10,8 +10,10 @@ import { OVERVIEW_NAV_ITEM } from "@/lib/modules";
 import {
   ALL_SIDEBAR_GROUPS,
   MAIN_SIDEBAR_GROUPS,
+  PINNED_SIDEBAR_ITEMS,
   SETTINGS_GROUP,
   type SidebarGroupConfig,
+  type SidebarItem,
 } from "@/lib/sidebar-nav";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
 import { Logo } from "@/components/logo";
@@ -50,12 +52,12 @@ function storageKey(heading: string) {
 // so the JIT compiler can actually see them.
 function groupTone(heading: string): string {
   switch (heading) {
-    case "Workspace":
-      return "text-orange-400/55";
-    case "Build":
+    case "Create":
       return "text-purple-400/55";
-    case "Business":
+    case "My Business":
       return "text-sky-400/55";
+    case "Insights":
+      return "text-amber-400/55";
     default:
       return "text-emerald-400/50";
   }
@@ -148,30 +150,63 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
           }`}
         >
           <div className="min-h-0 overflow-hidden">
+            {/* One line saying what is actually in here, shown only while
+                the group is open. A heading alone ("Track") does not tell
+                anyone that their trade log lives inside it. */}
+            {group.hintKey && (
+              <p className="px-3 pb-2 text-[11px] leading-snug text-muted/70">
+                {t(`groupHints.${group.hintKey}`)}
+              </p>
+            )}
             <div className="space-y-0.5 pb-0.5">
-              {group.items.map((item) => {
-                const active = isActive(pathname, item.href);
-                const Icon = item.icon;
-                return (
+              {group.items.map((item) => renderItem(item, groupTone(group.heading)))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // One renderer for every nav row, pinned or grouped, so the two can
+  // never drift apart. `prominent` is what gives the three daily entry
+  // points their visual weight over the twenty-odd module links.
+  function renderItem(item: SidebarItem, tone: string, prominent = false) {
+    const active = isActive(pathname, item.href);
+    const Icon = item.icon;
+    const hint = item.hintKey ? t(`hints.${item.hintKey}`) : undefined;
+    return (
                   <Link
                     key={item.href}
                     href={item.href}
                     onClick={closeOnMobile}
+                    // A plain title attribute rather than a custom tooltip:
+                    // it needs no JS, no portal and no hover state, and
+                    // screen readers already announce it. On touch there is
+                    // no hover at all, which is why these are only ever
+                    // supplementary — no item depends on its hint to be
+                    // findable.
+                    title={hint}
                     // nav-item draws the active highlight and the leading
                     // rail as pseudo-elements so both can animate; the
                     // look is unchanged, it just slides in now.
                     data-active={active}
-                    className={`nav-item group relative flex min-h-[40px] items-center gap-2.5 rounded-xl py-2 pl-2.5 pr-3 text-sm transition-colors duration-200 ${
+                    className={`nav-item group relative flex items-center gap-2.5 rounded-xl transition-colors duration-200 ${
+                      prominent
+                        ? "min-h-[44px] py-2.5 pl-2.5 pr-3 text-[15px] font-medium"
+                        : "min-h-[40px] py-2 pl-2.5 pr-3 text-sm"
+                    } ${
                       active
                         ? "font-semibold text-orange-200"
-                        : "text-muted hover:bg-white/[0.045] hover:text-foreground hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.18)]"
+                        : prominent
+                          ? "text-foreground/90 hover:bg-white/[0.045] hover:text-foreground hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.18)]"
+                          : "text-muted hover:bg-white/[0.045] hover:text-foreground hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.18)]"
                     }`}
                   >
                     <Icon
-                      className={`icon-bounce h-4 w-4 shrink-0 ${
+                      className={`icon-bounce shrink-0 ${prominent ? "h-[18px] w-[18px]" : "h-4 w-4"} ${
                         active
                           ? "text-orange-300 drop-shadow-[0_0_6px_rgba(249,115,22,0.8)]"
-                          : `${groupTone(group.heading)} group-hover:text-orange-300`
+                          : `${tone} group-hover:text-orange-300`
                       }`}
                       aria-hidden="true"
                     />
@@ -187,12 +222,6 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
                       {translatedLabel(item.label)}
                     </span>
                   </Link>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
     );
   }
 
@@ -225,7 +254,15 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
           </button>
         </div>
 
-        <nav className="space-y-5 p-3">{MAIN_SIDEBAR_GROUPS.map(renderGroup)}</nav>
+        <nav className="space-y-5 p-3">
+          {/* The three daily entry points, above every category and
+              outside all of them — no heading, no chevron, nothing to
+              expand before you can click them. */}
+          <div className="space-y-0.5">
+            {PINNED_SIDEBAR_ITEMS.map((item) => renderItem(item, "text-orange-400/70", true))}
+          </div>
+          {MAIN_SIDEBAR_GROUPS.map(renderGroup)}
+        </nav>
 
         <div className="border-t border-white/[0.07] p-3">{renderGroup(SETTINGS_GROUP)}</div>
 

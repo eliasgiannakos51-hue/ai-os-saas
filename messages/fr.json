@@ -29,7 +29,11 @@
       "strategy": "Stratégie",
       "operations": "Opérations",
       "marketplace": "Place de marché",
-      "settings": "Paramètres"
+      "settings": "Paramètres",
+      "create": "Créer",
+      "myBusiness": "Mon activité",
+      "track": "Suivre",
+      "insights": "Bilan"
     },
     "items": {
       "home": "Accueil",
@@ -42,7 +46,7 @@
       "settings": "Paramètres",
       "team": "Équipe",
       "agents": "Agents IA",
-      "websites": "Sites web",
+      "websites": "Plans de sites",
       "websiteBuilder": "Générateur de Site",
       "apps": "Applications",
       "images": "Images",
@@ -68,6 +72,46 @@
       "productWorkflow": "Flux Produit",
       "automation": "Automatisation",
       "marketplace": "Place de marché"
+    },
+    "groupHints": {
+      "create": "Générez un site, planifiez un objectif, rédigez un document.",
+      "myBusiness": "Argent, clients, produits et comment ils se portent.",
+      "track": "Notez idées, recherches, trades et décisions avant de les oublier.",
+      "operations": "Travail récurrent et flux en plusieurs étapes.",
+      "insights": "Revoyez ce que vous avez fait et ce que l'IA retient.",
+      "marketplace": "Partagez et découvrez des configurations — pas encore ouvert."
+    },
+    "hints": {
+      "chat": "Demandez n'importe quoi — sans lien avec un module.",
+      "create": "Décrivez ce que vous voulez en une phrase ; il déduit le reste.",
+      "websiteBuilder": "Décrivez un site et l'IA génère la vraie page.",
+      "missionControl": "Fixez un objectif, l'IA le découpe en étapes.",
+      "documents": "Notes et documents libres que vous rédigez vous-même.",
+      "websites": "Suivez les sites que vous possédez — nom, URL, statut. Sans génération.",
+      "agents": "Planifiez les agents souhaités. Un suivi, pas un moteur.",
+      "finance": "Notez revenus et dépenses.",
+      "sales": "Prospects, prise de contact et prochaines étapes.",
+      "content": "Idées de contenu, légendes et fils.",
+      "campaigns": "Planifiez des campagnes — canal, budget, statut.",
+      "products": "Plans produit — tarifs, feuille de route, lancement.",
+      "analytics": "Les indicateurs que vous suivez.",
+      "ideas": "Notez les nouvelles idées avant de les oublier.",
+      "research": "Conservez recherches, sources et résumés.",
+      "competitors": "Suivez produits concurrents, prix et positionnement.",
+      "decisions": "Pesez les options avant de trancher.",
+      "learning": "Suivez ce que vous apprenez.",
+      "trading": "Journal de trades — symbole, sens, résultat, P&L.",
+      "feedback": "Ce que les utilisateurs vous ont dit, au même endroit.",
+      "dataAnalysis": "Demandes d'analyse et ce que vous avez trouvé.",
+      "automation": "Ce qui s'exécute selon un calendrier.",
+      "tradingWorkflow": "Vos trades, vos schémas et votre mentor en une vue.",
+      "productWorkflow": "Vos produits, vos schémas et votre mentor en une vue.",
+      "timeline": "Tout ce que vous avez fait, dans l'ordre.",
+      "reflection": "Un résumé hebdomadaire de vos progrès.",
+      "memory": "Ce que l'IA retient de vous.",
+      "favorites": "Tout ce que vous avez mis en favori.",
+      "marketplace": "Partagez et découvrez des configurations — pas encore ouvert.",
+      "team": "Invitez des personnes dans votre espace."
     }
   },
   "landing": {

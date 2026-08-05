@@ -29,7 +29,11 @@
       "strategy": "策略",
       "operations": "运营",
       "marketplace": "市场",
-      "settings": "设置"
+      "settings": "设置",
+      "create": "创建",
+      "myBusiness": "我的业务",
+      "track": "记录",
+      "insights": "回顾"
     },
     "items": {
       "home": "主页",
@@ -42,7 +46,7 @@
       "settings": "设置",
       "team": "团队",
       "agents": "AI 智能体",
-      "websites": "网站",
+      "websites": "网站计划",
       "websiteBuilder": "网站生成器",
       "apps": "应用",
       "images": "图像",
@@ -68,6 +72,46 @@
       "productWorkflow": "产品工作流",
       "automation": "自动化",
       "marketplace": "市场"
+    },
+    "groupHints": {
+      "create": "生成网站、规划目标、撰写文档。",
+      "myBusiness": "资金、客户、产品，以及它们的表现。",
+      "track": "在忘记之前记下想法、研究、交易和决策。",
+      "operations": "重复性工作和多步骤流程。",
+      "insights": "回看你做过什么，以及 AI 记住了什么。",
+      "marketplace": "分享与发现配置——尚未开放。"
+    },
+    "hints": {
+      "chat": "什么都可以问——不绑定任何模块。",
+      "create": "用一句话描述你要什么，其余的它自己判断。",
+      "websiteBuilder": "描述一个网站，AI 生成真实页面。",
+      "missionControl": "设定目标，AI 拆成步骤。",
+      "documents": "你自己撰写的自由笔记和文档。",
+      "websites": "记录你拥有的网站——名称、网址、状态。不生成。",
+      "agents": "规划你想要的智能体。这是记录，不是运行时。",
+      "finance": "记录收入和支出。",
+      "sales": "线索、触达和后续动作。",
+      "content": "内容创意、文案和推文串。",
+      "campaigns": "规划营销活动——渠道、预算、状态。",
+      "products": "产品规划——定价、路线图、发布。",
+      "analytics": "你在关注的指标。",
+      "ideas": "在忘记之前记下新想法。",
+      "research": "保存研究、来源和摘要。",
+      "competitors": "跟踪竞品、定价与定位。",
+      "decisions": "决定之前先权衡选项。",
+      "learning": "记录你正在学习的内容。",
+      "trading": "交易日志——品种、方向、结果、盈亏。",
+      "feedback": "用户告诉你的话，集中在一处。",
+      "dataAnalysis": "分析请求以及你的发现。",
+      "automation": "按计划自动运行的事情。",
+      "tradingWorkflow": "你的交易、模式和导师，一个视图。",
+      "productWorkflow": "你的产品、模式和导师，一个视图。",
+      "timeline": "你做过的一切，按时间排列。",
+      "reflection": "每周进度小结。",
+      "memory": "AI 记住的关于你的事。",
+      "favorites": "你收藏的一切。",
+      "marketplace": "分享与发现配置——尚未开放。",
+      "team": "邀请他人加入你的工作区。"
     }
   },
   "landing": {

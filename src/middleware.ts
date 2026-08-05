@@ -53,16 +53,38 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/signup");
   const isDashboardRoute = request.nextUrl.pathname.startsWith("/dashboard");
 
+  // DEFECT 1 (fixed here): both redirects below used to return a FRESH
+  // NextResponse.redirect(), which does not carry the cookies that
+  // setAll() wrote onto `response` moments earlier.
+  //
+  // Why that loses data rather than just logging someone out: Supabase
+  // ROTATES refresh tokens. When getUser() above refreshes an expired
+  // access token, the old refresh token is spent server-side and a new
+  // pair is written to `response`. If the request then redirects, that
+  // response is discarded and the browser keeps the OLD, now-spent
+  // cookies. The next request presents a refresh token Supabase has
+  // already retired, the refresh fails, and the session silently
+  // degrades to anonymous — at which point every RLS-scoped query
+  // returns ZERO ROWS WITH NO ERROR, which is exactly what "my missions
+  // disappeared" looks like from the outside.
+  //
+  // Copying the cookies onto the redirect keeps the rotation chain
+  // intact across every response path, not just the pass-through one.
+  function withRefreshedCookies(redirect: NextResponse): NextResponse {
+    response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+    return redirect;
+  }
+
   if (!user && isDashboardRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    return NextResponse.redirect(url);
+    return withRefreshedCookies(NextResponse.redirect(url));
   }
 
   if (user && isAuthRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard/overview";
-    return NextResponse.redirect(url);
+    return withRefreshedCookies(NextResponse.redirect(url));
   }
 
   return response;

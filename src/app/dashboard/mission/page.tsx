@@ -55,11 +55,31 @@ export default async function MissionPage() {
     redirect("/login");
   }
 
+  // DEFECT 2 (fixed here): this query used to carry NO user filter at all
+  // and relied entirely on RLS to scope it. That is correct for security,
+  // but it makes two very different outcomes indistinguishable:
+  //
+  //   - "this user genuinely has no missions"      -> 0 rows, no error
+  //   - "the session degraded to anonymous"        -> 0 rows, no error
+  //
+  // PostgREST does not error when RLS filters everything out; it returns
+  // an empty set. So a lost session rendered the empty state instead of
+  // an error, which is precisely the reported symptom: the missions
+  // "disappear" and the page looks normal.
+  //
+  // The explicit .eq() does not replace RLS (RLS still enforces it) — it
+  // puts the intent in the code, and it lets the check below tell the two
+  // cases apart by comparing against a count taken with the same filter.
   const [{ data: missions, error }, { data: scheduledRuns }] = await Promise.all([
-    supabase.from("ai_missions").select("*").order("created_at", { ascending: false }),
+    supabase
+      .from("ai_missions")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false }),
     supabase
       .from("scheduled_agent_runs")
       .select("*")
+      .eq("user_id", user.id)
       .eq("status", "pending")
       .order("scheduled_for", { ascending: true }),
   ]);
@@ -67,6 +87,26 @@ export default async function MissionPage() {
   diagLog(`[mission-diag ${reqId}] ai_missions query -> rows=${missions?.length ?? "null"} error=${error?.message ?? "none"} ids=${
       (missions as Mission[] | null)?.map((m) => m.id.slice(0, 8)).join(",") ?? "-"
     }`);
+
+  // The one check that separates "no missions" from "no session". A
+  // degraded session cannot read the row it is asking about, so a
+  // head-count that comes back null while getUser() reported a user is a
+  // session problem, not an empty account — and must NOT render as the
+  // friendly empty state.
+  const { count: ownedCount, error: countError } = await supabase
+    .from("ai_missions")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id);
+
+  const sessionDegraded = countError !== null || ownedCount === null;
+
+  diagLog(`[mission-diag ${reqId}] ownership count -> count=${ownedCount ?? "null"} error=${
+      countError?.message ?? "none"
+    } sessionDegraded=${sessionDegraded}`);
+
+  diagLog(`[mission-diag ${reqId}] render -> missionsPassedToComponent=${
+      (missions as Mission[] | null)?.length ?? 0
+    } pendingRuns=${(scheduledRuns as ScheduledAgentRun[] | null)?.length ?? 0}`);
 
   const pendingRuns = (scheduledRuns as ScheduledAgentRun[] | null) ?? [];
   const scheduledStepIndicesByMission: Record<string, number[]> = {};
@@ -89,10 +129,21 @@ export default async function MissionPage() {
 
         {error && <ErrorMessage message={`loading missions: ${error.message}`} />}
 
-        <MissionList
-          missions={(missions as Mission[] | null) ?? []}
-          scheduledStepIndicesByMission={scheduledStepIndicesByMission}
-        />
+        {/* A degraded session must never render as "you have no missions".
+            Showing a reload prompt instead is the difference between the
+            user thinking their data was deleted and the user pressing
+            reload once, which is all the recovery this needs now that the
+            middleware keeps the refresh-token chain intact. */}
+        {!error && sessionDegraded && (
+          <ErrorMessage message={t("sessionExpired")} />
+        )}
+
+        {!sessionDegraded && (
+          <MissionList
+            missions={(missions as Mission[] | null) ?? []}
+            scheduledStepIndicesByMission={scheduledStepIndicesByMission}
+          />
+        )}
       </div>
     </main>
   );

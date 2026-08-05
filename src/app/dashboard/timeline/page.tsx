@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { diagLog } from "@/lib/diag";
+import { ErrorMessage } from "@/components/error-message";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
@@ -27,6 +28,7 @@ export default async function TimelinePage({
   searchParams: { module?: string; range?: string };
 }) {
   const t = await getTranslations("dashboard.timeline");
+  const tMission = await getTranslations("dashboard.mission");
   const supabase = createClient();
 
   // TEMPORARY diagnostic logging — see dashboard/mission/page.tsx for why
@@ -51,19 +53,32 @@ export default async function TimelinePage({
     : "all";
   const range = resolveRange(searchParams.range);
 
-  const entries = await loadTimelineEntries(supabase, user.id, {
+  const { entries, failedTables } = await loadTimelineEntries(supabase, user.id, {
     moduleSlug: moduleSlug === "all" ? null : moduleSlug,
     range,
   });
 
-  diagLog(`[timeline-diag ${reqId}] loadTimelineEntries -> entries=${entries.length} moduleSlug=${moduleSlug} range=${range}`);
+  // Every module table failing at once is not "no entries" — it is a lost
+  // session. One table failing is a real per-table problem and stays
+  // tolerated, exactly as before.
+  const sessionDegraded = failedTables.length > 0 && entries.length === 0;
+
+  diagLog(`[timeline-diag ${reqId}] loadTimelineEntries -> entries=${entries.length} moduleSlug=${moduleSlug} range=${range} failedTables=${
+      failedTables.length === 0 ? "none" : failedTables.join(",")
+    } sessionDegraded=${sessionDegraded}`);
+
+  diagLog(`[timeline-diag ${reqId}] render -> entriesPassedToComponent=${entries.length}`);
 
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader icon={TIMELINE_ICON} title={t("title")} />
         <TimelineFilters moduleSlug={moduleSlug} range={range} />
-        <TimelineList entries={entries} />
+        {sessionDegraded ? (
+          <ErrorMessage message={tMission("sessionExpired")} />
+        ) : (
+          <TimelineList entries={entries} />
+        )}
       </div>
     </main>
   );

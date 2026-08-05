@@ -127,7 +127,7 @@ export default async function TradingWorkflowPage() {
 
   const tradingTimeline = (
     await loadTimelineEntries(supabase, user.id, { moduleSlug: "trading", range: "all" })
-  ).slice(0, MINI_TIMELINE_LIMIT);
+  ).entries.slice(0, MINI_TIMELINE_LIMIT);
 
   return (
     <main className="min-h-full bg-dot-grid">

@@ -580,7 +580,8 @@
       },
       "builtByAgent": "Criado por {agent}",
       "retry": "Tentar novamente ({attempts}/{max})",
-      "stepFailedMax": "Falhou {max}x — não tentará novamente automaticamente. Tente reformular a etapa ou criá-la manualmente."
+      "stepFailedMax": "Falhou {max}x — não tentará novamente automaticamente. Tente reformular a etapa ou criá-la manualmente.",
+      "sessionExpired": "A tua sessão expirou durante o carregamento. Nada se perdeu — recarrega a página."
     },
     "reflection": {
       "title": "Reflexão Semanal",

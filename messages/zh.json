@@ -580,7 +580,8 @@
       },
       "builtByAgent": "由{agent}创建",
       "retry": "重试 ({attempts}/{max})",
-      "stepFailedMax": "已失败 {max} 次——不会自动重试。请尝试重新表述该步骤或手动创建。"
+      "stepFailedMax": "已失败 {max} 次——不会自动重试。请尝试重新表述该步骤或手动创建。",
+      "sessionExpired": "加载时会话已过期。没有丢失任何内容 — 请重新加载页面。"
     },
     "reflection": {
       "title": "每周回顾",

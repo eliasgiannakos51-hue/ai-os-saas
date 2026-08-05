@@ -96,7 +96,7 @@ export default async function ProductWorkflowPage() {
 
   const productTimeline = (
     await loadTimelineEntries(supabase, user.id, { moduleSlug: "products", range: "all" })
-  ).slice(0, MINI_TIMELINE_LIMIT);
+  ).entries.slice(0, MINI_TIMELINE_LIMIT);
 
   return (
     <main className="min-h-full bg-dot-grid">

@@ -62,7 +62,8 @@ export async function loadTimelineEntries(
   supabase: SupabaseClient,
   userId: string,
   { moduleSlug, range }: { moduleSlug: string | null; range: TimelineRange }
-): Promise<TimelineEntry[]> {
+): Promise<{ entries: TimelineEntry[]; failedTables: string[] }> {
+  const failedTables: string[] = [];
   const modules = moduleSlug
     ? LINKABLE_MODULES.filter((m) => m.slug === moduleSlug)
     : LINKABLE_MODULES;
@@ -70,16 +71,27 @@ export async function loadTimelineEntries(
 
   const perModule = await Promise.all(
     modules.map(async (config) => {
+      // DEFECT 3 (fixed here): `userId` was accepted as a parameter and
+      // then never used — the query relied entirely on RLS. Combined with
+      // the swallow-and-return-[] below, a session that degraded to
+      // anonymous produced an EMPTY TIMELINE with no error anywhere the
+      // user could see it, across all 13 module tables at once. That is
+      // the "Timeline is empty even though I have entries" report.
       let query = supabase
         .from(config.table)
         .select("*")
+        .eq("user_id", userId)
         .order("created_at", { ascending: false })
         .limit(PER_MODULE_LIMIT);
       if (cutoff) query = query.gte("created_at", cutoff);
 
       const { data, error } = await query;
       if (error || !data) {
+        // Still per-module tolerant (one broken table must not blank the
+        // whole timeline), but the failure is now REPORTED to the caller
+        // instead of being indistinguishable from "no entries".
         if (error) logApiError("timeline:loadTimelineEntries", error, { table: config.table });
+        failedTables.push(config.table);
         return [] as TimelineEntry[];
       }
 
@@ -105,7 +117,7 @@ export async function loadTimelineEntries(
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, MAX_ENTRIES);
 
-  if (merged.length === 0) return merged;
+  if (merged.length === 0) return { entries: merged, failedTables };
 
   const idsByTable = new Map<string, string[]>();
   for (const entry of merged) {
@@ -124,8 +136,11 @@ export async function loadTimelineEntries(
     })
   );
 
-  return merged.map((entry) => ({
-    ...entry,
-    linked: linkedByKey.get(entry.key) ?? [],
-  }));
+  return {
+    entries: merged.map((entry) => ({
+      ...entry,
+      linked: linkedByKey.get(entry.key) ?? [],
+    })),
+    failedTables,
+  };
 }

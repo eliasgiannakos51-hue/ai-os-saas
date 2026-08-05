@@ -580,7 +580,8 @@
       },
       "builtByAgent": "Créé par {agent}",
       "retry": "Réessayer ({attempts}/{max})",
-      "stepFailedMax": "Échec {max}x — ne réessaiera pas automatiquement. Essayez de reformuler l’étape ou de la créer manuellement."
+      "stepFailedMax": "Échec {max}x — ne réessaiera pas automatiquement. Essayez de reformuler l’étape ou de la créer manuellement.",
+      "sessionExpired": "Votre session a expiré pendant le chargement. Rien n'est perdu — rechargez la page."
     },
     "reflection": {
       "title": "Bilan Hebdomadaire",

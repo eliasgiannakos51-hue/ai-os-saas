@@ -580,7 +580,8 @@
       },
       "builtByAgent": "Erstellt von {agent}",
       "retry": "Wiederholen ({attempts}/{max})",
-      "stepFailedMax": "{max}x fehlgeschlagen — wird nicht automatisch wiederholt. Formuliere den Schritt um oder erstelle ihn manuell."
+      "stepFailedMax": "{max}x fehlgeschlagen — wird nicht automatisch wiederholt. Formuliere den Schritt um oder erstelle ihn manuell.",
+      "sessionExpired": "Deine Sitzung ist beim Laden abgelaufen. Nichts ging verloren — lade die Seite neu."
     },
     "reflection": {
       "title": "Wöchentliche Reflexion",

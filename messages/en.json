@@ -580,7 +580,8 @@
       },
       "builtByAgent": "Built by {agent}",
       "retry": "Retry ({attempts}/{max})",
-      "stepFailedMax": "Failed {max}x — won't retry automatically. Try rephrasing the step or building it manually."
+      "stepFailedMax": "Failed {max}x — won't retry automatically. Try rephrasing the step or building it manually.",
+      "sessionExpired": "Your session expired while loading. Nothing was lost — please reload the page."
     },
     "reflection": {
       "title": "Weekly Reflection",

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
 import { FileText } from "lucide-react";
@@ -7,9 +6,9 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
 import { EmptyState } from "@/components/empty-state";
-import { DeleteButton } from "@/components/delete-button";
+import { DocumentListRow } from "@/components/documents/document-list-row";
+import { loadFavoriteIds } from "@/lib/favorites";
 import { NewDocumentButton } from "@/components/documents/new-document-button";
-import { formatRelativeTime } from "@/lib/format-time";
 import type { UserDocument } from "@/types/document";
 
 export const metadata: Metadata = { title: "Documents" };
@@ -40,6 +39,13 @@ export default async function DocumentsPage() {
     .order("updated_at", { ascending: false });
 
   const docs = (documents as Pick<UserDocument, "id" | "title" | "updated_at">[] | null) ?? [];
+  // Batched, same as every other list — one query for the whole page.
+  const favoritedDocIds = await loadFavoriteIds(
+    supabase,
+    user.id,
+    "user_documents",
+    docs.map((d) => d.id)
+  );
 
   return (
     <main className="min-h-full bg-dot-grid">
@@ -62,34 +68,12 @@ export default async function DocumentsPage() {
         ) : (
           <ul className="space-y-2">
             {docs.map((doc) => (
-              <li
+              <DocumentListRow
                 key={doc.id}
-                className="group flex items-center justify-between gap-3 rounded-xl border border-border bg-panel px-4 py-3 transition-colors duration-150 hover:border-orange-500/40"
-              >
-                <Link
-                  href={`/dashboard/documents/${doc.id}`}
-                  className="flex min-w-0 flex-1 items-center gap-3"
-                >
-                  <FileText
-                    className="h-4 w-4 shrink-0 text-orange-500/60 group-hover:text-orange-400"
-                    aria-hidden="true"
-                  />
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium text-foreground">
-                      {doc.title || t("untitled")}
-                    </span>
-                    <span className="block text-xs text-muted" suppressHydrationWarning>
-                      {formatRelativeTime(doc.updated_at, locale)}
-                    </span>
-                  </span>
-                </Link>
-                <DeleteButton
-                  table="user_documents"
-                  id={doc.id}
-                  label={t("deleteLabel")}
-                  itemName={doc.title}
-                />
-              </li>
+                doc={doc}
+                locale={locale}
+                favorited={favoritedDocIds.has(doc.id)}
+              />
             ))}
           </ul>
         )}

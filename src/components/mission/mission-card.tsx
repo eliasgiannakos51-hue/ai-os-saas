@@ -19,6 +19,7 @@ import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { AGENT_ROLES, type AgentRole } from "@/lib/agent-roles";
 import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
 import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 import type { Mission, MissionStatus } from "@/types/mission";
 
 const STATUS_COLORS: Record<MissionStatus, string> = {
@@ -70,8 +71,12 @@ const AGENT_ROLE_LABEL_KEYS: Record<AgentRole, string> = {
 export function MissionCard({
   mission,
   scheduledStepIndices = [],
+  initialFavorited = false,
 }: {
   mission: Mission;
+  /** Whether this mission is already starred, resolved server-side in one
+   *  batched query rather than a fetch per card. */
+  initialFavorited?: boolean;
   // Indices of steps that already have a pending scheduled_agent_runs row
   // for this mission (see dashboard/mission/page.tsx) — used to show
   // "Scheduled" instead of offering to schedule the same step twice.
@@ -271,8 +276,15 @@ export function MissionCard({
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-panel p-5">
-      <div className="flex flex-wrap items-start justify-between gap-2">
+    <div className="relative rounded-2xl border border-border bg-panel p-5">
+      <FavoriteButton
+        table="ai_missions"
+        recordId={mission.id}
+        headline={mission.goal}
+        initialFavorited={initialFavorited}
+      />
+      {/* pr-12 clears the corner star so a long goal never runs under it */}
+      <div className="flex flex-wrap items-start justify-between gap-2 pr-12">
         <div className="min-w-0">
           <h3 className="text-sm font-semibold text-foreground">{mission.goal}</h3>
           <p className="mt-0.5 text-xs text-muted" title={new Date(mission.created_at).toLocaleString()} suppressHydrationWarning>

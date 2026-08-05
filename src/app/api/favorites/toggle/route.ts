@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { isLinkableTable } from "@/lib/knowledge-graph";
+import { isFavoritableTable } from "@/lib/favoritable";
 import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
 
-    if (!table || !recordId || !isLinkableTable(table)) {
+    if (!table || !recordId || !isFavoritableTable(table)) {
       return NextResponse.json({ ok: false, error: "Invalid record." }, { status: 400 });
     }
 

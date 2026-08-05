@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { WebsiteBuilderWorkspace } from "@/components/website-builder/website-builder-workspace";
 import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
+import { loadFavoriteIds } from "@/lib/favorites";
 import type { UserWebsite } from "@/types/user-website";
 
 export const metadata: Metadata = { title: "Website Builder" };
@@ -33,11 +34,19 @@ export default async function WebsiteBuilderPage() {
     .select("*")
     .order("created_at", { ascending: false });
 
+  const websiteRows = (websites as UserWebsite[] | null) ?? [];
+  const favoritedWebsiteIds = [
+    ...(await loadFavoriteIds(supabase, user.id, "user_websites", websiteRows.map((w) => w.id))),
+  ];
+
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader icon={WEBSITE_BUILDER_ICON} title={t("title")} description={t("description")} />
-        <WebsiteBuilderWorkspace initialWebsites={(websites as UserWebsite[] | null) ?? []} />
+        <WebsiteBuilderWorkspace
+          initialWebsites={websiteRows}
+          favoritedWebsiteIds={favoritedWebsiteIds}
+        />
       </div>
     </main>
   );

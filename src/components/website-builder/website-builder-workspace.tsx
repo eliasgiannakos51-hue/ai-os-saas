@@ -28,6 +28,7 @@ import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 
 const MAX_NAME_LENGTH = 100;
@@ -125,7 +126,14 @@ function downloadHtml(website: UserWebsite) {
 // generate/delete state lives here in one client component (same reasoning
 // as chat-workspace.tsx: it's all one interaction, no benefit to splitting
 // state across multiple components that'd just need to stay in sync).
-export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: UserWebsite[] }) {
+export function WebsiteBuilderWorkspace({
+  initialWebsites,
+  favoritedWebsiteIds = [],
+}: {
+  initialWebsites: UserWebsite[];
+  /** Starred project ids, resolved server-side in one batched query. */
+  favoritedWebsiteIds?: string[];
+}) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.websiteBuilder");
   const supabase = createClient();
@@ -913,8 +921,17 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
       </form>
 
       {previewWebsite && (
-        <div className="rounded-2xl border border-border bg-panel p-5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
+        // The project's detail view. Same corner star as the list card, so
+        // a project can be starred from wherever the user happens to be
+        // looking at it.
+        <div className="relative rounded-2xl border border-border bg-panel p-5">
+          <FavoriteButton
+            table="user_websites"
+            recordId={previewWebsite.id}
+            headline={previewWebsite.name}
+            initialFavorited={favoritedWebsiteIds.includes(previewWebsite.id)}
+          />
+          <div className="flex flex-wrap items-center justify-between gap-2 pr-12">
             <div className="flex min-w-0 items-center gap-2">
               <p className="min-w-0 truncate text-sm font-semibold text-foreground">
                 {previewWebsite.name}
@@ -1148,12 +1165,20 @@ export function WebsiteBuilderWorkspace({ initialWebsites }: { initialWebsites: 
             {paginatedWebsites.map((website) => (
               <li
                 key={website.id}
-                className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 transition-colors duration-150 ${
+                // pr reserves the corner star's column so the download and
+                // delete buttons land to its left rather than beneath it.
+                className={`relative flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 pr-[52px] transition-colors duration-150 ${
                   website.id === previewId
                     ? "border-orange-500/40 bg-orange-500/[0.03]"
                     : "border-border bg-input"
                 }`}
               >
+                <FavoriteButton
+                  table="user_websites"
+                  recordId={website.id}
+                  headline={website.name}
+                  initialFavorited={favoritedWebsiteIds.includes(website.id)}
+                />
                 <button
                   type="button"
                   onClick={() => selectWebsite(website.id)}

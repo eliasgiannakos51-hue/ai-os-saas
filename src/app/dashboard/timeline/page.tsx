@@ -10,6 +10,7 @@ import { TimelineList } from "@/components/timeline/timeline-list";
 import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
 import { TIMELINE_ICON } from "@/lib/module-icons";
 import { loadTimelineEntries, TIMELINE_RANGES, type TimelineRange } from "@/lib/timeline";
+import { loadFavoriteKeys } from "@/lib/favorites";
 
 export const metadata: Metadata = { title: "Timeline" };
 
@@ -67,6 +68,13 @@ export default async function TimelinePage({
       failedTables.length === 0 ? "none" : failedTables.join(",")
     } sessionDegraded=${sessionDegraded}`);
 
+  // One query per distinct table on the page, not one per entry.
+  const favoritedKeys = await loadFavoriteKeys(
+    supabase,
+    user.id,
+    entries.map((e) => ({ table: e.table, id: e.id }))
+  );
+
   diagLog(`[timeline-diag ${reqId}] render -> entriesPassedToComponent=${entries.length}`);
 
   return (
@@ -77,7 +85,7 @@ export default async function TimelinePage({
         {sessionDegraded ? (
           <ErrorMessage message={tMission("sessionExpired")} />
         ) : (
-          <TimelineList entries={entries} />
+          <TimelineList entries={entries} favoritedKeys={favoritedKeys} />
         )}
       </div>
     </main>

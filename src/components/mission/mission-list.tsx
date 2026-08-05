@@ -21,15 +21,20 @@ const MISSIONS_PER_PAGE = 5;
 export function MissionList({
   missions,
   scheduledStepIndicesByMission = {},
+  favoritedIds = [],
 }: {
   missions: Mission[];
   // Keyed by mission id — see dashboard/mission/page.tsx, passed straight
   // through to each MissionCard so it can show "Scheduled" instead of the
   // schedule button for a step that already has one pending.
   scheduledStepIndicesByMission?: Record<string, number[]>;
+  /** Mission ids the user has starred — one batched query on the page,
+   *  not a fetch per card. */
+  favoritedIds?: string[];
 }) {
   const t = useTranslations("dashboard.mission");
   const [page, setPage] = useState(1);
+  const favoritedSet = useMemo(() => new Set(favoritedIds), [favoritedIds]);
 
   // Active missions (planning/in_progress) surface first regardless of
   // age, so a user with many finished missions doesn't have to scroll
@@ -60,6 +65,7 @@ export function MissionList({
             key={mission.id}
             mission={mission}
             scheduledStepIndices={scheduledStepIndicesByMission[mission.id] ?? []}
+            initialFavorited={favoritedSet.has(mission.id)}
           />
         ))}
       </div>

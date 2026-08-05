@@ -1,6 +1,6 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { LINKABLE_MODULES, moduleHref } from "@/lib/knowledge-graph";
+import { FAVORITABLE, getFavoritableByTable } from "@/lib/favoritable";
 import { logApiError } from "@/lib/log-error";
 
 export type FavoriteEntry = {
@@ -68,7 +68,7 @@ export async function loadAllFavorites(
   const headlineByKey = new Map<string, string>();
   await Promise.all(
     [...idsByTable.entries()].map(async ([table, ids]) => {
-      const config = LINKABLE_MODULES.find((m) => m.table === table);
+      const config = getFavoritableByTable(table);
       if (!config) return;
       const { data, error: rowsError } = await supabase.from(table).select("*").in("id", ids);
       if (rowsError || !data) return;
@@ -80,7 +80,7 @@ export async function loadAllFavorites(
 
   const result: FavoriteEntry[] = [];
   for (const row of favoriteRows) {
-    const config = LINKABLE_MODULES.find((m) => m.table === row.table_name);
+    const config = getFavoritableByTable(row.table_name);
     if (!config) continue;
     const headline = headlineByKey.get(`${row.table_name}:${row.record_id}`);
     // Missing headline means the favorited record was since deleted —
@@ -94,10 +94,89 @@ export async function loadAllFavorites(
       moduleSlug: config.slug,
       moduleTitle: config.title,
       headline,
-      href: moduleHref(config.slug),
+      href: config.hrefFor(row.record_id),
       createdAt: row.created_at,
     });
   }
 
   return result;
+}
+
+export type FavoriteGroup = {
+  moduleSlug: string;
+  moduleTitle: string;
+  entries: FavoriteEntry[];
+};
+
+/**
+ * Splits a flat favorites list into per-module groups.
+ *
+ * A mixed reverse-chronological list answers "what did I star recently",
+ * which is not the question anyone opens this page with — they came
+ * looking for a specific thing and they remember which module it was in.
+ *
+ * Group order follows the FAVORITABLE registry (which follows the sidebar)
+ * rather than recency, so the page doesn't reshuffle itself every time
+ * something is starred. Entries inside a group keep their
+ * newest-first order.
+ */
+export function groupFavorites(entries: FavoriteEntry[]): FavoriteGroup[] {
+  const bySlug = new Map<string, FavoriteEntry[]>();
+  for (const entry of entries) {
+    const list = bySlug.get(entry.moduleSlug) ?? [];
+    list.push(entry);
+    bySlug.set(entry.moduleSlug, list);
+  }
+
+  const groups: FavoriteGroup[] = [];
+  for (const config of FAVORITABLE) {
+    const found = bySlug.get(config.slug);
+    if (!found || found.length === 0) continue;
+    groups.push({
+      moduleSlug: config.slug,
+      moduleTitle: config.title,
+      entries: found,
+    });
+    // Deleted so a slug that somehow appears twice in the registry cannot
+    // render its entries twice.
+    bySlug.delete(config.slug);
+  }
+
+  // Anything whose module left the registry still gets shown rather than
+  // silently vanishing from a page whose whole job is "things I saved".
+  for (const [slug, found] of bySlug) {
+    groups.push({ moduleSlug: slug, moduleTitle: slug, entries: found });
+  }
+
+  return groups;
+}
+
+/**
+ * Favorite state for records spanning SEVERAL tables — the Timeline's
+ * shape, where one page mixes rows from every module.
+ *
+ * Returns "<table>:<id>" keys because ids from different tables are
+ * unrelated and could collide on a plain id set. One query per distinct
+ * table, run in parallel, rather than one per row.
+ */
+export async function loadFavoriteKeys(
+  supabase: SupabaseClient,
+  userId: string,
+  records: { table: string; id: string }[]
+): Promise<string[]> {
+  const idsByTable = new Map<string, string[]>();
+  for (const record of records) {
+    const list = idsByTable.get(record.table) ?? [];
+    list.push(record.id);
+    idsByTable.set(record.table, list);
+  }
+
+  const perTable = await Promise.all(
+    [...idsByTable.entries()].map(async ([table, ids]) => {
+      const found = await loadFavoriteIds(supabase, userId, table, ids);
+      return [...found].map((id) => `${table}:${id}`);
+    })
+  );
+
+  return perTable.flat();
 }

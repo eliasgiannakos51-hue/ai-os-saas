@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DocumentEditor } from "@/components/documents/document-editor";
+import { loadFavoriteIds } from "@/lib/favorites";
 import type { UserDocument } from "@/types/document";
 
 export const metadata: Metadata = { title: "Document" };
@@ -32,5 +33,12 @@ export default async function DocumentEditorPage({ params }: { params: { id: str
     notFound();
   }
 
-  return <DocumentEditor doc={doc as Pick<UserDocument, "id" | "title" | "content" | "updated_at">} />;
+  const favorited = await loadFavoriteIds(supabase, user.id, "user_documents", [doc.id as string]);
+
+  return (
+    <DocumentEditor
+      doc={doc as Pick<UserDocument, "id" | "title" | "content" | "updated_at">}
+      initialFavorited={favorited.has(doc.id as string)}
+    />
+  );
 }

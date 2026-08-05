@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Bold, Italic, Heading1, Heading2, List, ChevronLeft, Check, Loader2 } from "lucide-react";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 import type { UserDocument } from "@/types/document";
 
 const AUTOSAVE_DEBOUNCE_MS = 2000;
@@ -18,8 +19,10 @@ type SaveState = "idle" | "saving" | "saved" | "error";
 // pulling in a whole rich-text framework for four buttons.
 export function DocumentEditor({
   doc,
+  initialFavorited = false,
 }: {
   doc: Pick<UserDocument, "id" | "title" | "content" | "updated_at">;
+  initialFavorited?: boolean;
 }) {
   const t = useTranslations("dashboard.documents");
   const [title, setTitle] = useState(doc.title);
@@ -154,14 +157,24 @@ export function DocumentEditor({
           </span>
         </div>
 
-        <input
-          type="text"
-          value={title}
-          onChange={handleTitleChange}
-          placeholder={t("titlePlaceholder")}
-          aria-label={t("titlePlaceholder")}
-          className="mb-4 w-full bg-transparent text-2xl font-bold text-foreground outline-none placeholder:text-muted/50"
-        />
+        {/* The star pins to this block's top-right, next to the title, so
+            the detail view puts the control where the card does. */}
+        <div className="relative mb-4 pr-12">
+          <input
+            type="text"
+            value={title}
+            onChange={handleTitleChange}
+            placeholder={t("titlePlaceholder")}
+            aria-label={t("titlePlaceholder")}
+            className="w-full bg-transparent text-2xl font-bold text-foreground outline-none placeholder:text-muted/50"
+          />
+          <FavoriteButton
+            table="user_documents"
+            recordId={doc.id}
+            headline={title || t("untitled")}
+            initialFavorited={initialFavorited}
+          />
+        </div>
 
         <div className="mb-3 flex flex-wrap items-center gap-1 rounded-xl border border-border bg-panel p-1.5">
           {toolbarButtons.map(({ label, icon: Icon, onClick }) => (

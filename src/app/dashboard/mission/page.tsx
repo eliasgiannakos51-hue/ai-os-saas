@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
 import { MissionForm } from "@/components/mission/mission-form";
 import { MissionList } from "@/components/mission/mission-list";
+import { loadFavoriteIds } from "@/lib/favorites";
 import { ScheduledRunsList } from "@/components/mission/scheduled-runs-list";
 import { MISSION_ICON } from "@/lib/module-icons";
 import type { Mission } from "@/types/mission";
@@ -108,6 +109,13 @@ export default async function MissionPage() {
       (missions as Mission[] | null)?.length ?? 0
     } pendingRuns=${(scheduledRuns as ScheduledAgentRun[] | null)?.length ?? 0}`);
 
+  // One batched lookup for every mission on the page — the star's state
+  // has to come from the server or each card would flash unstarred.
+  const missionRows = (missions as Mission[] | null) ?? [];
+  const favoritedMissionIds = [
+    ...(await loadFavoriteIds(supabase, user.id, "ai_missions", missionRows.map((m) => m.id))),
+  ];
+
   const pendingRuns = (scheduledRuns as ScheduledAgentRun[] | null) ?? [];
   const scheduledStepIndicesByMission: Record<string, number[]> = {};
   for (const run of pendingRuns) {
@@ -140,8 +148,9 @@ export default async function MissionPage() {
 
         {!sessionDegraded && (
           <MissionList
-            missions={(missions as Mission[] | null) ?? []}
+            missions={missionRows}
             scheduledStepIndicesByMission={scheduledStepIndicesByMission}
+            favoritedIds={favoritedMissionIds}
           />
         )}
       </div>

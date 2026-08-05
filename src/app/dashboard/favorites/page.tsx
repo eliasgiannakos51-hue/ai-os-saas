@@ -5,7 +5,7 @@ import { Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { FavoritesList } from "@/components/favorites/favorites-list";
-import { loadAllFavorites } from "@/lib/favorites";
+import { groupFavorites, loadAllFavorites } from "@/lib/favorites";
 
 export const metadata: Metadata = { title: "Favorites" };
 
@@ -28,12 +28,13 @@ export default async function FavoritesPage() {
   }
 
   const entries = await loadAllFavorites(supabase, user.id);
+  const groups = groupFavorites(entries);
 
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader icon={Star} title={t("title")} description={t("description")} />
-        <FavoritesList entries={entries} />
+        <FavoritesList groups={groups} />
       </div>
     </main>
   );

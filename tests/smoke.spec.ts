@@ -174,14 +174,52 @@ test.describe("authenticated dashboard", () => {
       await page.getByRole("link", { name: m.title, exact: true }).first().click();
       await expect(page).toHaveURL(new RegExp(`${m.href}$`));
       await expect(page.getByRole("heading", { name: m.title, exact: true })).toBeVisible();
+      // The shared list layout, in the order it always appears now:
+      // "+ New", then search, then sort/filter, then the card grid.
       await expect(page.getByRole("button", { name: `New ${m.title}` })).toBeVisible();
       await expect(page.getByPlaceholder("Search...")).toBeVisible();
       await expect(page.getByText("Sort:")).toBeVisible();
-      await expect(page.getByRole("button", { name: "newest" })).toBeVisible();
-      await expect(page.getByRole("button", { name: "oldest" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Newest" })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Oldest" })).toBeVisible();
       await expect(page.getByRole("button", { name: "Export CSV" })).toBeVisible();
     });
   }
+
+  // -------------------------------------------------------------------------
+  // The shared card + detail structure. Checked on one module rather than
+  // all 18: every module list renders the same GenericRecordCard, so a
+  // structural break shows up here regardless of which one is used.
+  // -------------------------------------------------------------------------
+  test("module card: icon tile, '...' menu, and a detail panel with tabs", async () => {
+    await page.goto("/dashboard/competitors");
+    const uniqueName = `Smoke card ${Date.now()}`;
+    await page.getByRole("button", { name: "New Competitors" }).click();
+    await page.locator("form input[type='text'], form input:not([type])").first().fill(uniqueName);
+    await page.getByRole("button", { name: "Save" }).click();
+
+    const card = page.locator("[data-row]", { hasText: uniqueName }).first();
+    await expect(card).toBeVisible({ timeout: 10_000 });
+
+    // The "..." menu carries the actions that used to be a row of bare
+    // icon buttons along the card's bottom edge.
+    await card.getByRole("button", { name: `Actions for ${uniqueName}` }).click();
+    await expect(page.getByRole("menu")).toBeVisible();
+    await expect(page.getByRole("menuitem", { name: "Edit" })).toBeVisible();
+    await expect(page.getByRole("menuitem", { name: "Ask AI" })).toBeVisible();
+    await expect(page.getByRole("menuitem", { name: "Delete" })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("menu")).toBeHidden();
+
+    // Clicking the card opens the detail panel: tabs on top, actions last.
+    // exact: true — the corner star's accessible name is
+    // "Add to favorites: <name>", which a substring match would also hit.
+    await card.getByRole("button", { name: uniqueName, exact: true }).click();
+    await expect(page.getByRole("tab", { name: "Details" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Edit" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Links" })).toBeVisible();
+    await page.getByRole("tab", { name: "Edit" }).click();
+    await expect(page.getByRole("button", { name: "Save" })).toBeVisible();
+  });
 
   // -------------------------------------------------------------------------
   // Mission Control — plan + step creation. The Planner/step-classification
@@ -209,9 +247,26 @@ test.describe("authenticated dashboard", () => {
     });
 
     await page.goto("/dashboard/mission");
+    // The mission form opens by default only while the account has no
+    // missions — a fresh smoke-test account does — but click through the
+    // "+ New Mission" button when it doesn't, so this test doesn't depend
+    // on run order.
+    const newMission = page.getByRole("button", { name: "New Mission" });
+    if (await newMission.isVisible().catch(() => false)) await newMission.click();
     await page.getByLabel("What's your goal?").fill("Smoke test mission goal");
     await page.getByRole("button", { name: "Create Plan" }).click();
-    await expect(page.getByText("Smoke test mission goal")).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText("Smoke test mission goal").first()).toBeVisible({ timeout: 10_000 });
+
+    // The card summarises; the steps live in the detail panel it opens.
+    // "Create with AI" is in there, not on the card.
+    await page
+      .locator("[data-row]", { hasText: "Smoke test mission goal" })
+      .first()
+      // exact: true, for the same reason as the module-card test above.
+      .getByRole("button", { name: "Smoke test mission goal", exact: true })
+      .click();
+    await expect(page.getByRole("tab", { name: /Steps/ })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Review" })).toBeVisible();
     await expect(page.getByText("Log an idea about smoke testing")).toBeVisible();
 
     await page.route("**/api/create", async (route) => {
@@ -288,9 +343,104 @@ test.describe("authenticated dashboard", () => {
     });
 
     await page.goto("/dashboard/website-builder");
+    // Same as Mission Control: the form opens by itself on an empty
+    // account, otherwise it's behind "+ New Website".
+    const newWebsite = page.getByRole("button", { name: "New Website" });
+    if (await newWebsite.isVisible().catch(() => false)) await newWebsite.click();
     await page.getByLabel("Name").fill("Smoke Test Site");
     await page.getByLabel("Describe your website").fill("A one-page smoke test site for automated checks.");
     await page.getByRole("button", { name: "Generate Website" }).click();
     await expect(page.getByText("Website generated")).toBeVisible({ timeout: 10_000 });
+
+    // The finished project opens in the shared detail panel.
+    await expect(page.getByRole("tab", { name: "Preview" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "History" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Download HTML" })).toBeVisible();
+  });
+
+  // -------------------------------------------------------------------------
+  // Create Studio — one sentence in, a preview the user can correct, then
+  // the workspace. The type detection is mocked so this runs without an
+  // Anthropic key; everything after "Create" is the real Website Builder
+  // flow, mocked exactly as the test above mocks it.
+  // -------------------------------------------------------------------------
+  test("Create Studio: detect a type, preview it, then create (mocked AI)", async () => {
+    const websiteId = `smoke-studio-${Date.now()}`;
+
+    await page.route("**/api/create-studio/detect", async (route) => {
+      await route.fulfill({
+        json: {
+          ok: true,
+          detection: {
+            type: "website",
+            title: "Smoke Studio Site",
+            understanding: "You want a one-page smoke test site.",
+            moduleSlug: null,
+            frequency: null,
+          },
+        },
+      });
+    });
+    await page.route("**/api/websites/generate", async (route) => {
+      if (route.request().method() !== "POST") return route.fallback();
+      await route.fulfill({
+        json: {
+          ok: true,
+          generated: true,
+          record: {
+            id: websiteId,
+            user_id: "smoke",
+            name: "Smoke Studio Site",
+            html_content: "",
+            status: "pending",
+            error_message: null,
+            reference_image_url: null,
+            created_at: new Date().toISOString(),
+          },
+        },
+      });
+    });
+    await page.route("**/api/websites/generate/process", async (route) => {
+      await route.fulfill({ json: { ok: true } });
+    });
+    await page.route("**/api/websites/status*", async (route) => {
+      await route.fulfill({
+        json: {
+          ok: true,
+          record: {
+            id: websiteId,
+            user_id: "smoke",
+            name: "Smoke Studio Site",
+            html_content: "<html><body><h1>Studio</h1></body></html>",
+            status: "completed",
+            error_message: null,
+            reference_image_url: null,
+            created_at: new Date().toISOString(),
+          },
+        },
+      });
+    });
+
+    await page.goto("/dashboard/create");
+    await page.locator("#studio-input").fill("A one-page smoke test site for automated checks");
+    await page.getByRole("button", { name: "Continue" }).click();
+
+    // The preview: what it understood, the type, and BOTH real numbers.
+    await expect(page.getByText("You want a one-page smoke test site.")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText("Website", { exact: true })).toBeVisible();
+    await expect(page.getByText("Estimated time")).toBeVisible();
+    await expect(page.getByText("Estimated credits")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Edit description" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Change type" })).toBeVisible();
+
+    // Nothing is created until Create is pressed.
+    await page.getByRole("button", { name: "Create", exact: true }).click();
+    await expect(page.getByRole("tab", { name: "Overview" })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("tab", { name: /Progress/ })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "AI Chat" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: /Files/ })).toBeVisible();
+
+    await page.getByRole("tab", { name: /Progress/ }).click();
+    await expect(page.getByText("Generating the website")).toBeVisible();
   });
 });

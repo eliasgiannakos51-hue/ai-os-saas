@@ -163,6 +163,10 @@ export function EntityCard({
         <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-muted">{description}</p>
       ) : null}
 
+      {/* Positioned, so the children slot paints above the title's
+          stretched ::after overlay — it can hold real controls
+          (LinkedEntities' unlink buttons) and those must stay clickable
+          rather than being swallowed into "select this card". */}
       {children ? <div className="relative z-[1] mt-3">{children}</div> : null}
 
       {(tags.length > 0 || status) && (

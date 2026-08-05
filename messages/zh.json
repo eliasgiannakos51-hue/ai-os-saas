@@ -880,6 +880,10 @@
       "confirmBody": "此操作约需 {count} 积分。您可以继续，或缩减请求内容。",
       "cancel": "取消",
       "continue": "继续"
+    },
+    "freeChat": {
+      "remaining": "本月还剩 {count} 条免费消息",
+      "exhausted": "免费消息已用完 — 本月的对话将开始消耗积分"
     }
   }
 }

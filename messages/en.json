@@ -880,6 +880,10 @@
       "confirmBody": "This will cost about {count} credits. You can continue, or edit your request to make it smaller.",
       "cancel": "Cancel",
       "continue": "Continue"
+    },
+    "freeChat": {
+      "remaining": "{count} free messages left this month",
+      "exhausted": "Free messages used up — this month's chats now use credits"
     }
   }
 }

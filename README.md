@@ -109,6 +109,22 @@ touch targets) and works identically on mobile and desktop.
 - `USD_TO_EUR_RATE` — optional, default `0.92`. Anthropic bills in USD; credits are priced in EUR.
 - `LARGE_ACTION_CONFIRM_THRESHOLD` — optional, default `50`. Estimates above this many credits require explicit user confirmation before the action starts.
 - `RESERVE_BUFFER_PERCENT` — optional, default `10`. Extra percentage held (not charged) when reserving credits, released at settlement.
+
+#### Free chat
+
+A monthly allowance of chat messages that cost no credits. Free messages run in a smaller envelope than paid ones — 2,000-character input, 6 messages of history, 800 output tokens, and no web search — which is what keeps the worst case affordable enough to give away (≈€0.035 per message, versus ≈€1.01 for a full paid message with three web searches). See `src/lib/billing/free-chat.ts`; `npm run test:unit` enforces that no allowance can exceed 25% of its plan price.
+
+Requires `supabase_free_chat_migration.sql` to have been applied. Without it the feature degrades to off and chat charges credits exactly as before.
+
+- `FREE_CHAT_ENABLED` — optional. Set to `false` to disable free chat entirely on every plan.
+- `FREE_CHAT_MESSAGES_FREE` — optional, default `15`.
+- `FREE_CHAT_MESSAGES_STARTER` — optional, default `120`.
+- `FREE_CHAT_MESSAGES_GROWTH` — optional, default `300`.
+- `FREE_CHAT_MESSAGES_PROFESSIONAL` — optional, default `600`.
+- `FREE_CHAT_MESSAGES_ULTIMATE` — optional, default `1200`.
+- `FREE_CHAT_MESSAGES_ENTERPRISE` — optional, default `1200`.
+
+  Each accepts a non-negative integer; `0` disables the allowance for that plan. An unparseable or negative value is ignored and the default is used. The allowance resets on the first of each calendar month (UTC).
    ```
 
    `.env.local` is gitignored — never commit real credentials.

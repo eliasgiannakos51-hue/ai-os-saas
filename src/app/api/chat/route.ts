@@ -17,6 +17,8 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { FREE_CHAT_LIMITS } from "@/lib/billing/free-chat";
+import { consumeFreeChatMessage, releaseFreeChatMessage } from "@/lib/billing/free-chat-usage";
 import { diagLog } from "@/lib/diag";
 import {
   extractAndStoreMemory,
@@ -277,6 +279,20 @@ export async function POST(request: Request) {
           await getPurchasedPackCreditPriceEur(user.id),
           pricingConfig
         );
+    // FREE CHAT. Claimed before any credit machinery runs, because a
+    // granted free message skips the reserve/settle path entirely.
+    //
+    // Only offered for a message that already fits the free envelope: a
+    // longer one falls through to the normal paid path rather than being
+    // rejected, so the cap never turns into an error the user has to
+    // understand. Admins and beta testers already pay nothing, so
+    // spending their allowance on them would be pure bookkeeping.
+    const freeGrant =
+      !bypassCredits && message.length <= FREE_CHAT_LIMITS.maxMessageChars
+        ? await consumeFreeChatMessage(user.id, plan?.slug ?? "free")
+        : null;
+    const isFreeMessage = freeGrant?.granted === true;
+
     // The pre-check runs before the conversation history is loaded, so it
     // sizes on the message and system prompt alone. The real reserve, taken
     // just before the stream, adds the history — see reserveCredits below.
@@ -295,7 +311,7 @@ export async function POST(request: Request) {
       accountCreditPriceEur
     );
 
-    if (!bypassCredits) {
+    if (!bypassCredits && !isFreeMessage) {
       const check = await hasEnoughCredits(user.id, estimate.reserveCredits, plan);
       if (!check.ok) {
         return NextResponse.json({
@@ -320,12 +336,14 @@ export async function POST(request: Request) {
 
       if (convError) {
         logApiError("/api/chat", convError, { stage: "load_conversation" });
+        if (isFreeMessage) await releaseFreeChatMessage(user.id);
         return NextResponse.json(
           { ok: false, error: "Could not load that conversation." },
           { status: 500 }
         );
       }
       if (!existing) {
+        if (isFreeMessage) await releaseFreeChatMessage(user.id);
         return NextResponse.json(
           { ok: false, error: "Conversation not found." },
           { status: 404 }
@@ -341,6 +359,7 @@ export async function POST(request: Request) {
 
       if (createConvError || !newConversation) {
         logApiError("/api/chat", createConvError, { stage: "create_conversation" });
+        if (isFreeMessage) await releaseFreeChatMessage(user.id);
         return NextResponse.json(
           { ok: false, error: "Could not start a new conversation." },
           { status: 500 }
@@ -361,6 +380,7 @@ export async function POST(request: Request) {
 
     if (historyError) {
       logApiError("/api/chat", historyError, { stage: "load_history" });
+      if (isFreeMessage) await releaseFreeChatMessage(user.id);
       return NextResponse.json(
         { ok: false, error: "Could not load conversation history." },
         { status: 500 }
@@ -400,6 +420,10 @@ export async function POST(request: Request) {
             conversationId: finalConversationId,
             isNewConversation,
             title: newConversationTitle,
+            // So the composer can say how many free messages are left the
+            // moment one is used, rather than on the next page load.
+            freeMessage: isFreeMessage,
+            freeRemaining: freeGrant?.granted ? freeGrant.remaining : undefined,
           })
         );
 
@@ -411,20 +435,34 @@ export async function POST(request: Request) {
         // second concurrent message sees a balance that already excludes
         // this one.
         const costs = new CostAccumulator();
-        const historyChars = history.reduce((sum, m) => sum + m.content.length, 0);
+
+        // A free message runs in a smaller envelope than a paid one: a
+        // short history window, a shorter reply, and no web search. That
+        // is what makes the worst case affordable enough to give away —
+        // see lib/billing/free-chat.ts for the arithmetic. Paid messages
+        // are completely unchanged.
+        const effectiveHistory = isFreeMessage
+          ? history.slice(-FREE_CHAT_LIMITS.historyLimit)
+          : history;
+        const effectiveMaxTokens = isFreeMessage
+          ? FREE_CHAT_LIMITS.maxOutputTokens
+          : MAX_TOKENS;
+        const effectiveTools = isFreeMessage ? [] : [WEB_SEARCH_TOOL];
+
+        const historyChars = effectiveHistory.reduce((sum, m) => sum + m.content.length, 0);
         const streamEstimate = estimateForAction(
           "chatMessage",
           {
             model: MODEL,
             inputChars: message.length + historyChars + systemPrompt.length,
-            expectedWebSearches: 1,
+            expectedWebSearches: isFreeMessage ? 0 : 1,
           },
           pricingConfig,
           accountCreditPriceEur
         );
 
         let reservationId = "";
-        if (!bypassCredits) {
+        if (!bypassCredits && !isFreeMessage) {
           const reservation = await reserveCredits(user.id, streamEstimate.reserveCredits, "chat_message", {
             conversationId: finalConversationId,
             estimatedCredits: streamEstimate.estimatedCredits,
@@ -450,13 +488,13 @@ export async function POST(request: Request) {
           void recordAiCallForDailySpend(streamEstimate.estimatedCredits);
           const claudeStream = anthropic.messages.stream({
             model: MODEL,
-            max_tokens: MAX_TOKENS,
+            max_tokens: effectiveMaxTokens,
             system: systemPrompt,
             messages: [
-              ...history.map((m) => ({ role: m.role, content: m.content })),
+              ...effectiveHistory.map((m) => ({ role: m.role, content: m.content })),
               { role: "user" as const, content: message },
             ],
-            tools: [WEB_SEARCH_TOOL],
+            tools: effectiveTools,
           });
 
           claudeStream.on("text", (delta) => {
@@ -475,6 +513,7 @@ export async function POST(request: Request) {
         } catch (err) {
           logApiError("/api/chat", err, { stage: "anthropic_stream" });
           await releaseReservation(user.id, reservationId);
+          if (isFreeMessage) await releaseFreeChatMessage(user.id);
           const errMessage = err instanceof Error ? err.message : "Chat request failed.";
           controller.enqueue(
             ndjsonLine({ type: "error", error: `${errMessage} No credits were charged — please try again.` })
@@ -485,6 +524,7 @@ export async function POST(request: Request) {
 
         if (!assistantText.trim()) {
           await releaseReservation(user.id, reservationId);
+          if (isFreeMessage) await releaseFreeChatMessage(user.id);
           controller.enqueue(
             ndjsonLine({
               type: "error",
@@ -503,16 +543,18 @@ export async function POST(request: Request) {
         const settlement = await settleReservation({
           userId: user.id,
           reservationId,
-          feature: "chat_message",
+          feature: isFreeMessage ? "chat_free" : "chat_message",
           costs,
           plan,
-          bypassCharge: bypassCredits,
+          bypassCharge: bypassCredits || isFreeMessage,
           metadata: {
             conversationId: finalConversationId,
             webSearches: webSearchCount,
             replyChars: assistantText.length,
             estimatedCredits: streamEstimate.estimatedCredits,
-            reservedCredits: bypassCredits ? 0 : streamEstimate.reserveCredits,
+            reservedCredits: bypassCredits || isFreeMessage ? 0 : streamEstimate.reserveCredits,
+            freeMessage: isFreeMessage,
+            freeRemaining: isFreeMessage && freeGrant?.granted ? freeGrant.remaining : undefined,
           },
         });
         diagLog(

@@ -880,6 +880,10 @@
       "confirmBody": "Das kostet etwa {count} Credits. Du kannst fortfahren oder deine Anfrage verkleinern.",
       "cancel": "Abbrechen",
       "continue": "Fortfahren"
+    },
+    "freeChat": {
+      "remaining": "Noch {count} kostenlose Nachrichten diesen Monat",
+      "exhausted": "Kostenlose Nachrichten aufgebraucht — Chats verbrauchen jetzt Guthaben"
     }
   }
 }

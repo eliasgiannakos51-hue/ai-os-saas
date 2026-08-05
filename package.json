@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/check-i18n.js && next build",
+    "build": "node scripts/check-i18n.js && npm run test:unit && next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "verify": "npm run test:e2e && npm run typecheck && npm run lint && npm run build",
-    "check:i18n": "node scripts/check-i18n.js"
+    "check:i18n": "node scripts/check-i18n.js",
+    "test:unit": "for f in scripts/tests/*.test.mjs; do echo \"--- $f\"; node \"$f\" || exit 1; done"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

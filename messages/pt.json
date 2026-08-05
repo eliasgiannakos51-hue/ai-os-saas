@@ -880,6 +880,10 @@
       "confirmBody": "Isto custará cerca de {count} créditos. Podes continuar ou reduzir o teu pedido.",
       "cancel": "Cancelar",
       "continue": "Continuar"
+    },
+    "freeChat": {
+      "remaining": "Restam {count} mensagens gratuitas este mês",
+      "exhausted": "Mensagens gratuitas esgotadas — as conversas passam a consumir créditos"
     }
   }
 }

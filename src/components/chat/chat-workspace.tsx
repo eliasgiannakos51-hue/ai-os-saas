@@ -8,7 +8,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
-import { ArrowUp, Compass, MessageCircle } from "lucide-react";
+import { ArrowUp, Compass, Gift, MessageCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -48,6 +48,7 @@ export function ChatWorkspace({
   initialConversations,
   userInitial,
   initialMentorPreset,
+  initialFreeChatRemaining,
 }: {
   initialConversations: ChatConversation[];
   userInitial: string;
@@ -59,9 +60,12 @@ export function ChatWorkspace({
   // mentorPreset). Omitted entirely by every other entry point into this
   // page, so default chat behavior is untouched.
   initialMentorPreset?: "trading" | "product";
+  /** Free chat messages left this month; undefined when the feature is off. */
+  initialFreeChatRemaining?: number;
 }) {
   const tTrading = useTranslations("dashboard.tradingWorkflow");
   const tProduct = useTranslations("dashboard.productWorkflow");
+  const tFree = useTranslations("credits.freeChat");
   const { refresh: refreshCredits } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -74,6 +78,13 @@ export function ChatWorkspace({
         : ""
   );
   const [mentorPreset] = useState<"trading" | "product" | null>(initialMentorPreset ?? null);
+  // How many free messages are left this month. Seeded by the server on
+  // page load and then updated straight from the stream's meta line, so
+  // the count drops as the message is sent rather than on the next
+  // navigation. null means the feature is off for this account.
+  const [freeRemaining, setFreeRemaining] = useState<number | null>(
+    initialFreeChatRemaining ?? null
+  );
   // Not persisted per conversation on purpose — a runtime toggle for the
   // NEXT message sent, same as the API route treating it as a per-request
   // flag (see api/chat/route.ts) rather than conversation state.
@@ -271,6 +282,9 @@ export function ChatWorkspace({
           const event = JSON.parse(line);
           if (event.type === "meta") {
             resolvedConversationId = event.conversationId;
+            if (typeof event.freeRemaining === "number") {
+              setFreeRemaining(event.freeRemaining);
+            }
             if (event.conversationId && event.conversationId !== sentFromId) {
               setActiveId(event.conversationId);
             }
@@ -466,6 +480,14 @@ export function ChatWorkspace({
                   )}
                 </button>
               </div>
+              {freeRemaining !== null && (
+                <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
+                  <Gift className="h-3 w-3 text-emerald-400/80" aria-hidden="true" />
+                  {freeRemaining > 0
+                    ? tFree("remaining", { count: freeRemaining })
+                    : tFree("exhausted")}
+                </p>
+              )}
             </form>
           </div>
         </div>

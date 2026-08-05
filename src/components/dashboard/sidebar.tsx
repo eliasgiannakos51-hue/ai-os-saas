@@ -77,7 +77,7 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
     // Lives under "common" (shared with command-palette.tsx's identical
     // special case) rather than sidebar.items, since Create Anything is
     // also referenced by that non-sidebar name elsewhere in the app.
-    if (label === "Create Anything") return tCommon("createAnything");
+    if (label === "Create Studio") return tCommon("createStudio");
     const key = ITEM_LABEL_KEYS[label];
     return key ? t(`items.${key}`) : label;
   }

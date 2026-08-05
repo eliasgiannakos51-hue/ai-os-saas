@@ -1,12 +1,20 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { AssistantChat } from "@/components/create/assistant-chat";
+import { CreateStudio } from "@/components/create/create-studio";
 
 export const metadata: Metadata = {
-  title: "Create Anything",
+  title: "Create Studio",
 };
 
+// Create Studio replaces the old free-text "Create Anything" thread here.
+// The classifier behind it is the same one — /api/create still routes an
+// entry into a module — but it is no longer the ONLY thing this page can
+// produce, and the user no longer has to know in advance whether what
+// they want is a module entry, a website, a mission, an automation or a
+// document. They write one sentence; the studio works out which it is,
+// shows them what it understood along with the real cost and time range,
+// and only then creates anything.
 export default async function CreatePage() {
   const supabase = createClient();
 
@@ -18,11 +26,9 @@ export default async function CreatePage() {
     redirect("/login");
   }
 
-  const userInitial = (user.email?.[0] ?? "?").toUpperCase();
-
   return (
-    <main className="h-[calc(100vh-4rem)]">
-      <AssistantChat userInitial={userInitial} />
+    <main className="min-h-full bg-dot-grid">
+      <CreateStudio />
     </main>
   );
 }

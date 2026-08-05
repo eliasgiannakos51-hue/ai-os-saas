@@ -14,6 +14,7 @@ import { DocumentsList } from "@/components/documents/documents-list";
 import type { UserWebsite } from "@/types/user-website";
 import { MissionList } from "@/components/mission/mission-list";
 import type { Mission } from "@/types/mission";
+import { CreateStudio } from "@/components/create/create-studio";
 
 export const dynamic = "force-dynamic";
 
@@ -151,6 +152,10 @@ export default function DevPreviewPage() {
       <CreditsProvider initialCredits={500} initialTotal={1000} initialCreditPriceEur={0.01} isAdmin={false}>
         <main className="min-h-full bg-dot-grid">
           <div className="mx-auto max-w-3xl space-y-12 px-4 py-8 sm:px-6">
+            <section id="studio">
+              <h1 className="mb-4 text-xl font-bold text-foreground">Create Studio</h1>
+              <CreateStudio />
+            </section>
             <section>
               <h1 className="mb-4 text-xl font-bold text-foreground">Competitors (classifier module)</h1>
               <GenericList module={competitors} records={competitorRows} />

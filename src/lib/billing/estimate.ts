@@ -177,6 +177,29 @@ export const ACTION_PROFILES = {
     baseOutputChars: 900,
     outputCharsPerInputChar: 1,
   },
+  // Create Studio's type detection: one small forced-tool-use call that
+  // returns a type, a title and a one-sentence restatement — nothing
+  // longer. No auxiliary calls, because the restatement it produces IS
+  // the clarification step (the user sees it and can edit it before
+  // anything is created), so the separate clarification pre-check the
+  // other entry points run would be asking the same question twice.
+  createStudioDetect: {
+    systemPromptTokens: 700,
+    auxiliaryCalls: [],
+    baseOutputChars: 400,
+    outputCharsPerInputChar: 0,
+  },
+  // Creating an automation makes exactly one AI call — the clarifying-
+  // questions pre-check (see api/automations/create/route.ts). The row
+  // itself is written without a model call, and every future RUN is
+  // charged separately by the cron. Modelling it as anything bigger would
+  // quote the user for work this action does not do.
+  automationCreate: {
+    systemPromptTokens: 0,
+    auxiliaryCalls: [{ inputTokens: 700, outputTokens: 150 }],
+    baseOutputChars: 0,
+    outputCharsPerInputChar: 0,
+  },
 } as const;
 
 export type ActionProfileKey = keyof typeof ACTION_PROFILES;

@@ -73,6 +73,16 @@ const LOCALE_ALLOWED = new Set([
   // "Status" is the German word, spelled identically.
   "de:dashboard.websiteBuilder.statusLabel",
   "de:dashboard.mission.statusFilterLabel",
+  // Create Studio: genuine cognates and loanwords, not skipped work.
+  // "credits" is used verbatim in Greek throughout this UI already (see
+  // el:credits.estimate.approx above); "Type"/"Mission"/"Document" are
+  // spelled identically in French; "Website"/"Mission" in German.
+  "el:dashboard.createStudio.creditsApprox",
+  "fr:dashboard.createStudio.detectedType",
+  "fr:dashboard.createStudio.typeMission",
+  "fr:dashboard.createStudio.typeDocument",
+  "de:dashboard.createStudio.typeWebsite",
+  "de:dashboard.createStudio.typeMission",
   "es:common.error",
   "es:dashboard.chat.title",
   "es:dashboard.mission.agentRole.general",

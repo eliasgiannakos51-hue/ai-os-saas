@@ -90,7 +90,7 @@ export function CommandPalette() {
   const searchTokenRef = useRef(0);
 
   function translatedLabel(label: string): string {
-    if (label === "Create Anything") return tCommon("createAnything");
+    if (label === "Create Studio") return tCommon("createStudio");
     const key = ITEM_LABEL_KEYS[label];
     return key ? tSidebar(`items.${key}`) : label;
   }

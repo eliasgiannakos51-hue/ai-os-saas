@@ -98,7 +98,7 @@ export default async function PricingPage() {
           <p className="mt-3 text-sm text-muted">{t("subtitle")}</p>
         </div>
 
-        <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
           {PLANS.map((plan) => (
             <div
               key={plan.slug}
@@ -179,19 +179,12 @@ export default async function PricingPage() {
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Business "card" — same visual language as the 6 plan cards above,
-            kept in its own grid row (same wrapper classes) instead of a 7th
-            slot in the xl:grid-cols-6 grid so that grid's column math for
-            the existing 6 plans isn't disturbed — Enterprise already sits
-            immediately right of Ultimate in that grid, so a literal "right
-            of Ultimate" placement here would mean displacing a real plan
-            tier, not adding a UI-only extra like on /signup (which has no
-            Enterprise tier and is where this positioning request actually
-            applies — see signup-flow.tsx, where Business is the 6th card
-            in the SAME grid as the 5 real plans, directly beside Ultimate). */}
-        <div className="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          {/* Business — a real member of the SAME grid as the plan cards,
+              not a separate row underneath. It used to sit in its own
+              trailing grid, which put it 781px below Ultimate and read as an
+              unrelated footnote; measured before/after with Playwright.
+              The grid is xl:grid-cols-7 so all seven cards share one row at
+              full width without displacing Enterprise. */}
           <div className="relative flex flex-col rounded-2xl border border-border bg-panel p-6">
             <h2 className="text-sm font-semibold text-orange-400">{t("businessTitle")}</h2>
             <p className="mt-3 text-lg font-bold text-foreground">{t("businessSubtitle")}</p>

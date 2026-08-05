@@ -129,7 +129,7 @@ async function syncSubscriptionToUser(
 // One-time credit pack purchase (api/credits/checkout, mode: "payment") —
 // grants credits from the session's own metadata rather than re-deriving
 // anything from a subscription, since a credit pack purchase isn't one.
-async function grantPurchasedCredits(session: Stripe.Checkout.Session) {
+async function grantPurchasedCredits(session: Stripe.Checkout.Session, eventId: string) {
   const supabaseUserId = session.metadata?.supabase_user_id;
   const creditAmount = Number(session.metadata?.credit_amount);
   const packId = session.metadata?.credit_pack_id ?? "unknown_pack";
@@ -143,7 +143,26 @@ async function grantPurchasedCredits(session: Stripe.Checkout.Session) {
     return;
   }
 
-  await grantCredits(supabaseUserId, creditAmount, "purchase", `Purchased ${packId} credit pack`);
+  // Keyed on the checkout session, not the event id: a single purchase is
+  // one session, but Stripe can deliver more than one EVENT that refers to
+  // it (a retry of checkout.session.completed, an async_payment_succeeded
+  // for the same session, a manual resend). Keying on the session is what
+  // makes "this pack has been granted" true across all of them.
+  const { granted } = await grantCredits(
+    supabaseUserId,
+    creditAmount,
+    "purchase",
+    `Purchased ${packId} credit pack`,
+    { idempotencyKey: `stripe_checkout:${session.id}` }
+  );
+
+  if (!granted) {
+    // A replay. Not an error — this is the guard doing its job — but worth
+    // a log line, because a HIGH rate of these means something upstream is
+    // redelivering far more than Stripe normally would.
+    diagLog(`[webhook-diag] duplicate credit grant suppressed session=${session.id} event=${eventId}`);
+    return;
+  }
 
   // Packs sell credits below list price (€100 / 8,000 = €0.0125 each).
   // Persist the rate so settlement charges against what was actually paid
@@ -200,7 +219,7 @@ export async function POST(request: Request) {
             session.metadata?.supabase_user_id
           );
         } else if (session.mode === "payment") {
-          await grantPurchasedCredits(session);
+          await grantPurchasedCredits(session, event.id);
         }
         break;
       }

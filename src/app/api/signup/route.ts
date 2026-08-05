@@ -182,6 +182,12 @@ export async function POST(request: Request) {
         {
           setTotal: signupCredits,
           setPlanTier: signupPlan.slug,
+          // One signup grant per account, ever. api/signup and
+          // auth/callback are normally disjoint paths (password vs OAuth),
+          // but both bootstrap an account and both used to grant
+          // unconditionally — a shared key means whichever runs first wins
+          // and a concurrent or repeated run grants nothing.
+          idempotencyKey: `signup_grant:${createData.user.id}`,
           ...(isValidBetaCode ? { setBetaExpiresAt: computeBetaExpiresAt() } : {}),
         }
       );

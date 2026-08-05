@@ -200,35 +200,67 @@ export async function deductCredits(
 // api/signup/route.ts) — omitted, it leaves the existing value (or null
 // for a brand-new row) untouched, so a normal credit-pack purchase or plan
 // renewal never accidentally clears or extends someone's beta window.
+//
+// TWO DEFECTS fixed here in the V1+V2 audit, both of which moved real money:
+//
+//   1. It was not IDEMPOTENT. The Stripe webhook called this for every
+//      checkout.session.completed it received, keeping no record of which
+//      events it had handled. Stripe's delivery guarantee is at-least-once —
+//      the same event legitimately arrives twice after a timeout on our side,
+//      a Stripe-side retry, or a manual resend — and every duplicate granted
+//      the whole pack again.
+//   2. It was not ATOMIC. `select credits_remaining` then `upsert(remaining +
+//      amount)` is a read-modify-write across two round trips: two grants that
+//      overlap in that window both read the same starting balance, and the
+//      second write silently discards the first. The reservation path already
+//      closed exactly this race with reserve_credits' FOR UPDATE; grants never
+//      got the same treatment.
+//
+// Both are now a single statement-level transaction in the
+// grant_credits_idempotent RPC, with credit_transactions.idempotency_key as
+// the ledger. Pass an idempotencyKey for anything that can legitimately be
+// delivered twice (a Stripe event id, a per-user signup key); omit it for
+// grants that are meant to be repeatable, such as a manual admin adjustment.
 export async function grantCredits(
   userId: string,
   amount: number,
   actionType: string,
   description: string,
-  options?: { setTotal?: number; setPlanTier?: PlanSlug; setBetaExpiresAt?: string }
-): Promise<void> {
+  options?: {
+    setTotal?: number;
+    setPlanTier?: PlanSlug;
+    setBetaExpiresAt?: string;
+    /** Stable key for an operation that must happen at most once. */
+    idempotencyKey?: string;
+  }
+): Promise<{ granted: boolean; creditsRemaining: number }> {
   const admin = createAdminClient();
-  const { data: row } = await admin
-    .from("user_credits")
-    .select("credits_remaining, credits_total, plan_tier, beta_expires_at")
-    .eq("user_id", userId)
-    .maybeSingle();
 
-  const nextRemaining = (row?.credits_remaining ?? 0) + amount;
-  await admin.from("user_credits").upsert(
-    {
-      user_id: userId,
-      credits_remaining: nextRemaining,
-      credits_total: options?.setTotal ?? row?.credits_total ?? amount,
-      plan_tier: options?.setPlanTier ?? row?.plan_tier ?? "free",
-      beta_expires_at: options?.setBetaExpiresAt ?? row?.beta_expires_at ?? null,
-    },
-    { onConflict: "user_id" }
-  );
+  const { data, error } = await admin.rpc("grant_credits_idempotent", {
+    p_user_id: userId,
+    p_amount: amount,
+    p_action_type: actionType,
+    p_description: description,
+    p_idempotency_key: options?.idempotencyKey ?? null,
+    p_set_total: options?.setTotal ?? null,
+    p_set_plan_tier: options?.setPlanTier ?? null,
+    p_set_beta_expires_at: options?.setBetaExpiresAt ?? null,
+  });
 
-  await admin
-    .from("credit_transactions")
-    .insert({ user_id: userId, amount, action_type: actionType, description });
+  if (error) {
+    // Surfaced rather than swallowed: unlike the optional pack-price column
+    // above, a failed grant means a paying customer did not receive what they
+    // bought. Callers already wrap this in try/catch and log; letting it
+    // through is what makes the failure visible instead of silent.
+    logApiError("billing:grantCredits", error, { userId, actionType, amount });
+    throw new Error(`Could not grant credits: ${error.message}`);
+  }
+
+  const row = Array.isArray(data) ? data[0] : data;
+  return {
+    granted: Boolean(row?.granted),
+    creditsRemaining: Number(row?.credits_remaining ?? 0),
+  };
 }
 
 // The cheapest euro-per-credit rate this account has ever bought a credit

@@ -78,7 +78,9 @@ export function FavoriteButton({
       data-favorited={favorited}
       className={[
         "z-[2] flex shrink-0 items-center justify-center rounded-xl transition-all duration-200",
-        corner ? "absolute right-3 top-3 h-9 w-9" : "h-8 w-8",
+        // Both variants are 36px: "inline" now sits beside the card's
+        // "..." menu (components/ui/card-menu.tsx) and has to match it.
+        corner ? "absolute right-3 top-3 h-9 w-9" : "h-9 w-9",
         favorited
           ? "bg-orange-500/20 text-orange-300 shadow-[0_0_0_1px_rgba(249,115,22,0.55),0_0_16px_-2px_rgba(249,115,22,0.6)] hover:bg-orange-500/30"
           : // A resting ring, not bare grey: the control has to look
@@ -88,7 +90,7 @@ export function FavoriteButton({
     >
       <Star
         key={popKey}
-        className={`${corner ? "h-[18px] w-[18px]" : "h-4 w-4"} ${popKey > 0 && favorited ? "favorite-pop" : ""}`}
+        className={`h-[18px] w-[18px] ${popKey > 0 && favorited ? "favorite-pop" : ""}`}
         fill={favorited ? "currentColor" : "none"}
         strokeWidth={favorited ? 2 : 1.9}
       />

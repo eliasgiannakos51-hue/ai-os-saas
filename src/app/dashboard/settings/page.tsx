@@ -15,6 +15,7 @@ import { BillingSummary } from "@/components/settings/billing-summary";
 import { BuyCredits } from "@/components/settings/buy-credits";
 import { CreditHistory, type CreditTransaction } from "@/components/settings/credit-history";
 import { AiUsageSettings } from "@/components/settings/ai-usage-settings";
+import { Reveal } from "@/components/ui/reveal";
 import { MarginReport } from "@/components/settings/margin-report";
 import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
 import { EmailNotificationSettings } from "@/components/settings/email-notification-settings";
@@ -195,25 +196,31 @@ export default async function SettingsPage() {
           initialPrefs={(emailPrefs as Record<string, boolean> | null) ?? {}}
         />
 
-        {hasCustomAiPersona && <AiPersonaSettings initialName={aiPersonaName} />}
+        {hasCustomAiPersona && <Reveal><AiPersonaSettings initialName={aiPersonaName} /></Reveal>}
 
-        <ThemeSettings />
+        <Reveal><ThemeSettings /></Reveal>
 
-        <AccessibilitySettings />
+        <Reveal><AccessibilitySettings /></Reveal>
 
-        <AiUsageSettings
-          totalCreditsUsed={totalCreditsUsed}
-          totalEntries={totalEntries}
-          mostActiveModuleTitle={
-            mostActiveModule && mostActiveModule.count > 0 ? mostActiveModule.title : null
-          }
-          moduleUsage={moduleUsage}
-        />
+        <Reveal>
+          <AiUsageSettings
+            totalCreditsUsed={totalCreditsUsed}
+            totalEntries={totalEntries}
+            mostActiveModuleTitle={
+              mostActiveModule && mostActiveModule.count > 0 ? mostActiveModule.title : null
+            }
+            moduleUsage={moduleUsage}
+          />
+        </Reveal>
 
         {/* Owner-only: reads platform-wide spend with the service-role
             client, so mounting it for a normal user would leak other
             customers' costs. The isAdmin gate is the access control. */}
-        {isAdmin && <MarginReport />}
+        {isAdmin && (
+          <Reveal>
+            <MarginReport />
+          </Reveal>
+        )}
 
         <AchievementsSection unlocked={unlockedAchievements} />
 

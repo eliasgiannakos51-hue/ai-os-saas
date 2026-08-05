@@ -32,6 +32,11 @@ export const metadata: Metadata = {
 // whenever nothing is stored yet, except reduce-motion, which also falls
 // back to the OS-level prefers-reduced-motion query so motion-sensitive
 // users are covered even before they find the toggle in Settings.
+// data-motion is written in BOTH directions ("reduce" / "full") rather
+// than only when reducing, because globals.css needs to tell "the user
+// explicitly asked for motion" apart from "this page has no JS yet" —
+// see the prefers-reduced-motion media query there, which is the
+// JS-free floor and must not override an explicit opt-in.
 // theme-toggle.tsx and accessibility-settings.tsx are the only other
 // places these values are written.
 const INIT_SCRIPT = `(function(){try{
@@ -42,7 +47,7 @@ document.documentElement.setAttribute('data-font-size',(fs==='small'||fs==='larg
 if(localStorage.getItem('${HIGH_CONTRAST_STORAGE_KEY}')==='1'){document.documentElement.setAttribute('data-contrast','high');}
 var rm=localStorage.getItem('${REDUCE_MOTION_STORAGE_KEY}');
 var rmOn=rm==='1'||(rm===null&&window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-if(rmOn){document.documentElement.setAttribute('data-motion','reduce');}
+document.documentElement.setAttribute('data-motion',rmOn?'reduce':'full');
 }catch(e){}})();`;
 
 export default async function RootLayout({

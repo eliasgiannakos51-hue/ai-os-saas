@@ -14,6 +14,7 @@ import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula"
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { isAdminEmail } from "@/lib/admin";
 import { logApiError } from "@/lib/log-error";
+import { AmbientDots } from "@/components/ui/ambient-dots";
 import { DashboardBackground } from "@/components/dashboard/dashboard-background";
 import { checkAndUnlockAchievements } from "@/lib/achievements";
 import { AchievementUnlockBridge } from "@/components/achievements/achievement-unlock-bridge";
@@ -98,6 +99,14 @@ export default async function DashboardLayout({
                 directly) picks the opacity per-route, since Chat/Create
                 need a higher one — see its own comment for why. */}
             <DashboardBackground />
+            {/* A second, much quieter ambient layer above the globe: ten
+                slowly drifting dots and two breathing glows, pure CSS. The
+                globe is a canvas with its own render loop and is not
+                touched — this sits on top of it at z-0 and costs nothing
+                per frame. */}
+            <div className="pointer-events-none fixed inset-0 z-0">
+              <AmbientDots />
+            </div>
             <div className="relative z-10 flex min-h-screen">
               <Sidebar email={user.email ?? ""} planName={plan.name} />
               <div className="flex min-w-0 flex-1 flex-col">

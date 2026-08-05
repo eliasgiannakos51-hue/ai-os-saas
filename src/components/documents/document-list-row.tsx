@@ -30,7 +30,7 @@ export async function DocumentListRow({
     <li
       // pr reserves the corner star's column so the delete button lands to
       // its left rather than underneath it.
-      className="group relative flex items-center justify-between gap-3 rounded-xl border border-border bg-panel px-4 py-3 pr-[52px] transition-colors duration-150 hover:border-orange-500/40"
+      className="list-slide-in group relative flex items-center justify-between gap-3 rounded-xl border border-border bg-panel px-4 py-3 pr-[52px] transition-colors duration-150 hover:border-orange-500/40"
     >
       <Link
         href={`/dashboard/documents/${doc.id}`}

@@ -37,14 +37,15 @@ export function TimelineList({
   return (
     <div>
       <div className="space-y-2">
-        {paginated.map((entry) => (
+        {paginated.map((entry, i) => (
           // The whole row used to BE the link. It can't stay that way now
           // that it holds a button: a <button> inside an <a> is invalid
           // HTML, and every star click would navigate instead of toggling.
           // So the anchor covers the content and the star sits beside it.
           <div
             key={entry.key}
-            className="group relative flex items-start gap-3 rounded-2xl border border-border bg-panel p-4 pr-14 transition-all duration-200 hover:border-orange-500/40 hover:shadow-[0_14px_32px_-18px_rgba(249,115,22,0.3)]"
+            style={{ "--i": i } as React.CSSProperties}
+            className="list-slide-in group relative flex items-start gap-3 rounded-2xl border border-border bg-panel p-4 pr-14 transition-all duration-200 hover:border-orange-500/40 hover:shadow-[0_14px_32px_-18px_rgba(249,115,22,0.3)]"
           >
           <Link href={entry.href} className="flex min-w-0 flex-1 items-start gap-3">
             <span

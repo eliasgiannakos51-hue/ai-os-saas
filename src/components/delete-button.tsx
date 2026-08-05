@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -22,6 +22,7 @@ export function DeleteButton({
   const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const hostRef = useRef<HTMLDivElement>(null);
 
   async function handleDelete() {
     if (!window.confirm(`Delete this ${label}? This can't be undone.`)) {
@@ -40,11 +41,48 @@ export function DeleteButton({
     }
 
     addToast("✓ deleted");
-    router.refresh();
+    animateRowOut(hostRef.current, () => router.refresh());
+  }
+
+  /**
+   * Fades the deleted row out, then collapses the space it occupied,
+   * before asking the router to re-fetch.
+   *
+   * Without this the row simply vanishes on refresh and everything below
+   * it jumps up — the user cannot tell what left. The row's measured
+   * height is written to a custom property because a CSS animation cannot
+   * interpolate from `auto`.
+   *
+   * The refresh is what actually removes the row; the animation only
+   * covers the gap until then, so a missed animationend still resolves
+   * via the timeout and the list is never left stale.
+   */
+  function animateRowOut(node: HTMLElement | null, done: () => void) {
+    const row = node?.closest<HTMLElement>("[data-row], li, tr");
+    const reduced =
+      document.documentElement.getAttribute("data-motion") === "reduce" ||
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+
+    if (!row || reduced) {
+      done();
+      return;
+    }
+
+    row.style.setProperty("--row-h", `${row.getBoundingClientRect().height}px`);
+    row.classList.add("row-collapse-out");
+
+    let finished = false;
+    const finish = () => {
+      if (finished) return;
+      finished = true;
+      done();
+    };
+    row.addEventListener("animationend", finish, { once: true });
+    window.setTimeout(finish, 500);
   }
 
   return (
-    <div className="flex flex-col items-end gap-1">
+    <div ref={hostRef} className="flex flex-col items-end gap-1">
       <button
         type="button"
         onClick={handleDelete}

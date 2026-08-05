@@ -7,6 +7,7 @@ import { needsLargeActionConfirmation } from "@/lib/billing/credit-formula";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import { useCredits } from "@/components/credits/credits-context";
+import { useRipple } from "@/hooks/use-ripple";
 
 /**
  * Shared pre-submit estimate, so "how much will this cost me" is answered
@@ -68,14 +69,15 @@ export function LargeActionConfirm({
   onCancel: () => void;
 }) {
   const t = useTranslations("credits.estimate");
+  const ripple = useRipple();
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+      className="overlay-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
       role="dialog"
       aria-modal="true"
     >
-      <div className="w-full max-w-sm rounded-2xl border border-border bg-panel p-5 shadow-2xl">
+      <div className="panel-pop-in w-full max-w-sm rounded-2xl border border-border bg-panel p-5 shadow-2xl">
         <div className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/15 text-orange-400">
             <Zap className="h-4 w-4" aria-hidden="true" />
@@ -96,7 +98,8 @@ export function LargeActionConfirm({
           <button
             type="button"
             onClick={onConfirm}
-            className="min-h-[44px] flex-1 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 sm:min-h-0"
+            onMouseDown={ripple}
+            className="ripple-host min-h-[44px] flex-1 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 sm:min-h-0"
           >
             {t("continue")}
           </button>

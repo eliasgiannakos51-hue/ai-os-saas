@@ -464,7 +464,7 @@ export function ChatWorkspace({
                   onKeyDown={handleTextareaKeyDown}
                   placeholder="Message Ionexa..."
                   rows={1}
-                  className="max-h-40 min-h-[52px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-panel px-4 py-3.5 pr-14 text-sm text-foreground outline-none transition-colors duration-150 placeholder:text-muted focus:border-orange-500/60"
+                  className="focus-glow max-h-40 min-h-[52px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-panel px-4 py-3.5 pr-14 text-sm text-foreground outline-none placeholder:text-muted focus:border-orange-500/60"
                   autoFocus
                 />
                 <button

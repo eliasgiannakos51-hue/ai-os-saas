@@ -56,10 +56,11 @@ export function FavoritesList({ groups }: { groups: FavoriteGroup[] }) {
             </div>
 
             <div className="space-y-2">
-              {group.entries.map((entry) => (
+              {group.entries.map((entry, i) => (
                 <div
                   key={entry.id}
-                  className="relative flex items-start gap-3 rounded-2xl border border-border bg-panel p-4 pr-14 transition-all duration-200 hover:border-orange-500/40"
+                  style={{ "--i": i } as React.CSSProperties}
+                  className="list-slide-in relative flex items-start gap-3 rounded-2xl border border-border bg-panel p-4 pr-14 transition-all duration-200 hover:border-orange-500/40"
                 >
                   <Link href={entry.href} className="min-w-0 flex-1">
                     <h3 className="truncate text-sm font-semibold text-foreground hover:text-orange-400">

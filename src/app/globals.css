@@ -707,3 +707,277 @@ input:-webkit-autofill:focus {
 .favorite-pop {
   animation: favorite-pop 380ms cubic-bezier(0.22, 1, 0.36, 1) 1;
 }
+
+/* ===========================================================================
+   Motion system.
+   ===========================================================================
+   Every animation below sits in the 200-350ms band. That range is chosen,
+   not arbitrary: under ~150ms a transition reads as a jump rather than a
+   movement, and over ~400ms the interface starts to feel like it is
+   waiting on you. Ambient (non-interactive) motion is the deliberate
+   exception — it runs over several seconds precisely so it is never the
+   thing you are looking at.
+
+   The globe (components/ui/network-field.tsx) and the celebration burst
+   (components/celebration/celebration-burst.tsx) own their own keyframes
+   and are untouched by anything here; every name below is new.
+   =========================================================================== */
+
+/* JS-free floor for the OS-level preference. The blocking script in
+   layout.tsx already sets data-motion from localStorage + the media
+   query, but that needs JS to have run. This covers the gap — and is
+   scoped to :not([data-motion="full"]) so a user who explicitly opted IN
+   to motion in Settings keeps it, even if their OS says otherwise. */
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) *,
+  html:not([data-motion="full"]) *::before,
+  html:not([data-motion="full"]) *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* --- 1. Sidebar active-item highlight ------------------------------------
+   The highlight is a pseudo-element on the nav item, scaled from 0 on the
+   Y axis so it grows out of the item's own vertical centre instead of
+   appearing all at once. transform-only, so it never triggers layout. */
+.nav-item {
+  position: relative;
+  isolation: isolate;
+}
+.nav-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  /* Same gradient + inset ring + glow the active item already had — it is
+     moved into a pseudo-element purely so it can animate. A gradient
+     background-image does not transition, which is why the previous
+     class-swap snapped instead of sliding. */
+  background: linear-gradient(
+    100deg,
+    rgba(249, 115, 22, 0.22) 0%,
+    rgba(168, 85, 247, 0.13) 100%
+  );
+  box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.45),
+    0 0 18px -6px rgba(249, 115, 22, 0.7);
+  transform: scaleY(0.6);
+  opacity: 0;
+  transition: transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 240ms ease-out;
+}
+.nav-item[data-active="true"]::before {
+  transform: scaleY(1);
+  opacity: 1;
+}
+/* The 2px rail on the leading edge slides in from the top on the same
+   curve, so the whole active state reads as one movement. */
+.nav-item::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 0 9999px 9999px 0;
+  background: linear-gradient(to bottom, rgb(252, 211, 77), rgb(249, 115, 22));
+  box-shadow: 0 0 10px rgba(249, 115, 22, 0.8);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-item[data-active="true"]::after {
+  transform: scaleY(1);
+}
+
+/* --- 2. Icon hover bounce ------------------------------------------------
+   A single lift-and-settle, not a loop. Runs on the icon only, so the
+   label beside it stays put and the row doesn't shimmy. */
+@keyframes icon-bounce {
+  0% { transform: translateY(0) scale(1); }
+  45% { transform: translateY(-3px) scale(1.09); }
+  75% { transform: translateY(1px) scale(0.99); }
+  100% { transform: translateY(0) scale(1); }
+}
+.icon-bounce {
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (hover: hover) {
+  .group:hover .icon-bounce,
+  .icon-bounce-host:hover .icon-bounce {
+    animation: icon-bounce 320ms cubic-bezier(0.22, 1, 0.36, 1) 1;
+  }
+}
+
+/* --- 3. Stat pulse on change ---------------------------------------------
+   Fired by re-keying the element (see hooks/use-pulse-on-change.ts): a CSS
+   animation only restarts on mount or on a changed animation-name, so a
+   changing key is what makes a repeated pulse actually replay. */
+@keyframes stat-pulse {
+  0% { transform: scale(1); text-shadow: none; }
+  40% {
+    transform: scale(1.09);
+    text-shadow: 0 0 18px rgba(249, 115, 22, 0.55);
+  }
+  100% { transform: scale(1); text-shadow: none; }
+}
+.stat-pulse {
+  display: inline-block;
+  animation: stat-pulse 300ms cubic-bezier(0.22, 1, 0.36, 1) 1;
+}
+
+/* --- 4. Input focus glow -------------------------------------------------
+   Applied via :focus-within so a wrapper can carry the glow while the
+   real focus ring stays on the input itself (never remove the ring —
+   keyboard users navigate by it). */
+.focus-glow {
+  transition: box-shadow 240ms ease-out, border-color 240ms ease-out;
+}
+.focus-glow:focus,
+.focus-glow:focus-within {
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.45),
+    0 0 22px -4px rgba(249, 115, 22, 0.45);
+}
+
+/* --- 5. Loading -> loaded fade ------------------------------------------- */
+@keyframes content-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.content-fade-in {
+  animation: content-fade-in 280ms ease-out 1;
+}
+
+/* --- 6. Empty -> data slide-in -------------------------------------------
+   Staggered by --i (set inline per row) so a list arrives as a cascade
+   rather than a single block. Capped at 8 steps: past that the last rows
+   feel like they are lagging, not arriving. */
+@keyframes list-slide-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+.list-slide-in {
+  animation: list-slide-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(min(var(--i, 0), 8) * 35ms);
+}
+
+/* --- 7. Delete: fade out, then collapse the space -----------------------
+   Two phases in one animation. Fading and collapsing at the same time
+   makes the rows below jump while the row is still visible; fading first
+   and only then collapsing reads as the row leaving and the list closing
+   behind it. */
+@keyframes row-collapse-out {
+  0% { opacity: 1; transform: none; max-height: var(--row-h, 200px); }
+  45% { opacity: 0; transform: translateX(-8px); max-height: var(--row-h, 200px); }
+  100% {
+    opacity: 0;
+    transform: translateX(-8px);
+    max-height: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-width: 0;
+  }
+}
+.row-collapse-out {
+  overflow: hidden;
+  animation: row-collapse-out 340ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  pointer-events: none;
+}
+
+/* --- 8. Ambient drifting dots -------------------------------------------
+   Long, offset drifts so the field never visibly loops. Purely
+   decorative: the host element is aria-hidden and pointer-events:none. */
+@keyframes dot-drift {
+  0% { transform: translate(0, 0); opacity: 0.14; }
+  25% { opacity: 0.4; }
+  50% { transform: translate(var(--dx, 18px), var(--dy, -22px)); opacity: 0.22; }
+  75% { opacity: 0.38; }
+  100% { transform: translate(0, 0); opacity: 0.14; }
+}
+.ambient-dot {
+  position: absolute;
+  border-radius: 9999px;
+  background: rgb(249, 115, 22);
+  filter: blur(0.5px);
+  animation: dot-drift var(--dur, 22s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+/* --- 9. Ambient breathing glow (8-10s) ----------------------------------
+   Slow on purpose. Anything under a few seconds here stops being ambient
+   and starts competing with the content for attention. */
+@keyframes ambient-breathe {
+  0%, 100% { opacity: 0.28; transform: scale(1); }
+  50% { opacity: 0.62; transform: scale(1.06); }
+}
+.ambient-breathe {
+  animation: ambient-breathe 9s ease-in-out infinite;
+}
+
+/* --- 10. Click ripple ----------------------------------------------------
+   Origin is set from the actual pointer position (see hooks/use-ripple.ts)
+   rather than the element centre, so the ripple starts where the finger
+   or cursor actually landed. */
+@keyframes ripple-out {
+  from { transform: scale(0); opacity: 0.45; }
+  to { transform: scale(2.6); opacity: 0; }
+}
+.ripple {
+  position: absolute;
+  border-radius: 9999px;
+  background: currentColor;
+  pointer-events: none;
+  transform: scale(0);
+  animation: ripple-out 320ms ease-out 1 forwards;
+}
+.ripple-host {
+  position: relative;
+  overflow: hidden;
+}
+
+/* --- 11. Scroll reveal ---------------------------------------------------
+   The visible class is added by an IntersectionObserver
+   (components/ui/reveal.tsx). The hidden state is only applied when the
+   observer has actually claimed the element (data-reveal="pending"), so
+   content is never left invisible if JS fails to run. */
+[data-reveal="pending"] {
+  opacity: 0;
+  transform: translateY(14px);
+}
+[data-reveal="shown"] {
+  opacity: 1;
+  transform: none;
+  transition: opacity 320ms ease-out, transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* --- 12. Tooltip / modal / dropdown entrances ---------------------------- */
+@keyframes overlay-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes panel-pop-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes tooltip-in {
+  from { opacity: 0; transform: translateY(4px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+.overlay-fade-in {
+  animation: overlay-fade-in 220ms ease-out 1;
+}
+.panel-pop-in {
+  animation: panel-pop-in 260ms cubic-bezier(0.22, 1, 0.36, 1) 1;
+}
+.dropdown-in {
+  transform-origin: top;
+  animation: panel-pop-in 220ms cubic-bezier(0.22, 1, 0.36, 1) 1;
+}
+.tooltip-in {
+  animation: tooltip-in 200ms ease-out 1;
+}

@@ -157,20 +157,18 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
                     key={item.href}
                     href={item.href}
                     onClick={closeOnMobile}
-                    className={`group relative flex min-h-[40px] items-center gap-2.5 overflow-hidden rounded-xl py-2 pl-2.5 pr-3 text-sm transition-all duration-200 ${
+                    // nav-item draws the active highlight and the leading
+                    // rail as pseudo-elements so both can animate; the
+                    // look is unchanged, it just slides in now.
+                    data-active={active}
+                    className={`nav-item group relative flex min-h-[40px] items-center gap-2.5 rounded-xl py-2 pl-2.5 pr-3 text-sm transition-colors duration-200 ${
                       active
-                        ? "bg-[linear-gradient(100deg,rgba(249,115,22,0.22)_0%,rgba(168,85,247,0.13)_100%)] font-semibold text-orange-200 shadow-[inset_0_0_0_1px_rgba(249,115,22,0.45),0_0_18px_-6px_rgba(249,115,22,0.7)]"
+                        ? "font-semibold text-orange-200"
                         : "text-muted hover:bg-white/[0.045] hover:text-foreground hover:shadow-[inset_0_0_0_1px_rgba(249,115,22,0.18)]"
                     }`}
                   >
-                    {active && (
-                      <span
-                        aria-hidden="true"
-                        className="absolute inset-y-1.5 left-0 w-[3px] rounded-r-full bg-gradient-to-b from-amber-300 to-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.8)]"
-                      />
-                    )}
                     <Icon
-                      className={`h-4 w-4 shrink-0 transition-all duration-200 group-hover:scale-110 ${
+                      className={`icon-bounce h-4 w-4 shrink-0 ${
                         active
                           ? "text-orange-300 drop-shadow-[0_0_6px_rgba(249,115,22,0.8)]"
                           : `${groupTone(group.heading)} group-hover:text-orange-300`

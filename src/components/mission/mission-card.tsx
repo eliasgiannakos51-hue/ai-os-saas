@@ -276,7 +276,7 @@ export function MissionCard({
   }
 
   return (
-    <div className="relative rounded-2xl border border-border bg-panel p-5">
+    <div className="list-slide-in relative rounded-2xl border border-border bg-panel p-5">
       <FavoriteButton
         table="ai_missions"
         recordId={mission.id}

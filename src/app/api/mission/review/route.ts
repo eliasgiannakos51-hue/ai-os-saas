@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { reviewMission } from "@/lib/mission-agents";
+import { MISSION_AGENT_MODEL, reviewMission } from "@/lib/mission-agents";
 import { logApiError } from "@/lib/log-error";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
+import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { diagLog } from "@/lib/diag";
+
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
-  CREDIT_COSTS,
-  deductCredits,
+  getPurchasedPackCreditPriceEur,
   hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
@@ -95,29 +101,74 @@ export async function POST(request: Request) {
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
     let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
+
+    // The Reviewer is sent the goal AND every completed step, so a mission
+    // with twenty steps costs far more than one with three — the old flat
+    // 2 credits charged both the same.
+    const reviewInputChars =
+      typedMission.goal.length +
+      steps.reduce((sum, s) => sum + s.text.length + (s.moduleTitle?.length ?? 0), 0);
+    const pricingConfig = resolvePricingConfig();
+    const accountCreditPriceEur = bypassCredits
+      ? pricingConfig.creditPriceEur
+      : effectiveCreditPriceEurForAccount(
+          await resolveEffectivePlan(user),
+          await getPurchasedPackCreditPriceEur(user.id),
+          pricingConfig
+        );
+    const estimate = estimateForAction(
+      "missionPlan",
+      { model: MISSION_AGENT_MODEL, inputChars: reviewInputChars },
+      pricingConfig,
+      accountCreditPriceEur
+    );
+    const costs = new CostAccumulator();
+
+    let reservationId = "";
     if (!bypassCredits) {
       plan = await resolveEffectivePlan(user);
-      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.missionReview, plan);
+      const check = await hasEnoughCredits(user.id, estimate.reserveCredits, plan);
       if (!check.ok) {
         return NextResponse.json({
           ok: true,
           reviewed: false,
           rateLimited: true,
-          message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.missionReview),
+          outOfCredits: true,
+          message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
         });
       }
+      const reservation = await reserveCredits(user.id, estimate.reserveCredits, "mission_review", {
+        missionId,
+        stepCount: steps.length,
+        estimatedCredits: estimate.estimatedCredits,
+      });
+      if (!reservation.ok) {
+        return NextResponse.json({
+          ok: true,
+          reviewed: false,
+          rateLimited: true,
+          outOfCredits: reservation.reason === "insufficient",
+          message:
+            reservation.reason === "insufficient"
+              ? insufficientCreditsMessage(reservation.available, estimate.reserveCredits)
+              : "Could not reserve credits for the Reviewer. No credits were charged — please try again.",
+        });
+      }
+      reservationId = reservation.reservationId;
     }
 
     let reviewText: string;
     try {
-      void recordAiCallForDailySpend(CREDIT_COSTS.missionReview);
+      void recordAiCallForDailySpend(estimate.estimatedCredits);
       reviewText = await reviewMission(
         apiKey,
         typedMission.goal,
-        steps.map((s) => ({ text: s.text, moduleTitle: s.moduleTitle }))
+        steps.map((s) => ({ text: s.text, moduleTitle: s.moduleTitle })),
+        costs
       );
     } catch (err) {
       logApiError("/api/mission/review", err, { stage: "reviewer_call" });
+      await releaseReservation(user.id, reservationId);
       const errMessage = err instanceof Error ? err.message : "The Reviewer request failed.";
       return NextResponse.json(
         { ok: false, error: `${errMessage} No credits were charged — please try again.` },
@@ -136,6 +187,7 @@ export async function POST(request: Request) {
 
     if (updateError || !updated) {
       logApiError("/api/mission/review", updateError, { stage: "update_mission" });
+      await releaseReservation(user.id, reservationId);
       return NextResponse.json(
         { ok: false, error: "Review generated, but could not save it. No credits were charged — please try again." },
         { status: 500 }
@@ -144,9 +196,29 @@ export async function POST(request: Request) {
 
     // Only now — the Reviewer succeeded AND the mission is durably saved —
     // is this confirmed a success worth charging for.
-    if (!bypassCredits && plan) {
-      await deductCredits(user.id, CREDIT_COSTS.missionReview, "mission_review", "Mission Control: Reviewer Agent", plan);
-    }
+    const settlement = await settleReservation({
+      userId: user.id,
+      reservationId,
+      feature: "mission_review",
+      costs,
+      plan,
+      bypassCharge: bypassCredits || !plan,
+      metadata: {
+        missionId,
+        stepCount: steps.length,
+        estimatedCredits: estimate.estimatedCredits,
+        reservedCredits: bypassCredits ? 0 : estimate.reserveCredits,
+      },
+    });
+    diagLog(
+      `[billing] mission_review settled: ${JSON.stringify({
+        userId: user.id,
+        missionId,
+        realCostUsd: settlement.realCostUsd,
+        creditsCharged: settlement.creditsCharged,
+        achievedMargin: settlement.achievedMargin,
+      })}`
+    );
 
     return NextResponse.json({ ok: true, reviewed: true, mission: updated });
   } catch (err) {

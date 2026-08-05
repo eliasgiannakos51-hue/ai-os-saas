@@ -2,8 +2,14 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
-import { CREDIT_COSTS, deductCredits, hasEnoughCredits, resolveEffectivePlan } from "@/lib/billing/credits";
-import { runMissionStepForUser } from "@/lib/mission-step-runner";
+import { hasEnoughCredits, resolveEffectivePlan, getPurchasedPackCreditPriceEur } from "@/lib/billing/credits";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
+import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { diagLog } from "@/lib/diag";
+import { MISSION_STEP_MODEL, runMissionStepForUser } from "@/lib/mission-step-runner";
 import { buildPriorStepsContext } from "@/lib/mission-context";
 import { updateMissionPlanSteps } from "@/lib/mission-plan-steps";
 import { computeNextRunAt } from "@/lib/automation-schedule";
@@ -114,6 +120,24 @@ export async function GET(request: Request) {
       const isAdmin = isAdminEmail(user.email);
       const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
       const plan = bypassCredits ? null : await resolveEffectivePlan(user);
+      // Sized from the step/automation text, at this account's own
+      // per-credit rate — the flat CREDIT_COSTS.createAnything charged
+      // one number regardless of how much work the step described.
+      const pricingConfig = resolvePricingConfig();
+      const accountCreditPriceEur = bypassCredits
+        ? pricingConfig.creditPriceEur
+        : effectiveCreditPriceEurForAccount(
+            plan,
+            await getPurchasedPackCreditPriceEur(userId),
+            pricingConfig
+          );
+      const stepEstimate = (text: string) =>
+        estimateForAction(
+          "createAnything",
+          { model: MISSION_STEP_MODEL, inputChars: text.length },
+          pricingConfig,
+          accountCreditPriceEur
+        );
 
       for (const run of toProcess) {
         // Read-only check first — never call the AI, never touch the
@@ -121,7 +145,7 @@ export async function GET(request: Request) {
         // check-then-call-then-deduct shape as every other AI-calling
         // endpoint in this app.
         if (!bypassCredits && plan) {
-          const check = await hasEnoughCredits(userId, CREDIT_COSTS.createAnything, plan);
+          const check = await hasEnoughCredits(userId, stepEstimate(run.step_text).reserveCredits, plan);
           if (!check.ok) {
             await admin
               .from("scheduled_agent_runs")
@@ -195,10 +219,41 @@ export async function GET(request: Request) {
         }
 
         const priorContext = buildPriorStepsContext(steps, run.step_index);
-        void recordAiCallForDailySpend(CREDIT_COSTS.createAnything);
-        const result = await runMissionStepForUser(apiKey, admin, userId, run.step_text, run.agent_role, priorContext);
+        const runCosts = new CostAccumulator();
+        const runEstimate = stepEstimate(run.step_text + priorContext);
+        let runReservationId = "";
+        if (!bypassCredits && plan) {
+          const reservation = await reserveCredits(userId, runEstimate.reserveCredits, "scheduled_agent_run", {
+            runId: run.id,
+            estimatedCredits: runEstimate.estimatedCredits,
+          });
+          if (!reservation.ok) {
+            await admin
+              .from("scheduled_agent_runs")
+              .update({
+                status: "failed",
+                result: "Not enough credits for this scheduled run. No credits were charged.",
+                executed_at: new Date().toISOString(),
+              })
+              .eq("id", run.id);
+            failed++;
+            continue;
+          }
+          runReservationId = reservation.reservationId;
+        }
+        void recordAiCallForDailySpend(runEstimate.estimatedCredits);
+        const result = await runMissionStepForUser(
+          apiKey,
+          admin,
+          userId,
+          run.step_text,
+          run.agent_role,
+          priorContext,
+          runCosts
+        );
 
         if (!result.ok) {
+          await releaseReservation(userId, runReservationId);
           await admin
             .from("scheduled_agent_runs")
             .update({ status: "failed", result: result.error, executed_at: new Date().toISOString() })
@@ -263,9 +318,23 @@ export async function GET(request: Request) {
           extraFields: { status: status === "planning" ? "in_progress" : status },
         }));
 
-        if (!bypassCredits && plan) {
-          await deductCredits(userId, CREDIT_COSTS.createAnything, "create_anything", "Scheduled agent run", plan);
-        }
+        const runSettlement = await settleReservation({
+          userId,
+          reservationId: runReservationId,
+          feature: "scheduled_agent_run",
+          costs: runCosts,
+          plan,
+          bypassCharge: bypassCredits || !plan,
+          metadata: { runId: run.id, estimatedCredits: runEstimate.estimatedCredits },
+        });
+        diagLog(
+          `[billing] scheduled_agent_run settled: ${JSON.stringify({
+            userId,
+            runId: run.id,
+            creditsCharged: runSettlement.creditsCharged,
+            achievedMargin: runSettlement.achievedMargin,
+          })}`
+        );
 
         await admin
           .from("scheduled_agent_runs")
@@ -321,6 +390,24 @@ export async function GET(request: Request) {
       const isAdmin = isAdminEmail(user.email);
       const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
       const plan = bypassCredits ? null : await resolveEffectivePlan(user);
+      // Sized from the step/automation text, at this account's own
+      // per-credit rate — the flat CREDIT_COSTS.createAnything charged
+      // one number regardless of how much work the step described.
+      const pricingConfig = resolvePricingConfig();
+      const accountCreditPriceEur = bypassCredits
+        ? pricingConfig.creditPriceEur
+        : effectiveCreditPriceEurForAccount(
+            plan,
+            await getPurchasedPackCreditPriceEur(userId),
+            pricingConfig
+          );
+      const stepEstimate = (text: string) =>
+        estimateForAction(
+          "createAnything",
+          { model: MISSION_STEP_MODEL, inputChars: text.length },
+          pricingConfig,
+          accountCreditPriceEur
+        );
 
       for (const automation of dueForUser) {
         // Atomic claim (see supabase_schema.sql's processing_started_at
@@ -351,7 +438,7 @@ export async function GET(request: Request) {
         ).toISOString();
 
         if (!bypassCredits && plan) {
-          const check = await hasEnoughCredits(userId, CREDIT_COSTS.createAnything, plan);
+          const check = await hasEnoughCredits(userId, stepEstimate(automation.description).reserveCredits, plan);
           if (!check.ok) {
             await admin
               .from("user_automations")
@@ -391,10 +478,37 @@ export async function GET(request: Request) {
           continue;
         }
 
-        void recordAiCallForDailySpend(CREDIT_COSTS.createAnything);
-        const result = await runMissionStepForUser(apiKey, admin, userId, automation.description, "general", "");
+        const autoCosts = new CostAccumulator();
+        const autoEstimate = stepEstimate(automation.description);
+        let autoReservationId = "";
+        if (!bypassCredits && plan) {
+          const reservation = await reserveCredits(userId, autoEstimate.reserveCredits, "automation_run", {
+            automationId: automation.id,
+            estimatedCredits: autoEstimate.estimatedCredits,
+          });
+          if (!reservation.ok) {
+            await admin
+              .from("user_automations")
+              .update({ next_run_at: advancedNextRunAt })
+              .eq("id", automation.id);
+            automationsFailed++;
+            continue;
+          }
+          autoReservationId = reservation.reservationId;
+        }
+        void recordAiCallForDailySpend(autoEstimate.estimatedCredits);
+        const result = await runMissionStepForUser(
+          apiKey,
+          admin,
+          userId,
+          automation.description,
+          "general",
+          "",
+          autoCosts
+        );
 
         if (!result.ok || !result.matched) {
+          await releaseReservation(userId, autoReservationId);
           await admin
             .from("user_automations")
             .update({ next_run_at: advancedNextRunAt })
@@ -413,9 +527,23 @@ export async function GET(request: Request) {
         // Confirmed success — runMissionStepForUser already durably saved
         // the record, so credits are deducted after that, then the
         // automation is advanced to its next cycle.
-        if (!bypassCredits && plan) {
-          await deductCredits(userId, CREDIT_COSTS.createAnything, "create_anything", "Automation run", plan);
-        }
+        const autoSettlement = await settleReservation({
+          userId,
+          reservationId: autoReservationId,
+          feature: "automation_run",
+          costs: autoCosts,
+          plan,
+          bypassCharge: bypassCredits || !plan,
+          metadata: { automationId: automation.id, estimatedCredits: autoEstimate.estimatedCredits },
+        });
+        diagLog(
+          `[billing] automation_run settled: ${JSON.stringify({
+            userId,
+            automationId: automation.id,
+            creditsCharged: autoSettlement.creditsCharged,
+            achievedMargin: autoSettlement.achievedMargin,
+          })}`
+        );
 
         await admin
           .from("user_automations")

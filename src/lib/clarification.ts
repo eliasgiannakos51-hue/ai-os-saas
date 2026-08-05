@@ -1,5 +1,6 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
+import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import {
   parseClarificationResult,
   type ClarificationCheckResult,
@@ -82,7 +83,8 @@ SAFETY CHECK (this automation will run repeatedly, unsupervised, on whatever sch
 export async function checkNeedsClarification(
   apiKey: string,
   kind: ClarificationKind,
-  userText: string
+  userText: string,
+  costs?: CostAccumulator
 ): Promise<ClarificationCheckResult> {
   const anthropic = new Anthropic({ apiKey });
   const response = await anthropic.messages.create({
@@ -93,6 +95,11 @@ export async function checkNeedsClarification(
     tools: [CLARIFICATION_TOOL],
     tool_choice: { type: "tool", name: "evaluate_request_clarity" },
   });
+
+  // Recorded before the parse: a call that came back in an unusable shape
+  // still cost real tokens, and the action that triggered it has to carry
+  // that cost.
+  costs?.record("clarification", response.usage, MODEL);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

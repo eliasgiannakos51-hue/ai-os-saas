@@ -1,8 +1,12 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
+import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 
 const MISSION_MODEL = "claude-sonnet-4-6";
+// Exported so the routes' billing estimates price the same model these
+// agents actually call.
+export const MISSION_AGENT_MODEL = MISSION_MODEL;
 const MIN_STEPS = 4;
 const MAX_STEPS = 8;
 // AI Output Protection Layer thresholds (see parsePlanMissionToolInput
@@ -122,7 +126,12 @@ export function parsePlanMissionToolInput(input: {
 // existing modules/missions/products instead of a goal considered in
 // isolation. Optional and additive: omitting it just means a plan built
 // from the goal text alone, same as before this was added.
-export async function planMission(apiKey: string, goal: string, userContext = ""): Promise<PlanMissionResult> {
+export async function planMission(
+  apiKey: string,
+  goal: string,
+  userContext = "",
+  costs?: CostAccumulator
+): Promise<PlanMissionResult> {
   const anthropic = new Anthropic({ apiKey });
   const response = await anthropic.messages.create({
     model: MISSION_MODEL,
@@ -132,6 +141,8 @@ export async function planMission(apiKey: string, goal: string, userContext = ""
     tools: [PLAN_MISSION_TOOL],
     tool_choice: { type: "tool", name: "create_plan" },
   });
+
+  costs?.record("generation", response.usage, MISSION_MODEL);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
@@ -154,7 +165,8 @@ ${AI_QUALITY_CHECKLIST_EL}`;
 export async function reviewMission(
   apiKey: string,
   goal: string,
-  completedSteps: { text: string; moduleTitle?: string }[]
+  completedSteps: { text: string; moduleTitle?: string }[],
+  costs?: CostAccumulator
 ): Promise<string> {
   const anthropic = new Anthropic({ apiKey });
   const stepsSummary = completedSteps
@@ -168,6 +180,8 @@ export async function reviewMission(
     system: REVIEWER_SYSTEM_PROMPT,
     messages: [{ role: "user", content: userContent }],
   });
+
+  costs?.record("generation", response.usage, MISSION_MODEL);
 
   const textBlock = response.content.find(
     (block): block is Anthropic.TextBlock => block.type === "text"

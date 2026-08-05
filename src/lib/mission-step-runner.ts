@@ -6,8 +6,12 @@ import type { FieldConfig } from "@/lib/modules";
 import { agentRoleSystemPromptAddition, type AgentRole } from "@/lib/agent-roles";
 import { buildOutputSummary, buildMissionContextSystemPromptAddition } from "@/lib/mission-context";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
+import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 
 const MODEL = "claude-sonnet-4-6";
+// Exported so the cron runner's billing estimate prices the same model
+// this runner actually calls.
+export const MISSION_STEP_MODEL = MODEL;
 
 // Same classification logic as api/create/route.ts's POST handler
 // (system prompt, tool definition, field coercion, module-match/insert),
@@ -117,7 +121,8 @@ export async function runMissionStepForUser(
   userId: string,
   stepText: string,
   agentRole: AgentRole,
-  priorStepsContext: string
+  priorStepsContext: string,
+  costs?: CostAccumulator
 ): Promise<MissionStepRunResult> {
   const anthropic = new Anthropic({ apiKey });
   let toolInput: RouteEntryInput;
@@ -133,6 +138,8 @@ export async function runMissionStepForUser(
       tools: [ROUTE_ENTRY_TOOL],
       tool_choice: { type: "tool", name: "route_entry" },
     });
+
+    costs?.record("classification", response.usage, MODEL);
 
     const toolUse = response.content.find(
       (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

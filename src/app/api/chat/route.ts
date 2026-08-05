@@ -7,11 +7,17 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
   CREDIT_COSTS,
-  deductCredits,
   hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
+  getPurchasedPackCreditPriceEur,
 } from "@/lib/billing/credits";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
+import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { diagLog } from "@/lib/diag";
 import {
   extractAndStoreMemory,
   loadRecentMemories,
@@ -256,13 +262,46 @@ export async function POST(request: Request) {
     // stream throws or the model returns nothing, no deduction ever runs.
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+
+    // Estimated from the real size of THIS request — the message plus the
+    // conversation history that gets re-sent with it, plus the system
+    // prompt this route composes from memory/mentor/user context. The old
+    // flat CREDIT_COSTS.chatMessage charged 1 credit whether the reply was
+    // two sentences or two thousand words, and charged nothing at all for
+    // the tokens the accumulated history contributed.
+    const pricingConfig = resolvePricingConfig();
+    const accountCreditPriceEur = bypassCredits
+      ? pricingConfig.creditPriceEur
+      : effectiveCreditPriceEurForAccount(
+          plan,
+          await getPurchasedPackCreditPriceEur(user.id),
+          pricingConfig
+        );
+    // The pre-check runs before the conversation history is loaded, so it
+    // sizes on the message and system prompt alone. The real reserve, taken
+    // just before the stream, adds the history — see reserveCredits below.
+    const estimate = estimateForAction(
+      "chatMessage",
+      {
+        model: MODEL,
+        inputChars: message.length + systemPrompt.length,
+        // The tool is offered on every message but only billed when the
+        // model really searches. Budgeting for one keeps the hold from
+        // being short on the replies that do search, and the difference
+        // is released when they don't.
+        expectedWebSearches: 1,
+      },
+      pricingConfig,
+      accountCreditPriceEur
+    );
+
     if (!bypassCredits) {
-      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.chatMessage, plan);
+      const check = await hasEnoughCredits(user.id, estimate.reserveCredits, plan);
       if (!check.ok) {
         return NextResponse.json({
           ok: true,
           rateLimited: true,
-          message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.chatMessage),
+          message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
         });
       }
     }
@@ -366,8 +405,49 @@ export async function POST(request: Request) {
 
         let assistantText = "";
         let webSearchCount = 0;
+
+        // RESERVE, now that the full request (history included) is known.
+        // Taken inside the stream but BEFORE the Anthropic call, so a
+        // second concurrent message sees a balance that already excludes
+        // this one.
+        const costs = new CostAccumulator();
+        const historyChars = history.reduce((sum, m) => sum + m.content.length, 0);
+        const streamEstimate = estimateForAction(
+          "chatMessage",
+          {
+            model: MODEL,
+            inputChars: message.length + historyChars + systemPrompt.length,
+            expectedWebSearches: 1,
+          },
+          pricingConfig,
+          accountCreditPriceEur
+        );
+
+        let reservationId = "";
+        if (!bypassCredits) {
+          const reservation = await reserveCredits(user.id, streamEstimate.reserveCredits, "chat_message", {
+            conversationId: finalConversationId,
+            estimatedCredits: streamEstimate.estimatedCredits,
+          });
+          if (!reservation.ok) {
+            controller.enqueue(
+              ndjsonLine({
+                type: "error",
+                error:
+                  reservation.reason === "insufficient"
+                    ? `Not enough credits for this message (you have ${reservation.available}, this needs about ${streamEstimate.reserveCredits}). No credits were charged.`
+                    : "Could not reserve credits for this message. No credits were charged — please try again.",
+                outOfCredits: reservation.reason === "insufficient",
+              })
+            );
+            controller.close();
+            return;
+          }
+          reservationId = reservation.reservationId;
+        }
+
         try {
-          void recordAiCallForDailySpend(CREDIT_COSTS.chatMessage);
+          void recordAiCallForDailySpend(streamEstimate.estimatedCredits);
           const claudeStream = anthropic.messages.stream({
             model: MODEL,
             max_tokens: MAX_TOKENS,
@@ -385,9 +465,16 @@ export async function POST(request: Request) {
           });
 
           const finalResponse = await claudeStream.finalMessage();
+          // One record covers the whole reply: Anthropic reports the
+          // history and system prompt inside this call's input_tokens, and
+          // the executed searches inside server_tool_use — so the web
+          // search charge is no longer a second, separately-guessed
+          // deduction, it is part of the measured cost.
+          costs.record("generation", finalResponse.usage, MODEL);
           webSearchCount = finalResponse.usage.server_tool_use?.web_search_requests ?? 0;
         } catch (err) {
           logApiError("/api/chat", err, { stage: "anthropic_stream" });
+          await releaseReservation(user.id, reservationId);
           const errMessage = err instanceof Error ? err.message : "Chat request failed.";
           controller.enqueue(
             ndjsonLine({ type: "error", error: `${errMessage} No credits were charged — please try again.` })
@@ -397,6 +484,7 @@ export async function POST(request: Request) {
         }
 
         if (!assistantText.trim()) {
+          await releaseReservation(user.id, reservationId);
           controller.enqueue(
             ndjsonLine({
               type: "error",
@@ -409,37 +497,34 @@ export async function POST(request: Request) {
 
         // Confirmed success — a real reply streamed all the way through,
         // so this is the one place the message actually gets charged.
-        if (!bypassCredits) {
-          const deduction = await deductCredits(
-            user.id,
-            CREDIT_COSTS.chatMessage,
-            "chat_message",
-            "Ionexa Chat message",
-            plan
-          );
-          if (!deduction.ok) {
-            // Balance changed between the pre-check above and now — log
-            // it, but still deliver the reply already streamed to the
-            // user (see the same tolerance documented on
-            // deductCredits/edit/generate).
-            logApiError("/api/chat", "credit deduction failed after successful reply", {
-              userId: user.id,
-              conversationId: finalConversationId,
-            });
-          }
-          // Extra charge only if the model actually performed a real web
-          // search for this reply — never charged just for the tool
-          // being offered (see WEB_SEARCH_TOOL/CREDIT_COSTS.webSearchPerQuery).
-          if (webSearchCount > 0) {
-            await deductCredits(
-              user.id,
-              CREDIT_COSTS.webSearchPerQuery * webSearchCount,
-              "web_search",
-              `Ionexa Chat — ${webSearchCount} web search${webSearchCount > 1 ? "es" : ""}`,
-              plan
-            );
-          }
-        }
+        // Settlement charges the real measured cost and releases the rest
+        // of the hold; the separate per-search deduction is gone because
+        // searches are already inside the usage recorded above.
+        const settlement = await settleReservation({
+          userId: user.id,
+          reservationId,
+          feature: "chat_message",
+          costs,
+          plan,
+          bypassCharge: bypassCredits,
+          metadata: {
+            conversationId: finalConversationId,
+            webSearches: webSearchCount,
+            replyChars: assistantText.length,
+            estimatedCredits: streamEstimate.estimatedCredits,
+            reservedCredits: bypassCredits ? 0 : streamEstimate.reserveCredits,
+          },
+        });
+        diagLog(
+          `[billing] chat_message settled: ${JSON.stringify({
+            userId: user.id,
+            conversationId: finalConversationId,
+            realCostUsd: settlement.realCostUsd,
+            creditsCharged: settlement.creditsCharged,
+            achievedMargin: settlement.achievedMargin,
+            webSearches: webSearchCount,
+          })}`
+        );
 
         const { error: assistantMessageError } = await supabase.from("chat_messages").insert({
           conversation_id: finalConversationId,

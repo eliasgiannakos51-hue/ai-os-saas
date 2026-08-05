@@ -1,15 +1,21 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { planMission, type PlanMissionResult } from "@/lib/mission-agents";
+import { MISSION_AGENT_MODEL, planMission, type PlanMissionResult } from "@/lib/mission-agents";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
 import { logSecurityCheck } from "@/lib/security-check-log";
 import { logApiError } from "@/lib/log-error";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
+import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { diagLog } from "@/lib/diag";
+
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
-  CREDIT_COSTS,
-  deductCredits,
+  getPurchasedPackCreditPriceEur,
   hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
@@ -86,17 +92,55 @@ export async function POST(request: Request) {
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
     let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
+
+    // A two-word goal and a 3,000-character one no longer cost the same
+    // flat 2 credits — the Planner's real token use follows the goal.
+    const pricingConfig = resolvePricingConfig();
+    const accountCreditPriceEur = bypassCredits
+      ? pricingConfig.creditPriceEur
+      : effectiveCreditPriceEurForAccount(
+          await resolveEffectivePlan(user),
+          await getPurchasedPackCreditPriceEur(user.id),
+          pricingConfig
+        );
+    const estimate = estimateForAction(
+      "missionPlan",
+      { model: MISSION_AGENT_MODEL, inputChars: goal.length },
+      pricingConfig,
+      accountCreditPriceEur
+    );
+    const costs = new CostAccumulator();
+
+    let reservationId = "";
     if (!bypassCredits) {
       plan = await resolveEffectivePlan(user);
-      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.missionPlan, plan);
+      const check = await hasEnoughCredits(user.id, estimate.reserveCredits, plan);
       if (!check.ok) {
         return NextResponse.json({
           ok: true,
           planned: false,
           rateLimited: true,
-          message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.missionPlan),
+          outOfCredits: true,
+          message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
         });
       }
+      const reservation = await reserveCredits(user.id, estimate.reserveCredits, "mission_plan", {
+        goalChars: goal.length,
+        estimatedCredits: estimate.estimatedCredits,
+      });
+      if (!reservation.ok) {
+        return NextResponse.json({
+          ok: true,
+          planned: false,
+          rateLimited: true,
+          outOfCredits: reservation.reason === "insufficient",
+          message:
+            reservation.reason === "insufficient"
+              ? insufficientCreditsMessage(reservation.available, estimate.reserveCredits)
+              : "Could not reserve credits for the Planner. No credits were charged — please try again.",
+        });
+      }
+      reservationId = reservation.reservationId;
     }
 
     // "AI Life Context" — same consolidated user picture used by
@@ -116,10 +160,11 @@ export async function POST(request: Request) {
 
     let planResult: PlanMissionResult;
     try {
-      void recordAiCallForDailySpend(CREDIT_COSTS.missionPlan);
-      planResult = await planMission(apiKey, goal, userContext);
+      void recordAiCallForDailySpend(estimate.estimatedCredits);
+      planResult = await planMission(apiKey, goal, userContext, costs);
     } catch (err) {
       logApiError("/api/mission/plan", err, { stage: "planner_call" });
+      await releaseReservation(user.id, reservationId);
       const errMessage = err instanceof Error ? err.message : "The Planner request failed.";
       return NextResponse.json(
         { ok: false, error: `${errMessage} No credits were charged — please try again.` },
@@ -127,10 +172,32 @@ export async function POST(request: Request) {
       );
     }
 
+    let settled = false;
     async function chargeMissionPlan() {
-      if (!bypassCredits && plan) {
-        await deductCredits(user!.id, CREDIT_COSTS.missionPlan, "mission_plan", "Mission Control: Planner Agent", plan);
-      }
+      // Guarded — called from more than one terminal branch.
+      if (settled) return;
+      settled = true;
+      const settlement = await settleReservation({
+        userId: user!.id,
+        reservationId,
+        feature: "mission_plan",
+        costs,
+        plan,
+        bypassCharge: bypassCredits || !plan,
+        metadata: {
+          goalChars: goal.length,
+          estimatedCredits: estimate.estimatedCredits,
+          reservedCredits: bypassCredits ? 0 : estimate.reserveCredits,
+        },
+      });
+      diagLog(
+        `[billing] mission_plan settled: ${JSON.stringify({
+          userId: user!.id,
+          realCostUsd: settlement.realCostUsd,
+          creditsCharged: settlement.creditsCharged,
+          achievedMargin: settlement.achievedMargin,
+        })}`
+      );
     }
 
     // Vague goal (e.g. "θέλω να πετύχω") — the Planner asked for

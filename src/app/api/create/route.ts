@@ -16,12 +16,18 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
   CREDIT_COSTS,
-  deductCredits,
   hasEnoughCredits,
+  getPurchasedPackCreditPriceEur,
   insufficientCreditsMessage,
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
 import { checkNeedsClarification } from "@/lib/clarification";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
+import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { diagLog } from "@/lib/diag";
 import { MAX_ATTACHMENT_IMAGES } from "@/lib/create-attachment-image";
 import { downloadAttachmentImages } from "@/lib/attachment-image-server";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
@@ -193,6 +199,11 @@ export async function POST(request: Request) {
     // skipClarification: true). Most Create Anything entries are already
     // clear enough that this never fires — it's specifically for the
     // genuinely ambiguous ones.
+    // One accumulator for the whole request: the clarifying-questions
+    // pre-check and the classification call both feed it, so whichever
+    // branch the request exits through settles the real total.
+    const costs = new CostAccumulator();
+
     let clarificationBypassCredits = false;
     let clarificationPlanForCheck: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
     if (!skipClarification) {
@@ -214,17 +225,29 @@ export async function POST(request: Request) {
       }
       try {
         void recordAiCallForDailySpend(1);
-        const clarification = await checkNeedsClarification(apiKey, "create", message);
-        if (clarificationPlanForCheck) {
-          await deductCredits(
-            user.id,
-            CREDIT_COSTS.clarificationCheck,
-            "clarification_check",
-            "Create Anything — clarifying-questions check",
-            clarificationPlanForCheck
-          );
-        }
+        // Recorded into the SAME accumulator the classification uses, so a
+        // request that ends here (needs clarification) and one that runs
+        // all the way through are both charged their real total rather
+        // than a flat 1 credit plus a flat createAnything credit.
+        const clarification = await checkNeedsClarification(apiKey, "create", message, costs);
         if (clarification.needsClarification) {
+          if (clarificationPlanForCheck) {
+            const clarificationSettlement = await settleReservation({
+              userId: user.id,
+              reservationId: "",
+              feature: "clarification_check",
+              costs,
+              plan: clarificationPlanForCheck,
+              metadata: { source: "create_anything", outcome: "needs_clarification" },
+            });
+            diagLog(
+              `[billing] clarification_check settled: ${JSON.stringify({
+                userId: user.id,
+                creditsCharged: clarificationSettlement.creditsCharged,
+                achievedMargin: clarificationSettlement.achievedMargin,
+              })}`
+            );
+          }
           return NextResponse.json({
             ok: true,
             matched: false,
@@ -250,16 +273,55 @@ export async function POST(request: Request) {
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
     let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
+
+    const pricingConfig = resolvePricingConfig();
+    const accountCreditPriceEur = bypassCredits
+      ? pricingConfig.creditPriceEur
+      : effectiveCreditPriceEurForAccount(
+          await resolveEffectivePlan(user),
+          await getPurchasedPackCreditPriceEur(user.id),
+          pricingConfig
+        );
+    // Scales with the real request: a one-line note and a 4,000-character
+    // brief with three attached images are no longer the same 1 credit.
+    const estimate = estimateForAction(
+      "createAnything",
+      // imagePaths, not the downloaded images: the download happens later,
+      // and the requested count is the upper bound — a hold that leans
+      // high is released at settlement, a hold that leans low is not.
+      { model: MODEL, inputChars: message.length, imageCount: imagePaths.length },
+      pricingConfig,
+      accountCreditPriceEur
+    );
+
+    let reservationId = "";
     if (!bypassCredits) {
       plan = await resolveEffectivePlan(user);
-      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.createAnything, plan);
+      const check = await hasEnoughCredits(user.id, estimate.reserveCredits, plan);
       if (!check.ok) {
         return NextResponse.json({
           ok: true,
           matched: false,
-          message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.createAnything),
+          outOfCredits: true,
+          message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
         });
       }
+      const reservation = await reserveCredits(user.id, estimate.reserveCredits, "create_anything", {
+        messageChars: message.length,
+        estimatedCredits: estimate.estimatedCredits,
+      });
+      if (!reservation.ok) {
+        return NextResponse.json({
+          ok: true,
+          matched: false,
+          outOfCredits: reservation.reason === "insufficient",
+          message:
+            reservation.reason === "insufficient"
+              ? insufficientCreditsMessage(reservation.available, estimate.reserveCredits)
+              : "Could not reserve credits for this request. No credits were charged — please try again.",
+        });
+      }
+      reservationId = reservation.reservationId;
     }
 
     // create_requests keeps a per-request log for history/debugging — no
@@ -296,7 +358,7 @@ export async function POST(request: Request) {
     try {
       const missionContextAddition = buildMissionContextSystemPromptAddition(priorStepsContext);
 
-      void recordAiCallForDailySpend(CREDIT_COSTS.createAnything);
+      void recordAiCallForDailySpend(estimate.estimatedCredits);
       const userContent: Anthropic.MessageParam["content"] =
         attachmentImages.length > 0
           ? [
@@ -320,6 +382,8 @@ export async function POST(request: Request) {
         tool_choice: { type: "tool", name: "route_entry" },
       });
 
+      costs.record("classification", response.usage, MODEL);
+
       const toolUse = response.content.find(
         (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
       );
@@ -334,6 +398,7 @@ export async function POST(request: Request) {
       toolInput = toolUse.input as RouteEntryInput;
     } catch (err) {
       logApiError("/api/create", err, { stage: "anthropic_call" });
+      await releaseReservation(user.id, reservationId);
       const errMessage = err instanceof Error ? err.message : "AI classification request failed.";
       return NextResponse.json(
         { ok: false, error: `${errMessage} No credits were charged — please try again.` },
@@ -349,23 +414,36 @@ export async function POST(request: Request) {
     // charged with nothing saved. chargeForClassification() is called at
     // every terminal branch below, once that branch's outcome is final.
     const userId = user.id;
+    let settled = false;
     async function chargeForClassification() {
-      if (bypassCredits || !plan) return;
-      const deduction = await deductCredits(
+      // Guarded: chargeForClassification() is called from every terminal
+      // branch and some branches fall through to another, so without this
+      // a single request could settle twice.
+      if (settled) return;
+      settled = true;
+      const settlement = await settleReservation({
         userId,
-        CREDIT_COSTS.createAnything,
-        "create_anything",
-        "Create Anything request",
-        plan
-      );
-      if (!deduction.ok) {
-        // Balance changed between the pre-check above and now — log it,
-        // but still deliver the result (see the same tolerance
-        // documented on deductCredits/edit/generate).
-        logApiError("/api/create", "credit deduction failed after successful classification", {
+        reservationId,
+        feature: "create_anything",
+        costs,
+        plan,
+        bypassCharge: bypassCredits || !plan,
+        metadata: {
+          messageChars: message.length,
+          attachmentImages: attachmentImages.length,
+          estimatedCredits: estimate.estimatedCredits,
+          reservedCredits: bypassCredits ? 0 : estimate.reserveCredits,
+        },
+      });
+      diagLog(
+        `[billing] create_anything settled: ${JSON.stringify({
           userId,
-        });
-      }
+          aiCalls: costs.callCount,
+          realCostUsd: settlement.realCostUsd,
+          creditsCharged: settlement.creditsCharged,
+          achievedMargin: settlement.achievedMargin,
+        })}`
+      );
     }
 
     if (!toolInput.module || toolInput.module === "none") {

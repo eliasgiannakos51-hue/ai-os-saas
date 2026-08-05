@@ -68,4 +68,40 @@ export function logApiError(
       ...context,
     })
   );
+
+  // Persist to production_errors as well, so the owner has one place that
+  // answers "is something broken right now". Fire-and-forget on purpose:
+  // logging must never slow down or fail the request that is already
+  // going wrong, and recordProductionError swallows its own failures.
+  void persistAndMaybeAlert({
+    message,
+    stack: error instanceof Error ? error.stack ?? null : null,
+    route: endpoint,
+    userId: typeof context?.userId === "string" ? context.userId : null,
+  });
+}
+
+async function persistAndMaybeAlert(params: {
+  message: string;
+  stack: string | null;
+  route: string;
+  userId: string | null;
+}): Promise<void> {
+  try {
+    const { recordProductionError } = await import("@/lib/production-errors");
+    const result = await recordProductionError(params);
+    if (!result?.shouldAlert) return;
+
+    const { sendErrorAlertEmail } = await import("@/lib/email/error-alert");
+    await sendErrorAlertEmail({
+      message: params.message,
+      route: params.route,
+      occurrenceCount: result.occurrenceCount,
+      affectedUsers: result.affectedUsers,
+      recentCount: result.recentCount,
+    });
+  } catch {
+    // Never rethrow: this whole path is best-effort telemetry sitting
+    // inside the app's own error handler.
+  }
 }

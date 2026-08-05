@@ -15,6 +15,7 @@ import { BillingSummary } from "@/components/settings/billing-summary";
 import { BuyCredits } from "@/components/settings/buy-credits";
 import { CreditHistory, type CreditTransaction } from "@/components/settings/credit-history";
 import { AiUsageSettings } from "@/components/settings/ai-usage-settings";
+import { MarginReport } from "@/components/settings/margin-report";
 import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
 import { EmailNotificationSettings } from "@/components/settings/email-notification-settings";
 import { AchievementsSection } from "@/components/settings/achievements-section";
@@ -208,6 +209,11 @@ export default async function SettingsPage() {
           }
           moduleUsage={moduleUsage}
         />
+
+        {/* Owner-only: reads platform-wide spend with the service-role
+            client, so mounting it for a normal user would leak other
+            customers' costs. The isAdmin gate is the access control. */}
+        {isAdmin && <MarginReport />}
 
         <AchievementsSection unlocked={unlockedAchievements} />
 

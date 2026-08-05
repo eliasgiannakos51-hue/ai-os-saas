@@ -396,6 +396,17 @@
       "creditHistory": "クレジット履歴",
       "manageTeam": "チーム管理",
       "ownerAccess": "オーナーアクセス"
+    },
+    "marginReport": {
+      "title": "マージンレポート",
+      "ownerOnly": "オーナー",
+      "description": "過去 {days} 日間の機能別の平均達成マージン（実測 AI コストに基づく）。",
+      "empty": "この期間に記録された AI 操作はまだありません。",
+      "unavailable": "レポートを読み込めませんでした。ai_cost_log が存在するか確認してください。",
+      "colFeature": "機能",
+      "colCalls": "操作数",
+      "colMargin": "平均マージン",
+      "colCost": "実コスト"
     }
   },
   "dashboard": {

@@ -396,6 +396,17 @@
       "creditHistory": "Historial de Créditos",
       "manageTeam": "Gestionar Equipo",
       "ownerAccess": "Acceso de Propietario"
+    },
+    "marginReport": {
+      "title": "Informe de Margen",
+      "ownerOnly": "Propietario",
+      "description": "Margen medio obtenido por función en los últimos {days} días, a partir del coste real de IA.",
+      "empty": "Aún no hay acciones de IA registradas en este periodo.",
+      "unavailable": "No se pudo cargar el informe. Comprueba que existe ai_cost_log.",
+      "colFeature": "Función",
+      "colCalls": "Acciones",
+      "colMargin": "Margen medio",
+      "colCost": "Coste real"
     }
   },
   "dashboard": {

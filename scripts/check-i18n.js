@@ -82,6 +82,9 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.documents.deleteLabel",
   "fr:dashboard.documents.title",
   "fr:dashboard.overview.quickActions.trading.label",
+  // "Actions" is the correct French word, spelled identically — a cognate,
+  // not a translation that was skipped.
+  "fr:settings.marginReport.colCalls",
   "fr:sidebar.items.documents",
   "fr:sidebar.items.finance",
   "fr:sidebar.items.images",

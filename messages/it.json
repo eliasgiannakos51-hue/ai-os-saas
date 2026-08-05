@@ -396,6 +396,17 @@
       "creditHistory": "Cronologia Crediti",
       "manageTeam": "Gestisci Team",
       "ownerAccess": "Accesso Proprietario"
+    },
+    "marginReport": {
+      "title": "Rapporto Margine",
+      "ownerOnly": "Proprietario",
+      "description": "Margine medio ottenuto per funzione negli ultimi {days} giorni, dal costo IA reale misurato.",
+      "empty": "Nessuna azione IA registrata in questo periodo.",
+      "unavailable": "Impossibile caricare il rapporto. Verifica che ai_cost_log esista.",
+      "colFeature": "Funzione",
+      "colCalls": "Azioni",
+      "colMargin": "Margine medio",
+      "colCost": "Costo reale"
     }
   },
   "dashboard": {

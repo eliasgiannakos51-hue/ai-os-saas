@@ -396,6 +396,17 @@
       "creditHistory": "Credit-Verlauf",
       "manageTeam": "Team Verwalten",
       "ownerAccess": "Inhaber-Zugang"
+    },
+    "marginReport": {
+      "title": "Margenbericht",
+      "ownerOnly": "Inhaber",
+      "description": "Durchschnittlich erzielte Marge je Funktion der letzten {days} Tage, aus real gemessenen KI-Kosten.",
+      "empty": "In diesem Zeitraum wurden noch keine KI-Aktionen erfasst.",
+      "unavailable": "Bericht konnte nicht geladen werden. Prüfe, ob ai_cost_log existiert.",
+      "colFeature": "Funktion",
+      "colCalls": "Aktionen",
+      "colMargin": "Ø Marge",
+      "colCost": "Reale Kosten"
     }
   },
   "dashboard": {

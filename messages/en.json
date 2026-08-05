@@ -396,6 +396,17 @@
       "creditHistory": "Credit History",
       "manageTeam": "Manage Team",
       "ownerAccess": "Owner Access"
+    },
+    "marginReport": {
+      "title": "Margin Report",
+      "ownerOnly": "Owner",
+      "description": "Average achieved margin per feature over the last {days} days, from real measured AI cost.",
+      "empty": "No AI actions recorded in this window yet.",
+      "unavailable": "Could not load the report. Check that ai_cost_log exists.",
+      "colFeature": "Feature",
+      "colCalls": "Actions",
+      "colMargin": "Avg margin",
+      "colCost": "Real cost"
     }
   },
   "dashboard": {

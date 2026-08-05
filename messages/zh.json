@@ -396,6 +396,17 @@
       "creditHistory": "积分记录",
       "manageTeam": "管理团队",
       "ownerAccess": "所有者权限"
+    },
+    "marginReport": {
+      "title": "利润率报告",
+      "ownerOnly": "所有者",
+      "description": "过去 {days} 天各功能的平均实际利润率，基于真实测量的 AI 成本。",
+      "empty": "此时间段内尚无 AI 操作记录。",
+      "unavailable": "无法加载报告。请确认 ai_cost_log 表存在。",
+      "colFeature": "功能",
+      "colCalls": "操作次数",
+      "colMargin": "平均利润率",
+      "colCost": "真实成本"
     }
   },
   "dashboard": {

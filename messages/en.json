@@ -591,7 +591,9 @@
       "title": "Ionexa Chat",
       "hideConversations": "Hide conversations",
       "showConversations": "Show conversations",
-      "focusMode": "Focus mode"
+      "focusMode": "Focus mode",
+      "streamInterrupted": "The connection dropped before the reply finished.",
+      "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete."
     },
     "create": {
       "title": "Create Anything"
@@ -911,7 +913,9 @@
       "chatThinking": "Thinking",
       "chatFailed": "The chat request failed.",
       "chatNetworkError": "Network error — please try again.",
-      "chatContext": "Context: I just created a {type} called \"{title}\" in Ionexa AI. My original request was: {request}"
+      "chatContext": "Context: I just created a {type} called \"{title}\" in Ionexa AI. My original request was: {request}",
+      "streamInterrupted": "The connection dropped before the reply finished.",
+      "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete."
     }
   },
   "module": {
@@ -952,7 +956,9 @@
     "placeholder": "Ask anything about this entry...",
     "emptyState": "Ask a question about this entry — no need to explain the context, the AI already has it.",
     "send": "Send",
-    "close": "Close"
+    "close": "Close",
+    "streamInterrupted": "The connection dropped before the reply finished.",
+    "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete."
   },
   "entityLinks": {
     "buttonLabel": "Link to...",

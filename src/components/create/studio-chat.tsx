@@ -7,6 +7,7 @@ import { MessageContent } from "@/components/chat/message-content";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useCredits } from "@/components/credits/credits-context";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { readNdjsonStream } from "@/lib/ndjson-stream";
 
 type StudioMessage = { id: number; role: "user" | "assistant"; content: string };
 
@@ -72,35 +73,24 @@ export function StudioChat({ context }: { context: string }) {
         return;
       }
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
       let accumulated = "";
       let streamError: string | null = null;
 
-      for (;;) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex = buffer.indexOf("\n");
-        while (newlineIndex !== -1) {
-          const line = buffer.slice(0, newlineIndex);
-          buffer = buffer.slice(newlineIndex + 1);
-          newlineIndex = buffer.indexOf("\n");
-          if (!line.trim()) continue;
-
-          const event = JSON.parse(line);
-          if (event.type === "meta") {
-            conversationIdRef.current = event.conversationId ?? conversationIdRef.current;
-          } else if (event.type === "delta") {
+      // Never throws — a dropped connection must not delete the answer
+      // the user already watched stream in. See lib/ndjson-stream.ts.
+      const { interrupted } = await readNdjsonStream(res.body, (event) => {
+        if (event.type === "meta") {
+          conversationIdRef.current =
+            (event.conversationId as string | undefined) ?? conversationIdRef.current;
+        } else if (event.type === "delta") {
+          if (typeof event.text === "string") {
             accumulated += event.text;
             setStreaming(accumulated);
-          } else if (event.type === "error") {
-            streamError = event.error;
           }
+        } else if (event.type === "error") {
+          streamError = typeof event.error === "string" ? event.error : t("chatFailed");
         }
-      }
+      });
 
       void refreshCredits();
 
@@ -112,6 +102,9 @@ export function StudioChat({ context }: { context: string }) {
         ]);
       }
       if (streamError) setError(streamError);
+      else if (interrupted) {
+        setError(accumulated ? t("streamInterruptedPartial") : t("streamInterrupted"));
+      }
     } catch {
       setError(t("chatNetworkError"));
     } finally {

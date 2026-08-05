@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
+import { checkCronAuth } from "@/lib/cron-auth";
 import { sendWeeklyDigestEmail } from "@/lib/email/send-weekly-digest-email";
 import { logApiError } from "@/lib/log-error";
 
@@ -12,19 +13,16 @@ const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 // this route; it's meant to be hit periodically by a scheduled trigger
 // (Vercel Cron, a GitHub Action, etc.) once that's set up separately.
 //
-// If CRON_SECRET is set, callers must send it as `Authorization: Bearer
-// <CRON_SECRET>` (the header Vercel Cron sends automatically when a cron
-// job has a secret configured). If CRON_SECRET is unset, the route runs
-// unauthenticated — fine for local testing, but set CRON_SECRET before
-// exposing this in production so a stray request can't email every user.
+// Callers must send CRON_SECRET as `Authorization: Bearer <CRON_SECRET>`
+// (the header Vercel Cron sends automatically when a cron job has a secret
+// configured) or as `x-cron-secret`. Without CRON_SECRET configured the
+// route refuses to run on any deployment, so a stray request can't email
+// every user. See lib/cron-auth.ts.
 export async function GET(request: Request) {
   try {
-    const secret = process.env.CRON_SECRET;
-    if (secret) {
-      const authHeader = request.headers.get("authorization");
-      if (authHeader !== `Bearer ${secret}`) {
-        return NextResponse.json({ ok: false, error: "Unauthorized." }, { status: 401 });
-      }
+    const auth = checkCronAuth(request);
+    if (!auth.ok) {
+      return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
     }
 
     const admin = createAdminClient();

@@ -12,6 +12,7 @@ import { ArrowUp, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen } 
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { MessageContent } from "@/components/chat/message-content";
 import { useCredits } from "@/components/credits/credits-context";
@@ -309,55 +310,46 @@ export function ChatWorkspace({
         return;
       }
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
       let resolvedConversationId: string | null = sentFromId;
       let accumulatedText = "";
       let streamError: string | null = null;
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex = buffer.indexOf("\n");
-        while (newlineIndex !== -1) {
-          const line = buffer.slice(0, newlineIndex);
-          buffer = buffer.slice(newlineIndex + 1);
-          newlineIndex = buffer.indexOf("\n");
-          if (!line.trim()) continue;
-
-          const event = JSON.parse(line);
-          if (event.type === "meta") {
-            resolvedConversationId = event.conversationId;
-            if (typeof event.freeRemaining === "number") {
-              setFreeRemaining(event.freeRemaining);
-            }
-            if (event.conversationId && event.conversationId !== sentFromId) {
-              setActiveId(event.conversationId);
-            }
-            if (event.isNewConversation) {
-              const nowIso = new Date().toISOString();
-              setConversations((prev) => [
-                {
-                  id: event.conversationId,
-                  title: event.title ?? text.slice(0, 40),
-                  is_pinned: false,
-                  created_at: nowIso,
-                  updated_at: nowIso,
-                },
-                ...prev,
-              ]);
-            }
-          } else if (event.type === "delta") {
+      // readNdjsonStream never throws — see lib/ndjson-stream.ts. That is
+      // what keeps a reply the user already watched arrive from being
+      // discarded when the connection drops partway through it.
+      const { interrupted } = await readNdjsonStream(res.body, (event) => {
+        if (event.type === "meta") {
+          resolvedConversationId = (event.conversationId as string | null) ?? null;
+          if (typeof event.freeRemaining === "number") {
+            setFreeRemaining(event.freeRemaining);
+          }
+          if (event.conversationId && event.conversationId !== sentFromId) {
+            setActiveId(event.conversationId as string);
+          }
+          if (event.isNewConversation) {
+            const nowIso = new Date().toISOString();
+            setConversations((prev) => [
+              {
+                id: event.conversationId as string,
+                title: (event.title as string | undefined) ?? text.slice(0, 40),
+                is_pinned: false,
+                created_at: nowIso,
+                updated_at: nowIso,
+              },
+              ...prev,
+            ]);
+          }
+        } else if (event.type === "delta") {
+          // Guard the concatenation: an event without a string `text`
+          // used to append the literal "undefined" into the reply.
+          if (typeof event.text === "string") {
             accumulatedText += event.text;
             setStreamingText(accumulatedText);
-          } else if (event.type === "error") {
-            streamError = event.error;
           }
+        } else if (event.type === "error") {
+          streamError = typeof event.error === "string" ? event.error : "Something went wrong.";
         }
-      }
+      });
 
       if (accumulatedText) {
         setMessages((m) => [
@@ -385,6 +377,14 @@ export function ChatWorkspace({
 
       if (streamError) {
         setError(streamError);
+      } else if (interrupted) {
+        // The partial reply above has already been kept. Say what
+        // happened rather than pretending the whole request failed.
+        setError(
+          accumulatedText
+            ? t("streamInterruptedPartial")
+            : t("streamInterrupted")
+        );
       }
 
       void refreshCredits();

@@ -591,7 +591,9 @@
       "title": "محادثة Ionexa",
       "hideConversations": "إخفاء المحادثات",
       "showConversations": "إظهار المحادثات",
-      "focusMode": "وضع التركيز"
+      "focusMode": "وضع التركيز",
+      "streamInterrupted": "انقطع الاتصال قبل اكتمال الرد.",
+      "streamInterruptedPartial": "انقطع الاتصال — قد يكون الرد أعلاه غير مكتمل."
     },
     "create": {
       "title": "إنشاء أي شيء"
@@ -911,7 +913,9 @@
       "chatThinking": "جارٍ التفكير",
       "chatFailed": "فشل طلب المحادثة.",
       "chatNetworkError": "خطأ في الشبكة — يُرجى المحاولة مجددًا.",
-      "chatContext": "السياق: أنشأتُ للتو {type} باسم «{title}» في Ionexa AI. طلبي الأصلي كان: {request}"
+      "chatContext": "السياق: أنشأتُ للتو {type} باسم «{title}» في Ionexa AI. طلبي الأصلي كان: {request}",
+      "streamInterrupted": "انقطع الاتصال قبل اكتمال الرد.",
+      "streamInterruptedPartial": "انقطع الاتصال — قد يكون الرد أعلاه غير مكتمل."
     }
   },
   "module": {
@@ -952,7 +956,9 @@
     "placeholder": "اسأل أي شيء عن هذا الإدخال...",
     "emptyState": "اطرح سؤالاً عن هذا الإدخال — لا حاجة لشرح السياق، فالذكاء الاصطناعي يعرفه بالفعل.",
     "send": "إرسال",
-    "close": "إغلاق"
+    "close": "إغلاق",
+    "streamInterrupted": "انقطع الاتصال قبل اكتمال الرد.",
+    "streamInterruptedPartial": "انقطع الاتصال — قد يكون الرد أعلاه غير مكتمل."
   },
   "entityLinks": {
     "buttonLabel": "ربط بـ...",

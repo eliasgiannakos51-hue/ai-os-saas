@@ -591,7 +591,9 @@
       "title": "Ionexa Chat",
       "hideConversations": "Ocultar conversaciones",
       "showConversations": "Mostrar conversaciones",
-      "focusMode": "Modo concentración"
+      "focusMode": "Modo concentración",
+      "streamInterrupted": "La conexión se interrumpió antes de que terminara la respuesta.",
+      "streamInterruptedPartial": "La conexión se interrumpió: la respuesta anterior puede estar incompleta."
     },
     "create": {
       "title": "Crear Cualquier Cosa"
@@ -911,7 +913,9 @@
       "chatThinking": "Pensando",
       "chatFailed": "La petición de chat falló.",
       "chatNetworkError": "Error de red: inténtalo de nuevo.",
-      "chatContext": "Contexto: acabo de crear un {type} llamado «{title}» en Ionexa AI. Mi petición original fue: {request}"
+      "chatContext": "Contexto: acabo de crear un {type} llamado «{title}» en Ionexa AI. Mi petición original fue: {request}",
+      "streamInterrupted": "La conexión se interrumpió antes de que terminara la respuesta.",
+      "streamInterruptedPartial": "La conexión se interrumpió: la respuesta anterior puede estar incompleta."
     }
   },
   "module": {
@@ -952,7 +956,9 @@
     "placeholder": "Pregunta cualquier cosa sobre esta entrada...",
     "emptyState": "Haz una pregunta sobre esta entrada — no hace falta explicar el contexto, la IA ya lo tiene.",
     "send": "Enviar",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "streamInterrupted": "La conexión se interrumpió antes de que terminara la respuesta.",
+    "streamInterruptedPartial": "La conexión se interrumpió: la respuesta anterior puede estar incompleta."
   },
   "entityLinks": {
     "buttonLabel": "Vincular a...",

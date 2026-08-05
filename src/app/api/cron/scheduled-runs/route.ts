@@ -7,13 +7,19 @@ import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
-import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import {
+  reserveCredits,
+  settleReservation,
+  releaseReservation,
+  releaseExpiredReservations,
+} from "@/lib/billing/reservations";
 import { diagLog } from "@/lib/diag";
 import { MISSION_STEP_MODEL, runMissionStepForUser } from "@/lib/mission-step-runner";
 import { buildPriorStepsContext } from "@/lib/mission-context";
 import { updateMissionPlanSteps } from "@/lib/mission-plan-steps";
 import { computeNextRunAt } from "@/lib/automation-schedule";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
+import { checkCronAuth } from "@/lib/cron-auth";
 import { sendScheduledRunCompleteEmail } from "@/lib/email/send-scheduled-run-complete-email";
 import { sendStuckGenerationEmail } from "@/lib/email/send-stuck-generation-email";
 import { logApiError } from "@/lib/log-error";
@@ -53,18 +59,18 @@ const MAX_RUNS_PER_USER_PER_DAY = 5;
 // already picked; this route's only job is running it a day later than
 // they clicked it, with a credit check first.
 //
-// If CRON_SECRET is set, callers must send it as `Authorization: Bearer
-// <CRON_SECRET>` (the header Vercel Cron sends automatically when a cron
-// job has a secret configured) — same convention as
-// api/cron/reset-credits and api/weekly-digest.
+// Callers must send CRON_SECRET as `Authorization: Bearer <CRON_SECRET>`
+// (the header Vercel Cron sends automatically when a cron job has a secret
+// configured) or as `x-cron-secret` — same convention as
+// api/cron/reset-credits and api/weekly-digest. Without CRON_SECRET
+// configured the route refuses to run on any deployment: this one spends
+// real money per invocation, so an unauthenticated caller could run up an
+// Anthropic bill on every user's behalf. See lib/cron-auth.ts.
 export async function GET(request: Request) {
   try {
-    const secret = process.env.CRON_SECRET;
-    if (secret) {
-      const authHeader = request.headers.get("authorization");
-      if (authHeader !== `Bearer ${secret}`) {
-        return NextResponse.json({ ok: false, error: "Unauthorized." }, { status: 401 });
-      }
+    const auth = checkCronAuth(request);
+    if (!auth.ok) {
+      return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
     }
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -635,6 +641,29 @@ export async function GET(request: Request) {
       logApiError("/api/cron/scheduled-runs", rateLimitCleanupError, { stage: "cleanup_rate_limit_log" });
     }
 
+    // Phase 3 — sweep abandoned credit holds.
+    //
+    // DEFECT this fixes (found in the V1+V2 audit): releaseExpiredReservations
+    // was documented in BOTH lib/billing/reservations.ts and the SQL function
+    // itself as "called by the daily cron" — and had ZERO callers anywhere in
+    // the repo. Nothing swept, ever.
+    //
+    // It is not a lockout (reserve_credits already ignores holds whose
+    // expires_at has passed, so no user ever lost access to their balance),
+    // which is why it went unnoticed. What it does mean is that
+    // credit_reservations accumulates 'active' rows forever, and every single
+    // reserve makes a sum() over that growing set — a slow, permanent
+    // degradation on the hottest path in the billing system, plus a status
+    // column that lies to anything reading it.
+    let expiredReservationsSwept = 0;
+    try {
+      expiredReservationsSwept = await releaseExpiredReservations();
+    } catch (err) {
+      // Never let housekeeping fail the cron: the scheduled runs and
+      // automations above have already done real, billable work by now.
+      logApiError("/api/cron/scheduled-runs", err, { stage: "sweep_reservations" });
+    }
+
     return NextResponse.json({
       ok: true,
       completed,
@@ -643,6 +672,7 @@ export async function GET(request: Request) {
       automationsCompleted,
       automationsFailed,
       stuckNotified,
+      expiredReservationsSwept,
     });
   } catch (err) {
     logApiError("/api/cron/scheduled-runs", err);

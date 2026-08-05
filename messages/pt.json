@@ -591,7 +591,9 @@
       "title": "Ionexa Conversa",
       "hideConversations": "Ocultar conversas",
       "showConversations": "Mostrar conversas",
-      "focusMode": "Modo de foco"
+      "focusMode": "Modo de foco",
+      "streamInterrupted": "A ligação foi interrompida antes de a resposta terminar.",
+      "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta."
     },
     "create": {
       "title": "Criar Qualquer Coisa"
@@ -911,7 +913,9 @@
       "chatThinking": "A pensar",
       "chatFailed": "O pedido de chat falhou.",
       "chatNetworkError": "Erro de rede — tente novamente.",
-      "chatContext": "Contexto: acabei de criar um {type} chamado «{title}» no Ionexa AI. O meu pedido original foi: {request}"
+      "chatContext": "Contexto: acabei de criar um {type} chamado «{title}» no Ionexa AI. O meu pedido original foi: {request}",
+      "streamInterrupted": "A ligação foi interrompida antes de a resposta terminar.",
+      "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta."
     }
   },
   "module": {
@@ -952,7 +956,9 @@
     "placeholder": "Pergunte qualquer coisa sobre esta entrada...",
     "emptyState": "Faça uma pergunta sobre esta entrada — não precisa explicar o contexto, a IA já o tem.",
     "send": "Enviar",
-    "close": "Fechar"
+    "close": "Fechar",
+    "streamInterrupted": "A ligação foi interrompida antes de a resposta terminar.",
+    "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta."
   },
   "entityLinks": {
     "buttonLabel": "Vincular a...",

@@ -92,6 +92,15 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // Every request that isn't a static asset runs the auth check above,
+    // which includes a Supabase getUser() round trip. Anything that is
+    // fetched by a browser or an email client rather than navigated to
+    // belongs in this exclusion list — .webmanifest was missing, so the
+    // manifest fetch (which Next serves with crossorigin=use-credentials,
+    // i.e. WITH cookies) paid for a full auth round trip on every cold
+    // load. The same omission is what made the old extensionless
+    // /email-logo route run middleware on every image fetch from every
+    // inbox; that route is gone and its replacement is a real .png.
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)",
   ],
 };

@@ -14,18 +14,42 @@ const FOREGROUND = "#f5f5f5";
 const MUTED = "#a3a3a3";
 const MONO_STACK = "'Courier New', Courier, monospace";
 
-// /email-logo is a real, hosted PNG (see src/app/email-logo/route.tsx) —
-// email clients need a fully-qualified, actually-hosted image URL, and
-// most of them (Outlook especially) won't render inline or linked SVG at
-// all, so the mark can't simply be dropped in as markup here.
+// A committed, static PNG served straight off the CDN — NOT a rendered
+// route. It used to point at /email-logo, a Next.js edge route returning
+// an ImageResponse, and that is why the logo never appeared in a real
+// inbox even though every render test said it did. Three separate
+// reasons, all of which this file's URL choice now avoids:
 //
-// Deliberately NOT /apple-icon, which this used to point at: that route
-// is drawn for a home-screen tile (thin 2-3px strokes on a 180px canvas)
-// and renders as a barely-visible hairline once an inbox scales it down.
-// /email-logo draws the same mark with ~3x heavier strokes on a tighter
-// canvas so it stays legible at the size below.
+//   1. /email-logo has no file extension, so it did NOT match
+//      src/middleware.ts's matcher exclusion (which only skips paths
+//      ending .svg/.png/.jpg/...). Every image fetch from every inbox
+//      therefore ran the auth middleware, including a Supabase
+//      getUser() round trip, before the image was produced.
+//   2. Gmail and Outlook fetch images through their own caching proxies.
+//      Those proxies are far more reliable with a plain static file than
+//      with a cold-starting, extensionless, dynamically generated route.
+//   3. An ImageResponse route is generated per request. A static file is
+//      just bytes on a CDN.
+//
+// Regenerate with: node scripts/generate-email-logo.mjs
 const SITE_URL = getSiteUrl();
-const LOGO_URL = `${SITE_URL}/email-logo`;
+const LOGO_URL = `${SITE_URL}/ionexa-email-logo.png`;
+
+// An inbox can only ever load an absolute https URL. Locally SITE_URL is
+// http://localhost:3000, which every real client fails to fetch and then
+// renders as a broken-image icon — worse than no image. In that case the
+// header falls back to the wordmark alone, which is text and always
+// renders.
+const LOGO_IS_REACHABLE = LOGO_URL.startsWith("https://");
+
+// The wordmark is real styled TEXT, not part of the image, so the brand
+// still reads when a client blocks images — which most do by default.
+// The alt text carries its own inline styling for the same reason: an
+// unstyled alt renders as tiny default-serif black-on-dark and is
+// effectively invisible in this template.
+const LOGO_HTML = LOGO_IS_REACHABLE
+  ? `<img src="${LOGO_URL}" width="56" height="56" alt="Ionexa AI" style="display:block; border:0; outline:none; text-decoration:none; border-radius:12px; margin-bottom:10px; color:${ORANGE}; font-family:${MONO_STACK}; font-size:15px; font-weight:bold; line-height:56px;" />`
+  : "";
 
 function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }) {
   return `<!doctype html>
@@ -43,7 +67,7 @@ function layout({ preheader, bodyHtml }: { preheader: string; bodyHtml: string }
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
             <tr>
               <td style="padding-bottom:24px;">
-                <img src="${LOGO_URL}" width="56" height="56" alt="Ionexa AI" style="display:block; border:0; outline:none; text-decoration:none; border-radius:12px; margin-bottom:10px;" />
+                ${LOGO_HTML}
                 <span style="color:${ORANGE}; font-size:15px; letter-spacing:2px; font-weight:bold;">Ionexa AI</span>
               </td>
             </tr>

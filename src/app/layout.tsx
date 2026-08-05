@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import "@fontsource/inter/400.css";
@@ -15,14 +15,50 @@ import {
 } from "@/lib/accessibility-prefs";
 import { getSiteUrl } from "@/lib/site-url";
 
+const SITE_DESCRIPTION =
+  "Create anything with AI. From ideas and research to trading, finance, product planning and business decisions — organized in one intelligent workspace.";
+
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
     default: "Ionexa AI — The energy behind everything you build.",
     template: "%s — Ionexa AI",
   },
-  description:
-    "Create anything with AI. From ideas and research to trading, finance, product planning and business decisions — organized in one intelligent workspace.",
+  description: SITE_DESCRIPTION,
+  applicationName: "Ionexa AI",
+  // What Safari puts under the icon when the site is added to the home
+  // screen. Without it — and without the manifest in app/manifest.ts —
+  // the browser falls back to scraping the host, which on a *.vercel.app
+  // deployment reads as "Vercel". That fallback is the reported bug; both
+  // of these together are what override it.
+  appleWebApp: {
+    capable: true,
+    title: "Ionexa AI",
+    statusBarStyle: "black-translucent",
+  },
+  // siteName is what a browser, a share sheet and every social preview
+  // use to name the site itself, as opposed to naming the page.
+  openGraph: {
+    type: "website",
+    siteName: "Ionexa AI",
+    title: "Ionexa AI — The energy behind everything you build.",
+    description: SITE_DESCRIPTION,
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ionexa AI — The energy behind everything you build.",
+    description: SITE_DESCRIPTION,
+  },
+};
+
+// Colours the browser chrome on mobile to match the app's own background,
+// so the status bar doesn't sit as a white band above a black page.
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
+  colorScheme: "dark light",
+  width: "device-width",
+  initialScale: 1,
 };
 
 // Sets data-theme and the three accessibility data-* attributes on <html>

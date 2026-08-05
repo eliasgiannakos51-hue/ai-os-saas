@@ -5,7 +5,6 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
-import { GenericAddForm } from "@/components/modules/generic-add-form";
 import { GenericList } from "@/components/modules/generic-list";
 import { TimelineList } from "@/components/timeline/timeline-list";
 import { ReflectionGenerator } from "@/components/reflection/reflection-generator";
@@ -171,9 +170,6 @@ export default async function TradingWorkflowPage() {
 
           {error && <ErrorMessage message={`loading trades: ${error.message}`} />}
 
-          <div className="mb-6">
-            <GenericAddForm module={tradingModule} />
-          </div>
 
           <GenericList module={tradingModule} records={tradeRows} linkedEntities={linkedEntities} />
         </div>

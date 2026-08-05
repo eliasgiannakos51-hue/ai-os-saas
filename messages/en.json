@@ -532,7 +532,8 @@
       "italic": "Italic",
       "heading1": "Heading 1",
       "heading2": "Heading 2",
-      "bulletList": "Bullet list"
+      "bulletList": "Bullet list",
+      "updatedAt": "Edited {when}"
     },
     "chat": {
       "title": "Ionexa Chat"
@@ -553,7 +554,8 @@
     "favorites": {
       "title": "Favorites",
       "description": "Everything you've starred, across every module, in one place.",
-      "emptyState": "Nothing starred yet — tap the star on any entry to save it here."
+      "emptyState": "Nothing starred yet — tap the star on any entry to save it here.",
+      "starredAt": "Starred {when}"
     },
     "mission": {
       "title": "Mission Control",
@@ -563,7 +565,7 @@
       "goalPlaceholder": "e.g. I want to start an online store for handmade jewelry",
       "createPlan": "Create Plan",
       "planning": "Planning...",
-      "emptyState": "No missions yet — describe a goal above to get your first plan.",
+      "emptyState": "No missions yet — use \"New Mission\" to describe a goal and get your first plan.",
       "createWithAi": "Create with AI",
       "creating": "Creating...",
       "openWebsiteBuilder": "Open Website Builder",
@@ -592,7 +594,16 @@
       "builtByAgent": "Built by {agent}",
       "retry": "Retry ({attempts}/{max})",
       "stepFailedMax": "Failed {max}x — won't retry automatically. Try rephrasing the step or building it manually.",
-      "sessionExpired": "Your session expired while loading. Nothing was lost — please reload the page."
+      "sessionExpired": "Your session expired while loading. Nothing was lost — please reload the page.",
+      "newMission": "New Mission",
+      "tabSteps": "Steps",
+      "tabReview": "Review",
+      "stepsProgress": "{done}/{total} steps",
+      "statusFilterLabel": "Status",
+      "nextStep": "Next: {step}",
+      "noSteps": "This mission has no plan steps yet.",
+      "reviewNotRunYet": "Every step is done — run the Reviewer to get a summary.",
+      "reviewLocked": "The Reviewer runs once every step is complete."
     },
     "reflection": {
       "title": "Weekly Reflection",
@@ -691,7 +702,7 @@
       "downloadButton": "Download HTML",
       "deleteButton": "Delete",
       "deleted": "Website deleted",
-      "emptyState": "No websites yet — describe one above to generate your first.",
+      "emptyState": "No websites yet — use \"New Website\" to generate your first.",
       "editLabel": "Request a change",
       "editPlaceholder": "e.g. Make the hero section bigger, or change the colors to blue.",
       "editButton": "Apply changes",
@@ -711,7 +722,17 @@
       "imageRemove": "Remove image",
       "imageInvalidType": "Only JPG or PNG images are supported.",
       "imageTooLarge": "Image is too large — please choose a file under 5MB.",
-      "imageTooMany": "You can add up to {max} images."
+      "imageTooMany": "You can add up to {max} images.",
+      "newProject": "New Website",
+      "tabPreview": "Preview",
+      "tabEdit": "Edit",
+      "tabHistory": "History",
+      "statusLabel": "Status",
+      "statusCompleted": "Ready",
+      "statusFlagged": "Flagged",
+      "flaggedTitle": "Flagged by our safety review",
+      "regenerateFree": "Regenerate (free)",
+      "editUnavailable": "You can request changes once this website has finished generating."
     },
     "marketplace": {
       "title": "Marketplace",
@@ -779,7 +800,28 @@
     "new": "New {title}",
     "selectPlaceholder": "select...",
     "save": "Save",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "untitled": "Untitled",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleted": "Deleted",
+    "deleteConfirm": "Delete this {label}? This can't be undone.",
+    "updated": "Updated",
+    "actionsFor": "Actions for {name}",
+    "tabDetails": "Details",
+    "tabEdit": "Edit",
+    "tabLinks": "Links",
+    "noDetails": "Nothing else recorded for this entry.",
+    "noLinks": "Not linked to anything yet.",
+    "loggedAt": "Logged {when}",
+    "filterBy": "Filter by {label}",
+    "filterAll": "All {label}",
+    "resultCount": "{count} of {total}",
+    "sort": {
+      "label": "Sort:",
+      "newest": "Newest",
+      "oldest": "Oldest"
+    }
   },
   "askAi": {
     "buttonLabel": "Ask AI",

@@ -3,21 +3,37 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
+import {
+  recordActionClasses,
+  recordActionIconClasses,
+  type RecordActionVariant,
+} from "@/components/ui/record-action-variants";
 
 export function DeleteButton({
   table,
   id,
   label = "entry",
   itemName,
+  variant = "icon",
+  onActivate,
+  onDeleted,
 }: {
   table: string;
   id: string;
   label?: string;
   itemName?: string;
+  /** See record-action-variants.ts — chrome only, same action. */
+  variant?: RecordActionVariant;
+  /** Called before the confirm — lets a host menu close itself first. */
+  onActivate?: () => void;
+  /** Called after a successful delete, before the router refresh. */
+  onDeleted?: () => void;
 }) {
   const router = useRouter();
+  const t = useTranslations("module");
   const supabase = createClient();
   const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -25,7 +41,8 @@ export function DeleteButton({
   const hostRef = useRef<HTMLDivElement>(null);
 
   async function handleDelete() {
-    if (!window.confirm(`Delete this ${label}? This can't be undone.`)) {
+    onActivate?.();
+    if (!window.confirm(t("deleteConfirm", { label }))) {
       return;
     }
 
@@ -36,11 +53,12 @@ export function DeleteButton({
 
     if (error) {
       setError(error.message);
-      addToast(`✗ error: ${error.message}`, "error");
+      addToast(`✗ ${error.message}`, "error");
       return;
     }
 
-    addToast("✓ deleted");
+    addToast(`✓ ${t("deleted")}`);
+    onDeleted?.();
     animateRowOut(hostRef.current, () => router.refresh());
   }
 
@@ -81,21 +99,26 @@ export function DeleteButton({
     window.setTimeout(finish, 500);
   }
 
+  const menuItem = variant === "menuItem";
+
   return (
-    <div ref={hostRef} className="flex flex-col items-end gap-1">
+    <div ref={hostRef} className={variant === "icon" ? "flex flex-col items-end gap-1" : ""}>
       <button
         type="button"
+        data-menu-item={menuItem ? "" : undefined}
+        role={menuItem ? "menuitem" : undefined}
         onClick={handleDelete}
         disabled={loading}
-        aria-label={itemName ? `Delete ${label}: ${itemName}` : `Delete ${label}`}
-        title="Delete"
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50"
+        aria-label={itemName ? `${t("delete")}: ${itemName}` : t("delete")}
+        title={t("delete")}
+        className={recordActionClasses(variant, "destructive")}
       >
-        <Trash2 className="h-4 w-4" />
+        <Trash2 className={recordActionIconClasses(variant)} />
+        {variant !== "icon" && t("delete")}
       </button>
       {error && (
-        <p className="max-w-[16rem] text-right text-xs text-red-400">
-          error: {error}
+        <p className={`text-xs text-red-400 ${menuItem ? "px-2.5 pb-1" : "max-w-[16rem] text-right"}`}>
+          {error}
         </p>
       )}
     </div>

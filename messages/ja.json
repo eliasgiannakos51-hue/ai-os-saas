@@ -532,7 +532,8 @@
       "italic": "斜体",
       "heading1": "見出し1",
       "heading2": "見出し2",
-      "bulletList": "箇条書き"
+      "bulletList": "箇条書き",
+      "updatedAt": "{when}に編集"
     },
     "chat": {
       "title": "Ionexa チャット"
@@ -553,7 +554,8 @@
     "favorites": {
       "title": "お気に入り",
       "description": "すべてのモジュールでスター付けした項目を1か所にまとめて表示します。",
-      "emptyState": "まだお気に入りはありません — 項目のスターをタップして保存してください。"
+      "emptyState": "まだお気に入りはありません — 項目のスターをタップして保存してください。",
+      "starredAt": "{when}に登録"
     },
     "mission": {
       "title": "ミッションコントロール",
@@ -563,7 +565,7 @@
       "goalPlaceholder": "例: 手作りジュエリーのオンラインストアを始めたい",
       "createPlan": "計画を作成",
       "planning": "計画中...",
-      "emptyState": "ミッションはまだありません — 上に目標を記述して最初の計画を作成してください。",
+      "emptyState": "ミッションはまだありません。「新しいミッション」から目標を入力して最初の計画を作成してください。",
       "createWithAi": "AIで作成",
       "creating": "作成中...",
       "openWebsiteBuilder": "Website Builderを開く",
@@ -592,7 +594,16 @@
       "builtByAgent": "{agent}が作成",
       "retry": "再試行 ({attempts}/{max})",
       "stepFailedMax": "{max}回失敗しました — 自動的には再試行されません。ステップの言い方を変えるか、手動で作成してください。",
-      "sessionExpired": "読み込み中にセッションが期限切れになりました。データは失われていません — ページを再読み込みしてください。"
+      "sessionExpired": "読み込み中にセッションが期限切れになりました。データは失われていません — ページを再読み込みしてください。",
+      "newMission": "新しいミッション",
+      "tabSteps": "ステップ",
+      "tabReview": "レビュー",
+      "stepsProgress": "{total} 中 {done} ステップ",
+      "statusFilterLabel": "ステータス",
+      "nextStep": "次: {step}",
+      "noSteps": "このミッションにはまだ計画ステップがありません。",
+      "reviewNotRunYet": "すべてのステップが完了しました。レビュアーを実行して要約を取得してください。",
+      "reviewLocked": "レビュアーはすべてのステップ完了後に実行されます。"
     },
     "reflection": {
       "title": "週次振り返り",
@@ -691,7 +702,7 @@
       "downloadButton": "HTMLをダウンロード",
       "deleteButton": "削除",
       "deleted": "ウェブサイトを削除しました",
-      "emptyState": "まだウェブサイトがありません — 上で説明して最初のサイトを生成しましょう。",
+      "emptyState": "ウェブサイトはまだありません。「新しいウェブサイト」から最初の1つを生成してください。",
       "editLabel": "変更をリクエスト",
       "editPlaceholder": "例：ヒーローセクションを大きくして、または色を青に変更して。",
       "editButton": "変更を適用",
@@ -711,7 +722,17 @@
       "imageRemove": "画像を削除",
       "imageInvalidType": "JPGまたはPNG画像のみサポートされています。",
       "imageTooLarge": "画像が大きすぎます — 5MB未満のファイルを選択してください。",
-      "imageTooMany": "画像は最大{max}枚まで追加できます。"
+      "imageTooMany": "画像は最大{max}枚まで追加できます。",
+      "newProject": "新しいウェブサイト",
+      "tabPreview": "プレビュー",
+      "tabEdit": "編集",
+      "tabHistory": "履歴",
+      "statusLabel": "ステータス",
+      "statusCompleted": "完成",
+      "statusFlagged": "フラグ付き",
+      "flaggedTitle": "安全性レビューによりフラグが付けられました",
+      "regenerateFree": "再生成（無料）",
+      "editUnavailable": "ウェブサイトの生成が完了すると変更をリクエストできます。"
     },
     "marketplace": {
       "title": "マーケットプレイス",
@@ -779,7 +800,28 @@
     "new": "新規 {title}",
     "selectPlaceholder": "選択してください...",
     "save": "保存",
-    "saving": "保存中..."
+    "saving": "保存中...",
+    "untitled": "無題",
+    "edit": "編集",
+    "delete": "削除",
+    "deleted": "削除しました",
+    "deleteConfirm": "この{label}を削除しますか？元に戻せません。",
+    "updated": "更新しました",
+    "actionsFor": "{name} の操作",
+    "tabDetails": "詳細",
+    "tabEdit": "編集",
+    "tabLinks": "リンク",
+    "noDetails": "このエントリーには他に記録がありません。",
+    "noLinks": "まだ何にもリンクされていません。",
+    "loggedAt": "{when}に記録",
+    "filterBy": "{label}で絞り込む",
+    "filterAll": "すべての{label}",
+    "resultCount": "{total} 件中 {count} 件",
+    "sort": {
+      "label": "並び替え:",
+      "newest": "新しい順",
+      "oldest": "古い順"
+    }
   },
   "askAi": {
     "buttonLabel": "AI に質問",

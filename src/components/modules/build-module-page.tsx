@@ -3,7 +3,6 @@ import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
-import { GenericAddForm } from "@/components/modules/generic-add-form";
 import { GenericList } from "@/components/modules/generic-list";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
 import type { ModuleConfig } from "@/lib/modules";
@@ -75,9 +74,6 @@ export async function BuildModulePage({
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader icon={icon} title={config.title} />
 
-        <div className="mb-6">
-          <GenericAddForm module={config} />
-        </div>
 
         {error && <ErrorMessage message={`loading ${config.table}: ${error.message}`} />}
 

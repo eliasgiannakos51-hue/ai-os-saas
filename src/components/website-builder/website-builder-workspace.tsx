@@ -1,7 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
-import { AlertTriangle, Download, History, Image as ImageIcon, Layout, Loader2, Sparkles, Trash2, Wand2, X } from "lucide-react";
+import {
+  AlertTriangle,
+  Download,
+  Eye,
+  History,
+  Image as ImageIcon,
+  Layout,
+  Loader2,
+  Plus,
+  SearchX,
+  Sparkles,
+  Trash2,
+  Wand2,
+  X,
+} from "lucide-react";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
@@ -29,11 +43,44 @@ import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
+import { CardGrid, EntityCard, type EntityCardStatusTone } from "@/components/ui/entity-card";
+import { DetailPanel, type DetailTab } from "@/components/ui/detail-panel";
+import { ListLayout } from "@/components/ui/list-layout";
+import { SortToggle } from "@/components/sort-toggle";
+import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 20000;
 const MAX_CHANGE_REQUEST_LENGTH = 20000;
+
+// The edit form lives inside the detail panel's content area while its
+// submit button lives in the panel's footer — the shared detail shape puts
+// every committing action in the footer — so the two are tied together by
+// this id via the button's `form` attribute.
+const EDIT_FORM_ID = "website-edit-form";
+
+type DetailTabKey = "preview" | "edit" | "history";
+
+// Every status a user_websites row can hold, in the order the filter
+// dropdown offers them, with the label key and card tone each maps to.
+const WEBSITE_STATUSES = ["pending", "processing", "completed", "failed", "flagged"] as const;
+
+const WEBSITE_STATUS_LABEL_KEYS: Record<string, string> = {
+  pending: "statusGenerating",
+  processing: "statusGenerating",
+  completed: "statusCompleted",
+  failed: "statusFailed",
+  flagged: "statusFlagged",
+};
+
+const WEBSITE_STATUS_TONES: Record<string, EntityCardStatusTone> = {
+  pending: "active",
+  processing: "active",
+  completed: "success",
+  failed: "danger",
+  flagged: "warning",
+};
 
 // How often the client polls /api/websites/status for a website still
 // "pending"/"processing" — see pollWebsiteStatus below. Short enough to
@@ -136,6 +183,8 @@ export function WebsiteBuilderWorkspace({
 }) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.websiteBuilder");
+  const tCommon = useTranslations("common");
+  const tModule = useTranslations("module");
   const supabase = createClient();
   const { refresh: refreshCredits, accountCreditPriceEur } = useCredits();
   const { addToast } = useToast();
@@ -147,6 +196,14 @@ export function WebsiteBuilderWorkspace({
   const [error, setError] = useState<string | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(initialWebsites[0]?.id ?? null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // The generation form is now behind the list's "+ New" button, like
+  // every other list in the app — it opens by default only when there is
+  // nothing to look at yet.
+  const [showForm, setShowForm] = useState(initialWebsites.length === 0);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [detailTab, setDetailTab] = useState<DetailTabKey>("preview");
 
   // Optional reference images (logo/product photos/style screenshot, up
   // to MAX_REFERENCE_IMAGES) — uploaded to Supabase Storage right before
@@ -187,7 +244,6 @@ export function WebsiteBuilderWorkspace({
   // is opened for a given site), keyed by website_id.
   const [versionsByWebsite, setVersionsByWebsite] = useState<Record<string, WebsiteVersion[]>>({});
   const [loadingVersionsFor, setLoadingVersionsFor] = useState<string | null>(null);
-  const [historyOpenFor, setHistoryOpenFor] = useState<string | null>(null);
   const [viewingVersion, setViewingVersion] = useState<WebsiteVersion | null>(null);
 
   // Guards every poll's setState against firing after this component has
@@ -303,6 +359,25 @@ export function WebsiteBuilderWorkspace({
     // need to be re-triggered when `websites` itself changes client-side.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialWebsites]);
+
+  // Deep link support for ?project=<id>, which is the href every starred
+  // Website Builder project has always pointed at (lib/favoritable.ts's
+  // EXTRA_FAVORITABLE) — the workspace never read it, so following a
+  // favorite landed on whichever project happened to be newest instead of
+  // the one that was starred.
+  //
+  // Read from window.location rather than useSearchParams: this component
+  // is a client component inside a page that next build would otherwise
+  // demand a Suspense boundary for, and the value is only needed once, on
+  // mount.
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("project");
+    if (requested && initialWebsites.some((w) => w.id === requested)) {
+      setPreviewId(requested);
+      setShowForm(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleImageChange(e: ChangeEvent<HTMLInputElement>) {
     const selected = Array.from(e.target.files ?? []);
@@ -453,6 +528,8 @@ export function WebsiteBuilderWorkspace({
       setDescription("");
       setReferenceImageFiles([]);
       setPendingClarification(null);
+      setShowForm(false);
+      setDetailTab("preview");
 
       // Idempotency guard (see api/websites/generate/route.ts) — a fast
       // double-submit resolves to the SAME already-created pending row
@@ -608,9 +685,10 @@ export function WebsiteBuilderWorkspace({
     addToast(t("deleted"));
   }
 
-  function selectWebsite(id: string) {
+  function selectWebsite(id: string, tab: DetailTabKey = "preview") {
     setPreviewId(id);
-    setHistoryOpenFor(null);
+    setDetailTab(tab);
+    if (tab === "history") void loadVersions(id);
     setViewingVersion(null);
     setEditText("");
     setEditError(null);
@@ -690,13 +768,9 @@ export function WebsiteBuilderWorkspace({
     }
   }
 
-  async function toggleHistory(websiteId: string) {
-    if (historyOpenFor === websiteId) {
-      setHistoryOpenFor(null);
-      return;
-    }
-    setHistoryOpenFor(websiteId);
-    setViewingVersion(null);
+  // Version history is still fetched lazily — now on the first time the
+  // History TAB is opened for a given site rather than on a button press.
+  async function loadVersions(websiteId: string) {
     if (versionsByWebsite[websiteId] || loadingVersionsFor === websiteId) return;
 
     setLoadingVersionsFor(websiteId);
@@ -712,6 +786,11 @@ export function WebsiteBuilderWorkspace({
       return;
     }
     setVersionsByWebsite((prev) => ({ ...prev, [websiteId]: (data as WebsiteVersion[]) ?? [] }));
+  }
+
+  function selectDetailTab(key: DetailTabKey) {
+    setDetailTab(key);
+    if (key === "history" && previewId) void loadVersions(previewId);
   }
 
   const previewWebsite = websites.find((w) => w.id === previewId) ?? null;
@@ -785,184 +864,198 @@ export function WebsiteBuilderWorkspace({
     accountCreditPriceEur ?? undefined
   ).estimatedCredits;
 
-  // Pagination — same shared pattern/page size as every module list
-  // (lib/use-sort-and-paginate.ts), so a user with 10+ generated sites
-  // gets a bounded, navigable list instead of an ever-growing one.
-  const { page, setPage, totalPages, paginated: paginatedWebsites } = useSortAndPaginate(
-    websites,
-    websites.length
-  );
+
+  // Search + status filter + sort + pagination — the same toolbar every
+  // other list in the app now carries (components/ui/list-layout.tsx),
+  // over the same shared sort/paginate hook.
+  const filteredWebsites = websites.filter((website) => {
+    const q = query.trim().toLowerCase();
+    if (q && !`${website.name} ${website.description ?? ""}`.toLowerCase().includes(q)) return false;
+    if (statusFilter && website.status !== statusFilter) return false;
+    return true;
+  });
+
+  const { sortOrder, setSortOrder, page, setPage, totalPages, paginated: paginatedWebsites } =
+    useSortAndPaginate(filteredWebsites, `${query}|${statusFilter}`);
+
+  const detailTabs: DetailTab[] = [
+    { key: "preview", label: t("tabPreview"), icon: Eye },
+    { key: "edit", label: t("tabEdit"), icon: Wand2 },
+    {
+      key: "history",
+      label: t("tabHistory"),
+      icon: History,
+      badge: activeVersions?.length || undefined,
+    },
+  ];
 
   return (
     <div className="space-y-6">
-      <form
-        onSubmit={handleGenerate}
-        className="space-y-3 rounded-2xl border border-border bg-panel p-5"
-      >
-        <div>
-          <label htmlFor="website-name" className="mb-1 block text-xs text-muted">
-            {t("nameLabel")}
-          </label>
-          <input
-            id="website-name"
-            type="text"
-            required
-            maxLength={MAX_NAME_LENGTH}
-            value={name}
-            onChange={(e) => setName(e.target.value.slice(0, MAX_NAME_LENGTH))}
-            placeholder={t("namePlaceholder")}
-            className="input"
-          />
-        </div>
-        <div>
-          <label htmlFor="website-description" className="mb-1 block text-xs text-muted">
-            {t("descriptionLabel")}
-          </label>
-          <textarea
-            id="website-description"
-            required
-            maxLength={MAX_DESCRIPTION_LENGTH}
-            value={description}
-            onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_LENGTH))}
-            placeholder={t("descriptionPlaceholder")}
-            className="input min-h-32 resize-y"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="website-reference-image" className="mb-1 block text-xs text-muted">
-            {t("imageLabel", { count: referenceImageFiles.length, max: MAX_REFERENCE_IMAGES })}
-          </label>
-          {referenceImageFiles.length > 0 && (
-            <ul className="mb-2 space-y-1.5">
-              {referenceImageFiles.map((file, index) => (
-                <li
-                  key={`${file.name}-${index}`}
-                  className="flex items-center gap-2 rounded-lg border border-border bg-input px-3 py-2"
-                >
-                  <ImageIcon className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
-                  <span className="min-w-0 flex-1 truncate text-sm text-foreground">{file.name}</span>
-                  <button
-                    type="button"
-                    onClick={() => removeReferenceImage(index)}
-                    aria-label={t("imageRemove")}
-                    title={t("imageRemove")}
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
-                  >
-                    <X className="h-3.5 w-3.5" aria-hidden="true" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-          {referenceImageFiles.length < MAX_REFERENCE_IMAGES && (
-            <FilePicker
-              id="website-reference-image"
-              inputRef={imageInputRef}
-              multiple
-              accept={ACCEPTED_REFERENCE_IMAGE_TYPES.join(",")}
-              selectedCount={referenceImageFiles.length}
-              onChange={handleImageChange}
-            />
-          )}
-          <p className="mt-1 text-[11px] text-muted">{t("imageHelp", { max: MAX_REFERENCE_IMAGES })}</p>
-          {imageError && <p className="mt-1 text-[11px] text-red-400">{imageError}</p>}
-        </div>
-
-        {description.trim().length > 0 && (
-          <p className="rounded-lg border border-border bg-input px-3 py-2 text-xs text-muted">
-            {t("estimatedCost", { count: estimatedCost })}
-          </p>
-        )}
-
-        {isLargeGenerationRequest(description.length, referenceImageFiles.length) ? (
-          <p className="rounded-lg border border-amber-800/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-300">
-            {t("estimatedTimeLargeRequest")}
-          </p>
-        ) : (
-          referenceImageFiles.length > 0 && (
-            <p className="rounded-lg border border-amber-800/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-300">
-              {t("estimatedTimeWithImages")}
-            </p>
-          )
-        )}
-
-        {error && (
-          <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
-            {error}
-          </p>
-        )}
-
-        {pendingClarification ? (
-          <ClarificationQuestions
-            questions={pendingClarification.questions}
-            onAnswer={handleClarificationAnswer}
-            onSkip={handleClarificationSkip}
-            submitting={generating}
-            title={t("clarificationTitle")}
-            skipLabel={t("clarificationSkip")}
-            continueLabel={t("clarificationContinue")}
-            answerPlaceholder={t("clarificationAnswerPlaceholder")}
-          />
-        ) : (
-          <button
-            type="submit"
-            disabled={generating || !name.trim() || !description.trim()}
-            className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
-          >
-            {generating ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-            ) : (
-              <Sparkles className="h-4 w-4" aria-hidden="true" />
-            )}
-            {generating ? t("generating") : t("generateButton")}
-          </button>
-        )}
-      </form>
-
       {previewWebsite && (
-        // The project's detail view. Same corner star as the list card, so
-        // a project can be starred from wherever the user happens to be
-        // looking at it.
-        <div className="relative rounded-2xl border border-border bg-panel p-5">
-          <FavoriteButton
-            table="user_websites"
-            recordId={previewWebsite.id}
-            headline={previewWebsite.name}
-            initialFavorited={favoritedWebsiteIds.includes(previewWebsite.id)}
-          />
-          <div className="flex flex-wrap items-center justify-between gap-2 pr-12">
-            <div className="flex min-w-0 items-center gap-2">
-              <p className="min-w-0 truncate text-sm font-semibold text-foreground">
-                {previewWebsite.name}
-              </p>
+        <DetailPanel
+          icon={WEBSITE_BUILDER_ICON}
+          accentSlug="websiteBuilder"
+          title={previewWebsite.name}
+          subtitle={
+            <span
+              title={new Date(previewWebsite.created_at).toLocaleString()}
+              suppressHydrationWarning
+            >
+              {formatRelativeTime(previewWebsite.created_at)}
+            </span>
+          }
+          corner={
+            <>
               {(previewWebsite.status === "completed" || previewWebsite.status === "flagged") && (
                 <SecurityCheckedBadge resourceType="website" resourceId={previewWebsite.id} />
               )}
-            </div>
-            <div className="flex shrink-0 items-center gap-1.5">
+              <FavoriteButton
+                table="user_websites"
+                recordId={previewWebsite.id}
+                headline={previewWebsite.name}
+                initialFavorited={favoritedWebsiteIds.includes(previewWebsite.id)}
+                variant="inline"
+              />
               <button
                 type="button"
-                onClick={() => toggleHistory(previewWebsite.id)}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+                onClick={() => setPreviewId(null)}
+                aria-label={tCommon("cancel")}
+                title={tCommon("cancel")}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
               >
-                <History className="h-3.5 w-3.5" aria-hidden="true" />
-                {t("historyButton")}
+                <X className="h-4 w-4" aria-hidden="true" />
               </button>
+            </>
+          }
+          tabs={detailTabs}
+          activeTab={detailTab}
+          onTabChange={(key) => selectDetailTab(key as DetailTabKey)}
+          actions={
+            detailTab === "edit" ? (
               <button
-                type="button"
-                onClick={() => downloadHtml(previewWebsite)}
-                disabled={previewWebsite.status !== "completed"}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40"
+                type="submit"
+                form={EDIT_FORM_ID}
+                disabled={editing || !editText.trim() || previewWebsite.status !== "completed"}
+                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
               >
-                <Download className="h-3.5 w-3.5" aria-hidden="true" />
-                {t("downloadButton")}
+                {editing ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                ) : (
+                  <Wand2 className="h-3.5 w-3.5" aria-hidden="true" />
+                )}
+                {editing ? t("editApplying") : t("editButton")}
               </button>
-            </div>
-          </div>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => downloadHtml(previewWebsite)}
+                  disabled={previewWebsite.status !== "completed"}
+                  className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0"
+                >
+                  <Download className="h-3.5 w-3.5" aria-hidden="true" />
+                  {t("downloadButton")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(previewWebsite.id)}
+                  disabled={deletingId === previewWebsite.id}
+                  className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-red-400 transition-colors duration-150 hover:border-red-500/60 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0"
+                >
+                  <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  {t("deleteButton")}
+                </button>
+              </>
+            )
+          }
+        >
+          {detailTab === "preview" && (
+            <>
+              {viewingVersion && (
+                <p className="mb-3 rounded-lg border border-orange-800 bg-orange-950/20 px-3 py-2 text-xs text-orange-300">
+                  {t("viewingOldVersion", { number: viewingVersion.version_number })}{" "}
+                  <button
+                    type="button"
+                    onClick={() => setViewingVersion(null)}
+                    className="font-semibold underline hover:no-underline"
+                  >
+                    {t("backToLatest")}
+                  </button>
+                </p>
+              )}
 
-          {historyOpenFor === previewWebsite.id && (
-            <div className="mt-3 rounded-xl border border-border bg-input p-3">
+              {!viewingVersion && previewIsGenerating && hasLivePreviewContent ? (
+                <div className="relative h-[500px] w-full">
+                  <iframe
+                    key={previewWebsite.id}
+                    srcDoc={livePreviewHtml}
+                    sandbox=""
+                    title={previewWebsite.name}
+                    className="h-full w-full rounded-xl border border-border bg-white"
+                  />
+                  <div className="absolute left-1/2 top-3 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-orange-500/40 bg-black/80 px-3 py-1.5 text-xs font-medium text-orange-300 shadow-lg backdrop-blur">
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                    {t("livePreviewBadge")}
+                  </div>
+                </div>
+              ) : !viewingVersion && previewIsGenerating ? (
+                <div className="flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-border bg-input px-6 text-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-orange-400" aria-hidden="true" />
+                  <p className="text-sm font-medium text-foreground">{t("generatingTitle")}</p>
+                  <p className="max-w-md text-xs text-muted">{t("generatingBody")}</p>
+                  <p className="text-xs text-orange-400/80" aria-live="polite">
+                    {t(PROGRESS_MESSAGE_KEYS[progressMessageIndex])}
+                  </p>
+                </div>
+              ) : !viewingVersion && previewWebsite.status === "failed" ? (
+                <div className="flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-red-800 bg-red-950/20 px-6 text-center">
+                  <AlertTriangle className="h-8 w-8 text-red-400" aria-hidden="true" />
+                  <p className="text-sm font-medium text-red-300">{t("generationFailedTitle")}</p>
+                  <p className="max-w-md text-xs text-red-300/80">
+                    {previewWebsite.error_message ?? t("generateFailed")}
+                  </p>
+                </div>
+              ) : !viewingVersion && previewWebsite.status === "flagged" ? (
+                <div className="flex h-[500px] w-full flex-col items-center justify-center gap-3 rounded-xl border border-amber-800 bg-amber-950/20 px-6 text-center">
+                  <AlertTriangle className="h-8 w-8 text-amber-400" aria-hidden="true" />
+                  <p className="text-sm font-medium text-amber-300">{t("flaggedTitle")}</p>
+                  <p className="max-w-md text-xs text-amber-300/80">{previewWebsite.error_message}</p>
+                  {!previewWebsite.free_retry_used && previewWebsite.description && (
+                    <button
+                      type="button"
+                      onClick={() => handleRegenerateFlagged(previewWebsite.id)}
+                      disabled={regeneratingId === previewWebsite.id}
+                      className="inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-lg bg-amber-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {regeneratingId === previewWebsite.id ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                      ) : (
+                        <Wand2 className="h-3.5 w-3.5" aria-hidden="true" />
+                      )}
+                      {t("regenerateFree")}
+                    </button>
+                  )}
+                </div>
+              ) : displayedHtmlIsComplete ? (
+                <iframe
+                  key={`${previewWebsite.id}:${viewingVersion?.id ?? "latest"}`}
+                  srcDoc={displayedHtml}
+                  sandbox=""
+                  title={previewWebsite.name}
+                  className="h-[500px] w-full rounded-xl border border-border bg-white"
+                />
+              ) : (
+                <div className="flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-red-800 bg-red-950/20 px-6 text-center">
+                  <AlertTriangle className="h-8 w-8 text-red-400" aria-hidden="true" />
+                  <p className="text-sm font-medium text-red-300">{t("previewIncompleteTitle")}</p>
+                  <p className="max-w-md text-xs text-red-300/80">{t("previewIncompleteBody")}</p>
+                </div>
+              )}
+            </>
+          )}
+
+          {detailTab === "history" && (
+            <div>
               {loadingVersionsFor === previewWebsite.id ? (
                 <p className="flex items-center gap-1.5 text-xs text-muted">
                   <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
@@ -976,9 +1069,12 @@ export function WebsiteBuilderWorkspace({
                     <li key={version.id}>
                       <button
                         type="button"
-                        onClick={() =>
-                          setViewingVersion((current) => (current?.id === version.id ? null : version))
-                        }
+                        onClick={() => {
+                          setViewingVersion((current) =>
+                            current?.id === version.id ? null : version
+                          );
+                          setDetailTab("preview");
+                        }}
                         className={`w-full rounded-lg border px-2.5 py-1.5 text-left text-xs transition-colors duration-150 ${
                           viewingVersion?.id === version.id
                             ? "border-orange-500/40 bg-orange-500/[0.03] text-foreground"
@@ -990,7 +1086,11 @@ export function WebsiteBuilderWorkspace({
                         </span>
                         {" — "}
                         {version.change_description ?? t("versionOriginal")}
-                        <span className="ml-1.5 text-muted" title={new Date(version.created_at).toLocaleString()} suppressHydrationWarning>
+                        <span
+                          className="ml-1.5 text-muted"
+                          title={new Date(version.created_at).toLocaleString()}
+                          suppressHydrationWarning
+                        >
                           ({formatRelativeTime(version.created_at)})
                         </span>
                       </button>
@@ -1001,89 +1101,13 @@ export function WebsiteBuilderWorkspace({
             </div>
           )}
 
-          {viewingVersion && (
-            <p className="mt-3 rounded-lg border border-orange-800 bg-orange-950/20 px-3 py-2 text-xs text-orange-300">
-              {t("viewingOldVersion", { number: viewingVersion.version_number })}{" "}
-              <button
-                type="button"
-                onClick={() => setViewingVersion(null)}
-                className="font-semibold underline hover:no-underline"
-              >
-                {t("backToLatest")}
-              </button>
-            </p>
-          )}
-
-          {!viewingVersion && previewIsGenerating && hasLivePreviewContent ? (
-            <div className="relative mt-3 h-[500px] w-full">
-              <iframe
-                key={previewWebsite.id}
-                srcDoc={livePreviewHtml}
-                sandbox=""
-                title={previewWebsite.name}
-                className="h-full w-full rounded-xl border border-border bg-white"
-              />
-              <div className="absolute left-1/2 top-3 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-orange-500/40 bg-black/80 px-3 py-1.5 text-xs font-medium text-orange-300 shadow-lg backdrop-blur">
-                <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
-                {t("livePreviewBadge")}
-              </div>
-            </div>
-          ) : !viewingVersion && previewIsGenerating ? (
-            <div className="mt-3 flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-border bg-input px-6 text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-orange-400" aria-hidden="true" />
-              <p className="text-sm font-medium text-foreground">{t("generatingTitle")}</p>
-              <p className="max-w-md text-xs text-muted">{t("generatingBody")}</p>
-              <p className="text-xs text-orange-400/80" aria-live="polite">
-                {t(PROGRESS_MESSAGE_KEYS[progressMessageIndex])}
-              </p>
-            </div>
-          ) : !viewingVersion && previewWebsite.status === "failed" ? (
-            <div className="mt-3 flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-red-800 bg-red-950/20 px-6 text-center">
-              <AlertTriangle className="h-8 w-8 text-red-400" aria-hidden="true" />
-              <p className="text-sm font-medium text-red-300">{t("generationFailedTitle")}</p>
-              <p className="max-w-md text-xs text-red-300/80">
-                {previewWebsite.error_message ?? t("generateFailed")}
-              </p>
-            </div>
-          ) : !viewingVersion && previewWebsite.status === "flagged" ? (
-            <div className="mt-3 flex h-[500px] w-full flex-col items-center justify-center gap-3 rounded-xl border border-amber-800 bg-amber-950/20 px-6 text-center">
-              <AlertTriangle className="h-8 w-8 text-amber-400" aria-hidden="true" />
-              <p className="text-sm font-medium text-amber-300">Flagged by our safety review</p>
-              <p className="max-w-md text-xs text-amber-300/80">{previewWebsite.error_message}</p>
-              {!previewWebsite.free_retry_used && previewWebsite.description && (
-                <button
-                  type="button"
-                  onClick={() => handleRegenerateFlagged(previewWebsite.id)}
-                  disabled={regeneratingId === previewWebsite.id}
-                  className="inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-lg bg-amber-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {regeneratingId === previewWebsite.id ? (
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-                  ) : (
-                    <Wand2 className="h-3.5 w-3.5" aria-hidden="true" />
-                  )}
-                  Regenerate (free)
-                </button>
+          {detailTab === "edit" && (
+            <form id={EDIT_FORM_ID} onSubmit={handleEdit} className="space-y-2">
+              {previewWebsite.status !== "completed" && (
+                <p className="rounded-lg border border-border bg-input px-3 py-2 text-xs text-muted">
+                  {t("editUnavailable")}
+                </p>
               )}
-            </div>
-          ) : displayedHtmlIsComplete ? (
-            <iframe
-              key={`${previewWebsite.id}:${viewingVersion?.id ?? "latest"}`}
-              srcDoc={displayedHtml}
-              sandbox=""
-              title={previewWebsite.name}
-              className="mt-3 h-[500px] w-full rounded-xl border border-border bg-white"
-            />
-          ) : (
-            <div className="mt-3 flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-red-800 bg-red-950/20 px-6 text-center">
-              <AlertTriangle className="h-8 w-8 text-red-400" aria-hidden="true" />
-              <p className="text-sm font-medium text-red-300">{t("previewIncompleteTitle")}</p>
-              <p className="max-w-md text-xs text-red-300/80">{t("previewIncompleteBody")}</p>
-            </div>
-          )}
-
-          {!viewingVersion && previewWebsite.status === "completed" && (
-            <form onSubmit={handleEdit} className="mt-4 space-y-2 border-t border-border pt-4">
               <label htmlFor="website-edit" className="block text-xs text-muted">
                 {t("editLabel")}
               </label>
@@ -1093,6 +1117,7 @@ export function WebsiteBuilderWorkspace({
                 value={editText}
                 onChange={(e) => setEditText(e.target.value.slice(0, MAX_CHANGE_REQUEST_LENGTH))}
                 placeholder={t("editPlaceholder")}
+                disabled={previewWebsite.status !== "completed"}
                 className="input min-h-28 resize-y"
               />
 
@@ -1108,7 +1133,9 @@ export function WebsiteBuilderWorkspace({
                         className="flex items-center gap-2 rounded-lg border border-border bg-input px-3 py-2"
                       >
                         <ImageIcon className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
-                        <span className="min-w-0 flex-1 truncate text-sm text-foreground">{file.name}</span>
+                        <span className="min-w-0 flex-1 truncate text-sm text-foreground">
+                          {file.name}
+                        </span>
                         <button
                           type="button"
                           onClick={() => removeEditReferenceImage(index)}
@@ -1140,100 +1167,264 @@ export function WebsiteBuilderWorkspace({
                   {editError}
                 </p>
               )}
-              <button
-                type="submit"
-                disabled={editing || !editText.trim()}
-                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
-              >
-                {editing ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-                ) : (
-                  <Wand2 className="h-3.5 w-3.5" aria-hidden="true" />
-                )}
-                {editing ? t("editApplying") : t("editButton")}
-              </button>
             </form>
           )}
-        </div>
+        </DetailPanel>
       )}
 
-      {websites.length === 0 ? (
-        <EmptyState icon={Layout}>{t("emptyState")}</EmptyState>
-      ) : (
-        <>
-          <ul className="space-y-2">
-            {paginatedWebsites.map((website) => (
-              <li
-                key={website.id}
-                // pr reserves the corner star's column so the download and
-                // delete buttons land to its left rather than beneath it.
-                className={`relative flex items-center justify-between gap-2 rounded-xl border px-3 py-2.5 pr-[52px] transition-colors duration-150 ${
-                  website.id === previewId
-                    ? "border-orange-500/40 bg-orange-500/[0.03]"
-                    : "border-border bg-input"
-                }`}
-              >
-                <FavoriteButton
-                  table="user_websites"
-                  recordId={website.id}
-                  headline={website.name}
-                  initialFavorited={favoritedWebsiteIds.includes(website.id)}
-                />
+      <ListLayout
+        newAction={
+          showForm ? (
+            <form
+              onSubmit={handleGenerate}
+              className="panel-pop-in space-y-3 rounded-2xl border border-border bg-panel p-5"
+            >
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-foreground">{t("newProject")}</h2>
                 <button
                   type="button"
-                  onClick={() => selectWebsite(website.id)}
-                  className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+                  onClick={() => setShowForm(false)}
+                  aria-label={tCommon("cancel")}
+                  title={tCommon("cancel")}
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
                 >
-                  <WebsiteThumbnail website={website} />
-                  <span className="min-w-0">
-                    <p className="flex items-center gap-1.5 truncate text-sm font-medium text-foreground">
-                      <span className="truncate">{website.name}</span>
-                      {website.status === "pending" || website.status === "processing" ? (
-                        <span className="shrink-0 rounded-full bg-orange-500/10 px-1.5 py-0.5 text-[10px] font-medium text-orange-400">
-                          {t("statusGenerating")}
-                        </span>
-                      ) : website.status === "failed" ? (
-                        <span className="shrink-0 rounded-full bg-red-500/10 px-1.5 py-0.5 text-[10px] font-medium text-red-400">
-                          {t("statusFailed")}
-                        </span>
-                      ) : website.status === "flagged" ? (
-                        <span className="shrink-0 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-400">
-                          Flagged
-                        </span>
-                      ) : null}
-                    </p>
-                    <p className="text-xs text-muted" title={new Date(website.created_at).toLocaleString()} suppressHydrationWarning>
-                      {formatRelativeTime(website.created_at)}
-                    </p>
-                  </span>
+                  <X className="h-4 w-4" aria-hidden="true" />
                 </button>
-                <div className="flex shrink-0 items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => downloadHtml(website)}
-                    aria-label={t("downloadButton")}
-                    title={t("downloadButton")}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
-                  >
-                    <Download className="h-3.5 w-3.5" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(website.id)}
-                    disabled={deletingId === website.id}
-                    aria-label={t("deleteButton")}
-                    title={t("deleteButton")}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-red-950/40 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <PaginationControls page={page} totalPages={totalPages} onChange={setPage} />
-        </>
-      )}
+              </div>
+
+              <div>
+                <label htmlFor="website-name" className="mb-1 block text-xs text-muted">
+                  {t("nameLabel")}
+                </label>
+                <input
+                  id="website-name"
+                  type="text"
+                  required
+                  maxLength={MAX_NAME_LENGTH}
+                  value={name}
+                  onChange={(e) => setName(e.target.value.slice(0, MAX_NAME_LENGTH))}
+                  placeholder={t("namePlaceholder")}
+                  className="input"
+                />
+              </div>
+              <div>
+                <label htmlFor="website-description" className="mb-1 block text-xs text-muted">
+                  {t("descriptionLabel")}
+                </label>
+                <textarea
+                  id="website-description"
+                  required
+                  maxLength={MAX_DESCRIPTION_LENGTH}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_LENGTH))}
+                  placeholder={t("descriptionPlaceholder")}
+                  className="input min-h-32 resize-y"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="website-reference-image" className="mb-1 block text-xs text-muted">
+                  {t("imageLabel", { count: referenceImageFiles.length, max: MAX_REFERENCE_IMAGES })}
+                </label>
+                {referenceImageFiles.length > 0 && (
+                  <ul className="mb-2 space-y-1.5">
+                    {referenceImageFiles.map((file, index) => (
+                      <li
+                        key={`${file.name}-${index}`}
+                        className="flex items-center gap-2 rounded-lg border border-border bg-input px-3 py-2"
+                      >
+                        <ImageIcon className="h-4 w-4 shrink-0 text-muted" aria-hidden="true" />
+                        <span className="min-w-0 flex-1 truncate text-sm text-foreground">{file.name}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeReferenceImage(index)}
+                          aria-label={t("imageRemove")}
+                          title={t("imageRemove")}
+                          className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+                        >
+                          <X className="h-3.5 w-3.5" aria-hidden="true" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {referenceImageFiles.length < MAX_REFERENCE_IMAGES && (
+                  <FilePicker
+                    id="website-reference-image"
+                    inputRef={imageInputRef}
+                    multiple
+                    accept={ACCEPTED_REFERENCE_IMAGE_TYPES.join(",")}
+                    selectedCount={referenceImageFiles.length}
+                    onChange={handleImageChange}
+                  />
+                )}
+                <p className="mt-1 text-[11px] text-muted">{t("imageHelp", { max: MAX_REFERENCE_IMAGES })}</p>
+                {imageError && <p className="mt-1 text-[11px] text-red-400">{imageError}</p>}
+              </div>
+
+              {description.trim().length > 0 && (
+                <p className="rounded-lg border border-border bg-input px-3 py-2 text-xs text-muted">
+                  {t("estimatedCost", { count: estimatedCost })}
+                </p>
+              )}
+
+              {isLargeGenerationRequest(description.length, referenceImageFiles.length) ? (
+                <p className="rounded-lg border border-amber-800/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-300">
+                  {t("estimatedTimeLargeRequest")}
+                </p>
+              ) : (
+                referenceImageFiles.length > 0 && (
+                  <p className="rounded-lg border border-amber-800/40 bg-amber-500/5 px-3 py-2 text-xs text-amber-300">
+                    {t("estimatedTimeWithImages")}
+                  </p>
+                )
+              )}
+
+              {error && (
+                <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+                  {error}
+                </p>
+              )}
+
+              {pendingClarification ? (
+                <ClarificationQuestions
+                  questions={pendingClarification.questions}
+                  onAnswer={handleClarificationAnswer}
+                  onSkip={handleClarificationSkip}
+                  submitting={generating}
+                  title={t("clarificationTitle")}
+                  skipLabel={t("clarificationSkip")}
+                  continueLabel={t("clarificationContinue")}
+                  answerPlaceholder={t("clarificationAnswerPlaceholder")}
+                />
+              ) : (
+                <button
+                  type="submit"
+                  disabled={generating || !name.trim() || !description.trim()}
+                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+                >
+                  {generating ? (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Sparkles className="h-4 w-4" aria-hidden="true" />
+                  )}
+                  {generating ? t("generating") : t("generateButton")}
+                </button>
+              )}
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowForm(true)}
+              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" /> {t("newProject")}
+            </button>
+          )
+        }
+        searchValue={query}
+        onSearchChange={setQuery}
+        searchPlaceholder={tModule("searchPlaceholder")}
+        filters={
+          <>
+            <SortToggle sortOrder={sortOrder} onChange={setSortOrder} />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              aria-label={tModule("filterBy", { label: t("statusLabel") })}
+              className="min-h-[36px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60 sm:min-h-0"
+            >
+              <option value="">{tModule("filterAll", { label: t("statusLabel") })}</option>
+              {WEBSITE_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {t(WEBSITE_STATUS_LABEL_KEYS[status])}
+                </option>
+              ))}
+            </select>
+          </>
+        }
+        meta={
+          <span className="text-xs text-muted">
+            {tModule("resultCount", { count: filteredWebsites.length, total: websites.length })}
+          </span>
+        }
+      >
+        {websites.length === 0 ? (
+          <EmptyState icon={Layout}>{t("emptyState")}</EmptyState>
+        ) : filteredWebsites.length === 0 ? (
+          <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>
+        ) : (
+          <>
+            <CardGrid>
+              {paginatedWebsites.map((website, i) => (
+                <EntityCard
+                  key={website.id}
+                  index={i}
+                  selected={website.id === previewId}
+                  icon={WEBSITE_BUILDER_ICON}
+                  accentSlug="websiteBuilder"
+                  media={<WebsiteThumbnail website={website} />}
+                  title={website.name}
+                  description={website.description}
+                  onSelect={() => selectWebsite(website.id)}
+                  tags={[
+                    {
+                      key: "created",
+                      label: formatRelativeTime(website.created_at),
+                    },
+                  ]}
+                  status={{
+                    label: t(WEBSITE_STATUS_LABEL_KEYS[website.status] ?? "statusGenerating"),
+                    tone: WEBSITE_STATUS_TONES[website.status] ?? "neutral",
+                    pulse: website.status === "pending" || website.status === "processing",
+                  }}
+                  corner={
+                    <FavoriteButton
+                      table="user_websites"
+                      recordId={website.id}
+                      headline={website.name}
+                      initialFavorited={favoritedWebsiteIds.includes(website.id)}
+                      variant="inline"
+                    />
+                  }
+                  menuLabel={tModule("actionsFor", { name: website.name })}
+                  menu={[
+                    {
+                      key: "open",
+                      label: t("tabPreview"),
+                      icon: Eye,
+                      onSelect: () => selectWebsite(website.id),
+                    },
+                    {
+                      key: "edit",
+                      label: t("editButton"),
+                      icon: Wand2,
+                      disabled: website.status !== "completed",
+                      onSelect: () => selectWebsite(website.id, "edit"),
+                    },
+                    {
+                      key: "download",
+                      label: t("downloadButton"),
+                      icon: Download,
+                      disabled: website.status !== "completed",
+                      onSelect: () => downloadHtml(website),
+                    },
+                    {
+                      key: "delete",
+                      label: t("deleteButton"),
+                      icon: Trash2,
+                      destructive: true,
+                      disabled: deletingId === website.id,
+                      onSelect: () => handleDelete(website.id),
+                    },
+                  ]}
+                />
+              ))}
+            </CardGrid>
+            <PaginationControls page={page} totalPages={totalPages} onChange={setPage} />
+          </>
+        )}
+      </ListLayout>
     </div>
   );
 }

@@ -67,6 +67,12 @@ const LOCALE_ALLOWED = new Set([
   "de:sidebar.items.team",
   "de:sidebar.items.videos",
   "de:sidebar.items.websites",
+  // "Details" is the German word, spelled identically — a loanword the
+  // rest of the German UI already uses, not a skipped translation.
+  "de:module.tabDetails",
+  // "Status" is the German word, spelled identically.
+  "de:dashboard.websiteBuilder.statusLabel",
+  "de:dashboard.mission.statusFilterLabel",
   "es:common.error",
   "es:dashboard.chat.title",
   "es:dashboard.mission.agentRole.general",

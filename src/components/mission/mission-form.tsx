@@ -17,7 +17,7 @@ const MAX_GOAL_LENGTH = 20000;
 // row. router.refresh() afterward re-fetches the mission list server-side
 // (dashboard/mission/page.tsx), same pattern as every other add-form in
 // this app.
-export function MissionForm() {
+export function MissionForm({ onCreated }: { onCreated?: () => void } = {}) {
   const t = useTranslations("dashboard.mission");
   const router = useRouter();
   const { refresh: refreshCredits } = useCredits();
@@ -77,6 +77,7 @@ export function MissionForm() {
 
       setGoal("");
       addToast(`✓ ${t("createPlan")}`);
+      onCreated?.();
       router.refresh();
     } catch {
       const message = "Network error — please try again.";
@@ -99,7 +100,7 @@ export function MissionForm() {
         onCancel={() => setPendingConfirm(false)}
       />
     )}
-    <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-border bg-panel p-5">
+    <form onSubmit={handleSubmit} className="space-y-3 rounded-2xl border border-border bg-panel p-5 pr-14">
       <label htmlFor="mission-goal" className="block text-sm font-semibold text-foreground">
         {t("goalLabel")}
       </label>

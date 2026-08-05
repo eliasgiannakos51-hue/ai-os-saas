@@ -1,22 +1,28 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Rocket } from "lucide-react";
+import { Plus, Rocket, SearchX, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { EmptyState } from "@/components/empty-state";
 import { PaginationControls } from "@/components/pagination-controls";
+import { SortToggle } from "@/components/sort-toggle";
+import { ListLayout } from "@/components/ui/list-layout";
+import { CardGrid } from "@/components/ui/entity-card";
 import { MissionCard } from "@/components/mission/mission-card";
+import { MissionDetail, type MissionDetailTab } from "@/components/mission/mission-detail";
+import { MissionForm } from "@/components/mission/mission-form";
+import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { isActiveMission } from "@/lib/mission-progress";
-import type { Mission } from "@/types/mission";
+import type { Mission, MissionStatus } from "@/types/mission";
 
-// Missions are much larger/heavier than a plain record row (full step
-// list, agent-role pickers, review text), so a smaller page size than the
-// generic 20-per-page (lib/use-sort-and-paginate.ts) keeps the page
-// actually readable once a user has more than a handful of missions —
-// without this, dashboard/mission/page.tsx's unbounded "select every
-// mission ever created" query renders every one of them, fully expanded,
-// on a single ever-growing page.
-const MISSIONS_PER_PAGE = 5;
+const MISSION_STATUSES: MissionStatus[] = ["planning", "in_progress", "completed", "failed"];
+
+const STATUS_LABEL_KEYS: Record<MissionStatus, string> = {
+  planning: "statusPlanning",
+  in_progress: "statusInProgress",
+  completed: "statusCompleted",
+  failed: "statusFailed",
+};
 
 export function MissionList({
   missions,
@@ -25,7 +31,7 @@ export function MissionList({
 }: {
   missions: Mission[];
   // Keyed by mission id — see dashboard/mission/page.tsx, passed straight
-  // through to each MissionCard so it can show "Scheduled" instead of the
+  // through to the detail panel so it can show "Scheduled" instead of the
   // schedule button for a step that already has one pending.
   scheduledStepIndicesByMission?: Record<string, number[]>;
   /** Mission ids the user has starred — one batched query on the page,
@@ -33,43 +39,128 @@ export function MissionList({
   favoritedIds?: string[];
 }) {
   const t = useTranslations("dashboard.mission");
-  const [page, setPage] = useState(1);
+  const tModule = useTranslations("module");
+  const tCommon = useTranslations("common");
+  const [showForm, setShowForm] = useState(missions.length === 0);
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [selected, setSelected] = useState<{ id: string; tab: MissionDetailTab } | null>(null);
   const favoritedSet = useMemo(() => new Set(favoritedIds), [favoritedIds]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return missions.filter((mission) => {
+      if (statusFilter && mission.status !== statusFilter) return false;
+      if (!q) return true;
+      const steps = (mission.plan_steps?.steps ?? []).map((s) => s.text).join(" ");
+      return `${mission.goal} ${steps}`.toLowerCase().includes(q);
+    });
+  }, [missions, query, statusFilter]);
 
   // Active missions (planning/in_progress) surface first regardless of
   // age, so a user with many finished missions doesn't have to scroll
   // past all of them to find what's still in progress — stable within
-  // each group (server already orders by created_at desc).
+  // each group (the shared hook keeps the sort order inside each half).
   const ordered = useMemo(() => {
-    const active = missions.filter(isActiveMission);
-    const finished = missions.filter((m) => !isActiveMission(m));
+    const active = filtered.filter(isActiveMission);
+    const finished = filtered.filter((m) => !isActiveMission(m));
     return [...active, ...finished];
-  }, [missions]);
+  }, [filtered]);
 
-  const totalPages = Math.max(1, Math.ceil(ordered.length / MISSIONS_PER_PAGE));
-  const currentPage = Math.min(page, totalPages);
-  const paginated = ordered.slice(
-    (currentPage - 1) * MISSIONS_PER_PAGE,
-    currentPage * MISSIONS_PER_PAGE
+  const { sortOrder, setSortOrder, page, setPage, totalPages, paginated } = useSortAndPaginate(
+    ordered,
+    `${query}|${statusFilter}`
   );
 
-  if (missions.length === 0) {
-    return <EmptyState icon={Rocket}>{t("emptyState")}</EmptyState>;
-  }
+  const selectedMission = selected ? missions.find((m) => m.id === selected.id) ?? null : null;
 
   return (
-    <div>
-      <div className="space-y-4">
-        {paginated.map((mission) => (
-          <MissionCard
-            key={mission.id}
-            mission={mission}
-            scheduledStepIndices={scheduledStepIndicesByMission[mission.id] ?? []}
-            initialFavorited={favoritedSet.has(mission.id)}
-          />
-        ))}
-      </div>
-      <PaginationControls page={currentPage} totalPages={totalPages} onChange={setPage} />
+    <div className="space-y-6">
+      {selectedMission && (
+        <MissionDetail
+          key={selectedMission.id}
+          mission={selectedMission}
+          scheduledStepIndices={scheduledStepIndicesByMission[selectedMission.id] ?? []}
+          initialFavorited={favoritedSet.has(selectedMission.id)}
+          initialTab={selected?.tab ?? "steps"}
+          onClose={() => setSelected(null)}
+        />
+      )}
+
+      <ListLayout
+        newAction={
+          showForm ? (
+            <div className="panel-pop-in relative">
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                aria-label={tCommon("cancel")}
+                title={tCommon("cancel")}
+                className="absolute right-3 top-3 z-[2] flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </button>
+              <MissionForm onCreated={() => setShowForm(false)} />
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowForm(true)}
+              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" /> {t("newMission")}
+            </button>
+          )
+        }
+        searchValue={query}
+        onSearchChange={setQuery}
+        searchPlaceholder={tModule("searchPlaceholder")}
+        filters={
+          <>
+            <SortToggle sortOrder={sortOrder} onChange={setSortOrder} />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              aria-label={tModule("filterBy", { label: t("statusFilterLabel") })}
+              className="min-h-[36px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60 sm:min-h-0"
+            >
+              <option value="">{tModule("filterAll", { label: t("statusFilterLabel") })}</option>
+              {MISSION_STATUSES.map((status) => (
+                <option key={status} value={status}>
+                  {t(STATUS_LABEL_KEYS[status])}
+                </option>
+              ))}
+            </select>
+          </>
+        }
+        meta={
+          <span className="text-xs text-muted">
+            {tModule("resultCount", { count: filtered.length, total: missions.length })}
+          </span>
+        }
+      >
+        {missions.length === 0 ? (
+          <EmptyState icon={Rocket}>{t("emptyState")}</EmptyState>
+        ) : filtered.length === 0 ? (
+          <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>
+        ) : (
+          <>
+            <CardGrid>
+              {paginated.map((mission, i) => (
+                <MissionCard
+                  key={mission.id}
+                  mission={mission}
+                  index={i}
+                  selected={selected?.id === mission.id}
+                  initialFavorited={favoritedSet.has(mission.id)}
+                  onOpen={(tab) => setSelected({ id: mission.id, tab: tab ?? "steps" })}
+                />
+              ))}
+            </CardGrid>
+            <PaginationControls page={page} totalPages={totalPages} onChange={setPage} />
+          </>
+        )}
+      </ListLayout>
     </div>
   );
 }

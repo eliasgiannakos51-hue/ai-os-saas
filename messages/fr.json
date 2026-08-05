@@ -532,7 +532,8 @@
       "italic": "Italique",
       "heading1": "Titre 1",
       "heading2": "Titre 2",
-      "bulletList": "Liste à puces"
+      "bulletList": "Liste à puces",
+      "updatedAt": "Modifié {when}"
     },
     "chat": {
       "title": "Ionexa Discussion"
@@ -553,7 +554,8 @@
     "favorites": {
       "title": "Favoris",
       "description": "Tout ce que vous avez marqué d'une étoile, dans tous les modules, au même endroit.",
-      "emptyState": "Rien en favori pour l'instant — appuyez sur l'étoile d'une entrée pour l'enregistrer ici."
+      "emptyState": "Rien en favori pour l'instant — appuyez sur l'étoile d'une entrée pour l'enregistrer ici.",
+      "starredAt": "Ajouté {when}"
     },
     "mission": {
       "title": "Contrôle de Mission",
@@ -563,7 +565,7 @@
       "goalPlaceholder": "ex. Je veux lancer une boutique en ligne de bijoux faits main",
       "createPlan": "Créer le Plan",
       "planning": "Planification...",
-      "emptyState": "Aucune mission pour l'instant — décrivez un objectif ci-dessus pour obtenir votre premier plan.",
+      "emptyState": "Aucune mission pour l'instant — utilisez « Nouvelle mission » pour décrire un objectif.",
       "createWithAi": "Créer avec l'IA",
       "creating": "Création...",
       "openWebsiteBuilder": "Ouvrir Website Builder",
@@ -592,7 +594,16 @@
       "builtByAgent": "Créé par {agent}",
       "retry": "Réessayer ({attempts}/{max})",
       "stepFailedMax": "Échec {max}x — ne réessaiera pas automatiquement. Essayez de reformuler l’étape ou de la créer manuellement.",
-      "sessionExpired": "Votre session a expiré pendant le chargement. Rien n'est perdu — rechargez la page."
+      "sessionExpired": "Votre session a expiré pendant le chargement. Rien n'est perdu — rechargez la page.",
+      "newMission": "Nouvelle mission",
+      "tabSteps": "Étapes",
+      "tabReview": "Évaluation",
+      "stepsProgress": "{done}/{total} étapes",
+      "statusFilterLabel": "Statut",
+      "nextStep": "Suivant : {step}",
+      "noSteps": "Cette mission n'a pas encore d'étapes de plan.",
+      "reviewNotRunYet": "Toutes les étapes sont terminées — lancez l'Évaluateur pour obtenir une synthèse.",
+      "reviewLocked": "L'Évaluateur se lance une fois toutes les étapes terminées."
     },
     "reflection": {
       "title": "Bilan Hebdomadaire",
@@ -691,7 +702,7 @@
       "downloadButton": "Télécharger le HTML",
       "deleteButton": "Supprimer",
       "deleted": "Site supprimé",
-      "emptyState": "Aucun site pour l'instant — décrivez-en un ci-dessus pour générer le premier.",
+      "emptyState": "Aucun site web pour l'instant — utilisez « Nouveau site web » pour générer le premier.",
       "editLabel": "Demander une modification",
       "editPlaceholder": "ex. Agrandis la section hero, ou change les couleurs en bleu.",
       "editButton": "Appliquer les modifications",
@@ -711,7 +722,17 @@
       "imageRemove": "Retirer l'image",
       "imageInvalidType": "Seules les images JPG ou PNG sont prises en charge.",
       "imageTooLarge": "Image trop volumineuse — veuillez choisir un fichier de moins de 5 Mo.",
-      "imageTooMany": "Vous pouvez ajouter jusqu'à {max} images."
+      "imageTooMany": "Vous pouvez ajouter jusqu'à {max} images.",
+      "newProject": "Nouveau site web",
+      "tabPreview": "Aperçu",
+      "tabEdit": "Modifier",
+      "tabHistory": "Historique",
+      "statusLabel": "Statut",
+      "statusCompleted": "Prêt",
+      "statusFlagged": "Signalé",
+      "flaggedTitle": "Signalé par notre contrôle de sécurité",
+      "regenerateFree": "Régénérer (gratuit)",
+      "editUnavailable": "Vous pourrez demander des modifications une fois le site généré."
     },
     "marketplace": {
       "title": "Place de marché",
@@ -779,7 +800,28 @@
     "new": "Nouveau {title}",
     "selectPlaceholder": "sélectionner...",
     "save": "Enregistrer",
-    "saving": "Enregistrement..."
+    "saving": "Enregistrement...",
+    "untitled": "Sans titre",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "deleted": "Supprimé",
+    "deleteConfirm": "Supprimer ce {label} ? Action irréversible.",
+    "updated": "Mis à jour",
+    "actionsFor": "Actions pour {name}",
+    "tabDetails": "Détails",
+    "tabEdit": "Modifier",
+    "tabLinks": "Liens",
+    "noDetails": "Rien d'autre n'est enregistré pour cette entrée.",
+    "noLinks": "Pas encore lié à quoi que ce soit.",
+    "loggedAt": "Enregistré {when}",
+    "filterBy": "Filtrer par {label}",
+    "filterAll": "Tous : {label}",
+    "resultCount": "{count} sur {total}",
+    "sort": {
+      "label": "Trier :",
+      "newest": "Plus récents",
+      "oldest": "Plus anciens"
+    }
   },
   "askAi": {
     "buttonLabel": "Demander à l'IA",

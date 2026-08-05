@@ -5,6 +5,13 @@ const config: Config = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    // src/lib holds class strings too — lib/module-colors.ts's per-module
+    // palette is the whole of it. Without this glob Tailwind never saw
+    // "bg-rose-500/10" or "text-rose-400" in any scanned file and purged
+    // every one of them, so the Timeline's module badges and the
+    // Favorites page's group headings have been rendering with no colour
+    // at all: the class was on the element, the rule didn't exist.
+    "./src/lib/**/*.{js,ts}",
   ],
   theme: {
     extend: {

@@ -532,7 +532,8 @@
       "italic": "Itálico",
       "heading1": "Título 1",
       "heading2": "Título 2",
-      "bulletList": "Lista com marcadores"
+      "bulletList": "Lista com marcadores",
+      "updatedAt": "Editado {when}"
     },
     "chat": {
       "title": "Ionexa Conversa"
@@ -553,7 +554,8 @@
     "favorites": {
       "title": "Favoritos",
       "description": "Tudo o que você marcou com estrela, em todos os módulos, em um só lugar.",
-      "emptyState": "Nada favoritado ainda — toque na estrela de qualquer item para salvá-lo aqui."
+      "emptyState": "Nada favoritado ainda — toque na estrela de qualquer item para salvá-lo aqui.",
+      "starredAt": "Guardado {when}"
     },
     "mission": {
       "title": "Controle de Missão",
@@ -563,7 +565,7 @@
       "goalPlaceholder": "ex. Quero abrir uma loja online de joias artesanais",
       "createPlan": "Criar Plano",
       "planning": "Planejando...",
-      "emptyState": "Nenhuma missão ainda — descreva um objetivo acima para obter seu primeiro plano.",
+      "emptyState": "Ainda não há missões — use «Nova missão» para descrever um objetivo.",
       "createWithAi": "Criar com IA",
       "creating": "Criando...",
       "openWebsiteBuilder": "Abrir Website Builder",
@@ -592,7 +594,16 @@
       "builtByAgent": "Criado por {agent}",
       "retry": "Tentar novamente ({attempts}/{max})",
       "stepFailedMax": "Falhou {max}x — não tentará novamente automaticamente. Tente reformular a etapa ou criá-la manualmente.",
-      "sessionExpired": "A tua sessão expirou durante o carregamento. Nada se perdeu — recarrega a página."
+      "sessionExpired": "A tua sessão expirou durante o carregamento. Nada se perdeu — recarrega a página.",
+      "newMission": "Nova missão",
+      "tabSteps": "Passos",
+      "tabReview": "Revisão",
+      "stepsProgress": "{done}/{total} passos",
+      "statusFilterLabel": "Estado",
+      "nextStep": "Seguinte: {step}",
+      "noSteps": "Esta missão ainda não tem passos de plano.",
+      "reviewNotRunYet": "Todos os passos estão concluídos — execute o Revisor para obter um resumo.",
+      "reviewLocked": "O Revisor corre assim que todos os passos estiverem concluídos."
     },
     "reflection": {
       "title": "Reflexão Semanal",
@@ -691,7 +702,7 @@
       "downloadButton": "Baixar HTML",
       "deleteButton": "Excluir",
       "deleted": "Site excluído",
-      "emptyState": "Nenhum site ainda — descreva um acima para gerar o primeiro.",
+      "emptyState": "Ainda não há sites — use «Novo site» para gerar o primeiro.",
       "editLabel": "Solicitar uma alteração",
       "editPlaceholder": "ex. Aumente a seção principal, ou mude as cores para azul.",
       "editButton": "Aplicar alterações",
@@ -711,7 +722,17 @@
       "imageRemove": "Remover imagem",
       "imageInvalidType": "Apenas imagens JPG ou PNG são suportadas.",
       "imageTooLarge": "Imagem muito grande — escolha um arquivo com menos de 5MB.",
-      "imageTooMany": "Podes adicionar até {max} imagens."
+      "imageTooMany": "Podes adicionar até {max} imagens.",
+      "newProject": "Novo site",
+      "tabPreview": "Pré-visualização",
+      "tabEdit": "Editar",
+      "tabHistory": "Histórico",
+      "statusLabel": "Estado",
+      "statusCompleted": "Pronto",
+      "statusFlagged": "Sinalizado",
+      "flaggedTitle": "Sinalizado pela nossa revisão de segurança",
+      "regenerateFree": "Regenerar (grátis)",
+      "editUnavailable": "Poderá pedir alterações assim que o site terminar de ser gerado."
     },
     "marketplace": {
       "title": "Mercado",
@@ -779,7 +800,28 @@
     "new": "Novo {title}",
     "selectPlaceholder": "selecionar...",
     "save": "Salvar",
-    "saving": "Salvando..."
+    "saving": "Salvando...",
+    "untitled": "Sem título",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "deleted": "Eliminado",
+    "deleteConfirm": "Eliminar este {label}? Não é possível anular.",
+    "updated": "Atualizado",
+    "actionsFor": "Ações para {name}",
+    "tabDetails": "Detalhes",
+    "tabEdit": "Editar",
+    "tabLinks": "Ligações",
+    "noDetails": "Nada mais registado para esta entrada.",
+    "noLinks": "Ainda não está ligado a nada.",
+    "loggedAt": "Registado {when}",
+    "filterBy": "Filtrar por {label}",
+    "filterAll": "Todos: {label}",
+    "resultCount": "{count} de {total}",
+    "sort": {
+      "label": "Ordenar:",
+      "newest": "Mais recentes",
+      "oldest": "Mais antigos"
+    }
   },
   "askAi": {
     "buttonLabel": "Perguntar à IA",

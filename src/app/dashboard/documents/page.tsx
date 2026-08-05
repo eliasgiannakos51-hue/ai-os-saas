@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
-import { EmptyState } from "@/components/empty-state";
-import { DocumentListRow } from "@/components/documents/document-list-row";
+import { DocumentsList, type DocumentListItem } from "@/components/documents/documents-list";
 import { loadFavoriteIds } from "@/lib/favorites";
-import { NewDocumentButton } from "@/components/documents/new-document-button";
-import type { UserDocument } from "@/types/document";
+import { documentPreviewText } from "@/lib/document-preview";
+import type { DocumentContent, UserDocument } from "@/types/document";
 
 export const metadata: Metadata = { title: "Documents" };
 
@@ -22,7 +21,6 @@ export const fetchCache = "force-no-store";
 
 export default async function DocumentsPage() {
   const t = await getTranslations("dashboard.documents");
-  const locale = await getLocale();
   const supabase = createClient();
 
   const {
@@ -33,12 +31,26 @@ export default async function DocumentsPage() {
     redirect("/login");
   }
 
+  // `content` is now selected too: every card carries a two-line preview
+  // of the note's own text, which is the only thing that tells two
+  // "Untitled" documents apart at a glance.
   const { data: documents, error } = await supabase
     .from("user_documents")
-    .select("id, title, updated_at")
+    .select("id, title, updated_at, content")
     .order("updated_at", { ascending: false });
 
-  const docs = (documents as Pick<UserDocument, "id" | "title" | "updated_at">[] | null) ?? [];
+  const rows =
+    (documents as (Pick<UserDocument, "id" | "title" | "updated_at"> & {
+      content: DocumentContent | null;
+    })[] | null) ?? [];
+
+  const docs: DocumentListItem[] = rows.map((doc) => ({
+    id: doc.id,
+    title: doc.title,
+    updated_at: doc.updated_at,
+    preview: documentPreviewText(doc.content),
+  }));
+
   // Batched, same as every other list — one query for the whole page.
   const favoritedDocIds = await loadFavoriteIds(
     supabase,
@@ -50,33 +62,11 @@ export default async function DocumentsPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <div className="mb-6 flex items-center justify-between gap-3">
-          <PageHeader icon={FileText} title={t("title")} description={t("description")} />
-          {docs.length > 0 && <NewDocumentButton label={t("newDocument")} />}
-        </div>
+        <PageHeader icon={FileText} title={t("title")} description={t("description")} />
 
         {error && <ErrorMessage message={`loading documents: ${error.message}`} />}
 
-        {docs.length === 0 ? (
-          <EmptyState icon={FileText}>
-            <p className="text-base font-semibold text-foreground">{t("emptyTitle")}</p>
-            <p className="mt-1 text-sm text-muted">{t("emptyHint")}</p>
-            <div className="mt-5 flex justify-center">
-              <NewDocumentButton label={t("newDocument")} large />
-            </div>
-          </EmptyState>
-        ) : (
-          <ul className="space-y-2">
-            {docs.map((doc) => (
-              <DocumentListRow
-                key={doc.id}
-                doc={doc}
-                locale={locale}
-                favorited={favoritedDocIds.has(doc.id)}
-              />
-            ))}
-          </ul>
-        )}
+        <DocumentsList documents={docs} favoritedIds={[...favoritedDocIds]} />
       </div>
     </main>
   );

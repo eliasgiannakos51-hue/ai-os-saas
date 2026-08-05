@@ -27,10 +27,31 @@ export const MODULE_BADGE_COLORS: Record<string, string> = {
   documents: "border-slate-500/40 bg-slate-500/10 text-slate-300",
   presentations: "border-amber-600/40 bg-amber-600/10 text-amber-300",
   campaigns: "border-fuchsia-600/40 bg-fuchsia-600/10 text-fuchsia-300",
+  // The three starrable-but-not-linkable surfaces (lib/favoritable.ts's
+  // EXTRA_FAVORITABLE) plus Mission Control. They render EntityCards like
+  // every other list now, so they need a colour for the icon tile too —
+  // without an entry here they'd all fall back to the same grey.
+  missionControl: "border-orange-600/40 bg-orange-600/10 text-orange-300",
+  websiteBuilder: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300",
+  createStudio: "border-orange-500/40 bg-orange-500/10 text-orange-400",
 };
 
 const FALLBACK_BADGE_COLOR = "border-border bg-input text-foreground/80";
 
 export function moduleBadgeColor(slug: string): string {
   return MODULE_BADGE_COLORS[slug] ?? FALLBACK_BADGE_COLOR;
+}
+
+/**
+ * Classes for a card's icon tile — the small rounded square in the top-left
+ * corner of every EntityCard (components/ui/entity-card.tsx).
+ *
+ * Deliberately the SAME map as the badge above rather than a second
+ * palette: a module's colour is one fact about it, and the timeline badge,
+ * the favorites heading and the card's icon tile all have to agree or the
+ * "same module everywhere" promise breaks the moment someone adds a
+ * module and updates only one of the two maps.
+ */
+export function moduleAccent(slug: string): string {
+  return moduleBadgeColor(slug);
 }

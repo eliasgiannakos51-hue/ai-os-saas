@@ -90,3 +90,24 @@ export const WEBSITE_BUILDER_ICON: LucideIcon = Layout;
 // already used elsewhere in the same sidebar section) — this is the
 // unified Product Workflow page, not the raw Products module list.
 export const PRODUCT_WORKFLOW_ICON: LucideIcon = Flag;
+
+/**
+ * The icon for any slug that can appear on a card, including the
+ * starrable-but-not-a-module surfaces (lib/favoritable.ts's
+ * EXTRA_FAVORITABLE) whose slugs aren't keys of MODULE_ICONS.
+ *
+ * Without this, a starred Website Builder project or Mission fell through
+ * to a generic fallback on the Favorites page while the same record
+ * carried its real icon everywhere else.
+ */
+const EXTRA_ICONS: Record<string, LucideIcon> = {
+  websiteBuilder: WEBSITE_BUILDER_ICON,
+  missionControl: MISSION_ICON,
+  createStudio: CREATE_ICON,
+  tradingWorkflow: TRADING_WORKFLOW_ICON,
+  productWorkflow: PRODUCT_WORKFLOW_ICON,
+};
+
+export function iconForSlug(slug: string, fallback: LucideIcon = Sparkles): LucideIcon {
+  return MODULE_ICONS[slug] ?? EXTRA_ICONS[slug] ?? fallback;
+}

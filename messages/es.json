@@ -532,7 +532,8 @@
       "italic": "Cursiva",
       "heading1": "Encabezado 1",
       "heading2": "Encabezado 2",
-      "bulletList": "Lista con viñetas"
+      "bulletList": "Lista con viñetas",
+      "updatedAt": "Editado {when}"
     },
     "chat": {
       "title": "Ionexa Chat"
@@ -553,7 +554,8 @@
     "favorites": {
       "title": "Favoritos",
       "description": "Todo lo que has marcado con estrella, de todos los módulos, en un solo lugar.",
-      "emptyState": "Aún no hay favoritos — toca la estrella de cualquier entrada para guardarla aquí."
+      "emptyState": "Aún no hay favoritos — toca la estrella de cualquier entrada para guardarla aquí.",
+      "starredAt": "Guardado {when}"
     },
     "mission": {
       "title": "Centro de Misión",
@@ -563,7 +565,7 @@
       "goalPlaceholder": "ej. Quiero abrir una tienda online de joyería artesanal",
       "createPlan": "Crear Plan",
       "planning": "Planificando...",
-      "emptyState": "Aún no hay misiones — describe un objetivo arriba para obtener tu primer plan.",
+      "emptyState": "Aún no hay misiones: usa «Nueva misión» para describir un objetivo y obtener tu primer plan.",
       "createWithAi": "Crear con IA",
       "creating": "Creando...",
       "openWebsiteBuilder": "Abrir Website Builder",
@@ -592,7 +594,16 @@
       "builtByAgent": "Creado por {agent}",
       "retry": "Reintentar ({attempts}/{max})",
       "stepFailedMax": "Falló {max} veces — no se reintentará automáticamente. Intenta reformular el paso o crearlo manualmente.",
-      "sessionExpired": "Tu sesión expiró durante la carga. No se perdió nada: recarga la página."
+      "sessionExpired": "Tu sesión expiró durante la carga. No se perdió nada: recarga la página.",
+      "newMission": "Nueva misión",
+      "tabSteps": "Pasos",
+      "tabReview": "Revisión",
+      "stepsProgress": "{done}/{total} pasos",
+      "statusFilterLabel": "Estado",
+      "nextStep": "Siguiente: {step}",
+      "noSteps": "Esta misión todavía no tiene pasos de plan.",
+      "reviewNotRunYet": "Todos los pasos están hechos: ejecuta el Revisor para obtener un resumen.",
+      "reviewLocked": "El Revisor se ejecuta cuando todos los pasos estén completos."
     },
     "reflection": {
       "title": "Reflexión Semanal",
@@ -691,7 +702,7 @@
       "downloadButton": "Descargar HTML",
       "deleteButton": "Eliminar",
       "deleted": "Sitio eliminado",
-      "emptyState": "Aún no hay sitios — describe uno arriba para generar el primero.",
+      "emptyState": "Aún no hay sitios web: usa «Nuevo sitio web» para generar el primero.",
       "editLabel": "Solicitar un cambio",
       "editPlaceholder": "ej. Haz la sección hero más grande, o cambia los colores a azul.",
       "editButton": "Aplicar cambios",
@@ -711,7 +722,17 @@
       "imageRemove": "Eliminar imagen",
       "imageInvalidType": "Solo se admiten imágenes JPG o PNG.",
       "imageTooLarge": "La imagen es demasiado grande — elige un archivo de menos de 5MB.",
-      "imageTooMany": "Puedes añadir hasta {max} imágenes."
+      "imageTooMany": "Puedes añadir hasta {max} imágenes.",
+      "newProject": "Nuevo sitio web",
+      "tabPreview": "Vista previa",
+      "tabEdit": "Editar",
+      "tabHistory": "Historial",
+      "statusLabel": "Estado",
+      "statusCompleted": "Listo",
+      "statusFlagged": "Marcado",
+      "flaggedTitle": "Marcado por nuestra revisión de seguridad",
+      "regenerateFree": "Regenerar (gratis)",
+      "editUnavailable": "Podrás pedir cambios cuando termine de generarse el sitio web."
     },
     "marketplace": {
       "title": "Mercado",
@@ -779,7 +800,28 @@
     "new": "Nuevo {title}",
     "selectPlaceholder": "seleccionar...",
     "save": "Guardar",
-    "saving": "Guardando..."
+    "saving": "Guardando...",
+    "untitled": "Sin título",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "deleted": "Eliminado",
+    "deleteConfirm": "¿Eliminar este {label}? No se puede deshacer.",
+    "updated": "Actualizado",
+    "actionsFor": "Acciones para {name}",
+    "tabDetails": "Detalles",
+    "tabEdit": "Editar",
+    "tabLinks": "Enlaces",
+    "noDetails": "No hay nada más registrado en esta entrada.",
+    "noLinks": "Aún no está enlazado a nada.",
+    "loggedAt": "Registrado {when}",
+    "filterBy": "Filtrar por {label}",
+    "filterAll": "Todos: {label}",
+    "resultCount": "{count} de {total}",
+    "sort": {
+      "label": "Ordenar:",
+      "newest": "Más recientes",
+      "oldest": "Más antiguos"
+    }
   },
   "askAi": {
     "buttonLabel": "Preguntar a la IA",

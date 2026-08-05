@@ -532,7 +532,8 @@
       "italic": "斜体",
       "heading1": "标题 1",
       "heading2": "标题 2",
-      "bulletList": "项目符号列表"
+      "bulletList": "项目符号列表",
+      "updatedAt": "编辑于 {when}"
     },
     "chat": {
       "title": "Ionexa 聊天"
@@ -553,7 +554,8 @@
     "favorites": {
       "title": "收藏",
       "description": "所有模块中你加星标的内容，都在这里集中展示。",
-      "emptyState": "还没有收藏 — 点击任意条目的星标即可保存到这里。"
+      "emptyState": "还没有收藏 — 点击任意条目的星标即可保存到这里。",
+      "starredAt": "收藏于 {when}"
     },
     "mission": {
       "title": "任务控制中心",
@@ -563,7 +565,7 @@
       "goalPlaceholder": "例如:我想开一家手工珠宝在线商店",
       "createPlan": "创建计划",
       "planning": "规划中...",
-      "emptyState": "还没有任务 — 在上方描述一个目标以获取你的第一个计划。",
+      "emptyState": "还没有任务——点击「新建任务」描述一个目标并获取第一份计划。",
       "createWithAi": "用 AI 创建",
       "creating": "创建中...",
       "openWebsiteBuilder": "打开网站构建器",
@@ -592,7 +594,16 @@
       "builtByAgent": "由{agent}创建",
       "retry": "重试 ({attempts}/{max})",
       "stepFailedMax": "已失败 {max} 次——不会自动重试。请尝试重新表述该步骤或手动创建。",
-      "sessionExpired": "加载时会话已过期。没有丢失任何内容 — 请重新加载页面。"
+      "sessionExpired": "加载时会话已过期。没有丢失任何内容 — 请重新加载页面。",
+      "newMission": "新建任务",
+      "tabSteps": "步骤",
+      "tabReview": "评审",
+      "stepsProgress": "{done}/{total} 个步骤",
+      "statusFilterLabel": "状态",
+      "nextStep": "下一步：{step}",
+      "noSteps": "此任务尚无计划步骤。",
+      "reviewNotRunYet": "所有步骤已完成——运行评审员以获取总结。",
+      "reviewLocked": "所有步骤完成后评审员才会运行。"
     },
     "reflection": {
       "title": "每周回顾",
@@ -691,7 +702,7 @@
       "downloadButton": "下载 HTML",
       "deleteButton": "删除",
       "deleted": "网站已删除",
-      "emptyState": "还没有网站 — 在上方描述一个来生成你的第一个网站。",
+      "emptyState": "还没有网站——点击「新建网站」生成第一个。",
       "editLabel": "请求修改",
       "editPlaceholder": "例如：把主视觉区域放大，或把颜色改成蓝色。",
       "editButton": "应用更改",
@@ -711,7 +722,17 @@
       "imageRemove": "移除图片",
       "imageInvalidType": "仅支持 JPG 或 PNG 图片。",
       "imageTooLarge": "图片太大——请选择小于 5MB 的文件。",
-      "imageTooMany": "最多可添加{max}张图片。"
+      "imageTooMany": "最多可添加{max}张图片。",
+      "newProject": "新建网站",
+      "tabPreview": "预览",
+      "tabEdit": "编辑",
+      "tabHistory": "历史版本",
+      "statusLabel": "状态",
+      "statusCompleted": "已就绪",
+      "statusFlagged": "已标记",
+      "flaggedTitle": "已被我们的安全审核标记",
+      "regenerateFree": "重新生成（免费）",
+      "editUnavailable": "网站生成完成后即可提出修改要求。"
     },
     "marketplace": {
       "title": "市场",
@@ -779,7 +800,28 @@
     "new": "新建 {title}",
     "selectPlaceholder": "请选择...",
     "save": "保存",
-    "saving": "保存中..."
+    "saving": "保存中...",
+    "untitled": "未命名",
+    "edit": "编辑",
+    "delete": "删除",
+    "deleted": "已删除",
+    "deleteConfirm": "确定删除此{label}？此操作无法撤销。",
+    "updated": "已更新",
+    "actionsFor": "{name} 的操作",
+    "tabDetails": "详情",
+    "tabEdit": "编辑",
+    "tabLinks": "关联",
+    "noDetails": "此条目没有其他记录内容。",
+    "noLinks": "尚未关联任何内容。",
+    "loggedAt": "记录于 {when}",
+    "filterBy": "按{label}筛选",
+    "filterAll": "全部：{label}",
+    "resultCount": "{total} 项中的 {count} 项",
+    "sort": {
+      "label": "排序：",
+      "newest": "最新",
+      "oldest": "最早"
+    }
   },
   "askAi": {
     "buttonLabel": "问 AI",

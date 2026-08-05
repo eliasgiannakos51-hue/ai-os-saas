@@ -532,7 +532,8 @@
       "italic": "مائل",
       "heading1": "عنوان 1",
       "heading2": "عنوان 2",
-      "bulletList": "قائمة نقطية"
+      "bulletList": "قائمة نقطية",
+      "updatedAt": "عُدّل {when}"
     },
     "chat": {
       "title": "محادثة Ionexa"
@@ -553,7 +554,8 @@
     "favorites": {
       "title": "المفضلة",
       "description": "كل ما وضعت عليه نجمة، من جميع الوحدات، في مكان واحد.",
-      "emptyState": "لا توجد عناصر مفضلة بعد — انقر على نجمة أي عنصر لحفظه هنا."
+      "emptyState": "لا توجد عناصر مفضلة بعد — انقر على نجمة أي عنصر لحفظه هنا.",
+      "starredAt": "حُفظ {when}"
     },
     "mission": {
       "title": "مركز التحكم بالمهام",
@@ -563,7 +565,7 @@
       "goalPlaceholder": "مثال: أريد بدء متجر إلكتروني للمجوهرات اليدوية",
       "createPlan": "إنشاء خطة",
       "planning": "جارٍ التخطيط...",
-      "emptyState": "لا توجد مهام بعد — صف هدفًا أعلاه للحصول على أول خطة لك.",
+      "emptyState": "لا توجد مهام بعد — استخدم «مهمة جديدة» لوصف هدفك والحصول على أول خطة.",
       "createWithAi": "إنشاء بالذكاء الاصطناعي",
       "creating": "جارٍ الإنشاء...",
       "openWebsiteBuilder": "فتح منشئ المواقع",
@@ -592,7 +594,16 @@
       "builtByAgent": "تم الإنشاء بواسطة {agent}",
       "retry": "إعادة المحاولة ({attempts}/{max})",
       "stepFailedMax": "فشلت {max} مرات — لن تتم إعادة المحاولة تلقائيًا. حاول إعادة صياغة الخطوة أو أنشئها يدويًا.",
-      "sessionExpired": "انتهت جلستك أثناء التحميل. لم يُفقد شيء — أعد تحميل الصفحة."
+      "sessionExpired": "انتهت جلستك أثناء التحميل. لم يُفقد شيء — أعد تحميل الصفحة.",
+      "newMission": "مهمة جديدة",
+      "tabSteps": "الخطوات",
+      "tabReview": "المراجعة",
+      "stepsProgress": "{done}/{total} خطوات",
+      "statusFilterLabel": "الحالة",
+      "nextStep": "التالي: {step}",
+      "noSteps": "لا توجد خطوات خطة لهذه المهمة بعد.",
+      "reviewNotRunYet": "اكتملت كل الخطوات — شغّل المراجِع للحصول على ملخص.",
+      "reviewLocked": "يعمل المراجِع بمجرد اكتمال جميع الخطوات."
     },
     "reflection": {
       "title": "التأمل الأسبوعي",
@@ -691,7 +702,7 @@
       "downloadButton": "تنزيل HTML",
       "deleteButton": "حذف",
       "deleted": "تم حذف الموقع",
-      "emptyState": "لا توجد مواقع بعد — صف موقعًا أعلاه لإنشاء أول موقع لك.",
+      "emptyState": "لا توجد مواقع بعد — استخدم «موقع جديد» لإنشاء أول موقع لك.",
       "editLabel": "اطلب تغييرًا",
       "editPlaceholder": "مثال: اجعل قسم البطل أكبر، أو غيّر الألوان إلى الأزرق.",
       "editButton": "تطبيق التغييرات",
@@ -711,7 +722,17 @@
       "imageRemove": "إزالة الصورة",
       "imageInvalidType": "يتم دعم صور JPG أو PNG فقط.",
       "imageTooLarge": "الصورة كبيرة جدًا — يرجى اختيار ملف أقل من 5 ميجابايت.",
-      "imageTooMany": "يمكنك إضافة حتى {max} صور."
+      "imageTooMany": "يمكنك إضافة حتى {max} صور.",
+      "newProject": "موقع جديد",
+      "tabPreview": "معاينة",
+      "tabEdit": "تعديل",
+      "tabHistory": "السجل",
+      "statusLabel": "الحالة",
+      "statusCompleted": "جاهز",
+      "statusFlagged": "مُعلَّم",
+      "flaggedTitle": "تم تعليمه بواسطة مراجعة السلامة لدينا",
+      "regenerateFree": "إعادة الإنشاء (مجانًا)",
+      "editUnavailable": "يمكنك طلب تعديلات بمجرد انتهاء إنشاء الموقع."
     },
     "marketplace": {
       "title": "السوق",
@@ -779,7 +800,28 @@
     "new": "جديد {title}",
     "selectPlaceholder": "اختر...",
     "save": "حفظ",
-    "saving": "جارٍ الحفظ..."
+    "saving": "جارٍ الحفظ...",
+    "untitled": "بدون عنوان",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "deleted": "تم الحذف",
+    "deleteConfirm": "هل تريد حذف هذا العنصر ({label})؟ لا يمكن التراجع عن ذلك.",
+    "updated": "تم التحديث",
+    "actionsFor": "إجراءات {name}",
+    "tabDetails": "التفاصيل",
+    "tabEdit": "تعديل",
+    "tabLinks": "الروابط",
+    "noDetails": "لا يوجد شيء آخر مسجَّل لهذا العنصر.",
+    "noLinks": "غير مرتبط بأي شيء بعد.",
+    "loggedAt": "سُجّل {when}",
+    "filterBy": "تصفية حسب {label}",
+    "filterAll": "الكل: {label}",
+    "resultCount": "{count} من {total}",
+    "sort": {
+      "label": "ترتيب:",
+      "newest": "الأحدث",
+      "oldest": "الأقدم"
+    }
   },
   "askAi": {
     "buttonLabel": "اسأل الذكاء الاصطناعي",

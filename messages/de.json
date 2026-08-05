@@ -532,7 +532,8 @@
       "italic": "Kursiv",
       "heading1": "Überschrift 1",
       "heading2": "Überschrift 2",
-      "bulletList": "Aufzählungsliste"
+      "bulletList": "Aufzählungsliste",
+      "updatedAt": "Bearbeitet {when}"
     },
     "chat": {
       "title": "Ionexa Chat"
@@ -553,7 +554,8 @@
     "favorites": {
       "title": "Favoriten",
       "description": "Alles, was du markiert hast, aus allen Modulen, an einem Ort.",
-      "emptyState": "Noch nichts favorisiert — tippe auf den Stern eines Eintrags, um ihn hier zu speichern."
+      "emptyState": "Noch nichts favorisiert — tippe auf den Stern eines Eintrags, um ihn hier zu speichern.",
+      "starredAt": "Gemerkt {when}"
     },
     "mission": {
       "title": "Missionskontrolle",
@@ -563,7 +565,7 @@
       "goalPlaceholder": "z. B. Ich möchte einen Online-Shop für handgefertigten Schmuck starten",
       "createPlan": "Plan Erstellen",
       "planning": "Planung...",
-      "emptyState": "Noch keine Missionen — beschreibe oben ein Ziel für deinen ersten Plan.",
+      "emptyState": "Noch keine Missionen — mit „Neue Mission“ ein Ziel beschreiben und den ersten Plan erhalten.",
       "createWithAi": "Mit KI Erstellen",
       "creating": "Erstellen...",
       "openWebsiteBuilder": "Website-Builder öffnen",
@@ -592,7 +594,16 @@
       "builtByAgent": "Erstellt von {agent}",
       "retry": "Wiederholen ({attempts}/{max})",
       "stepFailedMax": "{max}x fehlgeschlagen — wird nicht automatisch wiederholt. Formuliere den Schritt um oder erstelle ihn manuell.",
-      "sessionExpired": "Deine Sitzung ist beim Laden abgelaufen. Nichts ging verloren — lade die Seite neu."
+      "sessionExpired": "Deine Sitzung ist beim Laden abgelaufen. Nichts ging verloren — lade die Seite neu.",
+      "newMission": "Neue Mission",
+      "tabSteps": "Schritte",
+      "tabReview": "Auswertung",
+      "stepsProgress": "{done}/{total} Schritte",
+      "statusFilterLabel": "Status",
+      "nextStep": "Als Nächstes: {step}",
+      "noSteps": "Diese Mission hat noch keine Planschritte.",
+      "reviewNotRunYet": "Alle Schritte sind erledigt — starte den Reviewer für eine Zusammenfassung.",
+      "reviewLocked": "Der Reviewer läuft, sobald alle Schritte abgeschlossen sind."
     },
     "reflection": {
       "title": "Wöchentliche Reflexion",
@@ -691,7 +702,7 @@
       "downloadButton": "HTML Herunterladen",
       "deleteButton": "Löschen",
       "deleted": "Website gelöscht",
-      "emptyState": "Noch keine Websites — beschreibe oben eine, um deine erste zu generieren.",
+      "emptyState": "Noch keine Websites — mit „Neue Website“ die erste erzeugen.",
       "editLabel": "Änderung anfordern",
       "editPlaceholder": "z. B. Mach den Hero-Bereich größer oder ändere die Farben zu Blau.",
       "editButton": "Änderungen anwenden",
@@ -711,7 +722,17 @@
       "imageRemove": "Bild entfernen",
       "imageInvalidType": "Nur JPG- oder PNG-Bilder werden unterstützt.",
       "imageTooLarge": "Bild ist zu groß — bitte wähle eine Datei unter 5MB.",
-      "imageTooMany": "Du kannst bis zu {max} Bilder hinzufügen."
+      "imageTooMany": "Du kannst bis zu {max} Bilder hinzufügen.",
+      "newProject": "Neue Website",
+      "tabPreview": "Vorschau",
+      "tabEdit": "Bearbeiten",
+      "tabHistory": "Verlauf",
+      "statusLabel": "Status",
+      "statusCompleted": "Fertig",
+      "statusFlagged": "Markiert",
+      "flaggedTitle": "Von unserer Sicherheitsprüfung markiert",
+      "regenerateFree": "Neu erzeugen (kostenlos)",
+      "editUnavailable": "Änderungen sind möglich, sobald die Website fertig erzeugt ist."
     },
     "marketplace": {
       "title": "Marktplatz",
@@ -779,7 +800,28 @@
     "new": "Neu: {title}",
     "selectPlaceholder": "auswählen...",
     "save": "Speichern",
-    "saving": "Wird gespeichert..."
+    "saving": "Wird gespeichert...",
+    "untitled": "Ohne Titel",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "deleted": "Gelöscht",
+    "deleteConfirm": "Diesen Eintrag ({label}) löschen? Das lässt sich nicht rückgängig machen.",
+    "updated": "Aktualisiert",
+    "actionsFor": "Aktionen für {name}",
+    "tabDetails": "Details",
+    "tabEdit": "Bearbeiten",
+    "tabLinks": "Verknüpfungen",
+    "noDetails": "Für diesen Eintrag ist nichts weiter erfasst.",
+    "noLinks": "Noch mit nichts verknüpft.",
+    "loggedAt": "Erfasst {when}",
+    "filterBy": "Nach {label} filtern",
+    "filterAll": "Alle: {label}",
+    "resultCount": "{count} von {total}",
+    "sort": {
+      "label": "Sortieren:",
+      "newest": "Neueste",
+      "oldest": "Älteste"
+    }
   },
   "askAi": {
     "buttonLabel": "KI fragen",

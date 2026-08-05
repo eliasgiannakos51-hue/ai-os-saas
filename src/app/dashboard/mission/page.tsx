@@ -5,7 +5,6 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
-import { MissionForm } from "@/components/mission/mission-form";
 import { MissionList } from "@/components/mission/mission-list";
 import { loadFavoriteIds } from "@/lib/favorites";
 import { ScheduledRunsList } from "@/components/mission/scheduled-runs-list";
@@ -129,9 +128,6 @@ export default async function MissionPage() {
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader icon={MISSION_ICON} title={t("title")} description={t("description")} />
 
-        <div className="mb-6">
-          <MissionForm />
-        </div>
 
         <ScheduledRunsList runs={pendingRuns} />
 

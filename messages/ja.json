@@ -536,7 +536,10 @@
       "updatedAt": "{when}に編集"
     },
     "chat": {
-      "title": "Ionexa チャット"
+      "title": "Ionexa チャット",
+      "hideConversations": "会話一覧を隠す",
+      "showConversations": "会話一覧を表示",
+      "focusMode": "集中モード"
     },
     "create": {
       "title": "何でも作成"

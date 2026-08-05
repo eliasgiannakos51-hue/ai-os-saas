@@ -536,7 +536,10 @@
       "updatedAt": "Editado {when}"
     },
     "chat": {
-      "title": "Ionexa Conversa"
+      "title": "Ionexa Conversa",
+      "hideConversations": "Ocultar conversas",
+      "showConversations": "Mostrar conversas",
+      "focusMode": "Modo de foco"
     },
     "create": {
       "title": "Criar Qualquer Coisa"

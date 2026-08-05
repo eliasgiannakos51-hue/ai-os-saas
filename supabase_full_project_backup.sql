@@ -1215,18 +1215,33 @@ create policy "insert_own_website_versions" on public.website_versions
 
 -- ============================================================================
 -- Website Builder reference images — Storage bucket "website-references"
--- Private bucket; files are stored under a `${auth.uid()}/...` path prefix,
--- which is what the RLS policies below check (storage.foldername(name))[1]
--- against — the standard per-user-folder Supabase Storage pattern, same
--- ownership model as every table above, just expressed on storage.objects
--- instead of a public.* table. Read server-side (service role) when
--- generating so the reference image can be sent to Claude's vision input;
--- never made public.
+--
+-- PUBLIC READ, owner-only write. Files are stored under a `${auth.uid()}/...`
+-- path prefix, which is what the write policies below check
+-- (storage.foldername(name))[1] against.
+--
+-- WHY PUBLIC: the whole point of a reference image is that the generated
+-- website EMBEDS it — lib/website-reference-image-server.ts resolves each
+-- upload with getPublicUrl() and hands that URL to Claude, which writes it
+-- into an <img src>. getPublicUrl() happily builds a /object/public/ URL
+-- for a private bucket too, but that URL answers 400, so every generated
+-- site rendered broken images while the HTML looked correct. That is the
+-- "my uploaded images don't appear" bug, and no prompt change could fix
+-- it: the model was doing exactly what it was told.
+--
+-- Signed URLs are not an option here: the user downloads the generated
+-- HTML and hosts it wherever they like, so any expiry turns their live
+-- site's images into 400s later. A public read is what "put this photo on
+-- my website" actually means.
+--
+-- The exposure is bounded: paths are `<uuid>/<random>`, not enumerable
+-- (listing still requires the select policy below), and writes/deletes
+-- remain owner-only.
 -- ============================================================================
 
 insert into storage.buckets (id, name, public)
-values ('website-references', 'website-references', false)
-on conflict (id) do nothing;
+values ('website-references', 'website-references', true)
+on conflict (id) do update set public = true;
 
 drop policy if exists "select_own_website_references" on storage.objects;
 create policy "select_own_website_references" on storage.objects

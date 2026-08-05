@@ -14,6 +14,13 @@ export const metadata: Metadata = {
   title: { absolute: TITLE },
   description: DESCRIPTION,
   openGraph: {
+    // siteName has to be repeated here: Next.js REPLACES the whole
+    // openGraph object when a page declares one, it does not merge it
+    // field-by-field with the root layout's. Without this line the
+    // landing page — the one page a share sheet or a browser is most
+    // likely to read — ships no og:site_name at all, which is part of
+    // why the app was surfacing as the deployment host on mobile.
+    siteName: "Ionexa AI",
     title: TITLE,
     description: DESCRIPTION,
     type: "website",

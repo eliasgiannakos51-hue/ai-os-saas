@@ -29,7 +29,11 @@
       "strategy": "Strategy",
       "operations": "Operations",
       "marketplace": "Marketplace",
-      "settings": "Settings"
+      "settings": "Settings",
+      "create": "Create",
+      "myBusiness": "My Business",
+      "track": "Track",
+      "insights": "Insights"
     },
     "items": {
       "home": "Home",
@@ -42,7 +46,7 @@
       "settings": "Settings",
       "team": "Team",
       "agents": "AI Agents",
-      "websites": "Websites",
+      "websites": "Website Plans",
       "websiteBuilder": "Website Builder",
       "apps": "Apps",
       "images": "Images",
@@ -68,6 +72,46 @@
       "productWorkflow": "Product Workflow",
       "automation": "Automation",
       "marketplace": "Marketplace"
+    },
+    "groupHints": {
+      "create": "Generate a site, plan a goal, write a document.",
+      "myBusiness": "Money, customers, products and how they're doing.",
+      "track": "Capture ideas, research, trades and decisions before you forget them.",
+      "operations": "Recurring work and the multi-step workflows.",
+      "insights": "Look back at what you've done and what the AI remembers.",
+      "marketplace": "Share and discover setups — not open yet."
+    },
+    "hints": {
+      "chat": "Ask anything — not tied to any module.",
+      "create": "Describe what you want in one sentence; it works out the rest.",
+      "websiteBuilder": "Describe a site and AI generates the real page.",
+      "missionControl": "Set a goal, AI breaks it into steps.",
+      "documents": "Freeform notes and documents you write yourself.",
+      "websites": "Track sites you own — name, URL, status. No generation.",
+      "agents": "Plan the agents you want. A tracker, not a runtime.",
+      "finance": "Log income and expenses.",
+      "sales": "Leads, outreach and next steps.",
+      "content": "Content ideas, captions and threads.",
+      "campaigns": "Plan campaigns — channel, budget, status.",
+      "products": "Product plans — pricing, roadmap, launch.",
+      "analytics": "Metrics you're watching.",
+      "ideas": "Capture new ideas before you forget them.",
+      "research": "Save research, sources and summaries.",
+      "competitors": "Track rival products, pricing and positioning.",
+      "decisions": "Weigh the options before you decide.",
+      "learning": "Track what you're studying.",
+      "trading": "Trade log — symbol, direction, result, P&L.",
+      "feedback": "What users told you, in one place.",
+      "dataAnalysis": "Analysis requests and what you found.",
+      "automation": "Things that run on a schedule.",
+      "tradingWorkflow": "Your trades, patterns and mentor in one view.",
+      "productWorkflow": "Your products, patterns and mentor in one view.",
+      "timeline": "Everything you've done, in order.",
+      "reflection": "A weekly summary of your progress.",
+      "memory": "What the AI remembers about you.",
+      "favorites": "Everything you've starred.",
+      "marketplace": "Share and discover setups — not open yet.",
+      "team": "Invite people to your workspace."
     }
   },
   "landing": {

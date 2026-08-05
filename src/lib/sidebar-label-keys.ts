@@ -4,11 +4,14 @@
 // English (state keys, search matching) — only the rendered label goes
 // through messages/*.json's sidebar.items.
 export const GROUP_HEADING_KEYS: Record<string, string> = {
-  Workspace: "workspace",
-  Build: "build",
-  Business: "business",
-  Strategy: "strategy",
+  // Renamed from Build/Business/Strategy: those said what a category was
+  // called, not what you do inside it. A user cannot guess that
+  // "Strategy" holds their trade log or that "Build" holds Documents.
+  Create: "create",
+  "My Business": "myBusiness",
+  Track: "track",
   Operations: "operations",
+  Insights: "insights",
   Marketplace: "marketplace",
   Settings: "settings",
 };
@@ -24,7 +27,7 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Settings: "settings",
   Team: "team",
   "AI Agents": "agents",
-  Websites: "websites",
+  "Website Plans": "websites",
   "Website Builder": "websiteBuilder",
   Apps: "apps",
   Images: "images",

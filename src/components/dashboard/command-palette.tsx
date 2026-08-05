@@ -4,14 +4,20 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Search, MessageCircle, FileText } from "lucide-react";
-import { ALL_SIDEBAR_GROUPS, type SidebarItem } from "@/lib/sidebar-nav";
+import { ALL_SIDEBAR_GROUPS, PINNED_SIDEBAR_ITEMS, type SidebarItem } from "@/lib/sidebar-nav";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
 
 // Every sidebar link (including Create Anything, part of the Workspace
 // group — see lib/sidebar-nav.ts) is searchable here too, flattened out of
 // its groups.
-const PALETTE_ITEMS: SidebarItem[] = ALL_SIDEBAR_GROUPS.flatMap((group) => group.items);
+// PINNED first: Home, Ionexa Chat and Create Studio were lifted out of
+// the groups entirely, so flattening the groups alone would silently drop
+// the three most-searched destinations from the palette.
+const PALETTE_ITEMS: SidebarItem[] = [
+  ...PINNED_SIDEBAR_ITEMS,
+  ...ALL_SIDEBAR_GROUPS.flatMap((group) => group.items),
+];
 
 type ContentResult = {
   id: string;

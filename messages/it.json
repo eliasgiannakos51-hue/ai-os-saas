@@ -29,7 +29,11 @@
       "strategy": "Strategia",
       "operations": "Operazioni",
       "marketplace": "Mercato",
-      "settings": "Impostazioni"
+      "settings": "Impostazioni",
+      "create": "Creare",
+      "myBusiness": "La mia attività",
+      "track": "Registrare",
+      "insights": "Analisi"
     },
     "items": {
       "home": "Home",
@@ -42,7 +46,7 @@
       "settings": "Impostazioni",
       "team": "Team",
       "agents": "Agenti IA",
-      "websites": "Siti web",
+      "websites": "Piani sito",
       "websiteBuilder": "Generatore di Siti",
       "apps": "App",
       "images": "Immagini",
@@ -68,6 +72,46 @@
       "productWorkflow": "Flusso Prodotto",
       "automation": "Automazione",
       "marketplace": "Mercato"
+    },
+    "groupHints": {
+      "create": "Genera un sito, pianifica un obiettivo, scrivi un documento.",
+      "myBusiness": "Soldi, clienti, prodotti e come stanno andando.",
+      "track": "Annota idee, ricerche, trade e decisioni prima di dimenticarle.",
+      "operations": "Lavoro ricorrente e i flussi a più passaggi.",
+      "insights": "Rivedi cosa hai fatto e cosa ricorda l'IA.",
+      "marketplace": "Condividi e scopri configurazioni — non ancora aperto."
+    },
+    "hints": {
+      "chat": "Chiedi qualsiasi cosa — non legato a nessun modulo.",
+      "create": "Descrivi in una frase cosa vuoi; il resto lo capisce da solo.",
+      "websiteBuilder": "Descrivi un sito e l'IA genera la pagina vera.",
+      "missionControl": "Fissa un obiettivo, l'IA lo divide in passaggi.",
+      "documents": "Note e documenti liberi che scrivi tu.",
+      "websites": "Tieni traccia dei siti che hai — nome, URL, stato. Nessuna generazione.",
+      "agents": "Pianifica gli agenti che vuoi. Un registro, non un runtime.",
+      "finance": "Registra entrate e uscite.",
+      "sales": "Contatti, messaggi e prossimi passi.",
+      "content": "Idee di contenuto, didascalie e thread.",
+      "campaigns": "Pianifica campagne — canale, budget, stato.",
+      "products": "Piani di prodotto — prezzi, roadmap, lancio.",
+      "analytics": "Le metriche che segui.",
+      "ideas": "Annota nuove idee prima di dimenticarle.",
+      "research": "Salva ricerche, fonti e sintesi.",
+      "competitors": "Segui prodotti rivali, prezzi e posizionamento.",
+      "decisions": "Valuta le opzioni prima di decidere.",
+      "learning": "Segui cosa stai studiando.",
+      "trading": "Diario dei trade — simbolo, direzione, esito, P&L.",
+      "feedback": "Cosa ti hanno detto gli utenti, in un posto solo.",
+      "dataAnalysis": "Richieste di analisi e cosa hai trovato.",
+      "automation": "Cose che partono a orario.",
+      "tradingWorkflow": "I tuoi trade, i pattern e il mentore in una vista.",
+      "productWorkflow": "I tuoi prodotti, i pattern e il mentore in una vista.",
+      "timeline": "Tutto quello che hai fatto, in ordine.",
+      "reflection": "Un riepilogo settimanale dei tuoi progressi.",
+      "memory": "Cosa l'IA ricorda di te.",
+      "favorites": "Tutto quello che hai messo tra i preferiti.",
+      "marketplace": "Condividi e scopri configurazioni — non ancora aperto.",
+      "team": "Invita persone nel tuo spazio."
     }
   },
   "landing": {

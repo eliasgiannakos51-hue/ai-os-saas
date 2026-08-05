@@ -591,7 +591,9 @@
       "title": "Ionexa チャット",
       "hideConversations": "会話一覧を隠す",
       "showConversations": "会話一覧を表示",
-      "focusMode": "集中モード"
+      "focusMode": "集中モード",
+      "streamInterrupted": "応答が完了する前に接続が切断されました。",
+      "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。"
     },
     "create": {
       "title": "何でも作成"
@@ -911,7 +913,9 @@
       "chatThinking": "考え中",
       "chatFailed": "チャットのリクエストに失敗しました。",
       "chatNetworkError": "ネットワークエラー — もう一度お試しください。",
-      "chatContext": "背景: Ionexa AI で「{title}」という{type}を作成しました。元のリクエストは次のとおりです: {request}"
+      "chatContext": "背景: Ionexa AI で「{title}」という{type}を作成しました。元のリクエストは次のとおりです: {request}",
+      "streamInterrupted": "応答が完了する前に接続が切断されました。",
+      "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。"
     }
   },
   "module": {
@@ -952,7 +956,9 @@
     "placeholder": "このエントリーについて何でも質問してください...",
     "emptyState": "このエントリーについて質問してください — 背景を説明する必要はありません。AI は既に把握しています。",
     "send": "送信",
-    "close": "閉じる"
+    "close": "閉じる",
+    "streamInterrupted": "応答が完了する前に接続が切断されました。",
+    "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。"
   },
   "entityLinks": {
     "buttonLabel": "リンク...",

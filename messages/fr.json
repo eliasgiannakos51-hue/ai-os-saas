@@ -591,7 +591,9 @@
       "title": "Ionexa Discussion",
       "hideConversations": "Masquer les conversations",
       "showConversations": "Afficher les conversations",
-      "focusMode": "Mode concentration"
+      "focusMode": "Mode concentration",
+      "streamInterrupted": "La connexion a été interrompue avant la fin de la réponse.",
+      "streamInterruptedPartial": "La connexion a été interrompue — la réponse ci-dessus est peut-être incomplète."
     },
     "create": {
       "title": "Créer N'importe Quoi"
@@ -911,7 +913,9 @@
       "chatThinking": "Réflexion",
       "chatFailed": "La requête de chat a échoué.",
       "chatNetworkError": "Erreur réseau — veuillez réessayer.",
-      "chatContext": "Contexte : je viens de créer un {type} nommé « {title} » dans Ionexa AI. Ma demande initiale était : {request}"
+      "chatContext": "Contexte : je viens de créer un {type} nommé « {title} » dans Ionexa AI. Ma demande initiale était : {request}",
+      "streamInterrupted": "La connexion a été interrompue avant la fin de la réponse.",
+      "streamInterruptedPartial": "La connexion a été interrompue — la réponse ci-dessus est peut-être incomplète."
     }
   },
   "module": {
@@ -952,7 +956,9 @@
     "placeholder": "Posez une question sur cette entrée...",
     "emptyState": "Posez une question sur cette entrée — pas besoin d'expliquer le contexte, l'IA l'a déjà.",
     "send": "Envoyer",
-    "close": "Fermer"
+    "close": "Fermer",
+    "streamInterrupted": "La connexion a été interrompue avant la fin de la réponse.",
+    "streamInterruptedPartial": "La connexion a été interrompue — la réponse ci-dessus est peut-être incomplète."
   },
   "entityLinks": {
     "buttonLabel": "Lier à...",

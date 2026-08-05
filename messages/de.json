@@ -591,7 +591,9 @@
       "title": "Ionexa Chat",
       "hideConversations": "Unterhaltungen ausblenden",
       "showConversations": "Unterhaltungen einblenden",
-      "focusMode": "Fokusmodus"
+      "focusMode": "Fokusmodus",
+      "streamInterrupted": "Die Verbindung wurde unterbrochen, bevor die Antwort fertig war.",
+      "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig."
     },
     "create": {
       "title": "Alles Erstellen"
@@ -911,7 +913,9 @@
       "chatThinking": "Denkt nach",
       "chatFailed": "Die Chat-Anfrage ist fehlgeschlagen.",
       "chatNetworkError": "Netzwerkfehler — bitte erneut versuchen.",
-      "chatContext": "Kontext: Ich habe gerade ein {type} namens „{title}“ in Ionexa AI erstellt. Meine ursprüngliche Anfrage war: {request}"
+      "chatContext": "Kontext: Ich habe gerade ein {type} namens „{title}“ in Ionexa AI erstellt. Meine ursprüngliche Anfrage war: {request}",
+      "streamInterrupted": "Die Verbindung wurde unterbrochen, bevor die Antwort fertig war.",
+      "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig."
     }
   },
   "module": {
@@ -952,7 +956,9 @@
     "placeholder": "Frag irgendetwas zu diesem Eintrag...",
     "emptyState": "Stell eine Frage zu diesem Eintrag — du musst den Kontext nicht erklären, die KI hat ihn bereits.",
     "send": "Senden",
-    "close": "Schließen"
+    "close": "Schließen",
+    "streamInterrupted": "Die Verbindung wurde unterbrochen, bevor die Antwort fertig war.",
+    "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig."
   },
   "entityLinks": {
     "buttonLabel": "Verknüpfen mit...",

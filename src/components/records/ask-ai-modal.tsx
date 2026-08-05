@@ -11,6 +11,7 @@ import {
 import { ArrowUp, Sparkles, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { MessageContent } from "@/components/chat/message-content";
 import { useCredits } from "@/components/credits/credits-context";
 
@@ -118,33 +119,21 @@ export function AskAiModal({
         return;
       }
 
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
       let accumulatedText = "";
       let streamError: string | null = null;
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex = buffer.indexOf("\n");
-        while (newlineIndex !== -1) {
-          const line = buffer.slice(0, newlineIndex);
-          buffer = buffer.slice(newlineIndex + 1);
-          newlineIndex = buffer.indexOf("\n");
-          if (!line.trim()) continue;
-
-          const event = JSON.parse(line);
-          if (event.type === "delta") {
+      // Never throws — a dropped connection must not delete the answer
+      // the user already watched stream in. See lib/ndjson-stream.ts.
+      const { interrupted } = await readNdjsonStream(res.body, (event) => {
+        if (event.type === "delta") {
+          if (typeof event.text === "string") {
             accumulatedText += event.text;
             setStreamingText(accumulatedText);
-          } else if (event.type === "error") {
-            streamError = event.error;
           }
+        } else if (event.type === "error") {
+          streamError = typeof event.error === "string" ? event.error : "Something went wrong.";
         }
-      }
+      });
 
       if (accumulatedText) {
         setMessages((m) => [...m, { id: nextLocalId(), role: "assistant", content: accumulatedText }]);
@@ -152,6 +141,8 @@ export function AskAiModal({
 
       if (streamError) {
         setError(streamError);
+      } else if (interrupted) {
+        setError(accumulatedText ? t("streamInterruptedPartial") : t("streamInterrupted"));
       }
 
       void refreshCredits();

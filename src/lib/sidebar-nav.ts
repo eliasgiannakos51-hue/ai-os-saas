@@ -40,6 +40,17 @@ export type SidebarItem = {
   icon: LucideIcon;
   /** i18n key under sidebar.hints; omitted when the label speaks for itself. */
   hintKey?: string;
+  /**
+   * Listed, but not yet built. Renders greyed out with a "Coming soon"
+   * badge and does not navigate.
+   *
+   * These were pulled out of the sidebar entirely for one release, and
+   * that traded one problem for another: a user could no longer see what
+   * the product is going to do. Showing them as visibly unfinished is the
+   * honest middle — you learn what is coming without landing on a page
+   * that does nothing.
+   */
+  comingSoon?: boolean;
 };
 
 export type SidebarGroupConfig = {
@@ -86,6 +97,39 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: "/dashboard/documents", label: "Documents", icon: MODULE_ICONS.documents, hintKey: "documents" },
       { href: "/dashboard/websites", label: "Website Plans", icon: MODULE_ICONS.websites, hintKey: "websites" },
       { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents, hintKey: "agents" },
+      // Roadmap items, shown but not clickable — see `comingSoon` above.
+      // The routes and tables still exist and still hold any data already
+      // in them; only the nav entry is inert until each one actually does
+      // what its name promises.
+      { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps, hintKey: "apps", comingSoon: true },
+      {
+        href: "/dashboard/images",
+        label: "Images",
+        icon: MODULE_ICONS.images,
+        hintKey: "images",
+        comingSoon: true,
+      },
+      {
+        href: "/dashboard/videos",
+        label: "Videos",
+        icon: MODULE_ICONS.videos,
+        hintKey: "videos",
+        comingSoon: true,
+      },
+      {
+        href: "/dashboard/coding",
+        label: "AI Coding",
+        icon: MODULE_ICONS.coding,
+        hintKey: "coding",
+        comingSoon: true,
+      },
+      {
+        href: "/dashboard/presentations",
+        label: "Presentations",
+        icon: MODULE_ICONS.presentations,
+        hintKey: "presentations",
+        comingSoon: true,
+      },
     ],
   },
   {
@@ -167,18 +211,12 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
   },
 ];
 
-// TEMPORARILY OUT OF THE SIDEBAR, still on the public roadmap and still
-// reachable by URL: /dashboard/apps, /dashboard/images, /dashboard/videos,
-// /dashboard/coding, /dashboard/presentations.
-//
-// Every one of them is a plain text tracker today — a form and a list
-// that store a row, with no generation behind them (lib/build-modules.ts
-// says so in its own header comment). Their names promise an image
-// generator, a video generator, an app builder. Listing them in the
-// sidebar next to Website Builder, which really does generate, is what
-// makes the product feel like it is mostly stubs. Nothing is deleted:
-// the routes, the tables, the data and the roadmap entries all stay, and
-// each returns to the sidebar the moment it does what its name says.
+/** Every item that is listed but deliberately not reachable yet. */
+export const COMING_SOON_HREFS: ReadonlySet<string> = new Set(
+  MAIN_SIDEBAR_GROUPS.flatMap((g) => g.items)
+    .filter((i) => i.comingSoon)
+    .map((i) => i.href)
+);
 
 export const SETTINGS_GROUP: SidebarGroupConfig = {
   heading: "Settings",

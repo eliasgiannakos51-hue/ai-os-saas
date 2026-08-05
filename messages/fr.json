@@ -111,8 +111,16 @@
       "memory": "Ce que l'IA retient de vous.",
       "favorites": "Tout ce que vous avez mis en favori.",
       "marketplace": "Partagez et découvrez des configurations — pas encore ouvert.",
-      "team": "Invitez des personnes dans votre espace."
-    }
+      "team": "Invitez des personnes dans votre espace.",
+      "apps": "Décrivez une appli et obtenez-la vraiment. Pas encore prêt.",
+      "images": "Générez des images à partir d'une description. Pas encore prêt.",
+      "videos": "Générez une vidéo à partir d'une description. Pas encore prêt.",
+      "coding": "Décrivez ce qu'il vous faut et obtenez du code qui marche. Pas encore prêt.",
+      "presentations": "Transformez un brief en présentation finie. Pas encore prêt."
+    },
+    "comingSoon": "Bientôt",
+    "comingSoonToast": "{name} n'est pas encore disponible — c'est prévu dans la feuille de route.",
+    "comingSoonBadge": "Bientôt"
   },
   "landing": {
     "hero": "Votre entreprise, organisée — avec une IA qui aide vraiment.",

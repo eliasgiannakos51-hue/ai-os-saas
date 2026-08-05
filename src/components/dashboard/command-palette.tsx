@@ -17,7 +17,11 @@ import { useCommandPalette } from "@/components/dashboard/command-palette-contex
 const PALETTE_ITEMS: SidebarItem[] = [
   ...PINNED_SIDEBAR_ITEMS,
   ...ALL_SIDEBAR_GROUPS.flatMap((group) => group.items),
-];
+  // Coming-soon entries are excluded: the palette's only action is to
+  // navigate, and navigating to them is precisely what the sidebar now
+  // prevents. Listing them here would reintroduce the empty page by a
+  // side door.
+].filter((item) => !item.comingSoon);
 
 type ContentResult = {
   id: string;

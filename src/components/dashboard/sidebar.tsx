@@ -16,6 +16,7 @@ import {
   type SidebarItem,
 } from "@/lib/sidebar-nav";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
+import { useToast } from "@/components/toast/toast-context";
 import { Logo } from "@/components/logo";
 import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 
@@ -68,6 +69,7 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
   const t = useTranslations("sidebar");
   const tCommon = useTranslations("common");
   const { open, setOpen } = useSidebar();
+  const { addToast } = useToast();
   const closeOnMobile = () => setOpen(false);
 
   function translatedHeading(heading: string): string {
@@ -174,6 +176,32 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
     const active = isActive(pathname, item.href);
     const Icon = item.icon;
     const hint = item.hintKey ? t(`hints.${item.hintKey}`) : undefined;
+
+    // A roadmap item: visible so the user knows it is coming, inert so
+    // they never land on a page that does nothing. A button rather than a
+    // disabled element on purpose — `disabled` swallows the click, and
+    // then a tap on mobile does nothing at all with no explanation.
+    if (item.comingSoon) {
+      return (
+        <button
+          key={item.href}
+          type="button"
+          onClick={() => addToast(t("comingSoonToast", { name: translatedLabel(item.label) }))}
+          title={hint ? `${hint} — ${t("comingSoon")}` : t("comingSoon")}
+          className="group flex w-full min-h-[40px] cursor-default items-center gap-2.5 rounded-xl py-2 pl-2.5 pr-2 text-left text-sm text-muted/60 opacity-60 transition-opacity duration-200 hover:opacity-90"
+        >
+          <Icon className="h-4 w-4 shrink-0 text-muted/50" aria-hidden="true" />
+          <span className="min-w-0 flex-1 truncate">{translatedLabel(item.label)}</span>
+          {/* Short form on purpose: the full "Coming soon" pushed
+              "Presentations" into an ellipsis at this sidebar width. The
+              tooltip and the click toast both say it in full. */}
+          <span className="shrink-0 rounded-full border border-border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-muted/70">
+            {t("comingSoonBadge")}
+          </span>
+        </button>
+      );
+    }
+
     return (
                   <Link
                     key={item.href}

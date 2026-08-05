@@ -81,6 +81,11 @@ export async function GET(request: Request) {
       await grantCredits(user.id, freeCredits, "signup_grant", "Free plan signup credits", {
         setTotal: freeCredits,
         setPlanTier: freePlan.slug,
+        // Same key api/signup uses — see there. needsBootstrap is read
+        // before this runs, so two concurrent callbacks (a double-click, a
+        // browser prefetch) could both pass that check; the key is what
+        // actually makes the grant happen once.
+        idempotencyKey: `signup_grant:${user.id}`,
       });
     } catch (err) {
       logApiError("/auth/callback", err, { stage: "bootstrap_grant_credits" });

@@ -252,5 +252,70 @@ for (const plan of [PLANS[0], PLANS[5], null, undefined]) {
   checkTrue(`${plan?.name ?? String(plan)} falls back to the list price`, r === config.creditPriceEur);
 }
 
+console.log("\n== 8. a charging settlement always charges, and always clears the bar ==");
+// Production showed seven ai_cost_log rows with credits_charged = 0 and
+// achieved_margin = null against EUR 0.37 of real cost. That is the exact
+// signature of bypassCharge — an admin or beta-tester account, which is
+// deliberately free. It is also indistinguishable, in the log, from
+// billing being broken. Both halves are asserted here.
+const res = readFileSync("src/lib/billing/reservations.ts", "utf8");
+checkTrue("0 credits and a null margin come from bypassCharge alone", /const creditsCharged = bypassCharge\s*\?\s*0/.test(res) && /const margin = bypassCharge\s*\?\s*null/.test(res));
+// So a charging settlement can never land on zero: any positive cost
+// produces at least one credit, because ceil() of a positive number is.
+let zeroCharges = 0,
+  belowBar = 0,
+  checked = 0;
+for (const plan of PLANS) {
+  for (const pack of PACKS) {
+    for (let usd = 0.000001; usd < 3; usd *= 1.3) {
+      const eur = usd * config.usdToEurRate;
+      const credits = formula.creditsForRealCostOnAccount(eur, plan, pack, config);
+      const m = formula.achievedMarginOnAccount(credits, eur, plan, pack, config);
+      checked++;
+      if (credits <= 0) zeroCharges++;
+      if (m === null || m < M) belowBar++;
+    }
+  }
+}
+check(`no charging settlement yields 0 credits (${checked} checked)`, zeroCharges, 0);
+check("and none yields a null or sub-target margin", belowBar, 0);
+
+console.log("\n== 9. the alert cannot be defeated by null ==");
+// An alert written as `margin < 4` treats null as healthy, because null
+// is not less than 4 — so the one case it exists to catch, a margin that
+// could not be computed, was the one case it stayed silent for.
+checkTrue(
+  "the shortfall alert fires on null as well as on a low number",
+  /if \(!bypassCharge && \(margin === null \|\| margin < config\.marginMultiplier/.test(res)
+);
+checkTrue("and does not fire for a bypass row, which is legitimately null", /!bypassCharge &&/.test(res));
+// A zero-credit row must say WHY it is zero, or the next person reading
+// the cost log has to guess — which is what happened here.
+checkTrue("every settled row records whether it was a bypass", /bypassCharge,\n/.test(res));
+checkTrue("and what a bypass would have been charged", /wouldHaveChargedCredits: wouldHaveCharged/.test(res));
+checkTrue(
+  "which is computed with the same formula as a real charge",
+  /wouldHaveCharged = bypassCharge\s*\n?\s*\?\s*creditsForRealCostOnAccount/.test(res)
+);
+
+console.log("\n== 10. the build gate cannot depend on the environment ==");
+// The deploy broke because suites that bind a port, write into
+// node_modules and drive the Anthropic SDK ran inside `next build`. A
+// gate that needs a working network is not a gate, it is a coin flip.
+const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+checkTrue("the build runs the unit suites", /npm run test:unit/.test(pkg.scripts.build));
+check("unit suites are *.test.mjs", pkg.scripts["test:unit"].includes("*.test.mjs"), true);
+// This file names both patterns in order to search for them, so it would
+// otherwise flag itself.
+const SELF = "billing-coverage.test.mjs";
+for (const file of readdirSync("scripts/tests").filter((f) => f.endsWith(".test.mjs") && f !== SELF)) {
+  const body = readFileSync(path.join("scripts/tests", file), "utf8");
+  checkTrue(`${file} binds no port`, !/createServer\s*\(/.test(body));
+  checkTrue(`${file} writes nothing into node_modules`, !/loadTsWithDeps/.test(body));
+}
+// Node is pinned, because Vercel otherwise picks its newest — it built
+// with v24.15.0 against Next 14.2, which predates it.
+check("Node is pinned for the host", pkg.engines?.node, "22.x");
+
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

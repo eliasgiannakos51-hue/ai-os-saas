@@ -161,7 +161,13 @@ export const ACTION_PROFILES = {
   },
   chatMessage: {
     systemPromptTokens: 1000,
-    auxiliaryCalls: [],
+    // The memory-extraction call that follows every reply when chat
+    // memory is on (lib/chat/memory.ts). It reads the user message plus
+    // the whole assistant reply and writes a sentence or two. It is now
+    // settled as part of the same turn, so the hold has to cover it —
+    // otherwise the reservation is short by exactly one Claude call on
+    // every message.
+    auxiliaryCalls: [{ inputTokens: 1200, outputTokens: 60 }],
     baseOutputChars: 2000,
     outputCharsPerInputChar: 2,
   },
@@ -210,6 +216,36 @@ export const ACTION_PROFILES = {
     auxiliaryCalls: [{ inputTokens: 700, outputTokens: 150 }],
     baseOutputChars: 0,
     outputCharsPerInputChar: 0,
+  },
+  // Ask AI about a record (api/records/ask). The user's question is
+  // short; the INPUT is dominated by the record itself, which the route
+  // serialises in full and passes as inputChars. That is exactly why a
+  // flat 1-credit charge was wrong here — the price has to track the
+  // size of the thing being asked about, and a large record is an order
+  // of magnitude more input than a chat message.
+  recordAsk: {
+    systemPromptTokens: 900,
+    auxiliaryCalls: [],
+    baseOutputChars: 1200,
+    outputCharsPerInputChar: 1,
+  },
+  // Rewrite/expand/summarise a piece of text (api/text-actions). Output
+  // scales with input almost 1:1 — "expand this" can return more than it
+  // was given, so the ratio is deliberately not below 1.
+  textAction: {
+    systemPromptTokens: 400,
+    auxiliaryCalls: [],
+    baseOutputChars: 400,
+    outputCharsPerInputChar: 2,
+  },
+  // Weekly Reflection (api/reflection/generate). The input is a whole
+  // week of the user's activity, assembled by the route, so like
+  // recordAsk it is the context and not the prompt that sets the cost.
+  weeklyReflection: {
+    systemPromptTokens: 1200,
+    auxiliaryCalls: [],
+    baseOutputChars: 3000,
+    outputCharsPerInputChar: 1,
   },
 } as const;
 

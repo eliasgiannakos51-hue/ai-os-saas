@@ -535,6 +535,28 @@ export async function POST(request: Request) {
           return;
         }
 
+        // Memory extraction runs BEFORE settlement, not after.
+        //
+        // It is a second real Claude call, and while it sat after the
+        // settle it could not be billed at all — the accumulator had
+        // already been spent. Running it first folds its tokens into the
+        // same settlement as the reply, so one chat turn is one charge
+        // covering both calls. Nothing about user-visible latency
+        // changes: the reply has already fully streamed by this point
+        // either way. Best-effort, and awaited so it reliably finishes
+        // before the response stream closes (see lib/chat/memory.ts).
+        if (memoryEnabled) {
+          await extractAndStoreMemory({
+            apiKey,
+            supabase,
+            userId: user.id,
+            conversationId: finalConversationId!,
+            userMessage: message,
+            assistantMessage: assistantText,
+            costs,
+          });
+        }
+
         // Confirmed success — a real reply streamed all the way through,
         // so this is the one place the message actually gets charged.
         // Settlement charges the real measured cost and releases the rest
@@ -587,20 +609,6 @@ export async function POST(request: Request) {
           .eq("id", finalConversationId);
         if (touchError) {
           logApiError("/api/chat", touchError, { stage: "touch_conversation" });
-        }
-
-        // Best-effort, awaited so it reliably finishes before the response
-        // stream closes (see lib/chat/memory.ts) — adds a little latency
-        // after the visible reply has already fully streamed in, not before.
-        if (memoryEnabled) {
-          await extractAndStoreMemory({
-            apiKey,
-            supabase,
-            userId: user.id,
-            conversationId: finalConversationId!,
-            userMessage: message,
-            assistantMessage: assistantText,
-          });
         }
 
         controller.enqueue(ndjsonLine({ type: "done" }));

@@ -1,5 +1,6 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
+import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logApiError } from "@/lib/log-error";
 import { recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
@@ -24,6 +25,7 @@ export async function extractAndStoreMemory({
   conversationId,
   userMessage,
   assistantMessage,
+  costs,
 }: {
   apiKey: string;
   supabase: SupabaseClient;
@@ -31,6 +33,11 @@ export async function extractAndStoreMemory({
   conversationId: string;
   userMessage: string;
   assistantMessage: string;
+  // The chat turn's accumulator. This is a SECOND real Claude call on
+  // every message with memory enabled, and it used to report only a call
+  // COUNT to the circuit breaker — its tokens were never priced and
+  // never charged to anyone. See CREDITS.md.
+  costs?: CostAccumulator;
 }): Promise<void> {
   try {
     // No separate circuit-breaker check here — this only ever runs once
@@ -52,6 +59,8 @@ export async function extractAndStoreMemory({
         },
       ],
     });
+
+    costs?.record("other", result.usage, MEMORY_MODEL);
 
     const textBlock = result.content.find(
       (block): block is Anthropic.TextBlock => block.type === "text"

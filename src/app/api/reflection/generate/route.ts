@@ -1,18 +1,23 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { loadWeeklyReflectionStats } from "@/lib/reflection";
-import { buildReflectionUserMessage, generateWeeklyReflection } from "@/lib/reflection-agent";
+import { buildReflectionUserMessage, generateWeeklyReflection, REFLECTION_MODEL } from "@/lib/reflection-agent";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
   CREDIT_COSTS,
-  deductCredits,
+  getPurchasedPackCreditPriceEur,
   hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
+import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
 
 export const dynamic = "force-dynamic";
 
@@ -81,29 +86,62 @@ export async function POST(request: Request) {
     // above), so a successful AI response IS the confirmed success here.
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
-    let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
-    if (!bypassCredits) {
-      plan = await resolveEffectivePlan(user);
-      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.weeklyReflection, plan);
+    // Was a flat CREDIT_COSTS.weeklyReflection (2 credits) with NO usage
+    // tracking whatsoever — the only AI call in the app whose tokens
+    // reached no cost log at all. The input is a whole week of activity,
+    // so it is also one of the larger ones. See CREDITS.md.
+    const plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = bypassCredits
+      ? null
+      : await resolveEffectivePlan(user);
+
+    // Stats are loaded first because they ARE the input being priced.
+    const stats = await loadWeeklyReflectionStats(supabase, tableFilter);
+    const userMessage = buildReflectionUserMessage(stats);
+
+    const pricingConfig = resolvePricingConfig();
+    const estimate = estimateForAction(
+      "weeklyReflection",
+      { model: REFLECTION_MODEL, inputChars: userMessage.length },
+      pricingConfig,
+      plan
+        ? effectiveCreditPriceEurForAccount(plan, await getPurchasedPackCreditPriceEur(user.id), pricingConfig)
+        : undefined
+    );
+
+    let reservationId = "";
+    if (!bypassCredits && plan) {
+      const check = await hasEnoughCredits(user.id, estimate.reserveCredits, plan);
       if (!check.ok) {
         return NextResponse.json({
           ok: true,
           generated: false,
           rateLimited: true,
-          message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.weeklyReflection),
+          message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
         });
       }
+      const reservation = await reserveCredits(user.id, estimate.reserveCredits, "weekly_reflection", {});
+      if (!reservation.ok) {
+        return NextResponse.json({
+          ok: true,
+          generated: false,
+          rateLimited: true,
+          message:
+            reservation.reason === "insufficient"
+              ? insufficientCreditsMessage(reservation.available, estimate.reserveCredits)
+              : "Could not reserve credits for this request. No credits were charged — please try again.",
+        });
+      }
+      reservationId = reservation.reservationId;
     }
 
-    const stats = await loadWeeklyReflectionStats(supabase, tableFilter);
-    const userMessage = buildReflectionUserMessage(stats);
-
+    const costs = new CostAccumulator();
     let reflection: string;
     try {
       void recordAiCallForDailySpend(CREDIT_COSTS.weeklyReflection);
-      reflection = await generateWeeklyReflection(apiKey, userMessage);
+      reflection = await generateWeeklyReflection(apiKey, userMessage, costs);
     } catch (err) {
       logApiError("/api/reflection/generate", err, { stage: "reflection_call" });
+      await releaseReservation(user.id, reservationId);
       const errMessage = err instanceof Error ? err.message : "The reflection request failed.";
       return NextResponse.json(
         { ok: false, error: `${errMessage} No credits were charged — please try again.` },
@@ -111,9 +149,19 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!bypassCredits && plan) {
-      await deductCredits(user.id, CREDIT_COSTS.weeklyReflection, "weekly_reflection", "Weekly Reflection", plan);
-    }
+    await settleReservation({
+      userId: user.id,
+      reservationId,
+      feature: "weekly_reflection",
+      costs,
+      plan,
+      bypassCharge: bypassCredits,
+      metadata: {
+        inputChars: userMessage.length,
+        estimatedCredits: estimate.estimatedCredits,
+        reservedCredits: bypassCredits ? 0 : estimate.reserveCredits,
+      },
+    });
 
     return NextResponse.json({ ok: true, generated: true, reflection, stats });
   } catch (err) {

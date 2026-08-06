@@ -10,6 +10,7 @@ import {
 } from "@/lib/billing/credit-formula";
 import { getPurchasedPackCreditPriceEur } from "@/lib/billing/credits";
 import type { Plan } from "@/lib/billing/plans";
+import { sendMarginAlertEmail } from "@/lib/email/margin-alert";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 
 // Three-phase billing: RESERVE -> EXECUTE -> SETTLE.
@@ -143,6 +144,19 @@ export async function settleReservation(params: {
     ? null
     : achievedMarginOnAccount(creditsCharged, realCostEur, plan, packPriceEur, config);
 
+  // A bypass row is 0 credits and a null margin BY DESIGN — an admin or
+  // beta tester genuinely produces no revenue, so there is no multiplier
+  // to report. That is indistinguishable in the cost log from billing
+  // being broken, which is exactly how it reads when every row on an
+  // owner's own account shows credits_charged = 0 and margin = null.
+  //
+  // So record what the charge WOULD have been. It makes the two cases
+  // tellable apart at a glance, and it is the only way the margin report
+  // can price bypass traffic, which is real spend either way.
+  const wouldHaveCharged = bypassCharge
+    ? creditsForRealCostOnAccount(realCostEur, plan, packPriceEur, config)
+    : null;
+
   // The multiplier is guaranteed by construction — credits are ceil()ed
   // up, so credits * price / cost can never come out below it. That makes
   // this branch unreachable by arithmetic, which is exactly why it is
@@ -151,7 +165,12 @@ export async function settleReservation(params: {
   // stored achieved_margin is computed from the same understated cost and
   // will look healthy). A margin shortfall must never be something we
   // learn about from a user comparing an invoice to a dashboard.
-  if (margin !== null && margin < config.marginMultiplier - 1e-9) {
+  // Fires on null as well as on a low number. A null margin on a
+  // CHARGING settlement is not "no data", it means the multiplier could
+  // not be computed at all — and an alert that only tests `< 4` treats
+  // that as healthy, because null is not less than 4. The case the alert
+  // exists for is precisely the one where something upstream went wrong.
+  if (!bypassCharge && (margin === null || margin < config.marginMultiplier - 1e-9)) {
     logApiError("billing:marginBelowTarget", new Error("settled below the guaranteed margin"), {
       userId,
       feature,
@@ -160,6 +179,20 @@ export async function settleReservation(params: {
       realCostEur,
       achievedMargin: margin,
       targetMargin: config.marginMultiplier,
+      effectiveCreditPriceEur: effectivePrice,
+    });
+    // The log line alone is only useful to someone already reading logs.
+    // A shortfall keeps costing money until it is fixed, so it has to
+    // reach a person. Awaited-but-never-throwing: the user has already
+    // been charged by the time this runs.
+    void sendMarginAlertEmail({
+      feature,
+      creditsCharged,
+      realCostUsd,
+      realCostEur,
+      achievedMargin: margin,
+      targetMargin: config.marginMultiplier,
+      planSlug: plan?.slug ?? null,
       effectiveCreditPriceEur: effectivePrice,
     });
   }
@@ -189,6 +222,9 @@ export async function settleReservation(params: {
         planSlug: plan?.slug ?? null,
         effectiveCreditPriceEur: effectivePrice,
         packCreditPriceEur: packPriceEur,
+        // Why this row charged nothing, so 0 credits is never ambiguous.
+        bypassCharge,
+        wouldHaveChargedCredits: wouldHaveCharged,
       },
     });
     if (error) {

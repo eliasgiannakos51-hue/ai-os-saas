@@ -5,6 +5,10 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
+    // Enables src/instrumentation.ts, which reports the environment once
+    // at server startup (see lib/env-check.ts). Next 14 requires the flag;
+    // it becomes the default in 15.
+    instrumentationHook: true,
     // Next 14.2's client Router Cache defaults dynamic-route entries to a
     // 30s staleTime (node_modules/next/dist/server/config-shared.js) — this
     // is SEPARATE from the server-side Data/Full Route Cache that

@@ -8,11 +8,16 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
   CREDIT_COSTS,
-  deductCredits,
+  getPurchasedPackCreditPriceEur,
   hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
+import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
 
 export const dynamic = "force-dynamic";
 
@@ -120,23 +125,55 @@ export async function POST(request: Request) {
     // response IS the confirmed success here.
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
-    let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
-    if (!bypassCredits) {
-      plan = await resolveEffectivePlan(user);
-      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.textAction, plan);
+    // Was a flat CREDIT_COSTS.textAction — 1 credit whether the user
+    // rewrote a sentence or a ten-page document. Output here scales with
+    // input, so a flat charge under-prices exactly the requests that cost
+    // the most. Reserved and settled on measured usage now (CREDITS.md).
+    const plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = bypassCredits
+      ? null
+      : await resolveEffectivePlan(user);
+    const pricingConfig = resolvePricingConfig();
+    const estimate = estimateForAction(
+      "textAction",
+      { model: MODEL, inputChars: SYSTEM_PROMPTS_WITH_QUALITY_CYCLE[action].length + text.length },
+      pricingConfig,
+      plan
+        ? effectiveCreditPriceEurForAccount(plan, await getPurchasedPackCreditPriceEur(user.id), pricingConfig)
+        : undefined
+    );
+
+    let reservationId = "";
+    if (!bypassCredits && plan) {
+      const check = await hasEnoughCredits(user.id, estimate.reserveCredits, plan);
       if (!check.ok) {
         return NextResponse.json(
           {
             ok: false,
             insufficientCredits: true,
-            error: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.textAction),
+            error: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
           },
           { status: 402 }
         );
       }
+      const reservation = await reserveCredits(user.id, estimate.reserveCredits, "text_action", { action });
+      if (!reservation.ok) {
+        return NextResponse.json(
+          {
+            ok: false,
+            insufficientCredits: reservation.reason === "insufficient",
+            error:
+              reservation.reason === "insufficient"
+                ? insufficientCreditsMessage(reservation.available, estimate.reserveCredits)
+                : "Could not reserve credits for this request. No credits were charged — please try again.",
+          },
+          { status: 402 }
+        );
+      }
+      reservationId = reservation.reservationId;
     }
 
     const anthropic = new Anthropic({ apiKey });
+    const costs = new CostAccumulator();
 
     try {
       void recordAiCallForDailySpend(CREDIT_COSTS.textAction);
@@ -147,25 +184,42 @@ export async function POST(request: Request) {
         messages: [{ role: "user", content: text }],
       });
 
+      costs.record("generation", response.usage, MODEL);
+
       const block = response.content.find(
         (b): b is Anthropic.TextBlock => b.type === "text"
       );
       const result = block?.text?.trim();
 
       if (!result) {
+        await releaseReservation(user.id, reservationId);
         return NextResponse.json(
           { ok: false, error: "The model did not return a result. No credits were charged — please try again." },
           { status: 502 }
         );
       }
 
-      if (!bypassCredits && plan) {
-        await deductCredits(user.id, CREDIT_COSTS.textAction, "text_action", `Text action — ${action}`, plan);
-      }
+      // Bypass accounts settle too — charged nothing, but their real
+      // spend still lands in the cost log.
+      await settleReservation({
+        userId: user.id,
+        reservationId,
+        feature: "text_action",
+        costs,
+        plan,
+        bypassCharge: bypassCredits,
+        metadata: {
+          action,
+          inputChars: text.length,
+          estimatedCredits: estimate.estimatedCredits,
+          reservedCredits: bypassCredits ? 0 : estimate.reserveCredits,
+        },
+      });
 
       return NextResponse.json({ ok: true, result });
     } catch (err) {
       logApiError("/api/text-actions", err, { stage: "anthropic_call", action });
+      await releaseReservation(user.id, reservationId);
       const errMessage = err instanceof Error ? err.message : "Request failed.";
       return NextResponse.json(
         { ok: false, error: `${errMessage} No credits were charged — please try again.` },

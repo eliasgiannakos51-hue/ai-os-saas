@@ -1,0 +1,136 @@
+# Credits and margin
+
+Every Claude call costs real money. This document is the contract that
+keeps each one profitable, and the short version is one sentence:
+
+> **Never charge a fixed number of credits for an AI call.** Measure what
+> the call actually cost and settle against the account's own per-credit
+> price.
+
+## Why a fixed number is always wrong
+
+A credit is not worth the same to everyone. Plans sell them in bulk:
+
+| Plan | Price | Credits | € per credit | 1 credit covers a call costing up to (at 4×) |
+|---|---|---|---|---|
+| Free | €0 | 100 | €0.0200 (list) | €0.00500 |
+| Starter | €20 | 1,000 | €0.0200 | €0.00500 |
+| Growth | €50 | 3,000 | €0.0167 | €0.00417 |
+| Professional | €100 | 10,000 | €0.0100 | €0.00250 |
+| Ultimate | €200 | 25,000 | €0.0080 | €0.00200 |
+| Enterprise | custom | custom | €0.0200 (list) | €0.00500 |
+
+Credit packs are cheaper still — the €100 / 8,000 pack is €0.0125 each.
+
+So "1 credit per message" means something different on every plan. On
+Ultimate one credit buys €0.008 of revenue, which at a 4× target allows a
+call costing at most €0.002 (~$0.0022). A single small Sonnet turn —
+1,000 input, 500 output — costs **$0.0105**. Five times over budget, on
+the cheapest possible call. There is no flat number that works, because
+the number would have to differ per plan and per request size.
+
+## The formula
+
+```
+creditsCharged = ceil(realCostEur × marginMultiplier / effectiveCreditPriceEur)
+```
+
+`effectiveCreditPriceEur` is the **minimum** of the list price, the
+account's plan rate, and the cheapest credit pack it has bought — the
+cheapest euro a credit could have been sold for. Credits are fungible
+once granted; there is no lot accounting that could tell a plan credit
+from a pack credit at spend time, so taking the minimum is the only
+choice that cannot under-charge.
+
+`ceil` only ever rounds up, so `credits × price / cost ≥ multiplier`
+holds by construction. That in turn bounds total AI spend at `1/M` of
+revenue — 25% at 4× — no matter how a customer uses their allowance.
+
+Both facts are asserted by brute force in
+`scripts/tests/billing-coverage.test.mjs` (§5, §6).
+
+## What a new AI feature must do
+
+1. Create a `CostAccumulator`.
+2. Estimate and **reserve** before calling Claude
+   (`estimateForAction` + `reserveCredits`), so a user cannot start work
+   they cannot pay for.
+3. `costs.record(stage, response.usage, MODEL)` for **every** call,
+   including retries and continuation rounds. All four token types are
+   priced — input, output, `cache_creation_input_tokens` (1.25× input)
+   and `cache_read_input_tokens` (0.1× input) — plus web searches at
+   $10/1,000. Missing a sub-call means it comes out of margin.
+4. On success, `settleReservation({ userId, reservationId, feature,
+   costs, plan, ... })`, passing the plan from
+   `resolveEffectivePlan(user)`. Settlement resolves the account's rate,
+   charges, releases the hold and writes the `ai_cost_log` row in one
+   transaction.
+5. On failure, `releaseReservation` — the user is not charged for work
+   they did not receive. Note that this is a **real loss**: we paid
+   Anthropic. Failures are a margin problem, not just a UX one, which is
+   why the Website Builder recovers an interrupted generation instead of
+   discarding it.
+
+Add the model to `MODEL_PRICING_USD` in `lib/billing/model-pricing.ts`
+if it is not there. An unknown model falls back to the most expensive
+known one — over-charging slightly is the safe direction to fail in.
+
+## What enforces this
+
+- **`scripts/tests/billing-coverage.test.mjs`** inventories every
+  `messages.create` / `messages.stream` in `src/` and fails on any that
+  is not declared with its billing mode. It runs inside `npm run build`
+  (via `test:unit`), so a feature that does not say how it bills cannot
+  be deployed. It also brute-forces margin over plan × pack × cost.
+- **`scripts/tests/website-margin-real-numbers.test.mjs`** prices real
+  production rows by hand and checks each token type reaches the cost.
+- **Runtime.** `settleReservation` logs `billing:marginBelowTarget` if an
+  achieved margin ever lands under the multiplier.
+- **Config floors.** `CREDIT_MARGIN_MULTIPLIER` cannot be set below 4,
+  and `USD_TO_EUR_RATE` cannot be set below 0.85 — a low FX rate
+  understates the euro cost the multiplier is applied to, and the damage
+  is invisible from the settled row because the stored `achieved_margin`
+  is measured against the same understated euros.
+
+## Known gaps
+
+None. Every `messages.create` / `messages.stream` in `src/` reserves,
+records measured usage and settles at the account's own per-credit rate.
+`billing-coverage.test.mjs` asserts that count is 13 settled, 0 flat, 0
+unbilled, and the build fails if a new call site appears undeclared.
+
+Two of them are worth knowing about because their shape is unusual:
+
+- **`lib/lead-classification.ts`** is reached from the **public**
+  `api/websites/[id]/submit-form`, so there is no caller to charge. It
+  settles against the site **owner** — who the triage is for. A
+  stranger's form POST cannot hold the owner's credits while it runs, so
+  solvency is checked *before* the call rather than reserved; an owner
+  who cannot pay gets the submission without a priority tag, and the
+  visitor's form never fails. A per-website hourly cap and a honeypot
+  bound the volume.
+- **`lib/chat/memory.ts`** is a second Claude call on every chat turn. It
+  runs *before* `settleReservation` and records onto the same
+  accumulator, so one chat turn is one charge covering both calls. The
+  `chatMessage` estimate profile carries an auxiliary call for it — if it
+  did not, every hold would be short by exactly one Claude call.
+
+## The environment
+
+`lib/env-check.ts` reports, once at startup via `src/instrumentation.ts`,
+which variables are missing and which are set to something suspicious. It
+runs at **runtime only** and never throws: env validation that can fail a
+build is worse than the problem it solves.
+
+Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+`SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_SITE_URL`.
+
+Recommended: `USD_TO_EUR_RATE` (0.92), `CREDIT_MARGIN_MULTIPLIER` (4),
+`CREDIT_PRICE_EUR` (0.02), `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
+`CRON_SECRET`, `RESEND_API_KEY`.
+
+The three pricing knobs have defaults, which is why a wrong value is more
+dangerous than a missing one — `USD_TO_EUR_RATE=0.80` charged 45 credits
+where 52 was correct while every settled row still reported a healthy
+margin. Values outside their sane range are rejected in favour of the
+default *and* flagged at startup.

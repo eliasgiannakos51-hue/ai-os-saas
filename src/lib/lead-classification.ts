@@ -1,5 +1,6 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
+import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 
 // "Lead intelligence" — one small, cheap, forced-tool-use classification
 // call run on every published-website contact-form submission (see
@@ -58,7 +59,13 @@ function formatFields(fields: Record<string, string>): string {
 // always be saved/emailed regardless of whether this succeeds.
 export async function classifyLeadMessage(
   apiKey: string,
-  fields: Record<string, string>
+  fields: Record<string, string>,
+  // Every other AI call in this app records what it cost. This one did
+  // not, so a submission to a published website spent real money that
+  // appeared in no cost log and was charged to no account — see
+  // CREDITS.md. The caller settles it against the site OWNER, who is the
+  // party the classification is for.
+  costs?: CostAccumulator
 ): Promise<LeadClassification | null> {
   const text = formatFields(fields);
   if (!text.trim()) return null;
@@ -72,6 +79,9 @@ export async function classifyLeadMessage(
     tools: [CLASSIFY_TOOL],
     tool_choice: { type: "tool", name: "classify_lead" },
   });
+  // Recorded before the parse below can bail out: the tokens are spent
+  // whether or not the tool call came back usable.
+  costs?.record("classification", response.usage, MODEL);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

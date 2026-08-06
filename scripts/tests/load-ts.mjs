@@ -10,6 +10,7 @@
 // throws on anything else rather than silently mis-resolving.
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import ts from "typescript";
 
 const ROOT = process.cwd();
@@ -121,7 +122,14 @@ export async function loadTsWithDeps(entry) {
   mkdirSync(dir, { recursive: true });
   const file = path.join(dir, `${path.basename(entry).replace(/\W/g, "_")}.mjs`);
   writeFileSync(file, bundleOf(entry, true));
-  const mod = await import(`${file}?v=${process.pid}`);
+  // pathToFileURL, not the bare path. `import("/abs/path.mjs?v=1")` is
+  // accepted on POSIX Node 22 but is not a valid module specifier — the
+  // query string makes it look like a bare specifier to stricter
+  // resolvers, and Node has been tightening this. A file: URL is the
+  // documented form and behaves the same everywhere.
+  const url = new URL(pathToFileURL(file));
+  url.searchParams.set("v", String(process.pid));
+  const mod = await import(url.href);
   cache.set(key, mod);
   return mod;
 }

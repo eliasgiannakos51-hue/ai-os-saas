@@ -121,7 +121,9 @@
       "images": "Generate images from a prompt. Not ready yet.",
       "videos": "Generate video from a prompt. Not ready yet.",
       "coding": "Describe what you need and get working code. Not ready yet.",
-      "presentations": "Turn a brief into a finished deck. Not ready yet."
+      "presentations": "Turn a brief into a finished deck. Not ready yet.",
+      "home": "Your dashboard — activity, stats and quick actions.",
+      "settings": "Account, billing, language and preferences."
     },
     "comingSoon": "Coming soon",
     "comingSoonToast": "{name} isn't available yet — it's on the roadmap.",
@@ -648,7 +650,9 @@
       "showConversations": "Show conversations",
       "focusMode": "Focus mode",
       "streamInterrupted": "The connection dropped before the reply finished.",
-      "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete."
+      "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete.",
+      "hideConversationsHint": "Hide the conversation list and give the thread the full width.",
+      "showConversationsHint": "Show the conversation list again."
     },
     "create": {
       "title": "Create Anything"

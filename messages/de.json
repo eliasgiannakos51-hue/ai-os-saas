@@ -121,7 +121,9 @@
       "images": "Bilder aus einer Beschreibung erzeugen. Noch nicht fertig.",
       "videos": "Video aus einer Beschreibung erzeugen. Noch nicht fertig.",
       "coding": "Beschreibe, was du brauchst, und bekomme funktionierenden Code. Noch nicht fertig.",
-      "presentations": "Aus einem Briefing eine fertige Präsentation machen. Noch nicht fertig."
+      "presentations": "Aus einem Briefing eine fertige Präsentation machen. Noch nicht fertig.",
+      "home": "Ihr Dashboard — Aktivität, Statistiken und Schnellaktionen.",
+      "settings": "Konto, Abrechnung, Sprache und Einstellungen."
     },
     "comingSoon": "Demnächst",
     "comingSoonToast": "{name} ist noch nicht verfügbar — steht auf der Roadmap.",
@@ -648,7 +650,9 @@
       "showConversations": "Unterhaltungen einblenden",
       "focusMode": "Fokusmodus",
       "streamInterrupted": "Die Verbindung wurde unterbrochen, bevor die Antwort fertig war.",
-      "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig."
+      "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig.",
+      "hideConversationsHint": "Blendet die Unterhaltungsliste aus und gibt dem Verlauf die volle Breite.",
+      "showConversationsHint": "Die Unterhaltungsliste wieder anzeigen."
     },
     "create": {
       "title": "Alles Erstellen"

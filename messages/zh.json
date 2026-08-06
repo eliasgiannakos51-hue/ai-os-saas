@@ -121,7 +121,9 @@
       "images": "根据描述生成图片。尚未就绪。",
       "videos": "根据描述生成视频。尚未就绪。",
       "coding": "描述你的需求，得到可运行的代码。尚未就绪。",
-      "presentations": "把一份简报变成完整的演示文稿。尚未就绪。"
+      "presentations": "把一份简报变成完整的演示文稿。尚未就绪。",
+      "home": "你的仪表板——活动、统计和快捷操作。",
+      "settings": "账户、账单、语言和偏好设置。"
     },
     "comingSoon": "即将推出",
     "comingSoonToast": "{name} 尚未推出——已列入路线图。",
@@ -648,7 +650,9 @@
       "showConversations": "显示对话列表",
       "focusMode": "专注模式",
       "streamInterrupted": "连接在回复完成前中断。",
-      "streamInterruptedPartial": "连接已中断——上面的回复可能不完整。"
+      "streamInterruptedPartial": "连接已中断——上面的回复可能不完整。",
+      "hideConversationsHint": "隐藏会话列表，让对话占据整个宽度。",
+      "showConversationsHint": "再次显示会话列表。"
     },
     "create": {
       "title": "创建任何内容"

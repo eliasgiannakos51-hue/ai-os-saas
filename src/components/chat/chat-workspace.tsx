@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
+import { Tooltip } from "@/components/ui/tooltip";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { MessageContent } from "@/components/chat/message-content";
 import { useCredits } from "@/components/credits/credits-context";
@@ -444,25 +445,35 @@ export function ChatWorkspace({
 
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-center gap-2 border-b border-border px-2 py-1.5">
-          <button
-            type="button"
-            onClick={toggleSidebar}
-            aria-expanded={sidebarOpen}
-            aria-label={sidebarOpen ? t("hideConversations") : t("showConversations")}
-            title={sidebarOpen ? t("hideConversations") : t("showConversations")}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+          {/* DEFECT this fixes: this was a bare 36x36 icon whose only
+              affordance was a native `title` tooltip — the exact thing the
+              user reported never seeing. The feature worked and shipped;
+              nobody could find it. It now carries a VISIBLE text label
+              (the icon alone never said what it did) and the real Tooltip
+              component for the longer explanation. */}
+          <Tooltip
+            content={sidebarOpen ? t("hideConversationsHint") : t("showConversationsHint")}
+            side="top"
           >
-            {sidebarOpen ? (
-              <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />
-            ) : (
-              <PanelLeftOpen className="h-[18px] w-[18px]" aria-hidden="true" />
-            )}
-          </button>
-          {/* Rendered only once the stored preference has been read, so the
-              label can never briefly contradict the sidebar beside it. */}
-          {sidebarResolved && !sidebarOpen && (
-            <span className="truncate text-xs text-muted">{t("focusMode")}</span>
-          )}
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              aria-expanded={sidebarOpen}
+              aria-label={sidebarOpen ? t("hideConversations") : t("showConversations")}
+              className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-2 text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            >
+              {sidebarOpen ? (
+                <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />
+              ) : (
+                <PanelLeftOpen className="h-[18px] w-[18px]" aria-hidden="true" />
+              )}
+              {/* Hidden below sm only — at 375px the composer needs the
+                  width more than the label does. */}
+              <span className="hidden truncate text-xs sm:inline">
+                {sidebarOpen ? t("hideConversations") : t("focusMode")}
+              </span>
+            </button>
+          </Tooltip>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">

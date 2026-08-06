@@ -1,9 +1,11 @@
 import "server-only";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 import Anthropic from "@anthropic-ai/sdk";
+import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import type { WeeklyReflectionStats } from "@/lib/reflection";
 
-const REFLECTION_MODEL = "claude-sonnet-4-6";
+// Exported so the route prices the SAME model this file calls.
+export const REFLECTION_MODEL = "claude-sonnet-4-6";
 
 const REFLECTION_SYSTEM_PROMPT = `Δώσε σύντομη, ειλικρινή ανασκόπηση της βδομάδας — τι πήγε καλά, τι έμεινε ημιτελές, ΧΩΡΙΣ να είσαι υπερβολικά θετικός αν τα δεδομένα δείχνουν στασιμότητα. Βασίσου ΑΠΟΚΛΕΙΣΤΙΚΑ στα δεδομένα που σου δίνονται — μην υποθέτεις ή εφευρίσκεις πράγματα που δεν αναφέρονται. 3-6 σύντομες προτάσεις ή bullet points. Απάντα στα ελληνικά, εκτός αν κάτι στα δεδομένα υποδεικνύει άλλη γλώσσα.
 ${AI_QUALITY_CHECKLIST_EL}`;
@@ -31,7 +33,13 @@ ${moduleLines || "(καμία δραστηριότητα σε κανένα modul
 ${missionLine}`;
 }
 
-export async function generateWeeklyReflection(apiKey: string, userMessage: string): Promise<string> {
+export async function generateWeeklyReflection(
+  apiKey: string,
+  userMessage: string,
+  // This call recorded nothing at all — the route charged a flat 2
+  // credits and the tokens never reached a cost log. See CREDITS.md.
+  costs?: CostAccumulator
+): Promise<string> {
   const anthropic = new Anthropic({ apiKey });
   const response = await anthropic.messages.create({
     model: REFLECTION_MODEL,
@@ -39,6 +47,8 @@ export async function generateWeeklyReflection(apiKey: string, userMessage: stri
     system: REFLECTION_SYSTEM_PROMPT,
     messages: [{ role: "user", content: userMessage }],
   });
+  // Before the parse below, which can still bail out on an empty reply.
+  costs?.record("generation", response.usage, REFLECTION_MODEL);
 
   const textBlock = response.content.find(
     (block): block is Anthropic.TextBlock => block.type === "text"

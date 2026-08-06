@@ -10,6 +10,7 @@ import {
 } from "@/lib/billing/credit-formula";
 import { getPurchasedPackCreditPriceEur } from "@/lib/billing/credits";
 import type { Plan } from "@/lib/billing/plans";
+import { sendMarginAlertEmail } from "@/lib/email/margin-alert";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 
 // Three-phase billing: RESERVE -> EXECUTE -> SETTLE.
@@ -178,6 +179,20 @@ export async function settleReservation(params: {
       realCostEur,
       achievedMargin: margin,
       targetMargin: config.marginMultiplier,
+      effectiveCreditPriceEur: effectivePrice,
+    });
+    // The log line alone is only useful to someone already reading logs.
+    // A shortfall keeps costing money until it is fixed, so it has to
+    // reach a person. Awaited-but-never-throwing: the user has already
+    // been charged by the time this runs.
+    void sendMarginAlertEmail({
+      feature,
+      creditsCharged,
+      realCostUsd,
+      realCostEur,
+      achievedMargin: margin,
+      targetMargin: config.marginMultiplier,
+      planSlug: plan?.slug ?? null,
       effectiveCreditPriceEur: effectivePrice,
     });
   }

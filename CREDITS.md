@@ -94,22 +94,43 @@ known one — over-charging slightly is the safe direction to fail in.
 
 ## Known gaps
 
-These predate the settlement system and are **not** margin-guaranteed.
-They are listed in `billing-coverage.test.mjs` so the count cannot grow
-silently, and each needs converting to reserve/settle:
+None. Every `messages.create` / `messages.stream` in `src/` reserves,
+records measured usage and settles at the account's own per-credit rate.
+`billing-coverage.test.mjs` asserts that count is 13 settled, 0 flat, 0
+unbilled, and the build fails if a new call site appears undeclared.
 
-| Where | Charge | Problem |
-|---|---|---|
-| `api/records/ask` | flat 1 credit | Ask-AI sends a whole record as context; on Ultimate that is €0.008 of revenue. |
-| `api/text-actions` | flat 1 credit | Same. |
-| `api/reflection/generate` | flat 2 credits | Records no usage at all. |
-| `lib/chat/memory.ts` | none | Memory extraction inside a chat turn; only a call *count* reaches the circuit breaker. |
+Two of them are worth knowing about because their shape is unusual:
 
-`lib/lead-classification.ts` was in this table and is now fixed: it is
-reached from the **public** `api/websites/[id]/submit-form`, so there is
-no caller to charge, and it now settles against the site **owner** — who
-the triage is for. Because a stranger's form POST cannot hold the
-owner's credits while it runs, solvency is checked *before* the call
-rather than reserved; an owner who cannot pay gets the submission without
-a priority tag, and the visitor's form never fails. A per-website hourly
-cap and a honeypot bound the volume.
+- **`lib/lead-classification.ts`** is reached from the **public**
+  `api/websites/[id]/submit-form`, so there is no caller to charge. It
+  settles against the site **owner** — who the triage is for. A
+  stranger's form POST cannot hold the owner's credits while it runs, so
+  solvency is checked *before* the call rather than reserved; an owner
+  who cannot pay gets the submission without a priority tag, and the
+  visitor's form never fails. A per-website hourly cap and a honeypot
+  bound the volume.
+- **`lib/chat/memory.ts`** is a second Claude call on every chat turn. It
+  runs *before* `settleReservation` and records onto the same
+  accumulator, so one chat turn is one charge covering both calls. The
+  `chatMessage` estimate profile carries an auxiliary call for it — if it
+  did not, every hold would be short by exactly one Claude call.
+
+## The environment
+
+`lib/env-check.ts` reports, once at startup via `src/instrumentation.ts`,
+which variables are missing and which are set to something suspicious. It
+runs at **runtime only** and never throws: env validation that can fail a
+build is worse than the problem it solves.
+
+Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+`SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, `NEXT_PUBLIC_SITE_URL`.
+
+Recommended: `USD_TO_EUR_RATE` (0.92), `CREDIT_MARGIN_MULTIPLIER` (4),
+`CREDIT_PRICE_EUR` (0.02), `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
+`CRON_SECRET`, `RESEND_API_KEY`.
+
+The three pricing knobs have defaults, which is why a wrong value is more
+dangerous than a missing one — `USD_TO_EUR_RATE=0.80` charged 45 credits
+where 52 was correct while every settled row still reported a healthy
+margin. Values outside their sane range are rejected in favour of the
+default *and* flagged at startup.

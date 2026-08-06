@@ -76,26 +76,25 @@ const DECLARED = {
   "src/app/api/create-studio/detect/route.ts": { calls: 1, billing: "settled" },
   "src/app/api/chat/route.ts": { calls: 1, billing: "settled" },
 
-  // --- the gaps this inventory was written to make visible -----------
   "src/app/api/records/ask/route.ts": {
     calls: 1,
-    billing: "flat",
-    note: "CREDIT_COSTS.chatMessage = 1 credit. On Ultimate that is EUR 0.008 of revenue against an Ask-AI call carrying a whole record as context.",
+    billing: "settled",
+    note: "was a flat 1 credit; the input is the WHOLE record, so the price now tracks the record's size. Reservation sized after the record loads.",
   },
   "src/app/api/text-actions/route.ts": {
     calls: 1,
-    billing: "flat",
-    note: "CREDIT_COSTS.textAction = 1 credit, same problem.",
+    billing: "settled",
+    note: "was a flat 1 credit whether rewriting a sentence or a document.",
   },
   "src/lib/reflection-agent.ts": {
     calls: 1,
-    billing: "flat",
-    note: "api/reflection/generate charges CREDIT_COSTS.weeklyReflection = 2 credits, and records no usage at all.",
+    billing: "settled",
+    note: "was a flat 2 credits with NO usage tracking at all — the only call whose tokens reached no cost log.",
   },
   "src/lib/chat/memory.ts": {
     calls: 1,
-    billing: "unbilled",
-    note: "memory extraction inside a chat turn. Only a CALL COUNT reaches the circuit breaker; the tokens are never priced or charged.",
+    billing: "settled",
+    note: "memory extraction now runs BEFORE the chat settlement and records onto the same accumulator, so one chat turn is one charge covering both calls.",
   },
   "src/lib/lead-classification.ts": {
     calls: 1,
@@ -146,8 +145,9 @@ for (const [file, m] of [...flat, ...unbilled]) {
 // deliberately — moving a feature onto settlement lowers them and the
 // test tells you to update it; adding another flat-fee feature raises
 // them and the build fails.
-check("flat-fee AI features (not margin-guaranteed)", flat.length, 3);
-check("completely unbilled AI calls", unbilled.length, 1);
+check("flat-fee AI features (not margin-guaranteed)", flat.length, 0);
+check("completely unbilled AI calls", unbilled.length, 0);
+check("every AI call site is settled on measured usage", settled.length, Object.keys(DECLARED).length);
 
 console.log("\n== 2b. the public contact-form endpoint bills the site owner ==");
 // The one AI call in this app that an ANONYMOUS third party can trigger.
@@ -354,6 +354,100 @@ for (const file of readdirSync("scripts/tests").filter((f) => f.endsWith(".test.
 // Node is pinned, because Vercel otherwise picks its newest — it built
 // with v24.15.0 against Next 14.2, which predates it.
 check("Node is pinned for the host", pkg.engines?.node, "22.x");
+
+console.log("\n== 11. the four converted endpoints reserve, record and settle ==");
+// Each of these used to charge a flat CREDIT_COSTS number (or nothing).
+// The three-phase shape is what makes the margin hold, so all three
+// phases are checked, not just the settle.
+for (const [label, file, feature] of [
+  ["records/ask", "src/app/api/records/ask/route.ts", "ask_ai_record"],
+  ["text-actions", "src/app/api/text-actions/route.ts", "text_action"],
+  ["reflection/generate", "src/app/api/reflection/generate/route.ts", "weekly_reflection"],
+]) {
+  const body = readFileSync(file, "utf8");
+  checkTrue(`${label}: estimates from real input size`, /estimateForAction\(/.test(body));
+  checkTrue(`${label}: reserves before calling`, /reserveCredits\(/.test(body));
+  checkTrue(`${label}: records measured usage`, /costs\.record\(/.test(body) || /, costs\)/.test(body));
+  checkTrue(`${label}: settles as ${feature}`, new RegExp(`feature: "${feature}"`).test(body));
+  checkTrue(`${label}: releases the hold on failure`, /releaseReservation\(/.test(body));
+  checkTrue(`${label}: at the account's own rate`, /effectiveCreditPriceEurForAccount\(/.test(body) || /plan,/.test(body));
+  // The old flat charge must be gone, not merely bypassed.
+  checkTrue(`${label}: no flat deductCredits remains`, !/deductCredits\(/.test(body));
+}
+// The reservation has to be sized AFTER the thing being priced is
+// loaded, or it prices a request it has not seen.
+const ask = readFileSync("src/app/api/records/ask/route.ts", "utf8");
+checkTrue("records/ask sizes the hold after the record loads", ask.indexOf("const systemPrompt = buildSystemPrompt") < ask.indexOf('estimateForAction(\n      "recordAsk"'));
+const refl = readFileSync("src/app/api/reflection/generate/route.ts", "utf8");
+checkTrue("reflection sizes the hold after the week's stats load", refl.indexOf("loadWeeklyReflectionStats") < refl.indexOf("estimateForAction"));
+
+console.log("\n== 12. chat memory extraction is inside the chat settlement ==");
+// It was a second real Claude call running AFTER settleReservation, so
+// its tokens could not be billed even in principle — the accumulator was
+// already spent.
+const chat = readFileSync("src/app/api/chat/route.ts", "utf8");
+checkTrue("extraction runs BEFORE the settle", chat.indexOf("await extractAndStoreMemory({") < chat.indexOf("await settleReservation({"));
+checkTrue("and shares the turn's accumulator", /extractAndStoreMemory\(\{[\s\S]{0,400}costs,/.test(chat));
+checkTrue("the extractor records its own usage", /costs\?\.record\("other", result\.usage, MEMORY_MODEL\)/.test(readFileSync("src/lib/chat/memory.ts", "utf8")));
+// If the hold does not cover the second call, every chat message is
+// short by exactly one Claude call.
+const est = readFileSync("src/lib/billing/estimate.ts", "utf8");
+checkTrue("the chat estimate holds for the extraction call too", /chatMessage: \{[\s\S]{0,600}auxiliaryCalls: \[\{ inputTokens: \d+/.test(est));
+for (const profile of ["recordAsk", "textAction", "weeklyReflection"]) {
+  checkTrue(`a ${profile} estimate profile exists`, new RegExp(`\\b${profile}: \\{`).test(est));
+}
+
+console.log("\n== 13. a margin shortfall reaches a person, not just a log ==");
+const alert = readFileSync("src/lib/email/margin-alert.ts", "utf8");
+checkTrue("settlement sends the alert", /sendMarginAlertEmail\(\{/.test(res));
+checkTrue("it goes to the admins", /ADMIN_EMAILS/.test(alert));
+checkTrue("null is reported as its own diagnosis, not as missing data", /could not be computed \(null\)/.test(alert));
+checkTrue("it is rate limited so a systemic cause cannot flood", /COOLDOWN_MS/.test(alert));
+checkTrue("and never throws — it runs after the user was charged", /catch \{[\s\S]{0,120}\}/.test(alert));
+
+console.log("\n== 14. the environment is reported at runtime, never at build ==");
+const envMod = await loadTs("src/lib/env-check.ts");
+const full = {
+  ...Object.fromEntries(
+    [
+      "NEXT_PUBLIC_SUPABASE_URL",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "SUPABASE_SERVICE_ROLE_KEY",
+      "ANTHROPIC_API_KEY",
+      "NEXT_PUBLIC_SITE_URL",
+      "STRIPE_SECRET_KEY",
+      "STRIPE_WEBHOOK_SECRET",
+      "CRON_SECRET",
+      "RESEND_API_KEY",
+    ].map((k) => [k, "set"])
+  ),
+  // The pricing knobs are "recommended", not optional: leaving them
+  // unset is exactly how a default silently becomes the live rate.
+  USD_TO_EUR_RATE: "0.92",
+  CREDIT_MARGIN_MULTIPLIER: "4",
+  CREDIT_PRICE_EUR: "0.02",
+};
+let r = envMod.checkEnv(full);
+check("a complete environment reports nothing missing", r.missingRequired, []);
+check("...and nothing recommended missing", r.missingRecommended, []);
+r = envMod.checkEnv({});
+check("an empty environment names every required variable", r.missingRequired.length, 5);
+checkTrue("including the Anthropic key", r.missingRequired.includes("ANTHROPIC_API_KEY"));
+// The value that actually cost money.
+r = envMod.checkEnv({ ...full, USD_TO_EUR_RATE: "0.80" });
+check("USD_TO_EUR_RATE=0.80 is flagged", r.suspicious.map((x) => x.name), ["USD_TO_EUR_RATE"]);
+checkTrue("with the reason spelled out", /outside the sane range/.test(r.suspicious[0].reason));
+r = envMod.checkEnv({ ...full, USD_TO_EUR_RATE: "0.92", CREDIT_MARGIN_MULTIPLIER: "2" });
+check("a healthy FX rate is not flagged", r.suspicious.map((x) => x.name), ["CREDIT_MARGIN_MULTIPLIER"]);
+// Secrets must never be echoed into logs.
+r = envMod.checkEnv({ ...full, ANTHROPIC_API_KEY: "sk-ant-supersecret" });
+checkTrue("a secret's VALUE is never echoed", !JSON.stringify(r).includes("supersecret"));
+// And the check must be incapable of breaking a deploy.
+const instr = readFileSync("src/instrumentation.ts", "utf8");
+checkTrue("it runs from instrumentation, i.e. at startup", /export async function register/.test(instr));
+checkTrue("node runtime only", /NEXT_RUNTIME !== "nodejs"/.test(instr));
+checkTrue("it cannot throw or exit", !/throw |process\.exit/.test(instr) && !/throw new Error/.test(readFileSync("src/lib/env-check.ts", "utf8")));
+checkTrue("and nothing in the build script validates env", !/env-check/.test(pkg.scripts.build));
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

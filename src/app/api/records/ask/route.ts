@@ -11,11 +11,16 @@ import { isAdminEmail } from "@/lib/admin";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
   CREDIT_COSTS,
-  deductCredits,
+  getPurchasedPackCreditPriceEur,
   hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
 } from "@/lib/billing/credits";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
+import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
 
 export const dynamic = "force-dynamic";
 
@@ -167,24 +172,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, rateLimited: true, message: breakerCheck.reason });
     }
 
-    // Same credits-based gate as Ionexa Chat (api/chat) and Create Anything
-    // (api/create) — 1 credit per message, admin-listed accounts (see
-    // lib/admin.ts) skip it entirely. Read-only check here; the actual
-    // deduct happens inside the stream below, only after the model has
-    // confirmed-successfully returned a real response — never before.
+    // Ask AI used to charge a flat CREDIT_COSTS.chatMessage — 1 credit,
+    // whatever the record. That is the one shape of charge that cannot
+    // hold a margin: the input here is the WHOLE record, so a long one
+    // costs many times a short one, and on Ultimate a credit is only
+    // worth EUR 0.008. It now reserves and settles on measured usage like
+    // every other AI call (see CREDITS.md).
+    //
+    // The reservation is sized after the record is loaded, further down,
+    // because the record is what the price depends on.
     const isAdmin = isAdminEmail(user.email);
-    let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
-    if (!isAdmin) {
-      plan = await resolveEffectivePlan(user);
-      const check = await hasEnoughCredits(user.id, CREDIT_COSTS.chatMessage, plan);
-      if (!check.ok) {
-        return NextResponse.json({
-          ok: true,
-          rateLimited: true,
-          message: insufficientCreditsMessage(check.remaining, CREDIT_COSTS.chatMessage),
-        });
-      }
-    }
+    const plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = isAdmin
+      ? null
+      : await resolveEffectivePlan(user);
 
     // RLS (auth.uid() = user_id) means this only ever finds the row if the
     // caller actually owns it — a stranger's id simply comes back null,
@@ -211,6 +211,53 @@ export async function POST(request: Request) {
     const systemPrompt = buildSystemPrompt(moduleConfig, record as ModuleRecord);
     const anthropic = new Anthropic({ apiKey });
 
+    // Sized from what will actually be sent: the serialised record (which
+    // dominates), the conversation so far, and the question.
+    const historyChars = history.reduce((sum, m) => sum + m.content.length, 0);
+    const pricingConfig = resolvePricingConfig();
+    const estimate = estimateForAction(
+      "recordAsk",
+      {
+        model: MODEL,
+        inputChars: systemPrompt.length + historyChars + message.length,
+        // The tool is offered on every call, so the hold has to assume it
+        // might be used — an unheld search is an unbilled one.
+        expectedWebSearches: 1,
+      },
+      pricingConfig,
+      plan
+        ? effectiveCreditPriceEurForAccount(plan, await getPurchasedPackCreditPriceEur(user.id), pricingConfig)
+        : undefined
+    );
+
+    let reservationId = "";
+    if (!isAdmin && plan) {
+      const check = await hasEnoughCredits(user.id, estimate.reserveCredits, plan);
+      if (!check.ok) {
+        return NextResponse.json({
+          ok: true,
+          rateLimited: true,
+          message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
+        });
+      }
+      const reservation = await reserveCredits(user.id, estimate.reserveCredits, "ask_ai_record", {
+        moduleSlug,
+        recordId,
+      });
+      if (!reservation.ok) {
+        return NextResponse.json({
+          ok: true,
+          rateLimited: true,
+          message:
+            reservation.reason === "insufficient"
+              ? insufficientCreditsMessage(reservation.available, estimate.reserveCredits)
+              : "Could not reserve credits for this request. No credits were charged — please try again.",
+        });
+      }
+      reservationId = reservation.reservationId;
+    }
+    const costs = new CostAccumulator();
+
     const stream = new ReadableStream({
       async start(controller) {
         let assistantText = "";
@@ -235,8 +282,13 @@ export async function POST(request: Request) {
 
           const finalResponse = await claudeStream.finalMessage();
           webSearchCount = finalResponse.usage.server_tool_use?.web_search_requests ?? 0;
+          // Web searches are inside this usage object and are priced per
+          // query by priceUsage, so they no longer need a second, flat
+          // deduction of their own.
+          costs.record("generation", finalResponse.usage, MODEL);
         } catch (err) {
           logApiError("/api/records/ask", err, { stage: "anthropic_stream", moduleSlug });
+          await releaseReservation(user.id, reservationId);
           const errMessage = err instanceof Error ? err.message : "Request failed.";
           controller.enqueue(
             ndjsonLine({ type: "error", error: `${errMessage} No credits were charged — please try again.` })
@@ -246,6 +298,7 @@ export async function POST(request: Request) {
         }
 
         if (!assistantText.trim()) {
+          await releaseReservation(user.id, reservationId);
           controller.enqueue(
             ndjsonLine({
               type: "error",
@@ -257,19 +310,24 @@ export async function POST(request: Request) {
         }
 
         // Only now — a real, non-empty response was confirmed — is this
-        // worth charging for.
-        if (!isAdmin && plan) {
-          await deductCredits(user.id, CREDIT_COSTS.chatMessage, "ask_ai_record", `Ask AI — ${moduleConfig.title}`, plan);
-          if (webSearchCount > 0) {
-            await deductCredits(
-              user.id,
-              CREDIT_COSTS.webSearchPerQuery * webSearchCount,
-              "web_search",
-              `Ask AI (${moduleConfig.title}) — ${webSearchCount} web search${webSearchCount > 1 ? "es" : ""}`,
-              plan
-            );
-          }
-        }
+        // worth charging for. Admins settle too: they are charged
+        // nothing, but their real spend still has to reach the cost log
+        // or the margin report only sees billed traffic.
+        await settleReservation({
+          userId: user.id,
+          reservationId,
+          feature: "ask_ai_record",
+          costs,
+          plan,
+          bypassCharge: isAdmin,
+          metadata: {
+            moduleSlug,
+            recordId,
+            webSearches: webSearchCount,
+            estimatedCredits: estimate.estimatedCredits,
+            reservedCredits: isAdmin ? 0 : estimate.reserveCredits,
+          },
+        });
 
         controller.enqueue(ndjsonLine({ type: "done" }));
         controller.close();

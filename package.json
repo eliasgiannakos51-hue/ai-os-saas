@@ -9,9 +9,10 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
-    "verify": "npm run test:e2e && npm run typecheck && npm run lint && npm run build",
+    "verify": "npm run test:e2e && npm run typecheck && npm run lint && npm run build && npm run test:prod",
     "check:i18n": "node scripts/check-i18n.js",
-    "test:unit": "for f in scripts/tests/*.test.mjs; do echo \"--- $f\"; node \"$f\" || exit 1; done"
+    "test:unit": "for f in scripts/tests/*.test.mjs; do echo \"--- $f\"; node \"$f\" || exit 1; done",
+    "test:prod": "for f in scripts/tests/*.prodtest.mjs; do echo \"--- $f\"; node \"$f\" || exit 1; done"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",

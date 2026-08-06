@@ -86,7 +86,13 @@ const MODULE_TABLES = [
 // V3 feature tables, asserted by name for the same reason the module
 // tables are: a count that moves tells you nothing about WHICH table lost
 // its policies.
-const V3_TABLES = ["user_agents", "agent_runs"];
+const V3_TABLES = [
+  "user_agents",
+  "agent_runs",
+  "published_sites",
+  "site_versions",
+  "site_analytics",
+];
 for (const t of MODULE_TABLES) {
   if (!rlsEnabled.has(t)) {
     fail++;
@@ -94,7 +100,7 @@ for (const t of MODULE_TABLES) {
   }
 }
 check(`all ${MODULE_TABLES.length} module tables have RLS`, MODULE_TABLES.every((t) => rlsEnabled.has(t)), true);
-check(`all ${V3_TABLES.length} V3 agent tables have RLS`, V3_TABLES.every((t) => rlsEnabled.has(t)), true);
+check(`all ${V3_TABLES.length} V3 feature tables have RLS`, V3_TABLES.every((t) => rlsEnabled.has(t)), true);
 
 // RLS with no policy denies everything to anon/authenticated (service_role
 // bypasses) — correct for the admin-only tables, a bug for anything else.
@@ -113,6 +119,26 @@ const agentRunsPolicies = [...sql.matchAll(/create policy[^;]*?\son\s+(?:public\
 );
 checkTrue(`agent_runs has exactly one policy (${agentRunsPolicies.length})`, agentRunsPolicies.length === 1);
 checkTrue("...and it is select-only", /for select/i.test(agentRunsPolicies[0] ?? ""));
+
+// site_analytics is read-only to its owner for the same reason: only the
+// public serving route writes counts, through the service-role client.
+const analyticsPolicies = [...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?site_analytics"?[^;]*/gis)].map(
+  (m) => m[0]
+);
+checkTrue(`site_analytics has exactly one policy (${analyticsPolicies.length})`, analyticsPolicies.length === 1);
+checkTrue("...and it is select-only", /for select/i.test(analyticsPolicies[0] ?? ""));
+
+// published_sites must NOT be publicly readable. The anon key is printed
+// in the client bundle, so a "true" select policy here would hand every
+// site row — user_id included — to anyone who asked.
+const publishedPolicies = [...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?published_sites"?[^;]*/gis)].map(
+  (m) => m[0]
+);
+checkTrue(`published_sites has policies (${publishedPolicies.length})`, publishedPolicies.length >= 1);
+checkTrue(
+  "...and every one of them is scoped to auth.uid()",
+  publishedPolicies.every((p) => /auth\.uid\(\) = user_id/.test(p))
+);
 
 const silentlyDenied = [...rlsEnabled].filter(
   (t) => !policyTables.has(t) && !loopRls.has(t) && !ADMIN_ONLY_TABLES.has(t)
@@ -143,7 +169,11 @@ for (const table of ADMIN_ONLY_TABLES) {
 }
 
 console.log("\n== 3. every API route authenticates, or is justified ==");
-const routes = walk("src/app/api").filter((f) => f.endsWith("route.ts"));
+// EVERY route handler in the app, not just the ones under /api. The public
+// site route added by V3 Task 2 lives at src/app/s/[subdomain]/route.ts and
+// would have been invisible to a scan of src/app/api alone — which is
+// precisely the kind of route that most needs to be on a justified list.
+const routes = walk("src/app").filter((f) => f.endsWith("route.ts"));
 checkTrue(`routes discovered (${routes.length})`, routes.length >= 40);
 
 // Routes that legitimately have no logged-in user. Each is load-bearing
@@ -160,6 +190,10 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",
   "src/app/api/websites/[id]/submit-form/route.ts": "public contact form on generated sites; write-only, honeypot + 30/hr cap",
   "src/app/api/client-error/route.ts": "browser error beacon; fires when there may be no session",
+  "src/app/auth/callback/route.ts":
+    "the OAuth/magic-link landing. It CREATES the session by exchanging a single-use code — requiring one first is a contradiction. Surfaced by widening this scan beyond src/app/api; it was never checked before, and reading it line by line confirmed everything after the exchange acts on the user that exchange returned, never on an id from the request.",
+  "src/app/s/[subdomain]/route.ts":
+    "the public web: serves a published site to anonymous visitors. Reads through the admin client and selects only the columns a visitor needs; published_sites has no public RLS policy, so a visitor cannot read the table at all. In-memory rate limited, and every response carries a restrictive CSP.",
 };
 
 for (const file of routes) {

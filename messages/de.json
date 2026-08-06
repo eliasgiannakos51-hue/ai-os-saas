@@ -76,7 +76,8 @@
       "tradingWorkflow": "Trading-Workflow",
       "productWorkflow": "Produkt-Workflow",
       "automation": "Automatisierung",
-      "marketplace": "Marktplatz"
+      "marketplace": "Marktplatz",
+      "published": "Veröffentlichte Seiten"
     },
     "groupHints": {
       "create": "Eine Website erzeugen, ein Ziel planen, ein Dokument schreiben.",
@@ -123,7 +124,8 @@
       "coding": "Beschreibe, was du brauchst, und bekomme funktionierenden Code. Noch nicht fertig.",
       "presentations": "Aus einem Briefing eine fertige Präsentation machen. Noch nicht fertig.",
       "home": "Ihr Dashboard — Aktivität, Statistiken und Schnellaktionen.",
-      "settings": "Konto, Abrechnung, Sprache und Einstellungen."
+      "settings": "Konto, Abrechnung, Sprache und Einstellungen.",
+      "published": "Alle Ihre Live-Seiten, mit Zugriffen und Versionsverlauf"
     },
     "comingSoon": "Demnächst",
     "comingSoonToast": "{name} ist noch nicht verfügbar — steht auf der Roadmap.",
@@ -1072,6 +1074,49 @@
         "monthly": "Am {day}. jedes Monats um {time}",
         "custom": "Zeitplan: {expression}"
       }
+    },
+    "publishing": {
+      "title": "Veröffentlichte Seiten",
+      "description": "Ihre Seiten, live im Web.",
+      "analyticsNotice": "Wir zählen Seitenaufrufe pro Tag und sonst nichts — keine Cookies, kein Besucher-Tracking, keinerlei personenbezogene Daten über die Menschen, die Ihre Seiten besuchen.",
+      "goToBuilder": "Website-Builder",
+      "sitesUsed": "{used} von {cap} live",
+      "sitesUsedUnlimited": "{used} live",
+      "emptyTitle": "Noch nichts veröffentlicht",
+      "emptyHint": "Öffnen Sie eine fertige Seite im Builder und klicken Sie auf Veröffentlichen — sie bekommt sofort eine Live-Adresse.",
+      "publish": "Veröffentlichen",
+      "republish": "Erneut veröffentlichen",
+      "publishNow": "Veröffentlichen",
+      "publishing": "Wird veröffentlicht...",
+      "publishChanges": "Änderungen veröffentlichen",
+      "publishSuccess": "Ihre Seite ist live.",
+      "publishError": "Die Seite konnte nicht veröffentlicht werden. Bitte erneut versuchen.",
+      "unpublish": "Offline nehmen",
+      "unpublishSuccess": "Ihre Seite ist nicht mehr öffentlich.",
+      "unpublishError": "Die Seite konnte nicht offline genommen werden. Bitte erneut versuchen.",
+      "confirmUnpublish": "Diese Seite offline nehmen? Die Adresse bleibt erhalten, Sie können sie später wieder veröffentlichen.",
+      "chooseAddress": "Adresse Ihrer Seite wählen",
+      "addressLabel": "Adresse",
+      "willBeAt": "Ihre Seite liegt unter {url}",
+      "addressRules": "{min}-{max} Zeichen. Kleinbuchstaben, Ziffern und Bindestriche.",
+      "cancel": "Abbrechen",
+      "viewLive": "Live ansehen",
+      "copyLink": "Link kopieren",
+      "copied": "Kopiert",
+      "copyFailed": "Der Link konnte nicht kopiert werden.",
+      "statusLive": "Live",
+      "statusUnpublished": "Offline",
+      "viewsThisWeek": "{count} Aufrufe diese Woche",
+      "viewsTotal": "{count} insgesamt",
+      "close": "Schließen",
+      "versionHistory": "Versionsverlauf",
+      "noVersions": "Noch keine Versionen.",
+      "versionNumber": "Version {number}",
+      "currentlyLive": "aktuell live",
+      "rollback": "Zurücksetzen",
+      "rollbackSuccess": "Auf Version {number} zurückgesetzt.",
+      "rollbackError": "Zurücksetzen nicht möglich. Bitte erneut versuchen.",
+      "confirmRollback": "Version {number} wieder live schalten?"
     }
   },
   "module": {

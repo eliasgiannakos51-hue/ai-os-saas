@@ -101,6 +101,14 @@ export const config = {
     // load. The same omission is what made the old extensionless
     // /email-logo route run middleware on every image fetch from every
     // inbox; that route is gone and its replacement is a real .png.
-    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)",
+    // `s/` — published sites (V3 Task 2). These are served to the public
+    // web with no session at all: the route reads through the service-role
+    // client and never touches a cookie. Running the auth middleware on
+    // them would add a Supabase getUser() round trip to every page view by
+    // every anonymous visitor of every customer's site — the single
+    // highest-traffic path in the product paying for a session lookup
+    // whose result is discarded. Excluded for that reason, not to skip a
+    // check: there is no check to skip.
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|s/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)",
   ],
 };

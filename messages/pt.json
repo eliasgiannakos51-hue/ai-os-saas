@@ -76,7 +76,8 @@
       "tradingWorkflow": "Fluxo de Trading",
       "productWorkflow": "Fluxo de Produto",
       "automation": "Automação",
-      "marketplace": "Mercado"
+      "marketplace": "Mercado",
+      "published": "Sites publicados"
     },
     "groupHints": {
       "create": "Gere um site, planeie um objetivo, escreva um documento.",
@@ -123,7 +124,8 @@
       "coding": "Descreva o que precisa e obtenha código funcional. Ainda não está pronto.",
       "presentations": "Transforme um resumo numa apresentação acabada. Ainda não está pronto.",
       "home": "O teu painel — atividade, estatísticas e ações rápidas.",
-      "settings": "Conta, faturação, idioma e preferências."
+      "settings": "Conta, faturação, idioma e preferências.",
+      "published": "Todos os seus sites no ar, com o tráfego e o histórico de versões"
     },
     "comingSoon": "Em breve",
     "comingSoonToast": "{name} ainda não está disponível — está no roteiro.",
@@ -1072,6 +1074,49 @@
         "monthly": "Dia {day} de cada mês às {time}",
         "custom": "Agendamento: {expression}"
       }
+    },
+    "publishing": {
+      "title": "Sites publicados",
+      "description": "Os seus sites, no ar na web.",
+      "analyticsNotice": "Contamos as visualizações por dia e mais nada — sem cookies, sem rastreamento de visitantes e sem registar qualquer dado pessoal de quem visita os seus sites.",
+      "goToBuilder": "Criador de sites",
+      "sitesUsed": "{used} de {cap} no ar",
+      "sitesUsedUnlimited": "{used} no ar",
+      "emptyTitle": "Ainda não publicou nada",
+      "emptyHint": "Abra um site terminado no criador e carregue em Publicar — recebe um endereço no ar de imediato.",
+      "publish": "Publicar",
+      "republish": "Publicar de novo",
+      "publishNow": "Publicar",
+      "publishing": "A publicar...",
+      "publishChanges": "Publicar alterações",
+      "publishSuccess": "O seu site está no ar.",
+      "publishError": "Não foi possível publicar o site. Tente novamente.",
+      "unpublish": "Retirar",
+      "unpublishSuccess": "O seu site já não é público.",
+      "unpublishError": "Não foi possível retirar o site. Tente novamente.",
+      "confirmUnpublish": "Retirar este site? O endereço é mantido, pode publicá-lo outra vez.",
+      "chooseAddress": "Escolha o endereço do seu site",
+      "addressLabel": "Endereço",
+      "willBeAt": "O seu site ficará em {url}",
+      "addressRules": "{min}-{max} caracteres. Minúsculas, números e hífenes.",
+      "cancel": "Cancelar",
+      "viewLive": "Ver no ar",
+      "copyLink": "Copiar ligação",
+      "copied": "Copiado",
+      "copyFailed": "Não foi possível copiar a ligação.",
+      "statusLive": "No ar",
+      "statusUnpublished": "Fora do ar",
+      "viewsThisWeek": "{count} visualizações esta semana",
+      "viewsTotal": "{count} no total",
+      "close": "Fechar",
+      "versionHistory": "Histórico de versões",
+      "noVersions": "Ainda não há versões.",
+      "versionNumber": "Versão {number}",
+      "currentlyLive": "no ar agora",
+      "rollback": "Repor",
+      "rollbackSuccess": "Reposta a versão {number}.",
+      "rollbackError": "Não foi possível repor. Tente novamente.",
+      "confirmRollback": "Repor a versão {number} no site no ar?"
     }
   },
   "module": {

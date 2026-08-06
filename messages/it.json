@@ -76,7 +76,8 @@
       "tradingWorkflow": "Flusso Trading",
       "productWorkflow": "Flusso Prodotto",
       "automation": "Automazione",
-      "marketplace": "Mercato"
+      "marketplace": "Mercato",
+      "published": "Siti pubblicati"
     },
     "groupHints": {
       "create": "Genera un sito, pianifica un obiettivo, scrivi un documento.",
@@ -123,7 +124,8 @@
       "coding": "Descrivi cosa ti serve e ottieni codice funzionante. Non ancora pronto.",
       "presentations": "Trasforma un brief in una presentazione finita. Non ancora pronto.",
       "home": "La tua dashboard: attività, statistiche e azioni rapide.",
-      "settings": "Account, fatturazione, lingua e preferenze."
+      "settings": "Account, fatturazione, lingua e preferenze.",
+      "published": "Tutti i tuoi siti online, con traffico e cronologia delle versioni"
     },
     "comingSoon": "In arrivo",
     "comingSoonToast": "{name} non è ancora disponibile: è nella roadmap.",
@@ -1072,6 +1074,49 @@
         "monthly": "Il giorno {day} di ogni mese alle {time}",
         "custom": "Pianificazione: {expression}"
       }
+    },
+    "publishing": {
+      "title": "Siti pubblicati",
+      "description": "I tuoi siti, online sul web.",
+      "analyticsNotice": "Contiamo le visualizzazioni al giorno e nient'altro: nessun cookie, nessun tracciamento dei visitatori, nessun dato personale registrato su chi visita i tuoi siti.",
+      "goToBuilder": "Creatore di siti",
+      "sitesUsed": "{used} di {cap} online",
+      "sitesUsedUnlimited": "{used} online",
+      "emptyTitle": "Non hai ancora pubblicato nulla",
+      "emptyHint": "Apri un sito finito nel creatore e premi Pubblica: riceve subito un indirizzo online.",
+      "publish": "Pubblica",
+      "republish": "Pubblica di nuovo",
+      "publishNow": "Pubblica",
+      "publishing": "Pubblicazione...",
+      "publishChanges": "Pubblica le modifiche",
+      "publishSuccess": "Il tuo sito è online.",
+      "publishError": "Non è stato possibile pubblicare il sito. Riprova.",
+      "unpublish": "Rimuovi",
+      "unpublishSuccess": "Il tuo sito non è più pubblico.",
+      "unpublishError": "Non è stato possibile rimuovere il sito. Riprova.",
+      "confirmUnpublish": "Mettere offline questo sito? L'indirizzo viene conservato, potrai ripubblicarlo.",
+      "chooseAddress": "Scegli l'indirizzo del tuo sito",
+      "addressLabel": "Indirizzo",
+      "willBeAt": "Il tuo sito sarà su {url}",
+      "addressRules": "{min}-{max} caratteri. Minuscole, numeri e trattini.",
+      "cancel": "Annulla",
+      "viewLive": "Vedi online",
+      "copyLink": "Copia link",
+      "copied": "Copiato",
+      "copyFailed": "Non è stato possibile copiare il link.",
+      "statusLive": "Online",
+      "statusUnpublished": "Offline",
+      "viewsThisWeek": "{count} visualizzazioni questa settimana",
+      "viewsTotal": "{count} in totale",
+      "close": "Chiudi",
+      "versionHistory": "Cronologia versioni",
+      "noVersions": "Ancora nessuna versione.",
+      "versionNumber": "Versione {number}",
+      "currentlyLive": "online ora",
+      "rollback": "Ripristina",
+      "rollbackSuccess": "Ripristinata la versione {number}.",
+      "rollbackError": "Non è stato possibile ripristinare. Riprova.",
+      "confirmRollback": "Rimettere online la versione {number}?"
     }
   },
   "module": {

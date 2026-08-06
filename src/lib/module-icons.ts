@@ -30,6 +30,7 @@ import {
   Megaphone,
   Brain,
   History,
+  Radio,
   Rocket,
   CalendarClock,
   LineChart,
@@ -90,6 +91,10 @@ export const WEBSITE_BUILDER_ICON: LucideIcon = Layout;
 // already used elsewhere in the same sidebar section) — this is the
 // unified Product Workflow page, not the raw Products module list.
 export const PRODUCT_WORKFLOW_ICON: LucideIcon = Flag;
+// Distinct from MODULE_ICONS.websites (Globe, the idea tracker) and from
+// WEBSITE_BUILDER_ICON (Layout, the generator) — this is the list of sites
+// that are actually LIVE on the public web, which is a third thing.
+export const PUBLISHED_SITES_ICON: LucideIcon = Radio;
 
 /**
  * The icon for any slug that can appear on a card, including the

@@ -133,7 +133,14 @@ const clientFallbacks = sources.flatMap((f) => [
 // translated in all ten locales; what is English here is the fallback
 // text shown only when a request fails in a way the client has no
 // specific message for.
-const SERVER_PROSE_BASELINE = 282;
+// 282 -> 314: V3 Task 2 (Website Hosting) added api/websites/[id]/publish
+// and api/published/[id]/rollback, whose validation, ownership,
+// plan-cap, address-clash and security-block responses are English prose
+// like the 282 before them. Same recorded decision as above: the fix is
+// stable error CODES across all 45+ routes, not a string sweep inside one
+// feature. Everything the user READS on /dashboard/published and on the
+// publish control is fully translated in all ten locales.
+const SERVER_PROSE_BASELINE = 314;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

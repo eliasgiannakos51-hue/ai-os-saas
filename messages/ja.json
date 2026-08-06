@@ -76,7 +76,8 @@
       "tradingWorkflow": "トレーディングワークフロー",
       "productWorkflow": "プロダクトワークフロー",
       "automation": "自動化",
-      "marketplace": "マーケットプレイス"
+      "marketplace": "マーケットプレイス",
+      "published": "公開中のサイト"
     },
     "groupHints": {
       "create": "サイトを生成し、目標を計画し、文書を書く。",
@@ -123,7 +124,8 @@
       "coding": "必要なものを説明すると動くコードが得られます。まだ準備中です。",
       "presentations": "要点から完成したスライドを作ります。まだ準備中です。",
       "home": "ダッシュボード — アクティビティ、統計、クイック操作。",
-      "settings": "アカウント、請求、言語、設定。"
+      "settings": "アカウント、請求、言語、設定。",
+      "published": "公開中のすべてのサイトと、その閲覧数・バージョン履歴"
     },
     "comingSoon": "近日公開",
     "comingSoonToast": "{name} はまだ利用できません。ロードマップに入っています。",
@@ -1072,6 +1074,49 @@
         "monthly": "毎月 {day} 日 {time}",
         "custom": "スケジュール：{expression}"
       }
+    },
+    "publishing": {
+      "title": "公開中のサイト",
+      "description": "あなたのサイトを、ウェブ上で公開します。",
+      "analyticsNotice": "1日ごとのページビューだけを数えます。Cookie も訪問者トラッキングも使わず、サイトを訪れた人の個人データは一切記録しません。",
+      "goToBuilder": "ウェブサイトビルダー",
+      "sitesUsed": "{cap} 件中 {used} 件公開中",
+      "sitesUsedUnlimited": "{used} 件公開中",
+      "emptyTitle": "まだ公開したサイトはありません",
+      "emptyHint": "ビルダーで完成したサイトを開き「公開」を押すと、すぐに公開アドレスが割り当てられます。",
+      "publish": "公開",
+      "republish": "再公開",
+      "publishNow": "公開する",
+      "publishing": "公開中...",
+      "publishChanges": "変更を公開",
+      "publishSuccess": "サイトを公開しました。",
+      "publishError": "サイトを公開できませんでした。もう一度お試しください。",
+      "unpublish": "非公開にする",
+      "unpublishSuccess": "サイトを非公開にしました。",
+      "unpublishError": "非公開にできませんでした。もう一度お試しください。",
+      "confirmUnpublish": "このサイトを非公開にしますか？アドレスは保持されるので、あとで再公開できます。",
+      "chooseAddress": "サイトのアドレスを決める",
+      "addressLabel": "アドレス",
+      "willBeAt": "サイトのアドレスは {url} になります",
+      "addressRules": "{min}〜{max} 文字。半角小文字・数字・ハイフンのみ。",
+      "cancel": "キャンセル",
+      "viewLive": "公開ページを見る",
+      "copyLink": "リンクをコピー",
+      "copied": "コピーしました",
+      "copyFailed": "リンクをコピーできませんでした。",
+      "statusLive": "公開中",
+      "statusUnpublished": "非公開",
+      "viewsThisWeek": "今週 {count} 回の表示",
+      "viewsTotal": "累計 {count} 回",
+      "close": "閉じる",
+      "versionHistory": "バージョン履歴",
+      "noVersions": "バージョンはまだありません。",
+      "versionNumber": "バージョン {number}",
+      "currentlyLive": "現在公開中",
+      "rollback": "元に戻す",
+      "rollbackSuccess": "バージョン {number} に戻しました。",
+      "rollbackError": "元に戻せませんでした。もう一度お試しください。",
+      "confirmRollback": "バージョン {number} を公開サイトに戻しますか？"
     }
   },
   "module": {

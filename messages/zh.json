@@ -76,7 +76,8 @@
       "tradingWorkflow": "交易工作流",
       "productWorkflow": "产品工作流",
       "automation": "自动化",
-      "marketplace": "市场"
+      "marketplace": "市场",
+      "published": "已发布网站"
     },
     "groupHints": {
       "create": "生成网站、规划目标、撰写文档。",
@@ -123,7 +124,8 @@
       "coding": "描述你的需求，得到可运行的代码。尚未就绪。",
       "presentations": "把一份简报变成完整的演示文稿。尚未就绪。",
       "home": "你的仪表板——活动、统计和快捷操作。",
-      "settings": "账户、账单、语言和偏好设置。"
+      "settings": "账户、账单、语言和偏好设置。",
+      "published": "你所有已上线的网站，含访问量与版本历史"
     },
     "comingSoon": "即将推出",
     "comingSoonToast": "{name} 尚未推出——已列入路线图。",
@@ -1072,6 +1074,49 @@
         "monthly": "每月 {day} 号 {time}",
         "custom": "计划：{expression}"
       }
+    },
+    "publishing": {
+      "title": "已发布网站",
+      "description": "你的网站，已在互联网上线。",
+      "analyticsNotice": "我们只按天统计页面浏览量，别无其他——不使用 Cookie，不追踪访客，也不会记录访问者的任何个人数据。",
+      "goToBuilder": "网站生成器",
+      "sitesUsed": "{used} / {cap} 个在线",
+      "sitesUsedUnlimited": "{used} 个在线",
+      "emptyTitle": "还没有发布任何网站",
+      "emptyHint": "在网站生成器中打开已完成的网站并点击“发布”，立刻就能获得一个在线地址。",
+      "publish": "发布",
+      "republish": "重新发布",
+      "publishNow": "发布",
+      "publishing": "发布中……",
+      "publishChanges": "发布更改",
+      "publishSuccess": "你的网站已上线。",
+      "publishError": "无法发布该网站，请重试。",
+      "unpublish": "下线",
+      "unpublishSuccess": "你的网站已不再公开。",
+      "unpublishError": "无法将网站下线，请重试。",
+      "confirmUnpublish": "将该网站下线？地址会保留，之后仍可重新发布。",
+      "chooseAddress": "选择网站地址",
+      "addressLabel": "地址",
+      "willBeAt": "你的网站将位于 {url}",
+      "addressRules": "{min}-{max} 个字符，仅限小写字母、数字和连字符。",
+      "cancel": "取消",
+      "viewLive": "查看线上版本",
+      "copyLink": "复制链接",
+      "copied": "已复制",
+      "copyFailed": "无法复制链接。",
+      "statusLive": "在线",
+      "statusUnpublished": "已下线",
+      "viewsThisWeek": "本周 {count} 次浏览",
+      "viewsTotal": "累计 {count} 次",
+      "close": "关闭",
+      "versionHistory": "版本历史",
+      "noVersions": "暂无版本。",
+      "versionNumber": "版本 {number}",
+      "currentlyLive": "当前在线",
+      "rollback": "回滚",
+      "rollbackSuccess": "已回滚到版本 {number}。",
+      "rollbackError": "无法回滚，请重试。",
+      "confirmRollback": "将版本 {number} 重新设为线上版本？"
     }
   },
   "module": {

@@ -76,7 +76,8 @@
       "tradingWorkflow": "Flux Trading",
       "productWorkflow": "Flux Produit",
       "automation": "Automatisation",
-      "marketplace": "Place de marché"
+      "marketplace": "Place de marché",
+      "published": "Sites publiés"
     },
     "groupHints": {
       "create": "Générez un site, planifiez un objectif, rédigez un document.",
@@ -123,7 +124,8 @@
       "coding": "Décrivez ce qu'il vous faut et obtenez du code qui marche. Pas encore prêt.",
       "presentations": "Transformez un brief en présentation finie. Pas encore prêt.",
       "home": "Votre tableau de bord — activité, statistiques et actions rapides.",
-      "settings": "Compte, facturation, langue et préférences."
+      "settings": "Compte, facturation, langue et préférences.",
+      "published": "Tous vos sites en ligne, avec leur trafic et leur historique de versions"
     },
     "comingSoon": "Bientôt",
     "comingSoonToast": "{name} n'est pas encore disponible — c'est prévu dans la feuille de route.",
@@ -1072,6 +1074,49 @@
         "monthly": "Le {day} de chaque mois à {time}",
         "custom": "Planning : {expression}"
       }
+    },
+    "publishing": {
+      "title": "Sites publiés",
+      "description": "Vos sites, en ligne sur le web.",
+      "analyticsNotice": "Nous comptons les vues par jour, rien d'autre : aucun cookie, aucun suivi des visiteurs, aucune donnée personnelle enregistrée sur les personnes qui visitent vos sites.",
+      "goToBuilder": "Créateur de sites",
+      "sitesUsed": "{used} sur {cap} en ligne",
+      "sitesUsedUnlimited": "{used} en ligne",
+      "emptyTitle": "Rien de publié pour l'instant",
+      "emptyHint": "Ouvrez un site terminé dans le créateur et cliquez sur Publier : il reçoit une adresse en ligne immédiatement.",
+      "publish": "Publier",
+      "republish": "Publier à nouveau",
+      "publishNow": "Publier",
+      "publishing": "Publication...",
+      "publishChanges": "Publier les modifications",
+      "publishSuccess": "Votre site est en ligne.",
+      "publishError": "Impossible de publier ce site. Réessayez.",
+      "unpublish": "Retirer",
+      "unpublishSuccess": "Votre site n'est plus public.",
+      "unpublishError": "Impossible de retirer ce site. Réessayez.",
+      "confirmUnpublish": "Retirer ce site ? L'adresse est conservée, vous pourrez le republier.",
+      "chooseAddress": "Choisissez l'adresse de votre site",
+      "addressLabel": "Adresse",
+      "willBeAt": "Votre site sera à {url}",
+      "addressRules": "{min}-{max} caractères. Minuscules, chiffres et tirets.",
+      "cancel": "Annuler",
+      "viewLive": "Voir en ligne",
+      "copyLink": "Copier le lien",
+      "copied": "Copié",
+      "copyFailed": "Impossible de copier le lien.",
+      "statusLive": "En ligne",
+      "statusUnpublished": "Hors ligne",
+      "viewsThisWeek": "{count} vues cette semaine",
+      "viewsTotal": "{count} au total",
+      "close": "Fermer",
+      "versionHistory": "Historique des versions",
+      "noVersions": "Aucune version pour l'instant.",
+      "versionNumber": "Version {number}",
+      "currentlyLive": "en ligne actuellement",
+      "rollback": "Restaurer",
+      "rollbackSuccess": "Version {number} restaurée.",
+      "rollbackError": "Impossible de restaurer. Réessayez.",
+      "confirmRollback": "Remettre la version {number} en ligne ?"
     }
   },
   "module": {

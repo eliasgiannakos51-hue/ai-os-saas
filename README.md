@@ -61,6 +61,27 @@ touch targets) and works identically on mobile and desktop.
   Starter 2, Growth 5, Professional 15, Ultimate 50, Enterprise 100), every
   number overridable via `AGENT_LIMIT_*`, plus a per-account cap of
   `AGENT_MAX_RUNS_PER_HOUR` executions an hour.
+- **Published Sites** (`/dashboard/published`) — real hosting. A finished
+  site in the Website Builder gets a **Publish** button: the user picks an
+  address (3-30 chars, `[a-z0-9-]`, unique, with a reserved blocklist that
+  keeps `admin`, `support`, `billing`, `www` and ~70 others out of
+  customers' hands) and the site goes live immediately at `/s/<address>` —
+  or at `<address>.<PUBLISHED_SITE_DOMAIN>` once a wildcard domain exists,
+  with no migration, because the stored value is a bare label. The public
+  route (`src/app/s/[subdomain]/route.ts`) reads no session, returns the
+  published bytes as their own document rather than injecting them into
+  ours, and carries a CSP that permits the inline CSS/JS a single-file
+  generated site needs and nothing else — no external script host,
+  `form-action 'self'`, `frame-ancestors 'none'`, `base-uri 'none'` —
+  plus `X-Frame-Options`, `nosniff`, a `Permissions-Policy` and an
+  in-memory rate limit. Every publish and every rollback re-runs the
+  static security scan, fail-closed. Re-publishing appends a version;
+  the last 20 are kept and any of them can be rolled back to in one click.
+  Analytics are views per day with **no cookies and no personal data of
+  any kind** — the table has no column that could hold an IP, a user agent
+  or a visitor id. Fair use per plan (Free 0, Starter 1, Growth 3,
+  Professional 10, Ultimate 30, Enterprise unlimited), overridable via
+  `PUBLISHED_SITE_LIMIT_*`.
 - **Settings** (`/dashboard/settings`) — account email, password change,
   current plan + billing management, Buy Credits, credit transaction
   history, and a full-data JSON export.

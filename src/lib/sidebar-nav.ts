@@ -24,6 +24,7 @@ import {
   TRADING_WORKFLOW_ICON,
   WEBSITE_BUILDER_ICON,
   PRODUCT_WORKFLOW_ICON,
+  PUBLISHED_SITES_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -70,6 +71,10 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         href: "/dashboard/website-builder",
         label: "Website Builder",
         icon: WEBSITE_BUILDER_ICON, hintKey: "websiteBuilder" },
+      // Sits directly under the Builder rather than in its own group: a
+      // published site IS a website that went live, and separating the two
+      // would make "where did my site go" a navigation question.
+      { href: "/dashboard/published", label: "Published Sites", icon: PUBLISHED_SITES_ICON, hintKey: "published" },
       { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps , hintKey: "apps" },
       { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images , hintKey: "images" },
       { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos , hintKey: "videos" },

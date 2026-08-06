@@ -76,7 +76,8 @@
       "tradingWorkflow": "سير عمل التداول",
       "productWorkflow": "سير عمل المنتج",
       "automation": "الأتمتة",
-      "marketplace": "السوق"
+      "marketplace": "السوق",
+      "published": "المواقع المنشورة"
     },
     "groupHints": {
       "create": "أنشئ موقعًا، خطّط هدفًا، اكتب مستندًا.",
@@ -123,7 +124,8 @@
       "coding": "صِف ما تحتاجه واحصل على شفرة تعمل. غير جاهز بعد.",
       "presentations": "حوّل ملخصًا إلى عرض تقديمي مكتمل. غير جاهز بعد.",
       "home": "لوحتك — النشاط والإحصاءات والإجراءات السريعة.",
-      "settings": "الحساب والفوترة واللغة والتفضيلات."
+      "settings": "الحساب والفوترة واللغة والتفضيلات.",
+      "published": "كل مواقعك المنشورة، مع عدد الزيارات وسجل الإصدارات"
     },
     "comingSoon": "قريبًا",
     "comingSoonToast": "{name} غير متاح بعد — إنه ضمن خارطة الطريق.",
@@ -1072,6 +1074,49 @@
         "monthly": "يوم {day} من كل شهر الساعة {time}",
         "custom": "الجدول: {expression}"
       }
+    },
+    "publishing": {
+      "title": "المواقع المنشورة",
+      "description": "مواقعك، منشورة مباشرة على الويب.",
+      "analyticsNotice": "نحصي عدد المشاهدات يوميًا فقط — بلا ملفات تعريف ارتباط، وبلا تتبّع للزوار، ودون تسجيل أي بيانات شخصية عمّن يزور مواقعك.",
+      "goToBuilder": "منشئ المواقع",
+      "sitesUsed": "{used} من {cap} منشور",
+      "sitesUsedUnlimited": "{used} منشور",
+      "emptyTitle": "لم تنشر شيئًا بعد",
+      "emptyHint": "افتح موقعًا مكتملًا في منشئ المواقع واضغط نشر — سيحصل على عنوان مباشر على الفور.",
+      "publish": "نشر",
+      "republish": "إعادة النشر",
+      "publishNow": "انشر",
+      "publishing": "جارٍ النشر...",
+      "publishChanges": "نشر التغييرات",
+      "publishSuccess": "موقعك أصبح منشورًا.",
+      "publishError": "تعذّر نشر هذا الموقع. حاول مرة أخرى.",
+      "unpublish": "إلغاء النشر",
+      "unpublishSuccess": "لم يعد موقعك عامًا.",
+      "unpublishError": "تعذّر إلغاء النشر. حاول مرة أخرى.",
+      "confirmUnpublish": "هل تريد إخراج هذا الموقع من الخدمة؟ سيُحتفظ بالعنوان لتتمكن من نشره لاحقًا.",
+      "chooseAddress": "اختر عنوان موقعك",
+      "addressLabel": "العنوان",
+      "willBeAt": "سيكون موقعك على {url}",
+      "addressRules": "من {min} إلى {max} حرفًا. أحرف لاتينية صغيرة وأرقام وشرطات فقط.",
+      "cancel": "إلغاء",
+      "viewLive": "عرض الموقع",
+      "copyLink": "نسخ الرابط",
+      "copied": "تم النسخ",
+      "copyFailed": "تعذّر نسخ الرابط.",
+      "statusLive": "منشور",
+      "statusUnpublished": "غير منشور",
+      "viewsThisWeek": "{count} مشاهدة هذا الأسبوع",
+      "viewsTotal": "{count} إجمالًا",
+      "close": "إغلاق",
+      "versionHistory": "سجل الإصدارات",
+      "noVersions": "لا توجد إصدارات بعد.",
+      "versionNumber": "الإصدار {number}",
+      "currentlyLive": "المنشور حاليًا",
+      "rollback": "استرجاع",
+      "rollbackSuccess": "تم الاسترجاع إلى الإصدار {number}.",
+      "rollbackError": "تعذّر الاسترجاع. حاول مرة أخرى.",
+      "confirmRollback": "هل تريد إعادة الإصدار {number} إلى الموقع المنشور؟"
     }
   },
   "module": {

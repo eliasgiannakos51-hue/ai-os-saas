@@ -228,6 +228,7 @@ const DASHBOARD_ROUTES = [
   "/dashboard/team",
   "/dashboard/reflection",
   "/dashboard/agents",
+  "/dashboard/published",
   "/dashboard/apps",
   "/dashboard/images",
   "/dashboard/videos",

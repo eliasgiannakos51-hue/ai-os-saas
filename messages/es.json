@@ -76,7 +76,8 @@
       "tradingWorkflow": "Flujo de Trading",
       "productWorkflow": "Flujo de Producto",
       "automation": "Automatización",
-      "marketplace": "Mercado"
+      "marketplace": "Mercado",
+      "published": "Sitios publicados"
     },
     "groupHints": {
       "create": "Genera un sitio, planifica un objetivo, escribe un documento.",
@@ -123,7 +124,8 @@
       "coding": "Describe lo que necesitas y obtén código que funciona. Todavía no está listo.",
       "presentations": "Convierte un resumen en una presentación acabada. Todavía no está listo.",
       "home": "Tu panel: actividad, estadísticas y acciones rápidas.",
-      "settings": "Cuenta, facturación, idioma y preferencias."
+      "settings": "Cuenta, facturación, idioma y preferencias.",
+      "published": "Todos tus sitios en vivo, con su tráfico y su historial de versiones"
     },
     "comingSoon": "Próximamente",
     "comingSoonToast": "{name} aún no está disponible: está en la hoja de ruta.",
@@ -1072,6 +1074,49 @@
         "monthly": "El día {day} de cada mes a las {time}",
         "custom": "Programación: {expression}"
       }
+    },
+    "publishing": {
+      "title": "Sitios publicados",
+      "description": "Tus sitios, en vivo en la web.",
+      "analyticsNotice": "Contamos las visitas por día y nada más: sin cookies, sin seguimiento de visitantes y sin registrar ningún dato personal de quienes visitan tus sitios.",
+      "goToBuilder": "Creador de sitios",
+      "sitesUsed": "{used} de {cap} en vivo",
+      "sitesUsedUnlimited": "{used} en vivo",
+      "emptyTitle": "Todavía no has publicado nada",
+      "emptyHint": "Abre un sitio terminado en el creador y pulsa Publicar: recibe una dirección en vivo al instante.",
+      "publish": "Publicar",
+      "republish": "Publicar de nuevo",
+      "publishNow": "Publicar",
+      "publishing": "Publicando...",
+      "publishChanges": "Publicar cambios",
+      "publishSuccess": "Tu sitio está en vivo.",
+      "publishError": "No se pudo publicar el sitio. Inténtalo de nuevo.",
+      "unpublish": "Retirar",
+      "unpublishSuccess": "Tu sitio ya no es público.",
+      "unpublishError": "No se pudo retirar el sitio. Inténtalo de nuevo.",
+      "confirmUnpublish": "¿Retirar este sitio? La dirección se conserva, así que puedes volver a publicarlo.",
+      "chooseAddress": "Elige la dirección de tu sitio",
+      "addressLabel": "Dirección",
+      "willBeAt": "Tu sitio estará en {url}",
+      "addressRules": "{min}-{max} caracteres. Minúsculas, números y guiones.",
+      "cancel": "Cancelar",
+      "viewLive": "Ver en vivo",
+      "copyLink": "Copiar enlace",
+      "copied": "Copiado",
+      "copyFailed": "No se pudo copiar el enlace.",
+      "statusLive": "En vivo",
+      "statusUnpublished": "Fuera de línea",
+      "viewsThisWeek": "{count} visitas esta semana",
+      "viewsTotal": "{count} en total",
+      "close": "Cerrar",
+      "versionHistory": "Historial de versiones",
+      "noVersions": "Todavía no hay versiones.",
+      "versionNumber": "Versión {number}",
+      "currentlyLive": "en vivo ahora",
+      "rollback": "Restaurar",
+      "rollbackSuccess": "Restaurada la versión {number}.",
+      "rollbackError": "No se pudo restaurar. Inténtalo de nuevo.",
+      "confirmRollback": "¿Volver a poner la versión {number} en el sitio en vivo?"
     }
   },
   "module": {

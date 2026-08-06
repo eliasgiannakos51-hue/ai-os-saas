@@ -58,6 +58,19 @@ const LOCALE_ALLOWED = new Set([
   "de:dashboard.agents.previewName",
   "de:dashboard.agents.nameLabel",
   "fr:dashboard.agents.descriptionLabel",
+  // Published Sites (V3 Task 2). Every one checked by hand:
+  // "Website Builder" is the product's own name, used verbatim in the
+  // Greek UI already (sidebar.items.websiteBuilder); "Version" is the
+  // German and French word, spelled identically; "Live" and "Offline" are
+  // the loanwords German and Italian actually use for a site being up or
+  // down — "Offline" in particular has no natural German alternative.
+  "el:dashboard.publishing.goToBuilder",
+  "fr:dashboard.publishing.versionNumber",
+  "de:dashboard.publishing.versionNumber",
+  "de:dashboard.publishing.sitesUsedUnlimited",
+  "de:dashboard.publishing.statusLive",
+  "de:dashboard.publishing.statusUnpublished",
+  "it:dashboard.publishing.statusUnpublished",
   "es:sidebar.items.trading",
   "es:sidebar.items.sales",
   "fr:sidebar.items.trading",

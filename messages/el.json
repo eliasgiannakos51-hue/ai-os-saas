@@ -76,7 +76,8 @@
       "tradingWorkflow": "Ροή Εργασίας Trading",
       "productWorkflow": "Ροή Εργασίας Product",
       "automation": "Αυτοματισμοί",
-      "marketplace": "Αγορά"
+      "marketplace": "Αγορά",
+      "published": "Δημοσιευμένα Sites"
     },
     "groupHints": {
       "create": "Φτιάξε έναν ιστότοπο, σχεδίασε έναν στόχο, γράψε ένα έγγραφο.",
@@ -123,7 +124,8 @@
       "coding": "Περίγραψε τι χρειάζεσαι και πάρε κώδικα που δουλεύει. Δεν είναι έτοιμο ακόμα.",
       "presentations": "Μετάτρεψε ένα brief σε έτοιμη παρουσίαση. Δεν είναι έτοιμο ακόμα.",
       "home": "Ο πίνακάς σου — δραστηριότητα, στατιστικά και γρήγορες ενέργειες.",
-      "settings": "Λογαριασμός, χρεώσεις, γλώσσα και προτιμήσεις."
+      "settings": "Λογαριασμός, χρεώσεις, γλώσσα και προτιμήσεις.",
+      "published": "Κάθε site σου που είναι ζωντανό στο διαδίκτυο, με την επισκεψιμότητα και το ιστορικό εκδόσεων"
     },
     "comingSoon": "Έρχεται",
     "comingSoonToast": "Το {name} δεν είναι διαθέσιμο ακόμα — βρίσκεται στο roadmap.",
@@ -1072,6 +1074,49 @@
         "monthly": "Ημέρα {day} κάθε μήνα στις {time}",
         "custom": "Πρόγραμμα: {expression}"
       }
+    },
+    "publishing": {
+      "title": "Δημοσιευμένα Sites",
+      "description": "Τα sites σου, ζωντανά στο διαδίκτυο.",
+      "analyticsNotice": "Μετράμε προβολές ανά ημέρα και τίποτα άλλο — χωρίς cookies, χωρίς παρακολούθηση επισκεπτών, χωρίς κανένα προσωπικό δεδομένο για όσους επισκέπτονται τα sites σου.",
+      "goToBuilder": "Website Builder",
+      "sitesUsed": "{used} από {cap} ενεργά",
+      "sitesUsedUnlimited": "{used} ενεργά",
+      "emptyTitle": "Δεν έχεις δημοσιεύσει κάτι ακόμη",
+      "emptyHint": "Άνοιξε ένα έτοιμο site στο Website Builder και πάτα Δημοσίευση — παίρνει αμέσως ζωντανή διεύθυνση.",
+      "publish": "Δημοσίευση",
+      "republish": "Νέα δημοσίευση",
+      "publishNow": "Δημοσίευση",
+      "publishing": "Δημοσίευση...",
+      "publishChanges": "Δημοσίευση αλλαγών",
+      "publishSuccess": "Το site σου είναι ζωντανό.",
+      "publishError": "Δεν ήταν δυνατή η δημοσίευση. Δοκίμασε ξανά.",
+      "unpublish": "Απόσυρση",
+      "unpublishSuccess": "Το site σου δεν είναι πλέον δημόσιο.",
+      "unpublishError": "Δεν ήταν δυνατή η απόσυρση. Δοκίμασε ξανά.",
+      "confirmUnpublish": "Να αποσυρθεί το site; Η διεύθυνση διατηρείται, ώστε να μπορείς να το δημοσιεύσεις ξανά.",
+      "chooseAddress": "Διάλεξε τη διεύθυνση του site σου",
+      "addressLabel": "Διεύθυνση",
+      "willBeAt": "Το site σου θα βρίσκεται στο {url}",
+      "addressRules": "{min}-{max} χαρακτήρες. Πεζά λατινικά γράμματα, αριθμοί και παύλες.",
+      "cancel": "Άκυρο",
+      "viewLive": "Δες το ζωντανά",
+      "copyLink": "Αντιγραφή συνδέσμου",
+      "copied": "Αντιγράφηκε",
+      "copyFailed": "Δεν ήταν δυνατή η αντιγραφή του συνδέσμου.",
+      "statusLive": "Ζωντανό",
+      "statusUnpublished": "Εκτός",
+      "viewsThisWeek": "{count} προβολές αυτή την εβδομάδα",
+      "viewsTotal": "{count} συνολικά",
+      "close": "Κλείσιμο",
+      "versionHistory": "Ιστορικό εκδόσεων",
+      "noVersions": "Δεν υπάρχουν εκδόσεις ακόμη.",
+      "versionNumber": "Έκδοση {number}",
+      "currentlyLive": "τώρα ζωντανή",
+      "rollback": "Επαναφορά",
+      "rollbackSuccess": "Έγινε επαναφορά στην έκδοση {number}.",
+      "rollbackError": "Δεν ήταν δυνατή η επαναφορά. Δοκίμασε ξανά.",
+      "confirmRollback": "Να επιστρέψει η έκδοση {number} στο ζωντανό site;"
     }
   },
   "module": {

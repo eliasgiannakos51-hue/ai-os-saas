@@ -76,7 +76,8 @@
       "tradingWorkflow": "Trading Workflow",
       "productWorkflow": "Product Workflow",
       "automation": "Automation",
-      "marketplace": "Marketplace"
+      "marketplace": "Marketplace",
+      "published": "Published Sites"
     },
     "groupHints": {
       "create": "Generate a site, plan a goal, write a document.",
@@ -123,7 +124,8 @@
       "coding": "Describe what you need and get working code. Not ready yet.",
       "presentations": "Turn a brief into a finished deck. Not ready yet.",
       "home": "Your dashboard — activity, stats and quick actions.",
-      "settings": "Account, billing, language and preferences."
+      "settings": "Account, billing, language and preferences.",
+      "published": "Every site you have live on the web, with its traffic and version history"
     },
     "comingSoon": "Coming soon",
     "comingSoonToast": "{name} isn't available yet — it's on the roadmap.",
@@ -1072,6 +1074,49 @@
         "monthly": "Day {day} of each month at {time}",
         "custom": "Schedule: {expression}"
       }
+    },
+    "publishing": {
+      "title": "Published Sites",
+      "description": "Your sites, live on the web.",
+      "analyticsNotice": "We count page views per day and nothing else — no cookies, no visitor tracking, no personal data of any kind is recorded about the people who visit your sites.",
+      "goToBuilder": "Website Builder",
+      "sitesUsed": "{used} of {cap} live",
+      "sitesUsedUnlimited": "{used} live",
+      "emptyTitle": "Nothing published yet",
+      "emptyHint": "Open a finished site in the Website Builder and press Publish — it gets a live address straight away.",
+      "publish": "Publish",
+      "republish": "Publish again",
+      "publishNow": "Publish",
+      "publishing": "Publishing...",
+      "publishChanges": "Publish changes",
+      "publishSuccess": "Your site is live.",
+      "publishError": "Could not publish that site. Please try again.",
+      "unpublish": "Unpublish",
+      "unpublishSuccess": "Your site is no longer public.",
+      "unpublishError": "Could not unpublish that site. Please try again.",
+      "confirmUnpublish": "Take this site offline? The address is kept, so you can publish it again later.",
+      "chooseAddress": "Choose your site's address",
+      "addressLabel": "Address",
+      "willBeAt": "Your site will be at {url}",
+      "addressRules": "{min}-{max} characters. Lowercase letters, numbers and hyphens.",
+      "cancel": "Cancel",
+      "viewLive": "View live",
+      "copyLink": "Copy link",
+      "copied": "Copied",
+      "copyFailed": "Couldn't copy the link.",
+      "statusLive": "Live",
+      "statusUnpublished": "Offline",
+      "viewsThisWeek": "{count} views this week",
+      "viewsTotal": "{count} total",
+      "close": "Close",
+      "versionHistory": "Version history",
+      "noVersions": "No versions yet.",
+      "versionNumber": "Version {number}",
+      "currentlyLive": "live now",
+      "rollback": "Roll back",
+      "rollbackSuccess": "Rolled back to version {number}.",
+      "rollbackError": "Could not roll that back. Please try again.",
+      "confirmRollback": "Put version {number} back on the live site?"
     }
   },
   "module": {

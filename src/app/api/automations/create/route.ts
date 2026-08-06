@@ -102,7 +102,7 @@ export async function POST(request: Request) {
         if (breakerCheck.allowed) {
           const isAdmin = isAdminEmail(user.email);
           const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
-          const clarificationPlan = bypassCredits ? null : await resolveEffectivePlan(user);
+          const clarificationPlan = await resolveEffectivePlan(user);
           const affordabilityCheck = clarificationPlan
             ? await hasEnoughCredits(user.id, CREDIT_COSTS.clarificationCheck, clarificationPlan)
             : { ok: true, remaining: 0 };

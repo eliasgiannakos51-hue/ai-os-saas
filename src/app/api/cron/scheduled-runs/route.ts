@@ -125,7 +125,7 @@ export async function GET(request: Request) {
       const user = authUser.user;
       const isAdmin = isAdminEmail(user.email);
       const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
-      const plan = bypassCredits ? null : await resolveEffectivePlan(user);
+      const plan = await resolveEffectivePlan(user);
       // Sized from the step/automation text, at this account's own
       // per-credit rate — the flat CREDIT_COSTS.createAnything charged
       // one number regardless of how much work the step described.
@@ -395,7 +395,7 @@ export async function GET(request: Request) {
       const user = authUser.user;
       const isAdmin = isAdminEmail(user.email);
       const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
-      const plan = bypassCredits ? null : await resolveEffectivePlan(user);
+      const plan = await resolveEffectivePlan(user);
       // Sized from the step/automation text, at this account's own
       // per-credit rate — the flat CREDIT_COSTS.createAnything charged
       // one number regardless of how much work the step described.

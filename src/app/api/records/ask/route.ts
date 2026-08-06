@@ -182,9 +182,13 @@ export async function POST(request: Request) {
     // The reservation is sized after the record is loaded, further down,
     // because the record is what the price depends on.
     const isAdmin = isAdminEmail(user.email);
-    const plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = isAdmin
-      ? null
-      : await resolveEffectivePlan(user);
+    // Always resolved, never null — even for a bypass account.
+    //
+    // A null plan reached the cost log as planSlug: null, and made
+    // wouldHaveChargedCredits price against the LIST rate instead of the
+    // account's own. The saving was one metadata read; the cost was that
+    // admin and beta rows could not be checked against anything.
+    const plan = await resolveEffectivePlan(user);
 
     // RLS (auth.uid() = user_id) means this only ever finds the row if the
     // caller actually owns it — a stranger's id simply comes back null,

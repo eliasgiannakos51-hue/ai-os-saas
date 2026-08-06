@@ -1,4 +1,5 @@
 import { resolvePricingConfig, type PricingConfig } from "@/lib/billing/pricing-config";
+import { PLANS } from "@/lib/billing/plans";
 
 // THE formula. Everything the app charges for an AI action goes through
 // here, so the margin guarantee is a property of one function rather than
@@ -96,6 +97,27 @@ export function needsLargeActionConfirmation(
 // The fix is to divide by what a credit is actually WORTH on the user's
 // plan. Credits charged then scale up on discounted plans by exactly the
 // discount, restoring M on real revenue without changing a single
+
+/**
+ * The cheapest euro-per-credit any PUBLISHED plan sells at.
+ *
+ * Used as the assumption for a plan whose own rate is unknowable
+ * (Enterprise, priced per deal). Derived from PLANS rather than written
+ * as a constant so adding a cheaper tier cannot silently leave this
+ * behind — the value it guards is exactly "the lowest rate that exists".
+ */
+export function cheapestPublishedCreditPriceEur(config?: PricingConfig): number {
+  const c = config ?? resolvePricingConfig();
+  let cheapest = c.creditPriceEur;
+  for (const plan of PLANS) {
+    if (typeof plan.price !== "number" || typeof plan.monthlyCredits !== "number") continue;
+    if (plan.price <= 0 || plan.monthlyCredits <= 0) continue;
+    cheapest = Math.min(cheapest, plan.price / plan.monthlyCredits);
+  }
+  return cheapest;
+}
+
+
 // published price or allowance.
 export function effectiveCreditPriceEur(
   plan: { price: number | "custom"; monthlyCredits: number | "custom" } | null | undefined,
@@ -104,10 +126,25 @@ export function effectiveCreditPriceEur(
   const c = config ?? resolvePricingConfig();
   if (!plan) return c.creditPriceEur;
   if (typeof plan.price !== "number" || typeof plan.monthlyCredits !== "number") {
-    // Free (price 0) and Enterprise (custom) have no meaningful per-credit
-    // rate — fall back to list price.
-    return c.creditPriceEur;
+    // A CUSTOM-priced plan (Enterprise) used to fall back to the list
+    // price. That is the most expensive per-credit rate in the product,
+    // which makes it the least safe possible guess: an Enterprise deal is
+    // negotiated in bulk, so its real rate is at or below the cheapest
+    // published one. Pricing it at EUR 0.02 charged an Enterprise
+    // customer 53 credits for a generation that costs 132 at Ultimate's
+    // rate — a 60% under-charge on the highest-value accounts, and one
+    // that no test caught because the multiplier still read 4x against
+    // the assumed rate.
+    //
+    // The cheapest known plan rate is the only assumption that cannot
+    // under-charge, and it is the same reasoning FALLBACK_MODEL_PRICING
+    // already applies to an unrecognised model: over-charging slightly is
+    // the safe direction to fail in.
+    return Math.min(c.creditPriceEur, cheapestPublishedCreditPriceEur(c));
   }
+  // Free (price 0) genuinely has no per-credit revenue — its allowance is
+  // a marketing cost, and a free user who wants more buys at list. That
+  // is a real rate, not an unknown one, so it keeps the list price.
   if (plan.price <= 0 || plan.monthlyCredits <= 0) return c.creditPriceEur;
 
   const perCredit = plan.price / plan.monthlyCredits;

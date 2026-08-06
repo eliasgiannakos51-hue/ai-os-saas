@@ -90,9 +90,13 @@ export async function POST(request: Request) {
     // tracking whatsoever — the only AI call in the app whose tokens
     // reached no cost log at all. The input is a whole week of activity,
     // so it is also one of the larger ones. See CREDITS.md.
-    const plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = bypassCredits
-      ? null
-      : await resolveEffectivePlan(user);
+    // Always resolved, never null — even for a bypass account.
+    //
+    // A null plan reached the cost log as planSlug: null, and made
+    // wouldHaveChargedCredits price against the LIST rate instead of the
+    // account's own. The saving was one metadata read; the cost was that
+    // admin and beta rows could not be checked against anything.
+    const plan = await resolveEffectivePlan(user);
 
     // Stats are loaded first because they ARE the input being priced.
     const stats = await loadWeeklyReflectionStats(supabase, tableFilter);

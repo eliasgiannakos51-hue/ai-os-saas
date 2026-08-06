@@ -121,7 +121,9 @@
       "images": "Genera immagini da una descrizione. Non ancora pronto.",
       "videos": "Genera video da una descrizione. Non ancora pronto.",
       "coding": "Descrivi cosa ti serve e ottieni codice funzionante. Non ancora pronto.",
-      "presentations": "Trasforma un brief in una presentazione finita. Non ancora pronto."
+      "presentations": "Trasforma un brief in una presentazione finita. Non ancora pronto.",
+      "home": "La tua dashboard: attività, statistiche e azioni rapide.",
+      "settings": "Account, fatturazione, lingua e preferenze."
     },
     "comingSoon": "In arrivo",
     "comingSoonToast": "{name} non è ancora disponibile: è nella roadmap.",
@@ -648,7 +650,9 @@
       "showConversations": "Mostra conversazioni",
       "focusMode": "Modalità concentrazione",
       "streamInterrupted": "La connessione si è interrotta prima che la risposta fosse completata.",
-      "streamInterruptedPartial": "La connessione si è interrotta — la risposta qui sopra potrebbe essere incompleta."
+      "streamInterruptedPartial": "La connessione si è interrotta — la risposta qui sopra potrebbe essere incompleta.",
+      "hideConversationsHint": "Nascondi l’elenco delle conversazioni e dai tutta la larghezza al thread.",
+      "showConversationsHint": "Mostra di nuovo l’elenco delle conversazioni."
     },
     "create": {
       "title": "Crea Qualsiasi Cosa"

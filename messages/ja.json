@@ -121,7 +121,9 @@
       "images": "説明から画像を生成します。まだ準備中です。",
       "videos": "説明から動画を生成します。まだ準備中です。",
       "coding": "必要なものを説明すると動くコードが得られます。まだ準備中です。",
-      "presentations": "要点から完成したスライドを作ります。まだ準備中です。"
+      "presentations": "要点から完成したスライドを作ります。まだ準備中です。",
+      "home": "ダッシュボード — アクティビティ、統計、クイック操作。",
+      "settings": "アカウント、請求、言語、設定。"
     },
     "comingSoon": "近日公開",
     "comingSoonToast": "{name} はまだ利用できません。ロードマップに入っています。",
@@ -648,7 +650,9 @@
       "showConversations": "会話一覧を表示",
       "focusMode": "集中モード",
       "streamInterrupted": "応答が完了する前に接続が切断されました。",
-      "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。"
+      "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。",
+      "hideConversationsHint": "会話リストを隠して、スレッドに全幅を使います。",
+      "showConversationsHint": "会話リストを再表示します。"
     },
     "create": {
       "title": "何でも作成"

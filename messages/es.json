@@ -121,7 +121,9 @@
       "images": "Genera imágenes a partir de una descripción. Todavía no está listo.",
       "videos": "Genera vídeo a partir de una descripción. Todavía no está listo.",
       "coding": "Describe lo que necesitas y obtén código que funciona. Todavía no está listo.",
-      "presentations": "Convierte un resumen en una presentación acabada. Todavía no está listo."
+      "presentations": "Convierte un resumen en una presentación acabada. Todavía no está listo.",
+      "home": "Tu panel: actividad, estadísticas y acciones rápidas.",
+      "settings": "Cuenta, facturación, idioma y preferencias."
     },
     "comingSoon": "Próximamente",
     "comingSoonToast": "{name} aún no está disponible: está en la hoja de ruta.",
@@ -648,7 +650,9 @@
       "showConversations": "Mostrar conversaciones",
       "focusMode": "Modo concentración",
       "streamInterrupted": "La conexión se interrumpió antes de que terminara la respuesta.",
-      "streamInterruptedPartial": "La conexión se interrumpió: la respuesta anterior puede estar incompleta."
+      "streamInterruptedPartial": "La conexión se interrumpió: la respuesta anterior puede estar incompleta.",
+      "hideConversationsHint": "Oculta la lista de conversaciones y da todo el ancho al hilo.",
+      "showConversationsHint": "Vuelve a mostrar la lista de conversaciones."
     },
     "create": {
       "title": "Crear Cualquier Cosa"

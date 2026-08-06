@@ -181,7 +181,13 @@ export async function POST(request: Request) {
     // A flat per-call fee cannot track cost by construction, which is why
     // this is a settlement rather than a bigger flat number.
     const costs = new CostAccumulator();
-    const precheckPlan = bypassCredits ? null : await resolveEffectivePlan(user);
+    // Always resolved, never null — even for a bypass account.
+    //
+    // A null plan reached the cost log as planSlug: null, and made
+    // wouldHaveChargedCredits price against the LIST rate instead of the
+    // account's own. The saving was one metadata read; the cost was that
+    // admin and beta rows could not be checked against anything.
+    const precheckPlan = await resolveEffectivePlan(user);
 
     async function settlePrechecks() {
       // Nothing measured (no call ran, or every call threw before

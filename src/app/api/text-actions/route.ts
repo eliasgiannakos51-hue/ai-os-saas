@@ -129,9 +129,13 @@ export async function POST(request: Request) {
     // rewrote a sentence or a ten-page document. Output here scales with
     // input, so a flat charge under-prices exactly the requests that cost
     // the most. Reserved and settled on measured usage now (CREDITS.md).
-    const plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = bypassCredits
-      ? null
-      : await resolveEffectivePlan(user);
+    // Always resolved, never null — even for a bypass account.
+    //
+    // A null plan reached the cost log as planSlug: null, and made
+    // wouldHaveChargedCredits price against the LIST rate instead of the
+    // account's own. The saving was one metadata read; the cost was that
+    // admin and beta rows could not be checked against anything.
+    const plan = await resolveEffectivePlan(user);
     const pricingConfig = resolvePricingConfig();
     const estimate = estimateForAction(
       "textAction",

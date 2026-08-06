@@ -4,6 +4,7 @@ import { logApiError } from "@/lib/log-error";
 import { hasActiveBetaBypass, isBetaTester } from "@/lib/beta";
 import { diagLog } from "@/lib/diag";
 import { getPlan, type Plan, type PlanSlug } from "./plans";
+import { isAdminEmail } from "@/lib/admin";
 
 // The plan a user is on lives in user_metadata.subscription_tier, written
 // by the Stripe webhook on checkout/subscription events (see
@@ -19,14 +20,34 @@ import { getPlan, type Plan, type PlanSlug } from "./plans";
 // resolveEffectivePlanSlug/resolveEffectivePlan below instead, which layer
 // the live beta-expiry check on top of this.
 export function resolvePlanSlug(
-  user: { user_metadata?: Record<string, unknown> | null } | null | undefined
+  user: { email?: string | null; user_metadata?: Record<string, unknown> | null } | null | undefined
 ): PlanSlug {
   const raw = user?.user_metadata?.subscription_tier;
-  return typeof raw === "string" && getPlan(raw) ? (raw as PlanSlug) : "free";
+  if (typeof raw === "string" && getPlan(raw)) return raw as PlanSlug;
+
+  // An owner/admin account has no subscription_tier, because it never
+  // bought a subscription — admin status lives in ADMIN_EMAILS, which is
+  // an entirely separate axis. Falling through to "free" therefore
+  // labelled the owner a free user.
+  //
+  // That is not merely cosmetic. The plan is what settlement divides by,
+  // so it decides what a credit is worth: an owner's generation reported
+  // wouldHaveChargedCredits at the FREE/list rate (EUR 0.02 -> 53
+  // credits) when their real tier prices it at EUR 0.008 -> 132. The one
+  // number available for checking the margin on admin traffic was 60%
+  // low, which is the opposite of what a safety figure should do.
+  //
+  // "enterprise" rather than a paid tier because that is already what the
+  // rest of the app calls an admin — see pricing/page.tsx, team/invite
+  // and dashboard/team, all of which read `isAdmin ? "enterprise" : ...`.
+  // Billing was the only place that disagreed.
+  if (isAdminEmail(user?.email)) return "enterprise";
+
+  return "free";
 }
 
 export function resolvePlan(
-  user: { user_metadata?: Record<string, unknown> | null } | null | undefined
+  user: { email?: string | null; user_metadata?: Record<string, unknown> | null } | null | undefined
 ): Plan {
   return getPlan(resolvePlanSlug(user)) ?? getPlan("free")!;
 }
@@ -38,7 +59,7 @@ export function resolvePlan(
 // left untouched — Stripe's webhook owns their tier from that point on,
 // regardless of whether their old beta window is still open.
 export async function resolveEffectivePlanSlug(
-  user: { id: string; user_metadata?: Record<string, unknown> | null } | null | undefined
+  user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> | null } | null | undefined
 ): Promise<PlanSlug> {
   const baseSlug = resolvePlanSlug(user);
   if (!user || baseSlug === "free") return baseSlug;
@@ -50,7 +71,7 @@ export async function resolveEffectivePlanSlug(
 }
 
 export async function resolveEffectivePlan(
-  user: { id: string; user_metadata?: Record<string, unknown> | null } | null | undefined
+  user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> | null } | null | undefined
 ): Promise<Plan> {
   return getPlan(await resolveEffectivePlanSlug(user)) ?? getPlan("free")!;
 }

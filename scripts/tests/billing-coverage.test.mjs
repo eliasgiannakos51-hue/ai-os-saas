@@ -285,10 +285,18 @@ checkTrue("the generate route resolves the real plan", /resolveEffectivePlan\(us
 checkTrue("and hands it to settlement", /\n\s*plan,\n/.test(routeSrc));
 // Free and Enterprise have no per-credit rate, so they must fall back to
 // the LIST price — never to zero, which would divide by zero.
-for (const plan of [PLANS[0], PLANS[5], null, undefined]) {
+// Free has a real rate (its allowance is a marketing cost, and a free
+// user who wants more buys at list), and so does "no plan at all". A
+// CUSTOM-priced plan is different: its rate is unknowable, so it takes
+// the cheapest published one instead — see section 21.
+for (const plan of [PLANS[0], null, undefined]) {
   const r = formula.effectiveCreditPriceEur(plan, config);
-  checkTrue(`${plan?.name ?? String(plan)} falls back to the list price`, r === config.creditPriceEur);
+  checkTrue(`${plan?.name ?? String(plan)} prices at the list rate`, r === config.creditPriceEur);
 }
+checkTrue(
+  "Enterprise does NOT price at the list rate — that would under-charge a bulk deal",
+  formula.effectiveCreditPriceEur(PLANS[5], config) < config.creditPriceEur
+);
 
 console.log("\n== 8. a charging settlement always charges, and always clears the bar ==");
 // Production showed seven ai_cost_log rows with credits_charged = 0 and
@@ -580,6 +588,84 @@ const packRate = 100 / 8000;
 check("a pack holder would have paid 85 credits, not 53",
   formula.creditsForRealCostOnAccount(realEur, null, packRate, config), 85);
 checkTrue("which is still >= 4x", formula.achievedMarginOnAccount(85, realEur, null, packRate, config) >= M);
+
+console.log("\n== 21. plan resolution: the tier decides the rate, so it must be right ==");
+// PRODUCTION: an owner/admin generation logged planSlug "free" and
+// wouldHaveChargedCredits 53, when the owner's real tier prices the same
+// EUR 0.2635 at 132. Two precheck rows logged planSlug NULL.
+//
+// resolvePlanSlug reads ONE place — user_metadata.subscription_tier — and
+// nothing else. An owner never bought a subscription, so that field is
+// unset and the function fell through to "free". Admin status lives in
+// ADMIN_EMAILS, a completely separate axis, which billing never consulted
+// even though pricing/page.tsx, team/invite and dashboard/team all do.
+const credits = readFileSync("src/lib/billing/credits.ts", "utf8");
+checkTrue("the only source is user_metadata.subscription_tier", /user\?\.user_metadata\?\.subscription_tier/.test(credits));
+checkTrue("an admin no longer falls through to free", /if \(isAdminEmail\(user\?\.email\)\) return "enterprise";/.test(credits));
+checkTrue("...matching what the rest of the app already calls an admin",
+  /isAdmin \? "enterprise"/.test(readFileSync("src/app/pricing/page.tsx", "utf8")));
+
+// Enterprise is priced per deal, so its per-credit rate is unknowable.
+// It used to fall back to the LIST price — the most EXPENSIVE rate in the
+// product, and therefore the least safe guess for a bulk contract.
+const ENT = PLANS[5];
+check("Enterprise now prices at the cheapest published rate", Number(formula.effectiveCreditPriceEur(ENT, config).toFixed(6)), 0.008);
+check("so the real production row is 132 credits, not 53", formula.creditsForRealCostOnAccount(realEur, ENT, null, config), 132);
+checkTrue("which clears the bar", formula.achievedMarginOnAccount(132, realEur, ENT, null, config) >= M);
+checkTrue("and the helper is derived from PLANS, not hardcoded",
+  /for \(const plan of PLANS\)/.test(readFileSync("src/lib/billing/credit-formula.ts", "utf8")));
+// Free is a real rate, not an unknown one: its allowance is a marketing
+// cost and a free user who wants more buys at list. It must NOT move.
+check("Free still prices at list", formula.effectiveCreditPriceEur(PLANS[0], config), config.creditPriceEur);
+
+console.log("\n== 22. a real user's tier, through every lifecycle step ==");
+const meta = (tier) => ({ id: "u", email: "user@example.com", user_metadata: tier ? { subscription_tier: tier } : {} });
+check("brand-new user -> free", formula.effectiveCreditPriceEur(null, config), config.creditPriceEur);
+for (const [label, tier, expectedRate] of [
+  ["subscribed to Starter", "starter", 0.02],
+  ["upgraded to Growth", "growth", 50 / 3000],
+  ["upgraded to Professional", "professional", 0.01],
+  ["upgraded to Ultimate", "ultimate", 0.008],
+  ["cancelled, back to free", "free", 0.02],
+]) {
+  const plan = PLANS.find((p) => p.name.toLowerCase() === tier) ?? PLANS[0];
+  check(`${label}: EUR ${expectedRate.toFixed(6)} per credit`, Number(formula.effectiveCreditPriceEur(plan, config).toFixed(8)), Number(expectedRate.toFixed(8)));
+}
+// Stripe is what writes the tier. If it ever stopped, every paying
+// customer would silently be billed as free — this is the line that
+// prevents that, so it is asserted rather than assumed.
+const stripeHook = readFileSync("src/app/api/webhooks/stripe/route.ts", "utf8");
+checkTrue("the Stripe webhook writes subscription_tier", /subscription_tier: planSlug/.test(stripeHook));
+checkTrue("signup seeds a tier so the field is never absent", /subscription_tier:/.test(readFileSync("src/app/api/signup/route.ts", "utf8")));
+checkTrue("and the auth callback backfills one for older accounts", /subscription_tier: "free"/.test(readFileSync("src/app/auth/callback/route.ts", "utf8")));
+
+console.log("\n== 23. planSlug is never null in a settled row ==");
+// Two production rows logged planSlug null, because several routes did
+// `bypassCredits ? null : await resolveEffectivePlan(user)`. The saving
+// was one metadata read; the cost was that admin and beta rows could not
+// be checked against anything, and wouldHaveChargedCredits priced them
+// at the list rate instead of the account's own.
+const ROUTES_THAT_SETTLE = [
+  "src/app/api/records/ask/route.ts",
+  "src/app/api/text-actions/route.ts",
+  "src/app/api/reflection/generate/route.ts",
+  "src/app/api/websites/generate/route.ts",
+  "src/app/api/websites/generate/process/route.ts",
+  "src/app/api/automations/create/route.ts",
+  "src/app/api/cron/scheduled-runs/route.ts",
+  "src/app/api/chat/route.ts",
+  "src/app/api/create/route.ts",
+  "src/app/api/create-studio/detect/route.ts",
+  "src/app/api/mission/plan/route.ts",
+];
+for (const file of ROUTES_THAT_SETTLE) {
+  const body = readFileSync(file, "utf8");
+  checkTrue(
+    `${file.replace("src/app/api/", "")}: no conditionally-null plan`,
+    !/(bypassCredits|isAdmin|bypassCharge)\s*\?\s*null\s*:\s*await resolveEffectivePlan/.test(body) &&
+      !/\|\s*null\s*=\s*(bypassCredits|isAdmin)\s*\n?\s*\?\s*null/.test(body)
+  );
+}
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

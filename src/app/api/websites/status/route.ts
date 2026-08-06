@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isGenerationJobStale } from "@/lib/website-generation-limits";
 import { logApiError } from "@/lib/log-error";
+import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
 import type { UserWebsite } from "@/types/user-website";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +14,42 @@ export const dynamic = "force-dynamic";
 // fast row read, so it can never itself time out the way one giant
 // blocking request could. Also what a page reload uses to pick a
 // still-processing generation back up without the user doing anything.
+
+// What the generation cost, for the client's "used N credits" message.
+//
+// The Website Builder settles in a BACKGROUND worker, so unlike every
+// other AI route there is no response to attach a receipt to — the client
+// only ever sees this polled row. The figure therefore has to be read
+// back from the settled cost-log row. Best-effort: a missing row just
+// means no message, never a failed poll.
+async function readUsageForWebsite(
+  supabase: ReturnType<typeof createClient>,
+  userId: string,
+  websiteId: string
+) {
+  try {
+    const { data } = await supabase
+      .from("ai_cost_log")
+      .select("credits_charged, metadata")
+      .eq("user_id", userId)
+      .eq("feature", "website_generate")
+      .contains("metadata", { websiteId })
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (!data) return null;
+    const meta = (data.metadata ?? {}) as { bypassCharge?: unknown; wouldHaveChargedCredits?: unknown };
+    return buildUsageReceipt({
+      creditsCharged: Number(data.credits_charged) || 0,
+      bypass: meta.bypassCharge === true,
+      wouldHaveCharged:
+        typeof meta.wouldHaveChargedCredits === "number" ? meta.wouldHaveChargedCredits : null,
+    });
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -102,7 +139,15 @@ export async function GET(request: Request) {
       }
     }
 
-    return NextResponse.json({ ok: true, record });
+    // Only on a terminal status: while it is still generating there is no
+    // settlement to report, and the worker marks the row finished only
+    // AFTER settling (see generate/process), so by this point the cost-log
+    // row exists.
+    const usage =
+      record.status === "completed" || record.status === "flagged"
+        ? await readUsageForWebsite(supabase, user.id, String(record.id))
+        : null;
+    return NextResponse.json({ ok: true, record, usage });
   } catch (err) {
     logApiError("/api/websites/status", err);
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });

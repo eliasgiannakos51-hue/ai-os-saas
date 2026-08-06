@@ -188,7 +188,7 @@ export function WebsiteBuilderWorkspace({
   const tCommon = useTranslations("common");
   const tModule = useTranslations("module");
   const supabase = createClient();
-  const { refresh: refreshCredits, accountCreditPriceEur } = useCredits();
+  const { refresh: refreshCredits, reportUsage, accountCreditPriceEur } = useCredits();
   const { addToast } = useToast();
 
   const [websites, setWebsites] = useState<UserWebsite[]>(initialWebsites);
@@ -273,6 +273,7 @@ export function WebsiteBuilderWorkspace({
   function pollWebsiteStatus(id: string) {
     async function tick() {
       let record: UserWebsite;
+      let usagePayload: unknown = null;
       try {
         const res = await fetch(`/api/websites/status?id=${id}`);
         const data = await res.json();
@@ -281,6 +282,9 @@ export function WebsiteBuilderWorkspace({
           return;
         }
         record = data.record as UserWebsite;
+        // Kept outside the try so the terminal-status branch below can
+        // report what the generation cost.
+        usagePayload = data;
       } catch {
         // A transient network hiccup while polling isn't the same as the
         // generation failing — just retry on the next tick.
@@ -296,7 +300,7 @@ export function WebsiteBuilderWorkspace({
         return;
       }
 
-      void refreshCredits();
+      void reportUsage(usagePayload);
       if (record.status === "completed") {
         addToast(t("generated"));
       } else if (record.status === "failed") {

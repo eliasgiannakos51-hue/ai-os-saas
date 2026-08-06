@@ -4,6 +4,7 @@ import { useState, type ChangeEvent } from "react";
 import { Wand2, Languages, Sparkles, HelpCircle, Check, X, Loader2 } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useTranslations } from "next-intl";
+import { useCredits } from "@/components/credits/credits-context";
 
 const ACTIONS = [
   { id: "rewrite", label: "Rewrite", icon: Wand2 },
@@ -35,6 +36,7 @@ export function TextActionsTextarea({
   required?: boolean;
 }) {
   const tCommon = useTranslations("common");
+  const { reportUsage } = useCredits();
   const [selection, setSelection] = useState<{ start: number; end: number; text: string } | null>(
     null
   );
@@ -85,6 +87,11 @@ export function TextActionsTextarea({
       }
 
       setResult(data.result);
+      // This client never touched the credits context at all, so a text
+      // action moved the balance with nothing in the UI reflecting it —
+      // not even on the next navigation, since the counter is client
+      // state seeded once by the dashboard layout.
+      void reportUsage(data);
     } catch {
       setError(tCommon("networkError"));
     } finally {

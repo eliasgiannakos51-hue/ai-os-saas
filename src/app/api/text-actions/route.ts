@@ -18,6 +18,7 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
 
 export const dynamic = "force-dynamic";
 
@@ -205,7 +206,7 @@ export async function POST(request: Request) {
 
       // Bypass accounts settle too — charged nothing, but their real
       // spend still lands in the cost log.
-      await settleReservation({
+      const settlement = await settleReservation({
         userId: user.id,
         reservationId,
         feature: "text_action",
@@ -220,7 +221,15 @@ export async function POST(request: Request) {
         },
       });
 
-      return NextResponse.json({ ok: true, result });
+      return NextResponse.json({
+        ok: true,
+        result,
+        usage: buildUsageReceipt({
+          creditsCharged: settlement.creditsCharged,
+          bypass: bypassCredits,
+          wouldHaveCharged: null,
+        }),
+      });
     } catch (err) {
       logApiError("/api/text-actions", err, { stage: "anthropic_call", action });
       await releaseReservation(user.id, reservationId);

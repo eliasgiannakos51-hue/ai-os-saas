@@ -54,7 +54,7 @@ export function AskAiModal({
 }) {
   const t = useTranslations("askAi");
   const tCommon = useTranslations("common");
-  const { refresh: refreshCredits } = useCredits();
+  const { reportUsage } = useCredits();
   const [messages, setMessages] = useState<Turn[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -125,7 +125,9 @@ export function AskAiModal({
 
       // Never throws — a dropped connection must not delete the answer
       // the user already watched stream in. See lib/ndjson-stream.ts.
+      let usageEvent: unknown = null;
       const { interrupted } = await readNdjsonStream(res.body, (event) => {
+        if (event.type === "done") usageEvent = event;
         if (event.type === "delta") {
           if (typeof event.text === "string") {
             accumulatedText += event.text;
@@ -146,7 +148,10 @@ export function AskAiModal({
         setError(accumulatedText ? t("streamInterruptedPartial") : t("streamInterrupted"));
       }
 
-      void refreshCredits();
+      // The receipt rides on the stream's `done` event, same as chat, so
+      // the counter and the "used N credits" message come from the
+      // settlement itself rather than a second, racier read.
+      void reportUsage(usageEvent);
     } catch {
       setError(tCommon("networkError"));
     } finally {

@@ -18,6 +18,7 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
 import {
   CREATE_STUDIO_TYPES,
   isCreateStudioType,
@@ -279,7 +280,7 @@ export async function POST(request: Request) {
       );
     }
 
-    await settleReservation({
+    const settlement = await settleReservation({
       userId: user.id,
       reservationId,
       feature: "create_studio_detect",
@@ -289,7 +290,15 @@ export async function POST(request: Request) {
       metadata: { detectedType: detection.type, messageChars: message.length },
     });
 
-    return NextResponse.json({ ok: true, detection });
+    return NextResponse.json({
+      ok: true,
+      detection,
+      usage: buildUsageReceipt({
+        creditsCharged: settlement.creditsCharged,
+        bypass: bypassCredits,
+        wouldHaveCharged: null,
+      }),
+    });
   } catch (err) {
     logApiError("/api/create-studio/detect", err, { stage: "unhandled" });
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });

@@ -143,6 +143,27 @@ export async function settleReservation(params: {
     ? null
     : achievedMarginOnAccount(creditsCharged, realCostEur, plan, packPriceEur, config);
 
+  // The multiplier is guaranteed by construction — credits are ceil()ed
+  // up, so credits * price / cost can never come out below it. That makes
+  // this branch unreachable by arithmetic, which is exactly why it is
+  // worth having: if it ever fires, the cause is a cost that never
+  // reached the formula, and that is invisible from the settled row (the
+  // stored achieved_margin is computed from the same understated cost and
+  // will look healthy). A margin shortfall must never be something we
+  // learn about from a user comparing an invoice to a dashboard.
+  if (margin !== null && margin < config.marginMultiplier - 1e-9) {
+    logApiError("billing:marginBelowTarget", new Error("settled below the guaranteed margin"), {
+      userId,
+      feature,
+      creditsCharged,
+      realCostUsd,
+      realCostEur,
+      achievedMargin: margin,
+      targetMargin: config.marginMultiplier,
+      effectiveCreditPriceEur: effectivePrice,
+    });
+  }
+
   try {
     const admin = createAdminClient();
     const { error } = await admin.rpc("settle_reservation", {

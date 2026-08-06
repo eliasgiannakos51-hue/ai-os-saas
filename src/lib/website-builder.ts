@@ -20,22 +20,33 @@ const CLASSIFY_MAX_TOKENS = 300;
 // below and its call sites for how that's now caught instead of silently
 // shipping broken HTML.
 //
-// 64000 (not the model's full 128000 streaming ceiling) is a deliberate
-// middle ground: this route already has a separate, real Vercel execution-
-// time ceiling to work within (see api/websites/generate/process/route.ts's
-// maxDuration), and raising the token budget also raises how long a single
-// generation can legitimately run — going all the way to 128000 would
-// trade "cut off for being too large" for "cut off for taking too long",
-// which is not a net improvement. For the rare description complex enough
-// to still exceed even this, streamHtmlToCompletion below adds real
-// continuation logic instead of just failing.
-const WEBSITE_MAX_TOKENS = 64000;
-// How many extra "continue where you left off" calls to allow after the
-// first one hits WEBSITE_MAX_TOKENS. Each round is a full extra model call
-// (extra latency + cost), so this stays small — 2 extra rounds covers
-// genuinely large sites without turning a single generation into an
-// unbounded loop.
-const MAX_CONTINUATION_ROUNDS = 2;
+// claude-sonnet-4-6's documented maximum output. This was 64000 — a
+// deliberate middle ground, on the theory that a bigger token budget just
+// converts "cut off for being too large" into "cut off for taking too
+// long" against the route's maxDuration.
+//
+// Production then cut off at 13,624 output tokens, which is not close to
+// either ceiling. The token budget was never the binding constraint, and
+// treating it as one is what let the real cause (see
+// streamHtmlToCompletion) survive a round of fixes. It sits at the model
+// maximum now so that it is unambiguously not the limit; the wall-clock
+// ceiling is handled where it actually lives, by CONTINUATION_DEADLINE_MS
+// below.
+const WEBSITE_MAX_TOKENS = 128000;
+// How many extra calls to allow after the first, when the first does not
+// come back with a finished document. Each round is a full extra model
+// call (latency + real money), so this stays bounded — but 2 was too tight
+// once pause_turn rounds are in the mix, since a server-side search loop
+// can consume a round without producing much document.
+const MAX_CONTINUATION_ROUNDS = 4;
+// Vercel kills the function at maxDuration (800s for the generate
+// processor) and everything in flight is lost — we have already paid for
+// every token generated up to that point. Starting a fresh round with
+// almost no time left buys a near-certain hard kill instead of a clean,
+// reportable failure, so rounds stop when the remaining window is smaller
+// than a round plausibly needs.
+const CONTINUATION_DEADLINE_MS = 700_000;
+const MIN_MS_FOR_ANOTHER_ROUND = 120_000;
 const CONTINUATION_INSTRUCTION =
   "Continue the HTML document EXACTLY where you left off — do not repeat anything you already wrote, do not restart the document, and do not add any commentary or markdown code fences. Output only the raw continuation of the HTML from the exact point it was cut off.";
 
@@ -312,13 +323,26 @@ function assertCompleteHtmlResponse(
   html: string,
   action: "generated" | "updated"
 ): void {
-  if (stopReason === "max_tokens" || !looksLikeCompleteHtmlDocument(html)) {
-    throw new Error(
-      action === "generated"
+  if (stopReason !== "max_tokens" && looksLikeCompleteHtmlDocument(html)) return;
+
+  // The reason has to match reality. "Too large — try a shorter
+  // description" was reported for a response that stopped at 13,624 of
+  // 128,000 available output tokens, i.e. it sent the user off to fix a
+  // problem they did not have, on a request that would fail again.
+  //
+  // Only an exhausted token budget is genuinely a size problem. Everything
+  // else that reaches here — a search loop that never converged, a model
+  // that stopped early, a refusal — is an interrupted run, and the honest
+  // advice is to try again.
+  const tooLarge = stopReason === "max_tokens";
+  const subject = action === "generated" ? "generated" : "updated";
+  throw new Error(
+    tooLarge
+      ? action === "generated"
         ? "The generated website was too large and got cut off before finishing — try a shorter or simpler description."
         : "The updated website was too large and got cut off before finishing — try a smaller change."
-    );
-  }
+      : `The website generation was interrupted before the ${subject} page was finished. Nothing was charged — please try again.`
+  );
 }
 
 // Reference images (Website Builder's optional "attach up to 20 reference
@@ -406,6 +430,7 @@ async function streamHtmlToCompletion(
   stage: CostStage = "generation"
 ): Promise<{ rawText: string; stopReason: string | null }> {
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: initialUserContent }];
+  const startedAt = Date.now();
   let combined = "";
   let stopReason: string | null = null;
 
@@ -429,22 +454,62 @@ async function streamHtmlToCompletion(
     const response = await stream.finalMessage();
     costs?.record(round === 0 ? stage : "retry", response.usage, MODEL);
     if (!onDelta) {
-      const textBlock = response.content.find(
-        (block): block is Anthropic.TextBlock => block.type === "text"
-      );
-      roundText = textBlock?.text ?? "";
+      // EVERY text block, joined — not the first one.
+      //
+      // A turn that searches the web comes back as
+      // [text, server_tool_use, web_search_tool_result, text, ...], so
+      // taking `.find(first text block)` kept the sentence before the
+      // search and threw away the entire document written after it. The
+      // streaming branch above never had this bug (it accumulates deltas
+      // from all blocks), which is precisely why it went unnoticed: the
+      // generate path streams, the edit path does not.
+      roundText = response.content
+        .filter((block): block is Anthropic.TextBlock => block.type === "text")
+        .map((block) => block.text)
+        .join("");
     }
     combined += roundText;
     stopReason = response.stop_reason;
 
-    const doneOrExhausted =
-      stopReason !== "max_tokens" ||
-      looksLikeCompleteHtmlDocument(stripCodeFence(combined.trim())) ||
-      round === MAX_CONTINUATION_ROUNDS;
-    if (doneOrExhausted) break;
+    if (looksLikeCompleteHtmlDocument(stripCodeFence(combined.trim()))) break;
+    if (round === MAX_CONTINUATION_ROUNDS) break;
+    // Don't start a round that the platform will kill mid-flight: those
+    // tokens are billed to us and reach the user as nothing at all.
+    if (Date.now() - startedAt > CONTINUATION_DEADLINE_MS - MIN_MS_FOR_ANOTHER_ROUND) break;
 
-    messages.push({ role: "assistant", content: roundText });
-    messages.push({ role: "user", content: CONTINUATION_INSTRUCTION });
+    // Which continuation to send depends on WHY the turn ended. The
+    // previous condition only ever recognised "max_tokens" and treated
+    // every other stop reason as success — so a document that stopped
+    // half-written for any other reason was discarded, and the caller
+    // reported it to the user as "too large".
+    if (stopReason === "pause_turn") {
+      // The server-side web_search loop hit its own iteration limit. This
+      // is the documented "I am not finished, hand this back to me"
+      // signal, and it is what actually happened in production at 13,624
+      // output tokens. The resume is to echo the assistant turn VERBATIM
+      // — every block, including server_tool_use and
+      // web_search_tool_result — with no new user message. Flattening it
+      // to text, or appending a "continue" instruction, breaks the
+      // in-flight tool loop the model is trying to resume.
+      messages.push({ role: "assistant", content: response.content });
+      continue;
+    }
+
+    if (stopReason === "max_tokens" || stopReason === "end_turn") {
+      // A genuine ceiling hit, or a model that simply stopped early. Both
+      // are resumed by asking for the rest of the document — but only if
+      // a document was actually started, otherwise the reply was prose of
+      // some other kind and another round just spends more money on it.
+      if (!/^\s*(?:```(?:html)?\s*)?<(?:!doctype html|html[\s>])/i.test(combined)) break;
+      messages.push({ role: "assistant", content: roundText });
+      messages.push({ role: "user", content: CONTINUATION_INSTRUCTION });
+      continue;
+    }
+
+    // refusal / stop_sequence / anything unrecognised: continuing cannot
+    // turn these into a finished document, so stop rather than pay for
+    // rounds that are certain to fail.
+    break;
   }
 
   return { rawText: combined.trim(), stopReason };

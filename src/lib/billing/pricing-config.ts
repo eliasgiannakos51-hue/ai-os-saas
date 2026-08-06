@@ -30,6 +30,30 @@ export type PricingConfig = {
 export const MARGIN_MULTIPLIER_MIN = 4;
 export const MARGIN_MULTIPLIER_MAX = 10;
 
+// The USD -> EUR rate needs the same kind of floor, for exactly the same
+// reason, and did not have one.
+//
+// It is the last step between a real dollar cost and the euro figure the
+// multiplier is applied to, so understating it understates the cost, and
+// the shortfall lands entirely in margin — invisibly, because the margin
+// the code then computes and stores is measured against the SAME
+// understated euros and still reports a healthy 4x.
+//
+// This is not hypothetical. A production settlement of three logged calls
+// costing $0.27800715 charged 45 credits. The formula cannot produce that
+// number at the default rate (it gives 52), and it is not reachable by
+// any plan or credit-pack rate. It is reachable at USD_TO_EUR_RATE=0.80,
+// which yields exactly 45 — while the real margin against $0.278 was
+// 3.52x. 0.79 gives 44 and 0.81 gives 46, so the value is pinned.
+//
+// The band is deliberately narrow around a plausible EUR/USD. Anything
+// under the floor is rejected and the default used instead, rather than
+// clamped, so a misconfiguration is visible in the logs rather than
+// silently "working". Over-stating the rate is the safe direction (it
+// over-charges slightly), so the ceiling is looser than the floor.
+export const USD_TO_EUR_RATE_MIN = 0.85;
+export const USD_TO_EUR_RATE_MAX = 1.5;
+
 export const DEFAULTS: PricingConfig = {
   marginMultiplier: 4,
   creditPriceEur: 0.02,
@@ -81,7 +105,9 @@ export function parsePricingConfig(env: Record<string, string | undefined>): {
         n <= 0 || n > 10 ? "must be greater than 0 and at most 10" : null
       ),
       usdToEurRate: num("USD_TO_EUR_RATE", DEFAULTS.usdToEurRate, (n) =>
-        n <= 0 || n > 10 ? "must be greater than 0 and at most 10" : null
+        n < USD_TO_EUR_RATE_MIN || n > USD_TO_EUR_RATE_MAX
+          ? `outside the allowed range ${USD_TO_EUR_RATE_MIN}-${USD_TO_EUR_RATE_MAX} — a rate below the floor understates the real cost and silently eats the margin`
+          : null
       ),
       largeActionConfirmThreshold: num(
         "LARGE_ACTION_CONFIRM_THRESHOLD",

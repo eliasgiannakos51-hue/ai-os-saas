@@ -8,12 +8,19 @@
 // Deliberately not a general-purpose bundler: it handles the import forms
 // these files actually use (named, type-only, relative and `@/`), and
 // throws on anything else rather than silently mis-resolving.
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import ts from "typescript";
 
 const ROOT = process.cwd();
 const cache = new Map();
+
+// Marker packages with no runtime API. `server-only` exists purely so the
+// Next bundler can fail a build that imports a server module from a client
+// one; outside Next its index.js throws on sight. Dropping the import
+// changes nothing about the module's behavior — unlike stubbing a real
+// dependency, which would be substituting our own logic for the app's.
+const MARKER_ONLY_PACKAGES = new Set(["server-only", "client-only"]);
 
 function resolveSpecifier(spec, fromFile) {
   let base;
@@ -29,7 +36,7 @@ function resolveSpecifier(spec, fromFile) {
 }
 
 /** Transpiles `file` and every local module it imports into one ES module. */
-function collect(file, seen, out) {
+function collect(file, seen, out, allowExternals = false) {
   const abs = path.resolve(file);
   if (seen.has(abs)) return;
   seen.add(abs);
@@ -46,7 +53,7 @@ function collect(file, seen, out) {
       ts.isStringLiteral(stmt.moduleSpecifier)
     ) {
       const resolved = resolveSpecifier(stmt.moduleSpecifier.text, abs);
-      if (resolved) collect(resolved, seen, out);
+      if (resolved) collect(resolved, seen, out, allowExternals);
     }
   }
 
@@ -56,15 +63,22 @@ function collect(file, seen, out) {
   }).outputText;
 
   // Local imports are satisfied by concatenation, so their statements are
-  // dropped. A bare-specifier import would be a real dependency and is not
-  // supported here — the tests only cover dependency-free libs.
+  // dropped. A bare-specifier import is a real dependency: rejected in the
+  // default mode (the billing libs genuinely have none, and a silent stub
+  // would be a lie), kept verbatim when `allowExternals` is on — see
+  // loadTsWithDeps.
   const stripped = js
     .split("\n")
     .filter((line) => {
       const t = line.trim();
+      // `import "server-only";` has no `from` clause, so the test below
+      // never sees it. Match the side-effect form explicitly.
+      const bare = t.match(/^import\s+["']([^"']+)["'];?$/)?.[1];
+      if (bare) return !MARKER_ONLY_PACKAGES.has(bare) && !bare.startsWith("@/") && !bare.startsWith(".");
       if (!/^(import|export)\s.*from\s+["']/.test(t)) return true;
       const spec = t.match(/from\s+["']([^"']+)["']/)?.[1] ?? "";
       if (spec.startsWith("@/") || spec.startsWith(".")) return false;
+      if (allowExternals) return true;
       throw new Error(`Unsupported external import in ${abs}: ${t}`);
     })
     .join("\n");
@@ -72,16 +86,42 @@ function collect(file, seen, out) {
   out.push(stripped);
 }
 
+function bundleOf(entry, allowExternals) {
+  const out = [];
+  collect(path.resolve(entry), new Set(), out, allowExternals);
+  return out.join("\n");
+}
+
 export async function loadTs(entry) {
   const key = path.resolve(entry);
   if (cache.has(key)) return cache.get(key);
-
-  const out = [];
-  collect(key, new Set(), out);
-  const bundle = out.join("\n");
   const mod = await import(
-    "data:text/javascript;base64," + Buffer.from(bundle).toString("base64")
+    "data:text/javascript;base64," + Buffer.from(bundleOf(entry, false)).toString("base64")
   );
+  cache.set(key, mod);
+  return mod;
+}
+
+/**
+ * Same transpile, but external (node_modules) imports are KEPT — so a
+ * module that genuinely depends on a real package can be exercised as
+ * itself rather than as a rewritten copy of itself.
+ *
+ * A data: URL can't resolve bare specifiers, so the bundle is written
+ * inside node_modules/, where Node's normal upward resolution finds the
+ * project's real dependencies. Nothing about the module under test is
+ * substituted: only `server-only`, a marker package with no runtime API,
+ * is dropped.
+ */
+export async function loadTsWithDeps(entry) {
+  const key = `deps:${path.resolve(entry)}`;
+  if (cache.has(key)) return cache.get(key);
+
+  const dir = path.join(ROOT, "node_modules", ".ionexa-test-bundles");
+  mkdirSync(dir, { recursive: true });
+  const file = path.join(dir, `${path.basename(entry).replace(/\W/g, "_")}.mjs`);
+  writeFileSync(file, bundleOf(entry, true));
+  const mod = await import(`${file}?v=${process.pid}`);
   cache.set(key, mod);
   return mod;
 }

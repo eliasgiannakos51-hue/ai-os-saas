@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { classifyWebsiteDescription, WEBSITE_MODEL } from "@/lib/website-builder";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
-import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
+import { MAX_REFERENCE_IMAGES, referenceImagePathBelongsToUser } from "@/lib/website-reference-image";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import {
@@ -15,6 +15,8 @@ import {
   getPurchasedPackCreditPriceEur,
 } from "@/lib/billing/credits";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { settleReservation } from "@/lib/billing/reservations";
 import { checkNeedsClarification } from "@/lib/clarification";
 import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
@@ -113,6 +115,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
 
+    // Defence in depth: only paths inside this user's own storage folder.
+    // Storage RLS enforces the same thing at the bucket level, so this is
+    // not the last line of defence — it is here so the invariant the rest
+    // of this route depends on is stated by this route, rather than
+    // assumed to hold because of a policy in another system.
+    referenceImagePaths = referenceImagePaths.filter((p) =>
+      referenceImagePathBelongsToUser(p, user.id)
+    );
+
     // Fair-use daily cap — applies to every account, including admin/beta
     // (see MAX_GENERATIONS_PER_DAY above for why no exception is made).
     // Cheap COUNT, no AI call, so it's checked before anything that costs
@@ -152,10 +163,50 @@ export async function POST(request: Request) {
     // confirmed success" timing as every other AI call in this app,
     // where "success" here means a real classification was returned, not
     // a database write.
+    // The two pre-check calls this route makes are MEASURED and settled on
+    // real usage, exactly like the generation itself.
+    //
+    // DEFECT this fixes: both checkNeedsClarification and
+    // classifyWebsiteDescription take an optional CostAccumulator, and this
+    // route passed neither. Their real Anthropic cost was therefore never
+    // measured, never written to ai_cost_log (so the margin report could
+    // not see it), and charged as a FLAT 1 credit for the clarification and
+    // NOTHING at all for the classifier.
+    //
+    // Meanwhile the worker settles its own calls at the full multiplier. So
+    // part of one generation earned 4x and part earned 0x, and the blend
+    // landed below the guarantee — measured in production at 3.1x (44
+    // credits charged for a €0.28 generation, where 4x is 57).
+    //
+    // A flat per-call fee cannot track cost by construction, which is why
+    // this is a settlement rather than a bigger flat number.
+    const costs = new CostAccumulator();
+    const precheckPlan = bypassCredits ? null : await resolveEffectivePlan(user);
+
+    async function settlePrechecks() {
+      // Nothing measured (no call ran, or every call threw before
+      // returning usage) — settling would write a zero-cost log row for
+      // work that never happened.
+      if (costs.callCount === 0) return;
+      await settleReservation({
+        userId: user!.id,
+        // No hold to release: these calls are small, bounded and already
+        // finished by the time this runs. settle_reservation treats an
+        // empty reservation id as "charge only".
+        reservationId: "",
+        feature: "website_generate_precheck",
+        costs,
+        plan: precheckPlan,
+        // Admin/beta accounts are still LOGGED — their spend is real and
+        // has to appear in the margin report — but charged nothing.
+        bypassCharge: bypassCredits,
+        metadata: { route: "/api/websites/generate" },
+      });
+    }
+
     if (!skipClarification) {
-      const clarificationPlan = bypassCredits ? null : await resolveEffectivePlan(user);
-      if (clarificationPlan) {
-        const check = await hasEnoughCredits(user.id, CREDIT_COSTS.clarificationCheck, clarificationPlan);
+      if (precheckPlan) {
+        const check = await hasEnoughCredits(user.id, CREDIT_COSTS.clarificationCheck, precheckPlan);
         if (!check.ok) {
           return NextResponse.json({
             ok: true,
@@ -167,17 +218,11 @@ export async function POST(request: Request) {
       }
       try {
         void recordAiCallForDailySpend(1);
-        const clarification = await checkNeedsClarification(apiKey, "website", description);
-        if (clarificationPlan) {
-          await deductCredits(
-            user.id,
-            CREDIT_COSTS.clarificationCheck,
-            "clarification_check",
-            "Website Builder — clarifying-questions check",
-            clarificationPlan
-          );
-        }
+        const clarification = await checkNeedsClarification(apiKey, "website", description, costs);
         if (clarification.needsClarification) {
+          // Settle before returning: this call really ran and really cost
+          // money, whether or not a website ends up being generated.
+          await settlePrechecks();
           return NextResponse.json({
             ok: true,
             generated: false,
@@ -187,7 +232,8 @@ export async function POST(request: Request) {
         }
       } catch (err) {
         // Best-effort: a clarification-check hiccup shouldn't block a
-        // real request — fall through to normal generation, uncharged.
+        // real request — fall through to normal generation. Anything the
+        // accumulator did capture before the throw is still settled below.
         logApiError("/api/websites/generate", err, { stage: "clarification_check" });
       }
     }
@@ -199,8 +245,11 @@ export async function POST(request: Request) {
     // lib/website-builder.ts).
     try {
       void recordAiCallForDailySpend(1);
-      const classification = await classifyWebsiteDescription(apiKey, description);
+      const classification = await classifyWebsiteDescription(apiKey, description, costs);
       if (!classification.isWebsiteRequest) {
+        // Same reasoning as the clarification branch: the call ran and
+        // cost money, so it is settled even though nothing gets generated.
+        await settlePrechecks();
         return NextResponse.json({ ok: true, generated: false, message: classification.message });
       }
     } catch (err) {
@@ -208,6 +257,13 @@ export async function POST(request: Request) {
       // request, so fall through to normal generation.
       logApiError("/api/websites/generate", err, { stage: "classify_call" });
     }
+
+    // Both pre-checks passed and generation will proceed. Settle them here
+    // rather than trying to hand the usage to the worker: the worker runs
+    // as a separate request and may never start (the client can navigate
+    // away between the two), and an AI call that already happened must be
+    // charged regardless of what happens next.
+    await settlePrechecks();
 
     // Credits: a READ-ONLY check against a rough pre-generation estimate
     // (lib/website-generation-cost.ts) — rejects early, before creating
@@ -329,6 +385,45 @@ export async function POST(request: Request) {
       }
       logApiError("/api/websites/generate", insertError, { stage: "insert" });
       return NextResponse.json({ ok: false, error: "Could not start generation. Please try again." }, { status: 500 });
+    }
+
+    // Bind the reference images to THIS website, now, before any
+    // generation runs.
+    //
+    // DEFECT this fixes: these rows used to be written only after the
+    // worker finished, which meant that during generation the worker had
+    // no server-side record of which images belonged to this site — so it
+    // took the list straight from its request body. Any stale path left in
+    // client state (a failed generation, a closed form, an abandoned
+    // clarification) was accepted and baked into the next website. That is
+    // the "photos from a previous project appeared in the new one" report.
+    //
+    // Writing the association here makes it authoritative BEFORE the work
+    // starts, so the worker can stop trusting its caller entirely.
+    if (referenceImagePaths.length > 0) {
+      const { error: refError } = await supabase.from("website_reference_images").insert(
+        referenceImagePaths.map((imageUrl) => ({
+          user_id: user.id,
+          website_id: record.id,
+          image_url: imageUrl,
+        }))
+      );
+      if (refError) {
+        // Not best-effort, unlike most of the bookkeeping in this app: if
+        // this fails the worker would generate a site with NO images while
+        // the user watched them upload. Fail the start instead, and mark
+        // the row so nothing picks it up half-configured.
+        logApiError("/api/websites/generate", refError, { stage: "insert_reference_images" });
+        await supabase
+          .from("user_websites")
+          .update({ status: "failed", error_message: "Could not attach the reference images." })
+          .eq("id", record.id)
+          .eq("status", "pending");
+        return NextResponse.json(
+          { ok: false, error: "Could not attach the reference images. Please try again." },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json({ ok: true, generated: true, pending: true, record });

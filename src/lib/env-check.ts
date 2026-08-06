@@ -76,6 +76,46 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
   { name: "UNSPLASH_ACCESS_KEY", level: "optional", what: "Real photos in generated websites", fallback: "placeholder images" },
   { name: "LARGE_ACTION_CONFIRM_THRESHOLD", level: "optional", what: "Credits above which an action asks for confirmation", fallback: "50" },
   { name: "RESERVE_BUFFER_PERCENT", level: "optional", what: "Headroom added to a reservation", fallback: "10" },
+  // Autonomous Agents fair use. Optional, because every one of them has a
+  // real default from plans.ts — but listed so the owner can SEE, on the
+  // system-health page, which of them are being overridden. A limit that
+  // silently differs from the pricing page is the kind of thing nobody
+  // finds until a customer asks why they cannot add an agent.
+  {
+    name: "AGENT_LIMIT_STARTER",
+    level: "optional",
+    what: "Agents a Starter account may own",
+    fallback: "2",
+    suspicious: numberIn(0, 1000),
+  },
+  {
+    name: "AGENT_LIMIT_GROWTH",
+    level: "optional",
+    what: "Agents a Growth account may own",
+    fallback: "5",
+    suspicious: numberIn(0, 1000),
+  },
+  {
+    name: "AGENT_LIMIT_PROFESSIONAL",
+    level: "optional",
+    what: "Agents a Professional account may own",
+    fallback: "15",
+    suspicious: numberIn(0, 1000),
+  },
+  {
+    name: "AGENT_LIMIT_ULTIMATE",
+    level: "optional",
+    what: "Agents an Ultimate account may own",
+    fallback: "50",
+    suspicious: numberIn(0, 1000),
+  },
+  {
+    name: "AGENT_MAX_RUNS_PER_HOUR",
+    level: "optional",
+    what: "Agent executions one account can cause per hour",
+    fallback: "20",
+    suspicious: numberIn(1, 500),
+  },
 ];
 
 export type EnvReport = {

@@ -82,6 +82,11 @@ const MODULE_TABLES = [
   "ai_images", "ai_videos", "ai_coding_requests", "ai_data_analysis_requests",
   "ai_documents", "ai_presentations", "ai_campaigns",
 ];
+
+// V3 feature tables, asserted by name for the same reason the module
+// tables are: a count that moves tells you nothing about WHICH table lost
+// its policies.
+const V3_TABLES = ["user_agents", "agent_runs"];
 for (const t of MODULE_TABLES) {
   if (!rlsEnabled.has(t)) {
     fail++;
@@ -89,15 +94,25 @@ for (const t of MODULE_TABLES) {
   }
 }
 check(`all ${MODULE_TABLES.length} module tables have RLS`, MODULE_TABLES.every((t) => rlsEnabled.has(t)), true);
+check(`all ${V3_TABLES.length} V3 agent tables have RLS`, V3_TABLES.every((t) => rlsEnabled.has(t)), true);
 
 // RLS with no policy denies everything to anon/authenticated (service_role
 // bypasses) — correct for the admin-only tables, a bug for anything else.
 const policyTables = new Set(
   [...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?([a-z_0-9]+)"?/gis)].map((m) => m[1])
 );
-for (const t of MODULE_TABLES) {
+for (const t of [...MODULE_TABLES, ...V3_TABLES]) {
   checkTrue(`${t} has at least one policy`, policyTables.has(t) || loopRls.has(t));
 }
+
+// agent_runs is READ-ONLY to its owner by design: only the service-role
+// client writes run history. A user who could insert here could fabricate
+// runs; one who could delete could hide a run they were charged for.
+const agentRunsPolicies = [...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?agent_runs"?[^;]*/gis)].map(
+  (m) => m[0]
+);
+checkTrue(`agent_runs has exactly one policy (${agentRunsPolicies.length})`, agentRunsPolicies.length === 1);
+checkTrue("...and it is select-only", /for select/i.test(agentRunsPolicies[0] ?? ""));
 
 const silentlyDenied = [...rlsEnabled].filter(
   (t) => !policyTables.has(t) && !loopRls.has(t) && !ADMIN_ONLY_TABLES.has(t)
@@ -140,6 +155,7 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/webhooks/stripe/route.ts": "authenticated by Stripe signature, not a cookie",
   "src/app/api/cron/reset-credits/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
+  "src/app/api/cron/agent-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts); executes every due Autonomous Agent, so it spends real money on many accounts per call",
   "src/app/api/weekly-digest/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",
   "src/app/api/websites/[id]/submit-form/route.ts": "public contact form on generated sites; write-only, honeypot + 30/hr cap",
@@ -196,6 +212,12 @@ const scheduledPaths = (vercel.crons ?? []).map((c) => c.path);
 checkTrue(
   `the sweeper's route is in vercel.json crons (${scheduledPaths.join(", ") || "none"})`,
   scheduledPaths.includes("/api/cron/scheduled-runs")
+);
+// Same rule for the agent engine: agents that are never executed are the
+// whole feature failing silently, and nothing in the app would say so.
+checkTrue(
+  "the Autonomous Agents engine is scheduled in vercel.json",
+  scheduledPaths.includes("/api/cron/agent-runs")
 );
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);

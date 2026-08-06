@@ -27,8 +27,8 @@ function coerceFieldValue(field: FieldConfig, raw: unknown): string | number | n
 }
 
 // Shared gated-creation endpoint for the handful of modules that have a
-// creditCost, minPlanSlug, or countCapCapability set (lib/modules.ts,
-// lib/build-modules.ts) — currently agents, websites, apps, automation.
+// creditCost or minPlanSlug set (lib/modules.ts, lib/build-modules.ts) —
+// currently websites, apps, automation.
 // GenericAddForm posts here instead of inserting directly for those
 // modules only; every other module keeps its existing direct-insert path
 // unchanged (see components/modules/generic-add-form.tsx).
@@ -71,28 +71,6 @@ export async function POST(request: Request) {
         },
         { status: 403 }
       );
-    }
-
-    if (!isAdmin && moduleConfig.countCapCapability === "maxAiAgents") {
-      const cap = plan.capabilities.maxAiAgents;
-      if (cap !== "unlimited") {
-        const { count, error: countError } = await supabase
-          .from(moduleConfig.table)
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", user.id);
-        if (countError) {
-          logApiError("/api/modules/create", countError, { stage: "count_cap", moduleSlug });
-        } else if ((count ?? 0) >= cap) {
-          return NextResponse.json(
-            {
-              ok: false,
-              upgradeRequired: true,
-              error: `You've reached the ${cap} AI agent limit on the ${plan.name} plan. Upgrade to create more.`,
-            },
-            { status: 403 }
-          );
-        }
-      }
     }
 
     // Credits: read-only check first (reject early, nothing written yet),

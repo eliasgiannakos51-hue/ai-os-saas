@@ -120,7 +120,20 @@ const clientFallbacks = sources.flatMap((f) => [
 // insert fail-closed instead of best-effort. Same already-documented class
 // (server-side English prose), raised deliberately rather than silently —
 // which is the entire point of pinning the number.
-const SERVER_PROSE_BASELINE = 236;
+// 236 -> 282: V3 Task 1 (Autonomous Agents) added five API routes —
+// api/agents, api/agents/[id], api/agents/[id]/run, api/agents/build and
+// api/cron/agent-runs — and every validation failure, ownership miss,
+// plan-cap rejection and rate-limit response in them returns English
+// prose, exactly like the 236 that came before. Raised deliberately, with
+// the same decision recorded: translating these means routes returning
+// stable error CODES the client looks up, which is a refactor of all 45+
+// routes at once and not something to start halfway through in one
+// feature. The USER-FACING strings for this feature — every label,
+// status, toast and confirmation on /dashboard/agents — are fully
+// translated in all ten locales; what is English here is the fallback
+// text shown only when a request fails in a way the client has no
+// specific message for.
+const SERVER_PROSE_BASELINE = 282;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

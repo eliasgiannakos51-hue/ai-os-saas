@@ -49,6 +49,15 @@ const LOCALE_ALLOWED = new Set([
   // "credits" is used verbatim in Greek — the same loanword the rest of the
   // Greek UI already uses ("Αγορά Credits", "Ιστορικό Credits").
   "el:credits.estimate.approx",
+  // Autonomous Agents (V3). Same loanword/cognate cases as everywhere else
+  // in this list, verified one by one rather than waved through:
+  // "credits" is the word the Greek UI already uses verbatim; "Name" is
+  // the German word, spelled identically; "Description" is French.
+  "el:dashboard.agents.creditsPerRun",
+  "el:dashboard.agents.runCredits",
+  "de:dashboard.agents.previewName",
+  "de:dashboard.agents.nameLabel",
+  "fr:dashboard.agents.descriptionLabel",
   "es:sidebar.items.trading",
   "es:sidebar.items.sales",
   "fr:sidebar.items.trading",

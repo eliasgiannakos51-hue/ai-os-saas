@@ -23,14 +23,14 @@ function emptyFormFor(module: ModuleConfig): Record<string, string> {
 const MAX_TEXT_LENGTH = 500;
 const MAX_TEXTAREA_LENGTH = 10000;
 
-// Modules with a creditCost, minPlanSlug, or countCapCapability set (see
+// Modules with a creditCost or minPlanSlug set (see
 // lib/modules.ts / lib/build-modules.ts) go through the gated
 // /api/modules/create endpoint instead of inserting directly — that's the
 // only way a credit deduction or a plan/count check can be trusted, since
 // a direct client insert can't be. Every other module keeps the original
 // direct-insert path below unchanged.
 function isGatedModule(module: ModuleConfig): boolean {
-  return Boolean(module.creditCost || module.minPlanSlug || module.countCapCapability);
+  return Boolean(module.creditCost || module.minPlanSlug);
 }
 
 export function GenericAddForm({ module }: { module: ModuleConfig }) {

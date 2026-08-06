@@ -96,6 +96,16 @@ const DECLARED = {
     billing: "settled",
     note: "memory extraction now runs BEFORE the chat settlement and records onto the same accumulator, so one chat turn is one charge covering both calls.",
   },
+  "src/lib/agents/agent-builder.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V3 Autonomous Agents. One forced-tool-use call that designs the agent; recorded onto the same CostAccumulator as the clarification pre-check and settled once by api/agents/build. A build that returns an unusable configuration still SETTLES rather than releasing — the tokens were spent.",
+  },
+  "src/lib/agents/agent-runner.ts": {
+    calls: 2,
+    billing: "settled",
+    note: "V3 Autonomous Agents. The optional web_search research pass plus the main run, both recorded onto one accumulator per execution. Retries record onto the SAME accumulator, so a run that tried three times is charged for three attempts — which is why executeAgent reserves AGENT_MAX_ATTEMPTS x the single-run estimate.",
+  },
   "src/lib/lead-classification.ts": {
     calls: 1,
     billing: "settled",

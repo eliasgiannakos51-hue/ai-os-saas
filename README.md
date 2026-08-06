@@ -41,6 +41,26 @@ touch targets) and works identically on mobile and desktop.
   assistant (not tied to any module) with real token-by-token streaming,
   markdown-rendered replies, and a conversation sidebar (pin, rename,
   delete, grouped by recency). Backed by `/api/chat`.
+- **AI Agents** (`/dashboard/agents`) — autonomous agents. The user
+  describes what they want in one sentence ("every morning, send me the
+  latest news about Nvidia"); `/api/agents/build` asks only the questions
+  that are genuinely missing (the shared clarifying-questions pre-check,
+  kind `agent`), designs a complete configuration, and shows a preview —
+  what it understood, when it will run, the first three run times in the
+  user's own timezone, and the credits each run will cost — before
+  anything exists. Confirmed agents run on our infrastructure forever:
+  `/api/cron/agent-runs` fires every 15 minutes, executes whatever is due
+  (optionally with a web search first), and emails the result via Resend.
+  Each execution reserves credits before the first token and settles on
+  measured usage, retries twice on a transient failure, auto-pauses the
+  agent if the account runs out of credits, and switches it off with an
+  email after five consecutive failures. Per-agent controls: pause/resume,
+  edit, delete, "Run now" (a real execution, which deliberately does not
+  touch the schedule or the failure streak), and the full run history with
+  each run's output, cost and outcome. Fair use is per plan (Free 0,
+  Starter 2, Growth 5, Professional 15, Ultimate 50, Enterprise 100), every
+  number overridable via `AGENT_LIMIT_*`, plus a per-account cap of
+  `AGENT_MAX_RUNS_PER_HOUR` executions an hour.
 - **Settings** (`/dashboard/settings`) — account email, password change,
   current plan + billing management, Buy Credits, credit transaction
   history, and a full-data JSON export.

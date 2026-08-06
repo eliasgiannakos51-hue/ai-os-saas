@@ -217,6 +217,36 @@ export const ACTION_PROFILES = {
     baseOutputChars: 0,
     outputCharsPerInputChar: 0,
   },
+  // Building an autonomous agent from one sentence (api/agents/build) —
+  // the clarifying-questions pre-check plus one forced-tool-use call that
+  // returns the configuration. Small and bounded: the tool schema caps
+  // what can come back, so the output does not scale with the request the
+  // way a generation does.
+  agentBuild: {
+    systemPromptTokens: 1400,
+    auxiliaryCalls: [{ inputTokens: 700, outputTokens: 150 }],
+    baseOutputChars: 900,
+    outputCharsPerInputChar: 1,
+  },
+  // ONE execution of an agent (api/cron/agent-runs, api/agents/[id]/run).
+  //
+  // The auxiliary call is the research pass — modelled unconditionally
+  // even though it only runs for agents with needsWebSearch, because this
+  // profile sizes a RESERVATION and a hold that is too small is the one
+  // failure mode a hold exists to prevent. The searches themselves are
+  // priced separately through expectedWebSearches at the call site, since
+  // Anthropic bills those per query rather than per token. The unused
+  // remainder is released at settlement, so over-holding costs the user
+  // nothing.
+  agentRun: {
+    systemPromptTokens: 800,
+    auxiliaryCalls: [{ inputTokens: 900, outputTokens: 900 }],
+    // MAX_OUTPUT_TOKENS in lib/agents/agent-runner.ts is 3,000 — ~12,000
+    // characters. Sized at the ceiling rather than the typical briefing
+    // for the same reason as websiteGenerate's baseOutputChars.
+    baseOutputChars: 12000,
+    outputCharsPerInputChar: 2,
+  },
   // Ask AI about a record (api/records/ask). The user's question is
   // short; the INPUT is dominated by the record itself, which the route
   // serialises in full and passes as inputChars. That is exactly why a

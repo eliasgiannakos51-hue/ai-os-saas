@@ -86,3 +86,36 @@ export function formatDate(value: string | Date, locale: string = DEFAULT_LOCALE
   if (Number.isNaN(date.getTime())) return "";
   return new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(date);
 }
+
+/**
+ * An absolute date+time rendered in a SPECIFIC timezone.
+ *
+ * Autonomous Agents carry their own IANA zone (an agent set to "every
+ * morning" runs at the user's 08:00, not the browser's), so "next run"
+ * has to be shown in that zone or the number on screen contradicts the
+ * schedule the user chose. Everywhere else in the app the viewer's own
+ * zone is the right one, which is why this is a separate function rather
+ * than an optional argument on formatDateTime — a timezone parameter that
+ * is usually omitted is a timezone parameter that will be omitted where
+ * it mattered.
+ *
+ * Falls back to the viewer's zone for an unrecognised id rather than
+ * throwing: a bad zone must not blank out the whole card.
+ */
+export function formatDateTimeInZone(
+  value: string | Date,
+  locale: string = DEFAULT_LOCALE,
+  timeZone?: string
+): string {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      dateStyle: "medium",
+      timeStyle: "short",
+      ...(timeZone ? { timeZone } : {}),
+    }).format(date);
+  } catch {
+    return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" }).format(date);
+  }
+}

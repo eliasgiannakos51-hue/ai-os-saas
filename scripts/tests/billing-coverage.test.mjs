@@ -449,5 +449,47 @@ checkTrue("node runtime only", /NEXT_RUNTIME !== "nodejs"/.test(instr));
 checkTrue("it cannot throw or exit", !/throw |process\.exit/.test(instr) && !/throw new Error/.test(readFileSync("src/lib/env-check.ts", "utf8")));
 checkTrue("and nothing in the build script validates env", !/env-check/.test(pkg.scripts.build));
 
+console.log("\n== 15. a zero-charge row can always be explained ==");
+// Production showed website_generate with credits_charged = 0 and
+// achieved_margin = null. There are exactly TWO ways to produce that, and
+// they were previously indistinguishable in the log — which is why the
+// same row was diagnosed twice and fixed neither time.
+//
+//   1. bypassCharge  — admin/beta. Legitimate, no revenue by design.
+//   2. realCostEur = 0 — the accumulator was never fed. A REAL bug: the
+//      AI call happened and we paid for it.
+//
+// Both come out of the same early return, so the arithmetic really is
+// identical:
+check("zero cost charges zero credits", formula.creditsForRealCostOnAccount(0, PLANS[4], null, config), 0);
+check("...and reports a null margin, exactly like a bypass", formula.achievedMarginOnAccount(0, 0, PLANS[4], null, config), null);
+// So the row has to carry its own explanation. These three fields are
+// what make the two cases tellable apart from SQL alone.
+checkTrue("the row records bypassCharge", /bypassCharge,\n/.test(res));
+checkTrue("the row records what a bypass would have cost", /wouldHaveChargedCredits: wouldHaveCharged/.test(res));
+checkTrue("the row records how many AI calls were measured", /p_ai_calls: costs\.callCount/.test(res));
+// And case 2 must be loud, not silent.
+checkTrue("a zero-cost settlement is logged as an error", /billing:zeroCostSettlement/.test(res));
+checkTrue("with a diagnosis naming the likely cause", /the accumulator was never fed/.test(res));
+checkTrue("distinguishing an unfed accumulator from an unpriced model", /priced at zero/.test(res));
+
+console.log("\n== 16. a failed settlement never reports success ==");
+// settleReservation caught the RPC error, logged it, and returned a
+// SettlementResult whose creditsCharged said the user had been charged —
+// when the database had done nothing at all. The caller could not tell.
+checkTrue("SettlementResult says whether it actually settled", /settled: boolean/.test(res));
+checkTrue("an RPC error returns settled: false", /return \{ creditsCharged: 0[^}]*settled: false \}/.test(res));
+checkTrue("so does an unhandled throw", (res.match(/settled: false/g) ?? []).length >= 2);
+checkTrue("and a real settlement returns settled: true", /achievedMargin: margin, settled: true \}/.test(res));
+// A stale RPC in the database is the failure that looks like nothing,
+// because PostgREST resolves overloads by argument NAME.
+checkTrue("the error names the signature-mismatch possibility", /does not match the arguments sent here/.test(res));
+
+console.log("\n== 17. every settlement step is traceable ==");
+checkTrue("one line records the whole settlement", /\[billing\] settled \$\{feature\}/.test(res));
+for (const field of ["aiCalls", "inputTokens", "outputTokens", "cacheWriteTokens", "cacheReadTokens", "realCostUsd", "effectiveCreditPriceEur", "planSlug", "bypassCharge", "creditsCharged", "achievedMargin", "reservationId"]) {
+  checkTrue(`  it includes ${field}`, new RegExp(`${field}[,:]`).test(res.slice(res.indexOf("[billing] settled"))));
+}
+
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

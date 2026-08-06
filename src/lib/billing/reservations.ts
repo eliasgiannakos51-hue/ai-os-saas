@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
+import { diagLog } from "@/lib/diag";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import {
   usdToEur,
@@ -95,6 +96,10 @@ export type SettlementResult = {
   realCostUsd: number;
   realCostEur: number;
   achievedMargin: number | null;
+  /** False when the RPC failed — nothing was charged and no cost-log row
+   *  exists, however healthy the other fields look. Callers that report a
+   *  charge to the user must check this. */
+  settled: boolean;
 };
 
 /**
@@ -128,6 +133,39 @@ export async function settleReservation(params: {
   const totals = costs.totals();
   const realCostUsd = totals.usdCost;
   const realCostEur = usdToEur(realCostUsd, config);
+
+  // A settled action that measured NOTHING.
+  //
+  // This is the second way — besides bypassCharge — to get a cost-log row
+  // reading credits_charged = 0 and achieved_margin = null, and until now
+  // it was completely silent. Both numbers come from the same early
+  // return: creditsForRealCostOnAccount returns 0 when realCostEur <= 0,
+  // and achievedMarginOnAccount returns null on the same condition. So a
+  // settlement whose accumulator was never fed looks EXACTLY like a
+  // legitimate admin bypass in the log, while being a real bug — the AI
+  // call happened, we paid for it, and the charge was zero.
+  //
+  // It is never legitimate for a completed action: reaching settlement at
+  // all means a call was made. So it is logged as an error rather than
+  // left for someone to notice in a SQL query weeks later.
+  const measuredNothing = !(realCostUsd > 0);
+  if (measuredNothing) {
+    logApiError("billing:zeroCostSettlement", new Error("settled with no measured usage"), {
+      userId,
+      feature,
+      aiCalls: costs.callCount,
+      reservationId: reservationId || "(none)",
+      bypassCharge,
+      // callCount 0 means nothing was ever recorded onto the accumulator
+      // — a missing costs.record() at the call site. A positive count
+      // with zero cost means usage came back empty or unpriced, which
+      // points at model-pricing.ts instead.
+      diagnosis:
+        costs.callCount === 0
+          ? "the accumulator was never fed — a call site is missing costs.record()"
+          : "usage was recorded but priced at zero — check MODEL_PRICING_USD covers this model",
+    });
+  }
 
   // A one-time credit pack sells credits below both the list price AND the
   // plan rate (€100 / 8,000 = €0.0125 each), so an account that bought one
@@ -228,13 +266,48 @@ export async function settleReservation(params: {
       },
     });
     if (error) {
-      logApiError("billing:settleReservation", error, { userId, feature, creditsCharged });
+      // A failed RPC used to be a log line and nothing else — the caller
+      // got a SettlementResult claiming credits were charged when the
+      // database had done nothing at all. Reported explicitly, and the
+      // returned result now says what really happened.
+      logApiError("billing:settleReservation", error, {
+        userId,
+        feature,
+        creditsCharged,
+        realCostUsd,
+        stage: "rpc_error",
+        // A signature mismatch is the failure mode that looks like
+        // nothing: PostgREST resolves overloads by argument NAME, so a
+        // stale settle_reservation in the database fails here while every
+        // line of TypeScript above it ran perfectly.
+        hint: "if this says the function was not found, the settle_reservation RPC in the database does not match the arguments sent here",
+      });
+      return { creditsCharged: 0, realCostUsd, realCostEur, achievedMargin: null, settled: false };
     }
+    diagLog(
+      `[billing] settled ${feature}: ${JSON.stringify({
+        userId,
+        aiCalls: costs.callCount,
+        inputTokens: totals.inputTokens,
+        outputTokens: totals.outputTokens,
+        cacheWriteTokens: totals.cacheWriteTokens,
+        cacheReadTokens: totals.cacheReadTokens,
+        realCostUsd: Number(realCostUsd.toFixed(8)),
+        realCostEur: Number(realCostEur.toFixed(8)),
+        effectiveCreditPriceEur: effectivePrice,
+        planSlug: plan?.slug ?? null,
+        bypassCharge,
+        creditsCharged,
+        achievedMargin: margin,
+        reservationId: reservationId || "(none)",
+      })}`
+    );
   } catch (err) {
     logApiError("billing:settleReservation", err, { userId, feature, stage: "unhandled" });
+    return { creditsCharged: 0, realCostUsd, realCostEur, achievedMargin: null, settled: false };
   }
 
-  return { creditsCharged, realCostUsd, realCostEur, achievedMargin: margin };
+  return { creditsCharged, realCostUsd, realCostEur, achievedMargin: margin, settled: true };
 }
 
 /**

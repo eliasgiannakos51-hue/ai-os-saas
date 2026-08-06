@@ -13,6 +13,7 @@ import {
   getPurchasedPackCreditPriceEur,
 } from "@/lib/billing/credits";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
@@ -611,7 +612,20 @@ export async function POST(request: Request) {
           logApiError("/api/chat", touchError, { stage: "touch_conversation" });
         }
 
-        controller.enqueue(ndjsonLine({ type: "done" }));
+        // The client needs to know what that reply cost. Without this the
+        // charge existed only in the database: the counter did not move
+        // until a full reload, and nothing said what had been spent.
+        controller.enqueue(
+          ndjsonLine({
+            type: "done",
+            usage: buildUsageReceipt({
+              creditsCharged: settlement.creditsCharged,
+              bypass: bypassCredits || isFreeMessage,
+              wouldHaveCharged: null,
+              freeRemaining: isFreeMessage && freeGrant?.granted ? freeGrant.remaining : null,
+            }),
+          })
+        );
         controller.close();
       },
     });

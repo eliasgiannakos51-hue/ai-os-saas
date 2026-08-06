@@ -122,5 +122,45 @@ for (const key of ["noCreditActivity", "balanceAfter", "unlimited", "wouldHaveCo
 checkTrue("action types are humanised", /function humanise/.test(panel));
 check("website_generate reads as words", "website_generate".replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()), "Website Generate");
 
+console.log("\n== 6. the counter cannot read the balance before the charge lands ==");
+// The Website Builder generates in a BACKGROUND worker. The client polls
+// user_websites and, the moment status stops being pending/processing,
+// refreshes the credits counter. The worker used to write
+// status: "completed" BEFORE calling settleReservation, so the client
+// reliably read the balance a moment too early — which is exactly the
+// "counter does not update until I reload" report. Every client was
+// already calling refresh; the ordering was the bug.
+const worker = readFileSync("src/app/api/websites/generate/process/route.ts", "utf8");
+const settleAt = worker.indexOf("const settlement = await settleReservation(");
+const finalStatusAt = worker.indexOf('status: isFlagged ? "flagged" : "completed"');
+checkTrue("the worker settles", settleAt > 0);
+checkTrue("the final status exists", finalStatusAt > 0);
+checkTrue("and is written only AFTER settlement", finalStatusAt > settleAt);
+checkTrue("the save before settlement leaves it processing", /html_content: htmlContent,[\s\S]{0,500}status: "processing",/.test(worker));
+// The client's trigger, so the pairing is asserted from both ends.
+const wb = readFileSync("src/components/website-builder/website-builder-workspace.tsx", "utf8");
+checkTrue("the client keeps polling while processing", /status === "pending" \|\| record\.status === "processing"/.test(wb));
+checkTrue("and refreshes once it stops", /refreshCredits\(\)/.test(wb));
+
+console.log("\n== 7. an action reports what it cost ==");
+const ctx = readFileSync("src/components/credits/credits-context.tsx", "utf8");
+checkTrue("the context exposes reportUsage", /reportUsage: \(payload: unknown\) => Promise<void>/.test(ctx));
+checkTrue("refresh returns the new balance, so one message can carry both", /refresh = useCallback\(async \(\): Promise<number \| null>/.test(ctx));
+checkTrue("the balance is re-read even when there is no receipt", /const remaining = await refresh\(\);[\s\S]{0,120}if \(!receipt\) return;/.test(ctx));
+checkTrue("a bypass says what it would have cost", /unlimitedWouldHaveCost/.test(ctx));
+checkTrue("a free message says how many are left", /freeMessage/.test(ctx));
+checkTrue("a zero charge does not interrupt anyone", /if \(receipt\.creditsCharged <= 0\) return;/.test(ctx));
+// Chat is the highest-traffic path, so its receipt is asserted end to end.
+const chatRoute = readFileSync("src/app/api/chat/route.ts", "utf8");
+checkTrue("chat returns a receipt on done", /type: "done",[\s\S]{0,200}usage: buildUsageReceipt\(/.test(chatRoute));
+checkTrue("carrying the free-message allowance", /freeRemaining: isFreeMessage && freeGrant\?\.granted \? freeGrant\.remaining : null/.test(chatRoute));
+// The receipt reader must never turn a successful action into a failure.
+const receipt = readFileSync("src/lib/billing/usage-receipt.ts", "utf8");
+checkTrue("reading a receipt is total, never throwing", /if \(!payload \|\| typeof payload !== "object"\) return null;/.test(receipt));
+for (const key of ["used", "usedWithRemaining", "unlimited", "unlimitedWouldHaveCost", "freeMessage"]) {
+  const missing = LOCALES.filter((l) => typeof messages[l]?.credits?.[key] !== "string");
+  check(`credits.${key} in every locale`, missing, []);
+}
+
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

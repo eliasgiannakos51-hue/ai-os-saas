@@ -1,6 +1,9 @@
 "use client";
 
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
+import { useToast } from "@/components/toast/toast-context";
+import { readUsageReceipt, type UsageReceipt } from "@/lib/billing/usage-receipt";
 
 type CreditsContextValue = {
   credits: number | null;
@@ -13,7 +16,23 @@ type CreditsContextValue = {
    *  the same number settlement does, or an Ultimate user is quoted less
    *  than half what they will actually be charged. */
   accountCreditPriceEur: number | null;
-  refresh: () => Promise<void>;
+  refresh: () => Promise<number | null>;
+  /**
+   * Call after ANY action that may have been billed, passing the raw API
+   * response. Refreshes the balance and shows the user what it cost.
+   *
+   * Both halves were missing. The counter only moved on a full reload —
+   * refresh() existed, and its own comment claimed "called by every
+   * credit-consuming action", but twelve of the seventeen components
+   * using this context never called it, including chat, the Website
+   * Builder, Create Studio, Ask AI and Weekly Reflection. And nothing
+   * anywhere reported what an action had cost, so a charge was visible
+   * only in the database.
+   *
+   * Safe to call with any payload: a response carrying no receipt just
+   * refreshes the balance.
+   */
+  reportUsage: (payload: unknown) => Promise<void>;
   isAdmin: boolean;
 };
 
@@ -44,11 +63,15 @@ export function CreditsProvider({
   isAdmin?: boolean;
   children: ReactNode;
 }) {
+  const { addToast } = useToast();
+  const t = useTranslations("credits");
   const [credits, setCredits] = useState<number | null>(initialCredits);
   const [total, setTotal] = useState<number | null>(initialTotal);
   const [accountCreditPriceEur, setRate] = useState<number | null>(initialCreditPriceEur);
 
-  const refresh = useCallback(async () => {
+  // Returns the new balance so a caller can put it in the same message as
+  // the charge ("Used 109 credits - 24,891 left") without a second read.
+  const refresh = useCallback(async (): Promise<number | null> => {
     try {
       const res = await fetch("/api/credits/balance");
       const data = await res.json();
@@ -56,15 +79,56 @@ export function CreditsProvider({
         setCredits(data.credits);
         if (typeof data.total === "number") setTotal(data.total);
         if (typeof data.creditPriceEur === "number") setRate(data.creditPriceEur);
+        return data.credits as number;
       }
     } catch {
       // Best-effort — a failed refresh just leaves the last known balance
       // displayed until the next successful one.
     }
+    return null;
   }, []);
 
+  const reportUsage = useCallback(
+    async (payload: unknown) => {
+      const receipt: UsageReceipt | null = readUsageReceipt(payload);
+      // The balance is re-read even without a receipt: an action that
+      // billed through a path this component cannot see still moved it.
+      const remaining = await refresh();
+      if (!receipt) return;
+
+      // A free chat message says how many are left, because that is the
+      // number the user is actually tracking.
+      if (receipt.freeRemaining !== null) {
+        addToast(t("freeMessage", { count: receipt.freeRemaining }), "success");
+        return;
+      }
+      if (receipt.bypass) {
+        addToast(
+          receipt.wouldHaveCharged !== null
+            ? t("unlimitedWouldHaveCost", { count: receipt.wouldHaveCharged })
+            : t("unlimited"),
+          "success"
+        );
+        return;
+      }
+      // Zero is not worth interrupting anyone for.
+      if (receipt.creditsCharged <= 0) return;
+      addToast(
+        remaining !== null
+          ? t("usedWithRemaining", { count: receipt.creditsCharged, remaining })
+          : t("used", { count: receipt.creditsCharged }),
+        "success"
+      );
+    },
+    [refresh, addToast, t]
+  );
+
   return (
-    <CreditsContext.Provider value={{ credits, total, accountCreditPriceEur, refresh, isAdmin }}>{children}</CreditsContext.Provider>
+    <CreditsContext.Provider
+      value={{ credits, total, accountCreditPriceEur, refresh, reportUsage, isAdmin }}
+    >
+      {children}
+    </CreditsContext.Provider>
   );
 }
 

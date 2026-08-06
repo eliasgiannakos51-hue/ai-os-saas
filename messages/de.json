@@ -1117,6 +1117,11 @@
     "freeChat": {
       "remaining": "Noch {count} kostenlose Nachrichten diesen Monat",
       "exhausted": "Kostenlose Nachrichten aufgebraucht — Chats verbrauchen jetzt Guthaben"
-    }
+    },
+    "used": "{count} Credits verbraucht",
+    "usedWithRemaining": "{count} Credits verbraucht · {remaining} übrig",
+    "unlimited": "Unbegrenzt — keine Credits verbraucht",
+    "unlimitedWouldHaveCost": "Unbegrenzt — hätte {count} Credits gekostet",
+    "freeMessage": "Kostenlose Nachricht · {count} übrig diesen Monat"
   }
 }

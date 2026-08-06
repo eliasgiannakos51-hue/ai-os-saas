@@ -1117,6 +1117,11 @@
     "freeChat": {
       "remaining": "今月の無料メッセージは残り {count} 件です",
       "exhausted": "無料メッセージを使い切りました — 以降のチャットはクレジットを消費します"
-    }
+    },
+    "used": "{count} クレジットを使用",
+    "usedWithRemaining": "{count} クレジットを使用 · 残り {remaining}",
+    "unlimited": "無制限 — クレジット未使用",
+    "unlimitedWouldHaveCost": "無制限 — {count} クレジットかかるはずでした",
+    "freeMessage": "無料メッセージ · 今月あと {count} 件"
   }
 }

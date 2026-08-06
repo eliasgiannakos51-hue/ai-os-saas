@@ -1117,6 +1117,11 @@
     "freeChat": {
       "remaining": "本月还剩 {count} 条免费消息",
       "exhausted": "免费消息已用完 — 本月的对话将开始消耗积分"
-    }
+    },
+    "used": "已使用 {count} 积分",
+    "usedWithRemaining": "已使用 {count} 积分 · 剩余 {remaining}",
+    "unlimited": "无限 — 未使用积分",
+    "unlimitedWouldHaveCost": "无限 — 将花费 {count} 积分",
+    "freeMessage": "免费消息 · 本月剩余 {count} 条"
   }
 }

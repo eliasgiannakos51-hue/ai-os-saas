@@ -1117,6 +1117,11 @@
     "freeChat": {
       "remaining": "تبقّى لديك {count} رسالة مجانية هذا الشهر",
       "exhausted": "انتهت الرسائل المجانية — أصبحت المحادثات تستهلك الأرصدة"
-    }
+    },
+    "used": "تم استخدام {count} رصيد",
+    "usedWithRemaining": "تم استخدام {count} رصيد · متبقٍ {remaining}",
+    "unlimited": "غير محدود — لم تُستخدم أرصدة",
+    "unlimitedWouldHaveCost": "غير محدود — كان سيكلف {count} رصيد",
+    "freeMessage": "رسالة مجانية · متبقٍ {count} هذا الشهر"
   }
 }

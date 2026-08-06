@@ -1117,6 +1117,11 @@
     "freeChat": {
       "remaining": "Te quedan {count} mensajes gratis este mes",
       "exhausted": "Mensajes gratis agotados: los chats de este mes ya consumen créditos"
-    }
+    },
+    "used": "Se usaron {count} créditos",
+    "usedWithRemaining": "Se usaron {count} créditos · quedan {remaining}",
+    "unlimited": "Ilimitado — no se usaron créditos",
+    "unlimitedWouldHaveCost": "Ilimitado — habría costado {count} créditos",
+    "freeMessage": "Mensaje gratuito · quedan {count} este mes"
   }
 }

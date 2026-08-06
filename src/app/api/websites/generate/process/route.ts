@@ -398,7 +398,14 @@ export async function POST(request: Request) {
       .from("user_websites")
       .update({
         html_content: htmlContent,
-        status: isFlagged ? "flagged" : "completed",
+        // Still "processing" here on purpose. The client polls this row
+        // and, the moment it stops being pending/processing, refreshes the
+        // credits counter — but settlement runs BELOW this update, so
+        // flipping to "completed" now let the client read the balance
+        // before the charge had landed. That is why the counter appeared
+        // not to move until a manual reload. The final status is written
+        // after settlement instead.
+        status: "processing",
         error_message: isFlagged
           ? `This website was flagged by our safety review and can't be published as-is: ${flaggedSummary}. You can regenerate it once at no extra charge.`
           : null,
@@ -447,6 +454,14 @@ export async function POST(request: Request) {
         flagged: isFlagged,
       },
     });
+    // Only now is the row allowed to look finished: the charge has been
+    // applied, so a client that reacts to this status reads a balance that
+    // already includes it.
+    await supabase
+      .from("user_websites")
+      .update({ status: isFlagged ? "flagged" : "completed" })
+      .eq("id", websiteId);
+
     diagLog(
       `[billing] website_generate settled: ${JSON.stringify({
         userId: user.id,

@@ -475,6 +475,23 @@ export function WebsiteBuilderWorkspace({
   // below). Reference images are uploaded once, by the caller, and their
   // already-uploaded paths are passed in here — never re-uploaded on a
   // clarification resubmission.
+  // Every exit from the new-project form goes through here.
+  //
+  // DEFECT this fixes: the staged files were cleared ONLY on a successful
+  // generation. A generation that failed, a form the user closed, or an
+  // abandoned clarification all left the previous project's images sitting
+  // in state — and the next "+ New" re-uploaded and attached them. That is
+  // the client half of "photos from a previous project appeared in the new
+  // one" (the server half is api/websites/generate/process, which used to
+  // take its image list from the request body).
+  function resetGenerationForm() {
+    setName("");
+    setDescription("");
+    setReferenceImageFiles([]);
+    setPendingClarification(null);
+    setError(null);
+  }
+
   async function submitGeneration(
     trimmedName: string,
     finalDescription: string,
@@ -526,10 +543,7 @@ export function WebsiteBuilderWorkspace({
 
       const record = data.record as UserWebsite;
       setPreviewId(record.id);
-      setName("");
-      setDescription("");
-      setReferenceImageFiles([]);
-      setPendingClarification(null);
+      resetGenerationForm();
       setShowForm(false);
       setDetailTab("preview");
 
@@ -1185,7 +1199,10 @@ export function WebsiteBuilderWorkspace({
                 <h2 className="text-sm font-semibold text-foreground">{t("newProject")}</h2>
                 <button
                   type="button"
-                  onClick={() => setShowForm(false)}
+                  onClick={() => {
+                    resetGenerationForm();
+                    setShowForm(false);
+                  }}
                   aria-label={tCommon("cancel")}
                   title={tCommon("cancel")}
                   className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
@@ -1317,7 +1334,10 @@ export function WebsiteBuilderWorkspace({
           ) : (
             <button
               type="button"
-              onClick={() => setShowForm(true)}
+              onClick={() => {
+                resetGenerationForm();
+                setShowForm(true);
+              }}
               className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
             >
               <Plus className="h-4 w-4" aria-hidden="true" /> {t("newProject")}

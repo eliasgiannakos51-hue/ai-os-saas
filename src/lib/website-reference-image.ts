@@ -23,3 +23,28 @@ export function buildReferenceImagePath(userId: string, fileName: string): strin
   const uniqueSuffix = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   return `${userId}/${uniqueSuffix}-${sanitized}`;
 }
+
+/**
+ * True when `path` sits directly in this user's own storage folder.
+ *
+ * Storage RLS already enforces this at the bucket level, so nothing here
+ * is the last line of defence against a cross-USER read. It exists because
+ * the reference-image bug was never a cross-user one: paths arrived from
+ * the client and were used unchecked, and the code that used them depended
+ * on an invariant it never actually stated. Relying on a policy in another
+ * system to hold an invariant this code needs is precisely how that
+ * survived review.
+ *
+ * Rejects traversal ("uid/../other/x.png"), a leading slash, a bare
+ * filename with no folder, and the prefix collision where another user id
+ * merely STARTS with this one.
+ */
+export function referenceImagePathBelongsToUser(path: string, userId: string): boolean {
+  if (typeof path !== "string" || !path || !userId) return false;
+  if (path.includes("..") || path.startsWith("/")) return false;
+  const slash = path.indexOf("/");
+  if (slash <= 0) return false;
+  // Compared as a whole segment, not with startsWith: "<uid>extra/x.png"
+  // starts with the uid but is a different folder.
+  return path.slice(0, slash) === userId;
+}

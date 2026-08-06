@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWebsiteHtml, WEBSITE_MODEL, type ReferenceImage } from "@/lib/website-builder";
-import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
+import { MAX_REFERENCE_IMAGES, referenceImagePathBelongsToUser } from "@/lib/website-reference-image";
 import { downloadReferenceImage } from "@/lib/website-reference-image-server";
 import { FIRST_VERSION_NUMBER } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/admin";
@@ -103,18 +103,16 @@ export async function POST(request: Request) {
 
     let websiteId: string;
     let description: string;
-    let referenceImagePaths: string[];
     try {
       const body = await request.json();
       websiteId = typeof body?.websiteId === "string" ? body.websiteId : "";
       description =
         typeof body?.description === "string" ? body.description.trim().slice(0, MAX_DESCRIPTION_LENGTH) : "";
-      referenceImagePaths = Array.isArray(body?.referenceImagePaths)
-        ? body.referenceImagePaths.filter((p: unknown): p is string => typeof p === "string").slice(0, MAX_REFERENCE_IMAGES)
-        : [];
     } catch {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
+    // referenceImagePaths is deliberately NOT read from the body — see
+    // where it is loaded below.
 
     if (!websiteId || !description) {
       return NextResponse.json({ ok: false, error: "websiteId and description are required." }, { status: 400 });
@@ -159,6 +157,37 @@ export async function POST(request: Request) {
     if (website.status !== "pending") {
       return NextResponse.json({ ok: true, alreadyHandled: true });
     }
+
+    // The reference images for THIS website, from the database — never
+    // from the request body.
+    //
+    // DEFECT this fixes: this list used to come from body.referenceImagePaths
+    // with no check that the paths had anything to do with this website.
+    // Storage RLS scopes the bucket per USER, not per project, so every
+    // path a user had ever uploaded stayed readable — and any stale one
+    // still sitting in client state (a failed generation, a closed form,
+    // an abandoned clarification) was accepted and baked into the next
+    // site. That is the "photos from a previous project appeared in the
+    // new one" report.
+    //
+    // api/websites/generate now writes these rows when it creates the
+    // pending record, so by the time this worker runs the association
+    // already exists and is authoritative. Reading it here means a caller
+    // cannot influence which images are used at all.
+    const { data: refRows, error: refError } = await supabase
+      .from("website_reference_images")
+      .select("image_url")
+      .eq("website_id", websiteId)
+      .eq("user_id", user.id)
+      .order("id", { ascending: true })
+      .limit(MAX_REFERENCE_IMAGES);
+
+    if (refError) {
+      logApiError("/api/websites/generate/process", refError, { stage: "load_reference_images" });
+    }
+    const referenceImagePaths: string[] = (refRows ?? [])
+      .map((r) => r.image_url as string)
+      .filter((p) => referenceImagePathBelongsToUser(p, user.id));
 
     // Hard circuit-breaker backstop (see lib/website-generation-limits.ts)
     // — this route has no auto-retry today, so in normal operation this
@@ -443,21 +472,16 @@ export async function POST(request: Request) {
       logApiError("/api/websites/generate/process", versionError, { stage: "insert_version" });
     }
 
-    // Reference image rows — one per successfully-downloaded image, linked
-    // to the now-existing website row. Best-effort, same reasoning as the
-    // version-history insert above.
-    if (successfulPaths.length > 0) {
-      const { error: imagesError } = await supabase.from("website_reference_images").insert(
-        successfulPaths.map((imageUrl) => ({
-          user_id: user.id,
-          website_id: updatedRecord.id,
-          image_url: imageUrl,
-        }))
-      );
-      if (imagesError) {
-        logApiError("/api/websites/generate/process", imagesError, { stage: "insert_reference_images" });
-      }
-    }
+    // The reference-image rows are NOT written here any more — they are
+    // written by api/websites/generate when the pending row is created,
+    // which is what lets this worker read them instead of trusting its
+    // caller. Inserting again here would duplicate every row.
+    //
+    // Any path that failed to download stays recorded: the row is the
+    // record of what the user attached to this site, not of what the
+    // vision call happened to succeed at reading. Dropping them would make
+    // a transient storage hiccup look like the user never attached
+    // anything, and would silently change what a later regenerate uses.
 
     return NextResponse.json({ ok: true, record: updatedRecord });
   } catch (err) {

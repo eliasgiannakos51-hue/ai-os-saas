@@ -115,7 +115,12 @@ const serverErrorProse = sources
 const clientFallbacks = sources.flatMap((f) => [
   ...stripComments(readFileSync(f, "utf8")).matchAll(/getErrorMessage\([^,]+,\s*"[^"]{6,}"/g),
 ]);
-const SERVER_PROSE_BASELINE = 235;
+// 235 -> 236: api/websites/generate gained "Could not attach the reference
+// images. Please try again." when the reference-image scoping fix made that
+// insert fail-closed instead of best-effort. Same already-documented class
+// (server-side English prose), raised deliberately rather than silently —
+// which is the entire point of pinning the number.
+const SERVER_PROSE_BASELINE = 236;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

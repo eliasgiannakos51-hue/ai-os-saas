@@ -4,13 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Tooltip } from "@/components/ui/tooltip";
 import { displayNameFromEmail } from "@/lib/greeting";
 import { ChevronRight, X } from "lucide-react";
 import { OVERVIEW_NAV_ITEM } from "@/lib/modules";
 import {
   ALL_SIDEBAR_GROUPS,
   MAIN_SIDEBAR_GROUPS,
-  PINNED_SIDEBAR_ITEMS,
   SETTINGS_GROUP,
   type SidebarGroupConfig,
   type SidebarItem,
@@ -152,14 +152,6 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
           }`}
         >
           <div className="min-h-0 overflow-hidden">
-            {/* One line saying what is actually in here, shown only while
-                the group is open. A heading alone ("Track") does not tell
-                anyone that their trade log lives inside it. */}
-            {group.hintKey && (
-              <p className="px-3 pb-2 text-[11px] leading-snug text-muted/70">
-                {t(`groupHints.${group.hintKey}`)}
-              </p>
-            )}
             <div className="space-y-0.5 pb-0.5">
               {group.items.map((item) => renderItem(item, groupTone(group.heading)))}
             </div>
@@ -177,43 +169,11 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
     const Icon = item.icon;
     const hint = item.hintKey ? t(`hints.${item.hintKey}`) : undefined;
 
-    // A roadmap item: visible so the user knows it is coming, inert so
-    // they never land on a page that does nothing. A button rather than a
-    // disabled element on purpose — `disabled` swallows the click, and
-    // then a tap on mobile does nothing at all with no explanation.
-    if (item.comingSoon) {
-      return (
-        <button
-          key={item.href}
-          type="button"
-          onClick={() => addToast(t("comingSoonToast", { name: translatedLabel(item.label) }))}
-          title={hint ? `${hint} — ${t("comingSoon")}` : t("comingSoon")}
-          className="group flex w-full min-h-[40px] cursor-default items-center gap-2.5 rounded-xl py-2 pl-2.5 pr-2 text-left text-sm text-muted/60 opacity-60 transition-opacity duration-200 hover:opacity-90"
-        >
-          <Icon className="h-4 w-4 shrink-0 text-muted/50" aria-hidden="true" />
-          <span className="min-w-0 flex-1 truncate">{translatedLabel(item.label)}</span>
-          {/* Short form on purpose: the full "Coming soon" pushed
-              "Presentations" into an ellipsis at this sidebar width. The
-              tooltip and the click toast both say it in full. */}
-          <span className="shrink-0 rounded-full border border-border px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-muted/70">
-            {t("comingSoonBadge")}
-          </span>
-        </button>
-      );
-    }
-
     return (
+                  <Tooltip key={item.href} content={hint} side="right">
                   <Link
-                    key={item.href}
                     href={item.href}
                     onClick={closeOnMobile}
-                    // A plain title attribute rather than a custom tooltip:
-                    // it needs no JS, no portal and no hover state, and
-                    // screen readers already announce it. On touch there is
-                    // no hover at all, which is why these are only ever
-                    // supplementary — no item depends on its hint to be
-                    // findable.
-                    title={hint}
                     // nav-item draws the active highlight and the leading
                     // rail as pseudo-elements so both can animate; the
                     // look is unchanged, it just slides in now.
@@ -250,6 +210,7 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
                       {translatedLabel(item.label)}
                     </span>
                   </Link>
+                  </Tooltip>
     );
   }
 
@@ -283,12 +244,6 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
         </div>
 
         <nav className="space-y-5 p-3">
-          {/* The three daily entry points, above every category and
-              outside all of them — no heading, no chevron, nothing to
-              expand before you can click them. */}
-          <div className="space-y-0.5">
-            {PINNED_SIDEBAR_ITEMS.map((item) => renderItem(item, "text-orange-400/70", true))}
-          </div>
           {MAIN_SIDEBAR_GROUPS.map(renderGroup)}
         </nav>
 

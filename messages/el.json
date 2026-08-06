@@ -502,7 +502,11 @@
       "buyCredits": "Αγορά Credits",
       "creditHistory": "Ιστορικό Credits",
       "manageTeam": "Διαχείριση Ομάδας",
-      "ownerAccess": "Πρόσβαση Ιδιοκτήτη"
+      "ownerAccess": "Πρόσβαση Ιδιοκτήτη",
+      "noCreditActivity": "Καμία δραστηριότητα credits ακόμη.",
+      "balanceAfter": "υπόλοιπο {count}",
+      "unlimited": "Απεριόριστα",
+      "wouldHaveCost": "θα κόστιζε {count}"
     },
     "marginReport": {
       "title": "Αναφορά Περιθωρίου",

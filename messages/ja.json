@@ -502,7 +502,11 @@
       "buyCredits": "クレジット購入",
       "creditHistory": "クレジット履歴",
       "manageTeam": "チーム管理",
-      "ownerAccess": "オーナーアクセス"
+      "ownerAccess": "オーナーアクセス",
+      "noCreditActivity": "クレジットの利用履歴はまだありません。",
+      "balanceAfter": "残高 {count}",
+      "unlimited": "無制限",
+      "wouldHaveCost": "{count} かかるはずでした"
     },
     "marginReport": {
       "title": "マージンレポート",

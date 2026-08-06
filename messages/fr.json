@@ -502,7 +502,11 @@
       "buyCredits": "Acheter des Crédits",
       "creditHistory": "Historique des Crédits",
       "manageTeam": "Gérer l'Équipe",
-      "ownerAccess": "Accès Propriétaire"
+      "ownerAccess": "Accès Propriétaire",
+      "noCreditActivity": "Aucune activité de crédits pour l'instant.",
+      "balanceAfter": "solde {count}",
+      "unlimited": "Illimité",
+      "wouldHaveCost": "aurait coûté {count}"
     },
     "marginReport": {
       "title": "Rapport de Marge",

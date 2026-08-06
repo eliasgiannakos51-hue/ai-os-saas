@@ -502,7 +502,11 @@
       "buyCredits": "Acquista Crediti",
       "creditHistory": "Cronologia Crediti",
       "manageTeam": "Gestisci Team",
-      "ownerAccess": "Accesso Proprietario"
+      "ownerAccess": "Accesso Proprietario",
+      "noCreditActivity": "Nessuna attività di crediti finora.",
+      "balanceAfter": "saldo {count}",
+      "unlimited": "Illimitato",
+      "wouldHaveCost": "sarebbe costato {count}"
     },
     "marginReport": {
       "title": "Rapporto Margine",

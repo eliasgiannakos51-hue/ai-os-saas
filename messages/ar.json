@@ -502,7 +502,11 @@
       "buyCredits": "شراء أرصدة",
       "creditHistory": "سجل الأرصدة",
       "manageTeam": "إدارة الفريق",
-      "ownerAccess": "وصول المالك"
+      "ownerAccess": "وصول المالك",
+      "noCreditActivity": "لا يوجد نشاط أرصدة بعد.",
+      "balanceAfter": "الرصيد {count}",
+      "unlimited": "غير محدود",
+      "wouldHaveCost": "كان سيكلف {count}"
     },
     "marginReport": {
       "title": "تقرير الهامش",

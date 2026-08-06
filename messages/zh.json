@@ -502,7 +502,11 @@
       "buyCredits": "购买积分",
       "creditHistory": "积分记录",
       "manageTeam": "管理团队",
-      "ownerAccess": "所有者权限"
+      "ownerAccess": "所有者权限",
+      "noCreditActivity": "暂无积分活动。",
+      "balanceAfter": "余额 {count}",
+      "unlimited": "无限",
+      "wouldHaveCost": "将花费 {count}"
     },
     "marginReport": {
       "title": "利润率报告",

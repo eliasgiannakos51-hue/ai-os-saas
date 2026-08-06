@@ -502,7 +502,11 @@
       "buyCredits": "Buy Credits",
       "creditHistory": "Credit History",
       "manageTeam": "Manage Team",
-      "ownerAccess": "Owner Access"
+      "ownerAccess": "Owner Access",
+      "noCreditActivity": "No credit activity yet.",
+      "balanceAfter": "balance {count}",
+      "unlimited": "Unlimited",
+      "wouldHaveCost": "would have cost {count}"
     },
     "marginReport": {
       "title": "Margin Report",

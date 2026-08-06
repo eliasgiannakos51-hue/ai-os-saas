@@ -502,7 +502,11 @@
       "buyCredits": "Credits Kaufen",
       "creditHistory": "Credit-Verlauf",
       "manageTeam": "Team Verwalten",
-      "ownerAccess": "Inhaber-Zugang"
+      "ownerAccess": "Inhaber-Zugang",
+      "noCreditActivity": "Noch keine Credit-Aktivität.",
+      "balanceAfter": "Guthaben {count}",
+      "unlimited": "Unbegrenzt",
+      "wouldHaveCost": "hätte {count} gekostet"
     },
     "marginReport": {
       "title": "Margenbericht",

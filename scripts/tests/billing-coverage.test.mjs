@@ -99,8 +99,8 @@ const DECLARED = {
   },
   "src/lib/lead-classification.ts": {
     calls: 1,
-    billing: "unbilled",
-    note: "reached from api/websites/[id]/submit-form, which is PUBLIC. An anonymous visitor to a generated website triggers a Claude call that no account pays for and no credit balance bounds.",
+    billing: "settled",
+    note: "reached from the PUBLIC api/websites/[id]/submit-form. Settled against the site OWNER, who is who the triage is for, after an up-front solvency check — a stranger's form POST cannot hold the owner's credits, so the balance must be checked before the call, not after.",
   },
 };
 
@@ -147,10 +147,27 @@ for (const [file, m] of [...flat, ...unbilled]) {
 // test tells you to update it; adding another flat-fee feature raises
 // them and the build fails.
 check("flat-fee AI features (not margin-guaranteed)", flat.length, 3);
-check("completely unbilled AI calls", unbilled.length, 2);
+check("completely unbilled AI calls", unbilled.length, 1);
 
-console.log("\n== 3. why a flat fee cannot hold the margin ==");
-// Not an opinion: the largest real cost a flat charge can cover, per plan.
+console.log("\n== 2b. the public contact-form endpoint bills the site owner ==");
+// The one AI call in this app that an ANONYMOUS third party can trigger.
+// It must charge someone, and it must check that someone can pay before
+// spending, because there is no reservation to unwind afterwards.
+const form = readFileSync("src/app/api/websites/[id]/submit-form/route.ts", "utf8");
+checkTrue("it settles against the website owner", /userId: website\.user_id,[\s\S]{0,200}feature: "lead_classification"/.test(form));
+checkTrue("with real measured usage, not a flat fee", /costs,/.test(form) && /new CostAccumulator\(\)/.test(form));
+checkTrue("at the owner's own plan rate", /plan: ownerPlan/.test(form));
+checkTrue("solvency is checked BEFORE the call", form.indexOf("hasEnoughCredits") < form.indexOf("classifyLeadMessage(apiKey"));
+checkTrue("and it settles even if the call threw afterwards", /finally \{[\s\S]{0,400}settleReservation/.test(form));
+checkTrue("the classifier records its own usage", /costs\?\.record\("classification", response\.usage, MODEL\)/.test(readFileSync("src/lib/lead-classification.ts", "utf8")));
+// The abuse ceiling that was already there, asserted so it cannot be
+// removed without noticing: an unpaid flood is capped per website/hour.
+checkTrue("a per-website hourly cap still gates the endpoint", /MAX_SUBMISSIONS_PER_HOUR = \d+/.test(form));
+checkTrue("checked before the AI call, not after", form.indexOf("MAX_SUBMISSIONS_PER_HOUR") < form.indexOf("classifyLeadMessage(apiKey"));
+checkTrue("and a honeypot rejects bots earlier still", /_hp/.test(form));
+// A visitor must never see the form fail because the OWNER is broke.
+checkTrue("an unaffordable classification degrades, it does not 4xx", /if \(affordable\.ok\)/.test(form));
+
 const PLANS = [
   { name: "Free", price: 0, monthlyCredits: 100 },
   { name: "Starter", price: 20, monthlyCredits: 1000 },
@@ -159,6 +176,27 @@ const PLANS = [
   { name: "Ultimate", price: 200, monthlyCredits: 25000 },
   { name: "Enterprise", price: "custom", monthlyCredits: "custom" },
 ];
+
+console.log("\n== 2c. a normal user IS charged for a website generation ==");
+// Production showed website_generate at 0 credits. That is bypassCharge
+// — admin and beta accounts are free by design, and the owner's own
+// email is a hardcoded admin. For everyone else the same EUR 0.255 costs
+// real credits, which is what this asserts.
+const REAL_COST_EUR = 0.25531762; // the exact production row
+const adminSrc = readFileSync("src/lib/admin.ts", "utf8");
+checkTrue("the bypass is an explicit admin list, not a default", /HARDCODED_ADMIN_EMAILS = \[/.test(adminSrc));
+for (const plan of PLANS) {
+  if (typeof plan.price !== "number" || plan.price <= 0) continue;
+  const credits = formula.creditsForRealCostOnAccount(REAL_COST_EUR, plan, null, config);
+  const m = formula.achievedMarginOnAccount(credits, REAL_COST_EUR, plan, null, config);
+  checkTrue(`${plan.name}: ${credits} credits, ${m.toFixed(3)}x`, credits > 0 && m >= M);
+}
+// Free plan too — it has no per-credit rate, so it pays the list price.
+const freeCredits = formula.creditsForRealCostOnAccount(REAL_COST_EUR, PLANS[0], null, config);
+checkTrue(`Free: ${freeCredits} credits, not zero`, freeCredits > 0);
+
+console.log("\n== 3. why a flat fee cannot hold the margin ==");
+// Not an opinion: the largest real cost a flat charge can cover, per plan.
 console.log("   plan          EUR/credit   1 credit covers a call costing up to");
 for (const plan of PLANS) {
   const rate = formula.effectiveCreditPriceEur(plan, config);

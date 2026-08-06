@@ -104,4 +104,12 @@ silently, and each needs converting to reserve/settle:
 | `api/text-actions` | flat 1 credit | Same. |
 | `api/reflection/generate` | flat 2 credits | Records no usage at all. |
 | `lib/chat/memory.ts` | none | Memory extraction inside a chat turn; only a call *count* reaches the circuit breaker. |
-| `lib/lead-classification.ts` | none | Reached from `api/websites/[id]/submit-form`, which is **public** — an anonymous visitor triggers a Claude call no account pays for and no balance bounds. |
+
+`lib/lead-classification.ts` was in this table and is now fixed: it is
+reached from the **public** `api/websites/[id]/submit-form`, so there is
+no caller to charge, and it now settles against the site **owner** — who
+the triage is for. Because a stranger's form POST cannot hold the
+owner's credits while it runs, solvency is checked *before* the call
+rather than reserved; an owner who cannot pay gets the submission without
+a priority tag, and the visitor's form never fails. A per-website hourly
+cap and a honeypot bound the volume.

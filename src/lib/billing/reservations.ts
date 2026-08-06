@@ -172,7 +172,17 @@ export async function settleReservation(params: {
   // has to be charged against THAT rate or the multiplier silently drops to
   // 2.5x. Null for every account that never bought a pack, which leaves the
   // plan-only behaviour exactly as it was.
-  const packPriceEur = bypassCharge ? null : await getPurchasedPackCreditPriceEur(userId);
+  // Fetched for bypass accounts too, which it previously was not.
+  //
+  // It used to be `bypassCharge ? null : await ...`, on the reasoning that
+  // a bypass account is charged nothing so the rate cannot matter. It
+  // does: wouldHaveChargedCredits below is supposed to answer "what would
+  // a normal user on this account's plan have paid", and skipping the
+  // pack lookup made that answer wrong for anyone who had bought one —
+  // the cheapest pack is EUR 0.0125 a credit against a EUR 0.02 list
+  // price, so the figure came out 37% low. A hypothetical charge that
+  // understates is worse than none, because it reads as reassurance.
+  const packPriceEur = await getPurchasedPackCreditPriceEur(userId);
   const effectivePrice = effectiveCreditPriceEurForAccount(plan, packPriceEur, config);
 
   const creditsCharged = bypassCharge

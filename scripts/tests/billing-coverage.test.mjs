@@ -491,5 +491,95 @@ for (const field of ["aiCalls", "inputTokens", "outputTokens", "cacheWriteTokens
   checkTrue(`  it includes ${field}`, new RegExp(`${field}[,:]`).test(res.slice(res.indexOf("[billing] settled"))));
 }
 
+console.log("\n== 18. the real production row, priced on every plan and pack ==");
+// website_generate, 2 AI calls, input 6064, output 14136,
+// real_cost_usd $0.28640440, wouldHaveChargedCredits 53.
+//
+// 53 is the LIST rate. The Ultimate rate gives 132. That is not a bug:
+// the rate determines the credits, so a dearer credit means FEWER of
+// them, not a thinner margin. The worry it looks like — "53 credits on
+// Ultimate is 1.6x" — would only be real if the charge were fixed at 53
+// while the rate fell, and it never is.
+const REAL_USD = 0.28640440;
+const realEur = REAL_USD * config.usdToEurRate;
+check("realCostEur", Number(realEur.toFixed(9)), 0.263492048);
+check("at the list rate that is 53 credits", formula.creditsForRealCostOnAccount(realEur, null, null, config), 53);
+check("and on Ultimate it is 132, not 53", formula.creditsForRealCostOnAccount(realEur, PLANS[4], null, config), 132);
+checkTrue("53 on Ultimate WOULD be under target, which is why it is never charged there",
+  (53 * formula.effectiveCreditPriceEur(PLANS[4], config)) / realEur < M);
+
+const PACK_ROWS = [
+  ["none", null],
+  ["EUR 10 / 500", 10 / 500],
+  ["EUR 25 / 1,500", 25 / 1500],
+  ["EUR 50 / 3,500", 50 / 3500],
+  ["EUR 100 / 8,000", 100 / 8000],
+];
+console.log("   plan          pack              EUR/cr   credits  revenue   margin");
+for (const plan of PLANS) {
+  for (const [packName, pack] of PACK_ROWS) {
+    const rate = formula.effectiveCreditPriceEurForAccount(plan, pack, config);
+    const credits = formula.creditsForRealCostOnAccount(realEur, plan, pack, config);
+    const m = formula.achievedMarginOnAccount(credits, realEur, plan, pack, config);
+    console.log(
+      `   ${plan.name.padEnd(13)} ${packName.padEnd(17)} ${rate.toFixed(4)}   ${String(credits).padStart(5)}   EUR ${(credits * rate).toFixed(3).padEnd(7)} ${m.toFixed(4)}x`
+    );
+    checkTrue(`${plan.name} + ${packName}: ${credits} credits, ${m.toFixed(4)}x >= ${M}`, m >= M);
+  }
+}
+
+console.log("\n== 19. every real feature, on every plan ==");
+// Real real_cost_eur values straight out of production ai_cost_log,
+// converted back to USD so the same pipeline prices them.
+const REAL_FEATURES = [
+  ["website_generate", 0.263492048],
+  ["website_generate_precheck", 0.00370668],
+  ["website_generate_precheck", 0.00594228],
+  ["create_studio_detect", 0.00616584],
+  ["chat_message", 0.03550740],
+  ["chat_message", 0.03129840],
+  ["chat_message", 0.03052836],
+];
+console.log("   feature                     EUR cost   Free  Start  Growth   Pro   Ultim  worst margin");
+let worstOverall = Infinity;
+for (const [feature, costEur] of REAL_FEATURES) {
+  const cells = [];
+  let worstHere = Infinity;
+  for (const plan of PLANS.slice(0, 5)) {
+    const credits = formula.creditsForRealCostOnAccount(costEur, plan, null, config);
+    const m = formula.achievedMarginOnAccount(credits, costEur, plan, null, config);
+    cells.push(String(credits).padStart(5));
+    if (m < worstHere) worstHere = m;
+    checkTrue(`${feature} on ${plan.name}: ${credits} credits, ${m.toFixed(3)}x`, m >= M);
+  }
+  if (worstHere < worstOverall) worstOverall = worstHere;
+  console.log(`   ${feature.padEnd(27)} ${costEur.toFixed(8)} ${cells.join(" ")}   ${worstHere.toFixed(4)}x`);
+}
+checkTrue(`worst margin across every real feature x plan is ${worstOverall.toFixed(4)}x`, worstOverall >= M);
+// The smallest real cost is the tightest case: ceil() rounds a tiny
+// charge up to a whole credit, so margin goes UP, never down.
+checkTrue("a tiny call still clears the bar", formula.achievedMarginOnAccount(
+  formula.creditsForRealCostOnAccount(0.00370668, PLANS[4], null, config), 0.00370668, PLANS[4], null, config) >= M);
+
+console.log("\n== 20. bypass does not distort what a normal user would pay ==");
+// wouldHaveChargedCredits exists to answer "what would a normal user on
+// this plan have paid". It used to skip the credit-pack lookup entirely
+// for bypass accounts (`bypassCharge ? null : await ...`), so for anyone
+// holding a pack the figure came out low — the cheapest pack is
+// EUR 0.0125 against a EUR 0.02 list price, a 37% understatement.
+checkTrue("the pack rate is fetched regardless of bypass", /const packPriceEur = await getPurchasedPackCreditPriceEur\(userId\);/.test(res));
+checkTrue("and the hypothetical charge uses it", /wouldHaveCharged = bypassCharge[\s\S]{0,120}creditsForRealCostOnAccount\(realCostEur, plan, packPriceEur, config\)/.test(res));
+// It must be the SAME function a real charge goes through, or the two
+// can drift apart silently.
+const chargeExpr = /creditsForRealCostOnAccount\(realCostEur, plan, packPriceEur, config\)/g;
+checkTrue("computed by the same function as a real charge", (res.match(chargeExpr) ?? []).length >= 2);
+// And the row says which plan produced the number, so it can be checked.
+checkTrue("the row records the plan it priced against", /planSlug: plan\?\.slug \?\? null/.test(res));
+// Concretely: a bypass account holding the cheapest pack.
+const packRate = 100 / 8000;
+check("a pack holder would have paid 85 credits, not 53",
+  formula.creditsForRealCostOnAccount(realEur, null, packRate, config), 85);
+checkTrue("which is still >= 4x", formula.achievedMarginOnAccount(85, realEur, null, packRate, config) >= M);
+
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

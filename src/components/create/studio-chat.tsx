@@ -27,7 +27,7 @@ let messageIdCounter = 0;
  */
 export function StudioChat({ context }: { context: string }) {
   const t = useTranslations("dashboard.createStudio");
-  const { refresh: refreshCredits } = useCredits();
+  const { reportUsage } = useCredits();
   const [messages, setMessages] = useState<StudioMessage[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState("");
@@ -78,7 +78,9 @@ export function StudioChat({ context }: { context: string }) {
 
       // Never throws — a dropped connection must not delete the answer
       // the user already watched stream in. See lib/ndjson-stream.ts.
+      let usageEvent: unknown = null;
       const { interrupted } = await readNdjsonStream(res.body, (event) => {
+        if (event.type === "done") usageEvent = event;
         if (event.type === "meta") {
           conversationIdRef.current =
             (event.conversationId as string | undefined) ?? conversationIdRef.current;
@@ -92,7 +94,7 @@ export function StudioChat({ context }: { context: string }) {
         }
       });
 
-      void refreshCredits();
+      void reportUsage(usageEvent);
 
       if (accumulated) {
         messageIdCounter += 1;

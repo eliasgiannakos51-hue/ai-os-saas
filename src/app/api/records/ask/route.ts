@@ -21,6 +21,7 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
 
 export const dynamic = "force-dynamic";
 
@@ -317,7 +318,7 @@ export async function POST(request: Request) {
         // worth charging for. Admins settle too: they are charged
         // nothing, but their real spend still has to reach the cost log
         // or the margin report only sees billed traffic.
-        await settleReservation({
+        const settlement = await settleReservation({
           userId: user.id,
           reservationId,
           feature: "ask_ai_record",
@@ -333,7 +334,16 @@ export async function POST(request: Request) {
           },
         });
 
-        controller.enqueue(ndjsonLine({ type: "done" }));
+        controller.enqueue(
+          ndjsonLine({
+            type: "done",
+            usage: buildUsageReceipt({
+              creditsCharged: settlement.creditsCharged,
+              bypass: isAdmin,
+              wouldHaveCharged: null,
+            }),
+          })
+        );
         controller.close();
       },
     });

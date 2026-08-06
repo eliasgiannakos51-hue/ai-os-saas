@@ -21,7 +21,7 @@ import type { WeeklyReflectionStats } from "@/lib/reflection";
 export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" } = {}) {
   const t = useTranslations("dashboard.reflection");
   const tCommon = useTranslations("common");
-  const { refresh: refreshCredits } = useCredits();
+  const { reportUsage } = useCredits();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reflection, setReflection] = useState<string | null>(null);
@@ -38,7 +38,9 @@ export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" }
           : {}),
       });
       const data = await res.json();
-      void refreshCredits();
+      // The response carries what this cost; reportUsage refreshes the
+      // balance AND says so, where refreshCredits only did the first half.
+      void reportUsage(data);
 
       if (!res.ok || !data.ok) {
         setError(getErrorMessage(data?.error, "Could not generate a reflection."));

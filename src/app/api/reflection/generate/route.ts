@@ -18,6 +18,7 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
 
 export const dynamic = "force-dynamic";
 
@@ -153,7 +154,7 @@ export async function POST(request: Request) {
       );
     }
 
-    await settleReservation({
+    const settlement = await settleReservation({
       userId: user.id,
       reservationId,
       feature: "weekly_reflection",
@@ -167,7 +168,17 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json({ ok: true, generated: true, reflection, stats });
+    return NextResponse.json({
+      ok: true,
+      generated: true,
+      reflection,
+      stats,
+      usage: buildUsageReceipt({
+        creditsCharged: settlement.creditsCharged,
+        bypass: bypassCredits,
+        wouldHaveCharged: null,
+      }),
+    });
   } catch (err) {
     logApiError("/api/reflection/generate", err);
     return NextResponse.json(

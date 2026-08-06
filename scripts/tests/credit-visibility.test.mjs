@@ -162,5 +162,51 @@ for (const key of ["used", "usedWithRemaining", "unlimited", "unlimitedWouldHave
   check(`credits.${key} in every locale`, missing, []);
 }
 
+console.log("\n== 8. every AI route returns a receipt, and its client reports it ==");
+// Chat was the precedent. These five follow it exactly: the route puts a
+// buildUsageReceipt on its response, the client passes that response to
+// reportUsage instead of calling refresh and saying nothing.
+const PAIRS = [
+  ["chat", "src/app/api/chat/route.ts", "src/components/chat/chat-workspace.tsx"],
+  ["create-studio/detect", "src/app/api/create-studio/detect/route.ts", "src/components/create/studio-chat.tsx"],
+  ["records/ask", "src/app/api/records/ask/route.ts", "src/components/records/ask-ai-modal.tsx"],
+  ["text-actions", "src/app/api/text-actions/route.ts", "src/components/text-actions/text-actions-textarea.tsx"],
+  ["reflection/generate", "src/app/api/reflection/generate/route.ts", "src/components/reflection/reflection-generator.tsx"],
+  ["websites/status", "src/app/api/websites/status/route.ts", "src/components/website-builder/website-builder-workspace.tsx"],
+];
+for (const [label, routeFile, clientFile] of PAIRS) {
+  const route = readFileSync(routeFile, "utf8");
+  const client = readFileSync(clientFile, "utf8");
+  checkTrue(`${label}: route builds a receipt`, /buildUsageReceipt\(/.test(route));
+  // The Website Builder is the one exception, and legitimately so: it
+  // settles in a background worker, so its figure comes from the settled
+  // cost-log row rather than a settlement variable in the same request.
+  checkTrue(
+    `${label}: from the real settled figure, not a guess`,
+    /settlement\.creditsCharged/.test(route) || /Number\(data\.credits_charged\)/.test(route)
+  );
+  checkTrue(`${label}: returned under \`usage\``, /usage: buildUsageReceipt\(|record, usage \}/.test(route));
+  checkTrue(`${label}: client reports it`, /reportUsage\(/.test(client));
+}
+// The streaming clients must capture the terminal event, or reportUsage
+// gets nothing and silently degrades to a bare refresh.
+for (const f of [
+  "src/components/chat/chat-workspace.tsx",
+  "src/components/records/ask-ai-modal.tsx",
+  "src/components/create/studio-chat.tsx",
+]) {
+  checkTrue(`${f.split("/").pop()} captures the done event`, /if \(event\.type === "done"\) usageEvent = event;/.test(readFileSync(f, "utf8")));
+}
+// The Website Builder settles in a worker, so it has no response to
+// attach to — the figure is read back from the settled cost-log row.
+const statusRoute = readFileSync("src/app/api/websites/status/route.ts", "utf8");
+checkTrue("the status route reads the settled row", /from\("ai_cost_log"\)/.test(statusRoute));
+checkTrue("scoped to this website", /contains\("metadata", \{ websiteId \}\)/.test(statusRoute));
+checkTrue("and only once the row is terminal", /record\.status === "completed" \|\| record\.status === "flagged"/.test(statusRoute));
+checkTrue("best-effort — a missing row never fails the poll", /catch \{\s*\n\s*return null;/.test(statusRoute));
+// text-actions never touched the credits context at all, so its balance
+// change was invisible even on the next navigation.
+checkTrue("the text-actions client now uses the credits context", /useCredits\(\)/.test(readFileSync("src/components/text-actions/text-actions-textarea.tsx", "utf8")));
+
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

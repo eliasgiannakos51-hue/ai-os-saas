@@ -502,7 +502,11 @@
       "buyCredits": "Buy Credits",
       "creditHistory": "Credit History",
       "manageTeam": "Manage Team",
-      "ownerAccess": "Owner Access"
+      "ownerAccess": "Owner Access",
+      "noCreditActivity": "No credit activity yet.",
+      "balanceAfter": "balance {count}",
+      "unlimited": "Unlimited",
+      "wouldHaveCost": "would have cost {count}"
     },
     "marginReport": {
       "title": "Margin Report",
@@ -1113,6 +1117,11 @@
     "freeChat": {
       "remaining": "{count} free messages left this month",
       "exhausted": "Free messages used up — this month's chats now use credits"
-    }
+    },
+    "used": "Used {count} credits",
+    "usedWithRemaining": "Used {count} credits · {remaining} left",
+    "unlimited": "Unlimited — no credits used",
+    "unlimitedWouldHaveCost": "Unlimited — would have cost {count} credits",
+    "freeMessage": "Free message · {count} left this month"
   }
 }

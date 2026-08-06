@@ -502,7 +502,11 @@
       "buyCredits": "Comprar Créditos",
       "creditHistory": "Histórico de Créditos",
       "manageTeam": "Gerir Equipa",
-      "ownerAccess": "Acesso de Proprietário"
+      "ownerAccess": "Acesso de Proprietário",
+      "noCreditActivity": "Ainda não há atividade de créditos.",
+      "balanceAfter": "saldo {count}",
+      "unlimited": "Ilimitado",
+      "wouldHaveCost": "teria custado {count}"
     },
     "marginReport": {
       "title": "Relatório de Margem",
@@ -1113,6 +1117,11 @@
     "freeChat": {
       "remaining": "Restam {count} mensagens gratuitas este mês",
       "exhausted": "Mensagens gratuitas esgotadas — as conversas passam a consumir créditos"
-    }
+    },
+    "used": "Usados {count} créditos",
+    "usedWithRemaining": "Usados {count} créditos · {remaining} restantes",
+    "unlimited": "Ilimitado — nenhum crédito usado",
+    "unlimitedWouldHaveCost": "Ilimitado — teria custado {count} créditos",
+    "freeMessage": "Mensagem gratuita · {count} restantes este mês"
   }
 }

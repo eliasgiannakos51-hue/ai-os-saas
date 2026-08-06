@@ -502,7 +502,11 @@
       "buyCredits": "Credits Kaufen",
       "creditHistory": "Credit-Verlauf",
       "manageTeam": "Team Verwalten",
-      "ownerAccess": "Inhaber-Zugang"
+      "ownerAccess": "Inhaber-Zugang",
+      "noCreditActivity": "Noch keine Credit-Aktivität.",
+      "balanceAfter": "Guthaben {count}",
+      "unlimited": "Unbegrenzt",
+      "wouldHaveCost": "hätte {count} gekostet"
     },
     "marginReport": {
       "title": "Margenbericht",
@@ -1113,6 +1117,11 @@
     "freeChat": {
       "remaining": "Noch {count} kostenlose Nachrichten diesen Monat",
       "exhausted": "Kostenlose Nachrichten aufgebraucht — Chats verbrauchen jetzt Guthaben"
-    }
+    },
+    "used": "{count} Credits verbraucht",
+    "usedWithRemaining": "{count} Credits verbraucht · {remaining} übrig",
+    "unlimited": "Unbegrenzt — keine Credits verbraucht",
+    "unlimitedWouldHaveCost": "Unbegrenzt — hätte {count} Credits gekostet",
+    "freeMessage": "Kostenlose Nachricht · {count} übrig diesen Monat"
   }
 }

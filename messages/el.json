@@ -502,7 +502,11 @@
       "buyCredits": "Αγορά Credits",
       "creditHistory": "Ιστορικό Credits",
       "manageTeam": "Διαχείριση Ομάδας",
-      "ownerAccess": "Πρόσβαση Ιδιοκτήτη"
+      "ownerAccess": "Πρόσβαση Ιδιοκτήτη",
+      "noCreditActivity": "Καμία δραστηριότητα credits ακόμη.",
+      "balanceAfter": "υπόλοιπο {count}",
+      "unlimited": "Απεριόριστα",
+      "wouldHaveCost": "θα κόστιζε {count}"
     },
     "marginReport": {
       "title": "Αναφορά Περιθωρίου",
@@ -1113,6 +1117,11 @@
     "freeChat": {
       "remaining": "{count} δωρεάν μηνύματα απομένουν αυτόν τον μήνα",
       "exhausted": "Τα δωρεάν μηνύματα εξαντλήθηκαν — οι συνομιλίες πλέον χρεώνονται σε credits"
-    }
+    },
+    "used": "Χρεώθηκαν {count} credits",
+    "usedWithRemaining": "Χρεώθηκαν {count} credits · απομένουν {remaining}",
+    "unlimited": "Απεριόριστα — δεν χρεώθηκαν credits",
+    "unlimitedWouldHaveCost": "Απεριόριστα — θα κόστιζε {count} credits",
+    "freeMessage": "Δωρεάν μήνυμα · απομένουν {count} αυτόν τον μήνα"
   }
 }

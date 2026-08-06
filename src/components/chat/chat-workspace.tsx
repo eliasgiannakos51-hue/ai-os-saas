@@ -76,7 +76,7 @@ export function ChatWorkspace({
   const tProduct = useTranslations("dashboard.productWorkflow");
   const tFree = useTranslations("credits.freeChat");
   const t = useTranslations("dashboard.chat");
-  const { refresh: refreshCredits } = useCredits();
+  const { refresh: refreshCredits, reportUsage } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -319,7 +319,9 @@ export function ChatWorkspace({
       // readNdjsonStream never throws — see lib/ndjson-stream.ts. That is
       // what keeps a reply the user already watched arrive from being
       // discarded when the connection drops partway through it.
+      let usageEvent: unknown = null;
       const { interrupted } = await readNdjsonStream(res.body, (event) => {
+        if (event.type === "done") usageEvent = event;
         if (event.type === "meta") {
           resolvedConversationId = (event.conversationId as string | null) ?? null;
           if (typeof event.freeRemaining === "number") {
@@ -389,7 +391,15 @@ export function ChatWorkspace({
         );
       }
 
-      void refreshCredits();
+      // The receipt rides on the stream's `done` event, so the counter and
+      // the "used N credits" message come from the same source of truth as
+      // the settlement itself. Falls back to a plain refresh if the event
+      // carried no receipt.
+      if (usageEvent) {
+        void reportUsage(usageEvent);
+      } else {
+        void refreshCredits();
+      }
     } catch {
       setError(tCommon("networkError"));
     } finally {

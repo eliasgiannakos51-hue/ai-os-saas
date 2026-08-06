@@ -77,10 +77,37 @@ export default async function SettingsPage() {
     .eq("user_id", user.id)
     .maybeSingle();
 
+  // The balance is what the running "balance after" column is derived
+  // from, walking backwards through the charges below. Nothing stores a
+  // per-row balance, and reconstructing it is exact as long as it only
+  // walks rows that actually moved the balance.
+  const { data: creditsRow } = await supabase
+    .from("user_credits")
+    .select("credits_remaining")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
   const { data: transactions } = await supabase
     .from("credit_transactions")
     .select("id, amount, action_type, description, created_at")
     .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  // AI actions that cost this account NOTHING — an admin/beta bypass, or a
+  // free chat message. settle_reservation only writes a credit_transactions
+  // row when it actually charges, which is right for a ledger of balance
+  // movements and is exactly why this panel read "No credit activity yet"
+  // on an account whose ai_cost_log was full: every row was a zero charge.
+  //
+  // Only credits_charged = 0 is taken from here. Rows that DID charge
+  // already have a credit_transactions row above, and reading both would
+  // show every charge twice.
+  const { data: freeAiActions } = await supabase
+    .from("ai_cost_log")
+    .select("id, feature, created_at, metadata")
+    .eq("user_id", user.id)
+    .eq("credits_charged", 0)
     .order("created_at", { ascending: false })
     .limit(20);
 
@@ -177,7 +204,20 @@ export default async function SettingsPage() {
 
         <BuyCredits />
 
-        <CreditHistory transactions={(transactions as CreditTransaction[] | null) ?? []} />
+        <CreditHistory
+          transactions={(transactions as CreditTransaction[] | null) ?? []}
+          freeActions={(freeAiActions ?? []).map((row) => {
+            const meta = (row.metadata ?? {}) as { wouldHaveChargedCredits?: unknown };
+            return {
+              id: String(row.id),
+              feature: String(row.feature),
+              created_at: String(row.created_at),
+              would_have_charged:
+                typeof meta.wouldHaveChargedCredits === "number" ? meta.wouldHaveChargedCredits : null,
+            };
+          })}
+          currentBalance={creditsRow?.credits_remaining}
+        />
 
         <PasswordChangeForm />
 

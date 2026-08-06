@@ -502,7 +502,11 @@
       "buyCredits": "Acquista Crediti",
       "creditHistory": "Cronologia Crediti",
       "manageTeam": "Gestisci Team",
-      "ownerAccess": "Accesso Proprietario"
+      "ownerAccess": "Accesso Proprietario",
+      "noCreditActivity": "Nessuna attività di crediti finora.",
+      "balanceAfter": "saldo {count}",
+      "unlimited": "Illimitato",
+      "wouldHaveCost": "sarebbe costato {count}"
     },
     "marginReport": {
       "title": "Rapporto Margine",
@@ -1113,6 +1117,11 @@
     "freeChat": {
       "remaining": "Ti restano {count} messaggi gratuiti questo mese",
       "exhausted": "Messaggi gratuiti esauriti: le chat ora consumano crediti"
-    }
+    },
+    "used": "Usati {count} crediti",
+    "usedWithRemaining": "Usati {count} crediti · {remaining} rimasti",
+    "unlimited": "Illimitato — nessun credito usato",
+    "unlimitedWouldHaveCost": "Illimitato — sarebbe costato {count} crediti",
+    "freeMessage": "Messaggio gratuito · {count} rimasti questo mese"
   }
 }

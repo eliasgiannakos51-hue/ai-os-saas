@@ -1453,6 +1453,20 @@
         "minSlides": "Uma apresentação precisa de pelo menos {min} diapositivos.",
         "noSlides": "Esta apresentação não tem diapositivos."
       }
+    },
+    "energySuggestion": {
+      "title": "Agora mesmo",
+      "noCheckIn": "Regista o teu estado acima e aqui aparece o que começar.",
+      "staleCheckIn": "O teu último registo é de antes de hoje. Regista outra vez para teres uma sugestão.",
+      "nothingLeft": "Todos os passos da tua missão ativa estão feitos.",
+      "allTooHeavy": "O que resta é mais pesado do que hoje — o mais leve exige {demand}. Vale a pena deixar para outro dia.",
+      "because": "Passo {n}, e exige {demand}, o que encaixa numa energia de {level}/5.",
+      "openMission": "Abrir a missão",
+      "demands": {
+        "light": "pouco esforço",
+        "moderate": "esforço médio",
+        "deep": "concentração profunda"
+      }
     }
   },
   "module": {

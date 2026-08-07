@@ -1453,6 +1453,20 @@
         "minSlides": "演示文稿至少需要 {min} 页。",
         "noSlides": "这份演示文稿没有任何页面。"
       }
+    },
+    "energySuggestion": {
+      "title": "现在做什么",
+      "noCheckIn": "先在上方记录状态，这里就会给出建议。",
+      "staleCheckIn": "你上次记录是在今天之前。重新记录一次才能给出建议。",
+      "nothingLeft": "当前任务的所有步骤都已完成。",
+      "allTooHeavy": "剩下的都比今天的状态更重——最轻的一项也需要{demand}。留到状态更好的一天吧。",
+      "because": "第 {n} 步，需要{demand}，与 {level}/5 的状态相符。",
+      "openMission": "打开任务",
+      "demands": {
+        "light": "较少精力",
+        "moderate": "中等精力",
+        "deep": "深度专注"
+      }
     }
   },
   "module": {

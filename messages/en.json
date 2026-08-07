@@ -1453,6 +1453,20 @@
         "minSlides": "A presentation needs at least {min} slides.",
         "noSlides": "This presentation has no slides."
       }
+    },
+    "energySuggestion": {
+      "title": "Right now",
+      "noCheckIn": "Check in above and this will suggest what to pick up.",
+      "staleCheckIn": "Your last check-in was before today. Check in again for a suggestion.",
+      "nothingLeft": "Every step in your active mission is done.",
+      "allTooHeavy": "Everything left is heavier than today — the lightest is {demand} work. Worth leaving for a better day.",
+      "because": "Step {n}, and it is {demand} work — which fits an energy of {level}/5.",
+      "openMission": "Open the mission",
+      "demands": {
+        "light": "light",
+        "moderate": "moderate",
+        "deep": "deep focus"
+      }
     }
   },
   "module": {

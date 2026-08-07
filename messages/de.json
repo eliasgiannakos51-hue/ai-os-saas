@@ -1453,6 +1453,20 @@
         "minSlides": "Eine Präsentation braucht mindestens {min} Folien.",
         "noSlides": "Diese Präsentation hat keine Folien."
       }
+    },
+    "energySuggestion": {
+      "title": "Gerade jetzt",
+      "noCheckIn": "Tragen Sie oben Ihren Stand ein, dann steht hier ein Vorschlag.",
+      "staleCheckIn": "Ihr letzter Eintrag ist von vor heute. Tragen Sie erneut ein, um einen Vorschlag zu bekommen.",
+      "nothingLeft": "Alle Schritte Ihrer aktiven Mission sind erledigt.",
+      "allTooHeavy": "Alles Verbleibende ist schwerer als heute — das Leichteste verlangt {demand}. Besser auf einen besseren Tag legen.",
+      "because": "Schritt {n}, und er verlangt {demand} — das passt zu einer Energie von {level}/5.",
+      "openMission": "Mission öffnen",
+      "demands": {
+        "light": "wenig Kraft",
+        "moderate": "mittlere Kraft",
+        "deep": "tiefe Konzentration"
+      }
     }
   },
   "module": {

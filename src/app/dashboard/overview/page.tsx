@@ -27,6 +27,7 @@ import { computeNextAction } from "@/lib/next-action";
 import { computeHealthScore } from "@/lib/health-score";
 import { HealthScoreCard } from "@/components/overview/health-score-card";
 import { loadLatestEnergyCheckIn } from "@/lib/energy-checkins";
+import { EnergySuggestion } from "@/components/overview/energy-suggestion";
 import { EnergyCheckinWidget } from "@/components/overview/energy-checkin-widget";
 import { Database, TrendingUp, Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
@@ -368,6 +369,16 @@ export default async function OverviewPage() {
         />
 
         <EnergyCheckinWidget initialCheckIn={latestEnergyCheckIn} />
+
+        {/* The check-in has been recorded and shown back since it was
+            built, and nothing ever acted on it. This is the part that
+            does — it suggests, it never reorders. */}
+        <EnergySuggestion
+          steps={activeMissionSteps}
+          missionId={activeMission?.id ?? null}
+          energyLevel={latestEnergyCheckIn?.energyLevel ?? null}
+          checkInAt={latestEnergyCheckIn?.createdAt ?? null}
+        />
 
         {nextAction && nextActionMessage && (
           <NextActionCard

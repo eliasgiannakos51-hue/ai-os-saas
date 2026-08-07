@@ -1453,6 +1453,20 @@
         "minSlides": "Una presentación necesita al menos {min} diapositivas.",
         "noSlides": "Esta presentación no tiene diapositivas."
       }
+    },
+    "energySuggestion": {
+      "title": "Ahora mismo",
+      "noCheckIn": "Regístrate arriba y aquí verás qué conviene empezar.",
+      "staleCheckIn": "Tu último registro es anterior a hoy. Vuelve a registrarte para una sugerencia.",
+      "nothingLeft": "Todos los pasos de tu misión activa están hechos.",
+      "allTooHeavy": "Lo que queda pesa más que hoy: lo más ligero requiere {demand}. Mejor dejarlo para otro día.",
+      "because": "Paso {n}, y requiere {demand}, que encaja con una energía de {level}/5.",
+      "openMission": "Abrir la misión",
+      "demands": {
+        "light": "poco esfuerzo",
+        "moderate": "esfuerzo medio",
+        "deep": "concentración profunda"
+      }
     }
   },
   "module": {

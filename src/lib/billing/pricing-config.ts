@@ -54,6 +54,54 @@ export const MARGIN_MULTIPLIER_MAX = 10;
 export const USD_TO_EUR_RATE_MIN = 0.85;
 export const USD_TO_EUR_RATE_MAX = 1.5;
 
+// ---------------------------------------------------------------------
+// Per-plan margin.
+// ---------------------------------------------------------------------
+//
+// One multiplier for everybody was the wrong shape, and the reason is
+// that a credit is not worth the same amount on every plan:
+//
+//     list     EUR 0.0200 per credit
+//     Starter  EUR 0.0200   (20 / 1000)
+//     Growth   EUR 0.0167   (50 / 3000)
+//     Pro      EUR 0.0100   (100 / 10000)
+//     Ultimate EUR 0.0080   (200 / 25000)
+//
+// The multiplier is applied to REAL COST before dividing by that price,
+// so the same 4x means something different at each tier. On Free the
+// credits were given away — a monthly allowance nobody paid for — so
+// every cent of real cost is a loss, and 4x recovers nothing because
+// there was no revenue to recover it from. On Ultimate the customer has
+// already paid EUR 200 up front and a credit costs them EUR 0.008;
+// charging them a 6x multiplier on top would price the plan they bought
+// out of usefulness.
+//
+// So margin descends as commitment rises: it is the discount for paying
+// more, expressed where the money actually moves.
+//
+// 4 remains the FLOOR everywhere, which is what keeps
+// scripts/tests/billing-coverage.test.mjs's brute force meaningful — no
+// plan may be configured below the guarantee the product is sold on.
+export const PLAN_MARGIN_MULTIPLIERS: Record<string, number> = {
+  free: 6,
+  starter: 5,
+  growth: 4.5,
+  professional: 4,
+  ultimate: 4,
+  // Negotiated, and negotiated cannot mean "below the floor". Same as
+  // Ultimate until a contract says otherwise.
+  enterprise: 4,
+};
+
+export const PLAN_MARGIN_ENV_VARS: Record<string, string> = {
+  free: "CREDIT_MARGIN_FREE",
+  starter: "CREDIT_MARGIN_STARTER",
+  growth: "CREDIT_MARGIN_GROWTH",
+  professional: "CREDIT_MARGIN_PROFESSIONAL",
+  ultimate: "CREDIT_MARGIN_ULTIMATE",
+  enterprise: "CREDIT_MARGIN_ENTERPRISE",
+};
+
 export const DEFAULTS: PricingConfig = {
   marginMultiplier: 4,
   creditPriceEur: 0.02,
@@ -122,22 +170,79 @@ export function parsePricingConfig(env: Record<string, string | undefined>): {
   };
 }
 
+/**
+ * The multiplier for one plan.
+ *
+ * Falls back to the BASE multiplier (CREDIT_MARGIN_MULTIPLIER, default 4)
+ * when the plan is unknown — an account with no resolvable plan is not a
+ * reason to charge nothing, and 4 is the guaranteed floor.
+ *
+ * A per-plan override outside the allowed range warns and falls back,
+ * like every other tuning variable here. The floor matters more in this
+ * one: a deployment that set CREDIT_MARGIN_FREE=2 would be selling below
+ * the margin the whole product is priced on, and silently.
+ */
+export function marginMultiplierForPlan(
+  planSlug: string | null | undefined,
+  env: Record<string, string | undefined> = process.env
+): number {
+  const base = parsePricingConfig(env).config.marginMultiplier;
+  if (!planSlug || !(planSlug in PLAN_MARGIN_MULTIPLIERS)) return base;
+
+  const fallback = PLAN_MARGIN_MULTIPLIERS[planSlug];
+  const raw = env[PLAN_MARGIN_ENV_VARS[planSlug]];
+  if (raw === undefined || raw.trim() === "") return fallback;
+
+  const parsed = Number(raw);
+  if (
+    !Number.isFinite(parsed) ||
+    parsed < MARGIN_MULTIPLIER_MIN ||
+    parsed > MARGIN_MULTIPLIER_MAX
+  ) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[pricing-config] ${PLAN_MARGIN_ENV_VARS[planSlug]}="${raw}" ignored (outside ${MARGIN_MULTIPLIER_MIN}-${MARGIN_MULTIPLIER_MAX}) — using ${fallback}.`
+    );
+    return fallback;
+  }
+  return parsed;
+}
+
 let cached: PricingConfig | null = null;
 
 // Reads process.env once per process. Warnings are logged on that first
 // read only — repeating them on every request would bury the logs, and
 // env vars cannot change within a running process.
-export function resolvePricingConfig(): PricingConfig {
-  if (cached) return cached;
-  const { config, warnings } = parsePricingConfig(process.env);
-  for (const w of warnings) {
-    // eslint-disable-next-line no-console
-    console.warn(
-      `[pricing-config] ${w.variable}="${w.value}" ignored (${w.reason}) — using default.`
-    );
+/**
+ * The pricing config, optionally specialised to a plan.
+ *
+ * `planSlug` is OPTIONAL rather than required, and that is a compromise
+ * worth naming: making it required would have been safer, and would also
+ * have meant touching two dozen call sites at once, several of which
+ * (the credits balance widget, the dashboard shell) only want the credit
+ * price and have no plan in scope.
+ *
+ * The risk of an optional argument is precise and worth stating: a route
+ * that RESERVES using the base multiplier while settlement charges the
+ * plan's higher one holds less than it charges, which is the single
+ * failure reserve/settle exists to prevent. That is why
+ * scripts/tests/billing-coverage.test.mjs asserts that every route
+ * calling reserveCredits passes a plan here — the omission cannot be
+ * made silently.
+ */
+export function resolvePricingConfig(planSlug?: string | null): PricingConfig {
+  if (!cached) {
+    const { config, warnings } = parsePricingConfig(process.env);
+    for (const w of warnings) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[pricing-config] ${w.variable}="${w.value}" ignored (${w.reason}) — using default.`
+      );
+    }
+    cached = config;
   }
-  cached = config;
-  return config;
+  if (planSlug === undefined || planSlug === null) return cached;
+  return { ...cached, marginMultiplier: marginMultiplierForPlan(planSlug) };
 }
 
 // Test seam: lets a reproduction harness swap the config without setting

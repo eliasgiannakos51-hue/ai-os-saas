@@ -129,7 +129,7 @@ export async function GET(request: Request) {
       // Sized from the step/automation text, at this account's own
       // per-credit rate — the flat CREDIT_COSTS.createAnything charged
       // one number regardless of how much work the step described.
-      const pricingConfig = resolvePricingConfig();
+      const pricingConfig = resolvePricingConfig(plan?.slug ?? null);
       const accountCreditPriceEur = bypassCredits
         ? pricingConfig.creditPriceEur
         : effectiveCreditPriceEurForAccount(
@@ -399,7 +399,7 @@ export async function GET(request: Request) {
       // Sized from the step/automation text, at this account's own
       // per-credit rate — the flat CREDIT_COSTS.createAnything charged
       // one number regardless of how much work the step described.
-      const pricingConfig = resolvePricingConfig();
+      const pricingConfig = resolvePricingConfig(plan?.slug ?? null);
       const accountCreditPriceEur = bypassCredits
         ? pricingConfig.creditPriceEur
         : effectiveCreditPriceEurForAccount(

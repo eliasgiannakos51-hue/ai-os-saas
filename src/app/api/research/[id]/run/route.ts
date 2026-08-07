@@ -113,7 +113,7 @@ export async function POST(_request: Request, { params }: { params: { id: string
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
     const plan = await resolveEffectivePlan(user);
-    const pricingConfig = resolvePricingConfig();
+    const pricingConfig = resolvePricingConfig(plan?.slug ?? null);
     const accountCreditPriceEur = bypassCredits
       ? pricingConfig.creditPriceEur
       : effectiveCreditPriceEurForAccount(

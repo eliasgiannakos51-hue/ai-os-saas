@@ -302,7 +302,7 @@ export async function POST(request: Request) {
     // flat CREDIT_COSTS.chatMessage charged 1 credit whether the reply was
     // two sentences or two thousand words, and charged nothing at all for
     // the tokens the accumulated history contributed.
-    const pricingConfig = resolvePricingConfig();
+    const pricingConfig = resolvePricingConfig(plan?.slug ?? null);
     const accountCreditPriceEur = bypassCredits
       ? pricingConfig.creditPriceEur
       : effectiveCreditPriceEurForAccount(

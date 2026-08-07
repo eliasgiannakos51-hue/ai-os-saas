@@ -137,7 +137,7 @@ export async function POST(request: Request) {
     // account's own. The saving was one metadata read; the cost was that
     // admin and beta rows could not be checked against anything.
     const plan = await resolveEffectivePlan(user);
-    const pricingConfig = resolvePricingConfig();
+    const pricingConfig = resolvePricingConfig(plan?.slug ?? null);
     const estimate = estimateForAction(
       "textAction",
       { model: MODEL, inputChars: SYSTEM_PROMPTS_WITH_QUALITY_CYCLE[action].length + text.length },

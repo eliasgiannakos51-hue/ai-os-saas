@@ -219,7 +219,7 @@ export async function POST(request: Request) {
     // Sized from what will actually be sent: the serialised record (which
     // dominates), the conversation so far, and the question.
     const historyChars = history.reduce((sum, m) => sum + m.content.length, 0);
-    const pricingConfig = resolvePricingConfig();
+    const pricingConfig = resolvePricingConfig(plan?.slug ?? null);
     const estimate = estimateForAction(
       "recordAsk",
       {

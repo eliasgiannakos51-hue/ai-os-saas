@@ -446,6 +446,80 @@ checkTrue("it is rate limited so a systemic cause cannot flood", /COOLDOWN_MS/.t
 checkTrue("and never throws — it runs after the user was charged", /catch \{[\s\S]{0,120}\}/.test(alert));
 
 console.log("\n== 14. the environment is reported at runtime, never at build ==");
+// ---------------------------------------------------------------------
+// Per-plan margin tiers: the estimate and the charge must agree.
+// ---------------------------------------------------------------------
+//
+// Margin is no longer one number. settleReservation charges at the
+// PLAN's multiplier (6x on Free down to 4x on Ultimate), so any route
+// that RESERVES using the base multiplier holds less than it charges —
+// on Free, two thirds of what it needs. That is the single failure
+// reserve/settle exists to prevent, and it is invisible in review
+// because `resolvePricingConfig()` and `resolvePricingConfig(slug)` look
+// almost identical.
+//
+// So: every file that calls reserveCredits must pass a plan when it
+// resolves the pricing config. The plan argument is optional at the type
+// level (two dozen display-only call sites have no plan in scope), which
+// is exactly why it needs a gate rather than a compiler error.
+console.log("\n== per-plan margin: every reserving route prices at its plan's rate ==");
+{
+  const pricing = await loadTs("src/lib/billing/pricing-config.ts");
+
+  // The floor is what keeps the 4x brute force below meaningful.
+  for (const [slug, multiplier] of Object.entries(pricing.PLAN_MARGIN_MULTIPLIERS)) {
+    checkTrue(`${slug} is at or above the 4x floor`, multiplier >= 4, `got ${multiplier}`);
+  }
+  check("Free pays the most margin", pricing.PLAN_MARGIN_MULTIPLIERS.free, 6);
+  check("Starter", pricing.PLAN_MARGIN_MULTIPLIERS.starter, 5);
+  check("Growth", pricing.PLAN_MARGIN_MULTIPLIERS.growth, 4.5);
+  check("Professional", pricing.PLAN_MARGIN_MULTIPLIERS.professional, 4);
+  check("Ultimate", pricing.PLAN_MARGIN_MULTIPLIERS.ultimate, 4);
+  // Margin descends as commitment rises. Asserted as an ORDERING rather
+  // than only as values, so a future re-tuning cannot accidentally make
+  // a bigger plan pay a bigger multiplier.
+  const order = ["free", "starter", "growth", "professional", "ultimate"];
+  let monotonic = true;
+  for (let i = 1; i < order.length; i++) {
+    if (pricing.PLAN_MARGIN_MULTIPLIERS[order[i]] > pricing.PLAN_MARGIN_MULTIPLIERS[order[i - 1]]) monotonic = false;
+  }
+  checkTrue("margin never rises as the plan gets bigger", monotonic);
+
+  // An override below the floor is refused, not honoured.
+  check(
+    "CREDIT_MARGIN_FREE=2 is refused",
+    pricing.marginMultiplierForPlan("free", { CREDIT_MARGIN_FREE: "2" }),
+    6
+  );
+  check(
+    "a valid override is honoured",
+    pricing.marginMultiplierForPlan("free", { CREDIT_MARGIN_FREE: "7" }),
+    7
+  );
+  check("an unknown plan falls back to the base", pricing.marginMultiplierForPlan("mystery", {}), 4);
+  check("no plan falls back to the base", pricing.marginMultiplierForPlan(null, {}), 4);
+
+  const reservingFiles = [];
+  (function walk(dir) {
+    for (const entry of readdirSync(dir)) {
+      const full = path.join(dir, entry);
+      if (statSync(full).isDirectory()) walk(full);
+      else if (/\.ts$/.test(full) && readFileSync(full, "utf8").includes("reserveCredits(")) {
+        reservingFiles.push(full);
+      }
+    }
+  })("src");
+
+  checkTrue(`found the reserving files (${reservingFiles.length})`, reservingFiles.length >= 15);
+
+  const bare = reservingFiles.filter((f) => {
+    // reservations.ts is the settlement side and already passes the plan.
+    if (f.endsWith(path.join("billing", "reservations.ts"))) return false;
+    return /resolvePricingConfig\(\s*\)/.test(readFileSync(f, "utf8"));
+  });
+  check("no reserving route prices at the base multiplier", bare, []);
+}
+
 const envMod = await loadTs("src/lib/env-check.ts");
 const full = {
   ...Object.fromEntries(

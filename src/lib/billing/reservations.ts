@@ -128,7 +128,12 @@ export async function settleReservation(params: {
   metadata?: Record<string, unknown>;
 }): Promise<SettlementResult> {
   const { userId, reservationId, feature, costs, plan, bypassCharge = false, metadata = {} } = params;
-  const config = resolvePricingConfig();
+  // The PLAN's multiplier, not the base one. This is the charging side of
+  // the per-plan margin tiers; the estimate side passes the same slug to
+  // resolvePricingConfig, and billing-coverage.test.mjs asserts it does,
+  // because a reserve computed at 4x against a charge computed at 6x is
+  // a hold that is two thirds of what it has to cover.
+  const config = resolvePricingConfig(plan?.slug ?? null);
 
   const totals = costs.totals();
   const realCostUsd = totals.usdCost;

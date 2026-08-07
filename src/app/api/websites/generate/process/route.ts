@@ -224,8 +224,8 @@ export async function POST(request: Request) {
     // process invocation that never runs. Holding it here still closes the
     // race the reservation exists for, because it is taken before the
     // first token is generated.
-    const pricingConfig = resolvePricingConfig();
     const plan = await resolveEffectivePlan(user);
+    const pricingConfig = resolvePricingConfig(plan?.slug ?? null);
     const costs = new CostAccumulator();
 
     // Same rate settlement will divide by, so the hold is sized in the

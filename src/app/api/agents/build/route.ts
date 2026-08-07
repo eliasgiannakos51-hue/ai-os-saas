@@ -157,7 +157,7 @@ export async function POST(request: Request) {
 
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
     const plan = await resolveEffectivePlan(user);
-    const pricingConfig = resolvePricingConfig();
+    const pricingConfig = resolvePricingConfig(plan?.slug ?? null);
     const accountCreditPriceEur = bypassCredits
       ? pricingConfig.creditPriceEur
       : effectiveCreditPriceEurForAccount(
@@ -275,6 +275,7 @@ export async function POST(request: Request) {
       promptChars: draft.prompt.length,
       needsWebSearch: draft.config.needsWebSearch,
       accountCreditPriceEur,
+      planSlug: plan?.slug ?? null,
     });
 
     return NextResponse.json({

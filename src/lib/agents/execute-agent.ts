@@ -84,8 +84,16 @@ export function estimateAgentRun(params: {
   promptChars: number;
   needsWebSearch: boolean;
   accountCreditPriceEur: number;
+  /** The account's plan. Required rather than optional: this function
+   *  sizes a HOLD, settlement charges at the plan's own margin
+   *  multiplier, and an estimate computed at the base rate against a
+   *  charge computed at the plan's rate under-holds every account on a
+   *  plan above the floor. Passing null is the deliberate "no plan
+   *  resolved" case, which falls back to the base multiplier on both
+   *  sides. */
+  planSlug: string | null;
 }) {
-  const config = resolvePricingConfig();
+  const config = resolvePricingConfig(params.planSlug);
   const single = estimateForAction(
     "agentRun",
     {
@@ -160,7 +168,7 @@ export async function executeAgent(params: {
   const isAdmin = isAdminEmail(user.email);
   const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
   const plan = await resolveEffectivePlan(user);
-  const pricingConfig = resolvePricingConfig();
+  const pricingConfig = resolvePricingConfig(plan?.slug ?? null);
   const accountCreditPriceEur = bypassCredits
     ? pricingConfig.creditPriceEur
     : effectiveCreditPriceEurForAccount(
@@ -173,6 +181,7 @@ export async function executeAgent(params: {
     promptChars: agent.prompt.length,
     needsWebSearch: agentConfig.needsWebSearch,
     accountCreditPriceEur,
+    planSlug: plan?.slug ?? null,
   });
 
   // 4. Read-only affordability check before anything is held or called.

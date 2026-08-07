@@ -168,8 +168,8 @@ export async function POST(request: Request) {
     }
 
     const bypassCredits = isAdminEmail(user.email) || (await hasActiveBetaBypass(user));
-    const pricingConfig = resolvePricingConfig();
     const plan = await resolveEffectivePlan(user);
+    const pricingConfig = resolvePricingConfig(plan?.slug ?? null);
     const accountCreditPriceEur = bypassCredits
       ? pricingConfig.creditPriceEur
       : effectiveCreditPriceEurForAccount(

@@ -103,11 +103,25 @@ export async function POST(request: Request) {
 
     // A two-word goal and a 3,000-character one no longer cost the same
     // flat 2 credits — the Planner's real token use follows the goal.
-    const pricingConfig = resolvePricingConfig();
+    // Resolved ONCE, up front, because two different numbers now depend
+    // on it: the credit price this account pays, and the margin
+    // multiplier its plan settles at. Resolving it inline in the price
+    // call — as this did — left the config on the base multiplier while
+    // settlement charged at the plan's, which under-holds every account
+    // on a plan above the floor.
+    // Resolved UNCONDITIONALLY, including for bypass accounts. Writing
+    // `bypassCredits ? null : ...` here is the exact bug §23 of
+    // billing-coverage.test.mjs exists for: it logged planSlug null on
+    // admin and beta settlements, so those rows could not be checked
+    // against anything and wouldHaveChargedCredits priced them at the
+    // list rate instead of the account's own. The saving was one
+    // metadata read.
+    const accountPlan = await resolveEffectivePlan(user);
+    const pricingConfig = resolvePricingConfig(accountPlan?.slug ?? null);
     const accountCreditPriceEur = bypassCredits
       ? pricingConfig.creditPriceEur
       : effectiveCreditPriceEurForAccount(
-          await resolveEffectivePlan(user),
+          accountPlan,
           await getPurchasedPackCreditPriceEur(user.id),
           pricingConfig
         );

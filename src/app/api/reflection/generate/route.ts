@@ -103,7 +103,7 @@ export async function POST(request: Request) {
     const stats = await loadWeeklyReflectionStats(supabase, tableFilter);
     const userMessage = buildReflectionUserMessage(stats);
 
-    const pricingConfig = resolvePricingConfig();
+    const pricingConfig = resolvePricingConfig(plan?.slug ?? null);
     const estimate = estimateForAction(
       "weeklyReflection",
       { model: REFLECTION_MODEL, inputChars: userMessage.length },

@@ -17,7 +17,7 @@
 //      zero callers. Documentation is not wiring.
 //
 // Run: node scripts/tests/security-posture.test.mjs
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 let pass = 0,
@@ -348,6 +348,25 @@ checkTrue(
   "the Autonomous Agents engine is scheduled in vercel.json",
   scheduledPaths.includes("/api/cron/agent-runs")
 );
+
+console.log("\n== 5. SECURITY.md describes gates that actually exist ==");
+// The same rule as section 4, turned on the documentation itself. A
+// SECURITY.md that names a gate which was renamed or deleted is worse
+// than no SECURITY.md: it tells the next person a rule is enforced when
+// nothing enforces it, which is exactly the failure the "documentation
+// is not wiring" section above exists to catch.
+const securityDoc = readFileSync("SECURITY.md", "utf8");
+const namedGates = [...new Set([...securityDoc.matchAll(/`?(?:scripts\/tests\/)?([a-z0-9-]+\.test\.mjs|check-i18n\.js)`?/g)].map((m) => m[1]))];
+checkTrue(`SECURITY.md names its gates (${namedGates.length})`, namedGates.length >= 5);
+for (const gate of namedGates) {
+  const path = gate === "check-i18n.js" ? "scripts/check-i18n.js" : `scripts/tests/${gate}`;
+  checkTrue(`the gate SECURITY.md names exists: ${path}`, existsSync(path));
+}
+// And the six lettered rules are all still present, so a section cannot
+// be quietly dropped while the file still looks complete.
+for (const heading of ["## α.", "## β.", "## γ.", "## δ.", "## ε.", "## στ.", "## ζ."]) {
+  checkTrue(`SECURITY.md still has ${heading}`, securityDoc.includes(heading));
+}
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

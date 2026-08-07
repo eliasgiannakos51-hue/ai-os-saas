@@ -1677,5 +1677,43 @@
       "websiteBuilder": "Der Website-Builder",
       "files": "Datei"
     }
+  },
+  "onboarding": {
+    "title": "Erste Schritte",
+    "progress": "{done} von {total} erledigt",
+    "dismiss": "Leitfaden schließen",
+    "steps": {
+      "capture": {
+        "title": "Halte deine erste Idee fest",
+        "body": "Schreib eine Sache auf, die dir im Kopf herumgeht. Alles Weitere in Ionexa baut auf dem auf, was du einträgst."
+      },
+      "ask": {
+        "title": "Frag die KI danach",
+        "body": "Öffne den Chat und stell eine echte Frage. Die Antwort stützt sich auf das, was du bereits festgehalten hast."
+      },
+      "direction": {
+        "title": "Lege eine Mission fest",
+        "body": "Gib der Arbeit eine Richtung. Missionen zerlegen ein Ziel in Schritte, die sich wirklich abschließen lassen."
+      },
+      "present": {
+        "title": "Erstelle eine Präsentation",
+        "body": "Wähle ein Thema und erhalte ein komplettes Deck — mit recherchierten Fakten, Bildern und Sprechernotizen."
+      },
+      "publish": {
+        "title": "Veröffentliche eine Website",
+        "body": "Beschreibe eine Website und stelle sie live. Du bekommst einen echten Link zum Teilen."
+      }
+    }
+  },
+  "upgradeSuggestion": {
+    "evidence": "Diesen Monat hast du {used} von {cap} {resource} genutzt.",
+    "pitch": "{plan} enthält {nextCap} pro Monat.",
+    "pitchUnlimited": "{plan} hebt das Monatslimit auf.",
+    "seePlans": "Tarife ansehen",
+    "resources": {
+      "presentations": "Präsentationen",
+      "researchReports": "Forschungsberichten",
+      "publishedSites": "veröffentlichten Websites"
+    }
   }
 }

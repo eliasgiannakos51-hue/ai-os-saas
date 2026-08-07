@@ -1677,5 +1677,43 @@
       "websiteBuilder": "Le créateur de sites",
       "files": "fichier"
     }
+  },
+  "onboarding": {
+    "title": "Premiers pas",
+    "progress": "{done} sur {total} terminées",
+    "dismiss": "Fermer le guide",
+    "steps": {
+      "capture": {
+        "title": "Notez votre première idée",
+        "body": "Écrivez une chose que vous avez en tête. Tout le reste dans Ionexa se construit sur ce que vous saisissez."
+      },
+      "ask": {
+        "title": "Interrogez l'IA à son sujet",
+        "body": "Ouvrez le chat et posez une vraie question. La réponse s'appuie sur ce que vous avez déjà noté."
+      },
+      "direction": {
+        "title": "Définissez une mission",
+        "body": "Donnez une direction au travail. Les missions découpent un objectif en étapes que vous pouvez vraiment terminer."
+      },
+      "present": {
+        "title": "Générez une présentation",
+        "body": "Choisissez un sujet et obtenez un deck complet — faits vérifiés, images et notes de présentation inclus."
+      },
+      "publish": {
+        "title": "Publiez un site web",
+        "body": "Décrivez un site et mettez-le en ligne. Vous obtenez un vrai lien à partager."
+      }
+    }
+  },
+  "upgradeSuggestion": {
+    "evidence": "Ce mois-ci, vous avez utilisé {used} de vos {cap} {resource}.",
+    "pitch": "{plan} en inclut {nextCap} par mois.",
+    "pitchUnlimited": "{plan} supprime la limite mensuelle.",
+    "seePlans": "Voir les formules",
+    "resources": {
+      "presentations": "présentations",
+      "researchReports": "rapports de recherche",
+      "publishedSites": "sites publiés"
+    }
   }
 }

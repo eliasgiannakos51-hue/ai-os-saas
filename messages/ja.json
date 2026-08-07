@@ -1677,5 +1677,43 @@
       "websiteBuilder": "サイトビルダー",
       "files": "ファイル"
     }
+  },
+  "onboarding": {
+    "title": "はじめに",
+    "progress": "{done}/{total} 件完了",
+    "dismiss": "ガイドを閉じる",
+    "steps": {
+      "capture": {
+        "title": "最初のアイデアを記録する",
+        "body": "頭にあることをひとつ書き留めましょう。Ionexa の他の機能はすべて、入力した内容の上に成り立ちます。"
+      },
+      "ask": {
+        "title": "AI に質問する",
+        "body": "チャットを開いて実際の質問をしてみましょう。回答はすでに記録した内容に基づきます。"
+      },
+      "direction": {
+        "title": "ミッションを設定する",
+        "body": "作業に方向性を与えましょう。ミッションは目標を実際に完了できるステップに分解します。"
+      },
+      "present": {
+        "title": "プレゼンテーションを生成する",
+        "body": "テーマを選ぶと、調査済みの事実・画像・スピーカーノート付きの完全なスライドが得られます。"
+      },
+      "publish": {
+        "title": "ウェブサイトを公開する",
+        "body": "サイトの内容を説明して公開しましょう。共有できる本物のリンクが手に入ります。"
+      }
+    }
+  },
+  "upgradeSuggestion": {
+    "evidence": "今月は{resource}を {cap} 件中 {used} 件使いました。",
+    "pitch": "{plan} なら月 {nextCap} 件まで使えます。",
+    "pitchUnlimited": "{plan} なら月間上限がなくなります。",
+    "seePlans": "プランを見る",
+    "resources": {
+      "presentations": "プレゼンテーション",
+      "researchReports": "リサーチレポート",
+      "publishedSites": "公開サイト"
+    }
   }
 }

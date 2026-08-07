@@ -1677,5 +1677,43 @@
       "websiteBuilder": "网站生成器",
       "files": "文件"
     }
+  },
+  "onboarding": {
+    "title": "新手引导",
+    "progress": "已完成 {done}/{total}",
+    "dismiss": "关闭引导",
+    "steps": {
+      "capture": {
+        "title": "记下你的第一个想法",
+        "body": "写下你脑海中的一件事。Ionexa 的其他一切都建立在你输入的内容之上。"
+      },
+      "ask": {
+        "title": "向 AI 提问",
+        "body": "打开聊天,提出一个真实的问题。回答会基于你已经记录的内容。"
+      },
+      "direction": {
+        "title": "设定一个任务",
+        "body": "给工作一个方向。任务会把目标拆分成你真正能完成的步骤。"
+      },
+      "present": {
+        "title": "生成一份演示文稿",
+        "body": "选择一个主题,获得完整的幻灯片——包含经过检索的事实、图片和演讲者备注。"
+      },
+      "publish": {
+        "title": "发布一个网站",
+        "body": "描述一个网站并让它上线。你会得到一个可以分享的真实链接。"
+      }
+    }
+  },
+  "upgradeSuggestion": {
+    "evidence": "本月你已使用 {used}/{cap} 个{resource}。",
+    "pitch": "{plan} 每月包含 {nextCap} 个。",
+    "pitchUnlimited": "{plan} 取消每月上限。",
+    "seePlans": "查看套餐",
+    "resources": {
+      "presentations": "演示文稿",
+      "researchReports": "研究报告",
+      "publishedSites": "已发布网站"
+    }
   }
 }

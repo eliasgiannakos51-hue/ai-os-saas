@@ -120,9 +120,23 @@ function hoistExternalImports(chunks) {
 
   const IMPORT_RE = /^import\s+(?:([\w$]+)\s*,\s*)?(?:\{([^}]*)\}|([\w$]+))?\s*from\s*["']([^"']+)["'];?$/;
 
+  // Concatenation puts every module in ONE scope, so two files that each
+  // `export const UNLIMITED = Number.POSITIVE_INFINITY;` (the three
+  // limit modules genuinely do) become a redeclaration SyntaxError. The
+  // dedupe is deliberately the narrowest possible: a single-line const
+  // export is dropped only when a byte-identical line was already
+  // emitted — same name with a DIFFERENT value still collides, loudly,
+  // which is the correct outcome for a real conflict.
+  const seenConstLines = new Set();
+  const DEDUPABLE_CONST_RE = /^export const [\w$]+ = [^;]+;$/;
+
   for (const chunk of chunks) {
     for (const line of chunk.split("\n")) {
       const trimmed = line.trim();
+      if (DEDUPABLE_CONST_RE.test(trimmed)) {
+        if (seenConstLines.has(trimmed)) continue;
+        seenConstLines.add(trimmed);
+      }
       const bareMatch = trimmed.match(/^import\s+["']([^"']+)["'];?$/);
       if (bareMatch) {
         bare.add(bareMatch[1]);

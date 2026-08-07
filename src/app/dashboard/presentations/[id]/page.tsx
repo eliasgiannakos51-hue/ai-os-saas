@@ -5,6 +5,11 @@ import { getTranslations } from "next-intl/server";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { normaliseSlides, withUniqueIds } from "@/lib/presentations/slides";
+import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
+import { nextPlanUp } from "@/lib/billing/plans";
+import type { PlanSlug } from "@/lib/billing/plans";
+import { maxPresentationsForPlan } from "@/lib/presentations/presentation-limits";
+import { UpgradeMoment } from "@/components/billing/upgrade-moment";
 import {
   PresentationEditor,
   type PresentationRecord,
@@ -32,13 +37,47 @@ export default async function PresentationPage({ params }: { params: { id: strin
   // 403, which would confirm that somebody else's id exists.
   const { data: deck } = await supabase
     .from("user_presentations")
-    .select("id, title, brief, language, theme, slides, sources, share_slug, share_enabled")
+    .select("id, title, brief, language, theme, slides, sources, share_slug, share_enabled, created_at")
     .eq("id", params.id)
     .eq("user_id", user.id)
     .maybeSingle();
 
   if (!deck) {
     notFound();
+  }
+
+  // The success+ceiling moment (V3 Task 9). "Just succeeded" is read
+  // from the row itself — a deck created in the last couple of minutes
+  // means the user landed here off the back of generating it — so the
+  // signal survives the redirect from the workspace without query
+  // params or client state. For everyone else (opening an old deck,
+  // refreshing this page) the recency gate fails and none of the
+  // allowance queries below run.
+  let upgradeMoment: {
+    remaining: number | null;
+    nextPlanName: string | null;
+  } | null = null;
+  const deckAgeMs = Date.now() - new Date(deck.created_at).getTime();
+  if (deckAgeMs >= 0 && deckAgeMs < 2 * 60 * 1000) {
+    const planSlug = await resolveEffectivePlanSlug(user);
+    const cap = maxPresentationsForPlan(planSlug as PlanSlug);
+    if (Number.isFinite(cap) && cap > 0) {
+      const since = new Date();
+      since.setUTCDate(1);
+      since.setUTCHours(0, 0, 0, 0);
+      const { count } = await supabase
+        .from("user_presentations")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .gte("created_at", since.toISOString());
+      // A failed count leaves `count` null and remaining null, which the
+      // trigger treats as "no countable ceiling" — silence, the correct
+      // failure mode for a sales banner.
+      upgradeMoment = {
+        remaining: count === null ? null : Math.max(0, cap - count),
+        nextPlanName: nextPlanUp(planSlug)?.name ?? null,
+      };
+    }
   }
 
   const { data: versions } = await supabase
@@ -73,6 +112,17 @@ export default async function PresentationPage({ params }: { params: { id: strin
           <ArrowLeft className="h-3 w-3" aria-hidden="true" />
           {t("backToList")}
         </Link>
+
+        {upgradeMoment ? (
+          <UpgradeMoment
+            justSucceeded
+            remainingOfThisAction={upgradeMoment.remaining}
+            nextPlanName={upgradeMoment.nextPlanName}
+            reason="presentations"
+            refusalCount={0}
+            refusedFeature="presentations"
+          />
+        ) : null}
 
         <PresentationEditor
           presentation={record}

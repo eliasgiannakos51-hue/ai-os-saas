@@ -1677,5 +1677,43 @@
       "websiteBuilder": "The Website Builder",
       "files": "file"
     }
+  },
+  "onboarding": {
+    "title": "Getting started",
+    "progress": "{done} of {total} done",
+    "dismiss": "Dismiss the guide",
+    "steps": {
+      "capture": {
+        "title": "Capture your first idea",
+        "body": "Write down one thing on your mind. Everything else in Ionexa builds on what you put in."
+      },
+      "ask": {
+        "title": "Ask the AI about it",
+        "body": "Open the chat and ask a real question. The answer draws on what you have already captured."
+      },
+      "direction": {
+        "title": "Set a mission",
+        "body": "Give the work a direction. Missions break a goal into steps you can actually finish."
+      },
+      "present": {
+        "title": "Generate a presentation",
+        "body": "Pick a topic and get a full deck — researched facts, images and speaker notes included."
+      },
+      "publish": {
+        "title": "Publish a website",
+        "body": "Describe a site and put it live. You get a real link you can share."
+      }
+    }
+  },
+  "upgradeSuggestion": {
+    "evidence": "You've used {used} of {cap} {resource} this month.",
+    "pitch": "{plan} includes {nextCap} a month.",
+    "pitchUnlimited": "{plan} removes the monthly cap.",
+    "seePlans": "See plans",
+    "resources": {
+      "presentations": "presentations",
+      "researchReports": "research reports",
+      "publishedSites": "published sites"
+    }
   }
 }

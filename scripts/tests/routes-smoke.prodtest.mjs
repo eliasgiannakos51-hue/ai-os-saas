@@ -211,7 +211,7 @@ if (!up || /EADDRINUSE|Failed to start server/.test(serverLog)) {
 }
 console.log(`production server up on :${PORT} (next start, NODE_ENV=production)`);
 
-const PUBLIC_ROUTES = ["/", "/pricing", "/terms", "/privacy", "/login", "/signup", "/roadmap"];
+const PUBLIC_ROUTES = ["/", "/pricing", "/terms", "/privacy", "/login", "/signup", "/roadmap", "/contact"];
 const DASHBOARD_ROUTES = [
   "/dashboard",
   "/dashboard/overview",
@@ -239,6 +239,12 @@ const DASHBOARD_ROUTES = [
   "/dashboard/campaigns",
   "/dashboard/data-analysis",
   "/dashboard/presentations",
+  // V3 Tasks 6 and 8. Added here because this suite is the only thing
+  // that has ever caught an unresolved i18n key rendering its own dotted
+  // path to a user — a class of bug neither i18n gate can see, since the
+  // sidebar and these pages build keys by template.
+  "/dashboard/marketplace/sell",
+  "/dashboard/support",
   "/dashboard/websites",
   "/dashboard/product-workflow",
   "/dashboard/trading-workflow",

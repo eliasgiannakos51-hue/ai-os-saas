@@ -30,6 +30,12 @@ import { loadLatestEnergyCheckIn } from "@/lib/energy-checkins";
 import { EnergySuggestion } from "@/components/overview/energy-suggestion";
 import { ValueReportCard } from "@/components/overview/value-report-card";
 import { buildValueReport } from "@/lib/value-report";
+import { OnboardingGuideCard } from "@/components/overview/onboarding-guide";
+import { buildOnboardingGuide, daysSince, ONBOARDING_WINDOW_DAYS } from "@/lib/onboarding";
+import { lockedFeaturesForPlan } from "@/lib/feature-locks";
+import { resolveEffectivePlan } from "@/lib/billing/credits";
+import { UpgradeSuggestionCard } from "@/components/overview/upgrade-suggestion-card";
+import { buildUpgradeSuggestion, SUGGESTION_MIN_ACCOUNT_AGE_DAYS } from "@/lib/upgrade-suggestion";
 import { EnergyCheckinWidget } from "@/components/overview/energy-checkin-widget";
 import { Database, TrendingUp, Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
@@ -334,6 +340,78 @@ export default async function OverviewPage() {
     accountCreatedAt: user.created_at,
   });
 
+  // The personalised suggestion, after 30 days (V3 Task 9). Reuses the
+  // monthly counts the value report just paid for — presentations,
+  // published sites, research reports are exactly the metered resources
+  // the rule compares against caps — so the only extra work is one plan
+  // lookup, and only for accounts old enough to have a pattern at all.
+  const accountAgeDays = daysSince(user.created_at);
+  let upgradeSuggestion = buildUpgradeSuggestion({
+    accountAgeDays: null,
+    planSlug: "free",
+    usedThisMonth: { presentations: 0, researchReports: 0, publishedSites: 0 },
+  });
+  if (accountAgeDays !== null && accountAgeDays >= SUGGESTION_MIN_ACCOUNT_AGE_DAYS) {
+    const suggestionPlan = await resolveEffectivePlan(user);
+    upgradeSuggestion = buildUpgradeSuggestion({
+      accountAgeDays,
+      planSlug: suggestionPlan.slug,
+      usedThisMonth: {
+        presentations: presentationCount,
+        researchReports: researchCount,
+        publishedSites: publishedCount,
+      },
+    });
+  }
+
+  // The guided start (V3 Task 9).
+  //
+  // GATED ON AGE BEFORE ANY QUERY RUNS. The guide only exists for the
+  // first ONBOARDING_WINDOW_DAYS, so an account past that costs exactly
+  // nothing here — no plan lookup, no counts, no work at all. Writing it
+  // the other way round (count first, decide second) would have put five
+  // queries on the overview forever to serve a panel almost nobody sees.
+  let onboardingGuide = buildOnboardingGuide({
+    counts: { ideas: 0, aiActions: 0, missions: 0, presentations: 0, websitesPublished: 0 },
+    accountCreatedAt: null,
+  });
+  if (accountAgeDays !== null && accountAgeDays <= ONBOARDING_WINDOW_DAYS) {
+    const countAll = async (table: string) => {
+      const { count, error } = await supabase
+        .from(table)
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+      // Same rule as the value counts: a failed count reports zero
+      // rather than throwing. The cost of being wrong is one already
+      // finished step showing unticked, which is not worth a 500.
+      if (error) logApiError("/dashboard/overview", error, { stage: "onboarding_count", table });
+      return count ?? 0;
+    };
+    const [onboardingPlan, ideaCount, missionCount, deckCount, siteCount, aiCallCount] =
+      await Promise.all([
+        resolveEffectivePlan(user),
+        countAll("ideas"),
+        countAll("ai_missions"),
+        countAll("user_presentations"),
+        countAll("published_sites"),
+        countAll("ai_cost_log"),
+      ]);
+    onboardingGuide = buildOnboardingGuide({
+      counts: {
+        ideas: ideaCount,
+        aiActions: aiCallCount,
+        missions: missionCount,
+        presentations: deckCount,
+        websitesPublished: siteCount,
+      },
+      accountCreatedAt: user.created_at,
+      // The same locks the sidebar draws, so the checklist can never ask
+      // a Free account to generate a presentation it is not allowed to
+      // generate.
+      lockedHrefs: lockedFeaturesForPlan(onboardingPlan.slug).map((l) => l.href),
+    });
+  }
+
   const healthScoreRangeLabel =
     healthScore.label === "justStarting"
       ? t("healthScore.justStarting")
@@ -409,6 +487,11 @@ export default async function OverviewPage() {
           <CreditsHomeStat label={t("statRow.creditsRemaining")} />
         </div>
 
+        {/* Above the health score on purpose. A score is a judgement, and
+            judging somebody on their second day — before they have been
+            shown what there is to do — is the wrong order. */}
+        <OnboardingGuideCard guide={onboardingGuide} />
+
         <HealthScoreCard
           title={t("healthScore.title")}
           score={healthScore.score}
@@ -418,6 +501,11 @@ export default async function OverviewPage() {
         />
 
         <ValueReportCard report={valueReport} />
+
+        {/* Directly under the impact panel on purpose: the suggestion
+            cites this month's numbers, and the panel above it is where
+            those numbers are visible. Evidence first, pitch second. */}
+        <UpgradeSuggestionCard suggestion={upgradeSuggestion} />
 
         <EnergyCheckinWidget initialCheckIn={latestEnergyCheckIn} />
 

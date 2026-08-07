@@ -253,6 +253,24 @@ export function planMeetsMinimum(tier: string, minimum: PlanSlug): boolean {
   return tierRank >= 0 && tierRank >= minRank;
 }
 
+/**
+ * The plan an upgrade suggestion may name — the next SELF-SERVE plan up,
+ * or null when there is nothing suggestible.
+ *
+ * Enterprise is deliberately never returned: it is sales-negotiated, so
+ * pointing a banner at it sends the user to a pricing page with no
+ * button to press. Ultimate (and Enterprise itself, and any unknown
+ * slug) therefore get null, which every caller already treats as "say
+ * nothing" — the correct way to address the customer on the top plan.
+ */
+export function nextPlanUp(slug: string): Plan | null {
+  const rank = PLAN_RANK.indexOf(slug as PlanSlug);
+  if (rank < 0) return null;
+  const next = PLAN_RANK[rank + 1];
+  if (!next || !isPaidPlanSlug(next)) return null;
+  return getPlan(next) ?? null;
+}
+
 // One-time credit packs (mode: "payment", not a subscription) — display
 // metadata only, client-safe. Stripe Price IDs live in price-ids.ts
 // (server-only) keyed by the same `id`. Amounts/prices match the actual

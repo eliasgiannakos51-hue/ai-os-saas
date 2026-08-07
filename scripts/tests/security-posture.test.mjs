@@ -92,6 +92,8 @@ const V3_TABLES = [
   "published_sites",
   "site_versions",
   "site_analytics",
+  "user_integrations",
+  "integration_sync_log",
 ];
 for (const t of MODULE_TABLES) {
   if (!rlsEnabled.has(t)) {
@@ -127,6 +129,35 @@ const analyticsPolicies = [...sql.matchAll(/create policy[^;]*?\son\s+(?:public\
 );
 checkTrue(`site_analytics has exactly one policy (${analyticsPolicies.length})`, analyticsPolicies.length === 1);
 checkTrue("...and it is select-only", /for select/i.test(analyticsPolicies[0] ?? ""));
+
+// integration_sync_log is the user-facing audit trail of what the AI read
+// from their mail and files. A user-writable audit trail is not an audit
+// trail, so it is select-only for exactly the same reason agent_runs is.
+const syncLogPolicies = [
+  ...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?integration_sync_log"?[^;]*/gis),
+].map((m) => m[0]);
+checkTrue(`integration_sync_log has exactly one policy (${syncLogPolicies.length})`, syncLogPolicies.length === 1);
+checkTrue("...and it is select-only", /for select/i.test(syncLogPolicies[0] ?? ""));
+
+// The tables holding third-party OAuth tokens must be reachable ONLY by
+// their owner. A policy here that was not scoped to auth.uid() would hand
+// every stored Gmail grant to anyone with the anon key, which ships in the
+// client bundle.
+const integrationPolicies = [
+  ...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?user_integrations"?[^;]*/gis),
+].map((m) => m[0]);
+checkTrue(`user_integrations has policies (${integrationPolicies.length})`, integrationPolicies.length >= 1);
+checkTrue(
+  "...and every one is scoped to auth.uid()",
+  integrationPolicies.every((p) => /auth\.uid\(\) = user_id/.test(p))
+);
+// The columns are ciphertext, and the schema must keep saying so: a column
+// renamed to `access_token` would be a plaintext-shaped invitation.
+checkTrue(
+  "the token columns are named as ciphertext",
+  /access_token_encrypted/.test(sql) && /refresh_token_encrypted/.test(sql)
+);
+checkTrue("...and no plaintext token column exists", !/\baccess_token text\b/.test(sql));
 
 // published_sites must NOT be publicly readable. The anon key is printed
 // in the client bundle, so a "true" select policy here would hand every
@@ -238,6 +269,18 @@ const cronSrc = readFileSync(CRON_ROUTE, "utf8");
 checkTrue("releaseExpiredReservations is imported by the cron", cronSrc.includes("releaseExpiredReservations"));
 checkTrue("...and actually invoked", /await releaseExpiredReservations\(\)/.test(cronSrc));
 checkTrue("...and its failure cannot fail the cron", /catch[\s\S]{0,220}sweep_reservations/.test(cronSrc));
+
+// Same rule, applied to the V3 Task 3 addition the moment it shipped: the
+// integrations audit trail is pruned by an RPC whose own comment says the
+// daily cron calls it. This asserts that it does.
+checkTrue(
+  "prune_integration_sync_log is actually invoked by the cron",
+  /rpc\("prune_integration_sync_log"\)/.test(cronSrc)
+);
+checkTrue(
+  "...and its failure cannot fail the cron",
+  /catch[\s\S]{0,260}prune_integration_sync_log/.test(cronSrc)
+);
 
 // The route this cron actually runs on must be the one the scheduler
 // fires — a sweeper wired into a route nobody calls is the same bug again.

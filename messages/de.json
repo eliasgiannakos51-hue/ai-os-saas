@@ -77,7 +77,8 @@
       "productWorkflow": "Produkt-Workflow",
       "automation": "Automatisierung",
       "marketplace": "Marktplatz",
-      "published": "Veröffentlichte Seiten"
+      "published": "Veröffentlichte Seiten",
+      "integrations": "Integrationen"
     },
     "groupHints": {
       "create": "Eine Website erzeugen, ein Ziel planen, ein Dokument schreiben.",
@@ -125,7 +126,8 @@
       "presentations": "Aus einem Briefing eine fertige Präsentation machen. Noch nicht fertig.",
       "home": "Ihr Dashboard — Aktivität, Statistiken und Schnellaktionen.",
       "settings": "Konto, Abrechnung, Sprache und Einstellungen.",
-      "published": "Alle Ihre Live-Seiten, mit Zugriffen und Versionsverlauf"
+      "published": "Alle Ihre Live-Seiten, mit Zugriffen und Versionsverlauf",
+      "integrations": "Gmail, Drive und Slack verbinden, damit die KI mit Ihren echten Daten arbeitet"
     },
     "comingSoon": "Demnächst",
     "comingSoonToast": "{name} ist noch nicht verfügbar — steht auf der Roadmap.",
@@ -1117,6 +1119,66 @@
       "rollbackSuccess": "Auf Version {number} zurückgesetzt.",
       "rollbackError": "Zurücksetzen nicht möglich. Bitte erneut versuchen.",
       "confirmRollback": "Version {number} wieder live schalten?"
+    },
+    "integrations": {
+      "title": "Integrationen",
+      "description": "Verbinden Sie die Werkzeuge, die Sie ohnehin nutzen, damit die KI mit Ihren echten Daten arbeitet.",
+      "privacyNotice": "Verbindungen sind schreibgeschützt, sofern nicht anders angegeben. Tokens werden mit einem Schlüssel verschlüsselt, der nicht in unserer Datenbank liegt, erscheinen nie in Logs, und beim Trennen widerrufen wir den Zugriff beim Anbieter und löschen alles, was wir halten — einschließlich der Aufzeichnung darüber, was gelesen wurde.",
+      "notConfigured": "Integrationen sind auf diesem Deployment noch nicht eingerichtet, Verbinden ist daher deaktiviert.",
+      "providerUnavailable": "Auf diesem Deployment nicht verfügbar.",
+      "used": "{used} von {cap} verbunden",
+      "usedUnlimited": "{used} verbunden",
+      "connect": "Verbinden",
+      "disconnect": "Trennen",
+      "cancel": "Abbrechen",
+      "statusConnected": "Verbunden",
+      "statusNotConnected": "Nicht verbunden",
+      "statusExpired": "Neu verbinden nötig",
+      "statusRevoked": "Zugriff widerrufen",
+      "statusError": "Funktioniert nicht",
+      "accessReadOnly": "Nur lesen",
+      "accessReadWrite": "Lesen und posten",
+      "whatAiSees": "Was die KI sehen kann",
+      "lastSync": "Zuletzt gelesen {when}",
+      "confirmDisconnect": "{name} trennen? Wir widerrufen unseren Zugriff und löschen alles, was wir dazu halten.",
+      "disconnectSuccess": "Getrennt, und der Zugriff wurde widerrufen.",
+      "disconnectLocalOnly": "Hier getrennt. Den Anbieter konnten wir für den Widerruf nicht erreichen — entfernen Sie es ggf. auch in dessen Einstellungen.",
+      "disconnectError": "Trennen nicht möglich. Bitte erneut versuchen.",
+      "consentTitle": "Bevor Sie {name} verbinden",
+      "scopesLabel": "Genau das fragen wir an",
+      "consentPointEncrypted": "Ihr Token wird mit einem Schlüssel verschlüsselt, der nicht in unserer Datenbank liegt.",
+      "consentPointAudit": "Jeder Lesevorgang wird protokolliert, und Sie sehen, wann er zuletzt stattfand.",
+      "consentPointRevoke": "Trennen widerruft unseren Zugriff und löscht, was wir halten.",
+      "consentApprove": "Weiter zu {name}",
+      "status": {
+        "connected": "Verbunden.",
+        "cancelled": "Verbindung abgebrochen.",
+        "expired": "Das hat zu lange gedauert — bitte erneut verbinden.",
+        "invalid_state": "Die Verbindungsanfrage konnte nicht geprüft werden. Bitte neu starten.",
+        "invalid_response": "Der Anbieter hat unerwartet geantwortet.",
+        "exchange_failed": "Der Anbieter hat die Verbindung abgelehnt. Bitte erneut versuchen.",
+        "missing_scopes": "Einige Berechtigungen wurden abgelehnt, damit würde die Verbindung nicht funktionieren. Bitte erneut versuchen und alle zulassen.",
+        "save_failed": "Verbunden, aber wir konnten es nicht speichern. Bitte erneut versuchen.",
+        "provider_error": "Der Anbieter meldete einen Fehler.",
+        "error": "Etwas ist schiefgelaufen."
+      },
+      "providers": {
+        "gmail": {
+          "summary": "Aktuelle E-Mails lesen, damit die KI Fragen dazu beantworten kann.",
+          "sees": "Betreffs, Absender, Daten und eine kurze Vorschau passender Nachrichten. Nie ganze Nachrichtentexte, nie Anhänge, nie Spam oder Papierkorb.",
+          "consent": "Die KI kann Ihr Gmail durchsuchen und lesen, um Ihre Fragen dazu zu beantworten. Sie liest nur, wenn eine Frage es erfordert — nie im Hintergrund — und kann nichts senden, löschen oder ändern."
+        },
+        "googleDrive": {
+          "summary": "Ihre Dokumente finden und lesen, damit die KI sie als Kontext nutzt.",
+          "sees": "Dateinamen, Eigentümer und Änderungsdaten bei der Suche; den Text eines Dokuments nur, wenn Sie darum bitten.",
+          "consent": "Die KI kann Ihr Drive durchsuchen und Dokumente lesen, auf die Sie sie hinweisen. Sie kann nichts anlegen, ändern oder löschen."
+        },
+        "slack": {
+          "summary": "Kanäle lesen, in denen die App ist, und Agenten dort posten lassen.",
+          "sees": "Aktuelle Nachrichten in den öffentlichen Kanälen, in die Sie die Ionexa-App einladen. Private Kanäle und Direktnachrichten sieht sie nicht.",
+          "consent": "Die KI kann die öffentlichen Kanäle lesen, in die Sie sie einladen, und Ihre Agenten können ihre Ergebnisse in einem Kanal Ihrer Wahl posten. Dies ist die einzige Integration, die schreiben kann."
+        }
+      }
     }
   },
   "module": {

@@ -77,7 +77,8 @@
       "productWorkflow": "产品工作流",
       "automation": "自动化",
       "marketplace": "市场",
-      "published": "已发布网站"
+      "published": "已发布网站",
+      "integrations": "集成"
     },
     "groupHints": {
       "create": "生成网站、规划目标、撰写文档。",
@@ -125,7 +126,8 @@
       "presentations": "把一份简报变成完整的演示文稿。尚未就绪。",
       "home": "你的仪表板——活动、统计和快捷操作。",
       "settings": "账户、账单、语言和偏好设置。",
-      "published": "你所有已上线的网站，含访问量与版本历史"
+      "published": "你所有已上线的网站，含访问量与版本历史",
+      "integrations": "连接 Gmail、Drive 与 Slack，让 AI 处理你真实的数据"
     },
     "comingSoon": "即将推出",
     "comingSoonToast": "{name} 尚未推出——已列入路线图。",
@@ -1117,6 +1119,66 @@
       "rollbackSuccess": "已回滚到版本 {number}。",
       "rollbackError": "无法回滚，请重试。",
       "confirmRollback": "将版本 {number} 重新设为线上版本？"
+    },
+    "integrations": {
+      "title": "集成",
+      "description": "连接你已经在用的工具，让 AI 处理你真实的数据。",
+      "privacyNotice": "除非另有说明，连接均为只读。令牌使用不存放于我们数据库中的密钥加密，绝不会出现在日志里；断开连接会在服务商处撤销授权，并删除我们保存的一切，包括读取记录。",
+      "notConfigured": "此部署尚未配置集成，因此无法连接。",
+      "providerUnavailable": "此部署不提供。",
+      "used": "已连接 {used} / {cap}",
+      "usedUnlimited": "已连接 {used} 个",
+      "connect": "连接",
+      "disconnect": "断开",
+      "cancel": "取消",
+      "statusConnected": "已连接",
+      "statusNotConnected": "未连接",
+      "statusExpired": "需要重新连接",
+      "statusRevoked": "授权已撤销",
+      "statusError": "无法使用",
+      "accessReadOnly": "只读",
+      "accessReadWrite": "读取与发送",
+      "whatAiSees": "AI 能看到什么",
+      "lastSync": "上次读取 {when}",
+      "confirmDisconnect": "断开 {name}？我们会撤销授权并删除相关的一切。",
+      "disconnectSuccess": "已断开，授权已撤销。",
+      "disconnectLocalOnly": "已在本地断开。我们未能联系服务商撤销授权——建议你也到其设置中移除。",
+      "disconnectError": "无法断开，请重试。",
+      "consentTitle": "连接 {name} 之前",
+      "scopesLabel": "我们申请的具体权限",
+      "consentPointEncrypted": "你的令牌以不存放在我们数据库中的密钥加密。",
+      "consentPointAudit": "每次读取都会记录，你可以看到最近一次的时间。",
+      "consentPointRevoke": "断开连接会撤销我们的访问权并删除我们保存的内容。",
+      "consentApprove": "前往 {name}",
+      "status": {
+        "connected": "已连接。",
+        "cancelled": "已取消连接。",
+        "expired": "耗时过长——请重新连接。",
+        "invalid_state": "无法验证此连接请求，请重新开始。",
+        "invalid_response": "服务商返回了意外的响应。",
+        "exchange_failed": "服务商拒绝了连接，请重试。",
+        "missing_scopes": "部分权限被拒绝，连接将无法工作。请重试并全部允许。",
+        "save_failed": "已连接，但保存失败，请重试。",
+        "provider_error": "服务商报告了错误。",
+        "error": "出了点问题。"
+      },
+      "providers": {
+        "gmail": {
+          "summary": "读取近期邮件，让 AI 能回答与之相关的问题。",
+          "sees": "匹配邮件的主题、发件人、日期和简短摘要。绝不读取正文全文、附件，也不读取垃圾邮件与回收站。",
+          "consent": "AI 将能搜索并读取你的 Gmail 以回答你的提问。仅在问题需要时读取，绝不在后台读取，且无法发送、删除或修改任何内容。"
+        },
+        "googleDrive": {
+          "summary": "查找并读取你的文档，作为 AI 的上下文。",
+          "sees": "搜索时看到文件名、所有者和修改时间；只有在你要求读取某个文档时才会读取其正文。",
+          "consent": "AI 将能搜索你的云端硬盘并读取你指定的文档。它无法创建、修改或删除任何内容。"
+        },
+        "slack": {
+          "summary": "读取应用所在的频道，并让智能体把结果发到那里。",
+          "sees": "你邀请 Ionexa 应用加入的公开频道中的近期消息。它看不到私密频道和私信。",
+          "consent": "AI 将能读取你邀请它加入的公开频道，你的智能体也能把结果发到你选择的频道。这是唯一可以写入的集成。"
+        }
+      }
     }
   },
   "module": {

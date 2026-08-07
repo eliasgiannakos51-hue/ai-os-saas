@@ -29,10 +29,10 @@ import {
   maxAgentRunsPerHour,
 } from "@/lib/agents/agent-limits";
 import {
-  sendAgentRunResultEmail,
   sendAgentDisabledEmail,
   sendAgentPausedNoCreditsEmail,
 } from "@/lib/email/send-agent-emails";
+import { deliverAgentResult } from "@/lib/agents/deliver";
 import { normaliseAgentConfig, type UserAgent } from "@/lib/agents/agent-config";
 
 // ONE execution of one agent, end to end: rate limit, circuit breaker,
@@ -45,7 +45,18 @@ import { normaliseAgentConfig, type UserAgent } from "@/lib/agents/agent-config"
 // identical or the two paths drift and one of them stops charging.
 
 export type ExecuteAgentResult =
-  | { ok: true; runId: string; output: string | null; creditsCharged: number; emailed: boolean }
+  | {
+      ok: true;
+      runId: string;
+      output: string | null;
+      creditsCharged: number;
+      /** True only when the result actually reached the user. Named for the
+       *  outcome rather than the transport, since V3 Task 3 added Slack. */
+      delivered: boolean;
+      deliveredVia: "email" | "slack" | null;
+      /** Why it did not arrive, when it did not. */
+      deliveryIssue?: string;
+    }
   | {
       ok: false;
       reason:
@@ -327,16 +338,21 @@ export async function executeAgent(params: {
 
   // ---- success path (including "nothing to report") -----------------
   const output = outcome.ok ? outcome.output : null;
-  let emailed = false;
+  let delivery: { delivered: boolean; via: "email" | "slack" | null; reason?: string } = {
+    delivered: false,
+    via: null,
+  };
   if (output) {
-    const sent = await sendAgentRunResultEmail({
+    const result = await deliverAgentResult({
       userId,
       email: user.email ?? "",
+      method: agent.delivery_method,
+      target: agent.delivery_target,
       agentName: agent.name,
       output,
       language: agentConfig.language,
     });
-    emailed = sent.sent;
+    delivery = { delivered: result.delivered, via: result.via, reason: result.reason };
   }
 
   await admin
@@ -345,6 +361,10 @@ export async function executeAgent(params: {
       status: "success",
       finished_at: finishedAt,
       output,
+      // The run SUCCEEDED — the work was done and paid for — but if the
+      // result never reached the user, that has to be visible in the
+      // history rather than inferred from an inbox that stayed empty.
+      error: output && !delivery.delivered ? delivery.reason ?? null : null,
       credits_charged: settlement.creditsCharged,
       tokens_used: tokensUsed,
       attempts,
@@ -367,7 +387,15 @@ export async function executeAgent(params: {
     await admin.from("user_agents").update({ consecutive_failures: 0 }).eq("id", agent.id);
   }
 
-  return { ok: true, runId, output, creditsCharged: settlement.creditsCharged, emailed };
+  return {
+    ok: true,
+    runId,
+    output,
+    creditsCharged: settlement.creditsCharged,
+    delivered: delivery.delivered,
+    deliveredVia: delivery.via,
+    ...(delivery.reason ? { deliveryIssue: delivery.reason } : {}),
+  };
 }
 
 /**

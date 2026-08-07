@@ -77,7 +77,8 @@
       "productWorkflow": "Product Workflow",
       "automation": "Automation",
       "marketplace": "Marketplace",
-      "published": "Published Sites"
+      "published": "Published Sites",
+      "integrations": "Integrations"
     },
     "groupHints": {
       "create": "Generate a site, plan a goal, write a document.",
@@ -125,7 +126,8 @@
       "presentations": "Turn a brief into a finished deck. Not ready yet.",
       "home": "Your dashboard — activity, stats and quick actions.",
       "settings": "Account, billing, language and preferences.",
-      "published": "Every site you have live on the web, with its traffic and version history"
+      "published": "Every site you have live on the web, with its traffic and version history",
+      "integrations": "Connect Gmail, Drive and Slack so the AI can work with your real data"
     },
     "comingSoon": "Coming soon",
     "comingSoonToast": "{name} isn't available yet — it's on the roadmap.",
@@ -1117,6 +1119,66 @@
       "rollbackSuccess": "Rolled back to version {number}.",
       "rollbackError": "Could not roll that back. Please try again.",
       "confirmRollback": "Put version {number} back on the live site?"
+    },
+    "integrations": {
+      "title": "Integrations",
+      "description": "Connect the tools you already use, so the AI can work with your real data.",
+      "privacyNotice": "Connections are read-only unless stated otherwise. Tokens are encrypted with a key that is not stored in our database, they never appear in logs, and disconnecting revokes the access at the provider and deletes everything we hold — including the record of what was read.",
+      "notConfigured": "Integrations aren't set up on this deployment yet, so connecting is disabled.",
+      "providerUnavailable": "Not available on this deployment.",
+      "used": "{used} of {cap} connected",
+      "usedUnlimited": "{used} connected",
+      "connect": "Connect",
+      "disconnect": "Disconnect",
+      "cancel": "Cancel",
+      "statusConnected": "Connected",
+      "statusNotConnected": "Not connected",
+      "statusExpired": "Needs reconnecting",
+      "statusRevoked": "Access revoked",
+      "statusError": "Not working",
+      "accessReadOnly": "Read-only",
+      "accessReadWrite": "Read and post",
+      "whatAiSees": "What the AI can see",
+      "lastSync": "Last read {when}",
+      "confirmDisconnect": "Disconnect {name}? We'll revoke our access and delete everything we hold for it.",
+      "disconnectSuccess": "Disconnected, and access was revoked.",
+      "disconnectLocalOnly": "Disconnected here. We couldn't reach the provider to revoke it — you may want to remove it in their settings too.",
+      "disconnectError": "Could not disconnect. Please try again.",
+      "consentTitle": "Before connecting {name}",
+      "scopesLabel": "Exactly what we ask for",
+      "consentPointEncrypted": "Your access token is encrypted with a key that isn't in our database.",
+      "consentPointAudit": "Every read is recorded, and you can see when it last happened.",
+      "consentPointRevoke": "Disconnecting revokes our access and deletes what we hold.",
+      "consentApprove": "Continue to {name}",
+      "status": {
+        "connected": "Connected.",
+        "cancelled": "Connection cancelled.",
+        "expired": "That took too long — please try connecting again.",
+        "invalid_state": "That connection request couldn't be verified. Please start again.",
+        "invalid_response": "The provider sent back an unexpected response.",
+        "exchange_failed": "The provider refused the connection. Please try again.",
+        "missing_scopes": "Some permissions were declined, so the connection wouldn't work. Please try again and accept all of them.",
+        "save_failed": "Connected, but we couldn't store it. Please try again.",
+        "provider_error": "The provider reported an error.",
+        "error": "Something went wrong."
+      },
+      "providers": {
+        "gmail": {
+          "summary": "Read recent email so the AI can answer questions about it.",
+          "sees": "Subjects, senders, dates and a short preview of matching messages. Never full message bodies, never attachments, never Spam or Trash.",
+          "consent": "The AI will be able to search and read your Gmail in order to answer questions you ask about it. It reads only when a question needs it — never in the background — and it can't send, delete or change anything."
+        },
+        "googleDrive": {
+          "summary": "Find and read your documents so the AI can use them as context.",
+          "sees": "File names, owners and modification dates when searching; the text of a document only when you ask it to read that document.",
+          "consent": "The AI will be able to search your Drive and read documents you point it at. It can't create, change or delete anything."
+        },
+        "slack": {
+          "summary": "Read channels the app is in, and let agents post results there.",
+          "sees": "Recent messages in the public channels you invite the Ionexa app into. It can't see private channels or direct messages.",
+          "consent": "The AI will be able to read the public channels you invite it into, and your agents will be able to post their results to a channel you choose. This is the only integration that can write anything."
+        }
+      }
     }
   },
   "module": {

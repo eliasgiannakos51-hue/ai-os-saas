@@ -6,8 +6,14 @@ import {
   AGENT_LIMITS,
   sanitiseAgentText,
   isAgentOutputFormat,
+  isAgentDeliveryMethod,
+  isSlackChannelAllowed,
+  normaliseSlackChannel,
+  normaliseDeliveryTarget,
+  isDeliveryTargetAllowed,
   type UserAgent,
 } from "@/lib/agents/agent-config";
+import { listSlackChannels } from "@/lib/integrations/read";
 import { validateAgentCron, isValidTimeZone, nextRunAt } from "@/lib/agents/cron-expression";
 
 export const dynamic = "force-dynamic";
@@ -29,6 +35,8 @@ type PatchBody = {
   status?: unknown;
   needsWebSearch?: unknown;
   outputFormat?: unknown;
+  deliveryMethod?: unknown;
+  deliveryTarget?: unknown;
 };
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
@@ -145,6 +153,54 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       if (status === "active" && agent.consecutive_failures > 0) updates.consecutive_failures = 0;
     } else if (body.status !== undefined) {
       return NextResponse.json({ ok: false, error: "Invalid status." }, { status: 400 });
+    }
+
+    // Changing WHERE an agent sends goes through the same server-side
+    // ownership proof as creating one: the channel must be in the caller's
+    // own connected workspace, resolved here and never taken from the body.
+    // Leaving this out was the quiet gap — an agent created for email could
+    // otherwise never be pointed at Slack, and a half-implemented PATCH
+    // that accepted the field without the check would be worse than either.
+    if (body.deliveryMethod !== undefined || body.deliveryTarget !== undefined) {
+      const method = body.deliveryMethod === undefined ? agent.delivery_method : body.deliveryMethod;
+      if (!isAgentDeliveryMethod(method)) {
+        return NextResponse.json({ ok: false, error: "That delivery method is not available." }, { status: 400 });
+      }
+
+      if (method === "slack") {
+        const channel = normaliseSlackChannel(
+          typeof body.deliveryTarget === "string" ? body.deliveryTarget : agent.delivery_target
+        );
+        const channels = await listSlackChannels(user.id);
+        if (!channels.ok) {
+          return NextResponse.json(
+            { ok: false, error: "Connect Slack in Integrations before an agent can post to it." },
+            { status: 400 }
+          );
+        }
+        if (!isSlackChannelAllowed(channel, channels.channels.map((c) => c.id))) {
+          return NextResponse.json(
+            { ok: false, error: "An agent can only post to a channel in your own connected Slack workspace." },
+            { status: 400 }
+          );
+        }
+        updates.delivery_method = "slack";
+        updates.delivery_target = channel;
+      } else {
+        const target = normaliseDeliveryTarget(
+          typeof body.deliveryTarget === "string" && body.deliveryTarget.trim()
+            ? body.deliveryTarget
+            : user.email
+        );
+        if (!isDeliveryTargetAllowed(target, user.email)) {
+          return NextResponse.json(
+            { ok: false, error: "An agent can only send results to your own account email address." },
+            { status: 400 }
+          );
+        }
+        updates.delivery_method = "email";
+        updates.delivery_target = target;
+      }
     }
 
     if (body.needsWebSearch !== undefined || body.outputFormat !== undefined) {

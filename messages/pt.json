@@ -77,7 +77,8 @@
       "productWorkflow": "Fluxo de Produto",
       "automation": "Automação",
       "marketplace": "Mercado",
-      "published": "Sites publicados"
+      "published": "Sites publicados",
+      "integrations": "Integrações"
     },
     "groupHints": {
       "create": "Gere um site, planeie um objetivo, escreva um documento.",
@@ -125,7 +126,8 @@
       "presentations": "Transforme um resumo numa apresentação acabada. Ainda não está pronto.",
       "home": "O teu painel — atividade, estatísticas e ações rápidas.",
       "settings": "Conta, faturação, idioma e preferências.",
-      "published": "Todos os seus sites no ar, com o tráfego e o histórico de versões"
+      "published": "Todos os seus sites no ar, com o tráfego e o histórico de versões",
+      "integrations": "Ligue Gmail, Drive e Slack para a IA trabalhar com os seus dados reais"
     },
     "comingSoon": "Em breve",
     "comingSoonToast": "{name} ainda não está disponível — está no roteiro.",
@@ -1117,6 +1119,66 @@
       "rollbackSuccess": "Reposta a versão {number}.",
       "rollbackError": "Não foi possível repor. Tente novamente.",
       "confirmRollback": "Repor a versão {number} no site no ar?"
+    },
+    "integrations": {
+      "title": "Integrações",
+      "description": "Ligue as ferramentas que já usa, para a IA trabalhar com os seus dados reais.",
+      "privacyNotice": "As ligações são apenas de leitura salvo indicação em contrário. Os tokens são cifrados com uma chave que não está na nossa base de dados, nunca aparecem nos registos, e desligar revoga o acesso no fornecedor e apaga tudo o que guardamos, incluindo o histórico do que foi lido.",
+      "notConfigured": "As integrações ainda não estão configuradas nesta instalação, por isso ligar está desativado.",
+      "providerUnavailable": "Indisponível nesta instalação.",
+      "used": "{used} de {cap} ligadas",
+      "usedUnlimited": "{used} ligadas",
+      "connect": "Ligar",
+      "disconnect": "Desligar",
+      "cancel": "Cancelar",
+      "statusConnected": "Ligado",
+      "statusNotConnected": "Não ligado",
+      "statusExpired": "Precisa de nova ligação",
+      "statusRevoked": "Acesso revogado",
+      "statusError": "Não funciona",
+      "accessReadOnly": "Apenas leitura",
+      "accessReadWrite": "Ler e publicar",
+      "whatAiSees": "O que a IA pode ver",
+      "lastSync": "Última leitura {when}",
+      "confirmDisconnect": "Desligar {name}? Vamos revogar o nosso acesso e apagar tudo o que guardamos.",
+      "disconnectSuccess": "Desligado, e o acesso foi revogado.",
+      "disconnectLocalOnly": "Desligado aqui. Não conseguimos contactar o fornecedor para revogar — talvez queira removê-lo também nas definições dele.",
+      "disconnectError": "Não foi possível desligar. Tente novamente.",
+      "consentTitle": "Antes de ligar o {name}",
+      "scopesLabel": "Exatamente o que pedimos",
+      "consentPointEncrypted": "O seu token é cifrado com uma chave que não está na nossa base de dados.",
+      "consentPointAudit": "Cada leitura fica registada e pode ver quando foi a última.",
+      "consentPointRevoke": "Desligar revoga o nosso acesso e apaga o que guardamos.",
+      "consentApprove": "Continuar para {name}",
+      "status": {
+        "connected": "Ligado.",
+        "cancelled": "Ligação cancelada.",
+        "expired": "Demorou demasiado — tente ligar novamente.",
+        "invalid_state": "Não foi possível verificar o pedido de ligação. Comece de novo.",
+        "invalid_response": "O fornecedor devolveu uma resposta inesperada.",
+        "exchange_failed": "O fornecedor recusou a ligação. Tente novamente.",
+        "missing_scopes": "Algumas permissões foram recusadas, por isso a ligação não funcionaria. Tente de novo aceitando todas.",
+        "save_failed": "Ligado, mas não conseguimos guardar. Tente novamente.",
+        "provider_error": "O fornecedor comunicou um erro.",
+        "error": "Algo correu mal."
+      },
+      "providers": {
+        "gmail": {
+          "summary": "Ler emails recentes para a IA responder a perguntas sobre eles.",
+          "sees": "Assuntos, remetentes, datas e uma pré-visualização curta das mensagens correspondentes. Nunca os corpos completos, nunca anexos, nunca Spam ou Lixo.",
+          "consent": "A IA poderá pesquisar e ler o seu Gmail para responder às perguntas que lhe fizer. Só lê quando uma pergunta o exige — nunca em segundo plano — e não pode enviar, apagar nem alterar nada."
+        },
+        "googleDrive": {
+          "summary": "Encontrar e ler os seus documentos para a IA os usar como contexto.",
+          "sees": "Nomes de ficheiros, proprietários e datas de modificação na pesquisa; o texto de um documento apenas quando lhe pedir para o ler.",
+          "consent": "A IA poderá pesquisar no seu Drive e ler documentos que lhe indicar. Não pode criar, alterar nem apagar nada."
+        },
+        "slack": {
+          "summary": "Ler os canais onde a app está e deixar os agentes publicarem lá.",
+          "sees": "Mensagens recentes nos canais públicos para onde convidar a app Ionexa. Não vê canais privados nem mensagens diretas.",
+          "consent": "A IA poderá ler os canais públicos para onde a convidar, e os seus agentes poderão publicar os resultados num canal à sua escolha. É a única integração que pode escrever."
+        }
+      }
     }
   },
   "module": {

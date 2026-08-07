@@ -107,7 +107,9 @@ export async function POST(_request: Request, { params }: { params: { id: string
       runId: result.runId,
       output: result.output,
       creditsCharged: result.creditsCharged,
-      emailed: result.emailed,
+      delivered: result.delivered,
+      deliveredVia: result.deliveredVia,
+      deliveryIssue: result.deliveryIssue,
     });
   } catch (err) {
     logApiError("/api/agents/[id]/run", err);

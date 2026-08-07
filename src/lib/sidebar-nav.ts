@@ -25,6 +25,7 @@ import {
   WEBSITE_BUILDER_ICON,
   PRODUCT_WORKFLOW_ICON,
   PUBLISHED_SITES_ICON,
+  INTEGRATIONS_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -127,6 +128,11 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         label: "Product Workflow",
         icon: PRODUCT_WORKFLOW_ICON, hintKey: "productWorkflow" },
       { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation , hintKey: "automation" },
+      // Operations rather than Settings: connecting Gmail is something a
+      // user does to change how the product WORKS for them, not a
+      // preference. It sits next to Automation because both answer "what
+      // does this do on my behalf".
+      { href: "/dashboard/integrations", label: "Integrations", icon: INTEGRATIONS_ICON, hintKey: "integrations" },
     ],
   },
   {

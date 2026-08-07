@@ -77,7 +77,8 @@
       "productWorkflow": "Flujo de Producto",
       "automation": "Automatización",
       "marketplace": "Mercado",
-      "published": "Sitios publicados"
+      "published": "Sitios publicados",
+      "integrations": "Integraciones"
     },
     "groupHints": {
       "create": "Genera un sitio, planifica un objetivo, escribe un documento.",
@@ -125,7 +126,8 @@
       "presentations": "Convierte un resumen en una presentación acabada. Todavía no está listo.",
       "home": "Tu panel: actividad, estadísticas y acciones rápidas.",
       "settings": "Cuenta, facturación, idioma y preferencias.",
-      "published": "Todos tus sitios en vivo, con su tráfico y su historial de versiones"
+      "published": "Todos tus sitios en vivo, con su tráfico y su historial de versiones",
+      "integrations": "Conecta Gmail, Drive y Slack para que la IA trabaje con tus datos reales"
     },
     "comingSoon": "Próximamente",
     "comingSoonToast": "{name} aún no está disponible: está en la hoja de ruta.",
@@ -1117,6 +1119,66 @@
       "rollbackSuccess": "Restaurada la versión {number}.",
       "rollbackError": "No se pudo restaurar. Inténtalo de nuevo.",
       "confirmRollback": "¿Volver a poner la versión {number} en el sitio en vivo?"
+    },
+    "integrations": {
+      "title": "Integraciones",
+      "description": "Conecta las herramientas que ya usas para que la IA trabaje con tus datos reales.",
+      "privacyNotice": "Las conexiones son de solo lectura salvo que se indique lo contrario. Los tokens se cifran con una clave que no está en nuestra base de datos, nunca aparecen en los registros, y al desconectar revocamos el acceso en el proveedor y borramos todo lo que guardamos, incluido el historial de lo que se leyó.",
+      "notConfigured": "Las integraciones aún no están configuradas en esta instalación, así que conectar está desactivado.",
+      "providerUnavailable": "No disponible en esta instalación.",
+      "used": "{used} de {cap} conectadas",
+      "usedUnlimited": "{used} conectadas",
+      "connect": "Conectar",
+      "disconnect": "Desconectar",
+      "cancel": "Cancelar",
+      "statusConnected": "Conectado",
+      "statusNotConnected": "Sin conectar",
+      "statusExpired": "Requiere reconexión",
+      "statusRevoked": "Acceso revocado",
+      "statusError": "No funciona",
+      "accessReadOnly": "Solo lectura",
+      "accessReadWrite": "Leer y publicar",
+      "whatAiSees": "Qué puede ver la IA",
+      "lastSync": "Última lectura {when}",
+      "confirmDisconnect": "¿Desconectar {name}? Revocaremos nuestro acceso y borraremos todo lo que guardamos.",
+      "disconnectSuccess": "Desconectado y acceso revocado.",
+      "disconnectLocalOnly": "Desconectado aquí. No pudimos contactar con el proveedor para revocarlo: quizá quieras quitarlo también en sus ajustes.",
+      "disconnectError": "No se pudo desconectar. Inténtalo de nuevo.",
+      "consentTitle": "Antes de conectar {name}",
+      "scopesLabel": "Exactamente lo que pedimos",
+      "consentPointEncrypted": "Tu token se cifra con una clave que no está en nuestra base de datos.",
+      "consentPointAudit": "Cada lectura queda registrada y puedes ver cuándo fue la última.",
+      "consentPointRevoke": "Desconectar revoca nuestro acceso y borra lo que guardamos.",
+      "consentApprove": "Continuar a {name}",
+      "status": {
+        "connected": "Conectado.",
+        "cancelled": "Conexión cancelada.",
+        "expired": "Ha tardado demasiado: vuelve a intentar la conexión.",
+        "invalid_state": "No se pudo verificar la solicitud de conexión. Empieza de nuevo.",
+        "invalid_response": "El proveedor devolvió una respuesta inesperada.",
+        "exchange_failed": "El proveedor rechazó la conexión. Inténtalo de nuevo.",
+        "missing_scopes": "Se rechazaron algunos permisos, así que la conexión no funcionaría. Inténtalo otra vez aceptándolos todos.",
+        "save_failed": "Conectado, pero no pudimos guardarlo. Inténtalo de nuevo.",
+        "provider_error": "El proveedor informó de un error.",
+        "error": "Algo salió mal."
+      },
+      "providers": {
+        "gmail": {
+          "summary": "Leer correos recientes para que la IA responda preguntas sobre ellos.",
+          "sees": "Asuntos, remitentes, fechas y una vista previa breve de los mensajes que coinciden. Nunca el cuerpo completo, nunca adjuntos, nunca Spam ni Papelera.",
+          "consent": "La IA podrá buscar y leer tu Gmail para responder a las preguntas que le hagas. Solo lee cuando una pregunta lo necesita, nunca en segundo plano, y no puede enviar, borrar ni cambiar nada."
+        },
+        "googleDrive": {
+          "summary": "Encontrar y leer tus documentos para que la IA los use como contexto.",
+          "sees": "Nombres de archivo, propietarios y fechas de modificación al buscar; el texto de un documento solo cuando le pides que lo lea.",
+          "consent": "La IA podrá buscar en tu Drive y leer los documentos que le indiques. No puede crear, cambiar ni borrar nada."
+        },
+        "slack": {
+          "summary": "Leer los canales donde está la app y permitir que los agentes publiquen allí.",
+          "sees": "Mensajes recientes en los canales públicos a los que invites la app de Ionexa. No ve canales privados ni mensajes directos.",
+          "consent": "La IA podrá leer los canales públicos a los que la invites, y tus agentes podrán publicar sus resultados en el canal que elijas. Es la única integración que puede escribir algo."
+        }
+      }
     }
   },
   "module": {

@@ -82,6 +82,31 @@ touch targets) and works identically on mobile and desktop.
   or a visitor id. Fair use per plan (Free 0, Starter 1, Growth 3,
   Professional 10, Ultimate 30, Enterprise unlimited), overridable via
   `PUBLISHED_SITE_LIMIT_*`.
+- **Integrations** (`/dashboard/integrations`) — Gmail, Google Drive and
+  Slack, so the AI works on the user's real data. One generic OAuth flow
+  serves every provider (`/api/integrations/[provider]/connect` and
+  `/callback`), with CSRF state that is both HMAC-signed and bound to an
+  HttpOnly cookie, PKCE where the provider supports it, and refresh at the
+  point of use rather than on a schedule. Tokens are **AES-256-GCM
+  ciphertext** with a key that lives only in the environment; each one is
+  bound by GCM additional-authenticated-data to *whose* token it is and
+  *which* token it is, so a ciphertext copied between rows or columns
+  fails to decrypt instead of quietly working. Nothing token-shaped can
+  reach a log — the redactor and a string-only `safeErrorDetail` are the
+  only paths into `logApiError`. Gmail and Drive are deliberately
+  **separate** integrations sharing one Google client, so a user who wants
+  the AI to read their files never has to hand over their mail; Gmail is
+  read with `format=metadata` (subjects, senders, a snippet — never
+  bodies, never attachments, never Spam or Trash). Consent is a step, not
+  a checkbox: the panel states what the AI will see and lists the scopes
+  verbatim before the user leaves for Google. Disconnect revokes at the
+  provider **first**, then deletes our row, and the delete cascades to the
+  audit trail of what was read. In Ionexa Chat the model gets a real
+  `search_my_data` tool (the app's first client-side tool loop, bounded at
+  two rounds), whose results are fenced as untrusted third-party content;
+  Autonomous Agents can deliver to a Slack channel, which must be one the
+  user's own connected workspace offers. Fair use per plan (Free 0,
+  Starter 2, Growth 5, Professional+ unlimited) via `INTEGRATION_LIMIT_*`.
 - **Settings** (`/dashboard/settings`) — account email, password change,
   current plan + billing management, Buy Credits, credit transaction
   history, and a full-data JSON export.

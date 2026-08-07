@@ -364,8 +364,15 @@ check("unit suites are *.test.mjs", pkg.scripts["test:unit"].includes("*.test.mj
 // This file names both patterns in order to search for them, so it would
 // otherwise flag itself.
 const SELF = "billing-coverage.test.mjs";
+// Comments are stripped before scanning, for the same reason
+// scripts/tests/i18n-coverage.test.mjs strips them: a suite that documents
+// WHY it does not use loadTsWithDeps was flagged for containing the word.
+// A scanner that fails on its own subject's rationale teaches people to
+// delete the rationale.
+const stripJsComments = (src) =>
+  src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 for (const file of readdirSync("scripts/tests").filter((f) => f.endsWith(".test.mjs") && f !== SELF)) {
-  const body = readFileSync(path.join("scripts/tests", file), "utf8");
+  const body = stripJsComments(readFileSync(path.join("scripts/tests", file), "utf8"));
   checkTrue(`${file} binds no port`, !/createServer\s*\(/.test(body));
   checkTrue(`${file} writes nothing into node_modules`, !/loadTsWithDeps/.test(body));
 }

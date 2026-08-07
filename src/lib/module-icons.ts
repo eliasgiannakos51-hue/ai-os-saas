@@ -30,6 +30,7 @@ import {
   Megaphone,
   Brain,
   History,
+  Plug,
   Radio,
   Rocket,
   CalendarClock,
@@ -95,6 +96,9 @@ export const PRODUCT_WORKFLOW_ICON: LucideIcon = Flag;
 // WEBSITE_BUILDER_ICON (Layout, the generator) — this is the list of sites
 // that are actually LIVE on the public web, which is a third thing.
 export const PUBLISHED_SITES_ICON: LucideIcon = Radio;
+// Distinct from MODULE_ICONS.automation (Zap) — an integration is a
+// connection to somebody else's product, not a rule that runs inside ours.
+export const INTEGRATIONS_ICON: LucideIcon = Plug;
 
 /**
  * The icon for any slug that can appear on a card, including the

@@ -77,7 +77,8 @@
       "productWorkflow": "Flux Produit",
       "automation": "Automatisation",
       "marketplace": "Place de marché",
-      "published": "Sites publiés"
+      "published": "Sites publiés",
+      "integrations": "Intégrations"
     },
     "groupHints": {
       "create": "Générez un site, planifiez un objectif, rédigez un document.",
@@ -125,7 +126,8 @@
       "presentations": "Transformez un brief en présentation finie. Pas encore prêt.",
       "home": "Votre tableau de bord — activité, statistiques et actions rapides.",
       "settings": "Compte, facturation, langue et préférences.",
-      "published": "Tous vos sites en ligne, avec leur trafic et leur historique de versions"
+      "published": "Tous vos sites en ligne, avec leur trafic et leur historique de versions",
+      "integrations": "Connectez Gmail, Drive et Slack pour que l'IA travaille sur vos vraies données"
     },
     "comingSoon": "Bientôt",
     "comingSoonToast": "{name} n'est pas encore disponible — c'est prévu dans la feuille de route.",
@@ -1117,6 +1119,66 @@
       "rollbackSuccess": "Version {number} restaurée.",
       "rollbackError": "Impossible de restaurer. Réessayez.",
       "confirmRollback": "Remettre la version {number} en ligne ?"
+    },
+    "integrations": {
+      "title": "Intégrations",
+      "description": "Connectez les outils que vous utilisez déjà, pour que l'IA travaille sur vos vraies données.",
+      "privacyNotice": "Les connexions sont en lecture seule sauf mention contraire. Les jetons sont chiffrés avec une clé absente de notre base de données, n'apparaissent jamais dans les journaux, et la déconnexion révoque l'accès chez le fournisseur et supprime tout ce que nous conservons, y compris l'historique de ce qui a été lu.",
+      "notConfigured": "Les intégrations ne sont pas encore configurées sur ce déploiement, la connexion est donc désactivée.",
+      "providerUnavailable": "Indisponible sur ce déploiement.",
+      "used": "{used} sur {cap} connectées",
+      "usedUnlimited": "{used} connectées",
+      "connect": "Connecter",
+      "disconnect": "Déconnecter",
+      "cancel": "Annuler",
+      "statusConnected": "Connecté",
+      "statusNotConnected": "Non connecté",
+      "statusExpired": "À reconnecter",
+      "statusRevoked": "Accès révoqué",
+      "statusError": "Ne fonctionne pas",
+      "accessReadOnly": "Lecture seule",
+      "accessReadWrite": "Lire et publier",
+      "whatAiSees": "Ce que l'IA peut voir",
+      "lastSync": "Dernière lecture {when}",
+      "confirmDisconnect": "Déconnecter {name} ? Nous révoquerons notre accès et supprimerons tout ce que nous conservons.",
+      "disconnectSuccess": "Déconnecté, et l'accès a été révoqué.",
+      "disconnectLocalOnly": "Déconnecté ici. Nous n'avons pas pu joindre le fournisseur pour révoquer l'accès — pensez à le retirer aussi dans ses réglages.",
+      "disconnectError": "Impossible de déconnecter. Réessayez.",
+      "consentTitle": "Avant de connecter {name}",
+      "scopesLabel": "Exactement ce que nous demandons",
+      "consentPointEncrypted": "Votre jeton est chiffré avec une clé qui n'est pas dans notre base de données.",
+      "consentPointAudit": "Chaque lecture est enregistrée et vous voyez quand a eu lieu la dernière.",
+      "consentPointRevoke": "La déconnexion révoque notre accès et supprime ce que nous conservons.",
+      "consentApprove": "Continuer vers {name}",
+      "status": {
+        "connected": "Connecté.",
+        "cancelled": "Connexion annulée.",
+        "expired": "Cela a pris trop de temps — réessayez la connexion.",
+        "invalid_state": "La demande de connexion n'a pas pu être vérifiée. Recommencez.",
+        "invalid_response": "Le fournisseur a renvoyé une réponse inattendue.",
+        "exchange_failed": "Le fournisseur a refusé la connexion. Réessayez.",
+        "missing_scopes": "Certaines autorisations ont été refusées, la connexion ne fonctionnerait pas. Réessayez en les acceptant toutes.",
+        "save_failed": "Connecté, mais nous n'avons pas pu l'enregistrer. Réessayez.",
+        "provider_error": "Le fournisseur a signalé une erreur.",
+        "error": "Une erreur est survenue."
+      },
+      "providers": {
+        "gmail": {
+          "summary": "Lire les e-mails récents pour que l'IA réponde à vos questions dessus.",
+          "sees": "Objets, expéditeurs, dates et un court aperçu des messages correspondants. Jamais le corps complet, jamais les pièces jointes, jamais les spams ni la corbeille.",
+          "consent": "L'IA pourra chercher et lire votre Gmail pour répondre aux questions que vous lui posez. Elle ne lit que lorsqu'une question l'exige — jamais en arrière-plan — et ne peut ni envoyer, ni supprimer, ni modifier quoi que ce soit."
+        },
+        "googleDrive": {
+          "summary": "Trouver et lire vos documents pour que l'IA les utilise comme contexte.",
+          "sees": "Noms de fichiers, propriétaires et dates de modification lors d'une recherche ; le texte d'un document uniquement quand vous lui demandez de le lire.",
+          "consent": "L'IA pourra chercher dans votre Drive et lire les documents que vous lui indiquez. Elle ne peut rien créer, modifier ni supprimer."
+        },
+        "slack": {
+          "summary": "Lire les canaux où se trouve l'app et y laisser les agents publier.",
+          "sees": "Messages récents dans les canaux publics où vous invitez l'app Ionexa. Elle ne voit ni les canaux privés ni les messages directs.",
+          "consent": "L'IA pourra lire les canaux publics où vous l'invitez, et vos agents pourront publier leurs résultats dans un canal de votre choix. C'est la seule intégration capable d'écrire."
+        }
+      }
     }
   },
   "module": {

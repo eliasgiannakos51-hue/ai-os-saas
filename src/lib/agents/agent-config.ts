@@ -21,7 +21,13 @@ export const AGENT_LIMITS = {
   output: 20000,
 } as const;
 
-export type AgentDeliveryMethod = "email";
+export type AgentDeliveryMethod = "email" | "slack";
+
+export const AGENT_DELIVERY_METHODS: AgentDeliveryMethod[] = ["email", "slack"];
+
+export function isAgentDeliveryMethod(value: unknown): value is AgentDeliveryMethod {
+  return typeof value === "string" && (AGENT_DELIVERY_METHODS as string[]).includes(value);
+}
 export type AgentStatus = "active" | "paused" | "disabled";
 
 export type AgentOutputFormat = "summary" | "bullets" | "report";
@@ -132,6 +138,17 @@ export function normaliseAgentConfig(raw: Partial<AgentConfigJson> | null | unde
 // our sending domain, on a schedule, forever. That is a spam service with
 // a login page. Deliverability for every real user's transactional mail
 // depends on that never happening once.
+//
+// SLACK (V3 Task 3) is the second delivery method, and it keeps the rule
+// rather than relaxing it. The target is a channel id, and the id is only
+// accepted if it appears in the list of channels the caller's OWN
+// connected workspace reports the bot as a member of — a list this module
+// is HANDED (`options.allowedSlackChannels`) and never fetches, so it
+// stays pure and client-safe. The channel is therefore still not something
+// a request body can choose: an id typed into the API for a workspace the
+// user has not connected is refused exactly as a stranger's email address
+// is. What changed is the proof of ownership (a live OAuth grant instead
+// of a verified signup address), not the requirement for one.
 export function normaliseDeliveryTarget(accountEmail: string | null | undefined): string {
   return (accountEmail ?? "").trim().toLowerCase();
 }
@@ -143,6 +160,35 @@ export function isDeliveryTargetAllowed(
   const account = normaliseDeliveryTarget(accountEmail);
   if (!account) return false;
   return target.trim().toLowerCase() === account;
+}
+
+/**
+ * A Slack channel id, normalised.
+ *
+ * Case-PRESERVING, unlike the email normaliser: Slack ids are
+ * case-sensitive ("C01ABCDEF"), and lowercasing one produces an id that
+ * silently addresses nothing.
+ */
+export function normaliseSlackChannel(value: string | null | undefined): string {
+  return (value ?? "").trim();
+}
+
+/**
+ * Is this channel one the caller's own connected workspace offers?
+ *
+ * `allowedChannels` comes from the caller's own user_integrations row, so
+ * an id for a workspace they have not connected can never match. An empty
+ * allow-list means no workspace is connected, which allows NOTHING — the
+ * fail-closed direction.
+ */
+export function isSlackChannelAllowed(
+  channelId: string,
+  allowedChannels: string[] | null | undefined
+): boolean {
+  const target = normaliseSlackChannel(channelId);
+  if (!target) return false;
+  if (!Array.isArray(allowedChannels) || allowedChannels.length === 0) return false;
+  return allowedChannels.some((c) => normaliseSlackChannel(c) === target);
 }
 
 // ---------------------------------------------------------------------
@@ -235,7 +281,16 @@ export type ValidationIssue = { field: keyof AgentDraft | "config"; message: str
 
 export function validateAgentDraft(
   draft: Partial<AgentDraft>,
-  accountEmail: string | null | undefined
+  accountEmail: string | null | undefined,
+  /**
+   * Delivery context the caller resolved from the DATABASE, never from the
+   * request body.
+   *
+   * A third optional parameter rather than a wider second one on purpose:
+   * `accountEmail` stays a plain string, so every existing caller and every
+   * existing test keeps working unchanged, and the Slack path is additive.
+   */
+  options?: { allowedSlackChannels?: string[] }
 ): { ok: true; draft: AgentDraft } | { ok: false; issues: ValidationIssue[] } {
   const issues: ValidationIssue[] = [];
 
@@ -264,21 +319,37 @@ export function validateAgentDraft(
   if (!isValidTimeZone(timezone))
     issues.push({ field: "timezone", message: "That is not a recognised timezone." });
 
-  if (draft.deliveryMethod !== undefined && draft.deliveryMethod !== "email")
-    issues.push({ field: "deliveryMethod", message: "Only email delivery is available." });
+  const deliveryMethod: AgentDeliveryMethod =
+    draft.deliveryMethod === undefined ? "email" : (draft.deliveryMethod as AgentDeliveryMethod);
+  if (draft.deliveryMethod !== undefined && !isAgentDeliveryMethod(draft.deliveryMethod))
+    issues.push({ field: "deliveryMethod", message: "That delivery method is not available." });
 
-  const deliveryTarget = normaliseDeliveryTarget(
-    typeof draft.deliveryTarget === "string" && draft.deliveryTarget.trim()
-      ? draft.deliveryTarget
-      : accountEmail
-  );
-  if (!deliveryTarget)
-    issues.push({ field: "deliveryTarget", message: "Your account has no email address to send to." });
-  else if (!isDeliveryTargetAllowed(deliveryTarget, accountEmail))
-    issues.push({
-      field: "deliveryTarget",
-      message: "An agent can only send results to your own account email address.",
-    });
+  let deliveryTarget: string;
+  if (deliveryMethod === "slack") {
+    deliveryTarget = normaliseSlackChannel(
+      typeof draft.deliveryTarget === "string" ? draft.deliveryTarget : ""
+    );
+    if (!deliveryTarget)
+      issues.push({ field: "deliveryTarget", message: "Choose a Slack channel to post to." });
+    else if (!isSlackChannelAllowed(deliveryTarget, options?.allowedSlackChannels))
+      issues.push({
+        field: "deliveryTarget",
+        message: "An agent can only post to a channel in your own connected Slack workspace.",
+      });
+  } else {
+    deliveryTarget = normaliseDeliveryTarget(
+      typeof draft.deliveryTarget === "string" && draft.deliveryTarget.trim()
+        ? draft.deliveryTarget
+        : accountEmail
+    );
+    if (!deliveryTarget)
+      issues.push({ field: "deliveryTarget", message: "Your account has no email address to send to." });
+    else if (!isDeliveryTargetAllowed(deliveryTarget, accountEmail))
+      issues.push({
+        field: "deliveryTarget",
+        message: "An agent can only send results to your own account email address.",
+      });
+  }
 
   const rawConfig = (draft.config ?? {}) as Partial<AgentConfigJson>;
   const config: AgentConfigJson = {
@@ -307,7 +378,7 @@ export function validateAgentDraft(
       prompt: prompt.slice(0, AGENT_LIMITS.prompt),
       scheduleCron,
       timezone,
-      deliveryMethod: "email",
+      deliveryMethod,
       deliveryTarget,
       config,
     },

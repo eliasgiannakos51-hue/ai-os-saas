@@ -6,6 +6,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
 import { logSecurityCheck } from "@/lib/security-check-log";
 import { validateAgentDraft, sanitiseAgentText, type AgentDraft } from "@/lib/agents/agent-config";
+import { listSlackChannels } from "@/lib/integrations/read";
 import { nextRunAt } from "@/lib/agents/cron-expression";
 import { maxAgentsForPlan } from "@/lib/agents/agent-limits";
 
@@ -49,7 +50,24 @@ export async function POST(request: Request) {
       );
     }
 
-    const validated = validateAgentDraft(draft, user.email);
+    // The allowed Slack channels are resolved SERVER-SIDE, from the
+    // caller's own connected workspace, and handed to the validator — so a
+    // channel id in the request body can only be accepted if the user's own
+    // OAuth grant actually offers it. Fetched only when the draft asks for
+    // Slack, so an email agent costs no extra call.
+    let allowedSlackChannels: string[] | undefined;
+    if (draft.deliveryMethod === "slack") {
+      const channels = await listSlackChannels(user.id);
+      if (!channels.ok) {
+        return NextResponse.json(
+          { ok: false, error: "Connect Slack in Integrations before an agent can post to it." },
+          { status: 400 }
+        );
+      }
+      allowedSlackChannels = channels.channels.map((c) => c.id);
+    }
+
+    const validated = validateAgentDraft(draft, user.email, { allowedSlackChannels });
     if (!validated.ok) {
       return NextResponse.json(
         { ok: false, error: validated.issues[0]?.message ?? "That agent isn't valid.", issues: validated.issues },
@@ -155,7 +173,9 @@ export async function POST(request: Request) {
         checks: [
           "harmful/unsupervised-agent safety check (clarification pre-check, kind=agent)",
           "prompt-injection sanitisation of the stored task text",
-          "delivery target restricted to the account's own email address",
+          agent.deliveryMethod === "slack"
+            ? "delivery target restricted to a channel in the user's own connected Slack workspace"
+            : "delivery target restricted to the account's own email address",
           "schedule validated (max one run per hour)",
         ],
         issues:

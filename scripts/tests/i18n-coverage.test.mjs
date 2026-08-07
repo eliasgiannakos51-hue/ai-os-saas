@@ -140,7 +140,16 @@ const clientFallbacks = sources.flatMap((f) => [
 // stable error CODES across all 45+ routes, not a string sweep inside one
 // feature. Everything the user READS on /dashboard/published and on the
 // publish control is fully translated in all ten locales.
-const SERVER_PROSE_BASELINE = 314;
+// 314 -> 333: V3 Task 3 (Universal Integrations) added
+// api/integrations/[provider]/connect, .../callback and the disconnect
+// route, plus the Slack delivery branches in api/agents. Their
+// not-authenticated, unknown-provider, plan-cap, rate-limit and
+// not-configured responses are English prose like the 314 before them.
+// Same recorded decision: stable error CODES across all routes is the fix,
+// and it is a refactor of the whole API surface rather than something to
+// start inside one feature. Everything the user READS on
+// /dashboard/integrations is translated in all ten locales.
+const SERVER_PROSE_BASELINE = 333;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

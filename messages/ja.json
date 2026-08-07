@@ -77,7 +77,8 @@
       "productWorkflow": "プロダクトワークフロー",
       "automation": "自動化",
       "marketplace": "マーケットプレイス",
-      "published": "公開中のサイト"
+      "published": "公開中のサイト",
+      "integrations": "連携"
     },
     "groupHints": {
       "create": "サイトを生成し、目標を計画し、文書を書く。",
@@ -125,7 +126,8 @@
       "presentations": "要点から完成したスライドを作ります。まだ準備中です。",
       "home": "ダッシュボード — アクティビティ、統計、クイック操作。",
       "settings": "アカウント、請求、言語、設定。",
-      "published": "公開中のすべてのサイトと、その閲覧数・バージョン履歴"
+      "published": "公開中のすべてのサイトと、その閲覧数・バージョン履歴",
+      "integrations": "Gmail・Drive・Slack を接続して、AI が実際のデータを扱えるようにします"
     },
     "comingSoon": "近日公開",
     "comingSoonToast": "{name} はまだ利用できません。ロードマップに入っています。",
@@ -1117,6 +1119,66 @@
       "rollbackSuccess": "バージョン {number} に戻しました。",
       "rollbackError": "元に戻せませんでした。もう一度お試しください。",
       "confirmRollback": "バージョン {number} を公開サイトに戻しますか？"
+    },
+    "integrations": {
+      "title": "連携",
+      "description": "すでに使っているツールを connect して、AI が実際のデータを扱えるようにします。",
+      "privacyNotice": "特に記載がない限り、連携は読み取り専用です。トークンは当社データベースに保存されない鍵で暗号化され、ログに出ることはありません。解除するとプロバイダー側のアクセスを取り消し、読み取り履歴を含め当社が保持するすべてを削除します。",
+      "notConfigured": "このデプロイでは連携が未設定のため、接続できません。",
+      "providerUnavailable": "このデプロイでは利用できません。",
+      "used": "{cap} 件中 {used} 件を連携中",
+      "usedUnlimited": "{used} 件を連携中",
+      "connect": "接続",
+      "disconnect": "解除",
+      "cancel": "キャンセル",
+      "statusConnected": "接続済み",
+      "statusNotConnected": "未接続",
+      "statusExpired": "再接続が必要",
+      "statusRevoked": "アクセスが取り消されました",
+      "statusError": "動作していません",
+      "accessReadOnly": "読み取り専用",
+      "accessReadWrite": "読み取りと投稿",
+      "whatAiSees": "AI が見られる範囲",
+      "lastSync": "最終読み取り {when}",
+      "confirmDisconnect": "{name} を解除しますか？アクセスを取り消し、保持している情報をすべて削除します。",
+      "disconnectSuccess": "解除し、アクセスも取り消しました。",
+      "disconnectLocalOnly": "こちらでは解除しました。プロバイダーに取り消しを依頼できなかったため、先方の設定からも削除することをおすすめします。",
+      "disconnectError": "解除できませんでした。もう一度お試しください。",
+      "consentTitle": "{name} を接続する前に",
+      "scopesLabel": "実際に要求する権限",
+      "consentPointEncrypted": "トークンは当社データベースにない鍵で暗号化されます。",
+      "consentPointAudit": "読み取りはすべて記録され、最後にいつ行われたか確認できます。",
+      "consentPointRevoke": "解除すると当社のアクセスは取り消され、保持内容は削除されます。",
+      "consentApprove": "{name} へ進む",
+      "status": {
+        "connected": "接続しました。",
+        "cancelled": "接続をキャンセルしました。",
+        "expired": "時間がかかりすぎました。もう一度接続してください。",
+        "invalid_state": "接続リクエストを検証できませんでした。最初からやり直してください。",
+        "invalid_response": "プロバイダーから予期しない応答がありました。",
+        "exchange_failed": "プロバイダーが接続を拒否しました。もう一度お試しください。",
+        "missing_scopes": "一部の権限が拒否されたため、接続は機能しません。すべて許可してやり直してください。",
+        "save_failed": "接続しましたが保存できませんでした。もう一度お試しください。",
+        "provider_error": "プロバイダーがエラーを報告しました。",
+        "error": "問題が発生しました。"
+      },
+      "providers": {
+        "gmail": {
+          "summary": "最近のメールを読み、AI がそれについて答えられるようにします。",
+          "sees": "該当メールの件名・差出人・日付と短いプレビュー。本文全体や添付ファイル、迷惑メール・ゴミ箱は読みません。",
+          "consent": "AI はあなたの質問に答えるために Gmail を検索して読めるようになります。質問に必要なときだけ読み、バックグラウンドでは読みません。送信・削除・変更は一切できません。"
+        },
+        "googleDrive": {
+          "summary": "ドキュメントを検索・閲覧し、AI の文脈として使えるようにします。",
+          "sees": "検索時はファイル名・所有者・更新日時。本文を読むのは、あなたがその文書を読むよう指示したときだけです。",
+          "consent": "AI はあなたの Drive を検索し、指定した文書を読めるようになります。作成・変更・削除はできません。"
+        },
+        "slack": {
+          "summary": "アプリが参加しているチャンネルを読み、エージェントが結果を投稿できるようにします。",
+          "sees": "Ionexa アプリを招待した公開チャンネルの最近のメッセージ。非公開チャンネルや DM は見えません。",
+          "consent": "AI は招待された公開チャンネルを読めるようになり、エージェントは選んだチャンネルに結果を投稿できます。書き込みができる唯一の連携です。"
+        }
+      }
     }
   },
   "module": {

@@ -111,6 +111,11 @@ const DECLARED = {
     billing: "settled",
     note: "V3 File Workspace. One grounded call over the selected documents. The reservation is sized AFTER the documents load, because the cost is dominated by document text and a hold sized from the question alone is off by orders of magnitude on a long contract. A call that errors still SETTLES rather than releasing — the tokens were spent.",
   },
+  "src/app/api/demo/preview/route.ts": {
+    calls: 1,
+    billing: "unbilled",
+    note: "V3 landing redesign: the try-before-signup demo. There is NO account to bill — the caller is an anonymous landing-page visitor — and the entire point is a free taste that converts. Bounded harder than any billed call: 5/hour per IP, FAST tier, forced tool use, max_tokens 400, input capped at 500 chars, nothing persisted, and still counted against the platform daily spend cap.",
+  },
   "src/app/api/support/route.ts": {
     calls: 1,
     billing: "unbilled",
@@ -194,9 +199,9 @@ check("flat-fee AI features (not margin-guaranteed)", flat.length, 0);
 // the same shape as sending an email, which is also unbilled and also
 // rate limited.
 //
-// If a second unbilled call ever appears, this number moves again and
+// If ANOTHER unbilled call ever appears, this number moves again and
 // somebody has to write down why. That is the point.
-check("completely unbilled AI calls", unbilled.length, 1);
+check("completely unbilled AI calls", unbilled.length, 2);
 check(
   "every AI call site is settled on measured usage, except the declared unbilled one",
   settled.length,

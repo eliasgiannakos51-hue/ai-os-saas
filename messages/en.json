@@ -151,6 +151,60 @@
       "terms": "Terms of Service",
       "privacy": "Privacy Policy",
       "contact": "Contact"
+    },
+    "v2": {
+      "headline": "Tell it what you need. It builds it.",
+      "subline": "A website, a research report, a plan, a presentation — describe it below and watch Ionexa build a preview. No signup to try.",
+      "demo": {
+        "placeholder": "e.g. a one-page site for my bakery",
+        "button": "Preview it",
+        "hint": "Free to try · no account needed",
+        "buildForReal": "Sign up free to build it for real",
+        "rateLimited": "You've used the free previews for now — sign up to keep building.",
+        "error": "Couldn't build that preview. Try rephrasing.",
+        "kinds": {
+          "website": "Website",
+          "agent": "AI agent",
+          "mission": "Mission",
+          "presentation": "Presentation",
+          "research": "Research report",
+          "other": "Build"
+        }
+      },
+      "problem": {
+        "line1": "You jump between 14 tools to get anything done.",
+        "line2": "That's about 12 hours a week lost to switching, copying, and re-explaining.",
+        "solution": "Ionexa is one place where you describe what you want and it gets built, published and delivered — websites, agents, research, plans, decks."
+      },
+      "moments": {
+        "agent": {
+          "title": "An agent that works while you sleep",
+          "caption": "Set it once. It researches, checks your sources, and emails you the report every morning — on its own.",
+          "name": "Market Watch agent",
+          "status": "Running",
+          "inboxLine": "to you · 7:00 AM",
+          "reportLine": "3 competitor price changes overnight, 2 worth acting on. Full breakdown attached."
+        },
+        "website": {
+          "title": "A real website, live in a minute",
+          "caption": "Describe the site. Ionexa writes it, and publishes it at a real link you can share — no hosting, no code.",
+          "live": "Live"
+        },
+        "mission": {
+          "title": "A goal, broken into steps you'll actually finish",
+          "caption": "Tell it what you're trying to do. It splits the goal into concrete steps and tracks what's done.",
+          "goal": "Launch my online store",
+          "step1": "Pick products & pricing",
+          "step2": "Build the storefront",
+          "step3": "Set up payments",
+          "step4": "Announce to your list"
+        }
+      },
+      "cta": {
+        "title": "Describe your first thing. Build it free.",
+        "button": "Start free",
+        "note": "Email and password. That's it. No card."
+      }
     }
   },
   "pricing": {

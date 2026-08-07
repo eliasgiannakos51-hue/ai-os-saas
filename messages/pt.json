@@ -151,6 +151,60 @@
       "terms": "Termos de Serviço",
       "privacy": "Política de Privacidade",
       "contact": "Contacto"
+    },
+    "v2": {
+      "headline": "Diz o que precisas. Ele constrói.",
+      "subline": "Um site, um relatório, um plano, uma apresentação — descreve-o abaixo e vê o Ionexa criar uma pré-visualização. Sem registo para experimentar.",
+      "demo": {
+        "placeholder": "ex. um site de uma página para a minha padaria",
+        "button": "Ver pré-visualização",
+        "hint": "Grátis para experimentar · sem conta",
+        "buildForReal": "Regista-te grátis para o construir a sério",
+        "rateLimited": "Usaste as pré-visualizações gratuitas por agora — regista-te para continuar.",
+        "error": "Não foi possível criar a pré-visualização. Tenta reformular.",
+        "kinds": {
+          "website": "Site",
+          "agent": "Agente IA",
+          "mission": "Missão",
+          "presentation": "Apresentação",
+          "research": "Relatório",
+          "other": "Criação"
+        }
+      },
+      "problem": {
+        "line1": "Saltas entre 14 ferramentas para fazer qualquer coisa.",
+        "line2": "São cerca de 12 horas por semana perdidas a alternar, copiar e reexplicar.",
+        "solution": "O Ionexa é um único lugar onde descreves o que queres e é construído, publicado e entregue — sites, agentes, relatórios, planos, apresentações."
+      },
+      "moments": {
+        "agent": {
+          "title": "Um agente que trabalha enquanto dormes",
+          "caption": "Configura-o uma vez. Pesquisa, verifica as tuas fontes e envia-te o relatório todas as manhãs — sozinho.",
+          "name": "Agente Market Watch",
+          "status": "A correr",
+          "inboxLine": "para ti · 7:00",
+          "reportLine": "3 mudanças de preço da concorrência durante a noite, 2 valem ação. Análise completa em anexo."
+        },
+        "website": {
+          "title": "Um site real, online num minuto",
+          "caption": "Descreve o site. O Ionexa escreve-o e publica-o num link real que podes partilhar — sem alojamento, sem código.",
+          "live": "Online"
+        },
+        "mission": {
+          "title": "Um objetivo, dividido em passos que vais mesmo concluir",
+          "caption": "Diz-lhe o que queres fazer. Divide o objetivo em passos concretos e acompanha o que está feito.",
+          "goal": "Lançar a minha loja online",
+          "step1": "Escolher produtos e preços",
+          "step2": "Construir a loja",
+          "step3": "Configurar pagamentos",
+          "step4": "Anunciar à tua lista"
+        }
+      },
+      "cta": {
+        "title": "Descreve a tua primeira coisa. Constrói-a grátis.",
+        "button": "Começar grátis",
+        "note": "Email e palavra-passe. Só isso. Sem cartão."
+      }
     }
   },
   "pricing": {

@@ -151,6 +151,60 @@
       "terms": "Términos del servicio",
       "privacy": "Política de privacidad",
       "contact": "Contacto"
+    },
+    "v2": {
+      "headline": "Dile lo que necesitas. Lo construye.",
+      "subline": "Una web, un informe, un plan, una presentación — descríbelo abajo y mira cómo Ionexa crea una vista previa. Sin registro para probar.",
+      "demo": {
+        "placeholder": "p. ej. una web de una página para mi panadería",
+        "button": "Ver vista previa",
+        "hint": "Gratis para probar · sin cuenta",
+        "buildForReal": "Regístrate gratis para construirlo de verdad",
+        "rateLimited": "Has usado las vistas previas gratuitas por ahora — regístrate para seguir.",
+        "error": "No se pudo crear la vista previa. Prueba a reformularlo.",
+        "kinds": {
+          "website": "Web",
+          "agent": "Agente IA",
+          "mission": "Misión",
+          "presentation": "Presentación",
+          "research": "Informe",
+          "other": "Creación"
+        }
+      },
+      "problem": {
+        "line1": "Saltas entre 14 herramientas para hacer cualquier cosa.",
+        "line2": "Son unas 12 horas a la semana perdidas en cambiar, copiar y volver a explicar.",
+        "solution": "Ionexa es un solo lugar donde describes lo que quieres y se construye, se publica y se entrega — webs, agentes, informes, planes, presentaciones."
+      },
+      "moments": {
+        "agent": {
+          "title": "Un agente que trabaja mientras duermes",
+          "caption": "Configúralo una vez. Investiga, verifica tus fuentes y te envía el informe cada mañana — solo.",
+          "name": "Agente Market Watch",
+          "status": "En marcha",
+          "inboxLine": "para ti · 7:00",
+          "reportLine": "3 cambios de precio de la competencia durante la noche, 2 merecen acción. Análisis completo adjunto."
+        },
+        "website": {
+          "title": "Una web real, en línea en un minuto",
+          "caption": "Describe la web. Ionexa la escribe y la publica en un enlace real que puedes compartir — sin hosting, sin código.",
+          "live": "En vivo"
+        },
+        "mission": {
+          "title": "Un objetivo, dividido en pasos que sí terminarás",
+          "caption": "Dile qué intentas hacer. Divide el objetivo en pasos concretos y sigue lo que ya está hecho.",
+          "goal": "Lanzar mi tienda online",
+          "step1": "Elegir productos y precios",
+          "step2": "Construir la tienda",
+          "step3": "Configurar pagos",
+          "step4": "Anunciar a tu lista"
+        }
+      },
+      "cta": {
+        "title": "Describe tu primera cosa. Constrúyela gratis.",
+        "button": "Empieza gratis",
+        "note": "Email y contraseña. Nada más. Sin tarjeta."
+      }
     }
   },
   "pricing": {

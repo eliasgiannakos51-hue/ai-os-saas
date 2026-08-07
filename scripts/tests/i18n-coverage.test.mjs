@@ -219,7 +219,12 @@ const clientFallbacks = sources.flatMap((f) => [
 // increment above; the user-facing collaboration UI is fully translated
 // (the "collaboration" namespace in all ten locales), and what is
 // English here is the invite/accept routes' failure sentences.
-const SERVER_PROSE_BASELINE = 621;
+// 621 -> 627: V3 landing redesign's public demo route
+// (/api/demo/preview). Its error and rate-limit responses are consumed
+// by demo-widget.tsx, which shows its OWN fully-translated
+// landing.v2.demo strings; the English here is the API-level fallback
+// the widget only reaches if it cannot parse the JSON at all.
+const SERVER_PROSE_BASELINE = 627;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

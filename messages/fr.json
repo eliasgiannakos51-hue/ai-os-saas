@@ -151,6 +151,60 @@
       "terms": "Conditions d'utilisation",
       "privacy": "Politique de confidentialité",
       "contact": "Contact"
+    },
+    "v2": {
+      "headline": "Dites-lui ce qu'il vous faut. Il le construit.",
+      "subline": "Un site, un rapport, un plan, une présentation — décrivez-le ci-dessous et regardez Ionexa en créer un aperçu. Sans inscription pour essayer.",
+      "demo": {
+        "placeholder": "ex. un site d'une page pour ma boulangerie",
+        "button": "Voir l'aperçu",
+        "hint": "Gratuit à essayer · sans compte",
+        "buildForReal": "Inscrivez-vous gratuitement pour le construire pour de vrai",
+        "rateLimited": "Vous avez utilisé les aperçus gratuits pour l'instant — inscrivez-vous pour continuer.",
+        "error": "Impossible de créer l'aperçu. Essayez de reformuler.",
+        "kinds": {
+          "website": "Site web",
+          "agent": "Agent IA",
+          "mission": "Mission",
+          "presentation": "Présentation",
+          "research": "Rapport",
+          "other": "Création"
+        }
+      },
+      "problem": {
+        "line1": "Vous jonglez entre 14 outils pour accomplir quoi que ce soit.",
+        "line2": "C'est environ 12 heures par semaine perdues à basculer, copier et réexpliquer.",
+        "solution": "Ionexa est un seul endroit où vous décrivez ce que vous voulez et où c'est construit, publié et livré — sites, agents, rapports, plans, présentations."
+      },
+      "moments": {
+        "agent": {
+          "title": "Un agent qui travaille pendant que vous dormez",
+          "caption": "Configurez-le une fois. Il recherche, vérifie vos sources et vous envoie le rapport chaque matin — tout seul.",
+          "name": "Agent Market Watch",
+          "status": "En cours",
+          "inboxLine": "à vous · 7h00",
+          "reportLine": "3 changements de prix de la concurrence pendant la nuit, 2 méritent une action. Analyse complète en pièce jointe."
+        },
+        "website": {
+          "title": "Un vrai site, en ligne en une minute",
+          "caption": "Décrivez le site. Ionexa l'écrit et le publie sur un vrai lien partageable — sans hébergement, sans code.",
+          "live": "En ligne"
+        },
+        "mission": {
+          "title": "Un objectif, découpé en étapes que vous finirez vraiment",
+          "caption": "Dites-lui ce que vous voulez faire. Il découpe l'objectif en étapes concrètes et suit ce qui est fait.",
+          "goal": "Lancer ma boutique en ligne",
+          "step1": "Choisir produits et prix",
+          "step2": "Construire la boutique",
+          "step3": "Configurer les paiements",
+          "step4": "Annoncer à votre liste"
+        }
+      },
+      "cta": {
+        "title": "Décrivez votre première chose. Construisez-la gratuitement.",
+        "button": "Commencer gratuitement",
+        "note": "Email et mot de passe. C'est tout. Sans carte."
+      }
     }
   },
   "pricing": {

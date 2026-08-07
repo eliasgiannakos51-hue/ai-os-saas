@@ -46,6 +46,17 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // Landing demo (V3 redesign) — loanwords each locale's tech UI uses
+  // verbatim: "Live" for a site that is up (same call as
+  // dashboard.publishing.statusLive), "AI agent"/"Mission"/"Website" as
+  // product-category names.
+  "it:landing.v2.moments.website.live",
+  "de:landing.v2.moments.website.live",
+  "el:landing.v2.moments.website.live",
+  "el:landing.v2.demo.kinds.agent",
+  "fr:landing.v2.demo.kinds.mission",
+  "de:landing.v2.demo.kinds.mission",
+  "de:landing.v2.demo.kinds.website",
   // File Workspace + Deep Research (V3 Task 4). Each checked by hand:
   // "credits" is the loanword the Greek UI already uses verbatim
   // everywhere else; "pages", "Collections", "questions" and "Sources"

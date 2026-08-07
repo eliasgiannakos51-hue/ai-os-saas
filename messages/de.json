@@ -151,6 +151,60 @@
       "terms": "Nutzungsbedingungen",
       "privacy": "Datenschutzerklärung",
       "contact": "Kontakt"
+    },
+    "v2": {
+      "headline": "Sag, was du brauchst. Es wird gebaut.",
+      "subline": "Eine Website, ein Bericht, ein Plan, eine Präsentation — beschreib es unten und sieh zu, wie Ionexa eine Vorschau baut. Zum Ausprobieren ohne Anmeldung.",
+      "demo": {
+        "placeholder": "z. B. eine einseitige Website für meine Bäckerei",
+        "button": "Vorschau ansehen",
+        "hint": "Kostenlos testen · kein Konto nötig",
+        "buildForReal": "Kostenlos registrieren, um es wirklich zu bauen",
+        "rateLimited": "Du hast die kostenlosen Vorschauen vorerst aufgebraucht — registriere dich, um weiterzumachen.",
+        "error": "Vorschau konnte nicht erstellt werden. Formuliere es anders.",
+        "kinds": {
+          "website": "Website",
+          "agent": "KI-Agent",
+          "mission": "Mission",
+          "presentation": "Präsentation",
+          "research": "Bericht",
+          "other": "Erstellung"
+        }
+      },
+      "problem": {
+        "line1": "Du springst zwischen 14 Tools, um überhaupt etwas zu erledigen.",
+        "line2": "Das sind rund 12 Stunden pro Woche, verloren durch Wechseln, Kopieren und Wiedererklären.",
+        "solution": "Ionexa ist ein Ort, an dem du beschreibst, was du willst, und es wird gebaut, veröffentlicht und geliefert — Websites, Agenten, Berichte, Pläne, Präsentationen."
+      },
+      "moments": {
+        "agent": {
+          "title": "Ein Agent, der arbeitet, während du schläfst",
+          "caption": "Einmal einrichten. Er recherchiert, prüft deine Quellen und schickt dir jeden Morgen den Bericht — von allein.",
+          "name": "Agent Market Watch",
+          "status": "Läuft",
+          "inboxLine": "an dich · 7:00",
+          "reportLine": "3 Preisänderungen der Konkurrenz über Nacht, 2 lohnen sich. Vollständige Analyse im Anhang."
+        },
+        "website": {
+          "title": "Eine echte Website, in einer Minute live",
+          "caption": "Beschreib die Website. Ionexa schreibt sie und veröffentlicht sie unter einem echten, teilbaren Link — ohne Hosting, ohne Code.",
+          "live": "Live"
+        },
+        "mission": {
+          "title": "Ein Ziel, in Schritte zerlegt, die du wirklich schaffst",
+          "caption": "Sag ihm, was du vorhast. Es zerlegt das Ziel in konkrete Schritte und verfolgt, was erledigt ist.",
+          "goal": "Meinen Onlineshop starten",
+          "step1": "Produkte & Preise wählen",
+          "step2": "Den Shop bauen",
+          "step3": "Zahlungen einrichten",
+          "step4": "Deiner Liste ankündigen"
+        }
+      },
+      "cta": {
+        "title": "Beschreib deine erste Sache. Bau sie kostenlos.",
+        "button": "Kostenlos starten",
+        "note": "E-Mail und Passwort. Mehr nicht. Keine Karte."
+      }
     }
   },
   "pricing": {

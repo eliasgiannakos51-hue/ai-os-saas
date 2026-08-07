@@ -151,6 +151,60 @@
       "terms": "Termini di servizio",
       "privacy": "Informativa sulla privacy",
       "contact": "Contatti"
+    },
+    "v2": {
+      "headline": "Digli cosa ti serve. Lo costruisce.",
+      "subline": "Un sito, un report, un piano, una presentazione — descrivilo qui sotto e guarda Ionexa creare un'anteprima. Nessuna registrazione per provare.",
+      "demo": {
+        "placeholder": "es. un sito di una pagina per il mio panificio",
+        "button": "Vedi anteprima",
+        "hint": "Prova gratis · senza account",
+        "buildForReal": "Registrati gratis per costruirlo davvero",
+        "rateLimited": "Hai usato le anteprime gratuite per ora — registrati per continuare.",
+        "error": "Impossibile creare l'anteprima. Prova a riformulare.",
+        "kinds": {
+          "website": "Sito web",
+          "agent": "Agente IA",
+          "mission": "Missione",
+          "presentation": "Presentazione",
+          "research": "Report",
+          "other": "Creazione"
+        }
+      },
+      "problem": {
+        "line1": "Salti tra 14 strumenti per fare qualsiasi cosa.",
+        "line2": "Sono circa 12 ore a settimana perse tra passaggi, copie e rispiegazioni.",
+        "solution": "Ionexa è un unico posto dove descrivi ciò che vuoi e viene costruito, pubblicato e consegnato — siti, agenti, report, piani, presentazioni."
+      },
+      "moments": {
+        "agent": {
+          "title": "Un agente che lavora mentre dormi",
+          "caption": "Impostalo una volta. Ricerca, verifica le tue fonti e ti invia il report ogni mattina — da solo.",
+          "name": "Agente Market Watch",
+          "status": "In esecuzione",
+          "inboxLine": "a te · 7:00",
+          "reportLine": "3 cambi di prezzo dei concorrenti durante la notte, 2 meritano un'azione. Analisi completa allegata."
+        },
+        "website": {
+          "title": "Un sito vero, online in un minuto",
+          "caption": "Descrivi il sito. Ionexa lo scrive e lo pubblica a un link reale da condividere — senza hosting, senza codice.",
+          "live": "Live"
+        },
+        "mission": {
+          "title": "Un obiettivo, diviso in passi che finirai davvero",
+          "caption": "Digli cosa vuoi fare. Divide l'obiettivo in passi concreti e tiene traccia di ciò che è fatto.",
+          "goal": "Lanciare il mio negozio online",
+          "step1": "Scegliere prodotti e prezzi",
+          "step2": "Costruire il negozio",
+          "step3": "Impostare i pagamenti",
+          "step4": "Annunciare alla tua lista"
+        }
+      },
+      "cta": {
+        "title": "Descrivi la tua prima cosa. Costruiscila gratis.",
+        "button": "Inizia gratis",
+        "note": "Email e password. Tutto qui. Nessuna carta."
+      }
     }
   },
   "pricing": {

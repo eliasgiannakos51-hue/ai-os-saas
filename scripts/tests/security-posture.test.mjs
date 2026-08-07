@@ -268,6 +268,8 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/weekly-digest/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",
   "src/app/api/websites/[id]/submit-form/route.ts": "public contact form on generated sites; write-only, honeypot + 30/hr cap",
+  "src/app/api/demo/preview/route.ts":
+    "the landing page's try-before-signup demo — the caller is by definition anonymous. Read-only from the caller's view: stores nothing, reads no table, makes one FAST-tier model call behind a 5/hr-per-IP limit and the platform daily spend cap.",
   "src/app/api/contact/route.ts": "our own public contact page; somebody who cannot sign in is exactly who needs it. Sends only to the fixed ADMIN_EMAILS (the visitor's address is reply-to, never a recipient), honeypot + 5/hr per IP, and stores nothing",
   "src/app/api/client-error/route.ts": "browser error beacon; fires when there may be no session",
   "src/app/auth/callback/route.ts":

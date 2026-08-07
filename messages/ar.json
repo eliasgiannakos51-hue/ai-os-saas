@@ -760,7 +760,12 @@
       "reviewNotRunYet": "اكتملت كل الخطوات — شغّل المراجِع للحصول على ملخص.",
       "reviewLocked": "يعمل المراجِع بمجرد اكتمال جميع الخطوات.",
       "stepMinutes": "~{count} دقيقة",
-      "updatedElsewhere": "تم تحديث هذه المهمة في مكان آخر للتو — يتم التحديث لعرض أحدث حالة."
+      "updatedElsewhere": "تم تحديث هذه المهمة في مكان آخر للتو — يتم التحديث لعرض أحدث حالة.",
+      "sharedWithYou": "تمت مشاركته معك",
+      "collabRole": {
+        "editor": "محرر",
+        "viewer": "مشاهد"
+      }
     },
     "reflection": {
       "title": "التأمل الأسبوعي",
@@ -1714,6 +1719,46 @@
       "presentations": "عروض تقديمية",
       "researchReports": "تقارير بحثية",
       "publishedSites": "مواقع منشورة"
+    }
+  },
+  "collaboration": {
+    "pageTitle": "دعوة إلى مشروع",
+    "invalidInvite": "رابط الدعوة هذا لم يعد صالحًا. ربما انتهت صلاحيته أو أُلغي أو استُخدم بالفعل — اطلب رابطًا جديدًا ممن دعاك.",
+    "backHome": "العودة إلى الموقع",
+    "inviteSummary": "دعاك {inviter} للتعاون في مشروعه بصفة {role}. تحتفظ بحسابك وخطتك ورصيدك — تتم مشاركة مشروع واحد فقط لا غير.",
+    "signInFirst": "أُرسلت الدعوة إلى {email}. سجّل (أو سجّل الدخول) بهذا العنوان ثم افتح هذا الرابط مجددًا.",
+    "signUp": "إنشاء حساب",
+    "logIn": "تسجيل الدخول",
+    "comeBackHint": "تبقى هذه الصفحة صالحة حتى انتهاء صلاحية الدعوة، فيمكنك العودة إليها بعد تسجيل الدخول.",
+    "acceptButton": "الانضمام إلى المشروع",
+    "acceptFailed": "تعذّر قبول الدعوة. حاول مرة أخرى.",
+    "tabShare": "مشاركة",
+    "panelIntro": "ادعُ أشخاصًا لديهم حساب Ionexa خاص بهم إلى هذا المشروع. يمكن للمحررين تعليم الخطوات الفرعية؛ أما المشاهدون فيطّلعون فقط. يحتفظ كل شخص بخطته ورصيده، ويمكنك إلغاء الوصول في أي وقت.",
+    "emailPlaceholder": "zamil@example.com",
+    "roleLabel": "الدور",
+    "inviteButton": "دعوة",
+    "inviteFailed": "تعذّر إرسال الدعوة.",
+    "inviteSent": "أُرسلت الدعوة.",
+    "revokeFailed": "تعذّر الإلغاء.",
+    "loading": "جارٍ تحميل المتعاونين…",
+    "seatCount": "{used} من {max} مقاعد المتعاونين مستخدمة",
+    "attributedSignups": "انضم {count} إلى Ionexa عبر دعواتك",
+    "membersTitle": "المتعاونون",
+    "pendingTitle": "دعوات معلّقة",
+    "revoke": "إلغاء",
+    "aCollaborator": "متعاون",
+    "activityTitle": "النشاط",
+    "roles": {
+      "editor": "محرر",
+      "viewer": "مشاهد"
+    },
+    "activity": {
+      "invited": "تمت دعوة {detail}",
+      "joined": "انضم {detail} إلى المشروع",
+      "revoked": "أُلغي وصول {detail}",
+      "left": "غادر {detail} المشروع",
+      "step_completed": "أُنجزت خطوة فرعية: {detail}",
+      "step_reopened": "أُعيد فتح خطوة فرعية: {detail}"
     }
   }
 }

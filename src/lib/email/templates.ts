@@ -175,6 +175,56 @@ export function teamInviteEmailHtml({
   });
 }
 
+// Distinct from the team invite above on purpose: a team seat puts the
+// recipient inside the owner's account at the owner's tier, while a
+// project collaborator keeps their own independent account and plan and
+// is being granted access to exactly one mission. The copy must not
+// promise the team invite's "full access at their tier" here.
+export function collaborationInviteEmailHtml({
+  inviterEmail,
+  projectGoal,
+  role,
+  acceptUrl,
+}: {
+  inviterEmail: string;
+  projectGoal: string;
+  role: string;
+  acceptUrl: string;
+}): string {
+  // The goal is the owner's own text — user content, so escaped. The
+  // inviter email survived the login flow's validation (no angle
+  // brackets can), and role is one of two literals, but escaping all
+  // three costs nothing and assumes nothing.
+  const safeGoal = escapeHtml(projectGoal);
+  const safeInviter = escapeHtml(inviterEmail);
+  const safeRole = escapeHtml(role);
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">project invite</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">you've been invited to collaborate</h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      <span style="color:${FOREGROUND};">${safeInviter}</span> invited you to join
+      their project <span style="color:${ORANGE};">&ldquo;${safeGoal}&rdquo;</span>
+      on Ionexa AI as <span style="color:${FOREGROUND};">${safeRole}</span>.
+      You keep your own account and plan — this shares one project, nothing else.
+    </p>
+    <p style="margin:0 0 20px;">
+      <a href="${acceptUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        View the invite
+      </a>
+    </p>
+    <p style="color:${MUTED}; font-size:12px; line-height:1.6; margin:0;">
+      The invite was sent to this address and only an account with this
+      address can accept it. If you weren't expecting it, you can ignore
+      this email — it expires on its own.
+    </p>
+  `;
+
+  return layout({
+    preheader: `${inviterEmail} invited you to collaborate on a project.`,
+    bodyHtml,
+  });
+}
+
 export function deleteAccountConfirmationEmailHtml({
   email,
   confirmUrl,

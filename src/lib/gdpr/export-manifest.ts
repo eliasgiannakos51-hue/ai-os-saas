@@ -166,6 +166,20 @@ export const EXPORTED_TABLES: ExportTable[] = [
   // subject is on; the other person's rows are theirs, not this
   // subject's, and are not included by exporting the whole table.
   { table: "team_members", column: "owner_id" },
+
+  // --- collaborative projects (V3 Task 11) ---
+  // Same edge-between-people rule as team_members, from each side the
+  // subject can be on. Invites are exported from the owner side WITHOUT
+  // the token column: it is a live credential until it expires, and a
+  // credential does not belong in a downloads folder (same reasoning as
+  // account_deletion_requests' exclusion).
+  {
+    table: "collaboration_invites",
+    column: "owner_id",
+    select: "id, project_id, email, role, status, signup_attributed, created_at, accepted_at",
+  },
+  { table: "project_collaborators", column: "user_id" },
+  { table: "collaboration_activity", column: "actor_id" },
 ];
 
 /**

@@ -760,7 +760,12 @@
       "reviewNotRunYet": "Alle Schritte sind erledigt — starte den Reviewer für eine Zusammenfassung.",
       "reviewLocked": "Der Reviewer läuft, sobald alle Schritte abgeschlossen sind.",
       "stepMinutes": "~{count} Min.",
-      "updatedElsewhere": "Diese Mission wurde soeben anderswo aktualisiert — wird neu geladen, um den aktuellen Stand zu zeigen."
+      "updatedElsewhere": "Diese Mission wurde soeben anderswo aktualisiert — wird neu geladen, um den aktuellen Stand zu zeigen.",
+      "sharedWithYou": "Mit dir geteilt",
+      "collabRole": {
+        "editor": "Bearbeiter",
+        "viewer": "Betrachter"
+      }
     },
     "reflection": {
       "title": "Wöchentliche Reflexion",
@@ -1714,6 +1719,46 @@
       "presentations": "Präsentationen",
       "researchReports": "Forschungsberichten",
       "publishedSites": "veröffentlichten Websites"
+    }
+  },
+  "collaboration": {
+    "pageTitle": "Projekt-Einladung",
+    "invalidInvite": "Dieser Einladungslink ist nicht mehr gültig. Er ist vielleicht abgelaufen, wurde widerrufen oder bereits verwendet — bitte die Person, die dich eingeladen hat, um einen neuen.",
+    "backHome": "Zurück zur Website",
+    "inviteSummary": "{inviter} hat dich eingeladen, an ihrem Projekt als {role} mitzuarbeiten. Du behältst deinen eigenen Account, Tarif und deine Credits — geteilt wird ein Projekt, sonst nichts.",
+    "signInFirst": "Die Einladung ging an {email}. Registriere dich (oder melde dich an) mit dieser Adresse und öffne diesen Link dann erneut.",
+    "signUp": "Registrieren",
+    "logIn": "Anmelden",
+    "comeBackHint": "Diese Seite bleibt gültig, bis die Einladung abläuft — du kannst nach der Anmeldung hierher zurückkehren.",
+    "acceptButton": "Dem Projekt beitreten",
+    "acceptFailed": "Die Einladung konnte nicht angenommen werden. Bitte erneut versuchen.",
+    "tabShare": "Teilen",
+    "panelIntro": "Lade Personen mit eigenem Ionexa-Account zu diesem Projekt ein. Bearbeiter können Teilschritte abhaken; Betrachter nur ansehen. Jeder behält seinen Tarif und seine Credits, und du kannst den Zugriff jederzeit widerrufen.",
+    "emailPlaceholder": "kollege@example.com",
+    "roleLabel": "Rolle",
+    "inviteButton": "Einladen",
+    "inviteFailed": "Die Einladung konnte nicht gesendet werden.",
+    "inviteSent": "Einladung gesendet.",
+    "revokeFailed": "Widerruf fehlgeschlagen.",
+    "loading": "Mitarbeitende werden geladen…",
+    "seatCount": "{used} von {max} Plätzen belegt",
+    "attributedSignups": "{count, plural, one {# Person ist} other {# Personen sind}} über deine Einladungen zu Ionexa gekommen",
+    "membersTitle": "Mitarbeitende",
+    "pendingTitle": "Ausstehende Einladungen",
+    "revoke": "Widerrufen",
+    "aCollaborator": "Ein Mitarbeitender",
+    "activityTitle": "Aktivität",
+    "roles": {
+      "editor": "Bearbeiter",
+      "viewer": "Betrachter"
+    },
+    "activity": {
+      "invited": "{detail} wurde eingeladen",
+      "joined": "{detail} ist dem Projekt beigetreten",
+      "revoked": "Zugriff für {detail} widerrufen",
+      "left": "{detail} hat das Projekt verlassen",
+      "step_completed": "Teilschritt erledigt: {detail}",
+      "step_reopened": "Teilschritt wieder geöffnet: {detail}"
     }
   }
 }

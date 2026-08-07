@@ -760,7 +760,12 @@
       "reviewNotRunYet": "所有步骤已完成——运行评审员以获取总结。",
       "reviewLocked": "所有步骤完成后评审员才会运行。",
       "stepMinutes": "约 {count} 分钟",
-      "updatedElsewhere": "该任务刚刚在别处被更新——正在刷新以显示最新状态。"
+      "updatedElsewhere": "该任务刚刚在别处被更新——正在刷新以显示最新状态。",
+      "sharedWithYou": "与你共享",
+      "collabRole": {
+        "editor": "编辑者",
+        "viewer": "查看者"
+      }
     },
     "reflection": {
       "title": "每周回顾",
@@ -1714,6 +1719,46 @@
       "presentations": "演示文稿",
       "researchReports": "研究报告",
       "publishedSites": "已发布网站"
+    }
+  },
+  "collaboration": {
+    "pageTitle": "项目邀请",
+    "invalidInvite": "此邀请链接已失效。可能已过期、被撤销或已被使用——请向邀请你的人索取新的链接。",
+    "backHome": "返回网站",
+    "inviteSummary": "{inviter} 邀请你以{role}身份协作参与他们的项目。你保留自己的账户、套餐和积分——只共享一个项目,仅此而已。",
+    "signInFirst": "邀请已发送至 {email}。请用该地址注册(或登录),然后重新打开此链接。",
+    "signUp": "注册",
+    "logIn": "登录",
+    "comeBackHint": "在邀请过期前,此页面一直有效,登录后可以再回来。",
+    "acceptButton": "加入项目",
+    "acceptFailed": "无法接受邀请,请重试。",
+    "tabShare": "共享",
+    "panelIntro": "邀请拥有自己 Ionexa 账户的人加入此项目。编辑者可以勾选子步骤;查看者只能浏览。每个人保留自己的套餐和积分,你可以随时撤销访问权限。",
+    "emailPlaceholder": "colleague@example.com",
+    "roleLabel": "角色",
+    "inviteButton": "邀请",
+    "inviteFailed": "无法发送邀请。",
+    "inviteSent": "邀请已发送。",
+    "revokeFailed": "无法撤销。",
+    "loading": "正在加载协作者…",
+    "seatCount": "已使用 {used}/{max} 个协作席位",
+    "attributedSignups": "有 {count} 人通过你的邀请加入了 Ionexa",
+    "membersTitle": "协作者",
+    "pendingTitle": "待接受的邀请",
+    "revoke": "撤销",
+    "aCollaborator": "一位协作者",
+    "activityTitle": "动态",
+    "roles": {
+      "editor": "编辑者",
+      "viewer": "查看者"
+    },
+    "activity": {
+      "invited": "已邀请 {detail}",
+      "joined": "{detail} 加入了项目",
+      "revoked": "已撤销 {detail} 的访问权限",
+      "left": "{detail} 离开了项目",
+      "step_completed": "完成了子步骤:{detail}",
+      "step_reopened": "重新打开了子步骤:{detail}"
     }
   }
 }

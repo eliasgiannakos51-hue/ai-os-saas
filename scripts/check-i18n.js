@@ -212,6 +212,16 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // to make the string differ would be translating the checker rather
   // than the UI.
   "dashboard.marketplace.ratingSummary",
+  // An example email address in an input placeholder. Some locales
+  // localise the mailbox word, some keep the English example — both are
+  // correct, and "colleague@example.com" contains no prose to translate.
+  "collaboration.emailPlaceholder",
+  // "Editor" is the industry loanword for this role in es/it/pt UI copy
+  // (the same call LOCALE_ALLOWED already records for other marketplace
+  // loanwords); inventing "redactor"/"redattore" here would rename the
+  // role away from what those locales' software actually calls it.
+  "collaboration.roles.editor",
+  "dashboard.mission.collabRole.editor",
   "landing.footer.roadmap",
   "roadmap.title",
   "roadmap.items.agentBuilder.title",

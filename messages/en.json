@@ -760,7 +760,12 @@
       "reviewNotRunYet": "Every step is done — run the Reviewer to get a summary.",
       "reviewLocked": "The Reviewer runs once every step is complete.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "This mission was updated elsewhere just now — refreshing to show the latest state."
+      "updatedElsewhere": "This mission was updated elsewhere just now — refreshing to show the latest state.",
+      "sharedWithYou": "Shared with you",
+      "collabRole": {
+        "editor": "Editor",
+        "viewer": "Viewer"
+      }
     },
     "reflection": {
       "title": "Weekly Reflection",
@@ -1714,6 +1719,46 @@
       "presentations": "presentations",
       "researchReports": "research reports",
       "publishedSites": "published sites"
+    }
+  },
+  "collaboration": {
+    "pageTitle": "Project invite",
+    "invalidInvite": "This invite link is no longer valid. It may have expired, been revoked, or already been used — ask the person who invited you for a new one.",
+    "backHome": "Back to the site",
+    "inviteSummary": "{inviter} invited you to collaborate on their project as {role}. You keep your own account, plan and credits — this shares one project, nothing else.",
+    "signInFirst": "The invite was sent to {email}. Sign up (or log in) with that address, then open this link again.",
+    "signUp": "Sign up",
+    "logIn": "Log in",
+    "comeBackHint": "This page stays valid until the invite expires, so you can come back to it after signing in.",
+    "acceptButton": "Join the project",
+    "acceptFailed": "Could not accept the invite. Please try again.",
+    "tabShare": "Share",
+    "panelIntro": "Invite people with their own Ionexa account to this project. Editors can tick sub-steps; viewers can only look. Everyone keeps their own plan and credits, and you can revoke access at any time.",
+    "emailPlaceholder": "colleague@example.com",
+    "roleLabel": "Role",
+    "inviteButton": "Invite",
+    "inviteFailed": "Could not send the invite.",
+    "inviteSent": "Invite sent.",
+    "revokeFailed": "Could not revoke that.",
+    "loading": "Loading collaborators…",
+    "seatCount": "{used} of {max} collaborator seats used",
+    "attributedSignups": "{count, plural, one {# person} other {# people}} joined Ionexa from your invites",
+    "membersTitle": "Collaborators",
+    "pendingTitle": "Pending invites",
+    "revoke": "Revoke",
+    "aCollaborator": "A collaborator",
+    "activityTitle": "Activity",
+    "roles": {
+      "editor": "Editor",
+      "viewer": "Viewer"
+    },
+    "activity": {
+      "invited": "Invited {detail}",
+      "joined": "{detail} joined the project",
+      "revoked": "Access revoked for {detail}",
+      "left": "{detail} left the project",
+      "step_completed": "Completed a sub-step: {detail}",
+      "step_reopened": "Reopened a sub-step: {detail}"
     }
   }
 }

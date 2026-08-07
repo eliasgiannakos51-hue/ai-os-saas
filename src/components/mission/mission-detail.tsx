@@ -13,6 +13,7 @@ import {
   Loader2,
   RotateCw,
   Sparkles,
+  Users,
   X,
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
@@ -26,6 +27,7 @@ import { MessageContent } from "@/components/chat/message-content";
 import { getStuckStep } from "@/lib/mission-progress";
 import { buildPriorStepsContext, MAX_STEP_ATTEMPTS, stepAttemptsExhausted } from "@/lib/mission-context";
 import { updateMissionPlanSteps } from "@/lib/mission-plan-steps";
+import { CollaborationPanel } from "@/components/collaboration/collaboration-panel";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { AGENT_ROLES, type AgentRole } from "@/lib/agent-roles";
 import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
@@ -67,13 +69,14 @@ const AGENT_ROLE_LABEL_KEYS: Record<AgentRole, string> = {
 // chat-workspace.tsx's togglePin/renameConversation), then
 // router.refresh() reloads the mission from the server so this card is
 // always rendering real, persisted state rather than a hand-mirrored copy.
-export type MissionDetailTab = "steps" | "review";
+export type MissionDetailTab = "steps" | "review" | "share";
 
 export function MissionDetail({
   mission,
   scheduledStepIndices = [],
   initialFavorited = false,
   initialTab = "steps",
+  accessRole = "owner",
   onClose,
 }: {
   mission: Mission;
@@ -85,12 +88,21 @@ export function MissionDetail({
   // "Scheduled" instead of offering to schedule the same step twice.
   scheduledStepIndices?: number[];
   initialTab?: MissionDetailTab;
+  /** Collaboration (V3 Task 11). "owner" is the default and today's
+   *  behaviour; a mission shared with this user arrives as "editor"
+   *  (may tick sub-steps — the RLS update policy is the server truth
+   *  this mirrors) or "viewer" (read only). Non-owners never see the
+   *  AI-build, schedule or share controls: building and scheduling stay
+   *  owner concerns, and hiding what RLS would refuse beats offering
+   *  buttons that 403. */
+  accessRole?: "owner" | "editor" | "viewer";
   onClose: () => void;
 }) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.mission");
   const locale = useLocale();
   const tCommon = useTranslations("common");
+  const tCollab = useTranslations("collaboration");
   const router = useRouter();
   const supabase = createClient();
   const { refresh: refreshCredits } = useCredits();
@@ -332,6 +344,10 @@ export function MissionDetail({
   const tabs: DetailTab[] = [
     { key: "steps", label: t("tabSteps"), icon: ListChecks, badge: steps.length || undefined },
     { key: "review", label: t("tabReview"), icon: ClipboardCheck },
+    // Sharing is granting access, and only the owner grants access.
+    ...(accessRole === "owner"
+      ? [{ key: "share", label: tCollab("tabShare"), icon: Users } as DetailTab]
+      : []),
   ];
 
   return (
@@ -479,7 +495,10 @@ export function MissionDetail({
                               <button
                                 type="button"
                                 onClick={() => toggleSubstep(index, subIndex)}
-                                disabled={togglingSubstep !== null}
+                                // Viewers are read-only: the RLS update
+                                // policy would refuse the write anyway;
+                                // disabling is honesty, not enforcement.
+                                disabled={togglingSubstep !== null || accessRole === "viewer"}
                                 aria-pressed={done}
                                 className="flex w-full items-start gap-2 rounded-md px-1 py-0.5 text-left transition-colors duration-150 hover:bg-panel-hover disabled:cursor-not-allowed disabled:opacity-60"
                               >
@@ -506,7 +525,12 @@ export function MissionDetail({
                       </ul>
                     )}
                   </div>
-                  {step.status !== "completed" && (
+                  {/* Building with AI and scheduling stay owner concerns:
+                      the routes behind them are owner-scoped, and a
+                      collaborator's contribution surface is the sub-step
+                      ticks and the outputs, not spending decisions on a
+                      project they do not own. */}
+                  {step.status !== "completed" && accessRole === "owner" && (
                     <div className="flex shrink-0 flex-col items-end gap-1.5">
                       {stepAttemptsExhausted(step.attempts) ? (
                         <p className="max-w-[160px] text-right text-[11px] text-red-400">
@@ -613,6 +637,10 @@ export function MissionDetail({
           )}
         </div>
       )}
+
+      {/* Owner-only by the tab's own existence check above, and repeated
+          here so a stray tab state can never render the grant surface. */}
+      {tab === "share" && accessRole === "owner" && <CollaborationPanel projectId={mission.id} />}
     </DetailPanel>
   );
 }

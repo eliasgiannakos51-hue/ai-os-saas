@@ -214,7 +214,12 @@ const clientFallbacks = sources.flatMap((f) => [
 // sentence — prose that exists BECAUSE the security gate demanded the
 // limit. The device-check and client-error additions return silent
 // successes by design and add none.
-const SERVER_PROSE_BASELINE = 595;
+// 595 -> 621: V3 Task 11's collaboration routes (/api/collaboration/
+// invites and /accept). Same recorded decision as every API-error
+// increment above; the user-facing collaboration UI is fully translated
+// (the "collaboration" namespace in all ten locales), and what is
+// English here is the invite/accept routes' failure sentences.
+const SERVER_PROSE_BASELINE = 621;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

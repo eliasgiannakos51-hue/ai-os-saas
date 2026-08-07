@@ -108,6 +108,9 @@ const V3_TABLES = [
   "affiliate_accounts",
   "affiliate_referrals",
   "affiliate_commissions",
+  "collaboration_invites",
+  "project_collaborators",
+  "collaboration_activity",
 ];
 for (const t of MODULE_TABLES) {
   if (!rlsEnabled.has(t)) {

@@ -70,19 +70,46 @@ export default async function MissionPage() {
   // The explicit .eq() does not replace RLS (RLS still enforces it) — it
   // puts the intent in the code, and it lets the check below tell the two
   // cases apart by comparing against a count taken with the same filter.
-  const [{ data: missions, error }, { data: scheduledRuns }] = await Promise.all([
-    supabase
+  const [{ data: missions, error }, { data: scheduledRuns }, { data: collaborations }] =
+    await Promise.all([
+      supabase
+        .from("ai_missions")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("scheduled_agent_runs")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("status", "pending")
+        .order("scheduled_for", { ascending: true }),
+      // Collaboration (V3 Task 11): the memberships name which missions
+      // are shared with this user and at what role; the missions
+      // themselves are fetched below through the shared-select RLS
+      // policy those memberships power.
+      supabase
+        .from("project_collaborators")
+        .select("project_id, role")
+        .eq("user_id", user.id),
+    ]);
+
+  const collaborationRows =
+    (collaborations as { project_id: string; role: "editor" | "viewer" }[] | null) ?? [];
+  let sharedMissions: { mission: Mission; role: "editor" | "viewer" }[] = [];
+  if (collaborationRows.length > 0) {
+    const { data: sharedRows } = await supabase
       .from("ai_missions")
       .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("scheduled_agent_runs")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("status", "pending")
-      .order("scheduled_for", { ascending: true }),
-  ]);
+      .in("id", collaborationRows.map((c) => c.project_id))
+      .order("created_at", { ascending: false });
+    const roleByProject = new Map(collaborationRows.map((c) => [c.project_id, c.role]));
+    sharedMissions = ((sharedRows as Mission[] | null) ?? [])
+      // A row that came back without a matching membership cannot happen
+      // under the RLS design; filtering anyway costs one line and makes
+      // the page's own assumption explicit.
+      .filter((m) => roleByProject.has(m.id))
+      .map((m) => ({ mission: m, role: roleByProject.get(m.id)! }));
+  }
 
   diagLog(`[mission-diag ${reqId}] ai_missions query -> rows=${missions?.length ?? "null"} error=${error?.message ?? "none"} ids=${
       (missions as Mission[] | null)?.map((m) => m.id.slice(0, 8)).join(",") ?? "-"
@@ -145,6 +172,7 @@ export default async function MissionPage() {
         {!sessionDegraded && (
           <MissionList
             missions={missionRows}
+            sharedMissions={sharedMissions}
             scheduledStepIndicesByMission={scheduledStepIndicesByMission}
             favoritedIds={favoritedMissionIds}
           />

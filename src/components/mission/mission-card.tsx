@@ -36,12 +36,17 @@ export function MissionCard({
   index,
   selected,
   initialFavorited = false,
+  roleTag,
   onOpen,
 }: {
   mission: Mission;
   index: number;
   selected: boolean;
   initialFavorited?: boolean;
+  /** Set only on the "Shared with you" section (V3 Task 11): the
+   *  already-translated role label, shown as an extra tag so a shared
+   *  card is distinguishable from an owned one at a glance. */
+  roleTag?: string;
   onOpen: (tab?: "steps" | "review") => void;
 }) {
   const t = useTranslations("dashboard.mission");
@@ -73,6 +78,7 @@ export function MissionCard({
       onSelect={() => onOpen()}
       tags={[
         { key: "steps", label: t("stepsProgress", { done: completed, total: steps.length }) },
+        ...(roleTag ? [{ key: "role", label: roleTag }] : []),
       ]}
       status={{
         label: t(STATUS_LABEL_KEYS[mission.status]),

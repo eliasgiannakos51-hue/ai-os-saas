@@ -760,7 +760,12 @@
       "reviewNotRunYet": "Todos os passos estão concluídos — execute o Revisor para obter um resumo.",
       "reviewLocked": "O Revisor corre assim que todos os passos estiverem concluídos.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "Esta missão foi atualizada noutro local agora mesmo — a recarregar para mostrar o estado mais recente."
+      "updatedElsewhere": "Esta missão foi atualizada noutro local agora mesmo — a recarregar para mostrar o estado mais recente.",
+      "sharedWithYou": "Partilhados contigo",
+      "collabRole": {
+        "editor": "Editor",
+        "viewer": "Observador"
+      }
     },
     "reflection": {
       "title": "Reflexão Semanal",
@@ -1714,6 +1719,46 @@
       "presentations": "apresentações",
       "researchReports": "relatórios de investigação",
       "publishedSites": "sites publicados"
+    }
+  },
+  "collaboration": {
+    "pageTitle": "Convite para o projeto",
+    "invalidInvite": "Este link de convite já não é válido. Pode ter expirado, sido revogado ou já usado — pede um novo a quem te convidou.",
+    "backHome": "Voltar ao site",
+    "inviteSummary": "{inviter} convidou-te a colaborar no projeto como {role}. Manténs a tua conta, o teu plano e os teus créditos — partilha-se um projeto, nada mais.",
+    "signInFirst": "O convite foi enviado para {email}. Regista-te (ou inicia sessão) com esse endereço e volta a abrir este link.",
+    "signUp": "Registar",
+    "logIn": "Iniciar sessão",
+    "comeBackHint": "Esta página continua válida até o convite expirar, por isso podes voltar depois de iniciares sessão.",
+    "acceptButton": "Entrar no projeto",
+    "acceptFailed": "Não foi possível aceitar o convite. Tenta novamente.",
+    "tabShare": "Partilhar",
+    "panelIntro": "Convida pessoas com a sua própria conta Ionexa para este projeto. Os editores podem marcar sub-passos; os observadores apenas ver. Cada um mantém o seu plano e os seus créditos, e podes revogar o acesso a qualquer momento.",
+    "emailPlaceholder": "colega@example.com",
+    "roleLabel": "Função",
+    "inviteButton": "Convidar",
+    "inviteFailed": "Não foi possível enviar o convite.",
+    "inviteSent": "Convite enviado.",
+    "revokeFailed": "Não foi possível revogar.",
+    "loading": "A carregar colaboradores…",
+    "seatCount": "{used} de {max} lugares de colaborador em uso",
+    "attributedSignups": "{count, plural, one {# pessoa juntou-se} other {# pessoas juntaram-se}} ao Ionexa através dos teus convites",
+    "membersTitle": "Colaboradores",
+    "pendingTitle": "Convites pendentes",
+    "revoke": "Revogar",
+    "aCollaborator": "Um colaborador",
+    "activityTitle": "Atividade",
+    "roles": {
+      "editor": "Editor",
+      "viewer": "Observador"
+    },
+    "activity": {
+      "invited": "{detail} foi convidado",
+      "joined": "{detail} juntou-se ao projeto",
+      "revoked": "Acesso revogado para {detail}",
+      "left": "{detail} saiu do projeto",
+      "step_completed": "Sub-passo concluído: {detail}",
+      "step_reopened": "Sub-passo reaberto: {detail}"
     }
   }
 }

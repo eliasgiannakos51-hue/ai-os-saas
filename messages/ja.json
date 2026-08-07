@@ -760,7 +760,12 @@
       "reviewNotRunYet": "すべてのステップが完了しました。レビュアーを実行して要約を取得してください。",
       "reviewLocked": "レビュアーはすべてのステップ完了後に実行されます。",
       "stepMinutes": "約 {count} 分",
-      "updatedElsewhere": "このミッションは別の場所で更新されました — 最新の状態を表示するために再読み込みします。"
+      "updatedElsewhere": "このミッションは別の場所で更新されました — 最新の状態を表示するために再読み込みします。",
+      "sharedWithYou": "共有されたプロジェクト",
+      "collabRole": {
+        "editor": "編集者",
+        "viewer": "閲覧者"
+      }
     },
     "reflection": {
       "title": "週次振り返り",
@@ -1714,6 +1719,46 @@
       "presentations": "プレゼンテーション",
       "researchReports": "リサーチレポート",
       "publishedSites": "公開サイト"
+    }
+  },
+  "collaboration": {
+    "pageTitle": "プロジェクトへの招待",
+    "invalidInvite": "この招待リンクは無効になりました。期限切れ、取り消し、または使用済みの可能性があります。招待した人に新しいリンクを依頼してください。",
+    "backHome": "サイトに戻る",
+    "inviteSummary": "{inviter} さんがプロジェクトに{role}として招待しています。自分のアカウント・プラン・クレジットはそのまま——共有されるのはひとつのプロジェクトだけです。",
+    "signInFirst": "招待は {email} 宛てに送信されました。そのアドレスで登録(またはログイン)してから、もう一度このリンクを開いてください。",
+    "signUp": "登録する",
+    "logIn": "ログイン",
+    "comeBackHint": "このページは招待の有効期限まで使えます。ログイン後に戻ってきてください。",
+    "acceptButton": "プロジェクトに参加",
+    "acceptFailed": "招待を受諾できませんでした。もう一度お試しください。",
+    "tabShare": "共有",
+    "panelIntro": "自分の Ionexa アカウントを持つ人をこのプロジェクトに招待できます。編集者はサブステップにチェックを入れられ、閲覧者は見るだけです。各自が自分のプランとクレジットを使い、アクセスはいつでも取り消せます。",
+    "emailPlaceholder": "colleague@example.com",
+    "roleLabel": "役割",
+    "inviteButton": "招待する",
+    "inviteFailed": "招待を送信できませんでした。",
+    "inviteSent": "招待を送信しました。",
+    "revokeFailed": "取り消せませんでした。",
+    "loading": "コラボレーターを読み込み中…",
+    "seatCount": "コラボレーター枠 {max} のうち {used} を使用中",
+    "attributedSignups": "あなたの招待から {count} 人が Ionexa に参加しました",
+    "membersTitle": "コラボレーター",
+    "pendingTitle": "保留中の招待",
+    "revoke": "取り消す",
+    "aCollaborator": "コラボレーター",
+    "activityTitle": "アクティビティ",
+    "roles": {
+      "editor": "編集者",
+      "viewer": "閲覧者"
+    },
+    "activity": {
+      "invited": "{detail} を招待しました",
+      "joined": "{detail} がプロジェクトに参加しました",
+      "revoked": "{detail} のアクセスを取り消しました",
+      "left": "{detail} がプロジェクトを離れました",
+      "step_completed": "サブステップを完了: {detail}",
+      "step_reopened": "サブステップを再開: {detail}"
     }
   }
 }

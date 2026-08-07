@@ -26,10 +26,17 @@ const STATUS_LABEL_KEYS: Record<MissionStatus, string> = {
 
 export function MissionList({
   missions,
+  sharedMissions = [],
   scheduledStepIndicesByMission = {},
   favoritedIds = [],
 }: {
   missions: Mission[];
+  /** Missions OTHER accounts shared with this user (V3 Task 11), with
+   *  the role their collaborator row grants. Rendered as their own
+   *  section below the owned list — never mixed in, because "mine" and
+   *  "shared with me" answer different questions and a shared mission
+   *  must not look deletable. */
+  sharedMissions?: { mission: Mission; role: "editor" | "viewer" }[];
   // Keyed by mission id — see dashboard/mission/page.tsx, passed straight
   // through to the detail panel so it can show "Scheduled" instead of the
   // schedule button for a step that already has one pending.
@@ -72,7 +79,10 @@ export function MissionList({
     `${query}|${statusFilter}`
   );
 
-  const selectedMission = selected ? missions.find((m) => m.id === selected.id) ?? null : null;
+  const selectedOwned = selected ? missions.find((m) => m.id === selected.id) ?? null : null;
+  const selectedShared =
+    !selectedOwned && selected ? sharedMissions.find((s) => s.mission.id === selected.id) ?? null : null;
+  const selectedMission = selectedOwned ?? selectedShared?.mission ?? null;
 
   return (
     <div className="space-y-6">
@@ -83,6 +93,7 @@ export function MissionList({
           scheduledStepIndices={scheduledStepIndicesByMission[selectedMission.id] ?? []}
           initialFavorited={favoritedSet.has(selectedMission.id)}
           initialTab={selected?.tab ?? "steps"}
+          accessRole={selectedShared ? selectedShared.role : "owner"}
           onClose={() => setSelected(null)}
         />
       )}
@@ -161,6 +172,30 @@ export function MissionList({
           </>
         )}
       </ListLayout>
+
+      {/* Shared with you (V3 Task 11). Its own section, not mixed into
+          the owned grid: these cards carry someone else's project, and
+          the role tag is the honest label for what clicking one allows. */}
+      {sharedMissions.length > 0 && (
+        <section>
+          <h2 className="mb-3 flex items-center gap-2 text-xs font-medium text-muted">
+            {t("sharedWithYou")}
+          </h2>
+          <CardGrid>
+            {sharedMissions.map(({ mission, role }, i) => (
+              <MissionCard
+                key={mission.id}
+                mission={mission}
+                index={i}
+                selected={selected?.id === mission.id}
+                initialFavorited={favoritedSet.has(mission.id)}
+                roleTag={t(`collabRole.${role}`)}
+                onOpen={(tab) => setSelected({ id: mission.id, tab: tab ?? "steps" })}
+              />
+            ))}
+          </CardGrid>
+        </section>
+      )}
     </div>
   );
 }

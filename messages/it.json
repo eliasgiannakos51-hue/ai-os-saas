@@ -760,7 +760,12 @@
       "reviewNotRunYet": "Tutti i passaggi sono completati: esegui il Revisore per un riepilogo.",
       "reviewLocked": "Il Revisore parte quando tutti i passaggi sono completati.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "Questa missione è stata appena aggiornata altrove — aggiornamento per mostrare lo stato più recente."
+      "updatedElsewhere": "Questa missione è stata appena aggiornata altrove — aggiornamento per mostrare lo stato più recente.",
+      "sharedWithYou": "Condivisi con te",
+      "collabRole": {
+        "editor": "Editor",
+        "viewer": "Osservatore"
+      }
     },
     "reflection": {
       "title": "Riflessione Settimanale",
@@ -1714,6 +1719,46 @@
       "presentations": "presentazioni",
       "researchReports": "report di ricerca",
       "publishedSites": "siti pubblicati"
+    }
+  },
+  "collaboration": {
+    "pageTitle": "Invito al progetto",
+    "invalidInvite": "Questo link di invito non è più valido. Potrebbe essere scaduto, revocato o già usato — chiedi a chi ti ha invitato di inviartene uno nuovo.",
+    "backHome": "Torna al sito",
+    "inviteSummary": "{inviter} ti ha invitato a collaborare al suo progetto come {role}. Mantieni il tuo account, il tuo piano e i tuoi crediti — si condivide un progetto, nient'altro.",
+    "signInFirst": "L'invito è stato inviato a {email}. Registrati (o accedi) con quell'indirizzo e riapri questo link.",
+    "signUp": "Registrati",
+    "logIn": "Accedi",
+    "comeBackHint": "Questa pagina resta valida finché l'invito non scade: puoi tornarci dopo aver effettuato l'accesso.",
+    "acceptButton": "Unisciti al progetto",
+    "acceptFailed": "Impossibile accettare l'invito. Riprova.",
+    "tabShare": "Condividi",
+    "panelIntro": "Invita persone con un proprio account Ionexa a questo progetto. Gli editor possono spuntare i sotto-passi; gli osservatori possono solo guardare. Ognuno mantiene il proprio piano e i propri crediti, e puoi revocare l'accesso in qualsiasi momento.",
+    "emailPlaceholder": "collega@example.com",
+    "roleLabel": "Ruolo",
+    "inviteButton": "Invita",
+    "inviteFailed": "Impossibile inviare l'invito.",
+    "inviteSent": "Invito inviato.",
+    "revokeFailed": "Impossibile revocare.",
+    "loading": "Caricamento collaboratori…",
+    "seatCount": "{used} di {max} posti collaboratore in uso",
+    "attributedSignups": "{count, plural, one {# persona si è unita} other {# persone si sono unite}} a Ionexa grazie ai tuoi inviti",
+    "membersTitle": "Collaboratori",
+    "pendingTitle": "Inviti in sospeso",
+    "revoke": "Revoca",
+    "aCollaborator": "Un collaboratore",
+    "activityTitle": "Attività",
+    "roles": {
+      "editor": "Editor",
+      "viewer": "Osservatore"
+    },
+    "activity": {
+      "invited": "Invitato {detail}",
+      "joined": "{detail} si è unito al progetto",
+      "revoked": "Accesso revocato per {detail}",
+      "left": "{detail} ha lasciato il progetto",
+      "step_completed": "Sotto-passo completato: {detail}",
+      "step_reopened": "Sotto-passo riaperto: {detail}"
     }
   }
 }

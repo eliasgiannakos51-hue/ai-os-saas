@@ -458,10 +458,12 @@
     },
     "exportData": {
       "title": "Daten exportieren",
-      "description": "Lade alles, was du in allen 13 Modulen erfasst hast, als einzelne JSON-Datei herunter.",
+      "description": "Laden Sie alles herunter, was dieses Produkt über Sie speichert — Module, Chats, Dateien, Agenten, Websites, Credits und Kontoverlauf — als eine JSON-Datei.",
       "exportAll": "Alle Daten exportieren",
       "exporting": "Wird exportiert...",
-      "exportDownloaded": "✓ Export heruntergeladen"
+      "exportDownloaded": "✓ Export heruntergeladen",
+      "exportFailed": "Der Export konnte nicht erstellt werden. Bitte versuchen Sie es erneut.",
+      "exportNote": "Enthält den aus Ihren Dokumenten extrahierten Text, aber nicht die Originaldateien — die laden Sie auf der Seite Dateien herunter. Tokens verbundener Konten sind bewusst ausgenommen."
     },
     "dangerZone": {
       "title": "Gefahrenzone",

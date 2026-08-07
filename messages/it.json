@@ -458,10 +458,12 @@
     },
     "exportData": {
       "title": "Esporta dati",
-      "description": "Scarica tutto ciò che hai registrato nei 13 moduli come un unico file JSON.",
+      "description": "Scarica tutto ciò che questo prodotto conserva su di te — moduli, chat, file, agenti, siti, crediti e cronologia dell'account — in un unico file JSON.",
       "exportAll": "Esporta tutti i dati",
       "exporting": "Esportazione...",
-      "exportDownloaded": "✓ esportazione scaricata"
+      "exportDownloaded": "✓ esportazione scaricata",
+      "exportFailed": "Non è stato possibile preparare l'esportazione. Riprova.",
+      "exportNote": "Include il testo estratto dai tuoi documenti, ma non i file originali: scaricali dalla pagina File. I token degli account collegati sono esclusi di proposito."
     },
     "dangerZone": {
       "title": "Zona pericolosa",

@@ -458,10 +458,12 @@
     },
     "exportData": {
       "title": "Exporter les données",
-      "description": "Téléchargez tout ce que vous avez enregistré dans les 13 modules sous forme d'un seul fichier JSON.",
+      "description": "Téléchargez tout ce que ce produit conserve à votre sujet — modules, conversations, fichiers, agents, sites, crédits et historique du compte — dans un seul fichier JSON.",
       "exportAll": "Exporter toutes les données",
       "exporting": "Export en cours...",
-      "exportDownloaded": "✓ export téléchargé"
+      "exportDownloaded": "✓ export téléchargé",
+      "exportFailed": "L'export n'a pas pu être préparé. Réessayez.",
+      "exportNote": "Contient le texte extrait de vos documents, mais pas les fichiers d'origine : téléchargez-les depuis la page Fichiers. Les jetons des comptes connectés sont volontairement exclus."
     },
     "dangerZone": {
       "title": "Zone de danger",

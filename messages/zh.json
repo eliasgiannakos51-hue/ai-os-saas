@@ -458,10 +458,12 @@
     },
     "exportData": {
       "title": "导出数据",
-      "description": "将你在全部 13 个模块中记录的所有内容下载为单个 JSON 文件。",
+      "description": "下载本产品保存的关于你的全部数据——模块、对话、文件、智能体、网站、点数和账户历史——打包为一个 JSON 文件。",
       "exportAll": "导出全部数据",
       "exporting": "导出中...",
-      "exportDownloaded": "✓ 已下载导出文件"
+      "exportDownloaded": "✓ 已下载导出文件",
+      "exportFailed": "导出未能生成，请再试一次。",
+      "exportNote": "包含从你上传文档中提取的文字，但不含原始文件本身——原始文件请到「文件」页面下载。已连接账户的令牌是有意排除的。"
     },
     "dangerZone": {
       "title": "危险操作区",

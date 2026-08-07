@@ -458,10 +458,12 @@
     },
     "exportData": {
       "title": "Export Data",
-      "description": "Download everything you've logged across all 13 modules as a single JSON file.",
+      "description": "Download everything this product holds about you — your modules, chats, files, agents, sites, credits and account history — as one JSON file.",
       "exportAll": "Export All Data",
       "exporting": "Exporting...",
-      "exportDownloaded": "✓ export downloaded"
+      "exportDownloaded": "✓ export downloaded",
+      "exportFailed": "The export could not be prepared. Please try again.",
+      "exportNote": "Includes the text extracted from your uploaded documents, but not the original files themselves — download those from the Files page. Connected-account tokens are excluded on purpose."
     },
     "dangerZone": {
       "title": "Danger Zone",

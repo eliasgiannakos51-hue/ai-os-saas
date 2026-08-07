@@ -71,13 +71,71 @@ export default function PrivacyPage() {
 
       <LegalSection title="5. User Rights">
         <p>
-          You can download a complete copy of your data at any time — go to{" "}
-          <span className="text-foreground/90">Settings → export_all_data()</span>{" "}
-          for a single JSON file with everything you&apos;ve logged across
-          all 13 modules. You can also permanently delete your account and
-          every record tied to it from{" "}
-          <span className="text-foreground/90">Settings → danger_zone</span>.
-          Account deletion is immediate and cannot be undone.
+          <span className="text-foreground/90">Portability (Article 20).</span>{" "}
+          You can download a copy of your data at any time from{" "}
+          <span className="text-foreground/90">Settings → export_all_data()</span>.
+          It is a single JSON file covering everything this product holds
+          about you — your modules, chats, what the assistant has
+          remembered about you, your files&apos; extracted text, agents,
+          websites, presentations, credit history, connected accounts and
+          login devices. The file lists what it contains and what it
+          deliberately leaves out, so you can see the boundary rather than
+          having to infer it.
+        </p>
+        <p>
+          Two things are not in it, on purpose. The original bytes of
+          files you uploaded stay in private storage — the extracted text
+          is included, and the files themselves are downloadable
+          individually from the Files page. And the access tokens for
+          accounts you have connected (Gmail, Drive, Slack) are excluded:
+          they are encrypted credentials to services that are not ours,
+          and putting them in a file that lands in your downloads folder
+          would put you at risk rather than serve you.
+        </p>
+        <p>
+          <span className="text-foreground/90">Erasure (Article 17).</span>{" "}
+          You can permanently delete your account and every record tied to
+          it from{" "}
+          <span className="text-foreground/90">Settings → danger_zone</span>,
+          including the files in private storage. Deletion is confirmed by
+          an emailed link, and once confirmed it is immediate and cannot
+          be undone.
+        </p>
+        <p>
+          <span className="text-foreground/90">Access, rectification and
+          objection.</span>{" "}
+          Most of your data is directly viewable and editable in the app.
+          For anything else — including asking us to correct or stop
+          processing something — write to us via the{" "}
+          <a href="/contact" className="text-orange-400 underline underline-offset-2">
+            contact page
+          </a>
+          .
+        </p>
+      </LegalSection>
+
+      <LegalSection title="6. Cookies and local storage">
+        <p>
+          We set <span className="text-foreground/90">one</span> cookie:
+          the session cookie that keeps you signed in. It is strictly
+          necessary — without it there is no way to know a request is
+          yours — so it is set when you log in and does not require
+          consent under the ePrivacy Directive.
+        </p>
+        <p>
+          Your language, accessibility preferences and your cookie-consent
+          choice are kept in your browser&apos;s local storage rather than
+          in a cookie. They never reach our servers, and clearing your
+          browser data removes them.
+        </p>
+        <p>
+          There are <span className="text-foreground/90">no</span>{" "}
+          advertising cookies, no third-party tracking cookies, and no
+          analytics that follow you between sites. Public pages served
+          from generated sites you publish set no cookie at all, and the
+          view counts behind them record a date and a number — the table
+          has no column that could hold an IP address, a user agent, a
+          referrer or a visitor id.
         </p>
       </LegalSection>
     </LegalLayout>

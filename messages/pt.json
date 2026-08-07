@@ -458,10 +458,12 @@
     },
     "exportData": {
       "title": "Exportar dados",
-      "description": "Baixe tudo que você registrou nos 13 módulos como um único arquivo JSON.",
+      "description": "Descarrega tudo o que este produto guarda sobre ti — módulos, conversas, ficheiros, agentes, sites, créditos e histórico da conta — num único ficheiro JSON.",
       "exportAll": "Exportar todos os dados",
       "exporting": "Exportando...",
-      "exportDownloaded": "✓ exportação transferida"
+      "exportDownloaded": "✓ exportação transferida",
+      "exportFailed": "Não foi possível preparar a exportação. Tenta de novo.",
+      "exportNote": "Inclui o texto extraído dos teus documentos, mas não os ficheiros originais — descarrega-os na página Ficheiros. Os tokens das contas ligadas ficam de fora de propósito."
     },
     "dangerZone": {
       "title": "Zona de perigo",

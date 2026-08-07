@@ -324,6 +324,33 @@ and §4 (the erasure RPC is called, and called first).*
   and unique per `(listing_id, buyer_id)`, so a fake review costs the
   price of the product.
 
+### Data export (GDPR Article 20)
+
+- **Read through the CALLER's own client, never the service-role one.**
+  Every query in the export is subject to the same RLS as the rest of the
+  app, so a wrong table or scope column in the manifest returns nothing.
+  A service-role export with a `user_id` filter behaves identically right
+  up until that mistake is made, and then hands somebody else's rows to
+  whoever asked.
+- **The manifest is gated against the schema.** Every table in
+  `supabase_full_project_backup.sql` must appear in the exported list or
+  the excluded list, and every exclusion carries a written reason. The
+  realistic failure here is not refusing a request but answering one
+  incompletely, which looks exactly like answering it — a feature table
+  added next year silently dropping out of every subject access request.
+- **No credentials in the file.** `user_integrations` is exported with a
+  narrow column list that names no token; `account_deletion_requests` is
+  excluded entirely, because it holds the hash of a live token that
+  erases the account and a downloads folder is not where that belongs.
+- **Failures and truncation are reported inside the file.** A table that
+  could not be read, or that hit the row cap, is named in the manifest. A
+  silently absent table is indistinguishable from one that was empty.
+
+*Gate: `scripts/tests/gdpr.test.mjs` — §1 (no table unaccounted for, no
+phantom table, every scope column exists), §3 (no credential is
+exported), §4 (route posture, caller's client not service-role), §5
+(erasure still deletes the storage objects, and before the auth user).*
+
 *Gate: `scripts/tests/marketplace.test.mjs` §2 (the split reconciles at
 every price and rate), §3 (what must not travel with a listing), §4
 (installs land on the buyer, switched off), §5 (the scan), §6 (the
@@ -401,6 +428,10 @@ before `next build`. A new feature fails the build if:
 | A listing would carry the seller's delivery address or research | `marketplace.test.mjs` §3 |
 | A purchased agent or automation would install already running | `marketplace.test.mjs` §4 |
 | Anything but the Stripe webhook installs a purchase | `marketplace.test.mjs` §7 |
+| A new table is neither exported nor explicitly excluded from the data export | `gdpr.test.mjs` §1 |
+| The data export would include a credential | `gdpr.test.mjs` §3 |
+| The data export reads through the service-role client | `gdpr.test.mjs` §4 |
+| A reserving route prices at the base margin instead of its plan's | `billing-coverage.test.mjs` |
 | Server-side English prose grows past its recorded baseline | `i18n-coverage.test.mjs` §1 |
 | A user-facing string is hardcoded in a component | `i18n-coverage.test.mjs` §1 |
 | A `t()` key does not exist in all ten locales | `check-i18n.js` |

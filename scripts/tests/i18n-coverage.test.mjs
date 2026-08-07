@@ -194,7 +194,12 @@ const clientFallbacks = sources.flatMap((f) => [
 // send-failure responses. Its user-facing text on /contact is translated
 // in all ten locales; what is English here is the fallback the form
 // shows when a request fails in a way it has no key for.
-const SERVER_PROSE_BASELINE = 576;
+// 576 -> 579: V3 Task 8's GDPR data export (/api/account/export) — its
+// not-authenticated, rate-limit and failure responses. Same recorded
+// decision; the file the route RETURNS is a different matter and carries
+// its own plain-language README, which is the part a data subject
+// actually reads.
+const SERVER_PROSE_BASELINE = 579;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

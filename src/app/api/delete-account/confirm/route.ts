@@ -75,6 +75,28 @@ export async function POST(request: Request) {
       );
     }
 
+    // The uploaded FILES first, and before the auth user, because
+    // storage.objects has no foreign key to auth.users — nothing cascades
+    // here. Deleting the user without this leaves their contracts and
+    // payroll PDFs sitting in the bucket forever, which is not an
+    // untidiness problem: it is the erasure right in Article 17 not being
+    // honoured, on the most sensitive data this product holds.
+    //
+    // Done BEFORE deleteUser so a failure is still reportable against an
+    // account that exists. A failure here stops the deletion rather than
+    // proceeding, because "we deleted your account" must not be said
+    // while the files are still there.
+    const { error: objectsError } = await admin.rpc("delete_user_file_objects", {
+      target_user_id: claimed.user_id,
+    });
+    if (objectsError) {
+      logApiError("/api/delete-account/confirm", objectsError, { stage: "delete_file_objects" });
+      return NextResponse.json(
+        { ok: false, error: "Could not delete the account. Please contact support." },
+        { status: 500 }
+      );
+    }
+
     const { error: deleteError } = await admin.auth.admin.deleteUser(claimed.user_id);
 
     if (deleteError) {

@@ -149,7 +149,22 @@ const clientFallbacks = sources.flatMap((f) => [
 // and it is a refactor of the whole API surface rather than something to
 // start inside one feature. Everything the user READS on
 // /dashboard/integrations is translated in all ten locales.
-const SERVER_PROSE_BASELINE = 333;
+// 333 -> 441: V3 Task 4 (File Workspace + Deep Research) added the
+// largest single block of API surface so far — upload, list, delete,
+// signed download, ask, four collection endpoints, and the three research
+// routes. Their not-authenticated, size, type, plan-cap, storage-cap,
+// rate-limit, insufficient-credit and not-found responses are English
+// prose like the 333 before them, and several are inside `extract.ts`,
+// whose messages ("this PDF is password-protected", "no readable text was
+// found") are written to be read by a person rather than parsed.
+//
+// Same recorded decision as the four increments above, and it is worth
+// restating because the number has now tripled: the fix is stable error
+// CODES across all 60+ routes with the translation happening client-side,
+// which is a refactor of the entire API surface and not something to start
+// inside one feature. What the user READS on /dashboard/files and
+// /dashboard/research is fully translated in all ten locales.
+const SERVER_PROSE_BASELINE = 441;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

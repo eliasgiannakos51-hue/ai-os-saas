@@ -106,6 +106,16 @@ const DECLARED = {
     billing: "settled",
     note: "V3 Autonomous Agents. The optional web_search research pass plus the main run, both recorded onto one accumulator per execution. Retries record onto the SAME accumulator, so a run that tried three times is charged for three attempts — which is why executeAgent reserves AGENT_MAX_ATTEMPTS x the single-run estimate.",
   },
+  "src/app/api/files/ask/route.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V3 File Workspace. One grounded call over the selected documents. The reservation is sized AFTER the documents load, because the cost is dominated by document text and a hold sized from the question alone is off by orders of magnitude on a long contract. A call that errors still SETTLES rather than releasing — the tokens were spent.",
+  },
+  "src/lib/research/research.ts": {
+    calls: 3,
+    billing: "settled",
+    note: "V3 Deep Research. The PLANNING half (api/research) is cheap by design: it turns the topic into questions and stops, so the user sees the price of the expensive half before it runs. planResearch (forced tool use), researchQuestion (web search, once per question, sequential), synthesiseReport. All three record onto ONE CostAccumulator per report, settled by api/research/[id]/run — including the failure paths, since every phase that ran spent tokens.",
+  },
   "src/lib/lead-classification.ts": {
     calls: 1,
     billing: "settled",

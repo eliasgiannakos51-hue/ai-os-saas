@@ -94,6 +94,10 @@ const V3_TABLES = [
   "site_analytics",
   "user_integrations",
   "integration_sync_log",
+  "user_files",
+  "file_collections",
+  "file_collection_items",
+  "research_reports",
 ];
 for (const t of MODULE_TABLES) {
   if (!rlsEnabled.has(t)) {
@@ -158,6 +162,37 @@ checkTrue(
   /access_token_encrypted/.test(sql) && /refresh_token_encrypted/.test(sql)
 );
 checkTrue("...and no plaintext token column exists", !/\baccess_token text\b/.test(sql));
+
+// The File Workspace holds the most sensitive objects this product
+// touches — contracts, payroll, medical letters. Three things must stay
+// true, and each has been a real bug in some product at some point:
+//   1. every policy is scoped to the owner;
+//   2. the bucket is PRIVATE (a public bucket makes every RLS policy
+//      above it decorative, because the object URL bypasses the table);
+//   3. account deletion clears the OBJECTS, which nothing cascades.
+const filePolicies = [...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?user_files"?[^;]*/gis)].map(
+  (m) => m[0]
+);
+checkTrue(`user_files has policies (${filePolicies.length})`, filePolicies.length >= 1);
+checkTrue(
+  "...and every one is scoped to auth.uid()",
+  filePolicies.every((p) => /auth\.uid\(\) = user_id/.test(p))
+);
+const bucketInsert = /insert into storage\.buckets[^;]*'user-files'[^;]*;/is.exec(sql)?.[0] ?? "";
+checkTrue("the user-files bucket is declared", bucketInsert.length > 0);
+checkTrue("...and it is PRIVATE", /,\s*false\s*\)/.test(bucketInsert));
+// `on conflict do update set public = false` is what makes a bucket that
+// was flipped public in the dashboard get CORRECTED by running the
+// schema, rather than silently left open.
+checkTrue("...and re-running the schema forces it private again", /on conflict[^;]*public\s*=\s*false/is.test(bucketInsert));
+const objectPolicies = [
+  ...sql.matchAll(/create policy[^;]*?\son\s+storage\.objects[^;]*/gis),
+].map((m) => m[0]).filter((p) => p.includes("user-files"));
+checkTrue(`the bucket's own object policies exist (${objectPolicies.length})`, objectPolicies.length >= 3);
+checkTrue(
+  "...and every one matches the owner's folder",
+  objectPolicies.every((p) => /auth\.uid\(\)::text = \(storage\.foldername\(name\)\)\[1\]/.test(p))
+);
 
 // published_sites must NOT be publicly readable. The anon key is printed
 // in the client bundle, so a "true" select policy here would hand every
@@ -280,6 +315,23 @@ checkTrue(
 checkTrue(
   "...and its failure cannot fail the cron",
   /catch[\s\S]{0,260}prune_integration_sync_log/.test(cronSrc)
+);
+
+// Same rule for erasure: storage.objects has no FK to auth.users, so the
+// only thing that removes a deleted account's uploaded files is this RPC
+// being called. A function that exists and is never invoked would leave
+// every deleted user's documents in the bucket.
+const DELETE_ROUTE = "src/app/api/delete-account/confirm/route.ts";
+const deleteSrc = readFileSync(DELETE_ROUTE, "utf8");
+checkTrue(
+  "account deletion clears the user's file objects",
+  /rpc\("delete_user_file_objects"/.test(deleteSrc)
+);
+// ...and BEFORE the auth user is deleted, so a failure is still
+// attributable to an account that exists.
+checkTrue(
+  "...before the auth user is deleted",
+  deleteSrc.indexOf('delete_user_file_objects') < deleteSrc.indexOf("admin.deleteUser")
 );
 
 // The route this cron actually runs on must be the one the scheduler

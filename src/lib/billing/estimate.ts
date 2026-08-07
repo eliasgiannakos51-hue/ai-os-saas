@@ -277,6 +277,51 @@ export const ACTION_PROFILES = {
     baseOutputChars: 3000,
     outputCharsPerInputChar: 1,
   },
+  // Ask my documents (api/files/ask). Like recordAsk, the question is
+  // short and the INPUT is everything — the route passes the selected
+  // documents' text as inputChars, and a 200-page contract is three
+  // orders of magnitude more input than the question about it. This is
+  // the profile where a flat price would be most obviously wrong.
+  fileAsk: {
+    systemPromptTokens: 700,
+    auxiliaryCalls: [],
+    baseOutputChars: 1500,
+    // The answer does NOT grow with the documents — a question about a
+    // 300-page manual has the same length answer as one about a memo.
+    // Charging output proportional to input here would quote a user
+    // hundreds of credits for a two-sentence reply.
+    outputCharsPerInputChar: 0,
+  },
+  // One Deep Research run (api/research/process). The most expensive
+  // single action in the product, and the only one whose estimate has to
+  // be shown and confirmed before it starts.
+  //
+  // The shape: one planning call, then one call PER research question
+  // that runs web searches, then one synthesis call over everything the
+  // searches returned. The per-question calls are modelled as auxiliary
+  // calls at the CEILING number of questions, not the typical one,
+  // because this profile sizes a hold — and RESEARCH_MAX_QUESTIONS in
+  // lib/research/research.ts is 6.
+  deepResearch: {
+    systemPromptTokens: 1600,
+    auxiliaryCalls: [
+      // Planning: small in, a list of questions out.
+      { inputTokens: 900, outputTokens: 600 },
+      // Six research passes. Each re-sends the topic and gets back a
+      // summary of what its searches found; the searches themselves are
+      // priced separately per query through expectedWebSearches, since
+      // Anthropic bills those per search rather than per token.
+      { inputTokens: 1500, outputTokens: 2500 },
+      { inputTokens: 1500, outputTokens: 2500 },
+      { inputTokens: 1500, outputTokens: 2500 },
+      { inputTokens: 1500, outputTokens: 2500 },
+      { inputTokens: 1500, outputTokens: 2500 },
+      { inputTokens: 1500, outputTokens: 2500 },
+    ],
+    // The synthesis call's own output: a full report.
+    baseOutputChars: 16000,
+    outputCharsPerInputChar: 1,
+  },
 } as const;
 
 export type ActionProfileKey = keyof typeof ACTION_PROFILES;

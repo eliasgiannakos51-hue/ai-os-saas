@@ -230,6 +230,8 @@ const DASHBOARD_ROUTES = [
   "/dashboard/agents",
   "/dashboard/published",
   "/dashboard/integrations",
+  "/dashboard/files",
+  "/dashboard/deep-research",
   "/dashboard/apps",
   "/dashboard/images",
   "/dashboard/videos",

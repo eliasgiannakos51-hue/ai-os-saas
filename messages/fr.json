@@ -1664,5 +1664,18 @@
     "errorGeneric": "L'assistance n'a pas pu répondre. Utilisez la page de contact.",
     "humanNote": "Besoin d'une personne, d'un remboursement ou d'un changement de formule ?",
     "contactLink": "Nous contacter"
+  },
+  "upgradeTrigger": {
+    "successCeiling": "C'était votre dernière {reason} du mois sur cette formule. {plan} en inclut davantage.",
+    "repeatedRefusal": "{feature} n'est pas inclus dans votre formule. {plan} le propose.",
+    "seePlans": "Voir les formules",
+    "reasons": {
+      "presentations": "présentation",
+      "agents": "Les agents autonomes",
+      "research": "rapport de recherche",
+      "publishedSites": "site publié",
+      "websiteBuilder": "Le créateur de sites",
+      "files": "fichier"
+    }
   }
 }

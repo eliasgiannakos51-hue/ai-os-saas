@@ -1664,5 +1664,18 @@
     "errorGeneric": "Support chat could not answer. Please use the contact page.",
     "humanNote": "Need a person, a refund or a plan change?",
     "contactLink": "Contact us"
+  },
+  "upgradeTrigger": {
+    "successCeiling": "That was your last {reason} on this plan this month. {plan} includes more.",
+    "repeatedRefusal": "{feature} is not included on your plan. {plan} has it.",
+    "seePlans": "See plans",
+    "reasons": {
+      "presentations": "presentation",
+      "agents": "Autonomous agents",
+      "research": "research report",
+      "publishedSites": "published site",
+      "websiteBuilder": "The Website Builder",
+      "files": "file"
+    }
   }
 }

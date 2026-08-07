@@ -1664,5 +1664,18 @@
     "errorGeneric": "帮助助手无法作答，请使用联系页面。",
     "humanNote": "需要真人、退款或更改套餐？",
     "contactLink": "联系我们"
+  },
+  "upgradeTrigger": {
+    "successCeiling": "这是你本月在当前套餐下的最后一次{reason}。{plan} 套餐包含更多。",
+    "repeatedRefusal": "你的套餐不包含{feature}。{plan} 套餐有。",
+    "seePlans": "查看套餐",
+    "reasons": {
+      "presentations": "演示文稿",
+      "agents": "自主智能体",
+      "research": "研究报告",
+      "publishedSites": "网站发布",
+      "websiteBuilder": "网站生成器",
+      "files": "文件"
+    }
   }
 }

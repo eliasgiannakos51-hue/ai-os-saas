@@ -1664,5 +1664,18 @@
     "errorGeneric": "تعذّر على الدعم الإجابة. استخدم صفحة التواصل.",
     "humanNote": "تحتاج إلى شخص أو مبلغ مسترد أو تغيير الخطة؟",
     "contactLink": "تواصل معنا"
+  },
+  "upgradeTrigger": {
+    "successCeiling": "كانت تلك آخر {reason} لك هذا الشهر ضمن خطتك. خطة {plan} تتضمن المزيد.",
+    "repeatedRefusal": "{feature} غير مشمول في خطتك. خطة {plan} تتضمنه.",
+    "seePlans": "اطّلع على الخطط",
+    "reasons": {
+      "presentations": "عرض تقديمي",
+      "agents": "الوكلاء المستقلون",
+      "research": "تقرير بحث",
+      "publishedSites": "موقع منشور",
+      "websiteBuilder": "منشئ المواقع",
+      "files": "ملف"
+    }
   }
 }

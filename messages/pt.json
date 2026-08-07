@@ -1664,5 +1664,18 @@
     "errorGeneric": "O apoio não conseguiu responder. Usa a página de contacto.",
     "humanNote": "Precisas de uma pessoa, de um reembolso ou de mudar de plano?",
     "contactLink": "Fala connosco"
+  },
+  "upgradeTrigger": {
+    "successCeiling": "Essa foi a tua última {reason} deste mês neste plano. O {plan} inclui mais.",
+    "repeatedRefusal": "{feature} não está incluído no teu plano. O {plan} tem.",
+    "seePlans": "Ver planos",
+    "reasons": {
+      "presentations": "apresentação",
+      "agents": "Os agentes autónomos",
+      "research": "relatório de investigação",
+      "publishedSites": "site publicado",
+      "websiteBuilder": "O criador de sites",
+      "files": "ficheiro"
+    }
   }
 }

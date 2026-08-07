@@ -1664,5 +1664,18 @@
     "errorGeneric": "Die Hilfe konnte nicht antworten. Bitte nutzen Sie die Kontaktseite.",
     "humanNote": "Brauchen Sie einen Menschen, eine Erstattung oder einen Tarifwechsel?",
     "contactLink": "Kontakt aufnehmen"
+  },
+  "upgradeTrigger": {
+    "successCeiling": "Das war diesen Monat Ihre letzte {reason} in diesem Tarif. {plan} enthält mehr.",
+    "repeatedRefusal": "{feature} ist in Ihrem Tarif nicht enthalten. {plan} hat es.",
+    "seePlans": "Tarife ansehen",
+    "reasons": {
+      "presentations": "Präsentation",
+      "agents": "Autonome Agenten",
+      "research": "Recherchebericht",
+      "publishedSites": "veröffentlichte Website",
+      "websiteBuilder": "Der Website-Builder",
+      "files": "Datei"
+    }
   }
 }

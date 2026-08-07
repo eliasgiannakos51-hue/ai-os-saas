@@ -1664,5 +1664,18 @@
     "errorGeneric": "サポートが回答できませんでした。お問い合わせページをご利用ください。",
     "humanNote": "担当者、返金、プラン変更が必要ですか。",
     "contactLink": "お問い合わせ"
+  },
+  "upgradeTrigger": {
+    "successCeiling": "今月このプランで作れる{reason}はこれが最後でした。{plan} ならもっと使えます。",
+    "repeatedRefusal": "{feature}は現在のプランに含まれていません。{plan} には含まれています。",
+    "seePlans": "プランを見る",
+    "reasons": {
+      "presentations": "プレゼン",
+      "agents": "自律エージェント",
+      "research": "リサーチレポート",
+      "publishedSites": "公開サイト",
+      "websiteBuilder": "サイトビルダー",
+      "files": "ファイル"
+    }
   }
 }

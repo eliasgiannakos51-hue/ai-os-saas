@@ -1664,5 +1664,18 @@
     "errorGeneric": "L'assistenza non è riuscita a rispondere. Usa la pagina dei contatti.",
     "humanNote": "Ti serve una persona, un rimborso o un cambio di piano?",
     "contactLink": "Contattaci"
+  },
+  "upgradeTrigger": {
+    "successCeiling": "Era la tua ultima {reason} del mese con questo piano. {plan} ne include di più.",
+    "repeatedRefusal": "{feature} non è incluso nel tuo piano. {plan} lo ha.",
+    "seePlans": "Vedi i piani",
+    "reasons": {
+      "presentations": "presentazione",
+      "agents": "Gli agenti autonomi",
+      "research": "report di ricerca",
+      "publishedSites": "sito pubblicato",
+      "websiteBuilder": "Il creatore di siti",
+      "files": "file"
+    }
   }
 }

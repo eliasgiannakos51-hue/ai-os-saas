@@ -90,6 +90,9 @@ const LOCALE_ALLOWED = new Set([
   // make that UI worse rather than more translated.
   "fr:dashboard.presentations.bulletLabel",
   "de:dashboard.presentations.themes.modern",
+  // "file" is the Italian word, spelled identically — the loanword the
+  // Italian UI already uses for a computer file.
+  "it:upgradeTrigger.reasons.files",
   // Marketplace (V3 Task 6). Loanwords and cognates, each checked by
   // hand: "Marketing" is the word every one of these languages actually
   // uses; "Agent" is German and is the term the Greek UI already uses

@@ -1664,5 +1664,18 @@
     "errorGeneric": "El soporte no ha podido responder. Usa la página de contacto.",
     "humanNote": "¿Necesitas una persona, un reembolso o cambiar de plan?",
     "contactLink": "Contáctanos"
+  },
+  "upgradeTrigger": {
+    "successCeiling": "Esa ha sido tu última {reason} de este mes en tu plan. {plan} incluye más.",
+    "repeatedRefusal": "{feature} no está incluido en tu plan. {plan} lo tiene.",
+    "seePlans": "Ver planes",
+    "reasons": {
+      "presentations": "presentación",
+      "agents": "Los agentes autónomos",
+      "research": "informe de investigación",
+      "publishedSites": "web publicada",
+      "websiteBuilder": "El creador de webs",
+      "files": "archivo"
+    }
   }
 }

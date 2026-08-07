@@ -85,6 +85,11 @@ export const EXPORTED_TABLES: ExportTable[] = [
   { table: "create_requests", column: "user_id" },
   { table: "entity_links", column: "user_id" },
 
+  // --- imported data and what the AI said about it ---
+  { table: "user_imports", column: "user_id" },
+  { table: "user_insights", column: "user_id" },
+  { table: "user_onboarding", column: "user_id" },
+
   // --- files ---
   // The extracted TEXT is included; the bytes in the bucket are not, and
   // the export says so in its own README rather than leaving a person to

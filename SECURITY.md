@@ -422,6 +422,63 @@ lookalike hosts and userinfo spoofing) and §8 (auth, ownership-as-filter,
 404-not-403, rate limits, fail-closed fair use, the share page's
 service-role read and cache headers, and the token's entropy).*
 
+### Imported data (CSV, paste)
+
+- **Decide types from CONTENT, cap every dimension, and neutralise
+  formula cells.** A cell beginning `=`, `@`, or `+`/`-` followed by
+  anything non-numeric is EXECUTED by Excel, LibreOffice and Sheets when
+  the file is opened. Quoting does not help — CSV quotes are stripped
+  before the cell is evaluated. `neutraliseFormula` defuses on the way in
+  AND `escapeCSVValue` defuses on the way out, because either alone
+  leaves a hole: import-only does nothing for hand-typed rows, and
+  export-only does nothing for a value handed to another system. Plain
+  numbers, including negatives, pass through untouched — mangling every
+  `-1500.00` in a finance import would be a worse bug than the one being
+  fixed.
+- **Stamp `user_id` from the session and drop any that arrived on the
+  row.** Imported rows come from a model's output and a user's file;
+  neither gets a say in whose account they land in. `applyRows` builds
+  each insert from a per-target field ALLOWLIST, so `user_id`, `id` and
+  `import_id` cannot survive on an incoming row at all rather than being
+  overwritten afterwards and depending on key ordering to win.
+- **Re-parse on apply; never trust the client's copy.** The confirm step
+  re-reads the uploaded bytes and re-runs the same validator the model's
+  proposal went through. A mapping that has been through a browser is not
+  more trustworthy for it.
+- **Map by column NAME, not index.** A client that reordered its columns
+  between preview and confirm would otherwise import shifted data into
+  every field.
+- **A value that cannot be read becomes NULL, never a default.** An
+  unparseable date must not become `now()`: an import writes hundreds of
+  rows in one second, and every time-based analysis would then find a
+  pattern that is purely an artefact of when the upload ran.
+
+### Insights
+
+- **Patterns are found by CODE, not by a model.**
+  `lib/insights/detectors.ts` computes every claim, with a sample size
+  and the numbers behind it; the model is handed those numbers and asked
+  only for grammar. A model asked to find patterns always finds some,
+  because that is what it was asked for, and it cannot distinguish a fact
+  from a story that fits.
+- **Every number in the narration is checked against the evidence.** One
+  the detector never computed means the narration is discarded and the
+  detector's own wording stands. The AI improves the phrasing; it is
+  never a dependency for the correctness.
+- **Below the evidence threshold, say nothing.** No hedged sentence, no
+  generic advice. Silence is the correct output for four rows.
+- **`user_insights` has no delete policy** — an insight is dismissed, not
+  erased, so a claim made about somebody's business stays answerable for.
+
+### The free activation run
+
+- **Claimed by a conditional UPDATE in the database**
+  (`claim_activation_run`), granted only to `service_role`, and claimed
+  BEFORE the work. A read-then-write would hand two concurrent requests
+  the same free run; claiming on success would hand a second one to
+  anyone whose first attempt failed. A failed claim fails CLOSED and the
+  caller charges normally.
+
 ---
 
 ## Prompt injection
@@ -479,6 +536,9 @@ before `next build`. A new feature fails the build if:
 | A route justified by an inline limiter loses that limiter | `rate-limit-coverage.test.mjs` |
 | Maintenance documented as scheduled has no caller | `security-posture.test.mjs` §4 |
 | A new Anthropic call site is not DECLARED with its billing mode | `billing-coverage.test.mjs` §1 |
+| An insights table gains a delete policy | `security-posture.test.mjs` §1 |
+| The activation claim stops being a service-role-only conditional update | `security-posture.test.mjs` §1 |
+| The CSV export stops defusing formula cells | `security-posture.test.mjs` §1 |
 | A declared call site's call count changes | `billing-coverage.test.mjs` §1 |
 | Generated HTML would bypass the security scan | `publishing.test.mjs` |
 | A deck theme's text drops below WCAG AA on its own background | `presentations.test.mjs` §1 |

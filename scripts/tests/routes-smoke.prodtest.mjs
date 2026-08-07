@@ -212,6 +212,10 @@ if (!up || /EADDRINUSE|Failed to start server/.test(serverLog)) {
 console.log(`production server up on :${PORT} (next start, NODE_ENV=production)`);
 
 const PUBLIC_ROUTES = ["/", "/pricing", "/terms", "/privacy", "/login", "/signup", "/roadmap", "/contact"];
+// /onboarding is authenticated but lives OUTSIDE /dashboard on purpose —
+// it has no sidebar, because the one thing it is for is getting real
+// data in and one true sentence back out. Listed here so the smoke test
+// covers it like any other signed-in page.
 const DASHBOARD_ROUTES = [
   "/dashboard",
   "/dashboard/overview",
@@ -232,6 +236,7 @@ const DASHBOARD_ROUTES = [
   "/dashboard/integrations",
   "/dashboard/files",
   "/dashboard/deep-research",
+  "/onboarding",
   "/dashboard/apps",
   "/dashboard/images",
   "/dashboard/videos",

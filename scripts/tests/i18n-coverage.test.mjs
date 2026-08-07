@@ -230,7 +230,29 @@ const clientFallbacks = sources.flatMap((f) => [
 // message that names the specific issues. Same recorded decision as
 // every API-error increment above; the live-editor UI shows its own
 // translated dashboard.publishing.liveEdit strings for the happy path.
-const SERVER_PROSE_BASELINE = 638;
+// 638 -> 686: V3 Task 16 (Instant Value) added the import and insight
+// routes — CSV analyse/apply, paste, insights generate/dismiss and the
+// onboarding progress endpoint. Their not-authenticated, size, parse,
+// mapping, rate-limit and insufficient-credit responses are English
+// prose like the 441 before them.
+//
+// Same recorded decision as the five increments above: the fix is stable
+// error CODES across the whole API surface with the translation done
+// client-side, which is a refactor of every route and not something to
+// start inside one feature. What the user READS in the onboarding flow
+// and on the insight cards is fully translated in all ten locales.
+//
+// ONE HONEST EXCEPTION, recorded rather than glossed over: the insight
+// SENTENCES are written by the narrator in the user's language, but when
+// the narration is unavailable or rejected (lib/insights/narrate.ts
+// discards any wording that invents a number) the detector's own English
+// statement is shown instead. A true sentence in the wrong language beats
+// a fabricated one in the right language, so that is the deliberate
+// trade — but it is a degradation, not a translated path, and it is
+// counted here so nobody later mistakes it for one. (The +1 on top of
+// Task 16's own 47 is the dismiss endpoint's 429, added when the merge
+// brought it under Task 10's every-mutation-has-a-limiter gate.)
+const SERVER_PROSE_BASELINE = 686;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

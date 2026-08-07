@@ -277,6 +277,37 @@ export const ACTION_PROFILES = {
     baseOutputChars: 3000,
     outputCharsPerInputChar: 1,
   },
+  // Mapping a spreadsheet's columns (api/import/csv/analyse). The model
+  // sees the HEADERS and a dozen sample rows, never the whole file, so
+  // the input is bounded by the sample and not by the upload — a 5,000-
+  // row file and a 20-row file cost the same to map, which is why this
+  // profile does not scale with the file size.
+  importMap: {
+    systemPromptTokens: 1800,
+    auxiliaryCalls: [],
+    baseOutputChars: 1200,
+    outputCharsPerInputChar: 0,
+  },
+  // Extracting entries from pasted text (api/import/paste). The output
+  // genuinely scales with the input here — a longer business plan
+  // contains more entries — so unlike the mapper this one is
+  // proportional.
+  importPaste: {
+    systemPromptTokens: 1800,
+    auxiliaryCalls: [],
+    baseOutputChars: 800,
+    outputCharsPerInputChar: 1,
+  },
+  // Phrasing findings the detectors already computed
+  // (api/insights/generate). Small and bounded: the model is handed a
+  // handful of facts and asked for grammar, so the cost is set by the
+  // number of findings and not by how much data they were computed from.
+  insightNarrate: {
+    systemPromptTokens: 700,
+    auxiliaryCalls: [],
+    baseOutputChars: 1500,
+    outputCharsPerInputChar: 1,
+  },
   // Ask my documents (api/files/ask). Like recordAsk, the question is
   // short and the INPUT is everything — the route passes the selected
   // documents' text as inputChars, and a 200-page contract is three

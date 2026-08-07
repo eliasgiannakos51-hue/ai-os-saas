@@ -131,6 +131,21 @@ const DECLARED = {
     billing: "settled",
     note: "V3 Deep Research. The PLANNING half (api/research) is cheap by design: it turns the topic into questions and stops, so the user sees the price of the expensive half before it runs. The two create calls live in createWithRefusalFallback — the initial attempt on the MAX tier plus the retry on PREMIUM when Fable's safety classifiers decline — and every phase (planResearch, researchQuestion, synthesiseReport) routes through it. All record onto ONE CostAccumulator per report, settled by api/research/[id]/run — including the failure paths, since every phase that ran spent tokens.",
   },
+  "src/lib/import/map-columns.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V3 Task 16 Instant Value. One forced-tool-use call that decides what a spreadsheet is and maps its columns. It sees the HEADERS and a dozen sample rows, never the whole file — so a 5,000-row upload and a 20-row one cost the same, which is why the importMap profile does not scale with file size. Settled by api/import/csv/analyse whether or not a usable mapping came back; the confirm step (api/import/csv/apply) makes NO AI call and charges nothing, because applying a mapping the user already approved is arithmetic.",
+  },
+  "src/lib/import/paste.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V3 Task 16 Instant Value. One forced-tool-use call that extracts structured entries from pasted text. Output genuinely scales with input here, unlike the mapper, so importPaste is proportional. Settled by api/import/paste even when the model correctly answers 'there is nothing here worth recording' — the tokens were spent either way.",
+  },
+  "src/lib/insights/narrate.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V3 Task 16 Instant Value. Phrases findings the DETECTORS already computed — the patterns are found by lib/insights/detectors.ts, and this call is given the numbers and asked for grammar. Every number it writes is checked against the evidence and a narration that invents one is discarded in favour of the detector's own wording, so a model failure degrades the prose and never the correctness. Settled by api/insights/generate; when the detectors find nothing this call is never made and nothing is charged.",
+  },
   "src/lib/lead-classification.ts": {
     calls: 1,
     billing: "settled",

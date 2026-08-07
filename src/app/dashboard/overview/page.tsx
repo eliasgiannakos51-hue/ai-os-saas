@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { GreetingHeader } from "@/components/overview/greeting-header";
+import { InsightList, type Insight } from "@/components/onboarding/insight-list";
 import { CreateChat } from "@/components/create/create-chat";
 import { QuickActionCard } from "@/components/overview/quick-action-card";
 import { LowCreditsBanner } from "@/components/credits/low-credits-banner";
@@ -72,6 +73,7 @@ export default async function OverviewPage() {
   const t = await getTranslations("dashboard.overview");
   const locale = await getLocale();
   const tSidebar = await getTranslations("sidebar.items");
+  const tInsights = await getTranslations("dashboard.insights");
   const translateModuleTitle = (title: string) => {
     const key = ITEM_LABEL_KEYS[title];
     return key ? tSidebar(key) : title;
@@ -85,6 +87,33 @@ export default async function OverviewPage() {
   if (!user) {
     redirect("/login");
   }
+
+  // A brand-new account goes through the first-run flow once.
+  //
+  // The redirect is gated on a row EXISTING with an outcome, not on a
+  // count of their data: an account that imported nothing and skipped is
+  // still an account that has decided, and sending them back through the
+  // flow every visit would be nagging. Writing the row is what "decided"
+  // means, and both Skip and Finish write it.
+  const { data: onboardingState } = await supabase
+    .from("user_onboarding")
+    .select("completed_at, skipped_at")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (!onboardingState?.completed_at && !onboardingState?.skipped_at) {
+    redirect("/onboarding");
+  }
+
+  // The insights card. Dismissed ones are excluded by the query, so a
+  // pattern the user has said they know about does not come back.
+  const { data: activeInsights } = await supabase
+    .from("user_insights")
+    .select("id, detector, module_slug, headline, detail, evidence, sample_size")
+    .eq("user_id", user.id)
+    .is("dismissed_at", null)
+    .order("created_at", { ascending: false })
+    .limit(3);
 
   // Real account age (auth user's own created_at, not a separate stored
   // field) — 3 days is a threshold, not a stored flag, so it just
@@ -465,6 +494,13 @@ export default async function OverviewPage() {
         <LowCreditsBanner />
           <QuickStartButton />
         </div>
+
+        {(activeInsights ?? []).length > 0 && (
+          <section className="mt-6 space-y-2">
+            <h2 className="text-sm font-semibold text-foreground">{tInsights("title")}</h2>
+            <InsightList insights={(activeInsights ?? []) as unknown as Insight[]} />
+          </section>
+        )}
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <HomeStatCard

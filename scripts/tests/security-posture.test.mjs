@@ -111,6 +111,9 @@ const V3_TABLES = [
   "collaboration_invites",
   "project_collaborators",
   "collaboration_activity",
+  "user_imports",
+  "user_insights",
+  "user_onboarding",
 ];
 for (const t of MODULE_TABLES) {
   if (!rlsEnabled.has(t)) {
@@ -206,6 +209,64 @@ checkTrue(
   "...and every one matches the owner's folder",
   objectPolicies.every((p) => /auth\.uid\(\)::text = \(storage\.foldername\(name\)\)\[1\]/.test(p))
 );
+
+// V3 Task 16 (Instant Value). Two things must stay true here, and both
+// are about a flag that decides whether real money is spent for free.
+//
+//   1. `user_insights` has NO delete policy. An insight is DISMISSED,
+//      not erased: the row records that a claim was made about somebody's
+//      business and what numbers it rested on, and a user who could
+//      delete it could also make a wrong claim unanswerable.
+//   2. The free activation run is claimed by a CONDITIONAL UPDATE in the
+//      database, granted only to service_role. A read-then-write in
+//      application code would hand two requests the same free run, and
+//      the user owns their user_onboarding row, so the flag has to be out
+//      of their reach even though the row is not.
+const insightPolicies = [...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?user_insights"?[^;]*/gis)].map(
+  (m) => m[0]
+);
+checkTrue(`user_insights has policies (${insightPolicies.length})`, insightPolicies.length >= 1);
+checkTrue(
+  "...every one scoped to auth.uid()",
+  insightPolicies.every((p) => /auth\.uid\(\) = user_id/.test(p))
+);
+checkTrue(
+  "...and none of them is a delete policy",
+  insightPolicies.every((p) => !/for delete/i.test(p))
+);
+
+const claimFn = /create or replace function public\.claim_activation_run[\s\S]*?\$\$;/i.exec(sql)?.[0] ?? "";
+checkTrue("the activation claim is a database function", claimFn.length > 0);
+checkTrue("...that is security definer", /security definer/i.test(claimFn));
+// The `where activation_used_at is null` is what makes it exactly-once.
+checkTrue("...and claims conditionally, not by read-then-write", /activation_used_at is null/i.test(claimFn));
+checkTrue(
+  "...and is granted ONLY to service_role",
+  /grant execute on function public\.claim_activation_run\(uuid\) to service_role/i.test(sql) &&
+    /revoke all on function public\.claim_activation_run\(uuid\) from authenticated/i.test(sql)
+);
+// The route that records onboarding progress must never write the
+// billing flag, even though the user owns that row.
+const onboardingRoute = readFileSync("src/app/api/onboarding/route.ts", "utf8");
+checkTrue(
+  "the onboarding route never sets activation_used_at",
+  !/activation_used_at\s*[:=]/.test(onboardingRoute)
+);
+
+// The importer stamps user_id from the SESSION and drops any that came
+// in on the row. The rows originate from a model's output and a user's
+// file, and neither gets a say in whose account they land in.
+const applySrc = readFileSync("src/lib/import/apply.ts", "utf8");
+checkTrue("imported rows are stamped with the session user", /user_id: userId/.test(applySrc));
+checkTrue(
+  "...through a field allowlist, so an incoming user_id cannot survive",
+  /allowedKeys\.has\(key\)/.test(applySrc)
+);
+
+// Formula injection. The export path is where a stored payload actually
+// executes, so the defence has to be there and not only on import.
+const csvExport = readFileSync("src/lib/csv.ts", "utf8");
+checkTrue("the CSV export defuses formula cells", /neutraliseFormula/.test(csvExport));
 
 // published_sites must NOT be publicly readable. The anon key is printed
 // in the client bundle, so a "true" select policy here would hand every

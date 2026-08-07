@@ -17,6 +17,7 @@ import {
   MARKETPLACE_ICON,
   TEAM_ICON,
   SUPPORT_ICON,
+  TOUR_ICON,
   MEMORY_ICON,
   TIMELINE_ICON,
   FAVORITES_ICON,
@@ -167,6 +168,9 @@ export const SETTINGS_GROUP: SidebarGroupConfig = {
     // where somebody goes when something about their ACCOUNT is unclear,
     // which is the same place they were already heading.
     { href: "/dashboard/support", label: "Support", icon: SUPPORT_ICON, hintKey: "support" },
+    // The capability overview — available for whoever ASKS what the
+    // product can do, never pushed at a new user (see dashboard/tour).
+    { href: "/dashboard/tour", label: "What can Ionexa do?", icon: TOUR_ICON, hintKey: "tour" },
   ],
 };
 

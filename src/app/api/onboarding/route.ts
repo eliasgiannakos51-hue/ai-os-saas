@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
 import { activationAvailable } from "@/lib/import/activation";
+import { isFirstAction } from "@/lib/onboarding-flow";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -26,7 +27,7 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from("user_onboarding")
-      .select("goal, completed_at, skipped_at")
+      .select("goal, first_action, completed_at, skipped_at")
       .eq("user_id", user.id)
       .maybeSingle();
 
@@ -38,6 +39,7 @@ export async function GET() {
     return NextResponse.json({
       ok: true,
       goal: data?.goal ?? null,
+      firstAction: data?.first_action ?? null,
       completed: Boolean(data?.completed_at),
       skipped: Boolean(data?.skipped_at),
       activationAvailable: await activationAvailable(user.id),
@@ -84,6 +86,10 @@ export async function POST(request: Request) {
     if (typeof body?.goal === "string") {
       update.goal = body.goal.trim().slice(0, MAX_GOAL_CHARS) || null;
     }
+    // The action screen's choice. Allowlisted, not free text — the column
+    // drives resume logic and reporting, and "whatever the client sent"
+    // is how a flag becomes a dumping ground.
+    if (isFirstAction(body?.firstAction)) update.first_action = body.firstAction;
     if (body?.completed === true) update.completed_at = new Date().toISOString();
     if (body?.skipped === true) update.skipped_at = new Date().toISOString();
 

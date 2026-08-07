@@ -5,6 +5,7 @@ import {
   Brain,
   CalendarClock,
   Code2,
+  Compass,
   Database,
   DollarSign,
   FileText,
@@ -80,6 +81,7 @@ export const SETTINGS_ICON: LucideIcon = Settings;
 export const MARKETPLACE_ICON: LucideIcon = Store;
 export const TEAM_ICON: LucideIcon = Users;
 export const SUPPORT_ICON = LifeBuoy;
+export const TOUR_ICON: LucideIcon = Compass;
 export const MEMORY_ICON: LucideIcon = Brain;
 export const TIMELINE_ICON: LucideIcon = History;
 export const FAVORITES_ICON: LucideIcon = Star;

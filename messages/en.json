@@ -81,7 +81,8 @@
       "integrations": "Integrations",
       "files": "Files",
       "deepResearch": "Deep Research",
-      "support": "Support"
+      "support": "Support",
+      "tour": "What can Ionexa do?"
     },
     "groupHints": {
       "create": "Generate a site, plan a goal, write a document.",
@@ -133,7 +134,8 @@
       "integrations": "Connect Gmail, Drive and Slack so the AI can work with your real data",
       "files": "Upload PDFs, Word and Excel files and ask the AI questions about them",
       "deepResearch": "Give it a topic and it searches, cross-checks and writes a sourced report",
-      "support": "Ask how something works, or reach a person."
+      "support": "Ask how something works, or reach a person.",
+      "tour": "A quick overview of everything you can do here."
     },
     "comingSoon": "Coming soon",
     "comingSoonToast": "{name} isn't available yet — it's on the roadmap.",
@@ -948,7 +950,9 @@
       "statusFlagged": "Flagged",
       "flaggedTitle": "Flagged by our safety review",
       "regenerateFree": "Regenerate (free)",
-      "editUnavailable": "You can request changes once this website has finished generating."
+      "editUnavailable": "You can request changes once this website has finished generating.",
+      "exampleName": "Aroma — neighbourhood coffee shop",
+      "exampleDescription": "A one-page website for a small specialty coffee shop called Aroma. Warm, modern feel. Sections: a short welcome, our story, a menu with 6 drinks and prices, opening hours, and a contact section with address and phone. Call to action: order beans online."
     },
     "marketplace": {
       "title": "Marketplace",
@@ -1632,7 +1636,27 @@
       "noneTitle": "Nothing solid to report yet",
       "noneNeedMore": "There isn't enough here yet for anything to be worth calling a pattern. A few dozen rows with dates on them is usually the point where things start showing up — and we would rather say nothing than make something up.",
       "noneYet": "Add a bit more and run this again from your dashboard.",
-      "goToDashboard": "Go to my dashboard"
+      "goToDashboard": "Go to my dashboard",
+      "welcomeIntro": "No tour, no setup — pick a thing to do and you're doing it in the next minute.",
+      "actionTitle": "What do you want to do first?",
+      "actions": {
+        "website": {
+          "title": "Build a website",
+          "hint": "Describe it in one sentence — the AI builds a real page you can edit and publish."
+        },
+        "mission": {
+          "title": "Set a goal",
+          "hint": "Tell the AI what you're working toward and it plans the steps with you."
+        },
+        "data": {
+          "title": "Organise my data",
+          "hint": "Bring in a spreadsheet and get one true insight about your business."
+        },
+        "chat": {
+          "title": "Just ask something",
+          "hint": "Open a chat and ask anything — the input is ready."
+        }
+      }
     },
     "insights": {
       "title": "What I noticed",
@@ -1642,6 +1666,37 @@
       "hideNumbers": "Hide the numbers",
       "dismiss": "Dismiss this",
       "dismissError": "That could not be dismissed."
+    },
+    "tour": {
+      "title": "What can Ionexa do?",
+      "description": "A quick map of what's here. Every card opens the real thing — try whichever looks useful.",
+      "tryIt": "Try it",
+      "sections": {
+        "website": {
+          "title": "Build & publish websites",
+          "description": "Describe a site in a sentence; the AI generates a real page you can edit, then publish on the web."
+        },
+        "mission": {
+          "title": "Plan a goal in Mission Control",
+          "description": "State a goal; the AI breaks it into steps and helps you finish each one."
+        },
+        "chat": {
+          "title": "Ask anything in Chat",
+          "description": "A chat that knows your workspace — ask questions, draft text, or think something through."
+        },
+        "data": {
+          "title": "Import & understand your data",
+          "description": "Bring in spreadsheets or files; the AI organises them and points out real patterns."
+        },
+        "presentations": {
+          "title": "Generate presentations",
+          "description": "Describe a deck; it researches, writes and designs the slides with real sources."
+        },
+        "agents": {
+          "title": "Automate with AI agents",
+          "description": "Build agents that run on a schedule and do work while you're away."
+        }
+      }
     }
   },
   "module": {

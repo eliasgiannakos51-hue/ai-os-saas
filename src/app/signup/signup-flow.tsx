@@ -82,6 +82,10 @@ export function SignupFlow() {
   // the existing default when absent, so every other entry into signup is
   // unaffected.
   const [successPath, setSuccessPath] = useState<string | undefined>(undefined);
+  // ?next= — where to land after a FREE signup (an invite link's
+  // /collaborate/<token> round-trip, for example). Same-origin paths
+  // only, same open-redirect rule as /auth/callback and the login form.
+  const [nextPath, setNextPath] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [country, setCountry] = useState("");
@@ -106,6 +110,10 @@ export function SignupFlow() {
     const successPathParam = params.get("successPath");
     if (successPathParam) {
       setSuccessPath(successPathParam);
+    }
+    const rawNext = params.get("next");
+    if (rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//")) {
+      setNextPath(rawNext);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -221,7 +229,7 @@ export function SignupFlow() {
   }
 
   function goToDashboard() {
-    router.push("/dashboard/overview");
+    router.push(nextPath ?? "/dashboard/overview");
     router.refresh();
   }
 
@@ -448,7 +456,7 @@ export function SignupFlow() {
                 handleSubmit. A social signup that picked a paid plan
                 therefore lands on Free and upgrades from Settings > Billing,
                 rather than being silently charged or silently downgraded. */}
-            <SocialAuthButtons />
+            <SocialAuthButtons next={nextPath ?? undefined} />
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>

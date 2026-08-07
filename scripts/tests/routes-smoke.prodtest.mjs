@@ -250,6 +250,10 @@ const DASHBOARD_ROUTES = [
   // sidebar and these pages build keys by template.
   "/dashboard/marketplace/sell",
   "/dashboard/support",
+  // The on-demand capability overview (V3 First 60 Seconds) — linked
+  // from the sidebar, never auto-shown, and covered here like any other
+  // signed-in page.
+  "/dashboard/tour",
   "/dashboard/websites",
   "/dashboard/product-workflow",
   "/dashboard/trading-workflow",

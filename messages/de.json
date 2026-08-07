@@ -81,7 +81,8 @@
       "integrations": "Integrationen",
       "files": "Dateien",
       "deepResearch": "Tiefenrecherche",
-      "support": "Hilfe"
+      "support": "Hilfe",
+      "tour": "Was kann Ionexa?"
     },
     "groupHints": {
       "create": "Eine Website erzeugen, ein Ziel planen, ein Dokument schreiben.",
@@ -133,7 +134,8 @@
       "integrations": "Gmail, Drive und Slack verbinden, damit die KI mit Ihren echten Daten arbeitet",
       "files": "PDFs, Word- und Excel-Dateien hochladen und das KI dazu befragen",
       "deepResearch": "Thema angeben — es recherchiert, gleicht ab und schreibt einen belegten Bericht",
-      "support": "Fragen Sie, wie etwas funktioniert, oder erreichen Sie einen Menschen."
+      "support": "Fragen Sie, wie etwas funktioniert, oder erreichen Sie einen Menschen.",
+      "tour": "Ein schneller Überblick über alles, was du hier tun kannst."
     },
     "comingSoon": "Demnächst",
     "comingSoonToast": "{name} ist noch nicht verfügbar — steht auf der Roadmap.",
@@ -948,7 +950,9 @@
       "statusFlagged": "Markiert",
       "flaggedTitle": "Von unserer Sicherheitsprüfung markiert",
       "regenerateFree": "Neu erzeugen (kostenlos)",
-      "editUnavailable": "Änderungen sind möglich, sobald die Website fertig erzeugt ist."
+      "editUnavailable": "Änderungen sind möglich, sobald die Website fertig erzeugt ist.",
+      "exampleName": "Aroma — Café im Viertel",
+      "exampleDescription": "Eine einseitige Website für ein kleines Specialty-Café namens Aroma. Warmes, modernes Gefühl. Abschnitte: eine kurze Begrüßung, unsere Geschichte, eine Karte mit 6 Getränken und Preisen, Öffnungszeiten und ein Kontaktbereich mit Adresse und Telefon. Call-to-Action: Kaffeebohnen online bestellen."
     },
     "marketplace": {
       "title": "Marktplatz",
@@ -1632,7 +1636,27 @@
       "noneTitle": "Noch nichts Belastbares",
       "noneNeedMore": "Hier ist noch zu wenig, um von einem Muster zu sprechen. Ein paar Dutzend Zeilen mit Datum sind meist der Punkt, ab dem sich etwas zeigt — und wir sagen lieber nichts, als etwas zu erfinden.",
       "noneYet": "Füge etwas mehr hinzu und starte das aus deinem Dashboard erneut.",
-      "goToDashboard": "Zu meinem Dashboard"
+      "goToDashboard": "Zu meinem Dashboard",
+      "welcomeIntro": "Keine Tour, keine Einrichtung — wähle etwas aus und in einer Minute bist du mittendrin.",
+      "actionTitle": "Was möchtest du zuerst tun?",
+      "actions": {
+        "website": {
+          "title": "Eine Website bauen",
+          "hint": "Beschreibe sie in einem Satz — die KI baut eine echte Seite, die du bearbeiten und veröffentlichen kannst."
+        },
+        "mission": {
+          "title": "Ein Ziel setzen",
+          "hint": "Sag der KI, worauf du hinarbeitest, und sie plant die Schritte mit dir."
+        },
+        "data": {
+          "title": "Meine Daten ordnen",
+          "hint": "Bring eine Tabelle mit und erhalte eine echte Erkenntnis über dein Geschäft."
+        },
+        "chat": {
+          "title": "Einfach etwas fragen",
+          "hint": "Öffne einen Chat und frag, was du willst — das Eingabefeld ist bereit."
+        }
+      }
     },
     "insights": {
       "title": "Was mir aufgefallen ist",
@@ -1642,6 +1666,37 @@
       "hideNumbers": "Zahlen ausblenden",
       "dismiss": "Ausblenden",
       "dismissError": "Das konnte nicht ausgeblendet werden."
+    },
+    "tour": {
+      "title": "Was kann Ionexa?",
+      "description": "Eine schnelle Karte dessen, was es hier gibt. Jede Kachel öffnet das echte Werkzeug — probier aus, was nützlich aussieht.",
+      "tryIt": "Ausprobieren",
+      "sections": {
+        "website": {
+          "title": "Websites bauen und veröffentlichen",
+          "description": "Beschreibe eine Website in einem Satz; die KI erzeugt eine echte Seite, die du bearbeitest und dann im Web veröffentlichst."
+        },
+        "mission": {
+          "title": "Ein Ziel in Mission Control planen",
+          "description": "Nenne ein Ziel; die KI zerlegt es in Schritte und hilft dir, jeden abzuschließen."
+        },
+        "chat": {
+          "title": "Im Chat alles fragen",
+          "description": "Ein Chat, der deinen Arbeitsbereich kennt — stelle Fragen, entwirf Texte oder denke laut nach."
+        },
+        "data": {
+          "title": "Daten importieren und verstehen",
+          "description": "Bring Tabellen oder Dateien mit; die KI ordnet sie und zeigt echte Muster auf."
+        },
+        "presentations": {
+          "title": "Präsentationen erzeugen",
+          "description": "Beschreibe ein Deck; sie recherchiert, schreibt und gestaltet die Folien mit echten Quellen."
+        },
+        "agents": {
+          "title": "Mit KI-Agenten automatisieren",
+          "description": "Baue Agenten, die nach Zeitplan laufen und arbeiten, während du weg bist."
+        }
+      }
     }
   },
   "module": {

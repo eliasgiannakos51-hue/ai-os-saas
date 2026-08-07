@@ -104,15 +104,19 @@ export default async function CollaborateAcceptPage({ params }: { params: { toke
             ) : (
               <div className="space-y-3">
                 <p className="text-xs leading-relaxed text-muted">{t("signInFirst", { email: invite!.email })}</p>
+                {/* ?next= carries the invite through the auth round-trip,
+                    so a brand-new invitee lands back HERE after signing
+                    up — the shared project wins over the first-run flow,
+                    which stays pending for their next ordinary visit. */}
                 <div className="flex gap-3">
                   <Link
-                    href="/signup"
+                    href={`/signup?next=${encodeURIComponent(`/collaborate/${token}`)}`}
                     className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all hover:opacity-90"
                   >
                     {t("signUp")}
                   </Link>
                   <Link
-                    href="/login"
+                    href={`/login?next=${encodeURIComponent(`/collaborate/${token}`)}`}
                     className="inline-flex min-h-[44px] flex-1 items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-panel"
                   >
                     {t("logIn")}

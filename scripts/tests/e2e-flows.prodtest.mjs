@@ -293,6 +293,107 @@ await focusBtn.click();
 await page.waitForTimeout(350);
 check("toggling back restores the original state", await focusBtn.getAttribute("aria-expanded"), expandedBefore);
 
+console.log("\n== FLOW 9: First 60 seconds — one question, four doors ==");
+// The whole feature, driven the way a new account experiences it, in the
+// production build. The stand-in's user_onboarding starts EMPTY, which
+// is exactly a fresh account — including an OAuth account whose
+// bootstrap failed: this USER carries no subscription_tier in its
+// metadata and the flow must not care.
+
+// Phase 1: a new account landing on the dashboard is taken to the
+// question — and the question is the ACTION question, not a tour.
+await page.goto(`http://127.0.0.1:${PORT}/dashboard/overview`, { waitUntil: "networkidle" });
+check("a fresh account is taken to /onboarding", new URL(page.url()).pathname, "/onboarding");
+checkTrue(
+  "the first screen asks what to DO",
+  await page.getByRole("heading", { name: "What do you want to do first?" }).isVisible()
+);
+const doorTexts = await page.locator("section button").allInnerTexts();
+checkTrue(`four doors are offered (${doorTexts.length})`, doorTexts.length === 4);
+checkTrue("skip is visible on the very first step", await page.getByText("Skip for now").isVisible());
+const bodyText = await page.locator("body").innerText();
+checkTrue("no plan or price is sold on the welcome", !/€|\/month|per month|Upgrade/i.test(bodyText));
+
+// Phase 2: the chat door. One click -> /dashboard/chat with the
+// composer focused, and the choice recorded server-side.
+const onboardingWritesBefore = supaHits.filter((h) => h.startsWith("POST /rest/v1/user_onboarding")).length;
+await page.getByRole("button", { name: "Just ask something" }).click();
+await page.waitForURL("**/dashboard/chat", { timeout: 15000 });
+check("the chat door lands on chat", new URL(page.url()).pathname, "/dashboard/chat");
+await page.waitForTimeout(400);
+checkTrue(
+  "the composer is focused on arrival — input ready",
+  await page.evaluate(() => document.activeElement?.tagName === "TEXTAREA")
+);
+const onboardingWritesAfter = supaHits.filter((h) => h.startsWith("POST /rest/v1/user_onboarding")).length;
+checkTrue(
+  `the choice was recorded in the DATABASE, not localStorage (+${onboardingWritesAfter - onboardingWritesBefore} writes)`,
+  onboardingWritesAfter > onboardingWritesBefore
+);
+checkTrue(
+  "nothing was stashed in localStorage",
+  await page.evaluate(() => !Object.keys(localStorage).some((k) => /onboard/i.test(k)))
+);
+
+// Phase 3: the row is now complete. The BACK BUTTON must not resurrect
+// the flow. staleTimes.dynamic=0 does NOT cover this: the Router Cache
+// serves back/forward from cache regardless, which is why the doors
+// REPLACE the /onboarding history entry instead of pushing on top of it
+// — Back from the destination goes to wherever the user was before the
+// flow. A hand-typed /onboarding must still bounce to the dashboard.
+TABLE_ROWS.user_onboarding = [
+  { user_id: USER.id, goal: null, first_action: "chat", completed_at: "2026-08-07T10:00:00Z", skipped_at: null },
+];
+await page.goBack({ waitUntil: "networkidle" });
+checkTrue(
+  `browser back after completing does NOT re-show the flow (landed on ${new URL(page.url()).pathname})`,
+  new URL(page.url()).pathname !== "/onboarding"
+);
+await page.goto(`http://127.0.0.1:${PORT}/onboarding`, { waitUntil: "networkidle" });
+check("a direct /onboarding URL after completing bounces to the dashboard", new URL(page.url()).pathname, "/dashboard/overview");
+
+// Phase 4: a refresh MID-IMPORT resumes at the recorded step, not the
+// first question all over again.
+TABLE_ROWS.user_onboarding = [
+  { user_id: USER.id, goal: "trading", first_action: "data", completed_at: null, skipped_at: null },
+];
+await page.goto(`http://127.0.0.1:${PORT}/onboarding`, { waitUntil: "networkidle" });
+checkTrue(
+  "F5 mid-import resumes at the source step",
+  await page.getByRole("heading", { name: "Bring your data in" }).isVisible()
+);
+checkTrue(
+  "the privacy notice appears exactly where data changes hands",
+  (await page.locator("body").innerText()).includes("Your data stays yours")
+);
+
+// Phase 5: the website door arrives with the brief already written.
+TABLE_ROWS.user_onboarding = [];
+await page.goto(`http://127.0.0.1:${PORT}/onboarding`, { waitUntil: "networkidle" });
+await page.getByRole("button", { name: "Build a website" }).click();
+await page.waitForURL("**/dashboard/website-builder?example=1", { timeout: 15000 });
+await page.waitForTimeout(400);
+const nameValue = await page.locator('input[type="text"]').first().inputValue();
+check("the builder form is pre-filled with the example name", nameValue, "Aroma — neighbourhood coffee shop");
+const briefValue = await page.locator("textarea").first().inputValue();
+checkTrue(`...and a complete example brief (${briefValue.length} chars)`, briefValue.length > 100);
+
+// Phase 6: the mission door lands on an OPEN goal form with focus in it.
+TABLE_ROWS.user_onboarding = [];
+await page.goto(`http://127.0.0.1:${PORT}/onboarding`, { waitUntil: "networkidle" });
+await page.getByRole("button", { name: "Set a goal" }).click();
+await page.waitForURL("**/dashboard/mission", { timeout: 15000 });
+await page.waitForTimeout(400);
+checkTrue(
+  "the goal box is focused on arrival — input ready",
+  await page.evaluate(() => document.activeElement?.id === "mission-goal")
+);
+
+// Leave the row complete so the flows below are not intercepted.
+TABLE_ROWS.user_onboarding = [
+  { user_id: USER.id, goal: null, first_action: "chat", completed_at: "2026-08-07T10:00:00Z", skipped_at: null },
+];
+
 console.log("\n== FLOW 8: Settings — every tab opens ==");
 await page.goto(`http://127.0.0.1:${PORT}/dashboard/settings`, { waitUntil: "networkidle" });
 check("settings loads", new URL(page.url()).pathname, "/dashboard/settings");

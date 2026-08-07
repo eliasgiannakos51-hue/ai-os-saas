@@ -17,7 +17,11 @@ export const metadata: Metadata = { title: "Website Builder" };
 // that module is a plain idea/status CRUD tracker with no AI call and
 // already has its own credit cost + plan gating; this page doesn't touch
 // it at all.
-export default async function WebsiteBuilderPage() {
+export default async function WebsiteBuilderPage({
+  searchParams,
+}: {
+  searchParams: { example?: string };
+}) {
   const t = await getTranslations("dashboard.websiteBuilder");
   const supabase = createClient();
 
@@ -46,6 +50,15 @@ export default async function WebsiteBuilderPage() {
         <WebsiteBuilderWorkspace
           initialWebsites={websiteRows}
           favoritedWebsiteIds={favoritedWebsiteIds}
+          // ?example=1 — the onboarding "Build a website" door. The form
+          // arrives open with a complete, editable brief already in it,
+          // so the first click here can be Generate. Everything stays
+          // editable; nothing submits on its own.
+          initialDraft={
+            searchParams.example === "1"
+              ? { name: t("exampleName"), description: t("exampleDescription") }
+              : undefined
+          }
         />
       </div>
     </main>

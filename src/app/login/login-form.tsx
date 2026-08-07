@@ -21,11 +21,19 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
+  // Where to land after login. Only ever a same-origin path — a crafted
+  // ?next=https://evil.example must not turn the login form into an open
+  // redirect (same rule as /auth/callback).
+  const [nextPath, setNextPath] = useState<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("reset") === "success") {
       setResetSuccess(true);
+    }
+    const rawNext = params.get("next");
+    if (rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//")) {
+      setNextPath(rawNext);
     }
   }, []);
 
@@ -78,7 +86,7 @@ export function LoginForm() {
   }
 
   function goToDashboard() {
-    router.push("/dashboard/overview");
+    router.push(nextPath ?? "/dashboard/overview");
     router.refresh();
   }
 
@@ -104,7 +112,7 @@ export function LoginForm() {
         )}
 
         <div className="rounded-2xl border border-border bg-panel p-6 shadow-[0_0_0_1px_rgba(249,115,22,0.05)]">
-          <SocialAuthButtons />
+          <SocialAuthButtons next={nextPath ?? undefined} />
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

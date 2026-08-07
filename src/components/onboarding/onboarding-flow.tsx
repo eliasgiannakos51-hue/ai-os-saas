@@ -13,6 +13,10 @@ import {
   Sparkles,
   AlertTriangle,
   Check,
+  Globe,
+  Target,
+  Table2,
+  MessageCircle,
 } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -20,8 +24,15 @@ import { MAX_CSV_BYTES } from "@/lib/import/csv-parse";
 import { MAX_PASTE_CHARS, MIN_PASTE_CHARS } from "@/lib/import/paste-limits";
 import { formatBytes } from "@/lib/files/file-types";
 import { InsightList, type Insight } from "@/components/onboarding/insight-list";
+import {
+  FIRST_ACTIONS,
+  firstActionCompletes,
+  firstActionDestination,
+  type FirstAction,
+  type OnboardingEntryStep,
+} from "@/lib/onboarding-flow";
 
-type Step = "goal" | "source" | "csv" | "paste" | "quick" | "analysing" | "insights";
+type Step = "action" | "goal" | "source" | "csv" | "paste" | "quick" | "analysing" | "insights";
 
 type MappingEntry = { column: string; field: string | null };
 
@@ -45,12 +56,27 @@ type Analysis = {
 
 const GOALS = ["trading", "freelance", "startup", "agency", "other"] as const;
 
+const ACTION_ICONS: Record<FirstAction, typeof Globe> = {
+  website: Globe,
+  mission: Target,
+  data: Table2,
+  chat: MessageCircle,
+};
+
 /**
- * The first two minutes.
+ * The first 60 seconds.
  *
- * The whole screen exists to get from "I just signed up" to "it told me
- * something about my business I didn't know" without a detour. Three
- * decisions follow from that:
+ * ONE QUESTION, FOUR DOORS. The first screen asks what the user wants to
+ * DO — build a website, set a goal, organise their data, or just ask
+ * something — and a click goes straight there with the input ready. No
+ * feature tour, no plan picker: the documented failure this replaces is
+ * a tester looking at a capability presentation and concluding the
+ * product was "several LLMs in one, cheaper". Plans appear only at limit
+ * moments (the smart upgrade triggers), and the capability overview
+ * lives behind "What can Ionexa do?" in the sidebar for whoever asks.
+ *
+ * The data door continues into the import flow below, which keeps its
+ * own three decisions:
  *
  *   1. SKIP IS ALWAYS VISIBLE. Nobody is trapped in a wizard. An empty
  *      dashboard is a worse first impression than an optional step, but
@@ -61,13 +87,21 @@ const GOALS = ["trading", "freelance", "startup", "agency", "other"] as const;
  *   3. WHEN THERE IS NOTHING TO SAY, IT SAYS SO. The one thing this
  *      screen must never do is manufacture a finding to justify itself.
  */
-export function OnboardingFlow({ activationFree }: { activationFree: boolean }) {
+export function OnboardingFlow({
+  activationFree,
+  initialStep = "action",
+}: {
+  activationFree: boolean;
+  /** Where a refresh resumes — resolved server-side from the progress
+   *  row (see lib/onboarding-flow.ts's resolveInitialStep). */
+  initialStep?: OnboardingEntryStep;
+}) {
   const t = useTranslations("dashboard.onboarding");
   const locale = useLocale();
   const router = useRouter();
   const { addToast } = useToast();
 
-  const [step, setStep] = useState<Step>("goal");
+  const [step, setStep] = useState<Step>(initialStep);
   const [goal, setGoal] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -99,20 +133,52 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
     []
   );
 
+  async function chooseAction(action: FirstAction) {
+    if (busy) return;
+    const destination = firstActionDestination(action);
+    if (destination === null) {
+      // The data door stays here and continues into the import flow.
+      // Recording it is what a mid-flow refresh resumes from.
+      setStep("goal");
+      void saveProgress({ firstAction: action });
+      return;
+    }
+    // The other three doors leave. The same write records the choice AND
+    // completes the flow — a user who clicked through has had their
+    // first 60 seconds, and showing the question again next login would
+    // be the double-show bug. The write is awaited so the destination's
+    // own guards see a settled row; if it fails, the navigation still
+    // happens (worst case: the question shows once more, which beats a
+    // dead button).
+    //
+    // REPLACE, not push. The Router Cache serves back/forward
+    // navigations from cache regardless of staleTimes, so a pushed
+    // /onboarding entry re-shows the already-answered question on the
+    // browser's Back button. Replacing removes the transient question
+    // from history entirely — Back from the destination goes to wherever
+    // the user was before the flow, same as before it existed.
+    setBusy(true);
+    await saveProgress({ firstAction: action, completed: firstActionCompletes(action) });
+    router.replace(destination);
+  }
+
   async function chooseGoal(value: string) {
     setGoal(value);
     setStep("source");
     void saveProgress({ goal: value });
   }
 
+  // replace() for the same reason as chooseAction: a finished flow must
+  // not be one Back-press away, and the Router Cache replays history
+  // entries without asking the server.
   async function skip() {
     await saveProgress({ skipped: true });
-    router.push("/dashboard/overview");
+    router.replace("/dashboard/overview");
   }
 
   async function finish() {
     await saveProgress({ completed: true });
-    router.push("/dashboard/overview");
+    router.replace("/dashboard/overview");
   }
 
   async function analyse(chosen: File) {
@@ -228,7 +294,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
     <div className="space-y-6">
       {/* Always available, at every step. */}
       <div className="flex items-center justify-between gap-3">
-        <p className="text-[11px] text-muted">{t("stepLabel", { step: stepNumber(step), total: 3 })}</p>
+        <p className="text-[11px] text-muted">{t("stepLabel", { step: stepNumber(step), total: 4 })}</p>
         {step !== "insights" && (
           <button
             type="button"
@@ -239,6 +305,39 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
           </button>
         )}
       </div>
+
+      {step === "action" && (
+        <section className="space-y-3">
+          <h2 className="text-base font-semibold text-foreground">{t("actionTitle")}</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {FIRST_ACTIONS.map((action) => {
+              const Icon = ACTION_ICONS[action];
+              return (
+                <button
+                  key={action}
+                  type="button"
+                  onClick={() => void chooseAction(action)}
+                  disabled={busy}
+                  className="min-h-[92px] rounded-2xl border border-border bg-panel/60 p-4 text-left transition-colors duration-150 hover:border-orange-500/50 disabled:opacity-60"
+                >
+                  <Icon className="mb-2 h-5 w-5 text-orange-400" aria-hidden="true" />
+                  <p className="text-sm font-semibold text-foreground">{t(`actions.${action}.title`)}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted">{t(`actions.${action}.hint`)}</p>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* Said before anything is uploaded — the moment someone decides
+          whether to hand over their books. Only on the data path: the
+          action question above asks for nothing. */}
+      {(step === "goal" || step === "source" || step === "csv" || step === "paste") && (
+        <p className="rounded-xl border border-border bg-panel/60 p-3 text-[11px] leading-relaxed text-muted">
+          {t("privacyNotice")}
+        </p>
+      )}
 
       {step === "goal" && (
         <section className="space-y-3">
@@ -568,9 +667,10 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
 }
 
 function stepNumber(step: Step): number {
-  if (step === "goal") return 1;
-  if (step === "insights") return 3;
-  return 2;
+  if (step === "action") return 1;
+  if (step === "goal") return 2;
+  if (step === "analysing" || step === "insights") return 4;
+  return 3;
 }
 
 function SourceCard({

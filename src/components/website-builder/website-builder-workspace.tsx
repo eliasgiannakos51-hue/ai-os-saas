@@ -178,10 +178,15 @@ function downloadHtml(website: UserWebsite) {
 export function WebsiteBuilderWorkspace({
   initialWebsites,
   favoritedWebsiteIds = [],
+  initialDraft,
 }: {
   initialWebsites: UserWebsite[];
   /** Starred project ids, resolved server-side in one batched query. */
   favoritedWebsiteIds?: string[];
+  /** A pre-filled, fully editable brief — the onboarding "Build a
+   *  website" door arrives with one (?example=1) so the first click can
+   *  be Generate rather than a blank textarea. Never submits itself. */
+  initialDraft?: { name: string; description: string };
 }) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.websiteBuilder");
@@ -193,8 +198,8 @@ export function WebsiteBuilderWorkspace({
   const { addToast } = useToast();
 
   const [websites, setWebsites] = useState<UserWebsite[]>(initialWebsites);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [name, setName] = useState(initialDraft?.name ?? "");
+  const [description, setDescription] = useState(initialDraft?.description ?? "");
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(initialWebsites[0]?.id ?? null);
@@ -202,8 +207,9 @@ export function WebsiteBuilderWorkspace({
 
   // The generation form is now behind the list's "+ New" button, like
   // every other list in the app — it opens by default only when there is
-  // nothing to look at yet.
-  const [showForm, setShowForm] = useState(initialWebsites.length === 0);
+  // nothing to look at yet, or when the onboarding door arrived with a
+  // pre-filled brief to show.
+  const [showForm, setShowForm] = useState(initialWebsites.length === 0 || Boolean(initialDraft));
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [detailTab, setDetailTab] = useState<DetailTabKey>("preview");

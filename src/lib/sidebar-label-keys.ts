@@ -37,6 +37,7 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Documents: "documents",
   Presentations: "presentations",
   Support: "support",
+  "What can Ionexa do?": "tour",
   Campaigns: "campaigns",
   Analytics: "analytics",
   Finance: "finance",

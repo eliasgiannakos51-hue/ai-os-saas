@@ -5,6 +5,7 @@ import { Rocket } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { activationAvailable } from "@/lib/import/activation";
+import { resolveInitialStep } from "@/lib/onboarding-flow";
 import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
 
 export const dynamic = "force-dynamic";
@@ -33,10 +34,11 @@ export default async function OnboardingPage() {
   const t = await getTranslations("dashboard.onboarding");
 
   // Already been through it — going round again would re-ask questions
-  // they have answered.
+  // they have answered. This is also what a hand-typed /onboarding URL
+  // hits after completion: straight back to the dashboard.
   const { data: state } = await supabase
     .from("user_onboarding")
-    .select("completed_at, skipped_at")
+    .select("goal, first_action, completed_at, skipped_at")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -44,18 +46,27 @@ export default async function OnboardingPage() {
     redirect("/dashboard/overview");
   }
 
+  // A refresh mid-flow resumes where the user was, from the recorded
+  // progress row — the steps themselves are client state and would
+  // otherwise restart from the first question.
+  const initialStep = resolveInitialStep({
+    firstAction: state?.first_action ?? null,
+    goal: state?.goal ?? null,
+  });
+
   return (
     <main className="min-h-screen bg-dot-grid">
       <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6">
-        <PageHeader icon={Rocket} title={t("title")} description={t("description")} />
+        <PageHeader icon={Rocket} title={t("title")} description={t("welcomeIntro")} />
 
-        {/* Said before anything is uploaded, because this is the moment
-            someone decides whether to hand over their books. */}
-        <p className="mb-5 rounded-xl border border-border bg-panel/60 p-3 text-[11px] leading-relaxed text-muted">
-          {t("privacyNotice")}
-        </p>
-
-        <OnboardingFlow activationFree={await activationAvailable(user.id)} />
+        {/* The privacy notice moved INTO the flow: it is said before
+            anything is uploaded (the moment someone decides whether to
+            hand over their books), which is the data path's steps — not
+            the action question, where nothing is being handed over. */}
+        <OnboardingFlow
+          activationFree={await activationAvailable(user.id)}
+          initialStep={initialStep}
+        />
       </div>
     </main>
   );

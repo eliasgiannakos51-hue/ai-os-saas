@@ -4029,3 +4029,20 @@ revoke all on function public.claim_activation_run(uuid) from anon;
 revoke all on function public.claim_activation_run(uuid) from authenticated;
 grant execute on function public.claim_activation_run(uuid) to service_role;
 
+
+
+-- ============================================================================
+-- V3 — First 60 Seconds (action-first onboarding).
+--
+-- See v3_first_60_seconds_migration.sql. One additive column: which of
+-- the four first actions the user picked on the "What do you want to do
+-- first?" screen. Database, not localStorage, so "once per account"
+-- survives a new device and a cleared browser. Validated to the
+-- allowlist in /api/onboarding, the only writer.
+-- ============================================================================
+
+alter table public.user_onboarding
+  add column if not exists first_action text;
+
+comment on column public.user_onboarding.first_action is
+  'Which first action the user chose on the onboarding screen: website | mission | data | chat. Written only by /api/onboarding.';

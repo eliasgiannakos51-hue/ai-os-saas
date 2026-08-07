@@ -81,7 +81,8 @@
       "integrations": "集成",
       "files": "文件",
       "deepResearch": "深度研究",
-      "support": "帮助"
+      "support": "帮助",
+      "tour": "Ionexa 能做什么？"
     },
     "groupHints": {
       "create": "生成网站、规划目标、撰写文档。",
@@ -133,7 +134,8 @@
       "integrations": "连接 Gmail、Drive 与 Slack，让 AI 处理你真实的数据",
       "files": "上传 PDF、Word 和 Excel 文件，然后向 AI 提问",
       "deepResearch": "给一个主题，它会搜索、交叉核对并写出带来源的报告",
-      "support": "询问功能用法，或联系真人。"
+      "support": "询问功能用法，或联系真人。",
+      "tour": "快速了解你在这里能做的一切。"
     },
     "comingSoon": "即将推出",
     "comingSoonToast": "{name} 尚未推出——已列入路线图。",
@@ -948,7 +950,9 @@
       "statusFlagged": "已标记",
       "flaggedTitle": "已被我们的安全审核标记",
       "regenerateFree": "重新生成（免费）",
-      "editUnavailable": "网站生成完成后即可提出修改要求。"
+      "editUnavailable": "网站生成完成后即可提出修改要求。",
+      "exampleName": "Aroma——社区咖啡店",
+      "exampleDescription": "为一家名为 Aroma 的小型精品咖啡店制作单页网站。风格温暖现代。栏目：简短欢迎语、我们的故事、含 6 款饮品和价格的菜单、营业时间，以及带地址和电话的联系栏目。行动号召：在线订购咖啡豆。"
     },
     "marketplace": {
       "title": "市场",
@@ -1632,7 +1636,27 @@
       "noneTitle": "暂时还没有可靠的发现",
       "noneNeedMore": "目前的数据还不足以称为规律。通常几十行带日期的记录就会开始显现出一些东西——我们宁可不说，也不会编造。",
       "noneYet": "再添加一些数据，然后从仪表板重新运行。",
-      "goToDashboard": "前往我的仪表板"
+      "goToDashboard": "前往我的仪表板",
+      "welcomeIntro": "没有导览，也不用设置——选一件想做的事，一分钟内就开始做。",
+      "actionTitle": "你想先做什么？",
+      "actions": {
+        "website": {
+          "title": "建一个网站",
+          "hint": "用一句话描述它——AI 会生成一个可编辑、可发布的真实页面。"
+        },
+        "mission": {
+          "title": "设定一个目标",
+          "hint": "告诉 AI 你想达成什么，它会和你一起规划步骤。"
+        },
+        "data": {
+          "title": "整理我的数据",
+          "hint": "导入一份表格，获得一条关于你业务的真实洞察。"
+        },
+        "chat": {
+          "title": "直接问点什么",
+          "hint": "打开对话问任何问题——输入框已经就绪。"
+        }
+      }
     },
     "insights": {
       "title": "我注意到的",
@@ -1642,6 +1666,37 @@
       "hideNumbers": "隐藏数据",
       "dismiss": "忽略此项",
       "dismissError": "无法忽略该项。"
+    },
+    "tour": {
+      "title": "Ionexa 能做什么？",
+      "description": "这里功能的快速地图。每张卡片都会打开真实的工具——挑一个看起来有用的试试。",
+      "tryIt": "试一试",
+      "sections": {
+        "website": {
+          "title": "创建并发布网站",
+          "description": "用一句话描述网站；AI 生成真实页面，你可以编辑并发布到网上。"
+        },
+        "mission": {
+          "title": "在 Mission Control 中规划目标",
+          "description": "说出一个目标；AI 会把它拆成步骤，并帮你逐一完成。"
+        },
+        "chat": {
+          "title": "在对话中随便问",
+          "description": "一个了解你工作区的对话——提问、起草文字，或把想法梳理清楚。"
+        },
+        "data": {
+          "title": "导入并理解你的数据",
+          "description": "导入表格或文件；AI 会整理它们并指出真实的规律。"
+        },
+        "presentations": {
+          "title": "生成演示文稿",
+          "description": "描述一份幻灯片；它会检索、撰写并设计幻灯片，引用真实来源。"
+        },
+        "agents": {
+          "title": "用 AI 代理自动化",
+          "description": "创建按计划运行的代理，在你不在时替你工作。"
+        }
+      }
     }
   },
   "module": {

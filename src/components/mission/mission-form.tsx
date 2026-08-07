@@ -113,6 +113,10 @@ export function MissionForm({ onCreated }: { onCreated?: () => void } = {}) {
           onChange={(e) => setGoal(e.target.value)}
           placeholder={t("goalPlaceholder")}
           className="input min-h-24 resize-y"
+          // The onboarding "Set a goal" door lands here with the form
+          // already open (it opens itself on an empty account) — focusing
+          // the goal box is what makes "the input is ready" true.
+          autoFocus
         />
         <button
           type="submit"

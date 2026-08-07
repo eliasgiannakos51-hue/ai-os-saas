@@ -81,7 +81,8 @@
       "integrations": "Integrazioni",
       "files": "File",
       "deepResearch": "Ricerca approfondita",
-      "support": "Assistenza"
+      "support": "Assistenza",
+      "tour": "Cosa può fare Ionexa?"
     },
     "groupHints": {
       "create": "Genera un sito, pianifica un obiettivo, scrivi un documento.",
@@ -133,7 +134,8 @@
       "integrations": "Collega Gmail, Drive e Slack così l'IA lavora sui tuoi dati reali",
       "files": "Carica PDF, Word ed Excel e fai domande all'IA su di essi",
       "deepResearch": "Dai un argomento: cerca, verifica e scrive un report con le fonti",
-      "support": "Chiedi come funziona qualcosa o parla con una persona."
+      "support": "Chiedi come funziona qualcosa o parla con una persona.",
+      "tour": "Una panoramica rapida di tutto ciò che puoi fare qui."
     },
     "comingSoon": "In arrivo",
     "comingSoonToast": "{name} non è ancora disponibile: è nella roadmap.",
@@ -948,7 +950,9 @@
       "statusFlagged": "Segnalato",
       "flaggedTitle": "Segnalato dal nostro controllo di sicurezza",
       "regenerateFree": "Rigenera (gratis)",
-      "editUnavailable": "Potrai richiedere modifiche una volta terminata la generazione del sito."
+      "editUnavailable": "Potrai richiedere modifiche una volta terminata la generazione del sito.",
+      "exampleName": "Aroma — caffetteria di quartiere",
+      "exampleDescription": "Un sito web di una pagina per una piccola caffetteria specialty chiamata Aroma. Atmosfera calda e moderna. Sezioni: un breve benvenuto, la nostra storia, un menù con 6 bevande e prezzi, gli orari e una sezione contatti con indirizzo e telefono. Call to action: ordina il caffè online."
     },
     "marketplace": {
       "title": "Mercato",
@@ -1632,7 +1636,27 @@
       "noneTitle": "Ancora nulla di solido",
       "noneNeedMore": "Non c'è ancora abbastanza per parlare di uno schema. Qualche decina di righe con le date è di solito il punto in cui iniziano a emergere cose — e preferiamo tacere piuttosto che inventare.",
       "noneYet": "Aggiungi ancora qualcosa e rilancia dalla tua dashboard.",
-      "goToDashboard": "Vai alla mia dashboard"
+      "goToDashboard": "Vai alla mia dashboard",
+      "welcomeIntro": "Niente tour, niente configurazione: scegli qualcosa da fare e in un minuto lo stai facendo.",
+      "actionTitle": "Cosa vuoi fare per prima cosa?",
+      "actions": {
+        "website": {
+          "title": "Crea un sito web",
+          "hint": "Descrivilo in una frase — l'IA crea una pagina vera che puoi modificare e pubblicare."
+        },
+        "mission": {
+          "title": "Fissa un obiettivo",
+          "hint": "Di' all'IA a cosa stai lavorando e pianificherà i passi con te."
+        },
+        "data": {
+          "title": "Organizza i miei dati",
+          "hint": "Porta un foglio di calcolo e ricevi una constatazione reale sulla tua attività."
+        },
+        "chat": {
+          "title": "Chiedi e basta",
+          "hint": "Apri una chat e chiedi qualsiasi cosa — il campo è pronto."
+        }
+      }
     },
     "insights": {
       "title": "Cosa ho notato",
@@ -1642,6 +1666,37 @@
       "hideNumbers": "Nascondi i numeri",
       "dismiss": "Ignora",
       "dismissError": "Impossibile ignorarlo."
+    },
+    "tour": {
+      "title": "Cosa può fare Ionexa?",
+      "description": "Una mappa rapida di ciò che c'è qui. Ogni scheda apre lo strumento vero — prova quello che ti sembra utile.",
+      "tryIt": "Provalo",
+      "sections": {
+        "website": {
+          "title": "Crea e pubblica siti web",
+          "description": "Descrivi un sito in una frase; l'IA genera una pagina vera che modifichi e poi pubblichi sul web."
+        },
+        "mission": {
+          "title": "Pianifica un obiettivo in Mission Control",
+          "description": "Dichiara un obiettivo; l'IA lo divide in passi e ti aiuta a completarli uno a uno."
+        },
+        "chat": {
+          "title": "Chiedi qualsiasi cosa in chat",
+          "description": "Una chat che conosce il tuo spazio di lavoro — fai domande, scrivi testi o ragiona ad alta voce."
+        },
+        "data": {
+          "title": "Importa e comprendi i tuoi dati",
+          "description": "Porta fogli di calcolo o file; l'IA li organizza e mette in luce schemi reali."
+        },
+        "presentations": {
+          "title": "Genera presentazioni",
+          "description": "Descrivi un deck; ricerca, scrive e impagina le diapositive con fonti reali."
+        },
+        "agents": {
+          "title": "Automatizza con agenti IA",
+          "description": "Crea agenti che girano secondo un programma e lavorano mentre non ci sei."
+        }
+      }
     }
   },
   "module": {

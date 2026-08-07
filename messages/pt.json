@@ -1294,7 +1294,22 @@
       "rollback": "Repor",
       "rollbackSuccess": "Reposta a versão {number}.",
       "rollbackError": "Não foi possível repor. Tente novamente.",
-      "confirmRollback": "Repor a versão {number} no site no ar?"
+      "confirmRollback": "Repor a versão {number} no site no ar?",
+      "liveEdit": {
+        "title": "Editar o site publicado",
+        "placeholder": "ex. muda o telefone para 210 1234567",
+        "previewButton": "Pré-visualizar alteração",
+        "previewError": "Não foi possível gerar a alteração.",
+        "currentLabel": "Online agora",
+        "proposedLabel": "Alteração proposta",
+        "notLiveYet": "ainda não online",
+        "proposedEmpty": "Descreve uma alteração e pré-visualiza-a aqui.",
+        "applyButton": "Aprovar e publicar",
+        "applyHint": "Fica online assim que aprovares.",
+        "applyError": "Não foi possível aplicar a alteração.",
+        "applied": "A tua alteração está online.",
+        "discard": "Descartar"
+      }
     },
     "integrations": {
       "title": "Integrações",

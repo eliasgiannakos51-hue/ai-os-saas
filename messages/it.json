@@ -1294,7 +1294,22 @@
       "rollback": "Ripristina",
       "rollbackSuccess": "Ripristinata la versione {number}.",
       "rollbackError": "Non è stato possibile ripristinare. Riprova.",
-      "confirmRollback": "Rimettere online la versione {number}?"
+      "confirmRollback": "Rimettere online la versione {number}?",
+      "liveEdit": {
+        "title": "Modifica il sito live",
+        "placeholder": "es. cambia il telefono in 210 1234567",
+        "previewButton": "Anteprima modifica",
+        "previewError": "Impossibile generare la modifica.",
+        "currentLabel": "Live ora",
+        "proposedLabel": "Modifica proposta",
+        "notLiveYet": "non ancora live",
+        "proposedEmpty": "Descrivi una modifica e vedila in anteprima qui.",
+        "applyButton": "Approva e pubblica",
+        "applyHint": "Va live appena approvi.",
+        "applyError": "Impossibile applicare la modifica.",
+        "applied": "La tua modifica è live.",
+        "discard": "Scarta"
+      }
     },
     "integrations": {
       "title": "Integrazioni",

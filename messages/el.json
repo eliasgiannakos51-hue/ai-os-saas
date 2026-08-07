@@ -1294,7 +1294,22 @@
       "rollback": "Επαναφορά",
       "rollbackSuccess": "Έγινε επαναφορά στην έκδοση {number}.",
       "rollbackError": "Δεν ήταν δυνατή η επαναφορά. Δοκίμασε ξανά.",
-      "confirmRollback": "Να επιστρέψει η έκδοση {number} στο ζωντανό site;"
+      "confirmRollback": "Να επιστρέψει η έκδοση {number} στο ζωντανό site;",
+      "liveEdit": {
+        "title": "Επεξεργασία του live ιστότοπου",
+        "placeholder": "π.χ. άλλαξε το τηλέφωνο σε 210 1234567",
+        "previewButton": "Προεπισκόπηση αλλαγής",
+        "previewError": "Δεν δημιουργήθηκε η αλλαγή.",
+        "currentLabel": "Live τώρα",
+        "proposedLabel": "Προτεινόμενη αλλαγή",
+        "notLiveYet": "όχι ακόμα live",
+        "proposedEmpty": "Περίγραψε μια αλλαγή και κάνε προεπισκόπηση εδώ.",
+        "applyButton": "Έγκριση & δημοσίευση",
+        "applyHint": "Γίνεται live μόλις το εγκρίνεις.",
+        "applyError": "Δεν εφαρμόστηκε η αλλαγή.",
+        "applied": "Η αλλαγή σου είναι live.",
+        "discard": "Απόρριψη"
+      }
     },
     "integrations": {
       "title": "Συνδέσεις",

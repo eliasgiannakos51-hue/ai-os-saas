@@ -1294,7 +1294,22 @@
       "rollback": "Restaurer",
       "rollbackSuccess": "Version {number} restaurée.",
       "rollbackError": "Impossible de restaurer. Réessayez.",
-      "confirmRollback": "Remettre la version {number} en ligne ?"
+      "confirmRollback": "Remettre la version {number} en ligne ?",
+      "liveEdit": {
+        "title": "Modifier le site en ligne",
+        "placeholder": "ex. changer le téléphone en 210 1234567",
+        "previewButton": "Aperçu du changement",
+        "previewError": "Impossible de générer ce changement.",
+        "currentLabel": "En ligne",
+        "proposedLabel": "Changement proposé",
+        "notLiveYet": "pas encore en ligne",
+        "proposedEmpty": "Décrivez un changement et prévisualisez-le ici.",
+        "applyButton": "Approuver et publier",
+        "applyHint": "Publié dès que vous approuvez.",
+        "applyError": "Impossible d'appliquer ce changement.",
+        "applied": "Votre changement est en ligne.",
+        "discard": "Annuler"
+      }
     },
     "integrations": {
       "title": "Intégrations",

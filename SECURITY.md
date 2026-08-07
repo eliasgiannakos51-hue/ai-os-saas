@@ -361,6 +361,26 @@ phantom table, every scope column exists), §3 (no credential is
 exported), §4 (route posture, caller's client not service-role), §5
 (erasure still deletes the storage objects, and before the auth user).*
 
+### Live website editing (V3 Task 12)
+
+- **Nothing reaches the public page without a security scan.** The
+  preview step runs the static scan plus the AI content review; the apply
+  step re-runs the deterministic static scan on the exact bytes about to
+  be written — fail-closed, 422 on any finding. The apply step **never
+  trusts the submitted HTML**: a preview result is client-held, so a
+  tampered payload trying to slip a `<script>` past is caught by the
+  re-scan, not by faith that the preview arrived unmodified.
+- **Every live state is a version.** The result is snapshotted into
+  `site_versions` (pruned to `MAX_SITE_VERSIONS`) before the visible
+  content changes, so rollback means "what the public actually saw" and a
+  bad edit is one click undone. The version helpers are shared by the
+  publish, rollback and live-edit routes so "max 20" cannot mean 20 in
+  one route and 30 in another.
+- **Charged once, at preview.** The AI runs at preview time and is billed
+  there; apply makes no model call and no charge. The per-site-per-day
+  ceiling (`MAX_LIVE_EDITS_PER_SITE_PER_DAY`) is enforced on apply, where
+  the page changes — a preview that is never applied costs no budget.
+
 ### AI Support Chat
 
 - **Grounded in a computed corpus.** The assistant answers only from

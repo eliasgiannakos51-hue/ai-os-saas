@@ -1294,7 +1294,22 @@
       "rollback": "回滚",
       "rollbackSuccess": "已回滚到版本 {number}。",
       "rollbackError": "无法回滚，请重试。",
-      "confirmRollback": "将版本 {number} 重新设为线上版本？"
+      "confirmRollback": "将版本 {number} 重新设为线上版本？",
+      "liveEdit": {
+        "title": "编辑已上线的网站",
+        "placeholder": "例如:把电话改成 210 1234567",
+        "previewButton": "预览更改",
+        "previewError": "无法生成该更改。",
+        "currentLabel": "当前已上线",
+        "proposedLabel": "拟议更改",
+        "notLiveYet": "尚未上线",
+        "proposedEmpty": "描述一处更改,在此预览。",
+        "applyButton": "批准并上线",
+        "applyHint": "批准后立即上线。",
+        "applyError": "无法应用该更改。",
+        "applied": "你的更改已上线。",
+        "discard": "放弃"
+      }
     },
     "integrations": {
       "title": "集成",

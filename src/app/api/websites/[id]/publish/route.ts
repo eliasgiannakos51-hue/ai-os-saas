@@ -13,10 +13,10 @@ import {
 import { validateSubdomain, publishedSiteUrl } from "@/lib/publishing/subdomain";
 import {
   maxPublishedSitesForPlan,
-  MAX_SITE_VERSIONS,
   MAX_LIVE_EDITS_PER_SITE_PER_DAY,
 } from "@/lib/publishing/publish-limits";
 import { getSiteUrl } from "@/lib/site-url";
+import { nextSiteVersion, pruneSiteVersions } from "@/lib/publishing/site-versions";
 import type { UserWebsite } from "@/types/user-website";
 
 export const dynamic = "force-dynamic";
@@ -269,7 +269,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         return NextResponse.json({ ok: false, error: "Could not publish that change." }, { status: 500 });
       }
       publishedSiteId = existing.id;
-      versionNumber = await nextVersionFor(supabase, existing.id);
+      versionNumber = await nextSiteVersion(supabase, existing.id);
     } else {
       const taken = await subdomainTaken(supabase, subdomain, null);
       if (taken) {
@@ -327,7 +327,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       // than failing a publish that already succeeded.
       logApiError("/api/websites/[id]/publish", versionError, { stage: "insert_version" });
     }
-    await pruneVersions(supabase, publishedSiteId);
+    await pruneSiteVersions(supabase, publishedSiteId);
 
     void logSecurityCheck(supabase, {
       userId: user.id,
@@ -419,35 +419,4 @@ async function subdomainTaken(
   return Boolean(data && data.length > 0);
 }
 
-async function nextVersionFor(
-  supabase: ReturnType<typeof createClient>,
-  publishedSiteId: string
-): Promise<number> {
-  const { data } = await supabase
-    .from("site_versions")
-    .select("version_number")
-    .eq("published_site_id", publishedSiteId)
-    .order("version_number", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  return (data?.version_number ?? 0) + 1;
-}
 
-/** Keeps the newest MAX_SITE_VERSIONS. Each version is a full copy of the
- *  HTML, so an unbounded history is a table of megabyte rows that every
- *  dashboard query has to step over. */
-async function pruneVersions(
-  supabase: ReturnType<typeof createClient>,
-  publishedSiteId: string
-): Promise<void> {
-  const { data } = await supabase
-    .from("site_versions")
-    .select("id")
-    .eq("published_site_id", publishedSiteId)
-    .order("version_number", { ascending: false })
-    .range(MAX_SITE_VERSIONS, MAX_SITE_VERSIONS + 200);
-  const ids = (data ?? []).map((row) => row.id);
-  if (ids.length === 0) return;
-  const { error } = await supabase.from("site_versions").delete().in("id", ids);
-  if (error) logApiError("/api/websites/[id]/publish", error, { stage: "prune_versions" });
-}

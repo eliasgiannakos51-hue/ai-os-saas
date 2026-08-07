@@ -1294,7 +1294,22 @@
       "rollback": "Roll back",
       "rollbackSuccess": "Rolled back to version {number}.",
       "rollbackError": "Could not roll that back. Please try again.",
-      "confirmRollback": "Put version {number} back on the live site?"
+      "confirmRollback": "Put version {number} back on the live site?",
+      "liveEdit": {
+        "title": "Edit the live site",
+        "placeholder": "e.g. change the phone number to 210 1234567",
+        "previewButton": "Preview change",
+        "previewError": "Couldn't generate that change.",
+        "currentLabel": "Live now",
+        "proposedLabel": "Proposed change",
+        "notLiveYet": "not live yet",
+        "proposedEmpty": "Describe a change and preview it here.",
+        "applyButton": "Approve & go live",
+        "applyHint": "Goes live the moment you approve.",
+        "applyError": "Couldn't apply that change.",
+        "applied": "Your change is live.",
+        "discard": "Discard"
+      }
     },
     "integrations": {
       "title": "Integrations",

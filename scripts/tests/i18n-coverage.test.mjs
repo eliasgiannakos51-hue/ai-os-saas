@@ -224,7 +224,13 @@ const clientFallbacks = sources.flatMap((f) => [
 // by demo-widget.tsx, which shows its OWN fully-translated
 // landing.v2.demo strings; the English here is the API-level fallback
 // the widget only reaches if it cannot parse the JSON at all.
-const SERVER_PROSE_BASELINE = 627;
+// 627 -> 638: V3 Task 12's live-edit route (/api/published/[id]/
+// live-edit). Its security-block, rate-limit and failure responses —
+// including the "blocked by the security review, nothing went live"
+// message that names the specific issues. Same recorded decision as
+// every API-error increment above; the live-editor UI shows its own
+// translated dashboard.publishing.liveEdit strings for the happy path.
+const SERVER_PROSE_BASELINE = 638;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

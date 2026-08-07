@@ -1294,7 +1294,22 @@
       "rollback": "Zurücksetzen",
       "rollbackSuccess": "Auf Version {number} zurückgesetzt.",
       "rollbackError": "Zurücksetzen nicht möglich. Bitte erneut versuchen.",
-      "confirmRollback": "Version {number} wieder live schalten?"
+      "confirmRollback": "Version {number} wieder live schalten?",
+      "liveEdit": {
+        "title": "Die Live-Website bearbeiten",
+        "placeholder": "z. B. Telefonnummer auf 210 1234567 ändern",
+        "previewButton": "Änderung ansehen",
+        "previewError": "Änderung konnte nicht erstellt werden.",
+        "currentLabel": "Jetzt live",
+        "proposedLabel": "Vorgeschlagene Änderung",
+        "notLiveYet": "noch nicht live",
+        "proposedEmpty": "Beschreibe eine Änderung und sieh sie hier in der Vorschau.",
+        "applyButton": "Freigeben & live schalten",
+        "applyHint": "Geht live, sobald du freigibst.",
+        "applyError": "Änderung konnte nicht angewendet werden.",
+        "applied": "Deine Änderung ist live.",
+        "discard": "Verwerfen"
+      }
     },
     "integrations": {
       "title": "Integrationen",

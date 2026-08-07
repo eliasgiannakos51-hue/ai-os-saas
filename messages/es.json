@@ -1294,7 +1294,22 @@
       "rollback": "Restaurar",
       "rollbackSuccess": "Restaurada la versión {number}.",
       "rollbackError": "No se pudo restaurar. Inténtalo de nuevo.",
-      "confirmRollback": "¿Volver a poner la versión {number} en el sitio en vivo?"
+      "confirmRollback": "¿Volver a poner la versión {number} en el sitio en vivo?",
+      "liveEdit": {
+        "title": "Editar el sitio en vivo",
+        "placeholder": "p. ej. cambia el teléfono a 210 1234567",
+        "previewButton": "Ver cambio",
+        "previewError": "No se pudo generar el cambio.",
+        "currentLabel": "En vivo ahora",
+        "proposedLabel": "Cambio propuesto",
+        "notLiveYet": "aún no en vivo",
+        "proposedEmpty": "Describe un cambio y previsualízalo aquí.",
+        "applyButton": "Aprobar y publicar",
+        "applyHint": "Se publica en cuanto lo apruebas.",
+        "applyError": "No se pudo aplicar el cambio.",
+        "applied": "Tu cambio está en vivo.",
+        "discard": "Descartar"
+      }
     },
     "integrations": {
       "title": "Integraciones",

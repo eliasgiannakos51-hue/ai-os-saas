@@ -1294,7 +1294,22 @@
       "rollback": "استرجاع",
       "rollbackSuccess": "تم الاسترجاع إلى الإصدار {number}.",
       "rollbackError": "تعذّر الاسترجاع. حاول مرة أخرى.",
-      "confirmRollback": "هل تريد إعادة الإصدار {number} إلى الموقع المنشور؟"
+      "confirmRollback": "هل تريد إعادة الإصدار {number} إلى الموقع المنشور؟",
+      "liveEdit": {
+        "title": "تحرير الموقع المنشور",
+        "placeholder": "مثال: غيّر الهاتف إلى 210 1234567",
+        "previewButton": "معاينة التغيير",
+        "previewError": "تعذّر إنشاء التغيير.",
+        "currentLabel": "مباشر الآن",
+        "proposedLabel": "التغيير المقترح",
+        "notLiveYet": "ليس مباشرًا بعد",
+        "proposedEmpty": "صف تغييرًا وعاينه هنا.",
+        "applyButton": "الموافقة والنشر",
+        "applyHint": "يُنشر فور موافقتك.",
+        "applyError": "تعذّر تطبيق التغيير.",
+        "applied": "تغييرك أصبح مباشرًا.",
+        "discard": "تجاهل"
+      }
     },
     "integrations": {
       "title": "التكاملات",

@@ -1294,7 +1294,22 @@
       "rollback": "元に戻す",
       "rollbackSuccess": "バージョン {number} に戻しました。",
       "rollbackError": "元に戻せませんでした。もう一度お試しください。",
-      "confirmRollback": "バージョン {number} を公開サイトに戻しますか？"
+      "confirmRollback": "バージョン {number} を公開サイトに戻しますか？",
+      "liveEdit": {
+        "title": "公開中のサイトを編集",
+        "placeholder": "例:電話番号を 210 1234567 に変更",
+        "previewButton": "変更をプレビュー",
+        "previewError": "変更を生成できませんでした。",
+        "currentLabel": "現在公開中",
+        "proposedLabel": "変更案",
+        "notLiveYet": "まだ公開されていません",
+        "proposedEmpty": "変更を入力して、ここでプレビューします。",
+        "applyButton": "承認して公開",
+        "applyHint": "承認するとすぐ公開されます。",
+        "applyError": "変更を適用できませんでした。",
+        "applied": "変更が公開されました。",
+        "discard": "破棄"
+      }
     },
     "integrations": {
       "title": "連携",

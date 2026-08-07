@@ -4,7 +4,8 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
-import { Globe, ExternalLink, Copy, Check, History, SearchX, Undo2 } from "lucide-react";
+import { Globe, ExternalLink, Copy, Check, History, SearchX, Sparkles, Undo2 } from "lucide-react";
+import { LiveEditor } from "@/components/publishing/live-editor";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
 import { ListLayout } from "@/components/ui/list-layout";
 import { EmptyState } from "@/components/empty-state";
@@ -281,6 +282,20 @@ export function PublishedSitesList({
               {t("close")}
             </button>
           </div>
+
+          {/* Live editing (V3 Task 12): describe a change, preview it in
+              split view, approve → live immediately. Only for a site that
+              is currently live — an unpublished one has no page to edit in
+              place. */}
+          {selected.status === "live" && (
+            <div className="space-y-3 rounded-xl border border-border bg-input/40 p-3">
+              <h3 className="flex items-center gap-1.5 text-xs font-semibold text-foreground">
+                <Sparkles className="h-3.5 w-3.5 text-orange-400" aria-hidden="true" />
+                {t("liveEdit.title")}
+              </h3>
+              <LiveEditor siteId={selected.id} liveUrl={selected.url} />
+            </div>
+          )}
 
           <h3 className="flex items-center gap-1.5 text-xs font-semibold text-muted">
             <History className="h-3.5 w-3.5" aria-hidden="true" />

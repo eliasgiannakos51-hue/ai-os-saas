@@ -221,9 +221,23 @@ export function isSlackChannelAllowed(
 // filter for the obvious cases; the boundary is the capability model
 // (no tools, fixed recipient, output validated against a schema).
 
+// `(?:all |any |the |these |those )*` rather than a single optional
+// group: "Disregard THE above instructions" and "ignore THE previous
+// instructions" are the most natural phrasings of this attack, and both
+// walked straight through the earlier version, which only allowed
+// "all"/"any". Found by scripts/tests/red-team.test.mjs, which attacks
+// these patterns rather than asserting they exist.
+const DETERMINERS = "(?:all\\s+|any\\s+|the\\s+|these\\s+|those\\s+|my\\s+|your\\s+)*";
+
 const INJECTION_PATTERNS: RegExp[] = [
-  /ignore\s+(?:all\s+|any\s+)?(?:previous|prior|above|earlier)\s+(?:instructions?|prompts?|rules?|directions?)/gi,
-  /disregard\s+(?:all\s+|any\s+)?(?:previous|prior|above|earlier)\s+(?:instructions?|prompts?|rules?)/gi,
+  new RegExp(
+    `ignore\\s+${DETERMINERS}(?:previous|prior|above|earlier|preceding)\\s+(?:instructions?|prompts?|rules?|directions?)`,
+    "gi"
+  ),
+  new RegExp(
+    `disregard\\s+${DETERMINERS}(?:previous|prior|above|earlier|preceding)\\s+(?:instructions?|prompts?|rules?|directions?)`,
+    "gi"
+  ),
   /forget\s+(?:everything|all)\s+(?:you|above|before)/gi,
   /you\s+are\s+now\s+(?:a|an|the)\s+/gi,
   /(?:new|updated|revised)\s+(?:system\s+)?(?:instructions?|prompt)\s*:/gi,

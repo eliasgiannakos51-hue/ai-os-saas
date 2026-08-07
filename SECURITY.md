@@ -431,6 +431,10 @@ before `next build`. A new feature fails the build if:
 | A new table is neither exported nor explicitly excluded from the data export | `gdpr.test.mjs` §1 |
 | The data export would include a credential | `gdpr.test.mjs` §3 |
 | The data export reads through the service-role client | `gdpr.test.mjs` §4 |
+| A payload can close the untrusted fence from inside it | `red-team.test.mjs` §1 |
+| Instruction-override phrasing stops being neutralised | `red-team.test.mjs` §2 |
+| A path that sends third-party text to a model loses its fence | `red-team.test.mjs` §5 |
+| The fence markers get a second definition | `red-team.test.mjs` §5 |
 | A reserving route prices at the base margin instead of its plan's | `billing-coverage.test.mjs` |
 | Server-side English prose grows past its recorded baseline | `i18n-coverage.test.mjs` §1 |
 | A user-facing string is hardcoded in a component | `i18n-coverage.test.mjs` §1 |

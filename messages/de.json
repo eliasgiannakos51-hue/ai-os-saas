@@ -146,7 +146,8 @@
       "pricing": "Preise",
       "roadmap": "Roadmap",
       "terms": "Nutzungsbedingungen",
-      "privacy": "Datenschutzerklärung"
+      "privacy": "Datenschutzerklärung",
+      "contact": "Kontakt"
     }
   },
   "pricing": {
@@ -1592,5 +1593,18 @@
     "unlimited": "Unbegrenzt — keine Credits verbraucht",
     "unlimitedWouldHaveCost": "Unbegrenzt — hätte {count} Credits gekostet",
     "freeMessage": "Kostenlose Nachricht · {count} übrig diesen Monat"
+  },
+  "contact": {
+    "title": "Kontakt",
+    "intro": "Hier liest ein Mensch mit. Schreiben Sie uns, was Sie brauchen — wir antworten per E-Mail.",
+    "backHome": "Zurück zur Website",
+    "nameLabel": "Ihr Name (optional)",
+    "emailLabel": "Ihre E-Mail-Adresse",
+    "messageLabel": "Wie können wir helfen?",
+    "send": "Nachricht senden",
+    "sending": "Wird gesendet…",
+    "sent": "Danke — Ihre Nachricht ist unterwegs. Wir antworten an die angegebene Adresse.",
+    "errorGeneric": "Ihre Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
+    "privacyNote": "Was Sie hier schreiben, verwenden wir ausschließlich für unsere Antwort. Nichts aus diesem Formular wird auf unseren Servern gespeichert oder zum Trainieren verwendet."
   }
 }

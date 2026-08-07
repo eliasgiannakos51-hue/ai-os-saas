@@ -146,7 +146,8 @@
       "pricing": "Tarifs",
       "roadmap": "Feuille de route",
       "terms": "Conditions d'utilisation",
-      "privacy": "Politique de confidentialité"
+      "privacy": "Politique de confidentialité",
+      "contact": "Contact"
     }
   },
   "pricing": {
@@ -1592,5 +1593,18 @@
     "unlimited": "Illimité — aucun crédit utilisé",
     "unlimitedWouldHaveCost": "Illimité — aurait coûté {count} crédits",
     "freeMessage": "Message gratuit · {count} restants ce mois-ci"
+  },
+  "contact": {
+    "title": "Nous contacter",
+    "intro": "Une vraie personne les lit. Dites-nous ce dont vous avez besoin et nous vous répondrons par e-mail.",
+    "backHome": "Retour au site",
+    "nameLabel": "Votre nom (facultatif)",
+    "emailLabel": "Votre e-mail",
+    "messageLabel": "Comment pouvons-nous aider ?",
+    "send": "Envoyer le message",
+    "sending": "Envoi…",
+    "sent": "Merci — votre message est parti. Nous répondrons à l'adresse indiquée.",
+    "errorGeneric": "Votre message n'a pas pu être envoyé. Réessayez.",
+    "privacyNote": "Ce que vous écrivez ici ne sert qu'à vous répondre. Rien de ce formulaire n'est conservé sur nos serveurs ni utilisé pour entraîner quoi que ce soit."
   }
 }

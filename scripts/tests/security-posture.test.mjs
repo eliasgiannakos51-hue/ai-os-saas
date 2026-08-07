@@ -262,6 +262,7 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/weekly-digest/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",
   "src/app/api/websites/[id]/submit-form/route.ts": "public contact form on generated sites; write-only, honeypot + 30/hr cap",
+  "src/app/api/contact/route.ts": "our own public contact page; somebody who cannot sign in is exactly who needs it. Sends only to the fixed ADMIN_EMAILS (the visitor's address is reply-to, never a recipient), honeypot + 5/hr per IP, and stores nothing",
   "src/app/api/client-error/route.ts": "browser error beacon; fires when there may be no session",
   "src/app/auth/callback/route.ts":
     "the OAuth/magic-link landing. It CREATES the session by exchanging a single-use code — requiring one first is a contradiction. Surfaced by widening this scan beyond src/app/api; it was never checked before, and reading it line by line confirmed everything after the exchange acts on the user that exchange returned, never on an id from the request.",

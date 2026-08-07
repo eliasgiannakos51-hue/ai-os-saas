@@ -98,6 +98,12 @@ export default async function Home() {
           <Link href="/privacy" className="transition-colors duration-150 hover:text-orange-400">
             {t("footer.privacy")}
           </Link>
+          <span className="hidden sm:inline" aria-hidden="true">
+            ·
+          </span>
+          <Link href="/contact" className="transition-colors duration-150 hover:text-orange-400">
+            {t("footer.contact")}
+          </Link>
         </footer>
       </div>
     </main>

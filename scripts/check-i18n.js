@@ -105,6 +105,9 @@ const LOCALE_ALLOWED = new Set([
   "it:dashboard.marketplace.categories.marketing",
   "pt:dashboard.marketplace.categories.marketing",
   "fr:dashboard.marketplace.categories.finance",
+  // "Contact" is the French noun, spelled identically — the word every
+  // French site uses for this link.
+  "fr:landing.footer.contact",
   "fr:dashboard.marketplace.filterKind",
   "fr:dashboard.marketplace.kindLabel",
   "fr:dashboard.marketplace.descriptionLabel",

@@ -146,7 +146,8 @@
       "pricing": "定价",
       "roadmap": "路线图",
       "terms": "服务条款",
-      "privacy": "隐私政策"
+      "privacy": "隐私政策",
+      "contact": "联系我们"
     }
   },
   "pricing": {
@@ -1592,5 +1593,18 @@
     "unlimited": "无限 — 未使用积分",
     "unlimitedWouldHaveCost": "无限 — 将花费 {count} 积分",
     "freeMessage": "免费消息 · 本月剩余 {count} 条"
+  },
+  "contact": {
+    "title": "联系我们",
+    "intro": "这些消息由真人阅读。告诉我们你的需求，我们会通过邮件回复。",
+    "backHome": "返回网站",
+    "nameLabel": "你的称呼（选填）",
+    "emailLabel": "你的邮箱",
+    "messageLabel": "需要什么帮助？",
+    "send": "发送消息",
+    "sending": "发送中…",
+    "sent": "谢谢，消息已发出。我们会回复到你填写的邮箱。",
+    "errorGeneric": "消息未能发送，请再试一次。",
+    "privacyNote": "你在这里写的内容仅用于回复你。此表单的内容不会存入我们的服务器，也不会用于任何训练。"
   }
 }

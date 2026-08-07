@@ -189,7 +189,12 @@ const clientFallbacks = sources.flatMap((f) => [
 // all ten locales; the one place this prose is deliberately shown in
 // full is the security check's findings on a rejected listing, because a
 // seller who cannot see what was wrong cannot fix it.
-const SERVER_PROSE_BASELINE = 570;
+// 570 -> 576: V3 Task 8 added the public contact route
+// (/api/contact) — rate-limit, validation, not-configured and
+// send-failure responses. Its user-facing text on /contact is translated
+// in all ten locales; what is English here is the fallback the form
+// shows when a request fails in a way it has no key for.
+const SERVER_PROSE_BASELINE = 576;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

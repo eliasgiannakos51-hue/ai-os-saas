@@ -146,7 +146,8 @@
       "pricing": "Preços",
       "roadmap": "Roteiro",
       "terms": "Termos de Serviço",
-      "privacy": "Política de Privacidade"
+      "privacy": "Política de Privacidade",
+      "contact": "Contacto"
     }
   },
   "pricing": {
@@ -1592,5 +1593,18 @@
     "unlimited": "Ilimitado — nenhum crédito usado",
     "unlimitedWouldHaveCost": "Ilimitado — teria custado {count} créditos",
     "freeMessage": "Mensagem gratuita · {count} restantes este mês"
+  },
+  "contact": {
+    "title": "Contacto",
+    "intro": "Isto é lido por uma pessoa. Diz-nos do que precisas e respondemos por email.",
+    "backHome": "Voltar ao site",
+    "nameLabel": "O teu nome (opcional)",
+    "emailLabel": "O teu email",
+    "messageLabel": "Como podemos ajudar?",
+    "send": "Enviar mensagem",
+    "sending": "A enviar…",
+    "sent": "Obrigado — a tua mensagem seguiu. Respondemos para o endereço que indicaste.",
+    "errorGeneric": "Não foi possível enviar a tua mensagem. Tenta de novo.",
+    "privacyNote": "Usamos o que escreves aqui apenas para te responder. Nada deste formulário fica guardado nos nossos servidores nem é usado para treinar seja o que for."
   }
 }

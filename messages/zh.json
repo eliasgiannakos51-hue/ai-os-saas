@@ -80,7 +80,8 @@
       "published": "已发布网站",
       "integrations": "集成",
       "files": "文件",
-      "deepResearch": "深度研究"
+      "deepResearch": "深度研究",
+      "support": "帮助"
     },
     "groupHints": {
       "create": "生成网站、规划目标、撰写文档。",
@@ -131,7 +132,8 @@
       "published": "你所有已上线的网站，含访问量与版本历史",
       "integrations": "连接 Gmail、Drive 与 Slack，让 AI 处理你真实的数据",
       "files": "上传 PDF、Word 和 Excel 文件，然后向 AI 提问",
-      "deepResearch": "给一个主题，它会搜索、交叉核对并写出带来源的报告"
+      "deepResearch": "给一个主题，它会搜索、交叉核对并写出带来源的报告",
+      "support": "询问功能用法，或联系真人。"
     },
     "comingSoon": "即将推出",
     "comingSoonToast": "{name} 尚未推出——已列入路线图。",
@@ -1608,5 +1610,19 @@
     "sent": "谢谢，消息已发出。我们会回复到你填写的邮箱。",
     "errorGeneric": "消息未能发送，请再试一次。",
     "privacyNote": "你在这里写的内容仅用于回复你。此表单的内容不会存入我们的服务器，也不会用于任何训练。"
+  },
+  "support": {
+    "title": "帮助",
+    "description": "询问产品如何使用。真人客服只需一次点击。",
+    "intro": "它依据产品自身的文档作答，不知道时会直说。它看不到你的账户，也不能退款、更改套餐或调整点数——这些需要真人处理。",
+    "suggest1": "点数是怎么计算的？",
+    "suggest2": "我的套餐包含什么？",
+    "suggest3": "如何导出我的数据？",
+    "placeholder": "输入你的问题…",
+    "send": "提问",
+    "thinking": "正在查找…",
+    "errorGeneric": "帮助助手无法作答，请使用联系页面。",
+    "humanNote": "需要真人、退款或更改套餐？",
+    "contactLink": "联系我们"
   }
 }

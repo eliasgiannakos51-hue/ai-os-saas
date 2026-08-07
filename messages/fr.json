@@ -80,7 +80,8 @@
       "published": "Sites publiés",
       "integrations": "Intégrations",
       "files": "Fichiers",
-      "deepResearch": "Recherche approfondie"
+      "deepResearch": "Recherche approfondie",
+      "support": "Assistance"
     },
     "groupHints": {
       "create": "Générez un site, planifiez un objectif, rédigez un document.",
@@ -131,7 +132,8 @@
       "published": "Tous vos sites en ligne, avec leur trafic et leur historique de versions",
       "integrations": "Connectez Gmail, Drive et Slack pour que l'IA travaille sur vos vraies données",
       "files": "Importez des PDF, Word et Excel et posez des questions à l'IA",
-      "deepResearch": "Donnez un sujet : il cherche, recoupe et rédige un rapport sourcé"
+      "deepResearch": "Donnez un sujet : il cherche, recoupe et rédige un rapport sourcé",
+      "support": "Demandez comment quelque chose fonctionne, ou joignez une personne."
     },
     "comingSoon": "Bientôt",
     "comingSoonToast": "{name} n'est pas encore disponible — c'est prévu dans la feuille de route.",
@@ -1608,5 +1610,19 @@
     "sent": "Merci — votre message est parti. Nous répondrons à l'adresse indiquée.",
     "errorGeneric": "Votre message n'a pas pu être envoyé. Réessayez.",
     "privacyNote": "Ce que vous écrivez ici ne sert qu'à vous répondre. Rien de ce formulaire n'est conservé sur nos serveurs ni utilisé pour entraîner quoi que ce soit."
+  },
+  "support": {
+    "title": "Assistance",
+    "description": "Posez vos questions sur le fonctionnement du produit. Une personne est à un clic.",
+    "intro": "Cette assistance répond à partir de la documentation du produit et le dit quand elle ne sait pas. Elle ne voit pas votre compte, ne rembourse pas, ne change pas votre formule et ne modifie pas vos crédits : cela demande une personne.",
+    "suggest1": "Comment fonctionnent les crédits ?",
+    "suggest2": "Que comprend ma formule ?",
+    "suggest3": "Comment exporter mes données ?",
+    "placeholder": "Posez une question…",
+    "send": "Demander",
+    "thinking": "Recherche…",
+    "errorGeneric": "L'assistance n'a pas pu répondre. Utilisez la page de contact.",
+    "humanNote": "Besoin d'une personne, d'un remboursement ou d'un changement de formule ?",
+    "contactLink": "Nous contacter"
   }
 }

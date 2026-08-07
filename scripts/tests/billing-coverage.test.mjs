@@ -111,6 +111,11 @@ const DECLARED = {
     billing: "settled",
     note: "V3 File Workspace. One grounded call over the selected documents. The reservation is sized AFTER the documents load, because the cost is dominated by document text and a hold sized from the question alone is off by orders of magnitude on a long contract. A call that errors still SETTLES rather than releasing — the tokens were spent.",
   },
+  "src/app/api/support/route.ts": {
+    calls: 1,
+    billing: "unbilled",
+    note: "V3 Task 8 AI Support Chat, and the ONE deliberate unbilled call in the product. Charging for support is indefensible here: the most common question in a credit-metered product is \"why was I charged for that?\", and it comes most often from somebody who has just run out of credits — so a price would make help unreachable exactly when it is needed. Bounded by a 40/hour rate limit instead, on the cheapest model, over a small fixed corpus. It is retrieval, not reasoning: max_tokens 700, no tools, no user data in the prompt.",
+  },
   "src/lib/presentations/generate.ts": {
     calls: 3,
     billing: "settled",
@@ -171,8 +176,32 @@ for (const [file, m] of [...flat, ...unbilled]) {
 // test tells you to update it; adding another flat-fee feature raises
 // them and the build fails.
 check("flat-fee AI features (not margin-guaranteed)", flat.length, 0);
-check("completely unbilled AI calls", unbilled.length, 0);
-check("every AI call site is settled on measured usage", settled.length, Object.keys(DECLARED).length);
+// 0 -> 1: V3 Task 8's AI Support Chat, raised deliberately, which is
+// exactly the workflow this counter exists to force.
+//
+// The margin guarantee exists so the product cannot lose money on a
+// heavy user. Support is the one call where applying it produces a worse
+// product than skipping it: the most common question in a credit-metered
+// product is "why was I charged for that?", and it comes most often from
+// somebody who has just run out of credits. A price there makes help
+// unreachable at the exact moment it is needed, and answering "why was I
+// charged" by charging again is not defensible at any multiplier.
+//
+// The cost is bounded structurally rather than by a hold: the cheapest
+// model, max_tokens 700, a fixed ~2k-token corpus, no tools, no user
+// data in the prompt, and a 40/hour per-user rate limit. A user running
+// that limit flat out for an hour costs a fraction of a cent. This is
+// the same shape as sending an email, which is also unbilled and also
+// rate limited.
+//
+// If a second unbilled call ever appears, this number moves again and
+// somebody has to write down why. That is the point.
+check("completely unbilled AI calls", unbilled.length, 1);
+check(
+  "every AI call site is settled on measured usage, except the declared unbilled one",
+  settled.length,
+  Object.keys(DECLARED).length - unbilled.length
+);
 
 console.log("\n== 2b. the public contact-form endpoint bills the site owner ==");
 // The one AI call in this app that an ANONYMOUS third party can trigger.

@@ -80,7 +80,8 @@
       "published": "Veröffentlichte Seiten",
       "integrations": "Integrationen",
       "files": "Dateien",
-      "deepResearch": "Tiefenrecherche"
+      "deepResearch": "Tiefenrecherche",
+      "support": "Hilfe"
     },
     "groupHints": {
       "create": "Eine Website erzeugen, ein Ziel planen, ein Dokument schreiben.",
@@ -131,7 +132,8 @@
       "published": "Alle Ihre Live-Seiten, mit Zugriffen und Versionsverlauf",
       "integrations": "Gmail, Drive und Slack verbinden, damit die KI mit Ihren echten Daten arbeitet",
       "files": "PDFs, Word- und Excel-Dateien hochladen und das KI dazu befragen",
-      "deepResearch": "Thema angeben — es recherchiert, gleicht ab und schreibt einen belegten Bericht"
+      "deepResearch": "Thema angeben — es recherchiert, gleicht ab und schreibt einen belegten Bericht",
+      "support": "Fragen Sie, wie etwas funktioniert, oder erreichen Sie einen Menschen."
     },
     "comingSoon": "Demnächst",
     "comingSoonToast": "{name} ist noch nicht verfügbar — steht auf der Roadmap.",
@@ -1608,5 +1610,19 @@
     "sent": "Danke — Ihre Nachricht ist unterwegs. Wir antworten an die angegebene Adresse.",
     "errorGeneric": "Ihre Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut.",
     "privacyNote": "Was Sie hier schreiben, verwenden wir ausschließlich für unsere Antwort. Nichts aus diesem Formular wird auf unseren Servern gespeichert oder zum Trainieren verwendet."
+  },
+  "support": {
+    "title": "Hilfe",
+    "description": "Fragen Sie, wie das Produkt funktioniert. Ein Mensch ist einen Klick entfernt.",
+    "intro": "Antwortet aus der Dokumentation des Produkts und sagt es, wenn sie etwas nicht weiß. Sie sieht Ihr Konto nicht, erstattet nichts, ändert keinen Tarif und passt keine Credits an — dafür braucht es einen Menschen.",
+    "suggest1": "Wie funktionieren Credits?",
+    "suggest2": "Was ist in meinem Tarif enthalten?",
+    "suggest3": "Wie exportiere ich meine Daten?",
+    "placeholder": "Stellen Sie eine Frage…",
+    "send": "Fragen",
+    "thinking": "Wird nachgeschlagen…",
+    "errorGeneric": "Die Hilfe konnte nicht antworten. Bitte nutzen Sie die Kontaktseite.",
+    "humanNote": "Brauchen Sie einen Menschen, eine Erstattung oder einen Tarifwechsel?",
+    "contactLink": "Kontakt aufnehmen"
   }
 }

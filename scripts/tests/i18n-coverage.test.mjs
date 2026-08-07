@@ -199,7 +199,13 @@ const clientFallbacks = sources.flatMap((f) => [
 // decision; the file the route RETURNS is a different matter and carries
 // its own plain-language README, which is the part a data subject
 // actually reads.
-const SERVER_PROSE_BASELINE = 579;
+// 579 -> 585: V3 Task 8's AI Support Chat (/api/support). Its own
+// answers are produced in the user's language by the model, so the
+// English here is only the small set of "support is unavailable, use the
+// contact page" fallbacks — which is the one place a hardcoded English
+// sentence is least harmful, because it names a page rather than
+// explaining something.
+const SERVER_PROSE_BASELINE = 585;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

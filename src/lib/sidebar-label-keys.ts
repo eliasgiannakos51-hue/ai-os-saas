@@ -36,6 +36,7 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   "Data Analysis": "dataAnalysis",
   Documents: "documents",
   Presentations: "presentations",
+  Support: "support",
   Campaigns: "campaigns",
   Analytics: "analytics",
   Finance: "finance",

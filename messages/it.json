@@ -80,7 +80,8 @@
       "published": "Siti pubblicati",
       "integrations": "Integrazioni",
       "files": "File",
-      "deepResearch": "Ricerca approfondita"
+      "deepResearch": "Ricerca approfondita",
+      "support": "Assistenza"
     },
     "groupHints": {
       "create": "Genera un sito, pianifica un obiettivo, scrivi un documento.",
@@ -131,7 +132,8 @@
       "published": "Tutti i tuoi siti online, con traffico e cronologia delle versioni",
       "integrations": "Collega Gmail, Drive e Slack così l'IA lavora sui tuoi dati reali",
       "files": "Carica PDF, Word ed Excel e fai domande all'IA su di essi",
-      "deepResearch": "Dai un argomento: cerca, verifica e scrive un report con le fonti"
+      "deepResearch": "Dai un argomento: cerca, verifica e scrive un report con le fonti",
+      "support": "Chiedi come funziona qualcosa o parla con una persona."
     },
     "comingSoon": "In arrivo",
     "comingSoonToast": "{name} non è ancora disponibile: è nella roadmap.",
@@ -1608,5 +1610,19 @@
     "sent": "Grazie: il tuo messaggio è partito. Risponderemo all'indirizzo che ci hai indicato.",
     "errorGeneric": "Non è stato possibile inviare il messaggio. Riprova.",
     "privacyNote": "Usiamo quello che scrivi qui solo per risponderti. Nulla di questo modulo viene conservato sui nostri server né usato per addestrare alcunché."
+  },
+  "support": {
+    "title": "Assistenza",
+    "description": "Chiedi come funziona il prodotto. Una persona è a un clic di distanza.",
+    "intro": "Risponde partendo dalla documentazione del prodotto e lo dice quando non sa. Non vede il tuo account, non emette rimborsi, non cambia il piano e non modifica i crediti: per questo serve una persona.",
+    "suggest1": "Come funzionano i crediti?",
+    "suggest2": "Cosa include il mio piano?",
+    "suggest3": "Come esporto i miei dati?",
+    "placeholder": "Fai una domanda…",
+    "send": "Chiedi",
+    "thinking": "Sto cercando…",
+    "errorGeneric": "L'assistenza non è riuscita a rispondere. Usa la pagina dei contatti.",
+    "humanNote": "Ti serve una persona, un rimborso o un cambio di piano?",
+    "contactLink": "Contattaci"
   }
 }

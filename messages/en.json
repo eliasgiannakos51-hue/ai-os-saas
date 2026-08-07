@@ -80,7 +80,8 @@
       "published": "Published Sites",
       "integrations": "Integrations",
       "files": "Files",
-      "deepResearch": "Deep Research"
+      "deepResearch": "Deep Research",
+      "support": "Support"
     },
     "groupHints": {
       "create": "Generate a site, plan a goal, write a document.",
@@ -131,7 +132,8 @@
       "published": "Every site you have live on the web, with its traffic and version history",
       "integrations": "Connect Gmail, Drive and Slack so the AI can work with your real data",
       "files": "Upload PDFs, Word and Excel files and ask the AI questions about them",
-      "deepResearch": "Give it a topic and it searches, cross-checks and writes a sourced report"
+      "deepResearch": "Give it a topic and it searches, cross-checks and writes a sourced report",
+      "support": "Ask how something works, or reach a person."
     },
     "comingSoon": "Coming soon",
     "comingSoonToast": "{name} isn't available yet — it's on the roadmap.",
@@ -1608,5 +1610,19 @@
     "sent": "Thanks — your message is on its way. We will reply to the address you gave.",
     "errorGeneric": "Your message could not be sent. Please try again.",
     "privacyNote": "We use what you write here only to answer you. Nothing from this form is stored on our servers or used to train anything."
+  },
+  "support": {
+    "title": "Support",
+    "description": "Ask about how the product works. A person is one click away.",
+    "intro": "This answers from the product's own documentation, and says so when it does not know. It cannot see your account, issue refunds, change your plan or adjust credits — those need a person.",
+    "suggest1": "How do credits work?",
+    "suggest2": "What does my plan include?",
+    "suggest3": "How do I export my data?",
+    "placeholder": "Ask a question…",
+    "send": "Ask",
+    "thinking": "Looking it up…",
+    "errorGeneric": "Support chat could not answer. Please use the contact page.",
+    "humanNote": "Need a person, a refund or a plan change?",
+    "contactLink": "Contact us"
   }
 }

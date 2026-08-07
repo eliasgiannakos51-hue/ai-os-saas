@@ -16,6 +16,7 @@ import {
   SETTINGS_ICON,
   MARKETPLACE_ICON,
   TEAM_ICON,
+  SUPPORT_ICON,
   MEMORY_ICON,
   TIMELINE_ICON,
   FAVORITES_ICON,
@@ -162,6 +163,10 @@ export const SETTINGS_GROUP: SidebarGroupConfig = {
   items: [
     { href: SETTINGS_NAV_ITEM.href, label: "Settings", icon: SETTINGS_ICON, hintKey: "settings" },
     { href: "/dashboard/team", label: "Team", icon: TEAM_ICON , hintKey: "team" },
+    // Support sits with Settings rather than in a group of its own: it is
+    // where somebody goes when something about their ACCOUNT is unclear,
+    // which is the same place they were already heading.
+    { href: "/dashboard/support", label: "Support", icon: SUPPORT_ICON, hintKey: "support" },
   ],
 };
 

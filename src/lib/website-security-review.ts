@@ -1,8 +1,12 @@
 import "server-only";
+import { modelForTier } from "@/lib/ai/models";
 import Anthropic from "@anthropic-ai/sdk";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 
-const MODEL = "claude-sonnet-4-6";
+// STANDARD tier: a structured red-flag review of already-generated
+// HTML. Quality matters (it gates publishing), and Sonnet 5 is
+// near-Opus on this shape at 60% of the price.
+const MODEL = modelForTier("standard");
 // Small and cheap on purpose — this reviews already-generated HTML for
 // semantic/content red flags the static regex scan (see
 // lib/website-html-security-scan.ts) structurally cannot catch: fake
@@ -97,7 +101,7 @@ export async function reviewWebsiteContentSafety(
     // Recorded before the parse: this review is a real billed call whose
     // cost the user's action incurred whether or not the response came
     // back in a shape we could use.
-    costs?.record("security_review", response.usage, MODEL);
+    costs?.record("security_review", response.usage, response.model ?? MODEL);
 
     const toolUse = response.content.find(
       (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

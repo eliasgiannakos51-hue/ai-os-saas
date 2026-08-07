@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -339,6 +340,13 @@ export async function POST(_request: Request, { params }: { params: { id: string
       questionsAnswered: usable.length,
       questionsAsked: questions.length,
       disclosure,
+      // Deep Research runs on the MAX tier — the receipt's modelTier is
+      // what renders the "advanced model" note beside the charge.
+      usage: buildUsageReceipt({
+        creditsCharged: settlement.creditsCharged,
+        bypass: bypassCredits,
+        modelsUsed: costs.modelsUsed,
+      }),
     });
   } catch (err) {
     // Whatever went wrong, the tokens spent so far were spent. Settle,

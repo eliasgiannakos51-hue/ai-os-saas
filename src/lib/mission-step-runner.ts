@@ -1,4 +1,5 @@
 import "server-only";
+import { modelForTier } from "@/lib/ai/models";
 import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { CLASSIFIER_MODULES, getClassifierModule, moduleHref } from "@/lib/classifier-modules";
@@ -8,7 +9,9 @@ import { buildOutputSummary, buildMissionContextSystemPromptAddition } from "@/l
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 
-const MODEL = "claude-sonnet-4-6";
+// PREMIUM tier: executing a mission step produces the artifact the
+// step promised (V3 model tiers, lib/ai/models.ts).
+const MODEL = modelForTier("premium");
 // Exported so the cron runner's billing estimate prices the same model
 // this runner actually calls.
 export const MISSION_STEP_MODEL = MODEL;
@@ -139,7 +142,7 @@ export async function runMissionStepForUser(
       tool_choice: { type: "tool", name: "route_entry" },
     });
 
-    costs?.record("classification", response.usage, MODEL);
+    costs?.record("classification", response.usage, response.model ?? MODEL);
 
     const toolUse = response.content.find(
       (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

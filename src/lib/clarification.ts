@@ -1,4 +1,5 @@
 import "server-only";
+import { modelForTier } from "@/lib/ai/models";
 import Anthropic from "@anthropic-ai/sdk";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import {
@@ -10,7 +11,9 @@ import {
 export type { ClarificationCheckResult, ClarificationKind } from "@/lib/clarification-client";
 export { parseClarificationResult, appendClarificationAnswers } from "@/lib/clarification-client";
 
-const MODEL = "claude-sonnet-4-6";
+// FAST tier: a clarifying-questions pre-check is a closed-set decision
+// (V3 model tiers, lib/ai/models.ts).
+const MODEL = modelForTier("fast");
 const CLARIFICATION_MAX_TOKENS = 500;
 
 // Every AI-generation entry point in the app (Website Builder, Mission
@@ -109,7 +112,7 @@ export async function checkNeedsClarification(
   // Recorded before the parse: a call that came back in an unusable shape
   // still cost real tokens, and the action that triggered it has to carry
   // that cost.
-  costs?.record("clarification", response.usage, MODEL);
+  costs?.record("clarification", response.usage, response.model ?? MODEL);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

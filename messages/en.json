@@ -1641,7 +1641,8 @@
     "usedWithRemaining": "Used {count} credits · {remaining} left",
     "unlimited": "Unlimited — no credits used",
     "unlimitedWouldHaveCost": "Unlimited — would have cost {count} credits",
-    "freeMessage": "Free message · {count} left this month"
+    "freeMessage": "Free message · {count} left this month",
+    "advancedModel": "advanced model"
   },
   "contact": {
     "title": "Contact us",

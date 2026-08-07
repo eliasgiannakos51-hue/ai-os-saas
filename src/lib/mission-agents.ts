@@ -2,10 +2,17 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { modelForTier, selectMissionPlannerModel } from "@/lib/ai/models";
 
-const MISSION_MODEL = "claude-sonnet-4-6";
+// PREMIUM tier by default; the PLANNER escalates to MAX for complex
+// goals via selectMissionPlannerModel — one rule, in lib/ai/models.ts.
+// The research and reviewer calls stay PREMIUM: gathering findings and
+// summarising completed work are not the hard part of a mission.
+const MISSION_MODEL = modelForTier("premium");
 // Exported so the routes' billing estimates price the same model these
-// agents actually call.
+// agents actually call (the estimate prices the premium tier; a MAX
+// escalation costs more and the settle charges from measured usage, so
+// the reserve buffer absorbs the difference).
 export const MISSION_AGENT_MODEL = MISSION_MODEL;
 const MIN_STEPS = 4;
 const MAX_STEPS = 8;
@@ -254,7 +261,7 @@ export async function researchGoal(
       tools: [WEB_SEARCH_TOOL],
     });
 
-    costs?.record("web_search", response.usage, MISSION_MODEL);
+    costs?.record("web_search", response.usage, response.model ?? MISSION_MODEL);
     const searchCount = response.usage.server_tool_use?.web_search_requests ?? 0;
 
     const text = response.content
@@ -293,16 +300,32 @@ export async function planMission(
   const researchBlock = researchFindings
     ? `\n\nΕΥΡΗΜΑΤΑ ΑΝΑΖΗΤΗΣΗΣ (πραγματικά, πρόσφατα στοιχεία — χρησιμοποίησέ τα για να κάνεις τα βήματα συγκεκριμένα):\n${researchFindings}`
     : "";
-  const response = await anthropic.messages.create({
-    model: MISSION_MODEL,
+  // Complex goals (long, constraint-carrying briefs) plan on the MAX
+  // tier; everything else on PREMIUM. If the MAX model's safety
+  // classifiers decline (stop_reason "refusal" — rare, and possible on
+  // benign goals), retry once on PREMIUM rather than failing the plan.
+  let plannerModel = selectMissionPlannerModel({ goalChars: goal.length }).model;
+  let response = await anthropic.messages.create({
+    model: plannerModel,
     max_tokens: 2048,
     system: PLANNER_SYSTEM_PROMPT + userContext + researchBlock,
     messages: [{ role: "user", content: goal }],
     tools: [PLAN_MISSION_TOOL],
     tool_choice: { type: "tool", name: "create_plan" },
   });
-
-  costs?.record("generation", response.usage, MISSION_MODEL);
+  costs?.record("generation", response.usage, response.model ?? plannerModel);
+  if (response.stop_reason === "refusal" && plannerModel !== MISSION_MODEL) {
+    plannerModel = MISSION_MODEL;
+    response = await anthropic.messages.create({
+      model: plannerModel,
+      max_tokens: 2048,
+      system: PLANNER_SYSTEM_PROMPT + userContext + researchBlock,
+      messages: [{ role: "user", content: goal }],
+      tools: [PLAN_MISSION_TOOL],
+      tool_choice: { type: "tool", name: "create_plan" },
+    });
+    costs?.record("retry", response.usage, response.model ?? plannerModel);
+  }
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
@@ -341,7 +364,7 @@ export async function reviewMission(
     messages: [{ role: "user", content: userContent }],
   });
 
-  costs?.record("generation", response.usage, MISSION_MODEL);
+  costs?.record("generation", response.usage, response.model ?? MISSION_MODEL);
 
   const textBlock = response.content.find(
     (block): block is Anthropic.TextBlock => block.type === "text"

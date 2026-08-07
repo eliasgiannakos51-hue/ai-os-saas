@@ -1,3 +1,4 @@
+import { modelForTier } from "@/lib/ai/models";
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
@@ -15,7 +16,8 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 export const maxDuration = 60;
 
-const SUPPORT_MODEL = "claude-haiku-4-5-20251001";
+// FAST tier — retrieval over a small corpus, not reasoning.
+const SUPPORT_MODEL = modelForTier("fast");
 const MAX_TOKENS = 700;
 
 /**

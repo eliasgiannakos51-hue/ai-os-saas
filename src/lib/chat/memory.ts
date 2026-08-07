@@ -1,11 +1,13 @@
 import "server-only";
+import { modelForTier } from "@/lib/ai/models";
 import Anthropic from "@anthropic-ai/sdk";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logApiError } from "@/lib/log-error";
 import { recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 
-const MEMORY_MODEL = "claude-sonnet-4-6";
+// FAST tier: extracting a one-line memory from a chat turn.
+const MEMORY_MODEL = modelForTier("fast");
 const MEMORY_MAX_TOKENS = 150;
 const DEFAULT_MEMORY_LOAD_LIMIT = 20;
 
@@ -60,7 +62,7 @@ export async function extractAndStoreMemory({
       ],
     });
 
-    costs?.record("other", result.usage, MEMORY_MODEL);
+    costs?.record("other", result.usage, result.model ?? MEMORY_MODEL);
 
     const textBlock = result.content.find(
       (block): block is Anthropic.TextBlock => block.type === "text"

@@ -17,9 +17,59 @@ export type ModelPricing = {
   cacheReadPerMTok: number;
 };
 
+// Prices verified against Anthropic's published model pricing
+// (platform.claude.com/docs/en/about-claude/models) on 2026-08-07, the
+// same commit that introduced the four-tier model system in
+// lib/ai/models.ts. Cache write is the 5-minute-TTL rate (1.25x input —
+// the only TTL this app uses); cache read is 0.1x input.
+//
+// Sonnet 5 has introductory pricing ($2/$10) through 2026-08-31; the
+// STICKER price is recorded here deliberately, because charging users
+// against a price that expires in weeks would silently halve the margin
+// on 2026-09-01 without any code change.
 export const MODEL_PRICING_USD: Record<string, ModelPricing> = {
-  // The model every AI feature in this app calls today (see
-  // lib/website-builder.ts, lib/mission-agents.ts, api/chat, api/create).
+  // Tier MAX (lib/ai/models.ts) — Deep Research, complex missions,
+  // complex website builds.
+  "claude-fable-5": {
+    inputPerMTok: 10,
+    outputPerMTok: 50,
+    cacheWritePerMTok: 12.5,
+    cacheReadPerMTok: 1,
+  },
+  // Tier PREMIUM — Website Builder, Presentations, Agents, live editing.
+  "claude-opus-5": {
+    inputPerMTok: 5,
+    outputPerMTok: 25,
+    cacheWritePerMTok: 6.25,
+    cacheReadPerMTok: 0.5,
+  },
+  // Fable's refusal-fallback target: when Fable's safety classifiers
+  // decline a request, the retry runs on Opus 4.8 and the response names
+  // it — so its price must be known even though no code requests it.
+  "claude-opus-4-8": {
+    inputPerMTok: 5,
+    outputPerMTok: 25,
+    cacheWritePerMTok: 6.25,
+    cacheReadPerMTok: 0.5,
+  },
+  // Tier STANDARD — Chat, Create Anything, File/module Q&A.
+  "claude-sonnet-5": {
+    inputPerMTok: 3,
+    outputPerMTok: 15,
+    cacheWritePerMTok: 3.75,
+    cacheReadPerMTok: 0.3,
+  },
+  // Tier FAST — classification, extraction, clarifying checks, support.
+  "claude-haiku-4-5-20251001": {
+    inputPerMTok: 1,
+    outputPerMTok: 5,
+    cacheWritePerMTok: 1.25,
+    cacheReadPerMTok: 0.1,
+  },
+  // The previous single model for every feature. Kept so that any
+  // remaining call site — and any historical cost-log analysis — prices
+  // correctly rather than falling through to the most-expensive-known
+  // fallback.
   "claude-sonnet-4-6": {
     inputPerMTok: 3,
     outputPerMTok: 15,

@@ -1641,7 +1641,8 @@
     "usedWithRemaining": "Usados {count} créditos · {remaining} restantes",
     "unlimited": "Ilimitado — nenhum crédito usado",
     "unlimitedWouldHaveCost": "Ilimitado — teria custado {count} créditos",
-    "freeMessage": "Mensagem gratuita · {count} restantes este mês"
+    "freeMessage": "Mensagem gratuita · {count} restantes este mês",
+    "advancedModel": "modelo avançado"
   },
   "contact": {
     "title": "Contacto",

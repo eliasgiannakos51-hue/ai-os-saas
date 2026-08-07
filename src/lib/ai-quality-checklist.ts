@@ -28,6 +28,19 @@ import "server-only";
 // search"/"always use a real image" instruction would be actively
 // misleading there, pushing the model to claim it searched when it
 // could not.
+// Grammar/typography correctness, in both variants. Added after a real
+// tester report: AI output in Greek contained agreement errors ("το
+// κινητήρια δύναμη" for "η κινητήρια δύναμη"). Models handle inflected
+// languages far better when explicitly told to re-check agreement, so
+// every user-facing generation carries this — appended inside the two
+// checklist constants above AND exported standalone for the surfaces
+// whose prompt contract cannot absorb the full cycle.
+export const LANGUAGE_QUALITY_EN = `
+LANGUAGE QUALITY: write with correct spelling, grammar and syntax in the user's language. In inflected languages (Greek, German, French, ...) pay particular attention to gender, case, and adjective-noun/article-noun agreement — re-read your answer for agreement errors before returning it. When you give examples, make them SPECIFIC and realistic, with concrete numbers and names — never vague placeholders like "e.g. some company X".`;
+
+export const LANGUAGE_QUALITY_EL = `
+ΠΟΙΟΤΗΤΑ ΓΛΩΣΣΑΣ: γράψε με σωστή ορθογραφία, γραμματική και σύνταξη στη γλώσσα του χρήστη. Πρόσεξε ιδιαίτερα το γένος, την πτώση και τη συμφωνία άρθρου-ουσιαστικού και επιθέτου-ουσιαστικού στα Ελληνικά (π.χ. «η κινητήρια δύναμη», ποτέ «το κινητήρια δύναμη») — ξαναδιάβασε την απάντησή σου για τέτοια λάθη πριν την επιστρέψεις. Όταν δίνεις παραδείγματα, να είναι ΣΥΓΚΕΚΡΙΜΕΝΑ και ρεαλιστικά, με πραγματικά νούμερα και ονόματα — όχι αόριστα («π.χ. μια εταιρεία Χ»).`;
+
 export const AI_QUALITY_CHECKLIST_EN = `
 MANDATORY QUALITY CYCLE before you return anything:
 1. DO exactly what was asked — every single detail, nothing skipped, nothing quietly simplified.
@@ -35,7 +48,7 @@ MANDATORY QUALITY CYCLE before you return anything:
 3. CHECK your own result: re-read the request sentence by sentence and confirm that EACH requested item is genuinely present in your output — not merely mentioned or promised, but actually there.
 4. If anything is missing, wrong, or weaker than asked for, FIX it before answering. Go back and produce the corrected version — do not deliver an incomplete result with an apology or a caveat attached.
 5. Confirm the result is SAFE: no malicious or harmful element, no misleading claim, no invented fact presented as real. Specific real-world details belonging to the user (product prices, addresses, phone numbers, opening hours) must never be fabricated — ask for them, or mark them clearly as placeholders.
-DO NOT return a result that has not passed all five steps.`;
+DO NOT return a result that has not passed all five steps.` + LANGUAGE_QUALITY_EN;
 
 export const AI_QUALITY_CHECKLIST_EL = `
 ΥΠΟΧΡΕΩΤΙΚΟΣ ΚΥΚΛΟΣ ΠΟΙΟΤΗΤΑΣ πριν επιστρέψεις οτιδήποτε:
@@ -44,7 +57,8 @@ export const AI_QUALITY_CHECKLIST_EL = `
 3. ΕΛΕΓΞΕ το αποτέλεσμά σου: διάβασε ξανά το αίτημα πρόταση-πρόταση και επιβεβαίωσε ότι ΚΑΘΕ ζητούμενο υπάρχει πραγματικά στο output σου — όχι απλώς αναφερμένο ή υποσχεμένο, αλλά όντως εκεί.
 4. Αν κάτι λείπει, είναι λάθος ή πιο φτωχό απ' ό,τι ζητήθηκε, ΔΙΟΡΘΩΣΕ το πριν απαντήσεις. Γύρνα πίσω και παρήγαγε τη διορθωμένη έκδοση — μην παραδίδεις ημιτελές αποτέλεσμα με μια συγγνώμη ή μια επιφύλαξη από δίπλα.
 5. Επιβεβαίωσε ότι το αποτέλεσμα είναι ΑΣΦΑΛΕΣ: κανένα κακόβουλο ή επιβλαβές στοιχείο, καμία παραπλανητική δήλωση, κανένα εφευρημένο στοιχείο παρουσιασμένο ως πραγματικό. Συγκεκριμένα πραγματικά στοιχεία του χρήστη (τιμές προϊόντων, διευθύνσεις, τηλέφωνα, ώρες λειτουργίας) δεν επιτρέπεται ΠΟΤΕ να επινοηθούν — ζήτησέ τα, ή σημείωσέ τα καθαρά ως placeholder.
-ΜΗΝ επιστρέψεις αποτέλεσμα που δεν έχει περάσει και τα πέντε βήματα.`;
+ΜΗΝ επιστρέψεις αποτέλεσμα που δεν έχει περάσει και τα πέντε βήματα.` + LANGUAGE_QUALITY_EL;
+
 
 // Compact variant for the short, format-constrained transformations in
 // api/text-actions (rewrite / translate / improve / explain).

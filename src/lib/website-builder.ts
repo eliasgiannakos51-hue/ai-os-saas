@@ -5,8 +5,13 @@ import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { applyExactReplace } from "@/lib/website-patch";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
+import { modelForTier, selectWebsiteBuilderModel } from "@/lib/ai/models";
 import type { CostAccumulator, CostStage } from "@/lib/billing/cost-accumulator";
 
+// The DEFAULT (premium-tier) model. Generation itself picks per request:
+// selectWebsiteBuilderModel routes complex briefs (long description, 3+
+// reference images) to the MAX tier — the rule lives in lib/ai/models.ts
+// so the browser estimate prices the same choice.
 const MODEL = WEBSITE_BUILDER_MODEL;
 // Re-exported so the route's billing estimate prices the same model this
 // file actually calls, without the route reaching for a raw string.
@@ -122,8 +127,11 @@ export async function classifyWebsiteDescription(
   costs?: CostAccumulator
 ): Promise<WebsiteDescriptionClassification> {
   const anthropic = new Anthropic({ apiKey });
+  // FAST tier: a yes/no with a canned message is a closed-set decision —
+  // the premium model returns the same label at many times the price.
+  const classifyModel = modelForTier("fast");
   const response = await anthropic.messages.create({
-    model: MODEL,
+    model: classifyModel,
     max_tokens: CLASSIFY_MAX_TOKENS,
     system: CLASSIFY_SYSTEM_PROMPT,
     messages: [{ role: "user", content: description }],
@@ -131,7 +139,7 @@ export async function classifyWebsiteDescription(
     tool_choice: { type: "tool", name: "classify_website_request" },
   });
 
-  costs?.record("classification", response.usage, MODEL);
+  costs?.record("classification", response.usage, response.model ?? classifyModel);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
@@ -427,7 +435,8 @@ async function streamHtmlToCompletion(
   // would silently undercount a continued generation by however many
   // rounds it took, which is exactly the case where the cost is highest.
   costs?: CostAccumulator,
-  stage: CostStage = "generation"
+  stage: CostStage = "generation",
+  model: string = MODEL
 ): Promise<{ rawText: string; stopReason: string | null }> {
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: initialUserContent }];
   const startedAt = Date.now();
@@ -436,7 +445,7 @@ async function streamHtmlToCompletion(
 
   for (let round = 0; round <= MAX_CONTINUATION_ROUNDS; round++) {
     const stream = anthropic.messages.stream({
-      model: MODEL,
+      model,
       max_tokens: WEBSITE_MAX_TOKENS,
       system,
       tools: [WEB_SEARCH_TOOL],
@@ -452,7 +461,11 @@ async function streamHtmlToCompletion(
     }
 
     const response = await stream.finalMessage();
-    costs?.record(round === 0 ? stage : "retry", response.usage, MODEL);
+    // The RESPONSE names the model. On the MAX tier (Fable) a request can
+    // be served by a fallback model under safety routing, and pricing the
+    // one we asked for instead of the one that answered charges the wrong
+    // rate — invisibly, because achieved_margin would still look right.
+    costs?.record(round === 0 ? stage : "retry", response.usage, response.model ?? model);
     if (!onDelta) {
       // EVERY text block, joined — not the first one.
       //
@@ -547,14 +560,38 @@ export async function generateWebsiteHtml(
   // that ceiling entirely. streamHtmlToCompletion also transparently
   // continues the generation (up to MAX_CONTINUATION_ROUNDS extra calls)
   // if a single call's output alone isn't enough.
-  const { rawText, stopReason } = await streamHtmlToCompletion(
+  //
+  // MODEL SELECTION (V3): complex briefs go to the MAX tier, everything
+  // else runs PREMIUM — one rule, in lib/ai/models.ts, shared with the
+  // browser estimate. If the MAX model's safety classifiers decline the
+  // request (stop_reason "refusal" — occasionally triggered by benign
+  // briefs), the whole generation is retried once on PREMIUM: the user
+  // asked for a website, not for a particular engine, and both attempts'
+  // real usage is recorded so the settle charges what actually ran.
+  const selected = selectWebsiteBuilderModel({
+    descriptionChars: description.length,
+    imageCount: images.length,
+  });
+  let { rawText, stopReason } = await streamHtmlToCompletion(
     anthropic,
     buildGenerateSystemBlocks(formEndpointUrl),
     content,
     onDelta,
     costs,
-    "generation"
+    "generation",
+    selected.model
   );
+  if (stopReason === "refusal" && selected.tier === "max") {
+    ({ rawText, stopReason } = await streamHtmlToCompletion(
+      anthropic,
+      buildGenerateSystemBlocks(formEndpointUrl),
+      content,
+      onDelta,
+      costs,
+      "retry",
+      modelForTier("premium")
+    ));
+  }
   if (!rawText) {
     throw new Error("The model did not return a website.");
   }
@@ -648,7 +685,7 @@ async function tryApplySimpleEdit(
 ): Promise<string | null> {
   const anthropic = new Anthropic({ apiKey });
   const response = await anthropic.messages.create({
-    model: MODEL,
+    model: modelForTier("premium"),
     max_tokens: PATCH_MAX_TOKENS,
     system: [{ type: "text", text: currentHtml, cache_control: { type: "ephemeral" } }],
     messages: [{ role: "user", content: `CHANGE REQUEST: ${changeRequest}` }],
@@ -735,11 +772,17 @@ export async function editWebsiteHtml(
       : userText;
 
   // Streamed for the same reason as generateWebsiteHtml above, and same
-  // continuation logic via streamHtmlToCompletion.
+  // continuation logic via streamHtmlToCompletion. Edits (including live
+  // editing of published sites) run PREMIUM: the change is to a
+  // deliverable, but the hard planning was done at generation time.
   const { rawText, stopReason } = await streamHtmlToCompletion(
     anthropic,
     buildEditSystemBlocks(formEndpointUrl),
-    content
+    content,
+    undefined,
+    undefined,
+    "edit",
+    modelForTier("premium")
   );
   if (!rawText) {
     throw new Error("The model did not return an updated website.");

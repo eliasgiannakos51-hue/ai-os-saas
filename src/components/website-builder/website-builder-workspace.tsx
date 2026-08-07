@@ -36,7 +36,7 @@ import {
   REFERENCE_IMAGE_BUCKET,
 } from "@/lib/website-reference-image";
 import { estimateForAction } from "@/lib/billing/estimate";
-import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
+import { selectWebsiteBuilderModel } from "@/lib/ai-models";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
 import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
@@ -874,10 +874,17 @@ export function WebsiteBuilderWorkspace({
   // list price: the same generation charges 26 credits on Free and 64 on
   // Ultimate, so estimating at list price showed Ultimate users less than
   // half of what they would actually be billed.
+  // Priced on the model the server will SELECT for this brief — the
+  // complexity rule in lib/ai/models.ts routes long/multi-image briefs to
+  // the MAX tier, and the preview must price that same choice.
+  const selectedModel = selectWebsiteBuilderModel({
+    descriptionChars: description.trim().length,
+    imageCount: referenceImageFiles.length,
+  });
   const estimatedCost = estimateForAction(
     "websiteGenerate",
     {
-      model: WEBSITE_BUILDER_MODEL,
+      model: selectedModel.model,
       inputChars: description.trim().length,
       imageCount: referenceImageFiles.length,
     },

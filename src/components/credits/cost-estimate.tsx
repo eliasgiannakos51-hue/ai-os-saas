@@ -5,7 +5,7 @@ import { Zap } from "lucide-react";
 import { estimateForAction, type ActionProfileKey } from "@/lib/billing/estimate";
 import { needsLargeActionConfirmation } from "@/lib/billing/credit-formula";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
-import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
+import { WEBSITE_BUILDER_MODEL, selectWebsiteBuilderModel } from "@/lib/ai-models";
 import { useCredits } from "@/components/credits/credits-context";
 import { useRipple } from "@/hooks/use-ripple";
 
@@ -24,10 +24,18 @@ export function useCostEstimate(
   params: { inputChars: number; imageCount?: number }
 ) {
   const { accountCreditPriceEur } = useCredits();
+  // The SAME selection rule the server applies (lib/ai/models.ts):
+  // complex briefs run — and are therefore priced — on the MAX tier, and
+  // the estimate must show that BEFORE the user commits, not surprise
+  // them on the receipt.
+  const selected = selectWebsiteBuilderModel({
+    descriptionChars: params.inputChars,
+    imageCount: params.imageCount ?? 0,
+  });
   const estimate = estimateForAction(
     action,
     {
-      model: WEBSITE_BUILDER_MODEL,
+      model: action === "websiteGenerate" ? selected.model : WEBSITE_BUILDER_MODEL,
       inputChars: params.inputChars,
       imageCount: params.imageCount,
     },
@@ -37,6 +45,7 @@ export function useCostEstimate(
   return {
     credits: estimate.estimatedCredits,
     needsConfirmation: needsLargeActionConfirmation(estimate.estimatedCredits, DEFAULTS),
+    advancedModel: action === "websiteGenerate" && selected.tier === "max",
   };
 }
 

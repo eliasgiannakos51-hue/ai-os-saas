@@ -68,7 +68,7 @@ const M = config.marginMultiplier;
 // ---------------------------------------------------------------------
 const DECLARED = {
   "src/lib/website-builder.ts": { calls: 4, billing: "settled", note: "generate/edit stream + classifier + patch, all via CostAccumulator" },
-  "src/lib/mission-agents.ts": { calls: 3, billing: "settled", note: "planner/reviewer, costs passed in" },
+  "src/lib/mission-agents.ts": { calls: 4, billing: "settled", note: "researchGoal + planner + planner's refusal-fallback retry (the MAX tier can decline; the retry re-plans on PREMIUM) + reviewer, costs passed in" },
   "src/lib/website-security-review.ts": { calls: 1, billing: "settled", note: "recorded onto the generation's accumulator" },
   "src/lib/mission-step-runner.ts": { calls: 1, billing: "settled" },
   "src/lib/clarification.ts": { calls: 1, billing: "settled" },
@@ -122,9 +122,9 @@ const DECLARED = {
     note: "V3 Presentation Builder. gatherFacts (web search, once per deck), composeDeck (forced tool use), editDeck (forced tool use). The first two record onto ONE CostAccumulator settled by api/presentations, including the failure paths — a compose call that came back unusable still spent the tokens the fact-finding pass and the attempt cost. editDeck is settled separately by api/presentations/[id]/edit, priced off the WHOLE DECK's character count rather than the instruction's, since an edit re-sends every slide.",
   },
   "src/lib/research/research.ts": {
-    calls: 3,
+    calls: 2,
     billing: "settled",
-    note: "V3 Deep Research. The PLANNING half (api/research) is cheap by design: it turns the topic into questions and stops, so the user sees the price of the expensive half before it runs. planResearch (forced tool use), researchQuestion (web search, once per question, sequential), synthesiseReport. All three record onto ONE CostAccumulator per report, settled by api/research/[id]/run — including the failure paths, since every phase that ran spent tokens.",
+    note: "V3 Deep Research. The PLANNING half (api/research) is cheap by design: it turns the topic into questions and stops, so the user sees the price of the expensive half before it runs. The two create calls live in createWithRefusalFallback — the initial attempt on the MAX tier plus the retry on PREMIUM when Fable's safety classifiers decline — and every phase (planResearch, researchQuestion, synthesiseReport) routes through it. All record onto ONE CostAccumulator per report, settled by api/research/[id]/run — including the failure paths, since every phase that ran spent tokens.",
   },
   "src/lib/lead-classification.ts": {
     calls: 1,
@@ -213,7 +213,7 @@ checkTrue("with real measured usage, not a flat fee", /costs,/.test(form) && /ne
 checkTrue("at the owner's own plan rate", /plan: ownerPlan/.test(form));
 checkTrue("solvency is checked BEFORE the call", form.indexOf("hasEnoughCredits") < form.indexOf("classifyLeadMessage(apiKey"));
 checkTrue("and it settles even if the call threw afterwards", /finally \{[\s\S]{0,400}settleReservation/.test(form));
-checkTrue("the classifier records its own usage", /costs\?\.record\("classification", response\.usage, MODEL\)/.test(readFileSync("src/lib/lead-classification.ts", "utf8")));
+checkTrue("the classifier records its own usage", /costs\?\.record\("classification", response\.usage, response\.model \?\? MODEL\)/.test(readFileSync("src/lib/lead-classification.ts", "utf8")));
 // The abuse ceiling that was already there, asserted so it cannot be
 // removed without noticing: an unpaid flood is capped per website/hour.
 checkTrue("a per-website hourly cap still gates the endpoint", /MAX_SUBMISSIONS_PER_HOUR = \d+/.test(form));
@@ -457,7 +457,7 @@ console.log("\n== 12. chat memory extraction is inside the chat settlement ==");
 const chat = readFileSync("src/app/api/chat/route.ts", "utf8");
 checkTrue("extraction runs BEFORE the settle", chat.indexOf("await extractAndStoreMemory({") < chat.indexOf("await settleReservation({"));
 checkTrue("and shares the turn's accumulator", /extractAndStoreMemory\(\{[\s\S]{0,400}costs,/.test(chat));
-checkTrue("the extractor records its own usage", /costs\?\.record\("other", result\.usage, MEMORY_MODEL\)/.test(readFileSync("src/lib/chat/memory.ts", "utf8")));
+checkTrue("the extractor records its own usage", /costs\?\.record\("other", result\.usage, result\.model \?\? MEMORY_MODEL\)/.test(readFileSync("src/lib/chat/memory.ts", "utf8")));
 // If the hold does not cover the second call, every chat message is
 // short by exactly one Claude call.
 const est = readFileSync("src/lib/billing/estimate.ts", "utf8");

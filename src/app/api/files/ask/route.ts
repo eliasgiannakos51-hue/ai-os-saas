@@ -219,7 +219,7 @@ export async function POST(request: Request) {
           },
         ],
       });
-      costs.record("generation", response.usage, FILE_ASK_MODEL);
+      costs.record("generation", response.usage, response.model ?? FILE_ASK_MODEL);
       answer = response.content
         .filter((block): block is Anthropic.TextBlock => block.type === "text")
         .map((block) => block.text)

@@ -113,10 +113,15 @@ export function CreditsProvider({
       }
       // Zero is not worth interrupting anyone for.
       if (receipt.creditsCharged <= 0) return;
-      addToast(
+      // The user never chooses a model, so when a complex request ran on
+      // the strongest tier, the receipt says so — otherwise the higher
+      // charge looks like a pricing bug from their side.
+      const base =
         remaining !== null
           ? t("usedWithRemaining", { count: receipt.creditsCharged, remaining })
-          : t("used", { count: receipt.creditsCharged }),
+          : t("used", { count: receipt.creditsCharged });
+      addToast(
+        receipt.modelTier === "max" ? `${base} \u00b7 ${t("advancedModel")}` : base,
         "success"
       );
     },

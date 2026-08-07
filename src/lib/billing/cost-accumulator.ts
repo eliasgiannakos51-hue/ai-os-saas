@@ -59,6 +59,13 @@ export class CostAccumulator {
     return this.entries.reduce((sum, e) => sum + e.usage.usdCost, 0);
   }
 
+  /** Every distinct model that actually answered during this action —
+   *  fed to buildUsageReceipt so the "advanced model" note reflects what
+   *  RAN (including a safety-routing fallback), never what was asked. */
+  get modelsUsed(): string[] {
+    return [...new Set(this.entries.map((e) => e.model))];
+  }
+
   get callCount(): number {
     return this.entries.length;
   }

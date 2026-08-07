@@ -133,7 +133,7 @@ export async function buildAgentFromRequest(params: {
 
   // Recorded before the parse: a response that came back unusable still
   // cost real tokens.
-  costs.record("generation", response.usage, AGENT_BUILDER_MODEL);
+  costs.record("generation", response.usage, response.model ?? AGENT_BUILDER_MODEL);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

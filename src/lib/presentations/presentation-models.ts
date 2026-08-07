@@ -1,9 +1,12 @@
+import { modelForTier } from "@/lib/ai/models";
 // Client-safe model identifiers for the Presentation Builder — same
 // reason as lib/files/file-models.ts and lib/agents/agent-models.ts: the
 // credit estimate shown before the user commits is computed in the
 // browser and has to price the SAME model the server will call.
 
-export const PRESENTATION_MODEL = "claude-sonnet-4-6";
+// PREMIUM tier: a deck is a deliverable (V3 model tiers, lib/ai/models.ts).
+
+export const PRESENTATION_MODEL = modelForTier("premium");
 
 /**
  * Web searches the fact-finding pass may run, per deck.

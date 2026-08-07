@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { generateWebsiteHtml, WEBSITE_MODEL, type ReferenceImage } from "@/lib/website-builder";
+import { generateWebsiteHtml, type ReferenceImage } from "@/lib/website-builder";
+import { selectWebsiteBuilderModel } from "@/lib/ai/models";
 import { MAX_REFERENCE_IMAGES, referenceImagePathBelongsToUser } from "@/lib/website-reference-image";
 import { downloadReferenceImage } from "@/lib/website-reference-image-server";
 import { FIRST_VERSION_NUMBER } from "@/lib/website-versioning";
@@ -235,7 +236,13 @@ export async function POST(request: Request) {
     const estimate = estimateForAction(
       "websiteGenerate",
       {
-        model: WEBSITE_MODEL,
+        // Priced on the model the complexity rule will actually pick for
+        // this brief — reserving at the premium rate for a brief the MAX
+        // tier will serve would under-hold.
+        model: selectWebsiteBuilderModel({
+          descriptionChars: description.length,
+          imageCount: Math.min(referenceImagePaths.length, MAX_REFERENCE_IMAGES),
+        }).model,
         inputChars: description.length,
         imageCount: Math.min(referenceImagePaths.length, MAX_REFERENCE_IMAGES),
       },

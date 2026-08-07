@@ -1,4 +1,5 @@
 import "server-only";
+import { modelForTier } from "@/lib/ai/models";
 import Anthropic from "@anthropic-ai/sdk";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { RESEARCH_MODEL } from "@/lib/files/file-models";
@@ -98,6 +99,25 @@ export function planSystemPrompt(language: string): string {
   ].join("\n");
 }
 
+
+// Deep Research runs on the MAX tier (Fable), whose safety classifiers
+// can decline a request with stop_reason "refusal" — an HTTP 200, not an
+// error, and occasionally triggered by benign topics. A declined call is
+// retried once on the PREMIUM tier: the user asked for a report, not for
+// a particular engine. The refused attempt costs nothing when declined
+// before output, and both attempts' usage is recorded by the caller from
+// the response it finally gets.
+async function createWithRefusalFallback(
+  anthropic: Anthropic,
+  params: Anthropic.MessageCreateParamsNonStreaming
+): Promise<Anthropic.Message> {
+  const response = await anthropic.messages.create(params);
+  if (response.stop_reason !== "refusal") return response;
+  const fallbackModel = modelForTier("premium");
+  if (params.model === fallbackModel) return response;
+  return anthropic.messages.create({ ...params, model: fallbackModel });
+}
+
 export async function planResearch(params: {
   anthropic: Anthropic;
   topic: string;
@@ -105,7 +125,7 @@ export async function planResearch(params: {
   costs: CostAccumulator;
 }): Promise<{ ok: true; questions: ResearchQuestion[] } | { ok: false; reason: string }> {
   try {
-    const response = await params.anthropic.messages.create({
+    const response = await createWithRefusalFallback(params.anthropic, {
       model: RESEARCH_MODEL,
       max_tokens: PLAN_MAX_TOKENS,
       system: planSystemPrompt(params.language),
@@ -116,7 +136,7 @@ export async function planResearch(params: {
       tool_choice: { type: "tool", name: PLAN_TOOL.name },
       messages: [{ role: "user", content: `Topic:\n${wrapUntrusted(params.topic)}` }],
     });
-    params.costs.record("generation", response.usage, RESEARCH_MODEL);
+    params.costs.record("generation", response.usage, response.model ?? RESEARCH_MODEL);
 
     const use = response.content.find(
       (block): block is Anthropic.ToolUseBlock => block.type === "tool_use" && block.name === PLAN_TOOL.name
@@ -192,7 +212,7 @@ export async function researchQuestion(params: {
   costs: CostAccumulator;
 }): Promise<{ finding: ResearchFinding; searches: number }> {
   try {
-    const response = await params.anthropic.messages.create({
+    const response = await createWithRefusalFallback(params.anthropic, {
       model: RESEARCH_MODEL,
       max_tokens: QUESTION_MAX_TOKENS,
       system: questionSystemPrompt(params.language),
@@ -204,7 +224,7 @@ export async function researchQuestion(params: {
         },
       ],
     });
-    params.costs.record("generation", response.usage, RESEARCH_MODEL);
+    params.costs.record("generation", response.usage, response.model ?? RESEARCH_MODEL);
 
     const summary = response.content
       .filter((block): block is Anthropic.TextBlock => block.type === "text")
@@ -303,13 +323,13 @@ export async function synthesiseReport(params: {
   costs: CostAccumulator;
 }): Promise<{ ok: true; markdown: string } | { ok: false; reason: string }> {
   try {
-    const response = await params.anthropic.messages.create({
+    const response = await createWithRefusalFallback(params.anthropic, {
       model: RESEARCH_MODEL,
       max_tokens: SYNTHESIS_MAX_TOKENS,
       system: synthesisSystemPrompt(params.language),
       messages: [{ role: "user", content: buildSynthesisInput(params) }],
     });
-    params.costs.record("generation", response.usage, RESEARCH_MODEL);
+    params.costs.record("generation", response.usage, response.model ?? RESEARCH_MODEL);
 
     const markdown = response.content
       .filter((block): block is Anthropic.TextBlock => block.type === "text")

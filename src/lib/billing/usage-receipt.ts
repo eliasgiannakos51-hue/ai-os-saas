@@ -1,3 +1,5 @@
+import { tierForModel } from "@/lib/ai/models";
+
 // What an AI action tells the client it cost.
 //
 // Deliberately NOT `server-only`: the server builds it from a settlement,
@@ -21,6 +23,13 @@ export type UsageReceipt = {
   wouldHaveCharged: number | null;
   /** Free-chat allowance left this month, when this was a free message. */
   freeRemaining: number | null;
+  /** "max" when the action ran (at least partly) on the strongest model
+   *  tier (V3, lib/ai/models.ts). The user never picks a model — this is
+   *  the discreet "· advanced model" note on the receipt that explains
+   *  why a complex brief cost more than yesterday's simple one, which
+   *  otherwise looks like a pricing bug from their side. Null means
+   *  nothing worth noting. */
+  modelTier: "max" | null;
 };
 
 /** Server-side: build the receipt from a settlement result. */
@@ -29,6 +38,10 @@ export function buildUsageReceipt(params: {
   bypass: boolean;
   wouldHaveCharged?: number | null;
   freeRemaining?: number | null;
+  /** Models the settlement actually recorded (CostAccumulator entries) —
+   *  the receipt derives the tier note from what RAN, never from what was
+   *  requested. */
+  modelsUsed?: readonly string[];
 }): UsageReceipt {
   return {
     creditsCharged: Math.max(0, Math.round(params.creditsCharged || 0)),
@@ -41,6 +54,7 @@ export function buildUsageReceipt(params: {
       typeof params.freeRemaining === "number" && Number.isFinite(params.freeRemaining)
         ? Math.max(0, Math.round(params.freeRemaining))
         : null,
+    modelTier: (params.modelsUsed ?? []).some((m) => tierForModel(m) === "max") ? "max" : null,
   };
 }
 
@@ -63,5 +77,6 @@ export function readUsageReceipt(payload: unknown): UsageReceipt | null {
     bypass: u.bypass === true,
     wouldHaveCharged: typeof u.wouldHaveCharged === "number" ? Math.max(0, Math.round(u.wouldHaveCharged)) : null,
     freeRemaining: typeof u.freeRemaining === "number" ? Math.max(0, Math.round(u.freeRemaining)) : null,
+    modelTier: u.modelTier === "max" ? "max" : null,
   };
 }

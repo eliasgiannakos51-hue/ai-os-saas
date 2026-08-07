@@ -228,7 +228,7 @@ export async function POST(request: Request) {
         tool_choice: { type: "tool", name: "detect_intent" },
       });
 
-      costs.record("classification", response.usage, STUDIO_MODEL);
+      costs.record("classification", response.usage, response.model ?? STUDIO_MODEL);
 
       const toolUse = response.content.find(
         (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

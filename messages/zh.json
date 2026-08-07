@@ -1641,7 +1641,8 @@
     "usedWithRemaining": "已使用 {count} 积分 · 剩余 {remaining}",
     "unlimited": "无限 — 未使用积分",
     "unlimitedWouldHaveCost": "无限 — 将花费 {count} 积分",
-    "freeMessage": "免费消息 · 本月剩余 {count} 条"
+    "freeMessage": "免费消息 · 本月剩余 {count} 条",
+    "advancedModel": "高级模型"
   },
   "contact": {
     "title": "联系我们",

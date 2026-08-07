@@ -1,3 +1,4 @@
+import { modelForTier } from "@/lib/ai/models";
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
@@ -47,7 +48,8 @@ export const dynamic = "force-dynamic";
 // realistic worst case, not a guess.
 export const maxDuration = 120;
 
-const MODEL = "claude-sonnet-4-6";
+// STANDARD tier: Create Anything (V3 model tiers, lib/ai/models.ts).
+const MODEL = modelForTier("standard");
 const MAX_MESSAGE_LENGTH = 20000;
 
 function buildSystemPrompt(): string {
@@ -396,7 +398,7 @@ export async function POST(request: Request) {
         tool_choice: { type: "tool", name: "route_entry" },
       });
 
-      costs.record("classification", response.usage, MODEL);
+      costs.record("classification", response.usage, response.model ?? MODEL);
 
       const toolUse = response.content.find(
         (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

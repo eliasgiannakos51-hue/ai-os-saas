@@ -1,3 +1,4 @@
+import { modelForTier } from "@/lib/ai/models";
 import type { PlanSlug } from "@/lib/billing/plans";
 import { PLANS, getPlan } from "@/lib/billing/plans";
 import {
@@ -59,7 +60,13 @@ export const FREE_CHAT_LIMITS: FreeChatLimits = {
 export const PAID_CHAT_LIMITS = {
   maxMessageChars: 10000,
   historyLimit: 20,
-  maxOutputTokens: 2048,
+  // Raised from 2048 with the chat truncation fix: paid replies now have
+  // room for a genuinely thorough answer. This makes the paid worst case
+  // larger — which is fine, because paid messages are charged from
+  // MEASURED usage with the margin held — and leaves the FREE envelope
+  // above untouched, so the free allowance's 25%-of-plan ceiling is
+  // computed against exactly the same numbers as before.
+  maxOutputTokens: 8000,
   maxWebSearches: 3,
 };
 
@@ -79,7 +86,11 @@ const SYSTEM_PROMPT_TOKENS_WORST_CASE = 4000;
 // ceiling for one search.
 const WEB_SEARCH_RESULT_TOKENS = 15000;
 
-const CHAT_MODEL = "claude-sonnet-4-6";
+// The chat route's STANDARD tier (Sonnet 5 — same $3/$15 sticker price
+// as the previous model, so the allowance ceilings computed below are
+// unchanged by the V3 tier upgrade). Resolved through the same function
+// as the route so the worst-case math prices what chat actually calls.
+const CHAT_MODEL = modelForTier("standard");
 
 // ---------------------------------------------------------------------------
 // Worst-case cost

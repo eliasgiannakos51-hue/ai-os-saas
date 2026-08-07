@@ -1641,7 +1641,8 @@
     "usedWithRemaining": "{count} クレジットを使用 · 残り {remaining}",
     "unlimited": "無制限 — クレジット未使用",
     "unlimitedWouldHaveCost": "無制限 — {count} クレジットかかるはずでした",
-    "freeMessage": "無料メッセージ · 今月あと {count} 件"
+    "freeMessage": "無料メッセージ · 今月あと {count} 件",
+    "advancedModel": "高性能モデル"
   },
   "contact": {
     "title": "お問い合わせ",

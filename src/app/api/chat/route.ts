@@ -1,3 +1,4 @@
+import { modelForTier } from "@/lib/ai/models";
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
@@ -53,9 +54,21 @@ export const dynamic = "force-dynamic";
 // still hit a low platform default. 180s covers a realistic worst case.
 export const maxDuration = 180;
 
-const MODEL = "claude-sonnet-4-6";
+// STANDARD tier: conversational intelligence (V3 model tiers).
+const MODEL = modelForTier("standard");
 const MAX_MESSAGE_LENGTH = 10000;
-const MAX_TOKENS = 2048;
+// 2048 was the reported mid-sentence truncation: a thorough answer to a
+// complex question simply does not fit, and nothing handled the
+// "max_tokens" stop reason — the reply just stopped. 8000 covers any
+// realistic chat answer; the cost exposure is bounded because the charge
+// is settled from MEASURED output (a short answer costs what a short
+// answer costs), and the one answer in a thousand that still hits the
+// ceiling now gets a continuation round below instead of a cut sentence.
+const MAX_TOKENS = 8000;
+// One extra "continue where you stopped" round when the model hits the
+// output ceiling mid-answer. One, not more: two ceilings in a row means
+// the question wants a document, not a chat reply.
+const MAX_LENGTH_CONTINUATIONS = 1;
 const HISTORY_LIMIT = 20;
 const MAX_PERSONA_NAME_LENGTH = 40;
 
@@ -98,7 +111,7 @@ const WEB_SEARCH_TOOL: Anthropic.WebSearchTool20250305 = {
 };
 
 function buildSystemPrompt(personaName: string): string {
-  return `Είσαι ο/η ${personaName}, ένας εξελιγμένος AI βοηθός γενικής χρήσης. Έχεις ευρεία γνώση σε όλα τα θέματα (επιστήμη, ιστορία, προγραμματισμός, μαθηματικά, δημιουργική γραφή, επιχειρήσεις, καθημερινές ερωτήσεις, κ.λπ.) και μπορείς να βοηθήσεις με οτιδήποτε χρειαστεί ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος — ελληνικά, αγγλικά, ή οποιαδήποτε άλλη γλώσσα). Δώσε λεπτομερείς, χρήσιμες, ακριβείς απαντήσεις — προτίμησε μια ελαφρώς πιο εκτενή, ουσιαστική απάντηση αντί για μια πολύ σύντομη, χωρίς όμως να γίνεσαι φλύαρος ή να επαναλαμβάνεσαι. Όπου έχει νόημα για το ερώτημα (εξηγήσεις εννοιών, τεχνικά θέματα, "πώς κάνω Χ"), συμπλήρωσε τον ορισμό/την εξήγηση με ένα σύντομο πρακτικό παράδειγμα ή use case, όχι μόνο θεωρία — αλλά μην το κάνεις αυτό όταν ο χρήστης ζητάει ρητά κάτι σύντομο (π.χ. ναι/όχι, ένας αριθμός, μια γρήγορη μετάφραση) ή όταν ένα παράδειγμα δεν έχει φυσικό νόημα. Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.${WEB_SEARCH_INSTRUCTION}${REGULATED_ADVICE_INSTRUCTION}${AI_QUALITY_CHECKLIST_EL}`;
+  return `Είσαι ο/η ${personaName}, ένας εξελιγμένος AI βοηθός γενικής χρήσης. Έχεις ευρεία γνώση σε όλα τα θέματα (επιστήμη, ιστορία, προγραμματισμός, μαθηματικά, δημιουργική γραφή, επιχειρήσεις, καθημερινές ερωτήσεις, κ.λπ.) και μπορείς να βοηθήσεις με οτιδήποτε χρειαστεί ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος — ελληνικά, αγγλικά, ή οποιαδήποτε άλλη γλώσσα). ΠΡΟΣΑΡΜΟΣΕ ΤΟ ΜΗΚΟΣ ΣΤΗΝ ΕΡΩΤΗΣΗ: απλή/γρήγορη ερώτηση → σύντομη, άμεση απάντηση· σύνθετη ερώτηση που χρειάζεται βάθος (στρατηγική, ανάλυση, «εξήγησέ μου σε βάθος») → αναλυτική απάντηση με δομή (ενότητες, λίστες, πίνακες όπου βοηθούν), που καλύπτει το θέμα ουσιαστικά — χωρίς φλυαρία ή επαναλήψεις. Όπου έχει νόημα για το ερώτημα (εξηγήσεις εννοιών, τεχνικά θέματα, "πώς κάνω Χ"), συμπλήρωσε τον ορισμό/την εξήγηση με ένα σύντομο πρακτικό παράδειγμα ή use case, όχι μόνο θεωρία — αλλά μην το κάνεις αυτό όταν ο χρήστης ζητάει ρητά κάτι σύντομο (π.χ. ναι/όχι, ένας αριθμός, μια γρήγορη μετάφραση) ή όταν ένα παράδειγμα δεν έχει φυσικό νόημα. Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.${WEB_SEARCH_INSTRUCTION}${REGULATED_ADVICE_INSTRUCTION}${AI_QUALITY_CHECKLIST_EL}`;
 }
 
 // Mentor Mode (toggled client-side, see chat-workspace.tsx's "Mentor Mode"
@@ -536,6 +549,7 @@ export async function POST(request: Request) {
             { role: "user" as const, content: message },
           ];
 
+          let lengthContinuations = 0;
           for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
             const claudeStream = anthropic.messages.stream({
               model: MODEL,
@@ -555,13 +569,35 @@ export async function POST(request: Request) {
             // and then answered is two model calls, and both are settled
             // against the same reservation — a loop that recorded only its
             // last round would charge for part of the work it did.
-            costs.record("generation", finalResponse.usage, MODEL);
+            costs.record("generation", finalResponse.usage, finalResponse.model ?? MODEL);
             webSearchCount += finalResponse.usage.server_tool_use?.web_search_requests ?? 0;
 
             const toolUses = finalResponse.content.filter(
               (block): block is Anthropic.ToolUseBlock =>
                 block.type === "tool_use" && block.name === SEARCH_TOOL_NAME
             );
+
+            // The reported "answers cut mid-sentence" bug: the model hit
+            // the output ceiling and the stop reason was never handled.
+            // One continuation round asks it to resume EXACTLY where it
+            // stopped; the client keeps streaming into the same bubble,
+            // and both rounds' usage is settled above like any tool round.
+            if (
+              toolUses.length === 0 &&
+              finalResponse.stop_reason === "max_tokens" &&
+              lengthContinuations < MAX_LENGTH_CONTINUATIONS &&
+              round < MAX_TOOL_ROUNDS
+            ) {
+              lengthContinuations++;
+              conversation.push({ role: "assistant", content: assistantText });
+              conversation.push({
+                role: "user",
+                content:
+                  "Η απάντησή σου κόπηκε στη μέση. Συνέχισε ΑΚΡΙΒΩΣ από εκεί που σταμάτησες, χωρίς να επαναλάβεις τίποτα και χωρίς εισαγωγή.",
+              });
+              continue;
+            }
+
             // Not a tool round (or the ceiling is reached) — this is the
             // final answer. On the ceiling the model simply never sees
             // another result, and answers with what it has.

@@ -1,4 +1,5 @@
 import "server-only";
+import { modelForTier } from "@/lib/ai/models";
 import Anthropic from "@anthropic-ai/sdk";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 
@@ -11,7 +12,8 @@ import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 // classifier and lib/clarification.ts — forced tool_choice, tiny
 // max_tokens, best-effort (a failure here never blocks the actual
 // submission from being saved/emailed, see the route's own try/catch).
-const MODEL = "claude-sonnet-4-6";
+// FAST tier: lead scoring is classification (V3 model tiers).
+const MODEL = modelForTier("fast");
 const MAX_TOKENS = 200;
 
 export type LeadClassification = "genuine_interest" | "question" | "spam" | "unclear";
@@ -81,7 +83,7 @@ export async function classifyLeadMessage(
   });
   // Recorded before the parse below can bail out: the tokens are spent
   // whether or not the tool call came back usable.
-  costs?.record("classification", response.usage, MODEL);
+  costs?.record("classification", response.usage, response.model ?? MODEL);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { classifyWebsiteDescription, WEBSITE_MODEL } from "@/lib/website-builder";
+import { selectWebsiteBuilderModel } from "@/lib/ai/models";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { MAX_REFERENCE_IMAGES, referenceImagePathBelongsToUser } from "@/lib/website-reference-image";
@@ -289,7 +290,13 @@ export async function POST(request: Request) {
       const estimatedCost = estimateForAction(
         "websiteGenerate",
         {
-          model: WEBSITE_MODEL,
+          // Priced on the model the complexity rule will actually pick
+          // for this brief — reserving at the premium rate for a brief
+          // the MAX tier will serve would under-hold.
+          model: selectWebsiteBuilderModel({
+            descriptionChars: description.length,
+            imageCount: referenceImagePaths.length,
+          }).model,
           inputChars: description.length,
           imageCount: referenceImagePaths.length,
         },

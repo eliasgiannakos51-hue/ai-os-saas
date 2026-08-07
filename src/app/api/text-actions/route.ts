@@ -1,3 +1,4 @@
+import { modelForTier } from "@/lib/ai/models";
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
@@ -25,7 +26,8 @@ export const dynamic = "force-dynamic";
 // Same platform-timeout reasoning as api/create/route.ts.
 export const maxDuration = 60;
 
-const MODEL = "claude-sonnet-4-6";
+// STANDARD tier: user-facing text transforms.
+const MODEL = modelForTier("standard");
 const MAX_TEXT_LENGTH = 4000;
 const MAX_TOKENS = 2048;
 
@@ -189,7 +191,7 @@ export async function POST(request: Request) {
         messages: [{ role: "user", content: text }],
       });
 
-      costs.record("generation", response.usage, MODEL);
+      costs.record("generation", response.usage, response.model ?? MODEL);
 
       const block = response.content.find(
         (b): b is Anthropic.TextBlock => b.type === "text"

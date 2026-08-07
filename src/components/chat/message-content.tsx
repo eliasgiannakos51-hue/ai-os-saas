@@ -46,6 +46,23 @@ const markdownComponents: Components = {
       {children}
     </blockquote>
   ),
+  // GFM tables. remark-gfm has parsed these all along — what was missing
+  // was any styling, so a table rendered as unpadded, borderless rows
+  // (the reported "badly written tables"). The wrapper div gives wide
+  // tables their own horizontal scroll instead of stretching the chat
+  // bubble; row striping and header emphasis make them scannable.
+  table: ({ children }) => (
+    <div className="mb-2 overflow-x-auto last:mb-0">
+      <table className="w-full min-w-[360px] border-collapse text-[13px]">{children}</table>
+    </div>
+  ),
+  thead: ({ children }) => <thead className="border-b border-border">{children}</thead>,
+  tbody: ({ children }) => <tbody className="divide-y divide-border/60">{children}</tbody>,
+  tr: ({ children }) => <tr className="even:bg-input/40">{children}</tr>,
+  th: ({ children }) => (
+    <th className="px-3 py-1.5 text-left align-top font-semibold text-foreground">{children}</th>
+  ),
+  td: ({ children }) => <td className="px-3 py-1.5 align-top text-foreground/90">{children}</td>,
 };
 
 // Memoized: depends only on `content` (a plain string, compared by value),

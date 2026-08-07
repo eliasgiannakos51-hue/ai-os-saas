@@ -1641,7 +1641,8 @@
     "usedWithRemaining": "Χρεώθηκαν {count} credits · απομένουν {remaining}",
     "unlimited": "Απεριόριστα — δεν χρεώθηκαν credits",
     "unlimitedWouldHaveCost": "Απεριόριστα — θα κόστιζε {count} credits",
-    "freeMessage": "Δωρεάν μήνυμα · απομένουν {count} αυτόν τον μήνα"
+    "freeMessage": "Δωρεάν μήνυμα · απομένουν {count} αυτόν τον μήνα",
+    "advancedModel": "προηγμένο μοντέλο"
   },
   "contact": {
     "title": "Επικοινωνία",

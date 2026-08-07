@@ -1,3 +1,4 @@
+import { modelForTier } from "@/lib/ai/models";
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
@@ -30,7 +31,8 @@ export const dynamic = "force-dynamic";
 // 1024-token replies.
 export const maxDuration = 120;
 
-const MODEL = "claude-sonnet-4-6";
+// STANDARD tier: Q&A over the user's own records.
+const MODEL = modelForTier("standard");
 const MAX_MESSAGE_LENGTH = 2000;
 const MAX_TOKENS = 1024;
 const MAX_HISTORY_MESSAGES = 20;
@@ -290,7 +292,7 @@ export async function POST(request: Request) {
           // Web searches are inside this usage object and are priced per
           // query by priceUsage, so they no longer need a second, flat
           // deduction of their own.
-          costs.record("generation", finalResponse.usage, MODEL);
+          costs.record("generation", finalResponse.usage, finalResponse.model ?? MODEL);
         } catch (err) {
           logApiError("/api/records/ask", err, { stage: "anthropic_stream", moduleSlug });
           await releaseReservation(user.id, reservationId);

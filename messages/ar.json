@@ -1641,7 +1641,8 @@
     "usedWithRemaining": "تم استخدام {count} رصيد · متبقٍ {remaining}",
     "unlimited": "غير محدود — لم تُستخدم أرصدة",
     "unlimitedWouldHaveCost": "غير محدود — كان سيكلف {count} رصيد",
-    "freeMessage": "رسالة مجانية · متبقٍ {count} هذا الشهر"
+    "freeMessage": "رسالة مجانية · متبقٍ {count} هذا الشهر",
+    "advancedModel": "نموذج متقدم"
   },
   "contact": {
     "title": "اتصل بنا",

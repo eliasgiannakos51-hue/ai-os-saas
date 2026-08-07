@@ -28,6 +28,12 @@ function loadMissionAgents() {
     /import \{ AI_QUALITY_CHECKLIST_EL \} from "@\/lib\/ai-quality-checklist";/,
     'const AI_QUALITY_CHECKLIST_EL = "";'
   );
+  // The V3 tier import — parsePlanMissionToolInput never selects a
+  // model, so inert stubs keep this loader dependency-free.
+  src = src.replace(
+    /import \{ modelForTier, selectMissionPlannerModel \} from "@\/lib\/ai\/models";/,
+    'const modelForTier = () => "stub-model"; const selectMissionPlannerModel = () => ({ model: "stub-model", tier: "premium" });'
+  );
   src = src.replace(/import type \{ CostAccumulator \} from "@\/lib\/billing\/cost-accumulator";/, "");
   const js = ts.transpileModule(src, {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },

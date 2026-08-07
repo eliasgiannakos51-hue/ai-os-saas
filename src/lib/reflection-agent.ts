@@ -1,11 +1,13 @@
 import "server-only";
+import { modelForTier } from "@/lib/ai/models";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 import Anthropic from "@anthropic-ai/sdk";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import type { WeeklyReflectionStats } from "@/lib/reflection";
 
 // Exported so the route prices the SAME model this file calls.
-export const REFLECTION_MODEL = "claude-sonnet-4-6";
+// STANDARD tier: a short weekly summary over provided data.
+export const REFLECTION_MODEL = modelForTier("standard");
 
 const REFLECTION_SYSTEM_PROMPT = `Δώσε σύντομη, ειλικρινή ανασκόπηση της βδομάδας — τι πήγε καλά, τι έμεινε ημιτελές, ΧΩΡΙΣ να είσαι υπερβολικά θετικός αν τα δεδομένα δείχνουν στασιμότητα. Βασίσου ΑΠΟΚΛΕΙΣΤΙΚΑ στα δεδομένα που σου δίνονται — μην υποθέτεις ή εφευρίσκεις πράγματα που δεν αναφέρονται. 3-6 σύντομες προτάσεις ή bullet points. Απάντα στα ελληνικά, εκτός αν κάτι στα δεδομένα υποδεικνύει άλλη γλώσσα.
 ${AI_QUALITY_CHECKLIST_EL}`;
@@ -48,7 +50,7 @@ export async function generateWeeklyReflection(
     messages: [{ role: "user", content: userMessage }],
   });
   // Before the parse below, which can still bail out on an empty reply.
-  costs?.record("generation", response.usage, REFLECTION_MODEL);
+  costs?.record("generation", response.usage, response.model ?? REFLECTION_MODEL);
 
   const textBlock = response.content.find(
     (block): block is Anthropic.TextBlock => block.type === "text"

@@ -167,7 +167,7 @@ export async function gatherFacts(params: {
         },
       ],
     });
-    params.costs.record("generation", response.usage, PRESENTATION_MODEL);
+    params.costs.record("generation", response.usage, response.model ?? PRESENTATION_MODEL);
 
     const findings = response.content
       .filter((block): block is Anthropic.TextBlock => block.type === "text")
@@ -316,7 +316,7 @@ export async function composeDeck(params: {
         },
       ],
     });
-    params.costs.record("generation", response.usage, PRESENTATION_MODEL);
+    params.costs.record("generation", response.usage, response.model ?? PRESENTATION_MODEL);
 
     const use = response.content.find(
       (block): block is Anthropic.ToolUseBlock =>
@@ -424,7 +424,7 @@ export async function editDeck(params: {
         },
       ],
     });
-    params.costs.record("generation", response.usage, PRESENTATION_MODEL);
+    params.costs.record("generation", response.usage, response.model ?? PRESENTATION_MODEL);
 
     const use = response.content.find(
       (block): block is Anthropic.ToolUseBlock =>

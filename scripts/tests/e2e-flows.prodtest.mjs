@@ -77,6 +77,18 @@ const supa = http.createServer((req, res) => {
       // PostgREST returns a bare object (not an array) for .single()
       const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
       if (single) return rows[0] ? json(200, rows[0]) : json(406, { message: "no rows" });
+      // A `Prefer: count=…` request gets its Content-Range, the way real
+      // PostgREST answers it. Without this, supabase-js reports count as
+      // NULL — which the mission page correctly reads as a degraded
+      // session and hides its whole list behind a reload prompt. The
+      // harness was failing a page for refusing to trust the harness.
+      if (/count=/.test(req.headers.prefer ?? "")) {
+        res.writeHead(200, {
+          "Content-Type": "application/json",
+          "Content-Range": rows.length ? `0-${rows.length - 1}/${rows.length}` : "*/0",
+        });
+        return res.end(JSON.stringify(rows));
+      }
       return json(200, rows);
     }
     json(200, {});

@@ -81,9 +81,14 @@ checkTrue("renders the doors from FIRST_ACTIONS", /FIRST_ACTIONS\.map/.test(comp
 checkTrue("routes through firstActionDestination", component.includes("firstActionDestination(action)"));
 checkTrue("completes through firstActionCompletes", component.includes("firstActionCompletes(action)"));
 checkTrue(
-  "the action write is AWAITED before navigation",
-  /await saveProgress\(\{ firstAction: action, completed: firstActionCompletes\(action\) \}\);\s*\n\s*router\.push\(destination\)/.test(component)
+  "the action write is AWAITED, then the history entry is REPLACED",
+  // replace, not push: the Router Cache serves back/forward from cache
+  // regardless of staleTimes, so a pushed /onboarding entry re-shows the
+  // already-answered question on the Back button.
+  /await saveProgress\(\{ firstAction: action, completed: firstActionCompletes\(action\) \}\);\s*\n\s*router\.replace\(destination\)/.test(component)
 );
+checkTrue("finishing replaces too", /completed: true \}\);\s*\n\s*router\.replace\("\/dashboard\/overview"\)/.test(component));
+checkTrue("skipping replaces too", /skipped: true \}\);\s*\n\s*router\.replace\("\/dashboard\/overview"\)/.test(component));
 checkTrue("skip is rendered outside the step branches (every step)", /step !== "insights" && \(/.test(component));
 
 const page = readFileSync("src/app/onboarding/page.tsx", "utf8");

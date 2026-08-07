@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { lockedFeaturesForPlan } from "@/lib/feature-locks";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Tooltip } from "@/components/ui/tooltip";
 import { displayNameFromEmail } from "@/lib/greeting";
-import { ChevronRight, X } from "lucide-react";
+import { ChevronRight, X, Lock } from "lucide-react";
 import { OVERVIEW_NAV_ITEM } from "@/lib/modules";
 import {
   ALL_SIDEBAR_GROUPS,
@@ -64,7 +65,15 @@ function groupTone(heading: string): string {
   }
 }
 
-export function Sidebar({ email = "", planName = "" }: { email?: string; planName?: string }) {
+export function Sidebar({
+  email = "",
+  planName = "",
+  planSlug = "",
+}: {
+  email?: string;
+  planName?: string;
+  planSlug?: string;
+}) {
   const pathname = usePathname();
   const t = useTranslations("sidebar");
   const tCommon = useTranslations("common");
@@ -164,10 +173,25 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
   // One renderer for every nav row, pinned or grouped, so the two can
   // never drift apart. `prominent` is what gives the three daily entry
   // points their visual weight over the twenty-odd module links.
+  // Locked destinations stay VISIBLE, marked with what unlocks them. A
+  // hidden locked feature does not exist: a Free user never learns the
+  // product has agents, which is invisible at exactly the moment it
+  // could persuade. Derived from the same flags the server enforces, so
+  // the lock and the 403 behind it cannot disagree.
+  const featureLocks = new Map(lockedFeaturesForPlan(planSlug).map((l) => [l.href, l.unlockedOn]));
+
   function renderItem(item: SidebarItem, tone: string, prominent = false) {
     const active = isActive(pathname, item.href);
     const Icon = item.icon;
-    const hint = item.hintKey ? t(`hints.${item.hintKey}`) : undefined;
+    const lockedOn = featureLocks.get(item.href);
+    // A locked item's tooltip says what unlocks it INSTEAD of what it
+    // does — "what is this" matters less than "why can't I" once a lock
+    // is showing.
+    const hint = lockedOn
+      ? t("lockedHint", { plan: lockedOn })
+      : item.hintKey
+        ? t(`hints.${item.hintKey}`)
+        : undefined;
 
     return (
                   <Tooltip key={item.href} content={hint} side="right">
@@ -209,6 +233,16 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
                     >
                       {translatedLabel(item.label)}
                     </span>
+                    {lockedOn ? (
+                      // Still a link, deliberately: it lands on the
+                      // feature's own page, which explains itself and
+                      // carries the upgrade path. A dead row teaches
+                      // people the sidebar has broken entries.
+                      <Lock
+                        className="ml-auto h-3 w-3 shrink-0 text-muted/70"
+                        aria-label={t("lockedHint", { plan: lockedOn })}
+                      />
+                    ) : null}
                   </Link>
                   </Tooltip>
     );

@@ -137,7 +137,8 @@
     },
     "comingSoon": "近日公開",
     "comingSoonToast": "{name} はまだ利用できません。ロードマップに入っています。",
-    "comingSoonBadge": "近日"
+    "comingSoonBadge": "近日",
+    "lockedHint": "{plan} プラン以上で利用できます。"
   },
   "landing": {
     "hero": "あなたのビジネスを整理する、本当に役立つAI。",

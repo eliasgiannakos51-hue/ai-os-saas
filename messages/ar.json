@@ -137,7 +137,8 @@
     },
     "comingSoon": "قريبًا",
     "comingSoonToast": "{name} غير متاح بعد — إنه ضمن خارطة الطريق.",
-    "comingSoonBadge": "قريبًا"
+    "comingSoonBadge": "قريبًا",
+    "lockedHint": "متاح بدءًا من خطة {plan}."
   },
   "landing": {
     "hero": "عملك، منظّم — مع ذكاء اصطناعي يساعدك فعليًا.",

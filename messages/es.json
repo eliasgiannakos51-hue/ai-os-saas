@@ -137,7 +137,8 @@
     },
     "comingSoon": "Próximamente",
     "comingSoonToast": "{name} aún no está disponible: está en la hoja de ruta.",
-    "comingSoonBadge": "Pronto"
+    "comingSoonBadge": "Pronto",
+    "lockedHint": "Disponible desde el plan {plan}."
   },
   "landing": {
     "hero": "Tu negocio, organizado — con una IA que realmente ayuda.",

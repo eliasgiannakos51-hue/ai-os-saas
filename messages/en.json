@@ -137,7 +137,8 @@
     },
     "comingSoon": "Coming soon",
     "comingSoonToast": "{name} isn't available yet — it's on the roadmap.",
-    "comingSoonBadge": "Soon"
+    "comingSoonBadge": "Soon",
+    "lockedHint": "Available on {plan} and up."
   },
   "landing": {
     "hero": "Your business, organized — with AI that actually helps.",

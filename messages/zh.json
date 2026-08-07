@@ -137,7 +137,8 @@
     },
     "comingSoon": "即将推出",
     "comingSoonToast": "{name} 尚未推出——已列入路线图。",
-    "comingSoonBadge": "即将"
+    "comingSoonBadge": "即将",
+    "lockedHint": "{plan} 及以上套餐可用。"
   },
   "landing": {
     "hero": "你的业务，井井有条——配上真正有用的 AI。",

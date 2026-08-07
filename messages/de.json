@@ -137,7 +137,8 @@
     },
     "comingSoon": "Demnächst",
     "comingSoonToast": "{name} ist noch nicht verfügbar — steht auf der Roadmap.",
-    "comingSoonBadge": "Bald"
+    "comingSoonBadge": "Bald",
+    "lockedHint": "Verfügbar ab dem Tarif {plan}."
   },
   "landing": {
     "hero": "Dein Unternehmen, organisiert — mit KI, die wirklich hilft.",

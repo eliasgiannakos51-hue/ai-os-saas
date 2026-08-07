@@ -137,7 +137,8 @@
     },
     "comingSoon": "Έρχεται",
     "comingSoonToast": "Το {name} δεν είναι διαθέσιμο ακόμα — βρίσκεται στο roadmap.",
-    "comingSoonBadge": "Σύντομα"
+    "comingSoonBadge": "Σύντομα",
+    "lockedHint": "Διαθέσιμο από το πλάνο {plan} και πάνω."
   },
   "landing": {
     "hero": "Η επιχείρησή σου, οργανωμένη — με AI που πραγματικά βοηθάει.",

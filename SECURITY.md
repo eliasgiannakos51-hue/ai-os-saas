@@ -116,6 +116,16 @@ elsewhere:
 - The **AI circuit breaker** (`lib/ai-circuit-breaker.ts`) is the
   platform-wide backstop on runaway spend, independent of both.
 
+*Gate: `scripts/tests/rate-limit-coverage.test.mjs` — scans every route
+handler that exports a mutating method (POST/PATCH/PUT/DELETE) and fails
+the build unless it calls `checkRateLimit`, calls `checkAiCallAllowed`
+(the AI routes' per-user hourly cap plus platform cap plus duplicate
+breaker), or is on a justified list with the mechanism that bounds it
+instead written down. Where the justification is an inline mechanism —
+the login route's failed-attempt counter, the public form's per-website
+cap — the gate pins the mechanism's identifier, so deleting it
+un-justifies the route in the same commit.*
+
 ## ε. Input validation
 
 Maximum sizes, an allowlist of types, and sanitisation **before** any
@@ -351,6 +361,37 @@ phantom table, every scope column exists), §3 (no credential is
 exported), §4 (route posture, caller's client not service-role), §5
 (erasure still deletes the storage objects, and before the auth user).*
 
+### AI Support Chat
+
+- **Grounded in a computed corpus.** The assistant answers only from
+  `lib/support/knowledge.ts`, whose plan numbers are computed from the
+  same limit modules the API enforces with — it structurally cannot
+  quote an allowance the server would not apply. A support answer the
+  user acts on is a commitment; a guessed one is a liability.
+- **It reads nothing about the account.** No user rows go into the
+  prompt, so there is nothing for a crafted question to exfiltrate. The
+  user's pasted text is fenced with `wrapUntrusted()` like any other
+  replayed content.
+- **Free by policy, bounded by rate.** Declared `unbilled` in
+  `billing-coverage.test.mjs` with the reason written down: the most
+  common support question in a credit-metered product is "why was I
+  charged?", and charging to answer it is indefensible. The bound is
+  40/hr per user on the cheap model, plus length caps on the question
+  and the replayed history.
+
+### Affiliate program
+
+- **First touch wins and is never overwritten.** The referral cookie is
+  set only when absent, so a later link cannot steal an earlier
+  referrer's signup, and the attribution a commission pays on is the one
+  that actually introduced the account.
+- **Commissions are computed from Stripe's invoice, not the client.**
+  `recordCommissionForInvoice` runs in the webhook on Stripe-reported
+  amounts; nothing the browser sends can size a payout.
+- **Self-referral pays nothing.** An account cannot be its own referrer,
+  and the unique constraints make replaying a webhook idempotent rather
+  than double-paying.
+
 *Gate: `scripts/tests/marketplace.test.mjs` §2 (the split reconciles at
 every price and rate), §3 (what must not travel with a listing), §4
 (installs land on the buyer, switched off), §5 (the scan), §6 (the
@@ -414,6 +455,8 @@ before `next build`. A new feature fails the build if:
 | A new route handler has no `getUser()` and is not justified | `security-posture.test.mjs` §3 |
 | A route calls `getUser()` but does not 401 on null | `security-posture.test.mjs` §3 |
 | A cron route does not use `checkCronAuth` | `security-posture.test.mjs` §3 |
+| A mutating route has no rate limit, no AI breaker and no justification | `rate-limit-coverage.test.mjs` |
+| A route justified by an inline limiter loses that limiter | `rate-limit-coverage.test.mjs` |
 | Maintenance documented as scheduled has no caller | `security-posture.test.mjs` §4 |
 | A new Anthropic call site is not DECLARED with its billing mode | `billing-coverage.test.mjs` §1 |
 | A declared call site's call count changes | `billing-coverage.test.mjs` §1 |

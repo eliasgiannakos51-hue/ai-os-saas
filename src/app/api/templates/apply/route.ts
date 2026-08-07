@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getWorkspaceTemplate } from "@/lib/workspace-templates";
 import { logApiError } from "@/lib/log-error";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -34,6 +35,22 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+    }
+
+    // One click inserts a whole template of rows, free of credits — the
+    // cheapest storage-growth-per-request in the app. Nobody applies ten
+    // templates an hour on purpose.
+    const limited = await checkRateLimit({
+      scope: "template_apply",
+      identifier: user.id,
+      maxAttempts: 10,
+      windowMinutes: 60,
+    });
+    if (!limited.allowed) {
+      return NextResponse.json(
+        { ok: false, error: "Too many templates applied in the last hour. Please try again later." },
+        { status: 429 }
+      );
     }
 
     // Parallelized (each entry writes to its own table, or an independent

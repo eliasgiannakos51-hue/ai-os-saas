@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,22 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ ok: false }, { status: 401 });
+    }
+
+    // logApiError dedups and thresholds ALERTS, but every accepted call
+    // still writes a row — and a page stuck in a crash loop (or a user
+    // scripting their own session) should not get to grow the error
+    // table without bound. Sixty an hour keeps every real debugging
+    // session while capping the flood.
+    const limited = await checkRateLimit({
+      scope: "client_error",
+      identifier: user.id,
+      maxAttempts: 60,
+      windowMinutes: 60,
+    });
+    if (!limited.allowed) {
+      // The beacon is fire-and-forget; a capped report succeeds quietly.
+      return NextResponse.json({ ok: true });
     }
 
     let body: Record<string, unknown>;

@@ -4,6 +4,7 @@ import { getPlan } from "@/lib/billing/plans";
 import { sendTeamInviteEmail } from "@/lib/email/send-team-invite-email";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -45,6 +46,23 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+    }
+
+    // The seat cap bounds how many invites can EXIST, but remove +
+    // re-invite in a loop would still send an email per round trip — the
+    // one cost here the seat count does not bound. 20/hr is far above any
+    // real team's onboarding pace.
+    const limited = await checkRateLimit({
+      scope: "team_invite",
+      identifier: user.id,
+      maxAttempts: 20,
+      windowMinutes: 60,
+    });
+    if (!limited.allowed) {
+      return NextResponse.json(
+        { ok: false, error: "Too many invites in the last hour. Please try again later." },
+        { status: 429 }
+      );
     }
 
     // Admin-listed accounts (see lib/admin.ts) get full Enterprise-tier

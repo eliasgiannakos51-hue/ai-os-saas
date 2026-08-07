@@ -5,6 +5,7 @@ import { logApiError } from "@/lib/log-error";
 import { parseUserAgent } from "@/lib/parse-user-agent";
 import { sendNewDeviceLoginEmail } from "@/lib/email/send-new-device-login-email";
 import { getClientIp } from "@/lib/get-client-ip";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,23 @@ export async function POST(request: Request) {
 
     if (!user || !user.email) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+    }
+
+    // A fresh user-agent string per request would otherwise mean a fresh
+    // "new device" row and a fresh security email per request — the
+    // fingerprint is derived from attacker-controllable headers, so the
+    // dedup that normally makes this route quiet cannot be trusted to.
+    // Ten distinct devices an hour covers any real household.
+    const limited = await checkRateLimit({
+      scope: "device_check",
+      identifier: user.id,
+      maxAttempts: 10,
+      windowMinutes: 60,
+    });
+    if (!limited.allowed) {
+      // Best-effort by contract (login never blocks on this route), so a
+      // capped call reports ok rather than an error the caller ignores.
+      return NextResponse.json({ ok: true, newDevice: false });
     }
 
     const ipAddress = getClientIp(request);

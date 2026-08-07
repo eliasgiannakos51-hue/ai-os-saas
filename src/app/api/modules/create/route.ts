@@ -7,6 +7,7 @@ import { deductCredits, hasEnoughCredits, insufficientCreditsMessage, resolveEff
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { logApiError } from "@/lib/log-error";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -56,6 +57,23 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+    }
+
+    // Every accepted call writes a row (storage that bills forever), and
+    // the free-tier inserts cost no credits — so credits do not bound
+    // this route the way they bound the AI ones. 120/hr is far beyond
+    // any human's data entry and irrelevant to a script's.
+    const limited = await checkRateLimit({
+      scope: "module_create",
+      identifier: user.id,
+      maxAttempts: 120,
+      windowMinutes: 60,
+    });
+    if (!limited.allowed) {
+      return NextResponse.json(
+        { ok: false, error: "Too many entries in the last hour. Please try again later." },
+        { status: 429 }
+      );
     }
 
     const isAdmin = isAdminEmail(user.email);

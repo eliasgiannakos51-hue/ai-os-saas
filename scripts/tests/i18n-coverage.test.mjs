@@ -208,7 +208,13 @@ const clientFallbacks = sources.flatMap((f) => [
 // 585 -> 592: V3 Task 8's affiliate programme (/api/affiliate) — its
 // not-authenticated, rate-limit and link-creation-failure responses.
 // Same recorded decision as every increment above.
-const SERVER_PROSE_BASELINE = 592;
+// 592 -> 595: V3 Task 10's rate-limit sweep. Three routes that mutated
+// without any limiter (team/invite, modules/create, templates/apply)
+// gained one, and each 429 carries a "too many … try again later"
+// sentence — prose that exists BECAUSE the security gate demanded the
+// limit. The device-check and client-error additions return silent
+// successes by design and add none.
+const SERVER_PROSE_BASELINE = 595;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

@@ -1,5 +1,10 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { diagLog } from "@/lib/diag";
+import {
+  REFERRAL_COOKIE_MAX_AGE_SECONDS,
+  REFERRAL_COOKIE_NAME,
+  normaliseCode,
+} from "@/lib/affiliate/affiliate";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
@@ -85,6 +90,36 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard/overview";
     return withRefreshedCookies(NextResponse.redirect(url));
+  }
+
+  // ------------------------------------------------------------------
+  // Affiliate referral capture (V3 Task 8).
+  // ------------------------------------------------------------------
+  //
+  // ?ref=<code> on ANY page — a landing page, a blog post, a pricing
+  // link — is remembered for thirty days and read again at signup.
+  // Capturing it here rather than on the landing page is the difference
+  // between a programme that works and one that only works if the
+  // affiliate happened to link to the homepage.
+  //
+  // FIRST TOUCH WINS: an existing cookie is never overwritten. Last-touch
+  // attribution rewards whoever got the final click, which in practice is
+  // whoever spends most on ads — and it silently takes the credit away
+  // from the person who actually made the introduction a fortnight
+  // earlier.
+  const refParam = request.nextUrl.searchParams.get("ref");
+  const refCode = normaliseCode(refParam);
+  if (refCode && !request.cookies.get(REFERRAL_COOKIE_NAME)) {
+    response.cookies.set(REFERRAL_COOKIE_NAME, refCode, {
+      maxAge: REFERRAL_COOKIE_MAX_AGE_SECONDS,
+      path: "/",
+      sameSite: "lax",
+      // Not HttpOnly-exempt for a reason: nothing in the browser needs to
+      // read this, and the signup route reads it server-side. Secure in
+      // production only, so local http development still works.
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+    });
   }
 
   return response;

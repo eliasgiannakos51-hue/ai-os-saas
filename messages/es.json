@@ -539,6 +539,19 @@
       "colCalls": "Acciones",
       "colMargin": "Margen medio",
       "colCost": "Coste real"
+    },
+    "affiliate": {
+      "title": "Recomienda a alguien",
+      "description": "Comparte tu enlace. Cuando alguien se registre a través de él y empiece a pagar, ganas el {percent}% de lo que pague durante {months} meses.",
+      "join": "Obtener mi enlace",
+      "joinFailed": "No se ha podido crear tu enlace.",
+      "copy": "Copiar enlace",
+      "copied": "Enlace copiado.",
+      "statReferrals": "Registros",
+      "statConverted": "Ya pagan",
+      "statEarned": "Ganado",
+      "statUnpaid": "Pendiente de pago",
+      "payoutNote": "Las comisiones se registran según se ganan. Pagarlas usa la misma cuenta de Stripe que el mercado, que aún no está activada: lo ganado se te debe igualmente y se pagará cuando lo esté."
     }
   },
   "dashboard": {

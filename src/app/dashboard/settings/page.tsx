@@ -10,6 +10,7 @@ import { AccessibilitySettings } from "@/components/settings/accessibility-setti
 import { ThemeSettings } from "@/components/settings/theme-settings";
 import { LoginActivity, type KnownDevice } from "@/components/settings/login-activity";
 import { ExportDataButton } from "@/components/settings/export-data-button";
+import { AffiliateSection } from "@/components/settings/affiliate-section";
 import { DangerZone } from "@/components/settings/danger-zone";
 import { BillingSummary } from "@/components/settings/billing-summary";
 import { BuyCredits } from "@/components/settings/buy-credits";
@@ -269,6 +270,8 @@ export default async function SettingsPage() {
           <p className="text-xs text-muted">{t("exportData.description")}</p>
           <ExportDataButton />
         </div>
+
+        <AffiliateSection />
 
         <DangerZone email={user.email ?? ""} />
       </div>

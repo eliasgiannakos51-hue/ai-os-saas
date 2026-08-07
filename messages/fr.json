@@ -539,6 +539,19 @@
       "colCalls": "Actions",
       "colMargin": "Marge moy.",
       "colCost": "Coût réel"
+    },
+    "affiliate": {
+      "title": "Parrainez quelqu'un",
+      "description": "Partagez votre lien. Quand quelqu'un s'inscrit par ce lien et commence à payer, vous touchez {percent} % de ce qu'il paie pendant {months} mois.",
+      "join": "Obtenir mon lien",
+      "joinFailed": "Le lien n'a pas pu être créé.",
+      "copy": "Copier le lien",
+      "copied": "Lien copié.",
+      "statReferrals": "Inscriptions",
+      "statConverted": "Clients payants",
+      "statEarned": "Gagné",
+      "statUnpaid": "Pas encore versé",
+      "payoutNote": "Les commissions sont enregistrées au fur et à mesure. Leur versement passe par le même compte Stripe que la place de marché, qui n'est pas encore activé : ce que vous avez gagné vous est dû et sera versé."
     }
   },
   "dashboard": {

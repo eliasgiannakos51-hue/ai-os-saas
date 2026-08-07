@@ -539,6 +539,19 @@
       "colCalls": "操作次数",
       "colMargin": "平均利润率",
       "colCost": "真实成本"
+    },
+    "affiliate": {
+      "title": "推荐他人",
+      "description": "分享你的链接。有人通过它注册并开始付费后，你可在 {months} 个月内获得其付费金额的 {percent}%。",
+      "join": "获取我的推荐链接",
+      "joinFailed": "链接创建失败。",
+      "copy": "复制链接",
+      "copied": "链接已复制。",
+      "statReferrals": "注册人数",
+      "statConverted": "正在付费",
+      "statEarned": "已赚取",
+      "statUnpaid": "尚未结算",
+      "payoutNote": "佣金在产生时即被记录。结算使用与市场相同的 Stripe 账户，该功能尚未开放——无论如何，已赚取的部分都归你所有，开放后会支付。"
     }
   },
   "dashboard": {

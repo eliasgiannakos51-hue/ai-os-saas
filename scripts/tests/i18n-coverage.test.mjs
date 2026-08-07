@@ -205,7 +205,10 @@ const clientFallbacks = sources.flatMap((f) => [
 // contact page" fallbacks — which is the one place a hardcoded English
 // sentence is least harmful, because it names a page rather than
 // explaining something.
-const SERVER_PROSE_BASELINE = 585;
+// 585 -> 592: V3 Task 8's affiliate programme (/api/affiliate) — its
+// not-authenticated, rate-limit and link-creation-failure responses.
+// Same recorded decision as every increment above.
+const SERVER_PROSE_BASELINE = 592;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

@@ -8,6 +8,7 @@ import { getCreditPack, creditPackPriceEurPerCredit, type PlanSlug } from "@/lib
 import { grantCredits, syncCreditsForPlan, recordPackPurchaseRate } from "@/lib/billing/credits";
 import { logApiError } from "@/lib/log-error";
 import { fulfilMarketplacePurchase } from "@/lib/marketplace/fulfil";
+import { recordCommissionForInvoice } from "@/lib/affiliate/server";
 
 export const dynamic = "force-dynamic";
 
@@ -248,6 +249,34 @@ export async function POST(request: Request) {
         const subscriptionId = typeof subscriptionRef === "string" ? subscriptionRef : subscriptionRef?.id;
         if (subscriptionId) {
           await syncSubscriptionToUser(stripe, subscriptionId);
+        }
+
+        // Affiliate commission (V3 Task 8). Accrued from the invoice that
+        // was actually PAID, which is why it lives here rather than on
+        // checkout.session.completed: a renewal in month seven fires this
+        // and nothing else, and a referral programme that only pays on the
+        // first month is not a recurring one.
+        //
+        // Idempotent on the invoice id, because Stripe retries this event
+        // and a retry that pays twice is money out of the door.
+        try {
+          const customerId =
+            typeof invoice.customer === "string" ? invoice.customer : invoice.customer?.id;
+          if (customerId) {
+            const customer = await stripe.customers.retrieve(customerId);
+            const referredUserId =
+              !customer.deleted && typeof customer.metadata?.supabase_user_id === "string"
+                ? customer.metadata.supabase_user_id
+                : null;
+            if (referredUserId) {
+              await recordCommissionForInvoice({ customerUserId: referredUserId, invoice });
+            }
+          }
+        } catch (err) {
+          // Never fails the event. Credits for the renewal have already
+          // been synced above, and a customer must not lose their monthly
+          // allowance because an attribution lookup had a bad minute.
+          logApiError("/api/webhooks/stripe", err, { stage: "affiliate_commission" });
         }
         break;
       }

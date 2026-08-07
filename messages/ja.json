@@ -539,6 +539,19 @@
       "colCalls": "操作数",
       "colMargin": "平均マージン",
       "colCost": "実コスト"
+    },
+    "affiliate": {
+      "title": "紹介する",
+      "description": "あなたのリンクを共有してください。そこから登録した人が支払いを始めると、{months} か月間、その支払額の {percent}% を受け取れます。",
+      "join": "紹介リンクを取得",
+      "joinFailed": "リンクを作成できませんでした。",
+      "copy": "リンクをコピー",
+      "copied": "リンクをコピーしました。",
+      "statReferrals": "登録数",
+      "statConverted": "支払い中",
+      "statEarned": "獲得額",
+      "statUnpaid": "未支払い",
+      "payoutNote": "報酬は発生した時点で記録されます。支払いにはマーケットと同じ Stripe アカウントを使いますが、まだ有効になっていません。獲得した分はいずれにせよあなたのもので、有効になり次第お支払いします。"
     }
   },
   "dashboard": {

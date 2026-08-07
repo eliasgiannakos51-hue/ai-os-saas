@@ -539,6 +539,19 @@
       "colCalls": "Aktionen",
       "colMargin": "Ø Marge",
       "colCost": "Reale Kosten"
+    },
+    "affiliate": {
+      "title": "Jemanden empfehlen",
+      "description": "Teilen Sie Ihren Link. Wenn sich jemand darüber anmeldet und zu zahlen beginnt, erhalten Sie {months} Monate lang {percent} % von dem, was er zahlt.",
+      "join": "Meinen Link erstellen",
+      "joinFailed": "Der Link konnte nicht erstellt werden.",
+      "copy": "Link kopieren",
+      "copied": "Link kopiert.",
+      "statReferrals": "Anmeldungen",
+      "statConverted": "Zahlen jetzt",
+      "statEarned": "Verdient",
+      "statUnpaid": "Noch nicht ausgezahlt",
+      "payoutNote": "Provisionen werden erfasst, sobald sie anfallen. Die Auszahlung läuft über dasselbe Stripe-Konto wie der Marktplatz, das noch nicht freigeschaltet ist — geschuldet ist Ihnen das Verdiente trotzdem."
     }
   },
   "dashboard": {

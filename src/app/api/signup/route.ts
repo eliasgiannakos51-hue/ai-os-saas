@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { recordReferral } from "@/lib/affiliate/server";
+import { REFERRAL_COOKIE_NAME } from "@/lib/affiliate/affiliate";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendWelcomeEmail } from "@/lib/email/send-welcome-email";
@@ -191,6 +193,25 @@ export async function POST(request: Request) {
           ...(isValidBetaCode ? { setBetaExpiresAt: computeBetaExpiresAt() } : {}),
         }
       );
+      // Affiliate attribution (V3 Task 8). The code was captured into a
+      // cookie by middleware when the visitor first arrived with ?ref=,
+      // possibly weeks ago and possibly on a page that is not the
+      // homepage.
+      //
+      // Best-effort by construction, and awaited only so the row lands
+      // before the response: a signup must never fail because an
+      // attribution row would not write. The person creating an account
+      // did not ask to be part of anybody's referral programme, and
+      // losing a commission is a smaller harm than losing a customer.
+      await recordReferral({
+        code: request.headers
+          .get("cookie")
+          ?.split(";")
+          .map((part) => part.trim())
+          .find((part) => part.startsWith(`${REFERRAL_COOKIE_NAME}=`))
+          ?.split("=")[1],
+        referredUserId: createData.user.id,
+      });
     } catch (err) {
       logApiError("/api/signup", err, { stage: "grant_credits" });
     }

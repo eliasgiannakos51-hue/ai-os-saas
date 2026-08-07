@@ -105,6 +105,9 @@ const V3_TABLES = [
   "marketplace_listing_payloads",
   "marketplace_purchases",
   "marketplace_reviews",
+  "affiliate_accounts",
+  "affiliate_referrals",
+  "affiliate_commissions",
 ];
 for (const t of MODULE_TABLES) {
   if (!rlsEnabled.has(t)) {

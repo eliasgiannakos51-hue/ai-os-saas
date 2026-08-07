@@ -539,6 +539,19 @@
       "colCalls": "Ações",
       "colMargin": "Margem média",
       "colCost": "Custo real"
+    },
+    "affiliate": {
+      "title": "Recomenda alguém",
+      "description": "Partilha o teu link. Quando alguém se inscrever através dele e começar a pagar, ganhas {percent}% do que pagar durante {months} meses.",
+      "join": "Obter o meu link",
+      "joinFailed": "Não foi possível criar o teu link.",
+      "copy": "Copiar link",
+      "copied": "Link copiado.",
+      "statReferrals": "Inscrições",
+      "statConverted": "Já a pagar",
+      "statEarned": "Ganho",
+      "statUnpaid": "Ainda por pagar",
+      "payoutNote": "As comissões são registadas à medida que são ganhas. O pagamento usa a mesma conta Stripe do mercado, que ainda não está ativa — o que ganhaste é-te devido na mesma."
     }
   },
   "dashboard": {

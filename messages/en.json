@@ -539,6 +539,19 @@
       "colCalls": "Actions",
       "colMargin": "Avg margin",
       "colCost": "Real cost"
+    },
+    "affiliate": {
+      "title": "Refer someone",
+      "description": "Share your link. When someone signs up through it and starts paying, you earn {percent}% of what they pay for {months} months.",
+      "join": "Get my referral link",
+      "joinFailed": "Could not create your referral link.",
+      "copy": "Copy link",
+      "copied": "Link copied.",
+      "statReferrals": "Signed up",
+      "statConverted": "Now paying",
+      "statEarned": "Earned",
+      "statUnpaid": "Not yet paid out",
+      "payoutNote": "Commissions are recorded as they are earned. Paying them out uses the same Stripe account as the marketplace, which is not switched on yet — what you have earned is owed to you regardless, and will be paid once it is."
     }
   },
   "dashboard": {

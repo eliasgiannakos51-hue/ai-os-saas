@@ -141,6 +141,26 @@ export const EXPORTED_TABLES: ExportTable[] = [
   { table: "marketplace_reviews", column: "buyer_id" },
   { table: "site_analytics", column: "user_id" },
 
+  // --- affiliate ---
+  { table: "affiliate_accounts", column: "user_id" },
+  // Scoped to the AFFILIATE's side, and narrowed to drop
+  // `referred_user_id`. The rest of the row is this subject's data — when
+  // somebody signed up through their link, whether it converted, when the
+  // commission window closes — but the referred person's account id is
+  // somebody else's identifier, and there is no reason it needs to be in
+  // a file that lands in a downloads folder.
+  //
+  // The referred side is deliberately not surfaced at all: "who gets paid
+  // for you" is not information that person was given, and RLS does not
+  // grant them the row, so this export (which reads through their own
+  // client) correctly returns nothing for them.
+  {
+    table: "affiliate_referrals",
+    column: "affiliate_user_id",
+    select: "id, code, signed_up_at, first_paid_at, commission_ends_at, created_at",
+  },
+  { table: "affiliate_commissions", column: "affiliate_user_id" },
+
   // --- team ---
   // Membership is an edge between two people. Exported from the side the
   // subject is on; the other person's rows are theirs, not this

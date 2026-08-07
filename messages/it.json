@@ -539,6 +539,19 @@
       "colCalls": "Azioni",
       "colMargin": "Margine medio",
       "colCost": "Costo reale"
+    },
+    "affiliate": {
+      "title": "Presenta qualcuno",
+      "description": "Condividi il tuo link. Quando qualcuno si iscrive tramite esso e inizia a pagare, guadagni il {percent}% di quanto paga per {months} mesi.",
+      "join": "Ottieni il mio link",
+      "joinFailed": "Non è stato possibile creare il link.",
+      "copy": "Copia il link",
+      "copied": "Link copiato.",
+      "statReferrals": "Iscrizioni",
+      "statConverted": "Ora paganti",
+      "statEarned": "Guadagnato",
+      "statUnpaid": "Non ancora liquidato",
+      "payoutNote": "Le commissioni vengono registrate man mano che maturano. La liquidazione usa lo stesso conto Stripe del mercato, non ancora attivo: quanto hai guadagnato ti è dovuto comunque."
     }
   },
   "dashboard": {

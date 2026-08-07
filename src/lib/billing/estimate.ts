@@ -322,6 +322,42 @@ export const ACTION_PROFILES = {
     baseOutputChars: 16000,
     outputCharsPerInputChar: 1,
   },
+  // Generating one presentation (api/presentations).
+  //
+  // Two real calls plus the shared clarifying-questions pre-check:
+  // a fact-finding pass with web search on, then one forced-tool call
+  // that returns the whole deck as a structure. The searches themselves
+  // are priced per query through expectedWebSearches at the call site.
+  //
+  // baseOutputChars is deliberately the FLOOR here, not the ceiling,
+  // because the real output scales with the requested slide count and
+  // that is not an input this function sees — estimateForPresentation
+  // below adds the per-slide part. Calling estimateForAction with this
+  // profile directly would under-hold every deck longer than the
+  // minimum, so nothing does.
+  presentationGenerate: {
+    systemPromptTokens: 1200,
+    auxiliaryCalls: [
+      // Clarifying-questions pre-check.
+      { inputTokens: 700, outputTokens: 150 },
+      // The fact-finding pass: the brief in, sourced material out.
+      { inputTokens: 1200, outputTokens: 2000 },
+    ],
+    baseOutputChars: 1500,
+    outputCharsPerInputChar: 2,
+  },
+  // One AI edit of an existing deck (api/presentations/[id]/edit).
+  //
+  // The expensive half is the INPUT: the instruction is a sentence, and
+  // the whole deck is re-sent with it. The route passes the deck's
+  // character count as inputChars for exactly that reason. Output is
+  // roughly the deck again, since an edit returns every slide.
+  presentationEdit: {
+    systemPromptTokens: 900,
+    auxiliaryCalls: [],
+    baseOutputChars: 800,
+    outputCharsPerInputChar: 1,
+  },
 } as const;
 
 export type ActionProfileKey = keyof typeof ACTION_PROFILES;
@@ -349,6 +385,56 @@ export function estimateForAction(
         profile.baseOutputChars + params.inputChars * profile.outputCharsPerInputChar,
       expectedWebSearches: params.expectedWebSearches,
       continuationRounds: "continuationRounds" in profile ? profile.continuationRounds : 0,
+    },
+    config,
+    effectiveCreditPriceEur
+  );
+}
+
+/**
+ * Estimate one presentation generation.
+ *
+ * Its own function rather than an `estimateForAction` call because the
+ * output of this action scales with something no other action has: the
+ * number of slides asked for. A 30-slide deck is six times the generated
+ * text of a 5-slide one, and pricing both from the same profile would
+ * either quote the short deck for work it does not do or hold too little
+ * for the long one — and a hold that is too small is the single failure
+ * reserve/settle exists to prevent.
+ *
+ * CHARS_PER_SLIDE is measured against the tool schema this feature
+ * actually uses (lib/presentations/slides.ts): a title up to 120 chars,
+ * up to 8 bullets of up to 240, and up to 1,500 characters of speaker
+ * notes, plus the JSON scaffolding around them. A full slide at those
+ * ceilings is ~3,600 characters; real ones land near half that. 1,800 is
+ * the working figure, and it leans toward the upper end for the same
+ * reason websiteGenerate's does — over-holding is released at settlement
+ * and costs the user nothing.
+ *
+ * Shared by the browser (to show the price before the user commits) and
+ * the route (to size the reservation), so the two cannot disagree.
+ */
+export const CHARS_PER_SLIDE = 1800;
+
+export function estimateForPresentation(
+  params: { model: string; briefChars: number; slideCount: number; expectedWebSearches?: number },
+  config: PricingConfig,
+  effectiveCreditPriceEur?: number
+): CostEstimate {
+  const profile = ACTION_PROFILES.presentationGenerate;
+  const slides = Math.max(0, params.slideCount);
+
+  return estimateActionCost(
+    {
+      model: params.model,
+      inputChars: params.briefChars,
+      systemPromptTokens: profile.systemPromptTokens,
+      auxiliaryCalls: [...profile.auxiliaryCalls],
+      expectedOutputChars:
+        profile.baseOutputChars +
+        params.briefChars * profile.outputCharsPerInputChar +
+        slides * CHARS_PER_SLIDE,
+      expectedWebSearches: params.expectedWebSearches,
     },
     config,
     effectiveCreditPriceEur

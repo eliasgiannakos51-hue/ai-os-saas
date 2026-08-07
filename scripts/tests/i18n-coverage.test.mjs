@@ -164,7 +164,22 @@ const clientFallbacks = sources.flatMap((f) => [
 // which is a refactor of the entire API surface and not something to start
 // inside one feature. What the user READS on /dashboard/files and
 // /dashboard/research is fully translated in all ten locales.
-const SERVER_PROSE_BASELINE = 441;
+// 441 -> 501: V3 Task 5 (Presentation Builder) added six routes —
+// generate/list, get/patch/delete, AI edit, share, rollback and PPTX
+// export — each with the same not-authenticated, not-found, rate-limit,
+// plan-cap, insufficient-credit and validation responses as the 441
+// before them. (503 rather than 501: the autosave and delete endpoints
+// grew rate limits of their own once the feature's build gate asserted
+// every route has one.)
+//
+// The recorded decision does not change, and this is now the sixth
+// increment of it: the fix is stable error CODES across all 60+ routes
+// with the translation happening client-side, which is a refactor of the
+// entire API surface rather than something to start inside one feature.
+// Everything the user READS on /dashboard/presentations is translated in
+// all ten locales — the routes' prose reaches the screen only as the
+// fallback when a request fails in a way the client has no key for.
+const SERVER_PROSE_BASELINE = 503;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

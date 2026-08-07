@@ -83,6 +83,13 @@ const LOCALE_ALLOWED = new Set([
   "de:dashboard.publishing.statusLive",
   "de:dashboard.publishing.statusUnpublished",
   "it:dashboard.publishing.statusUnpublished",
+  // Presentation Builder (V3 Task 5). Both checked by hand: "Point" is
+  // the French word for a bullet point, spelled identically, and
+  // "Modern" is the German adjective. Substituting a synonym in either
+  // ("Puce" for a numbered item, "Zeitgemäß" for a theme name) would
+  // make that UI worse rather than more translated.
+  "fr:dashboard.presentations.bulletLabel",
+  "de:dashboard.presentations.themes.modern",
   "es:sidebar.items.trading",
   "es:sidebar.items.sales",
   "fr:sidebar.items.trading",

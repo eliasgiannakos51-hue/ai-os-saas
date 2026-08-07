@@ -247,6 +247,45 @@ watching. Therefore:
 *Gate: `security-posture.test.mjs` §1 (bucket private, policies scoped)
 and §4 (the erasure RPC is called, and called first).*
 
+### Presentations
+
+- **A share link is a credential.** There is no login on `/p/<token>`, so
+  the URL is the only thing protecting the deck. The token is 16 bytes of
+  `randomBytes` — 128 bits, the strength of a v4 UUID. `Math.random()`
+  here would be a credential drawn from a predictable sequence.
+- **No public RLS policy.** The share page reads through the
+  service-role client and selects only `title`, `theme` and `slides`. An
+  "anyone can read a shared presentation" policy is evaluated against the
+  ANON key, which is printed in the client bundle — anyone could then
+  query the table directly and read every shared deck's `brief` and
+  `credits_charged`, not just the one they were sent.
+- **`fetchCache = "force-no-store"` on the share page.** `force-dynamic`
+  governs the route, not the fetches the route makes; without this, Next's
+  Data Cache serves the slides it had when it was warmed and a revoked
+  share link keeps working. This is the same bug the published-sites route
+  shipped once.
+- **Export fetches from an allowlisted host and nowhere else.** It is the
+  only place the server fetches a URL out of a user-controlled row, and an
+  authenticated user can PATCH their own deck with any `https` URL and
+  press Export. `images.unsplash.com` / `plus.unsplash.com` only, with
+  `redirect: "manual"` so an allowlisted host cannot be used to reach one
+  that is not. A blocklist of internal ranges would have to anticipate
+  every private range, every redirect and every DNS name resolving into
+  one; the allowlist has to know one hostname.
+- **The image type comes from the bytes**, never the `Content-Type`, and
+  the response is size-capped before and after reading.
+- **Turning sharing off keeps the token; rotating replaces it.** Those are
+  different intentions and conflating them breaks one of them — a user who
+  toggles the switch twice has not asked to invalidate every URL they
+  already sent.
+- Versions are **append-only**: a rollback writes a new version rather
+  than rewinding, so no button can erase what the user had.
+
+*Gate: `scripts/tests/presentations.test.mjs` §5 (the allowlist, including
+lookalike hosts and userinfo spoofing) and §8 (auth, ownership-as-filter,
+404-not-403, rate limits, fail-closed fair use, the share page's
+service-role read and cache headers, and the token's entropy).*
+
 ---
 
 ## Prompt injection
@@ -304,6 +343,10 @@ before `next build`. A new feature fails the build if:
 | A new Anthropic call site is not DECLARED with its billing mode | `billing-coverage.test.mjs` §1 |
 | A declared call site's call count changes | `billing-coverage.test.mjs` §1 |
 | Generated HTML would bypass the security scan | `publishing.test.mjs` |
+| A deck theme's text drops below WCAG AA on its own background | `presentations.test.mjs` §1 |
+| A presentation route loses its auth, ownership filter or rate limit | `presentations.test.mjs` §8 |
+| The PPTX export would fetch an image from an unallowlisted host | `presentations.test.mjs` §5 |
+| The PPTX writer emits unbalanced XML or unescaped user text | `presentations.test.mjs` §7 |
 | Server-side English prose grows past its recorded baseline | `i18n-coverage.test.mjs` §1 |
 | A user-facing string is hardcoded in a component | `i18n-coverage.test.mjs` §1 |
 | A `t()` key does not exist in all ten locales | `check-i18n.js` |

@@ -3,7 +3,13 @@
 // (that guard blocks any client-side import, even of code that has
 // nothing to do with the actual Anthropic call). lib/clarification.ts
 // re-exports everything here so server code has one place to import from.
-export type ClarificationKind = "website" | "mission" | "automation" | "create" | "agent";
+export type ClarificationKind =
+  | "website"
+  | "mission"
+  | "automation"
+  | "create"
+  | "agent"
+  | "presentation";
 
 export type ClarificationCheckResult =
   | { needsClarification: true; questions: string[] }

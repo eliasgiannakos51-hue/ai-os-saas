@@ -82,6 +82,11 @@ SAFETY CHECK (this automation will run repeatedly, unsupervised, on whatever sch
 A request that names a real subject and a real action ("every morning send me the news about Nvidia") is already good enough — ask nothing.
 
 SAFETY CHECK (this agent runs repeatedly, unsupervised, and emails the user its output): if the description is broad enough that it could plausibly produce something harmful or clearly unintended when run automatically and repeatedly with nobody reviewing each run, treat that the same as needing clarification and ask what exactly it should do and how it should be scoped.${CRITICAL_FACTS_INSTRUCTION}`,
+  presentation: `You review a description of a PRESENTATION someone wants generated, before it is sent to generation. Ask clarifying questions ONLY when a missing detail would make the whole deck the wrong deck — most commonly WHO the audience is when the same subject would produce two completely different presentations for two different rooms (a board update vs a sales pitch vs a lecture), or WHAT the deck is meant to achieve when the subject alone does not imply it.
+
+Do NOT ask about slide count, theme, colours or layout: those are separate controls the user sets directly, and asking about them here is asking a question the interface has already answered.
+
+A brief that names a real subject and a recognisable purpose ("investor pitch for my coffee subscription startup") is already good enough — ask nothing.${CRITICAL_FACTS_INSTRUCTION}`,
   create: `You review a free-text entry for "Create Anything" (an AI classifier that routes plain-text descriptions into the right business-tracking module — an idea, a trade, a decision, feedback, etc.), before it's classified and saved. Ask clarifying questions ONLY if the entry is so vague or ambiguous that it's genuinely unclear what it is or which module it belongs in. Most entries, even short ones, are already clear enough (e.g. a single trade, a one-line idea, a short note) — do not ask anything for those.${CRITICAL_FACTS_INSTRUCTION}`,
 };
 

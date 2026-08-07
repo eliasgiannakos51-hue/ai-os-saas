@@ -82,6 +82,37 @@ touch targets) and works identically on mobile and desktop.
   or a visitor id. Fair use per plan (Free 0, Starter 1, Growth 3,
   Professional 10, Ultimate 30, Enterprise unlimited), overridable via
   `PUBLISHED_SITE_LIMIT_*`.
+- **Presentations** (`/dashboard/presentations`) — a deck from one
+  description. The brief goes through the shared clarifying-questions
+  pre-check (kind `presentation`), then two calls: a web-search pass that
+  gathers real, sourced material, and one forced-tool call that composes
+  the slides. That split is deliberate — forcing a tool is what guarantees
+  a parseable deck and is exactly what prevents the model searching first,
+  so they cannot be one call. Every figure in a deck has to come from the
+  findings, which are listed under it; when the search comes back empty
+  the composer is told to build the structure and leave the numbers to the
+  user rather than invent them, because a presentation is the artefact
+  people are most likely to put in front of someone else without checking.
+  Five themes (Professional, Modern, Minimal, Bold, Dark), every one
+  contrast-checked against WCAG AA in the build gate. Photos come from
+  Unsplash on the image layouts and are optional by construction — no key,
+  no picture, no failure. The editor gives inline editing of every field,
+  drag-and-drop reorder (with ordinary buttons beside it, since drag is
+  not reachable from a keyboard), add/delete, a theme switch, and AI edit
+  in a sentence ("make slide 3 shorter"), which appends a version — the
+  last 20 are kept and any of them can be restored, append-only, so
+  undoing an undo works. Export is **.pptx**, written by hand
+  (`src/lib/presentations/pptx.ts`: a ZIP writer and OOXML parts, no
+  dependency), with speaker notes in the notes pane and images embedded
+  with a centre crop so nothing is squashed; **PDF** is the browser's own
+  print pipeline over the same renderer, so the file matches the screen
+  exactly instead of being a second layout engine that has to agree with
+  the first. A **share link** (`/p/<token>`, 128 bits of `randomBytes`,
+  `noindex`) is revocable and rotatable. Fair use per plan (Free 0,
+  Starter 5, Growth 20, Professional 100, Ultimate and Enterprise
+  unlimited), overridable via `PRESENTATION_LIMIT_*`, plus
+  `PRESENTATION_MAX_EDITS_PER_HOUR`. Requires
+  `v3_presentations_migration.sql`.
 - **Integrations** (`/dashboard/integrations`) — Gmail, Google Drive and
   Slack, so the AI works on the user's real data. One generic OAuth flow
   serves every provider (`/api/integrations/[provider]/connect` and

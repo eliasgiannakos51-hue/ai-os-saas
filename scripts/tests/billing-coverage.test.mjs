@@ -111,6 +111,11 @@ const DECLARED = {
     billing: "settled",
     note: "V3 File Workspace. One grounded call over the selected documents. The reservation is sized AFTER the documents load, because the cost is dominated by document text and a hold sized from the question alone is off by orders of magnitude on a long contract. A call that errors still SETTLES rather than releasing — the tokens were spent.",
   },
+  "src/lib/presentations/generate.ts": {
+    calls: 3,
+    billing: "settled",
+    note: "V3 Presentation Builder. gatherFacts (web search, once per deck), composeDeck (forced tool use), editDeck (forced tool use). The first two record onto ONE CostAccumulator settled by api/presentations, including the failure paths — a compose call that came back unusable still spent the tokens the fact-finding pass and the attempt cost. editDeck is settled separately by api/presentations/[id]/edit, priced off the WHOLE DECK's character count rather than the instruction's, since an edit re-sends every slide.",
+  },
   "src/lib/research/research.ts": {
     calls: 3,
     billing: "settled",

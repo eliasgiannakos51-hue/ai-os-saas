@@ -139,24 +139,21 @@ export const BUILD_MODULES: ModuleConfig[] = [
       },
     ],
   },
-  {
-    slug: "presentations",
-    title: "Presentations",
-    table: "ai_presentations",
-    headlineKey: "title",
-    fields: [
-      { key: "title", label: "Title", type: "text", required: true },
-      { key: "description", label: "Description", type: "textarea", full: true },
-      { key: "slide_count", label: "Slide Count", type: "number", badge: true },
-      {
-        key: "status",
-        label: "Status",
-        type: "select",
-        badge: true,
-        options: ["draft", "in review", "final", "archived"],
-      },
-    ],
-  },
+  // "presentations" used to be here, as a tracker over `ai_presentations`
+  // — a table of hand-typed titles and statuses where nothing was ever
+  // generated. V3 Task 5 replaced /dashboard/presentations with the real
+  // Presentation Builder (user_presentations, an AI-generated deck), so
+  // the slug is no longer a build module.
+  //
+  // It has to come OUT of this list, not merely stop being rendered:
+  // /api/search enumerates BUILD_MODULES and links every hit to
+  // `/dashboard/<slug>`. Leaving it would keep offering tracker rows as
+  // search results that land on a page which cannot show them — a result
+  // you click and then cannot find.
+  //
+  // The `ai_presentations` TABLE is deliberately not dropped by
+  // v3_presentations_migration.sql. Removing a feature is not a reason to
+  // delete what users wrote in it.
   {
     slug: "campaigns",
     title: "Marketing Campaigns",

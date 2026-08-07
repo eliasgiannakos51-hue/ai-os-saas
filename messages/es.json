@@ -1480,6 +1480,18 @@
         "moderate": "esfuerzo medio",
         "deep": "concentración profunda"
       }
+    },
+    "valueReport": {
+      "title": "Tu impacto este mes",
+      "quiet": "Este mes aún no se ha ejecutado nada. Lo que empieces ahora aparecerá aquí.",
+      "creditsSpent": "{credits} créditos gastados.",
+      "lines": {
+        "agentRuns": "{count} ejecuciones de agentes ocurrieron sin ti",
+        "websitesPublished": "{count} sitios se publicaron",
+        "presentations": "{count} presentaciones creadas",
+        "researchReports": "{count} informes de investigación escritos",
+        "aiActions": "{count} acciones de IA"
+      }
     }
   },
   "module": {

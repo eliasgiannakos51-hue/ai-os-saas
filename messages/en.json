@@ -1480,6 +1480,18 @@
         "moderate": "moderate",
         "deep": "deep focus"
       }
+    },
+    "valueReport": {
+      "title": "Your impact this month",
+      "quiet": "Nothing ran this month yet. Whatever you start now shows up here.",
+      "creditsSpent": "{credits} credits spent.",
+      "lines": {
+        "agentRuns": "{count} agent runs happened without you",
+        "websitesPublished": "{count} sites went live",
+        "presentations": "{count} presentations built",
+        "researchReports": "{count} research reports written",
+        "aiActions": "{count} AI actions"
+      }
     }
   },
   "module": {

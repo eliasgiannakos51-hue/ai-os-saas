@@ -1480,6 +1480,18 @@
         "moderate": "そこそこの集中",
         "deep": "深い集中"
       }
+    },
+    "valueReport": {
+      "title": "今月の成果",
+      "quiet": "今月はまだ何も動いていません。これから始めたことがここに出ます。",
+      "creditsSpent": "{credits} クレジットを消費しました。",
+      "lines": {
+        "agentRuns": "あなたがいない間にエージェントが {count} 回実行されました",
+        "websitesPublished": "{count} 件のサイトを公開しました",
+        "presentations": "{count} 件のプレゼンを作成しました",
+        "researchReports": "{count} 件のリサーチレポートを作成しました",
+        "aiActions": "AI 操作 {count} 件"
+      }
     }
   },
   "module": {

@@ -1480,6 +1480,18 @@
         "moderate": "mittlere Kraft",
         "deep": "tiefe Konzentration"
       }
+    },
+    "valueReport": {
+      "title": "Ihre Wirkung diesen Monat",
+      "quiet": "Diesen Monat lief noch nichts. Was Sie jetzt starten, erscheint hier.",
+      "creditsSpent": "{credits} Credits ausgegeben.",
+      "lines": {
+        "agentRuns": "{count} Agentenläufe fanden ohne Sie statt",
+        "websitesPublished": "{count} Websites gingen live",
+        "presentations": "{count} Präsentationen erstellt",
+        "researchReports": "{count} Rechercheberichte geschrieben",
+        "aiActions": "{count} KI-Aktionen"
+      }
     }
   },
   "module": {

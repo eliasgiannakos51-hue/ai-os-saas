@@ -1480,6 +1480,18 @@
         "moderate": "中等精力",
         "deep": "深度专注"
       }
+    },
+    "valueReport": {
+      "title": "你本月的成果",
+      "quiet": "本月还没有任何任务运行。你现在开始的一切都会显示在这里。",
+      "creditsSpent": "已消耗 {credits} 点数。",
+      "lines": {
+        "agentRuns": "有 {count} 次智能体运行在你不在时完成",
+        "websitesPublished": "{count} 个网站已上线",
+        "presentations": "创建了 {count} 份演示文稿",
+        "researchReports": "撰写了 {count} 份研究报告",
+        "aiActions": "{count} 次 AI 操作"
+      }
     }
   },
   "module": {

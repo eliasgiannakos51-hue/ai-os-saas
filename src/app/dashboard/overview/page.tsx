@@ -28,6 +28,8 @@ import { computeHealthScore } from "@/lib/health-score";
 import { HealthScoreCard } from "@/components/overview/health-score-card";
 import { loadLatestEnergyCheckIn } from "@/lib/energy-checkins";
 import { EnergySuggestion } from "@/components/overview/energy-suggestion";
+import { ValueReportCard } from "@/components/overview/value-report-card";
+import { buildValueReport } from "@/lib/value-report";
 import { EnergyCheckinWidget } from "@/components/overview/energy-checkin-widget";
 import { Database, TrendingUp, Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
@@ -285,6 +287,53 @@ export default async function OverviewPage() {
   // check-in. This widget is the only place a check-in gets created.
   const latestEnergyCheckIn = await loadLatestEnergyCheckIn(supabase, user.id);
 
+  // "Your impact this month" (V3 Task 9). Six head-only counts over the
+  // calendar month — no rows are fetched, only counted, so this adds
+  // latency proportional to nothing. Every figure is a COUNT OF ROWS:
+  // see lib/value-report.ts for why there is no "hours saved" here.
+  const monthStart = new Date();
+  monthStart.setUTCDate(1);
+  monthStart.setUTCHours(0, 0, 0, 0);
+  const sinceMonth = monthStart.toISOString();
+  const countSince = async (table: string, column: string) => {
+    const { count, error } = await supabase
+      .from(table)
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte(column, sinceMonth);
+    // A failed count reports ZERO rather than throwing. This is a
+    // secondary panel; it must not be able to take the overview down,
+    // and a category that could not be counted showing nothing is
+    // consistent with the rule that only what is measured is claimed.
+    if (error) logApiError("/dashboard/overview", error, { stage: "value_count", table });
+    return count ?? 0;
+  };
+  const [agentRunCount, presentationCount, publishedCount, researchCount, aiActionCount] =
+    await Promise.all([
+      countSince("agent_runs", "started_at"),
+      countSince("user_presentations", "created_at"),
+      countSince("published_sites", "published_at"),
+      countSince("research_reports", "created_at"),
+      countSince("ai_cost_log", "created_at"),
+    ]);
+  const { data: monthSpend } = await supabase
+    .from("ai_cost_log")
+    .select("credits_charged")
+    .eq("user_id", user.id)
+    .gte("created_at", sinceMonth)
+    .limit(2000);
+  const valueReport = buildValueReport({
+    counts: {
+      agentRuns: agentRunCount,
+      presentations: presentationCount,
+      websitesPublished: publishedCount,
+      researchReports: researchCount,
+      aiActions: aiActionCount,
+      creditsSpent: (monthSpend ?? []).reduce((sum, row) => sum + (Number(row.credits_charged) || 0), 0),
+    },
+    accountCreatedAt: user.created_at,
+  });
+
   const healthScoreRangeLabel =
     healthScore.label === "justStarting"
       ? t("healthScore.justStarting")
@@ -367,6 +416,8 @@ export default async function OverviewPage() {
           suggestion={healthScoreSuggestion}
           trend={weeklySparkline}
         />
+
+        <ValueReportCard report={valueReport} />
 
         <EnergyCheckinWidget initialCheckIn={latestEnergyCheckIn} />
 

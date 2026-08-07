@@ -1480,6 +1480,18 @@
         "moderate": "مجهودًا متوسطًا",
         "deep": "تركيزًا عميقًا"
       }
+    },
+    "valueReport": {
+      "title": "أثرك هذا الشهر",
+      "quiet": "لم يعمل شيء بعد هذا الشهر. كل ما تبدأه الآن سيظهر هنا.",
+      "creditsSpent": "أُنفق {credits} رصيدًا.",
+      "lines": {
+        "agentRuns": "جرت {count} عمليات تشغيل للوكلاء دون حضورك",
+        "websitesPublished": "نُشر {count} موقعًا",
+        "presentations": "أُنشئ {count} عرضًا تقديميًا",
+        "researchReports": "كُتب {count} تقرير بحث",
+        "aiActions": "{count} إجراء بالذكاء الاصطناعي"
+      }
     }
   },
   "module": {

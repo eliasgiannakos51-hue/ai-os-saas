@@ -1480,6 +1480,18 @@
         "moderate": "μέτρια ενέργεια",
         "deep": "βαθιά συγκέντρωση"
       }
+    },
+    "valueReport": {
+      "title": "Ο αντίκτυπός σου αυτόν τον μήνα",
+      "quiet": "Δεν έτρεξε τίποτα ακόμη αυτόν τον μήνα. Ό,τι ξεκινήσεις τώρα θα φανεί εδώ.",
+      "creditsSpent": "Ξοδεύτηκαν {credits} credits.",
+      "lines": {
+        "agentRuns": "{count} εκτελέσεις agent έγιναν χωρίς εσένα",
+        "websitesPublished": "{count} ιστοσελίδες βγήκαν live",
+        "presentations": "{count} παρουσιάσεις φτιάχτηκαν",
+        "researchReports": "{count} αναφορές έρευνας γράφτηκαν",
+        "aiActions": "{count} ενέργειες AI"
+      }
     }
   },
   "module": {

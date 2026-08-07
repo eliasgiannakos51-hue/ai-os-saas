@@ -9,7 +9,16 @@ import { logApiError } from "@/lib/log-error";
 // here, pass or fail, so the owner has an independent, Supabase-Table-
 // Editor-visible record that these checks actually ran — not just an
 // in-app badge claiming they did.
-export type SecurityCheckResourceType = "website" | "mission_plan" | "automation" | "agent";
+export type SecurityCheckResourceType =
+  | "website"
+  | "mission_plan"
+  | "automation"
+  | "agent"
+  // A marketplace listing, scanned before it goes on sale. Logged under
+  // the SOURCE item's id rather than the listing's, because the check
+  // runs before the listing row exists — and because the thing a
+  // reviewer would want to trace back to is the item the seller owns.
+  | "marketplace_listing";
 
 export type SecurityCheckResult = {
   passed: boolean;

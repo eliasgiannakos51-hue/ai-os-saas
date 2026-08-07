@@ -110,15 +110,28 @@ for (const m of ["apps", "images", "videos", "coding"]) {
   checkTrue(`/${m} uses the shared BuildModulePage`, /BuildModulePage/.test(read(`src/app/dashboard/${m}/page.tsx`)));
 }
 
-console.log("\n== 4. Marketplace has no list to unify ==");
-// It is a "coming soon" empty state: no records, no search, no sort.
-// Bolting a list toolbar onto a page with nothing in it would be worse
-// than leaving it, so this asserts the REASON rather than the pattern.
+console.log("\n== 4. Marketplace is a list, and uses the shared one ==");
+// This section used to assert the OPPOSITE, and the change is the point.
+// The marketplace was a "coming soon" empty state with no records, no
+// search and no sort, so the honest thing to check was the REASON it had
+// no toolbar. V3 Task 6 gave it real listings, which makes it a list like
+// every other list here — and the moment a page has records to show, the
+// one-pattern promise applies to it.
+//
+// A stale assertion is worse than none: it would have gone on passing
+// against a page that no longer existed, right up until someone deleted
+// the empty state it was really describing.
 const market = read("src/app/dashboard/marketplace/page.tsx");
-checkTrue("it renders an EmptyState", /<EmptyState/.test(market));
-checkTrue("its action is disabled", /disabled/.test(market));
-checkTrue("and labelled coming soon", /comingSoon/.test(market));
-checkTrue("so it has no grid of its own to diverge", !/<ListLayout|grid-cols/.test(market));
+const marketBrowse = read("src/components/marketplace/marketplace-browse.tsx");
+checkTrue("the page delegates to the browse component", /<MarketplaceBrowse/.test(market));
+checkTrue("which builds on the shared ListLayout", /<ListLayout/.test(marketBrowse));
+checkTrue("and renders shared EntityCards", /<EntityCard/.test(marketBrowse));
+// The specific regression this guards: a second search box or sort
+// control hand-rolled next to the shared one.
+checkTrue(
+  "the page has no toolbar of its own to diverge",
+  !/<ListLayout|type="search"/.test(market)
+);
 
 console.log("\n== 5. nobody hand-rolls a list toolbar ==");
 // The failure this guards: a new page gets its own search box and its own

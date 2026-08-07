@@ -281,6 +281,54 @@ and §4 (the erasure RPC is called, and called first).*
 - Versions are **append-only**: a rollback writes a new version rather
   than rewinding, so no button can erase what the user had.
 
+### Marketplace
+
+- **The paywall is the schema.** The merchandise lives in
+  `marketplace_listing_payloads`, a separate table whose only select
+  policy is the seller's own. RLS is ROW-level: a `payload` column on
+  `marketplace_listings` would be readable by exactly the policy that
+  makes the shop window browsable, so every buyer could take every
+  product by selecting a column the UI happens not to render.
+- **`marketplace_listings` has no insert or update policy.** The obvious
+  one — `with check (auth.uid() = seller_id)` — is wrong here and looks
+  identical to the correct policy on every other table. This row carries
+  `status`: a seller holding the anon key could insert `published`
+  directly and be live without the mandatory scan ever running. Same for
+  update, plus `purchase_count` (manufacturing a bestseller) and the
+  rating aggregate. Every write goes through a route that whitelists
+  columns.
+- **Browsing requires a session.** A bare `status = 'published'` policy is
+  satisfied by the anon key, which turns the shop window into a public API
+  for scraping every seller's price and sales count.
+- **Money columns are platform-written.** `seller_accounts` and
+  `marketplace_purchases` have no insert or update policy at all — an
+  insertable purchases table is a free-products button.
+- **The publish scan is mandatory and fail-closed**, and the payload is
+  BUILT by the server from a row read under the seller's own id, never
+  taken from the request body. What is stored is what was scanned.
+- **Nothing sold carries the seller's identity or data.** A listed agent
+  drops `delivery_target` and the Slack channel; a listed deck drops its
+  sources and brief. The buyer's copy sets `user_id` from the verified
+  session and an agent's delivery to the BUYER's own address — no install
+  path reads a user id out of a payload.
+- **Nothing installs running.** Agents arrive paused, automations
+  inactive, missions in planning. Buying a thing that immediately starts
+  spending your credits is not something a purchase consented to.
+- **Fulfilment is webhook-only and idempotent.** Nothing installs because
+  a browser reached a success URL. The claim is conditioned on the
+  purchase still being `pending`, so a Stripe retry cannot deliver twice
+  or pay the seller twice. A failed install leaves the purchase `paid`
+  with no `installed_entity_id` — the state "paid and not received" has to
+  be findable, not hidden.
+- **You cannot review what you did not buy.** `purchase_id` is NOT NULL
+  and unique per `(listing_id, buyer_id)`, so a fake review costs the
+  price of the product.
+
+*Gate: `scripts/tests/marketplace.test.mjs` §2 (the split reconciles at
+every price and rate), §3 (what must not travel with a listing), §4
+(installs land on the buyer, switched off), §5 (the scan), §6 (the
+schema's policies), §7 (route posture, webhook-only fulfilment).*
+
 *Gate: `scripts/tests/presentations.test.mjs` §5 (the allowlist, including
 lookalike hosts and userinfo spoofing) and §8 (auth, ownership-as-filter,
 404-not-403, rate limits, fail-closed fair use, the share page's
@@ -347,6 +395,12 @@ before `next build`. A new feature fails the build if:
 | A presentation route loses its auth, ownership filter or rate limit | `presentations.test.mjs` §8 |
 | The PPTX export would fetch an image from an unallowlisted host | `presentations.test.mjs` §5 |
 | The PPTX writer emits unbalanced XML or unescaped user text | `presentations.test.mjs` §7 |
+| A marketplace payload column appears on the browsable listings table | `marketplace.test.mjs` §6 |
+| `marketplace_listings` gains an insert or update policy | `marketplace.test.mjs` §6 |
+| A listing's platform fee and seller share stop summing to the price | `marketplace.test.mjs` §2 |
+| A listing would carry the seller's delivery address or research | `marketplace.test.mjs` §3 |
+| A purchased agent or automation would install already running | `marketplace.test.mjs` §4 |
+| Anything but the Stripe webhook installs a purchase | `marketplace.test.mjs` §7 |
 | Server-side English prose grows past its recorded baseline | `i18n-coverage.test.mjs` §1 |
 | A user-facing string is hardcoded in a component | `i18n-coverage.test.mjs` §1 |
 | A `t()` key does not exist in all ten locales | `check-i18n.js` |

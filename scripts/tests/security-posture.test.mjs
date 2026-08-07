@@ -98,6 +98,13 @@ const V3_TABLES = [
   "file_collections",
   "file_collection_items",
   "research_reports",
+  "user_presentations",
+  "presentation_versions",
+  "seller_accounts",
+  "marketplace_listings",
+  "marketplace_listing_payloads",
+  "marketplace_purchases",
+  "marketplace_reviews",
 ];
 for (const t of MODULE_TABLES) {
   if (!rlsEnabled.has(t)) {

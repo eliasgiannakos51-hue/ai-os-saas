@@ -90,6 +90,25 @@ const LOCALE_ALLOWED = new Set([
   // make that UI worse rather than more translated.
   "fr:dashboard.presentations.bulletLabel",
   "de:dashboard.presentations.themes.modern",
+  // Marketplace (V3 Task 6). Loanwords and cognates, each checked by
+  // hand: "Marketing" is the word every one of these languages actually
+  // uses; "Agent" is German and is the term the Greek UI already uses
+  // verbatim for this product's agents; "Type", "Description" and
+  // "Finance" are French, spelled identically; "Live" is the loanword
+  // German uses for something being up. Substituting a synonym in any of
+  // them would make that UI read worse, not more translated.
+  "el:dashboard.marketplace.kinds.agentConfig",
+  "de:dashboard.marketplace.kinds.agentConfig",
+  "es:dashboard.marketplace.categories.marketing",
+  "fr:dashboard.marketplace.categories.marketing",
+  "de:dashboard.marketplace.categories.marketing",
+  "it:dashboard.marketplace.categories.marketing",
+  "pt:dashboard.marketplace.categories.marketing",
+  "fr:dashboard.marketplace.categories.finance",
+  "fr:dashboard.marketplace.filterKind",
+  "fr:dashboard.marketplace.kindLabel",
+  "fr:dashboard.marketplace.descriptionLabel",
+  "de:dashboard.marketplace.statuses.published",
   "es:sidebar.items.trading",
   "es:sidebar.items.sales",
   "fr:sidebar.items.trading",
@@ -182,6 +201,11 @@ const LOCALE_ALLOWED = new Set([
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
+  // A pure format template: a number, a space, a bracketed number. There
+  // is no word in it to translate, and inventing per-locale punctuation
+  // to make the string differ would be translating the checker rather
+  // than the UI.
+  "dashboard.marketplace.ratingSummary",
   "landing.footer.roadmap",
   "roadmap.title",
   "roadmap.items.agentBuilder.title",

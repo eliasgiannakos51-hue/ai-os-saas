@@ -179,7 +179,17 @@ const clientFallbacks = sources.flatMap((f) => [
 // Everything the user READS on /dashboard/presentations is translated in
 // all ten locales — the routes' prose reaches the screen only as the
 // fallback when a request fails in a way the client has no key for.
-const SERVER_PROSE_BASELINE = 503;
+// 503 -> 570: V3 Task 6 (Marketplace) added seven routes — browse and
+// publish, listing get/patch/delete, purchase, reviews and seller
+// onboarding — plus the not-open, onboarding-required, already-owned,
+// has-sales and security-blocked responses that are specific to a market
+// rather than to one user's own data. Same recorded decision, seventh
+// increment: stable error CODES across the whole API surface is the fix.
+// Everything the user READS on /dashboard/marketplace is translated in
+// all ten locales; the one place this prose is deliberately shown in
+// full is the security check's findings on a rejected listing, because a
+// seller who cannot see what was wrong cannot fix it.
+const SERVER_PROSE_BASELINE = 570;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

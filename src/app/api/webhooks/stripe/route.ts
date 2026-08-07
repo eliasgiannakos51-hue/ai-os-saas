@@ -7,6 +7,7 @@ import { getPlanSlugFromPriceId, getTeamSeatPriceId } from "@/lib/billing/price-
 import { getCreditPack, creditPackPriceEurPerCredit, type PlanSlug } from "@/lib/billing/plans";
 import { grantCredits, syncCreditsForPlan, recordPackPurchaseRate } from "@/lib/billing/credits";
 import { logApiError } from "@/lib/log-error";
+import { fulfilMarketplacePurchase } from "@/lib/marketplace/fulfil";
 
 export const dynamic = "force-dynamic";
 
@@ -219,7 +220,16 @@ export async function POST(request: Request) {
             session.metadata?.supabase_user_id
           );
         } else if (session.mode === "payment") {
-          await grantPurchasedCredits(session, event.id);
+          // Two different one-off payments arrive as mode "payment": a
+          // credit pack, and a marketplace purchase. They are told apart
+          // by the metadata the route that CREATED the session wrote —
+          // not by guessing from the amount or the line items, which
+          // would make a coincidence of price into a mis-fulfilment.
+          if (session.metadata?.marketplace_purchase_id) {
+            await fulfilMarketplacePurchase(session);
+          } else {
+            await grantPurchasedCredits(session, event.id);
+          }
         }
         break;
       }

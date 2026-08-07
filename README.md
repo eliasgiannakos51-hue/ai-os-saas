@@ -82,6 +82,34 @@ touch targets) and works identically on mobile and desktop.
   or a visitor id. Fair use per plan (Free 0, Starter 1, Growth 3,
   Professional 10, Ultimate 30, Enterprise unlimited), overridable via
   `PUBLISHED_SITE_LIMIT_*`.
+- **Marketplace** (`/dashboard/marketplace`) — buy and sell website
+  templates, agent configurations, mission and presentation templates and
+  automations, with Stripe Connect (Express) doing the payouts and a
+  20-25% commission (`MARKETPLACE_COMMISSION_PERCENT`, default 25). It
+  ships **dark**: `MARKETPLACE_ENABLED` is off, so browsing works and
+  every path that moves money — onboarding, publishing, buying — refuses
+  with "not open yet". That is deliberate rather than unfinished. Taking
+  other people's money and paying it out is regulated, Stripe Connect
+  needs a legally accountable account holder, and building the payment
+  code now means not writing it under the time pressure of a company that
+  has just been formed.
+  The security model is worth reading before extending it. The
+  merchandise lives in its own table (`marketplace_listing_payloads`)
+  because RLS is row-level: a payload column on the browsable listings
+  table would be handed out by the very policy that makes the shop window
+  work. `marketplace_listings` has no insert or update policy at all —
+  the obvious one would let a seller write `status: 'published'` with the
+  anon key and go live without the mandatory security scan. What is sold
+  is a CONFIGURATION and never an identity: a listed agent drops its
+  author's delivery address, a listed deck drops their sources and brief,
+  and the buyer's copy sets ownership from the verified session. Nothing
+  installs running — agents arrive paused, automations inactive — because
+  buying a thing that starts spending your credits on a schedule you have
+  not read is not something a purchase consented to. Fulfilment happens
+  only in the Stripe webhook and is idempotent against retries; a failed
+  install leaves the purchase `paid` with nothing installed, which is
+  exactly the state "somebody paid and did not receive it" needs to be
+  findable in. Reviews require a paid purchase, one per buyer per listing.
 - **Presentations** (`/dashboard/presentations`) — a deck from one
   description. The brief goes through the shared clarifying-questions
   pre-check (kind `presentation`), then two calls: a web-search pass that

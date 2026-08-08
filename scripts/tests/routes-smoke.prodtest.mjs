@@ -254,6 +254,7 @@ const DASHBOARD_ROUTES = [
   "/dashboard/websites",
   "/dashboard/product-workflow",
   "/dashboard/trading-workflow",
+  "/dashboard/affiliate",
 ];
 
 const { chromium } = await import("playwright");

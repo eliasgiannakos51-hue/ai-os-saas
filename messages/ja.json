@@ -2040,5 +2040,9 @@
       "in_progress": "進行中",
       "shipped": "リリース済み"
     }
+  },
+  "aiNotice": {
+    "interacting": "AIシステムと対話しています——重要な結果は確認してください。",
+    "learnMore": "AIの仕組みについて"
   }
 }

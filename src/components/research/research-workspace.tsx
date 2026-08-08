@@ -21,6 +21,7 @@ import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { MAX_TOPIC_CHARS } from "@/lib/research/research-limits";
 import { researchConfidence } from "@/lib/research/confidence";
+import { AiInteractionNotice } from "@/components/ui/ai-interaction-notice";
 
 type Question = { question: string; why: string };
 type Source = { title: string; url: string };
@@ -252,6 +253,7 @@ export function ResearchWorkspace({
           </span>
         </div>
         {capReached && <p className="text-[11px] text-amber-400/90">{t("capReached")}</p>}
+        <AiInteractionNotice />
       </section>
 
       {/* The stop. The questions and the price, together, before anything

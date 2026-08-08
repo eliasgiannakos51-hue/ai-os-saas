@@ -2040,5 +2040,9 @@
       "in_progress": "进行中",
       "shipped": "已上线"
     }
+  },
+  "aiNotice": {
+    "interacting": "你正在与 AI 系统交互——请核实重要结果。",
+    "learnMore": "我们的 AI 如何运作"
   }
 }

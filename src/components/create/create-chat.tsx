@@ -15,6 +15,7 @@ import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useToast } from "@/components/toast/toast-context";
+import { AiInteractionNotice } from "@/components/ui/ai-interaction-notice";
 import {
   ACCEPTED_ATTACHMENT_IMAGE_TYPES,
   buildAttachmentImagePath,
@@ -219,6 +220,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
             )}
           </button>
         </div>
+        <AiInteractionNotice />
       </form>
 
       <SmartSuggestions

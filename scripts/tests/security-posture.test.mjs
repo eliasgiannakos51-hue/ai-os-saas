@@ -341,6 +341,8 @@ const NO_SESSION_BY_DESIGN = {
     "the landing page's try-before-signup demo — the caller is by definition anonymous. Read-only from the caller's view: stores nothing, reads no table, makes one FAST-tier model call behind a 5/hr-per-IP limit and the platform daily spend cap.",
   "src/app/api/contact/route.ts": "our own public contact page; somebody who cannot sign in is exactly who needs it. Sends only to the fixed ADMIN_EMAILS (the visitor's address is reply-to, never a recipient), honeypot + 5/hr per IP, and stores nothing",
   "src/app/api/client-error/route.ts": "browser error beacon; fires when there may be no session",
+  "src/app/api/health/route.ts":
+    "the uptime probe (V3 Task 15): an external monitor has no session, and a health check behind auth monitors the auth. Reveals only up/down and a latency number — no versions, counts or error detail.",
   "src/app/auth/callback/route.ts":
     "the OAuth/magic-link landing. It CREATES the session by exchanging a single-use code — requiring one first is a contradiction. Surfaced by widening this scan beyond src/app/api; it was never checked before, and reading it line by line confirmed everything after the exchange acts on the user that exchange returned, never on an id from the request.",
   "src/app/s/[subdomain]/route.ts":

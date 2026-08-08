@@ -43,7 +43,22 @@ export default function TermsPage() {
         </p>
       </LegalSection>
 
-      <LegalSection title="4. Limitation of Liability">
+      <LegalSection title="4. AI-Generated Content & Transparency">
+        <p>
+          Ionexa AI is an AI system: its features generate, classify and analyse content by
+          calling large language models (currently Anthropic&apos;s Claude family). By using
+          the Service you acknowledge that you are interacting with AI, that AI outputs can
+          be inaccurate and must be checked before you rely on them, and that content
+          generated for an audience (published websites, shared presentations, agent emails)
+          is marked as AI-generated in line with Article 50 of the EU AI Act. You own the
+          content you create with the Service, and you are responsible for how you use and
+          publish it. Details of which models run and what data they see are at
+          /ai-transparency; acceptable uses are defined in the Acceptable Use Policy at
+          /acceptable-use.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="5. Limitation of Liability">
         <p>
           Ionexa AI is provided &quot;as is,&quot; without warranties of any
           kind, express or implied. To the fullest extent permitted by law,
@@ -53,7 +68,7 @@ export default function TermsPage() {
         </p>
       </LegalSection>
 
-      <LegalSection title="5. Changes to Terms">
+      <LegalSection title="6. Changes to Terms">
         <p>
           We may revise these Terms of Service as the Service evolves.
           Material changes will be reflected by updating the &quot;last

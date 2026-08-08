@@ -192,3 +192,28 @@ export const PUBLIC_RATE_LIMIT = {
   windowMs: WINDOW_MS,
   maxRequests: MAX_REQUESTS_PER_WINDOW,
 };
+
+// EU AI Act, Article 50 (V3 Task 15): a published site is AI-generated
+// content served to the open web, so it carries a MACHINE-READABLE
+// marking, injected at serve time. A <meta name="generator"> plus an
+// HTML comment right after <head> — visible to crawlers, archives and
+// anyone who views source, invisible to the page's design (altering the
+// rendered layout of somebody's published site to add a badge would be
+// defacing their work in the name of compliance; the human-facing
+// disclosure lives in the product and on /ai-transparency instead).
+// Idempotent: serving the same page twice never doubles the marking.
+const AI_MARKING =
+  '<!-- AI-generated content: this page was generated with AI on Ionexa AI (ionexa.ai). EU AI Act Art. 50 transparency marking. -->' +
+  '<meta name="generator" content="Ionexa AI (AI-generated content)" />';
+
+export function withAiContentMarking(html: string): string {
+  if (html.includes('content="Ionexa AI (AI-generated content)"')) return html;
+  const headMatch = html.match(/<head[^>]*>/i);
+  if (headMatch && headMatch.index !== undefined) {
+    const insertAt = headMatch.index + headMatch[0].length;
+    return html.slice(0, insertAt) + AI_MARKING + html.slice(insertAt);
+  }
+  // No <head> at all (malformed generation) — prepend, which keeps the
+  // marking present without pretending to know the document's structure.
+  return AI_MARKING + html;
+}

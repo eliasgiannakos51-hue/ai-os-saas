@@ -24,6 +24,7 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { FilePicker } from "@/components/ui/file-picker";
 import { useCredits } from "@/components/credits/credits-context";
+import { AiInteractionNotice } from "@/components/ui/ai-interaction-notice";
 import { useToast } from "@/components/toast/toast-context";
 import { EmptyState } from "@/components/empty-state";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
@@ -1382,6 +1383,7 @@ export function WebsiteBuilderWorkspace({
                   {generating ? t("generating") : t("generateButton")}
                 </button>
               )}
+              <AiInteractionNotice />
             </form>
           ) : (
             <button

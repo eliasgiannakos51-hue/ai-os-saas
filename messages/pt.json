@@ -2040,5 +2040,9 @@
       "in_progress": "Em andamento",
       "shipped": "Lançado"
     }
+  },
+  "aiNotice": {
+    "interacting": "Você está interagindo com um sistema de IA — verifique resultados importantes.",
+    "learnMore": "Como nossa IA funciona"
   }
 }

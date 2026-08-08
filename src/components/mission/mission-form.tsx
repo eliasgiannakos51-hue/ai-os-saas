@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useCredits } from "@/components/credits/credits-context";
 import { CostEstimateHint, LargeActionConfirm, useCostEstimate } from "@/components/credits/cost-estimate";
+import { AiInteractionNotice } from "@/components/ui/ai-interaction-notice";
 import { OutOfCreditsNotice } from "@/components/credits/out-of-credits-notice";
 import { useToast } from "@/components/toast/toast-context";
 
@@ -135,6 +136,7 @@ export function MissionForm({ onCreated }: { onCreated?: () => void } = {}) {
       {/* Shown before submit, not after — the whole point is that the cost
           is never a surprise. */}
       <CostEstimateHint credits={estimatedCredits} />
+      <AiInteractionNotice />
 
       {outOfCredits && <OutOfCreditsNotice />}
 

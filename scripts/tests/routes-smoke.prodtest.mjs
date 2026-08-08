@@ -211,7 +211,7 @@ if (!up || /EADDRINUSE|Failed to start server/.test(serverLog)) {
 }
 console.log(`production server up on :${PORT} (next start, NODE_ENV=production)`);
 
-const PUBLIC_ROUTES = ["/", "/pricing", "/terms", "/privacy", "/login", "/signup", "/roadmap", "/contact", "/changelog", "/help"];
+const PUBLIC_ROUTES = ["/", "/pricing", "/terms", "/privacy", "/login", "/signup", "/roadmap", "/contact", "/changelog", "/help", "/ai-transparency", "/acceptable-use", "/dpa"];
 // /onboarding is authenticated but lives OUTSIDE /dashboard on purpose —
 // it has no sidebar, because the one thing it is for is getting real
 // data in and one true sentence back out. Listed here so the smoke test
@@ -275,11 +275,14 @@ async function inspect(context, route) {
   });
   page.on("pageerror", (e) => errors.push(`pageerror: ${e.message}`));
   let status = 0;
+  const navStartedAt = Date.now();
+  let navMs = 0;
   try {
     const res = await page.goto(`http://127.0.0.1:${PORT}${route}`, {
       waitUntil: "networkidle",
       timeout: 25000,
     });
+    navMs = Date.now() - navStartedAt;
     status = res?.status() ?? 0;
   } catch (err) {
     await page.close();
@@ -323,7 +326,7 @@ async function inspect(context, route) {
       !/Failed to fetch RSC payload[\s\S]*Falling back to browser navigation/i.test(e)
   );
   await page.close();
-  return { status, errors: real, keys, overflow, landedOn };
+  return { status, errors: real, keys, overflow, landedOn, navMs };
 }
 
 console.log("\n== 1. public routes (logged out) ==");
@@ -346,8 +349,10 @@ const authed = await browser.newContext({ viewport: { width: 1280, height: 900 }
 await authed.addCookies([
   { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
 ]);
+const dashboardNavTimes = [];
 for (const route of DASHBOARD_ROUTES) {
   const r = await inspect(authed, route);
+  dashboardNavTimes.push(r.navMs);
   check(`${route}: 200`, r.status, 200);
   // A silent redirect to /login is the failure mode that makes every
   // other assertion on this route pass while proving nothing.
@@ -361,6 +366,23 @@ for (const route of DASHBOARD_ROUTES) {
   );
 }
 await authed.close();
+
+// Performance (V3 Task 15): the spec's page-load budget is <3s. The
+// harness is local (no network latency, no CDN), so the honest local
+// assertion is on the MEDIAN full navigation (goto -> networkidle)
+// across the signed-in routes, with the first route excluded — it pays
+// the server's cold start for everyone. Field Web Vitals come from real
+// traffic (see docs/OPERATIONS.md); this catches a regression that
+// makes a route structurally slow.
+{
+  const warm = dashboardNavTimes.slice(1).sort((a, b) => a - b);
+  const median = warm[Math.floor(warm.length / 2)] ?? 0;
+  const slowest = warm[warm.length - 1] ?? 0;
+  checkTrue(
+    `median signed-in navigation under 3s (median ${median}ms, slowest ${slowest}ms)`,
+    median < 3000
+  );
+}
 
 await browser.close();
 cleanup();

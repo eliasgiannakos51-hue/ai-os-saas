@@ -2040,5 +2040,9 @@
       "in_progress": "In Arbeit",
       "shipped": "Veröffentlicht"
     }
+  },
+  "aiNotice": {
+    "interacting": "Du interagierst mit einem KI-System — prüfe wichtige Ergebnisse.",
+    "learnMore": "Wie unsere KI arbeitet"
   }
 }

@@ -6,6 +6,7 @@ import {
   notFoundHeaders,
   isLikelyNewVisitor,
   publicRequestAllowed,
+  withAiContentMarking,
 } from "@/lib/publishing/public-serving";
 
 export const dynamic = "force-dynamic";
@@ -103,7 +104,7 @@ export async function GET(request: Request, { params }: { params: { subdomain: s
     // sub-millisecond cost on a response that already did a select.
     await recordView(admin, site.id, site.user_id, isLikelyNewVisitor(request, String(site.id)));
 
-    return new Response(site.html_content, {
+    return new Response(withAiContentMarking(site.html_content), {
       status: 200,
       headers: {
         ...publishedSiteHeaders(),

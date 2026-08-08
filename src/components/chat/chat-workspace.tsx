@@ -17,6 +17,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { MessageContent } from "@/components/chat/message-content";
 import { useCredits } from "@/components/credits/credits-context";
+import { AiInteractionNotice } from "@/components/ui/ai-interaction-notice";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
 
 // Remembered across visits, per the focus-mode toggle below.
@@ -611,6 +612,7 @@ export function ChatWorkspace({
                     : tFree("exhausted")}
                 </p>
               )}
+              <AiInteractionNotice />
             </form>
           </div>
         </div>

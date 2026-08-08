@@ -2040,5 +2040,9 @@
       "in_progress": "In progress",
       "shipped": "Shipped"
     }
+  },
+  "aiNotice": {
+    "interacting": "You're interacting with an AI system — check important results.",
+    "learnMore": "How our AI works"
   }
 }

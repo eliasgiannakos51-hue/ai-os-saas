@@ -149,7 +149,24 @@ try {
   const res = await fetch(`${base}/s/acme`);
   check("200", res.status, 200);
   const html = await res.text();
-  check("the bytes are the published HTML, not a wrapper", html, SITE_HTML);
+  // Since V3 Task 15 the served bytes are the published HTML PLUS the
+  // EU AI Act art. 50 marking injected into <head> at serve time — the
+  // one deliberate difference from the stored bytes. Assert both halves
+  // of that contract: the user's document arrives intact, and the
+  // marking is present exactly once.
+  checkTrue(
+    "the published HTML arrives intact (plus the AI marking, nothing else)",
+    html.replace(
+      /<!-- AI-generated content:[^>]*-->|<meta name="generator" content="Ionexa AI \(AI-generated content\)" \/>/g,
+      ""
+    ) === SITE_HTML,
+    html.slice(0, 300)
+  );
+  check(
+    "the art. 50 marking is present exactly once",
+    (html.match(/Ionexa AI \(AI-generated content\)/g) ?? []).length,
+    1
+  );
   checkTrue(
     "...served as its own document, not embedded in ours",
     !html.includes("__next") && !html.includes("_next/static"),

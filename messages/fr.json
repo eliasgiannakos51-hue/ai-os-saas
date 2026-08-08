@@ -617,6 +617,13 @@
       "statEarned": "Gagné",
       "statUnpaid": "Pas encore versé",
       "payoutNote": "Les commissions sont enregistrées au fur et à mesure. Leur versement passe par le même compte Stripe que la place de marché, qui n'est pas encore activé : ce que vous avez gagné vous est dû et sera versé."
+    },
+    "learnedPreferences": {
+      "title": "Ce que l'IA a appris de vous",
+      "description": "Observé à partir de vos actions réelles — jamais deviné, jamais écrit par l'IA elle-même. Cela oriente discrètement les suggestions. Supprimez-en un et l'IA l'oublie immédiatement.",
+      "empty": "Rien pour l'instant. À mesure que vous utilisez le produit, les schémas répétés apparaissent ici.",
+      "evidence": "vu {count}x",
+      "forget": "Oublier : {observation}"
     }
   },
   "dashboard": {
@@ -960,7 +967,9 @@
       "regenerateFree": "Régénérer (gratuit)",
       "editUnavailable": "Vous pourrez demander des modifications une fois le site généré.",
       "exampleName": "Aroma — café de quartier",
-      "exampleDescription": "Un site web d'une page pour un petit café de spécialité nommé Aroma. Ambiance chaleureuse et moderne. Sections : un court mot de bienvenue, notre histoire, un menu de 6 boissons avec les prix, les horaires, et une section contact avec adresse et téléphone. Appel à l'action : commander du café en ligne."
+      "exampleDescription": "Un site web d'une page pour un petit café de spécialité nommé Aroma. Ambiance chaleureuse et moderne. Sections : un court mot de bienvenue, notre histoire, un menu de 6 boissons avec les prix, les horaires, et une section contact avec adresse et téléphone. Appel à l'action : commander du café en ligne.",
+      "suggestReferenceImages": "Vous le voulez plus proche de votre marque ? Ajoutez un logo ou une capture de style en images de référence et régénérez — cette exécution n'en avait aucune.",
+      "suggestDismiss": "Ignorer"
     },
     "marketplace": {
       "title": "Place de marché",
@@ -1470,7 +1479,15 @@
       "empty": "Aucun rapport. Décrivez un sujet ci-dessus pour voir ce qui serait recherché.",
       "usedThisMonth": "{used} sur {cap} ce mois-ci",
       "usedUnlimited": "{used} ce mois-ci",
-      "capReached": "Vous avez utilisé les rapports de ce mois. Réinitialisation le 1er."
+      "capReached": "Vous avez utilisé les rapports de ce mois. Réinitialisation le 1er.",
+      "confidenceGrounded": "Fondé sur {count} sources — chaque chiffre renvoie à l'une d'elles.",
+      "confidenceThin": "Fondé sur seulement {count} sources. Prenez-le comme point de départ — un sujet plus précis et une nouvelle exécution chercheront plus en profondeur.",
+      "confidenceInsufficient": "Pas assez de sources solides trouvées. Rien ici n'a été gonflé pour le masquer — essayez un sujet plus précis et relancez.",
+      "howThisWasMade": "Comment cela a été fait",
+      "howThisWasMadeNote": "Enregistré depuis l'exécution réelle. Les crédits par étape sont la facturation finale répartie selon le coût réel de chaque appel — approximatifs par conception ; le total est exact.",
+      "runStageQuestion": "Recherche sur la question {number}",
+      "runStageSynthesis": "Rédaction du rapport à partir de tous les résultats",
+      "stepSearches": "{count} recherches web"
     },
     "presentations": {
       "title": "Présentations",

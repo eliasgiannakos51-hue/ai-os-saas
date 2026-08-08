@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
+import { recordLearnedObservation } from "@/lib/learning";
 import { MAX_CSV_BYTES, CsvError, parseCsv } from "@/lib/import/csv-parse";
 import { getImportTarget, isImportTargetSlug } from "@/lib/import/targets";
 import { validateMapping } from "@/lib/import/map-columns";
@@ -158,6 +159,12 @@ export async function POST(request: Request) {
       })
       .eq("id", importRow.id)
       .eq("user_id", user.id);
+
+    // Learning profile (V3 Task 14): where somebody keeps their real
+    // data is the strongest module-preference signal there is.
+    if (result.inserted > 0) {
+      await recordLearnedObservation(user.id, "modules", `keeps ${target.slug} data here`);
+    }
 
     return NextResponse.json({
       ok: true,

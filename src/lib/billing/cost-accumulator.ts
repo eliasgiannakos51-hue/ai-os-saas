@@ -92,6 +92,24 @@ export class CostAccumulator {
     );
   }
 
+  /**
+   * Per-call summaries in the order they ran (V3 Task 14 —
+   * explainability). Each entry is one real model call: its stage, the
+   * model that actually answered, the searches it made, and its share of
+   * the total USD cost. Callers split the SETTLED credit charge by
+   * usdShare to show "≈N credits" per step — approximate by
+   * construction, and labelled so.
+   */
+  stepSummaries(): { stage: CostStage; model: string; webSearches: number; usdShare: number }[] {
+    const totalUsd = this.totalUsdCost;
+    return this.entries.map((e) => ({
+      stage: e.stage,
+      model: e.model,
+      webSearches: e.usage.webSearches,
+      usdShare: totalUsd > 0 ? e.usage.usdCost / totalUsd : 0,
+    }));
+  }
+
   /** Per-stage USD, stored as jsonb so a margin problem can be traced to
    *  the sub-call responsible rather than just "the action was expensive". */
   breakdownByStage(): Record<string, { usdCost: number; calls: number }> {

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
+import { recordLearnedObservation } from "@/lib/learning";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -46,7 +47,7 @@ export async function POST(_request: Request, { params }: { params: { id: string
       .update({ dismissed_at: new Date().toISOString() })
       .eq("id", params.id)
       .eq("user_id", user.id)
-      .select("id")
+      .select("id, detector")
       .maybeSingle();
 
     if (error) {
@@ -57,6 +58,17 @@ export async function POST(_request: Request, { params }: { params: { id: string
     // exists, which is an existence oracle.
     if (!data) {
       return NextResponse.json({ ok: false, error: "Insight not found." }, { status: 404 });
+    }
+
+    // Learning profile (V3 Task 14): a dismissal is a real signal about
+    // what this user does NOT want re-reported. Best-effort — recording
+    // it must never fail the dismiss.
+    if (data.detector) {
+      await recordLearnedObservation(
+        user.id,
+        "dismissals",
+        `dismisses "${String(data.detector)}" insights`
+      );
     }
 
     return NextResponse.json({ ok: true });

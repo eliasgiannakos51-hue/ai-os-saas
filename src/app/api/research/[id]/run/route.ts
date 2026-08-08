@@ -19,7 +19,8 @@ import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } fro
 import { logApiError } from "@/lib/log-error";
 import { RESEARCH_MODEL } from "@/lib/files/file-models";
 import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
-import { RESEARCH_MAX_SEARCHES } from "@/lib/research/research-limits";
+import { RESEARCH_MAX_SEARCHES, RESEARCH_CONCURRENCY } from "@/lib/research/research-limits";
+import { mapWithConcurrency } from "@/lib/ai/parallel";
 import {
   collateSources,
   researchQuestion,
@@ -190,20 +191,31 @@ export async function POST(_request: Request, { params }: { params: { id: string
     const anthropic = new Anthropic({ apiKey });
     const findings: ResearchFinding[] = [];
 
-    // Sequential, not parallel. Six concurrent search-enabled calls is a
-    // burst that trips Anthropic's own rate limits on a busy account, and
-    // the failure mode of that is a report missing a third of its
-    // research for no reason the user can see.
-    for (const question of questions) {
-      const result = await researchQuestion({
-        anthropic,
-        topic: String(report.topic),
-        question,
-        language,
-        costs,
-      });
-      findings.push(result.finding);
-    }
+    // A POOL of RESEARCH_CONCURRENCY, not a bare Promise.all and not the
+    // old sequential loop (V3 Task 14). The questions are independent,
+    // so a 6-question report now takes ~2 question-latencies instead of
+    // 6; the pool cap is what keeps a burst of search-enabled calls from
+    // tripping the provider's rate limits, which was the reason the loop
+    // was sequential in the first place. The reservation above already
+    // covers EVERY question (estimate.reserveCredits is computed from
+    // questions.length), so concurrency changes nothing about coverage —
+    // each call records into the same accumulator and the settlement
+    // charges what actually ran.
+    const pooledFindings = await mapWithConcurrency(
+      questions,
+      RESEARCH_CONCURRENCY,
+      async (question) => {
+        const result = await researchQuestion({
+          anthropic,
+          topic: String(report.topic),
+          question,
+          language,
+          costs,
+        });
+        return result.finding;
+      }
+    );
+    findings.push(...pooledFindings);
 
     const usable = findings.filter((f) => f.summary.trim().length > 0);
     if (usable.length === 0) {
@@ -312,6 +324,22 @@ export async function POST(_request: Request, { params }: { params: { id: string
       documentId = String(document.id);
     }
 
+    // Explainability (V3 Task 14): the real steps that ran, each with
+    // the model that answered, its searches, and ≈credits — the settled
+    // charge split by each call's share of real USD cost. Approximate by
+    // construction and labelled so in the UI; the total always equals
+    // what was actually charged. The accumulator records every call as
+    // "generation", so the semantic label comes from position: this run
+    // makes exactly one call per question and then one synthesis.
+    const stepSummaries = costs.stepSummaries();
+    const runSteps = stepSummaries.map((step, index) => ({
+      stage: index < stepSummaries.length - 1 ? "question" : "synthesis",
+      questionNumber: index < stepSummaries.length - 1 ? index + 1 : null,
+      model: step.model,
+      searches: step.webSearches,
+      approxCredits: Math.round(settlement.creditsCharged * step.usdShare * 10) / 10,
+    }));
+
     const { error: finishError } = await supabase
       .from("research_reports")
       .update({
@@ -320,6 +348,7 @@ export async function POST(_request: Request, { params }: { params: { id: string
         sources,
         document_id: documentId,
         credits_charged: settlement.creditsCharged,
+        run_steps: runSteps,
         completed_at: new Date().toISOString(),
       })
       .eq("id", report.id)

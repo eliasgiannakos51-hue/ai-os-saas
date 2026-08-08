@@ -617,6 +617,13 @@
       "statEarned": "Earned",
       "statUnpaid": "Not yet paid out",
       "payoutNote": "Commissions are recorded as they are earned. Paying them out uses the same Stripe account as the marketplace, which is not switched on yet — what you have earned is owed to you regardless, and will be paid once it is."
+    },
+    "learnedPreferences": {
+      "title": "What the AI has learned about you",
+      "description": "Observed from your real actions — never guessed, never written by the AI itself. These quietly steer suggestions. Delete any of them and the AI forgets it immediately.",
+      "empty": "Nothing yet. As you use the product, repeated patterns show up here.",
+      "evidence": "seen {count}x",
+      "forget": "Forget: {observation}"
     }
   },
   "dashboard": {
@@ -960,7 +967,9 @@
       "regenerateFree": "Regenerate (free)",
       "editUnavailable": "You can request changes once this website has finished generating.",
       "exampleName": "Aroma — neighbourhood coffee shop",
-      "exampleDescription": "A one-page website for a small specialty coffee shop called Aroma. Warm, modern feel. Sections: a short welcome, our story, a menu with 6 drinks and prices, opening hours, and a contact section with address and phone. Call to action: order beans online."
+      "exampleDescription": "A one-page website for a small specialty coffee shop called Aroma. Warm, modern feel. Sections: a short welcome, our story, a menu with 6 drinks and prices, opening hours, and a contact section with address and phone. Call to action: order beans online.",
+      "suggestReferenceImages": "Want it closer to your brand? Add a logo or a style screenshot as reference images and generate again — this run had none to work from.",
+      "suggestDismiss": "Dismiss"
     },
     "marketplace": {
       "title": "Marketplace",
@@ -1470,7 +1479,15 @@
       "empty": "No reports yet. Describe a topic above to see what it would research.",
       "usedThisMonth": "{used} of {cap} this month",
       "usedUnlimited": "{used} this month",
-      "capReached": "You have used this month's research reports. It resets on the 1st."
+      "capReached": "You have used this month's research reports. It resets on the 1st.",
+      "confidenceGrounded": "Based on {count} sources — every figure links to one below.",
+      "confidenceThin": "Based on only {count} sources. Treat this as a starting point — narrowing the topic and running again will search deeper.",
+      "confidenceInsufficient": "Not enough solid sources were found. Nothing here is padded to hide that — try a narrower topic and run again.",
+      "howThisWasMade": "How this was made",
+      "howThisWasMadeNote": "Recorded from the actual run. Credits per step are the settled charge split by each call's real cost share — approximate by design; the total is exact.",
+      "runStageQuestion": "Researched question {number}",
+      "runStageSynthesis": "Wrote the report from all findings",
+      "stepSearches": "{count} web searches"
     },
     "presentations": {
       "title": "Presentations",

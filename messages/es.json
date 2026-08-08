@@ -617,6 +617,13 @@
       "statEarned": "Ganado",
       "statUnpaid": "Pendiente de pago",
       "payoutNote": "Las comisiones se registran según se ganan. Pagarlas usa la misma cuenta de Stripe que el mercado, que aún no está activada: lo ganado se te debe igualmente y se pagará cuando lo esté."
+    },
+    "learnedPreferences": {
+      "title": "Lo que la IA ha aprendido de ti",
+      "description": "Observado de tus acciones reales: nunca adivinado, nunca escrito por la propia IA. Guían las sugerencias discretamente. Borra cualquiera y la IA lo olvida al instante.",
+      "empty": "Nada aún. A medida que uses el producto, los patrones repetidos aparecerán aquí.",
+      "evidence": "visto {count}x",
+      "forget": "Olvidar: {observation}"
     }
   },
   "dashboard": {
@@ -960,7 +967,9 @@
       "regenerateFree": "Regenerar (gratis)",
       "editUnavailable": "Podrás pedir cambios cuando termine de generarse el sitio web.",
       "exampleName": "Aroma — cafetería de barrio",
-      "exampleDescription": "Un sitio web de una página para una pequeña cafetería de especialidad llamada Aroma. Estilo cálido y moderno. Secciones: una breve bienvenida, nuestra historia, un menú con 6 bebidas y precios, horario y una sección de contacto con dirección y teléfono. Llamada a la acción: pedir café en línea."
+      "exampleDescription": "Un sitio web de una página para una pequeña cafetería de especialidad llamada Aroma. Estilo cálido y moderno. Secciones: una breve bienvenida, nuestra historia, un menú con 6 bebidas y precios, horario y una sección de contacto con dirección y teléfono. Llamada a la acción: pedir café en línea.",
+      "suggestReferenceImages": "¿Lo quieres más cercano a tu marca? Añade un logo o una captura de estilo como imágenes de referencia y genera de nuevo: esta ejecución no tenía ninguna.",
+      "suggestDismiss": "Descartar"
     },
     "marketplace": {
       "title": "Mercado",
@@ -1470,7 +1479,15 @@
       "empty": "Aún no hay informes. Describe un tema arriba para ver qué investigaría.",
       "usedThisMonth": "{used} de {cap} este mes",
       "usedUnlimited": "{used} este mes",
-      "capReached": "Has usado los informes de este mes. Se reinicia el día 1."
+      "capReached": "Has usado los informes de este mes. Se reinicia el día 1.",
+      "confidenceGrounded": "Basado en {count} fuentes: cada cifra enlaza a una de abajo.",
+      "confidenceThin": "Basado en solo {count} fuentes. Tómalo como punto de partida: con un tema más concreto y otra ejecución buscará más a fondo.",
+      "confidenceInsufficient": "No se encontraron fuentes sólidas suficientes. Nada aquí se rellenó para ocultarlo: prueba un tema más concreto y vuelve a ejecutarlo.",
+      "howThisWasMade": "Cómo se hizo esto",
+      "howThisWasMadeNote": "Registrado de la ejecución real. Los créditos por paso son el cargo final repartido por el coste real de cada llamada — aproximados por diseño; el total es exacto.",
+      "runStageQuestion": "Investigó la pregunta {number}",
+      "runStageSynthesis": "Redactó el informe con todos los hallazgos",
+      "stepSearches": "{count} búsquedas web"
     },
     "presentations": {
       "title": "Presentaciones",

@@ -20,10 +20,18 @@ import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { MAX_TOPIC_CHARS } from "@/lib/research/research-limits";
+import { researchConfidence } from "@/lib/research/confidence";
 
 type Question = { question: string; why: string };
 type Source = { title: string; url: string };
 type Section = { heading: string; body: string };
+type RunStep = {
+  stage: string;
+  questionNumber?: number | null;
+  model: string;
+  searches: number;
+  approxCredits: number;
+};
 
 export type ResearchReport = {
   id: string;
@@ -32,6 +40,7 @@ export type ResearchReport = {
   questions: Question[];
   sections?: Section[];
   sources?: Source[];
+  run_steps?: RunStep[] | null;
   document_id: string | null;
   credits_charged: number;
   error: string | null;
@@ -382,6 +391,33 @@ export function ResearchWorkspace({
             </div>
           ))}
 
+          {/* Confidence (V3 Task 14) — never a percentage: the only
+              thing stated is what is actually known, the count of real
+              citation-block sources against the questions asked. When
+              thin, the same line doubles as the one dismissible
+              improvement suggestion for this report. */}
+          {open.status === "ready" &&
+            (() => {
+              const confidence = researchConfidence({
+                sourceCount: (open.sources ?? []).length,
+                questionCount: open.questions?.length ?? 1,
+              });
+              if (confidence.level === "grounded") {
+                return (
+                  <p className="rounded-xl border border-border bg-panel/60 p-2.5 text-[11px] text-muted">
+                    {t("confidenceGrounded", { count: confidence.sourceCount })}
+                  </p>
+                );
+              }
+              return (
+                <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-2.5 text-[11px] leading-relaxed text-amber-300">
+                  {confidence.level === "thin"
+                    ? t("confidenceThin", { count: confidence.sourceCount })
+                    : t("confidenceInsufficient")}
+                </p>
+              );
+            })()}
+
           {(open.sources ?? []).length > 0 && (
             <div>
               <h3 className="mb-1 text-xs font-semibold text-foreground">{t("sources")}</h3>
@@ -405,6 +441,34 @@ export function ResearchWorkspace({
                 ))}
               </ol>
             </div>
+          )}
+
+          {/* Explainability (V3 Task 14): the real steps that ran —
+              recorded at settlement, not reconstructed. Credits are the
+              settled charge split by each call's share of real cost,
+              labelled approximate because they are. */}
+          {(open.run_steps ?? []).length > 0 && (
+            <details className="rounded-xl border border-border bg-panel/60 p-3">
+              <summary className="cursor-pointer text-xs font-semibold text-foreground">
+                {t("howThisWasMade")}
+              </summary>
+              <ol className="mt-2 space-y-1">
+                {(open.run_steps ?? []).map((step, i) => (
+                  <li key={i} className="flex flex-wrap items-center gap-2 text-[11px] text-muted">
+                    <span className="font-mono text-foreground/80">{i + 1}.</span>
+                    <span>
+                      {step.stage === "synthesis"
+                        ? t("runStageSynthesis")
+                        : t("runStageQuestion", { number: step.questionNumber ?? i + 1 })}
+                    </span>
+                    <span className="font-mono text-[10px]">{step.model}</span>
+                    {step.searches > 0 && <span>{t("stepSearches", { count: step.searches })}</span>}
+                    <span className="ml-auto tabular-nums">≈{step.approxCredits} cr</span>
+                  </li>
+                ))}
+              </ol>
+              <p className="mt-2 text-[10px] text-muted/70">{t("howThisWasMadeNote")}</p>
+            </details>
           )}
 
           {open.document_id && (

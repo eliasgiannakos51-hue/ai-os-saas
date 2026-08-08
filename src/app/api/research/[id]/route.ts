@@ -22,7 +22,7 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     const { data, error } = await supabase
       .from("research_reports")
       .select(
-        "id, topic, language, status, questions, sections, sources, document_id, credits_charged, error, created_at, completed_at"
+        "id, topic, language, status, questions, sections, sources, run_steps, document_id, credits_charged, error, created_at, completed_at"
       )
       .eq("id", params.id)
       .eq("user_id", user.id)

@@ -617,6 +617,13 @@
       "statEarned": "已赚取",
       "statUnpaid": "尚未结算",
       "payoutNote": "佣金在产生时即被记录。结算使用与市场相同的 Stripe 账户，该功能尚未开放——无论如何，已赚取的部分都归你所有，开放后会支付。"
+    },
+    "learnedPreferences": {
+      "title": "AI 对你的了解",
+      "description": "从你的真实操作中观察——绝不猜测，也不由 AI 自行编写。它们会悄悄影响建议。删除任意一条，AI 立即忘记。",
+      "empty": "还没有。随着你的使用，重复的模式会出现在这里。",
+      "evidence": "出现 {count} 次",
+      "forget": "忘记：{observation}"
     }
   },
   "dashboard": {
@@ -960,7 +967,9 @@
       "regenerateFree": "重新生成（免费）",
       "editUnavailable": "网站生成完成后即可提出修改要求。",
       "exampleName": "Aroma——社区咖啡店",
-      "exampleDescription": "为一家名为 Aroma 的小型精品咖啡店制作单页网站。风格温暖现代。栏目：简短欢迎语、我们的故事、含 6 款饮品和价格的菜单、营业时间，以及带地址和电话的联系栏目。行动号召：在线订购咖啡豆。"
+      "exampleDescription": "为一家名为 Aroma 的小型精品咖啡店制作单页网站。风格温暖现代。栏目：简短欢迎语、我们的故事、含 6 款饮品和价格的菜单、营业时间，以及带地址和电话的联系栏目。行动号召：在线订购咖啡豆。",
+      "suggestReferenceImages": "想更贴近你的品牌？添加 logo 或风格截图作为参考图片后重新生成——本次运行没有任何参考。",
+      "suggestDismiss": "忽略"
     },
     "marketplace": {
       "title": "市场",
@@ -1470,7 +1479,15 @@
       "empty": "还没有报告。在上方描述一个主题，看看它会研究什么。",
       "usedThisMonth": "本月 {cap} 次中的 {used} 次",
       "usedUnlimited": "本月 {used} 次",
-      "capReached": "你已用完本月的研究报告额度，将于每月 1 日重置。"
+      "capReached": "你已用完本月的研究报告额度，将于每月 1 日重置。",
+      "confidenceGrounded": "基于 {count} 个来源——每个数字都对应下方其一。",
+      "confidenceThin": "仅基于 {count} 个来源。请视为起点——缩小主题后再运行一次会搜索得更深。",
+      "confidenceInsufficient": "未找到足够可靠的来源。这里没有为掩盖而注水——请尝试更具体的主题并重新运行。",
+      "howThisWasMade": "这是如何完成的",
+      "howThisWasMadeNote": "来自真实运行的记录。每步的积分是按各调用真实成本份额拆分的最终计费——设计上为近似值；总数是精确的。",
+      "runStageQuestion": "研究第 {number} 个问题",
+      "runStageSynthesis": "汇总所有发现撰写报告",
+      "stepSearches": "{count} 次网络搜索"
     },
     "presentations": {
       "title": "演示文稿",

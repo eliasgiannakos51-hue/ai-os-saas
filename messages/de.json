@@ -617,6 +617,13 @@
       "statEarned": "Verdient",
       "statUnpaid": "Noch nicht ausgezahlt",
       "payoutNote": "Provisionen werden erfasst, sobald sie anfallen. Die Auszahlung läuft über dasselbe Stripe-Konto wie der Marktplatz, das noch nicht freigeschaltet ist — geschuldet ist Ihnen das Verdiente trotzdem."
+    },
+    "learnedPreferences": {
+      "title": "Was die KI über dich gelernt hat",
+      "description": "Aus deinen echten Aktionen beobachtet — nie geraten, nie von der KI selbst geschrieben. Steuert Vorschläge dezent. Lösche etwas und die KI vergisst es sofort.",
+      "empty": "Noch nichts. Während du das Produkt nutzt, erscheinen wiederholte Muster hier.",
+      "evidence": "{count}x gesehen",
+      "forget": "Vergessen: {observation}"
     }
   },
   "dashboard": {
@@ -960,7 +967,9 @@
       "regenerateFree": "Neu erzeugen (kostenlos)",
       "editUnavailable": "Änderungen sind möglich, sobald die Website fertig erzeugt ist.",
       "exampleName": "Aroma — Café im Viertel",
-      "exampleDescription": "Eine einseitige Website für ein kleines Specialty-Café namens Aroma. Warmes, modernes Gefühl. Abschnitte: eine kurze Begrüßung, unsere Geschichte, eine Karte mit 6 Getränken und Preisen, Öffnungszeiten und ein Kontaktbereich mit Adresse und Telefon. Call-to-Action: Kaffeebohnen online bestellen."
+      "exampleDescription": "Eine einseitige Website für ein kleines Specialty-Café namens Aroma. Warmes, modernes Gefühl. Abschnitte: eine kurze Begrüßung, unsere Geschichte, eine Karte mit 6 Getränken und Preisen, Öffnungszeiten und ein Kontaktbereich mit Adresse und Telefon. Call-to-Action: Kaffeebohnen online bestellen.",
+      "suggestReferenceImages": "Soll es näher an deiner Marke sein? Füge ein Logo oder einen Stil-Screenshot als Referenzbilder hinzu und generiere erneut — dieser Lauf hatte keine.",
+      "suggestDismiss": "Ausblenden"
     },
     "marketplace": {
       "title": "Marktplatz",
@@ -1470,7 +1479,15 @@
       "empty": "Noch keine Berichte. Beschreibe oben ein Thema, um zu sehen, was recherchiert würde.",
       "usedThisMonth": "{used} von {cap} in diesem Monat",
       "usedUnlimited": "{used} in diesem Monat",
-      "capReached": "Du hast die Berichte dieses Monats aufgebraucht. Zurücksetzung am 1."
+      "capReached": "Du hast die Berichte dieses Monats aufgebraucht. Zurücksetzung am 1.",
+      "confidenceGrounded": "Auf Basis von {count} Quellen — jede Zahl verweist auf eine davon.",
+      "confidenceThin": "Auf Basis von nur {count} Quellen. Als Ausgangspunkt nehmen — ein engeres Thema und ein neuer Lauf suchen tiefer.",
+      "confidenceInsufficient": "Nicht genug belastbare Quellen gefunden. Nichts hier wurde aufgefüllt, um das zu verbergen — versuch ein engeres Thema und starte erneut.",
+      "howThisWasMade": "Wie das entstanden ist",
+      "howThisWasMadeNote": "Aus dem echten Lauf aufgezeichnet. Credits pro Schritt sind die endgültige Abrechnung, aufgeteilt nach dem realen Kostenanteil jedes Aufrufs — konstruktionsbedingt ungefähr; die Summe ist exakt.",
+      "runStageQuestion": "Frage {number} recherchiert",
+      "runStageSynthesis": "Bericht aus allen Ergebnissen geschrieben",
+      "stepSearches": "{count} Websuchen"
     },
     "presentations": {
       "title": "Präsentationen",

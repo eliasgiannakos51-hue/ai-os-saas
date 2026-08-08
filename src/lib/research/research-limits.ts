@@ -16,5 +16,13 @@ export const RESEARCH_SEARCHES_PER_QUESTION = 4;
 
 export const RESEARCH_MAX_SEARCHES = RESEARCH_MAX_QUESTIONS * RESEARCH_SEARCHES_PER_QUESTION;
 
+// V3 Task 14 — parallel thinking. The questions are independent, so they
+// run through a POOL of this many concurrent search-enabled calls: the
+// latency of the slowest ceil(N/3) instead of the sum of all N. Three,
+// not six: a six-wide burst of search calls is what trips provider rate
+// limits on a busy account, which surfaces as a report missing a third
+// of its research for no reason the user can see.
+export const RESEARCH_CONCURRENCY = 3;
+
 export const MAX_TOPIC_CHARS = 500;
 export const MIN_TOPIC_CHARS = 8;

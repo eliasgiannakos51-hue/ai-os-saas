@@ -90,6 +90,11 @@ export const EXPORTED_TABLES: ExportTable[] = [
   { table: "user_insights", column: "user_id" },
   { table: "user_onboarding", column: "user_id" },
 
+  // What the product INFERRED about them (V3 Task 14) — the most
+  // export-worthy table there is: inferences are personal data the
+  // subject never typed.
+  { table: "user_preferences_learned", column: "user_id" },
+
   // --- product feedback and what we told them ---
   { table: "feature_requests", column: "user_id" },
   { table: "feature_request_votes", column: "user_id" },

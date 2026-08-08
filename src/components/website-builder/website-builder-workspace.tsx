@@ -229,6 +229,12 @@ export function WebsiteBuilderWorkspace({
   // everything the original submit already computed (name, description,
   // already-uploaded reference image paths) so answering/skipping
   // resubmits without re-uploading images or losing the original text.
+  // One improvement suggestion per generation, dismissible, never
+  // automatic (V3 Task 14). Rule-based from a REAL signal — this
+  // generation ran without reference images — not a model asked to
+  // find something to say.
+  const [improvementHint, setImprovementHint] = useState<null | "addReferenceImages">(null);
+
   const [pendingClarification, setPendingClarification] = useState<{
     questions: string[];
     name: string;
@@ -277,7 +283,7 @@ export function WebsiteBuilderWorkspace({
   // or is still running entirely independently of whether anyone was
   // watching, so this just catches the UI up to whatever the database
   // already says.
-  function pollWebsiteStatus(id: string) {
+  function pollWebsiteStatus(id: string, options?: { suggestImagesOnComplete?: boolean }) {
     async function tick() {
       let record: UserWebsite;
       let usagePayload: unknown = null;
@@ -310,6 +316,10 @@ export function WebsiteBuilderWorkspace({
       void reportUsage(usagePayload);
       if (record.status === "completed") {
         addToast(t("generated"));
+        // The one post-task suggestion: only when THIS run started with
+        // no reference images to steer the style — a fact captured at
+        // submit time, not a guess.
+        if (options?.suggestImagesOnComplete) setImprovementHint("addReferenceImages");
       } else if (record.status === "failed") {
         addToast(`✗ ${record.error_message ?? t("generateFailed")}`, "error");
       } else if (record.status === "flagged") {
@@ -590,7 +600,7 @@ export function WebsiteBuilderWorkspace({
         body: JSON.stringify({ websiteId: record.id, description: finalDescription, referenceImagePaths }),
       });
 
-      pollWebsiteStatus(record.id);
+      pollWebsiteStatus(record.id, { suggestImagesOnComplete: referenceImagePaths.length === 0 });
     } catch (err) {
       // A fetch() throwing at all (as opposed to resolving with a non-ok
       // response) means the request never reached the server — a real
@@ -1013,6 +1023,22 @@ export function WebsiteBuilderWorkspace({
         >
           {detailTab === "preview" && (
             <>
+              {/* The single post-generation improvement suggestion
+                  (V3 Task 14): a proposal, never an automatic change,
+                  dismissible, at most one per generation. */}
+              {improvementHint === "addReferenceImages" && (
+                <p className="mb-3 flex items-start gap-2 rounded-lg border border-border bg-panel/60 px-3 py-2 text-xs text-muted">
+                  <span className="min-w-0 flex-1">{t("suggestReferenceImages")}</span>
+                  <button
+                    type="button"
+                    onClick={() => setImprovementHint(null)}
+                    aria-label={tCommon("cancel")}
+                    className="shrink-0 font-semibold text-muted underline decoration-dotted hover:text-foreground"
+                  >
+                    {t("suggestDismiss")}
+                  </button>
+                </p>
+              )}
               {viewingVersion && (
                 <p className="mb-3 rounded-lg border border-orange-800 bg-orange-950/20 px-3 py-2 text-xs text-orange-300">
                   {t("viewingOldVersion", { number: viewingVersion.version_number })}{" "}

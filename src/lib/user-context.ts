@@ -4,6 +4,7 @@ import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { computeHealthScore, type HealthScoreResult } from "@/lib/health-score";
 import { loadLatestEnergyCheckIn, type EnergyCheckIn } from "@/lib/energy-checkins";
 import { logApiError } from "@/lib/log-error";
+import { contextWorthy, type LearnedPreference } from "@/lib/learning-rules";
 import type { Mission } from "@/types/mission";
 
 const PER_MODULE_LIMIT = 5;
@@ -19,6 +20,9 @@ export type UserFullContext = {
   healthScore: HealthScoreResult;
   knowledgeGraphLinkCount: number;
   knowledgeGraphLinksThisWeek: number;
+  /** V3 Task 14 — observed, evidence-weighted preferences (see
+   *  lib/learning.ts). Only repeated observations reach here. */
+  learnedPreferences: { observation: string; evidenceCount: number }[];
 };
 
 type ModuleScan = {
@@ -44,7 +48,7 @@ export async function getUserFullContext(
   const now = Date.now();
   const weekAgoIso = new Date(now - CONSISTENCY_WINDOW_DAYS * DAY_MS).toISOString();
 
-  const [perModule, missionsResult, latestEnergyCheckIn, totalLinksResult, recentLinksResult] =
+  const [perModule, missionsResult, latestEnergyCheckIn, totalLinksResult, recentLinksResult, learnedResult] =
     await Promise.all([
       Promise.all(CLASSIFIER_MODULES.map((config) => scanModule(supabase, config, now))),
       supabase.from("ai_missions").select("*"),
@@ -55,6 +59,12 @@ export async function getUserFullContext(
         .select("id", { count: "exact", head: true })
         .eq("user_id", userId)
         .gte("created_at", weekAgoIso),
+      supabase
+        .from("user_preferences_learned")
+        .select("category, observation, confidence, evidence_count")
+        .eq("user_id", userId)
+        .order("evidence_count", { ascending: false })
+        .limit(20),
     ]);
 
   if (missionsResult.error) {
@@ -107,6 +117,12 @@ export async function getUserFullContext(
     .filter((m) => m.headlines.length > 0)
     .map((m) => ({ title: m.title, headlines: m.headlines }));
 
+  // Repeated observations only — one sighting is a coincidence and must
+  // not steer anything (see lib/learning.ts's contextWorthy).
+  const learnedPreferences = contextWorthy(
+    (learnedResult.data as LearnedPreference[] | null) ?? []
+  ).map((p) => ({ observation: p.observation, evidenceCount: p.evidence_count }));
+
   return {
     moduleSummaries,
     activeMissions,
@@ -114,6 +130,7 @@ export async function getUserFullContext(
     healthScore,
     knowledgeGraphLinkCount: totalLinksResult.count ?? 0,
     knowledgeGraphLinksThisWeek: recentLinksResult.count ?? 0,
+    learnedPreferences,
   };
 }
 
@@ -190,6 +207,14 @@ export function buildUserContextPromptAdditionGreek(context: UserFullContext): s
   parts.push(
     `Knowledge Graph: ${context.knowledgeGraphLinkCount} συνδέσεις συνολικά (${context.knowledgeGraphLinksThisWeek} αυτή την εβδομάδα).`
   );
+  if (context.learnedPreferences.length > 0) {
+    const lines = context.learnedPreferences
+      .map((p) => `- ${p.observation} (παρατηρήθηκε ${p.evidenceCount}x)`)
+      .join("\n");
+    parts.push(
+      `Παρατηρημένες προτιμήσεις (από πραγματική συμπεριφορά· προσαρμόσου διακριτικά, μην τις ανακοινώνεις):\n${lines}`
+    );
+  }
 
   return `\n\nΠλήρες πλαίσιο χρήστη (χρησιμοποίησέ το ΜΟΝΟ όταν είναι σχετικό με το ερώτημα, μην το απαριθμείς άσχετα):\n${parts.join("\n\n")}`;
 }
@@ -215,6 +240,14 @@ export function buildUserContextPromptAdditionEnglish(context: UserFullContext):
   parts.push(
     `Knowledge Graph: ${context.knowledgeGraphLinkCount} total connections (${context.knowledgeGraphLinksThisWeek} this week).`
   );
+  if (context.learnedPreferences.length > 0) {
+    const lines = context.learnedPreferences
+      .map((p) => `- ${p.observation} (seen ${p.evidenceCount}x)`)
+      .join("\n");
+    parts.push(
+      `Observed preferences (from real behaviour; adjust to them quietly, never announce them):\n${lines}`
+    );
+  }
 
   return `\n\nFull user context (use it ONLY when relevant to the request, don't recite it unprompted):\n${parts.join("\n\n")}`;
 }

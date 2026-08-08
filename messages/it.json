@@ -617,6 +617,13 @@
       "statEarned": "Guadagnato",
       "statUnpaid": "Non ancora liquidato",
       "payoutNote": "Le commissioni vengono registrate man mano che maturano. La liquidazione usa lo stesso conto Stripe del mercato, non ancora attivo: quanto hai guadagnato ti è dovuto comunque."
+    },
+    "learnedPreferences": {
+      "title": "Cosa ha imparato l'IA su di te",
+      "description": "Osservato dalle tue azioni reali — mai indovinato, mai scritto dall'IA stessa. Orienta i suggerimenti con discrezione. Cancella una voce e l'IA la dimentica subito.",
+      "empty": "Niente ancora. Usando il prodotto, gli schemi ricorrenti compaiono qui.",
+      "evidence": "visto {count}x",
+      "forget": "Dimentica: {observation}"
     }
   },
   "dashboard": {
@@ -960,7 +967,9 @@
       "regenerateFree": "Rigenera (gratis)",
       "editUnavailable": "Potrai richiedere modifiche una volta terminata la generazione del sito.",
       "exampleName": "Aroma — caffetteria di quartiere",
-      "exampleDescription": "Un sito web di una pagina per una piccola caffetteria specialty chiamata Aroma. Atmosfera calda e moderna. Sezioni: un breve benvenuto, la nostra storia, un menù con 6 bevande e prezzi, gli orari e una sezione contatti con indirizzo e telefono. Call to action: ordina il caffè online."
+      "exampleDescription": "Un sito web di una pagina per una piccola caffetteria specialty chiamata Aroma. Atmosfera calda e moderna. Sezioni: un breve benvenuto, la nostra storia, un menù con 6 bevande e prezzi, gli orari e una sezione contatti con indirizzo e telefono. Call to action: ordina il caffè online.",
+      "suggestReferenceImages": "Lo vuoi più vicino al tuo brand? Aggiungi un logo o uno screenshot di stile come immagini di riferimento e rigenera — questa esecuzione non ne aveva.",
+      "suggestDismiss": "Ignora"
     },
     "marketplace": {
       "title": "Mercato",
@@ -1470,7 +1479,15 @@
       "empty": "Ancora nessun report. Descrivi un argomento sopra per vedere cosa ricercherebbe.",
       "usedThisMonth": "{used} di {cap} questo mese",
       "usedUnlimited": "{used} questo mese",
-      "capReached": "Hai esaurito i report di questo mese. Si azzera il 1°."
+      "capReached": "Hai esaurito i report di questo mese. Si azzera il 1°.",
+      "confidenceGrounded": "Basato su {count} fonti — ogni cifra rimanda a una di esse.",
+      "confidenceThin": "Basato su sole {count} fonti. Prendilo come punto di partenza — con un tema più preciso e una nuova esecuzione cercherà più a fondo.",
+      "confidenceInsufficient": "Non sono state trovate fonti solide a sufficienza. Nulla qui è stato gonfiato per nasconderlo — prova un tema più preciso e riesegui.",
+      "howThisWasMade": "Come è stato fatto",
+      "howThisWasMadeNote": "Registrato dall'esecuzione reale. I crediti per passo sono l'addebito finale ripartito sul costo reale di ogni chiamata — approssimati per costruzione; il totale è esatto.",
+      "runStageQuestion": "Ricerca sulla domanda {number}",
+      "runStageSynthesis": "Scrittura del report da tutti i risultati",
+      "stepSearches": "{count} ricerche web"
     },
     "presentations": {
       "title": "Presentazioni",

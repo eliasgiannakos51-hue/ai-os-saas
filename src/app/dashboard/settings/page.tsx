@@ -5,6 +5,10 @@ import { Settings as SettingsIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { PasswordChangeForm } from "@/components/settings/password-change-form";
+import {
+  LearnedPreferencesSection,
+  type LearnedPreferenceRow,
+} from "@/components/settings/learned-preferences-section";
 import { ChatMemorySettings } from "@/components/settings/chat-memory-settings";
 import { AccessibilitySettings } from "@/components/settings/accessibility-settings";
 import { ThemeSettings } from "@/components/settings/theme-settings";
@@ -77,6 +81,15 @@ export default async function SettingsPage() {
     .select("*")
     .eq("user_id", user.id)
     .maybeSingle();
+
+  // The learning profile (V3 Task 14) — everything the product has
+  // observed, shown in full so the delete buttons mean something.
+  const { data: learnedPrefs } = await supabase
+    .from("user_preferences_learned")
+    .select("category, observation, confidence, evidence_count")
+    .eq("user_id", user.id)
+    .order("evidence_count", { ascending: false })
+    .limit(100);
 
   // The balance is what the running "balance after" column is derived
   // from, walking backwards through the charges below. Nothing stores a
@@ -235,6 +248,10 @@ export default async function SettingsPage() {
         <EmailNotificationSettings
           userId={user.id}
           initialPrefs={(emailPrefs as Record<string, boolean> | null) ?? {}}
+        />
+
+        <LearnedPreferencesSection
+          initial={(learnedPrefs as LearnedPreferenceRow[] | null) ?? []}
         />
 
         {hasCustomAiPersona && <Reveal><AiPersonaSettings initialName={aiPersonaName} /></Reveal>}

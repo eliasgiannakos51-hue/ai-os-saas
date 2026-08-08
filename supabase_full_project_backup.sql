@@ -3176,3 +3176,59 @@ as
     (revoked_at is null) as is_active
   from public.integration_consents
   order by granted_at desc;
+
+
+-- ============================================================================
+-- Red team run history (see red_team_migration.sql for the rationale).
+-- Mirrored here so a project restored from this one file still has
+-- somewhere for api/cron/red-team to write; without the table the weekly
+-- run still executes and still emails on a failure, but the history and
+-- the 'when did this start' question are lost.
+-- ============================================================================
+create table if not exists public.red_team_runs (
+  id uuid primary key default gen_random_uuid(),
+  run_at timestamptz not null default now(),
+  -- Which model answered. A bypass that appears the week a model id
+  -- changes is a different investigation from one that appears after a
+  -- system-prompt edit.
+  model text not null,
+  total integer not null,
+  failed integer not null,
+  -- The full ProbeResult[] — id, category, what, passed, failure, excerpt.
+  results jsonb not null default '[]'::jsonb
+);
+
+create index if not exists red_team_runs_run_at_idx
+  on public.red_team_runs (run_at desc);
+
+-- The query the owner's dashboard makes: "when did something last get
+-- through?"
+create index if not exists red_team_runs_failed_idx
+  on public.red_team_runs (failed, run_at desc) where failed > 0;
+
+alter table public.red_team_runs enable row level security;
+
+-- ----------------------------------------------------------------------------
+-- Housekeeping. One row a week is nothing, but each carries fourteen
+-- excerpts and this table has no natural end. A year of history answers
+-- every question anyone asks of it.
+-- ----------------------------------------------------------------------------
+create or replace function public.prune_red_team_runs()
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  deleted integer;
+begin
+  delete from public.red_team_runs where run_at < now() - interval '365 days';
+  get diagnostics deleted = row_count;
+  return deleted;
+end;
+$$;
+
+revoke all on function public.prune_red_team_runs() from public;
+revoke all on function public.prune_red_team_runs() from anon;
+revoke all on function public.prune_red_team_runs() from authenticated;
+grant execute on function public.prune_red_team_runs() to service_role;

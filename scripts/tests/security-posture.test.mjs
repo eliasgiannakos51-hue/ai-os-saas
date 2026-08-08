@@ -68,7 +68,18 @@ const created = new Set(
 
 // Tables that intentionally carry NO per-user rows readable by a client.
 // Each one is admin-client-only in application code — asserted below.
-const ADMIN_ONLY_TABLES = new Set(["rate_limit_log", "daily_ai_spend_tracking", "account_deletion_requests"]);
+// red_team_runs is here for a stronger reason than the other three: it is
+// not merely uninteresting to a client, it is actively dangerous to serve.
+// Each row holds the weekly adversarial suite's results — the probes that
+// got through, with an excerpt of exactly what the assistant said when it
+// did. That is a working list of ways to make the product misbehave, and
+// there is no user it belongs to.
+const ADMIN_ONLY_TABLES = new Set([
+  "rate_limit_log",
+  "daily_ai_spend_tracking",
+  "account_deletion_requests",
+  "red_team_runs",
+]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();
 check(`no user-data table is missing RLS (${created.size} tables checked)`, missing, []);
@@ -314,6 +325,8 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/agent-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts); executes every due Autonomous Agent, so it spends real money on many accounts per call",
   "src/app/api/weekly-digest/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
+  "src/app/api/cron/red-team/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts). It belongs to no user by construction — it attacks the shared chat system prompt with the adversarial suite in lib/security/red-team.ts and reports to the owner, touching no account's data. Its OUTPUT is the sensitive part, and red_team_runs has RLS enabled with no policy at all, so only the service role can read the list of things that got through.",
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",
   "src/app/api/websites/[id]/submit-form/route.ts": "public contact form on generated sites; write-only, honeypot + 30/hr cap",
   "src/app/api/client-error/route.ts": "browser error beacon; fires when there may be no session",

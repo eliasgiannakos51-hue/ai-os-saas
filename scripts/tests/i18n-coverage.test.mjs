@@ -209,7 +209,11 @@ const clientFallbacks = sources.flatMap((f) => [
 // for a request that failed in a way the client has no specific message
 // for, which is the same class as every increment above and the same
 // recorded decision: stable error CODES across the whole API surface.
-const SERVER_PROSE_BASELINE = 511;
+// 511 -> 513: api/cron/red-team's "no model configured" and generic
+// failure responses. These two are read by a SCHEDULER, not a person —
+// nobody's browser ever renders them — so unlike every increment above,
+// translating them would serve no one.
+const SERVER_PROSE_BASELINE = 513;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

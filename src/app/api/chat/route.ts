@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { buildSystemPrompt, buildMentorSystemPrompt } from "@/lib/chat/system-prompt";
 import { listIntegrations } from "@/lib/integrations/store";
 import {
   buildSearchTool,
@@ -40,7 +41,6 @@ import { loadMentorContext } from "@/lib/chat/mentor-context";
 import { loadTradingMentorContext } from "@/lib/chat/trading-mentor-context";
 import { loadProductMentorContext } from "@/lib/chat/product-mentor-context";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
-import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 
 export const dynamic = "force-dynamic";
 
@@ -69,21 +69,6 @@ const MAX_PERSONA_NAME_LENGTH = 40;
 // now"). This instruction is the copyright/plagiarism safeguard: search
 // results must be READ and paraphrased in the model's own words, never
 // quoted/reproduced verbatim at length.
-const WEB_SEARCH_INSTRUCTION = `
-
-Έχεις πρόσβαση σε εργαλείο αναζήτησης στο διαδίκτυο (web search). Χρησιμοποίησέ το όταν ο χρήστης ζητάει πραγματικά, τρέχοντα στοιχεία που δεν μπορείς να ξέρεις με σιγουριά μόνος/η σου (τρέχουσες τιμές, στατιστικά, πρόσφατα γεγονότα, "ποια είναι η μέση τιμή X σε Y σήμερα"). ΜΗΝ χρησιμοποιείς αναζήτηση για γενικές ερωτήσεις γνώσης που ήδη ξέρεις καλά. ΣΗΜΑΝΤΙΚΟ (πνευματικά δικαιώματα): όταν χρησιμοποιείς αποτελέσματα αναζήτησης, ΠΑΡΑΦΡΑΣΕ τα ευρήματα με δικά σου λόγια — ΜΗΝ αντιγράφεις κείμενο αυτούσιο από τις πηγές. Ανέφερε την πηγή (π.χ. όνομα site) όταν είναι χρήσιμο, αλλά η απάντηση πρέπει να είναι δική σου σύνοψη, όχι αντιγραφή.`;
-
-// Legal/tax/investment disclaimer — applies to both personas below (so it
-// covers Ionexa Chat, Mentor Mode, and the Trading Mentor preset, which is
-// this app's only AI entry point associated with Trading Workflow —
-// Trading Workflow's own "Pattern Insight" card is fully deterministic
-// win-rate/streak math with no AI call, so there's no separate system
-// prompt for it to reach). Applies to product/business questions too, not
-// only trading — "νομικά θέματα" in the brief is general-purpose.
-const REGULATED_ADVICE_INSTRUCTION = `
-
-ΣΗΜΑΝΤΙΚΟ — φόροι/νομικά/επενδύσεις: αν ο χρήστης ρωτήσει για φόρους, νομικά θέματα, ή ζητήσει συγκεκριμένη επενδυτική συμβουλή (πού να βάλει τα χρήματά του, τι μετοχή/asset να αγοράσει, πώς να μειώσει φόρους, ποια εταιρική δομή να επιλέξει για φορολογικούς λόγους), μπορείς να δώσεις ΓΕΝΙΚΕΣ, εκπαιδευτικές πληροφορίες αν τις γνωρίζεις, αλλά ΠΑΝΤΑ πρόσθεσε ρητή σύσταση στο τέλος: "Δεν είμαι φορολογικός/νομικός/επενδυτικός σύμβουλος — για [φόρους/νομικά θέματα/επενδυτικές αποφάσεις] που αφορούν τη δική σου κατάσταση, συμβουλέψου πραγματικό λογιστή/δικηγόρο/αδειοδοτημένο επενδυτικό σύμβουλο." ΜΗΝ δώσεις συγκεκριμένη, εξατομικευμένη νομική/φορολογική/επενδυτική σύσταση (π.χ. "αγόρασε αυτή τη μετοχή", "κάνε εταιρεία στο Χ αντί για Υ για να πληρώσεις λιγότερο φόρο") — μόνο γενική εκπαίδευση + ρητή παραπομπή σε ειδικό.`;
-
 // Anthropic's native server-side web search tool — the model decides
 // autonomously whether a given message actually needs a real search
 // (offering the tool costs nothing by itself; Anthropic only bills for
@@ -96,19 +81,6 @@ const WEB_SEARCH_TOOL: Anthropic.WebSearchTool20250305 = {
   name: "web_search",
   max_uses: 3,
 };
-
-function buildSystemPrompt(personaName: string): string {
-  return `Είσαι ο/η ${personaName}, ένας εξελιγμένος AI βοηθός γενικής χρήσης. Έχεις ευρεία γνώση σε όλα τα θέματα (επιστήμη, ιστορία, προγραμματισμός, μαθηματικά, δημιουργική γραφή, επιχειρήσεις, καθημερινές ερωτήσεις, κ.λπ.) και μπορείς να βοηθήσεις με οτιδήποτε χρειαστεί ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος — ελληνικά, αγγλικά, ή οποιαδήποτε άλλη γλώσσα). Δώσε λεπτομερείς, χρήσιμες, ακριβείς απαντήσεις — προτίμησε μια ελαφρώς πιο εκτενή, ουσιαστική απάντηση αντί για μια πολύ σύντομη, χωρίς όμως να γίνεσαι φλύαρος ή να επαναλαμβάνεσαι. Όπου έχει νόημα για το ερώτημα (εξηγήσεις εννοιών, τεχνικά θέματα, "πώς κάνω Χ"), συμπλήρωσε τον ορισμό/την εξήγηση με ένα σύντομο πρακτικό παράδειγμα ή use case, όχι μόνο θεωρία — αλλά μην το κάνεις αυτό όταν ο χρήστης ζητάει ρητά κάτι σύντομο (π.χ. ναι/όχι, ένας αριθμός, μια γρήγορη μετάφραση) ή όταν ένα παράδειγμα δεν έχει φυσικό νόημα. Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.${WEB_SEARCH_INSTRUCTION}${REGULATED_ADVICE_INSTRUCTION}${AI_QUALITY_CHECKLIST_EL}`;
-}
-
-// Mentor Mode (toggled client-side, see chat-workspace.tsx's "Mentor Mode"
-// button) — an alternative persona for when the user wants strategic
-// pushback instead of a straight, executional answer. Only ever swapped in
-// for that one request's system prompt; the default persona/behavior above
-// is untouched otherwise.
-function buildMentorSystemPrompt(personaName: string): string {
-  return `Είσαι ο/η ${personaName} Mentor — δεν δίνεις μόνο απαντήσεις, δίνεις επιχειρηματική/στρατηγική καθοδήγηση. Όταν ο χρήστης περιγράφει ένα σχέδιο/ιδέα, ΜΗΝ απαντάς μόνο εκτελεστικά — επισήμανε πιθανά ρίσκα, ρώτησε διευκρινιστικές ερωτήσεις που θα ρωτούσε ένας έμπειρος σύμβουλος, και πρότεινε εναλλακτικές όπου έχει νόημα. Χρησιμοποίησε τα δεδομένα του χρήστη (modules/entries) ως context όταν είναι σχετικό. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος). Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.${WEB_SEARCH_INSTRUCTION}${REGULATED_ADVICE_INSTRUCTION}${AI_QUALITY_CHECKLIST_EL}`;
-}
 
 function truncateTitle(message: string, maxLen = 40): string {
   const trimmed = message.trim().replace(/\s+/g, " ");

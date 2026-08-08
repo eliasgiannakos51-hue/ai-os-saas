@@ -136,6 +136,13 @@ const DECLARED = {
     billing: "settled",
     note: "reached from the PUBLIC api/websites/[id]/submit-form. Settled against the site OWNER, who is who the triage is for, after an up-front solvency check — a stranger's form POST cannot hold the owner's credits, so the balance must be checked before the call, not after.",
   },
+  "src/app/api/cron/red-team/route.ts": {
+    calls: 1,
+    billing: "unbilled",
+    note:
+      "The weekly adversarial suite (api/cron/red-team). It belongs to NO USER and so cannot be charged to one: it sends the probes in lib/security/red-team.ts at the real chat system prompt to find out whether the guardrails still hold, and the account it would bill is the company's own. " +
+      "Bounded by not being reachable: checkCronAuth fails closed, so without CRON_SECRET the route refuses to run on any deployment, and the schedule in vercel.json fires it once a week. One call per probe, no loop, no web-search tool offered, a 400-token reply cap — about 14 calls and roughly EUR 0.10 per run, on a fixed weekly cadence rather than per user.",
+  },
   "src/app/api/support/route.ts": {
     calls: 1,
     billing: "unbilled",
@@ -189,12 +196,18 @@ for (const [file, m] of [...flat, ...unbilled]) {
 // test tells you to update it; adding another flat-fee feature raises
 // them and the build fails.
 check("flat-fee AI features (not margin-guaranteed)", flat.length, 0);
-// 0 -> 1: the support widget (api/support). Free ON PURPOSE — see its
-// DECLARED note for the envelope that bounds it instead of a reservation.
-// The number is pinned so a SECOND unbilled feature cannot arrive quietly:
-// "one free thing, deliberately" and "AI calls that nobody is paying for"
+// 0 -> 2, in two deliberate steps:
+//   api/support     — the support widget. Free ON PURPOSE; charging credits
+//                     to ask how credits work is a fee for not
+//                     understanding the product. Its DECLARED note has the
+//                     envelope that bounds it instead of a reservation.
+//   api/cron/red-team — the weekly adversarial suite. Belongs to no user,
+//                     so there is nobody to charge; bounded by the cron
+//                     guard and a weekly schedule.
+// The number is pinned so a THIRD unbilled feature cannot arrive quietly:
+// "two free things, deliberately" and "AI calls that nobody is paying for"
 // are different situations and only the first one is a decision.
-check("completely unbilled AI calls", unbilled.length, 1);
+check("completely unbilled AI calls", unbilled.length, 2);
 check(
   "every OTHER AI call site is settled on measured usage",
   settled.length,

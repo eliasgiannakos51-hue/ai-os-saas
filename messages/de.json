@@ -522,6 +522,37 @@
       "withdrawn": "Widerrufen, und der Zugriff wurde entzogen.",
       "withdrawnLocalOnly": "Hier widerrufen und das Token gelöscht. Wir konnten den Anbieter nicht erreichen — entferne es am besten auch in dessen Einstellungen.",
       "withdrawError": "Konnte nicht widerrufen werden. Bitte erneut versuchen."
+    },
+    "learnedProfile": {
+      "title": "Was die KI über dich gelernt hat",
+      "description": "Ionexa merkt sich, wie du arbeitest — aus dem, was du tatsächlich tust, nie aus dem, was du über dich sagst. Alles Geschlossene steht unten. Ändere es, lösche einzelnes, oder lösche alles.",
+      "progress": "Die KI kennt dich: {percent}%",
+      "levelLabel": "Stufe {level}",
+      "actionsToNext": "{actions} bedeutsame Aktionen bisher. Noch {remaining}, dann kennt sie dich besser.",
+      "actionsMax": "{actions} bedeutsame Aktionen. Besser kennt sie dich nicht.",
+      "nothingYet": "Noch nichts. Nutze Ionexa eine Weile, dann füllt sich das von selbst.",
+      "category": {
+        "communication": "Wie du schreibst",
+        "work": "Wie du arbeitest",
+        "preferences": "Was du bevorzugst",
+        "goals": "Worauf du hinarbeitest",
+        "patterns": "Deine Muster"
+      },
+      "meta": "{times}-mal gesehen · zuletzt bestätigt {when}",
+      "fading": "Verblasst — wird nicht mehr genutzt, weil es zuletzt nicht mehr auftauchte",
+      "yourWording": "deine Formulierung",
+      "edit": "Bearbeiten",
+      "editLabel": "Diese Beobachtung bearbeiten",
+      "save": "Speichern",
+      "cancel": "Abbrechen",
+      "delete": "Löschen",
+      "deleted": "Gelöscht.",
+      "saved": "Gespeichert. Die KI überschreibt deine Formulierung nicht.",
+      "confirmDelete": "Diese Beobachtung löschen?",
+      "forgetAll": "Alles vergessen",
+      "confirmForgetAll": "Alles löschen, was die KI über dich gelernt hat? Sie fängt bei null an.",
+      "forgotten": "Gelöscht. Die KI fängt bei null an.",
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
     }
   },
   "dashboard": {

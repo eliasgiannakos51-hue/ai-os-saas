@@ -522,6 +522,37 @@
       "withdrawn": "Retirado, e o acesso foi revogado.",
       "withdrawnLocalOnly": "Retirado aqui e token apagado. Não conseguimos contactar o fornecedor para revogar — talvez queiras removê-lo também nas definições dele.",
       "withdrawError": "Não foi possível retirar. Tenta novamente."
+    },
+    "learnedProfile": {
+      "title": "O que a IA aprendeu sobre ti",
+      "description": "O Ionexa repara em como trabalhas a partir do que fazes mesmo — nunca do que dizes sobre ti. Tudo o que concluiu está abaixo. Muda, apaga o que quiseres, ou limpa tudo.",
+      "progress": "A IA conhece-te: {percent}%",
+      "levelLabel": "Nível {level}",
+      "actionsToNext": "{actions} ações significativas até agora. Mais {remaining} e conhece-te melhor.",
+      "actionsMax": "{actions} ações significativas. Conhece-te o melhor que consegue.",
+      "nothingYet": "Ainda nada. Usa o Ionexa durante algum tempo e isto preenche-se sozinho.",
+      "category": {
+        "communication": "Como comunicas",
+        "work": "Como trabalhas",
+        "preferences": "O que preferes",
+        "goals": "Para onde trabalhas",
+        "patterns": "Os teus padrões"
+      },
+      "meta": "Visto {times} vezes · última confirmação {when}",
+      "fading": "A desvanecer — já não é usado, por não ter voltado a aparecer",
+      "yourWording": "palavras tuas",
+      "edit": "Editar",
+      "editLabel": "Editar esta observação",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "delete": "Apagar",
+      "deleted": "Apagado.",
+      "saved": "Guardado. A IA não vai reescrever as tuas palavras.",
+      "confirmDelete": "Apagar esta observação?",
+      "forgetAll": "Esquecer tudo",
+      "confirmForgetAll": "Apagar tudo o que a IA aprendeu sobre ti? Recomeça do zero.",
+      "forgotten": "Limpo. A IA recomeça do zero.",
+      "error": "Algo correu mal. Tenta outra vez."
     }
   },
   "dashboard": {

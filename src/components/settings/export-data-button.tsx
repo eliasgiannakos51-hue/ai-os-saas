@@ -17,12 +17,24 @@ export function ExportDataButton() {
   async function handleExport() {
     setLoading(true);
 
-    const results = await Promise.all(
-      CLASSIFIER_MODULES.map(async (m) => {
+    // The modules, PLUS what the AI concluded about the person.
+    //
+    // The learned profile is the one thing in the export the user never
+    // typed — which makes it the part a data-access request is most
+    // actually about. Leaving it out would mean answering "give me
+    // everything you hold about me" with everything they already knew.
+    // Readable here through the ordinary client because
+    // user_profile_learned's select policy is scoped to auth.uid().
+    const results = await Promise.all([
+      ...CLASSIFIER_MODULES.map(async (m) => {
         const { data, error } = await supabase.from(m.table).select("*");
         return { title: m.title, data, error };
-      })
-    );
+      }),
+      (async () => {
+        const { data, error } = await supabase.from("user_profile_learned").select("*");
+        return { title: "AI profile (what Ionexa learned about you)", data, error };
+      })(),
+    ]);
 
     setLoading(false);
 

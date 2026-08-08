@@ -522,6 +522,37 @@
       "withdrawn": "已撤回，访问权限也已收回。",
       "withdrawnLocalOnly": "已在此撤回并删除令牌。我们无法联系到该服务商执行收回——建议你也去它的设置中移除。",
       "withdrawError": "撤回失败，请重试。"
+    },
+    "learnedProfile": {
+      "title": "AI 对你的了解",
+      "description": "Ionexa 根据你实际做的事来了解你的工作方式，而不是你怎么描述自己。它得出的所有结论都在下面。你可以修改、删除，或者全部清空。",
+      "progress": "AI 对你的了解：{percent}%",
+      "levelLabel": "等级 {level}",
+      "actionsToNext": "目前有 {actions} 次有效操作。再有 {remaining} 次，它会更了解你。",
+      "actionsMax": "{actions} 次有效操作。它已经尽可能了解你了。",
+      "nothingYet": "还没有内容。用一段时间 Ionexa，这里会自己填上。",
+      "category": {
+        "communication": "你的沟通方式",
+        "work": "你的工作方式",
+        "preferences": "你的偏好",
+        "goals": "你在为什么努力",
+        "patterns": "你的规律"
+      },
+      "meta": "出现 {times} 次 · 最近一次确认 {when}",
+      "fading": "正在淡出——因为最近没再出现，已不再使用",
+      "yourWording": "你写的",
+      "edit": "编辑",
+      "editLabel": "编辑这条观察",
+      "save": "保存",
+      "cancel": "取消",
+      "delete": "删除",
+      "deleted": "已删除。",
+      "saved": "已保存。AI 不会覆盖你写的内容。",
+      "confirmDelete": "删除这条观察？",
+      "forgetAll": "忘掉全部",
+      "confirmForgetAll": "删除 AI 对你的全部了解？它将从零开始。",
+      "forgotten": "已清空。AI 从零开始。",
+      "error": "出了点问题，请重试。"
     }
   },
   "dashboard": {

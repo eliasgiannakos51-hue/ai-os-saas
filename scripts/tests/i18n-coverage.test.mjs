@@ -220,7 +220,15 @@ const clientFallbacks = sources.flatMap((f) => [
 // them. Everything the affiliate READS on /dashboard/affiliate — the
 // pitch, the terms, the four stat labels, and every reason a payout has
 // not happened — is translated in all ten locales.
-const SERVER_PROSE_BASELINE = 529;
+// 529 -> 541: the learned AI profile added api/profile (edit, delete one,
+// forget everything) and api/cron/profile-refresh. Their
+// not-authenticated, nothing-to-change, rate-limit and could-not-save
+// responses are English prose like the 529 before them. Everything the
+// user READS in Settings > "What the AI has learned about you" — every
+// category name, the progress line, the fading label and both
+// confirmations — is translated in all ten locales, which for a screen
+// whose whole purpose is being understandable is the part that matters.
+const SERVER_PROSE_BASELINE = 541;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

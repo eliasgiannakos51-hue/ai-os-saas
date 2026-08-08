@@ -325,6 +325,8 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/agent-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts); executes every due Autonomous Agent, so it spends real money on many accounts per call",
   "src/app/api/weekly-digest/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
+  "src/app/api/cron/profile-refresh/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts). It belongs to no user: it recomputes every recently-active account's learned profile, confirming what is still true and decaying what is not. Deliberately NOT reachable from a page load — a refresh triggered by a page view would let anyone inflate their own profile by reloading Settings, and would mean an account that never opens Settings never has anything decay.",
   "src/app/api/cron/affiliate-payouts/route.ts":
     "authenticated by CRON_SECRET (lib/cron-auth.ts). It MOVES MONEY to Connect accounts, so the fail-closed guard matters more here than anywhere: without a secret configured it refuses to run on any deployment. It belongs to no user by construction — it pays every eligible affiliate — and each transfer claims its commission rows atomically first (claim_affiliate_commissions) so a second concurrent run finds nothing to send.",
   "src/app/r/[code]/route.ts":

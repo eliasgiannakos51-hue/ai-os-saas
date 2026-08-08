@@ -522,6 +522,37 @@
       "withdrawn": "撤回しました。アクセス権も取り消されています。",
       "withdrawnLocalOnly": "こちらで撤回し、トークンを削除しました。提供元に取り消しを届けられなかったため、先方の設定からも削除しておくと安心です。",
       "withdrawError": "撤回できませんでした。もう一度お試しください。"
+    },
+    "learnedProfile": {
+      "title": "AI があなたについて学んだこと",
+      "description": "Ionexa は、あなたが実際にしたことから働き方を見ています。自己申告からではありません。導き出した内容はすべて下にあります。書き直しても、個別に消しても、まとめて消しても構いません。",
+      "progress": "AI があなたを知っている度合い：{percent}%",
+      "levelLabel": "レベル {level}",
+      "actionsToNext": "これまでに {actions} 件の意味のある操作。あと {remaining} 件でもっと分かるようになります。",
+      "actionsMax": "{actions} 件の意味のある操作。これ以上ないほど分かっています。",
+      "nothingYet": "まだ何もありません。しばらく使えば自然にたまります。",
+      "category": {
+        "communication": "話し方",
+        "work": "働き方",
+        "preferences": "好み",
+        "goals": "目指していること",
+        "patterns": "リズム"
+      },
+      "meta": "{times} 回観測 · 最終確認 {when}",
+      "fading": "薄れています — 最近見られないため、もう使っていません",
+      "yourWording": "あなたの言葉",
+      "edit": "編集",
+      "editLabel": "この観察を編集",
+      "save": "保存",
+      "cancel": "キャンセル",
+      "delete": "削除",
+      "deleted": "削除しました。",
+      "saved": "保存しました。AI があなたの言葉を書き換えることはありません。",
+      "confirmDelete": "この観察を削除しますか？",
+      "forgetAll": "すべて忘れる",
+      "confirmForgetAll": "AI が学んだことをすべて削除しますか？ゼロから始めます。",
+      "forgotten": "消去しました。AI はゼロから始めます。",
+      "error": "うまくいきませんでした。もう一度お試しください。"
     }
   },
   "dashboard": {

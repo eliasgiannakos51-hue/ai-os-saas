@@ -522,6 +522,37 @@
       "withdrawn": "Withdrawn, and access was revoked.",
       "withdrawnLocalOnly": "Withdrawn here and the token deleted. We couldn't reach the provider to revoke it — you may want to remove it in their settings too.",
       "withdrawError": "Could not withdraw that. Please try again."
+    },
+    "learnedProfile": {
+      "title": "What the AI has learned about you",
+      "description": "Ionexa notices how you work from what you actually do — never from what you say about yourself. Everything it has concluded is below. Change any of it, delete any of it, or clear the lot.",
+      "progress": "The AI knows you: {percent}%",
+      "levelLabel": "Level {level}",
+      "actionsToNext": "{actions} meaningful actions so far. {remaining} more and it will know you better.",
+      "actionsMax": "{actions} meaningful actions. It knows you as well as it gets.",
+      "nothingYet": "Nothing yet. Use Ionexa for a while and this fills in on its own.",
+      "category": {
+        "communication": "How you communicate",
+        "work": "How you work",
+        "preferences": "What you prefer",
+        "goals": "What you're working towards",
+        "patterns": "Your patterns"
+      },
+      "meta": "Seen {times} times · last confirmed {when}",
+      "fading": "Fading — no longer used, because it hasn't shown up recently",
+      "yourWording": "your wording",
+      "edit": "Edit",
+      "editLabel": "Edit this observation",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "deleted": "Deleted.",
+      "saved": "Saved. The AI won't overwrite your wording.",
+      "confirmDelete": "Delete this observation?",
+      "forgetAll": "Forget everything",
+      "confirmForgetAll": "Delete everything the AI has learned about you? It starts from nothing.",
+      "forgotten": "Cleared. The AI starts from nothing.",
+      "error": "Something went wrong. Please try again."
     }
   },
   "dashboard": {

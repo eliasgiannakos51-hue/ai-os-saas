@@ -21,8 +21,11 @@ import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
 import { EmailNotificationSettings } from "@/components/settings/email-notification-settings";
 import { AchievementsSection } from "@/components/settings/achievements-section";
 import { IntegrationConsents } from "@/components/settings/integration-consents";
+import { LearnedProfile } from "@/components/settings/learned-profile";
 import { loadUnlockedAchievements } from "@/lib/achievements";
 import { listConsents } from "@/lib/integrations/consent";
+import { listProfile, getProfileState } from "@/lib/profile/store";
+import { knowledgePercent, actionsToNextLevel } from "@/lib/profile/maturity";
 import { isAdminEmail } from "@/lib/admin";
 import { isBetaTester, getBetaDaysRemaining } from "@/lib/beta";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
@@ -132,6 +135,15 @@ export default async function SettingsPage() {
   // through one server route. Reading it the same way keeps that boundary
   // in one file.
   const integrationConsents = await listConsents(user.id);
+
+  // What the AI has learned, and how far along it is. Read through the
+  // service-role client for the same reason the consents are: the table
+  // has select and delete policies but no insert or update policy, so
+  // every path that touches it lives in one server module.
+  const [learnedRows, profileState] = await Promise.all([
+    listProfile(user.id),
+    getProfileState(user.id),
+  ]);
 
   // AI Usage — credits spent lifetime (soft-capped at 5000 rows; a simple
   // sum, not a running ledger balance, good enough for a usage summary)
@@ -248,6 +260,16 @@ export default async function SettingsPage() {
             the delete-account button — not on the page they only open when
             they want to ADD something. */}
         <IntegrationConsents consents={integrationConsents} />
+
+        {/* Next to the consent list on purpose: both answer "what does
+            this system know about me, and can I take it back". */}
+        <LearnedProfile
+          rows={learnedRows}
+          percent={knowledgePercent(profileState.meaningfulActions)}
+          level={profileState.level}
+          actions={profileState.meaningfulActions}
+          actionsToNext={actionsToNextLevel(profileState.meaningfulActions)}
+        />
 
         <EmailNotificationSettings
           userId={user.id}

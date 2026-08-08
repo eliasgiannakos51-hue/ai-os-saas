@@ -522,6 +522,37 @@
       "withdrawn": "Retiré, et l'accès a été révoqué.",
       "withdrawnLocalOnly": "Retiré ici et jeton supprimé. Nous n'avons pas pu joindre le fournisseur pour le révoquer — pensez à le retirer aussi dans ses paramètres.",
       "withdrawError": "Impossible de retirer cela. Réessayez."
+    },
+    "learnedProfile": {
+      "title": "Ce que l'IA a appris de vous",
+      "description": "Ionexa observe votre façon de travailler à partir de ce que vous faites vraiment — jamais de ce que vous dites de vous. Tout ce qu'elle en a conclu est ci-dessous. Modifiez, supprimez, ou effacez tout.",
+      "progress": "L'IA vous connaît : {percent}%",
+      "levelLabel": "Niveau {level}",
+      "actionsToNext": "{actions} actions significatives jusqu'ici. Encore {remaining} et elle vous connaîtra mieux.",
+      "actionsMax": "{actions} actions significatives. Elle vous connaît autant que possible.",
+      "nothingYet": "Rien pour l'instant. Utilisez Ionexa quelque temps et ceci se remplira tout seul.",
+      "category": {
+        "communication": "Votre façon de communiquer",
+        "work": "Votre façon de travailler",
+        "preferences": "Vos préférences",
+        "goals": "Vos objectifs",
+        "patterns": "Vos habitudes"
+      },
+      "meta": "Vu {times} fois · dernière confirmation {when}",
+      "fading": "S'efface — plus utilisé, faute d'être réapparu",
+      "yourWording": "votre formulation",
+      "edit": "Modifier",
+      "editLabel": "Modifier cette observation",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "delete": "Supprimer",
+      "deleted": "Supprimé.",
+      "saved": "Enregistré. L'IA ne réécrira pas votre formulation.",
+      "confirmDelete": "Supprimer cette observation ?",
+      "forgetAll": "Tout oublier",
+      "confirmForgetAll": "Supprimer tout ce que l'IA a appris de vous ? Elle repart de zéro.",
+      "forgotten": "Effacé. L'IA repart de zéro.",
+      "error": "Une erreur est survenue. Réessayez."
     }
   },
   "dashboard": {

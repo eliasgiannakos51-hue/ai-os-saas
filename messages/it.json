@@ -522,6 +522,37 @@
       "withdrawn": "Ritirato, e l'accesso è stato revocato.",
       "withdrawnLocalOnly": "Ritirato qui e token eliminato. Non siamo riusciti a contattare il fornitore per revocarlo — conviene rimuoverlo anche dalle sue impostazioni.",
       "withdrawError": "Non è stato possibile ritirarlo. Riprova."
+    },
+    "learnedProfile": {
+      "title": "Cosa ha imparato l'IA su di te",
+      "description": "Ionexa nota come lavori da quello che fai davvero — mai da quello che dici di te. Tutto ciò che ha concluso è qui sotto. Modifica, cancella, o azzera tutto.",
+      "progress": "L'IA ti conosce: {percent}%",
+      "levelLabel": "Livello {level}",
+      "actionsToNext": "{actions} azioni significative finora. Altre {remaining} e ti conoscerà meglio.",
+      "actionsMax": "{actions} azioni significative. Ti conosce quanto può.",
+      "nothingYet": "Ancora niente. Usa Ionexa per un po' e questo si riempie da solo.",
+      "category": {
+        "communication": "Come comunichi",
+        "work": "Come lavori",
+        "preferences": "Cosa preferisci",
+        "goals": "Verso cosa lavori",
+        "patterns": "I tuoi ritmi"
+      },
+      "meta": "Visto {times} volte · ultima conferma {when}",
+      "fading": "Sta svanendo — non più usato, perché non si è più ripresentato",
+      "yourWording": "parole tue",
+      "edit": "Modifica",
+      "editLabel": "Modifica questa osservazione",
+      "save": "Salva",
+      "cancel": "Annulla",
+      "delete": "Elimina",
+      "deleted": "Eliminato.",
+      "saved": "Salvato. L'IA non riscriverà le tue parole.",
+      "confirmDelete": "Eliminare questa osservazione?",
+      "forgetAll": "Dimentica tutto",
+      "confirmForgetAll": "Cancellare tutto quello che l'IA ha imparato su di te? Riparte da zero.",
+      "forgotten": "Cancellato. L'IA riparte da zero.",
+      "error": "Qualcosa è andato storto. Riprova."
     }
   },
   "dashboard": {

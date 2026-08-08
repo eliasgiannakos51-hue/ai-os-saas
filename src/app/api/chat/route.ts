@@ -3,6 +3,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { buildSystemPrompt, buildMentorSystemPrompt } from "@/lib/chat/system-prompt";
+import { buildProfilePromptAddition } from "@/lib/profile/maturity";
+import { getProfileState, listProfile } from "@/lib/profile/store";
 import { listIntegrations } from "@/lib/integrations/store";
 import {
   buildSearchTool,
@@ -245,8 +247,32 @@ export async function POST(request: Request) {
       logApiError("/api/chat", err, { stage: "integrations" });
     }
 
+    // What the assistant has learned about this person from how they use
+    // the product (V3 — AI Profile Maturity). Empty below Level 1, and
+    // empty whenever the load fails: an assistant that knows nothing is
+    // the normal starting state, and degrading to it costs the user a
+    // slightly less tailored reply rather than their message.
+    let profileAddition = "";
+    try {
+      const [state, observations] = await Promise.all([
+        getProfileState(user.id),
+        listProfile(user.id),
+      ]);
+      profileAddition = buildProfilePromptAddition({
+        level: state.level,
+        observations: observations.map((o) => ({
+          category: o.category,
+          observation: o.observation,
+          confidence: o.confidence,
+        })),
+      });
+    } catch (err) {
+      logApiError("/api/chat", err, { stage: "learned_profile" });
+    }
+
     const systemPrompt =
       (mentorMode ? buildMentorSystemPrompt(personaName) : buildSystemPrompt(personaName)) +
+      profileAddition +
       buildMemoryPromptAddition(memories) +
       buildEntityMentionPromptAddition(mentionedEntities) +
       mentorContext +

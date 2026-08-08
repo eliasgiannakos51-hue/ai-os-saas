@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { AI_QUALITY_CYCLE_TRANSFORM_EN } from "@/lib/ai-quality-checklist";
+import { AI_SAFETY_COMPACT_EL } from "@/lib/ai-conduct";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -58,7 +59,7 @@ const SYSTEM_PROMPTS: Record<TextAction, string> = {
 const SYSTEM_PROMPTS_WITH_QUALITY_CYCLE: Record<TextAction, string> = Object.fromEntries(
   Object.entries(SYSTEM_PROMPTS).map(([action, prompt]) => [
     action,
-    prompt + AI_QUALITY_CYCLE_TRANSFORM_EN,
+    prompt + AI_QUALITY_CYCLE_TRANSFORM_EN + AI_SAFETY_COMPACT_EL,
   ])
 ) as Record<TextAction, string>;
 

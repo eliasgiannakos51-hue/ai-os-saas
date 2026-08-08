@@ -34,13 +34,15 @@
     "resend": "^6.18.1",
     "server-only": "^0.0.1",
     "sharp": "^0.35.3",
-    "stripe": "^22.4.0"
+    "stripe": "^22.4.0",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.0",
     "@types/node": "^20",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
+    "@types/web-push": "^3.6.4",
     "autoprefixer": "^10.5.4",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.35",

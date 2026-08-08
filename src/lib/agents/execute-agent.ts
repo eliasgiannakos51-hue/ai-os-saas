@@ -1,4 +1,5 @@
 import "server-only";
+import { sendPushToUser } from "@/lib/push/web-push";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { User } from "@supabase/supabase-js";
 import { isAdminEmail } from "@/lib/admin";
@@ -356,6 +357,17 @@ export async function executeAgent(params: {
       language: agentConfig.language,
     });
     delivery = { delivered: result.delivered, via: result.via, reason: result.reason };
+    // Push, in addition to (never instead of) the email/Slack delivery
+    // above. An agent runs unattended at 08:00 — a phone notification is
+    // what makes a result something the user actually sees that morning,
+    // and it carries no content beyond the agent's name: the result may
+    // be long and private, and a notification is shown on a lock screen.
+    void sendPushToUser(userId, "agent_results", {
+      title: agent.name,
+      body: "Your agent finished its run — tap to read the result.",
+      url: "/dashboard/agents",
+      tag: `agent-${agent.id}`,
+    });
   }
 
   await admin
@@ -419,4 +431,13 @@ export async function pauseAgentForNoCredits(params: {
     .update({ status: "paused", next_run_at: null })
     .eq("id", agent.id);
   void sendAgentPausedNoCreditsEmail({ userId, email, agentName: agent.name });
+  // The low-credits push. This is the moment it genuinely matters: an
+  // agent has just STOPPED because the balance ran out, and every further
+  // scheduled run is silently skipped until the user acts.
+  void sendPushToUser(userId, "low_credits", {
+    title: "Agent paused — out of credits",
+    body: `${agent.name} could not run because your balance ran out.`,
+    url: "/dashboard/settings",
+    tag: "low-credits",
+  });
 }

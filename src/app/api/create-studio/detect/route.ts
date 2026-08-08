@@ -26,6 +26,7 @@ import {
   type CreateStudioDetection,
 } from "@/lib/create-studio/plan";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
+import { AI_SAFETY_BOUNDARIES_EN } from "@/lib/ai-conduct";
 import { isAutomationFrequency } from "@/lib/automation-schedule";
 
 export const dynamic = "force-dynamic";
@@ -58,7 +59,7 @@ Rules:
 - Reply in the SAME LANGUAGE the user wrote in.
 - Set "moduleSlug" ONLY when the kind is "moduleEntry", to the single best-matching module slug from the list above. Leave it null otherwise.
 - Set "frequency" ONLY when the kind is "automation", to whichever of daily/weekly/monthly the user described. If they said it repeats but not how often, use "weekly" and say so in "understanding". Leave it null otherwise.
-${AI_QUALITY_CHECKLIST_EN}`;
+${AI_SAFETY_BOUNDARIES_EN}${AI_QUALITY_CHECKLIST_EN}`;
 }
 
 const DETECT_TOOL: Anthropic.Tool = {

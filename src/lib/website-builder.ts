@@ -4,6 +4,7 @@ import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { applyExactReplace } from "@/lib/website-patch";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
+import { AI_SAFETY_BOUNDARIES_EN } from "@/lib/ai-conduct";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import type { CostAccumulator, CostStage } from "@/lib/billing/cost-accumulator";
 
@@ -296,7 +297,7 @@ ${WEB_SEARCH_SECTION}
 ${FUNCTIONAL_ELEMENTS_SECTION}
 ${PLACEHOLDER_DATA_SECTION}
 ${FINAL_SELF_CHECK_SECTION}
-${AI_QUALITY_CHECKLIST_EN}`;
+${AI_SAFETY_BOUNDARIES_EN}${AI_QUALITY_CHECKLIST_EN}`;
 
 // Strips a leading/trailing markdown code fence if the model wrapped its
 // output in one despite the system prompt saying not to — Claude does this
@@ -579,7 +580,7 @@ ${FUNCTIONAL_ELEMENTS_SECTION}
 ${PLACEHOLDER_DATA_SECTION}
 If the change request asks to add a photo, a font, an animation, contact info, or a form, apply the same rules above as if generating fresh — e.g. a newly-requested photo still uses the PLACEHOLDER convention (or a newly-attached reference image's real URL) rather than an invented link.
 ${FINAL_SELF_CHECK_SECTION}
-${AI_QUALITY_CHECKLIST_EN}`;
+${AI_SAFETY_BOUNDARIES_EN}${AI_QUALITY_CHECKLIST_EN}`;
 
 // Same prompt-caching split as buildGenerateSystemBlocks above — the
 // (large, fully static) EDIT_SYSTEM_PROMPT gets its own cache_control

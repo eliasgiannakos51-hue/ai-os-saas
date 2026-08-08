@@ -19,6 +19,7 @@ import { Reveal } from "@/components/ui/reveal";
 import { MarginReport } from "@/components/settings/margin-report";
 import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
 import { EmailNotificationSettings } from "@/components/settings/email-notification-settings";
+import { PushNotificationSettings } from "@/components/settings/push-notification-settings";
 import { AchievementsSection } from "@/components/settings/achievements-section";
 import { loadUnlockedAchievements } from "@/lib/achievements";
 import { isAdminEmail } from "@/lib/admin";
@@ -234,6 +235,14 @@ export default async function SettingsPage() {
         <EmailNotificationSettings
           userId={user.id}
           initialPrefs={(emailPrefs as Record<string, boolean> | null) ?? {}}
+        />
+
+        {/* The VAPID public key is read here, on the server, and passed
+            down: it is NEXT_PUBLIC_ (the browser genuinely needs it to
+            create a subscription), but reading it in the component would
+            hide whether push is configured at all until runtime. */}
+        <PushNotificationSettings
+          vapidPublicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null}
         />
 
         {hasCustomAiPersona && <Reveal><AiPersonaSettings initialName={aiPersonaName} /></Reveal>}

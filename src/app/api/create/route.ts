@@ -31,6 +31,7 @@ import { diagLog } from "@/lib/diag";
 import { MAX_ATTACHMENT_IMAGES } from "@/lib/create-attachment-image";
 import { downloadAttachmentImages } from "@/lib/attachment-image-server";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
+import { AI_CONDUCT_EN } from "@/lib/ai-conduct";
 
 export const dynamic = "force-dynamic";
 
@@ -76,7 +77,7 @@ Rules:
 - Leave a field out (or null) if the message doesn't contain that information — don't fabricate data.
 - Always fill in the module's required field(s) if the message contains enough information to do so; if you can't, prefer "none" and explain what's missing in "message".
 - "message" is a short (1-2 sentence), friendly response shown directly to the user. If module is "none", briefly list the 13 available modules (ideas, competitors, research, finance, learning, trading, decisions, products, content, sales, feedback, analytics, automation) and ask them to rephrase. If matched, briefly confirm what you logged.
-${AI_QUALITY_CHECKLIST_EN}`;
+${AI_CONDUCT_EN}${AI_QUALITY_CHECKLIST_EN}`;
 }
 
 const ROUTE_ENTRY_TOOL: Anthropic.Tool = {

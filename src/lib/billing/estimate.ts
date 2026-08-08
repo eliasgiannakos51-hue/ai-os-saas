@@ -217,6 +217,36 @@ export const ACTION_PROFILES = {
     baseOutputChars: 0,
     outputCharsPerInputChar: 0,
   },
+  // Building an autonomous agent from one sentence (api/agents/build) —
+  // the clarifying-questions pre-check plus one forced-tool-use call that
+  // returns the configuration. Small and bounded: the tool schema caps
+  // what can come back, so the output does not scale with the request the
+  // way a generation does.
+  agentBuild: {
+    systemPromptTokens: 1400,
+    auxiliaryCalls: [{ inputTokens: 700, outputTokens: 150 }],
+    baseOutputChars: 900,
+    outputCharsPerInputChar: 1,
+  },
+  // ONE execution of an agent (api/cron/agent-runs, api/agents/[id]/run).
+  //
+  // The auxiliary call is the research pass — modelled unconditionally
+  // even though it only runs for agents with needsWebSearch, because this
+  // profile sizes a RESERVATION and a hold that is too small is the one
+  // failure mode a hold exists to prevent. The searches themselves are
+  // priced separately through expectedWebSearches at the call site, since
+  // Anthropic bills those per query rather than per token. The unused
+  // remainder is released at settlement, so over-holding costs the user
+  // nothing.
+  agentRun: {
+    systemPromptTokens: 800,
+    auxiliaryCalls: [{ inputTokens: 900, outputTokens: 900 }],
+    // MAX_OUTPUT_TOKENS in lib/agents/agent-runner.ts is 3,000 — ~12,000
+    // characters. Sized at the ceiling rather than the typical briefing
+    // for the same reason as websiteGenerate's baseOutputChars.
+    baseOutputChars: 12000,
+    outputCharsPerInputChar: 2,
+  },
   // Ask AI about a record (api/records/ask). The user's question is
   // short; the INPUT is dominated by the record itself, which the route
   // serialises in full and passes as inputChars. That is exactly why a
@@ -245,6 +275,82 @@ export const ACTION_PROFILES = {
     systemPromptTokens: 1200,
     auxiliaryCalls: [],
     baseOutputChars: 3000,
+    outputCharsPerInputChar: 1,
+  },
+  // Mapping a spreadsheet's columns (api/import/csv/analyse). The model
+  // sees the HEADERS and a dozen sample rows, never the whole file, so
+  // the input is bounded by the sample and not by the upload — a 5,000-
+  // row file and a 20-row file cost the same to map, which is why this
+  // profile does not scale with the file size.
+  importMap: {
+    systemPromptTokens: 1800,
+    auxiliaryCalls: [],
+    baseOutputChars: 1200,
+    outputCharsPerInputChar: 0,
+  },
+  // Extracting entries from pasted text (api/import/paste). The output
+  // genuinely scales with the input here — a longer business plan
+  // contains more entries — so unlike the mapper this one is
+  // proportional.
+  importPaste: {
+    systemPromptTokens: 1800,
+    auxiliaryCalls: [],
+    baseOutputChars: 800,
+    outputCharsPerInputChar: 1,
+  },
+  // Phrasing findings the detectors already computed
+  // (api/insights/generate). Small and bounded: the model is handed a
+  // handful of facts and asked for grammar, so the cost is set by the
+  // number of findings and not by how much data they were computed from.
+  insightNarrate: {
+    systemPromptTokens: 700,
+    auxiliaryCalls: [],
+    baseOutputChars: 1500,
+    outputCharsPerInputChar: 1,
+  },
+  // Ask my documents (api/files/ask). Like recordAsk, the question is
+  // short and the INPUT is everything — the route passes the selected
+  // documents' text as inputChars, and a 200-page contract is three
+  // orders of magnitude more input than the question about it. This is
+  // the profile where a flat price would be most obviously wrong.
+  fileAsk: {
+    systemPromptTokens: 700,
+    auxiliaryCalls: [],
+    baseOutputChars: 1500,
+    // The answer does NOT grow with the documents — a question about a
+    // 300-page manual has the same length answer as one about a memo.
+    // Charging output proportional to input here would quote a user
+    // hundreds of credits for a two-sentence reply.
+    outputCharsPerInputChar: 0,
+  },
+  // One Deep Research run (api/research/process). The most expensive
+  // single action in the product, and the only one whose estimate has to
+  // be shown and confirmed before it starts.
+  //
+  // The shape: one planning call, then one call PER research question
+  // that runs web searches, then one synthesis call over everything the
+  // searches returned. The per-question calls are modelled as auxiliary
+  // calls at the CEILING number of questions, not the typical one,
+  // because this profile sizes a hold — and RESEARCH_MAX_QUESTIONS in
+  // lib/research/research.ts is 6.
+  deepResearch: {
+    systemPromptTokens: 1600,
+    auxiliaryCalls: [
+      // Planning: small in, a list of questions out.
+      { inputTokens: 900, outputTokens: 600 },
+      // Six research passes. Each re-sends the topic and gets back a
+      // summary of what its searches found; the searches themselves are
+      // priced separately per query through expectedWebSearches, since
+      // Anthropic bills those per search rather than per token.
+      { inputTokens: 1500, outputTokens: 2500 },
+      { inputTokens: 1500, outputTokens: 2500 },
+      { inputTokens: 1500, outputTokens: 2500 },
+      { inputTokens: 1500, outputTokens: 2500 },
+      { inputTokens: 1500, outputTokens: 2500 },
+      { inputTokens: 1500, outputTokens: 2500 },
+    ],
+    // The synthesis call's own output: a full report.
+    baseOutputChars: 16000,
     outputCharsPerInputChar: 1,
   },
 } as const;

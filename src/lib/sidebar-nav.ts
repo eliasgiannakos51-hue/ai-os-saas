@@ -24,6 +24,10 @@ import {
   TRADING_WORKFLOW_ICON,
   WEBSITE_BUILDER_ICON,
   PRODUCT_WORKFLOW_ICON,
+  PUBLISHED_SITES_ICON,
+  INTEGRATIONS_ICON,
+  FILES_ICON,
+  DEEP_RESEARCH_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -58,6 +62,16 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: REFLECTION_NAV_ITEM.href, label: REFLECTION_NAV_ITEM.label, icon: REFLECTION_ICON, hintKey: "reflection" },
       { href: "/dashboard/memory", label: "AI Memory", icon: MEMORY_ICON , hintKey: "memory" },
       { href: "/dashboard/documents", label: "Documents", icon: MODULE_ICONS.documents , hintKey: "documents" },
+      // Next to Documents rather than in Build: both are about writing,
+      // and the difference — documents the AI wrote for you vs files you
+      // brought in for it to read — is exactly the distinction a user
+      // needs the two entries to be adjacent to notice.
+      { href: "/dashboard/files", label: "Files", icon: FILES_ICON, hintKey: "files" },
+      // NOT /dashboard/research: that route is the Knowledge tracker, a
+      // place to save links by hand. This is the autonomous job that goes
+      // and finds them. Sharing a route would have made one of the two
+      // unreachable.
+      { href: "/dashboard/deep-research", label: "Deep Research", icon: DEEP_RESEARCH_ICON, hintKey: "deepResearch" },
     ],
   },
   {
@@ -70,6 +84,10 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         href: "/dashboard/website-builder",
         label: "Website Builder",
         icon: WEBSITE_BUILDER_ICON, hintKey: "websiteBuilder" },
+      // Sits directly under the Builder rather than in its own group: a
+      // published site IS a website that went live, and separating the two
+      // would make "where did my site go" a navigation question.
+      { href: "/dashboard/published", label: "Published Sites", icon: PUBLISHED_SITES_ICON, hintKey: "published" },
       { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps , hintKey: "apps" },
       { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images , hintKey: "images" },
       { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos , hintKey: "videos" },
@@ -122,6 +140,11 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         label: "Product Workflow",
         icon: PRODUCT_WORKFLOW_ICON, hintKey: "productWorkflow" },
       { href: "/dashboard/automation", label: "Automation", icon: MODULE_ICONS.automation , hintKey: "automation" },
+      // Operations rather than Settings: connecting Gmail is something a
+      // user does to change how the product WORKS for them, not a
+      // preference. It sits next to Automation because both answer "what
+      // does this do on my behalf".
+      { href: "/dashboard/integrations", label: "Integrations", icon: INTEGRATIONS_ICON, hintKey: "integrations" },
     ],
   },
   {

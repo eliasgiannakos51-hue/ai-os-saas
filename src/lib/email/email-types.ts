@@ -28,6 +28,17 @@ export const EMAIL_TYPES = {
   scheduled_run_complete: { critical: false },
   stuck_generation: { critical: false },
   website_form_submission: { critical: false },
+  // V3 — Autonomous Agents. The result of a scheduled run is the whole
+  // point of the feature, but it is still something a user may want to
+  // stop receiving without deleting the agent, so it is togglable and
+  // counts against the daily cap.
+  agent_run_result: { critical: false },
+  // Critical for the same reason delete_account_confirmation is: it
+  // reports a state change the user must act on to undo. An agent that
+  // switched itself off silently — because a busy day had already hit the
+  // 20-email cap — is a user who stops receiving what they built and does
+  // not find out for weeks.
+  agent_disabled: { critical: true },
 } as const;
 
 export type EmailType = keyof typeof EMAIL_TYPES;

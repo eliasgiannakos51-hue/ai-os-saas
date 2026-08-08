@@ -68,6 +68,18 @@ function collect(file, seen, out, allowExternals = false) {
   // default mode (the billing libs genuinely have none, and a silent stub
   // would be a lie), kept verbatim when `allowExternals` is on — see
   // loadTsWithDeps.
+  //
+  // `node:` builtins are the one exception, and they are allowed in BOTH
+  // modes. The rule they would otherwise trip exists to stop a build-gate
+  // suite depending on node_modules — which is why
+  // scripts/tests/billing-coverage.test.mjs forbids loadTsWithDeps in any
+  // *.test.mjs. A Node builtin is not that: it needs no resolution, no
+  // install and no bundle written to disk, and a data: URL imports it
+  // directly (verified). Without this, a module that does nothing more
+  // exotic than `import { createCipheriv } from "node:crypto"` could only
+  // be tested by the mode that writes into node_modules — which would have
+  // pushed the encryption tests for third-party OAuth tokens OUT of the
+  // build gate, i.e. exactly the wrong place for them.
   const stripped = js
     .split("\n")
     .filter((line) => {
@@ -79,6 +91,7 @@ function collect(file, seen, out, allowExternals = false) {
       if (!/^(import|export)\s.*from\s+["']/.test(t)) return true;
       const spec = t.match(/from\s+["']([^"']+)["']/)?.[1] ?? "";
       if (spec.startsWith("@/") || spec.startsWith(".")) return false;
+      if (spec.startsWith("node:")) return true;
       if (allowExternals) return true;
       throw new Error(`Unsupported external import in ${abs}: ${t}`);
     })
@@ -87,10 +100,75 @@ function collect(file, seen, out, allowExternals = false) {
   out.push(stripped);
 }
 
+// External imports are HOISTED AND MERGED, not left where they were.
+//
+// Concatenating two modules that both `import { ... } from "node:crypto"`
+// produces two import statements in one module scope, and any binding they
+// share is a hard SyntaxError: "Identifier 'randomBytes' has already been
+// declared". That is a property of the bundling, not of the code — both
+// files are perfectly valid on their own — so it is fixed here rather than
+// by contorting the modules under test to suit the test harness.
+//
+// Merging per specifier also keeps the default and namespace forms
+// working: `import Anthropic from "@anthropic-ai/sdk"` in two files
+// collapses to one binding rather than colliding.
+function hoistExternalImports(chunks) {
+  const named = new Map(); // specifier -> Set of "a" | "a as b"
+  const defaults = new Map(); // specifier -> local name
+  const bare = new Set();
+  const body = [];
+
+  const IMPORT_RE = /^import\s+(?:([\w$]+)\s*,\s*)?(?:\{([^}]*)\}|([\w$]+))?\s*from\s*["']([^"']+)["'];?$/;
+
+  for (const chunk of chunks) {
+    for (const line of chunk.split("\n")) {
+      const trimmed = line.trim();
+      const bareMatch = trimmed.match(/^import\s+["']([^"']+)["'];?$/);
+      if (bareMatch) {
+        bare.add(bareMatch[1]);
+        continue;
+      }
+      const m = trimmed.match(IMPORT_RE);
+      if (!m) {
+        body.push(line);
+        continue;
+      }
+      const [, defaultWithNamed, namedList, defaultOnly, specifier] = m;
+      const defaultName = defaultWithNamed || defaultOnly;
+      if (defaultName) defaults.set(specifier, defaultName);
+      if (namedList) {
+        const set = named.get(specifier) ?? new Set();
+        for (const part of namedList.split(",")) {
+          const name = part.trim();
+          if (name) set.add(name);
+        }
+        named.set(specifier, set);
+      }
+      if (!defaultName && !namedList) bare.add(specifier);
+    }
+  }
+
+  const header = [];
+  for (const specifier of bare) header.push(`import "${specifier}";`);
+  const specifiers = new Set([...named.keys(), ...defaults.keys()]);
+  for (const specifier of specifiers) {
+    const defaultName = defaults.get(specifier);
+    const names = [...(named.get(specifier) ?? [])];
+    const clause = [defaultName, names.length ? `{ ${names.join(", ")} }` : null]
+      .filter(Boolean)
+      .join(", ");
+    header.push(`import ${clause} from "${specifier}";`);
+  }
+  return [...header, ...body].join("\n");
+}
+
 function bundleOf(entry, allowExternals) {
   const out = [];
   collect(path.resolve(entry), new Set(), out, allowExternals);
-  return out.join("\n");
+  // Hoisted in both modes: two concatenated modules that each import
+  // `node:crypto` would otherwise redeclare a shared binding and fail to
+  // parse.
+  return hoistExternalImports(out);
 }
 
 export async function loadTs(entry) {

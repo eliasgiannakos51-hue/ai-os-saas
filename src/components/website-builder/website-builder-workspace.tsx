@@ -45,6 +45,7 @@ import { SecurityCheckedBadge } from "@/components/security/security-checked-bad
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { CardGrid, EntityCard, type EntityCardStatusTone } from "@/components/ui/entity-card";
 import { DetailPanel, type DetailTab } from "@/components/ui/detail-panel";
+import { PublishControl } from "@/components/publishing/publish-control";
 import { ListLayout } from "@/components/ui/list-layout";
 import { SortToggle } from "@/components/sort-toggle";
 import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
@@ -967,6 +968,14 @@ export function WebsiteBuilderWorkspace({
               </button>
             ) : (
               <>
+                {/* V3 Task 2 — hosting. Self-contained: it fetches its own
+                    published state, so nothing about this workspace's
+                    existing data flow changes. */}
+                <PublishControl
+                  websiteId={previewWebsite.id}
+                  websiteName={previewWebsite.name}
+                  disabled={previewWebsite.status !== "completed"}
+                />
                 <button
                   type="button"
                   onClick={() => downloadHtml(previewWebsite)}

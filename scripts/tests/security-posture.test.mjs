@@ -17,7 +17,7 @@
 //      zero callers. Documentation is not wiring.
 //
 // Run: node scripts/tests/security-posture.test.mjs
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
 let pass = 0,
@@ -82,6 +82,26 @@ const MODULE_TABLES = [
   "ai_images", "ai_videos", "ai_coding_requests", "ai_data_analysis_requests",
   "ai_documents", "ai_presentations", "ai_campaigns",
 ];
+
+// V3 feature tables, asserted by name for the same reason the module
+// tables are: a count that moves tells you nothing about WHICH table lost
+// its policies.
+const V3_TABLES = [
+  "user_agents",
+  "agent_runs",
+  "published_sites",
+  "site_versions",
+  "site_analytics",
+  "user_integrations",
+  "integration_sync_log",
+  "user_files",
+  "file_collections",
+  "file_collection_items",
+  "research_reports",
+  "user_imports",
+  "user_insights",
+  "user_onboarding",
+];
 for (const t of MODULE_TABLES) {
   if (!rlsEnabled.has(t)) {
     fail++;
@@ -89,15 +109,163 @@ for (const t of MODULE_TABLES) {
   }
 }
 check(`all ${MODULE_TABLES.length} module tables have RLS`, MODULE_TABLES.every((t) => rlsEnabled.has(t)), true);
+check(`all ${V3_TABLES.length} V3 feature tables have RLS`, V3_TABLES.every((t) => rlsEnabled.has(t)), true);
 
 // RLS with no policy denies everything to anon/authenticated (service_role
 // bypasses) — correct for the admin-only tables, a bug for anything else.
 const policyTables = new Set(
   [...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?([a-z_0-9]+)"?/gis)].map((m) => m[1])
 );
-for (const t of MODULE_TABLES) {
+for (const t of [...MODULE_TABLES, ...V3_TABLES]) {
   checkTrue(`${t} has at least one policy`, policyTables.has(t) || loopRls.has(t));
 }
+
+// agent_runs is READ-ONLY to its owner by design: only the service-role
+// client writes run history. A user who could insert here could fabricate
+// runs; one who could delete could hide a run they were charged for.
+const agentRunsPolicies = [...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?agent_runs"?[^;]*/gis)].map(
+  (m) => m[0]
+);
+checkTrue(`agent_runs has exactly one policy (${agentRunsPolicies.length})`, agentRunsPolicies.length === 1);
+checkTrue("...and it is select-only", /for select/i.test(agentRunsPolicies[0] ?? ""));
+
+// site_analytics is read-only to its owner for the same reason: only the
+// public serving route writes counts, through the service-role client.
+const analyticsPolicies = [...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?site_analytics"?[^;]*/gis)].map(
+  (m) => m[0]
+);
+checkTrue(`site_analytics has exactly one policy (${analyticsPolicies.length})`, analyticsPolicies.length === 1);
+checkTrue("...and it is select-only", /for select/i.test(analyticsPolicies[0] ?? ""));
+
+// integration_sync_log is the user-facing audit trail of what the AI read
+// from their mail and files. A user-writable audit trail is not an audit
+// trail, so it is select-only for exactly the same reason agent_runs is.
+const syncLogPolicies = [
+  ...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?integration_sync_log"?[^;]*/gis),
+].map((m) => m[0]);
+checkTrue(`integration_sync_log has exactly one policy (${syncLogPolicies.length})`, syncLogPolicies.length === 1);
+checkTrue("...and it is select-only", /for select/i.test(syncLogPolicies[0] ?? ""));
+
+// The tables holding third-party OAuth tokens must be reachable ONLY by
+// their owner. A policy here that was not scoped to auth.uid() would hand
+// every stored Gmail grant to anyone with the anon key, which ships in the
+// client bundle.
+const integrationPolicies = [
+  ...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?user_integrations"?[^;]*/gis),
+].map((m) => m[0]);
+checkTrue(`user_integrations has policies (${integrationPolicies.length})`, integrationPolicies.length >= 1);
+checkTrue(
+  "...and every one is scoped to auth.uid()",
+  integrationPolicies.every((p) => /auth\.uid\(\) = user_id/.test(p))
+);
+// The columns are ciphertext, and the schema must keep saying so: a column
+// renamed to `access_token` would be a plaintext-shaped invitation.
+checkTrue(
+  "the token columns are named as ciphertext",
+  /access_token_encrypted/.test(sql) && /refresh_token_encrypted/.test(sql)
+);
+checkTrue("...and no plaintext token column exists", !/\baccess_token text\b/.test(sql));
+
+// The File Workspace holds the most sensitive objects this product
+// touches — contracts, payroll, medical letters. Three things must stay
+// true, and each has been a real bug in some product at some point:
+//   1. every policy is scoped to the owner;
+//   2. the bucket is PRIVATE (a public bucket makes every RLS policy
+//      above it decorative, because the object URL bypasses the table);
+//   3. account deletion clears the OBJECTS, which nothing cascades.
+const filePolicies = [...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?user_files"?[^;]*/gis)].map(
+  (m) => m[0]
+);
+checkTrue(`user_files has policies (${filePolicies.length})`, filePolicies.length >= 1);
+checkTrue(
+  "...and every one is scoped to auth.uid()",
+  filePolicies.every((p) => /auth\.uid\(\) = user_id/.test(p))
+);
+const bucketInsert = /insert into storage\.buckets[^;]*'user-files'[^;]*;/is.exec(sql)?.[0] ?? "";
+checkTrue("the user-files bucket is declared", bucketInsert.length > 0);
+checkTrue("...and it is PRIVATE", /,\s*false\s*\)/.test(bucketInsert));
+// `on conflict do update set public = false` is what makes a bucket that
+// was flipped public in the dashboard get CORRECTED by running the
+// schema, rather than silently left open.
+checkTrue("...and re-running the schema forces it private again", /on conflict[^;]*public\s*=\s*false/is.test(bucketInsert));
+const objectPolicies = [
+  ...sql.matchAll(/create policy[^;]*?\son\s+storage\.objects[^;]*/gis),
+].map((m) => m[0]).filter((p) => p.includes("user-files"));
+checkTrue(`the bucket's own object policies exist (${objectPolicies.length})`, objectPolicies.length >= 3);
+checkTrue(
+  "...and every one matches the owner's folder",
+  objectPolicies.every((p) => /auth\.uid\(\)::text = \(storage\.foldername\(name\)\)\[1\]/.test(p))
+);
+
+// V3 Task 16 (Instant Value). Two things must stay true here, and both
+// are about a flag that decides whether real money is spent for free.
+//
+//   1. `user_insights` has NO delete policy. An insight is DISMISSED,
+//      not erased: the row records that a claim was made about somebody's
+//      business and what numbers it rested on, and a user who could
+//      delete it could also make a wrong claim unanswerable.
+//   2. The free activation run is claimed by a CONDITIONAL UPDATE in the
+//      database, granted only to service_role. A read-then-write in
+//      application code would hand two requests the same free run, and
+//      the user owns their user_onboarding row, so the flag has to be out
+//      of their reach even though the row is not.
+const insightPolicies = [...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?user_insights"?[^;]*/gis)].map(
+  (m) => m[0]
+);
+checkTrue(`user_insights has policies (${insightPolicies.length})`, insightPolicies.length >= 1);
+checkTrue(
+  "...every one scoped to auth.uid()",
+  insightPolicies.every((p) => /auth\.uid\(\) = user_id/.test(p))
+);
+checkTrue(
+  "...and none of them is a delete policy",
+  insightPolicies.every((p) => !/for delete/i.test(p))
+);
+
+const claimFn = /create or replace function public\.claim_activation_run[\s\S]*?\$\$;/i.exec(sql)?.[0] ?? "";
+checkTrue("the activation claim is a database function", claimFn.length > 0);
+checkTrue("...that is security definer", /security definer/i.test(claimFn));
+// The `where activation_used_at is null` is what makes it exactly-once.
+checkTrue("...and claims conditionally, not by read-then-write", /activation_used_at is null/i.test(claimFn));
+checkTrue(
+  "...and is granted ONLY to service_role",
+  /grant execute on function public\.claim_activation_run\(uuid\) to service_role/i.test(sql) &&
+    /revoke all on function public\.claim_activation_run\(uuid\) from authenticated/i.test(sql)
+);
+// The route that records onboarding progress must never write the
+// billing flag, even though the user owns that row.
+const onboardingRoute = readFileSync("src/app/api/onboarding/route.ts", "utf8");
+checkTrue(
+  "the onboarding route never sets activation_used_at",
+  !/activation_used_at\s*[:=]/.test(onboardingRoute)
+);
+
+// The importer stamps user_id from the SESSION and drops any that came
+// in on the row. The rows originate from a model's output and a user's
+// file, and neither gets a say in whose account they land in.
+const applySrc = readFileSync("src/lib/import/apply.ts", "utf8");
+checkTrue("imported rows are stamped with the session user", /user_id: userId/.test(applySrc));
+checkTrue(
+  "...through a field allowlist, so an incoming user_id cannot survive",
+  /allowedKeys\.has\(key\)/.test(applySrc)
+);
+
+// Formula injection. The export path is where a stored payload actually
+// executes, so the defence has to be there and not only on import.
+const csvExport = readFileSync("src/lib/csv.ts", "utf8");
+checkTrue("the CSV export defuses formula cells", /neutraliseFormula/.test(csvExport));
+
+// published_sites must NOT be publicly readable. The anon key is printed
+// in the client bundle, so a "true" select policy here would hand every
+// site row — user_id included — to anyone who asked.
+const publishedPolicies = [...sql.matchAll(/create policy[^;]*?\son\s+(?:public\.)?"?published_sites"?[^;]*/gis)].map(
+  (m) => m[0]
+);
+checkTrue(`published_sites has policies (${publishedPolicies.length})`, publishedPolicies.length >= 1);
+checkTrue(
+  "...and every one of them is scoped to auth.uid()",
+  publishedPolicies.every((p) => /auth\.uid\(\) = user_id/.test(p))
+);
 
 const silentlyDenied = [...rlsEnabled].filter(
   (t) => !policyTables.has(t) && !loopRls.has(t) && !ADMIN_ONLY_TABLES.has(t)
@@ -128,7 +296,11 @@ for (const table of ADMIN_ONLY_TABLES) {
 }
 
 console.log("\n== 3. every API route authenticates, or is justified ==");
-const routes = walk("src/app/api").filter((f) => f.endsWith("route.ts"));
+// EVERY route handler in the app, not just the ones under /api. The public
+// site route added by V3 Task 2 lives at src/app/s/[subdomain]/route.ts and
+// would have been invisible to a scan of src/app/api alone — which is
+// precisely the kind of route that most needs to be on a justified list.
+const routes = walk("src/app").filter((f) => f.endsWith("route.ts"));
 checkTrue(`routes discovered (${routes.length})`, routes.length >= 40);
 
 // Routes that legitimately have no logged-in user. Each is load-bearing
@@ -140,10 +312,15 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/webhooks/stripe/route.ts": "authenticated by Stripe signature, not a cookie",
   "src/app/api/cron/reset-credits/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
+  "src/app/api/cron/agent-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts); executes every due Autonomous Agent, so it spends real money on many accounts per call",
   "src/app/api/weekly-digest/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",
   "src/app/api/websites/[id]/submit-form/route.ts": "public contact form on generated sites; write-only, honeypot + 30/hr cap",
   "src/app/api/client-error/route.ts": "browser error beacon; fires when there may be no session",
+  "src/app/auth/callback/route.ts":
+    "the OAuth/magic-link landing. It CREATES the session by exchanging a single-use code — requiring one first is a contradiction. Surfaced by widening this scan beyond src/app/api; it was never checked before, and reading it line by line confirmed everything after the exchange acts on the user that exchange returned, never on an id from the request.",
+  "src/app/s/[subdomain]/route.ts":
+    "the public web: serves a published site to anonymous visitors. Reads through the admin client and selects only the columns a visitor needs; published_sites has no public RLS policy, so a visitor cannot read the table at all. In-memory rate limited, and every response carries a restrictive CSP.",
 };
 
 for (const file of routes) {
@@ -189,6 +366,35 @@ checkTrue("releaseExpiredReservations is imported by the cron", cronSrc.includes
 checkTrue("...and actually invoked", /await releaseExpiredReservations\(\)/.test(cronSrc));
 checkTrue("...and its failure cannot fail the cron", /catch[\s\S]{0,220}sweep_reservations/.test(cronSrc));
 
+// Same rule, applied to the V3 Task 3 addition the moment it shipped: the
+// integrations audit trail is pruned by an RPC whose own comment says the
+// daily cron calls it. This asserts that it does.
+checkTrue(
+  "prune_integration_sync_log is actually invoked by the cron",
+  /rpc\("prune_integration_sync_log"\)/.test(cronSrc)
+);
+checkTrue(
+  "...and its failure cannot fail the cron",
+  /catch[\s\S]{0,260}prune_integration_sync_log/.test(cronSrc)
+);
+
+// Same rule for erasure: storage.objects has no FK to auth.users, so the
+// only thing that removes a deleted account's uploaded files is this RPC
+// being called. A function that exists and is never invoked would leave
+// every deleted user's documents in the bucket.
+const DELETE_ROUTE = "src/app/api/delete-account/confirm/route.ts";
+const deleteSrc = readFileSync(DELETE_ROUTE, "utf8");
+checkTrue(
+  "account deletion clears the user's file objects",
+  /rpc\("delete_user_file_objects"/.test(deleteSrc)
+);
+// ...and BEFORE the auth user is deleted, so a failure is still
+// attributable to an account that exists.
+checkTrue(
+  "...before the auth user is deleted",
+  deleteSrc.indexOf('delete_user_file_objects') < deleteSrc.indexOf("admin.deleteUser")
+);
+
 // The route this cron actually runs on must be the one the scheduler
 // fires — a sweeper wired into a route nobody calls is the same bug again.
 const vercel = JSON.parse(readFileSync("vercel.json", "utf8"));
@@ -197,6 +403,31 @@ checkTrue(
   `the sweeper's route is in vercel.json crons (${scheduledPaths.join(", ") || "none"})`,
   scheduledPaths.includes("/api/cron/scheduled-runs")
 );
+// Same rule for the agent engine: agents that are never executed are the
+// whole feature failing silently, and nothing in the app would say so.
+checkTrue(
+  "the Autonomous Agents engine is scheduled in vercel.json",
+  scheduledPaths.includes("/api/cron/agent-runs")
+);
+
+console.log("\n== 5. SECURITY.md describes gates that actually exist ==");
+// The same rule as section 4, turned on the documentation itself. A
+// SECURITY.md that names a gate which was renamed or deleted is worse
+// than no SECURITY.md: it tells the next person a rule is enforced when
+// nothing enforces it, which is exactly the failure the "documentation
+// is not wiring" section above exists to catch.
+const securityDoc = readFileSync("SECURITY.md", "utf8");
+const namedGates = [...new Set([...securityDoc.matchAll(/`?(?:scripts\/tests\/)?([a-z0-9-]+\.test\.mjs|check-i18n\.js)`?/g)].map((m) => m[1]))];
+checkTrue(`SECURITY.md names its gates (${namedGates.length})`, namedGates.length >= 5);
+for (const gate of namedGates) {
+  const path = gate === "check-i18n.js" ? "scripts/check-i18n.js" : `scripts/tests/${gate}`;
+  checkTrue(`the gate SECURITY.md names exists: ${path}`, existsSync(path));
+}
+// And the six lettered rules are all still present, so a section cannot
+// be quietly dropped while the file still looks complete.
+for (const heading of ["## α.", "## β.", "## γ.", "## δ.", "## ε.", "## στ.", "## ζ."]) {
+  checkTrue(`SECURITY.md still has ${heading}`, securityDoc.includes(heading));
+}
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

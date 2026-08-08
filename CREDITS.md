@@ -92,6 +92,30 @@ known one — over-charging slightly is the safe direction to fail in.
   is invisible from the settled row because the stored `achieved_margin`
   is measured against the same understated euros.
 
+## Agents: the one feature that spends money unattended
+
+Every other AI action in this app costs credits because a human just
+clicked something. An autonomous agent (`/dashboard/agents`) costs them at
+08:00 every morning for as long as the account exists, with nobody
+watching. That changes three things about how it bills:
+
+- **The hold covers retries, not one attempt.** An execution retries up to
+  `AGENT_MAX_ATTEMPTS` (3) times on a transient failure, and settlement
+  charges the measured usage of *every* attempt from one `CostAccumulator`.
+  So `estimateAgentRun` reserves `reserveCredits x AGENT_MAX_ATTEMPTS`. A
+  hold sized for a single attempt would let a retried run charge more than
+  was ever held, which is precisely the balance-goes-negative case the
+  three-phase flow exists to prevent. The remainder is released at
+  settlement, so over-holding costs the user nothing.
+- **A failed run still settles.** Every attempt spent real tokens. A failed
+  run that released instead of settling would be spend the margin report
+  cannot see.
+- **Fair use is a cost control, not a packaging decision.** The per-plan
+  agent counts (`AGENT_LIMIT_*`) cap how many recurring schedules an
+  account can own; `AGENT_MAX_RUNS_PER_HOUR` caps how hard it can drive
+  them; and a schedule may not fire more than once an hour, enforced in the
+  cron expression itself. Free is zero agents for the same reason.
+
 ## Known gaps
 
 None. Every `messages.create` / `messages.stream` in `src/` reserves,

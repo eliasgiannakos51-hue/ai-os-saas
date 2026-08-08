@@ -120,7 +120,71 @@ const clientFallbacks = sources.flatMap((f) => [
 // insert fail-closed instead of best-effort. Same already-documented class
 // (server-side English prose), raised deliberately rather than silently —
 // which is the entire point of pinning the number.
-const SERVER_PROSE_BASELINE = 236;
+// 236 -> 282: V3 Task 1 (Autonomous Agents) added five API routes —
+// api/agents, api/agents/[id], api/agents/[id]/run, api/agents/build and
+// api/cron/agent-runs — and every validation failure, ownership miss,
+// plan-cap rejection and rate-limit response in them returns English
+// prose, exactly like the 236 that came before. Raised deliberately, with
+// the same decision recorded: translating these means routes returning
+// stable error CODES the client looks up, which is a refactor of all 45+
+// routes at once and not something to start halfway through in one
+// feature. The USER-FACING strings for this feature — every label,
+// status, toast and confirmation on /dashboard/agents — are fully
+// translated in all ten locales; what is English here is the fallback
+// text shown only when a request fails in a way the client has no
+// specific message for.
+// 282 -> 314: V3 Task 2 (Website Hosting) added api/websites/[id]/publish
+// and api/published/[id]/rollback, whose validation, ownership,
+// plan-cap, address-clash and security-block responses are English prose
+// like the 282 before them. Same recorded decision as above: the fix is
+// stable error CODES across all 45+ routes, not a string sweep inside one
+// feature. Everything the user READS on /dashboard/published and on the
+// publish control is fully translated in all ten locales.
+// 314 -> 333: V3 Task 3 (Universal Integrations) added
+// api/integrations/[provider]/connect, .../callback and the disconnect
+// route, plus the Slack delivery branches in api/agents. Their
+// not-authenticated, unknown-provider, plan-cap, rate-limit and
+// not-configured responses are English prose like the 314 before them.
+// Same recorded decision: stable error CODES across all routes is the fix,
+// and it is a refactor of the whole API surface rather than something to
+// start inside one feature. Everything the user READS on
+// /dashboard/integrations is translated in all ten locales.
+// 333 -> 441: V3 Task 4 (File Workspace + Deep Research) added the
+// largest single block of API surface so far — upload, list, delete,
+// signed download, ask, four collection endpoints, and the three research
+// routes. Their not-authenticated, size, type, plan-cap, storage-cap,
+// rate-limit, insufficient-credit and not-found responses are English
+// prose like the 333 before them, and several are inside `extract.ts`,
+// whose messages ("this PDF is password-protected", "no readable text was
+// found") are written to be read by a person rather than parsed.
+//
+// Same recorded decision as the four increments above, and it is worth
+// restating because the number has now tripled: the fix is stable error
+// CODES across all 60+ routes with the translation happening client-side,
+// which is a refactor of the entire API surface and not something to start
+// inside one feature. What the user READS on /dashboard/files and
+// /dashboard/research is fully translated in all ten locales.
+// 441 -> 488: V3 Task 16 (Instant Value) added the import and insight
+// routes — CSV analyse/apply, paste, insights generate/dismiss and the
+// onboarding progress endpoint. Their not-authenticated, size, parse,
+// mapping, rate-limit and insufficient-credit responses are English
+// prose like the 441 before them.
+//
+// Same recorded decision as the five increments above: the fix is stable
+// error CODES across the whole API surface with the translation done
+// client-side, which is a refactor of every route and not something to
+// start inside one feature. What the user READS in the onboarding flow
+// and on the insight cards is fully translated in all ten locales.
+//
+// ONE HONEST EXCEPTION, recorded rather than glossed over: the insight
+// SENTENCES are written by the narrator in the user's language, but when
+// the narration is unavailable or rejected (lib/insights/narrate.ts
+// discards any wording that invents a number) the detector's own English
+// statement is shown instead. A true sentence in the wrong language beats
+// a fabricated one in the right language, so that is the deliberate
+// trade — but it is a degradation, not a translated path, and it is
+// counted here so nobody later mistakes it for one.
+const SERVER_PROSE_BASELINE = 488;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

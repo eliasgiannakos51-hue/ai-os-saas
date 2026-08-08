@@ -30,12 +30,16 @@ import {
   Megaphone,
   Brain,
   History,
+  Plug,
+  Radio,
   Rocket,
   CalendarClock,
   LineChart,
   Layout,
   Flag,
   Star,
+  FolderOpen,
+  Telescope,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -90,6 +94,22 @@ export const WEBSITE_BUILDER_ICON: LucideIcon = Layout;
 // already used elsewhere in the same sidebar section) — this is the
 // unified Product Workflow page, not the raw Products module list.
 export const PRODUCT_WORKFLOW_ICON: LucideIcon = Flag;
+// Distinct from MODULE_ICONS.websites (Globe, the idea tracker) and from
+// WEBSITE_BUILDER_ICON (Layout, the generator) — this is the list of sites
+// that are actually LIVE on the public web, which is a third thing.
+export const PUBLISHED_SITES_ICON: LucideIcon = Radio;
+// Distinct from MODULE_ICONS.automation (Zap) — an integration is a
+// connection to somebody else's product, not a rule that runs inside ours.
+export const INTEGRATIONS_ICON: LucideIcon = Plug;
+// Distinct from MODULE_ICONS.documents (FileText, documents the AI wrote
+// FOR you) — these are files the user brought IN for the AI to read.
+export const FILES_ICON: LucideIcon = FolderOpen;
+// Distinct from MODULE_ICONS.research (the Knowledge tracker at
+// /dashboard/research, a place to save links and notes by hand) — this is
+// the autonomous multi-search job that writes a report. Two different
+// things that both answer to the word "research", so they get two
+// different icons and two different routes.
+export const DEEP_RESEARCH_ICON: LucideIcon = Telescope;
 
 /**
  * The icon for any slug that can appear on a card, including the

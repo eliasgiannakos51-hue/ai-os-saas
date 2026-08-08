@@ -96,6 +96,41 @@ const DECLARED = {
     billing: "settled",
     note: "memory extraction now runs BEFORE the chat settlement and records onto the same accumulator, so one chat turn is one charge covering both calls.",
   },
+  "src/lib/agents/agent-builder.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V3 Autonomous Agents. One forced-tool-use call that designs the agent; recorded onto the same CostAccumulator as the clarification pre-check and settled once by api/agents/build. A build that returns an unusable configuration still SETTLES rather than releasing — the tokens were spent.",
+  },
+  "src/lib/agents/agent-runner.ts": {
+    calls: 2,
+    billing: "settled",
+    note: "V3 Autonomous Agents. The optional web_search research pass plus the main run, both recorded onto one accumulator per execution. Retries record onto the SAME accumulator, so a run that tried three times is charged for three attempts — which is why executeAgent reserves AGENT_MAX_ATTEMPTS x the single-run estimate.",
+  },
+  "src/app/api/files/ask/route.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V3 File Workspace. One grounded call over the selected documents. The reservation is sized AFTER the documents load, because the cost is dominated by document text and a hold sized from the question alone is off by orders of magnitude on a long contract. A call that errors still SETTLES rather than releasing — the tokens were spent.",
+  },
+  "src/lib/research/research.ts": {
+    calls: 3,
+    billing: "settled",
+    note: "V3 Deep Research. The PLANNING half (api/research) is cheap by design: it turns the topic into questions and stops, so the user sees the price of the expensive half before it runs. planResearch (forced tool use), researchQuestion (web search, once per question, sequential), synthesiseReport. All three record onto ONE CostAccumulator per report, settled by api/research/[id]/run — including the failure paths, since every phase that ran spent tokens.",
+  },
+  "src/lib/import/map-columns.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V3 Task 16 Instant Value. One forced-tool-use call that decides what a spreadsheet is and maps its columns. It sees the HEADERS and a dozen sample rows, never the whole file — so a 5,000-row upload and a 20-row one cost the same, which is why the importMap profile does not scale with file size. Settled by api/import/csv/analyse whether or not a usable mapping came back; the confirm step (api/import/csv/apply) makes NO AI call and charges nothing, because applying a mapping the user already approved is arithmetic.",
+  },
+  "src/lib/import/paste.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V3 Task 16 Instant Value. One forced-tool-use call that extracts structured entries from pasted text. Output genuinely scales with input here, unlike the mapper, so importPaste is proportional. Settled by api/import/paste even when the model correctly answers 'there is nothing here worth recording' — the tokens were spent either way.",
+  },
+  "src/lib/insights/narrate.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V3 Task 16 Instant Value. Phrases findings the DETECTORS already computed — the patterns are found by lib/insights/detectors.ts, and this call is given the numbers and asked for grammar. Every number it writes is checked against the evidence and a narration that invents one is discarded in favour of the detector's own wording, so a model failure degrades the prose and never the correctness. Settled by api/insights/generate; when the detectors find nothing this call is never made and nothing is charged.",
+  },
   "src/lib/lead-classification.ts": {
     calls: 1,
     billing: "settled",
@@ -354,8 +389,15 @@ check("unit suites are *.test.mjs", pkg.scripts["test:unit"].includes("*.test.mj
 // This file names both patterns in order to search for them, so it would
 // otherwise flag itself.
 const SELF = "billing-coverage.test.mjs";
+// Comments are stripped before scanning, for the same reason
+// scripts/tests/i18n-coverage.test.mjs strips them: a suite that documents
+// WHY it does not use loadTsWithDeps was flagged for containing the word.
+// A scanner that fails on its own subject's rationale teaches people to
+// delete the rationale.
+const stripJsComments = (src) =>
+  src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 for (const file of readdirSync("scripts/tests").filter((f) => f.endsWith(".test.mjs") && f !== SELF)) {
-  const body = readFileSync(path.join("scripts/tests", file), "utf8");
+  const body = stripJsComments(readFileSync(path.join("scripts/tests", file), "utf8"));
   checkTrue(`${file} binds no port`, !/createServer\s*\(/.test(body));
   checkTrue(`${file} writes nothing into node_modules`, !/loadTsWithDeps/.test(body));
 }

@@ -41,6 +41,72 @@ touch targets) and works identically on mobile and desktop.
   assistant (not tied to any module) with real token-by-token streaming,
   markdown-rendered replies, and a conversation sidebar (pin, rename,
   delete, grouped by recency). Backed by `/api/chat`.
+- **AI Agents** (`/dashboard/agents`) — autonomous agents. The user
+  describes what they want in one sentence ("every morning, send me the
+  latest news about Nvidia"); `/api/agents/build` asks only the questions
+  that are genuinely missing (the shared clarifying-questions pre-check,
+  kind `agent`), designs a complete configuration, and shows a preview —
+  what it understood, when it will run, the first three run times in the
+  user's own timezone, and the credits each run will cost — before
+  anything exists. Confirmed agents run on our infrastructure forever:
+  `/api/cron/agent-runs` fires every 15 minutes, executes whatever is due
+  (optionally with a web search first), and emails the result via Resend.
+  Each execution reserves credits before the first token and settles on
+  measured usage, retries twice on a transient failure, auto-pauses the
+  agent if the account runs out of credits, and switches it off with an
+  email after five consecutive failures. Per-agent controls: pause/resume,
+  edit, delete, "Run now" (a real execution, which deliberately does not
+  touch the schedule or the failure streak), and the full run history with
+  each run's output, cost and outcome. Fair use is per plan (Free 0,
+  Starter 2, Growth 5, Professional 15, Ultimate 50, Enterprise 100), every
+  number overridable via `AGENT_LIMIT_*`, plus a per-account cap of
+  `AGENT_MAX_RUNS_PER_HOUR` executions an hour.
+- **Published Sites** (`/dashboard/published`) — real hosting. A finished
+  site in the Website Builder gets a **Publish** button: the user picks an
+  address (3-30 chars, `[a-z0-9-]`, unique, with a reserved blocklist that
+  keeps `admin`, `support`, `billing`, `www` and ~70 others out of
+  customers' hands) and the site goes live immediately at `/s/<address>` —
+  or at `<address>.<PUBLISHED_SITE_DOMAIN>` once a wildcard domain exists,
+  with no migration, because the stored value is a bare label. The public
+  route (`src/app/s/[subdomain]/route.ts`) reads no session, returns the
+  published bytes as their own document rather than injecting them into
+  ours, and carries a CSP that permits the inline CSS/JS a single-file
+  generated site needs and nothing else — no external script host,
+  `form-action 'self'`, `frame-ancestors 'none'`, `base-uri 'none'` —
+  plus `X-Frame-Options`, `nosniff`, a `Permissions-Policy` and an
+  in-memory rate limit. Every publish and every rollback re-runs the
+  static security scan, fail-closed. Re-publishing appends a version;
+  the last 20 are kept and any of them can be rolled back to in one click.
+  Analytics are views per day with **no cookies and no personal data of
+  any kind** — the table has no column that could hold an IP, a user agent
+  or a visitor id. Fair use per plan (Free 0, Starter 1, Growth 3,
+  Professional 10, Ultimate 30, Enterprise unlimited), overridable via
+  `PUBLISHED_SITE_LIMIT_*`.
+- **Integrations** (`/dashboard/integrations`) — Gmail, Google Drive and
+  Slack, so the AI works on the user's real data. One generic OAuth flow
+  serves every provider (`/api/integrations/[provider]/connect` and
+  `/callback`), with CSRF state that is both HMAC-signed and bound to an
+  HttpOnly cookie, PKCE where the provider supports it, and refresh at the
+  point of use rather than on a schedule. Tokens are **AES-256-GCM
+  ciphertext** with a key that lives only in the environment; each one is
+  bound by GCM additional-authenticated-data to *whose* token it is and
+  *which* token it is, so a ciphertext copied between rows or columns
+  fails to decrypt instead of quietly working. Nothing token-shaped can
+  reach a log — the redactor and a string-only `safeErrorDetail` are the
+  only paths into `logApiError`. Gmail and Drive are deliberately
+  **separate** integrations sharing one Google client, so a user who wants
+  the AI to read their files never has to hand over their mail; Gmail is
+  read with `format=metadata` (subjects, senders, a snippet — never
+  bodies, never attachments, never Spam or Trash). Consent is a step, not
+  a checkbox: the panel states what the AI will see and lists the scopes
+  verbatim before the user leaves for Google. Disconnect revokes at the
+  provider **first**, then deletes our row, and the delete cascades to the
+  audit trail of what was read. In Ionexa Chat the model gets a real
+  `search_my_data` tool (the app's first client-side tool loop, bounded at
+  two rounds), whose results are fenced as untrusted third-party content;
+  Autonomous Agents can deliver to a Slack channel, which must be one the
+  user's own connected workspace offers. Fair use per plan (Free 0,
+  Starter 2, Growth 5, Professional+ unlimited) via `INTEGRATION_LIMIT_*`.
 - **Settings** (`/dashboard/settings`) — account email, password change,
   current plan + billing management, Buy Credits, credit transaction
   history, and a full-data JSON export.

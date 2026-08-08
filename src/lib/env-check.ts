@@ -76,6 +76,89 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
   { name: "UNSPLASH_ACCESS_KEY", level: "optional", what: "Real photos in generated websites", fallback: "placeholder images" },
   { name: "LARGE_ACTION_CONFIRM_THRESHOLD", level: "optional", what: "Credits above which an action asks for confirmation", fallback: "50" },
   { name: "RESERVE_BUFFER_PERCENT", level: "optional", what: "Headroom added to a reservation", fallback: "10" },
+  // Autonomous Agents fair use. Optional, because every one of them has a
+  // real default from plans.ts — but listed so the owner can SEE, on the
+  // system-health page, which of them are being overridden. A limit that
+  // silently differs from the pricing page is the kind of thing nobody
+  // finds until a customer asks why they cannot add an agent.
+  {
+    name: "AGENT_LIMIT_STARTER",
+    level: "optional",
+    what: "Agents a Starter account may own",
+    fallback: "2",
+    suspicious: numberIn(0, 1000),
+  },
+  {
+    name: "AGENT_LIMIT_GROWTH",
+    level: "optional",
+    what: "Agents a Growth account may own",
+    fallback: "5",
+    suspicious: numberIn(0, 1000),
+  },
+  {
+    name: "AGENT_LIMIT_PROFESSIONAL",
+    level: "optional",
+    what: "Agents a Professional account may own",
+    fallback: "15",
+    suspicious: numberIn(0, 1000),
+  },
+  {
+    name: "AGENT_LIMIT_ULTIMATE",
+    level: "optional",
+    what: "Agents an Ultimate account may own",
+    fallback: "50",
+    suspicious: numberIn(0, 1000),
+  },
+  // Integrations (V3 Task 3). All "optional": the feature is off unless
+  // they are set, and a deployment that never wanted Gmail/Slack must not
+  // be told it is misconfigured. INTEGRATION_ENCRYPTION_KEY is listed
+  // first because without it the connect route refuses to run at all —
+  // which is the correct behaviour, and worth being able to SEE on the
+  // system-health page rather than discovering from a 503.
+  {
+    name: "INTEGRATION_ENCRYPTION_KEY",
+    level: "optional",
+    what: "Encrypts stored third-party OAuth tokens. Without it, integrations refuse to connect",
+    fallback: "integrations disabled",
+  },
+  {
+    name: "GOOGLE_OAUTH_CLIENT_ID",
+    level: "optional",
+    what: "Gmail and Google Drive integrations",
+    fallback: "those providers are hidden",
+  },
+  {
+    name: "GOOGLE_OAUTH_CLIENT_SECRET",
+    level: "optional",
+    what: "Gmail and Google Drive token exchange",
+    fallback: "those providers are hidden",
+  },
+  {
+    name: "SLACK_CLIENT_ID",
+    level: "optional",
+    what: "Slack integration and Slack agent delivery",
+    fallback: "Slack is hidden",
+  },
+  {
+    name: "SLACK_CLIENT_SECRET",
+    level: "optional",
+    what: "Slack token exchange",
+    fallback: "Slack is hidden",
+  },
+  {
+    name: "INTEGRATION_MAX_READS_PER_HOUR",
+    level: "optional",
+    what: "Reads of connected accounts one user can cause per hour",
+    fallback: "60",
+    suspicious: numberIn(1, 1000),
+  },
+  {
+    name: "AGENT_MAX_RUNS_PER_HOUR",
+    level: "optional",
+    what: "Agent executions one account can cause per hour",
+    fallback: "20",
+    suspicious: numberIn(1, 500),
+  },
 ];
 
 export type EnvReport = {

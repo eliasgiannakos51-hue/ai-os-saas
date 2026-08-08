@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { listIntegrations } from "@/lib/integrations/store";
+import {
+  buildSearchTool,
+  searchToolInstruction,
+  executeSearchTool,
+  SEARCH_TOOL_NAME,
+  MAX_TOOL_ROUNDS,
+} from "@/lib/integrations/chat-tool";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
@@ -244,6 +252,27 @@ export async function POST(request: Request) {
     } catch (err) {
       logApiError("/api/chat", err, { stage: "user_full_context" });
     }
+    // V3 Task 3 — the user's own connected accounts.
+    //
+    // Both the tool and its instruction are built from what is ACTUALLY
+    // connected, so an account with no integrations gets a byte-identical
+    // request to the one it got before this feature existed: no extra tool
+    // in the array, no extra text in the system prompt, and no tool loop.
+    let integrationSearchTool: Anthropic.Tool | null = null;
+    let integrationInstruction = "";
+    try {
+      const integrations = await listIntegrations(user.id);
+      integrationSearchTool = buildSearchTool(integrations);
+      if (integrationSearchTool) {
+        integrationInstruction = searchToolInstruction(
+          integrations.filter((i) => i.status === "connected").map((i) => i.provider)
+        );
+      }
+    } catch (err) {
+      // A failure here must never cost the user their message.
+      logApiError("/api/chat", err, { stage: "integrations" });
+    }
+
     const systemPrompt =
       (mentorMode ? buildMentorSystemPrompt(personaName) : buildSystemPrompt(personaName)) +
       buildMemoryPromptAddition(memories) +
@@ -251,7 +280,8 @@ export async function POST(request: Request) {
       mentorContext +
       tradingMentorContext +
       productMentorContext +
-      userContext;
+      userContext +
+      integrationInstruction;
 
     // Credits: 1 credit per Ionexa Chat message, deducted from user_credits
     // (see lib/billing/credits.ts), the same shared budget Create Anything
@@ -448,7 +478,14 @@ export async function POST(request: Request) {
         const effectiveMaxTokens = isFreeMessage
           ? FREE_CHAT_LIMITS.maxOutputTokens
           : MAX_TOKENS;
-        const effectiveTools = isFreeMessage ? [] : [WEB_SEARCH_TOOL];
+        // Explicitly typed: the array is heterogeneous now (a server tool
+        // plus, sometimes, a custom one), and the ternary's inferred type
+        // would not accept both.
+        const effectiveTools: Anthropic.ToolUnion[] = isFreeMessage
+          ? []
+          : integrationSearchTool
+            ? [WEB_SEARCH_TOOL, integrationSearchTool]
+            : [WEB_SEARCH_TOOL];
 
         const historyChars = effectiveHistory.reduce((sum, m) => sum + m.content.length, 0);
         const streamEstimate = estimateForAction(
@@ -487,30 +524,62 @@ export async function POST(request: Request) {
 
         try {
           void recordAiCallForDailySpend(streamEstimate.estimatedCredits);
-          const claudeStream = anthropic.messages.stream({
-            model: MODEL,
-            max_tokens: effectiveMaxTokens,
-            system: systemPrompt,
-            messages: [
-              ...effectiveHistory.map((m) => ({ role: m.role, content: m.content })),
-              { role: "user" as const, content: message },
-            ],
-            tools: effectiveTools,
-          });
 
-          claudeStream.on("text", (delta) => {
-            assistantText += delta;
-            controller.enqueue(ndjsonLine({ type: "delta", text: delta }));
-          });
+          // The conversation as sent to the model. It grows only when the
+          // model asks to use the integration tool: an assistant turn
+          // carrying the tool_use block, then a user turn carrying the
+          // result. Without a connected integration this loop runs exactly
+          // once and is indistinguishable from the single call that was
+          // here before.
+          const conversation: Anthropic.MessageParam[] = [
+            ...effectiveHistory.map((m) => ({ role: m.role, content: m.content })),
+            { role: "user" as const, content: message },
+          ];
 
-          const finalResponse = await claudeStream.finalMessage();
-          // One record covers the whole reply: Anthropic reports the
-          // history and system prompt inside this call's input_tokens, and
-          // the executed searches inside server_tool_use — so the web
-          // search charge is no longer a second, separately-guessed
-          // deduction, it is part of the measured cost.
-          costs.record("generation", finalResponse.usage, MODEL);
-          webSearchCount = finalResponse.usage.server_tool_use?.web_search_requests ?? 0;
+          for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
+            const claudeStream = anthropic.messages.stream({
+              model: MODEL,
+              max_tokens: effectiveMaxTokens,
+              system: systemPrompt,
+              messages: conversation,
+              tools: effectiveTools,
+            });
+
+            claudeStream.on("text", (delta) => {
+              assistantText += delta;
+              controller.enqueue(ndjsonLine({ type: "delta", text: delta }));
+            });
+
+            const finalResponse = await claudeStream.finalMessage();
+            // Every round is recorded. A turn that searched the user's mail
+            // and then answered is two model calls, and both are settled
+            // against the same reservation — a loop that recorded only its
+            // last round would charge for part of the work it did.
+            costs.record("generation", finalResponse.usage, MODEL);
+            webSearchCount += finalResponse.usage.server_tool_use?.web_search_requests ?? 0;
+
+            const toolUses = finalResponse.content.filter(
+              (block): block is Anthropic.ToolUseBlock =>
+                block.type === "tool_use" && block.name === SEARCH_TOOL_NAME
+            );
+            // Not a tool round (or the ceiling is reached) — this is the
+            // final answer. On the ceiling the model simply never sees
+            // another result, and answers with what it has.
+            if (toolUses.length === 0 || round === MAX_TOOL_ROUNDS) break;
+
+            conversation.push({ role: "assistant", content: finalResponse.content });
+            const results = await Promise.all(
+              toolUses.map(async (toolUse) => {
+                const executed = await executeSearchTool({ userId: user.id, input: toolUse.input });
+                return {
+                  type: "tool_result" as const,
+                  tool_use_id: toolUse.id,
+                  content: executed.content,
+                };
+              })
+            );
+            conversation.push({ role: "user", content: results });
+          }
         } catch (err) {
           logApiError("/api/chat", err, { stage: "anthropic_stream" });
           await releaseReservation(user.id, reservationId);

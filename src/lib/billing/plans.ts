@@ -33,6 +33,19 @@ export type PlanFeature = { textKey: string };
 // today — nothing marked "Coming Soon"/pending; if a feature isn't real
 // yet, it simply isn't listed anywhere on this plan.
 export type PlanCapabilities = {
+  // How many AUTONOMOUS AGENTS this plan may own — real agents that run on
+  // a schedule on our infrastructure (V3 Task 1: user_agents + agent_runs,
+  // enforced in lib/agents/agent-limits.ts, which also lets every number
+  // here be overridden per-deployment via AGENT_LIMIT_<PLAN>).
+  //
+  // It used to mean something else: a row-count ceiling on the `ai_agents`
+  // TRACKER, a table of hand-typed notes that never ran anything. The old
+  // numbers (2/20/100/unlimited) were sized for that — for rows in a table.
+  // They are not defensible for a thing that calls Anthropic and sends an
+  // email on a schedule forever with no further consent: "unlimited"
+  // literally meant unbounded recurring cost per account. The numbers below
+  // are the real allowances, and Free is zero because an agent is the one
+  // feature that spends money while nobody is looking.
   maxAiAgents: number | "unlimited";
   websiteBuilder: boolean;
   mobileSaasBuilder: boolean;
@@ -75,7 +88,7 @@ export const PLANS: Plan[] = [
     monthlyCredits: 100,
     hasTeamSeats: false,
     capabilities: {
-      maxAiAgents: 2,
+      maxAiAgents: 0,
       websiteBuilder: false,
       mobileSaasBuilder: false,
       imageVideoGeneration: false,
@@ -86,7 +99,6 @@ export const PLANS: Plan[] = [
     },
     features: [
       { textKey: "1Workspace3Projects" },
-      { textKey: "2AiAgents" },
       { textKey: "basicAiChat" },
       { textKey: "creditsPerMonth" },
       { textKey: "marketplaceInstallOnly" },
@@ -100,7 +112,7 @@ export const PLANS: Plan[] = [
     monthlyCredits: 1000,
     hasTeamSeats: false,
     capabilities: {
-      maxAiAgents: 20,
+      maxAiAgents: 2,
       websiteBuilder: true,
       mobileSaasBuilder: false,
       imageVideoGeneration: true,
@@ -111,7 +123,7 @@ export const PLANS: Plan[] = [
     },
     features: [
       { textKey: "unlimitedProjects" },
-      { textKey: "upTo20AiAgents" },
+      { textKey: "upTo2AiAgents" },
       { textKey: "aiMemory" },
       { textKey: "websiteAutomationBuilderAccess" },
       { textKey: "imageVideoGenerationAccess" },
@@ -127,7 +139,7 @@ export const PLANS: Plan[] = [
     hasTeamSeats: false,
     highlighted: true,
     capabilities: {
-      maxAiAgents: 100,
+      maxAiAgents: 5,
       websiteBuilder: true,
       mobileSaasBuilder: true,
       imageVideoGeneration: true,
@@ -138,7 +150,7 @@ export const PLANS: Plan[] = [
     },
     features: [
       { textKey: "everythingInStarter" },
-      { textKey: "upTo100AiAgents" },
+      { textKey: "upTo5AiAgents" },
       { textKey: "mobileSaasBuilderAccess" },
       { textKey: "creditsPerMonth" },
       { textKey: "priorityProcessing" },
@@ -151,7 +163,7 @@ export const PLANS: Plan[] = [
     monthlyCredits: 10000,
     hasTeamSeats: true,
     capabilities: {
-      maxAiAgents: "unlimited",
+      maxAiAgents: 15,
       websiteBuilder: true,
       mobileSaasBuilder: true,
       imageVideoGeneration: true,
@@ -162,7 +174,7 @@ export const PLANS: Plan[] = [
     },
     features: [
       { textKey: "everythingInGrowth" },
-      { textKey: "unlimitedAiAgentsTeams" },
+      { textKey: "upTo15AiAgentsTeams" },
       { textKey: "teamCollaboration" },
       { textKey: "sharedAiMemory" },
       { textKey: "creditsPerMonth" },
@@ -177,7 +189,7 @@ export const PLANS: Plan[] = [
     hasTeamSeats: true,
     teamSeatsIncluded: true,
     capabilities: {
-      maxAiAgents: "unlimited",
+      maxAiAgents: 50,
       websiteBuilder: true,
       mobileSaasBuilder: true,
       imageVideoGeneration: true,
@@ -188,6 +200,7 @@ export const PLANS: Plan[] = [
     },
     features: [
       { textKey: "everythingInProfessional" },
+      { textKey: "upTo50AiAgents" },
       { textKey: "unlimitedTeamSeatsIncludedNoPerMemberCharge" },
       { textKey: "extendedChatMemoryRetention100Vs20RecentFact" },
       { textKey: "customAiPersonaNameInIonexaChat" },
@@ -203,7 +216,7 @@ export const PLANS: Plan[] = [
     hasTeamSeats: true,
     teamSeatsIncluded: true,
     capabilities: {
-      maxAiAgents: "unlimited",
+      maxAiAgents: 100,
       websiteBuilder: true,
       mobileSaasBuilder: true,
       imageVideoGeneration: true,
@@ -214,6 +227,7 @@ export const PLANS: Plan[] = [
     },
     features: [
       { textKey: "everythingInUltimate" },
+      { textKey: "upTo100AiAgents" },
       { textKey: "unlimitedMembers" },
       { textKey: "dedicatedSupport" },
       { textKey: "customCredits" },

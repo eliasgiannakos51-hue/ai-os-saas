@@ -9,7 +9,7 @@ import { logApiError } from "@/lib/log-error";
 // here, pass or fail, so the owner has an independent, Supabase-Table-
 // Editor-visible record that these checks actually ran — not just an
 // in-app badge claiming they did.
-export type SecurityCheckResourceType = "website" | "mission_plan" | "automation";
+export type SecurityCheckResourceType = "website" | "mission_plan" | "automation" | "agent";
 
 export type SecurityCheckResult = {
   passed: boolean;

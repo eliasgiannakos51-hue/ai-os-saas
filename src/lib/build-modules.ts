@@ -1,6 +1,6 @@
 import type { ModuleConfig } from "@/lib/modules";
 
-// "Build" modules — AI Agents, Websites, Apps, Images, Videos. Same
+// "Build" modules — Websites, Apps, Images, Videos and the rest. Same
 // RLS/CRUD/search/sort/export pattern as the 13 business modules
 // (lib/modules.ts), reusing the same generic list/form/row components, but
 // kept in a separate array on purpose: these are NOT added to
@@ -9,25 +9,6 @@ import type { ModuleConfig } from "@/lib/modules";
 // now — no real AI generation happens yet, matching the "Coming Soon" /
 // "Future Vision" framing on the public roadmap page.
 export const BUILD_MODULES: ModuleConfig[] = [
-  {
-    slug: "agents",
-    title: "AI Agents",
-    table: "ai_agents",
-    headlineKey: "name",
-    creditCost: 40,
-    countCapCapability: "maxAiAgents",
-    fields: [
-      { key: "name", label: "Name", type: "text", required: true },
-      { key: "description", label: "Goal / Description", type: "textarea", full: true },
-      {
-        key: "status",
-        label: "Status",
-        type: "select",
-        badge: true,
-        options: ["planned", "active", "paused", "archived"],
-      },
-    ],
-  },
   {
     slug: "websites",
     title: "Websites",

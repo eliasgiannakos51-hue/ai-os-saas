@@ -46,9 +46,43 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // File Workspace + Deep Research (V3 Task 4). Each checked by hand:
+  // "credits" is the loanword the Greek UI already uses verbatim
+  // everywhere else; "pages", "Collections", "questions" and "Sources"
+  // are spelled identically in French, and substituting a synonym to make
+  // the string differ would make the French UI worse, not more
+  // translated.
+  "el:dashboard.files.creditsCharged",
+  "el:dashboard.deepResearch.creditsCharged",
+  "fr:dashboard.files.pages",
+  "fr:dashboard.files.collections",
+  "fr:dashboard.deepResearch.questionCount",
+  "fr:dashboard.deepResearch.sources",
   // "credits" is used verbatim in Greek — the same loanword the rest of the
   // Greek UI already uses ("Αγορά Credits", "Ιστορικό Credits").
   "el:credits.estimate.approx",
+  // Autonomous Agents (V3). Same loanword/cognate cases as everywhere else
+  // in this list, verified one by one rather than waved through:
+  // "credits" is the word the Greek UI already uses verbatim; "Name" is
+  // the German word, spelled identically; "Description" is French.
+  "el:dashboard.agents.creditsPerRun",
+  "el:dashboard.agents.runCredits",
+  "de:dashboard.agents.previewName",
+  "de:dashboard.agents.nameLabel",
+  "fr:dashboard.agents.descriptionLabel",
+  // Published Sites (V3 Task 2). Every one checked by hand:
+  // "Website Builder" is the product's own name, used verbatim in the
+  // Greek UI already (sidebar.items.websiteBuilder); "Version" is the
+  // German and French word, spelled identically; "Live" and "Offline" are
+  // the loanwords German and Italian actually use for a site being up or
+  // down — "Offline" in particular has no natural German alternative.
+  "el:dashboard.publishing.goToBuilder",
+  "fr:dashboard.publishing.versionNumber",
+  "de:dashboard.publishing.versionNumber",
+  "de:dashboard.publishing.sitesUsedUnlimited",
+  "de:dashboard.publishing.statusLive",
+  "de:dashboard.publishing.statusUnpublished",
+  "it:dashboard.publishing.statusUnpublished",
   "es:sidebar.items.trading",
   "es:sidebar.items.sales",
   "fr:sidebar.items.trading",

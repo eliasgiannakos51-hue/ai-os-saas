@@ -641,6 +641,33 @@ export async function GET(request: Request) {
       logApiError("/api/cron/scheduled-runs", rateLimitCleanupError, { stage: "cleanup_rate_limit_log" });
     }
 
+    // Housekeeping — the integrations audit trail.
+    //
+    // integration_sync_log records every read the AI makes of a user's
+    // mail, files or Slack, and it is append-only by nature. 90 days is
+    // long enough to answer "what did it look at last quarter" and short
+    // enough that the table stays small.
+    //
+    // Wired HERE, in the same commit as the function, on purpose: this
+    // repo has already shipped a maintenance function documented as
+    // "called by the daily cron" that had zero callers
+    // (releaseExpiredReservations, below), and section 4 of
+    // scripts/tests/security-posture.test.mjs exists because of it.
+    // Documentation is not wiring.
+    let syncLogRowsPruned = 0;
+    try {
+      const { data: pruned, error: pruneError } = await admin.rpc("prune_integration_sync_log");
+      if (pruneError) {
+        logApiError("/api/cron/scheduled-runs", pruneError, { stage: "prune_integration_sync_log" });
+      } else {
+        syncLogRowsPruned = Number(pruned ?? 0);
+      }
+    } catch (err) {
+      // Never let housekeeping fail the cron: real, billable work has
+      // already happened above by this point.
+      logApiError("/api/cron/scheduled-runs", err, { stage: "prune_integration_sync_log" });
+    }
+
     // Phase 3 — sweep abandoned credit holds.
     //
     // DEFECT this fixes (found in the V1+V2 audit): releaseExpiredReservations
@@ -673,6 +700,7 @@ export async function GET(request: Request) {
       automationsFailed,
       stuckNotified,
       expiredReservationsSwept,
+      syncLogRowsPruned,
     });
   } catch (err) {
     logApiError("/api/cron/scheduled-runs", err);

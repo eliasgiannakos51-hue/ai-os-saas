@@ -76,6 +76,13 @@ for (const [label, file] of [
   ["Documents", "src/components/documents/documents-list.tsx"],
   ["Favorites", "src/components/favorites/favorites-list.tsx"],
   ["Modules (shared list)", "src/components/modules/generic-list.tsx"],
+  // V3 — Autonomous Agents. /dashboard/agents no longer routes through
+  // BuildModulePage: it stopped being a tracker of hand-typed rows and
+  // became a real feature with its own create flow, run history and
+  // per-agent actions. That is exactly the moment a surface hand-rolls its
+  // own grid and the pattern quietly forks, so it is asserted here as a
+  // direct consumer instead of being dropped from the list.
+  ["AI Agents", "src/components/agents/agents-workspace.tsx"],
 ]) {
   const src = read(file);
   checkTrue(`${label}: imports the primitive`, /from "@\/components\/ui\/list-layout"/.test(src));
@@ -97,7 +104,9 @@ for (const [label, file] of [
 }
 // Named individually so a build module quietly hand-rolling its own page
 // shows up as that module, not as a count that moved.
-for (const m of ["agents", "apps", "images", "videos", "coding"]) {
+// "agents" is deliberately absent — see the AI Agents entry among the
+// direct consumers above.
+for (const m of ["apps", "images", "videos", "coding"]) {
   checkTrue(`/${m} uses the shared BuildModulePage`, /BuildModulePage/.test(read(`src/app/dashboard/${m}/page.tsx`)));
 }
 

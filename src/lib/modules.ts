@@ -24,11 +24,17 @@ export type ModuleConfig = {
   // client insert, so the cost can be checked/deducted server-side.
   // minPlanSlug, when set, gates the whole page (BuildModulePage only) —
   // below that plan, the page shows an "Upgrade Required" prompt instead
-  // of its normal content. maxAiAgentsCap is a hard per-plan record count
-  // ceiling, special-cased for the "agents" module only.
+  // of its normal content.
+  //
+  // There used to be a third field here, countCapCapability, which existed
+  // solely to cap the "agents" tracker's row count against
+  // plan.capabilities.maxAiAgents. /dashboard/agents is the real
+  // Autonomous Agents feature now and maxAiAgents means the number of REAL
+  // agents an account may own (enforced in lib/agents/agent-limits.ts and
+  // checked in api/agents). Leaving a second, unrelated enforcement of the
+  // same capability behind would have made one number mean two things.
   creditCost?: number;
   minPlanSlug?: PlanSlug;
-  countCapCapability?: "maxAiAgents";
 };
 
 export const MODULES: ModuleConfig[] = [

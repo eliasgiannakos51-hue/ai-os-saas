@@ -1906,3 +1906,1175 @@ grant execute on function public.release_expired_reservations() to service_role;
 -- Tables that are intentionally NOT here because they were never built:
 --   any "daily_briefings" table, any "marketplace_listings" table.
 -- ============================================================================
+
+-- ============================================================================
+-- V3 — Task 1: Autonomous AI Agents.
+--
+-- Applied from v3_autonomous_agents_migration.sql, mirrored here so this
+-- file stays the single readable picture of the whole schema (and so the
+-- RLS coverage check in scripts/tests/security-posture.test.mjs, which
+-- reads THIS file, can see the new tables).
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- user_agents — one row per agent the user owns.
+-- ----------------------------------------------------------------------------
+create table if not exists public.user_agents (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+
+  -- Shown on the card. Written by the AI builder from the user's sentence,
+  -- editable afterwards.
+  name text not null,
+  description text,
+
+  -- The task the agent performs on every run, in natural language. This is
+  -- DATA, never instructions: lib/agents/agent-runner.ts wraps it in a
+  -- delimited block and the system prompt states explicitly that nothing
+  -- inside it can change the agent's rules. See the prompt-injection notes
+  -- in lib/agents/agent-config.ts.
+  prompt text not null,
+
+  -- Standard 5-field cron (minute hour day-of-month month day-of-week),
+  -- interpreted in `timezone` — NOT in UTC. Validated by
+  -- lib/agents/cron-expression.ts before it ever reaches this table, which
+  -- also enforces the "at most one run per hour" rule (the minute field
+  -- must resolve to exactly one value).
+  schedule_cron text not null,
+  -- IANA zone id ("Europe/Athens"). The existing cron
+  -- (api/cron/scheduled-runs) has a documented UTC-only limitation; this
+  -- feature does not inherit it, because "every morning" has to mean the
+  -- user's morning or the agent is useless to them.
+  timezone text not null default 'UTC',
+
+  -- Only 'email' today. Telegram/Slack/Discord are a later part; the CHECK
+  -- is what makes adding one a deliberate migration rather than a typo that
+  -- silently stores a delivery method nothing can honour.
+  delivery_method text not null default 'email'
+    check (delivery_method in ('email')),
+  -- Where the result goes. Constrained in application code to the account's
+  -- OWN verified email address — see the anti-abuse note in
+  -- lib/agents/agent-config.ts. Stored rather than derived so a future
+  -- multi-target delivery does not need a schema change.
+  delivery_target text not null,
+
+  --   active   — runs on schedule
+  --   paused   — the user turned it off, or they ran out of credits
+  --   disabled — 5 consecutive failures; needs the user to re-enable it
+  status text not null default 'active'
+    check (status in ('active', 'paused', 'disabled')),
+
+  -- Builder output that is not a first-class column: whether the task needs
+  -- a web search, the output format, the language to answer in. jsonb
+  -- rather than columns because this is the part that will grow.
+  config jsonb not null default '{}'::jsonb,
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  last_run_at timestamptz,
+  -- Null means "never scheduled" (paused/disabled). The cron selects on
+  -- next_run_at <= now(), so a null can never be picked up by accident.
+  next_run_at timestamptz,
+
+  -- Reset to 0 by any successful run. At AGENT_MAX_CONSECUTIVE_FAILURES
+  -- (5) the agent is auto-disabled and the owner is emailed.
+  consecutive_failures int not null default 0,
+
+  -- Atomic claim against two overlapping cron invocations both executing
+  -- the same due agent — same mechanism as user_automations.
+  processing_started_at timestamptz
+);
+
+-- The cron's own query: status + next_run_at, nothing else.
+create index if not exists user_agents_status_next_run_at_idx
+  on public.user_agents (status, next_run_at);
+
+-- The dashboard's query.
+create index if not exists user_agents_user_id_created_at_idx
+  on public.user_agents (user_id, created_at desc);
+
+-- The per-plan fair-use count ("how many agents does this user have").
+create index if not exists user_agents_user_id_status_idx
+  on public.user_agents (user_id, status);
+
+alter table public.user_agents enable row level security;
+
+drop policy if exists "select_own_user_agents" on public.user_agents;
+create policy "select_own_user_agents" on public.user_agents
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_user_agents" on public.user_agents;
+create policy "insert_own_user_agents" on public.user_agents
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "update_own_user_agents" on public.user_agents;
+create policy "update_own_user_agents" on public.user_agents
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_user_agents" on public.user_agents;
+create policy "delete_own_user_agents" on public.user_agents
+  for delete using (auth.uid() = user_id);
+
+drop trigger if exists set_updated_at on public.user_agents;
+create trigger set_updated_at before update on public.user_agents
+  for each row execute function public.set_updated_at();
+
+-- ----------------------------------------------------------------------------
+-- agent_runs — the execution history. One row per attempt, including the
+-- ones that failed, so "why did I stop getting my email" is answerable.
+-- ----------------------------------------------------------------------------
+create table if not exists public.agent_runs (
+  id uuid primary key default gen_random_uuid(),
+  agent_id uuid not null references public.user_agents(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+
+  started_at timestamptz not null default now(),
+  finished_at timestamptz,
+  status text not null default 'running'
+    check (status in ('running', 'success', 'failed')),
+
+  -- What the agent produced, verbatim — the same text that was emailed.
+  output text,
+  -- User-facing failure reason. Never a stack trace, never a provider
+  -- error body: those go to lib/log-error.ts, not to a row the user reads.
+  error text,
+
+  -- Written at settlement, from the SettlementResult — not estimated.
+  credits_charged int not null default 0,
+  tokens_used int not null default 0,
+
+  trigger_source text not null default 'schedule'
+    check (trigger_source in ('schedule', 'manual')),
+  -- 1 on the first try, 2 or 3 after a retry (AGENT_MAX_ATTEMPTS = 3, i.e.
+  -- the initial attempt plus the two retries the brief asks for).
+  attempts int not null default 1
+);
+
+create index if not exists agent_runs_user_id_started_at_idx
+  on public.agent_runs (user_id, started_at desc);
+
+create index if not exists agent_runs_agent_id_started_at_idx
+  on public.agent_runs (agent_id, started_at desc);
+
+-- The per-user hourly execution cap counts rows in this table.
+create index if not exists agent_runs_user_id_started_at_status_idx
+  on public.agent_runs (user_id, started_at desc, status);
+
+alter table public.agent_runs enable row level security;
+
+-- Read-only to the owner. There is deliberately NO insert/update/delete
+-- policy: only the service-role client writes here (the cron and the
+-- "Run now" route both use createAdminClient), and service role bypasses
+-- RLS. A user who could insert rows here could fabricate a run history;
+-- one who could delete them could hide a run they were charged for.
+drop policy if exists "select_own_agent_runs" on public.agent_runs;
+create policy "select_own_agent_runs" on public.agent_runs
+  for select using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- Email preference for agent results.
+--
+-- 'agent_run_result' is an OPTIONAL email type (lib/email/email-types.ts),
+-- so it needs its own column here or checkEmailAllowed's
+-- `select(OPTIONAL_EMAIL_TYPES.join(","))` fails for every user.
+--
+-- 'agent_disabled' is deliberately NOT here: it is critical mail. An agent
+-- that has switched itself off after five failures is a state change the
+-- owner has to know about to fix, and suppressing it because a busy day
+-- hit the 20-email cap would leave them silently without the thing they
+-- built the agent for.
+-- ----------------------------------------------------------------------------
+alter table public.user_email_preferences
+  add column if not exists agent_run_result boolean not null default true;
+
+-- V3 — Autonomous Agents:
+--   user_agents, agent_runs
+--   (+ user_email_preferences.agent_run_result)
+
+-- ============================================================================
+-- V3 — Task 2: Website Hosting & Publishing.
+--
+-- Applied from v3_website_hosting_migration.sql, mirrored here so this file
+-- stays the single readable picture of the whole schema (and so the RLS
+-- coverage check in scripts/tests/security-posture.test.mjs, which reads
+-- THIS file, can see the new tables).
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- published_sites — one row per live site.
+--
+-- html_content is stored HERE rather than read from user_websites on every
+-- request, deliberately. The published copy is a SNAPSHOT: a user editing
+-- a draft in the builder must not silently change what the public sees,
+-- and the live site must keep serving even while a regeneration is
+-- mid-flight (user_websites.html_content is empty for the whole duration
+-- of a 'pending'/'processing' generation — reading through would take
+-- every published site down for minutes every time its owner clicked
+-- "regenerate").
+-- ----------------------------------------------------------------------------
+create table if not exists public.published_sites (
+  id uuid primary key default gen_random_uuid(),
+  website_id uuid not null references public.user_websites(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+
+  -- 3-30 chars, [a-z0-9-], not starting/ending with a hyphen, not on the
+  -- reserved blocklist. Validated in lib/publishing/subdomain.ts before it
+  -- ever reaches here; the CHECK is the backstop that makes a bypassed
+  -- validator a database error rather than a live site at /s/admin.
+  subdomain text not null,
+  -- Infrastructure only for now: there is no domain to point at yet, so
+  -- the verification flow exists and nothing serves from it.
+  custom_domain text,
+  custom_domain_verification_token text,
+  custom_domain_verified_at timestamptz,
+
+  html_content text not null,
+
+  published_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+
+  --   live        — served
+  --   unpublished — withdrawn by the owner; the subdomain is kept so a
+  --                 re-publish reuses it and old links start working again
+  status text not null default 'live'
+    check (status in ('live', 'unpublished')),
+
+  -- Denormalised running total, incremented by the public route. The
+  -- per-day breakdown lives in site_analytics; this exists so a list of 30
+  -- sites is one query rather than 30 aggregations.
+  view_count bigint not null default 0,
+  is_active boolean not null default true
+);
+
+-- The unique constraint that makes a subdomain a namespace.
+--
+-- Case is folded because subdomains are case-insensitive in DNS and in
+-- URLs: without lower(), "Acme" and "acme" would be two different sites
+-- reachable at the same address. Application code lowercases on the way
+-- in; this makes that impossible to forget.
+create unique index if not exists published_sites_subdomain_key
+  on public.published_sites (lower(subdomain));
+
+-- The public route's only query.
+create index if not exists published_sites_subdomain_active_idx
+  on public.published_sites (lower(subdomain), is_active);
+
+create index if not exists published_sites_user_id_idx
+  on public.published_sites (user_id, published_at desc);
+
+-- One published site per website. Re-publishing updates the row rather
+-- than creating a second one, which is what keeps "how many sites has this
+-- account published" a truthful count.
+create unique index if not exists published_sites_website_id_key
+  on public.published_sites (website_id);
+
+alter table public.published_sites enable row level security;
+
+drop policy if exists "select_own_published_sites" on public.published_sites;
+create policy "select_own_published_sites" on public.published_sites
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_published_sites" on public.published_sites;
+create policy "insert_own_published_sites" on public.published_sites
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "update_own_published_sites" on public.published_sites;
+create policy "update_own_published_sites" on public.published_sites
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_published_sites" on public.published_sites;
+create policy "delete_own_published_sites" on public.published_sites
+  for delete using (auth.uid() = user_id);
+
+-- NO public select policy, on purpose. The public route reads through the
+-- service-role client (which bypasses RLS) and selects only the columns a
+-- visitor needs. An "anyone can read published_sites" policy would expose
+-- user_id and the full row of every site on the platform to anyone holding
+-- the anon key, which is printed in the client bundle.
+
+drop trigger if exists set_updated_at on public.published_sites;
+create trigger set_updated_at before update on public.published_sites
+  for each row execute function public.set_updated_at();
+
+-- ----------------------------------------------------------------------------
+-- site_versions — every version that was ever LIVE.
+--
+-- Distinct from website_versions, which tracks the draft in the builder. A
+-- user can edit a draft ten times and publish once; only the publish is a
+-- version of the live site, and rollback has to mean "what the public saw
+-- on Tuesday", not "what I had in the editor on Tuesday".
+-- ----------------------------------------------------------------------------
+create table if not exists public.site_versions (
+  id uuid primary key default gen_random_uuid(),
+  published_site_id uuid not null references public.published_sites(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  html_content text not null,
+  published_at timestamptz not null default now(),
+  version_number int not null,
+  -- What changed, in the user's words or the AI's — shown in the timeline.
+  change_description text
+);
+
+create unique index if not exists site_versions_site_version_key
+  on public.site_versions (published_site_id, version_number);
+
+create index if not exists site_versions_site_published_at_idx
+  on public.site_versions (published_site_id, published_at desc);
+
+alter table public.site_versions enable row level security;
+
+drop policy if exists "select_own_site_versions" on public.site_versions;
+create policy "select_own_site_versions" on public.site_versions
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_site_versions" on public.site_versions;
+create policy "insert_own_site_versions" on public.site_versions
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_site_versions" on public.site_versions;
+create policy "delete_own_site_versions" on public.site_versions
+  for delete using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- site_analytics — views per site per day.
+--
+-- GDPR-shaped by construction: there is no column that could hold personal
+-- data. No IP, no user agent, no cookie, no visitor id, no referrer, no
+-- path. A day and two counters. "unique_visitors" is derived from a
+-- rotating, salted, truncated hash held only in memory for the current day
+-- (see lib/publishing/analytics.ts) — it is a COUNT, and nothing that
+-- could identify a person is ever written here.
+-- ----------------------------------------------------------------------------
+create table if not exists public.site_analytics (
+  id uuid primary key default gen_random_uuid(),
+  published_site_id uuid not null references public.published_sites(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  date date not null,
+  views integer not null default 0,
+  unique_visitors integer not null default 0
+);
+
+create unique index if not exists site_analytics_site_date_key
+  on public.site_analytics (published_site_id, date);
+
+create index if not exists site_analytics_user_date_idx
+  on public.site_analytics (user_id, date desc);
+
+alter table public.site_analytics enable row level security;
+
+-- Read-only to the owner: only the service-role client (the public serving
+-- route) writes counts. A user who could write here could fabricate
+-- traffic; one who could delete could hide it.
+drop policy if exists "select_own_site_analytics" on public.site_analytics;
+create policy "select_own_site_analytics" on public.site_analytics
+  for select using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- record_site_view — one atomic call per public page view.
+--
+-- Doing this as read-then-write from the route would lose counts under any
+-- concurrency at all, which is exactly the condition a popular page is in.
+-- SECURITY DEFINER because the public route holds no session; it is
+-- callable only with the service-role key, which the client never sees.
+-- ----------------------------------------------------------------------------
+create or replace function public.record_site_view(
+  p_site_id uuid,
+  p_user_id uuid,
+  p_is_unique boolean
+) returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  update public.published_sites
+    set view_count = view_count + 1
+    where id = p_site_id;
+
+  insert into public.site_analytics (published_site_id, user_id, date, views, unique_visitors)
+    values (p_site_id, p_user_id, current_date, 1, case when p_is_unique then 1 else 0 end)
+  on conflict (published_site_id, date) do update
+    set views = public.site_analytics.views + 1,
+        unique_visitors = public.site_analytics.unique_visitors
+          + case when p_is_unique then 1 else 0 end;
+end;
+$$;
+
+revoke all on function public.record_site_view(uuid, uuid, boolean) from public;
+revoke all on function public.record_site_view(uuid, uuid, boolean) from anon;
+revoke all on function public.record_site_view(uuid, uuid, boolean) from authenticated;
+grant execute on function public.record_site_view(uuid, uuid, boolean) to service_role;
+
+-- V3 — Website Hosting & Publishing:
+--   published_sites, site_versions, site_analytics
+--   (+ RPC record_site_view)
+
+-- ============================================================================
+-- V3 — Task 3: Universal Integrations.
+--
+-- Applied from v3_integrations_migration.sql, mirrored here so this file
+-- stays the single readable picture of the whole schema (and so the RLS
+-- coverage check in scripts/tests/security-posture.test.mjs, which reads
+-- THIS file, can see the two tables that hold third-party OAuth tokens —
+-- the last tables in the product that should be outside that check).
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- user_integrations — one row per (user, provider).
+-- ----------------------------------------------------------------------------
+create table if not exists public.user_integrations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+
+  -- 'gmail' | 'google_drive' | 'slack'. Gmail and Drive are separate rows
+  -- even though they share one Google OAuth client: a user who wants the
+  -- AI to read their files should not have to hand over their mail to get
+  -- it, and "disconnect Gmail" has to be expressible on its own.
+  provider text not null check (provider in ('gmail', 'google_drive', 'slack')),
+
+  -- CIPHERTEXT. Never a raw token. Format: v1.<iv>.<tag>.<ciphertext>,
+  -- base64url, with the user id and the token kind bound in as GCM
+  -- additional authenticated data — so a ciphertext moved between rows or
+  -- between columns fails to decrypt instead of quietly working.
+  access_token_encrypted text not null,
+  -- Null for providers that issue no refresh token (Slack bot tokens do
+  -- not expire unless the workspace enables rotation).
+  refresh_token_encrypted text,
+  expires_at timestamptz,
+
+  -- What was actually granted, which is not always what was asked for —
+  -- a user can untick a scope on Google's consent screen. Stored so the
+  -- app can tell "connected" from "connected but useless".
+  scopes text[] not null default '{}',
+
+  connected_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  last_sync_at timestamptz,
+
+  --   connected — usable
+  --   expired   — the refresh token was rejected; needs reconnecting
+  --   revoked   — the user revoked access on the provider's side
+  --   error     — repeated failures; needs reconnecting
+  status text not null default 'connected'
+    check (status in ('connected', 'expired', 'revoked', 'error')),
+
+  -- NON-SENSITIVE display data only: the connected account's email
+  -- address, the Slack workspace name, the bot user id. Anything that is
+  -- a credential belongs in the _encrypted columns above. jsonb rather
+  -- than columns because it differs per provider.
+  metadata jsonb not null default '{}'::jsonb
+);
+
+-- One connection per provider per user. A second "Connect" replaces the
+-- first rather than accumulating orphaned grants nobody can revoke.
+create unique index if not exists user_integrations_user_provider_key
+  on public.user_integrations (user_id, provider);
+
+create index if not exists user_integrations_user_status_idx
+  on public.user_integrations (user_id, status);
+
+-- The refresh sweep's query.
+create index if not exists user_integrations_expires_at_idx
+  on public.user_integrations (expires_at)
+  where status = 'connected';
+
+alter table public.user_integrations enable row level security;
+
+drop policy if exists "select_own_user_integrations" on public.user_integrations;
+create policy "select_own_user_integrations" on public.user_integrations
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_user_integrations" on public.user_integrations;
+create policy "insert_own_user_integrations" on public.user_integrations
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "update_own_user_integrations" on public.user_integrations;
+create policy "update_own_user_integrations" on public.user_integrations
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Delete is what "Disconnect" does, and it must be the user's own right —
+-- GDPR erasure of a third-party grant cannot depend on us running a job.
+drop policy if exists "delete_own_user_integrations" on public.user_integrations;
+create policy "delete_own_user_integrations" on public.user_integrations
+  for delete using (auth.uid() = user_id);
+
+drop trigger if exists set_updated_at on public.user_integrations;
+create trigger set_updated_at before update on public.user_integrations
+  for each row execute function public.set_updated_at();
+
+-- ----------------------------------------------------------------------------
+-- integration_sync_log — an audit trail the USER can read.
+--
+-- Not for us: for them. "What has the AI actually looked at?" is a
+-- question a person is entitled to be able to answer about a system that
+-- reads their mail, and an answer that exists only in our server logs is
+-- not an answer they have.
+--
+-- It records COUNTS and OUTCOMES, never content. There is no column that
+-- could hold the subject of an email or the name of a file.
+-- ----------------------------------------------------------------------------
+create table if not exists public.integration_sync_log (
+  id uuid primary key default gen_random_uuid(),
+  integration_id uuid not null references public.user_integrations(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  synced_at timestamptz not null default now(),
+  items_synced integer not null default 0,
+  status text not null default 'success' check (status in ('success', 'failed')),
+  -- A short, user-facing reason. Never a provider error body: those
+  -- routinely echo the request, and the request carried a token.
+  error text,
+  -- What triggered the read, so "the AI read my mail" is attributable.
+  --   chat        — the user asked a question in Ionexa Chat
+  --   agent       — a scheduled agent run
+  --   life_context — the ambient context assembled for the AI
+  --   manual      — the user pressed Sync
+  source text not null default 'chat'
+    check (source in ('chat', 'agent', 'life_context', 'manual'))
+);
+
+create index if not exists integration_sync_log_integration_synced_idx
+  on public.integration_sync_log (integration_id, synced_at desc);
+
+create index if not exists integration_sync_log_user_synced_idx
+  on public.integration_sync_log (user_id, synced_at desc);
+
+alter table public.integration_sync_log enable row level security;
+
+-- Read-only to the owner. Only the service-role client writes here: an
+-- audit trail a user can edit is not an audit trail.
+drop policy if exists "select_own_integration_sync_log" on public.integration_sync_log;
+create policy "select_own_integration_sync_log" on public.integration_sync_log
+  for select using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- Housekeeping: the sync log is append-only and unbounded by nature.
+-- 90 days is long enough to answer "what did it read last quarter" and
+-- short enough that the table stays small. Called from the daily cron.
+-- ----------------------------------------------------------------------------
+create or replace function public.prune_integration_sync_log()
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  deleted integer;
+begin
+  delete from public.integration_sync_log
+    where synced_at < now() - interval '90 days';
+  get diagnostics deleted = row_count;
+  return deleted;
+end;
+$$;
+
+revoke all on function public.prune_integration_sync_log() from public;
+revoke all on function public.prune_integration_sync_log() from anon;
+revoke all on function public.prune_integration_sync_log() from authenticated;
+grant execute on function public.prune_integration_sync_log() to service_role;
+
+-- ----------------------------------------------------------------------------
+-- Agents can now deliver to Slack as well as email (V3 Task 1 + Task 3).
+--
+-- The CHECK is replaced rather than dropped: an agent row must still never
+-- hold a delivery method nothing can honour.
+-- ----------------------------------------------------------------------------
+alter table public.user_agents
+  drop constraint if exists user_agents_delivery_method_check;
+alter table public.user_agents
+  add constraint user_agents_delivery_method_check
+  check (delivery_method in ('email', 'slack'));
+
+-- V3 — Universal Integrations:
+--   user_integrations, integration_sync_log
+--   (+ RPC prune_integration_sync_log, and user_agents.delivery_method
+--      widened to ('email','slack'))
+-- ============================================================================
+-- V3 — Task 4: File Workspace + Deep Research.
+--
+-- Standalone, additive, idempotent. Safe to run on a project that already
+-- has supabase_full_project_backup.sql applied.
+--
+-- WHAT IS DIFFERENT ABOUT THIS ONE: the bytes a user uploads are theirs,
+-- not ours, and a PDF is routinely the single most sensitive object a
+-- small business owns — a contract, a payroll run, a medical letter. So
+-- the bucket is PRIVATE with no public read at all, every download goes
+-- through a short-lived signed URL minted only after an ownership check,
+-- and the extracted text lives in a table whose RLS is scoped to the
+-- owner exactly like every other one here.
+--
+-- The extracted text is stored in the DATABASE rather than re-derived
+-- from the object on every question. That is deliberate: extraction is
+-- the expensive, failure-prone step, and asking a question should not be
+-- able to fail because a PDF parser had a bad day. It also means "delete
+-- this file" has to clear BOTH the object and the row, which the delete
+-- route does in that order.
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- user_files — one row per uploaded file.
+-- ----------------------------------------------------------------------------
+create table if not exists public.user_files (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+
+  -- As the user named it, sanitised for display. NOT used to build the
+  -- storage path: a filename is attacker-controlled and a path built from
+  -- one is a traversal waiting to happen.
+  filename text not null,
+
+  -- The normalised kind, not the browser's Content-Type header (which is
+  -- client-supplied and therefore a hint, never a fact).
+  file_type text not null check (file_type in ('pdf', 'docx', 'xlsx', 'txt', 'csv', 'md')),
+
+  size_bytes bigint not null check (size_bytes >= 0),
+
+  -- `<user_id>/<uuid>.<ext>` inside the PRIVATE 'user-files' bucket. The
+  -- leading segment is what the storage RLS policies below match on, so
+  -- it is the ownership proof and not merely an organisational choice.
+  storage_path text not null,
+
+  -- The text the AI actually reads. Null while processing, and null
+  -- forever for a file we could not read (a scanned PDF with no text
+  -- layer), in which case `error` says so in words a person can act on.
+  extracted_text text,
+  page_count integer,
+  -- Characters of extracted text. Cheap to read for the cost estimate
+  -- without pulling the whole document into memory.
+  char_count integer not null default 0,
+
+  uploaded_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+
+  --   pending    — row exists, bytes uploaded, extraction not started
+  --   processing — extraction running
+  --   ready      — extracted_text is usable
+  --   failed     — see `error`; the file is still downloadable
+  processing_status text not null default 'pending'
+    check (processing_status in ('pending', 'processing', 'ready', 'failed')),
+  -- A short, user-facing reason. Never a parser stack trace.
+  error text
+);
+
+create index if not exists user_files_user_uploaded_idx
+  on public.user_files (user_id, uploaded_at desc);
+
+create index if not exists user_files_user_status_idx
+  on public.user_files (user_id, processing_status);
+
+alter table public.user_files enable row level security;
+
+drop policy if exists "select_own_user_files" on public.user_files;
+create policy "select_own_user_files" on public.user_files
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_user_files" on public.user_files;
+create policy "insert_own_user_files" on public.user_files
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "update_own_user_files" on public.user_files;
+create policy "update_own_user_files" on public.user_files
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_user_files" on public.user_files;
+create policy "delete_own_user_files" on public.user_files
+  for delete using (auth.uid() = user_id);
+
+drop trigger if exists set_updated_at on public.user_files;
+create trigger set_updated_at before update on public.user_files
+  for each row execute function public.set_updated_at();
+
+-- ----------------------------------------------------------------------------
+-- file_collections — a named group of files to ask questions against.
+-- ----------------------------------------------------------------------------
+create table if not exists public.file_collections (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  description text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists file_collections_user_created_idx
+  on public.file_collections (user_id, created_at desc);
+
+alter table public.file_collections enable row level security;
+
+drop policy if exists "select_own_file_collections" on public.file_collections;
+create policy "select_own_file_collections" on public.file_collections
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_file_collections" on public.file_collections;
+create policy "insert_own_file_collections" on public.file_collections
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "update_own_file_collections" on public.file_collections;
+create policy "update_own_file_collections" on public.file_collections
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_file_collections" on public.file_collections;
+create policy "delete_own_file_collections" on public.file_collections
+  for delete using (auth.uid() = user_id);
+
+drop trigger if exists set_updated_at on public.file_collections;
+create trigger set_updated_at before update on public.file_collections
+  for each row execute function public.set_updated_at();
+
+-- ----------------------------------------------------------------------------
+-- file_collection_items — the membership join.
+--
+-- user_id is denormalised here rather than derived through a join, for
+-- the same reason it is on website_versions and site_versions: this
+-- schema's RLS is `auth.uid() = user_id` everywhere, and a policy that
+-- has to join to find its owner is a policy nobody can read at a glance.
+-- The FKs to both parents mean a row can only ever name a collection and
+-- a file that exist; the CHECK on insert (in application code) means they
+-- must both belong to the same person.
+-- ----------------------------------------------------------------------------
+create table if not exists public.file_collection_items (
+  collection_id uuid not null references public.file_collections(id) on delete cascade,
+  file_id uuid not null references public.user_files(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  added_at timestamptz not null default now(),
+  primary key (collection_id, file_id)
+);
+
+create index if not exists file_collection_items_file_idx
+  on public.file_collection_items (file_id);
+create index if not exists file_collection_items_user_idx
+  on public.file_collection_items (user_id);
+
+alter table public.file_collection_items enable row level security;
+
+drop policy if exists "select_own_file_collection_items" on public.file_collection_items;
+create policy "select_own_file_collection_items" on public.file_collection_items
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_file_collection_items" on public.file_collection_items;
+create policy "insert_own_file_collection_items" on public.file_collection_items
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_file_collection_items" on public.file_collection_items;
+create policy "delete_own_file_collection_items" on public.file_collection_items
+  for delete using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- research_reports — Deep Research jobs and their results.
+--
+-- A long-running job that spends real money, so it follows the Website
+-- Builder's shape exactly: a row exists in 'pending' BEFORE the work
+-- starts, so a run killed mid-flight leaves a visible record instead of
+-- no trace, and `processing_started_at` is the atomic claim that stops
+-- two invocations working the same job.
+-- ----------------------------------------------------------------------------
+create table if not exists public.research_reports (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+
+  topic text not null,
+  -- The user's own language, so the report comes back in it.
+  language text not null default 'en',
+
+  --   pending    — created, not claimed
+  --   planning   — breaking the topic into research questions
+  --   researching— running the searches
+  --   synthesising — writing the report
+  --   ready      — `sections` is populated
+  --   failed     — see `error`
+  status text not null default 'pending'
+    check (status in ('pending', 'planning', 'researching', 'synthesising', 'ready', 'failed')),
+
+  -- The 3-6 questions the AI decided to research. Shown to the user
+  -- BEFORE the expensive part starts, because "here is what I am about to
+  -- spend your credits looking up" is the one moment they can say no.
+  questions jsonb not null default '[]'::jsonb,
+  -- The finished report: [{ heading, body, sourceIndexes }]
+  sections jsonb not null default '[]'::jsonb,
+  -- [{ title, url }] — every claim in the report points at one of these.
+  sources jsonb not null default '[]'::jsonb,
+
+  -- Set once the report has been saved into the Documents module, so the
+  -- user's report lives where the rest of their writing does.
+  document_id uuid,
+
+  credits_charged numeric not null default 0,
+  error text,
+
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  completed_at timestamptz,
+  -- The atomic claim. Null means unclaimed.
+  processing_started_at timestamptz
+);
+
+create index if not exists research_reports_user_created_idx
+  on public.research_reports (user_id, created_at desc);
+create index if not exists research_reports_status_idx
+  on public.research_reports (status, created_at);
+
+alter table public.research_reports enable row level security;
+
+drop policy if exists "select_own_research_reports" on public.research_reports;
+create policy "select_own_research_reports" on public.research_reports
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_research_reports" on public.research_reports;
+create policy "insert_own_research_reports" on public.research_reports
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "update_own_research_reports" on public.research_reports;
+create policy "update_own_research_reports" on public.research_reports
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_research_reports" on public.research_reports;
+create policy "delete_own_research_reports" on public.research_reports
+  for delete using (auth.uid() = user_id);
+
+drop trigger if exists set_updated_at on public.research_reports;
+create trigger set_updated_at before update on public.research_reports
+  for each row execute function public.set_updated_at();
+
+-- ----------------------------------------------------------------------------
+-- Storage: the 'user-files' bucket.
+--
+-- PRIVATE, unlike 'website-references'. That bucket is public because the
+-- user downloads the generated HTML and hosts it elsewhere, so any expiry
+-- would break their live site later. Nothing about a payroll PDF wants
+-- that trade. Every read here goes through a signed URL minted by
+-- api/files/[id]/download after an ownership check, and those expire in
+-- 60 seconds.
+--
+-- `public = false` is forced on conflict so that a bucket accidentally
+-- created public in the dashboard is CORRECTED by running this file,
+-- rather than silently left open.
+-- ----------------------------------------------------------------------------
+insert into storage.buckets (id, name, public)
+values ('user-files', 'user-files', false)
+on conflict (id) do update set public = false;
+
+-- The first path segment is the owner's uuid. These policies are what
+-- makes that true rather than merely conventional.
+drop policy if exists "select_own_user_files_objects" on storage.objects;
+create policy "select_own_user_files_objects" on storage.objects
+  for select using (
+    bucket_id = 'user-files' and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+drop policy if exists "insert_own_user_files_objects" on storage.objects;
+create policy "insert_own_user_files_objects" on storage.objects
+  for insert with check (
+    bucket_id = 'user-files' and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+drop policy if exists "update_own_user_files_objects" on storage.objects;
+create policy "update_own_user_files_objects" on storage.objects
+  for update using (
+    bucket_id = 'user-files' and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+drop policy if exists "delete_own_user_files_objects" on storage.objects;
+create policy "delete_own_user_files_objects" on storage.objects
+  for delete using (
+    bucket_id = 'user-files' and auth.uid()::text = (storage.foldername(name))[1]
+  );
+
+-- ----------------------------------------------------------------------------
+-- Account deletion must remove the OBJECTS too, not just the rows.
+--
+-- `on delete cascade` clears user_files, but storage.objects has no FK to
+-- auth.users — so without this the bytes of a deleted account's contracts
+-- would sit in the bucket forever. That is not a tidiness problem, it is
+-- the erasure right in Article 17 not being honoured.
+--
+-- Called by api/delete-account/confirm before it deletes the auth user.
+-- ----------------------------------------------------------------------------
+create or replace function public.delete_user_file_objects(target_user_id uuid)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  deleted integer;
+begin
+  delete from storage.objects
+    where bucket_id = 'user-files'
+      and (storage.foldername(name))[1] = target_user_id::text;
+  get diagnostics deleted = row_count;
+  return deleted;
+end;
+$$;
+
+revoke all on function public.delete_user_file_objects(uuid) from public;
+revoke all on function public.delete_user_file_objects(uuid) from anon;
+revoke all on function public.delete_user_file_objects(uuid) from authenticated;
+grant execute on function public.delete_user_file_objects(uuid) to service_role;
+
+-- ============================================================================
+-- V3 — Task 16: Instant Value on Day One.
+--
+-- Standalone, additive, idempotent. Safe to run on a project that already
+-- has supabase_full_project_backup.sql applied.
+--
+-- THE ROOT PROBLEM THIS FIXES FIRST.
+--
+-- The headline promise of this feature is an insight like "your three
+-- worst trades were all Monday morning". That sentence is impossible to
+-- produce from this schema as it stood, and the reason is not the
+-- analysis — it is the DATA MODEL. Every module table records only
+-- `created_at`, the moment the row was written. Import 400 trades from a
+-- CSV and all 400 share one timestamp, to the second. Every
+-- time-of-week, month-over-month or trend pattern is then not merely
+-- hard to find: it does not exist in the data at all, and any system
+-- that reported one would be inventing it.
+--
+-- So `occurred_at` is added to the three tables where a real-world date
+-- is the point of the row — when the trade was taken, when the money
+-- moved, when the lead arrived. It is NULLABLE and nothing is
+-- backfilled: an existing row genuinely does not know when it happened,
+-- and writing `created_at` into it would be manufacturing a fact. Every
+-- detector treats a null `occurred_at` as "not datable" and excludes it
+-- from time-based analysis rather than guessing.
+--
+-- `finance_entries.counterparty` exists for the same reason. "40% of
+-- your revenue comes from two clients" needs to know which client; a
+-- free-text description is where a bookkeeping CSV puts a memo, not
+-- reliably a name.
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- Real-world dates, and who the money was with.
+-- ----------------------------------------------------------------------------
+alter table public.trades add column if not exists occurred_at timestamptz;
+alter table public.finance_entries add column if not exists occurred_at timestamptz;
+alter table public.leads add column if not exists occurred_at timestamptz;
+
+-- The counterparty: the client who paid, or the supplier who was paid.
+alter table public.finance_entries add column if not exists counterparty text;
+
+-- Partial indexes: the detectors only ever scan datable rows, and a row
+-- with no occurred_at is excluded by every one of them.
+create index if not exists trades_user_occurred_idx
+  on public.trades (user_id, occurred_at)
+  where occurred_at is not null;
+
+create index if not exists finance_entries_user_occurred_idx
+  on public.finance_entries (user_id, occurred_at)
+  where occurred_at is not null;
+
+create index if not exists finance_entries_user_counterparty_idx
+  on public.finance_entries (user_id, counterparty)
+  where counterparty is not null;
+
+create index if not exists leads_user_occurred_idx
+  on public.leads (user_id, occurred_at)
+  where occurred_at is not null;
+
+-- ----------------------------------------------------------------------------
+-- user_imports — one row per import, whatever the source.
+--
+-- Exists so that "what did this thing put in my account, and can I undo
+-- it" is answerable. An import writes into a dozen module tables at
+-- once; without a record of which rows came from which import, an
+-- account that imported the wrong file has no way back except deleting
+-- rows by hand.
+-- ----------------------------------------------------------------------------
+create table if not exists public.user_imports (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+
+  --   csv       — a spreadsheet the user uploaded
+  --   paste     — free text the user pasted
+  --   quick_add — the short question flow
+  --   gmail | google_drive — pulled through a V3 Task 3 integration
+  source text not null check (source in ('csv', 'paste', 'quick_add', 'gmail', 'google_drive')),
+
+  -- Display only, sanitised. Never used to build a path.
+  filename text,
+  rows_imported integer not null default 0,
+  rows_rejected integer not null default 0,
+  -- { "<table>": <count> } — what landed where.
+  modules jsonb not null default '{}'::jsonb,
+  -- The column mapping that was actually applied, so a wrong import is
+  -- explainable rather than mysterious.
+  mapping jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists user_imports_user_created_idx
+  on public.user_imports (user_id, created_at desc);
+
+alter table public.user_imports enable row level security;
+
+drop policy if exists "select_own_user_imports" on public.user_imports;
+create policy "select_own_user_imports" on public.user_imports
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_user_imports" on public.user_imports;
+create policy "insert_own_user_imports" on public.user_imports
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "delete_own_user_imports" on public.user_imports;
+create policy "delete_own_user_imports" on public.user_imports
+  for delete using (auth.uid() = user_id);
+
+-- Every imported row carries the import it came from, so "undo this
+-- import" is one delete per table rather than a guess based on
+-- timestamps. Nullable: rows created by hand have no import.
+alter table public.ideas            add column if not exists import_id uuid references public.user_imports(id) on delete set null;
+alter table public.competitors      add column if not exists import_id uuid references public.user_imports(id) on delete set null;
+alter table public.research         add column if not exists import_id uuid references public.user_imports(id) on delete set null;
+alter table public.finance_entries  add column if not exists import_id uuid references public.user_imports(id) on delete set null;
+alter table public.learning_entries add column if not exists import_id uuid references public.user_imports(id) on delete set null;
+alter table public.trades           add column if not exists import_id uuid references public.user_imports(id) on delete set null;
+alter table public.decisions        add column if not exists import_id uuid references public.user_imports(id) on delete set null;
+alter table public.products         add column if not exists import_id uuid references public.user_imports(id) on delete set null;
+alter table public.content          add column if not exists import_id uuid references public.user_imports(id) on delete set null;
+alter table public.leads            add column if not exists import_id uuid references public.user_imports(id) on delete set null;
+alter table public.feedback         add column if not exists import_id uuid references public.user_imports(id) on delete set null;
+alter table public.metrics          add column if not exists import_id uuid references public.user_imports(id) on delete set null;
+
+-- ----------------------------------------------------------------------------
+-- user_insights — the "here is what I found" list.
+--
+-- The evidence is stored ALONGSIDE the sentence, and that is the whole
+-- design. An insight is a claim about somebody's business; if the
+-- numbers behind it are not kept, nobody — including us — can ever check
+-- whether it was true. `evidence` holds the computed facts the sentence
+-- was written from, and `detector` names the code that produced them.
+-- ----------------------------------------------------------------------------
+create table if not exists public.user_insights (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  import_id uuid references public.user_imports(id) on delete set null,
+
+  -- Which deterministic detector found the pattern. NOT free text: an
+  -- insight whose provenance is a model's imagination has no place here,
+  -- and a fixed vocabulary is what makes that enforceable.
+  detector text not null,
+  -- Where the user should go to see it for themselves.
+  module_slug text,
+
+  headline text not null,
+  detail text not null,
+  -- The numbers. { "sampleSize": 41, "share": 0.62, ... } — whatever the
+  -- detector measured, so the claim is auditable after the fact.
+  evidence jsonb not null default '{}'::jsonb,
+  -- How much of the user's data the pattern rests on. Shown, not hidden:
+  -- a pattern in nine rows is a hint, and saying so is the difference
+  -- between an insight and a horoscope.
+  sample_size integer not null default 0,
+
+  created_at timestamptz not null default now(),
+  dismissed_at timestamptz
+);
+
+create index if not exists user_insights_user_created_idx
+  on public.user_insights (user_id, created_at desc);
+
+create index if not exists user_insights_user_active_idx
+  on public.user_insights (user_id, created_at desc)
+  where dismissed_at is null;
+
+alter table public.user_insights enable row level security;
+
+drop policy if exists "select_own_user_insights" on public.user_insights;
+create policy "select_own_user_insights" on public.user_insights
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_user_insights" on public.user_insights;
+create policy "insert_own_user_insights" on public.user_insights
+  for insert with check (auth.uid() = user_id);
+
+-- Dismiss is an UPDATE the owner makes. Deliberately no DELETE policy:
+-- an insight is dismissed, not erased, so the same pattern is not
+-- re-reported to somebody who has already said they know.
+drop policy if exists "update_own_user_insights" on public.user_insights;
+create policy "update_own_user_insights" on public.user_insights
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- user_onboarding — one row per user, created on first sight.
+--
+-- Holds the two facts the flow needs to not repeat itself: whether the
+-- user has finished (or skipped) it, and whether the one FREE import and
+-- analysis has been spent.
+--
+-- The free run is an activation investment, and it has to be recorded
+-- server-side on a table the user cannot write the flag on. `activation_used_at`
+-- is therefore only ever set by the service-role client — the owner's
+-- UPDATE policy exists for the flow's own progress fields, and the API
+-- writes the billing flag with the admin client so a crafted request
+-- cannot un-spend it.
+-- ----------------------------------------------------------------------------
+create table if not exists public.user_onboarding (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  -- What the user said they wanted to do, from the first step.
+  goal text,
+  completed_at timestamptz,
+  skipped_at timestamptz,
+  -- Set once, by the server, when the free import+analysis is consumed.
+  activation_used_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.user_onboarding enable row level security;
+
+drop policy if exists "select_own_user_onboarding" on public.user_onboarding;
+create policy "select_own_user_onboarding" on public.user_onboarding
+  for select using (auth.uid() = user_id);
+
+drop policy if exists "insert_own_user_onboarding" on public.user_onboarding;
+create policy "insert_own_user_onboarding" on public.user_onboarding
+  for insert with check (auth.uid() = user_id);
+
+drop policy if exists "update_own_user_onboarding" on public.user_onboarding;
+create policy "update_own_user_onboarding" on public.user_onboarding
+  for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+drop trigger if exists set_updated_at on public.user_onboarding;
+create trigger set_updated_at before update on public.user_onboarding
+  for each row execute function public.set_updated_at();
+
+-- ----------------------------------------------------------------------------
+-- Claiming the one free activation run.
+--
+-- A conditional UPDATE rather than a read-then-write, for the same
+-- reason every other claim in this schema is one: two requests that both
+-- read "not used yet" would both get a free run. `where activation_used_at
+-- is null` makes exactly one of them win, in the database, and the
+-- caller finds out which by whether a row came back.
+--
+-- SECURITY DEFINER and granted only to service_role: the flag decides
+-- whether real money is spent for free, so the client must not be able
+-- to reach it even though it owns the row.
+-- ----------------------------------------------------------------------------
+create or replace function public.claim_activation_run(target_user_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  claimed integer;
+begin
+  insert into public.user_onboarding (user_id)
+    values (target_user_id)
+    on conflict (user_id) do nothing;
+
+  update public.user_onboarding
+    set activation_used_at = now()
+    where user_id = target_user_id
+      and activation_used_at is null;
+
+  get diagnostics claimed = row_count;
+  return claimed > 0;
+end;
+$$;
+
+revoke all on function public.claim_activation_run(uuid) from public;
+revoke all on function public.claim_activation_run(uuid) from anon;
+revoke all on function public.claim_activation_run(uuid) from authenticated;
+grant execute on function public.claim_activation_run(uuid) to service_role;
+

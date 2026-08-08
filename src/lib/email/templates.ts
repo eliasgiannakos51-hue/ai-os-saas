@@ -443,3 +443,145 @@ export function websiteFormSubmissionEmailHtml({
     bodyHtml,
   });
 }
+
+// ---------------------------------------------------------------------
+// V3 — Autonomous Agents.
+// ---------------------------------------------------------------------
+
+// The agent's own output, rendered as the body of the email.
+//
+// Agents produce plain text (see lib/agents/agent-runner.ts — no markdown
+// is requested and none is parsed). It is escaped and its line breaks are
+// turned into paragraphs, which is the whole conversion: rendering it as
+// HTML would take AI output that may quote a third-party web page and
+// paste it into an email as live markup. Blank lines separate paragraphs;
+// single newlines become <br>, so a bullet list survives.
+function agentOutputHtml(output: string): string {
+  return output
+    .split(/\n{2,}/)
+    .map((para) => escapeHtml(para).split("\n").join("<br />"))
+    .filter((para) => para.trim().length > 0)
+    .map(
+      (para) =>
+        `<p style="color:${FOREGROUND}; font-size:14px; line-height:1.65; margin:0 0 14px;">${para}</p>`
+    )
+    .join("");
+}
+
+export function agentRunResultEmailHtml({
+  agentName,
+  output,
+  agentsUrl,
+  aiGeneratedNotice,
+}: {
+  agentName: string;
+  output: string;
+  agentsUrl: string;
+  /** EU AI Act Article 50 — the recipient has to be able to tell that what
+   *  they are reading was produced by an AI system. Passed in rather than
+   *  hardcoded so it can be sent in the agent's own language. */
+  aiGeneratedNotice: string;
+}): string {
+  const safeAgentName = escapeHtml(agentName);
+
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">your agent</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">
+      ${safeAgentName}
+    </h1>
+    <div style="border-top:1px solid ${BORDER}; padding-top:16px;">
+      ${agentOutputHtml(output)}
+    </div>
+    <p style="color:${MUTED}; font-size:11px; line-height:1.6; margin:16px 0 20px; border-top:1px solid ${BORDER}; padding-top:12px;">
+      ${escapeHtml(aiGeneratedNotice)}
+    </p>
+    <p style="margin:0;">
+      <a href="${agentsUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        Manage your agents
+      </a>
+    </p>
+  `;
+
+  return layout({
+    preheader: `${agentName} — your scheduled result.`,
+    bodyHtml,
+  });
+}
+
+// Sent once, when an agent switches itself off after five consecutive
+// failed runs. Critical mail: the user built this thing to receive
+// something on a schedule, and the single most damaging outcome is that it
+// stops silently and they only notice weeks later.
+export function agentDisabledEmailHtml({
+  agentName,
+  reason,
+  consecutiveFailures,
+  agentsUrl,
+}: {
+  agentName: string;
+  reason: string;
+  consecutiveFailures: number;
+  agentsUrl: string;
+}): string {
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">your agent</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">
+      "${escapeHtml(agentName)}" has been switched off
+    </h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 12px;">
+      It failed ${consecutiveFailures} times in a row, so it has stopped running rather than keep failing and keep costing you credits.
+    </p>
+    <p style="color:#f87171; font-size:13px; line-height:1.6; margin:0 0 20px;">
+      Last error: ${escapeHtml(reason)}
+    </p>
+    <p style="color:${MUTED}; font-size:13px; line-height:1.6; margin:0 0 20px;">
+      Open it below to check the task and turn it back on.
+    </p>
+    <p style="margin:0;">
+      <a href="${agentsUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        Open your agents
+      </a>
+    </p>
+  `;
+
+  return layout({
+    preheader: `"${agentName}" stopped running after ${consecutiveFailures} failures.`,
+    bodyHtml,
+  });
+}
+
+// Sent when an agent is paused because the account ran out of credits.
+// Distinct from the disabled email on purpose: nothing is wrong with the
+// agent, and the fix is a top-up rather than an edit.
+export function agentPausedNoCreditsEmailHtml({
+  agentName,
+  agentsUrl,
+  billingUrl,
+}: {
+  agentName: string;
+  agentsUrl: string;
+  billingUrl: string;
+}): string {
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">your agent</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">
+      "${escapeHtml(agentName)}" is paused
+    </h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      It couldn't run because your account is out of credits. Nothing was charged, and nothing has been lost — top up or upgrade and turn it back on, and it picks up its normal schedule again.
+    </p>
+    <p style="margin:0 0 12px;">
+      <a href="${billingUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        Top up credits
+      </a>
+    </p>
+    <p style="margin:0;">
+      <a href="${agentsUrl}" style="color:${MUTED}; font-size:12px;">Open your agents</a>
+    </p>
+  `;
+
+  return layout({
+    preheader: `"${agentName}" is paused — your account is out of credits.`,
+    bodyHtml,
+  });
+}

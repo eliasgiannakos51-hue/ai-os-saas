@@ -188,7 +188,14 @@ const clientFallbacks = sources.flatMap((f) => [
 // server route following the same documented convention as every other
 // one here. The number is a RATCHET against unnoticed growth, not a cap
 // — it is raised deliberately, with the reason recorded, or not at all.
-const SERVER_PROSE_BASELINE = 504;
+//
+// Raised again to 507 by api/account/export (3 strings: not-authenticated,
+// the build-failure message, and the in-file explanation of why OAuth
+// tokens are shown as [redacted]). Same convention: a server route's
+// error replies are surfaced by the calling component, which translates
+// them; the third string is documentation written INTO the export file,
+// which is a JSON artefact the user downloads rather than UI chrome.
+const SERVER_PROSE_BASELINE = 507;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

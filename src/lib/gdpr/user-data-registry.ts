@@ -119,7 +119,7 @@ export const USER_DATA_TABLES: UserDataTable[] = [
     // OAuth material. The user is entitled to know WHICH accounts are
     // connected and when — they are not served by having a live access
     // token written into a JSON file in their Downloads folder.
-    redactColumns: ["access_token", "refresh_token", "token_encrypted", "credentials"],
+    redactColumns: ["access_token_encrypted", "refresh_token_encrypted"],
   },
   { table: "integration_sync_log", label: "integration_sync_log", scope: "account" },
   {
@@ -135,7 +135,7 @@ export const USER_DATA_TABLES: UserDataTable[] = [
     table: "known_devices",
     label: "known_devices",
     scope: "sensitive_redacted",
-    redactColumns: ["device_hash", "ip_hash"],
+    redactColumns: ["device_fingerprint", "ip_address"],
   },
   { table: "security_check_log", label: "security_checks", scope: "account" },
 

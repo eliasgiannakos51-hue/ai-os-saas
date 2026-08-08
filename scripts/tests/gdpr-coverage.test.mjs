@@ -93,6 +93,31 @@ check("integrations, push subscriptions and devices are all redacted", sensitive
 for (const t of sensitive) {
   check(`${t.table} declares which columns to strip`, Array.isArray(t.redactColumns) && t.redactColumns.length > 0);
 }
+// A redactColumns entry naming a column that does not exist is silently
+// useless: redactRow only replaces keys it finds, so the real secret
+// column sails straight into the export file. This caught exactly that —
+// the registry said "access_token" while the schema column is
+// "access_token_encrypted", so every OAuth token would have been
+// exported in full.
+const columnsByTable = new Map();
+for (const [, name, body] of blocks) {
+  if (!columnsByTable.has(name)) {
+    columnsByTable.set(name, new Set([...body.matchAll(/^\s{2}([a-z_][a-z0-9_]*)\s+/gm)].map((m) => m[1])));
+  }
+}
+for (const t of sensitive) {
+  const real = columnsByTable.get(t.table);
+  if (!real) continue;
+  const phantom = (t.redactColumns ?? []).filter((c) => !real.has(c));
+  check(
+    `${t.table}: every redacted column actually exists in the schema`,
+    phantom.length === 0,
+    phantom.length
+      ? `${phantom.join(", ")} not in ${t.table}. redactRow would not strip anything, and the real column would be exported verbatim.`
+      : ""
+  );
+}
+
 const redacted = redactRow({ id: "1", access_token: "secret-abc", name: "keep" }, ["access_token"]);
 check("redactRow strips the named column and keeps the rest", redacted.access_token === "[redacted]" && redacted.name === "keep" && redacted.id === "1");
 

@@ -80,7 +80,8 @@
       "published": "Sites publicados",
       "integrations": "Integrações",
       "files": "Ficheiros",
-      "deepResearch": "Investigação profunda"
+      "deepResearch": "Investigação profunda",
+      "affiliate": "Afiliados"
     },
     "groupHints": {
       "create": "Gere um site, planeie um objetivo, escreva um documento.",
@@ -131,7 +132,8 @@
       "published": "Todos os seus sites no ar, com o tráfego e o histórico de versões",
       "integrations": "Ligue Gmail, Drive e Slack para a IA trabalhar com os seus dados reais",
       "files": "Carrega PDF, Word e Excel e faz perguntas à IA sobre eles",
-      "deepResearch": "Dá um tema: pesquisa, cruza fontes e escreve um relatório com referências"
+      "deepResearch": "Dá um tema: pesquisa, cruza fontes e escreve um relatório com referências",
+      "affiliate": "O teu link de referência, o que ganhaste e como recebes."
     },
     "comingSoon": "Em breve",
     "comingSoonToast": "{name} ainda não está disponível — está no roteiro.",
@@ -1339,6 +1341,36 @@
       "hideNumbers": "Ocultar os números",
       "dismiss": "Dispensar",
       "dismissError": "Não foi possível dispensar."
+    },
+    "affiliate": {
+      "title": "Afiliados",
+      "description": "Partilha o Ionexa e ganha parte do que continuam a pagar as pessoas que trazes.",
+      "pitch": "Ganha {percent}% de cada pagamento dos teus referidos, todos os meses, durante {months} meses.",
+      "pitchTerms": "Não podes referir-te a ti próprio, e cada pessoa conta uma só vez. A comissão começa no primeiro pagamento deles.",
+      "join": "Quero o meu link",
+      "joining": "A preparar…",
+      "joinError": "Não resultou. Tenta outra vez.",
+      "yourLink": "O teu link",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "terms": "{percent}% de cada pagamento, durante {months} meses a contar do primeiro.",
+      "suspended": "Esta conta de afiliado está suspensa, por isso não estás a ganhar comissão nova. Fala connosco se achas que é engano.",
+      "stat": {
+        "signups": "Inscritos",
+        "paying": "A pagar",
+        "owed": "Em dívida",
+        "paidOut": "Pago"
+      },
+      "payouts": "Como recebes",
+      "payoutsUnavailable": "Os pagamentos ainda não estão configurados nesta instalação.",
+      "payoutsNotSetUp": "Configura os pagamentos com a Stripe para receberes o que ganhas. A Stripe recolhe os teus dados diretamente — nós nunca os vemos.",
+      "payoutsIncomplete": "A Stripe ainda precisa de alguns dados para te poder pagar. Termina a configuração e isto atualiza.",
+      "payoutsReady": "Os pagamentos são mensais. Tudo acima de {minimum} segue para a tua conta.",
+      "setUpPayouts": "Configurar pagamentos",
+      "finishSetup": "Terminar configuração",
+      "opening": "A abrir a Stripe…",
+      "connectError": "Não foi possível abrir a configuração. Tenta outra vez.",
+      "rules": "A comissão incide sobre pagamentos efetivamente recebidos. Reembolsos e disputas são revertidos. Auto-referências e segundas referências da mesma pessoa não rendem nada."
     }
   },
   "module": {

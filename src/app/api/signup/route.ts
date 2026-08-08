@@ -10,6 +10,8 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-client-ip";
 import { COUNTRIES } from "@/lib/countries";
 import { getBetaInviteCode, computeBetaExpiresAt } from "@/lib/beta";
+import { attributeReferral } from "@/lib/affiliate/store";
+import { REFERRAL_COOKIE } from "@/lib/affiliate/cookie";
 
 export const dynamic = "force-dynamic";
 
@@ -193,6 +195,28 @@ export async function POST(request: Request) {
       );
     } catch (err) {
       logApiError("/api/signup", err, { stage: "grant_credits" });
+    }
+
+    // Affiliate attribution, if they arrived through somebody's link.
+    //
+    // AFTER the account exists and BEFORE anything can fail: the cookie is
+    // set by /r/[code], which touches no database, so this is the first
+    // and only moment the referral becomes a row. Every refusal
+    // (self-referral, already attributed, unknown code) is a normal
+    // outcome and none of them may fail a signup — a person creating an
+    // account must never see an error about somebody else's commission.
+    const referralCode = request.headers
+      .get("cookie")
+      ?.split(";")
+      .map((c) => c.trim())
+      .find((c) => c.startsWith(`${REFERRAL_COOKIE}=`))
+      ?.slice(REFERRAL_COOKIE.length + 1);
+    if (referralCode) {
+      try {
+        await attributeReferral({ referredUserId: createData.user.id, code: referralCode });
+      } catch (err) {
+        logApiError("/api/signup", err, { stage: "affiliate_attribution" });
+      }
     }
 
     // Best-effort welcome email — sendWelcomeEmail never throws, so a failed

@@ -28,6 +28,7 @@ import {
   INTEGRATIONS_ICON,
   FILES_ICON,
   DEEP_RESEARCH_ICON,
+  AFFILIATE_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -162,6 +163,11 @@ export const SETTINGS_GROUP: SidebarGroupConfig = {
   items: [
     { href: SETTINGS_NAV_ITEM.href, label: "Settings", icon: SETTINGS_ICON, hintKey: "settings" },
     { href: "/dashboard/team", label: "Team", icon: TEAM_ICON , hintKey: "team" },
+    // Next to Settings and Team rather than in a group of its own: the
+    // affiliate programme is something you do with your ACCOUNT, not a
+    // module you work in, and it is checked occasionally rather than
+    // used daily.
+    { href: "/dashboard/affiliate", label: "Affiliate", icon: AFFILIATE_ICON, hintKey: "affiliate" },
   ],
 };
 

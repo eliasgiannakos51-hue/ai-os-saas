@@ -7,8 +7,51 @@ import { getPlanSlugFromPriceId, getTeamSeatPriceId } from "@/lib/billing/price-
 import { getCreditPack, creditPackPriceEurPerCredit, type PlanSlug } from "@/lib/billing/plans";
 import { grantCredits, syncCreditsForPlan, recordPackPurchaseRate } from "@/lib/billing/credits";
 import { logApiError } from "@/lib/log-error";
+import {
+  recordCommissionForInvoice,
+  reverseCommissionForInvoice,
+} from "@/lib/affiliate/store";
 
 export const dynamic = "force-dynamic";
+
+/**
+ * Turns a paid invoice into commission, if the payer was referred.
+ *
+ * Resolving WHO paid goes through the Stripe customer's
+ * `supabase_user_id` metadata — the same link syncSubscriptionToUser uses
+ * — because the invoice itself carries no Supabase id. A customer without
+ * that metadata is one created before the convention existed; there is
+ * nothing to attribute and nothing to do.
+ *
+ * Never throws: this runs inside the webhook's try, and an affiliate
+ * bookkeeping failure must not stop a subscription from being synced.
+ */
+async function recordAffiliateCommission(stripe: Stripe, invoice: Stripe.Invoice): Promise<void> {
+  try {
+    const amountCents = invoice.amount_paid ?? 0;
+    if (amountCents <= 0 || !invoice.id) return;
+
+    const customerRef = invoice.customer;
+    const customerId = typeof customerRef === "string" ? customerRef : customerRef?.id;
+    if (!customerId) return;
+
+    const customer = await stripe.customers.retrieve(customerId);
+    if (customer.deleted) return;
+    const supabaseUserId = customer.metadata?.supabase_user_id;
+    if (!supabaseUserId) return;
+
+    await recordCommissionForInvoice({
+      referredUserId: supabaseUserId,
+      stripeInvoiceId: invoice.id,
+      amountCents,
+      paidAt: new Date((invoice.status_transitions?.paid_at ?? invoice.created) * 1000),
+    });
+  } catch (err) {
+    logApiError("/api/webhooks/stripe", err, { stage: "affiliate_commission" });
+  }
+}
+
+
 
 // Re-derives the user's tier + seat count from the live subscription state
 // (rather than trusting the specific event payload) so
@@ -239,6 +282,37 @@ export async function POST(request: Request) {
         if (subscriptionId) {
           await syncSubscriptionToUser(stripe, subscriptionId);
         }
+        // Affiliate commission. This is the ONLY place money earns
+        // commission, and it hangs off the payment rather than off the
+        // subscription state on purpose: a plan change fires
+        // subscription.updated with nothing paid, and paying commission on
+        // that would pay for an upgrade that was never charged.
+        //
+        // amount_paid, not `total`: what the customer actually paid after
+        // credits, proration and discounts. Commission on an amount the
+        // company did not receive comes out of nowhere.
+        await recordAffiliateCommission(stripe, invoice);
+        break;
+      }
+      // A refund or a won dispute means the money went back. The
+      // commission has to go with it, or a refunded month is a month the
+      // company paid out on and never collected.
+      //
+      // Keyed on the INVOICE, which is what affiliate_commissions is keyed
+      // on. Newer Stripe API versions no longer expose `invoice` on a
+      // Charge, so it is read from the payment intent's own invoice link
+      // and from the charge metadata Stripe still sets — read defensively
+      // rather than typed, because the shape here has changed twice.
+      case "charge.refunded":
+      case "charge.dispute.closed": {
+        const object = event.data.object as unknown as {
+          invoice?: string | { id?: string } | null;
+          charge?: string | { invoice?: string | { id?: string } | null } | null;
+        };
+        const raw =
+          object.invoice ?? (typeof object.charge === "object" ? object.charge?.invoice : null);
+        const invoiceId = typeof raw === "string" ? raw : raw?.id;
+        if (invoiceId) await reverseCommissionForInvoice(invoiceId);
         break;
       }
       default:

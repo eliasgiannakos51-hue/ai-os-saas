@@ -213,7 +213,14 @@ const clientFallbacks = sources.flatMap((f) => [
 // failure responses. These two are read by a SCHEDULER, not a person —
 // nobody's browser ever renders them — so unlike every increment above,
 // translating them would serve no one.
-const SERVER_PROSE_BASELINE = 513;
+// 513 -> 529: the affiliate programme added api/affiliate,
+// api/affiliate/connect and api/cron/affiliate-payouts. Their
+// not-authenticated, not-joined, suspended, rate-limit and
+// could-not-reach-Stripe responses are English prose like the 513 before
+// them. Everything the affiliate READS on /dashboard/affiliate — the
+// pitch, the terms, the four stat labels, and every reason a payout has
+// not happened — is translated in all ten locales.
+const SERVER_PROSE_BASELINE = 529;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

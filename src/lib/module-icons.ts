@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Share2,
   Lightbulb,
   Target,
   Search,
@@ -131,3 +132,8 @@ const EXTRA_ICONS: Record<string, LucideIcon> = {
 export function iconForSlug(slug: string, fallback: LucideIcon = Sparkles): LucideIcon {
   return MODULE_ICONS[slug] ?? EXTRA_ICONS[slug] ?? fallback;
 }
+
+// The affiliate programme (Settings group). Share2 rather than a money
+// icon: what the user does here is share a link; the money is a
+// consequence, not the action.
+export const AFFILIATE_ICON = Share2;

@@ -80,7 +80,8 @@
       "published": "Published Sites",
       "integrations": "Integrations",
       "files": "Files",
-      "deepResearch": "Deep Research"
+      "deepResearch": "Deep Research",
+      "affiliate": "Affiliate"
     },
     "groupHints": {
       "create": "Generate a site, plan a goal, write a document.",
@@ -131,7 +132,8 @@
       "published": "Every site you have live on the web, with its traffic and version history",
       "integrations": "Connect Gmail, Drive and Slack so the AI can work with your real data",
       "files": "Upload PDFs, Word and Excel files and ask the AI questions about them",
-      "deepResearch": "Give it a topic and it searches, cross-checks and writes a sourced report"
+      "deepResearch": "Give it a topic and it searches, cross-checks and writes a sourced report",
+      "affiliate": "Your referral link, what you've earned, and how you get paid."
     },
     "comingSoon": "Coming soon",
     "comingSoonToast": "{name} isn't available yet — it's on the roadmap.",
@@ -1339,6 +1341,36 @@
       "hideNumbers": "Hide the numbers",
       "dismiss": "Dismiss this",
       "dismissError": "That could not be dismissed."
+    },
+    "affiliate": {
+      "title": "Affiliate",
+      "description": "Share Ionexa, earn a share of what the people you send keep paying.",
+      "pitch": "Earn {percent}% of every payment your referrals make, every month, for {months} months.",
+      "pitchTerms": "You can't refer yourself, and each person can only be referred once. Commission starts on their first payment.",
+      "join": "Get my link",
+      "joining": "Setting up…",
+      "joinError": "Could not set that up. Please try again.",
+      "yourLink": "Your link",
+      "copy": "Copy",
+      "copied": "Copied",
+      "terms": "{percent}% of every payment, for {months} months from their first one.",
+      "suspended": "This affiliate account is suspended, so no new commission is being earned. Contact support if you think that's wrong.",
+      "stat": {
+        "signups": "Signed up",
+        "paying": "Paying",
+        "owed": "Owed to you",
+        "paidOut": "Paid out"
+      },
+      "payouts": "Getting paid",
+      "payoutsUnavailable": "Payouts aren't set up on this deployment yet.",
+      "payoutsNotSetUp": "Set up payouts with Stripe to receive what you earn. Stripe collects your details directly — we never see them.",
+      "payoutsIncomplete": "Stripe still needs a few details before it can pay you. Finish the setup and this will update.",
+      "payoutsReady": "Payouts run monthly. Anything over {minimum} is sent to your bank account.",
+      "setUpPayouts": "Set up payouts",
+      "finishSetup": "Finish payout setup",
+      "opening": "Opening Stripe…",
+      "connectError": "Could not open payout setup. Please try again.",
+      "rules": "Commission is earned on payments actually received. Refunded and disputed payments are reversed. Self-referrals and second referrals of the same person earn nothing."
     }
   },
   "module": {

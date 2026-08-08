@@ -80,7 +80,8 @@
       "published": "Siti pubblicati",
       "integrations": "Integrazioni",
       "files": "File",
-      "deepResearch": "Ricerca approfondita"
+      "deepResearch": "Ricerca approfondita",
+      "affiliate": "Affiliazione"
     },
     "groupHints": {
       "create": "Genera un sito, pianifica un obiettivo, scrivi un documento.",
@@ -131,7 +132,8 @@
       "published": "Tutti i tuoi siti online, con traffico e cronologia delle versioni",
       "integrations": "Collega Gmail, Drive e Slack così l'IA lavora sui tuoi dati reali",
       "files": "Carica PDF, Word ed Excel e fai domande all'IA su di essi",
-      "deepResearch": "Dai un argomento: cerca, verifica e scrive un report con le fonti"
+      "deepResearch": "Dai un argomento: cerca, verifica e scrive un report con le fonti",
+      "affiliate": "Il tuo link di invito, quanto hai guadagnato e come vieni pagato."
     },
     "comingSoon": "In arrivo",
     "comingSoonToast": "{name} non è ancora disponibile: è nella roadmap.",
@@ -1339,6 +1341,36 @@
       "hideNumbers": "Nascondi i numeri",
       "dismiss": "Ignora",
       "dismissError": "Impossibile ignorarlo."
+    },
+    "affiliate": {
+      "title": "Affiliazione",
+      "description": "Condividi Ionexa e guadagna una parte di quello che pagano le persone che porti.",
+      "pitch": "Guadagna il {percent}% di ogni pagamento dei tuoi referral, ogni mese, per {months} mesi.",
+      "pitchTerms": "Non puoi segnalare te stesso, e ogni persona conta una volta sola. La commissione parte dal loro primo pagamento.",
+      "join": "Voglio il mio link",
+      "joining": "Preparazione…",
+      "joinError": "Non è riuscito. Riprova.",
+      "yourLink": "Il tuo link",
+      "copy": "Copia",
+      "copied": "Copiato",
+      "terms": "{percent}% di ogni pagamento, per {months} mesi dal primo.",
+      "suspended": "Questo account affiliato è sospeso, quindi non maturi nuove commissioni. Scrivici se pensi sia un errore.",
+      "stat": {
+        "signups": "Iscritti",
+        "paying": "Paganti",
+        "owed": "Ti spetta",
+        "paidOut": "Pagato"
+      },
+      "payouts": "Come vieni pagato",
+      "payoutsUnavailable": "I pagamenti non sono ancora configurati su questa installazione.",
+      "payoutsNotSetUp": "Configura i pagamenti con Stripe per ricevere quello che guadagni. Stripe raccoglie i tuoi dati direttamente — noi non li vediamo mai.",
+      "payoutsIncomplete": "Stripe ha ancora bisogno di qualche dato prima di poterti pagare. Completa la configurazione e questo si aggiornerà.",
+      "payoutsReady": "I pagamenti partono ogni mese. Tutto ciò che supera {minimum} viene inviato al tuo conto.",
+      "setUpPayouts": "Configura i pagamenti",
+      "finishSetup": "Completa la configurazione",
+      "opening": "Apertura di Stripe…",
+      "connectError": "Non è stato possibile aprire la configurazione. Riprova.",
+      "rules": "La commissione si calcola sui pagamenti effettivamente incassati. Rimborsi e contestazioni vengono stornati. Auto-segnalazioni e seconde segnalazioni della stessa persona non producono nulla."
     }
   },
   "module": {

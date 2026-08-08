@@ -325,6 +325,10 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/agent-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts); executes every due Autonomous Agent, so it spends real money on many accounts per call",
   "src/app/api/weekly-digest/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
+  "src/app/api/cron/affiliate-payouts/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts). It MOVES MONEY to Connect accounts, so the fail-closed guard matters more here than anywhere: without a secret configured it refuses to run on any deployment. It belongs to no user by construction — it pays every eligible affiliate — and each transfer claims its commission rows atomically first (claim_affiliate_commissions) so a second concurrent run finds nothing to send.",
+  "src/app/r/[code]/route.ts":
+    "the public share link. It sets a cookie and 302s to /signup, and does nothing else: no database read, no database write, and no destination the code can influence. Deliberately does NOT look the code up — that would make an unauthenticated URL both a write amplifier and an oracle for enumerating which affiliate codes exist. The code is resolved once, later, at signup, against a real session.",
   "src/app/api/cron/red-team/route.ts":
     "authenticated by CRON_SECRET (lib/cron-auth.ts). It belongs to no user by construction — it attacks the shared chat system prompt with the adversarial suite in lib/security/red-team.ts and reports to the owner, touching no account's data. Its OUTPUT is the sensitive part, and red_team_runs has RLS enabled with no policy at all, so only the service role can read the list of things that got through.",
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",

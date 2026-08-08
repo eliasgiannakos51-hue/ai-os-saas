@@ -7,6 +7,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
 import { MissionList } from "@/components/mission/mission-list";
 import { loadFavoriteIds } from "@/lib/favorites";
+import { loadLatestEnergyCheckIn } from "@/lib/energy-checkins";
 import { ScheduledRunsList } from "@/components/mission/scheduled-runs-list";
 import { MISSION_ICON } from "@/lib/module-icons";
 import type { Mission } from "@/types/mission";
@@ -111,6 +112,13 @@ export default async function MissionPage() {
   // One batched lookup for every mission on the page — the star's state
   // has to come from the server or each card would flash unstarred.
   const missionRows = (missions as Mission[] | null) ?? [];
+
+  // The latest energy check-in, so the detail panel can suggest which
+  // open step to pick up. Best-effort and nullable by design: no
+  // check-in means the suggestion panel renders nothing at all rather
+  // than guessing (see components/mission/energy-suggestion.tsx).
+  const energyCheckIn = await loadLatestEnergyCheckIn(supabase, user.id);
+
   const favoritedMissionIds = [
     ...(await loadFavoriteIds(supabase, user.id, "ai_missions", missionRows.map((m) => m.id))),
   ];
@@ -144,6 +152,7 @@ export default async function MissionPage() {
 
         {!sessionDegraded && (
           <MissionList
+            energyLevel={energyCheckIn?.energyLevel ?? null}
             missions={missionRows}
             scheduledStepIndicesByMission={scheduledStepIndicesByMission}
             favoritedIds={favoritedMissionIds}

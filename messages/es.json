@@ -765,7 +765,15 @@
       "reviewNotRunYet": "Todos los pasos están hechos: ejecuta el Revisor para obtener un resumen.",
       "reviewLocked": "El Revisor se ejecuta cuando todos los pasos estén completos.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "Esta misión se acaba de actualizar en otro lugar; recargando para mostrar el estado más reciente."
+      "updatedElsewhere": "Esta misión se acaba de actualizar en otro lugar; recargando para mostrar el estado más reciente.",
+      "energy": {
+        "heading": {
+          "light": "Poca energía — empieza aquí",
+          "medium": "Energía estable — buen siguiente paso",
+          "deep": "Buena energía — ponte con esto"
+        },
+        "heldBack": "{count} pasos más exigentes aplazados por ahora"
+      }
     },
     "reflection": {
       "title": "Reflexión Semanal",

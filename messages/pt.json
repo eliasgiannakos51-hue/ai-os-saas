@@ -765,7 +765,15 @@
       "reviewNotRunYet": "Todos os passos estão concluídos — execute o Revisor para obter um resumo.",
       "reviewLocked": "O Revisor corre assim que todos os passos estiverem concluídos.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "Esta missão foi atualizada noutro local agora mesmo — a recarregar para mostrar o estado mais recente."
+      "updatedElsewhere": "Esta missão foi atualizada noutro local agora mesmo — a recarregar para mostrar o estado mais recente.",
+      "energy": {
+        "heading": {
+          "light": "Pouca energia — comece aqui",
+          "medium": "Energia estável — bom próximo passo",
+          "deep": "Boa energia — encare este"
+        },
+        "heldBack": "{count} passos mais pesados adiados por agora"
+      }
     },
     "reflection": {
       "title": "Reflexão Semanal",

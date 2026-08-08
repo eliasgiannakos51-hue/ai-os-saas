@@ -21,6 +21,18 @@ const MAX_SUBSTEPS = 4;
 // always a mis-estimate rather than a real one, and a negative/zero one
 // is meaningless. Out-of-range values are dropped rather than shown.
 const MAX_STEP_MINUTES = 8 * 60;
+// The effort levels the Planner may assign, feeding BOTH the tool schema
+// and the parser below so the enum it is told about and the values it is
+// allowed to return cannot drift apart.
+//
+// Deliberately declared here rather than imported from lib/mission-energy:
+// this module is the PRODUCER of the field and mission-energy is a
+// consumer of it, so pointing the dependency that way would make the
+// planner depend on the suggestion feature it knows nothing about.
+// mission-energy.ts declares its own copy, and
+// scripts/tests/mission-energy.test.mjs asserts the two agree.
+export const STEP_EFFORTS = ["light", "medium", "deep"] as const;
+export type StepEffort = (typeof STEP_EFFORTS)[number];
 
 // Planner Agent — breaks a goal into concrete steps. Deliberately doesn't
 // assign a module per step itself: each step's text is later handed to the
@@ -50,6 +62,7 @@ const PLANNER_SYSTEM_PROMPT = `Είσαι ο Planner Agent. Ανάλυσε το�
 ΓΙΑ ΚΑΘΕ ΒΗΜΑ ΔΩΣΕ ΕΠΙΣΗΣ:
 - "outcome": τι ΘΑ ΕΧΕΙ ο χρήστης όταν το ολοκληρώσει (μία σύντομη φράση, π.χ. "5 ανταγωνιστές καταγεγραμμένοι με τιμές")
 - "estimatedMinutes": ρεαλιστική εκτίμηση σε λεπτά για ΑΝΘΡΩΠΟ που το κάνει
+- "effort": πόση συγκέντρωση απαιτεί, ΑΝΕΞΑΡΤΗΤΑ από τη διάρκεια. "light" = μηχανικό/διαδικαστικό, γίνεται και κουρασμένος. "medium" = συνηθισμένη εστιασμένη δουλειά. "deep" = παρατεταμένη συγκέντρωση, κρίση ή δημιουργική προσπάθεια. Μια καταχώρηση δεδομένων 90 λεπτών είναι "light"· μια απόφαση τιμολόγησης 20 λεπτών είναι "deep".
 - "substeps": ΜΟΝΟ αν το βήμα είναι μεγάλο/σύνθετο, σπάσ' το σε 2-4 μικρότερες, ξεχωριστά τσεκαριζόμενες ενέργειες. Αν το βήμα είναι ήδη μία απλή ενέργεια, άφησε το κενό.
 
 Αν ο στόχος είναι ΤΟΣΟ γενικός/ασαφής (π.χ. "θέλω να πετύχω", "θέλω να γίνω πλούσιος") που δεν μπορείς να τον αναλύσεις σε πραγματικά, συγκεκριμένα βήματα χωρίς να επινοήσεις γενικόλογα/κενά βήματα, ΜΗΝ επινοήσεις βήματα — αντ' αυτού ζήτησε μία σύντομη, φιλική διευκρίνιση.
@@ -94,6 +107,12 @@ const PLAN_MISSION_TOOL: Anthropic.Tool = {
               type: "number",
               description: "Realistic minutes for a person to actually do this.",
             },
+            effort: {
+              type: "string",
+              enum: [...STEP_EFFORTS],
+              description:
+                "How much focus this demands, independent of how long it takes. 'light' = mechanical or administrative, doable while tired. 'medium' = ordinary focused work. 'deep' = sustained concentration, judgement, or creative effort. A 90-minute data entry task is 'light'; a 20-minute pricing decision is 'deep'.",
+            },
             substeps: {
               type: "array",
               maxItems: MAX_SUBSTEPS,
@@ -116,6 +135,8 @@ export type PlannedStep = {
   outcome?: string;
   estimatedMinutes?: number;
   substeps?: string[];
+  /** How much focus the step demands — see lib/mission-energy.ts. */
+  effort?: StepEffort;
 };
 
 export type PlanMissionResult =
@@ -192,7 +213,16 @@ export function parsePlanMissionToolInput(input: {
       : [];
     const substeps = substepTexts.length >= 2 ? substepTexts : undefined;
 
-    steps.push({ text, outcome, estimatedMinutes, substeps });
+    // Left undefined rather than defaulted here when the model omits it
+    // or sends something outside the enum. mission-energy.ts treats an
+    // absent effort as "medium", and doing that in ONE place keeps a
+    // missing value from looking like a deliberate classification.
+    const effort =
+      typeof source.effort === "string" && (STEP_EFFORTS as readonly string[]).includes(source.effort)
+        ? (source.effort as StepEffort)
+        : undefined;
+
+    steps.push({ text, outcome, estimatedMinutes, substeps, effort });
   }
 
   if (steps.length < MIN_VALID_STEPS_AFTER_FILTERING) {

@@ -765,7 +765,15 @@
       "reviewNotRunYet": "Alle Schritte sind erledigt — starte den Reviewer für eine Zusammenfassung.",
       "reviewLocked": "Der Reviewer läuft, sobald alle Schritte abgeschlossen sind.",
       "stepMinutes": "~{count} Min.",
-      "updatedElsewhere": "Diese Mission wurde soeben anderswo aktualisiert — wird neu geladen, um den aktuellen Stand zu zeigen."
+      "updatedElsewhere": "Diese Mission wurde soeben anderswo aktualisiert — wird neu geladen, um den aktuellen Stand zu zeigen.",
+      "energy": {
+        "heading": {
+          "light": "Wenig Energie — fang hier an",
+          "medium": "Stabile Energie — guter nächster Schritt",
+          "deep": "Gute Energie — nimm das in Angriff"
+        },
+        "heldBack": "{count} anspruchsvollere Schritte vorerst zurückgestellt"
+      }
     },
     "reflection": {
       "title": "Wöchentliche Reflexion",

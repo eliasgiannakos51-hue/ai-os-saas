@@ -765,7 +765,15 @@
       "reviewNotRunYet": "Every step is done — run the Reviewer to get a summary.",
       "reviewLocked": "The Reviewer runs once every step is complete.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "This mission was updated elsewhere just now — refreshing to show the latest state."
+      "updatedElsewhere": "This mission was updated elsewhere just now — refreshing to show the latest state.",
+      "energy": {
+        "heading": {
+          "light": "Low energy — start here",
+          "medium": "Steady energy — good next step",
+          "deep": "Good energy — take this on"
+        },
+        "heldBack": "{count} heavier steps held back for now"
+      }
     },
     "reflection": {
       "title": "Weekly Reflection",

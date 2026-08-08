@@ -765,7 +765,15 @@
       "reviewNotRunYet": "所有步骤已完成——运行评审员以获取总结。",
       "reviewLocked": "所有步骤完成后评审员才会运行。",
       "stepMinutes": "约 {count} 分钟",
-      "updatedElsewhere": "该任务刚刚在别处被更新——正在刷新以显示最新状态。"
+      "updatedElsewhere": "该任务刚刚在别处被更新——正在刷新以显示最新状态。",
+      "energy": {
+        "heading": {
+          "light": "精力较低——从这里开始",
+          "medium": "精力平稳——合适的下一步",
+          "deep": "精力充沛——可以处理这个"
+        },
+        "heldBack": "暂时搁置了 {count} 个较重的步骤"
+      }
     },
     "reflection": {
       "title": "每周回顾",

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
+import { EnergySuggestion } from "@/components/mission/energy-suggestion";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { CelebrationBurst } from "@/components/celebration/celebration-burst";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
@@ -74,6 +75,7 @@ export function MissionDetail({
   scheduledStepIndices = [],
   initialFavorited = false,
   initialTab = "steps",
+  energyLevel = null,
   onClose,
 }: {
   mission: Mission;
@@ -85,6 +87,9 @@ export function MissionDetail({
   // "Scheduled" instead of offering to schedule the same step twice.
   scheduledStepIndices?: number[];
   initialTab?: MissionDetailTab;
+  /** Latest energy check-in (1-5), or null when there is none. Drives the
+   *  which-step-to-pick-up suggestion above the list. */
+  energyLevel?: number | null;
   onClose: () => void;
 }) {
   const formatRelativeTime = useFormatRelativeTime();
@@ -405,6 +410,7 @@ export function MissionDetail({
             </div>
           )}
 
+          <EnergySuggestion steps={steps} energyLevel={energyLevel} />
           {steps.length === 0 ? (
             <p className="text-sm text-muted">{t("noSteps")}</p>
           ) : (

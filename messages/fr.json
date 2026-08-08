@@ -765,7 +765,15 @@
       "reviewNotRunYet": "Toutes les étapes sont terminées — lancez l'Évaluateur pour obtenir une synthèse.",
       "reviewLocked": "L'Évaluateur se lance une fois toutes les étapes terminées.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "Cette mission vient d'être mise à jour ailleurs — actualisation pour afficher l'état le plus récent."
+      "updatedElsewhere": "Cette mission vient d'être mise à jour ailleurs — actualisation pour afficher l'état le plus récent.",
+      "energy": {
+        "heading": {
+          "light": "Peu d'énergie — commence ici",
+          "medium": "Énergie stable — bonne prochaine étape",
+          "deep": "Bonne énergie — attaque celle-ci"
+        },
+        "heldBack": "{count} étapes plus exigeantes mises de côté pour l'instant"
+      }
     },
     "reflection": {
       "title": "Bilan Hebdomadaire",

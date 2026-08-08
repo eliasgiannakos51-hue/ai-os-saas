@@ -765,7 +765,15 @@
       "reviewNotRunYet": "Tutti i passaggi sono completati: esegui il Revisore per un riepilogo.",
       "reviewLocked": "Il Revisore parte quando tutti i passaggi sono completati.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "Questa missione è stata appena aggiornata altrove — aggiornamento per mostrare lo stato più recente."
+      "updatedElsewhere": "Questa missione è stata appena aggiornata altrove — aggiornamento per mostrare lo stato più recente.",
+      "energy": {
+        "heading": {
+          "light": "Poca energia — parti da qui",
+          "medium": "Energia stabile — buon passo successivo",
+          "deep": "Buona energia — affronta questo"
+        },
+        "heldBack": "{count} passi più impegnativi rimandati per ora"
+      }
     },
     "reflection": {
       "title": "Riflessione Settimanale",

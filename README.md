@@ -117,9 +117,16 @@ touch targets) and works identically on mobile and desktop.
   Ultimate, Enterprise), each with a monthly credit allotment (EUR pricing)
   and a set of plan capabilities, plus a team-seat add-on on Professional+.
   Checkout supports Stripe promotion codes.
-- **Roadmap** (`/roadmap`) — a public, purely informational page laying out
-  what's live today, what's coming next, and the longer-term product
-  vision. No interactive elements by design.
+
+There is deliberately no public roadmap page. The one that used to live at
+`/roadmap` listed AI Agent Builder, Website Builder, AI Memory and the
+Automation Builder as "Coming Soon", and Presentations, Marketplace, Data
+Analysis, Coding, Images and Videos as "Future Vision" — every one of which
+had already shipped. A visitor comparing that page to the product would
+conclude it was a preview. The route now 404s, which
+`scripts/tests/routes-smoke.prodtest.mjs` asserts, along with there being no
+link left anywhere that points at it. A real one can come back when there is
+something maintained to put on it.
 
 ## Setup
 

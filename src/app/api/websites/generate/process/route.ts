@@ -412,12 +412,64 @@ export async function POST(request: Request) {
       })
       .eq("id", websiteId)
       .select()
-      .single();
+      // maybeSingle, NOT single.
+      //
+      // This line used to be .single(), and it is where the reported
+      // production failure surfaced: PostgREST answers a zero-row
+      // UPDATE ... RETURNING with PGRST116, "Cannot coerce the result to a
+      // single JSON object". That message went into the log and
+      // "Something went wrong generating your website" went to the user,
+      // and neither said the one useful thing — that the row this worker
+      // spent two minutes and real money generating for was no longer
+      // there to save it into.
+      //
+      // Two ways that happens, and they need different answers:
+      //   * the project was deleted while it generated (the user changed
+      //     their mind, or deleted their account). Nothing is wrong; the
+      //     work is simply homeless.
+      //   * the UPDATE was rejected — which is what a schema drift looks
+      //     like from here, and is what the missing 'flagged' status value
+      //     and the four missing columns produced.
+      // .single() collapsed both into one opaque error. maybeSingle()
+      // separates them below.
+      .maybeSingle();
 
     if (updateError) {
-      logApiError("/api/websites/generate/process", updateError, { stage: "update" });
+      logApiError("/api/websites/generate/process", updateError, {
+        stage: "update",
+        websiteId,
+        // The error PostgREST returns for a column that does not exist
+        // (PGRST204) is indistinguishable from a generic failure in the
+        // old message. Recording the code makes a schema drift diagnosable
+        // from the error log alone.
+        code: updateError.code,
+      });
       await releaseReservation(user.id, reservationId);
-      return NextResponse.json({ ok: false, error: "Could not save the generated website. Please try again." }, { status: 500 });
+      return NextResponse.json(
+        { ok: false, error: "Could not save the generated website. Please try again — no credits were charged." },
+        { status: 500 }
+      );
+    }
+
+    if (!updatedRecord) {
+      // The row is gone. The generation itself succeeded, so this is not a
+      // retryable failure and there is nothing to write the HTML into.
+      // Releasing rather than settling: the user has no website to show
+      // for it, and charging for output that no longer has anywhere to
+      // live is not defensible even though the tokens were really spent.
+      logApiError("/api/websites/generate/process", "website row disappeared mid-generation", {
+        stage: "update",
+        websiteId,
+      });
+      await releaseReservation(user.id, reservationId);
+      return NextResponse.json(
+        {
+          ok: false,
+          error:
+            "This project was deleted while it was being generated, so there was nowhere to save it. No credits were charged.",
+        },
+        { status: 409 }
+      );
     }
 
     // Only now — the AI call succeeded AND the result is durably saved —

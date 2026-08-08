@@ -987,6 +987,14 @@ create table if not exists public.credit_transactions (
   created_at timestamptz not null default now()
 );
 
+-- Free-chat allowance accounting (supabase_free_chat_migration.sql).
+-- lib/billing/free-chat-usage.ts upserts both on every free message; a
+-- project without them cannot count free chat at all.
+alter table public.user_credits
+  add column if not exists free_chat_used integer not null default 0;
+alter table public.user_credits
+  add column if not exists free_chat_period_start timestamptz;
+
 create index if not exists credit_transactions_user_id_created_at_idx
   on public.credit_transactions (user_id, created_at desc);
 
@@ -1064,6 +1072,14 @@ create table public.ai_missions (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Optimistic concurrency for the step list. lib/mission-plan-steps.ts
+-- reads this, writes back with `.eq("plan_steps_version", current)` and
+-- treats a zero-row result as "somebody else changed it, reload" — which
+-- only works if the column exists. Without it every step update loses the
+-- race check and two tabs silently overwrite each other.
+alter table public.ai_missions
+  add column if not exists plan_steps_version integer not null default 0;
 
 create index if not exists ai_missions_user_id_created_at_idx
   on public.ai_missions (user_id, created_at desc);
@@ -1156,6 +1172,60 @@ alter table public.user_websites
 
 alter table public.user_websites
   add column if not exists attempt_count integer not null default 0;
+
+-- THE FOUR COLUMNS THIS FILE USED TO BE MISSING, and the CHECK it used to
+-- get wrong. Every one of them is read or written by shipped code, and
+-- because the block above DROPS AND RECREATES this table, a project
+-- restored from this file lost all four — turning three separate live
+-- failures into one root cause:
+--
+--   description        api/websites/generate INSERTs it. Without the
+--                      column PostgREST rejects the insert (PGRST204) and
+--                      generation cannot even start.
+--   is_large_request   same INSERT. Also what api/websites/status uses to
+--                      pick the stale-job grace period.
+--   free_retry_used    the one complimentary regenerate after a flagged
+--                      result (api/websites/[id]/regenerate).
+--   stuck_notified_at  api/cron/scheduled-runs filters on it. Its absence
+--                      is the "column user_websites.stuck_notified_at
+--                      does not exist" error, three times a day.
+--
+-- And 'flagged' was missing from the status CHECK while
+-- api/websites/generate/process writes exactly that value at the end of a
+-- generation the safety review rejected — so the final UPDATE violated
+-- the constraint and the finished website was never marked.
+alter table public.user_websites
+  add column if not exists description text;
+
+alter table public.user_websites
+  add column if not exists is_large_request boolean not null default false;
+
+alter table public.user_websites
+  add column if not exists free_retry_used boolean not null default false;
+
+alter table public.user_websites
+  add column if not exists stuck_notified_at timestamptz;
+
+alter table public.user_websites
+  drop constraint if exists user_websites_status_check;
+alter table public.user_websites
+  add constraint user_websites_status_check
+  check (status in ('pending', 'processing', 'completed', 'failed', 'flagged'));
+
+-- The DB-level idempotency guarantee api/websites/generate relies on: it
+-- catches unique-violation 23505 from this index and returns the winning
+-- row instead of erroring. Without the index there is no violation to
+-- catch, and a double-submit creates two pending rows and two paid
+-- generations.
+create unique index if not exists user_websites_pending_dedup_idx
+  on public.user_websites (user_id, name) where status = 'pending';
+
+-- The edit-claim lock. api/websites/edit stamps it to claim a row and
+-- clears it when finished, and refuses to start on a row claimed less
+-- than the stale cutoff ago — which is what stops two concurrent edits of
+-- one site from both spending money and racing each other's HTML.
+alter table public.user_websites
+  add column if not exists editing_started_at timestamptz;
 
 create index if not exists user_websites_user_id_created_at_idx
   on public.user_websites (user_id, created_at desc);
@@ -3544,3 +3614,98 @@ create policy "select_own_profile_state" on public.user_profile_state
 drop policy if exists "delete_own_profile_state" on public.user_profile_state;
 create policy "delete_own_profile_state" on public.user_profile_state
   for delete using (auth.uid() = user_id);
+
+
+-- ============================================================================
+-- Help articles + support escalations (see help_articles_migration.sql).
+-- The seeded corpus lives in that file only: it is content, it changes on
+-- its own cadence, and a restore should bring the TABLES back and then be
+-- told to run the seed, rather than silently resurrect twelve articles
+-- that may since have been corrected.
+-- ============================================================================
+
+create table if not exists public.help_articles (
+  id uuid primary key default gen_random_uuid(),
+  slug text not null unique,
+  title text not null,
+  -- Plain text, not markdown or HTML. This is model input and it is also
+  -- what the grounding check searches; formatting would only add tokens
+  -- and false non-matches.
+  body text not null,
+  category text not null default 'general',
+  -- Retrieval is keyword-based (see lib/support/retrieve.ts). No vector
+  -- extension is assumed: this corpus is dozens of articles, not
+  -- millions, and a keyword match over a few dozen rows is both adequate
+  -- and explainable — you can see WHY an article was chosen.
+  keywords text[] not null default '{}',
+  is_published boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists help_articles_published_idx
+  on public.help_articles (is_published) where is_published;
+
+alter table public.help_articles enable row level security;
+
+-- Published help is public by design: someone deciding whether to sign up
+-- has the most need of it, and they have no session.
+drop policy if exists "read_published_help_articles" on public.help_articles;
+create policy "read_published_help_articles" on public.help_articles
+  for select using (is_published);
+
+-- No insert/update/delete policy. Articles are the assistant's entire
+-- source of truth; a table any logged-in account could write to would be
+-- a way to make the support bot say anything at all to other customers.
+
+-- ----------------------------------------------------------------------------
+-- support_escalations — the questions the assistant refused to guess at.
+--
+-- Every row here is a case where the widget said "I don't know" and the
+-- person asked for a human. That makes this table two things at once: a
+-- work queue, and the list of help articles that need writing.
+-- ----------------------------------------------------------------------------
+create table if not exists public.support_escalations (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete set null,
+  -- Kept even when the account is later deleted (user_id goes null), because
+  -- an unanswered support question is not the user's data to erase — it is
+  -- correspondence addressed to us. The address is needed to reply.
+  email text not null,
+  question text not null,
+  -- Why the assistant did not answer: no_answer, ungrounded_number,
+  -- ungrounded_claim, empty, or user_asked. Recorded because
+  -- "ungrounded_number" repeated across many rows means the price sheet is
+  -- missing something, which is a different fix from writing an article.
+  reason text not null default 'no_answer',
+  status text not null default 'open' check (status in ('open', 'answered', 'closed')),
+  created_at timestamptz not null default now()
+);
+
+create index if not exists support_escalations_status_idx
+  on public.support_escalations (status, created_at desc);
+create index if not exists support_escalations_user_idx
+  on public.support_escalations (user_id, created_at desc);
+
+alter table public.support_escalations enable row level security;
+
+-- The user can read what they sent. Only the service-role client writes:
+-- the escalation row is created by the API route that also sends the
+-- email, so a row without an email attempt behind it cannot exist.
+drop policy if exists "select_own_support_escalations" on public.support_escalations;
+create policy "select_own_support_escalations" on public.support_escalations
+  for select using (auth.uid() = user_id);
+
+-- ----------------------------------------------------------------------------
+-- The seed corpus.
+--
+-- Every statement below was checked against the code that implements it:
+--   credits          -> lib/billing/credits.ts, lib/billing/credit-formula.ts
+--   agents           -> lib/agents/*, api/cron/agent-runs
+--   website builder  -> lib/website-builder.ts, app/s/[subdomain]
+--   integrations     -> lib/integrations/*, integration_consent_migration.sql
+--   data + deletion  -> api/delete-account/*, SECURITY.md
+--   team             -> api/team/*
+--
+-- on conflict updates the body so re-running the migration republishes the
+-- corrected text rather than silently keeping an old copy.
+-- ----------------------------------------------------------------------------

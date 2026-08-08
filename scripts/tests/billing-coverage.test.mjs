@@ -230,6 +230,51 @@ check(
   checkTrue("support: one call per question, no loop", (support.match(/messages\.create\(/g) ?? []).length === 1);
 }
 
+console.log("\n== 2a. every settled row records WHICH MODEL produced the cost ==");
+// REPORTED: `model` was NULL on every row of ai_cost_log.
+//
+// It was not stored anywhere. The table has no model column, and nothing
+// put one in the metadata either — so the single most important audit
+// question about a cost row ("what was this priced as?") had no answer at
+// all. The accumulator has always KNOWN the model, because priceUsage()
+// prices against it; totals() and breakdownByStage() simply dropped it on
+// the way out.
+//
+// Why it matters more than an audit nicety: a real cost that looks low has
+// two explanations that are indistinguishable without this — the cheap
+// model genuinely ran, or an expensive one ran and was billed as the cheap
+// one. That is a 4-5x difference in margin, invisible in the log.
+{
+  const accumulator = readFileSync("src/lib/billing/cost-accumulator.ts", "utf8");
+  checkTrue("the accumulator can report which models ran", /modelsUsed\(\): string\[\]/.test(accumulator));
+  checkTrue("...and how much each cost", /costByModel\(\)/.test(accumulator));
+  // A model missing from MODEL_PRICING_USD is priced with the most
+  // expensive known one — safe, but not correct, and it must be visible
+  // in the row rather than only in a code review.
+  checkTrue("...and which of them have no known price", /unpricedModels\(\)/.test(accumulator));
+
+  const settle = readFileSync("src/lib/billing/reservations.ts", "utf8");
+  checkTrue("settlement stores the models", /modelsUsed: costs\.modelsUsed\(\)/.test(settle));
+  checkTrue("settlement stores the per-model cost", /costByModel: costs\.costByModel\(\)/.test(settle));
+  checkTrue("settlement flags an unpriced model", /unpricedModels: costs\.unpricedModels\(\)/.test(settle));
+
+  // Every model the app can actually call must have a real price. One that
+  // does not is silently billed with the fallback, which is exactly the
+  // "are we underbilling?" question this section exists to answer.
+  const pricing = readFileSync("src/lib/billing/model-pricing.ts", "utf8");
+  const priced = new Set([...pricing.matchAll(/^  "([a-z0-9.-]+)": \{/gm)].map((m) => m[1]));
+  const called = new Set();
+  for (const file of walk("src")) {
+    const body = readFileSync(file, "utf8");
+    for (const m of body.matchAll(/"(claude-[a-z0-9.-]+)"/g)) called.add(m[1]);
+  }
+  check(
+    `every model string in src has a price (${[...called].join(", ") || "none"})`,
+    [...called].filter((m) => !priced.has(m)).sort(),
+    []
+  );
+}
+
 console.log("\n== 2b. the public contact-form endpoint bills the site owner ==");
 // The one AI call in this app that an ANONYMOUS third party can trigger.
 // It must charge someone, and it must check that someone can pay before

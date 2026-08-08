@@ -273,6 +273,26 @@ export async function settleReservation(params: {
         // Why this row charged nothing, so 0 credits is never ambiguous.
         bypassCharge,
         wouldHaveChargedCredits: wouldHaveCharged,
+        // WHICH MODELS PRODUCED THIS COST.
+        //
+        // ai_cost_log has no model column, and until now nothing put the
+        // model in the metadata either — so every row answered "what was
+        // this priced as?" with silence. That is the one thing you cannot
+        // reconstruct after the fact, and it is precisely what you need
+        // when a real cost looks too low to be true: either the cheap
+        // model genuinely ran, or an expensive one ran and was billed as
+        // the cheap one. Those are a 4-5x difference and they look
+        // identical in the log without this.
+        //
+        // A list, plus per-model cost, because one settled action is
+        // several sub-calls that need not share a model.
+        modelsUsed: costs.modelsUsed(),
+        costByModel: costs.costByModel(),
+        // Non-empty means something ran on a model this app has no price
+        // for, and was charged with FALLBACK_MODEL_PRICING. Safe (it is
+        // the most expensive known model) but not correct, and it must be
+        // visible in the row rather than only in a code review.
+        unpricedModels: costs.unpricedModels(),
       },
     });
     if (error) {

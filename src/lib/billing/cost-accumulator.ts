@@ -1,4 +1,9 @@
-import { priceUsage, type AnthropicUsageLike, type UsageBreakdown } from "@/lib/billing/model-pricing";
+import {
+  MODEL_PRICING_USD,
+  priceUsage,
+  type AnthropicUsageLike,
+  type UsageBreakdown,
+} from "@/lib/billing/model-pricing";
 
 // Collects EVERY billable sub-call that makes up one user action.
 //
@@ -83,6 +88,62 @@ export class CostAccumulator {
         usdCost: 0,
       }
     );
+  }
+
+  /**
+   * Every model that was actually called, in first-seen order.
+   *
+   * WHY THIS EXISTS. The accumulator has always KNOWN the model — it is
+   * what priceUsage() prices against — but nothing persisted it, so every
+   * row in ai_cost_log answered "which model produced this cost?" with
+   * silence. That is the one question you cannot answer any other way
+   * after the fact, and it is exactly the question you need when a real
+   * cost looks too low: was the cheap model billed for an expensive
+   * model's work, or was the cheap model genuinely what ran?
+   *
+   * Recorded as a list rather than a single value because one settled
+   * action is several sub-calls (classifier, generation, security review)
+   * and they do not have to be the same model.
+   */
+  modelsUsed(): string[] {
+    const seen: string[] = [];
+    for (const e of this.entries) {
+      if (e.model && !seen.includes(e.model)) seen.push(e.model);
+    }
+    return seen;
+  }
+
+  /**
+   * USD and call count per model.
+   *
+   * modelsUsed() says WHICH; this says HOW MUCH each. A row showing
+   * 95% of its cost against a model that was supposed to be a cheap
+   * pre-check is a mis-tiering that no per-stage number would surface.
+   */
+  costByModel(): Record<string, { usdCost: number; calls: number }> {
+    const out: Record<string, { usdCost: number; calls: number }> = {};
+    for (const e of this.entries) {
+      const key = e.model || "unknown";
+      const row = out[key] ?? { usdCost: 0, calls: 0 };
+      row.usdCost += e.usage.usdCost;
+      row.calls += 1;
+      out[key] = row;
+    }
+    for (const k of Object.keys(out)) out[k].usdCost = Number(out[k].usdCost.toFixed(8));
+    return out;
+  }
+
+  /**
+   * Models whose price this app does not actually know.
+   *
+   * A model missing from MODEL_PRICING_USD is priced with
+   * FALLBACK_MODEL_PRICING — deliberately the most expensive known model,
+   * so the failure direction is safe — but "safe" is not "correct", and a
+   * feature quietly running on an unpriced model should be visible in the
+   * cost row rather than only in a code review.
+   */
+  unpricedModels(): string[] {
+    return this.modelsUsed().filter((m) => !(m in MODEL_PRICING_USD));
   }
 
   /** Per-stage USD, stored as jsonb so a margin problem can be traced to

@@ -138,10 +138,81 @@
     "comingSoonBadge": "Bald"
   },
   "landing": {
-    "hero": "Dein Unternehmen, organisiert — mit KI, die wirklich hilft.",
-    "description": "Behalte Ideen, Finanzen, Trading, Recherche, Entscheidungen und mehr im Blick — alles an einem Ort, mit einem KI-Assistenten, der deine Daten versteht und dir beim Durchdenken hilft. Schluss mit verstreuten Notizen, Tabellen und Chat-Fenstern.",
+    "hero": "Sag, was du willst. Ionexa macht es.",
+    "heroSub": "Probier es gleich hier. Nichts zu installieren.",
+    "cta": "Kostenlos starten",
     "logIn": "Anmelden",
-    "signUp": "Registrieren",
+    "finalLine": "Ein Satz. Ein Ort. Erledigt.",
+    "demo": {
+      "panelTitle": "Was Ionexa daraus macht",
+      "exampleTag": "Beispiel",
+      "note": "Ein aufgezeichnetes Beispiel. In deinem Konto läuft es echt.",
+      "examples": {
+        "website": "Mach eine Landingpage für ein Café",
+        "goal": "Setz ein Ziel: diesen Monat 5 Kunden finden",
+        "agent": "Bau einen Agenten, der mir jeden Morgen die Nachrichten mailt"
+      },
+      "steps": {
+        "website": {
+          "1": "Liest, was du gefragt hast",
+          "2": "Schreibt die ganze Seite",
+          "3": "Prüft, ob sie sicher online kann"
+        },
+        "goal": {
+          "1": "Teilt das Ziel in Schritte",
+          "2": "Sagt, was du nach jedem hast",
+          "3": "Legt den ersten Schritt auf morgen"
+        },
+        "agent": {
+          "1": "Baut den Agenten",
+          "2": "Stellt ihn auf 07:00 Uhr täglich",
+          "3": "Schickt das Ergebnis in dein Postfach"
+        }
+      },
+      "results": {
+        "website": "Eine fertige Seite, die du mit einfachen Worten änderst und unter einer echten Adresse veröffentlichst.",
+        "goal": "Fünf Schritte, jeder mit dem, was du bekommst, und wie lange er dauert.",
+        "agent": "Er läuft jeden Morgen von allein und mailt dir, was er gefunden hat."
+      }
+    },
+    "problem": {
+      "title": "Du bist nicht unorganisiert. Du hast vierzehn Tabs offen.",
+      "statOneValue": "1.200",
+      "statOneLabel": "Mal am Tag wechselt ein durchschnittlicher Arbeitnehmer die App",
+      "statTwoValue": "4 Stunden",
+      "statTwoLabel": "gehen jede Woche allein dafür drauf, den Faden wiederzufinden",
+      "source": "Harvard Business Review, 2022",
+      "answer": "Ionexa ist ein Ort, an dem du fragst, und es passiert."
+    },
+    "proof": {
+      "exampleTag": "Beispiel",
+      "website": {
+        "sentence": "Du bittest um eine Seite für deinen Laden und bekommst eine echte, die online gehen kann.",
+        "alt": "Der Website-Baukasten von Ionexa zeigt eine fertige Café-Seite in der Vorschau, mit Schaltflächen zum Veröffentlichen, Herunterladen und Löschen."
+      },
+      "agent": {
+        "sentence": "Du bittest jeden Morgen um die Nachrichten, und um sieben liegen sie im Postfach.",
+        "alt": "Eine E-Mail eines Ionexa-Agenten mit dem Titel Morning market brief und drei kurzen Absätzen über den Markt des Lesers."
+      },
+      "mission": {
+        "sentence": "Du gibst ihm ein Ziel, und er kommt mit den Schritten zurück und geht sie mit dir durch.",
+        "alt": "Ionexa Mission Control zeigt das Ziel diesen Monat 5 neue Kunden finden, aufgeteilt in fünf Schritte, zwei davon abgehakt."
+      }
+    },
+    "useCases": {
+      "founders": {
+        "title": "Für Gründer",
+        "line": "Hol die ersten Kunden, ohne jemanden einzustellen."
+      },
+      "businesses": {
+        "title": "Für Unternehmen",
+        "line": "Hör auf, acht Werkzeuge zu bezahlen, die du halb nutzt."
+      },
+      "creators": {
+        "title": "Für Kreative",
+        "line": "Mach dein Ding. Die langweilige Hälfte läuft von selbst."
+      }
+    },
     "footer": {
       "pricing": "Preise",
       "terms": "Nutzungsbedingungen",

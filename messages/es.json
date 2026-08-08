@@ -138,10 +138,81 @@
     "comingSoonBadge": "Pronto"
   },
   "landing": {
-    "hero": "Tu negocio, organizado — con una IA que realmente ayuda.",
-    "description": "Registra ideas, finanzas, trading, investigación, decisiones y más — todo en un solo lugar, con un asistente de IA que entiende tus datos y te ayuda a pensarlo con claridad. Se acabaron las notas dispersas, las hojas de cálculo y las ventanas de chat.",
+    "hero": "Di lo que quieres. Ionexa lo hace.",
+    "heroSub": "Pruébalo aquí mismo. Sin instalar nada.",
+    "cta": "Empieza gratis",
     "logIn": "Iniciar sesión",
-    "signUp": "Regístrate",
+    "finalLine": "Una frase. Un sitio. Hecho.",
+    "demo": {
+      "panelTitle": "Lo que Ionexa hace con eso",
+      "exampleTag": "Ejemplo",
+      "note": "Un ejemplo grabado. En tu cuenta se ejecuta de verdad.",
+      "examples": {
+        "website": "Haz una página para una cafetería",
+        "goal": "Ponme una meta: conseguir 5 clientes este mes",
+        "agent": "Crea un agente que me envíe las noticias cada mañana"
+      },
+      "steps": {
+        "website": {
+          "1": "Lee lo que has pedido",
+          "2": "Escribe la página entera",
+          "3": "Comprueba que es segura para publicar"
+        },
+        "goal": {
+          "1": "Divide la meta en pasos",
+          "2": "Dice qué tendrás después de cada uno",
+          "3": "Pone el primer paso para mañana"
+        },
+        "agent": {
+          "1": "Crea el agente",
+          "2": "Lo programa para las 07:00 cada día",
+          "3": "Envía el resultado a tu correo"
+        }
+      },
+      "results": {
+        "website": "Una página terminada que editas con palabras normales y publicas en una dirección real.",
+        "goal": "Cinco pasos, cada uno con lo que consigues y cuánto tarda.",
+        "agent": "Se ejecuta solo cada mañana y te envía por correo lo que ha encontrado."
+      }
+    },
+    "problem": {
+      "title": "No eres desordenado. Tienes catorce pestañas abiertas.",
+      "statOneValue": "1.200",
+      "statOneLabel": "veces al día cambia de aplicación un trabajador medio",
+      "statTwoValue": "4 horas",
+      "statTwoLabel": "perdidas cada semana solo en volver a encontrar dónde ibas",
+      "source": "Harvard Business Review, 2022",
+      "answer": "Ionexa es un solo sitio donde pides algo, y se hace."
+    },
+    "proof": {
+      "exampleTag": "Ejemplo",
+      "website": {
+        "sentence": "Pides una página para tu negocio y recibes una de verdad, lista para publicar.",
+        "alt": "El creador de webs de Ionexa muestra una página de cafetería terminada en su vista previa, con botones para publicar, descargar o borrar."
+      },
+      "agent": {
+        "sentence": "Pides las noticias cada mañana y las tienes en tu correo a las siete.",
+        "alt": "Un correo de un agente de Ionexa titulado Morning market brief, con tres párrafos cortos sobre el mercado del lector."
+      },
+      "mission": {
+        "sentence": "Le das una meta y vuelve con los pasos y los recorre contigo.",
+        "alt": "El control de misiones de Ionexa muestra la meta conseguir 5 clientes nuevos este mes dividida en cinco pasos, dos ya completados."
+      }
+    },
+    "useCases": {
+      "founders": {
+        "title": "Para fundadores",
+        "line": "Consigue tus primeros clientes sin contratar a nadie."
+      },
+      "businesses": {
+        "title": "Para empresas",
+        "line": "Deja de pagar ocho herramientas que usas a medias."
+      },
+      "creators": {
+        "title": "Para creadores",
+        "line": "Haz lo tuyo. Que la mitad aburrida se ocupe sola."
+      }
+    },
     "footer": {
       "pricing": "Precios",
       "terms": "Términos del servicio",

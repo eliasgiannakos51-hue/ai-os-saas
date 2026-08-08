@@ -142,10 +142,54 @@ body {
   height: 100%;
 }
 
+/* ---------------------------------------------------------------------------
+   A metric-matched stand-in for Inter, used only for the moment before
+   Inter itself arrives.
+
+   THE BUG THIS FIXES: @fontsource ships Inter with `font-display: swap`, so
+   on a cold load the browser paints the whole page in a system font and
+   then repaints it in Inter. Inter is 6.48% wider than Arial at the same
+   pixel size, so every line of text changed width at that moment — and the
+   landing page's hero was a shrink-to-fit flex item whose width came from
+   its own <h1>'s text. The measured result on the shipped page was the
+   entire hero block jumping sideways 14px (1190px wide -> 1218px wide,
+   x=45 -> x=31) about 880ms in, plus the footer links reflowing under it.
+   That is what "the top of the page appears wrong when it loads" was.
+
+   The layout half of the fix is in app/page.tsx: nothing sizes itself to
+   its own text any more. This is the type half — the fallback now occupies
+   the same space Inter will, so the swap changes the glyph shapes and
+   nothing else. No line rewraps, so nothing below moves either.
+
+   THE NUMBERS ARE MEASURED, NOT COPIED. Rendering the same string at
+   1000px in this exact @fontsource Inter build and in Arial:
+       Inter  width 44629.9  ascent 96.90%  descent 24.10%
+       Arial  width 41914.1  ascent 90.50%  descent 21.20%
+   so size-adjust = 44629.9 / 41914.1 = 106.48%, and the ascent/descent
+   overrides are Inter's own, divided by that same factor because they are
+   expressed against the ADJUSTED em. Re-derive with the same method if the
+   Inter version changes.
+
+   local() only — this never costs a request. If none of the named faces
+   exist (some Linux desktops have no Arial and no metric clone), the
+   @font-face simply fails to load and the stack falls through to the
+   original system list, exactly as it did before.
+   --------------------------------------------------------------------------- */
+@font-face {
+  font-family: "Inter Fallback";
+  font-style: normal;
+  font-weight: 100 900;
+  src: local("Arial"), local("Helvetica Neue"), local("Liberation Sans"), local("Arimo");
+  size-adjust: 106.48%;
+  ascent-override: 91%;
+  descent-override: 22.63%;
+  line-gap-override: 0%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  font-family: "Inter", "Inter Fallback", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
 }
 

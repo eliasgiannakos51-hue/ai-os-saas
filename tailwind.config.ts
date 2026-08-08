@@ -32,6 +32,11 @@ const config: Config = {
       fontFamily: {
         sans: [
           "'Inter'",
+          // The metric-matched stand-in — see globals.css's @font-face for
+          // the measured numbers and the layout shift it removes. It has to
+          // be in BOTH stacks: `body` sets one, and any element carrying
+          // Tailwind's `font-sans` overrides it with this one.
+          "'Inter Fallback'",
           "-apple-system",
           "BlinkMacSystemFont",
           "'Segoe UI'",

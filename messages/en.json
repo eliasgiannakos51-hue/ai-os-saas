@@ -138,10 +138,81 @@
     "comingSoonBadge": "Soon"
   },
   "landing": {
-    "hero": "Your business, organized — with AI that actually helps.",
-    "description": "Track ideas, finance, trading, research, decisions and more — all in one place, with an AI assistant that understands your data and helps you think it through. No more scattered notes, spreadsheets, and chat windows.",
-    "logIn": "Log In",
-    "signUp": "Sign Up",
+    "hero": "Say what you want. Ionexa does it.",
+    "heroSub": "Try it right here. Nothing to install.",
+    "cta": "Start free",
+    "logIn": "Log in",
+    "finalLine": "One sentence. One place. Done.",
+    "demo": {
+      "panelTitle": "What Ionexa does with that",
+      "exampleTag": "Example",
+      "note": "A recorded example. In your own account it runs for real.",
+      "examples": {
+        "website": "Make a landing page for a coffee shop",
+        "goal": "Set a goal: find 5 customers this month",
+        "agent": "Build an agent that emails me the news every morning"
+      },
+      "steps": {
+        "website": {
+          "1": "Reading what you asked for",
+          "2": "Writing the whole page",
+          "3": "Checking it is safe to put online"
+        },
+        "goal": {
+          "1": "Breaking the goal into steps",
+          "2": "Saying what you will have after each one",
+          "3": "Putting the first step in tomorrow"
+        },
+        "agent": {
+          "1": "Building the agent",
+          "2": "Setting it to run at 07:00 every day",
+          "3": "Pointing the result at your inbox"
+        }
+      },
+      "results": {
+        "website": "A finished page you can edit in plain words and put online at a real address.",
+        "goal": "Five steps, each with what you get and how long it takes.",
+        "agent": "It runs on its own every morning and emails you what it found."
+      }
+    },
+    "problem": {
+      "title": "You are not disorganised. You have fourteen tabs open.",
+      "statOneValue": "1,200",
+      "statOneLabel": "times a day the average worker switches between apps",
+      "statTwoValue": "4 hours",
+      "statTwoLabel": "lost every week just finding your place again",
+      "source": "Harvard Business Review, 2022",
+      "answer": "Ionexa is one place where you ask, and it gets done."
+    },
+    "proof": {
+      "exampleTag": "Example",
+      "website": {
+        "sentence": "You ask for a page for your shop, and you get a real one you can put online.",
+        "alt": "The Ionexa website builder showing a finished coffee shop page in its preview, with buttons to publish, download or delete it."
+      },
+      "agent": {
+        "sentence": "You ask for the news every morning, and it is in your inbox at seven.",
+        "alt": "An email from an Ionexa agent titled Morning market brief, with three short paragraphs about the reader's market."
+      },
+      "mission": {
+        "sentence": "You give it a goal, and it comes back with the steps and works through them with you.",
+        "alt": "Ionexa mission control showing the goal find 5 new customers this month broken into five steps, two of them ticked off."
+      }
+    },
+    "useCases": {
+      "founders": {
+        "title": "For founders",
+        "line": "Get your first customers without hiring anyone."
+      },
+      "businesses": {
+        "title": "For businesses",
+        "line": "Stop paying for eight tools you half use."
+      },
+      "creators": {
+        "title": "For creators",
+        "line": "Make the thing. Let the boring half run itself."
+      }
+    },
     "footer": {
       "pricing": "Pricing",
       "terms": "Terms of Service",

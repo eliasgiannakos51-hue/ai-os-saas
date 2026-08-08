@@ -174,6 +174,12 @@ const LOCALE_ALLOWED = new Set([
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
+  // A citation. The landing page's "1,200 app switches a day" number is
+  // only worth printing next to where it came from, and where it came from
+  // is a publication with one name in every language. Translating
+  // "Harvard Business Review" would make the source harder to look up,
+  // which is the opposite of what a source line is for.
+  "landing.problem.source",
   "pricing.businessTitle",
   "pricing.rows.websiteBuilder",
   "pricing.rows.mobileSaasBuilder",

@@ -1,14 +1,17 @@
 // End-to-end flows, in a production build.
 //
-// SCOPE, STATED UP FRONT. Four of the eight flows are covered here. The
-// other four (signup->first record, Create Studio, Website Builder
-// create/edit/versioning, Favorites toggle) all turn on data actually
-// PERSISTING, and the Supabase stand-in this harness runs against returns
-// empty rows: no RLS, no triggers, no RPCs. Asserting "the record was
-// created" against a stub that cannot store it would be the exact trap
-// that had tooltips reported fixed twice while broken — a harness
-// supplying what the real app lacks. Those four need a real Supabase
-// instance; see the report at the bottom.
+// SCOPE, STATED UP FRONT. The flows that turn on data actually
+// PERSISTING (signup->first RECORD, Create Studio, Website Builder
+// create/edit/versioning, Favorites toggle) are not asserted here: the
+// Supabase stand-in returns empty rows — no RLS, no triggers, no RPCs —
+// and asserting "the record was created" against a stub that cannot
+// store it would be the exact trap that had tooltips reported fixed
+// twice while broken. Those need a real Supabase instance.
+//
+// FLOW 1 below covers the signup ROUTING leg honestly within that
+// limit: the real form, the real /api/signup, and the session cookie
+// the response sets are all exercised; what is NOT asserted is the
+// created user persisting, because the stub cannot store one.
 //
 // What IS here is everything whose behaviour lives in the app rather than
 // in the database: client cache invalidation, UI state machines, and the
@@ -70,6 +73,13 @@ const supa = http.createServer((req, res) => {
       res.end(JSON.stringify(data));
     };
     if (url.pathname === "/auth/v1/user") return json(200, USER);
+    // GoTrue's admin create-user (api/signup's first call) answers with
+    // the user object itself, and the password grant answers with a full
+    // session — both needed so FLOW 1 can drive the REAL signup form:
+    // signInWithPassword's response is what @supabase/ssr turns into the
+    // browser's session cookie on the /api/signup response.
+    if (url.pathname === "/auth/v1/admin/users" && req.method === "POST") return json(200, USER);
+    if (url.pathname === "/auth/v1/token") return json(200, session);
     if (url.pathname.startsWith("/auth/v1/")) return json(200, { user: USER, session: null });
     if (url.pathname.startsWith("/rest/v1/")) {
       const table = url.pathname.slice("/rest/v1/".length);
@@ -228,6 +238,50 @@ console.log(`production server up on :${PORT} (next start, NODE_ENV=production)`
 
 const { chromium } = await import("playwright");
 const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
+
+console.log("\n== FLOW 1: Email signup — the real form, to the first minute ==");
+// A CLEAN account, through the REAL /signup form, in the production
+// build: plan chooser -> account form -> /api/signup (admin create +
+// password sign-in against the stand-in, which sets the actual session
+// cookie) -> splash -> overview -> the action question. No cookies are
+// pre-seeded here — the session the flow ends with is the one the
+// signup response set, exactly as a new user gets it.
+{
+  const signupCtx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+  const signupPage = await signupCtx.newPage();
+  await signupPage.goto(`http://127.0.0.1:${PORT}/signup`, { waitUntil: "networkidle" });
+  checkTrue(
+    "the plan chooser renders",
+    await signupPage.getByRole("heading", { name: "Choose your plan" }).isVisible()
+  );
+  // Free is the default selection; no plan is forced on anyone.
+  await signupPage.getByRole("button", { name: "Continue" }).click();
+  checkTrue(
+    "step 2 asks for the account",
+    await signupPage.getByRole("heading", { name: "Create your account" }).isVisible()
+  );
+  await signupPage.locator("#email").fill("owner@example.com");
+  await signupPage.locator("#password").fill("Str0ng!Passw0rd");
+  await signupPage.locator('input[type="checkbox"]').first().check();
+  await signupPage.getByRole("button", { name: "Create Account" }).click();
+  // Splash (~1.2s) -> push /dashboard/overview -> server redirect.
+  await signupPage.waitForURL("**/onboarding", { timeout: 20000 });
+  check("a brand-new email signup lands on /onboarding", new URL(signupPage.url()).pathname, "/onboarding");
+  checkTrue(
+    "...showing the action question, not a tour",
+    await signupPage.getByRole("heading", { name: "What do you want to do first?" }).isVisible()
+  );
+  checkTrue(
+    "the account was created through the admin API",
+    supaHits.some((h) => h === "POST /auth/v1/admin/users")
+  );
+  checkTrue(
+    "and signed in with the password grant",
+    supaHits.some((h) => h.startsWith("POST /auth/v1/token"))
+  );
+  await signupCtx.close();
+}
+
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 await ctx.addCookies([
   { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },

@@ -108,7 +108,7 @@ export async function POST(request: Request) {
 
     const estimate = estimateForAction(
       "importPaste",
-      { model: PASTE_MODEL, inputChars: text.length },
+      { model: PASTE_MODEL, inputChars: text.length, planSlug: plan?.slug ?? null },
       pricingConfig,
       accountCreditPriceEur
     );

@@ -43,6 +43,11 @@ export async function sendMarginAlertEmail(params: {
   targetMargin: number;
   planSlug: string | null;
   effectiveCreditPriceEur: number;
+  /** Extra context when the alert is about something other than the
+   *  stored margin being low — e.g. usage priced by fallback because the
+   *  model is missing from MODEL_PRICING_USD, in which case the stored
+   *  margin is computed from a GUESSED cost and cannot be trusted. */
+  reason?: string;
 }): Promise<void> {
   const recipients = ADMIN_EMAILS;
   if (recipients.length === 0) return;
@@ -78,6 +83,7 @@ export async function sendMarginAlertEmail(params: {
             <tr><td style="padding:6px 0;color:#666">Real cost</td><td>$${params.realCostUsd.toFixed(6)} / €${params.realCostEur.toFixed(6)}</td></tr>
             <tr><td style="padding:6px 0;color:#666">Plan</td><td>${escapeHtml(params.planSlug ?? "none")}</td></tr>
             <tr><td style="padding:6px 0;color:#666">€ per credit used</td><td>${params.effectiveCreditPriceEur}</td></tr>
+            ${params.reason ? `<tr><td style="padding:6px 0;color:#666">Reason</td><td><strong>${escapeHtml(params.reason)}</strong></td></tr>` : ""}
           </table>
           <p style="color:#666;font-size:13px;margin-top:16px">
             The formula rounds charges up, so this is unreachable by arithmetic —

@@ -73,7 +73,7 @@ type WorkspaceTab = "overview" | "progress" | "chat" | "files";
 export function CreateStudio() {
   const t = useTranslations("dashboard.createStudio");
   const tCommon = useTranslations("common");
-  const { accountCreditPriceEur } = useCredits();
+  const { accountCreditPriceEur, planSlug } = useCredits();
   const studio = useCreateStudio();
 
   const [description, setDescription] = useState("");
@@ -94,10 +94,11 @@ export function CreateStudio() {
             detection.type,
             description.trim().length,
             DEFAULTS,
-            accountCreditPriceEur ?? undefined
+            accountCreditPriceEur ?? undefined,
+            planSlug
           )
         : 0,
-    [detection, description, accountCreditPriceEur]
+    [detection, description, accountCreditPriceEur, planSlug]
   );
 
   const timeBucket = detection ? timeBucketFor(detection.type, description.trim().length) : null;

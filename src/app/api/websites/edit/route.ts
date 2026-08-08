@@ -11,17 +11,23 @@ import {
 } from "@/lib/website-html-security-scan";
 import { reviewWebsiteContentSafety } from "@/lib/website-security-review";
 import { logSecurityCheck } from "@/lib/security-check-log";
-import { computeWebsiteEditCost, estimateWebsiteEditCost } from "@/lib/website-edit-cost";
 import { getSiteUrl } from "@/lib/site-url";
 import { nextVersionNumber } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import {
-  deductCredits,
   hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
+  getPurchasedPackCreditPriceEur,
 } from "@/lib/billing/credits";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
+import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
+import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
 
@@ -155,32 +161,45 @@ export async function POST(request: Request) {
     // releases the claim automatically without needing to touch each one
     // individually.
     try {
-    // Credits: checked (read-only) BEFORE the AI call so an obviously
-    // insufficient balance is rejected early without ever calling Claude,
-    // but only actually DEDUCTED after that call has confirmed-
-    // successfully returned an updated website — see the deductCredits
-    // call further below. If editWebsiteHtml throws (network error,
-    // timeout, API error, anything), the catch block returns without
-    // ever calling deductCredits, so zero credits are charged.
+    // Credits: RESERVE -> EXECUTE -> SETTLE, the same three-phase billing
+    // as generation (lib/billing/reservations.ts). The edit used to charge
+    // a size-based heuristic (lib/website-edit-cost.ts) — dynamic, but not
+    // MEASURED, and priced against the list rate: on Ultimate's €0.008
+    // per-credit rate the heuristic could land under the 4x guarantee.
+    // Settlement now charges the real usage of every call the edit makes
+    // (cheap patch or every regeneration round, plus the safety review).
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
-    // Dynamic pricing (lib/website-edit-cost.ts) — replaces the old flat
-    // CREDIT_COSTS.websiteEdit (50 credits regardless of real cost). The
-    // pre-check here conservatively estimates the more expensive full-
-    // regeneration case, since whether the cheap-patch path will apply
-    // isn't known until editWebsiteHtml actually runs below; the REAL,
-    // final (and often much smaller) charge is computed after.
-    const estimatedEditCost = estimateWebsiteEditCost(website.html_content.length);
-    let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
+    const plan = await resolveEffectivePlan(user);
+    const pricingConfig = resolvePricingConfig();
+    const accountCreditPriceEur = bypassCredits
+      ? pricingConfig.creditPriceEur
+      : effectiveCreditPriceEurForAccount(
+          plan,
+          await getPurchasedPackCreditPriceEur(user.id),
+          pricingConfig
+        );
+    // The current HTML is re-sent as context, so the estimate has to
+    // scale with it — that is what the hold is sized from.
+    const estimate = estimateForAction(
+      "websiteEdit",
+      {
+        model: WEBSITE_BUILDER_MODEL,
+        inputChars: website.html_content.length + changeRequest.length,
+        imageCount: referenceImagePaths.length,
+        planSlug: plan?.slug ?? null,
+      },
+      pricingConfig,
+      accountCreditPriceEur
+    );
     if (!bypassCredits) {
-      plan = await resolveEffectivePlan(user);
-      const check = await hasEnoughCredits(user.id, estimatedEditCost, plan);
+      const check = await hasEnoughCredits(user.id, estimate.reserveCredits, plan);
       if (!check.ok) {
         return NextResponse.json({
           ok: true,
           edited: false,
           rateLimited: true,
-          message: insufficientCreditsMessage(check.remaining, estimatedEditCost),
+          message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
         });
       }
     }
@@ -196,11 +215,34 @@ export async function POST(request: Request) {
         : [];
     const formEndpointUrl = `${getSiteUrl()}/api/websites/${websiteId}/submit-form`;
 
+    // RESERVE, before the first AI call, so a second concurrent action
+    // sees a balance that already excludes this one.
+    const costs = new CostAccumulator();
+    let reservationId = "";
+    if (!bypassCredits) {
+      const reservation = await reserveCredits(user.id, estimate.reserveCredits, "website_edit", {
+        websiteId,
+        estimatedCredits: estimate.estimatedCredits,
+      });
+      if (!reservation.ok) {
+        return NextResponse.json({
+          ok: true,
+          edited: false,
+          rateLimited: true,
+          message:
+            reservation.reason === "insufficient"
+              ? insufficientCreditsMessage(reservation.available, estimate.reserveCredits)
+              : "Could not reserve credits for this edit. No credits were charged — please try again.",
+        });
+      }
+      reservationId = reservation.reservationId;
+    }
+
     let updatedHtml: string;
     let usedCheapPatch = false;
     try {
-      void recordAiCallForDailySpend(estimatedEditCost);
-      const editResult = await editWebsiteHtml(apiKey, website.html_content, changeRequest, referenceImages, formEndpointUrl);
+      void recordAiCallForDailySpend(estimate.estimatedCredits);
+      const editResult = await editWebsiteHtml(apiKey, website.html_content, changeRequest, referenceImages, formEndpointUrl, costs);
       updatedHtml = editResult.html;
       usedCheapPatch = editResult.usedCheapPatch;
       updatedHtml = await resolveWebsiteImagePlaceholders(updatedHtml);
@@ -215,7 +257,7 @@ export async function POST(request: Request) {
       // shipped with a warning.
       updatedHtml = stripDisallowedExternalScripts(updatedHtml);
       const securityIssues = scanWebsiteHtmlForSecurityIssues(updatedHtml);
-      const contentReview = await reviewWebsiteContentSafety(apiKey, updatedHtml);
+      const contentReview = await reviewWebsiteContentSafety(apiKey, updatedHtml, costs);
       const allIssueDescriptions = [
         ...securityIssues.map(describeSecurityScanIssue),
         ...contentReview.concerns,
@@ -237,6 +279,10 @@ export async function POST(request: Request) {
           websiteId,
           issues: allIssueDescriptions.join("; "),
         });
+        // The promise in the message below is kept literally: the hold is
+        // released and nothing is charged. The AI spend on the rejected
+        // edit is the business's cost, same as before this change.
+        await releaseReservation(user.id, reservationId);
         return NextResponse.json({
           ok: true,
           edited: false,
@@ -246,6 +292,7 @@ export async function POST(request: Request) {
       }
     } catch (err) {
       logApiError("/api/websites/edit", err, { stage: "anthropic_call" });
+      await releaseReservation(user.id, reservationId);
       const errMessage = err instanceof Error ? err.message : "The website edit request failed.";
       return NextResponse.json(
         { ok: false, error: `${errMessage} No credits were charged — please try again.` },
@@ -268,6 +315,7 @@ export async function POST(request: Request) {
 
     if (updateError) {
       logApiError("/api/websites/edit", updateError, { stage: "update" });
+      await releaseReservation(user.id, reservationId);
       return NextResponse.json(
         { ok: false, error: "Could not save the edit. No credits were charged — please try again." },
         { status: 500 }
@@ -275,32 +323,26 @@ export async function POST(request: Request) {
     }
 
     // Only now — the AI call succeeded AND the result is durably saved —
-    // is this confirmed a success worth charging for. The REAL, final
-    // cost (lib/website-edit-cost.ts) reflects which path was actually
-    // taken: the cheap patch (usedCheapPatch) is charged a small flat
-    // amount; a full regeneration is priced the same way as fresh
-    // generation output, by real output length — never the old flat
-    // CREDIT_COSTS.websiteEdit regardless of which happened.
-    const realEditCost = computeWebsiteEditCost({ usedCheapPatch, outputHtmlLength: updatedHtml.length });
-    if (!bypassCredits && plan) {
-      const deduction = await deductCredits(
-        user.id,
-        realEditCost,
-        "website_edit",
-        `Website Builder edit — ${realEditCost} credits (${usedCheapPatch ? "cheap patch" : `full regeneration, output ${updatedHtml.length} chars`})`,
-        plan
-      );
-      if (!deduction.ok) {
-        // Balance changed between the pre-check above and now — log it,
-        // but still deliver the edit: the AI cost is already spent, and
-        // taking the finished result away would be worse than the missed
-        // charge (see the same tolerance documented on deductCredits).
-        logApiError("/api/websites/edit", "credit deduction failed after successful edit", {
-          userId: user.id,
-          websiteId,
-        });
-      }
-    }
+    // is this confirmed a success worth charging for. Settlement charges
+    // the MEASURED cost of every call this edit made (the cheap patch or
+    // every regeneration round, plus the content-safety review) at the
+    // account's own per-credit rate and resolved margin, and releases the
+    // rest of the hold — the same machinery as generation.
+    const settlement = await settleReservation({
+      userId: user.id,
+      reservationId,
+      feature: "website_edit",
+      costs,
+      plan,
+      bypassCharge: bypassCredits,
+      metadata: {
+        websiteId,
+        usedCheapPatch,
+        outputChars: updatedHtml.length,
+        estimatedCredits: estimate.estimatedCredits,
+        reservedCredits: bypassCredits ? 0 : estimate.reserveCredits,
+      },
+    });
 
     const { error: versionError } = await supabase.from("website_versions").insert({
       user_id: user.id,
@@ -313,7 +355,17 @@ export async function POST(request: Request) {
       logApiError("/api/websites/edit", versionError, { stage: "insert_version" });
     }
 
-    return NextResponse.json({ ok: true, edited: true, record: updatedRecord });
+    return NextResponse.json({
+      ok: true,
+      edited: true,
+      record: updatedRecord,
+      usage: buildUsageReceipt({
+        creditsCharged: settlement.creditsCharged,
+        bypass: bypassCredits,
+        wouldHaveCharged: null,
+        freeRemaining: null,
+      }),
+    });
     } finally {
       // Release the claim regardless of how the try block above exits —
       // success, an early return, or an exception. Best-effort: if this

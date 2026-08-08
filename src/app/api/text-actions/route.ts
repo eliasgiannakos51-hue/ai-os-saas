@@ -140,7 +140,7 @@ export async function POST(request: Request) {
     const pricingConfig = resolvePricingConfig();
     const estimate = estimateForAction(
       "textAction",
-      { model: MODEL, inputChars: SYSTEM_PROMPTS_WITH_QUALITY_CYCLE[action].length + text.length },
+      { model: MODEL, inputChars: SYSTEM_PROMPTS_WITH_QUALITY_CYCLE[action].length + text.length, planSlug: plan?.slug ?? null },
       pricingConfig,
       plan
         ? effectiveCreditPriceEurForAccount(plan, await getPurchasedPackCreditPriceEur(user.id), pricingConfig)
@@ -189,7 +189,7 @@ export async function POST(request: Request) {
         messages: [{ role: "user", content: text }],
       });
 
-      costs.record("generation", response.usage, MODEL);
+      costs.record("generation", response.usage, response.model || MODEL);
 
       const block = response.content.find(
         (b): b is Anthropic.TextBlock => b.type === "text"

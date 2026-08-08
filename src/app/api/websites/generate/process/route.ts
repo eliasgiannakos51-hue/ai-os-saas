@@ -238,6 +238,7 @@ export async function POST(request: Request) {
         model: WEBSITE_MODEL,
         inputChars: description.length,
         imageCount: Math.min(referenceImagePaths.length, MAX_REFERENCE_IMAGES),
+        planSlug: plan?.slug ?? null,
       },
       pricingConfig,
       accountCreditPriceEur

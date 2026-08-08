@@ -19,10 +19,19 @@ import { PLANS } from "@/lib/billing/plans";
 // The one boundary case is real_eur = 0 (a call that never reached the
 // API). That charges 0 credits — correct, since there is no cost to make
 // margin on, and charging for nothing would be wrong.
-export function creditsForRealCostEur(realCostEur: number, config?: PricingConfig): number {
+// Every credits-computing function below takes an optional
+// `marginMultiplier` — the per-feature/per-plan resolved margin from
+// lib/billing/margin-policy.ts. Omitted, they use the general configured
+// multiplier, which is exactly what resolveMarginFor returns when no
+// override applies.
+export function creditsForRealCostEur(
+  realCostEur: number,
+  config?: PricingConfig,
+  marginMultiplier?: number
+): number {
   const c = config ?? resolvePricingConfig();
   if (!Number.isFinite(realCostEur) || realCostEur <= 0) return 0;
-  return Math.ceil((realCostEur * c.marginMultiplier) / c.creditPriceEur);
+  return Math.ceil((realCostEur * (marginMultiplier ?? c.marginMultiplier)) / c.creditPriceEur);
 }
 
 export function usdToEur(usd: number, config?: PricingConfig): number {
@@ -161,11 +170,14 @@ export function effectiveCreditPriceEur(
 export function creditsForRealCostOnPlan(
   realCostEur: number,
   plan: { price: number | "custom"; monthlyCredits: number | "custom" } | null | undefined,
-  config?: PricingConfig
+  config?: PricingConfig,
+  marginMultiplier?: number
 ): number {
   const c = config ?? resolvePricingConfig();
   if (!Number.isFinite(realCostEur) || realCostEur <= 0) return 0;
-  return Math.ceil((realCostEur * c.marginMultiplier) / effectiveCreditPriceEur(plan, c));
+  return Math.ceil(
+    (realCostEur * (marginMultiplier ?? c.marginMultiplier)) / effectiveCreditPriceEur(plan, c)
+  );
 }
 
 /**
@@ -251,12 +263,13 @@ export function creditsForRealCostOnAccount(
   realCostEur: number,
   plan: { price: number | "custom"; monthlyCredits: number | "custom" } | null | undefined,
   purchasedPackPriceEur: number | null | undefined,
-  config?: PricingConfig
+  config?: PricingConfig,
+  marginMultiplier?: number
 ): number {
   const c = config ?? resolvePricingConfig();
   if (!Number.isFinite(realCostEur) || realCostEur <= 0) return 0;
   return Math.ceil(
-    (realCostEur * c.marginMultiplier) /
+    (realCostEur * (marginMultiplier ?? c.marginMultiplier)) /
       effectiveCreditPriceEurForAccount(plan, purchasedPackPriceEur, c)
   );
 }
@@ -285,10 +298,11 @@ export function achievedMarginOnAccount(
 export function creditsForRealCostOnRate(
   realCostEur: number,
   creditPriceEur: number,
-  config?: PricingConfig
+  config?: PricingConfig,
+  marginMultiplier?: number
 ): number {
   const c = config ?? resolvePricingConfig();
   if (!Number.isFinite(realCostEur) || realCostEur <= 0) return 0;
   const price = Number.isFinite(creditPriceEur) && creditPriceEur > 0 ? creditPriceEur : c.creditPriceEur;
-  return Math.ceil((realCostEur * c.marginMultiplier) / price);
+  return Math.ceil((realCostEur * (marginMultiplier ?? c.marginMultiplier)) / price);
 }

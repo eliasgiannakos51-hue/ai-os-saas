@@ -1484,7 +1484,8 @@
     },
     "freeChat": {
       "remaining": "今月の無料メッセージは残り {count} 件です",
-      "exhausted": "無料メッセージを使い切りました — 以降のチャットはクレジットを消費します"
+      "exhausted": "無料メッセージを使い切りました — 以降のチャットはクレジットを消費します",
+      "largeMessage": "このメッセージは大きいため、約{count}クレジットが課金されます"
     },
     "used": "{count} クレジットを使用",
     "usedWithRemaining": "{count} クレジットを使用 · 残り {remaining}",

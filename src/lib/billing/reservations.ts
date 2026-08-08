@@ -10,6 +10,7 @@ import {
   effectiveCreditPriceEurForAccount,
 } from "@/lib/billing/credit-formula";
 import { getPurchasedPackCreditPriceEur } from "@/lib/billing/credits";
+import { resolveMarginFor } from "@/lib/billing/margin-policy";
 import type { Plan } from "@/lib/billing/plans";
 import { sendMarginAlertEmail } from "@/lib/email/margin-alert";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
@@ -185,12 +186,52 @@ export async function settleReservation(params: {
   const packPriceEur = await getPurchasedPackCreditPriceEur(userId);
   const effectivePrice = effectiveCreditPriceEurForAccount(plan, packPriceEur, config);
 
+  // The multiplier THIS settlement applies: max(general, plan margin,
+  // feature override), never below 4 — see lib/billing/margin-policy.ts
+  // for the rule and why max() is the only safe combination.
+  const marginPolicy = resolveMarginFor(feature, plan?.slug ?? null, config);
+
   const creditsCharged = bypassCharge
     ? 0
-    : creditsForRealCostOnAccount(realCostEur, plan, packPriceEur, config);
+    : creditsForRealCostOnAccount(realCostEur, plan, packPriceEur, config, marginPolicy.margin);
   const margin = bypassCharge
     ? null
     : achievedMarginOnAccount(creditsCharged, realCostEur, plan, packPriceEur, config);
+
+  // Usage priced by FALLBACK because the model is not in
+  // MODEL_PRICING_USD. This is the failure the below-target margin alert
+  // cannot see: an unknown model's cost is computed from guessed rates,
+  // and the stored margin — computed from that same guessed cost — reads
+  // healthy no matter how wrong the guess is. The one observable fact is
+  // that the guess HAPPENED, so that is what alerts. (This is exactly how
+  // a $0.10 chat message once settled for 2 credits without a single
+  // alert firing: the served model was missing from the table.)
+  const unknownModels = costs.unknownModels();
+  if (unknownModels.length > 0) {
+    logApiError(
+      "billing:unknownModelPricing",
+      new Error("settled usage from a model MODEL_PRICING_USD does not know"),
+      {
+        userId,
+        feature,
+        unknownModels: unknownModels.join(", "),
+        realCostUsd,
+        creditsCharged,
+        hint: "add the model to MODEL_PRICING_USD — until then its cost is a guess and the margin guarantee is unverifiable",
+      }
+    );
+    void sendMarginAlertEmail({
+      feature,
+      creditsCharged,
+      realCostUsd,
+      realCostEur,
+      achievedMargin: margin,
+      targetMargin: marginPolicy.margin,
+      planSlug: plan?.slug ?? null,
+      effectiveCreditPriceEur: effectivePrice,
+      reason: `usage priced by fallback for unknown model(s): ${unknownModels.join(", ")}`,
+    });
+  }
 
   // A bypass row is 0 credits and a null margin BY DESIGN — an admin or
   // beta tester genuinely produces no revenue, so there is no multiplier
@@ -202,7 +243,7 @@ export async function settleReservation(params: {
   // tellable apart at a glance, and it is the only way the margin report
   // can price bypass traffic, which is real spend either way.
   const wouldHaveCharged = bypassCharge
-    ? creditsForRealCostOnAccount(realCostEur, plan, packPriceEur, config)
+    ? creditsForRealCostOnAccount(realCostEur, plan, packPriceEur, config, marginPolicy.margin)
     : null;
 
   // The multiplier is guaranteed by construction — credits are ceil()ed
@@ -218,7 +259,7 @@ export async function settleReservation(params: {
   // not be computed at all — and an alert that only tests `< 4` treats
   // that as healthy, because null is not less than 4. The case the alert
   // exists for is precisely the one where something upstream went wrong.
-  if (!bypassCharge && (margin === null || margin < config.marginMultiplier - 1e-9)) {
+  if (!bypassCharge && (margin === null || margin < marginPolicy.margin - 1e-9)) {
     logApiError("billing:marginBelowTarget", new Error("settled below the guaranteed margin"), {
       userId,
       feature,
@@ -226,7 +267,8 @@ export async function settleReservation(params: {
       realCostUsd,
       realCostEur,
       achievedMargin: margin,
-      targetMargin: config.marginMultiplier,
+      targetMargin: marginPolicy.margin,
+      marginSource: marginPolicy.source,
       effectiveCreditPriceEur: effectivePrice,
     });
     // The log line alone is only useful to someone already reading logs.
@@ -239,7 +281,7 @@ export async function settleReservation(params: {
       realCostUsd,
       realCostEur,
       achievedMargin: margin,
-      targetMargin: config.marginMultiplier,
+      targetMargin: marginPolicy.margin,
       planSlug: plan?.slug ?? null,
       effectiveCreditPriceEur: effectivePrice,
     });
@@ -262,7 +304,9 @@ export async function settleReservation(params: {
       p_ai_calls: costs.callCount,
       p_real_cost_usd: Number(realCostUsd.toFixed(8)),
       p_real_cost_eur: Number(realCostEur.toFixed(8)),
-      p_margin_multiplier: config.marginMultiplier,
+      // The multiplier this row was ACTUALLY priced at — after feature and
+      // plan overrides — not the global default.
+      p_margin_multiplier: marginPolicy.margin,
       p_achieved_margin: margin,
       p_stage_breakdown: costs.breakdownByStage(),
       p_metadata: {
@@ -270,6 +314,16 @@ export async function settleReservation(params: {
         planSlug: plan?.slug ?? null,
         effectiveCreditPriceEur: effectivePrice,
         packCreditPriceEur: packPriceEur,
+        // WHICH margin applied and WHY — "general" | "plan" | "feature" —
+        // with the inputs, so a cost-log row explains its own multiplier.
+        appliedMarginMultiplier: marginPolicy.margin,
+        marginSource: marginPolicy.source,
+        marginGeneral: marginPolicy.general,
+        marginPlan: marginPolicy.planMargin,
+        marginPlanFromEnv: marginPolicy.planMarginFromEnv,
+        marginFeatureOverride: marginPolicy.featureMargin,
+        // Models priced by fallback, if any — see billing:unknownModelPricing.
+        unknownModels: unknownModels.length > 0 ? unknownModels : undefined,
         // Why this row charged nothing, so 0 credits is never ambiguous.
         bypassCharge,
         wouldHaveChargedCredits: wouldHaveCharged,

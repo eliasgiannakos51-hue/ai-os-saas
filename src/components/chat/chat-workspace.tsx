@@ -8,7 +8,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
-import { ArrowUp, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ArrowUp, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -95,6 +95,11 @@ export function ChatWorkspace({
   const [freeRemaining, setFreeRemaining] = useState<number | null>(
     initialFreeChatRemaining ?? null
   );
+  // Set from the stream's meta line when the last message fell outside the
+  // free envelope (too long, or over the FREE_CHAT_MAX_COST_EUR estimate):
+  // "this message is large — it will be charged ~N credits". Cleared on
+  // the next send so it only ever describes the message just sent.
+  const [largeMessageCredits, setLargeMessageCredits] = useState<number | null>(null);
   // Not persisted per conversation on purpose — a runtime toggle for the
   // NEXT message sent, same as the API route treating it as a per-request
   // flag (see api/chat/route.ts) rather than conversation state.
@@ -327,6 +332,10 @@ export function ChatWorkspace({
           if (typeof event.freeRemaining === "number") {
             setFreeRemaining(event.freeRemaining);
           }
+          const large = event.largeMessage as { estimatedCredits?: number } | undefined;
+          setLargeMessageCredits(
+            large && typeof large.estimatedCredits === "number" ? large.estimatedCredits : null
+          );
           if (event.conversationId && event.conversationId !== sentFromId) {
             setActiveId(event.conversationId as string);
           }
@@ -603,6 +612,12 @@ export function ChatWorkspace({
                   )}
                 </button>
               </div>
+              {largeMessageCredits !== null && (
+                <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-orange-300/90">
+                  <Zap className="h-3 w-3 text-orange-400/80" aria-hidden="true" />
+                  {tFree("largeMessage", { count: largeMessageCredits })}
+                </p>
+              )}
               {freeRemaining !== null && (
                 <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-muted">
                   <Gift className="h-3 w-3 text-emerald-400/80" aria-hidden="true" />

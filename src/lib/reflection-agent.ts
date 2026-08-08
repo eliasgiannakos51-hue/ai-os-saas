@@ -48,7 +48,7 @@ export async function generateWeeklyReflection(
     messages: [{ role: "user", content: userMessage }],
   });
   // Before the parse below, which can still bail out on an empty reply.
-  costs?.record("generation", response.usage, REFLECTION_MODEL);
+  costs?.record("generation", response.usage, response.model || REFLECTION_MODEL);
 
   const textBlock = response.content.find(
     (block): block is Anthropic.TextBlock => block.type === "text"

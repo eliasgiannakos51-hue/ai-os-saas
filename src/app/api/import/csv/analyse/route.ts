@@ -128,7 +128,7 @@ export async function POST(request: Request) {
     const sample = sampleRows(parsed);
     const estimate = estimateForAction(
       "importMap",
-      { model: IMPORT_MAPPER_MODEL, inputChars: JSON.stringify(sample).length + parsed.headers.join("").length },
+      { model: IMPORT_MAPPER_MODEL, inputChars: JSON.stringify(sample).length + parsed.headers.join("").length, planSlug: plan?.slug ?? null },
       pricingConfig,
       accountCreditPriceEur
     );

@@ -156,7 +156,7 @@ export async function POST(request: Request) {
 
     const estimate = estimateForAction(
       "insightNarrate",
-      { model: INSIGHT_MODEL, inputChars: findings.reduce((sum, f) => sum + f.statement.length + JSON.stringify(f.evidence).length, 0) },
+      { model: INSIGHT_MODEL, inputChars: findings.reduce((sum, f) => sum + f.statement.length + JSON.stringify(f.evidence).length, 0), planSlug: plan?.slug ?? null },
       pricingConfig,
       accountCreditPriceEur
     );

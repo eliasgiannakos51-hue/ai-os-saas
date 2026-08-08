@@ -1484,7 +1484,8 @@
     },
     "freeChat": {
       "remaining": "Noch {count} kostenlose Nachrichten diesen Monat",
-      "exhausted": "Kostenlose Nachrichten aufgebraucht — Chats verbrauchen jetzt Guthaben"
+      "exhausted": "Kostenlose Nachrichten aufgebraucht — Chats verbrauchen jetzt Guthaben",
+      "largeMessage": "Diese Nachricht ist groß — es werden etwa {count} Credits berechnet"
     },
     "used": "{count} Credits verbraucht",
     "usedWithRemaining": "{count} Credits verbraucht · {remaining} übrig",

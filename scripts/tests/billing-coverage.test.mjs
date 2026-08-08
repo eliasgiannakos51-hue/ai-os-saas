@@ -194,7 +194,7 @@ checkTrue("with real measured usage, not a flat fee", /costs,/.test(form) && /ne
 checkTrue("at the owner's own plan rate", /plan: ownerPlan/.test(form));
 checkTrue("solvency is checked BEFORE the call", form.indexOf("hasEnoughCredits") < form.indexOf("classifyLeadMessage(apiKey"));
 checkTrue("and it settles even if the call threw afterwards", /finally \{[\s\S]{0,400}settleReservation/.test(form));
-checkTrue("the classifier records its own usage", /costs\?\.record\("classification", response\.usage, MODEL\)/.test(readFileSync("src/lib/lead-classification.ts", "utf8")));
+checkTrue("the classifier records its own usage", /costs\?\.record\("classification", response\.usage, response\.model \|\| MODEL\)/.test(readFileSync("src/lib/lead-classification.ts", "utf8")));
 // The abuse ceiling that was already there, asserted so it cannot be
 // removed without noticing: an unpaid flood is capped per website/hour.
 checkTrue("a per-website hourly cap still gates the endpoint", /MAX_SUBMISSIONS_PER_HOUR = \d+/.test(form));
@@ -312,7 +312,7 @@ for (const plan of PLANS) {
 console.log("\n== 7. the settlement path really is plan-aware ==");
 // The code that makes it so, asserted rather than described.
 const src = readFileSync("src/lib/billing/reservations.ts", "utf8");
-checkTrue("settlement divides by the ACCOUNT's rate", /creditsForRealCostOnAccount\(realCostEur, plan, packPriceEur, config\)/.test(src));
+checkTrue("settlement divides by the ACCOUNT's rate", /creditsForRealCostOnAccount\(realCostEur, plan, packPriceEur, config, marginPolicy\.margin\)/.test(src));
 checkTrue("the plan is a required settlement input", /plan: Plan \| null;/.test(src));
 checkTrue("a shortfall is logged, not swallowed", /billing:marginBelowTarget/.test(src));
 const routeSrc = readFileSync("src/app/api/websites/generate/process/route.ts", "utf8");
@@ -367,7 +367,7 @@ console.log("\n== 9. the alert cannot be defeated by null ==");
 // could not be computed, was the one case it stayed silent for.
 checkTrue(
   "the shortfall alert fires on null as well as on a low number",
-  /if \(!bypassCharge && \(margin === null \|\| margin < config\.marginMultiplier/.test(res)
+  /if \(!bypassCharge && \(margin === null \|\| margin < marginPolicy\.margin/.test(res)
 );
 checkTrue("and does not fire for a bypass row, which is legitimately null", /!bypassCharge &&/.test(res));
 // A zero-credit row must say WHY it is zero, or the next person reading
@@ -438,7 +438,7 @@ console.log("\n== 12. chat memory extraction is inside the chat settlement ==");
 const chat = readFileSync("src/app/api/chat/route.ts", "utf8");
 checkTrue("extraction runs BEFORE the settle", chat.indexOf("await extractAndStoreMemory({") < chat.indexOf("await settleReservation({"));
 checkTrue("and shares the turn's accumulator", /extractAndStoreMemory\(\{[\s\S]{0,400}costs,/.test(chat));
-checkTrue("the extractor records its own usage", /costs\?\.record\("other", result\.usage, MEMORY_MODEL\)/.test(readFileSync("src/lib/chat/memory.ts", "utf8")));
+checkTrue("the extractor records its own usage", /costs\?\.record\("other", result\.usage, result\.model \|\| MEMORY_MODEL\)/.test(readFileSync("src/lib/chat/memory.ts", "utf8")));
 // If the hold does not cover the second call, every chat message is
 // short by exactly one Claude call.
 const est = readFileSync("src/lib/billing/estimate.ts", "utf8");
@@ -618,10 +618,10 @@ console.log("\n== 20. bypass does not distort what a normal user would pay ==");
 // holding a pack the figure came out low — the cheapest pack is
 // EUR 0.0125 against a EUR 0.02 list price, a 37% understatement.
 checkTrue("the pack rate is fetched regardless of bypass", /const packPriceEur = await getPurchasedPackCreditPriceEur\(userId\);/.test(res));
-checkTrue("and the hypothetical charge uses it", /wouldHaveCharged = bypassCharge[\s\S]{0,120}creditsForRealCostOnAccount\(realCostEur, plan, packPriceEur, config\)/.test(res));
+checkTrue("and the hypothetical charge uses it", /wouldHaveCharged = bypassCharge[\s\S]{0,160}creditsForRealCostOnAccount\(realCostEur, plan, packPriceEur, config, marginPolicy\.margin\)/.test(res));
 // It must be the SAME function a real charge goes through, or the two
 // can drift apart silently.
-const chargeExpr = /creditsForRealCostOnAccount\(realCostEur, plan, packPriceEur, config\)/g;
+const chargeExpr = /creditsForRealCostOnAccount\(realCostEur, plan, packPriceEur, config, marginPolicy\.margin\)/g;
 checkTrue("computed by the same function as a real charge", (res.match(chargeExpr) ?? []).length >= 2);
 // And the row says which plan produced the number, so it can be checked.
 checkTrue("the row records the plan it priced against", /planSlug: plan\?\.slug \?\? null/.test(res));

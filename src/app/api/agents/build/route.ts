@@ -167,7 +167,7 @@ export async function POST(request: Request) {
         );
     const estimate = estimateForAction(
       "agentBuild",
-      { model: AGENT_BUILDER_MODEL, inputChars: userRequest.length },
+      { model: AGENT_BUILDER_MODEL, inputChars: userRequest.length, planSlug: plan?.slug ?? null },
       pricingConfig,
       accountCreditPriceEur
     );
@@ -275,6 +275,7 @@ export async function POST(request: Request) {
       promptChars: draft.prompt.length,
       needsWebSearch: draft.config.needsWebSearch,
       accountCreditPriceEur,
+      planSlug: plan?.slug ?? null,
     });
 
     return NextResponse.json({

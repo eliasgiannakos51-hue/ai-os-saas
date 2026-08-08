@@ -131,7 +131,7 @@ export async function classifyWebsiteDescription(
     tool_choice: { type: "tool", name: "classify_website_request" },
   });
 
-  costs?.record("classification", response.usage, MODEL);
+  costs?.record("classification", response.usage, response.model || MODEL);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
@@ -452,7 +452,7 @@ async function streamHtmlToCompletion(
     }
 
     const response = await stream.finalMessage();
-    costs?.record(round === 0 ? stage : "retry", response.usage, MODEL);
+    costs?.record(round === 0 ? stage : "retry", response.usage, response.model || MODEL);
     if (!onDelta) {
       // EVERY text block, joined — not the first one.
       //
@@ -644,7 +644,8 @@ const APPLY_EDIT_TOOL: Anthropic.Tool = {
 async function tryApplySimpleEdit(
   apiKey: string,
   currentHtml: string,
-  changeRequest: string
+  changeRequest: string,
+  costs?: CostAccumulator
 ): Promise<string | null> {
   const anthropic = new Anthropic({ apiKey });
   const response = await anthropic.messages.create({
@@ -655,6 +656,7 @@ async function tryApplySimpleEdit(
     tools: [APPLY_EDIT_TOOL],
     tool_choice: { type: "tool", name: "apply_website_edit" },
   });
+  costs?.record("classification", response.usage, response.model || MODEL);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
@@ -700,13 +702,17 @@ export async function editWebsiteHtml(
   currentHtml: string,
   changeRequest: string,
   referenceImages?: ReferenceImage[],
-  formEndpointUrl?: string
+  formEndpointUrl?: string,
+  // Measured usage of every call this edit makes (the cheap patch, or
+  // every round of a full regeneration) — settlement charges from this,
+  // so an un-passed accumulator is an unbilled edit.
+  costs?: CostAccumulator
 ): Promise<EditWebsiteResult> {
   const images = referenceImages?.slice(0, MAX_REFERENCE_IMAGES) ?? [];
 
   if (images.length === 0) {
     try {
-      const patched = await tryApplySimpleEdit(apiKey, currentHtml, changeRequest);
+      const patched = await tryApplySimpleEdit(apiKey, currentHtml, changeRequest, costs);
       if (patched) {
         assertCompleteHtmlResponse(null, patched, "updated");
         return { html: patched, usedCheapPatch: true };
@@ -739,7 +745,10 @@ export async function editWebsiteHtml(
   const { rawText, stopReason } = await streamHtmlToCompletion(
     anthropic,
     buildEditSystemBlocks(formEndpointUrl),
-    content
+    content,
+    undefined,
+    costs,
+    "edit"
   );
   if (!rawText) {
     throw new Error("The model did not return an updated website.");

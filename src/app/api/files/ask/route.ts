@@ -173,7 +173,7 @@ export async function POST(request: Request) {
     // Sized on the documents, not the question — see the file comment.
     const estimate = estimateForAction(
       "fileAsk",
-      { model: FILE_ASK_MODEL, inputChars: context.charCount + question.length },
+      { model: FILE_ASK_MODEL, inputChars: context.charCount + question.length, planSlug: plan?.slug ?? null },
       pricingConfig,
       accountCreditPriceEur
     );
@@ -219,7 +219,7 @@ export async function POST(request: Request) {
           },
         ],
       });
-      costs.record("generation", response.usage, FILE_ASK_MODEL);
+      costs.record("generation", response.usage, response.model || FILE_ASK_MODEL);
       answer = response.content
         .filter((block): block is Anthropic.TextBlock => block.type === "text")
         .map((block) => block.text)

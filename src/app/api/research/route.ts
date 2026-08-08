@@ -149,7 +149,7 @@ export async function POST(request: Request) {
     // what the full run will cost (quoted now, charged by the run route).
     const planEstimate = estimateForAction(
       "agentBuild",
-      { model: RESEARCH_MODEL, inputChars: topicCheck.topic.length },
+      { model: RESEARCH_MODEL, inputChars: topicCheck.topic.length, planSlug: plan?.slug ?? null },
       pricingConfig,
       accountCreditPriceEur
     );
@@ -159,6 +159,7 @@ export async function POST(request: Request) {
         model: RESEARCH_MODEL,
         inputChars: topicCheck.topic.length,
         expectedWebSearches: RESEARCH_MAX_SEARCHES,
+        planSlug: plan?.slug ?? null,
       },
       pricingConfig,
       accountCreditPriceEur

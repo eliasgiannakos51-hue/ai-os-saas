@@ -1,5 +1,6 @@
 import { pricingForModel, WEB_SEARCH_USD_PER_QUERY } from "@/lib/billing/model-pricing";
 import { creditsForRealCostOnRate, reserveAmount, usdToEur } from "@/lib/billing/credit-formula";
+import { resolveMarginFor, ACTION_TO_FEATURE } from "@/lib/billing/margin-policy";
 import type { PricingConfig } from "@/lib/billing/pricing-config";
 
 // Pre-action cost estimation, in the same units the settlement uses, so
@@ -73,7 +74,12 @@ export function estimateActionCost(
   // well: dividing by the list price here while charging at the plan rate
   // made an Ultimate estimate read 61 credits for a generation that then
   // charged 658, and reserved far less than it went on to cost.
-  effectiveCreditPriceEur?: number
+  effectiveCreditPriceEur?: number,
+  // The resolved per-feature/per-plan margin (lib/billing/margin-policy.ts).
+  // Settlement multiplies the real cost by this, so the estimate has to as
+  // well — a Free-plan action settles at 6x, and an estimate stuck on the
+  // general 4x would reserve a third short on every one of them.
+  marginMultiplier?: number
 ): CostEstimate {
   const p = pricingForModel(input.model);
 
@@ -112,7 +118,8 @@ export function estimateActionCost(
   const estimatedCredits = creditsForRealCostOnRate(
     usdToEur(estimatedUsd, config),
     effectiveCreditPriceEur ?? config.creditPriceEur,
-    config
+    config,
+    marginMultiplier
   );
 
   return {
@@ -364,11 +371,25 @@ export type ActionProfileKey = keyof typeof ACTION_PROFILES;
  */
 export function estimateForAction(
   action: ActionProfileKey,
-  params: { model: string; inputChars: number; imageCount?: number; expectedWebSearches?: number },
+  params: {
+    model: string;
+    inputChars: number;
+    imageCount?: number;
+    expectedWebSearches?: number;
+    /** The user's plan slug — lets the estimate resolve the same
+     *  per-feature/per-plan margin the settlement will apply. Omitted,
+     *  the estimate uses the general multiplier, which under-reserves on
+     *  plans with a higher margin — so server call sites pass it. */
+    planSlug?: string | null;
+  },
   config: PricingConfig,
-  effectiveCreditPriceEur?: number
+  effectiveCreditPriceEur?: number,
+  marginMultiplier?: number
 ): CostEstimate {
   const profile = ACTION_PROFILES[action];
+  const margin =
+    marginMultiplier ??
+    resolveMarginFor(ACTION_TO_FEATURE[action] ?? null, params.planSlug ?? null, config).margin;
   return estimateActionCost(
     {
       model: params.model,
@@ -382,6 +403,7 @@ export function estimateForAction(
       continuationRounds: "continuationRounds" in profile ? profile.continuationRounds : 0,
     },
     config,
-    effectiveCreditPriceEur
+    effectiveCreditPriceEur,
+    margin
   );
 }

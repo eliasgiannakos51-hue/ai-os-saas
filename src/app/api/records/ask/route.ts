@@ -228,6 +228,7 @@ export async function POST(request: Request) {
         // The tool is offered on every call, so the hold has to assume it
         // might be used — an unheld search is an unbilled one.
         expectedWebSearches: 1,
+        planSlug: plan?.slug ?? null,
       },
       pricingConfig,
       plan
@@ -290,7 +291,7 @@ export async function POST(request: Request) {
           // Web searches are inside this usage object and are priced per
           // query by priceUsage, so they no longer need a second, flat
           // deduction of their own.
-          costs.record("generation", finalResponse.usage, MODEL);
+          costs.record("generation", finalResponse.usage, finalResponse.model || MODEL);
         } catch (err) {
           logApiError("/api/records/ask", err, { stage: "anthropic_stream", moduleSlug });
           await releaseReservation(user.id, reservationId);

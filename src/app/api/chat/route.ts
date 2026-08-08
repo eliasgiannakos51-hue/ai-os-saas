@@ -26,7 +26,12 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
-import { FREE_CHAT_LIMITS } from "@/lib/billing/free-chat";
+import {
+  FREE_CHAT_LIMITS,
+  freeChatMaxCostEur,
+  freeChatMessageEstimatedCostEur,
+} from "@/lib/billing/free-chat";
+import { CHAT_MODEL } from "@/lib/ai-models";
 import { consumeFreeChatMessage, releaseFreeChatMessage } from "@/lib/billing/free-chat-usage";
 import { diagLog } from "@/lib/diag";
 import {
@@ -53,7 +58,9 @@ export const dynamic = "force-dynamic";
 // still hit a low platform default. 180s covers a realistic worst case.
 export const maxDuration = 180;
 
-const MODEL = "claude-sonnet-4-6";
+// Shared with lib/billing/free-chat.ts so the free-chat economics always
+// price the model chat actually runs on — see lib/ai-models.ts.
+const MODEL = CHAT_MODEL;
 const MAX_MESSAGE_LENGTH = 10000;
 const MAX_TOKENS = 2048;
 const HISTORY_LIMIT = 20;
@@ -313,16 +320,30 @@ export async function POST(request: Request) {
     // FREE CHAT. Claimed before any credit machinery runs, because a
     // granted free message skips the reserve/settle path entirely.
     //
-    // Only offered for a message that already fits the free envelope: a
-    // longer one falls through to the normal paid path rather than being
-    // rejected, so the cap never turns into an error the user has to
-    // understand. Admins and beta testers already pay nothing, so
-    // spending their allowance on them would be pure bookkeeping.
+    // Only offered for a message that already fits the free envelope — by
+    // SIZE (the character cap) and by estimated COST (FREE_CHAT_MAX_COST_EUR,
+    // which holds even if the chat model is upgraded to a pricier one). A
+    // message over either limit falls through to the normal paid path
+    // rather than being rejected, so the cap never turns into an error the
+    // user has to understand — the meta event below tells the client why,
+    // and what the message will roughly cost. Admins and beta testers
+    // already pay nothing, so spending their allowance on them would be
+    // pure bookkeeping.
+    const withinFreeSize = message.length <= FREE_CHAT_LIMITS.maxMessageChars;
+    const withinFreeCost =
+      freeChatMessageEstimatedCostEur(message.length, systemPrompt.length, pricingConfig) <=
+      freeChatMaxCostEur();
     const freeGrant =
-      !bypassCredits && message.length <= FREE_CHAT_LIMITS.maxMessageChars
+      !bypassCredits && withinFreeSize && withinFreeCost
         ? await consumeFreeChatMessage(user.id, plan?.slug ?? "free")
         : null;
     const isFreeMessage = freeGrant?.granted === true;
+    const largeMessageReason: "message_too_long" | "over_cost_cap" | null =
+      !bypassCredits && !withinFreeSize
+        ? "message_too_long"
+        : !bypassCredits && !withinFreeCost
+          ? "over_cost_cap"
+          : null;
 
     // The pre-check runs before the conversation history is loaded, so it
     // sizes on the message and system prompt alone. The real reserve, taken
@@ -337,6 +358,7 @@ export async function POST(request: Request) {
         // being short on the replies that do search, and the difference
         // is released when they don't.
         expectedWebSearches: 1,
+        planSlug: plan?.slug ?? null,
       },
       pricingConfig,
       accountCreditPriceEur
@@ -455,6 +477,14 @@ export async function POST(request: Request) {
             // moment one is used, rather than on the next page load.
             freeMessage: isFreeMessage,
             freeRemaining: freeGrant?.granted ? freeGrant.remaining : undefined,
+            // "This message is large — it will be charged." Sent whenever a
+            // message fell outside the free envelope (by size or by the
+            // FREE_CHAT_MAX_COST_EUR estimate), with the rough charge, so
+            // the client can explain the paid path instead of the user
+            // wondering where a free message went.
+            largeMessage: largeMessageReason
+              ? { reason: largeMessageReason, estimatedCredits: estimate.estimatedCredits }
+              : undefined,
           })
         );
 
@@ -494,6 +524,7 @@ export async function POST(request: Request) {
             model: MODEL,
             inputChars: message.length + historyChars + systemPrompt.length,
             expectedWebSearches: isFreeMessage ? 0 : 1,
+            planSlug: plan?.slug ?? null,
           },
           pricingConfig,
           accountCreditPriceEur
@@ -555,7 +586,7 @@ export async function POST(request: Request) {
             // and then answered is two model calls, and both are settled
             // against the same reservation — a loop that recorded only its
             // last round would charge for part of the work it did.
-            costs.record("generation", finalResponse.usage, MODEL);
+            costs.record("generation", finalResponse.usage, finalResponse.model || MODEL);
             webSearchCount += finalResponse.usage.server_tool_use?.web_search_requests ?? 0;
 
             const toolUses = finalResponse.content.filter(

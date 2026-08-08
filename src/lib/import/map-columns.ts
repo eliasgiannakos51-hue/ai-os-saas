@@ -135,7 +135,7 @@ export async function proposeMapping(params: {
     return { ok: false, reason: "api_error" };
   }
 
-  params.costs.record("generation", response.usage, IMPORT_MAPPER_MODEL);
+  params.costs.record("generation", response.usage, response.model || IMPORT_MAPPER_MODEL);
 
   const use = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use" && block.name === MAP_TOOL.name

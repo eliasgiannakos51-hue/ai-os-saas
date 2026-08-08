@@ -407,12 +407,10 @@ export const CREDIT_COSTS = {
   // here only as an approximate reference point for other code/docs.
   websiteGenerate: 100,
   // Website Builder post-generation editing (api/websites/edit). No
-  // longer the actual charge: like websiteGenerate above, edit cost is
-  // now dynamic (see lib/website-edit-cost.ts) — a cheap find-replace
-  // patch and a full regeneration have wildly different real costs, so
-  // billing them the same flat amount (this constant) was a genuine
-  // pricing inconsistency this pass fixed. Kept only as a reference
-  // point for other code/docs.
+  // longer the actual charge: edits are reserved and settled on MEASURED
+  // usage through lib/billing/reservations.ts, exactly like generation —
+  // a cheap find-replace patch and a full regeneration have wildly
+  // different real costs. Kept only as a reference point for docs.
   websiteEdit: 50,
   // The "does this request need clarifying questions first?" check (see
   // lib/clarification.ts) — a small, cheap, forced-tool-use call that

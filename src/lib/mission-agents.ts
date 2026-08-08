@@ -254,7 +254,7 @@ export async function researchGoal(
       tools: [WEB_SEARCH_TOOL],
     });
 
-    costs?.record("web_search", response.usage, MISSION_MODEL);
+    costs?.record("web_search", response.usage, response.model || MISSION_MODEL);
     const searchCount = response.usage.server_tool_use?.web_search_requests ?? 0;
 
     const text = response.content
@@ -302,7 +302,7 @@ export async function planMission(
     tool_choice: { type: "tool", name: "create_plan" },
   });
 
-  costs?.record("generation", response.usage, MISSION_MODEL);
+  costs?.record("generation", response.usage, response.model || MISSION_MODEL);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
@@ -341,7 +341,7 @@ export async function reviewMission(
     messages: [{ role: "user", content: userContent }],
   });
 
-  costs?.record("generation", response.usage, MISSION_MODEL);
+  costs?.record("generation", response.usage, response.model || MISSION_MODEL);
 
   const textBlock = response.content.find(
     (block): block is Anthropic.TextBlock => block.type === "text"

@@ -116,7 +116,7 @@ export async function planResearch(params: {
       tool_choice: { type: "tool", name: PLAN_TOOL.name },
       messages: [{ role: "user", content: `Topic:\n${wrapUntrusted(params.topic)}` }],
     });
-    params.costs.record("generation", response.usage, RESEARCH_MODEL);
+    params.costs.record("generation", response.usage, response.model || RESEARCH_MODEL);
 
     const use = response.content.find(
       (block): block is Anthropic.ToolUseBlock => block.type === "tool_use" && block.name === PLAN_TOOL.name
@@ -204,7 +204,7 @@ export async function researchQuestion(params: {
         },
       ],
     });
-    params.costs.record("generation", response.usage, RESEARCH_MODEL);
+    params.costs.record("generation", response.usage, response.model || RESEARCH_MODEL);
 
     const summary = response.content
       .filter((block): block is Anthropic.TextBlock => block.type === "text")
@@ -309,7 +309,7 @@ export async function synthesiseReport(params: {
       system: synthesisSystemPrompt(params.language),
       messages: [{ role: "user", content: buildSynthesisInput(params) }],
     });
-    params.costs.record("generation", response.usage, RESEARCH_MODEL);
+    params.costs.record("generation", response.usage, response.model || RESEARCH_MODEL);
 
     const markdown = response.content
       .filter((block): block is Anthropic.TextBlock => block.type === "text")

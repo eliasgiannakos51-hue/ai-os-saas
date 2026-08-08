@@ -1484,7 +1484,8 @@
     },
     "freeChat": {
       "remaining": "{count} δωρεάν μηνύματα απομένουν αυτόν τον μήνα",
-      "exhausted": "Τα δωρεάν μηνύματα εξαντλήθηκαν — οι συνομιλίες πλέον χρεώνονται σε credits"
+      "exhausted": "Τα δωρεάν μηνύματα εξαντλήθηκαν — οι συνομιλίες πλέον χρεώνονται σε credits",
+      "largeMessage": "Αυτό το μήνυμα είναι μεγάλο — θα χρεωθεί περίπου {count} credits"
     },
     "used": "Χρεώθηκαν {count} credits",
     "usedWithRemaining": "Χρεώθηκαν {count} credits · απομένουν {remaining}",

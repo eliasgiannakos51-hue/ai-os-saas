@@ -10,7 +10,10 @@ import {
 export type { ClarificationCheckResult, ClarificationKind } from "@/lib/clarification-client";
 export { parseClarificationResult, appendClarificationAnswers } from "@/lib/clarification-client";
 
-const MODEL = "claude-sonnet-4-6";
+// Exported so routes that reserve/settle a clarification-only action can
+// size their estimate against the model this check actually calls.
+export const CLARIFICATION_MODEL = "claude-sonnet-4-6";
+const MODEL = CLARIFICATION_MODEL;
 const CLARIFICATION_MAX_TOKENS = 500;
 
 // Every AI-generation entry point in the app (Website Builder, Mission
@@ -104,7 +107,7 @@ export async function checkNeedsClarification(
   // Recorded before the parse: a call that came back in an unusable shape
   // still cost real tokens, and the action that triggered it has to carry
   // that cost.
-  costs?.record("clarification", response.usage, MODEL);
+  costs?.record("clarification", response.usage, response.model || MODEL);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

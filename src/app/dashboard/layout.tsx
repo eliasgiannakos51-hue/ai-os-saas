@@ -85,6 +85,7 @@ export default async function DashboardLayout({
               await getPurchasedPackCreditPriceEur(user.id),
               resolvePricingConfig()
             )}
+            initialPlanSlug={plan.slug}
             isAdmin={isAdmin}
           >
             {/* Same wireframe globe as login/signup/landing, now behind every

@@ -140,7 +140,7 @@ export async function GET(request: Request) {
       const stepEstimate = (text: string) =>
         estimateForAction(
           "createAnything",
-          { model: MISSION_STEP_MODEL, inputChars: text.length },
+          { model: MISSION_STEP_MODEL, inputChars: text.length, planSlug: plan?.slug ?? null },
           pricingConfig,
           accountCreditPriceEur
         );
@@ -410,7 +410,7 @@ export async function GET(request: Request) {
       const stepEstimate = (text: string) =>
         estimateForAction(
           "createAnything",
-          { model: MISSION_STEP_MODEL, inputChars: text.length },
+          { model: MISSION_STEP_MODEL, inputChars: text.length, planSlug: plan?.slug ?? null },
           pricingConfig,
           accountCreditPriceEur
         );

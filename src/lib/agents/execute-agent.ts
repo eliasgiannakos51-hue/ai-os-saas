@@ -84,6 +84,7 @@ export function estimateAgentRun(params: {
   promptChars: number;
   needsWebSearch: boolean;
   accountCreditPriceEur: number;
+  planSlug?: string | null;
 }) {
   const config = resolvePricingConfig();
   const single = estimateForAction(
@@ -92,6 +93,7 @@ export function estimateAgentRun(params: {
       model: AGENT_RUNNER_MODEL,
       inputChars: params.promptChars,
       expectedWebSearches: params.needsWebSearch ? AGENT_MAX_WEB_SEARCHES : 0,
+      planSlug: params.planSlug ?? null,
     },
     config,
     params.accountCreditPriceEur
@@ -173,6 +175,7 @@ export async function executeAgent(params: {
     promptChars: agent.prompt.length,
     needsWebSearch: agentConfig.needsWebSearch,
     accountCreditPriceEur,
+    planSlug: plan?.slug ?? null,
   });
 
   // 4. Read-only affordability check before anything is held or called.

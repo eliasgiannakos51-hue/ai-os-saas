@@ -60,7 +60,7 @@ export async function extractAndStoreMemory({
       ],
     });
 
-    costs?.record("other", result.usage, MEMORY_MODEL);
+    costs?.record("other", result.usage, result.model || MEMORY_MODEL);
 
     const textBlock = result.content.find(
       (block): block is Anthropic.TextBlock => block.type === "text"

@@ -123,12 +123,80 @@ check("unknown slug -> free allowance", freeChatAllowanceForSlug("no-such-plan")
 check("empty slug -> free allowance", freeChatAllowanceForSlug("") === DEFAULT_FREE_CHAT_MESSAGES.free);
 
 console.log("\n== 8. raising an allowance past the ceiling is caught ==");
-// Proves the ceiling check is load-bearing rather than always-true.
+// Proves the ceiling protection is load-bearing rather than always-true.
+// It used to be a REPORT (withinCeiling flipped to false and someone had
+// to notice); the allowance is now CLAMPED to the ceiling-derived maximum
+// at the source, so an absurd env value cannot take effect at all.
 process.env.FREE_CHAT_MESSAGES_STARTER = "100000";
-const breached = freeChatEconomics().find((r) => r.planSlug === "starter");
-check("an absurd allowance is reported as OUT of the ceiling", breached.withinCeiling === false,
-  `${(breached.shareOfPrice * 100).toFixed(0)}% of price`);
+const clamped = freeChatEconomics().find((r) => r.planSlug === "starter");
+check(
+  "an absurd allowance is CLAMPED, never granted",
+  clamped.freeMessages < 100000,
+  `granted ${clamped.freeMessages}`
+);
+check(
+  "the clamp lands exactly at the ceiling-derived maximum",
+  clamped.freeMessages === m.maxAllowanceWithinCeiling("starter"),
+  `granted ${clamped.freeMessages}, max ${m.maxAllowanceWithinCeiling("starter")}`
+);
+check("so the economics stay within the ceiling even then", clamped.withinCeiling === true,
+  `${(clamped.shareOfPrice * 100).toFixed(0)}% of price`);
 delete process.env.FREE_CHAT_MESSAGES_STARTER;
+
+console.log("\n== 9. the per-message cost cap (FREE_CHAT_MAX_COST_EUR) ==");
+const { freeChatMaxCostEur, freeChatMessageEstimatedCostEur, freeChatPerMessageWorstCaseEur } = m;
+check("default cap is €0.02", freeChatMaxCostEur({}) === 0.02);
+check("env override works", freeChatMaxCostEur({ FREE_CHAT_MAX_COST_EUR: "0.05" }) === 0.05);
+check("garbage falls back to the default", freeChatMaxCostEur({ FREE_CHAT_MAX_COST_EUR: "-1" }) === 0.02);
+const smallCost = freeChatMessageEstimatedCostEur(100, 3000);
+const bigCost = freeChatMessageEstimatedCostEur(FREE_CHAT_LIMITS.maxMessageChars, 14000);
+check("the estimate grows with message size", bigCost > smallCost, `${smallCost} vs ${bigCost}`);
+check(
+  "a small message fits under the default cap",
+  smallCost <= 0.02,
+  `€${smallCost.toFixed(4)}`
+);
+check(
+  "a max-length free message with a big system prompt still fits under the cap",
+  freeChatMessageEstimatedCostEur(FREE_CHAT_LIMITS.maxMessageChars, 8000) <= 0.02,
+  `€${freeChatMessageEstimatedCostEur(FREE_CHAT_LIMITS.maxMessageChars, 8000).toFixed(4)}`
+);
+check(
+  "an oversized context pushes the estimate over the cap (the gate bites)",
+  freeChatMessageEstimatedCostEur(FREE_CHAT_LIMITS.maxMessageChars, 30000) > 0.02,
+  `€${freeChatMessageEstimatedCostEur(FREE_CHAT_LIMITS.maxMessageChars, 30000).toFixed(4)}`
+);
+check(
+  "the per-message worst case is bounded by cap + the bounded history window",
+  freeChatPerMessageWorstCaseEur() <=
+    freeChatMaxCostEur({}) + m.freeChatHistoryWorstCaseEur() + 1e-12,
+  `€${freeChatPerMessageWorstCaseEur().toFixed(4)}`
+);
+
+console.log("\n== 10. the route gates free grants on BOTH size and estimated cost ==");
+const routeSrc = route.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+check("size gate present", /withinFreeSize && withinFreeCost/.test(routeSrc));
+check(
+  "cost gate compares the message estimate to the cap",
+  /freeChatMessageEstimatedCostEur\(message\.length, systemPrompt\.length, pricingConfig\) <=\s*\n?\s*freeChatMaxCostEur\(\)/.test(routeSrc)
+);
+check(
+  "the client is told when a message was too large to be free",
+  /largeMessage: largeMessageReason/.test(routeSrc) && /estimatedCredits: estimate\.estimatedCredits/.test(routeSrc)
+);
+
+console.log("\n== 11. the per-plan table (πλάνο | free μηνύματα | worst case | % τιμής) ==");
+for (const row of freeChatEconomics()) {
+  const share = row.shareOfPrice === null ? "  —  " : `${(row.shareOfPrice * 100).toFixed(1)}%`;
+  console.log(
+    `   ${row.planSlug.padEnd(13)} | ${String(row.freeMessages).padStart(5)} msgs | €${row.worstCaseCostEur.toFixed(2).padStart(6)} | ${share}`
+  );
+  check(
+    `   ...${row.planSlug} is within the 25% ceiling`,
+    row.withinCeiling === true,
+    JSON.stringify(row)
+  );
+}
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length) {

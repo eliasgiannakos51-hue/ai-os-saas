@@ -1484,7 +1484,8 @@
     },
     "freeChat": {
       "remaining": "本月还剩 {count} 条免费消息",
-      "exhausted": "免费消息已用完 — 本月的对话将开始消耗积分"
+      "exhausted": "免费消息已用完 — 本月的对话将开始消耗积分",
+      "largeMessage": "此消息较大——将收取约 {count} 个积分"
     },
     "used": "已使用 {count} 积分",
     "usedWithRemaining": "已使用 {count} 积分 · 剩余 {remaining}",

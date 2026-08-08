@@ -34,6 +34,10 @@ export async function GET() {
       credits: row.credits_remaining,
       total: row.credits_total,
       creditPriceEur,
+      // The pre-submit estimate resolves the same per-plan margin the
+      // settlement will apply (lib/billing/margin-policy.ts), so it needs
+      // to know which plan this account is on.
+      planSlug: plan.slug,
     });
   } catch (err) {
     logApiError("/api/credits/balance", err);

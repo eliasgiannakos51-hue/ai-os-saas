@@ -26,7 +26,12 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
-import { FREE_CHAT_LIMITS } from "@/lib/billing/free-chat";
+import {
+  FREE_CHAT_LIMITS,
+  freeChatMaxCostEur,
+  freeChatMessageEstimatedCostEur,
+} from "@/lib/billing/free-chat";
+import { CHAT_MODEL } from "@/lib/ai-models";
 import { consumeFreeChatMessage, releaseFreeChatMessage } from "@/lib/billing/free-chat-usage";
 import { diagLog } from "@/lib/diag";
 import {
@@ -41,6 +46,7 @@ import { loadTradingMentorContext } from "@/lib/chat/trading-mentor-context";
 import { loadProductMentorContext } from "@/lib/chat/product-mentor-context";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
+import { AI_CONDUCT_EL } from "@/lib/ai-conduct";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +59,9 @@ export const dynamic = "force-dynamic";
 // still hit a low platform default. 180s covers a realistic worst case.
 export const maxDuration = 180;
 
-const MODEL = "claude-sonnet-4-6";
+// Shared with lib/billing/free-chat.ts so the free-chat economics always
+// price the model chat actually runs on — see lib/ai-models.ts.
+const MODEL = CHAT_MODEL;
 const MAX_MESSAGE_LENGTH = 10000;
 const MAX_TOKENS = 2048;
 const HISTORY_LIMIT = 20;
@@ -73,16 +81,12 @@ const WEB_SEARCH_INSTRUCTION = `
 
 Έχεις πρόσβαση σε εργαλείο αναζήτησης στο διαδίκτυο (web search). Χρησιμοποίησέ το όταν ο χρήστης ζητάει πραγματικά, τρέχοντα στοιχεία που δεν μπορείς να ξέρεις με σιγουριά μόνος/η σου (τρέχουσες τιμές, στατιστικά, πρόσφατα γεγονότα, "ποια είναι η μέση τιμή X σε Y σήμερα"). ΜΗΝ χρησιμοποιείς αναζήτηση για γενικές ερωτήσεις γνώσης που ήδη ξέρεις καλά. ΣΗΜΑΝΤΙΚΟ (πνευματικά δικαιώματα): όταν χρησιμοποιείς αποτελέσματα αναζήτησης, ΠΑΡΑΦΡΑΣΕ τα ευρήματα με δικά σου λόγια — ΜΗΝ αντιγράφεις κείμενο αυτούσιο από τις πηγές. Ανέφερε την πηγή (π.χ. όνομα site) όταν είναι χρήσιμο, αλλά η απάντηση πρέπει να είναι δική σου σύνοψη, όχι αντιγραφή.`;
 
-// Legal/tax/investment disclaimer — applies to both personas below (so it
-// covers Ionexa Chat, Mentor Mode, and the Trading Mentor preset, which is
-// this app's only AI entry point associated with Trading Workflow —
-// Trading Workflow's own "Pattern Insight" card is fully deterministic
-// win-rate/streak math with no AI call, so there's no separate system
-// prompt for it to reach). Applies to product/business questions too, not
-// only trading — "νομικά θέματα" in the brief is general-purpose.
-const REGULATED_ADVICE_INSTRUCTION = `
-
-ΣΗΜΑΝΤΙΚΟ — φόροι/νομικά/επενδύσεις: αν ο χρήστης ρωτήσει για φόρους, νομικά θέματα, ή ζητήσει συγκεκριμένη επενδυτική συμβουλή (πού να βάλει τα χρήματά του, τι μετοχή/asset να αγοράσει, πώς να μειώσει φόρους, ποια εταιρική δομή να επιλέξει για φορολογικούς λόγους), μπορείς να δώσεις ΓΕΝΙΚΕΣ, εκπαιδευτικές πληροφορίες αν τις γνωρίζεις, αλλά ΠΑΝΤΑ πρόσθεσε ρητή σύσταση στο τέλος: "Δεν είμαι φορολογικός/νομικός/επενδυτικός σύμβουλος — για [φόρους/νομικά θέματα/επενδυτικές αποφάσεις] που αφορούν τη δική σου κατάσταση, συμβουλέψου πραγματικό λογιστή/δικηγόρο/αδειοδοτημένο επενδυτικό σύμβουλο." ΜΗΝ δώσεις συγκεκριμένη, εξατομικευμένη νομική/φορολογική/επενδυτική σύσταση (π.χ. "αγόρασε αυτή τη μετοχή", "κάνε εταιρεία στο Χ αντί για Υ για να πληρώσεις λιγότερο φόρο") — μόνο γενική εκπαίδευση + ρητή παραπομπή σε ειδικό.`;
+// The legal/tax/investment disclaimer that used to live here as a local
+// constant is superseded by the SHARED conduct block (lib/ai-conduct.ts):
+// the same referral-not-refusal rule, now covering HEALTH as well, plus
+// the absolute limits, the explicit anti-over-restriction instruction,
+// and the empathy guidance — appended to every AI feature in the app,
+// not just chat, so the wording cannot drift per feature.
 
 // Anthropic's native server-side web search tool — the model decides
 // autonomously whether a given message actually needs a real search
@@ -98,7 +102,7 @@ const WEB_SEARCH_TOOL: Anthropic.WebSearchTool20250305 = {
 };
 
 function buildSystemPrompt(personaName: string): string {
-  return `Είσαι ο/η ${personaName}, ένας εξελιγμένος AI βοηθός γενικής χρήσης. Έχεις ευρεία γνώση σε όλα τα θέματα (επιστήμη, ιστορία, προγραμματισμός, μαθηματικά, δημιουργική γραφή, επιχειρήσεις, καθημερινές ερωτήσεις, κ.λπ.) και μπορείς να βοηθήσεις με οτιδήποτε χρειαστεί ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος — ελληνικά, αγγλικά, ή οποιαδήποτε άλλη γλώσσα). Δώσε λεπτομερείς, χρήσιμες, ακριβείς απαντήσεις — προτίμησε μια ελαφρώς πιο εκτενή, ουσιαστική απάντηση αντί για μια πολύ σύντομη, χωρίς όμως να γίνεσαι φλύαρος ή να επαναλαμβάνεσαι. Όπου έχει νόημα για το ερώτημα (εξηγήσεις εννοιών, τεχνικά θέματα, "πώς κάνω Χ"), συμπλήρωσε τον ορισμό/την εξήγηση με ένα σύντομο πρακτικό παράδειγμα ή use case, όχι μόνο θεωρία — αλλά μην το κάνεις αυτό όταν ο χρήστης ζητάει ρητά κάτι σύντομο (π.χ. ναι/όχι, ένας αριθμός, μια γρήγορη μετάφραση) ή όταν ένα παράδειγμα δεν έχει φυσικό νόημα. Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.${WEB_SEARCH_INSTRUCTION}${REGULATED_ADVICE_INSTRUCTION}${AI_QUALITY_CHECKLIST_EL}`;
+  return `Είσαι ο/η ${personaName}, ένας εξελιγμένος AI βοηθός γενικής χρήσης. Έχεις ευρεία γνώση σε όλα τα θέματα (επιστήμη, ιστορία, προγραμματισμός, μαθηματικά, δημιουργική γραφή, επιχειρήσεις, καθημερινές ερωτήσεις, κ.λπ.) και μπορείς να βοηθήσεις με οτιδήποτε χρειαστεί ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος — ελληνικά, αγγλικά, ή οποιαδήποτε άλλη γλώσσα). Δώσε λεπτομερείς, χρήσιμες, ακριβείς απαντήσεις — προτίμησε μια ελαφρώς πιο εκτενή, ουσιαστική απάντηση αντί για μια πολύ σύντομη, χωρίς όμως να γίνεσαι φλύαρος ή να επαναλαμβάνεσαι. Όπου έχει νόημα για το ερώτημα (εξηγήσεις εννοιών, τεχνικά θέματα, "πώς κάνω Χ"), συμπλήρωσε τον ορισμό/την εξήγηση με ένα σύντομο πρακτικό παράδειγμα ή use case, όχι μόνο θεωρία — αλλά μην το κάνεις αυτό όταν ο χρήστης ζητάει ρητά κάτι σύντομο (π.χ. ναι/όχι, ένας αριθμός, μια γρήγορη μετάφραση) ή όταν ένα παράδειγμα δεν έχει φυσικό νόημα. Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.${WEB_SEARCH_INSTRUCTION}${AI_CONDUCT_EL}${AI_QUALITY_CHECKLIST_EL}`;
 }
 
 // Mentor Mode (toggled client-side, see chat-workspace.tsx's "Mentor Mode"
@@ -107,7 +111,7 @@ function buildSystemPrompt(personaName: string): string {
 // for that one request's system prompt; the default persona/behavior above
 // is untouched otherwise.
 function buildMentorSystemPrompt(personaName: string): string {
-  return `Είσαι ο/η ${personaName} Mentor — δεν δίνεις μόνο απαντήσεις, δίνεις επιχειρηματική/στρατηγική καθοδήγηση. Όταν ο χρήστης περιγράφει ένα σχέδιο/ιδέα, ΜΗΝ απαντάς μόνο εκτελεστικά — επισήμανε πιθανά ρίσκα, ρώτησε διευκρινιστικές ερωτήσεις που θα ρωτούσε ένας έμπειρος σύμβουλος, και πρότεινε εναλλακτικές όπου έχει νόημα. Χρησιμοποίησε τα δεδομένα του χρήστη (modules/entries) ως context όταν είναι σχετικό. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος). Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.${WEB_SEARCH_INSTRUCTION}${REGULATED_ADVICE_INSTRUCTION}${AI_QUALITY_CHECKLIST_EL}`;
+  return `Είσαι ο/η ${personaName} Mentor — δεν δίνεις μόνο απαντήσεις, δίνεις επιχειρηματική/στρατηγική καθοδήγηση. Όταν ο χρήστης περιγράφει ένα σχέδιο/ιδέα, ΜΗΝ απαντάς μόνο εκτελεστικά — επισήμανε πιθανά ρίσκα, ρώτησε διευκρινιστικές ερωτήσεις που θα ρωτούσε ένας έμπειρος σύμβουλος, και πρότεινε εναλλακτικές όπου έχει νόημα. Χρησιμοποίησε τα δεδομένα του χρήστη (modules/entries) ως context όταν είναι σχετικό. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος). Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.${WEB_SEARCH_INSTRUCTION}${AI_CONDUCT_EL}${AI_QUALITY_CHECKLIST_EL}`;
 }
 
 function truncateTitle(message: string, maxLen = 40): string {
@@ -313,16 +317,30 @@ export async function POST(request: Request) {
     // FREE CHAT. Claimed before any credit machinery runs, because a
     // granted free message skips the reserve/settle path entirely.
     //
-    // Only offered for a message that already fits the free envelope: a
-    // longer one falls through to the normal paid path rather than being
-    // rejected, so the cap never turns into an error the user has to
-    // understand. Admins and beta testers already pay nothing, so
-    // spending their allowance on them would be pure bookkeeping.
+    // Only offered for a message that already fits the free envelope — by
+    // SIZE (the character cap) and by estimated COST (FREE_CHAT_MAX_COST_EUR,
+    // which holds even if the chat model is upgraded to a pricier one). A
+    // message over either limit falls through to the normal paid path
+    // rather than being rejected, so the cap never turns into an error the
+    // user has to understand — the meta event below tells the client why,
+    // and what the message will roughly cost. Admins and beta testers
+    // already pay nothing, so spending their allowance on them would be
+    // pure bookkeeping.
+    const withinFreeSize = message.length <= FREE_CHAT_LIMITS.maxMessageChars;
+    const withinFreeCost =
+      freeChatMessageEstimatedCostEur(message.length, systemPrompt.length, pricingConfig) <=
+      freeChatMaxCostEur();
     const freeGrant =
-      !bypassCredits && message.length <= FREE_CHAT_LIMITS.maxMessageChars
+      !bypassCredits && withinFreeSize && withinFreeCost
         ? await consumeFreeChatMessage(user.id, plan?.slug ?? "free")
         : null;
     const isFreeMessage = freeGrant?.granted === true;
+    const largeMessageReason: "message_too_long" | "over_cost_cap" | null =
+      !bypassCredits && !withinFreeSize
+        ? "message_too_long"
+        : !bypassCredits && !withinFreeCost
+          ? "over_cost_cap"
+          : null;
 
     // The pre-check runs before the conversation history is loaded, so it
     // sizes on the message and system prompt alone. The real reserve, taken
@@ -337,6 +355,7 @@ export async function POST(request: Request) {
         // being short on the replies that do search, and the difference
         // is released when they don't.
         expectedWebSearches: 1,
+        planSlug: plan?.slug ?? null,
       },
       pricingConfig,
       accountCreditPriceEur
@@ -455,6 +474,14 @@ export async function POST(request: Request) {
             // moment one is used, rather than on the next page load.
             freeMessage: isFreeMessage,
             freeRemaining: freeGrant?.granted ? freeGrant.remaining : undefined,
+            // "This message is large — it will be charged." Sent whenever a
+            // message fell outside the free envelope (by size or by the
+            // FREE_CHAT_MAX_COST_EUR estimate), with the rough charge, so
+            // the client can explain the paid path instead of the user
+            // wondering where a free message went.
+            largeMessage: largeMessageReason
+              ? { reason: largeMessageReason, estimatedCredits: estimate.estimatedCredits }
+              : undefined,
           })
         );
 
@@ -494,6 +521,7 @@ export async function POST(request: Request) {
             model: MODEL,
             inputChars: message.length + historyChars + systemPrompt.length,
             expectedWebSearches: isFreeMessage ? 0 : 1,
+            planSlug: plan?.slug ?? null,
           },
           pricingConfig,
           accountCreditPriceEur
@@ -555,7 +583,7 @@ export async function POST(request: Request) {
             // and then answered is two model calls, and both are settled
             // against the same reservation — a loop that recorded only its
             // last round would charge for part of the work it did.
-            costs.record("generation", finalResponse.usage, MODEL);
+            costs.record("generation", finalResponse.usage, finalResponse.model || MODEL);
             webSearchCount += finalResponse.usage.server_tool_use?.web_search_requests ?? 0;
 
             const toolUses = finalResponse.content.filter(

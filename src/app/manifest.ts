@@ -29,6 +29,13 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#0a0a0a",
     theme_color: "#0a0a0a",
     categories: ["productivity", "business"],
+    // Long-press / jump-list entries on Android and desktop — the three
+    // things a returning user actually opens.
+    shortcuts: [
+      { name: "Chat", short_name: "Chat", url: "/dashboard/chat" },
+      { name: "Create", short_name: "Create", url: "/dashboard/create" },
+      { name: "Overview", short_name: "Overview", url: "/dashboard/overview" },
+    ],
     icons: [
       // Served by the Next.js file conventions in this same directory —
       // src/app/icon.svg and src/app/apple-icon.tsx.
@@ -49,6 +56,17 @@ export default function manifest(): MetadataRoute.Manifest {
         sizes: "256x256",
         type: "image/png",
         purpose: "any",
+      },
+      // A MASKABLE icon is what stops Android from framing the logo in a
+      // white circle: the launcher crops it to the device's own shape and
+      // needs the safe zone that "any" icons do not promise. Without at
+      // least one, the installed icon looks visibly worse than every
+      // other app on the home screen.
+      {
+        src: "/icon-maskable.png",
+        sizes: "512x512",
+        type: "image/png",
+        purpose: "maskable",
       },
     ],
   };

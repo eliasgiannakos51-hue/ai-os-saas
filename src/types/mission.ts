@@ -24,6 +24,11 @@ export type MissionSubstep = {
 export type MissionStep = {
   text: string;
   status: MissionStepStatus;
+  // How much focus this step demands, assigned by the Planner. Read by
+  // lib/mission-energy.ts to suggest what to pick up given the user's
+  // latest energy check-in. Absent on missions planned before this
+  // existed — treated as "medium" rather than guessed at.
+  effort?: "light" | "medium" | "deep";
   // Filled in from /api/create's response once "Create with AI" succeeds
   // for this step — the Planner never assigns a module itself, Create
   // Anything's own classifier decides it at build time.

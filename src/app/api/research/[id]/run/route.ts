@@ -128,6 +128,7 @@ export async function POST(_request: Request, { params }: { params: { id: string
         model: RESEARCH_MODEL,
         inputChars: String(report.topic).length,
         expectedWebSearches: RESEARCH_MAX_SEARCHES,
+        planSlug: plan?.slug ?? null,
       },
       pricingConfig,
       accountCreditPriceEur

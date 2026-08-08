@@ -1,4 +1,10 @@
-import { priceUsage, type AnthropicUsageLike, type UsageBreakdown } from "@/lib/billing/model-pricing";
+import {
+  priceUsage,
+  isKnownModel,
+  normalizeModelId,
+  type AnthropicUsageLike,
+  type UsageBreakdown,
+} from "@/lib/billing/model-pricing";
 
 // Collects EVERY billable sub-call that makes up one user action.
 //
@@ -37,13 +43,22 @@ export type CostEntry = {
 
 export class CostAccumulator {
   private entries: CostEntry[] = [];
+  private unpriced = new Set<string>();
 
   /**
    * Records one Anthropic response. Safe to call with a null/undefined
    * usage (a failed or aborted call) — it contributes zero rather than
    * throwing, so error paths can record unconditionally.
+   *
+   * Call sites pass `response.model ?? REQUESTED_MODEL` so the tokens are
+   * priced at the rates of the model that ACTUALLY served the call, not
+   * the one the code asked for. When the two diverge (an upgrade, an
+   * alias, a deploy that changed a constant), pricing the requested model
+   * is exactly the silent under-charge the margin guarantee exists to
+   * prevent.
    */
   record(stage: CostStage, usage: AnthropicUsageLike | null | undefined, model: string): void {
+    if (!isKnownModel(model)) this.unpriced.add(normalizeModelId(model));
     this.entries.push({ stage, model, usage: priceUsage(usage, model) });
   }
 
@@ -52,7 +67,19 @@ export class CostAccumulator {
    * priced its own call) without re-pricing it.
    */
   addBreakdown(stage: CostStage, model: string, usage: UsageBreakdown): void {
+    if (!isKnownModel(model)) this.unpriced.add(normalizeModelId(model));
     this.entries.push({ stage, model, usage });
+  }
+
+  /**
+   * Models that were priced by FALLBACK because MODEL_PRICING_USD does not
+   * know them. Settlement treats a non-empty list as an incident: the
+   * fallback is the most expensive KNOWN model, which is only safe while
+   * the table actually contains the expensive models — an unknown id means
+   * the real rate could be anything, so a person has to look.
+   */
+  unknownModels(): string[] {
+    return [...this.unpriced];
   }
 
   get totalUsdCost(): number {

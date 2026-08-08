@@ -107,7 +107,7 @@ export async function POST(request: Request) {
     const accountCreditPriceEur = bypassCredits
       ? pricingConfig.creditPriceEur
       : effectiveCreditPriceEurForAccount(
-          await resolveEffectivePlan(user),
+          (plan = await resolveEffectivePlan(user)),
           await getPurchasedPackCreditPriceEur(user.id),
           pricingConfig
         );
@@ -116,6 +116,7 @@ export async function POST(request: Request) {
       {
         model: MISSION_AGENT_MODEL,
         inputChars: goal.length,
+        planSlug: plan?.slug ?? null,
         // MAX_USES on the research pass's web_search tool. Held for
         // whether or not they run — an unused hold is released at
         // settlement, an absent one is a hole in the margin.

@@ -23,13 +23,14 @@ export function useCostEstimate(
   action: ActionProfileKey,
   params: { inputChars: number; imageCount?: number }
 ) {
-  const { accountCreditPriceEur } = useCredits();
+  const { accountCreditPriceEur, planSlug } = useCredits();
   const estimate = estimateForAction(
     action,
     {
       model: WEBSITE_BUILDER_MODEL,
       inputChars: params.inputChars,
       imageCount: params.imageCount,
+      planSlug,
     },
     DEFAULTS,
     accountCreditPriceEur ?? undefined

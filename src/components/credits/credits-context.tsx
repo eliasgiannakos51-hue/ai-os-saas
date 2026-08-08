@@ -16,6 +16,11 @@ type CreditsContextValue = {
    *  the same number settlement does, or an Ultimate user is quoted less
    *  than half what they will actually be charged. */
   accountCreditPriceEur: number | null;
+  /** The account's plan slug, so pre-submit estimates resolve the same
+   *  per-plan margin the settlement applies (a Free-plan action settles at
+   *  6x — an estimate stuck on the general 4x would quote two thirds of
+   *  the real charge). */
+  planSlug: string | null;
   refresh: () => Promise<number | null>;
   /**
    * Call after ANY action that may have been billed, passing the raw API
@@ -54,12 +59,14 @@ export function CreditsProvider({
   initialCredits,
   initialTotal = null,
   initialCreditPriceEur = null,
+  initialPlanSlug = null,
   isAdmin = false,
   children,
 }: {
   initialCredits: number | null;
   initialTotal?: number | null;
   initialCreditPriceEur?: number | null;
+  initialPlanSlug?: string | null;
   isAdmin?: boolean;
   children: ReactNode;
 }) {
@@ -68,6 +75,7 @@ export function CreditsProvider({
   const [credits, setCredits] = useState<number | null>(initialCredits);
   const [total, setTotal] = useState<number | null>(initialTotal);
   const [accountCreditPriceEur, setRate] = useState<number | null>(initialCreditPriceEur);
+  const [planSlug, setPlanSlug] = useState<string | null>(initialPlanSlug);
 
   // Returns the new balance so a caller can put it in the same message as
   // the charge ("Used 109 credits - 24,891 left") without a second read.
@@ -79,6 +87,7 @@ export function CreditsProvider({
         setCredits(data.credits);
         if (typeof data.total === "number") setTotal(data.total);
         if (typeof data.creditPriceEur === "number") setRate(data.creditPriceEur);
+        if (typeof data.planSlug === "string") setPlanSlug(data.planSlug);
         return data.credits as number;
       }
     } catch {
@@ -125,7 +134,7 @@ export function CreditsProvider({
 
   return (
     <CreditsContext.Provider
-      value={{ credits, total, accountCreditPriceEur, refresh, reportUsage, isAdmin }}
+      value={{ credits, total, accountCreditPriceEur, planSlug, refresh, reportUsage, isAdmin }}
     >
       {children}
     </CreditsContext.Provider>

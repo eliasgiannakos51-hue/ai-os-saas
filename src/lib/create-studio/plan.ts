@@ -99,13 +99,14 @@ export function estimateCreditsFor(
   type: CreateStudioType,
   inputChars: number,
   config: PricingConfig,
-  accountCreditPriceEur?: number
+  accountCreditPriceEur?: number,
+  planSlug?: string | null
 ): number {
   const profileKey = STUDIO_ACTION_PROFILE[type];
   if (!profileKey) return 0;
   return estimateForAction(
     profileKey,
-    { model: STUDIO_MODEL, inputChars },
+    { model: STUDIO_MODEL, inputChars, planSlug: planSlug ?? null },
     config,
     accountCreditPriceEur
   ).estimatedCredits;

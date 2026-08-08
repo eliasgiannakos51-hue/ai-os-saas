@@ -146,7 +146,8 @@
       "pricing": "Tarifs",
       "roadmap": "Feuille de route",
       "terms": "Conditions d'utilisation",
-      "privacy": "Politique de confidentialité"
+      "privacy": "Politique de confidentialité",
+      "cookies": "Politique de cookies"
     }
   },
   "pricing": {
@@ -460,6 +461,7 @@
       "description": "Téléchargez tout ce que vous avez enregistré dans les 13 modules sous forme d'un seul fichier JSON.",
       "exportAll": "Exporter toutes les données",
       "exporting": "Export en cours...",
+      "exportFailed": "Échec de l'export — veuillez réessayer",
       "exportDownloaded": "✓ export téléchargé"
     },
     "dangerZone": {
@@ -534,6 +536,28 @@
       "colCalls": "Actions",
       "colMargin": "Marge moy.",
       "colCost": "Coût réel"
+    },
+    "pushNotifications": {
+      "title": "Notifications push",
+      "perDevice": "Par appareil. Les activer ici n'affecte pas vos autres appareils.",
+      "turnOn": "Activer",
+      "turnOff": "Désactiver",
+      "enabled": "Les notifications sont activées sur cet appareil.",
+      "disabled": "Les notifications sont désactivées sur cet appareil.",
+      "blocked": "Les notifications sont bloquées dans les paramètres de votre navigateur.",
+      "enableError": "Impossible d'activer les notifications ici.",
+      "disableError": "Impossible de désactiver les notifications.",
+      "prefError": "Impossible d'enregistrer cette préférence.",
+      "unsupported": "Ce navigateur ne prend pas en charge les notifications push. Sur iPhone, ajoutez d'abord Ionexa à l'écran d'accueil (iOS 16.4+).",
+      "notConfigured": "Les notifications push ne sont pas configurées sur ce déploiement.",
+      "agentResults": "Résultats d'agent",
+      "agentResultsHint": "Quand un agent planifié termine une exécution",
+      "missionReminders": "Rappels de mission",
+      "missionRemindersHint": "Quand une étape de mission planifiée s'exécute",
+      "lowCredits": "Crédits faibles",
+      "lowCreditsHint": "Quand le travail s'arrête faute de solde",
+      "collaboration": "Collaboration",
+      "collaborationHint": "Invitations d'équipe et activité de l'espace partagé"
     }
   },
   "dashboard": {
@@ -741,7 +765,15 @@
       "reviewNotRunYet": "Toutes les étapes sont terminées — lancez l'Évaluateur pour obtenir une synthèse.",
       "reviewLocked": "L'Évaluateur se lance une fois toutes les étapes terminées.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "Cette mission vient d'être mise à jour ailleurs — actualisation pour afficher l'état le plus récent."
+      "updatedElsewhere": "Cette mission vient d'être mise à jour ailleurs — actualisation pour afficher l'état le plus récent.",
+      "energy": {
+        "heading": {
+          "light": "Peu d'énergie — commence ici",
+          "medium": "Énergie stable — bonne prochaine étape",
+          "deep": "Bonne énergie — attaque celle-ci"
+        },
+        "heldBack": "{count} étapes plus exigeantes mises de côté pour l'instant"
+      }
     },
     "reflection": {
       "title": "Bilan Hebdomadaire",
@@ -1484,7 +1516,8 @@
     },
     "freeChat": {
       "remaining": "Il vous reste {count} messages gratuits ce mois-ci",
-      "exhausted": "Messages gratuits épuisés — les discussions consomment désormais des crédits"
+      "exhausted": "Messages gratuits épuisés — les discussions consomment désormais des crédits",
+      "largeMessage": "Ce message est volumineux — environ {count} crédits seront facturés"
     },
     "used": "{count} crédits utilisés",
     "usedWithRemaining": "{count} crédits utilisés · {remaining} restants",

@@ -102,7 +102,7 @@ export async function extractFromPaste(params: {
     return { ok: false, reason: "api_error" };
   }
 
-  params.costs.record("generation", response.usage, PASTE_MODEL);
+  params.costs.record("generation", response.usage, response.model || PASTE_MODEL);
 
   const use = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use" && block.name === PASTE_TOOL.name

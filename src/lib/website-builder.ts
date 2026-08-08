@@ -4,6 +4,7 @@ import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { applyExactReplace } from "@/lib/website-patch";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
+import { AI_SAFETY_BOUNDARIES_EN } from "@/lib/ai-conduct";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import type { CostAccumulator, CostStage } from "@/lib/billing/cost-accumulator";
 
@@ -131,7 +132,7 @@ export async function classifyWebsiteDescription(
     tool_choice: { type: "tool", name: "classify_website_request" },
   });
 
-  costs?.record("classification", response.usage, MODEL);
+  costs?.record("classification", response.usage, response.model || MODEL);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
@@ -296,7 +297,7 @@ ${WEB_SEARCH_SECTION}
 ${FUNCTIONAL_ELEMENTS_SECTION}
 ${PLACEHOLDER_DATA_SECTION}
 ${FINAL_SELF_CHECK_SECTION}
-${AI_QUALITY_CHECKLIST_EN}`;
+${AI_SAFETY_BOUNDARIES_EN}${AI_QUALITY_CHECKLIST_EN}`;
 
 // Strips a leading/trailing markdown code fence if the model wrapped its
 // output in one despite the system prompt saying not to — Claude does this
@@ -452,7 +453,7 @@ async function streamHtmlToCompletion(
     }
 
     const response = await stream.finalMessage();
-    costs?.record(round === 0 ? stage : "retry", response.usage, MODEL);
+    costs?.record(round === 0 ? stage : "retry", response.usage, response.model || MODEL);
     if (!onDelta) {
       // EVERY text block, joined — not the first one.
       //
@@ -579,7 +580,7 @@ ${FUNCTIONAL_ELEMENTS_SECTION}
 ${PLACEHOLDER_DATA_SECTION}
 If the change request asks to add a photo, a font, an animation, contact info, or a form, apply the same rules above as if generating fresh — e.g. a newly-requested photo still uses the PLACEHOLDER convention (or a newly-attached reference image's real URL) rather than an invented link.
 ${FINAL_SELF_CHECK_SECTION}
-${AI_QUALITY_CHECKLIST_EN}`;
+${AI_SAFETY_BOUNDARIES_EN}${AI_QUALITY_CHECKLIST_EN}`;
 
 // Same prompt-caching split as buildGenerateSystemBlocks above — the
 // (large, fully static) EDIT_SYSTEM_PROMPT gets its own cache_control
@@ -644,7 +645,8 @@ const APPLY_EDIT_TOOL: Anthropic.Tool = {
 async function tryApplySimpleEdit(
   apiKey: string,
   currentHtml: string,
-  changeRequest: string
+  changeRequest: string,
+  costs?: CostAccumulator
 ): Promise<string | null> {
   const anthropic = new Anthropic({ apiKey });
   const response = await anthropic.messages.create({
@@ -655,6 +657,7 @@ async function tryApplySimpleEdit(
     tools: [APPLY_EDIT_TOOL],
     tool_choice: { type: "tool", name: "apply_website_edit" },
   });
+  costs?.record("classification", response.usage, response.model || MODEL);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"
@@ -700,13 +703,17 @@ export async function editWebsiteHtml(
   currentHtml: string,
   changeRequest: string,
   referenceImages?: ReferenceImage[],
-  formEndpointUrl?: string
+  formEndpointUrl?: string,
+  // Measured usage of every call this edit makes (the cheap patch, or
+  // every round of a full regeneration) — settlement charges from this,
+  // so an un-passed accumulator is an unbilled edit.
+  costs?: CostAccumulator
 ): Promise<EditWebsiteResult> {
   const images = referenceImages?.slice(0, MAX_REFERENCE_IMAGES) ?? [];
 
   if (images.length === 0) {
     try {
-      const patched = await tryApplySimpleEdit(apiKey, currentHtml, changeRequest);
+      const patched = await tryApplySimpleEdit(apiKey, currentHtml, changeRequest, costs);
       if (patched) {
         assertCompleteHtmlResponse(null, patched, "updated");
         return { html: patched, usedCheapPatch: true };
@@ -739,7 +746,10 @@ export async function editWebsiteHtml(
   const { rawText, stopReason } = await streamHtmlToCompletion(
     anthropic,
     buildEditSystemBlocks(formEndpointUrl),
-    content
+    content,
+    undefined,
+    costs,
+    "edit"
   );
   if (!rawText) {
     throw new Error("The model did not return an updated website.");

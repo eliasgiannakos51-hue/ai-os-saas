@@ -146,7 +146,8 @@
       "pricing": "Preços",
       "roadmap": "Roteiro",
       "terms": "Termos de Serviço",
-      "privacy": "Política de Privacidade"
+      "privacy": "Política de Privacidade",
+      "cookies": "Política de Cookies"
     }
   },
   "pricing": {
@@ -460,6 +461,7 @@
       "description": "Baixe tudo que você registrou nos 13 módulos como um único arquivo JSON.",
       "exportAll": "Exportar todos os dados",
       "exporting": "Exportando...",
+      "exportFailed": "A exportação falhou — tente novamente",
       "exportDownloaded": "✓ exportação transferida"
     },
     "dangerZone": {
@@ -534,6 +536,28 @@
       "colCalls": "Ações",
       "colMargin": "Margem média",
       "colCost": "Custo real"
+    },
+    "pushNotifications": {
+      "title": "Notificações push",
+      "perDevice": "Por dispositivo. Ativá-las aqui não afeta os teus outros dispositivos.",
+      "turnOn": "Ativar",
+      "turnOff": "Desativar",
+      "enabled": "As notificações estão ativas neste dispositivo.",
+      "disabled": "As notificações estão desativadas neste dispositivo.",
+      "blocked": "As notificações estão bloqueadas nas definições do teu navegador.",
+      "enableError": "Não foi possível ativar as notificações aqui.",
+      "disableError": "Não foi possível desativar as notificações.",
+      "prefError": "Não foi possível guardar essa preferência.",
+      "unsupported": "Este navegador não suporta notificações push. No iPhone, adiciona primeiro o Ionexa ao ecrã principal (iOS 16.4+).",
+      "notConfigured": "As notificações push não estão configuradas nesta instalação.",
+      "agentResults": "Resultados de agente",
+      "agentResultsHint": "Quando um agente agendado termina uma execução",
+      "missionReminders": "Lembretes de missão",
+      "missionRemindersHint": "Quando um passo de missão agendado é executado",
+      "lowCredits": "Créditos baixos",
+      "lowCreditsHint": "Quando o trabalho para porque o saldo acabou",
+      "collaboration": "Colaboração",
+      "collaborationHint": "Convites de equipa e atividade do espaço partilhado"
     }
   },
   "dashboard": {
@@ -741,7 +765,15 @@
       "reviewNotRunYet": "Todos os passos estão concluídos — execute o Revisor para obter um resumo.",
       "reviewLocked": "O Revisor corre assim que todos os passos estiverem concluídos.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "Esta missão foi atualizada noutro local agora mesmo — a recarregar para mostrar o estado mais recente."
+      "updatedElsewhere": "Esta missão foi atualizada noutro local agora mesmo — a recarregar para mostrar o estado mais recente.",
+      "energy": {
+        "heading": {
+          "light": "Pouca energia — comece aqui",
+          "medium": "Energia estável — bom próximo passo",
+          "deep": "Boa energia — encare este"
+        },
+        "heldBack": "{count} passos mais pesados adiados por agora"
+      }
     },
     "reflection": {
       "title": "Reflexão Semanal",
@@ -1484,7 +1516,8 @@
     },
     "freeChat": {
       "remaining": "Restam {count} mensagens gratuitas este mês",
-      "exhausted": "Mensagens gratuitas esgotadas — as conversas passam a consumir créditos"
+      "exhausted": "Mensagens gratuitas esgotadas — as conversas passam a consumir créditos",
+      "largeMessage": "Esta mensagem é grande — serão cobrados cerca de {count} créditos"
     },
     "used": "Usados {count} créditos",
     "usedWithRemaining": "Usados {count} créditos · {remaining} restantes",

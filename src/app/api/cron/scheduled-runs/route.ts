@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sendPushToUser } from "@/lib/push/web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -140,7 +141,7 @@ export async function GET(request: Request) {
       const stepEstimate = (text: string) =>
         estimateForAction(
           "createAnything",
-          { model: MISSION_STEP_MODEL, inputChars: text.length },
+          { model: MISSION_STEP_MODEL, inputChars: text.length, planSlug: plan?.slug ?? null },
           pricingConfig,
           accountCreditPriceEur
         );
@@ -354,6 +355,16 @@ export async function GET(request: Request) {
           succeeded: true,
           detail: result.outputSummary,
         });
+        // Mission reminder push — a scheduled step running is exactly the
+        // moment the user wanted to be reminded of it. The step text is
+        // the user's own words, truncated so a long step does not overflow
+        // a lock-screen notification.
+        void sendPushToUser(user.id, "mission_reminders", {
+          title: "Mission step done",
+          body: run.step_text.slice(0, 120),
+          url: "/dashboard/mission",
+          tag: `mission-${run.mission_id}`,
+        });
       }
     }
 
@@ -410,7 +421,7 @@ export async function GET(request: Request) {
       const stepEstimate = (text: string) =>
         estimateForAction(
           "createAnything",
-          { model: MISSION_STEP_MODEL, inputChars: text.length },
+          { model: MISSION_STEP_MODEL, inputChars: text.length, planSlug: plan?.slug ?? null },
           pricingConfig,
           accountCreditPriceEur
         );

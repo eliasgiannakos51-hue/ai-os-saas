@@ -81,7 +81,7 @@ export async function classifyLeadMessage(
   });
   // Recorded before the parse below can bail out: the tokens are spent
   // whether or not the tool call came back usable.
-  costs?.record("classification", response.usage, MODEL);
+  costs?.record("classification", response.usage, response.model || MODEL);
 
   const toolUse = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

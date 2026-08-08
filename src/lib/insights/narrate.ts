@@ -214,7 +214,7 @@ export async function narrateFindings(params: {
     return result;
   }
 
-  params.costs.record("generation", response.usage, INSIGHT_MODEL);
+  params.costs.record("generation", response.usage, response.model || INSIGHT_MODEL);
 
   const use = response.content.find(
     (block): block is Anthropic.ToolUseBlock => block.type === "tool_use" && block.name === NARRATE_TOOL.name

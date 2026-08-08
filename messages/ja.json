@@ -146,7 +146,8 @@
       "pricing": "料金",
       "roadmap": "ロードマップ",
       "terms": "利用規約",
-      "privacy": "プライバシーポリシー"
+      "privacy": "プライバシーポリシー",
+      "cookies": "Cookieポリシー"
     }
   },
   "pricing": {
@@ -460,6 +461,7 @@
       "description": "13 のモジュールすべてで記録した内容を、単一の JSON ファイルとしてダウンロードします。",
       "exportAll": "すべてのデータをエクスポート",
       "exporting": "エクスポート中...",
+      "exportFailed": "エクスポートに失敗しました — もう一度お試しください",
       "exportDownloaded": "✓ エクスポートをダウンロードしました"
     },
     "dangerZone": {
@@ -534,6 +536,28 @@
       "colCalls": "操作数",
       "colMargin": "平均マージン",
       "colCost": "実コスト"
+    },
+    "pushNotifications": {
+      "title": "プッシュ通知",
+      "perDevice": "デバイスごとの設定です。ここで有効にしても他のデバイスには影響しません。",
+      "turnOn": "オンにする",
+      "turnOff": "オフにする",
+      "enabled": "このデバイスで通知が有効になりました。",
+      "disabled": "このデバイスで通知が無効になりました。",
+      "blocked": "ブラウザの設定で通知がブロックされています。",
+      "enableError": "ここで通知を有効にできませんでした。",
+      "disableError": "通知を無効にできませんでした。",
+      "prefError": "設定を保存できませんでした。",
+      "unsupported": "このブラウザはプッシュ通知に対応していません。iPhoneではまずIonexaをホーム画面に追加してください（iOS 16.4以降）。",
+      "notConfigured": "このデプロイではプッシュ通知が設定されていません。",
+      "agentResults": "エージェントの結果",
+      "agentResultsHint": "スケジュールされたエージェントの実行が完了したとき",
+      "missionReminders": "ミッションのリマインダー",
+      "missionRemindersHint": "スケジュールされたミッションステップが実行されたとき",
+      "lowCredits": "クレジット残量わずか",
+      "lowCreditsHint": "残高が尽きて処理が停止したとき",
+      "collaboration": "コラボレーション",
+      "collaborationHint": "チーム招待と共有ワークスペースのアクティビティ"
     }
   },
   "dashboard": {
@@ -741,7 +765,15 @@
       "reviewNotRunYet": "すべてのステップが完了しました。レビュアーを実行して要約を取得してください。",
       "reviewLocked": "レビュアーはすべてのステップ完了後に実行されます。",
       "stepMinutes": "約 {count} 分",
-      "updatedElsewhere": "このミッションは別の場所で更新されました — 最新の状態を表示するために再読み込みします。"
+      "updatedElsewhere": "このミッションは別の場所で更新されました — 最新の状態を表示するために再読み込みします。",
+      "energy": {
+        "heading": {
+          "light": "エネルギー低め — ここから始めましょう",
+          "medium": "安定したエネルギー — 次に適したステップ",
+          "deep": "エネルギー十分 — これに取り組みましょう"
+        },
+        "heldBack": "負荷の高い{count}件のステップは今は保留"
+      }
     },
     "reflection": {
       "title": "週次振り返り",
@@ -1484,7 +1516,8 @@
     },
     "freeChat": {
       "remaining": "今月の無料メッセージは残り {count} 件です",
-      "exhausted": "無料メッセージを使い切りました — 以降のチャットはクレジットを消費します"
+      "exhausted": "無料メッセージを使い切りました — 以降のチャットはクレジットを消費します",
+      "largeMessage": "このメッセージは大きいため、約{count}クレジットが課金されます"
     },
     "used": "{count} クレジットを使用",
     "usedWithRemaining": "{count} クレジットを使用 · 残り {remaining}",

@@ -1,4 +1,5 @@
 import "server-only";
+import { AI_SAFETY_BOUNDARIES_EN, AI_CRISIS_EN } from "@/lib/ai-conduct";
 import { deserialisePages, type ExtractedPage } from "@/lib/files/extract";
 import { wrapUntrusted } from "@/lib/agents/agent-config";
 
@@ -150,6 +151,8 @@ export function askSystemPrompt(params: {
     "",
     `Documents supplied: ${params.filenames.join(", ")}`,
     `Reply in the user's language (${params.language}). Be concise and specific.`,
+    AI_SAFETY_BOUNDARIES_EN,
+    AI_CRISIS_EN,
   ]
     .filter(Boolean)
     .join("\n");

@@ -146,7 +146,8 @@
       "pricing": "定价",
       "roadmap": "路线图",
       "terms": "服务条款",
-      "privacy": "隐私政策"
+      "privacy": "隐私政策",
+      "cookies": "Cookie 政策"
     }
   },
   "pricing": {
@@ -460,6 +461,7 @@
       "description": "将你在全部 13 个模块中记录的所有内容下载为单个 JSON 文件。",
       "exportAll": "导出全部数据",
       "exporting": "导出中...",
+      "exportFailed": "导出失败——请重试",
       "exportDownloaded": "✓ 已下载导出文件"
     },
     "dangerZone": {
@@ -534,6 +536,28 @@
       "colCalls": "操作次数",
       "colMargin": "平均利润率",
       "colCost": "真实成本"
+    },
+    "pushNotifications": {
+      "title": "推送通知",
+      "perDevice": "按设备设置。在此开启不会影响你的其他设备。",
+      "turnOn": "开启",
+      "turnOff": "关闭",
+      "enabled": "此设备的通知已开启。",
+      "disabled": "此设备的通知已关闭。",
+      "blocked": "通知已在你的浏览器设置中被阻止。",
+      "enableError": "无法在此开启通知。",
+      "disableError": "无法关闭通知。",
+      "prefError": "无法保存该偏好设置。",
+      "unsupported": "此浏览器不支持推送通知。在 iPhone 上请先将 Ionexa 添加到主屏幕（iOS 16.4+）。",
+      "notConfigured": "此部署未配置推送通知。",
+      "agentResults": "智能体结果",
+      "agentResultsHint": "当计划的智能体完成一次运行时",
+      "missionReminders": "任务提醒",
+      "missionRemindersHint": "当计划的任务步骤运行时",
+      "lowCredits": "积分不足",
+      "lowCreditsHint": "当余额用尽导致工作停止时",
+      "collaboration": "协作",
+      "collaborationHint": "团队邀请与共享工作区动态"
     }
   },
   "dashboard": {
@@ -741,7 +765,15 @@
       "reviewNotRunYet": "所有步骤已完成——运行评审员以获取总结。",
       "reviewLocked": "所有步骤完成后评审员才会运行。",
       "stepMinutes": "约 {count} 分钟",
-      "updatedElsewhere": "该任务刚刚在别处被更新——正在刷新以显示最新状态。"
+      "updatedElsewhere": "该任务刚刚在别处被更新——正在刷新以显示最新状态。",
+      "energy": {
+        "heading": {
+          "light": "精力较低——从这里开始",
+          "medium": "精力平稳——合适的下一步",
+          "deep": "精力充沛——可以处理这个"
+        },
+        "heldBack": "暂时搁置了 {count} 个较重的步骤"
+      }
     },
     "reflection": {
       "title": "每周回顾",
@@ -1484,7 +1516,8 @@
     },
     "freeChat": {
       "remaining": "本月还剩 {count} 条免费消息",
-      "exhausted": "免费消息已用完 — 本月的对话将开始消耗积分"
+      "exhausted": "免费消息已用完 — 本月的对话将开始消耗积分",
+      "largeMessage": "此消息较大——将收取约 {count} 个积分"
     },
     "used": "已使用 {count} 积分",
     "usedWithRemaining": "已使用 {count} 积分 · 剩余 {remaining}",

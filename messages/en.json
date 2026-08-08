@@ -146,7 +146,8 @@
       "pricing": "Pricing",
       "roadmap": "Roadmap",
       "terms": "Terms of Service",
-      "privacy": "Privacy Policy"
+      "privacy": "Privacy Policy",
+      "cookies": "Cookie Policy"
     }
   },
   "pricing": {
@@ -460,6 +461,7 @@
       "description": "Download everything you've logged across all 13 modules as a single JSON file.",
       "exportAll": "Export All Data",
       "exporting": "Exporting...",
+      "exportFailed": "Export failed — please try again",
       "exportDownloaded": "✓ export downloaded"
     },
     "dangerZone": {
@@ -534,6 +536,28 @@
       "colCalls": "Actions",
       "colMargin": "Avg margin",
       "colCost": "Real cost"
+    },
+    "pushNotifications": {
+      "title": "Push notifications",
+      "perDevice": "Per device. Turning these on here doesn't affect your other devices.",
+      "turnOn": "Turn on",
+      "turnOff": "Turn off",
+      "enabled": "Notifications are on for this device.",
+      "disabled": "Notifications are off for this device.",
+      "blocked": "Notifications are blocked in your browser settings.",
+      "enableError": "Could not turn on notifications here.",
+      "disableError": "Could not turn notifications off.",
+      "prefError": "Could not save that preference.",
+      "unsupported": "This browser doesn't support push notifications. On iPhone, add Ionexa to your home screen first (iOS 16.4+).",
+      "notConfigured": "Push notifications are not configured on this deployment.",
+      "agentResults": "Agent results",
+      "agentResultsHint": "When a scheduled agent finishes a run",
+      "missionReminders": "Mission reminders",
+      "missionRemindersHint": "When a scheduled mission step runs",
+      "lowCredits": "Low credits",
+      "lowCreditsHint": "When work stops because the balance ran out",
+      "collaboration": "Collaboration",
+      "collaborationHint": "Team invites and shared-workspace activity"
     }
   },
   "dashboard": {
@@ -741,7 +765,15 @@
       "reviewNotRunYet": "Every step is done — run the Reviewer to get a summary.",
       "reviewLocked": "The Reviewer runs once every step is complete.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "This mission was updated elsewhere just now — refreshing to show the latest state."
+      "updatedElsewhere": "This mission was updated elsewhere just now — refreshing to show the latest state.",
+      "energy": {
+        "heading": {
+          "light": "Low energy — start here",
+          "medium": "Steady energy — good next step",
+          "deep": "Good energy — take this on"
+        },
+        "heldBack": "{count} heavier steps held back for now"
+      }
     },
     "reflection": {
       "title": "Weekly Reflection",
@@ -1484,7 +1516,8 @@
     },
     "freeChat": {
       "remaining": "{count} free messages left this month",
-      "exhausted": "Free messages used up — this month's chats now use credits"
+      "exhausted": "Free messages used up — this month's chats now use credits",
+      "largeMessage": "This message is large — it will be charged about {count} credits"
     },
     "used": "Used {count} credits",
     "usedWithRemaining": "Used {count} credits · {remaining} left",

@@ -28,6 +28,14 @@ function loadMissionAgents() {
     /import \{ AI_QUALITY_CHECKLIST_EL \} from "@\/lib\/ai-quality-checklist";/,
     'const AI_QUALITY_CHECKLIST_EL = "";'
   );
+  // Same stubbing reason as the checklist above: the conduct block is a
+  // constant string, and this test is about the PLANNER's parsing logic.
+  // scripts/tests/ai-conduct.test.mjs is what asserts the real block is
+  // present and correct.
+  src = src.replace(
+    /import \{ AI_CONDUCT_EL \} from "@\/lib\/ai-conduct";/,
+    'const AI_CONDUCT_EL = "";'
+  );
   src = src.replace(/import type \{ CostAccumulator \} from "@\/lib\/billing\/cost-accumulator";/, "");
   const js = ts.transpileModule(src, {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },

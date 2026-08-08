@@ -106,7 +106,7 @@ export async function POST(request: Request) {
     const pricingConfig = resolvePricingConfig();
     const estimate = estimateForAction(
       "weeklyReflection",
-      { model: REFLECTION_MODEL, inputChars: userMessage.length },
+      { model: REFLECTION_MODEL, inputChars: userMessage.length, planSlug: plan?.slug ?? null },
       pricingConfig,
       plan
         ? effectiveCreditPriceEurForAccount(plan, await getPurchasedPackCreditPriceEur(user.id), pricingConfig)

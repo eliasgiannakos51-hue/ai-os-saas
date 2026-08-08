@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { AI_QUALITY_CYCLE_TRANSFORM_EN } from "@/lib/ai-quality-checklist";
+import { AI_SAFETY_COMPACT_EL } from "@/lib/ai-conduct";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -58,7 +59,7 @@ const SYSTEM_PROMPTS: Record<TextAction, string> = {
 const SYSTEM_PROMPTS_WITH_QUALITY_CYCLE: Record<TextAction, string> = Object.fromEntries(
   Object.entries(SYSTEM_PROMPTS).map(([action, prompt]) => [
     action,
-    prompt + AI_QUALITY_CYCLE_TRANSFORM_EN,
+    prompt + AI_QUALITY_CYCLE_TRANSFORM_EN + AI_SAFETY_COMPACT_EL,
   ])
 ) as Record<TextAction, string>;
 
@@ -140,7 +141,7 @@ export async function POST(request: Request) {
     const pricingConfig = resolvePricingConfig();
     const estimate = estimateForAction(
       "textAction",
-      { model: MODEL, inputChars: SYSTEM_PROMPTS_WITH_QUALITY_CYCLE[action].length + text.length },
+      { model: MODEL, inputChars: SYSTEM_PROMPTS_WITH_QUALITY_CYCLE[action].length + text.length, planSlug: plan?.slug ?? null },
       pricingConfig,
       plan
         ? effectiveCreditPriceEurForAccount(plan, await getPurchasedPackCreditPriceEur(user.id), pricingConfig)
@@ -189,7 +190,7 @@ export async function POST(request: Request) {
         messages: [{ role: "user", content: text }],
       });
 
-      costs.record("generation", response.usage, MODEL);
+      costs.record("generation", response.usage, response.model || MODEL);
 
       const block = response.content.find(
         (b): b is Anthropic.TextBlock => b.type === "text"

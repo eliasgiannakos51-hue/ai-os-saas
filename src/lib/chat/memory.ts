@@ -9,8 +9,22 @@ const MEMORY_MODEL = "claude-sonnet-4-6";
 const MEMORY_MAX_TOKENS = 150;
 const DEFAULT_MEMORY_LOAD_LIMIT = 20;
 
+// The NEVER-EXTRACT clause is not a nicety — it closes a real leak.
+//
+// Chat memory is written once and then loaded into the system prompt of
+// every future conversation, indefinitely. Without this clause, a user
+// who says something in a moment of despair gets "the user has suicidal
+// thoughts" distilled into a permanent row, replayed into every unrelated
+// chat months later, visible in Settings > Memory, and carried into their
+// data export. That is a durable record of the most private thing a
+// person could type, created automatically, by a feature they enabled for
+// remembering their job title.
+//
+// The rule is broader than crisis on purpose: health conditions and
+// distress in general are not "permanently useful preferences", and the
+// extractor has no business deciding otherwise.
 const EXTRACTION_SYSTEM_PROMPT =
-  "Εξάγεις σημαντικά, μόνιμα-χρήσιμα γεγονότα ή προτιμήσεις για τον χρήστη από μία ανταλλαγή μηνυμάτων με έναν AI βοηθό. Απάντα με 1-2 σύντομες προτάσεις — μόνο πράγματα που αξίζει να θυμάται ο βοηθός σε ΜΕΛΛΟΝΤΙΚΕΣ, διαφορετικές συνομιλίες (π.χ. όνομα, επάγγελμα, μόνιμες προτιμήσεις/context). Αν δεν υπάρχει τίποτα αξιόλογο, απάντα ΑΚΡΙΒΩΣ: NONE. Μην εξηγείς, μην προσθέτεις τίποτα άλλο εκτός από τις 1-2 προτάσεις ή το NONE.";
+  "Εξάγεις σημαντικά, μόνιμα-χρήσιμα γεγονότα ή προτιμήσεις για τον χρήστη από μία ανταλλαγή μηνυμάτων με έναν AI βοηθό. Απάντα με 1-2 σύντομες προτάσεις — μόνο πράγματα που αξίζει να θυμάται ο βοηθός σε ΜΕΛΛΟΝΤΙΚΕΣ, διαφορετικές συνομιλίες (π.χ. όνομα, επάγγελμα, μόνιμες προτιμήσεις/context). ΠΟΤΕ μην εξάγεις οτιδήποτε αφορά ψυχική δυσφορία, απόγνωση, σκέψεις αυτοτραυματισμού ή αυτοκτονίας, ψυχική ή σωματική υγεία, ή οποιαδήποτε ευαίσθητη προσωπική κατάσταση — σε τέτοια μηνύματα απάντα ΑΚΡΙΒΩΣ: NONE, ό,τι άλλο κι αν περιέχει η ανταλλαγή. Αν δεν υπάρχει τίποτα αξιόλογο, απάντα ΑΚΡΙΒΩΣ: NONE. Μην εξηγείς, μην προσθέτεις τίποτα άλλο εκτός από τις 1-2 προτάσεις ή το NONE.";
 
 // Fires a second, small/fast Claude call after a chat exchange to pull out
 // anything worth remembering across future, unrelated conversations — a
@@ -60,7 +74,7 @@ export async function extractAndStoreMemory({
       ],
     });
 
-    costs?.record("other", result.usage, MEMORY_MODEL);
+    costs?.record("other", result.usage, result.model || MEMORY_MODEL);
 
     const textBlock = result.content.find(
       (block): block is Anthropic.TextBlock => block.type === "text"

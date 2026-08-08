@@ -28,6 +28,7 @@ export function MissionList({
   missions,
   scheduledStepIndicesByMission = {},
   favoritedIds = [],
+  energyLevel = null,
 }: {
   missions: Mission[];
   // Keyed by mission id — see dashboard/mission/page.tsx, passed straight
@@ -37,6 +38,8 @@ export function MissionList({
   /** Mission ids the user has starred — one batched query on the page,
    *  not a fetch per card. */
   favoritedIds?: string[];
+  /** Latest energy check-in (1-5), resolved server-side on the page. */
+  energyLevel?: number | null;
 }) {
   const t = useTranslations("dashboard.mission");
   const tModule = useTranslations("module");
@@ -83,6 +86,7 @@ export function MissionList({
           scheduledStepIndices={scheduledStepIndicesByMission[selectedMission.id] ?? []}
           initialFavorited={favoritedSet.has(selectedMission.id)}
           initialTab={selected?.tab ?? "steps"}
+          energyLevel={energyLevel}
           onClose={() => setSelected(null)}
         />
       )}

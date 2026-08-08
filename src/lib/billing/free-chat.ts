@@ -1,5 +1,6 @@
 import type { PlanSlug } from "@/lib/billing/plans";
 import { PLANS, getPlan } from "@/lib/billing/plans";
+import { CHAT_MODEL } from "@/lib/ai-models";
 import {
   MODEL_PRICING_USD,
   FALLBACK_MODEL_PRICING,
@@ -79,7 +80,6 @@ const SYSTEM_PROMPT_TOKENS_WORST_CASE = 4000;
 // ceiling for one search.
 const WEB_SEARCH_RESULT_TOKENS = 15000;
 
-const CHAT_MODEL = "claude-sonnet-4-6";
 
 // ---------------------------------------------------------------------------
 // Worst-case cost
@@ -129,6 +129,95 @@ export function freeChatWorstCaseCost(
     costUsd,
     costEur: costUsd * config.usdToEurRate,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Per-message cost cap
+// ---------------------------------------------------------------------------
+
+/**
+ * The hard EUR ceiling one FREE message may be estimated to cost.
+ *
+ * The size envelope above bounds cost INDIRECTLY (chars in, tokens out);
+ * this bounds it directly, so free chat stays affordable even if the chat
+ * model is upgraded to a pricier one — a message whose estimate exceeds
+ * the cap simply goes through the normal paid path, with the client told
+ * why (see api/chat's largeMessageNotice). Env-tunable without a deploy.
+ */
+export const DEFAULT_FREE_CHAT_MAX_COST_EUR = 0.02;
+
+let warnedMaxCost = false;
+
+export function freeChatMaxCostEur(env: Record<string, string | undefined> = process.env): number {
+  const raw = env.FREE_CHAT_MAX_COST_EUR;
+  if (raw === undefined || raw.trim() === "") return DEFAULT_FREE_CHAT_MAX_COST_EUR;
+  const parsed = Number(raw);
+  // Above €1 per free message is treated as a typo, like the other
+  // pricing envs: a silent acceptance would quietly turn the free tier
+  // into an unbounded marketing spend.
+  if (!Number.isFinite(parsed) || parsed <= 0 || parsed > 1) {
+    if (!warnedMaxCost) {
+      warnedMaxCost = true;
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[free-chat] FREE_CHAT_MAX_COST_EUR="${raw}" ignored (must be a number in (0, 1]) — using ${DEFAULT_FREE_CHAT_MAX_COST_EUR}.`
+      );
+    }
+    return DEFAULT_FREE_CHAT_MAX_COST_EUR;
+  }
+  return parsed;
+}
+
+/**
+ * Conservative estimate of what THIS message adds to the bill: its own
+ * text, the real system prompt it will be sent with, and a maximum-length
+ * reply — at the chat model's real rates, rounding high (3.5 chars/token,
+ * full output).
+ *
+ * Deliberately the message's MARGINAL cost, not the whole envelope: the
+ * history window is a bounded property of the envelope (historyLimit is
+ * hard-capped at 6 short turns and priced into the economics separately —
+ * see freeChatPerMessageWorstCaseEur), and folding its worst case into
+ * this gate would push even a two-word message over the €0.02 default
+ * cap, silently turning the free tier off.
+ *
+ * api/chat compares this against freeChatMaxCostEur() BEFORE claiming a
+ * free message — over the cap, the message falls through to the paid
+ * path exactly as an over-length one does.
+ */
+export function freeChatMessageEstimatedCostEur(
+  messageChars: number,
+  systemPromptChars: number,
+  config: PricingConfig = resolvePricingConfig(),
+  limits: FreeChatLimits = FREE_CHAT_LIMITS
+): number {
+  const p = pricing(CHAT_MODEL);
+
+  const messageTokens = Math.ceil(Math.max(0, messageChars) / CHARS_PER_TOKEN);
+  const systemTokens = Math.ceil(Math.max(0, systemPromptChars) / CHARS_PER_TOKEN);
+  const inputTokens = systemTokens + messageTokens;
+  const outputTokens = limits.maxOutputTokens;
+
+  const costUsd =
+    (inputTokens / 1_000_000) * p.inputPerMTok + (outputTokens / 1_000_000) * p.outputPerMTok;
+  return costUsd * config.usdToEurRate;
+}
+
+/**
+ * Worst-case cost of the free envelope's HISTORY window alone — what the
+ * cost-cap gate deliberately leaves out, priced here so the economics can
+ * add it back in.
+ */
+export function freeChatHistoryWorstCaseEur(
+  config: PricingConfig = resolvePricingConfig(),
+  limits: FreeChatLimits = FREE_CHAT_LIMITS
+): number {
+  const p = pricing(CHAT_MODEL);
+  const capTokens = Math.ceil(limits.maxMessageChars / CHARS_PER_TOKEN);
+  const userTurns = Math.ceil(limits.historyLimit / 2);
+  const assistantTurns = Math.floor(limits.historyLimit / 2);
+  const historyTokens = userTurns * capTokens + assistantTurns * limits.maxOutputTokens;
+  return (historyTokens / 1_000_000) * p.inputPerMTok * config.usdToEurRate;
 }
 
 /**
@@ -221,22 +310,72 @@ const ENV_KEYS: Record<PlanSlug, string> = {
 };
 
 /**
+ * The share of the plan price the allowance is SIZED to (headroom under
+ * the 25% FREE_CHAT_MAX_COST_SHARE ceiling it must never breach).
+ */
+export const FREE_CHAT_TARGET_SHARE = 0.2;
+
+/**
+ * The worst a single FREE message can cost.
+ *
+ * Two independent ceilings, and the lower one wins:
+ *  - the ENVELOPE's worst case (max message, full history, max reply);
+ *  - the COST-CAP gate plus the history the gate deliberately excludes —
+ *    a granted message's marginal cost is at most the cap, and the only
+ *    cost on top of that is the bounded history window.
+ */
+export function freeChatPerMessageWorstCaseEur(
+  config: PricingConfig = resolvePricingConfig()
+): number {
+  return Math.min(
+    freeChatWorstCaseCost(FREE_CHAT_LIMITS, config).costEur,
+    freeChatMaxCostEur() + freeChatHistoryWorstCaseEur(config)
+  );
+}
+
+/**
+ * The largest allowance a priced plan can carry without its worst case
+ * breaching the sizing target. Null for plans with no fixed price (Free,
+ * Enterprise) — they are bounded by the per-message cap instead.
+ */
+export function maxAllowanceWithinCeiling(
+  planSlug: PlanSlug,
+  config: PricingConfig = resolvePricingConfig()
+): number | null {
+  const plan = getPlan(planSlug);
+  const price = plan?.price;
+  if (typeof price !== "number" || price <= 0) return null;
+  const perMessage = freeChatPerMessageWorstCaseEur(config);
+  if (!(perMessage > 0)) return null;
+  return Math.floor((price * FREE_CHAT_TARGET_SHARE) / perMessage);
+}
+
+/**
  * Free messages per month for a plan.
  *
  * Env override per plan, so the allowance can be tuned in production
  * without a deploy. A malformed or negative value falls back to the
  * default rather than accidentally disabling (or unbounding) the feature.
  * `FREE_CHAT_ENABLED=false` turns the whole feature off.
+ *
+ * Whatever the source, the result is CLAMPED to the 25%-ceiling-derived
+ * maximum for priced plans. That is what makes the ceiling a property of
+ * the code rather than of whoever last edited an env var: raising the
+ * allowance, or the model getting pricier, cannot silently push free chat
+ * past the share of plan revenue it is allowed to burn.
  */
 export function freeChatAllowance(planSlug: PlanSlug): number {
   if (process.env.FREE_CHAT_ENABLED === "false") return 0;
 
+  let configured = DEFAULT_FREE_CHAT_MESSAGES[planSlug] ?? 0;
   const raw = process.env[ENV_KEYS[planSlug]];
   if (raw !== undefined && raw !== "") {
     const parsed = Number(raw);
-    if (Number.isFinite(parsed) && parsed >= 0) return Math.floor(parsed);
+    if (Number.isFinite(parsed) && parsed >= 0) configured = Math.floor(parsed);
   }
-  return DEFAULT_FREE_CHAT_MESSAGES[planSlug] ?? 0;
+
+  const ceilingMax = maxAllowanceWithinCeiling(planSlug);
+  return ceilingMax === null ? configured : Math.min(configured, ceilingMax);
 }
 
 export type PlanFreeChatEconomics = {
@@ -257,7 +396,7 @@ export type PlanFreeChatEconomics = {
 export function freeChatEconomics(
   config: PricingConfig = resolvePricingConfig()
 ): PlanFreeChatEconomics[] {
-  const perMessage = freeChatWorstCaseCost(FREE_CHAT_LIMITS, config).costEur;
+  const perMessage = freeChatPerMessageWorstCaseEur(config);
 
   return PLANS.map((plan) => {
     const freeMessages = freeChatAllowance(plan.slug);

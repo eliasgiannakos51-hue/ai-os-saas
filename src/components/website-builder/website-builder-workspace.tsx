@@ -189,7 +189,7 @@ export function WebsiteBuilderWorkspace({
   const tCommon = useTranslations("common");
   const tModule = useTranslations("module");
   const supabase = createClient();
-  const { refresh: refreshCredits, reportUsage, accountCreditPriceEur } = useCredits();
+  const { refresh: refreshCredits, reportUsage, accountCreditPriceEur, planSlug } = useCredits();
   const { addToast } = useToast();
 
   const [websites, setWebsites] = useState<UserWebsite[]>(initialWebsites);
@@ -880,6 +880,7 @@ export function WebsiteBuilderWorkspace({
       model: WEBSITE_BUILDER_MODEL,
       inputChars: description.trim().length,
       imageCount: referenceImageFiles.length,
+      planSlug,
     },
     DEFAULTS,
     accountCreditPriceEur ?? undefined

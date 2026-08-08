@@ -49,6 +49,43 @@ revenue — 25% at 4× — no matter how a customer uses their allowance.
 Both facts are asserted by brute force in
 `scripts/tests/billing-coverage.test.mjs` (§5, §6).
 
+### Which multiplier applies (lib/billing/margin-policy.ts)
+
+`marginMultiplier` is resolved per settlement, not read straight from the
+global default. Three inputs:
+
+- the general `CREDIT_MARGIN_MULTIPLIER` (default 4);
+- a **per-plan** margin — `CREDIT_MARGIN_<PLAN>`, with built-in defaults
+  FREE 6, STARTER 5, GROWTH 4.5, PROFESSIONAL/ULTIMATE/ENTERPRISE 4;
+- an optional **per-feature** override — `CREDIT_MARGIN_<FEATURE>`
+  (e.g. `CREDIT_MARGIN_DEEP_RESEARCH=8`), with grouped aliases
+  `CREDIT_MARGIN_CHAT`, `CREDIT_MARGIN_WEBSITE_GENERATE`,
+  `CREDIT_MARGIN_DEEP_RESEARCH`, `CREDIT_MARGIN_AGENT_RUN` covering their
+  related feature strings.
+
+**The combination rule: `applied = max(general, plan, feature)`, never
+below 4.** Each axis is a floor; taking anything but the highest floor
+would let one override silently cancel the other's guarantee — the same
+reasoning as `effectiveCreditPriceEur` taking the *minimum* price. Values
+outside 4–10 are ignored with a warning. Every `ai_cost_log` row stores
+the applied multiplier in `margin_multiplier` and records
+`marginSource` (`general` | `plan` | `feature`) plus all three inputs in
+its metadata, so a row explains its own price.
+
+### Pricing the model that actually answered (lib/billing/model-pricing.ts)
+
+`MODEL_PRICING_USD` must contain every model Anthropic can serve this
+app, at list rates, with cache write (1.25×) and read (0.1×) rates. Every
+`costs.record()` call site passes `response.model`, not the constant the
+code requested — so an upgraded or aliased model is priced at what really
+served the call. Usage from a model the table does not know is priced at
+the most expensive known rates AND raises `billing:unknownModelPricing`
+plus the margin alert email: the stored margin is computed from the same
+guessed cost and *always looks healthy*, so the guess itself is the only
+observable failure. This is exactly how a $0.10 chat message once settled
+for 2 credits (0.17×) without a single alert — reproduced and pinned in
+`scripts/tests/pricing-margin-bug.test.mjs`.
+
 ## What a new AI feature must do
 
 1. Create a `CostAccumulator`.
@@ -152,6 +189,18 @@ Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
 Recommended: `USD_TO_EUR_RATE` (0.92), `CREDIT_MARGIN_MULTIPLIER` (4),
 `CREDIT_PRICE_EUR` (0.02), `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`,
 `CRON_SECRET`, `RESEND_API_KEY`.
+
+Margin policy (all optional, range 4–10, invalid values warn and fall
+back): `CREDIT_MARGIN_FREE` (6), `CREDIT_MARGIN_STARTER` (5),
+`CREDIT_MARGIN_GROWTH` (4.5), `CREDIT_MARGIN_PROFESSIONAL` (4),
+`CREDIT_MARGIN_ULTIMATE` (4), `CREDIT_MARGIN_ENTERPRISE` (4), and
+`CREDIT_MARGIN_<FEATURE>` per feature (e.g. `CREDIT_MARGIN_CHAT`,
+`CREDIT_MARGIN_WEBSITE_GENERATE`, `CREDIT_MARGIN_DEEP_RESEARCH`,
+`CREDIT_MARGIN_AGENT_RUN`).
+
+Free chat: `FREE_CHAT_MAX_COST_EUR` (0.02) — the marginal-cost ceiling a
+message must fit under to spend a free-chat grant; larger messages take
+the paid path and the client is told the estimated charge.
 
 The three pricing knobs have defaults, which is why a wrong value is more
 dangerous than a missing one — `USD_TO_EUR_RATE=0.80` charged 45 credits

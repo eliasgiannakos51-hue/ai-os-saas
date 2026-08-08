@@ -26,6 +26,7 @@ import {
   type CreateStudioDetection,
 } from "@/lib/create-studio/plan";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
+import { AI_SAFETY_BOUNDARIES_EN, AI_CRISIS_CLASSIFIER_EN } from "@/lib/ai-conduct";
 import { isAutomationFrequency } from "@/lib/automation-schedule";
 
 export const dynamic = "force-dynamic";
@@ -58,7 +59,7 @@ Rules:
 - Reply in the SAME LANGUAGE the user wrote in.
 - Set "moduleSlug" ONLY when the kind is "moduleEntry", to the single best-matching module slug from the list above. Leave it null otherwise.
 - Set "frequency" ONLY when the kind is "automation", to whichever of daily/weekly/monthly the user described. If they said it repeats but not how often, use "weekly" and say so in "understanding". Leave it null otherwise.
-${AI_QUALITY_CHECKLIST_EN}`;
+${AI_SAFETY_BOUNDARIES_EN}${AI_CRISIS_CLASSIFIER_EN}${AI_QUALITY_CHECKLIST_EN}`;
 }
 
 const DETECT_TOOL: Anthropic.Tool = {
@@ -180,7 +181,7 @@ export async function POST(request: Request) {
 
     const estimate = estimateForAction(
       "createStudioDetect",
-      { model: STUDIO_MODEL, inputChars: message.length },
+      { model: STUDIO_MODEL, inputChars: message.length, planSlug: plan?.slug ?? null },
       pricingConfig,
       accountCreditPriceEur
     );
@@ -228,7 +229,7 @@ export async function POST(request: Request) {
         tool_choice: { type: "tool", name: "detect_intent" },
       });
 
-      costs.record("classification", response.usage, STUDIO_MODEL);
+      costs.record("classification", response.usage, response.model || STUDIO_MODEL);
 
       const toolUse = response.content.find(
         (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

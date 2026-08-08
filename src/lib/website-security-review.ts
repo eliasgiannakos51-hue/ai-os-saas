@@ -97,7 +97,7 @@ export async function reviewWebsiteContentSafety(
     // Recorded before the parse: this review is a real billed call whose
     // cost the user's action incurred whether or not the response came
     // back in a shape we could use.
-    costs?.record("security_review", response.usage, MODEL);
+    costs?.record("security_review", response.usage, response.model || MODEL);
 
     const toolUse = response.content.find(
       (block): block is Anthropic.ToolUseBlock => block.type === "tool_use"

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { PwaProvider } from "@/components/pwa/pwa-provider";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { SidebarProvider } from "@/components/dashboard/sidebar-context";
@@ -85,6 +86,7 @@ export default async function DashboardLayout({
               await getPurchasedPackCreditPriceEur(user.id),
               resolvePricingConfig()
             )}
+            initialPlanSlug={plan.slug}
             isAdmin={isAdmin}
           >
             {/* Same wireframe globe as login/signup/landing, now behind every
@@ -123,6 +125,10 @@ export default async function DashboardLayout({
             <AchievementUnlockBridge unlockedKeys={newlyUnlockedAchievements} />
             <CommandPalette />
           </CreditsProvider>
+          {/* Service worker + add-to-home-screen prompt. Mounted here, not
+              in the root layout, so the offline shell and push are
+              features of the signed-in app only. */}
+          <PwaProvider />
         </CommandPaletteProvider>
       </SidebarProvider>
     </ToastProvider>

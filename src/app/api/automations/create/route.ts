@@ -4,13 +4,17 @@ import { computeNextRunAt, isAutomationFrequency } from "@/lib/automation-schedu
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import {
-  CREDIT_COSTS,
-  deductCredits,
   hasEnoughCredits,
   insufficientCreditsMessage,
   resolveEffectivePlan,
+  getPurchasedPackCreditPriceEur,
 } from "@/lib/billing/credits";
-import { checkNeedsClarification } from "@/lib/clarification";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { estimateForAction } from "@/lib/billing/estimate";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
+import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { checkNeedsClarification, CLARIFICATION_MODEL } from "@/lib/clarification";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logSecurityCheck } from "@/lib/security-check-log";
 import { logApiError } from "@/lib/log-error";
@@ -103,29 +107,68 @@ export async function POST(request: Request) {
           const isAdmin = isAdminEmail(user.email);
           const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
           const clarificationPlan = await resolveEffectivePlan(user);
+          // Reserved and settled on MEASURED usage, like every other AI
+          // call — the old flat CREDIT_COSTS.clarificationCheck (1 credit)
+          // was worth only €0.008 on Ultimate's per-credit rate, which is
+          // ~2x the check's real cost instead of the guaranteed 4x.
+          const pricingConfig = resolvePricingConfig();
+          const accountCreditPriceEur = bypassCredits
+            ? pricingConfig.creditPriceEur
+            : effectiveCreditPriceEurForAccount(
+                clarificationPlan,
+                await getPurchasedPackCreditPriceEur(user.id),
+                pricingConfig
+              );
+          const estimate = estimateForAction(
+            "automationCreate",
+            {
+              model: CLARIFICATION_MODEL,
+              inputChars: description.length,
+              planSlug: clarificationPlan?.slug ?? null,
+            },
+            pricingConfig,
+            accountCreditPriceEur
+          );
           const affordabilityCheck = clarificationPlan
-            ? await hasEnoughCredits(user.id, CREDIT_COSTS.clarificationCheck, clarificationPlan)
+            ? await hasEnoughCredits(user.id, estimate.reserveCredits, clarificationPlan)
             : { ok: true, remaining: 0 };
           if (!affordabilityCheck.ok) {
             return NextResponse.json({
               ok: true,
               created: false,
               rateLimited: true,
-              message: insufficientCreditsMessage(affordabilityCheck.remaining, CREDIT_COSTS.clarificationCheck),
+              message: insufficientCreditsMessage(affordabilityCheck.remaining, estimate.reserveCredits),
             });
           }
+          const costs = new CostAccumulator();
+          let reservationId = "";
+          if (!bypassCredits) {
+            const reservation = await reserveCredits(
+              user.id,
+              estimate.reserveCredits,
+              "clarification_check",
+              { source: "automation_create", estimatedCredits: estimate.estimatedCredits }
+            );
+            // A failed reserve degrades to "check skipped", same as a
+            // failed call below — creating the automation must not break.
+            if (reservation.ok) reservationId = reservation.reservationId;
+          }
           try {
-            void recordAiCallForDailySpend(1);
-            const clarification = await checkNeedsClarification(apiKey, "automation", description);
-            if (clarificationPlan) {
-              await deductCredits(
-                user.id,
-                CREDIT_COSTS.clarificationCheck,
-                "clarification_check",
-                "Automations — clarifying-questions check",
-                clarificationPlan
-              );
-            }
+            void recordAiCallForDailySpend(estimate.estimatedCredits);
+            const clarification = await checkNeedsClarification(apiKey, "automation", description, costs);
+            await settleReservation({
+              userId: user.id,
+              reservationId,
+              feature: "clarification_check",
+              costs,
+              plan: clarificationPlan,
+              bypassCharge: bypassCredits,
+              metadata: {
+                source: "automation_create",
+                estimatedCredits: estimate.estimatedCredits,
+                reservedCredits: bypassCredits ? 0 : estimate.reserveCredits,
+              },
+            });
             if (clarification.needsClarification) {
               return NextResponse.json({
                 ok: true,
@@ -138,7 +181,8 @@ export async function POST(request: Request) {
           } catch (err) {
             // Best-effort: a clarification-check hiccup shouldn't block
             // a real automation from being created — fall through,
-            // uncharged.
+            // uncharged, with the hold given back.
+            await releaseReservation(user.id, reservationId);
             logApiError("/api/automations/create", err, { stage: "clarification_check" });
           }
         }

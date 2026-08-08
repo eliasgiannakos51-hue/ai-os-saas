@@ -146,7 +146,8 @@
       "pricing": "Prezzi",
       "roadmap": "Roadmap",
       "terms": "Termini di servizio",
-      "privacy": "Informativa sulla privacy"
+      "privacy": "Informativa sulla privacy",
+      "cookies": "Informativa sui cookie"
     }
   },
   "pricing": {
@@ -460,6 +461,7 @@
       "description": "Scarica tutto ciò che hai registrato nei 13 moduli come un unico file JSON.",
       "exportAll": "Esporta tutti i dati",
       "exporting": "Esportazione...",
+      "exportFailed": "Esportazione non riuscita — riprova",
       "exportDownloaded": "✓ esportazione scaricata"
     },
     "dangerZone": {
@@ -534,6 +536,28 @@
       "colCalls": "Azioni",
       "colMargin": "Margine medio",
       "colCost": "Costo reale"
+    },
+    "pushNotifications": {
+      "title": "Notifiche push",
+      "perDevice": "Per dispositivo. Attivarle qui non influisce sugli altri dispositivi.",
+      "turnOn": "Attiva",
+      "turnOff": "Disattiva",
+      "enabled": "Le notifiche sono attive su questo dispositivo.",
+      "disabled": "Le notifiche sono disattivate su questo dispositivo.",
+      "blocked": "Le notifiche sono bloccate nelle impostazioni del browser.",
+      "enableError": "Impossibile attivare le notifiche qui.",
+      "disableError": "Impossibile disattivare le notifiche.",
+      "prefError": "Impossibile salvare questa preferenza.",
+      "unsupported": "Questo browser non supporta le notifiche push. Su iPhone, aggiungi prima Ionexa alla schermata Home (iOS 16.4+).",
+      "notConfigured": "Le notifiche push non sono configurate in questo deployment.",
+      "agentResults": "Risultati agente",
+      "agentResultsHint": "Quando un agente pianificato completa un'esecuzione",
+      "missionReminders": "Promemoria missione",
+      "missionRemindersHint": "Quando viene eseguito un passo di missione pianificato",
+      "lowCredits": "Crediti bassi",
+      "lowCreditsHint": "Quando il lavoro si ferma perché il saldo è esaurito",
+      "collaboration": "Collaborazione",
+      "collaborationHint": "Inviti al team e attività dello spazio condiviso"
     }
   },
   "dashboard": {
@@ -741,7 +765,15 @@
       "reviewNotRunYet": "Tutti i passaggi sono completati: esegui il Revisore per un riepilogo.",
       "reviewLocked": "Il Revisore parte quando tutti i passaggi sono completati.",
       "stepMinutes": "~{count} min",
-      "updatedElsewhere": "Questa missione è stata appena aggiornata altrove — aggiornamento per mostrare lo stato più recente."
+      "updatedElsewhere": "Questa missione è stata appena aggiornata altrove — aggiornamento per mostrare lo stato più recente.",
+      "energy": {
+        "heading": {
+          "light": "Poca energia — parti da qui",
+          "medium": "Energia stabile — buon passo successivo",
+          "deep": "Buona energia — affronta questo"
+        },
+        "heldBack": "{count} passi più impegnativi rimandati per ora"
+      }
     },
     "reflection": {
       "title": "Riflessione Settimanale",
@@ -1484,7 +1516,8 @@
     },
     "freeChat": {
       "remaining": "Ti restano {count} messaggi gratuiti questo mese",
-      "exhausted": "Messaggi gratuiti esauriti: le chat ora consumano crediti"
+      "exhausted": "Messaggi gratuiti esauriti: le chat ora consumano crediti",
+      "largeMessage": "Questo messaggio è grande — verranno addebitati circa {count} crediti"
     },
     "used": "Usati {count} crediti",
     "usedWithRemaining": "Usati {count} crediti · {remaining} rimasti",

@@ -146,7 +146,8 @@
       "pricing": "Preise",
       "roadmap": "Roadmap",
       "terms": "Nutzungsbedingungen",
-      "privacy": "Datenschutzerklärung"
+      "privacy": "Datenschutzerklärung",
+      "cookies": "Cookie-Richtlinie"
     }
   },
   "pricing": {
@@ -460,6 +461,7 @@
       "description": "Lade alles, was du in allen 13 Modulen erfasst hast, als einzelne JSON-Datei herunter.",
       "exportAll": "Alle Daten exportieren",
       "exporting": "Wird exportiert...",
+      "exportFailed": "Export fehlgeschlagen — bitte erneut versuchen",
       "exportDownloaded": "✓ Export heruntergeladen"
     },
     "dangerZone": {
@@ -534,6 +536,28 @@
       "colCalls": "Aktionen",
       "colMargin": "Ø Marge",
       "colCost": "Reale Kosten"
+    },
+    "pushNotifications": {
+      "title": "Push-Benachrichtigungen",
+      "perDevice": "Pro Gerät. Das Aktivieren hier betrifft deine anderen Geräte nicht.",
+      "turnOn": "Aktivieren",
+      "turnOff": "Deaktivieren",
+      "enabled": "Benachrichtigungen sind auf diesem Gerät aktiv.",
+      "disabled": "Benachrichtigungen sind auf diesem Gerät deaktiviert.",
+      "blocked": "Benachrichtigungen sind in deinen Browsereinstellungen blockiert.",
+      "enableError": "Benachrichtigungen konnten hier nicht aktiviert werden.",
+      "disableError": "Benachrichtigungen konnten nicht deaktiviert werden.",
+      "prefError": "Diese Einstellung konnte nicht gespeichert werden.",
+      "unsupported": "Dieser Browser unterstützt keine Push-Benachrichtigungen. Füge Ionexa auf dem iPhone zuerst zum Home-Bildschirm hinzu (iOS 16.4+).",
+      "notConfigured": "Push-Benachrichtigungen sind in dieser Installation nicht konfiguriert.",
+      "agentResults": "Agent-Ergebnisse",
+      "agentResultsHint": "Wenn ein geplanter Agent einen Lauf beendet",
+      "missionReminders": "Missions-Erinnerungen",
+      "missionRemindersHint": "Wenn ein geplanter Missionsschritt ausgeführt wird",
+      "lowCredits": "Wenig Credits",
+      "lowCreditsHint": "Wenn die Arbeit stoppt, weil das Guthaben aufgebraucht ist",
+      "collaboration": "Zusammenarbeit",
+      "collaborationHint": "Team-Einladungen und Aktivität im geteilten Workspace"
     }
   },
   "dashboard": {
@@ -741,7 +765,15 @@
       "reviewNotRunYet": "Alle Schritte sind erledigt — starte den Reviewer für eine Zusammenfassung.",
       "reviewLocked": "Der Reviewer läuft, sobald alle Schritte abgeschlossen sind.",
       "stepMinutes": "~{count} Min.",
-      "updatedElsewhere": "Diese Mission wurde soeben anderswo aktualisiert — wird neu geladen, um den aktuellen Stand zu zeigen."
+      "updatedElsewhere": "Diese Mission wurde soeben anderswo aktualisiert — wird neu geladen, um den aktuellen Stand zu zeigen.",
+      "energy": {
+        "heading": {
+          "light": "Wenig Energie — fang hier an",
+          "medium": "Stabile Energie — guter nächster Schritt",
+          "deep": "Gute Energie — nimm das in Angriff"
+        },
+        "heldBack": "{count} anspruchsvollere Schritte vorerst zurückgestellt"
+      }
     },
     "reflection": {
       "title": "Wöchentliche Reflexion",
@@ -1484,7 +1516,8 @@
     },
     "freeChat": {
       "remaining": "Noch {count} kostenlose Nachrichten diesen Monat",
-      "exhausted": "Kostenlose Nachrichten aufgebraucht — Chats verbrauchen jetzt Guthaben"
+      "exhausted": "Kostenlose Nachrichten aufgebraucht — Chats verbrauchen jetzt Guthaben",
+      "largeMessage": "Diese Nachricht ist groß — es werden etwa {count} Credits berechnet"
     },
     "used": "{count} Credits verbraucht",
     "usedWithRemaining": "{count} Credits verbraucht · {remaining} übrig",

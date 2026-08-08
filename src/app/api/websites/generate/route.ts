@@ -292,6 +292,7 @@ export async function POST(request: Request) {
           model: WEBSITE_MODEL,
           inputChars: description.length,
           imageCount: referenceImagePaths.length,
+          planSlug: plan?.slug ?? null,
         },
         pricingConfig,
         effectiveCreditPriceEurForAccount(

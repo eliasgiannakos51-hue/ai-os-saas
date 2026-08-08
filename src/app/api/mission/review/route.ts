@@ -112,13 +112,13 @@ export async function POST(request: Request) {
     const accountCreditPriceEur = bypassCredits
       ? pricingConfig.creditPriceEur
       : effectiveCreditPriceEurForAccount(
-          await resolveEffectivePlan(user),
+          (plan = await resolveEffectivePlan(user)),
           await getPurchasedPackCreditPriceEur(user.id),
           pricingConfig
         );
     const estimate = estimateForAction(
       "missionPlan",
-      { model: MISSION_AGENT_MODEL, inputChars: reviewInputChars },
+      { model: MISSION_AGENT_MODEL, inputChars: reviewInputChars, planSlug: plan?.slug ?? null },
       pricingConfig,
       accountCreditPriceEur
     );

@@ -144,7 +144,6 @@
     "signUp": "Sign Up",
     "footer": {
       "pricing": "Pricing",
-      "roadmap": "Roadmap",
       "terms": "Terms of Service",
       "privacy": "Privacy Policy"
     }
@@ -217,106 +216,6 @@
       "upTo5AiAgents": "Up to 5 AI agents",
       "upTo15AiAgentsTeams": "Up to 15 AI agents & teams",
       "upTo50AiAgents": "Up to 50 AI agents"
-    }
-  },
-  "roadmap": {
-    "title": "Roadmap",
-    "subtitle": "Ionexa AI is being built in phases. Here's what's live today, what's coming next, and where we're headed.",
-    "backToHome": "← Back to Ionexa AI",
-    "sections": {
-      "available": "Available Now",
-      "soon": "Coming Soon",
-      "future": "Future Vision"
-    },
-    "items": {
-      "modules": {
-        "title": "13 Business Modules",
-        "description": "Ideas, Competitors, Research, Finance, Learning, Trading, Decisions, Products, Content, Sales/CRM, Feedback, Analytics, and Automation notes."
-      },
-      "createAnything": {
-        "title": "Create Anything",
-        "description": "Describe anything in plain text and AI files it into the right module automatically."
-      },
-      "chat": {
-        "title": "Ionexa Chat",
-        "description": "A general-purpose AI assistant for any question — not tied to a specific module."
-      },
-      "export": {
-        "title": "Data Export",
-        "description": "CSV export per module, plus a full JSON export of everything you've logged."
-      },
-      "team": {
-        "title": "Team Collaboration",
-        "description": "Invite teammates and give them full access at your plan's tier."
-      },
-      "agentBuilder": {
-        "title": "AI Agent Builder",
-        "description": "Describe a goal and get a working autonomous agent that pursues it."
-      },
-      "websiteBuilder": {
-        "title": "Website Builder",
-        "description": "AI-generated websites from a single prompt."
-      },
-      "automationBuilder": {
-        "title": "Real Automation Builder",
-        "description": "Actual workflow automation that runs — not just logged ideas."
-      },
-      "aiMemory": {
-        "title": "AI Memory",
-        "description": "Cross-project context and recall, so AI remembers what matters."
-      },
-      "mobileApps": {
-        "title": "Mobile & Desktop Apps",
-        "description": "Native apps for iOS, Android, macOS, and Windows."
-      },
-      "imageGeneration": {
-        "title": "AI Image Generation",
-        "description": "Generate images directly inside your workspace."
-      },
-      "videoGeneration": {
-        "title": "AI Video Generation & Editing",
-        "description": "Create and edit video with AI."
-      },
-      "presentations": {
-        "title": "AI Presentations & Documents",
-        "description": "Generate polished decks and documents from your data."
-      },
-      "marketingBuilder": {
-        "title": "AI Marketing Campaign Builder",
-        "description": "Plan and generate full marketing campaigns."
-      },
-      "coding": {
-        "title": "AI Coding Assistant",
-        "description": "Full app generation, not just snippets."
-      },
-      "dataAnalysis": {
-        "title": "AI Data Analysis",
-        "description": "Deep analysis and insight generation across your data."
-      },
-      "teamGenerator": {
-        "title": "AI Team Generator",
-        "description": "Multiple coordinated agents working together on a single goal."
-      },
-      "projectManager": {
-        "title": "AI Project Manager",
-        "description": "Automatic task breakdown and tracking for any project."
-      },
-      "ceoAdvisor": {
-        "title": "AI CEO Advisor",
-        "description": "A business planning consultant, always available."
-      },
-      "marketplace": {
-        "title": "Marketplace",
-        "description": "Buy and sell agents, automations, and templates."
-      },
-      "router": {
-        "title": "Universal AI Router",
-        "description": "Automatic selection across multiple AI providers for the best result."
-      },
-      "sync": {
-        "title": "Cross-Platform Sync",
-        "description": "A unified experience across web, mobile, and desktop."
-      }
     }
   },
   "auth": {

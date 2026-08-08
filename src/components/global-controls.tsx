@@ -5,7 +5,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { LanguageSelector } from "@/components/i18n/language-selector";
 
 // Mounted once, in the root layout, so the language switcher + theme
-// toggle reach every page (landing, pricing, roadmap, auth pages, legal
+// toggle reach every page (landing, pricing, auth pages, legal
 // pages, etc.) without touching each one's own markup. Dashboard routes
 // already get both controls from TopNav (the actual "top navigation bar"
 // the feature was asked for), so this renders nothing there to avoid a

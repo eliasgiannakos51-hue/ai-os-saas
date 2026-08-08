@@ -211,7 +211,14 @@ if (!up || /EADDRINUSE|Failed to start server/.test(serverLog)) {
 }
 console.log(`production server up on :${PORT} (next start, NODE_ENV=production)`);
 
-const PUBLIC_ROUTES = ["/", "/pricing", "/terms", "/privacy", "/login", "/signup", "/roadmap"];
+const PUBLIC_ROUTES = ["/", "/pricing", "/terms", "/privacy", "/login", "/signup"];
+// /roadmap is deliberately NOT here and is asserted GONE below. The static
+// marketing roadmap listed features as "Coming Soon" and "Future Vision"
+// that had already shipped (AI Agent Builder, Website Builder, AI Memory,
+// Automation, Presentations, Marketplace, Data Analysis) — a page that
+// tells a visitor the product is less finished than it is. Removed until
+// there is a real, maintained one to replace it.
+const REMOVED_ROUTES = ["/roadmap"];
 // /onboarding is authenticated but lives OUTSIDE /dashboard on purpose —
 // it has no sidebar, because the one thing it is for is getting real
 // data in and one true sentence back out. Listed here so the smoke test
@@ -329,6 +336,32 @@ for (const route of PUBLIC_ROUTES) {
     JSON.stringify(r.overflow)
   );
 }
+
+// A removed page is only removed if the URL stops answering. Deleting the
+// component while a stale route, a redirect or a cached prerender keeps
+// serving it is the failure this catches — and the whole reason /roadmap
+// was pulled is that it was telling visitors something untrue, so it
+// answering 200 anywhere is the bug, not a cosmetic leftover.
+for (const route of REMOVED_ROUTES) {
+  const page = await anon.newPage();
+  const res = await page.goto(`http://127.0.0.1:${PORT}${route}`, {
+    waitUntil: "domcontentloaded",
+    timeout: 25000,
+  });
+  check(`${route}: 404 (page removed)`, res?.status() ?? 0, 404);
+  await page.close();
+}
+
+// The link has to go too: a footer entry pointing at a 404 is a worse
+// outcome than the misleading page it replaced.
+const home = await anon.newPage();
+await home.goto(`http://127.0.0.1:${PORT}/`, { waitUntil: "networkidle", timeout: 25000 });
+const roadmapLinks = await home.evaluate(() =>
+  [...document.querySelectorAll('a[href*="roadmap"]')].map((a) => a.getAttribute("href"))
+);
+check("/: no link to the removed roadmap page", roadmapLinks, []);
+await home.close();
+
 await anon.close();
 
 console.log("\n== 2. dashboard routes (logged in) ==");

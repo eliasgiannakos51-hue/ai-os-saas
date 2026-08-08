@@ -40,10 +40,30 @@ function GoogleIcon() {
 // "sign up with Google" vs "log in with Google" path to drift apart.
 // New accounts are bootstrapped with the same tier/credits/welcome email
 // a normal signup gets — see app/auth/callback/route.ts.
-export function SocialAuthButtons({ next }: { next?: string }) {
+//
+// `providers` is the list the AUTH SERVER says it will accept, probed
+// server-side in lib/auth/oauth-providers.ts and passed down. When Google
+// is not in it this component renders NOTHING — not a disabled button, not
+// an explanation. A provider that is switched off in the Supabase project
+// answers every attempt with
+//   {"code":400,"error_code":"validation_failed",
+//    "msg":"Unsupported provider: provider is not enabled"}
+// and a control whose only outcome is that error should not be on the
+// page. The divider ("or continue with email") is inside this component
+// for the same reason: with no social buttons above it, "or" is a sentence
+// with nothing before it.
+export function SocialAuthButtons({
+  next,
+  providers,
+}: {
+  next?: string;
+  providers: readonly string[];
+}) {
   const t = useTranslations("auth.social");
   const [loadingProvider, setLoadingProvider] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const googleEnabled = providers.includes("google");
 
   async function handleGoogle() {
     if (loadingProvider) return;
@@ -70,6 +90,8 @@ export function SocialAuthButtons({ next }: { next?: string }) {
       setLoadingProvider(null);
     }
   }
+
+  if (!googleEnabled) return null;
 
   return (
     <div className="mb-5">

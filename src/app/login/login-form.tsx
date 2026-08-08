@@ -11,7 +11,7 @@ import { AppBackground } from "@/components/ui/app-background";
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { Logo } from "@/components/logo";
 
-export function LoginForm() {
+export function LoginForm({ oauthProviders }: { oauthProviders: readonly string[] }) {
   const router = useRouter();
   const t = useTranslations("auth.login");
 
@@ -104,7 +104,7 @@ export function LoginForm() {
         )}
 
         <div className="rounded-2xl border border-border bg-panel p-6 shadow-[0_0_0_1px_rgba(249,115,22,0.05)]">
-          <SocialAuthButtons />
+          <SocialAuthButtons providers={oauthProviders} />
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

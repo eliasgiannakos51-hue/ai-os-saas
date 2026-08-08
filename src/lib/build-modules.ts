@@ -5,9 +5,10 @@ import type { ModuleConfig } from "@/lib/modules";
 // (lib/modules.ts), reusing the same generic list/form/row components, but
 // kept in a separate array on purpose: these are NOT added to
 // CLASSIFIER_MODULES (lib/classifier-modules.ts), so Create Anything's
-// free-text routing is unaffected. Each is purely a tracking/log table for
-// now — no real AI generation happens yet, matching the "Coming Soon" /
-// "Future Vision" framing on the public roadmap page.
+// free-text routing is unaffected. Each is purely a tracking/log table:
+// the row records that the user planned or made the thing, the generation
+// itself lives in its own feature (Website Builder, Create Studio, Agents)
+// rather than here.
 export const BUILD_MODULES: ModuleConfig[] = [
   {
     slug: "websites",

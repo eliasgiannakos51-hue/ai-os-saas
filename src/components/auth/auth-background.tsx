@@ -22,7 +22,7 @@
 // gradient fades to fully transparent at the rim, so even at 0.28 the
 // densest region is far dimmer than body copy). Deliberately the SAME
 // value on every page that renders this (auth pages, landing, pricing,
-// roadmap, every dashboard page via dashboard/layout.tsx) for consistent
+// every dashboard page via dashboard/layout.tsx) for consistent
 // visual intensity across the whole app.
 export function AuthBackground({ opacity = 0.38 }: { opacity?: number }) {
   return (

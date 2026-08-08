@@ -57,7 +57,7 @@ const CAPABILITY_ROWS: { label: string; included: (p: Plan) => boolean }[] = [
 // straight to step 2 with that plan pre-selected — read from
 // window.location instead of useSearchParams() so this page doesn't need a
 // Suspense boundary, same pattern as login-form.tsx's ?mode= handling.
-export function SignupFlow() {
+export function SignupFlow({ oauthProviders }: { oauthProviders: readonly string[] }) {
   const router = useRouter();
   const t = useTranslations("auth.signup");
   const locale = useLocale();
@@ -448,7 +448,7 @@ export function SignupFlow() {
                 handleSubmit. A social signup that picked a paid plan
                 therefore lands on Free and upgrades from Settings > Billing,
                 rather than being silently charged or silently downgraded. */}
-            <SocialAuthButtons />
+            <SocialAuthButtons providers={oauthProviders} />
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>

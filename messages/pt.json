@@ -144,7 +144,6 @@
     "signUp": "Cadastre-se",
     "footer": {
       "pricing": "Preços",
-      "roadmap": "Roteiro",
       "terms": "Termos de Serviço",
       "privacy": "Política de Privacidade"
     }
@@ -217,106 +216,6 @@
       "upTo5AiAgents": "Até 5 agentes de IA",
       "upTo15AiAgentsTeams": "Até 15 agentes de IA e equipas",
       "upTo50AiAgents": "Até 50 agentes de IA"
-    }
-  },
-  "roadmap": {
-    "title": "Roteiro",
-    "subtitle": "O Ionexa AI está sendo construído em fases. Aqui está o que já está disponível, o que vem a seguir e para onde estamos indo.",
-    "backToHome": "← Voltar para Ionexa AI",
-    "sections": {
-      "available": "Disponível agora",
-      "soon": "Em breve",
-      "future": "Visão futura"
-    },
-    "items": {
-      "modules": {
-        "title": "13 módulos de negócio",
-        "description": "Ideias, Concorrentes, Pesquisa, Finanças, Aprendizado, Trading, Decisões, Produtos, Conteúdo, Vendas/CRM, Feedback, Análises e notas de Automação."
-      },
-      "createAnything": {
-        "title": "Criar Qualquer Coisa",
-        "description": "Descreva qualquer coisa em texto livre e a IA arquiva automaticamente no módulo certo."
-      },
-      "chat": {
-        "title": "Ionexa Chat",
-        "description": "Um assistente de IA de propósito geral para qualquer pergunta — não vinculado a um módulo específico."
-      },
-      "export": {
-        "title": "Exportação de dados",
-        "description": "Exportação CSV por módulo, além de uma exportação JSON completa de tudo que você registrou."
-      },
-      "team": {
-        "title": "Colaboração em equipe",
-        "description": "Convide colegas de equipe e dê a eles acesso completo ao nível do seu plano."
-      },
-      "agentBuilder": {
-        "title": "Criador de Agentes IA",
-        "description": "Descreva uma meta e obtenha um agente autônomo funcional que a persegue."
-      },
-      "websiteBuilder": {
-        "title": "Criador de Sites",
-        "description": "Sites gerados por IA a partir de um único prompt."
-      },
-      "automationBuilder": {
-        "title": "Criador de Automação Real",
-        "description": "Automação de fluxo de trabalho real que executa — não apenas ideias registradas."
-      },
-      "aiMemory": {
-        "title": "Memória IA",
-        "description": "Contexto e memória entre projetos, para que a IA lembre do que importa."
-      },
-      "mobileApps": {
-        "title": "Apps móveis e de desktop",
-        "description": "Apps nativos para iOS, Android, macOS e Windows."
-      },
-      "imageGeneration": {
-        "title": "Geração de imagens com IA",
-        "description": "Gere imagens diretamente dentro do seu espaço de trabalho."
-      },
-      "videoGeneration": {
-        "title": "Geração e edição de vídeo com IA",
-        "description": "Crie e edite vídeos com IA."
-      },
-      "presentations": {
-        "title": "Apresentações e documentos com IA",
-        "description": "Gere apresentações e documentos refinados a partir dos seus dados."
-      },
-      "marketingBuilder": {
-        "title": "Criador de campanhas de marketing com IA",
-        "description": "Planeje e gere campanhas de marketing completas."
-      },
-      "coding": {
-        "title": "Assistente de codificação com IA",
-        "description": "Geração de apps completos, não apenas trechos de código."
-      },
-      "dataAnalysis": {
-        "title": "Análise de dados com IA",
-        "description": "Análise profunda e geração de insights em todos os seus dados."
-      },
-      "teamGenerator": {
-        "title": "Gerador de Equipe IA",
-        "description": "Múltiplos agentes coordenados trabalhando juntos em um único objetivo."
-      },
-      "projectManager": {
-        "title": "Gerente de Projetos IA",
-        "description": "Divisão e acompanhamento automático de tarefas para qualquer projeto."
-      },
-      "ceoAdvisor": {
-        "title": "Consultor CEO IA",
-        "description": "Um consultor de planejamento de negócios, sempre disponível."
-      },
-      "marketplace": {
-        "title": "Marketplace",
-        "description": "Compre e venda agentes, automações e modelos."
-      },
-      "router": {
-        "title": "Roteador de IA Universal",
-        "description": "Seleção automática entre vários provedores de IA para o melhor resultado."
-      },
-      "sync": {
-        "title": "Sincronização multiplataforma",
-        "description": "Uma experiência unificada na web, no celular e no desktop."
-      }
     }
   },
   "auth": {

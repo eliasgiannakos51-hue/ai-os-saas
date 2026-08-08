@@ -161,7 +161,6 @@ const LOCALE_ALLOWED = new Set([
   "it:dashboard.overview.quickActions.trading.label",
   "it:dashboard.team.title",
   "it:entityLinks.no",
-  "it:roadmap.items.ceoAdvisor.title",
   "it:sidebar.groups.business",
   "it:sidebar.items.analytics",
   "it:sidebar.items.chat",
@@ -175,17 +174,6 @@ const LOCALE_ALLOWED = new Set([
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
-  "landing.footer.roadmap",
-  "roadmap.title",
-  "roadmap.items.agentBuilder.title",
-  "roadmap.items.websiteBuilder.title",
-  "roadmap.items.marketingBuilder.title",
-  "roadmap.items.teamGenerator.title",
-  "roadmap.items.projectManager.title",
-  "roadmap.items.router.title",
-  "roadmap.items.createAnything.title",
-  "roadmap.items.chat.title",
-  "roadmap.items.marketplace.title",
   "pricing.businessTitle",
   "pricing.rows.websiteBuilder",
   "pricing.rows.mobileSaasBuilder",

@@ -3,7 +3,7 @@ import { NetworkField } from "@/components/ui/network-field";
 
 // The full backdrop stack, in one place: wireframe globe, constellation
 // network on top of it, ambient corner pools over both. Used by every
-// public page (landing, login, signup, pricing, roadmap, legal) so they
+// public page (landing, login, signup, pricing, legal) so they
 // share the exact same backdrop as the dashboard, which composes the
 // same three layers itself in dashboard-background.tsx (that one needs
 // to be a Client Component to read the pathname; this one doesn't).

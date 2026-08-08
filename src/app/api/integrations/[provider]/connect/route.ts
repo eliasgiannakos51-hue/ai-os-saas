@@ -17,6 +17,7 @@ import {
 } from "@/lib/integrations/oauth";
 import { countConnectedIntegrations } from "@/lib/integrations/store";
 import { maxIntegrationsForPlan } from "@/lib/integrations/limits";
+import { hasActiveConsent } from "@/lib/integrations/consent";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,29 @@ export async function GET(request: Request, { params }: { params: { provider: st
       return NextResponse.json(
         { ok: false, error: "That integration is not configured on this deployment." },
         { status: 503 }
+      );
+    }
+
+    // THE CONSENT GATE.
+    //
+    // Before this existed, /connect answered a bare GET: a bookmark, a
+    // shared link, or any page in the app could start the OAuth flow with
+    // the consent panel never rendered. The panel was a design, not a
+    // control. Now the only way to reach a provider's authorize URL is to
+    // have POSTed to .../consent first, which is the one code path that
+    // has actually shown the wording being agreed to — and which writes
+    // the row that proves it.
+    //
+    // Checked here rather than in the panel because this is the boundary
+    // that matters: the redirect. Everything above it is UI.
+    if (!(await hasActiveConsent(user.id, provider.id))) {
+      return NextResponse.json(
+        {
+          ok: false,
+          consentRequired: true,
+          error: "Read what this connection allows, and agree to it, before connecting.",
+        },
+        { status: 403 }
       );
     }
 

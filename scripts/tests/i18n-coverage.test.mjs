@@ -184,7 +184,20 @@ const clientFallbacks = sources.flatMap((f) => [
 // a fabricated one in the right language, so that is the deliberate
 // trade — but it is a degradation, not a translated path, and it is
 // counted here so nobody later mistakes it for one.
-const SERVER_PROSE_BASELINE = 488;
+// 488 -> 501: the integration consent gate added
+// api/integrations/[provider]/consent (POST records the agreement, DELETE
+// withdraws it) and a consentRequired refusal in the connect route. Their
+// not-authenticated, unknown-provider, rate-limit, stale-wording and
+// could-not-record responses are English prose like the 488 before them.
+//
+// Same recorded decision as every increment above: the fix is stable error
+// CODES across the whole API surface with the translation done
+// client-side, which is a refactor of every route rather than something to
+// start inside one feature. Everything the user READS — the consent panel
+// itself, and the "What you've allowed" section in Settings — is fully
+// translated in all ten locales, which for a consent screen is the part
+// that legally has to be.
+const SERVER_PROSE_BASELINE = 501;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

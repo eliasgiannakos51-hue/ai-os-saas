@@ -504,6 +504,22 @@
       "colCalls": "操作数",
       "colMargin": "平均マージン",
       "colCost": "実コスト"
+    },
+    "integrationConsents": {
+      "title": "許可した内容",
+      "description": "このアカウントが同意した外部サービス連携のすべてと、その目的と日時。同意を撤回すると接続を切り、アクセストークンを削除します。",
+      "none": "外部サービスへのアクセスは許可していません。",
+      "statusActive": "有効",
+      "statusWithdrawn": "撤回済み",
+      "grantedAt": "{when} に同意",
+      "withdrawnAt": "{when} に撤回",
+      "supersededAt": "{when} により新しい同意に置き換え",
+      "withdraw": "撤回する",
+      "withdrawing": "撤回しています…",
+      "confirmWithdraw": "{name} への同意を撤回しますか？接続を切り、アクセストークンを削除します。",
+      "withdrawn": "撤回しました。アクセス権も取り消されています。",
+      "withdrawnLocalOnly": "こちらで撤回し、トークンを削除しました。提供元に取り消しを届けられなかったため、先方の設定からも削除しておくと安心です。",
+      "withdrawError": "撤回できませんでした。もう一度お試しください。"
     }
   },
   "dashboard": {
@@ -1152,7 +1168,13 @@
           "sees": "Ionexa アプリを招待した公開チャンネルの最近のメッセージ。非公開チャンネルや DM は見えません。",
           "consent": "AI は招待された公開チャンネルを読めるようになり、エージェントは選んだチャンネルに結果を投稿できます。書き込みができる唯一の連携です。"
         }
-      }
+      },
+      "consentWhatLabel": "AI が読む範囲",
+      "consentWhyLabel": "なぜ必要か",
+      "consentPointRecorded": "同意したこと、その日時、そのときの正確な文面を記録します。設定から確認できます。",
+      "consentRecording": "同意を記録しています…",
+      "consentError": "同意を記録できなかったため、何も接続していません。",
+      "consentStale": "このページは古く、文面が変わりました。再読み込みしてもう一度お読みください。"
     },
     "files": {
       "title": "ファイル",

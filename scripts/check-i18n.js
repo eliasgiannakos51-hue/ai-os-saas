@@ -143,6 +143,9 @@ const LOCALE_ALLOWED = new Set([
   "es:sidebar.items.chat",
   "es:sidebar.items.ideas",
   "es:sidebar.items.videos",
+  // "Active" is the French word, spelled identically — a cognate, not a
+  // skipped translation.
+  "fr:settings.integrationConsents.statusActive",
   "fr:common.notifications",
   "fr:dashboard.documents.backToDocuments",
   "fr:dashboard.documents.deleteLabel",

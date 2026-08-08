@@ -504,6 +504,22 @@
       "colCalls": "Actions",
       "colMargin": "Marge moy.",
       "colCost": "Coût réel"
+    },
+    "integrationConsents": {
+      "title": "Ce que vous avez autorisé",
+      "description": "Chaque connexion tierce acceptée par ce compte, à quoi elle servait et quand. Retirer un accord le déconnecte et supprime le jeton d'accès.",
+      "none": "Vous n'avez autorisé aucun accès tiers.",
+      "statusActive": "Active",
+      "statusWithdrawn": "Retiré",
+      "grantedAt": "Accepté le {when}",
+      "withdrawnAt": "Retiré le {when}",
+      "supersededAt": "Remplacé par un accord plus récent le {when}",
+      "withdraw": "Retirer",
+      "withdrawing": "Retrait en cours…",
+      "confirmWithdraw": "Retirer votre accord pour {name} ? Nous le déconnecterons et supprimerons le jeton d'accès.",
+      "withdrawn": "Retiré, et l'accès a été révoqué.",
+      "withdrawnLocalOnly": "Retiré ici et jeton supprimé. Nous n'avons pas pu joindre le fournisseur pour le révoquer — pensez à le retirer aussi dans ses paramètres.",
+      "withdrawError": "Impossible de retirer cela. Réessayez."
     }
   },
   "dashboard": {
@@ -1152,7 +1168,13 @@
           "sees": "Messages récents dans les canaux publics où vous invitez l'app Ionexa. Elle ne voit ni les canaux privés ni les messages directs.",
           "consent": "L'IA pourra lire les canaux publics où vous l'invitez, et vos agents pourront publier leurs résultats dans un canal de votre choix. C'est la seule intégration capable d'écrire."
         }
-      }
+      },
+      "consentWhatLabel": "Ce que l'IA va lire",
+      "consentWhyLabel": "Pourquoi elle en a besoin",
+      "consentPointRecorded": "Nous enregistrons votre accord, la date et ce texte exact — visible dans les Paramètres.",
+      "consentRecording": "Enregistrement de votre accord…",
+      "consentError": "Votre accord n'a pas pu être enregistré, donc rien n'a été connecté.",
+      "consentStale": "Cette page n'est plus à jour et le texte a changé. Rechargez et relisez-le."
     },
     "files": {
       "title": "Fichiers",

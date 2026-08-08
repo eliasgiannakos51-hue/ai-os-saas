@@ -4,6 +4,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
 import { isProviderId } from "@/lib/integrations/providers";
 import { disconnectIntegration } from "@/lib/integrations/store";
+import { revokeConsent } from "@/lib/integrations/consent";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,12 @@ export async function DELETE(_request: Request, { params }: { params: { provider
     }
 
     const result = await disconnectIntegration(user.id, params.provider);
+    // Disconnecting withdraws the consent too. Leaving it live would mean
+    // the next "Connect" skipped the consent screen entirely — the user
+    // would be sent to Google on the strength of an agreement they made
+    // before they changed their mind, which is the opposite of what
+    // pressing Disconnect means.
+    await revokeConsent(user.id, params.provider);
     if (!result.ok) {
       return NextResponse.json(
         { ok: false, error: "Could not disconnect that integration." },

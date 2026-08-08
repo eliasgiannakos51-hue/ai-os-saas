@@ -504,6 +504,22 @@
       "colCalls": "Azioni",
       "colMargin": "Margine medio",
       "colCost": "Costo reale"
+    },
+    "integrationConsents": {
+      "title": "Cosa hai permesso",
+      "description": "Ogni collegamento a terzi che questo account ha accettato, a cosa serviva e quando. Ritirare un consenso lo scollega ed elimina il token di accesso.",
+      "none": "Non hai permesso l'accesso a nessun servizio esterno.",
+      "statusActive": "Attivo",
+      "statusWithdrawn": "Ritirato",
+      "grantedAt": "Accettato il {when}",
+      "withdrawnAt": "Ritirato il {when}",
+      "supersededAt": "Sostituito da un consenso più recente il {when}",
+      "withdraw": "Ritira",
+      "withdrawing": "Ritiro in corso…",
+      "confirmWithdraw": "Ritirare il consenso per {name}? Scolleghiamo tutto ed eliminiamo il token di accesso.",
+      "withdrawn": "Ritirato, e l'accesso è stato revocato.",
+      "withdrawnLocalOnly": "Ritirato qui e token eliminato. Non siamo riusciti a contattare il fornitore per revocarlo — conviene rimuoverlo anche dalle sue impostazioni.",
+      "withdrawError": "Non è stato possibile ritirarlo. Riprova."
     }
   },
   "dashboard": {
@@ -1152,7 +1168,13 @@
           "sees": "Messaggi recenti nei canali pubblici in cui inviti l'app Ionexa. Non vede canali privati né messaggi diretti.",
           "consent": "L'IA potrà leggere i canali pubblici in cui la inviti, e i tuoi agenti potranno pubblicare i risultati in un canale che scegli. È l'unica integrazione che può scrivere."
         }
-      }
+      },
+      "consentWhatLabel": "Cosa leggerà l'IA",
+      "consentWhyLabel": "Perché le serve",
+      "consentPointRecorded": "Registriamo che hai accettato, quando, e con questo testo esatto — lo vedi nelle Impostazioni.",
+      "consentRecording": "Registrazione del tuo consenso…",
+      "consentError": "Il tuo consenso non è stato registrato, quindi non è stato collegato nulla.",
+      "consentStale": "Questa pagina non è aggiornata e il testo è cambiato. Ricarica e rileggilo."
     },
     "files": {
       "title": "File",

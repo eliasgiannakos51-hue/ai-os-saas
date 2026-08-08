@@ -10,7 +10,12 @@ import { EmptyState } from "@/components/empty-state";
 import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
-import { PROVIDERS, type IntegrationSummary, type ProviderId } from "@/lib/integrations/providers";
+import {
+  PROVIDERS,
+  CONSENT_VERSION,
+  type IntegrationSummary,
+  type ProviderId,
+} from "@/lib/integrations/providers";
 
 /**
  * The integrations surface.
@@ -235,9 +240,16 @@ export function IntegrationsList({
  * questions about it" gets said in our words, before they approve
  * anything.
  *
- * It navigates with a plain link rather than fetch(): the connect endpoint
- * answers with a 302 to the provider, and a redirect is a navigation, not
- * something to unwrap in JavaScript.
+ * IT USED TO BE A PLAIN LINK STRAIGHT TO /connect, and that was the defect.
+ * A link is not a gate: the same GET could be made from a bookmark, a
+ * shared URL or another page in the app, and the OAuth flow would start
+ * with this panel never rendered. Nothing was written down either, so
+ * "when did I agree to this, and to what" had no answer anywhere.
+ *
+ * Now: agreeing POSTs to .../consent, which records the wording version,
+ * the scopes and the purpose IN THE LANGUAGE THE USER READ IT, and only
+ * then does the browser navigate to /connect — which refuses to redirect
+ * without that row.
  */
 function ConsentPanel({
   providerId,
@@ -247,7 +259,38 @@ function ConsentPanel({
   onCancel: () => void;
 }) {
   const t = useTranslations("dashboard.integrations");
+  const { addToast } = useToast();
   const provider = PROVIDERS.find((p) => p.id === providerId)!;
+  const [recording, setRecording] = useState(false);
+
+  // Exactly the sentence rendered below, so the stored record and the
+  // screen cannot say different things.
+  const purpose = t(`providers.${provider.key}.consent`);
+
+  async function agree() {
+    if (recording) return;
+    setRecording(true);
+    try {
+      const response = await fetch(`/api/integrations/${provider.id}/consent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ purpose, version: CONSENT_VERSION }),
+      });
+      const data = await response.json();
+      if (!data.ok) {
+        addToast(data.staleConsent ? t("consentStale") : (data.error ?? t("consentError")), "error");
+        setRecording(false);
+        return;
+      }
+      // A full navigation, not router.push: the connect endpoint answers
+      // with a 302 to the provider's own domain, which is not something
+      // the client router can follow.
+      window.location.href = data.connectUrl;
+    } catch (err) {
+      addToast(getErrorMessage(err, t("consentError")), "error");
+      setRecording(false);
+    }
+  }
 
   return (
     <section className="space-y-3 rounded-2xl border border-orange-500/30 bg-orange-500/[0.04] p-4">
@@ -256,9 +299,24 @@ function ConsentPanel({
         {t("consentTitle", { name: provider.name })}
       </h2>
 
-      <p className="text-sm leading-relaxed text-foreground">
-        {t(`providers.${provider.key}.consent`)}
-      </p>
+      {/* WHAT the AI will read. */}
+      <div>
+        <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-muted">
+          {t("consentWhatLabel")}
+        </p>
+        <p className="text-sm leading-relaxed text-foreground">
+          {t(`providers.${provider.key}.sees`)}
+        </p>
+      </div>
+
+      {/* WHY. Data without a purpose is not informed consent — and this
+          exact sentence is what gets stored on the record. */}
+      <div>
+        <p className="mb-1 text-[11px] font-medium uppercase tracking-wide text-muted">
+          {t("consentWhyLabel")}
+        </p>
+        <p className="text-sm leading-relaxed text-foreground">{purpose}</p>
+      </div>
 
       <div>
         <p className="mb-1 text-[11px] font-medium text-muted">{t("scopesLabel")}</p>
@@ -277,20 +335,24 @@ function ConsentPanel({
         <li>• {t("consentPointEncrypted")}</li>
         <li>• {t("consentPointAudit")}</li>
         <li>• {t("consentPointRevoke")}</li>
+        <li>• {t("consentPointRecorded")}</li>
       </ul>
 
       <div className="flex flex-wrap gap-2">
-        <a
-          href={`/api/integrations/${provider.id}/connect`}
-          className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
+        <button
+          type="button"
+          onClick={() => void agree()}
+          disabled={recording}
+          className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
-          {t("consentApprove", { name: provider.name })}
-        </a>
+          {recording ? t("consentRecording") : t("consentApprove", { name: provider.name })}
+        </button>
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex min-h-[36px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+          disabled={recording}
+          className="inline-flex min-h-[36px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-60"
         >
           {t("cancel")}
         </button>

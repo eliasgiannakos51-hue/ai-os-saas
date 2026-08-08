@@ -504,6 +504,22 @@
       "colCalls": "操作次数",
       "colMargin": "平均利润率",
       "colCost": "真实成本"
+    },
+    "integrationConsents": {
+      "title": "你已授权的内容",
+      "description": "此账号同意过的每一项第三方连接、用途和时间。撤回同意会断开连接并删除访问令牌。",
+      "none": "你还没有授权任何第三方访问。",
+      "statusActive": "生效中",
+      "statusWithdrawn": "已撤回",
+      "grantedAt": "同意于 {when}",
+      "withdrawnAt": "撤回于 {when}",
+      "supersededAt": "已于 {when} 被更新的同意取代",
+      "withdraw": "撤回",
+      "withdrawing": "正在撤回…",
+      "confirmWithdraw": "撤回对 {name} 的同意？我们会断开连接并删除访问令牌。",
+      "withdrawn": "已撤回，访问权限也已收回。",
+      "withdrawnLocalOnly": "已在此撤回并删除令牌。我们无法联系到该服务商执行收回——建议你也去它的设置中移除。",
+      "withdrawError": "撤回失败，请重试。"
     }
   },
   "dashboard": {
@@ -1152,7 +1168,13 @@
           "sees": "你邀请 Ionexa 应用加入的公开频道中的近期消息。它看不到私密频道和私信。",
           "consent": "AI 将能读取你邀请它加入的公开频道，你的智能体也能把结果发到你选择的频道。这是唯一可以写入的集成。"
         }
-      }
+      },
+      "consentWhatLabel": "AI 将读取的内容",
+      "consentWhyLabel": "为什么需要",
+      "consentPointRecorded": "我们会记录你同意了什么、在什么时间、以及当时的确切措辞——可在“设置”中查看。",
+      "consentRecording": "正在记录你的同意…",
+      "consentError": "无法记录你的同意，因此没有建立任何连接。",
+      "consentStale": "此页面已过期，措辞已更改。请刷新后重新阅读。"
     },
     "files": {
       "title": "文件",

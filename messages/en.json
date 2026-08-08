@@ -504,6 +504,22 @@
       "colCalls": "Actions",
       "colMargin": "Avg margin",
       "colCost": "Real cost"
+    },
+    "integrationConsents": {
+      "title": "What you've allowed",
+      "description": "Every third-party connection this account has agreed to, what it was for, and when. Withdrawing an agreement disconnects it and deletes the access token.",
+      "none": "You haven't allowed any third-party access.",
+      "statusActive": "Active",
+      "statusWithdrawn": "Withdrawn",
+      "grantedAt": "Agreed {when}",
+      "withdrawnAt": "Withdrawn {when}",
+      "supersededAt": "Replaced by a newer agreement {when}",
+      "withdraw": "Withdraw",
+      "withdrawing": "Withdrawing…",
+      "confirmWithdraw": "Withdraw your agreement for {name}? We'll disconnect it and delete the access token.",
+      "withdrawn": "Withdrawn, and access was revoked.",
+      "withdrawnLocalOnly": "Withdrawn here and the token deleted. We couldn't reach the provider to revoke it — you may want to remove it in their settings too.",
+      "withdrawError": "Could not withdraw that. Please try again."
     }
   },
   "dashboard": {
@@ -1152,7 +1168,13 @@
           "sees": "Recent messages in the public channels you invite the Ionexa app into. It can't see private channels or direct messages.",
           "consent": "The AI will be able to read the public channels you invite it into, and your agents will be able to post their results to a channel you choose. This is the only integration that can write anything."
         }
-      }
+      },
+      "consentWhatLabel": "What the AI will read",
+      "consentWhyLabel": "Why it needs it",
+      "consentPointRecorded": "We record that you agreed, when, and to this exact wording — you can see it in Settings.",
+      "consentRecording": "Recording your agreement…",
+      "consentError": "Your agreement could not be recorded, so nothing was connected.",
+      "consentStale": "This page is out of date and the wording has changed. Reload and read it again."
     },
     "files": {
       "title": "Files",

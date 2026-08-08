@@ -9,6 +9,24 @@
 // NOTHING SECRET IS IN THIS FILE. Client ids and secrets are read from the
 // environment inside lib/integrations/oauth.ts, which is `server-only`.
 
+/**
+ * The version of the consent wording.
+ *
+ * BUMP THIS whenever the consent screen's text, the purpose statement, or
+ * a provider's scopes below change. Every recorded consent stops counting
+ * as live at that moment, so the next connect shows the new screen and
+ * writes a new agreement — reusing an old "yes" for new wording is how a
+ * consent log becomes decoration.
+ *
+ * It lives HERE, in the client-safe registry, rather than in consent.ts
+ * (which is `server-only`), because both halves need it: the panel sends
+ * the version it rendered, and the server refuses to record a consent for
+ * any other one. That mismatch check is the only thing standing between a
+ * tab left open across a deploy and a record that says someone agreed to
+ * text they never saw.
+ */
+export const CONSENT_VERSION = "2026-08-08.1";
+
 export type ProviderId = "gmail" | "google_drive" | "slack";
 
 export type IntegrationAccess = "read" | "read_write";

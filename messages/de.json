@@ -504,6 +504,22 @@
       "colCalls": "Aktionen",
       "colMargin": "Ø Marge",
       "colCost": "Reale Kosten"
+    },
+    "integrationConsents": {
+      "title": "Was du erlaubt hast",
+      "description": "Jede Drittanbieter-Verbindung, der dieses Konto zugestimmt hat, wofür sie war und wann. Ein Widerruf trennt sie und löscht das Zugriffstoken.",
+      "none": "Du hast keinem Drittanbieter Zugriff erlaubt.",
+      "statusActive": "Aktiv",
+      "statusWithdrawn": "Widerrufen",
+      "grantedAt": "Zugestimmt am {when}",
+      "withdrawnAt": "Widerrufen am {when}",
+      "supersededAt": "Ersetzt durch eine neuere Zustimmung am {when}",
+      "withdraw": "Widerrufen",
+      "withdrawing": "Wird widerrufen …",
+      "confirmWithdraw": "Zustimmung für {name} widerrufen? Wir trennen die Verbindung und löschen das Zugriffstoken.",
+      "withdrawn": "Widerrufen, und der Zugriff wurde entzogen.",
+      "withdrawnLocalOnly": "Hier widerrufen und das Token gelöscht. Wir konnten den Anbieter nicht erreichen — entferne es am besten auch in dessen Einstellungen.",
+      "withdrawError": "Konnte nicht widerrufen werden. Bitte erneut versuchen."
     }
   },
   "dashboard": {
@@ -1152,7 +1168,13 @@
           "sees": "Aktuelle Nachrichten in den öffentlichen Kanälen, in die Sie die Ionexa-App einladen. Private Kanäle und Direktnachrichten sieht sie nicht.",
           "consent": "Die KI kann die öffentlichen Kanäle lesen, in die Sie sie einladen, und Ihre Agenten können ihre Ergebnisse in einem Kanal Ihrer Wahl posten. Dies ist die einzige Integration, die schreiben kann."
         }
-      }
+      },
+      "consentWhatLabel": "Was die KI lesen wird",
+      "consentWhyLabel": "Warum sie es braucht",
+      "consentPointRecorded": "Wir halten fest, dass du zugestimmt hast, wann, und zu genau diesem Text — sichtbar in den Einstellungen.",
+      "consentRecording": "Zustimmung wird festgehalten …",
+      "consentError": "Deine Zustimmung konnte nicht festgehalten werden, es wurde nichts verbunden.",
+      "consentStale": "Diese Seite ist veraltet und der Text hat sich geändert. Neu laden und noch einmal lesen."
     },
     "files": {
       "title": "Dateien",

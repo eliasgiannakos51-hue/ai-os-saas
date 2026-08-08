@@ -504,6 +504,22 @@
       "colCalls": "Acciones",
       "colMargin": "Margen medio",
       "colCost": "Coste real"
+    },
+    "integrationConsents": {
+      "title": "Lo que has permitido",
+      "description": "Cada conexión con terceros que esta cuenta ha aceptado, para qué era y cuándo. Retirar una aceptación la desconecta y borra el token de acceso.",
+      "none": "No has permitido acceso a ningún tercero.",
+      "statusActive": "Activa",
+      "statusWithdrawn": "Retirada",
+      "grantedAt": "Aceptado el {when}",
+      "withdrawnAt": "Retirado el {when}",
+      "supersededAt": "Sustituido por una aceptación más reciente el {when}",
+      "withdraw": "Retirar",
+      "withdrawing": "Retirando…",
+      "confirmWithdraw": "¿Retirar tu aceptación para {name}? Lo desconectaremos y borraremos el token de acceso.",
+      "withdrawn": "Retirada, y el acceso fue revocado.",
+      "withdrawnLocalOnly": "Retirada aquí y token borrado. No pudimos contactar con el proveedor para revocarlo — quizá quieras quitarlo también en sus ajustes.",
+      "withdrawError": "No se pudo retirar. Inténtalo de nuevo."
     }
   },
   "dashboard": {
@@ -1152,7 +1168,13 @@
           "sees": "Mensajes recientes en los canales públicos a los que invites la app de Ionexa. No ve canales privados ni mensajes directos.",
           "consent": "La IA podrá leer los canales públicos a los que la invites, y tus agentes podrán publicar sus resultados en el canal que elijas. Es la única integración que puede escribir algo."
         }
-      }
+      },
+      "consentWhatLabel": "Qué leerá la IA",
+      "consentWhyLabel": "Por qué lo necesita",
+      "consentPointRecorded": "Registramos que aceptaste, cuándo y con este texto exacto — puedes verlo en Ajustes.",
+      "consentRecording": "Registrando tu aceptación…",
+      "consentError": "No se pudo registrar tu aceptación, así que no se conectó nada.",
+      "consentStale": "Esta página está desactualizada y el texto ha cambiado. Recárgala y léelo de nuevo."
     },
     "files": {
       "title": "Archivos",

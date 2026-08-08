@@ -504,6 +504,22 @@
       "colCalls": "Ações",
       "colMargin": "Margem média",
       "colCost": "Custo real"
+    },
+    "integrationConsents": {
+      "title": "O que autorizaste",
+      "description": "Cada ligação a terceiros que esta conta aceitou, para que servia e quando. Retirar um consentimento desliga-o e apaga o token de acesso.",
+      "none": "Não autorizaste acesso a nenhum serviço externo.",
+      "statusActive": "Ativo",
+      "statusWithdrawn": "Retirado",
+      "grantedAt": "Aceite em {when}",
+      "withdrawnAt": "Retirado em {when}",
+      "supersededAt": "Substituído por um consentimento mais recente em {when}",
+      "withdraw": "Retirar",
+      "withdrawing": "A retirar…",
+      "confirmWithdraw": "Retirar o teu consentimento para {name}? Vamos desligar e apagar o token de acesso.",
+      "withdrawn": "Retirado, e o acesso foi revogado.",
+      "withdrawnLocalOnly": "Retirado aqui e token apagado. Não conseguimos contactar o fornecedor para revogar — talvez queiras removê-lo também nas definições dele.",
+      "withdrawError": "Não foi possível retirar. Tenta novamente."
     }
   },
   "dashboard": {
@@ -1152,7 +1168,13 @@
           "sees": "Mensagens recentes nos canais públicos para onde convidar a app Ionexa. Não vê canais privados nem mensagens diretas.",
           "consent": "A IA poderá ler os canais públicos para onde a convidar, e os seus agentes poderão publicar os resultados num canal à sua escolha. É a única integração que pode escrever."
         }
-      }
+      },
+      "consentWhatLabel": "O que a IA vai ler",
+      "consentWhyLabel": "Porque precisa disso",
+      "consentPointRecorded": "Registamos que aceitaste, quando, e com este texto exato — podes vê-lo nas Definições.",
+      "consentRecording": "A registar o teu consentimento…",
+      "consentError": "O teu consentimento não foi registado, por isso nada foi ligado.",
+      "consentStale": "Esta página está desatualizada e o texto mudou. Recarrega e lê outra vez."
     },
     "files": {
       "title": "Ficheiros",

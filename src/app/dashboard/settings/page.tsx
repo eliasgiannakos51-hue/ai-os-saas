@@ -20,7 +20,9 @@ import { MarginReport } from "@/components/settings/margin-report";
 import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
 import { EmailNotificationSettings } from "@/components/settings/email-notification-settings";
 import { AchievementsSection } from "@/components/settings/achievements-section";
+import { IntegrationConsents } from "@/components/settings/integration-consents";
 import { loadUnlockedAchievements } from "@/lib/achievements";
+import { listConsents } from "@/lib/integrations/consent";
 import { isAdminEmail } from "@/lib/admin";
 import { isBetaTester, getBetaDaysRemaining } from "@/lib/beta";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
@@ -122,6 +124,14 @@ export default async function SettingsPage() {
     .select("id, user_agent, ip_address, last_seen")
     .eq("user_id", user.id)
     .order("last_seen", { ascending: false });
+
+  // Read through the service-role client (lib/integrations/consent.ts)
+  // rather than the request-scoped one, for the same reason nothing else
+  // touches integration_consents from the browser: the table has a select
+  // policy but no insert/update/delete policy at all, so every write goes
+  // through one server route. Reading it the same way keeps that boundary
+  // in one file.
+  const integrationConsents = await listConsents(user.id);
 
   // AI Usage — credits spent lifetime (soft-capped at 5000 rows; a simple
   // sum, not a running ledger balance, good enough for a usage summary)
@@ -230,6 +240,14 @@ export default async function SettingsPage() {
         </div>
 
         <LoginActivity devices={(knownDevices as KnownDevice[] | null) ?? []} />
+
+        {/* Every third-party access this account has ever agreed to, and
+            the button that takes it back. It lives in Settings rather than
+            on /dashboard/integrations because "what have I agreed to" is a
+            question people ask here, next to the password, the devices and
+            the delete-account button — not on the page they only open when
+            they want to ADD something. */}
+        <IntegrationConsents consents={integrationConsents} />
 
         <EmailNotificationSettings
           userId={user.id}

@@ -28,6 +28,8 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { AppBackground } from "@/components/ui/app-background";
+import { createClient } from "@/lib/supabase/server";
+import { CommunityRoadmap } from "@/components/roadmap/community-roadmap";
 
 export const metadata: Metadata = {
   title: "Roadmap",
@@ -110,6 +112,12 @@ const SECTIONS: RoadmapSection[] = [
 
 export default async function RoadmapPage() {
   const t = await getTranslations("roadmap");
+  // Only to decide whether the community section shows vote/submit
+  // controls or sign-in links — the list itself is public either way.
+  const supabase = createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   return (
     <main className="relative min-h-screen px-4 py-16 text-foreground sm:px-6">
@@ -170,6 +178,11 @@ export default async function RoadmapPage() {
             );
           })}
         </div>
+
+        {/* What the community asked for — voted, statused, and public
+            (V3 Task 13). Below the planned sections on purpose: what we
+            COMMITTED to comes before what is being weighed. */}
+        <CommunityRoadmap isAuthed={Boolean(user)} />
 
         <div className="mt-16 text-center">
           <Link href="/" className="text-xs text-orange-400 underline underline-offset-2">

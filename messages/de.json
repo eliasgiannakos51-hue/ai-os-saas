@@ -566,6 +566,14 @@
         "agent_run_result": {
           "label": "Agenten-Ergebnisse",
           "description": "Wenn einer Ihrer Agenten einen geplanten Lauf beendet."
+        },
+        "lifecycle": {
+          "label": "Einsteiger-Tipps",
+          "description": "Wenige E-Mails im ersten Monat, basierend auf dem, was du wirklich nutzt. Nie mehr als eine pro Tag."
+        },
+        "feature_request_shipped": {
+          "label": "Updates zu Vorschlägen",
+          "description": "Eine E-Mail, wenn etwas erscheint, das du vorgeschlagen oder gewählt hast."
         }
       }
     },
@@ -1908,7 +1916,8 @@
         "title": "Veröffentliche eine Website",
         "body": "Beschreibe eine Website und stelle sie live. Du bekommst einen echten Link zum Teilen."
       }
-    }
+    },
+    "percentReady": "Du bist zu {percent}% eingerichtet"
   },
   "upgradeSuggestion": {
     "evidence": "Diesen Monat hast du {used} von {cap} {resource} genutzt.",
@@ -1959,6 +1968,60 @@
       "left": "{detail} hat das Projekt verlassen",
       "step_completed": "Teilschritt erledigt: {detail}",
       "step_reopened": "Teilschritt wieder geöffnet: {detail}"
+    }
+  },
+  "changelog": {
+    "bellLabel": "Neuigkeiten",
+    "unseenBadge": "{count} neue Updates",
+    "whatsNew": "Neuigkeiten",
+    "empty": "Gerade nichts Neues.",
+    "viewAll": "Ganzes Changelog ansehen",
+    "newFeature": "Neue Funktion",
+    "dismiss": "Schließen",
+    "gotIt": "Verstanden",
+    "improved": "Verbessert:",
+    "andMore": "+{count} weitere",
+    "pageTitle": "Changelog",
+    "pageSubtitle": "Jede veröffentlichte Änderung, die neueste zuerst.",
+    "backHome": "Zurück zur Startseite",
+    "types": {
+      "feature": "Neue Funktion",
+      "improvement": "Verbesserung",
+      "fix": "Korrektur"
+    }
+  },
+  "help": {
+    "title": "Hilfe-Center",
+    "subtitle": "Wie Ionexa funktioniert — Anleitungen, Credits, Abrechnung und Fehlerbehebung.",
+    "backHome": "Zurück zur Startseite",
+    "backToHelp": "Alle Artikel",
+    "searchPlaceholder": "Artikel durchsuchen...",
+    "noResults": "Kein Artikel passt dazu.",
+    "categories": {
+      "getting-started": "Erste Schritte",
+      "modules": "Funktionen",
+      "credits-billing": "Credits & Abrechnung",
+      "troubleshooting": "Fehlerbehebung"
+    }
+  },
+  "communityRoadmap": {
+    "title": "Von der Community gewünscht",
+    "intro": "Wünsch dir, was fehlt, und stimme für das, was zählt — Status werden aktualisiert, und du wirst benachrichtigt, wenn etwas erscheint, wofür du gestimmt hast.",
+    "requestButton": "Funktion vorschlagen",
+    "signInToRequest": "Anmelden, um eine Funktion vorzuschlagen",
+    "signInToVote": "Anmelden, um abzustimmen",
+    "titlePlaceholder": "Was sollte Ionexa können? (kurzer Titel)",
+    "descriptionPlaceholder": "Welches Problem würde es lösen? (optional)",
+    "submit": "Vorschlag senden",
+    "submitError": "Konnte nicht gesendet werden.",
+    "loading": "Vorschläge werden geladen...",
+    "empty": "Noch nichts vorgeschlagen — sei die/der Erste.",
+    "voteLabel": "Für {title} stimmen",
+    "statuses": {
+      "under_review": "In Prüfung",
+      "planned": "Geplant",
+      "in_progress": "In Arbeit",
+      "shipped": "Veröffentlicht"
     }
   }
 }

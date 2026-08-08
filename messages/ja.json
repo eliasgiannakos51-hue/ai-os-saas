@@ -566,6 +566,14 @@
         "agent_run_result": {
           "label": "エージェントの結果",
           "description": "エージェントが予定された実行を終えたとき。"
+        },
+        "lifecycle": {
+          "label": "スタートのヒント",
+          "description": "最初の1か月に数通だけ、実際の利用状況に基づいて。1日1通を超えることはありません。"
+        },
+        "feature_request_shipped": {
+          "label": "リクエストの更新",
+          "description": "リクエストまたは投票した機能がリリースされたときに1通お知らせします。"
         }
       }
     },
@@ -1908,7 +1916,8 @@
         "title": "ウェブサイトを公開する",
         "body": "サイトの内容を説明して公開しましょう。共有できる本物のリンクが手に入ります。"
       }
-    }
+    },
+    "percentReady": "セットアップは {percent}% 完了"
   },
   "upgradeSuggestion": {
     "evidence": "今月は{resource}を {cap} 件中 {used} 件使いました。",
@@ -1959,6 +1968,60 @@
       "left": "{detail} がプロジェクトを離れました",
       "step_completed": "サブステップを完了: {detail}",
       "step_reopened": "サブステップを再開: {detail}"
+    }
+  },
+  "changelog": {
+    "bellLabel": "新着情報",
+    "unseenBadge": "{count} 件の新着",
+    "whatsNew": "新着情報",
+    "empty": "今のところ新しいものはありません。",
+    "viewAll": "変更履歴をすべて見る",
+    "newFeature": "新機能",
+    "dismiss": "閉じる",
+    "gotIt": "了解",
+    "improved": "改善：",
+    "andMore": "ほか {count} 件",
+    "pageTitle": "変更履歴",
+    "pageSubtitle": "リリースされたすべての変更を新しい順に。",
+    "backHome": "ホームに戻る",
+    "types": {
+      "feature": "新機能",
+      "improvement": "改善",
+      "fix": "修正"
+    }
+  },
+  "help": {
+    "title": "ヘルプセンター",
+    "subtitle": "Ionexaの使い方——ガイド、クレジット、請求、トラブルシューティング。",
+    "backHome": "ホームに戻る",
+    "backToHelp": "すべての記事",
+    "searchPlaceholder": "記事を検索...",
+    "noResults": "該当する記事がありません。",
+    "categories": {
+      "getting-started": "はじめに",
+      "modules": "機能",
+      "credits-billing": "クレジットと請求",
+      "troubleshooting": "トラブルシューティング"
+    }
+  },
+  "communityRoadmap": {
+    "title": "コミュニティからのリクエスト",
+    "intro": "足りないものをリクエストし、重要なものに投票を——進捗に応じてステータスが更新され、投票した機能がリリースされると通知が届きます。",
+    "requestButton": "機能をリクエスト",
+    "signInToRequest": "リクエストにはサインイン",
+    "signInToVote": "投票にはサインイン",
+    "titlePlaceholder": "Ionexaに何をしてほしい？（短いタイトル）",
+    "descriptionPlaceholder": "どんな課題を解決しますか？（任意）",
+    "submit": "リクエストを送信",
+    "submitError": "送信できませんでした。",
+    "loading": "リクエストを読み込み中...",
+    "empty": "まだリクエストはありません——最初の一人に。",
+    "voteLabel": "{title} に投票",
+    "statuses": {
+      "under_review": "検討中",
+      "planned": "予定",
+      "in_progress": "進行中",
+      "shipped": "リリース済み"
     }
   }
 }

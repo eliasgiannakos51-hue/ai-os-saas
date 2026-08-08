@@ -566,6 +566,14 @@
         "agent_run_result": {
           "label": "نتائج الوكلاء",
           "description": "عندما ينهي أحد وكلائك تشغيلًا مجدولًا."
+        },
+        "lifecycle": {
+          "label": "نصائح البداية",
+          "description": "بضع رسائل في شهرك الأول بحسب ما تستخدمه فعلًا. لا تتجاوز رسالة واحدة في اليوم."
+        },
+        "feature_request_shipped": {
+          "label": "تحديثات الطلبات",
+          "description": "رسالة واحدة عندما يصدر شيء طلبته أو صوّت له."
         }
       }
     },
@@ -1908,7 +1916,8 @@
         "title": "انشر موقعًا إلكترونيًا",
         "body": "صف موقعًا وأطلقه مباشرة. تحصل على رابط حقيقي يمكنك مشاركته."
       }
-    }
+    },
+    "percentReady": "أنجزت {percent}% من الإعداد"
   },
   "upgradeSuggestion": {
     "evidence": "استخدمت هذا الشهر {used} من أصل {cap} {resource}.",
@@ -1959,6 +1968,60 @@
       "left": "غادر {detail} المشروع",
       "step_completed": "أُنجزت خطوة فرعية: {detail}",
       "step_reopened": "أُعيد فتح خطوة فرعية: {detail}"
+    }
+  },
+  "changelog": {
+    "bellLabel": "ما الجديد",
+    "unseenBadge": "{count} تحديثات جديدة",
+    "whatsNew": "ما الجديد",
+    "empty": "لا جديد حاليًا.",
+    "viewAll": "عرض سجل التغييرات كاملًا",
+    "newFeature": "ميزة جديدة",
+    "dismiss": "إغلاق",
+    "gotIt": "فهمت",
+    "improved": "تحسّن:",
+    "andMore": "+{count} أخرى",
+    "pageTitle": "سجل التغييرات",
+    "pageSubtitle": "كل تغيير صدر، الأحدث أولًا.",
+    "backHome": "العودة إلى الرئيسية",
+    "types": {
+      "feature": "ميزة جديدة",
+      "improvement": "تحسين",
+      "fix": "إصلاح"
+    }
+  },
+  "help": {
+    "title": "مركز المساعدة",
+    "subtitle": "كيف يعمل Ionexa — أدلة، الأرصدة، الفوترة وحل المشكلات.",
+    "backHome": "العودة إلى الرئيسية",
+    "backToHelp": "كل المقالات",
+    "searchPlaceholder": "ابحث في المقالات...",
+    "noResults": "لا توجد مقالات مطابقة.",
+    "categories": {
+      "getting-started": "البدء",
+      "modules": "الميزات",
+      "credits-billing": "الأرصدة والفوترة",
+      "troubleshooting": "حل المشكلات"
+    }
+  },
+  "communityRoadmap": {
+    "title": "طلبات المجتمع",
+    "intro": "اطلب ما ينقص وصوّت لما يهم — تتحدث الحالات مع التقدم، وسيصلك إشعار عندما يصدر شيء صوّت له.",
+    "requestButton": "اطلب ميزة",
+    "signInToRequest": "سجّل الدخول لطلب ميزة",
+    "signInToVote": "سجّل الدخول للتصويت",
+    "titlePlaceholder": "ماذا تريد أن يفعل Ionexa؟ (عنوان قصير)",
+    "descriptionPlaceholder": "ما المشكلة التي سيحلها لك؟ (اختياري)",
+    "submit": "إرسال الطلب",
+    "submitError": "تعذّر الإرسال.",
+    "loading": "جارٍ تحميل الطلبات...",
+    "empty": "لا طلبات بعد — كن الأول.",
+    "voteLabel": "صوّت لـ {title}",
+    "statuses": {
+      "under_review": "قيد المراجعة",
+      "planned": "مخطط له",
+      "in_progress": "قيد التنفيذ",
+      "shipped": "صدر"
     }
   }
 }

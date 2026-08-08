@@ -18,6 +18,8 @@ import { AmbientDots } from "@/components/ui/ambient-dots";
 import { DashboardBackground } from "@/components/dashboard/dashboard-background";
 import { checkAndUnlockAchievements } from "@/lib/achievements";
 import { AchievementUnlockBridge } from "@/components/achievements/achievement-unlock-bridge";
+import { ChangelogProvider } from "@/components/changelog/changelog-context";
+import { ChangelogNotices } from "@/components/changelog/changelog-notices";
 import { PageTransition } from "@/components/page-transition";
 
 export default async function DashboardLayout({
@@ -87,6 +89,7 @@ export default async function DashboardLayout({
             )}
             isAdmin={isAdmin}
           >
+          <ChangelogProvider>
             {/* Same wireframe globe as login/signup/landing, now behind every
                 dashboard page for visual continuity with the auth pages —
                 fixed to the viewport, z-0. The whole app shell below is
@@ -111,6 +114,10 @@ export default async function DashboardLayout({
               <Sidebar email={user.email ?? ""} planName={plan.name} planSlug={plan.slug} />
               <div className="flex min-w-0 flex-1 flex-col">
                 <TopNav email={user.email ?? ""} />
+                {/* The what's-new modal/banner (V3 Task 13) — under the
+                    nav so the banner sits in normal flow, above the page
+                    body. */}
+                <ChangelogNotices />
                 {/* Wraps only the page body, not the Sidebar/TopNav —
                     the chrome must stay visually fixed while the content
                     beneath it fades/slides in on each navigation. */}
@@ -122,6 +129,7 @@ export default async function DashboardLayout({
             <ToastContainer />
             <AchievementUnlockBridge unlockedKeys={newlyUnlockedAchievements} />
             <CommandPalette />
+          </ChangelogProvider>
           </CreditsProvider>
         </CommandPaletteProvider>
       </SidebarProvider>

@@ -566,6 +566,14 @@
         "agent_run_result": {
           "label": "智能体结果",
           "description": "当你的某个智能体完成一次计划运行时。"
+        },
+        "lifecycle": {
+          "label": "入门提示",
+          "description": "第一个月内的少量邮件，基于你的实际使用。每天不超过一封。"
+        },
+        "feature_request_shipped": {
+          "label": "功能请求动态",
+          "description": "当你请求或投票的功能上线时发送一封邮件。"
         }
       }
     },
@@ -1908,7 +1916,8 @@
         "title": "发布一个网站",
         "body": "描述一个网站并让它上线。你会得到一个可以分享的真实链接。"
       }
-    }
+    },
+    "percentReady": "你已完成 {percent}% 的设置"
   },
   "upgradeSuggestion": {
     "evidence": "本月你已使用 {used}/{cap} 个{resource}。",
@@ -1959,6 +1968,60 @@
       "left": "{detail} 离开了项目",
       "step_completed": "完成了子步骤:{detail}",
       "step_reopened": "重新打开了子步骤:{detail}"
+    }
+  },
+  "changelog": {
+    "bellLabel": "新动态",
+    "unseenBadge": "{count} 条新更新",
+    "whatsNew": "新动态",
+    "empty": "暂时没有新内容。",
+    "viewAll": "查看完整更新日志",
+    "newFeature": "新功能",
+    "dismiss": "关闭",
+    "gotIt": "知道了",
+    "improved": "已改进：",
+    "andMore": "还有 {count} 条",
+    "pageTitle": "更新日志",
+    "pageSubtitle": "每一次发布的变更，最新的在前。",
+    "backHome": "返回首页",
+    "types": {
+      "feature": "新功能",
+      "improvement": "改进",
+      "fix": "修复"
+    }
+  },
+  "help": {
+    "title": "帮助中心",
+    "subtitle": "Ionexa 如何运作——指南、积分、计费与故障排除。",
+    "backHome": "返回首页",
+    "backToHelp": "全部文章",
+    "searchPlaceholder": "搜索文章...",
+    "noResults": "没有匹配的文章。",
+    "categories": {
+      "getting-started": "入门",
+      "modules": "功能",
+      "credits-billing": "积分与计费",
+      "troubleshooting": "故障排除"
+    }
+  },
+  "communityRoadmap": {
+    "title": "社区请求",
+    "intro": "提出缺少的功能，为重要的投票——状态会随进展更新，你投过票的功能上线时会收到通知。",
+    "requestButton": "请求新功能",
+    "signInToRequest": "登录后请求功能",
+    "signInToVote": "登录后投票",
+    "titlePlaceholder": "你希望 Ionexa 做什么？（简短标题）",
+    "descriptionPlaceholder": "它能为你解决什么问题？（可选）",
+    "submit": "提交请求",
+    "submitError": "提交失败。",
+    "loading": "正在加载请求...",
+    "empty": "还没有请求——来做第一个。",
+    "voteLabel": "为 {title} 投票",
+    "statuses": {
+      "under_review": "审核中",
+      "planned": "已计划",
+      "in_progress": "进行中",
+      "shipped": "已上线"
     }
   }
 }

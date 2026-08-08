@@ -566,6 +566,14 @@
         "agent_run_result": {
           "label": "Resultados de agentes",
           "description": "Cuando uno de tus agentes termina una ejecución programada."
+        },
+        "lifecycle": {
+          "label": "Consejos para empezar",
+          "description": "Unos pocos correos en tu primer mes, según lo que realmente usas. Nunca más de uno al día."
+        },
+        "feature_request_shipped": {
+          "label": "Novedades de peticiones",
+          "description": "Un correo cuando algo que pediste o votaste se publique."
         }
       }
     },
@@ -1908,7 +1916,8 @@
         "title": "Publica un sitio web",
         "body": "Describe un sitio y ponlo en línea. Obtienes un enlace real para compartir."
       }
-    }
+    },
+    "percentReady": "Estás configurado al {percent}%"
   },
   "upgradeSuggestion": {
     "evidence": "Este mes has usado {used} de {cap} {resource}.",
@@ -1959,6 +1968,60 @@
       "left": "{detail} dejó el proyecto",
       "step_completed": "Subpaso completado: {detail}",
       "step_reopened": "Subpaso reabierto: {detail}"
+    }
+  },
+  "changelog": {
+    "bellLabel": "Novedades",
+    "unseenBadge": "{count} novedades",
+    "whatsNew": "Novedades",
+    "empty": "Nada nuevo por ahora.",
+    "viewAll": "Ver todo el changelog",
+    "newFeature": "Nueva función",
+    "dismiss": "Cerrar",
+    "gotIt": "Entendido",
+    "improved": "Mejorado:",
+    "andMore": "+{count} más",
+    "pageTitle": "Changelog",
+    "pageSubtitle": "Cada cambio publicado, el más reciente primero.",
+    "backHome": "Volver al inicio",
+    "types": {
+      "feature": "Nueva función",
+      "improvement": "Mejora",
+      "fix": "Corrección"
+    }
+  },
+  "help": {
+    "title": "Centro de ayuda",
+    "subtitle": "Cómo funciona Ionexa: guías, créditos, facturación y solución de problemas.",
+    "backHome": "Volver al inicio",
+    "backToHelp": "Todos los artículos",
+    "searchPlaceholder": "Buscar artículos...",
+    "noResults": "Ningún artículo coincide.",
+    "categories": {
+      "getting-started": "Primeros pasos",
+      "modules": "Funciones",
+      "credits-billing": "Créditos y facturación",
+      "troubleshooting": "Solución de problemas"
+    }
+  },
+  "communityRoadmap": {
+    "title": "Pedido por la comunidad",
+    "intro": "Pide lo que falta y vota lo que importa: los estados se actualizan según avanzan, y te avisaremos cuando algo que votaste se publique.",
+    "requestButton": "Pedir una función",
+    "signInToRequest": "Inicia sesión para pedir una función",
+    "signInToVote": "Inicia sesión para votar",
+    "titlePlaceholder": "¿Qué debería hacer Ionexa? (título corto)",
+    "descriptionPlaceholder": "¿Qué problema te resolvería? (opcional)",
+    "submit": "Enviar petición",
+    "submitError": "No se pudo enviar.",
+    "loading": "Cargando peticiones...",
+    "empty": "Aún no hay peticiones: sé el primero.",
+    "voteLabel": "Votar por {title}",
+    "statuses": {
+      "under_review": "En revisión",
+      "planned": "Planificado",
+      "in_progress": "En curso",
+      "shipped": "Publicado"
     }
   }
 }

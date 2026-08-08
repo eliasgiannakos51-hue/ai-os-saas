@@ -566,6 +566,14 @@
         "agent_run_result": {
           "label": "Agent results",
           "description": "When one of your agents finishes a scheduled run."
+        },
+        "lifecycle": {
+          "label": "Getting-started tips",
+          "description": "A handful of emails in your first month, based on what you actually use. Never more than one a day."
+        },
+        "feature_request_shipped": {
+          "label": "Feature request updates",
+          "description": "One email when something you requested or voted for ships."
         }
       }
     },
@@ -1908,7 +1916,8 @@
         "title": "Publish a website",
         "body": "Describe a site and put it live. You get a real link you can share."
       }
-    }
+    },
+    "percentReady": "You're {percent}% set up"
   },
   "upgradeSuggestion": {
     "evidence": "You've used {used} of {cap} {resource} this month.",
@@ -1959,6 +1968,60 @@
       "left": "{detail} left the project",
       "step_completed": "Completed a sub-step: {detail}",
       "step_reopened": "Reopened a sub-step: {detail}"
+    }
+  },
+  "changelog": {
+    "bellLabel": "What's new",
+    "unseenBadge": "{count} new updates",
+    "whatsNew": "What's new",
+    "empty": "Nothing new right now.",
+    "viewAll": "View the full changelog",
+    "newFeature": "New feature",
+    "dismiss": "Dismiss",
+    "gotIt": "Got it",
+    "improved": "Improved:",
+    "andMore": "+{count} more",
+    "pageTitle": "Changelog",
+    "pageSubtitle": "Every change that shipped, newest first.",
+    "backHome": "Back to home",
+    "types": {
+      "feature": "New feature",
+      "improvement": "Improvement",
+      "fix": "Fix"
+    }
+  },
+  "help": {
+    "title": "Help Center",
+    "subtitle": "How Ionexa works — guides, credits, billing and troubleshooting.",
+    "backHome": "Back to home",
+    "backToHelp": "All articles",
+    "searchPlaceholder": "Search articles...",
+    "noResults": "No articles match that.",
+    "categories": {
+      "getting-started": "Getting started",
+      "modules": "Features",
+      "credits-billing": "Credits & billing",
+      "troubleshooting": "Troubleshooting"
+    }
+  },
+  "communityRoadmap": {
+    "title": "Requested by the community",
+    "intro": "Ask for what's missing and vote for what matters — statuses update as things move, and you'll be notified when something you voted for ships.",
+    "requestButton": "Request a feature",
+    "signInToRequest": "Sign in to request a feature",
+    "signInToVote": "Sign in to vote",
+    "titlePlaceholder": "What should Ionexa do? (short title)",
+    "descriptionPlaceholder": "What problem would it solve for you? (optional)",
+    "submit": "Submit request",
+    "submitError": "That could not be submitted.",
+    "loading": "Loading requests...",
+    "empty": "Nothing requested yet — be the first.",
+    "voteLabel": "Vote for {title}",
+    "statuses": {
+      "under_review": "Under review",
+      "planned": "Planned",
+      "in_progress": "In progress",
+      "shipped": "Shipped"
     }
   }
 }

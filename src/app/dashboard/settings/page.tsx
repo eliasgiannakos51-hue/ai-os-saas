@@ -160,7 +160,7 @@ export default async function SettingsPage() {
   return (
     <main className="min-h-full">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
-        <PageHeader icon={SettingsIcon} title={t("title")} />
+        <PageHeader icon={SettingsIcon} title={t("title")} helpSlug="how-credits-work" />
 
         <nav aria-label="Jump to section" className="mb-6 flex flex-wrap gap-2 text-xs">
           <a

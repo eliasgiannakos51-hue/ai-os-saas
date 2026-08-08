@@ -39,6 +39,12 @@ export const EMAIL_TYPES = {
   // 20-email cap — is a user who stops receiving what they built and does
   // not find out for weeks.
   agent_disabled: { critical: true },
+  // V3 Task 13 — the day-1/3/7/14/30 lifecycle sequence. The definition
+  // of marketing-adjacent: one toggle turns the whole sequence off.
+  lifecycle: { critical: false },
+  // "The thing you asked for shipped." Separate from lifecycle because a
+  // person who wants no drip emails may very much still want this one.
+  feature_request_shipped: { critical: false },
 } as const;
 
 export type EmailType = keyof typeof EMAIL_TYPES;

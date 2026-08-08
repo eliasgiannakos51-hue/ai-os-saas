@@ -156,6 +156,32 @@ export function buildSupportKnowledge(): string {
   return TOPICS.map((topic) => `## ${topic.title}\n${topic.body}`).join("\n\n");
 }
 
+/**
+ * The corpus PLUS the published help-centre articles (V3 Task 13) — the
+ * same text a user reads on /help, so support answers and the written
+ * docs cannot disagree. The DB read is best-effort: if it fails, the
+ * assistant falls back to the computed corpus rather than failing the
+ * question. Capped, because the system prompt is paid for per token and
+ * a runaway article table must not be able to blow the request up.
+ */
+export async function buildSupportKnowledgeWithArticles(
+  loadArticles: () => Promise<{ title: string; content: string }[]>
+): Promise<string> {
+  const base = buildSupportKnowledge();
+  try {
+    const articles = await loadArticles();
+    const MAX_ARTICLES = 30;
+    const MAX_CHARS_PER_ARTICLE = 4000;
+    const articleText = articles
+      .slice(0, MAX_ARTICLES)
+      .map((a) => `## ${a.title}\n${a.content.slice(0, MAX_CHARS_PER_ARTICLE)}`)
+      .join("\n\n");
+    return articleText ? `${base}\n\n${articleText}` : base;
+  } catch {
+    return base;
+  }
+}
+
 export function supportTopicIds(): string[] {
   return TOPICS.map((t) => t.id);
 }

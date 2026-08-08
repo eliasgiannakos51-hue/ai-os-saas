@@ -252,7 +252,13 @@ const clientFallbacks = sources.flatMap((f) => [
 // counted here so nobody later mistakes it for one. (The +1 on top of
 // Task 16's own 47 is the dismiss endpoint's 429, added when the merge
 // brought it under Task 10's every-mutation-has-a-limiter gate.)
-const SERVER_PROSE_BASELINE = 686;
+// 686 -> 707: V3 Task 13 added the changelog (list/mark-seen), feature
+// requests (create/vote) and lifecycle cron routes — the same
+// not-authenticated / rate-limit / validation / failure responses as
+// every increment above, same recorded decision. What the user READS
+// (bell, modal, roadmap section, help centre chrome) is translated in
+// all ten locales.
+const SERVER_PROSE_BASELINE = 707;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

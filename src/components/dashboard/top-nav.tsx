@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { Search, Bell, Plus, Zap } from "lucide-react";
+import { Search, Plus, Zap } from "lucide-react";
+import { ChangelogBell } from "@/components/changelog/changelog-bell";
 import { CREATE_NAV_ITEM, OVERVIEW_NAV_ITEM } from "@/lib/modules";
 import { MenuButton } from "@/components/dashboard/menu-button";
 import { LogoutButton } from "@/components/logout-button";
@@ -22,7 +23,6 @@ export function TopNav({ email }: { email: string }) {
   const locale = useLocale();
   const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   const { credits, isAdmin } = useCredits();
-  const [notifOpen, setNotifOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   function openCreate() {
@@ -61,25 +61,9 @@ export function TopNav({ email }: { email: string }) {
         <LanguageSelector />
         <ThemeToggle />
 
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => {
-              setNotifOpen((v) => !v);
-              setUserMenuOpen(false);
-            }}
-            aria-label={t("notifications")}
-            aria-expanded={notifOpen}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"
-          >
-            <Bell className="h-[18px] w-[18px]" />
-          </button>
-          {notifOpen && (
-            <div className="absolute right-0 top-11 w-56 rounded-xl border border-border bg-panel p-3 text-xs text-muted shadow-lg">
-              {t("noNotifications")}
-            </div>
-          )}
-        </div>
+        {/* The bell is real now (V3 Task 13): unseen product updates for
+            this viewer's plan, marked seen when read. */}
+        <ChangelogBell />
 
         <Link
           href="/dashboard/settings#buy-credits"
@@ -110,7 +94,6 @@ export function TopNav({ email }: { email: string }) {
             type="button"
             onClick={() => {
               setUserMenuOpen((v) => !v);
-              setNotifOpen(false);
             }}
             aria-label="Account menu"
             aria-expanded={userMenuOpen}

@@ -218,6 +218,10 @@ const LOCALE_ALLOWED = new Set([
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
+  // "Changelog" is the product-world loanword in several locales (Greek
+  // and Portuguese dev audiences use it verbatim); the locales with a
+  // native term (fr, de, zh, ja, ar...) translate it.
+  "changelog.pageTitle",
   // A pure format template: a number, a space, a bracketed number. There
   // is no word in it to translate, and inventing per-locale punctuation
   // to make the string differ would be translating the checker rather

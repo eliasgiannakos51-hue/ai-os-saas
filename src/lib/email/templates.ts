@@ -107,36 +107,33 @@ const MODULE_BLURBS: { title: string; blurb: string }[] = [
   { title: "Automation", blurb: "Workflows worth automating, and time saved." },
 ];
 
+// V3 Task 13 rewrote this from a 13-module feature table into ONE
+// concrete first step. A welcome email is day zero of the lifecycle
+// sequence, and the documented first-experience failure was precisely
+// "presented with capabilities, concluded it's several LLMs in one" —
+// the email must not re-teach what the first screen just unlearned.
 export function welcomeEmailHtml({ email }: { email: string }): string {
-  const moduleRows = MODULE_BLURBS.map(
-    ({ title, blurb }) => `
-              <tr>
-                <td style="padding:6px 0; border-bottom:1px solid ${BORDER};">
-                  <span style="color:${ORANGE}; font-size:13px;">${title}</span><br />
-                  <span style="color:${MUTED}; font-size:12px;">${blurb}</span>
-                </td>
-              </tr>`
-  ).join("");
-
   const bodyHtml = `
     <span style="color:${MUTED}; font-size:12px;">signup · ${email}</span>
-    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">welcome to Ionexa AI</h1>
-    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
-      Your account is ready — no email confirmation needed, you can log in right
-      away. Ionexa AI is 13 modules for running a startup, plus a free-text inbox
-      that files anything you type into the right one.
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">welcome — here's your first step</h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 14px;">
+      Your account is ready, no email confirmation needed. Do exactly one
+      thing: open your workspace and answer one question — what do you want
+      to do first? Build a website, set a goal, organise your data, or just
+      ask something.
     </p>
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-      ${moduleRows}
-    </table>
-    <p style="color:${MUTED}; font-size:12px; line-height:1.6; margin:20px 0 0;">
-      Tip: on <span style="color:${ORANGE};">/dashboard/create</span> you can just
-      describe what happened in plain English and it'll land in the right module
-      automatically.
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      Whichever you pick opens with the input ready. One sentence in,
+      something real out — in the next minute, not after a tour.
+    </p>
+    <p style="margin:0;">
+      <a href="${SITE_URL}/dashboard/overview" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        Pick your first thing
+      </a>
     </p>
   `;
 
-  return layout({ preheader: "Your Ionexa AI account is ready.", bodyHtml });
+  return layout({ preheader: "Your account is ready — pick your first thing.", bodyHtml });
 }
 
 export function teamInviteEmailHtml({
@@ -634,4 +631,59 @@ export function agentPausedNoCreditsEmailHtml({
     preheader: `"${agentName}" is paused — your account is out of credits.`,
     bodyHtml,
   });
+}
+
+// V3 Task 13 — the lifecycle sequence and the "your request shipped"
+// notice share one generic builder: a kicker, a heading, paragraphs, an
+// optional bullet list of REAL numbers, one CTA. The copy differences
+// live with the cron that decides which email is due, not here.
+export function lifecycleEmailHtml({
+  kicker,
+  heading,
+  paragraphs,
+  bullets = [],
+  ctaLabel,
+  ctaPath,
+}: {
+  kicker: string;
+  heading: string;
+  paragraphs: string[];
+  bullets?: string[];
+  ctaLabel: string;
+  ctaPath: string;
+}): string {
+  const safeParagraphs = paragraphs
+    .map(
+      (p) =>
+        `<p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 14px;">${escapeHtml(p)}</p>`
+    )
+    .join("");
+  const bulletRows = bullets
+    .map(
+      (b) => `
+              <tr>
+                <td style="padding:5px 0; border-bottom:1px solid ${BORDER}; color:${FOREGROUND}; font-size:13px;">${escapeHtml(b)}</td>
+              </tr>`
+    )
+    .join("");
+  const bulletTable = bullets.length
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">${bulletRows}</table>`
+    : "";
+
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">${escapeHtml(kicker)}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">${escapeHtml(heading)}</h1>
+    ${safeParagraphs}
+    ${bulletTable}
+    <p style="margin:0 0 6px;">
+      <a href="${SITE_URL}${ctaPath}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        ${escapeHtml(ctaLabel)}
+      </a>
+    </p>
+    <p style="color:${MUTED}; font-size:11px; line-height:1.6; margin:14px 0 0;">
+      You can turn these emails off any time in Settings &rarr; Email notifications.
+    </p>
+  `;
+
+  return layout({ preheader: heading, bodyHtml });
 }

@@ -90,6 +90,12 @@ export const EXPORTED_TABLES: ExportTable[] = [
   { table: "user_insights", column: "user_id" },
   { table: "user_onboarding", column: "user_id" },
 
+  // --- product feedback and what we told them ---
+  { table: "feature_requests", column: "user_id" },
+  { table: "feature_request_votes", column: "user_id" },
+  { table: "product_update_views", column: "user_id" },
+  { table: "lifecycle_email_log", column: "user_id" },
+
   // --- files ---
   // The extracted TEXT is included; the bytes in the bucket are not, and
   // the export says so in its own README rather than leaving a person to
@@ -205,6 +211,16 @@ export const EXCLUDED_TABLES: { table: string; reason: string }[] = [
     table: "rate_limit_log",
     reason:
       "operational counters keyed by an opaque identifier (a user id or an IP), holding no content. Retained briefly for abuse prevention; nothing in it is data the subject provided.",
+  },
+  {
+    table: "product_updates",
+    reason:
+      "the product's own changelog entries, authored by us, identical for everyone and public on /changelog. Nothing in it is the subject's data; what they SAW of it is exported via product_update_views.",
+  },
+  {
+    table: "help_articles",
+    reason:
+      "the public help centre's articles, authored by us and identical for everyone. Not the subject's data.",
   },
   {
     table: "account_deletion_requests",

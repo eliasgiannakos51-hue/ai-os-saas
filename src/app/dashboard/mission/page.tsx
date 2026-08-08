@@ -153,7 +153,7 @@ export default async function MissionPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={MISSION_ICON} title={t("title")} description={t("description")} />
+        <PageHeader icon={MISSION_ICON} title={t("title")} description={t("description")} helpSlug="mission-control" />
 
 
         <ScheduledRunsList runs={pendingRuns} />

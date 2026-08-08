@@ -114,6 +114,12 @@ const V3_TABLES = [
   "user_imports",
   "user_insights",
   "user_onboarding",
+  "product_updates",
+  "product_update_views",
+  "help_articles",
+  "lifecycle_email_log",
+  "feature_requests",
+  "feature_request_votes",
 ];
 for (const t of MODULE_TABLES) {
   if (!rlsEnabled.has(t)) {
@@ -327,6 +333,8 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/agent-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts); executes every due Autonomous Agent, so it spends real money on many accounts per call",
   "src/app/api/weekly-digest/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
+  "src/app/api/cron/lifecycle-emails/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts); sends the day-1/3/7/14/30 lifecycle emails and shipped-request notices, each idempotent via a claim-first log row",
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",
   "src/app/api/websites/[id]/submit-form/route.ts": "public contact form on generated sites; write-only, honeypot + 30/hr cap",
   "src/app/api/demo/preview/route.ts":

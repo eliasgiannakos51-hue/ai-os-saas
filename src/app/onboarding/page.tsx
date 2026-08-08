@@ -60,7 +60,7 @@ export default async function OnboardingPage() {
           the top-right corner, and at 375px the page title ran underneath
           them. Wider screens have margin to spare and keep py-10. */}
       <div className="mx-auto max-w-2xl px-4 pb-10 pt-24 sm:px-6 sm:py-10">
-        <PageHeader icon={Rocket} title={t("title")} description={t("welcomeIntro")} />
+        <PageHeader icon={Rocket} title={t("title")} description={t("welcomeIntro")} helpSlug="your-first-minute" />
 
         {/* The privacy notice moved INTO the flow: it is said before
             anything is uploaded (the moment someone decides whether to

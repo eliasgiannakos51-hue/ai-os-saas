@@ -97,6 +97,30 @@ export async function POST(request: Request) {
       );
     }
 
+    // The one table the cascade does not reach. production_errors.user_id
+    // is a bare uuid with no foreign key, and affected_user_ids is a
+    // uuid[] that no foreign key could cover — so deleteUser() leaves the
+    // deleted account's id sitting in the error tracker indefinitely, on
+    // a table the owner reads in System Health.
+    //
+    // Same ordering rule as the files above: before deleteUser, and a
+    // failure stops the deletion. Saying "we deleted your account" while
+    // an identifier for that person is still queryable is exactly the
+    // claim Article 17 does not allow us to make loosely.
+    const { error: forgetError } = await admin.rpc("forget_user_in_production_errors", {
+      p_user_id: claimed.user_id,
+    });
+    if (forgetError) {
+      logApiError("/api/delete-account/confirm", forgetError, {
+        stage: "forget_production_errors",
+        hint: "if this says the function was not found, apply supabase/migrations/20260808_gdpr_erasure_gaps.sql",
+      });
+      return NextResponse.json(
+        { ok: false, error: "Could not delete the account. Please contact support." },
+        { status: 500 }
+      );
+    }
+
     const { error: deleteError } = await admin.auth.admin.deleteUser(claimed.user_id);
 
     if (deleteError) {

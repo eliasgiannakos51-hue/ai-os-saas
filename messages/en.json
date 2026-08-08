@@ -460,6 +460,7 @@
       "description": "Download everything you've logged across all 13 modules as a single JSON file.",
       "exportAll": "Export All Data",
       "exporting": "Exporting...",
+      "exportFailed": "Export failed — please try again",
       "exportDownloaded": "✓ export downloaded"
     },
     "dangerZone": {

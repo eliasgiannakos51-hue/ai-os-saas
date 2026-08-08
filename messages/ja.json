@@ -460,6 +460,7 @@
       "description": "13 のモジュールすべてで記録した内容を、単一の JSON ファイルとしてダウンロードします。",
       "exportAll": "すべてのデータをエクスポート",
       "exporting": "エクスポート中...",
+      "exportFailed": "エクスポートに失敗しました — もう一度お試しください",
       "exportDownloaded": "✓ エクスポートをダウンロードしました"
     },
     "dangerZone": {

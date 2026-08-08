@@ -460,6 +460,7 @@
       "description": "将你在全部 13 个模块中记录的所有内容下载为单个 JSON 文件。",
       "exportAll": "导出全部数据",
       "exporting": "导出中...",
+      "exportFailed": "导出失败——请重试",
       "exportDownloaded": "✓ 已下载导出文件"
     },
     "dangerZone": {

@@ -460,6 +460,7 @@
       "description": "Lade alles, was du in allen 13 Modulen erfasst hast, als einzelne JSON-Datei herunter.",
       "exportAll": "Alle Daten exportieren",
       "exporting": "Wird exportiert...",
+      "exportFailed": "Export fehlgeschlagen — bitte erneut versuchen",
       "exportDownloaded": "✓ Export heruntergeladen"
     },
     "dangerZone": {

@@ -534,6 +534,28 @@
       "colCalls": "Aktionen",
       "colMargin": "Ø Marge",
       "colCost": "Reale Kosten"
+    },
+    "pushNotifications": {
+      "title": "Push-Benachrichtigungen",
+      "perDevice": "Pro Gerät. Das Aktivieren hier betrifft deine anderen Geräte nicht.",
+      "turnOn": "Aktivieren",
+      "turnOff": "Deaktivieren",
+      "enabled": "Benachrichtigungen sind auf diesem Gerät aktiv.",
+      "disabled": "Benachrichtigungen sind auf diesem Gerät deaktiviert.",
+      "blocked": "Benachrichtigungen sind in deinen Browsereinstellungen blockiert.",
+      "enableError": "Benachrichtigungen konnten hier nicht aktiviert werden.",
+      "disableError": "Benachrichtigungen konnten nicht deaktiviert werden.",
+      "prefError": "Diese Einstellung konnte nicht gespeichert werden.",
+      "unsupported": "Dieser Browser unterstützt keine Push-Benachrichtigungen. Füge Ionexa auf dem iPhone zuerst zum Home-Bildschirm hinzu (iOS 16.4+).",
+      "notConfigured": "Push-Benachrichtigungen sind in dieser Installation nicht konfiguriert.",
+      "agentResults": "Agent-Ergebnisse",
+      "agentResultsHint": "Wenn ein geplanter Agent einen Lauf beendet",
+      "missionReminders": "Missions-Erinnerungen",
+      "missionRemindersHint": "Wenn ein geplanter Missionsschritt ausgeführt wird",
+      "lowCredits": "Wenig Credits",
+      "lowCreditsHint": "Wenn die Arbeit stoppt, weil das Guthaben aufgebraucht ist",
+      "collaboration": "Zusammenarbeit",
+      "collaborationHint": "Team-Einladungen und Aktivität im geteilten Workspace"
     }
   },
   "dashboard": {

@@ -534,6 +534,28 @@
       "colCalls": "操作数",
       "colMargin": "平均マージン",
       "colCost": "実コスト"
+    },
+    "pushNotifications": {
+      "title": "プッシュ通知",
+      "perDevice": "デバイスごとの設定です。ここで有効にしても他のデバイスには影響しません。",
+      "turnOn": "オンにする",
+      "turnOff": "オフにする",
+      "enabled": "このデバイスで通知が有効になりました。",
+      "disabled": "このデバイスで通知が無効になりました。",
+      "blocked": "ブラウザの設定で通知がブロックされています。",
+      "enableError": "ここで通知を有効にできませんでした。",
+      "disableError": "通知を無効にできませんでした。",
+      "prefError": "設定を保存できませんでした。",
+      "unsupported": "このブラウザはプッシュ通知に対応していません。iPhoneではまずIonexaをホーム画面に追加してください（iOS 16.4以降）。",
+      "notConfigured": "このデプロイではプッシュ通知が設定されていません。",
+      "agentResults": "エージェントの結果",
+      "agentResultsHint": "スケジュールされたエージェントの実行が完了したとき",
+      "missionReminders": "ミッションのリマインダー",
+      "missionRemindersHint": "スケジュールされたミッションステップが実行されたとき",
+      "lowCredits": "クレジット残量わずか",
+      "lowCreditsHint": "残高が尽きて処理が停止したとき",
+      "collaboration": "コラボレーション",
+      "collaborationHint": "チーム招待と共有ワークスペースのアクティビティ"
     }
   },
   "dashboard": {

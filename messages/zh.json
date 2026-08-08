@@ -534,6 +534,28 @@
       "colCalls": "操作次数",
       "colMargin": "平均利润率",
       "colCost": "真实成本"
+    },
+    "pushNotifications": {
+      "title": "推送通知",
+      "perDevice": "按设备设置。在此开启不会影响你的其他设备。",
+      "turnOn": "开启",
+      "turnOff": "关闭",
+      "enabled": "此设备的通知已开启。",
+      "disabled": "此设备的通知已关闭。",
+      "blocked": "通知已在你的浏览器设置中被阻止。",
+      "enableError": "无法在此开启通知。",
+      "disableError": "无法关闭通知。",
+      "prefError": "无法保存该偏好设置。",
+      "unsupported": "此浏览器不支持推送通知。在 iPhone 上请先将 Ionexa 添加到主屏幕（iOS 16.4+）。",
+      "notConfigured": "此部署未配置推送通知。",
+      "agentResults": "智能体结果",
+      "agentResultsHint": "当计划的智能体完成一次运行时",
+      "missionReminders": "任务提醒",
+      "missionRemindersHint": "当计划的任务步骤运行时",
+      "lowCredits": "积分不足",
+      "lowCreditsHint": "当余额用尽导致工作停止时",
+      "collaboration": "协作",
+      "collaborationHint": "团队邀请与共享工作区动态"
     }
   },
   "dashboard": {

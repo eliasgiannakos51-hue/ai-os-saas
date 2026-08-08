@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Bell, BellOff } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useToast } from "@/components/toast/toast-context";
 
 // Per-type push opt-in for THIS browser.
@@ -13,11 +14,13 @@ import { useToast } from "@/components/toast/toast-context";
 // from the server — the browser is the source of truth for whether
 // notifications are actually possible here.
 
+// i18n key stems under settings.pushNotifications — the label and hint
+// for each are `<stem>` and `<stem>Hint`.
 const TYPES = [
-  { key: "agent_results", label: "Agent results", hint: "When a scheduled agent finishes a run" },
-  { key: "mission_reminders", label: "Mission reminders", hint: "When a scheduled mission step runs" },
-  { key: "low_credits", label: "Low credits", hint: "When work stops because the balance ran out" },
-  { key: "collaboration", label: "Collaboration", hint: "Team invites and shared-workspace activity" },
+  { key: "agent_results", stem: "agentResults" },
+  { key: "mission_reminders", stem: "missionReminders" },
+  { key: "low_credits", stem: "lowCredits" },
+  { key: "collaboration", stem: "collaboration" },
 ] as const;
 
 function urlBase64ToUint8Array(base64: string): Uint8Array {
@@ -29,6 +32,7 @@ function urlBase64ToUint8Array(base64: string): Uint8Array {
 }
 
 export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: string | null }) {
+  const t = useTranslations("settings.pushNotifications");
   const { addToast } = useToast();
   const [supported, setSupported] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
@@ -61,7 +65,7 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
     try {
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
-        addToast("Notifications are blocked in your browser settings.", "error");
+        addToast(t("blocked"), "error");
         return;
       }
       const reg = await navigator.serviceWorker.ready;
@@ -77,13 +81,13 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
       if (!res.ok) throw new Error("save failed");
       setSubscribed(true);
       setEndpoint(sub.endpoint);
-      addToast("Notifications are on for this device.", "success");
+      addToast(t("enabled"), "success");
     } catch {
-      addToast("Could not turn on notifications here.", "error");
+      addToast(t("enableError"), "error");
     } finally {
       setBusy(false);
     }
-  }, [vapidPublicKey, addToast]);
+  }, [vapidPublicKey, addToast, t]);
 
   const disable = useCallback(async () => {
     setBusy(true);
@@ -100,13 +104,13 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
       }
       setSubscribed(false);
       setEndpoint(null);
-      addToast("Notifications are off for this device.", "success");
+      addToast(t("disabled"), "success");
     } catch {
-      addToast("Could not turn notifications off.", "error");
+      addToast(t("disableError"), "error");
     } finally {
       setBusy(false);
     }
-  }, [addToast]);
+  }, [addToast, t]);
 
   const toggleType = useCallback(
     async (key: string) => {
@@ -120,10 +124,10 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
       });
       if (!res.ok) {
         setPrefs((p) => ({ ...p, [key]: !next }));
-        addToast("Could not save that preference.", "error");
+        addToast(t("prefError"), "error");
       }
     },
-    [endpoint, prefs, addToast]
+    [endpoint, prefs, addToast, t]
   );
 
   if (!supported) {
@@ -131,12 +135,10 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
       <div className="rounded-xl border border-border bg-panel p-5">
         <h2 className="flex items-center gap-2 text-sm font-semibold">
           <BellOff className="h-4 w-4 text-muted" aria-hidden="true" />
-          Push notifications
+          {t("title")}
         </h2>
         <p className="mt-2 text-xs text-muted">
-          {vapidPublicKey
-            ? "This browser doesn't support push notifications. On iPhone, add Ionexa to your home screen first (iOS 16.4+)."
-            : "Push notifications are not configured on this deployment."}
+          {vapidPublicKey ? t("unsupported") : t("notConfigured")}
         </p>
       </div>
     );
@@ -148,11 +150,9 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
         <div>
           <h2 className="flex items-center gap-2 text-sm font-semibold">
             <Bell className="h-4 w-4 text-orange-400" aria-hidden="true" />
-            Push notifications
+            {t("title")}
           </h2>
-          <p className="mt-1 text-xs text-muted">
-            Per device. Turning these on here doesn&apos;t affect your other devices.
-          </p>
+          <p className="mt-1 text-xs text-muted">{t("perDevice")}</p>
         </div>
         <button
           type="button"
@@ -160,31 +160,31 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
           onClick={subscribed ? disable : enable}
           className="shrink-0 rounded-lg border border-border px-3 py-1.5 text-xs font-medium transition hover:text-orange-400 disabled:opacity-50"
         >
-          {busy ? "…" : subscribed ? "Turn off" : "Turn on"}
+          {busy ? "…" : subscribed ? t("turnOff") : t("turnOn")}
         </button>
       </div>
 
       {subscribed && (
         <ul className="mt-4 space-y-2">
-          {TYPES.map((t) => (
-            <li key={t.key} className="flex items-center justify-between gap-4">
+          {TYPES.map((type) => (
+            <li key={type.key} className="flex items-center justify-between gap-4">
               <div className="min-w-0">
-                <p className="text-xs font-medium">{t.label}</p>
-                <p className="text-[11px] text-muted">{t.hint}</p>
+                <p className="text-xs font-medium">{t(type.stem)}</p>
+                <p className="text-[11px] text-muted">{t(`${type.stem}Hint`)}</p>
               </div>
               <button
                 type="button"
                 role="switch"
-                aria-checked={prefs[t.key] ?? true}
-                aria-label={t.label}
-                onClick={() => toggleType(t.key)}
+                aria-checked={prefs[type.key] ?? true}
+                aria-label={t(type.stem)}
+                onClick={() => toggleType(type.key)}
                 className={`relative h-5 w-9 shrink-0 rounded-full transition ${
-                  (prefs[t.key] ?? true) ? "bg-orange-500" : "bg-border"
+                  (prefs[type.key] ?? true) ? "bg-orange-500" : "bg-border"
                 }`}
               >
                 <span
                   className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${
-                    (prefs[t.key] ?? true) ? "left-[1.125rem]" : "left-0.5"
+                    (prefs[type.key] ?? true) ? "left-[1.125rem]" : "left-0.5"
                   }`}
                 />
               </button>

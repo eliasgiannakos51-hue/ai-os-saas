@@ -534,6 +534,28 @@
       "colCalls": "Azioni",
       "colMargin": "Margine medio",
       "colCost": "Costo reale"
+    },
+    "pushNotifications": {
+      "title": "Notifiche push",
+      "perDevice": "Per dispositivo. Attivarle qui non influisce sugli altri dispositivi.",
+      "turnOn": "Attiva",
+      "turnOff": "Disattiva",
+      "enabled": "Le notifiche sono attive su questo dispositivo.",
+      "disabled": "Le notifiche sono disattivate su questo dispositivo.",
+      "blocked": "Le notifiche sono bloccate nelle impostazioni del browser.",
+      "enableError": "Impossibile attivare le notifiche qui.",
+      "disableError": "Impossibile disattivare le notifiche.",
+      "prefError": "Impossibile salvare questa preferenza.",
+      "unsupported": "Questo browser non supporta le notifiche push. Su iPhone, aggiungi prima Ionexa alla schermata Home (iOS 16.4+).",
+      "notConfigured": "Le notifiche push non sono configurate in questo deployment.",
+      "agentResults": "Risultati agente",
+      "agentResultsHint": "Quando un agente pianificato completa un'esecuzione",
+      "missionReminders": "Promemoria missione",
+      "missionRemindersHint": "Quando viene eseguito un passo di missione pianificato",
+      "lowCredits": "Crediti bassi",
+      "lowCreditsHint": "Quando il lavoro si ferma perché il saldo è esaurito",
+      "collaboration": "Collaborazione",
+      "collaborationHint": "Inviti al team e attività dello spazio condiviso"
     }
   },
   "dashboard": {

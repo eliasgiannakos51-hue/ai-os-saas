@@ -1483,5 +1483,20 @@
     "unlimited": "Illimitato — nessun credito usato",
     "unlimitedWouldHaveCost": "Illimitato — sarebbe costato {count} crediti",
     "freeMessage": "Messaggio gratuito · {count} rimasti questo mese"
+  },
+  "support": {
+    "title": "Chiedi su Ionexa",
+    "open": "Chiedi su Ionexa",
+    "close": "Chiudi",
+    "intro": "Chiedi qualunque cosa su come funziona Ionexa — funzioni, piani, crediti, privacy. Le risposte vengono dalle pagine di aiuto, e quando non ce n'è una lo dico invece di tirare a indovinare.",
+    "placeholder": "Come si fa a…?",
+    "send": "Invia",
+    "thinking": "Sto cercando…",
+    "from": "Da:",
+    "declined": "Questo non c'è nelle pagine di aiuto e non lo indovino. Mandalo a una persona e riceverai una risposta vera via email.",
+    "sendToHuman": "Manda a una persona",
+    "sending": "Invio in corso…",
+    "sent": "Inviato. Ti rispondiamo all'email del tuo account.",
+    "error": "Qualcosa è andato storto. Riprova."
   }
 }

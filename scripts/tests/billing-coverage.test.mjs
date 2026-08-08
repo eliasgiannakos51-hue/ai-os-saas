@@ -136,6 +136,14 @@ const DECLARED = {
     billing: "settled",
     note: "reached from the PUBLIC api/websites/[id]/submit-form. Settled against the site OWNER, who is who the triage is for, after an up-front solvency check — a stranger's form POST cannot hold the owner's credits, so the balance must be checked before the call, not after.",
   },
+  "src/app/api/support/route.ts": {
+    calls: 1,
+    billing: "unbilled",
+    note:
+      "THE ONE DELIBERATELY FREE AI CALL IN THE APP, and the first entry in this file that is not settled. Charging credits to ask how credits work is a fee for not understanding the product: it would price the support widget out of reach of exactly the people who need it, and every such question is one the operator would rather answer than have asked by email. " +
+      "It is free, so the ENVELOPE is what bounds it, not a reservation. One call per question, no history replay, a 600-character question, at most 4 help articles of context, and a 500-token reply — worst case about 3,000 input and 500 output tokens on Sonnet, roughly EUR 0.015 per question. Twenty questions per user per hour (rate_limit_log, scope support_question) caps one account at about EUR 0.30 an hour, and the same daily platform spend cap and identical-request breaker every other AI route sits behind (checkAiCallAllowed) caps the deployment. " +
+      "If this ever needs to become chargeable, the shape to copy is api/files/ask: estimate after the context is assembled, reserve, settle on measured usage.",
+  },
 };
 
 function walk(dir, out = []) {
@@ -181,8 +189,33 @@ for (const [file, m] of [...flat, ...unbilled]) {
 // test tells you to update it; adding another flat-fee feature raises
 // them and the build fails.
 check("flat-fee AI features (not margin-guaranteed)", flat.length, 0);
-check("completely unbilled AI calls", unbilled.length, 0);
-check("every AI call site is settled on measured usage", settled.length, Object.keys(DECLARED).length);
+// 0 -> 1: the support widget (api/support). Free ON PURPOSE — see its
+// DECLARED note for the envelope that bounds it instead of a reservation.
+// The number is pinned so a SECOND unbilled feature cannot arrive quietly:
+// "one free thing, deliberately" and "AI calls that nobody is paying for"
+// are different situations and only the first one is a decision.
+check("completely unbilled AI calls", unbilled.length, 1);
+check(
+  "every OTHER AI call site is settled on measured usage",
+  settled.length,
+  Object.keys(DECLARED).length - unbilled.length
+);
+
+// A free AI endpoint has to be bounded by something. These are the four
+// things standing between it and an unmetered bill, asserted individually
+// because the note above is only true while all four are still there.
+{
+  const support = readFileSync("src/app/api/support/route.ts", "utf8");
+  checkTrue("support: a session is required", /if \(!user\)[\s\S]{0,120}status: 401/.test(support));
+  checkTrue("support: a per-user hourly cap", /MAX_QUESTIONS_PER_HOUR = \d+/.test(support));
+  checkTrue("support: the platform circuit breaker", /checkAiCallAllowed\(/.test(support));
+  checkTrue(
+    "support: a small, fixed reply budget",
+    /max_tokens: SUPPORT_MAX_OUTPUT_TOKENS/.test(support) &&
+      /SUPPORT_MAX_OUTPUT_TOKENS = \d{2,3};/.test(readFileSync("src/lib/support/answer.ts", "utf8"))
+  );
+  checkTrue("support: one call per question, no loop", (support.match(/messages\.create\(/g) ?? []).length === 1);
+}
 
 console.log("\n== 2b. the public contact-form endpoint bills the site owner ==");
 // The one AI call in this app that an ANONYMOUS third party can trigger.

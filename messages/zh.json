@@ -1483,5 +1483,20 @@
     "unlimited": "无限 — 未使用积分",
     "unlimitedWouldHaveCost": "无限 — 将花费 {count} 积分",
     "freeMessage": "免费消息 · 本月剩余 {count} 条"
+  },
+  "support": {
+    "title": "关于 Ionexa 的问题",
+    "open": "关于 Ionexa 的问题",
+    "close": "关闭",
+    "intro": "关于 Ionexa 怎么用，随便问——功能、套餐、额度、隐私。答案都来自帮助页面；没有依据时我会直说，而不是猜。",
+    "placeholder": "要怎么…？",
+    "send": "发送",
+    "thinking": "正在查找…",
+    "from": "来源：",
+    "declined": "帮助页面里没有这条内容，我不会去猜。把它发给真人，你会收到邮件回复。",
+    "sendToHuman": "发给真人",
+    "sending": "发送中…",
+    "sent": "已发送。我们会回复到你账号的邮箱。",
+    "error": "出了点问题，请重试。"
   }
 }

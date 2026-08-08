@@ -1483,5 +1483,20 @@
     "unlimited": "Unlimited — no credits used",
     "unlimitedWouldHaveCost": "Unlimited — would have cost {count} credits",
     "freeMessage": "Free message · {count} left this month"
+  },
+  "support": {
+    "title": "Ask about Ionexa",
+    "open": "Ask about Ionexa",
+    "close": "Close",
+    "intro": "Ask anything about how Ionexa works — features, plans, credits, privacy. Answers come from the help pages, and when there isn't one, I'll say so instead of guessing.",
+    "placeholder": "How does… ?",
+    "send": "Send",
+    "thinking": "Looking it up…",
+    "from": "From:",
+    "declined": "I don't have that in the help pages, and I won't guess at it. Send it to a person and you'll get a real answer by email.",
+    "sendToHuman": "Send this to a person",
+    "sending": "Sending…",
+    "sent": "Sent. We'll reply to your account email.",
+    "error": "Something went wrong. Please try again."
   }
 }

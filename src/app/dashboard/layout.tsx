@@ -19,6 +19,7 @@ import { DashboardBackground } from "@/components/dashboard/dashboard-background
 import { checkAndUnlockAchievements } from "@/lib/achievements";
 import { AchievementUnlockBridge } from "@/components/achievements/achievement-unlock-bridge";
 import { PageTransition } from "@/components/page-transition";
+import { SupportWidget } from "@/components/support/support-widget";
 
 export default async function DashboardLayout({
   children,
@@ -122,6 +123,12 @@ export default async function DashboardLayout({
             <ToastContainer />
             <AchievementUnlockBridge unlockedKeys={newlyUnlockedAchievements} />
             <CommandPalette />
+            {/* Inside ToastProvider because it reports failures through
+                toasts, and inside the dashboard layout rather than the root
+                one because escalation needs an account to reply to: the
+                widget mails the asker back, and a logged-out visitor has no
+                address we could use without asking for one. */}
+            <SupportWidget />
           </CreditsProvider>
         </CommandPaletteProvider>
       </SidebarProvider>

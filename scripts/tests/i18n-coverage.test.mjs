@@ -197,7 +197,19 @@ const clientFallbacks = sources.flatMap((f) => [
 // itself, and the "What you've allowed" section in Settings — is fully
 // translated in all ten locales, which for a consent screen is the part
 // that legally has to be.
-const SERVER_PROSE_BASELINE = 501;
+// 501 -> 511: the AI support widget added api/support and
+// api/support/escalate. Their not-authenticated, too-long, rate-limit and
+// could-not-send responses are English prose like the 501 before them.
+//
+// Worth one extra note because of what this feature IS: the assistant's
+// own answers are produced in the user's language (the system prompt ends
+// "Reply in <language>"), and every string the widget renders around them
+// — the intro, the refusal, the escalate button, the confirmation — is
+// translated in all ten locales. What is English here is the fallback text
+// for a request that failed in a way the client has no specific message
+// for, which is the same class as every increment above and the same
+// recorded decision: stable error CODES across the whole API surface.
+const SERVER_PROSE_BASELINE = 511;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

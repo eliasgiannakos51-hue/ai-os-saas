@@ -21,6 +21,8 @@ import { useTranslations, useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { CreditShortfallPanel } from "@/components/billing/credit-shortfall-panel";
+import type { CreditShortfall } from "@/lib/billing/shortfall";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { FilePicker } from "@/components/ui/file-picker";
 import { useCredits } from "@/components/credits/credits-context";
@@ -197,6 +199,7 @@ export function WebsiteBuilderWorkspace({
   const [description, setDescription] = useState("");
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [shortfall, setShortfall] = useState<CreditShortfall | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(initialWebsites[0]?.id ?? null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -495,6 +498,7 @@ export function WebsiteBuilderWorkspace({
     setReferenceImageFiles([]);
     setPendingClarification(null);
     setError(null);
+    setShortfall(null);
   }
 
   async function submitGeneration(
@@ -505,6 +509,7 @@ export function WebsiteBuilderWorkspace({
   ) {
     setGenerating(true);
     setError(null);
+    setShortfall(null);
     try {
       // Step 1/2: create the "pending" row and get its id back — this
       // request is deliberately fast (no AI call in it beyond the small
@@ -542,7 +547,14 @@ export function WebsiteBuilderWorkspace({
         return;
       }
       if (!data.generated) {
-        setError(data.message ?? "Could not generate the website.");
+        // A credit shortfall arrives with everything needed to act on it
+        // (api/websites/generate). Anything else is still a plain error.
+        if (data.shortfall) {
+          setShortfall(data.shortfall as CreditShortfall);
+          setError(null);
+        } else {
+          setError(data.message ?? "Could not generate the website.");
+        }
         return;
       }
 
@@ -1312,10 +1324,31 @@ export function WebsiteBuilderWorkspace({
                 )
               )}
 
-              {error && (
-                <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
-                  {error}
-                </p>
+              {/* The credit refusal is NOT rendered as an error. It is not
+                  a failure — nothing broke, and one of the three things it
+                  offers costs nothing. Painting it red taught users to
+                  read it as "this is broken" and close it. */}
+              {shortfall ? (
+                <CreditShortfallPanel
+                  shortfall={shortfall}
+                  onSimplify={() => {
+                    setShortfall(null);
+                    const field = document.getElementById("website-description");
+                    if (field instanceof HTMLTextAreaElement) {
+                      field.focus();
+                      // Cursor at the end, not selecting everything: the
+                      // next keystroke must not wipe what they wrote.
+                      field.setSelectionRange(field.value.length, field.value.length);
+                    }
+                  }}
+                  onDismiss={() => setShortfall(null)}
+                />
+              ) : (
+                error && (
+                  <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+                    {error}
+                  </p>
+                )
               )}
 
               {pendingClarification ? (

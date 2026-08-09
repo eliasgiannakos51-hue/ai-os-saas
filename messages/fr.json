@@ -288,6 +288,22 @@
       "upTo5AiAgents": "Jusqu'à 5 agents IA",
       "upTo15AiAgentsTeams": "Jusqu'à 15 agents IA et équipes",
       "upTo50AiAgents": "Jusqu'à 50 agents IA"
+    },
+    "allowance": {
+      "approx": "~{count}",
+      "tableTitle": "Ce que vous pouvez faire chaque mois",
+      "perMonthHeader": "Par mois",
+      "creditsEach": "({count} crédits chacun)",
+      "footnoteMeasured": "Chiffres typiques, tirés de ce que ces actions ont réellement coûté ces 90 derniers jours. Votre usage varie selon la taille de vos demandes.",
+      "footnoteEstimated": "Chiffres typiques, estimés d'après la taille d'une demande normale. Ils sont remplacés par des moyennes mesurées dès qu'il y a assez de données d'usage.",
+      "action": {
+        "website": "sites web",
+        "chatMessage": "messages de chat",
+        "mission": "missions",
+        "agentRun": "exécutions d'agents",
+        "deepResearch": "rapports de recherche",
+        "fileAsk": "questions sur vos documents"
+      }
     }
   },
   "auth": {
@@ -1560,5 +1576,18 @@
     "sending": "Envoi…",
     "sent": "Envoyé. Nous répondrons à l'adresse de votre compte.",
     "error": "Une erreur est survenue. Réessayez."
+  },
+  "creditShortfall": {
+    "title": "Crédits insuffisants pour cela",
+    "summary": "Cela demande environ {needed} crédits et vous en avez {available}.",
+    "simplerTitle": "Décrivez-le plus simplement — gratuit",
+    "simplerBody": "Environ {percent}% plus courte — près de {chars} caractères — coûterait environ {credits} crédits.",
+    "simplerBodyNoImages": "Sans les images de référence et avec environ {chars} caractères, cela coûterait environ {credits} crédits.",
+    "noSimplerOption": "Même la version la plus simple demande environ {floor} crédits : raccourcir ne suffira pas.",
+    "packTitle": "Ajouter {credits} crédits — {price}",
+    "packBody": "Recharge ponctuelle, sans changer votre abonnement. Cette demande coûterait alors environ {credits} crédits.",
+    "upgradeTitle": "Passer à {plan} — {price}/mois",
+    "upgradeBody": "{monthly} crédits par mois. Cette demande coûte environ {credits} sur ce forfait.",
+    "checkoutFailed": "Impossible de démarrer le paiement."
   }
 }

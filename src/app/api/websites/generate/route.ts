@@ -15,6 +15,7 @@ import {
   getPurchasedPackCreditPriceEur,
 } from "@/lib/billing/credits";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { describeShortfall } from "@/lib/billing/shortfall";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { settleReservation } from "@/lib/billing/reservations";
 import { checkNeedsClarification } from "@/lib/clarification";
@@ -286,6 +287,7 @@ export async function POST(request: Request) {
       // row already created — a confusing failure that only exists because
       // two numbers were computed different ways.
       const pricingConfig = resolvePricingConfig();
+      const packPriceEur = await getPurchasedPackCreditPriceEur(user.id);
       const estimatedCost = estimateForAction(
         "websiteGenerate",
         {
@@ -294,18 +296,33 @@ export async function POST(request: Request) {
           imageCount: referenceImagePaths.length,
         },
         pricingConfig,
-        effectiveCreditPriceEurForAccount(
-          plan,
-          await getPurchasedPackCreditPriceEur(user.id),
-          pricingConfig
-        )
+        effectiveCreditPriceEurForAccount(plan, packPriceEur, pricingConfig)
       ).reserveCredits;
       const check = await hasEnoughCredits(user.id, estimatedCost, plan);
       if (!check.ok) {
+        // Answer the question the refusal raises, in the same response
+        // that refuses. `message` stays for any client that has not been
+        // taught about `shortfall` yet; everything actionable is in the
+        // structured field — including the free option (describe it more
+        // simply), which the old message never mentioned because nothing
+        // had worked out whether it was available.
+        const shortfall = describeShortfall(
+          {
+            action: "websiteGenerate",
+            model: WEBSITE_MODEL,
+            inputChars: description.length,
+            imageCount: referenceImagePaths.length,
+            available: check.remaining,
+            plan,
+            purchasedPackPriceEur: packPriceEur,
+          },
+          pricingConfig
+        );
         return NextResponse.json({
           ok: true,
           generated: false,
           rateLimited: true,
+          shortfall,
           message: insufficientCreditsMessage(check.remaining, estimatedCost),
         });
       }

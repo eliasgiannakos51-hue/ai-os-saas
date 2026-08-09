@@ -288,6 +288,22 @@
       "upTo5AiAgents": "Hasta 5 agentes de IA",
       "upTo15AiAgentsTeams": "Hasta 15 agentes de IA y equipos",
       "upTo50AiAgents": "Hasta 50 agentes de IA"
+    },
+    "allowance": {
+      "approx": "~{count}",
+      "tableTitle": "Qué puedes hacer cada mes",
+      "perMonthHeader": "Al mes",
+      "creditsEach": "({count} créditos cada uno)",
+      "footnoteMeasured": "Cifras típicas, tomadas de lo que estas acciones han costado realmente en los últimos 90 días. Tu uso varía según el tamaño de tus solicitudes.",
+      "footnoteEstimated": "Cifras típicas, estimadas a partir del tamaño de una solicitud normal. Se sustituyen por medias medidas cuando hay suficientes datos de uso.",
+      "action": {
+        "website": "sitios web",
+        "chatMessage": "mensajes de chat",
+        "mission": "misiones",
+        "agentRun": "ejecuciones de agentes",
+        "deepResearch": "informes de investigación",
+        "fileAsk": "preguntas sobre tus documentos"
+      }
     }
   },
   "auth": {
@@ -1560,5 +1576,18 @@
     "sending": "Enviando…",
     "sent": "Enviado. Te responderemos al correo de tu cuenta.",
     "error": "Algo salió mal. Inténtalo de nuevo."
+  },
+  "creditShortfall": {
+    "title": "No tienes créditos suficientes",
+    "summary": "Esto necesita unos {needed} créditos y tienes {available}.",
+    "simplerTitle": "Descríbelo de forma más simple: gratis",
+    "simplerBody": "Un {percent}% más corta —unos {chars} caracteres— costaría unos {credits} créditos.",
+    "simplerBodyNoImages": "Sin las imágenes de referencia y con unos {chars} caracteres, costaría unos {credits} créditos.",
+    "noSimplerOption": "Incluso la versión más simple necesita unos {floor} créditos, así que acortarla no bastará.",
+    "packTitle": "Añade {credits} créditos: {price}",
+    "packBody": "Recarga puntual, sin cambiar tu suscripción. Esta solicitud costaría entonces unos {credits} créditos.",
+    "upgradeTitle": "Cambia a {plan}: {price}/mes",
+    "upgradeBody": "{monthly} créditos al mes. Esta solicitud cuesta unos {credits} en ese plan.",
+    "checkoutFailed": "No se pudo iniciar el pago."
   }
 }

@@ -288,6 +288,22 @@
       "upTo5AiAgents": "最多 5 个 AI 智能体",
       "upTo15AiAgentsTeams": "最多 15 个 AI 智能体与团队",
       "upTo50AiAgents": "最多 50 个 AI 智能体"
+    },
+    "allowance": {
+      "approx": "约{count}",
+      "tableTitle": "每月可以完成的工作量",
+      "perMonthHeader": "每月",
+      "creditsEach": "（每次 {count} credits）",
+      "footnoteMeasured": "典型数值，取自过去 90 天这些操作的实际成本。实际用量会随请求的大小而变化。",
+      "footnoteEstimated": "典型数值，根据一次普通请求的规模估算。积累足够使用数据后，将替换为实测平均值。",
+      "action": {
+        "website": "个网站",
+        "chatMessage": "条聊天消息",
+        "mission": "个任务",
+        "agentRun": "次智能体运行",
+        "deepResearch": "份研究报告",
+        "fileAsk": "个关于文档的问题"
+      }
     }
   },
   "auth": {
@@ -1560,5 +1576,18 @@
     "sending": "发送中…",
     "sent": "已发送。我们会回复到你账号的邮箱。",
     "error": "出了点问题，请重试。"
+  },
+  "creditShortfall": {
+    "title": "credits 不足，无法完成此操作",
+    "summary": "此操作约需 {needed} credits，你现有 {available}。",
+    "simplerTitle": "把描述写得更简单——免费",
+    "simplerBody": "缩短约 {percent}%（大约 {chars} 个字符）后，约需 {credits} credits。",
+    "simplerBodyNoImages": "去掉参考图片，并将描述控制在约 {chars} 个字符，约需 {credits} credits。",
+    "noSimplerOption": "即便是最简版本也约需 {floor} credits，仅靠缩短描述不够。",
+    "packTitle": "增加 {credits} credits — {price}",
+    "packBody": "一次性充值，不改变订阅。此请求届时约需 {credits} credits。",
+    "upgradeTitle": "升级到 {plan} — {price}/月",
+    "upgradeBody": "每月 {monthly} credits。在该方案下此请求约需 {credits}。",
+    "checkoutFailed": "无法启动结账。"
   }
 }

@@ -288,6 +288,22 @@
       "upTo5AiAgents": "AIエージェント最大5体",
       "upTo15AiAgentsTeams": "AIエージェント最大15体・チーム",
       "upTo50AiAgents": "AIエージェント最大50体"
+    },
+    "allowance": {
+      "approx": "約{count}",
+      "tableTitle": "毎月できること",
+      "perMonthHeader": "1か月あたり",
+      "creditsEach": "（1件あたり {count} credits）",
+      "footnoteMeasured": "過去90日間にこれらの操作が実際にかかった費用から算出した目安です。実際の消費量はリクエストの大きさによって変わります。",
+      "footnoteEstimated": "通常のリクエストの大きさから見積もった目安です。利用データが十分に集まると実測平均に置き換わります。",
+      "action": {
+        "website": "件のウェブサイト",
+        "chatMessage": "件のチャットメッセージ",
+        "mission": "件のミッション",
+        "agentRun": "回のエージェント実行",
+        "deepResearch": "件のリサーチレポート",
+        "fileAsk": "件の書類に関する質問"
+      }
     }
   },
   "auth": {
@@ -1560,5 +1576,18 @@
     "sending": "送信中…",
     "sent": "送信しました。アカウントのメールアドレスへ返信します。",
     "error": "うまくいきませんでした。もう一度お試しください。"
+  },
+  "creditShortfall": {
+    "title": "この操作にはcreditsが足りません",
+    "summary": "この操作には約 {needed} credits が必要ですが、残高は {available} です。",
+    "simplerTitle": "もっと簡単に書く — 無料",
+    "simplerBody": "約 {percent}% 短く（およそ {chars} 文字）すれば、約 {credits} credits で済みます。",
+    "simplerBodyNoImages": "参考画像を外し、約 {chars} 文字にすれば、約 {credits} credits で済みます。",
+    "noSimplerOption": "もっとも簡単な内容でも約 {floor} credits かかるため、短くするだけでは足りません。",
+    "packTitle": "{credits} credits を追加 — {price}",
+    "packBody": "サブスクリプションを変えない一回限りのチャージです。このリクエストは約 {credits} credits になります。",
+    "upgradeTitle": "{plan} にアップグレード — {price}/月",
+    "upgradeBody": "月 {monthly} credits。そのプランではこのリクエストは約 {credits} です。",
+    "checkoutFailed": "決済を開始できませんでした。"
   }
 }

@@ -288,6 +288,22 @@
       "upTo5AiAgents": "Up to 5 AI agents",
       "upTo15AiAgentsTeams": "Up to 15 AI agents & teams",
       "upTo50AiAgents": "Up to 50 AI agents"
+    },
+    "allowance": {
+      "approx": "~{count}",
+      "tableTitle": "What you can do each month",
+      "perMonthHeader": "Per month",
+      "creditsEach": "({count} credits each)",
+      "footnoteMeasured": "Typical figures, taken from what these actions have really cost over the last 90 days. Your own usage varies with how large your requests are.",
+      "footnoteEstimated": "Typical figures, estimated from the size of a normal request. They are replaced by measured averages once there is enough usage data.",
+      "action": {
+        "website": "websites",
+        "chatMessage": "chat messages",
+        "mission": "missions",
+        "agentRun": "agent runs",
+        "deepResearch": "research reports",
+        "fileAsk": "questions about your documents"
+      }
     }
   },
   "auth": {
@@ -1560,5 +1576,18 @@
     "sending": "Sending…",
     "sent": "Sent. We'll reply to your account email.",
     "error": "Something went wrong. Please try again."
+  },
+  "creditShortfall": {
+    "title": "Not enough credits for this",
+    "summary": "This needs about {needed} credits and you have {available}.",
+    "simplerTitle": "Describe it more simply — free",
+    "simplerBody": "About {percent}% shorter — roughly {chars} characters — would cost about {credits} credits.",
+    "simplerBodyNoImages": "Without the reference images, and at roughly {chars} characters, it would cost about {credits} credits.",
+    "noSimplerOption": "Even the simplest version of this needs about {floor} credits, so shortening it will not be enough.",
+    "packTitle": "Add {credits} credits — {price}",
+    "packBody": "One-off top-up, no change to your subscription. This request would then cost about {credits} credits.",
+    "upgradeTitle": "Upgrade to {plan} — {price}/month",
+    "upgradeBody": "{monthly} credits a month. This request costs about {credits} on that plan.",
+    "checkoutFailed": "Could not start checkout."
   }
 }

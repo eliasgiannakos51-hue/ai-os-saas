@@ -288,6 +288,22 @@
       "upTo5AiAgents": "Bis zu 5 KI-Agenten",
       "upTo15AiAgentsTeams": "Bis zu 15 KI-Agenten & Teams",
       "upTo50AiAgents": "Bis zu 50 KI-Agenten"
+    },
+    "allowance": {
+      "approx": "~{count}",
+      "tableTitle": "Was Sie jeden Monat tun können",
+      "perMonthHeader": "Pro Monat",
+      "creditsEach": "(je {count} Credits)",
+      "footnoteMeasured": "Typische Werte, ermittelt aus den tatsächlichen Kosten dieser Aktionen in den letzten 90 Tagen. Ihr Verbrauch hängt davon ab, wie umfangreich Ihre Anfragen sind.",
+      "footnoteEstimated": "Typische Werte, geschätzt anhand der Größe einer normalen Anfrage. Sie werden durch gemessene Mittelwerte ersetzt, sobald genügend Nutzungsdaten vorliegen.",
+      "action": {
+        "website": "Websites",
+        "chatMessage": "Chat-Nachrichten",
+        "mission": "Missionen",
+        "agentRun": "Agenten-Läufe",
+        "deepResearch": "Recherche-Berichte",
+        "fileAsk": "Fragen zu Ihren Dokumenten"
+      }
     }
   },
   "auth": {
@@ -1560,5 +1576,18 @@
     "sending": "Wird gesendet …",
     "sent": "Gesendet. Wir antworten an die E-Mail-Adresse deines Kontos.",
     "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
+  },
+  "creditShortfall": {
+    "title": "Dafür reichen die Credits nicht",
+    "summary": "Das benötigt etwa {needed} Credits, verfügbar sind {available}.",
+    "simplerTitle": "Einfacher beschreiben — kostenlos",
+    "simplerBody": "Rund {percent}% kürzer — etwa {chars} Zeichen — würde etwa {credits} Credits kosten.",
+    "simplerBodyNoImages": "Ohne die Referenzbilder und mit etwa {chars} Zeichen würde es etwa {credits} Credits kosten.",
+    "noSimplerOption": "Selbst die einfachste Fassung braucht etwa {floor} Credits — kürzen reicht hier nicht.",
+    "packTitle": "{credits} Credits hinzufügen — {price}",
+    "packBody": "Einmalige Aufladung, ohne Änderung Ihres Abos. Diese Anfrage kostet dann etwa {credits} Credits.",
+    "upgradeTitle": "Auf {plan} wechseln — {price}/Monat",
+    "upgradeBody": "{monthly} Credits pro Monat. Diese Anfrage kostet dort etwa {credits}.",
+    "checkoutFailed": "Der Bezahlvorgang konnte nicht gestartet werden."
   }
 }

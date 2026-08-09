@@ -9,6 +9,8 @@ import { AppBackground } from "@/components/ui/app-background";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 import { formatNumber } from "@/lib/format-number";
+import { ALLOWANCE_ACTIONS, allAllowances, headlineRows } from "@/lib/billing/plan-allowance";
+import { getMeasuredCosts } from "@/lib/billing/measured-costs";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -65,6 +67,16 @@ function ComparisonCellContent({ cell }: { cell: ComparisonCell }) {
 export default async function PricingPage() {
   const t = await getTranslations("pricing");
   const locale = await getLocale();
+
+  // Measured first, estimator as the fallback — getMeasuredCosts() returns
+  // an empty map rather than throwing when the stats function has not been
+  // migrated yet, so this page renders on a project that has never run
+  // plan_allowance_migration.sql. It just quotes estimated figures there,
+  // and says so in the footnote below.
+  const measured = await getMeasuredCosts();
+  const allowances = allAllowances(measured);
+  const allowanceBySlug = new Map(allowances.map((a) => [a.slug, headlineRows(a)]));
+  const anyMeasured = allowances.some((a) => a.rows.some((r) => r.source === "measured"));
 
   // Determines whether "Set Up Team" below can skip straight to
   // /dashboard/team, or needs to route through checkout first — mirrors
@@ -134,6 +146,28 @@ export default async function PricingPage() {
                   ? t("features.customCredits")
                   : t("features.creditsPerMonth", { count: formatNumber(plan.monthlyCredits, locale) })}
               </p>
+
+              {/* What the allowance actually BUYS. A credit count is a
+                  unit the buyer has never used; this is the same number
+                  expressed in work they recognise. Derived at request time
+                  from lib/billing/plan-allowance.ts, which reads the real
+                  measured cost of each action — never hand-written, so it
+                  cannot drift from what gets charged. */}
+              {allowanceBySlug.get(plan.slug)?.length ? (
+                <ul
+                  data-testid={`plan-allowance-${plan.slug}`}
+                  className="mt-3 space-y-1 rounded-xl border border-border/70 bg-background/40 px-3 py-2.5"
+                >
+                  {allowanceBySlug.get(plan.slug)!.map((row) => (
+                    <li key={row.key} className="text-[11px] leading-relaxed text-foreground">
+                      <span className="font-semibold text-orange-400">
+                        {t("allowance.approx", { count: formatNumber(row.perMonth, locale) })}
+                      </span>{" "}
+                      <span className="text-muted">{t(`allowance.action.${row.key}`)}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
 
               <ul className="mt-6 flex-1 space-y-2.5 text-sm text-muted">
                 {plan.features.map((feature) => (
@@ -243,6 +277,71 @@ export default async function PricingPage() {
           <p className="mt-2 text-sm text-muted">
             {t("teamBannerBody", { price: `${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}` })}
           </p>
+        </div>
+
+        {/* The full version of what the cards summarise: every action,
+            every plan, in one grid. Same source, same formula — this table
+            and the card lines cannot disagree, because both are
+            planAllowance() output. */}
+        <div className="mt-16">
+          <h2 className="mb-2 text-center text-xl font-bold text-foreground">
+            {t("allowance.tableTitle")}
+          </h2>
+          <p className="mb-5 text-center text-xs text-muted">
+            {anyMeasured ? t("allowance.footnoteMeasured") : t("allowance.footnoteEstimated")}
+          </p>
+          <div className="overflow-x-auto rounded-2xl border border-border">
+            <table className="w-full min-w-[720px] border-collapse text-sm" data-testid="allowance-table">
+              <thead>
+                <tr className="border-b border-border bg-panel">
+                  <th className="px-4 py-3 text-left font-semibold text-muted">
+                    {t("allowance.perMonthHeader")}
+                  </th>
+                  {allowances.map((a) => (
+                    <th
+                      key={a.slug}
+                      className={`px-4 py-3 text-center font-semibold ${
+                        getPlan(a.slug)?.highlighted ? "text-orange-400" : "text-foreground"
+                      }`}
+                    >
+                      {getPlan(a.slug)?.name ?? a.slug}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {ALLOWANCE_ACTIONS.map((action, index) => (
+                  <tr
+                    key={action.key}
+                    className={`border-b border-border last:border-b-0 ${index % 2 === 1 ? "bg-panel/40" : ""}`}
+                  >
+                    <td className="px-4 py-3 text-left text-muted">{t(`allowance.action.${action.key}`)}</td>
+                    {allowances.map((a) => {
+                      const row = a.rows.find((r) => r.key === action.key);
+                      return (
+                        <td key={a.slug} className="px-4 py-3 text-center">
+                          {a.monthlyCredits === null ? (
+                            <span className="text-sm text-muted">{t("custom")}</span>
+                          ) : row ? (
+                            <span className="text-sm text-foreground">
+                              {formatNumber(row.perMonth, locale)}
+                              <span className="ml-1 text-[11px] text-muted">
+                                {t("allowance.creditsEach", {
+                                  count: formatNumber(row.creditsPerAction, locale),
+                                })}
+                              </span>
+                            </span>
+                          ) : (
+                            <X className="mx-auto h-4 w-4 text-muted/50" aria-hidden="true" />
+                          )}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div className="mt-16">

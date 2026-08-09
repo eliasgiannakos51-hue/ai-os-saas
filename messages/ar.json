@@ -288,6 +288,22 @@
       "upTo5AiAgents": "حتى 5 وكلاء أذكياء",
       "upTo15AiAgentsTeams": "حتى 15 وكيلاً ذكياً وفرق",
       "upTo50AiAgents": "حتى 50 وكيلاً ذكياً"
+    },
+    "allowance": {
+      "approx": "~{count}",
+      "tableTitle": "ما يمكنك إنجازه كل شهر",
+      "perMonthHeader": "شهريًا",
+      "creditsEach": "({count} رصيد لكل واحدة)",
+      "footnoteMeasured": "أرقام تقريبية مأخوذة من التكلفة الفعلية لهذه العمليات خلال آخر 90 يومًا. يختلف استهلاكك حسب حجم طلباتك.",
+      "footnoteEstimated": "أرقام تقريبية مقدَّرة بناءً على حجم الطلب المعتاد. تُستبدل بمتوسطات مقيسة فور توفر بيانات استخدام كافية.",
+      "action": {
+        "website": "مواقع ويب",
+        "chatMessage": "رسائل محادثة",
+        "mission": "مهام",
+        "agentRun": "عمليات تشغيل الوكلاء",
+        "deepResearch": "تقارير بحثية",
+        "fileAsk": "أسئلة عن مستنداتك"
+      }
     }
   },
   "auth": {
@@ -1560,5 +1576,18 @@
     "sending": "جارٍ الإرسال…",
     "sent": "تم الإرسال. سنرد على بريد حسابك.",
     "error": "حدث خطأ ما. حاول مرة أخرى."
+  },
+  "creditShortfall": {
+    "title": "الرصيد غير كافٍ لهذه العملية",
+    "summary": "تحتاج هذه العملية إلى نحو {needed} رصيد، ولديك {available}.",
+    "simplerTitle": "اوصفها بشكل أبسط — مجانًا",
+    "simplerBody": "أقصر بنحو {percent}% — حوالي {chars} حرف — ستكلّف نحو {credits} رصيد.",
+    "simplerBodyNoImages": "بدون الصور المرجعية وبنحو {chars} حرف، ستكلّف نحو {credits} رصيد.",
+    "noSimplerOption": "حتى أبسط نسخة تحتاج نحو {floor} رصيد، لذا الاختصار وحده لن يكفي.",
+    "packTitle": "أضف {credits} رصيد — {price}",
+    "packBody": "شحن لمرة واحدة دون تغيير اشتراكك. عندها سيكلّف هذا الطلب نحو {credits} رصيد.",
+    "upgradeTitle": "الترقية إلى {plan} — {price}/شهر",
+    "upgradeBody": "{monthly} رصيد شهريًا. يكلّف هذا الطلب نحو {credits} في تلك الباقة.",
+    "checkoutFailed": "تعذّر بدء عملية الدفع."
   }
 }

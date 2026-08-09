@@ -239,6 +239,18 @@ export const PLANS: Plan[] = [
 // gating, feature gating) — index in this array, higher is better.
 const PLAN_RANK: PlanSlug[] = ["free", "starter", "growth", "professional", "ultimate", "enterprise"];
 
+/**
+ * Where a plan sits in the ladder, or -1 for a slug that is not a plan.
+ *
+ * Exported because "which plans are ABOVE the one this account is on" is
+ * now asked by more than the gating check — the insufficient-credits
+ * panel has to find the cheapest plan that would actually cover the
+ * action, and re-deriving the order there would be a second copy of it.
+ */
+export function planRank(slug: string): number {
+  return PLAN_RANK.indexOf(slug as PlanSlug);
+}
+
 export function getPlan(slug: string): Plan | undefined {
   return PLANS.find((p) => p.slug === slug);
 }

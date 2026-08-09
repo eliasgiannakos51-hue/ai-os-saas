@@ -288,6 +288,22 @@
       "upTo5AiAgents": "Fino a 5 agenti IA",
       "upTo15AiAgentsTeams": "Fino a 15 agenti IA e team",
       "upTo50AiAgents": "Fino a 50 agenti IA"
+    },
+    "allowance": {
+      "approx": "~{count}",
+      "tableTitle": "Cosa puoi fare ogni mese",
+      "perMonthHeader": "Al mese",
+      "creditsEach": "({count} crediti ciascuno)",
+      "footnoteMeasured": "Valori tipici, ricavati da quanto queste azioni sono realmente costate negli ultimi 90 giorni. Il tuo consumo varia in base alla dimensione delle richieste.",
+      "footnoteEstimated": "Valori tipici, stimati sulla dimensione di una richiesta normale. Vengono sostituiti da medie misurate non appena ci sono abbastanza dati d'uso.",
+      "action": {
+        "website": "siti web",
+        "chatMessage": "messaggi in chat",
+        "mission": "missioni",
+        "agentRun": "esecuzioni di agenti",
+        "deepResearch": "report di ricerca",
+        "fileAsk": "domande sui tuoi documenti"
+      }
     }
   },
   "auth": {
@@ -1560,5 +1576,18 @@
     "sending": "Invio in corso…",
     "sent": "Inviato. Ti rispondiamo all'email del tuo account.",
     "error": "Qualcosa è andato storto. Riprova."
+  },
+  "creditShortfall": {
+    "title": "Crediti insufficienti per questo",
+    "summary": "Servono circa {needed} crediti e ne hai {available}.",
+    "simplerTitle": "Descrivilo in modo più semplice — gratis",
+    "simplerBody": "Circa {percent}% più corta — all'incirca {chars} caratteri — costerebbe circa {credits} crediti.",
+    "simplerBodyNoImages": "Senza le immagini di riferimento e con circa {chars} caratteri, costerebbe circa {credits} crediti.",
+    "noSimplerOption": "Anche la versione più semplice richiede circa {floor} crediti, quindi accorciarla non basterà.",
+    "packTitle": "Aggiungi {credits} crediti — {price}",
+    "packBody": "Ricarica una tantum, senza modifiche all'abbonamento. La richiesta costerebbe poi circa {credits} crediti.",
+    "upgradeTitle": "Passa a {plan} — {price}/mese",
+    "upgradeBody": "{monthly} crediti al mese. Questa richiesta costa circa {credits} con quel piano.",
+    "checkoutFailed": "Impossibile avviare il pagamento."
   }
 }

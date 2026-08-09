@@ -54,6 +54,10 @@ const LOCALE_ALLOWED = new Set([
   // translated.
   "el:dashboard.files.creditsCharged",
   "el:dashboard.deepResearch.creditsCharged",
+  // "missions" is the French plural of "mission", spelled exactly as in
+  // English. Every alternative ("tâches", "objectifs") names a different
+  // thing than the Missions feature does.
+  "fr:pricing.allowance.action.mission",
   "fr:dashboard.files.pages",
   "fr:dashboard.files.collections",
   "fr:dashboard.deepResearch.questionCount",
@@ -183,6 +187,12 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // "Harvard Business Review" would make the source harder to look up,
   // which is the opposite of what a source line is for.
   "landing.problem.source",
+  // "~{count}" — a tilde and a number. The only translatable thing in it
+  // is the approximation mark, and that mark is the same character in
+  // every Latin- and Arabic-script locale here; zh and ja DO differ
+  // ("约"/"約") and are translated. isFormatOnly does not catch it only
+  // because the placeholder's own NAME contains letters.
+  "pricing.allowance.approx",
   "pricing.businessTitle",
   "pricing.rows.websiteBuilder",
   "pricing.rows.mobileSaasBuilder",

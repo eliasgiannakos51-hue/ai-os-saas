@@ -288,6 +288,22 @@
       "upTo5AiAgents": "Έως 5 πράκτορες AI",
       "upTo15AiAgentsTeams": "Έως 15 πράκτορες AI & ομάδες",
       "upTo50AiAgents": "Έως 50 πράκτορες AI"
+    },
+    "allowance": {
+      "approx": "~{count}",
+      "tableTitle": "Τι μπορείς να κάνεις κάθε μήνα",
+      "perMonthHeader": "Ανά μήνα",
+      "creditsEach": "({count} credits το καθένα)",
+      "footnoteMeasured": "Τυπικοί αριθμοί, από το τι κόστισαν πραγματικά αυτές οι ενέργειες τις τελευταίες 90 ημέρες. Η δική σου χρήση αλλάζει ανάλογα με το πόσο μεγάλα είναι τα αιτήματά σου.",
+      "footnoteEstimated": "Τυπικοί αριθμοί, υπολογισμένοι από το μέγεθος ενός κανονικού αιτήματος. Αντικαθίστανται από πραγματικές μετρήσεις μόλις υπάρξουν αρκετά δεδομένα χρήσης.",
+      "action": {
+        "website": "ιστοσελίδες",
+        "chatMessage": "μηνύματα chat",
+        "mission": "αποστολές",
+        "agentRun": "εκτελέσεις agent",
+        "deepResearch": "αναφορές έρευνας",
+        "fileAsk": "ερωτήσεις στα έγγραφά σου"
+      }
     }
   },
   "auth": {
@@ -1560,5 +1576,18 @@
     "sending": "Αποστέλλεται…",
     "sent": "Στάλθηκε. Θα απαντήσουμε στο email του λογαριασμού σου.",
     "error": "Κάτι πήγε στραβά. Δοκίμασε ξανά."
+  },
+  "creditShortfall": {
+    "title": "Δεν φτάνουν τα credits γι' αυτό",
+    "summary": "Αυτό χρειάζεται ~{needed} credits και έχεις {available}.",
+    "simplerTitle": "Πες το πιο απλά — δωρεάν",
+    "simplerBody": "Περίπου {percent}% πιο σύντομη — γύρω στους {chars} χαρακτήρες — θα κόστιζε ~{credits} credits.",
+    "simplerBodyNoImages": "Χωρίς τις εικόνες αναφοράς και γύρω στους {chars} χαρακτήρες, θα κόστιζε ~{credits} credits.",
+    "noSimplerOption": "Ακόμα και η πιο απλή εκδοχή χρειάζεται ~{floor} credits, οπότε η συντόμευση δεν αρκεί.",
+    "packTitle": "Πρόσθεσε {credits} credits — {price}",
+    "packBody": "Εφάπαξ ανανέωση, χωρίς αλλαγή στη συνδρομή σου. Τότε αυτό το αίτημα θα κοστίσει ~{credits} credits.",
+    "upgradeTitle": "Αναβάθμιση σε {plan} — {price}/μήνα",
+    "upgradeBody": "{monthly} credits τον μήνα. Αυτό το αίτημα κοστίζει ~{credits} σε εκείνο το πλάνο.",
+    "checkoutFailed": "Δεν ήταν δυνατή η έναρξη της πληρωμής."
   }
 }

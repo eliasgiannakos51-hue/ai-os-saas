@@ -28,6 +28,7 @@ import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
+import { describeShortfall } from "@/lib/billing/shortfall";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
 import { FREE_CHAT_LIMITS } from "@/lib/billing/free-chat";
 import { consumeFreeChatMessage, releaseFreeChatMessage } from "@/lib/billing/free-chat-usage";
@@ -301,13 +302,10 @@ export async function POST(request: Request) {
     // two sentences or two thousand words, and charged nothing at all for
     // the tokens the accumulated history contributed.
     const pricingConfig = resolvePricingConfig();
+    const packCreditPriceEur = bypassCredits ? null : await getPurchasedPackCreditPriceEur(user.id);
     const accountCreditPriceEur = bypassCredits
       ? pricingConfig.creditPriceEur
-      : effectiveCreditPriceEurForAccount(
-          plan,
-          await getPurchasedPackCreditPriceEur(user.id),
-          pricingConfig
-        );
+      : effectiveCreditPriceEurForAccount(plan, packCreditPriceEur, pricingConfig);
     // FREE CHAT. Claimed before any credit machinery runs, because a
     // granted free message skips the reserve/settle path entirely.
     //
@@ -343,9 +341,26 @@ export async function POST(request: Request) {
     if (!bypassCredits && !isFreeMessage) {
       const check = await hasEnoughCredits(user.id, estimate.reserveCredits, plan);
       if (!check.ok) {
+        // Same structured answer the Website Builder gives. `inputChars`
+        // is the MESSAGE alone, not message + system prompt: the system
+        // prompt is not something the user can shorten, and offering to
+        // trim it would quote a reduction they cannot act on.
+        const shortfall = describeShortfall(
+          {
+            action: "chatMessage",
+            model: MODEL,
+            inputChars: message.length,
+            expectedWebSearches: 1,
+            available: check.remaining,
+            plan,
+            purchasedPackPriceEur: packCreditPriceEur,
+          },
+          pricingConfig
+        );
         return NextResponse.json({
           ok: true,
           rateLimited: true,
+          shortfall,
           message: insufficientCreditsMessage(check.remaining, estimate.reserveCredits),
         });
       }

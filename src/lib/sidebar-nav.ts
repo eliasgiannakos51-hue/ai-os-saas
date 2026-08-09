@@ -99,7 +99,7 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         icon: MODULE_ICONS["data-analysis"], hintKey: "dataAnalysis" },
       {
         href: "/dashboard/presentations",
-        label: "Presentations",
+        label: "Presentation Notes",
         icon: MODULE_ICONS.presentations, hintKey: "presentations" },
       { href: "/dashboard/campaigns", label: "Campaigns", icon: MODULE_ICONS.campaigns , hintKey: "campaigns" },
     ],

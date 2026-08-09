@@ -35,6 +35,15 @@ export type ModuleConfig = {
   // same capability behind would have made one number mean two things.
   creditCost?: number;
   minPlanSlug?: PlanSlug;
+  // Overrides the shared "No entries yet" empty state with a key under
+  // messages/*.json's `module.*`.
+  //
+  // Exists for Presentation Notes, where the generic message is actively
+  // misleading: a user who arrived expecting a slide generator needs the
+  // empty screen to say what this actually is, and every OTHER module is
+  // served perfectly well by the shared string. A per-module override is
+  // the smallest change that fixes one module without touching twenty.
+  emptyKey?: string;
 };
 
 export const MODULES: ModuleConfig[] = [

@@ -523,6 +523,81 @@ const searchTool = (requests[0].tools ?? []).find((t) => t.type === "web_search_
 checkTrue("the request really offers web search", Boolean(searchTool));
 check("with the raised budget", searchTool?.max_uses, genSearches);
 
+// ---------------------------------------------------------------------
+// 16-17: the user's brief actually reaches the model LAST.
+// ---------------------------------------------------------------------
+//
+// REPORTED: "I give specific instructions and the result partly ignores
+// them."
+//
+// The static system prompt measures ~16,500 characters against a typical
+// description of ~250 — sixty-six to one. Every one of those characters is
+// a rule the model is asked to follow, and nothing said the person's own
+// instructions outranked them. Worse, the brief was NOT even the last
+// thing the model read: the user message was built as
+// `description + referenceImageUrlList`, so the final text before the
+// answer was a list of storage URLs.
+//
+// Asserting this against the REAL request body matters more than
+// asserting it against the source: the thing that decides the outcome is
+// what the SDK actually put on the wire.
+console.log("\n== 16. the brief is the LAST thing in the user message ==");
+reset({ text: HEAD + TAIL, stopReason: "end_turn", outputTokens: 5000 });
+await wb
+  .generateWebsiteHtml(
+    "sk-ant-test",
+    "A dark green site for a law firm. No animations.",
+    undefined,
+    () => {},
+    "https://example.com/api/websites/x/submit-form",
+    new CostAccumulator()
+  )
+  .catch(() => {});
+
+let sent = requests[0];
+let userContent = sent.messages[0].content;
+let userText = typeof userContent === "string" ? userContent : userContent.at(-1).text;
+checkTrue("the brief is labelled as the user's own", /THE USER'S BRIEF/.test(userText));
+checkTrue("and says it overrides the system prompt", /overrides every general preference/.test(userText));
+checkTrue("the brief text is present", /dark green site for a law firm/.test(userText));
+checkTrue(
+  "and nothing follows it",
+  userText.trim().endsWith("A dark green site for a law firm. No animations.")
+);
+
+console.log("\n== 17. precedence is stated, last, and outside the cached block ==");
+check("the system prompt is sent as three blocks", sent.system.length, 3);
+checkTrue("the last block is the precedence statement", /^PRECEDENCE/.test(sent.system[2].text));
+checkTrue("it says the brief wins", /If the brief contradicts a default above, the brief wins/.test(sent.system[2].text));
+checkTrue(
+  "it still protects the non-negotiables",
+  /cannot override[\s\S]{0,400}safety limits/.test(sent.system[2].text)
+);
+checkTrue("the big static block is cached", sent.system[0].cache_control?.type === "ephemeral");
+checkTrue("the precedence block is NOT cached", !sent.system[2].cache_control);
+checkTrue("nor is the per-site form block", !sent.system[1].cache_control);
+
+console.log("\n== 18. with reference images, the URLs come BEFORE the brief ==");
+reset({ text: HEAD + TAIL, stopReason: "end_turn", outputTokens: 5000 });
+await wb
+  .generateWebsiteHtml(
+    "sk-ant-test",
+    "Use my photos in the gallery.",
+    [{ base64: "aGk=", mediaType: "image/png", url: "https://storage.example.com/u/1.png" }],
+    () => {},
+    undefined,
+    new CostAccumulator()
+  )
+  .catch(() => {});
+sent = requests[0];
+userText = sent.messages[0].content.at(-1).text;
+checkTrue("the image URL list is present", /storage\.example\.com\/u\/1\.png/.test(userText));
+checkTrue(
+  "but it comes before the brief, not after it",
+  userText.indexOf("storage.example.com") < userText.indexOf("THE USER'S BRIEF")
+);
+checkTrue("and the brief is still last", userText.trim().endsWith("Use my photos in the gallery."));
+
 server.close();
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

@@ -1,6 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
+import { extractHtmlDocument, containsHtmlDocumentStart } from "@/lib/website-html-extract";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { applyExactReplace } from "@/lib/website-patch";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
@@ -52,16 +53,40 @@ const CONTINUATION_INSTRUCTION =
   "Continue the HTML document EXACTLY where you left off — do not repeat anything you already wrote, do not restart the document, and do not add any commentary or markdown code fences. Output only the raw continuation of the HTML from the exact point it was cut off.";
 
 // Same native, server-executed tool used by api/chat/route.ts — was
-// missing here entirely before this fix: streamHtmlToCompletion's
+// missing here entirely before an earlier fix: streamHtmlToCompletion's
 // anthropic.messages.stream() call never passed a `tools` array at all,
 // so the model had no way to actually search the web no matter what the
 // system prompt said to do, for either a fresh generation or an edit
-// (both go through this same function). max_uses caps it at 3 real
-// searches per generation/edit call, matching chat's same per-call limit.
+// (both go through this same function).
+//
+// max_uses was 3, copied from chat's per-reply limit. A chat reply answers
+// one question; a website has to establish the AREA, the INDUSTRY and the
+// going RATES before it can write a single true sentence, and 3 searches
+// cannot cover three subjects. The MANDATORY RESEARCH block below asks for
+// one search per subject plus follow-ups, so the ceiling is raised to
+// match what is actually being asked for.
+//
+// Cost is bounded and measured: Anthropic bills $10/1,000 searches and
+// every one lands in usage.server_tool_use.web_search_requests, which
+// CostAccumulator records and settlement charges at the account's margin
+// (see lib/billing/model-pricing.ts's WEB_SEARCH_USD_PER_QUERY). Eight
+// searches is $0.08 — real, but a fraction of the generation itself, and
+// it is the difference between a page about a real neighbourhood and a
+// page of plausible-sounding filler.
+const WEBSITE_MAX_SEARCHES = 8;
 const WEB_SEARCH_TOOL: Anthropic.WebSearchTool20250305 = {
   type: "web_search_20250305",
   name: "web_search",
-  max_uses: 3,
+  max_uses: WEBSITE_MAX_SEARCHES,
+};
+// Edits are a targeted change to an existing page, not a fresh brief, so
+// they keep the smaller budget — an edit rarely needs to re-establish the
+// whole context.
+const EDIT_MAX_SEARCHES = 3;
+const EDIT_WEB_SEARCH_TOOL: Anthropic.WebSearchTool20250305 = {
+  type: "web_search_20250305",
+  name: "web_search",
+  max_uses: EDIT_MAX_SEARCHES,
 };
 
 // Off-topic guard — without this, a request like "write me a poem" had no
@@ -245,18 +270,56 @@ const IMAGE_RULES_HEADER = `
 IMAGES:
 - If REFERENCE IMAGES are listed below with exact URLs, use them directly via <img src="EXACT_URL"> wherever they fit (hero photo, gallery, a logo in the header, etc. — infer which image is which from context). Never alter the given URL, and never fabricate additional reference-image URLs beyond what's listed.
 - MANDATORY — if the description asks for the attached/uploaded images to appear on the site at all ("put these photos in the hero", "use my images", "add these to the gallery", "βάλε αυτές τις φωτογραφίες"), then EVERY listed reference-image URL MUST appear in the output inside an <img src="..."> tag, copied character for character. Treating them as style inspiration only is WRONG in that case. Before finishing, count the listed URLs and confirm the same number appear in your HTML.
-- For any OTHER real photo the site should show (a product shot, a room, food, a team photo, an interior/exterior) that no reference image already covers, output exactly: <img src="PLACEHOLDER:short-slug" data-image-query="concise English search phrase describing exactly what the photo should show" alt="...">  — a short slug unique within this document, and a real, specific search phrase (e.g. "modern boutique hotel room interior", not just "room"). A post-processing step automatically replaces this with a real, working photo.
+- For any OTHER real photo the site should show (a product shot, a room, food, a team photo, an interior/exterior) that no reference image already covers, output exactly: <img src="PLACEHOLDER:short-slug" data-image-query="concise English search phrase describing exactly what the photo should show" alt="...">  — a short slug unique within this document, and a real, specific search phrase. A post-processing step automatically replaces this with a real, working photo from a stock photo library.
+- WRITING A GOOD data-image-query (this decides whether the photo actually matches the site):
+  * ALWAYS IN ENGLISH, even when the page itself is in another language — the photo library is searched in English, and a Greek or German query returns nothing and falls back to a random photo. This is the single most common reason a generated site ends up with unrelated images.
+  * 3-6 words, concrete and visual: "specialty coffee shop interior wooden", not "coffee" and not "a nice photo of the inside of our lovely café".
+  * Name the SUBJECT and the STYLE/SETTING, not the business: "greek mezze plates taverna table" — never the trading name, and never a city name unless the shot is genuinely of that skyline (a place name inside a subject query usually returns tourist postcards instead of the subject).
+  * One query per distinct photo. Two placeholders that would return the same image are one photo.
 - IMPORTANT — if the description names or lists SPECIFIC photos to include (e.g. "photos of the rooms", "a picture of the pool", "show our 3 menu items", "team photos"), each one of those, individually, MUST get its own PLACEHOLDER tag with a query specific to THAT exact item — never fewer PLACEHOLDER tags than the number of specific photos actually requested, and never a single generic PLACEHOLDER standing in for several distinct requested photos. Before moving on from the IMAGES step, mentally list every specific photo the description asked for and confirm each one has its own tag.
 - NEVER invent a fake external image URL yourself (no made-up unsplash.com/cdn/placeholder links) — the ONLY two ways to include a photo are a listed reference-image URL, or the PLACEHOLDER convention above.
 - Purely decorative graphics (icons, simple shapes, dividers) should still be built with CSS/inline SVG as before, not the PLACEHOLDER convention — that's reserved for actual photos.`;
 
-// Was previously described to the model in prose but never actually
-// wired up (streamHtmlToCompletion's stream() call had no `tools` at
-// all) — see WEB_SEARCH_TOOL below. Mirrors api/chat/route.ts's own
-// instruction/tool pairing.
+// MANDATORY RESEARCH — the section this whole feature's credibility rests
+// on, and the one that was getting ignored.
+//
+// The tool was wired up correctly (see WEB_SEARCH_TOOL) but the
+// instruction was permissive: "use it when the description implies…"
+// followed by "do NOT search for things you already know well". A model
+// asked for "a café in Thessaloniki" believes it knows what a café is and
+// where Thessaloniki is, so both clauses resolved to "no search needed"
+// and the page came out as generic filler with no trace of the actual
+// city. That is the reported defect — not a missing tool, a permissive
+// prompt around a wired one.
+//
+// So the trigger is inverted. Rather than asking the model to judge
+// whether it needs facts, this NAMES the three subjects a local/business
+// site cannot be honest without, and requires a search for each one that
+// applies. "You already know this" is explicitly removed as a reason to
+// skip: the model's training data does not contain which streets are busy
+// in Thessaloniki this year, and a page that pretends otherwise is the
+// failure being fixed.
+//
+// The boundary against PLACEHOLDER_DATA_SECTION is stated inline and
+// matters: research establishes facts about the AREA and the MARKET (real
+// neighbourhoods, what similar businesses charge, what the industry's
+// customers expect). It never invents facts about the USER'S OWN business
+// — their address, their phone number, their opening hours. Those are
+// still theirs to supply, and inventing one is still forbidden.
 const WEB_SEARCH_SECTION = `
-WEB SEARCH:
-You have access to a real web search tool. Use it when the description implies the site should reflect real, current facts you can't already know for certain — e.g. it asks for realistic/typical/current pricing for a named industry or service, current statistics, a real business's actual details, or anything else time-sensitive. Do NOT search for things you already know well or that are being explicitly given to you in the description (never search to "double check" content the user already supplied). When you do use search results, paraphrase them in your own words into the page's copy — never paste search-result text verbatim into the HTML.`;
+MANDATORY RESEARCH (do this BEFORE writing any HTML):
+You have a real web search tool. Do not treat it as optional. Before writing the page, search for each of the following that applies to this brief — "I already know this" is NOT a reason to skip a search, because your training data cannot contain what is true about a specific place or market right now:
+
+1. THE PLACE — if the brief names a city, neighbourhood, region or country, search it together with the business type (e.g. "cafés Thessaloniki Ladadika neighbourhood", "Thessaloniki city centre character"). You are looking for real, checkable specifics you can write into the copy: the actual character of the area, real landmarks and districts nearby, what locals and visitors actually come there for, seasonality. A page that could be about any city in the world has failed this step.
+2. THE INDUSTRY — search what websites for this kind of business actually contain and what their customers look for (e.g. "what customers look for in a specialty coffee shop", "typical sections on a restaurant website"). Use it to decide which SECTIONS the page needs, not just how to word them.
+3. THE NUMBERS — if the page should show or imply money, quantities or statistics (typical prices for this service in this market, opening-hours conventions, market size), search for them. Never invent a number you could have looked up.
+
+Then, while writing:
+- Write the researched facts into the copy as ordinary, confident sentences about the AREA and the MARKET. Naming a real nearby district, a real landmark, or a genuine local characteristic is exactly what this research is for.
+- HARD BOUNDARY: research establishes facts about the place and the industry. It NEVER establishes facts about THIS user's own business. Do not state their address, phone number, opening hours, staff names or exact prices unless the brief gave them — see DO NOT INVENT CRITICAL FACTS below, which still applies in full.
+- PARAPHRASE. Never paste search-result text verbatim into the HTML.
+- Do not search to "double check" something the brief already told you.
+- Your FINAL output is still ONLY the HTML document. Any thinking or narration you do while researching must not appear in the answer.`;
 
 // Requested explicitly as a final compliance pass: catches the common
 // failure mode of a long, multi-part description where one or two
@@ -299,15 +362,12 @@ ${PLACEHOLDER_DATA_SECTION}
 ${FINAL_SELF_CHECK_SECTION}
 ${AI_SAFETY_BOUNDARIES_EN}${AI_QUALITY_CHECKLIST_EN}`;
 
-// Strips a leading/trailing markdown code fence if the model wrapped its
-// output in one despite the system prompt saying not to — Claude does this
-// often enough for code output that it's worth handling defensively rather
-// than shipping a raw ```html fence into the user's downloaded file.
-function stripCodeFence(text: string): string {
-  const trimmed = text.trim();
-  const fenceMatch = trimmed.match(/^```(?:html)?\n([\s\S]*?)\n```$/);
-  return fenceMatch ? fenceMatch[1].trim() : trimmed;
-}
+// Was stripCodeFence — a narrower cleanup that only fired when the WHOLE
+// response was one fenced block. It is superseded by extractHtmlDocument
+// (lib/website-html-extract.ts), which also handles the case that was
+// actually breaking generations in production: a search-using turn that
+// narrates a sentence before the document. See that file for the full
+// explanation of the "generation was interrupted" failure.
 
 // Guards against the "white/blank page" bug: a sufficiently long, detailed
 // description can push a full single-file website's generation right up
@@ -428,7 +488,8 @@ async function streamHtmlToCompletion(
   // would silently undercount a continued generation by however many
   // rounds it took, which is exactly the case where the cost is highest.
   costs?: CostAccumulator,
-  stage: CostStage = "generation"
+  stage: CostStage = "generation",
+  searchTool: Anthropic.WebSearchTool20250305 = WEB_SEARCH_TOOL
 ): Promise<{ rawText: string; stopReason: string | null }> {
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: initialUserContent }];
   const startedAt = Date.now();
@@ -440,7 +501,7 @@ async function streamHtmlToCompletion(
       model: MODEL,
       max_tokens: WEBSITE_MAX_TOKENS,
       system,
-      tools: [WEB_SEARCH_TOOL],
+      tools: [searchTool],
       messages,
     });
 
@@ -448,7 +509,11 @@ async function streamHtmlToCompletion(
     if (onDelta) {
       stream.on("text", (delta) => {
         roundText += delta;
-        onDelta(combined + roundText);
+        // The live preview gets the DOCUMENT, not the raw stream. With
+        // research on, the raw stream opens with a sentence about what the
+        // model is looking up, and the preview iframe would render that
+        // sentence as the website for the first few seconds.
+        onDelta(extractHtmlDocument(combined + roundText));
       });
     }
 
@@ -472,7 +537,11 @@ async function streamHtmlToCompletion(
     combined += roundText;
     stopReason = response.stop_reason;
 
-    if (looksLikeCompleteHtmlDocument(stripCodeFence(combined.trim()))) break;
+    // Completeness is judged on the DOCUMENT, not on the raw response.
+    // Judging the raw text is what made a finished page preceded by one
+    // sentence of research narration read as unfinished — see
+    // lib/website-html-extract.ts.
+    if (looksLikeCompleteHtmlDocument(extractHtmlDocument(combined))) break;
     if (round === MAX_CONTINUATION_ROUNDS) break;
     // Don't start a round that the platform will kill mid-flight: those
     // tokens are billed to us and reach the user as nothing at all.
@@ -501,7 +570,14 @@ async function streamHtmlToCompletion(
       // are resumed by asking for the rest of the document — but only if
       // a document was actually started, otherwise the reply was prose of
       // some other kind and another round just spends more money on it.
-      if (!/^\s*(?:```(?:html)?\s*)?<(?:!doctype html|html[\s>])/i.test(combined)) break;
+      //
+      // "Was a document started" means ANYWHERE in the output, not "does
+      // the output begin with one". The prefix test this replaces is half
+      // of the interrupted-generation bug: a turn that researched first
+      // and then began the document was judged never to have started it,
+      // so the half-written page was thrown away un-resumed and reported
+      // to the user as an interruption.
+      if (!containsHtmlDocumentStart(combined)) break;
       messages.push({ role: "assistant", content: roundText });
       messages.push({ role: "user", content: CONTINUATION_INSTRUCTION });
       continue;
@@ -560,7 +636,7 @@ export async function generateWebsiteHtml(
     throw new Error("The model did not return a website.");
   }
 
-  const html = stripCodeFence(rawText);
+  const html = extractHtmlDocument(rawText);
   assertCompleteHtmlResponse(stopReason, html, "generated");
   return html;
 }
@@ -749,13 +825,14 @@ export async function editWebsiteHtml(
     content,
     undefined,
     costs,
-    "edit"
+    "edit",
+    EDIT_WEB_SEARCH_TOOL
   );
   if (!rawText) {
     throw new Error("The model did not return an updated website.");
   }
 
-  const html = stripCodeFence(rawText);
+  const html = extractHtmlDocument(rawText);
   assertCompleteHtmlResponse(stopReason, html, "updated");
   return { html, usedCheapPatch: false };
 }

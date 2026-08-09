@@ -63,7 +63,7 @@
       "coding": "KI-Coding",
       "dataAnalysis": "Datenanalyse",
       "documents": "Dokumente",
-      "presentations": "Präsentationen",
+      "presentations": "Präsentationsnotizen",
       "campaigns": "Kampagnen",
       "analytics": "Analytik",
       "finance": "Finanzen",
@@ -130,7 +130,7 @@
       "images": "Bilder aus einer Beschreibung erzeugen. Noch nicht fertig.",
       "videos": "Video aus einer Beschreibung erzeugen. Noch nicht fertig.",
       "coding": "Beschreibe, was du brauchst, und bekomme funktionierenden Code. Noch nicht fertig.",
-      "presentations": "Aus einem Briefing eine fertige Präsentation machen. Noch nicht fertig.",
+      "presentations": "Behalten Sie geplante oder bereits erstellte Präsentationen im Blick. Erstellt keine Folien.",
       "home": "Ihr Dashboard — Aktivität, Statistiken und Schnellaktionen.",
       "settings": "Konto, Abrechnung, Sprache und Einstellungen.",
       "published": "Alle Ihre Live-Seiten, mit Zugriffen und Versionsverlauf",
@@ -1461,7 +1461,8 @@
       "label": "Sortieren:",
       "newest": "Neueste",
       "oldest": "Älteste"
-    }
+    },
+    "emptyPresentationNotes": "Hier ist noch nichts. Dieser Bereich dient dazu, geplante oder bereits erstellte Präsentationen festzuhalten — er erstellt keine Folien für Sie. Fügen Sie mit der Schaltfläche oben eine hinzu."
   },
   "askAi": {
     "buttonLabel": "KI fragen",

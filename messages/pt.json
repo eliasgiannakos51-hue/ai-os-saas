@@ -63,7 +63,7 @@
       "coding": "Codificação IA",
       "dataAnalysis": "Análise de Dados",
       "documents": "Documentos",
-      "presentations": "Apresentações",
+      "presentations": "Notas de apresentação",
       "campaigns": "Campanhas",
       "analytics": "Análises",
       "finance": "Finanças",
@@ -130,7 +130,7 @@
       "images": "Gere imagens a partir de uma descrição. Ainda não está pronto.",
       "videos": "Gere vídeo a partir de uma descrição. Ainda não está pronto.",
       "coding": "Descreva o que precisa e obtenha código funcional. Ainda não está pronto.",
-      "presentations": "Transforme um resumo numa apresentação acabada. Ainda não está pronto.",
+      "presentations": "Acompanhe as apresentações que está a planear ou já fez. Não cria diapositivos.",
       "home": "O teu painel — atividade, estatísticas e ações rápidas.",
       "settings": "Conta, faturação, idioma e preferências.",
       "published": "Todos os seus sites no ar, com o tráfego e o histórico de versões",
@@ -1461,7 +1461,8 @@
       "label": "Ordenar:",
       "newest": "Mais recentes",
       "oldest": "Mais antigos"
-    }
+    },
+    "emptyPresentationNotes": "Ainda não há nada aqui. Este é um espaço para acompanhar as apresentações que está a planear ou já fez — não gera diapositivos por si. Use o botão acima para adicionar uma."
   },
   "askAi": {
     "buttonLabel": "Perguntar à IA",

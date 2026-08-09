@@ -143,7 +143,7 @@ export function GenericList({
         }
       >
         {records.length === 0 ? (
-          <EmptyState icon={MODULE_ICONS[module.slug]}>{t("noEntries")}</EmptyState>
+          <EmptyState icon={MODULE_ICONS[module.slug]}>{t(module.emptyKey ?? "noEntries")}</EmptyState>
         ) : filtered.length === 0 ? (
           <EmptyState icon={SearchX}>{t("noMatches", { query })}</EmptyState>
         ) : (

@@ -63,7 +63,7 @@
       "coding": "AI 编程",
       "dataAnalysis": "数据分析",
       "documents": "文档",
-      "presentations": "演示文稿",
+      "presentations": "演示文稿笔记",
       "campaigns": "营销活动",
       "analytics": "数据统计",
       "finance": "财务",
@@ -130,7 +130,7 @@
       "images": "根据描述生成图片。尚未就绪。",
       "videos": "根据描述生成视频。尚未就绪。",
       "coding": "描述你的需求，得到可运行的代码。尚未就绪。",
-      "presentations": "把一份简报变成完整的演示文稿。尚未就绪。",
+      "presentations": "记录你正在筹划或已经做好的演示文稿。它不会生成幻灯片。",
       "home": "你的仪表板——活动、统计和快捷操作。",
       "settings": "账户、账单、语言和偏好设置。",
       "published": "你所有已上线的网站，含访问量与版本历史",
@@ -1461,7 +1461,8 @@
       "label": "排序：",
       "newest": "最新",
       "oldest": "最早"
-    }
+    },
+    "emptyPresentationNotes": "这里还没有内容。这是用来记录你正在筹划或已经做好的演示文稿的地方——它不会替你生成幻灯片。点击上方按钮添加一条。"
   },
   "askAi": {
     "buttonLabel": "问 AI",

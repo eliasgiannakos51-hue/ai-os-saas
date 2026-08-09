@@ -141,8 +141,21 @@ export const BUILD_MODULES: ModuleConfig[] = [
   },
   {
     slug: "presentations",
-    title: "Presentations",
+    // "Presentations" promised a generator this module does not contain.
+    //
+    // It is a CRUD tracker — a table of rows the user types by hand, with
+    // no AI call anywhere in it. A user clicking "Presentations" expects
+    // to describe a deck and get slides, and finds a form with a
+    // slide-count field. That gap is not a wording problem to soften; the
+    // name was simply not true.
+    //
+    // Renamed rather than built: the real generator is a separate piece of
+    // work (slides jsonb, themes, a viewer/editor, PDF export) and is on
+    // the roadmap under "AI Presentations & Documents", where the promise
+    // belongs until it is real.
+    title: "Presentation Notes",
     table: "ai_presentations",
+    emptyKey: "emptyPresentationNotes",
     headlineKey: "title",
     fields: [
       { key: "title", label: "Title", type: "text", required: true },

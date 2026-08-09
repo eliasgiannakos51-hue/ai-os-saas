@@ -63,7 +63,7 @@
       "coding": "Codage IA",
       "dataAnalysis": "Analyse de données",
       "documents": "Documents",
-      "presentations": "Présentations",
+      "presentations": "Notes de présentation",
       "campaigns": "Campagnes",
       "analytics": "Analytique",
       "finance": "Finance",
@@ -130,7 +130,7 @@
       "images": "Générez des images à partir d'une description. Pas encore prêt.",
       "videos": "Générez une vidéo à partir d'une description. Pas encore prêt.",
       "coding": "Décrivez ce qu'il vous faut et obtenez du code qui marche. Pas encore prêt.",
-      "presentations": "Transformez un brief en présentation finie. Pas encore prêt.",
+      "presentations": "Suivez les présentations que vous préparez ou avez déjà faites. Ne crée pas de diapositives.",
       "home": "Votre tableau de bord — activité, statistiques et actions rapides.",
       "settings": "Compte, facturation, langue et préférences.",
       "published": "Tous vos sites en ligne, avec leur trafic et leur historique de versions",
@@ -1461,7 +1461,8 @@
       "label": "Trier :",
       "newest": "Plus récents",
       "oldest": "Plus anciens"
-    }
+    },
+    "emptyPresentationNotes": "Rien ici pour l’instant. Cet espace sert à suivre les présentations que vous préparez ou avez déjà faites — il ne génère pas de diapositives à votre place. Utilisez le bouton ci-dessus pour en ajouter une."
   },
   "askAi": {
     "buttonLabel": "Demander à l'IA",

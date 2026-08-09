@@ -63,7 +63,7 @@
       "coding": "AI Coding",
       "dataAnalysis": "Data Analysis",
       "documents": "Documents",
-      "presentations": "Presentations",
+      "presentations": "Presentation Notes",
       "campaigns": "Campaigns",
       "analytics": "Analytics",
       "finance": "Finance",
@@ -130,7 +130,7 @@
       "images": "Generate images from a prompt. Not ready yet.",
       "videos": "Generate video from a prompt. Not ready yet.",
       "coding": "Describe what you need and get working code. Not ready yet.",
-      "presentations": "Turn a brief into a finished deck. Not ready yet.",
+      "presentations": "Keep track of decks you are planning or have already made. It does not create slides.",
       "home": "Your dashboard — activity, stats and quick actions.",
       "settings": "Account, billing, language and preferences.",
       "published": "Every site you have live on the web, with its traffic and version history",
@@ -1461,7 +1461,8 @@
       "label": "Sort:",
       "newest": "Newest",
       "oldest": "Oldest"
-    }
+    },
+    "emptyPresentationNotes": "Nothing here yet. This is a place to keep track of presentations you are planning or have already made — it does not generate slides for you. Use the button above to add one."
   },
   "askAi": {
     "buttonLabel": "Ask AI",

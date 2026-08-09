@@ -9,7 +9,9 @@ import {
   MIN_TOPIC_CHARS,
   RESEARCH_MAX_QUESTIONS,
   RESEARCH_MIN_QUESTIONS,
+  RESEARCH_QUESTION_TIMEOUT_MS,
   RESEARCH_SEARCHES_PER_QUESTION,
+  RESEARCH_SYNTHESIS_TIMEOUT_MS,
 } from "@/lib/research/research-limits";
 
 /**
@@ -194,18 +196,25 @@ export async function researchQuestion(params: {
   costs: CostAccumulator;
 }): Promise<{ finding: ResearchFinding; searches: number }> {
   try {
-    const response = await params.anthropic.messages.create({
-      model: RESEARCH_MODEL,
-      max_tokens: QUESTION_MAX_TOKENS,
-      system: questionSystemPrompt(params.language),
-      tools: [WEB_SEARCH_TOOL],
-      messages: [
-        {
-          role: "user",
-          content: `Overall topic:\n${wrapUntrusted(params.topic)}\n\nResearch this question and report what you find:\n${wrapUntrusted(params.question.question)}`,
-        },
-      ],
-    });
+    const response = await params.anthropic.messages.create(
+      {
+        model: RESEARCH_MODEL,
+        max_tokens: QUESTION_MAX_TOKENS,
+        system: questionSystemPrompt(params.language),
+        tools: [WEB_SEARCH_TOOL],
+        messages: [
+          {
+            role: "user",
+            content: `Overall topic:\n${wrapUntrusted(params.topic)}\n\nResearch this question and report what you find:\n${wrapUntrusted(params.question.question)}`,
+          },
+        ],
+      },
+      // A hung request used to consume the whole run's wall clock, so
+      // every later question was skipped and the platform killed the
+      // function mid-report. One question failing is already survivable
+      // (see the catch below); one question hanging was not.
+      { timeout: RESEARCH_QUESTION_TIMEOUT_MS }
+    );
     params.costs.record("generation", response.usage, response.model || RESEARCH_MODEL);
 
     const summary = response.content
@@ -306,12 +315,15 @@ export async function synthesiseReport(params: {
   costs: CostAccumulator;
 }): Promise<{ ok: true; markdown: string } | { ok: false; reason: string }> {
   try {
-    const response = await params.anthropic.messages.create({
-      model: RESEARCH_MODEL,
-      max_tokens: SYNTHESIS_MAX_TOKENS,
-      system: synthesisSystemPrompt(params.language),
-      messages: [{ role: "user", content: buildSynthesisInput(params) }],
-    });
+    const response = await params.anthropic.messages.create(
+      {
+        model: RESEARCH_MODEL,
+        max_tokens: SYNTHESIS_MAX_TOKENS,
+        system: synthesisSystemPrompt(params.language),
+        messages: [{ role: "user", content: buildSynthesisInput(params) }],
+      },
+      { timeout: RESEARCH_SYNTHESIS_TIMEOUT_MS }
+    );
     params.costs.record("generation", response.usage, response.model || RESEARCH_MODEL);
 
     const markdown = response.content

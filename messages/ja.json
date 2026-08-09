@@ -24,7 +24,11 @@
     "notAuthenticated": "認証されていません。",
     "created": "✓ 作成しました",
     "updated": "✓ 更新しました",
-    "linked": "✓ リンクしました"
+    "linked": "✓ リンクしました",
+    "aiGenerated": {
+      "short": "AI が生成",
+      "long": "これは AI が生成した内容です。誤りが含まれる場合があります。重要な点は確認してください。"
+    }
   },
   "sidebar": {
     "groups": {
@@ -80,7 +84,8 @@
       "published": "公開中のサイト",
       "integrations": "連携",
       "files": "ファイル",
-      "deepResearch": "ディープリサーチ"
+      "deepResearch": "ディープリサーチ",
+      "help": "ヘルプセンター"
     },
     "groupHints": {
       "create": "サイトを生成し、目標を計画し、文書を書く。",
@@ -131,7 +136,8 @@
       "published": "公開中のすべてのサイトと、その閲覧数・バージョン履歴",
       "integrations": "Gmail・Drive・Slack を接続して、AI が実際のデータを扱えるようにします",
       "files": "PDF・Word・Excel をアップロードして、AI に内容を質問できます",
-      "deepResearch": "トピックを渡すと検索・照合して出典付きのレポートを書きます"
+      "deepResearch": "トピックを渡すと検索・照合して出典付きのレポートを書きます",
+      "help": "よくある質問への回答です。クレジットは消費しません。"
     },
     "comingSoon": "近日公開",
     "comingSoonToast": "{name} はまだ利用できません。ロードマップに入っています。",
@@ -902,7 +908,33 @@
       "statusFlagged": "フラグ付き",
       "flaggedTitle": "安全性レビューによりフラグが付けられました",
       "regenerateFree": "再生成（無料）",
-      "editUnavailable": "ウェブサイトの生成が完了すると変更をリクエストできます。"
+      "editUnavailable": "ウェブサイトの生成が完了すると変更をリクエストできます。",
+      "design": {
+        "title": "デザイン",
+        "optional": "任意",
+        "colours": "配色",
+        "primary": "メインカラー",
+        "secondary": "サブカラー",
+        "hexPlaceholder": "#1d4ed8",
+        "hexInvalid": "6 桁の 16 進カラーを入力してください（例: #1d4ed8）。",
+        "clear": "クリア",
+        "background": "背景",
+        "ownPhotoNeedsUpload": "先に上で写真をアップロードしてください。",
+        "imageUse": "アップロードした写真 {count} 枚",
+        "backgrounds": {
+          "auto": "おまかせ",
+          "solid": "単色",
+          "gradient": "アニメーショングラデーション",
+          "photo": "写真",
+          "pattern": "パターン",
+          "own-photo": "自分の写真"
+        },
+        "imageUses": {
+          "in-site": "サイトに使う",
+          "style-only": "スタイル参考のみ"
+        }
+      },
+      "imageIntro": "ロゴ、商品写真、店内の写真など。ページに載せたいもの、雰囲気の参考にしたいもの。"
     },
     "marketplace": {
       "title": "マーケットプレイス",
@@ -1303,7 +1335,9 @@
       "empty": "まだレポートがありません。上でトピックを入力すると、何を調べるか確認できます。",
       "usedThisMonth": "今月 {cap} 件中 {used} 件",
       "usedUnlimited": "今月 {used} 件",
-      "capReached": "今月の調査レポートを使い切りました。1日にリセットされます。"
+      "capReached": "今月の調査レポートを使い切りました。1日にリセットされます。",
+      "progressStep": "質問 {done} / {total}",
+      "keepsRunning": "ページを閉じても処理は続きます。"
     },
     "onboarding": {
       "title": "あなた仕様にしましょう",

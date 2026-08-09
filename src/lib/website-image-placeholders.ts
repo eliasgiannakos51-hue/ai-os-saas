@@ -43,6 +43,36 @@ export function findImagePlaceholders(html: string): ImagePlaceholder[] {
   return results;
 }
 
+/**
+ * Progressively broader versions of an image query, most specific first.
+ *
+ * The Unsplash search is exact enough that a good, specific query
+ * ("handmade sourdough loaves cooling rack bakery") can legitimately
+ * return zero results — and a zero-result search used to fall STRAIGHT to
+ * picsum, i.e. to a photo with no relationship to the subject at all. That
+ * is the "it puts the wrong images" report: not a broken integration, a
+ * one-shot search with no second attempt.
+ *
+ * Dropping trailing words keeps the head of the phrase, which is where the
+ * subject lives — the system prompt asks for "SUBJECT then STYLE/SETTING",
+ * so "sourdough loaves cooling rack bakery" degrades to "sourdough loaves
+ * cooling" and then "sourdough loaves", each of which is still ABOUT the
+ * bread. Stops at two words: one word is generic enough that picsum is no
+ * worse and a real search costs a round trip.
+ */
+export function broadenImageQuery(query: string): string[] {
+  const words = query.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return [];
+  const attempts: string[] = [];
+  for (let length = words.length; length >= 2; length--) {
+    attempts.push(words.slice(0, length).join(" "));
+  }
+  if (attempts.length === 0) attempts.push(words[0]);
+  // Cap the round trips: 4 attempts is already an unusually long query,
+  // and every attempt is a real HTTP request inside a generation.
+  return attempts.slice(0, 4);
+}
+
 // Deterministic picsum.photos fallback — seeded by the query text itself,
 // so the SAME query always resolves to the SAME photo (stable across
 // re-renders/re-downloads of the same generated site) without any

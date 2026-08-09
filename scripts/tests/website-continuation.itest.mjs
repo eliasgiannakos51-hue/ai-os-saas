@@ -393,6 +393,211 @@ check("no error without an onDelta callback", err?.message ?? null, null);
 checkTrue("the post-search text survives", html?.includes("12 High Street"));
 check("and no continuation was needed", requests.length, 1);
 
+// ---------------------------------------------------------------------
+// 11-15: the SECOND interrupted-generation bug — research narration.
+// ---------------------------------------------------------------------
+//
+// WHAT THE USER REPORTED, verbatim:
+//   "The website generation was interrupted before the generated page was
+//    finished."
+// on an account where the page had, in fact, been written.
+//
+// That string is thrown by assertCompleteHtmlResponse when the stop reason
+// is not max_tokens AND looksLikeCompleteHtmlDocument() says no. Both
+// inputs were being taken from the RAW accumulated response, and
+// looksLikeCompleteHtmlDocument requires the string to START with
+// <!doctype. A turn that uses web_search does not: it opens with a
+// sentence about what it is looking up, then searches, then writes the
+// document. One sentence of narration in front of a perfect page was
+// enough to fail the check and throw.
+//
+// The continuation gate had the same prefix test, so the half-written case
+// could not even be resumed — it was discarded un-continued.
+//
+// This is why the failure looked random and why it got WORSE as the
+// research instructions got stronger: it tracked whether the model
+// narrated, not whether it finished.
+const NARRATION = "I'll look up what's actually around that area before writing the page.\n\n";
+
+console.log("\n== 11. a narrated, COMPLETE generation is not reported as interrupted ==");
+reset({ withSearch: true, text: NARRATION + HEAD + TAIL, stopReason: "end_turn", outputTokens: 9000 });
+err = null;
+html = null;
+try {
+  html = await generate(new CostAccumulator());
+} catch (e) {
+  err = e;
+}
+check("no error is thrown", err?.message ?? null, null);
+checkTrue("specifically not the interrupted error", !/interrupted/i.test(err?.message ?? ""));
+checkTrue("the document is returned", html?.startsWith("<!DOCTYPE html>"));
+checkTrue("and it is complete", html?.trim().endsWith("</html>"));
+checkTrue("the narration is not in the saved HTML", !html?.includes("I'll look up"));
+check("no wasted continuation round", requests.length, 1);
+
+console.log("\n== 12. a narrated, TRUNCATED generation is resumed rather than discarded ==");
+// The prefix gate refused to continue here, so the user paid for a
+// half-written page and got an error.
+reset(
+  { withSearch: true, text: NARRATION + HEAD, stopReason: "end_turn", outputTokens: 9000 },
+  { text: TAIL, stopReason: "end_turn", outputTokens: 900 }
+);
+err = null;
+html = null;
+try {
+  html = await generate(new CostAccumulator());
+} catch (e) {
+  err = e;
+}
+check("no error", err?.message ?? null, null);
+check("a continuation round really ran", requests.length, 2);
+checkTrue("the first round's work is kept", html?.includes("Corner Bakery"));
+checkTrue("the continuation is appended", html?.includes("12 High Street"));
+checkTrue("and the narration is gone", !html?.includes("I'll look up"));
+
+console.log("\n== 13. commentary AFTER the document is stripped from the downloaded file ==");
+reset({
+  text: HEAD + TAIL + "\n\nLet me know if you'd like a different colour scheme!",
+  stopReason: "end_turn",
+  outputTokens: 5000,
+});
+err = null;
+html = null;
+try {
+  html = await generate(new CostAccumulator());
+} catch (e) {
+  err = e;
+}
+check("no error", err?.message ?? null, null);
+checkTrue("the file ends at </html>", html?.trim().endsWith("</html>"));
+checkTrue("the sign-off is not in the file", !html?.includes("colour scheme"));
+
+console.log("\n== 14. the live preview shows the page, not the narration ==");
+// onDelta writes straight into user_websites.html_content, which the
+// polling client renders in an iframe. Feeding it the raw stream renders
+// the model's research narration as the website for the first seconds.
+reset({ withSearch: true, text: NARRATION + HEAD + TAIL, stopReason: "end_turn", outputTokens: 9000 });
+const deltas = [];
+err = null;
+try {
+  await wb.generateWebsiteHtml(
+    "sk-ant-test",
+    "A website for a corner bakery",
+    undefined,
+    (accumulated) => deltas.push(accumulated),
+    undefined,
+    new CostAccumulator()
+  );
+} catch (e) {
+  err = e;
+}
+check("no error", err?.message ?? null, null);
+checkTrue("deltas were emitted", deltas.length > 0);
+checkTrue(
+  "no delta ever carries the narration into the preview",
+  deltas.every((d) => !d.includes("I'll look up"))
+);
+checkTrue(
+  "the last delta is the document",
+  deltas.at(-1)?.startsWith("<!DOCTYPE html>")
+);
+
+console.log("\n== 15. research is instructed as mandatory, and the budget matches ==");
+// The tool was always wired; the instruction was "use it when the
+// description implies..." plus "do NOT search for things you already know
+// well", which for "a café in Thessaloniki" resolves to no search at all.
+checkTrue("the prompt names research as mandatory", /MANDATORY RESEARCH/.test(src));
+checkTrue("it forbids skipping on familiarity", /already know this.{0,40}NOT a reason to skip/is.test(src));
+checkTrue("it requires searching a named place", /THE PLACE/.test(src));
+checkTrue("it requires searching the industry", /THE INDUSTRY/.test(src));
+checkTrue("it requires searching real numbers", /THE NUMBERS/.test(src));
+checkTrue(
+  "it still forbids inventing the user's own business facts",
+  /NEVER establishes facts about THIS user's own business/.test(src)
+);
+const genSearches = Number(src.match(/const WEBSITE_MAX_SEARCHES = (\d+)/)?.[1]);
+checkTrue("the generate search budget covers three subjects plus follow-ups", genSearches >= 6);
+reset({ text: HEAD + TAIL, stopReason: "end_turn", outputTokens: 5000 });
+await generate(new CostAccumulator()).catch(() => {});
+const searchTool = (requests[0].tools ?? []).find((t) => t.type === "web_search_20250305");
+checkTrue("the request really offers web search", Boolean(searchTool));
+check("with the raised budget", searchTool?.max_uses, genSearches);
+
+// ---------------------------------------------------------------------
+// 16-17: the user's brief actually reaches the model LAST.
+// ---------------------------------------------------------------------
+//
+// REPORTED: "I give specific instructions and the result partly ignores
+// them."
+//
+// The static system prompt measures ~16,500 characters against a typical
+// description of ~250 — sixty-six to one. Every one of those characters is
+// a rule the model is asked to follow, and nothing said the person's own
+// instructions outranked them. Worse, the brief was NOT even the last
+// thing the model read: the user message was built as
+// `description + referenceImageUrlList`, so the final text before the
+// answer was a list of storage URLs.
+//
+// Asserting this against the REAL request body matters more than
+// asserting it against the source: the thing that decides the outcome is
+// what the SDK actually put on the wire.
+console.log("\n== 16. the brief is the LAST thing in the user message ==");
+reset({ text: HEAD + TAIL, stopReason: "end_turn", outputTokens: 5000 });
+await wb
+  .generateWebsiteHtml(
+    "sk-ant-test",
+    "A dark green site for a law firm. No animations.",
+    undefined,
+    () => {},
+    "https://example.com/api/websites/x/submit-form",
+    new CostAccumulator()
+  )
+  .catch(() => {});
+
+let sent = requests[0];
+let userContent = sent.messages[0].content;
+let userText = typeof userContent === "string" ? userContent : userContent.at(-1).text;
+checkTrue("the brief is labelled as the user's own", /THE USER'S BRIEF/.test(userText));
+checkTrue("and says it overrides the system prompt", /overrides every general preference/.test(userText));
+checkTrue("the brief text is present", /dark green site for a law firm/.test(userText));
+checkTrue(
+  "and nothing follows it",
+  userText.trim().endsWith("A dark green site for a law firm. No animations.")
+);
+
+console.log("\n== 17. precedence is stated, last, and outside the cached block ==");
+check("the system prompt is sent as three blocks", sent.system.length, 3);
+checkTrue("the last block is the precedence statement", /^PRECEDENCE/.test(sent.system[2].text));
+checkTrue("it says the brief wins", /If the brief contradicts a default above, the brief wins/.test(sent.system[2].text));
+checkTrue(
+  "it still protects the non-negotiables",
+  /cannot override[\s\S]{0,400}safety limits/.test(sent.system[2].text)
+);
+checkTrue("the big static block is cached", sent.system[0].cache_control?.type === "ephemeral");
+checkTrue("the precedence block is NOT cached", !sent.system[2].cache_control);
+checkTrue("nor is the per-site form block", !sent.system[1].cache_control);
+
+console.log("\n== 18. with reference images, the URLs come BEFORE the brief ==");
+reset({ text: HEAD + TAIL, stopReason: "end_turn", outputTokens: 5000 });
+await wb
+  .generateWebsiteHtml(
+    "sk-ant-test",
+    "Use my photos in the gallery.",
+    [{ base64: "aGk=", mediaType: "image/png", url: "https://storage.example.com/u/1.png" }],
+    () => {},
+    undefined,
+    new CostAccumulator()
+  )
+  .catch(() => {});
+sent = requests[0];
+userText = sent.messages[0].content.at(-1).text;
+checkTrue("the image URL list is present", /storage\.example\.com\/u\/1\.png/.test(userText));
+checkTrue(
+  "but it comes before the brief, not after it",
+  userText.indexOf("storage.example.com") < userText.indexOf("THE USER'S BRIEF")
+);
+checkTrue("and the brief is still last", userText.trim().endsWith("Use my photos in the gallery."));
+
 server.close();
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

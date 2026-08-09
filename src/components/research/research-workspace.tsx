@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
 import { EmptyState } from "@/components/empty-state";
+import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -37,12 +38,26 @@ export type ResearchReport = {
   error: string | null;
   created_at: string;
   completed_at: string | null;
+  // Written by the worker after each question. Optional because a
+  // database that has not had the progress migration applied simply does
+  // not return them — see api/research/[id], which selects `*`.
+  questions_done?: number | null;
+  questions_total?: number | null;
+  current_question?: string | null;
 };
 
 /** Poll interval while a report runs. A report takes minutes, so a
  *  one-second poll would be 300 pointless requests; five seconds is
  *  responsive enough that the status never feels stuck. */
 const POLL_MS = 5000;
+
+/** The statuses that mean a worker is (or should be) running. Derived
+ *  from the row, never from client state — see the polling effect. */
+const RUNNING_STATUSES = new Set(["planning", "researching", "synthesising"]);
+
+function isRunning(report: ResearchReport): boolean {
+  return RUNNING_STATUSES.has(report.status);
+}
 
 /**
  * Deep Research.
@@ -96,30 +111,60 @@ export function ResearchWorkspace({
     }
   }, []);
 
-  // Polling is driven by the report actually being in flight, and the
-  // interval is cleared on unmount — a timer that outlives the page is
-  // how a dashboard ends up making requests forever in a background tab.
+  // WHAT IS RUNNING COMES FROM THE ROWS, NOT FROM THIS COMPONENT.
+  //
+  // This used to poll only `running` — a piece of state set by pressing
+  // Start. So a user who started a report and then navigated anywhere, or
+  // reloaded, came back to a card frozen on "researching" with nothing
+  // polling it: the work was still happening on the server, but this
+  // screen had no idea and would never find out. The user's account of
+  // "I changed something on the page and the research stopped" is that
+  // exact thing seen from outside — the research did not stop, the only
+  // thing watching it did.
+  //
+  // Deriving the set from the reports themselves makes the page pick any
+  // in-flight report back up on mount, which is what makes closing the tab
+  // safe. `running` is kept purely for the per-card spinner on the report
+  // the user just started, before the first poll has returned.
+  const activeIds = reports.filter(isRunning).map((r) => r.id);
+  const activeKey = activeIds.join(",");
+
   useEffect(() => {
-    if (!running) {
+    const ids = activeKey ? activeKey.split(",") : [];
+    if (ids.length === 0) {
       if (pollRef.current) clearInterval(pollRef.current);
       pollRef.current = null;
       return;
     }
     pollRef.current = setInterval(() => {
-      void refresh(running).then((report) => {
-        if (report && (report.status === "ready" || report.status === "failed")) {
-          setRunning(null);
-          if (report.status === "ready") addToast(t("finished"));
-          else addToast(report.error ?? t("runError"), "error");
-          router.refresh();
-        }
-      });
+      for (const id of ids) {
+        void refresh(id).then((report) => {
+          if (!report) return;
+          if (report.status === "ready" || report.status === "failed") {
+            setRunning((current) => (current === id ? null : current));
+            if (report.status === "ready") addToast(t("finished"));
+            else addToast(report.error ?? t("runError"), "error");
+            router.refresh();
+          }
+        });
+      }
     }, POLL_MS);
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
       pollRef.current = null;
     };
-  }, [running, refresh, addToast, t, router]);
+  }, [activeKey, refresh, addToast, t, router]);
+
+  // One immediate read on mount for anything already in flight, so a user
+  // returning to the page does not stare at a stale status for a whole
+  // poll interval before it corrects itself.
+  useEffect(() => {
+    for (const report of initialReports) {
+      if (isRunning(report)) void refresh(report.id);
+    }
+    // Deliberately mount-only: later refreshes are the interval's job.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function plan() {
     const value = topic.trim();
@@ -349,11 +394,50 @@ export function ResearchWorkspace({
                   {report.error}
                 </p>
               )}
-              {running === report.id && (
-                <p className="flex items-center gap-1.5 text-[11px] text-muted">
-                  <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
-                  {t("inProgress")}
-                </p>
+              {/* Real progress, not a spinner.
+                  A report runs for minutes; "in progress" for six minutes
+                  is indistinguishable from "stuck", which is why the user
+                  read a slow run as a broken one. The worker writes
+                  questions_done after each question, so this can say which
+                  question it is on and what it is looking up. Falls back
+                  to the plain spinner when the row has no progress columns
+                  yet (migration not applied) rather than showing nothing. */}
+              {(isRunning(report) || running === report.id) && (
+                <div className="space-y-1">
+                  <p className="flex items-center gap-1.5 text-[11px] text-muted">
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                    {typeof report.questions_total === "number" && report.questions_total > 0
+                      ? t("progressStep", {
+                          done: Math.min((report.questions_done ?? 0) + 1, report.questions_total),
+                          total: report.questions_total,
+                        })
+                      : report.status === "synthesising"
+                        ? t("statusSynthesising")
+                        : t("inProgress")}
+                  </p>
+                  {report.current_question && report.status === "researching" && (
+                    <p className="line-clamp-2 pl-[18px] text-[11px] leading-relaxed text-muted/80">
+                      {report.current_question}
+                    </p>
+                  )}
+                  {typeof report.questions_total === "number" && report.questions_total > 0 && (
+                    <div
+                      className="ml-[18px] h-1 overflow-hidden rounded-full bg-border"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={report.questions_total}
+                      aria-valuenow={report.questions_done ?? 0}
+                    >
+                      <div
+                        className="h-full rounded-full bg-orange-500 transition-all duration-500"
+                        style={{
+                          width: `${Math.round(((report.questions_done ?? 0) / report.questions_total) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                  )}
+                  <p className="pl-[18px] text-[11px] text-muted/70">{t("keepsRunning")}</p>
+                </div>
               )}
             </EntityCard>
           ))}
@@ -372,6 +456,12 @@ export function ResearchWorkspace({
               {t("close")}
             </button>
           </div>
+
+          {/* EU AI Act art. 50. The report reads like a researched
+              document — sourced, structured, confident — which is exactly
+              why it needs the notice on screen and not only in the
+              Document copy's markdown. */}
+          <AiGeneratedNotice variant="block" />
 
           {(open.sections ?? []).map((section, i) => (
             <div key={`${section.heading}-${i}`} className="space-y-1">

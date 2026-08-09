@@ -24,7 +24,11 @@
     "notAuthenticated": "Not authenticated.",
     "created": "✓ created",
     "updated": "✓ updated",
-    "linked": "✓ linked"
+    "linked": "✓ linked",
+    "aiGenerated": {
+      "short": "AI-generated",
+      "long": "AI-generated content. It can be wrong — check anything important before you rely on it."
+    }
   },
   "sidebar": {
     "groups": {
@@ -80,7 +84,8 @@
       "published": "Published Sites",
       "integrations": "Integrations",
       "files": "Files",
-      "deepResearch": "Deep Research"
+      "deepResearch": "Deep Research",
+      "help": "Help Centre"
     },
     "groupHints": {
       "create": "Generate a site, plan a goal, write a document.",
@@ -131,7 +136,8 @@
       "published": "Every site you have live on the web, with its traffic and version history",
       "integrations": "Connect Gmail, Drive and Slack so the AI can work with your real data",
       "files": "Upload PDFs, Word and Excel files and ask the AI questions about them",
-      "deepResearch": "Give it a topic and it searches, cross-checks and writes a sourced report"
+      "deepResearch": "Give it a topic and it searches, cross-checks and writes a sourced report",
+      "help": "Answers to the questions people ask most — no credits used."
     },
     "comingSoon": "Coming soon",
     "comingSoonToast": "{name} isn't available yet — it's on the roadmap.",
@@ -902,7 +908,33 @@
       "statusFlagged": "Flagged",
       "flaggedTitle": "Flagged by our safety review",
       "regenerateFree": "Regenerate (free)",
-      "editUnavailable": "You can request changes once this website has finished generating."
+      "editUnavailable": "You can request changes once this website has finished generating.",
+      "design": {
+        "title": "Design",
+        "optional": "optional",
+        "colours": "Colours",
+        "primary": "Primary colour",
+        "secondary": "Secondary colour",
+        "hexPlaceholder": "#1d4ed8",
+        "hexInvalid": "Use a six-digit hex colour, e.g. #1d4ed8.",
+        "clear": "Clear",
+        "background": "Background",
+        "ownPhotoNeedsUpload": "Upload a photo above first.",
+        "imageUse": "Your {count} uploaded photo(s)",
+        "backgrounds": {
+          "auto": "You choose",
+          "solid": "Solid",
+          "gradient": "Animated gradient",
+          "photo": "Photo",
+          "pattern": "Pattern",
+          "own-photo": "My own photo"
+        },
+        "imageUses": {
+          "in-site": "Put them on the site",
+          "style-only": "Style reference only"
+        }
+      },
+      "imageIntro": "Your logo, product shots, photos of the place — anything you want on the page or want the style taken from."
     },
     "marketplace": {
       "title": "Marketplace",
@@ -1303,7 +1335,9 @@
       "empty": "No reports yet. Describe a topic above to see what it would research.",
       "usedThisMonth": "{used} of {cap} this month",
       "usedUnlimited": "{used} this month",
-      "capReached": "You have used this month's research reports. It resets on the 1st."
+      "capReached": "You have used this month's research reports. It resets on the 1st.",
+      "progressStep": "Question {done} of {total}",
+      "keepsRunning": "This keeps running if you close the page."
     },
     "onboarding": {
       "title": "Let's make this yours",

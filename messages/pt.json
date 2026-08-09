@@ -24,7 +24,11 @@
     "notAuthenticated": "Não autenticado.",
     "created": "✓ criado",
     "updated": "✓ atualizado",
-    "linked": "✓ associado"
+    "linked": "✓ associado",
+    "aiGenerated": {
+      "short": "Gerado por IA",
+      "long": "Conteúdo gerado por IA. Pode conter erros — confirme o que for importante antes de confiar nele."
+    }
   },
   "sidebar": {
     "groups": {
@@ -80,7 +84,8 @@
       "published": "Sites publicados",
       "integrations": "Integrações",
       "files": "Ficheiros",
-      "deepResearch": "Investigação profunda"
+      "deepResearch": "Investigação profunda",
+      "help": "Centro de ajuda"
     },
     "groupHints": {
       "create": "Gere um site, planeie um objetivo, escreva um documento.",
@@ -131,7 +136,8 @@
       "published": "Todos os seus sites no ar, com o tráfego e o histórico de versões",
       "integrations": "Ligue Gmail, Drive e Slack para a IA trabalhar com os seus dados reais",
       "files": "Carrega PDF, Word e Excel e faz perguntas à IA sobre eles",
-      "deepResearch": "Dá um tema: pesquisa, cruza fontes e escreve um relatório com referências"
+      "deepResearch": "Dá um tema: pesquisa, cruza fontes e escreve um relatório com referências",
+      "help": "Respostas às perguntas mais frequentes, sem gastar créditos."
     },
     "comingSoon": "Em breve",
     "comingSoonToast": "{name} ainda não está disponível — está no roteiro.",
@@ -902,7 +908,33 @@
       "statusFlagged": "Sinalizado",
       "flaggedTitle": "Sinalizado pela nossa revisão de segurança",
       "regenerateFree": "Regenerar (grátis)",
-      "editUnavailable": "Poderá pedir alterações assim que o site terminar de ser gerado."
+      "editUnavailable": "Poderá pedir alterações assim que o site terminar de ser gerado.",
+      "design": {
+        "title": "Design",
+        "optional": "opcional",
+        "colours": "Cores",
+        "primary": "Cor principal",
+        "secondary": "Cor secundária",
+        "hexPlaceholder": "#1d4ed8",
+        "hexInvalid": "Use uma cor hex de seis dígitos, ex. #1d4ed8.",
+        "clear": "Limpar",
+        "background": "Fundo",
+        "ownPhotoNeedsUpload": "Carregue primeiro uma foto acima.",
+        "imageUse": "As suas {count} fotos carregadas",
+        "backgrounds": {
+          "auto": "Escolha você",
+          "solid": "Sólido",
+          "gradient": "Gradiente animado",
+          "photo": "Foto",
+          "pattern": "Padrão",
+          "own-photo": "Foto minha"
+        },
+        "imageUses": {
+          "in-site": "Colocá-las no site",
+          "style-only": "Apenas como referência de estilo"
+        }
+      },
+      "imageIntro": "O seu logótipo, fotos de produto ou do espaço — o que quiser na página ou que defina o estilo."
     },
     "marketplace": {
       "title": "Mercado",
@@ -1303,7 +1335,9 @@
       "empty": "Ainda não há relatórios. Descreve um tema acima para veres o que investigaria.",
       "usedThisMonth": "{used} de {cap} este mês",
       "usedUnlimited": "{used} este mês",
-      "capReached": "Já usaste os relatórios deste mês. Reinicia no dia 1."
+      "capReached": "Já usaste os relatórios deste mês. Reinicia no dia 1.",
+      "progressStep": "Pergunta {done} de {total}",
+      "keepsRunning": "Continua a correr mesmo que feche a página."
     },
     "onboarding": {
       "title": "Vamos torná-lo teu",

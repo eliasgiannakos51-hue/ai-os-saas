@@ -24,7 +24,11 @@
     "notAuthenticated": "Non authentifié.",
     "created": "✓ créé",
     "updated": "✓ mis à jour",
-    "linked": "✓ lié"
+    "linked": "✓ lié",
+    "aiGenerated": {
+      "short": "Généré par IA",
+      "long": "Contenu généré par IA. Il peut comporter des erreurs — vérifiez ce qui compte avant de vous y fier."
+    }
   },
   "sidebar": {
     "groups": {
@@ -80,7 +84,8 @@
       "published": "Sites publiés",
       "integrations": "Intégrations",
       "files": "Fichiers",
-      "deepResearch": "Recherche approfondie"
+      "deepResearch": "Recherche approfondie",
+      "help": "Centre d’aide"
     },
     "groupHints": {
       "create": "Générez un site, planifiez un objectif, rédigez un document.",
@@ -131,7 +136,8 @@
       "published": "Tous vos sites en ligne, avec leur trafic et leur historique de versions",
       "integrations": "Connectez Gmail, Drive et Slack pour que l'IA travaille sur vos vraies données",
       "files": "Importez des PDF, Word et Excel et posez des questions à l'IA",
-      "deepResearch": "Donnez un sujet : il cherche, recoupe et rédige un rapport sourcé"
+      "deepResearch": "Donnez un sujet : il cherche, recoupe et rédige un rapport sourcé",
+      "help": "Les réponses aux questions les plus fréquentes, sans consommer de crédits."
     },
     "comingSoon": "Bientôt",
     "comingSoonToast": "{name} n'est pas encore disponible — c'est prévu dans la feuille de route.",
@@ -902,7 +908,33 @@
       "statusFlagged": "Signalé",
       "flaggedTitle": "Signalé par notre contrôle de sécurité",
       "regenerateFree": "Régénérer (gratuit)",
-      "editUnavailable": "Vous pourrez demander des modifications une fois le site généré."
+      "editUnavailable": "Vous pourrez demander des modifications une fois le site généré.",
+      "design": {
+        "title": "Design",
+        "optional": "facultatif",
+        "colours": "Couleurs",
+        "primary": "Couleur principale",
+        "secondary": "Couleur secondaire",
+        "hexPlaceholder": "#1d4ed8",
+        "hexInvalid": "Utilisez une couleur hex à six chiffres, ex. #1d4ed8.",
+        "clear": "Effacer",
+        "background": "Arrière-plan",
+        "ownPhotoNeedsUpload": "Importez d’abord une photo ci-dessus.",
+        "imageUse": "Vos {count} photo(s) importées",
+        "backgrounds": {
+          "auto": "À vous de voir",
+          "solid": "Uni",
+          "gradient": "Dégradé animé",
+          "photo": "Photo",
+          "pattern": "Motif",
+          "own-photo": "Ma propre photo"
+        },
+        "imageUses": {
+          "in-site": "Les mettre sur le site",
+          "style-only": "Référence de style seulement"
+        }
+      },
+      "imageIntro": "Votre logo, vos photos de produits ou du lieu — ce que vous voulez voir sur la page ou qui doit inspirer le style."
     },
     "marketplace": {
       "title": "Place de marché",
@@ -1303,7 +1335,9 @@
       "empty": "Aucun rapport. Décrivez un sujet ci-dessus pour voir ce qui serait recherché.",
       "usedThisMonth": "{used} sur {cap} ce mois-ci",
       "usedUnlimited": "{used} ce mois-ci",
-      "capReached": "Vous avez utilisé les rapports de ce mois. Réinitialisation le 1er."
+      "capReached": "Vous avez utilisé les rapports de ce mois. Réinitialisation le 1er.",
+      "progressStep": "Question {done} sur {total}",
+      "keepsRunning": "Le travail continue même si vous fermez la page."
     },
     "onboarding": {
       "title": "Faisons-en le vôtre",

@@ -24,7 +24,11 @@
     "notAuthenticated": "Nicht angemeldet.",
     "created": "✓ erstellt",
     "updated": "✓ aktualisiert",
-    "linked": "✓ verknüpft"
+    "linked": "✓ verknüpft",
+    "aiGenerated": {
+      "short": "KI-generiert",
+      "long": "Von KI erzeugter Inhalt. Er kann Fehler enthalten — prüfen Sie Wichtiges, bevor Sie sich darauf verlassen."
+    }
   },
   "sidebar": {
     "groups": {
@@ -80,7 +84,8 @@
       "published": "Veröffentlichte Seiten",
       "integrations": "Integrationen",
       "files": "Dateien",
-      "deepResearch": "Tiefenrecherche"
+      "deepResearch": "Tiefenrecherche",
+      "help": "Hilfe-Center"
     },
     "groupHints": {
       "create": "Eine Website erzeugen, ein Ziel planen, ein Dokument schreiben.",
@@ -131,7 +136,8 @@
       "published": "Alle Ihre Live-Seiten, mit Zugriffen und Versionsverlauf",
       "integrations": "Gmail, Drive und Slack verbinden, damit die KI mit Ihren echten Daten arbeitet",
       "files": "PDFs, Word- und Excel-Dateien hochladen und das KI dazu befragen",
-      "deepResearch": "Thema angeben — es recherchiert, gleicht ab und schreibt einen belegten Bericht"
+      "deepResearch": "Thema angeben — es recherchiert, gleicht ab und schreibt einen belegten Bericht",
+      "help": "Antworten auf die häufigsten Fragen — ohne Credits zu verbrauchen."
     },
     "comingSoon": "Demnächst",
     "comingSoonToast": "{name} ist noch nicht verfügbar — steht auf der Roadmap.",
@@ -902,7 +908,33 @@
       "statusFlagged": "Markiert",
       "flaggedTitle": "Von unserer Sicherheitsprüfung markiert",
       "regenerateFree": "Neu erzeugen (kostenlos)",
-      "editUnavailable": "Änderungen sind möglich, sobald die Website fertig erzeugt ist."
+      "editUnavailable": "Änderungen sind möglich, sobald die Website fertig erzeugt ist.",
+      "design": {
+        "title": "Design",
+        "optional": "optional",
+        "colours": "Farben",
+        "primary": "Primärfarbe",
+        "secondary": "Sekundärfarbe",
+        "hexPlaceholder": "#1d4ed8",
+        "hexInvalid": "Bitte einen sechsstelligen Hex-Wert, z. B. #1d4ed8.",
+        "clear": "Zurücksetzen",
+        "background": "Hintergrund",
+        "ownPhotoNeedsUpload": "Laden Sie zuerst oben ein Foto hoch.",
+        "imageUse": "Ihre {count} hochgeladenen Fotos",
+        "backgrounds": {
+          "auto": "Sie entscheiden",
+          "solid": "Einfarbig",
+          "gradient": "Animierter Verlauf",
+          "photo": "Foto",
+          "pattern": "Muster",
+          "own-photo": "Mein eigenes Foto"
+        },
+        "imageUses": {
+          "in-site": "Auf die Seite setzen",
+          "style-only": "Nur als Stilvorlage"
+        }
+      },
+      "imageIntro": "Ihr Logo, Produktfotos, Bilder vom Laden — alles, was auf die Seite soll oder den Stil vorgeben darf."
     },
     "marketplace": {
       "title": "Marktplatz",
@@ -1303,7 +1335,9 @@
       "empty": "Noch keine Berichte. Beschreibe oben ein Thema, um zu sehen, was recherchiert würde.",
       "usedThisMonth": "{used} von {cap} in diesem Monat",
       "usedUnlimited": "{used} in diesem Monat",
-      "capReached": "Du hast die Berichte dieses Monats aufgebraucht. Zurücksetzung am 1."
+      "capReached": "Du hast die Berichte dieses Monats aufgebraucht. Zurücksetzung am 1.",
+      "progressStep": "Frage {done} von {total}",
+      "keepsRunning": "Das läuft weiter, auch wenn Sie die Seite schließen."
     },
     "onboarding": {
       "title": "Machen wir es zu deinem",

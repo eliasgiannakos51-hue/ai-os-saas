@@ -46,6 +46,17 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // Website Builder design controls. Each checked by hand: "Design" is
+  // the ordinary word in French, German, Italian and Portuguese;
+  // "optional" is genuine German; "Photo" is French. Substituting a
+  // synonym to make the string differ would make those UIs worse, not
+  // more translated — the same reasoning as the existing entries below.
+  "fr:dashboard.websiteBuilder.design.title",
+  "de:dashboard.websiteBuilder.design.title",
+  "it:dashboard.websiteBuilder.design.title",
+  "pt:dashboard.websiteBuilder.design.title",
+  "de:dashboard.websiteBuilder.design.optional",
+  "fr:dashboard.websiteBuilder.design.backgrounds.photo",
   // "Collaboration" is spelled identically in French — substituting a
   // synonym to make the string differ would make the French UI worse,
   // not more translated. Same reasoning as the entries below.
@@ -179,6 +190,11 @@ const LOCALE_ALLOWED = new Set([
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
+  // A hex colour code shown as the placeholder in the Website Builder's
+  // colour field. It is a FORMAT example, not prose — "#1d4ed8" is the
+  // same six characters in every language, and translating it would mean
+  // showing a different colour per locale for no reason.
+  "dashboard.websiteBuilder.design.hexPlaceholder",
   "landing.footer.roadmap",
   "roadmap.title",
   "roadmap.items.agentBuilder.title",

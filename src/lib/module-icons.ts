@@ -40,6 +40,7 @@ import {
   Star,
   FolderOpen,
   Telescope,
+  LifeBuoy,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -110,6 +111,10 @@ export const FILES_ICON: LucideIcon = FolderOpen;
 // things that both answer to the word "research", so they get two
 // different icons and two different routes.
 export const DEEP_RESEARCH_ICON: LucideIcon = Telescope;
+
+// Help Centre (app/help/page.tsx) — a life ring, not a question mark:
+// a "?" reads as "what is this control" and this is "I need help".
+export const HELP_ICON: LucideIcon = LifeBuoy;
 
 /**
  * The icon for any slug that can appear on a card, including the

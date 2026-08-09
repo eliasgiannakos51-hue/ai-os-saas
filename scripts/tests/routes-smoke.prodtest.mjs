@@ -211,7 +211,10 @@ if (!up || /EADDRINUSE|Failed to start server/.test(serverLog)) {
 }
 console.log(`production server up on :${PORT} (next start, NODE_ENV=production)`);
 
-const PUBLIC_ROUTES = ["/", "/pricing", "/terms", "/privacy", "/login", "/signup", "/roadmap"];
+// /help is public on purpose: half the questions it answers ("what does it
+// cost", "is my data safe", "what is this") are asked before anyone signs
+// up, and an answer you need an account to read is not an answer.
+const PUBLIC_ROUTES = ["/", "/pricing", "/help", "/terms", "/privacy", "/login", "/signup", "/roadmap"];
 // /onboarding is authenticated but lives OUTSIDE /dashboard on purpose —
 // it has no sidebar, because the one thing it is for is getting real
 // data in and one true sentence back out. Listed here so the smoke test
@@ -350,6 +353,95 @@ for (const route of DASHBOARD_ROUTES) {
     JSON.stringify(r.overflow)
   );
 }
+// A route returning 200 says the page rendered. It does not say the
+// controls on it are FINDABLE, which is the thing that was actually
+// reported: "the image upload exists but nobody sees it", "there is no
+// AI indication anywhere". Both of those would pass every assertion
+// above. So the two screens carrying new, must-be-noticed controls are
+// checked for what a user would look at, in the production build, at
+// phone width.
+console.log("\n== 3. new controls are actually visible (production build, 375px) ==");
+{
+  const page = await authed.newPage();
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/website-builder`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+
+  // The generation form opens by default when the account has no sites,
+  // which is the state this stand-in serves.
+  const visible = async (selector) => {
+    const el = page.locator(selector).first();
+    return (await el.count()) > 0 && (await el.isVisible());
+  };
+
+  checkTrue("design section heading is on screen", await visible('h3:has-text("Design")'));
+  checkTrue("a primary colour picker is on screen", await visible('input[type="color"]'));
+  const colourInputs = await page.locator('input[type="color"]').count();
+  check("both primary and secondary colour pickers exist", colourInputs, 2);
+  checkTrue("background options are on screen", await visible('button:has-text("Animated gradient")'));
+  checkTrue('"You choose" is the default background', await visible('button[aria-pressed="true"]:has-text("You choose")'));
+  checkTrue(
+    '"My own photo" is offered but disabled with nothing uploaded',
+    await page.locator('button:has-text("My own photo")[disabled]').count() > 0
+  );
+  checkTrue(
+    "the upload control explains what it is for",
+    await visible('text=/logo, product shots/i')
+  );
+
+  // The controls must actually DO something — one that renders and is
+  // inert is exactly the failure this section exists to catch.
+  //
+  // `fill()`, not a hand-dispatched Event. Setting .value from script and
+  // dispatching an event does not reach a React onChange: React's value
+  // tracker sees no change and swallows it. That is a property of the
+  // test technique, not of the app, and using it would have produced a
+  // failure that says nothing about whether a real click works.
+  await page.locator('input[type="color"]').first().fill("#1d4ed8");
+  check(
+    "picking a colour fills the paired hex field",
+    await page.locator('input[aria-label="Primary colour (hex)"]').inputValue(),
+    "#1d4ed8"
+  );
+
+  // ...and the other direction: typing a hex drives the swatch.
+  await page.locator('input[aria-label="Secondary colour (hex)"]').fill("#f59e0b");
+  check(
+    "typing a hex drives the colour swatch",
+    await page.locator('input[type="color"]').nth(1).inputValue(),
+    "#f59e0b"
+  );
+
+  // A background chip really selects.
+  await page.locator('button:has-text("Animated gradient")').first().click();
+  checkTrue(
+    "choosing a background marks it selected",
+    (await page
+      .locator('button[aria-pressed="true"]:has-text("Animated gradient")')
+      .count()) > 0
+  );
+
+  await page.close();
+}
+
+{
+  const page = await authed.newPage();
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/deep-research`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+  // EU AI Act art. 50 — the notice has to be READABLE, not present.
+  // Deep Research renders it above a finished report; with no report on
+  // this stand-in account, what is assertable here is that the page
+  // carries the translated string rather than a raw key.
+  const body = await page.locator("body").innerText();
+  checkTrue("no raw i18n key leaks into Deep Research", !/common\.aiGenerated/.test(body));
+  await page.close();
+}
+
 await authed.close();
 
 await browser.close();

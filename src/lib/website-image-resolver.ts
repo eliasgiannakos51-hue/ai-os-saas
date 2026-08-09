@@ -1,5 +1,10 @@
 import "server-only";
-import { findImagePlaceholders, picsumFallbackUrl, applyResolvedImageUrls } from "@/lib/website-image-placeholders";
+import {
+  findImagePlaceholders,
+  picsumFallbackUrl,
+  applyResolvedImageUrls,
+  broadenImageQuery,
+} from "@/lib/website-image-placeholders";
 import { searchUnsplashPhoto } from "@/lib/unsplash";
 
 // Runs after generateWebsiteHtml/editWebsiteHtml (lib/website-builder.ts)
@@ -18,8 +23,19 @@ export async function resolveWebsiteImagePlaceholders(html: string): Promise<str
   const resolved = new Map<string, string>();
   await Promise.all(
     placeholders.map(async ({ slug, query }) => {
-      const unsplashUrl = await searchUnsplashPhoto(query);
-      resolved.set(slug, unsplashUrl ?? picsumFallbackUrl(query));
+      // Most specific first, broadening only on an empty result — see
+      // broadenImageQuery. A specific query that HITS is never widened, so
+      // this costs one request in the common case and only spends more
+      // round trips on the queries that would otherwise have produced an
+      // unrelated photo.
+      for (const attempt of broadenImageQuery(query)) {
+        const unsplashUrl = await searchUnsplashPhoto(attempt);
+        if (unsplashUrl) {
+          resolved.set(slug, unsplashUrl);
+          return;
+        }
+      }
+      resolved.set(slug, picsumFallbackUrl(query));
     })
   );
   return applyResolvedImageUrls(html, resolved);

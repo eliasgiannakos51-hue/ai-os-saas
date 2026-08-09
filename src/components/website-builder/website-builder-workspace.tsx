@@ -42,6 +42,13 @@ import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
+import { DesignControls } from "@/components/website-builder/design-controls";
+import {
+  applyDesignBrief,
+  DEFAULT_DESIGN_CHOICES,
+  type WebsiteDesignChoices,
+} from "@/lib/website-design-brief";
+import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { CardGrid, EntityCard, type EntityCardStatusTone } from "@/components/ui/entity-card";
 import { DetailPanel, type DetailTab } from "@/components/ui/detail-panel";
@@ -216,6 +223,14 @@ export function WebsiteBuilderWorkspace({
   const [referenceImageFiles, setReferenceImageFiles] = useState<File[]>([]);
   const [imageError, setImageError] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+
+  // Custom design (colours, background, what to do with the uploaded
+  // photos). Compiled into an explicit instruction block appended to the
+  // description at submit time — see lib/website-design-brief.ts for why
+  // it is a text brief rather than a schema. Every default produces an
+  // EMPTY brief, so a user who touches nothing sends byte-for-byte the
+  // description this form sent before these controls existed.
+  const [design, setDesign] = useState<WebsiteDesignChoices>(DEFAULT_DESIGN_CHOICES);
 
   // Clarifying-questions pre-check (see lib/clarification.ts,
   // api/websites/generate/route.ts) — set when the server's first-pass
@@ -493,6 +508,7 @@ export function WebsiteBuilderWorkspace({
     setName("");
     setDescription("");
     setReferenceImageFiles([]);
+    setDesign(DEFAULT_DESIGN_CHOICES);
     setPendingClarification(null);
     setError(null);
   }
@@ -649,7 +665,16 @@ export function WebsiteBuilderWorkspace({
         referenceImagePaths = uploadResults.map((r) => r.path);
       }
 
-      await submitGeneration(trimmedName, trimmedDescription, referenceImagePaths, false);
+      // The design choices ride along inside the description, so every
+      // downstream step (clarification, the off-topic classifier, the
+      // worker, a later regenerate) sees one brief rather than a
+      // description plus a second channel that only some of them read.
+      await submitGeneration(
+        trimmedName,
+        applyDesignBrief(trimmedDescription, { ...design, imageCount: referenceImagePaths.length }),
+        referenceImagePaths,
+        false
+      );
     } catch (err) {
       setError(
         err instanceof TypeError
@@ -1001,6 +1026,13 @@ export function WebsiteBuilderWorkspace({
         >
           {detailTab === "preview" && (
             <>
+              {/* EU AI Act art. 50. A generated site is the artefact in
+                  this product most likely to be mistaken for something a
+                  person built — it renders as a real page in an iframe —
+                  so the notice sits above the preview, where it is read
+                  before the page is, rather than in metadata. */}
+              <AiGeneratedNotice variant="block" className="mb-3" />
+
               {viewingVersion && (
                 <p className="mb-3 rounded-lg border border-orange-800 bg-orange-950/20 px-3 py-2 text-xs text-orange-300">
                   {t("viewingOldVersion", { number: viewingVersion.version_number })}{" "}
@@ -1256,9 +1288,16 @@ export function WebsiteBuilderWorkspace({
               </div>
 
               <div>
-                <label htmlFor="website-reference-image" className="mb-1 block text-xs text-muted">
+                {/* The upload heading is a real instruction now, not a
+                    neutral field label. The report was that this control
+                    exists but nobody finds it — "Reference images
+                    (0/20)" reads like an advanced option, and a user
+                    looking for "put my photos on the site" does not
+                    recognise themselves in it. */}
+                <label htmlFor="website-reference-image" className="mb-0.5 block text-xs font-medium text-foreground">
                   {t("imageLabel", { count: referenceImageFiles.length, max: MAX_REFERENCE_IMAGES })}
                 </label>
+                <p className="mb-1.5 text-[11px] text-muted">{t("imageIntro")}</p>
                 {referenceImageFiles.length > 0 && (
                   <ul className="mb-2 space-y-1.5">
                     {referenceImageFiles.map((file, index) => (
@@ -1294,6 +1333,17 @@ export function WebsiteBuilderWorkspace({
                 <p className="mt-1 text-[11px] text-muted">{t("imageHelp", { max: MAX_REFERENCE_IMAGES })}</p>
                 {imageError && <p className="mt-1 text-[11px] text-red-400">{imageError}</p>}
               </div>
+
+              {/* Custom design — colours, background, and what to do with
+                  the uploaded photos. Rendered inline rather than behind
+                  an "Advanced" toggle: the request was that these be
+                  possible AND findable, and a collapsed section answers
+                  only the first half. */}
+              <DesignControls
+                value={design}
+                onChange={setDesign}
+                imageCount={referenceImageFiles.length}
+              />
 
               {description.trim().length > 0 && (
                 <p className="rounded-lg border border-border bg-input px-3 py-2 text-xs text-muted">

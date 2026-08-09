@@ -24,7 +24,11 @@
     "notAuthenticated": "未登录。",
     "created": "✓ 已创建",
     "updated": "✓ 已更新",
-    "linked": "✓ 已关联"
+    "linked": "✓ 已关联",
+    "aiGenerated": {
+      "short": "由 AI 生成",
+      "long": "本内容由 AI 生成，可能有误。在依赖之前请核实重要信息。"
+    }
   },
   "sidebar": {
     "groups": {
@@ -80,7 +84,8 @@
       "published": "已发布网站",
       "integrations": "集成",
       "files": "文件",
-      "deepResearch": "深度研究"
+      "deepResearch": "深度研究",
+      "help": "帮助中心"
     },
     "groupHints": {
       "create": "生成网站、规划目标、撰写文档。",
@@ -131,7 +136,8 @@
       "published": "你所有已上线的网站，含访问量与版本历史",
       "integrations": "连接 Gmail、Drive 与 Slack，让 AI 处理你真实的数据",
       "files": "上传 PDF、Word 和 Excel 文件，然后向 AI 提问",
-      "deepResearch": "给一个主题，它会搜索、交叉核对并写出带来源的报告"
+      "deepResearch": "给一个主题，它会搜索、交叉核对并写出带来源的报告",
+      "help": "最常见问题的答案，不消耗额度。"
     },
     "comingSoon": "即将推出",
     "comingSoonToast": "{name} 尚未推出——已列入路线图。",
@@ -902,7 +908,33 @@
       "statusFlagged": "已标记",
       "flaggedTitle": "已被我们的安全审核标记",
       "regenerateFree": "重新生成（免费）",
-      "editUnavailable": "网站生成完成后即可提出修改要求。"
+      "editUnavailable": "网站生成完成后即可提出修改要求。",
+      "design": {
+        "title": "设计",
+        "optional": "可选",
+        "colours": "配色",
+        "primary": "主色",
+        "secondary": "辅助色",
+        "hexPlaceholder": "#1d4ed8",
+        "hexInvalid": "请填写六位十六进制颜色，例如 #1d4ed8。",
+        "clear": "清除",
+        "background": "背景",
+        "ownPhotoNeedsUpload": "请先在上方上传照片。",
+        "imageUse": "你上传的 {count} 张照片",
+        "backgrounds": {
+          "auto": "由 AI 决定",
+          "solid": "纯色",
+          "gradient": "动态渐变",
+          "photo": "照片",
+          "pattern": "图案",
+          "own-photo": "我自己的照片"
+        },
+        "imageUses": {
+          "in-site": "放到网站上",
+          "style-only": "仅作风格参考"
+        }
+      },
+      "imageIntro": "你的标志、产品照片、店内照片——想放到页面上的，或想让它决定风格的。"
     },
     "marketplace": {
       "title": "市场",
@@ -1303,7 +1335,9 @@
       "empty": "还没有报告。在上方描述一个主题，看看它会研究什么。",
       "usedThisMonth": "本月 {cap} 次中的 {used} 次",
       "usedUnlimited": "本月 {used} 次",
-      "capReached": "你已用完本月的研究报告额度，将于每月 1 日重置。"
+      "capReached": "你已用完本月的研究报告额度，将于每月 1 日重置。",
+      "progressStep": "第 {done} 个问题，共 {total} 个",
+      "keepsRunning": "即使关闭页面，任务也会继续运行。"
     },
     "onboarding": {
       "title": "让它成为你的",

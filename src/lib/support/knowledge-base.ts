@@ -279,7 +279,11 @@ export const KNOWLEDGE_BASE: KnowledgeArticle[] = [
     triggers: [
       "δεδομενα μου", "ιδιωτικοτητα", "privacy", "ασφαλεια", "τα πουλατε", "εκπαιδευση μοντελων",
     ],
-    href: "/legal/privacy",
+    // /privacy, not /legal/privacy — there is no /legal segment in this
+    // app (src/app/privacy/page.tsx). The wrong path was invisible while
+    // nothing rendered these links; the Help Centre renders every one of
+    // them, so a 404 here is now a 404 a user clicks.
+    href: "/privacy",
   },
   {
     id: "password-reset",

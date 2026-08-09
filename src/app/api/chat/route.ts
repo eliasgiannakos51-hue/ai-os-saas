@@ -47,6 +47,7 @@ import { loadProductMentorContext } from "@/lib/chat/product-mentor-context";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 import { AI_CONDUCT_EL } from "@/lib/ai-conduct";
+import { matchCannedAnswer, type CannedMatch } from "@/lib/support/knowledge-base";
 
 export const dynamic = "force-dynamic";
 
@@ -114,6 +115,36 @@ function buildMentorSystemPrompt(personaName: string): string {
   return `Είσαι ο/η ${personaName} Mentor — δεν δίνεις μόνο απαντήσεις, δίνεις επιχειρηματική/στρατηγική καθοδήγηση. Όταν ο χρήστης περιγράφει ένα σχέδιο/ιδέα, ΜΗΝ απαντάς μόνο εκτελεστικά — επισήμανε πιθανά ρίσκα, ρώτησε διευκρινιστικές ερωτήσεις που θα ρωτούσε ένας έμπειρος σύμβουλος, και πρότεινε εναλλακτικές όπου έχει νόημα. Χρησιμοποίησε τα δεδομένα του χρήστη (modules/entries) ως context όταν είναι σχετικό. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος). Χρησιμοποίησε markdown formatting όπου βοηθάει (code blocks, λίστες, bold) για ευανάγνωστες απαντήσεις.${WEB_SEARCH_INSTRUCTION}${AI_CONDUCT_EL}${AI_QUALITY_CHECKLIST_EL}`;
 }
 
+// CANNED ANSWERS — the part of support traffic that does not need a model.
+//
+// lib/support/knowledge-base.ts has existed, tested, for a while and was
+// never connected to anything. So every "how much does it cost", "how do I
+// cancel", "what are credits" paid for a full Claude turn — reserve,
+// stream, memory extraction, settle, log — to reproduce a sentence that
+// has not changed in months. Removing that call makes the answer BETTER,
+// not worse: a fixed answer cannot hallucinate a price, and the file's own
+// rule is that no canned answer states a number that moves.
+//
+// TWO THRESHOLDS, and the second one is the point.
+//
+// On a NEW conversation the message is the whole context, so the library's
+// own 0.85 applies. Inside an EXISTING conversation the same words can
+// mean something else entirely — "πόσο κοστίζει;" after three turns about
+// a client proposal is a question about the proposal, and answering it
+// with our pricing page would be worse than useless. So a mid-conversation
+// match has to be near-exact before it is allowed to pre-empt the model.
+//
+// isAccountSpecific already rejects anything in the first person, so
+// "how many credits do I have left" can never reach this path — that is a
+// question about an account and it has to hit the real one.
+const CANNED_THRESHOLD_NEW_CONVERSATION = 0.85;
+const CANNED_THRESHOLD_MID_CONVERSATION = 0.92;
+
+// Shared by the canned path and the model path, so wiring up a second way
+// into this route did not fork the wording of the same two failures.
+const CONVERSATION_NOT_FOUND = "Conversation not found.";
+const CONVERSATION_CREATE_FAILED = "Could not start a new conversation.";
+
 function truncateTitle(message: string, maxLen = 40): string {
   const trimmed = message.trim().replace(/\s+/g, " ");
   if (trimmed.length <= maxLen) return trimmed;
@@ -125,6 +156,116 @@ function truncateTitle(message: string, maxLen = 40): string {
 // splitting on "\n" — a plain fetch() + ReadableStream reader is enough.
 function ndjsonLine(event: Record<string, unknown>): Uint8Array {
   return new TextEncoder().encode(`${JSON.stringify(event)}\n`);
+}
+
+/**
+ * Answers from the knowledge base, in the SAME wire shape as a model
+ * reply, so the client needs no branch for it.
+ *
+ * It streams meta -> delta -> done exactly like the real path. That is
+ * deliberate: a canned answer that arrived through a different response
+ * shape would need its own rendering, its own error handling and its own
+ * conversation bookkeeping, and the three would drift. The only difference
+ * a user can observe is that it is instant and the receipt says zero.
+ *
+ * NOTHING IS CHARGED and nothing is reserved, because no AI call is made.
+ * No cost-log row is written either — settleReservation exists to price
+ * measured usage, and there is none; a zero-cost row here would be
+ * indistinguishable from the "settled with no measured usage" bug it
+ * already alerts on.
+ */
+async function answerFromKnowledgeBase(params: {
+  supabase: ReturnType<typeof createClient>;
+  userId: string;
+  message: string;
+  conversationId: string | null;
+  match: CannedMatch;
+}): Promise<Response> {
+  const { supabase, userId, message, match } = params;
+  let conversationId = params.conversationId;
+  let isNewConversation = false;
+  let newConversationTitle: string | undefined;
+
+  if (conversationId) {
+    const { data: existing } = await supabase
+      .from("chat_conversations")
+      .select("id")
+      .eq("id", conversationId)
+      .maybeSingle();
+    if (!existing) {
+      return NextResponse.json({ ok: false, error: CONVERSATION_NOT_FOUND }, { status: 404 });
+    }
+  } else {
+    newConversationTitle = truncateTitle(message);
+    const { data: created, error: createError } = await supabase
+      .from("chat_conversations")
+      .insert({ user_id: userId, title: newConversationTitle })
+      .select("id")
+      .single();
+    if (createError || !created) {
+      logApiError("/api/chat", createError, { stage: "create_conversation_canned" });
+      return NextResponse.json({ ok: false, error: CONVERSATION_CREATE_FAILED }, { status: 500 });
+    }
+    conversationId = created.id;
+    isNewConversation = true;
+  }
+
+  // The article's own link, appended once, so a fixed answer still leads
+  // somewhere with the live numbers on it — the knowledge base
+  // deliberately states no price, allowance or limit, and this is how the
+  // user gets to them.
+  const answer = match.article.href
+    ? `${match.article.answer}\n\n→ ${match.article.href}`
+    : match.article.answer;
+
+  const finalConversationId = conversationId;
+  const { error: saveError } = await supabase.from("chat_messages").insert([
+    { conversation_id: finalConversationId, user_id: userId, role: "user", content: message },
+    { conversation_id: finalConversationId, user_id: userId, role: "assistant", content: answer },
+  ]);
+  if (saveError) {
+    logApiError("/api/chat", saveError, { stage: "save_canned_messages" });
+  }
+  await supabase
+    .from("chat_conversations")
+    .update({ updated_at: new Date().toISOString() })
+    .eq("id", finalConversationId);
+
+  diagLog(
+    `[canned] chat answered without a model call: ${JSON.stringify({
+      userId,
+      articleId: match.article.id,
+      confidence: match.confidence,
+    })}`
+  );
+
+  const stream = new ReadableStream({
+    start(controller) {
+      controller.enqueue(
+        ndjsonLine({
+          type: "meta",
+          conversationId: finalConversationId,
+          isNewConversation,
+          title: newConversationTitle,
+          // So the UI can say where the answer came from and link to the
+          // full article rather than presenting it as a model reply.
+          cannedAnswer: { articleId: match.article.id, href: match.article.href ?? null },
+        })
+      );
+      controller.enqueue(ndjsonLine({ type: "delta", text: answer }));
+      controller.enqueue(
+        ndjsonLine({
+          type: "done",
+          usage: buildUsageReceipt({ creditsCharged: 0, bypass: false, wouldHaveCharged: null }),
+        })
+      );
+      controller.close();
+    },
+  });
+
+  return new Response(stream, {
+    headers: { "Content-Type": "application/x-ndjson; charset=utf-8", "Cache-Control": "no-cache" },
+  });
 }
 
 export async function POST(request: Request) {
@@ -184,6 +325,31 @@ export async function POST(request: Request) {
         { ok: false, error: "Not authenticated." },
         { status: 401 }
       );
+    }
+
+    // CANNED ANSWER — checked before the circuit breaker, before credits,
+    // before any context is loaded, because none of that machinery exists
+    // for an answer that makes no AI call. A user who has run out of
+    // credits, or who has tripped the breaker, can still be told how to
+    // cancel their subscription.
+    //
+    // Mentor Mode is excluded: the user explicitly asked for strategic
+    // pushback on their situation, and handing them a FAQ entry instead is
+    // not a cheaper version of that, it is a different (wrong) answer.
+    const cannedMatch = mentorMode
+      ? null
+      : matchCannedAnswer(
+          message,
+          conversationId ? CANNED_THRESHOLD_MID_CONVERSATION : CANNED_THRESHOLD_NEW_CONVERSATION
+        );
+    if (cannedMatch) {
+      return await answerFromKnowledgeBase({
+        supabase,
+        userId: user.id,
+        message,
+        conversationId,
+        match: cannedMatch,
+      });
     }
 
     // Circuit breaker: independent of credits (see lib/ai-circuit-breaker.ts).
@@ -403,7 +569,7 @@ export async function POST(request: Request) {
       if (!existing) {
         if (isFreeMessage) await releaseFreeChatMessage(user.id);
         return NextResponse.json(
-          { ok: false, error: "Conversation not found." },
+          { ok: false, error: CONVERSATION_NOT_FOUND },
           { status: 404 }
         );
       }
@@ -419,7 +585,7 @@ export async function POST(request: Request) {
         logApiError("/api/chat", createConvError, { stage: "create_conversation" });
         if (isFreeMessage) await releaseFreeChatMessage(user.id);
         return NextResponse.json(
-          { ok: false, error: "Could not start a new conversation." },
+          { ok: false, error: CONVERSATION_CREATE_FAILED },
           { status: 500 }
         );
       }

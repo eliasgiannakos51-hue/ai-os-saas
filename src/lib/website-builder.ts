@@ -1,6 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
+import { extractHtmlDocument, containsHtmlDocumentStart } from "@/lib/website-html-extract";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { applyExactReplace } from "@/lib/website-patch";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
@@ -52,16 +53,40 @@ const CONTINUATION_INSTRUCTION =
   "Continue the HTML document EXACTLY where you left off — do not repeat anything you already wrote, do not restart the document, and do not add any commentary or markdown code fences. Output only the raw continuation of the HTML from the exact point it was cut off.";
 
 // Same native, server-executed tool used by api/chat/route.ts — was
-// missing here entirely before this fix: streamHtmlToCompletion's
+// missing here entirely before an earlier fix: streamHtmlToCompletion's
 // anthropic.messages.stream() call never passed a `tools` array at all,
 // so the model had no way to actually search the web no matter what the
 // system prompt said to do, for either a fresh generation or an edit
-// (both go through this same function). max_uses caps it at 3 real
-// searches per generation/edit call, matching chat's same per-call limit.
+// (both go through this same function).
+//
+// max_uses was 3, copied from chat's per-reply limit. A chat reply answers
+// one question; a website has to establish the AREA, the INDUSTRY and the
+// going RATES before it can write a single true sentence, and 3 searches
+// cannot cover three subjects. The MANDATORY RESEARCH block below asks for
+// one search per subject plus follow-ups, so the ceiling is raised to
+// match what is actually being asked for.
+//
+// Cost is bounded and measured: Anthropic bills $10/1,000 searches and
+// every one lands in usage.server_tool_use.web_search_requests, which
+// CostAccumulator records and settlement charges at the account's margin
+// (see lib/billing/model-pricing.ts's WEB_SEARCH_USD_PER_QUERY). Eight
+// searches is $0.08 — real, but a fraction of the generation itself, and
+// it is the difference between a page about a real neighbourhood and a
+// page of plausible-sounding filler.
+const WEBSITE_MAX_SEARCHES = 8;
 const WEB_SEARCH_TOOL: Anthropic.WebSearchTool20250305 = {
   type: "web_search_20250305",
   name: "web_search",
-  max_uses: 3,
+  max_uses: WEBSITE_MAX_SEARCHES,
+};
+// Edits are a targeted change to an existing page, not a fresh brief, so
+// they keep the smaller budget — an edit rarely needs to re-establish the
+// whole context.
+const EDIT_MAX_SEARCHES = 3;
+const EDIT_WEB_SEARCH_TOOL: Anthropic.WebSearchTool20250305 = {
+  type: "web_search_20250305",
+  name: "web_search",
+  max_uses: EDIT_MAX_SEARCHES,
 };
 
 // Off-topic guard — without this, a request like "write me a poem" had no
@@ -169,7 +194,15 @@ FONTS (Google Fonts):
 Available named fonts you recognize and can use exactly by this name: ${GOOGLE_FONTS_LIST}.
 - If the user names a specific one of these (or something close/misspelled), use that exact font.
 - If the user names a font NOT in this list, use the closest visual match from the list instead (never invent a fake font-family name).
-- If the user only describes a vibe, pick a fitting pair from the list: e.g. "elegant/luxury" -> a serif display face (Playfair Display, Cormorant Garamond, Fraunces) for headings + a clean sans (Inter, Karla) for body; "modern/tech/startup" -> a geometric sans (Space Grotesk, Manrope, Outfit) for both; "warm/friendly" -> a rounded sans (Nunito, Quicksand, Rubik).
+- If the user names no font, choose the pairing from the SITE SHAPE and the subject, not from habit. Three mappings used to be listed here and the result was three looks across every site ever generated, so treat the following as a starting range and pick deliberately:
+  * elegant / luxury / hospitality -> serif display headings (Playfair Display, Cormorant Garamond, Bodoni Moda, Prata) + a quiet sans body (Inter, Karla, Work Sans)
+  * legal / medical / financial / institutional -> a restrained serif throughout (Libre Baskerville, Merriweather, Spectral, Domine) or a sober grotesk (IBM Plex Sans, Source Sans 3, Archivo) — authority reads as understatement, not as a display face
+  * modern / tech / product -> geometric sans (Space Grotesk, Manrope, Outfit, Plus Jakarta Sans, Sora)
+  * warm / family / neighbourhood -> rounded sans (Nunito, Quicksand, Rubik) or a friendly slab (Zilla Slab)
+  * editorial / writing / personal -> a reading serif (Crimson Pro, Lora, Spectral, Merriweather) at a generous size, single column
+  * bold / nightlife / sport / streetwear -> condensed display (Oswald, Bebas Neue, Archivo) + a neutral sans body
+  * gallery / architecture / minimal -> one grotesk at two weights (Epilogue, Urbanist, Barlow), heavy reliance on scale and space rather than on a second family
+- Inter is a perfectly good body face and it is also the most over-used font on the web. Do not reach for it by default — choose it when it is right, not when nothing else came to mind.
 - To actually load a font, add BOTH of these to <head> (this is the one and only external-resource exception in this document — see the rules above):
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -177,8 +210,20 @@ Available named fonts you recognize and can use exactly by this name: ${GOOGLE_F
   (replace spaces in FONT NAME with + in the URL, e.g. "Playfair Display" -> family=Playfair+Display)
 - Then reference it in CSS: font-family: 'Font Name', sans-serif; (or serif, matching the font's actual category).`;
 
+// "reproduce these patterns consistently rather than inventing new ones
+// each time" used to be the first line of this section. It is a direct
+// order to be identical every time, and it is one of the reasons every
+// generated site looked like every other one: the same three effects, on
+// the same elements, in the same order, whatever the site was for.
+//
+// These are now REFERENCE IMPLEMENTATIONS — correct, tested CSS to copy
+// when a given effect is the right one — with an explicit instruction
+// that most sites need one or none. The literal sunset/purple gradient in
+// pattern 4 is gone for the same reason: a caveat saying "pick colours
+// that fit" does not survive contact with four concrete hex values sitting
+// right above it.
 const ANIMATIONS_SECTION = `
-ANIMATIONS (pure CSS, reproduce these patterns consistently rather than inventing new ones each time):
+ANIMATIONS (pure CSS). These are REFERENCE IMPLEMENTATIONS, not a checklist — copy the CSS for an effect when that effect is right for THIS site, and skip the rest. Most good sites use one, or none. Using all five on every site is a failure, not thoroughness.
 
 1) Scroll-reveal fade-in — add class="reveal" to a section, plus this CSS and this exact tiny script (the ONLY two purposes an inline <script> may ever be used for in this document are this effect and the contact-form handler described below):
    CSS:
@@ -200,10 +245,9 @@ ANIMATIONS (pure CSS, reproduce these patterns consistently rather than inventin
      .card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
      .card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
 
-4) Animated gradient background — hero sections, CTAs:
-     .gradient-bg { background: linear-gradient(-45deg, #ff7e5f, #feb47b, #6a11cb, #2575fc); background-size: 400% 400%; animation: gradientShift 12s ease infinite; }
+4) Animated gradient background — hero sections, CTAs. The four colour stops below are written as PLACEHOLDERS on purpose: substitute four real colours from THIS site's own palette. Emitting a literal purple/orange gradient on a law firm or a bakery is exactly the kind of copied default this section exists to prevent.
+     .gradient-bg { background: linear-gradient(-45deg, COLOR_1, COLOR_2, COLOR_3, COLOR_4); background-size: 400% 400%; animation: gradientShift 12s ease infinite; }
      @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-   (pick colors that fit the site's actual palette — the above is a structural example, not literal colors to always use)
 
 5) Staggered list-item entrance:
      .stagger-item { opacity: 0; animation: fadeInUp 0.6s ease forwards; }
@@ -212,7 +256,51 @@ ANIMATIONS (pure CSS, reproduce these patterns consistently rather than inventin
      .stagger-item:nth-child(3) { animation-delay: 0.3s; }
      @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
-Use these when the description asks for "impressive"/"modern"/"animated" or similar — don't overdo it on a simple/minimal request.`;
+Reach for these when the description asks for "impressive"/"modern"/"animated" or similar. A restrained, serious or editorial site is BETTER with no animation at all — do not add motion to prove effort.`;
+
+// THE SECTION THAT DID NOT EXIST, and whose absence is the real reason
+// every generated site looked the same.
+//
+// The rest of this prompt is exhaustively specific about MECHANICS —
+// which fonts, which animation CSS, how to embed a photo, how to wire a
+// form, what not to invent — and completely silent about STRUCTURE. It
+// never said that a lawyer's page and a café's page are different shapes.
+//
+// A model given detailed mechanics and no structural guidance falls back
+// on its own strongest prior, which for "make me a website" is the
+// generic centred-hero SaaS landing page: hero with a gradient, three
+// feature cards with icons, a testimonial, a CTA band, a fat footer. That
+// is what was arriving every time, for every business, and it was the
+// prompt's silence producing it rather than any template inside it.
+//
+// So this names real archetypes with genuinely DIFFERENT shapes, bans the
+// default explicitly, and makes the choice the first decision the model
+// takes — before it writes any markup.
+const SITE_SHAPE_SECTION = `
+SITE SHAPE — DECIDE THIS FIRST, BEFORE YOU WRITE ANY HTML:
+Different businesses need structurally different pages. Ask "what is a visitor to THIS site actually trying to do, and what is the fastest path to it?", then build that page. The answer is different for a café and for a barrister, and the two pages should not be recognisable as the same template with different words in it.
+
+Reference shapes (pick the closest, adapt it, or build a better one — this is a list of examples, not an enum):
+
+- LOCAL PLACE (café, restaurant, bar, salon, gym, clinic, shop): photography-led. A large real photo above everything. Then the thing people actually came for — the menu, the price list, the timetable — HIGH ON THE PAGE, not after three feature cards. Opening hours, address, a maps link and a tappable phone number are primary content near the top AND repeated in the footer. Very little marketing prose; nobody reads "we are passionate about quality" before deciding where to have lunch.
+- PROFESSIONAL SERVICES (lawyer, accountant, architect, consultant, therapist, medical practice): credibility-led and restrained. Typographic rather than decorative. Practice areas as a plain, readable list or a simple two-column layout — not icon cards, which read as unserious here. Real credentials: qualifications, years in practice, bar/association membership, languages spoken. A proper contact form and a direct phone number. Sparse photography, and never generic stock handshakes or smiling headsets.
+- PORTFOLIO / CREATIVE (photographer, designer, illustrator, artist, studio): work-first. The work IS the page — a large gallery or grid at or near the very top, often before any headline at all. Minimal body copy, minimal navigation, generous whitespace, no feature cards, no testimonials section unless asked. Contact is one line, not a section.
+- PRODUCT / SAAS / APP: this is the ONE case where the familiar shape is correct — value proposition hero, how it works, features, pricing, call to action. Use it here and only here.
+- EVENT / CAMPAIGN / SINGLE PURPOSE (wedding, conference, launch, fundraiser): one dominant action. Date, place and the CTA sit above everything else in the visual hierarchy; every other section exists to support that one decision.
+- PERSONAL / CV / WRITING: editorial. A single readable column, a comfortable measure, name and one true sentence first, then the substance. No hero band, no cards.
+- CATALOGUE / LISTINGS (products, properties, menu of services with prices): a real grid or table of items with prices, and an unmistakable explanation of how to actually order or enquire.
+
+FORBIDDEN DEFAULT: do NOT produce the generic centred-hero landing page — big centred headline over a gradient, a row of three feature cards with icons, a testimonial, a CTA band, a fat footer — unless the brief genuinely IS a product/SaaS landing page. It is the single most over-used shape on the web and it is wrong for most of the briefs you will receive.
+
+VARY THESE DELIBERATELY, driven by the subject rather than by habit:
+- HERO: full-bleed photograph / split text-and-image / purely typographic with no image / asymmetric offset / no hero at all, opening straight into the work or the menu.
+- NAVIGATION: a normal top bar / a logo alone / anchored section links / none, for a short single-purpose page.
+- SECTION RHYTHM: alternating left-right blocks / full-bleed colour bands / a card grid / one continuous editorial column / an overlapping asymmetric layout.
+- PALETTE: derive it from the actual subject — a taverna is not a fintech. Warm earth tones, deep monochrome, high-contrast black and white, a single accent on near-white, muted naturals are all available. Avoid the default indigo-to-violet gradient unless the brief asks for it.
+- TYPOGRAPHY: vary the pairing, the scale and the weight contrast per the shape above; see FONTS.
+- DENSITY: a listings page should be dense; a portfolio should be sparse. Do not apply the same vertical rhythm to both.
+
+If two sites you generated for two different businesses would look like the same page with the words swapped, you have not done this step.`;
 
 const FUNCTIONAL_ELEMENTS_SECTION = `
 FUNCTIONAL CONTACT ELEMENTS (not decorative — these must actually work):
@@ -245,18 +333,56 @@ const IMAGE_RULES_HEADER = `
 IMAGES:
 - If REFERENCE IMAGES are listed below with exact URLs, use them directly via <img src="EXACT_URL"> wherever they fit (hero photo, gallery, a logo in the header, etc. — infer which image is which from context). Never alter the given URL, and never fabricate additional reference-image URLs beyond what's listed.
 - MANDATORY — if the description asks for the attached/uploaded images to appear on the site at all ("put these photos in the hero", "use my images", "add these to the gallery", "βάλε αυτές τις φωτογραφίες"), then EVERY listed reference-image URL MUST appear in the output inside an <img src="..."> tag, copied character for character. Treating them as style inspiration only is WRONG in that case. Before finishing, count the listed URLs and confirm the same number appear in your HTML.
-- For any OTHER real photo the site should show (a product shot, a room, food, a team photo, an interior/exterior) that no reference image already covers, output exactly: <img src="PLACEHOLDER:short-slug" data-image-query="concise English search phrase describing exactly what the photo should show" alt="...">  — a short slug unique within this document, and a real, specific search phrase (e.g. "modern boutique hotel room interior", not just "room"). A post-processing step automatically replaces this with a real, working photo.
+- For any OTHER real photo the site should show (a product shot, a room, food, a team photo, an interior/exterior) that no reference image already covers, output exactly: <img src="PLACEHOLDER:short-slug" data-image-query="concise English search phrase describing exactly what the photo should show" alt="...">  — a short slug unique within this document, and a real, specific search phrase. A post-processing step automatically replaces this with a real, working photo from a stock photo library.
+- WRITING A GOOD data-image-query (this decides whether the photo actually matches the site):
+  * ALWAYS IN ENGLISH, even when the page itself is in another language — the photo library is searched in English, and a Greek or German query returns nothing and falls back to a random photo. This is the single most common reason a generated site ends up with unrelated images.
+  * 3-6 words, concrete and visual: "specialty coffee shop interior wooden", not "coffee" and not "a nice photo of the inside of our lovely café".
+  * Name the SUBJECT and the STYLE/SETTING, not the business: "greek mezze plates taverna table" — never the trading name, and never a city name unless the shot is genuinely of that skyline (a place name inside a subject query usually returns tourist postcards instead of the subject).
+  * One query per distinct photo. Two placeholders that would return the same image are one photo.
 - IMPORTANT — if the description names or lists SPECIFIC photos to include (e.g. "photos of the rooms", "a picture of the pool", "show our 3 menu items", "team photos"), each one of those, individually, MUST get its own PLACEHOLDER tag with a query specific to THAT exact item — never fewer PLACEHOLDER tags than the number of specific photos actually requested, and never a single generic PLACEHOLDER standing in for several distinct requested photos. Before moving on from the IMAGES step, mentally list every specific photo the description asked for and confirm each one has its own tag.
 - NEVER invent a fake external image URL yourself (no made-up unsplash.com/cdn/placeholder links) — the ONLY two ways to include a photo are a listed reference-image URL, or the PLACEHOLDER convention above.
 - Purely decorative graphics (icons, simple shapes, dividers) should still be built with CSS/inline SVG as before, not the PLACEHOLDER convention — that's reserved for actual photos.`;
 
-// Was previously described to the model in prose but never actually
-// wired up (streamHtmlToCompletion's stream() call had no `tools` at
-// all) — see WEB_SEARCH_TOOL below. Mirrors api/chat/route.ts's own
-// instruction/tool pairing.
+// MANDATORY RESEARCH — the section this whole feature's credibility rests
+// on, and the one that was getting ignored.
+//
+// The tool was wired up correctly (see WEB_SEARCH_TOOL) but the
+// instruction was permissive: "use it when the description implies…"
+// followed by "do NOT search for things you already know well". A model
+// asked for "a café in Thessaloniki" believes it knows what a café is and
+// where Thessaloniki is, so both clauses resolved to "no search needed"
+// and the page came out as generic filler with no trace of the actual
+// city. That is the reported defect — not a missing tool, a permissive
+// prompt around a wired one.
+//
+// So the trigger is inverted. Rather than asking the model to judge
+// whether it needs facts, this NAMES the three subjects a local/business
+// site cannot be honest without, and requires a search for each one that
+// applies. "You already know this" is explicitly removed as a reason to
+// skip: the model's training data does not contain which streets are busy
+// in Thessaloniki this year, and a page that pretends otherwise is the
+// failure being fixed.
+//
+// The boundary against PLACEHOLDER_DATA_SECTION is stated inline and
+// matters: research establishes facts about the AREA and the MARKET (real
+// neighbourhoods, what similar businesses charge, what the industry's
+// customers expect). It never invents facts about the USER'S OWN business
+// — their address, their phone number, their opening hours. Those are
+// still theirs to supply, and inventing one is still forbidden.
 const WEB_SEARCH_SECTION = `
-WEB SEARCH:
-You have access to a real web search tool. Use it when the description implies the site should reflect real, current facts you can't already know for certain — e.g. it asks for realistic/typical/current pricing for a named industry or service, current statistics, a real business's actual details, or anything else time-sensitive. Do NOT search for things you already know well or that are being explicitly given to you in the description (never search to "double check" content the user already supplied). When you do use search results, paraphrase them in your own words into the page's copy — never paste search-result text verbatim into the HTML.`;
+MANDATORY RESEARCH (do this BEFORE writing any HTML):
+You have a real web search tool. Do not treat it as optional. Before writing the page, search for each of the following that applies to this brief — "I already know this" is NOT a reason to skip a search, because your training data cannot contain what is true about a specific place or market right now:
+
+1. THE PLACE — if the brief names a city, neighbourhood, region or country, search it together with the business type (e.g. "cafés Thessaloniki Ladadika neighbourhood", "Thessaloniki city centre character"). You are looking for real, checkable specifics you can write into the copy: the actual character of the area, real landmarks and districts nearby, what locals and visitors actually come there for, seasonality. A page that could be about any city in the world has failed this step.
+2. THE INDUSTRY — search what websites for this kind of business actually contain and what their customers look for (e.g. "what customers look for in a specialty coffee shop", "typical sections on a restaurant website"). Use it to decide which SECTIONS the page needs, not just how to word them.
+3. THE NUMBERS — if the page should show or imply money, quantities or statistics (typical prices for this service in this market, opening-hours conventions, market size), search for them. Never invent a number you could have looked up.
+
+Then, while writing:
+- Write the researched facts into the copy as ordinary, confident sentences about the AREA and the MARKET. Naming a real nearby district, a real landmark, or a genuine local characteristic is exactly what this research is for.
+- HARD BOUNDARY: research establishes facts about the place and the industry. It NEVER establishes facts about THIS user's own business. Do not state their address, phone number, opening hours, staff names or exact prices unless the brief gave them — see DO NOT INVENT CRITICAL FACTS below, which still applies in full.
+- PARAPHRASE. Never paste search-result text verbatim into the HTML.
+- Do not search to "double check" something the brief already told you.
+- Your FINAL output is still ONLY the HTML document. Any thinking or narration you do while researching must not appear in the answer.`;
 
 // Requested explicitly as a final compliance pass: catches the common
 // failure mode of a long, multi-part description where one or two
@@ -273,7 +399,39 @@ You have access to a real web search tool. Use it when the description implies t
 // for" a website description tends to contain).
 const FINAL_SELF_CHECK_SECTION = `
 FINAL SELF-CHECK (do this before you output anything):
-Before returning the final HTML, re-read the user's original description line by line and confirm every specific thing it asked for is actually present in what you're about to output — every named section, every specific requested photo (see IMAGES above), every color/style preference, every specific piece of text/copy given verbatim, every named contact detail. If anything is missing, add it now before returning your answer. Do not return a final answer you haven't checked this way.`;
+1. Re-read the user's brief line by line and write down, for yourself, every EXPLICIT requirement in it — every named section, every specific requested photo (see IMAGES above), every colour, every font, every piece of copy given verbatim, every contact detail, every stated preference about tone or layout.
+2. Go through that list one item at a time against the HTML you are about to return, and confirm each one is actually present. Not "addressed in spirit" — present.
+3. A requirement you decided against is still a requirement. If the brief asked for something you think is a bad idea, DO IT ANYWAY; it is their site. The only exceptions are the safety limits below and inventing facts you were not given.
+4. Anything missing, add it now. Do not return an answer you have not checked this way.
+5. Finally, look at the page as a whole and ask whether it is recognisably a page for THIS business, or a generic template with this business's words swapped in. If it is the second one, restructure it before returning — a page that would look identical for a completely different business has failed, however clean it is.`;
+
+// The user's brief has to WIN, and it has to be LAST.
+//
+// The measured problem: the static system prompt is ~16,500 characters
+// against a typical description of ~250. Sixty-six to one. Every one of
+// those 16,500 characters is a rule the model is asked to follow, and
+// nothing anywhere said that the person's own instructions outrank them —
+// so a brief that asked for something the prompt has an opinion about
+// ("make it plain, no animations", "use dark green, not blue") lost the
+// argument silently.
+//
+// Two fixes, and they are separate:
+//   PRECEDENCE — stated explicitly, here, rather than left to be inferred.
+//   POSITION — this block is the LAST thing in the system prompt, and the
+//     brief itself is the LAST thing in the user message (see
+//     buildUserBriefBlock). Recency is the cheapest lever available on
+//     instruction-following and it was being spent on a reference-image
+//     URL list.
+//
+// Kept OUT of the cached static block deliberately: it is tiny, and
+// leaving the big block byte-identical is what keeps the prompt cache
+// hitting.
+const USER_BRIEF_PRECEDENCE = `PRECEDENCE — READ THIS LAST AND APPLY IT ABOVE EVERYTHING ELSE:
+Everything above is DEFAULT behaviour, for the parts of a site the user did not specify. The user's own brief follows in the next message, and it OVERRIDES every general preference stated above — every style suggestion, every font mapping, every layout convention, every animation, every structural recommendation.
+
+If the brief contradicts a default above, the brief wins. Silently. Do not compromise between the two, do not apply the default "as well", and do not decide the user would prefer your judgement.
+
+The only things the brief cannot override are: the output format (one complete HTML document, nothing else), the technical constraints (inline CSS, no external scripts or libraries, responsive), the rule against inventing facts you were not given, and the safety limits.`;
 
 const PLACEHOLDER_DATA_SECTION = `
 DO NOT INVENT CRITICAL FACTS:
@@ -290,6 +448,7 @@ CORE RULES:
 - Use semantic HTML5 (header, nav, main, section, footer, etc.) and a real, polished visual design (not a bare unstyled page) — sensible typography, spacing, and a coherent color scheme that fits what was described.
 - Use placeholder text/content that fits the description where specific non-critical content wasn't given — never leave Lorem Ipsum, always write real-sounding copy relevant to the request. See DO NOT INVENT CRITICAL FACTS below for the difference between ordinary filler copy (fine) and specific real-world facts (not fine unless explicitly authorized).
 - Fill in a <title> tag that fits the description.
+${SITE_SHAPE_SECTION}
 ${FONTS_SECTION}
 ${ANIMATIONS_SECTION}
 ${IMAGE_RULES_HEADER}
@@ -299,15 +458,12 @@ ${PLACEHOLDER_DATA_SECTION}
 ${FINAL_SELF_CHECK_SECTION}
 ${AI_SAFETY_BOUNDARIES_EN}${AI_QUALITY_CHECKLIST_EN}`;
 
-// Strips a leading/trailing markdown code fence if the model wrapped its
-// output in one despite the system prompt saying not to — Claude does this
-// often enough for code output that it's worth handling defensively rather
-// than shipping a raw ```html fence into the user's downloaded file.
-function stripCodeFence(text: string): string {
-  const trimmed = text.trim();
-  const fenceMatch = trimmed.match(/^```(?:html)?\n([\s\S]*?)\n```$/);
-  return fenceMatch ? fenceMatch[1].trim() : trimmed;
-}
+// Was stripCodeFence — a narrower cleanup that only fired when the WHOLE
+// response was one fenced block. It is superseded by extractHtmlDocument
+// (lib/website-html-extract.ts), which also handles the case that was
+// actually breaking generations in production: a search-using turn that
+// narrates a sentence before the document. See that file for the full
+// explanation of the "generation was interrupted" failure.
 
 // Guards against the "white/blank page" bug: a sufficiently long, detailed
 // description can push a full single-file website's generation right up
@@ -399,7 +555,21 @@ function buildGenerateSystemBlocks(formEndpointUrl: string | undefined): Anthrop
   return [
     { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
     { type: "text", text: buildFormEndpointInstruction(formEndpointUrl) },
+    // LAST, and outside the cached block. See USER_BRIEF_PRECEDENCE.
+    { type: "text", text: USER_BRIEF_PRECEDENCE },
   ];
+}
+
+// The user's own words, wrapped and placed LAST in the user message.
+//
+// It used to be `description + referenceImageUrlList`, which put a list of
+// storage URLs after the brief — so the final thing the model read before
+// answering was machine-generated metadata, and the person's actual
+// instructions were buried above it. The order is now inverted and the
+// brief is labelled, so the last thing in context is what the user asked
+// for.
+function buildUserBriefBlock(description: string): string {
+  return `THE USER'S BRIEF — follow it exactly. It overrides every general preference in the system prompt:\n\n${description}`;
 }
 
 // Website Builder (see api/websites/generate/route.ts) — a real Claude
@@ -428,7 +598,8 @@ async function streamHtmlToCompletion(
   // would silently undercount a continued generation by however many
   // rounds it took, which is exactly the case where the cost is highest.
   costs?: CostAccumulator,
-  stage: CostStage = "generation"
+  stage: CostStage = "generation",
+  searchTool: Anthropic.WebSearchTool20250305 = WEB_SEARCH_TOOL
 ): Promise<{ rawText: string; stopReason: string | null }> {
   const messages: Anthropic.MessageParam[] = [{ role: "user", content: initialUserContent }];
   const startedAt = Date.now();
@@ -440,7 +611,7 @@ async function streamHtmlToCompletion(
       model: MODEL,
       max_tokens: WEBSITE_MAX_TOKENS,
       system,
-      tools: [WEB_SEARCH_TOOL],
+      tools: [searchTool],
       messages,
     });
 
@@ -448,7 +619,11 @@ async function streamHtmlToCompletion(
     if (onDelta) {
       stream.on("text", (delta) => {
         roundText += delta;
-        onDelta(combined + roundText);
+        // The live preview gets the DOCUMENT, not the raw stream. With
+        // research on, the raw stream opens with a sentence about what the
+        // model is looking up, and the preview iframe would render that
+        // sentence as the website for the first few seconds.
+        onDelta(extractHtmlDocument(combined + roundText));
       });
     }
 
@@ -472,7 +647,11 @@ async function streamHtmlToCompletion(
     combined += roundText;
     stopReason = response.stop_reason;
 
-    if (looksLikeCompleteHtmlDocument(stripCodeFence(combined.trim()))) break;
+    // Completeness is judged on the DOCUMENT, not on the raw response.
+    // Judging the raw text is what made a finished page preceded by one
+    // sentence of research narration read as unfinished — see
+    // lib/website-html-extract.ts.
+    if (looksLikeCompleteHtmlDocument(extractHtmlDocument(combined))) break;
     if (round === MAX_CONTINUATION_ROUNDS) break;
     // Don't start a round that the platform will kill mid-flight: those
     // tokens are billed to us and reach the user as nothing at all.
@@ -501,7 +680,14 @@ async function streamHtmlToCompletion(
       // are resumed by asking for the rest of the document — but only if
       // a document was actually started, otherwise the reply was prose of
       // some other kind and another round just spends more money on it.
-      if (!/^\s*(?:```(?:html)?\s*)?<(?:!doctype html|html[\s>])/i.test(combined)) break;
+      //
+      // "Was a document started" means ANYWHERE in the output, not "does
+      // the output begin with one". The prefix test this replaces is half
+      // of the interrupted-generation bug: a turn that researched first
+      // and then began the document was judged never to have started it,
+      // so the half-written page was thrown away un-resumed and reported
+      // to the user as an interruption.
+      if (!containsHtmlDocumentStart(combined)) break;
       messages.push({ role: "assistant", content: roundText });
       messages.push({ role: "user", content: CONTINUATION_INSTRUCTION });
       continue;
@@ -527,7 +713,12 @@ export async function generateWebsiteHtml(
   const anthropic = new Anthropic({ apiKey });
   const images = referenceImages?.slice(0, MAX_REFERENCE_IMAGES) ?? [];
 
-  const userText = description + buildReferenceImageUrlList(images);
+  // Reference-image metadata FIRST, the user's brief LAST — see
+  // buildUserBriefBlock. The reverse order left a list of storage URLs as
+  // the final thing in context before the model answered.
+  const userText = buildReferenceImageUrlList(images).trim()
+    ? `${buildReferenceImageUrlList(images).trim()}\n\n${buildUserBriefBlock(description)}`
+    : buildUserBriefBlock(description);
   const content: Anthropic.MessageParam["content"] =
     images.length > 0
       ? [
@@ -560,7 +751,7 @@ export async function generateWebsiteHtml(
     throw new Error("The model did not return a website.");
   }
 
-  const html = stripCodeFence(rawText);
+  const html = extractHtmlDocument(rawText);
   assertCompleteHtmlResponse(stopReason, html, "generated");
   return html;
 }
@@ -589,6 +780,7 @@ function buildEditSystemBlocks(formEndpointUrl: string | undefined): Anthropic.T
   return [
     { type: "text", text: EDIT_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
     { type: "text", text: buildFormEndpointInstruction(formEndpointUrl) },
+    { type: "text", text: USER_BRIEF_PRECEDENCE },
   ];
 }
 
@@ -727,7 +919,12 @@ export async function editWebsiteHtml(
 
   const anthropic = new Anthropic({ apiKey });
 
-  const userText = `CURRENT HTML:\n\n${currentHtml}\n\nCHANGE REQUEST: ${changeRequest}${buildReferenceImageUrlList(images)}`;
+  // Same ordering rule as generation: the current HTML and the image
+  // metadata are context, the change request is the instruction, and the
+  // instruction goes last. It used to sit before the reference-image URL
+  // list, so on an image-attaching edit the final thing in context was a
+  // list of storage paths.
+  const userText = `CURRENT HTML:\n\n${currentHtml}${buildReferenceImageUrlList(images)}\n\nTHE USER'S CHANGE REQUEST — apply exactly this, and nothing else. It overrides every general preference in the system prompt:\n\n${changeRequest}`;
   const content: Anthropic.MessageParam["content"] =
     images.length > 0
       ? [
@@ -749,13 +946,14 @@ export async function editWebsiteHtml(
     content,
     undefined,
     costs,
-    "edit"
+    "edit",
+    EDIT_WEB_SEARCH_TOOL
   );
   if (!rawText) {
     throw new Error("The model did not return an updated website.");
   }
 
-  const html = stripCodeFence(rawText);
+  const html = extractHtmlDocument(rawText);
   assertCompleteHtmlResponse(stopReason, html, "updated");
   return { html, usedCheapPatch: false };
 }

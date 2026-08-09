@@ -94,18 +94,35 @@ alter table public.user_credits
 -- ----------------------------------------------------------------------------
 -- Verification. Run this after the statements above: every row must read
 -- ok, and status_check_allows_flagged must be true.
+--
+-- Selects required.column_name, NOT c.column_name. The joined side is
+-- NULL for exactly the rows that are missing, so selecting it prints a
+-- blank name next to the word MISSING — a report that tells you something
+-- is wrong and not which thing, which is the one job it has.
+--
+-- All THREE tables the same restore damaged, not just user_websites.
 -- ----------------------------------------------------------------------------
 select
-  c.column_name,
+  required.table_name,
+  required.column_name,
   case when c.column_name is null then 'MISSING' else 'ok' end as state
 from (values
-  ('description'), ('is_large_request'), ('free_retry_used'),
-  ('stuck_notified_at'), ('attempt_count'), ('has_reference_images')
-) as required(column_name)
+  ('user_websites', 'description'),
+  ('user_websites', 'is_large_request'),
+  ('user_websites', 'free_retry_used'),
+  ('user_websites', 'stuck_notified_at'),
+  ('user_websites', 'attempt_count'),
+  ('user_websites', 'has_reference_images'),
+  ('user_websites', 'editing_started_at'),
+  ('ai_missions',   'plan_steps_version'),
+  ('user_credits',  'free_chat_used'),
+  ('user_credits',  'free_chat_period_start')
+) as required(table_name, column_name)
 left join information_schema.columns c
   on c.table_schema = 'public'
- and c.table_name = 'user_websites'
- and c.column_name = required.column_name;
+ and c.table_name = required.table_name
+ and c.column_name = required.column_name
+order by required.table_name, required.column_name;
 
 select
   pg_get_constraintdef(oid) like '%flagged%' as status_check_allows_flagged,

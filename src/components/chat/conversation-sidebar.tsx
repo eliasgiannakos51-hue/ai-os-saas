@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, MessageCircle, Pin, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import type { ChatConversation } from "@/types/chat";
 import { groupConversationsByDate } from "@/lib/chat/group-conversations";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 
 export function ConversationSidebar({
   conversations,
@@ -13,6 +14,7 @@ export function ConversationSidebar({
   onTogglePin,
   onRename,
   onDelete,
+  onToggleFavorite,
 }: {
   conversations: ChatConversation[];
   activeId: string | null;
@@ -21,6 +23,7 @@ export function ConversationSidebar({
   onTogglePin: (id: string) => void;
   onRename: (id: string, title: string) => void;
   onDelete: (id: string) => void;
+  onToggleFavorite: (id: string, favorited: boolean) => void;
 }) {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
@@ -128,6 +131,25 @@ export function ConversationSidebar({
                         )}
                         <span className="min-w-0 flex-1 truncate">{conversation.title}</span>
                       </button>
+                      {/* Starred conversations stay visible at rest; an
+                          unstarred one only appears on hover, so the list
+                          does not turn into a wall of grey stars. */}
+                      <div
+                        className={`shrink-0 transition-opacity duration-150 ${
+                          conversation.is_favorited
+                            ? "opacity-100"
+                            : "opacity-0 focus-within:opacity-100 group-hover/row:opacity-100"
+                        }`}
+                      >
+                        <FavoriteButton
+                          table="chat_conversations"
+                          recordId={conversation.id}
+                          headline={conversation.title}
+                          initialFavorited={conversation.is_favorited}
+                          variant="inline"
+                          onToggled={(fav) => onToggleFavorite(conversation.id, fav)}
+                        />
+                      </div>
                       <button
                         type="button"
                         onClick={() =>
@@ -136,7 +158,9 @@ export function ConversationSidebar({
                           )
                         }
                         aria-label={`Options for ${conversation.title}`}
-                        className={`mr-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-muted opacity-0 transition-opacity duration-150 hover:bg-panel-hover hover:text-foreground group-hover/row:opacity-100 ${
+                        // 36px to match the star beside it — two adjacent
+                        // controls at different sizes read as a mistake.
+                        className={`mr-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-muted opacity-0 transition-opacity duration-150 hover:bg-panel-hover hover:text-foreground group-hover/row:opacity-100 ${
                           menuOpenId === conversation.id ? "opacity-100" : ""
                         }`}
                       >

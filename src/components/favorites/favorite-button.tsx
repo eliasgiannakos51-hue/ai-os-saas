@@ -25,11 +25,17 @@ export function FavoriteButton({
   headline,
   initialFavorited,
   variant = "corner",
+  onToggled,
 }: {
   table: string;
   recordId: string;
   headline: string;
   initialFavorited: boolean;
+  /** Fired after a confirmed toggle. Surfaces where the same record's star
+   *  is drawn twice (Ionexa Chat shows one in the conversation list and one
+   *  in the open conversation's header) use this to keep both in step —
+   *  without it the two copies hold independent state and disagree. */
+  onToggled?: (favorited: boolean) => void;
   /** "corner" pins to the card's top-right; "inline" keeps the old flow
    *  position for surfaces that aren't cards (e.g. the favorites list
    *  itself, where every row is a favourite by definition). */
@@ -58,6 +64,8 @@ export function FavoriteButton({
       const data = await res.json();
       if (!res.ok || !data.ok) {
         setFavorited(!next);
+      } else {
+        onToggled?.(next);
       }
     } catch {
       setFavorited(!next);

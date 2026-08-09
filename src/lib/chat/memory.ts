@@ -23,8 +23,26 @@ const DEFAULT_MEMORY_LOAD_LIMIT = 20;
 // The rule is broader than crisis on purpose: health conditions and
 // distress in general are not "permanently useful preferences", and the
 // extractor has no business deciding otherwise.
+//
+// WHAT CHANGED, AND WHY. The first version of this clause vetoed the
+// WHOLE EXCHANGE — "σε τέτοια μηνύματα απάντα ΑΚΡΙΒΩΣ: NONE, ό,τι άλλο κι
+// αν περιέχει η ανταλλαγή". That is a bigger rule than the leak needs, and
+// it silently broke the feature it was bolted onto: "με λένε Ηλία, φτιάχνω
+// SaaS, και τελευταία είμαι εξαντλημένος" returned NONE, so the name and
+// the job — the exact things memory exists for — were thrown away along
+// with the sensitive part. A user who mentions being tired once stops
+// being remembered at all.
+//
+// The veto is therefore scoped to the CONTENT, not to the exchange: the
+// sensitive material must never appear in the output, and the durable,
+// ordinary facts in the same message must still be extracted. The
+// privacy guarantee is unchanged — nothing sensitive is ever written —
+// and the feature survives contact with a human being having a bad day.
 const EXTRACTION_SYSTEM_PROMPT =
-  "Εξάγεις σημαντικά, μόνιμα-χρήσιμα γεγονότα ή προτιμήσεις για τον χρήστη από μία ανταλλαγή μηνυμάτων με έναν AI βοηθό. Απάντα με 1-2 σύντομες προτάσεις — μόνο πράγματα που αξίζει να θυμάται ο βοηθός σε ΜΕΛΛΟΝΤΙΚΕΣ, διαφορετικές συνομιλίες (π.χ. όνομα, επάγγελμα, μόνιμες προτιμήσεις/context). ΠΟΤΕ μην εξάγεις οτιδήποτε αφορά ψυχική δυσφορία, απόγνωση, σκέψεις αυτοτραυματισμού ή αυτοκτονίας, ψυχική ή σωματική υγεία, ή οποιαδήποτε ευαίσθητη προσωπική κατάσταση — σε τέτοια μηνύματα απάντα ΑΚΡΙΒΩΣ: NONE, ό,τι άλλο κι αν περιέχει η ανταλλαγή. Αν δεν υπάρχει τίποτα αξιόλογο, απάντα ΑΚΡΙΒΩΣ: NONE. Μην εξηγείς, μην προσθέτεις τίποτα άλλο εκτός από τις 1-2 προτάσεις ή το NONE.";
+  "Εξάγεις σημαντικά, μόνιμα-χρήσιμα γεγονότα ή προτιμήσεις για τον χρήστη από μία ανταλλαγή μηνυμάτων με έναν AI βοηθό. Απάντα με 1-2 σύντομες προτάσεις — μόνο πράγματα που αξίζει να θυμάται ο βοηθός σε ΜΕΛΛΟΝΤΙΚΕΣ, διαφορετικές συνομιλίες (π.χ. όνομα, επάγγελμα, μόνιμες προτιμήσεις/context). " +
+  "ΑΠΑΓΟΡΕΥΜΕΝΟ ΠΕΡΙΕΧΟΜΕΝΟ: ΠΟΤΕ μην συμπεριλάβεις στην απάντησή σου οτιδήποτε αφορά ψυχική δυσφορία, απόγνωση, σκέψεις αυτοτραυματισμού ή αυτοκτονίας, ψυχική ή σωματική υγεία, ή άλλη ευαίσθητη προσωπική κατάσταση — ούτε ως υπαινιγμό, ούτε παραφρασμένο. " +
+  "ΣΗΜΑΝΤΙΚΟ: η απαγόρευση αφορά ΤΟ ΠΕΡΙΕΧΟΜΕΝΟ, ΟΧΙ ολόκληρη την ανταλλαγή. Αν το ίδιο μήνυμα περιέχει ΚΑΙ ευαίσθητο υλικό ΚΑΙ συνηθισμένα μόνιμα στοιχεία (όνομα, επάγγελμα, προτίμηση), εξάγεις ΜΟΝΟ τα συνηθισμένα και αγνοείς εντελώς το ευαίσθητο. Παράδειγμα: «με λένε Ηλίας, φτιάχνω SaaS, και τελευταία νιώθω εξαντλημένος» -> «Τον λένε Ηλία και φτιάχνει ένα SaaS.» (χωρίς καμία αναφορά στην εξάντληση). " +
+  "Απάντα ΑΚΡΙΒΩΣ: NONE μόνο όταν δεν μένει ΤΙΠΟΤΑ μη-ευαίσθητο και αξιόλογο να θυμάσαι. Μην εξηγείς, μην προσθέτεις τίποτα άλλο εκτός από τις 1-2 προτάσεις ή το NONE.";
 
 // Fires a second, small/fast Claude call after a chat exchange to pull out
 // anything worth remembering across future, unrelated conversations — a
@@ -122,10 +140,8 @@ export function buildMemoryPromptAddition(memories: string[]): string {
   return `\n\nΠράγματα που ήδη ξέρεις για αυτόν τον χρήστη από προηγούμενες συνομιλίες:\n${bulletList}`;
 }
 
-// Defaults to on — chat_memory_enabled is only ever written as `false`
-// (see chat-memory-settings.tsx), so anything else (unset, true) means on.
-export function isChatMemoryEnabled(
-  user: { user_metadata?: Record<string, unknown> | null } | null | undefined
-): boolean {
-  return user?.user_metadata?.chat_memory_enabled !== false;
-}
+// The two pure predicates live in ./memory-policy so they can be executed
+// by a build-gate test — this module pulls in the Anthropic SDK on load,
+// which puts it out of reach of scripts/tests/load-ts.mjs. Re-exported
+// here so existing importers keep one obvious place to look.
+export { isChatMemoryEnabled, chatMemoryActive } from "./memory-policy";

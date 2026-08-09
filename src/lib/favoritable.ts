@@ -34,6 +34,21 @@ export type FavoritableConfig = {
 // Mission is labelled the same everywhere.
 export const EXTRA_FAVORITABLE: FavoritableConfig[] = [
   {
+    // The one starrable surface that is not a record in a module at all.
+    // A conversation is the thing people most want to come back to — it
+    // holds the reasoning, not just the output — and it was the only
+    // major surface with no way to pin it.
+    table: "chat_conversations",
+    slug: "chat",
+    title: "Conversations",
+    headlineKey: "title",
+    // Chat has no per-conversation route; the workspace picks the active
+    // one from state. `?c=` is read by app/dashboard/chat/page.tsx and
+    // handed to the workspace as its initial selection, so a starred
+    // conversation opens ON that conversation rather than on a new chat.
+    hrefFor: (id) => `/dashboard/chat?c=${id}`,
+  },
+  {
     table: "user_websites",
     slug: "websiteBuilder",
     title: "Website Builder",

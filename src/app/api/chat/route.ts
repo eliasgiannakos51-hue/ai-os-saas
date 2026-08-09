@@ -38,8 +38,8 @@ import {
   extractAndStoreMemory,
   loadRecentMemories,
   buildMemoryPromptAddition,
-  isChatMemoryEnabled,
 } from "@/lib/chat/memory";
+import { isChatMemoryEnabled, chatMemoryActive } from "@/lib/chat/memory-policy";
 import { findMentionedEntities, buildEntityMentionPromptAddition } from "@/lib/chat/entity-mentions";
 import { loadMentorContext } from "@/lib/chat/mentor-context";
 import { loadTradingMentorContext } from "@/lib/chat/trading-mentor-context";
@@ -201,8 +201,16 @@ export async function POST(request: Request) {
     // Cross-conversation memory (see lib/chat/memory.ts) — off entirely
     // when the user has disabled it in Settings. Retention length is
     // plan-driven (capabilities.chatMemoryLimit — Ultimate+ keep more).
-    const memoryEnabled = isChatMemoryEnabled(user);
-    const memories = memoryEnabled
+    // Both the read below and the write after the stream derive from this
+    // ONE predicate. They used to be two conditions and they disagreed:
+    // Free is chatMemoryLimit 0, so the read returned nothing while the
+    // write still made a second billed Claude call per message. See
+    // chatMemoryActive() in lib/chat/memory.ts.
+    const memoryActive = chatMemoryActive({
+      userEnabled: isChatMemoryEnabled(user),
+      planLimit: plan.capabilities.chatMemoryLimit,
+    });
+    const memories = memoryActive
       ? await loadRecentMemories(supabase, user.id, plan.capabilities.chatMemoryLimit)
       : [];
 
@@ -643,7 +651,7 @@ export async function POST(request: Request) {
         // changes: the reply has already fully streamed by this point
         // either way. Best-effort, and awaited so it reliably finishes
         // before the response stream closes (see lib/chat/memory.ts).
-        if (memoryEnabled) {
+        if (memoryActive) {
           await extractAndStoreMemory({
             apiKey,
             supabase,

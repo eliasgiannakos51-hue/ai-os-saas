@@ -15,6 +15,7 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { MessageContent } from "@/components/chat/message-content";
 import { useCredits } from "@/components/credits/credits-context";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
@@ -57,9 +58,14 @@ export function ChatWorkspace({
   userInitial,
   initialMentorPreset,
   initialFreeChatRemaining,
+  initialConversationId,
 }: {
   initialConversations: ChatConversation[];
   userInitial: string;
+  /** Conversation to open on load — the `?c=` deep link a starred
+   *  conversation on /dashboard/favorites points at. Already checked
+   *  against the user's own list server-side. */
+  initialConversationId?: string;
   // Trading Workflow's "Trading Mentor" and Product Workflow's "Product
   // Mentor" buttons link here with ?preset=trading / ?preset=product (see
   // dashboard/chat/page.tsx) — when set, Mentor Mode starts pre-enabled
@@ -79,6 +85,7 @@ export function ChatWorkspace({
   const { refresh: refreshCredits, reportUsage } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState(() =>
     initialMentorPreset === "trading"
@@ -226,6 +233,26 @@ export function ChatWorkspace({
     }
   }
 
+  // Favourite state lives here rather than inside each star, because the
+  // same conversation is drawn twice (list + header) and two independent
+  // copies of the state disagree the moment one is clicked.
+  // Opening a starred conversation from /dashboard/favorites. Runs once:
+  // it has to go through selectConversation rather than just seeding
+  // activeId, because that is what loads the thread's messages.
+  const deepLinkedRef = useRef(false);
+  useEffect(() => {
+    if (deepLinkedRef.current || !initialConversationId) return;
+    deepLinkedRef.current = true;
+    selectConversation(initialConversationId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialConversationId]);
+
+  function toggleFavorite(id: string, favorited: boolean) {
+    setConversations((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, is_favorited: favorited } : c))
+    );
+  }
+
   async function renameConversation(id: string, title: string) {
     const previousTitle = conversations.find((c) => c.id === id)?.title;
     setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)));
@@ -346,6 +373,9 @@ export function ChatWorkspace({
                 id: event.conversationId as string,
                 title: (event.title as string | undefined) ?? text.slice(0, 40),
                 is_pinned: false,
+                // A conversation that was created one second ago has no
+                // row in user_favorites yet, by construction.
+                is_favorited: false,
                 created_at: nowIso,
                 updated_at: nowIso,
               },
@@ -448,6 +478,7 @@ export function ChatWorkspace({
           onTogglePin={togglePin}
           onRename={renameConversation}
           onDelete={deleteConversation}
+          onToggleFavorite={toggleFavorite}
         />
       </div>
 
@@ -493,6 +524,27 @@ export function ChatWorkspace({
               </span>
             </button>
           </Tooltip>
+
+          {/* The open conversation's own star, top-right — the same
+              control as in the list, so starring is reachable whichever
+              way you got here. Only once a conversation exists: a brand
+              new, unsaved chat has no row to star yet.
+              The key includes the favourited flag so a toggle made in the
+              sidebar re-mounts this copy instead of leaving the two
+              stars disagreeing. */}
+          {activeConversation && (
+            <div className="ml-auto shrink-0">
+              <FavoriteButton
+                key={`${activeConversation.id}:${activeConversation.is_favorited}`}
+                table="chat_conversations"
+                recordId={activeConversation.id}
+                headline={activeConversation.title}
+                initialFavorited={activeConversation.is_favorited}
+                variant="inline"
+                onToggled={(fav) => toggleFavorite(activeConversation.id, fav)}
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">

@@ -7,6 +7,7 @@ import { resolveEffectivePlan } from "@/lib/billing/credits";
 import { getFreeChatStatus } from "@/lib/billing/free-chat-usage";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
+import { loadFavoriteIds } from "@/lib/favorites";
 
 export const metadata: Metadata = {
   title: "Ionexa Chat",
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
 export default async function ChatPage({
   searchParams,
 }: {
-  searchParams: { preset?: string };
+  searchParams: { preset?: string; c?: string };
 }) {
   const supabase = createClient();
 
@@ -27,10 +28,24 @@ export default async function ChatPage({
     redirect("/login");
   }
 
-  const { data: conversations } = await supabase
+  const { data: conversationRows } = await supabase
     .from("chat_conversations")
     .select("id, title, is_pinned, created_at, updated_at")
     .order("updated_at", { ascending: false });
+
+  // Starred state comes from user_favorites, not from a column here — one
+  // batched read for the whole list rather than a query per row.
+  const rows = (conversationRows ?? []) as Omit<ChatConversation, "is_favorited">[];
+  const favoritedIds = await loadFavoriteIds(
+    supabase,
+    user.id,
+    "chat_conversations",
+    rows.map((c) => c.id)
+  );
+  const conversations: ChatConversation[] = rows.map((c) => ({
+    ...c,
+    is_favorited: favoritedIds.has(c.id),
+  }));
 
   // Admins and beta testers already pay nothing, so a "free messages left"
   // counter would be meaningless noise for them — the route skips the
@@ -46,9 +61,17 @@ export default async function ChatPage({
   return (
     <main className="h-[calc(100vh-4rem)]">
       <ChatWorkspace
-        initialConversations={(conversations as ChatConversation[] | null) ?? []}
+        initialConversations={conversations}
         userInitial={userInitial}
         initialMentorPreset={initialMentorPreset}
+        // Deep link from /dashboard/favorites. Validated against the
+        // user's own list rather than trusted: an id in the URL must not
+        // be able to make the workspace ask for someone else's thread.
+        initialConversationId={
+          searchParams.c && conversations.some((c) => c.id === searchParams.c)
+            ? searchParams.c
+            : undefined
+        }
         initialFreeChatRemaining={freeChat && freeChat.limit > 0 ? freeChat.remaining : undefined}
       />
     </main>

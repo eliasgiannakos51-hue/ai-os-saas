@@ -91,9 +91,18 @@ console.log("\n== 2c. distress is never recorded anywhere ==");
 // leak by accident is chat memory, which is written once and replayed
 // into every future conversation forever.
 const memSrc = readFileSync("src/lib/chat/memory.ts", "utf8");
+// Bound to the GUARANTEE, not to one sentence: an absolute prohibition
+// ("ΠΟΤΕ μην") that names distress, self-harm and health. The wording moved
+// once already — from "never EXTRACT" to "never INCLUDE IN YOUR ANSWER",
+// which is the stronger form — and pinning the old phrasing turned a
+// deliberate strengthening into a red build. What must never change is
+// that the ban exists and covers these categories.
 check(
   "the memory extractor is forbidden from extracting distress/health",
-  /ΠΟΤΕ μην εξάγεις οτιδήποτε αφορά ψυχική δυσφορία/.test(memSrc)
+  /ΠΟΤΕ μην[\s\S]{0,80}ψυχική δυσφορία/.test(memSrc) &&
+    /αυτοτραυματισμού ή αυτοκτονίας/.test(memSrc) &&
+    /ψυχική ή σωματική υγεία/.test(memSrc),
+  "the absolute distress/health prohibition is gone from EXTRACTION_SYSTEM_PROMPT"
 );
 check(
   "...and must answer NONE for such an exchange",

@@ -162,13 +162,52 @@ function hoistExternalImports(chunks) {
   return [...header, ...body].join("\n");
 }
 
+// Re-exports collapse into duplicates once the modules share a scope.
+//
+// `lib/classifier-modules.ts` declares `export function moduleHref`, and
+// `lib/knowledge-graph.ts` re-exports it with a bare `export { moduleHref };`
+// so its own consumers have one place to import from. Both files are
+// valid; concatenated, they produce two exports of the same name and the
+// module fails to parse with "Duplicate export of 'moduleHref'".
+//
+// Same category as the import hoisting above — an artefact of bundling by
+// concatenation, not a property of the code — so it is fixed here rather
+// than by asking the app's modules to stop re-exporting.
+function dedupeReExports(code) {
+  const declared = new Set();
+  for (const m of code.matchAll(/^export\s+(?:async\s+)?(?:function|const|let|var|class)\s+([\w$]+)/gm)) {
+    declared.add(m[1]);
+  }
+  const seenInLists = new Set();
+  return code
+    .split("\n")
+    .map((line) => {
+      // Only bare `export { ... };` — an `export ... from "..."` still
+      // names another module and is handled elsewhere.
+      const m = line.trim().match(/^export\s*\{([^}]*)\}\s*;?$/);
+      if (!m) return line;
+      const kept = [];
+      for (const part of m[1].split(",")) {
+        const spec = part.trim();
+        if (!spec) continue;
+        // `a as b` exports `b`; that is the name that can collide.
+        const exported = spec.split(/\s+as\s+/).pop().trim();
+        if (declared.has(exported) || seenInLists.has(exported)) continue;
+        seenInLists.add(exported);
+        kept.push(spec);
+      }
+      return kept.length ? `export { ${kept.join(", ")} };` : "";
+    })
+    .join("\n");
+}
+
 function bundleOf(entry, allowExternals) {
   const out = [];
   collect(path.resolve(entry), new Set(), out, allowExternals);
   // Hoisted in both modes: two concatenated modules that each import
   // `node:crypto` would otherwise redeclare a shared binding and fail to
   // parse.
-  return hoistExternalImports(out);
+  return dedupeReExports(hoistExternalImports(out));
 }
 
 export async function loadTs(entry) {

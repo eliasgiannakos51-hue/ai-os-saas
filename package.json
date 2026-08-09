@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/check-i18n.js && npm run test:unit && next build",
+    "build": "node scripts/apply-function-limits.mjs && node scripts/check-i18n.js && npm run test:unit && next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
@@ -13,7 +13,8 @@
     "check:i18n": "node scripts/check-i18n.js",
     "test:unit": "for f in scripts/tests/*.test.mjs; do echo \"--- $f\"; node \"$f\" || exit 1; done",
     "test:prod": "for f in scripts/tests/*.prodtest.mjs; do echo \"--- $f\"; node \"$f\" || exit 1; done",
-    "test:integration": "for f in scripts/tests/*.itest.mjs; do echo \"--- $f\"; node \"$f\" || exit 1; done"
+    "test:integration": "for f in scripts/tests/*.itest.mjs; do echo \"--- $f\"; node \"$f\" || exit 1; done",
+    "limits": "node scripts/apply-function-limits.mjs"
   },
   "engines": {
     "node": "22.x"

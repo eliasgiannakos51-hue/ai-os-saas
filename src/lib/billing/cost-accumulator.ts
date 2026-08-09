@@ -72,6 +72,42 @@ export class CostAccumulator {
   }
 
   /**
+   * Every recorded sub-call, as plain data.
+   *
+   * Exists because a chunked action does not fit in one function
+   * invocation: Deep Research on a 60-second platform runs its questions
+   * across several invocations and settles once at the end (see
+   * lib/research/run-research.ts). The usage measured in invocation 1 has
+   * to survive into invocation 4, or the settlement charges for a
+   * fraction of the work that was actually done — an under-charge that no
+   * alert can see, because the stored margin would be computed from the
+   * same understated cost and read as healthy.
+   *
+   * Deep-copied: the caller persists this as jsonb, and handing out a
+   * reference to the live array would let a later record() mutate what is
+   * about to be written.
+   */
+  snapshot(): CostEntry[] {
+    return this.entries.map((e) => ({ ...e, usage: { ...e.usage } }));
+  }
+
+  /**
+   * Rebuilds an accumulator from a snapshot, WITHOUT re-pricing.
+   *
+   * Re-pricing would be wrong twice over: the rates could have changed
+   * between invocations, and the stored breakdown is already the priced
+   * truth of what those calls cost when they ran.
+   */
+  static restore(entries: CostEntry[] | null | undefined): CostAccumulator {
+    const acc = new CostAccumulator();
+    for (const entry of entries ?? []) {
+      if (!entry || typeof entry.model !== "string" || !entry.usage) continue;
+      acc.addBreakdown(entry.stage, entry.model, entry.usage);
+    }
+    return acc;
+  }
+
+  /**
    * Models that were priced by FALLBACK because MODEL_PRICING_USD does not
    * know them. Settlement treats a non-empty list as an incident: the
    * fallback is the most expensive KNOWN model, which is only safe while

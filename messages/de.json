@@ -429,7 +429,9 @@
       "title": "KI-Nutzung",
       "creditsUsed": "Verwendete Credits",
       "totalEntries": "Einträge insgesamt",
-      "mostActiveModule": "Aktivstes Modul"
+      "mostActiveModule": "Aktivstes Modul",
+      "unlimited": "Unbegrenzt",
+      "wouldHaveCost": "Hätte {credits} Credits gekostet"
     },
     "theme": {
       "title": "Design",
@@ -541,7 +543,9 @@
       "colFeature": "Funktion",
       "colCalls": "Aktionen",
       "colMargin": "Ø Marge",
-      "colCost": "Reale Kosten"
+      "colCost": "Reale Kosten",
+      "hypotheticalHint": "Enthält Aktionen von Konten, die nie belastet werden — so viel hätten sie gekostet.",
+      "hypotheticalNote": "* Enthält nicht belastete Konten (Admin, Beta). Dort ist die gezeigte Marge das, was die Aktion zum Tarif dieses Kontos eingebracht hätte."
     },
     "pushNotifications": {
       "title": "Push-Benachrichtigungen",
@@ -1186,7 +1190,8 @@
       "rollback": "Zurücksetzen",
       "rollbackSuccess": "Auf Version {number} zurückgesetzt.",
       "rollbackError": "Zurücksetzen nicht möglich. Bitte erneut versuchen.",
-      "confirmRollback": "Version {number} wieder live schalten?"
+      "confirmRollback": "Version {number} wieder live schalten?",
+      "unpublishHint": "Nimmt die Seite vom Netz. Sie bleibt im Konto und kann erneut veröffentlicht werden."
     },
     "integrations": {
       "title": "Integrationen",

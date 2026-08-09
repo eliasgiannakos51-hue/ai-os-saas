@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Globe, Loader2, Check, Copy, ExternalLink } from "lucide-react";
+import { Globe, Loader2, Check, Copy, ExternalLink, EyeOff } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { getErrorMessage } from "@/lib/get-error-message";
 import {
@@ -182,12 +182,29 @@ export function PublishControl({
             )}
             {t("publishChanges")}
           </button>
+          {/* "There is a Publish button but I cannot find Unpublish."
+              It was here the whole time — as the ONLY item in a row of
+              four with no icon, in text-muted (the lowest-contrast token
+              on the row), last in the wrap order. Rendered, and not
+              findable, which are different things.
+
+              Same place, because taking a site down belongs next to
+              putting it up. Now with an icon like its neighbours, real
+              foreground text, and an amber destructive tone on hover so
+              it reads as the action that changes something rather than as
+              disabled chrome. */}
           <button
             type="button"
             onClick={() => void unpublish()}
             disabled={busy}
-            className="inline-flex min-h-[40px] shrink-0 items-center rounded-lg border border-border px-3 py-2 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-40 sm:min-h-0"
+            title={t("unpublishHint")}
+            className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-amber-500/40 px-3 py-2 text-xs font-medium text-amber-300 transition-colors duration-150 hover:border-amber-500 hover:bg-amber-500/10 disabled:opacity-40 sm:min-h-0"
           >
+            {busy ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+            ) : (
+              <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />
+            )}
             {t("unpublish")}
           </button>
         </div>

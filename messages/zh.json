@@ -429,7 +429,9 @@
       "title": "AI 使用情况",
       "creditsUsed": "已用额度",
       "totalEntries": "总记录数",
-      "mostActiveModule": "最活跃模块"
+      "mostActiveModule": "最活跃模块",
+      "unlimited": "无限制",
+      "wouldHaveCost": "本应消耗 {credits} 额度"
     },
     "theme": {
       "title": "主题",
@@ -541,7 +543,9 @@
       "colFeature": "功能",
       "colCalls": "操作次数",
       "colMargin": "平均利润率",
-      "colCost": "真实成本"
+      "colCost": "真实成本",
+      "hypotheticalHint": "包含从不计费账户的操作——这是它们本应产生的成本。",
+      "hypotheticalNote": "* 包含免计费账户（管理员、Beta）。对这些账户，所示利润率是按其套餐费率本应获得的数值。"
     },
     "pushNotifications": {
       "title": "推送通知",
@@ -1186,7 +1190,8 @@
       "rollback": "回滚",
       "rollbackSuccess": "已回滚到版本 {number}。",
       "rollbackError": "无法回滚，请重试。",
-      "confirmRollback": "将版本 {number} 重新设为线上版本？"
+      "confirmRollback": "将版本 {number} 重新设为线上版本？",
+      "unpublishHint": "将网站从互联网下线。它仍保留在你的账户中，可以重新发布。"
     },
     "integrations": {
       "title": "集成",

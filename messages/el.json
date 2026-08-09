@@ -429,7 +429,9 @@
       "title": "Χρήση AI",
       "creditsUsed": "Credits που Χρησιμοποιήθηκαν",
       "totalEntries": "Σύνολο Εγγραφών",
-      "mostActiveModule": "Πιο Ενεργό Module"
+      "mostActiveModule": "Πιο Ενεργό Module",
+      "unlimited": "Απεριόριστα",
+      "wouldHaveCost": "Θα κόστιζαν {credits} credits"
     },
     "theme": {
       "title": "Θέμα",
@@ -541,7 +543,9 @@
       "colFeature": "Λειτουργία",
       "colCalls": "Ενέργειες",
       "colMargin": "Μέσο περιθώριο",
-      "colCost": "Πραγματικό κόστος"
+      "colCost": "Πραγματικό κόστος",
+      "hypotheticalHint": "Περιλαμβάνει ενέργειες από λογαριασμούς που δεν χρεώνονται — αυτό θα κόστιζαν.",
+      "hypotheticalNote": "* Περιλαμβάνει λογαριασμούς χωρίς χρέωση (admin, beta). Για αυτούς, το margin είναι αυτό που θα απέδιδε η ενέργεια με το rate του πλάνου τους."
     },
     "pushNotifications": {
       "title": "Ειδοποιήσεις push",
@@ -1186,7 +1190,8 @@
       "rollback": "Επαναφορά",
       "rollbackSuccess": "Έγινε επαναφορά στην έκδοση {number}.",
       "rollbackError": "Δεν ήταν δυνατή η επαναφορά. Δοκίμασε ξανά.",
-      "confirmRollback": "Να επιστρέψει η έκδοση {number} στο ζωντανό site;"
+      "confirmRollback": "Να επιστρέψει η έκδοση {number} στο ζωντανό site;",
+      "unpublishHint": "Κατέβασε το site από το διαδίκτυο. Παραμένει στον λογαριασμό σου και μπορείς να το ξαναδημοσιεύσεις."
     },
     "integrations": {
       "title": "Συνδέσεις",

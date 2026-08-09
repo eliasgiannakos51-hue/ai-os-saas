@@ -429,7 +429,9 @@
       "title": "AI Usage",
       "creditsUsed": "Credits Used",
       "totalEntries": "Total Entries",
-      "mostActiveModule": "Most Active Module"
+      "mostActiveModule": "Most Active Module",
+      "unlimited": "Unlimited",
+      "wouldHaveCost": "Would have cost {credits} credits"
     },
     "theme": {
       "title": "Theme",
@@ -541,7 +543,9 @@
       "colFeature": "Feature",
       "colCalls": "Actions",
       "colMargin": "Avg margin",
-      "colCost": "Real cost"
+      "colCost": "Real cost",
+      "hypotheticalHint": "Includes actions on accounts that are never charged — this is what they would have cost.",
+      "hypotheticalNote": "* Includes uncharged accounts (admin, beta). For those, the margin shown is what the action would have earned at that account’s plan rate."
     },
     "pushNotifications": {
       "title": "Push notifications",
@@ -1186,7 +1190,8 @@
       "rollback": "Roll back",
       "rollbackSuccess": "Rolled back to version {number}.",
       "rollbackError": "Could not roll that back. Please try again.",
-      "confirmRollback": "Put version {number} back on the live site?"
+      "confirmRollback": "Put version {number} back on the live site?",
+      "unpublishHint": "Take the site off the web. It stays in your account and can be republished."
     },
     "integrations": {
       "title": "Integrations",

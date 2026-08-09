@@ -46,7 +46,7 @@ export const dynamic = "force-dynamic";
 // then the real classification, 1024 tokens) plus AI Life Context/
 // mission-context lookups, so 120s is comfortable headroom over the
 // realistic worst case, not a guess.
-export const maxDuration = 120;
+export const maxDuration = 120; // @function-limit 120
 
 const MODEL = "claude-sonnet-4-6";
 const MAX_MESSAGE_LENGTH = 20000;

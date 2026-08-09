@@ -25,7 +25,7 @@ export const dynamic = "force-dynamic";
 // Same platform-timeout reasoning as api/create/route.ts. The reflection
 // generation call (700 tokens) is this route's only AI call; 90s is
 // ample headroom.
-export const maxDuration = 90;
+export const maxDuration = 90; // @function-limit 90
 
 // Module tables scoped to Trading Workflow's "Trading Reflection" (see
 // reflection-generator.tsx's `scope` prop) — trading itself plus the two

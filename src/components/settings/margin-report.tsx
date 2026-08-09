@@ -35,7 +35,11 @@ export async function MarginReport() {
 
     const { data, error } = await admin
       .from("ai_cost_log")
-      .select("feature, achieved_margin, real_cost_eur")
+      // metadata too: a bypass row stores achieved_margin = null by
+      // design, and the owner's own account IS a bypass account — so
+      // without it every row in this table read "—". See
+      // hypotheticalMargin in lib/billing/margin-report.ts.
+      .select("feature, achieved_margin, real_cost_eur, metadata")
       .gte("created_at", since)
       .limit(20000);
 
@@ -111,6 +115,17 @@ export async function MarginReportView({
                         }
                       >
                         {row.averageMargin.toFixed(2)}x
+                        {/* A margin computed from a charge nobody paid is
+                            a different claim from one computed on real
+                            revenue, and the table has to say which. */}
+                        {row.hypotheticalCalls > 0 && (
+                          <span
+                            className="ml-1 font-normal text-muted"
+                            title={t("hypotheticalHint")}
+                          >
+                            *
+                          </span>
+                        )}
                       </span>
                     )}
                   </td>
@@ -120,6 +135,13 @@ export async function MarginReportView({
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* The footnote is not decoration: without it a reader would take
+          every number in the column as achieved revenue, and on an
+          owner's own account most of them are not. */}
+      {rows.some((r) => r.hypotheticalCalls > 0) && (
+        <p className="mt-3 text-[11px] leading-relaxed text-muted">{t("hypotheticalNote")}</p>
       )}
     </section>
   );

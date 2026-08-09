@@ -429,7 +429,9 @@
       "title": "Utilisation IA",
       "creditsUsed": "Crédits utilisés",
       "totalEntries": "Entrées totales",
-      "mostActiveModule": "Module le plus actif"
+      "mostActiveModule": "Module le plus actif",
+      "unlimited": "Illimité",
+      "wouldHaveCost": "Aurait coûté {credits} crédits"
     },
     "theme": {
       "title": "Thème",
@@ -541,7 +543,9 @@
       "colFeature": "Fonctionnalité",
       "colCalls": "Actions",
       "colMargin": "Marge moy.",
-      "colCost": "Coût réel"
+      "colCost": "Coût réel",
+      "hypotheticalHint": "Inclut des actions sur des comptes jamais facturés — voici ce qu’elles auraient coûté.",
+      "hypotheticalNote": "* Inclut les comptes non facturés (admin, bêta). Pour eux, la marge affichée est celle qu’aurait rapportée l’action au tarif de leur formule."
     },
     "pushNotifications": {
       "title": "Notifications push",
@@ -1186,7 +1190,8 @@
       "rollback": "Restaurer",
       "rollbackSuccess": "Version {number} restaurée.",
       "rollbackError": "Impossible de restaurer. Réessayez.",
-      "confirmRollback": "Remettre la version {number} en ligne ?"
+      "confirmRollback": "Remettre la version {number} en ligne ?",
+      "unpublishHint": "Retire le site du web. Il reste dans votre compte et peut être republié."
     },
     "integrations": {
       "title": "Intégrations",

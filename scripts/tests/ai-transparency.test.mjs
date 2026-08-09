@@ -103,7 +103,12 @@ console.log("\n== 5. a research report is saved where a screen can open it ==");
 // `ai_documents`, the LEGACY tracker, while the UI linked to
 // /dashboard/documents/<id>, which reads `user_documents`. Every
 // "Open as a document" link was a guaranteed 404.
-const runRoute = read("src/app/api/research/[id]/run/route.ts");
+// The document write moved into the chunked worker when Deep Research had
+// to survive a 60-second function ceiling. The guarantee is unchanged;
+// only its address is. Both files are read so a future move back cannot
+// quietly drop it.
+const runRoute =
+  read("src/app/api/research/[id]/run/route.ts") + read("src/lib/research/run-research.ts");
 const docPage = read("src/app/dashboard/documents/[id]/page.tsx");
 check("the document page reads user_documents", /\.from\("user_documents"\)/.test(docPage));
 check("so the report is written to user_documents", /\.from\("user_documents"\)/.test(runRoute));

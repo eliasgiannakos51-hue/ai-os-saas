@@ -52,11 +52,34 @@ export const MIN_TOPIC_CHARS = 8;
 //      got.
 
 /** Stop starting new questions after this much wall clock, so there is
- *  always room to synthesise inside the function's own budget. */
+ *  always room to synthesise inside the function's own budget.
+ *
+ *  On a platform whose ceiling is smaller than this (Vercel Hobby's 60s),
+ *  lib/function-limits.ts's functionBudgetMs() is the smaller number and
+ *  wins — runResearchChunk takes the MINIMUM of the two. This constant is
+ *  the ceiling for a generous budget, not an assumption that one exists. */
 export const RESEARCH_DEADLINE_MS = 640_000;
 
 /** Reserved for the synthesis call plus the writes after it. */
 export const RESEARCH_SYNTHESIS_RESERVE_MS = 120_000;
+
+/**
+ * What ONE question is assumed to cost, when deciding whether to start it
+ * inside the remaining budget.
+ *
+ * Deliberately pessimistic and deliberately not the same number as
+ * RESEARCH_QUESTION_TIMEOUT_MS. Starting a question that does not finish
+ * loses BOTH the tokens and the record of them, because a platform kill
+ * takes the write with it. Refusing to start one that would have fitted
+ * costs one extra handoff — about a second. The asymmetry is the whole
+ * reason this is a separate, larger number.
+ *
+ * At 45s a 60-second Hobby budget (48s of usable work after the safety
+ * margin) runs exactly one question per invocation, which is the intended
+ * behaviour there: a five-question report becomes six short invocations
+ * instead of one that gets killed.
+ */
+export const RESEARCH_QUESTION_BUDGET_MS = 45_000;
 
 /** Hard ceiling on one question's model call. Without it, a single hung
  *  request consumes the entire budget and every later question is skipped
@@ -92,3 +115,33 @@ export function isResearchJobStale(
   if (!Number.isFinite(startedAt)) return false;
   return now.getTime() - startedAt > RESEARCH_STALE_MS;
 }
+
+/**
+ * The most invocations one report may consume.
+ *
+ * TWO THINGS THIS BOUNDS, and the second is the one that matters.
+ *
+ * COST. A chunk that hands off to a chunk that hands off is a loop, and a
+ * loop that spends money on every pass needs a ceiling that does not
+ * depend on every hand-off being correct.
+ *
+ * COMPLETION. The pre-chunking code had a "deadline reached, synthesise
+ * what we have" path, so a slow report still produced something. Chunking
+ * replaced that with "hand the rest on", which is better — until the
+ * hand-off cannot land (no CRON_SECRET, a dropped request, a closed tab
+ * and no nudge). Without a ceiling the report would then sit unfinished
+ * until the staleness reaper failed it, and the user would get NOTHING
+ * after paying for the questions that did run.
+ *
+ * At this many chunks the worker stops researching and synthesises
+ * whatever it has, marking the rest unanswered — the synthesis prompt is
+ * already required to list what could not be established, so an
+ * unanswered question becomes a line in the report rather than a silent
+ * omission. A partial report the user can read beats a perfect one they
+ * never receive.
+ *
+ * 12 is generous: on a 60-second Hobby budget a six-question report needs
+ * seven chunks (one per question plus the synthesis), so this only bites
+ * when something is genuinely wrong.
+ */
+export const MAX_RESEARCH_CHUNKS = 12;

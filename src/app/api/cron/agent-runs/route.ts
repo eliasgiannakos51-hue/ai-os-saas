@@ -7,7 +7,7 @@ import { nextRunAt } from "@/lib/agents/cron-expression";
 import type { UserAgent } from "@/lib/agents/agent-config";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 300;
+export const maxDuration = 300; // @function-limit 300
 
 // The Autonomous Agents execution engine.
 //

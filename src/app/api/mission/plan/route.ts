@@ -35,7 +35,7 @@ export const dynamic = "force-dynamic";
 // Two sequential Claude calls now, and the first can run up to three real
 // web searches before it answers. 90s was comfortable for one call and is
 // not for this.
-export const maxDuration = 180;
+export const maxDuration = 180; // @function-limit 180
 
 const MAX_GOAL_LENGTH = 20000;
 

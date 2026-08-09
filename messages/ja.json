@@ -429,7 +429,9 @@
       "title": "AI 利用状況",
       "creditsUsed": "使用クレジット",
       "totalEntries": "合計エントリー数",
-      "mostActiveModule": "最もアクティブなモジュール"
+      "mostActiveModule": "最もアクティブなモジュール",
+      "unlimited": "無制限",
+      "wouldHaveCost": "本来なら {credits} クレジット"
     },
     "theme": {
       "title": "テーマ",
@@ -541,7 +543,9 @@
       "colFeature": "機能",
       "colCalls": "操作数",
       "colMargin": "平均マージン",
-      "colCost": "実コスト"
+      "colCost": "実コスト",
+      "hypotheticalHint": "課金されないアカウントの操作を含みます。これはその想定コストです。",
+      "hypotheticalNote": "* 課金対象外のアカウント（管理者・ベータ）を含みます。その場合の利益率は、そのプラン単価で得られたはずの値です。"
     },
     "pushNotifications": {
       "title": "プッシュ通知",
@@ -1186,7 +1190,8 @@
       "rollback": "元に戻す",
       "rollbackSuccess": "バージョン {number} に戻しました。",
       "rollbackError": "元に戻せませんでした。もう一度お試しください。",
-      "confirmRollback": "バージョン {number} を公開サイトに戻しますか？"
+      "confirmRollback": "バージョン {number} を公開サイトに戻しますか？",
+      "unpublishHint": "サイトを公開停止にします。アカウントには残り、再公開できます。"
     },
     "integrations": {
       "title": "連携",

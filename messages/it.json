@@ -429,7 +429,9 @@
       "title": "Utilizzo AI",
       "creditsUsed": "Crediti utilizzati",
       "totalEntries": "Voci totali",
-      "mostActiveModule": "Modulo più attivo"
+      "mostActiveModule": "Modulo più attivo",
+      "unlimited": "Illimitato",
+      "wouldHaveCost": "Sarebbe costato {credits} crediti"
     },
     "theme": {
       "title": "Tema",
@@ -541,7 +543,9 @@
       "colFeature": "Funzione",
       "colCalls": "Azioni",
       "colMargin": "Margine medio",
-      "colCost": "Costo reale"
+      "colCost": "Costo reale",
+      "hypotheticalHint": "Include azioni di account mai addebitati: ecco quanto sarebbero costate.",
+      "hypotheticalNote": "* Include account senza addebito (admin, beta). Per questi, il margine mostrato è quello che l’azione avrebbe reso alla tariffa del loro piano."
     },
     "pushNotifications": {
       "title": "Notifiche push",
@@ -1186,7 +1190,8 @@
       "rollback": "Ripristina",
       "rollbackSuccess": "Ripristinata la versione {number}.",
       "rollbackError": "Non è stato possibile ripristinare. Riprova.",
-      "confirmRollback": "Rimettere online la versione {number}?"
+      "confirmRollback": "Rimettere online la versione {number}?",
+      "unpublishHint": "Rimuove il sito dal web. Resta nel tuo account e puoi ripubblicarlo."
     },
     "integrations": {
       "title": "Integrazioni",

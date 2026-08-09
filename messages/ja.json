@@ -24,7 +24,11 @@
     "notAuthenticated": "認証されていません。",
     "created": "✓ 作成しました",
     "updated": "✓ 更新しました",
-    "linked": "✓ リンクしました"
+    "linked": "✓ リンクしました",
+    "aiGenerated": {
+      "short": "AI が生成",
+      "long": "これは AI が生成した内容です。誤りが含まれる場合があります。重要な点は確認してください。"
+    }
   },
   "sidebar": {
     "groups": {

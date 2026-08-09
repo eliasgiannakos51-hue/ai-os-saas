@@ -18,6 +18,7 @@ import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } fro
 import { logApiError } from "@/lib/log-error";
 import { RESEARCH_MODEL } from "@/lib/files/file-models";
 import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
+import { researchReportToDocumentHtml } from "@/lib/research/report-to-html";
 import {
   RESEARCH_DEADLINE_MS,
   RESEARCH_MAX_SEARCHES,
@@ -350,28 +351,37 @@ export async function POST(_request: Request, { params }: { params: { id: string
     const sections = splitSections(synthesis.markdown);
 
     // Saved as a Document too, so the report lives where the rest of the
-    // user's writing does rather than only inside this feature. Written
-    // with the admin client because `ai_documents` is the module table and
-    // this is a server-side write on the user's behalf; failure here is
-    // logged and does NOT fail the report, which already exists.
+    // user's writing does rather than only inside this feature.
+    //
+    // DEFECT this fixes: it used to insert into `ai_documents` — the
+    // LEGACY Build-module tracker — while the UI linked to
+    // /dashboard/documents/<id>, which has rendered `user_documents` since
+    // the Documents module replaced it. Every "Open as a document" link on
+    // every report ever produced was therefore a guaranteed 404: the row
+    // existed, in a table no screen shows. It was invisible because the
+    // insert succeeded and the id came back, so nothing logged an error.
+    //
+    // user_documents.content is jsonb { html }, and the editor assigns it
+    // straight to innerHTML — so the report is converted by
+    // researchReportToDocumentHtml, which escapes everything before
+    // re-introducing a fixed set of tags. A research report is assembled
+    // from web pages strangers wrote; passing that through unescaped would
+    // be stored XSS with an obvious delivery path.
     let documentId: string | null = null;
     const disclosure = aiGeneratedNotice(language);
-    const documentBody = [
-      synthesis.markdown,
-      "",
-      "## Sources",
-      ...sources.map((s, i) => `${i + 1}. [${s.title}](${s.url})`),
-      "",
-      `_${disclosure}_`,
-    ].join("\n");
+    const documentHtml = researchReportToDocumentHtml({
+      markdown: synthesis.markdown,
+      sources,
+      disclosure,
+      sourcesHeading: "Sources",
+    });
 
     const { data: document, error: documentError } = await admin
-      .from("ai_documents")
+      .from("user_documents")
       .insert({
         user_id: user.id,
         title: String(report.topic).slice(0, 200),
-        content: documentBody,
-        status: "completed",
+        content: { html: documentHtml },
       })
       .select("id")
       .maybeSingle();

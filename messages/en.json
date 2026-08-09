@@ -24,7 +24,11 @@
     "notAuthenticated": "Not authenticated.",
     "created": "✓ created",
     "updated": "✓ updated",
-    "linked": "✓ linked"
+    "linked": "✓ linked",
+    "aiGenerated": {
+      "short": "AI-generated",
+      "long": "AI-generated content. It can be wrong — check anything important before you rely on it."
+    }
   },
   "sidebar": {
     "groups": {

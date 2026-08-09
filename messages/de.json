@@ -24,7 +24,11 @@
     "notAuthenticated": "Nicht angemeldet.",
     "created": "✓ erstellt",
     "updated": "✓ aktualisiert",
-    "linked": "✓ verknüpft"
+    "linked": "✓ verknüpft",
+    "aiGenerated": {
+      "short": "KI-generiert",
+      "long": "Von KI erzeugter Inhalt. Er kann Fehler enthalten — prüfen Sie Wichtiges, bevor Sie sich darauf verlassen."
+    }
   },
   "sidebar": {
     "groups": {

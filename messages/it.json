@@ -24,7 +24,11 @@
     "notAuthenticated": "Non autenticato.",
     "created": "✓ creato",
     "updated": "✓ aggiornato",
-    "linked": "✓ collegato"
+    "linked": "✓ collegato",
+    "aiGenerated": {
+      "short": "Generato dall’IA",
+      "long": "Contenuto generato dall’IA. Può contenere errori: verifica ciò che è importante prima di fidartene."
+    }
   },
   "sidebar": {
     "groups": {

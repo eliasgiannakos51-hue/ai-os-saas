@@ -42,6 +42,7 @@ import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
+import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { CardGrid, EntityCard, type EntityCardStatusTone } from "@/components/ui/entity-card";
 import { DetailPanel, type DetailTab } from "@/components/ui/detail-panel";
@@ -1001,6 +1002,13 @@ export function WebsiteBuilderWorkspace({
         >
           {detailTab === "preview" && (
             <>
+              {/* EU AI Act art. 50. A generated site is the artefact in
+                  this product most likely to be mistaken for something a
+                  person built — it renders as a real page in an iframe —
+                  so the notice sits above the preview, where it is read
+                  before the page is, rather than in metadata. */}
+              <AiGeneratedNotice variant="block" className="mb-3" />
+
               {viewingVersion && (
                 <p className="mb-3 rounded-lg border border-orange-800 bg-orange-950/20 px-3 py-2 text-xs text-orange-300">
                   {t("viewingOldVersion", { number: viewingVersion.version_number })}{" "}

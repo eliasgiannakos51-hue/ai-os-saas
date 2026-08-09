@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
 import { EmptyState } from "@/components/empty-state";
+import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -455,6 +456,12 @@ export function ResearchWorkspace({
               {t("close")}
             </button>
           </div>
+
+          {/* EU AI Act art. 50. The report reads like a researched
+              document — sourced, structured, confident — which is exactly
+              why it needs the notice on screen and not only in the
+              Document copy's markdown. */}
+          <AiGeneratedNotice variant="block" />
 
           {(open.sections ?? []).map((section, i) => (
             <div key={`${section.heading}-${i}`} className="space-y-1">

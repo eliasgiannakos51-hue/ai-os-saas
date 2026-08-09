@@ -17,6 +17,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { MessageContent } from "@/components/chat/message-content";
+import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useCredits } from "@/components/credits/credits-context";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
 
@@ -581,8 +582,12 @@ export function ChatWorkspace({
                 ) : (
                   <div key={msg.id} className="flex items-start gap-2">
                     <AssistantAvatar />
+                    {/* EU AI Act art. 50 — on the reply itself, not in
+                        metadata. Inside the bubble so it cannot be read as
+                        belonging to the next message. */}
                     <div className="max-w-[80%] rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-2.5 text-foreground/90">
                       <MessageContent content={msg.content} />
+                      <AiGeneratedNotice />
                     </div>
                   </div>
                 )
@@ -594,6 +599,7 @@ export function ChatWorkspace({
                   {streamingText !== null ? (
                     <div className="max-w-[80%] rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-2.5 text-foreground/90">
                       <MessageContent content={streamingText} />
+                      <AiGeneratedNotice />
                     </div>
                   ) : (
                     <TypingDots />

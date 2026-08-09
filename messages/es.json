@@ -24,7 +24,11 @@
     "notAuthenticated": "No has iniciado sesión.",
     "created": "✓ creado",
     "updated": "✓ actualizado",
-    "linked": "✓ vinculado"
+    "linked": "✓ vinculado",
+    "aiGenerated": {
+      "short": "Generado por IA",
+      "long": "Contenido generado por IA. Puede contener errores: comprueba lo importante antes de fiarte de ello."
+    }
   },
   "sidebar": {
     "groups": {

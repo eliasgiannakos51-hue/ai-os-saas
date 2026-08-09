@@ -908,7 +908,33 @@
       "statusFlagged": "フラグ付き",
       "flaggedTitle": "安全性レビューによりフラグが付けられました",
       "regenerateFree": "再生成（無料）",
-      "editUnavailable": "ウェブサイトの生成が完了すると変更をリクエストできます。"
+      "editUnavailable": "ウェブサイトの生成が完了すると変更をリクエストできます。",
+      "design": {
+        "title": "デザイン",
+        "optional": "任意",
+        "colours": "配色",
+        "primary": "メインカラー",
+        "secondary": "サブカラー",
+        "hexPlaceholder": "#1d4ed8",
+        "hexInvalid": "6 桁の 16 進カラーを入力してください（例: #1d4ed8）。",
+        "clear": "クリア",
+        "background": "背景",
+        "ownPhotoNeedsUpload": "先に上で写真をアップロードしてください。",
+        "imageUse": "アップロードした写真 {count} 枚",
+        "backgrounds": {
+          "auto": "おまかせ",
+          "solid": "単色",
+          "gradient": "アニメーショングラデーション",
+          "photo": "写真",
+          "pattern": "パターン",
+          "own-photo": "自分の写真"
+        },
+        "imageUses": {
+          "in-site": "サイトに使う",
+          "style-only": "スタイル参考のみ"
+        }
+      },
+      "imageIntro": "ロゴ、商品写真、店内の写真など。ページに載せたいもの、雰囲気の参考にしたいもの。"
     },
     "marketplace": {
       "title": "マーケットプレイス",

@@ -908,7 +908,33 @@
       "statusFlagged": "Segnalato",
       "flaggedTitle": "Segnalato dal nostro controllo di sicurezza",
       "regenerateFree": "Rigenera (gratis)",
-      "editUnavailable": "Potrai richiedere modifiche una volta terminata la generazione del sito."
+      "editUnavailable": "Potrai richiedere modifiche una volta terminata la generazione del sito.",
+      "design": {
+        "title": "Design",
+        "optional": "facoltativo",
+        "colours": "Colori",
+        "primary": "Colore principale",
+        "secondary": "Colore secondario",
+        "hexPlaceholder": "#1d4ed8",
+        "hexInvalid": "Usa un colore hex a sei cifre, es. #1d4ed8.",
+        "clear": "Cancella",
+        "background": "Sfondo",
+        "ownPhotoNeedsUpload": "Carica prima una foto qui sopra.",
+        "imageUse": "Le tue {count} foto caricate",
+        "backgrounds": {
+          "auto": "Scegli tu",
+          "solid": "Tinta unita",
+          "gradient": "Gradiente animato",
+          "photo": "Foto",
+          "pattern": "Motivo",
+          "own-photo": "Una mia foto"
+        },
+        "imageUses": {
+          "in-site": "Mettile nel sito",
+          "style-only": "Solo come riferimento di stile"
+        }
+      },
+      "imageIntro": "Il tuo logo, foto dei prodotti o del locale: quello che vuoi nella pagina o che deve dare lo stile."
     },
     "marketplace": {
       "title": "Mercato",

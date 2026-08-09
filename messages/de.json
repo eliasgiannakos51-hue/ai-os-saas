@@ -908,7 +908,33 @@
       "statusFlagged": "Markiert",
       "flaggedTitle": "Von unserer Sicherheitsprüfung markiert",
       "regenerateFree": "Neu erzeugen (kostenlos)",
-      "editUnavailable": "Änderungen sind möglich, sobald die Website fertig erzeugt ist."
+      "editUnavailable": "Änderungen sind möglich, sobald die Website fertig erzeugt ist.",
+      "design": {
+        "title": "Design",
+        "optional": "optional",
+        "colours": "Farben",
+        "primary": "Primärfarbe",
+        "secondary": "Sekundärfarbe",
+        "hexPlaceholder": "#1d4ed8",
+        "hexInvalid": "Bitte einen sechsstelligen Hex-Wert, z. B. #1d4ed8.",
+        "clear": "Zurücksetzen",
+        "background": "Hintergrund",
+        "ownPhotoNeedsUpload": "Laden Sie zuerst oben ein Foto hoch.",
+        "imageUse": "Ihre {count} hochgeladenen Fotos",
+        "backgrounds": {
+          "auto": "Sie entscheiden",
+          "solid": "Einfarbig",
+          "gradient": "Animierter Verlauf",
+          "photo": "Foto",
+          "pattern": "Muster",
+          "own-photo": "Mein eigenes Foto"
+        },
+        "imageUses": {
+          "in-site": "Auf die Seite setzen",
+          "style-only": "Nur als Stilvorlage"
+        }
+      },
+      "imageIntro": "Ihr Logo, Produktfotos, Bilder vom Laden — alles, was auf die Seite soll oder den Stil vorgeben darf."
     },
     "marketplace": {
       "title": "Marktplatz",

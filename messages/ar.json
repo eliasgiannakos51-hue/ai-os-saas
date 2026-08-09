@@ -908,7 +908,33 @@
       "statusFlagged": "مُعلَّم",
       "flaggedTitle": "تم تعليمه بواسطة مراجعة السلامة لدينا",
       "regenerateFree": "إعادة الإنشاء (مجانًا)",
-      "editUnavailable": "يمكنك طلب تعديلات بمجرد انتهاء إنشاء الموقع."
+      "editUnavailable": "يمكنك طلب تعديلات بمجرد انتهاء إنشاء الموقع.",
+      "design": {
+        "title": "التصميم",
+        "optional": "اختياري",
+        "colours": "الألوان",
+        "primary": "اللون الأساسي",
+        "secondary": "اللون الثانوي",
+        "hexPlaceholder": "#1d4ed8",
+        "hexInvalid": "استخدم لونًا سداسيًا من ست خانات، مثل ‎#1d4ed8.",
+        "clear": "مسح",
+        "background": "الخلفية",
+        "ownPhotoNeedsUpload": "ارفع صورة في الأعلى أولًا.",
+        "imageUse": "صورك المرفوعة ({count})",
+        "backgrounds": {
+          "auto": "اتركه للذكاء الاصطناعي",
+          "solid": "لون واحد",
+          "gradient": "تدرّج متحرك",
+          "photo": "صورة",
+          "pattern": "نقش",
+          "own-photo": "صورة من عندي"
+        },
+        "imageUses": {
+          "in-site": "ضعها في الموقع",
+          "style-only": "كمرجع للأسلوب فقط"
+        }
+      },
+      "imageIntro": "شعارك أو صور منتجاتك أو المكان — أي شيء تريده في الصفحة أو أن يوحي بالأسلوب."
     },
     "marketplace": {
       "title": "السوق",

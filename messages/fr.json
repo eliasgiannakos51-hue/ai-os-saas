@@ -908,7 +908,33 @@
       "statusFlagged": "Signalé",
       "flaggedTitle": "Signalé par notre contrôle de sécurité",
       "regenerateFree": "Régénérer (gratuit)",
-      "editUnavailable": "Vous pourrez demander des modifications une fois le site généré."
+      "editUnavailable": "Vous pourrez demander des modifications une fois le site généré.",
+      "design": {
+        "title": "Design",
+        "optional": "facultatif",
+        "colours": "Couleurs",
+        "primary": "Couleur principale",
+        "secondary": "Couleur secondaire",
+        "hexPlaceholder": "#1d4ed8",
+        "hexInvalid": "Utilisez une couleur hex à six chiffres, ex. #1d4ed8.",
+        "clear": "Effacer",
+        "background": "Arrière-plan",
+        "ownPhotoNeedsUpload": "Importez d’abord une photo ci-dessus.",
+        "imageUse": "Vos {count} photo(s) importées",
+        "backgrounds": {
+          "auto": "À vous de voir",
+          "solid": "Uni",
+          "gradient": "Dégradé animé",
+          "photo": "Photo",
+          "pattern": "Motif",
+          "own-photo": "Ma propre photo"
+        },
+        "imageUses": {
+          "in-site": "Les mettre sur le site",
+          "style-only": "Référence de style seulement"
+        }
+      },
+      "imageIntro": "Votre logo, vos photos de produits ou du lieu — ce que vous voulez voir sur la page ou qui doit inspirer le style."
     },
     "marketplace": {
       "title": "Place de marché",

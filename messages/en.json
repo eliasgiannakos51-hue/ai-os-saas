@@ -908,7 +908,33 @@
       "statusFlagged": "Flagged",
       "flaggedTitle": "Flagged by our safety review",
       "regenerateFree": "Regenerate (free)",
-      "editUnavailable": "You can request changes once this website has finished generating."
+      "editUnavailable": "You can request changes once this website has finished generating.",
+      "design": {
+        "title": "Design",
+        "optional": "optional",
+        "colours": "Colours",
+        "primary": "Primary colour",
+        "secondary": "Secondary colour",
+        "hexPlaceholder": "#1d4ed8",
+        "hexInvalid": "Use a six-digit hex colour, e.g. #1d4ed8.",
+        "clear": "Clear",
+        "background": "Background",
+        "ownPhotoNeedsUpload": "Upload a photo above first.",
+        "imageUse": "Your {count} uploaded photo(s)",
+        "backgrounds": {
+          "auto": "You choose",
+          "solid": "Solid",
+          "gradient": "Animated gradient",
+          "photo": "Photo",
+          "pattern": "Pattern",
+          "own-photo": "My own photo"
+        },
+        "imageUses": {
+          "in-site": "Put them on the site",
+          "style-only": "Style reference only"
+        }
+      },
+      "imageIntro": "Your logo, product shots, photos of the place — anything you want on the page or want the style taken from."
     },
     "marketplace": {
       "title": "Marketplace",

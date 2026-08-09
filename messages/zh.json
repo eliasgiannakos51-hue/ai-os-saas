@@ -908,7 +908,33 @@
       "statusFlagged": "已标记",
       "flaggedTitle": "已被我们的安全审核标记",
       "regenerateFree": "重新生成（免费）",
-      "editUnavailable": "网站生成完成后即可提出修改要求。"
+      "editUnavailable": "网站生成完成后即可提出修改要求。",
+      "design": {
+        "title": "设计",
+        "optional": "可选",
+        "colours": "配色",
+        "primary": "主色",
+        "secondary": "辅助色",
+        "hexPlaceholder": "#1d4ed8",
+        "hexInvalid": "请填写六位十六进制颜色，例如 #1d4ed8。",
+        "clear": "清除",
+        "background": "背景",
+        "ownPhotoNeedsUpload": "请先在上方上传照片。",
+        "imageUse": "你上传的 {count} 张照片",
+        "backgrounds": {
+          "auto": "由 AI 决定",
+          "solid": "纯色",
+          "gradient": "动态渐变",
+          "photo": "照片",
+          "pattern": "图案",
+          "own-photo": "我自己的照片"
+        },
+        "imageUses": {
+          "in-site": "放到网站上",
+          "style-only": "仅作风格参考"
+        }
+      },
+      "imageIntro": "你的标志、产品照片、店内照片——想放到页面上的，或想让它决定风格的。"
     },
     "marketplace": {
       "title": "市场",

@@ -1303,7 +1303,9 @@
       "empty": "No reports yet. Describe a topic above to see what it would research.",
       "usedThisMonth": "{used} of {cap} this month",
       "usedUnlimited": "{used} this month",
-      "capReached": "You have used this month's research reports. It resets on the 1st."
+      "capReached": "You have used this month's research reports. It resets on the 1st.",
+      "progressStep": "Question {done} of {total}",
+      "keepsRunning": "This keeps running if you close the page."
     },
     "onboarding": {
       "title": "Let's make this yours",

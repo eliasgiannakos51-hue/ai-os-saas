@@ -1303,7 +1303,9 @@
       "empty": "まだレポートがありません。上でトピックを入力すると、何を調べるか確認できます。",
       "usedThisMonth": "今月 {cap} 件中 {used} 件",
       "usedUnlimited": "今月 {used} 件",
-      "capReached": "今月の調査レポートを使い切りました。1日にリセットされます。"
+      "capReached": "今月の調査レポートを使い切りました。1日にリセットされます。",
+      "progressStep": "質問 {done} / {total}",
+      "keepsRunning": "ページを閉じても処理は続きます。"
     },
     "onboarding": {
       "title": "あなた仕様にしましょう",

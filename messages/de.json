@@ -1303,7 +1303,9 @@
       "empty": "Noch keine Berichte. Beschreibe oben ein Thema, um zu sehen, was recherchiert würde.",
       "usedThisMonth": "{used} von {cap} in diesem Monat",
       "usedUnlimited": "{used} in diesem Monat",
-      "capReached": "Du hast die Berichte dieses Monats aufgebraucht. Zurücksetzung am 1."
+      "capReached": "Du hast die Berichte dieses Monats aufgebraucht. Zurücksetzung am 1.",
+      "progressStep": "Frage {done} von {total}",
+      "keepsRunning": "Das läuft weiter, auch wenn Sie die Seite schließen."
     },
     "onboarding": {
       "title": "Machen wir es zu deinem",

@@ -1303,7 +1303,9 @@
       "empty": "Ancora nessun report. Descrivi un argomento sopra per vedere cosa ricercherebbe.",
       "usedThisMonth": "{used} di {cap} questo mese",
       "usedUnlimited": "{used} questo mese",
-      "capReached": "Hai esaurito i report di questo mese. Si azzera il 1°."
+      "capReached": "Hai esaurito i report di questo mese. Si azzera il 1°.",
+      "progressStep": "Domanda {done} di {total}",
+      "keepsRunning": "Continua a girare anche se chiudi la pagina."
     },
     "onboarding": {
       "title": "Rendiamolo tuo",

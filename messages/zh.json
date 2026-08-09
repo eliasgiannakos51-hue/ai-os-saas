@@ -1303,7 +1303,9 @@
       "empty": "还没有报告。在上方描述一个主题，看看它会研究什么。",
       "usedThisMonth": "本月 {cap} 次中的 {used} 次",
       "usedUnlimited": "本月 {used} 次",
-      "capReached": "你已用完本月的研究报告额度，将于每月 1 日重置。"
+      "capReached": "你已用完本月的研究报告额度，将于每月 1 日重置。",
+      "progressStep": "第 {done} 个问题，共 {total} 个",
+      "keepsRunning": "即使关闭页面，任务也会继续运行。"
     },
     "onboarding": {
       "title": "让它成为你的",

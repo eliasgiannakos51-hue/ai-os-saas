@@ -1303,7 +1303,9 @@
       "empty": "Aucun rapport. Décrivez un sujet ci-dessus pour voir ce qui serait recherché.",
       "usedThisMonth": "{used} sur {cap} ce mois-ci",
       "usedUnlimited": "{used} ce mois-ci",
-      "capReached": "Vous avez utilisé les rapports de ce mois. Réinitialisation le 1er."
+      "capReached": "Vous avez utilisé les rapports de ce mois. Réinitialisation le 1er.",
+      "progressStep": "Question {done} sur {total}",
+      "keepsRunning": "Le travail continue même si vous fermez la page."
     },
     "onboarding": {
       "title": "Faisons-en le vôtre",

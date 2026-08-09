@@ -1303,7 +1303,9 @@
       "empty": "Ainda não há relatórios. Descreve um tema acima para veres o que investigaria.",
       "usedThisMonth": "{used} de {cap} este mês",
       "usedUnlimited": "{used} este mês",
-      "capReached": "Já usaste os relatórios deste mês. Reinicia no dia 1."
+      "capReached": "Já usaste os relatórios deste mês. Reinicia no dia 1.",
+      "progressStep": "Pergunta {done} de {total}",
+      "keepsRunning": "Continua a correr mesmo que feche a página."
     },
     "onboarding": {
       "title": "Vamos torná-lo teu",

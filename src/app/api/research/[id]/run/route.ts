@@ -18,7 +18,11 @@ import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } fro
 import { logApiError } from "@/lib/log-error";
 import { RESEARCH_MODEL } from "@/lib/files/file-models";
 import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
-import { RESEARCH_MAX_SEARCHES } from "@/lib/research/research-limits";
+import {
+  RESEARCH_DEADLINE_MS,
+  RESEARCH_MAX_SEARCHES,
+  RESEARCH_SYNTHESIS_RESERVE_MS,
+} from "@/lib/research/research-limits";
 import {
   collateSources,
   researchQuestion,
@@ -34,7 +38,20 @@ export const fetchCache = "force-no-store";
 // longest-running route in the app by design; the client does not wait
 // for it (it polls GET /api/research/[id]), so the only thing this number
 // governs is how much work can complete before the platform kills it.
-export const maxDuration = 300;
+//
+// It was 300s, and that is the whole reason a report could run for half an
+// hour and return nothing. One search-enabled question call takes 60-90
+// seconds — Anthropic runs several real searches inside it — so six of
+// them plus a synthesis never fitted in five minutes. The platform killed
+// the function around question four, and a kill runs no catch block: no
+// status was written, no settlement happened, the row stayed 'researching'
+// forever and the client polled it forever.
+//
+// 800s matches the website worker's ceiling. It is necessary but not
+// sufficient on its own, which is why RESEARCH_DEADLINE_MS below stops the
+// route BEFORE the platform does, and isResearchJobStale reaps whatever
+// still slips through. See lib/research/research-limits.ts.
+export const maxDuration = 800;
 
 /**
  * Run a planned research job.
@@ -189,12 +206,62 @@ export async function POST(_request: Request, { params }: { params: { id: string
     const language = String(report.language ?? "en");
     const anthropic = new Anthropic({ apiKey });
     const findings: ResearchFinding[] = [];
+    const startedAt = Date.now();
+
+    // Progress, written after every question.
+    //
+    // Best-effort by construction: the columns are added by the migration
+    // in supabase/migrations/20260809_research_progress.sql, and an
+    // instance running new code against an un-migrated database must keep
+    // producing reports rather than failing on a progress write. A
+    // PostgREST unknown-column error comes back as `error`, not as a
+    // throw, so ignoring it is genuinely safe here — and the GET endpoint
+    // selects `*`, so it never asks for a column that might not exist.
+    async function writeProgress(done: number, current: string | null) {
+      await supabase
+        .from("research_reports")
+        .update({
+          questions_done: done,
+          questions_total: questions.length,
+          current_question: current,
+        })
+        .eq("id", report!.id)
+        .eq("user_id", user!.id);
+    }
+    await writeProgress(0, questions[0]?.question ?? null);
 
     // Sequential, not parallel. Six concurrent search-enabled calls is a
     // burst that trips Anthropic's own rate limits on a busy account, and
     // the failure mode of that is a report missing a third of its
     // research for no reason the user can see.
-    for (const question of questions) {
+    //
+    // THE DEADLINE. Every question is checked against the wall clock
+    // BEFORE it starts. The old loop ran all six unconditionally, so on a
+    // slow run the platform killed the function somewhere in the middle
+    // and the user got nothing at all — not a partial report, nothing,
+    // and no terminal status either. Stopping early and synthesising what
+    // we have is strictly better: the synthesis prompt is already required
+    // to list what could not be established, so an unanswered question
+    // becomes a line in the report rather than a silent omission.
+    let stoppedEarly = false;
+    for (const [index, question] of questions.entries()) {
+      if (index > 0 && Date.now() - startedAt > RESEARCH_DEADLINE_MS - RESEARCH_SYNTHESIS_RESERVE_MS) {
+        stoppedEarly = true;
+        logApiError("/api/research/[id]/run", "research deadline reached, synthesising early", {
+          reportId: String(report.id),
+          answered: index,
+          asked: questions.length,
+          elapsedMs: Date.now() - startedAt,
+        });
+        // The remaining questions still belong in the report, marked
+        // unanswered, so the synthesis names them under "could not be
+        // established" instead of quietly dropping a third of the plan.
+        for (const remaining of questions.slice(index)) {
+          findings.push({ question: remaining.question, summary: "", sources: [] });
+        }
+        break;
+      }
+
       const result = await researchQuestion({
         anthropic,
         topic: String(report.topic),
@@ -203,6 +270,7 @@ export async function POST(_request: Request, { params }: { params: { id: string
         costs,
       });
       findings.push(result.finding);
+      await writeProgress(index + 1, questions[index + 1]?.question ?? null);
     }
 
     const usable = findings.filter((f) => f.summary.trim().length > 0);
@@ -260,6 +328,8 @@ export async function POST(_request: Request, { params }: { params: { id: string
         questions: questions.length,
         answered: usable.length,
         sources: sources.length,
+        stoppedEarly,
+        elapsedMs: Date.now() - startedAt,
       },
     });
 

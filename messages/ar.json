@@ -429,7 +429,9 @@
       "title": "استخدام الذكاء الاصطناعي",
       "creditsUsed": "الرصيد المستخدم",
       "totalEntries": "إجمالي الإدخالات",
-      "mostActiveModule": "الوحدة الأكثر نشاطًا"
+      "mostActiveModule": "الوحدة الأكثر نشاطًا",
+      "unlimited": "غير محدود",
+      "wouldHaveCost": "كان سيكلّف {credits} رصيدًا"
     },
     "theme": {
       "title": "السمة",
@@ -541,7 +543,21 @@
       "colFeature": "الميزة",
       "colCalls": "الإجراءات",
       "colMargin": "متوسط الهامش",
-      "colCost": "التكلفة الفعلية"
+      "colCost": "التكلفة الفعلية",
+      "hypotheticalNote": "* يشمل حسابات بلا محاسبة (مسؤول، تجريبي). لهذه الحسابات، الهامش المعروض هو ما كان سيتحقق بسعر خطتها.",
+      "colCharged": "مُحاسَبة",
+      "colBypass": "بلا محاسبة",
+      "colMarginCharged": "متوسط الهامش (محاسَب)",
+      "colMarginWouldBe": "متوسط الهامش (مُقدَّر)",
+      "sumCost": "التكلفة الفعلية (30 يومًا)",
+      "sumCredits": "الرصيد",
+      "sumCreditsHint": "{charged} محاسَب · {wouldBe} مُقدَّر",
+      "sumMargin": "الهامش الإجمالي",
+      "sumMarginHint": "مرجَّح بالتكلفة",
+      "sumTop": "أغلى ميزة",
+      "sumTopHint": "{percent}% من إجمالي الإنفاق",
+      "projectionOnly": "لا توجد إجراءات محاسَبة بعد — كل هامش أدناه تقدير من سجلات بلا محاسبة، وليس إيرادًا.",
+      "belowTargetAlert": "{count} ميزة أقل من هدف {target}x: {features}. تم إرسال تنبيه بالبريد."
     },
     "pushNotifications": {
       "title": "إشعارات الدفع",
@@ -1186,7 +1202,8 @@
       "rollback": "استرجاع",
       "rollbackSuccess": "تم الاسترجاع إلى الإصدار {number}.",
       "rollbackError": "تعذّر الاسترجاع. حاول مرة أخرى.",
-      "confirmRollback": "هل تريد إعادة الإصدار {number} إلى الموقع المنشور؟"
+      "confirmRollback": "هل تريد إعادة الإصدار {number} إلى الموقع المنشور؟",
+      "unpublishHint": "يزيل الموقع من الإنترنت. يبقى في حسابك ويمكن نشره مجددًا."
     },
     "integrations": {
       "title": "التكاملات",

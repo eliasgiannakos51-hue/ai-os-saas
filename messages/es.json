@@ -429,7 +429,9 @@
       "title": "Uso de IA",
       "creditsUsed": "Créditos usados",
       "totalEntries": "Entradas totales",
-      "mostActiveModule": "Módulo más activo"
+      "mostActiveModule": "Módulo más activo",
+      "unlimited": "Ilimitado",
+      "wouldHaveCost": "Habría costado {credits} créditos"
     },
     "theme": {
       "title": "Tema",
@@ -541,7 +543,21 @@
       "colFeature": "Función",
       "colCalls": "Acciones",
       "colMargin": "Margen medio",
-      "colCost": "Coste real"
+      "colCost": "Coste real",
+      "hypotheticalNote": "* Incluye cuentas sin cargo (admin, beta). Para ellas, el margen mostrado es el que habría generado la acción a la tarifa de su plan.",
+      "colCharged": "Cobradas",
+      "colBypass": "Bypass",
+      "colMarginCharged": "Margen medio (cobrado)",
+      "colMarginWouldBe": "Margen medio (estimado)",
+      "sumCost": "Coste real (30 d)",
+      "sumCredits": "Créditos",
+      "sumCreditsHint": "{charged} cobrados · {wouldBe} estimados",
+      "sumMargin": "Margen global",
+      "sumMarginHint": "Ponderado por coste",
+      "sumTop": "Función más cara",
+      "sumTopHint": "{percent}% del gasto total",
+      "projectionOnly": "Aún no hay acciones cobradas: todos los márgenes siguientes son proyecciones de registros bypass, no ingresos.",
+      "belowTargetAlert": "{count} función(es) por debajo del objetivo {target}x: {features}. Se ha enviado una alerta por correo."
     },
     "pushNotifications": {
       "title": "Notificaciones push",
@@ -1186,7 +1202,8 @@
       "rollback": "Restaurar",
       "rollbackSuccess": "Restaurada la versión {number}.",
       "rollbackError": "No se pudo restaurar. Inténtalo de nuevo.",
-      "confirmRollback": "¿Volver a poner la versión {number} en el sitio en vivo?"
+      "confirmRollback": "¿Volver a poner la versión {number} en el sitio en vivo?",
+      "unpublishHint": "Retira el sitio de la web. Permanece en tu cuenta y puedes volver a publicarlo."
     },
     "integrations": {
       "title": "Integraciones",

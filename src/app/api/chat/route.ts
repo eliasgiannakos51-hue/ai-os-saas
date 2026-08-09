@@ -58,7 +58,7 @@ export const dynamic = "force-dynamic";
 // reply with a lot of context (memory + entity mentions + AI Life
 // Context) plus the trailing memory-extraction call could otherwise
 // still hit a low platform default. 180s covers a realistic worst case.
-export const maxDuration = 180;
+export const maxDuration = 180; // @function-limit 180
 
 // Shared with lib/billing/free-chat.ts so the free-chat economics always
 // price the model chat actually runs on — see lib/ai-models.ts.

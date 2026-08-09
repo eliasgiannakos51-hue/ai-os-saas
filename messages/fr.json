@@ -429,7 +429,9 @@
       "title": "Utilisation IA",
       "creditsUsed": "Crédits utilisés",
       "totalEntries": "Entrées totales",
-      "mostActiveModule": "Module le plus actif"
+      "mostActiveModule": "Module le plus actif",
+      "unlimited": "Illimité",
+      "wouldHaveCost": "Aurait coûté {credits} crédits"
     },
     "theme": {
       "title": "Thème",
@@ -541,7 +543,21 @@
       "colFeature": "Fonctionnalité",
       "colCalls": "Actions",
       "colMargin": "Marge moy.",
-      "colCost": "Coût réel"
+      "colCost": "Coût réel",
+      "hypotheticalNote": "* Inclut les comptes non facturés (admin, bêta). Pour eux, la marge affichée est celle qu’aurait rapportée l’action au tarif de leur formule.",
+      "colCharged": "Facturées",
+      "colBypass": "Bypass",
+      "colMarginCharged": "Marge moy. (facturée)",
+      "colMarginWouldBe": "Marge moy. (estimée)",
+      "sumCost": "Coût réel (30 j)",
+      "sumCredits": "Crédits",
+      "sumCreditsHint": "{charged} facturés · {wouldBe} estimés",
+      "sumMargin": "Marge globale",
+      "sumMarginHint": "Pondérée par le coût",
+      "sumTop": "Fonction la plus coûteuse",
+      "sumTopHint": "{percent}% des dépenses",
+      "projectionOnly": "Aucune action facturée pour l’instant — toutes les marges ci-dessous sont des projections issues d’enregistrements bypass, pas des revenus.",
+      "belowTargetAlert": "{count} fonction(s) sous l’objectif de {target}x : {features}. Une alerte a été envoyée par e-mail."
     },
     "pushNotifications": {
       "title": "Notifications push",
@@ -1186,7 +1202,8 @@
       "rollback": "Restaurer",
       "rollbackSuccess": "Version {number} restaurée.",
       "rollbackError": "Impossible de restaurer. Réessayez.",
-      "confirmRollback": "Remettre la version {number} en ligne ?"
+      "confirmRollback": "Remettre la version {number} en ligne ?",
+      "unpublishHint": "Retire le site du web. Il reste dans votre compte et peut être republié."
     },
     "integrations": {
       "title": "Intégrations",

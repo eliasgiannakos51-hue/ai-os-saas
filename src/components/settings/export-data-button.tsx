@@ -41,19 +41,47 @@ export function ExportDataButton() {
       // Streamed to a blob rather than parsed: a heavy account's export
       // is large, and JSON.parse-ing it only to re-serialize it wastes
       // memory on the user's device for no benefit.
-      const blob = await res.blob();
       const filename =
         res.headers.get("Content-Disposition")?.match(/filename="([^"]+)"/)?.[1] ??
         `ionexa_export_${new Date().toISOString().slice(0, 10)}.json`;
+
+      // "Export All Data opens in a text editor instead of downloading."
+      //
+      // The server side was never the problem: the route already sends
+      // Content-Disposition: attachment. The two things that make a blob
+      // download open inline instead are both here.
+      //
+      // 1. THE BLOB'S OWN TYPE. res.blob() inherits application/json from
+      //    the response, and a browser handed a blob: URL it knows how to
+      //    render will render it — Content-Disposition does not travel
+      //    with a blob: URL, so the header cannot save it. Forcing
+      //    application/octet-stream removes the "I can display this"
+      //    decision entirely.
+      //
+      // 2. REVOKING TOO EARLY. revokeObjectURL ran on the very next line
+      //    after click(), synchronously. Chrome usually starts the
+      //    download first; Safari and Firefox can lose the race and end up
+      //    navigating to a URL that no longer exists. The revoke is now
+      //    deferred, and the anchor is removed with it.
+      const raw = await res.blob();
+      const blob = new Blob([raw], { type: "application/octet-stream" });
 
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = filename;
+      // rel=noopener: if `download` is ignored (an in-app browser, an old
+      // iOS), the fallback is a navigation, and it must not hand the
+      // opener reference to whatever renders it.
+      a.rel = "noopener";
       document.body.appendChild(a);
       a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      // Long enough for every engine to have taken the blob, short enough
+      // that nothing meaningful is retained.
+      setTimeout(() => {
+        a.remove();
+        URL.revokeObjectURL(url);
+      }, 30_000);
 
       addToast(t("exportDownloaded"));
     } catch {

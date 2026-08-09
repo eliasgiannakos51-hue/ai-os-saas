@@ -2,6 +2,7 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { extractHtmlDocument, containsHtmlDocumentStart } from "@/lib/website-html-extract";
+import { functionBudgetMs } from "@/lib/function-limits";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { applyExactReplace } from "@/lib/website-patch";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
@@ -47,8 +48,32 @@ const MAX_CONTINUATION_ROUNDS = 4;
 // almost no time left buys a near-certain hard kill instead of a clean,
 // reportable failure, so rounds stop when the remaining window is smaller
 // than a round plausibly needs.
-const CONTINUATION_DEADLINE_MS = 700_000;
-const MIN_MS_FOR_ANOTHER_ROUND = 120_000;
+// Was a hardcoded 700_000 (~11.7 min), which is only meaningful on a
+// platform that grants 800 seconds. On Vercel Hobby the whole invocation
+// is 60 seconds, so a deadline of 700s never fires and the function is
+// killed mid-round with every token already paid for.
+//
+// The budget now comes from lib/function-limits.ts, which reads
+// MAX_FUNCTION_DURATION. functionBudgetMs() already subtracts a safety
+// margin for the writes that follow, so this is the room genuinely
+// available for model rounds.
+function continuationDeadlineMs(): number {
+  return Math.min(700_000, functionBudgetMs());
+}
+
+// How much room one more round needs before it is worth starting.
+//
+// It was a flat 120_000, which on a 60-second budget is larger than the
+// budget itself — so the guard would refuse EVERY continuation and a
+// truncated document could never be finished. Scaling it to the budget
+// keeps the original intent (do not start a round that will certainly be
+// killed) at any ceiling: a third of the budget, floored at 15s so it
+// stays meaningful, capped at the original 120s so a generous plan
+// behaves exactly as before.
+function minMsForAnotherRound(): number {
+  const budget = continuationDeadlineMs();
+  return Math.min(120_000, Math.max(15_000, Math.floor(budget / 3)));
+}
 const CONTINUATION_INSTRUCTION =
   "Continue the HTML document EXACTLY where you left off — do not repeat anything you already wrote, do not restart the document, and do not add any commentary or markdown code fences. Output only the raw continuation of the HTML from the exact point it was cut off.";
 
@@ -655,7 +680,7 @@ async function streamHtmlToCompletion(
     if (round === MAX_CONTINUATION_ROUNDS) break;
     // Don't start a round that the platform will kill mid-flight: those
     // tokens are billed to us and reach the user as nothing at all.
-    if (Date.now() - startedAt > CONTINUATION_DEADLINE_MS - MIN_MS_FOR_ANOTHER_ROUND) break;
+    if (Date.now() - startedAt > continuationDeadlineMs() - minMsForAnotherRound()) break;
 
     // Which continuation to send depends on WHY the turn ended. The
     // previous condition only ever recognised "max_tokens" and treated

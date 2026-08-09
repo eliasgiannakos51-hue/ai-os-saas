@@ -5,6 +5,10 @@ import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-client-ip";
 
+// @service-role-justified token-auth — the 256-bit single-use token from
+// the emailed link IS the proof of identity (see the file comment below);
+// there is no session on this path by design.
+
 export const dynamic = "force-dynamic";
 
 const DELETE_CONFIRM_MAX_ATTEMPTS = 10;

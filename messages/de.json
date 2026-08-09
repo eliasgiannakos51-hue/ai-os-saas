@@ -429,7 +429,9 @@
       "title": "KI-Nutzung",
       "creditsUsed": "Verwendete Credits",
       "totalEntries": "Einträge insgesamt",
-      "mostActiveModule": "Aktivstes Modul"
+      "mostActiveModule": "Aktivstes Modul",
+      "unlimited": "Unbegrenzt",
+      "wouldHaveCost": "Hätte {credits} Credits gekostet"
     },
     "theme": {
       "title": "Design",
@@ -541,7 +543,21 @@
       "colFeature": "Funktion",
       "colCalls": "Aktionen",
       "colMargin": "Ø Marge",
-      "colCost": "Reale Kosten"
+      "colCost": "Reale Kosten",
+      "hypotheticalNote": "* Enthält nicht belastete Konten (Admin, Beta). Dort ist die gezeigte Marge das, was die Aktion zum Tarif dieses Kontos eingebracht hätte.",
+      "colCharged": "Berechnet",
+      "colBypass": "Bypass",
+      "colMarginCharged": "Ø Marge (berechnet)",
+      "colMarginWouldBe": "Ø Marge (hypothetisch)",
+      "sumCost": "Echte Kosten (30 T.)",
+      "sumCredits": "Credits",
+      "sumCreditsHint": "{charged} berechnet · {wouldBe} hypothetisch",
+      "sumMargin": "Gesamtmarge",
+      "sumMarginHint": "Nach Kosten gewichtet",
+      "sumTop": "Teuerste Funktion",
+      "sumTopHint": "{percent}% der Gesamtausgaben",
+      "projectionOnly": "Noch keine berechneten Aktionen — jede Marge unten ist eine Hochrechnung aus Bypass-Einträgen, kein Umsatz.",
+      "belowTargetAlert": "{count} Funktion(en) unter dem Ziel von {target}x: {features}. Eine Warnung wurde per E-Mail versendet."
     },
     "pushNotifications": {
       "title": "Push-Benachrichtigungen",
@@ -1186,7 +1202,8 @@
       "rollback": "Zurücksetzen",
       "rollbackSuccess": "Auf Version {number} zurückgesetzt.",
       "rollbackError": "Zurücksetzen nicht möglich. Bitte erneut versuchen.",
-      "confirmRollback": "Version {number} wieder live schalten?"
+      "confirmRollback": "Version {number} wieder live schalten?",
+      "unpublishHint": "Nimmt die Seite vom Netz. Sie bleibt im Konto und kann erneut veröffentlicht werden."
     },
     "integrations": {
       "title": "Integrationen",

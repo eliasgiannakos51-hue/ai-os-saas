@@ -151,6 +151,32 @@ export default async function SettingsPage() {
     (sum, tx) => sum + Math.abs(tx.amount),
     0
   );
+
+  // "0 credits used" on an account that has spent real money.
+  //
+  // credit_transactions only has rows for credits actually CHARGED, and a
+  // bypass account (admin, beta tester) is charged nothing by design. So
+  // the tile read 0 while the margin report on the same page showed €2.90
+  // of real Anthropic spend — two numbers about the same activity that
+  // could not both be right, on the one screen where the owner looks to
+  // understand their own costs.
+  //
+  // settleReservation already records what the charge WOULD have been
+  // (metadata.wouldHaveChargedCredits, written precisely so a bypass row
+  // is not indistinguishable from broken billing). Nothing ever read it.
+  let wouldHaveUsedCredits: number | null = null;
+  if (isAdmin || isBeta) {
+    const { data: bypassRows } = await supabase
+      .from("ai_cost_log")
+      .select("metadata")
+      .eq("user_id", user.id)
+      .limit(5000);
+    wouldHaveUsedCredits = (bypassRows ?? []).reduce((sum, row) => {
+      const value = (row.metadata as { wouldHaveChargedCredits?: unknown } | null)
+        ?.wouldHaveChargedCredits;
+      return sum + (typeof value === "number" && Number.isFinite(value) ? value : 0);
+    }, 0);
+  }
   const totalEntries = moduleUsage.reduce((sum, m) => sum + m.count, 0);
   const mostActiveModule = moduleUsage.reduce<(typeof moduleUsage)[number] | null>(
     (max, m) => (m.count > (max?.count ?? -1) ? m : max),
@@ -254,6 +280,7 @@ export default async function SettingsPage() {
         <Reveal>
           <AiUsageSettings
             totalCreditsUsed={totalCreditsUsed}
+            wouldHaveUsedCredits={wouldHaveUsedCredits}
             totalEntries={totalEntries}
             mostActiveModuleTitle={
               mostActiveModule && mostActiveModule.count > 0 ? mostActiveModule.title : null

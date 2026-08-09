@@ -96,6 +96,9 @@ export function ResearchWorkspace({
   const [open, setOpen] = useState<ResearchReport | null>(null);
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Last observed "status:questionsDone" per report, so a stalled chunked
+  // run can be told from one that is simply between questions.
+  const lastProgressRef = useRef<Map<string, string>>(new Map());
 
   const refresh = useCallback(async (id: string) => {
     try {
@@ -140,6 +143,30 @@ export function ResearchWorkspace({
       for (const id of ids) {
         void refresh(id).then((report) => {
           if (!report) return;
+          // THE NUDGE. On a constrained platform a report runs in chunks
+          // that hand off to each other server-side (see
+          // lib/research/run-research.ts). That handoff can fail to land —
+          // no CRON_SECRET configured, a dropped outbound request, a cold
+          // start — and the report would then sit at a status that never
+          // advances even though nothing is wrong with it.
+          //
+          // So the poll doubles as a safety net: a running report whose
+          // progress has not moved since the previous tick gets a nudge.
+          // The endpoint claims the same lock the handoff does, so a nudge
+          // that races a live chunk is a no-op rather than a second run.
+          if (isRunning(report)) {
+            const previous = lastProgressRef.current.get(report.id);
+            const current = `${report.status}:${report.questions_done ?? 0}`;
+            if (previous === current) {
+              void fetch(`/api/research/${report.id}/continue`, {
+                method: "POST",
+                keepalive: true,
+              }).catch(() => undefined);
+            }
+            lastProgressRef.current.set(report.id, current);
+          } else {
+            lastProgressRef.current.delete(report.id);
+          }
           if (report.status === "ready" || report.status === "failed") {
             setRunning((current) => (current === id ? null : current));
             if (report.status === "ready") addToast(t("finished"));

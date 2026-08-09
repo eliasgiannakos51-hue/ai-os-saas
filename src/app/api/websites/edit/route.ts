@@ -48,7 +48,7 @@ export const dynamic = "force-dynamic";
 // full parity with generation's background-job architecture (which
 // allows up to 800s) would need the same fast-start-then-process split,
 // a larger change out of scope for this pass.
-export const maxDuration = 300;
+export const maxDuration = 300; // @function-limit 300
 
 const MAX_CHANGE_REQUEST_LENGTH = 20000;
 

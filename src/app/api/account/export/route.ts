@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 // website versions) can still take a while, and this must not be cut off
 // half-written — a truncated export that still says "your data" is worse
 // than a slow one.
-export const maxDuration = 120;
+export const maxDuration = 120; // @function-limit 120
 
 // Rows per table. A ceiling exists so one enormous table cannot blow the
 // function's memory and fail the whole export; when it bites, the export
@@ -103,9 +103,23 @@ export async function GET() {
     const filename = `ionexa_export_${new Date().toISOString().slice(0, 10)}.json`;
     return new NextResponse(JSON.stringify(payload, null, 2), {
       headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${filename}"`,
+        // octet-stream, not application/json.
+        //
+        // Content-Disposition: attachment is correct and was already here,
+        // but Safari has a long history of rendering application/json
+        // inline regardless — and this route is also reachable by direct
+        // navigation, where the header is the ONLY thing deciding. A type
+        // the browser has no viewer for removes the decision.
+        //
+        // filename* as well as filename: the RFC 5987 form is what
+        // survives a non-ASCII filename, and it costs nothing to send
+        // both.
+        "Content-Type": "application/octet-stream",
+        "Content-Disposition": `attachment; filename="${filename}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
         "Cache-Control": "no-store",
+        // Belt and braces against a browser that sniffs its way back to
+        // rendering the payload.
+        "X-Content-Type-Options": "nosniff",
       },
     });
   } catch (err) {

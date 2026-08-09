@@ -1,3 +1,5 @@
+import { functionBudgetMs, isChunkedRuntime } from "@/lib/function-limits";
+
 // Shared reliability constants for the Website Builder background job
 // (api/websites/generate/process/route.ts writes, api/websites/status/
 // route.ts reads) — one source of truth so the "how many attempts" and
@@ -55,6 +57,22 @@ export function isLargeGenerationRequest(descriptionLength: number, imageCount: 
 // unit-testable with fixed timestamps instead of needing to fake the
 // clock or wait for real time to pass. api/websites/status calls this
 // with real values; tests call it with constructed ones.
+/**
+ * The stale ceilings above assume a platform that grants ~800 seconds. On
+ * a 60-second one every one of them is minutes of spinner AFTER the
+ * function is already dead — the job cannot possibly still be running, and
+ * making the user wait 5 minutes to be told so is the failure this whole
+ * mechanism exists to avoid.
+ *
+ * So on a constrained runtime the timeout collapses to a small multiple of
+ * what one invocation can even do. Three budgets is generous: it covers a
+ * cold start plus a retry and still fails in well under a minute.
+ */
+function effectiveTimeoutMs(base: number): number {
+  if (!isChunkedRuntime()) return base;
+  return Math.min(base, Math.max(60_000, functionBudgetMs() * 3));
+}
+
 export function isGenerationJobStale(
   status: "pending" | "processing" | "completed" | "failed" | "flagged",
   createdAt: string,
@@ -64,10 +82,12 @@ export function isGenerationJobStale(
 ): boolean {
   if (status !== "pending" && status !== "processing") return false;
   const ageMs = now.getTime() - new Date(createdAt).getTime();
-  const timeoutMs = isLargeRequest
-    ? STALE_JOB_TIMEOUT_LARGE_REQUEST_MS
-    : hasReferenceImages
-      ? STALE_JOB_TIMEOUT_WITH_IMAGES_MS
-      : STALE_JOB_TIMEOUT_MS;
+  const timeoutMs = effectiveTimeoutMs(
+    isLargeRequest
+      ? STALE_JOB_TIMEOUT_LARGE_REQUEST_MS
+      : hasReferenceImages
+        ? STALE_JOB_TIMEOUT_WITH_IMAGES_MS
+        : STALE_JOB_TIMEOUT_MS
+  );
   return ageMs > timeoutMs;
 }

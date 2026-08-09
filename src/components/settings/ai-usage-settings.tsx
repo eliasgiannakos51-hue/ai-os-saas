@@ -19,10 +19,14 @@ function StatTile({
   icon: Icon,
   label,
   value,
+  detail,
 }: {
   icon: typeof Zap;
   label: string;
   value: string;
+  /** Optional second line — used to say what an uncharged account's
+   *  activity would have cost, so "Unlimited" is not the whole story. */
+  detail?: string;
 }) {
   return (
     <div className="rounded-xl border border-border bg-input p-3.5">
@@ -31,17 +35,23 @@ function StatTile({
       </span>
       <p className="mt-2 text-xl font-bold text-foreground">{value}</p>
       <p className="mt-0.5 text-[11px] uppercase tracking-wide text-muted">{label}</p>
+      {detail && <p className="mt-1 text-[11px] leading-snug text-muted/80">{detail}</p>}
     </div>
   );
 }
 
 export function AiUsageSettings({
   totalCreditsUsed,
+  wouldHaveUsedCredits = null,
   totalEntries,
   mostActiveModuleTitle,
   moduleUsage,
 }: {
   totalCreditsUsed: number;
+  /** For an account that is never charged (admin, beta): what the same
+   *  activity WOULD have cost. Null for a normal account, which is
+   *  charged for real and whose tile is already truthful. */
+  wouldHaveUsedCredits?: number | null;
   totalEntries: number;
   mostActiveModuleTitle: string | null;
   moduleUsage: ModuleUsage[];
@@ -64,7 +74,26 @@ export function AiUsageSettings({
       </h2>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        <StatTile icon={Zap} label={t("creditsUsed")} value={formatNumber(totalCreditsUsed, locale)} />
+        {/* "0 credits used" was true and useless: a bypass account is
+            charged nothing by design, so credit_transactions is empty
+            while the margin report on the same page shows real euros of
+            Anthropic spend. Two numbers about one activity that could not
+            both be right. settleReservation already stores what the charge
+            would have been — this is the first thing to read it. */}
+        <StatTile
+          icon={Zap}
+          label={t("creditsUsed")}
+          value={
+            wouldHaveUsedCredits !== null
+              ? t("unlimited")
+              : formatNumber(totalCreditsUsed, locale)
+          }
+          detail={
+            wouldHaveUsedCredits !== null
+              ? t("wouldHaveCost", { credits: formatNumber(wouldHaveUsedCredits, locale) })
+              : undefined
+          }
+        />
         <StatTile icon={Database} label={t("totalEntries")} value={formatNumber(totalEntries, locale)} />
         <StatTile
           icon={Layers}

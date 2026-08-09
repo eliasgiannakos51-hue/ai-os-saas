@@ -4,6 +4,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getClientIp } from "@/lib/get-client-ip";
 import { logApiError } from "@/lib/log-error";
 
+// @service-role-justified pre-auth — there is no session yet; the admin
+// client only INSERTS into rate_limit_log and reads nothing across accounts.
+
 export const dynamic = "force-dynamic";
 
 // Suspicious-activity detection: repeated FAILED login attempts from the

@@ -11,6 +11,10 @@ import { getClientIp } from "@/lib/get-client-ip";
 import { COUNTRIES } from "@/lib/countries";
 import { getBetaInviteCode, computeBetaExpiresAt } from "@/lib/beta";
 
+// @service-role-justified pre-auth — account creation happens before a
+// session can exist. admin.auth.admin.createUser only creates the caller's
+// own account.
+
 export const dynamic = "force-dynamic";
 
 const SIGNUP_MAX_ATTEMPTS = 10;

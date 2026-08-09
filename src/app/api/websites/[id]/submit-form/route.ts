@@ -7,6 +7,10 @@ import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { settleReservation } from "@/lib/billing/reservations";
 import { hasEnoughCredits, resolveEffectivePlan } from "@/lib/billing/credits";
 
+// @service-role-justified public — this is the contact form on a PUBLISHED
+// site, submitted by strangers who have no account. Scoped to the one
+// website in the URL and rate-limited per website; see the caps below.
+
 export const dynamic = "force-dynamic";
 
 const MAX_FIELDS = 20;

@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 // A run with web search plus a retry is the slowest thing this feature
 // does. 300s is Vercel's ceiling for the Pro plan's function timeout and
 // is what api/websites/generate/process already uses.
-export const maxDuration = 300;
+export const maxDuration = 300; // @function-limit 300
 
 // "Run now" — a real execution of a real agent, on demand.
 //

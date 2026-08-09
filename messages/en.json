@@ -429,7 +429,9 @@
       "title": "AI Usage",
       "creditsUsed": "Credits Used",
       "totalEntries": "Total Entries",
-      "mostActiveModule": "Most Active Module"
+      "mostActiveModule": "Most Active Module",
+      "unlimited": "Unlimited",
+      "wouldHaveCost": "Would have cost {credits} credits"
     },
     "theme": {
       "title": "Theme",
@@ -541,7 +543,21 @@
       "colFeature": "Feature",
       "colCalls": "Actions",
       "colMargin": "Avg margin",
-      "colCost": "Real cost"
+      "colCost": "Real cost",
+      "hypotheticalNote": "* Includes uncharged accounts (admin, beta). For those, the margin shown is what the action would have earned at that account’s plan rate.",
+      "colCharged": "Charged",
+      "colBypass": "Bypass",
+      "colMarginCharged": "Avg margin (charged)",
+      "colMarginWouldBe": "Avg margin (would-be)",
+      "sumCost": "Real cost (30d)",
+      "sumCredits": "Credits",
+      "sumCreditsHint": "{charged} charged · {wouldBe} would-be",
+      "sumMargin": "Overall margin",
+      "sumMarginHint": "Weighted by cost",
+      "sumTop": "Costliest feature",
+      "sumTopHint": "{percent}% of all spend",
+      "projectionOnly": "No charged actions yet — every margin below is a projection from bypass records, not revenue.",
+      "belowTargetAlert": "{count} feature(s) below the {target}x target: {features}. An alert has been emailed."
     },
     "pushNotifications": {
       "title": "Push notifications",
@@ -1186,7 +1202,8 @@
       "rollback": "Roll back",
       "rollbackSuccess": "Rolled back to version {number}.",
       "rollbackError": "Could not roll that back. Please try again.",
-      "confirmRollback": "Put version {number} back on the live site?"
+      "confirmRollback": "Put version {number} back on the live site?",
+      "unpublishHint": "Take the site off the web. It stays in your account and can be republished."
     },
     "integrations": {
       "title": "Integrations",

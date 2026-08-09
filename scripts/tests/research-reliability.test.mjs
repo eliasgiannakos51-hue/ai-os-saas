@@ -42,43 +42,71 @@ const { loadTs } = await import("./load-ts.mjs");
 const limits = await loadTs("src/lib/research/research-limits.ts");
 
 const runSrc = readFileSync("src/app/api/research/[id]/run/route.ts", "utf8");
+// The WORK moved out of the route into a chunked worker when the app had
+// to survive a 60-second function ceiling. These assertions follow it —
+// the guarantees are identical, the file they live in is not.
+const workerSrc = readFileSync("src/lib/research/run-research.ts", "utf8");
+const continueSrc = readFileSync("src/app/api/research/[id]/continue/route.ts", "utf8");
+const fl = await loadTs("src/lib/function-limits.ts");
 const getSrc = readFileSync("src/app/api/research/[id]/route.ts", "utf8");
 const uiSrc = readFileSync("src/components/research/research-workspace.tsx", "utf8");
 const researchSrc = readFileSync("src/lib/research/research.ts", "utf8");
 const migration = readFileSync("supabase/migrations/20260809_research_progress.sql", "utf8");
 
 // ---------------------------------------------------------------------
-console.log("== 1. the budget can actually hold the work it schedules ==");
-const maxDuration = Number(runSrc.match(/export const maxDuration = (\d+)/)?.[1]);
-check(`maxDuration is no longer 300 (${maxDuration})`, maxDuration > 300);
-// Six questions at a realistic 90s each is 540s before synthesis. A budget
-// that cannot hold its own worst case is the bug, not a tuning choice.
-const worstCaseResearchMs = limits.RESEARCH_MAX_QUESTIONS * 90_000;
+console.log("== 1. the work fits ANY budget, instead of needing a big one ==");
+// The original assertion here was "maxDuration is big enough to hold six
+// 90-second questions". That was the right demand of a design that ran the
+// whole report in one invocation — and it is unsatisfiable on a platform
+// whose ceiling is 60 seconds, which is the situation this now has to
+// survive. The guarantee is therefore stronger, not weaker: the work is
+// split so that it completes at ANY ceiling.
+check("the route no longer declares a bare number", !/export const maxDuration = \d+;/.test(runSrc));
+check("it declares through routeMaxDuration", /export const maxDuration = routeMaxDuration\(/.test(runSrc));
+check("so a 60s platform declares 60", fl.routeMaxDuration(800) <= fl.MAX_FUNCTION_DURATION_SECONDS);
+
+// The real question: at the SMALLEST supported ceiling, does a full report
+// still complete? Computed, not asserted by hand.
+const HOBBY_BUDGET_MS = 60 * 1000 - Math.max(8000, 60 * 1000 * 0.2);
+const questionsPerChunk = Math.max(1, Math.floor(HOBBY_BUDGET_MS / limits.RESEARCH_QUESTION_BUDGET_MS));
+const chunksNeeded = Math.ceil(limits.RESEARCH_MAX_QUESTIONS / questionsPerChunk) + 1; // +1 for synthesis
 check(
-  `the budget covers ${limits.RESEARCH_MAX_QUESTIONS} questions at 90s plus synthesis`,
-  maxDuration * 1000 >= worstCaseResearchMs + limits.RESEARCH_SYNTHESIS_RESERVE_MS,
-  `budget ${maxDuration * 1000}ms vs needed ${worstCaseResearchMs + limits.RESEARCH_SYNTHESIS_RESERVE_MS}ms`
+  `a ${limits.RESEARCH_MAX_QUESTIONS}-question report needs ${chunksNeeded} chunks at 60s, within the ceiling of ${limits.MAX_RESEARCH_CHUNKS}`,
+  chunksNeeded <= limits.MAX_RESEARCH_CHUNKS
 );
+check("at least one question fits in a 60s chunk", questionsPerChunk >= 1);
 check(
-  "the route's own deadline fires before the platform's",
-  limits.RESEARCH_DEADLINE_MS < maxDuration * 1000
-);
-check(
-  "and leaves room to synthesise after it fires",
-  limits.RESEARCH_DEADLINE_MS + limits.RESEARCH_SYNTHESIS_RESERVE_MS <= maxDuration * 1000
+  "and on a generous plan it is still one invocation",
+  Math.floor(Math.min(limits.RESEARCH_DEADLINE_MS, 640_000) / limits.RESEARCH_QUESTION_BUDGET_MS) >=
+    limits.RESEARCH_MAX_QUESTIONS
 );
 
 console.log("\n== 2. it stops itself instead of being killed mid-report ==");
-check("the loop checks the wall clock before each question", /RESEARCH_DEADLINE_MS - RESEARCH_SYNTHESIS_RESERVE_MS/.test(runSrc));
+check("the worker checks the budget before each question", /if \(!questionFits\(Date\.now\(\) - startedAt, budgetMs\)\)/.test(workerSrc));
+check("the budget is the SMALLER of the two ceilings", /Math\.min\(functionBudgetMs\(\), RESEARCH_DEADLINE_MS\)/.test(workerSrc));
+check("synthesis is only started if it fits", /hasBudgetFor\(Date\.now\(\) - startedAt, RESEARCH_SYNTHESIS_RESERVE_MS, budgetMs\)/.test(workerSrc));
 check(
-  "unanswered questions are still carried into the synthesis",
-  /for \(const remaining of questions\.slice\(index\)\)/.test(runSrc)
+  "unanswered questions are still carried into the synthesis at the ceiling",
+  /for \(const remaining of questions\.slice\(answered\)\)/.test(workerSrc)
 );
 check(
   "so they are reported rather than silently dropped",
   /could not be established/.test(researchSrc)
 );
-check("stopping early is recorded on the cost-log row", /stoppedEarly/.test(runSrc));
+check("hitting the ceiling is recorded on the cost-log row", /hitChunkCeiling/.test(workerSrc));
+check("as is how many chunks it took", /chunks: chunkNumber/.test(workerSrc));
+
+console.log("\n== 2b. the chunk loop is BOUNDED ==");
+// A chunk that hands off to a chunk that hands off is a loop that spends
+// money each pass. Without a ceiling, a handoff that keeps failing would
+// leave the user with nothing after paying for the questions that ran.
+check("there is a maximum number of chunks", typeof limits.MAX_RESEARCH_CHUNKS === "number");
+check("it is above what a real Hobby run needs", limits.MAX_RESEARCH_CHUNKS > limits.RESEARCH_MAX_QUESTIONS);
+check("the worker enforces it", /atChunkCeiling/.test(workerSrc));
+check(
+  "and degrades to a partial report rather than to nothing",
+  /chunk ceiling reached, synthesising what exists/.test(workerSrc)
+);
 
 console.log("\n== 3. one hung call cannot eat the whole run ==");
 check("questions carry a request timeout", /RESEARCH_QUESTION_TIMEOUT_MS/.test(researchSrc));
@@ -128,7 +156,10 @@ check(
   "an unparseable timestamp is not treated as stale",
   !limits.isResearchJobStale("researching", "not-a-date", "not-a-date", now)
 );
-check("the staleness ceiling is above maxDuration", limits.RESEARCH_STALE_MS > maxDuration * 1000);
+check(
+  "the staleness ceiling is above one chunk's whole budget",
+  limits.RESEARCH_STALE_MS > fl.MAX_FUNCTION_DURATION_SECONDS * 1000
+);
 check("the poll endpoint actually applies it", /isResearchJobStale/.test(getSrc));
 check(
   "and the force-fail is conditioned on the status it read",
@@ -152,8 +183,8 @@ check(
 );
 
 console.log("\n== 6. progress is real, not a spinner ==");
-check("the worker writes progress after each question", /await writeProgress\(index \+ 1/.test(runSrc));
-check("and before the first one", /await writeProgress\(0,/.test(runSrc));
+check("the worker persists progress after each question", /findings\.push\(result\.finding\);[\s\S]{0,400}await persist\(\);/.test(workerSrc));
+check("progress carries the current question", /current_question: questions\[answered\]\?\.question/.test(workerSrc));
 check("the UI renders which question it is on", /progressStep/.test(uiSrc));
 check("and the question text", /report\.current_question/.test(uiSrc));
 check("with an accessible progress bar", /role="progressbar"/.test(uiSrc));

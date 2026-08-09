@@ -84,7 +84,8 @@
       "published": "Sitios publicados",
       "integrations": "Integraciones",
       "files": "Archivos",
-      "deepResearch": "Investigación profunda"
+      "deepResearch": "Investigación profunda",
+      "help": "Centro de ayuda"
     },
     "groupHints": {
       "create": "Genera un sitio, planifica un objetivo, escribe un documento.",
@@ -135,7 +136,8 @@
       "published": "Todos tus sitios en vivo, con su tráfico y su historial de versiones",
       "integrations": "Conecta Gmail, Drive y Slack para que la IA trabaje con tus datos reales",
       "files": "Sube PDF, Word y Excel y hazle preguntas a la IA sobre ellos",
-      "deepResearch": "Dale un tema: busca, contrasta y escribe un informe con fuentes"
+      "deepResearch": "Dale un tema: busca, contrasta y escribe un informe con fuentes",
+      "help": "Respuestas a las preguntas más frecuentes, sin gastar créditos."
     },
     "comingSoon": "Próximamente",
     "comingSoonToast": "{name} aún no está disponible: está en la hoja de ruta.",

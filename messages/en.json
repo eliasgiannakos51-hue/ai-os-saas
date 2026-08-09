@@ -84,7 +84,8 @@
       "published": "Published Sites",
       "integrations": "Integrations",
       "files": "Files",
-      "deepResearch": "Deep Research"
+      "deepResearch": "Deep Research",
+      "help": "Help Centre"
     },
     "groupHints": {
       "create": "Generate a site, plan a goal, write a document.",
@@ -135,7 +136,8 @@
       "published": "Every site you have live on the web, with its traffic and version history",
       "integrations": "Connect Gmail, Drive and Slack so the AI can work with your real data",
       "files": "Upload PDFs, Word and Excel files and ask the AI questions about them",
-      "deepResearch": "Give it a topic and it searches, cross-checks and writes a sourced report"
+      "deepResearch": "Give it a topic and it searches, cross-checks and writes a sourced report",
+      "help": "Answers to the questions people ask most — no credits used."
     },
     "comingSoon": "Coming soon",
     "comingSoonToast": "{name} isn't available yet — it's on the roadmap.",

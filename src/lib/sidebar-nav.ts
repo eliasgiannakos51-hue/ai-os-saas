@@ -28,6 +28,7 @@ import {
   INTEGRATIONS_ICON,
   FILES_ICON,
   DEEP_RESEARCH_ICON,
+  HELP_ICON,
 } from "@/lib/module-icons";
 
 // Single source of truth for every sidebar link — shared by the Sidebar
@@ -162,6 +163,10 @@ export const SETTINGS_GROUP: SidebarGroupConfig = {
   items: [
     { href: SETTINGS_NAV_ITEM.href, label: "Settings", icon: SETTINGS_ICON, hintKey: "settings" },
     { href: "/dashboard/team", label: "Team", icon: TEAM_ICON , hintKey: "team" },
+    // The Help Centre (app/help/page.tsx) — the same 27 answers the chat
+    // replies with, as a page. Listed here so it is also reachable from
+    // the command palette, which is built from these same groups.
+    { href: "/help", label: "Help Centre", icon: HELP_ICON, hintKey: "help" },
   ],
 };
 

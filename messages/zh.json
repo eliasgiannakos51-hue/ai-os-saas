@@ -84,7 +84,8 @@
       "published": "已发布网站",
       "integrations": "集成",
       "files": "文件",
-      "deepResearch": "深度研究"
+      "deepResearch": "深度研究",
+      "help": "帮助中心"
     },
     "groupHints": {
       "create": "生成网站、规划目标、撰写文档。",
@@ -135,7 +136,8 @@
       "published": "你所有已上线的网站，含访问量与版本历史",
       "integrations": "连接 Gmail、Drive 与 Slack，让 AI 处理你真实的数据",
       "files": "上传 PDF、Word 和 Excel 文件，然后向 AI 提问",
-      "deepResearch": "给一个主题，它会搜索、交叉核对并写出带来源的报告"
+      "deepResearch": "给一个主题，它会搜索、交叉核对并写出带来源的报告",
+      "help": "最常见问题的答案，不消耗额度。"
     },
     "comingSoon": "即将推出",
     "comingSoonToast": "{name} 尚未推出——已列入路线图。",

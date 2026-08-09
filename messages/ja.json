@@ -84,7 +84,8 @@
       "published": "公開中のサイト",
       "integrations": "連携",
       "files": "ファイル",
-      "deepResearch": "ディープリサーチ"
+      "deepResearch": "ディープリサーチ",
+      "help": "ヘルプセンター"
     },
     "groupHints": {
       "create": "サイトを生成し、目標を計画し、文書を書く。",
@@ -135,7 +136,8 @@
       "published": "公開中のすべてのサイトと、その閲覧数・バージョン履歴",
       "integrations": "Gmail・Drive・Slack を接続して、AI が実際のデータを扱えるようにします",
       "files": "PDF・Word・Excel をアップロードして、AI に内容を質問できます",
-      "deepResearch": "トピックを渡すと検索・照合して出典付きのレポートを書きます"
+      "deepResearch": "トピックを渡すと検索・照合して出典付きのレポートを書きます",
+      "help": "よくある質問への回答です。クレジットは消費しません。"
     },
     "comingSoon": "近日公開",
     "comingSoonToast": "{name} はまだ利用できません。ロードマップに入っています。",

@@ -84,7 +84,8 @@
       "published": "Veröffentlichte Seiten",
       "integrations": "Integrationen",
       "files": "Dateien",
-      "deepResearch": "Tiefenrecherche"
+      "deepResearch": "Tiefenrecherche",
+      "help": "Hilfe-Center"
     },
     "groupHints": {
       "create": "Eine Website erzeugen, ein Ziel planen, ein Dokument schreiben.",
@@ -135,7 +136,8 @@
       "published": "Alle Ihre Live-Seiten, mit Zugriffen und Versionsverlauf",
       "integrations": "Gmail, Drive und Slack verbinden, damit die KI mit Ihren echten Daten arbeitet",
       "files": "PDFs, Word- und Excel-Dateien hochladen und das KI dazu befragen",
-      "deepResearch": "Thema angeben — es recherchiert, gleicht ab und schreibt einen belegten Bericht"
+      "deepResearch": "Thema angeben — es recherchiert, gleicht ab und schreibt einen belegten Bericht",
+      "help": "Antworten auf die häufigsten Fragen — ohne Credits zu verbrauchen."
     },
     "comingSoon": "Demnächst",
     "comingSoonToast": "{name} ist noch nicht verfügbar — steht auf der Roadmap.",

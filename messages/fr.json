@@ -544,8 +544,20 @@
       "colCalls": "Actions",
       "colMargin": "Marge moy.",
       "colCost": "Coût réel",
-      "hypotheticalHint": "Inclut des actions sur des comptes jamais facturés — voici ce qu’elles auraient coûté.",
-      "hypotheticalNote": "* Inclut les comptes non facturés (admin, bêta). Pour eux, la marge affichée est celle qu’aurait rapportée l’action au tarif de leur formule."
+      "hypotheticalNote": "* Inclut les comptes non facturés (admin, bêta). Pour eux, la marge affichée est celle qu’aurait rapportée l’action au tarif de leur formule.",
+      "colCharged": "Facturées",
+      "colBypass": "Bypass",
+      "colMarginCharged": "Marge moy. (facturée)",
+      "colMarginWouldBe": "Marge moy. (estimée)",
+      "sumCost": "Coût réel (30 j)",
+      "sumCredits": "Crédits",
+      "sumCreditsHint": "{charged} facturés · {wouldBe} estimés",
+      "sumMargin": "Marge globale",
+      "sumMarginHint": "Pondérée par le coût",
+      "sumTop": "Fonction la plus coûteuse",
+      "sumTopHint": "{percent}% des dépenses",
+      "projectionOnly": "Aucune action facturée pour l’instant — toutes les marges ci-dessous sont des projections issues d’enregistrements bypass, pas des revenus.",
+      "belowTargetAlert": "{count} fonction(s) sous l’objectif de {target}x : {features}. Une alerte a été envoyée par e-mail."
     },
     "pushNotifications": {
       "title": "Notifications push",

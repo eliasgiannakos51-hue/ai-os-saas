@@ -544,8 +544,20 @@
       "colCalls": "Acciones",
       "colMargin": "Margen medio",
       "colCost": "Coste real",
-      "hypotheticalHint": "Incluye acciones de cuentas que nunca se cobran: esto es lo que habrían costado.",
-      "hypotheticalNote": "* Incluye cuentas sin cargo (admin, beta). Para ellas, el margen mostrado es el que habría generado la acción a la tarifa de su plan."
+      "hypotheticalNote": "* Incluye cuentas sin cargo (admin, beta). Para ellas, el margen mostrado es el que habría generado la acción a la tarifa de su plan.",
+      "colCharged": "Cobradas",
+      "colBypass": "Bypass",
+      "colMarginCharged": "Margen medio (cobrado)",
+      "colMarginWouldBe": "Margen medio (estimado)",
+      "sumCost": "Coste real (30 d)",
+      "sumCredits": "Créditos",
+      "sumCreditsHint": "{charged} cobrados · {wouldBe} estimados",
+      "sumMargin": "Margen global",
+      "sumMarginHint": "Ponderado por coste",
+      "sumTop": "Función más cara",
+      "sumTopHint": "{percent}% del gasto total",
+      "projectionOnly": "Aún no hay acciones cobradas: todos los márgenes siguientes son proyecciones de registros bypass, no ingresos.",
+      "belowTargetAlert": "{count} función(es) por debajo del objetivo {target}x: {features}. Se ha enviado una alerta por correo."
     },
     "pushNotifications": {
       "title": "Notificaciones push",

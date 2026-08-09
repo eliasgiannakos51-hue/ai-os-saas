@@ -544,8 +544,20 @@
       "colCalls": "操作次数",
       "colMargin": "平均利润率",
       "colCost": "真实成本",
-      "hypotheticalHint": "包含从不计费账户的操作——这是它们本应产生的成本。",
-      "hypotheticalNote": "* 包含免计费账户（管理员、Beta）。对这些账户，所示利润率是按其套餐费率本应获得的数值。"
+      "hypotheticalNote": "* 包含免计费账户（管理员、Beta）。对这些账户，所示利润率是按其套餐费率本应获得的数值。",
+      "colCharged": "已计费",
+      "colBypass": "免计费",
+      "colMarginCharged": "平均利润率（已计费）",
+      "colMarginWouldBe": "平均利润率（假设）",
+      "sumCost": "实际成本（30 天）",
+      "sumCredits": "额度",
+      "sumCreditsHint": "已计费 {charged} · 假设 {wouldBe}",
+      "sumMargin": "整体利润率",
+      "sumMarginHint": "按成本加权",
+      "sumTop": "最贵的功能",
+      "sumTopHint": "占总支出 {percent}%",
+      "projectionOnly": "尚无计费操作——下方所有利润率均为免计费记录的推算值，并非实际收入。",
+      "belowTargetAlert": "{count} 个功能低于 {target}x 目标：{features}。已发送邮件告警。"
     },
     "pushNotifications": {
       "title": "推送通知",

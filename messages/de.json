@@ -544,8 +544,20 @@
       "colCalls": "Aktionen",
       "colMargin": "Ø Marge",
       "colCost": "Reale Kosten",
-      "hypotheticalHint": "Enthält Aktionen von Konten, die nie belastet werden — so viel hätten sie gekostet.",
-      "hypotheticalNote": "* Enthält nicht belastete Konten (Admin, Beta). Dort ist die gezeigte Marge das, was die Aktion zum Tarif dieses Kontos eingebracht hätte."
+      "hypotheticalNote": "* Enthält nicht belastete Konten (Admin, Beta). Dort ist die gezeigte Marge das, was die Aktion zum Tarif dieses Kontos eingebracht hätte.",
+      "colCharged": "Berechnet",
+      "colBypass": "Bypass",
+      "colMarginCharged": "Ø Marge (berechnet)",
+      "colMarginWouldBe": "Ø Marge (hypothetisch)",
+      "sumCost": "Echte Kosten (30 T.)",
+      "sumCredits": "Credits",
+      "sumCreditsHint": "{charged} berechnet · {wouldBe} hypothetisch",
+      "sumMargin": "Gesamtmarge",
+      "sumMarginHint": "Nach Kosten gewichtet",
+      "sumTop": "Teuerste Funktion",
+      "sumTopHint": "{percent}% der Gesamtausgaben",
+      "projectionOnly": "Noch keine berechneten Aktionen — jede Marge unten ist eine Hochrechnung aus Bypass-Einträgen, kein Umsatz.",
+      "belowTargetAlert": "{count} Funktion(en) unter dem Ziel von {target}x: {features}. Eine Warnung wurde per E-Mail versendet."
     },
     "pushNotifications": {
       "title": "Push-Benachrichtigungen",

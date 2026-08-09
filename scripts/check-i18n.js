@@ -46,6 +46,22 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // Margin report, owner-only. "Bypass" is the loanword these languages
+  // actually use for this concept — and it is also the literal value
+  // stored in ai_cost_log's metadata (bypassCharge), so translating the
+  // column heading away from the field name it reports would make the
+  // table harder to reconcile with the data, not easier.
+  "el:settings.marginReport.colBypass",
+  "es:settings.marginReport.colBypass",
+  "fr:settings.marginReport.colBypass",
+  "de:settings.marginReport.colBypass",
+  "it:settings.marginReport.colBypass",
+  "pt:settings.marginReport.colBypass",
+  // "Credits" is the loanword the Greek and German UI already uses
+  // verbatim everywhere else — see the existing entries below for
+  // dashboard.files.creditsCharged.
+  "el:settings.marginReport.sumCredits",
+  "de:settings.marginReport.sumCredits",
   // Website Builder design controls. Each checked by hand: "Design" is
   // the ordinary word in French, German, Italian and Portuguese;
   // "optional" is genuine German; "Photo" is French. Substituting a

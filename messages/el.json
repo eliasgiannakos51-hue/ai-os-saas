@@ -544,8 +544,20 @@
       "colCalls": "Ενέργειες",
       "colMargin": "Μέσο περιθώριο",
       "colCost": "Πραγματικό κόστος",
-      "hypotheticalHint": "Περιλαμβάνει ενέργειες από λογαριασμούς που δεν χρεώνονται — αυτό θα κόστιζαν.",
-      "hypotheticalNote": "* Περιλαμβάνει λογαριασμούς χωρίς χρέωση (admin, beta). Για αυτούς, το margin είναι αυτό που θα απέδιδε η ενέργεια με το rate του πλάνου τους."
+      "hypotheticalNote": "* Περιλαμβάνει λογαριασμούς χωρίς χρέωση (admin, beta). Για αυτούς, το margin είναι αυτό που θα απέδιδε η ενέργεια με το rate του πλάνου τους.",
+      "colCharged": "Χρεωμένα",
+      "colBypass": "Bypass",
+      "colMarginCharged": "Μέσο margin (χρεωμένα)",
+      "colMarginWouldBe": "Μέσο margin (υποθετικό)",
+      "sumCost": "Πραγματικό κόστος (30 ημ.)",
+      "sumCredits": "Credits",
+      "sumCreditsHint": "{charged} χρεωμένα · {wouldBe} υποθετικά",
+      "sumMargin": "Συνολικό margin",
+      "sumMarginHint": "Σταθμισμένο με το κόστος",
+      "sumTop": "Ακριβότερο feature",
+      "sumTopHint": "{percent}% της συνολικής δαπάνης",
+      "projectionOnly": "Δεν υπάρχουν χρεωμένες ενέργειες — κάθε margin παρακάτω είναι πρόβλεψη από bypass εγγραφές, όχι έσοδα.",
+      "belowTargetAlert": "{count} feature κάτω από τον στόχο {target}x: {features}. Στάλθηκε ειδοποίηση με email."
     },
     "pushNotifications": {
       "title": "Ειδοποιήσεις push",

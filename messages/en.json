@@ -544,8 +544,20 @@
       "colCalls": "Actions",
       "colMargin": "Avg margin",
       "colCost": "Real cost",
-      "hypotheticalHint": "Includes actions on accounts that are never charged — this is what they would have cost.",
-      "hypotheticalNote": "* Includes uncharged accounts (admin, beta). For those, the margin shown is what the action would have earned at that account’s plan rate."
+      "hypotheticalNote": "* Includes uncharged accounts (admin, beta). For those, the margin shown is what the action would have earned at that account’s plan rate.",
+      "colCharged": "Charged",
+      "colBypass": "Bypass",
+      "colMarginCharged": "Avg margin (charged)",
+      "colMarginWouldBe": "Avg margin (would-be)",
+      "sumCost": "Real cost (30d)",
+      "sumCredits": "Credits",
+      "sumCreditsHint": "{charged} charged · {wouldBe} would-be",
+      "sumMargin": "Overall margin",
+      "sumMarginHint": "Weighted by cost",
+      "sumTop": "Costliest feature",
+      "sumTopHint": "{percent}% of all spend",
+      "projectionOnly": "No charged actions yet — every margin below is a projection from bypass records, not revenue.",
+      "belowTargetAlert": "{count} feature(s) below the {target}x target: {features}. An alert has been emailed."
     },
     "pushNotifications": {
       "title": "Push notifications",

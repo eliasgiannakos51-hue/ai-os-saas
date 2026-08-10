@@ -48,6 +48,68 @@ export function genericShapeSignals(html) {
   };
 }
 
+/**
+ * The design decisions the page committed to, read back off the page.
+ *
+ * The prompt requires a DESIGN DECISIONS comment as the first thing in the
+ * document — archetype, hero, section order, palette, type, density —
+ * decided from the subject and written BEFORE the markup.
+ *
+ * Two things come from that, and the second is why it is worth the tokens.
+ * Committing in writing before building is what stops a model drifting
+ * back to the shape it knows best. And it turns "the sites still look the
+ * same" from an argument into a measurement: if two briefs as different as
+ * a taverna and a tax accountant declare the same archetype and the same
+ * hero, that is a fact about the output, not an impression of it.
+ *
+ * Returns null when the block is absent, which is itself the finding —
+ * never a made-up default that would score as compliance.
+ */
+export function designDecisions(html) {
+  const block = html.match(/<!--\s*DESIGN DECISIONS\s*([\s\S]*?)-->/i);
+  if (!block) return null;
+  const out = {};
+  for (const line of block[1].split("\n")) {
+    const m = line.match(/^\s*([a-z]+)\s*:\s*(.+?)\s*$/i);
+    if (!m) continue;
+    const key = m[1].toLowerCase();
+    out[key] = key === "sections" ? m[2].split(",").map((s) => s.trim().toLowerCase()).filter(Boolean) : m[2];
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+/**
+ * Does the page do what its own comment said it would?
+ *
+ * A declaration nobody checks is a declaration a model can write and then
+ * ignore, which would make the whole mechanism worse than nothing — it
+ * would look like evidence. So the declared section count is compared with
+ * the landmarks actually built, and the declared fonts with the fonts
+ * actually loaded.
+ */
+export function decisionsHonoured(html) {
+  const declared = designDecisions(html);
+  if (!declared) return { declared: false };
+  const built = structureFingerprint(html).filter((t) => t === "section" || t === "article");
+  const fonts = fontsUsed(html).map((f) => f.toLowerCase());
+  const declaredFonts = (declared.type ?? "")
+    .split("/")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+  return {
+    declared: true,
+    declaredSections: declared.sections?.length ?? 0,
+    builtSections: built.length,
+    // Exact equality would fail on a perfectly good page that wrapped two
+    // declared sections in one <section>; the check is that the commitment
+    // is roughly kept, not that it is transcribed.
+    sectionCountPlausible:
+      (declared.sections?.length ?? 0) > 0 && Math.abs((declared.sections?.length ?? 0) - built.length) <= 2,
+    fontsMatch:
+      declaredFonts.length > 0 && declaredFonts.every((d) => fonts.some((f) => f.includes(d) || d.includes(f))),
+  };
+}
+
 export function jaccard(a, b) {
   const sa = new Set(a);
   const sb = new Set(b);

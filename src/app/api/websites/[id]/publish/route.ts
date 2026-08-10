@@ -11,6 +11,7 @@ import {
   describeSecurityScanIssue,
 } from "@/lib/website-html-security-scan";
 import { validateSubdomain, publishedSiteUrl } from "@/lib/publishing/subdomain";
+import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
 import {
   maxPublishedSitesForPlan,
   MAX_SITE_VERSIONS,
@@ -216,7 +217,17 @@ export async function POST(request: Request, { params }: { params: { id: string 
     // left, and REFUSE if anything remains. At generation time a flagged
     // site becomes a draft the user can regenerate; here it would become a
     // live page on our origin, so there is no "flag and continue" path.
-    const html = stripDisallowedExternalScripts(website.html_content);
+    // makeGeneratedLinksSafe here as well as at generation time, and the
+    // repetition is the point: this is the boundary where HTML becomes a
+    // public page, and it is the only one that can help a site generated
+    // BEFORE the link fix existed. Those documents are already stored with
+    // <a href="/about"> in them; one press of Publish now repairs them.
+    //
+    // Done here rather than in /s/[subdomain] on purpose. Measured at
+    // 3.28ms on a 135KB document — negligible once, wasteful on every
+    // uncached page view of a popular site. It is idempotent, so paying it
+    // again on republish costs nothing.
+    const html = makeGeneratedLinksSafe(stripDisallowedExternalScripts(website.html_content)).html;
     const issues = scanWebsiteHtmlForSecurityIssues(html);
     if (issues.length > 0) {
       const described = issues.map(describeSecurityScanIssue);

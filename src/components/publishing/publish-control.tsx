@@ -146,79 +146,93 @@ export function PublishControl({
 
   return (
     <div className="relative">
-      {isLive ? (
-        <div className="flex flex-wrap items-center gap-1.5">
-          <a
-            href={site.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-300 transition-colors duration-150 hover:bg-emerald-500/20 sm:min-h-0"
-          >
-            <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
-            {t("viewLive")}
-          </a>
-          <button
-            type="button"
-            onClick={copyLink}
-            className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
-          >
-            {copied ? (
-              <Check className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
-            ) : (
-              <Copy className="h-3.5 w-3.5" aria-hidden="true" />
-            )}
-            {copied ? t("copied") : t("copyLink")}
-          </button>
-          <button
-            type="button"
-            onClick={() => void publish()}
-            disabled={busy || disabled}
-            className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:opacity-40 sm:min-h-0"
-          >
-            {busy ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-            ) : (
-              <Globe className="h-3.5 w-3.5" aria-hidden="true" />
-            )}
-            {t("publishChanges")}
-          </button>
-          {/* "There is a Publish button but I cannot find Unpublish."
-              It was here the whole time — as the ONLY item in a row of
-              four with no icon, in text-muted (the lowest-contrast token
-              on the row), last in the wrap order. Rendered, and not
-              findable, which are different things.
+      <div className="flex flex-wrap items-center gap-1.5">
+        {/* ONE BUTTON, TWO STATES.
 
-              Same place, because taking a site down belongs next to
-              putting it up. Now with an icon like its neighbours, real
-              foreground text, and an amber destructive tone on hover so
-              it reads as the action that changes something rather than as
-              disabled chrome. */}
-          <button
-            type="button"
-            onClick={() => void unpublish()}
-            disabled={busy}
-            title={t("unpublishHint")}
-            className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-amber-500/40 px-3 py-2 text-xs font-medium text-amber-300 transition-colors duration-150 hover:border-amber-500 hover:bg-amber-500/10 disabled:opacity-40 sm:min-h-0"
-          >
-            {busy ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-            ) : (
-              <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />
-            )}
-            {t("unpublish")}
-          </button>
-        </div>
-      ) : (
+            Previously: "Publish" alone when offline, and when live a row
+            of four — View live, Copy link, Publish changes, Unpublish —
+            in which Unpublish was last in the wrap order and read as
+            chrome. The report was "I only see Publish", and moving
+            Unpublish around inside that row had already failed once,
+            because the problem was never where it sat. It was that
+            putting a site online and taking it offline are one decision
+            and were being shown as two unrelated controls.
+
+            So this is a real toggle: the same element, in the same first
+            position, whose label and action flip with the site's state.
+            aria-pressed says so to a screen reader too, which is what
+            makes it a toggle rather than two buttons that happen to
+            share a slot.
+
+            The other three controls only exist when there is a live site
+            to view, copy or update — they are consequences of the state,
+            not alternatives to the toggle. */}
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
-          disabled={disabled}
-          className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0"
+          aria-pressed={isLive}
+          onClick={isLive ? () => void unpublish() : () => setOpen((v) => !v)}
+          disabled={busy || disabled}
+          title={isLive ? t("unpublishHint") : undefined}
+          className={
+            "inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 " +
+            (isLive
+              ? "border-amber-500/40 text-amber-300 hover:border-amber-500 hover:bg-amber-500/10"
+              : "border-border text-foreground hover:border-orange-500 hover:text-orange-400")
+          }
         >
-          <Globe className="h-3.5 w-3.5" aria-hidden="true" />
-          {site ? t("republish") : t("publish")}
+          {busy ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+          ) : isLive ? (
+            <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />
+          ) : (
+            <Globe className="h-3.5 w-3.5" aria-hidden="true" />
+          )}
+          {isLive ? t("unpublish") : site ? t("republish") : t("publish")}
         </button>
-      )}
+
+        {isLive && (
+          <>
+            <a
+              href={site.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-300 transition-colors duration-150 hover:bg-emerald-500/20 sm:min-h-0"
+            >
+              <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+              {t("viewLive")}
+            </a>
+            <button
+              type="button"
+              onClick={copyLink}
+              className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
+            >
+              {copied ? (
+                <Check className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+              {copied ? t("copied") : t("copyLink")}
+            </button>
+            {/* Publishing an EDIT is a different action from publishing or
+                unpublishing the site, so it is not folded into the toggle
+                — it pushes the current draft onto an address that already
+                exists. */}
+            <button
+              type="button"
+              onClick={() => void publish()}
+              disabled={busy || disabled}
+              className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:opacity-40 sm:min-h-0"
+            >
+              {busy ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+              ) : (
+                <Globe className="h-3.5 w-3.5" aria-hidden="true" />
+              )}
+              {t("publishChanges")}
+            </button>
+          </>
+        )}
+      </div>
 
       {open && (
         <div className="absolute right-0 top-full z-20 mt-2 w-[min(22rem,calc(100vw-2rem))] rounded-xl border border-border bg-panel p-4 shadow-xl">

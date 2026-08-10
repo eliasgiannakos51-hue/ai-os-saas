@@ -16,6 +16,7 @@ import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import { MAX_GENERATION_ATTEMPTS } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
+import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
 import {
   describeSecurityScanIssue,
   scanWebsiteHtmlForSecurityIssues,
@@ -326,6 +327,18 @@ export async function POST(request: Request) {
       // the model didn't emit any PLACEHOLDER:<slug> images, which is the
       // common case for a description that didn't ask for real photos.
       htmlContent = await resolveWebsiteImagePlaceholders(htmlContent);
+
+      // Keep the site's own links inside the site.
+      //
+      // A published site is one file served from /s/<subdomain>, so an
+      // ordinary-looking <a href="/about"> resolves against OUR origin and
+      // lands the visitor on our login page. That was reported from a real
+      // generated site: every item in the top menu led to Ionexa's sign-in
+      // form. The prompt now forbids it; this makes it true, because the
+      // failure is silent and it is the customer's live site that carries
+      // it. See lib/website-link-safety.ts for why <base href> cannot be
+      // the fix here.
+      htmlContent = makeGeneratedLinksSafe(htmlContent).html;
 
       // AI Output Protection Layer — defense in depth beyond the
       // sandboxed preview iframe (sandbox="", the strictest possible

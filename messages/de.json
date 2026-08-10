@@ -1203,7 +1203,19 @@
       "rollbackSuccess": "Auf Version {number} zurückgesetzt.",
       "rollbackError": "Zurücksetzen nicht möglich. Bitte erneut versuchen.",
       "confirmRollback": "Version {number} wieder live schalten?",
-      "unpublishHint": "Nimmt die Seite vom Netz. Sie bleibt im Konto und kann erneut veröffentlicht werden."
+      "unpublishHint": "Nimmt die Seite vom Netz. Sie bleibt im Konto und kann erneut veröffentlicht werden.",
+      "publishIntro": "Deine Website braucht eine eigene Webadresse, bevor sie online gehen kann. Wähle eine aus — du kannst sie später ändern.",
+      "addressPlaceholder": "deine-adresse",
+      "previewLabel": "Deine Website liegt dann unter",
+      "addressAvailable": "Diese Adresse sieht gut aus.",
+      "disabledHint": "Gib eine gültige Adresse ein, um zu veröffentlichen.",
+      "reasonEmpty": "Gib eine Adresse ein, um fortzufahren.",
+      "reasonTooShort": "Zu kurz — verwende mindestens {min} Zeichen.",
+      "reasonTooLong": "Zu lang — verwende höchstens {max} Zeichen.",
+      "reasonInvalidCharacters": "Erlaubt sind nur Kleinbuchstaben, Ziffern und Bindestriche.",
+      "reasonBadEdges": "Sie darf nicht mit einem Bindestrich beginnen oder enden.",
+      "reasonReserved": "Diese Adresse ist reserviert. Bitte wähle eine andere.",
+      "reasonTaken": "Diese Adresse ist bereits vergeben. Probiere eine andere."
     },
     "integrations": {
       "title": "Integrationen",

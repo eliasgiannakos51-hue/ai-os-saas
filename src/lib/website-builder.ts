@@ -266,19 +266,17 @@ ANIMATIONS (pure CSS). These are REFERENCE IMPLEMENTATIONS, not a checklist — 
 2) Parallax-style background movement — a section with a background photo:
      .parallax-section { background-image: url('...'); background-attachment: fixed; background-size: cover; background-position: center; }
 
-3) Smooth hover transforms — cards, buttons, images:
-     .card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-     .card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+3) Smooth hover lift — for whatever element this page actually has that should respond to a pointer. Name the class after that element in THIS design; do not introduce a card because a hover effect exists.
+     .lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+     .lift:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
 
-4) Animated gradient background — hero sections, CTAs. The four colour stops below are written as PLACEHOLDERS on purpose: substitute four real colours from THIS site's own palette. Emitting a literal purple/orange gradient on a law firm or a bakery is exactly the kind of copied default this section exists to prevent.
+4) Animated gradient — for any large colour field this design already calls for. The four colour stops below are written as PLACEHOLDERS on purpose: substitute four real colours from THIS site's own palette. Emitting a literal purple/orange gradient on a law firm or a bakery is exactly the kind of copied default this section exists to prevent. Several shapes above forbid a gradient outright; the shape you chose wins over this snippet.
      .gradient-bg { background: linear-gradient(-45deg, COLOR_1, COLOR_2, COLOR_3, COLOR_4); background-size: 400% 400%; animation: gradientShift 12s ease infinite; }
      @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-5) Staggered list-item entrance:
+5) Staggered entrance for a list — write one delay rule per item the list ACTUALLY has, however many that is. The count below is an illustration of the pattern, not a target:
      .stagger-item { opacity: 0; animation: fadeInUp 0.6s ease forwards; }
-     .stagger-item:nth-child(1) { animation-delay: 0.1s; }
-     .stagger-item:nth-child(2) { animation-delay: 0.2s; }
-     .stagger-item:nth-child(3) { animation-delay: 0.3s; }
+     .stagger-item:nth-child(n) { animation-delay: calc(n * 0.1s); }  /* i.e. one rule per real item */
      @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
 Reach for these when the description asks for "impressive"/"modern"/"animated" or similar. A restrained, serious or editorial site is BETTER with no animation at all — do not add motion to prove effort.`;
@@ -305,15 +303,58 @@ const SITE_SHAPE_SECTION = `
 SITE SHAPE — DECIDE THIS FIRST, BEFORE YOU WRITE ANY HTML:
 Different businesses need structurally different pages. Ask "what is a visitor to THIS site actually trying to do, and what is the fastest path to it?", then build that page. The answer is different for a café and for a barrister, and the two pages should not be recognisable as the same template with different words in it.
 
-Reference shapes (pick the closest, adapt it, or build a better one — this is a list of examples, not an enum):
+CHOOSE EXACTLY ONE of the seven shapes below, by subject, and build THAT page. This is a closed list — the archetype you name in your DESIGN DECISIONS block must be one of these seven words. If the subject sits between two, pick the one whose visitor question matches and take nothing from the other.
 
-- LOCAL PLACE (café, restaurant, bar, salon, gym, clinic, shop): photography-led. A large real photo above everything. Then the thing people actually came for — the menu, the price list, the timetable — HIGH ON THE PAGE, not after three feature cards. Opening hours, address, a maps link and a tappable phone number are primary content near the top AND repeated in the footer. Very little marketing prose; nobody reads "we are passionate about quality" before deciding where to have lunch.
-- PROFESSIONAL SERVICES (lawyer, accountant, architect, consultant, therapist, medical practice): credibility-led and restrained. Typographic rather than decorative. Practice areas as a plain, readable list or a simple two-column layout — not icon cards, which read as unserious here. Real credentials: qualifications, years in practice, bar/association membership, languages spoken. A proper contact form and a direct phone number. Sparse photography, and never generic stock handshakes or smiling headsets.
-- PORTFOLIO / CREATIVE (photographer, designer, illustrator, artist, studio): work-first. The work IS the page — a large gallery or grid at or near the very top, often before any headline at all. Minimal body copy, minimal navigation, generous whitespace, no feature cards, no testimonials section unless asked. Contact is one line, not a section.
-- PRODUCT / SAAS / APP: this is the ONE case where the familiar shape is correct — value proposition hero, how it works, features, pricing, call to action. Use it here and only here.
-- EVENT / CAMPAIGN / SINGLE PURPOSE (wedding, conference, launch, fundraiser): one dominant action. Date, place and the CTA sit above everything else in the visual hierarchy; every other section exists to support that one decision.
-- PERSONAL / CV / WRITING: editorial. A single readable column, a comfortable measure, name and one true sentence first, then the substance. No hero band, no cards.
-- CATALOGUE / LISTINGS (products, properties, menu of services with prices): a real grid or table of items with prices, and an unmistakable explanation of how to actually order or enquire.
+Each shape sets five things. They are not stylistic preferences; they are what makes two pages structurally different rather than differently worded.
+
+- local-place: café, restaurant, taverna, bar, salon, gym, clinic, shop, campsite, hotel.
+  FIRST: a full-bleed photograph of the actual place, before any heading.
+  ORDER: photo > menu or price list or timetable > hours and address and phone > gallery > map.
+  TYPE: a warm display face for headings against a plain sans body; prices set large, prose set small.
+  IMAGES: many — the room, the food, the pitches, the view. Photography carries this page.
+  NEVER: feature cards, a testimonial section, or any marketing prose above the menu.
+
+- professional-services: lawyer, accountant, architect, consultant, therapist, medical practice, engineer.
+  FIRST: the practice name and one sentence of plain text stating what is done and for whom.
+  ORDER: name and statement > practice areas as a plain list > credentials and qualifications > people > contact form and direct phone.
+  TYPE: one serif at two sizes, high contrast, generous line height; no decorative face anywhere.
+  IMAGES: sparse — one portrait or one interior at most, and never stock handshakes or headsets.
+  NEVER: icon cards, gradients, animation, or a photograph before the first sentence of text.
+
+- gallery: photographer, designer, illustrator, artist, studio, craftsperson, architect's portfolio.
+  FIRST: the work itself — a full-width image or a grid, before any headline at all.
+  ORDER: work > more work > one short statement > contact as a single line.
+  TYPE: one small, quiet sans at one or two sizes; the type must never compete with the images.
+  IMAGES: the maximum — the page is images with captions, not text with illustrations.
+  NEVER: a hero band with a headline over the work, feature cards, testimonials, or a fat footer.
+
+- editorial: personal site, CV, writer, researcher, essay, newsletter, about-me page.
+  FIRST: a name and one true sentence, set as text, in a single column.
+  ORDER: name and sentence > the substance in prose > selected work as a plain list > contact line.
+  TYPE: one text face at a comfortable measure of 60-75 characters, large body size, real paragraphs.
+  IMAGES: almost none — one portrait at most; this page is read, not looked at.
+  NEVER: a hero band, cards of any kind, columns, a gradient, or any full-bleed section.
+
+- catalogue: products, properties, vehicles, courses, a priced menu of services.
+  FIRST: the items themselves, as a dense grid or a real table, with prices visible immediately.
+  ORDER: items with prices > filters or categories > how to order or enquire > delivery and terms.
+  TYPE: one compact sans throughout; tabular figures for prices, tight line height, small headings.
+  IMAGES: one per item, uniform in crop and size — consistency matters more than individual quality.
+  NEVER: a marketing hero above the items, or a page where a price requires scrolling to find.
+
+- event: wedding, conference, launch, fundraiser, festival, one-off campaign.
+  FIRST: the date, the place and the single action, together, above everything else.
+  ORDER: date and place and action > what it is > schedule or programme > directions > the action again.
+  TYPE: one strong display face for the date and the action; everything else deliberately quiet.
+  IMAGES: one or two atmospheric photographs, used full-bleed as backdrops rather than as content.
+  NEVER: more than one call to action, a pricing table, or a features section.
+
+- product-landing: SaaS, app, digital product, subscription tool.
+  FIRST: a headline stating the value proposition, with a signup action beside it.
+  ORDER: value proposition > how it works > features > pricing > final call to action.
+  TYPE: a geometric sans at strong weight contrast, tight headline tracking.
+  IMAGES: product screenshots and interface shots, not photographs of people.
+  NEVER: use this shape for anything that is not actually a software product — it is the correct answer here and the wrong answer for every other brief on this list.
 
 FORBIDDEN DEFAULT: do NOT produce the generic centred-hero landing page — big centred headline over a gradient, a row of three feature cards with icons, a testimonial, a CTA band, a fat footer — unless the brief genuinely IS a product/SaaS landing page. It is the single most over-used shape on the web and it is wrong for most of the briefs you will receive.
 
@@ -331,7 +372,7 @@ COMMIT TO THE DECISIONS BEFORE YOU WRITE THE PAGE.
 The section above lists choices. Listing choices is not making them, and a page written without making them first will drift back to the shape you know best. So the FIRST thing in the document, immediately after <!DOCTYPE html> and before <html>, is a comment recording what you decided FOR THIS SUBJECT — written before the markup, and then actually obeyed by it:
 
 <!-- DESIGN DECISIONS
-archetype: <one of: local-place | professional-services | portfolio | catalogue | event | personal | product-landing>
+archetype: <one of: local-place | professional-services | gallery | editorial | catalogue | event | product-landing>
 hero: <one of: full-bleed-photo | split | typographic | asymmetric | none>
 sections: <the section order you are about to build, comma-separated, in order>
 palette: <a two-or-three-word name, then the actual hex values you will use>

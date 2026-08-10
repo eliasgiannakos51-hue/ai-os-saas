@@ -1203,7 +1203,19 @@
       "rollbackSuccess": "Reposta a versão {number}.",
       "rollbackError": "Não foi possível repor. Tente novamente.",
       "confirmRollback": "Repor a versão {number} no site no ar?",
-      "unpublishHint": "Retira o site da web. Permanece na sua conta e pode voltar a ser publicado."
+      "unpublishHint": "Retira o site da web. Permanece na sua conta e pode voltar a ser publicado.",
+      "publishIntro": "O teu site precisa do seu próprio endereço web antes de ficar online. Escolhe um — podes alterá-lo mais tarde.",
+      "addressPlaceholder": "o-teu-endereco",
+      "previewLabel": "O teu site ficará em",
+      "addressAvailable": "Esse endereço parece bom.",
+      "disabledHint": "Escreve um endereço válido para publicar.",
+      "reasonEmpty": "Escreve um endereço para continuar.",
+      "reasonTooShort": "Demasiado curto — usa pelo menos {min} caracteres.",
+      "reasonTooLong": "Demasiado longo — usa no máximo {max} caracteres.",
+      "reasonInvalidCharacters": "Só são permitidas minúsculas, números e hífenes.",
+      "reasonBadEdges": "Não pode começar nem terminar com um hífen.",
+      "reasonReserved": "Esse endereço está reservado. Escolhe outro.",
+      "reasonTaken": "Esse endereço já está ocupado. Tenta outro."
     },
     "integrations": {
       "title": "Integrações",

@@ -1203,7 +1203,19 @@
       "rollbackSuccess": "Ripristinata la versione {number}.",
       "rollbackError": "Non è stato possibile ripristinare. Riprova.",
       "confirmRollback": "Rimettere online la versione {number}?",
-      "unpublishHint": "Rimuove il sito dal web. Resta nel tuo account e puoi ripubblicarlo."
+      "unpublishHint": "Rimuove il sito dal web. Resta nel tuo account e puoi ripubblicarlo.",
+      "publishIntro": "Il tuo sito ha bisogno di un proprio indirizzo web prima di andare online. Scegline uno — potrai cambiarlo in seguito.",
+      "addressPlaceholder": "il-tuo-indirizzo",
+      "previewLabel": "Il tuo sito sarà su",
+      "addressAvailable": "Questo indirizzo va bene.",
+      "disabledHint": "Inserisci un indirizzo valido per pubblicare.",
+      "reasonEmpty": "Scrivi un indirizzo per continuare.",
+      "reasonTooShort": "Troppo corto — usa almeno {min} caratteri.",
+      "reasonTooLong": "Troppo lungo — usa al massimo {max} caratteri.",
+      "reasonInvalidCharacters": "Sono ammessi solo lettere minuscole, numeri e trattini.",
+      "reasonBadEdges": "Non può iniziare né finire con un trattino.",
+      "reasonReserved": "Questo indirizzo è riservato. Scegline un altro.",
+      "reasonTaken": "Questo indirizzo è già occupato. Provane un altro."
     },
     "integrations": {
       "title": "Integrazioni",

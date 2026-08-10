@@ -1203,7 +1203,19 @@
       "rollbackSuccess": "バージョン {number} に戻しました。",
       "rollbackError": "元に戻せませんでした。もう一度お試しください。",
       "confirmRollback": "バージョン {number} を公開サイトに戻しますか？",
-      "unpublishHint": "サイトを公開停止にします。アカウントには残り、再公開できます。"
+      "unpublishHint": "サイトを公開停止にします。アカウントには残り、再公開できます。",
+      "publishIntro": "サイトを公開するには専用のアドレスが必要です。下から選んでください（あとから変更できます）。",
+      "addressPlaceholder": "あなたのアドレス",
+      "previewLabel": "サイトの公開先",
+      "addressAvailable": "このアドレスは使えます。",
+      "disabledHint": "公開するには有効なアドレスを入力してください。",
+      "reasonEmpty": "続けるにはアドレスを入力してください。",
+      "reasonTooShort": "短すぎます。{min} 文字以上にしてください。",
+      "reasonTooLong": "長すぎます。{max} 文字以内にしてください。",
+      "reasonInvalidCharacters": "使えるのは英小文字・数字・ハイフンだけです。",
+      "reasonBadEdges": "ハイフンで始めたり終えたりはできません。",
+      "reasonReserved": "このアドレスは予約済みです。別のものを選んでください。",
+      "reasonTaken": "このアドレスは既に使われています。別のものをお試しください。"
     },
     "integrations": {
       "title": "連携",

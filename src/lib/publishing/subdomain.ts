@@ -129,6 +129,20 @@ export function suggestSubdomain(name: string): string {
  * subdomains without touching a single stored row — which is the entire
  * reason the subdomain is stored as a bare label rather than as a URL.
  */
+/**
+ * Stand-in for a subdomain when building a URL TEMPLATE rather than a URL.
+ *
+ * The publish dialog previews the address while it is being typed, and the
+ * two URL shapes put the subdomain in different places — `/s/acme` versus
+ * `acme.example.com`. Passing this token through publishedSiteUrl and
+ * splitting on it gives the client a prefix and a suffix that are correct
+ * for whichever shape is configured, without the client knowing which.
+ *
+ * Chosen to be impossible as a real subdomain: braces are rejected by
+ * validateSubdomain, so it can never collide with a stored value.
+ */
+export const SUBDOMAIN_TOKEN = "{subdomain}";
+
 export function publishedSiteUrl(subdomain: string, siteUrl: string, domain?: string | null): string {
   if (domain && domain.trim()) {
     const clean = domain.trim().replace(/^https?:\/\//, "").replace(/\/+$/, "");

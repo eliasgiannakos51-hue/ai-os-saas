@@ -97,30 +97,82 @@ check(
   src.indexOf("${SITE_SHAPE_SECTION}") < src.indexOf("${FONTS_SECTION}")
 );
 // The archetypes have to be genuinely DIFFERENT, not one shape relabelled.
+//
+// THIS BLOCK WENT RED WHEN THE SECTION WAS REWRITTEN, and it is worth
+// saying why rather than just re-pointing it. The old assertions matched
+// PROSE — "LOCAL PLACE", "credibility-led and restrained", "The work IS
+// the page". Every one of those guarantees still holds; the sentences
+// carrying them do not, because the third report of "every site looks the
+// same" traced back to this section being a soft list. It is now a closed
+// set of seven, each fixing five structural axes.
+//
+// So these check the GUARANTEE — that seven distinct shapes exist and each
+// one commits on every axis — which is both what the old assertions were
+// reaching for and something prose-matching could never have proved.
 const ARCHETYPES = [
-  "LOCAL PLACE",
-  "PROFESSIONAL SERVICES",
-  "PORTFOLIO / CREATIVE",
-  "PRODUCT / SAAS / APP",
-  "EVENT / CAMPAIGN / SINGLE PURPOSE",
-  "PERSONAL / CV / WRITING",
-  "CATALOGUE / LISTINGS",
+  "local-place",
+  "professional-services",
+  "gallery",
+  "editorial",
+  "catalogue",
+  "event",
+  "product-landing",
 ];
-for (const a of ARCHETYPES) check(`${a} is described`, shape.includes(a));
-check("they are examples, not a closed enum", /not an enum/.test(shape));
+for (const a of ARCHETYPES) check(`${a} is described`, new RegExp(`^- ${a}:`, "m").test(shape));
+
+// ONE ASSERTION HERE IS DELIBERATELY INVERTED, not relaxed. It used to
+// read `check("they are examples, not a closed enum", /not an enum/)`.
+// That sentence WAS the bug: the DESIGN DECISIONS block demands the page
+// declare "one of:" a fixed list, while this section told the model the
+// list was optional, and a rule that is optional in one paragraph is
+// optional. The list is closed now, and the test says so.
+check("the list is a CLOSED set, which the old prompt explicitly denied", /CHOOSE EXACTLY ONE/.test(shape));
+check("and the old permissive sentence is gone", !/not an enum/.test(shape));
+check("the archetype named in the declaration must come from it", /must be one of these seven words/.test(shape));
 
 console.log("\n== 4. the three briefs in the report get different shapes ==");
+// Same guarantees as before, read off the structured definitions rather
+// than off the sentences that used to express them.
+function shapeBlock(name) {
+  return shape.split(/\n(?=- [a-z-]+:)/).find((b) => b.startsWith(`- ${name}:`)) ?? "";
+}
+const localPlace = shapeBlock("local-place");
+const professional = shapeBlock("professional-services");
+const galleryShape = shapeBlock("gallery");
+
 // cafe -> menu and hours high, photo-led
-check("a cafe is told to put the menu high, not after feature cards", /menu, the price list, the timetable — HIGH ON THE PAGE/.test(shape));
-check("with hours, address and phone as primary content", /Opening hours, address, a maps link and a tappable phone number/.test(shape));
+check("a cafe covers cafes", /caf|restaurant|taverna/i.test(localPlace));
+check("it leads with a photograph of the place", /FIRST:[^\n]*photograph/i.test(localPlace));
+check(
+  "the menu comes before anything else in its order",
+  /ORDER:\s*photo\s*>\s*menu/i.test(localPlace)
+);
+check("with hours, address and phone as primary content", /hours and address and phone/i.test(localPlace));
+check("and marketing prose above the menu is forbidden", /NEVER:[^\n]*marketing prose above the menu/i.test(localPlace));
+
 // lawyer -> restrained, credentials, no icon cards
-check("a lawyer is told to be restrained and typographic", /credibility-led and restrained/.test(shape));
-check("explicitly NOT icon cards", /not icon cards, which read as unserious here/.test(shape));
-check("with real credentials", /bar\/association membership/.test(shape));
+check("a lawyer's page leads with text, not a picture", /FIRST:[^\n]*sentence of plain text/i.test(professional));
+check("explicitly NOT icon cards", /NEVER:[^\n]*icon cards/i.test(professional));
+check("nor animation or a gradient", /NEVER:[^\n]*gradients?, animation/i.test(professional));
+check("with real credentials", /credentials and qualifications/i.test(professional));
+check("and deliberately sparse photography", /IMAGES:\s*sparse/i.test(professional));
+
 // photographer -> work first, no testimonials
-check("a photographer leads with the work itself", /The work IS the page/.test(shape));
-check("often before any headline", /before any headline at all/.test(shape));
-check("and without the marketing furniture", /no feature cards, no testimonials section unless asked/.test(shape));
+check("a photographer leads with the work itself", /FIRST:[^\n]*the work itself/i.test(galleryShape));
+check("often before any headline", /before any headline at all/i.test(galleryShape));
+check(
+  "and without the marketing furniture",
+  /NEVER:[^\n]*feature cards, testimonials/i.test(galleryShape)
+);
+
+// The contrast the brief asked for by name: text-first versus image-first.
+const editorialShape = shapeBlock("editorial");
+check("editorial is text-first", /FIRST:[^\n]*name and one true sentence/i.test(editorialShape));
+check("gallery is image-first", /FIRST:[^\n]*work itself/i.test(galleryShape));
+check(
+  "and the two disagree about images",
+  /IMAGES:\s*almost none/i.test(editorialShape) && /IMAGES:\s*the maximum/i.test(galleryShape)
+);
 
 console.log("\n== 5. the default shape is banned by name ==");
 check("the generic landing page is forbidden explicitly", /FORBIDDEN DEFAULT/.test(shape));
@@ -128,7 +180,18 @@ check(
   "and described precisely enough to be recognised",
   /three feature cards with icons, a testimonial, a CTA band, a fat footer/.test(shape)
 );
-check("with the one case where it IS right", /ONE case where the familiar shape is correct/.test(shape));
+// The permission for the familiar shape did not disappear — it moved into
+// product-landing's own NEVER clause, which is where a model reading that
+// archetype actually meets it, rather than in a sentence three paragraphs
+// away that it may never re-read.
+check(
+  "with the one case where it IS right",
+  /- product-landing:[\s\S]*?NEVER:[^\n]*not actually a software product/i.test(shape)
+);
+check(
+  "and every other brief told plainly it is the wrong answer",
+  /wrong answer for every other brief on this list/i.test(shape)
+);
 check(
   "and a plain statement of what failure looks like",
   /would look like the same page with the words swapped, you have not done this step/.test(shape)

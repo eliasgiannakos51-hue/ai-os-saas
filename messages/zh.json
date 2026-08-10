@@ -1203,7 +1203,19 @@
       "rollbackSuccess": "已回滚到版本 {number}。",
       "rollbackError": "无法回滚，请重试。",
       "confirmRollback": "将版本 {number} 重新设为线上版本？",
-      "unpublishHint": "将网站从互联网下线。它仍保留在你的账户中，可以重新发布。"
+      "unpublishHint": "将网站从互联网下线。它仍保留在你的账户中，可以重新发布。",
+      "publishIntro": "网站需要有自己的网址才能上线。请在下方选择一个——之后仍可修改。",
+      "addressPlaceholder": "您的网址",
+      "previewLabel": "您的网站将位于",
+      "addressAvailable": "这个网址可以使用。",
+      "disabledHint": "请输入有效的网址后再发布。",
+      "reasonEmpty": "请输入网址以继续。",
+      "reasonTooShort": "太短了——至少需要 {min} 个字符。",
+      "reasonTooLong": "太长了——最多 {max} 个字符。",
+      "reasonInvalidCharacters": "只能使用小写字母、数字和连字符。",
+      "reasonBadEdges": "不能以连字符开头或结尾。",
+      "reasonReserved": "该网址已被保留，请另选一个。",
+      "reasonTaken": "该网址已被占用，请换一个。"
     },
     "integrations": {
       "title": "集成",

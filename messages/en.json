@@ -1203,7 +1203,19 @@
       "rollbackSuccess": "Rolled back to version {number}.",
       "rollbackError": "Could not roll that back. Please try again.",
       "confirmRollback": "Put version {number} back on the live site?",
-      "unpublishHint": "Take the site off the web. It stays in your account and can be republished."
+      "unpublishHint": "Take the site off the web. It stays in your account and can be republished.",
+      "publishIntro": "Your site needs its own web address before it can go live. Pick one below — you can change it later.",
+      "addressPlaceholder": "your-address",
+      "previewLabel": "Your site will be at",
+      "addressAvailable": "That address looks good.",
+      "disabledHint": "Enter a valid address to publish.",
+      "reasonEmpty": "Type an address to continue.",
+      "reasonTooShort": "Too short — use at least {min} characters.",
+      "reasonTooLong": "Too long — use at most {max} characters.",
+      "reasonInvalidCharacters": "Only lowercase letters, numbers and hyphens are allowed.",
+      "reasonBadEdges": "It can't start or end with a hyphen.",
+      "reasonReserved": "That address is reserved. Please pick another.",
+      "reasonTaken": "That address is already taken. Try a different one."
     },
     "integrations": {
       "title": "Integrations",

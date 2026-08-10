@@ -5,7 +5,9 @@ import {
   applyResolvedImageUrls,
   broadenImageQuery,
 } from "@/lib/website-image-placeholders";
-import { searchUnsplashPhoto } from "@/lib/unsplash";
+import { searchUnsplashPhoto, isUnsplashConfigured } from "@/lib/unsplash";
+import { createUnsplashBudget, describeUnsplashHalt } from "@/lib/unsplash-budget";
+import { logApiError } from "@/lib/log-error";
 
 // Runs after generateWebsiteHtml/editWebsiteHtml (lib/website-builder.ts)
 // returns — scans the output for the PLACEHOLDER:<slug> image convention
@@ -20,7 +22,22 @@ export async function resolveWebsiteImagePlaceholders(html: string): Promise<str
   const placeholders = findImagePlaceholders(html);
   if (placeholders.length === 0) return html;
 
+  // ONE budget for the whole document, not one per photo.
+  //
+  // Every photo walks broadenImageQuery's ladder — up to four searches —
+  // so ten photos whose queries all miss is forty requests, and a free
+  // Unsplash application allows fifty PER HOUR. Two such generations put
+  // the account at zero, after which every search 403s and every photo
+  // silently becomes an unrelated picsum image. That looks exactly like
+  // "Unsplash was never wired up", which is how it was reported.
+  //
+  // Sharing one budget across the parallel resolutions is what makes the
+  // breaker work: the first photo to be told "you are out" stops the other
+  // nine from asking.
+  const budget = createUnsplashBudget();
   const resolved = new Map<string, string>();
+  let fellBack = 0;
+
   await Promise.all(
     placeholders.map(async ({ slug, query }) => {
       // Most specific first, broadening only on an empty result — see
@@ -29,14 +46,34 @@ export async function resolveWebsiteImagePlaceholders(html: string): Promise<str
       // round trips on the queries that would otherwise have produced an
       // unrelated photo.
       for (const attempt of broadenImageQuery(query)) {
-        const unsplashUrl = await searchUnsplashPhoto(attempt);
+        const unsplashUrl = await searchUnsplashPhoto(attempt, budget);
         if (unsplashUrl) {
           resolved.set(slug, unsplashUrl);
           return;
         }
+        if (budget.halted) break;
       }
+      fellBack += 1;
       resolved.set(slug, picsumFallbackUrl(query));
     })
   );
+
+  // Said out loud, once, because the symptom on the page — generic photos
+  // — is identical for "no key configured", "quota exhausted" and "the
+  // queries genuinely found nothing", and those need three different
+  // fixes from whoever reads the log.
+  if (budget.halted) {
+    logApiError("website-image-resolver", new Error(describeUnsplashHalt(budget.halted, budget.spent)), {
+      placeholders: placeholders.length,
+      fellBackToPicsum: fellBack,
+    });
+  } else if (fellBack > 0 && isUnsplashConfigured()) {
+    logApiError(
+      "website-image-resolver",
+      new Error(`${fellBack} of ${placeholders.length} photo(s) found nothing on Unsplash and fell back to picsum.`),
+      { unsplashRequests: budget.spent }
+    );
+  }
+
   return applyResolvedImageUrls(html, resolved);
 }

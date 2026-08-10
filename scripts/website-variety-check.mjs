@@ -59,6 +59,8 @@ const {
   genericShapeSignals,
   jaccard,
   sequenceSimilarity,
+  designDecisions,
+  decisionsHonoured,
 } = await import("./lib/site-fingerprint.mjs");
 const wb = await loadTsWithDeps("src/lib/website-builder.ts");
 const { CostAccumulator } = await loadTsWithDeps("src/lib/billing/cost-accumulator.ts");
@@ -164,12 +166,49 @@ for (const r of results) {
   r.fonts = fontsUsed(r.html);
   r.palette = palette(r.html);
   r.generic = genericShapeSignals(r.html);
+  r.decisions = designDecisions(r.html);
+  r.honoured = decisionsHonoured(r.html);
   console.log(`\n  ${r.label}`);
+  // The declared decisions come first because they are the cheapest
+  // diagnosis available: if a taverna and a tax office both declare
+  // "product-landing / split / medium", the sameness is a DECISION
+  // problem, and no amount of structural scoring will say that as
+  // plainly.
+  if (r.decisions) {
+    console.log(`    declared  : ${r.decisions.archetype} / hero=${r.decisions.hero} / density=${r.decisions.density}`);
+    console.log(`    sections  : ${(r.decisions.sections ?? []).join(" > ")}`);
+    console.log(`    honoured  : sections ${r.honoured.sectionCountPlausible ? "yes" : "NO"} (declared ${r.honoured.declaredSections}, built ${r.honoured.builtSections}), fonts ${r.honoured.fontsMatch ? "yes" : "NO"}`);
+  } else {
+    console.log("    declared  : (NO DESIGN DECISIONS BLOCK — the prompt requires one)");
+  }
   console.log(`    landmarks : ${r.structure.join(" > ")}`);
   console.log(`    fonts     : ${r.fonts.join(", ") || "(none loaded)"}`);
   console.log(`    palette   : ${r.palette.join(" ") || "(no colours found)"}`);
   const hits = Object.entries(r.generic).filter(([, v]) => v).map(([k]) => k);
   console.log(`    generic-shape signals : ${hits.length ? hits.join(", ") : "none"}`);
+}
+
+// Two different businesses declaring the same archetype AND the same hero
+// is the sameness bug stated at its source, before any similarity score.
+const declaredPairs = results.filter((r) => r.decisions);
+if (declaredPairs.length >= 2) {
+  const collisions = [];
+  for (let i = 0; i < declaredPairs.length; i++) {
+    for (let j = i + 1; j < declaredPairs.length; j++) {
+      const a = declaredPairs[i];
+      const b = declaredPairs[j];
+      if (a.decisions.archetype === b.decisions.archetype && a.decisions.hero === b.decisions.hero) {
+        collisions.push(`${a.slug} and ${b.slug} both chose ${a.decisions.archetype} / ${a.decisions.hero}`);
+      }
+    }
+  }
+  console.log(
+    `\n  declaration collisions: ${collisions.length === 0 ? "none — every brief chose its own shape" : collisions.join("; ")}`
+  );
+}
+const missingBlock = results.filter((r) => !r.decisions).map((r) => r.slug);
+if (missingBlock.length) {
+  console.log(`  WARNING: ${missingBlock.join(", ")} produced no DESIGN DECISIONS block at all.`);
 }
 
 console.log("\n  pairwise similarity (0 = nothing in common, 1 = identical)\n");

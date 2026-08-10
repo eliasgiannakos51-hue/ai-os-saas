@@ -11,6 +11,8 @@
 // Runs in the build gate; needs no API key.
 //
 // Run: node scripts/tests/site-fingerprint.test.mjs
+import { readFileSync } from "node:fs";
+
 let pass = 0;
 const failures = [];
 function check(name, cond, detail) {
@@ -124,6 +126,85 @@ near("identical sets are 1", fp.jaccard(["a"], ["a"]), 1);
 near("disjoint sets are 0", fp.jaccard(["a"], ["b"]), 0);
 near("half-overlap is 1/3", fp.jaccard(["a", "b"], ["b", "c"]), 1 / 3);
 near("two empties are 0, not NaN", fp.jaccard([], []), 0);
+
+console.log("\n== 7. the declared design decisions ==");
+// The prompt now requires the page to commit, in writing and before the
+// markup, to an archetype / hero / section order / palette / type /
+// density chosen FROM THE SUBJECT. Reading that back is what turns "the
+// sites still look the same" into a measurement.
+const DECLARED = `<!DOCTYPE html>
+<!-- DESIGN DECISIONS
+archetype: local-place
+hero: full-bleed-photo
+sections: hero, menu, hours, location, contact
+palette: warm earth #3b2314 #d9a441 #faf6f0
+type: Playfair Display / Inter
+density: medium
+why: people choose a taverna from photos and a menu, not from feature cards.
+-->
+<html><head>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&display=swap" rel="stylesheet">
+</head><body>
+<header></header>
+<section id="menu"></section><section id="hours"></section>
+<section id="location"></section><section id="contact"></section>
+</body></html>`;
+
+const d = fp.designDecisions(DECLARED);
+check("the block is found", d !== null);
+check("the archetype is read", d.archetype === "local-place");
+check("the hero is read", d.hero === "full-bleed-photo");
+check("the section order is a list, in order", Array.isArray(d.sections) && d.sections[0] === "hero" && d.sections[4] === "contact");
+check("the palette line is kept whole, hexes and all", /#3b2314/.test(d.palette));
+check("the type pairing is read", /playfair/i.test(d.type) && /inter/i.test(d.type));
+check("and the one-sentence reason", /taverna/.test(d.why));
+
+// A page with no block must report nothing rather than a default, or the
+// absence would score as compliance.
+check("a page with no block returns null", fp.designDecisions("<html><body></body></html>") === null);
+check("an empty block returns null too", fp.designDecisions("<!-- DESIGN DECISIONS\n-->") === null);
+
+console.log("\n== 8. a declaration nobody checks is worth nothing ==");
+// The failure mode of this whole mechanism: the model writes a beautiful
+// commitment and then builds the page it always builds.
+const honoured = fp.decisionsHonoured(DECLARED);
+check("the page is recognised as having declared", honoured.declared === true);
+check(
+  `the declared section count is roughly what was built (${honoured.declaredSections} vs ${honoured.builtSections})`,
+  honoured.sectionCountPlausible === true
+);
+check("the declared fonts are the fonts actually loaded", honoured.fontsMatch === true);
+
+const LIED = DECLARED.replace(/family=Playfair\+Display[^"]*/, "family=Roboto:wght@700&display=swap");
+check(
+  "a page that loads a font it did not declare is caught",
+  fp.decisionsHonoured(LIED).fontsMatch === false
+);
+const OVERDECLARED = DECLARED.replace(
+  "sections: hero, menu, hours, location, contact",
+  "sections: a, b, c, d, e, f, g, h, i, j, k, l"
+);
+check(
+  "declaring twelve sections and building four is caught",
+  fp.decisionsHonoured(OVERDECLARED).sectionCountPlausible === false
+);
+check("a page with no block declares nothing", fp.decisionsHonoured("<html></html>").declared === false);
+
+console.log("\n== 9. the prompt actually asks for all of it ==");
+const builder = readFileSync("src/lib/website-builder.ts", "utf8");
+check("the prompt requires the commitment", /COMMIT TO THE DECISIONS BEFORE YOU WRITE THE PAGE/.test(builder));
+for (const axis of ["archetype", "hero", "sections", "palette", "type", "density", "why"]) {
+  check(`it asks for ${axis}`, new RegExp(`^${axis}:`, "m").test(builder));
+}
+check(
+  "the section list is described as a commitment, not a summary",
+  /It is a commitment, not a summary written afterwards/.test(builder)
+);
+check(
+  "and copying an example from the prompt is forbidden",
+  /Never copy an example from this prompt as your answer/.test(builder)
+);
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

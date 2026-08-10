@@ -325,13 +325,48 @@ VARY THESE DELIBERATELY, driven by the subject rather than by habit:
 - TYPOGRAPHY: vary the pairing, the scale and the weight contrast per the shape above; see FONTS.
 - DENSITY: a listings page should be dense; a portfolio should be sparse. Do not apply the same vertical rhythm to both.
 
-If two sites you generated for two different businesses would look like the same page with the words swapped, you have not done this step.`;
+If two sites you generated for two different businesses would look like the same page with the words swapped, you have not done this step.
+
+COMMIT TO THE DECISIONS BEFORE YOU WRITE THE PAGE.
+The section above lists choices. Listing choices is not making them, and a page written without making them first will drift back to the shape you know best. So the FIRST thing in the document, immediately after <!DOCTYPE html> and before <html>, is a comment recording what you decided FOR THIS SUBJECT — written before the markup, and then actually obeyed by it:
+
+<!-- DESIGN DECISIONS
+archetype: <one of: local-place | professional-services | portfolio | catalogue | event | personal | product-landing>
+hero: <one of: full-bleed-photo | split | typographic | asymmetric | none>
+sections: <the section order you are about to build, comma-separated, in order>
+palette: <a two-or-three-word name, then the actual hex values you will use>
+type: <heading font / body font>
+density: <sparse | medium | dense>
+why: <one sentence: what about THIS subject drove the choices above>
+-->
+
+Rules for it:
+- Decide from the SUBJECT, not from habit. A taverna, a tax accountant and a wedding photographer must not come out with the same archetype, the same hero, the same section order or the same palette.
+- The "sections" line must match the sections you actually build, in the order you build them. It is a commitment, not a summary written afterwards.
+- product-landing is a real answer for a real SaaS brief and the wrong answer for most others. If you choose it, "why" must say what makes this an actual product landing page.
+- Never copy an example from this prompt as your answer. There are no default values here.`;
 
 const FUNCTIONAL_ELEMENTS_SECTION = `
+INTERNAL LINKS — THIS PAGE IS THE WHOLE SITE:
+You are producing ONE single file. There is no /about page, no /contact page and no second file, so a link to one is a link to nothing.
+- Every link to another part of THIS site must be a fragment: <a href="#section-id">, pointing at an id that exists on this page.
+- NEVER write href="/about", href="/contact", href="about.html", href="./services" or href="/". A published site is served from a sub-path, so a browser resolves those against the hosting domain and the visitor LEAVES the site entirely — they land on a sign-in page belonging to someone else. This has happened on a real customer site.
+- A logo or "home" link goes to href="#" or to the id of the top section.
+- Give every section you link to a real id: <section id="rooms">, then <a href="#rooms">.
+- Absolute links to OTHER people's sites are fine and often wanted — a Google Maps pin, a Facebook page, a booking platform. Write those in full, starting with https://.
+- tel:, mailto: and sms: links are not navigation; use them exactly as described below.
+
 FUNCTIONAL CONTACT ELEMENTS (not decorative — these must actually work):
 - Every phone number given in the description must be rendered as a real link: <a href="tel:+<digits, include country code if given>">display text</a>.
 - Every email address given must be rendered as: <a href="mailto:the@address">display text</a>.
 - Never show a phone/email as plain unlinked text if one was actually given.
+
+CONTACT DETAILS THAT WERE NOT GIVEN — SHOW A GAP, NEVER HIDE ONE:
+A visitor who cannot find a phone number does not become a customer, and a site owner who cannot see that the number is missing will never add it. So:
+- If no phone number was given, still build the place where it belongs and write a visible, obviously-unfinished placeholder in the language of the site — e.g. [Your phone number] / [Το τηλέφωνό σας]. Square brackets, always.
+- Same for a missing email, street address, opening hours or price list: a bracketed placeholder in the right position, never a section quietly dropped and never an invented value.
+- NEVER invent a phone number, an email address, a street address, a price, an opening time, a company registration number or a review. A plausible-looking fake is far worse than a visible gap: the owner ships it without noticing.
+- Do not wrap a placeholder in tel:/mailto: — leave it as plain bracketed text so it is obviously a blank to fill in.
 
 CONTACT / BOOKING FORMS (only when the description implies one — not every site needs a form):
 - Every input needs a real, meaningful name attribute (name="name", name="email", name="phone", name="message", etc.) — never an unnamed input.

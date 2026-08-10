@@ -4,6 +4,7 @@ import { editWebsiteHtml } from "@/lib/website-builder";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { downloadReferenceImages } from "@/lib/website-reference-image-server";
 import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
+import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
 import {
   describeSecurityScanIssue,
   scanWebsiteHtmlForSecurityIssues,
@@ -246,6 +247,12 @@ export async function POST(request: Request) {
       updatedHtml = editResult.html;
       usedCheapPatch = editResult.usedCheapPatch;
       updatedHtml = await resolveWebsiteImagePlaceholders(updatedHtml);
+
+      // Same enforcement as generation: an edit that adds a nav item can
+      // reintroduce <a href="/about"> just as easily as a fresh generation
+      // can, and the result is the same — the customer's menu pointing at
+      // our login page. See lib/website-link-safety.ts.
+      updatedHtml = makeGeneratedLinksSafe(updatedHtml).html;
 
       // AI Output Protection Layer — same two-layer check as generation
       // (see api/websites/generate/process/route.ts's file comment for

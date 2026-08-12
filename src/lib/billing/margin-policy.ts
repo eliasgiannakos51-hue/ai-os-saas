@@ -73,6 +73,13 @@ export const FEATURE_MARGIN_GROUPS: Record<string, string> = {
   research_plan: "CREDIT_MARGIN_DEEP_RESEARCH",
   agent_run: "CREDIT_MARGIN_AGENT_RUN",
   scheduled_agent_run: "CREDIT_MARGIN_AGENT_RUN",
+  // The clarifying-questions pre-check rounds, split out of their parent
+  // feature so a €0.001 row and a €0.03 row stop being averaged together
+  // (see lib/jobs/handlers/agent-build.ts). Grouped back onto the parent's
+  // env var so tuning a feature's margin still means one variable, not
+  // one per round.
+  agent_build_precheck: "CREDIT_MARGIN_AGENT_BUILD",
+  create_precheck: "CREDIT_MARGIN_CREATE",
 };
 
 export function featureMarginEnvKeys(feature: string): string[] {

@@ -280,8 +280,16 @@ export async function executeAgent(params: {
   );
 
   const totals = costs.totals();
+  // Every token Anthropic billed for, including BOTH cache-write TTLs —
+  // the 1-hour slice is priced separately (2x input) but it is still
+  // tokens the run consumed, and omitting it would understate the figure
+  // shown on the run.
   const tokensUsed =
-    totals.inputTokens + totals.outputTokens + totals.cacheReadTokens + totals.cacheWriteTokens;
+    totals.inputTokens +
+    totals.outputTokens +
+    totals.cacheReadTokens +
+    totals.cacheWriteTokens +
+    totals.cacheWrite1hTokens;
   const finishedAt = new Date().toISOString();
 
   // 9. Reschedule. Computed from NOW rather than from the stored

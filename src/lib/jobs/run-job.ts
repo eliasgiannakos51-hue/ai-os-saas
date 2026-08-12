@@ -87,6 +87,26 @@ export type JobHandlerResult = {
    * below-target alert for a feature that is fine.
    */
   selfBilled?: boolean;
+  /**
+   * Settle under a DIFFERENT feature name than the job kind.
+   *
+   * For the case where one job kind produces two structurally different
+   * actions. agent_build is the example: a run that stops at the
+   * clarifying-questions pre-check made ONE small call, while a run that
+   * builds made two and did ten times the work. Logging both as
+   * "agent_build" blends them into a single average, and the blend is not
+   * a number that describes anything — it is the arithmetic mean of a
+   * €0.001 row and a €0.03 row.
+   *
+   * That blend is exactly how a healthy system reads as a broken one. Two
+   * rows of one interaction, each margin-guaranteed on its own cost,
+   * invite being compared one-at-a-time against the interaction's TOTAL
+   * cost on the Anthropic Console — which shows half the cost accounted
+   * for and half the margin earned. api/websites/generate already avoids
+   * this by settling its pre-check as "website_generate_precheck"; this
+   * field is how a background job does the same thing.
+   */
+  feature?: string;
 };
 
 export type JobHandler = (ctx: JobContext) => Promise<JobHandlerResult>;
@@ -272,9 +292,11 @@ export async function runJob(params: { jobId: string; apiKey: string }): Promise
     const settlement = await settleReservation({
       userId: job.user_id,
       reservationId: job.reservation_id ?? "",
-      feature: kind,
+      feature: handled.feature ?? kind,
       costs,
       plan,
+      // `kind` is kept in metadata even when the feature is overridden, so
+      // the two rows of one interaction can still be found together.
       bypassCharge: bypass,
       metadata: { jobId, kind, attempts },
     });

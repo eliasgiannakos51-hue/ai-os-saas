@@ -54,6 +54,26 @@ export const agentBuildHandler: JobHandler = async (ctx: JobContext): Promise<Jo
       if (clarification.needsClarification) {
         return {
           result: { built: false, needsClarification: true, questions: clarification.questions },
+          // Settled as its OWN feature, not as agent_build.
+          //
+          // A build that stops here made one small classification call.
+          // A build that finishes made two calls and produced a
+          // configuration. Both were previously logged as "agent_build",
+          // so the margin report averaged them — and because a user who
+          // gets questions comes straight back and submits again, ONE
+          // agent design routinely produced TWO agent_build rows, each
+          // holding roughly half the interaction's Anthropic cost.
+          //
+          // Each row is margin-guaranteed on its own cost, so no money
+          // was lost. What was lost is the ability to check that: one row
+          // read against the Console's total for the whole interaction
+          // shows about half the margin it really earned. On Ultimate,
+          // a $0.06 interaction split into two $0.03 rows reads as 2.03x
+          // against a real 4x. Naming the pre-check separately is what
+          // makes the two rows addable instead of averageable — the same
+          // fix api/websites/generate already carries as
+          // "website_generate_precheck".
+          feature: "agent_build_precheck",
         };
       }
     } catch (err) {

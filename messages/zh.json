@@ -1349,7 +1349,12 @@
       "example2": "总结要点。",
       "example3": "有哪些期限和金额？",
       "processingHint": "正在读取文件——通常只需几秒。准备好后即可提问。",
-      "failedHint": "未找到可读文本。请上传文字可选中的版本。"
+      "failedHint": "未找到可读文本。请上传文字可选中的版本。",
+      "askStillRunning": "仍在阅读——需要一点时间。关闭页面后也会继续；稍后回来再问一次即可看到答案。",
+      "askStalled": "该问题意外中断。未扣除任何积分——请重试。",
+      "stepReading": "正在读取你的文件",
+      "stepAnswering": "正在整理答案",
+      "stepChecking": "正在核对引用"
     },
     "deepResearch": {
       "title": "深度研究",

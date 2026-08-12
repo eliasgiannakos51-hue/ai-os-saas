@@ -21,6 +21,7 @@ import { EmptyState } from "@/components/empty-state";
 import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { startAndWatchJob } from "@/lib/jobs/start-and-watch";
 import {
   ACCEPT_ATTRIBUTE,
   MAX_FILE_BYTES,
@@ -95,6 +96,19 @@ export function FilesWorkspace({
   const [question, setQuestion] = useState("");
   const [asking, setAsking] = useState(false);
   const [answer, setAnswer] = useState<Answer | null>(null);
+  // The worker's real step, so a long read is not a bare spinner.
+  //
+  // JOB_STEPS stores CODES ("reading", "answering", "checking"), not
+  // sentences — a label written on the server is a label in one language,
+  // and this one is shown to the user at the moment they are waiting. The
+  // code is translated here.
+  const [askStep, setAskStep] = useState<string | null>(null);
+  const ASK_STEP_KEY: Record<string, string> = {
+    reading: "stepReading",
+    answering: "stepAnswering",
+    checking: "stepChecking",
+  };
+  const askStepLabel = askStep && ASK_STEP_KEY[askStep] ? t(ASK_STEP_KEY[askStep]) : t("asking");
 
   const [newCollectionName, setNewCollectionName] = useState("");
   const [creatingCollection, setCreatingCollection] = useState(false);
@@ -221,24 +235,40 @@ export function FilesWorkspace({
     setAsking(true);
     setAnswer(null);
     try {
-      const response = await fetch("/api/files/ask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: question.trim(), fileIds: selected, language: locale }),
-      });
-      const data = await response.json();
-      if (!data.ok) {
-        addToast(data.error ?? t("askError"), "error");
+      // ASKING IS A BACKGROUND JOB NOW. The route used to send the whole
+      // document set through one model call under a 60-second ceiling —
+      // the request most likely to be killed, and a kill lost the answer
+      // and kept the hold. The work now outlives this page; the progress
+      // line below is the worker's real step, not a timer.
+      const outcome = await startAndWatchJob(
+        "/api/files/ask",
+        { question: question.trim(), fileIds: selected, language: locale },
+        { onProgress: (job) => setAskStep(job.stepLabel) }
+      );
+      if (!outcome.ok) {
+        addToast(
+          outcome.code === "still_running"
+            ? t("askStillRunning")
+            : outcome.code === "stalled"
+              ? t("askStalled")
+              : outcome.error || t("askError"),
+          outcome.code === "still_running" ? "success" : "error"
+        );
+        return;
+      }
+      const data = outcome.result as Record<string, unknown>;
+      if (!data.answered) {
+        addToast(t("askError"), "error");
         return;
       }
       setAnswer({
-        text: data.answer,
-        fromDocuments: data.answeredFromDocuments,
-        citations: data.citations ?? [],
-        removedCitations: data.removedCitations ?? 0,
-        skippedFiles: data.skippedFiles ?? [],
+        text: String(data.answer ?? ""),
+        fromDocuments: Boolean(data.answeredFromDocuments),
+        citations: (data.citations ?? []) as Citation[],
+        removedCitations: Number(data.removedCitations ?? 0),
+        skippedFiles: (data.skippedFiles ?? []) as string[],
         truncated: Boolean(data.truncated),
-        credits: Number(data.creditsCharged ?? 0),
+        credits: Number(outcome.creditsCharged ?? 0),
         disclosure: String(data.disclosure ?? ""),
       });
       router.refresh();
@@ -655,7 +685,7 @@ export function FilesWorkspace({
             ) : (
               <Sparkles className="h-4 w-4" aria-hidden="true" />
             )}
-            {asking ? t("asking") : t("ask")}
+            {asking ? askStepLabel : t("ask")}
           </button>
           {/* A grey button with no explanation is where this flow dead-ended.
               Which of the two prerequisites is missing decides what the user

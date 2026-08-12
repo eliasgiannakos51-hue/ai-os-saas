@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -12,7 +11,6 @@ import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula"
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
-import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
 import {
   checkAiCallAllowed,
   fingerprintRequest,
@@ -24,14 +22,8 @@ import { FILE_ASK_MODEL } from "@/lib/files/file-models";
 import { maxFileQuestionsPerHour } from "@/lib/files/limits";
 import { fileIdsInCollection, loadReadableFiles } from "@/lib/files/store";
 import { MAX_FILES_PER_QUESTION, MAX_QUESTION_CHARS } from "@/lib/files/file-types";
-import {
-  askSystemPrompt,
-  isNotInDocuments,
-  prepareContext,
-  stripNotInDocuments,
-  verifyCitations,
-} from "@/lib/files/ask";
-import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
+import { prepareContext } from "@/lib/files/ask";
+import { startJob } from "@/lib/jobs/start-job";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -50,10 +42,6 @@ const MAX_OUTPUT_TOKENS = 2000;
  * off by three orders of magnitude on a 200-page contract.
  */
 export async function POST(request: Request) {
-  let reservationId = "";
-  let userId = "";
-  const costs = new CostAccumulator();
-
   try {
     const supabase = createClient();
     const {
@@ -63,7 +51,6 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
     }
-    userId = user.id;
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
@@ -178,106 +165,43 @@ export async function POST(request: Request) {
       accountCreditPriceEur
     );
 
-    if (!bypassCredits && plan) {
-      const affordable = await hasEnoughCredits(user.id, estimate.reserveCredits, plan);
-      if (!affordable.ok) {
-        return NextResponse.json(
-          { ok: false, insufficientCredits: true, error: "Not enough credits for this question." },
-          { status: 402 }
-        );
-      }
-      const reservation = await reserveCredits(user.id, estimate.reserveCredits, "file_ask", {
-        files: files.length,
-        estimatedCredits: estimate.estimatedCredits,
-      });
-      if (!reservation.ok) {
-        return NextResponse.json(
-          { ok: false, insufficientCredits: true, error: "Not enough credits for this question." },
-          { status: 402 }
-        );
-      }
-      reservationId = reservation.reservationId;
-    }
-    void recordAiCallForDailySpend(estimate.estimatedCredits);
-
-    const anthropic = new Anthropic({ apiKey });
-    let answer = "";
-
-    try {
-      const response = await anthropic.messages.create({
-        model: FILE_ASK_MODEL,
-        max_tokens: MAX_OUTPUT_TOKENS,
-        system: askSystemPrompt({
-          language,
-          filenames: files.map((f) => f.filename),
-          truncated: context.truncated,
-        }),
-        messages: [
-          {
-            role: "user",
-            content: `${context.text}\n\nQuestion: ${question}`,
-          },
-        ],
-      });
-      costs.record("generation", response.usage, response.model || FILE_ASK_MODEL);
-      answer = response.content
-        .filter((block): block is Anthropic.TextBlock => block.type === "text")
-        .map((block) => block.text)
-        .join("")
-        .trim();
-    } catch (err) {
-      // Settle rather than release: a failed call that consumed tokens
-      // still consumed them, and an accumulator with nothing in it
-      // settles to zero anyway.
-      await settleReservation({
-        userId: user.id,
-        reservationId,
-        feature: "file_ask",
-        costs,
-        plan,
-        bypassCharge: bypassCredits || !plan,
-        metadata: { outcome: "api_error" },
-      });
-      logApiError("/api/files/ask", err, { stage: "anthropic" });
-      return NextResponse.json({ ok: false, error: "The AI could not answer just now." }, { status: 502 });
-    }
-
-    const settlement = await settleReservation({
+    // FROM HERE THE ROUTE DOES NOT ANSWER.
+    //
+    // It declared maxDuration = 60 while sending an entire document set
+    // through one model call. A large PDF plus a real question is exactly
+    // the request most likely to exceed that, and a kill runs no catch
+    // block: the answer is lost and the hold stands against it.
+    //
+    // The files are NOT put in the job input — a document set can be
+    // megabytes, and storing the user's whole contract a second time in a
+    // jsonb column would be both wasteful and wrong. The worker re-reads
+    // them, scoped to the same user, so a file deleted in between is not
+    // answerable from a copy we kept.
+    const started = await startJob({
       userId: user.id,
-      reservationId,
-      feature: "file_ask",
-      costs,
-      plan,
-      bypassCharge: bypassCredits || !plan,
-      metadata: { files: files.length, chars: context.charCount },
+      kind: "file_ask",
+      reserve: bypassCredits || !plan ? 0 : estimate.reserveCredits,
+      reserveMetadata: { files: files.length, estimatedCredits: estimate.estimatedCredits },
+      input: { question, language, fileIds: files.map((f) => f.id) },
     });
 
-    if (!answer) {
-      return NextResponse.json({ ok: false, error: "The AI returned nothing." }, { status: 502 });
+    if (!started.ok) {
+      if (started.reason === "insufficient") {
+        return NextResponse.json(
+          { ok: false, insufficientCredits: true, error: "Not enough credits for this question." },
+          { status: 402 }
+        );
+      }
+      return NextResponse.json({ ok: false, error: started.message }, { status: 500 });
     }
 
-    // The citations are checked against what the model was actually
-    // shown. One that names a page we never sent is removed — a
-    // fabricated reference looks checkable, which makes it worse than no
-    // reference at all.
-    const notFound = isNotInDocuments(answer);
-    const checked = verifyCitations(notFound ? stripNotInDocuments(answer) : answer, context.allowed);
-
-    return NextResponse.json({
-      ok: true,
-      answer: checked.answer,
-      answeredFromDocuments: !notFound,
-      citations: checked.verified,
-      // Reported, not hidden: if the model invented references, the user
-      // is entitled to know its answer was less grounded than it looked.
-      removedCitations: checked.fabricated.length,
-      skippedFiles: context.skipped,
-      truncated: context.truncated,
-      creditsCharged: settlement.creditsCharged,
-      disclosure: aiGeneratedNotice(language),
-    });
+    return NextResponse.json({ ok: true, jobId: started.jobId, queued: true }, { status: 202 });
   } catch (err) {
-    if (reservationId && userId) await releaseReservation(userId, reservationId);
+    // No reservation to release here any more: the hold is taken inside
+    // startJob, which gives it straight back if the row cannot be written.
+    // Everything after that belongs to the job, which has its own refund
+    // path. Releasing here as well would double-release a hold this route
+    // no longer owns.
     logApiError("/api/files/ask", err, {});
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });
   }

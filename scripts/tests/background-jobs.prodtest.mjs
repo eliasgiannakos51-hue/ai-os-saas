@@ -81,6 +81,9 @@ const anthropic = http.createServer((req, res) => {
     // payload would be "malformed" to whichever parser did not expect it —
     // the mistake this fake already made once with snake_case.
     const isPlan = /create_plan/.test(toolsText);
+    // file_ask sends NO tools at all — it wants prose back. Answering it
+    // with a tool_use block would make the handler read an empty answer.
+    const isPlainText = !parsed?.tools || parsed.tools.length === 0;
     const payload = isPlan
       ? {
           steps: [
@@ -110,6 +113,25 @@ const anthropic = http.createServer((req, res) => {
     if (!isClarify) await new Promise((r) => setTimeout(r, BUILD_DELAY_MS));
 
     res.writeHead(200, { "Content-Type": "application/json" });
+    if (isPlainText) {
+      res.end(
+        JSON.stringify({
+          id: "msg_test",
+          type: "message",
+          role: "assistant",
+          model: "claude-test",
+          content: [
+            {
+              type: "text",
+              text: "Η σύμβαση επιτρέπει ακύρωση με γραπτή ειδοποίηση 30 ημερών (Symvasi-Enoikiasis.pdf).",
+            },
+          ],
+          stop_reason: "end_turn",
+          usage: { input_tokens: 3400, output_tokens: 120 },
+        })
+      );
+      return;
+    }
     res.end(
       JSON.stringify({
         id: "msg_test",
@@ -128,6 +150,24 @@ await new Promise((r) => anthropic.listen(54351, "127.0.0.1", r));
 // ---------------------------------------------------------------------
 // An in-memory PostgREST that honours a conditional update.
 // ---------------------------------------------------------------------
+const FILES = [
+  {
+    id: "aaaaaaaa-1111-4111-8111-111111111111",
+    user_id: USER_ID,
+    filename: "Symvasi-Enoikiasis.pdf",
+    file_type: "pdf",
+    size_bytes: 284312,
+    page_count: 12,
+    char_count: 240,
+    extracted_text:
+      "ΑΡΘΡΟ 7 — ΑΚΥΡΩΣΗ. Ο μισθωτής μπορεί να ακυρώσει με γραπτή ειδοποίηση 30 ημερών. " +
+      "Σε ακύρωση εντός 30 ημερών από την έναρξη, παρακρατείται η προκαταβολή του ενός μήνα.",
+    processing_status: "ready",
+    error: null,
+    uploaded_at: "2026-02-01T09:00:00Z",
+  },
+];
+
 const jobs = new Map();
 const missions = [];
 let jobSeq = 0;
@@ -252,7 +292,12 @@ const supa = http.createServer((req, res) => {
 
     if (url.pathname.startsWith("/rest/v1/")) {
       const table = url.pathname.slice("/rest/v1/".length);
-      const rows = table === "user_credits" ? [{ user_id: USER_ID, credits_remaining: 5000, credits_total: 6000 }] : [];
+      const rows =
+        table === "user_credits"
+          ? [{ user_id: USER_ID, credits_remaining: 5000, credits_total: 6000 }]
+          : table === "user_files"
+            ? FILES
+            : [];
       const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
       if (single) return rows[0] ? json(200, rows[0]) : json(406, { message: "no rows" });
       return json(200, rows);
@@ -443,6 +488,42 @@ try {
     check(`the mission row exists (${missions.length})`, missions.length === 1);
     check(`and it settled once more, not twice (${settlements})`, settlements === 2);
     await ctxM2.close();
+  }
+
+  console.log("\n== 6c. file_ask: same test, same guarantees ==");
+  {
+    const ctxF = await newContext();
+    const pageF = await ctxF.newPage();
+    await pageF.goto(`http://127.0.0.1:${PORT}/dashboard/files`, { waitUntil: "networkidle", timeout: 60000 });
+    const startedF = await pageF.evaluate(async (fileId) => {
+      const r = await fetch("/api/files/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: "Τι λέει η σύμβαση για την ακύρωση;",
+          fileIds: [fileId],
+          language: "el",
+        }),
+      });
+      return { status: r.status, body: await r.json() };
+    }, FILES[0].id);
+    check(`the ask route answers 202 (${startedF.status})`, startedF.status === 202, JSON.stringify(startedF.body).slice(0, 200));
+    check("with a job id and no answer", typeof startedF.body.jobId === "string" && !startedF.body.answer);
+    const askJobId = startedF.body.jobId;
+
+    const closedAtF = Date.now();
+    await ctxF.close();
+    await new Promise((r) => setTimeout(r, BUILD_DELAY_MS + 6000));
+
+    const ctxF2 = await newContext();
+    const pageF2 = await ctxF2.newPage();
+    await pageF2.goto(`http://127.0.0.1:${PORT}/dashboard/files`, { waitUntil: "networkidle", timeout: 60000 });
+    const doneF = await pageF2.evaluate(async (id) => (await (await fetch(`/api/jobs/${id}`)).json()).job, askJobId);
+    check(`the answer completed with the page closed (status=${doneF.status})`, doneF.status === "done", JSON.stringify(doneF).slice(0, 300));
+    check("it answered", doneF.result?.answered === true, JSON.stringify(doneF.result ?? {}).slice(0, 300));
+    check("from the documents", doneF.result?.answeredFromDocuments === true);
+    check("and it finished after the page closed", Date.parse(doneF.finishedAt) >= closedAtF - 2000);
+    await ctxF2.close();
   }
 
   console.log("\n== 7. a second worker cannot run the same job ==");

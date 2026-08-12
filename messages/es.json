@@ -1349,7 +1349,12 @@
       "example2": "Resume los puntos clave.",
       "example3": "¿Cuáles son los plazos y los importes?",
       "processingHint": "Leyendo el archivo — suele tardar unos segundos. Podrás preguntar en cuanto esté listo.",
-      "failedHint": "No se encontró texto legible. Sube una versión con texto seleccionable."
+      "failedHint": "No se encontró texto legible. Sube una versión con texto seleccionable.",
+      "askStillRunning": "Sigue leyendo — está tardando. Continúa con la página cerrada; vuelve y pregunta de nuevo para ver la respuesta.",
+      "askStalled": "La pregunta se detuvo inesperadamente. No se cobraron créditos — inténtalo de nuevo.",
+      "stepReading": "Leyendo tus archivos",
+      "stepAnswering": "Elaborando la respuesta",
+      "stepChecking": "Comprobando las referencias"
     },
     "deepResearch": {
       "title": "Investigación profunda",

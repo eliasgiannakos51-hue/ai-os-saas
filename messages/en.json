@@ -1349,7 +1349,12 @@
       "example2": "Summarise the key points.",
       "example3": "What are the deadlines and amounts?",
       "processingHint": "Reading this file — usually a few seconds. It can be asked about once it is ready.",
-      "failedHint": "No readable text was found. Upload a version with selectable text."
+      "failedHint": "No readable text was found. Upload a version with selectable text.",
+      "askStillRunning": "Still reading — this is taking a while. It keeps going with the page closed; come back and ask again to see the answer.",
+      "askStalled": "That question stopped unexpectedly. No credits were charged — please try again.",
+      "stepReading": "Reading your files",
+      "stepAnswering": "Working out the answer",
+      "stepChecking": "Checking the references"
     },
     "deepResearch": {
       "title": "Deep Research",

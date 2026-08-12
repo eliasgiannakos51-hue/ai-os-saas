@@ -1349,7 +1349,12 @@
       "example2": "Résumez les points essentiels.",
       "example3": "Quels sont les délais et les montants ?",
       "processingHint": "Lecture du fichier — quelques secondes en général. Vous pourrez l'interroger dès qu'il sera prêt.",
-      "failedHint": "Aucun texte lisible trouvé. Importez une version au texte sélectionnable."
+      "failedHint": "Aucun texte lisible trouvé. Importez une version au texte sélectionnable.",
+      "askStillRunning": "Lecture en cours — cela prend du temps. Le travail continue même page fermée ; revenez et reposez la question pour voir la réponse.",
+      "askStalled": "La question s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez.",
+      "stepReading": "Lecture de vos fichiers",
+      "stepAnswering": "Élaboration de la réponse",
+      "stepChecking": "Vérification des références"
     },
     "deepResearch": {
       "title": "Recherche approfondie",

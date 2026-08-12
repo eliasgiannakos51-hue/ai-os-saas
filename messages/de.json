@@ -1349,7 +1349,12 @@
       "example2": "Fasse die wichtigsten Punkte zusammen.",
       "example3": "Welche Fristen und Beträge gibt es?",
       "processingHint": "Die Datei wird gelesen — meist ein paar Sekunden. Sobald sie fertig ist, kannst du dazu fragen.",
-      "failedHint": "Kein lesbarer Text gefunden. Lade eine Fassung mit auswählbarem Text hoch."
+      "failedHint": "Kein lesbarer Text gefunden. Lade eine Fassung mit auswählbarem Text hoch.",
+      "askStillRunning": "Liest noch — das dauert etwas. Es läuft auch bei geschlossener Seite weiter; komm zurück und frage erneut, um die Antwort zu sehen.",
+      "askStalled": "Die Frage wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
+      "stepReading": "Deine Dateien werden gelesen",
+      "stepAnswering": "Antwort wird erarbeitet",
+      "stepChecking": "Belege werden geprüft"
     },
     "deepResearch": {
       "title": "Tiefenrecherche",

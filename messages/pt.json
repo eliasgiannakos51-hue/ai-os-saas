@@ -1349,7 +1349,12 @@
       "example2": "Resume os pontos principais.",
       "example3": "Quais são os prazos e os valores?",
       "processingHint": "A ler o ficheiro — normalmente alguns segundos. Podes perguntar assim que estiver pronto.",
-      "failedHint": "Não foi encontrado texto legível. Carrega uma versão com texto selecionável."
+      "failedHint": "Não foi encontrado texto legível. Carrega uma versão com texto selecionável.",
+      "askStillRunning": "Ainda a ler — está a demorar. Continua com a página fechada; volta e pergunta de novo para veres a resposta.",
+      "askStalled": "A pergunta parou inesperadamente. Não foram cobrados créditos — tenta novamente.",
+      "stepReading": "A ler os teus ficheiros",
+      "stepAnswering": "A elaborar a resposta",
+      "stepChecking": "A verificar as referências"
     },
     "deepResearch": {
       "title": "Investigação profunda",

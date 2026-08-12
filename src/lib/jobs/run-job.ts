@@ -75,6 +75,18 @@ export type JobHandlerResult = {
    *  nothing worth charging for — a question the documents did not answer
    *  still costs tokens, but a handler may decide otherwise. */
   refund?: boolean;
+  /**
+   * The handler did its own reserve and settle.
+   *
+   * agent_run is the one case: executeAgent has always owned the whole
+   * billing cycle for a run, because a scheduled run happens with no
+   * request at all and had to. Settling again here would write a SECOND
+   * cost-log row for the same work — zero-cost, because this job's
+   * accumulator never saw the tokens, and therefore a row with a margin of
+   * zero that would drag the feature's average down and fire the
+   * below-target alert for a feature that is fine.
+   */
+  selfBilled?: boolean;
 };
 
 export type JobHandler = (ctx: JobContext) => Promise<JobHandlerResult>;
@@ -235,6 +247,26 @@ export async function runJob(params: { jobId: string; apiKey: string }): Promise
         })
         .eq("id", jobId);
       return { ran: true, status: "done", creditsCharged: 0 };
+    }
+
+    if (handled.selfBilled) {
+      // Nothing to settle here — see selfBilled. The row still records
+      // what the handler reported it charged, so the UI and the job
+      // history agree.
+      await admin
+        .from("ai_jobs")
+        .update({
+          status: "done",
+          running: false,
+          result: handled.result,
+          credits_charged: Number(handled.result.creditsCharged ?? 0),
+          usage_entries: costs.snapshot(),
+          step: stepCount(kind),
+          step_label: null,
+          finished_at: new Date().toISOString(),
+        })
+        .eq("id", jobId);
+      return { ran: true, status: "done", creditsCharged: Number(handled.result.creditsCharged ?? 0) };
     }
 
     const settlement = await settleReservation({

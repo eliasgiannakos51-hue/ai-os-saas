@@ -795,7 +795,9 @@
           "deep": "Gute Energie — nimm das in Angriff"
         },
         "heldBack": "{count} anspruchsvollere Schritte vorerst zurückgestellt"
-      }
+      },
+      "stillPlanning": "Plant noch — das dauert etwas. Es läuft weiter, und der Plan steht in deiner Missionsliste, sobald er fertig ist.",
+      "planStalled": "Der Plan wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen."
     },
     "reflection": {
       "title": "Wöchentliche Reflexion",

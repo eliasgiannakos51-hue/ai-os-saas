@@ -623,7 +623,17 @@ console.log("\n== 12. the wiring, asserted rather than assumed ==");
     checkTrue(`${file}: is rate limited`, /checkRateLimit\(/.test(src));
   }
   const runRoute = read("src/app/api/agents/[id]/run/route.ts");
-  checkTrue("Run now writes history with the admin client only", /createAdminClient\(\)/.test(runRoute));
+  // Moved with the work: "Run now" is a background job, so the write goes
+  // through the handler. The guarantee is unchanged — agent_runs has no
+  // insert policy on purpose, because a user who could write their own run
+  // history could fabricate one — so it is checked where the write is.
+  const runHandler = read("src/lib/jobs/handlers/agent-run.ts");
+  checkTrue("Run now writes history with the admin client only", /createAdminClient\(\)/.test(runHandler));
+  checkTrue("Run now no longer awaits the execution in the request", !/await executeAgent/.test(runRoute) && /status: 202/.test(runRoute));
+  // Ownership is still decided by RLS, in the route, where a session exists.
+  checkTrue("Run now still authorises through the user-scoped client", /from\("user_agents"\)/.test(runRoute));
+  // And the worker re-checks the agent belongs to the job's own user.
+  checkTrue("the worker re-checks ownership too", /agent\.user_id\) !== ctx\.userId/.test(runHandler));
 }
 {
   const buildRoute = read("src/app/api/agents/build/route.ts");

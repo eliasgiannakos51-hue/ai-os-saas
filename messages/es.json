@@ -795,7 +795,9 @@
           "deep": "Buena energía — ponte con esto"
         },
         "heldBack": "{count} pasos más exigentes aplazados por ahora"
-      }
+      },
+      "stillPlanning": "Sigue planificando — está tardando. Continuará, y el plan estará en tu lista de misiones cuando esté listo.",
+      "planStalled": "El plan se detuvo inesperadamente. No se cobraron créditos — inténtalo de nuevo."
     },
     "reflection": {
       "title": "Reflexión Semanal",

@@ -795,7 +795,9 @@
           "deep": "Bonne énergie — attaque celle-ci"
         },
         "heldBack": "{count} étapes plus exigeantes mises de côté pour l'instant"
-      }
+      },
+      "stillPlanning": "Planification en cours — cela prend du temps. Le travail continue et le plan sera dans votre liste de missions une fois prêt.",
+      "planStalled": "Le plan s'est arrêté de façon inattendue. Aucun crédit n'a été débité — réessayez."
     },
     "reflection": {
       "title": "Bilan Hebdomadaire",

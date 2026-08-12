@@ -75,8 +75,21 @@ const anthropic = http.createServer((req, res) => {
     // The clarifying-questions pre-check runs first and must say "no
     // questions", or the build would stop there and never reach the part
     // this test is about.
-    const isClarify = /clarif/i.test(JSON.stringify(parsed?.tools ?? []));
-    const payload = isClarify
+    const toolsText = JSON.stringify(parsed?.tools ?? []);
+    const isClarify = /clarif/i.test(toolsText);
+    // The Planner's own tool. Named separately because a single generic
+    // payload would be "malformed" to whichever parser did not expect it —
+    // the mistake this fake already made once with snake_case.
+    const isPlan = /create_plan/.test(toolsText);
+    const payload = isPlan
+      ? {
+          steps: [
+            { text: "Μάθε τα βασικά της αγοράς και ποιοι είναι οι ανταγωνιστές." },
+            { text: "Φτιάξε μια απλή σελίδα προσγείωσης και μέτρα το ενδιαφέρον." },
+            { text: "Μίλα με δέκα πιθανούς πελάτες πριν γράψεις κώδικα." },
+          ],
+        }
+      : isClarify
       ? { needs_clarification: false, questions: [] }
       : {
           // The REAL field names from agent-builder's tool schema. My first
@@ -116,6 +129,7 @@ await new Promise((r) => anthropic.listen(54351, "127.0.0.1", r));
 // An in-memory PostgREST that honours a conditional update.
 // ---------------------------------------------------------------------
 const jobs = new Map();
+const missions = [];
 let jobSeq = 0;
 let settlements = 0;
 let releases = 0;
@@ -224,6 +238,16 @@ const supa = http.createServer((req, res) => {
       const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
       if (single) return found[0] ? json(200, found[0]) : json(406, { message: "no rows" });
       return json(200, found);
+    }
+
+    if (url.pathname === "/rest/v1/ai_missions") {
+      if (req.method === "POST") {
+        const row = { id: `mission-${missions.length + 1}`, ...(parsed ?? {}) };
+        missions.push(row);
+        const wantsObject = (req.headers.accept ?? "").includes("vnd.pgrst.object");
+        return json(201, wantsObject ? row : [row]);
+      }
+      return json(200, missions);
     }
 
     if (url.pathname.startsWith("/rest/v1/")) {
@@ -388,7 +412,45 @@ try {
   const done = await page2.evaluate(async () => (await (await fetch("/api/jobs?kind=agent_build&active=0")).json()));
   check("while the finished job is still findable", done.job?.id === jobId);
 
+  console.log("\n== 6b. mission_plan: same test, same guarantees ==");
+  {
+    const ctxM = await newContext();
+    const pageM = await ctxM.newPage();
+    await pageM.goto(`http://127.0.0.1:${PORT}/dashboard/mission`, { waitUntil: "networkidle", timeout: 60000 });
+    const startedM = await pageM.evaluate(async () => {
+      const r = await fetch("/api/mission/plan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ goal: "Θέλω να ξεκινήσω μια μικρή επιχείρηση με χειροποίητα κοσμήματα." }),
+      });
+      return { status: r.status, body: await r.json() };
+    });
+    check(`the plan route answers 202 (${startedM.status})`, startedM.status === 202);
+    check("with a job id and no mission yet", typeof startedM.body.jobId === "string" && !startedM.body.mission);
+    const missionJobId = startedM.body.jobId;
+
+    const closedAtM = Date.now();
+    await ctxM.close();
+    await new Promise((r) => setTimeout(r, BUILD_DELAY_MS + 6000));
+
+    const ctxM2 = await newContext();
+    const pageM2 = await ctxM2.newPage();
+    await pageM2.goto(`http://127.0.0.1:${PORT}/dashboard/mission`, { waitUntil: "networkidle", timeout: 60000 });
+    const doneM = await pageM2.evaluate(async (id) => (await (await fetch(`/api/jobs/${id}`)).json()).job, missionJobId);
+    check(`the plan completed with the page closed (status=${doneM.status})`, doneM.status === "done", JSON.stringify(doneM).slice(0, 300));
+    check("a mission was actually saved", doneM.result?.planned === true, JSON.stringify(doneM.result ?? {}).slice(0, 300));
+    check("and it finished after the page closed", Date.parse(doneM.finishedAt) >= closedAtM - 2000);
+    check(`the mission row exists (${missions.length})`, missions.length === 1);
+    check(`and it settled once more, not twice (${settlements})`, settlements === 2);
+    await ctxM2.close();
+  }
+
   console.log("\n== 7. a second worker cannot run the same job ==");
+  // Anchored to the count as it stands NOW, not to the literal 1. The
+  // first version asserted 1 and went red the moment the mission section
+  // above legitimately settled a second job — the assertion was counting
+  // the wrong thing, not catching a double charge.
+  const settlementsBeforeRace = settlements;
   const raced = await page2.evaluate(async (id) => {
     const [a, b] = await Promise.all([
       fetch(`/api/jobs/${id}/continue`, { method: "POST" }).then((r) => r.json()),
@@ -398,7 +460,7 @@ try {
   }, jobId);
   check("both calls are answered", raced.every((r) => r.ok === true), JSON.stringify(raced));
   check("neither re-ran the finished job", raced.every((r) => r.ran === false), JSON.stringify(raced));
-  check(`and nothing settled a second time (${settlements})`, settlements === 1);
+  check(`and nothing settled again (${settlementsBeforeRace} -> ${settlements})`, settlements === settlementsBeforeRace);
   await ctx2.close();
 } catch (err) {
   failures.push("unhandled error");

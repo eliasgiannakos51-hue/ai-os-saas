@@ -795,7 +795,9 @@
           "deep": "Boa energia — encare este"
         },
         "heldBack": "{count} passos mais pesados adiados por agora"
-      }
+      },
+      "stillPlanning": "Ainda a planear — está a demorar. Vai continuar, e o plano estará na tua lista de missões quando estiver pronto.",
+      "planStalled": "O plano parou inesperadamente. Não foram cobrados créditos — tenta novamente."
     },
     "reflection": {
       "title": "Reflexão Semanal",

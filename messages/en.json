@@ -795,7 +795,9 @@
           "deep": "Good energy — take this on"
         },
         "heldBack": "{count} heavier steps held back for now"
-      }
+      },
+      "stillPlanning": "Still planning — this is taking a while. It will keep going, and the plan will be on your missions list when it is ready.",
+      "planStalled": "That plan stopped unexpectedly. No credits were charged — please try again."
     },
     "reflection": {
       "title": "Weekly Reflection",

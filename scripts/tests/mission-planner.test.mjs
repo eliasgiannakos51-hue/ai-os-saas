@@ -176,9 +176,19 @@ checkTrue('an empty result is signalled with NONE', agents.includes('toUpperCase
 const route = readFileSync("src/app/api/mission/plan/route.ts", "utf8");
 // Compare the awaited CALL SITES, not any textual occurrence — prose
 // comments in this file mention planMission() long before it is called.
+// The ordering guarantee moved with the work: planning is a background
+// job now, so research-then-plan happens in the handler. The route's job
+// is to authorise, reserve and hand off — it does neither call. Checked
+// where the calls are rather than relaxed to fit the file that used to
+// hold them.
+const planHandler = readFileSync("src/lib/jobs/handlers/mission-plan.ts", "utf8");
 checkTrue(
   "the route researches before it plans",
-  route.indexOf("await researchGoal(") < route.indexOf("await planMission(")
+  planHandler.indexOf("await researchGoal(") < planHandler.indexOf("await planMission(")
+);
+checkTrue(
+  "and the route itself no longer awaits either",
+  !/await researchGoal\(/.test(route) && !/await planMission\(/.test(route)
 );
 checkTrue("web searches are reserved for", route.includes("expectedWebSearches: 3"));
 

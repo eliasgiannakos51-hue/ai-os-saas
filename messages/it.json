@@ -795,7 +795,9 @@
           "deep": "Buona energia — affronta questo"
         },
         "heldBack": "{count} passi più impegnativi rimandati per ora"
-      }
+      },
+      "stillPlanning": "Sta ancora pianificando — ci vuole un po'. Continuerà, e il piano sarà nel tuo elenco missioni quando è pronto.",
+      "planStalled": "Il piano si è interrotto inaspettatamente. Nessun credito è stato addebitato — riprova."
     },
     "reflection": {
       "title": "Riflessione Settimanale",

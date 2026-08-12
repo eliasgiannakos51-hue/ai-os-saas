@@ -79,6 +79,8 @@ export function AgentsWorkspace({
   // changed pages.
   const [jobId, setJobId] = useState<string | null>(null);
   const { job, isRunning: building } = useAiJob(jobId);
+  const [runJobId, setRunJobId] = useState<string | null>(null);
+  const { job: runJob, isRunning: runningNow } = useAiJob(runJobId);
   const [questions, setQuestions] = useState<string[] | null>(null);
   const [preview, setPreview] = useState<BuildResponse | null>(null);
   const [savingAgent, setSavingAgent] = useState(false);
@@ -208,6 +210,50 @@ export function AgentsWorkspace({
     };
   }, []);
 
+  // The run's outcome arrives from its row, exactly like the build's.
+  useEffect(() => {
+    if (!runJob || runJob.status === "queued" || runJob.status === "running") return;
+    if (runJob.status === "failed") {
+      addToast(runJob.error === "stalled" ? t("buildStalled") : t("runFailed"), "error");
+      setRunJobId(null);
+      router.refresh();
+      return;
+    }
+    const result = (runJob.result ?? {}) as {
+      ran?: boolean;
+      output?: string;
+      creditsCharged?: number;
+      error?: string;
+    };
+    if (!result.ran) {
+      addToast(result.error ?? t("runFailed"), "error");
+    } else if (result.output) {
+      setLastRunOutput(result.output);
+      addToast(t("runSuccess", { credits: formatNumber(result.creditsCharged ?? 0, locale) }));
+    } else {
+      addToast(t("runNothingToReport"));
+    }
+    setRunJobId(null);
+    router.refresh();
+  }, [runJob, addToast, t, locale, router]);
+
+  // A run started before a reload is picked back up the same way a build is.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch("/api/jobs?kind=agent_run");
+        const data = await response.json();
+        if (!cancelled && data.ok && data.job) setRunJobId(String(data.job.id));
+      } catch {
+        /* no running job is the common answer */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   async function createAgent() {
     if (!preview?.draft) return;
     setSavingAgent(true);
@@ -285,29 +331,23 @@ export function AgentsWorkspace({
     }
   }
 
+  // RUNNING IS A BACKGROUND JOB NOW, for the same reason building is: a
+  // search-enabled run plus a retry plus an email is the slowest thing
+  // this feature does, and awaiting it meant closing the tab aborted the
+  // fetch while the run itself carried on unseen.
   async function runNow(agent: UserAgent) {
-    setBusyId(agent.id);
     setLastRunOutput(null);
+    setSelectedId(agent.id);
     try {
-      const response = await fetch(`/api/agents/${agent.id}/run`, { method: "POST" });
+      const response = await fetch(`/api/agents/${agent.id}/run`, { method: "POST", keepalive: true });
       const data = await response.json();
       if (!data.ok) {
         addToast(data.error ?? t("runFailed"), "error");
-        router.refresh();
         return;
       }
-      if (data.output) {
-        setLastRunOutput(data.output);
-        setSelectedId(agent.id);
-        addToast(t("runSuccess", { credits: formatNumber(data.creditsCharged ?? 0, locale) }));
-      } else {
-        addToast(t("runNothingToReport"));
-      }
-      router.refresh();
+      setRunJobId(String(data.jobId));
     } catch (err) {
       addToast(getErrorMessage(err, t("runFailed")), "error");
-    } finally {
-      setBusyId(null);
     }
   }
 
@@ -346,7 +386,7 @@ export function AgentsWorkspace({
 
   function statusFor(agent: UserAgent): EntityCardStatus {
     if (agent.status === "active")
-      return { label: t("statusActive"), tone: "success", pulse: busyId === agent.id };
+      return { label: t("statusActive"), tone: "success", pulse: busyId === agent.id || runningNow };
     if (agent.status === "paused") return { label: t("statusPaused"), tone: "neutral" };
     return { label: t("statusDisabled"), tone: "danger" };
   }
@@ -541,7 +581,9 @@ export function AgentsWorkspace({
                       key: "run",
                       label: t("menuRunNow"),
                       icon: Play,
-                      disabled: busyId === agent.id,
+                      // Driven by the job row rather than a local flag, so a
+                      // run started before a reload still reads as running.
+                      disabled: busyId === agent.id || runningNow,
                       onSelect: () => void runNow(agent),
                     },
                     {

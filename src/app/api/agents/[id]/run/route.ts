@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { executeAgent } from "@/lib/agents/execute-agent";
-import type { UserAgent } from "@/lib/agents/agent-config";
+import { startJob } from "@/lib/jobs/start-job";
 
 export const dynamic = "force-dynamic";
 // A run with web search plus a retry is the slowest thing this feature
@@ -59,10 +57,14 @@ export async function POST(_request: Request, { params }: { params: { id: string
       .eq("id", agentId)
       .maybeSingle();
 
+    // Read through the user-scoped client so RLS decides ownership BEFORE
+    // a job exists. The worker re-reads the agent for itself (a prompt
+    // edited between the press and the run must not be executed stale),
+    // but the authorisation question is answered here, where there is a
+    // session to answer it with.
     if (fetchError || !agentRow) {
       return NextResponse.json({ ok: false, error: "Agent not found." }, { status: 404 });
     }
-    const agent = agentRow as UserAgent;
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
@@ -72,45 +74,32 @@ export async function POST(_request: Request, { params }: { params: { id: string
       );
     }
 
-    // The admin client is used for the WRITES only (agent_runs has no
-    // insert policy on purpose — a user who could write their own run
-    // history could fabricate one). The row being executed was already
-    // authorised above through RLS.
-    const result = await executeAgent({
-      admin: createAdminClient(),
-      user,
-      agent,
-      triggerSource: "manual",
-      apiKey,
+    // FROM HERE THE ROUTE DOES NOT DO THE RUN.
+    //
+    // executeAgent is the slowest thing this feature does — a search-
+    // enabled call plus a retry plus an email — and awaiting it meant
+    // closing the tab aborted the fetch. The run itself often finished,
+    // and the user was left with no result and no way to know.
+    //
+    // No reserve here: executeAgent owns the whole billing cycle for a
+    // run, because a SCHEDULED run happens with no request at all. See
+    // selfBilled in lib/jobs/run-job.ts for why settling twice would be
+    // worse than not settling here.
+    const started = await startJob({
+      userId: user.id,
+      kind: "agent_run",
+      reserve: 0,
+      input: { agentId },
     });
 
-    if (!result.ok) {
-      const status =
-        result.reason === "rate_limited" || result.reason === "circuit_breaker"
-          ? 429
-          : result.reason === "insufficient_credits"
-            ? 402
-            : result.reason === "run_failed"
-              ? 200
-              : 500;
-      // A run that legitimately failed is a 200 with ok:false — it is a
-      // real, recorded outcome the user needs to read, not a transport
-      // error the client should retry.
+    if (!started.ok) {
       return NextResponse.json(
-        { ok: false, reason: result.reason, error: result.message, runId: result.runId },
-        { status }
+        { ok: false, error: started.reason === "insufficient" ? "Not enough credits." : started.message },
+        { status: started.reason === "insufficient" ? 402 : 500 }
       );
     }
 
-    return NextResponse.json({
-      ok: true,
-      runId: result.runId,
-      output: result.output,
-      creditsCharged: result.creditsCharged,
-      delivered: result.delivered,
-      deliveredVia: result.deliveredVia,
-      deliveryIssue: result.deliveryIssue,
-    });
+    return NextResponse.json({ ok: true, jobId: started.jobId, queued: true }, { status: 202 });
   } catch (err) {
     logApiError("/api/agents/[id]/run", err);
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });

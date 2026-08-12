@@ -2,6 +2,8 @@ import "server-only";
 import type { JobHandler } from "@/lib/jobs/run-job";
 import type { JobKind } from "@/lib/jobs/job-types";
 import { agentBuildHandler } from "@/lib/jobs/handlers/agent-build";
+import { agentRunHandler } from "@/lib/jobs/handlers/agent-run";
+import { missionPlanHandler } from "@/lib/jobs/handlers/mission-plan";
 
 /**
  * Which worker runs which kind of job.
@@ -17,4 +19,6 @@ import { agentBuildHandler } from "@/lib/jobs/handlers/agent-build";
  */
 export const JOB_HANDLERS: Partial<Record<JobKind, JobHandler>> = {
   agent_build: agentBuildHandler,
+  agent_run: agentRunHandler,
+  mission_plan: missionPlanHandler,
 };

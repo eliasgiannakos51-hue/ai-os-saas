@@ -120,7 +120,11 @@ console.log("\n== 3. every user-facing AI feature carries the block ==");
 // feature file -> the export its system prompt must reference.
 const WIRING = {
   "src/app/api/chat/route.ts": "AI_CONDUCT_EL",
-  "src/app/api/create/route.ts": "AI_CONDUCT_EN",
+  // Moved out of api/create when Create Anything became a background job:
+  // the system prompt now lives in the module the WORKER builds it from,
+  // because a prompt inside a route handler cannot be shared with one. The
+  // requirement is unchanged — it is checked where the prompt is.
+  "src/lib/create-studio/route-entry.ts": "AI_CONDUCT_EN",
   "src/app/api/create-studio/detect/route.ts": "AI_SAFETY_BOUNDARIES_EN",
   "src/app/api/records/ask/route.ts": "AI_CONDUCT_EL",
   "src/app/api/text-actions/route.ts": "AI_SAFETY_COMPACT_EL",

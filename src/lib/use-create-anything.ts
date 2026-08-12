@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useCredits } from "@/components/credits/credits-context";
-import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
+import { createViaJob } from "@/lib/create-studio/create-via-job";
 
 export type CreateResult =
   | { type: "matched"; moduleTitle: string; href: string; message: string }
@@ -38,21 +38,19 @@ export function useCreateAnything() {
       // means this is the resubmission after a clarifying-questions
       // pause, where a user's access token can realistically expire
       // while they compose real answers. See lib/fetch-with-auth-retry.ts.
-      const res = await fetchWithAuthRetry("/api/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, skipClarification, imagePaths }),
-      });
-      const data = await res.json();
+      // Started as a background job: the work now outlives this request,
+      // so closing the page mid-classification still creates the entry.
+      const data = await createViaJob({ message, skipClarification, imagePaths });
 
-      if (!res.ok || !data.ok) {
+      if (!data.ok) {
+        if (data.outOfCredits) return { type: "outOfCredits", message: data.message ?? "" };
         return { type: "error", message: data.error ?? "Something went wrong." };
       }
 
       void refreshCredits();
 
-      if (data.outOfCredits) {
-        return { type: "outOfCredits", message: data.message ?? "" };
+      if (data.stillRunning) {
+        return { type: "unmatched", message: "" };
       }
 
       if (data.needsClarification) {
@@ -62,12 +60,12 @@ export function useCreateAnything() {
       if (data.matched) {
         return {
           type: "matched",
-          moduleTitle: data.moduleTitle,
-          href: data.href,
-          message: data.message,
+          moduleTitle: data.moduleTitle ?? "",
+          href: data.href ?? "",
+          message: data.message ?? "",
         };
       }
-      return { type: "unmatched", message: data.message };
+      return { type: "unmatched", message: data.message ?? "" };
     } catch {
       return { type: "error", message: "Network error — please try again." };
     } finally {

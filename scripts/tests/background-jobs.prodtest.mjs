@@ -81,10 +81,13 @@ const anthropic = http.createServer((req, res) => {
     // payload would be "malformed" to whichever parser did not expect it —
     // the mistake this fake already made once with snake_case.
     const isPlan = /create_plan/.test(toolsText);
+    const isRouteEntry = /route_entry/.test(toolsText);
     // file_ask sends NO tools at all — it wants prose back. Answering it
     // with a tool_use block would make the handler read an empty answer.
     const isPlainText = !parsed?.tools || parsed.tools.length === 0;
-    const payload = isPlan
+    const payload = isRouteEntry
+      ? { module: "ideas", fields: { title: "Χειροποίητα κοσμήματα" }, message: "Καταχωρήθηκε ως ιδέα." }
+      : isPlan
       ? {
           steps: [
             { text: "Μάθε τα βασικά της αγοράς και ποιοι είναι οι ανταγωνιστές." },
@@ -170,6 +173,7 @@ const FILES = [
 
 const jobs = new Map();
 const missions = [];
+const moduleRows = [];
 let jobSeq = 0;
 let settlements = 0;
 let releases = 0;
@@ -278,6 +282,16 @@ const supa = http.createServer((req, res) => {
       const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
       if (single) return found[0] ? json(200, found[0]) : json(406, { message: "no rows" });
       return json(200, found);
+    }
+
+    if (url.pathname === "/rest/v1/create_requests" || url.pathname === "/rest/v1/user_ideas") {
+      if (req.method === "POST") {
+        const row = { id: `row-${moduleRows.length + 1}`, ...(parsed ?? {}) };
+        moduleRows.push(row);
+        const wantsObject = (req.headers.accept ?? "").includes("vnd.pgrst.object");
+        return json(201, wantsObject ? row : [row]);
+      }
+      return json(200, moduleRows);
     }
 
     if (url.pathname === "/rest/v1/ai_missions") {
@@ -524,6 +538,36 @@ try {
     check("from the documents", doneF.result?.answeredFromDocuments === true);
     check("and it finished after the page closed", Date.parse(doneF.finishedAt) >= closedAtF - 2000);
     await ctxF2.close();
+  }
+
+  console.log("\n== 6d. create: same test, same guarantees ==");
+  {
+    const ctxC = await newContext();
+    const pageC = await ctxC.newPage();
+    await pageC.goto(`http://127.0.0.1:${PORT}/dashboard/create`, { waitUntil: "networkidle", timeout: 60000 });
+    const startedC = await pageC.evaluate(async () => {
+      const r = await fetch("/api/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: "Ιδέα: χειροποίητα κοσμήματα από ασήμι.", skipClarification: true }),
+      });
+      return { status: r.status, body: await r.json() };
+    });
+    check(`the create route answers 202 (${startedC.status})`, startedC.status === 202, JSON.stringify(startedC.body).slice(0, 200));
+    check("with a job id and no classification", typeof startedC.body.jobId === "string" && startedC.body.matched === undefined);
+    const createJobId = startedC.body.jobId;
+
+    const closedAtC = Date.now();
+    await ctxC.close();
+    await new Promise((r) => setTimeout(r, BUILD_DELAY_MS + 6000));
+
+    const ctxC2 = await newContext();
+    const pageC2 = await ctxC2.newPage();
+    await pageC2.goto(`http://127.0.0.1:${PORT}/dashboard/create`, { waitUntil: "networkidle", timeout: 60000 });
+    const doneC = await pageC2.evaluate(async (id) => (await (await fetch(`/api/jobs/${id}`)).json()).job, createJobId);
+    check(`create completed with the page closed (status=${doneC.status})`, doneC.status === "done", JSON.stringify(doneC).slice(0, 300));
+    check("and it finished after the page closed", Date.parse(doneC.finishedAt) >= closedAtC - 2000);
+    await ctxC2.close();
   }
 
   console.log("\n== 7. a second worker cannot run the same job ==");

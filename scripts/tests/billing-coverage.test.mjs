@@ -72,7 +72,17 @@ const DECLARED = {
   "src/lib/website-security-review.ts": { calls: 1, billing: "settled", note: "recorded onto the generation's accumulator" },
   "src/lib/mission-step-runner.ts": { calls: 1, billing: "settled" },
   "src/lib/clarification.ts": { calls: 1, billing: "settled" },
-  "src/app/api/create/route.ts": { calls: 1, billing: "settled" },
+  // Moved out of api/create when Create Anything became a background job:
+  // the route awaited a vision-capable classification under a 120-second
+  // ceiling, and vision is the slow case because the images travel with
+  // the message. Still ONE call from this file — the clarifying-questions
+  // pre-check moved with it but is counted at lib/clarification.ts, which
+  // is where its messages.create lives; it lands on the same accumulator,
+  // so a request that stops there is still paid for. Billing otherwise
+  // unchanged: a classification that matched nothing still settles (it is
+  // a real answer the user reads), and an insert that fails still refunds
+  // (nothing was saved).
+  "src/lib/jobs/handlers/create.ts": { calls: 1, billing: "settled" },
   "src/app/api/create-studio/detect/route.ts": { calls: 1, billing: "settled" },
   "src/app/api/chat/route.ts": { calls: 1, billing: "settled" },
 

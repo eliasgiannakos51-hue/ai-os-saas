@@ -5,6 +5,7 @@ import { agentBuildHandler } from "@/lib/jobs/handlers/agent-build";
 import { agentRunHandler } from "@/lib/jobs/handlers/agent-run";
 import { missionPlanHandler } from "@/lib/jobs/handlers/mission-plan";
 import { fileAskHandler } from "@/lib/jobs/handlers/file-ask";
+import { createHandler } from "@/lib/jobs/handlers/create";
 
 /**
  * Which worker runs which kind of job.
@@ -23,4 +24,5 @@ export const JOB_HANDLERS: Partial<Record<JobKind, JobHandler>> = {
   agent_run: agentRunHandler,
   mission_plan: missionPlanHandler,
   file_ask: fileAskHandler,
+  create: createHandler,
 };

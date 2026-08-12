@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useCredits } from "@/components/credits/credits-context";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { createViaJob } from "@/lib/create-studio/create-via-job";
 import type { CreateStudioDetection, CreateStudioType } from "@/lib/create-studio/plan";
 import type { UserWebsite } from "@/types/user-website";
 
@@ -187,14 +188,9 @@ export function useCreateStudio() {
 
           case "moduleEntry": {
             pushStep({ key: "route", labelKey: "routingEntry", status: "running" });
-            const res = await fetchWithAuthRetry("/api/create", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ message: description, skipClarification: true }),
-            });
-            const data = await res.json();
+            const data = await createViaJob({ message: description, skipClarification: true });
             void refreshCredits();
-            if (!res.ok || !data.ok) {
+            if (!data.ok) {
               finishStep("route", "failed");
               setError(getErrorMessage(data?.error, "Could not create that entry."));
               return;

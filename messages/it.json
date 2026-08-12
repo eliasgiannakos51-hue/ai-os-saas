@@ -795,7 +795,9 @@
           "deep": "Buona energia — affronta questo"
         },
         "heldBack": "{count} passi più impegnativi rimandati per ora"
-      }
+      },
+      "stillPlanning": "Sta ancora pianificando — ci vuole un po'. Continuerà, e il piano sarà nel tuo elenco missioni quando è pronto.",
+      "planStalled": "Il piano si è interrotto inaspettatamente. Nessun credito è stato addebitato — riprova."
     },
     "reflection": {
       "title": "Riflessione Settimanale",
@@ -1159,7 +1161,8 @@
         "weekly": "Ogni {day} alle {time}",
         "monthly": "Il giorno {day} di ogni mese alle {time}",
         "custom": "Pianificazione: {expression}"
-      }
+      },
+      "buildStalled": "La creazione si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova."
     },
     "publishing": {
       "title": "Siti pubblicati",
@@ -1203,7 +1206,19 @@
       "rollbackSuccess": "Ripristinata la versione {number}.",
       "rollbackError": "Non è stato possibile ripristinare. Riprova.",
       "confirmRollback": "Rimettere online la versione {number}?",
-      "unpublishHint": "Rimuove il sito dal web. Resta nel tuo account e puoi ripubblicarlo."
+      "unpublishHint": "Rimuove il sito dal web. Resta nel tuo account e puoi ripubblicarlo.",
+      "publishIntro": "Il tuo sito ha bisogno di un proprio indirizzo web prima di andare online. Scegline uno — potrai cambiarlo in seguito.",
+      "addressPlaceholder": "il-tuo-indirizzo",
+      "previewLabel": "Il tuo sito sarà su",
+      "addressAvailable": "Questo indirizzo va bene.",
+      "disabledHint": "Inserisci un indirizzo valido per pubblicare.",
+      "reasonEmpty": "Scrivi un indirizzo per continuare.",
+      "reasonTooShort": "Troppo corto — usa almeno {min} caratteri.",
+      "reasonTooLong": "Troppo lungo — usa al massimo {max} caratteri.",
+      "reasonInvalidCharacters": "Sono ammessi solo lettere minuscole, numeri e trattini.",
+      "reasonBadEdges": "Non può iniziare né finire con un trattino.",
+      "reasonReserved": "Questo indirizzo è riservato. Scegline un altro.",
+      "reasonTaken": "Questo indirizzo è già occupato. Provane un altro."
     },
     "integrations": {
       "title": "Integrazioni",
@@ -1303,7 +1318,7 @@
       "askNothingSelected": "Seleziona i file da cui deve venire la risposta. Non verrà usato altro.",
       "askSelected": "Risposta da {count} file: {names}",
       "tooManySelected": "Chiedi al massimo di {max} file alla volta.",
-      "askPlaceholder": "Cosa dicono questi documenti su…?",
+      "askPlaceholder": "Chiedi qualcosa sui file selezionati…",
       "ask": "Chiedi",
       "asking": "Sta leggendo…",
       "askError": "Impossibile rispondere alla domanda.",
@@ -1313,7 +1328,33 @@
       "removedCitations": "{count} riferimento(i) puntavano a pagine non fornite e sono stati rimossi.",
       "truncatedWarning": "È entrata solo una parte della selezione, quindi la risposta può essere incompleta.",
       "skippedFiles": "Saltati (nessun testo leggibile): {names}",
-      "creditsCharged": "{credits} crediti"
+      "creditsCharged": "{credits} crediti",
+      "stepsLabel": "Come funziona questa pagina",
+      "step1Title": "1. Carica i file",
+      "step1Hint": "PDF, Word, Excel, CSV o testo.",
+      "step2Title": "2. Scegli su quali chiedere",
+      "step2Hint": "Spunta i file da cui deve arrivare la risposta.",
+      "step3Title": "3. Fai la tua domanda",
+      "step3Hint": "L'IA risponde solo dai file che hai spuntato.",
+      "selectedCount": "{count, plural, one {# file selezionato} other {# file selezionati}}",
+      "clearSelection": "Azzera",
+      "goToAsk": "Chiedi su questi",
+      "emptyTitle": "Non hai ancora caricato nulla",
+      "emptyBody": "Carica un PDF, Word o Excel e chiedi all'IA cosa contiene. Legge solo i file che spunti, e ogni risposta indica la pagina da cui proviene.",
+      "emptyExample": "Ad es. «Cosa dice il contratto sulla disdetta?»",
+      "askDisabledNoFiles": "Spunta prima almeno un file qui sopra.",
+      "askDisabledNoQuestion": "Scrivi la tua domanda per continuare.",
+      "examplesLabel": "Prova:",
+      "example1": "Cosa dice sulla disdetta?",
+      "example2": "Riassumi i punti principali.",
+      "example3": "Quali sono le scadenze e gli importi?",
+      "processingHint": "Sto leggendo il file — di solito pochi secondi. Potrai interrogarlo appena è pronto.",
+      "failedHint": "Nessun testo leggibile trovato. Carica una versione con testo selezionabile.",
+      "askStillRunning": "Sta ancora leggendo — ci vuole un po'. Continua anche a pagina chiusa; torna e richiedi per vedere la risposta.",
+      "askStalled": "La domanda si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova.",
+      "stepReading": "Sto leggendo i tuoi file",
+      "stepAnswering": "Sto elaborando la risposta",
+      "stepChecking": "Sto verificando i riferimenti"
     },
     "deepResearch": {
       "title": "Ricerca approfondita",

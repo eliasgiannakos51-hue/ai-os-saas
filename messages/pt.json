@@ -795,7 +795,9 @@
           "deep": "Boa energia — encare este"
         },
         "heldBack": "{count} passos mais pesados adiados por agora"
-      }
+      },
+      "stillPlanning": "Ainda a planear — está a demorar. Vai continuar, e o plano estará na tua lista de missões quando estiver pronto.",
+      "planStalled": "O plano parou inesperadamente. Não foram cobrados créditos — tenta novamente."
     },
     "reflection": {
       "title": "Reflexão Semanal",
@@ -1159,7 +1161,8 @@
         "weekly": "Todas as {day} às {time}",
         "monthly": "Dia {day} de cada mês às {time}",
         "custom": "Agendamento: {expression}"
-      }
+      },
+      "buildStalled": "A criação parou inesperadamente. Não foram cobrados créditos — tenta novamente."
     },
     "publishing": {
       "title": "Sites publicados",
@@ -1203,7 +1206,19 @@
       "rollbackSuccess": "Reposta a versão {number}.",
       "rollbackError": "Não foi possível repor. Tente novamente.",
       "confirmRollback": "Repor a versão {number} no site no ar?",
-      "unpublishHint": "Retira o site da web. Permanece na sua conta e pode voltar a ser publicado."
+      "unpublishHint": "Retira o site da web. Permanece na sua conta e pode voltar a ser publicado.",
+      "publishIntro": "O teu site precisa do seu próprio endereço web antes de ficar online. Escolhe um — podes alterá-lo mais tarde.",
+      "addressPlaceholder": "o-teu-endereco",
+      "previewLabel": "O teu site ficará em",
+      "addressAvailable": "Esse endereço parece bom.",
+      "disabledHint": "Escreve um endereço válido para publicar.",
+      "reasonEmpty": "Escreve um endereço para continuar.",
+      "reasonTooShort": "Demasiado curto — usa pelo menos {min} caracteres.",
+      "reasonTooLong": "Demasiado longo — usa no máximo {max} caracteres.",
+      "reasonInvalidCharacters": "Só são permitidas minúsculas, números e hífenes.",
+      "reasonBadEdges": "Não pode começar nem terminar com um hífen.",
+      "reasonReserved": "Esse endereço está reservado. Escolhe outro.",
+      "reasonTaken": "Esse endereço já está ocupado. Tenta outro."
     },
     "integrations": {
       "title": "Integrações",
@@ -1303,7 +1318,7 @@
       "askNothingSelected": "Marca os ficheiros de onde deve vir a resposta. Nada mais será usado.",
       "askSelected": "A responder a partir de {count} ficheiro(s): {names}",
       "tooManySelected": "Pergunta sobre até {max} ficheiros de cada vez.",
-      "askPlaceholder": "O que dizem estes documentos sobre…?",
+      "askPlaceholder": "Pergunta algo sobre os ficheiros selecionados…",
       "ask": "Perguntar",
       "asking": "A ler…",
       "askError": "Não foi possível responder à pergunta.",
@@ -1313,7 +1328,33 @@
       "removedCitations": "{count} referência(s) apontavam para páginas não fornecidas e foram removidas.",
       "truncatedWarning": "Só coube parte da seleção, por isso a resposta pode estar incompleta.",
       "skippedFiles": "Ignorados (sem texto legível): {names}",
-      "creditsCharged": "{credits} créditos"
+      "creditsCharged": "{credits} créditos",
+      "stepsLabel": "Como funciona esta página",
+      "step1Title": "1. Carrega ficheiros",
+      "step1Hint": "PDF, Word, Excel, CSV ou texto.",
+      "step2Title": "2. Escolhe sobre quais perguntar",
+      "step2Hint": "Marca os ficheiros de onde deve vir a resposta.",
+      "step3Title": "3. Faz a tua pergunta",
+      "step3Hint": "A IA responde apenas a partir dos ficheiros marcados.",
+      "selectedCount": "{count, plural, one {# ficheiro selecionado} other {# ficheiros selecionados}}",
+      "clearSelection": "Limpar",
+      "goToAsk": "Perguntar sobre estes",
+      "emptyTitle": "Ainda não carregaste nada",
+      "emptyBody": "Carrega um PDF, Word ou Excel e pergunta à IA sobre o conteúdo. Só lê os ficheiros que marcares, e cada resposta aponta a página de onde veio.",
+      "emptyExample": "P. ex. «O que diz o contrato sobre o cancelamento?»",
+      "askDisabledNoFiles": "Marca primeiro pelo menos um ficheiro acima.",
+      "askDisabledNoQuestion": "Escreve a tua pergunta para continuar.",
+      "examplesLabel": "Experimenta:",
+      "example1": "O que diz sobre o cancelamento?",
+      "example2": "Resume os pontos principais.",
+      "example3": "Quais são os prazos e os valores?",
+      "processingHint": "A ler o ficheiro — normalmente alguns segundos. Podes perguntar assim que estiver pronto.",
+      "failedHint": "Não foi encontrado texto legível. Carrega uma versão com texto selecionável.",
+      "askStillRunning": "Ainda a ler — está a demorar. Continua com a página fechada; volta e pergunta de novo para veres a resposta.",
+      "askStalled": "A pergunta parou inesperadamente. Não foram cobrados créditos — tenta novamente.",
+      "stepReading": "A ler os teus ficheiros",
+      "stepAnswering": "A elaborar a resposta",
+      "stepChecking": "A verificar as referências"
     },
     "deepResearch": {
       "title": "Investigação profunda",

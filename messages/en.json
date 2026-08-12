@@ -795,7 +795,9 @@
           "deep": "Good energy — take this on"
         },
         "heldBack": "{count} heavier steps held back for now"
-      }
+      },
+      "stillPlanning": "Still planning — this is taking a while. It will keep going, and the plan will be on your missions list when it is ready.",
+      "planStalled": "That plan stopped unexpectedly. No credits were charged — please try again."
     },
     "reflection": {
       "title": "Weekly Reflection",
@@ -1159,7 +1161,8 @@
         "weekly": "Every {day} at {time}",
         "monthly": "Day {day} of each month at {time}",
         "custom": "Schedule: {expression}"
-      }
+      },
+      "buildStalled": "That build stopped unexpectedly. No credits were charged — please try again."
     },
     "publishing": {
       "title": "Published Sites",
@@ -1203,7 +1206,19 @@
       "rollbackSuccess": "Rolled back to version {number}.",
       "rollbackError": "Could not roll that back. Please try again.",
       "confirmRollback": "Put version {number} back on the live site?",
-      "unpublishHint": "Take the site off the web. It stays in your account and can be republished."
+      "unpublishHint": "Take the site off the web. It stays in your account and can be republished.",
+      "publishIntro": "Your site needs its own web address before it can go live. Pick one below — you can change it later.",
+      "addressPlaceholder": "your-address",
+      "previewLabel": "Your site will be at",
+      "addressAvailable": "That address looks good.",
+      "disabledHint": "Enter a valid address to publish.",
+      "reasonEmpty": "Type an address to continue.",
+      "reasonTooShort": "Too short — use at least {min} characters.",
+      "reasonTooLong": "Too long — use at most {max} characters.",
+      "reasonInvalidCharacters": "Only lowercase letters, numbers and hyphens are allowed.",
+      "reasonBadEdges": "It can't start or end with a hyphen.",
+      "reasonReserved": "That address is reserved. Please pick another.",
+      "reasonTaken": "That address is already taken. Try a different one."
     },
     "integrations": {
       "title": "Integrations",
@@ -1303,7 +1318,7 @@
       "askNothingSelected": "Tick the files the answer should come from. Nothing else will be used.",
       "askSelected": "Answering from {count} file(s): {names}",
       "tooManySelected": "Ask about up to {max} files at a time.",
-      "askPlaceholder": "What do these documents say about…?",
+      "askPlaceholder": "Ask something about the selected files…",
       "ask": "Ask",
       "asking": "Reading…",
       "askError": "The question could not be answered.",
@@ -1313,7 +1328,33 @@
       "removedCitations": "{count} reference(s) pointed at pages that were not supplied and were removed.",
       "truncatedWarning": "Only part of the selection fitted, so the answer may be incomplete.",
       "skippedFiles": "Skipped (no readable text): {names}",
-      "creditsCharged": "{credits} credits"
+      "creditsCharged": "{credits} credits",
+      "stepsLabel": "How this page works",
+      "step1Title": "1. Upload files",
+      "step1Hint": "PDF, Word, Excel, CSV or text.",
+      "step2Title": "2. Choose which to ask about",
+      "step2Hint": "Tick the files the answer should come from.",
+      "step3Title": "3. Ask your question",
+      "step3Hint": "The AI answers only from the files you ticked.",
+      "selectedCount": "{count, plural, one {# file selected} other {# files selected}}",
+      "clearSelection": "Clear",
+      "goToAsk": "Ask about these",
+      "emptyTitle": "Nothing uploaded yet",
+      "emptyBody": "Upload a PDF, Word or Excel file and ask the AI about what is inside it. It reads only the files you tick, and every answer points at the page it came from.",
+      "emptyExample": "e.g. “What does the contract say about cancellation?”",
+      "askDisabledNoFiles": "Tick at least one file above first.",
+      "askDisabledNoQuestion": "Type your question to continue.",
+      "examplesLabel": "Try:",
+      "example1": "What does this say about cancellation?",
+      "example2": "Summarise the key points.",
+      "example3": "What are the deadlines and amounts?",
+      "processingHint": "Reading this file — usually a few seconds. It can be asked about once it is ready.",
+      "failedHint": "No readable text was found. Upload a version with selectable text.",
+      "askStillRunning": "Still reading — this is taking a while. It keeps going with the page closed; come back and ask again to see the answer.",
+      "askStalled": "That question stopped unexpectedly. No credits were charged — please try again.",
+      "stepReading": "Reading your files",
+      "stepAnswering": "Working out the answer",
+      "stepChecking": "Checking the references"
     },
     "deepResearch": {
       "title": "Deep Research",

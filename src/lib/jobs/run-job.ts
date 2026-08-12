@@ -1,0 +1,381 @@
+import "server-only";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { logApiError } from "@/lib/log-error";
+import { getSiteUrl } from "@/lib/site-url";
+import { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { resolveEffectivePlan } from "@/lib/billing/credits";
+import { isAdminEmail } from "@/lib/admin";
+import { hasActiveBetaBypass } from "@/lib/beta";
+import { internalHandoffToken, INTERNAL_HANDOFF_HEADER } from "@/lib/function-limits";
+import {
+  isJobKind,
+  canRetry,
+  stepCount,
+  type JobKind,
+  type JobStatus,
+} from "@/lib/jobs/job-types";
+import { JOB_HANDLERS } from "@/lib/jobs/handlers";
+
+// The worker that outlives the request.
+//
+// THE PATTERN, copied from lib/research/run-research.ts because it is the
+// one already proven in production:
+//
+//   1. The route creates a row, reserves credits, kicks a worker and
+//      returns the job id. It never awaits the work.
+//   2. The worker claims the row with a conditional update — the claim IS
+//      the lock, so a duplicated kick cannot run the same job twice.
+//   3. It writes progress as it passes each real step.
+//   4. It settles on success, refunds on failure, and never leaves a hold
+//      behind.
+//
+// WHAT MAKES IT SURVIVE THE PAGE CLOSING. The work is not attached to the
+// request at all. The kick is a fire-and-forget POST to our own endpoint,
+// authenticated with the internal token; the browser's fetch can be
+// aborted, the tab can be closed, and the job is unaffected because
+// nothing it needs lives in that connection.
+
+export type JobRunOutcome =
+  | { ran: true; status: "done" | "failed"; creditsCharged: number }
+  | { ran: false; reason: "locked" | "not_found" | "finished" | "no_handler" };
+
+type JobRow = {
+  id: string;
+  user_id: string;
+  kind: string;
+  status: string;
+  input: Record<string, unknown> | null;
+  usage_entries: unknown;
+  reservation_id: string | null;
+  attempts: number | null;
+};
+
+/**
+ * Everything a handler is given, and the only way it talks to the outside.
+ *
+ * Handlers do NOT touch the job row, settle credits or decide retries —
+ * that is all here, once, so five features cannot get it five different
+ * ways. A handler does the work, reports progress and returns a result.
+ */
+export type JobContext = {
+  jobId: string;
+  userId: string;
+  input: Record<string, unknown>;
+  costs: CostAccumulator;
+  apiKey: string;
+  /** Advance the visible progress. Awaited, so a kill cannot lose the
+   *  step that just completed. */
+  progress: (step: number, label: string) => Promise<void>;
+};
+
+export type JobHandlerResult = {
+  result: Record<string, unknown>;
+  /** Overrides the credit outcome for a job that "succeeded" but produced
+   *  nothing worth charging for — a question the documents did not answer
+   *  still costs tokens, but a handler may decide otherwise. */
+  refund?: boolean;
+  /**
+   * The handler did its own reserve and settle.
+   *
+   * agent_run is the one case: executeAgent has always owned the whole
+   * billing cycle for a run, because a scheduled run happens with no
+   * request at all and had to. Settling again here would write a SECOND
+   * cost-log row for the same work — zero-cost, because this job's
+   * accumulator never saw the tokens, and therefore a row with a margin of
+   * zero that would drag the feature's average down and fire the
+   * below-target alert for a feature that is fine.
+   */
+  selfBilled?: boolean;
+};
+
+export type JobHandler = (ctx: JobContext) => Promise<JobHandlerResult>;
+
+/**
+ * Starts a worker for this job without waiting for it.
+ *
+ * Fire and forget on purpose: awaiting the response would hold the caller
+ * open for the whole of the job, which is exactly the behaviour being
+ * replaced. The 2-second abort is on the HANDSHAKE, not the work — by then
+ * the receiving invocation has the job id and is running independently.
+ */
+export async function kickJob(jobId: string): Promise<boolean> {
+  const token = internalHandoffToken();
+  if (!token) {
+    // Without CRON_SECRET there is no authenticated way to call ourselves.
+    // The job is NOT lost — the row exists and the client's next poll can
+    // start it (see api/jobs/[id]/continue, which also accepts the owner's
+    // session). But the "works with the tab closed" guarantee is gone, so
+    // this is an error rather than a debug line.
+    logApiError("jobs:kick", new Error("CRON_SECRET is not set — a job cannot start itself"), {
+      jobId,
+      hint: "set CRON_SECRET so background work continues with the page closed",
+    });
+    return false;
+  }
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 2_000);
+    void fetch(`${getSiteUrl()}/api/jobs/${jobId}/continue`, {
+      method: "POST",
+      headers: { [INTERNAL_HANDOFF_HEADER]: token, "Content-Type": "application/json" },
+      body: JSON.stringify({ jobId }),
+      signal: controller.signal,
+    })
+      .catch(() => undefined)
+      .finally(() => clearTimeout(timer));
+    return true;
+  } catch (err) {
+    logApiError("jobs:kick", err, { jobId });
+    return false;
+  }
+}
+
+/**
+ * Takes the lock on a job.
+ *
+ * The conditional update is the whole mechanism: `.eq("running", false)`
+ * means exactly one caller can flip it, and everyone else gets zero rows
+ * back and returns. Reading the row and then writing it would reopen the
+ * race this closes.
+ */
+export async function claimJob(jobId: string): Promise<boolean> {
+  const admin = createAdminClient();
+  const { data, error } = await admin
+    .from("ai_jobs")
+    .update({ running: true, status: "running", started_at: new Date().toISOString() })
+    .eq("id", jobId)
+    .eq("running", false)
+    .in("status", ["queued", "running"])
+    .select("id");
+  if (error) {
+    logApiError("jobs:claim", error, { jobId });
+    return false;
+  }
+  return (data ?? []).length === 1;
+}
+
+/** Who the user is for billing purposes — the same three questions
+ *  settleReservation needs, asked once. */
+async function billingIdentity(userId: string) {
+  const admin = createAdminClient();
+  const { data } = await admin.auth.admin.getUserById(userId);
+  // The REAL user object, not a stub. resolveEffectivePlan and
+  // hasActiveBetaBypass both read user_metadata (stripe_customer_id, beta
+  // flags), so a `{id, email}` cast would silently classify every beta
+  // tester and every pack purchaser as a plain plan user — and settle
+  // their jobs at the wrong credit price.
+  const account = {
+    id: userId,
+    email: data?.user?.email ?? null,
+    user_metadata: (data?.user?.user_metadata ?? null) as Record<string, unknown> | null,
+  };
+  const [plan, beta] = await Promise.all([
+    resolveEffectivePlan(account),
+    hasActiveBetaBypass(account),
+  ]);
+  return { plan, bypass: isAdminEmail(account.email) || beta };
+}
+
+/**
+ * Runs one job to completion, or fails it cleanly.
+ *
+ * "Cleanly" is the load-bearing word. Every exit from here — success,
+ * handler throw, missing handler, retry exhausted — leaves the row in a
+ * terminal state with the credit hold either settled or given back. The
+ * state this replaces is the one an uncaught platform kill produces:
+ * status stuck at running, no settlement, and the user's credits held
+ * against work they never received.
+ */
+export async function runJob(params: { jobId: string; apiKey: string }): Promise<JobRunOutcome> {
+  const { jobId, apiKey } = params;
+  const admin = createAdminClient();
+
+  const { data: raw, error } = await admin.from("ai_jobs").select("*").eq("id", jobId).maybeSingle();
+  if (error || !raw) {
+    logApiError("jobs:run", error ?? new Error("job not found"), { jobId });
+    return { ran: false, reason: "not_found" };
+  }
+  const job = raw as JobRow;
+  if (job.status === "done" || job.status === "failed") return { ran: false, reason: "finished" };
+  // Bound to a local so the narrowing survives to the call site — reading
+  // JOB_HANDLERS[kind] again below would be a fresh, unnarrowed lookup.
+  const kind: JobKind | null = isJobKind(job.kind) ? job.kind : null;
+  const handler = kind ? JOB_HANDLERS[kind] : undefined;
+  if (!kind || !handler) {
+    await failJob(jobId, job, "This kind of job is no longer supported.");
+    return { ran: false, reason: "no_handler" };
+  }
+  const costs = CostAccumulator.restore(Array.isArray(job.usage_entries) ? job.usage_entries : []);
+  const attempts = (job.attempts ?? 0) + 1;
+  await admin.from("ai_jobs").update({ attempts, step_total: stepCount(kind) }).eq("id", jobId);
+
+  const ctx: JobContext = {
+    jobId,
+    userId: job.user_id,
+    input: (job.input ?? {}) as Record<string, unknown>,
+    costs,
+    apiKey,
+    progress: async (step, label) => {
+      // Usage is snapshotted with every step, not only at the end: a kill
+      // between two steps must not lose the tokens already spent, or the
+      // eventual settlement under-charges for work really done.
+      await admin
+        .from("ai_jobs")
+        .update({ step, step_label: label, usage_entries: costs.snapshot() })
+        .eq("id", jobId);
+    },
+  };
+
+  try {
+    const handled = await handler(ctx);
+    const { plan, bypass } = await billingIdentity(job.user_id);
+
+    if (handled.refund) {
+      // Produced nothing worth charging for. The hold goes back whole.
+      if (job.reservation_id) await releaseReservation(job.user_id, job.reservation_id);
+      await admin
+        .from("ai_jobs")
+        .update({
+          status: "done",
+          running: false,
+          result: handled.result,
+          credits_charged: 0,
+          usage_entries: costs.snapshot(),
+          step: stepCount(kind),
+          finished_at: new Date().toISOString(),
+        })
+        .eq("id", jobId);
+      return { ran: true, status: "done", creditsCharged: 0 };
+    }
+
+    if (handled.selfBilled) {
+      // Nothing to settle here — see selfBilled. The row still records
+      // what the handler reported it charged, so the UI and the job
+      // history agree.
+      await admin
+        .from("ai_jobs")
+        .update({
+          status: "done",
+          running: false,
+          result: handled.result,
+          credits_charged: Number(handled.result.creditsCharged ?? 0),
+          usage_entries: costs.snapshot(),
+          step: stepCount(kind),
+          step_label: null,
+          finished_at: new Date().toISOString(),
+        })
+        .eq("id", jobId);
+      return { ran: true, status: "done", creditsCharged: Number(handled.result.creditsCharged ?? 0) };
+    }
+
+    const settlement = await settleReservation({
+      userId: job.user_id,
+      reservationId: job.reservation_id ?? "",
+      feature: kind,
+      costs,
+      plan,
+      bypassCharge: bypass,
+      metadata: { jobId, kind, attempts },
+    });
+
+    await admin
+      .from("ai_jobs")
+      .update({
+        status: "done",
+        running: false,
+        result: handled.result,
+        credits_charged: settlement.creditsCharged,
+        usage_entries: costs.snapshot(),
+        step: stepCount(kind),
+        step_label: null,
+        finished_at: new Date().toISOString(),
+      })
+      .eq("id", jobId);
+
+    return { ran: true, status: "done", creditsCharged: settlement.creditsCharged };
+  } catch (err) {
+    logApiError("jobs:run", err, { jobId, kind, attempts });
+
+    // RETRY, BOUNDED. The failures worth retrying are transient — an
+    // overloaded API, a dropped socket. A malformed input fails
+    // identically every time, so an unbounded retry would just spend the
+    // reservation over and over with nothing to show.
+    if (canRetry(attempts)) {
+      await admin
+        .from("ai_jobs")
+        .update({
+          status: "queued",
+          running: false,
+          error: null,
+          step_label: null,
+          usage_entries: costs.snapshot(),
+        })
+        .eq("id", jobId);
+      await kickJob(jobId);
+      return { ran: true, status: "failed", creditsCharged: 0 };
+    }
+
+    await failJob(jobId, job, err instanceof Error ? err.message : "The job could not be completed.");
+    return { ran: true, status: "failed", creditsCharged: 0 };
+  }
+}
+
+/**
+ * The terminal failure path, and the only one.
+ *
+ * Refunds first, then writes the row: if the write failed after a refund
+ * the reaper would find the row and refund an already-released hold, which
+ * releaseReservation treats as a no-op. The other order would leave a
+ * failed job whose credits were never returned, which is money.
+ */
+export async function failJob(jobId: string, job: { user_id: string; reservation_id: string | null }, message: string) {
+  const admin = createAdminClient();
+  if (job.reservation_id) {
+    await releaseReservation(job.user_id, job.reservation_id);
+  }
+  await admin
+    .from("ai_jobs")
+    .update({
+      status: "failed",
+      running: false,
+      error: message,
+      credits_charged: 0,
+      step_label: null,
+      finished_at: new Date().toISOString(),
+    })
+    .eq("id", jobId);
+}
+
+/**
+ * Fails and refunds a job whose worker died without running a catch block.
+ *
+ * Conditioned on the status it read, so a job that finished between the
+ * read and the write is not clobbered — the same guard
+ * api/research/[id] uses for the same reason.
+ */
+export async function reapJob(job: {
+  id: string;
+  user_id: string;
+  status: string;
+  reservation_id: string | null;
+}): Promise<boolean> {
+  const admin = createAdminClient();
+  if (job.reservation_id) await releaseReservation(job.user_id, job.reservation_id);
+  const { data } = await admin
+    .from("ai_jobs")
+    .update({
+      status: "failed" satisfies JobStatus,
+      running: false,
+      // A code as well as the prose. The prose is for the log; the code
+      // is what the client translates, so a Greek user is not shown an
+      // English sentence at the one moment something has gone wrong.
+      error: "stalled",
+      credits_charged: 0,
+      finished_at: new Date().toISOString(),
+    })
+    .eq("id", job.id)
+    .eq("status", job.status)
+    .select("id");
+  return (data ?? []).length === 1;
+}

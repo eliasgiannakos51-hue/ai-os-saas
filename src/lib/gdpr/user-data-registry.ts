@@ -84,6 +84,11 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "file_collection_items", label: "file_collection_items", scope: "user_content" },
   { table: "user_documents", label: "documents", scope: "user_content" },
   { table: "research_reports", label: "research_reports", scope: "user_content" },
+  // Background job rows. `input` holds the user's own words — the agent
+  // they described, the question they asked — and `result` holds what came
+  // back, so a job row is user content in the ordinary sense and has to be
+  // exported and erased like any other.
+  { table: "ai_jobs", label: "background_jobs", scope: "user_content" },
   { table: "user_insights", label: "insights", scope: "user_content" },
   { table: "user_favorites", label: "favorites", scope: "user_content" },
   { table: "entity_links", label: "entity_links", scope: "user_content" },

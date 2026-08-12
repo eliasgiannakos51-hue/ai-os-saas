@@ -795,7 +795,9 @@
           "deep": "Gute Energie — nimm das in Angriff"
         },
         "heldBack": "{count} anspruchsvollere Schritte vorerst zurückgestellt"
-      }
+      },
+      "stillPlanning": "Plant noch — das dauert etwas. Es läuft weiter, und der Plan steht in deiner Missionsliste, sobald er fertig ist.",
+      "planStalled": "Der Plan wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen."
     },
     "reflection": {
       "title": "Wöchentliche Reflexion",
@@ -1159,7 +1161,8 @@
         "weekly": "Jeden {day} um {time}",
         "monthly": "Am {day}. jedes Monats um {time}",
         "custom": "Zeitplan: {expression}"
-      }
+      },
+      "buildStalled": "Die Erstellung wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen."
     },
     "publishing": {
       "title": "Veröffentlichte Seiten",
@@ -1203,7 +1206,19 @@
       "rollbackSuccess": "Auf Version {number} zurückgesetzt.",
       "rollbackError": "Zurücksetzen nicht möglich. Bitte erneut versuchen.",
       "confirmRollback": "Version {number} wieder live schalten?",
-      "unpublishHint": "Nimmt die Seite vom Netz. Sie bleibt im Konto und kann erneut veröffentlicht werden."
+      "unpublishHint": "Nimmt die Seite vom Netz. Sie bleibt im Konto und kann erneut veröffentlicht werden.",
+      "publishIntro": "Deine Website braucht eine eigene Webadresse, bevor sie online gehen kann. Wähle eine aus — du kannst sie später ändern.",
+      "addressPlaceholder": "deine-adresse",
+      "previewLabel": "Deine Website liegt dann unter",
+      "addressAvailable": "Diese Adresse sieht gut aus.",
+      "disabledHint": "Gib eine gültige Adresse ein, um zu veröffentlichen.",
+      "reasonEmpty": "Gib eine Adresse ein, um fortzufahren.",
+      "reasonTooShort": "Zu kurz — verwende mindestens {min} Zeichen.",
+      "reasonTooLong": "Zu lang — verwende höchstens {max} Zeichen.",
+      "reasonInvalidCharacters": "Erlaubt sind nur Kleinbuchstaben, Ziffern und Bindestriche.",
+      "reasonBadEdges": "Sie darf nicht mit einem Bindestrich beginnen oder enden.",
+      "reasonReserved": "Diese Adresse ist reserviert. Bitte wähle eine andere.",
+      "reasonTaken": "Diese Adresse ist bereits vergeben. Probiere eine andere."
     },
     "integrations": {
       "title": "Integrationen",
@@ -1303,7 +1318,7 @@
       "askNothingSelected": "Wähle die Dateien aus, aus denen die Antwort stammen soll. Nichts anderes wird verwendet.",
       "askSelected": "Antwort aus {count} Datei(en): {names}",
       "tooManySelected": "Frage nach höchstens {max} Dateien auf einmal.",
-      "askPlaceholder": "Was sagen diese Dokumente über…?",
+      "askPlaceholder": "Frag etwas zu den ausgewählten Dateien…",
       "ask": "Fragen",
       "asking": "Liest…",
       "askError": "Die Frage konnte nicht beantwortet werden.",
@@ -1313,7 +1328,33 @@
       "removedCitations": "{count} Verweis(e) zeigten auf nicht gelieferte Seiten und wurden entfernt.",
       "truncatedWarning": "Nur ein Teil der Auswahl passte, die Antwort kann unvollständig sein.",
       "skippedFiles": "Übersprungen (kein lesbarer Text): {names}",
-      "creditsCharged": "{credits} Credits"
+      "creditsCharged": "{credits} Credits",
+      "stepsLabel": "So funktioniert diese Seite",
+      "step1Title": "1. Dateien hochladen",
+      "step1Hint": "PDF, Word, Excel, CSV oder Text.",
+      "step2Title": "2. Auswählen, worüber gefragt wird",
+      "step2Hint": "Hake die Dateien an, aus denen die Antwort kommen soll.",
+      "step3Title": "3. Frage stellen",
+      "step3Hint": "Die KI antwortet nur aus den angehakten Dateien.",
+      "selectedCount": "{count, plural, one {# Datei ausgewählt} other {# Dateien ausgewählt}}",
+      "clearSelection": "Zurücksetzen",
+      "goToAsk": "Dazu fragen",
+      "emptyTitle": "Noch nichts hochgeladen",
+      "emptyBody": "Lade ein PDF, Word oder Excel hoch und frage die KI nach dem Inhalt. Sie liest nur die Dateien, die du anhakst, und jede Antwort verweist auf die Seite, aus der sie stammt.",
+      "emptyExample": "z. B. „Was steht im Vertrag zur Kündigung?“",
+      "askDisabledNoFiles": "Hake oben zuerst mindestens eine Datei an.",
+      "askDisabledNoQuestion": "Gib deine Frage ein, um fortzufahren.",
+      "examplesLabel": "Beispiele:",
+      "example1": "Was steht hier zur Kündigung?",
+      "example2": "Fasse die wichtigsten Punkte zusammen.",
+      "example3": "Welche Fristen und Beträge gibt es?",
+      "processingHint": "Die Datei wird gelesen — meist ein paar Sekunden. Sobald sie fertig ist, kannst du dazu fragen.",
+      "failedHint": "Kein lesbarer Text gefunden. Lade eine Fassung mit auswählbarem Text hoch.",
+      "askStillRunning": "Liest noch — das dauert etwas. Es läuft auch bei geschlossener Seite weiter; komm zurück und frage erneut, um die Antwort zu sehen.",
+      "askStalled": "Die Frage wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
+      "stepReading": "Deine Dateien werden gelesen",
+      "stepAnswering": "Antwort wird erarbeitet",
+      "stepChecking": "Belege werden geprüft"
     },
     "deepResearch": {
       "title": "Tiefenrecherche",

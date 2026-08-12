@@ -795,7 +795,9 @@
           "deep": "エネルギー十分 — これに取り組みましょう"
         },
         "heldBack": "負荷の高い{count}件のステップは今は保留"
-      }
+      },
+      "stillPlanning": "まだ計画中です。少し時間がかかっています。処理は続いており、完成すると計画がミッション一覧に表示されます。",
+      "planStalled": "計画が予期せず停止しました。クレジットは請求されていません。もう一度お試しください。"
     },
     "reflection": {
       "title": "週次振り返り",
@@ -1159,7 +1161,8 @@
         "weekly": "毎週{day} {time}",
         "monthly": "毎月 {day} 日 {time}",
         "custom": "スケジュール：{expression}"
-      }
+      },
+      "buildStalled": "作成が予期せず停止しました。クレジットは請求されていません。もう一度お試しください。"
     },
     "publishing": {
       "title": "公開中のサイト",
@@ -1203,7 +1206,19 @@
       "rollbackSuccess": "バージョン {number} に戻しました。",
       "rollbackError": "元に戻せませんでした。もう一度お試しください。",
       "confirmRollback": "バージョン {number} を公開サイトに戻しますか？",
-      "unpublishHint": "サイトを公開停止にします。アカウントには残り、再公開できます。"
+      "unpublishHint": "サイトを公開停止にします。アカウントには残り、再公開できます。",
+      "publishIntro": "サイトを公開するには専用のアドレスが必要です。下から選んでください（あとから変更できます）。",
+      "addressPlaceholder": "あなたのアドレス",
+      "previewLabel": "サイトの公開先",
+      "addressAvailable": "このアドレスは使えます。",
+      "disabledHint": "公開するには有効なアドレスを入力してください。",
+      "reasonEmpty": "続けるにはアドレスを入力してください。",
+      "reasonTooShort": "短すぎます。{min} 文字以上にしてください。",
+      "reasonTooLong": "長すぎます。{max} 文字以内にしてください。",
+      "reasonInvalidCharacters": "使えるのは英小文字・数字・ハイフンだけです。",
+      "reasonBadEdges": "ハイフンで始めたり終えたりはできません。",
+      "reasonReserved": "このアドレスは予約済みです。別のものを選んでください。",
+      "reasonTaken": "このアドレスは既に使われています。別のものをお試しください。"
     },
     "integrations": {
       "title": "連携",
@@ -1303,7 +1318,7 @@
       "askNothingSelected": "回答の根拠にするファイルを選んでください。それ以外は使われません。",
       "askSelected": "{count} 件のファイルから回答: {names}",
       "tooManySelected": "一度に質問できるのは最大 {max} ファイルです。",
-      "askPlaceholder": "これらの書類は…について何と書かれていますか？",
+      "askPlaceholder": "選択したファイルについて質問…",
       "ask": "質問する",
       "asking": "読んでいます…",
       "askError": "質問に回答できませんでした。",
@@ -1313,7 +1328,33 @@
       "removedCitations": "提供されていないページを指す参照が {count} 件あり、削除しました。",
       "truncatedWarning": "選択の一部しか収まらなかったため、回答が不完全な可能性があります。",
       "skippedFiles": "スキップ（読み取れるテキストなし）: {names}",
-      "creditsCharged": "{credits} クレジット"
+      "creditsCharged": "{credits} クレジット",
+      "stepsLabel": "このページの使い方",
+      "step1Title": "1. ファイルをアップロード",
+      "step1Hint": "PDF・Word・Excel・CSV・テキスト。",
+      "step2Title": "2. 質問する対象を選ぶ",
+      "step2Hint": "回答の根拠にするファイルにチェックを入れます。",
+      "step3Title": "3. 質問する",
+      "step3Hint": "AI はチェックしたファイルだけを読んで答えます。",
+      "selectedCount": "{count, plural, other {# 件のファイルを選択中}}",
+      "clearSelection": "クリア",
+      "goToAsk": "これらについて質問",
+      "emptyTitle": "まだ何もアップロードされていません",
+      "emptyBody": "PDF・Word・Excel をアップロードして、中身について AI に質問できます。読み取るのはチェックしたファイルだけで、回答には出典のページが示されます。",
+      "emptyExample": "例：「契約書には解約について何と書かれていますか？」",
+      "askDisabledNoFiles": "まず上のファイルを 1 つ以上チェックしてください。",
+      "askDisabledNoQuestion": "続けるには質問を入力してください。",
+      "examplesLabel": "例：",
+      "example1": "解約について何と書かれていますか？",
+      "example2": "要点をまとめてください。",
+      "example3": "期限と金額は？",
+      "processingHint": "ファイルを読み取っています（通常は数秒）。完了すると質問できます。",
+      "failedHint": "読み取れるテキストがありません。文字を選択できる版をアップロードしてください。",
+      "askStillRunning": "まだ読み込み中です。少し時間がかかっています。ページを閉じても処理は続きます。戻ってもう一度質問すると回答が表示されます。",
+      "askStalled": "質問が予期せず停止しました。クレジットは請求されていません。もう一度お試しください。",
+      "stepReading": "ファイルを読み込み中",
+      "stepAnswering": "回答を作成中",
+      "stepChecking": "出典を確認中"
     },
     "deepResearch": {
       "title": "ディープリサーチ",

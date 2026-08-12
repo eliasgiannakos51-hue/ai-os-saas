@@ -10,7 +10,7 @@ import {
   stripDisallowedExternalScripts,
   describeSecurityScanIssue,
 } from "@/lib/website-html-security-scan";
-import { validateSubdomain, publishedSiteUrl } from "@/lib/publishing/subdomain";
+import { validateSubdomain, publishedSiteUrl, SUBDOMAIN_TOKEN } from "@/lib/publishing/subdomain";
 import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
 import {
   maxPublishedSitesForPlan,
@@ -47,6 +47,20 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 
     return NextResponse.json({
       ok: true,
+      // The address the publish dialog previews as the user types, built
+      // by the SAME function that builds the real one — with the
+      // subdomain replaced by a token the client splits on.
+      //
+      // A client-side `${origin}/s/${value}` would have been simpler and
+      // silently wrong the day PUBLISHED_SITE_DOMAIN is set, because that
+      // form puts the subdomain at the FRONT (acme.example.com), not after
+      // a path. A preview that lies about the address being chosen is
+      // worse than no preview.
+      urlTemplate: publishedSiteUrl(
+        SUBDOMAIN_TOKEN,
+        getSiteUrl(),
+        process.env.PUBLISHED_SITE_DOMAIN
+      ),
       site: site
         ? {
             ...site,

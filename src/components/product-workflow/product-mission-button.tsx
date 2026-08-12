@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Flag } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { startAndWatchJob } from "@/lib/jobs/start-and-watch";
 import { useCredits } from "@/components/credits/credits-context";
 import { useTranslations } from "next-intl";
 
@@ -35,18 +36,21 @@ export function ProductMissionButton({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/mission/plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ goal }),
-      });
-      const data = await res.json();
+      const outcome = await startAndWatchJob("/api/mission/plan", { goal });
       void refreshCredits();
 
-      if (!res.ok || !data.ok) {
-        setError(getErrorMessage(data?.error, "Could not create a plan."));
+      if (!outcome.ok) {
+        // still_running means the worker is fine and this page stopped
+        // watching — sending the user to the missions list is the honest
+        // response, because that is where the plan will appear.
+        if (outcome.code === "still_running") {
+          router.push("/dashboard/mission");
+          return;
+        }
+        setError(getErrorMessage(outcome.error, "Could not create a plan."));
         return;
       }
+      const data = outcome.result as { planned?: boolean; message?: string };
       if (!data.planned) {
         setError(data.message ?? "Could not create a plan.");
         return;

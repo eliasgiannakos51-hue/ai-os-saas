@@ -795,7 +795,9 @@
           "deep": "精力充沛——可以处理这个"
         },
         "heldBack": "暂时搁置了 {count} 个较重的步骤"
-      }
+      },
+      "stillPlanning": "仍在规划中——需要一点时间。它会继续运行，完成后计划会出现在你的任务列表里。",
+      "planStalled": "该计划意外中断。未扣除任何积分——请重试。"
     },
     "reflection": {
       "title": "每周回顾",
@@ -1159,7 +1161,8 @@
         "weekly": "每{day} {time}",
         "monthly": "每月 {day} 号 {time}",
         "custom": "计划：{expression}"
-      }
+      },
+      "buildStalled": "创建意外中断。未扣除任何积分——请重试。"
     },
     "publishing": {
       "title": "已发布网站",
@@ -1203,7 +1206,19 @@
       "rollbackSuccess": "已回滚到版本 {number}。",
       "rollbackError": "无法回滚，请重试。",
       "confirmRollback": "将版本 {number} 重新设为线上版本？",
-      "unpublishHint": "将网站从互联网下线。它仍保留在你的账户中，可以重新发布。"
+      "unpublishHint": "将网站从互联网下线。它仍保留在你的账户中，可以重新发布。",
+      "publishIntro": "网站需要有自己的网址才能上线。请在下方选择一个——之后仍可修改。",
+      "addressPlaceholder": "您的网址",
+      "previewLabel": "您的网站将位于",
+      "addressAvailable": "这个网址可以使用。",
+      "disabledHint": "请输入有效的网址后再发布。",
+      "reasonEmpty": "请输入网址以继续。",
+      "reasonTooShort": "太短了——至少需要 {min} 个字符。",
+      "reasonTooLong": "太长了——最多 {max} 个字符。",
+      "reasonInvalidCharacters": "只能使用小写字母、数字和连字符。",
+      "reasonBadEdges": "不能以连字符开头或结尾。",
+      "reasonReserved": "该网址已被保留，请另选一个。",
+      "reasonTaken": "该网址已被占用，请换一个。"
     },
     "integrations": {
       "title": "集成",
@@ -1303,7 +1318,7 @@
       "askNothingSelected": "勾选答案应当来源的文件。除此之外不会使用任何内容。",
       "askSelected": "依据 {count} 个文件回答：{names}",
       "tooManySelected": "每次最多可就 {max} 个文件提问。",
-      "askPlaceholder": "这些文档关于……说了什么？",
+      "askPlaceholder": "就已选择的文件提问…",
       "ask": "提问",
       "asking": "正在阅读…",
       "askError": "无法回答该问题。",
@@ -1313,7 +1328,33 @@
       "removedCitations": "有 {count} 处引用指向未提供的页面，已被移除。",
       "truncatedWarning": "仅有部分所选内容被纳入，答案可能不完整。",
       "skippedFiles": "已跳过（无可读文本）：{names}",
-      "creditsCharged": "{credits} 积分"
+      "creditsCharged": "{credits} 积分",
+      "stepsLabel": "本页使用方法",
+      "step1Title": "1. 上传文件",
+      "step1Hint": "PDF、Word、Excel、CSV 或文本。",
+      "step2Title": "2. 选择要提问的文件",
+      "step2Hint": "勾选答案应当来自哪些文件。",
+      "step3Title": "3. 提出你的问题",
+      "step3Hint": "AI 只依据你勾选的文件作答。",
+      "selectedCount": "{count, plural, other {已选择 # 个文件}}",
+      "clearSelection": "清除",
+      "goToAsk": "就这些提问",
+      "emptyTitle": "还没有上传任何文件",
+      "emptyBody": "上传 PDF、Word 或 Excel，然后向 AI 询问其中的内容。它只读取你勾选的文件，每条回答都会标明出处页码。",
+      "emptyExample": "例如「合同里关于取消是怎么写的？」",
+      "askDisabledNoFiles": "请先在上方勾选至少一个文件。",
+      "askDisabledNoQuestion": "请输入你的问题以继续。",
+      "examplesLabel": "试试：",
+      "example1": "关于取消是怎么写的？",
+      "example2": "总结要点。",
+      "example3": "有哪些期限和金额？",
+      "processingHint": "正在读取文件——通常只需几秒。准备好后即可提问。",
+      "failedHint": "未找到可读文本。请上传文字可选中的版本。",
+      "askStillRunning": "仍在阅读——需要一点时间。关闭页面后也会继续；稍后回来再问一次即可看到答案。",
+      "askStalled": "该问题意外中断。未扣除任何积分——请重试。",
+      "stepReading": "正在读取你的文件",
+      "stepAnswering": "正在整理答案",
+      "stepChecking": "正在核对引用"
     },
     "deepResearch": {
       "title": "深度研究",

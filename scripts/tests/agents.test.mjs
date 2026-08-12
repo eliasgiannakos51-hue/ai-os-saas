@@ -623,15 +623,49 @@ console.log("\n== 12. the wiring, asserted rather than assumed ==");
     checkTrue(`${file}: is rate limited`, /checkRateLimit\(/.test(src));
   }
   const runRoute = read("src/app/api/agents/[id]/run/route.ts");
-  checkTrue("Run now writes history with the admin client only", /createAdminClient\(\)/.test(runRoute));
+  // Moved with the work: "Run now" is a background job, so the write goes
+  // through the handler. The guarantee is unchanged — agent_runs has no
+  // insert policy on purpose, because a user who could write their own run
+  // history could fabricate one — so it is checked where the write is.
+  const runHandler = read("src/lib/jobs/handlers/agent-run.ts");
+  checkTrue("Run now writes history with the admin client only", /createAdminClient\(\)/.test(runHandler));
+  checkTrue("Run now no longer awaits the execution in the request", !/await executeAgent/.test(runRoute) && /status: 202/.test(runRoute));
+  // Ownership is still decided by RLS, in the route, where a session exists.
+  checkTrue("Run now still authorises through the user-scoped client", /from\("user_agents"\)/.test(runRoute));
+  // And the worker re-checks the agent belongs to the job's own user.
+  checkTrue("the worker re-checks ownership too", /agent\.user_id\) !== ctx\.userId/.test(runHandler));
 }
 {
   const buildRoute = read("src/app/api/agents/build/route.ts");
   checkTrue("build authenticates", /auth\.getUser\(\)/.test(buildRoute));
   checkTrue("build is rate limited", /checkRateLimit\(/.test(buildRoute));
-  checkTrue("build reserves and settles", /reserveCredits\(/.test(buildRoute) && /settleReservation\(/.test(buildRoute));
+  // THESE TWO WENT RED WHEN BUILDING BECAME A BACKGROUND JOB, and both
+  // guarantees still hold — the code moved, it did not disappear. The
+  // route used to await two model calls under a 60-second ceiling, where a
+  // platform kill ran no catch block and stranded the credit hold. Now it
+  // reserves, writes a job row and returns 202; the worker does the calls
+  // and settles.
+  //
+  // So the assertions follow the guarantee across the split rather than
+  // being relaxed to fit one file: the hold is still taken before any work
+  // (startJob), and it is still settled after it (run-job), and the
+  // clarification pre-check still runs with the same shared kind.
+  const startJob = read("src/lib/jobs/start-job.ts");
+  const runJob = read("src/lib/jobs/run-job.ts");
+  const buildHandler = read("src/lib/jobs/handlers/agent-build.ts");
+  checkTrue(
+    "build reserves and settles",
+    /startJob\(\{/.test(buildRoute) && /reserveCredits\(/.test(startJob) && /settleReservation\(\{/.test(runJob)
+  );
+  checkTrue(
+    "build no longer awaits the work in the request",
+    !/await buildAgentFromRequest/.test(buildRoute) && /status: 202/.test(buildRoute)
+  );
   checkTrue("build refuses before spending when the plan owns no agents", /agentCap <= 0/.test(buildRoute));
-  checkTrue("build runs the shared clarification pre-check", /checkNeedsClarification\(apiKey, "agent"/.test(buildRoute));
+  checkTrue(
+    "build runs the shared clarification pre-check",
+    /checkNeedsClarification\(ctx\.apiKey, "agent"/.test(buildHandler)
+  );
   const createRoute = read("src/app/api/agents/route.ts");
   checkTrue("create re-validates the draft server-side", /validateAgentDraft\(/.test(createRoute));
   checkTrue("create enforces the plan cap", /maxAgentsForPlan\(/.test(createRoute));

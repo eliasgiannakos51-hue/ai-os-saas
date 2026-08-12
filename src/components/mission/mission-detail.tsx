@@ -19,6 +19,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 import { EnergySuggestion } from "@/components/mission/energy-suggestion";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { createViaJob } from "@/lib/create-studio/create-via-job";
 import { CelebrationBurst } from "@/components/celebration/celebration-burst";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
@@ -195,31 +196,25 @@ export function MissionDetail({
     setBuildingIndex(index);
     setError(null);
     try {
-      const res = await fetchWithAuthRetry("/api/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: step.text,
-          agentRole,
-          // The Planner Agent already refuses to create vague filler
-          // steps (see clarificationNeeded in lib/mission-agents.ts) —
-          // step.text is always a concrete, specific action by the time
-          // it reaches here, so api/create's own clarifying-questions
-          // pre-check (lib/clarification.ts) would essentially never
-          // fire for it. Explicitly skipped rather than left to chance:
-          // this card has no inline UI for answering clarification
-          // questions, and a needsClarification response here would
-          // otherwise be misread as a real failure (see the !data.matched
-          // branch below), wrongly burning one of this step's limited
-          // attempts.
-          skipClarification: true,
-          ...(priorContext ? { context: priorContext } : {}),
-        }),
+      // Started as a background job — the classification outlives this
+      // request, so navigating away mid-step still creates the entry.
+      const data = await createViaJob({
+        message: step.text,
+        agentRole,
+        // The Planner Agent already refuses to create vague filler steps
+        // (see clarificationNeeded in lib/mission-agents.ts), so step.text
+        // is always concrete by the time it reaches here and the
+        // clarifying-questions pre-check would essentially never fire.
+        // Explicitly skipped rather than left to chance: this card has no
+        // inline UI for answering questions, and a needsClarification
+        // result would be misread as a real failure below, wrongly burning
+        // one of this step's limited attempts.
+        skipClarification: true,
+        ...(priorContext ? { context: priorContext } : {}),
       });
-      const data = await res.json();
       void refreshCredits();
 
-      if (!res.ok || !data.ok) {
+      if (!data.ok) {
         await persistStepFailure(index);
         setError(getErrorMessage(data?.error, "Could not create this entry."));
         return;

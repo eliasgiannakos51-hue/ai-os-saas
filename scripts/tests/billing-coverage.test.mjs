@@ -72,7 +72,17 @@ const DECLARED = {
   "src/lib/website-security-review.ts": { calls: 1, billing: "settled", note: "recorded onto the generation's accumulator" },
   "src/lib/mission-step-runner.ts": { calls: 1, billing: "settled" },
   "src/lib/clarification.ts": { calls: 1, billing: "settled" },
-  "src/app/api/create/route.ts": { calls: 1, billing: "settled" },
+  // Moved out of api/create when Create Anything became a background job:
+  // the route awaited a vision-capable classification under a 120-second
+  // ceiling, and vision is the slow case because the images travel with
+  // the message. Still ONE call from this file — the clarifying-questions
+  // pre-check moved with it but is counted at lib/clarification.ts, which
+  // is where its messages.create lives; it lands on the same accumulator,
+  // so a request that stops there is still paid for. Billing otherwise
+  // unchanged: a classification that matched nothing still settles (it is
+  // a real answer the user reads), and an insert that fails still refunds
+  // (nothing was saved).
+  "src/lib/jobs/handlers/create.ts": { calls: 1, billing: "settled" },
   "src/app/api/create-studio/detect/route.ts": { calls: 1, billing: "settled" },
   "src/app/api/chat/route.ts": { calls: 1, billing: "settled" },
 
@@ -106,10 +116,10 @@ const DECLARED = {
     billing: "settled",
     note: "V3 Autonomous Agents. The optional web_search research pass plus the main run, both recorded onto one accumulator per execution. Retries record onto the SAME accumulator, so a run that tried three times is charged for three attempts — which is why executeAgent reserves AGENT_MAX_ATTEMPTS x the single-run estimate.",
   },
-  "src/app/api/files/ask/route.ts": {
+  "src/lib/jobs/handlers/file-ask.ts": {
     calls: 1,
     billing: "settled",
-    note: "V3 File Workspace. One grounded call over the selected documents. The reservation is sized AFTER the documents load, because the cost is dominated by document text and a hold sized from the question alone is off by orders of magnitude on a long contract. A call that errors still SETTLES rather than releasing — the tokens were spent.",
+    note: "V3 File Workspace, moved out of api/files/ask when asking became a background job — the route sent a whole document set through one model call under a 60-second ceiling, which is the request most likely to be killed, and a kill lost the answer while keeping the hold. Unchanged in billing: one grounded call, the reservation still sized AFTER the documents load (the cost is dominated by document text, so a hold sized from the question alone is off by orders of magnitude on a long contract), and a call that throws still SETTLES via run-job rather than releasing, because the tokens were spent. The one REFUND path is 'no readable files', where no model call happens at all.",
   },
   "src/lib/research/research.ts": {
     calls: 3,

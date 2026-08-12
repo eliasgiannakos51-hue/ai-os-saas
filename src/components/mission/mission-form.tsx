@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Rocket } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { startAndWatchJob } from "@/lib/jobs/start-and-watch";
 import { useCredits } from "@/components/credits/credits-context";
 import { CostEstimateHint, LargeActionConfirm, useCostEstimate } from "@/components/credits/cost-estimate";
 import { OutOfCreditsNotice } from "@/components/credits/out-of-credits-notice";
@@ -32,6 +33,8 @@ export function MissionForm({ onCreated }: { onCreated?: () => void } = {}) {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The worker's real step, so a long plan is not a bare spinner.
+  const [stepLabel, setStepLabel] = useState<string | null>(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -50,24 +53,34 @@ export function MissionForm({ onCreated }: { onCreated?: () => void } = {}) {
     setError(null);
     setOutOfCredits(false);
     try {
-      const res = await fetch("/api/mission/plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ goal: trimmed }),
+      // PLANNING IS A BACKGROUND JOB NOW. This still awaits an outcome,
+      // but the work is no longer attached to the request: closing the page
+      // here leaves the worker running, and the mission is waiting on the
+      // missions list when the user comes back.
+      const outcome = await startAndWatchJob("/api/mission/plan", { goal: trimmed }, {
+        onProgress: (job) => setStepLabel(job.stepLabel),
       });
-      const data = await res.json();
       void refreshCredits();
 
-      if (!res.ok || !data.ok) {
-        const message = getErrorMessage(data?.error, "Could not create a plan.");
+      if (!outcome.ok) {
+        if (outcome.code === "insufficient") {
+          setOutOfCredits(true);
+          return;
+        }
+        // "still_running" is not a failure of the JOB — this page simply
+        // stopped watching. Saying "it failed" would be untrue and would
+        // invite a second, duplicate plan.
+        const message =
+          outcome.code === "still_running"
+            ? t("stillPlanning")
+            : outcome.code === "stalled"
+              ? t("planStalled")
+              : getErrorMessage(outcome.error, "Could not create a plan.");
         setError(message);
-        addToast(`✗ ${message}`, "error");
+        addToast(`✗ ${message}`, outcome.code === "still_running" ? "success" : "error");
         return;
       }
-      if (data.outOfCredits) {
-        setOutOfCredits(true);
-        return;
-      }
+      const data = outcome.result as { planned?: boolean; message?: string };
       if (!data.planned) {
         const message = data.message ?? "Could not create a plan.";
         setError(message);

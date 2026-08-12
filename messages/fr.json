@@ -795,7 +795,9 @@
           "deep": "Bonne énergie — attaque celle-ci"
         },
         "heldBack": "{count} étapes plus exigeantes mises de côté pour l'instant"
-      }
+      },
+      "stillPlanning": "Planification en cours — cela prend du temps. Le travail continue et le plan sera dans votre liste de missions une fois prêt.",
+      "planStalled": "Le plan s'est arrêté de façon inattendue. Aucun crédit n'a été débité — réessayez."
     },
     "reflection": {
       "title": "Bilan Hebdomadaire",
@@ -1159,7 +1161,8 @@
         "weekly": "Chaque {day} à {time}",
         "monthly": "Le {day} de chaque mois à {time}",
         "custom": "Planning : {expression}"
-      }
+      },
+      "buildStalled": "La création s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez."
     },
     "publishing": {
       "title": "Sites publiés",
@@ -1203,7 +1206,19 @@
       "rollbackSuccess": "Version {number} restaurée.",
       "rollbackError": "Impossible de restaurer. Réessayez.",
       "confirmRollback": "Remettre la version {number} en ligne ?",
-      "unpublishHint": "Retire le site du web. Il reste dans votre compte et peut être republié."
+      "unpublishHint": "Retire le site du web. Il reste dans votre compte et peut être republié.",
+      "publishIntro": "Votre site a besoin de sa propre adresse web avant d'être mis en ligne. Choisissez-en une — vous pourrez la modifier plus tard.",
+      "addressPlaceholder": "votre-adresse",
+      "previewLabel": "Votre site sera à l'adresse",
+      "addressAvailable": "Cette adresse convient.",
+      "disabledHint": "Saisissez une adresse valide pour publier.",
+      "reasonEmpty": "Saisissez une adresse pour continuer.",
+      "reasonTooShort": "Trop courte — utilisez au moins {min} caractères.",
+      "reasonTooLong": "Trop longue — utilisez au plus {max} caractères.",
+      "reasonInvalidCharacters": "Seuls les minuscules, les chiffres et les tirets sont autorisés.",
+      "reasonBadEdges": "Elle ne peut pas commencer ni finir par un tiret.",
+      "reasonReserved": "Cette adresse est réservée. Choisissez-en une autre.",
+      "reasonTaken": "Cette adresse est déjà prise. Essayez-en une autre."
     },
     "integrations": {
       "title": "Intégrations",
@@ -1303,7 +1318,7 @@
       "askNothingSelected": "Cochez les fichiers d'où doit venir la réponse. Rien d'autre ne sera utilisé.",
       "askSelected": "Réponse à partir de {count} fichier(s) : {names}",
       "tooManySelected": "Interrogez au maximum {max} fichiers à la fois.",
-      "askPlaceholder": "Que disent ces documents à propos de… ?",
+      "askPlaceholder": "Posez une question sur les fichiers sélectionnés…",
       "ask": "Demander",
       "asking": "Lecture…",
       "askError": "La question n'a pas pu recevoir de réponse.",
@@ -1313,7 +1328,33 @@
       "removedCitations": "{count} référence(s) pointaient vers des pages non fournies et ont été supprimées.",
       "truncatedWarning": "Seule une partie de la sélection a tenu ; la réponse peut être incomplète.",
       "skippedFiles": "Ignorés (aucun texte lisible) : {names}",
-      "creditsCharged": "{credits} crédits"
+      "creditsCharged": "{credits} crédits",
+      "stepsLabel": "Comment fonctionne cette page",
+      "step1Title": "1. Importez des fichiers",
+      "step1Hint": "PDF, Word, Excel, CSV ou texte.",
+      "step2Title": "2. Choisissez lesquels interroger",
+      "step2Hint": "Cochez les fichiers d'où doit venir la réponse.",
+      "step3Title": "3. Posez votre question",
+      "step3Hint": "L'IA répond uniquement à partir des fichiers cochés.",
+      "selectedCount": "{count, plural, one {# fichier sélectionné} other {# fichiers sélectionnés}}",
+      "clearSelection": "Effacer",
+      "goToAsk": "Interroger ces fichiers",
+      "emptyTitle": "Rien d'importé pour l'instant",
+      "emptyBody": "Importez un PDF, un Word ou un Excel et interrogez l'IA sur son contenu. Elle ne lit que les fichiers cochés, et chaque réponse indique la page dont elle provient.",
+      "emptyExample": "Par ex. « Que dit le contrat sur l'annulation ? »",
+      "askDisabledNoFiles": "Cochez d'abord au moins un fichier ci-dessus.",
+      "askDisabledNoQuestion": "Saisissez votre question pour continuer.",
+      "examplesLabel": "Essayez :",
+      "example1": "Que dit ce document sur l'annulation ?",
+      "example2": "Résumez les points essentiels.",
+      "example3": "Quels sont les délais et les montants ?",
+      "processingHint": "Lecture du fichier — quelques secondes en général. Vous pourrez l'interroger dès qu'il sera prêt.",
+      "failedHint": "Aucun texte lisible trouvé. Importez une version au texte sélectionnable.",
+      "askStillRunning": "Lecture en cours — cela prend du temps. Le travail continue même page fermée ; revenez et reposez la question pour voir la réponse.",
+      "askStalled": "La question s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez.",
+      "stepReading": "Lecture de vos fichiers",
+      "stepAnswering": "Élaboration de la réponse",
+      "stepChecking": "Vérification des références"
     },
     "deepResearch": {
       "title": "Recherche approfondie",

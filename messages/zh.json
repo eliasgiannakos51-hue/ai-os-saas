@@ -1159,7 +1159,8 @@
         "weekly": "每{day} {time}",
         "monthly": "每月 {day} 号 {time}",
         "custom": "计划：{expression}"
-      }
+      },
+      "buildStalled": "创建意外中断。未扣除任何积分——请重试。"
     },
     "publishing": {
       "title": "已发布网站",

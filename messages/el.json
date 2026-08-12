@@ -1159,7 +1159,8 @@
         "weekly": "Κάθε {day} στις {time}",
         "monthly": "Ημέρα {day} κάθε μήνα στις {time}",
         "custom": "Πρόγραμμα: {expression}"
-      }
+      },
+      "buildStalled": "Η δημιουργία σταμάτησε απροσδόκητα. Δεν χρεώθηκαν credits — δοκίμασε ξανά."
     },
     "publishing": {
       "title": "Δημοσιευμένα Sites",

@@ -195,7 +195,25 @@ const clientFallbacks = sources.flatMap((f) => [
 // error replies are surfaced by the calling component, which translates
 // them; the third string is documentation written INTO the export file,
 // which is a JSON artefact the user downloads rather than UI chrome.
-const SERVER_PROSE_BASELINE = 507;
+// Raised again to 517 by the background-jobs infrastructure (10 strings):
+// api/jobs, api/jobs/[id], api/jobs/[id]/continue and lib/jobs/*. Same
+// documented convention — a server route's error replies are surfaced by
+// the calling component, which translates them.
+//
+// The ONE string a user was actually going to read in English is gone
+// rather than counted: the reaper used to write "This job stopped
+// unexpectedly. No credits were charged." straight onto the row, and the
+// client printed it. It now writes the code "stalled" and the client
+// renders dashboard.agents.buildStalled in the user's own language. A
+// baseline raised over a string the user genuinely sees would be this
+// check being talked around instead of answered.
+const SERVER_PROSE_BASELINE = 518;
+// 517 -> 518 for the "Not authenticated." reply added to
+// api/jobs/[id]/continue. That string is the standard one every other
+// route in the app already returns, and it appeared because
+// security-posture.test.mjs was right: the route was answering an
+// unauthenticated caller with 404 alongside the wrong-owner case, which
+// conflated "sign in" with "no such job".
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

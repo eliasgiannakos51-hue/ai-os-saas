@@ -1159,7 +1159,8 @@
         "weekly": "Every {day} at {time}",
         "monthly": "Day {day} of each month at {time}",
         "custom": "Schedule: {expression}"
-      }
+      },
+      "buildStalled": "That build stopped unexpectedly. No credits were charged — please try again."
     },
     "publishing": {
       "title": "Published Sites",

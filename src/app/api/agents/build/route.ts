@@ -8,24 +8,20 @@ import {
   resolveEffectivePlanSlug,
   getPurchasedPackCreditPriceEur,
 } from "@/lib/billing/credits";
-import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
-import { reserveCredits, settleReservation } from "@/lib/billing/reservations";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { checkNeedsClarification } from "@/lib/clarification";
 import { logApiError } from "@/lib/log-error";
 import { AGENT_BUILDER_MODEL } from "@/lib/agents/agent-models";
-import { buildAgentFromRequest } from "@/lib/agents/agent-builder";
 import { AGENT_LIMITS, normaliseDeliveryTarget } from "@/lib/agents/agent-config";
-import { isValidTimeZone, nextRuns } from "@/lib/agents/cron-expression";
+import { isValidTimeZone } from "@/lib/agents/cron-expression";
 import { maxAgentsForPlan } from "@/lib/agents/agent-limits";
-import { estimateAgentRun } from "@/lib/agents/execute-agent";
+import { startJob } from "@/lib/jobs/start-job";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 60; // @function-limit 60
 
 // The Agent Builder endpoint: one sentence in, a complete runnable
 // configuration out. It CREATES NOTHING — the user sees a preview first
@@ -182,116 +178,51 @@ export async function POST(request: Request) {
       }
     }
 
-    const costs = new CostAccumulator();
-    let reservationId = "";
-    if (!bypassCredits && plan) {
-      const reservation = await reserveCredits(user.id, estimate.reserveCredits, "agent_build", {
-        estimatedCredits: estimate.estimatedCredits,
-      });
-      if (!reservation.ok) {
+    // FROM HERE THE ROUTE DOES NOT DO THE WORK.
+    //
+    // It used to await two sequential model calls under a 60-second
+    // ceiling, which is where the reported failure lived: on a 60s
+    // platform the second call could be killed outright, and a kill runs
+    // no catch block — no settlement, no status, and the reservation held
+    // against work the user never received. Their first impression of the
+    // product was paying for a spinner.
+    //
+    // Now: hold the credits, write a job row, kick a worker, return the
+    // id. The work continues whether or not this connection survives, and
+    // the client watches the row rather than the socket.
+    const started = await startJob({
+      userId: user.id,
+      kind: "agent_build",
+      reserve: bypassCredits || !plan ? 0 : estimate.reserveCredits,
+      reserveMetadata: { estimatedCredits: estimate.estimatedCredits },
+      input: {
+        request: userRequest,
+        timezone,
+        deliveryTarget,
+        skipClarification,
+        // Captured NOW, not looked up by the worker. The estimate the user
+        // was quoted is the estimate the preview must show, and a plan
+        // change between the press and the worker must not silently
+        // reprice a job already in flight.
+        accountCreditPriceEur,
+        planSlug: plan?.slug ?? null,
+      },
+    });
+
+    if (!started.ok) {
+      if (started.reason === "insufficient") {
         return NextResponse.json(
           { ok: false, insufficientCredits: true, error: "Not enough credits to build an agent." },
           { status: 402 }
         );
       }
-      reservationId = reservation.reservationId;
+      return NextResponse.json({ ok: false, error: started.message }, { status: 500 });
     }
+
     void recordAiCallForDailySpend(estimate.estimatedCredits);
 
-    // The clarifying-questions pre-check — the EXISTING shared one, kind
-    // "agent". Its cost lands on the same accumulator, so a build that
-    // stops here is still paid for.
-    if (!skipClarification) {
-      try {
-        const clarification = await checkNeedsClarification(apiKey, "agent", userRequest, costs);
-        if (clarification.needsClarification) {
-          await settleReservation({
-            userId: user.id,
-            reservationId,
-            feature: "agent_build",
-            costs,
-            plan,
-            bypassCharge: bypassCredits || !plan,
-            metadata: { outcome: "clarification_requested" },
-          });
-          return NextResponse.json({
-            ok: true,
-            built: false,
-            needsClarification: true,
-            questions: clarification.questions,
-          });
-        }
-      } catch (err) {
-        // Best-effort, exactly as in api/automations/create: a hiccup in
-        // the pre-check must not block a real agent from being designed.
-        logApiError("/api/agents/build", err, { stage: "clarification_check" });
-      }
-    }
-
-    const result = await buildAgentFromRequest({
-      apiKey,
-      request: userRequest,
-      timezone,
-      deliveryTarget,
-      costs,
-    });
-
-    if (!result.ok) {
-      // The builder ran and cost real tokens even though it produced
-      // nothing usable, so this settles rather than releases.
-      await settleReservation({
-        userId: user.id,
-        reservationId,
-        feature: "agent_build",
-        costs,
-        plan,
-        bypassCharge: bypassCredits || !plan,
-        metadata: { outcome: result.reason },
-      });
-      return NextResponse.json(
-        {
-          ok: false,
-          error:
-            result.reason === "invalid_schedule"
-              ? `Couldn't work out a valid schedule: ${result.detail} Try saying when it should run, e.g. "every morning".`
-              : "Couldn't design that agent. Try describing it a little differently.",
-        },
-        { status: 422 }
-      );
-    }
-
-    const settlement = await settleReservation({
-      userId: user.id,
-      reservationId,
-      feature: "agent_build",
-      costs,
-      plan,
-      bypassCharge: bypassCredits || !plan,
-      metadata: { outcome: "built" },
-    });
-
-    const { draft, understood, unsupported } = result.built;
-    const perRun = estimateAgentRun({
-      promptChars: draft.prompt.length,
-      needsWebSearch: draft.config.needsWebSearch,
-      accountCreditPriceEur,
-      planSlug: plan?.slug ?? null,
-    });
-
-    return NextResponse.json({
-      ok: true,
-      built: true,
-      draft,
-      understood,
-      unsupported,
-      // The preview: what it understood, when it will run, and what each
-      // run will cost. All three before the agent exists.
-      upcomingRuns: nextRuns(draft.scheduleCron, new Date(), draft.timezone, 3).map((d) =>
-        d.toISOString()
-      ),
-      estimatedCreditsPerRun: perRun.estimatedCredits,
-      creditsChargedForBuild: settlement.creditsCharged,
-    });
+    // 202: accepted, not finished. The client polls /api/jobs/<id>.
+    return NextResponse.json({ ok: true, jobId: started.jobId, queued: true }, { status: 202 });
   } catch (err) {
     logApiError("/api/agents/build", err);
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });

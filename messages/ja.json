@@ -1159,7 +1159,8 @@
         "weekly": "毎週{day} {time}",
         "monthly": "毎月 {day} 日 {time}",
         "custom": "スケジュール：{expression}"
-      }
+      },
+      "buildStalled": "作成が予期せず停止しました。クレジットは請求されていません。もう一度お試しください。"
     },
     "publishing": {
       "title": "公開中のサイト",

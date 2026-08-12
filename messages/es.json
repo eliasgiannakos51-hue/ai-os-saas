@@ -1159,7 +1159,8 @@
         "weekly": "Cada {day} a las {time}",
         "monthly": "El día {day} de cada mes a las {time}",
         "custom": "Programación: {expression}"
-      }
+      },
+      "buildStalled": "La creación se detuvo inesperadamente. No se cobraron créditos — inténtalo de nuevo."
     },
     "publishing": {
       "title": "Sitios publicados",

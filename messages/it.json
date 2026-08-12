@@ -1159,7 +1159,8 @@
         "weekly": "Ogni {day} alle {time}",
         "monthly": "Il giorno {day} di ogni mese alle {time}",
         "custom": "Pianificazione: {expression}"
-      }
+      },
+      "buildStalled": "La creazione si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova."
     },
     "publishing": {
       "title": "Siti pubblicati",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Bot, Plus, Play, Pause, Pencil, Trash2, SearchX, History } from "lucide-react";
@@ -15,6 +15,7 @@ import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { formatDateTimeInZone, formatNumber } from "@/lib/format-number";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { useAiJob } from "@/lib/jobs/use-ai-job";
 import { resolveBrowserTimeZone, nextRuns } from "@/lib/agents/cron-expression";
 import type { AgentDraft, AgentRun, UserAgent } from "@/lib/agents/agent-config";
 import {
@@ -72,7 +73,12 @@ export function AgentsWorkspace({
   const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
   const [requestText, setRequestText] = useState("");
-  const [building, setBuilding] = useState(false);
+  // The id, not a boolean. "Am I building" is answered by the job row, so
+  // it survives a reload — a `building` flag set by pressing a button is
+  // exactly what made Deep Research look like it had stopped when the user
+  // changed pages.
+  const [jobId, setJobId] = useState<string | null>(null);
+  const { job, isRunning: building } = useAiJob(jobId);
   const [questions, setQuestions] = useState<string[] | null>(null);
   const [preview, setPreview] = useState<BuildResponse | null>(null);
   const [savingAgent, setSavingAgent] = useState(false);
@@ -114,37 +120,93 @@ export function AgentsWorkspace({
 
   // ---- create flow ---------------------------------------------------
 
+  // BUILDING IS A BACKGROUND JOB NOW.
+  //
+  // This used to await the whole design — two sequential model calls — on
+  // one fetch, so closing the tab aborted it and a platform kill left the
+  // credit hold stranded with nothing written anywhere. The route returns
+  // a job id immediately; the row is the record; this only watches it.
   async function build(text: string, skipClarification: boolean) {
-    setBuilding(true);
     try {
       const response = await fetch("/api/agents/build", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        // keepalive so navigating away in the second between the press and
+        // the 202 cannot lose the request that creates the job.
+        keepalive: true,
         body: JSON.stringify({
           request: text,
           skipClarification,
           timezone: resolveBrowserTimeZone(),
         }),
       });
-      const data = (await response.json()) as BuildResponse;
-
+      const data = await response.json();
       if (!data.ok) {
         addToast(data.error ?? t("buildError"), "error");
         return;
       }
-      if (data.needsClarification && data.questions?.length) {
-        setQuestions(data.questions);
-        setPreview(null);
-        return;
-      }
       setQuestions(null);
-      setPreview(data);
+      setPreview(null);
+      setJobId(String(data.jobId));
     } catch (err) {
       addToast(getErrorMessage(err, t("buildError")), "error");
-    } finally {
-      setBuilding(false);
     }
   }
+
+  // THE RESULT ARRIVES FROM THE ROW, not from the fetch that started it.
+  useEffect(() => {
+    if (!job || job.status === "queued" || job.status === "running") return;
+    if (job.status === "failed") {
+      // Never the raw server string: it is English, and this is precisely
+      // the moment a user in another language should not be handed one.
+      // "stalled" is the reaper's code for a worker that died — the credits
+      // are already back, and saying so is the difference between a scare
+      // and an inconvenience.
+      addToast(job.error === "stalled" ? t("buildStalled") : t("buildError"), "error");
+      setJobId(null);
+      return;
+    }
+    const result = (job.result ?? {}) as BuildResponse;
+    if (result.needsClarification && result.questions?.length) {
+      setQuestions(result.questions);
+      setPreview(null);
+    } else if (result.built) {
+      setQuestions(null);
+      setPreview({ ...result, ok: true });
+    } else {
+      // The builder ran and could not design it. Real tokens were spent,
+      // so this is a completed job carrying a refusal — not an error to
+      // retry for free.
+      addToast(result.error ?? t("buildError"), "error");
+    }
+    setJobId(null);
+  }, [job, addToast, t]);
+
+  // WHAT MAKES CLOSING THE PAGE SAFE. On mount, ask the server whether
+  // this account already has a build running. Nothing is remembered in the
+  // browser, so it works in a second tab, in a different browser, and
+  // after a cleared cache — all three of which a localStorage id gets
+  // wrong by telling the user nothing is running while a worker spends
+  // their credits.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch("/api/jobs?kind=agent_build");
+        const data = await response.json();
+        if (!cancelled && data.ok && data.job) {
+          setCreating(true);
+          setJobId(String(data.job.id));
+        }
+      } catch {
+        // No running job is the common answer and a failed check is not
+        // evidence of one. The page works either way.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function createAgent() {
     if (!preview?.draft) return;

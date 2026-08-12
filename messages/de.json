@@ -1159,7 +1159,8 @@
         "weekly": "Jeden {day} um {time}",
         "monthly": "Am {day}. jedes Monats um {time}",
         "custom": "Zeitplan: {expression}"
-      }
+      },
+      "buildStalled": "Die Erstellung wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen."
     },
     "publishing": {
       "title": "Veröffentlichte Seiten",

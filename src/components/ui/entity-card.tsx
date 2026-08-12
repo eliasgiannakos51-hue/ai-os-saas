@@ -115,6 +115,10 @@ export function EntityCard({
     <div
       data-row
       data-testid={testId}
+      // Exposed as an attribute as well as a class so "is this row
+      // selected" can be asserted without matching on styling — the
+      // highlight is a design decision and may change; the state may not.
+      data-selected={selected ? "true" : undefined}
       style={index === undefined ? undefined : ({ "--i": index } as CSSProperties)}
       className={[
         "card-lift group relative flex flex-col rounded-2xl border p-4 transition-colors duration-200",
@@ -206,6 +210,10 @@ export function EntityCard({
 }
 
 /** The grid every EntityCard list sits in — one column on phones, two from `sm`. */
-export function CardGrid({ children }: { children: ReactNode }) {
-  return <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">{children}</div>;
+export function CardGrid({ children, testId }: { children: ReactNode; testId?: string }) {
+  return (
+    <div data-testid={testId} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      {children}
+    </div>
+  );
 }

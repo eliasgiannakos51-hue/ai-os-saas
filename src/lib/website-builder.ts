@@ -8,6 +8,11 @@ import { applyExactReplace } from "@/lib/website-patch";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 import { AI_SAFETY_BOUNDARIES_EN } from "@/lib/ai-conduct";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
+import {
+  MOTION_VOCABULARIES,
+  REDUCED_MOTION_BLOCK,
+  allowedMotionFor,
+} from "@/lib/website-motion";
 import type { CostAccumulator, CostStage } from "@/lib/billing/cost-accumulator";
 
 const MODEL = WEBSITE_BUILDER_MODEL;
@@ -220,13 +225,13 @@ Available named fonts you recognize and can use exactly by this name: ${GOOGLE_F
 - If the user names a specific one of these (or something close/misspelled), use that exact font.
 - If the user names a font NOT in this list, use the closest visual match from the list instead (never invent a fake font-family name).
 - If the user names no font, choose the pairing from the SITE SHAPE and the subject, not from habit. Three mappings used to be listed here and the result was three looks across every site ever generated, so treat the following as a starting range and pick deliberately:
-  * elegant / luxury / hospitality -> serif display headings (Playfair Display, Cormorant Garamond, Bodoni Moda, Prata) + a quiet sans body (Inter, Karla, Work Sans)
-  * legal / medical / financial / institutional -> a restrained serif throughout (Libre Baskerville, Merriweather, Spectral, Domine) or a sober grotesk (IBM Plex Sans, Source Sans 3, Archivo) — authority reads as understatement, not as a display face
+  * elegant / luxury / hospitality -> serif display headings (Playfair Display, Cormorant Garamond, Bodoni Moda, Prata) + a quiet sans body (Karla, Work Sans)
+  * legal / medical / financial / institutional -> a restrained serif throughout (Libre Baskerville, Merriweather, Spectral, Domine) or a sober grotesk (IBM Plex Sans, Source Sans 3, Archivo); authority reads as understatement, never as a display face
   * modern / tech / product -> geometric sans (Space Grotesk, Manrope, Outfit, Plus Jakarta Sans, Sora)
   * warm / family / neighbourhood -> rounded sans (Nunito, Quicksand, Rubik) or a friendly slab (Zilla Slab)
-  * editorial / writing / personal -> a reading serif (Crimson Pro, Lora, Spectral, Merriweather) at a generous size, single column
-  * bold / nightlife / sport / streetwear -> condensed display (Oswald, Bebas Neue, Archivo) + a neutral sans body
-  * gallery / architecture / minimal -> one grotesk at two weights (Epilogue, Urbanist, Barlow), heavy reliance on scale and space rather than on a second family
+  * editorial / writing / personal -> a reading serif (Crimson Pro, Lora, Spectral) at a generous size, single column
+  * bold / nightlife / sport -> condensed display (Oswald, Bebas Neue, Archivo) + a neutral sans body
+  * gallery / architecture / minimal -> one grotesk at two weights (Epilogue, Urbanist, Barlow), leaning on scale and space rather than a second family
 - Inter is a perfectly good body face and it is also the most over-used font on the web. Do not reach for it by default — choose it when it is right, not when nothing else came to mind.
 - To actually load a font, add BOTH of these to <head> (this is the one and only external-resource exception in this document — see the rules above):
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -234,6 +239,55 @@ Available named fonts you recognize and can use exactly by this name: ${GOOGLE_F
   <link href="https://fonts.googleapis.com/css2?family=FONT+NAME:wght@400;600;700&display=swap" rel="stylesheet">
   (replace spaces in FONT NAME with + in the URL, e.g. "Playfair Display" -> family=Playfair+Display)
 - Then reference it in CSS: font-family: 'Font Name', sans-serif; (or serif, matching the font's actual category).`;
+
+// MOTION — the half of "it is the same template" that survived the SITE
+// SHAPE fix, and the reason the complaint came back.
+//
+// SITE SHAPE changed what the page is made of. It said nothing about how
+// the page BEHAVES, and behaviour is what a visitor experiences first: the
+// same sections fading up on the same scroll trigger over the same 0.7
+// seconds, the same lift under the cursor, the same easing curve. Two
+// pages built from different section orders still feel identical when they
+// move identically — "ίδια animations, ίδια συμπεριφορά, ίδιο feel" is
+// exactly that, and it is an accurate report.
+//
+// The prompt's only guidance on motion was ANIMATIONS below: five
+// reference snippets and an instruction to use one or none. "One or none"
+// leaves the choice unmade, and an unmade choice resolves to the model's
+// prior, which is scroll-reveal plus hover-lift on everything.
+//
+// So motion becomes a NAMED, DECLARED, CLOSED choice, the same shape as
+// the archetype: six vocabularies, each archetype allowed only two or
+// three of them, the pick written into the DESIGN DECISIONS block with a
+// reason, and mechanically checkable afterwards
+// (scripts/lib/site-fingerprint.mjs's motionSignals/motionContradictions).
+// A declaration nobody can check is a declaration a model can write and
+// then ignore.
+const MOTION_SECTION = `
+MOTION VOCABULARY — CHOOSE EXACTLY ONE, FROM THE SET YOUR ARCHETYPE ALLOWS:
+How a page moves is as recognisable as how it looks. Two sites that reveal the same sections on the same scroll trigger with the same easing over the same 0.7 seconds ARE the same site to the person using them, whatever their section order and palette. So motion is decided once, by name, and then obeyed — not added at the end because the page felt static.
+
+This is a closed list. The word on your "motion" line must be one of these six (${MOTION_VOCABULARIES.join(" | ")}) AND one your archetype permits (see its MOTION line above).
+
+1. still — NOTHING moves. No @keyframes, no animation property, no transform anywhere, no scroll-reveal, no parallax, no hover that displaces anything. A colour or underline change on :hover and a visible :focus outline are not motion and are still required. For subjects movement would undermine: a barrister, a bereavement service, a clinic, an archive.
+
+2. subtle — FEEDBACK ONLY. Something moves when, and only when, the visitor points at it or focuses it: 120-200ms on colour, opacity, border, and at most 2px of displacement. No entrance animation, no scroll-reveal, nothing self-starting. The correct default for most working sites and the least likely to be wrong.
+
+3. editorial — motion serves READING and nothing else. scroll-behavior: smooth for anchors, at most ONE quiet fade on first paint, 300-600ms ease-out. Body text never moves, never staggers and never fades in as the reader reaches it: a paragraph that animates while being read is harder to read.
+
+4. bold — ONE large, deliberate movement, then stillness. A heading that arrives, an image that unmasks, a colour field that sweeps in once. Hover states displace decisively, 4-8px. 200-400ms on a firm curve, cubic-bezier(0.2, 0.8, 0.2, 1). The discipline is one such moment on the page, not one per section.
+
+5. playful — MANY small, cheap movements: a staggered list entrance, hovers that lift and tilt slightly, colour shifts, a bouncy curve, cubic-bezier(0.34, 1.56, 0.64, 1). 150-500ms. Never on a form field, never on anything being read or typed into, never so much that the page cannot be scanned.
+
+6. cinematic — SLOW, HEAVY, ATMOSPHERIC. The imagery moves and the type stays still: a parallax backdrop, a long cross-fade, a slow scale on a hero photograph. 800-2000ms, one or two such moments in the whole page. Weight and patience, not quantity. Never with a bouncy curve or a stagger.
+
+WHATEVER YOU CHOSE:
+- Write its name on the "motion" line of DESIGN DECISIONS, and one sentence on "why-motion" naming what moves and what deliberately does not. Then build that and only that: declaring "still" and shipping @keyframes, or declaring "cinematic" on a page where nothing moves, makes the record false, which is worse than no record.
+- REDUCED MOTION IS NOT OPTIONAL. Unless your vocabulary is "still", include this verbatim in the <style>; nothing else about your CSS changes:
+    ${REDUCED_MOTION_BLOCK}
+  Leaving it out is a real accessibility failure, not a nice-to-have.
+- Motion never hides content: anything revealed on scroll must be legible with JavaScript disabled, which the .reveal snippet below does not satisfy on its own.
+- Do not use motion to prove effort. The commonest failure here is a restrained subject given a lively page because lively felt more finished.`;
 
 // "reproduce these patterns consistently rather than inventing new ones
 // each time" used to be the first line of this section. It is a direct
@@ -248,9 +302,9 @@ Available named fonts you recognize and can use exactly by this name: ${GOOGLE_F
 // that fit" does not survive contact with four concrete hex values sitting
 // right above it.
 const ANIMATIONS_SECTION = `
-ANIMATIONS (pure CSS). These are REFERENCE IMPLEMENTATIONS, not a checklist — copy the CSS for an effect when that effect is right for THIS site, and skip the rest. Most good sites use one, or none. Using all five on every site is a failure, not thoroughness.
+ANIMATIONS (pure CSS). REFERENCE IMPLEMENTATIONS, not a checklist — the CSS to copy when the MOTION VOCABULARY you declared calls for that effect. Each names the vocabularies it belongs to; using one your vocabulary does not list contradicts your own DESIGN DECISIONS block. Declaring "still" means none of the five apply. Most good sites use one, or none. Using all five on every site is a failure, not thoroughness.
 
-1) Scroll-reveal fade-in — add class="reveal" to a section, plus this CSS and this exact tiny script (the ONLY two purposes an inline <script> may ever be used for in this document are this effect and the contact-form handler described below):
+1) Scroll-reveal fade-in — for "bold" (once, on the one moment) or "playful". NOT for still, subtle, editorial or cinematic. Add class="reveal" to a section, plus this CSS and this exact tiny script (the ONLY two purposes an inline <script> may ever be used for in this document are this effect and the contact-form handler described below):
    CSS:
      .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
      .reveal.is-visible { opacity: 1; transform: translateY(0); }
@@ -263,23 +317,23 @@ ANIMATIONS (pure CSS). These are REFERENCE IMPLEMENTATIONS, not a checklist — 
        revealEls.forEach(function(el){ io.observe(el); });
      </script>
 
-2) Parallax-style background movement — a section with a background photo:
+2) Parallax-style background movement — for "cinematic" only. A section with a background photo:
      .parallax-section { background-image: url('...'); background-attachment: fixed; background-size: cover; background-position: center; }
 
-3) Smooth hover lift — for whatever element this page actually has that should respond to a pointer. Name the class after that element in THIS design; do not introduce a card because a hover effect exists.
+3) Smooth hover lift — for "bold" or "playful". For "subtle", keep the transition and drop the displacement to 0-2px; for "still" and "editorial", do not use it at all. Apply it to whatever element this page actually has that should respond to a pointer. Name the class after that element in THIS design; do not introduce a card because a hover effect exists.
      .lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
      .lift:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
 
-4) Animated gradient — for any large colour field this design already calls for. The four colour stops below are written as PLACEHOLDERS on purpose: substitute four real colours from THIS site's own palette. Emitting a literal purple/orange gradient on a law firm or a bakery is exactly the kind of copied default this section exists to prevent. Several shapes above forbid a gradient outright; the shape you chose wins over this snippet.
+4) Animated gradient — for "bold" or "playful", on any large colour field this design already calls for. Never for still, subtle, editorial or cinematic. The four colour stops below are written as PLACEHOLDERS on purpose: substitute four real colours from THIS site's own palette. Emitting a literal purple/orange gradient on a law firm or a bakery is exactly the kind of copied default this section exists to prevent. Several shapes above forbid a gradient outright; the shape you chose wins over this snippet.
      .gradient-bg { background: linear-gradient(-45deg, COLOR_1, COLOR_2, COLOR_3, COLOR_4); background-size: 400% 400%; animation: gradientShift 12s ease infinite; }
      @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-5) Staggered entrance for a list — write one delay rule per item the list ACTUALLY has, however many that is. The count below is an illustration of the pattern, not a target:
+5) Staggered entrance for a list — for "playful" only. Write one delay rule per item the list ACTUALLY has, however many that is. The count below is an illustration of the pattern, not a target:
      .stagger-item { opacity: 0; animation: fadeInUp 0.6s ease forwards; }
      .stagger-item:nth-child(n) { animation-delay: calc(n * 0.1s); }  /* i.e. one rule per real item */
      @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 
-Reach for these when the description asks for "impressive"/"modern"/"animated" or similar. A restrained, serious or editorial site is BETTER with no animation at all — do not add motion to prove effort.`;
+A brief asking for "impressive"/"modern"/"animated" is a reason to choose a livelier VOCABULARY above, not a reason to bolt extra effects onto the one you already declared. A restrained, serious or editorial site is BETTER with no animation at all — do not add motion to prove effort. And whatever you used from this list, the prefers-reduced-motion block from MOTION VOCABULARY is still mandatory.`;
 
 // THE SECTION THAT DID NOT EXIST, and whose absence is the real reason
 // every generated site looked the same.
@@ -312,6 +366,8 @@ Each shape sets five things. They are not stylistic preferences; they are what m
   ORDER: photo > menu or price list or timetable > hours and address and phone > gallery > map.
   TYPE: a warm display face for headings against a plain sans body; prices set large, prose set small.
   IMAGES: many — the room, the food, the pitches, the view. Photography carries this page.
+  MOTION: ${allowedMotionFor("local-place")}. Never still (the place should feel alive) and never editorial.
+  INTERACTION: navigation is anchored section links, not a full menu bar; the action is CALL or DIRECTIONS as a real tel:/maps link, at the top and again at the end, never a "learn more"; a form only if the place takes bookings, and then date, people and phone only; on mobile the phone number is a thumb-sized tap target in the first screen.
   NEVER: feature cards, a testimonial section, or any marketing prose above the menu.
 
 - professional-services: lawyer, accountant, architect, consultant, therapist, medical practice, engineer.
@@ -319,6 +375,8 @@ Each shape sets five things. They are not stylistic preferences; they are what m
   ORDER: name and statement > practice areas as a plain list > credentials and qualifications > people > contact form and direct phone.
   TYPE: one serif at two sizes, high contrast, generous line height; no decorative face anywhere.
   IMAGES: sparse — one portrait or one interior at most, and never stock handshakes or headsets.
+  MOTION: ${allowedMotionFor("professional-services")}. Nothing else is permitted here: movement reads as advertising, and this page is selling judgement.
+  INTERACTION: navigation is a plain top bar of text links, no dropdown, no hamburger animation; the action is a request for a consultation, worded as such, beside the direct phone number rather than replacing it; the form asks name, contact and matter, and says what happens next and how long it takes, never using a placeholder as its only label; on mobile the phone number stays in the header rather than collapsing behind a menu icon.
   NEVER: icon cards, gradients, animation, or a photograph before the first sentence of text.
 
 - gallery: photographer, designer, illustrator, artist, studio, craftsperson, architect's portfolio.
@@ -326,6 +384,8 @@ Each shape sets five things. They are not stylistic preferences; they are what m
   ORDER: work > more work > one short statement > contact as a single line.
   TYPE: one small, quiet sans at one or two sizes; the type must never compete with the images.
   IMAGES: the maximum — the page is images with captions, not text with illustrations.
+  MOTION: ${allowedMotionFor("gallery")}. Either the images move and nothing else does, or nothing moves at all — never playful, never bold.
+  INTERACTION: navigation is the artist's name alone, or nothing; the only action is contact, as one line of text at the end, never a button band; a form only if the brief asks, then three fields at most; on mobile the grid becomes ONE full-bleed column with no gutters — a portfolio thumbnailed to 140px is a portfolio nobody saw.
   NEVER: a hero band with a headline over the work, feature cards, testimonials, or a fat footer.
 
 - editorial: personal site, CV, writer, researcher, essay, newsletter, about-me page.
@@ -333,6 +393,8 @@ Each shape sets five things. They are not stylistic preferences; they are what m
   ORDER: name and sentence > the substance in prose > selected work as a plain list > contact line.
   TYPE: one text face at a comfortable measure of 60-75 characters, large body size, real paragraphs.
   IMAGES: almost none — one portrait at most; this page is read, not looked at.
+  MOTION: ${allowedMotionFor("editorial")}. Motion here exists only to keep the reader's place, never to decorate it.
+  INTERACTION: navigation is none, or in-page anchors as plain underlined text; no call-to-action button anywhere — the action is an email address written out in full; no form unless the brief explicitly asks; on mobile the measure narrows and the body size stays large, because this page's only job is to be read.
   NEVER: a hero band, cards of any kind, columns, a gradient, or any full-bleed section.
 
 - catalogue: products, properties, vehicles, courses, a priced menu of services.
@@ -340,6 +402,8 @@ Each shape sets five things. They are not stylistic preferences; they are what m
   ORDER: items with prices > filters or categories > how to order or enquire > delivery and terms.
   TYPE: one compact sans throughout; tabular figures for prices, tight line height, small headings.
   IMAGES: one per item, uniform in crop and size — consistency matters more than individual quality.
+  MOTION: ${allowedMotionFor("catalogue")}. A dense page that moves is a page that cannot be scanned; hover feedback on a row is the ceiling.
+  INTERACTION: navigation is the category list itself, sticky if long; the action lives on EVERY item ("enquire", "order", a price and a way to get it), not once at the bottom; a form is per-item and pre-fills which item; on mobile the grid becomes one column of rows with the price on the same line as the name, never below it.
   NEVER: a marketing hero above the items, or a page where a price requires scrolling to find.
 
 - event: wedding, conference, launch, fundraiser, festival, one-off campaign.
@@ -347,6 +411,8 @@ Each shape sets five things. They are not stylistic preferences; they are what m
   ORDER: date and place and action > what it is > schedule or programme > directions > the action again.
   TYPE: one strong display face for the date and the action; everything else deliberately quiet.
   IMAGES: one or two atmospheric photographs, used full-bleed as backdrops rather than as content.
+  MOTION: ${allowedMotionFor("event")}. Never still — an event that does not move does not feel like it is happening.
+  INTERACTION: navigation is none, or two anchors at most; exactly ONE action word on the page (RSVP, register, buy), appearing twice — top and end — identically worded; the form is the RSVP and asks the fewest fields that can work; on mobile the date and the action are both above the fold, at large type.
   NEVER: more than one call to action, a pricing table, or a features section.
 
 - product-landing: SaaS, app, digital product, subscription tool.
@@ -354,17 +420,23 @@ Each shape sets five things. They are not stylistic preferences; they are what m
   ORDER: value proposition > how it works > features > pricing > final call to action.
   TYPE: a geometric sans at strong weight contrast, tight headline tracking.
   IMAGES: product screenshots and interface shots, not photographs of people.
+  MOTION: ${allowedMotionFor("product-landing")}. Never cinematic — slow, heavy motion on a product page reads as a page that is slow.
+  INTERACTION: navigation is a top bar whose last item IS the signup action; the same action repeats at each scroll depth in the same words; the form is the signup and asks one field (email), everything else deferred; on mobile it becomes a sticky bottom bar rather than something to scroll back up for.
   NEVER: use this shape for anything that is not actually a software product — it is the correct answer here and the wrong answer for every other brief on this list.
 
 FORBIDDEN DEFAULT: do NOT produce the generic centred-hero landing page — big centred headline over a gradient, a row of three feature cards with icons, a testimonial, a CTA band, a fat footer — unless the brief genuinely IS a product/SaaS landing page. It is the single most over-used shape on the web and it is wrong for most of the briefs you will receive.
 
-VARY THESE DELIBERATELY, driven by the subject rather than by habit:
-- HERO: full-bleed photograph / split text-and-image / purely typographic with no image / asymmetric offset / no hero at all, opening straight into the work or the menu.
-- NAVIGATION: a normal top bar / a logo alone / anchored section links / none, for a short single-purpose page.
-- SECTION RHYTHM: alternating left-right blocks / full-bleed colour bands / a card grid / one continuous editorial column / an overlapping asymmetric layout.
-- PALETTE: derive it from the actual subject — a taverna is not a fintech. Warm earth tones, deep monochrome, high-contrast black and white, a single accent on near-white, muted naturals are all available. Avoid the default indigo-to-violet gradient unless the brief asks for it.
-- TYPOGRAPHY: vary the pairing, the scale and the weight contrast per the shape above; see FONTS.
-- DENSITY: a listings page should be dense; a portfolio should be sparse. Do not apply the same vertical rhythm to both.
+THE SAME APPLIES TO MOVEMENT. There is a default way for a generated page to behave — every section fading up on scroll, every card lifting 6px under the cursor, an animated gradient somewhere — and it arrives whatever the site is for, which is what makes two structurally different pages feel like one. Motion is chosen by name in MOTION VOCABULARY below, not applied at the end.
+
+VARY THESE DELIBERATELY, from the subject rather than from habit:
+- HERO: full-bleed photograph / split text-and-image / purely typographic / asymmetric offset / none, opening straight into the work or the menu.
+- SECTION RHYTHM: alternating left-right blocks / full-bleed colour bands / a card grid / one continuous column / an overlapping asymmetric layout.
+- PALETTE: from the actual subject — a taverna is not a fintech. Warm earth, deep monochrome, high-contrast black and white, one accent on near-white, muted naturals. Avoid the default indigo-to-violet gradient unless the brief asks for it.
+- TYPOGRAPHY: the pairing, scale and weight contrast from your shape's TYPE line; see FONTS.
+- DENSITY: a listings page is dense, a portfolio sparse. Not the same vertical rhythm for both.
+- NAVIGATION: a top bar / a logo alone / anchored section links / none, for a short single-purpose page.
+- MOTION: one of the six vocabularies in MOTION VOCABULARY below, from the set your shape allows.
+- ACTION, FORMS, MOBILE: your shape's INTERACTION line states all three, alongside navigation. Part of the shape, not decoration added afterwards.
 
 If two sites you generated for two different businesses would look like the same page with the words swapped, you have not done this step.
 
@@ -378,12 +450,15 @@ sections: <the section order you are about to build, comma-separated, in order>
 palette: <a two-or-three-word name, then the actual hex values you will use>
 type: <heading font / body font>
 density: <sparse | medium | dense>
+motion: <one of: ${MOTION_VOCABULARIES.join(" | ")} — and it MUST be one your archetype's MOTION line allows>
+why-motion: <one sentence naming what actually moves on this page, what stays still, and why that is right for THIS subject>
 why: <one sentence: what about THIS subject drove the choices above>
 -->
 
 Rules for it:
-- Decide from the SUBJECT, not from habit. A taverna, a tax accountant and a wedding photographer must not come out with the same archetype, the same hero, the same section order or the same palette.
+- Decide from the SUBJECT, not from habit. A taverna, a tax accountant and a wedding photographer must not come out with the same archetype, the same hero, the same section order, the same palette or the same motion.
 - The "sections" line must match the sections you actually build, in the order you build them. It is a commitment, not a summary written afterwards.
+- The "motion" line is the same kind of commitment. Declaring "still" and then writing a @keyframes rule, or declaring "cinematic" and shipping a page where nothing moves, is worse than not declaring at all — it turns the record into a false one. Whatever you name, the CSS has to match it.
 - product-landing is a real answer for a real SaaS brief and the wrong answer for most others. If you choose it, "why" must say what makes this an actual product landing page.
 - Never copy an example from this prompt as your answer. There are no default values here.`;
 
@@ -504,7 +579,8 @@ FINAL SELF-CHECK (do this before you output anything):
 2. Go through that list one item at a time against the HTML you are about to return, and confirm each one is actually present. Not "addressed in spirit" — present.
 3. A requirement you decided against is still a requirement. If the brief asked for something you think is a bad idea, DO IT ANYWAY; it is their site. The only exceptions are the safety limits below and inventing facts you were not given.
 4. Anything missing, add it now. Do not return an answer you have not checked this way.
-5. Finally, look at the page as a whole and ask whether it is recognisably a page for THIS business, or a generic template with this business's words swapped in. If it is the second one, restructure it before returning — a page that would look identical for a completely different business has failed, however clean it is.`;
+5. Check the page against its own DESIGN DECISIONS comment, line by line. The sections you built, in the order you built them, must be the "sections" line. The fonts you loaded must be the "type" line. And the CSS must be the "motion" line: if you declared "still" there must be no @keyframes, no animation property and no transform anywhere; if you declared anything else the prefers-reduced-motion block must be present. A declaration the page contradicts is worse than no declaration, because it reads as evidence.
+6. Finally, look at the page as a whole and ask whether it is recognisably a page for THIS business, or a generic template with this business's words swapped in. Ask it about BEHAVIOUR as well as appearance: if this page fades the same sections in on the same scroll trigger, over the same duration, with the same hover lift as the last site you would have built for a completely different business, it is the same page however different the colours are. If it is the second one, restructure it before returning.`;
 
 // The user's brief has to WIN, and it has to be LAST.
 //
@@ -551,6 +627,7 @@ CORE RULES:
 - Fill in a <title> tag that fits the description.
 ${SITE_SHAPE_SECTION}
 ${FONTS_SECTION}
+${MOTION_SECTION}
 ${ANIMATIONS_SECTION}
 ${IMAGE_RULES_HEADER}
 ${WEB_SEARCH_SECTION}
@@ -865,6 +942,12 @@ CORE RULES:
 - Apply ONLY the requested change. Keep every other section, all copy, and the overall structure and design exactly as they were unless the change necessarily affects them.
 - Keep following the same rules the original site was built under: all CSS inline in a single <style> tag, no external stylesheets/fonts/scripts except the specific exceptions below, responsive with a viewport meta tag, semantic HTML5.
 ${FONTS_SECTION}
+${MOTION_SECTION}
+
+THE PAGE ALREADY MADE ITS MOTION DECISION. The document you were given opens with a DESIGN DECISIONS comment naming a motion vocabulary. Keep that vocabulary and keep the comment true:
+- An edit about anything else (copy, a colour, a new section, a photo) must not change how the page moves. A new section built with a fade-in, added to a page that declared "still", breaks a commitment the page already made.
+- Only when the change request is itself about movement ("add some animation", "make it calmer", "too much movement") do you pick a different vocabulary — and then you UPDATE the motion and why-motion lines in the comment to the new one, and bring the whole page to it, not just the part you touched.
+- If the document has no DESIGN DECISIONS comment (it was generated before they existed), do not add one — infer the page's existing vocabulary from its CSS and stay inside it.
 ${ANIMATIONS_SECTION}
 ${IMAGE_RULES_HEADER}
 ${WEB_SEARCH_SECTION}

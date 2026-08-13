@@ -55,6 +55,24 @@ function section(name) {
   return src.slice(from, src.indexOf("`;", from));
 }
 
+// The two shared blocks every AI feature in the app receives. They are not
+// declared in website-builder.ts, so section() cannot see them — but they
+// are still text the user's brief has to compete with, and leaving them out
+// of the ratio would understate it by several thousand characters.
+const SHARED_SECTION_FILES = {
+  AI_SAFETY_BOUNDARIES_EN: "src/lib/ai-conduct.ts",
+  AI_QUALITY_CHECKLIST_EN: "src/lib/ai-quality-checklist.ts",
+};
+function sharedSectionLength(name) {
+  const file = SHARED_SECTION_FILES[name];
+  if (!file) return 0;
+  const text = readFileSync(file, "utf8");
+  const start = text.indexOf(`const ${name} = \``);
+  if (start < 0) return 0;
+  const from = start + `const ${name} = \``.length;
+  return text.slice(from, text.indexOf("`;", from)).length;
+}
+
 console.log("== 1. the instruction to be identical every time is gone ==");
 const animations = section("ANIMATIONS_SECTION");
 check(
@@ -254,26 +272,57 @@ check(
 console.log("\n== 11. the ratio the brief has to compete against ==");
 // Not a pass/fail on size — a recorded measurement, so a future edit that
 // doubles the prompt is visible rather than silent.
-const SECTIONS = [
-  "SITE_SHAPE_SECTION",
-  "FONTS_SECTION",
-  "ANIMATIONS_SECTION",
-  "IMAGE_RULES_HEADER",
-  "WEB_SEARCH_SECTION",
-  "FUNCTIONAL_ELEMENTS_SECTION",
-  "PLACEHOLDER_DATA_SECTION",
-  "FINAL_SELF_CHECK_SECTION",
-];
+//
+// THE LIST USED TO BE HAND-MAINTAINED, AND THAT WAS A HOLE.
+//
+// Adding MOTION_SECTION to the system prompt without adding its name here
+// left 3,374 characters completely unmeasured — the guard went on reporting
+// a comfortable total while the real prompt had grown past the ceiling. A
+// tripwire a new section walks straight past is not a tripwire, and the
+// failure mode is silent by construction: nobody edits a test to add a name
+// they did not know was needed.
+//
+// So the list is derived from the prompt instead of typed alongside it:
+// every `${NAME}` the SYSTEM_PROMPT template interpolates must be measured,
+// and a section that is not is a failure in itself.
+const systemPromptBody = src.match(/const SYSTEM_PROMPT = `([\s\S]*?)`;/)?.[1] ?? "";
+const INTERPOLATED = [...systemPromptBody.matchAll(/\$\{([A-Z][A-Z0-9_]*)\}/g)].map((m) => m[1]);
+check("the SYSTEM_PROMPT template was found", systemPromptBody.length > 0);
+check(`it interpolates ${INTERPOLATED.length} named sections`, INTERPOLATED.length >= 9, INTERPOLATED.join(", "));
+
 let total = 0;
-for (const name of SECTIONS) {
+for (const name of INTERPOLATED) {
   const len = section(name).length;
-  total += len;
-  console.log(`        ${name.padEnd(30)} ${String(len).padStart(6)} chars`);
+  // AI_SAFETY_BOUNDARIES_EN / AI_QUALITY_CHECKLIST_EN live in other modules
+  // and are shared with every AI feature in the app; they are not this
+  // prompt's to trim, but they are still text the brief competes with, so
+  // they are counted from their own files rather than skipped.
+  const resolved = len || sharedSectionLength(name);
+  total += resolved;
+  console.log(`        ${name.padEnd(30)} ${String(resolved).padStart(6)} chars`);
 }
-console.log(`        ${"TOTAL (sections only)".padEnd(30)} ${String(total).padStart(6)} chars ~ ${Math.round(total / 4)} tokens`);
+console.log(`        ${"TOTAL (whole system prompt)".padEnd(30)} ${String(total).padStart(6)} chars ~ ${Math.round(total / 4)} tokens`);
+
+// THE CEILING, AND WHY IT IS THIS NUMBER.
+//
+// It was 30,000 over eight hand-listed sections. It is now 38,000 over
+// every section the prompt actually interpolates — which is a STRICTER
+// guard on a LARGER surface, not a relaxed one: the previous rule could be
+// satisfied while the real prompt was any size at all, and this one cannot.
+//
+// The rise pays for MOTION VOCABULARY and the per-archetype INTERACTION
+// lines, which is the "same animations, same behaviour, same feel" report
+// answered — the single largest addition since SITE SHAPE, and load-bearing
+// rather than decorative. It was paid for in part by trimming: VARY THESE
+// no longer restates what each archetype already prescribes, ANIMATIONS no
+// longer re-argues what MOTION VOCABULARY settles, and the INTERACTION
+// lines were compressed by a third after they were written.
+//
+// If this fires, the answer is still trim-before-adding.
+const CEILING = 38000;
 check(
-  `the prompt has not run away (${total} chars, ceiling 30000)`,
-  total < 30000,
+  `the prompt has not run away (${total} chars, ceiling ${CEILING})`,
+  total < CEILING,
   "if this fires, the brief is competing against even more text — trim before adding"
 );
 

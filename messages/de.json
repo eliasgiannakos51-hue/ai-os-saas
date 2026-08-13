@@ -1162,7 +1162,43 @@
         "monthly": "Am {day}. jedes Monats um {time}",
         "custom": "Zeitplan: {expression}"
       },
-      "buildStalled": "Die Erstellung wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen."
+      "buildStalled": "Die Erstellung wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
+      "runCannotComplete": "Dieser Agent kann diese Aufgabe nicht erfüllen und wurde deshalb abgeschaltet. Es wurden keine Credits berechnet.",
+      "capability": {
+        "canTitle": "Ein Agent kann",
+        "cannotTitle": "Ein Agent kann nicht",
+        "can": {
+          "search": "Im Web nach aktuellen Informationen suchen",
+          "analyse": "Lesen und auswerten, was er findet",
+          "summarise": "Zusammenfassen, vergleichen und Schlüsse ziehen",
+          "monitor": "Ein Thema über die Zeit verfolgen und melden, was sich geändert hat",
+          "schedule": "All das nach Zeitplan tun und Ihnen das Ergebnis per E-Mail schicken"
+        },
+        "cannot": {
+          "code": "Code schreiben oder ausführen, Software oder Websites bauen, Tests laufen lassen, Fehler beheben",
+          "system_access": "Auf Ihren Rechner, Ihre Dateien, Konten oder Systeme zugreifen",
+          "other_platforms": "Auf anderen Plattformen handeln — posten, jemandem schreiben, buchen oder bestellen",
+          "physical": "Irgendetwas in der physischen Welt tun",
+          "financial": "Geld bewegen, etwas kaufen oder verkaufen",
+          "phone": "Telefonate führen"
+        },
+        "refusedTitle": "Das kann ein Agent nicht leisten",
+        "refusedBody": "Alles, worum Sie gebeten haben, braucht etwas außerhalb der Möglichkeiten eines Agenten:",
+        "detectedIn": "Gefunden in Ihrem Text: {words}",
+        "noCharge": "Ihnen wurde nichts berechnet — es lief nichts.",
+        "noChargeYet": "Bisher wurde nichts berechnet.",
+        "tryInstead": "Bitten Sie stattdessen um Recherche, Beobachtung oder eine Zusammenfassung — zum Beispiel: „Fasse mir jeden Montag zusammen, was es in meiner Branche Neues gibt.“",
+        "rephrase": "Anfrage neu formulieren",
+        "partialTitle": "Ein Teil davon geht nicht",
+        "partialWillDo": "Stattdessen würde der Agent dies tun: {parts}",
+        "partialContinue": "Nur den machbaren Teil bauen",
+        "previewWhatItDoes": "Was er bei jedem Lauf tut",
+        "previewWillNotDo": "Was er nicht tun wird",
+        "stepSearch": "Sucht im Web nach aktuellen Informationen zum Thema.",
+        "stepNoSearch": "Arbeitet allein mit dem Aufgabentext — ohne Websuche.",
+        "stepWrite": "Schreibt das Ergebnis und gleicht es mit dem Gefundenen ab.",
+        "stepDeliver": "Schickt es per E-Mail an {target}, {when}."
+      }
     },
     "publishing": {
       "title": "Veröffentlichte Seiten",

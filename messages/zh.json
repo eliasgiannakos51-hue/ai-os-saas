@@ -1162,7 +1162,43 @@
         "monthly": "每月 {day} 号 {time}",
         "custom": "计划：{expression}"
       },
-      "buildStalled": "创建意外中断。未扣除任何积分——请重试。"
+      "buildStalled": "创建意外中断。未扣除任何积分——请重试。",
+      "runCannotComplete": "该智能体无法完成这项任务，已被停用。未扣除任何积分。",
+      "capability": {
+        "canTitle": "智能体可以",
+        "cannotTitle": "智能体不能",
+        "can": {
+          "search": "在网上搜索最新信息",
+          "analyse": "阅读并分析找到的内容",
+          "summarise": "归纳、对比并得出结论",
+          "monitor": "持续关注某个主题并报告变化",
+          "schedule": "按计划完成上述工作，并把结果发到你的邮箱"
+        },
+        "cannot": {
+          "code": "编写或运行代码、开发软件或网站、跑测试、修复缺陷",
+          "system_access": "访问你的电脑、文件、账户或系统",
+          "other_platforms": "在其他平台上操作——发帖、给人发消息、预订或下单",
+          "physical": "做任何现实世界中的事情",
+          "financial": "转移资金、买入或卖出",
+          "phone": "拨打电话"
+        },
+        "refusedTitle": "这件事智能体做不了",
+        "refusedBody": "你要求的全部内容都需要智能体能力之外的东西：",
+        "detectedIn": "在你写的内容中发现：{words}",
+        "noCharge": "未向你收费——什么都没有运行。",
+        "noChargeYet": "目前尚未收取任何费用。",
+        "tryInstead": "换成研究、监测或摘要类的请求试试——例如「每周一，总结我所在行业的最新动态」。",
+        "rephrase": "我想重写请求",
+        "partialTitle": "其中一部分无法完成",
+        "partialWillDo": "智能体会改为做这些：{parts}",
+        "partialContinue": "只创建可行的部分",
+        "previewWhatItDoes": "每次运行时它会做什么",
+        "previewWillNotDo": "它不会做什么",
+        "stepSearch": "在网上搜索该主题的最新信息。",
+        "stepNoSearch": "仅根据任务文本工作，不进行网络搜索。",
+        "stepWrite": "撰写结果，并与查到的内容核对。",
+        "stepDeliver": "{when}，通过电子邮件发送到 {target}。"
+      }
     },
     "publishing": {
       "title": "已发布网站",

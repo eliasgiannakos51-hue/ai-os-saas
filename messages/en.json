@@ -1162,7 +1162,43 @@
         "monthly": "Day {day} of each month at {time}",
         "custom": "Schedule: {expression}"
       },
-      "buildStalled": "That build stopped unexpectedly. No credits were charged — please try again."
+      "buildStalled": "That build stopped unexpectedly. No credits were charged — please try again.",
+      "runCannotComplete": "This agent can't do that task, so it has been switched off. No credits were charged.",
+      "capability": {
+        "canTitle": "An agent can",
+        "cannotTitle": "An agent cannot",
+        "can": {
+          "search": "Search the web for current information",
+          "analyse": "Read and analyse what it finds",
+          "summarise": "Summarise, compare and draw conclusions",
+          "monitor": "Watch a topic over time and report what changed",
+          "schedule": "Do all of that on a schedule and email you the result"
+        },
+        "cannot": {
+          "code": "Write or run code, build software or websites, run tests, fix bugs",
+          "system_access": "Reach your computer, files, accounts or systems",
+          "other_platforms": "Act on other platforms — post, message someone, book or order",
+          "physical": "Do anything in the physical world",
+          "financial": "Move money, buy or sell anything",
+          "phone": "Make phone calls"
+        },
+        "refusedTitle": "An agent can't do this one",
+        "refusedBody": "Everything you asked for needs something outside what an agent can do:",
+        "detectedIn": "Found in what you wrote: {words}",
+        "noCharge": "You have not been charged — nothing ran.",
+        "noChargeYet": "Nothing has been charged yet.",
+        "tryInstead": "Try asking for research, monitoring or a summary instead — for example, \"every Monday, summarise what's new in my industry\".",
+        "rephrase": "Rewrite my request",
+        "partialTitle": "Part of this can't be done",
+        "partialWillDo": "The agent would do this instead: {parts}",
+        "partialContinue": "Build the part that works",
+        "previewWhatItDoes": "What it does on every run",
+        "previewWillNotDo": "What it will not do",
+        "stepSearch": "Searches the web for current information on the topic.",
+        "stepNoSearch": "Works from the task text alone — no web search.",
+        "stepWrite": "Writes the result and checks it against what it found.",
+        "stepDeliver": "Emails it to {target}, {when}."
+      }
     },
     "publishing": {
       "title": "Published Sites",

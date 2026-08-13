@@ -1162,7 +1162,43 @@
         "monthly": "Il giorno {day} di ogni mese alle {time}",
         "custom": "Pianificazione: {expression}"
       },
-      "buildStalled": "La creazione si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova."
+      "buildStalled": "La creazione si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova.",
+      "runCannotComplete": "Questo agente non può svolgere quel compito, quindi è stato disattivato. Non è stato addebitato alcun credito.",
+      "capability": {
+        "canTitle": "Un agente può",
+        "cannotTitle": "Un agente non può",
+        "can": {
+          "search": "Cercare informazioni aggiornate sul web",
+          "analyse": "Leggere e analizzare ciò che trova",
+          "summarise": "Riassumere, confrontare e trarre conclusioni",
+          "monitor": "Seguire un argomento nel tempo e segnalare cosa è cambiato",
+          "schedule": "Fare tutto questo a intervalli programmati e inviarti il risultato via e-mail"
+        },
+        "cannot": {
+          "code": "Scrivere o eseguire codice, creare software o siti, lanciare test, correggere bug",
+          "system_access": "Accedere al tuo computer, ai tuoi file, account o sistemi",
+          "other_platforms": "Agire su altre piattaforme: pubblicare, scrivere a qualcuno, prenotare o ordinare",
+          "physical": "Fare qualsiasi cosa nel mondo fisico",
+          "financial": "Spostare denaro, comprare o vendere",
+          "phone": "Fare telefonate"
+        },
+        "refusedTitle": "Questo un agente non può farlo",
+        "refusedBody": "Tutto ciò che hai chiesto richiede qualcosa fuori da ciò che un agente sa fare:",
+        "detectedIn": "Rilevato in ciò che hai scritto: {words}",
+        "noCharge": "Non ti è stato addebitato nulla: non è stato eseguito niente.",
+        "noChargeYet": "Finora non è stato addebitato nulla.",
+        "tryInstead": "Prova invece a chiedere una ricerca, un monitoraggio o un riassunto — per esempio: «ogni lunedì, riassumi le novità del mio settore».",
+        "rephrase": "Voglio riscrivere la richiesta",
+        "partialTitle": "Una parte di questo non è possibile",
+        "partialWillDo": "L'agente farebbe invece questo: {parts}",
+        "partialContinue": "Crea solo la parte fattibile",
+        "previewWhatItDoes": "Cosa fa a ogni esecuzione",
+        "previewWillNotDo": "Cosa non farà",
+        "stepSearch": "Cerca sul web informazioni aggiornate sull'argomento.",
+        "stepNoSearch": "Lavora solo sul testo del compito, senza ricerca web.",
+        "stepWrite": "Scrive il risultato e lo verifica con quanto ha trovato.",
+        "stepDeliver": "Lo invia via e-mail a {target}, {when}."
+      }
     },
     "publishing": {
       "title": "Siti pubblicati",

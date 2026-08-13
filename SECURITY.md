@@ -379,3 +379,39 @@ files carry prose explaining each entry rather than bare strings.
 Email **security@ionexa.ai**. Please include what you did, what happened,
 and what you expected. We will confirm receipt within two working days.
 Do not open a public issue for a security report.
+
+## Agent capability boundary
+
+Autonomous agents can search the web, read and analyse what they find,
+summarise, monitor a topic, and email the user on a schedule. They cannot
+write or run code, reach the user's systems, act on other platforms, do
+anything physical, move money, or make phone calls.
+
+That boundary is enforced in three places, and the ORDER is the security
+property:
+
+1. **`lib/agents/agent-capability.ts` — before any reservation.**
+   `classifyAgentRequest` runs in `api/agents/build` ahead of
+   `estimateForAction`, `hasEnoughCredits` and `startJob`, so a request
+   outside the boundary costs the user nothing: no hold, no job row, no
+   Anthropic call. Deliberately high-precision rather than exhaustive — a
+   wrongly refused user has no later layer to rescue them, and layers 2
+   and 3 catch what it misses.
+2. **The builder's `feasibility` enum.** A model reading the request in
+   any language returns `full` / `partial` / `none`; `none` makes
+   `parseBuiltAgent` return `not_feasible`, which no caller can turn into
+   an agent, and the job refunds.
+3. **`detectCapabilityRefusal` at run time.** If the agent's own output is
+   a refusal, the run refunds, logs its real cost as
+   `agent_run_cannot_complete`, and switches the agent off on the first
+   occurrence rather than billing the same refusal every morning.
+
+**When adding a new blocked category or a new matcher:** ids go in
+`AGENT_BLOCKED_CATEGORIES`, prose goes in
+`dashboard.agents.capability.cannot.<id>` in all ten locales, and both the
+false-positive and false-negative corpora in
+`scripts/tests/agent-capability.test.mjs` get a case. Never use `\b` in a
+matcher — JavaScript defines it against ASCII `\w`, so every Greek letter
+is a non-word character and the pattern silently matches nothing. Use the
+`word()` / `stem()` helpers, which are built on `\p{L}`. The build gate
+fails on a bare `\b` in that file for exactly this reason.

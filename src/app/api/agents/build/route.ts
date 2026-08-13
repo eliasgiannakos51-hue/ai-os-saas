@@ -16,6 +16,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
 import { AGENT_BUILDER_MODEL } from "@/lib/agents/agent-models";
 import { AGENT_LIMITS, normaliseDeliveryTarget } from "@/lib/agents/agent-config";
+import { classifyAgentRequest } from "@/lib/agents/agent-capability";
 import { isValidTimeZone } from "@/lib/agents/cron-expression";
 import { maxAgentsForPlan } from "@/lib/agents/agent-limits";
 import { startJob } from "@/lib/jobs/start-job";
@@ -38,11 +39,15 @@ export async function POST(request: Request) {
     let userRequest: string;
     let skipClarification: boolean;
     let timezone: string;
+    let acknowledgedLimits: boolean;
     try {
       const body = await request.json();
       userRequest = typeof body?.request === "string" ? body.request.trim() : "";
       skipClarification = body?.skipClarification === true;
       timezone = typeof body?.timezone === "string" ? body.timezone.trim() : "UTC";
+      // Set by the client only after the user has SEEN which part of their
+      // request cannot be done and chosen to build the rest anyway.
+      acknowledgedLimits = body?.acknowledgedLimits === true;
     } catch {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
@@ -98,6 +103,55 @@ export async function POST(request: Request) {
         { ok: false, error: "Too many agent drafts in the last hour. Try again shortly." },
         { status: 429 }
       );
+    }
+
+    // THE CAPABILITY GATE — before the plan lookup, before the estimate,
+    // before the reservation, and before a single Anthropic call.
+    //
+    // This is the whole fix for "the builder accepted a request it could
+    // not execute, charged for it, and the agent later replied that it
+    // does not produce executable source code". The check is pure string
+    // work: refusing here costs the user nothing, because nothing has
+    // been spent yet. That ordering is the feature — a capability check
+    // that runs after the reservation is just a more polite way of
+    // charging for a refusal.
+    //
+    // It runs on EVERY submission, including the resubmission after
+    // clarifying questions: the user may have added the impossible part
+    // in their answer.
+    const capability = classifyAgentRequest(userRequest);
+
+    if (capability.verdict === "unsupported") {
+      // Nothing in this request is inside the envelope. Refuse, name the
+      // categories, and hand back the evidence so a wrong refusal is
+      // arguable rather than mysterious.
+      //
+      // Ids, not prose: the client renders them through next-intl, so a
+      // Greek user reads Greek. A server-side English sentence here is
+      // exactly the shape scripts/tests/i18n-coverage.test.mjs exists to
+      // stop.
+      return NextResponse.json({
+        ok: true,
+        queued: false,
+        capabilityBlocked: true,
+        blocked: capability.blocked,
+        evidence: capability.evidence,
+      });
+    }
+
+    if (capability.verdict === "partial" && !acknowledgedLimits) {
+      // Some of it is buildable. Say which part is not, say what the
+      // agent WILL do instead, and let the user decide — still without
+      // having spent anything. `acknowledgedLimits` on the next
+      // submission is that decision.
+      return NextResponse.json({
+        ok: true,
+        queued: false,
+        capabilityPartial: true,
+        blocked: capability.blocked,
+        evidence: capability.evidence,
+        doableParts: capability.doableParts,
+      });
     }
 
     const isAdmin = isAdminEmail(user.email);

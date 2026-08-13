@@ -71,6 +71,18 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
   // --- degrade gracefully, but a user notices ------------------------
   { name: "CRON_SECRET", level: "recommended", what: "Authenticates scheduled runs. Without it cron endpoints return 503" },
   { name: "RESEND_API_KEY", level: "recommended", what: "All outbound email, including margin and error alerts" },
+  // Annual billing. OPTIONAL, and the fallback is the whole design: with
+  // any of the four missing, annualBillingAvailable() is false, /pricing
+  // renders no Monthly/Annual toggle, ?billing=annual does nothing, and
+  // the product sells exactly as it did before annual existed. Nothing
+  // breaks and nothing half-works — the failure mode of a partially
+  // configured toggle would be a buy button that 500s on a price id
+  // that does not exist.
+  { name: "STRIPE_PRICE_STARTER_ANNUAL", level: "optional", what: "Starter billed yearly (€192)", fallback: "annual billing is not offered at all" },
+  { name: "STRIPE_PRICE_GROWTH_ANNUAL", level: "optional", what: "Growth billed yearly (€480)", fallback: "annual billing is not offered at all" },
+  { name: "STRIPE_PRICE_PROFESSIONAL_ANNUAL", level: "optional", what: "Professional billed yearly (€960)", fallback: "annual billing is not offered at all" },
+  { name: "STRIPE_PRICE_ULTIMATE_ANNUAL", level: "optional", what: "Ultimate billed yearly (€1,920)", fallback: "annual billing is not offered at all" },
+
   { name: "RESEND_FROM_EMAIL", level: "optional", what: "Sender address", fallback: "Ionexa AI <onboarding@resend.dev>" },
   { name: "ADMIN_EMAILS", level: "optional", what: "Extra admin accounts, comma-separated", fallback: "the hardcoded owner address" },
   { name: "UNSPLASH_ACCESS_KEY", level: "optional", what: "Real photos in generated websites", fallback: "placeholder images" },

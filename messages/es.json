@@ -224,7 +224,13 @@
       "upTo5AiAgents": "Hasta 5 agentes de IA",
       "upTo15AiAgentsTeams": "Hasta 15 agentes de IA y equipos",
       "upTo50AiAgents": "Hasta 50 agentes de IA"
-    }
+    },
+    "billingMonthly": "Mensual",
+    "billingAnnual": "Anual",
+    "billingIntervalLabel": "Periodo de facturación",
+    "billingAnnualSaving": "Ahorra un {percent}%: dos meses gratis",
+    "billedAnnually": "Se cobra {total} una vez al año: ahorras {saving}",
+    "checkoutFailed": "No se pudo iniciar el pago. Inténtalo de nuevo."
   },
   "roadmap": {
     "title": "Hoja de ruta",

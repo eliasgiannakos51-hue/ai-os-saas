@@ -224,7 +224,13 @@
       "upTo5AiAgents": "最多 5 个 AI 智能体",
       "upTo15AiAgentsTeams": "最多 15 个 AI 智能体与团队",
       "upTo50AiAgents": "最多 50 个 AI 智能体"
-    }
+    },
+    "billingMonthly": "按月",
+    "billingAnnual": "按年",
+    "billingIntervalLabel": "计费周期",
+    "billingAnnualSaving": "立省 {percent}%——相当于免费两个月",
+    "billedAnnually": "每年收取 {total}，为你节省 {saving}",
+    "checkoutFailed": "无法开始结账，请重试。"
   },
   "roadmap": {
     "title": "路线图",

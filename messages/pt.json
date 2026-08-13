@@ -224,7 +224,13 @@
       "upTo5AiAgents": "Até 5 agentes de IA",
       "upTo15AiAgentsTeams": "Até 15 agentes de IA e equipas",
       "upTo50AiAgents": "Até 50 agentes de IA"
-    }
+    },
+    "billingMonthly": "Mensal",
+    "billingAnnual": "Anual",
+    "billingIntervalLabel": "Período de faturação",
+    "billingAnnualSaving": "Poupe {percent}% — dois meses grátis",
+    "billedAnnually": "Cobrança de {total} uma vez por ano — poupa {saving}",
+    "checkoutFailed": "Não foi possível iniciar o pagamento. Tente novamente."
   },
   "roadmap": {
     "title": "Roteiro",

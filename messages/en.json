@@ -224,7 +224,13 @@
       "upTo5AiAgents": "Up to 5 AI agents",
       "upTo15AiAgentsTeams": "Up to 15 AI agents & teams",
       "upTo50AiAgents": "Up to 50 AI agents"
-    }
+    },
+    "billingMonthly": "Monthly",
+    "billingAnnual": "Annual",
+    "billingIntervalLabel": "Billing period",
+    "billingAnnualSaving": "Save {percent}% — two months free",
+    "billedAnnually": "Billed {total} once a year — you save {saving}",
+    "checkoutFailed": "Could not start checkout. Please try again."
   },
   "roadmap": {
     "title": "Roadmap",

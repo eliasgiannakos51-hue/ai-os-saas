@@ -224,7 +224,13 @@
       "upTo5AiAgents": "حتى 5 وكلاء أذكياء",
       "upTo15AiAgentsTeams": "حتى 15 وكيلاً ذكياً وفرق",
       "upTo50AiAgents": "حتى 50 وكيلاً ذكياً"
-    }
+    },
+    "billingMonthly": "شهريًا",
+    "billingAnnual": "سنويًا",
+    "billingIntervalLabel": "دورة الفوترة",
+    "billingAnnualSaving": "وفّر {percent}% — شهران مجانًا",
+    "billedAnnually": "تُحصَّل {total} مرة واحدة سنويًا — توفّر {saving}",
+    "checkoutFailed": "تعذّر بدء عملية الدفع. حاول مرة أخرى."
   },
   "roadmap": {
     "title": "خارطة الطريق",

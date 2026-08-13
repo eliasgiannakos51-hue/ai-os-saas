@@ -224,7 +224,13 @@
       "upTo5AiAgents": "AIエージェント最大5体",
       "upTo15AiAgentsTeams": "AIエージェント最大15体・チーム",
       "upTo50AiAgents": "AIエージェント最大50体"
-    }
+    },
+    "billingMonthly": "月額",
+    "billingAnnual": "年額",
+    "billingIntervalLabel": "請求サイクル",
+    "billingAnnualSaving": "{percent}% お得 — 2か月分無料",
+    "billedAnnually": "年1回 {total} のご請求 — {saving} お得です",
+    "checkoutFailed": "決済を開始できませんでした。もう一度お試しください。"
   },
   "roadmap": {
     "title": "ロードマップ",

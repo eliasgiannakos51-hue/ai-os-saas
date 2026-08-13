@@ -3,9 +3,19 @@ import { diagLog } from "@/lib/diag";
 import type Stripe from "stripe";
 import { createStripeClient } from "@/lib/stripe/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getPlanSlugFromPriceId, getTeamSeatPriceId } from "@/lib/billing/price-ids";
-import { getCreditPack, creditPackPriceEurPerCredit, type PlanSlug } from "@/lib/billing/plans";
-import { grantCredits, syncCreditsForPlan, recordPackPurchaseRate } from "@/lib/billing/credits";
+import { getPlanFromPriceId, getTeamSeatPriceId } from "@/lib/billing/price-ids";
+import {
+  getCreditPack,
+  creditPackPriceEurPerCredit,
+  type BillingInterval,
+  type PlanSlug,
+} from "@/lib/billing/plans";
+import {
+  grantCredits,
+  grantMonthlyPlanCredits,
+  syncCreditsForPlan,
+  recordPackPurchaseRate,
+} from "@/lib/billing/credits";
 import { logApiError } from "@/lib/log-error";
 
 export const dynamic = "force-dynamic";
@@ -79,13 +89,20 @@ async function syncSubscriptionToUser(
 
   let planSlug: PlanSlug = "free";
   let seatCount = 0;
+  // Monthly unless a matched price says otherwise. Read from the
+  // subscription's own price, never from checkout metadata — metadata is
+  // whatever we wrote at session creation, and a customer who later
+  // switched interval in the Stripe portal would keep the stale value
+  // forever. The price id is the fact.
+  let interval: BillingInterval = "month";
 
   if (isActive) {
     for (const item of subscription.items.data) {
       const priceId = item.price.id;
-      const matchedPlan = getPlanSlugFromPriceId(priceId);
-      if (matchedPlan) {
-        planSlug = matchedPlan;
+      const matched = getPlanFromPriceId(priceId);
+      if (matched) {
+        planSlug = matched.slug;
+        interval = matched.interval;
       } else if (teamSeatPriceId && priceId === teamSeatPriceId) {
         seatCount = item.quantity ?? 0;
       }
@@ -108,6 +125,9 @@ async function syncSubscriptionToUser(
       stripe_subscription_id: isActive ? subscription.id : null,
       subscription_tier: planSlug,
       seat_count: seatCount,
+      // Reset to "month" when the subscription ends, so a lapsed annual
+      // customer is not left being priced at the annual credit rate.
+      billing_interval: isActive ? interval : "month",
     },
   });
   if (updateError) {
@@ -115,12 +135,32 @@ async function syncSubscriptionToUser(
   }
   diagLog(`[webhook-diag] syncSubscriptionToUser result supabaseUserId=${supabaseUserId} planSlug=${planSlug} isActive=${isActive} seatCount=${seatCount} updateError=${updateError?.message ?? "none"}`);
 
-  // Resets the credit balance to the (new) plan's monthly allotment — same
-  // call on a brand-new subscription, a plan change, a cancellation (falls
-  // back to Free's allotment since planSlug is "free" when !isActive), and
-  // a recurring renewal (see the invoice.paid handler below).
+  // CREDITS. Two paths, because annual and monthly are genuinely
+  // different problems.
+  //
+  // MONTHLY (and every cancellation, whatever the interval): reset the
+  // balance to the plan's allotment, exactly as before. One invoice a
+  // month means one reset a month, and a reset is what a customer expects
+  // from a renewal — last month's leftovers do not roll over.
+  //
+  // ANNUAL: a reset here would be wrong twice. Stripe fires invoice.paid
+  // once a YEAR, so resetting on it gives eleven months of nothing; and
+  // customer.subscription.updated fires on unrelated changes (a card
+  // update, a portal visit), so resetting on that would hand out a fresh
+  // allowance every time the customer touched their billing settings.
+  // Instead the annual account gets THIS MONTH's allowance through the
+  // same idempotent, month-keyed grant the cron uses — so the first month
+  // lands immediately, and calling it again this month is a no-op.
   try {
-    await syncCreditsForPlan(supabaseUserId, planSlug, `Subscription ${isActive ? "active" : "ended"}: ${planSlug} plan`);
+    if (isActive && interval === "year") {
+      await grantMonthlyPlanCredits(supabaseUserId, planSlug);
+    } else {
+      await syncCreditsForPlan(
+        supabaseUserId,
+        planSlug,
+        `Subscription ${isActive ? "active" : "ended"}: ${planSlug} plan`
+      );
+    }
   } catch (err) {
     logApiError("/api/webhooks/stripe", err, { stage: "sync_credits", supabaseUserId });
   }

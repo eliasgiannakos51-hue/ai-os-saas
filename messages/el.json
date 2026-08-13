@@ -224,7 +224,13 @@
       "upTo5AiAgents": "Έως 5 πράκτορες AI",
       "upTo15AiAgentsTeams": "Έως 15 πράκτορες AI & ομάδες",
       "upTo50AiAgents": "Έως 50 πράκτορες AI"
-    }
+    },
+    "billingMonthly": "Μηνιαία",
+    "billingAnnual": "Ετήσια",
+    "billingIntervalLabel": "Περίοδος χρέωσης",
+    "billingAnnualSaving": "Εξοικονόμηση {percent}% — δύο μήνες δώρο",
+    "billedAnnually": "Χρέωση {total} μία φορά τον χρόνο — κερδίζεις {saving}",
+    "checkoutFailed": "Δεν ήταν δυνατή η έναρξη της πληρωμής. Δοκίμασε ξανά."
   },
   "roadmap": {
     "title": "Roadmap",

@@ -119,7 +119,16 @@ for (const file of routes) {
   // The research continuation authenticates with the internal token when
   // called by our own infrastructure, and by ownership otherwise.
   const hasInternalToken = /internalHandoffToken\(\)/.test(src);
-  const hasCronAuth = /requireCronAuth|CRON_SECRET/.test(src);
+  // An actual CALL, not a mention.
+  //
+  // This used to be /requireCronAuth|CRON_SECRET/, which every cron route
+  // satisfied through the words "CRON_SECRET" in its header COMMENT — so
+  // a new cron route that documented the convention and forgot to enforce
+  // it would have passed this check. Every cron route in the app really
+  // does call checkCronAuth(); requiring the call is both stricter and a
+  // true description of the pattern. Verified against all five cron-shaped
+  // routes (api/cron/* and api/weekly-digest).
+  const hasCronAuth = /\b(?:check|require)CronAuth\s*\(/.test(src);
   const hasAdminCheck = /isAdminEmail\(/.test(src);
   // Scoping every query to the authenticated user is the other legitimate
   // pattern: the service-role client is used to write across RLS, but the

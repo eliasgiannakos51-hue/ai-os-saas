@@ -3,7 +3,13 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { hasActiveBetaBypass, isBetaTester } from "@/lib/beta";
 import { diagLog } from "@/lib/diag";
-import { getPlan, type Plan, type PlanSlug } from "./plans";
+import {
+  getPlan,
+  annualMonthlyEquivalentEur,
+  type BillingInterval,
+  type Plan,
+  type PlanSlug,
+} from "./plans";
 import { isAdminEmail } from "@/lib/admin";
 
 // The plan a user is on lives in user_metadata.subscription_tier, written
@@ -70,10 +76,51 @@ export async function resolveEffectivePlanSlug(
   return active ? baseSlug : "free";
 }
 
+/**
+ * Which billing interval this account is on. Written by the Stripe
+ * webhook from the subscription's own price, never from anything the
+ * client sends.
+ */
+export function resolveBillingInterval(
+  user: { user_metadata?: Record<string, unknown> | null } | null | undefined
+): BillingInterval {
+  return user?.user_metadata?.billing_interval === "year" ? "year" : "month";
+}
+
+/**
+ * The plan in effect, priced at WHAT THIS ACCOUNT ACTUALLY PAYS PER
+ * MONTH.
+ *
+ * For a monthly subscriber that is the catalogue price. For an annual one
+ * it is the discounted price divided by twelve — €192/yr becomes €16.
+ *
+ * WHY THE PRICE IS REWRITTEN HERE rather than an `interval` argument
+ * threaded through settlement. Every credit-price divisor in the app is
+ * ultimately `plan.price / plan.monthlyCredits`
+ * (effectiveCreditPriceEur), and the whole margin guarantee rests on that
+ * divisor being what the customer really pays. Annual sells the same
+ * credits for 20% less, so leaving `price` at the catalogue figure would
+ * drop every annual settlement from 4x to 3.2x — the exact leak the plan
+ * and credit-pack fixes already closed, arriving through a third door,
+ * and invisible for the same reason: the stored margin would be computed
+ * from the same wrong divisor and read as healthy.
+ *
+ * Returning the real monthly price makes every existing call site correct
+ * with no change, which is a much smaller surface to get wrong than 31
+ * threaded arguments.
+ *
+ * The CATALOGUE price is still what /pricing renders — that reads PLANS
+ * directly, and must, because it is advertising a rate rather than
+ * describing an account.
+ */
 export async function resolveEffectivePlan(
   user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> | null } | null | undefined
 ): Promise<Plan> {
-  return getPlan(await resolveEffectivePlanSlug(user)) ?? getPlan("free")!;
+  const plan = getPlan(await resolveEffectivePlanSlug(user)) ?? getPlan("free")!;
+  if (resolveBillingInterval(user) !== "year") return plan;
+  const monthly = annualMonthlyEquivalentEur(plan);
+  if (monthly === null) return plan;
+  return { ...plan, price: monthly };
 }
 
 type CreditsRow = {
@@ -376,6 +423,63 @@ export async function syncCreditsForPlan(userId: string, planSlug: PlanSlug, rea
   await admin
     .from("credit_transactions")
     .insert({ user_id: userId, amount: total, action_type: "plan_renewal", description: reason });
+}
+
+/**
+ * The calendar month a monthly allowance belongs to, as "YYYY-MM".
+ *
+ * The idempotency key is built from this, so it is what makes "grant this
+ * month's credits" safe to call from a cron that may retry, from a
+ * webhook that Stripe may redeliver, and from both at once.
+ */
+export function creditMonthKey(now: Date = new Date()): string {
+  return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+/**
+ * One month's credit allowance for a plan, granted at most once per
+ * calendar month.
+ *
+ * WHY THIS EXISTS. Credits used to arrive entirely through the Stripe
+ * webhook: `invoice.paid` fires, syncCreditsForPlan resets the balance to
+ * the plan's monthly allotment. For a monthly subscriber that is exactly
+ * right — one invoice a month, one allowance a month.
+ *
+ * For an ANNUAL subscriber, Stripe fires invoice.paid ONCE A YEAR. On the
+ * old path a €192/year Starter customer would have received 1,000 credits
+ * in January and nothing until the following January. That is not a
+ * subtle bug — it is eleven months of an unusable product — and it is why
+ * "credits given monthly, not all at once" cannot be satisfied by the
+ * webhook alone.
+ *
+ * `setTotal` moves credits_total too, so the balance and the plan's
+ * allowance stay in step through an upgrade mid-year.
+ *
+ * Returns whether it actually granted, so the caller can count.
+ */
+export async function grantMonthlyPlanCredits(
+  userId: string,
+  planSlug: PlanSlug,
+  monthKey: string = creditMonthKey()
+): Promise<boolean> {
+  const plan = getPlan(planSlug);
+  if (!plan || typeof plan.monthlyCredits !== "number" || plan.monthlyCredits <= 0) return false;
+  const { granted } = await grantCredits(
+    userId,
+    plan.monthlyCredits,
+    "plan_renewal",
+    `Monthly credits for the ${plan.name} plan (${monthKey})`,
+    {
+      // The whole safety property. The same key from the cron, from a
+      // Stripe redelivery, and from the first month of a new annual
+      // subscription — so all three can call this and exactly one grant
+      // lands.
+      idempotencyKey: `plan_month:${userId}:${monthKey}`,
+      setTotal: plan.monthlyCredits,
+      setPlanTier: planSlug,
+    }
+  );
+  return granted;
 }
 
 export const CREDIT_COSTS = {

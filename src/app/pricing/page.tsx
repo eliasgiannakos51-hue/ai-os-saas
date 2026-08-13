@@ -3,7 +3,21 @@ import Link from "next/link";
 import { getTranslations, getLocale } from "next-intl/server";
 import { Check, X } from "lucide-react";
 import { Logo } from "@/components/logo";
-import { PLANS, TEAM_SEAT_PRICE, CURRENCY_SYMBOL, getPlan, type Plan, type PaidPlanSlug } from "@/lib/billing/plans";
+import {
+  PLANS,
+  TEAM_SEAT_PRICE,
+  CURRENCY_SYMBOL,
+  ANNUAL_DISCOUNT_PERCENT,
+  getPlan,
+  annualPriceEur,
+  annualMonthlyEquivalentEur,
+  annualSavingsEur,
+  type BillingInterval,
+  type Plan,
+  type PaidPlanSlug,
+} from "@/lib/billing/plans";
+import { annualBillingAvailable } from "@/lib/billing/price-ids";
+import { BillingIntervalToggle } from "@/components/billing/billing-interval-toggle";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
 import { AppBackground } from "@/components/ui/app-background";
 import { createClient } from "@/lib/supabase/server";
@@ -62,7 +76,19 @@ function ComparisonCellContent({ cell }: { cell: ComparisonCell }) {
   return <X className="mx-auto h-4 w-4 text-muted/50" aria-hidden="true" />;
 }
 
-export default async function PricingPage() {
+export default async function PricingPage({
+  searchParams,
+}: {
+  searchParams?: { billing?: string };
+}) {
+  // The interval lives in the URL so this page stays a server component —
+  // see components/billing/billing-interval-toggle.tsx. Annual is only
+  // ever offered when every paid plan has a Stripe annual price
+  // configured: a toggle that half-works is worse than none, and a
+  // checkout for a missing price id is a 500 on the buy button.
+  const annualAvailable = annualBillingAvailable();
+  const interval: BillingInterval =
+    annualAvailable && searchParams?.billing === "annual" ? "year" : "month";
   const t = await getTranslations("pricing");
   const locale = await getLocale();
 
@@ -98,6 +124,9 @@ export default async function PricingPage() {
             {t("title")}
           </h1>
           <p className="mt-3 text-sm text-muted">{t("subtitle")}</p>
+          {annualAvailable && (
+            <BillingIntervalToggle interval={interval} savingsPercent={ANNUAL_DISCOUNT_PERCENT} />
+          )}
         </div>
 
         <div className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7">
@@ -120,7 +149,14 @@ export default async function PricingPage() {
                 {typeof plan.price === "number" ? (
                   <>
                     {CURRENCY_SYMBOL}
-                    {plan.price}
+                    {/* On annual, the HEADLINE is still a monthly number —
+                        the per-month equivalent — because that is the
+                        figure a reader compares against the monthly plan
+                        and against a competitor. The real amount charged
+                        is stated immediately underneath, never implied. */}
+                    {interval === "year" && annualMonthlyEquivalentEur(plan) !== null
+                      ? formatNumber(annualMonthlyEquivalentEur(plan)!, locale)
+                      : plan.price}
                     {plan.price > 0 && (
                       <span className="text-sm font-normal text-muted">{t("perMonth")}</span>
                     )}
@@ -129,6 +165,14 @@ export default async function PricingPage() {
                   t("custom")
                 )}
               </p>
+              {interval === "year" && annualPriceEur(plan) !== null && (
+                <p className="mt-1 text-xs text-emerald-400">
+                  {t("billedAnnually", {
+                    total: `${CURRENCY_SYMBOL}${formatNumber(annualPriceEur(plan)!, locale)}`,
+                    saving: `${CURRENCY_SYMBOL}${formatNumber(annualSavingsEur(plan)!, locale)}`,
+                  })}
+                </p>
+              )}
               <p className="mt-2 text-xs text-muted">
                 {plan.monthlyCredits === "custom"
                   ? t("features.customCredits")
@@ -181,6 +225,7 @@ export default async function PricingPage() {
                 ) : (
                   <SubscribeButton
                     plan={plan.slug as PaidPlanSlug}
+                    interval={interval}
                     label={t("getPlan", { plan: plan.name })}
                     className={`inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-0 ${
                       plan.highlighted

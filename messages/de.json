@@ -224,7 +224,13 @@
       "upTo5AiAgents": "Bis zu 5 KI-Agenten",
       "upTo15AiAgentsTeams": "Bis zu 15 KI-Agenten & Teams",
       "upTo50AiAgents": "Bis zu 50 KI-Agenten"
-    }
+    },
+    "billingMonthly": "Monatlich",
+    "billingAnnual": "Jährlich",
+    "billingIntervalLabel": "Abrechnungszeitraum",
+    "billingAnnualSaving": "{percent} % sparen — zwei Monate geschenkt",
+    "billedAnnually": "{total} einmal im Jahr — Sie sparen {saving}",
+    "checkoutFailed": "Der Bezahlvorgang konnte nicht gestartet werden. Bitte erneut versuchen."
   },
   "roadmap": {
     "title": "Roadmap",

@@ -206,7 +206,10 @@ export async function settleReservation(params: {
   // that the guess HAPPENED, so that is what alerts. (This is exactly how
   // a $0.10 chat message once settled for 2 credits without a single
   // alert firing: the served model was missing from the table.)
-  const unknownModels = costs.unknownModels();
+  // Both are the same class of incident — usage priced by a guess — and
+  // both are invisible in the settled row, because the stored margin is
+  // computed from the same guessed cost and reads healthy either way.
+  const unknownModels = [...costs.unknownModels(), ...costs.unpricedServiceTiers()];
   if (unknownModels.length > 0) {
     logApiError(
       "billing:unknownModelPricing",
@@ -298,7 +301,12 @@ export async function settleReservation(params: {
       p_feature: feature,
       p_input_tokens: totals.inputTokens,
       p_output_tokens: totals.outputTokens,
-      p_cache_write_tokens: totals.cacheWriteTokens,
+      // The SUM of both cache-write TTLs — this column mirrors what
+      // Anthropic reports as cache_creation_input_tokens, which is the
+      // inclusive total. The 1-hour slice is priced separately inside
+      // priceUsage and carried in metadata below, so a row can still be
+      // audited against the pricing page without a schema migration.
+      p_cache_write_tokens: totals.cacheWriteTokens + totals.cacheWrite1hTokens,
       p_cache_read_tokens: totals.cacheReadTokens,
       p_web_searches: totals.webSearches,
       p_ai_calls: costs.callCount,
@@ -324,6 +332,11 @@ export async function settleReservation(params: {
         marginFeatureOverride: marginPolicy.featureMargin,
         // Models priced by fallback, if any — see billing:unknownModelPricing.
         unknownModels: unknownModels.length > 0 ? unknownModels : undefined,
+        // The 1-hour slice of cache_write_tokens, which is billed at 2x
+        // input rather than 1.25x. Stored so the retroactive audit in
+        // scripts/ can re-derive a row's cost from its own columns.
+        cacheWrite1hTokens: totals.cacheWrite1hTokens || undefined,
+        webFetches: totals.webFetches || undefined,
         // Why this row charged nothing, so 0 credits is never ambiguous.
         bypassCharge,
         wouldHaveChargedCredits: wouldHaveCharged,

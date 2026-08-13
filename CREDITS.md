@@ -75,7 +75,13 @@ its metadata, so a row explains its own price.
 ### Pricing the model that actually answered (lib/billing/model-pricing.ts)
 
 `MODEL_PRICING_USD` must contain every model Anthropic can serve this
-app, at list rates, with cache write (1.25×) and read (0.1×) rates. Every
+app, at list rates, with cache write (1.25× at the 5-minute TTL, **2× at
+the 1-hour TTL**) and read (0.1×) rates. Anthropic reports both TTLs
+inside one `cache_creation_input_tokens` total and separates them only in
+`usage.cache_creation`, so pricing that total at the 5-minute rate
+under-charges a 1-hour write by 37.5% — invisibly, because the stored
+margin is computed from the same understated cost. `priceUsage` splits
+the total by the breakdown and never adds the two together. Every
 `costs.record()` call site passes `response.model`, not the constant the
 code requested — so an upgraded or aliased model is priced at what really
 served the call. Usage from a model the table does not know is priced at
@@ -93,10 +99,32 @@ for 2 credits (0.17×) without a single alert — reproduced and pinned in
    (`estimateForAction` + `reserveCredits`), so a user cannot start work
    they cannot pay for.
 3. `costs.record(stage, response.usage, MODEL)` for **every** call,
-   including retries and continuation rounds. All four token types are
-   priced — input, output, `cache_creation_input_tokens` (1.25× input)
-   and `cache_read_input_tokens` (0.1× input) — plus web searches at
-   $10/1,000. Missing a sub-call means it comes out of margin.
+   including retries and continuation rounds. Every field of Anthropic's
+   `Usage` is accounted for — input, output,
+   `cache_creation_input_tokens` (1.25× input, or 2× for the 1-hour slice
+   reported in `cache_creation`) and `cache_read_input_tokens` (0.1×
+   input) — plus web searches at $10/1,000. Missing a sub-call means it
+   comes out of margin.
+   `scripts/tests/usage-field-coverage.test.mjs` reads the installed
+   SDK's `Usage` interface and fails the build if a field exists that
+   nothing prices, so an SDK upgrade that adds a billable field cannot
+   land silently.
+
+   **One user action, one feature name.** If a job can end in two
+   structurally different ways — a cheap pre-check that returns questions
+   and an expensive run that produces the thing — settle them under
+   *different* feature names (`JobHandlerResult.feature`), the way
+   `agent_build` / `agent_build_precheck` and
+   `website_generate` / `website_generate_precheck` do. Sharing one name
+   averages a €0.001 row with a €0.03 row, and because the user answers
+   the questions and resubmits, one action then writes two rows each
+   holding half the interaction's cost. Every row is still margin-
+   guaranteed, but comparing one of them against the Anthropic Console's
+   total for the interaction reads as *half the margin* — which is
+   precisely the "agent_build is 2.03×" report reproduced in
+   `scripts/tests/agent-build-margin.test.mjs`. Register the new name in
+   `FEATURE_MARGIN_GROUPS` so it shares its parent's `CREDIT_MARGIN_*`
+   variable.
 4. On success, `settleReservation({ userId, reservationId, feature,
    costs, plan, ... })`, passing the plan from
    `resolveEffectivePlan(user)`. Settlement resolves the account's rate,

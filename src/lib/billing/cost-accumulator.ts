@@ -1,6 +1,7 @@
 import {
   priceUsage,
   isKnownModel,
+  isUnpricedServiceTier,
   normalizeModelId,
   type AnthropicUsageLike,
   type UsageBreakdown,
@@ -44,6 +45,7 @@ export type CostEntry = {
 export class CostAccumulator {
   private entries: CostEntry[] = [];
   private unpriced = new Set<string>();
+  private unpricedTierUsage = new Set<string>();
 
   /**
    * Records one Anthropic response. Safe to call with a null/undefined
@@ -59,6 +61,13 @@ export class CostAccumulator {
    */
   record(stage: CostStage, usage: AnthropicUsageLike | null | undefined, model: string): void {
     if (!isKnownModel(model)) this.unpriced.add(normalizeModelId(model));
+    // A premium/discount service tier makes the rate wrong even when the
+    // model id is perfectly well known, so it is collected on the same
+    // list settlement already alerts on. Recorded as "<model>@<tier>" so
+    // the alert names the call that needs looking at.
+    if (isUnpricedServiceTier(usage)) {
+      this.unpricedTierUsage.add(`${normalizeModelId(model)}@${String(usage?.service_tier)}`);
+    }
     this.entries.push({ stage, model, usage: priceUsage(usage, model) });
   }
 
@@ -118,6 +127,25 @@ export class CostAccumulator {
     return [...this.unpriced];
   }
 
+  /**
+   * Calls served on a service tier MODEL_PRICING_USD does not price, as
+   * "<model>@<tier>".
+   *
+   * Not folded into unknownModels() because the two need different fixes:
+   * an unknown model means "add a row to the table", an unpriced tier
+   * means "this call should not have been made on that tier, or the table
+   * needs a second set of rates". Settlement alerts on both for the same
+   * reason — a guessed cost produces a guessed margin that reads healthy.
+   *
+   * Not restored from a snapshot: only priced totals survive a job
+   * handoff, and re-deriving the tier from them is impossible. A
+   * cross-invocation job therefore alerts on the invocation that saw the
+   * tier, which is the one whose logs explain it.
+   */
+  unpricedServiceTiers(): string[] {
+    return [...this.unpricedTierUsage];
+  }
+
   get totalUsdCost(): number {
     return this.entries.reduce((sum, e) => sum + e.usage.usdCost, 0);
   }
@@ -133,16 +161,26 @@ export class CostAccumulator {
         inputTokens: acc.inputTokens + e.usage.inputTokens,
         outputTokens: acc.outputTokens + e.usage.outputTokens,
         cacheWriteTokens: acc.cacheWriteTokens + e.usage.cacheWriteTokens,
+        // `?? 0`, unlike its siblings: a snapshot persisted by an earlier
+        // deploy has no cacheWrite1hTokens/webFetches key, and
+        // CostAccumulator.restore hands those objects straight back. A bare
+        // `+ undefined` would turn the whole total into NaN — and a NaN
+        // cost settles as zero credits, which is the exact silent
+        // under-charge this file exists to prevent.
+        cacheWrite1hTokens: acc.cacheWrite1hTokens + (e.usage.cacheWrite1hTokens ?? 0),
         cacheReadTokens: acc.cacheReadTokens + e.usage.cacheReadTokens,
         webSearches: acc.webSearches + e.usage.webSearches,
+        webFetches: acc.webFetches + (e.usage.webFetches ?? 0),
         usdCost: acc.usdCost + e.usage.usdCost,
       }),
       {
         inputTokens: 0,
         outputTokens: 0,
         cacheWriteTokens: 0,
+        cacheWrite1hTokens: 0,
         cacheReadTokens: 0,
         webSearches: 0,
+        webFetches: 0,
         usdCost: 0,
       }
     );

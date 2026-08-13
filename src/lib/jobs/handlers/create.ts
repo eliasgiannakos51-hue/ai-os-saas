@@ -63,7 +63,16 @@ export const createHandler: JobHandler = async (ctx: JobContext): Promise<JobHan
     try {
       const clarification = await checkNeedsClarification(ctx.apiKey, "create", message, ctx.costs);
       if (clarification.needsClarification) {
-        return { result: { matched: false, needsClarification: true, questions: clarification.questions } };
+        return {
+          result: { matched: false, needsClarification: true, questions: clarification.questions },
+          // Its own feature, for the reason spelled out in
+          // handlers/agent-build.ts: a run that stops at the pre-check and
+          // a run that classifies are different actions with an order of
+          // magnitude between their costs, and the user's resubmission
+          // makes one entry produce two rows. Averaged together they
+          // describe neither.
+          feature: "create_precheck",
+        };
       }
     } catch (err) {
       // Best-effort: a hiccup in the pre-check must not block a real entry.

@@ -952,7 +952,9 @@
           "style-only": "仅作风格参考"
         }
       },
-      "imageIntro": "你的标志、产品照片、店内照片——想放到页面上的，或想让它决定风格的。"
+      "imageIntro": "你的标志、产品照片、店内照片——想放到页面上的，或想让它决定风格的。",
+      "regenerateAlreadyUsed": "您已使用过此站点的免费重新生成。请用其他描述创建新站点。",
+      "regenerateNoBrief": "此站点创建于我们开始保存原始描述之前，因此无法自动重新生成。请用相同描述创建新站点。"
     },
     "marketplace": {
       "title": "市场",
@@ -1218,7 +1220,10 @@
       "reasonInvalidCharacters": "只能使用小写字母、数字和连字符。",
       "reasonBadEdges": "不能以连字符开头或结尾。",
       "reasonReserved": "该网址已被保留，请另选一个。",
-      "reasonTaken": "该网址已被占用，请换一个。"
+      "reasonTaken": "该网址已被占用，请换一个。",
+      "disabledFlagged": "此站点被安全审核暂留，因此无法上线。请查看下方详情 — 您可以免费重新生成一次。",
+      "disabledFailed": "此站点尚未生成完成，暂无内容可发布。",
+      "disabledGenerating": "正在生成。完成后即可发布。"
     },
     "integrations": {
       "title": "集成",
@@ -1501,7 +1506,9 @@
     "sort": {
       "label": "排序：",
       "newest": "最新",
-      "oldest": "最早"
+      "oldest": "最早",
+      "az": "A–Z",
+      "za": "Z–A"
     },
     "emptyPresentationNotes": "这里还没有内容。这是用来记录你正在筹划或已经做好的演示文稿的地方——它不会替你生成幻灯片。点击上方按钮添加一条。"
   },

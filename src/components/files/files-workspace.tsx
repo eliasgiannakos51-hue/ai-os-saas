@@ -22,6 +22,7 @@ import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { startAndWatchJob } from "@/lib/jobs/start-and-watch";
+import { matchesSearch } from "@/lib/text/search-match";
 import {
   ACCEPT_ATTRIBUTE,
   MAX_FILE_BYTES,
@@ -121,8 +122,8 @@ export function FilesWorkspace({
   );
 
   const rows = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return files.filter((f) => !q || f.filename.toLowerCase().includes(q));
+    const q = query.trim();
+    return files.filter((f) => matchesSearch(f.filename, q));
   }, [files, query]);
 
   const selectedFiles = useMemo(

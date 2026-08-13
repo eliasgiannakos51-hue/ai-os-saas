@@ -952,7 +952,9 @@
           "style-only": "Apenas como referência de estilo"
         }
       },
-      "imageIntro": "O seu logótipo, fotos de produto ou do espaço — o que quiser na página ou que defina o estilo."
+      "imageIntro": "O seu logótipo, fotos de produto ou do espaço — o que quiser na página ou que defina o estilo.",
+      "regenerateAlreadyUsed": "Já usou a regeneração gratuita deste site. Crie um novo site com outra descrição.",
+      "regenerateNoBrief": "Este site foi criado antes de guardarmos a descrição original, por isso não pode ser regenerado automaticamente. Crie um novo site com a mesma descrição."
     },
     "marketplace": {
       "title": "Mercado",
@@ -1218,7 +1220,10 @@
       "reasonInvalidCharacters": "Só são permitidas minúsculas, números e hífenes.",
       "reasonBadEdges": "Não pode começar nem terminar com um hífen.",
       "reasonReserved": "Esse endereço está reservado. Escolhe outro.",
-      "reasonTaken": "Esse endereço já está ocupado. Tenta outro."
+      "reasonTaken": "Esse endereço já está ocupado. Tenta outro.",
+      "disabledFlagged": "Este site foi retido pela nossa revisão de segurança, por isso não pode ficar online. Veja os detalhes abaixo — pode regenerá-lo uma vez gratuitamente.",
+      "disabledFailed": "Este site não terminou de ser gerado, por isso ainda não há nada para publicar.",
+      "disabledGenerating": "Ainda a gerar. Poderá publicar assim que terminar."
     },
     "integrations": {
       "title": "Integrações",
@@ -1501,7 +1506,9 @@
     "sort": {
       "label": "Ordenar:",
       "newest": "Mais recentes",
-      "oldest": "Mais antigos"
+      "oldest": "Mais antigos",
+      "az": "A–Z",
+      "za": "Z–A"
     },
     "emptyPresentationNotes": "Ainda não há nada aqui. Este é um espaço para acompanhar as apresentações que está a planear ou já fez — não gera diapositivos por si. Use o botão acima para adicionar uma."
   },

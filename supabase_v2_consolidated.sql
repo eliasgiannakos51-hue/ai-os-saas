@@ -487,3 +487,22 @@ create policy "delete_own_user_automations" on public.user_automations
 -- public.set_updated_at() (also defined early in supabase_schema.sql) for
 -- the triggers on ai_missions and user_credits.
 -- ============================================================================
+
+-- The 'flagged' status. src/types/user-website.ts declares it and
+-- api/websites/generate/process/route.ts writes it whenever the AI Output
+-- Protection Layer finds a real issue in generated HTML. Without it here,
+-- that write is rejected by Postgres, the row is stranded on 'processing',
+-- and the stale reaper later marks it 'failed' — with the user already
+-- charged and the flagged-only free regenerate out of reach. See
+-- supabase/migrations/20260813_flagged_status_constraint.sql.
+alter table public.user_websites
+  drop constraint if exists user_websites_status_check;
+alter table public.user_websites
+  add constraint user_websites_status_check
+  check (status in ('pending', 'processing', 'completed', 'failed', 'flagged'));
+
+alter table public.user_websites
+  add column if not exists free_retry_used boolean not null default false;
+
+alter table public.user_websites
+  add column if not exists description text;

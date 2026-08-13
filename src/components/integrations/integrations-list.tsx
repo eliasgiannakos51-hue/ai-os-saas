@@ -11,6 +11,7 @@ import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { PROVIDERS, type IntegrationSummary, type ProviderId } from "@/lib/integrations/providers";
+import { matchesSearch } from "@/lib/text/search-match";
 
 /**
  * The integrations surface.
@@ -75,8 +76,8 @@ export function IntegrationsList({
   const connectedCount = integrations.filter((i) => i.status === "connected").length;
 
   const rows = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return PROVIDERS.filter((p) => !q || p.name.toLowerCase().includes(q));
+    const q = query.trim();
+    return PROVIDERS.filter((p) => matchesSearch(p.name, q));
   }, [query]);
 
   async function disconnect(provider: ProviderId, name: string) {

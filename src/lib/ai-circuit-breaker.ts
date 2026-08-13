@@ -117,46 +117,42 @@ export async function checkAiCallAllowed(
 
 // Called once a route has actually decided to make the Claude call (i.e.
 // checkAiCallAllowed already said yes) — increments today's row,
-// creating it on first call of the day. Read-then-write, tolerant of
-// races under bursty traffic, same acceptable-imprecision tolerance as
-// checkRateLimit and deductCredits elsewhere in this codebase: this is
-// abuse/cost containment, not a financial ledger, so an occasional
-// undercount under heavy concurrency is fine — it only ever means the
-// cap fires slightly later, never that real requests get wrongly
-// blocked.
+// creating it on first call of the day.
+//
+// ATOMIC, via increment_daily_ai_spend (see
+// supabase/migrations/20260813_atomic_daily_ai_spend.sql). This used to be
+// a read-modify-write: SELECT total_calls, then UPDATE to
+// `existing.total_calls + 1`, with the addition done in Node against a
+// value read in an earlier round trip. Every call that read between
+// another call's SELECT and its UPDATE wrote the same number, and the
+// later write silently won — so the counter measured how many calls
+// happened to be serialised, not how many happened.
+//
+// The old comment here waved that away as acceptable imprecision. It is
+// not, for a reason specific to this counter: it is the ONLY input to
+// checkDailyPlatformCap, the breaker whose entire job is to contain a
+// runaway spike — the exact condition under which concurrency, and so the
+// undercount, is worst. The breaker was least accurate precisely when it
+// mattered, and estimated_cost drifted the same way, so today's reported
+// AI spend was low by an unknown amount. Both are now single-statement
+// increments evaluated by Postgres against the row it is locking.
+//
+// Still best-effort in the sense that a failure is logged and swallowed
+// rather than thrown: this runs after the decision to make the Claude
+// call, so failing here must not turn a successful request into an error.
 export async function recordAiCallForDailySpend(estimatedCreditCost: number): Promise<void> {
   const admin = createAdminClient();
+  // UTC date, matching checkDailyPlatformCap's reader above. Passed
+  // explicitly rather than left to the function's default so the two can
+  // never disagree about which row "today" is.
   const today = new Date().toISOString().slice(0, 10);
 
-  const { data: existing, error: selectError } = await admin
-    .from("daily_ai_spend_tracking")
-    .select("total_calls, estimated_cost")
-    .eq("date", today)
-    .maybeSingle();
+  const { error } = await admin.rpc("increment_daily_ai_spend", {
+    p_estimated_cost: estimatedCreditCost,
+    p_date: today,
+  });
 
-  if (selectError) {
-    logApiError("ai-circuit-breaker", selectError, { stage: "record_daily_spend_select" });
-    return;
-  }
-
-  if (existing) {
-    const { error: updateError } = await admin
-      .from("daily_ai_spend_tracking")
-      .update({
-        total_calls: existing.total_calls + 1,
-        estimated_cost: Number(existing.estimated_cost) + estimatedCreditCost,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("date", today);
-    if (updateError) {
-      logApiError("ai-circuit-breaker", updateError, { stage: "record_daily_spend_update" });
-    }
-  } else {
-    const { error: insertError } = await admin
-      .from("daily_ai_spend_tracking")
-      .insert({ date: today, total_calls: 1, estimated_cost: estimatedCreditCost });
-    if (insertError) {
-      logApiError("ai-circuit-breaker", insertError, { stage: "record_daily_spend_insert" });
-    }
+  if (error) {
+    logApiError("ai-circuit-breaker", error, { stage: "record_daily_spend_rpc" });
   }
 }

@@ -48,11 +48,21 @@ create table if not exists public.user_agents (
   -- user's morning or the agent is useless to them.
   timezone text not null default 'UTC',
 
-  -- Only 'email' today. Telegram/Slack/Discord are a later part; the CHECK
-  -- is what makes adding one a deliberate migration rather than a typo that
-  -- silently stores a delivery method nothing can honour.
+  -- 'email' and 'slack'. The CHECK is what makes adding a third a deliberate
+  -- migration rather than a typo that silently stores a delivery method
+  -- nothing can honour — but it has to list everything the application can
+  -- actually write, which is AGENT_DELIVERY_METHODS in
+  -- lib/agents/agent-config.ts.
+  --
+  -- This said ('email') only, and was widened by v3_integrations_migration.sql
+  -- running afterwards. That worked, and worked only because of the order:
+  -- a project built from this file alone rejected every Slack-delivered
+  -- agent the UI would happily let someone create. Same shape as the
+  -- 'flagged' website status — see
+  -- supabase/migrations/20260813_flagged_status_constraint.sql — and
+  -- scripts/tests/enum-schema-drift.test.mjs now fails on either.
   delivery_method text not null default 'email'
-    check (delivery_method in ('email')),
+    check (delivery_method in ('email', 'slack')),
   -- Where the result goes. Constrained in application code to the account's
   -- OWN verified email address — see the anti-abuse note in
   -- lib/agents/agent-config.ts. Stored rather than derived so a future

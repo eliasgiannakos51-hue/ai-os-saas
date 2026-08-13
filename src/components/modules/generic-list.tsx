@@ -20,14 +20,14 @@ import { PaginationControls } from "@/components/pagination-controls";
 import { EmptyState } from "@/components/empty-state";
 import { ListLayout } from "@/components/ui/list-layout";
 import { CardGrid } from "@/components/ui/entity-card";
+import { matchesSearch } from "@/lib/text/search-match";
 
 function searchableText(module: ModuleConfig, record: ModuleRecord): string {
   return module.fields
     .filter((field) => field.type !== "number")
     .map((field) => record[field.key])
     .filter((value): value is string => typeof value === "string" && value.length > 0)
-    .join(" ")
-    .toLowerCase();
+    .join(" ");
 }
 
 /**
@@ -64,16 +64,18 @@ export function GenericList({
   );
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query.trim();
     return records.filter((record) => {
-      if (q && !searchableText(module, record).includes(q)) return false;
+      if (!matchesSearch(searchableText(module, record), q)) return false;
       if (statusFilter && String(record[statusField?.key ?? ""] ?? "") !== statusFilter) return false;
       return true;
     });
   }, [module, records, query, statusFilter, statusField]);
 
-  const { sortOrder, setSortOrder, page, setPage, totalPages, sorted, paginated } =
-    useSortAndPaginate(filtered, `${query}|${statusFilter}`);
+  const { sortOrder, setSortOrder, page, setPage, totalPages, sorted, paginated, alphabetical } =
+    useSortAndPaginate(filtered, `${query}|${statusFilter}`, (record) =>
+      String(record[module.headlineKey] ?? "")
+    );
 
   const selectedRecord = selected ? records.find((r) => r.id === selected.id) ?? null : null;
 
@@ -108,7 +110,7 @@ export function GenericList({
         searchPlaceholder={t("searchPlaceholder")}
         filters={
           <>
-            <SortToggle sortOrder={sortOrder} onChange={setSortOrder} />
+            <SortToggle sortOrder={sortOrder} onChange={setSortOrder} alphabetical={alphabetical} />
             {statusField && (
               <select
                 value={statusFilter}

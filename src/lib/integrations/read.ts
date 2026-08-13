@@ -2,6 +2,7 @@ import "server-only";
 import { logApiError } from "@/lib/log-error";
 import { getUsableAccessToken, recordSync } from "@/lib/integrations/store";
 import type { ProviderId } from "@/lib/integrations/providers";
+import { matchesSearch } from "@/lib/text/search-match";
 
 // Reading the user's real data.
 //
@@ -241,7 +242,7 @@ async function readSlack(accessToken: string, query: string, limit: number): Pro
   // regardless would just produce a wall of errors.
   const joined = list.filter((c) => c.is_member && c.id).slice(0, 10);
 
-  const needle = query.trim().toLowerCase();
+  const needle = query.trim();
   const items: IntegrationItem[] = [];
 
   for (const channel of joined) {
@@ -258,7 +259,7 @@ async function readSlack(accessToken: string, query: string, limit: number): Pro
     for (const message of messages) {
       if (items.length >= limit) break;
       const text = message.text ?? "";
-      if (needle && !text.toLowerCase().includes(needle)) continue;
+      if (!matchesSearch(text, needle)) continue;
       items.push({
         source: "slack",
         title: `#${channel.name ?? "channel"}`,

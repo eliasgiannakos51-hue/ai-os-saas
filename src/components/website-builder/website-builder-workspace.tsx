@@ -58,6 +58,7 @@ import { SortToggle } from "@/components/sort-toggle";
 import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 import { formatDateTime } from "@/lib/format-number";
+import { matchesSearch } from "@/lib/text/search-match";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 20000;
@@ -194,6 +195,7 @@ export function WebsiteBuilderWorkspace({
   const t = useTranslations("dashboard.websiteBuilder");
   const locale = useLocale();
   const tCommon = useTranslations("common");
+  const tPublish = useTranslations("dashboard.publishing");
   const tModule = useTranslations("module");
   const supabase = createClient();
   const { refresh: refreshCredits, reportUsage, accountCreditPriceEur, planSlug } = useCredits();
@@ -916,14 +918,21 @@ export function WebsiteBuilderWorkspace({
   // other list in the app now carries (components/ui/list-layout.tsx),
   // over the same shared sort/paginate hook.
   const filteredWebsites = websites.filter((website) => {
-    const q = query.trim().toLowerCase();
-    if (q && !`${website.name} ${website.description ?? ""}`.toLowerCase().includes(q)) return false;
+    const q = query.trim();
+    if (!matchesSearch(`${website.name} ${website.description ?? ""}`, q)) return false;
     if (statusFilter && website.status !== statusFilter) return false;
     return true;
   });
 
-  const { sortOrder, setSortOrder, page, setPage, totalPages, paginated: paginatedWebsites } =
-    useSortAndPaginate(filteredWebsites, `${query}|${statusFilter}`);
+  const {
+    sortOrder,
+    setSortOrder,
+    page,
+    setPage,
+    totalPages,
+    paginated: paginatedWebsites,
+    alphabetical,
+  } = useSortAndPaginate(filteredWebsites, `${query}|${statusFilter}`, (w) => w.name);
 
   const detailTabs: DetailTab[] = [
     { key: "preview", label: t("tabPreview"), icon: Eye },
@@ -1001,6 +1010,20 @@ export function WebsiteBuilderWorkspace({
                   websiteId={previewWebsite.id}
                   websiteName={previewWebsite.name}
                   disabled={previewWebsite.status !== "completed"}
+                  // Three different reasons this is off, and they used to
+                  // look identical: a grey button that does nothing. The
+                  // flagged case especially — the user has already paid for
+                  // that generation and there is still something they can
+                  // do, which was only ever said further down the page.
+                  disabledReason={
+                    previewWebsite.status === "flagged"
+                      ? tPublish("disabledFlagged")
+                      : previewWebsite.status === "failed"
+                        ? tPublish("disabledFailed")
+                        : previewWebsite.status === "pending" || previewWebsite.status === "processing"
+                          ? tPublish("disabledGenerating")
+                          : undefined
+                  }
                 />
                 <button
                   type="button"
@@ -1082,7 +1105,14 @@ export function WebsiteBuilderWorkspace({
                   <AlertTriangle className="h-8 w-8 text-amber-400" aria-hidden="true" />
                   <p className="text-sm font-medium text-amber-300">{t("flaggedTitle")}</p>
                   <p className="max-w-md text-xs text-amber-300/80">{previewWebsite.error_message}</p>
-                  {!previewWebsite.free_retry_used && previewWebsite.description && (
+                  {/* THE OFFER, OR WHY THERE IS NOT ONE.
+                      The button used to simply vanish when the free retry
+                      was spent or the original brief was never stored, so
+                      a user whose site was held for review and who had
+                      already paid for it was left with a warning and no
+                      next step at all. Both cases now say what happened
+                      and what to do instead. */}
+                  {!previewWebsite.free_retry_used && previewWebsite.description ? (
                     <button
                       type="button"
                       onClick={() => handleRegenerateFlagged(previewWebsite.id)}
@@ -1096,6 +1126,12 @@ export function WebsiteBuilderWorkspace({
                       )}
                       {t("regenerateFree")}
                     </button>
+                  ) : (
+                    <p className="max-w-md text-xs text-amber-300/70">
+                      {previewWebsite.free_retry_used
+                        ? t("regenerateAlreadyUsed")
+                        : t("regenerateNoBrief")}
+                    </p>
                   )}
                 </div>
               ) : displayedHtmlIsComplete ? (
@@ -1413,7 +1449,7 @@ export function WebsiteBuilderWorkspace({
         searchPlaceholder={tModule("searchPlaceholder")}
         filters={
           <>
-            <SortToggle sortOrder={sortOrder} onChange={setSortOrder} />
+            <SortToggle sortOrder={sortOrder} onChange={setSortOrder} alphabetical={alphabetical} />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}

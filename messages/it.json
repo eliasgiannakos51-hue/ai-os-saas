@@ -952,7 +952,9 @@
           "style-only": "Solo come riferimento di stile"
         }
       },
-      "imageIntro": "Il tuo logo, foto dei prodotti o del locale: quello che vuoi nella pagina o che deve dare lo stile."
+      "imageIntro": "Il tuo logo, foto dei prodotti o del locale: quello che vuoi nella pagina o che deve dare lo stile.",
+      "regenerateAlreadyUsed": "Hai già usato la rigenerazione gratuita per questo sito. Crea un nuovo sito con una descrizione diversa.",
+      "regenerateNoBrief": "Questo sito è stato creato prima che salvassimo la descrizione originale, quindi non può essere rigenerato automaticamente. Crea un nuovo sito con la stessa descrizione."
     },
     "marketplace": {
       "title": "Mercato",
@@ -1218,7 +1220,10 @@
       "reasonInvalidCharacters": "Sono ammessi solo lettere minuscole, numeri e trattini.",
       "reasonBadEdges": "Non può iniziare né finire con un trattino.",
       "reasonReserved": "Questo indirizzo è riservato. Scegline un altro.",
-      "reasonTaken": "Questo indirizzo è già occupato. Provane un altro."
+      "reasonTaken": "Questo indirizzo è già occupato. Provane un altro.",
+      "disabledFlagged": "Questo sito è stato trattenuto dalla nostra revisione di sicurezza e non può andare online. Vedi i dettagli qui sotto: puoi rigenerarlo una volta gratuitamente.",
+      "disabledFailed": "La generazione di questo sito non è stata completata, quindi non c’è ancora nulla da pubblicare.",
+      "disabledGenerating": "Generazione in corso. Potrai pubblicarlo appena sarà pronto."
     },
     "integrations": {
       "title": "Integrazioni",
@@ -1501,7 +1506,9 @@
     "sort": {
       "label": "Ordina:",
       "newest": "Più recenti",
-      "oldest": "Meno recenti"
+      "oldest": "Meno recenti",
+      "az": "A–Z",
+      "za": "Z–A"
     },
     "emptyPresentationNotes": "Qui non c’è ancora nulla. Questo è uno spazio per tenere traccia delle presentazioni che stai pianificando o hai già fatto: non genera diapositive al posto tuo. Usa il pulsante sopra per aggiungerne una."
   },

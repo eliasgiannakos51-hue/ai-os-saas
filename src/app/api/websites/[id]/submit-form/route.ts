@@ -6,6 +6,8 @@ import { logApiError } from "@/lib/log-error";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { settleReservation } from "@/lib/billing/reservations";
 import { hasEnoughCredits, resolveEffectivePlan } from "@/lib/billing/credits";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { getClientIp } from "@/lib/get-client-ip";
 
 // @service-role-justified public — this is the contact form on a PUBLISHED
 // site, submitted by strangers who have no account. Scoped to the one
@@ -23,6 +25,27 @@ const MAX_KEY_LENGTH = 60;
 // only thing standing between a scripted flood and an unbounded number
 // of outbound emails + lead-classification AI calls charged to nobody.
 const MAX_SUBMISSIONS_PER_HOUR = 30;
+// Per-IP hourly cap, checked IN ADDITION to the per-website one above.
+//
+// WHY THE PER-WEBSITE CAP ALONE WAS NOT ENOUGH. It bounds one site at 30
+// submissions an hour — 720 a day — and every one of them spends the site
+// owner's credits on a lead-classification call that the owner never asked
+// for and cannot see coming. One anonymous script, one published site, no
+// account, no CAPTCHA: 720 billable AI calls a day against a stranger's
+// balance. The honeypot only catches a bot that fills every field blindly,
+// which is one line of code to avoid.
+//
+// A per-IP cap changes the shape of that attack: 720 calls a day now needs
+// 144 distinct source addresses instead of one. It does not make the
+// endpoint unattackable — nothing that is public and free can be — it makes
+// the cheap version of the attack stop working, which is the whole job of a
+// rate limit.
+//
+// FIVE, not thirty. A real visitor fills in a contact form once. Someone
+// correcting a typo or asking a second question might do it two or three
+// times. Five leaves room for that and for a small office behind one NAT
+// address, while cutting the single-source ceiling by 6x.
+const MAX_SUBMISSIONS_PER_IP_PER_HOUR = 5;
 // The owner must hold at least this much before we spend anything on
 // their behalf. The classification is a ~200-token forced-tool-use call,
 // so one credit covers it many times over at any plan's rate — this is a
@@ -109,6 +132,16 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ ok: false, error: "Website not found." }, { status: 404, headers });
     }
 
+    // TWO caps, both of which must pass.
+    //
+    // Per-website first, because it is the cheaper query and the one that
+    // protects the owner's balance in aggregate. Per-IP second, because it
+    // is what stops a single anonymous source from consuming that whole
+    // budget on its own — see MAX_SUBMISSIONS_PER_IP_PER_HOUR above.
+    //
+    // The IP cap is scoped per website (`${websiteId}:${ip}`) rather than
+    // globally, so one busy office behind a single NAT address cannot lock
+    // itself out of every published site in the platform at once.
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const { count: recentCount } = await admin
       .from("website_form_submissions")
@@ -118,6 +151,22 @@ export async function POST(request: Request, { params }: { params: { id: string 
     if ((recentCount ?? 0) >= MAX_SUBMISSIONS_PER_HOUR) {
       return NextResponse.json(
         { ok: false, error: "Too many submissions for this website right now — please try again later." },
+        { status: 429, headers }
+      );
+    }
+
+    // Checked BEFORE any money is spent and before anything is written —
+    // the point is that a blocked request costs the owner nothing at all.
+    const ip = getClientIp(request);
+    const ipLimit = await checkRateLimit({
+      scope: "website_form_ip",
+      identifier: `${websiteId}:${ip}`,
+      maxAttempts: MAX_SUBMISSIONS_PER_IP_PER_HOUR,
+      windowMinutes: 60,
+    });
+    if (!ipLimit.allowed) {
+      return NextResponse.json(
+        { ok: false, error: "Too many submissions from this connection — please try again later." },
         { status: 429, headers }
       );
     }

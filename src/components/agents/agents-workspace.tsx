@@ -18,6 +18,7 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { useAiJob } from "@/lib/jobs/use-ai-job";
 import { resolveBrowserTimeZone, nextRuns } from "@/lib/agents/cron-expression";
 import type { AgentDraft, AgentRun, UserAgent } from "@/lib/agents/agent-config";
+import { matchesSearch } from "@/lib/text/search-match";
 import {
   ScheduleEditor,
   cronToParts,
@@ -99,17 +100,15 @@ export function AgentsWorkspace({
   const atCapacity = agents.length >= agentCap;
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query.trim();
     if (!q) return agents;
     return agents.filter((a) =>
-      `${a.name} ${a.description ?? ""} ${a.prompt}`.toLowerCase().includes(q)
+      matchesSearch(`${a.name} ${a.description ?? ""} ${a.prompt}`, q)
     );
   }, [agents, query]);
 
-  const { sortOrder, setSortOrder, page, setPage, totalPages, paginated } = useSortAndPaginate(
-    filtered,
-    query
-  );
+  const { sortOrder, setSortOrder, page, setPage, totalPages, paginated, alphabetical } =
+    useSortAndPaginate(filtered, query, (a) => a.name);
 
   const selected = useMemo(
     () => agents.find((a) => a.id === selectedId) ?? null,
@@ -410,7 +409,7 @@ export function AgentsWorkspace({
         searchValue={query}
         onSearchChange={setQuery}
         searchPlaceholder={tModule("searchPlaceholder")}
-        filters={<SortToggle sortOrder={sortOrder} onChange={setSortOrder} />}
+        filters={<SortToggle sortOrder={sortOrder} onChange={setSortOrder} alphabetical={alphabetical} />}
         meta={
           <span className="text-xs text-muted">
             {t("agentsUsed", { used: agents.length, cap: agentCap })}

@@ -42,6 +42,7 @@ import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
+import { WebsiteImageNotice } from "@/components/website-builder/website-image-notice";
 import { DesignControls } from "@/components/website-builder/design-controls";
 import {
   applyDesignBrief,
@@ -1135,13 +1136,21 @@ export function WebsiteBuilderWorkspace({
                   )}
                 </div>
               ) : displayedHtmlIsComplete ? (
-                <iframe
-                  key={`${previewWebsite.id}:${viewingVersion?.id ?? "latest"}`}
-                  srcDoc={displayedHtml}
-                  sandbox=""
-                  title={previewWebsite.name}
-                  className="h-[500px] w-full rounded-xl border border-border bg-white"
-                />
+                <>
+                  <iframe
+                    key={`${previewWebsite.id}:${viewingVersion?.id ?? "latest"}`}
+                    srcDoc={displayedHtml}
+                    sandbox=""
+                    title={previewWebsite.name}
+                    className="h-[500px] w-full rounded-xl border border-border bg-white"
+                  />
+                  {/* Directly under the page it is about, and only for the
+                      latest version — the report describes what THIS
+                      generation did, and an older version in the history
+                      viewer was resolved by a different run with different
+                      quota. Renders nothing when every photo is real. */}
+                  {!viewingVersion && <WebsiteImageNotice report={previewWebsite.image_report} />}
+                </>
               ) : (
                 <div className="flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-red-800 bg-red-950/20 px-6 text-center">
                   <AlertTriangle className="h-8 w-8 text-red-400" aria-hidden="true" />

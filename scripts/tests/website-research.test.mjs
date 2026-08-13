@@ -106,8 +106,30 @@ check("the final fallback is still a real, working URL", picsumFallbackUrl("espr
 console.log("\n== 5. the resolver actually uses the broadening ==");
 const resolverSrc = readFileSync("src/lib/website-image-resolver.ts", "utf8");
 check("broadenImageQuery is imported", /broadenImageQuery/.test(resolverSrc));
-check("and iterated, not called once", /for \(const attempt of broadenImageQuery\(query\)\)/.test(resolverSrc));
-check("picsum is only reached after every attempt", /resolved\.set\(slug, picsumFallbackUrl\(query\)\);\s*\}\s*\)/.test(resolverSrc));
+// THESE TWO USED TO MATCH THE OLD SINGLE LOOP, in which each photo walked
+// its whole ladder concurrently with every other photo's. That structure had
+// a measured defect — on a 20-photo page, eight photos reached picsum
+// without the library ever being asked about them — so it is now a
+// guaranteed first pass followed by a shared broadening pass. Both
+// properties below survive intact; only their spelling changed, and
+// scripts/tests/website-image-resolution.itest.mjs now proves them from the
+// outside by counting real requests instead of reading for a shape.
+check(
+  "the ladder is built for every photo",
+  /ladders\.set\(slug, broadenImageQuery\(query\)\)/.test(resolverSrc)
+);
+check(
+  "and iterated, not called once — the broader attempts are actually walked",
+  /for \(const attempt of \(ladders\.get\(slug\) \?\? \[\]\)\.slice\(1\)\)/.test(resolverSrc)
+);
+check(
+  "picsum is only reached after every attempt, and only for what is still missing",
+  /if \(resolved\.has\(slug\)\) continue;[\s\S]{0,120}picsumFallbackUrl\(query\)/.test(resolverSrc)
+);
+check(
+  "...and that fallback runs after broadening, not beside it",
+  resolverSrc.indexOf("picsumFallbackUrl(query)") > resolverSrc.indexOf(".slice(1))")
+);
 
 console.log("\n== 6. the generation prompt orders research rather than permitting it ==");
 const builderSrc = readFileSync("src/lib/website-builder.ts", "utf8");

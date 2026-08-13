@@ -1,3 +1,5 @@
+import type { WebsiteImageReport } from "@/lib/website-image-brief";
+
 // 'pending': row just created, generation not started yet server-side.
 // 'processing': the background generation call is actually running.
 // 'completed': html_content holds the real, finished website.
@@ -38,6 +40,17 @@ export type UserWebsite = {
   // The original generation description — null for rows created before
   // this column existed. See api/websites/[id]/regenerate/route.ts.
   description: string | null;
+  // What the photo step actually did: how many <img> tags got a real
+  // library photograph and how many got a seeded placeholder instead.
+  //
+  // Null for every row generated before this column existed, and that is
+  // meaningful rather than empty — "we did not record this" is not the same
+  // claim as "every photo is real", and the interface must not make the
+  // second claim on the strength of the first.
+  //
+  // Structured counts rather than a message on purpose: a sentence written
+  // here would be an English sentence shown to a Greek user forever.
+  image_report: WebsiteImageReport | null;
   created_at: string;
 };
 

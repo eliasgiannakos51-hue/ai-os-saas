@@ -39,6 +39,44 @@
  */
 export const UNSPLASH_REQUESTS_PER_GENERATION = 12;
 
+/**
+ * The ceiling any one generation may reach, however many photos it wants.
+ *
+ * A `gallery` page ("IMAGES: the maximum") legitimately asks for fifteen or
+ * twenty photographs. Letting one such page spend eighty requests would put
+ * a demo-tier account at zero for the rest of the hour and make every
+ * subsequent site's photos generic — the failure this file already exists
+ * to prevent, arriving by a different route.
+ */
+export const UNSPLASH_MAX_REQUESTS_PER_GENERATION = 40;
+
+/**
+ * How many requests a generation with `placeholderCount` photos may spend.
+ *
+ * THE BUG THIS REPLACES, which is arithmetic and was measurable.
+ *
+ * The budget was a flat 12 shared by every photo, and every photo walked a
+ * ladder of up to four broadening searches concurrently. Simulated over the
+ * real control flow: at 14 photos, two of them never got a SINGLE search
+ * before the ceiling was reached; at 20 photos, eight of them never did.
+ * Those photos went straight to a seeded placeholder without the library
+ * ever being asked about them — which on a portfolio site, the exact shape
+ * that asks for the most photographs, is most of the page.
+ *
+ * A photo that was never searched for is strictly worse than a photo whose
+ * search was shallow, so the first search per photo is guaranteed and the
+ * broadening allowance is what is shared. The old flat 12 becomes that
+ * shared allowance, which is what it was always really for: broadening is
+ * the multiplier, not the first attempt.
+ */
+export function unsplashBudgetForPlaceholders(placeholderCount: number): number {
+  const guaranteedFirstPass = Math.max(0, placeholderCount);
+  return Math.min(
+    guaranteedFirstPass + UNSPLASH_REQUESTS_PER_GENERATION,
+    UNSPLASH_MAX_REQUESTS_PER_GENERATION
+  );
+}
+
 export type UnsplashHaltReason = "rate-limited" | "budget-exhausted" | "unauthorised";
 
 export type UnsplashBudget = {
@@ -50,6 +88,10 @@ export type UnsplashBudget = {
   halt(reason: UnsplashHaltReason): void;
   readonly spent: number;
   readonly halted: UnsplashHaltReason | null;
+  /** The ceiling this budget was created with — so a message about
+   *  exhausting it can name the real number rather than a constant that is
+   *  now only one term of it. */
+  readonly limit: number;
 };
 
 export function createUnsplashBudget(limit: number = UNSPLASH_REQUESTS_PER_GENERATION): UnsplashBudget {
@@ -75,6 +117,9 @@ export function createUnsplashBudget(limit: number = UNSPLASH_REQUESTS_PER_GENER
     },
     get halted() {
       return halted;
+    },
+    get limit() {
+      return limit;
     },
   };
 }
@@ -108,13 +153,16 @@ export function classifyUnsplashResponse(
 
 /** Human-readable, for the generation log — so "why are the photos
  *  generic" has an answer that is not a guess. */
-export function describeUnsplashHalt(reason: UnsplashHaltReason, spent: number): string {
+export function describeUnsplashHalt(reason: UnsplashHaltReason, spent: number, limit?: number): string {
   switch (reason) {
     case "rate-limited":
       return `Unsplash quota exhausted after ${spent} request(s) — remaining photos fell back to picsum. A demo Unsplash application allows 50 requests/hour; apply for production access (5000/hour) or wait for the window to reset.`;
     case "unauthorised":
       return `Unsplash rejected the credentials after ${spent} request(s) — check UNSPLASH_ACCESS_KEY. All photos fell back to picsum.`;
     case "budget-exhausted":
-      return `This generation reached its ceiling of ${UNSPLASH_REQUESTS_PER_GENERATION} Unsplash requests — remaining photos fell back to picsum.`;
+      // The ceiling is per-generation and scales with the photo count now,
+      // so quoting the shared broadening allowance would name a number this
+      // run never had.
+      return `This generation reached its ceiling of ${limit ?? UNSPLASH_REQUESTS_PER_GENERATION} Unsplash requests — remaining photos fell back to picsum.`;
   }
 }

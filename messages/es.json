@@ -954,7 +954,13 @@
       },
       "imageIntro": "Tu logo, fotos de producto o del local: lo que quieras que aparezca o que marque el estilo.",
       "regenerateAlreadyUsed": "Ya has usado la regeneración gratuita de este sitio. Crea un sitio nuevo con otra descripción.",
-      "regenerateNoBrief": "Este sitio se creó antes de que guardáramos la descripción original, así que no puede regenerarse automáticamente. Crea un sitio nuevo con la misma descripción."
+      "regenerateNoBrief": "Este sitio se creó antes de que guardáramos la descripción original, así que no puede regenerarse automáticamente. Crea un sitio nuevo con la misma descripción.",
+      "photosPlaceholderTitle": "Algunas fotos son marcadores de posición",
+      "photosMissingTitle": "Pediste fotos reales: faltan algunas",
+      "photosPlaceholderBody": "{placeholder, plural, one {# de las {total} fotos de esta página es un marcador de posición} other {# de las {total} fotos de esta página son marcadores de posición}}: no se encontró ninguna fotografía que coincidiera. Sustitúye{placeholder, plural, one {la} other {las}} por las tuyas antes de publicar.",
+      "photosQuotaBody": "La fototeca agotó sus peticiones de esta hora, así que {placeholder, plural, one {# foto es un marcador de posición} other {# fotos son marcadores de posición}}. Vuelve a intentarlo en una hora o sube tus propias fotos.",
+      "photosNotConfiguredBody": "No hay ninguna fototeca conectada, así que {total, plural, one {la # foto} other {las # fotos}} de esta página {total, plural, one {es un marcador de posición} other {son marcadores de posición}}. Sube tus propias fotos o pide a un administrador que conecte una.",
+      "photosCredentialsBody": "La fototeca rechazó nuestras credenciales, así que {total, plural, one {la # foto es un marcador de posición} other {las # fotos son marcadores de posición}}. Es un problema de configuración nuestro: por favor, comunícalo."
     },
     "marketplace": {
       "title": "Mercado",

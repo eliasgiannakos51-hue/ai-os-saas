@@ -16,6 +16,11 @@ import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import { MAX_GENERATION_ATTEMPTS } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
+import {
+  EMPTY_IMAGE_REPORT,
+  requestsRealPhotos,
+  type WebsiteImageReport,
+} from "@/lib/website-image-brief";
 import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
 import {
   describeSecurityScanIssue,
@@ -310,6 +315,11 @@ export async function POST(request: Request) {
     let htmlContent: string;
     let isFlagged = false;
     let flaggedSummary = "";
+    // What the photo step actually did. Recorded even on the happy path,
+    // because "every photo is real" is worth being able to state as much as
+    // "three of them are not" — and because a report that only exists on
+    // failure is a report nobody trusts.
+    let imageReport: WebsiteImageReport = { ...EMPTY_IMAGE_REPORT };
     try {
       void recordAiCallForDailySpend(
         estimateWebsiteGenerationCost({ descriptionLength: description.length, imageCount: referenceImages.length })
@@ -326,7 +336,15 @@ export async function POST(request: Request) {
       // picsum.photos) — see lib/website-image-resolver.ts. A no-op when
       // the model didn't emit any PLACEHOLDER:<slug> images, which is the
       // common case for a description that didn't ask for real photos.
-      htmlContent = await resolveWebsiteImagePlaceholders(htmlContent);
+      // requestsRealPhotos reads the user's OWN words: a brief that said
+      // "βάλε φωτογραφίες από τη Σαντορίνη" and came back with seeded
+      // placeholders is a broken promise, not a detail, and the notice the
+      // user sees is worded accordingly.
+      const resolvedImages = await resolveWebsiteImagePlaceholders(htmlContent, {
+        requestedRealPhotos: requestsRealPhotos(description),
+      });
+      htmlContent = resolvedImages.html;
+      imageReport = resolvedImages.report;
 
       // Keep the site's own links inside the site.
       //
@@ -423,6 +441,16 @@ export async function POST(request: Request) {
         error_message: isFlagged
           ? `This website was flagged by our safety review and can't be published as-is: ${flaggedSummary}. You can regenerate it once at no extra charge.`
           : null,
+        // Counts, not a sentence — see lib/website-image-brief.ts.
+        //
+        // Last in the object rather than beside html_content, because
+        // scripts/tests/credit-visibility.test.mjs asserts the save that
+        // precedes settlement still writes status "processing" — by
+        // measuring the distance between the two lines. Slotting a field
+        // between them pushes them apart and reds a test about credit
+        // timing, which has nothing to do with photos. Order in an object
+        // literal changes nothing about the UPDATE.
+        image_report: imageReport,
       })
       .eq("id", websiteId)
       .select()

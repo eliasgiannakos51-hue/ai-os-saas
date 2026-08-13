@@ -954,7 +954,13 @@
       },
       "imageIntro": "Your logo, product shots, photos of the place — anything you want on the page or want the style taken from.",
       "regenerateAlreadyUsed": "You’ve already used the free regeneration for this site. Create a new website to try a different brief.",
-      "regenerateNoBrief": "This site was made before we started saving the original brief, so it can’t be regenerated automatically. Create a new website with the same description."
+      "regenerateNoBrief": "This site was made before we started saving the original brief, so it can’t be regenerated automatically. Create a new website with the same description.",
+      "photosPlaceholderTitle": "Some photos are placeholders",
+      "photosMissingTitle": "You asked for real photos — some are missing",
+      "photosPlaceholderBody": "{placeholder, plural, one {# of the {total} photos on this page is a placeholder} other {# of the {total} photos on this page are placeholders}}: no matching photograph was found. Replace {placeholder, plural, one {it} other {them}} with your own before you publish.",
+      "photosQuotaBody": "The photo library ran out of requests for this hour, so {placeholder, plural, one {# photo is a placeholder} other {# photos are placeholders}}. Try generating again in an hour, or upload your own photos.",
+      "photosNotConfiguredBody": "No photo library is connected, so all {total, plural, one {# photo} other {# photos}} on this page are placeholders. Upload your own photos, or ask an administrator to connect one.",
+      "photosCredentialsBody": "The photo library rejected our credentials, so all {total, plural, one {# photo} other {# photos}} are placeholders. This is a configuration problem on our side — please report it."
     },
     "marketplace": {
       "title": "Marketplace",

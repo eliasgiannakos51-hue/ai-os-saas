@@ -954,7 +954,13 @@
       },
       "imageIntro": "Ihr Logo, Produktfotos, Bilder vom Laden — alles, was auf die Seite soll oder den Stil vorgeben darf.",
       "regenerateAlreadyUsed": "Sie haben die kostenlose Neuerstellung für diese Website bereits genutzt. Erstellen Sie eine neue Website mit einer anderen Beschreibung.",
-      "regenerateNoBrief": "Diese Website entstand, bevor wir die ursprüngliche Beschreibung gespeichert haben, daher ist keine automatische Neuerstellung möglich. Erstellen Sie eine neue Website mit derselben Beschreibung."
+      "regenerateNoBrief": "Diese Website entstand, bevor wir die ursprüngliche Beschreibung gespeichert haben, daher ist keine automatische Neuerstellung möglich. Erstellen Sie eine neue Website mit derselben Beschreibung.",
+      "photosPlaceholderTitle": "Einige Fotos sind Platzhalter",
+      "photosMissingTitle": "Sie wollten echte Fotos — einige fehlen",
+      "photosPlaceholderBody": "{placeholder, plural, one {# der {total} Fotos auf dieser Seite ist ein Platzhalter} other {# der {total} Fotos auf dieser Seite sind Platzhalter}}: es wurde keine passende Aufnahme gefunden. Ersetzen Sie {placeholder, plural, one {ihn} other {sie}} vor der Veröffentlichung durch eigene Fotos.",
+      "photosQuotaBody": "Die Fotobibliothek hat ihr Stundenkontingent aufgebraucht, deshalb {placeholder, plural, one {ist # Foto ein Platzhalter} other {sind # Fotos Platzhalter}}. Versuchen Sie es in einer Stunde erneut oder laden Sie eigene Fotos hoch.",
+      "photosNotConfiguredBody": "Es ist keine Fotobibliothek verbunden, deshalb {total, plural, one {ist das # Foto} other {sind alle # Fotos}} auf dieser Seite Platzhalter. Laden Sie eigene Fotos hoch oder bitten Sie eine Administratorin oder einen Administrator, eine Bibliothek zu verbinden.",
+      "photosCredentialsBody": "Die Fotobibliothek hat unsere Zugangsdaten abgelehnt, deshalb {total, plural, one {ist das # Foto} other {sind alle # Fotos}} Platzhalter. Das ist ein Konfigurationsproblem auf unserer Seite — bitte melden Sie es."
     },
     "marketplace": {
       "title": "Marktplatz",

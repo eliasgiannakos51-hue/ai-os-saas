@@ -186,18 +186,35 @@ eq("and the FIRST reason is kept, not the last", (tripped.halt("unauthorised"), 
 console.log("\n== 9. the breaker is shared across the photos, not per photo ==");
 // A per-photo budget would be no breaker at all: photo two would start
 // again from zero and fire its own four doomed requests.
+//
+// THREE OF THESE USED TO MATCH A LITERAL LINE OF THE RESOLVER, and went red
+// when the resolver was restructured into a guaranteed first pass plus a
+// shared broadening pass — a change that preserved every property asserted
+// here and broke only the spelling of them. They are rewritten to assert
+// the property rather than the line: one budget object, created before any
+// search, sized from the document. The behaviour itself is now checked from
+// the outside by scripts/tests/website-image-resolution.itest.mjs, which
+// runs the real resolver against a counting fetch and can therefore observe
+// what this file can only infer.
 check(
-  "one budget is created per document",
-  /const budget = createUnsplashBudget\(\);/.test(resolver)
+  "one budget is created per document, sized from the document",
+  /const budget = createUnsplashBudget\(unsplashBudgetForPlaceholders\(placeholders\.length\)\);/.test(resolver)
 );
 check(
-  "it is created OUTSIDE the per-photo loop",
-  resolver.indexOf("createUnsplashBudget()") < resolver.indexOf("placeholders.map(")
+  "it is created before any search is issued",
+  resolver.indexOf("createUnsplashBudget(") < resolver.indexOf("searchUnsplashPhoto(")
 );
 check("every search is charged against it", /searchUnsplashPhoto\(attempt, budget\)/.test(resolver));
 check(
   "and broadening stops the moment it trips",
-  /if \(budget\.halted\) break;/.test(resolver)
+  /if \(budget\.halted \|\| !budget\.canSpend\(\)\) break;/.test(resolver)
+);
+// New, and the reason the restructure happened: a batch that is already in
+// flight cannot be stopped by a response arriving beside it, so the batches
+// have to be bounded for the breaker to mean anything at all.
+check(
+  "and no further batch is started once it trips",
+  /shouldStop\(\)\) return;/.test(resolver)
 );
 check("the fetch itself refuses to run when it cannot spend", /if \(budget && !budget\.canSpend\(\)\) return null;/.test(unsplash));
 check("a fatal status trips it", /budget\.halt\(fatal\)/.test(unsplash));

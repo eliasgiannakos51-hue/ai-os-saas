@@ -954,7 +954,13 @@
       },
       "imageIntro": "O seu logótipo, fotos de produto ou do espaço — o que quiser na página ou que defina o estilo.",
       "regenerateAlreadyUsed": "Já usou a regeneração gratuita deste site. Crie um novo site com outra descrição.",
-      "regenerateNoBrief": "Este site foi criado antes de guardarmos a descrição original, por isso não pode ser regenerado automaticamente. Crie um novo site com a mesma descrição."
+      "regenerateNoBrief": "Este site foi criado antes de guardarmos a descrição original, por isso não pode ser regenerado automaticamente. Crie um novo site com a mesma descrição.",
+      "photosPlaceholderTitle": "Algumas fotos são marcadores de posição",
+      "photosMissingTitle": "Pediu fotos reais — faltam algumas",
+      "photosPlaceholderBody": "{placeholder, plural, one {# das {total} fotos desta página é um marcador de posição} other {# das {total} fotos desta página são marcadores de posição}}: não foi encontrada nenhuma fotografia correspondente. Substitua-{placeholder, plural, one {a} other {as}} pelas suas antes de publicar.",
+      "photosQuotaBody": "A fototeca esgotou os pedidos desta hora, por isso {placeholder, plural, one {# foto é um marcador de posição} other {# fotos são marcadores de posição}}. Tente novamente daqui a uma hora ou carregue as suas próprias fotos.",
+      "photosNotConfiguredBody": "Não há nenhuma fototeca ligada, por isso {total, plural, one {a # foto} other {as # fotos}} desta página {total, plural, one {é um marcador de posição} other {são marcadores de posição}}. Carregue as suas fotos ou peça a um administrador que ligue uma.",
+      "photosCredentialsBody": "A fototeca rejeitou as nossas credenciais, por isso {total, plural, one {a # foto é um marcador de posição} other {as # fotos são marcadores de posição}}. É um problema de configuração do nosso lado — por favor, comunique-o."
     },
     "marketplace": {
       "title": "Mercado",

@@ -4,6 +4,11 @@ import { editWebsiteHtml } from "@/lib/website-builder";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { downloadReferenceImages } from "@/lib/website-reference-image-server";
 import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
+import {
+  EMPTY_IMAGE_REPORT,
+  requestsRealPhotos,
+  type WebsiteImageReport,
+} from "@/lib/website-image-brief";
 import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
 import {
   describeSecurityScanIssue,
@@ -241,12 +246,21 @@ export async function POST(request: Request) {
 
     let updatedHtml: string;
     let usedCheapPatch = false;
+    let imageReport: WebsiteImageReport = { ...EMPTY_IMAGE_REPORT };
     try {
       void recordAiCallForDailySpend(estimate.estimatedCredits);
       const editResult = await editWebsiteHtml(apiKey, website.html_content, changeRequest, referenceImages, formEndpointUrl, costs);
       updatedHtml = editResult.html;
       usedCheapPatch = editResult.usedCheapPatch;
-      updatedHtml = await resolveWebsiteImagePlaceholders(updatedHtml);
+      // An edit that adds a photo goes through exactly the same resolution
+      // and the same reporting as a fresh generation — an edit is where a
+      // photo request most often arrives ("add a picture of the terrace"),
+      // so it is the last place that should silently ship a placeholder.
+      const resolvedImages = await resolveWebsiteImagePlaceholders(updatedHtml, {
+        requestedRealPhotos: requestsRealPhotos(changeRequest),
+      });
+      updatedHtml = resolvedImages.html;
+      imageReport = resolvedImages.report;
 
       // Same enforcement as generation: an edit that adds a nav item can
       // reintroduce <a href="/about"> just as easily as a fresh generation
@@ -315,7 +329,7 @@ export async function POST(request: Request) {
 
     const { data: updatedRecord, error: updateError } = await supabase
       .from("user_websites")
-      .update({ html_content: updatedHtml })
+      .update({ html_content: updatedHtml, image_report: imageReport })
       .eq("id", websiteId)
       .select()
       .single();

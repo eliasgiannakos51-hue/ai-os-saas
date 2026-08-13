@@ -954,7 +954,13 @@
       },
       "imageIntro": "Votre logo, vos photos de produits ou du lieu — ce que vous voulez voir sur la page ou qui doit inspirer le style.",
       "regenerateAlreadyUsed": "Vous avez déjà utilisé la régénération gratuite pour ce site. Créez un nouveau site avec une autre description.",
-      "regenerateNoBrief": "Ce site a été créé avant que nous enregistrions la description d’origine ; il ne peut donc pas être régénéré automatiquement. Créez un nouveau site avec la même description."
+      "regenerateNoBrief": "Ce site a été créé avant que nous enregistrions la description d’origine ; il ne peut donc pas être régénéré automatiquement. Créez un nouveau site avec la même description.",
+      "photosPlaceholderTitle": "Certaines photos sont des espaces réservés",
+      "photosMissingTitle": "Vous aviez demandé de vraies photos — il en manque",
+      "photosPlaceholderBody": "{placeholder, plural, one {# des {total} photos de cette page est un espace réservé} other {# des {total} photos de cette page sont des espaces réservés}} : aucune photographie correspondante n'a été trouvée. Remplacez-{placeholder, plural, one {la} other {les}} par les vôtres avant de publier.",
+      "photosQuotaBody": "La photothèque a épuisé ses requêtes pour cette heure, donc {placeholder, plural, one {# photo est un espace réservé} other {# photos sont des espaces réservés}}. Réessayez dans une heure ou importez vos propres photos.",
+      "photosNotConfiguredBody": "Aucune photothèque n'est connectée, donc {total, plural, one {la # photo} other {les # photos}} de cette page {total, plural, one {est un espace réservé} other {sont des espaces réservés}}. Importez vos propres photos ou demandez à un administrateur d'en connecter une.",
+      "photosCredentialsBody": "La photothèque a rejeté nos identifiants, donc {total, plural, one {la # photo est un espace réservé} other {les # photos sont des espaces réservés}}. C'est un problème de configuration de notre côté — merci de le signaler."
     },
     "marketplace": {
       "title": "Place de marché",

@@ -954,7 +954,13 @@
       },
       "imageIntro": "Il tuo logo, foto dei prodotti o del locale: quello che vuoi nella pagina o che deve dare lo stile.",
       "regenerateAlreadyUsed": "Hai già usato la rigenerazione gratuita per questo sito. Crea un nuovo sito con una descrizione diversa.",
-      "regenerateNoBrief": "Questo sito è stato creato prima che salvassimo la descrizione originale, quindi non può essere rigenerato automaticamente. Crea un nuovo sito con la stessa descrizione."
+      "regenerateNoBrief": "Questo sito è stato creato prima che salvassimo la descrizione originale, quindi non può essere rigenerato automaticamente. Crea un nuovo sito con la stessa descrizione.",
+      "photosPlaceholderTitle": "Alcune foto sono segnaposto",
+      "photosMissingTitle": "Hai chiesto foto reali: alcune mancano",
+      "photosPlaceholderBody": "{placeholder, plural, one {# delle {total} foto di questa pagina è un segnaposto} other {# delle {total} foto di questa pagina sono segnaposto}}: non è stata trovata alcuna fotografia corrispondente. Sostituisci{placeholder, plural, one {la} other {le}} con le tue prima di pubblicare.",
+      "photosQuotaBody": "La fototeca ha esaurito le richieste di quest'ora, quindi {placeholder, plural, one {# foto è un segnaposto} other {# foto sono segnaposto}}. Riprova tra un'ora oppure carica le tue foto.",
+      "photosNotConfiguredBody": "Nessuna fototeca è collegata, quindi {total, plural, one {la # foto} other {tutte le # foto}} di questa pagina {total, plural, one {è un segnaposto} other {sono segnaposto}}. Carica le tue foto o chiedi a un amministratore di collegarne una.",
+      "photosCredentialsBody": "La fototeca ha rifiutato le nostre credenziali, quindi {total, plural, one {la # foto è un segnaposto} other {tutte le # foto sono segnaposto}}. È un problema di configurazione da parte nostra: segnalacelo."
     },
     "marketplace": {
       "title": "Mercato",

@@ -954,7 +954,13 @@
       },
       "imageIntro": "你的标志、产品照片、店内照片——想放到页面上的，或想让它决定风格的。",
       "regenerateAlreadyUsed": "您已使用过此站点的免费重新生成。请用其他描述创建新站点。",
-      "regenerateNoBrief": "此站点创建于我们开始保存原始描述之前，因此无法自动重新生成。请用相同描述创建新站点。"
+      "regenerateNoBrief": "此站点创建于我们开始保存原始描述之前，因此无法自动重新生成。请用相同描述创建新站点。",
+      "photosPlaceholderTitle": "部分图片是占位图",
+      "photosMissingTitle": "您要求使用真实照片——有几张缺失",
+      "photosPlaceholderBody": "本页 {total} 张图片中有 {placeholder} 张是占位图：没有找到匹配的照片。发布前请换成您自己的照片。",
+      "photosQuotaBody": "图片库本小时的请求次数已用完，因此有 {placeholder} 张图片是占位图。请一小时后重新生成，或上传您自己的照片。",
+      "photosNotConfiguredBody": "尚未连接图片库，因此本页全部 {total} 张图片都是占位图。请上传您自己的照片，或请管理员连接图片库。",
+      "photosCredentialsBody": "图片库拒绝了我们的凭据，因此全部 {total} 张图片都是占位图。这是我们这边的配置问题——请向我们反馈。"
     },
     "marketplace": {
       "title": "市场",

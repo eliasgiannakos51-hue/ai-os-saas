@@ -14,6 +14,7 @@ import { DeleteButton } from "@/components/delete-button";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import type { UserDocument } from "@/types/document";
+import { matchesSearch } from "@/lib/text/search-match";
 
 export type DocumentListItem = Pick<UserDocument, "id" | "title" | "updated_at"> & {
   /** First ~200 characters of the body, for the card's description line. */
@@ -48,17 +49,15 @@ export function DocumentsList({
   );
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query.trim();
     if (!q) return sortable;
     return sortable.filter((doc) =>
-      `${doc.title ?? ""} ${doc.preview ?? ""}`.toLowerCase().includes(q)
+      matchesSearch(`${doc.title ?? ""} ${doc.preview ?? ""}`, q)
     );
   }, [sortable, query]);
 
-  const { sortOrder, setSortOrder, page, setPage, totalPages, paginated } = useSortAndPaginate(
-    filtered,
-    query
-  );
+  const { sortOrder, setSortOrder, page, setPage, totalPages, paginated, alphabetical } =
+    useSortAndPaginate(filtered, query, (d) => d.title ?? "");
 
   return (
     <ListLayout
@@ -66,7 +65,7 @@ export function DocumentsList({
       searchValue={query}
       onSearchChange={setQuery}
       searchPlaceholder={tModule("searchPlaceholder")}
-      filters={<SortToggle sortOrder={sortOrder} onChange={setSortOrder} />}
+      filters={<SortToggle sortOrder={sortOrder} onChange={setSortOrder} alphabetical={alphabetical} />}
       meta={
         <span className="text-xs text-muted">
           {tModule("resultCount", { count: filtered.length, total: documents.length })}

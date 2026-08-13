@@ -43,3 +43,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# screenshot artefacts written by the *.prodtest.mjs suites
+/files-shots/
+/publish-dialog-shots/

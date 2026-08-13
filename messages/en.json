@@ -1501,7 +1501,9 @@
     "sort": {
       "label": "Sort:",
       "newest": "Newest",
-      "oldest": "Oldest"
+      "oldest": "Oldest",
+      "az": "A–Z",
+      "za": "Z–A"
     },
     "emptyPresentationNotes": "Nothing here yet. This is a place to keep track of presentations you are planning or have already made — it does not generate slides for you. Use the button above to add one."
   },

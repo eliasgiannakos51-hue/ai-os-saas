@@ -1501,7 +1501,9 @@
     "sort": {
       "label": "Sortieren:",
       "newest": "Neueste",
-      "oldest": "Älteste"
+      "oldest": "Älteste",
+      "az": "A–Z",
+      "za": "Z–A"
     },
     "emptyPresentationNotes": "Hier ist noch nichts. Dieser Bereich dient dazu, geplante oder bereits erstellte Präsentationen festzuhalten — er erstellt keine Folien für Sie. Fügen Sie mit der Schaltfläche oben eine hinzu."
   },

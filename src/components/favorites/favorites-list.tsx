@@ -12,6 +12,7 @@ import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { EntityCard, CardGrid } from "@/components/ui/entity-card";
 import { ListLayout } from "@/components/ui/list-layout";
 import type { FavoriteGroup } from "@/lib/favorites";
+import { matchesSearch } from "@/lib/text/search-match";
 
 /**
  * Favorites, grouped by module with a heading and a count.
@@ -41,12 +42,12 @@ export function FavoritesList({ groups }: { groups: FavoriteGroup[] }) {
   );
 
   const visibleGroups = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query.trim();
     if (!q) return groups;
     return groups
       .map((group) => ({
         ...group,
-        entries: group.entries.filter((entry) => entry.headline.toLowerCase().includes(q)),
+        entries: group.entries.filter((entry) => matchesSearch(entry.headline, q)),
       }))
       .filter((group) => group.entries.length > 0);
   }, [groups, query]);

@@ -14,6 +14,7 @@ import { MissionForm } from "@/components/mission/mission-form";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { isActiveMission } from "@/lib/mission-progress";
 import type { Mission, MissionStatus } from "@/types/mission";
+import { matchesSearch } from "@/lib/text/search-match";
 
 const MISSION_STATUSES: MissionStatus[] = ["planning", "in_progress", "completed", "failed"];
 
@@ -51,12 +52,12 @@ export function MissionList({
   const favoritedSet = useMemo(() => new Set(favoritedIds), [favoritedIds]);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query.trim();
     return missions.filter((mission) => {
       if (statusFilter && mission.status !== statusFilter) return false;
       if (!q) return true;
       const steps = (mission.plan_steps?.steps ?? []).map((s) => s.text).join(" ");
-      return `${mission.goal} ${steps}`.toLowerCase().includes(q);
+      return matchesSearch(`${mission.goal} ${steps}`, q);
     });
   }, [missions, query, statusFilter]);
 
@@ -70,10 +71,8 @@ export function MissionList({
     return [...active, ...finished];
   }, [filtered]);
 
-  const { sortOrder, setSortOrder, page, setPage, totalPages, paginated } = useSortAndPaginate(
-    ordered,
-    `${query}|${statusFilter}`
-  );
+  const { sortOrder, setSortOrder, page, setPage, totalPages, paginated, alphabetical } =
+    useSortAndPaginate(ordered, `${query}|${statusFilter}`, (m) => m.goal);
 
   const selectedMission = selected ? missions.find((m) => m.id === selected.id) ?? null : null;
 
@@ -121,7 +120,7 @@ export function MissionList({
         searchPlaceholder={tModule("searchPlaceholder")}
         filters={
           <>
-            <SortToggle sortOrder={sortOrder} onChange={setSortOrder} />
+            <SortToggle sortOrder={sortOrder} onChange={setSortOrder} alphabetical={alphabetical} />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}

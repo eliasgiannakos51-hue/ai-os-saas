@@ -10,6 +10,7 @@ import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";
 import { EmptyState } from "@/components/empty-state";
+import { matchesSearch } from "@/lib/text/search-match";
 
 const CSV_HEADERS = [
   "name",
@@ -48,8 +49,7 @@ function searchableText(idea: Idea): string {
     idea.verdict,
   ]
     .filter((value): value is string => Boolean(value))
-    .join(" ")
-    .toLowerCase();
+    .join(" ");
 }
 
 export function IdeasList({
@@ -64,13 +64,13 @@ export function IdeasList({
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query.trim();
     if (!q) return ideas;
-    return ideas.filter((idea) => searchableText(idea).includes(q));
+    return ideas.filter((idea) => matchesSearch(searchableText(idea), q));
   }, [ideas, query]);
 
-  const { sortOrder, setSortOrder, page, setPage, totalPages, sorted, paginated } =
-    useSortAndPaginate(filtered, query);
+  const { sortOrder, setSortOrder, page, setPage, totalPages, sorted, paginated, alphabetical } =
+    useSortAndPaginate(filtered, query, (idea) => idea.name ?? "");
 
   function handleExport() {
     const csv = toCSV(CSV_HEADERS, sorted.map(toCSVRow));
@@ -91,7 +91,7 @@ export function IdeasList({
           />
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <SortToggle sortOrder={sortOrder} onChange={setSortOrder} />
+          <SortToggle sortOrder={sortOrder} onChange={setSortOrder} alphabetical={alphabetical} />
           <button
             type="button"
             onClick={handleExport}

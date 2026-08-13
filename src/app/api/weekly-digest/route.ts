@@ -9,9 +9,17 @@ export const dynamic = "force-dynamic";
 
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
-// PLACEHOLDER — not wired to any scheduler yet. Nothing in this app calls
-// this route; it's meant to be hit periodically by a scheduled trigger
-// (Vercel Cron, a GitHub Action, etc.) once that's set up separately.
+// SCHEDULED, as of this change, in vercel.json: "0 8 * * 1" — 08:00 UTC
+// every Monday, covering the seven days behind it. It was a placeholder
+// wired to nothing, so the digest never went out.
+//
+// SILENT ON A QUIET WEEK. Turning this on unchanged would have mailed every
+// account a table of zeroes every Monday — a weekly reminder that nothing
+// happened, which is worse than no email at all and is the fastest way to
+// get a sender marked as spam. An account with no activity in the window is
+// skipped entirely. (Users can also switch the digest off in Settings; the
+// email gate in lib/email/email-gate.ts already enforces that and the daily
+// cap. This is on top of both, because "no news" is not news.)
 //
 // Callers must send CRON_SECRET as `Authorization: Bearer <CRON_SECRET>`
 // (the header Vercel Cron sends automatically when a cron job has a secret
@@ -35,6 +43,7 @@ export async function GET(request: Request) {
 
     const since = new Date(Date.now() - SEVEN_DAYS_MS).toISOString();
     let sent = 0;
+    let skipped = 0;
 
     for (const user of usersData.users) {
       if (!user.email) continue;
@@ -50,11 +59,17 @@ export async function GET(request: Request) {
         })
       );
 
+      // Nothing happened this week — say nothing.
+      if (moduleCounts.every((m) => m.count === 0)) {
+        skipped++;
+        continue;
+      }
+
       await sendWeeklyDigestEmail({ email: user.email, userId: user.id, moduleCounts, periodLabel: "7d" });
       sent++;
     }
 
-    return NextResponse.json({ ok: true, sent });
+    return NextResponse.json({ ok: true, sent, skippedNoActivity: skipped });
   } catch (err) {
     logApiError("/api/weekly-digest", err);
     return NextResponse.json(

@@ -58,6 +58,7 @@ import { SortToggle } from "@/components/sort-toggle";
 import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import type { UserWebsite, WebsiteVersion } from "@/types/user-website";
 import { formatDateTime } from "@/lib/format-number";
+import { matchesSearch } from "@/lib/text/search-match";
 
 const MAX_NAME_LENGTH = 100;
 const MAX_DESCRIPTION_LENGTH = 20000;
@@ -916,14 +917,21 @@ export function WebsiteBuilderWorkspace({
   // other list in the app now carries (components/ui/list-layout.tsx),
   // over the same shared sort/paginate hook.
   const filteredWebsites = websites.filter((website) => {
-    const q = query.trim().toLowerCase();
-    if (q && !`${website.name} ${website.description ?? ""}`.toLowerCase().includes(q)) return false;
+    const q = query.trim();
+    if (!matchesSearch(`${website.name} ${website.description ?? ""}`, q)) return false;
     if (statusFilter && website.status !== statusFilter) return false;
     return true;
   });
 
-  const { sortOrder, setSortOrder, page, setPage, totalPages, paginated: paginatedWebsites } =
-    useSortAndPaginate(filteredWebsites, `${query}|${statusFilter}`);
+  const {
+    sortOrder,
+    setSortOrder,
+    page,
+    setPage,
+    totalPages,
+    paginated: paginatedWebsites,
+    alphabetical,
+  } = useSortAndPaginate(filteredWebsites, `${query}|${statusFilter}`, (w) => w.name);
 
   const detailTabs: DetailTab[] = [
     { key: "preview", label: t("tabPreview"), icon: Eye },
@@ -1413,7 +1421,7 @@ export function WebsiteBuilderWorkspace({
         searchPlaceholder={tModule("searchPlaceholder")}
         filters={
           <>
-            <SortToggle sortOrder={sortOrder} onChange={setSortOrder} />
+            <SortToggle sortOrder={sortOrder} onChange={setSortOrder} alphabetical={alphabetical} />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}

@@ -1501,7 +1501,9 @@
     "sort": {
       "label": "Ordenar:",
       "newest": "Mais recentes",
-      "oldest": "Mais antigos"
+      "oldest": "Mais antigos",
+      "az": "A–Z",
+      "za": "Z–A"
     },
     "emptyPresentationNotes": "Ainda não há nada aqui. Este é um espaço para acompanhar as apresentações que está a planear ou já fez — não gera diapositivos por si. Use o botão acima para adicionar uma."
   },

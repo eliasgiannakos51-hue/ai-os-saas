@@ -1,4 +1,6 @@
 import { validateAgentCron, isValidTimeZone } from "@/lib/agents/cron-expression";
+import { INJECTION_PATTERNS } from "@/lib/agents/injection-patterns";
+import { foldForMatch } from "@/lib/text/unicode-patterns";
 
 // Shape, validation and prompt-injection defence for Autonomous Agents.
 //
@@ -216,22 +218,16 @@ export function isSlackChannelAllowed(
 //    (there is no tool call it can make, and the delivery address is
 //    fixed above rather than chosen at run time).
 //
-// The regexes below are NOT the security boundary — a defence that
-// depends on enumerating attack phrasings always loses. They are a cheap
-// filter for the obvious cases; the boundary is the capability model
-// (no tools, fixed recipient, output validated against a schema).
-
-const INJECTION_PATTERNS: RegExp[] = [
-  /ignore\s+(?:all\s+|any\s+)?(?:previous|prior|above|earlier)\s+(?:instructions?|prompts?|rules?|directions?)/gi,
-  /disregard\s+(?:all\s+|any\s+)?(?:previous|prior|above|earlier)\s+(?:instructions?|prompts?|rules?)/gi,
-  /forget\s+(?:everything|all)\s+(?:you|above|before)/gi,
-  /you\s+are\s+now\s+(?:a|an|the)\s+/gi,
-  /(?:new|updated|revised)\s+(?:system\s+)?(?:instructions?|prompt)\s*:/gi,
-  /\bsystem\s*(?:prompt)?\s*:\s*(?=\S)/gi,
-  /<\/?\s*(?:system|assistant|human)\s*>/gi,
-  /\[\/?\s*(?:INST|SYS|SYSTEM)\s*\]/gi,
-  /reveal\s+(?:your|the)\s+(?:system\s+)?(?:prompt|instructions?)/gi,
-];
+// The regexes (now in lib/agents/injection-patterns.ts) are NOT the
+// security boundary — a defence that depends on enumerating attack
+// phrasings always loses. They are a cheap filter for the obvious cases;
+// the boundary is the capability model (no tools, fixed recipient, output
+// validated against a schema).
+//
+// They were, until this change, a cheap filter for the obvious cases IN
+// ENGLISH ONLY, and not merely absent for other scripts but inverted:
+// `\b` is ASCII-only, so /\bσύστημα/ failed on "σύστημα:" and succeeded on
+// "aσύστημα:". See injection-patterns.ts for the full account.
 
 /**
  * Neutralises the obvious instruction-override phrasings in text that will
@@ -241,17 +237,63 @@ const INJECTION_PATTERNS: RegExp[] = [
  * meaning of a legitimate sentence ("write about how attackers say ignore
  * previous instructions") into something the user did not write. The
  * marker makes the neutralisation visible in the run output instead.
+ *
+ * MATCHES ON A FOLDED COPY, SPLICES THE ORIGINAL. The patterns run against
+ * foldForMatch(text) — lower-cased, accent-stripped, final sigma
+ * normalised — so "ΑΓΝΌΗΣΕ", "Αγνόησε" and "αγνοησε" are one pattern
+ * rather than three that each miss the other two. The replacement is then
+ * applied to the untouched original at the offsets the match reported,
+ * which only works because foldForMatch is index-stable by construction
+ * (see lib/text/unicode-patterns.ts). Everything the user actually typed —
+ * their accents, their capitals — survives except the neutralised span.
  */
 export function sanitiseAgentText(text: string): { text: string; neutralised: number } {
-  let neutralised = 0;
-  let out = String(text ?? "");
+  const original = String(text ?? "");
+  if (!original) return { text: original, neutralised: 0 };
+
+  const folded = foldForMatch(original);
+
+  // Collect every match as a half-open range over the ORIGINAL string.
+  // Group 1 is the leading boundary character (or "") — see
+  // boundedPattern; it is not part of the offence and must survive.
+  const ranges: { start: number; end: number }[] = [];
   for (const pattern of INJECTION_PATTERNS) {
-    out = out.replace(pattern, (match) => {
-      neutralised++;
-      return `[removed: ${match.length} chars of instruction-override text]`;
-    });
+    pattern.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = pattern.exec(folded)) !== null) {
+      const start = m.index + (m[1] ? m[1].length : 0);
+      const end = m.index + m[0].length;
+      if (end > start) ranges.push({ start, end });
+      // A zero-length match would spin forever; nothing here can produce
+      // one, but an empty advance is cheap insurance against a future
+      // pattern that can.
+      if (pattern.lastIndex === m.index) pattern.lastIndex++;
+    }
   }
-  return { text: out, neutralised };
+
+  if (ranges.length === 0) return { text: original, neutralised: 0 };
+
+  // Two patterns can flag overlapping spans of the same sentence. Merging
+  // means that counts as one neutralisation and produces one marker,
+  // rather than a marker nested inside the text of another.
+  ranges.sort((a, b) => a.start - b.start || a.end - b.end);
+  const merged: { start: number; end: number }[] = [];
+  for (const r of ranges) {
+    const last = merged[merged.length - 1];
+    if (last && r.start <= last.end) last.end = Math.max(last.end, r.end);
+    else merged.push({ ...r });
+  }
+
+  let out = "";
+  let cursor = 0;
+  for (const r of merged) {
+    out += original.slice(cursor, r.start);
+    out += `[removed: ${r.end - r.start} chars of instruction-override text]`;
+    cursor = r.end;
+  }
+  out += original.slice(cursor);
+
+  return { text: out, neutralised: merged.length };
 }
 
 /**

@@ -14,6 +14,7 @@ import { useToast } from "@/components/toast/toast-context";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { formatDateTime, formatNumber } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { matchesSearch } from "@/lib/text/search-match";
 
 export type PublishedSiteRow = {
   id: string;
@@ -60,15 +61,13 @@ export function PublishedSitesList({
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = query.trim();
     if (!q) return sites;
-    return sites.filter((s) => `${s.website_name} ${s.subdomain}`.toLowerCase().includes(q));
+    return sites.filter((s) => matchesSearch(`${s.website_name} ${s.subdomain}`, q));
   }, [sites, query]);
 
-  const { sortOrder, setSortOrder, page, setPage, totalPages, paginated } = useSortAndPaginate(
-    filtered,
-    query
-  );
+  const { sortOrder, setSortOrder, page, setPage, totalPages, paginated, alphabetical } =
+    useSortAndPaginate(filtered, query, (s) => s.website_name);
 
   const selected = useMemo(() => sites.find((s) => s.id === selectedId) ?? null, [sites, selectedId]);
   const selectedVersions = useMemo(
@@ -173,7 +172,7 @@ export function PublishedSitesList({
         searchValue={query}
         onSearchChange={setQuery}
         searchPlaceholder={tModule("searchPlaceholder")}
-        filters={<SortToggle sortOrder={sortOrder} onChange={setSortOrder} />}
+        filters={<SortToggle sortOrder={sortOrder} onChange={setSortOrder} alphabetical={alphabetical} />}
         meta={
           <span className="text-xs text-muted">
             {Number.isFinite(cap)

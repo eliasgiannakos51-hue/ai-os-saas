@@ -1501,7 +1501,9 @@
     "sort": {
       "label": "Ordina:",
       "newest": "Più recenti",
-      "oldest": "Meno recenti"
+      "oldest": "Meno recenti",
+      "az": "A–Z",
+      "za": "Z–A"
     },
     "emptyPresentationNotes": "Qui non c’è ancora nulla. Questo è uno spazio per tenere traccia delle presentazioni che stai pianificando o hai già fatto: non genera diapositive al posto tuo. Usa il pulsante sopra per aggiungerne una."
   },

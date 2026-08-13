@@ -415,7 +415,10 @@
       "clearing": "Limpando...",
       "couldNotUpdatePreference": "✗ não foi possível atualizar a preferência",
       "couldNotClearMemory": "✗ não foi possível limpar a memória",
-      "memoryCleared": "✓ memória limpa"
+      "memoryCleared": "✓ memória limpa",
+      "planExcludes": "O seu plano atual não inclui memória de conversas, por isso nada é guardado. Os planos a partir do Starter recordam entre conversas.",
+      "switchedOff": "A memória está desligada, por isso nada é guardado das suas conversas.",
+      "nothingYet": "Ainda nada guardado. A memória está ativa — guarda elementos duradouros como o seu nome, o seu trabalho ou uma preferência, assim que uma conversa mencionar algum."
     },
     "loginActivity": {
       "title": "Atividade de login",

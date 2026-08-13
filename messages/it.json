@@ -415,7 +415,10 @@
       "clearing": "Cancellazione...",
       "couldNotUpdatePreference": "✗ impossibile aggiornare la preferenza",
       "couldNotClearMemory": "✗ impossibile cancellare la memoria",
-      "memoryCleared": "✓ memoria cancellata"
+      "memoryCleared": "✓ memoria cancellata",
+      "planExcludes": "Il tuo piano attuale non include la memoria delle chat, quindi non viene salvato nulla. Dai piani Starter in su si ricorda tra una conversazione e l’altra.",
+      "switchedOff": "La memoria è disattivata, quindi non viene salvato nulla dalle tue conversazioni.",
+      "nothingYet": "Ancora nulla di salvato. La memoria è attiva: conserva elementi duraturi come il tuo nome, il tuo lavoro o una preferenza, non appena una conversazione ne cita uno."
     },
     "loginActivity": {
       "title": "Attività di accesso",

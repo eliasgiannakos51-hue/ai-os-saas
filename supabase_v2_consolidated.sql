@@ -1,4 +1,12 @@
 -- ============================================================================
+-- SAFE TO RE-RUN. Every `create table` in this file is `if not exists`, and
+-- the 39 `drop table ... cascade` statements that used to sit at the top —
+-- which silently deleted every module table, every chat, every website and
+-- everything chat memory had learned on each re-run — are gone. Measured:
+-- 47 rows in chat_memory, re-run, 0 rows. See supabase_schema.sql's header.
+-- ============================================================================
+
+-- ============================================================================
 -- Ionexa AI — V2 CONSOLIDATED SCHEMA (full backup, last regenerated as part
 -- of the SECTION 8 final wrap-up — includes everything through Real
 -- Automations)
@@ -47,9 +55,8 @@
 -- 1. Knowledge graph: links between records across different modules
 -- ============================================================================
 
-drop table if exists public.entity_links cascade;
 
-create table public.entity_links (
+create table if not exists public.entity_links (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   source_table text not null,
@@ -84,9 +91,8 @@ create policy "delete_own_entity_links" on public.entity_links
 -- 4. Mission Control ("AI Company" concept): Planner -> Builder -> Reviewer
 -- ============================================================================
 
-drop table if exists public.ai_missions cascade;
 
-create table public.ai_missions (
+create table if not exists public.ai_missions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   goal text not null,
@@ -126,9 +132,8 @@ create trigger set_updated_at before update on public.ai_missions
 -- 10. Website Builder — user_websites (incl. background-job status tracking)
 -- ============================================================================
 
-drop table if exists public.user_websites cascade;
 
-create table public.user_websites (
+create table if not exists public.user_websites (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
@@ -177,9 +182,8 @@ create policy "delete_own_user_websites" on public.user_websites
 -- 10. Website Builder — version history
 -- ============================================================================
 
-drop table if exists public.website_versions cascade;
 
-create table public.website_versions (
+create table if not exists public.website_versions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   website_id uuid not null references public.user_websites(id) on delete cascade,
@@ -232,9 +236,8 @@ create policy "delete_own_website_references" on storage.objects
 -- 10. Website Builder — reference images: table (up to 10 per website)
 -- ============================================================================
 
-drop table if exists public.website_reference_images cascade;
 
-create table public.website_reference_images (
+create table if not exists public.website_reference_images (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   website_id uuid not null references public.user_websites(id) on delete cascade,
@@ -263,9 +266,8 @@ create policy "delete_own_website_reference_images" on public.website_reference_
 -- 9. AI Life Context — energy check-ins
 -- ============================================================================
 
-drop table if exists public.user_energy_checkins cascade;
 
-create table public.user_energy_checkins (
+create table if not exists public.user_energy_checkins (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   energy_level smallint not null check (energy_level between 1 and 5),
@@ -290,9 +292,8 @@ create policy "insert_own_user_energy_checkins" on public.user_energy_checkins
 -- 12. Gamification — real, earned achievements
 -- ============================================================================
 
-drop table if exists public.user_achievements cascade;
 
-create table public.user_achievements (
+create table if not exists public.user_achievements (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   achievement_key text not null,
@@ -380,9 +381,8 @@ create policy "select_own_credit_transactions" on public.credit_transactions
 -- beyond insert" convention elsewhere in this schema.
 -- ============================================================================
 
-drop table if exists public.scheduled_agent_runs cascade;
 
-create table public.scheduled_agent_runs (
+create table if not exists public.scheduled_agent_runs (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   mission_id uuid not null references public.ai_missions(id) on delete cascade,
@@ -431,9 +431,8 @@ create policy "delete_own_scheduled_agent_runs" on public.scheduled_agent_runs
 -- protect from being tampered with mid-flight the way status/result are.
 -- ============================================================================
 
-drop table if exists public.user_automations cascade;
 
-create table public.user_automations (
+create table if not exists public.user_automations (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   description text not null,

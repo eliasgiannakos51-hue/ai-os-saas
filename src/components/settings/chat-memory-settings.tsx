@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Brain, Trash2 } from "lucide-react";
+import { Brain, Trash2, Info } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
 
@@ -10,10 +10,21 @@ export function ChatMemorySettings({
   userId,
   initialEnabled,
   initialCount,
+  planLimit,
 }: {
   userId: string;
   initialEnabled: boolean;
   initialCount: number;
+  /**
+   * How many memories this plan may hold — plan.capabilities.chatMemoryLimit.
+   *
+   * Zero is not "no limit", it is OFF: chatMemoryActive() in
+   * lib/chat/memory-policy.ts requires planLimit > 0 before anything is
+   * either written or read back. Without this prop the panel could only ever
+   * show an ON switch above "0 things remembered" and let the user conclude
+   * the feature is broken — which is the reported complaint.
+   */
+  planLimit: number;
 }) {
   const t = useTranslations("settings.chatMemory");
   const supabase = createClient();
@@ -69,6 +80,18 @@ export function ChatMemorySettings({
     addToast(t("memoryCleared"));
   }
 
+  // Mirrors chatMemoryActive() exactly: userEnabled && planLimit > 0. Kept
+  // as one expression so the explanation cannot drift from the condition
+  // that actually governs whether anything is written.
+  const planIncludesMemory = Number.isFinite(planLimit) && planLimit > 0;
+  const reason = !planIncludesMemory
+    ? t("planExcludes")
+    : !enabled
+      ? t("switchedOff")
+      : count === 0
+        ? t("nothingYet")
+        : null;
+
   return (
     <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
       <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -88,7 +111,7 @@ export function ChatMemorySettings({
           aria-checked={enabled}
           aria-label={t("toggleLabel")}
           onClick={handleToggle}
-          disabled={updating}
+          disabled={updating || !planIncludesMemory}
           className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
             enabled ? "bg-orange-500" : "bg-panel-hover"
           }`}
@@ -100,6 +123,25 @@ export function ChatMemorySettings({
           />
         </button>
       </div>
+
+      {/* WHY IT SAYS ZERO.
+​
+          "0 things remembered" on its own is the same sentence for three
+          completely different situations, and the user is left to guess
+          which. Each one now says which, and what to do about it:
+
+            - the plan does not include memory at all (planLimit 0), which
+              no amount of toggling changes;
+            - memory is switched off here;
+            - it is on and working, and simply has not learned anything yet,
+              which is normal until a conversation contains something
+              durable worth keeping. */}
+      {reason && (
+        <p className="flex items-start gap-1.5 rounded-lg border border-border bg-input px-3 py-2 text-xs leading-relaxed text-muted">
+          <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-400" aria-hidden="true" />
+          <span>{reason}</span>
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
         <p className="text-xs text-muted">

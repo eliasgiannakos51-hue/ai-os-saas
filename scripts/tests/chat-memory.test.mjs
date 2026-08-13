@@ -18,7 +18,7 @@
 // job in the same message. The veto has to be scoped to the content.
 //
 // Run: node scripts/tests/chat-memory.test.mjs
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 
 let pass = 0;
@@ -125,6 +125,72 @@ console.log("\n== 7. still no crisis-to-logging wiring anywhere in memory ==");
 check("no keyword detection list", !/(SUICIDE|CRISIS_KEYWORDS|distressKeywords)/i.test(memSrc));
 check("the extracted text is never logged", !/logApiError\([^)]*extracted/.test(memSrc));
 check("no admin alert on extraction", !/notifyAdmin|sendAdminAlert/.test(memSrc));
+
+console.log("\n== 8. the schema file no longer empties chat_memory on a re-run ==");
+// THE MEASURED CAUSE of "0 things remembered despite dozens of
+// conversations". supabase_schema.sql opened with 39
+// `drop table if exists ... cascade` statements, chat_memory among them,
+// and re-created each one empty. Against PostgreSQL 16, running that
+// file's own chat_memory block: 47 rows -> re-run -> 0 rows. The file
+// warned about it in a comment, which is not a safeguard in a project
+// whose workflow is "paste the SQL into the Supabase editor".
+for (const file of [
+  "supabase_schema.sql",
+  "supabase_complete_schema.sql",
+  "supabase_full_project_backup.sql",
+]) {
+  const sql = readFileSync(file, "utf8")
+    .split("\n")
+    .filter((line) => !/^\s*--/.test(line))
+    .join("\n");
+  check(`${file}: no DROP TABLE at all`, !/drop\s+table/i.test(sql));
+  check(
+    `${file}: chat_memory is created only IF NOT EXISTS`,
+    /create table if not exists public\.chat_memory/i.test(sql),
+    "a bare CREATE aborts the rest of the file on a second run"
+  );
+}
+
+console.log("\n== 9. Settings says WHY it is zero ==");
+// "0 things remembered" is the same sentence for three different
+// situations — the plan does not include memory, the switch is off, or it
+// is on and has simply not learned anything yet. Showing one sentence for
+// all three is what made a working feature look broken.
+{
+  const panel = readFileSync("src/components/settings/chat-memory-settings.tsx", "utf8");
+  check("the panel receives the plan's limit", /planLimit/.test(panel));
+  check(
+    "...and mirrors chatMemoryActive's own condition",
+    /Number\.isFinite\(planLimit\) && planLimit > 0/.test(panel),
+    "the explanation must not drift from the condition that governs the write"
+  );
+  for (const key of ["planExcludes", "switchedOff", "nothingYet"]) {
+    check(`it explains the "${key}" case`, panel.includes(key));
+  }
+  check(
+    "the toggle is disabled when the plan excludes memory",
+    /disabled=\{updating \|\| !planIncludesMemory\}/.test(panel),
+    "an ON switch that changes nothing is worse than no switch"
+  );
+
+  const page = readFileSync("src/app/dashboard/settings/page.tsx", "utf8");
+  check(
+    "the settings page actually passes it",
+    /planLimit=\{getPlan\(tier\)\?\.capabilities\.chatMemoryLimit/.test(page),
+    "the prop exists but nothing supplies it"
+  );
+
+  // In every language, or a Greek user reads a raw key.
+  const langs = readdirSync("messages").filter((f) => f.endsWith(".json"));
+  const missing = [];
+  for (const f of langs) {
+    const j = JSON.parse(readFileSync(`messages/${f}`, "utf8"));
+    for (const key of ["planExcludes", "switchedOff", "nothingYet"]) {
+      if (!j?.settings?.chatMemory?.[key]) missing.push(`${f}:${key}`);
+    }
+  }
+  check(`all three strings present in all ${langs.length} locales`, missing.length === 0, missing.join(", "));
+}
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length) process.exit(1);

@@ -415,7 +415,10 @@
       "clearing": "Borrando...",
       "couldNotUpdatePreference": "✗ no se pudo actualizar la preferencia",
       "couldNotClearMemory": "✗ no se pudo borrar la memoria",
-      "memoryCleared": "✓ memoria borrada"
+      "memoryCleared": "✓ memoria borrada",
+      "planExcludes": "Tu plan actual no incluye memoria de chat, así que no se guarda nada. Los planes desde Starter recuerdan entre conversaciones.",
+      "switchedOff": "La memoria está desactivada, así que no se guarda nada de tus conversaciones.",
+      "nothingYet": "Todavía no se ha guardado nada. La memoria está activa: retiene cosas duraderas como tu nombre, tu trabajo o una preferencia, en cuanto una conversación menciona alguna."
     },
     "loginActivity": {
       "title": "Actividad de inicio de sesión",

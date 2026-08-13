@@ -415,7 +415,10 @@
       "clearing": "Clearing...",
       "couldNotUpdatePreference": "✗ could not update preference",
       "couldNotClearMemory": "✗ could not clear memory",
-      "memoryCleared": "✓ memory cleared"
+      "memoryCleared": "✓ memory cleared",
+      "planExcludes": "Your current plan doesn’t include chat memory, so nothing is being saved. Plans from Starter up remember across conversations.",
+      "switchedOff": "Memory is switched off, so nothing is being saved from your conversations.",
+      "nothingYet": "Nothing saved yet. Memory is on and working — it keeps durable things like your name, your work or a preference, once a conversation mentions one."
     },
     "loginActivity": {
       "title": "Login Activity",

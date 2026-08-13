@@ -253,6 +253,11 @@ export default async function SettingsPage() {
             userId={user.id}
             initialEnabled={chatMemoryEnabled}
             initialCount={chatMemoryCount ?? 0}
+            // The plan's limit, because 0 is not a bug the user can fix by
+            // toggling something — chatMemoryActive() switches the whole
+            // feature off when the limit is 0, so the panel has to say so
+            // rather than showing an ON switch above a count of nothing.
+            planLimit={getPlan(tier)?.capabilities.chatMemoryLimit ?? 0}
           />
         </div>
 

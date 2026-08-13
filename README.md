@@ -287,6 +287,80 @@ resolves to an actual, working photo URL — never a broken or invented link.
 Both paths are real, legal, functioning images — this app never scrapes
 Google Images or hotlinks an unlicensed photo.
 
+### The user is told which they got
+
+A seeded placeholder looks like a photograph on screen: it loads, it is the
+right shape, it is in the right slot. So a site whose brief said "photos
+from Santorini" and came back with placeholders is a site the owner
+publishes without noticing — which is how it was reported.
+
+Every generation and every edit now records what actually happened in
+`user_websites.image_report` (see `website_image_report_migration.sql`):
+how many photos the page asked for, how many came from the library, how
+many fell back, and why. The Website Builder renders it under the finished
+page — quietly when nobody asked for real photography, and as a warning
+when the brief explicitly did. `NULL` means "not recorded" (a row generated
+before the column existed) and is deliberately not treated as "every photo
+is real".
+
+### Demo tier vs production: what the rate limit actually costs you
+
+A new Unsplash application is a **demo** application: **50 requests per
+hour, for the whole account**. That is not per user and not per site.
+
+A generation spends one request per photo, plus a broadening retry for each
+photo whose specific query found nothing (`src/lib/unsplash-budget.ts`). A
+typical page has 3–6 photos, so in practice:
+
+| Page | Photos | Typical requests | Sites per hour on demo |
+| --- | --- | --- | --- |
+| Professional services | 1–2 | 1–3 | ~20 |
+| Café / local place | 4–6 | 4–10 | ~6 |
+| Portfolio (`gallery`) | 12–20 | 12–32 | **1–2** |
+
+Once the hour's 50 are gone, every search returns `403` with
+`X-Ratelimit-Remaining: 0` and **every photo on every site becomes a
+placeholder** until the window resets. On the page that is indistinguishable
+from the integration never having been wired up.
+
+**A production application is 5,000 requests/hour** — 100× the headroom,
+and enough that the ceiling stops being a factor.
+
+### Applying for production access — the exact steps
+
+Unsplash reviews these by hand and rejects incomplete ones, so all of this
+is required, not optional:
+
+1. Sign in at [unsplash.com/oauth/applications](https://unsplash.com/oauth/applications)
+   and open the application whose `UNSPLASH_ACCESS_KEY` this app uses.
+2. Satisfy every point of the [API Guidelines](https://help.unsplash.com/en/articles/2511245-unsplash-api-guidelines)
+   **before** applying — the review checks the live product, not the form:
+   - **Attribution on every photo.** Each displayed photo must credit the
+     photographer and Unsplash, both as links back to unsplash.com carrying
+     the UTM parameters Unsplash specifies. ⚠️ **This app does not do this
+     yet** — the resolver stores only `urls.regular` and discards
+     `user.name` / `user.links.html`. Adding it is a prerequisite for
+     approval, not a nicety, and it is a code change in
+     `src/lib/unsplash.ts` and `src/lib/website-image-resolver.ts`.
+   - **Trigger a download event** when a photo is actually used, by
+     `GET`ting the photo's `links.download_location` with your Client-ID.
+     ⚠️ Also not implemented yet. Unsplash treats a missing download
+     trigger as a hard guideline violation.
+   - **No replicating Unsplash core experience**, no selling the photos,
+     no hotlinking outside the API's returned URLs. This app is compliant
+     on all three: photos are embedded inside a generated page.
+3. Press **Apply for production** on the application page and fill in:
+   - what the product is (an AI website generator),
+   - where photos appear (inside generated single-file websites),
+   - a **live URL** a reviewer can open showing a real generated page with
+     working attribution. A staging URL behind a login is usually rejected.
+4. Expect **a few days to two weeks**. There is no way to expedite it.
+
+Until it is approved, the honest mitigation is the one already in place:
+the per-generation ceiling stops one portfolio site eating the whole hour,
+and the notice tells the user when a page's photos are placeholders instead
+of letting them find out after publishing.
+
 ## Billing
 
 Subscriptions run through [Stripe](https://stripe.com) Checkout + the

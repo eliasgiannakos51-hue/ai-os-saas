@@ -203,6 +203,25 @@ eq(
   brief.classifyImageOutcome(report({ halted: "unauthorised", fromLibrary: 0, fromPlaceholder: 6 })),
   "credentials"
 );
+// OUR ceiling is not THEIR quota, and saying so would send the user away
+// for an hour to wait for something that will not change. Found by running
+// the Santorini case: a page whose queries all missed spent its own budget
+// and was told the library was out of requests for the hour.
+eq(
+  "our own per-generation ceiling is not reported as the library's quota",
+  brief.classifyImageOutcome(report({ halted: "budget-exhausted", fromLibrary: 0, fromPlaceholder: 6 })),
+  "all-placeholder"
+);
+eq(
+  "...and with some found, it is an ordinary partial result",
+  brief.classifyImageOutcome(report({ halted: "budget-exhausted", fromLibrary: 2, fromPlaceholder: 4 })),
+  "some-placeholder"
+);
+eq(
+  "a real hourly quota still says so, because waiting DOES fix that one",
+  brief.classifyImageOutcome(report({ halted: "rate-limited", fromLibrary: 0, fromPlaceholder: 6 })),
+  "quota"
+);
 // A rejected key is a problem with our configuration whether or not one was
 // present, so it outranks "not configured".
 eq(

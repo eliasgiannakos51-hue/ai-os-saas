@@ -157,7 +157,18 @@ export function classifyImageOutcome(report: WebsiteImageReport): ImageOutcome {
   if (report.total === 0) return "none-requested";
   if (report.halted === "unauthorised") return "credentials";
   if (!report.configured) return "not-configured";
-  if (report.halted === "rate-limited" || report.halted === "budget-exhausted") return "quota";
+  // Only a REAL quota is reported as a quota.
+  //
+  // "budget-exhausted" used to be folded in here, and the message it
+  // produced told the user "the photo library ran out of requests for this
+  // hour" — which is not what happened. That halt is OUR OWN per-generation
+  // ceiling (unsplashBudgetForPlaceholders), reached because this page asked
+  // for many photos and few of them matched. Telling someone to come back in
+  // an hour when waiting will change nothing is a false instruction, and a
+  // false instruction is worse than a vague one: it sends them away instead
+  // of toward the fix, which is to upload their own photos or reword. So it
+  // falls through to the ordinary placeholder counts, which are true.
+  if (report.halted === "rate-limited") return "quota";
   if (report.fromPlaceholder === 0) return "all-real";
   if (report.fromLibrary === 0) return "all-placeholder";
   return "some-placeholder";

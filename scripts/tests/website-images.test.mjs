@@ -276,6 +276,22 @@ check(
   "but not for an old version, whose photos a different run resolved",
   /!viewingVersion && <WebsiteImageNotice/.test(workspace)
 );
+// The gap that would make every assertion above true and the feature still
+// invisible: a column the client is never sent. Both routes that deliver a
+// website to the browser — the first page load and the poll that follows a
+// generation — must return the whole row.
+const builderPage = readFileSync("src/app/dashboard/website-builder/page.tsx", "utf8");
+const statusRoute = readFileSync("src/app/api/websites/status/route.ts", "utf8");
+check(
+  "the first page load returns the whole row, so the report arrives with it",
+  /from\("user_websites"\)\s*\.select\("\*"\)/.test(builderPage) ||
+    /select\("\*"\)/.test(builderPage.slice(builderPage.indexOf('from("user_websites")'))),
+  "a named column list here would silently drop image_report and the notice would never render"
+);
+check(
+  "and so does the poll the client runs after a generation",
+  /select\("\*"\)/.test(statusRoute)
+);
 check("the notice is announced to a screen reader", /aria-live="polite"/.test(notice));
 check("it renders nothing when there is nothing to say", /if \(severity === "none"\) return null;/.test(notice));
 check(

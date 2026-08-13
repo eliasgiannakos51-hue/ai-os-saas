@@ -48,7 +48,13 @@ export function TopNav({ email }: { email: string }) {
       <button
         type="button"
         onClick={() => setCommandPaletteOpen(true)}
-        className="mx-auto hidden max-w-md flex-1 items-center gap-2 rounded-full border border-border bg-panel px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-foreground sm:flex"
+        // min-w-0 is load-bearing, not tidiness. `flex-1` sets the basis to
+        // 0, but a flex item's default `min-width: auto` refuses to shrink
+        // below its content — so this button held 161px it did not have and
+        // pushed the whole header past the viewport. Measured at 640px:
+        // 92 (logo) + 161 (this) + 416 (controls) + gaps + padding = 765
+        // inside 640, i.e. 125px of horizontal page scroll.
+        className="mx-auto hidden min-w-0 max-w-md flex-1 items-center gap-2 rounded-full border border-border bg-panel px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-foreground sm:flex"
       >
         <Search className="h-4 w-4 shrink-0" aria-hidden="true" />
         <span className="flex-1 text-left">{t("search")}</span>
@@ -57,7 +63,27 @@ export function TopNav({ email }: { email: string }) {
         </kbd>
       </button>
 
-      <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-3">
+      {/* WHY THIS ROW IS NOT `shrink-0` ANY MORE.
+​
+          Reported three times as "the Publish bar is squeezed to the left".
+          The publish dialog was rebuilt twice on that report and was never
+          the cause: measured across twelve viewport widths it is centred to
+          within 0px at every one of them. What was actually wrong is here.
+
+          This row is 416px of controls. `shrink-0` told it never to give
+          any of that back. Between 768px and 1023px the sidebar takes 240px,
+          leaving the header 528px for a 92px logo, a search field and these
+          416px — so the row's right edge landed at 958px on a 768px screen
+          and THE WHOLE PAGE scrolled sideways by 190px. Everything on it,
+          including the Publish toolbar, sat shifted and cut off. On a tablet
+          or a half-width desktop window the dashboard was simply broken, and
+          a centred dialog on a page that is 190px too wide still reads as
+          "squeezed to the side".
+
+          Now it may shrink, and the two widest optional items below reveal
+          at `lg` (1024px) — the first width where there is genuinely room
+          for them next to the sidebar — instead of at `sm` (640px). */}
+      <div className="ml-auto flex min-w-0 items-center gap-1.5 lg:gap-3">
         <LanguageSelector />
         <ThemeToggle />
 
@@ -83,7 +109,7 @@ export function TopNav({ email }: { email: string }) {
 
         <Link
           href="/dashboard/settings#buy-credits"
-          className="hidden items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-400 sm:inline-flex"
+          className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-400 lg:inline-flex"
           title={isAdmin ? "Owner access — unlimited credits" : "Credits remaining — buy more in Settings"}
         >
           <Zap className="h-3.5 w-3.5 text-orange-400" aria-hidden="true" />
@@ -99,13 +125,13 @@ export function TopNav({ email }: { email: string }) {
         <button
           type="button"
           onClick={openCreate}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:px-3.5"
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] lg:px-3.5"
         >
           <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">{t("newProject")}</span>
+          <span className="hidden lg:inline">{t("newProject")}</span>
         </button>
 
-        <div className="relative">
+        <div className="relative shrink-0">
           <button
             type="button"
             onClick={() => {

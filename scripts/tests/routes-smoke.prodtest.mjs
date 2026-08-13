@@ -276,7 +276,7 @@ async function inspect(context, route) {
     status = res?.status() ?? 0;
   } catch (err) {
     await page.close();
-    return { status: 0, errors: [`navigation failed: ${err.message}`], keys: [], overflow: null, landedOn: route };
+    return { status: 0, errors: [`navigation failed: ${err.message}`], keys: [], overflow: null, overflowTablet: null, landedOn: route };
   }
   const landedOn = new URL(page.url()).pathname;
 
@@ -292,14 +292,29 @@ async function inspect(context, route) {
     return [...new Set(out)].slice(0, 5);
   }, KEY_RE.source);
 
-  // 375px is the narrowest phone this app targets. scrollWidth beyond the
-  // viewport is what makes a page slide sideways under a thumb.
-  await page.setViewportSize({ width: 375, height: 800 });
-  await page.waitForTimeout(250);
-  const overflow = await page.evaluate(() => ({
-    scrollWidth: document.documentElement.scrollWidth,
-    clientWidth: document.documentElement.clientWidth,
-  }));
+  // MEASURED AT TWO WIDTHS, and the second one is why.
+  //
+  // This check used to run at 375px only, and 375px was fine — so every
+  // route passed while the dashboard header overflowed the viewport by up
+  // to 190px between 640px and 1023px. That is a tablet, or a desktop
+  // window at half screen. The visible symptom was reported three times as
+  // "the Publish bar is squeezed to the left"; the publish dialog was
+  // rebuilt twice on that report and was never the cause. Sampling one
+  // width and calling the layout checked is what let it survive.
+  //
+  // 768px is the width where the sidebar appears while the header still
+  // carries its full-width controls — the worst case, not an arbitrary
+  // second sample.
+  const measure = async (width, height) => {
+    await page.setViewportSize({ width, height });
+    await page.waitForTimeout(250);
+    return page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+  };
+  const overflow = await measure(375, 800);
+  const overflowTablet = await measure(768, 1024);
 
   // Noise that is not a defect in this environment: the stand-in Supabase
   // returns empty rows, and favicon/asset 404s are not route failures.
@@ -316,7 +331,7 @@ async function inspect(context, route) {
       !/Failed to fetch RSC payload[\s\S]*Falling back to browser navigation/i.test(e)
   );
   await page.close();
-  return { status, errors: real, keys, overflow, landedOn };
+  return { status, errors: real, keys, overflow, overflowTablet, landedOn };
 }
 
 console.log("\n== 1. public routes (logged out) ==");
@@ -330,6 +345,11 @@ for (const route of PUBLIC_ROUTES) {
     `${route}: no horizontal overflow @375px (${r.overflow?.scrollWidth}/${r.overflow?.clientWidth})`,
     r.overflow && r.overflow.scrollWidth <= r.overflow.clientWidth + 1,
     JSON.stringify(r.overflow)
+  );
+  checkTrue(
+    `${route}: no horizontal overflow @768px (${r.overflowTablet?.scrollWidth}/${r.overflowTablet?.clientWidth})`,
+    r.overflowTablet && r.overflowTablet.scrollWidth <= r.overflowTablet.clientWidth + 1,
+    JSON.stringify(r.overflowTablet)
   );
 }
 await anon.close();
@@ -351,6 +371,11 @@ for (const route of DASHBOARD_ROUTES) {
     `${route}: no horizontal overflow @375px (${r.overflow?.scrollWidth}/${r.overflow?.clientWidth})`,
     r.overflow && r.overflow.scrollWidth <= r.overflow.clientWidth + 1,
     JSON.stringify(r.overflow)
+  );
+  checkTrue(
+    `${route}: no horizontal overflow @768px (${r.overflowTablet?.scrollWidth}/${r.overflowTablet?.clientWidth})`,
+    r.overflowTablet && r.overflowTablet.scrollWidth <= r.overflowTablet.clientWidth + 1,
+    JSON.stringify(r.overflowTablet)
   );
 }
 // A route returning 200 says the page rendered. It does not say the

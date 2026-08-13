@@ -390,6 +390,174 @@ try {
   await p3.waitForTimeout(150);
   check("changing the address clears the rejection", await p3.locator(`${DIALOG} button.bg-orange-500`).isEnabled());
   await ctx3.close();
+  subdomainTaken = false;
+
+  // -------------------------------------------------------------------
+  console.log("\n== 9. EVERY width, not two of them ==");
+  // WHY THIS SECTION EXISTS. The report — "a bar squeezed to the left
+  // where you have to type something" — has now been made three times,
+  // against a dialog that this file already asserted was centred. Both
+  // of those things can be true at once if the two widths sampled here
+  // (1280 and 375) happen to be the two that work. "Squeezed to the
+  // left" is precisely what an off-centre dialog looks like, so the
+  // honest test is to measure the offset at every width a real person
+  // uses instead of generalising from two.
+  //
+  // The measurement is the dialog's own centre against the viewport's
+  // centre. Below the `sm` breakpoint the dialog is deliberately
+  // bottom-anchored (items-end), so only the HORIZONTAL axis is
+  // asserted — that is the axis the report is about.
+  const WIDTHS = [
+    [360, 780],   // small Android
+    [375, 812],   // iPhone SE/12 mini
+    [390, 844],   // iPhone 14
+    [414, 896],   // iPhone Plus
+    [540, 900],   // small window / foldable
+    [640, 900],   // the `sm` breakpoint itself
+    [768, 1024],  // iPad portrait
+    [820, 1180],  // iPad Air
+    [1024, 768],  // iPad landscape / small laptop
+    [1280, 900],  // laptop
+    [1440, 900],  // MacBook
+    [1920, 1080], // desktop
+  ];
+
+  const offsets = [];
+  for (const [w, h] of WIDTHS) {
+    const { context: cw, page: pw } = await openDialog(w, h);
+    await (await publishToggle(pw)).click();
+    await pw.waitForSelector(DIALOG, { timeout: 10000 });
+    await pw.waitForTimeout(150);
+
+    const box = await pw.locator(DIALOG).boundingBox();
+    const doc = await pw.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+    // Is the backdrop actually covering the whole viewport? A dialog can
+    // be perfectly centred and still read as "a bar off to the side" if
+    // the page behind it is only half dimmed.
+    const backdrop = await pw
+      .locator(`${DIALOG}`)
+      .evaluate((el) => {
+        const bd = el.parentElement?.querySelector('[aria-hidden="true"].fixed');
+        if (!bd) return null;
+        const r = bd.getBoundingClientRect();
+        return { x: r.x, y: r.y, width: r.width, height: r.height };
+      })
+      .catch(() => null);
+
+    const dialogCentre = box.x + box.width / 2;
+    const viewportCentre = w / 2;
+    const offBy = Math.abs(dialogCentre - viewportCentre);
+    offsets.push({ w, offBy: Math.round(offBy), width: Math.round(box.width), x: Math.round(box.x) });
+
+    // 2px of tolerance for sub-pixel rounding, and nothing more: the whole
+    // point is that "roughly centred" is what the user is calling squeezed.
+    check(
+      `${w}px: horizontally centred (off by ${Math.round(offBy)}px, dialog ${Math.round(box.width)}px at x=${Math.round(box.x)})`,
+      offBy <= 2,
+      `dialog centre ${Math.round(dialogCentre)} vs viewport centre ${viewportCentre}`
+    );
+    check(
+      `${w}px: fits the viewport horizontally`,
+      box.x >= 0 && box.x + box.width <= w + 1,
+      `x=${Math.round(box.x)} width=${Math.round(box.width)}`
+    );
+    check(
+      `${w}px: the dialog is a real fraction of the screen, not a strip`,
+      box.width >= Math.min(300, w - 40),
+      `width ${Math.round(box.width)} of ${w}`
+    );
+    // When this fails, say WHAT is too wide. "376/360" tells nobody which
+    // element to fix, and this failure has now survived three rounds of
+    // being looked at rather than measured.
+    const offenders =
+      doc.scrollWidth > doc.clientWidth + 1
+        ? await pw.evaluate((vw) => {
+            const out = [];
+            for (const el of Array.from(document.querySelectorAll("*"))) {
+              const r = el.getBoundingClientRect();
+              if (r.width === 0 || r.height === 0) continue;
+              // Skip anything an ancestor already clips: a decorative blob
+              // inside `overflow-hidden` has a bounding box past the edge
+              // but contributes nothing to the document's scroll width, and
+              // listing it buries the element that actually does.
+              let clipped = false;
+              for (let a = el.parentElement; a; a = a.parentElement) {
+                const ov = getComputedStyle(a).overflowX;
+                if (ov === "hidden" || ov === "clip" || ov === "auto" || ov === "scroll") {
+                  clipped = true;
+                  break;
+                }
+              }
+              if (clipped) continue;
+              if (r.right > vw + 1) {
+                out.push({
+                  tag: el.tagName.toLowerCase(),
+                  cls: (el.className && typeof el.className === "string" ? el.className : "").slice(0, 90),
+                  right: Math.round(r.right),
+                  width: Math.round(r.width),
+                });
+              }
+            }
+            // Widest first, and only the outermost few — a too-wide parent
+            // drags all its children into this list.
+            return out.sort((a, b) => b.right - a.right).slice(0, 4);
+          }, w)
+        : [];
+    check(
+      `${w}px: no horizontal page overflow`,
+      doc.scrollWidth <= doc.clientWidth + 1,
+      `${doc.scrollWidth}/${doc.clientWidth}` +
+        offenders.map((o) => `\n          ${o.right}px right edge: <${o.tag} class="${o.cls}"> (${o.width}px wide)`).join("")
+    );
+    check(
+      `${w}px: the backdrop covers the whole viewport`,
+      backdrop !== null && backdrop.x <= 0.5 && backdrop.width >= w - 1,
+      backdrop ? `backdrop x=${Math.round(backdrop.x)} width=${Math.round(backdrop.width)} vs viewport ${w}` : "no backdrop found"
+    );
+    // The input has to be the obvious target at every width too — a
+    // full-width field is what makes "you have to type here" self-evident.
+    const ibox = await pw.locator(INPUT).boundingBox();
+    check(
+      `${w}px: the input spans the dialog (${Math.round(ibox.width)}/${Math.round(box.width)}px)`,
+      ibox.width >= box.width - 60,
+      `input ${Math.round(ibox.width)} vs dialog ${Math.round(box.width)}`
+    );
+
+    if (process.env.DIAGNOSE_HEADER && (w === 768 || w === 640)) {
+      const header = await pw.evaluate(() => {
+        const h = document.querySelector("header");
+        if (!h) return null;
+        return {
+          headerWidth: Math.round(h.getBoundingClientRect().width),
+          children: Array.from(h.children).map((el) => {
+            const r = el.getBoundingClientRect();
+            const cs = getComputedStyle(el);
+            return {
+              tag: el.tagName.toLowerCase(),
+              cls: String(el.className || "").slice(0, 60),
+              x: Math.round(r.x),
+              w: Math.round(r.width),
+              flex: cs.flex,
+              minWidth: cs.minWidth,
+            };
+          }),
+        };
+      });
+      console.log(`  DIAG ${w}px header (${header.headerWidth}px):`);
+      for (const c of header.children) {
+        console.log(`        x=${String(c.x).padStart(4)} w=${String(c.w).padStart(4)} flex=${c.flex} minW=${c.minWidth} <${c.tag} class="${c.cls}">`);
+      }
+    }
+
+    await pw.screenshot({ path: path.join(outDir, `width-${w}.png`), fullPage: false });
+    await cw.close();
+  }
+
+  const worst = offsets.reduce((a, b) => (b.offBy > a.offBy ? b : a));
+  console.log(`  ....  worst horizontal offset across ${WIDTHS.length} widths: ${worst.offBy}px at ${worst.w}px`);
 } catch (err) {
   failures.push("unhandled error");
   console.log(`  FAIL  unhandled error\n        ${err.stack ?? err.message}`);

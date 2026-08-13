@@ -36,10 +36,26 @@ export function PublishControl({
   websiteId,
   websiteName,
   disabled = false,
+  disabledReason,
 }: {
   websiteId: string;
   websiteName: string;
   disabled?: boolean;
+  /**
+   * Why the toggle is off, in the user's language — rendered as VISIBLE
+   * text beside the button, not as a title attribute.
+   *
+   * A greyed-out button is not an explanation. This control is disabled
+   * for three different reasons (still generating, generation failed, held
+   * by the safety review) and until now all three looked identical: a
+   * button at 40% opacity that does nothing when pressed. The safety-review
+   * case is the one that matters most, because the user has already been
+   * charged for that generation and there is something they can still do
+   * about it — and the only place that was said was further down the page,
+   * in the preview area, which is not where someone who has just pressed
+   * Publish is looking.
+   */
+  disabledReason?: string;
 }) {
   const t = useTranslations("dashboard.publishing");
   const { addToast } = useToast();
@@ -259,6 +275,21 @@ export function PublishControl({
           )}
           {isLive ? t("unpublish") : site ? t("republish") : t("publish")}
         </button>
+
+        {/* The reason sits next to the button it explains, and is announced
+            rather than left for the eye to find — someone who pressed a
+            dead button is already looking here. `basis-full` on small
+            screens so it wraps onto its own line instead of squeezing the
+            controls beside it. */}
+        {disabled && disabledReason && (
+          <p
+            role="status"
+            className="flex basis-full items-start gap-1.5 text-xs leading-relaxed text-amber-300/90 sm:basis-auto sm:max-w-xs"
+          >
+            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span>{disabledReason}</span>
+          </p>
+        )}
 
         {isLive && (
           <>

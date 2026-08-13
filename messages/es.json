@@ -952,7 +952,9 @@
           "style-only": "Solo como referencia de estilo"
         }
       },
-      "imageIntro": "Tu logo, fotos de producto o del local: lo que quieras que aparezca o que marque el estilo."
+      "imageIntro": "Tu logo, fotos de producto o del local: lo que quieras que aparezca o que marque el estilo.",
+      "regenerateAlreadyUsed": "Ya has usado la regeneración gratuita de este sitio. Crea un sitio nuevo con otra descripción.",
+      "regenerateNoBrief": "Este sitio se creó antes de que guardáramos la descripción original, así que no puede regenerarse automáticamente. Crea un sitio nuevo con la misma descripción."
     },
     "marketplace": {
       "title": "Mercado",
@@ -1218,7 +1220,10 @@
       "reasonInvalidCharacters": "Solo se permiten minúsculas, números y guiones.",
       "reasonBadEdges": "No puede empezar ni terminar con un guion.",
       "reasonReserved": "Esa dirección está reservada. Elige otra.",
-      "reasonTaken": "Esa dirección ya está ocupada. Prueba con otra."
+      "reasonTaken": "Esa dirección ya está ocupada. Prueba con otra.",
+      "disabledFlagged": "Nuestra revisión de seguridad ha retenido este sitio, así que no puede publicarse. Consulta los detalles abajo: puedes regenerarlo una vez gratis.",
+      "disabledFailed": "Este sitio no terminó de generarse, así que todavía no hay nada que publicar.",
+      "disabledGenerating": "Aún se está generando. Podrás publicarlo en cuanto termine."
     },
     "integrations": {
       "title": "Integraciones",

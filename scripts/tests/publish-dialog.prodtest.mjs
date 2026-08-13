@@ -70,9 +70,22 @@ const WEBSITE = {
   updated_at: "2026-02-01T00:00:00Z",
 };
 
+// A website the AI Output Protection Layer held. Publishing is correctly
+// impossible for this one — the question is whether the user is told why,
+// which until now they were not: the toggle simply greyed out.
+const FLAGGED_WEBSITE = {
+  ...WEBSITE,
+  id: "66666666-6666-4666-8666-666666666666",
+  name: "Held For Review",
+  status: "flagged",
+  free_retry_used: false,
+  error_message:
+    "This website was flagged by our safety review and can't be published as-is: a form posts to an external domain. You can regenerate it once at no extra charge.",
+};
+
 const TABLE_ROWS = {
   user_credits: [{ user_id: USER_ID, credits_remaining: 2500, credits_total: 3000 }],
-  user_websites: [WEBSITE],
+  user_websites: [WEBSITE, FLAGGED_WEBSITE],
   // Nothing published yet — the state the report is about.
   published_sites: [],
   favorites: [],
@@ -101,6 +114,17 @@ const supa = http.createServer((req, res) => {
       // reason:"taken" through the real route rather than a stubbed error.
       if (table === "published_sites" && subdomainTaken && url.search.includes("subdomain=")) {
         rows = [{ id: "55555555-5555-4555-8555-555555555555", subdomain: "taken-name", website_id: "other" }];
+      }
+      // Honour `col=eq.value`, which PostgREST does and this stand-in used
+      // not to. With a single row per table that never mattered; the moment
+      // a second website was added, a route asking for ONE website by id
+      // got whichever row happened to be first. A mock that ignores the
+      // filter quietly tests something other than the application.
+      for (const [key, value] of url.searchParams) {
+        if (key === "select" || key === "order" || key === "limit") continue;
+        if (!value.startsWith("eq.")) continue;
+        const wanted = value.slice(3);
+        rows = rows.filter((row) => String(row[key] ?? "") === wanted);
       }
       const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
       if (single) return rows[0] ? json(200, rows[0]) : json(406, { message: "no rows" });
@@ -558,6 +582,58 @@ try {
 
   const worst = offsets.reduce((a, b) => (b.offBy > a.offBy ? b : a));
   console.log(`  ....  worst horizontal offset across ${WIDTHS.length} widths: ${worst.offBy}px at ${worst.w}px`);
+
+  // -------------------------------------------------------------------
+  console.log("\n== 10. a site held by the safety review says so ==");
+  // Publishing a flagged site is correctly impossible. What was wrong is
+  // that the Publish toggle just greyed out and said nothing, while the
+  // explanation sat further down the page — not where someone who just
+  // pressed Publish is looking. The user has already been charged for this
+  // generation and still has a free regenerate available, so a silent grey
+  // button is the worst possible answer.
+  for (const [w, h, label] of [
+    [1280, 900, "1280"],
+    [375, 812, "375"],
+  ]) {
+    const { context: cf, page: pf } = await openDialog(w, h);
+    const flaggedCard = pf.locator(`text=${FLAGGED_WEBSITE.name}`).first();
+    if (await flaggedCard.count()) await flaggedCard.click().catch(() => {});
+    await pf.waitForTimeout(1200);
+
+    const toggle = pf.getByRole("button", { name: "Publish", exact: true }).first();
+    await toggle.scrollIntoViewIfNeeded().catch(() => {});
+    check(`${label}px: the Publish toggle is present but disabled`, !(await toggle.isEnabled()));
+
+    // The reason has to be READABLE, not a title attribute.
+    const reason = pf.getByRole("status").filter({ hasText: /safety review/i }).first();
+    const visible = (await reason.count()) > 0 && (await reason.isVisible());
+    check(
+      `${label}px: and a visible sentence says why`,
+      visible,
+      visible ? "" : "no visible reason next to the disabled toggle"
+    );
+    if (visible) {
+      const box = await reason.boundingBox();
+      check(`${label}px: the reason is on screen, not clipped`, box && box.x >= 0 && box.x + box.width <= w + 1);
+    }
+
+    // And the next step the user still has.
+    const regen = pf.getByRole("button", { name: /Regenerate/i }).first();
+    check(`${label}px: the free regeneration is offered`, (await regen.count()) > 0 && (await regen.isVisible()));
+
+    const overflow = await pf.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+    check(
+      `${label}px: no horizontal overflow with the reason rendered`,
+      overflow.scrollWidth <= overflow.clientWidth + 1,
+      `${overflow.scrollWidth}/${overflow.clientWidth}`
+    );
+
+    await pf.screenshot({ path: path.join(outDir, `flagged-${label}.png`), fullPage: false });
+    await cf.close();
+  }
 } catch (err) {
   failures.push("unhandled error");
   console.log(`  FAIL  unhandled error\n        ${err.stack ?? err.message}`);

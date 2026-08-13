@@ -952,7 +952,9 @@
           "style-only": "Nur als Stilvorlage"
         }
       },
-      "imageIntro": "Ihr Logo, Produktfotos, Bilder vom Laden — alles, was auf die Seite soll oder den Stil vorgeben darf."
+      "imageIntro": "Ihr Logo, Produktfotos, Bilder vom Laden — alles, was auf die Seite soll oder den Stil vorgeben darf.",
+      "regenerateAlreadyUsed": "Sie haben die kostenlose Neuerstellung für diese Website bereits genutzt. Erstellen Sie eine neue Website mit einer anderen Beschreibung.",
+      "regenerateNoBrief": "Diese Website entstand, bevor wir die ursprüngliche Beschreibung gespeichert haben, daher ist keine automatische Neuerstellung möglich. Erstellen Sie eine neue Website mit derselben Beschreibung."
     },
     "marketplace": {
       "title": "Marktplatz",
@@ -1218,7 +1220,10 @@
       "reasonInvalidCharacters": "Erlaubt sind nur Kleinbuchstaben, Ziffern und Bindestriche.",
       "reasonBadEdges": "Sie darf nicht mit einem Bindestrich beginnen oder enden.",
       "reasonReserved": "Diese Adresse ist reserviert. Bitte wähle eine andere.",
-      "reasonTaken": "Diese Adresse ist bereits vergeben. Probiere eine andere."
+      "reasonTaken": "Diese Adresse ist bereits vergeben. Probiere eine andere.",
+      "disabledFlagged": "Diese Website wurde von unserer Sicherheitsprüfung zurückgehalten und kann nicht online gehen. Details siehe unten — Sie können sie einmal kostenlos neu erstellen lassen.",
+      "disabledFailed": "Diese Website wurde nicht fertiggestellt, es gibt also noch nichts zu veröffentlichen.",
+      "disabledGenerating": "Wird noch erstellt. Sie können sie veröffentlichen, sobald sie fertig ist."
     },
     "integrations": {
       "title": "Integrationen",

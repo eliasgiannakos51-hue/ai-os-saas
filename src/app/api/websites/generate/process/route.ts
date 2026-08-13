@@ -471,10 +471,47 @@ export async function POST(request: Request) {
     // Only now is the row allowed to look finished: the charge has been
     // applied, so a client that reacts to this status reads a balance that
     // already includes it.
-    await supabase
+    //
+    // THE ERROR IS CHECKED, and it is the last write of the whole flow, so
+    // it has to be. It used to be discarded, which turned a schema drift
+    // into a silent, expensive dead end: on any project whose
+    // user_websites_status_check had not been widened to include 'flagged'
+    // (see supabase/migrations/20260813_flagged_status_constraint.sql for
+    // how that happened), this update was REJECTED by Postgres, the row
+    // stayed on 'processing' forever, and the stale reaper in
+    // api/websites/status eventually marked it 'failed' — with the user
+    // already charged above and the free regenerate, which is offered only
+    // for 'flagged', permanently out of reach. Nothing anywhere said so.
+    const { error: finalStatusError } = await supabase
       .from("user_websites")
       .update({ status: isFlagged ? "flagged" : "completed" })
       .eq("id", websiteId);
+
+    if (finalStatusError) {
+      logApiError("/api/websites/generate/process", finalStatusError, {
+        stage: "final_status_update",
+        websiteId,
+        attemptedStatus: isFlagged ? "flagged" : "completed",
+      });
+      // Fall back to a status the row can actually hold, so the site is at
+      // least reachable rather than stuck mid-flight. 'completed' is the
+      // truthful fallback for a non-flagged result; for a flagged one there
+      // is no safe fallback that both shows the content and keeps the
+      // warning, so the row is failed with the real reason — the user can
+      // see what happened instead of watching a spinner for 25 minutes.
+      await supabase
+        .from("user_websites")
+        .update(
+          isFlagged
+            ? {
+                status: "failed",
+                error_message:
+                  "This website was held by our safety review, but your project's database does not yet allow the 'flagged' status. Ask an administrator to run the flagged-status migration; your credits for this generation can be refunded.",
+              }
+            : { status: "completed" }
+        )
+        .eq("id", websiteId);
+    }
 
     diagLog(
       `[billing] website_generate settled: ${JSON.stringify({

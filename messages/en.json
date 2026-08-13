@@ -952,7 +952,9 @@
           "style-only": "Style reference only"
         }
       },
-      "imageIntro": "Your logo, product shots, photos of the place — anything you want on the page or want the style taken from."
+      "imageIntro": "Your logo, product shots, photos of the place — anything you want on the page or want the style taken from.",
+      "regenerateAlreadyUsed": "You’ve already used the free regeneration for this site. Create a new website to try a different brief.",
+      "regenerateNoBrief": "This site was made before we started saving the original brief, so it can’t be regenerated automatically. Create a new website with the same description."
     },
     "marketplace": {
       "title": "Marketplace",
@@ -1218,7 +1220,10 @@
       "reasonInvalidCharacters": "Only lowercase letters, numbers and hyphens are allowed.",
       "reasonBadEdges": "It can't start or end with a hyphen.",
       "reasonReserved": "That address is reserved. Please pick another.",
-      "reasonTaken": "That address is already taken. Try a different one."
+      "reasonTaken": "That address is already taken. Try a different one.",
+      "disabledFlagged": "This site was held by our safety review, so it can’t go live. See the details below — you can regenerate it once for free.",
+      "disabledFailed": "This site didn’t finish generating, so there’s nothing to publish yet.",
+      "disabledGenerating": "Still generating. You can publish as soon as it’s finished."
     },
     "integrations": {
       "title": "Integrations",

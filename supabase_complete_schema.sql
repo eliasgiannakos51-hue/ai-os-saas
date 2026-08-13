@@ -1587,6 +1587,15 @@ create policy "insert_own_security_check_log" on public.security_check_log
 -- user can't chain unlimited free retries off a single flagged row.
 -- ============================================================================
 
+-- The constraint widening itself, which was lost when this consolidated
+-- file was assembled: the section above documents 'flagged' and adds its
+-- two columns, but without this ALTER the status can never be written.
+alter table public.user_websites
+  drop constraint if exists user_websites_status_check;
+alter table public.user_websites
+  add constraint user_websites_status_check
+  check (status in ('pending', 'processing', 'completed', 'failed', 'flagged'));
+
 alter table public.user_websites
   add column if not exists free_retry_used boolean not null default false;
 

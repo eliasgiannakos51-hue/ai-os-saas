@@ -98,6 +98,30 @@ function stripComments(src) {
 // words come from a translated variable and the literal parts are a symbol
 // and a space. So only the literal chunks between the interpolations are
 // tested, which is what separates that from `` `✗ could not save` ``.
+/**
+ * Is this string a SENTENCE somebody reads, or an identifier?
+ *
+ * The plain `[A-Za-z]{3,}` test above is right for the anchored forms —
+ * the first argument of addToast is prose by construction. It is wrong the
+ * moment the scan widens to "any literal near a ternary", because that
+ * sweeps up every `t("buildError")` key, every `?? "untitled"` sentinel and
+ * every Tailwind class list. The first version of this widening reported
+ * 124 items of which about a dozen were real, and a check with that ratio
+ * gets its baseline set to 124, which is the same as deleting it.
+ *
+ * So: prose has a space in it (`buildError`, `untitled`, `slack_error`,
+ * `/dashboard/overview` do not), is not a class list, and is not so long
+ * that it can only be markup.
+ */
+const TAILWIND = /(^|\s)(flex|grid|inline|text-|bg-|border|rounded|hover:|focus|min-h|max-w|h-\d|w-\d|px-|py-|mt-|absolute|relative|shrink)/;
+function isEnglishProse(text) {
+  if (!PROSE.test(text)) return false;
+  if (!text.includes(" ")) return false;
+  if (text.length > 120) return false;
+  if (TAILWIND.test(text)) return false;
+  return true;
+}
+
 // Brace-BALANCED, because `${[^}]*}` is not good enough here: a real
 // interpolation in this codebase looks like
 //   ${describe(new ApiError(500, { error: e.message })).what}
@@ -139,12 +163,65 @@ for (const file of sources) {
         hardcoded.push(`${file}: ${fn}(\`${m[1]}\`)`);
       }
     }
+    // A TERNARY IS TWO STRINGS, and the anchored patterns above see
+    // neither: `addToast(next ? "enabled" : "disabled")` does not start
+    // with a quote after the paren, so it matched nothing. Found by the
+    // audit immediately after this check was widened to template
+    // literals — the same defect, one syntax over, which is the argument
+    // for scanning the ARGUMENT rather than guessing its shape.
+    for (const m of src.matchAll(new RegExp(`\\b${fn}\\(([^;]{0,200}?)\\)[,;]`, "g"))) {
+      if (!m[1].includes("?")) continue;
+      for (const lit of m[1].matchAll(/"([^"]*)"|`([^`]*)`/g)) {
+        // A backtick branch gets the same interpolation-stripping as the
+        // anchored case: in `` `✗ ${message}` `` the words are in a
+        // variable, and the literal part is a symbol and a space.
+        const parts = lit[1] !== undefined ? [lit[1]] : literalChunksOf(lit[2] ?? "");
+        const text = parts.find(isEnglishProse);
+        if (text) hardcoded.push(`${file}: ${fn}(... ? "${text}" ...)`);
+      }
+    }
+  }
+
+  // `data.error ?? "Could not start checkout."` — the English is the
+  // FALLBACK for a server message, so it reads as a safety net and is
+  // exactly as user-facing as everything above. Counted by neither
+  // baseline: getErrorMessage's fallback ratchet only matches
+  // `getErrorMessage(x, "...")`, and this form does not call it.
+  for (const m of src.matchAll(/\?\?\s*"([^"]{8,})"/g)) {
+    if (isEnglishProse(m[1])) hardcoded.push(`${file}: ?? "${m[1]}"`);
   }
 }
+// TWO CHECKS, because the two forms are at different stages.
+//
+// The ANCHORED forms — a quoted or templated first argument — are at zero
+// and stay at zero. That is the check this file has always made, widened
+// to backticks, and everything it found has been fixed.
+//
+// The INDIRECT forms — a ternary branch, or `?? "English"` — were found by
+// the audit and have never been enforced, so they are at 38 and ratcheted.
+// Splitting them is deliberate: rolling 38 known items into the same check
+// would take the zero-tolerance one off zero, and a check that is allowed
+// to be non-zero stops being read as "this must not happen".
+const anchoredOnly = hardcoded.filter((h) => !/\(\.\.\. \? |: \?\? /.test(h));
+const indirect = hardcoded.filter((h) => /\(\.\.\. \? |: \?\? /.test(h));
+
 check(
-  `no hardcoded prose in ${USER_FACING_CALLS.join("/")}, quoted OR templated (${sources.length} files scanned)`,
-  hardcoded,
+  `no hardcoded prose in a ${USER_FACING_CALLS.join("/")} argument, quoted OR templated (${sources.length} files scanned)`,
+  anchoredOnly,
   []
+);
+
+// 38 English sentences reached through a ternary branch or a `??`
+// fallback. Every one is real — "Could not start checkout.", "Could not
+// generate a reflection.", "✓ chat memory enabled" — and every one is
+// read by a Greek user in English. They are recorded rather than fixed in
+// this pass because closing them is 38 keys across ten locales, which is
+// a translation job, not a sweep; recording them is what stops a 39th.
+const INDIRECT_ENGLISH_BASELINE = 38;
+checkTrue(
+  `English reached through a ternary or ?? has not grown (${indirect.length} <= ${INDIRECT_ENGLISH_BASELINE})`,
+  indirect.length <= INDIRECT_ENGLISH_BASELINE,
+  indirect.join("\n        ")
 );
 
 // KNOWN GAP, recorded rather than silently tolerated.

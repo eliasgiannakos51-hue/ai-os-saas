@@ -1,3 +1,4 @@
+import { pageTitleMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -18,7 +19,9 @@ import { loadTimelineEntries } from "@/lib/timeline";
 import { detectProductDetailInsight, type ProductForPattern } from "@/lib/product-pattern";
 import type { ModuleRecord } from "@/types/module-record";
 
-export const metadata: Metadata = { title: "Product Workflow" };
+export function generateMetadata() {
+  return pageTitleMetadata("sidebar.items.productWorkflow");
+}
 
 const MINI_TIMELINE_LIMIT = 10;
 

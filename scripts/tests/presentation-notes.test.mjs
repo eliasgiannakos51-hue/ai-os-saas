@@ -54,8 +54,13 @@ check("the table is unchanged, so no data moves", module.table === "ai_presentat
 // beside it. The header now resolves sidebar.items.<titleKey>, so this
 // checks the name the user actually reads instead of an English constant
 // that only happened to be right for one locale.
+// THE TAB TITLE MOVED TOO, and for the same reason the heading did: it
+// read config.title, so the browser tab said the module's English name in
+// all ten locales. It now goes through the same key as the heading and
+// the sidebar, so a rename can never leave the tab behind.
 const page = readFileSync("src/app/dashboard/presentations/page.tsx", "utf8");
-check("the page takes its browser-tab title from the config", /title: CONFIG\.title/.test(page));
+check("the browser tab takes its title from the translated name", /moduleTitleMetadata\(CONFIG\)/.test(page));
+check("...and no longer hardcodes the English one", !/title: CONFIG\.title/.test(page));
 const buildPage = readFileSync("src/components/modules/build-module-page.tsx", "utf8");
 check("the header renders the translated name", /title=\{title\}/.test(buildPage));
 check("...resolved from the sidebar's own key", /getTranslations\("sidebar\.items"\)/.test(buildPage));

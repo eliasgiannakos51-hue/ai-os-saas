@@ -512,7 +512,7 @@ export function ChatWorkspace({
               onClick={toggleSidebar}
               aria-expanded={sidebarOpen}
               aria-label={sidebarOpen ? t("hideConversations") : t("showConversations")}
-              className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-2 text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg px-2 text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground sm:h-9"
             >
               {sidebarOpen ? (
                 <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -627,7 +627,7 @@ export function ChatWorkspace({
                 onClick={() => setMentorMode((v) => !v)}
                 aria-pressed={mentorMode}
                 title="Mentor Mode: strategic guidance instead of just answers — flags risks, asks clarifying questions, suggests alternatives, and uses your logged data as context."
-                className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 ${
+                className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 sm:min-h-[36px] ${
                   mentorMode
                     ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
                     : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"

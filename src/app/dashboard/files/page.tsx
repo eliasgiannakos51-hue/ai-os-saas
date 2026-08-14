@@ -1,3 +1,4 @@
+import { pageTitleMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -16,7 +17,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Files" };
+export function generateMetadata() {
+  return pageTitleMetadata("sidebar.items.files");
+}
 
 export default async function FilesPage() {
   const supabase = createClient();

@@ -1,3 +1,4 @@
+import { moduleTitleMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -14,13 +15,17 @@ import { AutomationRealizeList } from "@/components/automation/automation-realiz
 import { AutomationActiveList } from "@/components/automation/automation-active-list";
 import type { UserAutomation } from "@/types/user-automation";
 
-export function generateMetadata({
+export async function generateMetadata({
   params,
 }: {
   params: { module: string };
-}): Metadata {
+}): Promise<Metadata> {
   const moduleConfig = getModule(params.module);
-  return { title: moduleConfig?.title ?? "Not Found" };
+  // The tab said the module's ENGLISH name in every locale, so a Greek
+  // user's tab strip read Ideas / Competitors / Decisions above pages
+  // that were entirely in Greek. Same key as the sidebar and the heading.
+  if (!moduleConfig) return { title: "Not Found" };
+  return moduleTitleMetadata(moduleConfig);
 }
 
 export default async function ModulePage({

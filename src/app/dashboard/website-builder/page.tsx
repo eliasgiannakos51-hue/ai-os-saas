@@ -1,3 +1,4 @@
+import { pageTitleMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -8,7 +9,9 @@ import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import { loadFavoriteIds } from "@/lib/favorites";
 import type { UserWebsite } from "@/types/user-website";
 
-export const metadata: Metadata = { title: "Website Builder" };
+export function generateMetadata() {
+  return pageTitleMetadata("sidebar.items.websiteBuilder");
+}
 
 // Real AI website generation (Claude produces a complete, standalone HTML
 // document — see lib/website-builder.ts), stored in user_websites. This is

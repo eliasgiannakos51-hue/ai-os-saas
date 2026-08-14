@@ -1,3 +1,4 @@
+import { pageTitleMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -7,9 +8,9 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { EmptyState } from "@/components/empty-state";
 import { MARKETPLACE_ICON } from "@/lib/module-icons";
 
-export const metadata: Metadata = {
-  title: "Marketplace",
-};
+export function generateMetadata() {
+  return pageTitleMetadata("sidebar.items.marketplace");
+}
 
 // No table, no listings, no buy/sell flow yet — the previous version of
 // this page showed hardcoded demo listings with "Coming Soon" badges,

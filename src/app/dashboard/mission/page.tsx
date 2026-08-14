@@ -1,3 +1,4 @@
+import { pageTitleMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import { diagLog } from "@/lib/diag";
 import { redirect } from "next/navigation";
@@ -13,7 +14,9 @@ import { MISSION_ICON } from "@/lib/module-icons";
 import type { Mission } from "@/types/mission";
 import type { ScheduledAgentRun } from "@/types/scheduled-agent-run";
 
-export const metadata: Metadata = { title: "Mission Control" };
+export function generateMetadata() {
+  return pageTitleMetadata("sidebar.items.missionControl");
+}
 
 // Explicit, not just implicit-via-cookies(): Next.js App Router's fetch
 // Data Cache can, in some versions/edge cases, still cache a GET request

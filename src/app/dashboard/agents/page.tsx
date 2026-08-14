@@ -1,3 +1,4 @@
+import { pageTitleMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -15,7 +16,9 @@ import type { AgentRun, UserAgent } from "@/lib/agents/agent-config";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "AI Agents" };
+export function generateMetadata() {
+  return pageTitleMetadata("sidebar.items.agents");
+}
 
 // Autonomous Agents.
 //

@@ -1,3 +1,4 @@
+import { pageTitleMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -10,9 +11,9 @@ import type { Idea } from "@/types/ideas";
 import { loadLinkedEntities } from "@/lib/entity-links";
 import { loadFavoriteIds } from "@/lib/favorites";
 
-export const metadata: Metadata = {
-  title: "Ideas",
-};
+export function generateMetadata() {
+  return pageTitleMetadata("sidebar.items.ideas");
+}
 
 export default async function DashboardPage() {
   const supabase = createClient();

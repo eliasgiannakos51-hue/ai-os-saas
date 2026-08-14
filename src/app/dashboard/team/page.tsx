@@ -1,3 +1,4 @@
+import { pageTitleMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import { diagLog } from "@/lib/diag";
 import { redirect } from "next/navigation";
@@ -10,9 +11,9 @@ import { TeamMembersList, type TeamMember } from "@/components/team/team-members
 import { getPlan, TEAM_SEAT_PRICE, CURRENCY_SYMBOL } from "@/lib/billing/plans";
 import { isAdminEmail } from "@/lib/admin";
 
-export const metadata: Metadata = {
-  title: "Team",
-};
+export function generateMetadata() {
+  return pageTitleMetadata("sidebar.items.team");
+}
 
 export default async function TeamPage({
   searchParams,

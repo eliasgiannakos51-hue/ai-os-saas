@@ -1,3 +1,4 @@
+import { pageTitleMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -29,13 +30,18 @@ import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { BUILD_MODULES } from "@/lib/build-modules";
 import { getPlan } from "@/lib/billing/plans";
 
-export const metadata: Metadata = {
-  title: "Settings",
-};
+export function generateMetadata() {
+  return pageTitleMetadata("sidebar.items.settings");
+}
 
 export default async function SettingsPage() {
   const t = await getTranslations("settings");
   const tBilling = await getTranslations("settings.billing");
+  // The jump-to-section nav below named three of its four links in
+  // hardcoded English while the fourth was already translated — the four
+  // chips sat side by side, three in English and one in Greek. Every key
+  // already existed; nothing was reaching them.
+  const tAchievements = await getTranslations("achievements");
   const supabase = createClient();
 
   const {
@@ -193,13 +199,13 @@ export default async function SettingsPage() {
             href="#accessibility"
             className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
           >
-            Accessibility
+            {t("accessibility.title")}
           </a>
           <a
             href="#ai-usage"
             className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
           >
-            AI Usage
+            {t("aiUsage.title")}
           </a>
           <a
             href="#buy-credits"
@@ -211,7 +217,7 @@ export default async function SettingsPage() {
             href="#achievements"
             className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
           >
-            Achievements
+            {tAchievements("title")}
           </a>
         </nav>
 

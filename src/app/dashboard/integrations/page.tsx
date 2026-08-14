@@ -1,3 +1,4 @@
+import { pageTitleMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
@@ -17,7 +18,9 @@ import { IntegrationsList } from "@/components/integrations/integrations-list";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Integrations" };
+export function generateMetadata() {
+  return pageTitleMetadata("sidebar.items.integrations");
+}
 
 export default async function IntegrationsPage() {
   const supabase = createClient();

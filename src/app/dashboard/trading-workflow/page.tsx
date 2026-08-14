@@ -1,3 +1,4 @@
+import { pageTitleMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -23,7 +24,9 @@ import {
 } from "@/lib/trading-pattern";
 import type { ModuleRecord } from "@/types/module-record";
 
-export const metadata: Metadata = { title: "Trading Workflow" };
+export function generateMetadata() {
+  return pageTitleMetadata("sidebar.items.tradingWorkflow");
+}
 
 const MINI_TIMELINE_LIMIT = 10;
 

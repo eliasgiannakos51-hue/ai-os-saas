@@ -21,6 +21,11 @@ export async function BillingSummary({
   // plain "Beta Tester" label instead of an expiry count.
   betaDaysRemaining?: number | null;
 }) {
+  // "Upgrade Plan" was hardcoded English on the billing panel while
+  // credits.outOfCredits.upgradePlan already carried it, translated, in
+  // all ten locales — the same shape as the settings jump links and the
+  // upgrade wall: the string existed and nothing reached it.
+  const tCredits = await getTranslations("credits.outOfCredits");
   const t = await getTranslations("settings.billing");
   const plan = getPlan(tier) ?? getPlan("free")!;
 
@@ -53,9 +58,9 @@ export async function BillingSummary({
           ) : (
             <Link
               href="/pricing"
-              className="inline-flex min-h-[40px] items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
             >
-              Upgrade Plan
+              {tCredits("upgradePlan")}
             </Link>
           )}
           {(hasSubscription || isAdmin || isBetaTester) && tier !== "free" && (

@@ -48,10 +48,11 @@ export function ExamplePrompts({
             type="button"
             data-testid="ai-example"
             onClick={() => onPick(example)}
-            // 36px rather than the 30px Files used: this is a real touch
-            // target on a phone, and it is the first thing a new user is
-            // invited to press.
-            className="inline-flex min-h-[36px] items-center rounded-full border border-border px-3 py-1 text-[11px] leading-tight text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-300"
+            // 44 on a phone, 36 once there is a mouse. This is the first
+            // thing a new user is invited to press, and it was measured at
+            // 36 tall on every AI surface — under the size a finger
+            // reliably hits.
+            className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1 text-[11px] leading-tight text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-300 sm:min-h-[36px]"
           >
             {example}
           </button>

@@ -19,7 +19,7 @@
 //    sentence they then apply to the features that DO work.
 //
 // Run: node scripts/tests/sidebar-naming.test.mjs
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 
 let pass = 0;
 const failures = [];
@@ -225,6 +225,46 @@ check(
 );
 // Presentation Notes was already honest and must not have been churned.
 check("Presentation Notes is unchanged", lookup(messages.en, "sidebar.items.presentations") === "Presentation Notes");
+
+console.log("\n== 4d. the browser tab is the third place the name appears ==");
+// It was the one piece of UI still in English: 31 pages declaring
+// `export const metadata = { title: "Mission Control" }`, plus the module
+// catch-all. A Greek user's tab strip read Timeline / Files /
+// Integrations above pages that were entirely in Greek — and after the
+// renaming pass it read the OLD names, so one thing had three names at
+// once.
+function walkPages(dir) {
+  const out = [];
+  for (const entry of readdirSync(dir)) {
+    const p = `${dir}/${entry}`;
+    if (statSync(p).isDirectory()) out.push(...walkPages(p));
+    else if (entry === "page.tsx") out.push(p);
+  }
+  return out;
+}
+const dashboardPages = walkPages("src/app/dashboard");
+const hardcodedTabs = dashboardPages.filter((file) => {
+  const src = readFileSync(file, "utf8");
+  const m = src.match(/export const metadata: Metadata = \{[\s\S]*?\};/);
+  // A literal English title is the fault. A page with no metadata at all
+  // inherits the layout's, which is fine.
+  return m && /title:\s*"/.test(m[0]);
+});
+check(
+  `no dashboard page hardcodes its tab title (${dashboardPages.length} pages)`,
+  hardcodedTabs.length <= 2,
+  hardcodedTabs.join(", ")
+);
+// The two that legitimately keep theirs, named so the allowance cannot
+// quietly grow: System Health is an owner-only diagnostic page, and a
+// document's tab is the document's own name rather than a nav label.
+check(
+  "and the two that do are the two that should",
+  hardcodedTabs.every((f) => /system-health|documents\/\[id\]/.test(f)),
+  hardcodedTabs.join(", ")
+);
+const metadataHelper = readFileSync("src/lib/page-metadata.ts", "utf8");
+check("the tab title reads the same key as the sidebar", /sidebar\.items\.\$\{config\.titleKey\}/.test(metadataHelper));
 
 console.log("\n== 5. the approved renames landed everywhere the name is shown ==");
 // A name changed in the sidebar but not on the page it opens gives the

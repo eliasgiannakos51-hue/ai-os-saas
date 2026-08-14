@@ -1,3 +1,4 @@
+import { pageTitleMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -14,9 +15,9 @@ import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/admin";
 
-export const metadata: Metadata = {
-  title: "AI Memory",
-};
+export function generateMetadata() {
+  return pageTitleMetadata("sidebar.items.memory");
+}
 
 // Every table with a ModuleConfig, across both the original 13 business
 // modules (CLASSIFIER_MODULES, which is ideas + lib/modules.ts's MODULES)

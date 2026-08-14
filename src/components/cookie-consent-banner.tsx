@@ -46,7 +46,7 @@ export function CookieConsentBanner() {
             type="button"
             onClick={() => setExpanded((e) => !e)}
             aria-expanded={expanded}
-            className="flex min-w-0 items-center gap-1.5 text-left text-xs text-muted transition-colors duration-150 hover:text-foreground"
+            className="flex min-h-[44px] min-w-0 items-center gap-1.5 text-left text-xs text-muted transition-colors duration-150 hover:text-foreground sm:min-h-0"
           >
             <span>
               We use cookies for essential functionality — signing you in and keeping your
@@ -62,7 +62,7 @@ export function CookieConsentBanner() {
           <button
             type="button"
             onClick={accept}
-            className="inline-flex min-h-[36px] shrink-0 items-center justify-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 sm:min-h-0"
+            className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 sm:min-h-0"
           >
             Accept
           </button>

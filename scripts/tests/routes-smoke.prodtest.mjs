@@ -752,6 +752,12 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   );
   checkTrue("no raw i18n key leaks into it", !/module\.empty/.test(main));
 
+  // THE BROWSER TAB, in Greek. It was the last piece of English on an
+  // otherwise translated screen, and the piece that survives the page
+  // being scrolled away or buried behind twenty other tabs.
+  const tabTitle = await page.title();
+  checkTrue(`the tab title is Greek ("${tabTitle}")`, /Αιτήματα κώδικα/.test(tabTitle), tabTitle);
+
   // THE SWITCHES, LOOKED AT. Their hit area was grown from 24px to 44 by
   // padding the box and clipping the background back to the content
   // box — the track must still paint at its original size, so this is

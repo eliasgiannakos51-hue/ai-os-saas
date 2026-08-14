@@ -1,3 +1,4 @@
+import { pageTitleMetadata } from "@/lib/page-metadata";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -18,7 +19,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Published Sites" };
+export function generateMetadata() {
+  return pageTitleMetadata("sidebar.items.published");
+}
 
 // Every site this account has live, with its traffic and its version
 // history.

@@ -171,7 +171,7 @@ export default async function TradingWorkflowPage() {
         <div className="mt-8">
           <h2 className="mb-3 text-sm font-semibold text-foreground">{t("tradesTitle")}</h2>
 
-          {error && <ErrorMessage message={`loading trades: ${error.message}`} />}
+          {error && <ErrorMessage detail={`loading trades: ${error.message}`} />}
 
 
           <GenericList module={tradingModule} records={tradeRows} linkedEntities={linkedEntities} />

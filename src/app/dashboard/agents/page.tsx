@@ -95,8 +95,8 @@ export default async function AgentsPage() {
           {t("aiDisclosure")}
         </p>
 
-        {agentsError && <ErrorMessage message={`loading agents: ${agentsError.message}`} />}
-        {runsError && <ErrorMessage message={`loading agent runs: ${runsError.message}`} />}
+        {agentsError && <ErrorMessage detail={`loading agents: ${agentsError.message}`} />}
+        {runsError && <ErrorMessage detail={`loading agent runs: ${runsError.message}`} />}
 
         <AgentsWorkspace
           agents={(agents as UserAgent[] | null) ?? []}

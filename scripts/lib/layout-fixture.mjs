@@ -204,6 +204,37 @@ export async function buildFixture() {
     created_at: isoDaysAgo(i),
   }));
 
+  // AN ACCOUNT THAT HAS FINISHED ONBOARDING.
+  //
+  // Without this row, dashboard/overview/page.tsx:96 redirects to
+  // /onboarding — so every layout check that has ever "measured
+  // /dashboard/overview", here and in routes-smoke.prodtest.mjs, actually
+  // measured the onboarding wizard. The smoke test could not see it: its
+  // only redirect guard is `landedOn !== "/login"`, and this redirect goes
+  // somewhere else. The app's busiest signed-in screen had never been
+  // measured at any width.
+  tables.user_onboarding = [
+    {
+      user_id: USER_ID,
+      completed_at: isoDaysAgo(30),
+      skipped_at: null,
+      created_at: isoDaysAgo(30),
+    },
+  ];
+
+  tables.user_insights = seq(3, (i) => ({
+    id: `insight-${i}`,
+    user_id: USER_ID,
+    detector: "spend_spike",
+    module_slug: "finance",
+    headline: `${LONG_EL} #${i + 1}`,
+    detail: LONG_PROSE,
+    evidence: { rows: 12 },
+    sample_size: 37,
+    dismissed_at: null,
+    created_at: isoDaysAgo(i),
+  }));
+
   // One row, read with .single().
   tables.user_credits = [
     {

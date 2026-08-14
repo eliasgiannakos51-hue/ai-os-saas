@@ -140,7 +140,7 @@ export default async function ProductWorkflowPage() {
         <div className="mt-8">
           <h2 className="mb-3 text-sm font-semibold text-foreground">{t("productsTitle")}</h2>
 
-          {error && <ErrorMessage message={`loading products: ${error.message}`} />}
+          {error && <ErrorMessage detail={`loading products: ${error.message}`} />}
 
 
           <GenericList module={productsModule} records={productRows} linkedEntities={linkedEntities} />

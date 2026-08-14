@@ -60,7 +60,16 @@ check(
   "the page takes its title from the shared translated name",
   /pageTitle\("sidebar\.items\.presentations"\)/.test(page)
 );
-check("and the header does too", /title=\{config\.title\}/.test(readFileSync("src/components/modules/build-module-page.tsx", "utf8")));
+// The <h1> reads the same translated name, derived from the slug. It used
+// to read `config.title` — the English string in this file — which put
+// "Presentation Notes" at the top of a Greek page even though the rename
+// this test protects had been done properly everywhere else.
+const buildPage = readFileSync("src/components/modules/build-module-page.tsx", "utf8");
+check("and the header does too", /title=\{moduleLabel\}/.test(buildPage));
+check(
+  "...taking it from the slug, so the rename still propagates",
+  /sidebarKeyForSlug\(config\.slug\)/.test(buildPage)
+);
 
 console.log("\n== 2. the sidebar label and its lookup key agree ==");
 const nav = readFileSync("src/lib/sidebar-nav.ts", "utf8");

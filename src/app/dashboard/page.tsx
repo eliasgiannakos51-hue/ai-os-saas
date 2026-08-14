@@ -46,7 +46,7 @@ export default async function DashboardPage() {
           <AddIdeaForm />
         </div>
 
-        {error && <ErrorMessage message={`loading ideas: ${error.message}`} />}
+        {error && <ErrorMessage detail={`loading ideas: ${error.message}`} />}
 
         <IdeasList
           ideas={(ideas as Idea[]) ?? []}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { pageTitle } from "@/lib/page-title";
 import { sidebarKeyForSlug } from "@/lib/favoritable";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
@@ -41,6 +42,12 @@ export default async function ModulePage({
     notFound();
   }
 
+  // Same as the Build modules above: the <h1> was the English config title
+  // on all twelve business module pages.
+  const moduleLabel = (await getTranslations("sidebar.items"))(
+    sidebarKeyForSlug(moduleConfig.slug)
+  );
+
   const supabase = createClient();
 
   const {
@@ -79,11 +86,11 @@ export default async function ModulePage({
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={MODULE_ICONS[moduleConfig.slug]} title={moduleConfig.title} />
+        <PageHeader icon={MODULE_ICONS[moduleConfig.slug]} title={moduleLabel} />
 
 
         {error && (
-          <ErrorMessage message={`loading ${moduleConfig.table}: ${error.message}`} />
+          <ErrorMessage detail={`loading ${moduleConfig.table}: ${error.message}`} />
         )}
 
         {isAutomationModule && <AutomationActiveList automations={userAutomations} />}

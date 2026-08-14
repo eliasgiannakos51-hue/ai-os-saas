@@ -142,7 +142,7 @@ export default async function MissionPage() {
 
         <ScheduledRunsList runs={pendingRuns} />
 
-        {error && <ErrorMessage message={`loading missions: ${error.message}`} />}
+        {error && <ErrorMessage detail={`loading missions: ${error.message}`} />}
 
         {/* A degraded session must never render as "you have no missions".
             Showing a reload prompt instead is the difference between the

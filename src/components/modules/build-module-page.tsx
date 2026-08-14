@@ -1,4 +1,6 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
+import { sidebarKeyForSlug } from "@/lib/favoritable";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -30,6 +32,11 @@ export async function BuildModulePage({
   config: ModuleConfig;
   icon: LucideIcon;
 }) {
+  // `config.title` is the author's English name — "AI Coding", "Marketing
+  // Campaigns". Printed as the page's <h1> it put an English heading at the
+  // top of a Greek page on all seven Build modules. The sidebar has always
+  // had the reader's name for them.
+  const moduleLabel = (await getTranslations("sidebar.items"))(sidebarKeyForSlug(config.slug));
   const supabase = createClient();
 
   const {
@@ -48,7 +55,7 @@ export async function BuildModulePage({
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={icon} title={config.title} />
+          <PageHeader icon={icon} title={moduleLabel} />
           <UpgradeRequired
             featureName={config.title}
             planName={requiredPlan?.name ?? config.minPlanSlug}
@@ -72,10 +79,10 @@ export async function BuildModulePage({
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={icon} title={config.title} />
+        <PageHeader icon={icon} title={moduleLabel} />
 
 
-        {error && <ErrorMessage message={`loading ${config.table}: ${error.message}`} />}
+        {error && <ErrorMessage detail={`loading ${config.table}: ${error.message}`} />}
 
         <GenericList
           module={config}

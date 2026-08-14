@@ -67,7 +67,7 @@ export default async function DocumentsPage() {
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader icon={FileText} title={t("title")} description={t("description")} />
 
-        {error && <ErrorMessage message={`loading documents: ${error.message}`} />}
+        {error && <ErrorMessage detail={`loading documents: ${error.message}`} />}
 
         <DocumentsList documents={docs} favoritedIds={[...favoritedDocIds]} />
       </div>

@@ -349,10 +349,22 @@ async function sweep(context, route, locale) {
     checkTrue(`${locale} ${route}: loaded`, false, err.message);
     return;
   }
+  // THE ROUTE HAS TO BE THE ROUTE.
+  //
+  // Not "did not bounce to /login", which is what the older smoke test
+  // asserts — that check passes happily when a page redirects somewhere
+  // else, and one does: /dashboard/overview sends an account with no
+  // onboarding row to /onboarding. Every layout measurement ever taken of
+  // the app's busiest signed-in screen was actually taken of the
+  // onboarding wizard, and nothing said so.
   const landedOn = new URL(page.url()).pathname;
-  if (landedOn === "/login" && route !== "/login") {
+  if (landedOn !== route) {
     await page.close();
-    checkTrue(`${locale} ${route}: did not bounce to /login`, false, `landed on ${landedOn}`);
+    checkTrue(
+      `${locale} ${route}: measured the route it asked for`,
+      false,
+      `redirected to ${landedOn} — whatever was measured, it was not ${route}`
+    );
     return;
   }
 
@@ -474,15 +486,34 @@ const MODALS = [
     const page = await authed.newPage();
     await page.goto(`${harness.origin}${modal.route}`, { waitUntil: "networkidle", timeout: 45000 });
     let opened = true;
+    let why = "";
     try {
       const result = await modal.open(page);
-      if (result === false) opened = false;
-      await page.waitForSelector('[role="dialog"]', { timeout: 4000 });
-    } catch {
+      if (result === false) {
+        opened = false;
+        why = "the trigger was not on the page";
+      }
+      if (opened) await page.waitForSelector('[role="dialog"]', { timeout: 4000 });
+    } catch (err) {
       opened = false;
+      if (!why) why = err.message.split("\n")[0];
     }
 
-    checkTrue(`${modal.name}: opens`, opened, `no [role="dialog"] on ${modal.route}`);
+    // "does not open" is not a finding, it is a question. When the trigger
+    // cannot be found, say what IS on the page — the first version of this
+    // section reported all four dialogs as broken when three of them were
+    // fine and the selectors were looking in the wrong place.
+    if (!opened) {
+      const buttons = await page.evaluate(() =>
+        [...document.querySelectorAll("button")]
+          .map((b) => (b.getAttribute("aria-label") || b.textContent || "").trim().slice(0, 40))
+          .filter(Boolean)
+          .slice(0, 12)
+      );
+      why += `; buttons present: ${JSON.stringify(buttons)}`;
+    }
+
+    checkTrue(`${modal.name}: opens`, opened, `on ${modal.route}: ${why}`);
     if (!opened) {
       await page.close();
       continue;

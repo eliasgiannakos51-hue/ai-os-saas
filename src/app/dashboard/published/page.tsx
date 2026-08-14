@@ -122,7 +122,7 @@ export default async function PublishedSitesPage() {
           {t("analyticsNotice")}
         </p>
 
-        {sitesError && <ErrorMessage message={`loading published sites: ${sitesError.message}`} />}
+        {sitesError && <ErrorMessage detail={`loading published sites: ${sitesError.message}`} />}
 
         <PublishedSitesList
           sites={rows}

@@ -11,7 +11,7 @@ import { useSmartSuggestions } from "@/lib/use-smart-suggestions";
 import { SmartSuggestions } from "@/components/create/smart-suggestions";
 import { NextStepSuggestion } from "@/components/create/next-step-suggestion";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
-import { appendClarificationAnswers } from "@/lib/clarification-client";
+import { appendClarificationAnswers, alignSuggestions } from "@/lib/clarification-client";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useToast } from "@/components/toast/toast-context";
@@ -232,6 +232,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
           {result.type === "needsClarification" && (
             <ClarificationQuestions
               questions={result.questions}
+              suggestions={alignSuggestions(result.questions, result.suggestions)}
               onAnswer={(answers) => handleClarificationAnswer(result.questions, answers)}
               onSkip={handleClarificationSkip}
               submitting={loading}

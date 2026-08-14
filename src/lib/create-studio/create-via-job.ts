@@ -1,6 +1,7 @@
 "use client";
 
 import { startAndWatchJob } from "@/lib/jobs/start-and-watch";
+import { alignSuggestions } from "@/lib/clarification-client";
 
 /**
  * Create Anything, started as a background job, reported in the shape its
@@ -25,6 +26,10 @@ export type CreateOutcome = {
   matched?: boolean;
   needsClarification?: boolean;
   questions?: string[];
+  /** Tappable answers, aligned by index with `questions` — always the
+   *  same length, so a question with none offered has an empty array
+   *  rather than a missing one. */
+  questionSuggestions?: string[][];
   outOfCredits?: boolean;
   moduleTitle?: string;
   href?: string;
@@ -48,7 +53,17 @@ export async function createViaJob(body: Record<string, unknown>): Promise<Creat
 
   const r = outcome.result as Record<string, unknown>;
   if (r.needsClarification) {
-    return { ok: true, needsClarification: true, questions: (r.questions ?? []) as string[] };
+    const questions = (r.questions ?? []) as string[];
+    return {
+      ok: true,
+      needsClarification: true,
+      questions,
+      // Realigned rather than trusted: a job that finished before
+      // suggestions existed carries none, and since finished-but-unseen
+      // jobs are offered back for 24 hours (lib/jobs/resumable.ts) that
+      // older shape can still reach this code.
+      questionSuggestions: alignSuggestions(questions, r.questionSuggestions),
+    };
   }
   // An insert that failed saved nothing and was refunded — reported as an
   // error rather than as an unmatched classification, which would read to

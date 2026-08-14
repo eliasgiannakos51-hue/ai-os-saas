@@ -58,6 +58,31 @@ const user = () => ({
 const BUILD_DELAY_MS = 6000;
 let anthropicCalls = 0;
 
+// What the clarifying-questions pre-check comes back with.
+//
+// Mutable because the two things worth testing about it are opposites: a
+// clear request must sail past it (every section before 9), and a vague
+// one must stop and ASK — with answers the user can tap. Section 9 flips
+// this and drives the real UI against it.
+//
+// The field names are the tool schema's, not invented ones: needing a
+// second look at lib/clarification.ts to write this fake is the point,
+// because a stub that agrees with a schema nobody checked is how a parser
+// bug survives its own test.
+// needsClarification, camelCase — the field name in CLARIFICATION_TOOL's
+// input_schema. Written snake_case first, and the symptom was a build that
+// completed normally with no questions anywhere: parseClarificationResult
+// reads `input.needsClarification`, a snake_case key is simply absent, and
+// "absent" parses to "no questions needed". The fake was wrong, not the
+// parser — the same trap this file's build payload already documents, and
+// the reason a stub is only worth what it was checked against.
+let clarifyAnswer = { needsClarification: false, questions: [] };
+const CLARIFY_QUESTIONS = [
+  { question: "How often should it run?", suggestions: ["Every morning", "Weekly", "Every Monday"] },
+  { question: "Where should it look?", suggestions: ["Official sources", "Anywhere reputable"] },
+  { question: "What if there is nothing that day?", suggestions: ["Say nothing", "Tell me anyway"] },
+];
+
 const anthropic = http.createServer((req, res) => {
   let body = "";
   req.on("data", (c) => (body += c));
@@ -96,7 +121,7 @@ const anthropic = http.createServer((req, res) => {
           ],
         }
       : isClarify
-      ? { needs_clarification: false, questions: [] }
+      ? clarifyAnswer
       : {
           // The REAL field names from agent-builder's tool schema. My first
           // version used snake_case and the job completed with
@@ -740,6 +765,87 @@ try {
       jobs.get(uiJobId)?.attempts === 1
     );
     await ctxA.close();
+  }
+
+  // -------------------------------------------------------------------
+  console.log("\n== 9. the clarifying questions actually reach the screen ==");
+  // -------------------------------------------------------------------
+  // The reported symptom was "needsClarification exists in the build
+  // response but never fires". The cause was the system prompt, not the
+  // wiring — so this proves the wiring end to end by making the check say
+  // yes and then looking at what a real browser renders.
+  //
+  // Everything after the fake's answer is the real thing: the real
+  // handler, the real parser, the real job row, the real component.
+  {
+    clarifyAnswer = { needsClarification: true, questions: CLARIFY_QUESTIONS };
+    const ctxQ = await newContext();
+    const pageQ = await ctxQ.newPage();
+    const AGENTS = `http://127.0.0.1:${PORT}/dashboard/agents`;
+    await pageQ.goto(AGENTS, { waitUntil: "networkidle", timeout: 60000 });
+    await pageQ.getByRole("button", { name: "New agent" }).click();
+    await pageQ.locator("#agent-request").fill("Keep me updated on my competitors");
+    await pageQ.getByRole("button", { name: "Design my agent" }).click();
+
+    const asked = await pageQ
+      .waitForFunction(() => document.body.innerText.includes("How often should it run?"), { timeout: 40000 })
+      .then(() => true)
+      .catch(() => false);
+    const bodyQ = await pageQ.evaluate(() => document.body.innerText);
+    // The ROW, not just the pixels. "The questions did not appear" has
+    // three very different causes — the job failed, the check said no, or
+    // the screen dropped what it was given — and only the row can say
+    // which, so it is printed rather than guessed at.
+    const askJob = [...jobs.values()].filter((j) => j.kind === "agent_build").pop();
+    check(
+      "a vague request is asked about instead of guessed at",
+      asked,
+      `job=${JSON.stringify({ status: askJob?.status, error: askJob?.error, result: askJob?.result })}\n        page=${bodyQ.replace(/\s+/g, " ").slice(-400)}`
+    );
+    check("   all three questions are shown", /Where should it look\?/.test(bodyQ) && /nothing that day/.test(bodyQ));
+
+    // (γ) the answers are tappable, not an empty box.
+    const chip = pageQ.getByRole("button", { name: "Every morning", exact: true });
+    check("   the suggested answers are real buttons", (await chip.count()) === 1);
+    await chip.click();
+    await pageQ.waitForTimeout(200);
+    const filled = await pageQ.locator("#clarify-0").inputValue();
+    check(`   tapping one fills that answer ("${filled}")`, filled === "Every morning");
+    check("   and marks itself chosen", (await chip.getAttribute("aria-pressed")) === "true");
+    await chip.click();
+    await pageQ.waitForTimeout(200);
+    check("   tapping it again clears it", (await pageQ.locator("#clarify-0").inputValue()) === "");
+    await chip.click();
+    await pageQ.waitForTimeout(200);
+
+    // (γ) Skip is always there.
+    check("   Skip is on the screen", (await pageQ.getByRole("button", { name: "Skip, build it anyway" }).count()) === 1);
+
+    // The answer is folded back into the ORIGINAL request and resubmitted
+    // with skipClarification, so the second pass is not asked again.
+    const jobsBeforeAnswer = jobs.size;
+    await pageQ.getByRole("button", { name: "Continue", exact: true }).click();
+    let secondJob = null;
+    for (let i = 0; i < 60 && !secondJob; i++) {
+      await new Promise((r) => setTimeout(r, 250));
+      if (jobs.size > jobsBeforeAnswer) secondJob = [...jobs.values()].pop();
+    }
+    check("   answering starts a second, informed build", Boolean(secondJob));
+    check(
+      "   carrying the original sentence AND the answer",
+      /Keep me updated on my competitors/.test(secondJob?.input?.request ?? "") &&
+        /Every morning/.test(secondJob?.input?.request ?? ""),
+      String(secondJob?.input?.request ?? "").slice(0, 300)
+    );
+    check("   and it does not ask the same questions again", secondJob?.input?.skipClarification === true);
+    // (δ) the check is given what the app already knows, so it cannot ask
+    // for it — captured by the route, on the FIRST pass only.
+    const firstJob = [...jobs.values()].find((j) => j.kind === "agent_build" && j.input?.skipClarification === false);
+    check("   the first pass carried the AI Life Context", typeof firstJob?.input?.knownContext === "string" && firstJob.input.knownContext.length > 0);
+    check("   the resubmission did not pay for it again", secondJob?.input?.knownContext == null);
+
+    await ctxQ.close();
+    clarifyAnswer = { needsClarification: false, questions: [] };
   }
 } catch (err) {
   failures.push("unhandled error");

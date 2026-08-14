@@ -13,7 +13,7 @@ import { ClarificationQuestions } from "@/components/clarification/clarification
 import { useToast } from "@/components/toast/toast-context";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { formatDateTimeInZone, formatNumber } from "@/lib/format-number";
-import { appendClarificationAnswers } from "@/lib/clarification-client";
+import { appendClarificationAnswers, alignSuggestions } from "@/lib/clarification-client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useAiJob } from "@/lib/jobs/use-ai-job";
 import { markJobConsumed } from "@/lib/jobs/consume";
@@ -45,6 +45,8 @@ type BuildResponse = {
   built?: boolean;
   needsClarification?: boolean;
   questions?: string[];
+  /** Tappable answers, aligned by index with `questions`. */
+  questionSuggestions?: string[][];
   draft?: AgentDraft;
   understood?: string;
   unsupported?: string;
@@ -85,6 +87,7 @@ export function AgentsWorkspace({
   const [runJobId, setRunJobId] = useState<string | null>(null);
   const { job: runJob, isRunning: runningNow } = useAiJob(runJobId);
   const [questions, setQuestions] = useState<string[] | null>(null);
+  const [questionSuggestions, setQuestionSuggestions] = useState<string[][]>([]);
   const [preview, setPreview] = useState<BuildResponse | null>(null);
   // WHICH JOB THE THING ON SCREEN CAME FROM. jobId is cleared the moment
   // the row reaches an outcome, but the draft it produced is still in
@@ -154,6 +157,7 @@ export function AgentsWorkspace({
         return;
       }
       setQuestions(null);
+      setQuestionSuggestions([]);
       setPreview(null);
       setJobId(String(data.jobId));
     } catch (err) {
@@ -181,6 +185,11 @@ export function AgentsWorkspace({
     setResultJobId(job.id);
     if (result.needsClarification && result.questions?.length) {
       setQuestions(result.questions);
+      // Realigned rather than trusted. A build that finished before
+      // suggestions existed carries none, and since a finished-but-unseen
+      // job is offered back for 24 hours (lib/jobs/resumable.ts), that
+      // older result shape can still arrive here after a deploy.
+      setQuestionSuggestions(alignSuggestions(result.questions, result.questionSuggestions));
       setPreview(null);
     } else if (result.built) {
       setQuestions(null);
@@ -320,6 +329,7 @@ export function AgentsWorkspace({
     setCreating(false);
     setRequestText("");
     setQuestions(null);
+    setQuestionSuggestions([]);
     setPreview(null);
   }
 
@@ -481,6 +491,7 @@ export function AgentsWorkspace({
               <JobSeen jobId={resultJobId} />
               <ClarificationQuestions
                 questions={questions}
+                suggestions={questionSuggestions}
                 submitting={building}
                 title={t("clarificationTitle")}
                 skipLabel={t("clarificationSkip")}

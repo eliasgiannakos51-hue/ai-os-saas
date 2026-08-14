@@ -39,7 +39,7 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
 import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
-import { appendClarificationAnswers } from "@/lib/clarification-client";
+import { appendClarificationAnswers, alignSuggestions } from "@/lib/clarification-client";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
 import { DesignControls } from "@/components/website-builder/design-controls";
@@ -242,6 +242,8 @@ export function WebsiteBuilderWorkspace({
   // resubmits without re-uploading images or losing the original text.
   const [pendingClarification, setPendingClarification] = useState<{
     questions: string[];
+    /** Tappable answers, aligned by index with `questions`. */
+    suggestions: string[][];
     name: string;
     description: string;
     referenceImagePaths: string[];
@@ -552,6 +554,10 @@ export function WebsiteBuilderWorkspace({
       if (data.needsClarification) {
         setPendingClarification({
           questions: data.questions as string[],
+          // Realigned rather than trusted: a response written before
+          // suggestions existed carries none, and a mismatched array
+          // would put one question's answers under another.
+          suggestions: alignSuggestions(data.questions as string[], data.questionSuggestions),
           name: trimmedName,
           description: finalDescription,
           referenceImagePaths,
@@ -1408,6 +1414,7 @@ export function WebsiteBuilderWorkspace({
               {pendingClarification ? (
                 <ClarificationQuestions
                   questions={pendingClarification.questions}
+                  suggestions={pendingClarification.suggestions}
                   onAnswer={handleClarificationAnswer}
                   onSkip={handleClarificationSkip}
                   submitting={generating}

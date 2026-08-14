@@ -234,6 +234,7 @@ export async function POST(request: Request) {
             generated: false,
             needsClarification: true,
             questions: clarification.questions,
+            questionSuggestions: clarification.suggestions,
           });
         }
       } catch (err) {

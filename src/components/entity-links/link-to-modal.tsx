@@ -8,6 +8,7 @@ import { useErrorText } from "@/lib/errors/use-error-text";
 import { ChevronLeft, Link2, Search, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
+import { sidebarKeyForSlug } from "@/lib/favoritable";
 import { useToast } from "@/components/toast/toast-context";
 import type { ModuleConfig } from "@/lib/modules";
 
@@ -41,6 +42,9 @@ export function LinkToModal({
 }) {
   const t = useTranslations("entityLinks");
   const describe = useErrorText();
+  // `m.title` is the author's English module name; the picker showed it
+  // untranslated next to fully-Greek chrome.
+  const tSidebar = useTranslations("sidebar.items");
   const tCommon = useTranslations("common");
   const router = useRouter();
   const supabase = createClient();
@@ -174,7 +178,7 @@ export function LinkToModal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
@@ -190,9 +194,9 @@ export function LinkToModal({
                     key={m.slug}
                     type="button"
                     onClick={() => setSelectedModule(m)}
-                    className="rounded-xl border border-border bg-input px-3 py-2.5 text-left text-sm text-foreground transition-colors duration-150 hover:border-orange-500/60 hover:text-orange-400"
+                    className="flex min-h-[44px] items-center rounded-xl border border-border bg-input px-3 py-2.5 text-left text-sm text-foreground transition-colors duration-150 hover:border-orange-500/60 hover:text-orange-400"
                   >
-                    {m.title}
+                    {tSidebar(sidebarKeyForSlug(m.slug))}
                   </button>
                 ))}
               </div>

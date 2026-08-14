@@ -192,7 +192,7 @@ export function AskAiModal({
             type="button"
             onClick={onClose}
             aria-label={t("close")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
@@ -275,7 +275,7 @@ export function AskAiModal({
                 type="submit"
                 disabled={sending || !input.trim()}
                 aria-label={t("send")}
-                className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+                className="absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
               >
                 {sending ? (
                   <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-black/30 border-t-black" />

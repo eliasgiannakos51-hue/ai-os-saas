@@ -313,6 +313,13 @@ const PROBE = () => {
       // Report the DEEPEST offenders only: every ancestor of a too-wide
       // element is also too wide, and the leaf is the one to fix.
       if ([...el.children].some((c) => rectOf(c).right > clientWidth + 1)) continue;
+      // A `position: fixed` element is OUT OF FLOW — it cannot extend
+      // document.scrollWidth however wide it is. The decorative background
+      // blobs are fixed and enormous, so they won the "widest" contest on
+      // every overflowing page and pointed at themselves instead of at the
+      // element actually causing the scroll. Naming an innocent element is
+      // worse than naming none: it sends you to fix the wrong thing.
+      if (layerOf(el)) continue;
       overflowing.push({ path: path(el), right: Math.round(r.right), text: label(el).slice(0, 40) });
     }
   }

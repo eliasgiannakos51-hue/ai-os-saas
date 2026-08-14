@@ -319,7 +319,22 @@ const PROBE = () => {
       // every overflowing page and pointed at themselves instead of at the
       // element actually causing the scroll. Naming an innocent element is
       // worse than naming none: it sends you to fix the wrong thing.
-      if (layerOf(el)) continue;
+      //
+      // FIXED ONLY — not `layerOf`, which also matches `sticky`. A sticky
+      // element is still in normal flow horizontally and absolutely can
+      // push the page sideways; the dashboard header is sticky, and a
+      // header too wide at 768px is the exact bug that was reported three
+      // times as "the Publish bar is squeezed to the left". Excluding
+      // sticky here made this diagnostic name nothing at all on a page
+      // that was demonstrably 32px too wide.
+      let insideFixed = false;
+      for (let p = el; p && p !== document.body; p = p.parentElement) {
+        if (getComputedStyle(p).position === "fixed") {
+          insideFixed = true;
+          break;
+        }
+      }
+      if (insideFixed) continue;
       overflowing.push({ path: path(el), right: Math.round(r.right), text: label(el).slice(0, 40) });
     }
   }
@@ -641,7 +656,16 @@ check("no route overflows horizontally at any of the four widths", census.overfl
 // routes-smoke.prodtest.mjs before it — measured the onboarding wizard
 // while reporting the route as /dashboard/overview. The extra 26 are the
 // real Home screen's own controls, seen here for the first time.
-const SMALL_TARGET_BASELINE = 119;
+//
+// 119 -> 141 -> 109, and the middle number is the same story once more.
+// Fixing the two modal bugs meant the dialogs actually opened, which put
+// 22 more controls in front of the measurement — every command-palette
+// result row at 40px, Ask AI's Close and Send at 32px, the Link To chips
+// at 42px. None of them were new; nothing had ever opened a modal. They
+// are raised rather than absorbed, because they are the controls a person
+// taps once they are already inside the thing they opened, and that lands
+// at 109 — ten below where the ratchet sat.
+const SMALL_TARGET_BASELINE = 109;
 
 // Text cut off with no title= or aria-label to recover the full string
 // from. Most are card headings under a long record name — the fixture's

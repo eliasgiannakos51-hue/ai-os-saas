@@ -1164,7 +1164,36 @@
         "monthly": "Ημέρα {day} κάθε μήνα στις {time}",
         "custom": "Πρόγραμμα: {expression}"
       },
-      "buildStalled": "Η δημιουργία σταμάτησε απροσδόκητα. Δεν χρεώθηκαν credits — δοκίμασε ξανά."
+      "buildStalled": "Η δημιουργία σταμάτησε απροσδόκητα. Δεν χρεώθηκαν credits — δοκίμασε ξανά.",
+      "delivery": {
+        "label": "Πού πηγαίνει το αποτέλεσμα",
+        "channels": {
+          "email": "Email",
+          "slack": "Slack",
+          "telegram": "Telegram",
+          "discord": "Discord",
+          "in_app": "Μέσα στην εφαρμογή"
+        },
+        "emailNote": "Στέλνεται στο {email} — τη διεύθυνση του λογαριασμού σου.",
+        "inAppNote": "Μένει στην εφαρμογή, στις ειδοποιήσεις σου. Τίποτα δεν φεύγει από το Ionexa.",
+        "slackNotConnected": "Σύνδεσε πρώτα το Slack στις Ενσωματώσεις.",
+        "slackChannelLabel": "Κανάλι Slack",
+        "telegramHelp": "Φτιάξε ένα bot με τον @BotFather, στείλε του ένα μήνυμα και μετά επικόλλησε το token και το chat id σου.",
+        "telegramTokenPlaceholder": "Token του bot",
+        "telegramChatPlaceholder": "Chat id, π.χ. 123456789",
+        "telegramTokenInvalid": "Αυτό δεν μοιάζει με token bot του Telegram.",
+        "telegramChatInvalid": "Αυτό δεν μοιάζει με chat id του Telegram.",
+        "telegramConnected": "Συνδέθηκε με τη συνομιλία {chat} · token {hint}",
+        "discordHelp": "Στο κανάλι σου στο Discord: Ρυθμίσεις → Integrations → Webhooks → New Webhook και αντίγραψε τη διεύθυνση.",
+        "discordUrlPlaceholder": "Διεύθυνση webhook του Discord",
+        "discordUrlInvalid": "Αυτή δεν είναι διεύθυνση webhook του Discord.",
+        "discordConnected": "Συνδέθηκε · webhook {hint}",
+        "connect": "Σύνδεση και δοκιμαστικό μήνυμα",
+        "connectSuccess": "Συνδέθηκε — παραδόθηκε δοκιμαστικό μήνυμα.",
+        "connectFailed": "Δεν ήταν δυνατή η σύνδεση αυτού του καναλιού.",
+        "disconnect": "Αποσύνδεση",
+        "disconnected": "Αποσυνδέθηκε."
+      }
     },
     "publishing": {
       "title": "Δημοσιευμένα Sites",

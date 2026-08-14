@@ -1164,7 +1164,36 @@
         "monthly": "Le {day} de chaque mois à {time}",
         "custom": "Planning : {expression}"
       },
-      "buildStalled": "La création s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez."
+      "buildStalled": "La création s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez.",
+      "delivery": {
+        "label": "Où arrive le résultat",
+        "channels": {
+          "email": "E-mail",
+          "slack": "Slack",
+          "telegram": "Telegram",
+          "discord": "Discord",
+          "in_app": "Dans l’application"
+        },
+        "emailNote": "Envoyé à {email}, l’adresse de votre compte.",
+        "inAppNote": "Conservé dans l’application, dans vos notifications. Rien ne quitte Ionexa.",
+        "slackNotConnected": "Connectez d’abord Slack dans Intégrations.",
+        "slackChannelLabel": "Canal Slack",
+        "telegramHelp": "Créez un bot avec @BotFather, envoyez-lui un message, puis collez son token et votre chat id.",
+        "telegramTokenPlaceholder": "Token du bot",
+        "telegramChatPlaceholder": "Chat id, ex. 123456789",
+        "telegramTokenInvalid": "Cela ne ressemble pas à un token de bot Telegram.",
+        "telegramChatInvalid": "Cela ne ressemble pas à un chat id Telegram.",
+        "telegramConnected": "Connecté à la conversation {chat} · token {hint}",
+        "discordHelp": "Dans votre canal Discord : Paramètres → Intégrations → Webhooks → Nouveau webhook, puis copiez l’adresse.",
+        "discordUrlPlaceholder": "Adresse du webhook Discord",
+        "discordUrlInvalid": "Ce n’est pas une adresse de webhook Discord.",
+        "discordConnected": "Connecté · webhook {hint}",
+        "connect": "Connecter et envoyer un test",
+        "connectSuccess": "Connecté — un message de test a été remis.",
+        "connectFailed": "Impossible de connecter ce canal.",
+        "disconnect": "Déconnecter",
+        "disconnected": "Déconnecté."
+      }
     },
     "publishing": {
       "title": "Sites publiés",

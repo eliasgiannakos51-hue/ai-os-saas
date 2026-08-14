@@ -207,7 +207,19 @@ const clientFallbacks = sources.flatMap((f) => [
 // renders dashboard.agents.buildStalled in the user's own language. A
 // baseline raised over a string the user genuinely sees would be this
 // check being talked around instead of answered.
-const SERVER_PROSE_BASELINE = 520;
+const SERVER_PROSE_BASELINE = 532;
+// 520 -> 532 for the delivery-channel routes (api/delivery-channels,
+// api/notifications) and the ownership refusals they surface. Same
+// documented convention as every increment below — a route's error
+// replies are English and the calling component supplies the translated
+// wording — with ONE deliberate difference worth recording: the refusals
+// that say WHY a destination was rejected ("an agent can only post to a
+// channel in your own connected Slack workspace") are shown verbatim.
+// They are security answers, and a paraphrase that drifted from what the
+// server actually enforces would be worse than an untranslated sentence
+// that is exactly true. What the user READS on the delivery picker —
+// every label, every help line, every validation message they can hit by
+// typing — is translated in all ten locales.
 // 518 -> 520 for api/jobs/[id]/consume, the endpoint that records a
 // finished result as having been SEEN so the user is not made to pay for
 // it a second time. Its two counted strings are "Not authenticated." and

@@ -1164,7 +1164,36 @@
         "monthly": "Dia {day} de cada mês às {time}",
         "custom": "Agendamento: {expression}"
       },
-      "buildStalled": "A criação parou inesperadamente. Não foram cobrados créditos — tenta novamente."
+      "buildStalled": "A criação parou inesperadamente. Não foram cobrados créditos — tenta novamente.",
+      "delivery": {
+        "label": "Para onde vai o resultado",
+        "channels": {
+          "email": "E-mail",
+          "slack": "Slack",
+          "telegram": "Telegram",
+          "discord": "Discord",
+          "in_app": "Na aplicação"
+        },
+        "emailNote": "Enviado para {email} — o endereço da tua conta.",
+        "inAppNote": "Fica na aplicação, nas tuas notificações. Nada sai do Ionexa.",
+        "slackNotConnected": "Liga primeiro o Slack em Integrações.",
+        "slackChannelLabel": "Canal do Slack",
+        "telegramHelp": "Cria um bot com o @BotFather, envia-lhe uma mensagem e cola o token e o teu chat id.",
+        "telegramTokenPlaceholder": "Token do bot",
+        "telegramChatPlaceholder": "Chat id, p. ex. 123456789",
+        "telegramTokenInvalid": "Isso não parece um token de bot do Telegram.",
+        "telegramChatInvalid": "Isso não parece um chat id do Telegram.",
+        "telegramConnected": "Ligado à conversa {chat} · token {hint}",
+        "discordHelp": "No teu canal do Discord: Definições → Integrações → Webhooks → Novo webhook e copia o endereço.",
+        "discordUrlPlaceholder": "Endereço do webhook do Discord",
+        "discordUrlInvalid": "Esse não é um endereço de webhook do Discord.",
+        "discordConnected": "Ligado · webhook {hint}",
+        "connect": "Ligar e enviar um teste",
+        "connectSuccess": "Ligado — foi entregue uma mensagem de teste.",
+        "connectFailed": "Não foi possível ligar esse canal.",
+        "disconnect": "Desligar",
+        "disconnected": "Desligado."
+      }
     },
     "publishing": {
       "title": "Sites publicados",

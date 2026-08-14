@@ -1164,7 +1164,36 @@
         "monthly": "Am {day}. jedes Monats um {time}",
         "custom": "Zeitplan: {expression}"
       },
-      "buildStalled": "Die Erstellung wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen."
+      "buildStalled": "Die Erstellung wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
+      "delivery": {
+        "label": "Wohin das Ergebnis geht",
+        "channels": {
+          "email": "E-Mail",
+          "slack": "Slack",
+          "telegram": "Telegram",
+          "discord": "Discord",
+          "in_app": "In der App"
+        },
+        "emailNote": "Geht an {email} — die Adresse deines Kontos.",
+        "inAppNote": "Bleibt in der App, in deinen Benachrichtigungen. Nichts verlässt Ionexa.",
+        "slackNotConnected": "Verbinde zuerst Slack unter Integrationen.",
+        "slackChannelLabel": "Slack-Kanal",
+        "telegramHelp": "Erstelle mit @BotFather einen Bot, schreib ihm einmal, und füge dann Token und Chat-ID ein.",
+        "telegramTokenPlaceholder": "Bot-Token",
+        "telegramChatPlaceholder": "Chat-ID, z. B. 123456789",
+        "telegramTokenInvalid": "Das sieht nicht nach einem Telegram-Bot-Token aus.",
+        "telegramChatInvalid": "Das sieht nicht nach einer Telegram-Chat-ID aus.",
+        "telegramConnected": "Verbunden mit Chat {chat} · Token {hint}",
+        "discordHelp": "In deinem Discord-Kanal: Einstellungen → Integrationen → Webhooks → Neuer Webhook, dann die Adresse kopieren.",
+        "discordUrlPlaceholder": "Discord-Webhook-Adresse",
+        "discordUrlInvalid": "Das ist keine Discord-Webhook-Adresse.",
+        "discordConnected": "Verbunden · Webhook {hint}",
+        "connect": "Verbinden und Test senden",
+        "connectSuccess": "Verbunden — eine Testnachricht kam an.",
+        "connectFailed": "Dieser Kanal ließ sich nicht verbinden.",
+        "disconnect": "Trennen",
+        "disconnected": "Getrennt."
+      }
     },
     "publishing": {
       "title": "Veröffentlichte Seiten",

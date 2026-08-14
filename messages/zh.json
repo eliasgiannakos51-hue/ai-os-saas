@@ -1164,7 +1164,36 @@
         "monthly": "每月 {day} 号 {time}",
         "custom": "计划：{expression}"
       },
-      "buildStalled": "创建意外中断。未扣除任何积分——请重试。"
+      "buildStalled": "创建意外中断。未扣除任何积分——请重试。",
+      "delivery": {
+        "label": "结果发送到哪里",
+        "channels": {
+          "email": "邮件",
+          "slack": "Slack",
+          "telegram": "Telegram",
+          "discord": "Discord",
+          "in_app": "应用内"
+        },
+        "emailNote": "发送至 {email}，即您的账户邮箱。",
+        "inAppNote": "保留在应用内的通知中，不会离开 Ionexa。",
+        "slackNotConnected": "请先在“集成”中连接 Slack。",
+        "slackChannelLabel": "Slack 频道",
+        "telegramHelp": "用 @BotFather 创建机器人，给它发一条消息，然后粘贴它的 token 和您的 chat id。",
+        "telegramTokenPlaceholder": "机器人 token",
+        "telegramChatPlaceholder": "Chat id，例如 123456789",
+        "telegramTokenInvalid": "这看起来不像 Telegram 机器人 token。",
+        "telegramChatInvalid": "这看起来不像 Telegram chat id。",
+        "telegramConnected": "已连接到会话 {chat} · token {hint}",
+        "discordHelp": "在您的 Discord 频道：设置 → 集成 → Webhook → 新建 Webhook，然后复制地址。",
+        "discordUrlPlaceholder": "Discord webhook 地址",
+        "discordUrlInvalid": "这不是 Discord webhook 地址。",
+        "discordConnected": "已连接 · webhook {hint}",
+        "connect": "连接并发送测试",
+        "connectSuccess": "已连接——测试消息已送达。",
+        "connectFailed": "无法连接该渠道。",
+        "disconnect": "断开连接",
+        "disconnected": "已断开连接。"
+      }
     },
     "publishing": {
       "title": "已发布网站",

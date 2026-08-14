@@ -16,6 +16,8 @@ import { formatDateTimeInZone, formatNumber } from "@/lib/format-number";
 import { appendClarificationAnswers, alignSuggestions } from "@/lib/clarification-client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useAiJob } from "@/lib/jobs/use-ai-job";
+import { DeliveryPicker } from "@/components/agents/delivery-picker";
+import { isDeliveryChannel, type DeliveryChannel } from "@/lib/agents/delivery-channels";
 import { markJobConsumed } from "@/lib/jobs/consume";
 import { JobSeen } from "@/components/jobs/job-seen";
 import { resolveBrowserTimeZone, nextRuns } from "@/lib/agents/cron-expression";
@@ -62,11 +64,16 @@ export function AgentsWorkspace({
   runs,
   agentCap,
   accountEmail,
+  slackChannels = [],
 }: {
   agents: UserAgent[];
   runs: AgentRun[];
   agentCap: number;
   accountEmail: string;
+  /** Channels from this user's own connected Slack workspace, resolved on
+   *  the server. Empty when Slack is not connected — which is what makes
+   *  the picker able to say so instead of offering an empty dropdown. */
+  slackChannels?: { id: string; name: string }[];
 }) {
   const t = useTranslations("dashboard.agents");
   const tModule = useTranslations("module");
@@ -104,6 +111,11 @@ export function AgentsWorkspace({
     prompt: string;
     parts: ScheduleParts;
     needsWebSearch: boolean;
+    // WHERE IT SENDS, editable at last. The API has supported a second
+    // destination since Slack was added and the editor had no field for
+    // it, so every agent anyone could create emailed.
+    deliveryMethod: DeliveryChannel;
+    deliveryTarget: string;
   } | null>(null);
   const [lastRunOutput, setLastRunOutput] = useState<string | null>(null);
 
@@ -408,6 +420,8 @@ export function AgentsWorkspace({
       prompt: agent.prompt,
       parts: cronToParts(agent.schedule_cron) ?? DEFAULT_SCHEDULE_PARTS,
       needsWebSearch: agent.config?.needsWebSearch === true,
+      deliveryMethod: isDeliveryChannel(agent.delivery_method) ? agent.delivery_method : "email",
+      deliveryTarget: agent.delivery_target ?? "",
     });
   }
 
@@ -421,6 +435,12 @@ export function AgentsWorkspace({
         prompt: editDraft.prompt,
         scheduleCron: partsToCron(editDraft.parts),
         needsWebSearch: editDraft.needsWebSearch,
+        // Sent together, because the server resolves the TARGET from the
+        // method: a Discord agent's target is a constant, a Telegram
+        // agent's is the chat saved with the token, and sending one
+        // without the other would ask the route to guess.
+        deliveryMethod: editDraft.deliveryMethod,
+        deliveryTarget: editDraft.deliveryTarget,
       },
       t("updateSuccess")
     );
@@ -749,6 +769,15 @@ export function AgentsWorkspace({
                   onChange={(e) => setEditDraft({ ...editDraft, prompt: e.target.value })}
                 />
               </div>
+              <DeliveryPicker
+                value={editDraft.deliveryMethod}
+                target={editDraft.deliveryTarget}
+                accountEmail={accountEmail}
+                slackChannels={slackChannels}
+                onChange={({ method, target }) =>
+                  setEditDraft({ ...editDraft, deliveryMethod: method, deliveryTarget: target })
+                }
+              />
               <ScheduleEditor
                 parts={editDraft.parts}
                 onChange={(parts) => setEditDraft({ ...editDraft, parts })}

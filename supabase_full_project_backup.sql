@@ -2477,12 +2477,20 @@ grant execute on function public.prune_integration_sync_log() to service_role;
 --
 -- The CHECK is replaced rather than dropped: an agent row must still never
 -- hold a delivery method nothing can honour.
+--
+-- WIDENED AGAIN, and the list here must match
+-- supabase/migrations/20260814_agent_delivery_channels.sql exactly.
+-- Both files DROP this constraint by name before re-adding it, so whichever
+-- runs last wins — and if this one still said ('email','slack'), re-running
+-- it after the newer migration would silently make every Telegram, Discord
+-- and in-app agent row invalid. Two definitions of one constraint is the
+-- drift scripts/tests/enum-schema-drift.test.mjs exists to catch.
 -- ----------------------------------------------------------------------------
 alter table public.user_agents
   drop constraint if exists user_agents_delivery_method_check;
 alter table public.user_agents
   add constraint user_agents_delivery_method_check
-  check (delivery_method in ('email', 'slack'));
+  check (delivery_method in ('email', 'slack', 'telegram', 'discord', 'in_app'));
 
 -- V3 — Universal Integrations:
 --   user_integrations, integration_sync_log

@@ -68,7 +68,20 @@ check("file Q&A still shows its disclosure on screen", /\{answer\.disclosure\}/.
 const agentEmail = read("src/lib/email/send-agent-emails.ts");
 check("agent emails still carry the notice", /aiGeneratedNotice\(language\)/.test(agentEmail));
 const deliver = read("src/lib/agents/deliver.ts");
-check("and so does every other agent delivery channel", /aiGeneratedNotice\(language\)/.test(deliver));
+// STRONGER THAN THE LINE IT REPLACES, which matched the literal
+// `aiGeneratedNotice(language)` and would have passed on a file where
+// three of the five channels never called it. The notice is now added in
+// ONE composer, so the real check is that every transport goes through
+// that composer — which is also what makes a sixth channel carry the
+// notice without anyone remembering to add it.
+check("the notice is added in one shared place", /function composeMessage/.test(deliver) && /aiGeneratedNotice\(/.test(deliver));
+for (const channel of ["slack", "telegram", "discord", "in_app"]) {
+  check(`${channel} delivery composes through it`, new RegExp(`composeMessage\\(\\{ channel: "${channel}"`).test(deliver));
+}
+// And it survives a message too long for the destination: cutting the
+// notice to make room would produce a shorter message that is no longer
+// legal to send.
+check("an over-long message keeps the notice and trims the output", /The notice survives the cut/.test(deliver));
 
 console.log("\n== 3. the notice is translated in every locale ==");
 for (const locale of LOCALES) {

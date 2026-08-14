@@ -7,13 +7,10 @@ import {
   sanitiseAgentText,
   isAgentOutputFormat,
   isAgentDeliveryMethod,
-  isSlackChannelAllowed,
-  normaliseSlackChannel,
-  normaliseDeliveryTarget,
-  isDeliveryTargetAllowed,
   type UserAgent,
 } from "@/lib/agents/agent-config";
-import { listSlackChannels } from "@/lib/integrations/read";
+import { resolveDeliveryOwnership } from "@/lib/agents/delivery-ownership";
+import { resolveDeliveryTarget } from "@/lib/agents/delivery-channels";
 import { validateAgentCron, isValidTimeZone, nextRunAt } from "@/lib/agents/cron-expression";
 
 export const dynamic = "force-dynamic";
@@ -161,46 +158,37 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     // Leaving this out was the quiet gap — an agent created for email could
     // otherwise never be pointed at Slack, and a half-implemented PATCH
     // that accepted the field without the check would be worse than either.
+    // THE SAME OWNERSHIP PROOF AS CREATE, from the same two functions.
+    //
+    // This branch used to carry its own copy of the Slack check and its
+    // own copy of the email check — which was correct while there were
+    // two channels and is exactly how a third arrives checked in one
+    // route and unchecked in the other. An agent's destination is worth
+    // more care than that: it runs unattended, forever, on data the user
+    // has not read yet.
     if (body.deliveryMethod !== undefined || body.deliveryTarget !== undefined) {
       const method = body.deliveryMethod === undefined ? agent.delivery_method : body.deliveryMethod;
       if (!isAgentDeliveryMethod(method)) {
         return NextResponse.json({ ok: false, error: "That delivery method is not available." }, { status: 400 });
       }
 
-      if (method === "slack") {
-        const channel = normaliseSlackChannel(
-          typeof body.deliveryTarget === "string" ? body.deliveryTarget : agent.delivery_target
-        );
-        const channels = await listSlackChannels(user.id);
-        if (!channels.ok) {
-          return NextResponse.json(
-            { ok: false, error: "Connect Slack in Integrations before an agent can post to it." },
-            { status: 400 }
-          );
-        }
-        if (!isSlackChannelAllowed(channel, channels.channels.map((c) => c.id))) {
-          return NextResponse.json(
-            { ok: false, error: "An agent can only post to a channel in your own connected Slack workspace." },
-            { status: 400 }
-          );
-        }
-        updates.delivery_method = "slack";
-        updates.delivery_target = channel;
-      } else {
-        const target = normaliseDeliveryTarget(
-          typeof body.deliveryTarget === "string" && body.deliveryTarget.trim()
-            ? body.deliveryTarget
-            : user.email
-        );
-        if (!isDeliveryTargetAllowed(target, user.email)) {
-          return NextResponse.json(
-            { ok: false, error: "An agent can only send results to your own account email address." },
-            { status: 400 }
-          );
-        }
-        updates.delivery_method = "email";
-        updates.delivery_target = target;
+      const ownership = await resolveDeliveryOwnership(user.id, method);
+      if (!ownership.ok) {
+        return NextResponse.json({ ok: false, error: ownership.message }, { status: 400 });
       }
+      const decision = resolveDeliveryTarget(
+        method,
+        // The agent's current target is the fallback, so changing ONLY
+        // the method on an agent that already had a valid destination
+        // does not silently reset it.
+        typeof body.deliveryTarget === "string" ? body.deliveryTarget : agent.delivery_target,
+        { accountEmail: user.email, ...ownership.context }
+      );
+      if (!decision.ok) {
+        return NextResponse.json({ ok: false, error: decision.message }, { status: 400 });
+      }
+      updates.delivery_method = method;
+      updates.delivery_target = decision.target;
     }
 
     if (body.needsWebSearch !== undefined || body.outputFormat !== undefined) {

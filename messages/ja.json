@@ -1164,7 +1164,36 @@
         "monthly": "毎月 {day} 日 {time}",
         "custom": "スケジュール：{expression}"
       },
-      "buildStalled": "作成が予期せず停止しました。クレジットは請求されていません。もう一度お試しください。"
+      "buildStalled": "作成が予期せず停止しました。クレジットは請求されていません。もう一度お試しください。",
+      "delivery": {
+        "label": "結果の届け先",
+        "channels": {
+          "email": "メール",
+          "slack": "Slack",
+          "telegram": "Telegram",
+          "discord": "Discord",
+          "in_app": "アプリ内"
+        },
+        "emailNote": "アカウントのアドレス {email} に送信します。",
+        "inAppNote": "アプリ内の通知に残ります。Ionexa の外には出ません。",
+        "slackNotConnected": "先に「連携」で Slack を接続してください。",
+        "slackChannelLabel": "Slack チャンネル",
+        "telegramHelp": "@BotFather でボットを作成し、一度メッセージを送ってから、トークンとチャット ID を貼り付けてください。",
+        "telegramTokenPlaceholder": "ボットのトークン",
+        "telegramChatPlaceholder": "チャット ID（例: 123456789）",
+        "telegramTokenInvalid": "Telegram のボットトークンには見えません。",
+        "telegramChatInvalid": "Telegram のチャット ID には見えません。",
+        "telegramConnected": "チャット {chat} に接続済み · トークン {hint}",
+        "discordHelp": "Discord のチャンネルで：設定 → 連携サービス → ウェブフック → 新規作成 し、アドレスをコピーします。",
+        "discordUrlPlaceholder": "Discord ウェブフックのアドレス",
+        "discordUrlInvalid": "Discord のウェブフックのアドレスではありません。",
+        "discordConnected": "接続済み · ウェブフック {hint}",
+        "connect": "接続してテスト送信",
+        "connectSuccess": "接続しました。テストメッセージが届きました。",
+        "connectFailed": "そのチャンネルに接続できませんでした。",
+        "disconnect": "接続を解除",
+        "disconnected": "接続を解除しました。"
+      }
     },
     "publishing": {
       "title": "公開中のサイト",

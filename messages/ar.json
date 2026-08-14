@@ -1164,7 +1164,36 @@
         "monthly": "يوم {day} من كل شهر الساعة {time}",
         "custom": "الجدول: {expression}"
       },
-      "buildStalled": "توقّف الإنشاء بشكل غير متوقع. لم يتم خصم أي رصيد — يرجى المحاولة مرة أخرى."
+      "buildStalled": "توقّف الإنشاء بشكل غير متوقع. لم يتم خصم أي رصيد — يرجى المحاولة مرة أخرى.",
+      "delivery": {
+        "label": "إلى أين تصل النتيجة",
+        "channels": {
+          "email": "البريد",
+          "slack": "Slack",
+          "telegram": "Telegram",
+          "discord": "Discord",
+          "in_app": "داخل التطبيق"
+        },
+        "emailNote": "تُرسل إلى {email}، عنوان حسابك.",
+        "inAppNote": "تبقى داخل التطبيق ضمن إشعاراتك. لا شيء يغادر Ionexa.",
+        "slackNotConnected": "اربط Slack من التكاملات أولاً.",
+        "slackChannelLabel": "قناة Slack",
+        "telegramHelp": "أنشئ بوتًا عبر @BotFather، أرسل له رسالة، ثم الصق الرمز ومعرّف المحادثة.",
+        "telegramTokenPlaceholder": "رمز البوت",
+        "telegramChatPlaceholder": "معرّف المحادثة، مثل 123456789",
+        "telegramTokenInvalid": "هذا لا يبدو رمز بوت في Telegram.",
+        "telegramChatInvalid": "هذا لا يبدو معرّف محادثة في Telegram.",
+        "telegramConnected": "مرتبط بالمحادثة {chat} · الرمز {hint}",
+        "discordHelp": "في قناتك على Discord: الإعدادات ← التكاملات ← Webhooks ← إنشاء، ثم انسخ العنوان.",
+        "discordUrlPlaceholder": "عنوان webhook في Discord",
+        "discordUrlInvalid": "هذا ليس عنوان webhook في Discord.",
+        "discordConnected": "مرتبط · webhook {hint}",
+        "connect": "اربط وأرسل رسالة اختبار",
+        "connectSuccess": "تم الربط — وصلت رسالة اختبار.",
+        "connectFailed": "تعذّر ربط هذه القناة.",
+        "disconnect": "إلغاء الربط",
+        "disconnected": "تم إلغاء الربط."
+      }
     },
     "publishing": {
       "title": "المواقع المنشورة",

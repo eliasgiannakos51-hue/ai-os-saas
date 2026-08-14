@@ -7,7 +7,7 @@
     "signOut": "サインアウト",
     "jumpToPage": "モジュールやページに移動...",
     "noMatches": "'{query}' に一致する結果はありません",
-    "createStudio": "クリエイト・スタジオ",
+    "createStudio": "何でもつくる",
     "cancel": "キャンセル",
     "save": "保存",
     "saving": "保存中...",
@@ -34,7 +34,7 @@
   "sidebar": {
     "groups": {
       "workspace": "ワークスペース",
-      "build": "ビルド",
+      "build": "つくる",
       "business": "ビジネス",
       "strategy": "戦略",
       "operations": "運用",
@@ -43,21 +43,22 @@
       "create": "つくる",
       "myBusiness": "わたしのビジネス",
       "track": "記録する",
-      "insights": "ふりかえり"
+      "insights": "気づいたこと",
+      "tracking": "記録"
     },
     "items": {
       "home": "ホーム",
       "chat": "Ionexa チャット",
-      "memory": "AI メモリー",
-      "timeline": "タイムライン",
+      "memory": "自分の記録を検索",
+      "timeline": "履歴",
       "favorites": "お気に入り",
-      "missionControl": "ミッションコントロール",
+      "missionControl": "目標とプラン",
       "reflection": "週次振り返り",
       "settings": "設定",
       "team": "チーム",
       "agents": "AI エージェント",
-      "websites": "サイト計画",
-      "websiteBuilder": "ウェブサイトビルダー",
+      "websites": "計画",
+      "websiteBuilder": "サイトをつくる",
       "apps": "アプリ",
       "images": "画像",
       "videos": "動画",
@@ -71,7 +72,7 @@
       "content": "マーケティング",
       "sales": "CRM",
       "products": "プロダクト",
-      "research": "ナレッジ",
+      "research": "リサーチ",
       "learning": "学習",
       "ideas": "アイデア",
       "competitors": "競合",
@@ -687,7 +688,7 @@
       "couldNotRemoveMember": "✗ メンバーを削除できませんでした"
     },
     "memory": {
-      "title": "AI メモリー",
+      "title": "自分の記録を検索",
       "description": "どこに記録したか覚えていなくても、全モジュールを横断して記録したすべてを検索できます。"
     },
     "documents": {
@@ -728,7 +729,7 @@
       "title": "何でも作成"
     },
     "timeline": {
-      "title": "タイムライン",
+      "title": "履歴",
       "allModules": "すべてのモジュール",
       "showOnly": "表示: {module}のみ",
       "rangeToday": "今日",
@@ -744,7 +745,7 @@
       "starredAt": "{when}に登録"
     },
     "mission": {
-      "title": "ミッションコントロール",
+      "title": "目標とプラン",
       "started": "開始: {time}",
       "description": "Planner → Builder → Reviewer — 目標を記述すると計画が作成され、AIで一歩ずつ構築できます。",
       "goalLabel": "あなたの目標は?",
@@ -869,7 +870,7 @@
       "levelLabel": "エネルギーレベル {level}"
     },
     "websiteBuilder": {
-      "title": "ウェブサイトビルダー",
+      "title": "サイトをつくる",
       "description": "作りたいものを説明すると、AIが本物の完全なウェブサイトを生成します — 即座にプレビューでき、HTMLをダウンロードできます。",
       "nameLabel": "名前",
       "namePlaceholder": "例: コーチングのランディングページ",
@@ -1018,7 +1019,7 @@
       "clarifyAnswerPlaceholder": "あなたの回答..."
     },
     "createStudio": {
-      "title": "クリエイト・スタジオ",
+      "title": "何でもつくる",
       "subtitle": "作りたいものを一文で書いてください。ツールを選ぶ必要はありません。スタジオが何かを判断し、理解した内容を先に見せてから作成します。",
       "inputLabel": "何を作りますか？",
       "inputPlaceholder": "例: コーチング事業向けの、温かく professional なランディングページ",
@@ -1545,7 +1546,14 @@
       "az": "昇順",
       "za": "降順"
     },
-    "emptyPresentationNotes": "まだ何もありません。ここは作成予定または作成済みのプレゼンを記録しておく場所です。スライドを自動生成するものではありません。上のボタンから追加してください。"
+    "emptyPresentationNotes": "まだ何もありません。ここは作成予定または作成済みのプレゼンを記録しておく場所です。スライドを自動生成するものではありません。上のボタンから追加してください。",
+    "emptyWebsitePlans": "まだ何もありません。ここは計画中のサイトを記録する場所で、サイトを作るわけではありません。作るには「サイトをつくる」を使ってください。",
+    "emptyApps": "まだ何もありません。ここは計画中や作成済みのアプリを記録する場所で、アプリを作るわけではありません。上のボタンから追加してください。",
+    "emptyImages": "まだ何もありません。ここは必要な画像や作成済みの画像を記録する場所で、画像を生成するわけではありません。上のボタンから追加してください。",
+    "emptyVideos": "まだ何もありません。ここは計画中や作成済みの動画を記録する場所で、動画を生成するわけではありません。上のボタンから追加してください。",
+    "emptyCoding": "まだ何もありません。ここは計画中や完了した開発作業を記録する場所で、コードを書くわけではありません。上のボタンから追加してください。",
+    "emptyDataAnalysis": "まだ何もありません。ここは計画中や実施済みの分析を記録する場所で、データを分析するわけではありません。上のボタンから追加してください。",
+    "emptyCampaigns": "まだ何もありません。ここは計画中や実施済みのキャンペーンを記録する場所で、配信を行うわけではありません。上のボタンから追加してください。"
   },
   "askAi": {
     "buttonLabel": "AI に質問",

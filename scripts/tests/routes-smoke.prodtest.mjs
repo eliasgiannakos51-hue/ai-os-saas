@@ -568,6 +568,95 @@ console.log("\n== 4. every AI box says what it accepts, and what it will not do 
   setPlan(null);
 }
 
+// -------------------------------------------------------------------
+console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
+// -------------------------------------------------------------------
+// SHOT IN GREEK ON PURPOSE. The fault this locks down is invisible in an
+// English render: sidebar-label-keys.ts mapped four group headings and
+// five item labels that sidebar-nav.ts does not use, so Workspace,
+// Build, Business, Strategy, Files, Deep Research, Published Sites,
+// Websites and Integrations printed raw English in all ten locales —
+// with correct translations sitting unreachable beside them.
+//
+// It also checks the other half of the same problem: a page filed under
+// "Build" that builds nothing now says so where the user can read it.
+{
+  const greek = await browser.newContext({
+    viewport: { width: 1280, height: 1000 },
+    locale: "el-GR",
+  });
+  await greek.addCookies([
+    { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+    { name: "NEXT_LOCALE", value: "el", domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+  ]);
+  const page = await greek.newPage();
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/coding`, { waitUntil: "networkidle", timeout: 45000 });
+
+  // Open every collapsed group so the whole nav is measurable at once.
+  for (const button of await page.locator("aside button[aria-expanded]").all()) {
+    if ((await button.getAttribute("aria-expanded")) === "false") {
+      await button.click();
+      await page.waitForTimeout(80);
+    }
+  }
+  await page.waitForTimeout(300);
+
+  const aside = page.locator("aside").first();
+  // innerText returns the CSS-TRANSFORMED text, and the group headings
+  // carry `uppercase`. Greek uppercasing also drops the tonos by
+  // typographic rule, so "Χώρος εργασίας" comes back as
+  // "ΧΩΡΟΣ ΕΡΓΑΣΙΑΣ" — comparing the raw strings fails on a page that is
+  // perfectly correct. Both sides are folded the same way instead.
+  const fold = (text) =>
+    text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+  const navText = await aside.innerText();
+  const foldedNav = fold(navText);
+  await aside.screenshot({ path: "/tmp/ionexa-sidebar-el.png" });
+
+  // Every heading, by the Greek it must now be showing.
+  for (const [english, greekWord] of [
+    ["Workspace", "Χώρος εργασίας"],
+    ["Build", "Δημιουργία"],
+    ["Tracking", "Παρακολούθηση"],
+    ["Business", "Επιχείρηση"],
+    ["Strategy", "Στρατηγική"],
+  ]) {
+    checkTrue(`heading "${english}" renders as "${greekWord}"`, foldedNav.includes(fold(greekWord)), navText.slice(0, 300));
+    checkTrue(`...and the English word is gone`, !new RegExp(`\\b${english}\\b`).test(navText));
+  }
+  // The five item labels that had no key at all.
+  for (const [english, greekWord] of [
+    ["Files", "Αρχεία"],
+    ["Deep Research", "Βαθιά Έρευνα"],
+    ["Integrations", "Συνδέσεις"],
+    ["Published Sites", "Ζωντανά site"],
+  ]) {
+    checkTrue(`item "${english}" renders as "${greekWord}"`, foldedNav.includes(fold(greekWord)), navText.slice(-400));
+  }
+  // The approved renames, as the user sees them.
+  for (const [was, now] of [
+    ["AI Memory", "Αναζήτηση"],
+    ["Mission Control", "Στόχοι & Σχέδια"],
+    ["Timeline", "Ιστορικό"],
+    ["Create Studio", "Φτιάξε κάτι"],
+  ]) {
+    checkTrue(`"${was}" now reads "${now}"`, foldedNav.includes(fold(now)), navText.slice(0, 400));
+  }
+
+  // A tracking page states, on screen, that it produces nothing.
+  await page.screenshot({ path: "/tmp/ionexa-coding-el.png" });
+  const main = await page.locator("main").innerText();
+  checkTrue(
+    "the AI Coding page says it does not write code",
+    /δεν γράφει κώδικα/.test(main),
+    main.replace(/\s+/g, " ").slice(0, 300)
+  );
+  checkTrue("no raw i18n key leaks into it", !/module\.empty/.test(main));
+
+  await page.close();
+  await greek.close();
+}
+
 await authed.close();
 
 await browser.close();

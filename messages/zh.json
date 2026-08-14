@@ -7,7 +7,7 @@
     "signOut": "退出登录",
     "jumpToPage": "跳转到模块或页面...",
     "noMatches": "没有找到与 '{query}' 匹配的结果",
-    "createStudio": "创作工作室",
+    "createStudio": "创建任何东西",
     "cancel": "取消",
     "save": "保存",
     "saving": "保存中...",
@@ -34,7 +34,7 @@
   "sidebar": {
     "groups": {
       "workspace": "工作区",
-      "build": "构建",
+      "build": "创建",
       "business": "业务",
       "strategy": "策略",
       "operations": "运营",
@@ -43,21 +43,22 @@
       "create": "创建",
       "myBusiness": "我的业务",
       "track": "记录",
-      "insights": "回顾"
+      "insights": "我注意到的",
+      "tracking": "记录"
     },
     "items": {
       "home": "主页",
       "chat": "Ionexa 聊天",
-      "memory": "AI 记忆",
-      "timeline": "时间线",
+      "memory": "搜索我的记录",
+      "timeline": "历史",
       "favorites": "收藏",
-      "missionControl": "任务控制中心",
+      "missionControl": "目标与计划",
       "reflection": "每周回顾",
       "settings": "设置",
       "team": "团队",
       "agents": "AI 智能体",
-      "websites": "网站计划",
-      "websiteBuilder": "网站生成器",
+      "websites": "计划",
+      "websiteBuilder": "做个网站",
       "apps": "应用",
       "images": "图像",
       "videos": "视频",
@@ -71,7 +72,7 @@
       "content": "营销",
       "sales": "客户管理",
       "products": "产品",
-      "research": "知识库",
+      "research": "研究",
       "learning": "学习",
       "ideas": "创意",
       "competitors": "竞争对手",
@@ -82,7 +83,7 @@
       "productWorkflow": "产品工作流",
       "automation": "自动化",
       "marketplace": "市场",
-      "published": "已发布网站",
+      "published": "已上线网站",
       "integrations": "集成",
       "files": "文件",
       "deepResearch": "深度研究",
@@ -687,7 +688,7 @@
       "couldNotRemoveMember": "✗ 无法移除成员"
     },
     "memory": {
-      "title": "AI 记忆",
+      "title": "搜索我的记录",
       "description": "在所有模块中搜索你记录过的一切——无需记得存放在哪里。"
     },
     "documents": {
@@ -728,7 +729,7 @@
       "title": "创建任何内容"
     },
     "timeline": {
-      "title": "时间线",
+      "title": "历史",
       "allModules": "所有模块",
       "showOnly": "仅显示:{module}",
       "rangeToday": "今天",
@@ -744,7 +745,7 @@
       "starredAt": "收藏于 {when}"
     },
     "mission": {
-      "title": "任务控制中心",
+      "title": "目标与计划",
       "started": "开始于 {time}",
       "description": "Planner → Builder → Reviewer — 描述一个目标,获取计划,然后用 AI 逐步构建。",
       "goalLabel": "你的目标是什么?",
@@ -869,7 +870,7 @@
       "levelLabel": "能量等级 {level}"
     },
     "websiteBuilder": {
-      "title": "网站生成器",
+      "title": "做个网站",
       "description": "描述你想要的内容,AI 会生成一个真实、完整的网站 — 即时预览,下载 HTML。",
       "nameLabel": "名称",
       "namePlaceholder": "例如:教练业务落地页",
@@ -1018,7 +1019,7 @@
       "clarifyAnswerPlaceholder": "你的回答..."
     },
     "createStudio": {
-      "title": "创作工作室",
+      "title": "创建任何东西",
       "subtitle": "用一句话描述你想要什么。无需选择工具——工作室会判断它是什么，先告诉你它的理解，然后才动手创建。",
       "inputLabel": "你想创建什么？",
       "inputPlaceholder": "例如：为我的教练业务做一个温暖专业的落地页",
@@ -1200,7 +1201,7 @@
       }
     },
     "publishing": {
-      "title": "已发布网站",
+      "title": "已上线网站",
       "description": "你的网站，已在互联网上线。",
       "analyticsNotice": "我们只按天统计页面浏览量，别无其他——不使用 Cookie，不追踪访客，也不会记录访问者的任何个人数据。",
       "goToBuilder": "网站生成器",
@@ -1545,7 +1546,14 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyPresentationNotes": "这里还没有内容。这是用来记录你正在筹划或已经做好的演示文稿的地方——它不会替你生成幻灯片。点击上方按钮添加一条。"
+    "emptyPresentationNotes": "这里还没有内容。这是用来记录你正在筹划或已经做好的演示文稿的地方——它不会替你生成幻灯片。点击上方按钮添加一条。",
+    "emptyWebsitePlans": "这里还什么都没有。这里用来记录你打算做的网站——它不会帮你建站。要真正生成网站，请用“做个网站”。",
+    "emptyApps": "这里还什么都没有。这里用来记录你打算做或已经做过的应用——它不会帮你开发应用。请用上方按钮添加。",
+    "emptyImages": "这里还什么都没有。这里用来记录你需要或已经做好的图片——它不会生成图片。请用上方按钮添加。",
+    "emptyVideos": "这里还什么都没有。这里用来记录你打算做或已经做好的视频——它不会生成视频。请用上方按钮添加。",
+    "emptyCoding": "这里还什么都没有。这里用来记录你打算做或已经完成的开发工作——它不会写代码。请用上方按钮添加。",
+    "emptyDataAnalysis": "这里还什么都没有。这里用来记录你打算做或已经完成的分析——它不会分析你的数据。请用上方按钮添加。",
+    "emptyCampaigns": "这里还什么都没有。这里用来记录你打算做或已经投放过的营销活动——它不会替你投放。请用上方按钮添加。"
   },
   "askAi": {
     "buttonLabel": "问 AI",

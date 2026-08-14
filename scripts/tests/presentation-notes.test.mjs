@@ -40,6 +40,7 @@ const messages = Object.fromEntries(
 
 const { loadTs } = await import("./load-ts.mjs");
 const { BUILD_MODULES, getBuildModule } = await loadTs("src/lib/build-modules.ts");
+const { MODULES } = await loadTs("src/lib/modules.ts");
 const module = getBuildModule("presentations");
 
 console.log("== 1. the module is renamed at its source ==");
@@ -131,9 +132,35 @@ check(
 console.log("\n== 6. no OTHER module's empty state changed ==");
 // The way a per-module override goes wrong: a shared string quietly
 // replaced for everyone. Every other module must still get noEntries.
+// WAS "exactly one", and that was right when Presentations was the only
+// tracker whose empty state told the truth. All eight now do, so the
+// count is no longer the invariant — what it was really protecting is.
+// Restated as the three things that actually go wrong, each of which the
+// count only caught by accident:
 const overridden = BUILD_MODULES.filter((m) => m.emptyKey);
-check(`exactly one module overrides its empty state (${overridden.length})`, overridden.length === 1);
-check("and it is this one", overridden[0]?.slug === "presentations");
+check("this module still overrides its empty state", overridden.some((m) => m.slug === "presentations"));
+check(
+  `every tracking module now does (${overridden.length}/${BUILD_MODULES.length})`,
+  overridden.length === BUILD_MODULES.length,
+  BUILD_MODULES.filter((m) => !m.emptyKey).map((m) => m.slug).join(", ")
+);
+// 1. No two modules share one key — a shared override is the "quietly
+//    replaced for everyone" failure wearing a different hat.
+const keys = overridden.map((m) => m.emptyKey);
+check("no two modules share an empty-state key", new Set(keys).size === keys.length, keys.join(", "));
+// 2. No override IS the shared string, which would make the override
+//    pointless while looking deliberate.
+check(
+  "and none of them is just the generic message",
+  keys.every((k) => messages.en.module[k] && messages.en.module[k] !== messages.en.module.noEntries)
+);
+// 3. The thirteen business modules are untouched: they DO have a purpose
+//    beyond logging, and the shared message is correct for them.
+check(
+  "the business modules still use the shared message",
+  MODULES.every((m) => !m.emptyKey),
+  MODULES.filter((m) => m.emptyKey).map((m) => m.slug).join(", ")
+);
 const list = readFileSync("src/components/modules/generic-list.tsx", "utf8");
 check(
   "the override falls back to the shared string",

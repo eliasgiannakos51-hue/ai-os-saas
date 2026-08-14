@@ -7,7 +7,7 @@
     "signOut": "Se déconnecter",
     "jumpToPage": "Aller à un module ou une page...",
     "noMatches": "Aucun résultat pour '{query}'",
-    "createStudio": "Studio de création",
+    "createStudio": "Créer n’importe quoi",
     "cancel": "Annuler",
     "save": "Enregistrer",
     "saving": "Enregistrement...",
@@ -34,7 +34,7 @@
   "sidebar": {
     "groups": {
       "workspace": "Espace de travail",
-      "build": "Construire",
+      "build": "Créer",
       "business": "Entreprise",
       "strategy": "Stratégie",
       "operations": "Opérations",
@@ -43,21 +43,22 @@
       "create": "Créer",
       "myBusiness": "Mon activité",
       "track": "Suivre",
-      "insights": "Bilan"
+      "insights": "Ce que j’ai remarqué",
+      "tracking": "Suivi"
     },
     "items": {
       "home": "Accueil",
       "chat": "Ionexa Discussion",
-      "memory": "Mémoire IA",
-      "timeline": "Chronologie",
+      "memory": "Chercher dans mes données",
+      "timeline": "Historique",
       "favorites": "Favoris",
-      "missionControl": "Contrôle de Mission",
+      "missionControl": "Objectifs et plans",
       "reflection": "Bilan Hebdomadaire",
       "settings": "Paramètres",
       "team": "Équipe",
       "agents": "Agents IA",
-      "websites": "Plans de sites",
-      "websiteBuilder": "Générateur de Site",
+      "websites": "Projets",
+      "websiteBuilder": "Créer un site",
       "apps": "Applications",
       "images": "Images",
       "videos": "Vidéos",
@@ -67,11 +68,11 @@
       "presentations": "Notes de présentation",
       "campaigns": "Campagnes",
       "analytics": "Analytique",
-      "finance": "Finance",
+      "finance": "Finances",
       "content": "Marketing",
       "sales": "CRM",
       "products": "Produits",
-      "research": "Connaissances",
+      "research": "Recherche",
       "learning": "Apprentissage",
       "ideas": "Idées",
       "competitors": "Concurrents",
@@ -82,7 +83,7 @@
       "productWorkflow": "Flux Produit",
       "automation": "Automatisation",
       "marketplace": "Place de marché",
-      "published": "Sites publiés",
+      "published": "Sites en ligne",
       "integrations": "Intégrations",
       "files": "Fichiers",
       "deepResearch": "Recherche approfondie",
@@ -687,7 +688,7 @@
       "couldNotRemoveMember": "✗ impossible de retirer le membre"
     },
     "memory": {
-      "title": "Mémoire IA",
+      "title": "Chercher dans mes données",
       "description": "Recherchez tout ce que vous avez enregistré, dans tous les modules — sans avoir à vous souvenir d'où vous l'avez mis."
     },
     "documents": {
@@ -728,7 +729,7 @@
       "title": "Créer N'importe Quoi"
     },
     "timeline": {
-      "title": "Chronologie",
+      "title": "Historique",
       "allModules": "Tous les modules",
       "showOnly": "Afficher uniquement : {module}",
       "rangeToday": "Aujourd'hui",
@@ -744,7 +745,7 @@
       "starredAt": "Ajouté {when}"
     },
     "mission": {
-      "title": "Contrôle de Mission",
+      "title": "Objectifs et plans",
       "started": "Démarré {time}",
       "description": "Planner → Builder → Reviewer — décrivez un objectif, obtenez un plan, puis construisez-le étape par étape avec l'IA.",
       "goalLabel": "Quel est votre objectif ?",
@@ -869,7 +870,7 @@
       "levelLabel": "Niveau d'énergie {level}"
     },
     "websiteBuilder": {
-      "title": "Générateur de Site",
+      "title": "Créer un site",
       "description": "Décrivez ce que vous voulez, et l'IA génère un vrai site web complet — aperçu instantané, téléchargez le HTML.",
       "nameLabel": "Nom",
       "namePlaceholder": "ex. Page d'Accueil Coaching",
@@ -1018,7 +1019,7 @@
       "clarifyAnswerPlaceholder": "Votre réponse..."
     },
     "createStudio": {
-      "title": "Studio de création",
+      "title": "Créer n’importe quoi",
       "subtitle": "Décrivez en une phrase ce que vous voulez. Aucun outil à choisir : le studio devine de quoi il s'agit, vous montre ce qu'il a compris, puis seulement le crée.",
       "inputLabel": "Que voulez-vous créer ?",
       "inputPlaceholder": "ex. Une page d'accueil pour mon activité de coaching, chaleureuse et professionnelle",
@@ -1200,7 +1201,7 @@
       }
     },
     "publishing": {
-      "title": "Sites publiés",
+      "title": "Sites en ligne",
       "description": "Vos sites, en ligne sur le web.",
       "analyticsNotice": "Nous comptons les vues par jour, rien d'autre : aucun cookie, aucun suivi des visiteurs, aucune donnée personnelle enregistrée sur les personnes qui visitent vos sites.",
       "goToBuilder": "Créateur de sites",
@@ -1545,7 +1546,14 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyPresentationNotes": "Rien ici pour l’instant. Cet espace sert à suivre les présentations que vous préparez ou avez déjà faites — il ne génère pas de diapositives à votre place. Utilisez le bouton ci-dessus pour en ajouter une."
+    "emptyPresentationNotes": "Rien ici pour l’instant. Cet espace sert à suivre les présentations que vous préparez ou avez déjà faites — il ne génère pas de diapositives à votre place. Utilisez le bouton ci-dessus pour en ajouter une.",
+    "emptyWebsitePlans": "Rien ici pour l’instant. C’est un endroit pour noter les sites que vous préparez — il ne les construit pas. Pour en faire créer un, utilisez « Créer un site ».",
+    "emptyApps": "Rien ici pour l’instant. C’est un endroit pour suivre les applications que vous préparez ou avez déjà faites — il n’en crée aucune. Utilisez le bouton ci-dessus.",
+    "emptyImages": "Rien ici pour l’instant. C’est un endroit pour suivre les images dont vous avez besoin ou que vous avez déjà faites — il n’en génère aucune. Utilisez le bouton ci-dessus.",
+    "emptyVideos": "Rien ici pour l’instant. C’est un endroit pour suivre les vidéos que vous préparez ou avez déjà faites — il n’en génère aucune. Utilisez le bouton ci-dessus.",
+    "emptyCoding": "Rien ici pour l’instant. C’est un endroit pour suivre le travail de développement que vous préparez ou avez déjà fait — il n’écrit pas de code. Utilisez le bouton ci-dessus.",
+    "emptyDataAnalysis": "Rien ici pour l’instant. C’est un endroit pour suivre les analyses que vous préparez ou avez déjà faites — il n’analyse pas vos données. Utilisez le bouton ci-dessus.",
+    "emptyCampaigns": "Rien ici pour l’instant. C’est un endroit pour suivre les campagnes que vous préparez ou avez déjà menées — il n’en lance aucune. Utilisez le bouton ci-dessus."
   },
   "askAi": {
     "buttonLabel": "Demander à l'IA",

@@ -7,7 +7,7 @@
     "signOut": "Sign out",
     "jumpToPage": "Jump to a module or page...",
     "noMatches": "No matches for '{query}'",
-    "createStudio": "Create Studio",
+    "createStudio": "Make anything",
     "cancel": "Cancel",
     "save": "Save",
     "saving": "Saving...",
@@ -43,21 +43,22 @@
       "create": "Create",
       "myBusiness": "My Business",
       "track": "Track",
-      "insights": "Insights"
+      "insights": "What I noticed",
+      "tracking": "Tracking"
     },
     "items": {
       "home": "Home",
       "chat": "Ionexa Chat",
-      "memory": "AI Memory",
-      "timeline": "Timeline",
+      "memory": "Search my records",
+      "timeline": "History",
       "favorites": "Favorites",
-      "missionControl": "Mission Control",
+      "missionControl": "Goals & Plans",
       "reflection": "Weekly Reflection",
       "settings": "Settings",
       "team": "Team",
       "agents": "AI Agents",
-      "websites": "Website Plans",
-      "websiteBuilder": "Website Builder",
+      "websites": "Plans",
+      "websiteBuilder": "Build a site",
       "apps": "Apps",
       "images": "Images",
       "videos": "Videos",
@@ -71,7 +72,7 @@
       "content": "Marketing",
       "sales": "CRM",
       "products": "Products",
-      "research": "Knowledge",
+      "research": "Research",
       "learning": "Learning",
       "ideas": "Ideas",
       "competitors": "Competitors",
@@ -82,7 +83,7 @@
       "productWorkflow": "Product Workflow",
       "automation": "Automation",
       "marketplace": "Marketplace",
-      "published": "Published Sites",
+      "published": "Live sites",
       "integrations": "Integrations",
       "files": "Files",
       "deepResearch": "Deep Research",
@@ -687,7 +688,7 @@
       "couldNotRemoveMember": "✗ could not remove member"
     },
     "memory": {
-      "title": "AI Memory",
+      "title": "Search my records",
       "description": "Search everything you've logged, across every module — no need to remember where you put it."
     },
     "documents": {
@@ -728,7 +729,7 @@
       "title": "Create Anything"
     },
     "timeline": {
-      "title": "Timeline",
+      "title": "History",
       "allModules": "All Modules",
       "showOnly": "Show only: {module}",
       "rangeToday": "Today",
@@ -744,7 +745,7 @@
       "starredAt": "Starred {when}"
     },
     "mission": {
-      "title": "Mission Control",
+      "title": "Goals & Plans",
       "started": "Started {time}",
       "description": "Planner → Builder → Reviewer — describe a goal, get a plan, then build it step by step with AI.",
       "goalLabel": "What's your goal?",
@@ -869,7 +870,7 @@
       "levelLabel": "Energy level {level}"
     },
     "websiteBuilder": {
-      "title": "Website Builder",
+      "title": "Build a site",
       "description": "Describe what you want, and AI generates a real, complete website — instant preview, download the HTML.",
       "nameLabel": "Name",
       "namePlaceholder": "e.g. Coaching Landing Page",
@@ -1018,7 +1019,7 @@
       "clarifyAnswerPlaceholder": "Your answer..."
     },
     "createStudio": {
-      "title": "Create Studio",
+      "title": "Make anything",
       "subtitle": "Describe what you want in one sentence. No tool to pick — the studio works out what it is, shows you what it understood, and only then creates it.",
       "inputLabel": "What do you want to create?",
       "inputPlaceholder": "e.g. A landing page for my coaching business, warm and professional",
@@ -1200,7 +1201,7 @@
       }
     },
     "publishing": {
-      "title": "Published Sites",
+      "title": "Live sites",
       "description": "Your sites, live on the web.",
       "analyticsNotice": "We count page views per day and nothing else — no cookies, no visitor tracking, no personal data of any kind is recorded about the people who visit your sites.",
       "goToBuilder": "Website Builder",
@@ -1545,7 +1546,14 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyPresentationNotes": "Nothing here yet. This is a place to keep track of presentations you are planning or have already made — it does not generate slides for you. Use the button above to add one."
+    "emptyPresentationNotes": "Nothing here yet. This is a place to keep track of presentations you are planning or have already made — it does not generate slides for you. Use the button above to add one.",
+    "emptyWebsitePlans": "Nothing here yet. This is a place to note websites you are planning — it does not build them. To have one built for you, use Build a site.",
+    "emptyApps": "Nothing here yet. This is a place to keep track of apps you are planning or have already made — it does not build apps for you. Use the button above to add one.",
+    "emptyImages": "Nothing here yet. This is a place to keep track of images you need or have already made — it does not create images. Use the button above to add one.",
+    "emptyVideos": "Nothing here yet. This is a place to keep track of videos you are planning or have already made — it does not create videos. Use the button above to add one.",
+    "emptyCoding": "Nothing here yet. This is a place to keep track of coding work you are planning or have already done — it does not write code. Use the button above to add one.",
+    "emptyDataAnalysis": "Nothing here yet. This is a place to keep track of analyses you are planning or have already done — it does not analyse your data. Use the button above to add one.",
+    "emptyCampaigns": "Nothing here yet. This is a place to keep track of campaigns you are planning or have already run — it does not run campaigns. Use the button above to add one."
   },
   "askAi": {
     "buttonLabel": "Ask AI",

@@ -11,6 +11,7 @@ import type { ModuleConfig } from "@/lib/modules";
 export const BUILD_MODULES: ModuleConfig[] = [
   {
     slug: "websites",
+    emptyKey: "emptyWebsitePlans",
     title: "Websites",
     table: "ai_websites",
     headlineKey: "name",
@@ -31,6 +32,7 @@ export const BUILD_MODULES: ModuleConfig[] = [
   },
   {
     slug: "apps",
+    emptyKey: "emptyApps",
     title: "Apps",
     table: "ai_apps",
     headlineKey: "name",
@@ -57,6 +59,7 @@ export const BUILD_MODULES: ModuleConfig[] = [
   },
   {
     slug: "images",
+    emptyKey: "emptyImages",
     title: "Images",
     table: "ai_images",
     headlineKey: "prompt",
@@ -75,6 +78,7 @@ export const BUILD_MODULES: ModuleConfig[] = [
   },
   {
     slug: "videos",
+    emptyKey: "emptyVideos",
     title: "Videos",
     table: "ai_videos",
     headlineKey: "prompt",
@@ -93,6 +97,7 @@ export const BUILD_MODULES: ModuleConfig[] = [
   },
   {
     slug: "coding",
+    emptyKey: "emptyCoding",
     title: "AI Coding",
     table: "ai_coding_requests",
     headlineKey: "title",
@@ -117,6 +122,7 @@ export const BUILD_MODULES: ModuleConfig[] = [
   },
   {
     slug: "data-analysis",
+    emptyKey: "emptyDataAnalysis",
     title: "Data Analysis",
     table: "ai_data_analysis_requests",
     headlineKey: "title",
@@ -172,6 +178,7 @@ export const BUILD_MODULES: ModuleConfig[] = [
   },
   {
     slug: "campaigns",
+    emptyKey: "emptyCampaigns",
     title: "Marketing Campaigns",
     table: "ai_campaigns",
     headlineKey: "name",

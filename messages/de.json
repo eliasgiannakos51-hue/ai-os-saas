@@ -7,7 +7,7 @@
     "signOut": "Abmelden",
     "jumpToPage": "Zu einem Modul oder einer Seite springen...",
     "noMatches": "Keine Treffer für '{query}'",
-    "createStudio": "Kreativ-Studio",
+    "createStudio": "Mach irgendwas",
     "cancel": "Abbrechen",
     "save": "Speichern",
     "saving": "Wird gespeichert...",
@@ -43,21 +43,22 @@
       "create": "Erstellen",
       "myBusiness": "Mein Geschäft",
       "track": "Erfassen",
-      "insights": "Rückblick"
+      "insights": "Was mir aufgefallen ist",
+      "tracking": "Erfassung"
     },
     "items": {
       "home": "Start",
       "chat": "Ionexa Chat",
-      "memory": "KI-Gedächtnis",
-      "timeline": "Zeitleiste",
+      "memory": "Meine Einträge durchsuchen",
+      "timeline": "Verlauf",
       "favorites": "Favoriten",
-      "missionControl": "Missionskontrolle",
+      "missionControl": "Ziele & Pläne",
       "reflection": "Wöchentliche Reflexion",
       "settings": "Einstellungen",
       "team": "Team",
       "agents": "KI-Agenten",
-      "websites": "Website-Pläne",
-      "websiteBuilder": "Website-Builder",
+      "websites": "Pläne",
+      "websiteBuilder": "Website bauen",
       "apps": "Apps",
       "images": "Bilder",
       "videos": "Videos",
@@ -71,7 +72,7 @@
       "content": "Marketing",
       "sales": "CRM",
       "products": "Produkte",
-      "research": "Wissen",
+      "research": "Recherche",
       "learning": "Lernen",
       "ideas": "Ideen",
       "competitors": "Wettbewerber",
@@ -82,7 +83,7 @@
       "productWorkflow": "Produkt-Workflow",
       "automation": "Automatisierung",
       "marketplace": "Marktplatz",
-      "published": "Veröffentlichte Seiten",
+      "published": "Live-Seiten",
       "integrations": "Integrationen",
       "files": "Dateien",
       "deepResearch": "Tiefenrecherche",
@@ -687,7 +688,7 @@
       "couldNotRemoveMember": "✗ Mitglied konnte nicht entfernt werden"
     },
     "memory": {
-      "title": "KI-Gedächtnis",
+      "title": "Meine Einträge durchsuchen",
       "description": "Durchsuche alles, was du erfasst hast, über alle Module hinweg — ohne dich erinnern zu müssen, wo du es abgelegt hast."
     },
     "documents": {
@@ -728,7 +729,7 @@
       "title": "Alles Erstellen"
     },
     "timeline": {
-      "title": "Zeitleiste",
+      "title": "Verlauf",
       "allModules": "Alle Module",
       "showOnly": "Nur anzeigen: {module}",
       "rangeToday": "Heute",
@@ -744,7 +745,7 @@
       "starredAt": "Gemerkt {when}"
     },
     "mission": {
-      "title": "Missionskontrolle",
+      "title": "Ziele & Pläne",
       "started": "Gestartet {time}",
       "description": "Planner → Builder → Reviewer — beschreibe ein Ziel, erhalte einen Plan und baue ihn dann Schritt für Schritt mit KI auf.",
       "goalLabel": "Was ist dein Ziel?",
@@ -869,7 +870,7 @@
       "levelLabel": "Energielevel {level}"
     },
     "websiteBuilder": {
-      "title": "Website-Builder",
+      "title": "Website bauen",
       "description": "Beschreibe, was du willst, und die KI generiert eine echte, vollständige Website — sofortige Vorschau, HTML herunterladen.",
       "nameLabel": "Name",
       "namePlaceholder": "z. B. Coaching-Landingpage",
@@ -1018,7 +1019,7 @@
       "clarifyAnswerPlaceholder": "Deine Antwort..."
     },
     "createStudio": {
-      "title": "Kreativ-Studio",
+      "title": "Mach irgendwas",
       "subtitle": "Beschreibe in einem Satz, was du willst. Kein Werkzeug zum Auswählen — das Studio erkennt, worum es geht, zeigt dir sein Verständnis und erstellt es erst danach.",
       "inputLabel": "Was möchtest du erstellen?",
       "inputPlaceholder": "z. B. Eine Landingpage für mein Coaching-Angebot, warm und professionell",
@@ -1200,7 +1201,7 @@
       }
     },
     "publishing": {
-      "title": "Veröffentlichte Seiten",
+      "title": "Live-Seiten",
       "description": "Ihre Seiten, live im Web.",
       "analyticsNotice": "Wir zählen Seitenaufrufe pro Tag und sonst nichts — keine Cookies, kein Besucher-Tracking, keinerlei personenbezogene Daten über die Menschen, die Ihre Seiten besuchen.",
       "goToBuilder": "Website-Builder",
@@ -1545,7 +1546,14 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyPresentationNotes": "Hier ist noch nichts. Dieser Bereich dient dazu, geplante oder bereits erstellte Präsentationen festzuhalten — er erstellt keine Folien für Sie. Fügen Sie mit der Schaltfläche oben eine hinzu."
+    "emptyPresentationNotes": "Hier ist noch nichts. Dieser Bereich dient dazu, geplante oder bereits erstellte Präsentationen festzuhalten — er erstellt keine Folien für Sie. Fügen Sie mit der Schaltfläche oben eine hinzu.",
+    "emptyWebsitePlans": "Hier ist noch nichts. Ein Platz für Websites, die du planst — gebaut werden sie hier nicht. Zum Bauen nutze „Website bauen“.",
+    "emptyApps": "Hier ist noch nichts. Ein Platz, um Apps zu erfassen, die du planst oder schon gebaut hast — gebaut werden sie hier nicht. Nutze den Button oben.",
+    "emptyImages": "Hier ist noch nichts. Ein Platz, um Bilder zu erfassen, die du brauchst oder schon hast — erzeugt werden hier keine. Nutze den Button oben.",
+    "emptyVideos": "Hier ist noch nichts. Ein Platz, um Videos zu erfassen, die du planst oder schon gemacht hast — erzeugt werden hier keine. Nutze den Button oben.",
+    "emptyCoding": "Hier ist noch nichts. Ein Platz, um Programmierarbeit zu erfassen, die du planst oder schon erledigt hast — Code schreibt es nicht. Nutze den Button oben.",
+    "emptyDataAnalysis": "Hier ist noch nichts. Ein Platz, um Auswertungen zu erfassen, die du planst oder schon gemacht hast — deine Daten wertet es nicht aus. Nutze den Button oben.",
+    "emptyCampaigns": "Hier ist noch nichts. Ein Platz, um Kampagnen zu erfassen, die du planst oder schon gefahren hast — ausgeführt werden sie hier nicht. Nutze den Button oben."
   },
   "askAi": {
     "buttonLabel": "KI fragen",

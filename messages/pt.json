@@ -28,7 +28,14 @@
     "aiGenerated": {
       "short": "Gerado por IA",
       "long": "Conteúdo gerado por IA. Pode conter erros — confirme o que for importante antes de confiar nele."
-    }
+    },
+    "accountMenu": "Menu da conta",
+    "creditsUnlimited": "Ilimitados",
+    "creditsHint": "Créditos restantes — compra mais nas Definições",
+    "creditsUnlimitedHint": "Acesso de proprietário — créditos ilimitados",
+    "whatIsThis": "O que é isto?",
+    "moreInHelp": "Ler mais no Centro de Ajuda",
+    "close": "Fechar"
   },
   "sidebar": {
     "groups": {
@@ -224,7 +231,8 @@
       "upTo5AiAgents": "Até 5 agentes de IA",
       "upTo15AiAgentsTeams": "Até 15 agentes de IA e equipas",
       "upTo50AiAgents": "Até 50 agentes de IA"
-    }
+    },
+    "metaDescription": "Preços do Ionexa AI — planos Free, Starter, Growth, Professional, Ultimate e Enterprise."
   },
   "roadmap": {
     "title": "Roteiro",
@@ -324,7 +332,8 @@
         "title": "Sincronização multiplataforma",
         "description": "Uma experiência unificada na web, no celular e no desktop."
       }
-    }
+    },
+    "metaDescription": "O que já funciona hoje no Ionexa AI, o que vem a seguir e para onde vamos."
   },
   "auth": {
     "login": {
@@ -580,7 +589,8 @@
       "lowCreditsHint": "Quando o trabalho para porque o saldo acabou",
       "collaboration": "Colaboração",
       "collaborationHint": "Convites de equipa e atividade do espaço partilhado"
-    }
+    },
+    "jumpToSection": "Ir para uma secção"
   },
   "dashboard": {
     "overview": {
@@ -1481,7 +1491,6 @@
   "module": {
     "searchPlaceholder": "Pesquisar...",
     "exportCsv": "Exportar CSV",
-    "noEntries": "Ainda não há entradas — use o botão acima para registrar a primeira.",
     "noMatches": "Nenhum resultado para '{query}'",
     "new": "Novo {title}",
     "selectPlaceholder": "selecionar...",
@@ -1510,7 +1519,32 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyPresentationNotes": "Ainda não há nada aqui. Este é um espaço para acompanhar as apresentações que está a planear ou já fez — não gera diapositivos por si. Use o botão acima para adicionar uma."
+    "emptyPresentationNotes": "Ainda não há nada aqui. Este é um espaço para acompanhar as apresentações que está a planear ou já fez — não gera diapositivos por si. Use o botão acima para adicionar uma.",
+    "emptyWhat": "{module} está vazio.",
+    "emptyWhy": "Tudo o que registares aqui entra na tua Cronologia e passa a ser algo que a IA pode usar quando lhe fizeres uma pergunta sobre o teu trabalho.",
+    "emptyExample": "Começa com: «{example}»",
+    "examples": {
+      "competitors": "Notion — o concorrente mais próximo no preço",
+      "research": "Porque caiu a conversão de teste para pago em junho",
+      "finance": "Fatura de alojamento de setembro — 240 €",
+      "learning": "Funções de janela em SQL — capítulo 4 concluído",
+      "trading": "EURUSD long, fechado a +1,8R",
+      "decisions": "Escolhi Postgres em vez de MongoDB, e porquê",
+      "products": "Plano Pro — opção de faturação anual",
+      "content": "Email de lançamento da versão de setembro",
+      "sales": "Acme Lda — demo marcada para terça",
+      "feedback": "Cliente: a exportação é lenta acima de 5.000 linhas",
+      "analytics": "Registos esta semana: 142 (+18%)",
+      "automation": "Envia-me um resumo todas as segundas de manhã",
+      "websites": "Landing page para os novos preços",
+      "apps": "Registo interno de faturas",
+      "images": "Imagem principal da página de preços",
+      "videos": "Apresentação do produto em 60 segundos",
+      "coding": "Script para reconciliar os pagamentos Stripe",
+      "data-analysis": "Que plano tem a menor taxa de cancelamento?",
+      "campaigns": "Lançamento de setembro — email + LinkedIn",
+      "presentations": "Atualização ao conselho do 3.º trimestre — pontos-chave"
+    }
   },
   "askAi": {
     "buttonLabel": "Perguntar à IA",
@@ -1624,5 +1658,111 @@
     "unlimited": "Ilimitado — nenhum crédito usado",
     "unlimitedWouldHaveCost": "Ilimitado — teria custado {count} créditos",
     "freeMessage": "Mensagem gratuita · {count} restantes este mês"
+  },
+  "pageTitle": {
+    "document": "Documento",
+    "systemHealth": "Estado do sistema",
+    "onboarding": "Começar",
+    "notFound": "Não encontrada",
+    "notFoundBody": "Esta página não existe — o endereço pode ter sido mal escrito ou a página pode ter mudado.",
+    "notFoundAction": "Voltar ao início",
+    "forgotPassword": "Esqueci a palavra-passe",
+    "resetPassword": "Definir nova palavra-passe",
+    "confirmDeletion": "Confirmar eliminação da conta",
+    "logInDescription": "Inicia sessão no Ionexa AI.",
+    "signUpDescription": "Escolhe um plano e cria a tua conta Ionexa AI.",
+    "forgotPasswordDescription": "Repõe a palavra-passe da tua conta Ionexa AI.",
+    "resetPasswordDescription": "Define uma nova palavra-passe para a tua conta Ionexa AI.",
+    "confirmDeletionDescription": "Confirma a eliminação permanente da tua conta Ionexa AI.",
+    "termsDescription": "Termos de Serviço do Ionexa AI.",
+    "privacyDescription": "Política de Privacidade do Ionexa AI.",
+    "cookiesDescription": "Que cookies o Ionexa AI define, o que faz cada um e quanto tempo duram.",
+    "helpDescription": "Respostas às perguntas mais frequentes sobre o Ionexa AI — preços, créditos, sites, agents, privacidade."
+  },
+  "errors": {
+    "retry": "Tentar de novo",
+    "creditHistory": "Ver histórico de créditos",
+    "credits": {
+      "refunded": "Os teus créditos foram devolvidos.",
+      "notCharged": "Não te foi cobrado nada.",
+      "charged": "Esta tentativa consumiu créditos.",
+      "unverified": "Daqui não conseguimos confirmar se foi cobrado."
+    },
+    "codes": {
+      "notAuthenticated": {
+        "what": "A tua sessão terminou.",
+        "next": "Inicia sessão outra vez e repete a ação — não perdeste nada do que tinhas escrito."
+      },
+      "forbidden": {
+        "what": "O teu plano não inclui isto.",
+        "next": "Abre Definições › Faturação para veres que plano o cobre."
+      },
+      "notFound": {
+        "what": "Isto já não existe.",
+        "next": "Provavelmente foi eliminado. Volta à lista e escolhe outro."
+      },
+      "invalidInput": {
+        "what": "Algo no formulário não foi aceite.",
+        "next": "Verifica os campos assinalados e envia outra vez."
+      },
+      "rateLimited": {
+        "what": "Demasiados pedidos em pouco tempo.",
+        "next": "Espera cerca de um minuto e tenta mais uma vez."
+      },
+      "insufficientCredits": {
+        "what": "Não tens créditos suficientes para isto.",
+        "next": "Compra créditos nas Definições ou espera pela renovação mensal."
+      },
+      "planLimit": {
+        "what": "Chegaste ao limite do teu plano.",
+        "next": "Elimina algo de que já não precises, ou muda de plano em Definições › Faturação."
+      },
+      "fileTooLarge": {
+        "what": "Esse ficheiro é demasiado grande.",
+        "next": "Divide-o ou carrega uma versão mais pequena."
+      },
+      "unsupportedType": {
+        "what": "Esse tipo de ficheiro não é suportado.",
+        "next": "Converte-o para PDF, DOCX, CSV ou TXT e carrega outra vez."
+      },
+      "conflict": {
+        "what": "Alguém — ou outro separador — alterou isto enquanto trabalhavas nele.",
+        "next": "Recarrega a página para veres a versão atual e repete a tua alteração."
+      },
+      "upstreamUnavailable": {
+        "what": "O serviço de IA não está a responder neste momento.",
+        "next": "É do nosso lado e costuma resolver-se em poucos minutos."
+      },
+      "serverError": {
+        "what": "Isto falhou do nosso lado.",
+        "next": "Ficou registado. Tenta outra vez daqui a pouco e contacta o apoio se continuar."
+      },
+      "offline": {
+        "what": "O teu dispositivo não conseguiu contactar-nos.",
+        "next": "Verifica a tua ligação e tenta outra vez."
+      },
+      "unknown": {
+        "what": "Esta ação não foi concluída.",
+        "next": "Tenta outra vez e contacta o apoio se acontecer de novo."
+      }
+    }
+  },
+  "aiSteps": {
+    "counter": "({step}/{total})",
+    "understanding": "A perceber o que pediste",
+    "searching": "À procura da informação",
+    "reading": "A ler os teus ficheiros",
+    "planning": "A planear os passos",
+    "drafting": "A escrever um primeiro rascunho",
+    "creating": "A criar",
+    "generating": "A gerar",
+    "working": "A trabalhar nisso",
+    "answering": "A elaborar a resposta",
+    "rewriting": "A reescrever o texto",
+    "summarising": "A resumir",
+    "checking": "A verificar o resultado",
+    "saving": "A guardar",
+    "delivering": "A enviar-te",
+    "publishing": "A publicar o site"
   }
 }

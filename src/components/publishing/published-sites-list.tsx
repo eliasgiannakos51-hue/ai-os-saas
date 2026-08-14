@@ -163,7 +163,7 @@ export function PublishedSitesList({
         newAction={
           <Link
             href="/dashboard/website-builder"
-            className="inline-flex min-h-[40px] items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
           >
             <Globe className="h-4 w-4" aria-hidden="true" />
             {t("goToBuilder")}
@@ -309,7 +309,7 @@ export function PublishedSitesList({
                       type="button"
                       onClick={() => void rollback(selected, version)}
                       disabled={busyId === selected.id}
-                      className="inline-flex min-h-[32px] items-center gap-1.5 rounded-lg border border-border px-3 py-1 text-[11px] font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:opacity-40"
+                      className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-1 text-[11px] font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:opacity-40"
                     >
                       <Undo2 className="h-3 w-3" aria-hidden="true" />
                       {t("rollback")}

@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
+import { sidebarKeyForSlug } from "@/lib/favoritable";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -13,13 +15,19 @@ import { AutomationRealizeList } from "@/components/automation/automation-realiz
 import { AutomationActiveList } from "@/components/automation/automation-active-list";
 import type { UserAutomation } from "@/types/user-automation";
 
-export function generateMetadata({
+// The 12 business modules share this one route, so they shared one
+// English title too: `moduleConfig.title` is the author's string, not the
+// reader's. sidebarKeyForSlug is the same slug -> `sidebar.items` mapping
+// the sidebar and the favorites grouping already use, so /dashboard/finance
+// puts the same word in the tab as in the nav that got you there.
+export async function generateMetadata({
   params,
 }: {
   params: { module: string };
-}): Metadata {
+}): Promise<Metadata> {
   const moduleConfig = getModule(params.module);
-  return { title: moduleConfig?.title ?? "Not Found" };
+  if (!moduleConfig) return pageTitle("pageTitle.notFound");
+  return pageTitle(`sidebar.items.${sidebarKeyForSlug(moduleConfig.slug)}`);
 }
 
 export default async function ModulePage({

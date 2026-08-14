@@ -49,14 +49,14 @@ export function OutOfCreditsNotice({
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
               href="/dashboard/settings#credits"
-              className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-lg bg-orange-500 px-3.5 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-orange-500 px-3.5 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
             >
               <CreditCard className="h-3.5 w-3.5" aria-hidden="true" />
               {t("buyCredits")}
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-lg border border-border px-3.5 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400"
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-border px-3.5 py-2 text-xs font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400"
             >
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
               {t("upgradePlan")}

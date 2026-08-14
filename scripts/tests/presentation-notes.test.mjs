@@ -50,7 +50,16 @@ check("the table is unchanged, so no data moves", module.table === "ai_presentat
 // The page header and the browser tab both read config.title, so renaming
 // it there is what actually changes what the user sees.
 const page = readFileSync("src/app/dashboard/presentations/page.tsx", "utf8");
-check("the page takes its title from the config", /title: CONFIG\.title/.test(page));
+// The browser tab used to read `title: CONFIG.title`, which is this file's
+// English `title` field and therefore English in every locale. It now reads
+// `sidebar.items.presentations` — the same translated name the nav link
+// uses — so the tab, the nav and the header say one thing rather than two.
+// The rename this test protects still works: `sidebarKeyForSlug` derives
+// the key from the slug, which is asserted unchanged three lines above.
+check(
+  "the page takes its title from the shared translated name",
+  /pageTitle\("sidebar\.items\.presentations"\)/.test(page)
+);
 check("and the header does too", /title=\{config\.title\}/.test(readFileSync("src/components/modules/build-module-page.tsx", "utf8")));
 
 console.log("\n== 2. the sidebar label and its lookup key agree ==");
@@ -125,21 +134,36 @@ check("and still tells the user what to do next", /button above/i.test(empty));
 // "log your first one" with no hint that logging is ALL this does.
 check(
   "it is not the shared message",
-  empty !== messages.en.module.noEntries
+  empty !== messages.en.module.emptyWhat
 );
 
 console.log("\n== 6. no OTHER module's empty state changed ==");
 // The way a per-module override goes wrong: a shared string quietly
-// replaced for everyone. Every other module must still get noEntries.
+// replaced for everyone. Every other module must still get the shared one.
 const overridden = BUILD_MODULES.filter((m) => m.emptyKey);
 check(`exactly one module overrides its empty state (${overridden.length})`, overridden.length === 1);
 check("and it is this one", overridden[0]?.slug === "presentations");
 const list = readFileSync("src/components/modules/generic-list.tsx", "utf8");
+// The shared string is now `emptyWhat` rather than `noEntries`, because the
+// empty state grew from one sentence into three parts — what this is, why
+// you want it, and a clickable example. The override still applies to the
+// FIRST part only, which is the part that was misleading here: Presentation
+// Notes needed to say it does not generate slides, and it did not need a
+// different reason-to-care or a different example button.
 check(
-  "the override falls back to the shared string",
-  /t\(module\.emptyKey \?\? "noEntries"\)/.test(list)
+  "the override replaces only the shared WHAT line",
+  /module\.emptyKey \? t\(module\.emptyKey\) : t\("emptyWhat"/.test(list)
 );
-check("the shared string still exists for everyone else", Boolean(messages.en.module.noEntries));
+check(
+  "...and the why/example are still shared by every module including this one",
+  /why=\{t\("emptyWhy"\)\}/.test(list) && /t\("emptyExample"/.test(list)
+);
+check(
+  "the shared strings still exist for everyone else",
+  Boolean(messages.en.module.emptyWhat) &&
+    Boolean(messages.en.module.emptyWhy) &&
+    Boolean(messages.en.module.emptyExample)
+);
 
 console.log("\n== 7. the real generator is still promised where it belongs ==");
 // Renaming must not delete the intention. The roadmap entry is under

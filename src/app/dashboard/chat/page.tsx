@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { ChatWorkspace } from "@/components/chat/chat-workspace";
@@ -9,9 +10,9 @@ import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { loadFavoriteIds } from "@/lib/favorites";
 
-export const metadata: Metadata = {
-  title: "Ionexa Chat",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.chat");
+}
 
 export default async function ChatPage({
   searchParams,

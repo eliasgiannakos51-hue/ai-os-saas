@@ -10,6 +10,7 @@ import {
 } from "react";
 import { ArrowUp, Sparkles, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { AiActivity } from "@/components/ui/ai-activity";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { MessageContent } from "@/components/chat/message-content";
@@ -21,16 +22,6 @@ let localIdCounter = 0;
 function nextLocalId(): number {
   localIdCounter += 1;
   return localIdCounter;
-}
-
-function TypingDots() {
-  return (
-    <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-3.5">
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted [animation-delay:-0.3s]" />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted [animation-delay:-0.15s]" />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted" />
-    </div>
-  );
 }
 
 // Ephemeral, per-record mini-chat — every open/close cycle starts fresh
@@ -244,7 +235,7 @@ export function AskAiModal({
                       <MessageContent content={streamingText} />
                     </div>
                   ) : (
-                    <TypingDots />
+                    <AiActivity kind="recordsAsk" className="rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-3.5" />
                   )}
                 </div>
               )}

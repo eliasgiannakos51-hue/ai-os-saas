@@ -75,7 +75,7 @@ export function DangerZone({ email }: { email: string }) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="mt-4 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-red-800 px-4 py-2 text-sm text-red-400 transition-colors duration-150 hover:border-red-500 hover:bg-red-950/30 sm:min-h-0"
+          className="mt-4 inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-red-800 px-4 py-2 text-sm text-red-400 transition-colors duration-150 hover:border-red-500 hover:bg-red-950/30"
         >
           <Trash2 className="h-4 w-4" /> {t("deleteAccount")}
         </button>
@@ -109,7 +109,7 @@ export function DangerZone({ email }: { email: string }) {
             <button
               type="submit"
               disabled={loading || !confirmed}
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(220,38,38,0.35)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-none sm:min-h-0"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(220,38,38,0.35)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:shadow-none"
             >
               {loading ? t("sending") : t("sendConfirmationEmail")}
             </button>
@@ -117,7 +117,7 @@ export function DangerZone({ email }: { email: string }) {
               type="button"
               onClick={cancel}
               disabled={loading}
-              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:opacity-50 sm:min-h-0"
+              className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:opacity-50"
             >
               {tCommon("cancel")}
             </button>

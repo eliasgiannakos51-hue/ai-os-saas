@@ -83,7 +83,25 @@ check(
 
 console.log("\n== 5. the design is the SAME control, not a lookalike (α, β) ==");
 const btn = readFileSync("src/components/favorites/favorite-button.tsx", "utf8");
-check("36x36", /h-9 w-9/.test(btn));
+// 44x44, raised from 36x36.
+//
+// This check was written to pin the star and the card's "..." menu to the
+// SAME size, so the two controls sitting side by side on every card could
+// not drift apart — which is a real thing to protect and is why the check
+// exists. It pinned the NUMBER as well, and the number was wrong: 36px is
+// under the 44px minimum a finger needs, and layout-stress.prodtest.mjs
+// measured this exact button as one of the smallest tap targets in the
+// app, on every card on every list screen.
+//
+// So the number moves and the pairing is now asserted rather than implied:
+// both controls are read, and they have to agree.
+check("44x44", /h-11 w-11/.test(btn));
+const cardMenu = readFileSync("src/components/ui/card-menu.tsx", "utf8");
+check(
+  "...and the card menu it sits beside is the same size",
+  /h-11 w-11/.test(cardMenu),
+  "the star and the ... menu are adjacent on every card; different sizes read as a mistake."
+);
 check("resting ring when unstarred", /shadow-\[0_0_0_1px_rgba\(255,255,255,0\.09\)\]/.test(btn));
 check("filled amber with a glow when starred", /bg-orange-500\/20/.test(btn) && /0_0_16px_-2px_rgba\(249,115,22,0\.6\)/.test(btn));
 check("the star fills only when favourited", /fill=\{favorited \? "currentColor" : "none"\}/.test(btn));

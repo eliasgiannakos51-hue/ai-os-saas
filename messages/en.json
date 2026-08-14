@@ -28,7 +28,14 @@
     "aiGenerated": {
       "short": "AI-generated",
       "long": "AI-generated content. It can be wrong — check anything important before you rely on it."
-    }
+    },
+    "accountMenu": "Account menu",
+    "creditsUnlimited": "Unlimited",
+    "creditsHint": "Credits remaining — buy more in Settings",
+    "creditsUnlimitedHint": "Owner access — unlimited credits",
+    "whatIsThis": "What is this?",
+    "moreInHelp": "Read more in the Help Centre",
+    "close": "Close"
   },
   "sidebar": {
     "groups": {
@@ -224,7 +231,8 @@
       "upTo5AiAgents": "Up to 5 AI agents",
       "upTo15AiAgentsTeams": "Up to 15 AI agents & teams",
       "upTo50AiAgents": "Up to 50 AI agents"
-    }
+    },
+    "metaDescription": "Ionexa AI pricing — Free, Starter, Growth, Professional, Ultimate, and Enterprise plans."
   },
   "roadmap": {
     "title": "Roadmap",
@@ -324,7 +332,8 @@
         "title": "Cross-Platform Sync",
         "description": "A unified experience across web, mobile, and desktop."
       }
-    }
+    },
+    "metaDescription": "What's live in Ionexa AI today, what's coming next, and where we're headed."
   },
   "auth": {
     "login": {
@@ -580,7 +589,8 @@
       "lowCreditsHint": "When work stops because the balance ran out",
       "collaboration": "Collaboration",
       "collaborationHint": "Team invites and shared-workspace activity"
-    }
+    },
+    "jumpToSection": "Jump to section"
   },
   "dashboard": {
     "overview": {
@@ -1481,7 +1491,6 @@
   "module": {
     "searchPlaceholder": "Search...",
     "exportCsv": "Export CSV",
-    "noEntries": "No entries yet — use the button above to log your first one.",
     "noMatches": "No matches for '{query}'",
     "new": "New {title}",
     "selectPlaceholder": "select...",
@@ -1510,7 +1519,32 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyPresentationNotes": "Nothing here yet. This is a place to keep track of presentations you are planning or have already made — it does not generate slides for you. Use the button above to add one."
+    "emptyPresentationNotes": "Nothing here yet. This is a place to keep track of presentations you are planning or have already made — it does not generate slides for you. Use the button above to add one.",
+    "emptyWhat": "{module} is empty.",
+    "emptyWhy": "Anything you log here joins your Timeline and becomes something the AI can use when you ask it a question about your work.",
+    "emptyExample": "Start with: “{example}”",
+    "examples": {
+      "competitors": "Notion — closest competitor on pricing",
+      "research": "Why our trial-to-paid rate dropped in June",
+      "finance": "September hosting invoice — €240",
+      "learning": "SQL window functions — finished chapter 4",
+      "trading": "EURUSD long, closed +1.8R",
+      "decisions": "Chose Postgres over MongoDB, and why",
+      "products": "Pro plan — annual billing option",
+      "content": "Launch email for the September release",
+      "sales": "Acme Ltd — demo booked for Tuesday",
+      "feedback": "Customer: export is too slow over 5k rows",
+      "analytics": "Signups this week: 142 (+18%)",
+      "automation": "Email me a summary every Monday morning",
+      "websites": "Landing page for the new pricing",
+      "apps": "Internal invoice tracker",
+      "images": "Hero image for the pricing page",
+      "videos": "60-second product walkthrough",
+      "coding": "Script to reconcile Stripe payouts",
+      "data-analysis": "Which plan has the lowest churn?",
+      "campaigns": "September launch — email + LinkedIn",
+      "presentations": "Q3 board update — talking points"
+    }
   },
   "askAi": {
     "buttonLabel": "Ask AI",
@@ -1624,5 +1658,111 @@
     "unlimited": "Unlimited — no credits used",
     "unlimitedWouldHaveCost": "Unlimited — would have cost {count} credits",
     "freeMessage": "Free message · {count} left this month"
+  },
+  "pageTitle": {
+    "document": "Document",
+    "systemHealth": "System Health",
+    "onboarding": "Get started",
+    "notFound": "Not Found",
+    "notFoundBody": "This page doesn't exist — the address may have been mistyped, or the page may have moved.",
+    "notFoundAction": "Back to Home",
+    "forgotPassword": "Forgot Password",
+    "resetPassword": "Set New Password",
+    "confirmDeletion": "Confirm Account Deletion",
+    "logInDescription": "Log in to Ionexa AI.",
+    "signUpDescription": "Choose a plan and create your Ionexa AI account.",
+    "forgotPasswordDescription": "Reset your Ionexa AI account password.",
+    "resetPasswordDescription": "Set a new password for your Ionexa AI account.",
+    "confirmDeletionDescription": "Confirm permanent deletion of your Ionexa AI account.",
+    "termsDescription": "Terms of Service for Ionexa AI.",
+    "privacyDescription": "Privacy Policy for Ionexa AI.",
+    "cookiesDescription": "Which cookies Ionexa AI sets, what each one does, and how long it lasts.",
+    "helpDescription": "Answers to the questions people ask most about Ionexa AI — pricing, credits, websites, agents, privacy."
+  },
+  "errors": {
+    "retry": "Try again",
+    "creditHistory": "See credit history",
+    "credits": {
+      "refunded": "Your credits were returned.",
+      "notCharged": "You were not charged.",
+      "charged": "This attempt used credits.",
+      "unverified": "We can't confirm from here whether this was charged."
+    },
+    "codes": {
+      "notAuthenticated": {
+        "what": "You're signed out.",
+        "next": "Sign in again and repeat the action — nothing you had entered is lost."
+      },
+      "forbidden": {
+        "what": "Your plan doesn't include this.",
+        "next": "Open Settings › Billing to see which plan covers it."
+      },
+      "notFound": {
+        "what": "This no longer exists.",
+        "next": "It was probably deleted. Go back to the list and pick another one."
+      },
+      "invalidInput": {
+        "what": "Something in the form wasn't accepted.",
+        "next": "Check the highlighted fields and send it again."
+      },
+      "rateLimited": {
+        "what": "Too many requests in a short time.",
+        "next": "Wait about a minute, then try once more."
+      },
+      "insufficientCredits": {
+        "what": "You don't have enough credits for this.",
+        "next": "Buy credits in Settings, or wait for your monthly reset."
+      },
+      "planLimit": {
+        "what": "You've reached the limit of your plan.",
+        "next": "Delete something you no longer need, or upgrade in Settings › Billing."
+      },
+      "fileTooLarge": {
+        "what": "That file is too big.",
+        "next": "Split it, or upload a smaller version."
+      },
+      "unsupportedType": {
+        "what": "That file type isn't supported.",
+        "next": "Convert it to PDF, DOCX, CSV or TXT and upload it again."
+      },
+      "conflict": {
+        "what": "Someone — or another tab — changed this while you were working on it.",
+        "next": "Reload the page to see the current version, then redo your change."
+      },
+      "upstreamUnavailable": {
+        "what": "The AI service isn't responding right now.",
+        "next": "This is on our side and usually clears within a few minutes."
+      },
+      "serverError": {
+        "what": "This broke on our side.",
+        "next": "It's been logged. Try again in a moment, and contact support if it keeps happening."
+      },
+      "offline": {
+        "what": "Your device couldn't reach us.",
+        "next": "Check your connection and try again."
+      },
+      "unknown": {
+        "what": "This action didn't complete.",
+        "next": "Try again, and contact support if it happens twice."
+      }
+    }
+  },
+  "aiSteps": {
+    "counter": "({step}/{total})",
+    "understanding": "Understanding what you asked",
+    "searching": "Looking for the information",
+    "reading": "Reading your files",
+    "planning": "Planning the steps",
+    "drafting": "Writing a first draft",
+    "creating": "Creating it",
+    "generating": "Generating",
+    "working": "Working on it",
+    "answering": "Working out the answer",
+    "rewriting": "Rewriting the text",
+    "summarising": "Summarising",
+    "checking": "Checking the result",
+    "saving": "Saving",
+    "delivering": "Sending it to you",
+    "publishing": "Putting the site live"
   }
 }

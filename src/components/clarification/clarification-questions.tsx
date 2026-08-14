@@ -55,7 +55,7 @@ export function ClarificationQuestions({
           type="button"
           onClick={() => onAnswer(answers)}
           disabled={submitting}
-          className="inline-flex min-h-[36px] items-center justify-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {continueLabel}
         </button>
@@ -63,7 +63,7 @@ export function ClarificationQuestions({
           type="button"
           onClick={onSkip}
           disabled={submitting}
-          className="inline-flex min-h-[36px] items-center justify-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50"
         >
           {skipLabel}
         </button>

@@ -92,7 +92,7 @@ export function LargeActionConfirm({
           <button
             type="button"
             onClick={onCancel}
-            className="min-h-[44px] flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors duration-200 hover:border-orange-500/50 sm:min-h-0"
+            className="min-h-[44px] flex-1 rounded-lg border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors duration-200 hover:border-orange-500/50"
           >
             {t("cancel")}
           </button>
@@ -100,7 +100,7 @@ export function LargeActionConfirm({
             type="button"
             onClick={onConfirm}
             onMouseDown={ripple}
-            className="ripple-host min-h-[44px] flex-1 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 sm:min-h-0"
+            className="ripple-host min-h-[44px] flex-1 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
           >
             {t("continue")}
           </button>

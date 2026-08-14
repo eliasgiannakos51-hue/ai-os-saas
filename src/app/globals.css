@@ -191,7 +191,10 @@ body {
 
 @layer components {
   .input {
-    @apply w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500;
+    /* min-h-[44px]: px-3/py-2 renders 40px, and this class is what every
+       text field, textarea and select in the app is built from — so it was
+       twenty of the under-44px controls by itself. */
+    @apply min-h-[44px] w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500;
   }
 }
 

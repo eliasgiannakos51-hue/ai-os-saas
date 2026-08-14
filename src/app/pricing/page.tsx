@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitleAndDescription } from "@/lib/page-title";
 import Link from "next/link";
 import { getTranslations, getLocale } from "next-intl/server";
 import { Check, X } from "lucide-react";
@@ -10,11 +11,9 @@ import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 import { formatNumber } from "@/lib/format-number";
 
-export const metadata: Metadata = {
-  title: "Pricing",
-  description:
-    "Ionexa AI pricing — Free, Starter, Growth, Professional, Ultimate, and Enterprise plans.",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitleAndDescription("pricing.title", "pricing.metaDescription");
+}
 
 type ComparisonCell = { type: "value"; text: string } | { type: "check" } | { type: "cross" };
 
@@ -167,14 +166,14 @@ export default async function PricingPage() {
                 {plan.slug === "free" ? (
                   <Link
                     href="/signup?plan=free"
-                    className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
+                    className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400"
                   >
                     {t("signUp")}
                   </Link>
                 ) : plan.slug === "enterprise" ? (
                   <a
                     href="mailto:sales@ionexa.ai?subject=Ionexa%20AI%20Enterprise"
-                    className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
+                    className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400"
                   >
                     {t("contactSales")}
                   </a>
@@ -182,7 +181,7 @@ export default async function PricingPage() {
                   <SubscribeButton
                     plan={plan.slug as PaidPlanSlug}
                     label={t("getPlan", { plan: plan.name })}
-                    className={`inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-0 ${
+                    className={`inline-flex min-h-[44px] w-full items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60 ${
                       plan.highlighted
                         ? "bg-orange-500 text-black hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
                         : "border border-border text-foreground hover:border-orange-500 hover:text-orange-400"
@@ -211,7 +210,7 @@ export default async function PricingPage() {
               {hasTeamCapablePlan ? (
                 <Link
                   href="/dashboard/team"
-                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
+                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400"
                 >
                   {t("setUpTeam")}
                 </Link>
@@ -220,7 +219,7 @@ export default async function PricingPage() {
                   plan="professional"
                   label={t("setUpTeam")}
                   successPath="/dashboard/team?setup=success"
-                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-60 sm:min-h-0"
+                  className="inline-flex min-h-[44px] w-full items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-foreground transition-all duration-200 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
                 />
               )}
             </div>

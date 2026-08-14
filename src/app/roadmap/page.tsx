@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitleAndDescription } from "@/lib/page-title";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import type { LucideIcon } from "lucide-react";
@@ -29,10 +30,9 @@ import {
 import { Logo } from "@/components/logo";
 import { AppBackground } from "@/components/ui/app-background";
 
-export const metadata: Metadata = {
-  title: "Roadmap",
-  description: "What's live in Ionexa AI today, what's coming next, and where we're headed.",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitleAndDescription("roadmap.title", "roadmap.metaDescription");
+}
 
 type RoadmapStatus = "available" | "soon" | "future";
 

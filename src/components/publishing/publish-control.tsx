@@ -224,7 +224,7 @@ export function PublishControl({
 
   if (loading) {
     return (
-      <span className="inline-flex min-h-[40px] items-center gap-1.5 px-3 py-2 text-xs text-muted sm:min-h-0">
+      <span className="inline-flex min-h-[40px] items-center gap-1.5 px-3 py-2 text-xs text-muted">
         <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
       </span>
     );
@@ -260,7 +260,7 @@ export function PublishControl({
           disabled={busy || disabled}
           title={isLive ? t("unpublishHint") : undefined}
           className={
-            "inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 " +
+            "inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 " +
             (isLive
               ? "border-amber-500/40 text-amber-300 hover:border-amber-500 hover:bg-amber-500/10"
               : "border-border text-foreground hover:border-orange-500 hover:text-orange-400")
@@ -297,7 +297,7 @@ export function PublishControl({
               href={site.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-300 transition-colors duration-150 hover:bg-emerald-500/20 sm:min-h-0"
+              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-300 transition-colors duration-150 hover:bg-emerald-500/20"
             >
               <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
               {t("viewLive")}
@@ -305,7 +305,7 @@ export function PublishControl({
             <button
               type="button"
               onClick={copyLink}
-              className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
+              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
             >
               {copied ? (
                 <Check className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
@@ -322,7 +322,7 @@ export function PublishControl({
               type="button"
               onClick={() => void publish()}
               disabled={busy || disabled}
-              className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:opacity-40 sm:min-h-0"
+              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:opacity-40"
             >
               {busy ? (
                 <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -466,7 +466,7 @@ export function PublishControl({
                 type="button"
                 onClick={() => void publish()}
                 disabled={busy || !valid}
-                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : null}
                 {busy ? t("publishing") : t("publishNow")}
@@ -474,7 +474,7 @@ export function PublishControl({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="inline-flex min-h-[40px] items-center rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted transition-colors duration-150 hover:text-foreground"
+                className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-2 text-sm font-medium text-muted transition-colors duration-150 hover:text-foreground"
               >
                 {t("cancel")}
               </button>

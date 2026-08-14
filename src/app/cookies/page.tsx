@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
+import { pageTitleAndDescription } from "@/lib/page-title";
 import { LegalLayout } from "@/components/legal/legal-layout";
 import { LegalSection } from "@/components/legal/legal-section";
 
-export const metadata: Metadata = {
-  title: "Cookie Policy",
-  description: "Which cookies Ionexa AI sets, what each one does, and how long it lasts.",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitleAndDescription("landing.footer.cookies", "pageTitle.cookiesDescription");
+}
 
 // Written from what the app ACTUALLY sets, not from a template.
 //

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { FileText } from "lucide-react";
@@ -10,7 +11,9 @@ import { loadFavoriteIds } from "@/lib/favorites";
 import { documentPreviewText } from "@/lib/document-preview";
 import type { DocumentContent, UserDocument } from "@/types/document";
 
-export const metadata: Metadata = { title: "Documents" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.documents");
+}
 
 // Live, frequently-mutated per-user data (created/renamed/edited on every
 // visit) — same reasoning as dashboard/mission and dashboard/timeline for

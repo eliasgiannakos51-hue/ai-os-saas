@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DocumentEditor } from "@/components/documents/document-editor";
 import { loadFavoriteIds } from "@/lib/favorites";
 import type { UserDocument } from "@/types/document";
 
-export const metadata: Metadata = { title: "Document" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("pageTitle.document");
+}
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";

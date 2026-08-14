@@ -28,7 +28,14 @@
     "aiGenerated": {
       "short": "Généré par IA",
       "long": "Contenu généré par IA. Il peut comporter des erreurs — vérifiez ce qui compte avant de vous y fier."
-    }
+    },
+    "accountMenu": "Menu du compte",
+    "creditsUnlimited": "Illimités",
+    "creditsHint": "Crédits restants — en acheter dans les Paramètres",
+    "creditsUnlimitedHint": "Accès propriétaire — crédits illimités",
+    "whatIsThis": "Qu'est-ce que c'est ?",
+    "moreInHelp": "En savoir plus dans le Centre d'aide",
+    "close": "Fermer"
   },
   "sidebar": {
     "groups": {
@@ -224,7 +231,8 @@
       "upTo5AiAgents": "Jusqu'à 5 agents IA",
       "upTo15AiAgentsTeams": "Jusqu'à 15 agents IA et équipes",
       "upTo50AiAgents": "Jusqu'à 50 agents IA"
-    }
+    },
+    "metaDescription": "Tarifs Ionexa AI — formules Free, Starter, Growth, Professional, Ultimate et Enterprise."
   },
   "roadmap": {
     "title": "Feuille de route",
@@ -324,7 +332,8 @@
         "title": "Synchronisation multiplateforme",
         "description": "Une expérience unifiée sur le web, mobile et bureau."
       }
-    }
+    },
+    "metaDescription": "Ce qui fonctionne aujourd'hui dans Ionexa AI, ce qui arrive ensuite et où nous allons."
   },
   "auth": {
     "login": {
@@ -580,7 +589,8 @@
       "lowCreditsHint": "Quand le travail s'arrête faute de solde",
       "collaboration": "Collaboration",
       "collaborationHint": "Invitations d'équipe et activité de l'espace partagé"
-    }
+    },
+    "jumpToSection": "Aller à une section"
   },
   "dashboard": {
     "overview": {
@@ -1481,7 +1491,6 @@
   "module": {
     "searchPlaceholder": "Rechercher...",
     "exportCsv": "Exporter en CSV",
-    "noEntries": "Aucune entrée pour l'instant — utilisez le bouton ci-dessus pour enregistrer la première.",
     "noMatches": "Aucun résultat pour '{query}'",
     "new": "Nouveau {title}",
     "selectPlaceholder": "sélectionner...",
@@ -1510,7 +1519,32 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyPresentationNotes": "Rien ici pour l’instant. Cet espace sert à suivre les présentations que vous préparez ou avez déjà faites — il ne génère pas de diapositives à votre place. Utilisez le bouton ci-dessus pour en ajouter une."
+    "emptyPresentationNotes": "Rien ici pour l’instant. Cet espace sert à suivre les présentations que vous préparez ou avez déjà faites — il ne génère pas de diapositives à votre place. Utilisez le bouton ci-dessus pour en ajouter une.",
+    "emptyWhat": "{module} est vide.",
+    "emptyWhy": "Tout ce que vous consignez ici rejoint votre Chronologie et devient une information que l'IA peut utiliser lorsque vous l'interrogez sur votre travail.",
+    "emptyExample": "Commencez par : « {example} »",
+    "examples": {
+      "competitors": "Notion — le concurrent le plus proche sur les prix",
+      "research": "Pourquoi le taux de conversion a baissé en juin",
+      "finance": "Facture d'hébergement de septembre — 240 €",
+      "learning": "Fonctions de fenêtrage SQL — chapitre 4 terminé",
+      "trading": "EURUSD long, clôturé à +1,8R",
+      "decisions": "Choix de Postgres plutôt que MongoDB, et pourquoi",
+      "products": "Formule Pro — option de facturation annuelle",
+      "content": "E-mail de lancement de la version de septembre",
+      "sales": "Acme Ltd — démo prévue mardi",
+      "feedback": "Client : l'export est trop lent au-delà de 5 000 lignes",
+      "analytics": "Inscriptions cette semaine : 142 (+18 %)",
+      "automation": "M'envoyer un résumé chaque lundi matin",
+      "websites": "Page d'accueil pour la nouvelle grille tarifaire",
+      "apps": "Suivi interne des factures",
+      "images": "Image principale de la page tarifs",
+      "videos": "Présentation du produit en 60 secondes",
+      "coding": "Script de rapprochement des versements Stripe",
+      "data-analysis": "Quelle formule a le taux d'attrition le plus bas ?",
+      "campaigns": "Lancement de septembre — e-mail + LinkedIn",
+      "presentations": "Point trimestriel au conseil — éléments de langage"
+    }
   },
   "askAi": {
     "buttonLabel": "Demander à l'IA",
@@ -1624,5 +1658,111 @@
     "unlimited": "Illimité — aucun crédit utilisé",
     "unlimitedWouldHaveCost": "Illimité — aurait coûté {count} crédits",
     "freeMessage": "Message gratuit · {count} restants ce mois-ci"
+  },
+  "pageTitle": {
+    "document": "Document",
+    "systemHealth": "État du système",
+    "onboarding": "Commencer",
+    "notFound": "Introuvable",
+    "notFoundBody": "Cette page n'existe pas — l'adresse a peut-être été mal saisie, ou la page a été déplacée.",
+    "notFoundAction": "Retour à l'accueil",
+    "forgotPassword": "Mot de passe oublié",
+    "resetPassword": "Définir un nouveau mot de passe",
+    "confirmDeletion": "Confirmer la suppression du compte",
+    "logInDescription": "Connectez-vous à Ionexa AI.",
+    "signUpDescription": "Choisissez une formule et créez votre compte Ionexa AI.",
+    "forgotPasswordDescription": "Réinitialisez le mot de passe de votre compte Ionexa AI.",
+    "resetPasswordDescription": "Définissez un nouveau mot de passe pour votre compte Ionexa AI.",
+    "confirmDeletionDescription": "Confirmez la suppression définitive de votre compte Ionexa AI.",
+    "termsDescription": "Conditions d'utilisation d'Ionexa AI.",
+    "privacyDescription": "Politique de confidentialité d'Ionexa AI.",
+    "cookiesDescription": "Quels cookies Ionexa AI dépose, à quoi sert chacun d'eux et combien de temps ils durent.",
+    "helpDescription": "Réponses aux questions les plus fréquentes sur Ionexa AI — tarifs, crédits, sites web, agents, confidentialité."
+  },
+  "errors": {
+    "retry": "Réessayer",
+    "creditHistory": "Voir l'historique des crédits",
+    "credits": {
+      "refunded": "Vos crédits ont été restitués.",
+      "notCharged": "Vous n'avez pas été débité.",
+      "charged": "Cette tentative a consommé des crédits.",
+      "unverified": "Nous ne pouvons pas confirmer d'ici si cela a été débité."
+    },
+    "codes": {
+      "notAuthenticated": {
+        "what": "Vous êtes déconnecté.",
+        "next": "Reconnectez-vous et refaites l'action — rien de ce que vous aviez saisi n'est perdu."
+      },
+      "forbidden": {
+        "what": "Votre formule ne comprend pas cela.",
+        "next": "Ouvrez Paramètres › Facturation pour voir quelle formule le couvre."
+      },
+      "notFound": {
+        "what": "Ceci n'existe plus.",
+        "next": "L'élément a probablement été supprimé. Revenez à la liste et choisissez-en un autre."
+      },
+      "invalidInput": {
+        "what": "Un élément du formulaire n'a pas été accepté.",
+        "next": "Vérifiez les champs signalés et renvoyez-le."
+      },
+      "rateLimited": {
+        "what": "Trop de requêtes en peu de temps.",
+        "next": "Attendez environ une minute, puis réessayez."
+      },
+      "insufficientCredits": {
+        "what": "Vous n'avez pas assez de crédits pour cela.",
+        "next": "Achetez des crédits dans les Paramètres ou attendez votre renouvellement mensuel."
+      },
+      "planLimit": {
+        "what": "Vous avez atteint la limite de votre formule.",
+        "next": "Supprimez ce dont vous n'avez plus besoin, ou changez de formule dans Paramètres › Facturation."
+      },
+      "fileTooLarge": {
+        "what": "Ce fichier est trop volumineux.",
+        "next": "Divisez-le ou envoyez une version plus petite."
+      },
+      "unsupportedType": {
+        "what": "Ce type de fichier n'est pas pris en charge.",
+        "next": "Convertissez-le en PDF, DOCX, CSV ou TXT puis renvoyez-le."
+      },
+      "conflict": {
+        "what": "Quelqu'un — ou un autre onglet — l'a modifié pendant que vous y travailliez.",
+        "next": "Rechargez la page pour voir la version actuelle, puis refaites votre modification."
+      },
+      "upstreamUnavailable": {
+        "what": "Le service d'IA ne répond pas pour le moment.",
+        "next": "Cela vient de chez nous et se résout généralement en quelques minutes."
+      },
+      "serverError": {
+        "what": "Cela a échoué de notre côté.",
+        "next": "L'incident est enregistré. Réessayez dans un instant et contactez le support si cela persiste."
+      },
+      "offline": {
+        "what": "Votre appareil n'a pas pu nous joindre.",
+        "next": "Vérifiez votre connexion et réessayez."
+      },
+      "unknown": {
+        "what": "Cette action ne s'est pas terminée.",
+        "next": "Réessayez et contactez le support si cela se reproduit."
+      }
+    }
+  },
+  "aiSteps": {
+    "counter": "({step}/{total})",
+    "understanding": "Compréhension de votre demande",
+    "searching": "Recherche des informations",
+    "reading": "Lecture de vos fichiers",
+    "planning": "Planification des étapes",
+    "drafting": "Rédaction d'un premier jet",
+    "creating": "Création en cours",
+    "generating": "Génération en cours",
+    "working": "Traitement en cours",
+    "answering": "Élaboration de la réponse",
+    "rewriting": "Réécriture du texte",
+    "summarising": "Synthèse en cours",
+    "checking": "Vérification du résultat",
+    "saving": "Enregistrement",
+    "delivering": "Envoi en cours",
+    "publishing": "Mise en ligne du site"
   }
 }

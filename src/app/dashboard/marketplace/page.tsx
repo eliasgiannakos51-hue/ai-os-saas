@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Store } from "lucide-react";
@@ -7,9 +8,9 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { EmptyState } from "@/components/empty-state";
 import { MARKETPLACE_ICON } from "@/lib/module-icons";
 
-export const metadata: Metadata = {
-  title: "Marketplace",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.marketplace");
+}
 
 // No table, no listings, no buy/sell flow yet — the previous version of
 // this page showed hardcoded demo listings with "Coming Soon" badges,
@@ -41,7 +42,7 @@ export default async function MarketplacePage() {
               disabled
               title={t("comingSoon")}
               aria-disabled="true"
-              className="inline-flex min-h-[44px] cursor-not-allowed items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-muted opacity-60 sm:min-h-0"
+              className="inline-flex min-h-[44px] cursor-not-allowed items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-muted opacity-60"
             >
               {t("publishButton")}
             </button>

@@ -34,3 +34,52 @@ export function EmptyState({
     </div>
   );
 }
+
+/**
+ * An empty list that answers the three questions someone actually has.
+ *
+ * WHAT THE OLD ONE SAID, on eleven different screens:
+ *
+ *     No entries yet — use the button above to log your first one.
+ *
+ * That sentence describes the SCREEN's state, which the reader can already
+ * see, and then points at a button they can also already see. It never says
+ * what this list is for, why they would want anything in it, or what a good
+ * first row even looks like — so the honest response to it is to leave, and
+ * on a fresh account there are nineteen of these in a row.
+ *
+ * So every empty list now answers, in order:
+ *
+ *   1. WHAT THIS IS      — the one sentence that says what belongs here.
+ *   2. WHY YOU WANT IT   — the payoff, in terms of something this product
+ *                          does with the data once it exists. Not "stay
+ *                          organized"; something concrete and true.
+ *   3. ONE EXAMPLE       — a real, specific row, and it is CLICKABLE. The
+ *                          gap between "log your first one" and knowing
+ *                          what to type is the whole reason these screens
+ *                          stay empty, and an example that fills the form
+ *                          in closes it.
+ *
+ * `example` is deliberately not optional-by-convenience. A list that cannot
+ * offer an example is a list whose empty state is still guesswork, and the
+ * type makes that a decision rather than an omission.
+ */
+export function GuidedEmptyState({
+  icon,
+  what,
+  why,
+  example,
+}: {
+  icon?: LucideIcon;
+  what: string;
+  why: string;
+  example: React.ReactNode;
+}) {
+  return (
+    <EmptyState icon={icon}>
+      <p className="text-base font-semibold text-foreground">{what}</p>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-muted">{why}</p>
+      <div className="mt-5 flex justify-center">{example}</div>
+    </EmptyState>
+  );
+}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
@@ -14,7 +15,9 @@ import type { AgentRun, UserAgent } from "@/lib/agents/agent-config";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "AI Agents" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.agents");
+}
 
 // Autonomous Agents.
 //
@@ -50,7 +53,7 @@ export default async function AgentsPage() {
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={MODULE_ICONS.agents} title={t("title")} description={t("description")} />
+          <PageHeader helpArticleId="create-agent" icon={MODULE_ICONS.agents} title={t("title")} description={t("description")} />
           <UpgradeRequired featureName={t("title")} planName="Starter" />
         </div>
       </main>

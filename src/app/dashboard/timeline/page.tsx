@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { diagLog } from "@/lib/diag";
 import { ErrorMessage } from "@/components/error-message";
 import { redirect } from "next/navigation";
@@ -12,7 +13,9 @@ import { TIMELINE_ICON } from "@/lib/module-icons";
 import { loadTimelineEntries, TIMELINE_RANGES, type TimelineRange } from "@/lib/timeline";
 import { loadFavoriteKeys } from "@/lib/favorites";
 
-export const metadata: Metadata = { title: "Timeline" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.timeline");
+}
 
 // See dashboard/mission/page.tsx for why this is explicit — this page
 // merges live data from every linkable module's table on every load.

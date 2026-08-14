@@ -429,7 +429,7 @@ export function FilesWorkspace({
           data-testid="files-upload-button"
           onClick={() => inputRef.current?.click()}
           disabled={Boolean(uploading)}
-          className="mt-3 inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+          className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
         >
           {uploading ? (
             <>
@@ -486,7 +486,7 @@ export function FilesWorkspace({
                 type="button"
                 data-testid="files-empty-upload"
                 onClick={() => inputRef.current?.click()}
-                className="mt-4 inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+                className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
               >
                 <Upload className="h-4 w-4" aria-hidden="true" />
                 {t("choose")}
@@ -595,7 +595,7 @@ export function FilesWorkspace({
                 key={collection.id}
                 type="button"
                 onClick={() => setSelected(collection.fileIds)}
-                className="inline-flex min-h-[32px] items-center rounded-lg border border-border px-3 py-1 text-[11px] font-medium text-muted transition-colors duration-150 hover:text-foreground"
+                className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-3 py-1 text-[11px] font-medium text-muted transition-colors duration-150 hover:text-foreground"
               >
                 {collection.name} · {collection.fileIds.length}
               </button>
@@ -608,13 +608,13 @@ export function FilesWorkspace({
             onChange={(e) => setNewCollectionName(e.target.value)}
             placeholder={t("collectionPlaceholder")}
             maxLength={80}
-            className="min-h-[36px] flex-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted"
+            className="min-h-[44px] flex-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted"
           />
           <button
             type="button"
             onClick={() => void createCollection()}
             disabled={creatingCollection || !newCollectionName.trim()}
-            className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
           >
             <FolderPlus className="h-3.5 w-3.5" aria-hidden="true" />
             {t("saveSelection", { count: selected.length })}
@@ -666,7 +666,7 @@ export function FilesWorkspace({
               type="button"
               data-testid="files-example"
               onClick={() => setQuestion(example)}
-              className="inline-flex min-h-[30px] items-center rounded-full border border-border px-3 py-1 text-[11px] text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-300"
+              className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1 text-[11px] text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-300"
             >
               {example}
             </button>
@@ -793,7 +793,7 @@ export function FilesWorkspace({
                   350
                 );
               }}
-              className="inline-flex min-h-[40px] items-center gap-2 rounded-lg bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
             >
               <Sparkles className="h-4 w-4" aria-hidden="true" />
               {t("goToAsk")}

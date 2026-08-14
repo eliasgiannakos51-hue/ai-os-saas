@@ -84,8 +84,18 @@ export function TopNav({ email }: { email: string }) {
           at `lg` (1024px) — the first width where there is genuinely room
           for them next to the sidebar — instead of at `sm` (640px). */}
       <div className="ml-auto flex min-w-0 items-center gap-1.5 lg:gap-3">
-        <LanguageSelector />
-        <ThemeToggle />
+        {/* HIDDEN ON PHONES, and moved into the account menu below.
+            Every control in this header is now a 44px tap target, which is
+            the size a finger actually needs — and five of them plus the
+            logo do not fit across 375px, which is why raising them pushed
+            the header 15px past the viewport on every dashboard route.
+            Language and theme are the two a person changes once and then
+            never again, so they are the two that belong one tap deeper
+            rather than the two that get to stay small. */}
+        <span className="hidden sm:contents">
+          <LanguageSelector />
+          <ThemeToggle />
+        </span>
 
         <div className="relative">
           <button
@@ -96,7 +106,7 @@ export function TopNav({ email }: { email: string }) {
             }}
             aria-label={t("notifications")}
             aria-expanded={notifOpen}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"
+            className="flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"
           >
             <Bell className="h-[18px] w-[18px]" />
           </button>
@@ -110,10 +120,10 @@ export function TopNav({ email }: { email: string }) {
         <Link
           href="/dashboard/settings#buy-credits"
           className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-400 lg:inline-flex"
-          title={isAdmin ? "Owner access — unlimited credits" : "Credits remaining — buy more in Settings"}
+          title={isAdmin ? t("creditsUnlimitedHint") : t("creditsHint")}
         >
           <Zap className="h-3.5 w-3.5 text-orange-400" aria-hidden="true" />
-          {isAdmin ? "Unlimited" : credits === null ? "…" : formatNumber(credits, locale)}
+          {isAdmin ? t("creditsUnlimited") : credits === null ? "…" : formatNumber(credits, locale)}
         </Link>
 
         {/* Only renders below 20% of the monthly allowance — see
@@ -125,7 +135,10 @@ export function TopNav({ email }: { email: string }) {
         <button
           type="button"
           onClick={openCreate}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] lg:px-3.5"
+          // Below `lg` this is the icon alone, which `px-3 py-2` sized at
+          // 40x40 — the one control in the header that stayed under 44px
+          // after everything else was raised.
+          className="inline-flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] lg:px-3.5"
         >
           <Plus className="h-4 w-4" />
           <span className="hidden lg:inline">{t("newProject")}</span>
@@ -138,15 +151,23 @@ export function TopNav({ email }: { email: string }) {
               setUserMenuOpen((v) => !v);
               setNotifOpen(false);
             }}
-            aria-label="Account menu"
+            aria-label={t("accountMenu")}
             aria-expanded={userMenuOpen}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500/15 text-sm font-semibold text-orange-400 transition-colors duration-150 hover:bg-orange-500/25"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-orange-500/15 text-sm font-semibold text-orange-400 transition-colors duration-150 hover:bg-orange-500/25"
           >
             {initial}
           </button>
           {userMenuOpen && (
             <div className="absolute right-0 top-11 w-56 rounded-xl border border-border bg-panel p-3 shadow-lg">
               <p className="truncate text-xs text-muted">{email}</p>
+              {/* The phone-width home for the two controls the header no
+                  longer has room for. `sm:hidden` mirrors the `hidden
+                  sm:contents` above exactly, so they appear in one place
+                  and never in both. */}
+              <div className="mt-3 flex items-center gap-1 border-t border-border pt-3 sm:hidden">
+                <LanguageSelector />
+                <ThemeToggle />
+              </div>
               <div className="mt-3">
                 <LogoutButton />
               </div>

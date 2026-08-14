@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import { GlowOrb } from "@/components/ui/glow-orb";
+import { helpArticle } from "@/lib/support/help-topics";
+import { ContextualHelp } from "@/components/ui/contextual-help";
 
 // Shared by every page-level header (Home, module pages, Settings, Team,
 // Marketplace, AI Memory) — the ambient glow behind it is applied once
@@ -10,11 +12,20 @@ export function PageHeader({
   icon: Icon,
   title,
   description,
+  // The "?" for this screen. Pass a knowledge-base article id (see
+  // lib/support/help-topics.ts) and the header grows a help affordance
+  // whose paragraph comes from the same place /help and the support bot
+  // read from. Omitted on screens with no article: no "?" is better than a
+  // "?" that opens something invented for the occasion.
+  helpArticleId,
 }: {
   icon?: LucideIcon;
   title: string;
   description?: string;
+  helpArticleId?: string;
 }) {
+  const article = helpArticle(helpArticleId);
+
   return (
     <div className="relative mb-6 flex items-center gap-3">
       <GlowOrb className="-left-8 -top-16 -z-10 h-40 w-40" />
@@ -23,10 +34,13 @@ export function PageHeader({
           <Icon className="h-5 w-5" aria-hidden="true" />
         </span>
       )}
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <h1 className="truncate text-2xl font-bold text-foreground">{title}</h1>
         {description && <p className="mt-0.5 text-sm text-muted">{description}</p>}
       </div>
+      {article && (
+        <ContextualHelp title={article.title} body={article.answer} articleId={article.id} />
+      )}
     </div>
   );
 }

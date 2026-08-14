@@ -114,7 +114,7 @@ export function AccessibilitySettings() {
               type="button"
               onClick={() => selectFontSize(size)}
               aria-pressed={fontSize === size}
-              className={`min-h-[36px] rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors duration-150 sm:min-h-0 ${
+              className={`min-h-[44px] rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors duration-150 ${
                 fontSize === size
                   ? "bg-orange-500 text-black"
                   : "text-muted hover:text-foreground"

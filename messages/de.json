@@ -28,7 +28,14 @@
     "aiGenerated": {
       "short": "KI-generiert",
       "long": "Von KI erzeugter Inhalt. Er kann Fehler enthalten — prüfen Sie Wichtiges, bevor Sie sich darauf verlassen."
-    }
+    },
+    "accountMenu": "Kontomenü",
+    "creditsUnlimited": "Unbegrenzt",
+    "creditsHint": "Verbleibende Credits — in den Einstellungen nachkaufen",
+    "creditsUnlimitedHint": "Inhaberzugang — unbegrenzte Credits",
+    "whatIsThis": "Was ist das?",
+    "moreInHelp": "Mehr im Hilfebereich lesen",
+    "close": "Schließen"
   },
   "sidebar": {
     "groups": {
@@ -224,7 +231,8 @@
       "upTo5AiAgents": "Bis zu 5 KI-Agenten",
       "upTo15AiAgentsTeams": "Bis zu 15 KI-Agenten & Teams",
       "upTo50AiAgents": "Bis zu 50 KI-Agenten"
-    }
+    },
+    "metaDescription": "Ionexa-AI-Preise — die Tarife Free, Starter, Growth, Professional, Ultimate und Enterprise."
   },
   "roadmap": {
     "title": "Roadmap",
@@ -324,7 +332,8 @@
         "title": "Plattformübergreifende Synchronisierung",
         "description": "Ein einheitliches Erlebnis über Web, Mobile und Desktop."
       }
-    }
+    },
+    "metaDescription": "Was in Ionexa AI heute schon läuft, was als Nächstes kommt und wohin es geht."
   },
   "auth": {
     "login": {
@@ -580,7 +589,8 @@
       "lowCreditsHint": "Wenn die Arbeit stoppt, weil das Guthaben aufgebraucht ist",
       "collaboration": "Zusammenarbeit",
       "collaborationHint": "Team-Einladungen und Aktivität im geteilten Workspace"
-    }
+    },
+    "jumpToSection": "Zu einem Abschnitt springen"
   },
   "dashboard": {
     "overview": {
@@ -1481,7 +1491,6 @@
   "module": {
     "searchPlaceholder": "Suchen...",
     "exportCsv": "CSV exportieren",
-    "noEntries": "Noch keine Einträge — nutze den Button oben, um deinen ersten zu erfassen.",
     "noMatches": "Keine Treffer für '{query}'",
     "new": "Neu: {title}",
     "selectPlaceholder": "auswählen...",
@@ -1510,7 +1519,32 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyPresentationNotes": "Hier ist noch nichts. Dieser Bereich dient dazu, geplante oder bereits erstellte Präsentationen festzuhalten — er erstellt keine Folien für Sie. Fügen Sie mit der Schaltfläche oben eine hinzu."
+    "emptyPresentationNotes": "Hier ist noch nichts. Dieser Bereich dient dazu, geplante oder bereits erstellte Präsentationen festzuhalten — er erstellt keine Folien für Sie. Fügen Sie mit der Schaltfläche oben eine hinzu.",
+    "emptyWhat": "{module} ist leer.",
+    "emptyWhy": "Alles, was du hier festhältst, landet in deiner Chronik und wird zu etwas, das die KI nutzen kann, wenn du sie zu deiner Arbeit befragst.",
+    "emptyExample": "Fang an mit: „{example}“",
+    "examples": {
+      "competitors": "Notion — beim Preis der nächste Wettbewerber",
+      "research": "Warum die Testkonversion im Juni gefallen ist",
+      "finance": "Hosting-Rechnung September — 240 €",
+      "learning": "SQL-Fensterfunktionen — Kapitel 4 geschafft",
+      "trading": "EURUSD long, geschlossen mit +1,8R",
+      "decisions": "Postgres statt MongoDB gewählt — und warum",
+      "products": "Pro-Tarif — Option für jährliche Abrechnung",
+      "content": "Launch-E-Mail für das September-Release",
+      "sales": "Acme GmbH — Demo für Dienstag vereinbart",
+      "feedback": "Kunde: Export ist ab 5.000 Zeilen zu langsam",
+      "analytics": "Anmeldungen diese Woche: 142 (+18 %)",
+      "automation": "Schick mir jeden Montagmorgen eine Zusammenfassung",
+      "websites": "Landingpage für die neuen Preise",
+      "apps": "Interne Rechnungsverfolgung",
+      "images": "Titelbild für die Preisseite",
+      "videos": "60-Sekunden-Produktrundgang",
+      "coding": "Skript zum Abgleich der Stripe-Auszahlungen",
+      "data-analysis": "Welcher Tarif hat die niedrigste Abwanderung?",
+      "campaigns": "September-Launch — E-Mail + LinkedIn",
+      "presentations": "Q3-Update fürs Board — Kernaussagen"
+    }
   },
   "askAi": {
     "buttonLabel": "KI fragen",
@@ -1624,5 +1658,111 @@
     "unlimited": "Unbegrenzt — keine Credits verbraucht",
     "unlimitedWouldHaveCost": "Unbegrenzt — hätte {count} Credits gekostet",
     "freeMessage": "Kostenlose Nachricht · {count} übrig diesen Monat"
+  },
+  "pageTitle": {
+    "document": "Dokument",
+    "systemHealth": "Systemzustand",
+    "onboarding": "Loslegen",
+    "notFound": "Nicht gefunden",
+    "notFoundBody": "Diese Seite gibt es nicht — vielleicht wurde die Adresse falsch eingegeben oder die Seite verschoben.",
+    "notFoundAction": "Zurück zur Startseite",
+    "forgotPassword": "Passwort vergessen",
+    "resetPassword": "Neues Passwort festlegen",
+    "confirmDeletion": "Kontolöschung bestätigen",
+    "logInDescription": "Bei Ionexa AI anmelden.",
+    "signUpDescription": "Wähle einen Tarif und erstelle dein Ionexa-AI-Konto.",
+    "forgotPasswordDescription": "Setze das Passwort deines Ionexa-AI-Kontos zurück.",
+    "resetPasswordDescription": "Lege ein neues Passwort für dein Ionexa-AI-Konto fest.",
+    "confirmDeletionDescription": "Bestätige die endgültige Löschung deines Ionexa-AI-Kontos.",
+    "termsDescription": "Nutzungsbedingungen von Ionexa AI.",
+    "privacyDescription": "Datenschutzerklärung von Ionexa AI.",
+    "cookiesDescription": "Welche Cookies Ionexa AI setzt, was jedes einzelne tut und wie lange es gilt.",
+    "helpDescription": "Antworten auf die häufigsten Fragen zu Ionexa AI — Preise, Credits, Websites, Agents, Datenschutz."
+  },
+  "errors": {
+    "retry": "Erneut versuchen",
+    "creditHistory": "Credit-Verlauf ansehen",
+    "credits": {
+      "refunded": "Deine Credits wurden zurückgebucht.",
+      "notCharged": "Dir wurde nichts berechnet.",
+      "charged": "Dieser Versuch hat Credits verbraucht.",
+      "unverified": "Wir können von hier aus nicht bestätigen, ob das berechnet wurde."
+    },
+    "codes": {
+      "notAuthenticated": {
+        "what": "Du bist abgemeldet.",
+        "next": "Melde dich erneut an und wiederhole die Aktion — nichts von deinen Eingaben ist verloren."
+      },
+      "forbidden": {
+        "what": "Dein Tarif enthält das nicht.",
+        "next": "Öffne Einstellungen › Abrechnung, um zu sehen, welcher Tarif es abdeckt."
+      },
+      "notFound": {
+        "what": "Das gibt es nicht mehr.",
+        "next": "Es wurde vermutlich gelöscht. Geh zurück zur Liste und wähle etwas anderes."
+      },
+      "invalidInput": {
+        "what": "Etwas im Formular wurde nicht akzeptiert.",
+        "next": "Prüfe die markierten Felder und sende es erneut."
+      },
+      "rateLimited": {
+        "what": "Zu viele Anfragen in kurzer Zeit.",
+        "next": "Warte etwa eine Minute und versuch es dann noch einmal."
+      },
+      "insufficientCredits": {
+        "what": "Du hast dafür nicht genug Credits.",
+        "next": "Kaufe Credits in den Einstellungen oder warte auf deine monatliche Zurücksetzung."
+      },
+      "planLimit": {
+        "what": "Du hast das Limit deines Tarifs erreicht.",
+        "next": "Lösche etwas, das du nicht mehr brauchst, oder wechsle den Tarif unter Einstellungen › Abrechnung."
+      },
+      "fileTooLarge": {
+        "what": "Diese Datei ist zu groß.",
+        "next": "Teile sie auf oder lade eine kleinere Version hoch."
+      },
+      "unsupportedType": {
+        "what": "Dieser Dateityp wird nicht unterstützt.",
+        "next": "Wandle sie in PDF, DOCX, CSV oder TXT um und lade sie erneut hoch."
+      },
+      "conflict": {
+        "what": "Jemand — oder ein anderer Tab — hat das geändert, während du daran gearbeitet hast.",
+        "next": "Lade die Seite neu, um die aktuelle Fassung zu sehen, und mach deine Änderung erneut."
+      },
+      "upstreamUnavailable": {
+        "what": "Der KI-Dienst antwortet gerade nicht.",
+        "next": "Das liegt an uns und ist meist innerhalb weniger Minuten behoben."
+      },
+      "serverError": {
+        "what": "Das ist auf unserer Seite schiefgegangen.",
+        "next": "Es wurde protokolliert. Versuch es gleich noch einmal und wende dich an den Support, wenn es weiter passiert."
+      },
+      "offline": {
+        "what": "Dein Gerät konnte uns nicht erreichen.",
+        "next": "Prüfe deine Verbindung und versuch es erneut."
+      },
+      "unknown": {
+        "what": "Diese Aktion wurde nicht abgeschlossen.",
+        "next": "Versuch es erneut und wende dich an den Support, wenn es zweimal passiert."
+      }
+    }
+  },
+  "aiSteps": {
+    "counter": "({step}/{total})",
+    "understanding": "Ich verstehe, was du gefragt hast",
+    "searching": "Ich suche die Informationen",
+    "reading": "Ich lese deine Dateien",
+    "planning": "Ich plane die Schritte",
+    "drafting": "Ich schreibe einen ersten Entwurf",
+    "creating": "Ich erstelle es",
+    "generating": "Ich generiere",
+    "working": "Ich arbeite daran",
+    "answering": "Ich erarbeite die Antwort",
+    "rewriting": "Ich schreibe den Text um",
+    "summarising": "Ich fasse zusammen",
+    "checking": "Ich prüfe das Ergebnis",
+    "saving": "Ich speichere",
+    "delivering": "Ich schicke es dir",
+    "publishing": "Ich stelle die Website online"
   }
 }

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { SearchX, Download } from "lucide-react";
+import { SearchX, Download, Plus } from "lucide-react";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import type { LinkedEntity } from "@/lib/entity-links";
@@ -17,7 +17,8 @@ import { toCSV, downloadCSV, todayForFilename } from "@/lib/csv";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState, GuidedEmptyState } from "@/components/empty-state";
+import { sidebarKeyForSlug } from "@/lib/favoritable";
 import { ListLayout } from "@/components/ui/list-layout";
 import { CardGrid } from "@/components/ui/entity-card";
 import { matchesSearch } from "@/lib/text/search-match";
@@ -51,9 +52,23 @@ export function GenericList({
   favoritedIds?: Set<string>;
 }) {
   const t = useTranslations("module");
+  const tExample = useTranslations("module.examples");
+  const moduleLabel = useTranslations("sidebar.items")(sidebarKeyForSlug(module.slug));
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [selected, setSelected] = useState<{ id: string; tab: RecordDetailTab } | null>(null);
+  // Bumped by the empty state's example button, which opens the add form
+  // below with the example already filled in.
+  const [exampleSignal, setExampleSignal] = useState(0);
+
+  // The example row, as the add form wants it: the module's headline field
+  // set to a concrete, translated example and everything else left blank.
+  // Derived from the config rather than hand-mapped per module, so a module
+  // that renames its headline field does not silently stop prefilling.
+  const examplePrefill = useMemo(
+    () => ({ [module.headlineKey]: tExample(module.slug) }),
+    [module.headlineKey, module.slug, tExample]
+  );
 
   // The filter dropdown only appears for modules that actually have a
   // status-shaped field (the five Build modules, Trading's result) —
@@ -104,7 +119,9 @@ export function GenericList({
       )}
 
       <ListLayout
-        newAction={<GenericAddForm module={module} />}
+        newAction={
+          <GenericAddForm module={module} openSignal={exampleSignal} prefill={examplePrefill} />
+        }
         searchValue={query}
         onSearchChange={setQuery}
         searchPlaceholder={t("searchPlaceholder")}
@@ -116,7 +133,7 @@ export function GenericList({
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 aria-label={t("filterBy", { label: statusField.label })}
-                className="min-h-[36px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60 sm:min-h-0"
+                className="min-h-[44px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60"
               >
                 <option value="">{t("filterAll", { label: statusField.label })}</option>
                 {statusField.options?.map((option) => (
@@ -137,7 +154,7 @@ export function GenericList({
               type="button"
               onClick={handleExport}
               disabled={filtered.length === 0}
-              className="inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Download className="h-3.5 w-3.5" aria-hidden="true" /> {t("exportCsv")}
             </button>
@@ -145,7 +162,21 @@ export function GenericList({
         }
       >
         {records.length === 0 ? (
-          <EmptyState icon={MODULE_ICONS[module.slug]}>{t(module.emptyKey ?? "noEntries")}</EmptyState>
+          <GuidedEmptyState
+            icon={MODULE_ICONS[module.slug]}
+            what={module.emptyKey ? t(module.emptyKey) : t("emptyWhat", { module: moduleLabel })}
+            why={t("emptyWhy")}
+            example={
+              <button
+                type="button"
+                onClick={() => setExampleSignal((n) => n + 1)}
+                className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-orange-500/40 bg-orange-500/10 px-4 py-2 text-sm font-medium text-orange-300 transition-colors duration-150 hover:border-orange-500 hover:bg-orange-500/20"
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                {t("emptyExample", { example: tExample(module.slug) })}
+              </button>
+            }
+          />
         ) : filtered.length === 0 ? (
           <EmptyState icon={SearchX}>{t("noMatches", { query })}</EmptyState>
         ) : (

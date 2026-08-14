@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -17,7 +18,9 @@ import { IntegrationsList } from "@/components/integrations/integrations-list";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Integrations" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.integrations");
+}
 
 export default async function IntegrationsPage() {
   const supabase = createClient();
@@ -39,7 +42,7 @@ export default async function IntegrationsPage() {
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={Plug} title={t("title")} description={t("description")} />
+          <PageHeader helpArticleId="connect-gmail" icon={Plug} title={t("title")} description={t("description")} />
           <UpgradeRequired featureName={t("title")} planName="Starter" />
         </div>
       </main>

@@ -88,7 +88,7 @@ export function FavoriteButton({
         "z-[2] flex shrink-0 items-center justify-center rounded-xl transition-all duration-200",
         // Both variants are 36px: "inline" now sits beside the card's
         // "..." menu (components/ui/card-menu.tsx) and has to match it.
-        corner ? "absolute right-3 top-3 h-9 w-9" : "h-9 w-9",
+        corner ? "absolute right-3 top-3 h-11 w-11" : "h-11 w-11",
         favorited
           ? "bg-orange-500/20 text-orange-300 shadow-[0_0_0_1px_rgba(249,115,22,0.55),0_0_16px_-2px_rgba(249,115,22,0.6)] hover:bg-orange-500/30"
           : // A resting ring, not bare grey: the control has to look

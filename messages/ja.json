@@ -28,7 +28,14 @@
     "aiGenerated": {
       "short": "AI が生成",
       "long": "これは AI が生成した内容です。誤りが含まれる場合があります。重要な点は確認してください。"
-    }
+    },
+    "accountMenu": "アカウントメニュー",
+    "creditsUnlimited": "無制限",
+    "creditsHint": "残りの credits — 設定から追加購入できます",
+    "creditsUnlimitedHint": "オーナー権限 — credits は無制限",
+    "whatIsThis": "これは何ですか？",
+    "moreInHelp": "ヘルプセンターで詳しく読む",
+    "close": "閉じる"
   },
   "sidebar": {
     "groups": {
@@ -224,7 +231,8 @@
       "upTo5AiAgents": "AIエージェント最大5体",
       "upTo15AiAgentsTeams": "AIエージェント最大15体・チーム",
       "upTo50AiAgents": "AIエージェント最大50体"
-    }
+    },
+    "metaDescription": "Ionexa AI の料金 — Free、Starter、Growth、Professional、Ultimate、Enterprise の各プラン。"
   },
   "roadmap": {
     "title": "ロードマップ",
@@ -324,7 +332,8 @@
         "title": "クロスプラットフォーム同期",
         "description": "ウェブ・モバイル・デスクトップで統一された体験。"
       }
-    }
+    },
+    "metaDescription": "Ionexa AI で今使える機能、次に来るもの、そしてこれから向かう先。"
   },
   "auth": {
     "login": {
@@ -580,7 +589,8 @@
       "lowCreditsHint": "残高が尽きて処理が停止したとき",
       "collaboration": "コラボレーション",
       "collaborationHint": "チーム招待と共有ワークスペースのアクティビティ"
-    }
+    },
+    "jumpToSection": "セクションへ移動"
   },
   "dashboard": {
     "overview": {
@@ -1481,7 +1491,6 @@
   "module": {
     "searchPlaceholder": "検索...",
     "exportCsv": "CSV をエクスポート",
-    "noEntries": "まだエントリーがありません — 上のボタンから最初のエントリーを記録しましょう。",
     "noMatches": "'{query}' に一致する結果はありません",
     "new": "新規 {title}",
     "selectPlaceholder": "選択してください...",
@@ -1510,7 +1519,32 @@
       "az": "昇順",
       "za": "降順"
     },
-    "emptyPresentationNotes": "まだ何もありません。ここは作成予定または作成済みのプレゼンを記録しておく場所です。スライドを自動生成するものではありません。上のボタンから追加してください。"
+    "emptyPresentationNotes": "まだ何もありません。ここは作成予定または作成済みのプレゼンを記録しておく場所です。スライドを自動生成するものではありません。上のボタンから追加してください。",
+    "emptyWhat": "{module} はまだ空です。",
+    "emptyWhy": "ここに記録したものはタイムラインに加わり、仕事について AI に質問したときに AI が使える情報になります。",
+    "emptyExample": "この例から始める：「{example}」",
+    "examples": {
+      "competitors": "Notion — 価格面で最も近い競合",
+      "research": "6月に試用から有料への転換率が下がった理由",
+      "finance": "9月のホスティング請求 — 240ユーロ",
+      "learning": "SQL のウィンドウ関数 — 第4章を完了",
+      "trading": "EURUSD ロング、+1.8R で決済",
+      "decisions": "MongoDB ではなく Postgres を選んだ理由",
+      "products": "Pro プラン — 年払いオプション",
+      "content": "9月リリースの告知メール",
+      "sales": "Acme 社 — 火曜にデモを設定",
+      "feedback": "顧客の声：5,000行を超えるとエクスポートが遅い",
+      "analytics": "今週の登録数：142（+18%）",
+      "automation": "毎週月曜の朝にまとめを送って",
+      "websites": "新しい料金ページのランディングページ",
+      "apps": "社内の請求書管理ツール",
+      "images": "料金ページのメイン画像",
+      "videos": "60秒のプロダクト紹介",
+      "coding": "Stripe の入金を照合するスクリプト",
+      "data-analysis": "解約率がいちばん低いプランは？",
+      "campaigns": "9月のローンチ — メール＋LinkedIn",
+      "presentations": "第3四半期の取締役会報告 — 要点"
+    }
   },
   "askAi": {
     "buttonLabel": "AI に質問",
@@ -1624,5 +1658,111 @@
     "unlimited": "無制限 — クレジット未使用",
     "unlimitedWouldHaveCost": "無制限 — {count} クレジットかかるはずでした",
     "freeMessage": "無料メッセージ · 今月あと {count} 件"
+  },
+  "pageTitle": {
+    "document": "ドキュメント",
+    "systemHealth": "システム状態",
+    "onboarding": "はじめる",
+    "notFound": "ページが見つかりません",
+    "notFoundBody": "このページは存在しません。アドレスの入力ミスか、ページが移動された可能性があります。",
+    "notFoundAction": "ホームに戻る",
+    "forgotPassword": "パスワードをお忘れの方",
+    "resetPassword": "新しいパスワードを設定",
+    "confirmDeletion": "アカウント削除の確認",
+    "logInDescription": "Ionexa AI にログインします。",
+    "signUpDescription": "プランを選んで Ionexa AI のアカウントを作成します。",
+    "forgotPasswordDescription": "Ionexa AI アカウントのパスワードを再設定します。",
+    "resetPasswordDescription": "Ionexa AI アカウントに新しいパスワードを設定します。",
+    "confirmDeletionDescription": "Ionexa AI アカウントの完全な削除を確認します。",
+    "termsDescription": "Ionexa AI の利用規約。",
+    "privacyDescription": "Ionexa AI のプライバシーポリシー。",
+    "cookiesDescription": "Ionexa AI が使用する Cookie の種類、それぞれの目的、保存期間について。",
+    "helpDescription": "Ionexa AI について最もよく寄せられる質問への回答 — 料金、credits、ウェブサイト、agents、プライバシー。"
+  },
+  "errors": {
+    "retry": "もう一度試す",
+    "creditHistory": "credits の履歴を見る",
+    "credits": {
+      "refunded": "credits は返却されました。",
+      "notCharged": "請求は発生していません。",
+      "charged": "この試行で credits を消費しました。",
+      "unverified": "ここからは請求されたかどうかを確認できません。"
+    },
+    "codes": {
+      "notAuthenticated": {
+        "what": "サインアウトされています。",
+        "next": "もう一度サインインして操作をやり直してください。入力した内容は失われていません。"
+      },
+      "forbidden": {
+        "what": "現在のプランには含まれていません。",
+        "next": "「設定 › お支払い」でどのプランに含まれるか確認してください。"
+      },
+      "notFound": {
+        "what": "これはもう存在しません。",
+        "next": "削除された可能性があります。一覧に戻って別のものを選んでください。"
+      },
+      "invalidInput": {
+        "what": "フォームの内容が受け付けられませんでした。",
+        "next": "指摘された項目を確認して、もう一度送信してください。"
+      },
+      "rateLimited": {
+        "what": "短時間にリクエストが多すぎます。",
+        "next": "1分ほど待ってから、もう一度お試しください。"
+      },
+      "insufficientCredits": {
+        "what": "この操作に必要な credits が足りません。",
+        "next": "「設定」から credits を購入するか、毎月のリセットをお待ちください。"
+      },
+      "planLimit": {
+        "what": "プランの上限に達しました。",
+        "next": "不要なものを削除するか、「設定 › お支払い」でアップグレードしてください。"
+      },
+      "fileTooLarge": {
+        "what": "このファイルは大きすぎます。",
+        "next": "分割するか、より小さいものをアップロードしてください。"
+      },
+      "unsupportedType": {
+        "what": "このファイル形式には対応していません。",
+        "next": "PDF、DOCX、CSV、TXT のいずれかに変換して、もう一度アップロードしてください。"
+      },
+      "conflict": {
+        "what": "作業中に、他の人または別のタブがこれを変更しました。",
+        "next": "ページを再読み込みして最新の状態を確認し、変更をやり直してください。"
+      },
+      "upstreamUnavailable": {
+        "what": "AI サービスが現在応答していません。",
+        "next": "こちら側の問題で、通常は数分で復旧します。"
+      },
+      "serverError": {
+        "what": "こちら側で問題が発生しました。",
+        "next": "記録されました。少し待ってからもう一度お試しいただき、続く場合はサポートにご連絡ください。"
+      },
+      "offline": {
+        "what": "お使いの端末から接続できませんでした。",
+        "next": "接続を確認して、もう一度お試しください。"
+      },
+      "unknown": {
+        "what": "この操作は完了しませんでした。",
+        "next": "もう一度お試しいただき、再発する場合はサポートにご連絡ください。"
+      }
+    }
+  },
+  "aiSteps": {
+    "counter": "（{step}/{total}）",
+    "understanding": "ご依頼の内容を理解しています",
+    "searching": "情報を探しています",
+    "reading": "ファイルを読んでいます",
+    "planning": "手順を組み立てています",
+    "drafting": "下書きを書いています",
+    "creating": "作成しています",
+    "generating": "生成しています",
+    "working": "処理しています",
+    "answering": "答えをまとめています",
+    "rewriting": "文章を書き直しています",
+    "summarising": "要約しています",
+    "checking": "結果を確認しています",
+    "saving": "保存しています",
+    "delivering": "お届けしています",
+    "publishing": "サイトを公開しています"
   }
 }

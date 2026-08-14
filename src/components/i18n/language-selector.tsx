@@ -32,7 +32,7 @@ export function LanguageSelector({ className }: { className?: string }) {
         aria-expanded={open}
         className={
           className ??
-          "flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"
+          "flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"
         }
       >
         <Globe className="h-[18px] w-[18px]" aria-hidden="true" />

@@ -537,7 +537,8 @@
     "aiPersona": {
       "title": "شخصية الذكاء الاصطناعي",
       "description": "امنح المساعد اسمًا مخصصًا.",
-      "personaUpdated": "✓ تم تحديث اسم المساعد"
+      "personaUpdated": "✓ تم تحديث اسم المساعد",
+      "saveFailed": "تعذّر حفظ الاسم. حاول بعد قليل."
     },
     "billing": {
       "title": "الفوترة",
@@ -676,7 +677,11 @@
         }
       },
       "quickStart": "بداية سريعة",
-      "quickStartTemplates": "قوالب البداية السريعة"
+      "quickStartTemplates": "قوالب البداية السريعة",
+      "templateApplied": "تمت إضافة {count} أمثلة",
+      "templateFailed": "تعذّر تطبيق هذا القالب. حاول بعد قليل — لم تتم إضافة أي شيء.",
+      "quickStartBlurb": "أضف بعض الإدخالات كأمثلة لترى كيف يبدو مساحة عمل ممتلئة.",
+      "quickStartAdd": "إضافة"
     },
     "team": {
       "title": "الفريق",

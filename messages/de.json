@@ -537,7 +537,8 @@
     "aiPersona": {
       "title": "KI-Persona",
       "description": "Gib dem Assistenten einen eigenen Namen.",
-      "personaUpdated": "✓ Name des Assistenten aktualisiert"
+      "personaUpdated": "✓ Name des Assistenten aktualisiert",
+      "saveFailed": "Wir konnten den Namen nicht speichern. Versuch es gleich noch einmal."
     },
     "billing": {
       "title": "Abrechnung",
@@ -676,7 +677,11 @@
         }
       },
       "quickStart": "Schnellstart",
-      "quickStartTemplates": "Schnellstart-Vorlagen"
+      "quickStartTemplates": "Schnellstart-Vorlagen",
+      "templateApplied": "{count} Beispiele hinzugefügt",
+      "templateFailed": "Wir konnten diese Vorlage nicht anwenden. Versuch es gleich noch einmal — es wurde nichts hinzugefügt.",
+      "quickStartBlurb": "Füge ein paar Beispieleinträge hinzu, um zu sehen, wie ein gefüllter Arbeitsbereich aussieht.",
+      "quickStartAdd": "Hinzufügen"
     },
     "team": {
       "title": "Team",

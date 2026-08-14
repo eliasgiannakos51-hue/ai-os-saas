@@ -537,7 +537,8 @@
     "aiPersona": {
       "title": "AI Persona",
       "description": "Give the assistant a custom name.",
-      "personaUpdated": "✓ persona name updated"
+      "personaUpdated": "✓ persona name updated",
+      "saveFailed": "We couldn't save the persona name. Try again in a moment."
     },
     "billing": {
       "title": "Billing",
@@ -676,7 +677,11 @@
         }
       },
       "quickStart": "Quick Start",
-      "quickStartTemplates": "Quick Start templates"
+      "quickStartTemplates": "Quick Start templates",
+      "templateApplied": "Added {count} example {count, plural, one {entry} other {entries}}",
+      "templateFailed": "We couldn't apply that template. Try again in a moment — nothing was added.",
+      "quickStartBlurb": "Add a few example entries so you can see what a filled-in workspace looks like.",
+      "quickStartAdd": "Add"
     },
     "team": {
       "title": "Team",

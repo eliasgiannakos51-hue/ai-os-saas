@@ -537,7 +537,8 @@
     "aiPersona": {
       "title": "AI ペルソナ",
       "description": "アシスタントに好きな名前を付けましょう。",
-      "personaUpdated": "✓ アシスタント名を更新しました"
+      "personaUpdated": "✓ アシスタント名を更新しました",
+      "saveFailed": "名前を保存できませんでした。少し待ってからお試しください。"
     },
     "billing": {
       "title": "請求",
@@ -676,7 +677,11 @@
         }
       },
       "quickStart": "クイックスタート",
-      "quickStartTemplates": "クイックスタートのテンプレート"
+      "quickStartTemplates": "クイックスタートのテンプレート",
+      "templateApplied": "{count} 件のサンプルを追加しました",
+      "templateFailed": "このテンプレートを適用できませんでした。少し待ってからお試しください — 何も追加されていません。",
+      "quickStartBlurb": "サンプルをいくつか追加して、中身の入ったワークスペースがどう見えるか確かめてみてください。",
+      "quickStartAdd": "追加"
     },
     "team": {
       "title": "チーム",

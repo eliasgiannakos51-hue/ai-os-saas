@@ -84,17 +84,68 @@ function stripComments(src) {
     .replace(/^\s*\/\/.*$/gm, "");
 }
 
+// TEMPLATE LITERALS COUNT, and until now they did not.
+//
+// This scanner matched `addToast("...")` only. `addToast(`...`)` is the
+// same string reaching the same user, and it is the form people reach for
+// the moment a message has a symbol or a value in it — which is most of
+// them. So `addToast(`✓ saved`)` shipped English past a check whose entire
+// job is to stop that, and the SECURITY.md line describing this gate ("a
+// user-facing string is hardcoded in a component fails the build") was
+// true of half the ways to write one.
+//
+// Interpolated segments are NOT prose: in `` `✗ ${failure.what}` `` the
+// words come from a translated variable and the literal parts are a symbol
+// and a space. So only the literal chunks between the interpolations are
+// tested, which is what separates that from `` `✗ could not save` ``.
+// Brace-BALANCED, because `${[^}]*}` is not good enough here: a real
+// interpolation in this codebase looks like
+//   ${describe(new ApiError(500, { error: e.message })).what}
+// and a non-greedy scan stops at the object literal's first `}`, leaving
+// `})).what` behind as "literal text" — which contains letters, so the
+// check flags its own fix. Walking the braces is the only version that
+// tells an interpolation from the prose around it.
+function literalChunksOf(template) {
+  const chunks = [];
+  let buf = "";
+  for (let i = 0; i < template.length; i++) {
+    if (template[i] === "$" && template[i + 1] === "{") {
+      chunks.push(buf);
+      buf = "";
+      let depth = 1;
+      i += 2;
+      while (i < template.length && depth > 0) {
+        if (template[i] === "{") depth++;
+        else if (template[i] === "}") depth--;
+        if (depth > 0) i++;
+      }
+      continue;
+    }
+    buf += template[i];
+  }
+  chunks.push(buf);
+  return chunks;
+}
+
 const hardcoded = [];
 for (const file of sources) {
   const src = stripComments(readFileSync(file, "utf8"));
   for (const fn of USER_FACING_CALLS) {
-    const re = new RegExp(`\\b${fn}\\(\\s*"([^"]*)"`, "g");
-    for (const m of src.matchAll(re)) {
+    for (const m of src.matchAll(new RegExp(`\\b${fn}\\(\\s*"([^"]*)"`, "g"))) {
       if (PROSE.test(m[1])) hardcoded.push(`${file}: ${fn}("${m[1]}")`);
+    }
+    for (const m of src.matchAll(new RegExp(`\\b${fn}\\(\\s*\`([^\`]*)\``, "g"))) {
+      if (literalChunksOf(m[1]).some((chunk) => PROSE.test(chunk))) {
+        hardcoded.push(`${file}: ${fn}(\`${m[1]}\`)`);
+      }
     }
   }
 }
-check(`no hardcoded prose in ${USER_FACING_CALLS.join("/")} (${sources.length} files scanned)`, hardcoded, []);
+check(
+  `no hardcoded prose in ${USER_FACING_CALLS.join("/")}, quoted OR templated (${sources.length} files scanned)`,
+  hardcoded,
+  []
+);
 
 // KNOWN GAP, recorded rather than silently tolerated.
 //

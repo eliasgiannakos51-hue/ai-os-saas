@@ -93,14 +93,20 @@ const DASHBOARD_ROUTES = [
   "/dashboard/memory",
   "/dashboard/marketplace",
   "/dashboard/settings",
-  "/dashboard/team",
   "/dashboard/reflection",
   "/dashboard/agents",
   "/dashboard/published",
   "/dashboard/integrations",
   "/dashboard/files",
   "/dashboard/deep-research",
-  "/onboarding",
+  // NOT MEASURED HERE, both for the same reason — this fixture is one
+  // account, and neither page is reachable from it:
+  //   /onboarding       correctly redirects an account that has already
+  //                     finished onboarding to the dashboard.
+  //   /dashboard/team   redirects to Settings unless the account owns a
+  //                     subscription whose plan has teamCollaboration.
+  // Both need a second fixture with a different account shape. Recorded
+  // here rather than left as two red lines that get skimmed past.
   "/dashboard/apps",
   "/dashboard/images",
   "/dashboard/videos",
@@ -630,11 +636,17 @@ check("no route overflows horizontally at any of the four widths", census.overfl
 // real Home screen's own controls, seen here for the first time.
 const SMALL_TARGET_BASELINE = 119;
 
-// 26 pieces of text that are cut off with no title= or aria-label to
-// recover the full string from. Most are card headings under a long
-// record name — the fixture's 68-character names are what surfaced them,
-// and they are invisible on the empty account every other check uses.
-const CLIPPED_BASELINE = 46;
+// Text cut off with no title= or aria-label to recover the full string
+// from. Most are card headings under a long record name — the fixture's
+// 68-character names are what surfaced them, and they are invisible on
+// the empty account every other check uses.
+//
+// 46 -> 48 is a deliberate trade, not a slip. Letting the health-score
+// card's text shrink (it had `shrink-0` around the text as well as the
+// ring) stopped it pushing the page sideways in Greek; the text now
+// truncates instead. Truncating beats scrolling the whole page, so the
+// two extra clipped strings are the price and they are recorded as such.
+const CLIPPED_BASELINE = 48;
 
 // Five, all on /dashboard/chat at 375px: the conversation drawer is
 // translated off-canvas rather than removed, so the controls inside it

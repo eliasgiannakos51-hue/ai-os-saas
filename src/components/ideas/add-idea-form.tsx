@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
 import { SuggestedLinksPrompt } from "@/components/entity-links/suggested-links-prompt";
 import { useTranslations } from "next-intl";
+import { ApiError } from "@/lib/errors/api-error";
+import { useErrorText } from "@/lib/errors/use-error-text";
 
 const EMPTY_FORM = {
   name: "",
@@ -24,6 +26,7 @@ export function AddIdeaForm() {
   const supabase = createClient();
   const { addToast } = useToast();
   const tCommon = useTranslations("common");
+  const describe = useErrorText();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +76,7 @@ export function AddIdeaForm() {
 
     if (error) {
       setError(error.message);
-      addToast(`✗ error: ${error.message}`, "error");
+      addToast(`✗ ${describe(new ApiError(500, { error: error.message })).what}`, "error");
       return;
     }
 

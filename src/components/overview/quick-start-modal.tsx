@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { X, Rocket, Check } from "lucide-react";
 import { WORKSPACE_TEMPLATES } from "@/lib/workspace-templates";
 import { useToast } from "@/components/toast/toast-context";
-import { getErrorMessage } from "@/lib/get-error-message";
 import { useTranslations } from "next-intl";
 
 export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -26,11 +25,11 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        addToast(`✗ ${getErrorMessage(data?.error, "Could not apply template.")}`, "error");
+        addToast(`✗ ${t("templateFailed")}`, "error");
         return;
       }
 
-      addToast(`✓ added ${data.appliedCount} example ${data.appliedCount === 1 ? "entry" : "entries"}`);
+      addToast(`✓ ${t("templateApplied", { count: data.appliedCount })}`);
       onClose();
       router.refresh();
     } catch {
@@ -58,17 +57,15 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
               <Rocket className="h-4 w-4" aria-hidden="true" />
             </span>
             <div>
-              <h2 className="text-sm font-semibold text-foreground">Quick Start</h2>
-              <p className="text-xs text-muted">
-                Add a few example entries so you can see what a filled-in workspace looks like.
-              </p>
+              <h2 className="text-sm font-semibold text-foreground">{t("quickStart")}</h2>
+              <p className="text-xs text-muted">{t("quickStartBlurb")}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label={tCommon("close")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
@@ -95,7 +92,7 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
                 ) : (
                   <Check className="h-3.5 w-3.5" />
                 )}
-                Add
+                {t("quickStartAdd")}
               </button>
             </div>
           ))}

@@ -2,6 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { ApiError } from "@/lib/errors/api-error";
+import { useErrorText } from "@/lib/errors/use-error-text";
 import { Pencil, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Idea } from "@/types/ideas";
@@ -67,6 +69,7 @@ export function IdeaRow({
   const supabase = createClient();
   const { addToast } = useToast();
   const tCommon = useTranslations("common");
+  const describe = useErrorText();
   const locale = useLocale();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<FormState>(() => toFormState(idea));
@@ -117,7 +120,7 @@ export function IdeaRow({
 
     if (error) {
       setError(error.message);
-      addToast(`✗ error: ${error.message}`, "error");
+      addToast(`✗ ${describe(new ApiError(500, { error: error.message })).what}`, "error");
       return;
     }
 

@@ -537,7 +537,8 @@
     "aiPersona": {
       "title": "Persona de IA",
       "description": "Dale al asistente un nombre personalizado.",
-      "personaUpdated": "✓ nombre del asistente actualizado"
+      "personaUpdated": "✓ nombre del asistente actualizado",
+      "saveFailed": "No hemos podido guardar el nombre. Inténtalo de nuevo en un momento."
     },
     "billing": {
       "title": "Facturación",
@@ -676,7 +677,11 @@
         }
       },
       "quickStart": "Inicio rápido",
-      "quickStartTemplates": "Plantillas de inicio rápido"
+      "quickStartTemplates": "Plantillas de inicio rápido",
+      "templateApplied": "Se han añadido {count} ejemplos",
+      "templateFailed": "No hemos podido aplicar esa plantilla. Inténtalo de nuevo en un momento: no se ha añadido nada.",
+      "quickStartBlurb": "Añade algunas entradas de ejemplo para ver cómo se ve un espacio de trabajo con contenido.",
+      "quickStartAdd": "Añadir"
     },
     "team": {
       "title": "Equipo",

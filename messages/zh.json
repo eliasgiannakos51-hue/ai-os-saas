@@ -537,7 +537,8 @@
     "aiPersona": {
       "title": "AI 人格",
       "description": "为助手设置自定义名称。",
-      "personaUpdated": "✓ 助手名称已更新"
+      "personaUpdated": "✓ 助手名称已更新",
+      "saveFailed": "无法保存该名称。请稍后重试。"
     },
     "billing": {
       "title": "账单",
@@ -676,7 +677,11 @@
         }
       },
       "quickStart": "快速开始",
-      "quickStartTemplates": "快速开始模板"
+      "quickStartTemplates": "快速开始模板",
+      "templateApplied": "已添加 {count} 条示例",
+      "templateFailed": "无法应用该模板。请稍后重试 — 未添加任何内容。",
+      "quickStartBlurb": "添加几条示例记录，看看填充后的工作区是什么样子。",
+      "quickStartAdd": "添加"
     },
     "team": {
       "title": "团队",

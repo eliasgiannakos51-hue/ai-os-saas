@@ -46,11 +46,16 @@ const PRODUCT_SCOPE_TABLES = ["products", "content", "leads"];
 export async function POST(request: Request) {
   try {
     let scope: string | null = null;
+    let locale: string | null = null;
     try {
       const raw = await request.text();
       if (raw) {
         const body = JSON.parse(raw);
         scope = typeof body?.scope === "string" ? body.scope : null;
+        // The reader's language. A weekly reflection is computed from stats
+        // with no prose in them, so the caller's locale is the only signal —
+        // and the prompt used to hardcode Greek regardless of it.
+        locale = typeof body?.locale === "string" ? body.locale.slice(0, 12) : null;
       }
     } catch {
       scope = null;
@@ -143,7 +148,7 @@ export async function POST(request: Request) {
     let reflection: string;
     try {
       void recordAiCallForDailySpend(CREDIT_COSTS.weeklyReflection);
-      reflection = await generateWeeklyReflection(apiKey, userMessage, costs);
+      reflection = await generateWeeklyReflection(apiKey, userMessage, costs, locale ?? undefined);
     } catch (err) {
       logApiError("/api/reflection/generate", err, { stage: "reflection_call" });
       await releaseReservation(user.id, reservationId);

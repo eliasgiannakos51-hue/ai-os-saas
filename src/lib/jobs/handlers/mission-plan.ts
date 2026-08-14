@@ -1,4 +1,5 @@
 import "server-only";
+import { languageInstruction, resolveContentLanguage } from "@/lib/content-language";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
@@ -47,7 +48,17 @@ export const missionPlanHandler: JobHandler = async (ctx: JobContext): Promise<J
   // goal depends on external facts, caps itself at 3 searches, and returns
   // nothing on any failure.
   const research = await researchGoal(ctx.apiKey, goal, ctx.costs);
-  const planResult = await planMission(ctx.apiKey, goal, userContext, ctx.costs, research.findings);
+  // The goal is the user's own prose, so it is what decides the language the
+  // plan comes back in — not the menu language, and not the Greek the
+  // planner's own prompt happens to be written in.
+  const planResult = await planMission(
+    ctx.apiKey,
+    goal,
+    userContext,
+    ctx.costs,
+    research.findings,
+    languageInstruction(resolveContentLanguage(goal, undefined), "every step and every question")
+  );
 
   // A vague goal: the Planner asked for clarification instead of inventing
   // generic filler steps. No mission is created, but a real model call

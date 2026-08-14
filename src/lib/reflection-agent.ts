@@ -1,4 +1,5 @@
 import "server-only";
+import { contentLanguageFromCode, languageInstruction } from "@/lib/content-language";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 import { AI_CONDUCT_EL } from "@/lib/ai-conduct";
 import Anthropic from "@anthropic-ai/sdk";
@@ -8,7 +9,7 @@ import type { WeeklyReflectionStats } from "@/lib/reflection";
 // Exported so the route prices the SAME model this file calls.
 export const REFLECTION_MODEL = "claude-sonnet-4-6";
 
-const REFLECTION_SYSTEM_PROMPT = `Δώσε σύντομη, ειλικρινή ανασκόπηση της βδομάδας — τι πήγε καλά, τι έμεινε ημιτελές, ΧΩΡΙΣ να είσαι υπερβολικά θετικός αν τα δεδομένα δείχνουν στασιμότητα. Βασίσου ΑΠΟΚΛΕΙΣΤΙΚΑ στα δεδομένα που σου δίνονται — μην υποθέτεις ή εφευρίσκεις πράγματα που δεν αναφέρονται. 3-6 σύντομες προτάσεις ή bullet points. Απάντα στα ελληνικά, εκτός αν κάτι στα δεδομένα υποδεικνύει άλλη γλώσσα.
+const REFLECTION_SYSTEM_PROMPT = `Δώσε σύντομη, ειλικρινή ανασκόπηση της βδομάδας — τι πήγε καλά, τι έμεινε ημιτελές, ΧΩΡΙΣ να είσαι υπερβολικά θετικός αν τα δεδομένα δείχνουν στασιμότητα. Βασίσου ΑΠΟΚΛΕΙΣΤΙΚΑ στα δεδομένα που σου δίνονται — μην υποθέτεις ή εφευρίσκεις πράγματα που δεν αναφέρονται. 3-6 σύντομες προτάσεις ή bullet points. 
 ${AI_CONDUCT_EL}${AI_QUALITY_CHECKLIST_EL}`;
 
 // Turns the computed stats (lib/reflection.ts) into the plain-text user
@@ -39,13 +40,22 @@ export async function generateWeeklyReflection(
   userMessage: string,
   // This call recorded nothing at all — the route charged a flat 2
   // credits and the tokens never reached a cost log. See CREDITS.md.
-  costs?: CostAccumulator
+  costs?: CostAccumulator,
+  /** The reader's locale. Stats carry no prose to detect a language from,
+   *  so this is the only signal — and it is a legitimate one here. */
+  locale?: string
 ): Promise<string> {
+  const language = contentLanguageFromCode(locale);
   const anthropic = new Anthropic({ apiKey });
   const response = await anthropic.messages.create({
     model: REFLECTION_MODEL,
     max_tokens: 700,
-    system: REFLECTION_SYSTEM_PROMPT,
+    // The prompt itself is Greek and used to end with "answer in Greek
+    // unless the data suggests otherwise" — so an English or German user got
+    // a Greek reflection. Like Insights, this runs on computed stats with no
+    // user prose to read a language off, so the caller's locale decides; the
+    // instruction now names the language instead of assuming one.
+    system: `${REFLECTION_SYSTEM_PROMPT}\n\n${languageInstruction(language, "the whole reflection")}`,
     messages: [{ role: "user", content: userMessage }],
   });
   // Before the parse below, which can still bail out on an empty reply.

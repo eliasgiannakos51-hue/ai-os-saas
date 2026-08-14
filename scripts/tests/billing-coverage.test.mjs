@@ -427,7 +427,11 @@ for (const [label, file, feature] of [
   const body = readFileSync(file, "utf8");
   checkTrue(`${label}: estimates from real input size`, /estimateForAction\(/.test(body));
   checkTrue(`${label}: reserves before calling`, /reserveCredits\(/.test(body));
-  checkTrue(`${label}: records measured usage`, /costs\.record\(/.test(body) || /, costs\)/.test(body));
+  // `, costs)` assumed the accumulator was the LAST argument, so adding a
+  // parameter after it reds a billing test that has nothing to do with the
+  // change. What matters is that the accumulator is passed at all, wherever
+  // it sits in the list.
+  checkTrue(`${label}: records measured usage`, /costs\.record\(/.test(body) || /,\s*costs\b/.test(body));
   checkTrue(`${label}: settles as ${feature}`, new RegExp(`feature: "${feature}"`).test(body));
   checkTrue(`${label}: releases the hold on failure`, /releaseReservation\(/.test(body));
   checkTrue(`${label}: at the account's own rate`, /effectiveCreditPriceEurForAccount\(/.test(body) || /plan,/.test(body));

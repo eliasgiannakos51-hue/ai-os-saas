@@ -566,16 +566,33 @@ checkTrue(
 );
 
 console.log("\n== 17. precedence is stated, last, and outside the cached block ==");
-check("the system prompt is sent as three blocks", sent.system.length, 3);
-checkTrue("the last block is the precedence statement", /^PRECEDENCE/.test(sent.system[2].text));
-checkTrue("it says the brief wins", /If the brief contradicts a default above, the brief wins/.test(sent.system[2].text));
+// FOUR blocks, not three: a language instruction was added between the
+// per-site form endpoint and the precedence statement. It went from three to
+// four when Website Builder stopped relying on the model to infer the site's
+// language from the brief it had just read.
+//
+// The count is asserted by INDEX FROM THE END rather than by a hard number,
+// because the property that matters is "precedence is LAST and uncached" —
+// not "there are exactly N blocks". A positional assertion that breaks every
+// time a block is added tests the arrangement instead of the invariant, and
+// this one broke on a change that preserved everything it was protecting.
+checkTrue("the system prompt is split for caching", sent.system.length >= 3);
+const precedence = sent.system.at(-1);
+checkTrue("the last block is the precedence statement", /^PRECEDENCE/.test(precedence.text));
+checkTrue("it says the brief wins", /If the brief contradicts a default above, the brief wins/.test(precedence.text));
 checkTrue(
   "it still protects the non-negotiables",
-  /cannot override[\s\S]{0,400}safety limits/.test(sent.system[2].text)
+  /cannot override[\s\S]{0,400}safety limits/.test(precedence.text)
 );
 checkTrue("the big static block is cached", sent.system[0].cache_control?.type === "ephemeral");
-checkTrue("the precedence block is NOT cached", !sent.system[2].cache_control);
+checkTrue("the precedence block is NOT cached", !precedence.cache_control);
 checkTrue("nor is the per-site form block", !sent.system[1].cache_control);
+// The new block, asserted rather than merely tolerated: a Greek brief has to
+// produce an instruction naming Greek, and it must not be cached, since it
+// differs per brief.
+const languageBlock = sent.system.find((b) => /^LANGUAGE:/.test(b.text ?? ""));
+checkTrue("a language instruction is sent", Boolean(languageBlock));
+checkTrue("and it is not cached, because it varies per brief", !languageBlock?.cache_control);
 
 console.log("\n== 18. with reference images, the URLs come BEFORE the brief ==");
 reset({ text: HEAD + TAIL, stopReason: "end_turn", outputTokens: 5000 });

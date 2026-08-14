@@ -318,16 +318,30 @@ export async function planMission(
   userContext = "",
   costs?: CostAccumulator,
   /** Findings from researchGoal(), if it ran and found anything. */
-  researchFindings = ""
+  researchFindings = "",
+  /** Built by the caller from lib/content-language.ts. */
+  languageInstruction = ""
 ): Promise<PlanMissionResult> {
   const anthropic = new Anthropic({ apiKey });
+  // THE PLAN COMES BACK IN THE LANGUAGE OF THE GOAL.
+  //
+  // PLANNER_SYSTEM_PROMPT is written in Greek, and a Greek prompt is a strong
+  // pull toward a Greek answer whoever is asking — the mirror image of the
+  // reported bug, and just as wrong for the German user it hands Greek steps
+  // to.
+  //
+  // Passed IN rather than resolved here. This module is exercised by a test
+  // harness that stubs the Anthropic SDK and cannot resolve new `@/` imports,
+  // and a module should not have to grow a dependency to be correct when the
+  // caller already knows the request. See api/mission/plan/route.ts.
+  const languageBlock = languageInstruction ? `\n\n${languageInstruction}` : "";
   const researchBlock = researchFindings
     ? `\n\nΕΥΡΗΜΑΤΑ ΑΝΑΖΗΤΗΣΗΣ (πραγματικά, πρόσφατα στοιχεία — χρησιμοποίησέ τα για να κάνεις τα βήματα συγκεκριμένα):\n${researchFindings}`
     : "";
   const response = await anthropic.messages.create({
     model: MISSION_MODEL,
     max_tokens: 2048,
-    system: PLANNER_SYSTEM_PROMPT + userContext + researchBlock,
+    system: PLANNER_SYSTEM_PROMPT + languageBlock + userContext + researchBlock,
     messages: [{ role: "user", content: goal }],
     tools: [PLAN_MISSION_TOOL],
     tool_choice: { type: "tool", name: "create_plan" },

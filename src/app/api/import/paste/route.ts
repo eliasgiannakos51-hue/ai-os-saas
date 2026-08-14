@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveContentLanguage } from "@/lib/content-language";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
@@ -72,7 +73,11 @@ export async function POST(request: Request) {
 
     const body = await request.json().catch(() => null);
     const text = typeof body?.text === "string" ? body.text.trim() : "";
-    const language = typeof body?.language === "string" ? body.language.slice(0, 12) : "en";
+    // Detected from the PASTED TEXT, which is the user's own writing — the
+    // whole point of this feature is to keep their words, so reading the
+    // language off anything else would be odd.
+    const uiLocale = typeof body?.language === "string" ? body.language.slice(0, 12) : undefined;
+    const language = resolveContentLanguage(text, uiLocale);
 
     if (text.length < MIN_PASTE_CHARS) {
       return NextResponse.json(

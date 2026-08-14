@@ -138,18 +138,12 @@ export function detectLanguage(text: string): SupportedLocale | null {
     .replace(/`[^`]*`/g, " ")
     .replace(/[\w.+-]+@[\w-]+\.[\w.]+/g, " ");
 
-  // --- Non-Latin scripts settle it outright.
   const letters = countMatches(cleaned, /\p{L}/gu);
   if (letters < MIN_LETTERS) return null;
-  for (const { locale, pattern } of SCRIPTS) {
-    const hits = countMatches(cleaned, pattern);
-    // A low bar on purpose: these scripts appear in no other supported
-    // language, so even a minority of the letters is decisive. A Greek
-    // sentence containing "startup" and "SaaS" is still Greek.
-    if (hits >= 4 && hits / letters >= 0.2) return locale;
-  }
 
-  // --- Latin six: stopwords, plus diacritics at higher weight.
+  // --- Latin six: stopwords, plus diacritics at higher weight. Scored
+  //     BEFORE the script check, because the script check needs to know how
+  //     strong the Latin evidence is before it overrides it.
   const words = cleaned.toLowerCase().match(/\p{L}+/gu) ?? [];
   const wordSet = words;
   const scores = new Map<SupportedLocale, number>();
@@ -165,6 +159,28 @@ export function detectLanguage(text: string): SupportedLocale | null {
   const ranked = [...scores.entries()].sort((a, b) => b[1] - a[1]);
   const [best, bestScore] = ranked[0];
   const secondScore = ranked[1]?.[1] ?? 0;
+
+  // --- Non-Latin scripts, weighed against that Latin evidence.
+  //
+  // These four scripts appear in no other supported language, so a MAJORITY
+  // of them is decisive on its own. A MINORITY is not, and treating it as
+  // decisive was a real defect: "how the Ελληνικά Ταχυδρομεία network
+  // compares with the private couriers" is an English sentence containing a
+  // Greek proper noun, and it was being detected as Greek — which would have
+  // answered an English speaker in a language they may not read, on the
+  // strength of the company they asked about.
+  //
+  // So a minority script only wins when the Latin evidence is weak. That
+  // keeps "Θέλω ένα SaaS landing page με modern design" Greek — its Latin
+  // words are borrowed nouns, which score nothing, because STOPWORDS are
+  // function words and borrowings never are.
+  for (const { locale, pattern } of SCRIPTS) {
+    const hits = countMatches(cleaned, pattern);
+    if (hits < 4) continue;
+    const share = hits / letters;
+    if (share >= 0.5) return locale;
+    if (share >= 0.2 && bestScore < 6) return locale;
+  }
   // Two guards, both of which produce null rather than a guess:
   //   a floor, so a sentence of proper nouns is not "detected", and
   //   a margin, so es/pt on a sentence they genuinely share stays undecided

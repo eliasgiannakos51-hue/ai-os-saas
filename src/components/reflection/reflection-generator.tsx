@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Sparkles, TrendingDown, TrendingUp } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useCredits } from "@/components/credits/credits-context";
 import { MessageContent } from "@/components/chat/message-content";
@@ -20,6 +20,7 @@ import type { WeeklyReflectionStats } from "@/lib/reflection";
 // bodyless POST exactly as before — zero change to default behavior.
 export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" } = {}) {
   const t = useTranslations("dashboard.reflection");
+  const locale = useLocale();
   const tCommon = useTranslations("common");
   const { reportUsage } = useCredits();
   const [loading, setLoading] = useState(false);
@@ -31,11 +32,14 @@ export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" }
     setLoading(true);
     setError(null);
     try {
+      // The locale always goes now, scope or not. A weekly reflection is
+      // written from computed stats with no prose in them, so this is the
+      // only signal the server has about which language to write in — and
+      // without it the prompt fell back to the Greek it was written in.
       const res = await fetch("/api/reflection/generate", {
         method: "POST",
-        ...(scope
-          ? { headers: { "Content-Type": "application/json" }, body: JSON.stringify({ scope }) }
-          : {}),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(scope ? { scope, locale } : { locale }),
       });
       const data = await res.json();
       // The response carries what this cost; reportUsage refreshes the

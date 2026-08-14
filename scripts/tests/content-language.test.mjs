@@ -198,6 +198,112 @@ check(
   "this is the literal line that shipped a code into the prompt"
 );
 
+// ---------------------------------------------------------------------
+console.log("\n== 7. mixed-language text picks the DOMINANT language ==");
+// Greek prose full of borrowed English tech words is Greek, and English
+// prose containing a Greek product name is English. Scoring by proportion
+// rather than by first-match is what makes both come out right.
+eq(
+  "Greek prose with English tech terms",
+  cl.detectLanguage("Θέλω ένα dashboard με analytics και ένα CRM integration για τους πελάτες μου στη Λάρισα"),
+  "el"
+);
+eq(
+  "English prose naming a Greek company",
+  cl.detectLanguage("I want a report on how the Ελληνικά Ταχυδρομεία network compares with the private couriers"),
+  "en"
+);
+eq(
+  "German prose with English loanwords",
+  cl.detectLanguage("Ich brauche ein Dashboard mit Analytics und einem CRM Integration für meine Kunden in Leipzig"),
+  "de"
+);
+
+// ---------------------------------------------------------------------
+console.log("\n== 8. THE GATE: a new AI call cannot reintroduce the bug ==");
+//
+// The defect was not hard to see once you looked — `(${language})` with a
+// UI locale in it, three times in one file. It shipped because nothing was
+// looking. This is the thing that looks, on every build.
+//
+// It scans every module that builds a system prompt and fails on the two
+// shapes that caused it: interpolating a variable named `language`/`locale`
+// straight into prompt text, and taking body.language as the answer rather
+// than as a fallback.
+import { readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+
+/** Source with // and /* *\/ comments removed, so the guards below grade
+ *  what is SENT to a model rather than what is written about it. */
+function stripComments(src) {
+  return src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+}
+
+function walk(dir, out = []) {
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) walk(full, out);
+    else if (full.endsWith(".ts") || full.endsWith(".tsx")) out.push(full);
+  }
+  return out;
+}
+
+const ALL = [...walk("src/lib"), ...walk("src/app/api")];
+
+// A bare code interpolated into prompt prose. `language.name` and
+// `languageInstruction(...)` are the sanctioned forms and do not match.
+const BARE_CODE = /\$\{\s*(?:params\.)?(?:config\.)?(?:language|locale)\s*\}/;
+const offenders = [];
+for (const file of ALL) {
+  if (file.endsWith("content-language.ts")) continue;
+  const src = readFileSync(file, "utf8");
+  // Only look inside template literals that read like prompt text — a
+  // `${language}` in a URL or a log line is not this bug.
+  for (const line of stripComments(src).split("\n")) {
+    if (!BARE_CODE.test(line)) continue;
+    if (!/language|Language|LANGUAGE|Write|write|Reply/.test(line)) continue;
+    offenders.push(`${file}: ${line.trim().slice(0, 90)}`);
+  }
+}
+check(
+  "no prompt interpolates a bare language code",
+  offenders.length === 0,
+  offenders.join("\n        ") + "\n        use languageInstruction(resolveContentLanguage(userText, uiLocale)) instead"
+);
+
+// The second shape: a route that reads body.language and treats it as the
+// answer. The sanctioned form names it uiLocale and passes it as the
+// FALLBACK argument of resolveContentLanguage.
+const uiAsAnswer = [];
+for (const file of ALL) {
+  const src = readFileSync(file, "utf8");
+  if (!/body\?\.language/.test(src)) continue;
+  const takesItAsTheAnswer = /const language = typeof body\?\.language/.test(src);
+  if (takesItAsTheAnswer) uiAsAnswer.push(file);
+}
+check(
+  "no route takes the UI locale as the answer",
+  uiAsAnswer.length === 0,
+  uiAsAnswer.join(", ") + "\n        name it uiLocale and pass it to resolveContentLanguage(userText, uiLocale)"
+);
+
+// And the mirror defect, which the sweep turned up on its own: a prompt
+// that hardcodes ONE language for everybody. A Greek prompt telling the
+// model to answer in Greek is the reported bug with the languages swapped.
+const hardcoded = [];
+for (const file of ALL) {
+  // Comments stripped first. The check flagged its own fix's explanatory
+  // comment on the first run — a guard that fires on prose ABOUT the bug
+  // teaches people to ignore it, which is worse than not having it.
+  const src = stripComments(readFileSync(file, "utf8"));
+  if (/Απάντα στα ελληνικά|Answer in Greek|answer in Greek/i.test(src)) hardcoded.push(file);
+}
+check(
+  "no prompt hardcodes one language for every user",
+  hardcoded.length === 0,
+  hardcoded.join(", ")
+);
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length) {
   console.log("FAILED:\n" + failures.map((f) => "  - " + f).join("\n"));

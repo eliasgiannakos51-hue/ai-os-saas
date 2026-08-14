@@ -1,4 +1,5 @@
 import "server-only";
+import { contentLanguageFromCode } from "@/lib/content-language";
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
@@ -39,7 +40,10 @@ const MAX_OUTPUT_TOKENS = 2000;
 export const fileAskHandler: JobHandler = async (ctx: JobContext): Promise<JobHandlerResult> => {
   const steps = JOB_STEPS.file_ask;
   const question = String(ctx.input.question ?? "").trim();
-  const language = String(ctx.input.language ?? "en").slice(0, 12);
+  // The code the route resolved from the user's question when the job was
+  // enqueued. Rebuilt rather than re-detected: the worker runs later and
+  // the question is no longer the only text around.
+  const language = contentLanguageFromCode(String(ctx.input.language ?? "en").slice(0, 12));
   const fileIds = Array.isArray(ctx.input.fileIds) ? (ctx.input.fileIds as string[]) : [];
   const admin = createAdminClient();
 
@@ -109,7 +113,7 @@ export const fileAskHandler: JobHandler = async (ctx: JobContext): Promise<JobHa
       removedCitations: checked.fabricated.length,
       skippedFiles: context.skipped,
       truncated: context.truncated,
-      disclosure: aiGeneratedNotice(language),
+      disclosure: aiGeneratedNotice(language.code),
     },
   };
 };

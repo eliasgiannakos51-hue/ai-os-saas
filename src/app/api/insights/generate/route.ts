@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { contentLanguageFromCode } from "@/lib/content-language";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
@@ -87,7 +88,15 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json().catch(() => null);
-    const language = typeof body?.language === "string" ? body.language.slice(0, 12) : "en";
+    // Insights are the one feature here with NO user prose to read a
+    // language off: the findings are computed from uploaded numbers, and the
+    // user never wrote a sentence for this run. So the UI locale is not a
+    // wrong source here, it is the only one — and it is still routed through
+    // contentLanguageFromCode so the prompt receives "Greek" rather than
+    // "el", and gets the same quality instruction every other feature does.
+    const language = contentLanguageFromCode(
+      typeof body?.language === "string" ? body.language.slice(0, 12) : undefined
+    );
     const importId = typeof body?.importId === "string" ? body.importId : null;
 
     // Every read is scoped to the user by the query itself, not checked

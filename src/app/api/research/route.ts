@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveContentLanguage } from "@/lib/content-language";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
@@ -83,7 +84,16 @@ export async function POST(request: Request) {
     if (!topicCheck.ok) {
       return NextResponse.json({ ok: false, error: topicCheck.error }, { status: 400 });
     }
-    const language = typeof body?.language === "string" ? body.language.slice(0, 12) : "en";
+    // THE LANGUAGE FOLLOWS THE TOPIC, NOT THE MENUS.
+    //
+    // `body.language` is the UI locale — what the chrome is set to, which is
+    // not evidence of what the person writes in. A Greek user running an
+    // English interface typed a Greek topic and got an English report,
+    // because this line used to end here and hand "en" to the prompt.
+    // It is now the FALLBACK, used only when the topic is too short or too
+    // ambiguous to read a language off.
+    const uiLocale = typeof body?.language === "string" ? body.language.slice(0, 12) : undefined;
+    const language = resolveContentLanguage(topicCheck.topic, uiLocale);
 
     const isAdmin = isAdminEmail(user.email);
     const planSlug = await resolveEffectivePlanSlug(user);
@@ -226,7 +236,10 @@ export async function POST(request: Request) {
       .insert({
         user_id: user.id,
         topic: topicCheck.topic,
-        language,
+        // The CODE goes in the column; the NAME goes in the prompt. The
+        // chunked runner rebuilds the second from the first on resume — see
+        // lib/content-language.ts's contentLanguageFromCode.
+        language: language.code,
         status: "pending",
         questions: planned.questions,
       })

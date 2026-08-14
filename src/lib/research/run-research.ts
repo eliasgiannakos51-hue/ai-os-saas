@@ -1,4 +1,5 @@
 import "server-only";
+import { contentLanguageFromCode } from "@/lib/content-language";
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
@@ -175,7 +176,12 @@ export async function runResearchChunk(params: {
     ? report.partial_findings
     : [];
   const costs = CostAccumulator.restore(report.usage_entries);
-  const language = String(report.language ?? "en");
+  // The code stored when the run started (resolved then from the topic the
+  // user typed — see api/research/route.ts). Rebuilt rather than
+  // re-detected: a resumed chunk that disagreed with the chunk before it
+  // would produce a report written half in one language and half in
+  // another.
+  const language = contentLanguageFromCode(report.language);
   const anthropic = new Anthropic({ apiKey });
 
   // Where the previous chunks got to. Derived from the findings array
@@ -335,7 +341,7 @@ export async function runResearchChunk(params: {
   }
 
   const sections = splitSections(synthesis.markdown);
-  const disclosure = aiGeneratedNotice(language);
+  const disclosure = aiGeneratedNotice(language.code);
   const documentHtml = researchReportToDocumentHtml({
     markdown: synthesis.markdown,
     sources,

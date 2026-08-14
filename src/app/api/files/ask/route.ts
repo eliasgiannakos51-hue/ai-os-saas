@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { resolveContentLanguage } from "@/lib/content-language";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -72,11 +73,16 @@ export async function POST(request: Request) {
 
     const body = await request.json().catch(() => null);
     const question = typeof body?.question === "string" ? body.question.trim() : "";
-    const language = typeof body?.language === "string" ? body.language.slice(0, 12) : "en";
+    // Resolved from the QUESTION the user typed, not from the menu
+    // language — somebody asking a question in Greek wants a Greek answer
+    // whatever their interface is set to. The UI locale is the fallback for
+    // a question too short to read a language off ("summary?").
+    const uiLocale = typeof body?.language === "string" ? body.language.slice(0, 12) : undefined;
 
     if (!question) {
       return NextResponse.json({ ok: false, error: "Ask a question first." }, { status: 400 });
     }
+    const language = resolveContentLanguage(question, uiLocale);
     if (question.length > MAX_QUESTION_CHARS) {
       return NextResponse.json(
         { ok: false, error: `Questions can be up to ${MAX_QUESTION_CHARS} characters.` },
@@ -182,7 +188,8 @@ export async function POST(request: Request) {
       kind: "file_ask",
       reserve: bypassCredits || !plan ? 0 : estimate.reserveCredits,
       reserveMetadata: { files: files.length, estimatedCredits: estimate.estimatedCredits },
-      input: { question, language, fileIds: files.map((f) => f.id) },
+      // The code is what the job row carries; the worker rebuilds the name.
+      input: { question, language: language.code, fileIds: files.map((f) => f.id) },
     });
 
     if (!started.ok) {

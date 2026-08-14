@@ -1,4 +1,5 @@
 import "server-only";
+import { languageInstruction, type ContentLanguage } from "@/lib/content-language";
 import { AI_SAFETY_BOUNDARIES_EN, AI_CRISIS_EN } from "@/lib/ai-conduct";
 import { deserialisePages, type ExtractedPage } from "@/lib/files/extract";
 import { wrapUntrusted } from "@/lib/agents/agent-config";
@@ -130,7 +131,7 @@ export function prepareContext(files: AskableFile[]): PreparedContext {
  * single literal token for the refusal case that the UI can detect.
  */
 export function askSystemPrompt(params: {
-  language: string;
+  language: ContentLanguage;
   filenames: string[];
   truncated: boolean;
 }): string {
@@ -150,7 +151,8 @@ export function askSystemPrompt(params: {
       : "",
     "",
     `Documents supplied: ${params.filenames.join(", ")}`,
-    `Reply in the user's language (${params.language}). Be concise and specific.`,
+    languageInstruction(params.language, "your answer"),
+    "Be concise and specific.",
     AI_SAFETY_BOUNDARIES_EN,
     AI_CRISIS_EN,
   ]

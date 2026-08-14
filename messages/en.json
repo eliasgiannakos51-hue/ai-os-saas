@@ -345,7 +345,8 @@
       "noAccount": "No account yet?",
       "signUp": "Sign up",
       "forgotPassword": "Forgot password?",
-      "resetSuccess": "Password updated — sign in with your new password."
+      "resetSuccess": "Password updated — sign in with your new password.",
+      "failed": "We couldn't sign you in. Check the email and password, or reset your password if you're not sure."
     },
     "signup": {
       "chooseYourPlan": "Choose your plan",
@@ -372,7 +373,8 @@
       "createAccount": "Create Account",
       "mostPopular": "Most Popular",
       "mustAgreeToTerms": "You must agree to the Terms of Service and Privacy Policy to create an account.",
-      "passwordRequirementsNotMet": "Please choose a password that meets every requirement above."
+      "passwordRequirementsNotMet": "Please choose a password that meets every requirement above.",
+      "failed": "We couldn't create the account. Check the details and try again — you have not been charged."
     },
     "forgotPassword": {
       "title": "Reset password",
@@ -383,7 +385,8 @@
       "checkInbox": "If an account exists for <highlight>{emailAddress}</highlight>, a password reset link is on its way. Check your inbox.",
       "backToLogin": "Back to login",
       "rememberedIt": "Remembered it?",
-      "logIn": "Log in"
+      "logIn": "Log in",
+      "failed": "We couldn't send the reset email. Check the address and try again in a moment."
     },
     "resetPassword": {
       "title": "Set new password",
@@ -393,7 +396,9 @@
       "confirmPassword": "Confirm password",
       "saveNewPassword": "Save new password",
       "saving": "Saving...",
-      "passwordsDoNotMatch": "Passwords don't match."
+      "passwordsDoNotMatch": "Passwords don't match.",
+      "linkInvalid": "This reset link is no longer valid. Links expire after a short time — request a new one.",
+      "failed": "We couldn't set the new password. Try again, and request a new link if it keeps failing."
     },
     "social": {
       "continueWithGoogle": "Continue with Google",
@@ -413,7 +418,8 @@
       "requirementsNotMet": "Please choose a password that meets every requirement below.",
       "passwordsDoNotMatch": "Passwords do not match.",
       "couldNotUpdate": "✗ could not update password",
-      "passwordUpdated": "✓ password updated"
+      "passwordUpdated": "✓ password updated",
+      "failed": "We couldn't change your password. Check the current one and try again."
     },
     "chatMemory": {
       "title": "Chat Memory",
@@ -490,7 +496,9 @@
       "sending": "Sending...",
       "checkEmail": "Check your email to confirm deletion — we sent a link to <highlight>{email}</highlight>. It expires in 1 hour; nothing is deleted until you click it.",
       "emailDoesNotMatch": "Email doesn't match.",
-      "couldNotStartDeletion": "✗ could not start account deletion"
+      "couldNotStartDeletion": "✗ could not start account deletion",
+      "failed": "We couldn't send the confirmation email. Try again in a moment — nothing has been deleted.",
+      "confirmFailed": "We couldn't complete the deletion. Your account is still here — try the link again, or contact support."
     },
     "emailNotifications": {
       "title": "Email notifications",
@@ -720,7 +728,8 @@
       "heading1": "Heading 1",
       "heading2": "Heading 2",
       "bulletList": "Bullet list",
-      "updatedAt": "Edited {when}"
+      "updatedAt": "Edited {when}",
+      "createFailed": "We couldn't create the document. Try again in a moment — nothing was saved."
     },
     "chat": {
       "title": "Ionexa Chat",

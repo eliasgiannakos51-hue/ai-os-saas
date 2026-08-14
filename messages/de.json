@@ -345,7 +345,8 @@
       "noAccount": "Noch kein Konto?",
       "signUp": "Registrieren",
       "forgotPassword": "Passwort vergessen?",
-      "resetSuccess": "Passwort aktualisiert — melde dich mit deinem neuen Passwort an."
+      "resetSuccess": "Passwort aktualisiert — melde dich mit deinem neuen Passwort an.",
+      "failed": "Wir konnten dich nicht anmelden. Prüfe E-Mail und Passwort, oder setze das Passwort zurück, wenn du unsicher bist."
     },
     "signup": {
       "chooseYourPlan": "Wähle deinen Plan",
@@ -372,7 +373,8 @@
       "createAccount": "Konto erstellen",
       "mostPopular": "Am beliebtesten",
       "mustAgreeToTerms": "Sie müssen den Nutzungsbedingungen und der Datenschutzerklärung zustimmen, um ein Konto zu erstellen.",
-      "passwordRequirementsNotMet": "Bitte wählen Sie ein Passwort, das alle oben genannten Anforderungen erfüllt."
+      "passwordRequirementsNotMet": "Bitte wählen Sie ein Passwort, das alle oben genannten Anforderungen erfüllt.",
+      "failed": "Wir konnten das Konto nicht anlegen. Prüfe die Angaben und versuch es erneut — dir wurde nichts berechnet."
     },
     "forgotPassword": {
       "title": "Passwort zurücksetzen",
@@ -383,7 +385,8 @@
       "checkInbox": "Falls ein Konto für <highlight>{emailAddress}</highlight> existiert, ist ein Link zum Zurücksetzen unterwegs. Prüfe dein Postfach.",
       "backToLogin": "Zurück zur Anmeldung",
       "rememberedIt": "Erinnert?",
-      "logIn": "Anmelden"
+      "logIn": "Anmelden",
+      "failed": "Wir konnten die E-Mail zum Zurücksetzen nicht senden. Prüfe die Adresse und versuch es gleich noch einmal."
     },
     "resetPassword": {
       "title": "Neues Passwort festlegen",
@@ -393,7 +396,9 @@
       "confirmPassword": "Passwort bestätigen",
       "saveNewPassword": "Neues Passwort speichern",
       "saving": "Wird gespeichert...",
-      "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein."
+      "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein.",
+      "linkInvalid": "Dieser Link ist nicht mehr gültig. Links laufen nach kurzer Zeit ab — fordere einen neuen an.",
+      "failed": "Wir konnten das neue Passwort nicht setzen. Versuch es erneut und fordere einen neuen Link an, falls es weiter fehlschlägt."
     },
     "social": {
       "continueWithGoogle": "Weiter mit Google",
@@ -413,7 +418,8 @@
       "requirementsNotMet": "Bitte wählen Sie ein Passwort, das alle folgenden Anforderungen erfüllt.",
       "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein.",
       "couldNotUpdate": "✗ Passwort konnte nicht aktualisiert werden",
-      "passwordUpdated": "✓ Passwort aktualisiert"
+      "passwordUpdated": "✓ Passwort aktualisiert",
+      "failed": "Wir konnten dein Passwort nicht ändern. Prüfe das aktuelle und versuch es erneut."
     },
     "chatMemory": {
       "title": "Chat-Gedächtnis",
@@ -490,7 +496,9 @@
       "sending": "Wird gesendet...",
       "checkEmail": "Prüfe deine E-Mail, um die Löschung zu bestätigen — wir haben einen Link an <highlight>{email}</highlight> gesendet. Er läuft in 1 Stunde ab; nichts wird gelöscht, bis du darauf klickst.",
       "emailDoesNotMatch": "Die E-Mail stimmt nicht überein.",
-      "couldNotStartDeletion": "✗ Kontolöschung konnte nicht gestartet werden"
+      "couldNotStartDeletion": "✗ Kontolöschung konnte nicht gestartet werden",
+      "failed": "Wir konnten die Bestätigungs-E-Mail nicht senden. Versuch es gleich noch einmal — es wurde nichts gelöscht.",
+      "confirmFailed": "Wir konnten die Löschung nicht abschließen. Dein Konto besteht weiterhin — versuch den Link erneut oder wende dich an den Support."
     },
     "emailNotifications": {
       "title": "E-Mail-Benachrichtigungen",
@@ -720,7 +728,8 @@
       "heading1": "Überschrift 1",
       "heading2": "Überschrift 2",
       "bulletList": "Aufzählungsliste",
-      "updatedAt": "Bearbeitet {when}"
+      "updatedAt": "Bearbeitet {when}",
+      "createFailed": "Wir konnten das Dokument nicht anlegen. Versuch es gleich noch einmal — es wurde nichts gespeichert."
     },
     "chat": {
       "title": "Ionexa Chat",

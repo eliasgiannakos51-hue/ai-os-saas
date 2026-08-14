@@ -38,7 +38,7 @@ export function PasswordChangeForm() {
       if (error) {
         // eslint-disable-next-line no-console
         console.error("Password change error:", error);
-        setError(getErrorMessage(error));
+        setError(getErrorMessage(error, t("failed")));
         addToast(t("couldNotUpdate"), "error");
         return;
       }
@@ -49,7 +49,7 @@ export function PasswordChangeForm() {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Password change threw:", err);
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err, t("failed")));
       addToast(t("couldNotUpdate"), "error");
     } finally {
       setLoading(false);

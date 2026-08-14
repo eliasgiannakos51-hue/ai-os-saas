@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { useTranslations, useLocale } from "next-intl";
+import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { createClient } from "@/lib/supabase/client";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -193,6 +194,8 @@ export function WebsiteBuilderWorkspace({
 }) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.websiteBuilder");
+  const describe = useErrorText();
+  const describeStatus = useErrorTextForStatus();
   const locale = useLocale();
   const tCommon = useTranslations("common");
   const tPublish = useTranslations("dashboard.publishing");
@@ -546,7 +549,7 @@ export function WebsiteBuilderWorkspace({
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        setError(getErrorMessage(data?.error, "Something went wrong — no credits were charged. Please try again."));
+        setError(describeStatus(res.status).text);
         return;
       }
       if (data.needsClarification) {
@@ -614,7 +617,7 @@ export function WebsiteBuilderWorkspace({
       setError(
         err instanceof TypeError
           ? "Network error — please check your connection and try again."
-          : getErrorMessage(err, "Something went wrong — no credits were charged. Please try again.")
+          : describe(err).text
       );
     } finally {
       setGenerating(false);
@@ -681,7 +684,7 @@ export function WebsiteBuilderWorkspace({
       setError(
         err instanceof TypeError
           ? "Network error — please check your connection and try again."
-          : getErrorMessage(err, "Something went wrong — no credits were charged. Please try again.")
+          : describe(err).text
       );
       setGenerating(false);
     }

@@ -49,7 +49,7 @@ export function DangerZone({ email }: { email: string }) {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Delete account request threw:", err);
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err, t("failed")));
       addToast(t("couldNotStartDeletion"), "error");
     } finally {
       setLoading(false);

@@ -4,6 +4,7 @@ import { useState, type ChangeEvent } from "react";
 import { Wand2, Languages, Sparkles, HelpCircle, Check, X, Loader2 } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useTranslations } from "next-intl";
+import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { useCredits } from "@/components/credits/credits-context";
 
 const ACTIONS = [
@@ -36,6 +37,8 @@ export function TextActionsTextarea({
   required?: boolean;
 }) {
   const tCommon = useTranslations("common");
+  const describe = useErrorText();
+  const describeStatus = useErrorTextForStatus();
   const { reportUsage } = useCredits();
   const [selection, setSelection] = useState<{ start: number; end: number; text: string } | null>(
     null
@@ -82,7 +85,7 @@ export function TextActionsTextarea({
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        setError(getErrorMessage(data?.error, "Something went wrong."));
+        setError(describeStatus(res.status).text);
         return;
       }
 

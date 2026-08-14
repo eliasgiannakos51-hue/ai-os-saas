@@ -102,7 +102,7 @@ export function ResetPasswordForm() {
             type: "recovery",
           });
           if (error) {
-            setInvalidReason(getErrorMessage(error));
+            setInvalidReason(getErrorMessage(error, t("linkInvalid")));
             setStatus("invalid");
           } else {
             setStatus("ready");
@@ -114,7 +114,7 @@ export function ResetPasswordForm() {
         if (code) {
           const { error } = await supabase.auth.exchangeCodeForSession(code);
           if (error) {
-            setInvalidReason(getErrorMessage(error));
+            setInvalidReason(getErrorMessage(error, t("linkInvalid")));
             setStatus("invalid");
           } else {
             setStatus("ready");
@@ -130,7 +130,7 @@ export function ResetPasswordForm() {
             refresh_token: refreshToken,
           });
           if (error) {
-            setInvalidReason(getErrorMessage(error));
+            setInvalidReason(getErrorMessage(error, t("linkInvalid")));
             setStatus("invalid");
           } else {
             setStatus("ready");
@@ -147,7 +147,7 @@ export function ResetPasswordForm() {
         );
         setStatus("invalid");
       } catch (err) {
-        setInvalidReason(getErrorMessage(err));
+        setInvalidReason(getErrorMessage(err, t("linkInvalid")));
         setStatus("invalid");
       }
     }
@@ -169,7 +169,7 @@ export function ResetPasswordForm() {
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
-        setError(getErrorMessage(error));
+        setError(getErrorMessage(error, t("failed")));
         return;
       }
 
@@ -177,7 +177,7 @@ export function ResetPasswordForm() {
       router.push("/login?reset=success");
       router.refresh();
     } catch (err) {
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err, t("failed")));
     } finally {
       setLoading(false);
     }

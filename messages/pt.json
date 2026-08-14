@@ -345,7 +345,8 @@
       "noAccount": "Ainda não tem conta?",
       "signUp": "Cadastre-se",
       "forgotPassword": "Esqueceu a senha?",
-      "resetSuccess": "Senha atualizada — entre com sua nova senha."
+      "resetSuccess": "Senha atualizada — entre com sua nova senha.",
+      "failed": "Não conseguimos iniciar a tua sessão. Verifica o email e a palavra-passe, ou repõe-na se não tiveres a certeza."
     },
     "signup": {
       "chooseYourPlan": "Escolha seu plano",
@@ -372,7 +373,8 @@
       "createAccount": "Criar conta",
       "mostPopular": "Mais popular",
       "mustAgreeToTerms": "Tem de aceitar os Termos de Serviço e a Política de Privacidade para criar uma conta.",
-      "passwordRequirementsNotMet": "Escolha uma palavra-passe que cumpra todos os requisitos acima."
+      "passwordRequirementsNotMet": "Escolha uma palavra-passe que cumpra todos os requisitos acima.",
+      "failed": "Não conseguimos criar a conta. Verifica os dados e tenta outra vez — não te foi cobrado nada."
     },
     "forgotPassword": {
       "title": "Redefinir senha",
@@ -383,7 +385,8 @@
       "checkInbox": "Se existir uma conta para <highlight>{emailAddress}</highlight>, um link de redefinição está a caminho. Verifique sua caixa de entrada.",
       "backToLogin": "Voltar para o login",
       "rememberedIt": "Lembrou a senha?",
-      "logIn": "Entrar"
+      "logIn": "Entrar",
+      "failed": "Não conseguimos enviar o email de reposição. Verifica o endereço e tenta outra vez daqui a pouco."
     },
     "resetPassword": {
       "title": "Definir nova senha",
@@ -393,7 +396,9 @@
       "confirmPassword": "Confirmar senha",
       "saveNewPassword": "Salvar nova senha",
       "saving": "Salvando...",
-      "passwordsDoNotMatch": "As palavras-passe não coincidem."
+      "passwordsDoNotMatch": "As palavras-passe não coincidem.",
+      "linkInvalid": "Este link já não é válido. Os links expiram passado pouco tempo — pede um novo.",
+      "failed": "Não conseguimos definir a nova palavra-passe. Tenta outra vez e pede um novo link se continuar."
     },
     "social": {
       "continueWithGoogle": "Continuar com Google",
@@ -413,7 +418,8 @@
       "requirementsNotMet": "Escolha uma palavra-passe que cumpra todos os requisitos abaixo.",
       "passwordsDoNotMatch": "As palavras-passe não coincidem.",
       "couldNotUpdate": "✗ não foi possível atualizar a palavra-passe",
-      "passwordUpdated": "✓ palavra-passe atualizada"
+      "passwordUpdated": "✓ palavra-passe atualizada",
+      "failed": "Não conseguimos mudar a tua palavra-passe. Verifica a atual e tenta outra vez."
     },
     "chatMemory": {
       "title": "Memória do chat",
@@ -490,7 +496,9 @@
       "sending": "Enviando...",
       "checkEmail": "Verifique seu e-mail para confirmar a exclusão — enviamos um link para <highlight>{email}</highlight>. Ele expira em 1 hora; nada será excluído até que você clique nele.",
       "emailDoesNotMatch": "O e-mail não corresponde.",
-      "couldNotStartDeletion": "✗ não foi possível iniciar a eliminação da conta"
+      "couldNotStartDeletion": "✗ não foi possível iniciar a eliminação da conta",
+      "failed": "Não conseguimos enviar o email de confirmação. Tenta outra vez daqui a pouco — não foi eliminado nada.",
+      "confirmFailed": "Não conseguimos concluir a eliminação. A tua conta continua a existir — tenta o link outra vez ou contacta o apoio."
     },
     "emailNotifications": {
       "title": "Notificações por e-mail",
@@ -720,7 +728,8 @@
       "heading1": "Título 1",
       "heading2": "Título 2",
       "bulletList": "Lista com marcadores",
-      "updatedAt": "Editado {when}"
+      "updatedAt": "Editado {when}",
+      "createFailed": "Não conseguimos criar o documento. Tenta outra vez daqui a pouco — não foi guardado nada."
     },
     "chat": {
       "title": "Ionexa Conversa",

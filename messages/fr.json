@@ -345,7 +345,8 @@
       "noAccount": "Pas encore de compte ?",
       "signUp": "Inscrivez-vous",
       "forgotPassword": "Mot de passe oublié ?",
-      "resetSuccess": "Mot de passe mis à jour — connectez-vous avec votre nouveau mot de passe."
+      "resetSuccess": "Mot de passe mis à jour — connectez-vous avec votre nouveau mot de passe.",
+      "failed": "Nous n'avons pas pu vous connecter. Vérifiez l'e-mail et le mot de passe, ou réinitialisez-le en cas de doute."
     },
     "signup": {
       "chooseYourPlan": "Choisissez votre forfait",
@@ -372,7 +373,8 @@
       "createAccount": "Créer le compte",
       "mostPopular": "Le plus populaire",
       "mustAgreeToTerms": "Vous devez accepter les Conditions d'utilisation et la Politique de confidentialité pour créer un compte.",
-      "passwordRequirementsNotMet": "Choisissez un mot de passe qui remplit toutes les conditions ci-dessus."
+      "passwordRequirementsNotMet": "Choisissez un mot de passe qui remplit toutes les conditions ci-dessus.",
+      "failed": "Nous n'avons pas pu créer le compte. Vérifiez les informations et réessayez — vous n'avez pas été débité."
     },
     "forgotPassword": {
       "title": "Réinitialiser le mot de passe",
@@ -383,7 +385,8 @@
       "checkInbox": "Si un compte existe pour <highlight>{emailAddress}</highlight>, un lien de réinitialisation est en route. Vérifiez votre boîte de réception.",
       "backToLogin": "Retour à la connexion",
       "rememberedIt": "Vous vous en souvenez ?",
-      "logIn": "Connexion"
+      "logIn": "Connexion",
+      "failed": "Nous n'avons pas pu envoyer l'e-mail de réinitialisation. Vérifiez l'adresse et réessayez dans un instant."
     },
     "resetPassword": {
       "title": "Définir un nouveau mot de passe",
@@ -393,7 +396,9 @@
       "confirmPassword": "Confirmer le mot de passe",
       "saveNewPassword": "Enregistrer le nouveau mot de passe",
       "saving": "Enregistrement...",
-      "passwordsDoNotMatch": "Les mots de passe ne correspondent pas."
+      "passwordsDoNotMatch": "Les mots de passe ne correspondent pas.",
+      "linkInvalid": "Ce lien de réinitialisation n'est plus valide. Les liens expirent rapidement — demandez-en un nouveau.",
+      "failed": "Nous n'avons pas pu définir le nouveau mot de passe. Réessayez, et demandez un nouveau lien si cela persiste."
     },
     "social": {
       "continueWithGoogle": "Continuer avec Google",
@@ -413,7 +418,8 @@
       "requirementsNotMet": "Choisissez un mot de passe qui remplit toutes les conditions ci-dessous.",
       "passwordsDoNotMatch": "Les mots de passe ne correspondent pas.",
       "couldNotUpdate": "✗ impossible de mettre à jour le mot de passe",
-      "passwordUpdated": "✓ mot de passe mis à jour"
+      "passwordUpdated": "✓ mot de passe mis à jour",
+      "failed": "Nous n'avons pas pu changer votre mot de passe. Vérifiez l'actuel et réessayez."
     },
     "chatMemory": {
       "title": "Mémoire de chat",
@@ -490,7 +496,9 @@
       "sending": "Envoi...",
       "checkEmail": "Vérifiez votre e-mail pour confirmer la suppression — un lien a été envoyé à <highlight>{email}</highlight>. Il expire dans 1 heure ; rien n'est supprimé tant que vous ne cliquez pas dessus.",
       "emailDoesNotMatch": "L'e-mail ne correspond pas.",
-      "couldNotStartDeletion": "✗ impossible de lancer la suppression du compte"
+      "couldNotStartDeletion": "✗ impossible de lancer la suppression du compte",
+      "failed": "Nous n'avons pas pu envoyer l'e-mail de confirmation. Réessayez dans un instant — rien n'a été supprimé.",
+      "confirmFailed": "Nous n'avons pas pu terminer la suppression. Votre compte existe toujours — réessayez le lien ou contactez le support."
     },
     "emailNotifications": {
       "title": "Notifications par e-mail",
@@ -720,7 +728,8 @@
       "heading1": "Titre 1",
       "heading2": "Titre 2",
       "bulletList": "Liste à puces",
-      "updatedAt": "Modifié {when}"
+      "updatedAt": "Modifié {when}",
+      "createFailed": "Nous n'avons pas pu créer le document. Réessayez dans un instant — rien n'a été enregistré."
     },
     "chat": {
       "title": "Ionexa Discussion",

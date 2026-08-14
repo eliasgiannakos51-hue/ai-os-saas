@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Loader2, Plus } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { getErrorMessage } from "@/lib/get-error-message";
 
 export function NewDocumentButton({ label, large = false }: { label: string; large?: boolean }) {
   const router = useRouter();
+  const t = useTranslations("dashboard.documents");
   const { addToast } = useToast();
   const [loading, setLoading] = useState(false);
 
@@ -18,12 +20,12 @@ export function NewDocumentButton({ label, large = false }: { label: string; lar
       const res = await fetch("/api/documents", { method: "POST" });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        addToast(`✗ ${getErrorMessage(data?.error, "Could not create document.")}`, "error");
+        addToast(`✗ ${getErrorMessage(data?.error, t("createFailed"))}`, "error");
         return;
       }
       router.push(`/dashboard/documents/${data.id}`);
     } catch (err) {
-      addToast(`✗ ${getErrorMessage(err)}`, "error");
+      addToast(`✗ ${t("createFailed")}`, "error");
     } finally {
       setLoading(false);
     }

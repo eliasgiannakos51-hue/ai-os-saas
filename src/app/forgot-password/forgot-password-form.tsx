@@ -29,7 +29,7 @@ export function ForgotPasswordForm() {
       if (error) {
         // eslint-disable-next-line no-console
         console.error("Reset password request error:", error);
-        setError(getErrorMessage(error));
+        setError(getErrorMessage(error, t("failed")));
         return;
       }
 
@@ -37,7 +37,7 @@ export function ForgotPasswordForm() {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Reset password request threw:", err);
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err, t("failed")));
     } finally {
       setLoading(false);
     }

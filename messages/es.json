@@ -345,7 +345,8 @@
       "noAccount": "¿No tienes cuenta?",
       "signUp": "Regístrate",
       "forgotPassword": "¿Olvidaste tu contraseña?",
-      "resetSuccess": "Contraseña actualizada — inicia sesión con tu nueva contraseña."
+      "resetSuccess": "Contraseña actualizada — inicia sesión con tu nueva contraseña.",
+      "failed": "No hemos podido iniciar tu sesión. Revisa el correo y la contraseña, o restablécela si no estás seguro."
     },
     "signup": {
       "chooseYourPlan": "Elige tu plan",
@@ -372,7 +373,8 @@
       "createAccount": "Crear cuenta",
       "mostPopular": "Más popular",
       "mustAgreeToTerms": "Debes aceptar los Términos del Servicio y la Política de Privacidad para crear una cuenta.",
-      "passwordRequirementsNotMet": "Elige una contraseña que cumpla todos los requisitos anteriores."
+      "passwordRequirementsNotMet": "Elige una contraseña que cumpla todos los requisitos anteriores.",
+      "failed": "No hemos podido crear la cuenta. Revisa los datos e inténtalo de nuevo: no se te ha cobrado nada."
     },
     "forgotPassword": {
       "title": "Restablecer contraseña",
@@ -383,7 +385,8 @@
       "checkInbox": "Si existe una cuenta para <highlight>{emailAddress}</highlight>, un enlace de restablecimiento está en camino. Revisa tu bandeja de entrada.",
       "backToLogin": "Volver al inicio de sesión",
       "rememberedIt": "¿La recordaste?",
-      "logIn": "Inicia sesión"
+      "logIn": "Inicia sesión",
+      "failed": "No hemos podido enviar el correo de restablecimiento. Revisa la dirección e inténtalo de nuevo en un momento."
     },
     "resetPassword": {
       "title": "Establecer nueva contraseña",
@@ -393,7 +396,9 @@
       "confirmPassword": "Confirmar contraseña",
       "saveNewPassword": "Guardar nueva contraseña",
       "saving": "Guardando...",
-      "passwordsDoNotMatch": "Las contraseñas no coinciden."
+      "passwordsDoNotMatch": "Las contraseñas no coinciden.",
+      "linkInvalid": "Este enlace de restablecimiento ya no es válido. Los enlaces caducan pronto: solicita uno nuevo.",
+      "failed": "No hemos podido establecer la nueva contraseña. Inténtalo de nuevo y pide otro enlace si sigue fallando."
     },
     "social": {
       "continueWithGoogle": "Continuar con Google",
@@ -413,7 +418,8 @@
       "requirementsNotMet": "Elige una contraseña que cumpla todos los requisitos siguientes.",
       "passwordsDoNotMatch": "Las contraseñas no coinciden.",
       "couldNotUpdate": "✗ no se pudo actualizar la contraseña",
-      "passwordUpdated": "✓ contraseña actualizada"
+      "passwordUpdated": "✓ contraseña actualizada",
+      "failed": "No hemos podido cambiar tu contraseña. Comprueba la actual e inténtalo de nuevo."
     },
     "chatMemory": {
       "title": "Memoria de chat",
@@ -490,7 +496,9 @@
       "sending": "Enviando...",
       "checkEmail": "Revisa tu correo para confirmar la eliminación — enviamos un enlace a <highlight>{email}</highlight>. Caduca en 1 hora; nada se elimina hasta que hagas clic en él.",
       "emailDoesNotMatch": "El correo no coincide.",
-      "couldNotStartDeletion": "✗ no se pudo iniciar la eliminación de la cuenta"
+      "couldNotStartDeletion": "✗ no se pudo iniciar la eliminación de la cuenta",
+      "failed": "No hemos podido enviar el correo de confirmación. Inténtalo de nuevo en un momento: no se ha eliminado nada.",
+      "confirmFailed": "No hemos podido completar la eliminación. Tu cuenta sigue existiendo: vuelve a usar el enlace o contacta con soporte."
     },
     "emailNotifications": {
       "title": "Notificaciones por correo",
@@ -720,7 +728,8 @@
       "heading1": "Encabezado 1",
       "heading2": "Encabezado 2",
       "bulletList": "Lista con viñetas",
-      "updatedAt": "Editado {when}"
+      "updatedAt": "Editado {when}",
+      "createFailed": "No hemos podido crear el documento. Inténtalo de nuevo en un momento: no se ha guardado nada."
     },
     "chat": {
       "title": "Ionexa Chat",

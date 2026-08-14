@@ -227,6 +227,41 @@ checkTrue(
   clientFallbacks.length <= CLIENT_FALLBACK_BASELINE
 );
 
+console.log("\n== 1b. the sentence that says nothing is gone from the client ==");
+// "Something went wrong. Please try again." was the DEFAULT second
+// argument of getErrorMessage, so it was reachable from eighteen call
+// sites that simply omitted it — and omitting an optional argument is not
+// a decision, it is what happens when the parameter is optional. It is
+// English in a Greek UI, and it answers neither "what do I do now" nor
+// the question people actually have after a failed AI action, which is
+// whether it cost them anything.
+//
+// The fallback is now REQUIRED (lib/get-error-message.ts) so the omission
+// cannot recur silently, and the AI surfaces build their message from the
+// response status instead (lib/errors/use-error-text.ts). This asserts the
+// string itself does not come back into anything the browser renders.
+//
+// SERVER ROUTES ARE NOT IN SCOPE HERE. They still return English prose —
+// that is the 518-string convention counted above, and the client no
+// longer shows it at the converted call sites.
+const clientFiles = sources.filter((f) => !f.startsWith("src/app/api/") && !f.startsWith("src/lib/"));
+const banned = [];
+for (const file of clientFiles) {
+  const src = stripComments(readFileSync(file, "utf8"));
+  for (const m of src.matchAll(/"([^"]*Something went wrong[^"]*)"/g)) {
+    banned.push(`${file}: "${m[1]}"`);
+  }
+}
+check(`no client component renders "Something went wrong" (${clientFiles.length} files)`, banned, []);
+
+// And the door it came through is shut: a required parameter cannot be
+// forgotten the way an optional one with a default can.
+const getErr = readFileSync("src/lib/get-error-message.ts", "utf8");
+checkTrue(
+  "getErrorMessage's fallback is required, not defaulted",
+  /export function getErrorMessage\(error: unknown, fallback: string\)/.test(getErr)
+);
+
 console.log("\n== 2. every t() call resolves to a real key ==");
 // next-intl renders the raw key path and logs to the console when a key is
 // missing. Nothing fails a build. This is the only thing standing between

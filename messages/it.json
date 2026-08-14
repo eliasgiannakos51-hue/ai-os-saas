@@ -345,7 +345,8 @@
       "noAccount": "Non hai ancora un account?",
       "signUp": "Registrati",
       "forgotPassword": "Password dimenticata?",
-      "resetSuccess": "Password aggiornata — accedi con la tua nuova password."
+      "resetSuccess": "Password aggiornata — accedi con la tua nuova password.",
+      "failed": "Non siamo riusciti ad accedere. Controlla email e password, oppure reimposta la password se non sei sicuro."
     },
     "signup": {
       "chooseYourPlan": "Scegli il tuo piano",
@@ -372,7 +373,8 @@
       "createAccount": "Crea account",
       "mostPopular": "Più popolare",
       "mustAgreeToTerms": "Devi accettare i Termini di servizio e l'Informativa sulla privacy per creare un account.",
-      "passwordRequirementsNotMet": "Scegli una password che soddisfi tutti i requisiti sopra indicati."
+      "passwordRequirementsNotMet": "Scegli una password che soddisfi tutti i requisiti sopra indicati.",
+      "failed": "Non siamo riusciti a creare l'account. Controlla i dati e riprova — non ti è stato addebitato nulla."
     },
     "forgotPassword": {
       "title": "Reimposta password",
@@ -383,7 +385,8 @@
       "checkInbox": "Se esiste un account per <highlight>{emailAddress}</highlight>, un link di reimpostazione è in arrivo. Controlla la tua casella di posta.",
       "backToLogin": "Torna al login",
       "rememberedIt": "Te la sei ricordata?",
-      "logIn": "Accedi"
+      "logIn": "Accedi",
+      "failed": "Non siamo riusciti a inviare l'email di reimpostazione. Controlla l'indirizzo e riprova tra poco."
     },
     "resetPassword": {
       "title": "Imposta nuova password",
@@ -393,7 +396,9 @@
       "confirmPassword": "Conferma password",
       "saveNewPassword": "Salva nuova password",
       "saving": "Salvataggio...",
-      "passwordsDoNotMatch": "Le password non coincidono."
+      "passwordsDoNotMatch": "Le password non coincidono.",
+      "linkInvalid": "Questo link non è più valido. I link scadono dopo poco — richiedine uno nuovo.",
+      "failed": "Non siamo riusciti a impostare la nuova password. Riprova e richiedi un nuovo link se continua."
     },
     "social": {
       "continueWithGoogle": "Continua con Google",
@@ -413,7 +418,8 @@
       "requirementsNotMet": "Scegli una password che soddisfi tutti i requisiti seguenti.",
       "passwordsDoNotMatch": "Le password non coincidono.",
       "couldNotUpdate": "✗ impossibile aggiornare la password",
-      "passwordUpdated": "✓ password aggiornata"
+      "passwordUpdated": "✓ password aggiornata",
+      "failed": "Non siamo riusciti a cambiare la password. Controlla quella attuale e riprova."
     },
     "chatMemory": {
       "title": "Memoria chat",
@@ -490,7 +496,9 @@
       "sending": "Invio...",
       "checkEmail": "Controlla la tua email per confermare l'eliminazione — abbiamo inviato un link a <highlight>{email}</highlight>. Scade tra 1 ora; nulla verrà eliminato finché non ci clicchi sopra.",
       "emailDoesNotMatch": "L'email non corrisponde.",
-      "couldNotStartDeletion": "✗ impossibile avviare l'eliminazione dell'account"
+      "couldNotStartDeletion": "✗ impossibile avviare l'eliminazione dell'account",
+      "failed": "Non siamo riusciti a inviare l'email di conferma. Riprova tra poco — non è stato eliminato nulla.",
+      "confirmFailed": "Non siamo riusciti a completare l'eliminazione. Il tuo account esiste ancora — riprova il link o contatta l'assistenza."
     },
     "emailNotifications": {
       "title": "Notifiche email",
@@ -720,7 +728,8 @@
       "heading1": "Titolo 1",
       "heading2": "Titolo 2",
       "bulletList": "Elenco puntato",
-      "updatedAt": "Modificato {when}"
+      "updatedAt": "Modificato {when}",
+      "createFailed": "Non siamo riusciti a creare il documento. Riprova tra poco — non è stato salvato nulla."
     },
     "chat": {
       "title": "Ionexa Chat",

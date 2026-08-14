@@ -214,7 +214,7 @@ export function SignupFlow() {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Signup flow threw:", err);
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err, t("failed")));
     } finally {
       setLoading(false);
     }

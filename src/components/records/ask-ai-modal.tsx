@@ -10,6 +10,7 @@ import {
 } from "react";
 import { ArrowUp, Sparkles, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { AiActivity } from "@/components/ui/ai-activity";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
@@ -44,6 +45,8 @@ export function AskAiModal({
   recordHeadline: string;
 }) {
   const t = useTranslations("askAi");
+  const describe = useErrorText();
+  const describeStatus = useErrorTextForStatus();
   const tCommon = useTranslations("common");
   const { reportUsage } = useCredits();
   const [messages, setMessages] = useState<Turn[]>([]);
@@ -106,7 +109,7 @@ export function AskAiModal({
           setIsRateLimitNotice(true);
           setError(data.message);
         } else {
-          setError(getErrorMessage(data?.error, "Something went wrong."));
+          setError(describeStatus(res.status).text);
         }
         return;
       }
@@ -125,7 +128,7 @@ export function AskAiModal({
             setStreamingText(accumulatedText);
           }
         } else if (event.type === "error") {
-          streamError = typeof event.error === "string" ? event.error : "Something went wrong.";
+          streamError = describeStatus(500).text;
         }
       });
 

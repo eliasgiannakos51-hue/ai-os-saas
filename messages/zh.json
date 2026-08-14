@@ -345,7 +345,8 @@
       "noAccount": "还没有账户？",
       "signUp": "注册",
       "forgotPassword": "忘记密码？",
-      "resetSuccess": "密码已更新——请使用新密码登录。"
+      "resetSuccess": "密码已更新——请使用新密码登录。",
+      "failed": "无法登录。请检查邮箱和密码，如不确定可重置密码。"
     },
     "signup": {
       "chooseYourPlan": "选择你的方案",
@@ -372,7 +373,8 @@
       "createAccount": "创建账户",
       "mostPopular": "最受欢迎",
       "mustAgreeToTerms": "您必须同意服务条款和隐私政策才能创建账户。",
-      "passwordRequirementsNotMet": "请选择满足以上所有要求的密码。"
+      "passwordRequirementsNotMet": "请选择满足以上所有要求的密码。",
+      "failed": "无法创建账户。请检查填写的信息后重试 — 未向你收费。"
     },
     "forgotPassword": {
       "title": "重置密码",
@@ -383,7 +385,8 @@
       "checkInbox": "如果 <highlight>{emailAddress}</highlight> 存在对应账户，重置链接即将发出。请查看你的收件箱。",
       "backToLogin": "返回登录",
       "rememberedIt": "想起密码了？",
-      "logIn": "登录"
+      "logIn": "登录",
+      "failed": "无法发送重置邮件。请检查邮箱地址，稍后再试。"
     },
     "resetPassword": {
       "title": "设置新密码",
@@ -393,7 +396,9 @@
       "confirmPassword": "确认密码",
       "saveNewPassword": "保存新密码",
       "saving": "保存中...",
-      "passwordsDoNotMatch": "两次输入的密码不一致。"
+      "passwordsDoNotMatch": "两次输入的密码不一致。",
+      "linkInvalid": "此重置链接已失效。链接会在短时间后过期 — 请重新申请一个。",
+      "failed": "无法设置新密码。请重试，若持续失败请重新申请链接。"
     },
     "social": {
       "continueWithGoogle": "使用 Google 继续",
@@ -413,7 +418,8 @@
       "requirementsNotMet": "请选择满足以下所有要求的密码。",
       "passwordsDoNotMatch": "两次输入的密码不一致。",
       "couldNotUpdate": "✗ 无法更新密码",
-      "passwordUpdated": "✓ 密码已更新"
+      "passwordUpdated": "✓ 密码已更新",
+      "failed": "无法修改密码。请确认当前密码后重试。"
     },
     "chatMemory": {
       "title": "对话记忆",
@@ -490,7 +496,9 @@
       "sending": "发送中...",
       "checkEmail": "请查看你的邮箱以确认删除——我们已向 <highlight>{email}</highlight> 发送了一个链接。该链接将在 1 小时后过期；在你点击之前不会删除任何内容。",
       "emailDoesNotMatch": "电子邮件地址不匹配。",
-      "couldNotStartDeletion": "✗ 无法开始删除账户"
+      "couldNotStartDeletion": "✗ 无法开始删除账户",
+      "failed": "无法发送确认邮件。请稍后重试 — 尚未删除任何内容。",
+      "confirmFailed": "无法完成删除。你的账户仍然存在 — 请重新点击链接，或联系客服。"
     },
     "emailNotifications": {
       "title": "邮件通知",
@@ -720,7 +728,8 @@
       "heading1": "标题 1",
       "heading2": "标题 2",
       "bulletList": "项目符号列表",
-      "updatedAt": "编辑于 {when}"
+      "updatedAt": "编辑于 {when}",
+      "createFailed": "无法创建文档。请稍后重试 — 未保存任何内容。"
     },
     "chat": {
       "title": "Ionexa 聊天",

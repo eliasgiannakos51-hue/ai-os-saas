@@ -345,7 +345,8 @@
       "noAccount": "アカウントをお持ちでないですか？",
       "signUp": "新規登録",
       "forgotPassword": "パスワードをお忘れですか？",
-      "resetSuccess": "パスワードを更新しました — 新しいパスワードでログインしてください。"
+      "resetSuccess": "パスワードを更新しました — 新しいパスワードでログインしてください。",
+      "failed": "サインインできませんでした。メールアドレスとパスワードをご確認いただくか、不明な場合はパスワードを再設定してください。"
     },
     "signup": {
       "chooseYourPlan": "プランを選択",
@@ -372,7 +373,8 @@
       "createAccount": "アカウントを作成",
       "mostPopular": "一番人気",
       "mustAgreeToTerms": "アカウントを作成するには、利用規約とプライバシーポリシーに同意する必要があります。",
-      "passwordRequirementsNotMet": "上記のすべての条件を満たすパスワードを選んでください。"
+      "passwordRequirementsNotMet": "上記のすべての条件を満たすパスワードを選んでください。",
+      "failed": "アカウントを作成できませんでした。入力内容をご確認のうえお試しください — 請求は発生していません。"
     },
     "forgotPassword": {
       "title": "パスワードをリセット",
@@ -383,7 +385,8 @@
       "checkInbox": "<highlight>{emailAddress}</highlight> のアカウントが存在する場合、リセットリンクを送信しています。受信トレイをご確認ください。",
       "backToLogin": "ログインに戻る",
       "rememberedIt": "思い出しましたか？",
-      "logIn": "ログイン"
+      "logIn": "ログイン",
+      "failed": "再設定メールを送信できませんでした。アドレスをご確認のうえ、少し待ってからお試しください。"
     },
     "resetPassword": {
       "title": "新しいパスワードを設定",
@@ -393,7 +396,9 @@
       "confirmPassword": "パスワードの確認",
       "saveNewPassword": "新しいパスワードを保存",
       "saving": "保存中...",
-      "passwordsDoNotMatch": "パスワードが一致しません。"
+      "passwordsDoNotMatch": "パスワードが一致しません。",
+      "linkInvalid": "この再設定リンクは無効です。リンクは短時間で期限切れになります — 新しいリンクをリクエストしてください。",
+      "failed": "新しいパスワードを設定できませんでした。もう一度お試しいただき、続く場合は新しいリンクをリクエストしてください。"
     },
     "social": {
       "continueWithGoogle": "Googleで続行",
@@ -413,7 +418,8 @@
       "requirementsNotMet": "以下のすべての条件を満たすパスワードを選んでください。",
       "passwordsDoNotMatch": "パスワードが一致しません。",
       "couldNotUpdate": "✗ パスワードを更新できませんでした",
-      "passwordUpdated": "✓ パスワードを更新しました"
+      "passwordUpdated": "✓ パスワードを更新しました",
+      "failed": "パスワードを変更できませんでした。現在のパスワードをご確認のうえお試しください。"
     },
     "chatMemory": {
       "title": "チャットメモリー",
@@ -490,7 +496,9 @@
       "sending": "送信中...",
       "checkEmail": "削除を確認するにはメールをご確認ください — <highlight>{email}</highlight> にリンクを送信しました。1時間で期限切れになります。クリックするまで何も削除されません。",
       "emailDoesNotMatch": "メールアドレスが一致しません。",
-      "couldNotStartDeletion": "✗ アカウント削除を開始できませんでした"
+      "couldNotStartDeletion": "✗ アカウント削除を開始できませんでした",
+      "failed": "確認メールを送信できませんでした。少し待ってからお試しください — 何も削除されていません。",
+      "confirmFailed": "削除を完了できませんでした。アカウントは残っています — リンクをもう一度お試しいただくか、サポートにご連絡ください。"
     },
     "emailNotifications": {
       "title": "メール通知",
@@ -720,7 +728,8 @@
       "heading1": "見出し1",
       "heading2": "見出し2",
       "bulletList": "箇条書き",
-      "updatedAt": "{when}に編集"
+      "updatedAt": "{when}に編集",
+      "createFailed": "ドキュメントを作成できませんでした。少し待ってからお試しください — 何も保存されていません。"
     },
     "chat": {
       "title": "Ionexa チャット",

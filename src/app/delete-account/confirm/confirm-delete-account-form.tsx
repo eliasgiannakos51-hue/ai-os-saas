@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { Logo } from "@/components/logo";
@@ -14,6 +15,7 @@ type Status = "idle" | "loading" | "done";
 // automatically on page load, so an email client's link-prescanning/bot
 // can't trigger a real deletion just by fetching this page.
 export function ConfirmDeleteAccountForm() {
+  const t = useTranslations("settings.dangerZone");
   const [token, setToken] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -46,7 +48,7 @@ export function ConfirmDeleteAccountForm() {
       // eslint-disable-next-line no-console
       console.error("Delete account confirmation threw:", err);
       setStatus("idle");
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err, t("confirmFailed")));
     }
   }
 

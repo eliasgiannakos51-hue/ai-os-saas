@@ -10,6 +10,7 @@ import {
 } from "react";
 import { ArrowUp, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { AiActivity } from "@/components/ui/ai-activity";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -70,6 +71,8 @@ export function ChatWorkspace({
   initialFreeChatRemaining?: number;
 }) {
   const tTrading = useTranslations("dashboard.tradingWorkflow");
+  const describe = useErrorText();
+  const describeStatus = useErrorTextForStatus();
   const tCommon = useTranslations("common");
   const tProduct = useTranslations("dashboard.productWorkflow");
   const tFree = useTranslations("credits.freeChat");
@@ -331,7 +334,7 @@ export function ChatWorkspace({
           setIsRateLimitNotice(true);
           setError(data.message);
         } else {
-          setError(getErrorMessage(data?.error, "Something went wrong."));
+          setError(describeStatus(res.status).text);
         }
         return;
       }
@@ -382,7 +385,7 @@ export function ChatWorkspace({
             setStreamingText(accumulatedText);
           }
         } else if (event.type === "error") {
-          streamError = typeof event.error === "string" ? event.error : "Something went wrong.";
+          streamError = describeStatus(500).text;
         }
       });
 

@@ -88,7 +88,7 @@ export function NotificationBell({ locale }: { locale: string }) {
         onClick={() => void openPanel()}
         aria-label={t("notifications")}
         aria-expanded={open}
-        className="relative flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"
+        className="relative flex h-11 w-9 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground sm:h-9"
       >
         <Bell className="h-[18px] w-[18px]" />
         {unread > 0 && (

@@ -37,10 +37,11 @@ export function TopNav({ email }: { email: string }) {
 
       <Link
         href={OVERVIEW_NAV_ITEM.href}
-        className="flex shrink-0 items-center gap-2"
+        // Height only — the bar has 64px of it and no spare width.
+        className="flex min-h-[44px] shrink-0 items-center gap-2"
       >
         <Logo iconOnly className="h-6 w-6" />
-        <span className="text-base font-bold tracking-tight text-foreground">
+        <span className="hidden text-base font-bold tracking-tight text-foreground min-[400px]:inline">
           IONEXA
         </span>
       </Link>
@@ -109,7 +110,7 @@ export function TopNav({ email }: { email: string }) {
         <button
           type="button"
           onClick={openCreate}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] lg:px-3.5"
+          className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0 lg:px-3.5"
         >
           <Plus className="h-4 w-4" />
           <span className="hidden lg:inline">{t("newProject")}</span>
@@ -121,7 +122,7 @@ export function TopNav({ email }: { email: string }) {
             onClick={() => setUserMenuOpen((v) => !v)}
             aria-label="Account menu"
             aria-expanded={userMenuOpen}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500/15 text-sm font-semibold text-orange-400 transition-colors duration-150 hover:bg-orange-500/25"
+            className="flex h-11 w-9 items-center justify-center rounded-full bg-orange-500/15 text-sm font-semibold text-orange-400 transition-colors duration-150 hover:bg-orange-500/25 sm:h-9"
           >
             {initial}
           </button>

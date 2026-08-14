@@ -89,7 +89,7 @@ export function ChatMemorySettings({
           aria-label={t("toggleLabel")}
           onClick={handleToggle}
           disabled={updating}
-          className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`relative -my-2.5 inline-flex h-11 w-11 shrink-0 items-center rounded-full bg-clip-content py-2.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
             enabled ? "bg-orange-500" : "bg-panel-hover"
           }`}
         >

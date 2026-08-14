@@ -91,11 +91,11 @@ export function CookieConsentBanner() {
               </p>
               <p>
                 No advertising or third-party tracking cookies are used. See our{" "}
-                <a href="/cookies" className="text-orange-400 underline underline-offset-2">
+                <a href="/cookies" className="-my-2 inline-block py-2 text-orange-400 underline underline-offset-2">
                   Cookie Policy
                 </a>{" "}
                 and{" "}
-                <a href="/privacy" className="text-orange-400 underline underline-offset-2">
+                <a href="/privacy" className="-my-2 inline-block py-2 text-orange-400 underline underline-offset-2">
                   Privacy Policy
                 </a>{" "}
                 for details.

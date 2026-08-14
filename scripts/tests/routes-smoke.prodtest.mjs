@@ -277,6 +277,18 @@ const DASHBOARD_ROUTES = [
   "/dashboard/trading-workflow",
 ];
 
+// The routes a new user actually lands on first, plus the two the
+// reported "the start is crooked on mobile" complaint points at.
+const TOUCH_ROUTES = [
+  "/dashboard",
+  "/dashboard/overview",
+  "/onboarding",
+  "/dashboard/create",
+  "/dashboard/chat",
+  "/dashboard/agents",
+  "/dashboard/settings",
+];
+
 const { chromium } = await import("playwright");
 const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
 
@@ -330,16 +342,77 @@ async function inspect(context, route) {
   // 768px is the width where the sidebar appears while the header still
   // carries its full-width controls — the worst case, not an arbitrary
   // second sample.
+  // FOUR WIDTHS NOW, and each one earns its place: 375 is a phone, 768 is
+  // the tablet width the publish bug lived at, 1024 is a small laptop or a
+  // half-screen window, 1280 is the desktop everything was designed on.
+  //
+  // AND IT NAMES THE ELEMENT. "scrollWidth 565 > 375" tells you a page is
+  // broken and nothing about where to look; the publish bug was reported
+  // three times and the dialog was rebuilt twice because nobody could see
+  // which node was doing it.
   const measure = async (width, height) => {
     await page.setViewportSize({ width, height });
     await page.waitForTimeout(250);
-    return page.evaluate(() => ({
-      scrollWidth: document.documentElement.scrollWidth,
-      clientWidth: document.documentElement.clientWidth,
-    }));
+    return page.evaluate(() => {
+      const clientWidth = document.documentElement.clientWidth;
+      const scrollWidth = document.documentElement.scrollWidth;
+
+      // WHAT ACTUALLY PUSHES THE PAGE WIDE. An element sticking out
+      // inside an overflow-x:auto container is a scrollable region doing
+      // its job, not a defect — so any node with a scrolling or clipping
+      // ancestor is skipped, and only the DEEPEST remaining offenders are
+      // named. Reporting <body> would be true and useless.
+      const describe = (el) => {
+        const id = el.id ? `#${el.id}` : "";
+        const cls = (typeof el.className === "string" ? el.className : "")
+          .split(/\s+/).filter(Boolean).slice(0, 3).map((c) => `.${c}`).join("");
+        const testid = el.getAttribute("data-testid");
+        const text = (el.textContent ?? "").trim().replace(/\s+/g, " ").slice(0, 40);
+        return `${el.tagName.toLowerCase()}${id}${testid ? `[data-testid=${testid}]` : ""}${cls}${text ? ` "${text}"` : ""}`;
+      };
+      const contained = (el) => {
+        for (let node = el.parentElement; node; node = node.parentElement) {
+          const style = getComputedStyle(node);
+          if (/(auto|scroll|hidden|clip)/.test(style.overflowX)) return true;
+        }
+        return false;
+      };
+      const offenders = [];
+      for (const el of Array.from(document.querySelectorAll("body *"))) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) continue;
+        if (rect.right <= clientWidth + 1) continue;
+        const style = getComputedStyle(el);
+        if (style.position === "fixed" && style.visibility === "hidden") continue;
+        if (contained(el)) continue;
+        offenders.push({ node: describe(el), right: Math.round(rect.right), depth: (() => {
+          let d = 0;
+          for (let n = el.parentElement; n; n = n.parentElement) d++;
+          return d;
+        })() });
+      }
+      // Deepest first: the innermost node is the one to fix.
+      offenders.sort((a, b) => b.depth - a.depth || b.right - a.right);
+
+      // Touch targets, measured rather than assumed. Anything the user
+      // is meant to press that is under 44px in either direction.
+      const small = [];
+      for (const el of Array.from(document.querySelectorAll("button, a[href], [role=button], select"))) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) continue;
+        if (getComputedStyle(el).visibility === "hidden") continue;
+        if (rect.height >= 44 && rect.width >= 44) continue;
+        small.push(`${describe(el)} ${Math.round(rect.width)}x${Math.round(rect.height)}`);
+      }
+      return { scrollWidth, clientWidth, offenders: offenders.slice(0, 4), small };
+    });
   };
-  const overflow = await measure(375, 800);
-  const overflowTablet = await measure(768, 1024);
+  const byWidth = {};
+  for (const [width, height] of [[375, 800], [768, 1024], [1024, 800], [1280, 900]]) {
+    byWidth[width] = await measure(width, height);
+  }
+  const overflow = byWidth[375];
+  const overflowTablet = byWidth[768];
 
   // Noise that is not a defect in this environment: the stand-in Supabase
   // returns empty rows, and favicon/asset 404s are not route failures.
@@ -356,7 +429,7 @@ async function inspect(context, route) {
       !/Failed to fetch RSC payload[\s\S]*Falling back to browser navigation/i.test(e)
   );
   await page.close();
-  return { status, errors: real, keys, overflow, overflowTablet, landedOn };
+  return { status, errors: real, keys, overflow, overflowTablet, byWidth, landedOn };
 }
 
 console.log("\n== 1. public routes (logged out) ==");
@@ -366,16 +439,26 @@ for (const route of PUBLIC_ROUTES) {
   check(`${route}: 200`, r.status, 200);
   check(`${route}: no console errors`, r.errors, []);
   check(`${route}: no unresolved i18n keys`, r.keys, []);
-  checkTrue(
-    `${route}: no horizontal overflow @375px (${r.overflow?.scrollWidth}/${r.overflow?.clientWidth})`,
-    r.overflow && r.overflow.scrollWidth <= r.overflow.clientWidth + 1,
-    JSON.stringify(r.overflow)
-  );
-  checkTrue(
-    `${route}: no horizontal overflow @768px (${r.overflowTablet?.scrollWidth}/${r.overflowTablet?.clientWidth})`,
-    r.overflowTablet && r.overflowTablet.scrollWidth <= r.overflowTablet.clientWidth + 1,
-    JSON.stringify(r.overflowTablet)
-  );
+  // ALL FOUR WIDTHS, and the failure NAMES the node.
+  //
+  // Two widths was already one more than this file started with, and the
+  // reason is on the record: measuring 375 alone let the dashboard header
+  // overflow by up to 190px between 640 and 1023, reported three times as
+  // "the Publish bar is squeezed to the left" while the publish dialog —
+  // which was never the cause — got rebuilt twice. Sampling is how that
+  // survived; 1024 and 1280 were still unsampled until now.
+  //
+  // "scrollWidth 565 > 375" says a page is broken and nothing about where
+  // to look, so the offending element is printed with its deepest node
+  // first.
+  for (const width of [375, 768, 1024, 1280]) {
+    const m = r.byWidth?.[width];
+    checkTrue(
+      `${route}: no horizontal overflow @${width}px (${m?.scrollWidth}/${m?.clientWidth})`,
+      m && m.scrollWidth <= m.clientWidth + 1,
+      (m?.offenders ?? []).map((o) => `${o.node} → right edge ${o.right}px`).join("\n        ")
+    );
+  }
 }
 await anon.close();
 
@@ -392,16 +475,26 @@ for (const route of DASHBOARD_ROUTES) {
   checkTrue(`${route}: did not bounce to /login`, r.landedOn !== "/login", `landed on ${r.landedOn}`);
   check(`${route}: no console errors`, r.errors, []);
   check(`${route}: no unresolved i18n keys`, r.keys, []);
-  checkTrue(
-    `${route}: no horizontal overflow @375px (${r.overflow?.scrollWidth}/${r.overflow?.clientWidth})`,
-    r.overflow && r.overflow.scrollWidth <= r.overflow.clientWidth + 1,
-    JSON.stringify(r.overflow)
-  );
-  checkTrue(
-    `${route}: no horizontal overflow @768px (${r.overflowTablet?.scrollWidth}/${r.overflowTablet?.clientWidth})`,
-    r.overflowTablet && r.overflowTablet.scrollWidth <= r.overflowTablet.clientWidth + 1,
-    JSON.stringify(r.overflowTablet)
-  );
+  // ALL FOUR WIDTHS, and the failure NAMES the node.
+  //
+  // Two widths was already one more than this file started with, and the
+  // reason is on the record: measuring 375 alone let the dashboard header
+  // overflow by up to 190px between 640 and 1023, reported three times as
+  // "the Publish bar is squeezed to the left" while the publish dialog —
+  // which was never the cause — got rebuilt twice. Sampling is how that
+  // survived; 1024 and 1280 were still unsampled until now.
+  //
+  // "scrollWidth 565 > 375" says a page is broken and nothing about where
+  // to look, so the offending element is printed with its deepest node
+  // first.
+  for (const width of [375, 768, 1024, 1280]) {
+    const m = r.byWidth?.[width];
+    checkTrue(
+      `${route}: no horizontal overflow @${width}px (${m?.scrollWidth}/${m?.clientWidth})`,
+      m && m.scrollWidth <= m.clientWidth + 1,
+      (m?.offenders ?? []).map((o) => `${o.node} → right edge ${o.right}px`).join("\n        ")
+    );
+  }
 }
 // A route returning 200 says the page rendered. It does not say the
 // controls on it are FINDABLE, which is the thing that was actually
@@ -659,8 +752,83 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
   );
   checkTrue("no raw i18n key leaks into it", !/module\.empty/.test(main));
 
+  // THE SWITCHES, LOOKED AT. Their hit area was grown from 24px to 44 by
+  // padding the box and clipping the background back to the content
+  // box — the track must still paint at its original size, so this is
+  // measured rather than assumed.
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/settings`, { waitUntil: "networkidle", timeout: 45000 });
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: "/tmp/ionexa-settings-el.png", fullPage: false });
+  const track = await page.evaluate(() => {
+    const el = document.querySelector("button.rounded-full.w-11, button[class*='w-11'][class*='rounded-full']");
+    if (!el) return null;
+    const box = el.getBoundingClientRect();
+    const style = getComputedStyle(el);
+    return {
+      hit: `${Math.round(box.width)}x${Math.round(box.height)}`,
+      paddingY: style.paddingTop,
+      clip: style.backgroundClip,
+    };
+  });
+  checkTrue(`a switch has a 44px hit area (${track?.hit})`, track?.hit === "44x44", JSON.stringify(track));
+  checkTrue("...with the visible track clipped back to its old size", track?.clip === "content-box", JSON.stringify(track));
+
   await page.close();
   await greek.close();
+}
+
+// -------------------------------------------------------------------
+console.log("\n== 6. touch targets on a phone ==");
+// -------------------------------------------------------------------
+// 44px is the size a finger actually hits. The app already knows this —
+// its own buttons use `min-h-[44px] sm:min-h-0`, which is 44 on a phone
+// and smaller once there is a mouse — so anything under it at 375px is a
+// control that missed the pattern rather than a deliberate choice.
+//
+// Reported per route with the element NAMED, because "12 targets are too
+// small" is not something anyone can act on.
+{
+  const bySize = new Map();
+  for (const route of TOUCH_ROUTES) {
+    const page = await authed.newPage();
+    try {
+      await page.setViewportSize({ width: 375, height: 800 });
+      await page.goto(`http://127.0.0.1:${PORT}${route}`, { waitUntil: "networkidle", timeout: 45000 });
+      await page.waitForTimeout(250);
+      const small = await page.evaluate(() => {
+        const out = [];
+        for (const el of Array.from(document.querySelectorAll("button, a[href], [role=button], select"))) {
+          const rect = el.getBoundingClientRect();
+          if (rect.width <= 0 || rect.height <= 0) continue;
+          if (getComputedStyle(el).visibility === "hidden") continue;
+          if (rect.height >= 44) continue;
+          const id = el.id ? `#${el.id}` : "";
+          const testid = el.getAttribute("data-testid");
+          const label = (el.getAttribute("aria-label") ?? el.textContent ?? "").trim().replace(/\s+/g, " ").slice(0, 28);
+          out.push(`${el.tagName.toLowerCase()}${id}${testid ? `[${testid}]` : ""} "${label}" ${Math.round(rect.width)}x${Math.round(rect.height)}`);
+        }
+        return out;
+      });
+      if (small.length) bySize.set(route, small);
+    } finally {
+      await page.close();
+    }
+  }
+  const total = [...bySize.values()].reduce((n, list) => n + list.length, 0);
+  console.log(`        ${total} targets under 44px tall across ${bySize.size}/${TOUCH_ROUTES.length} routes`);
+  for (const [route, list] of bySize) {
+    console.log(`        ${route}: ${list.length}`);
+    for (const item of list.slice(0, 6)) console.log(`          - ${item}`);
+  }
+  // A HARD FLOOR, not the full 44. Raising every 36px control to 44 in one
+  // change would relayout most of the app; what is asserted here is the
+  // size below which a control is not reliably hittable at all, so the
+  // number can be tightened toward 44 without the gate ever going
+  // backwards.
+  const tiny = [...bySize.entries()].flatMap(([route, list]) =>
+    list.filter((item) => Number(item.match(/x(\d+)$/)?.[1] ?? 99) < 32).map((item) => `${route} ${item}`)
+  );
+  checkTrue(`no control under 32px tall on a phone (${tiny.length})`, tiny.length === 0, tiny.slice(0, 10).join("\n        "));
 }
 
 await authed.close();

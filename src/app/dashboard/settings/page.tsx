@@ -191,25 +191,25 @@ export default async function SettingsPage() {
         <nav aria-label="Jump to section" className="mb-6 flex flex-wrap gap-2 text-xs">
           <a
             href="#accessibility"
-            className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+            className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
           >
             Accessibility
           </a>
           <a
             href="#ai-usage"
-            className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+            className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
           >
             AI Usage
           </a>
           <a
             href="#buy-credits"
-            className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+            className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
           >
             {tBilling("title")}
           </a>
           <a
             href="#achievements"
-            className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+            className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
           >
             Achievements
           </a>

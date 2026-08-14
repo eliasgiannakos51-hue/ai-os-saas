@@ -130,7 +130,12 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
             type="button"
             onClick={() => toggleGroup(group)}
             aria-expanded={expanded}
-            className="flex w-full items-center justify-between rounded-lg px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted transition-colors duration-150 hover:text-foreground"
+            // 21px tall on a phone, measured. These are the accordion
+            // toggles — the first thing a thumb lands on in the drawer —
+            // and they were the smallest interactive elements in the app.
+            // Height only on mobile: with a mouse the compact heading is
+            // right, and md: restores it exactly.
+            className="flex min-h-[44px] w-full items-center justify-between rounded-lg px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted transition-colors duration-150 hover:text-foreground md:min-h-0"
           >
             <span>{translatedHeading(group.heading)}</span>
             <ChevronRight
@@ -181,7 +186,9 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
                     className={`nav-item group relative flex items-center gap-2.5 rounded-xl transition-colors duration-200 ${
                       prominent
                         ? "min-h-[44px] py-2.5 pl-2.5 pr-3 text-[15px] font-medium"
-                        : "min-h-[40px] py-2 pl-2.5 pr-3 text-sm"
+                        // 44 on a phone, 40 once there is a mouse — the
+                        // pattern the rest of the app already uses.
+                        : "min-h-[44px] py-2 pl-2.5 pr-3 text-sm md:min-h-[40px]"
                     } ${
                       active
                         ? "font-semibold text-orange-200"
@@ -237,7 +244,9 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
             type="button"
             onClick={closeOnMobile}
             aria-label="Close menu"
-            className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground md:hidden"
+            // It only exists on mobile, so 36x36 was the size it was
+            // always used at.
+            className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground md:hidden"
           >
             <X className="h-4 w-4" />
           </button>

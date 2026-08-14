@@ -46,6 +46,14 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // Month names. German spells September and November exactly as English
+  // does — substituting a synonym to make the string differ would produce
+  // a German UI that names the months wrongly, which is the opposite of a
+  // translation. Same reasoning as the "Design"/"Team" entries below.
+  "de:dashboard.agents.monthNames.april",
+  "de:dashboard.agents.monthNames.august",
+  "de:dashboard.agents.monthNames.september",
+  "de:dashboard.agents.monthNames.november",
   // Margin report, owner-only. "Bypass" is the loanword these languages
   // actually use for this concept — and it is also the literal value
   // stored in ai_cost_log's metadata (bypassCharge), so translating the

@@ -1170,7 +1170,27 @@
         "monthly": "Il giorno {day} di ogni mese alle {time}",
         "custom": "Pianificazione: {expression}"
       },
-      "buildStalled": "La creazione si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova."
+      "buildStalled": "La creazione si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova.",
+      "cronError": {
+        "impossibleDate": "{monthName} non ha un giorno {day}, quindi questo agente non verrebbe mai eseguito. Scegli un giorno che esiste — il 28 c'è in tutti i mesi.",
+        "tooFrequent": "Un agente può essere eseguito al massimo una volta all'ora. Scegli un orario preciso, per esempio ogni giorno alle 09:00.",
+        "parse": "Non è stato possibile leggere questa pianificazione. Descrivila con parole semplici, per esempio «ogni mattina alle 9» o «ogni lunedì».",
+        "malformed": "Non è stato possibile progettare l'agente da questa descrizione. Prova a descriverlo in modo un po' diverso."
+      },
+      "monthNames": {
+        "january": "gennaio",
+        "february": "febbraio",
+        "march": "marzo",
+        "april": "aprile",
+        "may": "maggio",
+        "june": "giugno",
+        "july": "luglio",
+        "august": "agosto",
+        "september": "settembre",
+        "october": "ottobre",
+        "november": "novembre",
+        "december": "dicembre"
+      }
     },
     "publishing": {
       "title": "Siti pubblicati",

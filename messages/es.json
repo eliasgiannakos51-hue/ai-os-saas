@@ -1170,7 +1170,27 @@
         "monthly": "El día {day} de cada mes a las {time}",
         "custom": "Programación: {expression}"
       },
-      "buildStalled": "La creación se detuvo inesperadamente. No se cobraron créditos — inténtalo de nuevo."
+      "buildStalled": "La creación se detuvo inesperadamente. No se cobraron créditos — inténtalo de nuevo.",
+      "cronError": {
+        "impossibleDate": "{monthName} no tiene día {day}, así que este agente nunca se ejecutaría. Elige un día que exista — el 28 existe en todos los meses.",
+        "tooFrequent": "Un agente puede ejecutarse como máximo una vez por hora. Elige una hora concreta, por ejemplo todos los días a las 09:00.",
+        "parse": "No se pudo interpretar esa programación. Descríbela con palabras sencillas, por ejemplo «cada mañana a las 9» o «cada lunes».",
+        "malformed": "No se pudo diseñar el agente a partir de esa descripción. Prueba a describirlo de otra forma."
+      },
+      "monthNames": {
+        "january": "enero",
+        "february": "febrero",
+        "march": "marzo",
+        "april": "abril",
+        "may": "mayo",
+        "june": "junio",
+        "july": "julio",
+        "august": "agosto",
+        "september": "septiembre",
+        "october": "octubre",
+        "november": "noviembre",
+        "december": "diciembre"
+      }
     },
     "publishing": {
       "title": "Sitios publicados",

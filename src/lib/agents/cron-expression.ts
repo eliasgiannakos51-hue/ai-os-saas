@@ -150,13 +150,106 @@ export function parseCronExpression(expression: string): CronParseResult {
 // value: "0 * * * *" (hourly) is fine, "*/5 * * * *" is not.
 export const MAX_RUNS_PER_HOUR_PER_AGENT = 1;
 
-export function validateAgentCron(expression: string): { ok: true } | { ok: false; error: string } {
+/**
+ * The last day each month can have. February is 29 because a leap year is
+ * a real year — "29 2" is a rare schedule, not an impossible one.
+ */
+const LAST_DAY_OF_MONTH = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+/** Month names for the error message, indexed 1-12. */
+const MONTH_KEYS = [
+  "",
+  "january", "february", "march", "april", "may", "june",
+  "july", "august", "september", "october", "november", "december",
+] as const;
+
+export type ImpossibleCronDate = { day: number; month: number; monthKey: string };
+
+/**
+ * The day/month pairs in this expression that do not exist on a calendar.
+ *
+ * THE BUG THIS EXISTS FOR, which cost real money.
+ *
+ * "0 8 31 2 *" parsed cleanly (31 is inside dayOfMonth's 1-31 range, 2 is
+ * inside month's 1-12), passed validateAgentCron, and produced an agent
+ * that was created, charged for, and displayed as "day 31 of every month" —
+ * and never ran once, because the 31st of February is not a date.
+ *
+ * Seven combinations do this: 30 and 31 February, and 31 in each of the
+ * four thirty-day months. They are COMPUTED from the calendar below rather
+ * than listed, because a hand-written list of seven is a list that will
+ * miss the eighth if anyone ever edits the ranges.
+ *
+ * A pair is only impossible when the day is impossible in EVERY month the
+ * expression allows: "0 8 31 1,2 *" is fine, because January has a 31st.
+ * And the whole check is skipped when the day-of-week field is restricted,
+ * since cron ORs the two — "0 8 31 2 1" fires on Mondays regardless.
+ */
+export function impossibleCronDates(fields: CronFields): ImpossibleCronDate[] {
+  if (!fields.dayOfMonthRestricted) return [];
+  // dom and dow are OR-ed by cron when both are restricted, so a
+  // never-occurring dom is harmless if the dow can still fire.
+  if (fields.dayOfWeekRestricted) return [];
+
+  const reachable = fields.dayOfMonth.some((day) =>
+    fields.month.some((month) => day <= LAST_DAY_OF_MONTH[month - 1])
+  );
+  if (reachable) return [];
+
+  // Nothing is reachable: report every pair, so the message can name the
+  // one the user actually typed rather than a generic complaint.
+  const out: ImpossibleCronDate[] = [];
+  for (const day of fields.dayOfMonth) {
+    for (const month of fields.month) {
+      if (day > LAST_DAY_OF_MONTH[month - 1]) {
+        out.push({ day, month, monthKey: MONTH_KEYS[month] });
+      }
+    }
+  }
+  return out;
+}
+
+/**
+ * Why a schedule was refused, as an i18n KEY plus values.
+ *
+ * `error` is kept because logs, tests and server-side callers want one
+ * string. It is NOT what the user reads: a Greek user was being handed
+ * "minute value out of range" verbatim (agent-build.ts:135), which is the
+ * defect this shape exists to close. describeSchedule() in this same file
+ * already returns keys rather than sentences, for the same reason.
+ */
+export type AgentCronRejection = {
+  ok: false;
+  /** English, for logs and server-side callers. Never rendered as-is. */
+  error: string;
+  /** Key under dashboard.agents.cronError.<key>. */
+  key: "parse" | "tooFrequent" | "impossibleDate";
+  /** ICU values for that key. */
+  values?: Record<string, string | number>;
+};
+
+export function validateAgentCron(expression: string): { ok: true } | AgentCronRejection {
   const parsed = parseCronExpression(expression);
-  if (!parsed.ok) return { ok: false, error: parsed.error };
+  if (!parsed.ok) {
+    // The parser's own message is English and technical ("minute value out
+    // of range"). It is carried for the log and replaced for the reader.
+    return { ok: false, error: parsed.error, key: "parse", values: { detail: parsed.error } };
+  }
   if (parsed.fields.minute.length > MAX_RUNS_PER_HOUR_PER_AGENT) {
     return {
       ok: false,
       error: "An agent can run at most once per hour — pick a single minute (e.g. \"0 9 * * *\").",
+      key: "tooFrequent",
+    };
+  }
+  const impossible = impossibleCronDates(parsed.fields);
+  if (impossible.length > 0) {
+    const { day, month, monthKey } = impossible[0];
+    return {
+      ok: false,
+      error: `Day ${day} of month ${month} does not exist, so this agent would never run. Pick a day the month actually has (28 is safe in every month).`,
+      key: "impossibleDate",
+      values: { day, month, monthKey },
     };
   }
   return { ok: true };
@@ -284,7 +377,17 @@ function matchesDay(fields: CronFields, year: number, month: number, day: number
 
 /** Days scanned before giving up. A month field of a single month plus a
  *  day-of-month of 29-31 can legitimately need ~11 months. */
-const MAX_DAYS_AHEAD = 400;
+// Far enough ahead to reach the next 29 February from any starting point.
+//
+// It was 400 days, which clears "once a year" but not "once every four
+// years" — so "0 8 29 2 *" resolved to null, the agent was stored with
+// next_run_at = null, and nothing ever recomputes that column. A perfectly
+// legal schedule became an agent that could never run, and the user was
+// charged for it. 1500 days clears any gap between consecutive 29ths of
+// February (the longest is eight years across a skipped century leap year,
+// but 2100 is the next of those and 1500 days covers every case before it;
+// see the exhaustive check in scripts/tests/agent-cron.test.mjs).
+const MAX_DAYS_AHEAD = 3000;
 
 /**
  * The first instant strictly after `from` at which `expression` fires,

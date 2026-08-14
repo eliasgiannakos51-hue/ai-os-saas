@@ -1170,7 +1170,27 @@
         "monthly": "Am {day}. jedes Monats um {time}",
         "custom": "Zeitplan: {expression}"
       },
-      "buildStalled": "Die Erstellung wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen."
+      "buildStalled": "Die Erstellung wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
+      "cronError": {
+        "impossibleDate": "Der {monthName} hat keinen {day}. Tag, deshalb würde dieser Agent nie laufen. Wähle einen Tag, den es wirklich gibt — den 28. gibt es in jedem Monat.",
+        "tooFrequent": "Ein Agent kann höchstens einmal pro Stunde laufen. Wähle eine feste Uhrzeit, zum Beispiel täglich um 09:00 Uhr.",
+        "parse": "Dieser Zeitplan konnte nicht gelesen werden. Beschreibe mit einfachen Worten, wann er laufen soll, zum Beispiel „jeden Morgen um 9“ oder „jeden Montag“.",
+        "malformed": "Aus dieser Beschreibung liess sich kein Agent entwerfen. Beschreibe es bitte etwas anders."
+      },
+      "monthNames": {
+        "january": "Januar",
+        "february": "Februar",
+        "march": "März",
+        "april": "April",
+        "may": "Mai",
+        "june": "Juni",
+        "july": "Juli",
+        "august": "August",
+        "september": "September",
+        "october": "Oktober",
+        "november": "November",
+        "december": "Dezember"
+      }
     },
     "publishing": {
       "title": "Veröffentlichte Seiten",

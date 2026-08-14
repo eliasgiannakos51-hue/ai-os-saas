@@ -1170,7 +1170,27 @@
         "monthly": "每月 {day} 号 {time}",
         "custom": "计划：{expression}"
       },
-      "buildStalled": "创建意外中断。未扣除任何积分——请重试。"
+      "buildStalled": "创建意外中断。未扣除任何积分——请重试。",
+      "cronError": {
+        "impossibleDate": "{monthName}没有{day}日，因此这个助手永远不会运行。请选择实际存在的日期——28 日在每个月都存在。",
+        "tooFrequent": "一个助手每小时最多运行一次。请选择一个具体时间，例如每天 09:00。",
+        "parse": "无法解析该计划。请用简单的话描述运行时间，例如“每天早上 9 点”或“每周一”。",
+        "malformed": "无法根据该描述设计助手。请换一种方式描述。"
+      },
+      "monthNames": {
+        "january": "1月",
+        "february": "2月",
+        "march": "3月",
+        "april": "4月",
+        "may": "5月",
+        "june": "6月",
+        "july": "7月",
+        "august": "8月",
+        "september": "9月",
+        "october": "10月",
+        "november": "11月",
+        "december": "12月"
+      }
     },
     "publishing": {
       "title": "已发布网站",

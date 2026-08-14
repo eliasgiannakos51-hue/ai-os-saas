@@ -121,7 +121,15 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     if (typeof body.scheduleCron === "string") {
       const candidate = body.scheduleCron.trim();
       const check = validateAgentCron(candidate);
-      if (!check.ok) return NextResponse.json({ ok: false, error: check.error }, { status: 400 });
+      if (!check.ok) {
+        // Same leak as the build path had: check.error is the parser's own
+        // English. The key is what the interface renders; the string stays
+        // for the log and for any caller without a renderer.
+        return NextResponse.json(
+          { ok: false, error: check.error, errorKey: check.key, errorValues: check.values },
+          { status: 400 }
+        );
+      }
       scheduleCron = candidate;
       updates.schedule_cron = candidate;
       scheduleChanged = true;

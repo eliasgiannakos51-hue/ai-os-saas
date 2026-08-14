@@ -29,7 +29,16 @@ export type BuiltAgent = {
 
 export type BuildAgentResult =
   | { ok: true; built: BuiltAgent }
-  | { ok: false; reason: "malformed" | "invalid_schedule"; detail: string };
+  | {
+      ok: false;
+      reason: "malformed" | "invalid_schedule";
+      /** English. For logs and server-side callers, never rendered raw. */
+      detail: string;
+      /** Key under dashboard.agents.cronError.<key>, when the refusal came
+       *  from the schedule. Absent for a malformed draft. */
+      detailKey?: "parse" | "tooFrequent" | "impossibleDate";
+      detailValues?: Record<string, string | number>;
+    };
 
 /**
  * Deterministic interpretation of the tool input, split out so it is unit
@@ -59,7 +68,15 @@ export function parseBuiltAgent(
     // Not silently corrected to a default. A schedule the user did not
     // choose, applied to a thing that spends money on its own, is exactly
     // the class of "helpful" guess this feature must never make.
-    return { ok: false, reason: "invalid_schedule", detail: cronCheck.error };
+    return {
+      ok: false,
+      reason: "invalid_schedule",
+      detail: cronCheck.error,
+      // The reader's version. `detail` is English and stays English for the
+      // log; this is what the interface renders.
+      detailKey: cronCheck.key,
+      detailValues: cronCheck.values,
+    };
   }
 
   const outputFormat: AgentOutputFormat = isAgentOutputFormat(input.outputFormat)

@@ -49,9 +49,36 @@ type BuildResponse = {
   upcomingRuns?: string[];
   estimatedCreditsPerRun?: number;
   error?: string;
+  /** Key under dashboard.agents.cronError.*, preferred over `error`, which
+   *  is English and exists for the job log. */
+  errorKey?: string;
+  errorValues?: Record<string, string | number>;
   upgradeRequired?: boolean;
   limitReached?: boolean;
 };
+
+/**
+ * The refusal, in the reader's language.
+ *
+ * `error` was rendered directly, so a Greek user asking for an agent on the
+ * 31st of February was shown the cron parser's own English three layers
+ * down. The key wins when there is one; `error` remains the fallback for a
+ * refusal that has no key yet, which is better than an empty toast.
+ */
+function buildErrorMessage(
+  result: BuildResponse,
+  t: (key: string, values?: Record<string, string | number>) => string,
+  fallbackKey = "buildError"
+): string {
+  if (!result.errorKey) return result.error ?? t(fallbackKey);
+  const values = { ...result.errorValues };
+  // The month arrives as a key ("february") so it can be a real word in ten
+  // languages rather than the number 2.
+  if (typeof values.monthKey === "string") {
+    values.monthName = t(`monthNames.${values.monthKey}`);
+  }
+  return t(`cronError.${result.errorKey}`, values);
+}
 
 export function AgentsWorkspace({
   agents,
@@ -178,7 +205,7 @@ export function AgentsWorkspace({
       // The builder ran and could not design it. Real tokens were spent,
       // so this is a completed job carrying a refusal — not an error to
       // retry for free.
-      addToast(result.error ?? t("buildError"), "error");
+      addToast(buildErrorMessage(result, t), "error");
     }
     setJobId(null);
   }, [job, addToast, t]);
@@ -296,7 +323,7 @@ export function AgentsWorkspace({
       });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("saveError"), "error");
+        addToast(buildErrorMessage(data as BuildResponse, t, "saveError"), "error");
         return false;
       }
       addToast(successMessage);
@@ -317,7 +344,7 @@ export function AgentsWorkspace({
       const response = await fetch(`/api/agents/${agent.id}`, { method: "DELETE" });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("saveError"), "error");
+        addToast(buildErrorMessage(data as BuildResponse, t, "saveError"), "error");
         return;
       }
       addToast(t("deleteSuccess"));

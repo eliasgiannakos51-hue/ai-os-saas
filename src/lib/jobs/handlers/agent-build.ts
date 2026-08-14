@@ -103,10 +103,16 @@ export const agentBuildHandler: JobHandler = async (ctx: JobContext): Promise<Jo
       result: {
         built: false,
         reason: result.reason,
+        // English, for the job log and for any caller without a renderer.
         error:
           result.reason === "invalid_schedule"
             ? `Couldn't work out a valid schedule: ${result.detail} Try saying when it should run, e.g. "every morning".`
             : "Couldn't design that agent. Try describing it a little differently.",
+        // What the user actually reads. The line above used to be the only
+        // one, so a Greek user was handed "minute value out of range"
+        // verbatim — the parser's own English, three layers down.
+        errorKey: result.reason === "invalid_schedule" ? (result.detailKey ?? "parse") : "malformed",
+        errorValues: result.detailValues,
       },
     };
   }

@@ -1170,7 +1170,27 @@
         "monthly": "Day {day} of each month at {time}",
         "custom": "Schedule: {expression}"
       },
-      "buildStalled": "That build stopped unexpectedly. No credits were charged — please try again."
+      "buildStalled": "That build stopped unexpectedly. No credits were charged — please try again.",
+      "cronError": {
+        "impossibleDate": "{monthName} does not have a day {day}, so this agent would never run. Pick a day the month actually has — 28 works in every month.",
+        "tooFrequent": "An agent can run at most once per hour. Pick a single time, for example every day at 09:00.",
+        "parse": "That schedule could not be read. Try describing when it should run in plain words, for example “every morning at 9” or “every Monday”.",
+        "malformed": "The agent could not be designed from that description. Try describing it a little differently."
+      },
+      "monthNames": {
+        "january": "January",
+        "february": "February",
+        "march": "March",
+        "april": "April",
+        "may": "May",
+        "june": "June",
+        "july": "July",
+        "august": "August",
+        "september": "September",
+        "october": "October",
+        "november": "November",
+        "december": "December"
+      }
     },
     "publishing": {
       "title": "Published Sites",

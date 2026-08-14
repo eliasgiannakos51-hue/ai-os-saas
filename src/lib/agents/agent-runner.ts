@@ -1,4 +1,5 @@
 import "server-only";
+import { contentLanguageFromCode, languageInstruction } from "@/lib/content-language";
 import { AI_SAFETY_BOUNDARIES_EN } from "@/lib/ai-conduct";
 import Anthropic from "@anthropic-ai/sdk";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
@@ -67,7 +68,7 @@ WHAT YOU PRODUCE: the finished result itself. No greeting, no sign-off, no "here
 
 FORMAT: ${FORMAT_INSTRUCTIONS[config.outputFormat]}
 
-LANGUAGE: write the entire result in ${config.language}.
+${languageInstruction(contentLanguageFromCode(config.language), "the entire result")}
 
 HONESTY RULES — these are what make a scheduled agent safe to leave running:
 - Never invent a fact, a number, a date, a price or a name. If you do not have it, say plainly that you do not have it.

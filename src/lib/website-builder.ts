@@ -8,6 +8,7 @@ import { applyExactReplace } from "@/lib/website-patch";
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 import { AI_SAFETY_BOUNDARIES_EN } from "@/lib/ai-conduct";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
+import { languageInstruction, resolveContentLanguage } from "@/lib/content-language";
 import {
   MOTION_VOCABULARIES,
   REDUCED_MOTION_BLOCK,
@@ -734,10 +735,28 @@ function buildReferenceImageUrlList(images: ReferenceImage[]): string {
 // fraction of the normal input price) instead of full price again. The
 // small, per-website form-endpoint block is NOT cached (it's cheap and
 // different every time, so caching it would never hit anyway).
-function buildGenerateSystemBlocks(formEndpointUrl: string | undefined): Anthropic.TextBlockParam[] {
+function buildGenerateSystemBlocks(
+  formEndpointUrl: string | undefined,
+  description: string
+): Anthropic.TextBlockParam[] {
+  // THE SITE IS WRITTEN IN THE LANGUAGE OF THE BRIEF, and that was left
+  // entirely implicit before: the prompt said nothing about language at all
+  // and relied on the model matching the brief it had just read. It mostly
+  // does. "Mostly" is the same standard that produced English research
+  // reports for Greek users, and the fix costs one uncached block.
+  //
+  // Detected from the brief rather than taken from a UI locale — the person
+  // writing a Greek brief wants a Greek site whatever their menus say.
+  const language = resolveContentLanguage(description, undefined);
   return [
     { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
     { type: "text", text: buildFormEndpointInstruction(formEndpointUrl) },
+    // Uncached, because it varies per brief — same reasoning as the form
+    // endpoint block above.
+    {
+      type: "text",
+      text: `${languageInstruction(language, "every word of visible copy on the page")}\nThe data-image-query attributes are the ONE exception and stay in English — see IMAGES.`,
+    },
     // LAST, and outside the cached block. See USER_BRIEF_PRECEDENCE.
     { type: "text", text: USER_BRIEF_PRECEDENCE },
   ];
@@ -924,7 +943,7 @@ export async function generateWebsiteHtml(
   // if a single call's output alone isn't enough.
   const { rawText, stopReason } = await streamHtmlToCompletion(
     anthropic,
-    buildGenerateSystemBlocks(formEndpointUrl),
+    buildGenerateSystemBlocks(formEndpointUrl, description),
     content,
     onDelta,
     costs,

@@ -28,7 +28,8 @@
     "aiGenerated": {
       "short": "Generato dall’IA",
       "long": "Contenuto generato dall’IA. Può contenere errori: verifica ciò che è importante prima di fidartene."
-    }
+    },
+    "examplesLabel": "Prova:"
   },
   "sidebar": {
     "groups": {
@@ -718,7 +719,10 @@
       "streamInterrupted": "La connessione si è interrotta prima che la risposta fosse completata.",
       "streamInterruptedPartial": "La connessione si è interrotta — la risposta qui sopra potrebbe essere incompleta.",
       "hideConversationsHint": "Nascondi l’elenco delle conversazioni e dai tutta la larghezza al thread.",
-      "showConversationsHint": "Mostra di nuovo l’elenco delle conversazioni."
+      "showConversationsHint": "Mostra di nuovo l’elenco delle conversazioni.",
+      "emptyHint": "Chiedi qualsiasi cosa: cultura generale, idee, aiuto nella scrittura o solo due chiacchiere.",
+      "composerPlaceholder": "Scrivi a Ionexa...",
+      "send": "Invia"
     },
     "create": {
       "title": "Crea Qualsiasi Cosa"
@@ -1378,10 +1382,6 @@
       "emptyExample": "Ad es. «Cosa dice il contratto sulla disdetta?»",
       "askDisabledNoFiles": "Spunta prima almeno un file qui sopra.",
       "askDisabledNoQuestion": "Scrivi la tua domanda per continuare.",
-      "examplesLabel": "Prova:",
-      "example1": "Cosa dice sulla disdetta?",
-      "example2": "Riassumi i punti principali.",
-      "example3": "Quali sono le scadenze e gli importi?",
       "processingHint": "Sto leggendo il file — di solito pochi secondi. Potrai interrogarlo appena è pronto.",
       "failedHint": "Nessun testo leggibile trovato. Carica una versione con testo selezionabile.",
       "askStillRunning": "Sta ancora leggendo — ci vuole un po'. Continua anche a pagina chiusa; torna e richiedi per vedere la risposta.",
@@ -1659,5 +1659,50 @@
     "unlimited": "Illimitato — nessun credito usato",
     "unlimitedWouldHaveCost": "Illimitato — sarebbe costato {count} crediti",
     "freeMessage": "Messaggio gratuito · {count} rimasti questo mese"
+  },
+  "aiExamples": {
+    "createStudio": {
+      "e1": "Creami una pagina per il mio negozio",
+      "e2": "Un piano per trovare clienti",
+      "e3": "Idea: un abbonamento per piccole imprese",
+      "e4": "Ogni lunedì ricordami di controllare i conti",
+      "limits": "Crea cose dentro Ionexa · Non tocca nulla che non hai collegato"
+    },
+    "agents": {
+      "e1": "Ogni mattina mandami le notizie su Nvidia",
+      "e2": "Ogni lunedì un riepilogo dei miei concorrenti",
+      "e3": "Avvisami se qualcuno scrive del mio settore",
+      "limits": "Cerca sul web e ti scrive · Non esegue azioni e invia solo dove hai scelto"
+    },
+    "mission": {
+      "e1": "Trova 10 clienti per la mia attività",
+      "e2": "Prepara un piano di lancio per un nuovo prodotto",
+      "e3": "Aumenta le vendite del 20% in tre mesi",
+      "limits": "Scrive il piano e i passi · Un passo parte solo quando lo programmi"
+    },
+    "websiteBuilder": {
+      "e1": "Un caffè a Salonicco con menù e orari",
+      "e2": "Il portfolio di un fotografo con galleria",
+      "e3": "Una landing page per un SaaS, con i prezzi",
+      "limits": "Una pagina, non un negozio né un’app · Non si collega ai tuoi sistemi"
+    },
+    "files": {
+      "e1": "Cosa dice il contratto sulla disdetta?",
+      "e2": "Confronta le due offerte",
+      "e3": "Quali sono le scadenze e gli importi?",
+      "limits": "Risponde solo dai file che hai scelto · Non cerca sul web"
+    },
+    "research": {
+      "e1": "Concorrenti del mio settore in Grecia",
+      "e2": "Perché falliscono le startup di IA",
+      "e3": "Modelli di prezzo SaaS nel 2026",
+      "limits": "Legge fonti pubbliche sul web · Non vede i tuoi file"
+    },
+    "chat": {
+      "e1": "Cosa dovrei mettere per primo questa settimana?",
+      "e2": "Spiegami i numeri del mese",
+      "e3": "Scrivi un’email a un cliente in ritardo con il pagamento",
+      "limits": "Vede i tuoi dati su Ionexa e ciò che hai collegato · Non agisce da solo"
+    }
   }
 }

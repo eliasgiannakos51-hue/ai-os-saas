@@ -28,7 +28,8 @@
     "aiGenerated": {
       "short": "Gerado por IA",
       "long": "Conteúdo gerado por IA. Pode conter erros — confirme o que for importante antes de confiar nele."
-    }
+    },
+    "examplesLabel": "Experimenta:"
   },
   "sidebar": {
     "groups": {
@@ -718,7 +719,10 @@
       "streamInterrupted": "A ligação foi interrompida antes de a resposta terminar.",
       "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta.",
       "hideConversationsHint": "Oculta a lista de conversas e dá toda a largura ao tópico.",
-      "showConversationsHint": "Mostrar novamente a lista de conversas."
+      "showConversationsHint": "Mostrar novamente a lista de conversas.",
+      "emptyHint": "Pergunta o que quiseres — conhecimentos gerais, ideias, ajuda a escrever ou só conversar.",
+      "composerPlaceholder": "Escreve para o Ionexa...",
+      "send": "Enviar"
     },
     "create": {
       "title": "Criar Qualquer Coisa"
@@ -1378,10 +1382,6 @@
       "emptyExample": "P. ex. «O que diz o contrato sobre o cancelamento?»",
       "askDisabledNoFiles": "Marca primeiro pelo menos um ficheiro acima.",
       "askDisabledNoQuestion": "Escreve a tua pergunta para continuar.",
-      "examplesLabel": "Experimenta:",
-      "example1": "O que diz sobre o cancelamento?",
-      "example2": "Resume os pontos principais.",
-      "example3": "Quais são os prazos e os valores?",
       "processingHint": "A ler o ficheiro — normalmente alguns segundos. Podes perguntar assim que estiver pronto.",
       "failedHint": "Não foi encontrado texto legível. Carrega uma versão com texto selecionável.",
       "askStillRunning": "Ainda a ler — está a demorar. Continua com a página fechada; volta e pergunta de novo para veres a resposta.",
@@ -1659,5 +1659,50 @@
     "unlimited": "Ilimitado — nenhum crédito usado",
     "unlimitedWouldHaveCost": "Ilimitado — teria custado {count} créditos",
     "freeMessage": "Mensagem gratuita · {count} restantes este mês"
+  },
+  "aiExamples": {
+    "createStudio": {
+      "e1": "Cria-me uma página para a minha loja",
+      "e2": "Um plano para encontrar clientes",
+      "e3": "Ideia: uma subscrição para pequenos negócios",
+      "e4": "Todas as segundas, lembra-me de ver as finanças",
+      "limits": "Cria coisas dentro do Ionexa · Não mexe em nada que não tenhas ligado"
+    },
+    "agents": {
+      "e1": "Todas as manhãs, envia-me as notícias sobre a Nvidia",
+      "e2": "Todas as segundas, um resumo dos meus concorrentes",
+      "e3": "Avisa-me se alguém escrever sobre o meu setor",
+      "limits": "Procura na web e escreve-te · Não executa ações e só envia para onde escolheste"
+    },
+    "mission": {
+      "e1": "Encontra 10 clientes para o meu negócio",
+      "e2": "Prepara um plano de lançamento para um produto novo",
+      "e3": "Aumenta as vendas em 20% em três meses",
+      "limits": "Escreve o plano e os passos · Um passo só corre quando o agendas"
+    },
+    "websiteBuilder": {
+      "e1": "Um café em Salonica com ementa e horários",
+      "e2": "O portefólio de um fotógrafo com galeria",
+      "e3": "Uma landing page para um SaaS, com preços",
+      "limits": "Uma página, não uma loja nem uma app · Não se liga aos teus sistemas"
+    },
+    "files": {
+      "e1": "O que diz o contrato sobre o cancelamento?",
+      "e2": "Compara as duas propostas",
+      "e3": "Quais são os prazos e os valores?",
+      "limits": "Responde apenas a partir dos ficheiros que escolheste · Não procura na web"
+    },
+    "research": {
+      "e1": "Concorrentes do meu setor na Grécia",
+      "e2": "Porque falham as startups de IA",
+      "e3": "Modelos de preços SaaS em 2026",
+      "limits": "Lê fontes públicas na web · Não vê os teus ficheiros"
+    },
+    "chat": {
+      "e1": "O que devo priorizar esta semana?",
+      "e2": "Explica-me os números do mês",
+      "e3": "Escreve um email a um cliente atrasado no pagamento",
+      "limits": "Vê os teus dados no Ionexa e o que ligaste · Não age sozinho"
+    }
   }
 }

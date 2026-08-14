@@ -40,6 +40,7 @@ import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
 import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
 import { appendClarificationAnswers, alignSuggestions } from "@/lib/clarification-client";
+import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
 import { DesignControls } from "@/components/website-builder/design-controls";
@@ -1327,6 +1328,12 @@ export function WebsiteBuilderWorkspace({
                   placeholder={t("descriptionPlaceholder")}
                   className="input min-h-32 resize-y"
                 />
+                {/* THREE REAL SITES, pressable — and the honest ceiling
+                    next to them. "Describe your website" invites anything,
+                    including a shop with payments, which this cannot make:
+                    one HTML page is what comes out. Saying so here is
+                    cheaper than a refund conversation later. */}
+                <ExamplePrompts surface="websiteBuilder" onPick={setDescription} className="mt-2" />
               </div>
 
               <div>

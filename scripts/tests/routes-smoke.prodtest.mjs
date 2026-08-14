@@ -44,9 +44,20 @@ const USER = {
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-01T00:00:00Z",
   app_metadata: { provider: "email", providers: ["email"] },
+  // Free by default, because most of this file checks what a brand-new
+  // account sees. Section 4 raises it: Deep Research is Starter-and-above,
+  // so on a free account that page renders an upgrade wall and "the
+  // examples are missing" would be a true statement about the wrong
+  // screen. Asserting a feature is discoverable requires an account that
+  // can reach the feature.
   user_metadata: {},
   identities: [],
 };
+
+/** Swapped in for the sections that need a paying account. */
+function setPlan(tier) {
+  USER.user_metadata = tier ? { subscription_tier: tier } : {};
+}
 
 // --- a local stand-in for the Supabase project ------------------------
 // GoTrue's /auth/v1/user plus PostgREST table reads. Every table answers
@@ -72,6 +83,20 @@ const supa = http.createServer((req, res) => {
     if (url.pathname.startsWith("/rest/v1/")) {
       const table = url.pathname.slice("/rest/v1/".length);
       const rows = TABLE_ROWS[table] ?? [];
+      // COUNTS COME BACK IN A HEADER, not in the body — and a stand-in
+      // that skips it does not merely answer less, it answers WRONG.
+      // supabase-js reports `count: null` when Content-Range is absent,
+      // and dashboard/mission/page.tsx reads exactly that as a degraded
+      // session: it then renders "please reload" instead of the mission
+      // list, so an assertion about anything on that page was being made
+      // against an error screen. The page was right; the fake was not.
+      if ((req.headers.prefer ?? "").includes("count=")) {
+        res.writeHead(200, {
+          "Content-Type": "application/json",
+          "Content-Range": rows.length > 0 ? `0-${rows.length - 1}/${rows.length}` : `*/0`,
+        });
+        return res.end(JSON.stringify(req.method === "HEAD" ? null : rows));
+      }
       // PostgREST returns a bare object (not an array) for .single()
       const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
       if (single) return rows[0] ? json(200, rows[0]) : json(406, { message: "no rows" });
@@ -465,6 +490,82 @@ console.log("\n== 3. new controls are actually visible (production build, 375px)
   const body = await page.locator("body").innerText();
   checkTrue("no raw i18n key leaks into Deep Research", !/common\.aiGenerated/.test(body));
   await page.close();
+}
+
+// -------------------------------------------------------------------
+console.log("\n== 4. every AI box says what it accepts, and what it will not do ==");
+// -------------------------------------------------------------------
+// The reported failure was not a broken control: a tester came away
+// believing this product was "several LLMs in one, cheaper", and others
+// asked where to paste their API key. That is what an empty box which
+// accepts anything teaches. So each AI surface is opened in the
+// production build and checked for the two things that answer it — three
+// pressable examples, and one line saying what it will not do.
+//
+// At 375px, because a chip row that wraps into a wall of text on a phone
+// is not the same feature as one that reads as three options.
+{
+  // Growth, so every surface below is actually reachable. Restored at the
+  // end of the block so nothing after it inherits a paid account.
+  setPlan("growth");
+  const SURFACES = [
+    { name: "createStudio", url: "/dashboard/create", input: "#studio-input" },
+    { name: "mission", url: "/dashboard/mission", input: "#mission-goal", open: "New Mission" },
+    { name: "research", url: "/dashboard/deep-research", input: "#research-topic" },
+    { name: "chat", url: "/dashboard/chat", input: "textarea" },
+  ];
+  for (const surface of SURFACES) {
+    const page = await authed.newPage();
+    await page.setViewportSize({ width: 375, height: 812 });
+    try {
+      await page.goto(`http://127.0.0.1:${PORT}${surface.url}`, { waitUntil: "networkidle", timeout: 45000 });
+      if (surface.open) {
+        const opener = page.getByRole("button", { name: surface.open });
+        if ((await opener.count()) > 0) {
+          await opener.first().click();
+          await page.waitForTimeout(400);
+        }
+      }
+      const chips = page.locator(`[data-testid="examples-${surface.name}"] [data-testid="ai-example"]`);
+      const count = await chips.count();
+      if (count === 0) {
+        // WHAT THE PAGE ACTUALLY SHOWED. "0 examples" has three very
+        // different causes — the surface is behind a toggle, the account
+        // cannot reach the feature at all, or the chips genuinely are not
+        // rendered — and only the page can say which.
+        console.log(`        page said: ${(await page.locator("body").innerText()).replace(/\s+/g, " ").slice(0, 300)}`);
+      }
+      checkTrue(`${surface.name}: 3-4 examples are on the page (${count})`, count >= 3 && count <= 4);
+
+      const limits = page.locator(`[data-testid="examples-${surface.name}"] [data-testid="ai-limits"]`);
+      const limitsText = ((await limits.count()) > 0 ? await limits.first().innerText() : "").trim();
+      checkTrue(`${surface.name}: the limits line is readable ("${limitsText.slice(0, 46)}")`, limitsText.includes("·"));
+
+      // The whole point: pressing one fills the box the user then sends.
+      if (count > 0) {
+        const wanted = (await chips.first().innerText()).trim();
+        const box = page.locator(surface.input).first();
+        await box.fill("");
+        await chips.first().click();
+        await page.waitForTimeout(200);
+        const filled = (await box.inputValue()).trim();
+        checkTrue(`${surface.name}: clicking an example fills the input ("${filled.slice(0, 36)}")`, filled === wanted);
+      }
+
+      // A chip row must not push the page sideways on a phone.
+      const overflow = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      }));
+      checkTrue(
+        `${surface.name}: no horizontal overflow at 375px (${overflow.scrollWidth}/${overflow.clientWidth})`,
+        overflow.scrollWidth <= overflow.clientWidth + 1
+      );
+    } finally {
+      await page.close();
+    }
+  }
+  setPlan(null);
 }
 
 await authed.close();

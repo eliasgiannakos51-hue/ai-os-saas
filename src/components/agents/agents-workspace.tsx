@@ -17,6 +17,7 @@ import { appendClarificationAnswers, alignSuggestions } from "@/lib/clarificatio
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useAiJob } from "@/lib/jobs/use-ai-job";
 import { DeliveryPicker } from "@/components/agents/delivery-picker";
+import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { isDeliveryChannel, type DeliveryChannel } from "@/lib/agents/delivery-channels";
 import { markJobConsumed } from "@/lib/jobs/consume";
 import { JobSeen } from "@/components/jobs/job-seen";
@@ -501,6 +502,12 @@ export function AgentsWorkspace({
                 disabled={building || savingAgent}
               />
               <p className="mt-1.5 text-[11px] text-muted">{t("deliveryNote", { email: accountEmail })}</p>
+              {/* WHAT AN AGENT IS FOR, as three things you can press.
+                  "Describe what the agent should do" is a label, not an
+                  answer — somebody who has never had a scheduled agent
+                  does not know whether this box wants a job title, a
+                  prompt, or a sentence. */}
+              <ExamplePrompts surface="agents" onPick={setRequestText} className="mt-2.5" />
             </div>
 
             {questions && (

@@ -24,6 +24,7 @@ import { StudioChat } from "@/components/create/studio-chat";
 import { useCredits } from "@/components/credits/credits-context";
 import { useCreateStudio } from "@/lib/create-studio/use-create-studio";
 import { ResumedWorkNotice } from "@/components/jobs/resumed-work-notice";
+import { ExamplePrompts } from "@/components/ai/example-prompts";
 import {
   CREATE_STUDIO_TYPES,
   estimateCreditsFor,
@@ -193,6 +194,13 @@ export function CreateStudio() {
               <OutOfCreditsNotice />
             </div>
           )}
+
+          {/* FOUR EXAMPLES, one per kind this box can produce.
+              Create Studio is the front door and the one place where "you
+              write one sentence and it works out what you meant" has to be
+              believable before it is used. A page, a plan, an entry and a
+              recurring reminder — pressed rather than explained. */}
+          <ExamplePrompts surface="createStudio" onPick={setDescription} className="mt-3" />
 
           <button
             type="submit"

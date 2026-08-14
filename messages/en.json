@@ -28,7 +28,8 @@
     "aiGenerated": {
       "short": "AI-generated",
       "long": "AI-generated content. It can be wrong — check anything important before you rely on it."
-    }
+    },
+    "examplesLabel": "Try:"
   },
   "sidebar": {
     "groups": {
@@ -718,7 +719,10 @@
       "streamInterrupted": "The connection dropped before the reply finished.",
       "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete.",
       "hideConversationsHint": "Hide the conversation list and give the thread the full width.",
-      "showConversationsHint": "Show the conversation list again."
+      "showConversationsHint": "Show the conversation list again.",
+      "emptyHint": "Ask anything — general knowledge, brainstorming, writing help, or just a conversation.",
+      "composerPlaceholder": "Message Ionexa...",
+      "send": "Send"
     },
     "create": {
       "title": "Create Anything"
@@ -1378,10 +1382,6 @@
       "emptyExample": "e.g. “What does the contract say about cancellation?”",
       "askDisabledNoFiles": "Tick at least one file above first.",
       "askDisabledNoQuestion": "Type your question to continue.",
-      "examplesLabel": "Try:",
-      "example1": "What does this say about cancellation?",
-      "example2": "Summarise the key points.",
-      "example3": "What are the deadlines and amounts?",
       "processingHint": "Reading this file — usually a few seconds. It can be asked about once it is ready.",
       "failedHint": "No readable text was found. Upload a version with selectable text.",
       "askStillRunning": "Still reading — this is taking a while. It keeps going with the page closed; come back and ask again to see the answer.",
@@ -1659,5 +1659,50 @@
     "unlimited": "Unlimited — no credits used",
     "unlimitedWouldHaveCost": "Unlimited — would have cost {count} credits",
     "freeMessage": "Free message · {count} left this month"
+  },
+  "aiExamples": {
+    "createStudio": {
+      "e1": "Build me a page for my shop",
+      "e2": "A plan for finding customers",
+      "e3": "Idea: a subscription for small businesses",
+      "e4": "Every Monday, remind me to check the finances",
+      "limits": "Creates things inside Ionexa · It won't touch anything you haven't connected"
+    },
+    "agents": {
+      "e1": "Every morning, send me the news about Nvidia",
+      "e2": "Every Monday, a summary of my competitors",
+      "e3": "Tell me if anyone writes about my industry",
+      "limits": "Searches the web and writes to you · It takes no actions, and sends only where you chose"
+    },
+    "mission": {
+      "e1": "Find 10 customers for my business",
+      "e2": "Prepare a launch plan for a new product",
+      "e3": "Grow sales by 20% in three months",
+      "limits": "Writes the plan and its steps · A step only runs when you schedule it"
+    },
+    "websiteBuilder": {
+      "e1": "A café in Thessaloniki with a menu and opening hours",
+      "e2": "A photographer's portfolio with a gallery",
+      "e3": "A landing page for a SaaS, with pricing",
+      "limits": "One page, not a shop or an app · It doesn't connect to your systems"
+    },
+    "files": {
+      "e1": "What does the contract say about cancellation?",
+      "e2": "Compare the two offers",
+      "e3": "What are the deadlines and amounts?",
+      "limits": "Answers only from the files you picked · It doesn't search the web"
+    },
+    "research": {
+      "e1": "Competitors in my industry in Greece",
+      "e2": "Why AI startups fail",
+      "e3": "SaaS pricing models in 2026",
+      "limits": "Reads public sources on the web · It can't see your files"
+    },
+    "chat": {
+      "e1": "What should I prioritise this week?",
+      "e2": "Explain this month's numbers to me",
+      "e3": "Write an email to a customer who is late paying",
+      "limits": "Sees your Ionexa data and whatever you've connected · It takes no actions on its own"
+    }
   }
 }

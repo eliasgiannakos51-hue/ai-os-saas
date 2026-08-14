@@ -17,6 +17,7 @@ import { Tooltip } from "@/components/ui/tooltip";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { MessageContent } from "@/components/chat/message-content";
+import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useCredits } from "@/components/credits/credits-context";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
@@ -558,11 +559,17 @@ export function ChatWorkspace({
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-400">
                 <MessageCircle className="h-6 w-6" aria-hidden="true" />
               </span>
-              <h1 className="mt-4 text-xl font-bold tracking-wide text-foreground">Ionexa Chat</h1>
-              <p className="mt-2 text-sm text-muted">
-                Ask anything — general knowledge, brainstorming, writing help,
-                or just a conversation. Not tied to any Ionexa AI module.
-              </p>
+              <h1 className="mt-4 text-xl font-bold tracking-wide text-foreground">{t("title")}</h1>
+              {/* Was three hardcoded English sentences. A Greek user opening
+                  Chat met an English explanation of what it is for — which
+                  is the one moment the explanation has to land. */}
+              <p className="mt-2 text-sm text-muted">{t("emptyHint")}</p>
+              {/* AND WHAT TO ACTUALLY SAY. "Ask anything" is true and
+                  useless: the reported confusion was somebody deciding this
+                  product was "several LLMs in one, cheaper", which is
+                  exactly the conclusion you reach from a blank box that
+                  accepts anything. */}
+              <ExamplePrompts surface="chat" onPick={setInput} className="mt-5 w-full text-left" />
             </div>
           ) : (
             <div className="mx-auto max-w-2xl space-y-4">
@@ -648,7 +655,7 @@ export function ChatWorkspace({
                   value={input}
                   onChange={handleTextareaInput}
                   onKeyDown={handleTextareaKeyDown}
-                  placeholder="Message Ionexa..."
+                  placeholder={t("composerPlaceholder")}
                   rows={1}
                   // max-h-40 (160px) was the whole complaint: a long message scrolled
                   // inside a box a quarter the height of the thread above it. A
@@ -660,7 +667,7 @@ export function ChatWorkspace({
                 <button
                   type="submit"
                   disabled={sending || !input.trim()}
-                  aria-label="Send"
+                  aria-label={t("send")}
                   className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
                 >
                   {sending ? (

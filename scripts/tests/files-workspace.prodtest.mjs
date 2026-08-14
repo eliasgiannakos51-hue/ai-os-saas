@@ -334,7 +334,12 @@ try {
     check("the two reasons are different messages", reasonTyped !== reasonSelect);
 
     console.log("\n== 5. example questions, and they are clickable ==");
-    const examples = page.locator('[data-testid="files-example"]');
+    // The chips moved into the shared component every AI surface now uses
+    // (components/ai/example-prompts.tsx), so the test id is the shared
+    // one. The behaviour this checks is unchanged — and one assertion is
+    // added, because the shared version brings something this page did
+    // not have: a line saying what it will NOT do.
+    const examples = page.locator('[data-testid="examples-files"] [data-testid="ai-example"]');
     const exampleCount = await examples.count();
     check(`there are 2-4 examples (${exampleCount})`, exampleCount >= 2 && exampleCount <= 4);
     const questionBox = page.locator('[data-testid="files-question"]');
@@ -347,6 +352,12 @@ try {
       `clicking an example fills the box ("${exampleText.slice(0, 40)}...")`,
       (await questionBox.inputValue()).trim() === exampleText
     );
+    // The most common wrong expectation about this page is that it
+    // searches the web. It does not — file-ask sends no tools at all —
+    // and the page now says so next to the examples.
+    const limits = (await page.locator('[data-testid="examples-files"] [data-testid="ai-limits"]').innerText()).trim();
+    check(`the limits line is on the page ("${limits.slice(0, 50)}")`, limits.length > 20);
+    check("...and it says the web is not searched", /web/i.test(limits), limits);
 
     console.log("\n== 6. both remaining states are explained ==");
     // A file that could not be read must say so on its own card, not only

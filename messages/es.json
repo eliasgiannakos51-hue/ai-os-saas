@@ -28,7 +28,8 @@
     "aiGenerated": {
       "short": "Generado por IA",
       "long": "Contenido generado por IA. Puede contener errores: comprueba lo importante antes de fiarte de ello."
-    }
+    },
+    "examplesLabel": "Prueba:"
   },
   "sidebar": {
     "groups": {
@@ -718,7 +719,10 @@
       "streamInterrupted": "La conexión se interrumpió antes de que terminara la respuesta.",
       "streamInterruptedPartial": "La conexión se interrumpió: la respuesta anterior puede estar incompleta.",
       "hideConversationsHint": "Oculta la lista de conversaciones y da todo el ancho al hilo.",
-      "showConversationsHint": "Vuelve a mostrar la lista de conversaciones."
+      "showConversationsHint": "Vuelve a mostrar la lista de conversaciones.",
+      "emptyHint": "Pregunta lo que quieras: conocimientos generales, ideas, ayuda para escribir o simplemente conversar.",
+      "composerPlaceholder": "Escribe a Ionexa...",
+      "send": "Enviar"
     },
     "create": {
       "title": "Crear Cualquier Cosa"
@@ -1378,10 +1382,6 @@
       "emptyExample": "P. ej. «¿Qué dice el contrato sobre la cancelación?»",
       "askDisabledNoFiles": "Marca primero al menos un archivo de arriba.",
       "askDisabledNoQuestion": "Escribe tu pregunta para continuar.",
-      "examplesLabel": "Prueba:",
-      "example1": "¿Qué dice sobre la cancelación?",
-      "example2": "Resume los puntos clave.",
-      "example3": "¿Cuáles son los plazos y los importes?",
       "processingHint": "Leyendo el archivo — suele tardar unos segundos. Podrás preguntar en cuanto esté listo.",
       "failedHint": "No se encontró texto legible. Sube una versión con texto seleccionable.",
       "askStillRunning": "Sigue leyendo — está tardando. Continúa con la página cerrada; vuelve y pregunta de nuevo para ver la respuesta.",
@@ -1659,5 +1659,50 @@
     "unlimited": "Ilimitado — no se usaron créditos",
     "unlimitedWouldHaveCost": "Ilimitado — habría costado {count} créditos",
     "freeMessage": "Mensaje gratuito · quedan {count} este mes"
+  },
+  "aiExamples": {
+    "createStudio": {
+      "e1": "Créame una página para mi tienda",
+      "e2": "Un plan para encontrar clientes",
+      "e3": "Idea: una suscripción para pequeños negocios",
+      "e4": "Cada lunes, recuérdame revisar las finanzas",
+      "limits": "Crea cosas dentro de Ionexa · No toca nada que no hayas conectado"
+    },
+    "agents": {
+      "e1": "Cada mañana, envíame las noticias sobre Nvidia",
+      "e2": "Cada lunes, un resumen de mis competidores",
+      "e3": "Avísame si alguien escribe sobre mi sector",
+      "limits": "Busca en la web y te escribe · No ejecuta acciones y solo envía donde elegiste"
+    },
+    "mission": {
+      "e1": "Encuentra 10 clientes para mi negocio",
+      "e2": "Prepara un plan de lanzamiento para un producto nuevo",
+      "e3": "Aumenta las ventas un 20% en tres meses",
+      "limits": "Escribe el plan y sus pasos · Un paso solo se ejecuta cuando lo programas"
+    },
+    "websiteBuilder": {
+      "e1": "Una cafetería en Salónica con carta y horarios",
+      "e2": "El portafolio de un fotógrafo con galería",
+      "e3": "Una landing para un SaaS, con precios",
+      "limits": "Una página, no una tienda ni una app · No se conecta a tus sistemas"
+    },
+    "files": {
+      "e1": "¿Qué dice el contrato sobre la cancelación?",
+      "e2": "Compara las dos ofertas",
+      "e3": "¿Cuáles son los plazos y los importes?",
+      "limits": "Responde solo desde los archivos que elegiste · No busca en la web"
+    },
+    "research": {
+      "e1": "Competidores de mi sector en Grecia",
+      "e2": "Por qué fracasan las startups de IA",
+      "e3": "Modelos de precios SaaS en 2026",
+      "limits": "Lee fuentes públicas de la web · No puede ver tus archivos"
+    },
+    "chat": {
+      "e1": "¿Qué debería priorizar esta semana?",
+      "e2": "Explícame los números de este mes",
+      "e3": "Escribe un correo a un cliente que se retrasa en pagar",
+      "limits": "Ve tus datos de Ionexa y lo que hayas conectado · No ejecuta acciones por su cuenta"
+    }
   }
 }

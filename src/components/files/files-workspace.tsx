@@ -24,6 +24,7 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { startAndWatchJob, watchJob } from "@/lib/jobs/start-and-watch";
 import { markJobConsumed } from "@/lib/jobs/consume";
 import { JobSeen } from "@/components/jobs/job-seen";
+import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { matchesSearch } from "@/lib/text/search-match";
 import {
   ACCEPT_ATTRIBUTE,
@@ -436,8 +437,6 @@ export function FilesWorkspace({
           ? t("tooManySelected", { max: MAX_FILES_PER_QUESTION })
           : null;
 
-  const EXAMPLES = [t("example1"), t("example2"), t("example3")];
-
   return (
     <div className="space-y-5 pb-24">
       {/* THE THREE STEPS.
@@ -760,25 +759,17 @@ export function FilesWorkspace({
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
         />
 
-        {/* EXAMPLE QUESTIONS, clickable.
+        {/* EXAMPLE QUESTIONS, clickable — the pattern this page proved and
+            every other AI surface now shares (components/ai/example-prompts).
             "What do these documents say about…?" as a placeholder tells
             somebody the shape of a question but not that this page answers
             specific ones. A question they can press is faster to understand
-            than any amount of instruction, and it costs one click to try. */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] text-muted">{t("examplesLabel")}</span>
-          {EXAMPLES.map((example) => (
-            <button
-              key={example}
-              type="button"
-              data-testid="files-example"
-              onClick={() => setQuestion(example)}
-              className="inline-flex min-h-[30px] items-center rounded-full border border-border px-3 py-1 text-[11px] text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-300"
-            >
-              {example}
-            </button>
-          ))}
-        </div>
+            than any amount of instruction, and it costs one click to try.
+
+            The limits line comes with it: this box answers from the files
+            that are ticked and does not search the web, which is the single
+            most common wrong expectation about it. */}
+        <ExamplePrompts surface="files" onPick={setQuestion} />
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <button

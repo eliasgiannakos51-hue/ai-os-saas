@@ -643,6 +643,12 @@ console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
     checkTrue(`"${was}" now reads "${now}"`, foldedNav.includes(fold(now)), navText.slice(0, 400));
   }
 
+  // THE HEADING AND THE SIDEBAR AGREE. This is the assertion that would
+  // have caught renaming one and not the other.
+  const heading = (await page.locator("main h1").first().innerText()).trim();
+  checkTrue(`the page heading is Greek too ("${heading}")`, /Αιτήματα κώδικα/.test(heading), heading);
+  checkTrue("...and matches what the sidebar calls it", foldedNav.includes(fold(heading)), `${heading} not in nav`);
+
   // A tracking page states, on screen, that it produces nothing.
   await page.screenshot({ path: "/tmp/ionexa-coding-el.png" });
   const main = await page.locator("main").innerText();

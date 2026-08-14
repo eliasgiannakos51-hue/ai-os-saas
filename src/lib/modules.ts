@@ -44,11 +44,27 @@ export type ModuleConfig = {
   // served perfectly well by the shared string. A per-module override is
   // the smallest change that fixes one module without touching twenty.
   emptyKey?: string;
+  /**
+   * Message key under `sidebar.items` for this module's DISPLAYED name.
+   *
+   * `title` above stays English and stays the state key — it is what the
+   * classifier, the CSV export and the entity-link labels match on. What
+   * changes is the heading a person reads, which was rendering
+   * `moduleConfig.title` verbatim: every module page showed its English
+   * name in all ten locales while the sidebar beside it showed the
+   * translation. Two names for one thing, in two places on the same
+   * screen.
+   *
+   * Pointed at the SIDEBAR's key rather than a new one, so a module can
+   * only ever have one display name.
+   */
+  titleKey?: string;
 };
 
 export const MODULES: ModuleConfig[] = [
   {
     slug: "competitors",
+    titleKey: "competitors",
     title: "Competitors",
     table: "competitors",
     headlineKey: "company",
@@ -64,6 +80,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "research",
+    titleKey: "research",
     title: "Research",
     table: "research",
     headlineKey: "topic",
@@ -74,6 +91,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "finance",
+    titleKey: "finance",
     title: "Finance",
     table: "finance_entries",
     headlineKey: "description",
@@ -92,6 +110,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "learning",
+    titleKey: "learning",
     title: "Learning",
     table: "learning_entries",
     headlineKey: "topic",
@@ -103,6 +122,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "trading",
+    titleKey: "trading",
     title: "Trading",
     table: "trades",
     headlineKey: "symbol",
@@ -116,6 +136,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "decisions",
+    titleKey: "decisions",
     title: "Decisions",
     table: "decisions",
     headlineKey: "idea_names",
@@ -127,6 +148,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "products",
+    titleKey: "products",
     title: "Products",
     table: "products",
     headlineKey: "product_name",
@@ -143,6 +165,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "content",
+    titleKey: "content",
     title: "Content",
     table: "content",
     headlineKey: "topic",
@@ -156,6 +179,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "sales",
+    titleKey: "sales",
     title: "Sales",
     table: "leads",
     headlineKey: "lead_name",
@@ -169,6 +193,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "feedback",
+    titleKey: "feedback",
     title: "Feedback",
     table: "feedback",
     headlineKey: "summary",
@@ -182,6 +207,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "analytics",
+    titleKey: "analytics",
     title: "Analytics",
     table: "metrics",
     headlineKey: "metric_name",
@@ -193,6 +219,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "automation",
+    titleKey: "automation",
     title: "Automation",
     table: "automations",
     headlineKey: "task_name",

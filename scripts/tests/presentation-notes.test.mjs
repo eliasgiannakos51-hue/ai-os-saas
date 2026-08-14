@@ -48,11 +48,27 @@ check("the module still exists", Boolean(module));
 check('its title is "Presentation Notes"', module.title === "Presentation Notes");
 check("the slug is unchanged, so no route or link breaks", module.slug === "presentations");
 check("the table is unchanged, so no data moves", module.table === "ai_presentations");
-// The page header and the browser tab both read config.title, so renaming
-// it there is what actually changes what the user sees.
+// THE HEADER NO LONGER READS config.title, and that is a fix rather than
+// a regression. Reading it was why every module page showed its ENGLISH
+// name in all ten locales while the translated name sat in the sidebar
+// beside it. The header now resolves sidebar.items.<titleKey>, so this
+// checks the name the user actually reads instead of an English constant
+// that only happened to be right for one locale.
 const page = readFileSync("src/app/dashboard/presentations/page.tsx", "utf8");
-check("the page takes its title from the config", /title: CONFIG\.title/.test(page));
-check("and the header does too", /title=\{config\.title\}/.test(readFileSync("src/components/modules/build-module-page.tsx", "utf8")));
+check("the page takes its browser-tab title from the config", /title: CONFIG\.title/.test(page));
+const buildPage = readFileSync("src/components/modules/build-module-page.tsx", "utf8");
+check("the header renders the translated name", /title=\{title\}/.test(buildPage));
+check("...resolved from the sidebar's own key", /getTranslations\("sidebar\.items"\)/.test(buildPage));
+check("this module points at that key", module.titleKey === "presentations");
+check(
+  'and it still reads "Presentation Notes" in English',
+  messages.en.sidebar.items.presentations === "Presentation Notes"
+);
+// The rename must reach every locale, not only the one it was written in.
+for (const locale of ["el", "de", "ja"]) {
+  const value = JSON.parse(readFileSync(`messages/${locale}.json`, "utf8")).sidebar.items.presentations;
+  check(`${locale} has a name for it ("${value}")`, typeof value === "string" && value.length > 0);
+}
 
 console.log("\n== 2. the sidebar label and its lookup key agree ==");
 const nav = readFileSync("src/lib/sidebar-nav.ts", "utf8");

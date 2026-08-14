@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -32,6 +33,16 @@ export async function BuildModulePage({
 }) {
   const supabase = createClient();
 
+  // THE NAME THE USER READS, not the state key.
+  //
+  // This rendered `config.title` verbatim, so every one of these pages
+  // showed its English name in all ten locales while the sidebar beside
+  // it showed the translation — "Σημειώσεις εικόνων" in the nav, "Images"
+  // as the heading, on the same screen. The key is the sidebar's own, so
+  // there is exactly one display name per module.
+  const tNav = await getTranslations("sidebar.items");
+  const title = config.titleKey ? tNav(config.titleKey) : config.title;
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -48,9 +59,9 @@ export async function BuildModulePage({
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={icon} title={config.title} />
+          <PageHeader icon={icon} title={title} />
           <UpgradeRequired
-            featureName={config.title}
+            featureName={title}
             planName={requiredPlan?.name ?? config.minPlanSlug}
           />
         </div>
@@ -72,7 +83,7 @@ export async function BuildModulePage({
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={icon} title={config.title} />
+        <PageHeader icon={icon} title={title} />
 
 
         {error && <ErrorMessage message={`loading ${config.table}: ${error.message}`} />}

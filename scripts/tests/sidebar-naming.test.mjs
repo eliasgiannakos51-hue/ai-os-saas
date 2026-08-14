@@ -174,6 +174,58 @@ for (const [slug, pattern] of Object.entries(NEGATIONS)) {
   check(`${slug}: names the thing it will not do`, pattern.test(String(text)), String(text).slice(0, 90));
 }
 
+console.log("\n== 4b. the page heading agrees with the sidebar ==");
+// A module page rendered `config.title` verbatim, which is the ENGLISH
+// state key the classifier matches on — so the sidebar said
+// "Σημειώσεις εικόνων" and the heading two inches away said "Images", in
+// all ten locales, on all twenty-one module pages. Renaming only the
+// sidebar would have made that worse, not better.
+const modulesSrc = readFileSync("src/lib/modules.ts", "utf8");
+const buildPage = readFileSync("src/components/modules/build-module-page.tsx", "utf8");
+const modulePage = readFileSync("src/app/dashboard/[module]/page.tsx", "utf8");
+check("the tracking pages render a translated heading", /title=\{title\}/.test(buildPage) && /getTranslations\("sidebar\.items"\)/.test(buildPage));
+check("...and so do the business module pages", /title=\{title\}/.test(modulePage) && /getTranslations\("sidebar\.items"\)/.test(modulePage));
+check("...including the upgrade wall, which also showed the English name", /featureName=\{title\}/.test(buildPage));
+check("no page renders the raw English title any more", !/title=\{config\.title\}/.test(buildPage) && !/title=\{moduleConfig\.title\}/.test(modulePage));
+
+// Every module must declare which name to show, and it must be the
+// sidebar's own key — one display name per module, by construction.
+function blocksOf(src) {
+  return src.split(/\n  \{\n/).map((block) => ({
+    slug: block.match(/slug: "([^"]+)"/)?.[1],
+    titleKey: block.match(/titleKey: "(\w+)"/)?.[1],
+  })).filter((b) => b.slug);
+}
+const allModules = [...blocksOf(modulesSrc), ...blocksOf(buildModules)];
+const noTitleKey = allModules.filter((m) => !m.titleKey);
+check(`all ${allModules.length} modules declare a display name`, noTitleKey.length === 0, noTitleKey.map((m) => m.slug).join(", "));
+const badKey = allModules.filter((m) => m.titleKey && LOCALES.some((l) => typeof lookup(messages[l], `sidebar.items.${m.titleKey}`) !== "string"));
+check("and every one resolves in all 10 locales", badKey.length === 0, badKey.map((m) => `${m.slug}->${m.titleKey}`).join(", "));
+
+console.log("\n== 4c. the eight trackers no longer promise generation ==");
+// The approved names. "AI Coding" was the worst of them: it is a table
+// of rows the user types by hand.
+const TRACKER_NAMES = {
+  coding: ["Coding notes", "Αιτήματα κώδικα (σημειώσεις)"],
+  images: ["Image notes", "Σημειώσεις εικόνων"],
+  videos: ["Video notes", "Σημειώσεις βίντεο"],
+  apps: ["App notes", "Σημειώσεις εφαρμογών"],
+  dataAnalysis: ["Analysis notes", "Σημειώσεις αναλύσεων"],
+  campaigns: ["Campaign notes", "Σημειώσεις καμπανιών"],
+  websites: ["Website plans", "Σχέδια ιστότοπων"],
+};
+for (const [key, [en, el]] of Object.entries(TRACKER_NAMES)) {
+  check(`${key}: EN is "${en}"`, lookup(messages.en, `sidebar.items.${key}`) === en, String(lookup(messages.en, `sidebar.items.${key}`)));
+  check(`${key}: EL is "${el}"`, lookup(messages.el, `sidebar.items.${key}`) === el, String(lookup(messages.el, `sidebar.items.${key}`)));
+}
+// The word that was doing the damage.
+check(
+  'no tracker is still called "AI" anything',
+  !Object.keys(TRACKER_NAMES).some((k) => /\bAI\b/.test(String(lookup(messages.en, `sidebar.items.${k}`))))
+);
+// Presentation Notes was already honest and must not have been churned.
+check("Presentation Notes is unchanged", lookup(messages.en, "sidebar.items.presentations") === "Presentation Notes");
+
 console.log("\n== 5. the approved renames landed everywhere the name is shown ==");
 // A name changed in the sidebar but not on the page it opens gives the
 // user two names for one thing, which is worse than the old name.

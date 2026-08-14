@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
@@ -32,6 +33,11 @@ export default async function ModulePage({
   if (!moduleConfig) {
     notFound();
   }
+
+  // Same fix as the tracking pages: the heading is the translated name,
+  // read from the sidebar's own key so the two can never disagree.
+  const tNav = await getTranslations("sidebar.items");
+  const title = moduleConfig.titleKey ? tNav(moduleConfig.titleKey) : moduleConfig.title;
 
   const supabase = createClient();
 
@@ -71,7 +77,7 @@ export default async function ModulePage({
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={MODULE_ICONS[moduleConfig.slug]} title={moduleConfig.title} />
+        <PageHeader icon={MODULE_ICONS[moduleConfig.slug]} title={title} />
 
 
         {error && (

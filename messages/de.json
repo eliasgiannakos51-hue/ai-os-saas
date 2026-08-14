@@ -1536,7 +1536,7 @@
       "za": "Z–A"
     },
     "emptyPresentationNotes": "Hier ist noch nichts. Dieser Bereich dient dazu, geplante oder bereits erstellte Präsentationen festzuhalten — er erstellt keine Folien für Sie. Fügen Sie mit der Schaltfläche oben eine hinzu.",
-    "emptyWhat": "{module} ist leer.",
+    "emptyWhat": "Hier lebt alles, was du zu {module} festhältst.",
     "emptyWhy": "Alles, was du hier festhältst, landet in deiner Chronik und wird zu etwas, das die KI nutzen kann, wenn du sie zu deiner Arbeit befragst.",
     "emptyExample": "Fang an mit: „{example}“",
     "examples": {
@@ -1559,7 +1559,8 @@
       "coding": "Skript zum Abgleich der Stripe-Auszahlungen",
       "data-analysis": "Welcher Tarif hat die niedrigste Abwanderung?",
       "campaigns": "September-Launch — E-Mail + LinkedIn",
-      "presentations": "Q3-Update fürs Board — Kernaussagen"
+      "presentations": "Q3-Update fürs Board — Kernaussagen",
+      "ideas": "Ein Newsletter für alle, die von Tabellen umgestiegen sind"
     }
   },
   "askAi": {

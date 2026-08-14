@@ -1536,7 +1536,7 @@
       "za": "Z–A"
     },
     "emptyPresentationNotes": "这里还没有内容。这是用来记录你正在筹划或已经做好的演示文稿的地方——它不会替你生成幻灯片。点击上方按钮添加一条。",
-    "emptyWhat": "{module} 还是空的。",
+    "emptyWhat": "你记录的所有关于{module}的内容都在这里。",
     "emptyWhy": "你在这里记录的一切都会进入时间线，并成为 AI 在你询问工作相关问题时可以使用的信息。",
     "emptyExample": "从这条开始：「{example}」",
     "examples": {
@@ -1559,7 +1559,8 @@
       "coding": "对账 Stripe 付款的脚本",
       "data-analysis": "哪个方案的流失率最低？",
       "campaigns": "9 月发布 — 邮件 + LinkedIn",
-      "presentations": "第三季度董事会汇报 — 要点"
+      "presentations": "第三季度董事会汇报 — 要点",
+      "ideas": "写给从电子表格转过来的人的通讯"
     }
   },
   "askAi": {

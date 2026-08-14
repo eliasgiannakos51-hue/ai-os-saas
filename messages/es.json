@@ -1536,7 +1536,7 @@
       "za": "Z–A"
     },
     "emptyPresentationNotes": "Aquí no hay nada todavía. Este es un espacio para llevar el control de las presentaciones que planeas o ya has hecho: no genera diapositivas por ti. Usa el botón de arriba para añadir una.",
-    "emptyWhat": "{module} está vacío.",
+    "emptyWhat": "Aquí vive todo lo que registras sobre {module}.",
     "emptyWhy": "Todo lo que registres aquí se añade a tu Cronología y pasa a ser algo que la IA puede usar cuando le preguntes sobre tu trabajo.",
     "emptyExample": "Empieza con: «{example}»",
     "examples": {
@@ -1559,7 +1559,8 @@
       "coding": "Script para conciliar los pagos de Stripe",
       "data-analysis": "¿Qué plan tiene la menor cancelación?",
       "campaigns": "Lanzamiento de septiembre: email + LinkedIn",
-      "presentations": "Actualización al consejo del T3: puntos clave"
+      "presentations": "Actualización al consejo del T3: puntos clave",
+      "ideas": "Un boletín para quienes dejaron las hojas de cálculo"
     }
   },
   "askAi": {

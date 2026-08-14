@@ -1536,7 +1536,7 @@
       "za": "Z–A"
     },
     "emptyPresentationNotes": "Rien ici pour l’instant. Cet espace sert à suivre les présentations que vous préparez ou avez déjà faites — il ne génère pas de diapositives à votre place. Utilisez le bouton ci-dessus pour en ajouter une.",
-    "emptyWhat": "{module} est vide.",
+    "emptyWhat": "Tout ce que vous consignez sur {module} vit ici.",
     "emptyWhy": "Tout ce que vous consignez ici rejoint votre Chronologie et devient une information que l'IA peut utiliser lorsque vous l'interrogez sur votre travail.",
     "emptyExample": "Commencez par : « {example} »",
     "examples": {
@@ -1559,7 +1559,8 @@
       "coding": "Script de rapprochement des versements Stripe",
       "data-analysis": "Quelle formule a le taux d'attrition le plus bas ?",
       "campaigns": "Lancement de septembre — e-mail + LinkedIn",
-      "presentations": "Point trimestriel au conseil — éléments de langage"
+      "presentations": "Point trimestriel au conseil — éléments de langage",
+      "ideas": "Une newsletter pour ceux qui ont quitté les tableurs"
     }
   },
   "askAi": {

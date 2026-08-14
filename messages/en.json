@@ -1536,7 +1536,7 @@
       "za": "Z–A"
     },
     "emptyPresentationNotes": "Nothing here yet. This is a place to keep track of presentations you are planning or have already made — it does not generate slides for you. Use the button above to add one.",
-    "emptyWhat": "{module} is empty.",
+    "emptyWhat": "Everything you record about {module} lives here.",
     "emptyWhy": "Anything you log here joins your Timeline and becomes something the AI can use when you ask it a question about your work.",
     "emptyExample": "Start with: “{example}”",
     "examples": {
@@ -1559,7 +1559,8 @@
       "coding": "Script to reconcile Stripe payouts",
       "data-analysis": "Which plan has the lowest churn?",
       "campaigns": "September launch — email + LinkedIn",
-      "presentations": "Q3 board update — talking points"
+      "presentations": "Q3 board update — talking points",
+      "ideas": "A newsletter for people who switched from spreadsheets"
     }
   },
   "askAi": {

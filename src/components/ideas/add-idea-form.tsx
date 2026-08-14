@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -21,15 +21,23 @@ const EMPTY_FORM = {
   verdict: "",
 };
 
-export function AddIdeaForm() {
+export function AddIdeaForm({ openSignal = 0 }: { openSignal?: number } = {}) {
   const router = useRouter();
   const supabase = createClient();
   const { addToast } = useToast();
   const tCommon = useTranslations("common");
+  const tModule = useTranslations("module");
   const describe = useErrorText();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (openSignal === 0) return;
+    setForm({ ...EMPTY_FORM, name: tModule("examples.ideas") });
+    setOpen(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openSignal]);
   const [loading, setLoading] = useState(false);
   // Set right after a successful create so SuggestedLinksPrompt (Knowledge
   // Graph "Smart Search") can offer related-entry links for it — see

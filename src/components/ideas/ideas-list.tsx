@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, SearchX, Download } from "lucide-react";
+import { Search, SearchX, Download, Lightbulb, Plus } from "lucide-react";
 import type { Idea } from "@/types/ideas";
 import type { LinkedEntity } from "@/lib/entity-links";
 import { IdeaRow } from "@/components/ideas/idea-row";
@@ -9,7 +9,8 @@ import { toCSV, downloadCSV, todayForFilename } from "@/lib/csv";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";
-import { EmptyState } from "@/components/empty-state";
+import { EmptyState, GuidedEmptyState } from "@/components/empty-state";
+import { useTranslations } from "next-intl";
 import { matchesSearch } from "@/lib/text/search-match";
 
 const CSV_HEADERS = [
@@ -56,11 +57,16 @@ export function IdeasList({
   ideas,
   linkedEntities = {},
   favoritedIds,
+  onUseExample,
 }: {
   ideas: Idea[];
   linkedEntities?: Record<string, LinkedEntity[]>;
   favoritedIds?: Set<string>;
+  /** Opens the add form with the advertised example already typed in. */
+  onUseExample: () => void;
 }) {
+  const tModule = useTranslations("module");
+  const tSidebar = useTranslations("sidebar.items");
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -104,11 +110,29 @@ export function IdeasList({
       </div>
 
       {ideas.length === 0 ? (
-        <EmptyState>
-          No ideas yet — use the button above to log your first one.
-        </EmptyState>
+        // The Ideas board is where the overview's first Quick Action card
+        // sends a new user, so this was the empty state most likely to be
+        // the first one they ever saw — and it was still the exact "No X
+        // yet — use the button above" sentence that empty-state.tsx's own
+        // comment claims was eliminated. Missed because this list does not
+        // go through GenericList.
+        <GuidedEmptyState
+          icon={Lightbulb}
+          what={tModule("emptyWhat", { module: tSidebar("ideas") })}
+          why={tModule("emptyWhy")}
+          example={
+            <button
+              type="button"
+              onClick={onUseExample}
+              className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-orange-500/40 bg-orange-500/10 px-4 py-2 text-sm font-medium text-orange-300 transition-colors duration-150 hover:border-orange-500 hover:bg-orange-500/20"
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              {tModule("emptyExample", { example: tModule("examples.ideas") })}
+            </button>
+          }
+        />
       ) : filtered.length === 0 ? (
-        <EmptyState icon={SearchX}>No matches for &apos;{query}&apos;</EmptyState>
+        <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>
       ) : (
         <>
           <div className="space-y-3">

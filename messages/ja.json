@@ -1536,7 +1536,7 @@
       "za": "降順"
     },
     "emptyPresentationNotes": "まだ何もありません。ここは作成予定または作成済みのプレゼンを記録しておく場所です。スライドを自動生成するものではありません。上のボタンから追加してください。",
-    "emptyWhat": "{module} はまだ空です。",
+    "emptyWhat": "{module} について記録したものはすべてここにあります。",
     "emptyWhy": "ここに記録したものはタイムラインに加わり、仕事について AI に質問したときに AI が使える情報になります。",
     "emptyExample": "この例から始める：「{example}」",
     "examples": {
@@ -1559,7 +1559,8 @@
       "coding": "Stripe の入金を照合するスクリプト",
       "data-analysis": "解約率がいちばん低いプランは？",
       "campaigns": "9月のローンチ — メール＋LinkedIn",
-      "presentations": "第3四半期の取締役会報告 — 要点"
+      "presentations": "第3四半期の取締役会報告 — 要点",
+      "ideas": "表計算から乗り換えた人向けのニュースレター"
     }
   },
   "askAi": {

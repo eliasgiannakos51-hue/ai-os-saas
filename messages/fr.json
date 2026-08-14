@@ -666,7 +666,9 @@
           "label": "Trading",
           "description": "Consignez une opération"
         }
-      }
+      },
+      "quickStart": "Démarrage rapide",
+      "quickStartTemplates": "Modèles de démarrage rapide"
     },
     "team": {
       "title": "Équipe",

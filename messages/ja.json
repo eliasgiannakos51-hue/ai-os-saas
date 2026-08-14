@@ -666,7 +666,9 @@
           "label": "トレーディング",
           "description": "取引を記録"
         }
-      }
+      },
+      "quickStart": "クイックスタート",
+      "quickStartTemplates": "クイックスタートのテンプレート"
     },
     "team": {
       "title": "チーム",

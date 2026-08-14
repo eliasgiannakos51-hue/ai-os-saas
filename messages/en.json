@@ -666,7 +666,9 @@
           "label": "Trading",
           "description": "Log a trade"
         }
-      }
+      },
+      "quickStart": "Quick Start",
+      "quickStartTemplates": "Quick Start templates"
     },
     "team": {
       "title": "Team",

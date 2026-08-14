@@ -666,7 +666,9 @@
           "label": "交易",
           "description": "记录一笔交易"
         }
-      }
+      },
+      "quickStart": "快速开始",
+      "quickStartTemplates": "快速开始模板"
     },
     "team": {
       "title": "团队",

@@ -666,7 +666,9 @@
           "label": "Trading",
           "description": "Registra una operación"
         }
-      }
+      },
+      "quickStart": "Inicio rápido",
+      "quickStartTemplates": "Plantillas de inicio rápido"
     },
     "team": {
       "title": "Equipo",

@@ -666,7 +666,9 @@
           "label": "التداول",
           "description": "سجّل صفقة"
         }
-      }
+      },
+      "quickStart": "بداية سريعة",
+      "quickStartTemplates": "قوالب البداية السريعة"
     },
     "team": {
       "title": "الفريق",

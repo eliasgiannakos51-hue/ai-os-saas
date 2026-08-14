@@ -666,7 +666,9 @@
           "label": "Trading",
           "description": "Einen Trade erfassen"
         }
-      }
+      },
+      "quickStart": "Schnellstart",
+      "quickStartTemplates": "Schnellstart-Vorlagen"
     },
     "team": {
       "title": "Team",

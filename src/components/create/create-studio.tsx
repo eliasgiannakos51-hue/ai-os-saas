@@ -23,6 +23,7 @@ import { OutOfCreditsNotice } from "@/components/credits/out-of-credits-notice";
 import { StudioChat } from "@/components/create/studio-chat";
 import { useCredits } from "@/components/credits/credits-context";
 import { useCreateStudio } from "@/lib/create-studio/use-create-studio";
+import { ResumedWorkNotice } from "@/components/jobs/resumed-work-notice";
 import {
   CREATE_STUDIO_TYPES,
   estimateCreditsFor,
@@ -159,7 +160,16 @@ export function CreateStudio() {
           <p className="mx-auto mt-2 max-w-md text-sm text-muted">{t("subtitle")}</p>
         </div>
 
-        <form onSubmit={handleDetect} className="mt-6">
+        {/* WHAT WAS ALREADY ASKED FOR. A create that was still running
+            when the user left this page finishes and saves itself — but a
+            blank composer looks exactly like a page where nothing was
+            started, and the honest response to that is to type it again
+            and pay for it twice. */}
+        <div className="mt-6">
+          <ResumedWorkNotice kind="create" />
+        </div>
+
+        <form onSubmit={handleDetect}>
           <label htmlFor="studio-input" className="sr-only">
             {t("inputLabel")}
           </label>

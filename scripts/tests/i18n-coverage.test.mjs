@@ -207,7 +207,14 @@ const clientFallbacks = sources.flatMap((f) => [
 // renders dashboard.agents.buildStalled in the user's own language. A
 // baseline raised over a string the user genuinely sees would be this
 // check being talked around instead of answered.
-const SERVER_PROSE_BASELINE = 518;
+const SERVER_PROSE_BASELINE = 520;
+// 518 -> 520 for api/jobs/[id]/consume, the endpoint that records a
+// finished result as having been SEEN so the user is not made to pay for
+// it a second time. Its two counted strings are "Not authenticated." and
+// "Job not found." — the standard pair every other route here returns,
+// and neither is prose a user reads: the caller is a component that
+// renders nothing on failure, because a mark that did not land means only
+// that the result is offered once more, which is the safe direction.
 // 517 -> 518 for the "Not authenticated." reply added to
 // api/jobs/[id]/continue. That string is the standard one every other
 // route in the app already returns, and it appeared because

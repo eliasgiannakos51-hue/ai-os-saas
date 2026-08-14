@@ -1476,6 +1476,12 @@
       "hideNumbers": "Zahlen ausblenden",
       "dismiss": "Ausblenden",
       "dismissError": "Das konnte nicht ausgeblendet werden."
+    },
+    "backgroundWork": {
+      "working": "Deine letzte Anfrage läuft noch — sie wird auch fertig, wenn du diese Seite verlässt.",
+      "finished": "Deine letzte Anfrage wurde fertig, während du weg warst.",
+      "open": "Öffnen",
+      "dismiss": "Ausblenden"
     }
   },
   "module": {

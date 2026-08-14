@@ -1476,6 +1476,12 @@
       "hideNumbers": "Ocultar los números",
       "dismiss": "Descartar",
       "dismissError": "No se pudo descartar."
+    },
+    "backgroundWork": {
+      "working": "Seguimos trabajando en tu última petición: terminará aunque salgas de esta página.",
+      "finished": "Tu última petición terminó mientras no estabas.",
+      "open": "Ábrelo",
+      "dismiss": "Descartar"
     }
   },
   "module": {

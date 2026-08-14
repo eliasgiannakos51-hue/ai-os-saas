@@ -1476,6 +1476,12 @@
       "hideNumbers": "Nascondi i numeri",
       "dismiss": "Ignora",
       "dismissError": "Impossibile ignorarlo."
+    },
+    "backgroundWork": {
+      "working": "Sto ancora elaborando la tua ultima richiesta: si completerà anche se lasci questa pagina.",
+      "finished": "La tua ultima richiesta è stata completata mentre eri via.",
+      "open": "Aprila",
+      "dismiss": "Chiudi"
     }
   },
   "module": {

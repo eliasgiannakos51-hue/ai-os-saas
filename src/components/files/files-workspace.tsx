@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -21,7 +21,9 @@ import { EmptyState } from "@/components/empty-state";
 import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
-import { startAndWatchJob } from "@/lib/jobs/start-and-watch";
+import { startAndWatchJob, watchJob } from "@/lib/jobs/start-and-watch";
+import { markJobConsumed } from "@/lib/jobs/consume";
+import { JobSeen } from "@/components/jobs/job-seen";
 import { matchesSearch } from "@/lib/text/search-match";
 import {
   ACCEPT_ATTRIBUTE,
@@ -60,7 +62,39 @@ type Answer = {
   truncated: boolean;
   credits: number;
   disclosure: string;
+  /** The job that produced it, carried so the answer can report itself
+   *  seen. An answer the user has read must not be offered back to them
+   *  on the next visit as if it were new. */
+  jobId: string | null;
 };
+
+/**
+ * One answer, built the same way whether it arrived on this page or is
+ * being picked back up from a job that finished while the user was
+ * elsewhere.
+ *
+ * Shared because the resumed path is the one that matters and the one
+ * nobody looks at: if it drifted from the inline path, the answer a user
+ * came back for would be missing its citations or its "not in your
+ * documents" warning — quietly, and only for people who navigated away.
+ */
+function answerFromResult(
+  result: Record<string, unknown>,
+  credits: number,
+  jobId: string | null
+): Answer {
+  return {
+    text: String(result.answer ?? ""),
+    fromDocuments: Boolean(result.answeredFromDocuments),
+    citations: (result.citations ?? []) as Citation[],
+    removedCitations: Number(result.removedCitations ?? 0),
+    skippedFiles: (result.skippedFiles ?? []) as string[],
+    truncated: Boolean(result.truncated),
+    credits,
+    disclosure: String(result.disclosure ?? ""),
+    jobId,
+  };
+}
 
 /**
  * The File Workspace.
@@ -226,6 +260,88 @@ export function FilesWorkspace({
     }
   }
 
+  // WHERE THE USER WAS, ASKED OF THE SERVER RATHER THAN THE BROWSER.
+  //
+  // A question over a large document set takes a minute. Leaving the page
+  // while it runs used to lose the answer completely: the worker finished
+  // and wrote the result, but nothing on this screen ever asked for it
+  // again, so the only way back to the answer was to buy it a second time.
+  //
+  // Two cases, one query. Still running: attach to it and show the real
+  // step. Finished and never seen: put the answer back on the screen.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch("/api/jobs?kind=file_ask");
+        const data = await response.json();
+        if (cancelled || !data.ok || !data.job) return;
+        const job = data.job as {
+          id: string;
+          status: string;
+          stepLabel: string | null;
+          input: Record<string, unknown> | null;
+          result: Record<string, unknown> | null;
+          creditsCharged: number | null;
+        };
+
+        // What was asked, and of which files — restored only if the user
+        // has not already started typing something else. Their current
+        // input always wins over a restored one.
+        const asked = job.input?.question;
+        if (typeof asked === "string" && asked.trim()) {
+          setQuestion((current) => (current.trim() ? current : asked));
+        }
+        const askedFiles = job.input?.fileIds;
+        if (Array.isArray(askedFiles)) {
+          const ids = askedFiles.filter((id): id is string => typeof id === "string");
+          setSelected((current) => (current.length > 0 ? current : ids));
+        }
+
+        if (job.status === "done") {
+          const result = (job.result ?? {}) as Record<string, unknown>;
+          if (result.answered) {
+            setAnswer(answerFromResult(result, Number(job.creditsCharged ?? 0), String(job.id)));
+          } else {
+            // A completed job with no answer in it renders nothing, so
+            // nothing would ever mark it seen and it would be handed back
+            // on every page open for a day.
+            void markJobConsumed(String(job.id));
+          }
+          return;
+        }
+
+        setAsking(true);
+        setAskStep(job.stepLabel);
+        const outcome = await watchJob(String(job.id), (running) => {
+          if (!cancelled) setAskStep(running.stepLabel);
+        });
+        if (cancelled) return;
+        setAsking(false);
+        if (outcome.ok) {
+          const result = outcome.result;
+          if (result.answered) {
+            setAnswer(answerFromResult(result, Number(outcome.creditsCharged ?? 0), String(job.id)));
+          } else {
+            addToast(t("askError"), "error");
+            void markJobConsumed(String(job.id));
+          }
+        } else if (outcome.code !== "still_running") {
+          addToast(outcome.code === "stalled" ? t("askStalled") : t("askError"), "error");
+        }
+      } catch {
+        // Nothing in flight is the common answer, and a failed check is
+        // not evidence of one. The page works either way.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Mount only. Re-running this on every render of a translation
+    // function would re-attach to the same job and double the polling.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function ask() {
     if (selected.length === 0) {
       addToast(t("selectFirst"), "error");
@@ -262,16 +378,7 @@ export function FilesWorkspace({
         addToast(t("askError"), "error");
         return;
       }
-      setAnswer({
-        text: String(data.answer ?? ""),
-        fromDocuments: Boolean(data.answeredFromDocuments),
-        citations: (data.citations ?? []) as Citation[],
-        removedCitations: Number(data.removedCitations ?? 0),
-        skippedFiles: (data.skippedFiles ?? []) as string[],
-        truncated: Boolean(data.truncated),
-        credits: Number(outcome.creditsCharged ?? 0),
-        disclosure: String(data.disclosure ?? ""),
-      });
+      setAnswer(answerFromResult(data, Number(outcome.creditsCharged ?? 0), outcome.jobId ?? null));
       router.refresh();
     } catch (err) {
       addToast(getErrorMessage(err, t("askError")), "error");
@@ -700,6 +807,10 @@ export function FilesWorkspace({
 
         {answer && (
           <div className="space-y-2 rounded-xl border border-border bg-panel/60 p-3">
+            {/* On screen, therefore seen. Inside the answer rather than in
+                an effect beside it, so an answer can only be marked read
+                by actually being rendered. */}
+            <JobSeen jobId={answer.jobId} />
             {/* Said FIRST, not in a footnote: whether the answer came out
                 of the documents at all is the most important thing about
                 it. */}

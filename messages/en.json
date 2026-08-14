@@ -1476,6 +1476,12 @@
       "hideNumbers": "Hide the numbers",
       "dismiss": "Dismiss this",
       "dismissError": "That could not be dismissed."
+    },
+    "backgroundWork": {
+      "working": "Still working on your last request — it will finish even if you leave this page.",
+      "finished": "Your last request finished while you were away.",
+      "open": "Open it",
+      "dismiss": "Dismiss"
     }
   },
   "module": {

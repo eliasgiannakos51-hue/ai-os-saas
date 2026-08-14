@@ -1476,6 +1476,12 @@
       "hideNumbers": "Masquer les chiffres",
       "dismiss": "Ignorer",
       "dismissError": "Impossible de l'ignorer."
+    },
+    "backgroundWork": {
+      "working": "Votre dernière demande est toujours en cours — elle aboutira même si vous quittez cette page.",
+      "finished": "Votre dernière demande s'est terminée pendant votre absence.",
+      "open": "Ouvrir",
+      "dismiss": "Ignorer"
     }
   },
   "module": {

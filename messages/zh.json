@@ -1476,6 +1476,12 @@
       "hideNumbers": "隐藏数据",
       "dismiss": "忽略此项",
       "dismissError": "无法忽略该项。"
+    },
+    "backgroundWork": {
+      "working": "您上一个请求仍在处理中——即使离开此页面也会完成。",
+      "finished": "您离开期间，上一个请求已经完成。",
+      "open": "打开",
+      "dismiss": "关闭"
     }
   },
   "module": {

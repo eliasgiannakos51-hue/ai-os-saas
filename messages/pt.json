@@ -1476,6 +1476,12 @@
       "hideNumbers": "Ocultar os números",
       "dismiss": "Dispensar",
       "dismissError": "Não foi possível dispensar."
+    },
+    "backgroundWork": {
+      "working": "Ainda a processar o teu último pedido — vai terminar mesmo que saias desta página.",
+      "finished": "O teu último pedido terminou enquanto estavas fora.",
+      "open": "Abrir",
+      "dismiss": "Dispensar"
     }
   },
   "module": {

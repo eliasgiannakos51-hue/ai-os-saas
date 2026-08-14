@@ -6,6 +6,7 @@ import { useCredits } from "@/components/credits/credits-context";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { createViaJob } from "@/lib/create-studio/create-via-job";
+import { startAndWatchJob } from "@/lib/jobs/start-and-watch";
 import type { CreateStudioDetection, CreateStudioType } from "@/lib/create-studio/plan";
 import type { UserWebsite } from "@/types/user-website";
 
@@ -161,23 +162,51 @@ export function useCreateStudio() {
           }
 
           case "mission": {
+            // PLANNING IS A BACKGROUND JOB and this branch did not know it.
+            //
+            // The route stopped answering `{ planned: true, mission }` and
+            // started answering 202 `{ jobId }` when mission planning moved
+            // into a worker. This code kept testing `data.planned`, which is
+            // now never present — so every single Create Studio mission
+            // ended at "Could not create a plan." while the worker went on
+            // to plan it and charge for it. The user's honest next move is
+            // to press the button again, and that is a second charge for a
+            // plan they already own. Awaiting the job is the fix; the
+            // failure was never in the planner.
             pushStep({ key: "plan", labelKey: "planningMission", status: "running" });
-            const res = await fetchWithAuthRetry("/api/mission/plan", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ goal: description }),
-            });
-            const data = await res.json();
+            const outcome = await startAndWatchJob("/api/mission/plan", { goal: description });
             void refreshCredits();
-            if (!res.ok || !data.ok || !data.planned) {
+            if (!outcome.ok) {
+              // "still_running" is not a failure: the worker is fine and
+              // this page stopped watching. Sending the user to the
+              // missions list is the truthful answer, because that is
+              // where the plan appears.
+              if (outcome.code === "still_running") {
+                finishStep("plan", "done");
+                setResult({
+                  type: "mission",
+                  title: detection.title,
+                  href: "/dashboard/mission",
+                  website: null,
+                  moduleTitle: null,
+                  message: null,
+                });
+                return;
+              }
               finishStep("plan", "failed");
-              setError(getErrorMessage(data?.error ?? data?.message, "Could not create a plan."));
+              setError(getErrorMessage(outcome.error, "Could not create a plan."));
+              return;
+            }
+            const planned = outcome.result as { planned?: boolean; message?: string; mission?: { goal?: string } };
+            if (!planned.planned) {
+              finishStep("plan", "failed");
+              setError(planned.message ?? "Could not create a plan.");
               return;
             }
             finishStep("plan", "done");
             setResult({
               type: "mission",
-              title: data.mission?.goal ?? detection.title,
+              title: planned.mission?.goal ?? detection.title,
               href: "/dashboard/mission",
               website: null,
               moduleTitle: null,

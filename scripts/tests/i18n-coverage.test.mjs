@@ -217,7 +217,23 @@ const SERVER_PROSE_BASELINE = 518;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.
-const CLIENT_FALLBACK_BASELINE = 38;
+// 38 -> 31. A ratchet is only worth having if it is TIGHTENED when the
+// number falls, so lowering it is part of the same change that lowered
+// the count — otherwise the seven slots stay available and the next
+// English fallback slips in under a green check.
+//
+// What closed: the eighteen call sites that passed no fallback at all and
+// silently got "Something went wrong. Please try again.", plus the five AI
+// surfaces, which now build their message from the response status
+// (lib/errors/use-error-text.ts) rather than carrying an English one.
+//
+// WHAT THE REMAINING 31 ARE, honestly: specific, useful sentences —
+// "Could not rename conversation.", "Could not upload the reference
+// images." — that are specific and useful IN ENGLISH. They are better
+// than a generic message and worse than a translated one, and closing
+// them means 31 new keys across ten locales rather than a mechanical
+// sweep. Recorded rather than quietly tolerated.
+const CLIENT_FALLBACK_BASELINE = 31;
 checkTrue(
   `server-side English error prose has not grown (${serverErrorProse.length} <= ${SERVER_PROSE_BASELINE})`,
   serverErrorProse.length <= SERVER_PROSE_BASELINE

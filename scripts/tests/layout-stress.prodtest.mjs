@@ -576,15 +576,20 @@ for (const [, c] of census.clippedUnrecoverable) {
 
 console.log("\n== 4. the assertions ==");
 
+// EVERY ASSERTION BELOW COMES AFTER THE BASELINE CONSTS IT READS.
+//
+// It did not, for one commit, and the cost is worth recording: a `const`
+// read above its declaration is a ReferenceError, not a hoisted
+// `undefined`, so this file threw at the first baseline check and never
+// reached the other three. The run still printed a full census and a
+// PASS line above the crash, and the crash itself was hidden because the
+// command was piped to `tail`, which reports ITS OWN exit code. A gate
+// that dies silently after printing something reassuring is worse than
+// no gate.
+
 // Overflow is the one with no baseline: it was already at zero on an empty
 // account, and putting real data in it must not change that.
 check("no route overflows horizontally at any of the four widths", census.overflow, []);
-
-checkTrue(
-  `controls covered by another element has not grown (${census.covered.size} <= ${COVERED_BASELINE})`,
-  census.covered.size <= COVERED_BASELINE,
-  [...census.covered.values()].map((c) => `${c.label} <- ${c.by} [${c.where}]`).join("\n        ")
-);
 
 // BASELINES — a ratchet, not a target.
 //
@@ -637,6 +642,13 @@ const CLIPPED_BASELINE = 46;
 // drawer, which is a behaviour change to the chat surface rather than a
 // layout tweak, so it is recorded here rather than done in passing.
 const COVERED_BASELINE = 5;
+
+checkTrue(
+  `controls covered by another element has not grown (${census.covered.size} <= ${COVERED_BASELINE})`,
+  census.covered.size <= COVERED_BASELINE,
+  [...census.covered.values()].map((c) => `${c.label} <- ${c.by} [${c.where}]`).join("\n        ")
+);
+
 
 checkTrue(
   `controls under 44px has not grown (${census.smallTargets.size} <= ${SMALL_TARGET_BASELINE})`,

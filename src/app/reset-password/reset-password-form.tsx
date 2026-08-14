@@ -153,7 +153,13 @@ export function ResetPasswordForm() {
     }
 
     verifyRecoveryLink();
-  }, [supabase]);
+    // `t` joins the deps because the effect now reads a translated string.
+    // next-intl's translator is stable for a given locale, so this does not
+    // re-verify the link on every render — but it DOES re-run if the reader
+    // switches language mid-verification, which is the correct behaviour:
+    // the message they end up reading should be in the language they are
+    // now reading in.
+  }, [supabase, t]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

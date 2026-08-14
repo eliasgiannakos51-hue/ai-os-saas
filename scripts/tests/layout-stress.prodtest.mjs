@@ -615,13 +615,21 @@ checkTrue(
 //     changes the layout, which is the line the brief drew ("raise the
 //     ones that do not break the layout").
 //   - the rest are one-offs.
-const SMALL_TARGET_BASELINE = 93;
+//
+// 93 -> 119 AND THAT IS NOT A REGRESSION. It is what happens when a page
+// gets measured for the first time. /dashboard/overview redirects to
+// /onboarding unless the account has finished onboarding, so until the
+// fixture grew that row, every run of this file — and of
+// routes-smoke.prodtest.mjs before it — measured the onboarding wizard
+// while reporting the route as /dashboard/overview. The extra 26 are the
+// real Home screen's own controls, seen here for the first time.
+const SMALL_TARGET_BASELINE = 119;
 
 // 26 pieces of text that are cut off with no title= or aria-label to
 // recover the full string from. Most are card headings under a long
 // record name — the fixture's 68-character names are what surfaced them,
 // and they are invisible on the empty account every other check uses.
-const CLIPPED_BASELINE = 26;
+const CLIPPED_BASELINE = 46;
 
 // Five, all on /dashboard/chat at 375px: the conversation drawer is
 // translated off-canvas rather than removed, so the controls inside it

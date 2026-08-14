@@ -1,7 +1,7 @@
 import { KNOWLEDGE_BASE, type KnowledgeArticle } from "@/lib/support/knowledge-base";
 
 /**
- * Which help article belongs to which screen.
+ * The article behind a screen's "?".
  *
  * The 27 articles in the knowledge base already answer the questions people
  * ask, and they are already rendered — on /help, which is a separate page
@@ -12,33 +12,21 @@ import { KNOWLEDGE_BASE, type KnowledgeArticle } from "@/lib/support/knowledge-b
  * So the article comes to them: one paragraph, behind a "?" next to the
  * page title, from the SAME source /help and the support bot answer from.
  * One source, three surfaces — a help page, a bot and a tooltip that
- * disagree about the same question is worse than having only one of them,
- * and that is what happens the moment the text is copied.
+ * disagree about the same question is worse than having only one of them.
  *
- * Not every screen is here. A screen with no article gets no "?" rather
- * than an invented paragraph — an empty answer is better than a made-up
- * one, and the gap is visible in this map instead of hidden in prose.
+ * WHY THERE IS NO PATH -> ARTICLE MAP HERE. There was one, for about an
+ * hour: a `PAGE_HELP` record listing every route and its article. It was a
+ * second copy of a mapping the pages already express by passing
+ * `helpArticleId` to PageHeader, and it went stale immediately — it named
+ * three screens that render no help button at all. A registry nothing
+ * reads is not documentation, it is a claim that happens to be false, and
+ * it is the same defect class this audit was looking for elsewhere.
+ *
+ * The pages are the mapping. scripts/tests/canned-wiring.test.mjs checks
+ * that every id they pass resolves to a real article, so a typo or a
+ * deleted article fails a build instead of rendering nothing.
  */
-export const PAGE_HELP: Record<string, string> = {
-  "/dashboard/agents": "create-agent",
-  "/dashboard/website-builder": "create-website",
-  "/dashboard/published": "publish-website",
-  "/dashboard/mission": "create-mission",
-  "/dashboard/files": "upload-files",
-  "/dashboard/integrations": "connect-gmail",
-  "/dashboard/chat": "chat-memory",
-  "/dashboard/memory": "chat-memory",
-  "/dashboard/team": "team-members",
-  "/dashboard/settings": "export-data",
-  "/dashboard/overview": "what-is-ionexa",
-  "/onboarding": "what-is-ionexa",
-};
-
 export function helpArticle(id: string | undefined): KnowledgeArticle | null {
   if (!id) return null;
   return KNOWLEDGE_BASE.find((a) => a.id === id) ?? null;
-}
-
-export function helpArticleForPath(pathname: string): KnowledgeArticle | null {
-  return helpArticle(PAGE_HELP[pathname]);
 }

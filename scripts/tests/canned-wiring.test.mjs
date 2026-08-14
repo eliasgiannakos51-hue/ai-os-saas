@@ -136,5 +136,32 @@ for (const article of kb.KNOWLEDGE_BASE) {
   );
 }
 
+console.log("\n== every contextual '?' points at a real article ==");
+// PageHeader's `helpArticleId` is looked up at render time
+// (lib/support/help-topics.ts). next-intl-style, a miss is silent: the
+// header simply renders no "?" and the screen looks like one that was
+// never given help, which is indistinguishable from a typo'd id or an
+// article that was renamed out from under it.
+//
+// The pages ARE the route->article mapping — there is deliberately no
+// second registry listing them — so this is what makes that mapping
+// checkable.
+const KNOWN_IDS = new Set(kb.KNOWLEDGE_BASE.map((a) => a.id));
+const helpRefs = [];
+for (const route of APP_ROUTES) {
+  const file = route === "/" ? "src/app/page.tsx" : `src/app${route}/page.tsx`;
+  let src;
+  try {
+    src = readFileSync(file, "utf8");
+  } catch {
+    continue;
+  }
+  for (const m of src.matchAll(/helpArticleId="([^"]+)"/g)) helpRefs.push([route, m[1]]);
+}
+check(`at least one screen offers contextual help (${helpRefs.length})`, helpRefs.length > 0);
+for (const [route, id] of helpRefs) {
+  check(`${route}: helpArticleId "${id}" is a real article`, KNOWN_IDS.has(id));
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

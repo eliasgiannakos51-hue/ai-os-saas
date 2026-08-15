@@ -1529,6 +1529,36 @@
     },
     "systemHealth": {
       "toggleStackTrace": "Mostrar ou ocultar o stack trace"
+    },
+    "ideas": {
+      "new": "Nova ideia",
+      "edit": "Editar a ideia",
+      "empty": "Ainda não há ideias — use o botão acima para registrar a primeira.",
+      "loadError": "Não foi possível carregar as suas ideias: {message}",
+      "deleteConfirm": "Eliminar esta ideia? Não é possível anular.",
+      "editAria": "Editar a ideia: {name}",
+      "nameLabel": "Nome",
+      "namePlaceholder": "nome da ideia",
+      "customerLabel": "Cliente",
+      "customerPlaceholder": "cliente-alvo",
+      "problemLabel": "Problema",
+      "problemPlaceholder": "que problema isto resolve?",
+      "competitorsLabel": "Concorrentes",
+      "competitorsPlaceholder": "concorrentes conhecidos",
+      "marketSizeLabel": "Tamanho do mercado",
+      "marketSizePlaceholder": "ex.: TAM de US$ 2 mil milhões",
+      "scoreLabel": "Pontuação (0-100)",
+      "scorePlaceholder": "pontuação",
+      "mvpLabel": "Produto mínimo viável",
+      "mvpPlaceholder": "como é o produto mínimo viável?",
+      "verdictLabel": "Veredito",
+      "verdictPlaceholder": "ex.: seguir / descartar / observar",
+      "cardFor": "para: {customer}",
+      "cardScore": "Pontuação: {score}",
+      "cardProblem": "Problema:",
+      "cardCompetitors": "Concorrentes:",
+      "cardMarketSize": "Tamanho do mercado:",
+      "cardMvp": "Produto mínimo viável:"
     }
   },
   "module": {

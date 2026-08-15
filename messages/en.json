@@ -1529,6 +1529,36 @@
     },
     "systemHealth": {
       "toggleStackTrace": "Toggle stack trace"
+    },
+    "ideas": {
+      "new": "New Idea",
+      "edit": "Edit Idea",
+      "empty": "No ideas yet — use the button above to log your first one.",
+      "loadError": "Could not load your ideas: {message}",
+      "deleteConfirm": "Delete this idea? This can't be undone.",
+      "editAria": "Edit idea: {name}",
+      "nameLabel": "Name",
+      "namePlaceholder": "idea name",
+      "customerLabel": "Customer",
+      "customerPlaceholder": "target customer",
+      "problemLabel": "Problem",
+      "problemPlaceholder": "what problem does this solve?",
+      "competitorsLabel": "Competitors",
+      "competitorsPlaceholder": "known competitors",
+      "marketSizeLabel": "Market Size",
+      "marketSizePlaceholder": "e.g. $2B TAM",
+      "scoreLabel": "Score (0-100)",
+      "scorePlaceholder": "score",
+      "mvpLabel": "MVP",
+      "mvpPlaceholder": "what does the MVP look like?",
+      "verdictLabel": "Verdict",
+      "verdictPlaceholder": "e.g. pursue / kill / watch",
+      "cardFor": "for: {customer}",
+      "cardScore": "Score: {score}",
+      "cardProblem": "Problem:",
+      "cardCompetitors": "Competitors:",
+      "cardMarketSize": "Market Size:",
+      "cardMvp": "MVP:"
     }
   },
   "module": {

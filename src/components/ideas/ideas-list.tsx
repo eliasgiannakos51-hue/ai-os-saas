@@ -11,6 +11,7 @@ import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";
 import { EmptyState } from "@/components/empty-state";
 import { matchesSearch } from "@/lib/text/search-match";
+import { useTranslations } from "next-intl";
 
 const CSV_HEADERS = [
   "name",
@@ -61,6 +62,11 @@ export function IdeasList({
   linkedEntities?: Record<string, LinkedEntity[]>;
   favoritedIds?: Set<string>;
 }) {
+  // The chrome (search, export, "no matches") is the same in all 14
+  // modules and already lives in `module`; only the wording that is
+  // actually about ideas comes from `dashboard.ideas`.
+  const t = useTranslations("module");
+  const tIdeas = useTranslations("dashboard.ideas");
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -86,7 +92,7 @@ export function IdeasList({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search..."
+            placeholder={t("searchPlaceholder")}
             className="input pl-10"
           />
         </div>
@@ -98,17 +104,15 @@ export function IdeasList({
             disabled={filtered.length === 0}
             className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
           >
-            <Download className="h-4 w-4" /> Export CSV
+            <Download className="h-4 w-4" /> {t("exportCsv")}
           </button>
         </div>
       </div>
 
       {ideas.length === 0 ? (
-        <EmptyState>
-          No ideas yet — use the button above to log your first one.
-        </EmptyState>
+        <EmptyState>{tIdeas("empty")}</EmptyState>
       ) : filtered.length === 0 ? (
-        <EmptyState icon={SearchX}>No matches for &apos;{query}&apos;</EmptyState>
+        <EmptyState icon={SearchX}>{t("noMatches", { query })}</EmptyState>
       ) : (
         <>
           <div className="space-y-3">

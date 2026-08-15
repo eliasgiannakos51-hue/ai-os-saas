@@ -1529,6 +1529,36 @@
     },
     "systemHealth": {
       "toggleStackTrace": "Stacktrace ein- oder ausblenden"
+    },
+    "ideas": {
+      "new": "Neue Idee",
+      "edit": "Idee bearbeiten",
+      "empty": "Noch keine Ideen — nutze den Button oben, um deine erste zu erfassen.",
+      "loadError": "Deine Ideen konnten nicht geladen werden: {message}",
+      "deleteConfirm": "Diese Idee löschen? Das lässt sich nicht rückgängig machen.",
+      "editAria": "Idee bearbeiten: {name}",
+      "nameLabel": "Bezeichnung",
+      "namePlaceholder": "Name der Idee",
+      "customerLabel": "Kunde",
+      "customerPlaceholder": "Zielkunde",
+      "problemLabel": "Problemstellung",
+      "problemPlaceholder": "Welches Problem löst das?",
+      "competitorsLabel": "Wettbewerber",
+      "competitorsPlaceholder": "bekannte Wettbewerber",
+      "marketSizeLabel": "Marktgröße",
+      "marketSizePlaceholder": "z. B. TAM 2 Mrd. $",
+      "scoreLabel": "Bewertung (0-100)",
+      "scorePlaceholder": "Bewertung",
+      "mvpLabel": "Minimal funktionsfähiges Produkt",
+      "mvpPlaceholder": "Wie sieht die erste funktionsfähige Version aus?",
+      "verdictLabel": "Urteil",
+      "verdictPlaceholder": "z. B. verfolgen / verwerfen / beobachten",
+      "cardFor": "für: {customer}",
+      "cardScore": "Bewertung: {score}",
+      "cardProblem": "Problemstellung:",
+      "cardCompetitors": "Wettbewerber:",
+      "cardMarketSize": "Marktgröße:",
+      "cardMvp": "Minimal funktionsfähiges Produkt:"
     }
   },
   "module": {

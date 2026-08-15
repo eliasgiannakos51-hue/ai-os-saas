@@ -1529,6 +1529,36 @@
     },
     "systemHealth": {
       "toggleStackTrace": "إظهار تتبُّع المكدس أو إخفاؤه"
+    },
+    "ideas": {
+      "new": "فكرة جديدة",
+      "edit": "تعديل الفكرة",
+      "empty": "لا توجد أفكار بعد — استخدم الزر أعلاه لتسجيل أول فكرة.",
+      "loadError": "تعذّر تحميل أفكارك: {message}",
+      "deleteConfirm": "هل تريد حذف هذه الفكرة؟ لا يمكن التراجع عن ذلك.",
+      "editAria": "تعديل الفكرة: {name}",
+      "nameLabel": "الاسم",
+      "namePlaceholder": "اسم الفكرة",
+      "customerLabel": "العميل",
+      "customerPlaceholder": "العميل المستهدف",
+      "problemLabel": "المشكلة",
+      "problemPlaceholder": "ما المشكلة التي تحلها؟",
+      "competitorsLabel": "المنافسون",
+      "competitorsPlaceholder": "المنافسون المعروفون",
+      "marketSizeLabel": "حجم السوق",
+      "marketSizePlaceholder": "مثال: حجم السوق ملياران من الدولارات",
+      "scoreLabel": "التقييم (0-100)",
+      "scorePlaceholder": "التقييم",
+      "mvpLabel": "المنتج الأولي",
+      "mvpPlaceholder": "كيف يبدو المنتج الأولي؟",
+      "verdictLabel": "الحكم",
+      "verdictPlaceholder": "مثال: المتابعة / الإلغاء / المراقبة",
+      "cardFor": "لـ: {customer}",
+      "cardScore": "التقييم: {score}",
+      "cardProblem": "المشكلة:",
+      "cardCompetitors": "المنافسون:",
+      "cardMarketSize": "حجم السوق:",
+      "cardMvp": "المنتج الأولي:"
     }
   },
   "module": {

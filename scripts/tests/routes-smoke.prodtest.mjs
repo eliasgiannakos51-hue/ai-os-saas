@@ -762,6 +762,83 @@ console.log("\n== 7. every aria-label is translated in the browser (A1) ==");
   await elAuthed.close();
 }
 
+// ---------------------------------------------------------------------
+// BATCH A2 — THE IDEAS MODULE, END TO END, IN GREEK.
+//
+// Ideas is the app's landing screen (/dashboard) and the one module that
+// predates the shared module system, so it carried its own private copy of
+// every string the other thirteen get from `module`: the search box, the
+// CSV button, the empty state, all eight field labels, all eight
+// placeholders, the card prefixes, the timestamp and the delete
+// confirmation. Fifty-two strings, all English, on the first screen after
+// login.
+//
+// THE FORM IS OPENED, not just loaded. Every field label and placeholder
+// in this module lives behind the "New Idea" button — a check that only
+// visits the page proves nothing about the half of the module a user
+// actually types into.
+console.log("\n== 8. the Ideas module is Greek end to end (A2) ==");
+{
+  const ctx = await browser.newContext({ locale: "el", viewport: { width: 1280, height: 900 } });
+  await ctx.addCookies([
+    { name: "NEXT_LOCALE", value: "el", url: `http://127.0.0.1:${PORT}` },
+    { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+  ]);
+  const page = await ctx.newPage();
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard`, { waitUntil: "networkidle", timeout: 45000 });
+
+  check("the Ideas heading is Greek", await page.locator("main h1").first().innerText(), "Ιδέες");
+  const closed = await page.locator("main").innerText();
+  checkTrue("the empty state is Greek", /Δεν έχεις ιδέες ακόμα/.test(closed));
+  checkTrue("the search box is Greek", (await page.locator('main input[type="text"]').first().getAttribute("placeholder")) === "Αναζήτηση...");
+  checkTrue("the CSV button is Greek", closed.includes("Εξαγωγή CSV"));
+
+  // Open the form: eight labels and eight placeholders that no page-load
+  // check can see.
+  await page.getByRole("button", { name: "Νέα ιδέα" }).click();
+  await page.waitForTimeout(250);
+  const open = await page.locator("main").innerText();
+  for (const label of [
+    "Όνομα",
+    "Πελάτης",
+    "Πρόβλημα",
+    "Ανταγωνιστές",
+    "Μέγεθος αγοράς",
+    "Βαθμολογία (0-100)",
+    "Πρώτη λειτουργική έκδοση",
+    "Ετυμηγορία",
+  ]) {
+    checkTrue(`the "${label}" field label is Greek`, open.includes(label));
+  }
+  const placeholders = await page
+    .locator("main input, main textarea")
+    .evaluateAll((els) => els.map((e) => e.getAttribute("placeholder")).filter(Boolean));
+  for (const ph of [
+    "όνομα ιδέας",
+    "ο πελάτης-στόχος",
+    "ποιο πρόβλημα λύνει;",
+    "γνωστοί ανταγωνιστές",
+    "π.χ. TAM 2 δισ. $",
+    "βαθμολογία",
+    "πώς μοιάζει η πρώτη έκδοση;",
+    "π.χ. προχωράμε / ακύρωση / παρακολούθηση",
+  ]) {
+    checkTrue(`the "${ph}" placeholder is Greek`, placeholders.includes(ph));
+  }
+  checkTrue("the submit button is Greek", open.includes("Αποθήκευση"));
+
+  // Same instrument the /pricing check uses: three or more consecutive
+  // English words is a literal somebody forgot. Placeholders are pulled in
+  // separately because innerText does not include them.
+  const scanned = `${open}\n${placeholders.join("\n")}`;
+  const english = [...scanned.matchAll(/(?:^|[^\p{L}])([A-Za-z]{3,}(?: [a-z]{3,}){2,})/gu)].map((m) => m[1]);
+  check("no English sentence survives anywhere in the Ideas module", english, []);
+
+  await page.screenshot({ path: "/tmp/ionexa-a2-ideas-el.png", fullPage: false });
+  await page.close();
+  await ctx.close();
+}
+
 await browser.close();
 cleanup();
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);

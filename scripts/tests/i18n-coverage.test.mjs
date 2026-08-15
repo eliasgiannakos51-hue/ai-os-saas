@@ -392,8 +392,9 @@ checkTrue(
 //
 // A RATCHET, NOT A ZERO.
 //
-// 140 of these still ship — 162 when this landed, minus the 22 aria-label
-// attributes paid off in batch A1 and now held at zero by 1d above.
+// 115 of these still ship — 162 when this landed, minus the 22 aria-label
+// attributes paid off in batch A1 (now held at zero by 1d above) and the
+// 25 in the Ideas module paid off in batch A2.
 // Failing the build on all of them would mean
 // this check could not land at all, and a check that cannot land protects
 // nothing. So the baseline below is per FILE: no file may get worse, and
@@ -422,9 +423,6 @@ const BARE_TEXT_BASELINE = {
     "src/components/entity-links/link-to-modal.tsx": 1,
     "src/components/entity-links/linked-entities.tsx": 1,
     "src/components/error-message.tsx": 1,
-    "src/components/ideas/add-idea-form.tsx": 10,
-    "src/components/ideas/idea-row.tsx": 11,
-    "src/components/ideas/ideas-list.tsx": 4,
     "src/components/landing/deleted-account-banner.tsx": 1,
     "src/components/legal/legal-layout.tsx": 3,
     "src/components/memory/memory-search.tsx": 6,

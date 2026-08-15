@@ -1529,6 +1529,36 @@
     },
     "systemHealth": {
       "toggleStackTrace": "展开或收起调用栈"
+    },
+    "ideas": {
+      "new": "新建创意",
+      "edit": "编辑创意",
+      "empty": "目前还没有创意——使用上方按钮记录第一条。",
+      "loadError": "无法加载你的创意：{message}",
+      "deleteConfirm": "确定删除此创意？此操作无法撤销。",
+      "editAria": "编辑创意：{name}",
+      "nameLabel": "名称",
+      "namePlaceholder": "创意名称",
+      "customerLabel": "客户",
+      "customerPlaceholder": "目标客户",
+      "problemLabel": "问题",
+      "problemPlaceholder": "它解决什么问题？",
+      "competitorsLabel": "竞争对手",
+      "competitorsPlaceholder": "已知的竞争对手",
+      "marketSizeLabel": "市场规模",
+      "marketSizePlaceholder": "例如 TAM 20 亿美元",
+      "scoreLabel": "评分（0-100）",
+      "scorePlaceholder": "评分",
+      "mvpLabel": "最小可行产品",
+      "mvpPlaceholder": "最小可行产品是什么样子？",
+      "verdictLabel": "结论",
+      "verdictPlaceholder": "例如 推进 / 放弃 / 观望",
+      "cardFor": "面向：{customer}",
+      "cardScore": "评分：{score}",
+      "cardProblem": "问题：",
+      "cardCompetitors": "竞争对手：",
+      "cardMarketSize": "市场规模：",
+      "cardMvp": "最小可行产品："
     }
   },
   "module": {

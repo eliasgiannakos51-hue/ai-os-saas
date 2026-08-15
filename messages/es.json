@@ -1529,6 +1529,36 @@
     },
     "systemHealth": {
       "toggleStackTrace": "Mostrar u ocultar la traza de la pila"
+    },
+    "ideas": {
+      "new": "Nueva idea",
+      "edit": "Editar la idea",
+      "empty": "Todavía no hay ideas — usa el botón de arriba para registrar la primera.",
+      "loadError": "No se pudieron cargar tus ideas: {message}",
+      "deleteConfirm": "¿Eliminar esta idea? No se puede deshacer.",
+      "editAria": "Editar la idea: {name}",
+      "nameLabel": "Nombre",
+      "namePlaceholder": "nombre de la idea",
+      "customerLabel": "Cliente",
+      "customerPlaceholder": "cliente objetivo",
+      "problemLabel": "Problema",
+      "problemPlaceholder": "¿qué problema resuelve?",
+      "competitorsLabel": "Competidores",
+      "competitorsPlaceholder": "competidores conocidos",
+      "marketSizeLabel": "Tamaño de mercado",
+      "marketSizePlaceholder": "p. ej. TAM de 2000 M$",
+      "scoreLabel": "Puntuación (0-100)",
+      "scorePlaceholder": "puntuación",
+      "mvpLabel": "Producto mínimo viable",
+      "mvpPlaceholder": "¿cómo es el producto mínimo viable?",
+      "verdictLabel": "Veredicto",
+      "verdictPlaceholder": "p. ej. seguir / descartar / observar",
+      "cardFor": "para: {customer}",
+      "cardScore": "Puntuación: {score}",
+      "cardProblem": "Problema:",
+      "cardCompetitors": "Competidores:",
+      "cardMarketSize": "Tamaño de mercado:",
+      "cardMvp": "Producto mínimo viable:"
     }
   },
   "module": {

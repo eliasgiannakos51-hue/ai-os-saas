@@ -1529,6 +1529,36 @@
     },
     "systemHealth": {
       "toggleStackTrace": "Afficher ou masquer la trace d'appels"
+    },
+    "ideas": {
+      "new": "Nouvelle idée",
+      "edit": "Modifier l'idée",
+      "empty": "Aucune idée pour l'instant — utilisez le bouton ci-dessus pour enregistrer la première.",
+      "loadError": "Impossible de charger vos idées : {message}",
+      "deleteConfirm": "Supprimer cette idée ? Action irréversible.",
+      "editAria": "Modifier l'idée : {name}",
+      "nameLabel": "Nom",
+      "namePlaceholder": "nom de l'idée",
+      "customerLabel": "Client",
+      "customerPlaceholder": "client cible",
+      "problemLabel": "Problème",
+      "problemPlaceholder": "quel problème cela résout-il ?",
+      "competitorsLabel": "Concurrents",
+      "competitorsPlaceholder": "concurrents connus",
+      "marketSizeLabel": "Taille du marché",
+      "marketSizePlaceholder": "p. ex. TAM de 2 Md$",
+      "scoreLabel": "Note (0-100)",
+      "scorePlaceholder": "note",
+      "mvpLabel": "Produit minimum viable",
+      "mvpPlaceholder": "à quoi ressemble le produit minimum viable ?",
+      "verdictLabel": "Décision",
+      "verdictPlaceholder": "p. ex. poursuivre / abandonner / surveiller",
+      "cardFor": "pour : {customer}",
+      "cardScore": "Note : {score}",
+      "cardProblem": "Problème :",
+      "cardCompetitors": "Concurrents :",
+      "cardMarketSize": "Taille du marché :",
+      "cardMvp": "Produit minimum viable :"
     }
   },
   "module": {

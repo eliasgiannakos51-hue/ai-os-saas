@@ -1529,6 +1529,36 @@
     },
     "systemHealth": {
       "toggleStackTrace": "スタックトレースの表示を切り替える"
+    },
+    "ideas": {
+      "new": "新しいアイデア",
+      "edit": "アイデアを編集",
+      "empty": "まだアイデアがありません — 上のボタンから最初のアイデアを記録しましょう。",
+      "loadError": "アイデアを読み込めませんでした: {message}",
+      "deleteConfirm": "このアイデアを削除しますか？元に戻せません。",
+      "editAria": "アイデアを編集: {name}",
+      "nameLabel": "名前",
+      "namePlaceholder": "アイデア名",
+      "customerLabel": "顧客",
+      "customerPlaceholder": "想定する顧客",
+      "problemLabel": "課題",
+      "problemPlaceholder": "どんな課題を解決する？",
+      "competitorsLabel": "競合",
+      "competitorsPlaceholder": "把握している競合",
+      "marketSizeLabel": "市場規模",
+      "marketSizePlaceholder": "例: TAM 20億ドル",
+      "scoreLabel": "スコア（0〜100）",
+      "scorePlaceholder": "スコア",
+      "mvpLabel": "実用最小限の製品",
+      "mvpPlaceholder": "実用最小限の製品はどんなもの？",
+      "verdictLabel": "判定",
+      "verdictPlaceholder": "例: 進める / 中止 / 様子見",
+      "cardFor": "対象: {customer}",
+      "cardScore": "スコア: {score}",
+      "cardProblem": "課題:",
+      "cardCompetitors": "競合:",
+      "cardMarketSize": "市場規模:",
+      "cardMvp": "実用最小限の製品:"
     }
   },
   "module": {

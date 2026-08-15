@@ -1529,6 +1529,36 @@
     },
     "systemHealth": {
       "toggleStackTrace": "Εμφάνιση ή απόκρυψη του stack trace"
+    },
+    "ideas": {
+      "new": "Νέα ιδέα",
+      "edit": "Επεξεργασία ιδέας",
+      "empty": "Δεν έχεις ιδέες ακόμα — χρησιμοποίησε το κουμπί παραπάνω για να καταγράψεις την πρώτη σου.",
+      "loadError": "Δεν ήταν δυνατή η φόρτωση των ιδεών σου: {message}",
+      "deleteConfirm": "Να διαγραφεί αυτή η ιδέα; Η ενέργεια δεν αναιρείται.",
+      "editAria": "Επεξεργασία ιδέας: {name}",
+      "nameLabel": "Όνομα",
+      "namePlaceholder": "όνομα ιδέας",
+      "customerLabel": "Πελάτης",
+      "customerPlaceholder": "ο πελάτης-στόχος",
+      "problemLabel": "Πρόβλημα",
+      "problemPlaceholder": "ποιο πρόβλημα λύνει;",
+      "competitorsLabel": "Ανταγωνιστές",
+      "competitorsPlaceholder": "γνωστοί ανταγωνιστές",
+      "marketSizeLabel": "Μέγεθος αγοράς",
+      "marketSizePlaceholder": "π.χ. TAM 2 δισ. $",
+      "scoreLabel": "Βαθμολογία (0-100)",
+      "scorePlaceholder": "βαθμολογία",
+      "mvpLabel": "Πρώτη λειτουργική έκδοση",
+      "mvpPlaceholder": "πώς μοιάζει η πρώτη έκδοση;",
+      "verdictLabel": "Ετυμηγορία",
+      "verdictPlaceholder": "π.χ. προχωράμε / ακύρωση / παρακολούθηση",
+      "cardFor": "για: {customer}",
+      "cardScore": "Βαθμολογία: {score}",
+      "cardProblem": "Πρόβλημα:",
+      "cardCompetitors": "Ανταγωνιστές:",
+      "cardMarketSize": "Μέγεθος αγοράς:",
+      "cardMvp": "Πρώτη λειτουργική έκδοση:"
     }
   },
   "module": {

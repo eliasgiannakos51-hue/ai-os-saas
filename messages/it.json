@@ -36,7 +36,17 @@
     "hidePassword": "Nascondi password",
     "networkErrorCheckConnection": "Errore di rete — controlla la connessione e riprova.",
     "ownerAccessTooltip": "Accesso proprietario — crediti illimitati",
-    "creditsTooltip": "Crediti rimanenti — acquistane altri nelle Impostazioni"
+    "creditsTooltip": "Crediti rimanenti — acquistane altri nelle Impostazioni",
+    "accountMenu": "Menu dell'account",
+    "categories": "Categorie",
+    "commandPalette": "Riquadro dei comandi",
+    "dismiss": "Ignora",
+    "dismissSuggestion": "Ignora il suggerimento",
+    "installIonexa": "Installa Ionexa",
+    "loadingContent": "Caricamento dei contenuti",
+    "nextPage": "Pagina successiva",
+    "previousPage": "Pagina precedente",
+    "toggleMenu": "Mostra o nascondi il menu"
   },
   "sidebar": {
     "groups": {
@@ -149,7 +159,8 @@
     },
     "comingSoon": "In arrivo",
     "comingSoonToast": "{name} non è ancora disponibile: è nella roadmap.",
-    "comingSoonBadge": "Presto"
+    "comingSoonBadge": "Presto",
+    "closeMenu": "Chiudi il menu"
   },
   "landing": {
     "hero": "Il tuo business, organizzato — con un'IA che aiuta davvero.",
@@ -616,7 +627,8 @@
       "lowCreditsHint": "Quando il lavoro si ferma perché il saldo è esaurito",
       "collaboration": "Collaborazione",
       "collaborationHint": "Inviti al team e attività dello spazio condiviso"
-    }
+    },
+    "jumpToSection": "Vai a una sezione"
   },
   "dashboard": {
     "overview": {
@@ -692,7 +704,8 @@
           "label": "Trading",
           "description": "Registra un'operazione"
         }
-      }
+      },
+      "quickStartTemplates": "Modelli di avvio rapido"
     },
     "team": {
       "title": "Team",
@@ -754,7 +767,8 @@
       "streamInterrupted": "La connessione si è interrotta prima che la risposta fosse completata.",
       "streamInterruptedPartial": "La connessione si è interrotta — la risposta qui sopra potrebbe essere incompleta.",
       "hideConversationsHint": "Nascondi l’elenco delle conversazioni e dai tutta la larghezza al thread.",
-      "showConversationsHint": "Mostra di nuovo l’elenco delle conversazioni."
+      "showConversationsHint": "Mostra di nuovo l’elenco delle conversazioni.",
+      "send": "Invia"
     },
     "create": {
       "title": "Crea Qualsiasi Cosa"
@@ -1512,6 +1526,9 @@
       "hideNumbers": "Nascondi i numeri",
       "dismiss": "Ignora",
       "dismissError": "Impossibile ignorarlo."
+    },
+    "systemHealth": {
+      "toggleStackTrace": "Mostra o nascondi lo stack trace"
     }
   },
   "module": {

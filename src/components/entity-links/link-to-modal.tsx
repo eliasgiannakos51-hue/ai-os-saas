@@ -170,7 +170,7 @@ export function LinkToModal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={tCommon("close")}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" />

@@ -36,7 +36,17 @@
     "hidePassword": "隐藏密码",
     "networkErrorCheckConnection": "网络错误 — 请检查您的连接后重试。",
     "ownerAccessTooltip": "所有者权限 — 无限额度",
-    "creditsTooltip": "剩余额度 — 可在设置中购买更多"
+    "creditsTooltip": "剩余额度 — 可在设置中购买更多",
+    "accountMenu": "账户菜单",
+    "categories": "分类",
+    "commandPalette": "命令面板",
+    "dismiss": "关闭",
+    "dismissSuggestion": "关闭建议",
+    "installIonexa": "安装 Ionexa",
+    "loadingContent": "正在加载内容",
+    "nextPage": "下一页",
+    "previousPage": "上一页",
+    "toggleMenu": "切换菜单"
   },
   "sidebar": {
     "groups": {
@@ -149,7 +159,8 @@
     },
     "comingSoon": "即将推出",
     "comingSoonToast": "{name} 尚未推出——已列入路线图。",
-    "comingSoonBadge": "即将"
+    "comingSoonBadge": "即将",
+    "closeMenu": "关闭菜单"
   },
   "landing": {
     "hero": "你的业务，井井有条——配上真正有用的 AI。",
@@ -616,7 +627,8 @@
       "lowCreditsHint": "当余额用尽导致工作停止时",
       "collaboration": "协作",
       "collaborationHint": "团队邀请与共享工作区动态"
-    }
+    },
+    "jumpToSection": "跳转到某个部分"
   },
   "dashboard": {
     "overview": {
@@ -692,7 +704,8 @@
           "label": "交易",
           "description": "记录一笔交易"
         }
-      }
+      },
+      "quickStartTemplates": "快速开始模板"
     },
     "team": {
       "title": "团队",
@@ -754,7 +767,8 @@
       "streamInterrupted": "连接在回复完成前中断。",
       "streamInterruptedPartial": "连接已中断——上面的回复可能不完整。",
       "hideConversationsHint": "隐藏会话列表，让对话占据整个宽度。",
-      "showConversationsHint": "再次显示会话列表。"
+      "showConversationsHint": "再次显示会话列表。",
+      "send": "发送"
     },
     "create": {
       "title": "创建任何内容"
@@ -1512,6 +1526,9 @@
       "hideNumbers": "隐藏数据",
       "dismiss": "忽略此项",
       "dismissError": "无法忽略该项。"
+    },
+    "systemHealth": {
+      "toggleStackTrace": "展开或收起调用栈"
     }
   },
   "module": {

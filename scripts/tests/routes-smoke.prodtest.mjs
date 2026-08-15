@@ -560,6 +560,208 @@ await authed.close();
   await ctx.close();
 }
 
+// ---------------------------------------------------------------------
+// BATCH A1 — THE ARIA LABELS, IN THE REAL DOM.
+//
+// 22 icon-only controls carried an English aria-label. There is no visible
+// word beside any of them: for someone on a screen reader the aria-label
+// IS the button, so "Send", "Close menu" and "Command palette" were the
+// whole interface, in English, on a Greek page.
+//
+// The source-side gate (i18n-coverage.test.mjs §1d) proves no aria-label
+// is a literal any more. It CANNOT prove the key resolves: next-intl
+// renders the dotted path when a key is missing and fails nothing, so
+// `aria-label={t("toggleMenu")}` against a missing key makes a screen
+// reader read out "common.toggleMenu". Only the rendered document answers
+// that, which is what this section reads.
+//
+// TWO LOCALES, ON PURPOSE. Greek is what the app is used in; French is the
+// control. The Help Centre's landmark used to be the hardcoded Greek word
+// "Κατηγορίες" — identical to what a correct Greek translation produces —
+// so a Greek-only assertion would pass on the OLD code too. The French run
+// is what makes it mean "this came from the catalogue".
+//
+// MEASURED RED BEFORE IT WAS TRUSTED. Run against the pre-A1 build this
+// section reported 10 failures with the English still in the document:
+//
+//   /help (fr) landmark          "Κατηγορίες"        (hardcoded Greek)
+//   language switcher dismiss    "Close"
+//   settings section-jump        "Jump to section"
+//   account menu                 "Account menu"
+//   command palette dialog       "Command palette"
+//   chat send                    "Send"
+//   /dashboard/settings @375px   ["Toggle menu", null, "Γλώσσα",
+//                                 "Εναλλαγή σε ανοιχτό θέμα",
+//                                 "Ειδοποιήσεις", null, "Account menu"]
+//
+// That last line is the whole defect in one list: two English labels
+// sitting between three Greek ones, in the same header, on the same page.
+console.log("\n== 7. every aria-label is translated in the browser (A1) ==");
+{
+  // The 22 English strings that shipped. Nothing rendered in a non-English
+  // locale may equal any of them.
+  const SHIPPED_ENGLISH = new Set([
+    "Jump to section", "Send", "Dismiss suggestion", "Command palette",
+    "Toggle menu", "Close menu", "Account menu", "Close", "Cancel",
+    "Loading", "Dismiss", "Quick Start templates", "Previous page",
+    "Next page", "Install Ionexa", "Toggle stack trace",
+  ]);
+  // A key that did not resolve renders as its own dotted path.
+  const UNRESOLVED = /^[a-z][A-Za-z]*(\.[A-Za-z]+){1,}$/;
+
+  const localeCtx = async (code) => {
+    const ctx = await browser.newContext({ locale: code, viewport: { width: 1280, height: 900 } });
+    await ctx.addCookies([{ name: "NEXT_LOCALE", value: code, url: `http://127.0.0.1:${PORT}` }]);
+    return ctx;
+  };
+  const ariaLabels = (page) =>
+    page.locator("[aria-label]").evaluateAll((els) => els.map((e) => e.getAttribute("aria-label")));
+  // Runs on every page this section opens, not just the ones with a named
+  // assertion — the point is that NO aria-label anywhere is English or a
+  // raw key, including ones nobody thought to name.
+  const sweep = async (page, where) => {
+    const labels = await ariaLabels(page);
+    const english = labels.filter((l) => SHIPPED_ENGLISH.has(l.trim()));
+    const raw = labels.filter((l) => UNRESOLVED.test(l.trim()));
+    check(`${where}: no aria-label is one of the 22 English strings`, english, []);
+    check(`${where}: no aria-label is an unresolved key`, raw, []);
+    return labels;
+  };
+
+  // --- the Help Centre landmark, in French: the control ---------------
+  {
+    const ctx = await localeCtx("fr");
+    const page = await ctx.newPage();
+    await page.goto(`http://127.0.0.1:${PORT}/help`, { waitUntil: "networkidle", timeout: 45000 });
+    check(
+      "/help landmark is French, not the hardcoded Greek it used to be",
+      await page.locator("nav[aria-label]").first().getAttribute("aria-label"),
+      "Catégories"
+    );
+    await sweep(page, "/help (fr)");
+    await page.close();
+    await ctx.close();
+  }
+
+  // --- public, Greek: the language selector's own dismiss target ------
+  const el = await localeCtx("el");
+  {
+    const page = await el.newPage();
+    await page.goto(`http://127.0.0.1:${PORT}/help`, { waitUntil: "networkidle", timeout: 45000 });
+    check(
+      "/help landmark is Greek",
+      await page.locator("nav[aria-label]").first().getAttribute("aria-label"),
+      "Κατηγορίες"
+    );
+    // Opening the switcher is what mounts the full-screen dismiss button —
+    // an element with no text, no size on screen and nothing but its label.
+    await page.locator("div.fixed.right-3.top-3 button").first().click();
+    await page.waitForTimeout(200);
+    check(
+      "the language switcher's dismiss target is labelled in Greek",
+      await page.locator("button.fixed.inset-0").first().getAttribute("aria-label"),
+      "Κλείσιμο"
+    );
+    await sweep(page, "/help (el)");
+    await page.close();
+  }
+  await el.close();
+
+  // --- the dashboard, Greek, signed in --------------------------------
+  const elAuthed = await browser.newContext({ locale: "el", viewport: { width: 1280, height: 900 } });
+  await elAuthed.addCookies([
+    { name: "NEXT_LOCALE", value: "el", url: `http://127.0.0.1:${PORT}` },
+    { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+  ]);
+  {
+    const page = await elAuthed.newPage();
+
+    await page.goto(`http://127.0.0.1:${PORT}/dashboard/settings`, {
+      waitUntil: "networkidle",
+      timeout: 45000,
+    });
+    check(
+      "settings section-jump landmark is Greek",
+      await page.locator("main nav[aria-label]").first().getAttribute("aria-label"),
+      "Μετάβαση σε ενότητα"
+    );
+    check(
+      "the account menu button is Greek",
+      await page.locator('header button[aria-expanded]').last().getAttribute("aria-label"),
+      "Μενού λογαριασμού"
+    );
+    await sweep(page, "/dashboard/settings (el)");
+
+    // Ctrl+K is the palette's own shortcut — the dialog's aria-label is the
+    // only name it has, since its heading is a search input.
+    await page.keyboard.press("Control+k");
+    await page.waitForTimeout(250);
+    check(
+      "the command palette dialog is named in Greek",
+      await page.locator('[role="dialog"]').first().getAttribute("aria-label"),
+      "Παλέτα εντολών"
+    );
+    await page.keyboard.press("Escape");
+
+    // The composer's submit button is an arrow glyph and nothing else.
+    await page.goto(`http://127.0.0.1:${PORT}/dashboard/chat`, {
+      waitUntil: "networkidle",
+      timeout: 45000,
+    });
+    check(
+      "the chat send button is Greek",
+      await page.locator('form button[type="submit"]').first().getAttribute("aria-label"),
+      "Αποστολή"
+    );
+    await sweep(page, "/dashboard/chat (el)");
+
+    // Both menu controls only exist below md, which is where a phone user
+    // meets them — and where the whole navigation depends on them.
+    //
+    // /dashboard/settings, NOT /dashboard/overview: overview redirects to
+    // /onboarding for an account with no onboarding row (page.tsx:96),
+    // which is exactly what this stand-in serves — and /onboarding has its
+    // own chrome with no TopNav at all. The first run of this check asked
+    // overview for a header button and got an empty list, which reads as
+    // "the button is gone" when it is really "wrong page". Asserting the
+    // landed URL is what keeps that misreading from coming back.
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto(`http://127.0.0.1:${PORT}/dashboard/settings`, {
+      waitUntil: "networkidle",
+      timeout: 45000,
+    });
+    check(
+      "…and the mobile run is on a page that has the top nav",
+      new URL(page.url()).pathname,
+      "/dashboard/settings"
+    );
+    const headerButtons = await page
+      .locator("header button")
+      .evaluateAll((els) => els.map((e) => e.getAttribute("aria-label")));
+    check("the mobile menu button is Greek @375px", headerButtons.includes("Εναλλαγή μενού"), true);
+    if (!headerButtons.includes("Εναλλαγή μενού")) {
+      console.log(`        header buttons: ${JSON.stringify(headerButtons)}`);
+    }
+    // Clicked by POSITION, not by the Greek label: on a regression the
+    // label is the thing that is wrong, and a selector built out of it
+    // would hang for 30s and take the rest of this suite down with it
+    // instead of reporting. MenuButton is the first control in the header.
+    await page.locator("header button").first().click();
+    await page.waitForTimeout(300);
+    const drawerButtons = await page
+      .locator("aside button")
+      .evaluateAll((els) => els.map((e) => e.getAttribute("aria-label")).filter(Boolean));
+    check("the open drawer's close button is Greek @375px", drawerButtons.includes("Κλείσιμο μενού"), true);
+    if (!drawerButtons.includes("Κλείσιμο μενού")) {
+      console.log(`        drawer buttons: ${JSON.stringify(drawerButtons)}`);
+    }
+    await sweep(page, "/dashboard/settings @375 (el)");
+
+    await page.close();
+  }
+  await elAuthed.close();
+}
+
 await browser.close();
 cleanup();
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);

@@ -36,7 +36,17 @@
     "hidePassword": "إخفاء كلمة المرور",
     "networkErrorCheckConnection": "خطأ في الشبكة — تحقّق من اتصالك وحاول مرة أخرى.",
     "ownerAccessTooltip": "وصول المالك — أرصدة غير محدودة",
-    "creditsTooltip": "الأرصدة المتبقية — اشترِ المزيد من الإعدادات"
+    "creditsTooltip": "الأرصدة المتبقية — اشترِ المزيد من الإعدادات",
+    "accountMenu": "قائمة الحساب",
+    "categories": "الفئات",
+    "commandPalette": "لوحة الأوامر",
+    "dismiss": "تجاهل",
+    "dismissSuggestion": "تجاهل الاقتراح",
+    "installIonexa": "تثبيت Ionexa",
+    "loadingContent": "جارٍ تحميل المحتوى",
+    "nextPage": "الصفحة التالية",
+    "previousPage": "الصفحة السابقة",
+    "toggleMenu": "إظهار القائمة أو إخفاؤها"
   },
   "sidebar": {
     "groups": {
@@ -149,7 +159,8 @@
     },
     "comingSoon": "قريبًا",
     "comingSoonToast": "{name} غير متاح بعد — إنه ضمن خارطة الطريق.",
-    "comingSoonBadge": "قريبًا"
+    "comingSoonBadge": "قريبًا",
+    "closeMenu": "إغلاق القائمة"
   },
   "landing": {
     "hero": "عملك، منظّم — مع ذكاء اصطناعي يساعدك فعليًا.",
@@ -616,7 +627,8 @@
       "lowCreditsHint": "عند توقف العمل بسبب نفاد الرصيد",
       "collaboration": "التعاون",
       "collaborationHint": "دعوات الفريق ونشاط مساحة العمل المشتركة"
-    }
+    },
+    "jumpToSection": "الانتقال إلى قسم"
   },
   "dashboard": {
     "overview": {
@@ -692,7 +704,8 @@
           "label": "التداول",
           "description": "سجّل صفقة"
         }
-      }
+      },
+      "quickStartTemplates": "قوالب البدء السريع"
     },
     "team": {
       "title": "الفريق",
@@ -754,7 +767,8 @@
       "streamInterrupted": "انقطع الاتصال قبل اكتمال الرد.",
       "streamInterruptedPartial": "انقطع الاتصال — قد يكون الرد أعلاه غير مكتمل.",
       "hideConversationsHint": "إخفاء قائمة المحادثات ومنح المحادثة العرض الكامل.",
-      "showConversationsHint": "إظهار قائمة المحادثات مرة أخرى."
+      "showConversationsHint": "إظهار قائمة المحادثات مرة أخرى.",
+      "send": "إرسال"
     },
     "create": {
       "title": "إنشاء أي شيء"
@@ -1512,6 +1526,9 @@
       "hideNumbers": "أخفِ الأرقام",
       "dismiss": "تجاهل هذا",
       "dismissError": "تعذّر تجاهل ذلك."
+    },
+    "systemHealth": {
+      "toggleStackTrace": "إظهار تتبُّع المكدس أو إخفاؤه"
     }
   },
   "module": {

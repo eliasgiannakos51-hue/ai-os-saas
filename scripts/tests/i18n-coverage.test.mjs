@@ -392,7 +392,9 @@ checkTrue(
 //
 // A RATCHET, NOT A ZERO.
 //
-// 162 of these already ship. Failing the build on all of them would mean
+// 140 of these still ship — 162 when this landed, minus the 22 aria-label
+// attributes paid off in batch A1 and now held at zero by 1d above.
+// Failing the build on all of them would mean
 // this check could not land at all, and a check that cannot land protects
 // nothing. So the baseline below is per FILE: no file may get worse, and
 // the total may only go down. That is the same mechanism this file already
@@ -406,7 +408,6 @@ checkTrue(
 const BARE_TEXT_BASELINE = {
     "src/app/cookies/page.tsx": 19,
     "src/app/dashboard/error.tsx": 1,
-    "src/app/dashboard/settings/page.tsx": 1,
     "src/app/dashboard/system-health/page.tsx": 5,
     "src/app/not-found.tsx": 2,
     "src/app/offline/page.tsx": 3,
@@ -414,40 +415,36 @@ const BARE_TEXT_BASELINE = {
     "src/app/terms/page.tsx": 10,
     "src/components/auth/generate-password-button.tsx": 1,
     "src/components/billing/upgrade-required.tsx": 4,
-    "src/components/chat/chat-workspace.tsx": 6,
+    "src/components/chat/chat-workspace.tsx": 5,
     "src/components/chat/conversation-sidebar.tsx": 4,
     "src/components/create/create-chat.tsx": 4,
-    "src/components/create/next-step-suggestion.tsx": 1,
-    "src/components/dashboard/command-palette.tsx": 4,
-    "src/components/dashboard/menu-button.tsx": 1,
-    "src/components/dashboard/sidebar.tsx": 1,
-    "src/components/dashboard/top-nav.tsx": 1,
-    "src/components/entity-links/link-to-modal.tsx": 2,
+    "src/components/dashboard/command-palette.tsx": 3,
+    "src/components/entity-links/link-to-modal.tsx": 1,
     "src/components/entity-links/linked-entities.tsx": 1,
     "src/components/error-message.tsx": 1,
-    "src/components/i18n/language-selector.tsx": 1,
-    "src/components/ideas/add-idea-form.tsx": 11,
-    "src/components/ideas/idea-row.tsx": 12,
+    "src/components/ideas/add-idea-form.tsx": 10,
+    "src/components/ideas/idea-row.tsx": 11,
     "src/components/ideas/ideas-list.tsx": 4,
     "src/components/landing/deleted-account-banner.tsx": 1,
     "src/components/legal/legal-layout.tsx": 3,
-    "src/components/loading-state.tsx": 1,
     "src/components/memory/memory-search.tsx": 6,
-    "src/components/modules/generic-add-form.tsx": 1,
-    "src/components/overview/beta-expiry-banner.tsx": 3,
-    "src/components/overview/beta-feedback-banner.tsx": 1,
+    "src/components/overview/beta-expiry-banner.tsx": 2,
     "src/components/overview/quick-start-button.tsx": 1,
-    "src/components/overview/quick-start-modal.tsx": 5,
-    "src/components/pagination-controls.tsx": 5,
-    "src/components/pwa/pwa-provider.tsx": 6,
+    "src/components/overview/quick-start-modal.tsx": 3,
+    "src/components/pagination-controls.tsx": 3,
+    "src/components/pwa/pwa-provider.tsx": 4,
     "src/components/settings/buy-credits.tsx": 2,
     "src/components/settings/danger-zone.tsx": 1,
     "src/components/settings/login-activity.tsx": 1,
     "src/components/settings/password-change-form.tsx": 1,
-    "src/components/system-health/error-list.tsx": 3,
+    "src/components/system-health/error-list.tsx": 2,
     "src/components/text-actions/text-actions-textarea.tsx": 2,
     "src/components/ui/widget-boundary.tsx": 2,
   };
+// Derived, not typed. The printed total used to be a hand-written 162 in a
+// template string, which is a second number that can disagree with the
+// first — and did, the moment the per-file entries came down.
+const BASELINE_TOTAL = Object.values(BARE_TEXT_BASELINE).reduce((a, b) => a + b, 0);
 
 {
   const report = JSON.parse(
@@ -474,13 +471,128 @@ const BARE_TEXT_BASELINE = {
   }
 
   const total = [...counts.values()].reduce((a, b) => a + b, 0);
-  console.log(`        ${total} bare-English hits across ${counts.size} files (baseline total 162)`);
+  console.log(`        ${total} bare-English hits across ${counts.size} files (baseline total ${BASELINE_TOTAL})`);
   check("no file renders MORE bare English than its baseline", worse, []);
   if (worse.length) {
     console.log("        Translate it, or — if it is genuinely not translatable —");
     console.log("        say why in scripts/jsx-text-report.mjs rather than raising the baseline.");
   }
   check("no baseline is stale (a fixed file must lower its number)", stale, []);
+}
+
+// ---------------------------------------------------------------------
+// 1d. AN ARIA LABEL IS THE ONLY TEXT SOME USERS GET. NO LITERALS, AT ALL.
+//
+//     <button aria-label="Send">      <ArrowUp />      </button>
+//     <button aria-label="Close">     <X />            </button>
+//     <div role="dialog" aria-label="Command palette"> …
+//
+// Every one of those buttons is an ICON. There is no visible word to fall
+// back on: for someone using a screen reader the aria-label IS the button,
+// and 22 of them were English on a Greek, Japanese or Arabic page — while
+// the label beside them, the heading above them and the toast after them
+// were all translated. That is worse than an untranslated page, because it
+// is invisible to everyone who could have reported it. Nothing in this
+// file caught them: 1b only looks at conditionals, and 1c's ratchet let a
+// file keep whatever it already had.
+//
+// SO THIS ONE IS A ZERO, NOT A RATCHET. A ratchet is the right instrument
+// for a debt that is expensive to pay; this debt is 22 attributes and it
+// is paid. Holding it at zero is what stops the next icon button from
+// arriving with `aria-label="Retry"` — and there is nowhere for such a
+// string to hide, because an aria-label has no legitimate non-prose form
+// the way className or an id does.
+//
+// PARSED, NOT GREPPED, for the reason the two sections above give: the
+// point is to allow `aria-label={t("send")}` and reject `aria-label="Send"`,
+// and only the AST distinguishes an attribute's initializer kind.
+const ARIA_TEXT_ATTRS = new Set([
+  "aria-label",
+  "aria-description",
+  "aria-placeholder",
+  "aria-roledescription",
+  "aria-valuetext",
+]);
+// The ONE literal that is allowed, and only as the whole value: the
+// product's own name. "Ionexa AI" is the same nine characters in all ten
+// locales, so a key for it would be ten copies of a string that can never
+// differ — and check-i18n.js would then flag nine of them as untranslated.
+const BRAND_ARIA_LITERALS = new Set(["ionexa", "ionexa ai"]);
+
+const literalAria = [];
+for (const file of sources) {
+  if (!file.endsWith(".tsx")) continue;
+  const sf = ts.createSourceFile(
+    file,
+    readFileSync(file, "utf8"),
+    ts.ScriptTarget.ES2022,
+    true,
+    ts.ScriptKind.TSX
+  );
+  const visit = (node) => {
+    if (ts.isJsxAttribute(node) && ARIA_TEXT_ATTRS.has(node.name.getText())) {
+      const init = node.initializer;
+      // `aria-label={t("send")}` and `aria-label={expr}` are fine — the
+      // value comes from somewhere that can be translated. Only a literal
+      // pinned into the markup is not.
+      const text =
+        init && ts.isStringLiteral(init)
+          ? init.text
+          : init && ts.isJsxExpression(init) && init.expression && ts.isStringLiteral(init.expression)
+            ? init.expression.text
+            : null;
+      if (text !== null && !BRAND_ARIA_LITERALS.has(text.trim().toLowerCase())) {
+        const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+        literalAria.push(`${file}:${line + 1} ${node.name.getText()}="${text}"`);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+}
+check("no aria-* text attribute is a hardcoded string", literalAria, []);
+
+// The check must be able to FAIL, and must fail on the shapes that
+// actually shipped — including the one that is not English. A hardcoded
+// Greek aria-label is the same defect seen from the other side: a Japanese
+// user reads Greek, and no English-prose filter would ever notice.
+{
+  const SHIPPED = `
+    export function Regression({ t, onClose }) {
+      return (
+        <div role="dialog" aria-label="Command palette">
+          <button aria-label="Send" />
+          <button aria-label={"Close"} />
+          <nav aria-label="Κατηγορίες" />
+          <button aria-label={t("cancel")} onClick={onClose} />
+          <svg aria-label="Ionexa AI" />
+        </div>
+      );
+    }`;
+  const sf = ts.createSourceFile("aria.tsx", SHIPPED, ts.ScriptTarget.ES2022, true, ts.ScriptKind.TSX);
+  const caught = [];
+  const visit = (node) => {
+    if (ts.isJsxAttribute(node) && ARIA_TEXT_ATTRS.has(node.name.getText())) {
+      const init = node.initializer;
+      const text =
+        init && ts.isStringLiteral(init)
+          ? init.text
+          : init && ts.isJsxExpression(init) && init.expression && ts.isStringLiteral(init.expression)
+            ? init.expression.text
+            : null;
+      if (text !== null && !BRAND_ARIA_LITERALS.has(text.trim().toLowerCase())) caught.push(text);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  // Four: the plain literal, the braced literal, the Greek one, and the
+  // dialog label. Not the t() call, and not the brand name.
+  check("the aria walk catches every literal shape, including a non-English one", caught, [
+    "Command palette",
+    "Send",
+    "Close",
+    "Κατηγορίες",
+  ]);
 }
 
 console.log("\n== 2. every t() call resolves to a real key ==");

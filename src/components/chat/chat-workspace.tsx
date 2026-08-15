@@ -660,7 +660,7 @@ export function ChatWorkspace({
                 <button
                   type="submit"
                   disabled={sending || !input.trim()}
-                  aria-label="Send"
+                  aria-label={t("send")}
                   className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
                 >
                   {sending ? (

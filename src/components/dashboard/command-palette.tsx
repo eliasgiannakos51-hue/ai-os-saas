@@ -251,7 +251,7 @@ export function CommandPalette() {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Command palette"
+        aria-label={tCommon("commandPalette")}
         className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-panel shadow-[0_0_0_1px_rgba(249,115,22,0.05)]"
       >
         <div className="relative border-b border-border">

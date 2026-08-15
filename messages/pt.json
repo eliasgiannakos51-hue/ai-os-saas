@@ -36,7 +36,17 @@
     "hidePassword": "Ocultar palavra-passe",
     "networkErrorCheckConnection": "Erro de rede — verifique a sua ligação e tente novamente.",
     "ownerAccessTooltip": "Acesso de proprietário — créditos ilimitados",
-    "creditsTooltip": "Créditos restantes — compre mais nas Definições"
+    "creditsTooltip": "Créditos restantes — compre mais nas Definições",
+    "accountMenu": "Menu da conta",
+    "categories": "Categorias",
+    "commandPalette": "Paleta de comandos",
+    "dismiss": "Dispensar",
+    "dismissSuggestion": "Dispensar a sugestão",
+    "installIonexa": "Instalar o Ionexa",
+    "loadingContent": "Carregando o conteúdo",
+    "nextPage": "Próxima página",
+    "previousPage": "Página anterior",
+    "toggleMenu": "Mostrar ou ocultar o menu"
   },
   "sidebar": {
     "groups": {
@@ -149,7 +159,8 @@
     },
     "comingSoon": "Em breve",
     "comingSoonToast": "{name} ainda não está disponível — está no roteiro.",
-    "comingSoonBadge": "Em breve"
+    "comingSoonBadge": "Em breve",
+    "closeMenu": "Fechar o menu"
   },
   "landing": {
     "hero": "Seu negócio, organizado — com uma IA que realmente ajuda.",
@@ -616,7 +627,8 @@
       "lowCreditsHint": "Quando o trabalho para porque o saldo acabou",
       "collaboration": "Colaboração",
       "collaborationHint": "Convites de equipa e atividade do espaço partilhado"
-    }
+    },
+    "jumpToSection": "Ir para uma seção"
   },
   "dashboard": {
     "overview": {
@@ -692,7 +704,8 @@
           "label": "Trading",
           "description": "Regista uma operação"
         }
-      }
+      },
+      "quickStartTemplates": "Modelos de início rápido"
     },
     "team": {
       "title": "Equipe",
@@ -754,7 +767,8 @@
       "streamInterrupted": "A ligação foi interrompida antes de a resposta terminar.",
       "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta.",
       "hideConversationsHint": "Oculta a lista de conversas e dá toda a largura ao tópico.",
-      "showConversationsHint": "Mostrar novamente a lista de conversas."
+      "showConversationsHint": "Mostrar novamente a lista de conversas.",
+      "send": "Enviar"
     },
     "create": {
       "title": "Criar Qualquer Coisa"
@@ -1512,6 +1526,9 @@
       "hideNumbers": "Ocultar os números",
       "dismiss": "Dispensar",
       "dismissError": "Não foi possível dispensar."
+    },
+    "systemHealth": {
+      "toggleStackTrace": "Mostrar ou ocultar o stack trace"
     }
   },
   "module": {

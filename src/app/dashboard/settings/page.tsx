@@ -188,7 +188,7 @@ export default async function SettingsPage() {
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
         <PageHeader icon={SettingsIcon} title={t("title")} />
 
-        <nav aria-label="Jump to section" className="mb-6 flex flex-wrap gap-2 text-xs">
+        <nav aria-label={t("jumpToSection")} className="mb-6 flex flex-wrap gap-2 text-xs">
           <a
             href="#accessibility"
             className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"

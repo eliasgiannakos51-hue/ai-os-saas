@@ -36,7 +36,17 @@
     "hidePassword": "パスワードを非表示",
     "networkErrorCheckConnection": "ネットワークエラー — 接続を確認してもう一度お試しください。",
     "ownerAccessTooltip": "オーナーアクセス — クレジット無制限",
-    "creditsTooltip": "残りクレジット — 設定から追加購入できます"
+    "creditsTooltip": "残りクレジット — 設定から追加購入できます",
+    "accountMenu": "アカウントメニュー",
+    "categories": "カテゴリ",
+    "commandPalette": "コマンドパレット",
+    "dismiss": "閉じる",
+    "dismissSuggestion": "提案を閉じる",
+    "installIonexa": "Ionexa をインストール",
+    "loadingContent": "コンテンツを読み込んでいます",
+    "nextPage": "次のページ",
+    "previousPage": "前のページ",
+    "toggleMenu": "メニューの表示を切り替える"
   },
   "sidebar": {
     "groups": {
@@ -149,7 +159,8 @@
     },
     "comingSoon": "近日公開",
     "comingSoonToast": "{name} はまだ利用できません。ロードマップに入っています。",
-    "comingSoonBadge": "近日"
+    "comingSoonBadge": "近日",
+    "closeMenu": "メニューを閉じる"
   },
   "landing": {
     "hero": "あなたのビジネスを整理する、本当に役立つAI。",
@@ -616,7 +627,8 @@
       "lowCreditsHint": "残高が尽きて処理が停止したとき",
       "collaboration": "コラボレーション",
       "collaborationHint": "チーム招待と共有ワークスペースのアクティビティ"
-    }
+    },
+    "jumpToSection": "セクションへ移動"
   },
   "dashboard": {
     "overview": {
@@ -692,7 +704,8 @@
           "label": "トレーディング",
           "description": "取引を記録"
         }
-      }
+      },
+      "quickStartTemplates": "クイックスタートのテンプレート"
     },
     "team": {
       "title": "チーム",
@@ -754,7 +767,8 @@
       "streamInterrupted": "応答が完了する前に接続が切断されました。",
       "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。",
       "hideConversationsHint": "会話リストを隠して、スレッドに全幅を使います。",
-      "showConversationsHint": "会話リストを再表示します。"
+      "showConversationsHint": "会話リストを再表示します。",
+      "send": "送信"
     },
     "create": {
       "title": "何でも作成"
@@ -1512,6 +1526,9 @@
       "hideNumbers": "数値を隠す",
       "dismiss": "閉じる",
       "dismissError": "閉じられませんでした。"
+    },
+    "systemHealth": {
+      "toggleStackTrace": "スタックトレースの表示を切り替える"
     }
   },
   "module": {

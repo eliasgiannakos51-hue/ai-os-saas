@@ -36,7 +36,17 @@
     "hidePassword": "Passwort verbergen",
     "networkErrorCheckConnection": "Netzwerkfehler — bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
     "ownerAccessTooltip": "Inhaberzugang — unbegrenzte Credits",
-    "creditsTooltip": "Verbleibende Credits — mehr in den Einstellungen kaufen"
+    "creditsTooltip": "Verbleibende Credits — mehr in den Einstellungen kaufen",
+    "accountMenu": "Kontomenü",
+    "categories": "Kategorien",
+    "commandPalette": "Befehlspalette",
+    "dismiss": "Ausblenden",
+    "dismissSuggestion": "Vorschlag ausblenden",
+    "installIonexa": "Ionexa installieren",
+    "loadingContent": "Inhalt wird geladen",
+    "nextPage": "Nächste Seite",
+    "previousPage": "Vorherige Seite",
+    "toggleMenu": "Menü ein- oder ausblenden"
   },
   "sidebar": {
     "groups": {
@@ -149,7 +159,8 @@
     },
     "comingSoon": "Demnächst",
     "comingSoonToast": "{name} ist noch nicht verfügbar — steht auf der Roadmap.",
-    "comingSoonBadge": "Bald"
+    "comingSoonBadge": "Bald",
+    "closeMenu": "Menü schließen"
   },
   "landing": {
     "hero": "Dein Unternehmen, organisiert — mit KI, die wirklich hilft.",
@@ -616,7 +627,8 @@
       "lowCreditsHint": "Wenn die Arbeit stoppt, weil das Guthaben aufgebraucht ist",
       "collaboration": "Zusammenarbeit",
       "collaborationHint": "Team-Einladungen und Aktivität im geteilten Workspace"
-    }
+    },
+    "jumpToSection": "Zu einem Abschnitt springen"
   },
   "dashboard": {
     "overview": {
@@ -692,7 +704,8 @@
           "label": "Trading",
           "description": "Einen Trade erfassen"
         }
-      }
+      },
+      "quickStartTemplates": "Schnellstart-Vorlagen"
     },
     "team": {
       "title": "Team",
@@ -754,7 +767,8 @@
       "streamInterrupted": "Die Verbindung wurde unterbrochen, bevor die Antwort fertig war.",
       "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig.",
       "hideConversationsHint": "Blendet die Unterhaltungsliste aus und gibt dem Verlauf die volle Breite.",
-      "showConversationsHint": "Die Unterhaltungsliste wieder anzeigen."
+      "showConversationsHint": "Die Unterhaltungsliste wieder anzeigen.",
+      "send": "Senden"
     },
     "create": {
       "title": "Alles Erstellen"
@@ -1512,6 +1526,9 @@
       "hideNumbers": "Zahlen ausblenden",
       "dismiss": "Ausblenden",
       "dismissError": "Das konnte nicht ausgeblendet werden."
+    },
+    "systemHealth": {
+      "toggleStackTrace": "Stacktrace ein- oder ausblenden"
     }
   },
   "module": {

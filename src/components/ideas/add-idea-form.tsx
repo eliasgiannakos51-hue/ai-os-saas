@@ -106,7 +106,7 @@ export function AddIdeaForm() {
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="Cancel"
+              aria-label={tCommon("cancel")}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
             >
               <X className="h-4 w-4" />

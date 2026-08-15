@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { LifeBuoy, ArrowRight } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { AppBackground } from "@/components/ui/app-background";
@@ -23,9 +24,16 @@ export const metadata: Metadata = {
 // are asked BEFORE anyone signs up, and an answer you have to create an
 // account to read is not an answer.
 //
-// STATIC. Nothing here is per-user (that is enforced upstream: a question
-// containing any first-person marker never reaches a canned answer at
-// all), so this renders once at build time rather than per request.
+// NOT PER-USER. Nothing here varies by account — that is enforced
+// upstream: a question containing any first-person marker never reaches a
+// canned answer at all.
+//
+// This used to say the page was therefore STATIC, prerendered once at
+// build time. It is not, and never was: `next build` lists /help as ƒ
+// (Dynamic), like every other route in this app, because the root layout
+// resolves the locale from a cookie and reading a cookie opts the whole
+// route out of static rendering. The claim mattered because it was the
+// stated reason not to await anything here.
 //
 // NO NUMBERS. Not one article states a price, a credit cost or an
 // allowance — those live in lib/billing/plans.ts and on /pricing, they
@@ -84,7 +92,14 @@ function Article({ article }: { article: KnowledgeArticle }) {
   );
 }
 
-export default function HelpPage() {
+export default async function HelpPage() {
+  // The ARTICLES on this page are Greek-only (see the knowledge base) —
+  // but the landmark label is navigation chrome, not content, and a
+  // screen reader announcing a Greek landmark to a French user helps
+  // nobody. Awaiting a translation costs nothing here: every route in
+  // this app is already server-rendered on demand, because the root
+  // layout resolves the locale from a cookie.
+  const tCommon = await getTranslations("common");
   const byCategory = articlesByCategory();
   // Driven off the real categories rather than the hardcoded list, so an
   // article in a category nobody remembered to order still renders —
@@ -114,7 +129,7 @@ export default function HelpPage() {
 
         {/* A contents list, because 27 answers is more than a page you can
             scan. Anchors match the article ids. */}
-        <nav aria-label="Κατηγορίες" className="mb-8 flex flex-wrap gap-2">
+        <nav aria-label={tCommon("categories")} className="mb-8 flex flex-wrap gap-2">
           {ordered.map((category) => (
             <a
               key={category}

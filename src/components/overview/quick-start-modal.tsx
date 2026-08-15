@@ -12,6 +12,7 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
   const router = useRouter();
   const { addToast } = useToast();
   const tCommon = useTranslations("common");
+  const tOverview = useTranslations("dashboard.overview");
   const [applyingId, setApplyingId] = useState<string | null>(null);
 
   async function apply(templateId: string) {
@@ -48,7 +49,7 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Quick Start templates"
+        aria-label={tOverview("quickStartTemplates")}
         className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-panel shadow-[0_0_0_1px_rgba(249,115,22,0.05)]"
       >
         <div className="flex items-start justify-between gap-3 border-b border-border px-5 py-4">
@@ -66,7 +67,7 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={tCommon("close")}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" />

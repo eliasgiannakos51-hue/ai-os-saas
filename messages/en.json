@@ -36,7 +36,17 @@
     "hidePassword": "Hide password",
     "networkErrorCheckConnection": "Network error — please check your connection and try again.",
     "ownerAccessTooltip": "Owner access — unlimited credits",
-    "creditsTooltip": "Credits remaining — buy more in Settings"
+    "creditsTooltip": "Credits remaining — buy more in Settings",
+    "accountMenu": "Account menu",
+    "categories": "Categories",
+    "commandPalette": "Command palette",
+    "dismiss": "Dismiss",
+    "dismissSuggestion": "Dismiss suggestion",
+    "installIonexa": "Install Ionexa",
+    "loadingContent": "Loading content",
+    "nextPage": "Next page",
+    "previousPage": "Previous page",
+    "toggleMenu": "Toggle menu"
   },
   "sidebar": {
     "groups": {
@@ -149,7 +159,8 @@
     },
     "comingSoon": "Coming soon",
     "comingSoonToast": "{name} isn't available yet — it's on the roadmap.",
-    "comingSoonBadge": "Soon"
+    "comingSoonBadge": "Soon",
+    "closeMenu": "Close menu"
   },
   "landing": {
     "hero": "Your business, organized — with AI that actually helps.",
@@ -616,7 +627,8 @@
       "lowCreditsHint": "When work stops because the balance ran out",
       "collaboration": "Collaboration",
       "collaborationHint": "Team invites and shared-workspace activity"
-    }
+    },
+    "jumpToSection": "Jump to section"
   },
   "dashboard": {
     "overview": {
@@ -692,7 +704,8 @@
           "label": "Trading",
           "description": "Log a trade"
         }
-      }
+      },
+      "quickStartTemplates": "Quick Start templates"
     },
     "team": {
       "title": "Team",
@@ -754,7 +767,8 @@
       "streamInterrupted": "The connection dropped before the reply finished.",
       "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete.",
       "hideConversationsHint": "Hide the conversation list and give the thread the full width.",
-      "showConversationsHint": "Show the conversation list again."
+      "showConversationsHint": "Show the conversation list again.",
+      "send": "Send"
     },
     "create": {
       "title": "Create Anything"
@@ -1512,6 +1526,9 @@
       "hideNumbers": "Hide the numbers",
       "dismiss": "Dismiss this",
       "dismissError": "That could not be dismissed."
+    },
+    "systemHealth": {
+      "toggleStackTrace": "Toggle stack trace"
     }
   },
   "module": {

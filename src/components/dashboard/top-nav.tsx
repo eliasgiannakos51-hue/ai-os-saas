@@ -138,7 +138,7 @@ export function TopNav({ email }: { email: string }) {
               setUserMenuOpen((v) => !v);
               setNotifOpen(false);
             }}
-            aria-label="Account menu"
+            aria-label={t("accountMenu")}
             aria-expanded={userMenuOpen}
             className="flex h-9 w-9 items-center justify-center rounded-full bg-orange-500/15 text-sm font-semibold text-orange-400 transition-colors duration-150 hover:bg-orange-500/25"
           >

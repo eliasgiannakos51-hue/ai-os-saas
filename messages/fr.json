@@ -36,7 +36,17 @@
     "hidePassword": "Masquer le mot de passe",
     "networkErrorCheckConnection": "Erreur réseau — vérifiez votre connexion et réessayez.",
     "ownerAccessTooltip": "Accès propriétaire — crédits illimités",
-    "creditsTooltip": "Crédits restants — achetez-en plus dans les Paramètres"
+    "creditsTooltip": "Crédits restants — achetez-en plus dans les Paramètres",
+    "accountMenu": "Menu du compte",
+    "categories": "Catégories",
+    "commandPalette": "Palette de commandes",
+    "dismiss": "Ignorer",
+    "dismissSuggestion": "Ignorer la suggestion",
+    "installIonexa": "Installer Ionexa",
+    "loadingContent": "Chargement du contenu",
+    "nextPage": "Page suivante",
+    "previousPage": "Page précédente",
+    "toggleMenu": "Afficher ou masquer le menu"
   },
   "sidebar": {
     "groups": {
@@ -149,7 +159,8 @@
     },
     "comingSoon": "Bientôt",
     "comingSoonToast": "{name} n'est pas encore disponible — c'est prévu dans la feuille de route.",
-    "comingSoonBadge": "Bientôt"
+    "comingSoonBadge": "Bientôt",
+    "closeMenu": "Fermer le menu"
   },
   "landing": {
     "hero": "Votre entreprise, organisée — avec une IA qui aide vraiment.",
@@ -616,7 +627,8 @@
       "lowCreditsHint": "Quand le travail s'arrête faute de solde",
       "collaboration": "Collaboration",
       "collaborationHint": "Invitations d'équipe et activité de l'espace partagé"
-    }
+    },
+    "jumpToSection": "Aller à une section"
   },
   "dashboard": {
     "overview": {
@@ -692,7 +704,8 @@
           "label": "Trading",
           "description": "Consignez une opération"
         }
-      }
+      },
+      "quickStartTemplates": "Modèles de démarrage rapide"
     },
     "team": {
       "title": "Équipe",
@@ -754,7 +767,8 @@
       "streamInterrupted": "La connexion a été interrompue avant la fin de la réponse.",
       "streamInterruptedPartial": "La connexion a été interrompue — la réponse ci-dessus est peut-être incomplète.",
       "hideConversationsHint": "Masquer la liste des conversations et donner toute la largeur au fil.",
-      "showConversationsHint": "Afficher à nouveau la liste des conversations."
+      "showConversationsHint": "Afficher à nouveau la liste des conversations.",
+      "send": "Envoyer"
     },
     "create": {
       "title": "Créer N'importe Quoi"
@@ -1512,6 +1526,9 @@
       "hideNumbers": "Masquer les chiffres",
       "dismiss": "Ignorer",
       "dismissError": "Impossible de l'ignorer."
+    },
+    "systemHealth": {
+      "toggleStackTrace": "Afficher ou masquer la trace d'appels"
     }
   },
   "module": {

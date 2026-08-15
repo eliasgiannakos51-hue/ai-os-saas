@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Clock, X } from "lucide-react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 const STORAGE_KEY = "beta-expiry-banner-dismissed-for";
 
@@ -21,6 +22,7 @@ export function BetaExpiryBanner({
   daysRemaining: number;
   expiresAtKey: string;
 }) {
+  const t = useTranslations("common");
   const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
@@ -61,7 +63,7 @@ export function BetaExpiryBanner({
       <button
         type="button"
         onClick={dismiss}
-        aria-label="Dismiss"
+        aria-label={t("dismiss")}
         className="shrink-0 rounded p-1 text-orange-400/70 transition-colors duration-150 hover:text-orange-300"
       >
         <X className="h-4 w-4" aria-hidden="true" />

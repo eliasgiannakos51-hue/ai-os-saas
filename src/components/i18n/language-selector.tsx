@@ -13,6 +13,7 @@ export function LanguageSelector({ className }: { className?: string }) {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("language");
+  const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
 
   function selectLanguage(code: string) {
@@ -42,7 +43,7 @@ export function LanguageSelector({ className }: { className?: string }) {
         <>
           <button
             type="button"
-            aria-label="Close"
+            aria-label={tCommon("close")}
             tabIndex={-1}
             onClick={() => setOpen(false)}
             className="fixed inset-0 z-40 cursor-default"

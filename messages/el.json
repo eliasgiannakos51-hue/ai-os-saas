@@ -36,7 +36,17 @@
     "hidePassword": "Απόκρυψη κωδικού",
     "networkErrorCheckConnection": "Σφάλμα δικτύου — έλεγξε τη σύνδεσή σου και δοκίμασε ξανά.",
     "ownerAccessTooltip": "Πρόσβαση ιδιοκτήτη — απεριόριστα credits",
-    "creditsTooltip": "Υπόλοιπο credits — αγόρασε κι άλλα από τις Ρυθμίσεις"
+    "creditsTooltip": "Υπόλοιπο credits — αγόρασε κι άλλα από τις Ρυθμίσεις",
+    "accountMenu": "Μενού λογαριασμού",
+    "categories": "Κατηγορίες",
+    "commandPalette": "Παλέτα εντολών",
+    "dismiss": "Απόρριψη",
+    "dismissSuggestion": "Απόρριψη πρότασης",
+    "installIonexa": "Εγκατάσταση του Ionexa",
+    "loadingContent": "Φόρτωση περιεχομένου",
+    "nextPage": "Επόμενη σελίδα",
+    "previousPage": "Προηγούμενη σελίδα",
+    "toggleMenu": "Εναλλαγή μενού"
   },
   "sidebar": {
     "groups": {
@@ -149,7 +159,8 @@
     },
     "comingSoon": "Έρχεται",
     "comingSoonToast": "Το {name} δεν είναι διαθέσιμο ακόμα — βρίσκεται στο roadmap.",
-    "comingSoonBadge": "Σύντομα"
+    "comingSoonBadge": "Σύντομα",
+    "closeMenu": "Κλείσιμο μενού"
   },
   "landing": {
     "hero": "Η επιχείρησή σου, οργανωμένη — με AI που πραγματικά βοηθάει.",
@@ -616,7 +627,8 @@
       "lowCreditsHint": "Όταν η εργασία σταματά επειδή εξαντλήθηκε το υπόλοιπο",
       "collaboration": "Συνεργασία",
       "collaborationHint": "Προσκλήσεις ομάδας και δραστηριότητα κοινού χώρου"
-    }
+    },
+    "jumpToSection": "Μετάβαση σε ενότητα"
   },
   "dashboard": {
     "overview": {
@@ -692,7 +704,8 @@
           "label": "Συναλλαγές",
           "description": "Κατέγραψε μια συναλλαγή"
         }
-      }
+      },
+      "quickStartTemplates": "Πρότυπα γρήγορης εκκίνησης"
     },
     "team": {
       "title": "Ομάδα",
@@ -754,7 +767,8 @@
       "streamInterrupted": "Η σύνδεση διακόπηκε πριν ολοκληρωθεί η απάντηση.",
       "streamInterruptedPartial": "Η σύνδεση διακόπηκε — η παραπάνω απάντηση μπορεί να είναι ημιτελής.",
       "hideConversationsHint": "Κρύψε τη λίστα συνομιλιών και δώσε όλο το πλάτος στο νήμα.",
-      "showConversationsHint": "Εμφάνισε ξανά τη λίστα συνομιλιών."
+      "showConversationsHint": "Εμφάνισε ξανά τη λίστα συνομιλιών.",
+      "send": "Αποστολή"
     },
     "create": {
       "title": "Δημιουργία Οτιδήποτε"
@@ -1512,6 +1526,9 @@
       "hideNumbers": "Κρύψε τους αριθμούς",
       "dismiss": "Απόρριψη",
       "dismissError": "Δεν μπόρεσε να απορριφθεί."
+    },
+    "systemHealth": {
+      "toggleStackTrace": "Εμφάνιση ή απόκρυψη του stack trace"
     }
   },
   "module": {

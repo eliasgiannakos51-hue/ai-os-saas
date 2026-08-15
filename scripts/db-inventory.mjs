@@ -63,12 +63,16 @@ function provenance() {
   };
   const branch = git(["rev-parse", "--abbrev-ref", "HEAD"], "(no git)");
   const commit = git(["rev-parse", "--short", "HEAD"], "(no git)");
-  const dirty = git(["status", "--porcelain"], "");
-  return {
-    branch,
-    commit,
-    dirty: dirty ? dirty.split("\n").filter(Boolean).length : 0,
-  };
+  // The generated artefact itself is excluded from the dirty count.
+  // Writing `db_missing_check.sql` dirties the tree, so the header would
+  // report "+1 uncommitted file" describing nothing but its own existence —
+  // and could never say "clean tree" for a committed generated file.
+  const GENERATED = /db_missing_check\.sql$/;
+  const dirty = git(["status", "--porcelain"], "")
+    .split("\n")
+    .filter(Boolean)
+    .filter((line) => !GENERATED.test(line.slice(3).trim()));
+  return { branch, commit, dirty: dirty.length };
 }
 
 const ROOT = process.cwd();

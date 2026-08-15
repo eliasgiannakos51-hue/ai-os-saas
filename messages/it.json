@@ -178,7 +178,13 @@
       "imageVideo": "Generazione immagini e video",
       "aiMemory": "Memoria AI",
       "teamCollaboration": "Collaborazione in team",
-      "teamSeatsAddOn": "Posti team"
+      "teamSeatsAddOn": "Posti team",
+      "freeChatMessages": "Messaggi chat gratuiti / mese",
+      "deepResearch": "Esecuzioni Deep Research / mese",
+      "files": "File archiviati",
+      "storage": "Spazio di archiviazione",
+      "integrations": "Integrazioni collegate",
+      "publishedSites": "Siti web pubblicati"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Per team che costruiscono insieme",
@@ -191,13 +197,11 @@
     "setUpTeam": "Configura Team",
     "features": {
       "1Workspace3Projects": "1 area di lavoro, 3 progetti",
-      "2AiAgents": "2 agenti IA",
       "basicAiChat": "Chat IA di base",
       "creditsPerMonth": "{count} crediti/mese",
       "marketplaceInstallOnly": "Marketplace: solo installazione",
       "communitySupport": "Supporto della community",
       "unlimitedProjects": "Progetti illimitati",
-      "upTo20AiAgents": "Fino a 20 agenti IA",
       "aiMemory": "Memoria IA",
       "websiteAutomationBuilderAccess": "Accesso a Website & Automation Builder",
       "imageVideoGenerationAccess": "Accesso alla generazione di immagini e video",
@@ -207,7 +211,6 @@
       "mobileSaasBuilderAccess": "Accesso a Mobile & SaaS Builder",
       "priorityProcessing": "Elaborazione prioritaria",
       "everythingInGrowth": "Tutto ciò che include Growth",
-      "unlimitedAiAgentsTeams": "Agenti IA e team illimitati",
       "teamCollaboration": "Collaborazione in team",
       "sharedAiMemory": "Memoria IA condivisa",
       "prioritySupport": "Supporto prioritario",
@@ -224,6 +227,16 @@
       "upTo5AiAgents": "Fino a 5 agenti IA",
       "upTo15AiAgentsTeams": "Fino a 15 agenti IA e team",
       "upTo50AiAgents": "Fino a 50 agenti IA"
+    },
+    "values": {
+      "unlimited": "Illimitato",
+      "included": "Incluso",
+      "custom": "Personalizzato",
+      "perSeat": "+{currency}{price}/postazione"
+    },
+    "seatNote": {
+      "included": "Postazioni team illimitate incluse — nessun addebito per membro",
+      "perMember": "+ {currency}{price}/mese per membro del team — ogni membro ottiene accesso completo al livello del tuo piano"
     }
   },
   "roadmap": {

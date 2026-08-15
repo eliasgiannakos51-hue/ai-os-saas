@@ -178,7 +178,13 @@
       "imageVideo": "Geração de imagem e vídeo",
       "aiMemory": "Memória IA",
       "teamCollaboration": "Colaboração em equipe",
-      "teamSeatsAddOn": "Vagas de equipe"
+      "teamSeatsAddOn": "Vagas de equipe",
+      "freeChatMessages": "Mensagens de chat gratuitas / mês",
+      "deepResearch": "Execuções de Deep Research / mês",
+      "files": "Ficheiros armazenados",
+      "storage": "Armazenamento",
+      "integrations": "Integrações ligadas",
+      "publishedSites": "Sites publicados"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Para equipes que constroem juntas",
@@ -191,13 +197,11 @@
     "setUpTeam": "Configurar Equipe",
     "features": {
       "1Workspace3Projects": "1 espaço de trabalho, 3 projetos",
-      "2AiAgents": "2 agentes de IA",
       "basicAiChat": "Chat de IA básico",
       "creditsPerMonth": "{count} créditos/mês",
       "marketplaceInstallOnly": "Marketplace: apenas instalação",
       "communitySupport": "Apoio da comunidade",
       "unlimitedProjects": "Projetos ilimitados",
-      "upTo20AiAgents": "Até 20 agentes de IA",
       "aiMemory": "Memória de IA",
       "websiteAutomationBuilderAccess": "Acesso ao Website & Automation Builder",
       "imageVideoGenerationAccess": "Acesso à geração de imagem e vídeo",
@@ -207,7 +211,6 @@
       "mobileSaasBuilderAccess": "Acesso ao Mobile & SaaS Builder",
       "priorityProcessing": "Processamento prioritário",
       "everythingInGrowth": "Tudo o que o Growth inclui",
-      "unlimitedAiAgentsTeams": "Agentes de IA e equipas ilimitados",
       "teamCollaboration": "Colaboração em equipa",
       "sharedAiMemory": "Memória de IA partilhada",
       "prioritySupport": "Apoio prioritário",
@@ -224,6 +227,16 @@
       "upTo5AiAgents": "Até 5 agentes de IA",
       "upTo15AiAgentsTeams": "Até 15 agentes de IA e equipas",
       "upTo50AiAgents": "Até 50 agentes de IA"
+    },
+    "values": {
+      "unlimited": "Ilimitado",
+      "included": "Incluído",
+      "custom": "Personalizado",
+      "perSeat": "+{currency}{price}/lugar"
+    },
+    "seatNote": {
+      "included": "Lugares de equipa ilimitados incluídos — sem cobrança por membro",
+      "perMember": "+ {currency}{price}/mês por membro da equipa — cada membro obtém acesso total ao nível do seu plano"
     }
   },
   "roadmap": {

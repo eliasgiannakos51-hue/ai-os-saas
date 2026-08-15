@@ -178,7 +178,13 @@
       "imageVideo": "图像与视频生成",
       "aiMemory": "AI 记忆",
       "teamCollaboration": "团队协作",
-      "teamSeatsAddOn": "团队席位"
+      "teamSeatsAddOn": "团队席位",
+      "freeChatMessages": "每月免费聊天消息",
+      "deepResearch": "每月深度研究次数",
+      "files": "已存储文件",
+      "storage": "存储空间",
+      "integrations": "已连接的集成",
+      "publishedSites": "已发布网站"
     },
     "businessTitle": "商业版",
     "businessSubtitle": "为共同打造的团队而生",
@@ -191,13 +197,11 @@
     "setUpTeam": "设置团队",
     "features": {
       "1Workspace3Projects": "1 个工作区，3 个项目",
-      "2AiAgents": "2 个 AI 智能体",
       "basicAiChat": "基础 AI 聊天",
       "creditsPerMonth": "{count} 积分/月",
       "marketplaceInstallOnly": "市场：仅可安装",
       "communitySupport": "社区支持",
       "unlimitedProjects": "无限项目",
-      "upTo20AiAgents": "最多 20 个 AI 智能体",
       "aiMemory": "AI 记忆",
       "websiteAutomationBuilderAccess": "网站与自动化构建器访问权限",
       "imageVideoGenerationAccess": "图像与视频生成访问权限",
@@ -207,7 +211,6 @@
       "mobileSaasBuilderAccess": "移动端与 SaaS 构建器访问权限",
       "priorityProcessing": "优先处理",
       "everythingInGrowth": "包含 Growth 的全部功能",
-      "unlimitedAiAgentsTeams": "无限 AI 智能体与团队",
       "teamCollaboration": "团队协作",
       "sharedAiMemory": "共享 AI 记忆",
       "prioritySupport": "优先支持",
@@ -224,6 +227,16 @@
       "upTo5AiAgents": "最多 5 个 AI 智能体",
       "upTo15AiAgentsTeams": "最多 15 个 AI 智能体与团队",
       "upTo50AiAgents": "最多 50 个 AI 智能体"
+    },
+    "values": {
+      "unlimited": "无限",
+      "included": "已包含",
+      "custom": "定制",
+      "perSeat": "+{currency}{price}/席位"
+    },
+    "seatNote": {
+      "included": "包含无限团队席位 — 无需按成员付费",
+      "perMember": "+ 每位团队成员每月 {currency}{price} — 每位成员均可获得您所在套餐等级的完整访问权限"
     }
   },
   "roadmap": {

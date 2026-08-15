@@ -178,7 +178,13 @@
       "imageVideo": "画像・動画生成",
       "aiMemory": "AI メモリー",
       "teamCollaboration": "チームコラボレーション",
-      "teamSeatsAddOn": "チームシート"
+      "teamSeatsAddOn": "チームシート",
+      "freeChatMessages": "無料チャットメッセージ / 月",
+      "deepResearch": "ディープリサーチ実行回数 / 月",
+      "files": "保存ファイル数",
+      "storage": "ストレージ",
+      "integrations": "連携済み統合",
+      "publishedSites": "公開済みウェブサイト"
     },
     "businessTitle": "ビジネス",
     "businessSubtitle": "チームで共に構築する",
@@ -191,13 +197,11 @@
     "setUpTeam": "チームを設定",
     "features": {
       "1Workspace3Projects": "ワークスペース1つ、プロジェクト3つ",
-      "2AiAgents": "AIエージェント2体",
       "basicAiChat": "基本のAIチャット",
       "creditsPerMonth": "{count} クレジット/月",
       "marketplaceInstallOnly": "マーケットプレイス：インストールのみ",
       "communitySupport": "コミュニティサポート",
       "unlimitedProjects": "プロジェクト無制限",
-      "upTo20AiAgents": "AIエージェント最大20体",
       "aiMemory": "AIメモリ",
       "websiteAutomationBuilderAccess": "ウェブサイト＆自動化ビルダーへのアクセス",
       "imageVideoGenerationAccess": "画像・動画生成へのアクセス",
@@ -207,7 +211,6 @@
       "mobileSaasBuilderAccess": "モバイル＆SaaSビルダーへのアクセス",
       "priorityProcessing": "優先処理",
       "everythingInGrowth": "Growthのすべて",
-      "unlimitedAiAgentsTeams": "AIエージェント・チーム無制限",
       "teamCollaboration": "チームコラボレーション",
       "sharedAiMemory": "共有AIメモリ",
       "prioritySupport": "優先サポート",
@@ -224,6 +227,16 @@
       "upTo5AiAgents": "AIエージェント最大5体",
       "upTo15AiAgentsTeams": "AIエージェント最大15体・チーム",
       "upTo50AiAgents": "AIエージェント最大50体"
+    },
+    "values": {
+      "unlimited": "無制限",
+      "included": "込み",
+      "custom": "カスタム",
+      "perSeat": "+{currency}{price}/席"
+    },
+    "seatNote": {
+      "included": "無制限のチームシートを含む — メンバーごとの追加料金なし",
+      "perMember": "+ チームメンバー1人あたり月額{currency}{price} — 各メンバーはご利用プランの階層で全機能を利用できます"
     }
   },
   "roadmap": {

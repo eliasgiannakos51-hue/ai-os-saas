@@ -196,13 +196,13 @@ check("known models are not flagged", costs.unknownModels().length === 0);
 // ---------------------------------------------------------------------------
 console.log("\n== 4. margin policy: per-plan defaults, per-feature overrides, max() rule ==");
 check(
-  "plan margin defaults are FREE 6 / STARTER 5 / GROWTH 4.5 / PRO 4 / ULT 4 / ENT 4",
+  "plan margin defaults are FREE 6 / STARTER 5 / GROWTH 5 / PRO 5 / ULT 5 / ENT 5",
   PLAN_MARGIN_DEFAULTS.free === 6 &&
     PLAN_MARGIN_DEFAULTS.starter === 5 &&
-    PLAN_MARGIN_DEFAULTS.growth === 4.5 &&
-    PLAN_MARGIN_DEFAULTS.professional === 4 &&
-    PLAN_MARGIN_DEFAULTS.ultimate === 4 &&
-    PLAN_MARGIN_DEFAULTS.enterprise === 4
+    PLAN_MARGIN_DEFAULTS.growth === 5 &&
+    PLAN_MARGIN_DEFAULTS.professional === 5 &&
+    PLAN_MARGIN_DEFAULTS.ultimate === 5 &&
+    PLAN_MARGIN_DEFAULTS.enterprise === 5
 );
 {
   const r = resolveMarginFor("chat_message", "free", DEFAULTS, {});
@@ -220,17 +220,29 @@ check(
   const r = resolveMarginFor("chat_message", "free", DEFAULTS, { CREDIT_MARGIN_CHAT: "8" });
   check("feature 8x vs plan 6x -> the HIGHER (feature) wins", r.margin === 8 && r.source === "feature");
 }
+// An ignored override must change NOTHING — not "must produce 4". Those
+// were the same statement only while Ultimate happened to sit at the
+// global floor; once the combined ceiling moved it to 5 the hardcoded 4
+// asserted the wrong thing (a rejected override silently reading as the
+// floor would itself be a bug). Compared against the no-override
+// resolution instead, so the check holds at any plan margin.
 {
-  const r = resolveMarginFor("deep_research", "ultimate", DEFAULTS, { CREDIT_MARGIN_DEEP_RESEARCH: "3" });
-  check("out-of-range 3 is ignored -> general default", r.margin === 4 && r.featureMargin === null);
-}
-{
-  const r = resolveMarginFor("deep_research", "ultimate", DEFAULTS, { CREDIT_MARGIN_DEEP_RESEARCH: "11" });
-  check("out-of-range 11 is ignored -> general default", r.margin === 4 && r.featureMargin === null);
-}
-{
-  const r = resolveMarginFor("deep_research", "ultimate", DEFAULTS, { CREDIT_MARGIN_DEEP_RESEARCH: "banana" });
-  check("garbage is ignored -> general default", r.margin === 4 && r.featureMargin === null);
+  const baseline = resolveMarginFor("deep_research", "ultimate", DEFAULTS, {});
+  for (const bad of ["3", "11", "banana", "", "  ", "0", "-1", "Infinity"]) {
+    const r = resolveMarginFor("deep_research", "ultimate", DEFAULTS, {
+      CREDIT_MARGIN_DEEP_RESEARCH: bad,
+    });
+    check(
+      `an invalid CREDIT_MARGIN_DEEP_RESEARCH="${bad}" changes nothing (${r.margin}x, same as no override)`,
+      r.featureMargin === null && r.margin === baseline.margin && r.source === baseline.source,
+      `got ${r.margin}x source=${r.source}, baseline ${baseline.margin}x source=${baseline.source}`
+    );
+  }
+  check(
+    "…and it never drops below the configured floor",
+    baseline.margin >= 4,
+    `baseline ${baseline.margin}x`
+  );
 }
 {
   const r = resolveMarginFor("agent_run", "starter", DEFAULTS, { CREDIT_MARGIN_AGENT_RUN: "7" });

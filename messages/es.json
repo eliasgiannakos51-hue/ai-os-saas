@@ -178,7 +178,13 @@
       "imageVideo": "Generación de imágenes y video",
       "aiMemory": "Memoria AI",
       "teamCollaboration": "Colaboración en equipo",
-      "teamSeatsAddOn": "Puestos de equipo"
+      "teamSeatsAddOn": "Puestos de equipo",
+      "freeChatMessages": "Mensajes de chat gratuitos / mes",
+      "deepResearch": "Ejecuciones de Deep Research / mes",
+      "files": "Archivos almacenados",
+      "storage": "Almacenamiento",
+      "integrations": "Integraciones conectadas",
+      "publishedSites": "Sitios web publicados"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Para equipos que construyen juntos",
@@ -191,13 +197,11 @@
     "setUpTeam": "Configurar Equipo",
     "features": {
       "1Workspace3Projects": "1 espacio de trabajo, 3 proyectos",
-      "2AiAgents": "2 agentes de IA",
       "basicAiChat": "Chat de IA básico",
       "creditsPerMonth": "{count} créditos/mes",
       "marketplaceInstallOnly": "Marketplace: solo instalación",
       "communitySupport": "Soporte de la comunidad",
       "unlimitedProjects": "Proyectos ilimitados",
-      "upTo20AiAgents": "Hasta 20 agentes de IA",
       "aiMemory": "Memoria de IA",
       "websiteAutomationBuilderAccess": "Acceso a Website & Automation Builder",
       "imageVideoGenerationAccess": "Acceso a generación de imagen y vídeo",
@@ -207,7 +211,6 @@
       "mobileSaasBuilderAccess": "Acceso a Mobile & SaaS Builder",
       "priorityProcessing": "Procesamiento prioritario",
       "everythingInGrowth": "Todo lo de Growth",
-      "unlimitedAiAgentsTeams": "Agentes de IA y equipos ilimitados",
       "teamCollaboration": "Colaboración en equipo",
       "sharedAiMemory": "Memoria de IA compartida",
       "prioritySupport": "Soporte prioritario",
@@ -224,6 +227,16 @@
       "upTo5AiAgents": "Hasta 5 agentes de IA",
       "upTo15AiAgentsTeams": "Hasta 15 agentes de IA y equipos",
       "upTo50AiAgents": "Hasta 50 agentes de IA"
+    },
+    "values": {
+      "unlimited": "Ilimitado",
+      "included": "Incluido",
+      "custom": "Personalizado",
+      "perSeat": "+{currency}{price}/puesto"
+    },
+    "seatNote": {
+      "included": "Puestos de equipo ilimitados incluidos: sin cargo por miembro",
+      "perMember": "+ {currency}{price}/mes por miembro del equipo: cada miembro obtiene acceso completo al nivel de tu plan"
     }
   },
   "roadmap": {

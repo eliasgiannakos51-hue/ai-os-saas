@@ -16,7 +16,7 @@ const {
   freeChatAllowanceForSlug,
   FREE_CHAT_LIMITS,
   PAID_CHAT_LIMITS,
-  FREE_CHAT_MAX_COST_SHARE,
+  FREE_CHAT_TARGET_SHARE,
   DEFAULT_FREE_CHAT_MESSAGES,
 } = m;
 
@@ -67,9 +67,16 @@ check("free message charges no search fee", free.webSearches === 0);
 check("free worst case is at least 10x cheaper than paid", full.costEur / free.costEur >= 10,
   `ratio ${(full.costEur / free.costEur).toFixed(1)}x`);
 
-console.log("\n== 4. THE CEILING: worst case is at most 25% of plan price ==");
+console.log(`\n== 4. THE BUDGET: this quota fits the ${FREE_CHAT_TARGET_SHARE * 100}% it was allocated ==`);
+// DELIBERATELY NOT "the 25% ceiling". This file can only see one
+// subsystem, and a file that can only see one subsystem must not claim to
+// have checked the whole ceiling — that claim is exactly what let free
+// chat sit at 18.8% next to a credit subsystem at 25% and call the pair
+// compliant. The 25% question belongs to combined-ceiling.test.mjs, which
+// sees both halves; this section checks only that free chat stays inside
+// the slice the registry gave it.
 const rows = freeChatEconomics();
-console.log("        Plan          Price   Free  WorstCost   %ofPrice");
+console.log("        Plan          Price   Free  WorstCost    Budget   %ofPrice");
 for (const r of rows) {
   console.log(
     "       ",
@@ -77,20 +84,45 @@ for (const r of rows) {
     String(r.planPriceEur).padStart(6),
     String(r.freeMessages).padStart(5),
     ("EUR " + r.worstCaseCostEur.toFixed(2)).padStart(11),
+    (r.budgetEur === null ? "--" : "EUR " + r.budgetEur.toFixed(2)).padStart(9),
     (r.shareOfPrice === null ? "--" : (r.shareOfPrice * 100).toFixed(1) + "%").padStart(9)
   );
 }
 for (const r of rows) {
   check(
-    `${r.planSlug} within the ${FREE_CHAT_MAX_COST_SHARE * 100}% ceiling`,
-    r.withinCeiling,
-    r.shareOfPrice === null ? "" : `${(r.shareOfPrice * 100).toFixed(1)}%`
+    `${r.planSlug} within its allocated budget`,
+    r.withinBudget,
+    r.budgetEur === null
+      ? `EUR ${r.worstCaseCostEur.toFixed(4)} absolute`
+      : `EUR ${r.worstCaseCostEur.toFixed(4)} of EUR ${r.budgetEur.toFixed(4)}`
   );
 }
-check("every paid plan has a defined share", rows.filter((r) => typeof r.planPriceEur === "number" && r.planPriceEur > 0).every((r) => r.shareOfPrice !== null));
+// Enterprise is no longer exempt: it has a contractual floor price, so a
+// share of it is defined. Only Free — price genuinely zero — has none.
+check(
+  "every plan with a measurable price has a defined share",
+  rows.filter((r) => r.planSlug !== "free").every((r) => r.shareOfPrice !== null),
+  JSON.stringify(rows.filter((r) => r.shareOfPrice === null).map((r) => r.planSlug))
+);
+check(
+  "enterprise is measured against its contractual floor, not exempted",
+  rows.find((r) => r.planSlug === "enterprise").shareOfPrice !== null
+);
 check("free plan reports no share (its price is zero)", rows.find((r) => r.planSlug === "free").shareOfPrice === null);
 check("free plan's absolute cost stays under EUR 1/month", rows.find((r) => r.planSlug === "free").worstCaseCostEur < 1,
   `EUR ${rows.find((r) => r.planSlug === "free").worstCaseCostEur.toFixed(2)}`);
+
+// The handoff, asserted rather than described: the whole-ceiling question
+// is answered elsewhere, and it must actually reach 4x there.
+const combined = await loadTs("src/lib/billing/free-allowances.ts");
+for (const row of combined.combinedCeilingTable()) {
+  if (row.priceEur === null) continue;
+  check(
+    `${row.planSlug}: credits + free chat together really are >= 4x (${row.combinedMargin.toFixed(2)}x)`,
+    row.combinedMargin >= 4 - 1e-9,
+    `${(row.totalShare * 100).toFixed(1)}% of EUR ${row.priceEur}`
+  );
+}
 
 console.log("\n== 5. allowance grows with plan price ==");
 const order = ["free", "starter", "growth", "professional", "ultimate"];
@@ -139,8 +171,8 @@ check(
   clamped.freeMessages === m.maxAllowanceWithinCeiling("starter"),
   `granted ${clamped.freeMessages}, max ${m.maxAllowanceWithinCeiling("starter")}`
 );
-check("so the economics stay within the ceiling even then", clamped.withinCeiling === true,
-  `${(clamped.shareOfPrice * 100).toFixed(0)}% of price`);
+check("so the economics stay within the allocated budget even then", clamped.withinBudget === true,
+  `${(clamped.shareOfPrice * 100).toFixed(1)}% of price, budget EUR ${clamped.budgetEur.toFixed(2)}`);
 delete process.env.FREE_CHAT_MESSAGES_STARTER;
 
 console.log("\n== 9. the per-message cost cap (FREE_CHAT_MAX_COST_EUR) ==");
@@ -178,7 +210,21 @@ const routeSrc = route.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm,
 check("size gate present", /withinFreeSize && withinFreeCost/.test(routeSrc));
 check(
   "cost gate compares the message estimate to the cap",
-  /freeChatMessageEstimatedCostEur\(message\.length, systemPrompt\.length, pricingConfig\) <=\s*\n?\s*freeChatMaxCostEur\(\)/.test(routeSrc)
+  /freeChatMessageEstimatedCostEur\(\s*message\.length,\s*systemPrompt\.length,\s*pricingConfig,?\s*(freeLimits,?\s*)?\)\s*<=\s*freeChatMaxCostEur\(\)/.test(routeSrc),
+  "the gate's shape changed — check api/chat/route.ts"
+);
+// The gate must price the envelope THIS ACCOUNT will actually run in.
+// A grandfathered account keeps an 800-token reply cap; estimating it at
+// the published 600 would under-price the message and let it through the
+// cap when it should not.
+check(
+  "…using the ACCOUNT's envelope, not the published constant",
+  /freeChatMessageEstimatedCostEur\([\s\S]{0,120}freeLimits/.test(routeSrc) &&
+    !/freeChatMessageEstimatedCostEur\([\s\S]{0,120}FREE_CHAT_LIMITS/.test(routeSrc)
+);
+check(
+  "the size gate uses the account's envelope too",
+  /message\.length <= freeLimits\.maxMessageChars/.test(routeSrc)
 );
 check(
   "the client is told when a message was too large to be free",
@@ -192,8 +238,8 @@ for (const row of freeChatEconomics()) {
     `   ${row.planSlug.padEnd(13)} | ${String(row.freeMessages).padStart(5)} msgs | €${row.worstCaseCostEur.toFixed(2).padStart(6)} | ${share}`
   );
   check(
-    `   ...${row.planSlug} is within the 25% ceiling`,
-    row.withinCeiling === true,
+    `   ...${row.planSlug} is within its allocated ${FREE_CHAT_TARGET_SHARE * 100}% budget`,
+    row.withinBudget === true,
     JSON.stringify(row)
   );
 }

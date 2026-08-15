@@ -178,7 +178,13 @@
       "imageVideo": "Δημιουργία εικόνας & βίντεο",
       "aiMemory": "AI Μνήμη",
       "teamCollaboration": "Συνεργασία ομάδας",
-      "teamSeatsAddOn": "Θέσεις ομάδας"
+      "teamSeatsAddOn": "Θέσεις ομάδας",
+      "freeChatMessages": "Δωρεάν μηνύματα chat / μήνα",
+      "deepResearch": "Εκτελέσεις Deep Research / μήνα",
+      "files": "Αποθηκευμένα αρχεία",
+      "storage": "Αποθηκευτικός χώρος",
+      "integrations": "Συνδεδεμένες ενσωματώσεις",
+      "publishedSites": "Δημοσιευμένοι ιστότοποι"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Για ομάδες που χτίζουν μαζί",
@@ -191,13 +197,11 @@
     "setUpTeam": "Δημιουργία Ομάδας",
     "features": {
       "1Workspace3Projects": "1 χώρος εργασίας, 3 έργα",
-      "2AiAgents": "2 πράκτορες AI",
       "basicAiChat": "Βασική συνομιλία AI",
       "creditsPerMonth": "{count} credits/μήνα",
       "marketplaceInstallOnly": "Marketplace: μόνο εγκατάσταση",
       "communitySupport": "Υποστήριξη κοινότητας",
       "unlimitedProjects": "Απεριόριστα έργα",
-      "upTo20AiAgents": "Έως 20 πράκτορες AI",
       "aiMemory": "Μνήμη AI",
       "websiteAutomationBuilderAccess": "Πρόσβαση σε Website & Automation Builder",
       "imageVideoGenerationAccess": "Πρόσβαση σε δημιουργία εικόνας & βίντεο",
@@ -207,7 +211,6 @@
       "mobileSaasBuilderAccess": "Πρόσβαση σε Mobile & SaaS Builder",
       "priorityProcessing": "Επεξεργασία κατά προτεραιότητα",
       "everythingInGrowth": "Ό,τι περιλαμβάνει το Growth",
-      "unlimitedAiAgentsTeams": "Απεριόριστοι πράκτορες AI & ομάδες",
       "teamCollaboration": "Συνεργασία ομάδας",
       "sharedAiMemory": "Κοινόχρηστη μνήμη AI",
       "prioritySupport": "Υποστήριξη κατά προτεραιότητα",
@@ -224,6 +227,16 @@
       "upTo5AiAgents": "Έως 5 πράκτορες AI",
       "upTo15AiAgentsTeams": "Έως 15 πράκτορες AI & ομάδες",
       "upTo50AiAgents": "Έως 50 πράκτορες AI"
+    },
+    "values": {
+      "unlimited": "Απεριόριστα",
+      "included": "Περιλαμβάνεται",
+      "custom": "Προσαρμοσμένο",
+      "perSeat": "+{currency}{price}/θέση"
+    },
+    "seatNote": {
+      "included": "Απεριόριστες θέσεις ομάδας — χωρίς χρέωση ανά μέλος",
+      "perMember": "+ {currency}{price}/μήνα ανά μέλος ομάδας — κάθε μέλος έχει πλήρη πρόσβαση στο επίπεδο του πλάνου σας"
     }
   },
   "roadmap": {

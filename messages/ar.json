@@ -178,7 +178,13 @@
       "imageVideo": "توليد الصور والفيديو",
       "aiMemory": "ذاكرة الذكاء الاصطناعي",
       "teamCollaboration": "تعاون الفريق",
-      "teamSeatsAddOn": "مقاعد الفريق"
+      "teamSeatsAddOn": "مقاعد الفريق",
+      "freeChatMessages": "رسائل محادثة مجانية / شهريًا",
+      "deepResearch": "عمليات البحث المعمّق / شهريًا",
+      "files": "الملفات المخزّنة",
+      "storage": "مساحة التخزين",
+      "integrations": "التكاملات المتصلة",
+      "publishedSites": "المواقع المنشورة"
     },
     "businessTitle": "الأعمال",
     "businessSubtitle": "للفرق التي تبني معًا",
@@ -191,13 +197,11 @@
     "setUpTeam": "إعداد الفريق",
     "features": {
       "1Workspace3Projects": "مساحة عمل واحدة، 3 مشاريع",
-      "2AiAgents": "وكيلان بالذكاء الاصطناعي",
       "basicAiChat": "محادثة ذكاء اصطناعي أساسية",
       "creditsPerMonth": "{count} رصيد/شهر",
       "marketplaceInstallOnly": "المتجر: التثبيت فقط",
       "communitySupport": "دعم المجتمع",
       "unlimitedProjects": "مشاريع غير محدودة",
-      "upTo20AiAgents": "حتى 20 وكيلاً ذكياً",
       "aiMemory": "ذاكرة الذكاء الاصطناعي",
       "websiteAutomationBuilderAccess": "الوصول إلى منشئ المواقع والأتمتة",
       "imageVideoGenerationAccess": "الوصول إلى توليد الصور والفيديو",
@@ -207,7 +211,6 @@
       "mobileSaasBuilderAccess": "الوصول إلى منشئ تطبيقات الجوال وSaaS",
       "priorityProcessing": "معالجة ذات أولوية",
       "everythingInGrowth": "كل ما في باقة Growth",
-      "unlimitedAiAgentsTeams": "وكلاء ذكاء اصطناعي وفرق غير محدودة",
       "teamCollaboration": "تعاون الفريق",
       "sharedAiMemory": "ذاكرة ذكاء اصطناعي مشتركة",
       "prioritySupport": "دعم ذو أولوية",
@@ -224,6 +227,16 @@
       "upTo5AiAgents": "حتى 5 وكلاء أذكياء",
       "upTo15AiAgentsTeams": "حتى 15 وكيلاً ذكياً وفرق",
       "upTo50AiAgents": "حتى 50 وكيلاً ذكياً"
+    },
+    "values": {
+      "unlimited": "غير محدود",
+      "included": "مشمول",
+      "custom": "مخصّص",
+      "perSeat": "+{currency}{price}/مقعد"
+    },
+    "seatNote": {
+      "included": "مقاعد فريق غير محدودة مشمولة — بدون رسوم لكل عضو",
+      "perMember": "+ {currency}{price}/شهريًا لكل عضو في الفريق — يحصل كل عضو على وصول كامل بمستوى خطتك"
     }
   },
   "roadmap": {

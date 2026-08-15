@@ -5,6 +5,7 @@ import { hasActiveBetaBypass, isBetaTester } from "@/lib/beta";
 import { diagLog } from "@/lib/diag";
 import { getPlan, type Plan, type PlanSlug } from "./plans";
 import { isAdminEmail } from "@/lib/admin";
+import { clearLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
 
 // The plan a user is on lives in user_metadata.subscription_tier, written
 // by the Stripe webhook on checkout/subscription events (see
@@ -359,6 +360,15 @@ export async function resetCreditsToTotal(userId: string, total: number): Promis
 export async function syncCreditsForPlan(userId: string, planSlug: PlanSlug, reason: string): Promise<void> {
   const plan = getPlan(planSlug) ?? getPlan("free")!;
   const admin = createAdminClient();
+
+  // A plan change ends any grandfathered entitlement. This is the guard
+  // that keeps grandfathering from becoming a hole rather than a courtesy:
+  // without it, an Ultimate account that downgrades to Starter would keep
+  // 1,200 free chat messages — EUR 37.63/month of worst-case spend against
+  // EUR 20 of revenue — and downgrading would be the cheapest way to buy
+  // the expensive plan's allowance. Runs on every subscription event the
+  // Stripe webhook reports, including a cancellation back to Free.
+  await clearLegacyEntitlements(userId);
 
   if (plan.monthlyCredits === "custom") {
     await admin.from("user_credits").upsert(

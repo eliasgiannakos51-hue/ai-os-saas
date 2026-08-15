@@ -178,7 +178,13 @@
       "imageVideo": "Génération d'images et de vidéos",
       "aiMemory": "Mémoire IA",
       "teamCollaboration": "Collaboration d'équipe",
-      "teamSeatsAddOn": "Sièges d'équipe"
+      "teamSeatsAddOn": "Sièges d'équipe",
+      "freeChatMessages": "Messages de chat gratuits / mois",
+      "deepResearch": "Recherches approfondies / mois",
+      "files": "Fichiers stockés",
+      "storage": "Stockage",
+      "integrations": "Intégrations connectées",
+      "publishedSites": "Sites web publiés"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Pour les équipes qui construisent ensemble",
@@ -191,13 +197,11 @@
     "setUpTeam": "Configurer l'équipe",
     "features": {
       "1Workspace3Projects": "1 espace de travail, 3 projets",
-      "2AiAgents": "2 agents IA",
       "basicAiChat": "Chat IA basique",
       "creditsPerMonth": "{count} crédits/mois",
       "marketplaceInstallOnly": "Marketplace : installation uniquement",
       "communitySupport": "Assistance communautaire",
       "unlimitedProjects": "Projets illimités",
-      "upTo20AiAgents": "Jusqu'à 20 agents IA",
       "aiMemory": "Mémoire IA",
       "websiteAutomationBuilderAccess": "Accès à Website & Automation Builder",
       "imageVideoGenerationAccess": "Accès à la génération d'images et de vidéos",
@@ -207,7 +211,6 @@
       "mobileSaasBuilderAccess": "Accès à Mobile & SaaS Builder",
       "priorityProcessing": "Traitement prioritaire",
       "everythingInGrowth": "Tout ce que contient Growth",
-      "unlimitedAiAgentsTeams": "Agents IA et équipes illimités",
       "teamCollaboration": "Collaboration d'équipe",
       "sharedAiMemory": "Mémoire IA partagée",
       "prioritySupport": "Assistance prioritaire",
@@ -224,6 +227,16 @@
       "upTo5AiAgents": "Jusqu'à 5 agents IA",
       "upTo15AiAgentsTeams": "Jusqu'à 15 agents IA et équipes",
       "upTo50AiAgents": "Jusqu'à 50 agents IA"
+    },
+    "values": {
+      "unlimited": "Illimité",
+      "included": "Inclus",
+      "custom": "Sur mesure",
+      "perSeat": "+{currency}{price}/siège"
+    },
+    "seatNote": {
+      "included": "Sièges d'équipe illimités inclus — aucun frais par membre",
+      "perMember": "+ {currency}{price}/mois par membre d'équipe — chaque membre bénéficie d'un accès complet au niveau de votre offre"
     }
   },
   "roadmap": {

@@ -469,6 +469,67 @@ console.log("\n== 3. new controls are actually visible (production build, 375px)
 
 await authed.close();
 
+// ---------------------------------------------------------------------
+// /pricing — the quantitative limits, in a real browser, in Greek.
+//
+// The build gate (scripts/tests/combined-ceiling.test.mjs) proves each
+// number is READ FROM the module that enforces it and that every label
+// exists in ten locales. It cannot prove the page renders them, and the
+// difference is not academic: the first browser run of this check found
+// two English sentences and one English word ("/seat") that every
+// source-side i18n gate in the repo structurally could not see.
+//
+// Public page, so no auth — a fresh context with the locale cookie the
+// app actually reads (src/i18n/request.ts is cookie-based, not
+// header-based; setting accept-language alone renders English).
+{
+  const ctx = await browser.newContext({ locale: "el" });
+  await ctx.addCookies([
+    { name: "NEXT_LOCALE", value: "el", url: `http://127.0.0.1:${PORT}` },
+  ]);
+  const page = await ctx.newPage();
+  await page.goto(`http://127.0.0.1:${PORT}/pricing`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+  const main = await page.locator("main").innerText();
+
+  // Every enforced per-plan number, as the server would refuse it.
+  for (const [what, values] of Object.entries({
+    "free chat": ["15", "43", "107", "215", "430"],
+    "deep research": ["2", "10", "50", "200"],
+    files: ["20", "100", "500"],
+    storage: ["500 MB", "2 GB", "10 GB", "50 GB"],
+    "published sites": ["1", "3", "10", "30"],
+  })) {
+    const missing = values.filter((v) => !main.includes(v));
+    checkTrue(`/pricing shows every ${what} limit (${values.join(", ")})`, missing.length === 0);
+    if (missing.length) console.log(`        missing: ${missing.join(", ")}`);
+  }
+
+  // Greek page, Greek copy. Three or more consecutive English words is a
+  // literal somebody forgot; brand names are shorter than that.
+  const english = [...main.matchAll(/(?:^|[^\p{L}])([A-Za-z]{3,}(?: [a-z]{3,}){2,})/gu)].map((m) => m[1]);
+  checkTrue("no English sentence survives in the Greek pricing page", english.length === 0);
+  if (english.length) console.log(`        ${english.join(" | ")}`);
+  checkTrue("…and the row labels really are translated", /Αποθηκευτικός χώρος/.test(main));
+  checkTrue("…including the per-seat price", /θέση/.test(main) && !/\/seat/.test(main));
+
+  // 375 is where the seven-column table would break the page if it were
+  // not scrolling inside its own container. 768 is where a publish bug
+  // once hid between the two widths everyone tests.
+  for (const width of [375, 414, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.waitForTimeout(120);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    );
+    checkTrue(`/pricing does not scroll horizontally at ${width}px (overflow ${overflow}px)`, overflow <= 1);
+  }
+  await page.close();
+  await ctx.close();
+}
+
 await browser.close();
 cleanup();
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);

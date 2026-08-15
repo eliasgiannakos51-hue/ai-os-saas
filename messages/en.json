@@ -178,7 +178,13 @@
       "imageVideo": "Image & video generation",
       "aiMemory": "AI Memory",
       "teamCollaboration": "Team collaboration",
-      "teamSeatsAddOn": "Team seats"
+      "teamSeatsAddOn": "Team seats",
+      "freeChatMessages": "Free chat messages / month",
+      "deepResearch": "Deep Research runs / month",
+      "files": "Files stored",
+      "storage": "Storage",
+      "integrations": "Connected integrations",
+      "publishedSites": "Published websites"
     },
     "businessTitle": "Business",
     "businessSubtitle": "For teams building together",
@@ -191,13 +197,11 @@
     "setUpTeam": "Set Up Team",
     "features": {
       "1Workspace3Projects": "1 workspace, 3 projects",
-      "2AiAgents": "2 AI agents",
       "basicAiChat": "Basic AI chat",
       "creditsPerMonth": "{count} credits/month",
       "marketplaceInstallOnly": "Marketplace: install only",
       "communitySupport": "Community support",
       "unlimitedProjects": "Unlimited projects",
-      "upTo20AiAgents": "Up to 20 AI agents",
       "aiMemory": "AI Memory",
       "websiteAutomationBuilderAccess": "Website & Automation Builder access",
       "imageVideoGenerationAccess": "Image & video generation access",
@@ -207,7 +211,6 @@
       "mobileSaasBuilderAccess": "Mobile & SaaS Builder access",
       "priorityProcessing": "Priority processing",
       "everythingInGrowth": "Everything in Growth",
-      "unlimitedAiAgentsTeams": "Unlimited AI agents & teams",
       "teamCollaboration": "Team collaboration",
       "sharedAiMemory": "Shared AI memory",
       "prioritySupport": "Priority support",
@@ -224,6 +227,16 @@
       "upTo5AiAgents": "Up to 5 AI agents",
       "upTo15AiAgentsTeams": "Up to 15 AI agents & teams",
       "upTo50AiAgents": "Up to 50 AI agents"
+    },
+    "values": {
+      "unlimited": "Unlimited",
+      "included": "Included",
+      "custom": "Custom",
+      "perSeat": "+{currency}{price}/seat"
+    },
+    "seatNote": {
+      "included": "Unlimited team seats included — no per-member charge",
+      "perMember": "+ {currency}{price}/month per team member — each member gets full access at your plan's tier"
     }
   },
   "roadmap": {

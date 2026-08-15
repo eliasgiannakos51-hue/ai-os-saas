@@ -178,7 +178,13 @@
       "imageVideo": "Bild- & Videogenerierung",
       "aiMemory": "KI-Gedächtnis",
       "teamCollaboration": "Teamzusammenarbeit",
-      "teamSeatsAddOn": "Team-Plätze"
+      "teamSeatsAddOn": "Team-Plätze",
+      "freeChatMessages": "Kostenlose Chat-Nachrichten / Monat",
+      "deepResearch": "Deep-Research-Läufe / Monat",
+      "files": "Gespeicherte Dateien",
+      "storage": "Speicherplatz",
+      "integrations": "Verbundene Integrationen",
+      "publishedSites": "Veröffentlichte Websites"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Für Teams, die gemeinsam aufbauen",
@@ -191,13 +197,11 @@
     "setUpTeam": "Team einrichten",
     "features": {
       "1Workspace3Projects": "1 Arbeitsbereich, 3 Projekte",
-      "2AiAgents": "2 KI-Agenten",
       "basicAiChat": "Basis-KI-Chat",
       "creditsPerMonth": "{count} Credits/Monat",
       "marketplaceInstallOnly": "Marketplace: nur Installation",
       "communitySupport": "Community-Support",
       "unlimitedProjects": "Unbegrenzte Projekte",
-      "upTo20AiAgents": "Bis zu 20 KI-Agenten",
       "aiMemory": "KI-Gedächtnis",
       "websiteAutomationBuilderAccess": "Zugang zum Website- & Automation-Builder",
       "imageVideoGenerationAccess": "Zugang zur Bild- & Videogenerierung",
@@ -207,7 +211,6 @@
       "mobileSaasBuilderAccess": "Zugang zum Mobile- & SaaS-Builder",
       "priorityProcessing": "Vorrangige Verarbeitung",
       "everythingInGrowth": "Alles aus Growth",
-      "unlimitedAiAgentsTeams": "Unbegrenzte KI-Agenten & Teams",
       "teamCollaboration": "Team-Zusammenarbeit",
       "sharedAiMemory": "Gemeinsames KI-Gedächtnis",
       "prioritySupport": "Vorrangiger Support",
@@ -224,6 +227,16 @@
       "upTo5AiAgents": "Bis zu 5 KI-Agenten",
       "upTo15AiAgentsTeams": "Bis zu 15 KI-Agenten & Teams",
       "upTo50AiAgents": "Bis zu 50 KI-Agenten"
+    },
+    "values": {
+      "unlimited": "Unbegrenzt",
+      "included": "Inklusive",
+      "custom": "Individuell",
+      "perSeat": "+{currency}{price}/Platz"
+    },
+    "seatNote": {
+      "included": "Unbegrenzte Team-Plätze inklusive — keine Gebühr pro Mitglied",
+      "perMember": "+ {currency}{price}/Monat pro Teammitglied — jedes Mitglied erhält vollen Zugriff auf der Stufe Ihres Tarifs"
     }
   },
   "roadmap": {

@@ -4,6 +4,11 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { Check, X } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { PLANS, TEAM_SEAT_PRICE, CURRENCY_SYMBOL, getPlan, type Plan, type PaidPlanSlug } from "@/lib/billing/plans";
+import { freeChatAllowance } from "@/lib/billing/free-chat";
+import { maxAgentsForPlan } from "@/lib/agents/agent-limits";
+import { maxFilesForPlan, maxResearchRunsForPlan, maxStorageBytesForPlan } from "@/lib/files/limits";
+import { maxIntegrationsForPlan } from "@/lib/integrations/limits";
+import { maxPublishedSitesForPlan } from "@/lib/publishing/publish-limits";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
 import { AppBackground } from "@/components/ui/app-background";
 import { createClient } from "@/lib/supabase/server";
@@ -18,24 +23,88 @@ export const metadata: Metadata = {
 
 type ComparisonCell = { type: "value"; text: string } | { type: "check" } | { type: "cross" };
 
-// Every row here maps straight to a real, enforced capability
-// (lib/billing/plans.ts's PlanCapabilities/hasTeamSeats/teamSeatsIncluded)
-// — nothing pending/unbuilt is listed. labelKey looks up
-// messages/*.json's pricing.rows.<key> for the row name.
-const COMPARISON_ROWS: { labelKey: string; cell: (plan: Plan, locale: string) => ComparisonCell }[] = [
+// Words that appear INSIDE a cell rather than as a row label. They were
+// hardcoded English ("Unlimited", "Included", "Custom") on a page whose
+// whole point is that a non-English visitor sees it first — the same
+// defect the feature list was fixed for. Passed down as a lookup so the
+// cell builders stay pure.
+type CellWords = { unlimited: string; included: string; custom: string; perSeat: string };
+
+function formatStorage(bytes: number, locale: string): string {
+  const MB = 1024 * 1024;
+  const GB = 1024 * MB;
+  return bytes >= GB
+    ? `${formatNumber(Math.round(bytes / GB), locale)} GB`
+    : `${formatNumber(Math.round(bytes / MB), locale)} MB`;
+}
+
+function countOrUnlimited(n: number, locale: string, words: CellWords): ComparisonCell {
+  if (!Number.isFinite(n)) return { type: "value", text: words.unlimited };
+  if (n <= 0) return { type: "cross" };
+  return { type: "value", text: formatNumber(n, locale) };
+}
+
+// Every row here maps straight to a real, enforced capability or limit —
+// nothing pending/unbuilt is listed, and every number is READ FROM the
+// module that enforces it rather than typed here. That is the difference
+// between a pricing page and a promise: `maxResearchRunsForPlan` is the
+// same function api/research/route.ts refuses a run with.
+//
+// The six quantitative rows below were the gap this closes. Growth already
+// gave 5x the Deep Research, 5x the files, 4x the storage, 2.5x the
+// integrations and 3x the published sites of Starter — and the page said
+// "Everything in Starter", because none of those numbers appeared
+// anywhere. The differentiation existed; the copy did not mention it.
+//
+// labelKey looks up messages/*.json's pricing.rows.<key> for the row name.
+const COMPARISON_ROWS: {
+  labelKey: string;
+  cell: (plan: Plan, locale: string, words: CellWords) => ComparisonCell;
+}[] = [
   {
     labelKey: "creditsPerMonth",
-    cell: (p, locale) => ({
+    cell: (p, locale, words) => ({
       type: "value",
-      text: p.monthlyCredits === "custom" ? "Custom" : formatNumber(p.monthlyCredits, locale),
+      text: p.monthlyCredits === "custom" ? words.custom : formatNumber(p.monthlyCredits, locale),
     }),
   },
   {
+    labelKey: "freeChatMessages",
+    // lib/billing/free-chat.ts, clamped to the share of the combined
+    // ceiling the quota registry allocates it.
+    cell: (p, locale, words) => countOrUnlimited(freeChatAllowance(p.slug), locale, words),
+  },
+  {
     labelKey: "aiAgents",
-    cell: (p) => ({
-      type: "value",
-      text: p.capabilities.maxAiAgents === "unlimited" ? "Unlimited" : String(p.capabilities.maxAiAgents),
-    }),
+    // lib/agents/agent-limits.ts — enforced in api/agents.
+    cell: (p, locale, words) => countOrUnlimited(maxAgentsForPlan(p.slug), locale, words),
+  },
+  {
+    labelKey: "deepResearch",
+    // lib/files/limits.ts — enforced in api/research.
+    cell: (p, locale, words) => countOrUnlimited(maxResearchRunsForPlan(p.slug), locale, words),
+  },
+  {
+    labelKey: "files",
+    // lib/files/limits.ts — enforced in api/files/upload.
+    cell: (p, locale, words) => countOrUnlimited(maxFilesForPlan(p.slug), locale, words),
+  },
+  {
+    labelKey: "storage",
+    // lib/files/limits.ts — enforced in api/files/upload. Never
+    // "unlimited": storage is the one resource that bills every month
+    // whether anyone reads it or not.
+    cell: (p, locale) => ({ type: "value", text: formatStorage(maxStorageBytesForPlan(p.slug), locale) }),
+  },
+  {
+    labelKey: "integrations",
+    // lib/integrations/limits.ts — enforced in api/integrations/[provider]/connect.
+    cell: (p, locale, words) => countOrUnlimited(maxIntegrationsForPlan(p.slug), locale, words),
+  },
+  {
+    labelKey: "publishedSites",
+    // lib/publishing/publish-limits.ts — enforced in api/websites/[id]/publish.
+    cell: (p, locale, words) => countOrUnlimited(maxPublishedSitesForPlan(p.slug), locale, words),
   },
   { labelKey: "websiteBuilder", cell: (p) => (p.capabilities.websiteBuilder ? { type: "check" } : { type: "cross" }) },
   { labelKey: "mobileSaasBuilder", cell: (p) => (p.capabilities.mobileSaasBuilder ? { type: "check" } : { type: "cross" }) },
@@ -44,10 +113,13 @@ const COMPARISON_ROWS: { labelKey: string; cell: (plan: Plan, locale: string) =>
   { labelKey: "teamCollaboration", cell: (p) => (p.capabilities.teamCollaboration ? { type: "check" } : { type: "cross" }) },
   {
     labelKey: "teamSeatsAddOn",
-    cell: (p) => {
+    cell: (p, locale, words) => {
       if (!p.hasTeamSeats) return { type: "cross" };
-      if (p.teamSeatsIncluded) return { type: "value", text: "Included" };
-      return { type: "value", text: `+${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}/seat` };
+      if (p.teamSeatsIncluded) return { type: "value", text: words.included };
+      // "/seat" was the last English word left in the table — one word, so
+      // the sentence scanner in combined-ceiling.test.mjs could not see it,
+      // and it took a screenshot of the Greek page to find.
+      return { type: "value", text: words.perSeat };
     },
   },
 ];
@@ -65,6 +137,12 @@ function ComparisonCellContent({ cell }: { cell: ComparisonCell }) {
 export default async function PricingPage() {
   const t = await getTranslations("pricing");
   const locale = await getLocale();
+  const cellWords: CellWords = {
+    unlimited: t("values.unlimited"),
+    included: t("values.included"),
+    custom: t("values.custom"),
+    perSeat: t("values.perSeat", { currency: CURRENCY_SYMBOL, price: TEAM_SEAT_PRICE }),
+  };
 
   // Determines whether "Set Up Team" below can skip straight to
   // /dashboard/team, or needs to route through checkout first — mirrors
@@ -155,11 +233,16 @@ export default async function PricingPage() {
                 ))}
               </ul>
 
+              {/* Both of these were English string literals, on the page a
+                  non-English visitor is most likely to see FIRST — the same
+                  defect the feature bullets were converted to `textKey` for,
+                  in the same file, surviving because neither i18n gate reads
+                  JSX text nodes built from a ternary. */}
               {plan.hasTeamSeats && (
                 <p className="mt-4 border-t border-border pt-4 text-[11px] leading-relaxed text-muted">
                   {plan.teamSeatsIncluded
-                    ? "Unlimited team seats included — no per-member charge"
-                    : `+ ${CURRENCY_SYMBOL}${TEAM_SEAT_PRICE}/month per team member — each member gets full access at your plan's tier`}
+                    ? t("seatNote.included")
+                    : t("seatNote.perMember", { currency: CURRENCY_SYMBOL, price: TEAM_SEAT_PRICE })}
                 </p>
               )}
 
@@ -277,7 +360,7 @@ export default async function PricingPage() {
                     <td className="px-4 py-3 text-left text-muted">{t(`rows.${row.labelKey}`)}</td>
                     {PLANS.map((plan) => (
                       <td key={plan.slug} className="px-4 py-3 text-center">
-                        <ComparisonCellContent cell={row.cell(plan, locale)} />
+                        <ComparisonCellContent cell={row.cell(plan, locale, cellWords)} />
                       </td>
                     ))}
                   </tr>

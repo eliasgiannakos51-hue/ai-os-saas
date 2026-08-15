@@ -1,7 +1,7 @@
 -- =========================================================================
 -- WHAT IS MISSING FROM THIS DATABASE
 --
--- GENERATED FROM:  branch claude/pricing-margin-ceiling-9yoimd  @  commit 7f75354  (+1 uncommitted file(s))
+-- GENERATED FROM:  branch claude/pricing-margin-ceiling-9yoimd  @  commit bec8902  (clean tree)
 --
 -- That line is the answer to "which code is this measured against". A
 -- table reported as UNEXPECTED means nothing in THIS tree queries it —

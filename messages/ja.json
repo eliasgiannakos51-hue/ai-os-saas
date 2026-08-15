@@ -606,7 +606,8 @@
         "restored": "✓ サブスクリプションが再び有効になりました",
         "restore": "元に戻す",
         "endingIn": "{days, plural, =0 {サブスクリプションは本日終了します。} other {サブスクリプションはあと # 日で終了します。}}"
-      }
+      },
+      "creditsSplit": "月次 {monthly} + 購入分 {purchased}（有効期限なし）"
     },
     "marginReport": {
       "title": "マージンレポート",

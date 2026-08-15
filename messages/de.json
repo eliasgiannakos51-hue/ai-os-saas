@@ -606,7 +606,8 @@
         "restored": "✓ dein Abo ist wieder aktiv",
         "restore": "Reaktivieren",
         "endingIn": "{days, plural, =0 {Dein Abo endet heute.} one {Dein Abo endet in # Tag.} other {Dein Abo endet in # Tagen.}}"
-      }
+      },
+      "creditsSplit": "{monthly} monatlich + {purchased} gekauft (verfallen nie)"
     },
     "marginReport": {
       "title": "Margenbericht",

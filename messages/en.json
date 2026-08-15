@@ -606,7 +606,8 @@
         "restored": "✓ your subscription is active again",
         "restore": "Restore",
         "endingIn": "{days, plural, =0 {Your subscription ends today.} one {Your subscription ends in # day.} other {Your subscription ends in # days.}}"
-      }
+      },
+      "creditsSplit": "{monthly} monthly + {purchased} purchased (never expire)"
     },
     "marginReport": {
       "title": "Margin Report",

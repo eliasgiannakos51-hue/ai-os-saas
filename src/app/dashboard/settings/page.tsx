@@ -91,7 +91,7 @@ export default async function SettingsPage() {
   // walks rows that actually moved the balance.
   const { data: creditsRow } = await supabase
     .from("user_credits")
-    .select("credits_remaining")
+    .select("credits_remaining, purchased_credits")
     .eq("user_id", user.id)
     .maybeSingle();
 

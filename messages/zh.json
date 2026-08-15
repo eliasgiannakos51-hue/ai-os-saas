@@ -606,7 +606,8 @@
         "restored": "✓ 你的订阅已重新生效",
         "restore": "恢复",
         "endingIn": "{days, plural, =0 {你的订阅今天到期。} other {你的订阅将在 # 天后到期。}}"
-      }
+      },
+      "creditsSplit": "每月 {monthly} + 已购买 {purchased}（永不过期）"
     },
     "marginReport": {
       "title": "利润率报告",

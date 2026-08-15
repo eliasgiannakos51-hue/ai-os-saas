@@ -606,7 +606,8 @@
         "restored": "✓ a sua subscrição está ativa novamente",
         "restore": "Restaurar",
         "endingIn": "{days, plural, =0 {A sua subscrição termina hoje.} one {A sua subscrição termina daqui a # dia.} other {A sua subscrição termina daqui a # dias.}}"
-      }
+      },
+      "creditsSplit": "{monthly} mensais + {purchased} comprados (nunca expiram)"
     },
     "marginReport": {
       "title": "Relatório de Margem",

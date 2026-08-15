@@ -606,7 +606,8 @@
         "restored": "✓ il tuo abbonamento è di nuovo attivo",
         "restore": "Ripristina",
         "endingIn": "{days, plural, =0 {Il tuo abbonamento termina oggi.} one {Il tuo abbonamento termina tra # giorno.} other {Il tuo abbonamento termina tra # giorni.}}"
-      }
+      },
+      "creditsSplit": "{monthly} mensili + {purchased} acquistati (non scadono mai)"
     },
     "marginReport": {
       "title": "Rapporto Margine",

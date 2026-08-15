@@ -176,7 +176,9 @@ async function grantPurchasedCredits(session: Stripe.Checkout.Session, eventId: 
     creditAmount,
     "purchase",
     `Purchased ${packId} credit pack`,
-    { idempotencyKey: `stripe_checkout:${session.id}` }
+    // purchased: this is money for credits, not a plan allowance. It goes
+    // into the sub-ledger that survives every monthly reset.
+    { idempotencyKey: `stripe_checkout:${session.id}`, purchased: true }
   );
 
   if (!granted) {

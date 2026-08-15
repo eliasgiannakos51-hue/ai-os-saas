@@ -606,7 +606,8 @@
         "restored": "✓ votre abonnement est de nouveau actif",
         "restore": "Rétablir",
         "endingIn": "{days, plural, =0 {Votre abonnement prend fin aujourd'hui.} one {Votre abonnement prend fin dans # jour.} other {Votre abonnement prend fin dans # jours.}}"
-      }
+      },
+      "creditsSplit": "{monthly} mensuels + {purchased} achetés (n'expirent jamais)"
     },
     "marginReport": {
       "title": "Rapport de Marge",

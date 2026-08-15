@@ -15,6 +15,8 @@ export async function BillingSummary({
   isBetaTester = false,
   betaDaysRemaining = null,
   subscription = null,
+  creditsRemaining = 0,
+  purchasedCredits = 0,
 }: {
   tier: string;
   seatCount: number;
@@ -27,6 +29,10 @@ export async function BillingSummary({
   betaDaysRemaining?: number | null;
   /** Live cancel/renew state from Stripe, or null when there is none. */
   subscription?: SubscriptionState | null;
+  /** The whole spendable balance. */
+  creditsRemaining?: number;
+  /** How much of it was BOUGHT. Never expires; see the migration. */
+  purchasedCredits?: number;
 }) {
   const t = await getTranslations("settings.billing");
   const plan = getPlan(tier) ?? getPlan("free")!;
@@ -41,6 +47,18 @@ export async function BillingSummary({
         <div>
           <p className="text-xs text-muted">{t("currentPlan")}</p>
           <p className="mt-0.5 text-lg font-bold text-foreground">{plan.name}</p>
+          {/* Shown only when there is something to explain. A user with no
+              pack sees one number, as before; a user holding one needs to
+              know which part of their balance survives the month, because
+              that is the whole difference between the two. */}
+          {purchasedCredits > 0 && (
+            <p className="mt-0.5 text-xs text-muted">
+              {t("creditsSplit", {
+                monthly: creditsRemaining - purchasedCredits,
+                purchased: purchasedCredits,
+              })}
+            </p>
+          )}
           {seatCount > 0 && (
             <p className="mt-0.5 text-xs text-muted">
               {t("teamSeats", { seats: seatCount })}

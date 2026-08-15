@@ -31,6 +31,7 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import ts from "typescript";
+import { execFileSync } from "node:child_process";
 
 let pass = 0,
   fail = 0;
@@ -368,6 +369,119 @@ checkTrue(
   `client English fallbacks have not grown (${clientFallbacks.length} <= ${CLIENT_FALLBACK_BASELINE})`,
   clientFallbacks.length <= CLIENT_FALLBACK_BASELINE
 );
+
+// ---------------------------------------------------------------------
+// 1c. BARE ENGLISH RENDERED STRAIGHT INTO JSX.
+//
+//     <span>We use cookies for essential functionality…</span>
+//     <button>Accept</button>
+//     <p title="Owner access — unlimited credits">
+//
+// The sibling of 1b. That catches `{cond ? "A" : "B"}`; this catches the
+// literal that is simply there. Both walk the AST for the same reason —
+// a regex cannot tell a text node from a className, or a sentence from an
+// import specifier.
+//
+// MEASURED BEFORE IT WAS TRUSTED. The full report
+// (`node scripts/jsx-text-report.mjs`) was read hit by hit and checked
+// against a real browser on a Greek production build: 162 hits, of which
+// the only category that was not genuinely untranslated user-facing
+// English was the Next.js image-generation routes, whose PNG is fetched by
+// social crawlers that send no locale cookie — excluded by convention, not
+// by name. False-positive rate 0%.
+//
+// A RATCHET, NOT A ZERO.
+//
+// 162 of these already ship. Failing the build on all of them would mean
+// this check could not land at all, and a check that cannot land protects
+// nothing. So the baseline below is per FILE: no file may get worse, and
+// the total may only go down. That is the same mechanism this file already
+// uses for server-side error prose a few sections down — the number is
+// asserted so it cannot quietly GROW, and the decision to pay the debt
+// stays a decision instead of an accident.
+//
+// Fixing a file? Lower its number here, or delete the entry when it hits
+// zero. The check fails if a baseline is HIGHER than reality too, so a
+// stale entry cannot hide a regression somewhere else.
+const BARE_TEXT_BASELINE = {
+    "src/app/cookies/page.tsx": 19,
+    "src/app/dashboard/error.tsx": 1,
+    "src/app/dashboard/settings/page.tsx": 1,
+    "src/app/dashboard/system-health/page.tsx": 5,
+    "src/app/not-found.tsx": 2,
+    "src/app/offline/page.tsx": 3,
+    "src/app/privacy/page.tsx": 17,
+    "src/app/terms/page.tsx": 10,
+    "src/components/auth/generate-password-button.tsx": 1,
+    "src/components/billing/upgrade-required.tsx": 4,
+    "src/components/chat/chat-workspace.tsx": 6,
+    "src/components/chat/conversation-sidebar.tsx": 4,
+    "src/components/create/create-chat.tsx": 4,
+    "src/components/create/next-step-suggestion.tsx": 1,
+    "src/components/dashboard/command-palette.tsx": 4,
+    "src/components/dashboard/menu-button.tsx": 1,
+    "src/components/dashboard/sidebar.tsx": 1,
+    "src/components/dashboard/top-nav.tsx": 1,
+    "src/components/entity-links/link-to-modal.tsx": 2,
+    "src/components/entity-links/linked-entities.tsx": 1,
+    "src/components/error-message.tsx": 1,
+    "src/components/i18n/language-selector.tsx": 1,
+    "src/components/ideas/add-idea-form.tsx": 11,
+    "src/components/ideas/idea-row.tsx": 12,
+    "src/components/ideas/ideas-list.tsx": 4,
+    "src/components/landing/deleted-account-banner.tsx": 1,
+    "src/components/legal/legal-layout.tsx": 3,
+    "src/components/loading-state.tsx": 1,
+    "src/components/memory/memory-search.tsx": 6,
+    "src/components/modules/generic-add-form.tsx": 1,
+    "src/components/overview/beta-expiry-banner.tsx": 3,
+    "src/components/overview/beta-feedback-banner.tsx": 1,
+    "src/components/overview/quick-start-button.tsx": 1,
+    "src/components/overview/quick-start-modal.tsx": 5,
+    "src/components/pagination-controls.tsx": 5,
+    "src/components/pwa/pwa-provider.tsx": 6,
+    "src/components/settings/buy-credits.tsx": 2,
+    "src/components/settings/danger-zone.tsx": 1,
+    "src/components/settings/login-activity.tsx": 1,
+    "src/components/settings/password-change-form.tsx": 1,
+    "src/components/system-health/error-list.tsx": 3,
+    "src/components/text-actions/text-actions-textarea.tsx": 2,
+    "src/components/ui/widget-boundary.tsx": 2,
+  };
+
+{
+  const report = JSON.parse(
+    execFileSync("node", ["scripts/jsx-text-report.mjs", "--json"], {
+      encoding: "utf8",
+      maxBuffer: 32 * 1024 * 1024,
+    })
+  );
+  const counts = new Map();
+  for (const hit of report.hits) {
+    const rel = hit.file.slice(hit.file.indexOf("/src/") + 1);
+    counts.set(rel, (counts.get(rel) ?? 0) + 1);
+  }
+
+  const worse = [];
+  const stale = [];
+  for (const [file, allowed] of Object.entries(BARE_TEXT_BASELINE)) {
+    const actual = counts.get(file) ?? 0;
+    if (actual > allowed) worse.push(`${file}: ${actual} (baseline ${allowed})`);
+    if (actual < allowed) stale.push(`${file}: ${actual} (baseline ${allowed} — lower it)`);
+  }
+  for (const [file, actual] of counts) {
+    if (!(file in BARE_TEXT_BASELINE)) worse.push(`${file}: ${actual} (NEW — no baseline)`);
+  }
+
+  const total = [...counts.values()].reduce((a, b) => a + b, 0);
+  console.log(`        ${total} bare-English hits across ${counts.size} files (baseline total 162)`);
+  check("no file renders MORE bare English than its baseline", worse, []);
+  if (worse.length) {
+    console.log("        Translate it, or — if it is genuinely not translatable —");
+    console.log("        say why in scripts/jsx-text-report.mjs rather than raising the baseline.");
+  }
+  check("no baseline is stale (a fixed file must lower its number)", stale, []);
+}
 
 console.log("\n== 2. every t() call resolves to a real key ==");
 // next-intl renders the raw key path and logs to the console when a key is

@@ -37,8 +37,6 @@ const COMPARISON_ROWS: { labelKey: string; cell: (plan: Plan, locale: string) =>
     }),
   },
   { labelKey: "websiteBuilder", cell: (p) => (p.capabilities.websiteBuilder ? { type: "check" } : { type: "cross" }) },
-  { labelKey: "mobileSaasBuilder", cell: (p) => (p.capabilities.mobileSaasBuilder ? { type: "check" } : { type: "cross" }) },
-  { labelKey: "imageVideo", cell: (p) => (p.capabilities.imageVideoGeneration ? { type: "check" } : { type: "cross" }) },
   { labelKey: "aiMemory", cell: (p) => (p.capabilities.aiMemory ? { type: "check" } : { type: "cross" }) },
   { labelKey: "teamCollaboration", cell: (p) => (p.capabilities.teamCollaboration ? { type: "check" } : { type: "cross" }) },
   {

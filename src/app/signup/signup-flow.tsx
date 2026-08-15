@@ -38,8 +38,6 @@ type Step = 1 | 2;
 // deliberately not listed as a differentiator here either.
 const CAPABILITY_ROWS: { label: string; included: (p: Plan) => boolean }[] = [
   { label: "Website & Automation Builder", included: (p) => p.capabilities.websiteBuilder },
-  { label: "Mobile & SaaS Builder", included: (p) => p.capabilities.mobileSaasBuilder },
-  { label: "Image & video generation", included: (p) => p.capabilities.imageVideoGeneration },
   { label: "AI Memory", included: (p) => p.capabilities.aiMemory },
   { label: "Team collaboration", included: (p) => p.capabilities.teamCollaboration },
   {

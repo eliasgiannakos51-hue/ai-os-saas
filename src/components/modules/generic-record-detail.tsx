@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { deleteConfirmKey, optionLabelKey } from "@/lib/modules";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { FileText, Link2, Pencil, X } from "lucide-react";
@@ -61,6 +62,7 @@ export function GenericRecordDetail({
   onClose: () => void;
 }) {
   const t = useTranslations("module");
+  const tKey = useTranslations();
   const locale = useLocale();
   const tCommon = useTranslations("common");
   const formatRelativeTime = useFormatRelativeTime();
@@ -192,7 +194,7 @@ export function GenericRecordDetail({
             <AskAiButton
               variant="action"
               moduleSlug={module.slug}
-              moduleTitle={module.title}
+              moduleTitle={tKey(module.titleKey)}
               recordId={record.id}
               recordHeadline={headline}
             />
@@ -207,7 +209,7 @@ export function GenericRecordDetail({
               onDeleted={onClose}
               table={module.table}
               id={record.id}
-              label={module.title.toLowerCase()}
+              confirmMessage={tKey(deleteConfirmKey(module.slug))}
               itemName={headline}
             />
           </>
@@ -222,7 +224,7 @@ export function GenericRecordDetail({
             detailFields.map((field) => (
               <div key={field.key}>
                 <dt className="text-[11px] font-medium uppercase tracking-wide text-orange-500/80">
-                  {field.label}
+                  {tKey(field.labelKey)}
                 </dt>
                 <dd className="mt-0.5 whitespace-pre-wrap break-words text-sm text-foreground/90">
                   {String(record[field.key])}
@@ -242,7 +244,7 @@ export function GenericRecordDetail({
                 className={`block text-xs text-muted ${field.full ? "sm:col-span-2" : ""}`}
               >
                 <span className="mb-1 block">
-                  {field.label}
+                  {tKey(field.labelKey)}
                   {field.required && <span className="text-red-400"> *</span>}
                 </span>
                 {field.type === "textarea" ? (
@@ -251,7 +253,7 @@ export function GenericRecordDetail({
                     value={form[field.key]}
                     onChange={(v) => updateValue(field.key, v.slice(0, MAX_TEXTAREA_LENGTH))}
                     className="input min-h-32 resize-y"
-                    placeholder={field.placeholder}
+                    placeholder={field.placeholderKey ? tKey(field.placeholderKey) : undefined}
                   />
                 ) : field.type === "select" ? (
                   <select
@@ -265,7 +267,7 @@ export function GenericRecordDetail({
                     </option>
                     {field.options?.map((option) => (
                       <option key={option} value={option}>
-                        {option}
+                        {tKey(optionLabelKey(option))}
                       </option>
                     ))}
                   </select>
@@ -276,7 +278,7 @@ export function GenericRecordDetail({
                     value={form[field.key]}
                     onChange={(e) => updateValue(field.key, e.target.value)}
                     className="input"
-                    placeholder={field.placeholder}
+                    placeholder={field.placeholderKey ? tKey(field.placeholderKey) : undefined}
                     maxLength={field.type === "number" ? undefined : MAX_TEXT_LENGTH}
                   />
                 )}

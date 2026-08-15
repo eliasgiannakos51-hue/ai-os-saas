@@ -2,12 +2,13 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { LINKABLE_MODULES, moduleHref } from "@/lib/knowledge-graph";
 import { logApiError } from "@/lib/log-error";
+import type { ModuleTitleKey } from "@/lib/modules";
 
 export type LinkedEntity = {
   linkId: string;
   table: string;
   id: string;
-  moduleTitle: string;
+  moduleTitleKey: ModuleTitleKey;
   headline: string;
   href: string;
 };
@@ -114,7 +115,7 @@ export async function loadLinkedEntities(
         linkId: ref.linkId,
         table: ref.otherTable,
         id: ref.otherId,
-        moduleTitle: config.title,
+        moduleTitleKey: config.titleKey,
         headline,
         href: moduleHref(config.slug),
       });

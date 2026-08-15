@@ -1,4 +1,5 @@
 import { LINKABLE_MODULES, moduleHref } from "@/lib/knowledge-graph";
+import type { ModuleTitleKey } from "@/lib/modules";
 
 /**
  * Every table whose records can be starred.
@@ -19,7 +20,7 @@ export type FavoritableConfig = {
   /** Stable key used for grouping and for the module badge colour. */
   slug: string;
   /** English fallback name, used only if no translation exists. */
-  title: string;
+  titleKey: ModuleTitleKey;
   /** Column holding the human-readable name. */
   headlineKey: string;
   /**
@@ -40,7 +41,7 @@ export const EXTRA_FAVORITABLE: FavoritableConfig[] = [
     // major surface with no way to pin it.
     table: "chat_conversations",
     slug: "chat",
-    title: "Conversations",
+    titleKey: "sidebar.items.chat",
     headlineKey: "title",
     // Chat has no per-conversation route; the workspace picks the active
     // one from state. `?c=` is read by app/dashboard/chat/page.tsx and
@@ -51,7 +52,7 @@ export const EXTRA_FAVORITABLE: FavoritableConfig[] = [
   {
     table: "user_websites",
     slug: "websiteBuilder",
-    title: "Website Builder",
+    titleKey: "sidebar.items.websiteBuilder",
     headlineKey: "name",
     // The workspace selects a project from the query string rather than
     // having its own route, so the deep link has to carry the id.
@@ -60,14 +61,14 @@ export const EXTRA_FAVORITABLE: FavoritableConfig[] = [
   {
     table: "ai_missions",
     slug: "missionControl",
-    title: "Mission Control",
+    titleKey: "sidebar.items.missionControl",
     headlineKey: "goal",
     hrefFor: () => "/dashboard/mission",
   },
   {
     table: "user_documents",
     slug: "documents",
-    title: "Documents",
+    titleKey: "sidebar.items.documents",
     headlineKey: "title",
     hrefFor: (id) => `/dashboard/documents/${id}`,
   },
@@ -76,7 +77,7 @@ export const EXTRA_FAVORITABLE: FavoritableConfig[] = [
 const LINKABLE_FAVORITABLE: FavoritableConfig[] = LINKABLE_MODULES.map((m) => ({
   table: m.table,
   slug: m.slug,
-  title: m.title,
+  titleKey: m.titleKey,
   headlineKey: m.headlineKey,
   hrefFor: () => moduleHref(m.slug),
 }));

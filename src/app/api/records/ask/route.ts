@@ -23,6 +23,7 @@ import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
 import { buildUsageReceipt } from "@/lib/billing/usage-receipt";
+import { enModuleTitle, enFieldLabel } from "@/lib/module-labels";
 
 export const dynamic = "force-dynamic";
 
@@ -73,7 +74,7 @@ function formatRecordForPrompt(moduleConfig: ModuleConfig, record: ModuleRecord)
     .map((field) => {
       const value = record[field.key];
       if (value === null || value === undefined || value === "") return null;
-      return `- ${field.label}: ${value}`;
+      return `- ${enFieldLabel(field)}: ${value}`;
     })
     .filter((line): line is string => line !== null);
 
@@ -101,7 +102,7 @@ const WEB_SEARCH_TOOL: Anthropic.WebSearchTool20250305 = {
 };
 
 function buildSystemPrompt(moduleConfig: ModuleConfig, record: ModuleRecord): string {
-  return `Έχεις πρόσβαση στα ακόλουθα δεδομένα μιας συγκεκριμένης καταγραφής (module: ${moduleConfig.title}):
+  return `Έχεις πρόσβαση στα ακόλουθα δεδομένα μιας συγκεκριμένης καταγραφής (module: ${enModuleTitle(moduleConfig)}):
 
 ${formatRecordForPrompt(moduleConfig, record)}
 

@@ -30,6 +30,7 @@ const ACHIEVEMENT_KIND_KEYS: Record<Exclude<AchievementDisplay["kind"], "firstEn
 // dashboard/layout.tsx's checkAndUnlockAchievements.
 export function AchievementsSection({ unlocked }: { unlocked: UnlockedAchievementInfo[] }) {
   const t = useTranslations("achievements");
+  const tKey = useTranslations();
   const locale = useLocale();
   const unlockedByKey = new Map(unlocked.map((u) => [u.achievementKey, u.unlockedAt]));
   const displays = allAchievementDisplays();
@@ -50,11 +51,11 @@ export function AchievementsSection({ unlocked }: { unlocked: UnlockedAchievemen
           const isUnlocked = unlockedAt !== undefined;
           const title =
             display.kind === "firstEntry"
-              ? t("firstEntry.title", { module: display.moduleTitle })
+              ? t("firstEntry.title", { module: tKey(display.moduleTitleKey) })
               : t(`${ACHIEVEMENT_KIND_KEYS[display.kind]}.title`);
           const description =
             display.kind === "firstEntry"
-              ? t("firstEntry.description", { module: display.moduleTitle })
+              ? t("firstEntry.description", { module: tKey(display.moduleTitleKey) })
               : t(`${ACHIEVEMENT_KIND_KEYS[display.kind]}.description`);
 
           return (

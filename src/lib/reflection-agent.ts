@@ -4,6 +4,7 @@ import { AI_CONDUCT_EL } from "@/lib/ai-conduct";
 import Anthropic from "@anthropic-ai/sdk";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import type { WeeklyReflectionStats } from "@/lib/reflection";
+import { enModuleTitle } from "@/lib/module-labels";
 
 // Exported so the route prices the SAME model this file calls.
 export const REFLECTION_MODEL = "claude-sonnet-4-6";
@@ -18,7 +19,7 @@ ${AI_CONDUCT_EL}${AI_QUALITY_CHECKLIST_EL}`;
 export function buildReflectionUserMessage(stats: WeeklyReflectionStats): string {
   const activeModules = stats.moduleStats.filter((m) => m.thisWeek > 0 || m.lastWeek > 0);
   const moduleLines = activeModules
-    .map((m) => `- ${m.moduleTitle}: ${m.thisWeek} νέες εγγραφές αυτή τη βδομάδα (ήταν ${m.lastWeek} την προηγούμενη)`)
+    .map((m) => `- ${enModuleTitle({ titleKey: m.moduleTitleKey })}: ${m.thisWeek} νέες εγγραφές αυτή τη βδομάδα (ήταν ${m.lastWeek} την προηγούμενη)`)
     .join("\n");
 
   const missionLine =

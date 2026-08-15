@@ -786,6 +786,98 @@ for (const key of EXTRACTED) {
   check(`${key}: actually translated into el/ja/ar`, untranslated, []);
 }
 
+console.log("\n== 6. every key a DATA file names resolves, in all ten locales ==");
+// THE HALF THE TYPE CANNOT CHECK.
+//
+// lib/modules.ts and lib/build-modules.ts describe twenty modules — the
+// name, ~90 field labels, 26 select options, 5 placeholders — and every
+// one of those is now a KEY rather than text. `ModuleMessageKey` makes
+// `labelKey: "Company"` a compile error, which stops English getting IN.
+// It cannot check that "moduleData.fields.compayn" exists: any string with
+// the right prefix satisfies the type, and next-intl renders a missing key
+// as its own dotted path without failing anything. Section 2 above only
+// walks t("literal") call sites, and these keys never appear as literals
+// at a call site — they are read off a config object.
+//
+// So the pair is: the TYPE stops text getting in, and this stops a typo
+// getting out.
+//
+// Read from the SOURCE, not from an import of the module: the point is to
+// catch a key that was typed into the data file, and importing the file
+// would resolve `optionLabelKey("in progress")` into whatever the helper
+// produces rather than telling us what a human wrote.
+{
+  const DATA_FILES = ["src/lib/modules.ts", "src/lib/build-modules.ts", "src/lib/classifier-modules.ts"];
+  const seen = new Map(); // key -> where
+  for (const file of DATA_FILES) {
+    const src = stripComments(readFileSync(file, "utf8"));
+    for (const m of src.matchAll(/(?:labelKey|titleKey|placeholderKey):\s*"([^"]+)"/g)) {
+      if (!seen.has(m[1])) seen.set(m[1], file);
+    }
+    // Stored option values become display keys through optionLabelKey().
+    for (const m of src.matchAll(/options:\s*\[([^\]]+)\]/g)) {
+      for (const v of m[1].matchAll(/"([^"]+)"/g)) {
+        const camel = v[1]
+          .toLowerCase()
+          .replace(/[^a-z0-9]+(.)/g, (_, c) => c.toUpperCase())
+          .replace(/[^A-Za-z0-9]/g, "");
+        const key = `moduleData.options.${camel}`;
+        if (!seen.has(key)) seen.set(key, `${file} (option "${v[1]}")`);
+      }
+    }
+    // And every module needs a delete confirmation, built the same way.
+    for (const m of src.matchAll(/slug:\s*"([^"]+)"/g)) {
+      const key = `moduleData.deleteConfirm.${m[1]}`;
+      // Ideas has its own, from batch A2.
+      if (m[1] === "ideas") continue;
+      if (!seen.has(key)) seen.set(key, `${file} (slug "${m[1]}")`);
+    }
+  }
+  checkTrue(`keys found in the data files (${seen.size})`, seen.size > 130);
+
+  for (const loc of LOCALES) {
+    const missing = [...seen].filter(([k]) => typeof lookup(messages[loc], k) !== "string");
+    check(
+      `${loc}: every data-file key resolves`,
+      missing.map(([k, where]) => `${k} (${where})`),
+      []
+    );
+  }
+
+  // The other direction: a key nobody names is dead weight in ten files.
+  const declared = new Set();
+  const walkKeys = (node, prefix) => {
+    for (const [k, v] of Object.entries(node)) {
+      if (typeof v === "string") declared.add(`${prefix}${k}`);
+      else walkKeys(v, `${prefix}${k}.`);
+    }
+  };
+  walkKeys(messages.en.moduleData, "moduleData.");
+  const unused = [...declared].filter((k) => !seen.has(k));
+  check("no moduleData key is declared and never named", unused, []);
+
+  // And the type really does refuse text. Asserted on the SOURCE of the
+  // type rather than trusted from memory: a later edit that widens
+  // ModuleMessageKey to `string` would silently reopen the whole hole.
+  const modulesSrc = readFileSync("src/lib/modules.ts", "utf8");
+  checkTrue(
+    "ModuleMessageKey is a prefixed template type, not a bare string",
+    /export type ModuleMessageKey = `moduleData\.\$\{string\}`/.test(modulesSrc)
+  );
+  checkTrue(
+    "ModuleTitleKey is a prefixed template type, not a bare string",
+    /export type ModuleTitleKey = `sidebar\.items\.\$\{string\}`/.test(modulesSrc)
+  );
+  checkTrue(
+    "FieldConfig carries labelKey, and no `label`",
+    /labelKey: ModuleMessageKey;/.test(modulesSrc) && !/^\s+label: string;$/m.test(modulesSrc)
+  );
+  checkTrue(
+    "ModuleConfig carries titleKey, and no `title`",
+    /titleKey: ModuleTitleKey;/.test(modulesSrc) && !/^\s+title: string;$/m.test(modulesSrc)
+  );
+}
+
 console.log("\n== 5. check-i18n.js no longer claims to do this ==");
 // The stale claim is what made the gap invisible: anyone reading that
 // header would reasonably conclude JSX literals were already covered.

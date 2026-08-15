@@ -314,7 +314,7 @@ export async function GET(request: Request) {
                     ...s,
                     status: "completed" as const,
                     module: result.module,
-                    moduleTitle: result.moduleTitle,
+                    moduleTitleKey: result.moduleTitleKey,
                     href: result.href,
                     agentRole: run.agent_role,
                     output: result.outputSummary,

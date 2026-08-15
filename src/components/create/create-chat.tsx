@@ -24,6 +24,7 @@ import {
 
 export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
   const t = useTranslations("dashboard.createAnything");
+  const tKey = useTranslations();
   const tCreate = useTranslations("dashboard.create");
   const { submit, loading } = useCreateAnything();
   const [input, setInput] = useState("");
@@ -274,7 +275,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
                       href={item.href}
                       className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0 sm:px-2.5"
                     >
-                      {item.label.toLowerCase()}
+                      {tKey(item.titleKey)}
                     </Link>
                   ))}
                 </div>

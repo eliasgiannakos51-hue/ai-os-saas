@@ -44,14 +44,35 @@ const module = getBuildModule("presentations");
 
 console.log("== 1. the module is renamed at its source ==");
 check("the module still exists", Boolean(module));
-check('its title is "Presentation Notes"', module.title === "Presentation Notes");
+// The name now lives in the message catalogue and the config carries the
+// KEY, so this checks the thing the user actually reads — and checks it in
+// all ten languages instead of one English constant, which is strictly
+// more than the old `module.title === "Presentation Notes"` could see.
+check(
+  "its name comes from the catalogue, not from a string in the registry",
+  module.titleKey === "sidebar.items.presentations",
+  `titleKey is ${JSON.stringify(module.titleKey)}`
+);
+check('the English name is still "Presentation Notes"', messages.en.sidebar.items.presentations === "Presentation Notes");
+// The rename exists so nobody arrives expecting a slide generator. A
+// translation that says only "Presentations" reintroduces exactly that
+// expectation in that language, so every locale has to carry the
+// "notes"/"note" sense — checked per language against its own word.
+const NOTE_WORD = {
+  el: /σημει/i, es: /nota/i, fr: /note/i, de: /notiz/i, it: /not/i,
+  pt: /nota/i, zh: /记录|笔记/, ja: /メモ|ノート/, ar: /ملاحظ/,
+};
+for (const [loc, re] of Object.entries(NOTE_WORD)) {
+  const value = messages[loc].sidebar.items.presentations;
+  check(`${loc}: the name still says "notes", not just "presentations"`, re.test(value), `got ${JSON.stringify(value)}`);
+}
 check("the slug is unchanged, so no route or link breaks", module.slug === "presentations");
 check("the table is unchanged, so no data moves", module.table === "ai_presentations");
-// The page header and the browser tab both read config.title, so renaming
-// it there is what actually changes what the user sees.
+// The page header and the browser tab both resolve the config's key, so
+// that is what actually decides what the user sees.
 const page = readFileSync("src/app/dashboard/presentations/page.tsx", "utf8");
-check("the page takes its title from the config", /title: CONFIG\.title/.test(page));
-check("and the header does too", /title=\{config\.title\}/.test(readFileSync("src/components/modules/build-module-page.tsx", "utf8")));
+check("the page takes its title from the config", /t\(CONFIG\.titleKey\)/.test(page));
+check("and the header does too", /t\(config\.titleKey\)/.test(readFileSync("src/components/modules/build-module-page.tsx", "utf8")));
 
 console.log("\n== 2. the sidebar label and its lookup key agree ==");
 const nav = readFileSync("src/lib/sidebar-nav.ts", "utf8");

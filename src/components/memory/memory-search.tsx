@@ -10,7 +10,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 export type MemoryResult = {
   id: string;
-  moduleTitle: string;
+  moduleTitleKey: string;
   moduleHref: string;
   headline: string;
   snippet: string;
@@ -20,7 +20,7 @@ export type MemoryResult = {
 const MAX_RESULTS_SHOWN = 100;
 
 function matches(result: MemoryResult, query: string): boolean {
-  const haystack = `${result.headline} ${result.snippet} ${result.moduleTitle}`.toLowerCase();
+  const haystack = `${result.headline} ${result.snippet}`.toLowerCase();
   return haystack.includes(query);
 }
 
@@ -28,6 +28,7 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
   const locale = useLocale();
   const t = useTranslations("dashboard.memory");
   const tModule = useTranslations("module");
+  const tKey = useTranslations();
   const formatRelativeTime = useFormatRelativeTime();
   const [query, setQuery] = useState("");
 
@@ -77,7 +78,7 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
                     {result.headline}
                   </h3>
                   <span className="inline-flex shrink-0 items-center rounded-full border border-orange-800 bg-orange-950/30 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-orange-400">
-                    {result.moduleTitle}
+                    {tKey(result.moduleTitleKey)}
                   </span>
                 </div>
 

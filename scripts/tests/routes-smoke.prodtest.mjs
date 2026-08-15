@@ -959,6 +959,119 @@ console.log("\n== 9. Chat, Memory and Create are Greek (A3) ==");
   check("…and every one of them resolves in Greek", missing, []);
 }
 
+// ---------------------------------------------------------------------
+// THE GENERIC MODULES, IN GREEK.
+//
+// Twenty modules shared one registry that held their names and ~90 field
+// labels as English STRINGS, rendered through `{field.label}` and
+// `title={module.title}`. Expressions, not literals — so no JSX scanner
+// could see them, and the words never reached messages/*.json for
+// check-i18n.js to compare. Every module page, its form, its record cards
+// and its filter dropdown were English in all ten languages.
+//
+// The form is OPENED here for the same reason batch A2 opened Ideas': the
+// labels only exist once the form is on screen, and a check that merely
+// loads the page proves nothing about the half a user types into.
+// Opens the module's own "New <module>" form, reporting what it saw if it
+// cannot find it — a silent miss here reads as "the labels are English".
+async function openModuleForm(page) {
+  const buttons = page.locator("main button");
+  const labels = await buttons.evaluateAll((els) => els.map((e) => e.textContent?.trim() ?? ""));
+  const index = labels.findIndex((l) => /^(Νέο|Νέα|Νέος)\s/.test(l));
+  checkTrue(`the module's own create button is on the page`, index >= 0, JSON.stringify(labels));
+  if (index < 0) return false;
+  await buttons.nth(index).click();
+  await page.waitForTimeout(400);
+  return true;
+}
+
+console.log("\n== 10. the generic modules are Greek (lib/modules.ts) ==");
+{
+  const ctx = await browser.newContext({ locale: "el", viewport: { width: 1280, height: 900 } });
+  await ctx.addCookies([
+    { name: "NEXT_LOCALE", value: "el", url: `http://127.0.0.1:${PORT}` },
+    { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+  ]);
+  const page = await ctx.newPage();
+
+  // FOUR MODULES USED TO HAVE TWO NAMES EACH — the sidebar said CRM,
+  // Knowledge, Marketing and Website Plans while the page heading said
+  // Sales, Research, Content and Websites. One key each now, so the two
+  // are the same string by construction; this reads both off the rendered
+  // page rather than trusting that.
+  for (const [route, expected] of [
+    ["/dashboard/sales", "Πωλήσεις"],
+    ["/dashboard/research", "Έρευνα"],
+    ["/dashboard/content", "Περιεχόμενο"],
+    ["/dashboard/websites", "Ιστότοποι"],
+  ]) {
+    await page.goto(`http://127.0.0.1:${PORT}${route}`, { waitUntil: "networkidle", timeout: 45000 });
+    const heading = await page.locator("main h1").first().innerText();
+    check(`${route}: the page heading is Greek`, heading, expected);
+    const navLink = await page
+      .locator(`aside a[href="${route}"]`)
+      .first()
+      .innerText()
+      .catch(() => "(not in sidebar)");
+    check(`${route}: the sidebar calls it the same thing`, navLink.trim(), expected);
+  }
+
+  // One module opened end to end: labels, placeholders, select options.
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/sales`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+  // Scoped to MAIN. The first "Νέο …" button in the document is the top
+  // nav's "Νέο Project", so an unscoped role query clicked that instead,
+  // never opened the form, and reported five field labels as untranslated
+  // that were never on the page.
+  // NOT /^(Νέο)\b/. JavaScript's \b is an ASCII word boundary: "ο" is not
+  // an ASCII word character, so there is no boundary between it and the
+  // following space and the pattern never matches. The same \b trap this
+  // project has now hit twice on Greek text.
+  await openModuleForm(page);
+  await page.waitForTimeout(400);
+  const formText = await page.locator("main").innerText();
+  for (const label of ["Όνομα επαφής", "Βαθμολογία", "Πρώτο email", "Email παρακολούθησης", "Επόμενα βήματα"]) {
+    checkTrue(`/dashboard/sales: the "${label}" field label is Greek`, formText.includes(label));
+  }
+
+  // A select whose STORED values stay English while the display is Greek —
+  // the distinction the FieldConfig comment is about. Websites' status
+  // field is the one with options.
+  //
+  // Websites is minPlanSlug "starter" (lib/build-modules.ts), and the
+  // stand-in account is free, so the first run of this check found an
+  // upgrade notice with no buttons at all and reported the options as
+  // missing. Raised for these three assertions and put back after.
+  USER.user_metadata = { subscription_tier: "starter" };
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/websites`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+  // NOT /^(Νέο)\b/. JavaScript's \b is an ASCII word boundary: "ο" is not
+  // an ASCII word character, so there is no boundary between it and the
+  // following space and the pattern never matches. The same \b trap this
+  // project has now hit twice on Greek text.
+  await openModuleForm(page);
+  await page.waitForTimeout(400);
+  const options = await page
+    .locator("main select option")
+    .evaluateAll((els) => els.map((e) => ({ value: e.getAttribute("value"), text: e.textContent?.trim() })));
+  const planned = options.find((o) => o.value === "planned");
+  checkTrue("the stored option value is still English", planned?.value === "planned");
+  check("…while what the user reads is Greek", planned?.text, "προγραμματισμένο");
+
+  USER.user_metadata = {};
+  const modulesText = `${formText}\n${await page.locator("main").innerText()}`;
+  const english = [...modulesText.matchAll(/(?:^|[^\p{L}])([A-Za-z]{3,}(?: [a-z]{3,}){2,})/gu)].map((m) => m[1]);
+  check("no English sentence survives in a generic module page", english, []);
+
+  await page.screenshot({ path: "/tmp/ionexa-modules-el.png" });
+  await page.close();
+  await ctx.close();
+}
+
 await browser.close();
 cleanup();
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);

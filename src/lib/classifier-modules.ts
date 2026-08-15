@@ -4,20 +4,23 @@ import { MODULES, type ModuleConfig } from "@/lib/modules";
 // its own hand-built page/components), so they're mirrored here for the
 // "Create Anything" classifier only. Keep in sync with supabase_schema.sql /
 // src/types/ideas.ts if the ideas table ever changes.
+// Ideas keeps its own hand-built page and components, so its labels live
+// under dashboard.ideas (batch A2) rather than moduleData — the keys point
+// at the translations that already exist rather than duplicating them.
 const IDEAS_MODULE: ModuleConfig = {
   slug: "ideas",
-  title: "Ideas",
+  titleKey: "sidebar.items.ideas",
   table: "ideas",
   headlineKey: "name",
   fields: [
-    { key: "name", label: "name", type: "text", required: true },
-    { key: "problem", label: "problem", type: "textarea" },
-    { key: "customer", label: "customer", type: "text" },
-    { key: "competitors", label: "competitors", type: "textarea" },
-    { key: "market_size", label: "market_size", type: "text" },
-    { key: "mvp", label: "mvp", type: "textarea" },
-    { key: "score", label: "score", type: "number" },
-    { key: "verdict", label: "verdict", type: "text" },
+    { key: "name", labelKey: "dashboard.ideas.nameLabel", type: "text", required: true },
+    { key: "problem", labelKey: "dashboard.ideas.problemLabel", type: "textarea" },
+    { key: "customer", labelKey: "dashboard.ideas.customerLabel", type: "text" },
+    { key: "competitors", labelKey: "dashboard.ideas.competitorsLabel", type: "textarea" },
+    { key: "market_size", labelKey: "dashboard.ideas.marketSizeLabel", type: "text" },
+    { key: "mvp", labelKey: "dashboard.ideas.mvpLabel", type: "textarea" },
+    { key: "score", labelKey: "dashboard.ideas.scoreLabel", type: "number" },
+    { key: "verdict", labelKey: "dashboard.ideas.verdictLabel", type: "text" },
   ],
 };
 

@@ -11,6 +11,7 @@ import { useToast } from "@/components/toast/toast-context";
 import { useCredits } from "@/components/credits/credits-context";
 import { TextActionsTextarea } from "@/components/text-actions/text-actions-textarea";
 import { SuggestedLinksPrompt } from "@/components/entity-links/suggested-links-prompt";
+import { optionLabelKey } from "@/lib/modules";
 
 function emptyFormFor(module: ModuleConfig): Record<string, string> {
   return Object.fromEntries(module.fields.map((f) => [f.key, ""]));
@@ -37,6 +38,9 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
   const router = useRouter();
   const t = useTranslations("module");
   const tCommon = useTranslations("common");
+  // Root-namespace hook: a config carries FULL keys, because a module's
+  // name lives under sidebar.items and its field labels under moduleData.
+  const tKey = useTranslations();
   const supabase = createClient();
   const { addToast } = useToast();
   const { refresh: refreshCredits } = useCredits();
@@ -152,7 +156,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
           onClick={() => setOpen(true)}
           className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
         >
-          <Plus className="h-4 w-4" /> {t("new", { title: module.title })}
+          <Plus className="h-4 w-4" /> {t("new", { title: tKey(module.titleKey) })}
         </button>
       ) : (
         <form
@@ -161,7 +165,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
         >
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">
-              {t("new", { title: module.title })}
+              {t("new", { title: tKey(module.titleKey) })}
             </h2>
             <button
               type="button"
@@ -180,7 +184,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
                 className={`block text-xs text-muted ${field.full ? "sm:col-span-2" : ""}`}
               >
                 <span className="mb-1 block">
-                  {field.label}
+                  {tKey(field.labelKey)}
                   {field.required && <span className="text-red-400"> *</span>}
                 </span>
                 {field.type === "textarea" ? (
@@ -189,7 +193,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
                     value={form[field.key]}
                     onChange={(v) => updateValue(field.key, v.slice(0, MAX_TEXTAREA_LENGTH))}
                     className="input min-h-32 resize-y"
-                    placeholder={field.placeholder}
+                    placeholder={field.placeholderKey ? tKey(field.placeholderKey) : undefined}
                   />
                 ) : field.type === "select" ? (
                   <select
@@ -203,7 +207,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
                     </option>
                     {field.options?.map((option) => (
                       <option key={option} value={option}>
-                        {option}
+                        {tKey(optionLabelKey(option))}
                       </option>
                     ))}
                   </select>
@@ -214,7 +218,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
                     value={form[field.key]}
                     onChange={update(field.key)}
                     className="input"
-                    placeholder={field.placeholder}
+                    placeholder={field.placeholderKey ? tKey(field.placeholderKey) : undefined}
                     maxLength={field.type === "number" ? undefined : MAX_TEXT_LENGTH}
                   />
                 )}

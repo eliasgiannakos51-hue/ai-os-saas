@@ -2,13 +2,14 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { FAVORITABLE, getFavoritableByTable } from "@/lib/favoritable";
 import { logApiError } from "@/lib/log-error";
+import type { ModuleTitleKey } from "@/lib/modules";
 
 export type FavoriteEntry = {
   id: string;
   table: string;
   recordId: string;
   moduleSlug: string;
-  moduleTitle: string;
+  moduleTitleKey: ModuleTitleKey;
   headline: string;
   href: string;
   createdAt: string;
@@ -92,7 +93,7 @@ export async function loadAllFavorites(
       table: row.table_name,
       recordId: row.record_id,
       moduleSlug: config.slug,
-      moduleTitle: config.title,
+      moduleTitleKey: config.titleKey,
       headline,
       href: config.hrefFor(row.record_id),
       createdAt: row.created_at,
@@ -104,7 +105,7 @@ export async function loadAllFavorites(
 
 export type FavoriteGroup = {
   moduleSlug: string;
-  moduleTitle: string;
+  moduleTitleKey: ModuleTitleKey;
   entries: FavoriteEntry[];
 };
 
@@ -134,7 +135,7 @@ export function groupFavorites(entries: FavoriteEntry[]): FavoriteGroup[] {
     if (!found || found.length === 0) continue;
     groups.push({
       moduleSlug: config.slug,
-      moduleTitle: config.title,
+      moduleTitleKey: config.titleKey,
       entries: found,
     });
     // Deleted so a slug that somehow appears twice in the registry cannot
@@ -145,7 +146,7 @@ export function groupFavorites(entries: FavoriteEntry[]): FavoriteGroup[] {
   // Anything whose module left the registry still gets shown rather than
   // silently vanishing from a page whose whole job is "things I saved".
   for (const [slug, found] of bySlug) {
-    groups.push({ moduleSlug: slug, moduleTitle: slug, entries: found });
+    groups.push({ moduleSlug: slug, moduleTitleKey: `sidebar.items.${slug}`, entries: found });
   }
 
   return groups;

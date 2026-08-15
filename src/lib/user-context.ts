@@ -5,6 +5,7 @@ import { computeHealthScore, type HealthScoreResult } from "@/lib/health-score";
 import { loadLatestEnergyCheckIn, type EnergyCheckIn } from "@/lib/energy-checkins";
 import { logApiError } from "@/lib/log-error";
 import type { Mission } from "@/types/mission";
+import { enModuleTitle } from "@/lib/module-labels";
 
 const PER_MODULE_LIMIT = 5;
 const MAX_HEADLINE_LENGTH = 60;
@@ -123,7 +124,7 @@ async function scanModule(
   now: number
 ): Promise<ModuleScan> {
   const empty: ModuleScan = {
-    title: config.title,
+    title: enModuleTitle(config),
     headlines: [],
     hasRows: false,
     lastActivityMs: null,
@@ -158,7 +159,7 @@ async function scanModule(
       }
     }
 
-    return { title: config.title, headlines, hasRows: rows.length > 0, lastActivityMs, activeDays };
+    return { title: enModuleTitle(config), headlines, hasRows: rows.length > 0, lastActivityMs, activeDays };
   } catch (err) {
     logApiError("user-context:scanModule", err, { table: config.table });
     return empty;

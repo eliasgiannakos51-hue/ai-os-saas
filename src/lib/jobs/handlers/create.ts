@@ -17,6 +17,7 @@ import { agentRoleSystemPromptAddition, isAgentRole, type AgentRole } from "@/li
 import { buildOutputSummary, buildMissionContextSystemPromptAddition } from "@/lib/mission-context";
 import { JOB_STEPS } from "@/lib/jobs/job-types";
 import type { JobContext, JobHandler, JobHandlerResult } from "@/lib/jobs/run-job";
+import { enModuleTitle, enFieldLabel } from "@/lib/module-labels";
 
 /**
  * Create Anything, in the background.
@@ -158,7 +159,7 @@ export const createHandler: JobHandler = async (ctx: JobContext): Promise<JobHan
     return {
       result: {
         matched: false,
-        message: `I found this looked like a ${moduleConfig.title} entry, but couldn't extract "${missingRequired.label}", which is required. Could you add a bit more detail?`,
+        message: `I found this looked like a ${enModuleTitle(moduleConfig)} entry, but couldn't extract "${enFieldLabel(missingRequired)}", which is required. Could you add a bit more detail?`,
       },
     };
   }
@@ -182,7 +183,7 @@ export const createHandler: JobHandler = async (ctx: JobContext): Promise<JobHan
     result: {
       matched: true,
       module: moduleConfig.slug,
-      moduleTitle: moduleConfig.title,
+      moduleTitleKey: moduleConfig.titleKey,
       href: moduleHref(moduleConfig.slug),
       message: toolInput.message,
       outputSummary: buildOutputSummary(

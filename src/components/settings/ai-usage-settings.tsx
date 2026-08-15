@@ -13,7 +13,7 @@ import {
   CartesianGrid,
 } from "recharts";
 
-export type ModuleUsage = { title: string; count: number };
+export type ModuleUsage = { titleKey: string; count: number };
 
 function StatTile({
   icon: Icon,
@@ -58,14 +58,21 @@ export function AiUsageSettings({
 }) {
   const t = useTranslations("settings.aiUsage");
   const locale = useLocale();
+  const tKey = useTranslations();
   // Top 8 by count, ascending, so the biggest bar ends up at the top of a
   // horizontal chart — keeps a ~23-module fan-out readable instead of a
   // wall of thin bars.
+  // The axis binds by STRING dataKey, which no type check can follow: when
+  // moduleUsage stopped carrying `title` and started carrying `titleKey`,
+  // tsc stayed green and the Y axis would simply have rendered blank
+  // labels. The translated name is materialised here so the key the chart
+  // reads and the field this object has cannot drift apart again.
   const chartData = [...moduleUsage]
     .filter((m) => m.count > 0)
     .sort((a, b) => b.count - a.count)
     .slice(0, 8)
-    .reverse();
+    .reverse()
+    .map((m) => ({ ...m, title: tKey(m.titleKey) }));
 
   return (
     <div id="ai-usage" className="mb-6 scroll-mt-20 space-y-4 rounded-2xl border border-border bg-panel p-5">

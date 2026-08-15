@@ -29,7 +29,7 @@ export async function GET() {
         const { count } = await supabase
           .from(config.table)
           .select("id", { count: "exact", head: true });
-        return { slug: config.slug, title: config.title, count: count ?? 0 };
+        return { slug: config.slug, titleKey: config.titleKey, count: count ?? 0 };
       })
     );
 
@@ -37,7 +37,7 @@ export async function GET() {
       .filter((m) => m.count > 0)
       .sort((a, b) => b.count - a.count)
       .slice(0, TOP_N)
-      .map(({ slug, title }) => ({ slug, title }));
+      .map(({ slug, titleKey }) => ({ slug, titleKey }));
 
     return NextResponse.json({ ok: true, modules });
   } catch (err) {

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -13,13 +14,15 @@ import { AutomationRealizeList } from "@/components/automation/automation-realiz
 import { AutomationActiveList } from "@/components/automation/automation-active-list";
 import type { UserAutomation } from "@/types/user-automation";
 
-export function generateMetadata({
+export async function generateMetadata({
   params,
 }: {
   params: { module: string };
-}): Metadata {
+}): Promise<Metadata> {
   const moduleConfig = getModule(params.module);
-  return { title: moduleConfig?.title ?? "Not Found" };
+  if (!moduleConfig) return { title: "Not Found" };
+  const t = await getTranslations();
+  return { title: t(moduleConfig.titleKey) };
 }
 
 export default async function ModulePage({
@@ -33,6 +36,7 @@ export default async function ModulePage({
     notFound();
   }
 
+  const t = await getTranslations();
   const supabase = createClient();
 
   const {
@@ -71,7 +75,7 @@ export default async function ModulePage({
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={MODULE_ICONS[moduleConfig.slug]} title={moduleConfig.title} />
+        <PageHeader icon={MODULE_ICONS[moduleConfig.slug]} title={t(moduleConfig.titleKey)} />
 
 
         {error && (

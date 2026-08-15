@@ -4,6 +4,7 @@ import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { checkCronAuth } from "@/lib/cron-auth";
 import { sendWeeklyDigestEmail } from "@/lib/email/send-weekly-digest-email";
 import { logApiError } from "@/lib/log-error";
+import { enModuleTitle } from "@/lib/module-labels";
 
 export const dynamic = "force-dynamic";
 
@@ -55,7 +56,7 @@ export async function GET(request: Request) {
             .select("id", { count: "exact", head: true })
             .eq("user_id", user.id)
             .gte("created_at", since);
-          return { title: m.title, count: count ?? 0 };
+          return { title: enModuleTitle(m), count: count ?? 0 };
         })
       );
 

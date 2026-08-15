@@ -33,7 +33,7 @@ export type MissionStep = {
   // for this step — the Planner never assigns a module itself, Create
   // Anything's own classifier decides it at build time.
   module?: string;
-  moduleTitle?: string;
+  moduleTitleKey?: string;
   href?: string;
   // "AI Company" — which agent role (see lib/agent-roles.ts) this step was
   // built under, chosen per-step in mission-card.tsx before "Create with

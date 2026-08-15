@@ -16,6 +16,14 @@ export const GROUP_HEADING_KEYS: Record<string, string> = {
   Settings: "settings",
 };
 
+// FOUR MODULES USED TO HAVE TWO NAMES EACH. The sidebar said CRM,
+// Knowledge, Marketing and Website Plans; the page heading said Sales,
+// Research, Content and Websites — the same module, under a different
+// word, depending on which one you were looking at. Unified on the name a
+// stranger can guess: Sales over the jargon, Research over the vague one,
+// Content over the broader one, Websites over the page that is not about
+// plans. lib/modules.ts now points at these keys instead of holding its
+// own copy, so the two cannot drift apart again.
 export const ITEM_LABEL_KEYS: Record<string, string> = {
   Home: "home",
   "Ionexa Chat": "chat",
@@ -28,7 +36,7 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Team: "team",
   "Help Centre": "help",
   "AI Agents": "agents",
-  "Website Plans": "websites",
+  Websites: "websites",
   "Website Builder": "websiteBuilder",
   Apps: "apps",
   Images: "images",
@@ -40,10 +48,10 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Campaigns: "campaigns",
   Analytics: "analytics",
   Finance: "finance",
-  Marketing: "content",
-  CRM: "sales",
+  Content: "content",
+  Sales: "sales",
   Products: "products",
-  Knowledge: "research",
+  Research: "research",
   Learning: "learning",
   Ideas: "ideas",
   Competitors: "competitors",

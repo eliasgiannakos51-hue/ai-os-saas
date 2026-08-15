@@ -3,12 +3,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
 import { logApiError } from "@/lib/log-error";
 import type { Mission } from "@/types/mission";
+import type { ModuleTitleKey } from "@/lib/modules";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEK_MS = 7 * DAY_MS;
 
 export type ModuleWeeklyStat = {
-  moduleTitle: string;
+  moduleTitleKey: ModuleTitleKey;
   thisWeek: number;
   lastWeek: number;
 };
@@ -65,7 +66,7 @@ export async function loadWeeklyReflectionStats(
         if (error) {
           logApiError("reflection:loadWeeklyReflectionStats", error, { table: config.table });
         }
-        return { moduleTitle: config.title, thisWeek: 0, lastWeek: 0 };
+        return { moduleTitleKey: config.titleKey, thisWeek: 0, lastWeek: 0 };
       }
 
       let thisWeek = 0;
@@ -75,7 +76,7 @@ export async function loadWeeklyReflectionStats(
         if (ageMs < WEEK_MS) thisWeek += 1;
         else if (ageMs < 2 * WEEK_MS) lastWeek += 1;
       }
-      return { moduleTitle: config.title, thisWeek, lastWeek };
+      return { moduleTitleKey: config.titleKey, thisWeek, lastWeek };
     })
   );
 

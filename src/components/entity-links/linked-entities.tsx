@@ -10,6 +10,7 @@ import type { LinkedEntity } from "@/lib/entity-links";
 
 export function LinkedEntities({ entities }: { entities: LinkedEntity[] }) {
   const t = useTranslations("entityLinks");
+  const tKey = useTranslations();
   const router = useRouter();
   const supabase = createClient();
   const [removingId, setRemovingId] = useState<string | null>(null);
@@ -33,7 +34,7 @@ export function LinkedEntities({ entities }: { entities: LinkedEntity[] }) {
             className="inline-flex items-center gap-1 rounded-md border border-border bg-input py-0.5 pl-2 pr-1 text-xs text-foreground/90"
           >
             <Link href={entity.href} className="transition-colors duration-150 hover:text-orange-400">
-              <span className="text-muted">{entity.moduleTitle}:</span> {entity.headline}
+              <span className="text-muted">{tKey(entity.moduleTitleKey)}:</span> {entity.headline}
             </Link>
             <button
               type="button"

@@ -35,6 +35,9 @@ export const metadata: Metadata = {
 
 export default async function SettingsPage() {
   const t = await getTranslations("settings");
+  // Module names are keys on the config; this resolves them in the
+  // request's locale, the same way the sidebar does.
+  const tKey = await getTranslations();
   const tBilling = await getTranslations("settings.billing");
   const supabase = createClient();
 
@@ -142,7 +145,7 @@ export default async function SettingsPage() {
         const { count } = await supabase
           .from(module.table)
           .select("id", { count: "exact", head: true });
-        return { title: module.title, count: count ?? 0 };
+        return { titleKey: module.titleKey, count: count ?? 0 };
       })
     ),
   ]);
@@ -283,7 +286,7 @@ export default async function SettingsPage() {
             wouldHaveUsedCredits={wouldHaveUsedCredits}
             totalEntries={totalEntries}
             mostActiveModuleTitle={
-              mostActiveModule && mostActiveModule.count > 0 ? mostActiveModule.title : null
+              mostActiveModule && mostActiveModule.count > 0 ? tKey(mostActiveModule.titleKey) : null
             }
             moduleUsage={moduleUsage}
           />

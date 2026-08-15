@@ -393,10 +393,38 @@ const CONFIDENCE_THRESHOLD = 0.85;
  * Anything under 0.85 goes to the model, because a wrong canned answer is
  * far more expensive than the call it saved.
  */
+/**
+ * The ONE language this catalogue is written in.
+ *
+ * Every title and every answer above is Greek. The triggers are not: each
+ * article also lists the English words a Greek user types for product
+ * nouns ("pricing", "credits", "cancel"), which is right for them and was
+ * a trapdoor for everyone else. A bare trigger scores 0.975 against a
+ * 0.85 threshold, so an English, French, German or Japanese user who
+ * typed one English word was handed a Greek paragraph — with no model
+ * call and no credits charged, which is the cheapest possible way to
+ * answer the wrong person in the wrong language.
+ *
+ * Falling through to the model is the correct answer for them, not a
+ * degradation: the chat's system prompt says ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ
+ * ΓΛΩΣΣΑ, so they get a real answer in their own language. It costs a
+ * call. That is the right trade until the articles live in a table with a
+ * locale column and a fallback to English.
+ */
+export const CANNED_ANSWER_LOCALE = "el";
+
 export function matchCannedAnswer(
   message: string,
+  /**
+   * REQUIRED, and deliberately in second position: every existing call
+   * site had to be edited to compile, so the language cannot be forgotten
+   * by a caller that predates this argument. An unrecognised or empty
+   * locale falls through to the model, which is the safe direction.
+   */
+  locale: string,
   threshold: number = CONFIDENCE_THRESHOLD
 ): CannedMatch | null {
+  if (locale !== CANNED_ANSWER_LOCALE) return null;
   const n = normalize(message);
   if (!n) return null;
   // A long message is a conversation, not a lookup.

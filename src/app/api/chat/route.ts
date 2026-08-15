@@ -50,6 +50,7 @@ import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/u
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 import { AI_CONDUCT_EL } from "@/lib/ai-conduct";
 import { matchCannedAnswer, type CannedMatch } from "@/lib/support/knowledge-base";
+import { getLocale } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
@@ -338,10 +339,14 @@ export async function POST(request: Request) {
     // Mentor Mode is excluded: the user explicitly asked for strategic
     // pushback on their situation, and handing them a FAQ entry instead is
     // not a cheaper version of that, it is a different (wrong) answer.
+    // The knowledge base is Greek. Anyone else falls through to the model,
+    // which answers in their own language — see CANNED_ANSWER_LOCALE.
+    const locale = await getLocale();
     const cannedMatch = mentorMode
       ? null
       : matchCannedAnswer(
           message,
+          locale,
           conversationId ? CANNED_THRESHOLD_MID_CONVERSATION : CANNED_THRESHOLD_NEW_CONVERSATION
         );
     if (cannedMatch) {

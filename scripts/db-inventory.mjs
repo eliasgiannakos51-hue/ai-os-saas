@@ -67,11 +67,18 @@ function provenance() {
   // Writing `db_missing_check.sql` dirties the tree, so the header would
   // report "+1 uncommitted file" describing nothing but its own existence —
   // and could never say "clean tree" for a committed generated file.
+  // Matched against the WHOLE line, not against a fixed offset into it.
+  // `git status --porcelain` pads the status to two columns (" M path"),
+  // but the git() helper above trims its output — so the leading space is
+  // gone and `line.slice(3)` ate the first letter of the filename, giving
+  // "b_missing_check.sql" and never matching. An anchored test on the line
+  // itself has no offset to get wrong, and also survives the rename form
+  // ("R  old -> new").
   const GENERATED = /db_missing_check\.sql$/;
   const dirty = git(["status", "--porcelain"], "")
     .split("\n")
     .filter(Boolean)
-    .filter((line) => !GENERATED.test(line.slice(3).trim()));
+    .filter((line) => !GENERATED.test(line));
   return { branch, commit, dirty: dirty.length };
 }
 

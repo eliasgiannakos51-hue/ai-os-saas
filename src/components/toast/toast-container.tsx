@@ -1,8 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useToast } from "@/components/toast/toast-context";
 
 export function ToastContainer() {
+  const t = useTranslations("common");
   const { toasts, dismissToast } = useToast();
 
   if (toasts.length === 0) return null;
@@ -21,7 +23,7 @@ export function ToastContainer() {
               dismissToast(toast.id);
             }
           }}
-          aria-label={`${toast.message} — press Enter to dismiss`}
+          aria-label={t("dismissToastAria", { message: toast.message })}
           // `success-flash` (globals.css) is the one-shot green-into-amber
           // ring pulse on non-error toasts — the app's confirmation
           // moment. Errors deliberately don't get it: a success cue on a

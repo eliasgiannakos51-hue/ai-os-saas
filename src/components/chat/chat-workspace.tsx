@@ -551,18 +551,15 @@ export function ChatWorkspace({
         <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
           {loadingMessages ? (
             <div className="flex h-full items-center justify-center text-sm text-muted">
-              Loading...
+              {tCommon("loading")}
             </div>
           ) : messages.length === 0 && !sending ? (
             <div className="mx-auto flex h-full max-w-md flex-col items-center justify-center text-center">
               <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-400">
                 <MessageCircle className="h-6 w-6" aria-hidden="true" />
               </span>
-              <h1 className="mt-4 text-xl font-bold tracking-wide text-foreground">Ionexa Chat</h1>
-              <p className="mt-2 text-sm text-muted">
-                Ask anything — general knowledge, brainstorming, writing help,
-                or just a conversation. Not tied to any Ionexa AI module.
-              </p>
+              <h1 className="mt-4 text-xl font-bold tracking-wide text-foreground">{t("title")}</h1>
+              <p className="mt-2 text-sm text-muted">{t("emptyBody")}</p>
             </div>
           ) : (
             <div className="mx-auto max-w-2xl space-y-4">
@@ -619,7 +616,7 @@ export function ChatWorkspace({
                 type="button"
                 onClick={() => setMentorMode((v) => !v)}
                 aria-pressed={mentorMode}
-                title="Mentor Mode: strategic guidance instead of just answers — flags risks, asks clarifying questions, suggests alternatives, and uses your logged data as context."
+                title={t("mentorModeHint")}
                 className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 ${
                   mentorMode
                     ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
@@ -627,7 +624,7 @@ export function ChatWorkspace({
                 }`}
               >
                 <Compass className="h-3.5 w-3.5" aria-hidden="true" />
-                Mentor Mode
+                {t("mentorMode")}
               </button>
             </div>
             {error && (
@@ -648,7 +645,7 @@ export function ChatWorkspace({
                   value={input}
                   onChange={handleTextareaInput}
                   onKeyDown={handleTextareaKeyDown}
-                  placeholder="Message Ionexa..."
+                  placeholder={t("composerPlaceholder")}
                   rows={1}
                   // max-h-40 (160px) was the whole complaint: a long message scrolled
                   // inside a box a quarter the height of the thread above it. A

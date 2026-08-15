@@ -124,7 +124,7 @@ export function LinkToModal({
 
     if (insertError) {
       setError(insertError.message);
-      addToast(`✗ error: ${insertError.message}`, "error");
+      addToast(`✗ ${tCommon("error")}: ${insertError.message}`, "error");
       return;
     }
 

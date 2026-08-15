@@ -32,7 +32,7 @@ export function AiPersonaSettings({ initialName }: { initialName: string }) {
     setSaving(false);
 
     if (error) {
-      addToast(`✗ could not save persona name`, "error");
+      addToast(t("couldNotSave"), "error");
       return;
     }
 

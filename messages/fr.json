@@ -46,7 +46,8 @@
     "loadingContent": "Chargement du contenu",
     "nextPage": "Page suivante",
     "previousPage": "Page précédente",
-    "toggleMenu": "Afficher ou masquer le menu"
+    "toggleMenu": "Afficher ou masquer le menu",
+    "dismissToastAria": "{message} — appuyez sur Entrée pour ignorer"
   },
   "sidebar": {
     "groups": {
@@ -465,7 +466,9 @@
       "noDevices": "Aucun appareil enregistré pour l'instant.",
       "lastSeen": "Vu pour la dernière fois {time}",
       "couldNotRemoveDevice": "✗ impossible de supprimer l'appareil",
-      "deviceRemoved": "✓ appareil supprimé"
+      "deviceRemoved": "✓ appareil supprimé",
+      "removeDevice": "Retirer l'appareil",
+      "removeDeviceAria": "Retirer {device}"
     },
     "aiUsage": {
       "title": "Utilisation IA",
@@ -562,7 +565,8 @@
     "aiPersona": {
       "title": "Personnalité IA",
       "description": "Donnez un nom personnalisé à l'assistant.",
-      "personaUpdated": "✓ nom de l'assistant mis à jour"
+      "personaUpdated": "✓ nom de l'assistant mis à jour",
+      "couldNotSave": "✗ impossible d'enregistrer le nom"
     },
     "billing": {
       "title": "Facturation",
@@ -705,7 +709,8 @@
           "description": "Consignez une opération"
         }
       },
-      "quickStartTemplates": "Modèles de démarrage rapide"
+      "quickStartTemplates": "Modèles de démarrage rapide",
+      "quickStartApplied": "✓ {count, plural, one {# entrée d'exemple ajoutée} other {# entrées d'exemple ajoutées}}"
     },
     "team": {
       "title": "Équipe",
@@ -736,7 +741,12 @@
     },
     "memory": {
       "title": "Mémoire IA",
-      "description": "Recherchez tout ce que vous avez enregistré, dans tous les modules — sans avoir à vous souvenir d'où vous l'avez mis."
+      "description": "Recherchez tout ce que vous avez enregistré, dans tous les modules — sans avoir à vous souvenir d'où vous l'avez mis.",
+      "searchPlaceholder": "Cherchez dans tout ce que vous avez enregistré...",
+      "resultCount": "{count, plural, =0 {aucun résultat} one {# résultat} other {# résultats}} dans tous les modules",
+      "resultCountForQuery": "{count, plural, =0 {aucun résultat} one {# résultat} other {# résultats}} pour « {query} » dans tous les modules",
+      "empty": "Rien d'enregistré pour l'instant — dès que vous utiliserez les modules, vous pourrez tous les fouiller depuis ici.",
+      "truncated": "Affichage des {shown} premiers résultats sur {total} — affinez votre recherche."
     },
     "documents": {
       "title": "Documents",
@@ -768,10 +778,27 @@
       "streamInterruptedPartial": "La connexion a été interrompue — la réponse ci-dessus est peut-être incomplète.",
       "hideConversationsHint": "Masquer la liste des conversations et donner toute la largeur au fil.",
       "showConversationsHint": "Afficher à nouveau la liste des conversations.",
-      "send": "Envoyer"
+      "send": "Envoyer",
+      "emptyBody": "Posez n'importe quelle question — culture générale, idées, aide à la rédaction ou simple conversation. Sans lien avec un module d'Ionexa AI.",
+      "composerPlaceholder": "Écrire à Ionexa...",
+      "mentorMode": "Mode mentor",
+      "mentorModeHint": "Mode mentor : un accompagnement stratégique plutôt que de simples réponses — signale les risques, pose des questions de clarification, propose des alternatives et s'appuie sur les données que vous avez enregistrées.",
+      "newChat": "Nouvelle discussion",
+      "noConversations": "Aucune discussion pour l'instant.",
+      "groupPinned": "Épinglées",
+      "groupToday": "Aujourd'hui",
+      "groupYesterday": "Hier",
+      "groupOlder": "Plus anciennes",
+      "pin": "Épingler",
+      "unpin": "Désépingler",
+      "rename": "Renommer",
+      "deleteConfirm": "Supprimer « {title} » ? Action irréversible."
     },
     "create": {
-      "title": "Créer N'importe Quoi"
+      "title": "Créer N'importe Quoi",
+      "subtitle": "Décrivez n'importe quoi — une idée de produit, une opération, le retour d'un utilisateur, un indicateur — et cela atterrit automatiquement dans le bon module.",
+      "loggedTo": "Enregistré dans :",
+      "viewModule": "Ouvrir {module} →"
     },
     "timeline": {
       "title": "Chronologie",
@@ -1617,7 +1644,9 @@
     "mightBeRelated": "Cela pourrait être lié à : {titles}. Les lier ?",
     "yes": "Oui",
     "no": "Non",
-    "linked": "Lié"
+    "linked": "Lié",
+    "unlink": "Dissocier",
+    "unlinkAria": "Dissocier {name}"
   },
   "favorites": {
     "add": "Ajouter aux favoris",

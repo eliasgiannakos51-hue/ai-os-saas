@@ -46,7 +46,8 @@
     "loadingContent": "جارٍ تحميل المحتوى",
     "nextPage": "الصفحة التالية",
     "previousPage": "الصفحة السابقة",
-    "toggleMenu": "إظهار القائمة أو إخفاؤها"
+    "toggleMenu": "إظهار القائمة أو إخفاؤها",
+    "dismissToastAria": "{message} — اضغط Enter للتجاهل"
   },
   "sidebar": {
     "groups": {
@@ -465,7 +466,9 @@
       "noDevices": "لا توجد أجهزة مسجّلة حتى الآن.",
       "lastSeen": "آخر ظهور {time}",
       "couldNotRemoveDevice": "✗ تعذّرت إزالة الجهاز",
-      "deviceRemoved": "✓ تمت إزالة الجهاز"
+      "deviceRemoved": "✓ تمت إزالة الجهاز",
+      "removeDevice": "إزالة الجهاز",
+      "removeDeviceAria": "إزالة {device}"
     },
     "aiUsage": {
       "title": "استخدام الذكاء الاصطناعي",
@@ -562,7 +565,8 @@
     "aiPersona": {
       "title": "شخصية الذكاء الاصطناعي",
       "description": "امنح المساعد اسمًا مخصصًا.",
-      "personaUpdated": "✓ تم تحديث اسم المساعد"
+      "personaUpdated": "✓ تم تحديث اسم المساعد",
+      "couldNotSave": "✗ تعذّر حفظ الاسم"
     },
     "billing": {
       "title": "الفوترة",
@@ -705,7 +709,8 @@
           "description": "سجّل صفقة"
         }
       },
-      "quickStartTemplates": "قوالب البدء السريع"
+      "quickStartTemplates": "قوالب البدء السريع",
+      "quickStartApplied": "✓ {count, plural, zero {لم تُضف إدخالات} one {أُضيف إدخال تجريبي واحد} two {أُضيف إدخالان تجريبيان} few {أُضيفت # إدخالات تجريبية} many {أُضيف # إدخالًا تجريبيًا} other {أُضيف # إدخال تجريبي}}"
     },
     "team": {
       "title": "الفريق",
@@ -736,7 +741,12 @@
     },
     "memory": {
       "title": "ذاكرة الذكاء الاصطناعي",
-      "description": "ابحث في كل ما سجّلته، عبر كل وحدة — دون الحاجة لتذكر أين وضعته."
+      "description": "ابحث في كل ما سجّلته، عبر كل وحدة — دون الحاجة لتذكر أين وضعته.",
+      "searchPlaceholder": "ابحث في كل ما سجّلته...",
+      "resultCount": "{count, plural, zero {لا نتائج} one {نتيجة واحدة} two {نتيجتان} few {# نتائج} many {# نتيجة} other {# نتيجة}} في كل الوحدات",
+      "resultCountForQuery": "{count, plural, zero {لا نتائج} one {نتيجة واحدة} two {نتيجتان} few {# نتائج} many {# نتيجة} other {# نتيجة}} لـ «{query}» في كل الوحدات",
+      "empty": "لم تسجّل شيئًا بعد — بمجرد أن تبدأ باستخدام الوحدات ستتمكن من البحث فيها جميعًا من هنا.",
+      "truncated": "يتم عرض أول {shown} من {total} نتيجة — حسّن بحثك لتضييق النطاق."
     },
     "documents": {
       "title": "المستندات",
@@ -768,10 +778,27 @@
       "streamInterruptedPartial": "انقطع الاتصال — قد يكون الرد أعلاه غير مكتمل.",
       "hideConversationsHint": "إخفاء قائمة المحادثات ومنح المحادثة العرض الكامل.",
       "showConversationsHint": "إظهار قائمة المحادثات مرة أخرى.",
-      "send": "إرسال"
+      "send": "إرسال",
+      "emptyBody": "اسأل عن أي شيء — معلومات عامة، أفكار، مساعدة في الكتابة، أو مجرد محادثة. غير مرتبط بأي وحدة في Ionexa AI.",
+      "composerPlaceholder": "اكتب إلى Ionexa...",
+      "mentorMode": "وضع الإرشاد",
+      "mentorModeHint": "وضع الإرشاد: توجيه استراتيجي بدل الإجابات المجردة — يشير إلى المخاطر، ويطرح أسئلة توضيحية، ويقترح بدائل، ويستخدم بياناتك المسجّلة كسياق.",
+      "newChat": "محادثة جديدة",
+      "noConversations": "لا توجد محادثات بعد.",
+      "groupPinned": "مثبّتة",
+      "groupToday": "اليوم",
+      "groupYesterday": "أمس",
+      "groupOlder": "أقدم",
+      "pin": "تثبيت",
+      "unpin": "إلغاء التثبيت",
+      "rename": "إعادة التسمية",
+      "deleteConfirm": "هل تريد حذف «{title}»؟ لا يمكن التراجع عن ذلك."
     },
     "create": {
-      "title": "إنشاء أي شيء"
+      "title": "إنشاء أي شيء",
+      "subtitle": "صف أي شيء — فكرة منتج، صفقة، ملاحظة من مستخدم، مؤشرًا — وسيصل تلقائيًا إلى الوحدة الصحيحة.",
+      "loggedTo": "سُجّل في:",
+      "viewModule": "عرض {module} ←"
     },
     "timeline": {
       "title": "الجدول الزمني",
@@ -1617,7 +1644,9 @@
     "mightBeRelated": "قد يكون هذا مرتبطًا بـ: {titles}. هل تريد ربطها؟",
     "yes": "نعم",
     "no": "لا",
-    "linked": "تم الربط"
+    "linked": "تم الربط",
+    "unlink": "إلغاء الربط",
+    "unlinkAria": "إلغاء الربط بـ {name}"
   },
   "favorites": {
     "add": "إضافة إلى المفضلة",

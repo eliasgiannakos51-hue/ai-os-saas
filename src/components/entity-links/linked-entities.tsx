@@ -39,8 +39,8 @@ export function LinkedEntities({ entities }: { entities: LinkedEntity[] }) {
               type="button"
               onClick={() => handleRemove(entity.linkId)}
               disabled={removingId === entity.linkId}
-              aria-label={`Unlink ${entity.headline}`}
-              title="Unlink"
+              aria-label={t("unlinkAria", { name: entity.headline })}
+              title={t("unlink")}
               className="flex h-4 w-4 shrink-0 items-center justify-center rounded text-muted transition-colors duration-150 hover:text-red-400 disabled:opacity-50"
             >
               <X className="h-3 w-3" />

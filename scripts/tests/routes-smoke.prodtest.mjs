@@ -839,6 +839,126 @@ console.log("\n== 8. the Ideas module is Greek end to end (A2) ==");
   await ctx.close();
 }
 
+// ---------------------------------------------------------------------
+// BATCH A3 — CHAT, MEMORY AND CREATE, IN GREEK.
+//
+// The three screens with the highest visit count in the app. Chat's empty
+// state is the first thing a new account reads, and it was a paragraph of
+// English under a Greek sidebar.
+//
+// The conversation list's date headers are checked separately below,
+// because they were never text in a component at all: they were an
+// English string union produced by lib/chat/group-conversations.ts and
+// rendered as data. No JSX scanner can see that shape, and check-i18n.js
+// cannot either — the words never appeared in messages/*.json to be
+// compared against.
+console.log("\n== 9. Chat, Memory and Create are Greek (A3) ==");
+{
+  const ctx = await browser.newContext({ locale: "el", viewport: { width: 1280, height: 900 } });
+  await ctx.addCookies([
+    { name: "NEXT_LOCALE", value: "el", url: `http://127.0.0.1:${PORT}` },
+    { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+  ]);
+  const page = await ctx.newPage();
+
+  const textAndPlaceholders = async () => {
+    const text = await page.locator("main, aside").allInnerTexts();
+    const ph = await page
+      .locator("input, textarea")
+      .evaluateAll((els) => els.map((e) => e.getAttribute("placeholder")).filter(Boolean));
+    return `${text.join("\n")}\n${ph.join("\n")}`;
+  };
+
+  // ---- Chat -----------------------------------------------------------
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/chat`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+  const chat = await textAndPlaceholders();
+  for (const [what, needle] of [
+    ["the empty-state heading", "Ionexa Συνομιλία"],
+    ["the empty-state body", "Ρώτησε ό,τι θέλεις"],
+    ["the composer placeholder", "Γράψε στο Ionexa..."],
+    ["the Mentor Mode toggle", "Λειτουργία μέντορα"],
+    ["the new-chat button", "Νέα συνομιλία"],
+    ["the empty conversation list", "Καμία συνομιλία ακόμα."],
+  ]) {
+    checkTrue(`${what} is Greek`, chat.includes(needle));
+  }
+  await page.screenshot({ path: "/tmp/ionexa-a3-chat-el.png" });
+
+  // ---- Memory ---------------------------------------------------------
+  // AI Memory is Starter-and-above (memory/page.tsx gates it on
+  // planMeetsMinimum). The stand-in account is free, so the first run of
+  // this check read the upgrade notice and reported the search box as
+  // untranslated — the search box was never on the page. The plan lives in
+  // the auth user's metadata, so it is raised here, for this section, and
+  // put back straight after.
+  USER.user_metadata = { subscription_tier: "starter" };
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/memory`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+  const memory = await textAndPlaceholders();
+  USER.user_metadata = {};
+  checkTrue(
+    "the memory search placeholder is Greek",
+    memory.includes("Ψάξε σε ό,τι έχεις καταγράψει..."),
+    memory.slice(0, 200)
+  );
+  checkTrue(
+    "the memory empty state is Greek",
+    memory.includes("Δεν έχεις καταγράψει τίποτα ακόμα"),
+    memory.slice(0, 200)
+  );
+
+  // ---- Create ---------------------------------------------------------
+  // NOT asserted in the browser, and the reason is worth writing down
+  // rather than quietly dropping: CreateChat's heading and subtitle are
+  // behind `showHeading`, and the single caller in the whole repo
+  // (overview/page.tsx:448) passes showHeading={false}. The two strings
+  // are translated — a default-true prop that no caller sets is one edit
+  // away from rendering — but claiming a browser verified them would be a
+  // claim about markup that never mounts. /dashboard/create renders
+  // CreateStudio, a different component entirely.
+  const create = "";
+
+  const english = [
+    ...`${chat}\n${memory}\n${create}`.matchAll(/(?:^|[^\p{L}])([A-Za-z]{3,}(?: [a-z]{3,}){2,})/gu),
+  ].map((m) => m[1]);
+  check("no English sentence survives in Chat or Memory", english, []);
+
+  await page.close();
+  await ctx.close();
+}
+
+// The four conversation-list headers, rendered from real rows. The
+// stand-in serves none, so they are exercised through the pure function
+// that produces them rather than asserted as "absent from an empty list" —
+// which would pass whatever the labels said.
+{
+  const { loadTs } = await import("./load-ts.mjs");
+  const { readFileSync } = await import("node:fs");
+  const { groupConversationsByDate } = await loadTs("src/lib/chat/group-conversations.ts");
+  const el = JSON.parse(readFileSync("messages/el.json", "utf8"));
+  const now = Date.now();
+  const at = (hoursAgo) => new Date(now - hoursAgo * 3600e3).toISOString();
+  const labels = groupConversationsByDate([
+    { id: "a", title: "x", created_at: at(0), is_pinned: false },
+    { id: "b", title: "y", created_at: at(26), is_pinned: false },
+    { id: "c", title: "z", created_at: at(400), is_pinned: false },
+  ]).map((g) => g.label);
+  check("the date headers are keys, not English", labels, [
+    "groupToday",
+    "groupYesterday",
+    "groupOlder",
+  ]);
+  const missing = [...labels, "groupPinned"].filter(
+    (k) => typeof el.dashboard.chat[k] !== "string"
+  );
+  check("…and every one of them resolves in Greek", missing, []);
+}
+
 await browser.close();
 cleanup();
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);

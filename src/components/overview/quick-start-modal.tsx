@@ -30,7 +30,7 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
         return;
       }
 
-      addToast(`✓ added ${data.appliedCount} example ${data.appliedCount === 1 ? "entry" : "entries"}`);
+      addToast(tOverview("quickStartApplied", { count: data.appliedCount }));
       onClose();
       router.refresh();
     } catch {

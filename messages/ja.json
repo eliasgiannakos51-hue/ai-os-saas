@@ -46,7 +46,8 @@
     "loadingContent": "コンテンツを読み込んでいます",
     "nextPage": "次のページ",
     "previousPage": "前のページ",
-    "toggleMenu": "メニューの表示を切り替える"
+    "toggleMenu": "メニューの表示を切り替える",
+    "dismissToastAria": "{message} — Enter キーで閉じる"
   },
   "sidebar": {
     "groups": {
@@ -465,7 +466,9 @@
       "noDevices": "まだ記録されたデバイスはありません。",
       "lastSeen": "最終アクセス {time}",
       "couldNotRemoveDevice": "✗ デバイスを削除できませんでした",
-      "deviceRemoved": "✓ デバイスを削除しました"
+      "deviceRemoved": "✓ デバイスを削除しました",
+      "removeDevice": "デバイスを削除",
+      "removeDeviceAria": "{device} を削除"
     },
     "aiUsage": {
       "title": "AI 利用状況",
@@ -562,7 +565,8 @@
     "aiPersona": {
       "title": "AI ペルソナ",
       "description": "アシスタントに好きな名前を付けましょう。",
-      "personaUpdated": "✓ アシスタント名を更新しました"
+      "personaUpdated": "✓ アシスタント名を更新しました",
+      "couldNotSave": "✗ 名前を保存できませんでした"
     },
     "billing": {
       "title": "請求",
@@ -705,7 +709,8 @@
           "description": "取引を記録"
         }
       },
-      "quickStartTemplates": "クイックスタートのテンプレート"
+      "quickStartTemplates": "クイックスタートのテンプレート",
+      "quickStartApplied": "✓ サンプルを {count} 件追加しました"
     },
     "team": {
       "title": "チーム",
@@ -736,7 +741,12 @@
     },
     "memory": {
       "title": "AI メモリー",
-      "description": "どこに記録したか覚えていなくても、全モジュールを横断して記録したすべてを検索できます。"
+      "description": "どこに記録したか覚えていなくても、全モジュールを横断して記録したすべてを検索できます。",
+      "searchPlaceholder": "記録したものすべてを検索...",
+      "resultCount": "すべてのモジュールで {count} 件の結果",
+      "resultCountForQuery": "すべてのモジュールで「{query}」に一致する結果 {count} 件",
+      "empty": "まだ何も記録されていません — モジュールを使い始めると、ここからまとめて検索できます。",
+      "truncated": "{total} 件中の最初の {shown} 件を表示しています — 検索条件を絞り込んでください。"
     },
     "documents": {
       "title": "ドキュメント",
@@ -768,10 +778,27 @@
       "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。",
       "hideConversationsHint": "会話リストを隠して、スレッドに全幅を使います。",
       "showConversationsHint": "会話リストを再表示します。",
-      "send": "送信"
+      "send": "送信",
+      "emptyBody": "何でも聞いてください — 一般的な知識、アイデア出し、文章のお手伝い、ただの雑談でも。Ionexa AI のどのモジュールにも紐づいていません。",
+      "composerPlaceholder": "Ionexa にメッセージ...",
+      "mentorMode": "メンターモード",
+      "mentorModeHint": "メンターモード: 単なる回答ではなく戦略的な助言をします — リスクを指摘し、確認の質問をし、代替案を示し、記録したデータを文脈として使います。",
+      "newChat": "新しいチャット",
+      "noConversations": "まだ会話がありません。",
+      "groupPinned": "ピン留め",
+      "groupToday": "今日",
+      "groupYesterday": "昨日",
+      "groupOlder": "それ以前",
+      "pin": "ピン留め",
+      "unpin": "ピン留めを解除",
+      "rename": "名前を変更",
+      "deleteConfirm": "「{title}」を削除しますか？元に戻せません。"
     },
     "create": {
-      "title": "何でも作成"
+      "title": "何でも作成",
+      "subtitle": "何でも書いてください — 製品のアイデア、トレード、ユーザーからのフィードバック、指標 — 自動的に適切なモジュールに入ります。",
+      "loggedTo": "記録先:",
+      "viewModule": "{module} を開く →"
     },
     "timeline": {
       "title": "タイムライン",
@@ -1617,7 +1644,9 @@
     "mightBeRelated": "関連している可能性があります: {titles}。リンクしますか?",
     "yes": "はい",
     "no": "いいえ",
-    "linked": "リンク済み"
+    "linked": "リンク済み",
+    "unlink": "リンクを解除",
+    "unlinkAria": "{name} のリンクを解除"
   },
   "favorites": {
     "add": "お気に入りに追加",

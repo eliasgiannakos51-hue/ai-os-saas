@@ -6,7 +6,7 @@ import { Search, SearchX } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { formatDateTime } from "@/lib/format-number";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export type MemoryResult = {
   id: string;
@@ -26,6 +26,8 @@ function matches(result: MemoryResult, query: string): boolean {
 
 export function MemorySearch({ results }: { results: MemoryResult[] }) {
   const locale = useLocale();
+  const t = useTranslations("dashboard.memory");
+  const tModule = useTranslations("module");
   const formatRelativeTime = useFormatRelativeTime();
   const [query, setQuery] = useState("");
 
@@ -43,7 +45,7 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search everything you've logged..."
+          placeholder={t("searchPlaceholder")}
           className="input pl-10"
           autoFocus
         />
@@ -51,18 +53,16 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
 
       {results.length > 0 && (
         <p className="mb-4 text-xs text-muted">
-          {filtered.length} {filtered.length === 1 ? "result" : "results"}
-          {query.trim() && ` for "${query.trim()}"`} across every module
+          {query.trim()
+            ? t("resultCountForQuery", { count: filtered.length, query: query.trim() })
+            : t("resultCount", { count: filtered.length })}
         </p>
       )}
 
       {results.length === 0 ? (
-        <EmptyState>
-          Nothing logged yet — once you start using the modules, you&apos;ll be able to
-          search across all of them here.
-        </EmptyState>
+        <EmptyState>{t("empty")}</EmptyState>
       ) : filtered.length === 0 ? (
-        <EmptyState icon={SearchX}>No matches for &apos;{query}&apos;</EmptyState>
+        <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>
       ) : (
         <>
           <div className="space-y-3">
@@ -90,7 +90,7 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
                   title={formatDateTime(result.createdAt, locale)}
                   suppressHydrationWarning
                 >
-                  Logged {formatRelativeTime(result.createdAt)}
+                  {tModule("loggedAt", { when: formatRelativeTime(result.createdAt) })}
                 </p>
               </Link>
             ))}
@@ -98,8 +98,7 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
 
           {filtered.length > MAX_RESULTS_SHOWN && (
             <p className="mt-3 text-center text-xs text-muted">
-              Showing the first {MAX_RESULTS_SHOWN} of {filtered.length} matches — refine
-              your search to narrow it down.
+              {t("truncated", { shown: MAX_RESULTS_SHOWN, total: filtered.length })}
             </p>
           )}
         </>

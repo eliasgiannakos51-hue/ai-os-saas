@@ -5,6 +5,7 @@ import { Plus, MessageCircle, Pin, MoreHorizontal, Pencil, Trash2 } from "lucide
 import type { ChatConversation } from "@/types/chat";
 import { groupConversationsByDate } from "@/lib/chat/group-conversations";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
+import { useTranslations } from "next-intl";
 
 export function ConversationSidebar({
   conversations,
@@ -25,6 +26,8 @@ export function ConversationSidebar({
   onDelete: (id: string) => void;
   onToggleFavorite: (id: string, favorited: boolean) => void;
 }) {
+  const t = useTranslations("dashboard.chat");
+  const tModule = useTranslations("module");
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
@@ -32,7 +35,7 @@ export function ConversationSidebar({
   const pinned = conversations.filter((c) => c.is_pinned);
   const unpinned = conversations.filter((c) => !c.is_pinned);
   const groups = [
-    ...(pinned.length > 0 ? [{ label: "Pinned" as const, conversations: pinned }] : []),
+    ...(pinned.length > 0 ? [{ label: "groupPinned" as const, conversations: pinned }] : []),
     ...groupConversationsByDate(unpinned),
   ];
 
@@ -57,7 +60,7 @@ export function ConversationSidebar({
 
   function handleDelete(conversation: ChatConversation) {
     setMenuOpenId(null);
-    if (window.confirm(`Delete "${conversation.title}"? This can't be undone.`)) {
+    if (window.confirm(t("deleteConfirm", { title: conversation.title }))) {
       onDelete(conversation.id);
     }
   }
@@ -70,7 +73,7 @@ export function ConversationSidebar({
           onClick={onNewChat}
           className="inline-flex min-h-[40px] w-full items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
         >
-          <Plus className="h-4 w-4" /> New Chat
+          <Plus className="h-4 w-4" /> {t("newChat")}
         </button>
       </div>
 
@@ -78,13 +81,13 @@ export function ConversationSidebar({
         {groups.length === 0 ? (
           <div className="mt-6 flex flex-col items-center gap-2 px-2 text-center">
             <MessageCircle className="h-5 w-5 text-muted/80" aria-hidden="true" />
-            <p className="text-xs text-muted">No conversations yet.</p>
+            <p className="text-xs text-muted">{t("noConversations")}</p>
           </div>
         ) : (
           groups.map((group) => (
             <div key={group.label}>
               <p className="px-2 pb-1.5 text-[10px] font-semibold uppercase tracking-widest text-muted">
-                {group.label}
+                {t(group.label)}
               </p>
               <div className="space-y-0.5">
                 {group.conversations.map((conversation) => {
@@ -157,7 +160,7 @@ export function ConversationSidebar({
                             current === conversation.id ? null : conversation.id
                           )
                         }
-                        aria-label={`Options for ${conversation.title}`}
+                        aria-label={tModule("actionsFor", { name: conversation.title })}
                         // 36px to match the star beside it — two adjacent
                         // controls at different sizes read as a mistake.
                         className={`mr-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-muted opacity-0 transition-opacity duration-150 hover:bg-panel-hover hover:text-foreground group-hover/row:opacity-100 ${
@@ -178,7 +181,7 @@ export function ConversationSidebar({
                             className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
                           >
                             <Pin className="h-3.5 w-3.5" aria-hidden="true" />
-                            {conversation.is_pinned ? "Unpin" : "Pin"}
+                            {conversation.is_pinned ? t("unpin") : t("pin")}
                           </button>
                           <button
                             type="button"
@@ -186,7 +189,7 @@ export function ConversationSidebar({
                             className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
                           >
                             <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
-                            Rename
+                            {t("rename")}
                           </button>
                           <button
                             type="button"
@@ -194,7 +197,7 @@ export function ConversationSidebar({
                             className="flex w-full items-center gap-2 rounded-lg px-2.5 py-1.5 text-left text-xs text-red-400 transition-colors duration-150 hover:bg-red-500/10"
                           >
                             <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
-                            Delete
+                            {tModule("delete")}
                           </button>
                         </div>
                       )}

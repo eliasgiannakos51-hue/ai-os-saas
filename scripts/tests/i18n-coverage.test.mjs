@@ -99,6 +99,97 @@ for (const file of sources) {
 check(`no hardcoded prose in ${USER_FACING_CALLS.join("/")} (${sources.length} files scanned)`, hardcoded, []);
 
 // ---------------------------------------------------------------------
+// 1a. THE SAME CALLS, WRITTEN WITH BACKTICKS.
+//
+//     addToast(`✗ could not save persona name`, "error")
+//     addToast(`✗ error: ${err.message}`, "error")
+//     addToast(`✓ added ${n} example ${n === 1 ? "entry" : "entries"}`)
+//     window.confirm(`Delete "${title}"? This can't be undone.`)
+//
+// The regex above requires a double quote straight after the paren, so
+// every one of those was invisible to it — and the third is an English
+// plural rule baked into a ternary, which no language outside English
+// shares. Four of them shipped.
+//
+// PARSED, not pattern-matched: only the STATIC chunks count. `✗ ${msg}`
+// contributes "✗ " and is not prose; the interpolation is somebody else's
+// already-translated string.
+const RENDER_CALL_NAMES = new Set([...USER_FACING_CALLS, "setStatus", "alert", "confirm"]);
+function staticChunksOf(node) {
+  if (ts.isNoSubstitutionTemplateLiteral(node)) return [node.text];
+  if (ts.isTemplateExpression(node)) {
+    return [node.head.text, ...node.templateSpans.map((sp) => sp.literal.text)];
+  }
+  return null;
+}
+const templateProse = [];
+for (const file of sources) {
+  const sf = ts.createSourceFile(
+    file,
+    readFileSync(file, "utf8"),
+    ts.ScriptTarget.ES2022,
+    true,
+    file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+  );
+  const visit = (node) => {
+    if (ts.isCallExpression(node)) {
+      const callee = node.expression.getText().split(".").pop();
+      if (RENDER_CALL_NAMES.has(callee)) {
+        for (const arg of node.arguments) {
+          const chunks = staticChunksOf(arg);
+          if (!chunks) continue;
+          const prose = chunks.filter((c) => PROSE.test(c));
+          if (prose.length) {
+            const { line } = sf.getLineAndCharacterOfPosition(arg.getStart());
+            templateProse.push(`${file}:${line + 1} ${callee}(\`…${prose.join("…")}…\`)`);
+          }
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+}
+check("no rendered template literal has English in its static text", templateProse, []);
+
+// It has to be able to fail, on the exact four shapes that shipped.
+{
+  const SHIPPED = [
+    "function R({ addToast, err, n, title }) {",
+    "  addToast(`\\u2717 could not save persona name`, 'error');",
+    "  addToast(`\\u2717 error: ${err.message}`, 'error');",
+    "  addToast(`\\u2713 added ${n} example ${n === 1 ? 'entry' : 'entries'}`);",
+    "  window.confirm(`Delete \\\"${title}\\\"? This can't be undone.`);",
+    "  addToast(`\\u2717 ${err.message}`, 'error');",
+    "}",
+  ].join("\n");
+  const sf = ts.createSourceFile("toasts.ts", SHIPPED, ts.ScriptTarget.ES2022, true, ts.ScriptKind.TS);
+  const caught = [];
+  const visit = (node) => {
+    if (ts.isCallExpression(node)) {
+      const callee = node.expression.getText().split(".").pop();
+      if (RENDER_CALL_NAMES.has(callee)) {
+        for (const arg of node.arguments) {
+          const chunks = staticChunksOf(arg);
+          if (chunks && chunks.some((c) => PROSE.test(c))) caught.push(callee);
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  // Four flagged. The fifth — `\u2717 ${err.message}` — is left alone: its
+  // only static text is a symbol, and the message it wraps is the
+  // server-side prose already counted as a known gap below.
+  check("the template walk catches the four shapes that shipped", caught, [
+    "addToast",
+    "addToast",
+    "addToast",
+    "confirm",
+  ]);
+}
+
+// ---------------------------------------------------------------------
 // 1b. THE PATTERN NO REGEX GATE COULD SEE: a conditional whose branches
 //     are English literals, rendered straight into the UI.
 //
@@ -392,9 +483,11 @@ checkTrue(
 //
 // A RATCHET, NOT A ZERO.
 //
-// 115 of these still ship — 162 when this landed, minus the 22 aria-label
-// attributes paid off in batch A1 (now held at zero by 1d above) and the
-// 25 in the Ideas module paid off in batch A2.
+// 94 of these still ship — 162 when this landed, minus the 22 aria-label
+// attributes paid off in batch A1 (now held at zero by 1d above), the 25
+// in the Ideas module paid off in A2, the 19 in Chat, Memory and Create
+// paid off in A3, and the two `title=` attributes that came with the eight
+// template-literal strings 1a and 1d turned up.
 // Failing the build on all of them would mean
 // this check could not land at all, and a check that cannot land protects
 // nothing. So the baseline below is per FILE: no file may get worse, and
@@ -416,16 +509,11 @@ const BARE_TEXT_BASELINE = {
     "src/app/terms/page.tsx": 10,
     "src/components/auth/generate-password-button.tsx": 1,
     "src/components/billing/upgrade-required.tsx": 4,
-    "src/components/chat/chat-workspace.tsx": 5,
-    "src/components/chat/conversation-sidebar.tsx": 4,
-    "src/components/create/create-chat.tsx": 4,
     "src/components/dashboard/command-palette.tsx": 3,
     "src/components/entity-links/link-to-modal.tsx": 1,
-    "src/components/entity-links/linked-entities.tsx": 1,
     "src/components/error-message.tsx": 1,
     "src/components/landing/deleted-account-banner.tsx": 1,
     "src/components/legal/legal-layout.tsx": 3,
-    "src/components/memory/memory-search.tsx": 6,
     "src/components/overview/beta-expiry-banner.tsx": 2,
     "src/components/overview/quick-start-button.tsx": 1,
     "src/components/overview/quick-start-modal.tsx": 3,
@@ -433,7 +521,6 @@ const BARE_TEXT_BASELINE = {
     "src/components/pwa/pwa-provider.tsx": 4,
     "src/components/settings/buy-credits.tsx": 2,
     "src/components/settings/danger-zone.tsx": 1,
-    "src/components/settings/login-activity.tsx": 1,
     "src/components/settings/password-change-form.tsx": 1,
     "src/components/system-health/error-list.tsx": 2,
     "src/components/text-actions/text-actions-textarea.tsx": 2,
@@ -517,6 +604,37 @@ const ARIA_TEXT_ATTRS = new Set([
 // differ — and check-i18n.js would then flag nine of them as untranslated.
 const BRAND_ARIA_LITERALS = new Set(["ionexa", "ionexa ai"]);
 
+/**
+ * The hardcoded text in an aria attribute's value, or null when the value
+ * comes from somewhere translatable.
+ *
+ * A TEMPLATE LITERAL IS A LITERAL. The first version of this check only
+ * looked at `aria-label="..."`, so four attributes went on shipping
+ * English: `aria-label={`Unlink ${headline}`}`, `` `Remove ${label}` ``,
+ * `` `${message} — press Enter to dismiss` `` and `` `${label} (hex)` ``.
+ * The interpolation is the translatable part; the words around it are not.
+ *
+ * Its static chunks are joined so the technical-token test below sees the
+ * whole phrase: "(hex)" beside an interpolated label is a format hint, not
+ * prose, and flagging it would be a false report.
+ */
+function ariaLiteralText(init) {
+  if (!init) return null;
+  const node = ts.isJsxExpression(init) ? init.expression : init;
+  if (!node) return null;
+  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
+  if (ts.isTemplateExpression(node)) {
+    const words = [node.head.text, ...node.templateSpans.map((sp) => sp.literal.text)]
+      .join(" ")
+      .trim();
+    // Only the words matter. `${a} — ${b}` is punctuation glue; "(hex)" is
+    // a format hint. Two or more real letters in a row, at least once, is
+    // the line between the two.
+    return /[A-Za-z]{3,}/.test(words.replace(/\(hex\)/gi, "")) ? words : null;
+  }
+  return null;
+}
+
 const literalAria = [];
 for (const file of sources) {
   if (!file.endsWith(".tsx")) continue;
@@ -529,19 +647,10 @@ for (const file of sources) {
   );
   const visit = (node) => {
     if (ts.isJsxAttribute(node) && ARIA_TEXT_ATTRS.has(node.name.getText())) {
-      const init = node.initializer;
-      // `aria-label={t("send")}` and `aria-label={expr}` are fine — the
-      // value comes from somewhere that can be translated. Only a literal
-      // pinned into the markup is not.
-      const text =
-        init && ts.isStringLiteral(init)
-          ? init.text
-          : init && ts.isJsxExpression(init) && init.expression && ts.isStringLiteral(init.expression)
-            ? init.expression.text
-            : null;
+      const text = ariaLiteralText(node.initializer);
       if (text !== null && !BRAND_ARIA_LITERALS.has(text.trim().toLowerCase())) {
         const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
-        literalAria.push(`${file}:${line + 1} ${node.name.getText()}="${text}"`);
+        literalAria.push(`${file}:${line + 1} ${node.name.getText()}=${JSON.stringify(text)}`);
       }
     }
     ts.forEachChild(node, visit);
@@ -562,7 +671,9 @@ check("no aria-* text attribute is a hardcoded string", literalAria, []);
           <button aria-label="Send" />
           <button aria-label={"Close"} />
           <nav aria-label="Κατηγορίες" />
+          <button aria-label={\`Unlink \${name}\`} />
           <button aria-label={t("cancel")} onClick={onClose} />
+          <input aria-label={\`\${name} (hex)\`} />
           <svg aria-label="Ionexa AI" />
         </div>
       );
@@ -571,25 +682,22 @@ check("no aria-* text attribute is a hardcoded string", literalAria, []);
   const caught = [];
   const visit = (node) => {
     if (ts.isJsxAttribute(node) && ARIA_TEXT_ATTRS.has(node.name.getText())) {
-      const init = node.initializer;
-      const text =
-        init && ts.isStringLiteral(init)
-          ? init.text
-          : init && ts.isJsxExpression(init) && init.expression && ts.isStringLiteral(init.expression)
-            ? init.expression.text
-            : null;
+      const text = ariaLiteralText(node.initializer);
       if (text !== null && !BRAND_ARIA_LITERALS.has(text.trim().toLowerCase())) caught.push(text);
     }
     ts.forEachChild(node, visit);
   };
   visit(sf);
-  // Four: the plain literal, the braced literal, the Greek one, and the
-  // dialog label. Not the t() call, and not the brand name.
+  // Five: the plain literal, the braced literal, the Greek one, the dialog
+  // label and the template with English around the interpolation. NOT the
+  // t() call, NOT the brand name, and NOT `${name} (hex)`, whose only
+  // static text is a format hint.
   check("the aria walk catches every literal shape, including a non-English one", caught, [
     "Command palette",
     "Send",
     "Close",
     "Κατηγορίες",
+    "Unlink",
   ]);
 }
 

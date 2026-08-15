@@ -131,7 +131,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
 
     if (error) {
       setError(error.message);
-      addToast(`✗ error: ${error.message}`, "error");
+      addToast(`✗ ${tCommon("error")}: ${error.message}`, "error");
       return;
     }
 

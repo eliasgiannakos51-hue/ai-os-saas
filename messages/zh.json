@@ -46,7 +46,8 @@
     "loadingContent": "正在加载内容",
     "nextPage": "下一页",
     "previousPage": "上一页",
-    "toggleMenu": "切换菜单"
+    "toggleMenu": "切换菜单",
+    "dismissToastAria": "{message} — 按 Enter 键关闭"
   },
   "sidebar": {
     "groups": {
@@ -465,7 +466,9 @@
       "noDevices": "目前还没有记录到设备。",
       "lastSeen": "最后一次活跃于 {time}",
       "couldNotRemoveDevice": "✗ 无法移除设备",
-      "deviceRemoved": "✓ 已移除设备"
+      "deviceRemoved": "✓ 已移除设备",
+      "removeDevice": "移除设备",
+      "removeDeviceAria": "移除 {device}"
     },
     "aiUsage": {
       "title": "AI 使用情况",
@@ -562,7 +565,8 @@
     "aiPersona": {
       "title": "AI 人格",
       "description": "为助手设置自定义名称。",
-      "personaUpdated": "✓ 助手名称已更新"
+      "personaUpdated": "✓ 助手名称已更新",
+      "couldNotSave": "✗ 无法保存该名称"
     },
     "billing": {
       "title": "账单",
@@ -705,7 +709,8 @@
           "description": "记录一笔交易"
         }
       },
-      "quickStartTemplates": "快速开始模板"
+      "quickStartTemplates": "快速开始模板",
+      "quickStartApplied": "✓ 已添加 {count} 条示例记录"
     },
     "team": {
       "title": "团队",
@@ -736,7 +741,12 @@
     },
     "memory": {
       "title": "AI 记忆",
-      "description": "在所有模块中搜索你记录过的一切——无需记得存放在哪里。"
+      "description": "在所有模块中搜索你记录过的一切——无需记得存放在哪里。",
+      "searchPlaceholder": "搜索你记录过的一切...",
+      "resultCount": "在所有模块中共 {count} 条结果",
+      "resultCountForQuery": "在所有模块中共 {count} 条与“{query}”匹配的结果",
+      "empty": "还没有任何记录——一旦你开始使用各个模块，就可以在这里统一搜索。",
+      "truncated": "显示 {total} 条匹配结果中的前 {shown} 条——请细化搜索条件。"
     },
     "documents": {
       "title": "文档",
@@ -768,10 +778,27 @@
       "streamInterruptedPartial": "连接已中断——上面的回复可能不完整。",
       "hideConversationsHint": "隐藏会话列表，让对话占据整个宽度。",
       "showConversationsHint": "再次显示会话列表。",
-      "send": "发送"
+      "send": "发送",
+      "emptyBody": "什么都可以问——常识、头脑风暴、写作帮助，或者只是聊聊天。不与任何 Ionexa AI 模块绑定。",
+      "composerPlaceholder": "给 Ionexa 发消息...",
+      "mentorMode": "导师模式",
+      "mentorModeHint": "导师模式：给出战略性的引导而不只是答案——指出风险、提出澄清问题、给出替代方案，并把你记录的数据作为上下文。",
+      "newChat": "新建对话",
+      "noConversations": "还没有对话。",
+      "groupPinned": "已置顶",
+      "groupToday": "今天",
+      "groupYesterday": "昨天",
+      "groupOlder": "更早",
+      "pin": "置顶",
+      "unpin": "取消置顶",
+      "rename": "重命名",
+      "deleteConfirm": "确定删除“{title}”？此操作无法撤销。"
     },
     "create": {
-      "title": "创建任何内容"
+      "title": "创建任何内容",
+      "subtitle": "描述任何内容——一个产品创意、一笔交易、一条用户反馈、一项指标——它会自动归入正确的模块。",
+      "loggedTo": "已记录到：",
+      "viewModule": "查看 {module} →"
     },
     "timeline": {
       "title": "时间线",
@@ -1617,7 +1644,9 @@
     "mightBeRelated": "这可能与以下内容相关: {titles}。要关联吗?",
     "yes": "是",
     "no": "否",
-    "linked": "已关联"
+    "linked": "已关联",
+    "unlink": "取消关联",
+    "unlinkAria": "取消与 {name} 的关联"
   },
   "favorites": {
     "add": "添加到收藏",

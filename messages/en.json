@@ -46,7 +46,8 @@
     "loadingContent": "Loading content",
     "nextPage": "Next page",
     "previousPage": "Previous page",
-    "toggleMenu": "Toggle menu"
+    "toggleMenu": "Toggle menu",
+    "dismissToastAria": "{message} — press Enter to dismiss"
   },
   "sidebar": {
     "groups": {
@@ -465,7 +466,9 @@
       "noDevices": "No devices recorded yet.",
       "lastSeen": "Last seen {time}",
       "couldNotRemoveDevice": "✗ could not remove device",
-      "deviceRemoved": "✓ device removed"
+      "deviceRemoved": "✓ device removed",
+      "removeDevice": "Remove device",
+      "removeDeviceAria": "Remove {device}"
     },
     "aiUsage": {
       "title": "AI Usage",
@@ -562,7 +565,8 @@
     "aiPersona": {
       "title": "AI Persona",
       "description": "Give the assistant a custom name.",
-      "personaUpdated": "✓ persona name updated"
+      "personaUpdated": "✓ persona name updated",
+      "couldNotSave": "✗ could not save the persona name"
     },
     "billing": {
       "title": "Billing",
@@ -705,7 +709,8 @@
           "description": "Log a trade"
         }
       },
-      "quickStartTemplates": "Quick Start templates"
+      "quickStartTemplates": "Quick Start templates",
+      "quickStartApplied": "✓ {count, plural, one {# example entry added} other {# example entries added}}"
     },
     "team": {
       "title": "Team",
@@ -736,7 +741,12 @@
     },
     "memory": {
       "title": "AI Memory",
-      "description": "Search everything you've logged, across every module — no need to remember where you put it."
+      "description": "Search everything you've logged, across every module — no need to remember where you put it.",
+      "searchPlaceholder": "Search everything you've logged...",
+      "resultCount": "{count, plural, =0 {no results} one {# result} other {# results}} across every module",
+      "resultCountForQuery": "{count, plural, =0 {no results} one {# result} other {# results}} for \"{query}\" across every module",
+      "empty": "Nothing logged yet — once you start using the modules, you'll be able to search across all of them here.",
+      "truncated": "Showing the first {shown} of {total} matches — refine your search to narrow it down."
     },
     "documents": {
       "title": "Documents",
@@ -768,10 +778,27 @@
       "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete.",
       "hideConversationsHint": "Hide the conversation list and give the thread the full width.",
       "showConversationsHint": "Show the conversation list again.",
-      "send": "Send"
+      "send": "Send",
+      "emptyBody": "Ask anything — general knowledge, brainstorming, writing help, or just a conversation. Not tied to any Ionexa AI module.",
+      "composerPlaceholder": "Message Ionexa...",
+      "mentorMode": "Mentor Mode",
+      "mentorModeHint": "Mentor Mode: strategic guidance instead of just answers — flags risks, asks clarifying questions, suggests alternatives, and uses your logged data as context.",
+      "newChat": "New Chat",
+      "noConversations": "No conversations yet.",
+      "groupPinned": "Pinned",
+      "groupToday": "Today",
+      "groupYesterday": "Yesterday",
+      "groupOlder": "Older",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "rename": "Rename",
+      "deleteConfirm": "Delete \"{title}\"? This can't be undone."
     },
     "create": {
-      "title": "Create Anything"
+      "title": "Create Anything",
+      "subtitle": "Describe anything — a product idea, a trade, feedback from a user, a metric — and it lands in the right module automatically.",
+      "loggedTo": "Logged to:",
+      "viewModule": "View {module} →"
     },
     "timeline": {
       "title": "Timeline",
@@ -1617,7 +1644,9 @@
     "mightBeRelated": "This might be related to: {titles}. Link them?",
     "yes": "Yes",
     "no": "No",
-    "linked": "Linked"
+    "linked": "Linked",
+    "unlink": "Unlink",
+    "unlinkAria": "Unlink {name}"
   },
   "favorites": {
     "add": "Add to favorites",

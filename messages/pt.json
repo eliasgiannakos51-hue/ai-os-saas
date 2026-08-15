@@ -46,7 +46,8 @@
     "loadingContent": "Carregando o conteúdo",
     "nextPage": "Próxima página",
     "previousPage": "Página anterior",
-    "toggleMenu": "Mostrar ou ocultar o menu"
+    "toggleMenu": "Mostrar ou ocultar o menu",
+    "dismissToastAria": "{message} — prima Enter para dispensar"
   },
   "sidebar": {
     "groups": {
@@ -465,7 +466,9 @@
       "noDevices": "Nenhum dispositivo registrado ainda.",
       "lastSeen": "Visto pela última vez {time}",
       "couldNotRemoveDevice": "✗ não foi possível remover o dispositivo",
-      "deviceRemoved": "✓ dispositivo removido"
+      "deviceRemoved": "✓ dispositivo removido",
+      "removeDevice": "Remover o dispositivo",
+      "removeDeviceAria": "Remover {device}"
     },
     "aiUsage": {
       "title": "Uso de IA",
@@ -562,7 +565,8 @@
     "aiPersona": {
       "title": "Persona de IA",
       "description": "Dá ao assistente um nome personalizado.",
-      "personaUpdated": "✓ nome do assistente atualizado"
+      "personaUpdated": "✓ nome do assistente atualizado",
+      "couldNotSave": "✗ não foi possível guardar o nome"
     },
     "billing": {
       "title": "Faturação",
@@ -705,7 +709,8 @@
           "description": "Regista uma operação"
         }
       },
-      "quickStartTemplates": "Modelos de início rápido"
+      "quickStartTemplates": "Modelos de início rápido",
+      "quickStartApplied": "✓ {count, plural, one {# entrada de exemplo adicionada} other {# entradas de exemplo adicionadas}}"
     },
     "team": {
       "title": "Equipe",
@@ -736,7 +741,12 @@
     },
     "memory": {
       "title": "Memória IA",
-      "description": "Pesquise tudo que você registrou, em todos os módulos — sem precisar lembrar onde colocou."
+      "description": "Pesquise tudo que você registrou, em todos os módulos — sem precisar lembrar onde colocou.",
+      "searchPlaceholder": "Pesquise em tudo o que registou...",
+      "resultCount": "{count, plural, =0 {nenhum resultado} one {# resultado} other {# resultados}} em todos os módulos",
+      "resultCountForQuery": "{count, plural, =0 {nenhum resultado} one {# resultado} other {# resultados}} para «{query}» em todos os módulos",
+      "empty": "Ainda não registou nada — assim que começar a usar os módulos, poderá pesquisar em todos eles a partir daqui.",
+      "truncated": "A mostrar os primeiros {shown} de {total} resultados — refine a sua pesquisa."
     },
     "documents": {
       "title": "Documentos",
@@ -768,10 +778,27 @@
       "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta.",
       "hideConversationsHint": "Oculta a lista de conversas e dá toda a largura ao tópico.",
       "showConversationsHint": "Mostrar novamente a lista de conversas.",
-      "send": "Enviar"
+      "send": "Enviar",
+      "emptyBody": "Pergunte o que quiser — conhecimento geral, ideias, ajuda com a escrita ou apenas uma conversa. Não está ligado a nenhum módulo do Ionexa AI.",
+      "composerPlaceholder": "Escreva para o Ionexa...",
+      "mentorMode": "Modo mentor",
+      "mentorModeHint": "Modo mentor: orientação estratégica em vez de apenas respostas — assinala riscos, faz perguntas de esclarecimento, sugere alternativas e usa como contexto os dados que registou.",
+      "newChat": "Nova conversa",
+      "noConversations": "Ainda não há conversas.",
+      "groupPinned": "Fixadas",
+      "groupToday": "Hoje",
+      "groupYesterday": "Ontem",
+      "groupOlder": "Mais antigas",
+      "pin": "Fixar",
+      "unpin": "Desafixar",
+      "rename": "Mudar o nome",
+      "deleteConfirm": "Eliminar «{title}»? Não é possível anular."
     },
     "create": {
-      "title": "Criar Qualquer Coisa"
+      "title": "Criar Qualquer Coisa",
+      "subtitle": "Descreva qualquer coisa — uma ideia de produto, uma operação, o feedback de um utilizador, uma métrica — e vai parar automaticamente ao módulo certo.",
+      "loggedTo": "Registado em:",
+      "viewModule": "Abrir {module} →"
     },
     "timeline": {
       "title": "Linha do Tempo",
@@ -1617,7 +1644,9 @@
     "mightBeRelated": "Isso pode estar relacionado a: {titles}. Vincular?",
     "yes": "Sim",
     "no": "Não",
-    "linked": "Vinculado"
+    "linked": "Vinculado",
+    "unlink": "Desassociar",
+    "unlinkAria": "Desassociar {name}"
   },
   "favorites": {
     "add": "Adicionar aos favoritos",

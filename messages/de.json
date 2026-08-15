@@ -46,7 +46,8 @@
     "loadingContent": "Inhalt wird geladen",
     "nextPage": "Nächste Seite",
     "previousPage": "Vorherige Seite",
-    "toggleMenu": "Menü ein- oder ausblenden"
+    "toggleMenu": "Menü ein- oder ausblenden",
+    "dismissToastAria": "{message} — mit Enter ausblenden"
   },
   "sidebar": {
     "groups": {
@@ -465,7 +466,9 @@
       "noDevices": "Noch keine Geräte erfasst.",
       "lastSeen": "Zuletzt gesehen {time}",
       "couldNotRemoveDevice": "✗ Gerät konnte nicht entfernt werden",
-      "deviceRemoved": "✓ Gerät entfernt"
+      "deviceRemoved": "✓ Gerät entfernt",
+      "removeDevice": "Gerät entfernen",
+      "removeDeviceAria": "{device} entfernen"
     },
     "aiUsage": {
       "title": "KI-Nutzung",
@@ -562,7 +565,8 @@
     "aiPersona": {
       "title": "KI-Persona",
       "description": "Gib dem Assistenten einen eigenen Namen.",
-      "personaUpdated": "✓ Name des Assistenten aktualisiert"
+      "personaUpdated": "✓ Name des Assistenten aktualisiert",
+      "couldNotSave": "✗ Name konnte nicht gespeichert werden"
     },
     "billing": {
       "title": "Abrechnung",
@@ -705,7 +709,8 @@
           "description": "Einen Trade erfassen"
         }
       },
-      "quickStartTemplates": "Schnellstart-Vorlagen"
+      "quickStartTemplates": "Schnellstart-Vorlagen",
+      "quickStartApplied": "✓ {count, plural, one {# Beispieleintrag hinzugefügt} other {# Beispieleinträge hinzugefügt}}"
     },
     "team": {
       "title": "Team",
@@ -736,7 +741,12 @@
     },
     "memory": {
       "title": "KI-Gedächtnis",
-      "description": "Durchsuche alles, was du erfasst hast, über alle Module hinweg — ohne dich erinnern zu müssen, wo du es abgelegt hast."
+      "description": "Durchsuche alles, was du erfasst hast, über alle Module hinweg — ohne dich erinnern zu müssen, wo du es abgelegt hast.",
+      "searchPlaceholder": "Durchsuche alles, was du erfasst hast...",
+      "resultCount": "{count, plural, =0 {keine Treffer} one {# Treffer} other {# Treffer}} in allen Modulen",
+      "resultCountForQuery": "{count, plural, =0 {keine Treffer} one {# Treffer} other {# Treffer}} für „{query}“ in allen Modulen",
+      "empty": "Noch nichts erfasst — sobald du die Module nutzt, kannst du sie von hier aus alle durchsuchen.",
+      "truncated": "Es werden die ersten {shown} von {total} Treffern gezeigt — grenze deine Suche weiter ein."
     },
     "documents": {
       "title": "Dokumente",
@@ -768,10 +778,27 @@
       "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig.",
       "hideConversationsHint": "Blendet die Unterhaltungsliste aus und gibt dem Verlauf die volle Breite.",
       "showConversationsHint": "Die Unterhaltungsliste wieder anzeigen.",
-      "send": "Senden"
+      "send": "Senden",
+      "emptyBody": "Frag alles — Allgemeinwissen, Ideenfindung, Hilfe beim Schreiben oder einfach ein Gespräch. An kein Ionexa-AI-Modul gebunden.",
+      "composerPlaceholder": "Nachricht an Ionexa...",
+      "mentorMode": "Mentor-Modus",
+      "mentorModeHint": "Mentor-Modus: strategische Begleitung statt bloßer Antworten — benennt Risiken, stellt Rückfragen, schlägt Alternativen vor und nutzt deine erfassten Daten als Kontext.",
+      "newChat": "Neuer Chat",
+      "noConversations": "Noch keine Chats.",
+      "groupPinned": "Angeheftet",
+      "groupToday": "Heute",
+      "groupYesterday": "Gestern",
+      "groupOlder": "Älter",
+      "pin": "Anheften",
+      "unpin": "Lösen",
+      "rename": "Umbenennen",
+      "deleteConfirm": "„{title}“ löschen? Das lässt sich nicht rückgängig machen."
     },
     "create": {
-      "title": "Alles Erstellen"
+      "title": "Alles Erstellen",
+      "subtitle": "Beschreibe irgendetwas — eine Produktidee, einen Trade, das Feedback eines Nutzers, eine Kennzahl — und es landet automatisch im richtigen Modul.",
+      "loggedTo": "Erfasst in:",
+      "viewModule": "{module} öffnen →"
     },
     "timeline": {
       "title": "Zeitleiste",
@@ -1617,7 +1644,9 @@
     "mightBeRelated": "Das könnte mit {titles} zusammenhängen. Verknüpfen?",
     "yes": "Ja",
     "no": "Nein",
-    "linked": "Verknüpft"
+    "linked": "Verknüpft",
+    "unlink": "Verknüpfung lösen",
+    "unlinkAria": "Verknüpfung zu {name} lösen"
   },
   "favorites": {
     "add": "Zu Favoriten hinzufügen",

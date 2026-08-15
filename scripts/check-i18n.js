@@ -203,9 +203,54 @@ const LOCALE_ALLOWED = new Set([
   "pt:dashboard.overview.quickActions.trading.label",
   "pt:sidebar.items.feedback",
   "zh:dashboard.team.emailPlaceholder",
+  // lib/modules.ts field labels and select options. Each checked by hand
+  // against what the language actually calls the thing, not against
+  // whether a synonym exists: "Marketing", "Budget", "Status", "Quiz",
+  // "Hashtags", "Idea", "Sentiment", "Description", "Notes" and "Type"
+  // really are spelled this way in these languages, and "email", "web",
+  // "live", "final" and "social" are the loanwords their UIs already use
+  // — the same reasoning as the Website Builder design controls above.
+  // Substituting a rarer synonym to make the string differ would make
+  // those UIs worse, not more translated.
+  "de:moduleData.fields.budget",
+  "de:moduleData.fields.hashtags",
+  "de:moduleData.fields.marketing",
+  "de:moduleData.fields.quiz",
+  "de:moduleData.fields.status",
+  "de:moduleData.options.final",
+  "de:moduleData.options.live",
+  "el:moduleData.options.email",
+  "el:moduleData.options.web",
+  "es:moduleData.fields.hashtags",
+  "es:moduleData.fields.idea",
+  "es:moduleData.fields.marketing",
+  "es:moduleData.options.final",
+  "es:moduleData.options.web",
+  "fr:moduleData.fields.budget",
+  "fr:moduleData.fields.description",
+  "fr:moduleData.fields.marketing",
+  "fr:moduleData.fields.notes",
+  "fr:moduleData.fields.type",
+  "fr:moduleData.options.final",
+  "fr:moduleData.options.web",
+  "it:moduleData.fields.budget",
+  "it:moduleData.fields.idea",
+  "it:moduleData.fields.marketing",
+  "it:moduleData.fields.quiz",
+  "it:moduleData.fields.sentiment",
+  "it:moduleData.options.email",
+  "it:moduleData.options.social",
+  "it:moduleData.options.web",
+  "pt:moduleData.fields.marketing",
+  "pt:moduleData.options.final",
+  "pt:moduleData.options.web",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
+  // The placeholder in a URL field. "https://..." is a FORMAT, not prose:
+  // the scheme is the same eight characters in every written language,
+  // including the two that do not use the Latin alphabet at all.
+  "moduleData.placeholders.httpsUrl",
   // A hex colour code shown as the placeholder in the Website Builder's
   // colour field. It is a FORMAT example, not prose — "#1d4ed8" is the
   // same six characters in every language, and translating it would mean

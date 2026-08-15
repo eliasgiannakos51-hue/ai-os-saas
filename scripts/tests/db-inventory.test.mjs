@@ -19,12 +19,23 @@
 //
 // Run: node scripts/tests/db-inventory.test.mjs
 import { execFileSync } from "node:child_process";
-import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import path from "node:path";
 
 let pass = 0;
 const failures = [];
 function check(name, cond, detail = "") {
+  // TYPED ON PURPOSE. `check(name, someArray, [])` reads perfectly and is
+  // always green: EVERY array is truthy in JavaScript, including the empty
+  // one. That is how the regression check for the deleted `user_files`
+  // table came to print its own failure message and still report PASS —
+  // it was copied from i18n-coverage.test.mjs, whose check() takes
+  // (actual, expected) and compares them. Two conventions, one name.
+  if (typeof cond !== "boolean") {
+    failures.push(name);
+    console.log(`  FAIL  ${name}\n        check() takes a BOOLEAN; got ${Array.isArray(cond) ? "an array" : typeof cond}`);
+    return;
+  }
   if (cond) {
     pass++;
     console.log(`  PASS  ${name}`);
@@ -57,6 +68,70 @@ check(
   inv.orphanFunctions.join(", ")
 );
 check("the inventory is not empty", inv.tables.length > 40 && inv.functions.length > 10);
+
+// NO FILTER MAY DELETE A TABLE THE CODE ACTUALLY QUERIES.
+//
+// The regression this pins: a dedup step mapped every storage BUCKET name
+// to a table name by swapping hyphens for underscores, so the `user-files`
+// bucket removed the `user_files` table — twelve `.from("user_files")`
+// call sites and a row in the GDPR registry — and the diagnostic then
+// reported it as an UNEXPECTED table nothing queries. That is the most
+// dangerous sentence a schema diagnostic can produce: it invites somebody
+// to drop a table full of user data.
+//
+// Counted from the source independently of the generator, so a filter that
+// eats a table cannot also hide the evidence.
+{
+  const queried = new Set();
+  const walkSrc = (dir) => {
+    for (const entry of readdirSync(dir)) {
+      if (entry === "node_modules" || entry.startsWith(".")) continue;
+      const full = path.join(dir, entry);
+      if (statSync(full).isDirectory()) walkSrc(full);
+      else if (/\.tsx?$/.test(full)) {
+        const text = readFileSync(full, "utf8")
+          .replace(/\/\*[\s\S]*?\*\//g, "")
+          .replace(/^\s*\/\/.*$/gm, "");
+        for (const m of text.matchAll(/(?<!storage\s{0,4}\.\s{0,4})\.from\(\s*"([a-z0-9_]+)"\s*\)/g)) {
+          queried.add(m[1]);
+        }
+      }
+    }
+  };
+  walkSrc("src");
+  const dropped = [...queried].filter((t) => !inv.tables.includes(t)).sort();
+  check(
+    `every table with a .from("…") call site survives the filters (${queried.size} found)`,
+    dropped.length === 0,
+    dropped.join(", ")
+  );
+  if (dropped.length) {
+    console.log("        A filter in scripts/db-inventory.mjs removed a table the code queries.");
+    console.log("        The diagnostic would report it as UNEXPECTED — do NOT drop it.");
+  }
+  // The specific tables that made this necessary, named so the regression
+  // cannot come back quietly under a different filter.
+  for (const t of ["user_files", "website_form_submissions", "user_credits"]) {
+    check(`${t} is in the expected inventory`, inv.tables.includes(t), "missing");
+  }
+}
+
+console.log("\n== 1b. the output says which code it was measured against ==");
+// "Which branch did this run on?" was a real question about a real report,
+// and the artefact could not answer it.
+{
+  const diag = run();
+  check("the diagnostic stamps its branch and commit", /GENERATED FROM:\s+branch \S+\s+@\s+commit \S+/.test(diag));
+  check(
+    "…and says whether the tree was clean",
+    /\(clean tree\)|\(\+\d+ uncommitted file\(s\)\)/.test(diag)
+  );
+  check("the repair DDL stamps it too", /From branch \S+ @ commit \S+/.test(run("--repair", "user_credits")));
+  check(
+    "the header warns that UNEXPECTED is relative to this tree",
+    /nothing in THIS tree queries it/.test(diag)
+  );
+}
 
 console.log("\n== 2. the diagnostic query is READ-ONLY ==");
 // COMMENTS AND STRING LITERALS ARE REMOVED BEFORE ANY SCAN BELOW.
@@ -100,6 +175,35 @@ check("…and reports RLS that is switched off", diagnostic.includes("RLS DISABL
 
 console.log("\n== 3. the repair DDL destroys nothing and is idempotent ==");
 const repair = run("--repair");
+
+// A PIPE MUST GET THE SAME BYTES A FILE DOES.
+//
+// console.log() to a pipe is asynchronous in Node; to a file it is not. A
+// process.exit() straight after it discarded whatever had not flushed, so
+// `... --repair > fix.sql` wrote 5,324 lines and `... --repair | psql`
+// wrote 3,352 — and reported success. Redirecting to a file looked
+// perfect, which is what makes this worth a test: the failure only
+// appears in the one usage that applies the SQL directly.
+{
+  const viaPipe = execFileSync("sh", ["-c", "node scripts/db-inventory.mjs --repair | cat"], {
+    encoding: "utf8",
+    maxBuffer: 32 * 1024 * 1024,
+  });
+  check(
+    `piped output is not truncated (${viaPipe.length} bytes vs ${repair.length} captured)`,
+    viaPipe.length === repair.length,
+    `pipe lost ${repair.length - viaPipe.length} bytes`
+  );
+  const diagPipe = execFileSync("sh", ["-c", "node scripts/db-inventory.mjs | cat"], {
+    encoding: "utf8",
+    maxBuffer: 32 * 1024 * 1024,
+  });
+  check(
+    "the diagnostic survives a pipe too",
+    diagPipe.trimEnd().endsWith(";"),
+    `ends with: ${JSON.stringify(diagPipe.slice(-40))}`
+  );
+}
 const DESTRUCTIVE = /\b(drop\s+table|drop\s+schema|drop\s+constraint|drop\s+policy|drop\s+column|truncate|delete\s+from)\b/i;
 // FUNCTION BODIES ARE EXCLUDED, and the distinction is the whole point.
 //

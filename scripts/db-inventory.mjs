@@ -35,8 +35,41 @@
  *                                            # idempotent DDL for JUST those
  *   node scripts/db-inventory.mjs --repair   # idempotent DDL for everything
  */
-import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, existsSync, writeSync } from "node:fs";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
+
+/**
+ * WHICH WORKING TREE THIS INVENTORY DESCRIBES.
+ *
+ * The first real run of the diagnostic reported three tables as
+ * "unexpected", and the first hypothesis was that it had been generated on
+ * a branch missing the features that use them. It had not — but there was
+ * no way to tell from the query, which is the actual defect. The branch,
+ * the commit and whether the tree was dirty are now stamped into the SQL
+ * itself, so the question is answered by the artefact instead of by
+ * memory.
+ *
+ * Never throws: a tarball with no .git is still a perfectly good place to
+ * generate this from, it just cannot say which commit.
+ */
+function provenance() {
+  const git = (args, fallback) => {
+    try {
+      return execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    } catch {
+      return fallback;
+    }
+  };
+  const branch = git(["rev-parse", "--abbrev-ref", "HEAD"], "(no git)");
+  const commit = git(["rev-parse", "--short", "HEAD"], "(no git)");
+  const dirty = git(["status", "--porcelain"], "");
+  return {
+    branch,
+    commit,
+    dirty: dirty ? dirty.split("\n").filter(Boolean).length : 0,
+  };
+}
 
 const ROOT = process.cwd();
 
@@ -69,10 +102,30 @@ for (const file of walkSource(path.join(ROOT, "src"))) {
   for (const m of src.matchAll(/\btable:\s*"([a-z0-9_]+)"/g)) requiredTables.add(m[1]);
   for (const m of src.matchAll(/\.rpc\(\s*"([a-z0-9_]+)"/g)) requiredFunctions.add(m[1]);
   for (const m of src.matchAll(/_BUCKET\s*=\s*"([a-z0-9-]+)"/g)) requiredBuckets.add(m[1]);
+  // `.storage.from(x)` is a BUCKET, not a table. In this repo every such
+  // call passes a constant, so the table regex above never picks one up —
+  // but a literal would look identical, so it is excluded here by the
+  // `.storage.` prefix rather than by guessing from the name.
+  for (const m of src.matchAll(/storage\s*\.\s*from\(\s*"([a-z0-9_-]+)"\s*\)/g)) {
+    requiredBuckets.add(m[1]);
+    requiredTables.delete(m[1]);
+  }
 }
-// `.storage.from("bucket")` is a bucket, not a table — remove any that a
-// bucket constant already claimed.
-for (const bucket of requiredBuckets) requiredTables.delete(bucket.replace(/-/g, "_"));
+// WHAT USED TO BE HERE, AND WHY IT IS GONE:
+//
+//   for (const b of requiredBuckets) requiredTables.delete(b.replace(/-/g, "_"));
+//
+// It mapped every bucket name to a table name by swapping hyphens for
+// underscores, so the `user-files` BUCKET deleted the `user_files` TABLE —
+// a table with twelve `.from("user_files")` call sites and a row in the
+// GDPR registry. The diagnostic then reported it as an UNEXPECTED table
+// the code never queries, which is the most dangerous thing a diagnostic
+// can say: it invites someone to drop a table that holds user data.
+//
+// It also never fixed anything. Bucket names only reach `requiredTables`
+// through a `.storage.from("literal")` call, and this repo has none — the
+// three buckets are all referenced through constants. So the line removed
+// real tables and protected against nothing.
 
 // ---------------------------------------------------------------------------
 // 2. What the MIGRATIONS define
@@ -261,6 +314,43 @@ function parseDdl(files, into) {
       });
     }
 
+    // POLICIES CREATED BY A LOOP, not by a literal statement.
+    //
+    // The thirteen module tables get RLS and four policies each from a
+    // `do $$ ... execute format('create policy "select_own_%1$s" on
+    // public.%1$s ...', t) ... $$` block iterating a `unnest(array[...])`
+    // of table names. A scan for literal `create policy` sees none of
+    // them, so the diagnostic silently expected ZERO policies on thirteen
+    // tables holding user content — it would have reported a database with
+    // no RLS on `ideas` as complete.
+    //
+    // Found because a repaired `ideas` still showed RLS DISABLED and the
+    // expected-policy set for it was empty, which made no sense for a
+    // table with a user_id.
+    for (const block of sql.matchAll(/do\s+\$([a-z_]*)\$([\s\S]*?)\$\1\$/gi)) {
+      const body = block[2];
+      const arrayMatch = body.match(/unnest\s*\(\s*array\s*\[([\s\S]*?)\]/i);
+      if (!arrayMatch) continue;
+      const loopTables = [...arrayMatch[1].matchAll(/'([a-z0-9_]+)'/gi)].map((m) => m[1]);
+      if (loopTables.length === 0) continue;
+      for (const tpl of body.matchAll(
+        /create\s+policy\s+"([^"]*%1\$s[^"]*)"\s+on\s+(?:public\.)?%1\$s([^']*)/gi
+      )) {
+        for (const table of loopTables) {
+          const name = tpl[1].replace(/%1\$s/g, table);
+          const rest = tpl[2].replace(/%1\$s/g, table).replace(/;\s*$/, "").trim();
+          const key = `${table} ${name}`;
+          if (into.policies.has(key)) continue;
+          into.policies.set(key, {
+            table,
+            name,
+            file,
+            text: `create policy "${name}" on public.${table} ${rest};`,
+          });
+        }
+      }
+    }
+
     // CREATE [OR REPLACE] FUNCTION public.x(...)
     for (const m of sql.matchAll(
       /create\s+(?:or\s+replace\s+)?function\s+(?:public\.)?"?([a-z0-9_]+)"?\s*\(([^)]*)\)/gi
@@ -336,7 +426,66 @@ const policies = [...defined.policies.values()]
 // policy. The repo's three snapshot files carry 42-43 DROP TABLE
 // statements each and would empty a live database; that is precisely why
 // they are never the thing you run to repair one.
+/**
+ * Writes to stdout SYNCHRONOUSLY, then it is safe to exit.
+ *
+ * console.log() to a PIPE is asynchronous in Node; to a FILE it is not. So
+ * `node db-inventory.mjs --repair > fix.sql` wrote all 5,324 lines and
+ * `node db-inventory.mjs --repair | psql` wrote 3,352 — process.exit()
+ * discarded whatever had not flushed. Redirecting to a file looked fine,
+ * which is the worst version of this bug: piping the repair straight into
+ * psql would have applied a TRUNCATED schema change and reported success.
+ *
+ * writeSync on fd 1 cannot be cut short by the exit that follows it.
+ */
+function emit(text) {
+  const buf = Buffer.from(text + "\n", "utf8");
+  let written = 0;
+  while (written < buf.length) {
+    written += writeSync(1, buf, written, buf.length - written);
+  }
+}
+
 const sqlQuote = (v) => `'${String(v).replace(/'/g, "''")}'`;
+
+/**
+ * A column definition, made safe to ADD to a table that already has rows.
+ *
+ * Two clauses are legal in a CREATE body and can fail as an ALTER:
+ *
+ *   PRIMARY KEY  a table cannot have a second one, and the repair runs
+ *                against tables that already have theirs.
+ *   NOT NULL     with no DEFAULT, adding it to a table with rows is an
+ *                error. `not null default x` is fine — Postgres backfills.
+ *
+ * Both are dropped rather than the column being skipped: a column that
+ * exists nullable is a working application; a column that does not exist
+ * is a 400 on every select that names it. The looser constraint is
+ * reported so the difference is visible, not silent.
+ */
+function addColumnForm(name, def) {
+  let d = def;
+  const notes = [];
+  if (/\bprimary\s+key\b/i.test(d)) {
+    d = d.replace(/\s*\bprimary\s+key\b/i, "");
+    notes.push("primary key dropped — the table already has one");
+  }
+  if (/\bnot\s+null\b/i.test(d) && !/\bdefault\b/i.test(d)) {
+    d = d.replace(/\s*\bnot\s+null\b/i, "");
+    notes.push("not null dropped — it cannot be added to a table with rows");
+  }
+  d = d.replace(/\s+/g, " ").trim();
+  // The note goes on its OWN line ABOVE the clause. A trailing `-- …`
+  // comments out the comma that separates this clause from the next one,
+  // which turns a valid multi-column ALTER into a syntax error.
+  return {
+    clause: `add column if not exists ${d}`,
+    note: notes.length ? `  -- ${d.split(" ")[0]}: ${notes.join("; ")}` : null,
+  };
+}
+
+/** Blank lines left behind where a comment was stripped. */
+const tidy = (sql) => sql.replace(/\n\s*\n\s*\n+/g, "\n").replace(/\(\s*\n(\s*\n)+/g, "(\n");
 
 const repairIndex = process.argv.indexOf("--repair");
 if (repairIndex !== -1) {
@@ -349,6 +498,7 @@ if (repairIndex !== -1) {
 
   const out = [
     "-- Idempotent repair DDL, generated by scripts/db-inventory.mjs.",
+    `-- From branch ${provenance().branch} @ commit ${provenance().commit}.`,
     `-- Scope: ${wantAll ? "every expected object" : wanted.join(", ")}`,
     "-- Safe to run more than once — it creates only what is absent.",
     "-- No DROP TABLE. No TRUNCATE. No DELETE. No DROP CONSTRAINT. No DROP POLICY.",
@@ -363,22 +513,25 @@ if (repairIndex !== -1) {
     emitted++;
     out.push(`-- ${t}  (from ${ddl.file})`);
     // A snapshot writes plain `create table`; make it non-destructive.
-    out.push(ddl.text.replace(/^create\s+table\s+(?!if\s+not\s+exists)/i, "create table if not exists "));
+    out.push(tidy(ddl.text.replace(/^create\s+table\s+(?!if\s+not\s+exists)/i, "create table if not exists ")));
     out.push("");
 
-    // Columns the original CREATE did not have — added by a later ALTER.
-    const created = ddl.text;
+    // EVERY expected column, not just the ones a later ALTER added.
+    //
+    // `create table if not exists` is a NO-OP on a table that already
+    // exists, so a column declared inside the CREATE body could never be
+    // repaired by this output — which is precisely the shape of a real
+    // report: `ideas` present, `ideas.updated_at` missing. The ALTER below
+    // covers the partially-present table; the CREATE above covers the
+    // absent one. Both are idempotent, so emitting both is safe.
     const defs = defined.columnDefs.get(t) ?? new Map();
-    const later = [...defs.entries()].filter(
-      ([name]) => !new RegExp(`(^|[(,\\s])"?${name}"?[\\s(]`, "i").test(created)
-    );
-    if (later.length) {
-      out.push(`-- ${t}: columns added after the table was first created`);
-      out.push(
-        `alter table public.${t}\n  ` +
-          later.map(([, def]) => `add column if not exists ${def}`).join(",\n  ") +
-          ";"
-      );
+    const adds = [...defs.entries()].map(([name, def]) => addColumnForm(name, def));
+    if (adds.length) {
+      out.push(`-- ${t}: every expected column, for a table that already exists`);
+      const body = adds
+        .map((a, i) => (a.note ? `${a.note}\n` : "") + `  ${a.clause}${i === adds.length - 1 ? ";" : ","}`)
+        .join("\n");
+      out.push(`alter table public.${t}\n${body}`);
       out.push("");
     }
   }
@@ -389,7 +542,7 @@ if (repairIndex !== -1) {
     if (!ddl) continue;
     emitted++;
     out.push(`-- ${f}()  (from ${ddl.file})`);
-    out.push(ddl.text.replace(/^create\s+function/i, "create or replace function"));
+    out.push(tidy(ddl.text.replace(/^create\s+function/i, "create or replace function")));
     out.push("");
   }
 
@@ -425,12 +578,12 @@ if (repairIndex !== -1) {
     console.error("-- Nothing matched. Pass names exactly as the diagnostic reported them.");
     process.exit(1);
   }
-  console.log(out.join("\n"));
+  emit(out.join("\n"));
   process.exit(0);
 }
 
 if (process.argv.includes("--json")) {
-  console.log(
+  emit(
     JSON.stringify(
       {
         tables,
@@ -455,8 +608,18 @@ if (process.argv.includes("--json")) {
 const q = (s) => `'${String(s).replace(/'/g, "''")}'`;
 const rows = (arr, fn) => arr.map(fn).join(",\n    ");
 
-console.log(`-- =========================================================================
+const prov = provenance();
+emit(`-- =========================================================================
 -- WHAT IS MISSING FROM THIS DATABASE
+--
+-- GENERATED FROM:  branch ${prov.branch}  @  commit ${prov.commit}${
+  prov.dirty ? `  (+${prov.dirty} uncommitted file(s))` : "  (clean tree)"
+}
+--
+-- That line is the answer to "which code is this measured against". A
+-- table reported as UNEXPECTED means nothing in THIS tree queries it —
+-- which is a different statement from "nothing anywhere does". Check the
+-- branch before concluding a table is an orphan.
 --
 -- Read-only. Generated by scripts/db-inventory.mjs from this repository:
 -- ${tables.length} tables and ${functions.length} RPC functions the code actually calls,

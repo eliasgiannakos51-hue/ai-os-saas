@@ -583,7 +583,30 @@
       "upgradePlan": "Tarif upgraden",
       "betaTester": "Beta-Tester",
       "betaTesterExpires": "Beta-Tester — läuft ab in {days, plural, one {# Tag} other {# Tagen}}",
-      "teamSeats": "+ {seats, plural, one {# Team-Platz} other {# Team-Plätze}}"
+      "teamSeats": "+ {seats, plural, one {# Team-Platz} other {# Team-Plätze}}",
+      "cancel": {
+        "button": "Abo kündigen",
+        "title": "Dein Abo kündigen",
+        "keepsAccessUntil": "Du behältst den vollen Zugang bis zum {date}.",
+        "keepsAccessUntilPeriodEnd": "Du behältst den vollen Zugang bis zum Ende des bereits bezahlten Zeitraums.",
+        "creditsStay": "Deine verbleibenden Credits bleiben bis dahin nutzbar.",
+        "dataKept": "Es wird nichts gelöscht — deine Einträge, Dateien und Unterhaltungen bleiben genau dort, wo sie sind.",
+        "reversible": "Du kannst es jederzeit vor Ablauf wieder aktivieren, ohne zusätzliche Kosten.",
+        "surveyQuestion": "Was hat dich zum Gehen gebracht? (optional)",
+        "reasons": {
+          "too_expensive": "Zu teuer",
+          "missing_feature": "Es fehlt etwas, das ich brauche",
+          "not_using": "Ich nutze es zu wenig",
+          "found_alternative": "Ich habe etwas anderes gefunden"
+        },
+        "notePlaceholder": "Möchtest du uns noch etwas sagen? (optional)",
+        "confirm": "Abo kündigen",
+        "keepIt": "Behalten",
+        "done": "✓ dein Abo endet zum Ende des bezahlten Zeitraums",
+        "restored": "✓ dein Abo ist wieder aktiv",
+        "restore": "Reaktivieren",
+        "endingIn": "{days, plural, =0 {Dein Abo endet heute.} one {Dein Abo endet in # Tag.} other {Dein Abo endet in # Tagen.}}"
+      }
     },
     "marginReport": {
       "title": "Margenbericht",

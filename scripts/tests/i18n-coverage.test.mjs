@@ -441,7 +441,15 @@ const clientFallbacks = sources.flatMap((f) => [
 // renders dashboard.agents.buildStalled in the user's own language. A
 // baseline raised over a string the user genuinely sees would be this
 // check being talked around instead of answered.
-const SERVER_PROSE_BASELINE = 518;
+// 518 -> 521 for api/billing/cancel and api/billing/resume: the
+// not-authenticated reply, the no-subscription reply and the failure
+// reply, in the same documented convention as the 518 before them — the
+// calling component surfaces them and translates what it can. The three
+// sentences the user actually READS while cancelling (what happens to
+// access, credits, data, and that it is reversible) are in
+// settings.billing.cancel.* in all ten locales; these are the fallbacks
+// shown only when the request itself fails.
+const SERVER_PROSE_BASELINE = 521;
 // 517 -> 518 for the "Not authenticated." reply added to
 // api/jobs/[id]/continue. That string is the standard one every other
 // route in the app already returns, and it appeared because

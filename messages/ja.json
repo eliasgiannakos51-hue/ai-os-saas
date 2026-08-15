@@ -583,7 +583,30 @@
       "upgradePlan": "プランをアップグレード",
       "betaTester": "ベータテスター",
       "betaTesterExpires": "ベータテスター — あと{days, plural, other {#日}}で終了",
-      "teamSeats": "+ {seats, plural, other {チームシート#席}}"
+      "teamSeats": "+ {seats, plural, other {チームシート#席}}",
+      "cancel": {
+        "button": "サブスクリプションを解約",
+        "title": "サブスクリプションを解約する",
+        "keepsAccessUntil": "{date} まで、すべての機能をそのままご利用いただけます。",
+        "keepsAccessUntilPeriodEnd": "すでにお支払い済みの期間が終わるまで、すべての機能をご利用いただけます。",
+        "creditsStay": "残っているクレジットは、それまでそのまま使えます。",
+        "dataKept": "何も削除されません — 記録もファイルも会話も、そのまま残ります。",
+        "reversible": "終了前ならいつでも、追加料金なしで元に戻せます。",
+        "surveyQuestion": "解約の理由を教えてください（任意）",
+        "reasons": {
+          "too_expensive": "料金が高い",
+          "missing_feature": "必要な機能がない",
+          "not_using": "あまり使っていない",
+          "found_alternative": "他のサービスを見つけた"
+        },
+        "notePlaceholder": "ほかに伝えたいことがあれば（任意）",
+        "confirm": "解約する",
+        "keepIt": "解約しない",
+        "done": "✓ お支払い済み期間の終了時に解約されます",
+        "restored": "✓ サブスクリプションが再び有効になりました",
+        "restore": "元に戻す",
+        "endingIn": "{days, plural, =0 {サブスクリプションは本日終了します。} other {サブスクリプションはあと # 日で終了します。}}"
+      }
     },
     "marginReport": {
       "title": "マージンレポート",

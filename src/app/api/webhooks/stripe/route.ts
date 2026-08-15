@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { creditSyncDecision } from "@/lib/billing/subscription-sync";
 import { diagLog } from "@/lib/diag";
 import type Stripe from "stripe";
 import { createStripeClient } from "@/lib/stripe/server";
@@ -30,6 +31,13 @@ export const dynamic = "force-dynamic";
 async function syncSubscriptionToUser(
   stripe: Stripe,
   subscriptionId: string,
+  /**
+   * The Stripe event that brought us here. It decides whether the credit
+   * balance may be rewritten — see lib/billing/subscription-sync.ts. It is
+   * a required argument, in a position every existing caller had to edit,
+   * so no call site can quietly go back to resetting on everything.
+   */
+  eventType: string,
   subscriptionHint?: Stripe.Subscription,
   fallbackSupabaseUserId?: string
 ) {
@@ -101,6 +109,11 @@ async function syncSubscriptionToUser(
     return;
   }
 
+  // Read BEFORE the update below overwrites it: the decision is about what
+  // changed, and comparing the new tier with itself would make the guard a
+  // no-op that still looks correct.
+  const previousTier = (userData.user.user_metadata?.subscription_tier as PlanSlug | undefined) ?? null;
+
   const { error: updateError } = await admin.auth.admin.updateUserById(supabaseUserId, {
     user_metadata: {
       ...userData.user.user_metadata,
@@ -115,15 +128,25 @@ async function syncSubscriptionToUser(
   }
   diagLog(`[webhook-diag] syncSubscriptionToUser result supabaseUserId=${supabaseUserId} planSlug=${planSlug} isActive=${isActive} seatCount=${seatCount} updateError=${updateError?.message ?? "none"}`);
 
-  // Resets the credit balance to the (new) plan's monthly allotment — same
-  // call on a brand-new subscription, a plan change, a cancellation (falls
-  // back to Free's allotment since planSlug is "free" when !isActive), and
-  // a recurring renewal (see the invoice.paid handler below).
-  try {
-    await syncCreditsForPlan(supabaseUserId, planSlug, `Subscription ${isActive ? "active" : "ended"}: ${planSlug} plan`);
-  } catch (err) {
-    logApiError("/api/webhooks/stripe", err, { stage: "sync_credits", supabaseUserId });
+  // Resets the credit balance to the (new) plan's monthly allotment — on a
+  // brand-new subscription, a plan change, a cancellation (Free's allotment,
+  // since planSlug is "free" when !isActive), and a recurring renewal.
+  //
+  // NOT on every other customer.subscription.updated. Stripe fires that for
+  // a card update, a coupon, an added team seat and for setting
+  // cancel_at_period_end, and this used to rewrite credits_remaining on all
+  // of them — which destroyed the balance of anyone who had bought a credit
+  // pack, because a pack ADDS above the plan total and the reset clamps back
+  // down to it. See lib/billing/subscription-sync.ts.
+  const decision = creditSyncDecision({ eventType, previousTier, nextTier: planSlug });
+  if (decision === "reset") {
+    try {
+      await syncCreditsForPlan(supabaseUserId, planSlug, `Subscription ${isActive ? "active" : "ended"}: ${planSlug} plan`);
+    } catch (err) {
+      logApiError("/api/webhooks/stripe", err, { stage: "sync_credits", supabaseUserId });
+    }
   }
+  diagLog(`[webhook-diag] creditSync decision=${decision} eventType=${eventType} previousTier=${previousTier ?? "none"} nextTier=${planSlug}`);
 }
 
 // One-time credit pack purchase (api/credits/checkout, mode: "payment") —
@@ -215,6 +238,7 @@ export async function POST(request: Request) {
           await syncSubscriptionToUser(
             stripe,
             subscriptionId,
+            event.type,
             undefined,
             session.metadata?.supabase_user_id
           );
@@ -226,7 +250,7 @@ export async function POST(request: Request) {
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
-        await syncSubscriptionToUser(stripe, subscription.id, subscription);
+        await syncSubscriptionToUser(stripe, subscription.id, event.type, subscription);
         break;
       }
       case "invoice.paid": {
@@ -237,7 +261,7 @@ export async function POST(request: Request) {
         const subscriptionRef = invoice.parent?.subscription_details?.subscription;
         const subscriptionId = typeof subscriptionRef === "string" ? subscriptionRef : subscriptionRef?.id;
         if (subscriptionId) {
-          await syncSubscriptionToUser(stripe, subscriptionId);
+          await syncSubscriptionToUser(stripe, subscriptionId, event.type);
         }
         break;
       }

@@ -583,7 +583,30 @@
       "upgradePlan": "Mejorar plan",
       "betaTester": "Probador beta",
       "betaTesterExpires": "Probador beta: caduca en {days, plural, one {# día} other {# días}}",
-      "teamSeats": "+ {seats, plural, one {# puesto de equipo} other {# puestos de equipo}}"
+      "teamSeats": "+ {seats, plural, one {# puesto de equipo} other {# puestos de equipo}}",
+      "cancel": {
+        "button": "Cancelar la suscripción",
+        "title": "Cancelar tu suscripción",
+        "keepsAccessUntil": "Mantienes el acceso completo hasta el {date}.",
+        "keepsAccessUntilPeriodEnd": "Mantienes el acceso completo hasta el final del periodo que ya has pagado.",
+        "creditsStay": "Los créditos que te quedan siguen disponibles hasta entonces.",
+        "dataKept": "No se elimina nada: tus entradas, archivos y conversaciones se quedan donde están.",
+        "reversible": "Puedes restaurarla en cualquier momento antes de que termine, sin coste adicional.",
+        "surveyQuestion": "¿Qué te hizo marcharte? (opcional)",
+        "reasons": {
+          "too_expensive": "Demasiado caro",
+          "missing_feature": "Le falta algo que necesito",
+          "not_using": "No lo uso lo suficiente",
+          "found_alternative": "Encontré otra cosa"
+        },
+        "notePlaceholder": "¿Algo más que quieras contarnos? (opcional)",
+        "confirm": "Cancelar la suscripción",
+        "keepIt": "Mantenerla",
+        "done": "✓ tu suscripción terminará al final del periodo pagado",
+        "restored": "✓ tu suscripción vuelve a estar activa",
+        "restore": "Restaurar",
+        "endingIn": "{days, plural, =0 {Tu suscripción termina hoy.} one {Tu suscripción termina en # día.} other {Tu suscripción termina en # días.}}"
+      }
     },
     "marginReport": {
       "title": "Informe de Margen",

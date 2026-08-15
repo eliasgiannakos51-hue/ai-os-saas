@@ -25,6 +25,7 @@ import { loadUnlockedAchievements } from "@/lib/achievements";
 import { isAdminEmail } from "@/lib/admin";
 import { isBetaTester, getBetaDaysRemaining } from "@/lib/beta";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
+import { loadSubscriptionState } from "@/lib/billing/subscription-state";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { BUILD_MODULES } from "@/lib/build-modules";
 import { getPlan } from "@/lib/billing/plans";
@@ -71,6 +72,9 @@ export default async function SettingsPage() {
   const aiPersonaName = (user.user_metadata?.ai_persona_name as string | undefined) ?? "";
 
   const unlockedAchievements = await loadUnlockedAchievements(supabase, user.id);
+  // Live from Stripe — cancel_at_period_end is not mirrored locally, so a
+  // cancellation made from Stripe's own portal shows here too.
+  const subscriptionState = await loadSubscriptionState(user);
 
   // No row until the user actually toggles something (see the panel's
   // upsert) — an empty object means "all defaults on", the same thing

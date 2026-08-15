@@ -583,7 +583,30 @@
       "upgradePlan": "Upgrade Plan",
       "betaTester": "Beta Tester",
       "betaTesterExpires": "Beta Tester — expires in {days, plural, one {# day} other {# days}}",
-      "teamSeats": "+ {seats, plural, one {# team seat} other {# team seats}}"
+      "teamSeats": "+ {seats, plural, one {# team seat} other {# team seats}}",
+      "cancel": {
+        "button": "Cancel subscription",
+        "title": "Cancel your subscription",
+        "keepsAccessUntil": "You keep full access until {date}.",
+        "keepsAccessUntilPeriodEnd": "You keep full access until the end of the period you have already paid for.",
+        "creditsStay": "Your remaining credits stay usable until then.",
+        "dataKept": "Nothing is deleted — your entries, files and conversations stay exactly where they are.",
+        "reversible": "You can restore it any time before it ends, at no extra charge.",
+        "surveyQuestion": "What made you leave? (optional)",
+        "reasons": {
+          "too_expensive": "Too expensive",
+          "missing_feature": "Missing something I need",
+          "not_using": "I'm not using it enough",
+          "found_alternative": "Found something else"
+        },
+        "notePlaceholder": "Anything else you want to tell us? (optional)",
+        "confirm": "Cancel the subscription",
+        "keepIt": "Keep it",
+        "done": "✓ your subscription will end at the end of the paid period",
+        "restored": "✓ your subscription is active again",
+        "restore": "Restore",
+        "endingIn": "{days, plural, =0 {Your subscription ends today.} one {Your subscription ends in # day.} other {Your subscription ends in # days.}}"
+      }
     },
     "marginReport": {
       "title": "Margin Report",

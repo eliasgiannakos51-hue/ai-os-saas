@@ -583,7 +583,30 @@
       "upgradePlan": "升级套餐",
       "betaTester": "Beta 测试者",
       "betaTesterExpires": "Beta 测试者 — {days, plural, other {#天}}后到期",
-      "teamSeats": "+ {seats, plural, other {# 个团队席位}}"
+      "teamSeats": "+ {seats, plural, other {# 个团队席位}}",
+      "cancel": {
+        "button": "取消订阅",
+        "title": "取消你的订阅",
+        "keepsAccessUntil": "你将保留完整访问权限，直到 {date}。",
+        "keepsAccessUntilPeriodEnd": "你将保留完整访问权限，直到你已付费的周期结束。",
+        "creditsStay": "在此之前，你剩余的额度依然可以使用。",
+        "dataKept": "不会删除任何内容——你的记录、文件和对话都会原样保留。",
+        "reversible": "在到期之前，你可以随时恢复，无需额外付费。",
+        "surveyQuestion": "是什么让你决定离开？（选填）",
+        "reasons": {
+          "too_expensive": "太贵了",
+          "missing_feature": "缺少我需要的功能",
+          "not_using": "我用得不够多",
+          "found_alternative": "找到了其他方案"
+        },
+        "notePlaceholder": "还有什么想告诉我们的吗？（选填）",
+        "confirm": "确认取消订阅",
+        "keepIt": "继续保留",
+        "done": "✓ 你的订阅将在已付费周期结束时终止",
+        "restored": "✓ 你的订阅已重新生效",
+        "restore": "恢复",
+        "endingIn": "{days, plural, =0 {你的订阅今天到期。} other {你的订阅将在 # 天后到期。}}"
+      }
     },
     "marginReport": {
       "title": "利润率报告",

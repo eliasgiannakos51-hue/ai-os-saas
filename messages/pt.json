@@ -583,7 +583,30 @@
       "upgradePlan": "Atualizar Plano",
       "betaTester": "Testador Beta",
       "betaTesterExpires": "Testador Beta — expira em {days, plural, one {# dia} other {# dias}}",
-      "teamSeats": "+ {seats, plural, one {# lugar de equipa} other {# lugares de equipa}}"
+      "teamSeats": "+ {seats, plural, one {# lugar de equipa} other {# lugares de equipa}}",
+      "cancel": {
+        "button": "Cancelar a subscrição",
+        "title": "Cancelar a sua subscrição",
+        "keepsAccessUntil": "Mantém o acesso completo até {date}.",
+        "keepsAccessUntilPeriodEnd": "Mantém o acesso completo até ao fim do período que já pagou.",
+        "creditsStay": "Os créditos que lhe restam continuam disponíveis até lá.",
+        "dataKept": "Nada é eliminado — as suas entradas, ficheiros e conversas ficam exatamente onde estão.",
+        "reversible": "Pode restaurá-la a qualquer momento antes de terminar, sem custo adicional.",
+        "surveyQuestion": "O que o levou a sair? (opcional)",
+        "reasons": {
+          "too_expensive": "Demasiado caro",
+          "missing_feature": "Falta algo de que preciso",
+          "not_using": "Não o uso o suficiente",
+          "found_alternative": "Encontrei outra coisa"
+        },
+        "notePlaceholder": "Quer dizer-nos mais alguma coisa? (opcional)",
+        "confirm": "Cancelar a subscrição",
+        "keepIt": "Manter",
+        "done": "✓ a sua subscrição terminará no fim do período pago",
+        "restored": "✓ a sua subscrição está ativa novamente",
+        "restore": "Restaurar",
+        "endingIn": "{days, plural, =0 {A sua subscrição termina hoje.} one {A sua subscrição termina daqui a # dia.} other {A sua subscrição termina daqui a # dias.}}"
+      }
     },
     "marginReport": {
       "title": "Relatório de Margem",

@@ -2,6 +2,10 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { getPlan } from "@/lib/billing/plans";
 import { ManageBillingButton } from "@/components/billing/manage-billing-button";
+import { CancelSubscription } from "@/components/settings/cancel-subscription";
+import { SubscriptionEndingBanner } from "@/components/billing/subscription-ending-banner";
+import { daysUntil } from "@/lib/billing/subscription-period";
+import type { SubscriptionState } from "@/lib/billing/subscription-state";
 
 export async function BillingSummary({
   tier,
@@ -10,6 +14,7 @@ export async function BillingSummary({
   isAdmin = false,
   isBetaTester = false,
   betaDaysRemaining = null,
+  subscription = null,
 }: {
   tier: string;
   seatCount: number;
@@ -20,6 +25,8 @@ export async function BillingSummary({
   // only meaningful while isBetaTester is true. null just falls back to a
   // plain "Beta Tester" label instead of an expiry count.
   betaDaysRemaining?: number | null;
+  /** Live cancel/renew state from Stripe, or null when there is none. */
+  subscription?: SubscriptionState | null;
 }) {
   const t = await getTranslations("settings.billing");
   const plan = getPlan(tier) ?? getPlan("free")!;
@@ -27,6 +34,9 @@ export async function BillingSummary({
   return (
     <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
       <h2 className="text-sm font-semibold text-foreground">{t("title")}</h2>
+      {subscription?.cancelAtPeriodEnd && subscription.endsAt && (
+        <SubscriptionEndingBanner daysLeft={daysUntil(subscription.endsAt)} />
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs text-muted">{t("currentPlan")}</p>
@@ -53,7 +63,16 @@ export async function BillingSummary({
                 : t("betaTester")}
             </span>
           ) : hasSubscription ? (
-            <ManageBillingButton />
+            <>
+              <ManageBillingButton />
+              {/* Beside "Manage billing", not buried inside Stripe's hosted
+                  portal behind it. Hidden only once a cancellation is
+                  already pending, where the banner above offers Restore
+                  instead — cancelling twice is not a thing. */}
+              {!subscription?.cancelAtPeriodEnd && (
+                <CancelSubscription endsAt={subscription?.endsAt ?? null} />
+              )}
+            </>
           ) : (
             <Link
               href="/pricing"

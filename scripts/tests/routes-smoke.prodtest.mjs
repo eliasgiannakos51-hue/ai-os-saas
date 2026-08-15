@@ -1072,6 +1072,90 @@ console.log("\n== 10. the generic modules are Greek (lib/modules.ts) ==");
   await ctx.close();
 }
 
+// ---------------------------------------------------------------------
+// CANCELLING, IN THE BROWSER, IN GREEK.
+//
+// The source test (subscription-cancel.test.mjs) proves the route uses
+// cancel_at_period_end and that the survey cannot gate the button. It
+// cannot prove the button is REACHABLE — the whole complaint about cancel
+// flows is that the control exists and nobody can find it. So this opens
+// Settings as a subscribed account and counts the clicks.
+console.log("\n== 11. cancelling is one click away, in the user's language ==");
+{
+  // A subscribed account: hasSubscription is derived from
+  // stripe_customer_id, and stripe_subscription_id is what the routes act
+  // on. loadSubscriptionState() cannot reach Stripe from here and returns
+  // null by design, which is the "no cancellation pending" state — exactly
+  // the state in which the button must be visible.
+  USER.user_metadata = { subscription_tier: "growth", stripe_customer_id: "cus_test", stripe_subscription_id: "sub_test" };
+  const ctx = await browser.newContext({ locale: "el", viewport: { width: 375, height: 812 } });
+  await ctx.addCookies([
+    { name: "NEXT_LOCALE", value: "el", url: `http://127.0.0.1:${PORT}` },
+    { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+  ]);
+  const page = await ctx.newPage();
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/settings`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+
+  const cancelButton = page.getByRole("button", { name: "Ακύρωση συνδρομής" });
+  checkTrue("the cancel button is on the settings page at 375px", await cancelButton.isVisible());
+  // Beside "Manage billing", not inside it: a cancel control that requires
+  // leaving for Stripe's hosted portal first is the thing being avoided.
+  checkTrue(
+    "…next to Manage billing, not behind it",
+    await page.getByRole("button", { name: "Διαχείριση Χρέωσης" }).isVisible().catch(() => false)
+  );
+
+  // ONE click opens the confirmation. Not a wizard.
+  await cancelButton.click();
+  await page.waitForTimeout(250);
+  const panelRoot = page.locator('main div.rounded-xl.border.border-border.bg-input').first();
+  const panel = await panelRoot.innerText();
+  for (const [what, needle] of [
+    ["access end", "μέχρι το τέλος της περιόδου"],
+    ["credits", "Τα credits που σου μένουν"],
+    ["data", "Δεν διαγράφεται τίποτα"],
+    ["reversible", "Μπορείς να την επαναφέρεις"],
+  ]) {
+    checkTrue(`the ${what} fact is stated before the decision, in Greek`, panel.includes(needle));
+  }
+
+  // The survey is on screen and nothing is preselected, and the confirm
+  // button is enabled with no answer given — the skippable case.
+  // Scoped to the panel: Settings also holds the theme and accessibility
+  // toggles, which are legitimately aria-pressed="true" and made an
+  // unscoped count report two preselected survey answers that do not exist.
+  const pressed = await panelRoot
+    .locator("button[aria-pressed]")
+    .evaluateAll((els) => els.map((e) => e.getAttribute("aria-pressed")));
+  check("no survey answer is preselected", pressed.filter((p) => p === "true").length, 0);
+  const confirm = page.getByRole("button", { name: "Ακύρωση της συνδρομής" });
+  checkTrue("the confirm button is enabled without answering the survey", await confirm.isEnabled());
+
+  // And there is a way back that is not the browser's back button.
+  checkTrue("…and a way to keep the subscription", await page.getByRole("button", { name: "Να τη διατηρήσω" }).isVisible());
+
+  const english = [...panel.matchAll(/(?:^|[^\p{L}])([A-Za-z]{3,}(?: [a-z]{3,}){2,})/gu)].map((m) => m[1]);
+  // Scoped to the panel for the same reason: the first run flagged
+  // "Need more credits this month" from buy-credits.tsx, which is real
+  // untranslated English on this page but is NOT this feature — it is
+  // already counted in the 1c bare-text ratchet and is reported as a
+  // separate finding rather than hidden inside this assertion.
+  check("no English sentence survives in the cancel panel", english, []);
+
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+  );
+  checkTrue(`the panel does not scroll sideways at 375px (overflow ${overflow}px)`, overflow <= 1);
+
+  await page.screenshot({ path: "/tmp/ionexa-cancel-el.png" });
+  await page.close();
+  await ctx.close();
+  USER.user_metadata = {};
+}
+
 await browser.close();
 cleanup();
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);

@@ -206,6 +206,53 @@ export function deleteAccountConfirmationEmailHtml({
   });
 }
 
+export function subscriptionCancelledEmailHtml({
+  email,
+  endsOn,
+  restoreUrl,
+}: {
+  email: string;
+  /** Already formatted for a human, or null when Stripe gave us no date. */
+  endsOn: string | null;
+  restoreUrl: string;
+}): string {
+  // Confirms what was ASKED FOR, not what was taken away. Everything this
+  // says is the state the account is actually in: still paid for, still
+  // full of the user's data, still reversible. A cancellation email that
+  // reads like a punishment is the same dark pattern as a hidden button.
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">subscription · ${email}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">your subscription is set to end</h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      ${
+        endsOn
+          ? `You'll keep full access until <strong style="color:${FOREGROUND};">${endsOn}</strong>. Nothing changes before then — your remaining credits stay usable, and none of your data is deleted.`
+          : `You'll keep full access until the end of the period you've already paid for. Nothing changes before then — your remaining credits stay usable, and none of your data is deleted.`
+      }
+    </p>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      After that the account moves to the free plan. Your entries, files and
+      conversations stay exactly where they are.
+    </p>
+    <p style="margin:0 0 20px;">
+      <a href="${restoreUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        Changed your mind? Restore it
+      </a>
+    </p>
+    <p style="color:${MUTED}; font-size:12px; line-height:1.6; margin:0;">
+      You can restore the subscription any time before it ends, at no extra
+      charge — you have already paid for this period.
+    </p>
+  `;
+
+  return layout({
+    preheader: endsOn
+      ? `Your Ionexa AI subscription ends on ${endsOn}. You keep access until then.`
+      : "Your Ionexa AI subscription is set to end. You keep access until the period you paid for runs out.",
+    bodyHtml,
+  });
+}
+
 export function newDeviceLoginEmailHtml({
   email,
   deviceLabel,

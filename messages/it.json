@@ -583,7 +583,30 @@
       "upgradePlan": "Aggiorna piano",
       "betaTester": "Beta tester",
       "betaTesterExpires": "Beta tester — scade tra {days, plural, one {# giorno} other {# giorni}}",
-      "teamSeats": "+ {seats, plural, one {# postazione team} other {# postazioni team}}"
+      "teamSeats": "+ {seats, plural, one {# postazione team} other {# postazioni team}}",
+      "cancel": {
+        "button": "Disdici l'abbonamento",
+        "title": "Disdire il tuo abbonamento",
+        "keepsAccessUntil": "Mantieni l'accesso completo fino al {date}.",
+        "keepsAccessUntilPeriodEnd": "Mantieni l'accesso completo fino alla fine del periodo che hai già pagato.",
+        "creditsStay": "I crediti che ti restano restano utilizzabili fino ad allora.",
+        "dataKept": "Non viene eliminato nulla: le tue voci, i file e le conversazioni restano esattamente dove sono.",
+        "reversible": "Puoi ripristinarlo in qualsiasi momento prima della scadenza, senza costi aggiuntivi.",
+        "surveyQuestion": "Che cosa ti ha fatto andare via? (facoltativo)",
+        "reasons": {
+          "too_expensive": "Troppo caro",
+          "missing_feature": "Manca qualcosa che mi serve",
+          "not_using": "Non lo uso abbastanza",
+          "found_alternative": "Ho trovato qualcos'altro"
+        },
+        "notePlaceholder": "Vuoi dirci altro? (facoltativo)",
+        "confirm": "Disdici l'abbonamento",
+        "keepIt": "Mantienilo",
+        "done": "✓ il tuo abbonamento terminerà alla fine del periodo pagato",
+        "restored": "✓ il tuo abbonamento è di nuovo attivo",
+        "restore": "Ripristina",
+        "endingIn": "{days, plural, =0 {Il tuo abbonamento termina oggi.} one {Il tuo abbonamento termina tra # giorno.} other {Il tuo abbonamento termina tra # giorni.}}"
+      }
     },
     "marginReport": {
       "title": "Rapporto Margine",

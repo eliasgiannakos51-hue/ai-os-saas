@@ -583,7 +583,30 @@
       "upgradePlan": "Changer d'offre",
       "betaTester": "Bêta-testeur",
       "betaTesterExpires": "Bêta-testeur — expire dans {days, plural, one {# jour} other {# jours}}",
-      "teamSeats": "+ {seats, plural, one {# siège d'équipe} other {# sièges d'équipe}}"
+      "teamSeats": "+ {seats, plural, one {# siège d'équipe} other {# sièges d'équipe}}",
+      "cancel": {
+        "button": "Résilier l'abonnement",
+        "title": "Résilier votre abonnement",
+        "keepsAccessUntil": "Vous gardez un accès complet jusqu'au {date}.",
+        "keepsAccessUntilPeriodEnd": "Vous gardez un accès complet jusqu'à la fin de la période déjà payée.",
+        "creditsStay": "Vos crédits restants restent utilisables jusque-là.",
+        "dataKept": "Rien n'est supprimé : vos entrées, fichiers et conversations restent exactement où ils sont.",
+        "reversible": "Vous pouvez le rétablir à tout moment avant la fin, sans frais supplémentaires.",
+        "surveyQuestion": "Qu'est-ce qui vous fait partir ? (facultatif)",
+        "reasons": {
+          "too_expensive": "Trop cher",
+          "missing_feature": "Il manque ce dont j'ai besoin",
+          "not_using": "Je ne l'utilise pas assez",
+          "found_alternative": "J'ai trouvé autre chose"
+        },
+        "notePlaceholder": "Autre chose à nous dire ? (facultatif)",
+        "confirm": "Résilier l'abonnement",
+        "keepIt": "La conserver",
+        "done": "✓ votre abonnement prendra fin à la fin de la période payée",
+        "restored": "✓ votre abonnement est de nouveau actif",
+        "restore": "Rétablir",
+        "endingIn": "{days, plural, =0 {Votre abonnement prend fin aujourd'hui.} one {Votre abonnement prend fin dans # jour.} other {Votre abonnement prend fin dans # jours.}}"
+      }
     },
     "marginReport": {
       "title": "Rapport de Marge",

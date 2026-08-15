@@ -28,7 +28,15 @@
     "aiGenerated": {
       "short": "AI が生成",
       "long": "これは AI が生成した内容です。誤りが含まれる場合があります。重要な点は確認してください。"
-    }
+    },
+    "close": "閉じる",
+    "switchToDarkMode": "ダークテーマに切り替える",
+    "switchToLightMode": "ライトテーマに切り替える",
+    "showPassword": "パスワードを表示",
+    "hidePassword": "パスワードを非表示",
+    "networkErrorCheckConnection": "ネットワークエラー — 接続を確認してもう一度お試しください。",
+    "ownerAccessTooltip": "オーナーアクセス — クレジット無制限",
+    "creditsTooltip": "残りクレジット — 設定から追加購入できます"
   },
   "sidebar": {
     "groups": {
@@ -403,6 +411,14 @@
       "continueWithGoogle": "Googleで続行",
       "orContinueWithEmail": "またはメールで続行",
       "genericError": "Googleサインインを開始できませんでした。もう一度お試しください。"
+    },
+    "deleteAccount": {
+      "title": "アカウント削除の確認",
+      "missingToken": "このリンクには確認トークンがありません。メールに記載されたリンクをそのままご利用ください。",
+      "warning": "アカウントと記録したすべてのデータが完全に削除されます。この操作は取り消せません。",
+      "deleting": "削除しています…",
+      "confirmButton": "アカウントを完全に削除する",
+      "cancel": "キャンセルして戻る"
     }
   },
   "settings": {
@@ -428,7 +444,9 @@
       "clearing": "消去中...",
       "couldNotUpdatePreference": "✗ 設定を更新できませんでした",
       "couldNotClearMemory": "✗ メモリを消去できませんでした",
-      "memoryCleared": "✓ メモリを消去しました"
+      "memoryCleared": "✓ メモリを消去しました",
+      "memoryEnabled": "✓ チャットメモリを有効にしました",
+      "memoryDisabled": "✓ チャットメモリを無効にしました"
     },
     "loginActivity": {
       "title": "ログインアクティビティ",
@@ -545,7 +563,12 @@
       "noCreditActivity": "クレジットの利用履歴はまだありません。",
       "balanceAfter": "残高 {count}",
       "unlimited": "無制限",
-      "wouldHaveCost": "{count} かかるはずでした"
+      "wouldHaveCost": "{count} かかるはずでした",
+      "manageBilling": "請求を管理",
+      "upgradePlan": "プランをアップグレード",
+      "betaTester": "ベータテスター",
+      "betaTesterExpires": "ベータテスター — あと{days, plural, other {#日}}で終了",
+      "teamSeats": "+ {seats, plural, other {チームシート#席}}"
     },
     "marginReport": {
       "title": "マージンレポート",
@@ -1637,5 +1660,25 @@
     "unlimited": "無制限 — クレジット未使用",
     "unlimitedWouldHaveCost": "無制限 — {count} クレジットかかるはずでした",
     "freeMessage": "無料メッセージ · 今月あと {count} 件"
+  },
+  "cookies": {
+    "banner": {
+      "summary": "当サイトでは、ログインとセッション維持のために必要なCookieのみを使用しています。",
+      "accept": "同意する",
+      "essential": "<term>必須のセッションCookie</term> — ログイン時にSupabase Authが設定し、以降のリクエストでログイン状態を認識できるようにします。これがないと、ページを読み込むたびにログアウトされます。有効期限が切れるか、ログアウトすると自動的に削除されます。",
+      "preferences": "<term>ローカル設定</term> — テーマ、言語、アクセシビリティ設定、およびこのCookie同意の選択は、ブラウザのローカルストレージに保存され、どこにも送信されません。",
+      "noTracking": "広告や第三者によるトラッキングCookieは使用していません。詳しくは<cookiePolicy>Cookieポリシー</cookiePolicy>および<privacyPolicy>プライバシーポリシー</privacyPolicy>をご覧ください。"
+    }
+  },
+  "security": {
+    "badge": {
+      "checked": "セキュリティ確認済み",
+      "flagged": "セキュリティ要確認",
+      "title": "AI出力保護レイヤー",
+      "checkedAt": "確認日時 {when}",
+      "whatWasChecked": "確認した内容:",
+      "issuesFound": "検出された問題:",
+      "noIssues": "問題は検出されませんでした。"
+    }
   }
 }

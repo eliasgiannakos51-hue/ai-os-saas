@@ -28,7 +28,15 @@
     "aiGenerated": {
       "short": "Gerado por IA",
       "long": "Conteúdo gerado por IA. Pode conter erros — confirme o que for importante antes de confiar nele."
-    }
+    },
+    "close": "Fechar",
+    "switchToDarkMode": "Mudar para o tema escuro",
+    "switchToLightMode": "Mudar para o tema claro",
+    "showPassword": "Mostrar palavra-passe",
+    "hidePassword": "Ocultar palavra-passe",
+    "networkErrorCheckConnection": "Erro de rede — verifique a sua ligação e tente novamente.",
+    "ownerAccessTooltip": "Acesso de proprietário — créditos ilimitados",
+    "creditsTooltip": "Créditos restantes — compre mais nas Definições"
   },
   "sidebar": {
     "groups": {
@@ -403,6 +411,14 @@
       "continueWithGoogle": "Continuar com Google",
       "orContinueWithEmail": "ou continuar com email",
       "genericError": "Não foi possível iniciar o login com Google. Tente novamente."
+    },
+    "deleteAccount": {
+      "title": "Confirmar eliminação da conta",
+      "missingToken": "Falta o token de confirmação neste link. Use o link do seu email exactamente como foi enviado.",
+      "warning": "Isto eliminará permanentemente a sua conta e todos os registos que criou. Não pode ser anulado.",
+      "deleting": "A eliminar…",
+      "confirmButton": "Eliminar permanentemente a minha conta",
+      "cancel": "Cancelar e voltar"
     }
   },
   "settings": {
@@ -428,7 +444,9 @@
       "clearing": "Limpando...",
       "couldNotUpdatePreference": "✗ não foi possível atualizar a preferência",
       "couldNotClearMemory": "✗ não foi possível limpar a memória",
-      "memoryCleared": "✓ memória limpa"
+      "memoryCleared": "✓ memória limpa",
+      "memoryEnabled": "✓ memória de conversa activada",
+      "memoryDisabled": "✓ memória de conversa desactivada"
     },
     "loginActivity": {
       "title": "Atividade de login",
@@ -545,7 +563,12 @@
       "noCreditActivity": "Ainda não há atividade de créditos.",
       "balanceAfter": "saldo {count}",
       "unlimited": "Ilimitado",
-      "wouldHaveCost": "teria custado {count}"
+      "wouldHaveCost": "teria custado {count}",
+      "manageBilling": "Gerir Faturação",
+      "upgradePlan": "Atualizar Plano",
+      "betaTester": "Testador Beta",
+      "betaTesterExpires": "Testador Beta — expira em {days, plural, one {# dia} other {# dias}}",
+      "teamSeats": "+ {seats, plural, one {# lugar de equipa} other {# lugares de equipa}}"
     },
     "marginReport": {
       "title": "Relatório de Margem",
@@ -1637,5 +1660,25 @@
     "unlimited": "Ilimitado — nenhum crédito usado",
     "unlimitedWouldHaveCost": "Ilimitado — teria custado {count} créditos",
     "freeMessage": "Mensagem gratuita · {count} restantes este mês"
+  },
+  "cookies": {
+    "banner": {
+      "summary": "Utilizamos cookies apenas para funcionalidades essenciais — iniciar a sua sessão e mantê-la activa.",
+      "accept": "Aceitar",
+      "essential": "<term>Cookie de sessão essencial</term> — definido pelo Supabase Auth quando inicia sessão, para que a aplicação o reconheça nos pedidos seguintes. Sem ele, a sua sessão terminaria a cada carregamento de página. É eliminado automaticamente quando expira ou quando termina sessão.",
+      "preferences": "<term>Preferências locais</term> — tema, idioma, definições de acessibilidade e esta escolha sobre cookies ficam guardados no armazenamento local do seu navegador e não são enviados para lado nenhum.",
+      "noTracking": "Não são utilizados cookies de publicidade nem de rastreio de terceiros. Consulte a nossa <cookiePolicy>Política de Cookies</cookiePolicy> e a nossa <privacyPolicy>Política de Privacidade</privacyPolicy> para mais detalhes."
+    }
+  },
+  "security": {
+    "badge": {
+      "checked": "Segurança verificada",
+      "flagged": "Segurança sinalizada",
+      "title": "Camada de Proteção da Saída de IA",
+      "checkedAt": "Verificado {when}",
+      "whatWasChecked": "O que foi verificado:",
+      "issuesFound": "Problemas encontrados:",
+      "noIssues": "Nenhum problema detetado."
+    }
   }
 }

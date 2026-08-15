@@ -30,6 +30,7 @@
 // Run: node scripts/tests/i18n-coverage.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import ts from "typescript";
 
 let pass = 0,
   fail = 0;
@@ -95,6 +96,147 @@ for (const file of sources) {
   }
 }
 check(`no hardcoded prose in ${USER_FACING_CALLS.join("/")} (${sources.length} files scanned)`, hardcoded, []);
+
+// ---------------------------------------------------------------------
+// 1b. THE PATTERN NO REGEX GATE COULD SEE: a conditional whose branches
+//     are English literals, rendered straight into the UI.
+//
+//         {plan.teamSeatsIncluded
+//           ? "Unlimited team seats included — no per-member charge"
+//           : `+ €20/month per team member — ...`}
+//
+// Section 1 above scans `addToast("`, `setError("`, `setMessage("` — a
+// literal as the FIRST thing after the paren. `addToast(next ? "..." )`
+// does not match it. check-i18n.js never opens a source file at all. So
+// this shape shipped in nine components, in the two pages a non-English
+// visitor is most likely to see first, and every i18n check in the repo
+// was green the whole time.
+//
+// PARSED, NOT PATTERN-MATCHED. A regex cannot tell `? "A" : "B"` from
+// `reason: cond ? "A" : "B"` inside sendMarginAlertEmail({...}) — an
+// operator alert that is English by design, exactly like the server-side
+// error prose recorded as a known gap below. It also cannot tell prose
+// from `expanded ? "rotate-180" : "rotate-0"`. Walking the real AST
+// answers both by construction: a className attribute is not a text
+// attribute, and an object property is not a render.
+const TEXT_ATTRS = new Set([
+  "title",
+  "aria-label",
+  "aria-description",
+  "aria-placeholder",
+  "placeholder",
+  "alt",
+  "label",
+]);
+const RENDER_CALLS = new Set([...USER_FACING_CALLS, "setStatus", "alert", "confirm"]);
+// Two words is prose. One word is a class name, an enum value, or a
+// formatting token — and the single-word cases that ARE user-facing
+// (an aria-label of "Close") are caught by section 3's key coverage
+// instead, since they have to come from somewhere.
+const TERNARY_PROSE = /[A-Za-z]{3,}[ ,'\u2019][A-Za-z]{2,}/;
+
+function staticTextOf(node) {
+  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
+  if (ts.isTemplateExpression(node)) {
+    // Only the literal chunks: `${count} days` contributes " days".
+    return node.head.text + node.templateSpans.map((sp) => sp.literal.text).join(" ");
+  }
+  return null;
+}
+
+/**
+ * Walks up from a conditional to decide whether its value is RENDERED.
+ * Returns the sink's name, or null when the value is data rather than UI.
+ */
+function renderSinkFor(node) {
+  let cur = node.parent;
+  for (let depth = 0; cur && depth < 6; depth++) {
+    // An object property or a variable is data for whoever consumes it,
+    // not something the user is being shown. This is what keeps
+    // sendMarginAlertEmail({ reason: ... }) out of the results.
+    if (ts.isPropertyAssignment(cur) || ts.isVariableDeclaration(cur)) return null;
+    if (ts.isJsxExpression(cur)) {
+      const parent = cur.parent;
+      if (ts.isJsxAttribute(parent)) {
+        const name = parent.name.getText();
+        return TEXT_ATTRS.has(name) ? `${name}=` : null;
+      }
+      return "JSX text";
+    }
+    if (ts.isCallExpression(cur)) {
+      const callee = cur.expression.getText().split(".").pop();
+      return RENDER_CALLS.has(callee) ? `${callee}()` : null;
+    }
+    cur = cur.parent;
+  }
+  return null;
+}
+
+const ternaryLiterals = [];
+for (const file of sources) {
+  if (!file.endsWith(".tsx")) continue;
+  const sf = ts.createSourceFile(
+    file,
+    readFileSync(file, "utf8"),
+    ts.ScriptTarget.ES2022,
+    true,
+    ts.ScriptKind.TSX
+  );
+  const visit = (node) => {
+    if (ts.isConditionalExpression(node)) {
+      for (const branch of [node.whenTrue, node.whenFalse]) {
+        const text = staticTextOf(branch);
+        if (!text || !TERNARY_PROSE.test(text)) continue;
+        const sink = renderSinkFor(node);
+        if (!sink) continue;
+        const { line } = sf.getLineAndCharacterOfPosition(branch.getStart());
+        ternaryLiterals.push(`${file}:${line + 1} [${sink}] ${text.trim().slice(0, 60)}`);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+}
+check(`no rendered ternary branch is an English literal`, ternaryLiterals, []);
+
+// The check must be able to FAIL. Both shapes that shipped are parsed
+// here, so an edit that narrows the AST walk into uselessness fails
+// immediately instead of silently going quiet.
+{
+  const SHIPPED = `
+    export function Regression({ a, b, c }) {
+      const cls = a ? "rotate-180" : "rotate-0";
+      void cls;
+      send({ reason: c ? "30-day charged average is low" : "30-day projected average is low" });
+      if (b) addToast(b ? "\u2713 chat memory enabled" : "\u2713 chat memory disabled");
+      return (
+        <p title={a ? "Owner access — unlimited credits" : "Credits remaining — buy more"}>
+          {b ? "Unlimited team seats included — no per-member charge" : "\u002b €20/month per team member"}
+        </p>
+      );
+    }`;
+  const sf = ts.createSourceFile("regression.tsx", SHIPPED, ts.ScriptTarget.ES2022, true, ts.ScriptKind.TSX);
+  const caught = [];
+  const visit = (node) => {
+    if (ts.isConditionalExpression(node)) {
+      for (const branch of [node.whenTrue, node.whenFalse]) {
+        const text = staticTextOf(branch);
+        if (text && TERNARY_PROSE.test(text) && renderSinkFor(node)) caught.push(text.trim());
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  // Six flagged: two JSX text, two title=, two addToast.
+  check("the AST walk catches every shape that shipped", caught.length, 6);
+  // And leaves alone the two it must: a className toggle and an operator
+  // alert's payload.
+  check(
+    "…without flagging class names or operator-alert payloads",
+    caught.filter((c) => /rotate-|30-day/.test(c)),
+    []
+  );
+}
 
 // KNOWN GAP, recorded rather than silently tolerated.
 //
@@ -237,7 +379,12 @@ const unresolved = [];
 const usedKeys = new Set();
 
 for (const file of sources) {
-  const src = readFileSync(file, "utf8");
+  // Comments stripped, for the same reason section 1 strips them and with
+  // the same failure to point at: a file that documents the shape it was
+  // fixed for — `<span>{t("oldKey")}</span>` quoted inside a JSX comment —
+  // was reported as calling a key that does not exist. Section 1 got this
+  // right from the start; this section read the raw file.
+  const src = stripComments(readFileSync(file, "utf8"));
   // ident -> namespace, for both the client hook and the server helper.
   const hooks = {};
   for (const m of src.matchAll(/const (\w+) = (?:await )?(?:useTranslations|getTranslations)\(\s*"([^"]+)"\s*\)/g)) {

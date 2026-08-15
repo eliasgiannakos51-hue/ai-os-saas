@@ -28,7 +28,15 @@
     "aiGenerated": {
       "short": "Generato dall’IA",
       "long": "Contenuto generato dall’IA. Può contenere errori: verifica ciò che è importante prima di fidartene."
-    }
+    },
+    "close": "Chiudi",
+    "switchToDarkMode": "Passa al tema scuro",
+    "switchToLightMode": "Passa al tema chiaro",
+    "showPassword": "Mostra password",
+    "hidePassword": "Nascondi password",
+    "networkErrorCheckConnection": "Errore di rete — controlla la connessione e riprova.",
+    "ownerAccessTooltip": "Accesso proprietario — crediti illimitati",
+    "creditsTooltip": "Crediti rimanenti — acquistane altri nelle Impostazioni"
   },
   "sidebar": {
     "groups": {
@@ -403,6 +411,14 @@
       "continueWithGoogle": "Continua con Google",
       "orContinueWithEmail": "o continua con email",
       "genericError": "Impossibile avviare l'accesso con Google. Riprova."
+    },
+    "deleteAccount": {
+      "title": "Conferma eliminazione account",
+      "missingToken": "A questo link manca il token di conferma. Usa il link della tua email esattamente come è stato inviato.",
+      "warning": "Questa operazione eliminerà definitivamente il tuo account e ogni voce registrata. Non è reversibile.",
+      "deleting": "Eliminazione…",
+      "confirmButton": "Elimina definitivamente il mio account",
+      "cancel": "Annulla e torna indietro"
     }
   },
   "settings": {
@@ -428,7 +444,9 @@
       "clearing": "Cancellazione...",
       "couldNotUpdatePreference": "✗ impossibile aggiornare la preferenza",
       "couldNotClearMemory": "✗ impossibile cancellare la memoria",
-      "memoryCleared": "✓ memoria cancellata"
+      "memoryCleared": "✓ memoria cancellata",
+      "memoryEnabled": "✓ memoria chat attivata",
+      "memoryDisabled": "✓ memoria chat disattivata"
     },
     "loginActivity": {
       "title": "Attività di accesso",
@@ -545,7 +563,12 @@
       "noCreditActivity": "Nessuna attività di crediti finora.",
       "balanceAfter": "saldo {count}",
       "unlimited": "Illimitato",
-      "wouldHaveCost": "sarebbe costato {count}"
+      "wouldHaveCost": "sarebbe costato {count}",
+      "manageBilling": "Gestisci fatturazione",
+      "upgradePlan": "Aggiorna piano",
+      "betaTester": "Beta tester",
+      "betaTesterExpires": "Beta tester — scade tra {days, plural, one {# giorno} other {# giorni}}",
+      "teamSeats": "+ {seats, plural, one {# postazione team} other {# postazioni team}}"
     },
     "marginReport": {
       "title": "Rapporto Margine",
@@ -1637,5 +1660,25 @@
     "unlimited": "Illimitato — nessun credito usato",
     "unlimitedWouldHaveCost": "Illimitato — sarebbe costato {count} crediti",
     "freeMessage": "Messaggio gratuito · {count} rimasti questo mese"
+  },
+  "cookies": {
+    "banner": {
+      "summary": "Usiamo i cookie solo per le funzioni essenziali: accedere e mantenere attiva la tua sessione.",
+      "accept": "Accetta",
+      "essential": "<term>Cookie di sessione essenziale</term> — impostato da Supabase Auth quando accedi, così l'app ti riconosce nelle richieste successive. Senza di esso verresti disconnesso a ogni caricamento di pagina. Viene eliminato automaticamente alla scadenza o quando esci.",
+      "preferences": "<term>Preferenze locali</term> — tema, lingua, impostazioni di accessibilità e questa scelta sui cookie sono salvati nella memoria locale del tuo browser e non vengono inviati da nessuna parte.",
+      "noTracking": "Non vengono utilizzati cookie pubblicitari o di tracciamento di terze parti. Consulta la nostra <cookiePolicy>Informativa sui Cookie</cookiePolicy> e la nostra <privacyPolicy>Informativa sulla Privacy</privacyPolicy> per i dettagli."
+    }
+  },
+  "security": {
+    "badge": {
+      "checked": "Sicurezza verificata",
+      "flagged": "Sicurezza segnalata",
+      "title": "Livello di protezione dell'output IA",
+      "checkedAt": "Verificato {when}",
+      "whatWasChecked": "Cosa è stato verificato:",
+      "issuesFound": "Problemi rilevati:",
+      "noIssues": "Nessun problema rilevato."
+    }
   }
 }

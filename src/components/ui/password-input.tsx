@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type InputHTMLAttributes } from "react";
+import { useTranslations } from "next-intl";
 
 type PasswordInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type">;
 
@@ -47,6 +48,7 @@ function EyeOffIcon() {
 // show/hide eye toggle inside the right edge. Purely visual — no change to
 // value handling, so it composes with any existing onChange/validation.
 export function PasswordInput({ className = "", ...props }: PasswordInputProps) {
+  const t = useTranslations("common");
   const [visible, setVisible] = useState(false);
 
   return (
@@ -59,7 +61,7 @@ export function PasswordInput({ className = "", ...props }: PasswordInputProps) 
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
-        aria-label={visible ? "hide password" : "show password"}
+        aria-label={visible ? t("hidePassword") : t("showPassword")}
         className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-muted transition-colors hover:text-orange-400"
       >
         {visible ? <EyeOffIcon /> : <EyeIcon />}

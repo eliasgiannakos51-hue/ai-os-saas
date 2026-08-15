@@ -33,7 +33,7 @@ export async function BillingSummary({
           <p className="mt-0.5 text-lg font-bold text-foreground">{plan.name}</p>
           {seatCount > 0 && (
             <p className="mt-0.5 text-xs text-muted">
-              + {seatCount} team {seatCount === 1 ? "seat" : "seats"}
+              {t("teamSeats", { seats: seatCount })}
             </p>
           )}
         </div>
@@ -44,9 +44,13 @@ export async function BillingSummary({
             </span>
           ) : isBetaTester ? (
             <span className="inline-flex items-center rounded-full border border-emerald-800 bg-emerald-950/30 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-emerald-400">
+              {/* ICU plural, not `day${n === 1 ? "" : "s"}`. Arabic has six
+                  plural forms and Japanese has none; an English "(s)" hack
+                  is wrong in both directions and cannot be fixed by a
+                  translator, because the branch lives in the code. */}
               {typeof betaDaysRemaining === "number"
-                ? `Beta Tester — expires in ${betaDaysRemaining} day${betaDaysRemaining === 1 ? "" : "s"}`
-                : "Beta Tester"}
+                ? t("betaTesterExpires", { days: betaDaysRemaining })
+                : t("betaTester")}
             </span>
           ) : hasSubscription ? (
             <ManageBillingButton />
@@ -55,7 +59,7 @@ export async function BillingSummary({
               href="/pricing"
               className="inline-flex min-h-[40px] items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
             >
-              Upgrade Plan
+              {t("upgradePlan")}
             </Link>
           )}
           {(hasSubscription || isAdmin || isBetaTester) && tier !== "free" && (

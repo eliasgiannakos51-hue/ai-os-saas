@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 export function ManageBillingButton() {
   const tCommon = useTranslations("common");
+  const t = useTranslations("settings.billing");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,7 +35,7 @@ export function ManageBillingButton() {
         disabled={loading}
         className="inline-flex min-h-[40px] items-center justify-center rounded-lg border border-border px-4 py-2 text-sm text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {loading ? "Loading..." : "Manage Billing"}
+        {loading ? tCommon("loading") : t("manageBilling")}
       </button>
       {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
     </div>

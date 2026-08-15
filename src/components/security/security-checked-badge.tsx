@@ -5,7 +5,7 @@ import { ShieldCheck, ShieldAlert, X } from "lucide-react";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import type { SecurityCheckResourceType, SecurityCheckResult } from "@/lib/security-check-log";
 import { formatDateTime } from "@/lib/format-number";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 type SecurityCheckLogRow = {
   id: string;
@@ -27,6 +27,8 @@ export function SecurityCheckedBadge({
   resourceId: string;
 }) {
   const locale = useLocale();
+  const t = useTranslations("security.badge");
+  const tCommon = useTranslations("common");
   const formatRelativeTime = useFormatRelativeTime();
   const [log, setLog] = useState<SecurityCheckLogRow | null>(null);
   const [open, setOpen] = useState(false);
@@ -90,7 +92,7 @@ export function SecurityCheckedBadge({
         ) : (
           <ShieldAlert className="h-3 w-3" aria-hidden="true" />
         )}
-        {passed ? "Security checked" : "Security flagged"}
+        {passed ? t("checked") : t("flagged")}
         <span className="text-muted" suppressHydrationWarning>
           · {formatRelativeTime(log.checked_at)}
         </span>
@@ -102,20 +104,20 @@ export function SecurityCheckedBadge({
           className="absolute left-0 top-full z-20 mt-1.5 w-72 rounded-xl border border-border bg-panel p-3 text-left shadow-xl"
         >
           <div className="mb-2 flex items-center justify-between">
-            <p className="text-xs font-semibold text-foreground">AI Output Protection Layer</p>
+            <p className="text-xs font-semibold text-foreground">{t("title")}</p>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="Close"
+              aria-label={tCommon("close")}
               className="flex h-5 w-5 items-center justify-center rounded text-muted hover:text-foreground"
             >
               <X className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
           </div>
           <p className="mb-2 text-[11px] text-muted">
-            Checked {formatDateTime(log.checked_at, locale)}
+            {t("checkedAt", { when: formatDateTime(log.checked_at, locale) })}
           </p>
-          <p className="mb-1 text-[11px] font-medium text-foreground">What was checked:</p>
+          <p className="mb-1 text-[11px] font-medium text-foreground">{t("whatWasChecked")}</p>
           <ul className="mb-2 list-inside list-disc space-y-0.5 text-[11px] text-muted">
             {log.check_result.checks.map((check, i) => (
               <li key={i}>{check}</li>
@@ -123,7 +125,7 @@ export function SecurityCheckedBadge({
           </ul>
           {log.check_result.issues.length > 0 ? (
             <>
-              <p className="mb-1 text-[11px] font-medium text-amber-400">Issues found:</p>
+              <p className="mb-1 text-[11px] font-medium text-amber-400">{t("issuesFound")}</p>
               <ul className="list-inside list-disc space-y-0.5 text-[11px] text-amber-300/80">
                 {log.check_result.issues.map((issue, i) => (
                   <li key={i}>{issue}</li>
@@ -131,7 +133,7 @@ export function SecurityCheckedBadge({
               </ul>
             </>
           ) : (
-            <p className="text-[11px] text-emerald-400">No issues detected.</p>
+            <p className="text-[11px] text-emerald-400">{t("noIssues")}</p>
           )}
         </div>
       )}

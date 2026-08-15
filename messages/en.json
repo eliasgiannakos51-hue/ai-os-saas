@@ -28,7 +28,15 @@
     "aiGenerated": {
       "short": "AI-generated",
       "long": "AI-generated content. It can be wrong — check anything important before you rely on it."
-    }
+    },
+    "close": "Close",
+    "switchToDarkMode": "Switch to dark mode",
+    "switchToLightMode": "Switch to light mode",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "networkErrorCheckConnection": "Network error — please check your connection and try again.",
+    "ownerAccessTooltip": "Owner access — unlimited credits",
+    "creditsTooltip": "Credits remaining — buy more in Settings"
   },
   "sidebar": {
     "groups": {
@@ -403,6 +411,14 @@
       "continueWithGoogle": "Continue with Google",
       "orContinueWithEmail": "or continue with email",
       "genericError": "Couldn't start Google sign-in. Please try again."
+    },
+    "deleteAccount": {
+      "title": "Confirm account deletion",
+      "missingToken": "This link is missing its confirmation token. Please use the link from your email exactly as sent.",
+      "warning": "This will permanently delete your account and every record you've logged. This can't be undone.",
+      "deleting": "Deleting…",
+      "confirmButton": "Permanently delete my account",
+      "cancel": "Cancel and go back"
     }
   },
   "settings": {
@@ -428,7 +444,9 @@
       "clearing": "Clearing...",
       "couldNotUpdatePreference": "✗ could not update preference",
       "couldNotClearMemory": "✗ could not clear memory",
-      "memoryCleared": "✓ memory cleared"
+      "memoryCleared": "✓ memory cleared",
+      "memoryEnabled": "✓ chat memory enabled",
+      "memoryDisabled": "✓ chat memory disabled"
     },
     "loginActivity": {
       "title": "Login Activity",
@@ -545,7 +563,12 @@
       "noCreditActivity": "No credit activity yet.",
       "balanceAfter": "balance {count}",
       "unlimited": "Unlimited",
-      "wouldHaveCost": "would have cost {count}"
+      "wouldHaveCost": "would have cost {count}",
+      "manageBilling": "Manage Billing",
+      "upgradePlan": "Upgrade Plan",
+      "betaTester": "Beta Tester",
+      "betaTesterExpires": "Beta Tester — expires in {days, plural, one {# day} other {# days}}",
+      "teamSeats": "+ {seats, plural, one {# team seat} other {# team seats}}"
     },
     "marginReport": {
       "title": "Margin Report",
@@ -1637,5 +1660,25 @@
     "unlimited": "Unlimited — no credits used",
     "unlimitedWouldHaveCost": "Unlimited — would have cost {count} credits",
     "freeMessage": "Free message · {count} left this month"
+  },
+  "cookies": {
+    "banner": {
+      "summary": "We use cookies for essential functionality — signing you in and keeping your session working.",
+      "accept": "Accept",
+      "essential": "<term>Essential session cookie</term> — set by Supabase Auth when you log in, so the app knows you're signed in on later requests. Without it, you'd be signed out on every page load. Cleared automatically when it expires or when you sign out.",
+      "preferences": "<term>Local preferences</term> — theme, language, accessibility settings, and this cookie-consent choice are stored in your browser's local storage, not sent anywhere.",
+      "noTracking": "No advertising or third-party tracking cookies are used. See our <cookiePolicy>Cookie Policy</cookiePolicy> and <privacyPolicy>Privacy Policy</privacyPolicy> for details."
+    }
+  },
+  "security": {
+    "badge": {
+      "checked": "Security checked",
+      "flagged": "Security flagged",
+      "title": "AI Output Protection Layer",
+      "checkedAt": "Checked {when}",
+      "whatWasChecked": "What was checked:",
+      "issuesFound": "Issues found:",
+      "noIssues": "No issues detected."
+    }
   }
 }

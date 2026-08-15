@@ -110,7 +110,7 @@ export function TopNav({ email }: { email: string }) {
         <Link
           href="/dashboard/settings#buy-credits"
           className="hidden shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-400 lg:inline-flex"
-          title={isAdmin ? "Owner access — unlimited credits" : "Credits remaining — buy more in Settings"}
+          title={isAdmin ? t("ownerAccessTooltip") : t("creditsTooltip")}
         >
           <Zap className="h-3.5 w-3.5 text-orange-400" aria-hidden="true" />
           {isAdmin ? "Unlimited" : credits === null ? "…" : formatNumber(credits, locale)}

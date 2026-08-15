@@ -28,7 +28,15 @@
     "aiGenerated": {
       "short": "KI-generiert",
       "long": "Von KI erzeugter Inhalt. Er kann Fehler enthalten — prüfen Sie Wichtiges, bevor Sie sich darauf verlassen."
-    }
+    },
+    "close": "Schließen",
+    "switchToDarkMode": "Zum dunklen Design wechseln",
+    "switchToLightMode": "Zum hellen Design wechseln",
+    "showPassword": "Passwort anzeigen",
+    "hidePassword": "Passwort verbergen",
+    "networkErrorCheckConnection": "Netzwerkfehler — bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+    "ownerAccessTooltip": "Inhaberzugang — unbegrenzte Credits",
+    "creditsTooltip": "Verbleibende Credits — mehr in den Einstellungen kaufen"
   },
   "sidebar": {
     "groups": {
@@ -403,6 +411,14 @@
       "continueWithGoogle": "Weiter mit Google",
       "orContinueWithEmail": "oder weiter mit E-Mail",
       "genericError": "Google-Anmeldung konnte nicht gestartet werden. Bitte erneut versuchen."
+    },
+    "deleteAccount": {
+      "title": "Kontolöschung bestätigen",
+      "missingToken": "Diesem Link fehlt das Bestätigungs-Token. Bitte verwenden Sie den Link aus Ihrer E-Mail genau so, wie er gesendet wurde.",
+      "warning": "Dadurch werden Ihr Konto und alle von Ihnen erfassten Einträge dauerhaft gelöscht. Dies kann nicht rückgängig gemacht werden.",
+      "deleting": "Wird gelöscht…",
+      "confirmButton": "Mein Konto dauerhaft löschen",
+      "cancel": "Abbrechen und zurück"
     }
   },
   "settings": {
@@ -428,7 +444,9 @@
       "clearing": "Wird gelöscht...",
       "couldNotUpdatePreference": "✗ Einstellung konnte nicht aktualisiert werden",
       "couldNotClearMemory": "✗ Speicher konnte nicht gelöscht werden",
-      "memoryCleared": "✓ Speicher gelöscht"
+      "memoryCleared": "✓ Speicher gelöscht",
+      "memoryEnabled": "✓ Chat-Speicher aktiviert",
+      "memoryDisabled": "✓ Chat-Speicher deaktiviert"
     },
     "loginActivity": {
       "title": "Anmeldeaktivität",
@@ -545,7 +563,12 @@
       "noCreditActivity": "Noch keine Credit-Aktivität.",
       "balanceAfter": "Guthaben {count}",
       "unlimited": "Unbegrenzt",
-      "wouldHaveCost": "hätte {count} gekostet"
+      "wouldHaveCost": "hätte {count} gekostet",
+      "manageBilling": "Abrechnung verwalten",
+      "upgradePlan": "Tarif upgraden",
+      "betaTester": "Beta-Tester",
+      "betaTesterExpires": "Beta-Tester — läuft ab in {days, plural, one {# Tag} other {# Tagen}}",
+      "teamSeats": "+ {seats, plural, one {# Team-Platz} other {# Team-Plätze}}"
     },
     "marginReport": {
       "title": "Margenbericht",
@@ -1637,5 +1660,25 @@
     "unlimited": "Unbegrenzt — keine Credits verbraucht",
     "unlimitedWouldHaveCost": "Unbegrenzt — hätte {count} Credits gekostet",
     "freeMessage": "Kostenlose Nachricht · {count} übrig diesen Monat"
+  },
+  "cookies": {
+    "banner": {
+      "summary": "Wir verwenden Cookies nur für notwendige Funktionen — zur Anmeldung und um Ihre Sitzung aktiv zu halten.",
+      "accept": "Akzeptieren",
+      "essential": "<term>Notwendiges Sitzungscookie</term> — wird von Supabase Auth bei der Anmeldung gesetzt, damit die App Sie bei späteren Anfragen erkennt. Ohne dieses Cookie würden Sie bei jedem Seitenaufruf abgemeldet. Es wird automatisch gelöscht, wenn es abläuft oder Sie sich abmelden.",
+      "preferences": "<term>Lokale Einstellungen</term> — Design, Sprache, Barrierefreiheitseinstellungen und diese Cookie-Entscheidung werden im lokalen Speicher Ihres Browsers abgelegt und nirgendwohin gesendet.",
+      "noTracking": "Es werden keine Werbe- oder Tracking-Cookies von Dritten verwendet. Einzelheiten finden Sie in unserer <cookiePolicy>Cookie-Richtlinie</cookiePolicy> und unserer <privacyPolicy>Datenschutzerklärung</privacyPolicy>."
+    }
+  },
+  "security": {
+    "badge": {
+      "checked": "Sicherheit geprüft",
+      "flagged": "Sicherheit markiert",
+      "title": "KI-Ausgabeschutzebene",
+      "checkedAt": "Geprüft {when}",
+      "whatWasChecked": "Was geprüft wurde:",
+      "issuesFound": "Gefundene Probleme:",
+      "noIssues": "Keine Probleme festgestellt."
+    }
   }
 }

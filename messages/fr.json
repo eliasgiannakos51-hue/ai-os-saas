@@ -28,7 +28,15 @@
     "aiGenerated": {
       "short": "Généré par IA",
       "long": "Contenu généré par IA. Il peut comporter des erreurs — vérifiez ce qui compte avant de vous y fier."
-    }
+    },
+    "close": "Fermer",
+    "switchToDarkMode": "Passer au thème sombre",
+    "switchToLightMode": "Passer au thème clair",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "networkErrorCheckConnection": "Erreur réseau — vérifiez votre connexion et réessayez.",
+    "ownerAccessTooltip": "Accès propriétaire — crédits illimités",
+    "creditsTooltip": "Crédits restants — achetez-en plus dans les Paramètres"
   },
   "sidebar": {
     "groups": {
@@ -403,6 +411,14 @@
       "continueWithGoogle": "Continuer avec Google",
       "orContinueWithEmail": "ou continuer avec l'e-mail",
       "genericError": "Impossible de démarrer la connexion Google. Veuillez réessayer."
+    },
+    "deleteAccount": {
+      "title": "Confirmer la suppression du compte",
+      "missingToken": "Ce lien ne contient pas son jeton de confirmation. Veuillez utiliser le lien de votre e-mail exactement tel qu'il a été envoyé.",
+      "warning": "Cette action supprimera définitivement votre compte et tous les enregistrements que vous avez saisis. Elle est irréversible.",
+      "deleting": "Suppression…",
+      "confirmButton": "Supprimer définitivement mon compte",
+      "cancel": "Annuler et revenir"
     }
   },
   "settings": {
@@ -428,7 +444,9 @@
       "clearing": "Effacement...",
       "couldNotUpdatePreference": "✗ impossible de mettre à jour la préférence",
       "couldNotClearMemory": "✗ impossible d'effacer la mémoire",
-      "memoryCleared": "✓ mémoire effacée"
+      "memoryCleared": "✓ mémoire effacée",
+      "memoryEnabled": "✓ mémoire de conversation activée",
+      "memoryDisabled": "✓ mémoire de conversation désactivée"
     },
     "loginActivity": {
       "title": "Activité de connexion",
@@ -545,7 +563,12 @@
       "noCreditActivity": "Aucune activité de crédits pour l'instant.",
       "balanceAfter": "solde {count}",
       "unlimited": "Illimité",
-      "wouldHaveCost": "aurait coûté {count}"
+      "wouldHaveCost": "aurait coûté {count}",
+      "manageBilling": "Gérer la facturation",
+      "upgradePlan": "Changer d'offre",
+      "betaTester": "Bêta-testeur",
+      "betaTesterExpires": "Bêta-testeur — expire dans {days, plural, one {# jour} other {# jours}}",
+      "teamSeats": "+ {seats, plural, one {# siège d'équipe} other {# sièges d'équipe}}"
     },
     "marginReport": {
       "title": "Rapport de Marge",
@@ -1637,5 +1660,25 @@
     "unlimited": "Illimité — aucun crédit utilisé",
     "unlimitedWouldHaveCost": "Illimité — aurait coûté {count} crédits",
     "freeMessage": "Message gratuit · {count} restants ce mois-ci"
+  },
+  "cookies": {
+    "banner": {
+      "summary": "Nous utilisons des cookies uniquement pour les fonctions essentielles — vous connecter et maintenir votre session active.",
+      "accept": "Accepter",
+      "essential": "<term>Cookie de session essentiel</term> — défini par Supabase Auth lors de votre connexion, afin que l'application vous reconnaisse lors des requêtes suivantes. Sans lui, vous seriez déconnecté à chaque chargement de page. Il est supprimé automatiquement à son expiration ou lorsque vous vous déconnectez.",
+      "preferences": "<term>Préférences locales</term> — thème, langue, paramètres d'accessibilité et ce choix concernant les cookies sont enregistrés dans le stockage local de votre navigateur et ne sont envoyés nulle part.",
+      "noTracking": "Aucun cookie publicitaire ou de suivi tiers n'est utilisé. Consultez notre <cookiePolicy>Politique relative aux cookies</cookiePolicy> et notre <privacyPolicy>Politique de confidentialité</privacyPolicy> pour en savoir plus."
+    }
+  },
+  "security": {
+    "badge": {
+      "checked": "Sécurité vérifiée",
+      "flagged": "Sécurité signalée",
+      "title": "Couche de protection des sorties IA",
+      "checkedAt": "Vérifié {when}",
+      "whatWasChecked": "Ce qui a été vérifié :",
+      "issuesFound": "Problèmes détectés :",
+      "noIssues": "Aucun problème détecté."
+    }
   }
 }

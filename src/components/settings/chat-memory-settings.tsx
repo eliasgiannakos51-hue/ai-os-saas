@@ -42,7 +42,7 @@ export function ChatMemorySettings({
       return;
     }
 
-    addToast(next ? "✓ chat memory enabled" : "✓ chat memory disabled");
+    addToast(next ? t("memoryEnabled") : t("memoryDisabled"));
   }
 
   async function handleClearAll() {

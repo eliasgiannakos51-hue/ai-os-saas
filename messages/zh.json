@@ -28,7 +28,15 @@
     "aiGenerated": {
       "short": "由 AI 生成",
       "long": "本内容由 AI 生成，可能有误。在依赖之前请核实重要信息。"
-    }
+    },
+    "close": "关闭",
+    "switchToDarkMode": "切换到深色主题",
+    "switchToLightMode": "切换到浅色主题",
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码",
+    "networkErrorCheckConnection": "网络错误 — 请检查您的连接后重试。",
+    "ownerAccessTooltip": "所有者权限 — 无限额度",
+    "creditsTooltip": "剩余额度 — 可在设置中购买更多"
   },
   "sidebar": {
     "groups": {
@@ -403,6 +411,14 @@
       "continueWithGoogle": "使用 Google 继续",
       "orContinueWithEmail": "或使用邮箱继续",
       "genericError": "无法启动 Google 登录,请重试。"
+    },
+    "deleteAccount": {
+      "title": "确认删除账户",
+      "missingToken": "此链接缺少确认令牌。请完全按照邮件中发送的链接使用。",
+      "warning": "此操作将永久删除您的账户以及您记录的所有条目，且无法撤销。",
+      "deleting": "正在删除…",
+      "confirmButton": "永久删除我的账户",
+      "cancel": "取消并返回"
     }
   },
   "settings": {
@@ -428,7 +444,9 @@
       "clearing": "清除中...",
       "couldNotUpdatePreference": "✗ 无法更新偏好设置",
       "couldNotClearMemory": "✗ 无法清除记忆",
-      "memoryCleared": "✓ 记忆已清除"
+      "memoryCleared": "✓ 记忆已清除",
+      "memoryEnabled": "✓ 已开启聊天记忆",
+      "memoryDisabled": "✓ 已关闭聊天记忆"
     },
     "loginActivity": {
       "title": "登录活动",
@@ -545,7 +563,12 @@
       "noCreditActivity": "暂无积分活动。",
       "balanceAfter": "余额 {count}",
       "unlimited": "无限",
-      "wouldHaveCost": "将花费 {count}"
+      "wouldHaveCost": "将花费 {count}",
+      "manageBilling": "管理账单",
+      "upgradePlan": "升级套餐",
+      "betaTester": "Beta 测试者",
+      "betaTesterExpires": "Beta 测试者 — {days, plural, other {#天}}后到期",
+      "teamSeats": "+ {seats, plural, other {# 个团队席位}}"
     },
     "marginReport": {
       "title": "利润率报告",
@@ -1637,5 +1660,25 @@
     "unlimited": "无限 — 未使用积分",
     "unlimitedWouldHaveCost": "无限 — 将花费 {count} 积分",
     "freeMessage": "免费消息 · 本月剩余 {count} 条"
+  },
+  "cookies": {
+    "banner": {
+      "summary": "我们仅使用必要的 Cookie — 用于登录并保持您的会话有效。",
+      "accept": "接受",
+      "essential": "<term>必要的会话 Cookie</term> — 由 Supabase Auth 在您登录时设置，以便应用在后续请求中识别您的登录状态。没有它，每次加载页面都会退出登录。过期或退出登录时会自动清除。",
+      "preferences": "<term>本地偏好设置</term> — 主题、语言、无障碍设置以及此 Cookie 同意选择均存储在您浏览器的本地存储中，不会发送到任何地方。",
+      "noTracking": "我们不使用任何广告或第三方跟踪 Cookie。详情请参阅我们的<cookiePolicy>Cookie 政策</cookiePolicy>和<privacyPolicy>隐私政策</privacyPolicy>。"
+    }
+  },
+  "security": {
+    "badge": {
+      "checked": "已通过安全检查",
+      "flagged": "安全检查已标记",
+      "title": "AI 输出保护层",
+      "checkedAt": "检查时间 {when}",
+      "whatWasChecked": "检查内容：",
+      "issuesFound": "发现的问题：",
+      "noIssues": "未发现任何问题。"
+    }
   }
 }

@@ -515,6 +515,36 @@ await authed.close();
   checkTrue("…and the row labels really are translated", /Αποθηκευτικός χώρος/.test(main));
   checkTrue("…including the per-seat price", /θέση/.test(main) && !/\/seat/.test(main));
 
+  // THE COOKIE BANNER, which renders on every public page in every locale
+  // and was hardcoded English in all ten. Checked here rather than in its
+  // own file because it is already on screen: the banner is what the
+  // /pricing scan above kept tripping over.
+  {
+    const banner = page.locator("div.fixed.inset-x-0.bottom-0").first();
+    checkTrue("the cookie banner is visible on a public page", await banner.isVisible());
+    const collapsed = await banner.innerText();
+    checkTrue("the banner summary is Greek", /Χρησιμοποιούμε cookies/.test(collapsed));
+    checkTrue("the banner's Accept button is Greek", collapsed.includes("Αποδοχή"));
+    // Expanded is where the bulk of the English lived — three paragraphs
+    // of cookie detail that no source-side i18n gate could see.
+    await banner.locator("button").first().click();
+    await page.waitForTimeout(350);
+    const expanded = await banner.innerText();
+    checkTrue("the banner detail is Greek", /Απαραίτητο cookie συνεδρίας/.test(expanded));
+    const bannerEnglish = expanded.match(/[A-Za-z]{3,}(?: [a-z]{3,}){2,}/);
+    checkTrue("no English sentence survives in the banner", bannerEnglish === null);
+    if (bannerEnglish) console.log(`        ${bannerEnglish[0]}`);
+    // The two policy links are rich-text tags inside one message, so they
+    // must still come out as real anchors rather than as literal markup.
+    const hrefs = await banner
+      .locator("a")
+      .evaluateAll((as) => as.map((a) => a.getAttribute("href")));
+    checkTrue(
+      "both policy links survive rich-text rendering",
+      hrefs.includes("/cookies") && hrefs.includes("/privacy")
+    );
+  }
+
   // 375 is where the seven-column table would break the page if it were
   // not scrolling inside its own container. 768 is where a publish bug
   // once hid between the two widths everyone tests.

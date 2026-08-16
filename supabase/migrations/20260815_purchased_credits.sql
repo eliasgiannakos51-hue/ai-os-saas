@@ -47,9 +47,56 @@
 --
 -- ============================================================================
 
--- 1. The column ------------------------------------------------------------
-alter table public.user_credits
-  add column if not exists purchased_credits integer not null default 0;
+-- 1. The columns, and whether an EARLIER version of this file already ran
+-- ---------------------------------------------------------------------------
+--
+-- THIS BLOCK EXISTS BECAUSE THE FIRST VERSION OF THIS FILE SHIPPED WITHOUT
+-- THE MARKER COLUMN, and some databases already ran it.
+--
+-- On those, adding purchased_credits_backfilled_at leaves it NULL on every
+-- row — which the backfill below reads as "never considered". It would then
+-- run a SECOND time, and any account that has received a non-purchased
+-- grant since the first run (goodwill, a beta top-up, an admin adjustment)
+-- would have that grant reclassified as permanent purchased credits.
+--
+-- So the marker is seeded from a fact that is already true: if
+-- purchased_credits EXISTS before this statement, the earlier version ran,
+-- the backfill has happened, and every row alive at this moment has been
+-- considered. A fresh database has no such column and no such history, so
+-- nothing is marked and the backfill runs normally.
+--
+-- The detection has to happen BEFORE the ADD COLUMN, which is why the two
+-- are in one block rather than two statements.
+do $bootstrap$
+declare
+  v_earlier_version_ran boolean;
+begin
+  v_earlier_version_ran := exists (
+    select 1 from information_schema.columns
+     where table_schema = 'public'
+       and table_name   = 'user_credits'
+       and column_name  = 'purchased_credits'
+  );
+
+  alter table public.user_credits
+    add column if not exists purchased_credits integer not null default 0;
+  alter table public.user_credits
+    add column if not exists purchased_credits_backfilled_at timestamptz;
+
+  if v_earlier_version_ran then
+    -- EXECUTE, not a plain UPDATE: plpgsql plans the statement when the
+    -- block is first parsed, and purchased_credits_backfilled_at may not
+    -- exist yet at that moment. A plain statement fails with "column does
+    -- not exist" on exactly the databases this branch is for.
+    execute $sql$
+      update public.user_credits
+         set purchased_credits_backfilled_at = now()
+       where purchased_credits_backfilled_at is null
+    $sql$;
+    raise notice 'purchased_credits already existed: the earlier version of this migration ran, so every current row is marked as already considered and the backfill below is a no-op.';
+  end if;
+end
+$bootstrap$;
 
 -- Never negative, and never more than the balance it is part of: a
 -- purchased figure above credits_remaining would claim the user holds
@@ -95,9 +142,6 @@ $constraint$;
 -- The marker column is the same mechanism grandfathering already uses
 -- (legacy_entitlements_backfilled_at). It records that the row was
 -- CONSIDERED, which is the thing that must not happen twice.
-alter table public.user_credits
-  add column if not exists purchased_credits_backfilled_at timestamptz;
-
 comment on column public.user_credits.purchased_credits_backfilled_at is
   'When the purchased-credits backfill considered this row. Set once; its presence is what makes a re-run a no-op.';
 

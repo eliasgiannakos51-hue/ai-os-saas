@@ -613,7 +613,7 @@ export function WebsiteBuilderWorkspace({
       // used to produce.
       setError(
         err instanceof TypeError
-          ? "Network error — please check your connection and try again."
+          ? tCommon("networkErrorCheckConnection")
           : getErrorMessage(err, "Something went wrong — no credits were charged. Please try again.")
       );
     } finally {
@@ -680,7 +680,7 @@ export function WebsiteBuilderWorkspace({
     } catch (err) {
       setError(
         err instanceof TypeError
-          ? "Network error — please check your connection and try again."
+          ? tCommon("networkErrorCheckConnection")
           : getErrorMessage(err, "Something went wrong — no credits were charged. Please try again.")
       );
       setGenerating(false);

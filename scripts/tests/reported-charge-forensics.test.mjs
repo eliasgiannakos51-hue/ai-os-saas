@@ -43,19 +43,50 @@ const REPORTED_USD = 0.44;
 const REPORTED_CREDITS = 110;
 const eur = cf.usdToEur(REPORTED_USD, config);
 
-function chargeOn(slug) {
+// THE POLICY THE REPORT WAS FILED UNDER.
+//
+// Every figure in the diagnosis — 110 credits, 203 on Enterprise, "exactly
+// one plan matches" — is arithmetic on these six multipliers. They are the
+// per-plan defaults as they stood then, pinned as data rather than read
+// from PLAN_MARGIN_DEFAULTS, because this file reproduces a past event and
+// a past event does not change when policy does.
+//
+// The combined-ceiling change has since moved every paid plan to 5, so
+// that the credit subsystem takes 20% of revenue rather than 25% and the
+// free quotas registered in lib/billing/free-allowances.ts have a budget
+// at all. Reading the live margins here made a correct policy change look
+// like a regression in forensics that were, and remain, correct.
+const INCIDENT_PLAN_MARGINS = {
+  free: 6,
+  starter: 5,
+  growth: 4.5,
+  professional: 4,
+  ultimate: 4,
+  enterprise: 4,
+};
+
+function chargeAt(slug, margin) {
   const plan = getPlan(slug);
-  const margin = mp.resolveMarginFor("website_generate", slug, config, {}).margin;
   const credits = cf.creditsForRealCostOnAccount(eur, plan, null, config, margin);
   const achieved = cf.achievedMarginOnAccount(credits, eur, plan, null, config);
   return { credits, achieved, margin, rate: cf.effectiveCreditPriceEur(plan, config) };
+}
+
+/** The charge as it was when the report was filed. */
+function chargeThen(slug) {
+  return chargeAt(slug, INCIDENT_PLAN_MARGINS[slug]);
+}
+
+/** The charge under the policy that is live right now. */
+function chargeOn(slug) {
+  return chargeAt(slug, mp.resolveMarginFor("website_generate", slug, config, {}).margin);
 }
 
 console.log(`== the reported figures: $${REPORTED_USD} -> €${eur.toFixed(4)} ==`);
 check("the USD->EUR rate is the documented 0.92", config.usdToEurRate === 0.92);
 
 console.log("\n== 1. 110 credits is NOT what Enterprise would have charged ==");
-const ent = chargeOn("enterprise");
+const ent = chargeThen("enterprise");
 check(`Enterprise charges ${ent.credits}, not ${REPORTED_CREDITS}`, ent.credits !== REPORTED_CREDITS);
 check("Enterprise charges 203", ent.credits === 203);
 check("at €0.008/credit", Math.abs(ent.rate - 0.008) < 1e-9);
@@ -66,16 +97,30 @@ check(
 );
 
 console.log("\n== 2. exactly one plan produces 110 credits for $0.44 ==");
-const matches = PLANS.filter((p) => chargeOn(p.slug).credits === REPORTED_CREDITS).map((p) => p.slug);
+const matches = PLANS.filter((p) => chargeThen(p.slug).credits === REPORTED_CREDITS).map((p) => p.slug);
 check(`only one plan matches (${matches.join(", ") || "none"})`, matches.length === 1);
 check("and it is Growth", matches[0] === "growth");
-const growth = chargeOn("growth");
+const growth = chargeThen("growth");
 check("Growth's rate is €50/3000 = €0.01667", Math.abs(growth.rate - 50 / 3000) < 1e-9);
-check("Growth's margin target is 4.5x", growth.margin === 4.5);
+check("Growth's margin target was 4.5x at the time of the report", growth.margin === 4.5);
 check(
   `the achieved margin is above target, not 2.2x (${growth.achieved.toFixed(3)}x)`,
   growth.achieved >= 4.5
 );
+
+// The property that survives any future policy edit: whatever the numbers
+// become, no plan may ever charge LESS than it did when the report was
+// filed. That is the guarantee the hardcoded 110/203 were standing in for,
+// and unlike them it cannot be invalidated by a legitimate change.
+for (const plan of PLANS) {
+  const then = chargeThen(plan.slug);
+  const now = chargeOn(plan.slug);
+  check(
+    `${plan.slug.padEnd(13)} still charges at least the reported-era amount (${now.credits} >= ${then.credits})`,
+    now.credits >= then.credits,
+    `now ${now.credits} at ${now.margin}x, then ${then.credits} at ${then.margin}x`
+  );
+}
 
 console.log("\n== 3. the guarantee holds on every plan for this cost ==");
 for (const plan of PLANS) {
@@ -91,15 +136,19 @@ console.log("\n== 4. why 110 could ALSO be an estimate rather than a charge ==")
 // near 110 — which is the other way the reported pair can arise, and the
 // reason the answer asks for the FINAL website_generate row rather than
 // whatever number was on screen.
+// Priced at the reported-era multiplier for the same reason as above: the
+// question is what the UI showed that user, on that day.
 const entEstimate = est.estimateForAction(
   "websiteGenerate",
   { model: "claude-sonnet-4-6", inputChars: 200, imageCount: 0, planSlug: "enterprise" },
   config,
-  ent.rate
+  ent.rate,
+  INCIDENT_PLAN_MARGINS.enterprise
 );
 check(
   `the Enterprise estimate for a short brief is near 110 (${entEstimate.estimatedCredits})`,
-  Math.abs(entEstimate.estimatedCredits - REPORTED_CREDITS) <= 15
+  Math.abs(entEstimate.estimatedCredits - REPORTED_CREDITS) <= 15,
+  `got ${entEstimate.estimatedCredits}`
 );
 check("but it is an estimate, not a charge — it is bigger than itself only via the buffer", entEstimate.reserveCredits > entEstimate.estimatedCredits);
 

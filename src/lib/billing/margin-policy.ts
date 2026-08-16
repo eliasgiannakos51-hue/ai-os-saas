@@ -34,17 +34,33 @@ import {
 /**
  * Per-plan margin DEFAULTS — these apply even with no env set.
  *
- * Cheaper plans carry a higher multiplier: a Free or Starter action is
- * subsidised by far less committed revenue, so its per-action margin has
- * to work harder. Professional and up sit at the global floor.
+ * EVERY PAID PLAN IS 5, and the reason is the combined ceiling rather than
+ * anything about the plans themselves.
+ *
+ * The credit subsystem's worst case is exactly 1/M of revenue. At M = 4
+ * that is 25% — the WHOLE ceiling — which leaves nothing at all for the
+ * free quotas that also spend real Anthropic money outside credits. That
+ * is not a theoretical objection: Professional and Ultimate sat at M = 4
+ * while free chat burned a further 18.8%, for a combined 43.8% and a real
+ * margin of 2.28x against a stated 4x target.
+ *
+ * M = 5 hands the credit half exactly 20% and leaves 5% for the quota
+ * registry (see DECLARED_ALLOWANCE_SHARES in lib/billing/ceiling.ts).
+ * 20 + 5 = 25, and scripts/tests/combined-ceiling.test.mjs fails the build
+ * if that ever stops adding up.
+ *
+ * Free stays at 6, higher than the paid plans rather than lower: it has no
+ * revenue to take a share of, so its allowance is a flat acquisition cost
+ * and a higher multiplier makes that cost smaller. Lowering it to 5 for
+ * symmetry would have INCREASED what the free tier spends.
  */
 export const PLAN_MARGIN_DEFAULTS: Record<PlanSlug, number> = {
   free: 6,
   starter: 5,
-  growth: 4.5,
-  professional: 4,
-  ultimate: 4,
-  enterprise: 4,
+  growth: 5,
+  professional: 5,
+  ultimate: 5,
+  enterprise: 5,
 };
 
 const PLAN_MARGIN_ENV_KEYS: Record<PlanSlug, string> = {

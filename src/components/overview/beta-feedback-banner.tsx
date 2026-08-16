@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { MessageSquareHeart, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const STORAGE_KEY = "beta-feedback-banner-dismissed";
 
@@ -18,6 +19,7 @@ export function BetaFeedbackBanner({
   linkLabel: string;
   feedbackUrl: string;
 }) {
+  const t = useTranslations("common");
   const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
@@ -59,7 +61,7 @@ export function BetaFeedbackBanner({
       <button
         type="button"
         onClick={dismiss}
-        aria-label="Dismiss"
+        aria-label={t("dismiss")}
         className="shrink-0 rounded p-1 text-emerald-400/70 transition-colors duration-150 hover:text-emerald-300"
       >
         <X className="h-4 w-4" aria-hidden="true" />

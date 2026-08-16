@@ -32,6 +32,7 @@ const ACHIEVEMENT_TITLE_KEYS: Record<AchievementDisplay["kind"], string> = {
 // dedup mechanism (that's the query in lib/achievements.ts).
 export function AchievementUnlockBridge({ unlockedKeys }: { unlockedKeys: string[] }) {
   const t = useTranslations("achievements");
+  const tKey = useTranslations();
   const { addToast } = useToast();
   const firedRef = useRef<string>("");
   const [celebrating, setCelebrating] = useState(false);
@@ -51,7 +52,7 @@ export function AchievementUnlockBridge({ unlockedKeys }: { unlockedKeys: string
       if (!display) continue;
       const title =
         display.kind === "firstEntry"
-          ? t("firstEntry.title", { module: display.moduleTitle })
+          ? t("firstEntry.title", { module: tKey(display.moduleTitleKey) })
           : t(ACHIEVEMENT_TITLE_KEYS[display.kind]);
       addToast(`🏆 ${t("unlockedToast", { achievement: title })}`);
     }

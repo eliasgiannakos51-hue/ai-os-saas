@@ -28,7 +28,26 @@
     "aiGenerated": {
       "short": "من إنشاء الذكاء الاصطناعي",
       "long": "محتوى من إنشاء الذكاء الاصطناعي. قد يحتوي على أخطاء — تحقق من المعلومات المهمة قبل الاعتماد عليها."
-    }
+    },
+    "close": "إغلاق",
+    "switchToDarkMode": "التبديل إلى المظهر الداكن",
+    "switchToLightMode": "التبديل إلى المظهر الفاتح",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور",
+    "networkErrorCheckConnection": "خطأ في الشبكة — تحقّق من اتصالك وحاول مرة أخرى.",
+    "ownerAccessTooltip": "وصول المالك — أرصدة غير محدودة",
+    "creditsTooltip": "الأرصدة المتبقية — اشترِ المزيد من الإعدادات",
+    "accountMenu": "قائمة الحساب",
+    "categories": "الفئات",
+    "commandPalette": "لوحة الأوامر",
+    "dismiss": "تجاهل",
+    "dismissSuggestion": "تجاهل الاقتراح",
+    "installIonexa": "تثبيت Ionexa",
+    "loadingContent": "جارٍ تحميل المحتوى",
+    "nextPage": "الصفحة التالية",
+    "previousPage": "الصفحة السابقة",
+    "toggleMenu": "إظهار القائمة أو إخفاؤها",
+    "dismissToastAria": "{message} — اضغط Enter للتجاهل"
   },
   "sidebar": {
     "groups": {
@@ -55,7 +74,7 @@
       "settings": "الإعدادات",
       "team": "الفريق",
       "agents": "وكلاء الذكاء الاصطناعي",
-      "websites": "خطط المواقع",
+      "websites": "المواقع",
       "websiteBuilder": "منشئ المواقع",
       "apps": "التطبيقات",
       "images": "الصور",
@@ -67,10 +86,10 @@
       "campaigns": "الحملات",
       "analytics": "التحليلات",
       "finance": "المالية",
-      "content": "التسويق",
-      "sales": "إدارة علاقات العملاء",
+      "content": "المحتوى",
+      "sales": "المبيعات",
       "products": "المنتجات",
-      "research": "المعرفة",
+      "research": "البحث",
       "learning": "التعلّم",
       "ideas": "الأفكار",
       "competitors": "المنافسون",
@@ -141,7 +160,8 @@
     },
     "comingSoon": "قريبًا",
     "comingSoonToast": "{name} غير متاح بعد — إنه ضمن خارطة الطريق.",
-    "comingSoonBadge": "قريبًا"
+    "comingSoonBadge": "قريبًا",
+    "closeMenu": "إغلاق القائمة"
   },
   "landing": {
     "hero": "عملك، منظّم — مع ذكاء اصطناعي يساعدك فعليًا.",
@@ -178,7 +198,13 @@
       "imageVideo": "توليد الصور والفيديو",
       "aiMemory": "ذاكرة الذكاء الاصطناعي",
       "teamCollaboration": "تعاون الفريق",
-      "teamSeatsAddOn": "مقاعد الفريق"
+      "teamSeatsAddOn": "مقاعد الفريق",
+      "freeChatMessages": "رسائل محادثة مجانية / شهريًا",
+      "deepResearch": "عمليات البحث المعمّق / شهريًا",
+      "files": "الملفات المخزّنة",
+      "storage": "مساحة التخزين",
+      "integrations": "التكاملات المتصلة",
+      "publishedSites": "المواقع المنشورة"
     },
     "businessTitle": "الأعمال",
     "businessSubtitle": "للفرق التي تبني معًا",
@@ -191,13 +217,11 @@
     "setUpTeam": "إعداد الفريق",
     "features": {
       "1Workspace3Projects": "مساحة عمل واحدة، 3 مشاريع",
-      "2AiAgents": "وكيلان بالذكاء الاصطناعي",
       "basicAiChat": "محادثة ذكاء اصطناعي أساسية",
       "creditsPerMonth": "{count} رصيد/شهر",
       "marketplaceInstallOnly": "المتجر: التثبيت فقط",
       "communitySupport": "دعم المجتمع",
       "unlimitedProjects": "مشاريع غير محدودة",
-      "upTo20AiAgents": "حتى 20 وكيلاً ذكياً",
       "aiMemory": "ذاكرة الذكاء الاصطناعي",
       "websiteAutomationBuilderAccess": "الوصول إلى منشئ المواقع والأتمتة",
       "imageVideoGenerationAccess": "الوصول إلى توليد الصور والفيديو",
@@ -207,7 +231,6 @@
       "mobileSaasBuilderAccess": "الوصول إلى منشئ تطبيقات الجوال وSaaS",
       "priorityProcessing": "معالجة ذات أولوية",
       "everythingInGrowth": "كل ما في باقة Growth",
-      "unlimitedAiAgentsTeams": "وكلاء ذكاء اصطناعي وفرق غير محدودة",
       "teamCollaboration": "تعاون الفريق",
       "sharedAiMemory": "ذاكرة ذكاء اصطناعي مشتركة",
       "prioritySupport": "دعم ذو أولوية",
@@ -224,6 +247,16 @@
       "upTo5AiAgents": "حتى 5 وكلاء أذكياء",
       "upTo15AiAgentsTeams": "حتى 15 وكيلاً ذكياً وفرق",
       "upTo50AiAgents": "حتى 50 وكيلاً ذكياً"
+    },
+    "values": {
+      "unlimited": "غير محدود",
+      "included": "مشمول",
+      "custom": "مخصّص",
+      "perSeat": "+{currency}{price}/مقعد"
+    },
+    "seatNote": {
+      "included": "مقاعد فريق غير محدودة مشمولة — بدون رسوم لكل عضو",
+      "perMember": "+ {currency}{price}/شهريًا لكل عضو في الفريق — يحصل كل عضو على وصول كامل بمستوى خطتك"
     }
   },
   "roadmap": {
@@ -390,6 +423,14 @@
       "continueWithGoogle": "المتابعة باستخدام Google",
       "orContinueWithEmail": "أو المتابعة بالبريد الإلكتروني",
       "genericError": "تعذر بدء تسجيل الدخول عبر Google. يرجى المحاولة مرة أخرى."
+    },
+    "deleteAccount": {
+      "title": "تأكيد حذف الحساب",
+      "missingToken": "هذا الرابط تنقصه رمز التأكيد. يرجى استخدام الرابط من بريدك الإلكتروني كما أُرسل تمامًا.",
+      "warning": "سيؤدي هذا إلى حذف حسابك وكل سجل أضفته نهائيًا. لا يمكن التراجع عن ذلك.",
+      "deleting": "جارٍ الحذف…",
+      "confirmButton": "حذف حسابي نهائيًا",
+      "cancel": "إلغاء والعودة"
     }
   },
   "settings": {
@@ -415,7 +456,9 @@
       "clearing": "جارٍ المسح...",
       "couldNotUpdatePreference": "✗ تعذّر تحديث التفضيل",
       "couldNotClearMemory": "✗ تعذّر مسح الذاكرة",
-      "memoryCleared": "✓ تم مسح الذاكرة"
+      "memoryCleared": "✓ تم مسح الذاكرة",
+      "memoryEnabled": "✓ تم تفعيل ذاكرة المحادثة",
+      "memoryDisabled": "✓ تم تعطيل ذاكرة المحادثة"
     },
     "loginActivity": {
       "title": "نشاط تسجيل الدخول",
@@ -423,7 +466,9 @@
       "noDevices": "لا توجد أجهزة مسجّلة حتى الآن.",
       "lastSeen": "آخر ظهور {time}",
       "couldNotRemoveDevice": "✗ تعذّرت إزالة الجهاز",
-      "deviceRemoved": "✓ تمت إزالة الجهاز"
+      "deviceRemoved": "✓ تمت إزالة الجهاز",
+      "removeDevice": "إزالة الجهاز",
+      "removeDeviceAria": "إزالة {device}"
     },
     "aiUsage": {
       "title": "استخدام الذكاء الاصطناعي",
@@ -520,7 +565,8 @@
     "aiPersona": {
       "title": "شخصية الذكاء الاصطناعي",
       "description": "امنح المساعد اسمًا مخصصًا.",
-      "personaUpdated": "✓ تم تحديث اسم المساعد"
+      "personaUpdated": "✓ تم تحديث اسم المساعد",
+      "couldNotSave": "✗ تعذّر حفظ الاسم"
     },
     "billing": {
       "title": "الفوترة",
@@ -532,7 +578,36 @@
       "noCreditActivity": "لا يوجد نشاط أرصدة بعد.",
       "balanceAfter": "الرصيد {count}",
       "unlimited": "غير محدود",
-      "wouldHaveCost": "كان سيكلف {count}"
+      "wouldHaveCost": "كان سيكلف {count}",
+      "manageBilling": "إدارة الفوترة",
+      "upgradePlan": "ترقية الخطة",
+      "betaTester": "مختبِر تجريبي",
+      "betaTesterExpires": "مختبِر تجريبي — ينتهي خلال {days, plural, zero {# يوم} one {يوم واحد} two {يومين} few {# أيام} many {# يومًا} other {# يوم}}",
+      "teamSeats": "+ {seats, plural, zero {# مقعد فريق} one {مقعد فريق واحد} two {مقعدا فريق} few {# مقاعد فريق} many {# مقعد فريق} other {# مقعد فريق}}",
+      "cancel": {
+        "button": "إلغاء الاشتراك",
+        "title": "إلغاء اشتراكك",
+        "keepsAccessUntil": "تحتفظ بالوصول الكامل حتى {date}.",
+        "keepsAccessUntilPeriodEnd": "تحتفظ بالوصول الكامل حتى نهاية الفترة التي دفعت مقابلها بالفعل.",
+        "creditsStay": "تبقى أرصدتك المتبقية قابلة للاستخدام حتى ذلك الحين.",
+        "dataKept": "لا يُحذف أي شيء — تبقى إدخالاتك وملفاتك ومحادثاتك كما هي تمامًا.",
+        "reversible": "يمكنك استعادته في أي وقت قبل انتهائه، دون رسوم إضافية.",
+        "surveyQuestion": "ما الذي دفعك للمغادرة؟ (اختياري)",
+        "reasons": {
+          "too_expensive": "مكلف جدًا",
+          "missing_feature": "ينقصه ما أحتاجه",
+          "not_using": "لا أستخدمه بما يكفي",
+          "found_alternative": "وجدت بديلًا آخر"
+        },
+        "notePlaceholder": "هل تود إخبارنا بشيء آخر؟ (اختياري)",
+        "confirm": "تأكيد الإلغاء",
+        "keepIt": "الاحتفاظ به",
+        "done": "✓ سينتهي اشتراكك في نهاية الفترة المدفوعة",
+        "restored": "✓ أصبح اشتراكك نشطًا من جديد",
+        "restore": "استعادة",
+        "endingIn": "{days, plural, zero {ينتهي اشتراكك اليوم.} one {ينتهي اشتراكك خلال يوم واحد.} two {ينتهي اشتراكك خلال يومين.} few {ينتهي اشتراكك خلال # أيام.} many {ينتهي اشتراكك خلال # يومًا.} other {ينتهي اشتراكك خلال # يوم.}}"
+      },
+      "creditsSplit": "{monthly} شهريًا + {purchased} مشتراة (لا تنتهي صلاحيتها أبدًا)"
     },
     "marginReport": {
       "title": "تقرير الهامش",
@@ -580,7 +655,8 @@
       "lowCreditsHint": "عند توقف العمل بسبب نفاد الرصيد",
       "collaboration": "التعاون",
       "collaborationHint": "دعوات الفريق ونشاط مساحة العمل المشتركة"
-    }
+    },
+    "jumpToSection": "الانتقال إلى قسم"
   },
   "dashboard": {
     "overview": {
@@ -656,7 +732,9 @@
           "label": "التداول",
           "description": "سجّل صفقة"
         }
-      }
+      },
+      "quickStartTemplates": "قوالب البدء السريع",
+      "quickStartApplied": "✓ {count, plural, zero {لم تُضف إدخالات} one {أُضيف إدخال تجريبي واحد} two {أُضيف إدخالان تجريبيان} few {أُضيفت # إدخالات تجريبية} many {أُضيف # إدخالًا تجريبيًا} other {أُضيف # إدخال تجريبي}}"
     },
     "team": {
       "title": "الفريق",
@@ -687,7 +765,12 @@
     },
     "memory": {
       "title": "ذاكرة الذكاء الاصطناعي",
-      "description": "ابحث في كل ما سجّلته، عبر كل وحدة — دون الحاجة لتذكر أين وضعته."
+      "description": "ابحث في كل ما سجّلته، عبر كل وحدة — دون الحاجة لتذكر أين وضعته.",
+      "searchPlaceholder": "ابحث في كل ما سجّلته...",
+      "resultCount": "{count, plural, zero {لا نتائج} one {نتيجة واحدة} two {نتيجتان} few {# نتائج} many {# نتيجة} other {# نتيجة}} في كل الوحدات",
+      "resultCountForQuery": "{count, plural, zero {لا نتائج} one {نتيجة واحدة} two {نتيجتان} few {# نتائج} many {# نتيجة} other {# نتيجة}} لـ «{query}» في كل الوحدات",
+      "empty": "لم تسجّل شيئًا بعد — بمجرد أن تبدأ باستخدام الوحدات ستتمكن من البحث فيها جميعًا من هنا.",
+      "truncated": "يتم عرض أول {shown} من {total} نتيجة — حسّن بحثك لتضييق النطاق."
     },
     "documents": {
       "title": "المستندات",
@@ -718,10 +801,28 @@
       "streamInterrupted": "انقطع الاتصال قبل اكتمال الرد.",
       "streamInterruptedPartial": "انقطع الاتصال — قد يكون الرد أعلاه غير مكتمل.",
       "hideConversationsHint": "إخفاء قائمة المحادثات ومنح المحادثة العرض الكامل.",
-      "showConversationsHint": "إظهار قائمة المحادثات مرة أخرى."
+      "showConversationsHint": "إظهار قائمة المحادثات مرة أخرى.",
+      "send": "إرسال",
+      "emptyBody": "اسأل عن أي شيء — معلومات عامة، أفكار، مساعدة في الكتابة، أو مجرد محادثة. غير مرتبط بأي وحدة في Ionexa AI.",
+      "composerPlaceholder": "اكتب إلى Ionexa...",
+      "mentorMode": "وضع الإرشاد",
+      "mentorModeHint": "وضع الإرشاد: توجيه استراتيجي بدل الإجابات المجردة — يشير إلى المخاطر، ويطرح أسئلة توضيحية، ويقترح بدائل، ويستخدم بياناتك المسجّلة كسياق.",
+      "newChat": "محادثة جديدة",
+      "noConversations": "لا توجد محادثات بعد.",
+      "groupPinned": "مثبّتة",
+      "groupToday": "اليوم",
+      "groupYesterday": "أمس",
+      "groupOlder": "أقدم",
+      "pin": "تثبيت",
+      "unpin": "إلغاء التثبيت",
+      "rename": "إعادة التسمية",
+      "deleteConfirm": "هل تريد حذف «{title}»؟ لا يمكن التراجع عن ذلك."
     },
     "create": {
-      "title": "إنشاء أي شيء"
+      "title": "إنشاء أي شيء",
+      "subtitle": "صف أي شيء — فكرة منتج، صفقة، ملاحظة من مستخدم، مؤشرًا — وسيصل تلقائيًا إلى الوحدة الصحيحة.",
+      "loggedTo": "سُجّل في:",
+      "viewModule": "عرض {module} ←"
     },
     "timeline": {
       "title": "الجدول الزمني",
@@ -1476,6 +1577,39 @@
       "hideNumbers": "أخفِ الأرقام",
       "dismiss": "تجاهل هذا",
       "dismissError": "تعذّر تجاهل ذلك."
+    },
+    "systemHealth": {
+      "toggleStackTrace": "إظهار تتبُّع المكدس أو إخفاؤه"
+    },
+    "ideas": {
+      "new": "فكرة جديدة",
+      "edit": "تعديل الفكرة",
+      "empty": "لا توجد أفكار بعد — استخدم الزر أعلاه لتسجيل أول فكرة.",
+      "loadError": "تعذّر تحميل أفكارك: {message}",
+      "deleteConfirm": "هل تريد حذف هذه الفكرة؟ لا يمكن التراجع عن ذلك.",
+      "editAria": "تعديل الفكرة: {name}",
+      "nameLabel": "الاسم",
+      "namePlaceholder": "اسم الفكرة",
+      "customerLabel": "العميل",
+      "customerPlaceholder": "العميل المستهدف",
+      "problemLabel": "المشكلة",
+      "problemPlaceholder": "ما المشكلة التي تحلها؟",
+      "competitorsLabel": "المنافسون",
+      "competitorsPlaceholder": "المنافسون المعروفون",
+      "marketSizeLabel": "حجم السوق",
+      "marketSizePlaceholder": "مثال: حجم السوق ملياران من الدولارات",
+      "scoreLabel": "التقييم (0-100)",
+      "scorePlaceholder": "التقييم",
+      "mvpLabel": "المنتج الأولي",
+      "mvpPlaceholder": "كيف يبدو المنتج الأولي؟",
+      "verdictLabel": "الحكم",
+      "verdictPlaceholder": "مثال: المتابعة / الإلغاء / المراقبة",
+      "cardFor": "لـ: {customer}",
+      "cardScore": "التقييم: {score}",
+      "cardProblem": "المشكلة:",
+      "cardCompetitors": "المنافسون:",
+      "cardMarketSize": "حجم السوق:",
+      "cardMvp": "المنتج الأولي:"
     }
   },
   "module": {
@@ -1534,7 +1668,9 @@
     "mightBeRelated": "قد يكون هذا مرتبطًا بـ: {titles}. هل تريد ربطها؟",
     "yes": "نعم",
     "no": "لا",
-    "linked": "تم الربط"
+    "linked": "تم الربط",
+    "unlink": "إلغاء الربط",
+    "unlinkAria": "إلغاء الربط بـ {name}"
   },
   "favorites": {
     "add": "إضافة إلى المفضلة",
@@ -1624,5 +1760,147 @@
     "unlimited": "غير محدود — لم تُستخدم أرصدة",
     "unlimitedWouldHaveCost": "غير محدود — كان سيكلف {count} رصيد",
     "freeMessage": "رسالة مجانية · متبقٍ {count} هذا الشهر"
+  },
+  "cookies": {
+    "banner": {
+      "summary": "نستخدم ملفات تعريف الارتباط للوظائف الأساسية فقط — لتسجيل دخولك وإبقاء جلستك نشطة.",
+      "accept": "موافق",
+      "essential": "<term>ملف تعريف ارتباط أساسي للجلسة</term> — يضبطه Supabase Auth عند تسجيل دخولك، حتى يتعرّف عليك التطبيق في الطلبات اللاحقة. بدونه سيتم تسجيل خروجك مع كل تحميل للصفحة. يُحذف تلقائيًا عند انتهاء صلاحيته أو عند تسجيل الخروج.",
+      "preferences": "<term>التفضيلات المحلية</term> — يتم حفظ السمة واللغة وإعدادات إمكانية الوصول وهذا الاختيار الخاص بملفات تعريف الارتباط في التخزين المحلي لمتصفحك، ولا تُرسل إلى أي جهة.",
+      "noTracking": "لا تُستخدم أي ملفات تعريف ارتباط إعلانية أو تتبّع من أطراف خارجية. راجع <cookiePolicy>سياسة ملفات تعريف الارتباط</cookiePolicy> و<privacyPolicy>سياسة الخصوصية</privacyPolicy> لمزيد من التفاصيل."
+    }
+  },
+  "security": {
+    "badge": {
+      "checked": "تم فحص الأمان",
+      "flagged": "تم وضع علامة أمان",
+      "title": "طبقة حماية مخرجات الذكاء الاصطناعي",
+      "checkedAt": "تم الفحص {when}",
+      "whatWasChecked": "ما تم فحصه:",
+      "issuesFound": "المشكلات المكتشفة:",
+      "noIssues": "لم يتم اكتشاف أي مشكلات."
+    }
+  },
+  "moduleData": {
+    "fields": {
+      "amount": "المبلغ",
+      "budget": "الميزانية",
+      "caption": "التعليق",
+      "category": "الفئة",
+      "channel": "القناة",
+      "coldEmail": "رسالة تعريفية",
+      "company": "الشركة",
+      "contentIdeas": "أفكار للمحتوى",
+      "customers": "العملاء",
+      "dataSource": "مصدر البيانات",
+      "description": "الوصف",
+      "direction": "الاتجاه",
+      "findings": "النتائج",
+      "followUpEmail": "رسالة متابعة",
+      "hashtags": "الوسوم",
+      "idea": "الفكرة",
+      "ideaNames": "أسماء الأفكار",
+      "language": "اللغة",
+      "launchPlan": "خطة الإطلاق",
+      "leadName": "اسم العميل المحتمل",
+      "marketing": "التسويق",
+      "metricName": "اسم المؤشر",
+      "mvpFeatures": "ميزات المنتج الأولي",
+      "name": "الاسم",
+      "nextSteps": "الخطوات التالية",
+      "notes": "ملاحظات",
+      "pnl": "الربح/الخسارة",
+      "platform": "المنصة",
+      "pricing": "التسعير",
+      "priority": "الأولوية",
+      "product": "المنتج",
+      "productName": "اسم المنتج",
+      "prompt": "الطلب",
+      "quiz": "اختبار",
+      "ranking": "الترتيب",
+      "recommendation": "التوصية",
+      "resources": "المصادر",
+      "result": "النتيجة",
+      "risks": "المخاطر",
+      "roadmap": "خارطة الطريق",
+      "score": "التقييم",
+      "sentiment": "الانطباع",
+      "slideCount": "عدد الشرائح",
+      "status": "الحالة",
+      "strengths": "نقاط القوة",
+      "suggestedResponse": "الرد المقترح",
+      "suggestedWorkflow": "سير العمل المقترح",
+      "summary": "الملخص",
+      "symbol": "الرمز",
+      "targetAudience": "الجمهور المستهدف",
+      "taskName": "اسم المهمة",
+      "timeSaved": "الوقت الموفَّر",
+      "title": "العنوان",
+      "toolsNeeded": "الأدوات اللازمة",
+      "topic": "الموضوع",
+      "twitterThread": "سلسلة تغريدات",
+      "type": "النوع",
+      "url": "الرابط",
+      "userJourney": "رحلة المستخدم",
+      "value": "القيمة",
+      "weaknesses": "نقاط الضعف"
+    },
+    "options": {
+      "active": "نشط",
+      "android": "أندرويد",
+      "archived": "مؤرشف",
+      "completed": "مكتمل",
+      "content": "محتوى",
+      "crossPlatform": "متعدد المنصات",
+      "desktop": "سطح المكتب",
+      "done": "منجز",
+      "draft": "مسودة",
+      "email": "بريد إلكتروني",
+      "event": "فعالية",
+      "expense": "مصروف",
+      "final": "نهائي",
+      "inProgress": "قيد التنفيذ",
+      "inReview": "قيد المراجعة",
+      "income": "دخل",
+      "ios": "iOS",
+      "live": "منشور",
+      "other": "أخرى",
+      "paidAds": "إعلانات مدفوعة",
+      "paused": "متوقف مؤقتًا",
+      "planned": "مخطط له",
+      "requested": "مطلوب",
+      "seo": "تحسين محركات البحث",
+      "social": "التواصل الاجتماعي",
+      "web": "الويب"
+    },
+    "placeholders": {
+      "longShort": "شراء / بيع",
+      "winLoss": "ربح / خسارة",
+      "httpsUrl": "https://...",
+      "codingLanguages": "مثال: Python، TypeScript، Go",
+      "dataSources": "مثال: ملف CSV، Stripe، Google Analytics"
+    },
+    "deleteConfirm": {
+      "competitors": "هل تريد حذف هذا المنافس؟ لا يمكن التراجع عن ذلك.",
+      "research": "هل تريد حذف ملاحظة البحث هذه؟ لا يمكن التراجع عن ذلك.",
+      "finance": "هل تريد حذف هذه الحركة المالية؟ لا يمكن التراجع عن ذلك.",
+      "learning": "هل تريد حذف ملاحظة التعلّم هذه؟ لا يمكن التراجع عن ذلك.",
+      "trading": "هل تريد حذف هذه الصفقة؟ لا يمكن التراجع عن ذلك.",
+      "decisions": "هل تريد حذف هذا القرار؟ لا يمكن التراجع عن ذلك.",
+      "products": "هل تريد حذف هذا المنتج؟ لا يمكن التراجع عن ذلك.",
+      "content": "هل تريد حذف هذا المحتوى؟ لا يمكن التراجع عن ذلك.",
+      "sales": "هل تريد حذف هذا العميل المحتمل؟ لا يمكن التراجع عن ذلك.",
+      "feedback": "هل تريد حذف هذه الملاحظة؟ لا يمكن التراجع عن ذلك.",
+      "analytics": "هل تريد حذف هذا المؤشر؟ لا يمكن التراجع عن ذلك.",
+      "automation": "هل تريد حذف هذه الأتمتة؟ لا يمكن التراجع عن ذلك.",
+      "websites": "هل تريد حذف هذا الموقع؟ لا يمكن التراجع عن ذلك.",
+      "apps": "هل تريد حذف هذا التطبيق؟ لا يمكن التراجع عن ذلك.",
+      "images": "هل تريد حذف هذه الصورة؟ لا يمكن التراجع عن ذلك.",
+      "videos": "هل تريد حذف هذا الفيديو؟ لا يمكن التراجع عن ذلك.",
+      "coding": "هل تريد حذف طلب البرمجة هذا؟ لا يمكن التراجع عن ذلك.",
+      "data-analysis": "هل تريد حذف هذا التحليل؟ لا يمكن التراجع عن ذلك.",
+      "presentations": "هل تريد حذف ملاحظة العرض هذه؟ لا يمكن التراجع عن ذلك.",
+      "campaigns": "هل تريد حذف هذه الحملة؟ لا يمكن التراجع عن ذلك."
+    }
   }
 }

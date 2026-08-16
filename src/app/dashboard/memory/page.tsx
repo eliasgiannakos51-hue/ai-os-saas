@@ -83,7 +83,7 @@ export default async function MemoryPage() {
     .flatMap(({ config, href, records }) =>
       records.map((record) => ({
         id: `${config.slug}-${record.id}`,
-        moduleTitle: config.title,
+        moduleTitleKey: config.titleKey,
         moduleHref: href,
         headline: String(record[config.headlineKey] ?? "untitled"),
         snippet: buildSnippet(config, record),

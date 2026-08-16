@@ -25,6 +25,7 @@ import { loadUnlockedAchievements } from "@/lib/achievements";
 import { isAdminEmail } from "@/lib/admin";
 import { isBetaTester, getBetaDaysRemaining } from "@/lib/beta";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
+import { loadSubscriptionState } from "@/lib/billing/subscription-state";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { BUILD_MODULES } from "@/lib/build-modules";
 import { getPlan } from "@/lib/billing/plans";
@@ -35,6 +36,9 @@ export const metadata: Metadata = {
 
 export default async function SettingsPage() {
   const t = await getTranslations("settings");
+  // Module names are keys on the config; this resolves them in the
+  // request's locale, the same way the sidebar does.
+  const tKey = await getTranslations();
   const tBilling = await getTranslations("settings.billing");
   const supabase = createClient();
 
@@ -68,6 +72,9 @@ export default async function SettingsPage() {
   const aiPersonaName = (user.user_metadata?.ai_persona_name as string | undefined) ?? "";
 
   const unlockedAchievements = await loadUnlockedAchievements(supabase, user.id);
+  // Live from Stripe — cancel_at_period_end is not mirrored locally, so a
+  // cancellation made from Stripe's own portal shows here too.
+  const subscriptionState = await loadSubscriptionState(user);
 
   // No row until the user actually toggles something (see the panel's
   // upsert) — an empty object means "all defaults on", the same thing
@@ -84,7 +91,7 @@ export default async function SettingsPage() {
   // walks rows that actually moved the balance.
   const { data: creditsRow } = await supabase
     .from("user_credits")
-    .select("credits_remaining")
+    .select("credits_remaining, purchased_credits")
     .eq("user_id", user.id)
     .maybeSingle();
 
@@ -142,7 +149,7 @@ export default async function SettingsPage() {
         const { count } = await supabase
           .from(module.table)
           .select("id", { count: "exact", head: true });
-        return { title: module.title, count: count ?? 0 };
+        return { titleKey: module.titleKey, count: count ?? 0 };
       })
     ),
   ]);
@@ -188,7 +195,7 @@ export default async function SettingsPage() {
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
         <PageHeader icon={SettingsIcon} title={t("title")} />
 
-        <nav aria-label="Jump to section" className="mb-6 flex flex-wrap gap-2 text-xs">
+        <nav aria-label={t("jumpToSection")} className="mb-6 flex flex-wrap gap-2 text-xs">
           <a
             href="#accessibility"
             className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
@@ -283,7 +290,7 @@ export default async function SettingsPage() {
             wouldHaveUsedCredits={wouldHaveUsedCredits}
             totalEntries={totalEntries}
             mostActiveModuleTitle={
-              mostActiveModule && mostActiveModule.count > 0 ? mostActiveModule.title : null
+              mostActiveModule && mostActiveModule.count > 0 ? tKey(mostActiveModule.titleKey) : null
             }
             moduleUsage={moduleUsage}
           />

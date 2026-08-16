@@ -6,7 +6,7 @@ import { formatRelativeTime } from "@/lib/format-time";
 export type RecentEntry = {
   id: string;
   title: string;
-  moduleTitle: string;
+  moduleTitleKey: string;
   href: string;
   createdAt: string;
 };
@@ -14,6 +14,7 @@ export type RecentEntry = {
 export async function RecentEntriesCard({ entries }: { entries: RecentEntry[] }) {
   const t = await getTranslations("dashboard.overview.recentEntries");
   const locale = await getLocale();
+  const tKey = await getTranslations();
 
   return (
     <div className="rounded-2xl border border-border bg-panel p-5 sm:col-span-2 lg:col-span-1">
@@ -39,7 +40,7 @@ export async function RecentEntriesCard({ entries }: { entries: RecentEntry[] })
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm text-foreground">{entry.title}</p>
-                  <p className="text-xs text-muted">{entry.moduleTitle}</p>
+                  <p className="text-xs text-muted">{tKey(entry.moduleTitleKey)}</p>
                 </div>
                 <span
                   className="shrink-0 text-xs text-muted"

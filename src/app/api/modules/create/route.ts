@@ -7,6 +7,7 @@ import { deductCredits, hasEnoughCredits, insufficientCreditsMessage, resolveEff
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { logApiError } from "@/lib/log-error";
+import { enModuleTitle, enFieldLabel } from "@/lib/module-labels";
 
 export const dynamic = "force-dynamic";
 
@@ -67,7 +68,7 @@ export async function POST(request: Request) {
         {
           ok: false,
           upgradeRequired: true,
-          error: `${moduleConfig.title} requires the ${getPlan(moduleConfig.minPlanSlug)?.name ?? moduleConfig.minPlanSlug} plan or higher. Upgrade to continue.`,
+          error: `${enModuleTitle(moduleConfig)} requires the ${getPlan(moduleConfig.minPlanSlug)?.name ?? moduleConfig.minPlanSlug} plan or higher. Upgrade to continue.`,
         },
         { status: 403 }
       );
@@ -103,7 +104,7 @@ export async function POST(request: Request) {
     );
     if (missingRequired) {
       return NextResponse.json(
-        { ok: false, error: `${missingRequired.label} is required.` },
+        { ok: false, error: `${enFieldLabel(missingRequired)} is required.` },
         { status: 400 }
       );
     }
@@ -125,7 +126,7 @@ export async function POST(request: Request) {
     // Only now — the row is durably saved — is this confirmed a success
     // worth charging for.
     if (!bypassCredits && moduleConfig.creditCost) {
-      await deductCredits(user.id, moduleConfig.creditCost, `${moduleConfig.slug}_create`, `${moduleConfig.title} created`, plan);
+      await deductCredits(user.id, moduleConfig.creditCost, `${moduleConfig.slug}_create`, `${enModuleTitle(moduleConfig)} created`, plan);
     }
 
     return NextResponse.json({ ok: true, record });

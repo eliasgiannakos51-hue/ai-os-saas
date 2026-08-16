@@ -1,5 +1,6 @@
 import { test, expect, type Page, type BrowserContext } from "@playwright/test";
 import { MODULES } from "../src/lib/modules";
+import { enModuleTitle } from "../src/lib/module-labels";
 
 // Permanent regression-safety-net suite (see the project's "before every
 // push" workflow) — run this, not just tsc/eslint/build, before pushing
@@ -13,8 +14,10 @@ import { MODULES } from "../src/lib/modules";
 // only ever grows.
 
 const ALL_MODULES = [
+  // The English title comes from the message catalogue now, so this
+  // suite and the app cannot disagree about what a module is called.
   { slug: "ideas", href: "/dashboard", title: "Ideas" },
-  ...MODULES.map((m) => ({ slug: m.slug, href: `/dashboard/${m.slug}`, title: m.title })),
+  ...MODULES.map((m) => ({ slug: m.slug, href: `/dashboard/${m.slug}`, title: enModuleTitle(m) })),
 ];
 
 function randomTestUser() {

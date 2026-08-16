@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -30,6 +31,10 @@ export async function BuildModulePage({
   config: ModuleConfig;
   icon: LucideIcon;
 }) {
+  // The module's name is a key on the config, so the page resolves it in
+  // the request's locale rather than printing whatever English the
+  // registry used to hold.
+  const t = await getTranslations();
   const supabase = createClient();
 
   const {
@@ -48,9 +53,9 @@ export async function BuildModulePage({
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={icon} title={config.title} />
+          <PageHeader icon={icon} title={t(config.titleKey)} />
           <UpgradeRequired
-            featureName={config.title}
+            featureName={t(config.titleKey)}
             planName={requiredPlan?.name ?? config.minPlanSlug}
           />
         </div>
@@ -72,7 +77,7 @@ export async function BuildModulePage({
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={icon} title={config.title} />
+        <PageHeader icon={icon} title={t(config.titleKey)} />
 
 
         {error && <ErrorMessage message={`loading ${config.table}: ${error.message}`} />}

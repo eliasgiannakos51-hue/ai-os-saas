@@ -1,5 +1,8 @@
 import type { FieldConfig } from "@/lib/modules";
 import type { MissionStep } from "@/types/mission";
+import { enFieldLabel } from "@/lib/module-labels";
+import { enModuleTitle } from "@/lib/module-labels";
+import type { ModuleTitleKey } from "@/lib/modules";
 
 // "AI Company" real collaboration — pure functions with no I/O, shared by
 // api/create/route.ts (server) and mission-card.tsx (client) so the exact
@@ -13,7 +16,7 @@ import type { MissionStep } from "@/types/mission";
 // textFor() — that one is tied to Smart Search and shouldn't be touched
 // for this.
 export function buildOutputSummary(
-  moduleConfig: { title: string; fields: FieldConfig[] },
+  moduleConfig: { titleKey: ModuleTitleKey; fields: FieldConfig[] },
   record: Record<string, unknown>,
   aiMessage: string
 ): string {
@@ -21,12 +24,12 @@ export function buildOutputSummary(
     .map((f) => {
       const value = record[f.key];
       if (value === null || value === undefined || value === "") return null;
-      return `${f.label}: ${value}`;
+      return `${enFieldLabel(f)}: ${value}`;
     })
     .filter((s): s is string => s !== null)
     .join(", ");
 
-  return `Created a ${moduleConfig.title} entry — ${fieldSummary || "(no details)"}. ${aiMessage}`;
+  return `Created a ${enModuleTitle(moduleConfig)} entry — ${fieldSummary || "(no details)"}. ${aiMessage}`;
 }
 
 // Every earlier COMPLETED step's output, in mission order, up to (not

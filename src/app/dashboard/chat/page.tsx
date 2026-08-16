@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ChatWorkspace } from "@/components/chat/chat-workspace";
 import type { ChatConversation } from "@/types/chat";
 import { resolveEffectivePlan } from "@/lib/billing/credits";
+import { loadLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
 import { getFreeChatStatus } from "@/lib/billing/free-chat-usage";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -52,7 +53,13 @@ export default async function ChatPage({
   // allowance for those accounts entirely.
   const bypassesCredits = isAdminEmail(user.email) || (await hasActiveBetaBypass(user));
   const plan = await resolveEffectivePlan(user);
-  const freeChat = bypassesCredits ? null : await getFreeChatStatus(user.id, plan?.slug ?? "free");
+  // Same entitlements the route honours, so the counter the user sees and
+  // the allowance the server enforces cannot disagree for a grandfathered
+  // account.
+  const legacy = bypassesCredits ? null : await loadLegacyEntitlements(user.id);
+  const freeChat = bypassesCredits
+    ? null
+    : await getFreeChatStatus(user.id, plan?.slug ?? "free", legacy);
 
   const userInitial = (user.email?.[0] ?? "?").toUpperCase();
   const initialMentorPreset =

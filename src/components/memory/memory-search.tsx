@@ -6,11 +6,11 @@ import { Search, SearchX } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { formatDateTime } from "@/lib/format-number";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export type MemoryResult = {
   id: string;
-  moduleTitle: string;
+  moduleTitleKey: string;
   moduleHref: string;
   headline: string;
   snippet: string;
@@ -20,12 +20,15 @@ export type MemoryResult = {
 const MAX_RESULTS_SHOWN = 100;
 
 function matches(result: MemoryResult, query: string): boolean {
-  const haystack = `${result.headline} ${result.snippet} ${result.moduleTitle}`.toLowerCase();
+  const haystack = `${result.headline} ${result.snippet}`.toLowerCase();
   return haystack.includes(query);
 }
 
 export function MemorySearch({ results }: { results: MemoryResult[] }) {
   const locale = useLocale();
+  const t = useTranslations("dashboard.memory");
+  const tModule = useTranslations("module");
+  const tKey = useTranslations();
   const formatRelativeTime = useFormatRelativeTime();
   const [query, setQuery] = useState("");
 
@@ -43,7 +46,7 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search everything you've logged..."
+          placeholder={t("searchPlaceholder")}
           className="input pl-10"
           autoFocus
         />
@@ -51,18 +54,16 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
 
       {results.length > 0 && (
         <p className="mb-4 text-xs text-muted">
-          {filtered.length} {filtered.length === 1 ? "result" : "results"}
-          {query.trim() && ` for "${query.trim()}"`} across every module
+          {query.trim()
+            ? t("resultCountForQuery", { count: filtered.length, query: query.trim() })
+            : t("resultCount", { count: filtered.length })}
         </p>
       )}
 
       {results.length === 0 ? (
-        <EmptyState>
-          Nothing logged yet — once you start using the modules, you&apos;ll be able to
-          search across all of them here.
-        </EmptyState>
+        <EmptyState>{t("empty")}</EmptyState>
       ) : filtered.length === 0 ? (
-        <EmptyState icon={SearchX}>No matches for &apos;{query}&apos;</EmptyState>
+        <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>
       ) : (
         <>
           <div className="space-y-3">
@@ -77,7 +78,7 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
                     {result.headline}
                   </h3>
                   <span className="inline-flex shrink-0 items-center rounded-full border border-orange-800 bg-orange-950/30 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-orange-400">
-                    {result.moduleTitle}
+                    {tKey(result.moduleTitleKey)}
                   </span>
                 </div>
 
@@ -90,7 +91,7 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
                   title={formatDateTime(result.createdAt, locale)}
                   suppressHydrationWarning
                 >
-                  Logged {formatRelativeTime(result.createdAt)}
+                  {tModule("loggedAt", { when: formatRelativeTime(result.createdAt) })}
                 </p>
               </Link>
             ))}
@@ -98,8 +99,7 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
 
           {filtered.length > MAX_RESULTS_SHOWN && (
             <p className="mt-3 text-center text-xs text-muted">
-              Showing the first {MAX_RESULTS_SHOWN} of {filtered.length} matches — refine
-              your search to narrow it down.
+              {t("truncated", { shown: MAX_RESULTS_SHOWN, total: filtered.length })}
             </p>
           )}
         </>

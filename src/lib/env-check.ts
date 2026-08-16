@@ -65,6 +65,18 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
     fallback: "0.02",
     suspicious: numberIn(0.001, 10),
   },
+  {
+    // Enterprise is the one plan with no price in code, which used to mean
+    // its combined ceiling could not be checked at all — it inherited
+    // Ultimate's free-chat allowance against a price nothing knew. This is
+    // the contractual floor the gate measures it against; signing a deal
+    // below it is what would break the guarantee, not setting this wrong.
+    name: "ENTERPRISE_MIN_PRICE_EUR",
+    level: "optional",
+    what: "Floor price of an Enterprise contract — what its 25% ceiling is measured against",
+    fallback: "400",
+    suspicious: numberIn(200, 1_000_000),
+  },
   { name: "STRIPE_SECRET_KEY", level: "recommended", what: "Checkout and subscriptions" },
   { name: "STRIPE_WEBHOOK_SECRET", level: "recommended", what: "Verifying Stripe webhooks. Without it, grants never land" },
 

@@ -39,6 +39,7 @@ export function LinkToModal({
 }) {
   const t = useTranslations("entityLinks");
   const tCommon = useTranslations("common");
+  const tKey = useTranslations();
   const router = useRouter();
   const supabase = createClient();
   const { addToast } = useToast();
@@ -124,7 +125,7 @@ export function LinkToModal({
 
     if (insertError) {
       setError(insertError.message);
-      addToast(`✗ error: ${insertError.message}`, "error");
+      addToast(`✗ ${tCommon("error")}: ${insertError.message}`, "error");
       return;
     }
 
@@ -170,7 +171,7 @@ export function LinkToModal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={tCommon("close")}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" />
@@ -189,7 +190,7 @@ export function LinkToModal({
                     onClick={() => setSelectedModule(m)}
                     className="rounded-xl border border-border bg-input px-3 py-2.5 text-left text-sm text-foreground transition-colors duration-150 hover:border-orange-500/60 hover:text-orange-400"
                   >
-                    {m.title}
+                    {tKey(m.titleKey)}
                   </button>
                 ))}
               </div>
@@ -202,7 +203,7 @@ export function LinkToModal({
                 className="mb-3 inline-flex items-center gap-1 text-xs text-muted transition-colors duration-150 hover:text-foreground"
               >
                 <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
-                {selectedModule.title}
+                {tKey(selectedModule.titleKey)}
               </button>
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
@@ -211,7 +212,7 @@ export function LinkToModal({
                   type="text"
                   value={query}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
-                  placeholder={t("searchPlaceholder", { module: selectedModule.title })}
+                  placeholder={t("searchPlaceholder", { module: tKey(selectedModule.titleKey) })}
                   className="input pl-10"
                 />
               </div>

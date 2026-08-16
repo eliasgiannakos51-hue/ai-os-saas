@@ -1,6 +1,20 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
-import { freeChatAllowanceForSlug } from "@/lib/billing/free-chat";
+import { freeChatAllowanceForAccount } from "@/lib/billing/free-chat";
+import { getPlan, type PlanSlug } from "@/lib/billing/plans";
+import type { LegacyEntitlements } from "@/lib/billing/legacy-entitlements";
+
+/**
+ * The allowance for one ACCOUNT: the plan's published number, or the
+ * larger grandfathered one if this account carries it.
+ *
+ * Both entry points below take the entitlements as an argument rather than
+ * loading them, so one request reads user_credits once instead of twice.
+ */
+function allowanceFor(planSlug: string, legacy: LegacyEntitlements | null | undefined): number {
+  const slug = (getPlan(planSlug)?.slug ?? "free") as PlanSlug;
+  return freeChatAllowanceForAccount(slug, legacy);
+}
 
 /**
  * The free-chat counter.
@@ -33,9 +47,10 @@ export type FreeChatGrant =
  */
 export async function consumeFreeChatMessage(
   userId: string,
-  planSlug: string
+  planSlug: string,
+  legacy?: LegacyEntitlements | null
 ): Promise<FreeChatGrant> {
-  const limit = freeChatAllowanceForSlug(planSlug);
+  const limit = allowanceFor(planSlug, legacy);
   if (limit <= 0) {
     return { granted: false, used: 0, remaining: 0, limit: 0, reason: "disabled" };
   }
@@ -105,9 +120,10 @@ export type FreeChatStatus = {
  */
 export async function getFreeChatStatus(
   userId: string,
-  planSlug: string
+  planSlug: string,
+  legacy?: LegacyEntitlements | null
 ): Promise<FreeChatStatus> {
-  const limit = freeChatAllowanceForSlug(planSlug);
+  const limit = allowanceFor(planSlug, legacy);
   if (limit <= 0) return { limit: 0, used: 0, remaining: 0 };
 
   try {

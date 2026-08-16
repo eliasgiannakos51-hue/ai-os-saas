@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
 import { loadLinkedEntities } from "@/lib/entity-links";
 import { logApiError } from "@/lib/log-error";
+import { enModuleTitle } from "@/lib/module-labels";
 
 // Scans, per module, only this many of the user's most recent records —
 // keeps the per-message cost bounded regardless of how much data an
@@ -50,7 +51,7 @@ export async function findMentionedEntities(
           .map((row) => ({
             table: config.table,
             id: String(row.id),
-            moduleTitle: config.title,
+            moduleTitle: enModuleTitle(config),
             headline: String(row[config.headlineKey] ?? "").trim(),
             linked: [] as { moduleTitle: string; headline: string }[],
           }))
@@ -81,7 +82,7 @@ export async function findMentionedEntities(
         for (const [id, entities] of Object.entries(resolved)) {
           linkedByKey.set(
             `${table}:${id}`,
-            entities.map((e) => ({ moduleTitle: e.moduleTitle, headline: e.headline }))
+            entities.map((e) => ({ moduleTitle: enModuleTitle({ titleKey: e.moduleTitleKey }), headline: e.headline }))
           );
         }
       })

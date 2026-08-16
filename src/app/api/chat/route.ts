@@ -27,10 +27,12 @@ import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
 import {
-  FREE_CHAT_LIMITS,
   freeChatMaxCostEur,
   freeChatMessageEstimatedCostEur,
+  freeChatLimitsForAccount,
 } from "@/lib/billing/free-chat";
+import { loadLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
+import type { PlanSlug } from "@/lib/billing/plans";
 import { CHAT_MODEL } from "@/lib/ai-models";
 import { consumeFreeChatMessage, releaseFreeChatMessage } from "@/lib/billing/free-chat-usage";
 import { diagLog } from "@/lib/diag";
@@ -48,6 +50,7 @@ import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/u
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 import { AI_CONDUCT_EL } from "@/lib/ai-conduct";
 import { matchCannedAnswer, type CannedMatch } from "@/lib/support/knowledge-base";
+import { getLocale } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
@@ -336,10 +339,14 @@ export async function POST(request: Request) {
     // Mentor Mode is excluded: the user explicitly asked for strategic
     // pushback on their situation, and handing them a FAQ entry instead is
     // not a cheaper version of that, it is a different (wrong) answer.
+    // The knowledge base is Greek. Anyone else falls through to the model,
+    // which answers in their own language — see CANNED_ANSWER_LOCALE.
+    const locale = await getLocale();
     const cannedMatch = mentorMode
       ? null
       : matchCannedAnswer(
           message,
+          locale,
           conversationId ? CANNED_THRESHOLD_MID_CONVERSATION : CANNED_THRESHOLD_NEW_CONVERSATION
         );
     if (cannedMatch) {
@@ -500,13 +507,27 @@ export async function POST(request: Request) {
     // and what the message will roughly cost. Admins and beta testers
     // already pay nothing, so spending their allowance on them would be
     // pure bookkeeping.
-    const withinFreeSize = message.length <= FREE_CHAT_LIMITS.maxMessageChars;
+    //
+    // GRANDFATHERING. An account that predates the combined-ceiling change
+    // keeps both the allowance AND the envelope it had — a smaller reply
+    // cap is something the user would notice, so it is not enough to
+    // preserve only the message count. Loaded once here and threaded
+    // through, rather than read again inside the counter, so a chat turn
+    // still touches user_credits once.
+    const legacy = bypassCredits ? null : await loadLegacyEntitlements(user.id);
+    const freeLimits = freeChatLimitsForAccount((plan?.slug ?? "free") as PlanSlug, legacy);
+
+    const withinFreeSize = message.length <= freeLimits.maxMessageChars;
     const withinFreeCost =
-      freeChatMessageEstimatedCostEur(message.length, systemPrompt.length, pricingConfig) <=
-      freeChatMaxCostEur();
+      freeChatMessageEstimatedCostEur(
+        message.length,
+        systemPrompt.length,
+        pricingConfig,
+        freeLimits
+      ) <= freeChatMaxCostEur();
     const freeGrant =
       !bypassCredits && withinFreeSize && withinFreeCost
-        ? await consumeFreeChatMessage(user.id, plan?.slug ?? "free")
+        ? await consumeFreeChatMessage(user.id, plan?.slug ?? "free", legacy)
         : null;
     const isFreeMessage = freeGrant?.granted === true;
     const largeMessageReason: "message_too_long" | "over_cost_cap" | null =
@@ -674,10 +695,10 @@ export async function POST(request: Request) {
         // see lib/billing/free-chat.ts for the arithmetic. Paid messages
         // are completely unchanged.
         const effectiveHistory = isFreeMessage
-          ? history.slice(-FREE_CHAT_LIMITS.historyLimit)
+          ? history.slice(-freeLimits.historyLimit)
           : history;
         const effectiveMaxTokens = isFreeMessage
-          ? FREE_CHAT_LIMITS.maxOutputTokens
+          ? freeLimits.maxOutputTokens
           : MAX_TOKENS;
         // Explicitly typed: the array is heterogeneous now (a server tool
         // plus, sometimes, a custom one), and the ternary's inferred type

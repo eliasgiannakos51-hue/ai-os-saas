@@ -24,6 +24,8 @@ export function AddIdeaForm() {
   const supabase = createClient();
   const { addToast } = useToast();
   const tCommon = useTranslations("common");
+  const t = useTranslations("dashboard.ideas");
+  const tModule = useTranslations("module");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
@@ -73,7 +75,7 @@ export function AddIdeaForm() {
 
     if (error) {
       setError(error.message);
-      addToast(`✗ error: ${error.message}`, "error");
+      addToast(`✗ ${tCommon("error")}: ${error.message}`, "error");
       return;
     }
 
@@ -94,7 +96,7 @@ export function AddIdeaForm() {
           onClick={() => setOpen(true)}
           className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
         >
-          <Plus className="h-4 w-4" /> New Idea
+          <Plus className="h-4 w-4" /> {t("new")}
         </button>
       ) : (
         <form
@@ -102,11 +104,11 @@ export function AddIdeaForm() {
           className="space-y-4 rounded-2xl border border-border bg-panel p-5"
         >
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-foreground">New Idea</h2>
+            <h2 className="text-sm font-semibold text-foreground">{t("new")}</h2>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="Cancel"
+              aria-label={tCommon("cancel")}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
             >
               <X className="h-4 w-4" />
@@ -114,53 +116,53 @@ export function AddIdeaForm() {
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Name" required>
+            <Field label={t("nameLabel")} required>
               <input
                 required
                 value={form.name}
                 onChange={update("name")}
                 className="input"
-                placeholder="idea name"
+                placeholder={t("namePlaceholder")}
               />
             </Field>
 
-            <Field label="Customer">
+            <Field label={t("customerLabel")}>
               <input
                 value={form.customer}
                 onChange={update("customer")}
                 className="input"
-                placeholder="target customer"
+                placeholder={t("customerPlaceholder")}
               />
             </Field>
 
-            <Field label="Problem" full>
+            <Field label={t("problemLabel")} full>
               <textarea
                 value={form.problem}
                 onChange={update("problem")}
                 className="input min-h-32 resize-y"
-                placeholder="what problem does this solve?"
+                placeholder={t("problemPlaceholder")}
               />
             </Field>
 
-            <Field label="Competitors" full>
+            <Field label={t("competitorsLabel")} full>
               <textarea
                 value={form.competitors}
                 onChange={update("competitors")}
                 className="input min-h-32 resize-y"
-                placeholder="known competitors"
+                placeholder={t("competitorsPlaceholder")}
               />
             </Field>
 
-            <Field label="Market Size">
+            <Field label={t("marketSizeLabel")}>
               <input
                 value={form.market_size}
                 onChange={update("market_size")}
                 className="input"
-                placeholder="e.g. $2B TAM"
+                placeholder={t("marketSizePlaceholder")}
               />
             </Field>
 
-            <Field label="Score (0-100)">
+            <Field label={t("scoreLabel")}>
               <input
                 type="number"
                 min={0}
@@ -168,32 +170,32 @@ export function AddIdeaForm() {
                 value={form.score}
                 onChange={update("score")}
                 className="input"
-                placeholder="score"
+                placeholder={t("scorePlaceholder")}
               />
             </Field>
 
-            <Field label="MVP" full>
+            <Field label={t("mvpLabel")} full>
               <textarea
                 value={form.mvp}
                 onChange={update("mvp")}
                 className="input min-h-32 resize-y"
-                placeholder="what does the MVP look like?"
+                placeholder={t("mvpPlaceholder")}
               />
             </Field>
 
-            <Field label="Verdict" full>
+            <Field label={t("verdictLabel")} full>
               <input
                 value={form.verdict}
                 onChange={update("verdict")}
                 className="input"
-                placeholder="e.g. pursue / kill / watch"
+                placeholder={t("verdictPlaceholder")}
               />
             </Field>
           </div>
 
           {error && (
             <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
-              error: {error}
+              {tCommon("error")}: {error}
             </p>
           )}
 
@@ -202,7 +204,7 @@ export function AddIdeaForm() {
             disabled={loading}
             className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
           >
-            {loading ? "Saving..." : "Save"}
+            {loading ? tModule("saving") : tModule("save")}
           </button>
         </form>
       )}

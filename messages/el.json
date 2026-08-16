@@ -28,7 +28,26 @@
     "aiGenerated": {
       "short": "Δημιουργήθηκε από AI",
       "long": "Περιεχόμενο που δημιουργήθηκε από AI. Μπορεί να έχει λάθη — έλεγξε ό,τι είναι σημαντικό πριν βασιστείς σε αυτό."
-    }
+    },
+    "close": "Κλείσιμο",
+    "switchToDarkMode": "Εναλλαγή σε σκούρο θέμα",
+    "switchToLightMode": "Εναλλαγή σε ανοιχτό θέμα",
+    "showPassword": "Εμφάνιση κωδικού",
+    "hidePassword": "Απόκρυψη κωδικού",
+    "networkErrorCheckConnection": "Σφάλμα δικτύου — έλεγξε τη σύνδεσή σου και δοκίμασε ξανά.",
+    "ownerAccessTooltip": "Πρόσβαση ιδιοκτήτη — απεριόριστα credits",
+    "creditsTooltip": "Υπόλοιπο credits — αγόρασε κι άλλα από τις Ρυθμίσεις",
+    "accountMenu": "Μενού λογαριασμού",
+    "categories": "Κατηγορίες",
+    "commandPalette": "Παλέτα εντολών",
+    "dismiss": "Απόρριψη",
+    "dismissSuggestion": "Απόρριψη πρότασης",
+    "installIonexa": "Εγκατάσταση του Ionexa",
+    "loadingContent": "Φόρτωση περιεχομένου",
+    "nextPage": "Επόμενη σελίδα",
+    "previousPage": "Προηγούμενη σελίδα",
+    "toggleMenu": "Εναλλαγή μενού",
+    "dismissToastAria": "{message} — πάτησε Enter για απόρριψη"
   },
   "sidebar": {
     "groups": {
@@ -55,7 +74,7 @@
       "settings": "Ρυθμίσεις",
       "team": "Ομάδα",
       "agents": "AI Πράκτορες",
-      "websites": "Σχέδια Ιστότοπων",
+      "websites": "Ιστότοποι",
       "websiteBuilder": "Δημιουργός Ιστοσελίδων",
       "apps": "Εφαρμογές",
       "images": "Εικόνες",
@@ -67,10 +86,10 @@
       "campaigns": "Καμπάνιες",
       "analytics": "Αναλυτικά",
       "finance": "Πράκτορας Οικονομικών",
-      "content": "Marketing",
-      "sales": "CRM Πελατών",
+      "content": "Περιεχόμενο",
+      "sales": "Πωλήσεις",
       "products": "Προϊόντα",
-      "research": "Πράκτορας Έρευνας",
+      "research": "Έρευνα",
       "learning": "Εκμάθηση",
       "ideas": "Ιδέες",
       "competitors": "Ανταγωνιστές",
@@ -141,7 +160,8 @@
     },
     "comingSoon": "Έρχεται",
     "comingSoonToast": "Το {name} δεν είναι διαθέσιμο ακόμα — βρίσκεται στο roadmap.",
-    "comingSoonBadge": "Σύντομα"
+    "comingSoonBadge": "Σύντομα",
+    "closeMenu": "Κλείσιμο μενού"
   },
   "landing": {
     "hero": "Η επιχείρησή σου, οργανωμένη — με AI που πραγματικά βοηθάει.",
@@ -178,7 +198,13 @@
       "imageVideo": "Δημιουργία εικόνας & βίντεο",
       "aiMemory": "AI Μνήμη",
       "teamCollaboration": "Συνεργασία ομάδας",
-      "teamSeatsAddOn": "Θέσεις ομάδας"
+      "teamSeatsAddOn": "Θέσεις ομάδας",
+      "freeChatMessages": "Δωρεάν μηνύματα chat / μήνα",
+      "deepResearch": "Εκτελέσεις Deep Research / μήνα",
+      "files": "Αποθηκευμένα αρχεία",
+      "storage": "Αποθηκευτικός χώρος",
+      "integrations": "Συνδεδεμένες ενσωματώσεις",
+      "publishedSites": "Δημοσιευμένοι ιστότοποι"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Για ομάδες που χτίζουν μαζί",
@@ -191,13 +217,11 @@
     "setUpTeam": "Δημιουργία Ομάδας",
     "features": {
       "1Workspace3Projects": "1 χώρος εργασίας, 3 έργα",
-      "2AiAgents": "2 πράκτορες AI",
       "basicAiChat": "Βασική συνομιλία AI",
       "creditsPerMonth": "{count} credits/μήνα",
       "marketplaceInstallOnly": "Marketplace: μόνο εγκατάσταση",
       "communitySupport": "Υποστήριξη κοινότητας",
       "unlimitedProjects": "Απεριόριστα έργα",
-      "upTo20AiAgents": "Έως 20 πράκτορες AI",
       "aiMemory": "Μνήμη AI",
       "websiteAutomationBuilderAccess": "Πρόσβαση σε Website & Automation Builder",
       "imageVideoGenerationAccess": "Πρόσβαση σε δημιουργία εικόνας & βίντεο",
@@ -207,7 +231,6 @@
       "mobileSaasBuilderAccess": "Πρόσβαση σε Mobile & SaaS Builder",
       "priorityProcessing": "Επεξεργασία κατά προτεραιότητα",
       "everythingInGrowth": "Ό,τι περιλαμβάνει το Growth",
-      "unlimitedAiAgentsTeams": "Απεριόριστοι πράκτορες AI & ομάδες",
       "teamCollaboration": "Συνεργασία ομάδας",
       "sharedAiMemory": "Κοινόχρηστη μνήμη AI",
       "prioritySupport": "Υποστήριξη κατά προτεραιότητα",
@@ -224,6 +247,16 @@
       "upTo5AiAgents": "Έως 5 πράκτορες AI",
       "upTo15AiAgentsTeams": "Έως 15 πράκτορες AI & ομάδες",
       "upTo50AiAgents": "Έως 50 πράκτορες AI"
+    },
+    "values": {
+      "unlimited": "Απεριόριστα",
+      "included": "Περιλαμβάνεται",
+      "custom": "Προσαρμοσμένο",
+      "perSeat": "+{currency}{price}/θέση"
+    },
+    "seatNote": {
+      "included": "Απεριόριστες θέσεις ομάδας — χωρίς χρέωση ανά μέλος",
+      "perMember": "+ {currency}{price}/μήνα ανά μέλος ομάδας — κάθε μέλος έχει πλήρη πρόσβαση στο επίπεδο του πλάνου σας"
     }
   },
   "roadmap": {
@@ -390,6 +423,14 @@
       "continueWithGoogle": "Συνέχεια με Google",
       "orContinueWithEmail": "ή συνέχεια με email",
       "genericError": "Δεν ήταν δυνατή η σύνδεση με Google. Δοκίμασε ξανά."
+    },
+    "deleteAccount": {
+      "title": "Επιβεβαίωση διαγραφής λογαριασμού",
+      "missingToken": "Από αυτόν τον σύνδεσμο λείπει το διακριτικό επιβεβαίωσης. Χρησιμοποίησε τον σύνδεσμο από το email σου ακριβώς όπως στάλθηκε.",
+      "warning": "Αυτό θα διαγράψει οριστικά τον λογαριασμό σου και κάθε καταχώρηση που έχεις κάνει. Δεν μπορεί να αναιρεθεί.",
+      "deleting": "Διαγραφή…",
+      "confirmButton": "Οριστική διαγραφή του λογαριασμού μου",
+      "cancel": "Ακύρωση και επιστροφή"
     }
   },
   "settings": {
@@ -415,7 +456,9 @@
       "clearing": "Διαγραφή...",
       "couldNotUpdatePreference": "✗ δεν ήταν δυνατή η ενημέρωση της προτίμησης",
       "couldNotClearMemory": "✗ δεν ήταν δυνατή η εκκαθάριση της μνήμης",
-      "memoryCleared": "✓ η μνήμη εκκαθαρίστηκε"
+      "memoryCleared": "✓ η μνήμη εκκαθαρίστηκε",
+      "memoryEnabled": "✓ η μνήμη συνομιλίας ενεργοποιήθηκε",
+      "memoryDisabled": "✓ η μνήμη συνομιλίας απενεργοποιήθηκε"
     },
     "loginActivity": {
       "title": "Δραστηριότητα Σύνδεσης",
@@ -423,7 +466,9 @@
       "noDevices": "Δεν έχουν καταγραφεί συσκευές ακόμα.",
       "lastSeen": "Τελευταία εμφάνιση {time}",
       "couldNotRemoveDevice": "✗ δεν ήταν δυνατή η αφαίρεση της συσκευής",
-      "deviceRemoved": "✓ η συσκευή αφαιρέθηκε"
+      "deviceRemoved": "✓ η συσκευή αφαιρέθηκε",
+      "removeDevice": "Αφαίρεση συσκευής",
+      "removeDeviceAria": "Αφαίρεση: {device}"
     },
     "aiUsage": {
       "title": "Χρήση AI",
@@ -520,7 +565,8 @@
     "aiPersona": {
       "title": "Προσωπικότητα AI",
       "description": "Δώσε στον βοηθό ένα δικό σου όνομα.",
-      "personaUpdated": "✓ το όνομα του βοηθού ενημερώθηκε"
+      "personaUpdated": "✓ το όνομα του βοηθού ενημερώθηκε",
+      "couldNotSave": "✗ δεν ήταν δυνατή η αποθήκευση του ονόματος"
     },
     "billing": {
       "title": "Χρεώσεις",
@@ -532,7 +578,36 @@
       "noCreditActivity": "Καμία δραστηριότητα credits ακόμη.",
       "balanceAfter": "υπόλοιπο {count}",
       "unlimited": "Απεριόριστα",
-      "wouldHaveCost": "θα κόστιζε {count}"
+      "wouldHaveCost": "θα κόστιζε {count}",
+      "manageBilling": "Διαχείριση Χρέωσης",
+      "upgradePlan": "Αναβάθμιση Πλάνου",
+      "betaTester": "Beta Δοκιμαστής",
+      "betaTesterExpires": "Beta Δοκιμαστής — λήγει σε {days, plural, one {# ημέρα} other {# ημέρες}}",
+      "teamSeats": "+ {seats, plural, one {# θέση ομάδας} other {# θέσεις ομάδας}}",
+      "cancel": {
+        "button": "Ακύρωση συνδρομής",
+        "title": "Ακύρωση της συνδρομής σου",
+        "keepsAccessUntil": "Διατηρείς πλήρη πρόσβαση μέχρι τις {date}.",
+        "keepsAccessUntilPeriodEnd": "Διατηρείς πλήρη πρόσβαση μέχρι το τέλος της περιόδου που έχεις ήδη πληρώσει.",
+        "creditsStay": "Τα credits που σου μένουν παραμένουν διαθέσιμα μέχρι τότε.",
+        "dataKept": "Δεν διαγράφεται τίποτα — οι καταχωρίσεις, τα αρχεία και οι συνομιλίες σου μένουν ακριβώς εκεί που είναι.",
+        "reversible": "Μπορείς να την επαναφέρεις οποτεδήποτε πριν λήξει, χωρίς επιπλέον χρέωση.",
+        "surveyQuestion": "Τι σε έκανε να φύγεις; (προαιρετικό)",
+        "reasons": {
+          "too_expensive": "Πολύ ακριβό",
+          "missing_feature": "Λείπει κάτι που χρειάζομαι",
+          "not_using": "Δεν το χρησιμοποιώ αρκετά",
+          "found_alternative": "Βρήκα κάτι άλλο"
+        },
+        "notePlaceholder": "Θέλεις να μας πεις κάτι ακόμα; (προαιρετικό)",
+        "confirm": "Ακύρωση της συνδρομής",
+        "keepIt": "Να τη διατηρήσω",
+        "done": "✓ η συνδρομή σου θα λήξει στο τέλος της πληρωμένης περιόδου",
+        "restored": "✓ η συνδρομή σου είναι ξανά ενεργή",
+        "restore": "Επαναφορά",
+        "endingIn": "{days, plural, =0 {Η συνδρομή σου λήγει σήμερα.} one {Η συνδρομή σου λήγει σε # μέρα.} other {Η συνδρομή σου λήγει σε # μέρες.}}"
+      },
+      "creditsSplit": "{monthly} μηνιαία + {purchased} αγορασμένα (δεν λήγουν ποτέ)"
     },
     "marginReport": {
       "title": "Αναφορά Περιθωρίου",
@@ -580,7 +655,8 @@
       "lowCreditsHint": "Όταν η εργασία σταματά επειδή εξαντλήθηκε το υπόλοιπο",
       "collaboration": "Συνεργασία",
       "collaborationHint": "Προσκλήσεις ομάδας και δραστηριότητα κοινού χώρου"
-    }
+    },
+    "jumpToSection": "Μετάβαση σε ενότητα"
   },
   "dashboard": {
     "overview": {
@@ -656,7 +732,9 @@
           "label": "Συναλλαγές",
           "description": "Κατέγραψε μια συναλλαγή"
         }
-      }
+      },
+      "quickStartTemplates": "Πρότυπα γρήγορης εκκίνησης",
+      "quickStartApplied": "✓ {count, plural, one {προστέθηκε # παράδειγμα} other {προστέθηκαν # παραδείγματα}}"
     },
     "team": {
       "title": "Ομάδα",
@@ -687,7 +765,12 @@
     },
     "memory": {
       "title": "AI Μνήμη",
-      "description": "Αναζήτησε όλα όσα έχεις καταγράψει, σε κάθε module — δεν χρειάζεται να θυμάσαι πού το έβαλες."
+      "description": "Αναζήτησε όλα όσα έχεις καταγράψει, σε κάθε module — δεν χρειάζεται να θυμάσαι πού το έβαλες.",
+      "searchPlaceholder": "Ψάξε σε ό,τι έχεις καταγράψει...",
+      "resultCount": "{count, plural, =0 {κανένα αποτέλεσμα} one {# αποτέλεσμα} other {# αποτελέσματα}} σε όλα τα modules",
+      "resultCountForQuery": "{count, plural, =0 {κανένα αποτέλεσμα} one {# αποτέλεσμα} other {# αποτελέσματα}} για «{query}» σε όλα τα modules",
+      "empty": "Δεν έχεις καταγράψει τίποτα ακόμα — μόλις αρχίσεις να χρησιμοποιείς τα modules, θα μπορείς να ψάχνεις σε όλα από εδώ.",
+      "truncated": "Εμφανίζονται τα πρώτα {shown} από {total} αποτελέσματα — περιόρισε την αναζήτησή σου."
     },
     "documents": {
       "title": "Έγγραφα",
@@ -718,10 +801,28 @@
       "streamInterrupted": "Η σύνδεση διακόπηκε πριν ολοκληρωθεί η απάντηση.",
       "streamInterruptedPartial": "Η σύνδεση διακόπηκε — η παραπάνω απάντηση μπορεί να είναι ημιτελής.",
       "hideConversationsHint": "Κρύψε τη λίστα συνομιλιών και δώσε όλο το πλάτος στο νήμα.",
-      "showConversationsHint": "Εμφάνισε ξανά τη λίστα συνομιλιών."
+      "showConversationsHint": "Εμφάνισε ξανά τη λίστα συνομιλιών.",
+      "send": "Αποστολή",
+      "emptyBody": "Ρώτησε ό,τι θέλεις — γενικές γνώσεις, ιδέες, βοήθεια στο γράψιμο ή απλώς μια κουβέντα. Δεν συνδέεται με κανένα module του Ionexa AI.",
+      "composerPlaceholder": "Γράψε στο Ionexa...",
+      "mentorMode": "Λειτουργία μέντορα",
+      "mentorModeHint": "Λειτουργία μέντορα: στρατηγική καθοδήγηση αντί για σκέτες απαντήσεις — επισημαίνει κινδύνους, κάνει διευκρινιστικές ερωτήσεις, προτείνει εναλλακτικές και χρησιμοποιεί τα δεδομένα που έχεις καταγράψει ως πλαίσιο.",
+      "newChat": "Νέα συνομιλία",
+      "noConversations": "Καμία συνομιλία ακόμα.",
+      "groupPinned": "Καρφιτσωμένες",
+      "groupToday": "Σήμερα",
+      "groupYesterday": "Χθες",
+      "groupOlder": "Παλαιότερες",
+      "pin": "Καρφίτσωμα",
+      "unpin": "Ξεκαρφίτσωμα",
+      "rename": "Μετονομασία",
+      "deleteConfirm": "Να διαγραφεί η συνομιλία «{title}»; Η ενέργεια δεν αναιρείται."
     },
     "create": {
-      "title": "Δημιουργία Οτιδήποτε"
+      "title": "Δημιουργία Οτιδήποτε",
+      "subtitle": "Περίγραψε οτιδήποτε — μια ιδέα προϊόντος, μια συναλλαγή, ένα σχόλιο χρήστη, έναν δείκτη — και καταλήγει αυτόματα στο σωστό module.",
+      "loggedTo": "Καταγράφηκε στο:",
+      "viewModule": "Άνοιγμα: {module} →"
     },
     "timeline": {
       "title": "Χρονολόγιο",
@@ -1476,6 +1577,39 @@
       "hideNumbers": "Κρύψε τους αριθμούς",
       "dismiss": "Απόρριψη",
       "dismissError": "Δεν μπόρεσε να απορριφθεί."
+    },
+    "systemHealth": {
+      "toggleStackTrace": "Εμφάνιση ή απόκρυψη του stack trace"
+    },
+    "ideas": {
+      "new": "Νέα ιδέα",
+      "edit": "Επεξεργασία ιδέας",
+      "empty": "Δεν έχεις ιδέες ακόμα — χρησιμοποίησε το κουμπί παραπάνω για να καταγράψεις την πρώτη σου.",
+      "loadError": "Δεν ήταν δυνατή η φόρτωση των ιδεών σου: {message}",
+      "deleteConfirm": "Να διαγραφεί αυτή η ιδέα; Η ενέργεια δεν αναιρείται.",
+      "editAria": "Επεξεργασία ιδέας: {name}",
+      "nameLabel": "Όνομα",
+      "namePlaceholder": "όνομα ιδέας",
+      "customerLabel": "Πελάτης",
+      "customerPlaceholder": "ο πελάτης-στόχος",
+      "problemLabel": "Πρόβλημα",
+      "problemPlaceholder": "ποιο πρόβλημα λύνει;",
+      "competitorsLabel": "Ανταγωνιστές",
+      "competitorsPlaceholder": "γνωστοί ανταγωνιστές",
+      "marketSizeLabel": "Μέγεθος αγοράς",
+      "marketSizePlaceholder": "π.χ. TAM 2 δισ. $",
+      "scoreLabel": "Βαθμολογία (0-100)",
+      "scorePlaceholder": "βαθμολογία",
+      "mvpLabel": "Πρώτη λειτουργική έκδοση",
+      "mvpPlaceholder": "πώς μοιάζει η πρώτη έκδοση;",
+      "verdictLabel": "Ετυμηγορία",
+      "verdictPlaceholder": "π.χ. προχωράμε / ακύρωση / παρακολούθηση",
+      "cardFor": "για: {customer}",
+      "cardScore": "Βαθμολογία: {score}",
+      "cardProblem": "Πρόβλημα:",
+      "cardCompetitors": "Ανταγωνιστές:",
+      "cardMarketSize": "Μέγεθος αγοράς:",
+      "cardMvp": "Πρώτη λειτουργική έκδοση:"
     }
   },
   "module": {
@@ -1534,7 +1668,9 @@
     "mightBeRelated": "Ίσως σχετίζεται με: {titles}. Να τα συνδέσω;",
     "yes": "Ναι",
     "no": "Όχι",
-    "linked": "Συνδέθηκε"
+    "linked": "Συνδέθηκε",
+    "unlink": "Αποσύνδεση",
+    "unlinkAria": "Αποσύνδεση: {name}"
   },
   "favorites": {
     "add": "Προσθήκη στα αγαπημένα",
@@ -1624,5 +1760,147 @@
     "unlimited": "Απεριόριστα — δεν χρεώθηκαν credits",
     "unlimitedWouldHaveCost": "Απεριόριστα — θα κόστιζε {count} credits",
     "freeMessage": "Δωρεάν μήνυμα · απομένουν {count} αυτόν τον μήνα"
+  },
+  "cookies": {
+    "banner": {
+      "summary": "Χρησιμοποιούμε cookies μόνο για τα απαραίτητα — για τη σύνδεσή σου και για να παραμένει ενεργή η συνεδρία σου.",
+      "accept": "Αποδοχή",
+      "essential": "<term>Απαραίτητο cookie συνεδρίας</term> — ορίζεται από το Supabase Auth όταν συνδέεσαι, ώστε η εφαρμογή να σε αναγνωρίζει στα επόμενα αιτήματα. Χωρίς αυτό, θα αποσυνδεόσουν σε κάθε φόρτωση σελίδας. Διαγράφεται αυτόματα όταν λήξει ή όταν αποσυνδεθείς.",
+      "preferences": "<term>Τοπικές προτιμήσεις</term> — θέμα, γλώσσα, ρυθμίσεις προσβασιμότητας και αυτή η επιλογή για τα cookies αποθηκεύονται στον τοπικό αποθηκευτικό χώρο του browser σου και δεν αποστέλλονται πουθενά.",
+      "noTracking": "Δεν χρησιμοποιούνται cookies διαφήμισης ή παρακολούθησης τρίτων. Δες την <cookiePolicy>Πολιτική Cookies</cookiePolicy> και την <privacyPolicy>Πολιτική Απορρήτου</privacyPolicy> για λεπτομέρειες."
+    }
+  },
+  "security": {
+    "badge": {
+      "checked": "Ελέγχθηκε για ασφάλεια",
+      "flagged": "Επισημάνθηκε για ασφάλεια",
+      "title": "Επίπεδο Προστασίας Εξόδου AI",
+      "checkedAt": "Ελέγχθηκε {when}",
+      "whatWasChecked": "Τι ελέγχθηκε:",
+      "issuesFound": "Ζητήματα που βρέθηκαν:",
+      "noIssues": "Δεν εντοπίστηκαν ζητήματα."
+    }
+  },
+  "moduleData": {
+    "fields": {
+      "amount": "Ποσό",
+      "budget": "Προϋπολογισμός",
+      "caption": "Λεζάντα",
+      "category": "Κατηγορία",
+      "channel": "Κανάλι",
+      "coldEmail": "Πρώτο email",
+      "company": "Εταιρεία",
+      "contentIdeas": "Ιδέες περιεχομένου",
+      "customers": "Πελάτες",
+      "dataSource": "Πηγή δεδομένων",
+      "description": "Περιγραφή",
+      "direction": "Κατεύθυνση",
+      "findings": "Ευρήματα",
+      "followUpEmail": "Email παρακολούθησης",
+      "hashtags": "Hashtag",
+      "idea": "Ιδέα",
+      "ideaNames": "Ονόματα ιδεών",
+      "language": "Γλώσσα",
+      "launchPlan": "Σχέδιο κυκλοφορίας",
+      "leadName": "Όνομα επαφής",
+      "marketing": "Προώθηση",
+      "metricName": "Όνομα δείκτη",
+      "mvpFeatures": "Λειτουργίες πρώτης έκδοσης",
+      "name": "Όνομα",
+      "nextSteps": "Επόμενα βήματα",
+      "notes": "Σημειώσεις",
+      "pnl": "Κέρδος/Ζημία",
+      "platform": "Πλατφόρμα",
+      "pricing": "Τιμολόγηση",
+      "priority": "Προτεραιότητα",
+      "product": "Προϊόν",
+      "productName": "Όνομα προϊόντος",
+      "prompt": "Οδηγία",
+      "quiz": "Ερωτήσεις",
+      "ranking": "Κατάταξη",
+      "recommendation": "Σύσταση",
+      "resources": "Πηγές",
+      "result": "Αποτέλεσμα",
+      "risks": "Κίνδυνοι",
+      "roadmap": "Πλάνο εξέλιξης",
+      "score": "Βαθμολογία",
+      "sentiment": "Διάθεση",
+      "slideCount": "Αριθμός διαφανειών",
+      "status": "Κατάσταση",
+      "strengths": "Δυνατά σημεία",
+      "suggestedResponse": "Προτεινόμενη απάντηση",
+      "suggestedWorkflow": "Προτεινόμενη ροή",
+      "summary": "Σύνοψη",
+      "symbol": "Σύμβολο",
+      "targetAudience": "Κοινό-στόχος",
+      "taskName": "Όνομα εργασίας",
+      "timeSaved": "Χρόνος που γλιτώνεις",
+      "title": "Τίτλος",
+      "toolsNeeded": "Εργαλεία που χρειάζονται",
+      "topic": "Θέμα",
+      "twitterThread": "Νήμα στο Twitter",
+      "type": "Είδος",
+      "url": "Διεύθυνση",
+      "userJourney": "Διαδρομή χρήστη",
+      "value": "Τιμή",
+      "weaknesses": "Αδύνατα σημεία"
+    },
+    "options": {
+      "active": "ενεργό",
+      "android": "Android",
+      "archived": "αρχειοθετημένο",
+      "completed": "ολοκληρωμένο",
+      "content": "περιεχόμενο",
+      "crossPlatform": "πολυπλατφορμικό",
+      "desktop": "υπολογιστής",
+      "done": "έτοιμο",
+      "draft": "πρόχειρο",
+      "email": "email",
+      "event": "εκδήλωση",
+      "expense": "έξοδο",
+      "final": "τελικό",
+      "inProgress": "σε εξέλιξη",
+      "inReview": "υπό έλεγχο",
+      "income": "έσοδο",
+      "ios": "iOS",
+      "live": "ενεργό",
+      "other": "άλλο",
+      "paidAds": "πληρωμένες διαφημίσεις",
+      "paused": "σε παύση",
+      "planned": "προγραμματισμένο",
+      "requested": "ζητήθηκε",
+      "seo": "SEO",
+      "social": "κοινωνικά δίκτυα",
+      "web": "web"
+    },
+    "placeholders": {
+      "longShort": "θέση αγοράς / πώλησης",
+      "winLoss": "κέρδος / ζημία",
+      "httpsUrl": "https://...",
+      "codingLanguages": "π.χ. Python, TypeScript, Go",
+      "dataSources": "π.χ. αρχείο CSV, Stripe, Google Analytics"
+    },
+    "deleteConfirm": {
+      "competitors": "Να διαγραφεί αυτός ο ανταγωνιστής; Η ενέργεια δεν αναιρείται.",
+      "research": "Να διαγραφεί αυτή η σημείωση έρευνας; Η ενέργεια δεν αναιρείται.",
+      "finance": "Να διαγραφεί αυτή η κίνηση; Η ενέργεια δεν αναιρείται.",
+      "learning": "Να διαγραφεί αυτή η σημείωση μάθησης; Η ενέργεια δεν αναιρείται.",
+      "trading": "Να διαγραφεί αυτή η συναλλαγή; Η ενέργεια δεν αναιρείται.",
+      "decisions": "Να διαγραφεί αυτή η απόφαση; Η ενέργεια δεν αναιρείται.",
+      "products": "Να διαγραφεί αυτό το προϊόν; Η ενέργεια δεν αναιρείται.",
+      "content": "Να διαγραφεί αυτή η καταχώριση περιεχομένου; Η ενέργεια δεν αναιρείται.",
+      "sales": "Να διαγραφεί αυτή η επαφή; Η ενέργεια δεν αναιρείται.",
+      "feedback": "Να διαγραφεί αυτό το σχόλιο; Η ενέργεια δεν αναιρείται.",
+      "analytics": "Να διαγραφεί αυτός ο δείκτης; Η ενέργεια δεν αναιρείται.",
+      "automation": "Να διαγραφεί αυτός ο αυτοματισμός; Η ενέργεια δεν αναιρείται.",
+      "websites": "Να διαγραφεί αυτή η ιστοσελίδα; Η ενέργεια δεν αναιρείται.",
+      "apps": "Να διαγραφεί αυτή η εφαρμογή; Η ενέργεια δεν αναιρείται.",
+      "images": "Να διαγραφεί αυτή η εικόνα; Η ενέργεια δεν αναιρείται.",
+      "videos": "Να διαγραφεί αυτό το βίντεο; Η ενέργεια δεν αναιρείται.",
+      "coding": "Να διαγραφεί αυτό το αίτημα κώδικα; Η ενέργεια δεν αναιρείται.",
+      "data-analysis": "Να διαγραφεί αυτή η ανάλυση; Η ενέργεια δεν αναιρείται.",
+      "presentations": "Να διαγραφεί αυτή η σημείωση παρουσίασης; Η ενέργεια δεν αναιρείται.",
+      "campaigns": "Να διαγραφεί αυτή η καμπάνια; Η ενέργεια δεν αναιρείται."
+    }
   }
 }

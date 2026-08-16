@@ -21,6 +21,8 @@ import { EmptyState } from "@/components/empty-state";
 import { ListLayout } from "@/components/ui/list-layout";
 import { CardGrid } from "@/components/ui/entity-card";
 import { matchesSearch } from "@/lib/text/search-match";
+import { optionLabelKey } from "@/lib/modules";
+import { enFieldLabel } from "@/lib/module-labels";
 
 function searchableText(module: ModuleConfig, record: ModuleRecord): string {
   return module.fields
@@ -51,6 +53,7 @@ export function GenericList({
   favoritedIds?: Set<string>;
 }) {
   const t = useTranslations("module");
+  const tKey = useTranslations();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [selected, setSelected] = useState<{ id: string; tab: RecordDetailTab } | null>(null);
@@ -80,7 +83,7 @@ export function GenericList({
   const selectedRecord = selected ? records.find((r) => r.id === selected.id) ?? null : null;
 
   function handleExport() {
-    const headers = [...module.fields.map((f) => f.label), "created_at"];
+    const headers = [...module.fields.map((f) => enFieldLabel(f)), "created_at"];
     const rows = sorted.map((record) => [
       ...module.fields.map((f) => record[f.key]),
       record.created_at,
@@ -115,13 +118,13 @@ export function GenericList({
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                aria-label={t("filterBy", { label: statusField.label })}
+                aria-label={t("filterBy", { label: tKey(statusField.labelKey) })}
                 className="min-h-[36px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60 sm:min-h-0"
               >
-                <option value="">{t("filterAll", { label: statusField.label })}</option>
+                <option value="">{t("filterAll", { label: tKey(statusField.labelKey) })}</option>
                 {statusField.options?.map((option) => (
                   <option key={option} value={option}>
-                    {option}
+                    {tKey(optionLabelKey(option))}
                   </option>
                 ))}
               </select>

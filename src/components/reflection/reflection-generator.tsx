@@ -20,6 +20,7 @@ import type { WeeklyReflectionStats } from "@/lib/reflection";
 // bodyless POST exactly as before — zero change to default behavior.
 export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" } = {}) {
   const t = useTranslations("dashboard.reflection");
+  const tKey = useTranslations();
   const tCommon = useTranslations("common");
   const { reportUsage } = useCredits();
   const [loading, setLoading] = useState(false);
@@ -103,8 +104,8 @@ export function ReflectionGenerator({ scope }: { scope?: "trading" | "product" }
           {activeModuleStats.length > 0 ? (
             <ul className="mt-3 space-y-1.5">
               {activeModuleStats.map((m) => (
-                <li key={m.moduleTitle} className="flex items-center justify-between text-xs text-muted">
-                  <span>{m.moduleTitle}</span>
+                <li key={m.moduleTitleKey} className="flex items-center justify-between text-xs text-muted">
+                  <span>{tKey(m.moduleTitleKey)}</span>
                   <span className="text-foreground">
                     {m.thisWeek} <span className="text-muted">({m.lastWeek})</span>
                   </span>

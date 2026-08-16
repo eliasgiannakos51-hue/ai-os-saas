@@ -110,10 +110,10 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     items: [
       { href: "/dashboard/analytics", label: "Analytics", icon: MODULE_ICONS.analytics , hintKey: "analytics" },
       { href: "/dashboard/finance", label: "Finance", icon: MODULE_ICONS.finance , hintKey: "finance" },
-      { href: "/dashboard/content", label: "Marketing", icon: MODULE_ICONS.content , hintKey: "content" },
-      { href: "/dashboard/sales", label: "CRM", icon: MODULE_ICONS.sales , hintKey: "sales" },
+      { href: "/dashboard/content", label: "Content", icon: MODULE_ICONS.content , hintKey: "content" },
+      { href: "/dashboard/sales", label: "Sales", icon: MODULE_ICONS.sales , hintKey: "sales" },
       { href: "/dashboard/products", label: "Products", icon: MODULE_ICONS.products , hintKey: "products" },
-      { href: "/dashboard/research", label: "Knowledge", icon: MODULE_ICONS.research , hintKey: "research" },
+      { href: "/dashboard/research", label: "Research", icon: MODULE_ICONS.research , hintKey: "research" },
       { href: "/dashboard/learning", label: "Learning", icon: MODULE_ICONS.learning , hintKey: "learning" },
     ],
   },

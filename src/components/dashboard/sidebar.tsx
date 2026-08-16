@@ -236,7 +236,7 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
           <button
             type="button"
             onClick={closeOnMobile}
-            aria-label="Close menu"
+            aria-label={t("closeMenu")}
             className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground md:hidden"
           >
             <X className="h-4 w-4" />

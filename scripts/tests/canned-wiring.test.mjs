@@ -34,6 +34,12 @@ const kb = await loadTs("src/lib/support/knowledge-base.ts");
 console.log("== 1. it is wired into chat at all ==");
 check("chat imports the matcher", /import \{ matchCannedAnswer/.test(chat));
 check("and calls it", /matchCannedAnswer\(/.test(chat));
+// The catalogue is Greek-only (CANNED_ANSWER_LOCALE). The route must pass
+// the request's locale, or an English speaker gets a Greek FAQ entry
+// instead of an answer — asserted on the WIRING, because the matcher's own
+// unit test cannot see whether the route bothers to call it correctly.
+check("and passes the request locale to it", /const locale = await getLocale\(\)/.test(chat) &&
+  /matchCannedAnswer\(\s*message,\s*locale,/.test(chat));
 check("with a dedicated handler", /answerFromKnowledgeBase/.test(chat));
 
 console.log("\n== 2. the canned path costs nothing ==");
@@ -76,7 +82,7 @@ check(
 );
 check("Mentor Mode is never answered from the FAQ", /mentorMode\s*\?\s*null/.test(chat));
 // The behavioural half of the same claim.
-const pricing = kb.matchCannedAnswer("πόσο κοστίζει;", 0.85);
+const pricing = kb.matchCannedAnswer("πόσο κοστίζει;", "el", 0.85);
 check("a clear FAQ matches at the new-conversation threshold", pricing?.article.id === "pricing-overview");
 check(
   "and the same question is rejected at the mid-conversation threshold",

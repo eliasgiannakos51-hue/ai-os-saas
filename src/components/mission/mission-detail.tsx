@@ -95,6 +95,7 @@ export function MissionDetail({
 }) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.mission");
+  const tKey = useTranslations();
   const locale = useLocale();
   const tCommon = useTranslations("common");
   const router = useRouter();
@@ -439,7 +440,7 @@ export function MissionDetail({
                         href={step.href}
                         className="mt-0.5 inline-block text-xs text-orange-400 hover:underline"
                       >
-                        {t("viewIn", { module: step.moduleTitle ?? step.module ?? "" })}
+                        {t("viewIn", { module: step.moduleTitleKey ? tKey(step.moduleTitleKey) : step.module ?? "" })}
                       </Link>
                     )}
                     {step.status === "completed" && step.agentRole && step.agentRole !== "general" && (

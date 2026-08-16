@@ -5,7 +5,7 @@ import { CheckCircle2, ChevronDown, ShieldCheck } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { formatDateTime } from "@/lib/format-number";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 export type ProductionErrorRow = {
   id: string;
@@ -21,6 +21,7 @@ export type ProductionErrorRow = {
 
 export function ErrorList({ rows }: { rows: ProductionErrorRow[] }) {
   const locale = useLocale();
+  const t = useTranslations("dashboard.systemHealth");
   const formatRelativeTime = useFormatRelativeTime();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [resolving, setResolving] = useState<string | null>(null);
@@ -77,7 +78,7 @@ export function ErrorList({ rows }: { rows: ProductionErrorRow[] }) {
                     type="button"
                     onClick={() => setExpanded(open ? null : row.id)}
                     aria-expanded={open}
-                    aria-label="Toggle stack trace"
+                    aria-label={t("toggleStackTrace")}
                     className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
                   >
                     <ChevronDown

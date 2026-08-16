@@ -1,4 +1,5 @@
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
+import type { ModuleTitleKey } from "@/lib/modules";
 
 // Pure key/display resolution — no Supabase, safe to import from both
 // server (lib/achievements.ts, Settings) and client (the toast bridge)
@@ -40,7 +41,7 @@ export function allAchievementKeys(): string[] {
 }
 
 export type AchievementDisplay =
-  | { key: string; kind: "firstEntry"; moduleTitle: string }
+  | { key: string; kind: "firstEntry"; moduleTitleKey: ModuleTitleKey }
   | { key: string; kind: "firstMission" }
   | { key: string; kind: "streak" }
   | { key: string; kind: "firstWebsite" }
@@ -58,7 +59,7 @@ export type AchievementDisplay =
 export function allAchievementDisplays(): AchievementDisplay[] {
   return [
     ...CLASSIFIER_MODULES.map(
-      (m): AchievementDisplay => ({ key: moduleAchievementKey(m.slug), kind: "firstEntry", moduleTitle: m.title })
+      (m): AchievementDisplay => ({ key: moduleAchievementKey(m.slug), kind: "firstEntry", moduleTitleKey: m.titleKey })
     ),
     { key: FIRST_MISSION_ACHIEVEMENT_KEY, kind: "firstMission" },
     { key: SEVEN_DAY_STREAK_ACHIEVEMENT_KEY, kind: "streak" },

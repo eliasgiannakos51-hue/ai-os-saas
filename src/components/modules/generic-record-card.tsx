@@ -10,6 +10,7 @@ import { LinkToButton } from "@/components/entity-links/link-to-button";
 import { DeleteButton } from "@/components/delete-button";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
+import { deleteConfirmKey } from "@/lib/modules";
 import {
   descriptionFor,
   headlineFor,
@@ -47,6 +48,7 @@ export function GenericRecordCard({
   onDeleted: () => void;
 }) {
   const t = useTranslations("module");
+  const tKey = useTranslations();
   const headline = headlineFor(module, record, t("untitled"));
   const statusField = statusFieldFor(module, record);
   const statusValue = statusField ? String(record[statusField.key]) : null;
@@ -62,7 +64,7 @@ export function GenericRecordCard({
       description={descriptionFor(module, record)}
       tags={tagFieldsFor(module, record).map((field) => ({
         key: field.key,
-        label: `${field.label}: ${record[field.key]}`,
+        label: `${tKey(field.labelKey)}: ${record[field.key]}`,
       }))}
       status={
         statusValue && statusTone
@@ -90,7 +92,7 @@ export function GenericRecordCard({
             variant="menuItem"
             onActivate={close}
             moduleSlug={module.slug}
-            moduleTitle={module.title}
+            moduleTitle={tKey(module.titleKey)}
             recordId={record.id}
             recordHeadline={headline}
           />
@@ -108,7 +110,7 @@ export function GenericRecordCard({
             onDeleted={onDeleted}
             table={module.table}
             id={record.id}
-            label={module.title.toLowerCase()}
+            confirmMessage={tKey(deleteConfirmKey(module.slug))}
             itemName={headline}
           />
         </>

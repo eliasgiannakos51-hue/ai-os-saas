@@ -4,6 +4,7 @@ import type { ModuleConfig } from "@/lib/modules";
 import { LINKABLE_MODULES, moduleHref } from "@/lib/knowledge-graph";
 import { loadLinkedEntities, type LinkedEntity } from "@/lib/entity-links";
 import { logApiError } from "@/lib/log-error";
+import type { ModuleTitleKey } from "@/lib/modules";
 
 export type TimelineRange = "today" | "week" | "month" | "all";
 
@@ -14,7 +15,7 @@ export type TimelineEntry = {
   table: string;
   id: string;
   moduleSlug: string;
-  moduleTitle: string;
+  moduleTitleKey: ModuleTitleKey;
   headline: string;
   excerpt: string;
   createdAt: string;
@@ -101,7 +102,7 @@ export async function loadTimelineEntries(
           table: config.table,
           id: String(row.id),
           moduleSlug: config.slug,
-          moduleTitle: config.title,
+          moduleTitleKey: config.titleKey,
           headline: String(row[config.headlineKey] ?? "untitled"),
           excerpt: excerptFor(config, row),
           createdAt: String(row.created_at),

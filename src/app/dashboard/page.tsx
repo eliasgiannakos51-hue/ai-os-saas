@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
@@ -10,11 +11,17 @@ import type { Idea } from "@/types/ideas";
 import { loadLinkedEntities } from "@/lib/entity-links";
 import { loadFavoriteIds } from "@/lib/favorites";
 
-export const metadata: Metadata = {
-  title: "Ideas",
-};
+// The module name has exactly one source — the same key the sidebar
+// renders — so the tab title, the H1 and the "Ask AI about ..." heading
+// can never drift apart into three spellings of the same thing.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("sidebar");
+  return { title: t("items.ideas") };
+}
 
 export default async function DashboardPage() {
+  const t = await getTranslations("sidebar");
+  const tIdeas = await getTranslations("dashboard.ideas");
   const supabase = createClient();
 
   const {
@@ -39,13 +46,13 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={MODULE_ICONS.ideas} title="Ideas" />
+        <PageHeader icon={MODULE_ICONS.ideas} title={t("items.ideas")} />
 
         <div className="mb-6">
           <AddIdeaForm />
         </div>
 
-        {error && <ErrorMessage message={`loading ideas: ${error.message}`} />}
+        {error && <ErrorMessage message={tIdeas("loadError", { message: error.message })} />}
 
         <IdeasList
           ideas={(ideas as Idea[]) ?? []}

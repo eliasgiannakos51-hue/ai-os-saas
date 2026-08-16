@@ -16,6 +16,7 @@ export function DeleteButton({
   table,
   id,
   label = "entry",
+  confirmMessage,
   itemName,
   variant = "icon",
   onActivate,
@@ -24,6 +25,15 @@ export function DeleteButton({
   table: string;
   id: string;
   label?: string;
+  /**
+   * A COMPLETE confirmation sentence, already translated.
+   *
+   * module.deleteConfirm pours a noun into "Delete this {label}?", which
+   * only works while the noun is English. "ιδέα" is feminine and produces
+   * "Να διαγραφεί αυτό το ιδέα;" — not Greek. A caller that has a real
+   * translation for its own entry type passes the whole sentence instead.
+   */
+  confirmMessage?: string;
   itemName?: string;
   /** See record-action-variants.ts — chrome only, same action. */
   variant?: RecordActionVariant;
@@ -42,7 +52,7 @@ export function DeleteButton({
 
   async function handleDelete() {
     onActivate?.();
-    if (!window.confirm(t("deleteConfirm", { label }))) {
+    if (!window.confirm(confirmMessage ?? t("deleteConfirm", { label }))) {
       return;
     }
 

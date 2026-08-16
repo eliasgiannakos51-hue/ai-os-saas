@@ -157,6 +157,12 @@ export const USER_DATA_TABLES: UserDataTable[] = [
     erasureNote:
       "production_errors.user_id is a bare uuid with NO foreign key to auth.users, and affected_user_ids is a uuid[] that no foreign key could cover. Neither is touched by deleteUser()'s cascade, so both are scrubbed explicitly by the forget_user_in_production_errors() RPC before the auth user is removed.",
   },
+  // Exit survey answers from self-service cancellation. The note is free
+  // text a person typed about their own account, so it is personal data
+  // and belongs in their export — an "anonymous feedback" label on a row
+  // that carries user_id would be a claim the schema contradicts. The FK
+  // is on delete cascade, so erasure needs no explicit pass.
+  { table: "subscription_cancellations", label: "subscription_cancellations", scope: "account" },
 ];
 
 /** Tables with no user column at all — recorded so the coverage test can

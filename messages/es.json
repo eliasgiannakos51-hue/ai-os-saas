@@ -28,7 +28,26 @@
     "aiGenerated": {
       "short": "Generado por IA",
       "long": "Contenido generado por IA. Puede contener errores: comprueba lo importante antes de fiarte de ello."
-    }
+    },
+    "close": "Cerrar",
+    "switchToDarkMode": "Cambiar al tema oscuro",
+    "switchToLightMode": "Cambiar al tema claro",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
+    "networkErrorCheckConnection": "Error de red: comprueba tu conexión e inténtalo de nuevo.",
+    "ownerAccessTooltip": "Acceso de propietario: créditos ilimitados",
+    "creditsTooltip": "Créditos restantes: compra más en Ajustes",
+    "accountMenu": "Menú de cuenta",
+    "categories": "Categorías",
+    "commandPalette": "Paleta de comandos",
+    "dismiss": "Descartar",
+    "dismissSuggestion": "Descartar la sugerencia",
+    "installIonexa": "Instalar Ionexa",
+    "loadingContent": "Cargando el contenido",
+    "nextPage": "Página siguiente",
+    "previousPage": "Página anterior",
+    "toggleMenu": "Mostrar u ocultar el menú",
+    "dismissToastAria": "{message} — pulsa Intro para descartar"
   },
   "sidebar": {
     "groups": {
@@ -55,7 +74,7 @@
       "settings": "Configuración",
       "team": "Equipo",
       "agents": "Agentes IA",
-      "websites": "Planes de sitio",
+      "websites": "Sitios web",
       "websiteBuilder": "Generador de Sitios",
       "apps": "Apps",
       "images": "Imágenes",
@@ -67,10 +86,10 @@
       "campaigns": "Campañas",
       "analytics": "Analítica",
       "finance": "Finanzas",
-      "content": "Marketing",
-      "sales": "CRM",
+      "content": "Contenido",
+      "sales": "Ventas",
       "products": "Productos",
-      "research": "Conocimiento",
+      "research": "Investigación",
       "learning": "Aprendizaje",
       "ideas": "Ideas",
       "competitors": "Competidores",
@@ -141,7 +160,8 @@
     },
     "comingSoon": "Próximamente",
     "comingSoonToast": "{name} aún no está disponible: está en la hoja de ruta.",
-    "comingSoonBadge": "Pronto"
+    "comingSoonBadge": "Pronto",
+    "closeMenu": "Cerrar el menú"
   },
   "landing": {
     "hero": "Tu negocio, organizado — con una IA que realmente ayuda.",
@@ -178,7 +198,13 @@
       "imageVideo": "Generación de imágenes y video",
       "aiMemory": "Memoria AI",
       "teamCollaboration": "Colaboración en equipo",
-      "teamSeatsAddOn": "Puestos de equipo"
+      "teamSeatsAddOn": "Puestos de equipo",
+      "freeChatMessages": "Mensajes de chat gratuitos / mes",
+      "deepResearch": "Ejecuciones de Deep Research / mes",
+      "files": "Archivos almacenados",
+      "storage": "Almacenamiento",
+      "integrations": "Integraciones conectadas",
+      "publishedSites": "Sitios web publicados"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Para equipos que construyen juntos",
@@ -191,13 +217,11 @@
     "setUpTeam": "Configurar Equipo",
     "features": {
       "1Workspace3Projects": "1 espacio de trabajo, 3 proyectos",
-      "2AiAgents": "2 agentes de IA",
       "basicAiChat": "Chat de IA básico",
       "creditsPerMonth": "{count} créditos/mes",
       "marketplaceInstallOnly": "Marketplace: solo instalación",
       "communitySupport": "Soporte de la comunidad",
       "unlimitedProjects": "Proyectos ilimitados",
-      "upTo20AiAgents": "Hasta 20 agentes de IA",
       "aiMemory": "Memoria de IA",
       "websiteAutomationBuilderAccess": "Acceso a Website & Automation Builder",
       "imageVideoGenerationAccess": "Acceso a generación de imagen y vídeo",
@@ -207,7 +231,6 @@
       "mobileSaasBuilderAccess": "Acceso a Mobile & SaaS Builder",
       "priorityProcessing": "Procesamiento prioritario",
       "everythingInGrowth": "Todo lo de Growth",
-      "unlimitedAiAgentsTeams": "Agentes de IA y equipos ilimitados",
       "teamCollaboration": "Colaboración en equipo",
       "sharedAiMemory": "Memoria de IA compartida",
       "prioritySupport": "Soporte prioritario",
@@ -224,6 +247,16 @@
       "upTo5AiAgents": "Hasta 5 agentes de IA",
       "upTo15AiAgentsTeams": "Hasta 15 agentes de IA y equipos",
       "upTo50AiAgents": "Hasta 50 agentes de IA"
+    },
+    "values": {
+      "unlimited": "Ilimitado",
+      "included": "Incluido",
+      "custom": "Personalizado",
+      "perSeat": "+{currency}{price}/puesto"
+    },
+    "seatNote": {
+      "included": "Puestos de equipo ilimitados incluidos: sin cargo por miembro",
+      "perMember": "+ {currency}{price}/mes por miembro del equipo: cada miembro obtiene acceso completo al nivel de tu plan"
     }
   },
   "roadmap": {
@@ -390,6 +423,14 @@
       "continueWithGoogle": "Continuar con Google",
       "orContinueWithEmail": "o continuar con correo",
       "genericError": "No se pudo iniciar sesión con Google. Inténtalo de nuevo."
+    },
+    "deleteAccount": {
+      "title": "Confirmar eliminación de la cuenta",
+      "missingToken": "A este enlace le falta su token de confirmación. Usa el enlace de tu correo exactamente como se envió.",
+      "warning": "Esto eliminará permanentemente tu cuenta y todos los registros que hayas guardado. No se puede deshacer.",
+      "deleting": "Eliminando…",
+      "confirmButton": "Eliminar mi cuenta permanentemente",
+      "cancel": "Cancelar y volver"
     }
   },
   "settings": {
@@ -415,7 +456,9 @@
       "clearing": "Borrando...",
       "couldNotUpdatePreference": "✗ no se pudo actualizar la preferencia",
       "couldNotClearMemory": "✗ no se pudo borrar la memoria",
-      "memoryCleared": "✓ memoria borrada"
+      "memoryCleared": "✓ memoria borrada",
+      "memoryEnabled": "✓ memoria de chat activada",
+      "memoryDisabled": "✓ memoria de chat desactivada"
     },
     "loginActivity": {
       "title": "Actividad de inicio de sesión",
@@ -423,7 +466,9 @@
       "noDevices": "Todavía no hay dispositivos registrados.",
       "lastSeen": "Visto por última vez {time}",
       "couldNotRemoveDevice": "✗ no se pudo eliminar el dispositivo",
-      "deviceRemoved": "✓ dispositivo eliminado"
+      "deviceRemoved": "✓ dispositivo eliminado",
+      "removeDevice": "Quitar el dispositivo",
+      "removeDeviceAria": "Quitar {device}"
     },
     "aiUsage": {
       "title": "Uso de IA",
@@ -520,7 +565,8 @@
     "aiPersona": {
       "title": "Persona de IA",
       "description": "Dale al asistente un nombre personalizado.",
-      "personaUpdated": "✓ nombre del asistente actualizado"
+      "personaUpdated": "✓ nombre del asistente actualizado",
+      "couldNotSave": "✗ no se pudo guardar el nombre"
     },
     "billing": {
       "title": "Facturación",
@@ -532,7 +578,36 @@
       "noCreditActivity": "Aún no hay actividad de créditos.",
       "balanceAfter": "saldo {count}",
       "unlimited": "Ilimitado",
-      "wouldHaveCost": "habría costado {count}"
+      "wouldHaveCost": "habría costado {count}",
+      "manageBilling": "Gestionar facturación",
+      "upgradePlan": "Mejorar plan",
+      "betaTester": "Probador beta",
+      "betaTesterExpires": "Probador beta: caduca en {days, plural, one {# día} other {# días}}",
+      "teamSeats": "+ {seats, plural, one {# puesto de equipo} other {# puestos de equipo}}",
+      "cancel": {
+        "button": "Cancelar la suscripción",
+        "title": "Cancelar tu suscripción",
+        "keepsAccessUntil": "Mantienes el acceso completo hasta el {date}.",
+        "keepsAccessUntilPeriodEnd": "Mantienes el acceso completo hasta el final del periodo que ya has pagado.",
+        "creditsStay": "Los créditos que te quedan siguen disponibles hasta entonces.",
+        "dataKept": "No se elimina nada: tus entradas, archivos y conversaciones se quedan donde están.",
+        "reversible": "Puedes restaurarla en cualquier momento antes de que termine, sin coste adicional.",
+        "surveyQuestion": "¿Qué te hizo marcharte? (opcional)",
+        "reasons": {
+          "too_expensive": "Demasiado caro",
+          "missing_feature": "Le falta algo que necesito",
+          "not_using": "No lo uso lo suficiente",
+          "found_alternative": "Encontré otra cosa"
+        },
+        "notePlaceholder": "¿Algo más que quieras contarnos? (opcional)",
+        "confirm": "Cancelar la suscripción",
+        "keepIt": "Mantenerla",
+        "done": "✓ tu suscripción terminará al final del periodo pagado",
+        "restored": "✓ tu suscripción vuelve a estar activa",
+        "restore": "Restaurar",
+        "endingIn": "{days, plural, =0 {Tu suscripción termina hoy.} one {Tu suscripción termina en # día.} other {Tu suscripción termina en # días.}}"
+      },
+      "creditsSplit": "{monthly} mensuales + {purchased} comprados (no caducan nunca)"
     },
     "marginReport": {
       "title": "Informe de Margen",
@@ -580,7 +655,8 @@
       "lowCreditsHint": "Cuando el trabajo se detiene porque se acabó el saldo",
       "collaboration": "Colaboración",
       "collaborationHint": "Invitaciones de equipo y actividad del espacio compartido"
-    }
+    },
+    "jumpToSection": "Ir a una sección"
   },
   "dashboard": {
     "overview": {
@@ -656,7 +732,9 @@
           "label": "Trading",
           "description": "Registra una operación"
         }
-      }
+      },
+      "quickStartTemplates": "Plantillas de inicio rápido",
+      "quickStartApplied": "✓ {count, plural, one {se añadió # entrada de ejemplo} other {se añadieron # entradas de ejemplo}}"
     },
     "team": {
       "title": "Equipo",
@@ -687,7 +765,12 @@
     },
     "memory": {
       "title": "Memoria AI",
-      "description": "Busca todo lo que has registrado, en todos los módulos — sin necesidad de recordar dónde lo guardaste."
+      "description": "Busca todo lo que has registrado, en todos los módulos — sin necesidad de recordar dónde lo guardaste.",
+      "searchPlaceholder": "Busca en todo lo que has registrado...",
+      "resultCount": "{count, plural, =0 {ningún resultado} one {# resultado} other {# resultados}} en todos los módulos",
+      "resultCountForQuery": "{count, plural, =0 {ningún resultado} one {# resultado} other {# resultados}} para «{query}» en todos los módulos",
+      "empty": "Todavía no has registrado nada — en cuanto empieces a usar los módulos, podrás buscar en todos ellos desde aquí.",
+      "truncated": "Se muestran los primeros {shown} de {total} resultados — afina tu búsqueda para reducirlos."
     },
     "documents": {
       "title": "Documentos",
@@ -718,10 +801,28 @@
       "streamInterrupted": "La conexión se interrumpió antes de que terminara la respuesta.",
       "streamInterruptedPartial": "La conexión se interrumpió: la respuesta anterior puede estar incompleta.",
       "hideConversationsHint": "Oculta la lista de conversaciones y da todo el ancho al hilo.",
-      "showConversationsHint": "Vuelve a mostrar la lista de conversaciones."
+      "showConversationsHint": "Vuelve a mostrar la lista de conversaciones.",
+      "send": "Enviar",
+      "emptyBody": "Pregunta lo que quieras — conocimiento general, lluvia de ideas, ayuda con la escritura o simplemente una conversación. No está ligado a ningún módulo de Ionexa AI.",
+      "composerPlaceholder": "Escribe a Ionexa...",
+      "mentorMode": "Modo mentor",
+      "mentorModeHint": "Modo mentor: orientación estratégica en lugar de solo respuestas — señala riesgos, hace preguntas aclaratorias, sugiere alternativas y usa como contexto los datos que has registrado.",
+      "newChat": "Nueva conversación",
+      "noConversations": "Todavía no hay conversaciones.",
+      "groupPinned": "Fijadas",
+      "groupToday": "Hoy",
+      "groupYesterday": "Ayer",
+      "groupOlder": "Anteriores",
+      "pin": "Fijar",
+      "unpin": "No fijar",
+      "rename": "Cambiar el nombre",
+      "deleteConfirm": "¿Eliminar «{title}»? No se puede deshacer."
     },
     "create": {
-      "title": "Crear Cualquier Cosa"
+      "title": "Crear Cualquier Cosa",
+      "subtitle": "Describe cualquier cosa — una idea de producto, una operación, el comentario de un usuario, una métrica — y acaba automáticamente en el módulo correcto.",
+      "loggedTo": "Registrado en:",
+      "viewModule": "Ver {module} →"
     },
     "timeline": {
       "title": "Cronología",
@@ -1476,6 +1577,39 @@
       "hideNumbers": "Ocultar los números",
       "dismiss": "Descartar",
       "dismissError": "No se pudo descartar."
+    },
+    "systemHealth": {
+      "toggleStackTrace": "Mostrar u ocultar la traza de la pila"
+    },
+    "ideas": {
+      "new": "Nueva idea",
+      "edit": "Editar la idea",
+      "empty": "Todavía no hay ideas — usa el botón de arriba para registrar la primera.",
+      "loadError": "No se pudieron cargar tus ideas: {message}",
+      "deleteConfirm": "¿Eliminar esta idea? No se puede deshacer.",
+      "editAria": "Editar la idea: {name}",
+      "nameLabel": "Nombre",
+      "namePlaceholder": "nombre de la idea",
+      "customerLabel": "Cliente",
+      "customerPlaceholder": "cliente objetivo",
+      "problemLabel": "Problema",
+      "problemPlaceholder": "¿qué problema resuelve?",
+      "competitorsLabel": "Competidores",
+      "competitorsPlaceholder": "competidores conocidos",
+      "marketSizeLabel": "Tamaño de mercado",
+      "marketSizePlaceholder": "p. ej. TAM de 2000 M$",
+      "scoreLabel": "Puntuación (0-100)",
+      "scorePlaceholder": "puntuación",
+      "mvpLabel": "Producto mínimo viable",
+      "mvpPlaceholder": "¿cómo es el producto mínimo viable?",
+      "verdictLabel": "Veredicto",
+      "verdictPlaceholder": "p. ej. seguir / descartar / observar",
+      "cardFor": "para: {customer}",
+      "cardScore": "Puntuación: {score}",
+      "cardProblem": "Problema:",
+      "cardCompetitors": "Competidores:",
+      "cardMarketSize": "Tamaño de mercado:",
+      "cardMvp": "Producto mínimo viable:"
     }
   },
   "module": {
@@ -1534,7 +1668,9 @@
     "mightBeRelated": "Esto podría estar relacionado con: {titles}. ¿Vincular?",
     "yes": "Sí",
     "no": "No",
-    "linked": "Vinculado"
+    "linked": "Vinculado",
+    "unlink": "Desvincular",
+    "unlinkAria": "Desvincular {name}"
   },
   "favorites": {
     "add": "Añadir a favoritos",
@@ -1624,5 +1760,147 @@
     "unlimited": "Ilimitado — no se usaron créditos",
     "unlimitedWouldHaveCost": "Ilimitado — habría costado {count} créditos",
     "freeMessage": "Mensaje gratuito · quedan {count} este mes"
+  },
+  "cookies": {
+    "banner": {
+      "summary": "Usamos cookies solo para funciones esenciales: iniciar tu sesión y mantenerla activa.",
+      "accept": "Aceptar",
+      "essential": "<term>Cookie de sesión esencial</term>: la establece Supabase Auth cuando inicias sesión, para que la aplicación te reconozca en las solicitudes posteriores. Sin ella, se cerraría tu sesión en cada carga de página. Se elimina automáticamente cuando caduca o cuando cierras sesión.",
+      "preferences": "<term>Preferencias locales</term>: el tema, el idioma, los ajustes de accesibilidad y esta decisión sobre cookies se guardan en el almacenamiento local de tu navegador y no se envían a ningún sitio.",
+      "noTracking": "No se utilizan cookies publicitarias ni de seguimiento de terceros. Consulta nuestra <cookiePolicy>Política de Cookies</cookiePolicy> y nuestra <privacyPolicy>Política de Privacidad</privacyPolicy> para más detalles."
+    }
+  },
+  "security": {
+    "badge": {
+      "checked": "Seguridad verificada",
+      "flagged": "Seguridad marcada",
+      "title": "Capa de protección de salida de IA",
+      "checkedAt": "Verificado {when}",
+      "whatWasChecked": "Qué se verificó:",
+      "issuesFound": "Problemas encontrados:",
+      "noIssues": "No se detectaron problemas."
+    }
+  },
+  "moduleData": {
+    "fields": {
+      "amount": "Importe",
+      "budget": "Presupuesto",
+      "caption": "Texto",
+      "category": "Categoría",
+      "channel": "Canal",
+      "coldEmail": "Correo en frío",
+      "company": "Empresa",
+      "contentIdeas": "Ideas de contenido",
+      "customers": "Clientes",
+      "dataSource": "Fuente de datos",
+      "description": "Descripción",
+      "direction": "Dirección",
+      "findings": "Hallazgos",
+      "followUpEmail": "Correo de seguimiento",
+      "hashtags": "Hashtags",
+      "idea": "Idea",
+      "ideaNames": "Nombres de las ideas",
+      "language": "Lenguaje",
+      "launchPlan": "Plan de lanzamiento",
+      "leadName": "Nombre del contacto",
+      "marketing": "Marketing",
+      "metricName": "Nombre de la métrica",
+      "mvpFeatures": "Funciones del producto mínimo",
+      "name": "Nombre",
+      "nextSteps": "Próximos pasos",
+      "notes": "Notas",
+      "pnl": "Ganancia/Pérdida",
+      "platform": "Plataforma",
+      "pricing": "Precios",
+      "priority": "Prioridad",
+      "product": "Producto",
+      "productName": "Nombre del producto",
+      "prompt": "Instrucción",
+      "quiz": "Cuestionario",
+      "ranking": "Clasificación",
+      "recommendation": "Recomendación",
+      "resources": "Recursos",
+      "result": "Resultado",
+      "risks": "Riesgos",
+      "roadmap": "Hoja de ruta",
+      "score": "Puntuación",
+      "sentiment": "Sentimiento",
+      "slideCount": "Número de diapositivas",
+      "status": "Estado",
+      "strengths": "Fortalezas",
+      "suggestedResponse": "Respuesta sugerida",
+      "suggestedWorkflow": "Flujo sugerido",
+      "summary": "Resumen",
+      "symbol": "Símbolo",
+      "targetAudience": "Público objetivo",
+      "taskName": "Nombre de la tarea",
+      "timeSaved": "Tiempo ahorrado",
+      "title": "Título",
+      "toolsNeeded": "Herramientas necesarias",
+      "topic": "Tema",
+      "twitterThread": "Hilo de Twitter",
+      "type": "Tipo",
+      "url": "Dirección",
+      "userJourney": "Recorrido del usuario",
+      "value": "Valor",
+      "weaknesses": "Debilidades"
+    },
+    "options": {
+      "active": "activo",
+      "android": "Android",
+      "archived": "archivado",
+      "completed": "completado",
+      "content": "contenido",
+      "crossPlatform": "multiplataforma",
+      "desktop": "escritorio",
+      "done": "hecho",
+      "draft": "borrador",
+      "email": "correo",
+      "event": "evento",
+      "expense": "gasto",
+      "final": "final",
+      "inProgress": "en curso",
+      "inReview": "en revisión",
+      "income": "ingreso",
+      "ios": "iOS",
+      "live": "publicado",
+      "other": "otro",
+      "paidAds": "anuncios de pago",
+      "paused": "en pausa",
+      "planned": "planificado",
+      "requested": "solicitado",
+      "seo": "SEO",
+      "social": "redes sociales",
+      "web": "web"
+    },
+    "placeholders": {
+      "longShort": "larga / corta",
+      "winLoss": "ganada / perdida",
+      "httpsUrl": "https://...",
+      "codingLanguages": "p. ej. Python, TypeScript, Go",
+      "dataSources": "p. ej. exportación CSV, Stripe, Google Analytics"
+    },
+    "deleteConfirm": {
+      "competitors": "¿Eliminar este competidor? No se puede deshacer.",
+      "research": "¿Eliminar esta nota de investigación? No se puede deshacer.",
+      "finance": "¿Eliminar este movimiento? No se puede deshacer.",
+      "learning": "¿Eliminar esta nota de aprendizaje? No se puede deshacer.",
+      "trading": "¿Eliminar esta operación? No se puede deshacer.",
+      "decisions": "¿Eliminar esta decisión? No se puede deshacer.",
+      "products": "¿Eliminar este producto? No se puede deshacer.",
+      "content": "¿Eliminar esta entrada de contenido? No se puede deshacer.",
+      "sales": "¿Eliminar este contacto? No se puede deshacer.",
+      "feedback": "¿Eliminar este comentario? No se puede deshacer.",
+      "analytics": "¿Eliminar esta métrica? No se puede deshacer.",
+      "automation": "¿Eliminar esta automatización? No se puede deshacer.",
+      "websites": "¿Eliminar este sitio web? No se puede deshacer.",
+      "apps": "¿Eliminar esta aplicación? No se puede deshacer.",
+      "images": "¿Eliminar esta imagen? No se puede deshacer.",
+      "videos": "¿Eliminar este vídeo? No se puede deshacer.",
+      "coding": "¿Eliminar esta petición de código? No se puede deshacer.",
+      "data-analysis": "¿Eliminar este análisis? No se puede deshacer.",
+      "presentations": "¿Eliminar esta nota de presentación? No se puede deshacer.",
+      "campaigns": "¿Eliminar esta campaña? No se puede deshacer."
+    }
   }
 }

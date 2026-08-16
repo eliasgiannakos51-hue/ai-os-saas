@@ -5,6 +5,7 @@ import { hasActiveBetaBypass, isBetaTester } from "@/lib/beta";
 import { diagLog } from "@/lib/diag";
 import { getPlan, type Plan, type PlanSlug } from "./plans";
 import { isAdminEmail } from "@/lib/admin";
+import { clearLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
 
 // The plan a user is on lives in user_metadata.subscription_tier, written
 // by the Stripe webhook on checkout/subscription events (see
@@ -251,6 +252,13 @@ export async function grantCredits(
     setTotal?: number;
     setPlanTier?: PlanSlug;
     setBetaExpiresAt?: string;
+    /**
+     * True when the credits were BOUGHT (a pack), rather than granted by a
+     * plan, a beta window or a manual adjustment. Purchased credits are
+     * tracked in their own sub-ledger and survive every monthly reset;
+     * everything else expires with the month it belongs to.
+     */
+    purchased?: boolean;
     /** Stable key for an operation that must happen at most once. */
     idempotencyKey?: string;
   }
@@ -266,6 +274,7 @@ export async function grantCredits(
     p_set_total: options?.setTotal ?? null,
     p_set_plan_tier: options?.setPlanTier ?? null,
     p_set_beta_expires_at: options?.setBetaExpiresAt ?? null,
+    p_purchased: options?.purchased ?? false,
   });
 
   if (error) {
@@ -360,6 +369,15 @@ export async function syncCreditsForPlan(userId: string, planSlug: PlanSlug, rea
   const plan = getPlan(planSlug) ?? getPlan("free")!;
   const admin = createAdminClient();
 
+  // A plan change ends any grandfathered entitlement. This is the guard
+  // that keeps grandfathering from becoming a hole rather than a courtesy:
+  // without it, an Ultimate account that downgrades to Starter would keep
+  // 1,200 free chat messages — EUR 37.63/month of worst-case spend against
+  // EUR 20 of revenue — and downgrading would be the cheapest way to buy
+  // the expensive plan's allowance. Runs on every subscription event the
+  // Stripe webhook reports, including a cancellation back to Free.
+  await clearLegacyEntitlements(userId);
+
   if (plan.monthlyCredits === "custom") {
     await admin.from("user_credits").upsert(
       { user_id: userId, plan_tier: planSlug },
@@ -369,10 +387,21 @@ export async function syncCreditsForPlan(userId: string, planSlug: PlanSlug, rea
   }
 
   const total = plan.monthlyCredits;
-  await admin.from("user_credits").upsert(
-    { user_id: userId, credits_remaining: total, credits_total: total, plan_tier: planSlug },
-    { onConflict: "user_id" }
-  );
+  // reset_monthly_credits, not an upsert of credits_remaining.
+  //
+  // PURCHASED CREDITS DO NOT EXPIRE. A pack adds to the same balance
+  // column, and writing that column back down to the plan's allotment is
+  // what destroyed them — monthly, at every renewal. The RPC re-adds
+  // user_credits.purchased_credits inside the same statement, which is
+  // also the only way to do it without a race: reading the purchased
+  // figure here and writing the sum back would lose any spend that landed
+  // in between.
+  const { error: resetError } = await admin.rpc("reset_monthly_credits", {
+    p_user_id: userId,
+    p_monthly: total,
+    p_plan_tier: planSlug,
+  });
+  if (resetError) throw resetError;
   await admin
     .from("credit_transactions")
     .insert({ user_id: userId, amount: total, action_type: "plan_renewal", description: reason });

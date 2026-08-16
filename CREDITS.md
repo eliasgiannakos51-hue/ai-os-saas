@@ -1,24 +1,98 @@
 # Credits and margin
 
 Every Claude call costs real money. This document is the contract that
-keeps each one profitable, and the short version is one sentence:
+keeps each one profitable, and the short version is two sentences:
 
 > **Never charge a fixed number of credits for an AI call.** Measure what
 > the call actually cost and settle against the account's own per-credit
 > price.
+>
+> **The 25% ceiling applies to the SUM, not to each subsystem.** Credits
+> and every "free" quota are measured together, in one place, against one
+> number.
+
+## The combined ceiling
+
+```
+1/M  +  Σ share_of_each_free_quota   ≤   0.25          ⟺   combined margin ≥ 4x
+```
+
+The left term is credits. Settlement charges `cost × M / rate`, so an
+entire allowance of `C` credits worth `rate` each can cost at most
+`C × rate / M` — and `C × rate` is the plan price on every published plan,
+so the credit subsystem always costs exactly **1/M of revenue**, whatever
+the plan.
+
+The right terms are everything given away *without* charging credits. Each
+one is real Anthropic spend landing outside the credit ceiling entirely,
+so each one is declared in `DECLARED_ALLOWANCE_SHARES`
+(`lib/billing/ceiling.ts`) with the share of revenue it may burn, and
+registered in `FREE_ALLOWANCES` (`lib/billing/free-allowances.ts`).
+
+**Why this is stated at all.** For a year the two halves each enforced
+"25%" against their own subsystem, and both were green:
+
+```
+billing-coverage.test.mjs  PASS  Professional: AI cost <= 25% (25.0%)
+free-chat.test.mjs         PASS  professional within the 25% ceiling  (18.8%)
+                                                          real total:  43.8%
+```
+
+Neither test was wrong. Neither looked at the other. Professional and
+Ultimate ran at a combined **2.28x** against a stated 4x target, and no
+build could see it. The ceiling now lives in ONE module that both halves
+divide between them:
+
+| Plan | Price | Credits (M=5) | Free chat | Total | Combined |
+|---|---|---|---|---|---|
+| Free | €0 | €0.33 | 15 msgs, €0.35 | €0.68 | absolute cap €1 |
+| Starter | €20 | €4.00 (20%) | 43 msgs, €1.00 (5%) | €5.00 | **25.0% / 4.00x** |
+| Growth | €50 | €10.00 (20%) | 107 msgs, €2.49 (5%) | €12.49 | **25.0% / 4.00x** |
+| Professional | €100 | €20.00 (20%) | 215 msgs, €5.00 (5%) | €25.00 | **25.0% / 4.00x** |
+| Ultimate | €200 | €40.00 (20%) | 430 msgs, €9.99 (5%) | €49.99 | **25.0% / 4.00x** |
+| Enterprise | ≥€400 | €80.00 (20%) | 430 msgs, €9.99 (2.5%) | €89.99 | 22.5% / 4.44x |
+
+Enterprise has no price in code, which used to mean its ceiling could not
+be checked at all — it inherited Ultimate's 1,200-message allowance
+(€37.63/month) against a price nothing knew, and any deal under €150 would
+have breached 25% on free chat alone. `ENTERPRISE_MIN_PRICE_EUR`
+(default 400) is the contractual floor the gate measures it against.
+
+### Adding a free quota
+
+A registry nobody is forced to join is a comment. Three mechanisms force
+it, all in `scripts/tests/combined-ceiling.test.mjs`, all inside
+`npm run build`:
+
+1. **Every `bypassCharge:` expression in `src/` is inventoried.** If its
+   condition is not purely admin/beta, the identifier that turns it on must
+   appear in some entry's `bypassIdentifiers`. Ship "10 free
+   presentations" and the build fails until it is registered.
+2. **Every exported `Record<PlanSlug, number>` in `src/lib/`** must be
+   classified — a free AI quota (registered) or a capacity limit (with a
+   statement of what it bounds). A new per-plan number cannot appear
+   without someone saying which.
+3. **Both directions**: an entry cannot exist without a declared share, and
+   a share cannot exist without an entry.
+
+Plus a 3,600-combination cross-product over every permitted
+`CREDIT_MARGIN_<PLAN>` × `FREE_CHAT_MESSAGES_<PLAN>` ×
+`CREDIT_MARGIN_MULTIPLIER` × plan, and a runtime report
+(`billing:combinedCeilingBreached`) from `instrumentation.ts` for the
+environment the process is actually running with.
 
 ## Why a fixed number is always wrong
 
 A credit is not worth the same to everyone. Plans sell them in bulk:
 
-| Plan | Price | Credits | € per credit | 1 credit covers a call costing up to (at 4×) |
+| Plan | Price | Credits | € per credit | 1 credit covers a call costing up to |
 |---|---|---|---|---|
-| Free | €0 | 100 | €0.0200 (list) | €0.00500 |
-| Starter | €20 | 1,000 | €0.0200 | €0.00500 |
-| Growth | €50 | 3,000 | €0.0167 | €0.00417 |
-| Professional | €100 | 10,000 | €0.0100 | €0.00250 |
-| Ultimate | €200 | 25,000 | €0.0080 | €0.00200 |
-| Enterprise | custom | custom | €0.0200 (list) | €0.00500 |
+| Free | €0 | 100 | €0.0200 (list) | €0.00333 (at 6×) |
+| Starter | €20 | 1,000 | €0.0200 | €0.00400 (at 5×) |
+| Growth | €50 | 3,000 | €0.0167 | €0.00333 (at 5×) |
+| Professional | €100 | 10,000 | €0.0100 | €0.00200 (at 5×) |
+| Ultimate | €200 | 25,000 | €0.0080 | €0.00160 (at 5×) |
+| Enterprise | custom | custom | €0.0080 (cheapest published) | €0.00160 (at 5×) |
 
 Credit packs are cheaper still — the €100 / 8,000 pack is €0.0125 each.
 
@@ -56,7 +130,12 @@ global default. Three inputs:
 
 - the general `CREDIT_MARGIN_MULTIPLIER` (default 4);
 - a **per-plan** margin — `CREDIT_MARGIN_<PLAN>`, with built-in defaults
-  FREE 6, STARTER 5, GROWTH 4.5, PROFESSIONAL/ULTIMATE/ENTERPRISE 4;
+  FREE 6 and **5 for every paid plan**. Not 4: at M = 4 the credit
+  subsystem alone consumes the entire 25% ceiling and leaves nothing for
+  the free quotas that also spend real money. M = 5 hands credits exactly
+  20% and leaves 5% for the registry. Free stays at 6 — *higher* than the
+  paid plans, because it has no revenue to take a share of and a bigger
+  multiplier makes its flat acquisition cost smaller;
 - an optional **per-feature** override — `CREDIT_MARGIN_<FEATURE>`
   (e.g. `CREDIT_MARGIN_DEEP_RESEARCH=8`), with grouped aliases
   `CREDIT_MARGIN_CHAT`, `CREDIT_MARGIN_WEBSITE_GENERATE`,
@@ -229,6 +308,38 @@ back): `CREDIT_MARGIN_FREE` (6), `CREDIT_MARGIN_STARTER` (5),
 Free chat: `FREE_CHAT_MAX_COST_EUR` (0.02) — the marginal-cost ceiling a
 message must fit under to spend a free-chat grant; larger messages take
 the paid path and the client is told the estimated charge.
+
+Combined ceiling: `ENTERPRISE_MIN_PRICE_EUR` (400) — the contractual floor
+an Enterprise deal is measured against. Without it Enterprise is the one
+plan whose 25% cannot be computed, since its price is not in the code.
+Nothing breaks if it is unset; the default applies and the gate uses it.
+
+### Grandfathering
+
+The combined ceiling lowered what a plan grants (free chat
+120/300/600/1200 → 43/107/215/430, history 6 → 2 turns, replies 800 → 600
+tokens). Existing subscribers keep both the count AND the envelope, per
+row, in `user_credits.legacy_*` — see `lib/billing/legacy-entitlements.ts`
+and `supabase_grandfathering_migration.sql`.
+
+Say the uncomfortable part plainly: **grandfathering is a deliberate,
+bounded breach of the ceiling** — €2.76/€6.92/€13.82/€27.64 per
+grandfathered account per month, on top of the published worst case. Four
+guards keep it from becoming a hole:
+
+- `legacy_plan_tier` — the entitlement applies only while the account is
+  still on the plan it was granted for. This is what stops a beta account
+  (`plan_tier` 'ultimate', collapsing to Free when `beta_expires_at`
+  passes with no Stripe event to clear anything) keeping Ultimate's 1,200
+  free messages on a plan that pays nothing.
+- `syncCreditsForPlan` clears it on every subscription change.
+- `legacy_entitlements_until` — optional expiry, same mechanism as
+  `beta_expires_at`.
+- The envelope is stored as DATA, so the exception keeps meaning the same
+  thing after the next envelope change instead of silently tracking it.
+
+The cohort is countable — the query is in the migration header, and the
+number should only ever go down.
 
 The three pricing knobs have defaults, which is why a wrong value is more
 dangerous than a missing one — `USD_TO_EUR_RATE=0.80` charged 45 credits

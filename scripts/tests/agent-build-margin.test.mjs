@@ -62,10 +62,26 @@ const REPORTED_CREDITS = 14;
 const REPORTED_MARGIN = 2.03;
 const EXPECTED_CREDITS = 28;
 
-/** What settlement does, end to end, for one measured cost on one plan. */
-function settle(feature, slug, usd, pack = null) {
+// THE MULTIPLIER THE INCIDENT HAPPENED AT.
+//
+// Pinned as a literal rather than read from PLAN_MARGIN_DEFAULTS, because
+// the forensics below reproduce a report filed at a specific moment: every
+// figure in it ($0.06 -> 28 credits, $0.0304 -> 14, 2.03x) is arithmetic
+// on Ultimate at 4x, and none of them reproduces at any other multiplier.
+//
+// Ultimate has since moved to 5 — the combined-ceiling change, which had
+// to hand the credit subsystem 20% of revenue instead of 25% so the free
+// quotas registered in lib/billing/free-allowances.ts had anything left.
+// Reading the live margin here made this file's reproduction of a past
+// event depend on present policy, so a correct policy change broke a
+// correct forensic test. It is pinned now, and section 3 additionally
+// proves the live policy can only ever charge MORE than the incident-era
+// one — which is the property that actually matters going forward.
+const INCIDENT_MARGIN = 4;
+
+/** Settlement for one measured cost on one plan, at an explicit margin. */
+function settleAtMargin(slug, usd, margin, pack = null) {
   const plan = getPlan(slug);
-  const { margin } = mp.resolveMarginFor(feature, slug, C, {});
   const eur = cf.usdToEur(usd, C);
   const credits = cf.creditsForRealCostOnAccount(eur, plan, pack, C, margin);
   const rate = cf.effectiveCreditPriceEurForAccount(plan, pack, C);
@@ -76,6 +92,12 @@ function settle(feature, slug, usd, pack = null) {
     eur,
     achieved: cf.achievedMarginOnAccount(credits, eur, plan, pack, C),
   };
+}
+
+/** The same, at whatever margin the LIVE policy resolves for the feature. */
+function settle(feature, slug, usd, pack = null) {
+  const { margin } = mp.resolveMarginFor(feature, slug, C, {});
+  return settleAtMargin(slug, usd, margin, pack);
 }
 
 // ---------------------------------------------------------------------------
@@ -124,14 +146,14 @@ console.log("\n== 2. THE REPORTED NUMBERS, reproduced exactly ==");
 // Every reported figure falls out of one assumption: the account is on a
 // €0.008/credit rate (Ultimate or Enterprise) and the settlement measured
 // $0.0304 rather than $0.06.
-const full = settle("agent_build", "ultimate", REPORTED_TOTAL_USD);
-const half = settle("agent_build", "ultimate", REPORTED_SETTLED_USD);
+const full = settleAtMargin("ultimate", REPORTED_TOTAL_USD, INCIDENT_MARGIN);
+const half = settleAtMargin("ultimate", REPORTED_SETTLED_USD, INCIDENT_MARGIN);
 check(
   `€${full.rate}/credit is Ultimate's rate, the divisor in the report`,
   Math.abs(full.rate - 0.008) < 1e-9
 );
 check(
-  `$0.06 at 4x charges ${full.credits} credits — the reported "should have been ${EXPECTED_CREDITS}"`,
+  `$0.06 at ${INCIDENT_MARGIN}x charges ${full.credits} credits — the reported "should have been ${EXPECTED_CREDITS}"`,
   full.credits === EXPECTED_CREDITS,
   `got ${full.credits}`
 );
@@ -169,8 +191,28 @@ for (const plan of PLANS) {
   );
 }
 const ultimate = settle("agent_build", "ultimate", REPORTED_TOTAL_USD);
-check("on Ultimate specifically: exactly 28 credits", ultimate.credits === 28);
+check(
+  `on Ultimate specifically: at least the ${EXPECTED_CREDITS} credits the report asked for (${ultimate.credits})`,
+  ultimate.credits >= EXPECTED_CREDITS,
+  `got ${ultimate.credits} at the live margin ${ultimate.target}x`
+);
 check(`and the margin is >= 4x (${ultimate.achieved.toFixed(3)}x)`, ultimate.achieved >= 4 - 1e-9);
+
+// THE MONOTONIC GUARANTEE, which is what "exactly 28" was really reaching
+// for and could not express: whatever the policy becomes, no plan may ever
+// charge LESS than the incident-era 4x floor for the same measured cost.
+// A future edit that quietly lowers a per-plan margin fails here, and it
+// fails for every plan rather than for the one that happened to be in the
+// report.
+for (const plan of PLANS) {
+  const live = settle("agent_build", plan.slug, REPORTED_TOTAL_USD);
+  const atFloor = settleAtMargin(plan.slug, REPORTED_TOTAL_USD, INCIDENT_MARGIN);
+  check(
+    `${plan.slug.padEnd(13)} live policy charges >= the ${INCIDENT_MARGIN}x floor (${live.credits} >= ${atFloor.credits})`,
+    live.credits >= atFloor.credits,
+    `live margin ${live.target}x charged ${live.credits}, floor would charge ${atFloor.credits}`
+  );
+}
 // The same requirement with a credit pack in play, which is the cheapest
 // rate any account can reach.
 const packed = settle("agent_build", "ultimate", REPORTED_TOTAL_USD, 100 / 8000);

@@ -25,6 +25,7 @@ export function TimelineList({
 }) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.timeline");
+  const tKey = useTranslations();
   const locale = useLocale();
   const [page, setPage] = useState(1);
   const favoritedSet = useMemo(() => new Set(favoritedKeys), [favoritedKeys]);
@@ -55,7 +56,7 @@ export function TimelineList({
                 entry.moduleSlug
               )}`}
             >
-              {entry.moduleTitle}
+              {tKey(entry.moduleTitleKey)}
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-1.5">

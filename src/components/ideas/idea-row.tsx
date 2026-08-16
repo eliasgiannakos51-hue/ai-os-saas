@@ -67,6 +67,9 @@ export function IdeaRow({
   const supabase = createClient();
   const { addToast } = useToast();
   const tCommon = useTranslations("common");
+  const t = useTranslations("dashboard.ideas");
+  const tModule = useTranslations("module");
+  const tSidebar = useTranslations("sidebar");
   const locale = useLocale();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<FormState>(() => toFormState(idea));
@@ -117,7 +120,7 @@ export function IdeaRow({
 
     if (error) {
       setError(error.message);
-      addToast(`✗ error: ${error.message}`, "error");
+      addToast(`✗ ${tCommon("error")}: ${error.message}`, "error");
       return;
     }
 
@@ -133,11 +136,11 @@ export function IdeaRow({
         className="space-y-4 rounded-2xl border border-border bg-panel p-4"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-foreground">Edit Idea</h2>
+          <h2 className="text-sm font-semibold text-foreground">{t("edit")}</h2>
           <button
             type="button"
             onClick={cancelEditing}
-            aria-label="Cancel"
+            aria-label={tCommon("cancel")}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" />
@@ -145,53 +148,53 @@ export function IdeaRow({
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Field label="Name" required>
+          <Field label={t("nameLabel")} required>
             <input
               required
               value={form.name}
               onChange={update("name")}
               className="input"
-              placeholder="idea name"
+              placeholder={t("namePlaceholder")}
             />
           </Field>
 
-          <Field label="Customer">
+          <Field label={t("customerLabel")}>
             <input
               value={form.customer}
               onChange={update("customer")}
               className="input"
-              placeholder="target customer"
+              placeholder={t("customerPlaceholder")}
             />
           </Field>
 
-          <Field label="Problem" full>
+          <Field label={t("problemLabel")} full>
             <TextActionsTextarea
               value={form.problem}
               onChange={(v) => updateValue("problem", v)}
               className="input min-h-32 resize-y"
-              placeholder="what problem does this solve?"
+              placeholder={t("problemPlaceholder")}
             />
           </Field>
 
-          <Field label="Competitors" full>
+          <Field label={t("competitorsLabel")} full>
             <TextActionsTextarea
               value={form.competitors}
               onChange={(v) => updateValue("competitors", v)}
               className="input min-h-32 resize-y"
-              placeholder="known competitors"
+              placeholder={t("competitorsPlaceholder")}
             />
           </Field>
 
-          <Field label="Market Size">
+          <Field label={t("marketSizeLabel")}>
             <input
               value={form.market_size}
               onChange={update("market_size")}
               className="input"
-              placeholder="e.g. $2B TAM"
+              placeholder={t("marketSizePlaceholder")}
             />
           </Field>
 
-          <Field label="Score (0-100)">
+          <Field label={t("scoreLabel")}>
             <input
               type="number"
               min={0}
@@ -199,32 +202,32 @@ export function IdeaRow({
               value={form.score}
               onChange={update("score")}
               className="input"
-              placeholder="score"
+              placeholder={t("scorePlaceholder")}
             />
           </Field>
 
-          <Field label="MVP" full>
+          <Field label={t("mvpLabel")} full>
             <TextActionsTextarea
               value={form.mvp}
               onChange={(v) => updateValue("mvp", v)}
               className="input min-h-32 resize-y"
-              placeholder="what does the MVP look like?"
+              placeholder={t("mvpPlaceholder")}
             />
           </Field>
 
-          <Field label="Verdict" full>
+          <Field label={t("verdictLabel")} full>
             <input
               value={form.verdict}
               onChange={update("verdict")}
               className="input"
-              placeholder="e.g. pursue / kill / watch"
+              placeholder={t("verdictPlaceholder")}
             />
           </Field>
         </div>
 
         {error && (
           <p className="rounded-lg border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
-            error: {error}
+            {tCommon("error")}: {error}
           </p>
         )}
 
@@ -233,7 +236,7 @@ export function IdeaRow({
           disabled={loading}
           className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
         >
-          {loading ? "Saving..." : "Save"}
+          {loading ? tModule("saving") : tModule("save")}
         </button>
       </form>
     );
@@ -256,13 +259,13 @@ export function IdeaRow({
             {idea.name}
           </h3>
           {idea.customer && (
-            <p className="text-xs text-muted">for: {idea.customer}</p>
+            <p className="text-xs text-muted">{t("cardFor", { customer: idea.customer })}</p>
           )}
         </div>
         <div className="flex items-center gap-2">
           {idea.score !== null && (
             <span className="rounded-md border border-border bg-input px-2 py-0.5 text-xs text-foreground">
-              Score: {idea.score}
+              {t("cardScore", { score: idea.score })}
             </span>
           )}
           {idea.verdict && (
@@ -279,24 +282,24 @@ export function IdeaRow({
 
       {idea.problem && (
         <p className="mt-3 text-sm text-foreground/90">
-          <span className="text-orange-500">Problem:</span> {idea.problem}
+          <span className="text-orange-500">{t("cardProblem")}</span> {idea.problem}
         </p>
       )}
       {idea.competitors && (
         <p className="mt-1 text-sm text-foreground/90">
-          <span className="text-orange-500">Competitors:</span>{" "}
+          <span className="text-orange-500">{t("cardCompetitors")}</span>{" "}
           {idea.competitors}
         </p>
       )}
       {idea.market_size && (
         <p className="mt-1 text-sm text-foreground/90">
-          <span className="text-orange-500">Market Size:</span>{" "}
+          <span className="text-orange-500">{t("cardMarketSize")}</span>{" "}
           {idea.market_size}
         </p>
       )}
       {idea.mvp && (
         <p className="mt-1 text-sm text-foreground/90">
-          <span className="text-orange-500">MVP:</span> {idea.mvp}
+          <span className="text-orange-500">{t("cardMvp")}</span> {idea.mvp}
         </p>
       )}
 
@@ -308,12 +311,12 @@ export function IdeaRow({
           title={formatDateTime(idea.created_at, locale)}
           suppressHydrationWarning
         >
-          Logged {formatRelativeTime(idea.created_at)}
+          {tModule("loggedAt", { when: formatRelativeTime(idea.created_at) })}
         </p>
         <div className="flex items-center gap-1">
           <AskAiButton
             moduleSlug="ideas"
-            moduleTitle="Ideas"
+            moduleTitle={tSidebar("items.ideas")}
             recordId={idea.id}
             recordHeadline={idea.name}
           />
@@ -321,13 +324,18 @@ export function IdeaRow({
           <button
             type="button"
             onClick={startEditing}
-            aria-label={`Edit idea: ${idea.name}`}
-            title="Edit"
+            aria-label={t("editAria", { name: idea.name })}
+            title={tModule("edit")}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-orange-500/10 hover:text-orange-400"
           >
             <Pencil className="h-4 w-4" />
           </button>
-          <DeleteButton table="ideas" id={idea.id} label="idea" itemName={idea.name} />
+          <DeleteButton
+            table="ideas"
+            id={idea.id}
+            confirmMessage={t("deleteConfirm")}
+            itemName={idea.name}
+          />
         </div>
       </div>
     </div>

@@ -24,6 +24,8 @@ import {
 
 export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
   const t = useTranslations("dashboard.createAnything");
+  const tKey = useTranslations();
+  const tCreate = useTranslations("dashboard.create");
   const { submit, loading } = useCreateAnything();
   const [input, setInput] = useState("");
   const [focused, setFocused] = useState(false);
@@ -145,11 +147,8 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
     <div className="w-full">
       {showHeading && (
         <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-foreground">Create Anything</h1>
-          <p className="mt-2 text-sm text-muted">
-            Describe anything — a product idea, a trade, feedback from a user,
-            a metric — and it lands in the right module automatically.
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">{tCreate("title")}</h1>
+          <p className="mt-2 text-sm text-muted">{tCreate("subtitle")}</p>
         </div>
       )}
 
@@ -247,7 +246,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
               <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
               <div className="min-w-0">
                 <p className="text-emerald-400">
-                  Logged to:{" "}
+                  {tCreate("loggedTo")}{" "}
                   <span className="font-semibold">{result.moduleTitle}</span>
                 </p>
                 <p className="mt-1 text-foreground/90">{result.message}</p>
@@ -255,7 +254,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
                   href={result.href}
                   className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-emerald-900/60 px-3 py-1.5 text-xs text-emerald-400 transition-colors duration-150 hover:border-emerald-500 sm:min-h-0"
                 >
-                  View {result.moduleTitle.toLowerCase()} →
+                  {tCreate("viewModule", { module: result.moduleTitle })}
                 </Link>
                 <NextStepSuggestion sourceHref={result.href} />
               </div>
@@ -276,7 +275,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
                       href={item.href}
                       className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0 sm:px-2.5"
                     >
-                      {item.label.toLowerCase()}
+                      {tKey(item.titleKey)}
                     </Link>
                   ))}
                 </div>

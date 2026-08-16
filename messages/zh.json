@@ -28,7 +28,26 @@
     "aiGenerated": {
       "short": "由 AI 生成",
       "long": "本内容由 AI 生成，可能有误。在依赖之前请核实重要信息。"
-    }
+    },
+    "close": "关闭",
+    "switchToDarkMode": "切换到深色主题",
+    "switchToLightMode": "切换到浅色主题",
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码",
+    "networkErrorCheckConnection": "网络错误 — 请检查您的连接后重试。",
+    "ownerAccessTooltip": "所有者权限 — 无限额度",
+    "creditsTooltip": "剩余额度 — 可在设置中购买更多",
+    "accountMenu": "账户菜单",
+    "categories": "分类",
+    "commandPalette": "命令面板",
+    "dismiss": "关闭",
+    "dismissSuggestion": "关闭建议",
+    "installIonexa": "安装 Ionexa",
+    "loadingContent": "正在加载内容",
+    "nextPage": "下一页",
+    "previousPage": "上一页",
+    "toggleMenu": "切换菜单",
+    "dismissToastAria": "{message} — 按 Enter 键关闭"
   },
   "sidebar": {
     "groups": {
@@ -55,7 +74,7 @@
       "settings": "设置",
       "team": "团队",
       "agents": "AI 智能体",
-      "websites": "网站计划",
+      "websites": "网站",
       "websiteBuilder": "网站生成器",
       "apps": "应用",
       "images": "图像",
@@ -67,10 +86,10 @@
       "campaigns": "营销活动",
       "analytics": "数据统计",
       "finance": "财务",
-      "content": "营销",
-      "sales": "客户管理",
+      "content": "内容",
+      "sales": "销售",
       "products": "产品",
-      "research": "知识库",
+      "research": "研究",
       "learning": "学习",
       "ideas": "创意",
       "competitors": "竞争对手",
@@ -141,7 +160,8 @@
     },
     "comingSoon": "即将推出",
     "comingSoonToast": "{name} 尚未推出——已列入路线图。",
-    "comingSoonBadge": "即将"
+    "comingSoonBadge": "即将",
+    "closeMenu": "关闭菜单"
   },
   "landing": {
     "hero": "你的业务，井井有条——配上真正有用的 AI。",
@@ -178,7 +198,13 @@
       "imageVideo": "图像与视频生成",
       "aiMemory": "AI 记忆",
       "teamCollaboration": "团队协作",
-      "teamSeatsAddOn": "团队席位"
+      "teamSeatsAddOn": "团队席位",
+      "freeChatMessages": "每月免费聊天消息",
+      "deepResearch": "每月深度研究次数",
+      "files": "已存储文件",
+      "storage": "存储空间",
+      "integrations": "已连接的集成",
+      "publishedSites": "已发布网站"
     },
     "businessTitle": "商业版",
     "businessSubtitle": "为共同打造的团队而生",
@@ -191,13 +217,11 @@
     "setUpTeam": "设置团队",
     "features": {
       "1Workspace3Projects": "1 个工作区，3 个项目",
-      "2AiAgents": "2 个 AI 智能体",
       "basicAiChat": "基础 AI 聊天",
       "creditsPerMonth": "{count} 积分/月",
       "marketplaceInstallOnly": "市场：仅可安装",
       "communitySupport": "社区支持",
       "unlimitedProjects": "无限项目",
-      "upTo20AiAgents": "最多 20 个 AI 智能体",
       "aiMemory": "AI 记忆",
       "websiteAutomationBuilderAccess": "网站与自动化构建器访问权限",
       "imageVideoGenerationAccess": "图像与视频生成访问权限",
@@ -207,7 +231,6 @@
       "mobileSaasBuilderAccess": "移动端与 SaaS 构建器访问权限",
       "priorityProcessing": "优先处理",
       "everythingInGrowth": "包含 Growth 的全部功能",
-      "unlimitedAiAgentsTeams": "无限 AI 智能体与团队",
       "teamCollaboration": "团队协作",
       "sharedAiMemory": "共享 AI 记忆",
       "prioritySupport": "优先支持",
@@ -224,6 +247,16 @@
       "upTo5AiAgents": "最多 5 个 AI 智能体",
       "upTo15AiAgentsTeams": "最多 15 个 AI 智能体与团队",
       "upTo50AiAgents": "最多 50 个 AI 智能体"
+    },
+    "values": {
+      "unlimited": "无限",
+      "included": "已包含",
+      "custom": "定制",
+      "perSeat": "+{currency}{price}/席位"
+    },
+    "seatNote": {
+      "included": "包含无限团队席位 — 无需按成员付费",
+      "perMember": "+ 每位团队成员每月 {currency}{price} — 每位成员均可获得您所在套餐等级的完整访问权限"
     }
   },
   "roadmap": {
@@ -390,6 +423,14 @@
       "continueWithGoogle": "使用 Google 继续",
       "orContinueWithEmail": "或使用邮箱继续",
       "genericError": "无法启动 Google 登录,请重试。"
+    },
+    "deleteAccount": {
+      "title": "确认删除账户",
+      "missingToken": "此链接缺少确认令牌。请完全按照邮件中发送的链接使用。",
+      "warning": "此操作将永久删除您的账户以及您记录的所有条目，且无法撤销。",
+      "deleting": "正在删除…",
+      "confirmButton": "永久删除我的账户",
+      "cancel": "取消并返回"
     }
   },
   "settings": {
@@ -415,7 +456,9 @@
       "clearing": "清除中...",
       "couldNotUpdatePreference": "✗ 无法更新偏好设置",
       "couldNotClearMemory": "✗ 无法清除记忆",
-      "memoryCleared": "✓ 记忆已清除"
+      "memoryCleared": "✓ 记忆已清除",
+      "memoryEnabled": "✓ 已开启聊天记忆",
+      "memoryDisabled": "✓ 已关闭聊天记忆"
     },
     "loginActivity": {
       "title": "登录活动",
@@ -423,7 +466,9 @@
       "noDevices": "目前还没有记录到设备。",
       "lastSeen": "最后一次活跃于 {time}",
       "couldNotRemoveDevice": "✗ 无法移除设备",
-      "deviceRemoved": "✓ 已移除设备"
+      "deviceRemoved": "✓ 已移除设备",
+      "removeDevice": "移除设备",
+      "removeDeviceAria": "移除 {device}"
     },
     "aiUsage": {
       "title": "AI 使用情况",
@@ -520,7 +565,8 @@
     "aiPersona": {
       "title": "AI 人格",
       "description": "为助手设置自定义名称。",
-      "personaUpdated": "✓ 助手名称已更新"
+      "personaUpdated": "✓ 助手名称已更新",
+      "couldNotSave": "✗ 无法保存该名称"
     },
     "billing": {
       "title": "账单",
@@ -532,7 +578,36 @@
       "noCreditActivity": "暂无积分活动。",
       "balanceAfter": "余额 {count}",
       "unlimited": "无限",
-      "wouldHaveCost": "将花费 {count}"
+      "wouldHaveCost": "将花费 {count}",
+      "manageBilling": "管理账单",
+      "upgradePlan": "升级套餐",
+      "betaTester": "Beta 测试者",
+      "betaTesterExpires": "Beta 测试者 — {days, plural, other {#天}}后到期",
+      "teamSeats": "+ {seats, plural, other {# 个团队席位}}",
+      "cancel": {
+        "button": "取消订阅",
+        "title": "取消你的订阅",
+        "keepsAccessUntil": "你将保留完整访问权限，直到 {date}。",
+        "keepsAccessUntilPeriodEnd": "你将保留完整访问权限，直到你已付费的周期结束。",
+        "creditsStay": "在此之前，你剩余的额度依然可以使用。",
+        "dataKept": "不会删除任何内容——你的记录、文件和对话都会原样保留。",
+        "reversible": "在到期之前，你可以随时恢复，无需额外付费。",
+        "surveyQuestion": "是什么让你决定离开？（选填）",
+        "reasons": {
+          "too_expensive": "太贵了",
+          "missing_feature": "缺少我需要的功能",
+          "not_using": "我用得不够多",
+          "found_alternative": "找到了其他方案"
+        },
+        "notePlaceholder": "还有什么想告诉我们的吗？（选填）",
+        "confirm": "确认取消订阅",
+        "keepIt": "继续保留",
+        "done": "✓ 你的订阅将在已付费周期结束时终止",
+        "restored": "✓ 你的订阅已重新生效",
+        "restore": "恢复",
+        "endingIn": "{days, plural, =0 {你的订阅今天到期。} other {你的订阅将在 # 天后到期。}}"
+      },
+      "creditsSplit": "每月 {monthly} + 已购买 {purchased}（永不过期）"
     },
     "marginReport": {
       "title": "利润率报告",
@@ -580,7 +655,8 @@
       "lowCreditsHint": "当余额用尽导致工作停止时",
       "collaboration": "协作",
       "collaborationHint": "团队邀请与共享工作区动态"
-    }
+    },
+    "jumpToSection": "跳转到某个部分"
   },
   "dashboard": {
     "overview": {
@@ -656,7 +732,9 @@
           "label": "交易",
           "description": "记录一笔交易"
         }
-      }
+      },
+      "quickStartTemplates": "快速开始模板",
+      "quickStartApplied": "✓ 已添加 {count} 条示例记录"
     },
     "team": {
       "title": "团队",
@@ -687,7 +765,12 @@
     },
     "memory": {
       "title": "AI 记忆",
-      "description": "在所有模块中搜索你记录过的一切——无需记得存放在哪里。"
+      "description": "在所有模块中搜索你记录过的一切——无需记得存放在哪里。",
+      "searchPlaceholder": "搜索你记录过的一切...",
+      "resultCount": "在所有模块中共 {count} 条结果",
+      "resultCountForQuery": "在所有模块中共 {count} 条与“{query}”匹配的结果",
+      "empty": "还没有任何记录——一旦你开始使用各个模块，就可以在这里统一搜索。",
+      "truncated": "显示 {total} 条匹配结果中的前 {shown} 条——请细化搜索条件。"
     },
     "documents": {
       "title": "文档",
@@ -718,10 +801,28 @@
       "streamInterrupted": "连接在回复完成前中断。",
       "streamInterruptedPartial": "连接已中断——上面的回复可能不完整。",
       "hideConversationsHint": "隐藏会话列表，让对话占据整个宽度。",
-      "showConversationsHint": "再次显示会话列表。"
+      "showConversationsHint": "再次显示会话列表。",
+      "send": "发送",
+      "emptyBody": "什么都可以问——常识、头脑风暴、写作帮助，或者只是聊聊天。不与任何 Ionexa AI 模块绑定。",
+      "composerPlaceholder": "给 Ionexa 发消息...",
+      "mentorMode": "导师模式",
+      "mentorModeHint": "导师模式：给出战略性的引导而不只是答案——指出风险、提出澄清问题、给出替代方案，并把你记录的数据作为上下文。",
+      "newChat": "新建对话",
+      "noConversations": "还没有对话。",
+      "groupPinned": "已置顶",
+      "groupToday": "今天",
+      "groupYesterday": "昨天",
+      "groupOlder": "更早",
+      "pin": "置顶",
+      "unpin": "取消置顶",
+      "rename": "重命名",
+      "deleteConfirm": "确定删除“{title}”？此操作无法撤销。"
     },
     "create": {
-      "title": "创建任何内容"
+      "title": "创建任何内容",
+      "subtitle": "描述任何内容——一个产品创意、一笔交易、一条用户反馈、一项指标——它会自动归入正确的模块。",
+      "loggedTo": "已记录到：",
+      "viewModule": "查看 {module} →"
     },
     "timeline": {
       "title": "时间线",
@@ -1476,6 +1577,39 @@
       "hideNumbers": "隐藏数据",
       "dismiss": "忽略此项",
       "dismissError": "无法忽略该项。"
+    },
+    "systemHealth": {
+      "toggleStackTrace": "展开或收起调用栈"
+    },
+    "ideas": {
+      "new": "新建创意",
+      "edit": "编辑创意",
+      "empty": "目前还没有创意——使用上方按钮记录第一条。",
+      "loadError": "无法加载你的创意：{message}",
+      "deleteConfirm": "确定删除此创意？此操作无法撤销。",
+      "editAria": "编辑创意：{name}",
+      "nameLabel": "名称",
+      "namePlaceholder": "创意名称",
+      "customerLabel": "客户",
+      "customerPlaceholder": "目标客户",
+      "problemLabel": "问题",
+      "problemPlaceholder": "它解决什么问题？",
+      "competitorsLabel": "竞争对手",
+      "competitorsPlaceholder": "已知的竞争对手",
+      "marketSizeLabel": "市场规模",
+      "marketSizePlaceholder": "例如 TAM 20 亿美元",
+      "scoreLabel": "评分（0-100）",
+      "scorePlaceholder": "评分",
+      "mvpLabel": "最小可行产品",
+      "mvpPlaceholder": "最小可行产品是什么样子？",
+      "verdictLabel": "结论",
+      "verdictPlaceholder": "例如 推进 / 放弃 / 观望",
+      "cardFor": "面向：{customer}",
+      "cardScore": "评分：{score}",
+      "cardProblem": "问题：",
+      "cardCompetitors": "竞争对手：",
+      "cardMarketSize": "市场规模：",
+      "cardMvp": "最小可行产品："
     }
   },
   "module": {
@@ -1534,7 +1668,9 @@
     "mightBeRelated": "这可能与以下内容相关: {titles}。要关联吗?",
     "yes": "是",
     "no": "否",
-    "linked": "已关联"
+    "linked": "已关联",
+    "unlink": "取消关联",
+    "unlinkAria": "取消与 {name} 的关联"
   },
   "favorites": {
     "add": "添加到收藏",
@@ -1624,5 +1760,147 @@
     "unlimited": "无限 — 未使用积分",
     "unlimitedWouldHaveCost": "无限 — 将花费 {count} 积分",
     "freeMessage": "免费消息 · 本月剩余 {count} 条"
+  },
+  "cookies": {
+    "banner": {
+      "summary": "我们仅使用必要的 Cookie — 用于登录并保持您的会话有效。",
+      "accept": "接受",
+      "essential": "<term>必要的会话 Cookie</term> — 由 Supabase Auth 在您登录时设置，以便应用在后续请求中识别您的登录状态。没有它，每次加载页面都会退出登录。过期或退出登录时会自动清除。",
+      "preferences": "<term>本地偏好设置</term> — 主题、语言、无障碍设置以及此 Cookie 同意选择均存储在您浏览器的本地存储中，不会发送到任何地方。",
+      "noTracking": "我们不使用任何广告或第三方跟踪 Cookie。详情请参阅我们的<cookiePolicy>Cookie 政策</cookiePolicy>和<privacyPolicy>隐私政策</privacyPolicy>。"
+    }
+  },
+  "security": {
+    "badge": {
+      "checked": "已通过安全检查",
+      "flagged": "安全检查已标记",
+      "title": "AI 输出保护层",
+      "checkedAt": "检查时间 {when}",
+      "whatWasChecked": "检查内容：",
+      "issuesFound": "发现的问题：",
+      "noIssues": "未发现任何问题。"
+    }
+  },
+  "moduleData": {
+    "fields": {
+      "amount": "金额",
+      "budget": "预算",
+      "caption": "文案",
+      "category": "分类",
+      "channel": "渠道",
+      "coldEmail": "陌生开发邮件",
+      "company": "公司",
+      "contentIdeas": "内容创意",
+      "customers": "客户",
+      "dataSource": "数据来源",
+      "description": "描述",
+      "direction": "方向",
+      "findings": "发现",
+      "followUpEmail": "跟进邮件",
+      "hashtags": "话题标签",
+      "idea": "创意",
+      "ideaNames": "创意名称",
+      "language": "语言",
+      "launchPlan": "发布计划",
+      "leadName": "线索名称",
+      "marketing": "营销",
+      "metricName": "指标名称",
+      "mvpFeatures": "最小可行产品功能",
+      "name": "名称",
+      "nextSteps": "后续步骤",
+      "notes": "备注",
+      "pnl": "盈亏",
+      "platform": "平台",
+      "pricing": "定价",
+      "priority": "优先级",
+      "product": "产品",
+      "productName": "产品名称",
+      "prompt": "提示词",
+      "quiz": "小测验",
+      "ranking": "排名",
+      "recommendation": "建议",
+      "resources": "资源",
+      "result": "结果",
+      "risks": "风险",
+      "roadmap": "路线图",
+      "score": "评分",
+      "sentiment": "情绪",
+      "slideCount": "幻灯片数量",
+      "status": "状态",
+      "strengths": "优势",
+      "suggestedResponse": "建议回复",
+      "suggestedWorkflow": "建议流程",
+      "summary": "摘要",
+      "symbol": "代码",
+      "targetAudience": "目标受众",
+      "taskName": "任务名称",
+      "timeSaved": "节省的时间",
+      "title": "标题",
+      "toolsNeeded": "所需工具",
+      "topic": "主题",
+      "twitterThread": "Twitter 长贴",
+      "type": "类型",
+      "url": "网址",
+      "userJourney": "用户旅程",
+      "value": "数值",
+      "weaknesses": "劣势"
+    },
+    "options": {
+      "active": "进行中",
+      "android": "安卓",
+      "archived": "已归档",
+      "completed": "已完成",
+      "content": "内容",
+      "crossPlatform": "跨平台",
+      "desktop": "桌面端",
+      "done": "已完成",
+      "draft": "草稿",
+      "email": "电子邮件",
+      "event": "活动",
+      "expense": "支出",
+      "final": "定稿",
+      "inProgress": "进行中",
+      "inReview": "审阅中",
+      "income": "收入",
+      "ios": "iOS",
+      "live": "已上线",
+      "other": "其他",
+      "paidAds": "付费广告",
+      "paused": "已暂停",
+      "planned": "已计划",
+      "requested": "已请求",
+      "seo": "搜索优化",
+      "social": "社交媒体",
+      "web": "网页端"
+    },
+    "placeholders": {
+      "longShort": "做多 / 做空",
+      "winLoss": "盈利 / 亏损",
+      "httpsUrl": "https://...",
+      "codingLanguages": "例如 Python、TypeScript、Go",
+      "dataSources": "例如 CSV 导出、Stripe、Google Analytics"
+    },
+    "deleteConfirm": {
+      "competitors": "确定删除此竞争对手？此操作无法撤销。",
+      "research": "确定删除此研究记录？此操作无法撤销。",
+      "finance": "确定删除此财务记录？此操作无法撤销。",
+      "learning": "确定删除此学习记录？此操作无法撤销。",
+      "trading": "确定删除此笔交易？此操作无法撤销。",
+      "decisions": "确定删除此决策？此操作无法撤销。",
+      "products": "确定删除此产品？此操作无法撤销。",
+      "content": "确定删除此内容条目？此操作无法撤销。",
+      "sales": "确定删除此线索？此操作无法撤销。",
+      "feedback": "确定删除此反馈？此操作无法撤销。",
+      "analytics": "确定删除此指标？此操作无法撤销。",
+      "automation": "确定删除此自动化？此操作无法撤销。",
+      "websites": "确定删除此网站？此操作无法撤销。",
+      "apps": "确定删除此应用？此操作无法撤销。",
+      "images": "确定删除此图片？此操作无法撤销。",
+      "videos": "确定删除此视频？此操作无法撤销。",
+      "coding": "确定删除此编码请求？此操作无法撤销。",
+      "data-analysis": "确定删除此分析？此操作无法撤销。",
+      "presentations": "确定删除此演示记录？此操作无法撤销。",
+      "campaigns": "确定删除此营销活动？此操作无法撤销。"
+    }
   }
 }

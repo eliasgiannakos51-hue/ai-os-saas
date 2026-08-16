@@ -28,7 +28,26 @@
     "aiGenerated": {
       "short": "Generato dall’IA",
       "long": "Contenuto generato dall’IA. Può contenere errori: verifica ciò che è importante prima di fidartene."
-    }
+    },
+    "close": "Chiudi",
+    "switchToDarkMode": "Passa al tema scuro",
+    "switchToLightMode": "Passa al tema chiaro",
+    "showPassword": "Mostra password",
+    "hidePassword": "Nascondi password",
+    "networkErrorCheckConnection": "Errore di rete — controlla la connessione e riprova.",
+    "ownerAccessTooltip": "Accesso proprietario — crediti illimitati",
+    "creditsTooltip": "Crediti rimanenti — acquistane altri nelle Impostazioni",
+    "accountMenu": "Menu dell'account",
+    "categories": "Categorie",
+    "commandPalette": "Riquadro dei comandi",
+    "dismiss": "Ignora",
+    "dismissSuggestion": "Ignora il suggerimento",
+    "installIonexa": "Installa Ionexa",
+    "loadingContent": "Caricamento dei contenuti",
+    "nextPage": "Pagina successiva",
+    "previousPage": "Pagina precedente",
+    "toggleMenu": "Mostra o nascondi il menu",
+    "dismissToastAria": "{message} — premi Invio per ignorare"
   },
   "sidebar": {
     "groups": {
@@ -55,7 +74,7 @@
       "settings": "Impostazioni",
       "team": "Team",
       "agents": "Agenti IA",
-      "websites": "Piani sito",
+      "websites": "Siti web",
       "websiteBuilder": "Generatore di Siti",
       "apps": "App",
       "images": "Immagini",
@@ -67,10 +86,10 @@
       "campaigns": "Campagne",
       "analytics": "Analytics",
       "finance": "Agente Finanza",
-      "content": "Marketing",
-      "sales": "CRM",
+      "content": "Contenuti",
+      "sales": "Vendite",
       "products": "Prodotti",
-      "research": "Agente Ricerca",
+      "research": "Ricerca",
       "learning": "Apprendimento",
       "ideas": "Idee",
       "competitors": "Concorrenti",
@@ -141,7 +160,8 @@
     },
     "comingSoon": "In arrivo",
     "comingSoonToast": "{name} non è ancora disponibile: è nella roadmap.",
-    "comingSoonBadge": "Presto"
+    "comingSoonBadge": "Presto",
+    "closeMenu": "Chiudi il menu"
   },
   "landing": {
     "hero": "Il tuo business, organizzato — con un'IA che aiuta davvero.",
@@ -178,7 +198,13 @@
       "imageVideo": "Generazione immagini e video",
       "aiMemory": "Memoria AI",
       "teamCollaboration": "Collaborazione in team",
-      "teamSeatsAddOn": "Posti team"
+      "teamSeatsAddOn": "Posti team",
+      "freeChatMessages": "Messaggi chat gratuiti / mese",
+      "deepResearch": "Esecuzioni Deep Research / mese",
+      "files": "File archiviati",
+      "storage": "Spazio di archiviazione",
+      "integrations": "Integrazioni collegate",
+      "publishedSites": "Siti web pubblicati"
     },
     "businessTitle": "Business",
     "businessSubtitle": "Per team che costruiscono insieme",
@@ -191,13 +217,11 @@
     "setUpTeam": "Configura Team",
     "features": {
       "1Workspace3Projects": "1 area di lavoro, 3 progetti",
-      "2AiAgents": "2 agenti IA",
       "basicAiChat": "Chat IA di base",
       "creditsPerMonth": "{count} crediti/mese",
       "marketplaceInstallOnly": "Marketplace: solo installazione",
       "communitySupport": "Supporto della community",
       "unlimitedProjects": "Progetti illimitati",
-      "upTo20AiAgents": "Fino a 20 agenti IA",
       "aiMemory": "Memoria IA",
       "websiteAutomationBuilderAccess": "Accesso a Website & Automation Builder",
       "imageVideoGenerationAccess": "Accesso alla generazione di immagini e video",
@@ -207,7 +231,6 @@
       "mobileSaasBuilderAccess": "Accesso a Mobile & SaaS Builder",
       "priorityProcessing": "Elaborazione prioritaria",
       "everythingInGrowth": "Tutto ciò che include Growth",
-      "unlimitedAiAgentsTeams": "Agenti IA e team illimitati",
       "teamCollaboration": "Collaborazione in team",
       "sharedAiMemory": "Memoria IA condivisa",
       "prioritySupport": "Supporto prioritario",
@@ -224,6 +247,16 @@
       "upTo5AiAgents": "Fino a 5 agenti IA",
       "upTo15AiAgentsTeams": "Fino a 15 agenti IA e team",
       "upTo50AiAgents": "Fino a 50 agenti IA"
+    },
+    "values": {
+      "unlimited": "Illimitato",
+      "included": "Incluso",
+      "custom": "Personalizzato",
+      "perSeat": "+{currency}{price}/postazione"
+    },
+    "seatNote": {
+      "included": "Postazioni team illimitate incluse — nessun addebito per membro",
+      "perMember": "+ {currency}{price}/mese per membro del team — ogni membro ottiene accesso completo al livello del tuo piano"
     }
   },
   "roadmap": {
@@ -390,6 +423,14 @@
       "continueWithGoogle": "Continua con Google",
       "orContinueWithEmail": "o continua con email",
       "genericError": "Impossibile avviare l'accesso con Google. Riprova."
+    },
+    "deleteAccount": {
+      "title": "Conferma eliminazione account",
+      "missingToken": "A questo link manca il token di conferma. Usa il link della tua email esattamente come è stato inviato.",
+      "warning": "Questa operazione eliminerà definitivamente il tuo account e ogni voce registrata. Non è reversibile.",
+      "deleting": "Eliminazione…",
+      "confirmButton": "Elimina definitivamente il mio account",
+      "cancel": "Annulla e torna indietro"
     }
   },
   "settings": {
@@ -415,7 +456,9 @@
       "clearing": "Cancellazione...",
       "couldNotUpdatePreference": "✗ impossibile aggiornare la preferenza",
       "couldNotClearMemory": "✗ impossibile cancellare la memoria",
-      "memoryCleared": "✓ memoria cancellata"
+      "memoryCleared": "✓ memoria cancellata",
+      "memoryEnabled": "✓ memoria chat attivata",
+      "memoryDisabled": "✓ memoria chat disattivata"
     },
     "loginActivity": {
       "title": "Attività di accesso",
@@ -423,7 +466,9 @@
       "noDevices": "Nessun dispositivo registrato finora.",
       "lastSeen": "Ultimo accesso {time}",
       "couldNotRemoveDevice": "✗ impossibile rimuovere il dispositivo",
-      "deviceRemoved": "✓ dispositivo rimosso"
+      "deviceRemoved": "✓ dispositivo rimosso",
+      "removeDevice": "Rimuovi il dispositivo",
+      "removeDeviceAria": "Rimuovi {device}"
     },
     "aiUsage": {
       "title": "Utilizzo AI",
@@ -520,7 +565,8 @@
     "aiPersona": {
       "title": "Persona IA",
       "description": "Dai all'assistente un nome personalizzato.",
-      "personaUpdated": "✓ nome dell'assistente aggiornato"
+      "personaUpdated": "✓ nome dell'assistente aggiornato",
+      "couldNotSave": "✗ non è stato possibile salvare il nome"
     },
     "billing": {
       "title": "Fatturazione",
@@ -532,7 +578,36 @@
       "noCreditActivity": "Nessuna attività di crediti finora.",
       "balanceAfter": "saldo {count}",
       "unlimited": "Illimitato",
-      "wouldHaveCost": "sarebbe costato {count}"
+      "wouldHaveCost": "sarebbe costato {count}",
+      "manageBilling": "Gestisci fatturazione",
+      "upgradePlan": "Aggiorna piano",
+      "betaTester": "Beta tester",
+      "betaTesterExpires": "Beta tester — scade tra {days, plural, one {# giorno} other {# giorni}}",
+      "teamSeats": "+ {seats, plural, one {# postazione team} other {# postazioni team}}",
+      "cancel": {
+        "button": "Disdici l'abbonamento",
+        "title": "Disdire il tuo abbonamento",
+        "keepsAccessUntil": "Mantieni l'accesso completo fino al {date}.",
+        "keepsAccessUntilPeriodEnd": "Mantieni l'accesso completo fino alla fine del periodo che hai già pagato.",
+        "creditsStay": "I crediti che ti restano restano utilizzabili fino ad allora.",
+        "dataKept": "Non viene eliminato nulla: le tue voci, i file e le conversazioni restano esattamente dove sono.",
+        "reversible": "Puoi ripristinarlo in qualsiasi momento prima della scadenza, senza costi aggiuntivi.",
+        "surveyQuestion": "Che cosa ti ha fatto andare via? (facoltativo)",
+        "reasons": {
+          "too_expensive": "Troppo caro",
+          "missing_feature": "Manca qualcosa che mi serve",
+          "not_using": "Non lo uso abbastanza",
+          "found_alternative": "Ho trovato qualcos'altro"
+        },
+        "notePlaceholder": "Vuoi dirci altro? (facoltativo)",
+        "confirm": "Disdici l'abbonamento",
+        "keepIt": "Mantienilo",
+        "done": "✓ il tuo abbonamento terminerà alla fine del periodo pagato",
+        "restored": "✓ il tuo abbonamento è di nuovo attivo",
+        "restore": "Ripristina",
+        "endingIn": "{days, plural, =0 {Il tuo abbonamento termina oggi.} one {Il tuo abbonamento termina tra # giorno.} other {Il tuo abbonamento termina tra # giorni.}}"
+      },
+      "creditsSplit": "{monthly} mensili + {purchased} acquistati (non scadono mai)"
     },
     "marginReport": {
       "title": "Rapporto Margine",
@@ -580,7 +655,8 @@
       "lowCreditsHint": "Quando il lavoro si ferma perché il saldo è esaurito",
       "collaboration": "Collaborazione",
       "collaborationHint": "Inviti al team e attività dello spazio condiviso"
-    }
+    },
+    "jumpToSection": "Vai a una sezione"
   },
   "dashboard": {
     "overview": {
@@ -656,7 +732,9 @@
           "label": "Trading",
           "description": "Registra un'operazione"
         }
-      }
+      },
+      "quickStartTemplates": "Modelli di avvio rapido",
+      "quickStartApplied": "✓ {count, plural, one {aggiunta # voce di esempio} other {aggiunte # voci di esempio}}"
     },
     "team": {
       "title": "Team",
@@ -687,7 +765,12 @@
     },
     "memory": {
       "title": "Memoria AI",
-      "description": "Cerca tutto ciò che hai registrato, in ogni modulo — senza dover ricordare dove l'hai messo."
+      "description": "Cerca tutto ciò che hai registrato, in ogni modulo — senza dover ricordare dove l'hai messo.",
+      "searchPlaceholder": "Cerca in tutto ciò che hai registrato...",
+      "resultCount": "{count, plural, =0 {nessun risultato} one {# risultato} other {# risultati}} in tutti i moduli",
+      "resultCountForQuery": "{count, plural, =0 {nessun risultato} one {# risultato} other {# risultati}} per «{query}» in tutti i moduli",
+      "empty": "Non hai ancora registrato nulla — appena inizierai a usare i moduli, potrai cercarli tutti da qui.",
+      "truncated": "Vengono mostrati i primi {shown} di {total} risultati — affina la ricerca per restringerli."
     },
     "documents": {
       "title": "Documenti",
@@ -718,10 +801,28 @@
       "streamInterrupted": "La connessione si è interrotta prima che la risposta fosse completata.",
       "streamInterruptedPartial": "La connessione si è interrotta — la risposta qui sopra potrebbe essere incompleta.",
       "hideConversationsHint": "Nascondi l’elenco delle conversazioni e dai tutta la larghezza al thread.",
-      "showConversationsHint": "Mostra di nuovo l’elenco delle conversazioni."
+      "showConversationsHint": "Mostra di nuovo l’elenco delle conversazioni.",
+      "send": "Invia",
+      "emptyBody": "Chiedi qualsiasi cosa — cultura generale, idee, aiuto nella scrittura o semplicemente due chiacchiere. Non è legato a nessun modulo di Ionexa AI.",
+      "composerPlaceholder": "Scrivi a Ionexa...",
+      "mentorMode": "Modalità mentore",
+      "mentorModeHint": "Modalità mentore: una guida strategica invece di semplici risposte — segnala i rischi, pone domande di chiarimento, propone alternative e usa come contesto i dati che hai registrato.",
+      "newChat": "Nuova conversazione",
+      "noConversations": "Ancora nessuna conversazione.",
+      "groupPinned": "Fissate",
+      "groupToday": "Oggi",
+      "groupYesterday": "Ieri",
+      "groupOlder": "Meno recenti",
+      "pin": "Fissa",
+      "unpin": "Rimuovi",
+      "rename": "Rinomina",
+      "deleteConfirm": "Eliminare «{title}»? L'operazione è irreversibile."
     },
     "create": {
-      "title": "Crea Qualsiasi Cosa"
+      "title": "Crea Qualsiasi Cosa",
+      "subtitle": "Descrivi qualsiasi cosa — un'idea di prodotto, un'operazione, il feedback di un utente, una metrica — e finisce automaticamente nel modulo giusto.",
+      "loggedTo": "Registrato in:",
+      "viewModule": "Apri {module} →"
     },
     "timeline": {
       "title": "Cronologia",
@@ -1476,6 +1577,39 @@
       "hideNumbers": "Nascondi i numeri",
       "dismiss": "Ignora",
       "dismissError": "Impossibile ignorarlo."
+    },
+    "systemHealth": {
+      "toggleStackTrace": "Mostra o nascondi lo stack trace"
+    },
+    "ideas": {
+      "new": "Nuova idea",
+      "edit": "Modifica idea",
+      "empty": "Ancora nessuna idea — usa il pulsante qui sopra per registrare la prima.",
+      "loadError": "Non è stato possibile caricare le tue idee: {message}",
+      "deleteConfirm": "Eliminare questa idea? L'operazione è irreversibile.",
+      "editAria": "Modifica l'idea: {name}",
+      "nameLabel": "Nome",
+      "namePlaceholder": "nome dell'idea",
+      "customerLabel": "Cliente",
+      "customerPlaceholder": "cliente target",
+      "problemLabel": "Problema",
+      "problemPlaceholder": "quale problema risolve?",
+      "competitorsLabel": "Concorrenti",
+      "competitorsPlaceholder": "concorrenti noti",
+      "marketSizeLabel": "Dimensione del mercato",
+      "marketSizePlaceholder": "es. TAM da 2 Mld $",
+      "scoreLabel": "Punteggio (0-100)",
+      "scorePlaceholder": "punteggio",
+      "mvpLabel": "Prodotto minimo funzionante",
+      "mvpPlaceholder": "com'è il prodotto minimo funzionante?",
+      "verdictLabel": "Verdetto",
+      "verdictPlaceholder": "es. procedere / scartare / osservare",
+      "cardFor": "per: {customer}",
+      "cardScore": "Punteggio: {score}",
+      "cardProblem": "Problema:",
+      "cardCompetitors": "Concorrenti:",
+      "cardMarketSize": "Dimensione del mercato:",
+      "cardMvp": "Prodotto minimo funzionante:"
     }
   },
   "module": {
@@ -1534,7 +1668,9 @@
     "mightBeRelated": "Potrebbe essere collegato a: {titles}. Vuoi collegarli?",
     "yes": "Sì",
     "no": "No",
-    "linked": "Collegato"
+    "linked": "Collegato",
+    "unlink": "Scollega",
+    "unlinkAria": "Scollega {name}"
   },
   "favorites": {
     "add": "Aggiungi ai preferiti",
@@ -1624,5 +1760,147 @@
     "unlimited": "Illimitato — nessun credito usato",
     "unlimitedWouldHaveCost": "Illimitato — sarebbe costato {count} crediti",
     "freeMessage": "Messaggio gratuito · {count} rimasti questo mese"
+  },
+  "cookies": {
+    "banner": {
+      "summary": "Usiamo i cookie solo per le funzioni essenziali: accedere e mantenere attiva la tua sessione.",
+      "accept": "Accetta",
+      "essential": "<term>Cookie di sessione essenziale</term> — impostato da Supabase Auth quando accedi, così l'app ti riconosce nelle richieste successive. Senza di esso verresti disconnesso a ogni caricamento di pagina. Viene eliminato automaticamente alla scadenza o quando esci.",
+      "preferences": "<term>Preferenze locali</term> — tema, lingua, impostazioni di accessibilità e questa scelta sui cookie sono salvati nella memoria locale del tuo browser e non vengono inviati da nessuna parte.",
+      "noTracking": "Non vengono utilizzati cookie pubblicitari o di tracciamento di terze parti. Consulta la nostra <cookiePolicy>Informativa sui Cookie</cookiePolicy> e la nostra <privacyPolicy>Informativa sulla Privacy</privacyPolicy> per i dettagli."
+    }
+  },
+  "security": {
+    "badge": {
+      "checked": "Sicurezza verificata",
+      "flagged": "Sicurezza segnalata",
+      "title": "Livello di protezione dell'output IA",
+      "checkedAt": "Verificato {when}",
+      "whatWasChecked": "Cosa è stato verificato:",
+      "issuesFound": "Problemi rilevati:",
+      "noIssues": "Nessun problema rilevato."
+    }
+  },
+  "moduleData": {
+    "fields": {
+      "amount": "Importo",
+      "budget": "Budget",
+      "caption": "Didascalia",
+      "category": "Categoria",
+      "channel": "Canale",
+      "coldEmail": "Email a freddo",
+      "company": "Azienda",
+      "contentIdeas": "Idee di contenuto",
+      "customers": "Clienti",
+      "dataSource": "Fonte dei dati",
+      "description": "Descrizione",
+      "direction": "Direzione",
+      "findings": "Risultati",
+      "followUpEmail": "Email di follow-up",
+      "hashtags": "Hashtag",
+      "idea": "Idea",
+      "ideaNames": "Nomi delle idee",
+      "language": "Linguaggio",
+      "launchPlan": "Piano di lancio",
+      "leadName": "Nome del contatto",
+      "marketing": "Marketing",
+      "metricName": "Nome della metrica",
+      "mvpFeatures": "Funzionalità del prodotto minimo",
+      "name": "Nome",
+      "nextSteps": "Prossimi passi",
+      "notes": "Note",
+      "pnl": "Profitto/Perdita",
+      "platform": "Piattaforma",
+      "pricing": "Prezzi",
+      "priority": "Priorità",
+      "product": "Prodotto",
+      "productName": "Nome del prodotto",
+      "prompt": "Istruzione",
+      "quiz": "Quiz",
+      "ranking": "Classifica",
+      "recommendation": "Raccomandazione",
+      "resources": "Risorse",
+      "result": "Esito",
+      "risks": "Rischi",
+      "roadmap": "Tabella di marcia",
+      "score": "Punteggio",
+      "sentiment": "Sentiment",
+      "slideCount": "Numero di diapositive",
+      "status": "Stato",
+      "strengths": "Punti di forza",
+      "suggestedResponse": "Risposta suggerita",
+      "suggestedWorkflow": "Flusso suggerito",
+      "summary": "Sintesi",
+      "symbol": "Simbolo",
+      "targetAudience": "Pubblico di riferimento",
+      "taskName": "Nome dell'attività",
+      "timeSaved": "Tempo risparmiato",
+      "title": "Titolo",
+      "toolsNeeded": "Strumenti necessari",
+      "topic": "Argomento",
+      "twitterThread": "Thread su Twitter",
+      "type": "Tipo",
+      "url": "Indirizzo",
+      "userJourney": "Percorso dell'utente",
+      "value": "Valore",
+      "weaknesses": "Punti deboli"
+    },
+    "options": {
+      "active": "attivo",
+      "android": "Android",
+      "archived": "archiviato",
+      "completed": "completato",
+      "content": "contenuti",
+      "crossPlatform": "multipiattaforma",
+      "desktop": "computer",
+      "done": "fatto",
+      "draft": "bozza",
+      "email": "email",
+      "event": "evento",
+      "expense": "spesa",
+      "final": "finale",
+      "inProgress": "in corso",
+      "inReview": "in revisione",
+      "income": "entrata",
+      "ios": "iOS",
+      "live": "online",
+      "other": "altro",
+      "paidAds": "annunci a pagamento",
+      "paused": "in pausa",
+      "planned": "pianificato",
+      "requested": "richiesto",
+      "seo": "SEO",
+      "social": "social",
+      "web": "web"
+    },
+    "placeholders": {
+      "longShort": "lunga / corta",
+      "winLoss": "vincita / perdita",
+      "httpsUrl": "https://...",
+      "codingLanguages": "es. Python, TypeScript, Go",
+      "dataSources": "es. esportazione CSV, Stripe, Google Analytics"
+    },
+    "deleteConfirm": {
+      "competitors": "Eliminare questo concorrente? L'operazione è irreversibile.",
+      "research": "Eliminare questa nota di ricerca? L'operazione è irreversibile.",
+      "finance": "Eliminare questo movimento? L'operazione è irreversibile.",
+      "learning": "Eliminare questa nota di apprendimento? L'operazione è irreversibile.",
+      "trading": "Eliminare questa operazione? L'operazione è irreversibile.",
+      "decisions": "Eliminare questa decisione? L'operazione è irreversibile.",
+      "products": "Eliminare questo prodotto? L'operazione è irreversibile.",
+      "content": "Eliminare questo contenuto? L'operazione è irreversibile.",
+      "sales": "Eliminare questo contatto? L'operazione è irreversibile.",
+      "feedback": "Eliminare questo feedback? L'operazione è irreversibile.",
+      "analytics": "Eliminare questa metrica? L'operazione è irreversibile.",
+      "automation": "Eliminare questa automazione? L'operazione è irreversibile.",
+      "websites": "Eliminare questo sito web? L'operazione è irreversibile.",
+      "apps": "Eliminare questa applicazione? L'operazione è irreversibile.",
+      "images": "Eliminare questa immagine? L'operazione è irreversibile.",
+      "videos": "Eliminare questo video? L'operazione è irreversibile.",
+      "coding": "Eliminare questa richiesta di codice? L'operazione è irreversibile.",
+      "data-analysis": "Eliminare questa analisi? L'operazione è irreversibile.",
+      "presentations": "Eliminare questa nota di presentazione? L'operazione è irreversibile.",
+      "campaigns": "Eliminare questa campagna? L'operazione è irreversibile."
+    }
   }
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { THEME_STORAGE_KEY, type Theme } from "@/lib/theme-prefs";
+import { useTranslations } from "next-intl";
 
 // No context/provider needed — the theme lives on <html data-theme> and in
 // localStorage, both written directly to the DOM. The blocking inline
@@ -19,6 +20,7 @@ import { THEME_STORAGE_KEY, type Theme } from "@/lib/theme-prefs";
 // the only place to reach midnight/carbon, but this quick toggle never
 // corrupts that choice — it just doesn't cycle through it.
 export function ThemeToggle({ className }: { className?: string }) {
+  const t = useTranslations("common");
   const [theme, setTheme] = useState<Theme | null>(null);
 
   useEffect(() => {
@@ -42,7 +44,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     <button
       type="button"
       onClick={toggle}
-      aria-label={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+      aria-label={theme === "light" ? t("switchToDarkMode") : t("switchToLightMode")}
       className={
         className ??
         "flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"

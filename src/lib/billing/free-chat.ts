@@ -7,6 +7,13 @@ import {
   WEB_SEARCH_USD_PER_QUERY,
 } from "@/lib/billing/model-pricing";
 import { resolvePricingConfig, type PricingConfig } from "@/lib/billing/pricing-config";
+import {
+  DECLARED_ALLOWANCE_SHARES,
+  FREE_PLAN_MAX_MONTHLY_COST_EUR,
+  allowanceBudgetEur,
+  ceilingPriceEur,
+  creditCeilingEur,
+} from "@/lib/billing/ceiling";
 
 /**
  * Free chat: a monthly allowance of chat messages that cost the user no
@@ -46,10 +53,35 @@ export type FreeChatLimits = {
   webSearch: false;
 };
 
+/**
+ * The envelope as of the combined-ceiling change.
+ *
+ * `historyLimit` 6 -> 2 and `maxOutputTokens` 800 -> 600 are not a cost
+ * cut for its own sake. The alternative was cutting the message COUNT, and
+ * the arithmetic says the envelope is by far the cheaper place to take it:
+ *
+ *   per-message worst case  EUR 0.03136 -> EUR 0.02323   (-25.9%)
+ *
+ * The history window is the reason a free message costs more than the
+ * EUR 0.02 cost cap suggests — 6 turns of maximum-length context is
+ * EUR 0.0114 of input that the cap deliberately does not count (see
+ * freeChatMessageEstimatedCostEur). Cutting it to 2 removes three quarters
+ * of that without touching what the user can ASK: maxMessageChars is
+ * unchanged at 2,000.
+ *
+ * Dropping the reply cap to 600 tokens pays for itself twice, because
+ * output is charged at 5x input: it makes each message cheaper AND it
+ * lowers the estimate the cost-cap gate computes, so messages that used to
+ * fall through to the paid path now qualify as free. Measured against a
+ * 4,000-token system prompt with a 500-character question:
+ *
+ *   at 800 output tokens  EUR 0.0225  -> over the EUR 0.02 cap, PAID
+ *   at 600 output tokens  EUR 0.0197  -> under the cap, FREE
+ */
 export const FREE_CHAT_LIMITS: FreeChatLimits = {
   maxMessageChars: 2000,
-  historyLimit: 6,
-  maxOutputTokens: 800,
+  historyLimit: 2,
+  maxOutputTokens: 600,
   webSearch: false,
 };
 
@@ -273,31 +305,39 @@ export const FULL_CHAT_WORST_CASE = fullChatWorstCaseCost;
 // ---------------------------------------------------------------------------
 
 /**
- * The share of a plan's monthly price that free chat is allowed to burn in
- * the worst case. Kept well under the 25% ceiling so a future model price
- * rise doesn't silently breach it.
+ * The id this quota is registered under — in FREE_ALLOWANCES
+ * (lib/billing/free-allowances.ts) and in DECLARED_ALLOWANCE_SHARES
+ * (lib/billing/ceiling.ts), which is where its 5% budget lives.
  */
-export const FREE_CHAT_MAX_COST_SHARE = 0.25;
+export const FREE_CHAT_ALLOWANCE_ID = "free_chat";
 
 /**
  * Monthly free-chat allowance per plan.
  *
- * Paid plans are sized to land at ~20% of the plan price at absolute worst
- * case, leaving headroom under the 25% ceiling. Free is not a percentage
- * of anything (its price is zero), so it gets a flat, small allowance —
- * an acquisition cost, chosen so a free account can have a real
- * conversation before hitting the paywall.
+ * Sized to the 5% of plan price the quota registry allocates it — the
+ * remainder of the 25% combined ceiling after the credit subsystem's 20%
+ * (M = 5). These are the numbers that fall out of
+ * `budget / freeChatPerMessageWorstCaseEur()`; the clamp in
+ * freeChatAllowance re-derives them at runtime, so they cannot drift from
+ * the ceiling even if this table is edited by hand.
  *
- * Enterprise has no fixed price, so it inherits Ultimate's number rather
- * than being unbounded.
+ * They are lower than the 120/300/600/1,200 that shipped before, and that
+ * is the whole point: those numbers cost 18.8% of revenue on top of a
+ * credit subsystem that already cost 20-25%, for a combined 38.8-43.8%
+ * against a 25% ceiling. Existing subscribers keep their old numbers —
+ * see legacyFreeChatMessages below and the grandfathering migration.
+ *
+ * Free is not a percentage of anything (its price is zero), so it keeps a
+ * flat allowance bounded by FREE_PLAN_MAX_MONTHLY_COST_EUR instead.
+ * Enterprise inherits Ultimate's number rather than being unbounded.
  */
 export const DEFAULT_FREE_CHAT_MESSAGES: Record<PlanSlug, number> = {
   free: 15,
-  starter: 120,
-  growth: 300,
-  professional: 600,
-  ultimate: 1200,
-  enterprise: 1200,
+  starter: 43,
+  growth: 107,
+  professional: 215,
+  ultimate: 430,
+  enterprise: 430,
 };
 
 const ENV_KEYS: Record<PlanSlug, string> = {
@@ -310,10 +350,15 @@ const ENV_KEYS: Record<PlanSlug, string> = {
 };
 
 /**
- * The share of the plan price the allowance is SIZED to (headroom under
- * the 25% FREE_CHAT_MAX_COST_SHARE ceiling it must never breach).
+ * The share of the plan price this quota is allocated.
+ *
+ * Re-exported from lib/billing/ceiling.ts rather than declared here: the
+ * whole failure this change exists to fix was free chat owning its own
+ * private idea of what share of revenue it could burn. There is now
+ * exactly one table of shares, in one file, and the build gate checks it
+ * against the credit subsystem's 1/M.
  */
-export const FREE_CHAT_TARGET_SHARE = 0.2;
+export const FREE_CHAT_TARGET_SHARE = DECLARED_ALLOWANCE_SHARES[FREE_CHAT_ALLOWANCE_ID];
 
 /**
  * The worst a single FREE message can cost.
@@ -325,29 +370,56 @@ export const FREE_CHAT_TARGET_SHARE = 0.2;
  *    cost on top of that is the bounded history window.
  */
 export function freeChatPerMessageWorstCaseEur(
-  config: PricingConfig = resolvePricingConfig()
+  config: PricingConfig = resolvePricingConfig(),
+  env: Record<string, string | undefined> = process.env
 ): number {
   return Math.min(
     freeChatWorstCaseCost(FREE_CHAT_LIMITS, config).costEur,
-    freeChatMaxCostEur() + freeChatHistoryWorstCaseEur(config)
+    freeChatMaxCostEur(env) + freeChatHistoryWorstCaseEur(config)
   );
 }
 
 /**
- * The largest allowance a priced plan can carry without its worst case
- * breaching the sizing target. Null for plans with no fixed price (Free,
- * Enterprise) — they are bounded by the per-message cap instead.
+ * The largest allowance this plan can carry without the COMBINED worst
+ * case — credits plus every other free quota plus this one — breaching the
+ * ceiling.
+ *
+ * This used to be `price * 0.2 / perMessage`: free chat's own private
+ * share, computed as though nothing else spent money. That is the bug.
+ * Two subsystems each sizing themselves against the full ceiling is how
+ * Professional reached 43.8% with both halves reporting healthy.
+ *
+ * It now asks lib/billing/ceiling.ts for what is actually LEFT after the
+ * credit subsystem's 1/M and every other declared quota. Three
+ * consequences worth stating, because each one was a hole:
+ *
+ *  - Lowering CREDIT_MARGIN_<PLAN> to the floor of 4 pushes credits to the
+ *    whole 25% and this returns 0. The quota turns itself off rather than
+ *    letting the ceiling be breached from the environment.
+ *  - Free has no price, so it is bounded by an ABSOLUTE monthly cost
+ *    instead — minus what its credit grant already costs. Before this it
+ *    returned null and FREE_CHAT_MESSAGES_FREE was completely unclamped.
+ *  - Enterprise is measured against ENTERPRISE_MIN_PRICE_EUR. Before this
+ *    it was also unclamped: FREE_CHAT_MESSAGES_ENTERPRISE=100000 was
+ *    accepted and produced 809% of a EUR 400 contract.
  */
 export function maxAllowanceWithinCeiling(
   planSlug: PlanSlug,
-  config: PricingConfig = resolvePricingConfig()
+  config: PricingConfig = resolvePricingConfig(),
+  env: Record<string, string | undefined> = process.env
 ): number | null {
-  const plan = getPlan(planSlug);
-  const price = plan?.price;
-  if (typeof price !== "number" || price <= 0) return null;
-  const perMessage = freeChatPerMessageWorstCaseEur(config);
+  const perMessage = freeChatPerMessageWorstCaseEur(config, env);
   if (!(perMessage > 0)) return null;
-  return Math.floor((price * FREE_CHAT_TARGET_SHARE) / perMessage);
+
+  const budgetEur = allowanceBudgetEur(FREE_CHAT_ALLOWANCE_ID, planSlug, config, env);
+  if (budgetEur !== null) return Math.max(0, Math.floor(budgetEur / perMessage));
+
+  // No price to take a share of — the Free plan. Its credit grant and its
+  // free messages come out of one flat acquisition budget, so what is left
+  // for messages is the budget minus what the credits already cost.
+  const creditCost = creditCeilingEur(planSlug, config, env) ?? 0;
+  const remaining = FREE_PLAN_MAX_MONTHLY_COST_EUR - creditCost;
+  return Math.max(0, Math.floor(remaining / perMessage));
 }
 
 /**
@@ -364,17 +436,21 @@ export function maxAllowanceWithinCeiling(
  * allowance, or the model getting pricier, cannot silently push free chat
  * past the share of plan revenue it is allowed to burn.
  */
-export function freeChatAllowance(planSlug: PlanSlug): number {
-  if (process.env.FREE_CHAT_ENABLED === "false") return 0;
+export function freeChatAllowance(
+  planSlug: PlanSlug,
+  config: PricingConfig = resolvePricingConfig(),
+  env: Record<string, string | undefined> = process.env
+): number {
+  if (env.FREE_CHAT_ENABLED === "false") return 0;
 
   let configured = DEFAULT_FREE_CHAT_MESSAGES[planSlug] ?? 0;
-  const raw = process.env[ENV_KEYS[planSlug]];
+  const raw = env[ENV_KEYS[planSlug]];
   if (raw !== undefined && raw !== "") {
     const parsed = Number(raw);
     if (Number.isFinite(parsed) && parsed >= 0) configured = Math.floor(parsed);
   }
 
-  const ceilingMax = maxAllowanceWithinCeiling(planSlug);
+  const ceilingMax = maxAllowanceWithinCeiling(planSlug, config, env);
   return ceilingMax === null ? configured : Math.min(configured, ceilingMax);
 }
 
@@ -383,45 +459,194 @@ export type PlanFreeChatEconomics = {
   planPriceEur: number | "custom";
   freeMessages: number;
   worstCaseCostEur: number;
-  /** null for plans with no fixed price — a share of "custom" is undefined. */
+  /**
+   * Share of the price this plan is MEASURED against — the published price,
+   * or ENTERPRISE_MIN_PRICE_EUR for the custom-priced tier. Null only for
+   * Free, whose price is genuinely zero.
+   */
   shareOfPrice: number | null;
-  withinCeiling: boolean;
+  /** The EUR this quota was allocated on this plan; null for Free. */
+  budgetEur: number | null;
+  /**
+   * Whether this quota fits its OWN allocated budget. Not "are we at 4x" —
+   * that is combinedCeilingFor() in lib/billing/free-allowances.ts.
+   */
+  withinBudget: boolean;
 };
 
 /**
  * The per-plan table: allowance, worst-case cost, and what share of the
- * plan price that is. This is what proves the feature cannot lose money at
- * a rate the plan price doesn't cover.
+ * plan price that is.
+ *
+ * `withinCeiling` here answers a DELIBERATELY NARROW question — "does this
+ * quota fit inside the budget it was allocated" — not "are we at 4x". The
+ * second question belongs to combinedCeilingFor() in
+ * lib/billing/free-allowances.ts, which is the only function that sees
+ * every subsystem at once. Answering it here, from inside one subsystem,
+ * with one subsystem's numbers, is precisely the mistake this file used to
+ * make: it reported `withinCeiling: true` at 18.8% while the account it
+ * described was really at 43.8%.
+ *
+ * Enterprise is no longer exempt. It has a contractual floor price
+ * (ENTERPRISE_MIN_PRICE_EUR), so a share of it is defined and checked;
+ * only Free — whose price is genuinely zero — falls back to the absolute
+ * acquisition budget.
  */
 export function freeChatEconomics(
-  config: PricingConfig = resolvePricingConfig()
+  config: PricingConfig = resolvePricingConfig(),
+  env: Record<string, string | undefined> = process.env
 ): PlanFreeChatEconomics[] {
-  const perMessage = freeChatPerMessageWorstCaseEur(config);
+  const perMessage = freeChatPerMessageWorstCaseEur(config, env);
 
   return PLANS.map((plan) => {
-    const freeMessages = freeChatAllowance(plan.slug);
+    const freeMessages = freeChatAllowance(plan.slug, config, env);
     const worstCaseCostEur = freeMessages * perMessage;
-    const price = plan.price;
 
-    // A free plan has no price to take a share of, and neither does
-    // Enterprise. Both are judged on the absolute number instead, so
-    // shareOfPrice is null rather than Infinity or a fake 0.
-    const shareOfPrice =
-      typeof price === "number" && price > 0 ? worstCaseCostEur / price : null;
+    // The price the CEILING measures against, not plan.price. Enterprise
+    // used to report a null share here purely because its price is the
+    // string "custom" — which is how it ended up carrying Ultimate's
+    // 1,200-message allowance with nothing to check it against.
+    const measuredPrice = ceilingPriceEur(plan.slug, env);
+    const budgetEur = allowanceBudgetEur(FREE_CHAT_ALLOWANCE_ID, plan.slug, config, env);
 
     return {
       planSlug: plan.slug,
-      planPriceEur: price,
+      planPriceEur: plan.price,
       freeMessages,
       worstCaseCostEur,
-      shareOfPrice,
-      withinCeiling: shareOfPrice === null ? true : shareOfPrice <= FREE_CHAT_MAX_COST_SHARE,
+      shareOfPrice: measuredPrice === null ? null : worstCaseCostEur / measuredPrice,
+      budgetEur,
+      withinBudget:
+        budgetEur === null
+          ? worstCaseCostEur + (creditCeilingEur(plan.slug, config, env) ?? 0) <=
+            FREE_PLAN_MAX_MONTHLY_COST_EUR + 1e-9
+          : worstCaseCostEur <= budgetEur + 1e-9,
     };
   });
 }
 
 /** Convenience for the route: the allowance for a plan slug string. */
-export function freeChatAllowanceForSlug(slug: string): number {
+export function freeChatAllowanceForSlug(
+  slug: string,
+  config: PricingConfig = resolvePricingConfig(),
+  env: Record<string, string | undefined> = process.env
+): number {
   const plan = getPlan(slug);
-  return freeChatAllowance((plan?.slug ?? "free") as PlanSlug);
+  return freeChatAllowance((plan?.slug ?? "free") as PlanSlug, config, env);
+}
+
+// ---------------------------------------------------------------------------
+// Grandfathering
+// ---------------------------------------------------------------------------
+
+/**
+ * A grandfathered account's entitlements, as plain data.
+ *
+ * Structurally identical to LegacyEntitlements in
+ * lib/billing/legacy-entitlements.ts, restated here so this module stays
+ * free of `server-only` — every function in this file is also used by the
+ * economics tables and the build gate, which have no database.
+ */
+export type FreeChatLegacy = {
+  planTier: string | null;
+  freeChatMessages: number | null;
+  freeChatHistoryLimit: number | null;
+  freeChatMaxOutputTokens: number | null;
+  until: Date | null;
+};
+
+/**
+ * An entitlement is in force only on the plan it was granted for.
+ *
+ * The plan check is not redundant with clearing on plan change. A beta
+ * account carries plan_tier 'ultimate' and drops to Free the moment
+ * beta_expires_at passes — no Stripe event, no webhook, nothing to call
+ * clearLegacyEntitlements. Without this comparison such an account would
+ * keep Ultimate's 1,200 free messages, EUR 37.63/month, on a plan that
+ * pays nothing at all.
+ */
+function legacyInForce(
+  legacy: FreeChatLegacy | null | undefined,
+  planSlug: PlanSlug,
+  now: Date
+): boolean {
+  if (!legacy || legacy.freeChatMessages === null) return false;
+  if (legacy.planTier !== planSlug) return false;
+  return legacy.until === null || legacy.until.getTime() > now.getTime();
+}
+
+/**
+ * The allowance for an account, honouring a grandfathered one.
+ *
+ * `max`, not "legacy wins": if the published allowance ever grows past
+ * what an account was grandfathered, the account should get the larger
+ * number rather than being frozen at a figure that used to be generous.
+ */
+export function freeChatAllowanceForAccount(
+  planSlug: PlanSlug,
+  legacy: FreeChatLegacy | null | undefined,
+  config: PricingConfig = resolvePricingConfig(),
+  env: Record<string, string | undefined> = process.env,
+  now: Date = new Date()
+): number {
+  const published = freeChatAllowance(planSlug, config, env);
+  // FREE_CHAT_ENABLED=false is a kill switch, not a pricing change — it
+  // has to turn the feature off for grandfathered accounts too.
+  if (env.FREE_CHAT_ENABLED === "false") return 0;
+  if (!legacyInForce(legacy, planSlug, now)) return published;
+  return Math.max(published, legacy!.freeChatMessages!);
+}
+
+/**
+ * The envelope a free message runs in for this account.
+ *
+ * The stored numbers are used as-is rather than "the constants as they
+ * were", so the exception cannot silently start tracking a future
+ * envelope change in either direction. `max` for the same reason as the
+ * allowance: a later, more generous published envelope should reach
+ * grandfathered accounts too.
+ */
+export function freeChatLimitsForAccount(
+  planSlug: PlanSlug,
+  legacy: FreeChatLegacy | null | undefined,
+  now: Date = new Date()
+): FreeChatLimits {
+  if (!legacyInForce(legacy, planSlug, now)) return FREE_CHAT_LIMITS;
+  return {
+    ...FREE_CHAT_LIMITS,
+    historyLimit: Math.max(FREE_CHAT_LIMITS.historyLimit, legacy!.freeChatHistoryLimit ?? 0),
+    maxOutputTokens: Math.max(
+      FREE_CHAT_LIMITS.maxOutputTokens,
+      legacy!.freeChatMaxOutputTokens ?? 0
+    ),
+  };
+}
+
+/**
+ * What one grandfathered account costs per month, worst case, ON TOP of
+ * what the published numbers would have cost.
+ *
+ * The whole point of a bounded exception is that its size is a number
+ * somebody can look at. This is that number, per account; multiplied by
+ * the cohort count (a SQL query in the migration header) it is the total
+ * the ceiling is knowingly over by.
+ */
+export function legacyExcessCostEur(
+  planSlug: PlanSlug,
+  legacy: FreeChatLegacy | null | undefined,
+  config: PricingConfig = resolvePricingConfig(),
+  env: Record<string, string | undefined> = process.env,
+  now: Date = new Date()
+): number {
+  if (!legacyInForce(legacy, planSlug, now)) return 0;
+  const publishedMessages = freeChatAllowance(planSlug, config, env);
+  const publishedCost = publishedMessages * freeChatPerMessageWorstCaseEur(config, env);
+
+  const limits = freeChatLimitsForAccount(planSlug, legacy, now);
+  const perMessage = Math.min(
+    freeChatWorstCaseCost(limits, config).costEur,
+    freeChatMaxCostEur(env) + freeChatHistoryWorstCaseEur(config, limits)
+  );
+  const legacyCost = freeChatAllowanceForAccount(planSlug, legacy, config, env, now) * perMessage;
+  return Math.max(0, legacyCost - publishedCost);
 }

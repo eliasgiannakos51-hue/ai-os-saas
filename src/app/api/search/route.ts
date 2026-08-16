@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CLASSIFIER_MODULES, moduleHref } from "@/lib/classifier-modules";
 import { BUILD_MODULES } from "@/lib/build-modules";
 import { logApiError } from "@/lib/log-error";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
@@ -119,6 +120,9 @@ export async function GET(request: Request) {
     }
 
     const pattern = likePattern(q);
+    // The module name is a key on the config. This route answers a
+    // signed-in browser, so it resolves it in that request's locale.
+    const t = await getTranslations();
 
     const moduleResultLists = await Promise.all(
       ALL_MODULES.map(async ({ config, href }) => {
@@ -128,7 +132,7 @@ export async function GET(request: Request) {
             id: `${config.slug}-${row.id}`,
             type: "module",
             title: row.headline || "untitled",
-            subtitle: config.title,
+            subtitle: t(config.titleKey),
             href,
           })
         );

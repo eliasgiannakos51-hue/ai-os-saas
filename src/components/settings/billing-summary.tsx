@@ -2,6 +2,10 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { getPlan } from "@/lib/billing/plans";
 import { ManageBillingButton } from "@/components/billing/manage-billing-button";
+import { CancelSubscription } from "@/components/settings/cancel-subscription";
+import { SubscriptionEndingBanner } from "@/components/billing/subscription-ending-banner";
+import { daysUntil } from "@/lib/billing/subscription-period";
+import type { SubscriptionState } from "@/lib/billing/subscription-state";
 
 export async function BillingSummary({
   tier,
@@ -10,6 +14,9 @@ export async function BillingSummary({
   isAdmin = false,
   isBetaTester = false,
   betaDaysRemaining = null,
+  subscription = null,
+  creditsRemaining = 0,
+  purchasedCredits = 0,
 }: {
   tier: string;
   seatCount: number;
@@ -20,6 +27,12 @@ export async function BillingSummary({
   // only meaningful while isBetaTester is true. null just falls back to a
   // plain "Beta Tester" label instead of an expiry count.
   betaDaysRemaining?: number | null;
+  /** Live cancel/renew state from Stripe, or null when there is none. */
+  subscription?: SubscriptionState | null;
+  /** The whole spendable balance. */
+  creditsRemaining?: number;
+  /** How much of it was BOUGHT. Never expires; see the migration. */
+  purchasedCredits?: number;
 }) {
   const t = await getTranslations("settings.billing");
   const plan = getPlan(tier) ?? getPlan("free")!;
@@ -27,13 +40,28 @@ export async function BillingSummary({
   return (
     <div className="mb-6 space-y-3 rounded-2xl border border-border bg-panel p-5">
       <h2 className="text-sm font-semibold text-foreground">{t("title")}</h2>
+      {subscription?.cancelAtPeriodEnd && subscription.endsAt && (
+        <SubscriptionEndingBanner daysLeft={daysUntil(subscription.endsAt)} />
+      )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-xs text-muted">{t("currentPlan")}</p>
           <p className="mt-0.5 text-lg font-bold text-foreground">{plan.name}</p>
+          {/* Shown only when there is something to explain. A user with no
+              pack sees one number, as before; a user holding one needs to
+              know which part of their balance survives the month, because
+              that is the whole difference between the two. */}
+          {purchasedCredits > 0 && (
+            <p className="mt-0.5 text-xs text-muted">
+              {t("creditsSplit", {
+                monthly: creditsRemaining - purchasedCredits,
+                purchased: purchasedCredits,
+              })}
+            </p>
+          )}
           {seatCount > 0 && (
             <p className="mt-0.5 text-xs text-muted">
-              + {seatCount} team {seatCount === 1 ? "seat" : "seats"}
+              {t("teamSeats", { seats: seatCount })}
             </p>
           )}
         </div>
@@ -44,18 +72,31 @@ export async function BillingSummary({
             </span>
           ) : isBetaTester ? (
             <span className="inline-flex items-center rounded-full border border-emerald-800 bg-emerald-950/30 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-emerald-400">
+              {/* ICU plural, not `day${n === 1 ? "" : "s"}`. Arabic has six
+                  plural forms and Japanese has none; an English "(s)" hack
+                  is wrong in both directions and cannot be fixed by a
+                  translator, because the branch lives in the code. */}
               {typeof betaDaysRemaining === "number"
-                ? `Beta Tester — expires in ${betaDaysRemaining} day${betaDaysRemaining === 1 ? "" : "s"}`
-                : "Beta Tester"}
+                ? t("betaTesterExpires", { days: betaDaysRemaining })
+                : t("betaTester")}
             </span>
           ) : hasSubscription ? (
-            <ManageBillingButton />
+            <>
+              <ManageBillingButton />
+              {/* Beside "Manage billing", not buried inside Stripe's hosted
+                  portal behind it. Hidden only once a cancellation is
+                  already pending, where the banner above offers Restore
+                  instead — cancelling twice is not a thing. */}
+              {!subscription?.cancelAtPeriodEnd && (
+                <CancelSubscription endsAt={subscription?.endsAt ?? null} />
+              )}
+            </>
           ) : (
             <Link
               href="/pricing"
               className="inline-flex min-h-[40px] items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
             >
-              Upgrade Plan
+              {t("upgradePlan")}
             </Link>
           )}
           {(hasSubscription || isAdmin || isBetaTester) && tier !== "free" && (

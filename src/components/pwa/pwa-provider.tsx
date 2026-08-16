@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Download, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import {
   INSTALL_STATE_STORAGE_KEY,
   parseInstallState,
@@ -40,6 +41,7 @@ function writeState(state: InstallPromptState) {
 }
 
 export function PwaProvider() {
+  const t = useTranslations("common");
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [visible, setVisible] = useState(false);
 
@@ -121,7 +123,7 @@ export function PwaProvider() {
   return (
     <div
       role="dialog"
-      aria-label="Install Ionexa"
+      aria-label={t("installIonexa")}
       className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-sm rounded-xl border border-border bg-panel p-4 shadow-lg md:left-auto md:right-4 md:mx-0"
     >
       <div className="flex items-start gap-3">
@@ -153,7 +155,7 @@ export function PwaProvider() {
         <button
           type="button"
           onClick={dismiss}
-          aria-label="Dismiss"
+          aria-label={t("dismiss")}
           className="text-muted transition hover:text-foreground"
         >
           <X className="h-4 w-4" />

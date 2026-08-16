@@ -8,6 +8,8 @@ import { buildOutputSummary, buildMissionContextSystemPromptAddition } from "@/l
 import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 import { AI_SAFETY_BOUNDARIES_EN, AI_CRISIS_CLASSIFIER_EN } from "@/lib/ai-conduct";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
+import { enModuleTitle, enFieldLabel } from "@/lib/module-labels";
+import type { ModuleTitleKey } from "@/lib/modules";
 
 const MODEL = "claude-sonnet-4-6";
 // Exported so the cron runner's billing estimate prices the same model
@@ -101,7 +103,7 @@ export type MissionStepRunResult =
       ok: true;
       matched: true;
       module: string;
-      moduleTitle: string;
+      moduleTitleKey: ModuleTitleKey;
       href: string;
       message: string;
       outputSummary: string;
@@ -172,7 +174,7 @@ export async function runMissionStepForUser(
     return {
       ok: true,
       matched: false,
-      message: `I found this looked like a ${moduleConfig.title} entry, but couldn't extract "${missingRequired.label}", which is required.`,
+      message: `I found this looked like a ${enModuleTitle(moduleConfig)} entry, but couldn't extract "${enFieldLabel(missingRequired)}", which is required.`,
     };
   }
 
@@ -190,7 +192,7 @@ export async function runMissionStepForUser(
     ok: true,
     matched: true,
     module: moduleConfig.slug,
-    moduleTitle: moduleConfig.title,
+    moduleTitleKey: moduleConfig.titleKey,
     href: moduleHref(moduleConfig.slug),
     message: toolInput.message,
     outputSummary: buildOutputSummary(moduleConfig, insertedRecord as Record<string, unknown>, toolInput.message),

@@ -77,8 +77,8 @@ export function LoginActivity({ devices: initialDevices }: { devices: KnownDevic
                   type="button"
                   onClick={() => removeDevice(device)}
                   disabled={removingId === device.id}
-                  aria-label={`Remove ${label}`}
-                  title="Remove device"
+                  aria-label={t("removeDeviceAria", { device: label })}
+                  title={t("removeDevice")}
                   className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-red-950/30 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <X className="h-4 w-4" aria-hidden="true" />

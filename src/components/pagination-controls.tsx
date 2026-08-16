@@ -1,4 +1,7 @@
+"use client";
+
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function PaginationControls({
   page,
@@ -9,6 +12,8 @@ export function PaginationControls({
   totalPages: number;
   onChange: (page: number) => void;
 }) {
+  const t = useTranslations("common");
+
   if (totalPages <= 1) return null;
 
   return (
@@ -17,7 +22,7 @@ export function PaginationControls({
         type="button"
         onClick={() => onChange(page - 1)}
         disabled={page <= 1}
-        aria-label="Previous page"
+        aria-label={t("previousPage")}
         className="inline-flex min-h-[40px] items-center justify-center gap-1 rounded-lg border border-border px-3 transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 sm:py-1.5"
       >
         <ChevronLeft className="h-4 w-4" /> Prev
@@ -29,7 +34,7 @@ export function PaginationControls({
         type="button"
         onClick={() => onChange(page + 1)}
         disabled={page >= totalPages}
-        aria-label="Next page"
+        aria-label={t("nextPage")}
         className="inline-flex min-h-[40px] items-center justify-center gap-1 rounded-lg border border-border px-3 transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0 sm:py-1.5"
       >
         Next <ChevronRight className="h-4 w-4" />

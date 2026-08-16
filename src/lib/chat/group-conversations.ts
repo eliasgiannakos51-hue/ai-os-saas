@@ -1,7 +1,16 @@
 import type { ChatConversation } from "@/types/chat";
 
+/**
+ * `label` is a KEY under dashboard.chat, not text.
+ *
+ * It used to be the literal "Today" / "Yesterday" / "Older", rendered
+ * straight into the sidebar. Nothing could see it: it is a data field, so
+ * the JSX scanners walk past it, and it never appears in messages/*.json,
+ * so check-i18n.js has nothing to compare. Three English headers sat at
+ * the top of every Greek conversation list.
+ */
 export type ConversationGroup = {
-  label: "Today" | "Yesterday" | "Older";
+  label: "groupToday" | "groupYesterday" | "groupOlder";
   conversations: ChatConversation[];
 };
 
@@ -31,8 +40,8 @@ export function groupConversationsByDate(
   }
 
   return [
-    { label: "Today" as const, conversations: today },
-    { label: "Yesterday" as const, conversations: yesterday },
-    { label: "Older" as const, conversations: older },
+    { label: "groupToday" as const, conversations: today },
+    { label: "groupYesterday" as const, conversations: yesterday },
+    { label: "groupOlder" as const, conversations: older },
   ].filter((group) => group.conversations.length > 0);
 }

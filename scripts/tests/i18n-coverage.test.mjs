@@ -30,6 +30,8 @@
 // Run: node scripts/tests/i18n-coverage.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import ts from "typescript";
+import { execFileSync } from "node:child_process";
 
 let pass = 0,
   fail = 0;
@@ -95,6 +97,238 @@ for (const file of sources) {
   }
 }
 check(`no hardcoded prose in ${USER_FACING_CALLS.join("/")} (${sources.length} files scanned)`, hardcoded, []);
+
+// ---------------------------------------------------------------------
+// 1a. THE SAME CALLS, WRITTEN WITH BACKTICKS.
+//
+//     addToast(`✗ could not save persona name`, "error")
+//     addToast(`✗ error: ${err.message}`, "error")
+//     addToast(`✓ added ${n} example ${n === 1 ? "entry" : "entries"}`)
+//     window.confirm(`Delete "${title}"? This can't be undone.`)
+//
+// The regex above requires a double quote straight after the paren, so
+// every one of those was invisible to it — and the third is an English
+// plural rule baked into a ternary, which no language outside English
+// shares. Four of them shipped.
+//
+// PARSED, not pattern-matched: only the STATIC chunks count. `✗ ${msg}`
+// contributes "✗ " and is not prose; the interpolation is somebody else's
+// already-translated string.
+const RENDER_CALL_NAMES = new Set([...USER_FACING_CALLS, "setStatus", "alert", "confirm"]);
+function staticChunksOf(node) {
+  if (ts.isNoSubstitutionTemplateLiteral(node)) return [node.text];
+  if (ts.isTemplateExpression(node)) {
+    return [node.head.text, ...node.templateSpans.map((sp) => sp.literal.text)];
+  }
+  return null;
+}
+const templateProse = [];
+for (const file of sources) {
+  const sf = ts.createSourceFile(
+    file,
+    readFileSync(file, "utf8"),
+    ts.ScriptTarget.ES2022,
+    true,
+    file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+  );
+  const visit = (node) => {
+    if (ts.isCallExpression(node)) {
+      const callee = node.expression.getText().split(".").pop();
+      if (RENDER_CALL_NAMES.has(callee)) {
+        for (const arg of node.arguments) {
+          const chunks = staticChunksOf(arg);
+          if (!chunks) continue;
+          const prose = chunks.filter((c) => PROSE.test(c));
+          if (prose.length) {
+            const { line } = sf.getLineAndCharacterOfPosition(arg.getStart());
+            templateProse.push(`${file}:${line + 1} ${callee}(\`…${prose.join("…")}…\`)`);
+          }
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+}
+check("no rendered template literal has English in its static text", templateProse, []);
+
+// It has to be able to fail, on the exact four shapes that shipped.
+{
+  const SHIPPED = [
+    "function R({ addToast, err, n, title }) {",
+    "  addToast(`\\u2717 could not save persona name`, 'error');",
+    "  addToast(`\\u2717 error: ${err.message}`, 'error');",
+    "  addToast(`\\u2713 added ${n} example ${n === 1 ? 'entry' : 'entries'}`);",
+    "  window.confirm(`Delete \\\"${title}\\\"? This can't be undone.`);",
+    "  addToast(`\\u2717 ${err.message}`, 'error');",
+    "}",
+  ].join("\n");
+  const sf = ts.createSourceFile("toasts.ts", SHIPPED, ts.ScriptTarget.ES2022, true, ts.ScriptKind.TS);
+  const caught = [];
+  const visit = (node) => {
+    if (ts.isCallExpression(node)) {
+      const callee = node.expression.getText().split(".").pop();
+      if (RENDER_CALL_NAMES.has(callee)) {
+        for (const arg of node.arguments) {
+          const chunks = staticChunksOf(arg);
+          if (chunks && chunks.some((c) => PROSE.test(c))) caught.push(callee);
+        }
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  // Four flagged. The fifth — `\u2717 ${err.message}` — is left alone: its
+  // only static text is a symbol, and the message it wraps is the
+  // server-side prose already counted as a known gap below.
+  check("the template walk catches the four shapes that shipped", caught, [
+    "addToast",
+    "addToast",
+    "addToast",
+    "confirm",
+  ]);
+}
+
+// ---------------------------------------------------------------------
+// 1b. THE PATTERN NO REGEX GATE COULD SEE: a conditional whose branches
+//     are English literals, rendered straight into the UI.
+//
+//         {plan.teamSeatsIncluded
+//           ? "Unlimited team seats included — no per-member charge"
+//           : `+ €20/month per team member — ...`}
+//
+// Section 1 above scans `addToast("`, `setError("`, `setMessage("` — a
+// literal as the FIRST thing after the paren. `addToast(next ? "..." )`
+// does not match it. check-i18n.js never opens a source file at all. So
+// this shape shipped in nine components, in the two pages a non-English
+// visitor is most likely to see first, and every i18n check in the repo
+// was green the whole time.
+//
+// PARSED, NOT PATTERN-MATCHED. A regex cannot tell `? "A" : "B"` from
+// `reason: cond ? "A" : "B"` inside sendMarginAlertEmail({...}) — an
+// operator alert that is English by design, exactly like the server-side
+// error prose recorded as a known gap below. It also cannot tell prose
+// from `expanded ? "rotate-180" : "rotate-0"`. Walking the real AST
+// answers both by construction: a className attribute is not a text
+// attribute, and an object property is not a render.
+const TEXT_ATTRS = new Set([
+  "title",
+  "aria-label",
+  "aria-description",
+  "aria-placeholder",
+  "placeholder",
+  "alt",
+  "label",
+]);
+const RENDER_CALLS = new Set([...USER_FACING_CALLS, "setStatus", "alert", "confirm"]);
+// Two words is prose. One word is a class name, an enum value, or a
+// formatting token — and the single-word cases that ARE user-facing
+// (an aria-label of "Close") are caught by section 3's key coverage
+// instead, since they have to come from somewhere.
+const TERNARY_PROSE = /[A-Za-z]{3,}[ ,'\u2019][A-Za-z]{2,}/;
+
+function staticTextOf(node) {
+  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
+  if (ts.isTemplateExpression(node)) {
+    // Only the literal chunks: `${count} days` contributes " days".
+    return node.head.text + node.templateSpans.map((sp) => sp.literal.text).join(" ");
+  }
+  return null;
+}
+
+/**
+ * Walks up from a conditional to decide whether its value is RENDERED.
+ * Returns the sink's name, or null when the value is data rather than UI.
+ */
+function renderSinkFor(node) {
+  let cur = node.parent;
+  for (let depth = 0; cur && depth < 6; depth++) {
+    // An object property or a variable is data for whoever consumes it,
+    // not something the user is being shown. This is what keeps
+    // sendMarginAlertEmail({ reason: ... }) out of the results.
+    if (ts.isPropertyAssignment(cur) || ts.isVariableDeclaration(cur)) return null;
+    if (ts.isJsxExpression(cur)) {
+      const parent = cur.parent;
+      if (ts.isJsxAttribute(parent)) {
+        const name = parent.name.getText();
+        return TEXT_ATTRS.has(name) ? `${name}=` : null;
+      }
+      return "JSX text";
+    }
+    if (ts.isCallExpression(cur)) {
+      const callee = cur.expression.getText().split(".").pop();
+      return RENDER_CALLS.has(callee) ? `${callee}()` : null;
+    }
+    cur = cur.parent;
+  }
+  return null;
+}
+
+const ternaryLiterals = [];
+for (const file of sources) {
+  if (!file.endsWith(".tsx")) continue;
+  const sf = ts.createSourceFile(
+    file,
+    readFileSync(file, "utf8"),
+    ts.ScriptTarget.ES2022,
+    true,
+    ts.ScriptKind.TSX
+  );
+  const visit = (node) => {
+    if (ts.isConditionalExpression(node)) {
+      for (const branch of [node.whenTrue, node.whenFalse]) {
+        const text = staticTextOf(branch);
+        if (!text || !TERNARY_PROSE.test(text)) continue;
+        const sink = renderSinkFor(node);
+        if (!sink) continue;
+        const { line } = sf.getLineAndCharacterOfPosition(branch.getStart());
+        ternaryLiterals.push(`${file}:${line + 1} [${sink}] ${text.trim().slice(0, 60)}`);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+}
+check(`no rendered ternary branch is an English literal`, ternaryLiterals, []);
+
+// The check must be able to FAIL. Both shapes that shipped are parsed
+// here, so an edit that narrows the AST walk into uselessness fails
+// immediately instead of silently going quiet.
+{
+  const SHIPPED = `
+    export function Regression({ a, b, c }) {
+      const cls = a ? "rotate-180" : "rotate-0";
+      void cls;
+      send({ reason: c ? "30-day charged average is low" : "30-day projected average is low" });
+      if (b) addToast(b ? "\u2713 chat memory enabled" : "\u2713 chat memory disabled");
+      return (
+        <p title={a ? "Owner access — unlimited credits" : "Credits remaining — buy more"}>
+          {b ? "Unlimited team seats included — no per-member charge" : "\u002b €20/month per team member"}
+        </p>
+      );
+    }`;
+  const sf = ts.createSourceFile("regression.tsx", SHIPPED, ts.ScriptTarget.ES2022, true, ts.ScriptKind.TSX);
+  const caught = [];
+  const visit = (node) => {
+    if (ts.isConditionalExpression(node)) {
+      for (const branch of [node.whenTrue, node.whenFalse]) {
+        const text = staticTextOf(branch);
+        if (text && TERNARY_PROSE.test(text) && renderSinkFor(node)) caught.push(text.trim());
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  // Six flagged: two JSX text, two title=, two addToast.
+  check("the AST walk catches every shape that shipped", caught.length, 6);
+  // And leaves alone the two it must: a className toggle and an operator
+  // alert's payload.
+  check(
+    "…without flagging class names or operator-alert payloads",
+    caught.filter((c) => /rotate-|30-day/.test(c)),
+    []
+  );
+}
 
 // KNOWN GAP, recorded rather than silently tolerated.
 //
@@ -207,7 +441,15 @@ const clientFallbacks = sources.flatMap((f) => [
 // renders dashboard.agents.buildStalled in the user's own language. A
 // baseline raised over a string the user genuinely sees would be this
 // check being talked around instead of answered.
-const SERVER_PROSE_BASELINE = 518;
+// 518 -> 521 for api/billing/cancel and api/billing/resume: the
+// not-authenticated reply, the no-subscription reply and the failure
+// reply, in the same documented convention as the 518 before them — the
+// calling component surfaces them and translates what it can. The three
+// sentences the user actually READS while cancelling (what happens to
+// access, credits, data, and that it is reversible) are in
+// settings.billing.cancel.* in all ten locales; these are the fallbacks
+// shown only when the request itself fails.
+const SERVER_PROSE_BASELINE = 521;
 // 517 -> 518 for the "Not authenticated." reply added to
 // api/jobs/[id]/continue. That string is the standard one every other
 // route in the app already returns, and it appeared because
@@ -227,6 +469,246 @@ checkTrue(
   clientFallbacks.length <= CLIENT_FALLBACK_BASELINE
 );
 
+// ---------------------------------------------------------------------
+// 1c. BARE ENGLISH RENDERED STRAIGHT INTO JSX.
+//
+//     <span>We use cookies for essential functionality…</span>
+//     <button>Accept</button>
+//     <p title="Owner access — unlimited credits">
+//
+// The sibling of 1b. That catches `{cond ? "A" : "B"}`; this catches the
+// literal that is simply there. Both walk the AST for the same reason —
+// a regex cannot tell a text node from a className, or a sentence from an
+// import specifier.
+//
+// MEASURED BEFORE IT WAS TRUSTED. The full report
+// (`node scripts/jsx-text-report.mjs`) was read hit by hit and checked
+// against a real browser on a Greek production build: 162 hits, of which
+// the only category that was not genuinely untranslated user-facing
+// English was the Next.js image-generation routes, whose PNG is fetched by
+// social crawlers that send no locale cookie — excluded by convention, not
+// by name. False-positive rate 0%.
+//
+// A RATCHET, NOT A ZERO.
+//
+// 94 of these still ship — 162 when this landed, minus the 22 aria-label
+// attributes paid off in batch A1 (now held at zero by 1d above), the 25
+// in the Ideas module paid off in A2, the 19 in Chat, Memory and Create
+// paid off in A3, and the two `title=` attributes that came with the eight
+// template-literal strings 1a and 1d turned up.
+// Failing the build on all of them would mean
+// this check could not land at all, and a check that cannot land protects
+// nothing. So the baseline below is per FILE: no file may get worse, and
+// the total may only go down. That is the same mechanism this file already
+// uses for server-side error prose a few sections down — the number is
+// asserted so it cannot quietly GROW, and the decision to pay the debt
+// stays a decision instead of an accident.
+//
+// Fixing a file? Lower its number here, or delete the entry when it hits
+// zero. The check fails if a baseline is HIGHER than reality too, so a
+// stale entry cannot hide a regression somewhere else.
+const BARE_TEXT_BASELINE = {
+    "src/app/cookies/page.tsx": 19,
+    "src/app/dashboard/error.tsx": 1,
+    "src/app/dashboard/system-health/page.tsx": 5,
+    "src/app/not-found.tsx": 2,
+    "src/app/offline/page.tsx": 3,
+    "src/app/privacy/page.tsx": 17,
+    "src/app/terms/page.tsx": 10,
+    "src/components/auth/generate-password-button.tsx": 1,
+    "src/components/billing/upgrade-required.tsx": 4,
+    "src/components/dashboard/command-palette.tsx": 3,
+    "src/components/entity-links/link-to-modal.tsx": 1,
+    "src/components/error-message.tsx": 1,
+    "src/components/landing/deleted-account-banner.tsx": 1,
+    "src/components/legal/legal-layout.tsx": 3,
+    "src/components/overview/beta-expiry-banner.tsx": 2,
+    "src/components/overview/quick-start-button.tsx": 1,
+    "src/components/overview/quick-start-modal.tsx": 3,
+    "src/components/pagination-controls.tsx": 3,
+    "src/components/pwa/pwa-provider.tsx": 4,
+    "src/components/settings/buy-credits.tsx": 2,
+    "src/components/settings/danger-zone.tsx": 1,
+    "src/components/settings/password-change-form.tsx": 1,
+    "src/components/system-health/error-list.tsx": 2,
+    "src/components/text-actions/text-actions-textarea.tsx": 2,
+    "src/components/ui/widget-boundary.tsx": 2,
+  };
+// Derived, not typed. The printed total used to be a hand-written 162 in a
+// template string, which is a second number that can disagree with the
+// first — and did, the moment the per-file entries came down.
+const BASELINE_TOTAL = Object.values(BARE_TEXT_BASELINE).reduce((a, b) => a + b, 0);
+
+{
+  const report = JSON.parse(
+    execFileSync("node", ["scripts/jsx-text-report.mjs", "--json"], {
+      encoding: "utf8",
+      maxBuffer: 32 * 1024 * 1024,
+    })
+  );
+  const counts = new Map();
+  for (const hit of report.hits) {
+    const rel = hit.file.slice(hit.file.indexOf("/src/") + 1);
+    counts.set(rel, (counts.get(rel) ?? 0) + 1);
+  }
+
+  const worse = [];
+  const stale = [];
+  for (const [file, allowed] of Object.entries(BARE_TEXT_BASELINE)) {
+    const actual = counts.get(file) ?? 0;
+    if (actual > allowed) worse.push(`${file}: ${actual} (baseline ${allowed})`);
+    if (actual < allowed) stale.push(`${file}: ${actual} (baseline ${allowed} — lower it)`);
+  }
+  for (const [file, actual] of counts) {
+    if (!(file in BARE_TEXT_BASELINE)) worse.push(`${file}: ${actual} (NEW — no baseline)`);
+  }
+
+  const total = [...counts.values()].reduce((a, b) => a + b, 0);
+  console.log(`        ${total} bare-English hits across ${counts.size} files (baseline total ${BASELINE_TOTAL})`);
+  check("no file renders MORE bare English than its baseline", worse, []);
+  if (worse.length) {
+    console.log("        Translate it, or — if it is genuinely not translatable —");
+    console.log("        say why in scripts/jsx-text-report.mjs rather than raising the baseline.");
+  }
+  check("no baseline is stale (a fixed file must lower its number)", stale, []);
+}
+
+// ---------------------------------------------------------------------
+// 1d. AN ARIA LABEL IS THE ONLY TEXT SOME USERS GET. NO LITERALS, AT ALL.
+//
+//     <button aria-label="Send">      <ArrowUp />      </button>
+//     <button aria-label="Close">     <X />            </button>
+//     <div role="dialog" aria-label="Command palette"> …
+//
+// Every one of those buttons is an ICON. There is no visible word to fall
+// back on: for someone using a screen reader the aria-label IS the button,
+// and 22 of them were English on a Greek, Japanese or Arabic page — while
+// the label beside them, the heading above them and the toast after them
+// were all translated. That is worse than an untranslated page, because it
+// is invisible to everyone who could have reported it. Nothing in this
+// file caught them: 1b only looks at conditionals, and 1c's ratchet let a
+// file keep whatever it already had.
+//
+// SO THIS ONE IS A ZERO, NOT A RATCHET. A ratchet is the right instrument
+// for a debt that is expensive to pay; this debt is 22 attributes and it
+// is paid. Holding it at zero is what stops the next icon button from
+// arriving with `aria-label="Retry"` — and there is nowhere for such a
+// string to hide, because an aria-label has no legitimate non-prose form
+// the way className or an id does.
+//
+// PARSED, NOT GREPPED, for the reason the two sections above give: the
+// point is to allow `aria-label={t("send")}` and reject `aria-label="Send"`,
+// and only the AST distinguishes an attribute's initializer kind.
+const ARIA_TEXT_ATTRS = new Set([
+  "aria-label",
+  "aria-description",
+  "aria-placeholder",
+  "aria-roledescription",
+  "aria-valuetext",
+]);
+// The ONE literal that is allowed, and only as the whole value: the
+// product's own name. "Ionexa AI" is the same nine characters in all ten
+// locales, so a key for it would be ten copies of a string that can never
+// differ — and check-i18n.js would then flag nine of them as untranslated.
+const BRAND_ARIA_LITERALS = new Set(["ionexa", "ionexa ai"]);
+
+/**
+ * The hardcoded text in an aria attribute's value, or null when the value
+ * comes from somewhere translatable.
+ *
+ * A TEMPLATE LITERAL IS A LITERAL. The first version of this check only
+ * looked at `aria-label="..."`, so four attributes went on shipping
+ * English: `aria-label={`Unlink ${headline}`}`, `` `Remove ${label}` ``,
+ * `` `${message} — press Enter to dismiss` `` and `` `${label} (hex)` ``.
+ * The interpolation is the translatable part; the words around it are not.
+ *
+ * Its static chunks are joined so the technical-token test below sees the
+ * whole phrase: "(hex)" beside an interpolated label is a format hint, not
+ * prose, and flagging it would be a false report.
+ */
+function ariaLiteralText(init) {
+  if (!init) return null;
+  const node = ts.isJsxExpression(init) ? init.expression : init;
+  if (!node) return null;
+  if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return node.text;
+  if (ts.isTemplateExpression(node)) {
+    const words = [node.head.text, ...node.templateSpans.map((sp) => sp.literal.text)]
+      .join(" ")
+      .trim();
+    // Only the words matter. `${a} — ${b}` is punctuation glue; "(hex)" is
+    // a format hint. Two or more real letters in a row, at least once, is
+    // the line between the two.
+    return /[A-Za-z]{3,}/.test(words.replace(/\(hex\)/gi, "")) ? words : null;
+  }
+  return null;
+}
+
+const literalAria = [];
+for (const file of sources) {
+  if (!file.endsWith(".tsx")) continue;
+  const sf = ts.createSourceFile(
+    file,
+    readFileSync(file, "utf8"),
+    ts.ScriptTarget.ES2022,
+    true,
+    ts.ScriptKind.TSX
+  );
+  const visit = (node) => {
+    if (ts.isJsxAttribute(node) && ARIA_TEXT_ATTRS.has(node.name.getText())) {
+      const text = ariaLiteralText(node.initializer);
+      if (text !== null && !BRAND_ARIA_LITERALS.has(text.trim().toLowerCase())) {
+        const { line } = sf.getLineAndCharacterOfPosition(node.getStart());
+        literalAria.push(`${file}:${line + 1} ${node.name.getText()}=${JSON.stringify(text)}`);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+}
+check("no aria-* text attribute is a hardcoded string", literalAria, []);
+
+// The check must be able to FAIL, and must fail on the shapes that
+// actually shipped — including the one that is not English. A hardcoded
+// Greek aria-label is the same defect seen from the other side: a Japanese
+// user reads Greek, and no English-prose filter would ever notice.
+{
+  const SHIPPED = `
+    export function Regression({ t, onClose }) {
+      return (
+        <div role="dialog" aria-label="Command palette">
+          <button aria-label="Send" />
+          <button aria-label={"Close"} />
+          <nav aria-label="Κατηγορίες" />
+          <button aria-label={\`Unlink \${name}\`} />
+          <button aria-label={t("cancel")} onClick={onClose} />
+          <input aria-label={\`\${name} (hex)\`} />
+          <svg aria-label="Ionexa AI" />
+        </div>
+      );
+    }`;
+  const sf = ts.createSourceFile("aria.tsx", SHIPPED, ts.ScriptTarget.ES2022, true, ts.ScriptKind.TSX);
+  const caught = [];
+  const visit = (node) => {
+    if (ts.isJsxAttribute(node) && ARIA_TEXT_ATTRS.has(node.name.getText())) {
+      const text = ariaLiteralText(node.initializer);
+      if (text !== null && !BRAND_ARIA_LITERALS.has(text.trim().toLowerCase())) caught.push(text);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(sf);
+  // Five: the plain literal, the braced literal, the Greek one, the dialog
+  // label and the template with English around the interpolation. NOT the
+  // t() call, NOT the brand name, and NOT `${name} (hex)`, whose only
+  // static text is a format hint.
+  check("the aria walk catches every literal shape, including a non-English one", caught, [
+    "Command palette",
+    "Send",
+    "Close",
+    "Κατηγορίες",
+    "Unlink",
+  ]);
+}
+
 console.log("\n== 2. every t() call resolves to a real key ==");
 // next-intl renders the raw key path and logs to the console when a key is
 // missing. Nothing fails a build. This is the only thing standing between
@@ -237,7 +719,12 @@ const unresolved = [];
 const usedKeys = new Set();
 
 for (const file of sources) {
-  const src = readFileSync(file, "utf8");
+  // Comments stripped, for the same reason section 1 strips them and with
+  // the same failure to point at: a file that documents the shape it was
+  // fixed for — `<span>{t("oldKey")}</span>` quoted inside a JSX comment —
+  // was reported as calling a key that does not exist. Section 1 got this
+  // right from the start; this section read the raw file.
+  const src = stripComments(readFileSync(file, "utf8"));
   // ident -> namespace, for both the client hook and the server helper.
   const hooks = {};
   for (const m of src.matchAll(/const (\w+) = (?:await )?(?:useTranslations|getTranslations)\(\s*"([^"]+)"\s*\)/g)) {
@@ -305,6 +792,98 @@ for (const key of EXTRACTED) {
   const en = lookup(messages.en, key);
   const untranslated = ["el", "ja", "ar"].filter((l) => lookup(messages[l], key) === en);
   check(`${key}: actually translated into el/ja/ar`, untranslated, []);
+}
+
+console.log("\n== 6. every key a DATA file names resolves, in all ten locales ==");
+// THE HALF THE TYPE CANNOT CHECK.
+//
+// lib/modules.ts and lib/build-modules.ts describe twenty modules — the
+// name, ~90 field labels, 26 select options, 5 placeholders — and every
+// one of those is now a KEY rather than text. `ModuleMessageKey` makes
+// `labelKey: "Company"` a compile error, which stops English getting IN.
+// It cannot check that "moduleData.fields.compayn" exists: any string with
+// the right prefix satisfies the type, and next-intl renders a missing key
+// as its own dotted path without failing anything. Section 2 above only
+// walks t("literal") call sites, and these keys never appear as literals
+// at a call site — they are read off a config object.
+//
+// So the pair is: the TYPE stops text getting in, and this stops a typo
+// getting out.
+//
+// Read from the SOURCE, not from an import of the module: the point is to
+// catch a key that was typed into the data file, and importing the file
+// would resolve `optionLabelKey("in progress")` into whatever the helper
+// produces rather than telling us what a human wrote.
+{
+  const DATA_FILES = ["src/lib/modules.ts", "src/lib/build-modules.ts", "src/lib/classifier-modules.ts"];
+  const seen = new Map(); // key -> where
+  for (const file of DATA_FILES) {
+    const src = stripComments(readFileSync(file, "utf8"));
+    for (const m of src.matchAll(/(?:labelKey|titleKey|placeholderKey):\s*"([^"]+)"/g)) {
+      if (!seen.has(m[1])) seen.set(m[1], file);
+    }
+    // Stored option values become display keys through optionLabelKey().
+    for (const m of src.matchAll(/options:\s*\[([^\]]+)\]/g)) {
+      for (const v of m[1].matchAll(/"([^"]+)"/g)) {
+        const camel = v[1]
+          .toLowerCase()
+          .replace(/[^a-z0-9]+(.)/g, (_, c) => c.toUpperCase())
+          .replace(/[^A-Za-z0-9]/g, "");
+        const key = `moduleData.options.${camel}`;
+        if (!seen.has(key)) seen.set(key, `${file} (option "${v[1]}")`);
+      }
+    }
+    // And every module needs a delete confirmation, built the same way.
+    for (const m of src.matchAll(/slug:\s*"([^"]+)"/g)) {
+      const key = `moduleData.deleteConfirm.${m[1]}`;
+      // Ideas has its own, from batch A2.
+      if (m[1] === "ideas") continue;
+      if (!seen.has(key)) seen.set(key, `${file} (slug "${m[1]}")`);
+    }
+  }
+  checkTrue(`keys found in the data files (${seen.size})`, seen.size > 130);
+
+  for (const loc of LOCALES) {
+    const missing = [...seen].filter(([k]) => typeof lookup(messages[loc], k) !== "string");
+    check(
+      `${loc}: every data-file key resolves`,
+      missing.map(([k, where]) => `${k} (${where})`),
+      []
+    );
+  }
+
+  // The other direction: a key nobody names is dead weight in ten files.
+  const declared = new Set();
+  const walkKeys = (node, prefix) => {
+    for (const [k, v] of Object.entries(node)) {
+      if (typeof v === "string") declared.add(`${prefix}${k}`);
+      else walkKeys(v, `${prefix}${k}.`);
+    }
+  };
+  walkKeys(messages.en.moduleData, "moduleData.");
+  const unused = [...declared].filter((k) => !seen.has(k));
+  check("no moduleData key is declared and never named", unused, []);
+
+  // And the type really does refuse text. Asserted on the SOURCE of the
+  // type rather than trusted from memory: a later edit that widens
+  // ModuleMessageKey to `string` would silently reopen the whole hole.
+  const modulesSrc = readFileSync("src/lib/modules.ts", "utf8");
+  checkTrue(
+    "ModuleMessageKey is a prefixed template type, not a bare string",
+    /export type ModuleMessageKey = `moduleData\.\$\{string\}`/.test(modulesSrc)
+  );
+  checkTrue(
+    "ModuleTitleKey is a prefixed template type, not a bare string",
+    /export type ModuleTitleKey = `sidebar\.items\.\$\{string\}`/.test(modulesSrc)
+  );
+  checkTrue(
+    "FieldConfig carries labelKey, and no `label`",
+    /labelKey: ModuleMessageKey;/.test(modulesSrc) && !/^\s+label: string;$/m.test(modulesSrc)
+  );
+  checkTrue(
+    "ModuleConfig carries titleKey, and no `title`",
+    /titleKey: ModuleTitleKey;/.test(modulesSrc) && !/^\s+title: string;$/m.test(modulesSrc)
+  );
 }
 
 console.log("\n== 5. check-i18n.js no longer claims to do this ==");

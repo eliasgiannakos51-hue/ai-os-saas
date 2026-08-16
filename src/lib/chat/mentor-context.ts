@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
 import { logApiError } from "@/lib/log-error";
+import { enModuleTitle } from "@/lib/module-labels";
 
 // Bounded per-module scan, same "simple, bounded" trade-off as
 // lib/chat/entity-mentions.ts — this only runs when Mentor Mode is on, so
@@ -43,7 +44,7 @@ export async function loadMentorContext(
           );
         if (headlines.length === 0) return null;
 
-        return { title: config.title, headlines };
+        return { title: enModuleTitle(config), headlines };
       })
     );
 

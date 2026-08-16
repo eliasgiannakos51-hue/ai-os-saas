@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ModuleConfig } from "@/lib/modules";
 import { LINKABLE_MODULES, getLinkableModuleByTable, moduleHref } from "@/lib/knowledge-graph";
 import { logApiError } from "@/lib/log-error";
+import type { ModuleTitleKey } from "@/lib/modules";
 
 // Bounded per-module scan, same trade-off as lib/chat/entity-mentions.ts —
 // keeps a single "just created a record" call cheap regardless of how
@@ -53,7 +54,7 @@ export type EntityLinkSuggestion = {
   table: string;
   id: string;
   headline: string;
-  moduleTitle: string;
+  moduleTitleKey: ModuleTitleKey;
   href: string;
 };
 
@@ -141,7 +142,7 @@ export async function suggestEntityLinks(
             table: config.table,
             id: String(row.id),
             headline,
-            moduleTitle: config.title,
+            moduleTitleKey: config.titleKey,
             href: moduleHref(config.slug),
           });
         }

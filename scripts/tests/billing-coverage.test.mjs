@@ -56,6 +56,7 @@ const { loadTs } = await import("./load-ts.mjs");
 const formula = await loadTs("src/lib/billing/credit-formula.ts");
 const pricing = await loadTs("src/lib/billing/model-pricing.ts");
 const configMod = await loadTs("src/lib/billing/pricing-config.ts");
+const margin = await loadTs("src/lib/billing/margin-policy.ts");
 const config = configMod.resolvePricingConfig();
 const M = config.marginMultiplier;
 
@@ -213,14 +214,18 @@ checkTrue("and a honeypot rejects bots earlier still", /_hp/.test(form));
 // A visitor must never see the form fail because the OWNER is broke.
 checkTrue("an unaffordable classification degrades, it does not 4xx", /if \(affordable\.ok\)/.test(form));
 
-const PLANS = [
-  { name: "Free", price: 0, monthlyCredits: 100 },
-  { name: "Starter", price: 20, monthlyCredits: 1000 },
-  { name: "Growth", price: 50, monthlyCredits: 3000 },
-  { name: "Professional", price: 100, monthlyCredits: 10000 },
-  { name: "Ultimate", price: 200, monthlyCredits: 25000 },
-  { name: "Enterprise", price: "custom", monthlyCredits: "custom" },
-];
+// THE REAL TABLE, not a copy of it.
+//
+// This was six hand-typed objects — name, price, monthlyCredits — and the
+// omission that mattered was `slug`. Nothing needed it until a per-plan
+// margin existed; then resolveMarginFor(null, undefined) silently returned
+// the GENERAL multiplier for every row, and the section below reported
+// every plan at 4x when the shipped policy is 5x. A suite that duplicates
+// the thing it verifies eventually verifies the duplicate.
+const { PLANS } = await loadTs("src/lib/billing/plans.ts");
+checkTrue("the plan table is the real one, with slugs", PLANS.every((p) => typeof p.slug === "string"));
+checkTrue("…in the published order the indices below assume",
+  PLANS.map((p) => p.slug).join(",") === "free,starter,growth,professional,ultimate,enterprise");
 
 console.log("\n== 2c. a normal user IS charged for a website generation ==");
 // Production showed website_generate at 0 credits. That is bypassCharge
@@ -303,20 +308,49 @@ for (const plan of PLANS) {
 }
 checkTrue(`worst of ${combos} combinations is ${worst.toFixed(6)}x, still >= ${M}`, worst >= M, JSON.stringify(worstAt));
 
-console.log("\n== 6. worst case per plan: spend the whole allowance on one action ==");
-// The guarantee restated as the business rule: if every credit is spent
-// at >= Mx, total AI cost can never exceed 1/M of revenue.
-console.log("   plan          credits   revenue   max AI cost   % of price");
+console.log("\n== 6. worst case per plan: the CREDIT HALF of the ceiling ==");
+// THIS SECTION CHECKS ONE SUBSYSTEM, and now says so — the version that
+// did not is the reason a combined gate had to be written at all.
+//
+// It used to be labelled "AI cost <= 25% of the plan price" and passed at
+// exactly 25.0%, which reads as compliance. It was not: free chat spent a
+// further 18.8% outside credits entirely, for a real combined 43.8% and a
+// margin of 2.28x against a stated 4x target — while this check and
+// free-chat.test.mjs were both green, each measuring its own half against
+// the whole allowance.
+//
+// The credit half is now budgeted at 1/M with M = 5 per plan, i.e. 20%,
+// leaving 5% for the free-quota registry. The whole-ceiling question
+// belongs to scripts/tests/combined-ceiling.test.mjs, and is asserted at
+// the end of this section rather than implied by it.
+const CREDIT_BUDGET_SHARE = 0.2;
+console.log("   plan          credits   revenue   max AI cost   % of price   plan M");
 for (const plan of PLANS) {
   if (typeof plan.price !== "number" || typeof plan.monthlyCredits !== "number" || plan.price <= 0) continue;
   const rate = formula.effectiveCreditPriceEur(plan, config);
+  const planM = margin.resolveMarginFor(null, plan.slug, config, {}).margin;
   const revenue = plan.monthlyCredits * rate;
-  const maxCost = revenue / M;
+  const maxCost = revenue / planM;
   const pct = (maxCost / plan.price) * 100;
   console.log(
-    `   ${plan.name.padEnd(13)} ${String(plan.monthlyCredits).padEnd(9)} EUR ${revenue.toFixed(2).padEnd(9)} EUR ${maxCost.toFixed(2).padEnd(13)} ${pct.toFixed(1)}%`
+    `   ${plan.name.padEnd(13)} ${String(plan.monthlyCredits).padEnd(9)} EUR ${revenue.toFixed(2).padEnd(9)} EUR ${maxCost.toFixed(2).padEnd(13)} ${pct.toFixed(1).padEnd(6)}%  ${planM}x`
   );
-  checkTrue(`${plan.name}: AI cost <= 25% of the plan price (${pct.toFixed(1)}%)`, pct <= 25.001);
+  checkTrue(
+    `${plan.name}: the credit half stays inside its ${CREDIT_BUDGET_SHARE * 100}% budget (${pct.toFixed(1)}%)`,
+    pct <= CREDIT_BUDGET_SHARE * 100 + 0.001
+  );
+}
+// The handoff, asserted rather than described, so this file cannot drift
+// back into implying it checked the whole thing.
+{
+  const allowances = await loadTs("src/lib/billing/free-allowances.ts");
+  for (const row of allowances.combinedCeilingTable(config, {})) {
+    if (row.priceEur === null) continue;
+    checkTrue(
+      `${row.planSlug}: credits AND every free quota together clear 4x (${row.combinedMargin.toFixed(2)}x)`,
+      row.combinedMargin >= 4 - 1e-9
+    );
+  }
 }
 
 console.log("\n== 7. the settlement path really is plan-aware ==");

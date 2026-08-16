@@ -107,7 +107,7 @@ export async function POST(request: Request) {
     // 2 credits charged both the same.
     const reviewInputChars =
       typedMission.goal.length +
-      steps.reduce((sum, s) => sum + s.text.length + (s.moduleTitle?.length ?? 0), 0);
+      steps.reduce((sum, s) => sum + s.text.length + (s.moduleTitleKey?.length ?? 0), 0);
     const pricingConfig = resolvePricingConfig();
     const accountCreditPriceEur = bypassCredits
       ? pricingConfig.creditPriceEur
@@ -163,7 +163,7 @@ export async function POST(request: Request) {
       reviewText = await reviewMission(
         apiKey,
         typedMission.goal,
-        steps.map((s) => ({ text: s.text, moduleTitle: s.moduleTitle })),
+        steps.map((s) => ({ text: s.text, moduleTitle: s.moduleTitleKey })),
         costs
       );
     } catch (err) {

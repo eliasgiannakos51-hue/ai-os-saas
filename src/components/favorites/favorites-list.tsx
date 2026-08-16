@@ -80,7 +80,7 @@ export function FavoritesList({ groups }: { groups: FavoriteGroup[] }) {
             // The registry's English title is only a fallback — a module the
             // sidebar can name should be named the same way here.
             const key = sidebarKeyForSlug(group.moduleSlug);
-            const label = tSidebar.has(key) ? tSidebar(key) : group.moduleTitle;
+            const label = tSidebar.has(key) ? tSidebar(key) : group.moduleSlug;
 
             return (
               <section key={group.moduleSlug} aria-labelledby={`fav-${group.moduleSlug}`}>

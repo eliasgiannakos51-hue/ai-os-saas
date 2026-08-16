@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { useTranslations } from "next-intl";
 
 type Status = "idle" | "loading" | "done";
 
@@ -14,6 +15,7 @@ type Status = "idle" | "loading" | "done";
 // automatically on page load, so an email client's link-prescanning/bot
 // can't trigger a real deletion just by fetching this page.
 export function ConfirmDeleteAccountForm() {
+  const t = useTranslations("auth.deleteAccount");
   const [token, setToken] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -59,19 +61,17 @@ export function ConfirmDeleteAccountForm() {
 
         <div className="rounded-2xl border border-red-900/50 bg-red-500/[0.03] p-6">
           <h1 className="flex items-center justify-center gap-2 text-lg font-semibold text-red-400">
-            <AlertTriangle className="h-5 w-5" /> Confirm account deletion
+            <AlertTriangle className="h-5 w-5" /> {t("title")}
           </h1>
 
           {token === null ? null : !token ? (
             <p className="mt-3 text-sm text-muted">
-              This link is missing its confirmation token. Please use the
-              link from your email exactly as sent.
+              {t("missingToken")}
             </p>
           ) : (
             <>
               <p className="mt-3 text-sm text-muted">
-                This will permanently delete your account and every record
-                you&apos;ve logged. This can&apos;t be undone.
+                {t("warning")}
               </p>
 
               {error && (
@@ -86,14 +86,14 @@ export function ConfirmDeleteAccountForm() {
                 disabled={status === "loading"}
                 className="mt-5 inline-flex min-h-[44px] w-full items-center justify-center rounded-xl bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(220,38,38,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {status === "loading" ? "Deleting..." : "Permanently delete my account"}
+                {status === "loading" ? t("deleting") : t("confirmButton")}
               </button>
             </>
           )}
 
           <p className="mt-4 text-center text-xs text-muted">
             <Link href="/" className="text-orange-400 underline underline-offset-2">
-              Cancel and go back
+              {t("cancel")}
             </Link>
           </p>
         </div>

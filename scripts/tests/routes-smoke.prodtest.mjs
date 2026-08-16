@@ -469,6 +469,693 @@ console.log("\n== 3. new controls are actually visible (production build, 375px)
 
 await authed.close();
 
+// ---------------------------------------------------------------------
+// /pricing — the quantitative limits, in a real browser, in Greek.
+//
+// The build gate (scripts/tests/combined-ceiling.test.mjs) proves each
+// number is READ FROM the module that enforces it and that every label
+// exists in ten locales. It cannot prove the page renders them, and the
+// difference is not academic: the first browser run of this check found
+// two English sentences and one English word ("/seat") that every
+// source-side i18n gate in the repo structurally could not see.
+//
+// Public page, so no auth — a fresh context with the locale cookie the
+// app actually reads (src/i18n/request.ts is cookie-based, not
+// header-based; setting accept-language alone renders English).
+{
+  const ctx = await browser.newContext({ locale: "el" });
+  await ctx.addCookies([
+    { name: "NEXT_LOCALE", value: "el", url: `http://127.0.0.1:${PORT}` },
+  ]);
+  const page = await ctx.newPage();
+  await page.goto(`http://127.0.0.1:${PORT}/pricing`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+  const main = await page.locator("main").innerText();
+
+  // Every enforced per-plan number, as the server would refuse it.
+  for (const [what, values] of Object.entries({
+    "free chat": ["15", "43", "107", "215", "430"],
+    "deep research": ["2", "10", "50", "200"],
+    files: ["20", "100", "500"],
+    storage: ["500 MB", "2 GB", "10 GB", "50 GB"],
+    "published sites": ["1", "3", "10", "30"],
+  })) {
+    const missing = values.filter((v) => !main.includes(v));
+    checkTrue(`/pricing shows every ${what} limit (${values.join(", ")})`, missing.length === 0);
+    if (missing.length) console.log(`        missing: ${missing.join(", ")}`);
+  }
+
+  // Greek page, Greek copy. Three or more consecutive English words is a
+  // literal somebody forgot; brand names are shorter than that.
+  const english = [...main.matchAll(/(?:^|[^\p{L}])([A-Za-z]{3,}(?: [a-z]{3,}){2,})/gu)].map((m) => m[1]);
+  checkTrue("no English sentence survives in the Greek pricing page", english.length === 0);
+  if (english.length) console.log(`        ${english.join(" | ")}`);
+  checkTrue("…and the row labels really are translated", /Αποθηκευτικός χώρος/.test(main));
+  checkTrue("…including the per-seat price", /θέση/.test(main) && !/\/seat/.test(main));
+
+  // THE COOKIE BANNER, which renders on every public page in every locale
+  // and was hardcoded English in all ten. Checked here rather than in its
+  // own file because it is already on screen: the banner is what the
+  // /pricing scan above kept tripping over.
+  {
+    const banner = page.locator("div.fixed.inset-x-0.bottom-0").first();
+    checkTrue("the cookie banner is visible on a public page", await banner.isVisible());
+    const collapsed = await banner.innerText();
+    checkTrue("the banner summary is Greek", /Χρησιμοποιούμε cookies/.test(collapsed));
+    checkTrue("the banner's Accept button is Greek", collapsed.includes("Αποδοχή"));
+    // Expanded is where the bulk of the English lived — three paragraphs
+    // of cookie detail that no source-side i18n gate could see.
+    await banner.locator("button").first().click();
+    await page.waitForTimeout(350);
+    const expanded = await banner.innerText();
+    checkTrue("the banner detail is Greek", /Απαραίτητο cookie συνεδρίας/.test(expanded));
+    const bannerEnglish = expanded.match(/[A-Za-z]{3,}(?: [a-z]{3,}){2,}/);
+    checkTrue("no English sentence survives in the banner", bannerEnglish === null);
+    if (bannerEnglish) console.log(`        ${bannerEnglish[0]}`);
+    // The two policy links are rich-text tags inside one message, so they
+    // must still come out as real anchors rather than as literal markup.
+    const hrefs = await banner
+      .locator("a")
+      .evaluateAll((as) => as.map((a) => a.getAttribute("href")));
+    checkTrue(
+      "both policy links survive rich-text rendering",
+      hrefs.includes("/cookies") && hrefs.includes("/privacy")
+    );
+  }
+
+  // 375 is where the seven-column table would break the page if it were
+  // not scrolling inside its own container. 768 is where a publish bug
+  // once hid between the two widths everyone tests.
+  for (const width of [375, 414, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.waitForTimeout(120);
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    );
+    checkTrue(`/pricing does not scroll horizontally at ${width}px (overflow ${overflow}px)`, overflow <= 1);
+  }
+  await page.close();
+  await ctx.close();
+}
+
+// ---------------------------------------------------------------------
+// BATCH A1 — THE ARIA LABELS, IN THE REAL DOM.
+//
+// 22 icon-only controls carried an English aria-label. There is no visible
+// word beside any of them: for someone on a screen reader the aria-label
+// IS the button, so "Send", "Close menu" and "Command palette" were the
+// whole interface, in English, on a Greek page.
+//
+// The source-side gate (i18n-coverage.test.mjs §1d) proves no aria-label
+// is a literal any more. It CANNOT prove the key resolves: next-intl
+// renders the dotted path when a key is missing and fails nothing, so
+// `aria-label={t("toggleMenu")}` against a missing key makes a screen
+// reader read out "common.toggleMenu". Only the rendered document answers
+// that, which is what this section reads.
+//
+// TWO LOCALES, ON PURPOSE. Greek is what the app is used in; French is the
+// control. The Help Centre's landmark used to be the hardcoded Greek word
+// "Κατηγορίες" — identical to what a correct Greek translation produces —
+// so a Greek-only assertion would pass on the OLD code too. The French run
+// is what makes it mean "this came from the catalogue".
+//
+// MEASURED RED BEFORE IT WAS TRUSTED. Run against the pre-A1 build this
+// section reported 10 failures with the English still in the document:
+//
+//   /help (fr) landmark          "Κατηγορίες"        (hardcoded Greek)
+//   language switcher dismiss    "Close"
+//   settings section-jump        "Jump to section"
+//   account menu                 "Account menu"
+//   command palette dialog       "Command palette"
+//   chat send                    "Send"
+//   /dashboard/settings @375px   ["Toggle menu", null, "Γλώσσα",
+//                                 "Εναλλαγή σε ανοιχτό θέμα",
+//                                 "Ειδοποιήσεις", null, "Account menu"]
+//
+// That last line is the whole defect in one list: two English labels
+// sitting between three Greek ones, in the same header, on the same page.
+console.log("\n== 7. every aria-label is translated in the browser (A1) ==");
+{
+  // The 22 English strings that shipped. Nothing rendered in a non-English
+  // locale may equal any of them.
+  const SHIPPED_ENGLISH = new Set([
+    "Jump to section", "Send", "Dismiss suggestion", "Command palette",
+    "Toggle menu", "Close menu", "Account menu", "Close", "Cancel",
+    "Loading", "Dismiss", "Quick Start templates", "Previous page",
+    "Next page", "Install Ionexa", "Toggle stack trace",
+  ]);
+  // A key that did not resolve renders as its own dotted path.
+  const UNRESOLVED = /^[a-z][A-Za-z]*(\.[A-Za-z]+){1,}$/;
+
+  const localeCtx = async (code) => {
+    const ctx = await browser.newContext({ locale: code, viewport: { width: 1280, height: 900 } });
+    await ctx.addCookies([{ name: "NEXT_LOCALE", value: code, url: `http://127.0.0.1:${PORT}` }]);
+    return ctx;
+  };
+  const ariaLabels = (page) =>
+    page.locator("[aria-label]").evaluateAll((els) => els.map((e) => e.getAttribute("aria-label")));
+  // Runs on every page this section opens, not just the ones with a named
+  // assertion — the point is that NO aria-label anywhere is English or a
+  // raw key, including ones nobody thought to name.
+  const sweep = async (page, where) => {
+    const labels = await ariaLabels(page);
+    const english = labels.filter((l) => SHIPPED_ENGLISH.has(l.trim()));
+    const raw = labels.filter((l) => UNRESOLVED.test(l.trim()));
+    check(`${where}: no aria-label is one of the 22 English strings`, english, []);
+    check(`${where}: no aria-label is an unresolved key`, raw, []);
+    return labels;
+  };
+
+  // --- the Help Centre landmark, in French: the control ---------------
+  {
+    const ctx = await localeCtx("fr");
+    const page = await ctx.newPage();
+    await page.goto(`http://127.0.0.1:${PORT}/help`, { waitUntil: "networkidle", timeout: 45000 });
+    check(
+      "/help landmark is French, not the hardcoded Greek it used to be",
+      await page.locator("nav[aria-label]").first().getAttribute("aria-label"),
+      "Catégories"
+    );
+    await sweep(page, "/help (fr)");
+    await page.close();
+    await ctx.close();
+  }
+
+  // --- public, Greek: the language selector's own dismiss target ------
+  const el = await localeCtx("el");
+  {
+    const page = await el.newPage();
+    await page.goto(`http://127.0.0.1:${PORT}/help`, { waitUntil: "networkidle", timeout: 45000 });
+    check(
+      "/help landmark is Greek",
+      await page.locator("nav[aria-label]").first().getAttribute("aria-label"),
+      "Κατηγορίες"
+    );
+    // Opening the switcher is what mounts the full-screen dismiss button —
+    // an element with no text, no size on screen and nothing but its label.
+    await page.locator("div.fixed.right-3.top-3 button").first().click();
+    await page.waitForTimeout(200);
+    check(
+      "the language switcher's dismiss target is labelled in Greek",
+      await page.locator("button.fixed.inset-0").first().getAttribute("aria-label"),
+      "Κλείσιμο"
+    );
+    await sweep(page, "/help (el)");
+    await page.close();
+  }
+  await el.close();
+
+  // --- the dashboard, Greek, signed in --------------------------------
+  const elAuthed = await browser.newContext({ locale: "el", viewport: { width: 1280, height: 900 } });
+  await elAuthed.addCookies([
+    { name: "NEXT_LOCALE", value: "el", url: `http://127.0.0.1:${PORT}` },
+    { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+  ]);
+  {
+    const page = await elAuthed.newPage();
+
+    await page.goto(`http://127.0.0.1:${PORT}/dashboard/settings`, {
+      waitUntil: "networkidle",
+      timeout: 45000,
+    });
+    check(
+      "settings section-jump landmark is Greek",
+      await page.locator("main nav[aria-label]").first().getAttribute("aria-label"),
+      "Μετάβαση σε ενότητα"
+    );
+    check(
+      "the account menu button is Greek",
+      await page.locator('header button[aria-expanded]').last().getAttribute("aria-label"),
+      "Μενού λογαριασμού"
+    );
+    await sweep(page, "/dashboard/settings (el)");
+
+    // Ctrl+K is the palette's own shortcut — the dialog's aria-label is the
+    // only name it has, since its heading is a search input.
+    await page.keyboard.press("Control+k");
+    await page.waitForTimeout(250);
+    check(
+      "the command palette dialog is named in Greek",
+      await page.locator('[role="dialog"]').first().getAttribute("aria-label"),
+      "Παλέτα εντολών"
+    );
+    await page.keyboard.press("Escape");
+
+    // The composer's submit button is an arrow glyph and nothing else.
+    await page.goto(`http://127.0.0.1:${PORT}/dashboard/chat`, {
+      waitUntil: "networkidle",
+      timeout: 45000,
+    });
+    check(
+      "the chat send button is Greek",
+      await page.locator('form button[type="submit"]').first().getAttribute("aria-label"),
+      "Αποστολή"
+    );
+    await sweep(page, "/dashboard/chat (el)");
+
+    // Both menu controls only exist below md, which is where a phone user
+    // meets them — and where the whole navigation depends on them.
+    //
+    // /dashboard/settings, NOT /dashboard/overview: overview redirects to
+    // /onboarding for an account with no onboarding row (page.tsx:96),
+    // which is exactly what this stand-in serves — and /onboarding has its
+    // own chrome with no TopNav at all. The first run of this check asked
+    // overview for a header button and got an empty list, which reads as
+    // "the button is gone" when it is really "wrong page". Asserting the
+    // landed URL is what keeps that misreading from coming back.
+    await page.setViewportSize({ width: 375, height: 812 });
+    await page.goto(`http://127.0.0.1:${PORT}/dashboard/settings`, {
+      waitUntil: "networkidle",
+      timeout: 45000,
+    });
+    check(
+      "…and the mobile run is on a page that has the top nav",
+      new URL(page.url()).pathname,
+      "/dashboard/settings"
+    );
+    const headerButtons = await page
+      .locator("header button")
+      .evaluateAll((els) => els.map((e) => e.getAttribute("aria-label")));
+    check("the mobile menu button is Greek @375px", headerButtons.includes("Εναλλαγή μενού"), true);
+    if (!headerButtons.includes("Εναλλαγή μενού")) {
+      console.log(`        header buttons: ${JSON.stringify(headerButtons)}`);
+    }
+    // Clicked by POSITION, not by the Greek label: on a regression the
+    // label is the thing that is wrong, and a selector built out of it
+    // would hang for 30s and take the rest of this suite down with it
+    // instead of reporting. MenuButton is the first control in the header.
+    await page.locator("header button").first().click();
+    await page.waitForTimeout(300);
+    const drawerButtons = await page
+      .locator("aside button")
+      .evaluateAll((els) => els.map((e) => e.getAttribute("aria-label")).filter(Boolean));
+    check("the open drawer's close button is Greek @375px", drawerButtons.includes("Κλείσιμο μενού"), true);
+    if (!drawerButtons.includes("Κλείσιμο μενού")) {
+      console.log(`        drawer buttons: ${JSON.stringify(drawerButtons)}`);
+    }
+    await sweep(page, "/dashboard/settings @375 (el)");
+
+    await page.close();
+  }
+  await elAuthed.close();
+}
+
+// ---------------------------------------------------------------------
+// BATCH A2 — THE IDEAS MODULE, END TO END, IN GREEK.
+//
+// Ideas is the app's landing screen (/dashboard) and the one module that
+// predates the shared module system, so it carried its own private copy of
+// every string the other thirteen get from `module`: the search box, the
+// CSV button, the empty state, all eight field labels, all eight
+// placeholders, the card prefixes, the timestamp and the delete
+// confirmation. Fifty-two strings, all English, on the first screen after
+// login.
+//
+// THE FORM IS OPENED, not just loaded. Every field label and placeholder
+// in this module lives behind the "New Idea" button — a check that only
+// visits the page proves nothing about the half of the module a user
+// actually types into.
+console.log("\n== 8. the Ideas module is Greek end to end (A2) ==");
+{
+  const ctx = await browser.newContext({ locale: "el", viewport: { width: 1280, height: 900 } });
+  await ctx.addCookies([
+    { name: "NEXT_LOCALE", value: "el", url: `http://127.0.0.1:${PORT}` },
+    { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+  ]);
+  const page = await ctx.newPage();
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard`, { waitUntil: "networkidle", timeout: 45000 });
+
+  check("the Ideas heading is Greek", await page.locator("main h1").first().innerText(), "Ιδέες");
+  const closed = await page.locator("main").innerText();
+  checkTrue("the empty state is Greek", /Δεν έχεις ιδέες ακόμα/.test(closed));
+  checkTrue("the search box is Greek", (await page.locator('main input[type="text"]').first().getAttribute("placeholder")) === "Αναζήτηση...");
+  checkTrue("the CSV button is Greek", closed.includes("Εξαγωγή CSV"));
+
+  // Open the form: eight labels and eight placeholders that no page-load
+  // check can see.
+  await page.getByRole("button", { name: "Νέα ιδέα" }).click();
+  await page.waitForTimeout(250);
+  const open = await page.locator("main").innerText();
+  for (const label of [
+    "Όνομα",
+    "Πελάτης",
+    "Πρόβλημα",
+    "Ανταγωνιστές",
+    "Μέγεθος αγοράς",
+    "Βαθμολογία (0-100)",
+    "Πρώτη λειτουργική έκδοση",
+    "Ετυμηγορία",
+  ]) {
+    checkTrue(`the "${label}" field label is Greek`, open.includes(label));
+  }
+  const placeholders = await page
+    .locator("main input, main textarea")
+    .evaluateAll((els) => els.map((e) => e.getAttribute("placeholder")).filter(Boolean));
+  for (const ph of [
+    "όνομα ιδέας",
+    "ο πελάτης-στόχος",
+    "ποιο πρόβλημα λύνει;",
+    "γνωστοί ανταγωνιστές",
+    "π.χ. TAM 2 δισ. $",
+    "βαθμολογία",
+    "πώς μοιάζει η πρώτη έκδοση;",
+    "π.χ. προχωράμε / ακύρωση / παρακολούθηση",
+  ]) {
+    checkTrue(`the "${ph}" placeholder is Greek`, placeholders.includes(ph));
+  }
+  checkTrue("the submit button is Greek", open.includes("Αποθήκευση"));
+
+  // Same instrument the /pricing check uses: three or more consecutive
+  // English words is a literal somebody forgot. Placeholders are pulled in
+  // separately because innerText does not include them.
+  const scanned = `${open}\n${placeholders.join("\n")}`;
+  const english = [...scanned.matchAll(/(?:^|[^\p{L}])([A-Za-z]{3,}(?: [a-z]{3,}){2,})/gu)].map((m) => m[1]);
+  check("no English sentence survives anywhere in the Ideas module", english, []);
+
+  await page.screenshot({ path: "/tmp/ionexa-a2-ideas-el.png", fullPage: false });
+  await page.close();
+  await ctx.close();
+}
+
+// ---------------------------------------------------------------------
+// BATCH A3 — CHAT, MEMORY AND CREATE, IN GREEK.
+//
+// The three screens with the highest visit count in the app. Chat's empty
+// state is the first thing a new account reads, and it was a paragraph of
+// English under a Greek sidebar.
+//
+// The conversation list's date headers are checked separately below,
+// because they were never text in a component at all: they were an
+// English string union produced by lib/chat/group-conversations.ts and
+// rendered as data. No JSX scanner can see that shape, and check-i18n.js
+// cannot either — the words never appeared in messages/*.json to be
+// compared against.
+console.log("\n== 9. Chat, Memory and Create are Greek (A3) ==");
+{
+  const ctx = await browser.newContext({ locale: "el", viewport: { width: 1280, height: 900 } });
+  await ctx.addCookies([
+    { name: "NEXT_LOCALE", value: "el", url: `http://127.0.0.1:${PORT}` },
+    { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+  ]);
+  const page = await ctx.newPage();
+
+  const textAndPlaceholders = async () => {
+    const text = await page.locator("main, aside").allInnerTexts();
+    const ph = await page
+      .locator("input, textarea")
+      .evaluateAll((els) => els.map((e) => e.getAttribute("placeholder")).filter(Boolean));
+    return `${text.join("\n")}\n${ph.join("\n")}`;
+  };
+
+  // ---- Chat -----------------------------------------------------------
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/chat`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+  const chat = await textAndPlaceholders();
+  for (const [what, needle] of [
+    ["the empty-state heading", "Ionexa Συνομιλία"],
+    ["the empty-state body", "Ρώτησε ό,τι θέλεις"],
+    ["the composer placeholder", "Γράψε στο Ionexa..."],
+    ["the Mentor Mode toggle", "Λειτουργία μέντορα"],
+    ["the new-chat button", "Νέα συνομιλία"],
+    ["the empty conversation list", "Καμία συνομιλία ακόμα."],
+  ]) {
+    checkTrue(`${what} is Greek`, chat.includes(needle));
+  }
+  await page.screenshot({ path: "/tmp/ionexa-a3-chat-el.png" });
+
+  // ---- Memory ---------------------------------------------------------
+  // AI Memory is Starter-and-above (memory/page.tsx gates it on
+  // planMeetsMinimum). The stand-in account is free, so the first run of
+  // this check read the upgrade notice and reported the search box as
+  // untranslated — the search box was never on the page. The plan lives in
+  // the auth user's metadata, so it is raised here, for this section, and
+  // put back straight after.
+  USER.user_metadata = { subscription_tier: "starter" };
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/memory`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+  const memory = await textAndPlaceholders();
+  USER.user_metadata = {};
+  checkTrue(
+    "the memory search placeholder is Greek",
+    memory.includes("Ψάξε σε ό,τι έχεις καταγράψει..."),
+    memory.slice(0, 200)
+  );
+  checkTrue(
+    "the memory empty state is Greek",
+    memory.includes("Δεν έχεις καταγράψει τίποτα ακόμα"),
+    memory.slice(0, 200)
+  );
+
+  // ---- Create ---------------------------------------------------------
+  // NOT asserted in the browser, and the reason is worth writing down
+  // rather than quietly dropping: CreateChat's heading and subtitle are
+  // behind `showHeading`, and the single caller in the whole repo
+  // (overview/page.tsx:448) passes showHeading={false}. The two strings
+  // are translated — a default-true prop that no caller sets is one edit
+  // away from rendering — but claiming a browser verified them would be a
+  // claim about markup that never mounts. /dashboard/create renders
+  // CreateStudio, a different component entirely.
+  const create = "";
+
+  const english = [
+    ...`${chat}\n${memory}\n${create}`.matchAll(/(?:^|[^\p{L}])([A-Za-z]{3,}(?: [a-z]{3,}){2,})/gu),
+  ].map((m) => m[1]);
+  check("no English sentence survives in Chat or Memory", english, []);
+
+  await page.close();
+  await ctx.close();
+}
+
+// The four conversation-list headers, rendered from real rows. The
+// stand-in serves none, so they are exercised through the pure function
+// that produces them rather than asserted as "absent from an empty list" —
+// which would pass whatever the labels said.
+{
+  const { loadTs } = await import("./load-ts.mjs");
+  const { readFileSync } = await import("node:fs");
+  const { groupConversationsByDate } = await loadTs("src/lib/chat/group-conversations.ts");
+  const el = JSON.parse(readFileSync("messages/el.json", "utf8"));
+  const now = Date.now();
+  const at = (hoursAgo) => new Date(now - hoursAgo * 3600e3).toISOString();
+  const labels = groupConversationsByDate([
+    { id: "a", title: "x", created_at: at(0), is_pinned: false },
+    { id: "b", title: "y", created_at: at(26), is_pinned: false },
+    { id: "c", title: "z", created_at: at(400), is_pinned: false },
+  ]).map((g) => g.label);
+  check("the date headers are keys, not English", labels, [
+    "groupToday",
+    "groupYesterday",
+    "groupOlder",
+  ]);
+  const missing = [...labels, "groupPinned"].filter(
+    (k) => typeof el.dashboard.chat[k] !== "string"
+  );
+  check("…and every one of them resolves in Greek", missing, []);
+}
+
+// ---------------------------------------------------------------------
+// THE GENERIC MODULES, IN GREEK.
+//
+// Twenty modules shared one registry that held their names and ~90 field
+// labels as English STRINGS, rendered through `{field.label}` and
+// `title={module.title}`. Expressions, not literals — so no JSX scanner
+// could see them, and the words never reached messages/*.json for
+// check-i18n.js to compare. Every module page, its form, its record cards
+// and its filter dropdown were English in all ten languages.
+//
+// The form is OPENED here for the same reason batch A2 opened Ideas': the
+// labels only exist once the form is on screen, and a check that merely
+// loads the page proves nothing about the half a user types into.
+// Opens the module's own "New <module>" form, reporting what it saw if it
+// cannot find it — a silent miss here reads as "the labels are English".
+async function openModuleForm(page) {
+  const buttons = page.locator("main button");
+  const labels = await buttons.evaluateAll((els) => els.map((e) => e.textContent?.trim() ?? ""));
+  const index = labels.findIndex((l) => /^(Νέο|Νέα|Νέος)\s/.test(l));
+  checkTrue(`the module's own create button is on the page`, index >= 0, JSON.stringify(labels));
+  if (index < 0) return false;
+  await buttons.nth(index).click();
+  await page.waitForTimeout(400);
+  return true;
+}
+
+console.log("\n== 10. the generic modules are Greek (lib/modules.ts) ==");
+{
+  const ctx = await browser.newContext({ locale: "el", viewport: { width: 1280, height: 900 } });
+  await ctx.addCookies([
+    { name: "NEXT_LOCALE", value: "el", url: `http://127.0.0.1:${PORT}` },
+    { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+  ]);
+  const page = await ctx.newPage();
+
+  // FOUR MODULES USED TO HAVE TWO NAMES EACH — the sidebar said CRM,
+  // Knowledge, Marketing and Website Plans while the page heading said
+  // Sales, Research, Content and Websites. One key each now, so the two
+  // are the same string by construction; this reads both off the rendered
+  // page rather than trusting that.
+  for (const [route, expected] of [
+    ["/dashboard/sales", "Πωλήσεις"],
+    ["/dashboard/research", "Έρευνα"],
+    ["/dashboard/content", "Περιεχόμενο"],
+    ["/dashboard/websites", "Ιστότοποι"],
+  ]) {
+    await page.goto(`http://127.0.0.1:${PORT}${route}`, { waitUntil: "networkidle", timeout: 45000 });
+    const heading = await page.locator("main h1").first().innerText();
+    check(`${route}: the page heading is Greek`, heading, expected);
+    const navLink = await page
+      .locator(`aside a[href="${route}"]`)
+      .first()
+      .innerText()
+      .catch(() => "(not in sidebar)");
+    check(`${route}: the sidebar calls it the same thing`, navLink.trim(), expected);
+  }
+
+  // One module opened end to end: labels, placeholders, select options.
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/sales`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+  // Scoped to MAIN. The first "Νέο …" button in the document is the top
+  // nav's "Νέο Project", so an unscoped role query clicked that instead,
+  // never opened the form, and reported five field labels as untranslated
+  // that were never on the page.
+  // NOT /^(Νέο)\b/. JavaScript's \b is an ASCII word boundary: "ο" is not
+  // an ASCII word character, so there is no boundary between it and the
+  // following space and the pattern never matches. The same \b trap this
+  // project has now hit twice on Greek text.
+  await openModuleForm(page);
+  await page.waitForTimeout(400);
+  const formText = await page.locator("main").innerText();
+  for (const label of ["Όνομα επαφής", "Βαθμολογία", "Πρώτο email", "Email παρακολούθησης", "Επόμενα βήματα"]) {
+    checkTrue(`/dashboard/sales: the "${label}" field label is Greek`, formText.includes(label));
+  }
+
+  // A select whose STORED values stay English while the display is Greek —
+  // the distinction the FieldConfig comment is about. Websites' status
+  // field is the one with options.
+  //
+  // Websites is minPlanSlug "starter" (lib/build-modules.ts), and the
+  // stand-in account is free, so the first run of this check found an
+  // upgrade notice with no buttons at all and reported the options as
+  // missing. Raised for these three assertions and put back after.
+  USER.user_metadata = { subscription_tier: "starter" };
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/websites`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+  // NOT /^(Νέο)\b/. JavaScript's \b is an ASCII word boundary: "ο" is not
+  // an ASCII word character, so there is no boundary between it and the
+  // following space and the pattern never matches. The same \b trap this
+  // project has now hit twice on Greek text.
+  await openModuleForm(page);
+  await page.waitForTimeout(400);
+  const options = await page
+    .locator("main select option")
+    .evaluateAll((els) => els.map((e) => ({ value: e.getAttribute("value"), text: e.textContent?.trim() })));
+  const planned = options.find((o) => o.value === "planned");
+  checkTrue("the stored option value is still English", planned?.value === "planned");
+  check("…while what the user reads is Greek", planned?.text, "προγραμματισμένο");
+
+  USER.user_metadata = {};
+  const modulesText = `${formText}\n${await page.locator("main").innerText()}`;
+  const english = [...modulesText.matchAll(/(?:^|[^\p{L}])([A-Za-z]{3,}(?: [a-z]{3,}){2,})/gu)].map((m) => m[1]);
+  check("no English sentence survives in a generic module page", english, []);
+
+  await page.screenshot({ path: "/tmp/ionexa-modules-el.png" });
+  await page.close();
+  await ctx.close();
+}
+
+// ---------------------------------------------------------------------
+// CANCELLING, IN THE BROWSER, IN GREEK.
+//
+// The source test (subscription-cancel.test.mjs) proves the route uses
+// cancel_at_period_end and that the survey cannot gate the button. It
+// cannot prove the button is REACHABLE — the whole complaint about cancel
+// flows is that the control exists and nobody can find it. So this opens
+// Settings as a subscribed account and counts the clicks.
+console.log("\n== 11. cancelling is one click away, in the user's language ==");
+{
+  // A subscribed account: hasSubscription is derived from
+  // stripe_customer_id, and stripe_subscription_id is what the routes act
+  // on. loadSubscriptionState() cannot reach Stripe from here and returns
+  // null by design, which is the "no cancellation pending" state — exactly
+  // the state in which the button must be visible.
+  USER.user_metadata = { subscription_tier: "growth", stripe_customer_id: "cus_test", stripe_subscription_id: "sub_test" };
+  const ctx = await browser.newContext({ locale: "el", viewport: { width: 375, height: 812 } });
+  await ctx.addCookies([
+    { name: "NEXT_LOCALE", value: "el", url: `http://127.0.0.1:${PORT}` },
+    { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+  ]);
+  const page = await ctx.newPage();
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/settings`, {
+    waitUntil: "networkidle",
+    timeout: 45000,
+  });
+
+  const cancelButton = page.getByRole("button", { name: "Ακύρωση συνδρομής" });
+  checkTrue("the cancel button is on the settings page at 375px", await cancelButton.isVisible());
+  // Beside "Manage billing", not inside it: a cancel control that requires
+  // leaving for Stripe's hosted portal first is the thing being avoided.
+  checkTrue(
+    "…next to Manage billing, not behind it",
+    await page.getByRole("button", { name: "Διαχείριση Χρέωσης" }).isVisible().catch(() => false)
+  );
+
+  // ONE click opens the confirmation. Not a wizard.
+  await cancelButton.click();
+  await page.waitForTimeout(250);
+  const panelRoot = page.locator('main div.rounded-xl.border.border-border.bg-input').first();
+  const panel = await panelRoot.innerText();
+  for (const [what, needle] of [
+    ["access end", "μέχρι το τέλος της περιόδου"],
+    ["credits", "Τα credits που σου μένουν"],
+    ["data", "Δεν διαγράφεται τίποτα"],
+    ["reversible", "Μπορείς να την επαναφέρεις"],
+  ]) {
+    checkTrue(`the ${what} fact is stated before the decision, in Greek`, panel.includes(needle));
+  }
+
+  // The survey is on screen and nothing is preselected, and the confirm
+  // button is enabled with no answer given — the skippable case.
+  // Scoped to the panel: Settings also holds the theme and accessibility
+  // toggles, which are legitimately aria-pressed="true" and made an
+  // unscoped count report two preselected survey answers that do not exist.
+  const pressed = await panelRoot
+    .locator("button[aria-pressed]")
+    .evaluateAll((els) => els.map((e) => e.getAttribute("aria-pressed")));
+  check("no survey answer is preselected", pressed.filter((p) => p === "true").length, 0);
+  const confirm = page.getByRole("button", { name: "Ακύρωση της συνδρομής" });
+  checkTrue("the confirm button is enabled without answering the survey", await confirm.isEnabled());
+
+  // And there is a way back that is not the browser's back button.
+  checkTrue("…and a way to keep the subscription", await page.getByRole("button", { name: "Να τη διατηρήσω" }).isVisible());
+
+  const english = [...panel.matchAll(/(?:^|[^\p{L}])([A-Za-z]{3,}(?: [a-z]{3,}){2,})/gu)].map((m) => m[1]);
+  // Scoped to the panel for the same reason: the first run flagged
+  // "Need more credits this month" from buy-credits.tsx, which is real
+  // untranslated English on this page but is NOT this feature — it is
+  // already counted in the 1c bare-text ratchet and is reported as a
+  // separate finding rather than hidden inside this assertion.
+  check("no English sentence survives in the cancel panel", english, []);
+
+  const overflow = await page.evaluate(
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+  );
+  checkTrue(`the panel does not scroll sideways at 375px (overflow ${overflow}px)`, overflow <= 1);
+
+  await page.screenshot({ path: "/tmp/ionexa-cancel-el.png" });
+  await page.close();
+  await ctx.close();
+  USER.user_metadata = {};
+}
+
 await browser.close();
 cleanup();
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);

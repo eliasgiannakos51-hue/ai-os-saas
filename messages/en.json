@@ -28,7 +28,26 @@
     "aiGenerated": {
       "short": "AI-generated",
       "long": "AI-generated content. It can be wrong — check anything important before you rely on it."
-    }
+    },
+    "close": "Close",
+    "switchToDarkMode": "Switch to dark mode",
+    "switchToLightMode": "Switch to light mode",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "networkErrorCheckConnection": "Network error — please check your connection and try again.",
+    "ownerAccessTooltip": "Owner access — unlimited credits",
+    "creditsTooltip": "Credits remaining — buy more in Settings",
+    "accountMenu": "Account menu",
+    "categories": "Categories",
+    "commandPalette": "Command palette",
+    "dismiss": "Dismiss",
+    "dismissSuggestion": "Dismiss suggestion",
+    "installIonexa": "Install Ionexa",
+    "loadingContent": "Loading content",
+    "nextPage": "Next page",
+    "previousPage": "Previous page",
+    "toggleMenu": "Toggle menu",
+    "dismissToastAria": "{message} — press Enter to dismiss"
   },
   "sidebar": {
     "groups": {
@@ -55,7 +74,7 @@
       "settings": "Settings",
       "team": "Team",
       "agents": "AI Agents",
-      "websites": "Website Plans",
+      "websites": "Websites",
       "websiteBuilder": "Website Builder",
       "apps": "Apps",
       "images": "Images",
@@ -67,10 +86,10 @@
       "campaigns": "Campaigns",
       "analytics": "Analytics",
       "finance": "Finance",
-      "content": "Marketing",
-      "sales": "CRM",
+      "content": "Content",
+      "sales": "Sales",
       "products": "Products",
-      "research": "Knowledge",
+      "research": "Research",
       "learning": "Learning",
       "ideas": "Ideas",
       "competitors": "Competitors",
@@ -141,7 +160,8 @@
     },
     "comingSoon": "Coming soon",
     "comingSoonToast": "{name} isn't available yet — it's on the roadmap.",
-    "comingSoonBadge": "Soon"
+    "comingSoonBadge": "Soon",
+    "closeMenu": "Close menu"
   },
   "landing": {
     "hero": "Your business, organized — with AI that actually helps.",
@@ -178,7 +198,13 @@
       "imageVideo": "Image & video generation",
       "aiMemory": "AI Memory",
       "teamCollaboration": "Team collaboration",
-      "teamSeatsAddOn": "Team seats"
+      "teamSeatsAddOn": "Team seats",
+      "freeChatMessages": "Free chat messages / month",
+      "deepResearch": "Deep Research runs / month",
+      "files": "Files stored",
+      "storage": "Storage",
+      "integrations": "Connected integrations",
+      "publishedSites": "Published websites"
     },
     "businessTitle": "Business",
     "businessSubtitle": "For teams building together",
@@ -191,13 +217,11 @@
     "setUpTeam": "Set Up Team",
     "features": {
       "1Workspace3Projects": "1 workspace, 3 projects",
-      "2AiAgents": "2 AI agents",
       "basicAiChat": "Basic AI chat",
       "creditsPerMonth": "{count} credits/month",
       "marketplaceInstallOnly": "Marketplace: install only",
       "communitySupport": "Community support",
       "unlimitedProjects": "Unlimited projects",
-      "upTo20AiAgents": "Up to 20 AI agents",
       "aiMemory": "AI Memory",
       "websiteAutomationBuilderAccess": "Website & Automation Builder access",
       "imageVideoGenerationAccess": "Image & video generation access",
@@ -207,7 +231,6 @@
       "mobileSaasBuilderAccess": "Mobile & SaaS Builder access",
       "priorityProcessing": "Priority processing",
       "everythingInGrowth": "Everything in Growth",
-      "unlimitedAiAgentsTeams": "Unlimited AI agents & teams",
       "teamCollaboration": "Team collaboration",
       "sharedAiMemory": "Shared AI memory",
       "prioritySupport": "Priority support",
@@ -224,6 +247,16 @@
       "upTo5AiAgents": "Up to 5 AI agents",
       "upTo15AiAgentsTeams": "Up to 15 AI agents & teams",
       "upTo50AiAgents": "Up to 50 AI agents"
+    },
+    "values": {
+      "unlimited": "Unlimited",
+      "included": "Included",
+      "custom": "Custom",
+      "perSeat": "+{currency}{price}/seat"
+    },
+    "seatNote": {
+      "included": "Unlimited team seats included — no per-member charge",
+      "perMember": "+ {currency}{price}/month per team member — each member gets full access at your plan's tier"
     }
   },
   "roadmap": {
@@ -390,6 +423,14 @@
       "continueWithGoogle": "Continue with Google",
       "orContinueWithEmail": "or continue with email",
       "genericError": "Couldn't start Google sign-in. Please try again."
+    },
+    "deleteAccount": {
+      "title": "Confirm account deletion",
+      "missingToken": "This link is missing its confirmation token. Please use the link from your email exactly as sent.",
+      "warning": "This will permanently delete your account and every record you've logged. This can't be undone.",
+      "deleting": "Deleting…",
+      "confirmButton": "Permanently delete my account",
+      "cancel": "Cancel and go back"
     }
   },
   "settings": {
@@ -415,7 +456,9 @@
       "clearing": "Clearing...",
       "couldNotUpdatePreference": "✗ could not update preference",
       "couldNotClearMemory": "✗ could not clear memory",
-      "memoryCleared": "✓ memory cleared"
+      "memoryCleared": "✓ memory cleared",
+      "memoryEnabled": "✓ chat memory enabled",
+      "memoryDisabled": "✓ chat memory disabled"
     },
     "loginActivity": {
       "title": "Login Activity",
@@ -423,7 +466,9 @@
       "noDevices": "No devices recorded yet.",
       "lastSeen": "Last seen {time}",
       "couldNotRemoveDevice": "✗ could not remove device",
-      "deviceRemoved": "✓ device removed"
+      "deviceRemoved": "✓ device removed",
+      "removeDevice": "Remove device",
+      "removeDeviceAria": "Remove {device}"
     },
     "aiUsage": {
       "title": "AI Usage",
@@ -520,7 +565,8 @@
     "aiPersona": {
       "title": "AI Persona",
       "description": "Give the assistant a custom name.",
-      "personaUpdated": "✓ persona name updated"
+      "personaUpdated": "✓ persona name updated",
+      "couldNotSave": "✗ could not save the persona name"
     },
     "billing": {
       "title": "Billing",
@@ -532,7 +578,36 @@
       "noCreditActivity": "No credit activity yet.",
       "balanceAfter": "balance {count}",
       "unlimited": "Unlimited",
-      "wouldHaveCost": "would have cost {count}"
+      "wouldHaveCost": "would have cost {count}",
+      "manageBilling": "Manage Billing",
+      "upgradePlan": "Upgrade Plan",
+      "betaTester": "Beta Tester",
+      "betaTesterExpires": "Beta Tester — expires in {days, plural, one {# day} other {# days}}",
+      "teamSeats": "+ {seats, plural, one {# team seat} other {# team seats}}",
+      "cancel": {
+        "button": "Cancel subscription",
+        "title": "Cancel your subscription",
+        "keepsAccessUntil": "You keep full access until {date}.",
+        "keepsAccessUntilPeriodEnd": "You keep full access until the end of the period you have already paid for.",
+        "creditsStay": "Your remaining credits stay usable until then.",
+        "dataKept": "Nothing is deleted — your entries, files and conversations stay exactly where they are.",
+        "reversible": "You can restore it any time before it ends, at no extra charge.",
+        "surveyQuestion": "What made you leave? (optional)",
+        "reasons": {
+          "too_expensive": "Too expensive",
+          "missing_feature": "Missing something I need",
+          "not_using": "I'm not using it enough",
+          "found_alternative": "Found something else"
+        },
+        "notePlaceholder": "Anything else you want to tell us? (optional)",
+        "confirm": "Cancel the subscription",
+        "keepIt": "Keep it",
+        "done": "✓ your subscription will end at the end of the paid period",
+        "restored": "✓ your subscription is active again",
+        "restore": "Restore",
+        "endingIn": "{days, plural, =0 {Your subscription ends today.} one {Your subscription ends in # day.} other {Your subscription ends in # days.}}"
+      },
+      "creditsSplit": "{monthly} monthly + {purchased} purchased (never expire)"
     },
     "marginReport": {
       "title": "Margin Report",
@@ -580,7 +655,8 @@
       "lowCreditsHint": "When work stops because the balance ran out",
       "collaboration": "Collaboration",
       "collaborationHint": "Team invites and shared-workspace activity"
-    }
+    },
+    "jumpToSection": "Jump to section"
   },
   "dashboard": {
     "overview": {
@@ -656,7 +732,9 @@
           "label": "Trading",
           "description": "Log a trade"
         }
-      }
+      },
+      "quickStartTemplates": "Quick Start templates",
+      "quickStartApplied": "✓ {count, plural, one {# example entry added} other {# example entries added}}"
     },
     "team": {
       "title": "Team",
@@ -687,7 +765,12 @@
     },
     "memory": {
       "title": "AI Memory",
-      "description": "Search everything you've logged, across every module — no need to remember where you put it."
+      "description": "Search everything you've logged, across every module — no need to remember where you put it.",
+      "searchPlaceholder": "Search everything you've logged...",
+      "resultCount": "{count, plural, =0 {no results} one {# result} other {# results}} across every module",
+      "resultCountForQuery": "{count, plural, =0 {no results} one {# result} other {# results}} for \"{query}\" across every module",
+      "empty": "Nothing logged yet — once you start using the modules, you'll be able to search across all of them here.",
+      "truncated": "Showing the first {shown} of {total} matches — refine your search to narrow it down."
     },
     "documents": {
       "title": "Documents",
@@ -718,10 +801,28 @@
       "streamInterrupted": "The connection dropped before the reply finished.",
       "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete.",
       "hideConversationsHint": "Hide the conversation list and give the thread the full width.",
-      "showConversationsHint": "Show the conversation list again."
+      "showConversationsHint": "Show the conversation list again.",
+      "send": "Send",
+      "emptyBody": "Ask anything — general knowledge, brainstorming, writing help, or just a conversation. Not tied to any Ionexa AI module.",
+      "composerPlaceholder": "Message Ionexa...",
+      "mentorMode": "Mentor Mode",
+      "mentorModeHint": "Mentor Mode: strategic guidance instead of just answers — flags risks, asks clarifying questions, suggests alternatives, and uses your logged data as context.",
+      "newChat": "New Chat",
+      "noConversations": "No conversations yet.",
+      "groupPinned": "Pinned",
+      "groupToday": "Today",
+      "groupYesterday": "Yesterday",
+      "groupOlder": "Older",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "rename": "Rename",
+      "deleteConfirm": "Delete \"{title}\"? This can't be undone."
     },
     "create": {
-      "title": "Create Anything"
+      "title": "Create Anything",
+      "subtitle": "Describe anything — a product idea, a trade, feedback from a user, a metric — and it lands in the right module automatically.",
+      "loggedTo": "Logged to:",
+      "viewModule": "View {module} →"
     },
     "timeline": {
       "title": "Timeline",
@@ -1476,6 +1577,39 @@
       "hideNumbers": "Hide the numbers",
       "dismiss": "Dismiss this",
       "dismissError": "That could not be dismissed."
+    },
+    "systemHealth": {
+      "toggleStackTrace": "Toggle stack trace"
+    },
+    "ideas": {
+      "new": "New Idea",
+      "edit": "Edit Idea",
+      "empty": "No ideas yet — use the button above to log your first one.",
+      "loadError": "Could not load your ideas: {message}",
+      "deleteConfirm": "Delete this idea? This can't be undone.",
+      "editAria": "Edit idea: {name}",
+      "nameLabel": "Name",
+      "namePlaceholder": "idea name",
+      "customerLabel": "Customer",
+      "customerPlaceholder": "target customer",
+      "problemLabel": "Problem",
+      "problemPlaceholder": "what problem does this solve?",
+      "competitorsLabel": "Competitors",
+      "competitorsPlaceholder": "known competitors",
+      "marketSizeLabel": "Market Size",
+      "marketSizePlaceholder": "e.g. $2B TAM",
+      "scoreLabel": "Score (0-100)",
+      "scorePlaceholder": "score",
+      "mvpLabel": "MVP",
+      "mvpPlaceholder": "what does the MVP look like?",
+      "verdictLabel": "Verdict",
+      "verdictPlaceholder": "e.g. pursue / kill / watch",
+      "cardFor": "for: {customer}",
+      "cardScore": "Score: {score}",
+      "cardProblem": "Problem:",
+      "cardCompetitors": "Competitors:",
+      "cardMarketSize": "Market Size:",
+      "cardMvp": "MVP:"
     }
   },
   "module": {
@@ -1534,7 +1668,9 @@
     "mightBeRelated": "This might be related to: {titles}. Link them?",
     "yes": "Yes",
     "no": "No",
-    "linked": "Linked"
+    "linked": "Linked",
+    "unlink": "Unlink",
+    "unlinkAria": "Unlink {name}"
   },
   "favorites": {
     "add": "Add to favorites",
@@ -1624,5 +1760,147 @@
     "unlimited": "Unlimited — no credits used",
     "unlimitedWouldHaveCost": "Unlimited — would have cost {count} credits",
     "freeMessage": "Free message · {count} left this month"
+  },
+  "cookies": {
+    "banner": {
+      "summary": "We use cookies for essential functionality — signing you in and keeping your session working.",
+      "accept": "Accept",
+      "essential": "<term>Essential session cookie</term> — set by Supabase Auth when you log in, so the app knows you're signed in on later requests. Without it, you'd be signed out on every page load. Cleared automatically when it expires or when you sign out.",
+      "preferences": "<term>Local preferences</term> — theme, language, accessibility settings, and this cookie-consent choice are stored in your browser's local storage, not sent anywhere.",
+      "noTracking": "No advertising or third-party tracking cookies are used. See our <cookiePolicy>Cookie Policy</cookiePolicy> and <privacyPolicy>Privacy Policy</privacyPolicy> for details."
+    }
+  },
+  "security": {
+    "badge": {
+      "checked": "Security checked",
+      "flagged": "Security flagged",
+      "title": "AI Output Protection Layer",
+      "checkedAt": "Checked {when}",
+      "whatWasChecked": "What was checked:",
+      "issuesFound": "Issues found:",
+      "noIssues": "No issues detected."
+    }
+  },
+  "moduleData": {
+    "fields": {
+      "amount": "Amount",
+      "budget": "Budget",
+      "caption": "Caption",
+      "category": "Category",
+      "channel": "Channel",
+      "coldEmail": "Cold Email",
+      "company": "Company",
+      "contentIdeas": "Content Ideas",
+      "customers": "Customers",
+      "dataSource": "Data Source",
+      "description": "Description",
+      "direction": "Direction",
+      "findings": "Findings",
+      "followUpEmail": "Follow-up Email",
+      "hashtags": "Hashtags",
+      "idea": "Idea",
+      "ideaNames": "Idea Names",
+      "language": "Language",
+      "launchPlan": "Launch Plan",
+      "leadName": "Lead Name",
+      "marketing": "Marketing",
+      "metricName": "Metric Name",
+      "mvpFeatures": "MVP Features",
+      "name": "Name",
+      "nextSteps": "Next Steps",
+      "notes": "Notes",
+      "pnl": "P&L",
+      "platform": "Platform",
+      "pricing": "Pricing",
+      "priority": "Priority",
+      "product": "Product",
+      "productName": "Product Name",
+      "prompt": "Prompt",
+      "quiz": "Quiz",
+      "ranking": "Ranking",
+      "recommendation": "Recommendation",
+      "resources": "Resources",
+      "result": "Result",
+      "risks": "Risks",
+      "roadmap": "Roadmap",
+      "score": "Score",
+      "sentiment": "Sentiment",
+      "slideCount": "Slide Count",
+      "status": "Status",
+      "strengths": "Strengths",
+      "suggestedResponse": "Suggested Response",
+      "suggestedWorkflow": "Suggested Workflow",
+      "summary": "Summary",
+      "symbol": "Symbol",
+      "targetAudience": "Target Audience",
+      "taskName": "Task Name",
+      "timeSaved": "Time Saved",
+      "title": "Title",
+      "toolsNeeded": "Tools Needed",
+      "topic": "Topic",
+      "twitterThread": "Twitter Thread",
+      "type": "Type",
+      "url": "URL",
+      "userJourney": "User Journey",
+      "value": "Value",
+      "weaknesses": "Weaknesses"
+    },
+    "options": {
+      "active": "active",
+      "android": "android",
+      "archived": "archived",
+      "completed": "completed",
+      "content": "content",
+      "crossPlatform": "cross-platform",
+      "desktop": "desktop",
+      "done": "done",
+      "draft": "draft",
+      "email": "email",
+      "event": "event",
+      "expense": "expense",
+      "final": "final",
+      "inProgress": "in progress",
+      "inReview": "in review",
+      "income": "income",
+      "ios": "ios",
+      "live": "live",
+      "other": "other",
+      "paidAds": "paid ads",
+      "paused": "paused",
+      "planned": "planned",
+      "requested": "requested",
+      "seo": "seo",
+      "social": "social",
+      "web": "web"
+    },
+    "placeholders": {
+      "longShort": "long / short",
+      "winLoss": "win / loss",
+      "httpsUrl": "https://...",
+      "codingLanguages": "e.g. Python, TypeScript, Go",
+      "dataSources": "e.g. CSV export, Stripe, Google Analytics"
+    },
+    "deleteConfirm": {
+      "competitors": "Delete this competitor? This can't be undone.",
+      "research": "Delete this research note? This can't be undone.",
+      "finance": "Delete this finance entry? This can't be undone.",
+      "learning": "Delete this learning entry? This can't be undone.",
+      "trading": "Delete this trade? This can't be undone.",
+      "decisions": "Delete this decision? This can't be undone.",
+      "products": "Delete this product? This can't be undone.",
+      "content": "Delete this content entry? This can't be undone.",
+      "sales": "Delete this lead? This can't be undone.",
+      "feedback": "Delete this feedback entry? This can't be undone.",
+      "analytics": "Delete this metric? This can't be undone.",
+      "automation": "Delete this automation? This can't be undone.",
+      "websites": "Delete this website? This can't be undone.",
+      "apps": "Delete this app? This can't be undone.",
+      "images": "Delete this image? This can't be undone.",
+      "videos": "Delete this video? This can't be undone.",
+      "coding": "Delete this coding request? This can't be undone.",
+      "data-analysis": "Delete this analysis? This can't be undone.",
+      "presentations": "Delete this presentation note? This can't be undone.",
+      "campaigns": "Delete this campaign? This can't be undone."
+    }
   }
 }

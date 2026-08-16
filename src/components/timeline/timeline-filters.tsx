@@ -19,6 +19,7 @@ export function TimelineFilters({
   range: TimelineRange;
 }) {
   const t = useTranslations("dashboard.timeline");
+  const tKey = useTranslations();
   const router = useRouter();
 
   function navigate(nextModule: string, nextRange: TimelineRange) {
@@ -39,7 +40,7 @@ export function TimelineFilters({
         <option value="all">{t("showOnly", { module: t("allModules") })}</option>
         {LINKABLE_MODULES.map((m) => (
           <option key={m.slug} value={m.slug}>
-            {t("showOnly", { module: m.title })}
+            {t("showOnly", { module: tKey(m.titleKey) })}
           </option>
         ))}
       </select>

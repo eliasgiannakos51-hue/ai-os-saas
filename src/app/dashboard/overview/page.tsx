@@ -65,10 +65,9 @@ export default async function OverviewPage() {
   const locale = await getLocale();
   const tSidebar = await getTranslations("sidebar.items");
   const tInsights = await getTranslations("dashboard.insights");
-  const translateModuleTitle = (title: string) => {
-    const key = ITEM_LABEL_KEYS[title];
-    return key ? tSidebar(key) : title;
-  };
+  // The config carries the sidebar key directly now, so this no longer
+  // has to look an English string up in a table to find its own name.
+  const tKey = await getTranslations();
   const supabase = createClient();
 
   const {
@@ -226,7 +225,7 @@ export default async function OverviewPage() {
         // names English in every language. ITEM_LABEL_KEYS maps it onto the
         // same sidebar.items.* message the sidebar already uses, so a module
         // reads identically in both places.
-        moduleTitle: translateModuleTitle(summary.module.title),
+        moduleTitleKey: summary.module.titleKey,
         href: summary.href,
         createdAt: row.created_at,
       }))
@@ -352,9 +351,9 @@ export default async function OverviewPage() {
       ? t("aiCoach.noActivity")
       : [
           topModulesThisWeek
-            .map((s) => t("aiCoach.entryCount", { count: s.recentCount, module: s.module.title }))
+            .map((s) => t("aiCoach.entryCount", { count: s.recentCount, module: tKey(s.module.titleKey) }))
             .join(", "),
-          t("aiCoach.mostActiveIn", { module: topModulesThisWeek[0].module.title }),
+          t("aiCoach.mostActiveIn", { module: tKey(topModulesThisWeek[0].module.titleKey) }),
         ].join(". ");
 
   return (
@@ -390,7 +389,7 @@ export default async function OverviewPage() {
           <HomeStatCard
             icon={<Layers className="h-4 w-4" aria-hidden="true" />}
             label={t("statRow.mostActive")}
-            value={mostActive && mostActive.count > 0 ? mostActive.module.title : "—"}
+            value={mostActive && mostActive.count > 0 ? tKey(mostActive.module.titleKey) : "—"}
           />
           <CreditsHomeStat label={t("statRow.creditsRemaining")} />
         </div>

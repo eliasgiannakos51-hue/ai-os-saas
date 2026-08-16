@@ -12,6 +12,7 @@ import { ScheduledRunsList } from "@/components/mission/scheduled-runs-list";
 import { MISSION_ICON } from "@/lib/module-icons";
 import type { Mission } from "@/types/mission";
 import type { ScheduledAgentRun } from "@/types/scheduled-agent-run";
+import { HelpTip } from "@/components/help/help-tip";
 
 export const metadata: Metadata = { title: "Mission Control" };
 
@@ -134,7 +135,7 @@ export default async function MissionPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={MISSION_ICON} title={t("title")} description={t("description")} />
+        <PageHeader icon={MISSION_ICON} title={t("title")} description={t("description")} help={<HelpTip slug="create-mission" />} />
 
 
         <ScheduledRunsList runs={pendingRuns} />

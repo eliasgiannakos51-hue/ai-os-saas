@@ -34,59 +34,181 @@
     "what-is-ionexa": {
       "title": "Che cos'è Ionexa?",
       "body": "Un'area di lavoro dove dici che cosa ti serve e viene fatto: genera siti web, fa girare agenti che lavorano da soli secondo la loro pianificazione, divide i tuoi obiettivi in passaggi e legge i tuoi file per poi risponderti su quello che contengono.\n\nInvece di dieci strumenti separati che non si parlano tra loro, uno solo che sa tutto.",
-      "triggers": ["cos e ionexa", "che cos e ionexa", "cosa fa ionexa", "a cosa serve ionexa", "che cos e questo", "come funziona ionexa", "cosa offrite", "informazioni su ionexa"]
+      "triggers": [
+        "cos e ionexa",
+        "che cos e ionexa",
+        "cosa fa ionexa",
+        "a cosa serve ionexa",
+        "che cos e questo",
+        "come funziona ionexa",
+        "cosa offrite",
+        "informazioni su ionexa"
+      ]
     },
-
     "pricing-overview": {
       "title": "Quanto costa Ionexa?",
       "body": "C'è un piano gratuito per provarlo, e piani a pagamento man mano che crescono le tue esigenze.\n\nI prezzi aggiornati e quello che include ogni piano sono sempre sulla pagina Prezzi. Qui non li ripeto di proposito: un numero vecchio è peggio di nessun numero.",
-      "triggers": ["quanto costa", "quanto costa ionexa", "prezzi", "prezzo", "costi", "che piani ci sono", "quali piani", "quanto costa abbonarsi", "e gratis"]
+      "triggers": [
+        "quanto costa",
+        "quanto costa ionexa",
+        "prezzi",
+        "prezzo",
+        "costi",
+        "che piani ci sono",
+        "quali piani",
+        "quanto costa abbonarsi",
+        "e gratis"
+      ]
     },
     "cancel": {
       "title": "Come disdico l'abbonamento?",
       "body": "Impostazioni → Fatturazione → Disdici l'abbonamento. Un clic per arrivarci, uno per confermare.\n\nNon perdi subito l'accesso: il tuo piano resta attivo fino alla fine del periodo che hai già pagato, e solo allora l'account passa al piano gratuito. Non viene eliminato nulla — i tuoi dati, i tuoi file e i tuoi siti web restano esattamente dove sono.\n\nHai cambiato idea? Dalla stessa schermata puoi ripristinare l'abbonamento in qualsiasi momento prima della scadenza.",
-      "triggers": ["come disdico", "disdire abbonamento", "disdetta", "annullare abbonamento", "cancellare abbonamento", "voglio disdire", "come faccio a disdire", "chiudere abbonamento"]
+      "triggers": [
+        "come disdico",
+        "disdire abbonamento",
+        "disdetta",
+        "annullare abbonamento",
+        "cancellare abbonamento",
+        "voglio disdire",
+        "come faccio a disdire",
+        "chiudere abbonamento"
+      ]
     },
-
     "what-are-credits": {
       "title": "Che cosa sono i crediti?",
       "body": "I crediti sono quello che spendi per il lavoro dell'IA: un messaggio in chat, la generazione di un sito, l'esecuzione di un agente.\n\nOgni piano include una quantità mensile che si rinnova, e se finiscono prima puoi acquistare pacchetti extra. I crediti di un pacchetto non scadono a fine mese — restano sull'account finché non li usi.\n\nQuanti ne include ogni piano lo trovi sulla pagina Prezzi.",
-      "triggers": ["cosa sono i crediti", "che cosa sono i crediti", "crediti", "come funzionano i crediti", "a cosa servono i crediti", "sistema di crediti", "cos e un credito"]
+      "triggers": [
+        "cosa sono i crediti",
+        "che cosa sono i crediti",
+        "crediti",
+        "come funzionano i crediti",
+        "a cosa servono i crediti",
+        "sistema di crediti",
+        "cos e un credito"
+      ]
     },
     "credits-ran-out": {
       "title": "Ho finito i crediti — e adesso?",
       "body": "Due possibilità: aspettare il rinnovo del mese prossimo, oppure acquistare un pacchetto di crediti, che si aggiunge subito.\n\nI crediti del pacchetto non scadono a fine mese, quindi niente di quello che compri va perso al rinnovo successivo. Le fai entrambe da Impostazioni → Fatturazione.",
-      "triggers": ["ho finito i crediti", "crediti finiti", "non ho piu crediti", "sono senza crediti", "comprare crediti", "come compro i crediti", "mi servono piu crediti", "ricaricare i crediti"]
+      "triggers": [
+        "ho finito i crediti",
+        "crediti finiti",
+        "non ho piu crediti",
+        "sono senza crediti",
+        "comprare crediti",
+        "come compro i crediti",
+        "mi servono piu crediti",
+        "ricaricare i crediti"
+      ]
     },
-
     "create-website": {
       "title": "Come creo un sito web?",
       "body": "Apri il Generatore di Siti dal menu laterale, racconta con parole tue che cosa vuoi — di che cosa si occupa la tua attività, a chi si rivolge, che stile ti piace — e premi Genera Sito.\n\nPuoi anche caricare immagini di riferimento, il logo o le foto dei prodotti, così segue il tuo stile. Quando è pronto lo pubblichi al suo indirizzo con un clic.",
-      "triggers": ["come creo un sito", "come faccio un sito", "creare un sito web", "voglio un sito", "generatore di siti", "fare una pagina web", "sito internet", "come si crea un sito"]
+      "triggers": [
+        "come creo un sito",
+        "come faccio un sito",
+        "creare un sito web",
+        "voglio un sito",
+        "generatore di siti",
+        "fare una pagina web",
+        "sito internet",
+        "come si crea un sito"
+      ]
     },
-
     "create-agent": {
       "title": "Come creo un agente?",
       "body": "Nel menu Agenti IA descrivi in una frase che cosa deve fare e ogni quanto — per esempio «ogni mattina mandami un riassunto delle notizie del mio settore».\n\nIonexa costruisce l'agente al posto tuo, lo esegue secondo la pianificazione e ti manda il risultato. Puoi metterlo in pausa o modificarlo quando vuoi.",
-      "triggers": ["come creo un agente", "creare un agente", "agenti", "agente ia", "voglio un agente", "automatizzare", "automazione", "attivita programmata"]
+      "triggers": [
+        "come creo un agente",
+        "creare un agente",
+        "agenti",
+        "agente ia",
+        "voglio un agente",
+        "automatizzare",
+        "automazione",
+        "attivita programmata"
+      ]
     },
-
     "upload-files": {
       "title": "Posso caricare dei file?",
       "body": "Sì — PDF, Word, Excel, CSV, testo e Markdown. Li carichi nella sezione File, Ionexa ne legge il contenuto e poi puoi fargli tutte le domande che vuoi su quello che c'è dentro.\n\nI tuoi file sono privati: nessun altro può accedervi e ogni download passa da un link temporaneo.",
-      "triggers": ["caricare un file", "caricare file", "posso caricare file", "pdf", "file", "documenti", "allegare un file", "far leggere un documento"]
+      "triggers": [
+        "caricare un file",
+        "caricare file",
+        "posso caricare file",
+        "pdf",
+        "file",
+        "documenti",
+        "allegare un file",
+        "far leggere un documento"
+      ]
     },
-
     "contact-support": {
       "title": "Come parlo con una persona?",
       "body": "Impostazioni → Supporto, e scrivici.\n\nSe si tratta di un addebito, aggiungi il riferimento dell'addebito così lo troviamo subito.",
-      "triggers": ["contatto", "assistenza", "supporto", "parlare con una persona", "voglio parlare con qualcuno", "contattare l assistenza", "servizio clienti", "aiuto da una persona"]
+      "triggers": [
+        "contatto",
+        "assistenza",
+        "supporto",
+        "parlare con una persona",
+        "voglio parlare con qualcuno",
+        "contattare l assistenza",
+        "servizio clienti",
+        "aiuto da una persona"
+      ]
     },
-
     "data-privacy": {
       "title": "Che cosa fate con i miei dati?",
       "body": "I tuoi dati sono tuoi. Non li vendiamo, non li usiamo per addestrare modelli e ogni account vede solo i propri — ed è imposto nel database, non soltanto nell'applicazione.\n\nPuoi scaricarli o eliminarli quando vuoi.",
-      "triggers": ["i miei dati", "privacy", "protezione dei dati", "sicurezza dei dati", "vendete i miei dati", "addestrare i modelli", "gdpr", "i miei dati sono al sicuro"]
+      "triggers": [
+        "i miei dati",
+        "privacy",
+        "protezione dei dati",
+        "sicurezza dei dati",
+        "vendete i miei dati",
+        "addestrare i modelli",
+        "gdpr",
+        "i miei dati sono al sicuro"
+      ]
+    },
+    "chat-memory": {
+      "title": "La chat ricorda le conversazioni precedenti?",
+      "body": "All'interno della stessa conversazione ricorda sempre quello che è stato detto prima.\n\nTra una conversazione e l'altra conserva solo informazioni durature e utili — il tuo nome, di cosa ti occupi, le tue preferenze — ed è disponibile nei piani a pagamento. Puoi vedere tutto quello che ha conservato, ed eliminarlo, in Impostazioni → Memoria AI.",
+      "triggers": [
+        "si ricorda",
+        "memoria",
+        "conversazioni precedenti",
+        "dimentica",
+        "non ricorda",
+        "cronologia chat",
+        "conserva"
+      ]
+    },
+    "create-mission": {
+      "title": "Come creo una missione?",
+      "body": "Nel Centro Missioni scrivi un obiettivo come lo diresti a una persona: «voglio più clienti entro la primavera».\n\nIonexa lo scompone in passaggi concreti, e da lì puoi seguirli tu oppure affidarne qualcuno a un agente.",
+      "triggers": [
+        "come creo una missione",
+        "creare una missione",
+        "missioni",
+        "centro missioni",
+        "obiettivo",
+        "obiettivi",
+        "piano d azione"
+      ]
+    },
+    "connect-gmail": {
+      "title": "Come collego Gmail o Google Drive?",
+      "body": "Impostazioni → Integrazioni. Scegli il servizio e approvi l'accesso nella finestra di Google.\n\nVedi esattamente cosa leggerà prima di approvare, e puoi scollegare quando vuoi: le chiavi di accesso vengono cancellate subito.",
+      "triggers": [
+        "gmail",
+        "google drive",
+        "collegare",
+        "integrazioni",
+        "come collego",
+        "collegare la posta",
+        "collegamenti"
+      ]
     }
   }
 }

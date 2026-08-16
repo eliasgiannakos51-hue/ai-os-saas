@@ -155,6 +155,45 @@
         "modelle trainieren",
         "datensicherheit"
       ]
+    },
+    "chat-memory": {
+      "title": "Merkt sich der Chat frühere Unterhaltungen?",
+      "body": "Innerhalb einer Unterhaltung merkt er sich immer, was vorher gesagt wurde.\n\nÜber Unterhaltungen hinweg behält er nur dauerhaft Nützliches — deinen Namen, was du machst, deine Vorlieben — und das gibt es in den kostenpflichtigen Tarifen. Du kannst alles Gespeicherte ansehen und löschen unter Einstellungen → KI-Gedächtnis.",
+      "triggers": [
+        "merkt er sich",
+        "gedachtnis",
+        "fruhere unterhaltungen",
+        "vergisst",
+        "erinnert sich nicht",
+        "chatverlauf",
+        "speichert er"
+      ]
+    },
+    "create-mission": {
+      "title": "Wie erstelle ich eine Mission?",
+      "body": "In der Missionskontrolle schreibst du ein Ziel so auf, wie du es einem Menschen sagen würdest: «ich will bis zum Frühjahr mehr Kunden».\n\nIonexa zerlegt es in konkrete Schritte, und danach arbeitest du sie selbst ab oder gibst einzelne an einen Agenten ab.",
+      "triggers": [
+        "wie erstelle ich eine mission",
+        "mission erstellen",
+        "missionen",
+        "missionskontrolle",
+        "ziel",
+        "ziele",
+        "aktionsplan"
+      ]
+    },
+    "connect-gmail": {
+      "title": "Wie verbinde ich Gmail oder Google Drive?",
+      "body": "Einstellungen → Integrationen. Du wählst den Dienst und bestätigst den Zugriff im Fenster von Google.\n\nDu siehst vor dem Bestätigen genau, was gelesen wird, und kannst jederzeit trennen — die Zugangsschlüssel werden dann sofort gelöscht.",
+      "triggers": [
+        "gmail",
+        "google drive",
+        "verbinden",
+        "integrationen",
+        "wie verbinde ich",
+        "mail verknupfen",
+        "verbindungen"
+      ]
     }
   }
 }

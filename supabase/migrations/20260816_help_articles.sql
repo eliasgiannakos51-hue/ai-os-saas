@@ -29,8 +29,8 @@
 -- cannot reach a non-Greek reader by any code path. Greek is one more
 -- translation here, with no privileges.
 --
--- ROWS: 134 total across 10 locales
---   en=27  el=27  es=10  fr=10  de=10  it=10  pt=10  zh=10  ja=10  ar=10
+-- ROWS: 158 total across 10 locales
+--   en=27  el=27  es=13  fr=13  de=13  it=13  pt=13  zh=13  ja=13  ar=13
 --
 -- ============================================================================
 -- ONE COLUMN BEYOND THE AGREED SHAPE, AND WHY
@@ -43,7 +43,7 @@
 -- this migration exists to empty. Everything else matches the agreed shape.
 --
 -- `href` is deliberately NOT here. A route is code, not content: it is the
--- same in every language, storing it once per row invites 134 chances to
+-- same in every language, storing it once per row invites 158 chances to
 -- drift, and scripts/tests/help-links.test.mjs can only prove a route
 -- exists if it can see it in the repo. It lives in
 -- src/lib/support/help-links.ts.
@@ -485,12 +485,60 @@ Ionexa breaks it into concrete steps, and from there you can work through them y
   ('create-mission', 'el', 'Πώς φτιάχνω mission;', 'Στο Mission Control γράφεις έναν στόχο όπως θα τον έλεγες σε άνθρωπο — «θέλω περισσότερους πελάτες μέχρι την άνοιξη».
 
 Το Ionexa τον σπάει σε συγκεκριμένα βήματα, και μετά μπορείς να τα δουλέψεις μόνος σου ή να αναθέσεις κάποια σε agent.', 'missions', 10, array['πως φτιαχνω mission', 'mission control', 'στοχος', 'στοχους', 'create mission', 'missions', 'σχεδιο δρασης']::text[], true),
+  ('create-mission', 'es', '¿Cómo creo una misión?', 'En Centro de Misión escribes un objetivo tal como se lo dirías a una persona: «quiero más clientes para la primavera».
+
+Ionexa lo divide en pasos concretos, y a partir de ahí puedes trabajarlos tú o encargar alguno a un agente.', 'missions', 10, array['como creo una mision', 'crear mision', 'misiones', 'centro de mision', 'objetivo', 'objetivos', 'plan de accion']::text[], true),
+  ('create-mission', 'fr', 'Comment créer une mission ?', 'Dans Contrôle de Mission, vous écrivez un objectif comme vous le diriez à quelqu''un : « je veux plus de clients d''ici le printemps ».
+
+Ionexa le découpe en étapes concrètes, et vous pouvez ensuite les traiter vous-même ou en confier certaines à un agent.', 'missions', 10, array['comment creer une mission', 'creer une mission', 'missions', 'controle de mission', 'objectif', 'objectifs', 'plan d action']::text[], true),
+  ('create-mission', 'de', 'Wie erstelle ich eine Mission?', 'In der Missionskontrolle schreibst du ein Ziel so auf, wie du es einem Menschen sagen würdest: «ich will bis zum Frühjahr mehr Kunden».
+
+Ionexa zerlegt es in konkrete Schritte, und danach arbeitest du sie selbst ab oder gibst einzelne an einen Agenten ab.', 'missions', 10, array['wie erstelle ich eine mission', 'mission erstellen', 'missionen', 'missionskontrolle', 'ziel', 'ziele', 'aktionsplan']::text[], true),
+  ('create-mission', 'it', 'Come creo una missione?', 'Nel Centro Missioni scrivi un obiettivo come lo diresti a una persona: «voglio più clienti entro la primavera».
+
+Ionexa lo scompone in passaggi concreti, e da lì puoi seguirli tu oppure affidarne qualcuno a un agente.', 'missions', 10, array['come creo una missione', 'creare una missione', 'missioni', 'centro missioni', 'obiettivo', 'obiettivi', 'piano d azione']::text[], true),
+  ('create-mission', 'pt', 'Como crio uma missão?', 'No Controle de Missão escreves um objetivo como o dirias a uma pessoa: «quero mais clientes até à primavera».
+
+O Ionexa divide-o em passos concretos e, a partir daí, podes trabalhá-los tu ou entregar alguns a um agente.', 'missions', 10, array['como crio uma missao', 'criar missao', 'missoes', 'controle de missao', 'objetivo', 'objetivos', 'plano de acao']::text[], true),
+  ('create-mission', 'zh', '怎么创建任务？', '在任务控制中心，用你对人说话的方式写下目标——比如「我想在春天前多一些客户」。
+
+Ionexa 会把它拆成具体步骤，之后你可以自己去做，也可以把其中几步交给智能体。', 'missions', 10, array['怎么创建任务', '创建任务', '任务', '任务控制中心', '目标', '定目标', '行动计划']::text[], true),
+  ('create-mission', 'ja', 'ミッションはどう作りますか？', 'ミッションコントロールで、人に話すのと同じ言葉で目標を書いてください。たとえば「春までにお客様を増やしたい」といった具合です。
+
+Ionexa がそれを具体的な手順に分解します。あとはご自身で進めても、いくつかをエージェントに任せてもかまいません。', 'missions', 10, array['ミッションの作り方', 'ミッションを作る', 'ミッション', 'ミッションコントロール', '目標', '計画', 'やることを分ける']::text[], true),
+  ('create-mission', 'ar', 'كيف أُنشئ مهمة؟', 'في مركز التحكم بالمهام تكتب هدفك كما تقوله لشخص: «أريد عملاء أكثر قبل الربيع».
+
+يقسّمه Ionexa إلى خطوات محددة، ثم تنفذها بنفسك أو تُسند بعضها إلى وكيل.', 'missions', 10, array['كيف انشئ مهمة', 'انشاء مهمة', 'المهام', 'مركز التحكم بالمهام', 'هدف', 'اهداف', 'خطة عمل']::text[], true),
   ('chat-memory', 'en', 'Does the chat remember previous conversations?', 'Within a single conversation it always remembers what was said earlier.
 
 Between conversations it keeps only lasting, useful facts — your name, what you do, your preferences — and that is available on paid plans. You can see everything it has kept, and delete any of it, in Settings → Memory.', 'chat', 10, array['does it remember', 'memory', 'remember', 'previous conversations', 'forgets', 'does not remember', 'chat history']::text[], true),
   ('chat-memory', 'el', 'Θυμάται το chat προηγούμενες συνομιλίες;', 'Μέσα στην ίδια συνομιλία θυμάται πάντα τα προηγούμενα μηνύματα.
 
 Ανάμεσα σε διαφορετικές συνομιλίες κρατά μόνο μόνιμα χρήσιμα στοιχεία — όνομα, επάγγελμα, προτιμήσεις — και αυτό υπάρχει στα επί πληρωμή πλάνα. Μπορείς να δεις ό,τι έχει κρατήσει, και να το σβήσεις, από τις Ρυθμίσεις → Μνήμη.', 'chat', 10, array['θυμαται', 'μνημη', 'memory', 'προηγουμενες συνομιλιες', 'ξεχναει', 'δεν θυμαται', 'ιστορικο συνομιλιων']::text[], true),
+  ('chat-memory', 'es', '¿El chat recuerda conversaciones anteriores?', 'Dentro de una misma conversación siempre recuerda lo que se dijo antes.
+
+Entre conversaciones distintas guarda solo datos duraderos y útiles —tu nombre, a qué te dedicas, tus preferencias— y eso está disponible en los planes de pago. Puedes ver todo lo que ha guardado, y borrar lo que quieras, en Configuración → Memoria AI.', 'chat', 10, array['se acuerda', 'memoria', 'recuerda conversaciones', 'conversaciones anteriores', 'se olvida', 'no recuerda nada', 'historial de chat']::text[], true),
+  ('chat-memory', 'fr', 'Le chat se souvient-il des conversations précédentes ?', 'Au sein d''une même conversation, il se souvient toujours de ce qui a été dit avant.
+
+D''une conversation à l''autre, il ne garde que des informations durables et utiles — votre nom, votre métier, vos préférences — et cette fonction est réservée aux formules payantes. Vous pouvez voir tout ce qu''il a retenu, et le supprimer, dans Paramètres → Mémoire IA.', 'chat', 10, array['il se souvient', 'memoire', 'conversations precedentes', 'il oublie', 'ne se souvient pas', 'historique des discussions', 'garde t il']::text[], true),
+  ('chat-memory', 'de', 'Merkt sich der Chat frühere Unterhaltungen?', 'Innerhalb einer Unterhaltung merkt er sich immer, was vorher gesagt wurde.
+
+Über Unterhaltungen hinweg behält er nur dauerhaft Nützliches — deinen Namen, was du machst, deine Vorlieben — und das gibt es in den kostenpflichtigen Tarifen. Du kannst alles Gespeicherte ansehen und löschen unter Einstellungen → KI-Gedächtnis.', 'chat', 10, array['merkt er sich', 'gedachtnis', 'fruhere unterhaltungen', 'vergisst', 'erinnert sich nicht', 'chatverlauf', 'speichert er']::text[], true),
+  ('chat-memory', 'it', 'La chat ricorda le conversazioni precedenti?', 'All''interno della stessa conversazione ricorda sempre quello che è stato detto prima.
+
+Tra una conversazione e l''altra conserva solo informazioni durature e utili — il tuo nome, di cosa ti occupi, le tue preferenze — ed è disponibile nei piani a pagamento. Puoi vedere tutto quello che ha conservato, ed eliminarlo, in Impostazioni → Memoria AI.', 'chat', 10, array['si ricorda', 'memoria', 'conversazioni precedenti', 'dimentica', 'non ricorda', 'cronologia chat', 'conserva']::text[], true),
+  ('chat-memory', 'pt', 'O chat lembra-se de conversas anteriores?', 'Dentro da mesma conversa lembra-se sempre do que foi dito antes.
+
+Entre conversas diferentes guarda apenas informação duradoura e útil — o teu nome, o que fazes, as tuas preferências — e isso está disponível nos planos pagos. Podes ver tudo o que guardou, e apagar, em Configurações → Memória IA.', 'chat', 10, array['lembra se', 'memoria', 'conversas anteriores', 'esquece', 'nao se lembra', 'historico de conversas', 'guarda']::text[], true),
+  ('chat-memory', 'zh', '聊天会记得之前的对话吗？', '在同一个对话里，它始终记得前面说过的内容。
+
+跨对话时，它只保留长期有用的信息——你的名字、你做什么、你的偏好——这项功能在付费方案中提供。你可以在「设置 → AI 记忆」里查看它记住的全部内容，也可以随时删除。', 'chat', 10, array['会记得吗', '记忆', '记得之前', '之前的对话', '会忘记吗', '不记得', '聊天记录']::text[], true),
+  ('chat-memory', 'ja', 'チャットは前の会話を覚えていますか？', '同じ会話の中では、前に話した内容を常に覚えています。
+
+会話をまたぐ場合は、長く役立つ情報だけを保持します。お名前、お仕事、好みなどです。この機能は有料プランでご利用いただけます。保持している内容は「設定 → AI メモリー」からすべて確認でき、削除もできます。', 'chat', 10, array['覚えている', 'メモリー', '前の会話', '忘れる', '覚えていない', 'チャット履歴', '記憶']::text[], true),
+  ('chat-memory', 'ar', 'هل تتذكر المحادثة ما دار سابقًا؟', 'داخل المحادثة الواحدة تتذكر دائمًا ما قيل قبل ذلك.
+
+أما بين المحادثات فتحتفظ فقط بالمعلومات الدائمة المفيدة — اسمك، وما تعمل، وتفضيلاتك — وهذه الميزة متاحة في الخطط المدفوعة. ويمكنك الاطلاع على كل ما احتفظت به وحذفه من الإعدادات ← ذاكرة الذكاء الاصطناعي.', 'chat', 10, array['هل تتذكر', 'الذاكرة', 'المحادثات السابقة', 'تنسى', 'لا تتذكر', 'سجل المحادثات', 'تحتفظ']::text[], true),
   ('upload-files', 'en', 'Can I upload files?', 'Yes — PDF, Word, Excel, CSV, plain text and Markdown. Upload them in Files, Ionexa reads their contents, and then you can ask questions about them.
 
 Your files are private: nobody else has access, and every download goes through a temporary link.', 'files', 10, array['upload a file', 'upload', 'pdf', 'files', 'documents', 'can i upload', 'attach a file', 'read my document']::text[], true),
@@ -527,6 +575,30 @@ You see exactly what it will read before you approve, and you can disconnect whe
   ('connect-gmail', 'el', 'Πώς συνδέω Gmail ή Google Drive;', 'Ρυθμίσεις → Συνδέσεις. Διαλέγεις την υπηρεσία και εγκρίνεις την πρόσβαση στο παράθυρο της Google.
 
 Βλέπεις ακριβώς τι θα διαβάζει πριν το εγκρίνεις, και μπορείς να αποσυνδέσεις όποτε θες — τότε τα κλειδιά πρόσβασης διαγράφονται αμέσως.', 'integrations', 10, array['gmail', 'google drive', 'συνδεση', 'integration', 'slack', 'πως συνδεω', 'connect', 'συνδεσεις']::text[], true),
+  ('connect-gmail', 'es', '¿Cómo conecto Gmail o Google Drive?', 'Configuración → Integraciones. Eliges el servicio y apruebas el acceso en la propia ventana de Google.
+
+Ves exactamente qué va a leer antes de aprobarlo, y puedes desconectar cuando quieras: al hacerlo las claves de acceso se borran de inmediato.', 'integrations', 10, array['gmail', 'google drive', 'conectar', 'integraciones', 'como conecto', 'vincular correo', 'conexiones']::text[], true),
+  ('connect-gmail', 'fr', 'Comment connecter Gmail ou Google Drive ?', 'Paramètres → Intégrations. Vous choisissez le service et vous autorisez l''accès dans la fenêtre de Google.
+
+Vous voyez exactement ce qui sera lu avant d''autoriser, et vous pouvez vous déconnecter quand vous voulez — les clés d''accès sont alors supprimées immédiatement.', 'integrations', 10, array['gmail', 'google drive', 'connecter', 'integrations', 'comment connecter', 'relier ma boite mail', 'connexions']::text[], true),
+  ('connect-gmail', 'de', 'Wie verbinde ich Gmail oder Google Drive?', 'Einstellungen → Integrationen. Du wählst den Dienst und bestätigst den Zugriff im Fenster von Google.
+
+Du siehst vor dem Bestätigen genau, was gelesen wird, und kannst jederzeit trennen — die Zugangsschlüssel werden dann sofort gelöscht.', 'integrations', 10, array['gmail', 'google drive', 'verbinden', 'integrationen', 'wie verbinde ich', 'mail verknupfen', 'verbindungen']::text[], true),
+  ('connect-gmail', 'it', 'Come collego Gmail o Google Drive?', 'Impostazioni → Integrazioni. Scegli il servizio e approvi l''accesso nella finestra di Google.
+
+Vedi esattamente cosa leggerà prima di approvare, e puoi scollegare quando vuoi: le chiavi di accesso vengono cancellate subito.', 'integrations', 10, array['gmail', 'google drive', 'collegare', 'integrazioni', 'come collego', 'collegare la posta', 'collegamenti']::text[], true),
+  ('connect-gmail', 'pt', 'Como ligo o Gmail ou o Google Drive?', 'Configurações → Integrações. Escolhes o serviço e aprovas o acesso na própria janela da Google.
+
+Vês exatamente o que vai ler antes de aprovares, e podes desligar quando quiseres — as chaves de acesso são apagadas de imediato.', 'integrations', 10, array['gmail', 'google drive', 'ligar', 'integracoes', 'como ligo', 'ligar o email', 'ligacoes']::text[], true),
+  ('connect-gmail', 'zh', '怎么连接 Gmail 或 Google Drive？', '设置 → 集成。选好服务，然后在谷歌自己的窗口里授权。
+
+授权之前你会看到它到底会读取什么，而且随时可以断开——断开时访问密钥会立即删除。', 'integrations', 10, array['gmail', '谷歌网盘', '怎么连接', '集成', '连接邮箱', '授权', '绑定账号']::text[], true),
+  ('connect-gmail', 'ja', 'Gmail や Google ドライブはどう連携しますか？', '設定 → 連携から、サービスを選んで Google の画面でアクセスを承認してください。
+
+承認する前に何を読み取るかがはっきり表示され、いつでも解除できます。解除するとアクセスキーはその場で削除されます。', 'integrations', 10, array['gmail', 'グーグルドライブ', '連携', '接続', 'どう連携', 'メールをつなぐ', '外部サービス']::text[], true),
+  ('connect-gmail', 'ar', 'كيف أربط Gmail أو Google Drive؟', 'الإعدادات ← التكاملات. تختار الخدمة وتوافق على الوصول في نافذة Google نفسها.
+
+ترى بالضبط ما سيُقرأ قبل الموافقة، ويمكنك فصل الربط متى شئت — وعندها تُحذف مفاتيح الوصول فورًا.', 'integrations', 10, array['gmail', 'جوجل درايف', 'ربط', 'التكاملات', 'كيف اربط', 'ربط البريد', 'الاتصالات']::text[], true),
   ('password-reset', 'en', 'I forgot my password.', 'On the sign-in page press "Forgot my password" and enter your email address. A reset link will be sent to you.
 
 If it does not arrive, check your spam folder.', 'account', 10, array['forgot my password', 'password', 'reset password', 'cannot log in', 'cant sign in', 'locked out', 'change password']::text[], true),

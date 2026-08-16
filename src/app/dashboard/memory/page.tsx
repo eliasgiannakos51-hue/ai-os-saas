@@ -13,6 +13,7 @@ import type { ModuleRecord } from "@/types/module-record";
 import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/admin";
+import { HelpTip } from "@/components/help/help-tip";
 
 export const metadata: Metadata = {
   title: "AI Memory",
@@ -62,7 +63,7 @@ export default async function MemoryPage() {
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={MEMORY_ICON} title={t("title")} />
+          <PageHeader icon={MEMORY_ICON} title={t("title")} help={<HelpTip slug="chat-memory" />} />
           <UpgradeRequired featureName={t("title")} planName={getPlan("starter")?.name ?? "Starter"} />
         </div>
       </main>

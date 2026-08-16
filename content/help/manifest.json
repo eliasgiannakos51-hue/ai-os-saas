@@ -30,45 +30,208 @@
     "account",
     "privacy"
   ],
-  "locales": ["en", "el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"],
+  "locales": [
+    "en",
+    "el",
+    "es",
+    "fr",
+    "de",
+    "it",
+    "pt",
+    "zh",
+    "ja",
+    "ar"
+  ],
   "baseLocale": "en",
   "articles": [
-    { "slug": "what-is-ionexa", "category": "getting-started", "order": 10, "href": null, "core": true },
-    { "slug": "languages", "category": "getting-started", "order": 20, "href": "/dashboard/settings", "core": false },
-    { "slug": "mobile-app", "category": "getting-started", "order": 30, "href": null, "core": false },
-
-    { "slug": "pricing-overview", "category": "billing", "order": 10, "href": "/pricing", "core": true },
-    { "slug": "change-plan", "category": "billing", "order": 20, "href": "/dashboard/settings", "core": false },
-    { "slug": "cancel", "category": "billing", "order": 30, "href": "/dashboard/settings", "core": true },
-    { "slug": "invoices", "category": "billing", "order": 40, "href": "/dashboard/settings", "core": false },
-    { "slug": "refund", "category": "billing", "order": 50, "href": "/dashboard/settings", "core": false },
-
-    { "slug": "what-are-credits", "category": "credits", "order": 10, "href": "/pricing", "core": true },
-    { "slug": "credit-cost-per-action", "category": "credits", "order": 20, "href": "/dashboard/settings", "core": false },
-    { "slug": "credits-ran-out", "category": "credits", "order": 30, "href": "/dashboard/settings", "core": true },
-    { "slug": "credits-rollover", "category": "credits", "order": 40, "href": null, "core": false },
-
-    { "slug": "create-website", "category": "websites", "order": 10, "href": "/dashboard/website-builder", "core": true },
-    { "slug": "publish-website", "category": "websites", "order": 20, "href": "/dashboard/website-builder", "core": false },
-
-    { "slug": "create-agent", "category": "agents", "order": 10, "href": "/dashboard/agents", "core": true },
-
-    { "slug": "create-mission", "category": "missions", "order": 10, "href": "/dashboard/mission", "core": false },
-
-    { "slug": "chat-memory", "category": "chat", "order": 10, "href": "/dashboard/memory", "core": false },
-
-    { "slug": "upload-files", "category": "files", "order": 10, "href": "/dashboard/files", "core": true },
-
-    { "slug": "connect-gmail", "category": "integrations", "order": 10, "href": "/dashboard/integrations", "core": false },
-
-    { "slug": "password-reset", "category": "account", "order": 10, "href": "/login", "core": false },
-    { "slug": "invite-code", "category": "account", "order": 20, "href": "/dashboard/settings", "core": false },
-    { "slug": "team-members", "category": "account", "order": 30, "href": "/pricing", "core": false },
-    { "slug": "notifications", "category": "account", "order": 40, "href": "/dashboard/settings", "core": false },
-    { "slug": "contact-support", "category": "account", "order": 50, "href": "/dashboard/settings", "core": true },
-
-    { "slug": "data-privacy", "category": "privacy", "order": 10, "href": "/privacy", "core": true },
-    { "slug": "export-data", "category": "privacy", "order": 20, "href": "/dashboard/settings", "core": false },
-    { "slug": "delete-account", "category": "privacy", "order": 30, "href": "/dashboard/settings", "core": false }
+    {
+      "slug": "what-is-ionexa",
+      "category": "getting-started",
+      "order": 10,
+      "href": null,
+      "core": true
+    },
+    {
+      "slug": "languages",
+      "category": "getting-started",
+      "order": 20,
+      "href": "/dashboard/settings",
+      "core": false
+    },
+    {
+      "slug": "mobile-app",
+      "category": "getting-started",
+      "order": 30,
+      "href": null,
+      "core": false
+    },
+    {
+      "slug": "pricing-overview",
+      "category": "billing",
+      "order": 10,
+      "href": "/pricing",
+      "core": true
+    },
+    {
+      "slug": "change-plan",
+      "category": "billing",
+      "order": 20,
+      "href": "/dashboard/settings",
+      "core": false
+    },
+    {
+      "slug": "cancel",
+      "category": "billing",
+      "order": 30,
+      "href": "/dashboard/settings",
+      "core": true
+    },
+    {
+      "slug": "invoices",
+      "category": "billing",
+      "order": 40,
+      "href": "/dashboard/settings",
+      "core": false
+    },
+    {
+      "slug": "refund",
+      "category": "billing",
+      "order": 50,
+      "href": "/dashboard/settings",
+      "core": false
+    },
+    {
+      "slug": "what-are-credits",
+      "category": "credits",
+      "order": 10,
+      "href": "/pricing",
+      "core": true
+    },
+    {
+      "slug": "credit-cost-per-action",
+      "category": "credits",
+      "order": 20,
+      "href": "/dashboard/settings",
+      "core": false
+    },
+    {
+      "slug": "credits-ran-out",
+      "category": "credits",
+      "order": 30,
+      "href": "/dashboard/settings",
+      "core": true
+    },
+    {
+      "slug": "credits-rollover",
+      "category": "credits",
+      "order": 40,
+      "href": null,
+      "core": false
+    },
+    {
+      "slug": "create-website",
+      "category": "websites",
+      "order": 10,
+      "href": "/dashboard/website-builder",
+      "core": true
+    },
+    {
+      "slug": "publish-website",
+      "category": "websites",
+      "order": 20,
+      "href": "/dashboard/website-builder",
+      "core": false
+    },
+    {
+      "slug": "create-agent",
+      "category": "agents",
+      "order": 10,
+      "href": "/dashboard/agents",
+      "core": true
+    },
+    {
+      "slug": "create-mission",
+      "category": "missions",
+      "order": 10,
+      "href": "/dashboard/mission",
+      "core": true
+    },
+    {
+      "slug": "chat-memory",
+      "category": "chat",
+      "order": 10,
+      "href": "/dashboard/memory",
+      "core": true
+    },
+    {
+      "slug": "upload-files",
+      "category": "files",
+      "order": 10,
+      "href": "/dashboard/files",
+      "core": true
+    },
+    {
+      "slug": "connect-gmail",
+      "category": "integrations",
+      "order": 10,
+      "href": "/dashboard/integrations",
+      "core": true
+    },
+    {
+      "slug": "password-reset",
+      "category": "account",
+      "order": 10,
+      "href": "/login",
+      "core": false
+    },
+    {
+      "slug": "invite-code",
+      "category": "account",
+      "order": 20,
+      "href": "/dashboard/settings",
+      "core": false
+    },
+    {
+      "slug": "team-members",
+      "category": "account",
+      "order": 30,
+      "href": "/pricing",
+      "core": false
+    },
+    {
+      "slug": "notifications",
+      "category": "account",
+      "order": 40,
+      "href": "/dashboard/settings",
+      "core": false
+    },
+    {
+      "slug": "contact-support",
+      "category": "account",
+      "order": 50,
+      "href": "/dashboard/settings",
+      "core": true
+    },
+    {
+      "slug": "data-privacy",
+      "category": "privacy",
+      "order": 10,
+      "href": "/privacy",
+      "core": true
+    },
+    {
+      "slug": "export-data",
+      "category": "privacy",
+      "order": 20,
+      "href": "/dashboard/settings",
+      "core": false
+    },
+    {
+      "slug": "delete-account",
+      "category": "privacy",
+      "order": 30,
+      "href": "/dashboard/settings",
+      "core": false
+    }
   ]
 }

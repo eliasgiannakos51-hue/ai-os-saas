@@ -14,6 +14,7 @@ import { encryptionAvailable } from "@/lib/integrations/crypto";
 import { providerConfigured } from "@/lib/integrations/oauth";
 import { PROVIDERS, type ProviderId } from "@/lib/integrations/providers";
 import { IntegrationsList } from "@/components/integrations/integrations-list";
+import { HelpTip } from "@/components/help/help-tip";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +40,7 @@ export default async function IntegrationsPage() {
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={Plug} title={t("title")} description={t("description")} />
+          <PageHeader icon={Plug} title={t("title")} description={t("description")} help={<HelpTip slug="connect-gmail" />} />
           <UpgradeRequired featureName={t("title")} planName="Starter" />
         </div>
       </main>

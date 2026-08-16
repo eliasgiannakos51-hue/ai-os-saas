@@ -66,7 +66,26 @@ check(
   SLUGS.every((s) => content.get("el")[s]),
   SLUGS.filter((s) => !content.get("el")[s]).join(", ")
 );
-check("ten articles are marked core", CORE.length === 10, String(CORE.length));
+check(
+  `at least ten articles are core (${CORE.length})`,
+  CORE.length >= 10,
+  String(CORE.length)
+);
+// The count is not the point — this is. A slug marked core that some
+// language has not translated would show a fallback notice on a page that
+// language's readers use daily, which is the whole reason `core` exists.
+{
+  const shipped = LOCALES.filter((l) => Object.keys(content.get(l)).length > 0);
+  const gaps = [];
+  for (const slug of CORE) {
+    for (const loc of shipped) if (!content.get(loc)[slug]) gaps.push(`${loc}/${slug}`);
+  }
+  check(
+    `every core article exists in all ${shipped.length} shipped languages (${CORE.length} x ${shipped.length})`,
+    gaps.length === 0,
+    gaps.join(", ")
+  );
+}
 
 // NO NUMBERS THAT MOVE. A price or a credit amount in an article is a
 // quote a customer will hold us to, and nobody reviews an article the way

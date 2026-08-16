@@ -15,8 +15,21 @@
 // page header, the browser tab, the sidebar label, the sidebar tooltip and
 // the empty state, in all ten locales.
 //
-// It also checks the rename did not quietly change any OTHER module's
-// empty state, which is the way a per-module override goes wrong.
+// WHERE THE EMPTY STATE LIVES NOW. It was module.emptyPresentationNotes —
+// one string, reached through an OPTIONAL emptyKey override that only
+// this module set. Every module has its own empty state now (three parts:
+// title, why, example, under moduleData.empty.<slug>), emptyKey is
+// required, and so is the shared "No entries yet" sentence that the
+// override existed to escape: gone, because there is no longer anything
+// that could fall back to it.
+//
+// What that changes here is the ADDRESS of the strings, not the job of
+// this file. The check that mattered — that no surface of this module
+// promises a slide generator, in any of ten languages — is unchanged and
+// now reads the three parts as one blob. What section 6 can no longer
+// mean is "exactly one module overrides its empty state": all twenty do.
+// It asks the stronger question instead — that no module shares another's
+// empty state, and that the generic sentence is really gone.
 //
 // Run: node scripts/tests/presentation-notes.test.mjs
 import { readFileSync } from "node:fs";
@@ -34,6 +47,19 @@ function check(name, cond, detail) {
 }
 
 const LOCALES = ["en", "el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
+
+// The empty state is three strings now. Every check below that used to
+// read one string reads all three joined, because the promise this file
+// hunts for could be made in any of them — the title is the shortest and
+// therefore the likeliest place for "Turn a brief into a finished deck"
+// to reappear.
+function emptyState(m, slug = "presentations") {
+  return m.moduleData.empty[slug];
+}
+function emptyText(m, slug = "presentations") {
+  const e = emptyState(m, slug);
+  return e ? `${e.title} ${e.why} ${e.example}` : undefined;
+}
 const messages = Object.fromEntries(
   LOCALES.map((l) => [l, JSON.parse(readFileSync(`messages/${l}.json`, "utf8"))])
 );
@@ -109,7 +135,7 @@ check("nor the other phrasing of a denial", !PROMISE.test(withoutNegations("It d
 for (const locale of LOCALES) {
   const m = messages[locale];
   check(`${locale}: the sidebar tooltip no longer promises a deck`, !PROMISE.test(withoutNegations(m.sidebar.hints.presentations)));
-  check(`${locale}: nor does the empty state`, !PROMISE.test(withoutNegations(m.module.emptyPresentationNotes)));
+  check(`${locale}: nor does the empty state`, !PROMISE.test(withoutNegations(emptyText(m))));
 }
 check(
   "the English tooltip says what it IS",
@@ -125,7 +151,8 @@ for (const locale of LOCALES) {
   const m = messages[locale];
   check(`${locale}: has a sidebar label`, Boolean(m.sidebar.items.presentations));
   check(`${locale}: has a tooltip`, Boolean(m.sidebar.hints.presentations));
-  check(`${locale}: has its own empty state`, Boolean(m.module.emptyPresentationNotes));
+  const empty = emptyState(m);
+  check(`${locale}: has its own empty state`, Boolean(empty?.title && empty?.why && empty?.example));
   if (locale === "en") continue;
   check(
     `${locale}: the label is genuinely translated`,
@@ -133,34 +160,57 @@ for (const locale of LOCALES) {
   );
   check(
     `${locale}: the empty state is genuinely translated`,
-    m.module.emptyPresentationNotes !== messages.en.module.emptyPresentationNotes
+    emptyText(m) !== emptyText(messages.en)
   );
 }
 
 console.log("\n== 5. the empty state explains what this is ==");
-const empty = messages.en.module.emptyPresentationNotes;
-check("it says what the page is for", /keep track of presentations/i.test(empty));
-check("it says what it does NOT do", /does not generate slides/i.test(empty));
-check("and still tells the user what to do next", /button above/i.test(empty));
-// The generic message would have been actively misleading here: it says
-// "log your first one" with no hint that logging is ALL this does.
-check(
-  "it is not the shared message",
-  empty !== messages.en.module.noEntries
-);
+const enEmpty = emptyText(messages.en);
+check("it says what the page is for", /keep track of presentations/i.test(enEmpty));
+check("it says what it does NOT do", /does not generate slides/i.test(enEmpty));
+check("and still tells the user what to do next", /button above/i.test(enEmpty));
+// The old generic message was actively misleading here: it said "log your
+// first one" with no hint that logging is ALL this does. It no longer
+// exists anywhere in the catalogue, which is a stronger guarantee than
+// this module's copy merely differing from it — so that is what is
+// asserted, in every locale rather than in English.
+for (const locale of LOCALES) {
+  check(
+    `${locale}: the generic "No entries yet" sentence is gone from the catalogue`,
+    messages[locale].module.noEntries === undefined &&
+      messages[locale].module.emptyPresentationNotes === undefined
+  );
+}
 
-console.log("\n== 6. no OTHER module's empty state changed ==");
-// The way a per-module override goes wrong: a shared string quietly
-// replaced for everyone. Every other module must still get noEntries.
-const overridden = BUILD_MODULES.filter((m) => m.emptyKey);
-check(`exactly one module overrides its empty state (${overridden.length})`, overridden.length === 1);
-check("and it is this one", overridden[0]?.slug === "presentations");
-const list = readFileSync("src/components/modules/generic-list.tsx", "utf8");
+console.log("\n== 6. this module's empty state is its own, and so is everyone else's ==");
+// The way a per-module empty state goes wrong: one module's copy quietly
+// standing in for another's, which is what a shared string was. Every
+// build module names its own key, and no two names collide.
+const emptyKeys = BUILD_MODULES.map((m) => m.emptyKey);
+check(`every build module names an empty state (${emptyKeys.length})`, emptyKeys.every(Boolean));
+check("and no two of them name the same one", new Set(emptyKeys).size === emptyKeys.length);
 check(
-  "the override falls back to the shared string",
-  /t\(module\.emptyKey \?\? "noEntries"\)/.test(list)
+  "this module's is its own",
+  getBuildModule("presentations").emptyKey === "moduleData.empty.presentations"
 );
-check("the shared string still exists for everyone else", Boolean(messages.en.module.noEntries));
+// The fallback is gone with the shared string it fell back to. Left in
+// place it would be dead code that quietly revives the generic sentence
+// the day someone re-adds the key.
+// Comments stripped first: the line that removed the fallback explains
+// itself by quoting it, and a check that reads comments would be failed
+// by the sentence recording that it passes.
+const list = readFileSync("src/components/modules/generic-list.tsx", "utf8")
+  .replace(/\/\*[\s\S]*?\*\//g, "")
+  .replace(/^\s*\/\/.*$/gm, "");
+check('generic-list.tsx no longer falls back to "noEntries"', !/noEntries/.test(list));
+// Nothing is allowed to render this module's copy but this module: an
+// empty state that says "does not generate slides" would be a lie on any
+// other page.
+const allSlugs = Object.keys(messages.en.moduleData.empty);
+const sharing = allSlugs.filter(
+  (slug) => slug !== "presentations" && /generate slides/i.test(messages.en.moduleData.empty[slug].why)
+);
+check("and no other module borrowed its wording", sharing, []);
 
 console.log("\n== 7. the real generator is still promised where it belongs ==");
 // Renaming must not delete the intention. The roadmap entry is under

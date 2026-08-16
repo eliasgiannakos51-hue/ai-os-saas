@@ -822,6 +822,19 @@ console.log("\n== 6. every key a DATA file names resolves, in all ten locales ==
     for (const m of src.matchAll(/(?:labelKey|titleKey|placeholderKey):\s*"([^"]+)"/g)) {
       if (!seen.has(m[1])) seen.set(m[1], file);
     }
+    // emptyKey names a GROUP, not a leaf: the empty screen is three
+    // strings (title, why, example) and the component reads all three off
+    // the one key through emptyStateKey(). Expanded here for the same
+    // reason optionLabelKey() is expanded below — the parts are built in
+    // code, so a check that only looked at what a human typed would prove
+    // the existence of a key nothing ever renders and miss the three that
+    // are.
+    for (const m of src.matchAll(/emptyKey:\s*"([^"]+)"/g)) {
+      for (const part of ["title", "why", "example"]) {
+        const key = `${m[1]}.${part}`;
+        if (!seen.has(key)) seen.set(key, `${file} (emptyKey "${m[1]}")`);
+      }
+    }
     // Stored option values become display keys through optionLabelKey().
     for (const m of src.matchAll(/options:\s*\[([^\]]+)\]/g)) {
       for (const v of m[1].matchAll(/"([^"]+)"/g)) {
@@ -883,6 +896,19 @@ console.log("\n== 6. every key a DATA file names resolves, in all ten locales ==
   checkTrue(
     "ModuleConfig carries titleKey, and no `title`",
     /titleKey: ModuleTitleKey;/.test(modulesSrc) && !/^\s+title: string;$/m.test(modulesSrc)
+  );
+  // emptyKey was `emptyKey?: string` — optional, and therefore the empty
+  // screen twenty modules got was the generic one. Both halves matter:
+  // REQUIRED is what makes the twenty-first module answer the question
+  // too, and the KEY TYPE is what stops the answer being English prose
+  // typed into the registry, exactly as with labelKey above.
+  // Stripped, because the field's own doc comment quotes the shape it
+  // used to have — and a check that reads comments would be failed by the
+  // sentence explaining why it passes.
+  const modulesCode = stripComments(modulesSrc);
+  checkTrue(
+    "ModuleConfig carries a REQUIRED emptyKey, typed as a key",
+    /emptyKey: ModuleMessageKey;/.test(modulesCode) && !/emptyKey\?/.test(modulesCode)
   );
 }
 

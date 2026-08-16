@@ -1328,6 +1328,8 @@
     },
     "integrations": {
       "title": "Integrations",
+      "emptyTitle": "Nothing connected yet",
+      "emptyBody": "Connect an account and the AI can read from it — your mail, your calendar, your files — instead of only knowing what you typed in by hand.",
       "description": "Connect the tools you already use, so the AI can work with your real data.",
       "privacyNotice": "Connections are read-only unless stated otherwise. Tokens are encrypted with a key that is not stored in our database, they never appear in logs, and disconnecting revokes the access at the provider and deletes everything we hold — including the record of what was read.",
       "notConfigured": "Integrations aren't set up on this deployment yet, so connecting is disabled.",
@@ -1584,7 +1586,11 @@
     "ideas": {
       "new": "New Idea",
       "edit": "Edit Idea",
-      "empty": "No ideas yet — use the button above to log your first one.",
+      "empty": {
+        "title": "Every idea, in one place",
+        "why": "Write it down while it is still rough — this page scores it, compares it against the others, and remembers the ones you decided against.",
+        "example": "A new service for small businesses"
+      },
       "loadError": "Could not load your ideas: {message}",
       "deleteConfirm": "Delete this idea? This can't be undone.",
       "editAria": "Edit idea: {name}",
@@ -1615,7 +1621,6 @@
   "module": {
     "searchPlaceholder": "Search...",
     "exportCsv": "Export CSV",
-    "noEntries": "No entries yet — use the button above to log your first one.",
     "noMatches": "No matches for '{query}'",
     "new": "New {title}",
     "selectPlaceholder": "select...",
@@ -1643,8 +1648,7 @@
       "oldest": "Oldest",
       "az": "A–Z",
       "za": "Z–A"
-    },
-    "emptyPresentationNotes": "Nothing here yet. This is a place to keep track of presentations you are planning or have already made — it does not generate slides for you. Use the button above to add one."
+    }
   },
   "askAi": {
     "buttonLabel": "Ask AI",
@@ -1901,6 +1905,108 @@
       "data-analysis": "Delete this analysis? This can't be undone.",
       "presentations": "Delete this presentation note? This can't be undone.",
       "campaigns": "Delete this campaign? This can't be undone."
+    },
+    "empty": {
+      "competitors": {
+        "title": "Know who you are up against",
+        "why": "One row per rival — what they sell, what they charge, who buys it. The gaps between the rows are where your positioning comes from.",
+        "example": "Who entered the market this year"
+      },
+      "sales": {
+        "title": "Every lead, followed up",
+        "why": "A lead you only remember is a lead you lose. Log the name, the score and the next step, and the follow-up email writes itself.",
+        "example": "Customer who closed in March"
+      },
+      "finance": {
+        "title": "Where the money actually goes",
+        "why": "Income and expenses in one list, so the month's real number is something you read rather than something you estimate.",
+        "example": "Advertising expense, €200"
+      },
+      "trading": {
+        "title": "The trade, and the reason for it",
+        "why": "Symbol, direction, result — and the note that says why you took it. The note is the part that makes the next trade better.",
+        "example": "EURUSD long, 1:2 risk-reward"
+      },
+      "research": {
+        "title": "What you found out, kept",
+        "why": "The answer you dug up once, somewhere you will find it again — instead of researching the same question in three months.",
+        "example": "What customers pay for this today"
+      },
+      "learning": {
+        "title": "What you learned, kept",
+        "why": "A lesson you did not write down is one you get to pay for twice. Topic, resources, and the quiz that proves it stuck.",
+        "example": "What I learned from the last launch"
+      },
+      "decisions": {
+        "title": "The decision, and the reasoning",
+        "why": "Write the options and the reasoning down before you choose. In six months, the reasoning is the only part you will want back.",
+        "example": "Hire, or outsource"
+      },
+      "products": {
+        "title": "From idea to shipped",
+        "why": "Audience, pricing, MVP scope and roadmap in one place, so the product you build is the one you described.",
+        "example": "A subscription tier for small teams"
+      },
+      "content": {
+        "title": "The content pipeline",
+        "why": "Every topic you plan to publish, with the caption, the thread and the hashtags already written when the day comes.",
+        "example": "Article: the 5 mistakes beginners make"
+      },
+      "feedback": {
+        "title": "What your users are telling you",
+        "why": "One row per piece of feedback, sorted by sentiment and priority — the ones that repeat are your roadmap.",
+        "example": "Customer asked for Excel export"
+      },
+      "analytics": {
+        "title": "The numbers you actually watch",
+        "why": "Pick the handful of metrics that decide something and log them regularly — a number without a history means nothing.",
+        "example": "Visits per channel, March"
+      },
+      "automation": {
+        "title": "The work you stop doing by hand",
+        "why": "Name a task you repeat and this drafts the workflow and the tools for it, with the hours saved written next to it.",
+        "example": "Every Monday, a sales summary"
+      },
+      "websites": {
+        "title": "Every site you are planning",
+        "why": "One row per site — the brief, the address and where it stands — so nothing important lives only in a browser tab.",
+        "example": "Landing page for the spring launch"
+      },
+      "apps": {
+        "title": "Every app on the list",
+        "why": "What it does, which platform it targets and how far along it is — from first sketch to live in the store.",
+        "example": "iOS app for booking appointments"
+      },
+      "images": {
+        "title": "The images you need made",
+        "why": "Keep the prompt, not just the picture — a prompt you can read again is a prompt you can improve next time.",
+        "example": "Product photo on a white background"
+      },
+      "videos": {
+        "title": "The videos you have planned",
+        "why": "The brief for each video and how far it has got, so a shoot list is never something you keep in your head.",
+        "example": "A 30-second product demo"
+      },
+      "coding": {
+        "title": "The things you want built",
+        "why": "Describe the feature or the fix, tag the language, and keep the whole backlog somewhere other than your head.",
+        "example": "A script that merges the monthly CSVs"
+      },
+      "dataAnalysis": {
+        "title": "The questions your data can answer",
+        "why": "The question, the source it goes to, and the finding when it comes back — so an answer is never found twice.",
+        "example": "Which channel brings the customers who stay"
+      },
+      "presentations": {
+        "title": "A place to keep track of presentations",
+        "why": "Note the decks you are planning or have already given — this page does not generate slides for you. Use the button above to add one.",
+        "example": "Investor deck for the seed round"
+      },
+      "campaigns": {
+        "title": "Every campaign, and what it cost",
+        "why": "Channel, budget and status side by side, so the next budget decision is made from numbers rather than from feel.",
+        "example": "Spring email campaign, €500 budget"
+      }
     }
   }
 }

@@ -4,8 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
-import { AddIdeaForm } from "@/components/ideas/add-idea-form";
-import { IdeasList } from "@/components/ideas/ideas-list";
+import { IdeasSection } from "@/components/ideas/ideas-section";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import type { Idea } from "@/types/ideas";
 import { loadLinkedEntities } from "@/lib/entity-links";
@@ -48,17 +47,16 @@ export default async function DashboardPage() {
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader icon={MODULE_ICONS.ideas} title={t("items.ideas")} />
 
-        <div className="mb-6">
-          <AddIdeaForm />
-        </div>
-
-        {error && <ErrorMessage message={tIdeas("loadError", { message: error.message })} />}
-
-        <IdeasList
+        {/* Form + list share one client boundary so pressing the worked
+            example on the empty screen can fill the form — see
+            components/ideas/ideas-section.tsx. The DOM order is unchanged. */}
+        <IdeasSection
           ideas={(ideas as Idea[]) ?? []}
           linkedEntities={linkedEntities}
           favoritedIds={favoritedIds}
-        />
+        >
+          {error && <ErrorMessage message={tIdeas("loadError", { message: error.message })} />}
+        </IdeasSection>
       </div>
     </main>
   );

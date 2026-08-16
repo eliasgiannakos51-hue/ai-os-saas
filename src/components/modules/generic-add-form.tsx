@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -34,7 +34,24 @@ function isGatedModule(module: ModuleConfig): boolean {
   return Boolean(module.creditCost || module.minPlanSlug);
 }
 
-export function GenericAddForm({ module }: { module: ModuleConfig }) {
+export function GenericAddForm({
+  module,
+  prefill,
+}: {
+  module: ModuleConfig;
+  /**
+   * A worked example the user pressed on the empty screen
+   * (components/empty-state.tsx). Opens this form with the headline field
+   * already filled, so "here is what an entry looks like" and "you have
+   * started one" are the same click.
+   *
+   * Only the headline goes in, deliberately. The example is one line —
+   * "Advertising expense, €200" — and spreading a guess at it across
+   * amount, type and description would be the form inventing data the
+   * user did not type. The headline is the field the example IS.
+   */
+  prefill?: { text: string; nonce: number } | null;
+}) {
   const router = useRouter();
   const t = useTranslations("module");
   const tCommon = useTranslations("common");
@@ -54,6 +71,40 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
   // lib/entity-link-suggestions.ts. Never cleared afterward; a later
   // create just overwrites it and remounts the prompt via its key.
   const [newlyCreated, setNewlyCreated] = useState<{ table: string; id: string } | null>(null);
+  const headlineRef = useRef<HTMLInputElement | null>(null);
+  const focusOnOpen = useRef(false);
+
+  // Keyed on the nonce rather than on the text: pressing the same example
+  // twice is two requests, and both should open the form.
+  const nonce = prefill?.nonce;
+  useEffect(() => {
+    if (nonce === undefined || !prefill) return;
+    setForm({ ...emptyFormFor(module), [module.headlineKey]: prefill.text });
+    setOpen(true);
+    // The field is filled but not finished — the cursor belongs at the end
+    // of the example so the next keystroke edits it rather than replacing
+    // it, and a keyboard user is not left hunting for where the form went.
+    focusOnOpen.current = true;
+    // prefill is read through the nonce on purpose — see above. Adding the
+    // object itself would re-run this on every parent render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonce, module]);
+
+  // Focused in a SECOND effect, keyed on `open`, rather than inside the
+  // first: setOpen(true) is what mounts the input, and React has not
+  // committed that render by the time the effect that called it returns —
+  // so a focus() there (or in a requestAnimationFrame scheduled from
+  // there) reaches for a field that does not exist yet and silently does
+  // nothing. Measured, not assumed: the field filled correctly and the
+  // caret was nowhere.
+  useEffect(() => {
+    if (!open || !focusOnOpen.current) return;
+    focusOnOpen.current = false;
+    const input = headlineRef.current;
+    if (!input) return;
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+  }, [open]);
 
   function update(key: string) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -213,6 +264,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
                   </select>
                 ) : (
                   <input
+                    ref={field.key === module.headlineKey ? headlineRef : undefined}
                     type={field.type === "number" ? "number" : "text"}
                     required={field.required}
                     value={form[field.key]}

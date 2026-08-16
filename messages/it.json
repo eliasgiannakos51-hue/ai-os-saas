@@ -1328,6 +1328,8 @@
     },
     "integrations": {
       "title": "Integrazioni",
+      "emptyTitle": "Ancora nessuna connessione",
+      "emptyBody": "Collega un account e l'AI potrà leggerne i contenuti — posta, calendario, file — invece di conoscere solo ciò che hai digitato a mano.",
       "description": "Collega gli strumenti che già usi, così l'IA lavora sui tuoi dati reali.",
       "privacyNotice": "Le connessioni sono in sola lettura salvo diversa indicazione. I token sono cifrati con una chiave che non sta nel nostro database, non compaiono mai nei log, e disconnettere revoca l'accesso presso il fornitore ed elimina tutto ciò che conserviamo, incluso lo storico di ciò che è stato letto.",
       "notConfigured": "Le integrazioni non sono ancora configurate su questa installazione, quindi la connessione è disattivata.",
@@ -1584,7 +1586,11 @@
     "ideas": {
       "new": "Nuova idea",
       "edit": "Modifica idea",
-      "empty": "Ancora nessuna idea — usa il pulsante qui sopra per registrare la prima.",
+      "empty": {
+        "title": "Ogni idea, in un unico posto",
+        "why": "Annotala finché è ancora grezza: qui viene valutata, confrontata con le altre e resta anche se la scarti.",
+        "example": "Un nuovo servizio per le piccole imprese"
+      },
       "loadError": "Non è stato possibile caricare le tue idee: {message}",
       "deleteConfirm": "Eliminare questa idea? L'operazione è irreversibile.",
       "editAria": "Modifica l'idea: {name}",
@@ -1615,7 +1621,6 @@
   "module": {
     "searchPlaceholder": "Cerca...",
     "exportCsv": "Esporta CSV",
-    "noEntries": "Ancora nessuna voce — usa il pulsante qui sopra per registrare la prima.",
     "noMatches": "Nessun risultato per '{query}'",
     "new": "Nuovo {title}",
     "selectPlaceholder": "seleziona...",
@@ -1643,8 +1648,7 @@
       "oldest": "Meno recenti",
       "az": "A–Z",
       "za": "Z–A"
-    },
-    "emptyPresentationNotes": "Qui non c’è ancora nulla. Questo è uno spazio per tenere traccia delle presentazioni che stai pianificando o hai già fatto: non genera diapositive al posto tuo. Usa il pulsante sopra per aggiungerne una."
+    }
   },
   "askAi": {
     "buttonLabel": "Chiedi all'IA",
@@ -1901,6 +1905,108 @@
       "data-analysis": "Eliminare questa analisi? L'operazione è irreversibile.",
       "presentations": "Eliminare questa nota di presentazione? L'operazione è irreversibile.",
       "campaigns": "Eliminare questa campagna? L'operazione è irreversibile."
+    },
+    "empty": {
+      "competitors": {
+        "title": "Sappi chi hai di fronte",
+        "why": "Una riga per concorrente: cosa vende, quanto chiede, chi compra. Gli spazi vuoti tra le righe sono il tuo posizionamento.",
+        "example": "Chi è entrato nel mercato quest'anno"
+      },
+      "sales": {
+        "title": "Ogni contatto, ricontattato",
+        "why": "Un contatto che ricordi soltanto è un contatto perso. Registra nome, punteggio e prossimo passo: l'email di follow-up si scrive da sola.",
+        "example": "Cliente chiuso a marzo"
+      },
+      "finance": {
+        "title": "Dove finiscono davvero i soldi",
+        "why": "Entrate e uscite in un'unica lista, così il numero vero del mese si legge invece di stimarlo.",
+        "example": "Spesa pubblicitaria, 200 €"
+      },
+      "trading": {
+        "title": "L'operazione e il suo perché",
+        "why": "Simbolo, direzione, risultato — e la nota che spiega perché l'hai aperta. È la nota a migliorare la prossima.",
+        "example": "EURUSD long, rapporto 1:2"
+      },
+      "research": {
+        "title": "Quello che hai scoperto, conservato",
+        "why": "La risposta che hai cercato una volta, dove la ritroverai — invece di rifare la stessa ricerca fra tre mesi.",
+        "example": "Quanto pagano oggi i clienti per questo"
+      },
+      "learning": {
+        "title": "Quello che hai imparato, per iscritto",
+        "why": "Una lezione che non scrivi è una lezione che pagherai due volte. Argomento, risorse e il quiz che dimostra che è rimasta.",
+        "example": "Cosa ho imparato dall'ultimo lancio"
+      },
+      "decisions": {
+        "title": "La decisione e il ragionamento",
+        "why": "Scrivi le opzioni e il ragionamento prima di scegliere. Fra sei mesi il ragionamento è l'unica parte che vorrai indietro.",
+        "example": "Assumere o esternalizzare"
+      },
+      "products": {
+        "title": "Dall'idea al rilascio",
+        "why": "Pubblico, prezzi, perimetro dell'MVP e roadmap in un unico posto, così il prodotto che costruisci è quello che avevi descritto.",
+        "example": "Un piano in abbonamento per piccoli team"
+      },
+      "content": {
+        "title": "La pipeline dei contenuti",
+        "why": "Ogni argomento che vuoi pubblicare, con didascalia, thread e hashtag già pronti quando arriva il giorno.",
+        "example": "Articolo: i 5 errori dei principianti"
+      },
+      "feedback": {
+        "title": "Quello che ti dicono i tuoi utenti",
+        "why": "Una riga per ogni feedback, ordinati per sentiment e priorità: quelli che si ripetono sono la tua roadmap.",
+        "example": "Un cliente ha chiesto l'esportazione in Excel"
+      },
+      "analytics": {
+        "title": "I numeri che guardi davvero",
+        "why": "Scegli le poche metriche che decidono qualcosa e registrale con regolarità: un numero senza storico non significa nulla.",
+        "example": "Visite per canale, marzo"
+      },
+      "automation": {
+        "title": "Il lavoro che smetti di fare a mano",
+        "why": "Indica un'attività che ripeti: qui vengono scritti il flusso e gli strumenti, con accanto le ore risparmiate.",
+        "example": "Ogni lunedì, un riepilogo delle vendite"
+      },
+      "websites": {
+        "title": "Ogni sito che stai pianificando",
+        "why": "Una riga per sito: il brief, l'indirizzo e a che punto è, così niente di importante vive solo in una scheda del browser.",
+        "example": "Landing page per il lancio di primavera"
+      },
+      "apps": {
+        "title": "Ogni app in elenco",
+        "why": "Cosa fa, a quale piattaforma punta e a che punto è: dal primo schizzo alla pubblicazione sullo store.",
+        "example": "App iOS per prenotare appuntamenti"
+      },
+      "images": {
+        "title": "Le immagini che ti servono",
+        "why": "Conserva il prompt, non solo l'immagine: un prompt che puoi rileggere è un prompt che puoi migliorare.",
+        "example": "Foto di prodotto su sfondo bianco"
+      },
+      "videos": {
+        "title": "I video che hai in programma",
+        "why": "Il brief di ogni video e a che punto è, così la lista delle riprese non resta mai solo nella tua testa.",
+        "example": "Demo del prodotto da 30 secondi"
+      },
+      "coding": {
+        "title": "Le cose che vuoi far costruire",
+        "why": "Descrivi la funzionalità o la correzione, indica il linguaggio e tieni tutto il backlog da qualche parte che non sia la tua testa.",
+        "example": "Uno script che unisce i CSV mensili"
+      },
+      "dataAnalysis": {
+        "title": "Le domande a cui i tuoi dati sanno rispondere",
+        "why": "La domanda, la fonte a cui va e il risultato quando torna: così una risposta non si trova mai due volte.",
+        "example": "Quale canale porta i clienti che restano"
+      },
+      "presentations": {
+        "title": "Un posto per tenere traccia delle presentazioni",
+        "why": "Annota le presentazioni che stai preparando o che hai già tenuto: questa pagina non genera diapositive al posto tuo. Usa il pulsante qui sopra per aggiungerne una.",
+        "example": "Presentazione per investitori del round seed"
+      },
+      "campaigns": {
+        "title": "Ogni campagna, e quanto è costata",
+        "why": "Canale, budget e stato uno accanto all'altro, così la prossima decisione di budget nasce dai numeri e non a sensazione.",
+        "example": "Campagna email di primavera, budget 500 €"
+      }
     }
   }
 }

@@ -1328,6 +1328,8 @@
     },
     "integrations": {
       "title": "Integrationen",
+      "emptyTitle": "Noch nichts verbunden",
+      "emptyBody": "Verbinde ein Konto, und die KI kann daraus lesen — Mail, Kalender, Dateien — statt nur zu kennen, was du von Hand eingetippt hast.",
       "description": "Verbinden Sie die Werkzeuge, die Sie ohnehin nutzen, damit die KI mit Ihren echten Daten arbeitet.",
       "privacyNotice": "Verbindungen sind schreibgeschützt, sofern nicht anders angegeben. Tokens werden mit einem Schlüssel verschlüsselt, der nicht in unserer Datenbank liegt, erscheinen nie in Logs, und beim Trennen widerrufen wir den Zugriff beim Anbieter und löschen alles, was wir halten — einschließlich der Aufzeichnung darüber, was gelesen wurde.",
       "notConfigured": "Integrationen sind auf diesem Deployment noch nicht eingerichtet, Verbinden ist daher deaktiviert.",
@@ -1584,7 +1586,11 @@
     "ideas": {
       "new": "Neue Idee",
       "edit": "Idee bearbeiten",
-      "empty": "Noch keine Ideen — nutze den Button oben, um deine erste zu erfassen.",
+      "empty": {
+        "title": "Jede Idee an einem Ort",
+        "why": "Schreib sie auf, solange sie noch roh ist — hier wird sie bewertet, mit den anderen verglichen und bleibt erhalten, auch wenn du sie verwirfst.",
+        "example": "Ein neuer Service für kleine Unternehmen"
+      },
       "loadError": "Deine Ideen konnten nicht geladen werden: {message}",
       "deleteConfirm": "Diese Idee löschen? Das lässt sich nicht rückgängig machen.",
       "editAria": "Idee bearbeiten: {name}",
@@ -1615,7 +1621,6 @@
   "module": {
     "searchPlaceholder": "Suchen...",
     "exportCsv": "CSV exportieren",
-    "noEntries": "Noch keine Einträge — nutze den Button oben, um deinen ersten zu erfassen.",
     "noMatches": "Keine Treffer für '{query}'",
     "new": "Neu: {title}",
     "selectPlaceholder": "auswählen...",
@@ -1643,8 +1648,7 @@
       "oldest": "Älteste",
       "az": "A–Z",
       "za": "Z–A"
-    },
-    "emptyPresentationNotes": "Hier ist noch nichts. Dieser Bereich dient dazu, geplante oder bereits erstellte Präsentationen festzuhalten — er erstellt keine Folien für Sie. Fügen Sie mit der Schaltfläche oben eine hinzu."
+    }
   },
   "askAi": {
     "buttonLabel": "KI fragen",
@@ -1901,6 +1905,108 @@
       "data-analysis": "Diese Analyse löschen? Das lässt sich nicht rückgängig machen.",
       "presentations": "Diese Präsentationsnotiz löschen? Das lässt sich nicht rückgängig machen.",
       "campaigns": "Diese Kampagne löschen? Das lässt sich nicht rückgängig machen."
+    },
+    "empty": {
+      "competitors": {
+        "title": "Wisse, gegen wen du antrittst",
+        "why": "Eine Zeile je Wettbewerber — was er verkauft, was er verlangt, wer kauft. Die Lücken dazwischen sind deine Positionierung.",
+        "example": "Wer dieses Jahr in den Markt eingetreten ist"
+      },
+      "sales": {
+        "title": "Kein Lead ohne Nachfassen",
+        "why": "Ein Lead, den du dir nur merkst, ist ein verlorener Lead. Trag Name, Score und nächsten Schritt ein — die Follow-up-Mail schreibt sich dann selbst.",
+        "example": "Kunde, der im März abgeschlossen hat"
+      },
+      "finance": {
+        "title": "Wohin das Geld wirklich geht",
+        "why": "Einnahmen und Ausgaben in einer Liste — so ist die echte Zahl des Monats etwas zum Ablesen statt zum Schätzen.",
+        "example": "Werbeausgabe, 200 €"
+      },
+      "trading": {
+        "title": "Der Trade und sein Grund",
+        "why": "Symbol, Richtung, Ergebnis — und die Notiz, warum du ihn eingegangen bist. Die Notiz ist das, was den nächsten besser macht.",
+        "example": "EURUSD long, CRV 1:2"
+      },
+      "research": {
+        "title": "Was du herausgefunden hast, behalten",
+        "why": "Die Antwort, die du einmal ausgegraben hast, dort abgelegt, wo du sie wiederfindest — statt dieselbe Frage in drei Monaten erneut zu recherchieren.",
+        "example": "Was Kunden heute dafür zahlen"
+      },
+      "learning": {
+        "title": "Was du gelernt hast, festgehalten",
+        "why": "Eine Lektion, die du nicht aufschreibst, bezahlst du ein zweites Mal. Thema, Quellen und das Quiz, das zeigt, dass es sitzt.",
+        "example": "Was ich aus dem letzten Launch gelernt habe"
+      },
+      "decisions": {
+        "title": "Die Entscheidung und die Begründung",
+        "why": "Schreib die Optionen und die Begründung auf, bevor du wählst. In sechs Monaten ist die Begründung das Einzige, was du zurückhaben willst.",
+        "example": "Einstellen oder auslagern"
+      },
+      "products": {
+        "title": "Von der Idee bis zum Release",
+        "why": "Zielgruppe, Preise, MVP-Umfang und Roadmap an einem Ort — damit das Produkt, das du baust, das ist, das du beschrieben hast.",
+        "example": "Ein Abo-Paket für kleine Teams"
+      },
+      "content": {
+        "title": "Die Content-Pipeline",
+        "why": "Jedes Thema, das du veröffentlichen willst — Caption, Thread und Hashtags sind schon geschrieben, wenn der Tag kommt.",
+        "example": "Artikel: die 5 Fehler von Einsteigern"
+      },
+      "feedback": {
+        "title": "Was deine Nutzer dir sagen",
+        "why": "Eine Zeile je Rückmeldung, sortiert nach Stimmung und Priorität — was sich wiederholt, ist deine Roadmap.",
+        "example": "Kunde hat einen Excel-Export gewünscht"
+      },
+      "analytics": {
+        "title": "Die Zahlen, die du wirklich verfolgst",
+        "why": "Wähl die Handvoll Kennzahlen, die etwas entscheiden, und erfasse sie regelmäßig — eine Zahl ohne Verlauf sagt nichts.",
+        "example": "Besuche je Kanal, März"
+      },
+      "automation": {
+        "title": "Die Arbeit, die du nicht mehr von Hand machst",
+        "why": "Nenn eine Aufgabe, die du wiederholst — Workflow und Werkzeuge werden entworfen, mit den gesparten Stunden daneben.",
+        "example": "Jeden Montag eine Vertriebsübersicht"
+      },
+      "websites": {
+        "title": "Jede Website, die du planst",
+        "why": "Eine Zeile je Site — Briefing, Adresse und Stand — damit nichts Wichtiges nur in einem Browser-Tab existiert.",
+        "example": "Landingpage für den Frühjahrs-Launch"
+      },
+      "apps": {
+        "title": "Jede App auf der Liste",
+        "why": "Was sie tut, welche Plattform sie anpeilt und wie weit sie ist — von der ersten Skizze bis live im Store.",
+        "example": "iOS-App für Terminbuchungen"
+      },
+      "images": {
+        "title": "Die Bilder, die entstehen sollen",
+        "why": "Behalte den Prompt, nicht nur das Bild — einen Prompt, den du nachlesen kannst, kannst du beim nächsten Mal verbessern.",
+        "example": "Produktfoto auf weißem Hintergrund"
+      },
+      "videos": {
+        "title": "Die Videos, die du geplant hast",
+        "why": "Das Briefing je Video und wie weit es ist — damit eine Drehliste nie nur in deinem Kopf existiert.",
+        "example": "30-Sekunden-Produktdemo"
+      },
+      "coding": {
+        "title": "Was gebaut werden soll",
+        "why": "Beschreib das Feature oder den Fix, halt die Sprache fest, und leg das ganze Backlog woanders ab als in deinem Kopf.",
+        "example": "Ein Skript, das die Monats-CSVs zusammenführt"
+      },
+      "dataAnalysis": {
+        "title": "Die Fragen, die deine Daten beantworten",
+        "why": "Die Frage, die Quelle, an die sie geht, und der Befund, wenn er zurückkommt — damit eine Antwort nie zweimal gefunden wird.",
+        "example": "Welcher Kanal die Kunden bringt, die bleiben"
+      },
+      "presentations": {
+        "title": "Ein Ort, um Präsentationen im Blick zu behalten",
+        "why": "Notiere die Decks, die du planst oder schon gehalten hast — diese Seite erstellt keine Folien für dich. Nutze den Button oben, um eines hinzuzufügen.",
+        "example": "Investoren-Deck für die Seed-Runde"
+      },
+      "campaigns": {
+        "title": "Jede Kampagne und was sie gekostet hat",
+        "why": "Kanal, Budget und Status nebeneinander — damit die nächste Budgetentscheidung aus Zahlen entsteht und nicht aus Gefühl.",
+        "example": "Frühjahrs-E-Mail-Kampagne, Budget 500 €"
+      }
     }
   }
 }

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Search, SearchX, Download } from "lucide-react";
+import { MODULE_ICONS } from "@/lib/module-icons";
 import type { Idea } from "@/types/ideas";
 import type { LinkedEntity } from "@/lib/entity-links";
 import { IdeaRow } from "@/components/ideas/idea-row";
@@ -57,10 +58,18 @@ export function IdeasList({
   ideas,
   linkedEntities = {},
   favoritedIds,
+  onExample,
 }: {
   ideas: Idea[];
   linkedEntities?: Record<string, LinkedEntity[]>;
   favoritedIds?: Set<string>;
+  /**
+   * Hands the worked example on the empty screen back up to
+   * IdeasSection, which owns the form. Optional so this component still
+   * renders standalone; without it the example is shown as text rather
+   * than as a button that would do nothing.
+   */
+  onExample?: (text: string) => void;
 }) {
   // The chrome (search, export, "no matches") is the same in all 14
   // modules and already lives in `module`; only the wording that is
@@ -110,7 +119,14 @@ export function IdeasList({
       </div>
 
       {ideas.length === 0 ? (
-        <EmptyState>{tIdeas("empty")}</EmptyState>
+        <EmptyState
+          icon={MODULE_ICONS.ideas}
+          title={tIdeas("empty.title")}
+          example={tIdeas("empty.example")}
+          onExample={onExample}
+        >
+          {tIdeas("empty.why")}
+        </EmptyState>
       ) : filtered.length === 0 ? (
         <EmptyState icon={SearchX}>{t("noMatches", { query })}</EmptyState>
       ) : (

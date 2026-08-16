@@ -12,6 +12,11 @@ const IDEAS_MODULE: ModuleConfig = {
   titleKey: "sidebar.items.ideas",
   table: "ideas",
   headlineKey: "name",
+  // Under dashboard.ideas for the same reason the field labels above are:
+  // the strings Ideas' own list component already renders are the ones
+  // this mirror should point at, not a second copy under moduleData. The
+  // page itself reads them through components/ideas/ideas-list.tsx.
+  emptyKey: "dashboard.ideas.empty",
   fields: [
     { key: "name", labelKey: "dashboard.ideas.nameLabel", type: "text", required: true },
     { key: "problem", labelKey: "dashboard.ideas.problemLabel", type: "textarea" },

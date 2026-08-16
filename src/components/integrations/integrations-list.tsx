@@ -129,6 +129,30 @@ export function IntegrationsList({
           </p>
         )}
 
+        {/* Two different nothings, and they were being told apart by
+            nothing at all.
+
+            `rows` is the PROVIDER CATALOGUE filtered by the search box, so
+            it only empties out on a search that matched no provider —
+            which is what "No matches for 'x'" is for, and it stays. What
+            had no state of its own was the case a new account is actually
+            in: every provider listed, none of them connected. The page
+            answered that with a wall of cards and a "0 of 3 used" counter,
+            and never said what connecting one would get you.
+
+            So the empty-account message sits ABOVE the catalogue rather
+            than replacing it: the cards are the call to action, and
+            hiding them to explain them would be self-defeating. No
+            example here — the next step is an OAuth round trip, not a
+            form to type into, so EmptyState renders without one. */}
+        {connectedCount === 0 && rows.length > 0 && (
+          <div className="mb-4">
+            <EmptyState icon={Plug} title={t("emptyTitle")}>
+              {t("emptyBody")}
+            </EmptyState>
+          </div>
+        )}
+
         {rows.length === 0 ? (
           <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>
         ) : (

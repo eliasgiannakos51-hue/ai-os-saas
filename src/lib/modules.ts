@@ -78,6 +78,45 @@ export function deleteConfirmKey(slug: string): ModuleMessageKey {
   return `moduleData.deleteConfirm.${slug}`;
 }
 
+/**
+ * The three parts of a module's empty screen.
+ *
+ * An empty page is the first thing a new account shows, and for twenty
+ * modules it said the same sentence: "No entries yet — use the button
+ * above to log your first one." That reports a FACT the user can already
+ * see (the page is empty) and answers none of the questions they actually
+ * have: what is this page for, why would I put something here, and what
+ * does an entry even look like?
+ *
+ * So the empty state is three strings rather than one:
+ *
+ *   title   — what this page is, in a handful of words
+ *   why     — the one sentence that makes it worth typing into
+ *   example — a real first entry, which the user can PRESS to fill the
+ *             form with (components/empty-state.tsx -> generic-list.tsx)
+ *
+ * The example is the part that does the teaching. "Advertising expense,
+ * €200" tells a person what belongs in Finance faster than any sentence
+ * about expense tracking, and pressing it turns reading into having
+ * started. It is the same shape the Files workspace already proved out
+ * (files-workspace.tsx's emptyTitle/emptyBody/emptyExample); this brings
+ * the other twenty-one surfaces up to it instead of leaving one good
+ * empty state surrounded by twenty generic ones.
+ */
+export type EmptyStatePart = "title" | "why" | "example";
+
+/**
+ * `moduleData.empty.finance` + "example" -> moduleData.empty.finance.example
+ *
+ * Built here, next to optionLabelKey() and deleteConfirmKey(), for the
+ * reason those two are here: the key a component looks up and the key
+ * i18n-coverage.test.mjs proves exists have to be produced by the same
+ * line of code, or the check is verifying its own guess about the naming.
+ */
+export function emptyStateKey(module: ModuleConfig, part: EmptyStatePart): ModuleMessageKey {
+  return `${module.emptyKey}.${part}`;
+}
+
 export type ModuleConfig = {
   slug: string;
   titleKey: ModuleTitleKey;
@@ -100,20 +139,30 @@ export type ModuleConfig = {
   // same capability behind would have made one number mean two things.
   creditCost?: number;
   minPlanSlug?: PlanSlug;
-  // Overrides the shared "No entries yet" empty state with a key under
-  // messages/*.json's `module.*`.
-  //
-  // Exists for Presentation Notes, where the generic message is actively
-  // misleading: a user who arrived expecting a slide generator needs the
-  // empty screen to say what this actually is, and every OTHER module is
-  // served perfectly well by the shared string. A per-module override is
-  // the smallest change that fixes one module without touching twenty.
-  emptyKey?: string;
+  /**
+   * The module's own empty screen, as the key GROUP holding its title,
+   * why and example (see EmptyStatePart above).
+   *
+   * REQUIRED, and required on purpose. This was `emptyKey?: string` — an
+   * optional override, added for Presentation Notes, where the shared
+   * "No entries yet" message was actively misleading. It fixed that one
+   * module and left nineteen with a sentence that tells a new user
+   * nothing; because it was optional, the twentieth module was always
+   * going to be written without one too.
+   *
+   * Optional is what made the generic case the default. Mandatory is what
+   * makes "what does this page want from me" a question the author of a
+   * module has to answer before it compiles — the same reason labelKey
+   * and titleKey are mandatory, and the same reason they are typed as
+   * keys rather than as strings.
+   */
+  emptyKey: ModuleMessageKey;
 };
 
 export const MODULES: ModuleConfig[] = [
   {
     slug: "competitors",
+    emptyKey: "moduleData.empty.competitors",
     titleKey: "sidebar.items.competitors",
     table: "competitors",
     headlineKey: "company",
@@ -129,6 +178,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "research",
+    emptyKey: "moduleData.empty.research",
     titleKey: "sidebar.items.research",
     table: "research",
     headlineKey: "topic",
@@ -139,6 +189,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "finance",
+    emptyKey: "moduleData.empty.finance",
     titleKey: "sidebar.items.finance",
     table: "finance_entries",
     headlineKey: "description",
@@ -157,6 +208,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "learning",
+    emptyKey: "moduleData.empty.learning",
     titleKey: "sidebar.items.learning",
     table: "learning_entries",
     headlineKey: "topic",
@@ -168,6 +220,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "trading",
+    emptyKey: "moduleData.empty.trading",
     titleKey: "sidebar.items.trading",
     table: "trades",
     headlineKey: "symbol",
@@ -181,6 +234,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "decisions",
+    emptyKey: "moduleData.empty.decisions",
     titleKey: "sidebar.items.decisions",
     table: "decisions",
     headlineKey: "idea_names",
@@ -192,6 +246,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "products",
+    emptyKey: "moduleData.empty.products",
     titleKey: "sidebar.items.products",
     table: "products",
     headlineKey: "product_name",
@@ -208,6 +263,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "content",
+    emptyKey: "moduleData.empty.content",
     titleKey: "sidebar.items.content",
     table: "content",
     headlineKey: "topic",
@@ -221,6 +277,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "sales",
+    emptyKey: "moduleData.empty.sales",
     titleKey: "sidebar.items.sales",
     table: "leads",
     headlineKey: "lead_name",
@@ -234,6 +291,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "feedback",
+    emptyKey: "moduleData.empty.feedback",
     titleKey: "sidebar.items.feedback",
     table: "feedback",
     headlineKey: "summary",
@@ -247,6 +305,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "analytics",
+    emptyKey: "moduleData.empty.analytics",
     titleKey: "sidebar.items.analytics",
     table: "metrics",
     headlineKey: "metric_name",
@@ -258,6 +317,7 @@ export const MODULES: ModuleConfig[] = [
   },
   {
     slug: "automation",
+    emptyKey: "moduleData.empty.automation",
     titleKey: "sidebar.items.automation",
     table: "automations",
     headlineKey: "task_name",

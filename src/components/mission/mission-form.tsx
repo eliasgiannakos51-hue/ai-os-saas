@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { AiJobProgress } from "@/components/ui/ai-job-progress";
+import type { AiJob } from "@/lib/jobs/use-ai-job";
 import { useRouter } from "next/navigation";
 import { Loader2, Rocket } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -54,7 +56,11 @@ export function MissionForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // The worker's real step, so a long plan is not a bare spinner.
-  const [stepLabel, setStepLabel] = useState<string | null>(null);
+  // The whole job row, not just its label. This tracked `stepLabel`,
+  // updated it on every poll, and rendered it nowhere — the button said
+  // "Planning…" through all three steps. AiJobProgress needs the row
+  // (status, step, stepTotal), so the row is what is kept.
+  const [job, setJob] = useState<AiJob | null>(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -78,7 +84,7 @@ export function MissionForm({
       // here leaves the worker running, and the mission is waiting on the
       // missions list when the user comes back.
       const outcome = await startAndWatchJob("/api/mission/plan", { goal: trimmed }, {
-        onProgress: (job) => setStepLabel(job.stepLabel),
+        onProgress: setJob,
       });
       void refreshCredits();
 
@@ -160,6 +166,9 @@ export function MissionForm({
           )}
           {loading ? t("planning") : t("createPlan")}
         </button>
+        {/* The worker's real step, under the button. Three steps take long
+            enough that one static word for all of them reads as a hang. */}
+        <AiJobProgress job={job} />
       </div>
 
       {/* Shown before submit, not after — the whole point is that the cost

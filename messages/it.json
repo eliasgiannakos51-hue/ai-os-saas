@@ -1490,10 +1490,7 @@
       "processingHint": "Sto leggendo il file — di solito pochi secondi. Potrai interrogarlo appena è pronto.",
       "failedHint": "Nessun testo leggibile trovato. Carica una versione con testo selezionabile.",
       "askStillRunning": "Sta ancora leggendo — ci vuole un po'. Continua anche a pagina chiusa; torna e richiedi per vedere la risposta.",
-      "askStalled": "La domanda si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova.",
-      "stepReading": "Sto leggendo i tuoi file",
-      "stepAnswering": "Sto elaborando la risposta",
-      "stepChecking": "Sto verificando i riferimenti"
+      "askStalled": "La domanda si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova."
     },
     "deepResearch": {
       "title": "Ricerca approfondita",
@@ -2042,6 +2039,35 @@
         "why": "Canale, budget e stato uno accanto all'altro, così la prossima decisione di budget nasce dai numeri e non a sensazione.",
         "example": "Campagna email di primavera, budget 500 €"
       }
+    }
+  },
+  "aiSteps": {
+    "starting": "Sto iniziando…",
+    "agent_build": {
+      "understanding": "Capisco cosa ti serve…",
+      "drafting": "Scrivo l'agent…",
+      "checking": "Lo ricontrollo…",
+      "saving": "Lo salvo…"
+    },
+    "agent_run": {
+      "preparing": "Preparo i tuoi dati…",
+      "working": "Faccio il lavoro…",
+      "delivering": "Scrivo il risultato…"
+    },
+    "mission_plan": {
+      "reading": "Leggo quello che hai registrato…",
+      "planning": "Divido l'obiettivo in passi…",
+      "saving": "Salvo il tuo piano…"
+    },
+    "create": {
+      "understanding": "Capisco cosa hai chiesto…",
+      "creating": "Scrivo il contenuto…",
+      "saving": "Lo archivio dove va…"
+    },
+    "file_ask": {
+      "reading": "Leggo i tuoi file…",
+      "answering": "Compongo la risposta…",
+      "checking": "La verifico sui file…"
     }
   }
 }

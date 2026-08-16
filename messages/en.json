@@ -1490,10 +1490,7 @@
       "processingHint": "Reading this file — usually a few seconds. It can be asked about once it is ready.",
       "failedHint": "No readable text was found. Upload a version with selectable text.",
       "askStillRunning": "Still reading — this is taking a while. It keeps going with the page closed; come back and ask again to see the answer.",
-      "askStalled": "That question stopped unexpectedly. No credits were charged — please try again.",
-      "stepReading": "Reading your files",
-      "stepAnswering": "Working out the answer",
-      "stepChecking": "Checking the references"
+      "askStalled": "That question stopped unexpectedly. No credits were charged — please try again."
     },
     "deepResearch": {
       "title": "Deep Research",
@@ -2042,6 +2039,35 @@
         "why": "Channel, budget and status side by side, so the next budget decision is made from numbers rather than from feel.",
         "example": "Spring email campaign, €500 budget"
       }
+    }
+  },
+  "aiSteps": {
+    "starting": "Getting started…",
+    "agent_build": {
+      "understanding": "Working out what you need…",
+      "drafting": "Writing the agent…",
+      "checking": "Checking it over…",
+      "saving": "Saving it…"
+    },
+    "agent_run": {
+      "preparing": "Getting your data ready…",
+      "working": "Doing the work…",
+      "delivering": "Writing up the result…"
+    },
+    "mission_plan": {
+      "reading": "Reading what you have logged…",
+      "planning": "Breaking the goal into steps…",
+      "saving": "Saving your plan…"
+    },
+    "create": {
+      "understanding": "Working out what you asked for…",
+      "creating": "Writing the content…",
+      "saving": "Filing it where it belongs…"
+    },
+    "file_ask": {
+      "reading": "Reading your files…",
+      "answering": "Putting the answer together…",
+      "checking": "Checking it against the files…"
     }
   }
 }

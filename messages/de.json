@@ -1490,10 +1490,7 @@
       "processingHint": "Die Datei wird gelesen — meist ein paar Sekunden. Sobald sie fertig ist, kannst du dazu fragen.",
       "failedHint": "Kein lesbarer Text gefunden. Lade eine Fassung mit auswählbarem Text hoch.",
       "askStillRunning": "Liest noch — das dauert etwas. Es läuft auch bei geschlossener Seite weiter; komm zurück und frage erneut, um die Antwort zu sehen.",
-      "askStalled": "Die Frage wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
-      "stepReading": "Deine Dateien werden gelesen",
-      "stepAnswering": "Antwort wird erarbeitet",
-      "stepChecking": "Belege werden geprüft"
+      "askStalled": "Die Frage wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen."
     },
     "deepResearch": {
       "title": "Tiefenrecherche",
@@ -2042,6 +2039,35 @@
         "why": "Kanal, Budget und Status nebeneinander — damit die nächste Budgetentscheidung aus Zahlen entsteht und nicht aus Gefühl.",
         "example": "Frühjahrs-E-Mail-Kampagne, Budget 500 €"
       }
+    }
+  },
+  "aiSteps": {
+    "starting": "Ich fange an…",
+    "agent_build": {
+      "understanding": "Ich verstehe, was du brauchst…",
+      "drafting": "Ich schreibe den Agent…",
+      "checking": "Ich prüfe es nach…",
+      "saving": "Ich speichere…"
+    },
+    "agent_run": {
+      "preparing": "Ich bereite deine Daten vor…",
+      "working": "Ich mache die Arbeit…",
+      "delivering": "Ich schreibe das Ergebnis…"
+    },
+    "mission_plan": {
+      "reading": "Ich lese, was du erfasst hast…",
+      "planning": "Ich zerlege das Ziel in Schritte…",
+      "saving": "Ich speichere deinen Plan…"
+    },
+    "create": {
+      "understanding": "Ich verstehe, worum du gebeten hast…",
+      "creating": "Ich schreibe den Inhalt…",
+      "saving": "Ich lege es an der richtigen Stelle ab…"
+    },
+    "file_ask": {
+      "reading": "Ich lese deine Dateien…",
+      "answering": "Ich stelle die Antwort zusammen…",
+      "checking": "Ich gleiche sie mit den Dateien ab…"
     }
   }
 }

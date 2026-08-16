@@ -1490,10 +1490,7 @@
       "processingHint": "A ler o ficheiro — normalmente alguns segundos. Podes perguntar assim que estiver pronto.",
       "failedHint": "Não foi encontrado texto legível. Carrega uma versão com texto selecionável.",
       "askStillRunning": "Ainda a ler — está a demorar. Continua com a página fechada; volta e pergunta de novo para veres a resposta.",
-      "askStalled": "A pergunta parou inesperadamente. Não foram cobrados créditos — tenta novamente.",
-      "stepReading": "A ler os teus ficheiros",
-      "stepAnswering": "A elaborar a resposta",
-      "stepChecking": "A verificar as referências"
+      "askStalled": "A pergunta parou inesperadamente. Não foram cobrados créditos — tenta novamente."
     },
     "deepResearch": {
       "title": "Investigação profunda",
@@ -2042,6 +2039,35 @@
         "why": "Canal, orçamento e estado lado a lado, para que a próxima decisão de orçamento venha de números e não de intuição.",
         "example": "Campanha de email da primavera, orçamento de 500 €"
       }
+    }
+  },
+  "aiSteps": {
+    "starting": "A começar…",
+    "agent_build": {
+      "understanding": "A perceber o que precisa…",
+      "drafting": "A escrever o agente…",
+      "checking": "A rever…",
+      "saving": "A guardar…"
+    },
+    "agent_run": {
+      "preparing": "A preparar os seus dados…",
+      "working": "A fazer o trabalho…",
+      "delivering": "A escrever o resultado…"
+    },
+    "mission_plan": {
+      "reading": "A ler o que registou…",
+      "planning": "A dividir o objetivo em passos…",
+      "saving": "A guardar o seu plano…"
+    },
+    "create": {
+      "understanding": "A perceber o que pediu…",
+      "creating": "A escrever o conteúdo…",
+      "saving": "A arquivar onde pertence…"
+    },
+    "file_ask": {
+      "reading": "A ler os seus ficheiros…",
+      "answering": "A compor a resposta…",
+      "checking": "A verificar nos ficheiros…"
     }
   }
 }

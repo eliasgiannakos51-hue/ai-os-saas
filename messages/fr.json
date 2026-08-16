@@ -1490,10 +1490,7 @@
       "processingHint": "Lecture du fichier — quelques secondes en général. Vous pourrez l'interroger dès qu'il sera prêt.",
       "failedHint": "Aucun texte lisible trouvé. Importez une version au texte sélectionnable.",
       "askStillRunning": "Lecture en cours — cela prend du temps. Le travail continue même page fermée ; revenez et reposez la question pour voir la réponse.",
-      "askStalled": "La question s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez.",
-      "stepReading": "Lecture de vos fichiers",
-      "stepAnswering": "Élaboration de la réponse",
-      "stepChecking": "Vérification des références"
+      "askStalled": "La question s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez."
     },
     "deepResearch": {
       "title": "Recherche approfondie",
@@ -2042,6 +2039,35 @@
         "why": "Canal, budget et statut côte à côte : la prochaine décision budgétaire se prend sur des chiffres, pas au feeling.",
         "example": "Campagne e-mail de printemps, budget 500 €"
       }
+    }
+  },
+  "aiSteps": {
+    "starting": "Je commence…",
+    "agent_build": {
+      "understanding": "Je comprends ce qu'il vous faut…",
+      "drafting": "J'écris l'agent…",
+      "checking": "Je le relis…",
+      "saving": "J'enregistre…"
+    },
+    "agent_run": {
+      "preparing": "Je prépare vos données…",
+      "working": "Je fais le travail…",
+      "delivering": "Je rédige le résultat…"
+    },
+    "mission_plan": {
+      "reading": "Je lis ce que vous avez consigné…",
+      "planning": "Je découpe l'objectif en étapes…",
+      "saving": "J'enregistre votre plan…"
+    },
+    "create": {
+      "understanding": "Je comprends votre demande…",
+      "creating": "Je rédige le contenu…",
+      "saving": "Je le range au bon endroit…"
+    },
+    "file_ask": {
+      "reading": "Je lis vos fichiers…",
+      "answering": "Je compose la réponse…",
+      "checking": "Je la vérifie sur les fichiers…"
     }
   }
 }

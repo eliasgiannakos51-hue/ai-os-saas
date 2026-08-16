@@ -1490,10 +1490,7 @@
       "processingHint": "正在读取文件——通常只需几秒。准备好后即可提问。",
       "failedHint": "未找到可读文本。请上传文字可选中的版本。",
       "askStillRunning": "仍在阅读——需要一点时间。关闭页面后也会继续；稍后回来再问一次即可看到答案。",
-      "askStalled": "该问题意外中断。未扣除任何积分——请重试。",
-      "stepReading": "正在读取你的文件",
-      "stepAnswering": "正在整理答案",
-      "stepChecking": "正在核对引用"
+      "askStalled": "该问题意外中断。未扣除任何积分——请重试。"
     },
     "deepResearch": {
       "title": "深度研究",
@@ -2042,6 +2039,35 @@
         "why": "渠道、预算和状态并排放着，下一次的预算决定就能靠数字，而不是靠感觉。",
         "example": "春季邮件推广，预算 500 欧元"
       }
+    }
+  },
+  "aiSteps": {
+    "starting": "正在开始…",
+    "agent_build": {
+      "understanding": "正在理解你的需求…",
+      "drafting": "正在编写这个 agent…",
+      "checking": "正在检查…",
+      "saving": "正在保存…"
+    },
+    "agent_run": {
+      "preparing": "正在准备你的数据…",
+      "working": "正在干活…",
+      "delivering": "正在整理结果…"
+    },
+    "mission_plan": {
+      "reading": "正在读你记录过的内容…",
+      "planning": "正在把目标拆成步骤…",
+      "saving": "正在保存你的计划…"
+    },
+    "create": {
+      "understanding": "正在弄清你要什么…",
+      "creating": "正在写内容…",
+      "saving": "正在归到该去的地方…"
+    },
+    "file_ask": {
+      "reading": "正在读你的文件…",
+      "answering": "正在组织答案…",
+      "checking": "正在对照文件核实…"
     }
   }
 }

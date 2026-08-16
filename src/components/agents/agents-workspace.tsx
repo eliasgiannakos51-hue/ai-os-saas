@@ -16,6 +16,7 @@ import { formatDateTimeInZone, formatNumber } from "@/lib/format-number";
 import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useAiJob } from "@/lib/jobs/use-ai-job";
+import { AiJobProgress } from "@/components/ui/ai-job-progress";
 import { resolveBrowserTimeZone, nextRuns } from "@/lib/agents/cron-expression";
 import type { AgentDraft, AgentRun, UserAgent } from "@/lib/agents/agent-config";
 import { matchesSearch } from "@/lib/text/search-match";
@@ -535,6 +536,20 @@ export function AgentsWorkspace({
                 {building ? t("designing") : t("designButton")}
               </button>
             )}
+            {/* Four real steps — understanding, drafting, checking,
+                saving — reported by the worker and, until now, discarded:
+                the button said "Designing…" for all of them and the job
+                row's stepLabel was never read. */}
+            <AiJobProgress job={job} className="w-full" />
+          </div>
+        )}
+
+        {/* "Run now" was the quietest of the four: a pulsing dot on the
+            card's status badge and no words anywhere, for three real steps
+            that can take minutes. */}
+        {runJob && (runJob.status === "queued" || runJob.status === "running") && (
+          <div className="mb-4 rounded-xl border border-orange-500/25 bg-orange-500/5 px-3 py-2">
+            <AiJobProgress job={runJob} />
           </div>
         )}
 

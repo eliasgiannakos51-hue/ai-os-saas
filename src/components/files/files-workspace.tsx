@@ -18,6 +18,7 @@ import {
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
 import { ListLayout } from "@/components/ui/list-layout";
 import { EmptyState } from "@/components/empty-state";
+import { stepLabelKey } from "@/lib/jobs/step-labels";
 import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -81,6 +82,8 @@ export function FilesWorkspace({
   usage: { fileCap: number | null; storageBytes: number; storageCap: number | null };
 }) {
   const t = useTranslations("dashboard.files");
+  // Root translator: step-labels.ts returns FULL dotted keys (aiSteps.*).
+  const tKey = useTranslations();
   const tModule = useTranslations("module");
   const locale = useLocale();
   const router = useRouter();
@@ -101,15 +104,16 @@ export function FilesWorkspace({
   //
   // JOB_STEPS stores CODES ("reading", "answering", "checking"), not
   // sentences — a label written on the server is a label in one language,
-  // and this one is shown to the user at the moment they are waiting. The
-  // code is translated here.
+  // and this one is shown to the user at the moment they are waiting.
+  //
+  // The code-to-key map used to be three lines RIGHT HERE, which is why
+  // the other four job kinds went without one: a map inside a component is
+  // not somewhere the next feature looks. It lives in
+  // lib/jobs/step-labels.ts now, covering all five kinds, and this reads
+  // from it like everything else does.
   const [askStep, setAskStep] = useState<string | null>(null);
-  const ASK_STEP_KEY: Record<string, string> = {
-    reading: "stepReading",
-    answering: "stepAnswering",
-    checking: "stepChecking",
-  };
-  const askStepLabel = askStep && ASK_STEP_KEY[askStep] ? t(ASK_STEP_KEY[askStep]) : t("asking");
+  const askStepKey = stepLabelKey("file_ask", askStep);
+  const askStepLabel = askStepKey ? tKey(askStepKey) : t("asking");
 
   const [newCollectionName, setNewCollectionName] = useState("");
   const [creatingCollection, setCreatingCollection] = useState(false);

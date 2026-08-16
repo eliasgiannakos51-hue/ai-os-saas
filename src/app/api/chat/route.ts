@@ -49,7 +49,8 @@ import { loadProductMentorContext } from "@/lib/chat/product-mentor-context";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 import { AI_CONDUCT_EL } from "@/lib/ai-conduct";
-import { matchCannedAnswer, type CannedMatch } from "@/lib/support/knowledge-base";
+import { matchHelpArticle, type CannedMatch } from "@/lib/support/canned-answers";
+import { loadHelpArticlesForLocaleOnly } from "@/lib/support/help-articles";
 import { getLocale } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
@@ -218,8 +219,8 @@ async function answerFromKnowledgeBase(params: {
   // deliberately states no price, allowance or limit, and this is how the
   // user gets to them.
   const answer = match.article.href
-    ? `${match.article.answer}\n\n→ ${match.article.href}`
-    : match.article.answer;
+    ? `${match.article.body}\n\n→ ${match.article.href}`
+    : match.article.body;
 
   const finalConversationId = conversationId;
   const { error: saveError } = await supabase.from("chat_messages").insert([
@@ -237,7 +238,7 @@ async function answerFromKnowledgeBase(params: {
   diagLog(
     `[canned] chat answered without a model call: ${JSON.stringify({
       userId,
-      articleId: match.article.id,
+      articleId: match.article.slug,
       confidence: match.confidence,
     })}`
   );
@@ -252,7 +253,7 @@ async function answerFromKnowledgeBase(params: {
           title: newConversationTitle,
           // So the UI can say where the answer came from and link to the
           // full article rather than presenting it as a model reply.
-          cannedAnswer: { articleId: match.article.id, href: match.article.href ?? null },
+          cannedAnswer: { articleId: match.article.slug, href: match.article.href ?? null },
         })
       );
       controller.enqueue(ndjsonLine({ type: "delta", text: answer }));
@@ -339,13 +340,21 @@ export async function POST(request: Request) {
     // Mentor Mode is excluded: the user explicitly asked for strategic
     // pushback on their situation, and handing them a FAQ entry instead is
     // not a cheaper version of that, it is a different (wrong) answer.
-    // The knowledge base is Greek. Anyone else falls through to the model,
-    // which answers in their own language — see CANNED_ANSWER_LOCALE.
+    //
+    // THE READER'S OWN LANGUAGE ONLY. loadHelpArticlesForLocaleOnly does
+    // not fall back to English, and that is deliberate: /help can show an
+    // English article to a French reader because the page says so on
+    // screen, but a chat reply arrives as a bare sentence with nothing
+    // around it to explain the switch. Where the reader's language has no
+    // article, nothing matches and the model answers — in their language,
+    // at the cost of one call. That is the right trade.
     const locale = await getLocale();
+    const cannedArticles = mentorMode ? [] : await loadHelpArticlesForLocaleOnly(locale);
     const cannedMatch = mentorMode
       ? null
-      : matchCannedAnswer(
+      : matchHelpArticle(
           message,
+          cannedArticles,
           locale,
           conversationId ? CANNED_THRESHOLD_MID_CONVERSATION : CANNED_THRESHOLD_NEW_CONVERSATION
         );

@@ -46,6 +46,29 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // Help Centre category names that are the same word in that language.
+  //
+  // Listed one at a time, not as a blanket rule for the namespace: where
+  // the language HAS its own word the category uses it (Greek's
+  // "Ιστοσελίδες", "AI Πράκτορες", "Συνομιλία"; French "Discussion";
+  // Portuguese "Conversa"), and those are deliberately absent from this
+  // list so the gate keeps checking them.
+  //
+  // What is left is the set where the English form IS the word people use.
+  // "Chat" is a Spanish and Italian noun. German writes "Credits",
+  // "Websites" and "Chat". Greek writes "Credits". "Account" is the
+  // ordinary Italian word for a service login. Translating any of these
+  // would invent a term the reader does not use.
+  "es:help.categories.chat",
+  "it:help.categories.chat",
+  "it:help.categories.account",
+  "de:help.categories.chat",
+  "de:help.categories.credits",
+  "de:help.categories.websites",
+  "el:help.categories.credits",
+  // "Missions" is spelled identically in French — same word, same meaning,
+  // and the app's own French sidebar uses it.
+  "fr:help.categories.missions",
   // Margin report, owner-only. "Bypass" is the loanword these languages
   // actually use for this concept — and it is also the literal value
   // stored in ai_cost_log's metadata (bypassCharge), so translating the

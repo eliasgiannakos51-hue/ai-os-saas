@@ -11,6 +11,7 @@ import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { maxAgentsForPlan, DEFAULT_AGENT_LIMITS } from "@/lib/agents/agent-limits";
 import { AgentsWorkspace } from "@/components/agents/agents-workspace";
 import type { AgentRun, UserAgent } from "@/lib/agents/agent-config";
+import { HelpTip } from "@/components/help/help-tip";
 
 export const dynamic = "force-dynamic";
 
@@ -50,7 +51,7 @@ export default async function AgentsPage() {
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={MODULE_ICONS.agents} title={t("title")} description={t("description")} />
+          <PageHeader icon={MODULE_ICONS.agents} title={t("title")} description={t("description")} help={<HelpTip slug="create-agent" />} />
           <UpgradeRequired featureName={t("title")} planName="Starter" />
         </div>
       </main>

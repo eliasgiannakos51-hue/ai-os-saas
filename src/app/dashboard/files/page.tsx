@@ -13,6 +13,7 @@ import {
   type WorkspaceCollection,
   type WorkspaceFile,
 } from "@/components/files/files-workspace";
+import { HelpTip } from "@/components/help/help-tip";
 
 export const dynamic = "force-dynamic";
 
@@ -70,7 +71,7 @@ export default async function FilesPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-        <PageHeader icon={FolderOpen} title={t("title")} description={t("description")} />
+        <PageHeader icon={FolderOpen} title={t("title")} description={t("description")} help={<HelpTip slug="upload-files" />} />
 
         {/* Said once, at the top: this page is where somebody hands a
             contract to an AI, and the terms of that belong here rather

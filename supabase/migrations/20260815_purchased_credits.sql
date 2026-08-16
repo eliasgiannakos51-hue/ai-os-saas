@@ -74,14 +74,54 @@ $constraint$;
 -- syncCreditsForPlan writes as the plan's monthly figure, so the excess
 -- cannot have come from anywhere else.
 --
--- Guarded on purchased_credits = 0 so a re-run cannot double-count. This
--- recovers what is still in the balance; it does NOT recover what earlier
--- resets already destroyed — that is the restitution block at the bottom,
--- which is deliberately separate and commented out.
+-- IDEMPOTENT VIA A MARKER, NOT VIA THE DATA.
+--
+-- The obvious guard is `where purchased_credits = 0`, and it is wrong. It
+-- is a statement about the row's CURRENT state, not a record that the
+-- backfill already ran — so it re-fires on any account that has since
+-- come back to purchased_credits = 0 with a balance above its allotment.
+--
+-- MEASURED, on PostgreSQL 16, applying this file twice with normal
+-- activity in between:
+--
+--   grant_credits_idempotent(user, +440, 'admin_adjustment', p_purchased => false)
+--   before re-run:  (remaining, purchased) = (540, 0)
+--   after  re-run:  (remaining, purchased) = (540, 440)
+--
+-- A goodwill grant that was supposed to expire with the month had been
+-- silently converted into permanent purchased credits — by re-running a
+-- file whose header promised it was idempotent.
+--
+-- The marker column is the same mechanism grandfathering already uses
+-- (legacy_entitlements_backfilled_at). It records that the row was
+-- CONSIDERED, which is the thing that must not happen twice.
+alter table public.user_credits
+  add column if not exists purchased_credits_backfilled_at timestamptz;
+
+comment on column public.user_credits.purchased_credits_backfilled_at is
+  'When the purchased-credits backfill considered this row. Set once; its presence is what makes a re-run a no-op.';
+
+-- Anyone whose balance was ABOVE their plan's monthly allotment at the
+-- moment of the FIRST run is holding the difference because they bought
+-- it — credits_total is what syncCreditsForPlan writes as the plan's
+-- monthly figure, so the excess cannot have come from anywhere else.
+--
+-- This recovers what is still in the balance; it does NOT recover what
+-- earlier resets already destroyed — that is the restitution block at the
+-- bottom, which is deliberately separate and commented out.
 update public.user_credits
-   set purchased_credits = greatest(credits_remaining - credits_total, 0)
- where purchased_credits = 0
+   set purchased_credits = greatest(credits_remaining - credits_total, 0),
+       purchased_credits_backfilled_at = now()
+ where purchased_credits_backfilled_at is null
+   and purchased_credits = 0
    and credits_remaining > credits_total;
+
+-- Everyone else is marked as considered too, so the statement above can
+-- never look at them again. Without this, only the accounts it changed
+-- would be protected.
+update public.user_credits
+   set purchased_credits_backfilled_at = now()
+ where purchased_credits_backfilled_at is null;
 
 -- 3. Spending ---------------------------------------------------------------
 create or replace function public.deduct_credits_atomic(
@@ -326,16 +366,96 @@ begin
 end;
 $$;
 
--- Same posture as before: these grant or move credits, so a logged-in user
--- must never call them with the anon key.
-revoke all on function public.grant_credits_idempotent(
-  uuid, integer, text, text, text, integer, text, timestamptz, boolean
-) from public;
-revoke all on function public.reset_monthly_credits(uuid, integer, text) from public;
-grant execute on function public.grant_credits_idempotent(
-  uuid, integer, text, text, text, integer, text, timestamptz, boolean
-) to service_role;
-grant execute on function public.reset_monthly_credits(uuid, integer, text) to service_role;
+-- 6. Remove the stale overload -----------------------------------------------
+--
+-- PostgreSQL identifies a function by (name, argument types), so adding a
+-- ninth parameter did NOT replace the eight-argument version created by
+-- 20260805_idempotent_credit_grants.sql. It created a second one, and both
+-- survived.
+--
+-- MEASURED, applying 20260805 then this file on PostgreSQL 16:
+--
+--   grant_credits_idempotent(uuid, integer, text, text, text, integer, text, timestamptz)
+--   grant_credits_idempotent(uuid, integer, text, text, text, integer, text, timestamptz, boolean)
+--
+--   select * from public.grant_credits_idempotent(<eight arguments>)
+--   ERROR:  function public.grant_credits_idempotent(...) is not unique
+--
+-- Because the ninth parameter has a DEFAULT, an eight-argument call now
+-- matches both candidates and PostgreSQL refuses to choose. That is not a
+-- silently wrong answer — it is a hard error for every caller that has not
+-- been updated. The application passes all nine named arguments through
+-- PostgREST and is unaffected; a SQL console, an admin script or a future
+-- migration is not.
+--
+-- THIS IS A `drop function`, NOT A `drop table`. It removes an entry from
+-- pg_proc. It touches no row, no column and no constraint, the signature
+-- is written out in full so it cannot match anything else, and it runs
+-- AFTER the replacement above exists — so there is no moment at which the
+-- database has no grant_credits_idempotent.
+drop function if exists public.grant_credits_idempotent(
+  uuid, integer, text, text, text, integer, text, timestamptz
+);
+
+-- 7. Who may call these ------------------------------------------------------
+--
+-- All five are SECURITY DEFINER and every one of them moves credits, so a
+-- logged-in user holding the anon key must not be able to call any of
+-- them. Every caller in this codebase uses createAdminClient() — the
+-- service role — so nothing legitimate loses access:
+--
+--   deduct_credits_atomic              lib/billing/credits.ts:177   admin
+--   settle_reservation                 lib/billing/reservations.ts:295  admin
+--   grant_credits_idempotent           lib/billing/credits.ts:268   admin
+--   reset_monthly_credits              lib/billing/credits.ts:399   admin
+--   reset_monthly_credits_for_unbilled api/cron/reset-credits:49    admin
+--
+-- WHY `revoke ... from public` IS NOT ENOUGH, AND THIS IS THE SERIOUS ONE.
+-- A Supabase project ships with
+--
+--   alter default privileges in schema public
+--     grant all on functions to anon, authenticated, service_role;
+--
+-- so every newly created function gets an EXPLICIT execute grant to anon
+-- and authenticated. Revoking from PUBLIC removes only the implicit
+-- grant; the explicit ones survive it.
+--
+-- MEASURED, on a cluster with those default privileges in place:
+--
+--   create or replace function public.probe_fn() ...
+--   revoke all on function public.probe_fn() from public;
+--   has_function_privilege('anon',          'public.probe_fn()', 'execute')  -> t
+--   has_function_privilege('authenticated', 'public.probe_fn()', 'execute')  -> t
+--
+-- Left as it was, any signed-in user could call grant_credits_idempotent
+-- with the browser's own anon key and mint themselves credits. The roles
+-- are named explicitly below, and `if exists` on the role check keeps the
+-- file runnable on a plain PostgreSQL that has no Supabase roles.
+do $revoke_from_api_roles$
+declare
+  fn text;
+begin
+  foreach fn in array array[
+    'public.grant_credits_idempotent(uuid, integer, text, text, text, integer, text, timestamptz, boolean)',
+    'public.reset_monthly_credits(uuid, integer, text)',
+    'public.reset_monthly_credits_for_unbilled(date)',
+    'public.deduct_credits_atomic(uuid, integer, integer, text)',
+    'public.settle_reservation(uuid, uuid, integer, text, integer, integer, integer, integer, integer, integer, numeric, numeric, numeric, numeric, jsonb, jsonb)'
+  ]
+  loop
+    execute format('revoke all on function %s from public', fn);
+    if exists (select 1 from pg_roles where rolname = 'anon') then
+      execute format('revoke all on function %s from anon', fn);
+    end if;
+    if exists (select 1 from pg_roles where rolname = 'authenticated') then
+      execute format('revoke all on function %s from authenticated', fn);
+    end if;
+    if exists (select 1 from pg_roles where rolname = 'service_role') then
+      execute format('grant execute on function %s to service_role', fn);
+    end if;
+  end loop;
+end
+$revoke_from_api_roles$;
 
 
 -- ============================================================================

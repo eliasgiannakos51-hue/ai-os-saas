@@ -1902,5 +1902,34 @@
       "presentations": "Eliminar esta nota de apresentação? Não é possível anular.",
       "campaigns": "Eliminar esta campanha? Não é possível anular."
     }
+  },
+  "help": {
+    "title": "Centro de ajuda",
+    "intro": "As respostas às perguntas mais frequentes. Faz qualquer uma delas no chat e recebes a mesma resposta de imediato, sem gastar créditos.",
+    "contents": "Índice",
+    "goThere": "Ir para lá",
+    "fallbackNotice": "Ainda não está disponível no teu idioma — mostramos a versão em inglês.",
+    "notFoundTitle": "Não encontraste o que procuravas?",
+    "notFoundBody": "Pergunta no chat: para tudo o que diz respeito à tua conta ou aos teus dados, a resposta vem da IA e não desta página.",
+    "openChat": "Abrir o chat",
+    "pricingLink": "Preços e planos",
+    "answerCount": "{count, plural, one {# resposta} other {# respostas}}",
+    "unavailableTitle": "O centro de ajuda não está a carregar neste momento",
+    "unavailableBody": "Tenta outra vez daqui a pouco. Se precisas de uma resposta agora, pergunta no chat ou escreve ao suporte.",
+    "tipLabel": "O que é isto?",
+    "tipReadMore": "Mais no centro de ajuda",
+    "categories": {
+      "getting-started": "Primeiros passos",
+      "billing": "Faturação e planos",
+      "credits": "Créditos",
+      "websites": "Sites",
+      "agents": "Agentes de IA",
+      "missions": "Missões",
+      "chat": "Conversa",
+      "files": "Ficheiros",
+      "integrations": "Ligações",
+      "account": "Conta",
+      "privacy": "Dados e privacidade"
+    }
   }
 }

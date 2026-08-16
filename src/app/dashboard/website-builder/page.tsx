@@ -7,6 +7,7 @@ import { WebsiteBuilderWorkspace } from "@/components/website-builder/website-bu
 import { WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import { loadFavoriteIds } from "@/lib/favorites";
 import type { UserWebsite } from "@/types/user-website";
+import { HelpTip } from "@/components/help/help-tip";
 
 export const metadata: Metadata = { title: "Website Builder" };
 
@@ -42,7 +43,7 @@ export default async function WebsiteBuilderPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={WEBSITE_BUILDER_ICON} title={t("title")} description={t("description")} />
+        <PageHeader icon={WEBSITE_BUILDER_ICON} title={t("title")} description={t("description")} help={<HelpTip slug="create-website" />} />
         <WebsiteBuilderWorkspace
           initialWebsites={websiteRows}
           favoritedWebsiteIds={favoritedWebsiteIds}

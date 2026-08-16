@@ -1,0 +1,74 @@
+{
+  "locale": "es",
+  "_comment": [
+    "Español (España). Los diez artículos marcados core en manifest.json.",
+    "",
+    "Los nombres de menú están copiados de messages/es.json, no traducidos",
+    "del inglés: Configuración, Facturación, Generador de Sitios, Agentes IA,",
+    "Archivos, Cancelar la suscripción. Si en la app cambia una etiqueta,",
+    "cambia aquí también — un artículo que nombra un menú que no existe es",
+    "peor que no tener artículo.",
+    "",
+    "Trato de tú, como el resto de la aplicación. Ni un número: precios,",
+    "créditos y límites viven en /pricing y cambian."
+  ],
+  "articles": {
+    "what-is-ionexa": {
+      "title": "¿Qué es Ionexa?",
+      "body": "Un espacio de trabajo donde dices lo que quieres y se hace: crea sitios web, pone a funcionar agentes que trabajan solos y a su hora, divide tus objetivos en pasos y lee tus archivos para poder responderte sobre ellos.\n\nEn vez de diez herramientas sueltas que no se hablan entre sí, una sola que lo sabe todo.",
+      "triggers": ["que es ionexa", "que hace ionexa", "que es esto", "para que sirve", "de que va esto", "que ofreceis", "explicame ionexa", "informacion sobre ionexa"]
+    },
+
+    "pricing-overview": {
+      "title": "¿Cuánto cuesta Ionexa?",
+      "body": "Hay un plan gratuito para que lo pruebes, y planes de pago según van creciendo tus necesidades.\n\nLos precios de hoy y lo que incluye cada plan están siempre en la página de Precios. No los repito aquí a propósito: un número viejo es peor que ningún número.",
+      "triggers": ["cuanto cuesta", "precio", "precios", "cuanto vale", "que planes hay", "planes", "tarifas", "suscripcion", "es gratis"]
+    },
+    "cancel": {
+      "title": "¿Cómo cancelo mi suscripción?",
+      "body": "Configuración → Facturación → Cancelar la suscripción. Un clic para llegar y otro para confirmar.\n\nNo pierdes el acceso de golpe: tu plan sigue hasta el final del periodo que ya has pagado y solo entonces la cuenta pasa al plan gratuito. No se borra nada — tus datos, tus archivos y tus sitios web se quedan donde están.\n\n¿Te has arrepentido? Desde esa misma pantalla puedes restaurar la suscripción en cualquier momento antes de que termine.",
+      "triggers": ["como cancelo", "cancelar", "cancelar suscripcion", "darme de baja", "dar de baja", "quiero cancelar", "anular la suscripcion", "baja"]
+    },
+
+    "what-are-credits": {
+      "title": "¿Qué son los créditos?",
+      "body": "Los créditos son lo que gastas cuando trabaja la IA: un mensaje en el chat, la creación de un sitio web, la ejecución de un agente.\n\nCada plan trae una cantidad mensual que se renueva, y puedes comprar paquetes extra si se te acaban antes de tiempo. Los créditos de un paquete no caducan a final de mes — se quedan en tu cuenta hasta que los uses.\n\nCuántos incluye cada plan lo verás en la página de Precios.",
+      "triggers": ["que son los creditos", "creditos", "que es un credito", "como funcionan los creditos", "para que sirven los creditos", "sistema de creditos", "en que se gastan los creditos"]
+    },
+    "credits-ran-out": {
+      "title": "Me he quedado sin créditos, ¿y ahora qué?",
+      "body": "Dos opciones: esperar a la renovación del mes que viene, o comprar un paquete de créditos, que se añade al momento.\n\nLos créditos del paquete no caducan a final de mes, así que nada de lo que compres se pierde en la siguiente renovación. Las dos cosas se hacen desde Configuración → Facturación.",
+      "triggers": ["me he quedado sin creditos", "no me quedan creditos", "sin creditos", "comprar creditos", "como compro creditos", "necesito mas creditos", "se me han acabado los creditos", "recargar creditos"]
+    },
+
+    "create-website": {
+      "title": "¿Cómo hago un sitio web?",
+      "body": "Abre el Generador de Sitios en el menú lateral, cuenta con tus palabras qué quieres —a qué se dedica tu negocio, a quién se dirige, qué estilo te gusta— y dale a crear.\n\nTambién puedes subir imágenes de referencia, como el logo o fotos de tus productos, y seguirá tu estilo. Cuando esté listo, lo publicas en su propia dirección con un clic.",
+      "triggers": ["como hago una web", "crear una web", "hacer una pagina web", "generador de sitios", "quiero una web", "crear sitio web", "necesito una pagina", "montar una web"]
+    },
+
+    "create-agent": {
+      "title": "¿Cómo creo un agente?",
+      "body": "En el menú Agentes IA, describe en una frase qué quieres que haga y cada cuánto — por ejemplo «cada mañana mándame un resumen de las noticias de mi sector».\n\nIonexa te monta el agente, lo ejecuta a su hora y te envía el resultado. Puedes pausarlo o cambiarlo cuando quieras.",
+      "triggers": ["como creo un agente", "crear agente", "agentes", "quiero un agente", "automatizar", "automatizacion", "tarea programada", "programar una tarea"]
+    },
+
+    "upload-files": {
+      "title": "¿Puedo subir archivos?",
+      "body": "Sí — PDF, Word, Excel, CSV, texto plano y Markdown. Los subes en Archivos, Ionexa lee lo que hay dentro y a partir de ahí le preguntas lo que quieras sobre ellos.\n\nTus archivos son privados: nadie más tiene acceso y cada descarga se hace con un enlace temporal.",
+      "triggers": ["subir un archivo", "subir archivos", "pdf", "archivos", "documentos", "puedo subir", "adjuntar archivo", "que lea mi documento"]
+    },
+
+    "contact-support": {
+      "title": "¿Cómo hablo con una persona?",
+      "body": "Configuración → Soporte, y escríbenos.\n\nSi es por un cobro, añade la referencia del cobro y lo localizamos enseguida.",
+      "triggers": ["contacto", "soporte", "hablar con una persona", "atencion al cliente", "contactar", "ayuda de una persona", "quiero hablar con alguien", "escribir a soporte"]
+    },
+
+    "data-privacy": {
+      "title": "¿Qué hacéis con mis datos?",
+      "body": "Tus datos son tuyos. No los vendemos, no los usamos para entrenar modelos y cada cuenta ve solo los suyos — eso se impone en la base de datos, no solo en la aplicación.\n\nPuedes descargarlos o borrarlos cuando quieras.",
+      "triggers": ["mis datos", "privacidad", "proteccion de datos", "seguridad", "vendeis mis datos", "entrenar modelos", "rgpd", "gdpr", "estan seguros mis datos"]
+    }
+  }
+}

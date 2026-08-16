@@ -1902,5 +1902,34 @@
       "presentations": "Diese Präsentationsnotiz löschen? Das lässt sich nicht rückgängig machen.",
       "campaigns": "Diese Kampagne löschen? Das lässt sich nicht rückgängig machen."
     }
+  },
+  "help": {
+    "title": "Hilfe-Center",
+    "intro": "Die Antworten auf die häufigsten Fragen. Stell eine davon im Chat und du bekommst dieselbe Antwort sofort, ohne Credits auszugeben.",
+    "contents": "Inhalt",
+    "goThere": "Dorthin",
+    "fallbackNotice": "Noch nicht in deiner Sprache verfügbar — hier die englische Fassung.",
+    "notFoundTitle": "Nicht gefunden, wonach du gesucht hast?",
+    "notFoundBody": "Frag im Chat — bei allem, was dein eigenes Konto oder deine eigenen Daten betrifft, kommt die Antwort von der KI und nicht von dieser Seite.",
+    "openChat": "Chat öffnen",
+    "pricingLink": "Preise und Tarife",
+    "answerCount": "{count, plural, one {# Antwort} other {# Antworten}}",
+    "unavailableTitle": "Das Hilfe-Center lädt gerade nicht",
+    "unavailableBody": "Versuch es gleich noch einmal. Wenn du jetzt eine Antwort brauchst, frag im Chat oder schreib an den Support.",
+    "tipLabel": "Was ist das?",
+    "tipReadMore": "Mehr im Hilfe-Center",
+    "categories": {
+      "getting-started": "Erste Schritte",
+      "billing": "Abrechnung und Tarife",
+      "credits": "Credits",
+      "websites": "Websites",
+      "agents": "KI-Agenten",
+      "missions": "Missionen",
+      "chat": "Chat",
+      "files": "Dateien",
+      "integrations": "Verbindungen",
+      "account": "Konto",
+      "privacy": "Daten und Datenschutz"
+    }
   }
 }

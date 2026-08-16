@@ -1,0 +1,160 @@
+{
+  "locale": "de",
+  "_comment": [
+    "Deutsch (Deutschland). Die zehn Artikel, die in manifest.json als core",
+    "markiert sind.",
+    "",
+    "Die Menünamen sind aus messages/de.json übernommen, nicht aus dem",
+    "Englischen übersetzt: Einstellungen, Abrechnung, Abo kündigen,",
+    "Reaktivieren, Website-Builder, Website Generieren, KI-Agenten, Dateien.",
+    "Ändert sich in der App ein Label, muss es hier mitgeändert werden — ein",
+    "Artikel, der ein Menü nennt, das es so nicht gibt, ist schlimmer als gar",
+    "kein Artikel.",
+    "",
+    "Durchgehend „du“, wie im Rest der App (Landing, Preise, Abrechnung,",
+    "Kündigung, Dateien). Keine einzige Zahl: Preise, Credits und Limits",
+    "stehen auf /pricing und ändern sich."
+  ],
+  "articles": {
+    "what-is-ionexa": {
+      "title": "Was ist Ionexa?",
+      "body": "Ein Arbeitsbereich, in dem du sagst, was du willst, und es passiert: Er baut Websites, lässt Agenten nach eigenem Zeitplan für dich laufen, zerlegt Ziele in einzelne Schritte und liest deine Dateien, damit er dir Fragen dazu beantworten kann.\n\nStatt zehn einzelner Tools, die nicht miteinander reden, eines, das von allem weiß.",
+      "triggers": [
+        "was ist ionexa",
+        "was macht ionexa",
+        "was ist das hier",
+        "was kann das",
+        "wofur ist das",
+        "worum geht es hier",
+        "ionexa erklaren",
+        "was bringt mir das"
+      ]
+    },
+    "pricing-overview": {
+      "title": "Was kostet Ionexa?",
+      "body": "Es gibt einen kostenlosen Tarif zum Ausprobieren und bezahlte Tarife, wenn deine Ansprüche wachsen.\n\nDie aktuellen Preise und was in welchem Tarif steckt, stehen immer auf der Seite „Preise“. Hier stehen sie mit Absicht nicht — eine veraltete Zahl ist schlimmer als gar keine.",
+      "triggers": [
+        "was kostet ionexa",
+        "was kostet das",
+        "was kostet es",
+        "preise",
+        "wie teuer ist das",
+        "welche tarife gibt es",
+        "ist das kostenlos",
+        "kosten",
+        "abo preis"
+      ]
+    },
+    "cancel": {
+      "title": "Wie kündige ich mein Abo?",
+      "body": "Einstellungen → Abrechnung → Abo kündigen. Ein Klick dorthin, ein Klick zum Bestätigen.\n\nDen Zugang verlierst du nicht sofort: Dein Tarif läuft bis zum Ende des Zeitraums weiter, den du bereits bezahlt hast, und erst dann wechselt das Konto in den kostenlosen Tarif. Gelöscht wird nichts — deine Daten, deine Dateien und deine Websites bleiben genau dort, wo sie sind.\n\nDu hast es dir anders überlegt? Auf demselben Bildschirm kannst du das Abo jederzeit vor Ablauf wieder reaktivieren.",
+      "triggers": [
+        "abo kundigen",
+        "kundigen",
+        "wie kundige ich",
+        "abo beenden",
+        "kundigung",
+        "vertrag kundigen",
+        "abo canceln",
+        "abo stoppen"
+      ]
+    },
+    "what-are-credits": {
+      "title": "Was sind Credits?",
+      "body": "Credits sind das, was du für die Arbeit der KI ausgibst: eine Nachricht im Chat, das Erstellen einer Website, ein Agentenlauf.\n\nIn jedem Tarif steckt ein monatliches Guthaben, das sich immer wieder erneuert, und wenn es früher zur Neige geht, kaufst du einfach ein zusätzliches Paket dazu. Credits aus einem Paket verfallen am Monatsende nicht — sie bleiben auf deinem Konto, bis du sie verbrauchst.\n\nWie viel in welchem Tarif enthalten ist, steht auf der Preisseite.",
+      "triggers": [
+        "was sind credits",
+        "credits",
+        "was ist ein credit",
+        "wie funktionieren credits",
+        "wofur sind credits",
+        "credits erklarung",
+        "guthaben"
+      ]
+    },
+    "credits-ran-out": {
+      "title": "Meine Credits sind aufgebraucht — was jetzt?",
+      "body": "Zwei Möglichkeiten: auf die nächste monatliche Erneuerung warten oder ein Credit-Paket kaufen, das sofort gutgeschrieben wird.\n\nDie Credits aus einem Paket verfallen am Monatsende nicht, bei der nächsten Erneuerung geht dir also nichts davon verloren. Beides findest du unter Einstellungen → Abrechnung.",
+      "triggers": [
+        "credits alle",
+        "keine credits mehr",
+        "credits aufgebraucht",
+        "credits nachkaufen",
+        "wie kaufe ich credits",
+        "credits aufladen",
+        "mehr credits",
+        "guthaben leer"
+      ]
+    },
+    "create-website": {
+      "title": "Wie baue ich eine Website?",
+      "body": "Öffne im Seitenmenü den Website-Builder, beschreibe mit eigenen Worten, was du willst — was dein Unternehmen macht, für wen es da ist, welcher Stil dir gefällt — und klick auf „Website Generieren“.\n\nDu kannst auch Referenzbilder hochladen, ein Logo oder Produktfotos zum Beispiel, dann richtet sich die KI nach deinem Stil. Ist die Website fertig, veröffentlichst du sie mit einem Klick unter einer eigenen Adresse.",
+      "triggers": [
+        "wie baue ich eine website",
+        "website erstellen",
+        "webseite bauen",
+        "homepage erstellen",
+        "website builder",
+        "brauche eine website",
+        "internetseite erstellen",
+        "seite erstellen lassen"
+      ]
+    },
+    "create-agent": {
+      "title": "Wie erstelle ich einen Agenten?",
+      "body": "Im Menü KI-Agenten beschreibst du in einem Satz, was er tun soll und wie oft — zum Beispiel „schick mir jeden Morgen eine Zusammenfassung der Nachrichten aus meiner Branche“.\n\nIonexa baut den Agenten für dich, lässt ihn nach Zeitplan laufen und schickt dir das Ergebnis. Du kannst ihn jederzeit pausieren oder ändern.",
+      "triggers": [
+        "agent erstellen",
+        "wie erstelle ich einen agenten",
+        "ki agent",
+        "agenten",
+        "automatisierung",
+        "aufgabe automatisieren",
+        "agent einrichten",
+        "taglich automatisch"
+      ]
+    },
+    "upload-files": {
+      "title": "Kann ich Dateien hochladen?",
+      "body": "Ja — PDF, Word, Excel, CSV, einfacher Text und Markdown. Du lädst sie unter Dateien hoch, Ionexa liest ihren Inhalt, und danach kannst du Fragen dazu stellen.\n\nDeine Dateien bleiben privat: Sonst hat niemand Zugriff darauf, und jeder Download läuft über einen zeitlich begrenzten Link.",
+      "triggers": [
+        "datei hochladen",
+        "dateien hochladen",
+        "pdf hochladen",
+        "kann ich dateien hochladen",
+        "dokumente",
+        "pdf lesen lassen",
+        "unterlagen hochladen",
+        "dateien"
+      ]
+    },
+    "contact-support": {
+      "title": "Wie erreiche ich einen Menschen?",
+      "body": "Einstellungen → Support, und schreib uns.\n\nWenn es um eine Abbuchung geht, gib die Zahlungsreferenz mit an — dann finden wir sie schnell.",
+      "triggers": [
+        "support kontaktieren",
+        "kundenservice",
+        "mit einem menschen sprechen",
+        "hilfe von einem menschen",
+        "kontakt",
+        "support",
+        "wie erreiche ich euch",
+        "jemanden erreichen"
+      ]
+    },
+    "data-privacy": {
+      "title": "Was macht ihr mit meinen Daten?",
+      "body": "Deine Daten gehören dir. Wir verkaufen sie nicht, wir trainieren damit keine Modelle, und jedes Konto sieht ausschließlich seine eigenen — dafür sorgt die Datenbank selbst, nicht nur die Anwendung.\n\nDu kannst sie jederzeit herunterladen oder löschen.",
+      "triggers": [
+        "meine daten",
+        "datenschutz",
+        "dsgvo",
+        "sind meine daten sicher",
+        "was passiert mit meinen daten",
+        "daten verkaufen",
+        "modelle trainieren",
+        "datensicherheit"
+      ]
+    }
+  }
+}

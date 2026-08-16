@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { GlowOrb } from "@/components/ui/glow-orb";
 
@@ -10,10 +11,21 @@ export function PageHeader({
   icon: Icon,
   title,
   description,
+  help,
 }: {
   icon?: LucideIcon;
   title: string;
   description?: string;
+  /**
+   * The contextual "?" — pass <HelpTip slug="..." /> from a SERVER page.
+   *
+   * A ReactNode rather than a slug string on purpose: HelpTip reaches the
+   * database, so taking a slug here would drag `server-only` into a
+   * component that 22 pages import and that nothing today stops from
+   * being used in a client tree. This way the dependency stays at the
+   * call site, where it is visible.
+   */
+  help?: ReactNode;
 }) {
   return (
     <div className="relative mb-6 flex items-center gap-3">
@@ -24,7 +36,12 @@ export function PageHeader({
         </span>
       )}
       <div className="min-w-0">
-        <h1 className="truncate text-2xl font-bold text-foreground">{title}</h1>
+        {/* The heading keeps `truncate`; the "?" sits outside it, or a
+            long title on a 375px screen would clip the help away. */}
+        <div className="flex min-w-0 items-center gap-1">
+          <h1 className="truncate text-2xl font-bold text-foreground">{title}</h1>
+          {help}
+        </div>
         {description && <p className="mt-0.5 text-sm text-muted">{description}</p>}
       </div>
     </div>

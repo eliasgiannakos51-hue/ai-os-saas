@@ -1902,5 +1902,34 @@
       "presentations": "このプレゼンのメモを削除しますか？元に戻せません。",
       "campaigns": "このキャンペーンを削除しますか？元に戻せません。"
     }
+  },
+  "help": {
+    "title": "ヘルプセンター",
+    "intro": "よくある質問への回答をまとめています。チャットで同じ質問をすれば、クレジットを使わずにすぐ同じ回答が返ってきます。",
+    "contents": "目次",
+    "goThere": "そこへ移動",
+    "fallbackNotice": "お使いの言語にはまだ対応していないため、英語版を表示しています。",
+    "notFoundTitle": "お探しのものが見つかりませんでしたか？",
+    "notFoundBody": "チャットで質問してください。ご自身のアカウントやデータに関することは、このページではなく AI が回答します。",
+    "openChat": "チャットを開く",
+    "pricingLink": "料金とプラン",
+    "answerCount": "{count, plural, other {# 件の回答}}",
+    "unavailableTitle": "ヘルプセンターを読み込めません",
+    "unavailableBody": "少し時間をおいてもう一度お試しください。今すぐ回答が必要な場合は、チャットで質問するかサポートにご連絡ください。",
+    "tipLabel": "これは何ですか？",
+    "tipReadMore": "ヘルプセンターで詳しく見る",
+    "categories": {
+      "getting-started": "はじめに",
+      "billing": "請求とプラン",
+      "credits": "クレジット",
+      "websites": "ウェブサイト",
+      "agents": "AI エージェント",
+      "missions": "ミッション",
+      "chat": "チャット",
+      "files": "ファイル",
+      "integrations": "連携",
+      "account": "アカウント",
+      "privacy": "データとプライバシー"
+    }
   }
 }

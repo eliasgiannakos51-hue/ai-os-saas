@@ -1,0 +1,62 @@
+{
+  "locale": "pt",
+  "_comment": [
+    "Menu names taken from messages/pt.json, not invented:",
+    "  Configurações (settings.title) · Faturação (settings.billing) ·",
+    "  Ficheiros (sidebar.items.files) · Gerador de Sites (sidebar.items.websiteBuilder) ·",
+    "  Agentes de IA (sidebar.items.agents) · Preços (pricing.title)",
+    "An article that names a menu the reader cannot find is worse than none."
+  ],
+  "articles": {
+    "what-is-ionexa": {
+      "title": "O que é o Ionexa?",
+      "body": "Um espaço de trabalho onde dizes o que queres e acontece: cria sites, põe agentes a trabalhar sozinhos com horário próprio, divide objetivos em passos e lê os teus ficheiros para responder sobre eles.\n\nEm vez de dez ferramentas separadas que não falam entre si, uma que sabe de tudo.",
+      "triggers": ["o que e o ionexa", "o que faz o ionexa", "o que e isto", "para que serve", "sobre o ionexa", "como funciona isto"]
+    },
+    "pricing-overview": {
+      "title": "Quanto custa o Ionexa?",
+      "body": "Há um plano gratuito para experimentares e planos pagos à medida que as tuas necessidades crescem.\n\nOs preços atuais e o que cada plano inclui estão sempre na página Preços. Não os repetimos aqui de propósito — um número desatualizado é pior do que número nenhum.",
+      "triggers": ["quanto custa", "preco", "precos", "custo", "quanto e", "que planos existem", "planos", "quanto pago", "mensalidade"]
+    },
+    "what-are-credits": {
+      "title": "O que são os créditos?",
+      "body": "Os créditos são o que gastas em trabalho de IA: uma mensagem no chat, a criação de um site, a execução de um agente.\n\nCada plano inclui uma quantidade mensal que se renova, e podes comprar pacotes extra se acabarem mais cedo. Os créditos de um pacote não expiram no fim do mês — ficam na conta até os usares.\n\nQuanto inclui cada plano está na página Preços.",
+      "triggers": ["o que sao creditos", "creditos", "o que e um credito", "como funcionam os creditos", "para que servem os creditos"]
+    },
+    "credits-ran-out": {
+      "title": "Fiquei sem créditos — e agora?",
+      "body": "Duas opções: esperar pela renovação mensal seguinte, ou comprar um pacote de créditos que é adicionado de imediato.\n\nOs créditos do pacote não expiram no fim do mês, por isso nada do que compras se perde na renovação seguinte. Ambas as opções estão em Configurações → Faturação.",
+      "triggers": ["fiquei sem creditos", "acabaram os creditos", "nao tenho creditos", "comprar creditos", "como compro creditos", "preciso de mais creditos"]
+    },
+    "cancel": {
+      "title": "Como cancelo a minha subscrição?",
+      "body": "Configurações → Faturação → Cancelar subscrição. Um clique para lá chegar, outro para confirmar.\n\nNão perdes o acesso de imediato: o teu plano continua até ao fim do período que já pagaste e só depois a conta passa para o plano gratuito. Não se apaga nada — os teus dados, ficheiros e sites ficam exatamente onde estão.\n\nMudaste de ideias? No mesmo ecrã podes repor a subscrição a qualquer momento antes de terminar.",
+      "triggers": ["como cancelo", "cancelar", "cancelar subscricao", "anular subscricao", "quero cancelar", "parar a subscricao", "terminar assinatura"]
+    },
+    "create-website": {
+      "title": "Como crio um site?",
+      "body": "Abre o Gerador de Sites no menu lateral, descreve por palavras simples o que queres — o que faz o teu negócio, a quem se dirige, que estilo gostas — e carrega em criar.\n\nTambém podes carregar imagens de referência, como o logótipo ou fotografias de produtos, e ele segue o teu estilo. Quando estiver pronto, publicas num endereço próprio com um clique.",
+      "triggers": ["como crio um site", "como faco um website", "criar site", "criar website", "quero um site", "gerador de sites", "fazer uma pagina"]
+    },
+    "create-agent": {
+      "title": "Como crio um agente?",
+      "body": "No menu Agentes de IA, descreve numa frase o que queres que ele faça e com que frequência — por exemplo «todas as manhãs envia-me um resumo das notícias do meu setor».\n\nO Ionexa constrói o agente por ti, executa-o à hora certa e envia-te o resultado. Podes pausá-lo ou alterá-lo quando quiseres.",
+      "triggers": ["como crio um agente", "criar agente", "agentes", "automatizar", "quero um agente", "tarefa automatica", "agendar tarefa"]
+    },
+    "upload-files": {
+      "title": "Posso carregar ficheiros?",
+      "body": "Sim — PDF, Word, Excel, CSV, texto simples e Markdown. Carrega-os em Ficheiros, o Ionexa lê o conteúdo e depois podes fazer perguntas sobre eles.\n\nOs teus ficheiros são privados: mais ninguém tem acesso e cada descarga passa por uma ligação temporária.",
+      "triggers": ["carregar ficheiro", "enviar ficheiro", "upload", "pdf", "ficheiros", "documentos", "ler o meu documento"]
+    },
+    "data-privacy": {
+      "title": "O que fazem com os meus dados?",
+      "body": "Os teus dados são teus. Não os vendemos, não os usamos para treinar modelos e cada conta vê apenas os seus — isso é imposto na base de dados, não só na aplicação.\n\nPodes descarregá-los ou apagá-los quando quiseres.",
+      "triggers": ["os meus dados", "privacidade", "protecao de dados", "seguranca", "vendem os meus dados", "treinar modelos", "rgpd"]
+    },
+    "contact-support": {
+      "title": "Como falo com uma pessoa?",
+      "body": "Configurações → Suporte, e escreve-nos.\n\nSe for sobre uma cobrança, inclui a referência da cobrança para a encontrarmos depressa.",
+      "triggers": ["contacto", "suporte", "falar com alguem", "apoio ao cliente", "ajuda de uma pessoa", "atendimento"]
+    }
+  }
+}

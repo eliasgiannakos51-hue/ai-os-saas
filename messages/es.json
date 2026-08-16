@@ -1902,5 +1902,34 @@
       "presentations": "¿Eliminar esta nota de presentación? No se puede deshacer.",
       "campaigns": "¿Eliminar esta campaña? No se puede deshacer."
     }
+  },
+  "help": {
+    "title": "Centro de ayuda",
+    "intro": "Las respuestas a las preguntas más frecuentes. Pregunta cualquiera de ellas en el chat y recibes la misma respuesta al instante, sin gastar créditos.",
+    "contents": "Contenido",
+    "goThere": "Ir allí",
+    "fallbackNotice": "Todavía no está en tu idioma — se muestra la versión en inglés.",
+    "notFoundTitle": "¿No encontraste lo que buscabas?",
+    "notFoundBody": "Pregunta en el chat: para todo lo relacionado con tu cuenta o tus datos, la respuesta viene de la IA y no de esta página.",
+    "openChat": "Abrir el chat",
+    "pricingLink": "Precios y planes",
+    "answerCount": "{count, plural, one {# respuesta} other {# respuestas}}",
+    "unavailableTitle": "El centro de ayuda no carga en este momento",
+    "unavailableBody": "Inténtalo de nuevo en un momento. Si necesitas una respuesta ya, pregunta en el chat o escribe a soporte.",
+    "tipLabel": "¿Qué es esto?",
+    "tipReadMore": "Más en el centro de ayuda",
+    "categories": {
+      "getting-started": "Primeros pasos",
+      "billing": "Facturación y planes",
+      "credits": "Créditos",
+      "websites": "Sitios web",
+      "agents": "Agentes de IA",
+      "missions": "Misiones",
+      "chat": "Chat",
+      "files": "Archivos",
+      "integrations": "Conexiones",
+      "account": "Cuenta",
+      "privacy": "Datos y privacidad"
+    }
   }
 }

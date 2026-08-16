@@ -1,0 +1,85 @@
+{
+  "locale": "fr",
+  "_comment": [
+    "French (France). One more translation of en.json — not the base.",
+    "",
+    "Written against messages/fr.json, not against the English words: the",
+    "menu names here are the ones a French reader actually sees on screen.",
+    "",
+    "  Settings         → Paramètres          (settings.title, sidebar.items.settings)",
+    "  Billing          → Facturation         (settings.billing.title)",
+    "  Cancel subscript → Résilier l'abonnement (settings.billing.cancel.button)",
+    "  Website Builder  → Générateur de Site  (sidebar.items.websiteBuilder)",
+    "  press create     → Générer le Site     (dashboard.websiteBuilder.generateButton)",
+    "  Agents           → Agents IA           (sidebar.items.agents)",
+    "  Files            → Fichiers            (sidebar.items.files)",
+    "  pricing page     → page Tarifs         (pricing.title, landing.footer.pricing)",
+    "  plan             → forfait             (settings.billing.currentPlan)",
+    "",
+    "The app addresses the reader with «vous» everywhere, so these do too.",
+    "",
+    "ONE GAP: en.json sends people to «Settings → Support», and the app has",
+    "no such section — see contact-support below."
+  ],
+  "articles": {
+    "what-is-ionexa": {
+      "title": "Qu'est-ce qu'Ionexa ?",
+      "body": "Un espace de travail où il suffit de dire ce que vous voulez pour que ce soit fait : il crée des sites web, fait tourner des agents qui travaillent seuls selon leur planning, découpe vos objectifs en étapes et lit vos fichiers pour répondre à vos questions dessus.\n\nAu lieu de dix outils séparés qui ne se parlent pas, un seul qui est au courant de tout.",
+      "triggers": ["c est quoi ionexa", "qu est ce qu ionexa", "ionexa c est quoi", "a quoi sert ionexa", "que fait ionexa", "a quoi ca sert", "qu est ce que vous proposez", "c est quoi ce truc"]
+    },
+
+    "pricing-overview": {
+      "title": "Combien coûte Ionexa ?",
+      "body": "Il y a un forfait gratuit pour essayer, et des forfaits payants quand vos besoins grandissent.\n\nLes tarifs à jour et ce que contient chaque forfait sont toujours sur la page Tarifs. Ils ne sont pas recopiés ici, et c'est volontaire : un tarif périmé est pire que pas de tarif du tout.",
+      "triggers": ["combien ca coute", "ca coute combien", "prix", "tarifs", "quels sont les tarifs", "quels forfaits existent", "c est payant", "cout de l abonnement"]
+    },
+
+    "what-are-credits": {
+      "title": "Que sont les crédits ?",
+      "body": "Les crédits, c'est ce que vous dépensez pour le travail de l'IA : un message dans la discussion, la génération d'un site web, une exécution d'agent.\n\nChaque forfait comprend une réserve mensuelle qui se renouvelle, et vous pouvez acheter des packs supplémentaires si elle s'épuise avant. Les crédits d'un pack n'expirent pas à la fin du mois — ils restent sur le compte jusqu'à ce que vous les utilisiez.\n\nCe que comprend chaque forfait est indiqué sur la page Tarifs.",
+      "triggers": ["c est quoi les credits", "les credits c est quoi", "credits", "a quoi servent les credits", "comment marchent les credits", "comment fonctionnent les credits", "systeme de credits"]
+    },
+
+    "credits-ran-out": {
+      "title": "Je n'ai plus de crédits — je fais quoi ?",
+      "body": "Deux possibilités : attendre le prochain renouvellement mensuel, ou acheter un pack de crédits qui s'ajoute immédiatement.\n\nLes crédits d'un pack n'expirent pas à la fin du mois : rien de ce que vous achetez n'est perdu au renouvellement suivant. Les deux se font dans Paramètres → Facturation.",
+      "triggers": ["plus de credits", "je n ai plus de credits", "credits epuises", "acheter des credits", "comment acheter des credits", "il me faut plus de credits", "recharger des credits", "credits termines"]
+    },
+
+    "cancel": {
+      "title": "Comment résilier mon abonnement ?",
+      "body": "Paramètres → Facturation → Résilier l'abonnement. Un clic pour y arriver, un clic pour confirmer.\n\nVous ne perdez pas l'accès tout de suite : votre forfait continue jusqu'à la fin de la période déjà payée, et c'est seulement là que le compte bascule sur le forfait gratuit. Rien n'est supprimé — vos données, vos fichiers et vos sites web restent exactement où ils sont.\n\nVous changez d'avis ? Le même écran vous permet de rétablir l'abonnement à tout moment avant la fin.",
+      "triggers": ["comment resilier", "resilier", "resilier mon abonnement", "annuler mon abonnement", "je veux arreter", "se desabonner", "arreter l abonnement", "mettre fin a l abonnement"]
+    },
+
+    "create-website": {
+      "title": "Comment créer un site web ?",
+      "body": "Ouvrez le Générateur de Site dans le menu latéral, décrivez avec vos mots ce que vous voulez — ce que fait votre activité, à qui elle s'adresse, le style qui vous plaît — puis cliquez sur Générer le Site.\n\nVous pouvez aussi importer des images de référence, un logo ou des photos de produits par exemple, et il suivra votre style. Quand le site est prêt, vous le publiez à sa propre adresse en un clic.",
+      "triggers": ["comment faire un site", "creer un site", "faire un site web", "je veux un site", "generer un site", "generateur de site", "comment creer un site internet", "site vitrine"]
+    },
+
+    "create-agent": {
+      "title": "Comment créer un agent ?",
+      "body": "Dans le menu Agents IA, décrivez en une phrase ce que l'agent doit faire et à quelle fréquence — par exemple « chaque matin, envoie-moi un résumé de l'actualité de mon secteur ».\n\nIonexa construit l'agent à votre place, l'exécute selon son planning et vous envoie le résultat. Vous pouvez le mettre en pause ou le modifier quand vous voulez.",
+      "triggers": ["comment creer un agent", "creer un agent", "faire un agent", "agent ia", "je veux un agent", "automatiser une tache", "tache planifiee", "agents"]
+    },
+
+    "upload-files": {
+      "title": "Puis-je importer des fichiers ?",
+      "body": "Oui — PDF, Word, Excel, CSV, texte et Markdown. Vous les importez dans Fichiers, Ionexa lit leur contenu, et ensuite vous pouvez poser vos questions dessus.\n\nVos fichiers sont privés : personne d'autre n'y a accès, et chaque téléchargement passe par un lien temporaire.",
+      "triggers": ["importer un fichier", "envoyer un fichier", "uploader un fichier", "pdf", "fichiers", "documents", "je peux importer des fichiers", "lire mon document"]
+    },
+
+    "data-privacy": {
+      "title": "Que faites-vous de mes données ?",
+      "body": "Vos données vous appartiennent. Nous ne les vendons pas, nous ne nous en servons pas pour entraîner des modèles, et chaque compte ne voit que les siennes — c'est verrouillé dans la base de données, pas seulement dans l'application.\n\nVous pouvez les télécharger ou les supprimer quand vous voulez.",
+      "triggers": ["mes donnees", "confidentialite", "vie privee", "securite des donnees", "vous vendez mes donnees", "entrainement des modeles", "rgpd", "protection des donnees"]
+    },
+
+    "contact-support": {
+      "title": "Comment joindre une vraie personne ?",
+      "body": "Paramètres → Assistance, et écrivez-nous.\n\nS'il s'agit d'un paiement, indiquez la référence de la transaction pour qu'on la retrouve tout de suite.",
+      "triggers": ["contacter le support", "parler a quelqu un", "assistance", "support", "aide humaine", "service client", "joindre quelqu un", "contact"]
+    }
+  }
+}

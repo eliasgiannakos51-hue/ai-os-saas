@@ -1902,5 +1902,34 @@
       "presentations": "Eliminare questa nota di presentazione? L'operazione è irreversibile.",
       "campaigns": "Eliminare questa campagna? L'operazione è irreversibile."
     }
+  },
+  "help": {
+    "title": "Centro assistenza",
+    "intro": "Le risposte alle domande più frequenti. Fanne una qualsiasi nella chat e ricevi la stessa risposta subito, senza spendere crediti.",
+    "contents": "Contenuti",
+    "goThere": "Vai lì",
+    "fallbackNotice": "Non ancora disponibile nella tua lingua — mostriamo la versione inglese.",
+    "notFoundTitle": "Non hai trovato quello che cercavi?",
+    "notFoundBody": "Chiedi nella chat: per tutto ciò che riguarda il tuo account o i tuoi dati la risposta arriva dall'IA, non da questa pagina.",
+    "openChat": "Apri la chat",
+    "pricingLink": "Prezzi e piani",
+    "answerCount": "{count, plural, one {# risposta} other {# risposte}}",
+    "unavailableTitle": "Il centro assistenza non si carica in questo momento",
+    "unavailableBody": "Riprova tra poco. Se ti serve una risposta adesso, chiedi nella chat o scrivi all'assistenza.",
+    "tipLabel": "Che cos'è?",
+    "tipReadMore": "Altro nel centro assistenza",
+    "categories": {
+      "getting-started": "Per iniziare",
+      "billing": "Fatturazione e piani",
+      "credits": "Crediti",
+      "websites": "Siti web",
+      "agents": "Agenti IA",
+      "missions": "Missioni",
+      "chat": "Chat",
+      "files": "File",
+      "integrations": "Collegamenti",
+      "account": "Account",
+      "privacy": "Dati e privacy"
+    }
   }
 }

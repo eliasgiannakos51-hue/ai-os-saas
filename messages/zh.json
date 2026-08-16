@@ -1902,5 +1902,34 @@
       "presentations": "确定删除此演示记录？此操作无法撤销。",
       "campaigns": "确定删除此营销活动？此操作无法撤销。"
     }
+  },
+  "help": {
+    "title": "帮助中心",
+    "intro": "最常见问题的答案。在聊天里问其中任意一个，都会立刻得到同样的回答，而且不消耗额度。",
+    "contents": "目录",
+    "goThere": "前往",
+    "fallbackNotice": "尚未提供你所用的语言，先显示英文版本。",
+    "notFoundTitle": "没找到你要的内容？",
+    "notFoundBody": "在聊天里问吧——凡是涉及你自己的账户或数据的问题，答案来自 AI，而不是这个页面。",
+    "openChat": "打开聊天",
+    "pricingLink": "价格与方案",
+    "answerCount": "{count, plural, other {# 条回答}}",
+    "unavailableTitle": "帮助中心暂时无法加载",
+    "unavailableBody": "请稍后再试。如果你现在就需要答案，可以在聊天里提问或联系支持。",
+    "tipLabel": "这是什么？",
+    "tipReadMore": "在帮助中心了解更多",
+    "categories": {
+      "getting-started": "快速上手",
+      "billing": "账单与方案",
+      "credits": "额度",
+      "websites": "网站",
+      "agents": "AI 智能体",
+      "missions": "任务",
+      "chat": "聊天",
+      "files": "文件",
+      "integrations": "连接",
+      "account": "账户",
+      "privacy": "数据与隐私"
+    }
   }
 }

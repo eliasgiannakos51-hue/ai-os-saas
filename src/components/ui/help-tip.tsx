@@ -2,7 +2,8 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { HelpCircle, X, Check, Ban } from "lucide-react";
+import Link from "next/link";
+import { HelpCircle, X, Check, Ban, ArrowRight } from "lucide-react";
 
 /**
  * The "?" beside a page title.
@@ -21,7 +22,18 @@ import { HelpCircle, X, Check, Ban } from "lucide-react";
  * lib/help-tips.ts, where every entry records the specific wrong
  * assumption its `doesNot` is there to correct.
  */
-export function HelpTip({ helpKey }: { helpKey: string }) {
+export function HelpTip({
+  helpKey,
+  articleSlug,
+}: {
+  helpKey: string;
+  /**
+   * The Help Centre article about this page, if there is one. An anchor
+   * on /help, so it lands on the answer rather than on "the help page,
+   * scroll down".
+   */
+  articleSlug?: string;
+}) {
   const t = useTranslations();
   const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
@@ -132,6 +144,19 @@ export function HelpTip({ helpKey }: { helpKey: string }) {
             <Ban className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-400/80" aria-hidden="true" />
             <span>{t(`${helpKey}.doesNot`)}</span>
             </p>
+
+            {/* An extra, never the answer. Three of the twelve pages have
+                no article and read exactly as well without one. */}
+            {articleSlug && (
+              <Link
+                href={`/help#${articleSlug}`}
+                onClick={() => setOpen(false)}
+                className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-orange-400 transition-colors duration-150 hover:text-orange-300"
+              >
+                {tCommon("readMore")}
+                <ArrowRight className="h-3 w-3" aria-hidden="true" />
+              </Link>
+            )}
           </div>
         </>
       )}

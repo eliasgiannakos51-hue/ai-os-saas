@@ -49,7 +49,8 @@
     "toggleMenu": "Toggle menu",
     "dismissToastAria": "{message} — press Enter to dismiss",
     "retry": "Try again",
-    "whatIsThisPage": "What is this page?"
+    "whatIsThisPage": "What is this page?",
+    "readMore": "Read more"
   },
   "sidebar": {
     "groups": {
@@ -2155,6 +2156,30 @@
       "is": "Where people will share the agents, site templates and workflows they have built.",
       "does": "Nothing yet. This page is a placeholder for a feature that has not been built.",
       "doesNot": "It is not empty because of your plan, and upgrading will not open it. The button below is disabled because there is nothing behind it."
+    }
+  },
+  "helpCentre": {
+    "title": "Help Centre",
+    "intro": "Answers to the questions people ask most. Ask any of these in the chat and you get the same answer instantly, with no credits charged.",
+    "goThere": "Go there",
+    "shownInEnglish": "In English",
+    "notFoundTitle": "Not what you were looking for?",
+    "notFoundBody": "Ask in the chat — for anything about your own account or your own data, the answer comes from the AI rather than from this page.",
+    "openChat": "Open the chat",
+    "pricingLink": "Prices and plans",
+    "answerCount": "{count, plural, one {# answer} other {# answers}}",
+    "categories": {
+      "getting-started": "Getting started",
+      "billing": "Billing and plans",
+      "credits": "Credits",
+      "websites": "Websites",
+      "agents": "AI Agents",
+      "missions": "Missions",
+      "chat": "Chat",
+      "files": "Files",
+      "integrations": "Integrations",
+      "account": "Account",
+      "privacy": "Privacy and data"
     }
   }
 }

@@ -42,7 +42,7 @@ export default async function WebsiteBuilderPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader helpKey="help.websiteBuilder" icon={WEBSITE_BUILDER_ICON} title={t("title")} description={t("description")} />
+        <PageHeader helpKey="help.websiteBuilder" helpArticle="create-website" icon={WEBSITE_BUILDER_ICON} title={t("title")} description={t("description")} />
         <WebsiteBuilderWorkspace
           initialWebsites={websiteRows}
           favoritedWebsiteIds={favoritedWebsiteIds}

@@ -36,7 +36,7 @@ const rows = [];
 function push(locale, slug, title, body, triggers) {
   const base = BASE.get(slug);
   if (!base) throw new Error(`${locale}/${slug}: no English base article`);
-  rows.push({ slug, locale, title, body, category: base.category, order: base.order, triggers });
+  rows.push({ slug, locale, title, body, category: base.category, order: base.order, triggers, href: base.href ?? null });
 }
 
 for (const a of EN) push("en", a.slug, a.title, a.body, a.triggers);
@@ -89,15 +89,16 @@ const header = `-- Help Centre seed. GENERATED — do not edit by hand.
 `;
 
 const statements = rows.map(
-  (r) => `insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers)
-values (${q(r.slug)}, ${q(r.locale)}, ${q(r.title)}, ${q(r.body)}, ${q(r.category)}, ${r.order}, true, ${textArray(r.triggers)})
+  (r) => `insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
+values (${q(r.slug)}, ${q(r.locale)}, ${q(r.title)}, ${q(r.body)}, ${q(r.category)}, ${r.order}, true, ${textArray(r.triggers)}, ${r.href ? q(r.href) : "null"})
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,
   category = excluded.category,
   "order" = excluded."order",
   published = excluded.published,
-  triggers = excluded.triggers;`
+  triggers = excluded.triggers,
+  href = excluded.href;`
 );
 
 writeFileSync(OUT, header + statements.join("\n\n") + "\n");

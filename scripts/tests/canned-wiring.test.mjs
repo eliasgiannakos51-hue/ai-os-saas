@@ -34,12 +34,15 @@ const kb = await loadTs("src/lib/support/knowledge-base.ts");
 console.log("== 1. it is wired into chat at all ==");
 check("chat imports the matcher", /import \{ matchCannedAnswer/.test(chat));
 check("and calls it", /matchCannedAnswer\(/.test(chat));
-// The catalogue is Greek-only (CANNED_ANSWER_LOCALE). The route must pass
-// the request's locale, or an English speaker gets a Greek FAQ entry
-// instead of an answer — asserted on the WIRING, because the matcher's own
-// unit test cannot see whether the route bothers to call it correctly.
-check("and passes the request locale to it", /const locale = await getLocale\(\)/.test(chat) &&
-  /matchCannedAnswer\(\s*message,\s*locale,/.test(chat));
+// The route must load the articles for THIS REQUEST'S LOCALE and pass
+// those, or an English speaker gets a Greek FAQ entry instead of an
+// answer. Asserted on the WIRING, because the matcher's own unit test
+// cannot see whether the route bothers to call it correctly — and the
+// matcher can no longer defend itself, since the guard that used to
+// refuse every non-Greek locale is gone on purpose.
+check("it reads the request locale", /const locale = await getLocale\(\)/.test(chat));
+check("and passes the articles for that locale", /loadCannedArticles\(locale\)/.test(chat) &&
+  /matchCannedAnswer\(\s*message,\s*await loadCannedArticles\(locale\),/.test(chat));
 check("with a dedicated handler", /answerFromKnowledgeBase/.test(chat));
 
 console.log("\n== 2. the canned path costs nothing ==");
@@ -81,13 +84,16 @@ check(
   /conversationId \? CANNED_THRESHOLD_MID_CONVERSATION : CANNED_THRESHOLD_NEW_CONVERSATION/.test(chat)
 );
 check("Mentor Mode is never answered from the FAQ", /mentorMode\s*\?\s*null/.test(chat));
-// The behavioural half of the same claim.
-const pricing = kb.matchCannedAnswer("πόσο κοστίζει;", "el", 0.85);
-check("a clear FAQ matches at the new-conversation threshold", pricing?.article.id === "pricing-overview");
+// The behavioural half of the same claim, run against the Greek rows the
+// seed actually ships.
+const { EL } = await import("../help-articles/el.mjs");
+const EL_ROWS = EL.map((a) => ({ ...a, locale: "el", href: null }));
+const pricing = kb.matchCannedAnswer("πόσο κοστίζει;", EL_ROWS, 0.85);
+check("a clear FAQ matches at the new-conversation threshold", pricing?.article.slug === "pricing-overview");
 check(
   "and the same question is rejected at the mid-conversation threshold",
-  kb.matchCannedAnswer("πόσο κοστίζει;", 0.92) === null ||
-    kb.matchCannedAnswer("πόσο κοστίζει;", 0.92).confidence >= 0.92
+  kb.matchCannedAnswer("πόσο κοστίζει;", EL_ROWS, 0.92) === null ||
+    kb.matchCannedAnswer("πόσο κοστίζει;", EL_ROWS, 0.92).confidence >= 0.92
 );
 check(
   "an account-specific question never matches at either threshold",
@@ -108,9 +114,14 @@ check("both messages are persisted, so history stays coherent", /role: "assistan
 console.log("\n== 6. the same answers are readable as a page ==");
 check("the Help Centre exists", existsSync("src/app/help/page.tsx"));
 const help = readFileSync("src/app/help/page.tsx", "utf8");
-check("built from the same knowledge base", /from "@\/lib\/support\/knowledge-base"/.test(help));
+// The page and the chat share ONE source, which is the point of this
+// section — a help page and a support bot answering the same question
+// differently is worse than having only one of them. The source is the
+// help_articles table now rather than a literal both imported.
+check("built from the same articles the chat answers from", /loadHelpArticles/.test(help));
+check("and groups them with the same helper", /from "@\/lib\/support\/knowledge-base"/.test(help));
 check("not a second hand-written copy", !/const ARTICLES = \[/.test(help));
-check("every article gets its own anchor", /id=\{article\.id\}/.test(help));
+check("every article gets its own anchor", /id=\{article\.slug\}/.test(help));
 check("it is public, not under /dashboard", existsSync("src/app/help/page.tsx") && !existsSync("src/app/dashboard/help/page.tsx"));
 check("and it is in the sitemap", /"\/help"/.test(readFileSync("src/app/sitemap.ts", "utf8")));
 check("reachable from the sidebar", /href: "\/help"/.test(readFileSync("src/lib/sidebar-nav.ts", "utf8")));
@@ -133,10 +144,14 @@ function collect(dir) {
 const { createRequire } = await import("node:module");
 globalThis.require = createRequire(import.meta.url);
 collect("src/app");
-for (const article of kb.KNOWLEDGE_BASE) {
+// The hrefs come from the SEED now, not from a literal in the app — same
+// question, asked of the data that ships. English carries every article
+// and every href, so checking it checks them all.
+const { EN } = await import("../help-articles/en.mjs");
+for (const article of EN) {
   if (!article.href) continue;
   check(
-    `${article.id} -> ${article.href} exists`,
+    `${article.slug} -> ${article.href} exists`,
     APP_ROUTES.has(article.href),
     `known routes: ${[...APP_ROUTES].filter((r) => r.startsWith(article.href.split("/").slice(0, 2).join("/"))).join(", ")}`
   );

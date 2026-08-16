@@ -4,42 +4,25 @@ Work that is known, understood and deliberately not done yet. Each entry
 says what is wrong, what it costs to leave, and what fixing it involves —
 so a decision to defer stays a decision rather than becoming an accident.
 
-## Help Centre migration to a table with a locale column
+## Done: Help Centre migration to a table with a locale column
 
-**The `/help` page shows Greek to nine of the ten languages.**
+`/help` used to show Greek to nine of the ten languages: the 27 articles
+were string literals in `src/lib/support/knowledge-base.ts`, all Greek,
+rendered verbatim to every visitor, with the category headings hardcoded
+in the page on top of that. Nothing in the repo's i18n checks could see
+it — `check-i18n.js` reads `messages/*.json` and these were never there,
+and the bare-text scanner skips any string with no Latin letters.
 
-`src/lib/support/knowledge-base.ts` holds 27 articles whose titles and
-answers are written entirely in Greek, as string literals in a TypeScript
-file. `src/app/help/page.tsx` renders them verbatim to every visitor, and
-its category headings (`CATEGORY_TITLES`) are hardcoded Greek too.
+Now: `help_articles(slug, locale, ...)`, 158 seeded rows (en=27, el=27,
+13 core in the other eight), a loader that falls back to **English and
+never to Greek** and says so visibly, and `matchCannedAnswer` matching a
+user only against triggers in their own language. `CANNED_ANSWER_LOCALE`
+is gone — it existed to refuse nine locales a canned answer rather than
+give them a Greek one, and there is nothing left for it to protect
+against.
 
-The chat already handles this correctly: `CANNED_ANSWER_LOCALE = "el"`
-and `matchCannedAnswer` returns null for any other locale, so a
-non-Greek user falls through to the model and gets a real answer in their
-own language. That decision is recorded in the file and is the right
-trade. `/help` never got the same treatment.
-
-Nothing in the repo's own i18n checks catches it: `check-i18n.js` reads
-`messages/*.json` and these strings are not there, and the bare-text
-scanner (`scripts/jsx-text-report.mjs`) skips any string with no Latin
-letters — which is every one of them.
-
-**What fixing it involves**
-
-- A `help_articles` table with `(slug, locale, title, body, category,
-  published)`, a unique index on `(slug, locale)`, and a public read
-  policy for published rows.
-- A loader that resolves a locale and falls back to **English**, never to
-  Greek — the fallback direction is the whole point.
-- 27 articles × 10 locales to author. The Greek exists; English and the
-  other eight do not.
-- `/help` and `matchCannedAnswer` read from the table; `CATEGORY_TITLES`
-  moves into `messages/*.json`.
-
-**Not started.** There is no `help_articles` table, no migration for one,
-and no loader — verified against every commit on every ref.
-
-**Related, and deliberately independent:** the "?" help tips beside page
-titles (`src/lib/help-tips.ts`) carry their own translated copy in all ten
-locales and link to nothing. They were built that way so they would not
-have to wait for this.
+**Remaining, and deliberate:** the eight non-Greek, non-English locales
+carry the 13 core articles and fall back to English for the other 14.
+That is a data gap, not an architectural one — adding a language is an
+INSERT. The fallback is marked in the UI with a `lang` attribute rather
+than served silently.

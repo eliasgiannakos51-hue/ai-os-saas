@@ -81,7 +81,7 @@ export default async function TeamPage({
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
-        <PageHeader helpKey="help.team"
+        <PageHeader helpKey="help.team" helpArticle="team-members"
           icon={Users}
           title={t("title")}
           description={

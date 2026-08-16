@@ -4,7 +4,9 @@ import { getTranslations } from "next-intl/server";
 import { LifeBuoy, ArrowRight } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { AppBackground } from "@/components/ui/app-background";
-import { KNOWLEDGE_BASE, articlesByCategory, type KnowledgeArticle } from "@/lib/support/knowledge-base";
+import { articlesByCategory } from "@/lib/support/knowledge-base";
+import { loadHelpArticles, type HelpArticle } from "@/lib/support/help-articles";
+import { getLocale } from "next-intl/server";
 
 export const metadata: Metadata = {
   title: "Help Centre",
@@ -58,33 +60,47 @@ const CATEGORY_ORDER = [
   "privacy",
 ] as const;
 
-const CATEGORY_TITLES: Record<string, string> = {
-  "getting-started": "Ξεκινώντας",
-  billing: "Χρεώσεις και πλάνα",
-  credits: "Credits",
-  websites: "Websites",
-  agents: "AI Agents",
-  missions: "Missions",
-  chat: "Chat",
-  files: "Αρχεία",
-  integrations: "Συνδέσεις",
-  account: "Λογαριασμός",
-  privacy: "Δεδομένα και ιδιωτικότητα",
-};
+// CATEGORY_TITLES used to be right here, hardcoded in Greek. Nothing in
+// the repo could see it: check-i18n.js reads messages/*.json and these
+// were never there, and the bare-text scanner skips any string with no
+// Latin letters — which is every Greek one. They are in the catalogue
+// now, under helpCentre.categories, in all ten locales.
 
-function Article({ article }: { article: KnowledgeArticle }) {
+
+function Article({
+  article,
+  goThere,
+  fallbackNotice,
+}: {
+  article: HelpArticle;
+  goThere: string;
+  fallbackNotice: string;
+}) {
   return (
     // id, so every answer has its own link. Support replies point at a
     // specific answer, not at "the help page, scroll down".
-    <article id={article.id} className="scroll-mt-24 rounded-2xl border border-border bg-panel/60 p-4">
-      <h3 className="text-sm font-semibold text-foreground">{article.title}</h3>
-      <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted">{article.answer}</p>
+    <article id={article.slug} className="scroll-mt-24 rounded-2xl border border-border bg-panel/60 p-4">
+      {/* THE FALLBACK IS SAID OUT LOUD. A reader who asked for Spanish and
+          got English is told so, and the text carries lang="en" so a screen
+          reader switches voice rather than reading English words with
+          Spanish phonetics. Serving another language silently is precisely
+          how the original bug — a Greek-only Help Centre shown to ten
+          locales — survived: it looked like content, not like a gap. */}
+      {article.isFallback && (
+        <p className="mb-2 inline-flex rounded-full border border-border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted/80">
+          {fallbackNotice}
+        </p>
+      )}
+      <div lang={article.locale}>
+        <h3 className="text-sm font-semibold text-foreground">{article.title}</h3>
+        <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-muted">{article.body}</p>
+      </div>
       {article.href && (
         <Link
           href={article.href}
           className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-orange-400 transition-colors duration-150 hover:text-orange-300"
         >
-          Πήγαινε εκεί
+          {goThere}
           <ArrowRight className="h-3 w-3" aria-hidden="true" />
         </Link>
       )}
@@ -100,7 +116,14 @@ export default async function HelpPage() {
   // this app is already server-rendered on demand, because the root
   // layout resolves the locale from a cookie.
   const tCommon = await getTranslations("common");
-  const byCategory = articlesByCategory();
+  const t = await getTranslations("helpCentre");
+  const locale = await getLocale();
+  // Read in the reader's language, English filling any gap. An empty
+  // result (no database reachable, or the seed not run) renders the page
+  // with no articles rather than throwing — a Help Centre that 500s is
+  // worse than one that is briefly empty.
+  const articles = await loadHelpArticles(locale);
+  const byCategory = articlesByCategory(articles);
   // Driven off the real categories rather than the hardcoded list, so an
   // article in a category nobody remembered to order still renders —
   // silently dropping an answer would be the worst failure this page has.
@@ -119,11 +142,10 @@ export default async function HelpPage() {
           </Link>
           <h1 className="mt-6 flex items-center gap-2 text-2xl font-bold tracking-tight text-foreground">
             <LifeBuoy className="h-6 w-6 text-orange-400" aria-hidden="true" />
-            Κέντρο βοήθειας
+            {t("title")}
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            Οι απαντήσεις στις ερωτήσεις που γίνονται πιο συχνά. Αν ρωτήσεις κάτι από αυτά στο chat,
-            θα πάρεις την ίδια απάντηση αμέσως και χωρίς χρέωση credits.
+            {t("intro")}
           </p>
         </header>
 
@@ -136,7 +158,7 @@ export default async function HelpPage() {
               href={`#category-${category}`}
               className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted transition-colors duration-150 hover:border-orange-500/40 hover:text-foreground"
             >
-              {CATEGORY_TITLES[category] ?? category}
+              {t.has(`categories.${category}`) ? t(`categories.${category}`) : category}
             </a>
           ))}
         </nav>
@@ -145,37 +167,41 @@ export default async function HelpPage() {
           {ordered.map((category) => (
             <section key={category} id={`category-${category}`} className="scroll-mt-24 space-y-3">
               <h2 className="text-base font-semibold text-foreground">
-                {CATEGORY_TITLES[category] ?? category}
+                {t.has(`categories.${category}`) ? t(`categories.${category}`) : category}
               </h2>
               {(byCategory.get(category) ?? []).map((article) => (
-                <Article key={article.id} article={article} />
+                <Article
+                  key={article.slug}
+                  article={article}
+                  goThere={t("goThere")}
+                  fallbackNotice={t("shownInEnglish")}
+                />
               ))}
             </section>
           ))}
         </div>
 
         <footer className="mt-12 rounded-2xl border border-border bg-panel/60 p-4">
-          <h2 className="text-sm font-semibold text-foreground">Δεν βρήκες αυτό που έψαχνες;</h2>
+          <h2 className="text-sm font-semibold text-foreground">{t("notFoundTitle")}</h2>
           <p className="mt-2 text-sm leading-relaxed text-muted">
-            Ρώτησε στο chat — για οτιδήποτε αφορά τον δικό σου λογαριασμό ή τα δικά σου δεδομένα, η
-            απάντηση έρχεται από το AI και όχι από αυτή τη σελίδα.
+            {t("notFoundBody")}
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
               href="/dashboard/chat"
               className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
             >
-              Άνοιξε το chat
+              {t("openChat")}
             </Link>
             <Link
               href="/pricing"
               className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
             >
-              Τιμές και πλάνα
+              {t("pricingLink")}
             </Link>
           </div>
           <p className="mt-3 text-[11px] text-muted/70">
-            {KNOWLEDGE_BASE.length} απαντήσεις
+            {t("answerCount", { count: articles.length })}
           </p>
         </footer>
       </div>

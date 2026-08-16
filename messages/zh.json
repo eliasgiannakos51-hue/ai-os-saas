@@ -49,7 +49,8 @@
     "toggleMenu": "切换菜单",
     "dismissToastAria": "{message} — 按 Enter 键关闭",
     "retry": "再试一次",
-    "whatIsThisPage": "这个页面是什么？"
+    "whatIsThisPage": "这个页面是什么？",
+    "readMore": "了解更多"
   },
   "sidebar": {
     "groups": {
@@ -2155,6 +2156,30 @@
       "is": "以后大家分享自制 agent、网站模板和工作流的地方。",
       "does": "目前还没有内容。这个页面是为一个尚未开发的功能占位的。",
       "doesNot": "它空着不是因为你的套餐，升级也打不开它。下方的按钮是灰的，因为背后什么都还没有。"
+    }
+  },
+  "helpCentre": {
+    "title": "帮助中心",
+    "intro": "最常被问到的问题的答案。在聊天里问其中任何一个，都会立刻得到同样的回答，而且不扣额度。",
+    "goThere": "去那里",
+    "shownInEnglish": "英文版",
+    "notFoundTitle": "没找到你要的？",
+    "notFoundBody": "到聊天里问吧——凡是关于你自己账号或数据的问题，答案来自 AI，而不是这个页面。",
+    "openChat": "打开聊天",
+    "pricingLink": "价格与套餐",
+    "answerCount": "{count} 条答案",
+    "categories": {
+      "getting-started": "新手入门",
+      "billing": "账单与套餐",
+      "credits": "额度",
+      "websites": "网站",
+      "agents": "AI 智能体",
+      "missions": "任务",
+      "chat": "聊天",
+      "files": "文件",
+      "integrations": "连接",
+      "account": "账号",
+      "privacy": "隐私与数据"
     }
   }
 }

@@ -49,7 +49,8 @@
     "toggleMenu": "Mostrar ou ocultar o menu",
     "dismissToastAria": "{message} — prima Enter para dispensar",
     "retry": "Tentar de novo",
-    "whatIsThisPage": "O que é esta página?"
+    "whatIsThisPage": "O que é esta página?",
+    "readMore": "Ler mais"
   },
   "sidebar": {
     "groups": {
@@ -2155,6 +2156,30 @@
       "is": "O sítio onde as pessoas vão partilhar os agentes, modelos de site e fluxos que criaram.",
       "does": "Ainda nada. Esta página guarda o lugar de uma funcionalidade que não foi construída.",
       "doesNot": "Não está vazia por causa do seu plano, e mudar de plano não a vai abrir. O botão abaixo está desativado porque não há nada por trás dele."
+    }
+  },
+  "helpCentre": {
+    "title": "Centro de ajuda",
+    "intro": "As respostas às perguntas mais frequentes. Faça qualquer uma delas no chat e recebe a mesma resposta de imediato, sem gastar créditos.",
+    "goThere": "Ir para lá",
+    "shownInEnglish": "Em inglês",
+    "notFoundTitle": "Não era o que procurava?",
+    "notFoundBody": "Pergunte no chat — para tudo o que diga respeito à sua conta ou aos seus dados, a resposta vem da IA e não desta página.",
+    "openChat": "Abrir o chat",
+    "pricingLink": "Preços e planos",
+    "answerCount": "{count, plural, one {# resposta} other {# respostas}}",
+    "categories": {
+      "getting-started": "Primeiros passos",
+      "billing": "Faturação e planos",
+      "credits": "Créditos",
+      "websites": "Sites",
+      "agents": "Agentes de IA",
+      "missions": "Missões",
+      "chat": "Chat",
+      "files": "Ficheiros",
+      "integrations": "Ligações",
+      "account": "Conta",
+      "privacy": "Privacidade e dados"
     }
   }
 }

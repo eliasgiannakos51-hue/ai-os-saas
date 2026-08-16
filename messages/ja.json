@@ -49,7 +49,8 @@
     "toggleMenu": "メニューの表示を切り替える",
     "dismissToastAria": "{message} — Enter キーで閉じる",
     "retry": "もう一度試す",
-    "whatIsThisPage": "このページは何ですか？"
+    "whatIsThisPage": "このページは何ですか？",
+    "readMore": "詳しく読む"
   },
   "sidebar": {
     "groups": {
@@ -2155,6 +2156,30 @@
       "is": "作ったエージェントやサイトのテンプレート、ワークフローを共有する場になる予定の場所です。",
       "does": "まだ何もありません。このページは、未実装の機能のために場所を確保しているだけです。",
       "doesNot": "プランのせいで空なのではなく、アップグレードしても開きません。下のボタンが押せないのは、その先に何もないからです。"
+    }
+  },
+  "helpCentre": {
+    "title": "ヘルプセンター",
+    "intro": "よく聞かれる質問への答えです。チャットで同じことを聞けば、すぐに同じ回答が返り、クレジットは消費されません。",
+    "goThere": "そこへ移動",
+    "shownInEnglish": "英語で表示",
+    "notFoundTitle": "お探しのものが見つかりませんか？",
+    "notFoundBody": "チャットで聞いてください。ご自身のアカウントやデータに関することは、このページではなくAIが答えます。",
+    "openChat": "チャットを開く",
+    "pricingLink": "料金とプラン",
+    "answerCount": "{count}件の回答",
+    "categories": {
+      "getting-started": "はじめに",
+      "billing": "請求とプラン",
+      "credits": "クレジット",
+      "websites": "ウェブサイト",
+      "agents": "AIエージェント",
+      "missions": "ミッション",
+      "chat": "チャット",
+      "files": "ファイル",
+      "integrations": "連携",
+      "account": "アカウント",
+      "privacy": "プライバシーとデータ"
     }
   }
 }

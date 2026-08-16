@@ -12,6 +12,7 @@ export function PageHeader({
   title,
   description,
   helpKey,
+  helpArticle,
 }: {
   icon?: LucideIcon;
   title: string;
@@ -26,6 +27,8 @@ export function PageHeader({
    * for.
    */
   helpKey?: string;
+  /** Help Centre article slug for the "?", when one exists. */
+  helpArticle?: string;
 }) {
   return (
     <div className="relative mb-6 flex items-center gap-3">
@@ -38,7 +41,7 @@ export function PageHeader({
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <h1 className="truncate text-2xl font-bold text-foreground">{title}</h1>
-          {helpKey && <HelpTip helpKey={helpKey} />}
+          {helpKey && <HelpTip helpKey={helpKey} articleSlug={helpArticle} />}
         </div>
         {description && <p className="mt-0.5 text-sm text-muted">{description}</p>}
       </div>

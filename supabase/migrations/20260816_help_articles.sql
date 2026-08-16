@@ -76,9 +76,23 @@ create table if not exists public.help_articles (
   published boolean not null default true,
   -- The phrasings a user of THIS locale actually types.
   triggers text[] not null default '{}',
+  -- Where the reader goes to do the thing, or to read the live numbers.
+  -- Nullable: three of the twenty-seven answer a question that has no
+  -- destination ("do credits roll over", "is there an app"), and inventing
+  -- a link for them would send somebody somewhere for no reason.
+  --
+  -- NOT per-locale, unlike title/body/triggers: it is a route in this app,
+  -- and /pricing is /pricing in every language. Carried on every row
+  -- anyway so a reader never has to fall back to another locale just to
+  -- find out where the button is.
+  href text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- For a database that already ran an earlier version of this file, before
+-- href existed. Harmless on a fresh one, where the column is created above.
+alter table public.help_articles add column if not exists href text;
 
 -- One row per article per language. This is what makes the seed
 -- re-runnable: it is the conflict target for every ON CONFLICT below.

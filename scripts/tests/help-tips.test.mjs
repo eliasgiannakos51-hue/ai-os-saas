@@ -134,7 +134,14 @@ check("an agent run really emails the result and costs credits", /it costs credi
 // it is the one pinned hardest.
 const memoryPage = readFileSync("src/app/dashboard/memory/page.tsx", "utf8");
 check("AI Memory really reads the module tables", /CLASSIFIER_MODULES/.test(memoryPage) && /BUILD_MODULES/.test(memoryPage));
-check("and touches no conversation at all", !/chat|conversation|message/i.test(memoryPage));
+// Scoped to the page's DATA ACCESS, not the whole file: the page now
+// carries helpArticle="chat-memory", which contains the word "chat" and
+// is a link to an article, not a conversation being read. The claim being
+// checked is about what it queries.
+check(
+  "and touches no conversation at all",
+  !/from\(["'`](chat|messages|conversations)/i.test(memoryPage) && !/chat_messages|chat_conversations/.test(memoryPage)
+);
 for (const locale of LOCALES) {
   const empty = messages[locale].dashboard.memory.empty;
   check(
@@ -151,7 +158,7 @@ for (const tip of HELP_TIPS) {
 const header = readFileSync("src/components/dashboard/page-header.tsx", "utf8");
 // One place, so the control never moves between pages — a help affordance
 // that moves is one users stop looking for.
-check("PageHeader is where the tip lives", /helpKey && <HelpTip helpKey=\{helpKey\} \/>/.test(header));
+check("PageHeader is where the tip lives", /helpKey && <HelpTip helpKey=\{helpKey\}/.test(header));
 check("and it stays optional, so untouched pages are unchanged", /helpKey\?: string;/.test(header));
 
 console.log("\n== 6. it behaves like a popover, not a tooltip ==");
@@ -185,20 +192,33 @@ check("no arbitrary value hides an invalid calc", !BAD_CALC.test(tip));
 check("on a phone the panel is pinned to both edges", /fixed inset-x-4/.test(tip));
 check("and anchors under the button only from sm up", /sm:absolute[\s\S]{0,80}sm:w-80/.test(tip));
 
-console.log("\n== 7. it links to the Help Centre nowhere ==");
-// The Greek-only knowledge base would reach nine locales through such a
-// link. Asserted, not merely intended.
-check("the component links nowhere", !/href=|next\/link/i.test(tip));
-// Comments stripped: the registry's header explains the decision by
-// naming the thing it declines to link to.
-const registryCode = readFileSync("src/lib/help-tips.ts", "utf8")
-  .replace(/\/\*[\s\S]*?\*\//g, "")
-  .replace(/^\s*\/\/.*$/gm, "");
-check("the registry links nowhere", !/href/.test(registryCode));
-// And the reason is written down where the decision can be found again.
+console.log("\n== 7. it answers on its own, and links on as an extra ==");
+// THIS SECTION USED TO ASSERT THE OPPOSITE, and the flip is the record of
+// why. When the tips were written the 27 Help Centre articles were string
+// literals in knowledge-base.ts, all in Greek, rendered by /help to every
+// locale — so a "?" linking there would have sent nine languages to text
+// they could not read, and this file asserted that it linked nowhere.
+//
+// The articles are rows in help_articles now, one per locale, and /help
+// falls back to English visibly. So the link is allowed — but only as an
+// EXTRA. The three parts still have to answer on their own, because three
+// of the twelve pages have no article at all and because a tip that needs
+// a round trip to be useful is not a tip.
+const linkedTips = HELP_TIPS.filter((t) => t.article);
+check(`${linkedTips.length} of ${HELP_TIPS.length} tips link to an article`, linkedTips.length === 8);
+check("the link is an anchor on /help, not the page itself", /\/help#\$\{articleSlug\}/.test(tip));
+check("and renders only when there is an article", /articleSlug && \(/.test(tip));
+for (const t of HELP_TIPS) {
+  check(
+    `${t.id}: says what it does NOT do without following any link`,
+    typeof lookup(messages.en, helpTipKey(t, "doesNot")) === "string"
+  );
+}
+// The gap this used to guard is closed, and TODO.md records that rather
+// than silently dropping the entry.
 const todo = readFileSync("TODO.md", "utf8");
-check("TODO.md records the Help Centre gap", /help_articles/.test(todo) && /locale/.test(todo));
-check("and says which way the fallback must go", /fall back to \*\*English\*\*|never to\s*\n?Greek|never to Greek/i.test(todo));
+check("TODO.md records the Help Centre migration as done", /Done: Help Centre migration/.test(todo));
+check("and still names what is left", /fall back to English|falls back to English/i.test(todo));
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

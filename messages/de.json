@@ -49,7 +49,8 @@
     "toggleMenu": "Menü ein- oder ausblenden",
     "dismissToastAria": "{message} — mit Enter ausblenden",
     "retry": "Erneut versuchen",
-    "whatIsThisPage": "Was ist diese Seite?"
+    "whatIsThisPage": "Was ist diese Seite?",
+    "readMore": "Mehr lesen"
   },
   "sidebar": {
     "groups": {
@@ -2155,6 +2156,30 @@
       "is": "Der Ort, an dem Leute ihre Agents, Website-Vorlagen und Workflows teilen werden.",
       "does": "Noch nichts. Diese Seite hält den Platz für eine Funktion frei, die noch nicht gebaut ist.",
       "doesNot": "Sie ist nicht wegen deines Tarifs leer, und ein Upgrade öffnet sie nicht. Der Button unten ist deaktiviert, weil nichts dahinter liegt."
+    }
+  },
+  "helpCentre": {
+    "title": "Hilfe-Center",
+    "intro": "Die Antworten auf die häufigsten Fragen. Stell eine davon im Chat und du bekommst dieselbe Antwort sofort, ohne dass Credits verbraucht werden.",
+    "goThere": "Dorthin",
+    "shownInEnglish": "Auf Englisch",
+    "notFoundTitle": "Nicht das, wonach du gesucht hast?",
+    "notFoundBody": "Frag im Chat — bei allem, was dein eigenes Konto oder deine Daten betrifft, kommt die Antwort von der KI und nicht von dieser Seite.",
+    "openChat": "Chat öffnen",
+    "pricingLink": "Preise und Tarife",
+    "answerCount": "{count, plural, one {# Antwort} other {# Antworten}}",
+    "categories": {
+      "getting-started": "Erste Schritte",
+      "billing": "Abrechnung und Tarife",
+      "credits": "Credits",
+      "websites": "Websites",
+      "agents": "KI-Agents",
+      "missions": "Missionen",
+      "chat": "Chat",
+      "files": "Dateien",
+      "integrations": "Verbindungen",
+      "account": "Konto",
+      "privacy": "Datenschutz und Daten"
     }
   }
 }

@@ -51,6 +51,31 @@ const LOCALE_ALLOWED = new Set([
   // stored in ai_cost_log's metadata (bypassCharge), so translating the
   // column heading away from the field name it reports would make the
   // table harder to reconcile with the data, not easier.
+  // Help Centre category headings that genuinely coincide with English in
+  // one language: "Chat" is the word in five of them, "Credits",
+  // "Missions" and "Websites" are the loanwords those languages use for
+  // these product concepts, "AI Agents" is what the Greek UI already says
+  // everywhere else, and "Account" is ordinary Italian. Scoped per locale
+  // rather than globally, because a coincidence in Italian says nothing
+  // about whether Greek was translated.
+  "es:helpCentre.categories.chat",
+  "fr:helpCentre.categories.chat",
+  "de:helpCentre.categories.chat",
+  "it:helpCentre.categories.chat",
+  "pt:helpCentre.categories.chat",
+  "de:helpCentre.categories.credits",
+  "it:helpCentre.categories.credits",
+  "pt:helpCentre.categories.credits",
+  "de:helpCentre.categories.websites",
+  "it:helpCentre.categories.websites",
+  "fr:helpCentre.categories.missions",
+  "it:helpCentre.categories.missions",
+  "el:helpCentre.categories.agents",
+  "el:helpCentre.categories.credits",
+  "el:helpCentre.categories.websites",
+  "el:helpCentre.categories.missions",
+  "el:helpCentre.categories.chat",
+  "it:helpCentre.categories.account",
   "el:settings.marginReport.colBypass",
   "es:settings.marginReport.colBypass",
   "fr:settings.marginReport.colBypass",
@@ -280,6 +305,14 @@ const INTENTIONALLY_IDENTICAL = new Set([
   "dashboard.productWorkflow.mentorButton",
   "dashboard.productWorkflow.reflectionTitle",
   "dashboard.productWorkflow.productsTitle",
+  // Help Centre category headings. These are the SAME WORD in the
+  // languages listed, not an untranslated string: "Chat" is chat in
+  // Italian and Portuguese, "Credits"/"Missions"/"Websites" are the
+  // loanwords those languages actually use for these product concepts,
+  // and "Account" is the ordinary Italian word. Scoped per locale on
+  // purpose — "Chat" coinciding in Italian says nothing about Greek,
+  // which translates the ones it has words for (Αρχεία, Συνδέσεις,
+  // Λογαριασμός) and keeps the loanwords it does not.
   "sidebar.items.content",
   "achievements.firstEnergyCheckin.title",
   "achievements.fiftyEntries.title",

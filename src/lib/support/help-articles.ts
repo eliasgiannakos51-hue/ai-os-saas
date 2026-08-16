@@ -33,6 +33,9 @@ export type HelpArticle = {
   category: string;
   order: number;
   triggers: string[];
+  /** Where the reader goes to do the thing. Null for the three that have
+   *  no destination — the "?" tips and the chat both handle null. */
+  href: string | null;
   /** True when this is the English article standing in for a missing one. */
   isFallback: boolean;
 };
@@ -47,6 +50,7 @@ type Row = {
   category: string;
   order: number;
   triggers: string[] | null;
+  href: string | null;
 };
 
 function toArticle(row: Row, requested: string): HelpArticle {
@@ -58,6 +62,7 @@ function toArticle(row: Row, requested: string): HelpArticle {
     category: row.category,
     order: row.order,
     triggers: row.triggers ?? [],
+    href: row.href,
     isFallback: row.locale !== requested,
   };
 }
@@ -77,7 +82,7 @@ export async function loadHelpArticles(locale: string): Promise<HelpArticle[]> {
 
   const { data, error } = await admin
     .from("help_articles")
-    .select("slug, locale, title, body, category, order:\"order\", triggers")
+    .select("slug, locale, title, body, category, order:\"order\", triggers, href")
     .eq("published", true)
     .in("locale", wanted);
 
@@ -123,7 +128,7 @@ export async function loadCannedArticles(locale: string): Promise<HelpArticle[]>
 
   const { data, error } = await admin
     .from("help_articles")
-    .select("slug, locale, title, body, category, order:\"order\", triggers")
+    .select("slug, locale, title, body, category, order:\"order\", triggers, href")
     .eq("published", true)
     .eq("locale", locale);
 

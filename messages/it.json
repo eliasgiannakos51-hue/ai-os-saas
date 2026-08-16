@@ -49,7 +49,8 @@
     "toggleMenu": "Mostra o nascondi il menu",
     "dismissToastAria": "{message} — premi Invio per ignorare",
     "retry": "Riprova",
-    "whatIsThisPage": "Che cos'è questa pagina?"
+    "whatIsThisPage": "Che cos'è questa pagina?",
+    "readMore": "Leggi di più"
   },
   "sidebar": {
     "groups": {
@@ -2155,6 +2156,30 @@
       "is": "Il posto dove si condivideranno agent, modelli di sito e flussi già costruiti.",
       "does": "Ancora niente. Questa pagina tiene il posto per una funzione che non è stata costruita.",
       "doesNot": "Non è vuota per via del tuo piano, e passare a un piano superiore non la aprirà. Il pulsante qui sotto è disabilitato perché dietro non c'è nulla."
+    }
+  },
+  "helpCentre": {
+    "title": "Centro assistenza",
+    "intro": "Le risposte alle domande più frequenti. Chiedine una in chat e ottieni la stessa risposta subito, senza consumare credits.",
+    "goThere": "Vai lì",
+    "shownInEnglish": "In inglese",
+    "notFoundTitle": "Non è quello che cercavi?",
+    "notFoundBody": "Chiedi in chat: per tutto ciò che riguarda il tuo account o i tuoi dati, la risposta arriva dall'AI e non da questa pagina.",
+    "openChat": "Apri la chat",
+    "pricingLink": "Prezzi e piani",
+    "answerCount": "{count, plural, one {# risposta} other {# risposte}}",
+    "categories": {
+      "getting-started": "Per iniziare",
+      "billing": "Fatturazione e piani",
+      "credits": "Credits",
+      "websites": "Siti web",
+      "agents": "Agent AI",
+      "missions": "Mission",
+      "chat": "Chat",
+      "files": "File",
+      "integrations": "Connessioni",
+      "account": "Account",
+      "privacy": "Privacy e dati"
     }
   }
 }

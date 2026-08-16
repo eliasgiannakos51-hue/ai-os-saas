@@ -70,7 +70,7 @@ export default async function FilesPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-        <PageHeader helpKey="help.files" icon={FolderOpen} title={t("title")} description={t("description")} />
+        <PageHeader helpKey="help.files" helpArticle="upload-files" icon={FolderOpen} title={t("title")} description={t("description")} />
 
         {/* Said once, at the top: this page is where somebody hands a
             contract to an AI, and the terms of that belong here rather

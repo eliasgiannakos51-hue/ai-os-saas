@@ -49,7 +49,8 @@
     "toggleMenu": "Afficher ou masquer le menu",
     "dismissToastAria": "{message} — appuyez sur Entrée pour ignorer",
     "retry": "Réessayer",
-    "whatIsThisPage": "Qu'est-ce que cette page ?"
+    "whatIsThisPage": "Qu'est-ce que cette page ?",
+    "readMore": "En savoir plus"
   },
   "sidebar": {
     "groups": {
@@ -2155,6 +2156,30 @@
       "is": "L'endroit où l'on partagera les agents, modèles de sites et workflows créés.",
       "does": "Rien pour l'instant. Cette page réserve la place d'une fonctionnalité qui n'existe pas encore.",
       "doesNot": "Elle n'est pas vide à cause de votre formule, et changer de formule ne l'ouvrira pas. Le bouton ci-dessous est désactivé parce qu'il n'y a rien derrière."
+    }
+  },
+  "helpCentre": {
+    "title": "Centre d'aide",
+    "intro": "Les réponses aux questions les plus fréquentes. Posez-en une dans le chat et vous obtenez la même réponse immédiatement, sans crédits débités.",
+    "goThere": "Y aller",
+    "shownInEnglish": "En anglais",
+    "notFoundTitle": "Ce n'est pas ce que vous cherchiez ?",
+    "notFoundBody": "Demandez dans le chat : pour tout ce qui concerne votre compte ou vos données, la réponse vient de l'IA et non de cette page.",
+    "openChat": "Ouvrir le chat",
+    "pricingLink": "Tarifs et formules",
+    "answerCount": "{count, plural, one {# réponse} other {# réponses}}",
+    "categories": {
+      "getting-started": "Pour commencer",
+      "billing": "Facturation et formules",
+      "credits": "Crédits",
+      "websites": "Sites web",
+      "agents": "Agents IA",
+      "missions": "Missions",
+      "chat": "Chat",
+      "files": "Fichiers",
+      "integrations": "Connexions",
+      "account": "Compte",
+      "privacy": "Confidentialité et données"
     }
   }
 }

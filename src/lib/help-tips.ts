@@ -18,14 +18,18 @@
  * contain — and `doesNot` is that lesson made routine instead of a
  * one-off rescue.
  *
- * SELF-CONTAINED, NO LINK TO THE HELP CENTRE. Deliberate, and worth
- * recording because the opposite looks obvious: lib/support/knowledge-base.ts
- * has 27 articles whose href already points at most of these pages. It is
- * written entirely in Greek — CANNED_ANSWER_LOCALE = "el" — and /help
- * renders those Greek strings to all ten locales. Linking a "?" to it
- * would send nine languages to text they cannot read, so this carries its
- * own translated copy and waits for nothing. Moving the articles into a
- * table with a locale column is its own piece of work; see TODO.md.
+ * SELF-CONTAINED FIRST, LINKED SECOND. The three parts are written here
+ * and translated into all ten locales, so the tip answers on its own; the
+ * link to the full Help Centre article is an extra, not the answer.
+ *
+ * That order was forced and is worth keeping. When these were written the
+ * 27 articles were string literals in knowledge-base.ts, all in Greek, and
+ * /help rendered them to every locale — so a "?" that linked there would
+ * have sent nine languages to text they could not read, and a tip with
+ * nothing of its own would have had nothing to say. The articles are in
+ * help_articles now, per locale, with /help falling back to English
+ * visibly, so `article` links on to the one about this page. If the link
+ * ever breaks again, the tip still answers.
  *
  * NOT ON MODULE PAGES. The twenty module pages answer the same question
  * on their empty screen, in three parts, with a worked example
@@ -45,23 +49,43 @@ export type HelpTip = {
    * it is load-bearing for and does not soften it into nothing.
    */
   corrects: string;
+  /**
+   * The Help Centre article this page's "?" links on to, by slug, or
+   * undefined when there is no article about this page.
+   *
+   * THE INVERSE OF AN EXISTING MAPPING, not a new one: every article
+   * already carries an href pointing AT one of these pages, so this says
+   * the same thing in the direction the "?" needs to read it. Kept as
+   * data rather than derived at render time because three pages have no
+   * article and two share one, neither of which an href lookup expresses.
+   *
+   * Safe to link now, and it was not before: the articles lived in a
+   * Greek-only TypeScript literal, so a "?" pointing at /help would have
+   * sent nine locales to text they could not read. They are in
+   * help_articles with a locale column now and /help falls back to
+   * English, visibly.
+   */
+  article?: string;
 };
 
 export const HELP_TIPS: HelpTip[] = [
   {
     id: "agents",
+    article: "create-agent",
     file: "src/app/dashboard/agents/page.tsx",
     keyPrefix: "help.agents",
     corrects: "that an agent runs whenever it likes, without limit or cost",
   },
   {
     id: "websiteBuilder",
+    article: "create-website",
     file: "src/app/dashboard/website-builder/page.tsx",
     keyPrefix: "help.websiteBuilder",
     corrects: "that generating a site puts it on the internet",
   },
   {
     id: "published",
+    article: "publish-website",
     file: "src/app/dashboard/published/page.tsx",
     keyPrefix: "help.published",
     // subdomain.ts: the URL is path-based (/s/name) until a wildcard
@@ -70,6 +94,7 @@ export const HELP_TIPS: HelpTip[] = [
   },
   {
     id: "files",
+    article: "upload-files",
     file: "src/app/dashboard/files/page.tsx",
     // extract.ts refuses a scanned PDF by name — "it is probably a scan,
     // and it would need OCR" — and truncates at MAX_EXTRACTED_CHARS.
@@ -84,6 +109,7 @@ export const HELP_TIPS: HelpTip[] = [
   },
   {
     id: "memory",
+    article: "chat-memory",
     file: "src/app/dashboard/memory/page.tsx",
     keyPrefix: "help.memory",
     // The name is the problem: "AI Memory" reads as "what the AI
@@ -94,12 +120,14 @@ export const HELP_TIPS: HelpTip[] = [
   },
   {
     id: "mission",
+    article: "create-mission",
     file: "src/app/dashboard/mission/page.tsx",
     keyPrefix: "help.mission",
     corrects: "that a plan carries itself out once it exists",
   },
   {
     id: "integrations",
+    article: "connect-gmail",
     file: "src/app/dashboard/integrations/page.tsx",
     keyPrefix: "help.integrations",
     // providers.ts: gmail "read", google_drive "read", slack "read_write".
@@ -107,6 +135,7 @@ export const HELP_TIPS: HelpTip[] = [
   },
   {
     id: "team",
+    article: "team-members",
     file: "src/app/dashboard/team/page.tsx",
     keyPrefix: "help.team",
     corrects: "that adding people is free and that they use your login",

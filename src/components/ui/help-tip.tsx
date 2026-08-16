@@ -71,15 +71,38 @@ export function HelpTip({ helpKey }: { helpKey: string }) {
       </button>
 
       {open && (
-        <div
-          id={panelId}
-          role="dialog"
-          aria-label={tCommon("whatIsThisPage")}
-          // Anchored to the button but clamped to the viewport: at 375px a
-          // panel positioned purely relative to an icon near the right edge
-          // hangs off the screen, and the page then scrolls sideways.
-          className="absolute left-1/2 top-9 z-40 w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 rounded-2xl border border-border bg-panel p-4 text-left shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
-        >
+        <>
+          {/* Phone only. The panel below is a centred sheet at that size,
+              and a floating card over live content with nothing behind it
+              reads as a glitch. Closes on press, like everything else. */}
+          <span
+            aria-hidden="true"
+            onClick={() => setOpen(false)}
+            className="fixed inset-0 z-40 bg-black/50 sm:hidden"
+          />
+          <div
+            id={panelId}
+            role="dialog"
+            aria-label={tCommon("whatIsThisPage")}
+            // TWO POSITIONS, and the small one is not a nicety.
+            //
+            // Anchoring a 320px panel to an icon that sits beside a page
+            // title does not fit on a 375px screen: centre it on the
+            // button and it runs off one edge, and the whole page starts
+            // scrolling sideways. Measured, not reasoned about — the first
+            // version of this line clamped the width with
+            // `calc(100vw-2rem)`, which is not valid CSS (calc needs
+            // spaces around the minus, written `_-_` in a Tailwind
+            // arbitrary value), so the declaration was dropped silently
+            // and the panel took its natural width. A screenshot run
+            // reported document.scrollWidth > clientWidth at 375 and that
+            // is how it was caught.
+            //
+            // So below `sm` it is a centred sheet pinned to both edges,
+            // which cannot overflow by construction; from `sm` up it goes
+            // back to hanging under the button, where there is room.
+            className="fixed inset-x-4 top-1/2 z-50 -translate-y-1/2 rounded-2xl border border-border bg-panel p-4 text-left shadow-[0_12px_40px_rgba(0,0,0,0.45)] sm:absolute sm:inset-x-auto sm:left-1/2 sm:top-9 sm:z-40 sm:w-80 sm:-translate-x-1/2 sm:translate-y-0"
+          >
           <button
             type="button"
             onClick={() => {
@@ -108,8 +131,9 @@ export function HelpTip({ helpKey }: { helpKey: string }) {
           <p className="mt-2 flex gap-2 text-xs leading-relaxed text-muted">
             <Ban className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange-400/80" aria-hidden="true" />
             <span>{t(`${helpKey}.doesNot`)}</span>
-          </p>
-        </div>
+            </p>
+          </div>
+        </>
       )}
     </span>
   );

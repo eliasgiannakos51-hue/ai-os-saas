@@ -170,9 +170,20 @@ check("the button reports its state", /aria-expanded=\{open\}/.test(tip));
 // Listeners only while open — a page full of headers should not carry
 // listeners for a panel nobody opened.
 check("listeners are bound only while it is open", /if \(!open\) return;/.test(tip));
-// 375px: a panel anchored to an icon near the right edge hangs off screen
-// and the whole page starts scrolling sideways.
-check("the panel is clamped to the viewport", /calc\(100vw-2rem\)/.test(tip));
+// 375px. The first attempt clamped the width with `calc(100vw-2rem)`,
+// which is not valid CSS — calc needs spaces around the minus, written
+// `_-_` in a Tailwind arbitrary value — so the declaration was dropped
+// and the panel took its natural width. A screenshot run measured
+// document.scrollWidth > clientWidth and caught it.
+//
+// Two things are asserted as a result. First that no arbitrary value in
+// this file contains a calc with an unspaced operator, which is the class
+// of bug rather than the instance. Second that the small-screen layout is
+// pinned to both edges, which cannot overflow however wide the content.
+const BAD_CALC = /\[[^\]]*calc\([^)]*[a-z0-9%)]-[a-z0-9(]/i;
+check("no arbitrary value hides an invalid calc", !BAD_CALC.test(tip));
+check("on a phone the panel is pinned to both edges", /fixed inset-x-4/.test(tip));
+check("and anchors under the button only from sm up", /sm:absolute[\s\S]{0,80}sm:w-80/.test(tip));
 
 console.log("\n== 7. it links to the Help Centre nowhere ==");
 // The Greek-only knowledge base would reach nine locales through such a

@@ -47,7 +47,8 @@
     "nextPage": "Página siguiente",
     "previousPage": "Página anterior",
     "toggleMenu": "Mostrar u ocultar el menú",
-    "dismissToastAria": "{message} — pulsa Intro para descartar"
+    "dismissToastAria": "{message} — pulsa Intro para descartar",
+    "retry": "Reintentar"
   },
   "sidebar": {
     "groups": {
@@ -2068,6 +2069,29 @@
       "reading": "Leyendo sus archivos…",
       "answering": "Componiendo la respuesta…",
       "checking": "Contrastándola con los archivos…"
+    }
+  },
+  "problem": {
+    "out_of_credits": {
+      "what": "Se ha quedado sin créditos",
+      "next": "Compre un paquete de créditos o pase a un plan mayor y la misma acción se completará; no se ha perdido nada de lo que escribió."
+    },
+    "rate_limited": {
+      "what": "Demasiadas de estas en la última hora",
+      "next": "Esta acción tiene un límite por hora para que una cuenta no consuma el presupuesto compartido. Espere unos minutos y vuelva a intentarlo: el límite es deslizante, no se reinicia en punto."
+    },
+    "timeout": {
+      "what": "Esto tardó demasiado y se detuvo",
+      "next": "Los trabajos largos tienen un techo para que uno atascado no corra eternamente. Inténtelo con una petición más corta o más concreta: suele terminar bastante antes del límite."
+    },
+    "network": {
+      "what": "La respuesta nunca llegó",
+      "next": "Compruebe su conexión y vuelva a intentarlo. Si el trabajo ya había empezado, sigue en segundo plano: recargue la página en vez de lanzar otro."
+    },
+    "credits": {
+      "untouched": "No se han usado créditos.",
+      "refunded": "Los créditos reservados se han devuelto.",
+      "charged": "Se han usado los créditos del trabajo ya realizado."
     }
   }
 }

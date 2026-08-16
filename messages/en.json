@@ -47,7 +47,8 @@
     "nextPage": "Next page",
     "previousPage": "Previous page",
     "toggleMenu": "Toggle menu",
-    "dismissToastAria": "{message} — press Enter to dismiss"
+    "dismissToastAria": "{message} — press Enter to dismiss",
+    "retry": "Try again"
   },
   "sidebar": {
     "groups": {
@@ -2068,6 +2069,29 @@
       "reading": "Reading your files…",
       "answering": "Putting the answer together…",
       "checking": "Checking it against the files…"
+    }
+  },
+  "problem": {
+    "out_of_credits": {
+      "what": "You have run out of credits",
+      "next": "Buy a credit pack or move to a bigger plan, and the same action will go through — nothing you have written is lost."
+    },
+    "rate_limited": {
+      "what": "Too many of these in the last hour",
+      "next": "There is an hourly cap on this action so one account cannot spend the shared budget. Wait a few minutes and try again — the cap slides, it does not reset on the hour."
+    },
+    "timeout": {
+      "what": "This took too long and was stopped",
+      "next": "Long jobs have a ceiling so a stuck one cannot run forever. Try again with a shorter or more specific request — that usually finishes well inside it."
+    },
+    "network": {
+      "what": "The reply never came back",
+      "next": "Check your connection and try again. If the work had already started it is still running in the background — reload the page rather than starting a second one."
+    },
+    "credits": {
+      "untouched": "No credits were used.",
+      "refunded": "The credits held for this have been returned.",
+      "charged": "The credits for the work already done have been used."
     }
   }
 }

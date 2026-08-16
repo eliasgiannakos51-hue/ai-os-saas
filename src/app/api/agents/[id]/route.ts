@@ -69,7 +69,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       windowMinutes: 60,
     });
     if (!limited.allowed) {
-      return NextResponse.json({ ok: false, error: "Too many changes — try again shortly." }, { status: 429 });
+      return NextResponse.json({ ok: false, code: "rate_limited", error: "Too many changes — try again shortly." }, { status: 429 });
     }
 
     const { data: existing, error: fetchError } = await supabase

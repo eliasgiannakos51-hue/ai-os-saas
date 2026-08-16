@@ -47,7 +47,8 @@
     "nextPage": "Nächste Seite",
     "previousPage": "Vorherige Seite",
     "toggleMenu": "Menü ein- oder ausblenden",
-    "dismissToastAria": "{message} — mit Enter ausblenden"
+    "dismissToastAria": "{message} — mit Enter ausblenden",
+    "retry": "Erneut versuchen"
   },
   "sidebar": {
     "groups": {
@@ -2068,6 +2069,29 @@
       "reading": "Ich lese deine Dateien…",
       "answering": "Ich stelle die Antwort zusammen…",
       "checking": "Ich gleiche sie mit den Dateien ab…"
+    }
+  },
+  "problem": {
+    "out_of_credits": {
+      "what": "Deine Credits sind aufgebraucht",
+      "next": "Kauf ein Credit-Paket oder wechsel in einen größeren Tarif — dieselbe Aktion geht dann durch, und nichts von dem, was du geschrieben hast, ist weg."
+    },
+    "rate_limited": {
+      "what": "Zu viele davon in der letzten Stunde",
+      "next": "Für diese Aktion gilt ein Stundenlimit, damit ein Konto nicht das gemeinsame Budget aufbraucht. Warte ein paar Minuten und versuch es erneut — das Limit gleitet, es springt nicht zur vollen Stunde zurück."
+    },
+    "timeout": {
+      "what": "Das hat zu lange gedauert und wurde gestoppt",
+      "next": "Lange Jobs haben eine Obergrenze, damit ein hängender nicht ewig läuft. Versuch es mit einer kürzeren oder genaueren Anfrage — die ist meist deutlich vorher fertig."
+    },
+    "network": {
+      "what": "Die Antwort kam nie zurück",
+      "next": "Prüf deine Verbindung und versuch es erneut. Falls die Arbeit schon lief, läuft sie im Hintergrund weiter — lad die Seite neu, statt eine zweite zu starten."
+    },
+    "credits": {
+      "untouched": "Es wurden keine Credits verbraucht.",
+      "refunded": "Die dafür reservierten Credits wurden zurückgegeben.",
+      "charged": "Die Credits für die bereits geleistete Arbeit wurden verbraucht."
     }
   }
 }

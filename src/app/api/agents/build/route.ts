@@ -95,7 +95,7 @@ export async function POST(request: Request) {
     });
     if (!limited.allowed) {
       return NextResponse.json(
-        { ok: false, error: "Too many agent drafts in the last hour. Try again shortly." },
+        { ok: false, code: "rate_limited", error: "Too many agent drafts in the last hour. Try again shortly." },
         { status: 429 }
       );
     }

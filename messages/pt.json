@@ -47,7 +47,8 @@
     "nextPage": "Próxima página",
     "previousPage": "Página anterior",
     "toggleMenu": "Mostrar ou ocultar o menu",
-    "dismissToastAria": "{message} — prima Enter para dispensar"
+    "dismissToastAria": "{message} — prima Enter para dispensar",
+    "retry": "Tentar de novo"
   },
   "sidebar": {
     "groups": {
@@ -2068,6 +2069,29 @@
       "reading": "A ler os seus ficheiros…",
       "answering": "A compor a resposta…",
       "checking": "A verificar nos ficheiros…"
+    }
+  },
+  "problem": {
+    "out_of_credits": {
+      "what": "Ficou sem créditos",
+      "next": "Compre um pacote de créditos ou mude para um plano maior e a mesma ação passa — nada do que escreveu se perdeu."
+    },
+    "rate_limited": {
+      "what": "Demasiadas destas na última hora",
+      "next": "Esta ação tem um limite por hora para que uma conta não gaste o orçamento partilhado. Espere alguns minutos e tente de novo — o limite é deslizante, não reinicia à hora certa."
+    },
+    "timeout": {
+      "what": "Isto demorou demasiado e foi parado",
+      "next": "Os trabalhos longos têm um teto para que um encravado não corra para sempre. Tente com um pedido mais curto ou mais específico — costuma terminar bem dentro do limite."
+    },
+    "network": {
+      "what": "A resposta nunca chegou",
+      "next": "Verifique a ligação e tente de novo. Se o trabalho já tinha começado, continua em segundo plano — recarregue a página em vez de iniciar outro."
+    },
+    "credits": {
+      "untouched": "Não foram usados créditos.",
+      "refunded": "Os créditos reservados foram devolvidos.",
+      "charged": "Foram usados os créditos do trabalho já feito."
     }
   }
 }

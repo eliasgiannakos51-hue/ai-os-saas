@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     });
     if (!limited.allowed) {
       return NextResponse.json(
-        { ok: false, error: "Too many research requests. Try again shortly." },
+        { ok: false, code: "rate_limited", error: "Too many research requests. Try again shortly." },
         { status: 429 }
       );
     }

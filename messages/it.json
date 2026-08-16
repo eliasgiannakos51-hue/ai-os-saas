@@ -47,7 +47,8 @@
     "nextPage": "Pagina successiva",
     "previousPage": "Pagina precedente",
     "toggleMenu": "Mostra o nascondi il menu",
-    "dismissToastAria": "{message} — premi Invio per ignorare"
+    "dismissToastAria": "{message} — premi Invio per ignorare",
+    "retry": "Riprova"
   },
   "sidebar": {
     "groups": {
@@ -2068,6 +2069,29 @@
       "reading": "Leggo i tuoi file…",
       "answering": "Compongo la risposta…",
       "checking": "La verifico sui file…"
+    }
+  },
+  "problem": {
+    "out_of_credits": {
+      "what": "Hai finito i credits",
+      "next": "Compra un pacchetto di credits o passa a un piano più grande: la stessa azione andrà a buon fine, e nulla di ciò che hai scritto è perso."
+    },
+    "rate_limited": {
+      "what": "Troppe di queste nell'ultima ora",
+      "next": "Questa azione ha un tetto orario perché un account non consumi il budget condiviso. Aspetta qualche minuto e riprova: il tetto scorre, non si azzera all'ora esatta."
+    },
+    "timeout": {
+      "what": "Ci ha messo troppo ed è stato fermato",
+      "next": "I lavori lunghi hanno un tetto perché uno bloccato non giri all'infinito. Riprova con una richiesta più breve o più precisa: di solito finisce ben prima del limite."
+    },
+    "network": {
+      "what": "La risposta non è mai tornata",
+      "next": "Controlla la connessione e riprova. Se il lavoro era già partito, sta continuando in background: ricarica la pagina invece di avviarne un secondo."
+    },
+    "credits": {
+      "untouched": "Non è stato usato alcun credit.",
+      "refunded": "I credits riservati sono stati restituiti.",
+      "charged": "Sono stati usati i credits per il lavoro già svolto."
     }
   }
 }

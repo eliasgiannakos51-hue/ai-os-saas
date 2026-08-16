@@ -45,7 +45,7 @@ export async function POST(_request: Request, { params }: { params: { id: string
     });
     if (!limited.allowed) {
       return NextResponse.json(
-        { ok: false, error: "Too many manual runs in the last hour. Try again shortly." },
+        { ok: false, code: "rate_limited", error: "Too many manual runs in the last hour. Try again shortly." },
         { status: 429 }
       );
     }

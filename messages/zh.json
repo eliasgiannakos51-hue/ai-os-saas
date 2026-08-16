@@ -47,7 +47,8 @@
     "nextPage": "下一页",
     "previousPage": "上一页",
     "toggleMenu": "切换菜单",
-    "dismissToastAria": "{message} — 按 Enter 键关闭"
+    "dismissToastAria": "{message} — 按 Enter 键关闭",
+    "retry": "再试一次"
   },
   "sidebar": {
     "groups": {
@@ -2068,6 +2069,29 @@
       "reading": "正在读你的文件…",
       "answering": "正在组织答案…",
       "checking": "正在对照文件核实…"
+    }
+  },
+  "problem": {
+    "out_of_credits": {
+      "what": "你的额度用完了",
+      "next": "买一个额度包，或者换一个更大的套餐，同样的操作就能通过——你写的内容一点都没丢。"
+    },
+    "rate_limited": {
+      "what": "过去一小时内这类操作太多了",
+      "next": "这个操作有每小时上限，免得单个账号占掉共享额度。等几分钟再试——上限是滚动计算的，不是整点清零。"
+    },
+    "timeout": {
+      "what": "这一步耗时过长，已经停止",
+      "next": "长任务有时间上限，免得卡住的任务一直跑。换一个更短或更具体的请求再试，通常都能在上限内跑完。"
+    },
+    "network": {
+      "what": "没有收到回应",
+      "next": "检查一下网络再试。如果任务已经开始了，它还在后台跑——刷新页面就好，别再开一个。"
+    },
+    "credits": {
+      "untouched": "没有扣任何额度。",
+      "refunded": "为此预留的额度已经退回。",
+      "charged": "已完成部分所对应的额度已经扣除。"
     }
   }
 }

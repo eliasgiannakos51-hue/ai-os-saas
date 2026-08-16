@@ -17,6 +17,12 @@ import { appendClarificationAnswers } from "@/lib/clarification-client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useAiJob } from "@/lib/jobs/use-ai-job";
 import { AiJobProgress } from "@/components/ui/ai-job-progress";
+import { ProblemNotice } from "@/components/errors/problem-notice";
+import {
+  problemCodeFrom,
+  problemCodeForFetchFailure,
+  type ProblemCode,
+} from "@/lib/errors/problem-codes";
 import { resolveBrowserTimeZone, nextRuns } from "@/lib/agents/cron-expression";
 import type { AgentDraft, AgentRun, UserAgent } from "@/lib/agents/agent-config";
 import { matchesSearch } from "@/lib/text/search-match";
@@ -76,6 +82,10 @@ export function AgentsWorkspace({
   const [creating, setCreating] = useState(false);
   const [requestText, setRequestText] = useState("");
   const requestRef = useRef<HTMLTextAreaElement | null>(null);
+  // A toast was the wrong container for all four of these: it disappears,
+  // it cannot hold three lines, and the third line is about the user's
+  // money. The notice stays under the button they pressed until they act.
+  const [problem, setProblem] = useState<ProblemCode | null>(null);
   // The id, not a boolean. "Am I building" is answered by the job row, so
   // it survives a reload — a `building` flag set by pressing a button is
   // exactly what made Deep Research look like it had stopped when the user
@@ -145,14 +155,24 @@ export function AgentsWorkspace({
       });
       const data = await response.json();
       if (!data.ok) {
-        addToast(data.error ?? t("buildError"), "error");
+        // A code, when the route has one, beats its English sentence: the
+        // sentence is written on a server that does not know what language
+        // this page is in. Routes without one keep their existing message
+        // rather than being handed a guessed code.
+        const code = problemCodeFrom(data);
+        if (code) setProblem(code);
+        else addToast(data.error ?? t("buildError"), "error");
         return;
       }
+      setProblem(null);
       setQuestions(null);
       setPreview(null);
       setJobId(String(data.jobId));
     } catch (err) {
-      addToast(getErrorMessage(err, t("buildError")), "error");
+      // Never reached a route, so it can carry no code from one — the only
+      // place a code is inferred, and inferred from the transport failing
+      // rather than from the text of a message.
+      setProblem(problemCodeForFetchFailure(err));
     }
   }
 
@@ -535,6 +555,21 @@ export function AgentsWorkspace({
               >
                 {building ? t("designing") : t("designButton")}
               </button>
+            )}
+            {problem && (
+              <ProblemNotice
+                code={problem}
+                className="w-full"
+                onRetry={() => {
+                  setProblem(null);
+                  void build(requestText, true);
+                }}
+                action={
+                  problem === "out_of_credits"
+                    ? { href: "/pricing", labelKey: "common.viewPlans" }
+                    : undefined
+                }
+              />
             )}
             {/* Four real steps — understanding, drafting, checking,
                 saving — reported by the worker and, until now, discarded:

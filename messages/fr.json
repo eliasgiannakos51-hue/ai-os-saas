@@ -47,7 +47,8 @@
     "nextPage": "Page suivante",
     "previousPage": "Page précédente",
     "toggleMenu": "Afficher ou masquer le menu",
-    "dismissToastAria": "{message} — appuyez sur Entrée pour ignorer"
+    "dismissToastAria": "{message} — appuyez sur Entrée pour ignorer",
+    "retry": "Réessayer"
   },
   "sidebar": {
     "groups": {
@@ -2068,6 +2069,29 @@
       "reading": "Je lis vos fichiers…",
       "answering": "Je compose la réponse…",
       "checking": "Je la vérifie sur les fichiers…"
+    }
+  },
+  "problem": {
+    "out_of_credits": {
+      "what": "Vous n'avez plus de crédits",
+      "next": "Achetez un pack de crédits ou passez à une formule supérieure : la même action passera, et rien de ce que vous avez écrit n'est perdu."
+    },
+    "rate_limited": {
+      "what": "Trop d'actions de ce type dans la dernière heure",
+      "next": "Cette action a un plafond horaire pour qu'un compte ne consomme pas le budget partagé. Attendez quelques minutes et réessayez : le plafond glisse, il ne se remet pas à zéro à l'heure pile."
+    },
+    "timeout": {
+      "what": "Cela a pris trop de temps et a été arrêté",
+      "next": "Les traitements longs ont un plafond pour qu'un traitement bloqué ne tourne pas indéfiniment. Réessayez avec une demande plus courte ou plus précise : cela termine généralement bien avant."
+    },
+    "network": {
+      "what": "La réponse n'est jamais revenue",
+      "next": "Vérifiez votre connexion et réessayez. Si le traitement avait démarré, il continue en arrière-plan : rechargez la page plutôt que d'en lancer un second."
+    },
+    "credits": {
+      "untouched": "Aucun crédit n'a été utilisé.",
+      "refunded": "Les crédits réservés ont été restitués.",
+      "charged": "Les crédits du travail déjà effectué ont été utilisés."
     }
   }
 }

@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     });
     if (!allowed) {
       return NextResponse.json(
-        { ok: false, error: "Too many documents created. Please try again later." },
+        { ok: false, code: "rate_limited", error: "Too many documents created. Please try again later." },
         { status: 429 }
       );
     }

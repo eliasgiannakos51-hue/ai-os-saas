@@ -1579,7 +1579,8 @@
       "dismissError": "Impossibile ignorarlo."
     },
     "systemHealth": {
-      "toggleStackTrace": "Mostra o nascondi lo stack trace"
+      "toggleStackTrace": "Mostra o nascondi lo stack trace",
+      "noErrors": "Nessun errore registrato. Qui finiscono i problemi incontrati da utenti reali: una lista vuota significa che nessuno si è bloccato."
     },
     "ideas": {
       "new": "Nuova idea",

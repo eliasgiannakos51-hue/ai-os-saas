@@ -28,7 +28,16 @@ export function ErrorList({ rows }: { rows: ProductionErrorRow[] }) {
   const [locallyResolved, setLocallyResolved] = useState<Set<string>>(new Set());
 
   if (rows.length === 0) {
-    return <EmptyState icon={ShieldCheck}>No errors recorded. Nothing is on fire.</EmptyState>;
+    // Was an English sentence written straight into the JSX, rendered
+    // verbatim into a Greek UI. check-i18n never saw it: that gate reads
+    // messages/*.json, not JSX children.
+    //
+    // It now says WHAT this page is and WHY an empty one is good news.
+    // There is deliberately no clickable example — an error list has
+    // nothing for the reader to create, and inventing a button to satisfy
+    // a gate would be a fake promise. That half stays red on the ratchet
+    // until it gets a real answer.
+    return <EmptyState icon={ShieldCheck}>{t("noErrors")}</EmptyState>;
   }
 
   async function resolve(id: string) {

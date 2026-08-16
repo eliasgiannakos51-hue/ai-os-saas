@@ -1579,7 +1579,8 @@
       "dismissError": "无法忽略该项。"
     },
     "systemHealth": {
-      "toggleStackTrace": "展开或收起调用栈"
+      "toggleStackTrace": "展开或收起调用栈",
+      "noErrors": "没有记录到错误。真实用户遇到的崩溃都会出现在这里——列表为空，说明没有人卡住。"
     },
     "ideas": {
       "new": "新建创意",

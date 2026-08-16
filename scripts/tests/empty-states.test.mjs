@@ -231,7 +231,7 @@ console.log("\n== 6. the inventory has not fallen behind the codebase ==");
 // dashboard/marketplace/page.tsx on the first run.
 //
 // which is the number below. It may only go DOWN.
-const COMPLIANCE_BASELINE = 21;
+const COMPLIANCE_BASELINE = 20;
 
 console.log(
   `\n${failures.length} failing / baseline ${COMPLIANCE_BASELINE}  (${pass} passed)`

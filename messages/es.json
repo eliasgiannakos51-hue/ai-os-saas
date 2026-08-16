@@ -1579,7 +1579,8 @@
       "dismissError": "No se pudo descartar."
     },
     "systemHealth": {
-      "toggleStackTrace": "Mostrar u ocultar la traza de la pila"
+      "toggleStackTrace": "Mostrar u ocultar la traza de la pila",
+      "noErrors": "No hay errores registrados. Aquí aterrizan los fallos que encuentran los usuarios reales: una lista vacía significa que nadie se quedó atascado."
     },
     "ideas": {
       "new": "Nueva idea",

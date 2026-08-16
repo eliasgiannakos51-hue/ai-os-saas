@@ -1579,7 +1579,8 @@
       "dismissError": "Não foi possível dispensar."
     },
     "systemHealth": {
-      "toggleStackTrace": "Mostrar ou ocultar o stack trace"
+      "toggleStackTrace": "Mostrar ou ocultar o stack trace",
+      "noErrors": "Nenhum erro registado. É aqui que aterram as falhas que os utilizadores reais encontraram — uma lista vazia significa que ninguém ficou preso."
     },
     "ideas": {
       "new": "Nova ideia",

@@ -1579,7 +1579,8 @@
       "dismissError": "That could not be dismissed."
     },
     "systemHealth": {
-      "toggleStackTrace": "Toggle stack trace"
+      "toggleStackTrace": "Toggle stack trace",
+      "noErrors": "No errors recorded. This is where crashes that real users hit land — an empty list means nobody got stuck."
     },
     "ideas": {
       "new": "New Idea",

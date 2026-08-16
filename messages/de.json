@@ -1579,7 +1579,8 @@
       "dismissError": "Das konnte nicht ausgeblendet werden."
     },
     "systemHealth": {
-      "toggleStackTrace": "Stacktrace ein- oder ausblenden"
+      "toggleStackTrace": "Stacktrace ein- oder ausblenden",
+      "noErrors": "Keine Fehler erfasst. Hier landen Abstürze, die echte Nutzer getroffen haben — eine leere Liste heißt, niemand ist hängen geblieben."
     },
     "ideas": {
       "new": "Neue Idee",

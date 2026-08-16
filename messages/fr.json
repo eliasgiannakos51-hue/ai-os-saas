@@ -1579,7 +1579,8 @@
       "dismissError": "Impossible de l'ignorer."
     },
     "systemHealth": {
-      "toggleStackTrace": "Afficher ou masquer la trace d'appels"
+      "toggleStackTrace": "Afficher ou masquer la trace d'appels",
+      "noErrors": "Aucune erreur enregistrée. C'est ici qu'atterrissent les plantages rencontrés par de vrais utilisateurs — une liste vide signifie que personne n'a été bloqué."
     },
     "ideas": {
       "new": "Nouvelle idée",

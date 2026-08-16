@@ -48,7 +48,8 @@
     "previousPage": "Vorherige Seite",
     "toggleMenu": "Menü ein- oder ausblenden",
     "dismissToastAria": "{message} — mit Enter ausblenden",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "whatIsThisPage": "Was ist diese Seite?"
   },
   "sidebar": {
     "groups": {
@@ -774,8 +775,8 @@
       "resultCount": "{count, plural, =0 {keine Treffer} one {# Treffer} other {# Treffer}} in allen Modulen",
       "resultCountForQuery": "{count, plural, =0 {keine Treffer} one {# Treffer} other {# Treffer}} für „{query}“ in allen Modulen",
       "empty": {
-        "title": "Was die KI über deine Arbeit weiß",
-        "why": "Füllt sich von selbst, während du mit dem Chat sprichst — was es wert ist, bleibt hier, damit du dein Geschäft nicht in jedem Gespräch neu erklärst."
+        "title": "Noch nichts erfasst, also nichts zu finden",
+        "why": "Das durchsucht alle Module auf einmal — Ideen, Leads, Ausgaben, Trades. Es füllt sich, während du die anderen Seiten nutzt; eigenes hat es nicht."
       },
       "truncated": "Es werden die ersten {shown} von {total} Treffern gezeigt — grenze deine Suche weiter ein."
     },
@@ -2092,6 +2093,68 @@
       "untouched": "Es wurden keine Credits verbraucht.",
       "refunded": "Die dafür reservierten Credits wurden zurückgegeben.",
       "charged": "Die Credits für die bereits geleistete Arbeit wurden verbraucht."
+    }
+  },
+  "help": {
+    "agents": {
+      "is": "Ein Agent ist eine Aufgabe, die nach Zeitplan ohne dich läuft.",
+      "does": "Du beschreibst die Aufgabe einmal: sie läuft zur festgelegten Zeit, schickt dir das Ergebnis per E-Mail und führt eine Historie jedes Laufs.",
+      "doesNot": "Er läuft nicht unbegrenzt. Es gibt eine Obergrenze für Läufe pro Stunde und für die Zahl der Agents je Tarif, und jeder Lauf kostet Credits."
+    },
+    "websiteBuilder": {
+      "is": "Eine ganze Website, aus einer Beschreibung erzeugt.",
+      "does": "Sie schreibt Seiten, Texte und Layout aus dem, was du beschreibst, und du änderst es weiter in normalen Worten.",
+      "doesNot": "Sie stellt nichts ins Internet. Eine erzeugte Website bleibt privat, bis du sie selbst veröffentlichst."
+    },
+    "published": {
+      "is": "Deine Websites, die online sind.",
+      "does": "Veröffentlichen gibt einer Site eine Adresse, die jeder öffnen kann, und zählt hier ihre Besucher.",
+      "doesNot": "Es gibt dir keine eigene Domain. Die Adresse ist heute ein Pfad auf dieser Seite, nicht deinedomain.de — eine echte Domain daraufzeigen zu lassen ist ein eigener Schritt."
+    },
+    "files": {
+      "is": "Deine Dokumente, für die KI lesbar.",
+      "does": "Lad ein PDF, Word, Excel, CSV oder Textdatei hoch: der Text wird herausgezogen und du fragst über die, die du auswählst.",
+      "doesNot": "Sie liest keine Scans. Ein PDF, das ein Foto einer Seite ist, hat keinen Text zum Extrahieren und braucht erst OCR, und sehr lange Dokumente werden nur bis zu einer Grenze gelesen."
+    },
+    "deepResearch": {
+      "is": "Recherche, die dich mehrere Stunden kosten würde.",
+      "does": "Sie zeigt dir zuerst ihren Plan, macht dann die Arbeit und kommt mit überprüfbaren Quellen zurück.",
+      "doesNot": "Sie antwortet nicht, während du wartest. Sie läuft im Hintergrund — verlass die Seite, schließ den Tab, sie macht weiter und ist da, wenn du zurückkommst."
+    },
+    "memory": {
+      "is": "Eine Suche über alles, was du erfasst hast.",
+      "does": "Sie durchsucht alle Module auf einmal — Ideen, Leads, Ausgaben, Trades, Sites — und bringt dich direkt zum Eintrag.",
+      "doesNot": "Sie speichert deine Gespräche nicht und behält nichts Eigenes. Alles hier hast du in einem Modul geschrieben; die KI fügt nichts hinzu."
+    },
+    "mission": {
+      "is": "Ein Ziel, in datierte Schritte zerlegt.",
+      "does": "Du schreibst das Ziel: daraus wird ein Plan zum Abhaken, und jeder Schritt kann an die KI gegeben oder auf einen Tag gelegt werden.",
+      "doesNot": "Er führt sich nicht selbst aus. Ein Plan steht still, bis du einen Schritt startest oder planst — nichts passiert, nur weil Zeit vergeht."
+    },
+    "integrations": {
+      "is": "Deine eigenen Konten, verbunden, damit die KI daraus lesen kann.",
+      "does": "Gmail und Google Drive werden nur lesend verbunden. Slack liest die Kanäle, in die du die App einlädst, und Agents können ihre Ergebnisse dort posten.",
+      "doesNot": "Sie verschickt deine Mails nicht, antwortet nicht in deinem Namen und löscht nichts. Private Slack-Kanäle und Direktnachrichten sieht sie nie."
+    },
+    "team": {
+      "is": "Die Leute, die diesen Workspace mit dir teilen.",
+      "does": "Du lädst per E-Mail ein; jede Person meldet sich mit eigenem Konto an und sieht dieselben Daten.",
+      "doesNot": "Es ist weder kostenlos noch dein Login. Sitze werden pro Person abgerechnet, und niemand braucht je dein Passwort."
+    },
+    "timeline": {
+      "is": "Alles, was du getan hast, das Neueste zuerst.",
+      "does": "Es schreibt sich selbst aus jedem Modul, damit du \"was habe ich letzten Monat getan\" beantworten kannst, ohne fünf Seiten zu öffnen.",
+      "doesNot": "Hier schreibst du nicht. Es ist ein Protokoll, kein Tagebuch — Einträge erscheinen, weil du sie anderswo erfasst hast, und die Reihenfolge ist, wann sie passiert sind."
+    },
+    "favorites": {
+      "is": "Die Auswahl, die du mit Sternen angelegt hast.",
+      "does": "Alles, was du irgendwo mit einem Stern markierst, taucht hier auf, gruppiert nach Herkunft — das Wenige, zu dem du ständig zurückkehrst, ist einen Klick entfernt.",
+      "doesNot": "Ein Stern kopiert und verschiebt nichts. Es sind dieselben Einträge, ein zweites Mal gezeigt — bearbeitest du hier, hast du das Original bearbeitet."
+    },
+    "marketplace": {
+      "is": "Der Ort, an dem Leute ihre Agents, Website-Vorlagen und Workflows teilen werden.",
+      "does": "Noch nichts. Diese Seite hält den Platz für eine Funktion frei, die noch nicht gebaut ist.",
+      "doesNot": "Sie ist nicht wegen deines Tarifs leer, und ein Upgrade öffnet sie nicht. Der Button unten ist deaktiviert, weil nichts dahinter liegt."
     }
   }
 }

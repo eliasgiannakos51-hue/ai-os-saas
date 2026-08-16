@@ -48,7 +48,8 @@
     "previousPage": "Previous page",
     "toggleMenu": "Toggle menu",
     "dismissToastAria": "{message} — press Enter to dismiss",
-    "retry": "Try again"
+    "retry": "Try again",
+    "whatIsThisPage": "What is this page?"
   },
   "sidebar": {
     "groups": {
@@ -774,8 +775,8 @@
       "resultCount": "{count, plural, =0 {no results} one {# result} other {# results}} across every module",
       "resultCountForQuery": "{count, plural, =0 {no results} one {# result} other {# results}} for \"{query}\" across every module",
       "empty": {
-        "title": "What the AI remembers about your work",
-        "why": "This fills itself as you talk to Chat — the facts worth keeping are saved here, so you do not explain your business again every conversation."
+        "title": "Nothing logged yet, so nothing to find",
+        "why": "This searches every module at once — ideas, leads, expenses, trades. It fills up as you use the other pages; there is nothing here of its own."
       },
       "truncated": "Showing the first {shown} of {total} matches — refine your search to narrow it down."
     },
@@ -2092,6 +2093,68 @@
       "untouched": "No credits were used.",
       "refunded": "The credits held for this have been returned.",
       "charged": "The credits for the work already done have been used."
+    }
+  },
+  "help": {
+    "agents": {
+      "is": "An agent is a job that runs on a schedule without you.",
+      "does": "You describe the task once; it runs when you told it to, emails you the result and keeps a history of every run.",
+      "doesNot": "It does not run without limit. There is a cap on runs per hour and on how many agents your plan allows, and every run costs credits."
+    },
+    "websiteBuilder": {
+      "is": "A whole website, generated from a description.",
+      "does": "It writes the pages, the copy and the layout from what you describe, and you keep changing it in plain words.",
+      "doesNot": "It does not put anything on the internet. A generated site stays private until you publish it yourself."
+    },
+    "published": {
+      "is": "The sites you have made live.",
+      "does": "Publishing gives a site an address anyone can open, and counts its visitors here.",
+      "doesNot": "It does not give you a domain of your own. The address is a path on this site today, not yourdomain.com — pointing a real domain at it is separate."
+    },
+    "files": {
+      "is": "Your documents, readable by the AI.",
+      "does": "Upload a PDF, Word, Excel, CSV or text file; the text is pulled out and you can ask questions across the ones you pick.",
+      "doesNot": "It does not read scans. A PDF that is a photo of a page has no text to extract and needs OCR first, and very long documents are read up to a limit."
+    },
+    "deepResearch": {
+      "is": "Research that would cost you several hours.",
+      "does": "It shows you its plan first, then goes and does the work and comes back with sources you can check.",
+      "doesNot": "It does not answer while you wait. It runs in the background — leave the page, close the tab, it keeps going and is here when you return."
+    },
+    "memory": {
+      "is": "One search across everything you have logged.",
+      "does": "It looks through every module at once — ideas, leads, expenses, trades, sites — and takes you straight to the entry.",
+      "doesNot": "It does not store your conversations, and it keeps nothing of its own. Everything here is something you wrote in a module; nothing is added by the AI."
+    },
+    "mission": {
+      "is": "One goal, broken into dated steps.",
+      "does": "You write the goal; it produces a plan you can tick off, and any step can be handed to the AI or scheduled for a day.",
+      "doesNot": "It does not carry itself out. A plan sits still until you run a step or schedule one — nothing happens because time passed."
+    },
+    "integrations": {
+      "is": "Your own accounts, connected so the AI can read from them.",
+      "does": "Gmail and Google Drive are connected read-only. Slack reads the channels you invite the app into, and agents can post results back there.",
+      "doesNot": "It does not send your email, reply on your behalf, or delete anything. It never sees private Slack channels or direct messages."
+    },
+    "team": {
+      "is": "The people who share this workspace with you.",
+      "does": "You invite by email; each person signs in with their own account and sees the same data.",
+      "doesNot": "It is not free and it is not your login. Seats are billed per person, and nobody ever needs your password."
+    },
+    "timeline": {
+      "is": "Everything you have done, newest first.",
+      "does": "It writes itself from every module, so you can answer \"what did I actually do last month\" without opening five pages.",
+      "doesNot": "You do not write here. It is a record, not a diary — entries appear because you logged them elsewhere, and the order is when they happened."
+    },
+    "favorites": {
+      "is": "The short list you built by pressing stars.",
+      "does": "Anything you star anywhere shows up here, grouped by where it came from, so the few you keep returning to are one click away.",
+      "doesNot": "Starring does not copy or move anything. These are the same entries, shown twice — edit one here and you have edited the original."
+    },
+    "marketplace": {
+      "is": "Where people will share the agents, site templates and workflows they have built.",
+      "does": "Nothing yet. This page is a placeholder for a feature that has not been built.",
+      "doesNot": "It is not empty because of your plan, and upgrading will not open it. The button below is disabled because there is nothing behind it."
     }
   }
 }

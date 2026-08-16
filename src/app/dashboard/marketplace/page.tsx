@@ -31,7 +31,7 @@ export default async function MarketplacePage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={MARKETPLACE_ICON} title={t("title")} description={t("description")} />
+        <PageHeader helpKey="help.marketplace" icon={MARKETPLACE_ICON} title={t("title")} description={t("description")} />
 
         {/* No worked example, and this page is the clearest case for why:
             its own action is rendered DISABLED with a "Coming Soon" badge,

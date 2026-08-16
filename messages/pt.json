@@ -48,7 +48,8 @@
     "previousPage": "Página anterior",
     "toggleMenu": "Mostrar ou ocultar o menu",
     "dismissToastAria": "{message} — prima Enter para dispensar",
-    "retry": "Tentar de novo"
+    "retry": "Tentar de novo",
+    "whatIsThisPage": "O que é esta página?"
   },
   "sidebar": {
     "groups": {
@@ -774,8 +775,8 @@
       "resultCount": "{count, plural, =0 {nenhum resultado} one {# resultado} other {# resultados}} em todos os módulos",
       "resultCountForQuery": "{count, plural, =0 {nenhum resultado} one {# resultado} other {# resultados}} para «{query}» em todos os módulos",
       "empty": {
-        "title": "O que a IA se lembra do seu trabalho",
-        "why": "Preenche-se sozinho à medida que fala com o Chat — o que vale a pena guardar fica aqui, para não explicar o seu negócio em cada conversa."
+        "title": "Ainda não registou nada, por isso não há nada para encontrar",
+        "why": "Pesquisa em todos os módulos ao mesmo tempo: ideias, contactos, despesas, operações. Enche-se à medida que usa as outras páginas; aqui não há nada de seu."
       },
       "truncated": "A mostrar os primeiros {shown} de {total} resultados — refine a sua pesquisa."
     },
@@ -2092,6 +2093,68 @@
       "untouched": "Não foram usados créditos.",
       "refunded": "Os créditos reservados foram devolvidos.",
       "charged": "Foram usados os créditos do trabalho já feito."
+    }
+  },
+  "help": {
+    "agents": {
+      "is": "Um agente é uma tarefa que corre segundo um horário, sem si.",
+      "does": "Descreve a tarefa uma vez: corre quando definiu, envia-lhe o resultado por email e guarda o histórico de cada execução.",
+      "doesNot": "Não corre sem limite. Há um teto de execuções por hora e de agentes por plano, e cada execução custa créditos."
+    },
+    "websiteBuilder": {
+      "is": "Um site inteiro, gerado a partir de uma descrição.",
+      "does": "Escreve as páginas, os textos e o layout a partir do que descrever, e continua a alterá-lo por palavras.",
+      "doesNot": "Não coloca nada na internet. Um site gerado fica privado até o publicar."
+    },
+    "published": {
+      "is": "Os sites que colocou no ar.",
+      "does": "Publicar dá ao site um endereço que qualquer pessoa pode abrir, e conta aqui as suas visitas.",
+      "doesNot": "Não lhe dá um domínio próprio. Hoje o endereço é um caminho neste site, não oseudominio.com — apontar um domínio real é um passo separado."
+    },
+    "files": {
+      "is": "Os seus documentos, legíveis pela IA.",
+      "does": "Carregue um PDF, Word, Excel, CSV ou texto: o texto é extraído e pode fazer perguntas sobre os que escolher.",
+      "doesNot": "Não lê digitalizações. Um PDF que é uma fotografia de uma página não tem texto para extrair e precisa de OCR primeiro, e documentos muito longos são lidos até um limite."
+    },
+    "deepResearch": {
+      "is": "Investigação que lhe custaria várias horas.",
+      "does": "Mostra-lhe primeiro o plano, depois faz o trabalho e volta com fontes que pode verificar.",
+      "doesNot": "Não responde enquanto espera. Corre em segundo plano — saia da página, feche o separador, continua e está aqui quando voltar."
+    },
+    "memory": {
+      "is": "Uma pesquisa sobre tudo o que registou.",
+      "does": "Percorre todos os módulos ao mesmo tempo — ideias, contactos, despesas, operações, sites — e leva-o diretamente à entrada.",
+      "doesNot": "Não guarda as suas conversas nem retém nada de seu. Tudo o que está aqui foi escrito por si num módulo; a IA não acrescenta nada."
+    },
+    "mission": {
+      "is": "Um objetivo, dividido em passos com data.",
+      "does": "Escreve o objetivo: sai um plano para ir marcando, e qualquer passo pode ser dado à IA ou agendado para um dia.",
+      "doesNot": "Não se executa sozinho. Um plano fica parado até correr um passo ou agendá-lo — nada acontece só porque o tempo passou."
+    },
+    "integrations": {
+      "is": "As suas contas, ligadas para que a IA possa ler delas.",
+      "does": "O Gmail e o Google Drive ligam-se apenas para leitura. O Slack lê os canais para onde convidar a aplicação, e os agentes podem publicar lá os resultados.",
+      "doesNot": "Não envia os seus emails, não responde por si e não apaga nada. Nunca vê canais privados do Slack nem mensagens diretas."
+    },
+    "team": {
+      "is": "As pessoas que partilham consigo este espaço de trabalho.",
+      "does": "Convida por email; cada pessoa entra com a sua própria conta e vê os mesmos dados.",
+      "doesNot": "Não é gratuito nem é o seu acesso. Os lugares são cobrados por pessoa, e ninguém precisa alguma vez da sua palavra-passe."
+    },
+    "timeline": {
+      "is": "Tudo o que fez, do mais recente para trás.",
+      "does": "Escreve-se sozinho a partir de cada módulo, para responder a «o que fiz no mês passado» sem abrir cinco páginas.",
+      "doesNot": "Aqui não escreve. É um registo, não um diário — as entradas aparecem porque as registou noutro sítio, e a ordem é a de quando aconteceram."
+    },
+    "favorites": {
+      "is": "A lista curta que construiu com estrelas.",
+      "does": "Tudo o que marcar em qualquer sítio aparece aqui, agrupado pela origem, para que aquilo a que volta sempre fique a um clique.",
+      "doesNot": "A estrela não copia nem move nada. São as mesmas entradas, mostradas outra vez — se editar aqui, editou o original."
+    },
+    "marketplace": {
+      "is": "O sítio onde as pessoas vão partilhar os agentes, modelos de site e fluxos que criaram.",
+      "does": "Ainda nada. Esta página guarda o lugar de uma funcionalidade que não foi construída.",
+      "doesNot": "Não está vazia por causa do seu plano, e mudar de plano não a vai abrir. O botão abaixo está desativado porque não há nada por trás dele."
     }
   }
 }

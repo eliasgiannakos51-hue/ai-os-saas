@@ -62,7 +62,7 @@ export default async function MemoryPage() {
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={MEMORY_ICON} title={t("title")} />
+          <PageHeader helpKey="help.memory" icon={MEMORY_ICON} title={t("title")} />
           <UpgradeRequired featureName={t("title")} planName={getPlan("starter")?.name ?? "Starter"} />
         </div>
       </main>

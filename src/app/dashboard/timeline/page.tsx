@@ -80,7 +80,7 @@ export default async function TimelinePage({
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={TIMELINE_ICON} title={t("title")} />
+        <PageHeader helpKey="help.timeline" icon={TIMELINE_ICON} title={t("title")} />
         <TimelineFilters moduleSlug={moduleSlug} range={range} />
         {sessionDegraded ? (
           <ErrorMessage message={tMission("sessionExpired")} />

@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { GlowOrb } from "@/components/ui/glow-orb";
+import { HelpTip } from "@/components/ui/help-tip";
 
 // Shared by every page-level header (Home, module pages, Settings, Team,
 // Marketplace, AI Memory) — the ambient glow behind it is applied once
@@ -10,10 +11,21 @@ export function PageHeader({
   icon: Icon,
   title,
   description,
+  helpKey,
 }: {
   icon?: LucideIcon;
   title: string;
   description?: string;
+  /**
+   * Key prefix for the "?" beside the title — see lib/help-tips.ts, which
+   * is the registry of which pages have one and what wrong assumption
+   * each is there to correct.
+   *
+   * Here rather than per page so the control is always in the same place.
+   * A help affordance that moves between pages is one users stop looking
+   * for.
+   */
+  helpKey?: string;
 }) {
   return (
     <div className="relative mb-6 flex items-center gap-3">
@@ -24,7 +36,10 @@ export function PageHeader({
         </span>
       )}
       <div className="min-w-0">
-        <h1 className="truncate text-2xl font-bold text-foreground">{title}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="truncate text-2xl font-bold text-foreground">{title}</h1>
+          {helpKey && <HelpTip helpKey={helpKey} />}
+        </div>
         {description && <p className="mt-0.5 text-sm text-muted">{description}</p>}
       </div>
     </div>

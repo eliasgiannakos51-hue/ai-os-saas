@@ -33,7 +33,7 @@ export default async function FavoritesPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={Star} title={t("title")} description={t("description")} />
+        <PageHeader helpKey="help.favorites" icon={Star} title={t("title")} description={t("description")} />
         <FavoritesList groups={groups} />
       </div>
     </main>

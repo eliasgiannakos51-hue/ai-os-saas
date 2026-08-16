@@ -34,7 +34,7 @@ export default async function DeepResearchPage() {
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={Telescope} title={t("title")} description={t("description")} />
+          <PageHeader helpKey="help.deepResearch" icon={Telescope} title={t("title")} description={t("description")} />
           <UpgradeRequired featureName={t("title")} planName="Starter" />
         </div>
       </main>

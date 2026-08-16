@@ -48,7 +48,8 @@
     "previousPage": "Page précédente",
     "toggleMenu": "Afficher ou masquer le menu",
     "dismissToastAria": "{message} — appuyez sur Entrée pour ignorer",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "whatIsThisPage": "Qu'est-ce que cette page ?"
   },
   "sidebar": {
     "groups": {
@@ -774,8 +775,8 @@
       "resultCount": "{count, plural, =0 {aucun résultat} one {# résultat} other {# résultats}} dans tous les modules",
       "resultCountForQuery": "{count, plural, =0 {aucun résultat} one {# résultat} other {# résultats}} pour « {query} » dans tous les modules",
       "empty": {
-        "title": "Ce que l'IA retient de votre travail",
-        "why": "Cela se remplit tout seul au fil de vos échanges dans le Chat : les faits qui comptent sont conservés ici, pour ne pas réexpliquer votre activité à chaque fois."
+        "title": "Rien de consigné, donc rien à trouver",
+        "why": "Cela cherche dans tous les modules à la fois : idées, pistes, dépenses, positions. Cela se remplit à mesure que vous utilisez les autres pages ; rien ici ne lui appartient."
       },
       "truncated": "Affichage des {shown} premiers résultats sur {total} — affinez votre recherche."
     },
@@ -2092,6 +2093,68 @@
       "untouched": "Aucun crédit n'a été utilisé.",
       "refunded": "Les crédits réservés ont été restitués.",
       "charged": "Les crédits du travail déjà effectué ont été utilisés."
+    }
+  },
+  "help": {
+    "agents": {
+      "is": "Un agent est une tâche qui s'exécute selon un calendrier, sans vous.",
+      "does": "Vous décrivez la tâche une fois : elle s'exécute au moment prévu, vous envoie le résultat par e-mail et conserve l'historique de chaque exécution.",
+      "doesNot": "Il ne s'exécute pas sans limite. Il existe un plafond d'exécutions par heure et un nombre d'agents par formule, et chaque exécution coûte des crédits."
+    },
+    "websiteBuilder": {
+      "is": "Un site entier, généré à partir d'une description.",
+      "does": "Il écrit les pages, les textes et la mise en page à partir de votre description, et vous continuez à le modifier en langage courant.",
+      "doesNot": "Il ne met rien en ligne. Un site généré reste privé tant que vous ne le publiez pas vous-même."
+    },
+    "published": {
+      "is": "Les sites que vous avez mis en ligne.",
+      "does": "Publier donne au site une adresse que tout le monde peut ouvrir, et compte ses visiteurs ici.",
+      "doesNot": "Cela ne vous donne pas de domaine à vous. L'adresse est aujourd'hui un chemin sur ce site, pas votredomaine.com — y faire pointer un vrai domaine est une autre étape."
+    },
+    "files": {
+      "is": "Vos documents, lisibles par l'IA.",
+      "does": "Déposez un PDF, Word, Excel, CSV ou texte : le texte est extrait et vous posez des questions sur ceux que vous sélectionnez.",
+      "doesNot": "Il ne lit pas les scans. Un PDF qui est une photo de page n'a aucun texte à extraire et demande d'abord un OCR, et les documents très longs sont lus jusqu'à une limite."
+    },
+    "deepResearch": {
+      "is": "Une recherche qui vous coûterait plusieurs heures.",
+      "does": "Il vous montre d'abord son plan, puis fait le travail et revient avec des sources vérifiables.",
+      "doesNot": "Il ne répond pas pendant que vous attendez. Il tourne en arrière-plan : quittez la page, fermez l'onglet, il continue et vous attend au retour."
+    },
+    "memory": {
+      "is": "Une seule recherche sur tout ce que vous avez consigné.",
+      "does": "Elle parcourt tous les modules à la fois — idées, pistes, dépenses, positions, sites — et vous mène directement à l'entrée.",
+      "doesNot": "Elle ne stocke pas vos conversations et ne retient rien d'elle-même. Tout ici a été écrit par vous dans un module ; l'IA n'ajoute rien."
+    },
+    "mission": {
+      "is": "Un objectif, découpé en étapes datées.",
+      "does": "Vous écrivez l'objectif : un plan à cocher est produit, et chaque étape peut être confiée à l'IA ou programmée pour un jour donné.",
+      "doesNot": "Il ne s'exécute pas tout seul. Un plan reste immobile tant que vous ne lancez ni ne programmez une étape — rien ne se produit parce que le temps passe."
+    },
+    "integrations": {
+      "is": "Vos propres comptes, connectés pour que l'IA puisse y lire.",
+      "does": "Gmail et Google Drive sont connectés en lecture seule. Slack lit les canaux où vous invitez l'application, et les agents peuvent y publier leurs résultats.",
+      "doesNot": "Elle n'envoie pas vos e-mails, ne répond pas à votre place et ne supprime rien. Elle ne voit jamais les canaux Slack privés ni les messages directs."
+    },
+    "team": {
+      "is": "Les personnes qui partagent cet espace avec vous.",
+      "does": "Vous invitez par e-mail ; chacun se connecte avec son propre compte et voit les mêmes données.",
+      "doesNot": "Ce n'est ni gratuit ni votre identifiant. Les sièges sont facturés par personne, et personne n'a jamais besoin de votre mot de passe."
+    },
+    "timeline": {
+      "is": "Tout ce que vous avez fait, du plus récent au plus ancien.",
+      "does": "Cela s'écrit tout seul depuis chaque module : vous répondez à « qu'ai-je fait le mois dernier » sans ouvrir cinq pages.",
+      "doesNot": "Vous n'écrivez pas ici. C'est un relevé, pas un journal : les entrées apparaissent parce que vous les avez consignées ailleurs, et l'ordre est celui des faits."
+    },
+    "favorites": {
+      "is": "La liste courte que vous avez constituée avec les étoiles.",
+      "does": "Tout ce que vous marquez, où que ce soit, apparaît ici, regroupé par provenance, pour que l'essentiel soit à un clic.",
+      "doesNot": "L'étoile ne copie ni ne déplace rien. Ce sont les mêmes entrées, affichées une seconde fois : modifier ici, c'est modifier l'original."
+    },
+    "marketplace": {
+      "is": "L'endroit où l'on partagera les agents, modèles de sites et workflows créés.",
+      "does": "Rien pour l'instant. Cette page réserve la place d'une fonctionnalité qui n'existe pas encore.",
+      "doesNot": "Elle n'est pas vide à cause de votre formule, et changer de formule ne l'ouvrira pas. Le bouton ci-dessous est désactivé parce qu'il n'y a rien derrière."
     }
   }
 }

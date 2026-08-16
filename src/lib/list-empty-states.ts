@@ -106,11 +106,17 @@ export const LIST_EMPTY_STATES: ListEmptyState[] = [
     interactive: false,
     // Worth being precise about, because this one LOOKS interactive:
     // there is a text input right above the empty state. It is a SEARCH
-    // box, and this state means the account has no memories at all — so
-    // a button that typed into it would run a search over nothing and
-    // find nothing, every time, by construction. Memories are written by
-    // Chat as you talk to it; the next step is a conversation, not a
-    // keystroke here.
+    // box over every module's rows, and this state means nothing has been
+    // logged anywhere — so a button that typed into it would search an
+    // empty set and find nothing, every time, by construction. The next
+    // step is logging something on another page.
+    //
+    // The NAME is the trap here, and it caught me while writing this
+    // module's own copy: "AI Memory" reads as "what the AI remembers
+    // about me", and the first version of the empty state said memories
+    // were written by Chat. They are not — dashboard/memory/page.tsx
+    // reads CLASSIFIER_MODULES and BUILD_MODULES and no conversation is
+    // involved at any point. help.memory.doesNot now says so out loud.
     whyNot: "the only input is a search box, and this state means there is nothing to search",
   },
   {

@@ -743,7 +743,6 @@
       "emailPlaceholder": "kollege@firma.com",
       "sendInvite": "Einladung senden",
       "sending": "Wird gesendet...",
-      "noMembers": "Noch keine Teammitglieder — lade oben jemanden ein.",
       "inviteSent": "Einladung an {email} gesendet.",
       "inviteFailed": "Einladung konnte nicht gesendet werden.",
       "active": "Aktiv",
@@ -761,7 +760,11 @@
       "rolePlaceholder": "Was macht diese Person?",
       "workUseDisclaimer": "Teamplätze sind für tatsächliche Mitarbeiter oder Mitarbeitende gedacht, die an deinem Unternehmen arbeiten — nicht für den persönlichen/familiären Gebrauch. Mit der Einladung eines Mitglieds bestätigst du, dass es Teil der Arbeit deines Teams ist.",
       "memberRemoved": "✓ Mitglied entfernt",
-      "couldNotRemoveMember": "✗ Mitglied konnte nicht entfernt werden"
+      "couldNotRemoveMember": "✗ Mitglied konnte nicht entfernt werden",
+      "empty": {
+        "title": "Es wurde noch niemand eingeladen",
+        "why": "Lad jemanden per E-Mail ein — er bekommt einen eigenen Zugang zu diesem Workspace: dieselben Daten, unter seinem Konto, nicht mit deinem Passwort."
+      }
     },
     "memory": {
       "title": "KI-Gedächtnis",
@@ -769,15 +772,16 @@
       "searchPlaceholder": "Durchsuche alles, was du erfasst hast...",
       "resultCount": "{count, plural, =0 {keine Treffer} one {# Treffer} other {# Treffer}} in allen Modulen",
       "resultCountForQuery": "{count, plural, =0 {keine Treffer} one {# Treffer} other {# Treffer}} für „{query}“ in allen Modulen",
-      "empty": "Noch nichts erfasst — sobald du die Module nutzt, kannst du sie von hier aus alle durchsuchen.",
+      "empty": {
+        "title": "Was die KI über deine Arbeit weiß",
+        "why": "Füllt sich von selbst, während du mit dem Chat sprichst — was es wert ist, bleibt hier, damit du dein Geschäft nicht in jedem Gespräch neu erklärst."
+      },
       "truncated": "Es werden die ersten {shown} von {total} Treffern gezeigt — grenze deine Suche weiter ein."
     },
     "documents": {
       "title": "Dokumente",
       "description": "Freie Notizen und Dokumente — schreib einfach los, wird automatisch gespeichert.",
       "newDocument": "Neues Dokument",
-      "emptyTitle": "Noch keine Dokumente",
-      "emptyHint": "Erstelle dein erstes Dokument, um mit dem Schreiben zu beginnen.",
       "untitled": "Unbenannt",
       "titlePlaceholder": "Unbenanntes Dokument",
       "contentPlaceholder": "Beginn zu schreiben…",
@@ -791,7 +795,12 @@
       "heading1": "Überschrift 1",
       "heading2": "Überschrift 2",
       "bulletList": "Aufzählungsliste",
-      "updatedAt": "Bearbeitet {when}"
+      "updatedAt": "Bearbeitet {when}",
+      "empty": {
+        "title": "Ein leeres Blatt, das sich erinnert",
+        "why": "Längere Texte, die bei deiner Arbeit bleiben — ein Briefing, ein Entwurf, Besprechungsnotizen — durchsuchbar neben allem anderen.",
+        "example": "Notizen aus dem Meeting am Montag"
+      }
     },
     "chat": {
       "title": "Ionexa Chat",
@@ -832,13 +841,19 @@
       "rangeWeek": "Diese Woche",
       "rangeMonth": "Diesen Monat",
       "rangeAll": "Gesamter Zeitraum",
-      "emptyState": "Noch keine Einträge in diesem Zeitraum."
+      "empty": {
+        "title": "Deine Arbeit, in der Reihenfolge, in der sie passierte",
+        "why": "Das schreibt sich von selbst. Alles, was du in irgendeinem Modul erfasst, landet hier in einem Strom — so beantwortest du \"was habe ich letzten Monat eigentlich getan\"."
+      }
     },
     "favorites": {
       "title": "Favoriten",
       "description": "Alles, was du markiert hast, aus allen Modulen, an einem Ort.",
-      "emptyState": "Noch nichts favorisiert — tippe auf den Stern eines Eintrags, um ihn hier zu speichern.",
-      "starredAt": "Gemerkt {when}"
+      "starredAt": "Gemerkt {when}",
+      "empty": {
+        "title": "Die Auswahl, die du noch nicht getroffen hast",
+        "why": "Drück den Stern auf irgendetwas — eine Idee, einen Lead, eine Site — und es landet hier: die paar Dinge, zu denen du ständig zurückkehrst, sind einen Klick entfernt statt fünf."
+      }
     },
     "mission": {
       "title": "Missionskontrolle",
@@ -848,7 +863,6 @@
       "goalPlaceholder": "z. B. Ich möchte einen Online-Shop für handgefertigten Schmuck starten",
       "createPlan": "Plan Erstellen",
       "planning": "Planung...",
-      "emptyState": "Noch keine Missionen — mit „Neue Mission“ ein Ziel beschreiben und den ersten Plan erhalten.",
       "createWithAi": "Mit KI Erstellen",
       "creating": "Erstellen...",
       "openWebsiteBuilder": "Website-Builder öffnen",
@@ -898,7 +912,12 @@
         "heldBack": "{count} anspruchsvollere Schritte vorerst zurückgestellt"
       },
       "stillPlanning": "Plant noch — das dauert etwas. Es läuft weiter, und der Plan steht in deiner Missionsliste, sobald er fertig ist.",
-      "planStalled": "Der Plan wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen."
+      "planStalled": "Der Plan wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
+      "empty": {
+        "title": "Ein Ziel, in Schritte zerlegt",
+        "why": "Sag, was du erreichen willst — daraus wird ein Plan mit datierten Schritten zum Abhaken, keine Wunschliste.",
+        "example": "Die ersten 10 zahlenden Kunden gewinnen"
+      }
     },
     "reflection": {
       "title": "Wöchentliche Reflexion",
@@ -997,7 +1016,6 @@
       "downloadButton": "HTML Herunterladen",
       "deleteButton": "Löschen",
       "deleted": "Website gelöscht",
-      "emptyState": "Noch keine Websites — mit „Neue Website“ die erste erzeugen.",
       "editLabel": "Änderung anfordern",
       "editPlaceholder": "z. B. Mach den Hero-Bereich größer oder ändere die Farben zu Blau.",
       "editButton": "Änderungen anwenden",
@@ -1055,14 +1073,22 @@
       },
       "imageIntro": "Ihr Logo, Produktfotos, Bilder vom Laden — alles, was auf die Seite soll oder den Stil vorgeben darf.",
       "regenerateAlreadyUsed": "Sie haben die kostenlose Neuerstellung für diese Website bereits genutzt. Erstellen Sie eine neue Website mit einer anderen Beschreibung.",
-      "regenerateNoBrief": "Diese Website entstand, bevor wir die ursprüngliche Beschreibung gespeichert haben, daher ist keine automatische Neuerstellung möglich. Erstellen Sie eine neue Website mit derselben Beschreibung."
+      "regenerateNoBrief": "Diese Website entstand, bevor wir die ursprüngliche Beschreibung gespeichert haben, daher ist keine automatische Neuerstellung möglich. Erstellen Sie eine neue Website mit derselben Beschreibung.",
+      "empty": {
+        "title": "Beschreib die Website, bekomm die Website",
+        "why": "Schreib, wofür sie da ist und für wen — Seiten, Texte und Layout entstehen aus dieser Beschreibung, und du änderst sie weiter in normalen Worten.",
+        "example": "Einseitige Website für eine Bäckerei, mit Sortiment und Öffnungszeiten"
+      }
     },
     "marketplace": {
       "title": "Marktplatz",
       "description": "Kaufe und verkaufe Agents, Automatisierungen und Vorlagen — bald verfügbar.",
-      "emptyState": "Noch keine Angebote — sei der Erste, der veröffentlicht.",
       "comingSoon": "Bald verfügbar",
-      "publishButton": "Vorlage Veröffentlichen"
+      "publishButton": "Vorlage Veröffentlichen",
+      "empty": {
+        "title": "Der Marketplace ist noch nicht offen",
+        "why": "Geplant ist, dass Leute ihre Agents, Website-Vorlagen und Workflows teilen können. Hier läuft noch nichts — der Button unten ist deaktiviert, weil es die Funktion noch nicht gibt, nicht wegen deines Tarifs."
+      }
     },
     "automation": {
       "realizeSectionTitle": "Eine Idee real machen",
@@ -1211,8 +1237,6 @@
       "discard": "Verwerfen",
       "createSuccess": "Agent erstellt — er startet beim nächsten geplanten Lauf.",
       "createError": "Der Agent konnte nicht erstellt werden. Bitte erneut versuchen.",
-      "emptyTitle": "Noch keine Agenten",
-      "emptyHint": "Beschreiben Sie etwas, das regelmäßig für Sie erledigt werden soll — Ionexa baut den Agenten.",
       "statusActive": "Aktiv",
       "statusPaused": "Pausiert",
       "statusDisabled": "Abgeschaltet",
@@ -1265,7 +1289,12 @@
         "monthly": "Am {day}. jedes Monats um {time}",
         "custom": "Zeitplan: {expression}"
       },
-      "buildStalled": "Die Erstellung wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen."
+      "buildStalled": "Die Erstellung wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
+      "empty": {
+        "title": "Arbeit, die ohne dich passiert",
+        "why": "Beschreib eine Aufgabe in einem Satz — sie läuft danach nach Zeitplan und liefert das Ergebnis, statt dich daran zu erinnern.",
+        "example": "Jeden Montagmorgen die Verkäufe der Vorwoche zusammenfassen"
+      }
     },
     "publishing": {
       "title": "Veröffentlichte Seiten",
@@ -1274,8 +1303,6 @@
       "goToBuilder": "Website-Builder",
       "sitesUsed": "{used} von {cap} live",
       "sitesUsedUnlimited": "{used} live",
-      "emptyTitle": "Noch nichts veröffentlicht",
-      "emptyHint": "Öffnen Sie eine fertige Seite im Builder und klicken Sie auf Veröffentlichen — sie bekommt sofort eine Live-Adresse.",
       "publish": "Veröffentlichen",
       "republish": "Erneut veröffentlichen",
       "publishNow": "Veröffentlichen",
@@ -1324,7 +1351,11 @@
       "reasonTaken": "Diese Adresse ist bereits vergeben. Probiere eine andere.",
       "disabledFlagged": "Diese Website wurde von unserer Sicherheitsprüfung zurückgehalten und kann nicht online gehen. Details siehe unten — Sie können sie einmal kostenlos neu erstellen lassen.",
       "disabledFailed": "Diese Website wurde nicht fertiggestellt, es gibt also noch nichts zu veröffentlichen.",
-      "disabledGenerating": "Wird noch erstellt. Sie können sie veröffentlichen, sobald sie fertig ist."
+      "disabledGenerating": "Wird noch erstellt. Sie können sie veröffentlichen, sobald sie fertig ist.",
+      "empty": {
+        "title": "Es ist noch nichts online",
+        "why": "Eine Website, die du baust, bleibt privat, bis du sie veröffentlichst. Danach bekommt sie eine echte Adresse, und ihre Besucherzahlen stehen hier."
+      }
     },
     "integrations": {
       "title": "Integrationen",
@@ -1498,7 +1529,11 @@
       "confirmDelete": "Bericht zu {name} löschen? Ein daraus entstandenes Dokument bleibt erhalten.",
       "deleteSuccess": "Bericht gelöscht",
       "deleteError": "Der Bericht konnte nicht gelöscht werden.",
-      "empty": "Noch keine Berichte. Beschreibe oben ein Thema, um zu sehen, was recherchiert würde.",
+      "empty": {
+        "title": "Frag etwas, das echtes Graben braucht",
+        "why": "Eine Frage, die Stunden kostet: hier siehst du zuerst den Plan, dann wird die Arbeit gemacht und kommt mit Quellen zurück.",
+        "example": "Wer verkauft das noch in Griechenland, und zu welchem Preis"
+      },
       "usedThisMonth": "{used} von {cap} in diesem Monat",
       "usedUnlimited": "{used} in diesem Monat",
       "capReached": "Du hast die Berichte dieses Monats aufgebraucht. Zurücksetzung am 1.",

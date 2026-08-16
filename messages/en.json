@@ -743,7 +743,6 @@
       "emailPlaceholder": "teammate@company.com",
       "sendInvite": "Send Invite",
       "sending": "Sending...",
-      "noMembers": "No team members yet — invite someone above.",
       "inviteSent": "Invite sent to {email}.",
       "inviteFailed": "Could not send the invite.",
       "active": "Active",
@@ -761,7 +760,11 @@
       "rolePlaceholder": "What does this person do?",
       "workUseDisclaimer": "Team seats are intended for actual employees or collaborators working on your business — not personal/family use. By inviting a member, you confirm they are part of your team's work.",
       "memberRemoved": "✓ member removed",
-      "couldNotRemoveMember": "✗ could not remove member"
+      "couldNotRemoveMember": "✗ could not remove member",
+      "empty": {
+        "title": "Nobody else has been invited yet",
+        "why": "Invite someone by email and they get their own sign-in to this workspace — the same data, under their own account, not your password."
+      }
     },
     "memory": {
       "title": "AI Memory",
@@ -769,15 +772,16 @@
       "searchPlaceholder": "Search everything you've logged...",
       "resultCount": "{count, plural, =0 {no results} one {# result} other {# results}} across every module",
       "resultCountForQuery": "{count, plural, =0 {no results} one {# result} other {# results}} for \"{query}\" across every module",
-      "empty": "Nothing logged yet — once you start using the modules, you'll be able to search across all of them here.",
+      "empty": {
+        "title": "What the AI remembers about your work",
+        "why": "This fills itself as you talk to Chat — the facts worth keeping are saved here, so you do not explain your business again every conversation."
+      },
       "truncated": "Showing the first {shown} of {total} matches — refine your search to narrow it down."
     },
     "documents": {
       "title": "Documents",
       "description": "Freeform notes and documents — write anything, it saves as you go.",
       "newDocument": "New Document",
-      "emptyTitle": "No documents yet",
-      "emptyHint": "Create your first document to start writing.",
       "untitled": "Untitled",
       "titlePlaceholder": "Untitled document",
       "contentPlaceholder": "Start writing…",
@@ -791,7 +795,12 @@
       "heading1": "Heading 1",
       "heading2": "Heading 2",
       "bulletList": "Bullet list",
-      "updatedAt": "Edited {when}"
+      "updatedAt": "Edited {when}",
+      "empty": {
+        "title": "A blank page that remembers",
+        "why": "Long-form writing that stays with your work — a brief, a draft, meeting notes — searchable next to everything else you have logged.",
+        "example": "Notes from Monday's meeting"
+      }
     },
     "chat": {
       "title": "Ionexa Chat",
@@ -832,13 +841,19 @@
       "rangeWeek": "This Week",
       "rangeMonth": "This Month",
       "rangeAll": "All Time",
-      "emptyState": "No entries in this range yet."
+      "empty": {
+        "title": "Your work, in the order it happened",
+        "why": "This writes itself. Everything you log in any module lands here in one stream, which is how you answer \"what did I actually do last month\"."
+      }
     },
     "favorites": {
       "title": "Favorites",
       "description": "Everything you've starred, across every module, in one place.",
-      "emptyState": "Nothing starred yet — tap the star on any entry to save it here.",
-      "starredAt": "Starred {when}"
+      "starredAt": "Starred {when}",
+      "empty": {
+        "title": "The shortlist you have not made yet",
+        "why": "Press the star on anything — an idea, a lead, a site — and it lands here, so the handful you keep coming back to are one click away instead of five."
+      }
     },
     "mission": {
       "title": "Mission Control",
@@ -848,7 +863,6 @@
       "goalPlaceholder": "e.g. I want to start an online store for handmade jewelry",
       "createPlan": "Create Plan",
       "planning": "Planning...",
-      "emptyState": "No missions yet — use \"New Mission\" to describe a goal and get your first plan.",
       "createWithAi": "Create with AI",
       "creating": "Creating...",
       "openWebsiteBuilder": "Open Website Builder",
@@ -898,7 +912,12 @@
         "heldBack": "{count} heavier steps held back for now"
       },
       "stillPlanning": "Still planning — this is taking a while. It will keep going, and the plan will be on your missions list when it is ready.",
-      "planStalled": "That plan stopped unexpectedly. No credits were charged — please try again."
+      "planStalled": "That plan stopped unexpectedly. No credits were charged — please try again.",
+      "empty": {
+        "title": "One goal, broken into steps",
+        "why": "Say what you are trying to achieve and this turns it into a plan with dated steps you can tick off — not a wish list.",
+        "example": "Get the first 10 paying customers"
+      }
     },
     "reflection": {
       "title": "Weekly Reflection",
@@ -997,7 +1016,6 @@
       "downloadButton": "Download HTML",
       "deleteButton": "Delete",
       "deleted": "Website deleted",
-      "emptyState": "No websites yet — use \"New Website\" to generate your first.",
       "editLabel": "Request a change",
       "editPlaceholder": "e.g. Make the hero section bigger, or change the colors to blue.",
       "editButton": "Apply changes",
@@ -1055,14 +1073,22 @@
       },
       "imageIntro": "Your logo, product shots, photos of the place — anything you want on the page or want the style taken from.",
       "regenerateAlreadyUsed": "You’ve already used the free regeneration for this site. Create a new website to try a different brief.",
-      "regenerateNoBrief": "This site was made before we started saving the original brief, so it can’t be regenerated automatically. Create a new website with the same description."
+      "regenerateNoBrief": "This site was made before we started saving the original brief, so it can’t be regenerated automatically. Create a new website with the same description.",
+      "empty": {
+        "title": "Describe the site, get the site",
+        "why": "Write what the site is for and who it is for — the pages, the copy and the layout are generated from that description, and you can keep editing in plain words.",
+        "example": "A one-page site for a small bakery, with menu and hours"
+      }
     },
     "marketplace": {
       "title": "Marketplace",
       "description": "Buy and sell agents, automations, and templates — coming soon.",
-      "emptyState": "No listings yet — be the first to publish.",
       "comingSoon": "Coming soon",
-      "publishButton": "Publish a Template"
+      "publishButton": "Publish a Template",
+      "empty": {
+        "title": "The Marketplace is not open yet",
+        "why": "The plan is to let people share the agents, website templates and workflows they have built. Nothing here is live — the button below is disabled because the feature does not exist yet, not because of your plan."
+      }
     },
     "automation": {
       "realizeSectionTitle": "Make an idea real",
@@ -1211,8 +1237,6 @@
       "discard": "Discard",
       "createSuccess": "Agent created — it starts on its next scheduled run.",
       "createError": "Could not create the agent. Please try again.",
-      "emptyTitle": "No agents yet",
-      "emptyHint": "Describe something you want done for you regularly, and Ionexa builds the agent.",
       "statusActive": "Active",
       "statusPaused": "Paused",
       "statusDisabled": "Switched off",
@@ -1265,7 +1289,12 @@
         "monthly": "Day {day} of each month at {time}",
         "custom": "Schedule: {expression}"
       },
-      "buildStalled": "That build stopped unexpectedly. No credits were charged — please try again."
+      "buildStalled": "That build stopped unexpectedly. No credits were charged — please try again.",
+      "empty": {
+        "title": "Work that happens without you",
+        "why": "Describe a job in one sentence and it runs on a schedule from then on, delivering the result rather than reminding you to do it.",
+        "example": "Every Monday morning, summarise last week's sales"
+      }
     },
     "publishing": {
       "title": "Published Sites",
@@ -1274,8 +1303,6 @@
       "goToBuilder": "Website Builder",
       "sitesUsed": "{used} of {cap} live",
       "sitesUsedUnlimited": "{used} live",
-      "emptyTitle": "Nothing published yet",
-      "emptyHint": "Open a finished site in the Website Builder and press Publish — it gets a live address straight away.",
       "publish": "Publish",
       "republish": "Publish again",
       "publishNow": "Publish",
@@ -1324,7 +1351,11 @@
       "reasonTaken": "That address is already taken. Try a different one.",
       "disabledFlagged": "This site was held by our safety review, so it can’t go live. See the details below — you can regenerate it once for free.",
       "disabledFailed": "This site didn’t finish generating, so there’s nothing to publish yet.",
-      "disabledGenerating": "Still generating. You can publish as soon as it’s finished."
+      "disabledGenerating": "Still generating. You can publish as soon as it’s finished.",
+      "empty": {
+        "title": "Nothing is live yet",
+        "why": "A site you build stays private until you publish it. When you do, it gets a real address and its visitor numbers show up here."
+      }
     },
     "integrations": {
       "title": "Integrations",
@@ -1498,7 +1529,11 @@
       "confirmDelete": "Delete the report on {name}? Any document it produced is kept.",
       "deleteSuccess": "Report deleted",
       "deleteError": "The report could not be deleted.",
-      "empty": "No reports yet. Describe a topic above to see what it would research.",
+      "empty": {
+        "title": "Ask something that takes real digging",
+        "why": "A question worth several hours: this reads a plan back to you first, then goes and does the work and comes back with sources.",
+        "example": "Who else sells this in Greece, and at what price"
+      },
       "usedThisMonth": "{used} of {cap} this month",
       "usedUnlimited": "{used} this month",
       "capReached": "You have used this month's research reports. It resets on the 1st.",

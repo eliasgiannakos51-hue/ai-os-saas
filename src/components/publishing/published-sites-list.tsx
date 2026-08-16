@@ -182,9 +182,10 @@ export function PublishedSitesList({
         }
       >
         {sites.length === 0 ? (
-          <EmptyState icon={Globe}>
-            <p className="text-base font-semibold text-foreground">{t("emptyTitle")}</p>
-            <p className="mt-1 text-sm text-muted">{t("emptyHint")}</p>
+          /* No example: you publish a site that already exists, from the
+             Website Builder. There is nothing on this page to type into. */
+          <EmptyState icon={Globe} title={t("empty.title")}>
+            {t("empty.why")}
           </EmptyState>
         ) : filtered.length === 0 ? (
           <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>

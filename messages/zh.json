@@ -743,7 +743,6 @@
       "emailPlaceholder": "teammate@company.com",
       "sendInvite": "发送邀请",
       "sending": "发送中...",
-      "noMembers": "目前还没有团队成员——在上方邀请一位吧。",
       "inviteSent": "邀请已发送至 {email}。",
       "inviteFailed": "邀请发送失败。",
       "active": "活跃",
@@ -761,7 +760,11 @@
       "rolePlaceholder": "此人负责什么工作?",
       "workUseDisclaimer": "团队席位仅供实际在您企业工作的员工或合作者使用 — 不可用于个人/家庭用途。邀请成员即表示您确认其为团队工作的一部分。",
       "memberRemoved": "✓ 已移除成员",
-      "couldNotRemoveMember": "✗ 无法移除成员"
+      "couldNotRemoveMember": "✗ 无法移除成员",
+      "empty": {
+        "title": "还没有邀请任何人",
+        "why": "用邮箱邀请同事，他们会有自己的登录方式进入这个工作区——同样的数据，用他们自己的账号，而不是你的密码。"
+      }
     },
     "memory": {
       "title": "AI 记忆",
@@ -769,15 +772,16 @@
       "searchPlaceholder": "搜索你记录过的一切...",
       "resultCount": "在所有模块中共 {count} 条结果",
       "resultCountForQuery": "在所有模块中共 {count} 条与“{query}”匹配的结果",
-      "empty": "还没有任何记录——一旦你开始使用各个模块，就可以在这里统一搜索。",
+      "empty": {
+        "title": "AI 记住的关于你工作的事",
+        "why": "你和 Chat 聊天时它自己会填——值得留下的事实存在这里，省得你每次对话都重新介绍一遍自己的生意。"
+      },
       "truncated": "显示 {total} 条匹配结果中的前 {shown} 条——请细化搜索条件。"
     },
     "documents": {
       "title": "文档",
       "description": "自由形式的笔记和文档 — 随意书写,边写边自动保存。",
       "newDocument": "新建文档",
-      "emptyTitle": "还没有文档",
-      "emptyHint": "创建你的第一个文档,开始写作。",
       "untitled": "无标题",
       "titlePlaceholder": "无标题文档",
       "contentPlaceholder": "开始写作…",
@@ -791,7 +795,12 @@
       "heading1": "标题 1",
       "heading2": "标题 2",
       "bulletList": "项目符号列表",
-      "updatedAt": "编辑于 {when}"
+      "updatedAt": "编辑于 {when}",
+      "empty": {
+        "title": "一张会记事的空白页",
+        "why": "长篇的东西，和你的工作放在一起——一份需求、一版草稿、会议记录——和其他记录一起可搜。",
+        "example": "周一会议记录"
+      }
     },
     "chat": {
       "title": "Ionexa 聊天",
@@ -832,13 +841,19 @@
       "rangeWeek": "本周",
       "rangeMonth": "本月",
       "rangeAll": "所有时间",
-      "emptyState": "此时间段内暂无记录。"
+      "empty": {
+        "title": "你的工作，按发生的先后排好",
+        "why": "它自己会写。你在任何模块里记的东西都会汇到这一条流里——「上个月我到底做了什么」就是这么答的。"
+      }
     },
     "favorites": {
       "title": "收藏",
       "description": "所有模块中你加星标的内容，都在这里集中展示。",
-      "emptyState": "还没有收藏 — 点击任意条目的星标即可保存到这里。",
-      "starredAt": "收藏于 {when}"
+      "starredAt": "收藏于 {when}",
+      "empty": {
+        "title": "你还没挑出来的那几个",
+        "why": "在任何东西上点一下星标——一个想法、一条线索、一个站点——它就会出现在这里，常回头看的那几个从此只隔一次点击。"
+      }
     },
     "mission": {
       "title": "任务控制中心",
@@ -848,7 +863,6 @@
       "goalPlaceholder": "例如:我想开一家手工珠宝在线商店",
       "createPlan": "创建计划",
       "planning": "规划中...",
-      "emptyState": "还没有任务——点击「新建任务」描述一个目标并获取第一份计划。",
       "createWithAi": "用 AI 创建",
       "creating": "创建中...",
       "openWebsiteBuilder": "打开网站构建器",
@@ -898,7 +912,12 @@
         "heldBack": "暂时搁置了 {count} 个较重的步骤"
       },
       "stillPlanning": "仍在规划中——需要一点时间。它会继续运行，完成后计划会出现在你的任务列表里。",
-      "planStalled": "该计划意外中断。未扣除任何积分——请重试。"
+      "planStalled": "该计划意外中断。未扣除任何积分——请重试。",
+      "empty": {
+        "title": "一个目标，拆成若干步",
+        "why": "说出你想达成什么，这里会把它变成有日期、可勾选的计划，而不是一张愿望清单。",
+        "example": "拿下头 10 个付费客户"
+      }
     },
     "reflection": {
       "title": "每周回顾",
@@ -997,7 +1016,6 @@
       "downloadButton": "下载 HTML",
       "deleteButton": "删除",
       "deleted": "网站已删除",
-      "emptyState": "还没有网站——点击「新建网站」生成第一个。",
       "editLabel": "请求修改",
       "editPlaceholder": "例如：把主视觉区域放大，或把颜色改成蓝色。",
       "editButton": "应用更改",
@@ -1055,14 +1073,22 @@
       },
       "imageIntro": "你的标志、产品照片、店内照片——想放到页面上的，或想让它决定风格的。",
       "regenerateAlreadyUsed": "您已使用过此站点的免费重新生成。请用其他描述创建新站点。",
-      "regenerateNoBrief": "此站点创建于我们开始保存原始描述之前，因此无法自动重新生成。请用相同描述创建新站点。"
+      "regenerateNoBrief": "此站点创建于我们开始保存原始描述之前，因此无法自动重新生成。请用相同描述创建新站点。",
+      "empty": {
+        "title": "描述这个网站，拿到这个网站",
+        "why": "写清它是做什么的、给谁看——页面、文案和排版都由这段描述生成，之后还能用大白话继续改。",
+        "example": "面包店的单页网站，含产品和营业时间"
+      }
     },
     "marketplace": {
       "title": "市场",
       "description": "买卖代理、自动化和模板 — 即将推出。",
-      "emptyState": "还没有商品 — 成为第一个发布的人。",
       "comingSoon": "即将推出",
-      "publishButton": "发布模板"
+      "publishButton": "发布模板",
+      "empty": {
+        "title": "市场还没有开放",
+        "why": "计划是让大家分享自己做的 agent、网站模板和工作流。这里还没有任何东西上线——下方的按钮是灰的，因为功能还不存在，跟你的套餐无关。"
+      }
     },
     "automation": {
       "realizeSectionTitle": "将想法变为现实",
@@ -1211,8 +1237,6 @@
       "discard": "放弃",
       "createSuccess": "智能体已创建——将在下一次计划运行时启动。",
       "createError": "无法创建智能体，请重试。",
-      "emptyTitle": "还没有智能体",
-      "emptyHint": "描述你希望定期完成的事情，Ionexa 会替你搭建智能体。",
       "statusActive": "运行中",
       "statusPaused": "已暂停",
       "statusDisabled": "已关闭",
@@ -1265,7 +1289,12 @@
         "monthly": "每月 {day} 号 {time}",
         "custom": "计划：{expression}"
       },
-      "buildStalled": "创建意外中断。未扣除任何积分——请重试。"
+      "buildStalled": "创建意外中断。未扣除任何积分——请重试。",
+      "empty": {
+        "title": "不用你动手也会发生的工作",
+        "why": "用一句话描述一件事，之后它就按时自己跑，直接把结果交给你，而不是提醒你去做。",
+        "example": "每周一早上，汇总上周的销售情况"
+      }
     },
     "publishing": {
       "title": "已发布网站",
@@ -1274,8 +1303,6 @@
       "goToBuilder": "网站生成器",
       "sitesUsed": "{used} / {cap} 个在线",
       "sitesUsedUnlimited": "{used} 个在线",
-      "emptyTitle": "还没有发布任何网站",
-      "emptyHint": "在网站生成器中打开已完成的网站并点击“发布”，立刻就能获得一个在线地址。",
       "publish": "发布",
       "republish": "重新发布",
       "publishNow": "发布",
@@ -1324,7 +1351,11 @@
       "reasonTaken": "该网址已被占用，请换一个。",
       "disabledFlagged": "此站点被安全审核暂留，因此无法上线。请查看下方详情 — 您可以免费重新生成一次。",
       "disabledFailed": "此站点尚未生成完成，暂无内容可发布。",
-      "disabledGenerating": "正在生成。完成后即可发布。"
+      "disabledGenerating": "正在生成。完成后即可发布。",
+      "empty": {
+        "title": "还没有任何站点上线",
+        "why": "你做的网站在发布前一直是私有的。发布之后它会有一个真实网址，访问量也会显示在这里。"
+      }
     },
     "integrations": {
       "title": "集成",
@@ -1498,7 +1529,11 @@
       "confirmDelete": "删除关于 {name} 的报告？它生成的文档会被保留。",
       "deleteSuccess": "报告已删除",
       "deleteError": "无法删除该报告。",
-      "empty": "还没有报告。在上方描述一个主题，看看它会研究什么。",
+      "empty": {
+        "title": "问一个真要下功夫查的问题",
+        "why": "值得花几小时的问题：先把调研计划给你看，然后真的去查，带着出处回来。",
+        "example": "在希腊还有谁在卖这个，卖什么价"
+      },
       "usedThisMonth": "本月 {cap} 次中的 {used} 次",
       "usedUnlimited": "本月 {used} 次",
       "capReached": "你已用完本月的研究报告额度，将于每月 1 日重置。",

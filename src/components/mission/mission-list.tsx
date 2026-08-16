@@ -46,6 +46,7 @@ export function MissionList({
   const tModule = useTranslations("module");
   const tCommon = useTranslations("common");
   const [showForm, setShowForm] = useState(missions.length === 0);
+  const [prefill, setPrefill] = useState<{ text: string; nonce: number } | null>(null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selected, setSelected] = useState<{ id: string; tab: MissionDetailTab } | null>(null);
@@ -103,7 +104,7 @@ export function MissionList({
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </button>
-              <MissionForm onCreated={() => setShowForm(false)} />
+              <MissionForm onCreated={() => setShowForm(false)} prefill={prefill} />
             </div>
           ) : (
             <button
@@ -143,7 +144,20 @@ export function MissionList({
         }
       >
         {missions.length === 0 ? (
-          <EmptyState icon={Rocket}>{t("emptyState")}</EmptyState>
+          // The form is already on this page — collapsed when there are
+          // missions, open when there are none — so the press only has to
+          // make sure it is open and hand it the goal.
+          <EmptyState
+            icon={Rocket}
+            title={t("empty.title")}
+            example={t("empty.example")}
+            onExample={(text) => {
+              setShowForm(true);
+              setPrefill((current) => ({ text, nonce: (current?.nonce ?? 0) + 1 }));
+            }}
+          >
+            {t("empty.why")}
+          </EmptyState>
         ) : filtered.length === 0 ? (
           <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>
         ) : (

@@ -33,7 +33,7 @@
 // work, so that is checked too.
 //
 // Run: node scripts/tests/empty-states.test.mjs
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 
 let pass = 0;
 const failures = [];
@@ -229,7 +229,111 @@ check("Ideas is wired the same way", /onExample=\{\(text\)/.test(ideasSection));
 check("its list offers the example", /tIdeas\("empty\.example"\)/.test(ideasList));
 check("and its form fills in the name", /name: prefill\.text/.test(ideasForm));
 
-console.log("\n== 7. the two surfaces that are not modules ==");
+console.log("\n== 7. the eleven list surfaces that are not modules ==");
+// The modules were the easy half: they share a config, so a required
+// field could carry the guarantee. Mission Control, the Website Builder,
+// Deep Research, Documents, Agents, Memory, Team, Favourites, Published
+// Sites, Timeline and the Marketplace are eleven separate components with
+// eleven different shapes, so the guarantee is a registry
+// (lib/list-empty-states.ts) plus this check.
+const { LIST_EMPTY_STATES, listEmptyStateKey } = await loadTs("src/lib/list-empty-states.ts");
+const INTERACTIVE = LIST_EMPTY_STATES.filter((e) => e.interactive);
+const STATIC = LIST_EMPTY_STATES.filter((e) => !e.interactive);
+console.log(`        ${LIST_EMPTY_STATES.length} surfaces: ${INTERACTIVE.length} interactive, ${STATIC.length} not`);
+check(`all eleven are registered (${LIST_EMPTY_STATES.length})`, LIST_EMPTY_STATES.length === 11);
+check("every entry names a file that exists", LIST_EMPTY_STATES.every((e) => existsSync(e.file)));
+
+// (a) Every surface answers, in every language. title and why always;
+//     example if and only if the surface is interactive — an absent
+//     example on a static surface is the POINT, so it is asserted absent
+//     rather than merely not required.
+for (const locale of LOCALES) {
+  const missing = [];
+  const surplus = [];
+  for (const entry of LIST_EMPTY_STATES) {
+    for (const part of ["title", "why"]) {
+      if (typeof lookup(messages[locale], listEmptyStateKey(entry, part)) !== "string") {
+        missing.push(listEmptyStateKey(entry, part));
+      }
+    }
+    const example = lookup(messages[locale], listEmptyStateKey(entry, "example"));
+    if (entry.interactive && typeof example !== "string") missing.push(listEmptyStateKey(entry, "example"));
+    if (!entry.interactive && example !== undefined) surplus.push(`${entry.id} (not interactive)`);
+  }
+  checkList(`${locale}: every registered part resolves`, missing, []);
+  checkList(`${locale}: no static surface carries an unusable example`, surplus, []);
+}
+
+// (b) why is not title, and no two surfaces say the same thing.
+for (const locale of LOCALES) {
+  const echoes = LIST_EMPTY_STATES.filter(
+    (e) => lookup(messages[locale], listEmptyStateKey(e, "title")) ===
+           lookup(messages[locale], listEmptyStateKey(e, "why"))
+  ).map((e) => e.id);
+  checkList(`${locale}: no surface's reason merely repeats its title`, echoes, []);
+  const titles = LIST_EMPTY_STATES.map((e) => lookup(messages[locale], listEmptyStateKey(e, "title")));
+  const whys = LIST_EMPTY_STATES.map((e) => lookup(messages[locale], listEmptyStateKey(e, "why")));
+  check(`${locale}: no two surfaces share a title (${new Set(titles).size}/${titles.length})`, new Set(titles).size === titles.length);
+  check(`${locale}: nor a reason (${new Set(whys).size}/${whys.length})`, new Set(whys).size === whys.length);
+}
+// And none of them collides with a module's, which is how a shared string
+// creeps back in under a new name.
+{
+  const moduleTitles = new Set(ALL.map((m) => lookup(messages.en, emptyStateKey(m, "title"))));
+  const clashes = LIST_EMPTY_STATES
+    .filter((e) => moduleTitles.has(lookup(messages.en, listEmptyStateKey(e, "title"))))
+    .map((e) => e.id);
+  checkList("no list surface reuses a module's title", clashes, []);
+}
+
+// (c) The component really renders those keys. Without this the registry
+//     is a claim about the code rather than a fact about it.
+for (const entry of LIST_EMPTY_STATES) {
+  const src = readFileSync(entry.file, "utf8");
+  const leaf = entry.keyPrefix.split(".").slice(-1)[0];
+  check(
+    `${entry.id}: the component renders ${leaf}.title and ${leaf}.why`,
+    src.includes(`"${leaf}.title"`) && src.includes(`"${leaf}.why"`),
+    entry.file
+  );
+  // The retired single-string keys are gone from the component AND from
+  // the catalogue, so nothing can quietly render the old sentence.
+  check(
+    `${entry.id}: no hardcoded English is left in its empty state`,
+    !/<EmptyState[^>]*>\s*[A-Z][a-z]+ [a-z]/.test(src),
+    entry.file
+  );
+}
+
+// (d) THE TWO GROUPS, ENFORCED IN BOTH DIRECTIONS.
+//
+// A button that fills nothing is worse than no button, and a page that
+// could accept the text but does not offer it is a page teaching by
+// telling. So an interactive surface MUST pass onExample and a static one
+// MUST NOT — and every static entry has to say why in the registry, in
+// prose, next to the flag.
+for (const entry of INTERACTIVE) {
+  const src = readFileSync(entry.file, "utf8");
+  check(`${entry.id}: presses through to ${entry.fills ?? "its field"}`, /onExample=\{/.test(src), entry.file);
+  check(`${entry.id}: and says what it fills`, typeof entry.fills === "string" && entry.fills.length > 20);
+}
+for (const entry of STATIC) {
+  const src = readFileSync(entry.file, "utf8");
+  // Scoped to the empty-state block: some of these files legitimately
+  // contain the word elsewhere.
+  const emptyBlock = src.slice(src.indexOf(`${entry.keyPrefix.split(".").slice(-1)[0]}.title`));
+  check(
+    `${entry.id}: offers NO button — ${entry.whyNot ?? "(no reason given)"}`,
+    !/onExample=\{/.test(emptyBlock.slice(0, 900)),
+    entry.file
+  );
+  check(
+    `${entry.id}: and the reason is written down, not remembered`,
+    typeof entry.whyNot === "string" && entry.whyNot.length > 20
+  );
+}
+
+console.log("\n== 8. the two surfaces that are neither ==");
 // Files and Integrations are lists too, and a new account sees both. They
 // were answering "you have no files" and "you have connected nothing"
 // with the SEARCH message — telling a first-time user that their empty

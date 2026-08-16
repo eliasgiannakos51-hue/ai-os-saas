@@ -89,6 +89,7 @@ export function ResearchWorkspace({
 
   const [reports, setReports] = useState(initialReports);
   const [topic, setTopic] = useState("");
+  const topicRef = useRef<HTMLTextAreaElement | null>(null);
   const [planning, setPlanning] = useState(false);
   const [draft, setDraft] = useState<{ report: ResearchReport; credits: number } | null>(null);
   const [running, setRunning] = useState<string | null>(null);
@@ -282,6 +283,7 @@ export function ResearchWorkspace({
         </label>
         <textarea
           id="research-topic"
+          ref={topicRef}
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           placeholder={t("topicPlaceholder")}
@@ -364,7 +366,21 @@ export function ResearchWorkspace({
       )}
 
       {reports.length === 0 ? (
-        <EmptyState icon={Telescope}>{t("empty")}</EmptyState>
+        <EmptyState
+          icon={Telescope}
+          title={t("empty.title")}
+          example={t("empty.example")}
+          // The topic box is a few centimetres up the same page, so the
+          // press writes into it directly and puts the caret at the end —
+          // no state to lift, no form to open.
+          onExample={(text) => {
+            setTopic(text);
+            topicRef.current?.focus();
+            topicRef.current?.setSelectionRange(text.length, text.length);
+          }}
+        >
+          {t("empty.why")}
+        </EmptyState>
       ) : (
         <CardGrid>
           {reports.map((report, index) => (

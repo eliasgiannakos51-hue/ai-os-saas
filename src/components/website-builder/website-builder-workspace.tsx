@@ -204,6 +204,18 @@ export function WebsiteBuilderWorkspace({
   const [websites, setWebsites] = useState<UserWebsite[]>(initialWebsites);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  // The description field only exists once showForm is true, and React has
+  // not committed that render when the handler returns — so the focus is a
+  // separate effect, same shape as generic-add-form.tsx.
+  const [prefillNonce, setPrefillNonce] = useState(0);
+  const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
+  useEffect(() => {
+    if (prefillNonce === 0) return;
+    const field = descriptionRef.current;
+    if (!field) return;
+    field.focus();
+    field.setSelectionRange(field.value.length, field.value.length);
+  }, [prefillNonce]);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(initialWebsites[0]?.id ?? null);
@@ -1314,6 +1326,7 @@ export function WebsiteBuilderWorkspace({
                 </label>
                 <textarea
                   id="website-description"
+                  ref={descriptionRef}
                   required
                   maxLength={MAX_DESCRIPTION_LENGTH}
                   value={description}
@@ -1472,7 +1485,21 @@ export function WebsiteBuilderWorkspace({
         }
       >
         {websites.length === 0 ? (
-          <EmptyState icon={Layout}>{t("emptyState")}</EmptyState>
+          <EmptyState
+            icon={Layout}
+            title={t("empty.title")}
+            example={t("empty.example")}
+            // The brief IS the description field — that is the input the
+            // generator reads — so the press opens the form and writes
+            // there, rather than into the name box above it.
+            onExample={(text) => {
+              setShowForm(true);
+              setDescription(text.slice(0, MAX_DESCRIPTION_LENGTH));
+              setPrefillNonce((n) => n + 1);
+            }}
+          >
+            {t("empty.why")}
+          </EmptyState>
         ) : filteredWebsites.length === 0 ? (
           <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>
         ) : (

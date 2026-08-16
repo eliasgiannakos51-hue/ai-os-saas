@@ -58,7 +58,13 @@ export function FavoritesList({ groups }: { groups: FavoriteGroup[] }) {
   );
 
   if (groups.length === 0) {
-    return <EmptyState icon={Star}>{t("emptyState")}</EmptyState>;
+    // No example: a favourite is made by pressing the star on an item,
+    // which is somewhere else entirely. Nothing on this page receives text.
+    return (
+      <EmptyState icon={Star} title={t("empty.title")}>
+        {t("empty.why")}
+      </EmptyState>
+    );
   }
 
   return (

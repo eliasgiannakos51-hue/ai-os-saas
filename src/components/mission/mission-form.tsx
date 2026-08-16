@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Rocket } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -18,12 +18,32 @@ const MAX_GOAL_LENGTH = 20000;
 // row. router.refresh() afterward re-fetches the mission list server-side
 // (dashboard/mission/page.tsx), same pattern as every other add-form in
 // this app.
-export function MissionForm({ onCreated }: { onCreated?: () => void } = {}) {
+export function MissionForm({
+  onCreated,
+  prefill,
+}: {
+  onCreated?: () => void;
+  /**
+   * A worked example pressed on the empty screen. Same contract as
+   * GenericAddForm's: keyed on a nonce so a second press of the same
+   * example is a second request rather than a no-op.
+   */
+  prefill?: { text: string; nonce: number } | null;
+} = {}) {
   const t = useTranslations("dashboard.mission");
   const router = useRouter();
   const { refresh: refreshCredits } = useCredits();
   const { addToast } = useToast();
   const [goal, setGoal] = useState("");
+  const goalRef = useRef<HTMLTextAreaElement | null>(null);
+  const nonce = prefill?.nonce;
+  useEffect(() => {
+    if (nonce === undefined || !prefill) return;
+    setGoal(prefill.text);
+    goalRef.current?.focus();
+    goalRef.current?.setSelectionRange(prefill.text.length, prefill.text.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonce]);
   const [outOfCredits, setOutOfCredits] = useState(false);
   const [pendingConfirm, setPendingConfirm] = useState(false);
   // Live estimate from the SAME estimator the server reserves against, at
@@ -120,6 +140,7 @@ export function MissionForm({ onCreated }: { onCreated?: () => void } = {}) {
       <div className="flex flex-col gap-2">
         <textarea
           id="mission-goal"
+          ref={goalRef}
           required
           maxLength={MAX_GOAL_LENGTH}
           value={goal}

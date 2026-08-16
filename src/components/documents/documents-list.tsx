@@ -8,7 +8,7 @@ import { ListLayout } from "@/components/ui/list-layout";
 import { EmptyState } from "@/components/empty-state";
 import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";
-import { NewDocumentButton } from "@/components/documents/new-document-button";
+import { NewDocumentButton, useCreateDocument } from "@/components/documents/new-document-button";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { DeleteButton } from "@/components/delete-button";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
@@ -41,6 +41,7 @@ export function DocumentsList({
   const tModule = useTranslations("module");
   const formatRelativeTime = useFormatRelativeTime();
   const [query, setQuery] = useState("");
+  const { create: createDocument } = useCreateDocument();
   const favorited = useMemo(() => new Set(favoritedIds), [favoritedIds]);
 
   const sortable = useMemo(
@@ -73,9 +74,17 @@ export function DocumentsList({
       }
     >
       {documents.length === 0 ? (
-        <EmptyState icon={FileText}>
-          <p className="text-base font-semibold text-foreground">{t("emptyTitle")}</p>
-          <p className="mt-1 text-sm text-muted">{t("emptyHint")}</p>
+        /* The example creates a document ALREADY CALLED that and opens the
+           editor on it — the "field" it fills is the document's title, which
+           is why POST /api/documents now accepts one. The plain New Document
+           button stays beside it: an example is an offer, not the only way in. */
+        <EmptyState
+          icon={FileText}
+          title={t("empty.title")}
+          example={t("empty.example")}
+          onExample={(text) => void createDocument(text)}
+        >
+          {t("empty.why")}
           <div className="mt-5 flex justify-center">
             <NewDocumentButton label={t("newDocument")} large />
           </div>

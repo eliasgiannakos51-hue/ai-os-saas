@@ -61,7 +61,13 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
       )}
 
       {results.length === 0 ? (
-        <EmptyState>{t("empty")}</EmptyState>
+        /* No example, and this is the one that looks like it should have
+           one: there IS a text input directly above. It is a SEARCH box,
+           and this branch means the account has no memories at all — so a
+           button that filled it would run a search over nothing and find
+           nothing, every single time. Memories are written by Chat as you
+           use it; the next step is a conversation, not a keystroke here. */
+        <EmptyState title={t("empty.title")}>{t("empty.why")}</EmptyState>
       ) : filtered.length === 0 ? (
         <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>
       ) : (

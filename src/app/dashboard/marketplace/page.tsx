@@ -33,8 +33,13 @@ export default async function MarketplacePage() {
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader icon={MARKETPLACE_ICON} title={t("title")} description={t("description")} />
 
-        <EmptyState icon={Store}>
-          <p>{t("emptyState")}</p>
+        {/* No worked example, and this page is the clearest case for why:
+            its own action is rendered DISABLED with a "Coming Soon" badge,
+            because the feature does not exist. A pressable example under a
+            disabled button would be the page contradicting itself in the
+            same breath. */}
+        <EmptyState icon={Store} title={t("empty.title")}>
+          <p>{t("empty.why")}</p>
           <div className="mt-4 flex flex-col items-center gap-2">
             <button
               type="button"

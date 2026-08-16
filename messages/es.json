@@ -743,7 +743,6 @@
       "emailPlaceholder": "compañero@empresa.com",
       "sendInvite": "Enviar invitación",
       "sending": "Enviando...",
-      "noMembers": "Todavía no hay miembros en el equipo — invita a alguien arriba.",
       "inviteSent": "Invitación enviada a {email}.",
       "inviteFailed": "No se pudo enviar la invitación.",
       "active": "Activo",
@@ -761,7 +760,11 @@
       "rolePlaceholder": "¿Qué hace esta persona?",
       "workUseDisclaimer": "Los puestos de equipo están destinados a empleados o colaboradores reales que trabajan en tu negocio, no para uso personal/familiar. Al invitar a un miembro, confirmas que forma parte del trabajo de tu equipo.",
       "memberRemoved": "✓ miembro eliminado",
-      "couldNotRemoveMember": "✗ no se pudo eliminar el miembro"
+      "couldNotRemoveMember": "✗ no se pudo eliminar el miembro",
+      "empty": {
+        "title": "Todavía no ha invitado a nadie",
+        "why": "Invite a alguien por correo y tendrá su propio acceso a este espacio: los mismos datos, bajo su cuenta, no con su contraseña."
+      }
     },
     "memory": {
       "title": "Memoria AI",
@@ -769,15 +772,16 @@
       "searchPlaceholder": "Busca en todo lo que has registrado...",
       "resultCount": "{count, plural, =0 {ningún resultado} one {# resultado} other {# resultados}} en todos los módulos",
       "resultCountForQuery": "{count, plural, =0 {ningún resultado} one {# resultado} other {# resultados}} para «{query}» en todos los módulos",
-      "empty": "Todavía no has registrado nada — en cuanto empieces a usar los módulos, podrás buscar en todos ellos desde aquí.",
+      "empty": {
+        "title": "Lo que la IA recuerda de su trabajo",
+        "why": "Se llena solo mientras habla con el Chat: los datos que merece la pena guardar quedan aquí, para no explicar su negocio en cada conversación."
+      },
       "truncated": "Se muestran los primeros {shown} de {total} resultados — afina tu búsqueda para reducirlos."
     },
     "documents": {
       "title": "Documentos",
       "description": "Notas y documentos libres — escribe lo que quieras, se guarda mientras escribes.",
       "newDocument": "Nuevo Documento",
-      "emptyTitle": "Aún no hay documentos",
-      "emptyHint": "Crea tu primer documento para empezar a escribir.",
       "untitled": "Sin título",
       "titlePlaceholder": "Documento sin título",
       "contentPlaceholder": "Empieza a escribir…",
@@ -791,7 +795,12 @@
       "heading1": "Encabezado 1",
       "heading2": "Encabezado 2",
       "bulletList": "Lista con viñetas",
-      "updatedAt": "Editado {when}"
+      "updatedAt": "Editado {when}",
+      "empty": {
+        "title": "Una página en blanco con memoria",
+        "why": "Textos largos que viven junto a su trabajo —un briefing, un borrador, notas de reunión— y se buscan al lado de todo lo demás.",
+        "example": "Notas de la reunión del lunes"
+      }
     },
     "chat": {
       "title": "Ionexa Chat",
@@ -832,13 +841,19 @@
       "rangeWeek": "Esta semana",
       "rangeMonth": "Este mes",
       "rangeAll": "Todo el tiempo",
-      "emptyState": "Aún no hay entradas en este período."
+      "empty": {
+        "title": "Su trabajo, en el orden en que ocurrió",
+        "why": "Se escribe solo. Todo lo que registra en cualquier módulo llega aquí en un único flujo, que es como se responde a «qué hice realmente el mes pasado»."
+      }
     },
     "favorites": {
       "title": "Favoritos",
       "description": "Todo lo que has marcado con estrella, de todos los módulos, en un solo lugar.",
-      "emptyState": "Aún no hay favoritos — toca la estrella de cualquier entrada para guardarla aquí.",
-      "starredAt": "Guardado {when}"
+      "starredAt": "Guardado {when}",
+      "empty": {
+        "title": "La lista corta que aún no ha hecho",
+        "why": "Pulse la estrella en cualquier cosa —una idea, un contacto, un sitio— y aparecerá aquí, para que lo que consulta a diario esté a un clic y no a cinco."
+      }
     },
     "mission": {
       "title": "Centro de Misión",
@@ -848,7 +863,6 @@
       "goalPlaceholder": "ej. Quiero abrir una tienda online de joyería artesanal",
       "createPlan": "Crear Plan",
       "planning": "Planificando...",
-      "emptyState": "Aún no hay misiones: usa «Nueva misión» para describir un objetivo y obtener tu primer plan.",
       "createWithAi": "Crear con IA",
       "creating": "Creando...",
       "openWebsiteBuilder": "Abrir Website Builder",
@@ -898,7 +912,12 @@
         "heldBack": "{count} pasos más exigentes aplazados por ahora"
       },
       "stillPlanning": "Sigue planificando — está tardando. Continuará, y el plan estará en tu lista de misiones cuando esté listo.",
-      "planStalled": "El plan se detuvo inesperadamente. No se cobraron créditos — inténtalo de nuevo."
+      "planStalled": "El plan se detuvo inesperadamente. No se cobraron créditos — inténtalo de nuevo.",
+      "empty": {
+        "title": "Un objetivo, dividido en pasos",
+        "why": "Diga qué quiere conseguir y esto lo convierte en un plan con pasos fechados que puede ir marcando, no en una lista de deseos.",
+        "example": "Conseguir los 10 primeros clientes de pago"
+      }
     },
     "reflection": {
       "title": "Reflexión Semanal",
@@ -997,7 +1016,6 @@
       "downloadButton": "Descargar HTML",
       "deleteButton": "Eliminar",
       "deleted": "Sitio eliminado",
-      "emptyState": "Aún no hay sitios web: usa «Nuevo sitio web» para generar el primero.",
       "editLabel": "Solicitar un cambio",
       "editPlaceholder": "ej. Haz la sección hero más grande, o cambia los colores a azul.",
       "editButton": "Aplicar cambios",
@@ -1055,14 +1073,22 @@
       },
       "imageIntro": "Tu logo, fotos de producto o del local: lo que quieras que aparezca o que marque el estilo.",
       "regenerateAlreadyUsed": "Ya has usado la regeneración gratuita de este sitio. Crea un sitio nuevo con otra descripción.",
-      "regenerateNoBrief": "Este sitio se creó antes de que guardáramos la descripción original, así que no puede regenerarse automáticamente. Crea un sitio nuevo con la misma descripción."
+      "regenerateNoBrief": "Este sitio se creó antes de que guardáramos la descripción original, así que no puede regenerarse automáticamente. Crea un sitio nuevo con la misma descripción.",
+      "empty": {
+        "title": "Describa el sitio y tendrá el sitio",
+        "why": "Escriba para qué sirve y a quién va dirigido: las páginas, los textos y el diseño salen de esa descripción, y puede seguir editando con palabras normales.",
+        "example": "Sitio de una página para una panadería, con carta y horario"
+      }
     },
     "marketplace": {
       "title": "Mercado",
       "description": "Compra y vende agentes, automatizaciones y plantillas — próximamente.",
-      "emptyState": "Aún no hay anuncios — sé el primero en publicar.",
       "comingSoon": "Próximamente",
-      "publishButton": "Publicar una Plantilla"
+      "publishButton": "Publicar una Plantilla",
+      "empty": {
+        "title": "El Marketplace aún no está abierto",
+        "why": "La idea es que la gente comparta los agentes, plantillas de sitios y flujos que ha creado. Aquí no hay nada activo: el botón de abajo está desactivado porque la función todavía no existe, no por su plan."
+      }
     },
     "automation": {
       "realizeSectionTitle": "Hacer realidad una idea",
@@ -1211,8 +1237,6 @@
       "discard": "Descartar",
       "createSuccess": "Agente creado: empezará en su próxima ejecución programada.",
       "createError": "No se pudo crear el agente. Inténtalo de nuevo.",
-      "emptyTitle": "Todavía no hay agentes",
-      "emptyHint": "Describe algo que quieras que se haga con regularidad e Ionexa construye el agente.",
       "statusActive": "Activo",
       "statusPaused": "En pausa",
       "statusDisabled": "Desactivado",
@@ -1265,7 +1289,12 @@
         "monthly": "El día {day} de cada mes a las {time}",
         "custom": "Programación: {expression}"
       },
-      "buildStalled": "La creación se detuvo inesperadamente. No se cobraron créditos — inténtalo de nuevo."
+      "buildStalled": "La creación se detuvo inesperadamente. No se cobraron créditos — inténtalo de nuevo.",
+      "empty": {
+        "title": "Trabajo que ocurre sin usted",
+        "why": "Describa una tarea en una frase y se ejecutará con una periodicidad fija, entregándole el resultado en vez de recordarle que la haga.",
+        "example": "Cada lunes por la mañana, resumen de las ventas de la semana"
+      }
     },
     "publishing": {
       "title": "Sitios publicados",
@@ -1274,8 +1303,6 @@
       "goToBuilder": "Creador de sitios",
       "sitesUsed": "{used} de {cap} en vivo",
       "sitesUsedUnlimited": "{used} en vivo",
-      "emptyTitle": "Todavía no has publicado nada",
-      "emptyHint": "Abre un sitio terminado en el creador y pulsa Publicar: recibe una dirección en vivo al instante.",
       "publish": "Publicar",
       "republish": "Publicar de nuevo",
       "publishNow": "Publicar",
@@ -1324,7 +1351,11 @@
       "reasonTaken": "Esa dirección ya está ocupada. Prueba con otra.",
       "disabledFlagged": "Nuestra revisión de seguridad ha retenido este sitio, así que no puede publicarse. Consulta los detalles abajo: puedes regenerarlo una vez gratis.",
       "disabledFailed": "Este sitio no terminó de generarse, así que todavía no hay nada que publicar.",
-      "disabledGenerating": "Aún se está generando. Podrás publicarlo en cuanto termine."
+      "disabledGenerating": "Aún se está generando. Podrás publicarlo en cuanto termine.",
+      "empty": {
+        "title": "Todavía no hay nada publicado",
+        "why": "Un sitio que crea permanece privado hasta que lo publique. Cuando lo haga, recibirá una dirección real y sus visitas aparecerán aquí."
+      }
     },
     "integrations": {
       "title": "Integraciones",
@@ -1498,7 +1529,11 @@
       "confirmDelete": "¿Eliminar el informe sobre {name}? El documento que generó se conserva.",
       "deleteSuccess": "Informe eliminado",
       "deleteError": "No se pudo eliminar el informe.",
-      "empty": "Aún no hay informes. Describe un tema arriba para ver qué investigaría.",
+      "empty": {
+        "title": "Pregunte algo que exija investigar de verdad",
+        "why": "Una pregunta de varias horas: primero le enseña el plan, después hace el trabajo y vuelve con fuentes.",
+        "example": "Quién más vende esto en Grecia y a qué precio"
+      },
       "usedThisMonth": "{used} de {cap} este mes",
       "usedUnlimited": "{used} este mes",
       "capReached": "Has usado los informes de este mes. Se reinicia el día 1.",

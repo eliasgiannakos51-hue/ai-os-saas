@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Bot, Plus, Play, Pause, Pencil, Trash2, SearchX, History } from "lucide-react";
@@ -74,6 +74,7 @@ export function AgentsWorkspace({
   const [query, setQuery] = useState("");
   const [creating, setCreating] = useState(false);
   const [requestText, setRequestText] = useState("");
+  const requestRef = useRef<HTMLTextAreaElement | null>(null);
   // The id, not a boolean. "Am I building" is answered by the job row, so
   // it survives a reload — a `building` flag set by pressing a button is
   // exactly what made Deep Research look like it had stopped when the user
@@ -424,6 +425,7 @@ export function AgentsWorkspace({
               </label>
               <textarea
                 id="agent-request"
+                ref={requestRef}
                 value={requestText}
                 onChange={(e) => setRequestText(e.target.value)}
                 placeholder={t("requestPlaceholder")}
@@ -537,9 +539,17 @@ export function AgentsWorkspace({
         )}
 
         {agents.length === 0 ? (
-          <EmptyState icon={Bot}>
-            <p className="text-base font-semibold text-foreground">{t("emptyTitle")}</p>
-            <p className="mt-1 text-sm text-muted">{t("emptyHint")}</p>
+          <EmptyState
+            icon={Bot}
+            title={t("empty.title")}
+            example={t("empty.example")}
+            onExample={(text) => {
+              setRequestText(text);
+              requestRef.current?.focus();
+              requestRef.current?.setSelectionRange(text.length, text.length);
+            }}
+          >
+            {t("empty.why")}
           </EmptyState>
         ) : filtered.length === 0 ? (
           <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>

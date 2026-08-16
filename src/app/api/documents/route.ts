@@ -9,7 +9,24 @@ export const dynamic = "force-dynamic";
 // it and the client takes over from there via PATCH /api/documents/[id].
 // No AI call, no credit cost: this is user-authored freeform text, not a
 // generated artifact.
-export async function POST() {
+//
+// An OPTIONAL title may be posted. This took no body at all and always
+// wrote "Untitled", which made the worked example on the empty screen
+// ("Notes from Monday's meeting") a button that opened an editor on a
+// document called something else — the one thing an example must not do.
+// Length-capped and trimmed here rather than trusted: the client is not
+// the only thing that can call this.
+const MAX_TITLE_LENGTH = 200;
+
+function requestedTitle(body: unknown): string {
+  if (!body || typeof body !== "object") return "Untitled";
+  const raw = (body as { title?: unknown }).title;
+  if (typeof raw !== "string") return "Untitled";
+  const trimmed = raw.trim().slice(0, MAX_TITLE_LENGTH);
+  return trimmed || "Untitled";
+}
+
+export async function POST(request: Request) {
   try {
     const supabase = createClient();
     const {
@@ -32,9 +49,13 @@ export async function POST() {
       );
     }
 
+    // A malformed or absent body is not an error — it is the old,
+    // still-supported call, and it means "Untitled".
+    const body = await request.json().catch(() => null);
+
     const { data, error } = await supabase
       .from("user_documents")
-      .insert({ user_id: user.id, title: "Untitled", content: { html: "" } })
+      .insert({ user_id: user.id, title: requestedTitle(body), content: { html: "" } })
       .select("id")
       .single();
 

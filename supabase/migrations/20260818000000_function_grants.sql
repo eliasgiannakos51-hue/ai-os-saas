@@ -18,10 +18,26 @@
 -- anybody who knows its name until something revokes it. That is exactly
 -- how grant_credits ended up reachable by anon.
 --
--- SCOPE. public schema only, and only functions this project owns.
+-- SCOPE. public schema only, and only routines this project owns.
 -- Extension-owned functions (pg_trgm, unaccent, pgcrypto) are left alone:
 -- they are not reachable as RPC endpoints and revoking from them breaks
 -- the extensions' own operators.
+--
+-- FUNCTIONS, PROCEDURES AND AGGREGATES — all three, and the reason the
+-- list is not just functions is that the first version of this file WAS
+-- just functions. It filtered `prokind = 'f'`, which is exactly the shape
+-- of oversight it exists to prevent: a rule that covers the case somebody
+-- thought of. Measured on PostgreSQL 16 — a procedure and an aggregate
+-- created beside a plain function came out of that loop still executable
+-- by anon, while the function was locked.
+--
+-- The schema has no procedure and no aggregate today, so nothing was
+-- exposed. The point is the first one somebody adds: `create procedure` is
+-- ordinary SQL, PostgREST exposes procedures as RPC endpoints too, and
+-- there would have been nothing to notice.
+--
+-- REVOKE ON ROUTINE rather than ON FUNCTION, because that is the spelling
+-- that accepts all three.
 --
 -- IT RUNS LAST, and that is not cosmetic. This file was numbered
 -- 20260804000002 to begin with, third in the order. Against a clean clone
@@ -59,15 +75,18 @@ begin
      and d.deptype = 'e'          -- 'e' = owned by an extension
     where ns.nspname = 'public'
       and d.objid is null
-      and p.prokind = 'f'
+      -- 'f' function, 'p' procedure, 'a' aggregate, 'w' window. Window
+      -- functions in the public schema would be a surprise, and are
+      -- included rather than argued about.
+      and p.prokind in ('f', 'p', 'a', 'w')
   loop
-    execute format('revoke all on function %s from public', fn.sig);
-    execute format('revoke all on function %s from anon', fn.sig);
-    execute format('revoke all on function %s from authenticated', fn.sig);
-    execute format('grant execute on function %s to service_role', fn.sig);
+    execute format('revoke all on routine %s from public', fn.sig);
+    execute format('revoke all on routine %s from anon', fn.sig);
+    execute format('revoke all on routine %s from authenticated', fn.sig);
+    execute format('grant execute on routine %s to service_role', fn.sig);
     n_revoked := n_revoked + 1;
   end loop;
-  raise notice 'function grants normalised on % function(s)', n_revoked;
+  raise notice 'routine grants normalised on % routine(s)', n_revoked;
 end $$;
 
 -- THE EXCEPTIONS, stated rather than assumed.

@@ -98,7 +98,10 @@ checkList(
 );
 checkList(
   "and every one of them names the actual limit",
-  LOCALES.filter((l) => !messages[l].dashboard.files.questionAtLimit.includes("{max}"))
+  // `{max, number}`, not `{max}` — a bare placeholder printed
+  // "20000-character limit". The number is formatted per locale now, so
+  // the assertion is on the argument name rather than the whole tag.
+  LOCALES.filter((l) => !messages[l].dashboard.files.questionAtLimit.includes("{max"))
 );
 
 console.log("\n== 2. text past one window starts a pass, it is not dropped ==");

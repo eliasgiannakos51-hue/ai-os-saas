@@ -88,10 +88,14 @@ export function OfflineBanner() {
   return (
     <div
       data-testid="offline-banner"
+      // The right padding clears GlobalControls, which is `fixed right-3
+      // top-3` in the root layout. Without it the retry button sits
+      // underneath the language and theme buttons at 375px — measured in
+      // a screenshot, not guessed.
       // Assertive, not polite: the page underneath is stale and the
       // reader is entitled to be interrupted about it.
       role="alert"
-      className="sticky top-0 z-50 border-b border-amber-500/40 bg-amber-500/10 px-4 py-2.5 backdrop-blur"
+      className="sticky top-0 z-50 border-b border-amber-500/40 bg-amber-500/10 px-4 py-2.5 pr-28 backdrop-blur sm:pr-32"
     >
       <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-3 gap-y-1.5">
         <WifiOff className="h-4 w-4 shrink-0 text-amber-400" aria-hidden="true" />

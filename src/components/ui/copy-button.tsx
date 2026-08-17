@@ -109,7 +109,11 @@ export function CopyButton({
               }`)
         }
       >
-        <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+        {/* No icon next to the confirmation in the labelled form: the
+            string is "Copied ✓" — the tick is already in the words, and
+            a Check beside it renders "✓ Copied ✓". The icon form keeps
+            it, because there it is the only thing that changes. */}
+        {(variant === "icon" || !copied) && <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />}
         {variant === "button" && <span>{copied ? t("copied") : shown}</span>}
       </button>
       {/* Polite, and outside the button: a screen reader gets the

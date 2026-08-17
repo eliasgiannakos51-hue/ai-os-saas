@@ -39,8 +39,20 @@ export const MAX_EXTRACTED_CHARS = 600_000;
  *  only meets as a 400. */
 export const MAX_FILES_PER_QUESTION = 20;
 
-/** Longest question. Same reason as above — the textarea enforces it. */
-export const MAX_QUESTION_CHARS = 2_000;
+/** Longest question. Same reason as above — the textarea enforces it.
+ *
+ *  WAS 2,000, which is about 300 words. That is plenty for a question
+ *  and nowhere near enough for the thing people actually paste in: a
+ *  clause, a spec, a competitor's terms, followed by "how does this
+ *  compare to what my documents say". Those were rejected outright with
+ *  a 400 — the one shape of input a document-questioning tool has the
+ *  least excuse for refusing.
+ *
+ *  20,000 characters is roughly 5,000 tokens, which is noise next to the
+ *  400,000 characters of document text a single pass already carries. It
+ *  is not free — it is charged like any other input — but the cost is the
+ *  reason to SHOW it, not to refuse it. */
+export const MAX_QUESTION_CHARS = 20_000;
 
 /** Decompressed bytes we will accept out of a single DOCX/XLSX entry.
  *  A 20MB zip can expand to gigabytes; this is the ceiling that makes

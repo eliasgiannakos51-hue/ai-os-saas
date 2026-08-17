@@ -1472,7 +1472,7 @@
       "notInDocuments": "Die ausgewählten Dokumente beantworten das nicht. Nichts unten stammt daraus.",
       "citations": "Fundstellen in deinen Dokumenten",
       "removedCitations": "{count} Verweis(e) zeigten auf nicht gelieferte Seiten und wurden entfernt.",
-      "truncatedWarning": "Nur ein Teil der Auswahl passte, die Antwort kann unvollständig sein.",
+      "truncatedWarning": "Auch in Teilen gelesen war die Auswahl größer, als eine Frage abdecken kann, die Antwort kann also unvollständig sein. Frag nach weniger Dateien auf einmal.",
       "skippedFiles": "Übersprungen (kein lesbarer Text): {names}",
       "creditsCharged": "{credits} Credits",
       "stepsLabel": "So funktioniert diese Seite",
@@ -1497,7 +1497,10 @@
       "processingHint": "Die Datei wird gelesen — meist ein paar Sekunden. Sobald sie fertig ist, kannst du dazu fragen.",
       "failedHint": "Kein lesbarer Text gefunden. Lade eine Fassung mit auswählbarem Text hoch.",
       "askStillRunning": "Liest noch — das dauert etwas. Es läuft auch bei geschlossener Seite weiter; komm zurück und frage erneut, um die Antwort zu sehen.",
-      "askStalled": "Die Frage wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen."
+      "askStalled": "Die Frage wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
+      "questionLength": "{used} von {max} Zeichen",
+      "questionAtLimit": "Du hast das Limit von {max} Zeichen für eine Frage erreicht.",
+      "readInParts": "Deine Dokumente waren zu lang, um sie auf einmal zu lesen — sie wurden in {parts} Teilen gelesen und die Antworten zusammengeführt."
     },
     "deepResearch": {
       "title": "Tiefenrecherche",
@@ -2074,6 +2077,7 @@
     "file_ask": {
       "reading": "Ich lese deine Dateien…",
       "answering": "Ich stelle die Antwort zusammen…",
+      "combining": "Ich führe zusammen, was jeder Teil ergeben hat…",
       "checking": "Ich gleiche sie mit den Dateien ab…"
     }
   },

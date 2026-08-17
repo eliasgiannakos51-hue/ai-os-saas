@@ -1472,7 +1472,7 @@
       "notInDocuments": "所选文档无法回答这个问题。以下内容并非出自它们。",
       "citations": "文档中的出处",
       "removedCitations": "有 {count} 处引用指向未提供的页面，已被移除。",
-      "truncatedWarning": "仅有部分所选内容被纳入，答案可能不完整。",
+      "truncatedWarning": "即使分成几部分阅读，所选文档仍超出一个问题能覆盖的范围，答案可能不完整。请一次针对更少的文件提问。",
       "skippedFiles": "已跳过（无可读文本）：{names}",
       "creditsCharged": "{credits} 积分",
       "stepsLabel": "本页使用方法",
@@ -1497,7 +1497,10 @@
       "processingHint": "正在读取文件——通常只需几秒。准备好后即可提问。",
       "failedHint": "未找到可读文本。请上传文字可选中的版本。",
       "askStillRunning": "仍在阅读——需要一点时间。关闭页面后也会继续；稍后回来再问一次即可看到答案。",
-      "askStalled": "该问题意外中断。未扣除任何积分——请重试。"
+      "askStalled": "该问题意外中断。未扣除任何积分——请重试。",
+      "questionLength": "{used} / {max} 个字符",
+      "questionAtLimit": "单个问题已达到 {max} 个字符的上限。",
+      "readInParts": "你的文档太长，无法一次读完，因此分成 {parts} 部分阅读，再把答案合并。"
     },
     "deepResearch": {
       "title": "深度研究",
@@ -2074,6 +2077,7 @@
     "file_ask": {
       "reading": "正在读你的文件…",
       "answering": "正在组织答案…",
+      "combining": "正在合并各部分的结果…",
       "checking": "正在对照文件核实…"
     }
   },

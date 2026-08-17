@@ -1472,7 +1472,7 @@
       "notInDocuments": "I documenti selezionati non rispondono a questo. Nulla di seguito proviene da essi.",
       "citations": "Fonti nei tuoi documenti",
       "removedCitations": "{count} riferimento(i) puntavano a pagine non fornite e sono stati rimossi.",
-      "truncatedWarning": "È entrata solo una parte della selezione, quindi la risposta può essere incompleta.",
+      "truncatedWarning": "Anche letta a parti, la selezione superava quanto può coprire una singola domanda, quindi la risposta può essere incompleta. Chiedi di meno file per volta.",
       "skippedFiles": "Saltati (nessun testo leggibile): {names}",
       "creditsCharged": "{credits} crediti",
       "stepsLabel": "Come funziona questa pagina",
@@ -1497,7 +1497,10 @@
       "processingHint": "Sto leggendo il file — di solito pochi secondi. Potrai interrogarlo appena è pronto.",
       "failedHint": "Nessun testo leggibile trovato. Carica una versione con testo selezionabile.",
       "askStillRunning": "Sta ancora leggendo — ci vuole un po'. Continua anche a pagina chiusa; torna e richiedi per vedere la risposta.",
-      "askStalled": "La domanda si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova."
+      "askStalled": "La domanda si è interrotta inaspettatamente. Nessun credito è stato addebitato — riprova.",
+      "questionLength": "{used} di {max} caratteri",
+      "questionAtLimit": "Hai raggiunto il limite di {max} caratteri per una domanda.",
+      "readInParts": "I tuoi documenti erano troppo lunghi per essere letti in una volta: sono stati letti in {parts} parti e le risposte combinate."
     },
     "deepResearch": {
       "title": "Ricerca approfondita",
@@ -2074,6 +2077,7 @@
     "file_ask": {
       "reading": "Leggo i tuoi file…",
       "answering": "Compongo la risposta…",
+      "combining": "Combino quello che ha trovato ogni parte…",
       "checking": "La verifico sui file…"
     }
   },

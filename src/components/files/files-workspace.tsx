@@ -28,6 +28,7 @@ import {
   ACCEPT_ATTRIBUTE,
   MAX_FILE_BYTES,
   MAX_FILES_PER_QUESTION,
+  MAX_QUESTION_CHARS,
   formatBytes,
 } from "@/lib/files/file-types";
 
@@ -59,6 +60,9 @@ type Answer = {
   removedCitations: number;
   skippedFiles: string[];
   truncated: boolean;
+  /** How many passes the documents took to read. 1 for almost every
+   *  question; more means the answer was combined from parts. */
+  parts: number;
   credits: number;
   disclosure: string;
 };
@@ -273,6 +277,7 @@ export function FilesWorkspace({
         removedCitations: Number(data.removedCitations ?? 0),
         skippedFiles: (data.skippedFiles ?? []) as string[],
         truncated: Boolean(data.truncated),
+        parts: Number(data.parts ?? 1),
         credits: Number(outcome.creditsCharged ?? 0),
         disclosure: String(data.disclosure ?? ""),
       });
@@ -653,9 +658,31 @@ export function FilesWorkspace({
           onChange={(e) => setQuestion(e.target.value)}
           placeholder={t("askPlaceholder")}
           rows={3}
-          maxLength={2000}
+          maxLength={MAX_QUESTION_CHARS}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
         />
+
+        {/* THE LIMIT, WHERE IT CAN BE SEEN.
+            The textarea has always silently stopped accepting characters
+            at the cap. Silently is the problem: somebody pasting a long
+            clause gets a box that ignores their keystrokes with no
+            explanation, and the shorter the cap the more often that
+            happens. The cap is now 20,000 rather than 2,000, and it says
+            so — but only once the question is long enough for the number
+            to be worth reading, so a one-line question is not decorated
+            with a counter it will never approach. */}
+        {question.length >= MAX_QUESTION_CHARS / 2 && (
+          <p
+            data-testid="files-question-count"
+            className={`text-[11px] ${
+              question.length >= MAX_QUESTION_CHARS ? "text-amber-400" : "text-muted"
+            }`}
+          >
+            {question.length >= MAX_QUESTION_CHARS
+              ? t("questionAtLimit", { max: MAX_QUESTION_CHARS })
+              : t("questionLength", { used: question.length, max: MAX_QUESTION_CHARS })}
+          </p>
+        )}
 
         {/* EXAMPLE QUESTIONS, clickable.
             "What do these documents say about…?" as a placeholder tells
@@ -734,6 +761,16 @@ export function FilesWorkspace({
             {answer.removedCitations > 0 && (
               <p className="text-[11px] text-amber-400/90">
                 {t("removedCitations", { count: answer.removedCitations })}
+              </p>
+            )}
+            {/* Read in parts is a WEAKER guarantee than read whole: a
+                fact that only makes sense across two parts can be missed
+                by both. Said plainly rather than hidden, and separately
+                from the truncation warning, which now means something
+                much rarer — more text than five full passes could hold. */}
+            {answer.parts > 1 && !answer.truncated && (
+              <p data-testid="files-answer-parts" className="text-[11px] text-muted">
+                {t("readInParts", { parts: answer.parts })}
               </p>
             )}
             {answer.truncated && <p className="text-[11px] text-amber-400/90">{t("truncatedWarning")}</p>}

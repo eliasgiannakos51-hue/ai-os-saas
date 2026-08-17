@@ -1472,7 +1472,7 @@
       "notInDocuments": "Los documentos seleccionados no responden a esto. Nada de lo siguiente proviene de ellos.",
       "citations": "Fuentes en tus documentos",
       "removedCitations": "{count} referencia(s) apuntaban a páginas no suministradas y se eliminaron.",
-      "truncatedWarning": "Solo cupo parte de la selección, así que la respuesta puede estar incompleta.",
+      "truncatedWarning": "Incluso leída por partes, la selección superaba lo que cubre una sola pregunta, así que la respuesta puede estar incompleta. Pregunta por menos archivos a la vez.",
       "skippedFiles": "Omitidos (sin texto legible): {names}",
       "creditsCharged": "{credits} créditos",
       "stepsLabel": "Cómo funciona esta página",
@@ -1497,7 +1497,10 @@
       "processingHint": "Leyendo el archivo — suele tardar unos segundos. Podrás preguntar en cuanto esté listo.",
       "failedHint": "No se encontró texto legible. Sube una versión con texto seleccionable.",
       "askStillRunning": "Sigue leyendo — está tardando. Continúa con la página cerrada; vuelve y pregunta de nuevo para ver la respuesta.",
-      "askStalled": "La pregunta se detuvo inesperadamente. No se cobraron créditos — inténtalo de nuevo."
+      "askStalled": "La pregunta se detuvo inesperadamente. No se cobraron créditos — inténtalo de nuevo.",
+      "questionLength": "{used} de {max} caracteres",
+      "questionAtLimit": "Has alcanzado el límite de {max} caracteres para una pregunta.",
+      "readInParts": "Tus documentos eran demasiado largos para leerlos de una vez, así que se leyeron en {parts} partes y se combinaron las respuestas."
     },
     "deepResearch": {
       "title": "Investigación profunda",
@@ -2074,6 +2077,7 @@
     "file_ask": {
       "reading": "Leyendo sus archivos…",
       "answering": "Componiendo la respuesta…",
+      "combining": "Combinando lo que dijo cada parte…",
       "checking": "Contrastándola con los archivos…"
     }
   },

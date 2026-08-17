@@ -89,7 +89,10 @@ export const JOB_STEPS: Record<JobKind, string[]> = {
   agent_run: ["preparing", "working", "delivering"],
   mission_plan: ["reading", "planning", "saving"],
   create: ["understanding", "creating", "saving"],
-  file_ask: ["reading", "answering", "checking"],
+  // "combining" happens only when the documents took more than one pass
+  // to read. A one-pass question goes 1 -> 2 -> 4 and never shows it,
+  // which is right: a step that did not happen must not be claimed.
+  file_ask: ["reading", "answering", "combining", "checking"],
 };
 
 export function stepCount(kind: JobKind): number {

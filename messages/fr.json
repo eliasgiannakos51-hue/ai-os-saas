@@ -1472,7 +1472,7 @@
       "notInDocuments": "Les documents sélectionnés ne répondent pas à cela. Rien ci-dessous n'en provient.",
       "citations": "Sources dans vos documents",
       "removedCitations": "{count} référence(s) pointaient vers des pages non fournies et ont été supprimées.",
-      "truncatedWarning": "Seule une partie de la sélection a tenu ; la réponse peut être incomplète.",
+      "truncatedWarning": "Même lue par parties, la sélection dépassait ce qu'une seule question peut couvrir, donc la réponse peut être incomplète. Interrogez moins de fichiers à la fois.",
       "skippedFiles": "Ignorés (aucun texte lisible) : {names}",
       "creditsCharged": "{credits} crédits",
       "stepsLabel": "Comment fonctionne cette page",
@@ -1497,7 +1497,10 @@
       "processingHint": "Lecture du fichier — quelques secondes en général. Vous pourrez l'interroger dès qu'il sera prêt.",
       "failedHint": "Aucun texte lisible trouvé. Importez une version au texte sélectionnable.",
       "askStillRunning": "Lecture en cours — cela prend du temps. Le travail continue même page fermée ; revenez et reposez la question pour voir la réponse.",
-      "askStalled": "La question s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez."
+      "askStalled": "La question s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez.",
+      "questionLength": "{used} sur {max} caractères",
+      "questionAtLimit": "Vous avez atteint la limite de {max} caractères pour une question.",
+      "readInParts": "Vos documents étaient trop longs pour être lus d'un seul tenant : ils ont été lus en {parts} parties et les réponses combinées."
     },
     "deepResearch": {
       "title": "Recherche approfondie",
@@ -2074,6 +2077,7 @@
     "file_ask": {
       "reading": "Je lis vos fichiers…",
       "answering": "Je compose la réponse…",
+      "combining": "Je combine ce que chaque partie a trouvé…",
       "checking": "Je la vérifie sur les fichiers…"
     }
   },

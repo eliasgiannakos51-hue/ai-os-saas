@@ -1472,7 +1472,7 @@
       "notInDocuments": "The selected documents do not answer this. Nothing below comes from them.",
       "citations": "Sources in your documents",
       "removedCitations": "{count} reference(s) pointed at pages that were not supplied and were removed.",
-      "truncatedWarning": "Only part of the selection fitted, so the answer may be incomplete.",
+      "truncatedWarning": "Even read in parts, the selection was larger than one question can cover, so the answer may be incomplete. Ask about fewer files at a time.",
       "skippedFiles": "Skipped (no readable text): {names}",
       "creditsCharged": "{credits} credits",
       "stepsLabel": "How this page works",
@@ -1497,7 +1497,10 @@
       "processingHint": "Reading this file — usually a few seconds. It can be asked about once it is ready.",
       "failedHint": "No readable text was found. Upload a version with selectable text.",
       "askStillRunning": "Still reading — this is taking a while. It keeps going with the page closed; come back and ask again to see the answer.",
-      "askStalled": "That question stopped unexpectedly. No credits were charged — please try again."
+      "askStalled": "That question stopped unexpectedly. No credits were charged — please try again.",
+      "questionLength": "{used} of {max} characters",
+      "questionAtLimit": "You've reached the {max}-character limit for one question.",
+      "readInParts": "Your documents were too long to read in one go, so they were read in {parts} parts and the answers combined."
     },
     "deepResearch": {
       "title": "Deep Research",
@@ -2074,6 +2077,7 @@
     "file_ask": {
       "reading": "Reading your files…",
       "answering": "Putting the answer together…",
+      "combining": "Combining what each part said…",
       "checking": "Checking it against the files…"
     }
   },

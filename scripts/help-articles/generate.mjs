@@ -7,6 +7,18 @@
 // el.mjs / core-1.mjs / core-2.mjs, where it can be read as prose, and the
 // SQL is a build product.
 //
+// ONE STATEMENT PER ROW IS WHAT THIS EMITS, and that shape has a known
+// hazard when the file is pasted into a browser SQL editor rather than
+// run with psql: a run can stop part-way and leave rows behind WITHOUT
+// surfacing an error, which looks exactly like success. It happened —
+// twice — while seeding this table; see TODO.md for the measurements.
+//
+// The file is correct and `psql -f` runs it fine. If you are pasting,
+// generate the per-locale single-statement form instead (one multi-row
+// insert per language, ~7 KB each): that either lands whole or fails
+// loudly, and loud beats silent. Either way, count the rows per locale
+// after each piece — nothing else makes a partial run visible.
+//
 // Run: node scripts/help-articles/generate.mjs
 import { writeFileSync } from "node:fs";
 import { EN } from "./en.mjs";

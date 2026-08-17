@@ -38,8 +38,9 @@ drop function if exists public.grant_credits_idempotent(
 );
 
 -- The survivor keeps the grants the previous migration set on it, but
--- 20260804000002_function_grants.sql loops over every function anyway, so
--- this is belt and braces rather than the primary control.
+-- 20260818000000_function_grants.sql loops over every function in the
+-- schema anyway, and is dated to run LAST for exactly that reason — so this
+-- is belt and braces rather than the primary control.
 do $$
 begin
   if to_regprocedure('public.grant_credits_idempotent(uuid,integer,text,text,text,integer,text,timestamptz,boolean)') is not null then

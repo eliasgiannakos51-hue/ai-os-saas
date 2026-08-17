@@ -119,6 +119,36 @@ update public.user_credits uc
    -- than relying on the second guard.)
    and (uc.beta_expires_at is null or uc.beta_expires_at < now());
 
+-- 2b. Beta accounts are CONSIDERED, and refused ---------------------------
+--
+-- MEASURED, and it is why this block exists: the guard above tests
+-- beta_expires_at at the moment the file runs. A beta account is skipped
+-- while its window is open and left UNMARKED — so running this file again
+-- after the window closes picks it up and hands it Ultimate's 1,200 free
+-- messages. Nothing in the database clears plan_tier when a beta lapses,
+-- so `plan_tier = 'ultimate'` is still true and guard #1 (legacy_plan_tier
+-- must match plan_tier) does not catch it either.
+--
+-- Reproduced on PostgreSQL 16: one beta Ultimate account, window open ->
+-- legacy_free_chat_messages NULL; move beta_expires_at into the past, run
+-- the same file again -> 1200. An account that never paid, holding the
+-- most expensive allowance in the product, permanently.
+--
+-- Marking them closes it by construction rather than by remembering not to
+-- re-run the file. A beta grant is not a purchase and never becomes one; if
+-- such an account later subscribes, it subscribes at today's envelope,
+-- which is the correct outcome and not a loss.
+update public.user_credits uc
+   set legacy_entitlements_backfilled_at = now()
+ where uc.legacy_entitlements_backfilled_at is null
+   and uc.beta_expires_at is not null
+   and uc.beta_expires_at >= now()
+   and uc.plan_tier in ('starter', 'growth', 'professional', 'ultimate', 'enterprise');
+
+-- FREE accounts are deliberately NOT marked. Section 3 below is a real
+-- decision somebody may take later, and marking them now would make it a
+-- silent no-op when they do.
+
 -- ---------------------------------------------------------------------------
 -- 3. OPTIONAL — Free accounts.
 --

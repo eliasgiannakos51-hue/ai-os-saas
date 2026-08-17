@@ -50,7 +50,11 @@
     "dismissToastAria": "{message} — press Enter to dismiss",
     "retry": "Try again",
     "whatIsThisPage": "What is this page?",
-    "readMore": "Read more"
+    "readMore": "Read more",
+    "copy": "Copy",
+    "copied": "Copied ✓",
+    "copyFailed": "Your browser wouldn't let us copy. Select the text and copy it yourself.",
+    "copyNothing": "There's nothing to copy yet."
   },
   "sidebar": {
     "groups": {
@@ -1500,7 +1504,12 @@
       "askStalled": "That question stopped unexpectedly. No credits were charged — please try again.",
       "questionLength": "{used} of {max} characters",
       "questionAtLimit": "You've reached the {max}-character limit for one question.",
-      "readInParts": "Your documents were too long to read in one go, so they were read in {parts} parts and the answers combined."
+      "readInParts": "Your documents were too long to read in one go, so they were read in {parts} parts and the answers combined.",
+      "copyAnswer": "Copy answer",
+      "copyCitation": "Copy this source",
+      "copyText": "Copy the text",
+      "copyTextError": "Could not read that file's text.",
+      "copyTextEmpty": "We haven't read any text out of that file."
     },
     "deepResearch": {
       "title": "Deep Research",

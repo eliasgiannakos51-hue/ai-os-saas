@@ -14,10 +14,12 @@ import {
   Loader2,
   AlertTriangle,
   Check,
+  Copy,
 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
 import { ListLayout } from "@/components/ui/list-layout";
 import { EmptyState } from "@/components/empty-state";
+import { CopyButton, writeToClipboard } from "@/components/ui/copy-button";
 import { stepLabelKey } from "@/lib/jobs/step-labels";
 import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
@@ -53,6 +55,21 @@ export type WorkspaceCollection = {
 
 type Citation = { filename: string; label: string };
 
+/**
+ * What "copy the answer" puts on the clipboard.
+ *
+ * The answer plus its sources, not the answer alone. Every claim in the
+ * text carries an inline [file, page] reference that was CHECKED against
+ * the pages the model was shown; pasting the prose without the list
+ * behind it turns a verifiable answer into an assertion, and the person
+ * it is pasted to has no way back to the document.
+ */
+function answerForClipboard(answer: Answer): string {
+  if (answer.citations.length === 0) return answer.text;
+  const sources = answer.citations.map((c) => `- ${c.filename} — ${c.label}`).join("\n");
+  return `${answer.text}\n\n${sources}`;
+}
+
 type Answer = {
   text: string;
   fromDocuments: boolean;
@@ -86,6 +103,7 @@ export function FilesWorkspace({
   usage: { fileCap: number | null; storageBytes: number; storageCap: number | null };
 }) {
   const t = useTranslations("dashboard.files");
+  const tCommon = useTranslations("common");
   // Root translator: step-labels.ts returns FULL dotted keys (aiSteps.*).
   const tKey = useTranslations();
   const tModule = useTranslations("module");
@@ -186,6 +204,43 @@ export function FilesWorkspace({
       await uploadOne(file);
     }
     router.refresh();
+  }
+
+  /**
+   * Copy a file's extracted TEXT, not the file.
+   *
+   * Download hands back the original PDF; this hands back the thing we
+   * read out of it, which is what can be pasted into an email or a
+   * document. It is fetched on press rather than carried in the row —
+   * the list holds fifty files and a megabyte of text each would be a
+   * page that never finishes loading.
+   *
+   * Goes through writeToClipboard rather than navigator.clipboard, so it
+   * has the same insecure-origin fallback as every CopyButton on the
+   * page, and confirms with a toast because a menu item that has already
+   * closed has nowhere to show a tick.
+   */
+  async function copyFileText(id: string) {
+    setBusy(id);
+    try {
+      const response = await fetch(`/api/files/${id}`);
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) {
+        addToast(t("copyTextError"), "error");
+        return;
+      }
+      const text = String(data.text ?? "");
+      if (!text.trim()) {
+        addToast(t("copyTextEmpty"), "error");
+        return;
+      }
+      const copied = await writeToClipboard(text);
+      addToast(copied ? tCommon("copied") : tCommon("copyFailed"), copied ? "success" : "error");
+    } catch {
+      addToast(t("copyTextError"), "error");
+    } finally {
+      setBusy(null);
+    }
   }
 
   async function download(id: string, filename: string) {
@@ -535,6 +590,16 @@ export function FilesWorkspace({
                       onSelect: () => void download(file.id, file.filename),
                     },
                     {
+                      key: "copy-text",
+                      label: t("copyText"),
+                      icon: Copy,
+                      // Only for a file we actually read. Offering it on a
+                      // pending or failed row is offering an empty
+                      // clipboard.
+                      disabled: busy === file.id || file.processing_status !== "ready",
+                      onSelect: () => void copyFileText(file.id),
+                    },
+                    {
                       key: "delete",
                       label: t("delete"),
                       icon: Trash2,
@@ -742,13 +807,42 @@ export function FilesWorkspace({
             )}
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{answer.text}</p>
 
+            {/* THE ANSWER, ON THE CLIPBOARD.
+                An answer that can only be read on this page is an answer
+                that gets retyped into the email it was needed for — and
+                a long one, now that answers are allowed to be long, gets
+                retyped badly. The citations go with it: an answer pasted
+                without its sources is a claim with nothing behind it,
+                which is the opposite of what this feature is for. */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <CopyButton
+                data-testid="files-copy-answer"
+                label={t("copyAnswer")}
+                text={() => answerForClipboard(answer)}
+              />
+            </div>
+
             {answer.citations.length > 0 && (
               <div>
                 <p className="mb-1 text-[11px] font-medium text-muted">{t("citations")}</p>
                 <ul className="space-y-0.5">
                   {answer.citations.map((citation, i) => (
-                    <li key={`${citation.filename}-${citation.label}-${i}`} className="text-[11px] text-muted">
-                      {citation.filename} — {citation.label}
+                    <li
+                      key={`${citation.filename}-${citation.label}-${i}`}
+                      className="flex items-center gap-1.5 text-[11px] text-muted"
+                    >
+                      <span className="min-w-0 truncate">
+                        {citation.filename} — {citation.label}
+                      </span>
+                      {/* Each one on its own, because a citation is what
+                          somebody pastes into a message to say "it is on
+                          this page of this file". */}
+                      <CopyButton
+                        data-testid="files-copy-citation"
+                        variant="icon"
+                        label={t("copyCitation")}
+                        text={`${citation.filename} — ${citation.label}`}
+                      />
                     </li>
                   ))}
                 </ul>

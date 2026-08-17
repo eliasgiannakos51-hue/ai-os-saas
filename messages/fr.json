@@ -50,7 +50,11 @@
     "dismissToastAria": "{message} — appuyez sur Entrée pour ignorer",
     "retry": "Réessayer",
     "whatIsThisPage": "Qu'est-ce que cette page ?",
-    "readMore": "En savoir plus"
+    "readMore": "En savoir plus",
+    "copy": "Copier",
+    "copied": "Copié ✓",
+    "copyFailed": "Votre navigateur n'a pas autorisé la copie. Sélectionnez le texte et copiez-le vous-même.",
+    "copyNothing": "Il n'y a encore rien à copier."
   },
   "sidebar": {
     "groups": {
@@ -1500,7 +1504,12 @@
       "askStalled": "La question s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez.",
       "questionLength": "{used} sur {max} caractères",
       "questionAtLimit": "Vous avez atteint la limite de {max} caractères pour une question.",
-      "readInParts": "Vos documents étaient trop longs pour être lus d'un seul tenant : ils ont été lus en {parts} parties et les réponses combinées."
+      "readInParts": "Vos documents étaient trop longs pour être lus d'un seul tenant : ils ont été lus en {parts} parties et les réponses combinées.",
+      "copyAnswer": "Copier la réponse",
+      "copyCitation": "Copier cette source",
+      "copyText": "Copier le texte",
+      "copyTextError": "Impossible de lire le texte de ce fichier.",
+      "copyTextEmpty": "Nous n'avons extrait aucun texte de ce fichier."
     },
     "deepResearch": {
       "title": "Recherche approfondie",

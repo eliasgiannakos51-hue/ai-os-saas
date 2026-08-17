@@ -50,7 +50,11 @@
     "dismissToastAria": "{message} — mit Enter ausblenden",
     "retry": "Erneut versuchen",
     "whatIsThisPage": "Was ist diese Seite?",
-    "readMore": "Mehr lesen"
+    "readMore": "Mehr lesen",
+    "copy": "Kopieren",
+    "copied": "Kopiert ✓",
+    "copyFailed": "Dein Browser hat das Kopieren nicht zugelassen. Markiere den Text und kopiere ihn selbst.",
+    "copyNothing": "Es gibt noch nichts zu kopieren."
   },
   "sidebar": {
     "groups": {
@@ -1500,7 +1504,12 @@
       "askStalled": "Die Frage wurde unerwartet beendet. Es wurden keine Credits berechnet — bitte erneut versuchen.",
       "questionLength": "{used} von {max} Zeichen",
       "questionAtLimit": "Du hast das Limit von {max} Zeichen für eine Frage erreicht.",
-      "readInParts": "Deine Dokumente waren zu lang, um sie auf einmal zu lesen — sie wurden in {parts} Teilen gelesen und die Antworten zusammengeführt."
+      "readInParts": "Deine Dokumente waren zu lang, um sie auf einmal zu lesen — sie wurden in {parts} Teilen gelesen und die Antworten zusammengeführt.",
+      "copyAnswer": "Antwort kopieren",
+      "copyCitation": "Diese Quelle kopieren",
+      "copyText": "Den Text kopieren",
+      "copyTextError": "Der Text dieser Datei konnte nicht gelesen werden.",
+      "copyTextEmpty": "Aus dieser Datei haben wir keinen Text gelesen."
     },
     "deepResearch": {
       "title": "Tiefenrecherche",

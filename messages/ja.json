@@ -50,7 +50,11 @@
     "dismissToastAria": "{message} — Enter キーで閉じる",
     "retry": "もう一度試す",
     "whatIsThisPage": "このページは何ですか？",
-    "readMore": "詳しく読む"
+    "readMore": "詳しく読む",
+    "copy": "コピー",
+    "copied": "コピーしました ✓",
+    "copyFailed": "ブラウザがコピーを許可しませんでした。テキストを選択してご自身でコピーしてください。",
+    "copyNothing": "まだコピーできるものがありません。"
   },
   "sidebar": {
     "groups": {
@@ -1500,7 +1504,12 @@
       "askStalled": "質問が予期せず停止しました。クレジットは請求されていません。もう一度お試しください。",
       "questionLength": "{max} 文字中 {used} 文字",
       "questionAtLimit": "1 つの質問の上限 {max} 文字に達しました。",
-      "readInParts": "書類が長すぎて一度には読めなかったため、{parts} 回に分けて読み、答えをまとめました。"
+      "readInParts": "書類が長すぎて一度には読めなかったため、{parts} 回に分けて読み、答えをまとめました。",
+      "copyAnswer": "回答をコピー",
+      "copyCitation": "この出典をコピー",
+      "copyText": "テキストをコピー",
+      "copyTextError": "そのファイルのテキストを読み取れませんでした。",
+      "copyTextEmpty": "そのファイルからはテキストを読み取れていません。"
     },
     "deepResearch": {
       "title": "ディープリサーチ",

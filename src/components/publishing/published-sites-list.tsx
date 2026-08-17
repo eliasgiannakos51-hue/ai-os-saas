@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { Globe, ExternalLink, Copy, Check, History, SearchX, Undo2 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
+import { writeToClipboard } from "@/components/ui/copy-button";
 import { ListLayout } from "@/components/ui/list-layout";
 import { EmptyState } from "@/components/empty-state";
 import { SortToggle } from "@/components/sort-toggle";
@@ -77,14 +78,18 @@ export function PublishedSitesList({
 
   const liveCount = sites.filter((s) => s.status === "live").length;
 
+  // A menu item cannot be a CopyButton — it is an onSelect callback, not
+  // a component — but it can share the clipboard, and it must: the
+  // navigator.clipboard call this used to make is undefined on an
+  // insecure origin, so on plain http the item did nothing and said
+  // nothing.
   async function copyLink(site: PublishedSiteRow) {
-    try {
-      await navigator.clipboard.writeText(site.url);
+    if (await writeToClipboard(site.url)) {
       setCopiedId(site.id);
       setTimeout(() => setCopiedId(null), 2000);
-    } catch {
-      addToast(t("copyFailed"), "error");
+      return;
     }
+    addToast(t("copyFailed"), "error");
   }
 
   async function unpublish(site: PublishedSiteRow) {

@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
-import { Globe, Loader2, Check, Copy, ExternalLink, EyeOff, X, AlertCircle } from "lucide-react";
+import { Globe, Loader2, Check, ExternalLink, EyeOff, X, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
+import { CopyButton } from "@/components/ui/copy-button";
 import { getErrorMessage } from "@/lib/get-error-message";
 import {
   validateSubdomain,
@@ -65,7 +66,6 @@ export function PublishControl({
   const [open, setOpen] = useState(false);
   const [subdomain, setSubdomain] = useState("");
   const [busy, setBusy] = useState(false);
-  const [copied, setCopied] = useState(false);
   // Which exact address the server has already rejected as taken. Stored
   // with the value it applies to, so editing the field clears it.
   const [takenMessage, setTakenMessage] = useState<{ subdomain: string } | null>(null);
@@ -211,16 +211,6 @@ export function PublishControl({
     }
   }
 
-  async function copyLink() {
-    if (!site) return;
-    try {
-      await navigator.clipboard.writeText(site.url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      addToast(t("copyFailed"), "error");
-    }
-  }
 
   if (loading) {
     return (
@@ -302,18 +292,16 @@ export function PublishControl({
               <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
               {t("viewLive")}
             </a>
-            <button
-              type="button"
-              onClick={copyLink}
-              className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
-            >
-              {copied ? (
-                <Check className="h-3.5 w-3.5 text-emerald-400" aria-hidden="true" />
-              ) : (
-                <Copy className="h-3.5 w-3.5" aria-hidden="true" />
-              )}
-              {copied ? t("copied") : t("copyLink")}
-            </button>
+            {/* Was a hand-rolled copy with its own timer and its own
+                empty catch. The shared button has the insecure-origin
+                fallback and announces itself to a screen reader; two
+                implementations of that is one that quietly stops
+                working. */}
+            <CopyButton
+              label={t("copyLink")}
+              text={site.url}
+              className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:opacity-50 sm:min-h-0"
+            />
             {/* Publishing an EDIT is a different action from publishing or
                 unpublishing the site, so it is not folded into the toggle
                 — it pushes the current draft onto an address that already

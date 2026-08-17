@@ -157,12 +157,36 @@ export type ModuleConfig = {
    * keys rather than as strings.
    */
   emptyKey: ModuleMessageKey;
+  /**
+   * What the "add" button says. A WHOLE PHRASE per module, not a
+   * template.
+   *
+   * It used to be module.new = "New {title}" with the page title
+   * substituted in, and that produced garbage in every language that
+   * inflects — three separate kinds of it, all shipped:
+   *
+   *   · NUMBER. The title is the plural page name. "Νέο Ανταγωνιστές"
+   *     is "New competitors" on a form that adds exactly one.
+   *   · GENDER. "Nouveau Recherche" — recherche is feminine, so it is
+   *     Nouvelle. Greek needs Νέος/Νέα/Νέο by the noun's gender and
+   *     picked one for all of them.
+   *   · THE WRONG NOUN. /dashboard/finance is titled "Finance Agent",
+   *     so the button read "Νέο Πράκτορας Οικονομικών" — new finance
+   *     AGENT — for a form that adds a transaction.
+   *
+   * No amount of ICU cleverness fixes that: the grammar depends on a
+   * noun the page title does not contain. So each module states its own
+   * sentence, in every language, and the type makes it a question a new
+   * module has to answer before it compiles — exactly like emptyKey.
+   */
+  newKey: ModuleMessageKey;
 };
 
 export const MODULES: ModuleConfig[] = [
   {
     slug: "competitors",
     emptyKey: "moduleData.empty.competitors",
+    newKey: "moduleData.new.competitors",
     titleKey: "sidebar.items.competitors",
     table: "competitors",
     headlineKey: "company",
@@ -179,6 +203,7 @@ export const MODULES: ModuleConfig[] = [
   {
     slug: "research",
     emptyKey: "moduleData.empty.research",
+    newKey: "moduleData.new.research",
     titleKey: "sidebar.items.research",
     table: "research",
     headlineKey: "topic",
@@ -190,6 +215,7 @@ export const MODULES: ModuleConfig[] = [
   {
     slug: "finance",
     emptyKey: "moduleData.empty.finance",
+    newKey: "moduleData.new.finance",
     titleKey: "sidebar.items.finance",
     table: "finance_entries",
     headlineKey: "description",
@@ -209,6 +235,7 @@ export const MODULES: ModuleConfig[] = [
   {
     slug: "learning",
     emptyKey: "moduleData.empty.learning",
+    newKey: "moduleData.new.learning",
     titleKey: "sidebar.items.learning",
     table: "learning_entries",
     headlineKey: "topic",
@@ -221,6 +248,7 @@ export const MODULES: ModuleConfig[] = [
   {
     slug: "trading",
     emptyKey: "moduleData.empty.trading",
+    newKey: "moduleData.new.trading",
     titleKey: "sidebar.items.trading",
     table: "trades",
     headlineKey: "symbol",
@@ -235,6 +263,7 @@ export const MODULES: ModuleConfig[] = [
   {
     slug: "decisions",
     emptyKey: "moduleData.empty.decisions",
+    newKey: "moduleData.new.decisions",
     titleKey: "sidebar.items.decisions",
     table: "decisions",
     headlineKey: "idea_names",
@@ -247,6 +276,7 @@ export const MODULES: ModuleConfig[] = [
   {
     slug: "products",
     emptyKey: "moduleData.empty.products",
+    newKey: "moduleData.new.products",
     titleKey: "sidebar.items.products",
     table: "products",
     headlineKey: "product_name",
@@ -264,6 +294,7 @@ export const MODULES: ModuleConfig[] = [
   {
     slug: "content",
     emptyKey: "moduleData.empty.content",
+    newKey: "moduleData.new.content",
     titleKey: "sidebar.items.content",
     table: "content",
     headlineKey: "topic",
@@ -278,6 +309,7 @@ export const MODULES: ModuleConfig[] = [
   {
     slug: "sales",
     emptyKey: "moduleData.empty.sales",
+    newKey: "moduleData.new.sales",
     titleKey: "sidebar.items.sales",
     table: "leads",
     headlineKey: "lead_name",
@@ -292,6 +324,7 @@ export const MODULES: ModuleConfig[] = [
   {
     slug: "feedback",
     emptyKey: "moduleData.empty.feedback",
+    newKey: "moduleData.new.feedback",
     titleKey: "sidebar.items.feedback",
     table: "feedback",
     headlineKey: "summary",
@@ -306,6 +339,7 @@ export const MODULES: ModuleConfig[] = [
   {
     slug: "analytics",
     emptyKey: "moduleData.empty.analytics",
+    newKey: "moduleData.new.analytics",
     titleKey: "sidebar.items.analytics",
     table: "metrics",
     headlineKey: "metric_name",
@@ -318,6 +352,7 @@ export const MODULES: ModuleConfig[] = [
   {
     slug: "automation",
     emptyKey: "moduleData.empty.automation",
+    newKey: "moduleData.new.automation",
     titleKey: "sidebar.items.automation",
     table: "automations",
     headlineKey: "task_name",

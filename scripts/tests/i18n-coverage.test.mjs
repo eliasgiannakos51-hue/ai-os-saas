@@ -819,7 +819,10 @@ console.log("\n== 6. every key a DATA file names resolves, in all ten locales ==
   const seen = new Map(); // key -> where
   for (const file of DATA_FILES) {
     const src = stripComments(readFileSync(file, "utf8"));
-    for (const m of src.matchAll(/(?:labelKey|titleKey|placeholderKey):\s*"([^"]+)"/g)) {
+    // newKey is a leaf like labelKey — the whole "New competitor"
+    // sentence, per module, because "New " + the plural page title was
+    // ungrammatical in every language that inflects.
+    for (const m of src.matchAll(/(?:labelKey|titleKey|placeholderKey|newKey):\s*"([^"]+)"/g)) {
       if (!seen.has(m[1])) seen.set(m[1], file);
     }
     // emptyKey names a GROUP, not a leaf: the empty screen is three

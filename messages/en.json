@@ -1681,7 +1681,6 @@
     "searchPlaceholder": "Search...",
     "exportCsv": "Export CSV",
     "noMatches": "No matches for '{query}'",
-    "new": "New {title}",
     "selectPlaceholder": "select...",
     "save": "Save",
     "saving": "Saving...",
@@ -2066,6 +2065,28 @@
         "why": "Channel, budget and status side by side, so the next budget decision is made from numbers rather than from feel.",
         "example": "Spring email campaign, €500 budget"
       }
+    },
+    "new": {
+      "competitors": "New competitor",
+      "research": "New research note",
+      "finance": "New entry",
+      "learning": "New note",
+      "trading": "New trade",
+      "decisions": "New decision",
+      "products": "New product",
+      "content": "New content",
+      "sales": "New lead",
+      "feedback": "New feedback",
+      "analytics": "New metric",
+      "automation": "New automation",
+      "websites": "New website",
+      "apps": "New app",
+      "images": "New image",
+      "videos": "New video",
+      "coding": "New coding task",
+      "dataAnalysis": "New analysis",
+      "presentations": "New presentation note",
+      "campaigns": "New campaign"
     }
   },
   "aiSteps": {

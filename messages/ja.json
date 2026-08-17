@@ -1681,7 +1681,6 @@
     "searchPlaceholder": "検索...",
     "exportCsv": "CSV をエクスポート",
     "noMatches": "'{query}' に一致する結果はありません",
-    "new": "新規 {title}",
     "selectPlaceholder": "選択してください...",
     "save": "保存",
     "saving": "保存中...",
@@ -2066,6 +2065,28 @@
         "why": "チャネル・予算・状況を並べておく。次の予算判断が、感覚ではなく数字から出せるように。",
         "example": "春のメール施策、予算500ユーロ"
       }
+    },
+    "new": {
+      "competitors": "競合を追加",
+      "research": "リサーチを追加",
+      "finance": "収支を追加",
+      "learning": "学習メモを追加",
+      "trading": "取引を追加",
+      "decisions": "決定を追加",
+      "products": "商品を追加",
+      "content": "コンテンツを追加",
+      "sales": "リードを追加",
+      "feedback": "フィードバックを追加",
+      "analytics": "指標を追加",
+      "automation": "自動化を追加",
+      "websites": "サイトを追加",
+      "apps": "アプリを追加",
+      "images": "画像を追加",
+      "videos": "動画を追加",
+      "coding": "コーディング項目を追加",
+      "dataAnalysis": "分析を追加",
+      "presentations": "発表メモを追加",
+      "campaigns": "キャンペーンを追加"
     }
   },
   "aiSteps": {

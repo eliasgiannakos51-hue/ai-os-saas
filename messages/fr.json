@@ -1681,7 +1681,6 @@
     "searchPlaceholder": "Rechercher...",
     "exportCsv": "Exporter en CSV",
     "noMatches": "Aucun résultat pour '{query}'",
-    "new": "Nouveau {title}",
     "selectPlaceholder": "sélectionner...",
     "save": "Enregistrer",
     "saving": "Enregistrement...",
@@ -2066,6 +2065,28 @@
         "why": "Canal, budget et statut côte à côte : la prochaine décision budgétaire se prend sur des chiffres, pas au feeling.",
         "example": "Campagne e-mail de printemps, budget 500 €"
       }
+    },
+    "new": {
+      "competitors": "Nouveau concurrent",
+      "research": "Nouvelle recherche",
+      "finance": "Nouvelle écriture",
+      "learning": "Nouvelle note",
+      "trading": "Nouvelle transaction",
+      "decisions": "Nouvelle décision",
+      "products": "Nouveau produit",
+      "content": "Nouveau contenu",
+      "sales": "Nouveau prospect",
+      "feedback": "Nouveau retour",
+      "analytics": "Nouvelle métrique",
+      "automation": "Nouvelle automatisation",
+      "websites": "Nouveau site",
+      "apps": "Nouvelle application",
+      "images": "Nouvelle image",
+      "videos": "Nouvelle vidéo",
+      "coding": "Nouvelle tâche de code",
+      "dataAnalysis": "Nouvelle analyse",
+      "presentations": "Nouvelle note de présentation",
+      "campaigns": "Nouvelle campagne"
     }
   },
   "aiSteps": {

@@ -17,6 +17,11 @@ const IDEAS_MODULE: ModuleConfig = {
   // this mirror should point at, not a second copy under moduleData. The
   // page itself reads them through components/ideas/ideas-list.tsx.
   emptyKey: "dashboard.ideas.empty",
+  // Ideas already had a per-language phrase of its own — "Νέα ιδέα",
+  // "Nouvelle idée" — because its form was hand-written rather than
+  // generic. That is the pattern the other twenty just adopted; this
+  // points at the string that was already right.
+  newKey: "dashboard.ideas.new",
   fields: [
     { key: "name", labelKey: "dashboard.ideas.nameLabel", type: "text", required: true },
     { key: "problem", labelKey: "dashboard.ideas.problemLabel", type: "textarea" },

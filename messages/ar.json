@@ -1681,7 +1681,6 @@
     "searchPlaceholder": "بحث...",
     "exportCsv": "تصدير CSV",
     "noMatches": "لا توجد نتائج لـ '{query}'",
-    "new": "جديد {title}",
     "selectPlaceholder": "اختر...",
     "save": "حفظ",
     "saving": "جارٍ الحفظ...",
@@ -2066,6 +2065,28 @@
         "why": "القناة والميزانية والحالة جنبًا إلى جنب، ليصدر قرار الميزانية التالي عن أرقام لا عن انطباع.",
         "example": "حملة بريدية للربيع بميزانية 500 يورو"
       }
+    },
+    "new": {
+      "competitors": "منافس جديد",
+      "research": "بحث جديد",
+      "finance": "حركة جديدة",
+      "learning": "ملاحظة جديدة",
+      "trading": "صفقة جديدة",
+      "decisions": "قرار جديد",
+      "products": "منتج جديد",
+      "content": "محتوى جديد",
+      "sales": "عميل محتمل جديد",
+      "feedback": "تعليق جديد",
+      "analytics": "مؤشر جديد",
+      "automation": "أتمتة جديدة",
+      "websites": "موقع جديد",
+      "apps": "تطبيق جديد",
+      "images": "صورة جديدة",
+      "videos": "فيديو جديد",
+      "coding": "مهمة برمجة جديدة",
+      "dataAnalysis": "تحليل جديد",
+      "presentations": "ملاحظة عرض جديدة",
+      "campaigns": "حملة جديدة"
     }
   },
   "aiSteps": {

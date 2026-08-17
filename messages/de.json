@@ -1681,7 +1681,6 @@
     "searchPlaceholder": "Suchen...",
     "exportCsv": "CSV exportieren",
     "noMatches": "Keine Treffer für '{query}'",
-    "new": "Neu: {title}",
     "selectPlaceholder": "auswählen...",
     "save": "Speichern",
     "saving": "Wird gespeichert...",
@@ -2066,6 +2065,28 @@
         "why": "Kanal, Budget und Status nebeneinander — damit die nächste Budgetentscheidung aus Zahlen entsteht und nicht aus Gefühl.",
         "example": "Frühjahrs-E-Mail-Kampagne, Budget 500 €"
       }
+    },
+    "new": {
+      "competitors": "Neuer Wettbewerber",
+      "research": "Neue Recherche",
+      "finance": "Neue Buchung",
+      "learning": "Neue Notiz",
+      "trading": "Neuer Trade",
+      "decisions": "Neue Entscheidung",
+      "products": "Neues Produkt",
+      "content": "Neuer Inhalt",
+      "sales": "Neuer Lead",
+      "feedback": "Neues Feedback",
+      "analytics": "Neue Kennzahl",
+      "automation": "Neue Automatisierung",
+      "websites": "Neue Website",
+      "apps": "Neue App",
+      "images": "Neues Bild",
+      "videos": "Neues Video",
+      "coding": "Neue Coding-Aufgabe",
+      "dataAnalysis": "Neue Analyse",
+      "presentations": "Neue Präsentationsnotiz",
+      "campaigns": "Neue Kampagne"
     }
   },
   "aiSteps": {

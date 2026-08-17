@@ -1681,7 +1681,6 @@
     "searchPlaceholder": "Cerca...",
     "exportCsv": "Esporta CSV",
     "noMatches": "Nessun risultato per '{query}'",
-    "new": "Nuovo {title}",
     "selectPlaceholder": "seleziona...",
     "save": "Salva",
     "saving": "Salvataggio...",
@@ -2066,6 +2065,28 @@
         "why": "Canale, budget e stato uno accanto all'altro, così la prossima decisione di budget nasce dai numeri e non a sensazione.",
         "example": "Campagna email di primavera, budget 500 €"
       }
+    },
+    "new": {
+      "competitors": "Nuovo concorrente",
+      "research": "Nuova ricerca",
+      "finance": "Nuovo movimento",
+      "learning": "Nuova nota",
+      "trading": "Nuova operazione",
+      "decisions": "Nuova decisione",
+      "products": "Nuovo prodotto",
+      "content": "Nuovo contenuto",
+      "sales": "Nuovo contatto",
+      "feedback": "Nuovo commento",
+      "analytics": "Nuova metrica",
+      "automation": "Nuova automazione",
+      "websites": "Nuovo sito",
+      "apps": "Nuova app",
+      "images": "Nuova immagine",
+      "videos": "Nuovo video",
+      "coding": "Nuova attività di codice",
+      "dataAnalysis": "Nuova analisi",
+      "presentations": "Nuova nota di presentazione",
+      "campaigns": "Nuova campagna"
     }
   },
   "aiSteps": {

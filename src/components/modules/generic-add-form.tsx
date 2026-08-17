@@ -207,7 +207,10 @@ export function GenericAddForm({
           onClick={() => setOpen(true)}
           className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
         >
-          <Plus className="h-4 w-4" /> {t("new", { title: tKey(module.titleKey) })}
+          {/* The module's own sentence, not "New " + the page title.
+              The title is plural and the grammar around it changes with
+              the noun — see ModuleConfig.newKey. */}
+          <Plus className="h-4 w-4" /> {tKey(module.newKey)}
         </button>
       ) : (
         <form
@@ -216,7 +219,7 @@ export function GenericAddForm({
         >
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">
-              {t("new", { title: tKey(module.titleKey) })}
+              {tKey(module.newKey)}
             </h2>
             <button
               type="button"

@@ -1681,7 +1681,6 @@
     "searchPlaceholder": "搜索...",
     "exportCsv": "导出 CSV",
     "noMatches": "没有找到与 '{query}' 匹配的结果",
-    "new": "新建 {title}",
     "selectPlaceholder": "请选择...",
     "save": "保存",
     "saving": "保存中...",
@@ -2066,6 +2065,28 @@
         "why": "渠道、预算和状态并排放着，下一次的预算决定就能靠数字，而不是靠感觉。",
         "example": "春季邮件推广，预算 500 欧元"
       }
+    },
+    "new": {
+      "competitors": "新增竞争对手",
+      "research": "新增研究记录",
+      "finance": "新增收支记录",
+      "learning": "新增学习笔记",
+      "trading": "新增交易",
+      "decisions": "新增决策",
+      "products": "新增产品",
+      "content": "新增内容",
+      "sales": "新增线索",
+      "feedback": "新增反馈",
+      "analytics": "新增指标",
+      "automation": "新增自动化",
+      "websites": "新增网站",
+      "apps": "新增应用",
+      "images": "新增图片",
+      "videos": "新增视频",
+      "coding": "新增编程任务",
+      "dataAnalysis": "新增分析",
+      "presentations": "新增演示备注",
+      "campaigns": "新增活动"
     }
   },
   "aiSteps": {

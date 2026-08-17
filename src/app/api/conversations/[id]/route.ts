@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { pinLimitFor } from "@/lib/chat/pin-limits";
-import { normaliseConversationTitle } from "@/lib/chat/conversation-title";
+import { normaliseConversationTitle, autoTitleFromMessage } from "@/lib/chat/conversation-title";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +44,7 @@ type ConversationErrorCode =
   | "nothing_to_update"
   | "title_not_text"
   | "title_empty"
+  | "load_failed"
   | "pin_not_boolean"
   | "pin_limit"
   | "count_failed"
@@ -77,13 +78,41 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         return fail("title_not_text", 400);
       }
       const title = normaliseConversationTitle(raw);
-      // An empty title is a rename that erases the only label the
-      // conversation has. Refused rather than silently ignored, so the
-      // client can put the old text back instead of showing a blank row.
       if (!title) {
-        return fail("title_empty", 400);
+        // CLEARING THE BOX RESTORES THE AUTOMATIC NAME. It used to be a
+        // 400: an empty title erases the only label the row has, so it
+        // was refused. But "refused" leaves the user holding an empty
+        // field with no way back to the name they started with except
+        // remembering it — and the name they started with is not lost,
+        // it is a pure function of the conversation's first message.
+        //
+        // Recomputed rather than stored, and recomputed with the SAME
+        // function api/chat used to name it, so restoring gives back the
+        // identical string rather than a near-miss.
+        const { data: first, error: firstError } = await supabase
+          .from("chat_messages")
+          .select("content")
+          .eq("conversation_id", params.id)
+          .eq("user_id", user.id)
+          .eq("role", "user")
+          .order("created_at", { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        if (firstError) {
+          logApiError("/api/conversations/[id]", firstError, { stage: "first_message" });
+          return fail("load_failed", 500);
+        }
+        const restored = autoTitleFromMessage(String(first?.content ?? ""));
+        // A conversation with no user message has nothing to restore
+        // from. Refused, as before — there is no name to go back to.
+        if (!restored) {
+          return fail("title_empty", 400);
+        }
+        patch.title = restored;
+      } else {
+        patch.title = title;
       }
-      patch.title = title;
     }
 
     if ("is_pinned" in body) {

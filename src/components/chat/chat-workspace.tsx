@@ -15,6 +15,7 @@ import { getErrorMessage } from "@/lib/get-error-message";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
+import { InlineTitle } from "@/components/chat/inline-title";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { MessageContent } from "@/components/chat/message-content";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
@@ -87,6 +88,7 @@ export function ChatWorkspace({
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
   const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
+  const [headerRenaming, setHeaderRenaming] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState(() =>
     initialMentorPreset === "trading"
@@ -577,6 +579,25 @@ export function ChatWorkspace({
               The key includes the favourited flag so a toggle made in the
               sidebar re-mounts this copy instead of leaving the two
               stars disagreeing. */}
+          {/* THE NAME, WHERE YOU ARE READING THE CONVERSATION.
+              It was only ever in the sidebar — which is hidden in focus
+              mode and hidden by default at 375px, so on a phone the open
+              conversation had no name on screen at all and no way to
+              change it. Same component as the list, so the two cannot
+              drift apart. */}
+          {activeConversation && (
+            <div className="ml-3 flex min-w-0 flex-1 items-center">
+              <InlineTitle
+                testId="chat-header-title"
+                title={activeConversation.title}
+                editing={headerRenaming}
+                onEditingChange={setHeaderRenaming}
+                onRename={(next) => void renameConversation(activeConversation.id, next)}
+                className="min-w-0 truncate text-sm font-medium text-foreground"
+              />
+            </div>
+          )}
+
           {activeConversation && (
             <div className="ml-auto shrink-0">
               <FavoriteButton

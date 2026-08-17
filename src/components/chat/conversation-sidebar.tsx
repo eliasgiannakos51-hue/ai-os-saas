@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { Plus, MessageCircle, Pin, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import type { ChatConversation } from "@/types/chat";
 import { groupConversationsByDate } from "@/lib/chat/group-conversations";
-import { MAX_CONVERSATION_TITLE_LENGTH } from "@/lib/chat/conversation-title";
+import { InlineTitle } from "@/components/chat/inline-title";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { useTranslations } from "next-intl";
 
@@ -31,13 +31,6 @@ export function ConversationSidebar({
   const tModule = useTranslations("module");
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
-  // Escape has to beat the blur. Leaving the field saves what is in it,
-  // which is what makes the edit feel like an edit rather than a form —
-  // but Escape means "forget this", and cancelling by unmounting the
-  // input is itself a blur. Without this flag the cancelled text would be
-  // saved by the very act of cancelling it.
-  const cancelledRef = useRef(false);
 
   const pinned = conversations.filter((c) => c.is_pinned);
   const unpinned = conversations.filter((c) => !c.is_pinned);
@@ -51,34 +44,12 @@ export function ConversationSidebar({
     onSelect(id);
   }
 
+  // The menu's route into the same editor the title itself opens on a
+  // double-click or a long press. InlineTitle owns the field; who asked
+  // for it is the parent's business.
   function startRename(conversation: ChatConversation) {
-    cancelledRef.current = false;
     setRenamingId(conversation.id);
-    setRenameValue(conversation.title);
     setMenuOpenId(null);
-  }
-
-  function commitRename() {
-    if (cancelledRef.current) {
-      cancelledRef.current = false;
-      setRenamingId(null);
-      return;
-    }
-    if (renamingId) {
-      const trimmed = renameValue.trim();
-      // An empty box is a cancel, not a rename. Sending it would ask the
-      // server to erase the only label the conversation has, and the
-      // server refuses it anyway — so the row simply keeps its name.
-      if (trimmed && trimmed !== conversations.find((c) => c.id === renamingId)?.title) {
-        onRename(renamingId, trimmed);
-      }
-    }
-    setRenamingId(null);
-  }
-
-  function cancelRename() {
-    cancelledRef.current = true;
-    setRenamingId(null);
   }
 
   function handleDelete(conversation: ChatConversation) {
@@ -117,46 +88,19 @@ export function ConversationSidebar({
                   const active = conversation.id === activeId;
                   const isRenaming = renamingId === conversation.id;
 
-                  if (isRenaming) {
-                    return (
-                      <input
-                        key={conversation.id}
-                        autoFocus
-                        value={renameValue}
-                        // The same 100 the server enforces, so the text
-                        // that vanishes on save is text the box never
-                        // accepted in the first place.
-                        maxLength={MAX_CONVERSATION_TITLE_LENGTH}
-                        aria-label={t("renameLabel", { title: conversation.title })}
-                        data-testid="conversation-rename-input"
-                        onChange={(e) => setRenameValue(e.target.value)}
-                        onBlur={commitRename}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            commitRename();
-                          }
-                          if (e.key === "Escape") {
-                            e.preventDefault();
-                            cancelRename();
-                          }
-                        }}
-                        className="w-full rounded-lg border border-orange-500/60 bg-input px-2.5 py-[7px] text-sm text-foreground outline-none"
-                      />
-                    );
-                  }
-
                   return (
                     <div key={conversation.id} className="group/row relative flex items-center">
                       <button
                         type="button"
-                        onClick={() => handleSelect(conversation.id)}
-                        // Double-click renames, as well as the menu. The
-                        // menu is the discoverable route; this is the one
-                        // people try first because every other list of
-                        // named things works this way.
-                        onDoubleClick={() => startRename(conversation)}
-                        title={conversation.title}
+                        onClick={() => {
+                          // A long press opens the editor and THEN the
+                          // browser fires the click that ends the touch.
+                          // Without this guard that click navigates away
+                          // from the row being renamed, on the device
+                          // where the gesture was added for.
+                          if (isRenaming) return;
+                          handleSelect(conversation.id);
+                        }}
                         className={`flex min-w-0 flex-1 items-center gap-1.5 rounded-lg py-2 pl-2.5 pr-1 text-left text-sm transition-colors duration-150 ${
                           active
                             ? "bg-orange-500/10 font-medium text-orange-400"
@@ -169,7 +113,14 @@ export function ConversationSidebar({
                             aria-hidden="true"
                           />
                         )}
-                        <span className="min-w-0 flex-1 truncate">{conversation.title}</span>
+                        <InlineTitle
+                          testId="conversation-title"
+                          title={conversation.title}
+                          editing={isRenaming}
+                          onEditingChange={(on) => setRenamingId(on ? conversation.id : null)}
+                          onRename={(next) => onRename(conversation.id, next)}
+                          className="min-w-0 flex-1 truncate"
+                        />
                       </button>
                       {/* Starred conversations stay visible at rest; an
                           unstarred one only appears on hover, so the list

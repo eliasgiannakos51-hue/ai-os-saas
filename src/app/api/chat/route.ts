@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { autoTitleFromMessage } from "@/lib/chat/conversation-title";
 import { listIntegrations } from "@/lib/integrations/store";
 import {
   buildSearchTool,
@@ -149,11 +150,12 @@ const CANNED_THRESHOLD_MID_CONVERSATION = 0.92;
 const CONVERSATION_NOT_FOUND = "Conversation not found.";
 const CONVERSATION_CREATE_FAILED = "Could not start a new conversation.";
 
-function truncateTitle(message: string, maxLen = 40): string {
-  const trimmed = message.trim().replace(/\s+/g, " ");
-  if (trimmed.length <= maxLen) return trimmed;
-  return `${trimmed.slice(0, maxLen).trimEnd()}…`;
-}
+// Was a private helper here. It moved to lib/chat/conversation-title.ts
+// because api/conversations/[id] needs the SAME function: clearing a
+// title restores the automatic one, and "restores" has to mean the
+// identical string this route would have produced, not a second
+// implementation that rounds differently.
+const truncateTitle = autoTitleFromMessage;
 
 // Newline-delimited JSON: each line is one event. Chosen over SSE's
 // "data: " framing since it needs no extra parsing on the client beyond

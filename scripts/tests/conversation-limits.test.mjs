@@ -53,6 +53,11 @@ const { MAX_CONVERSATION_TITLE_LENGTH, normaliseConversationTitle } = await load
 const routeSrc = readFileSync("src/app/api/conversations/[id]/route.ts", "utf8");
 const sidebarSrc = readFileSync("src/components/chat/conversation-sidebar.tsx", "utf8");
 const workspaceSrc = readFileSync("src/components/chat/chat-workspace.tsx", "utf8");
+// The editor itself moved out of the sidebar: the name is shown in TWO
+// places now — the list, and the header above the open conversation —
+// and two implementations of one edit is the shape the favourite star in
+// this same view already got wrong once.
+const inlineSrc = readFileSync("src/components/chat/inline-title.tsx", "utf8");
 // Comments quote the very things these checks look for ("chat_conversations",
 // "update"), so scanning the raw file would find the explanation rather
 // than the code. Stripped before any "does the code do X" question.
@@ -62,6 +67,7 @@ function stripComments(src) {
 const routeCode = stripComments(routeSrc);
 const sidebarCode = stripComments(sidebarSrc);
 const workspaceCode = stripComments(workspaceSrc);
+const inlineCode = stripComments(inlineSrc);
 
 console.log("== 1. the numbers the batch asked for ==");
 const REQUIRED = { free: 3, starter: 10, growth: 25, professional: 50, ultimate: 100 };
@@ -170,7 +176,7 @@ checkList(
 
 console.log("\n== 5. one hundred characters, in one place ==");
 check("the limit is 100", MAX_CONVERSATION_TITLE_LENGTH === 100);
-check("the input caps at the shared constant", /maxLength=\{MAX_CONVERSATION_TITLE_LENGTH\}/.test(sidebarCode));
+check("the input caps at the shared constant", /maxLength=\{MAX_CONVERSATION_TITLE_LENGTH\}/.test(inlineCode));
 check("and the route normalises through the same module", /normaliseConversationTitle\(raw\)/.test(routeCode));
 // The failure this prevents: two literal 100s that drift apart, so the
 // box accepts text the server then throws away without saying so.
@@ -178,7 +184,7 @@ checkList(
   "neither side carries its own copy of the number",
   [
     ["route", /slice\(0,\s*100\)|length > 100/.test(routeCode)],
-    ["sidebar", /maxLength=\{100\}|maxLength="100"/.test(sidebarCode)],
+    ["editor", /maxLength=\{100\}|maxLength="100"/.test(inlineCode)],
   ]
     .filter(([, bad]) => bad)
     .map(([where]) => where)
@@ -186,24 +192,77 @@ checkList(
 check("a long title is trimmed, not refused", normaliseConversationTitle("x".repeat(400)).length === 100);
 check("whitespace is collapsed, so a pasted newline cannot stretch the row", normaliseConversationTitle("a\n\n  b") === "a b");
 check("a blank title normalises to empty", normaliseConversationTitle("   \n ") === "");
-check("and the route refuses that rather than storing it", /if \(!title\) \{\s*return fail\("title_empty", 400\)/.test(routeCode));
+// THIS ASSERTION USED TO SAY THE OPPOSITE, and the flip is the record of
+// why. Clearing the box was a 400: an empty title erases the only label
+// the row has. But refusing leaves the user holding an empty field with
+// no way back to the name they started with — and that name was never
+// lost. It is a pure function of the conversation's first message, so it
+// is recomputed rather than refused.
+check("clearing the box restores the automatic name", /autoTitleFromMessage\(String\(first\?\.content/.test(routeCode));
+check("read from the first USER message, oldest first", /\.eq\("role", "user"\)[\s\S]{0,120}ascending: true/.test(routeCode));
+// Scoped to the caller: a conversation id is not a secret, and reading
+// the first message of somebody else's row to build a title would be a
+// content leak through a rename.
+check("and scoped to the caller's own messages", /from\("chat_messages"\)[\s\S]{0,200}\.eq\("user_id", user\.id\)/.test(routeCode));
+// Restoring has to give back the IDENTICAL string api/chat produced, not
+// a near-miss from a second implementation of the same truncation.
+check("both routes share one auto-title function", /const truncateTitle = autoTitleFromMessage;/.test(stripComments(readFileSync("src/app/api/chat/route.ts", "utf8"))));
+check("a conversation with nothing to restore from is still refused", /if \(!restored\) \{\s*return fail\("title_empty", 400\)/.test(routeCode));
+// No stored copy of the automatic name — a second source of truth for a
+// derived string goes stale the moment anything edits the message it
+// came from.
+check("and there is no auto_title column to drift", !/auto_title/.test(routeCode));
 check("a title survives unchanged when it is already fine", normaliseConversationTitle("  Quarterly plan ") === "Quarterly plan");
 
-console.log("\n== 6. inline edit: two ways in, autosave, Escape out ==");
-check("double-click starts a rename", /onDoubleClick=\{\(\) => startRename\(conversation\)\}/.test(sidebarCode));
+console.log("\n== 6. inline edit: four ways in, autosave, Escape out ==");
+// ONE EDITOR, TWO PLACES. The name is in the sidebar list and above the
+// open conversation, and both have to be editable — the sidebar is
+// hidden in focus mode and hidden by default at 375px, so before this
+// the open conversation had no name on screen at all on a phone.
+check("the sidebar uses the shared editor", /<InlineTitle/.test(sidebarCode));
+check("so does the header", /<InlineTitle/.test(workspaceCode));
+checkList(
+  "and neither keeps an editor of its own",
+  [
+    ["sidebar", /onKeyDown=\{\(e\) =>[\s\S]{0,200}Escape/.test(sidebarCode)],
+    ["header", /maxLength=/.test(workspaceCode)],
+  ]
+    .filter(([, bad]) => bad)
+    .map(([where]) => where)
+);
+check("double-click starts a rename", /onDoubleClick=\{start\}/.test(inlineCode));
 check('the "..." menu still does too', /onClick=\{\(\) => startRename\(conversation\)\}/.test(sidebarCode));
-check("leaving the field saves", /onBlur=\{commitRename\}/.test(sidebarCode));
-check("Enter saves", /e\.key === "Enter"/.test(sidebarCode));
-// Anchored to the KEY HANDLER, not to the mere presence of the function
-// somewhere in the file — the first version of this assertion passed
-// against a build where the handler had been changed back to a bare
-// setRenamingId(null) and cancelRename was left behind unused.
-check("Escape cancels", /e\.key === "Escape"\)\s*\{[\s\S]{0,120}?cancelRename\(\);/.test(sidebarCode));
+// A touch screen has no double-click. Without this the gesture people
+// try first does nothing at all on a phone, and the menu is the only
+// route — on the device where menus are hardest to hit.
+check("a long press works where double-click cannot", /onTouchStart=\{startLongPress\}/.test(inlineCode));
+check("500ms, the platform convention", /setTimeout\(start, 500\)/.test(inlineCode));
+check(
+  "cancelled by moving or lifting, so a scroll does not open it",
+  /onTouchMove=\{cancelLongPress\}/.test(inlineCode) && /onTouchEnd=\{cancelLongPress\}/.test(inlineCode)
+);
+check("and its timer is cleared on unmount", /clearTimeout\(longPressRef\.current\)/.test(inlineCode));
+// The click that ENDS a long press would otherwise navigate away from
+// the row that just opened for editing.
+check("the click ending a long press does not change conversation", /if \(isRenaming\) return;/.test(sidebarCode));
+check("leaving the field saves", /onBlur=\{commit\}/.test(inlineCode));
+check("Enter saves", /e\.key === "Enter"/.test(inlineCode));
+check("Escape cancels", /e\.key === "Escape"\)\s*\{[\s\S]{0,120}?cancel\(\);/.test(inlineCode));
 // THE SUBTLE ONE. Cancelling unmounts the input, and leaving the input
 // is what triggers autosave — so without a flag, Escape would save the
 // text it was meant to discard.
-check("and cancelling cannot be undone by the blur it causes", /cancelledRef/.test(sidebarCode) && /if \(cancelledRef\.current\)/.test(sidebarCode));
-check("the field is labelled for screen readers", /aria-label=\{t\("renameLabel"/.test(sidebarCode));
+check("and cancelling cannot be undone by the blur it causes", /cancelledRef/.test(inlineCode) && /if \(cancelledRef\.current\)/.test(inlineCode));
+// An unchanged name is not a rename: no request, no optimistic flicker.
+check("saving an unchanged name does nothing", /if \(trimmed !== title\) onRename\(trimmed\)/.test(inlineCode));
+// But an EMPTY one is sent, because only the server knows what the
+// automatic name was.
+check("an emptied box is sent, not swallowed", !/if \(!trimmed\) return/.test(inlineCode));
+// A counter that is always on is decoration; one that appears at the
+// wall arrives too late to change what you were typing.
+check("a counter appears as the limit approaches", /remaining <= 20 &&/.test(inlineCode));
+check("counting down from the shared constant", /MAX_CONVERSATION_TITLE_LENGTH - value\.length/.test(inlineCode));
+check("and it warns at zero", /remaining === 0 \? "text-amber-400"/.test(inlineCode));
+check("the field is labelled for screen readers", /aria-label=\{t\("renameLabel"/.test(inlineCode));
 check("the rename goes through the route", /fetch\(`\/api\/conversations\/\$\{id\}`[\s\S]{0,200}JSON\.stringify\(\{ title \}\)/.test(workspaceCode));
 // The server trims; if the client kept its own optimistic string the
 // sidebar would show 120 characters of a title the database stored as

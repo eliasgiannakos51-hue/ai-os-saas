@@ -71,6 +71,16 @@ export async function BillingSummary({
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {/* THE BADGE IS ABOUT CREDITS. THE BUTTONS ARE ABOUT A
+              SUBSCRIPTION, and these used to be the same branch.
+              `isAdmin ? badge : isBetaTester ? badge : hasSubscription ?
+              <ManageBilling + Cancel> : <Upgrade>` meant an owner or a beta
+              tester who ALSO pays Stripe saw only their badge — no manage,
+              no cancel, no way out of a real subscription from the product
+              that sold it. Reported from a live account: "Settings >
+              Billing, I don't see a cancel button."
+              The badge still renders; it just no longer swallows the
+              controls beside it. */}
           {isAdmin ? (
             <span className="inline-flex items-center rounded-full border border-orange-800 bg-orange-950/30 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-orange-400">
               {t("ownerAccess")}
@@ -85,7 +95,9 @@ export async function BillingSummary({
                 ? t("betaTesterExpires", { days: betaDaysRemaining })
                 : t("betaTester")}
             </span>
-          ) : hasSubscription ? (
+          ) : null}
+
+          {hasSubscription ? (
             <>
               <ManageBillingButton />
               {/* Beside "Manage billing", not buried inside Stripe's hosted
@@ -96,6 +108,12 @@ export async function BillingSummary({
                 <CancelSubscription endsAt={subscription?.endsAt ?? null} />
               )}
             </>
+          ) : isAdmin || isBetaTester ? (
+            /* No Stripe subscription behind the badge, so there is nothing
+               to manage or cancel — and saying that is better than an empty
+               space the reader has to interpret. Owner access and a beta
+               window both end by their own mechanism, not by cancelling. */
+            <span className="text-xs text-muted">{t("noSubscriptionToCancel")}</span>
           ) : (
             <Link
               href="/pricing"

@@ -624,7 +624,8 @@
         "restore": "Ripristina",
         "endingIn": "{days, plural, =0 {Il tuo abbonamento termina oggi.} one {Il tuo abbonamento termina tra # giorno.} other {Il tuo abbonamento termina tra # giorni.}}"
       },
-      "creditsSplit": "{monthly} mensili + {purchased} acquistati (non scadono mai)"
+      "creditsSplit": "{monthly} mensili + {purchased} acquistati (non scadono mai)",
+      "noSubscriptionToCancel": "Nessun abbonamento da annullare: l'accesso proprietario e il periodo beta finiscono da soli."
     },
     "marginReport": {
       "title": "Rapporto Margine",

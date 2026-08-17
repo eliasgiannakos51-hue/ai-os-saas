@@ -8,8 +8,55 @@ import { getClientIp } from "@/lib/get-client-ip";
 
 export const dynamic = "force-dynamic";
 
+/**
+ * The NETWORK an address belongs to, not the address.
+ *
+ * WHY THE FULL IP WAS WRONG. The fingerprint was
+ * sha256(`${ip}|${userAgent}`), so a device got a new identity every time
+ * its address changed — and addresses change constantly without the
+ * device moving: a mobile carrier rotates its NAT pool between requests, a
+ * home router picks up a new DHCP lease overnight, and IPv6 privacy
+ * extensions (RFC 4941) deliberately mint a fresh address every few hours.
+ *
+ * The result reported from a live account is exactly what that predicts:
+ * "the same device appears many times in Login Activity for no reason".
+ * The dedup was not broken; it was keying on something that is not stable.
+ *
+ * Worse than the clutter: a "new sign-in" security email fires per NEW
+ * row, so the alert that is supposed to mean "somebody else is in your
+ * account" arrived every time a phone changed cell. An alert that cries
+ * wolf daily is one nobody reads, which is the actual security cost.
+ *
+ * SO: the /24 for IPv4 and the /48 for IPv6 — the prefix a network is
+ * routed as, which survives a lease renewal and a privacy-extension
+ * rotation. It still changes when the user is genuinely somewhere else,
+ * which is when the alert is worth sending.
+ */
+function networkOf(ip: string): string {
+  const raw = ip.trim();
+  if (!raw || raw === "unknown") return "unknown";
+  // IPv4-mapped IPv6 ("::ffff:1.2.3.4") is an IPv4 address wearing a hat.
+  const mapped = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/i.exec(raw);
+  const addr = mapped ? mapped[1] : raw;
+
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(addr)) {
+    return addr.split(".").slice(0, 3).join(".") + ".0/24";
+  }
+  if (addr.includes(":")) {
+    // First three hextets = /48. `::` is expanded first, or "2001:db8::1"
+    // and "2001:db8:0:0:0:0:0:1" would be different networks.
+    const parts = addr.split("%")[0].split("::");
+    const head = parts[0].split(":").filter(Boolean);
+    const tail = (parts[1] ?? "").split(":").filter(Boolean);
+    const missing = 8 - head.length - tail.length;
+    const full = [...head, ...Array(Math.max(missing, 0)).fill("0"), ...tail];
+    return full.slice(0, 3).map((h) => h.toLowerCase().replace(/^0+(?=.)/, "")).join(":") + "::/48";
+  }
+  return addr;
+}
+
 function computeFingerprint(ip: string, userAgent: string): string {
-  return createHash("sha256").update(`${ip}|${userAgent}`).digest("hex");
+  return createHash("sha256").update(`${networkOf(ip)}|${userAgent}`).digest("hex");
 }
 
 // Called once, client-side, right after a successful sign-in — this app's

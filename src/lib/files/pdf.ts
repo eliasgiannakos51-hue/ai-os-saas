@@ -309,19 +309,77 @@ function inferCodeBytes(map: Map<number, string>): number {
   return 1;
 }
 
+/**
+ * The dictionary that starts at `<<`, INCLUDING its nested dictionaries.
+ *
+ * THIS IS WHY NO REAL PDF EXTRACTED. It was
+ * `/\/Resources\s*(<<[\s\S]*?>>)/` — a non-greedy match, which stops at the
+ * FIRST `>>`. A PDF's Resources dictionary contains nested dictionaries:
+ *
+ *   /Resources <</ProcSet [/PDF /Text]
+ *   /ExtGState <</G3 3 0 R>>          <- the non-greedy match ended HERE
+ *   /Font <</F4 4 0 R /F5 5 0 R>>>>
+ *
+ * so `/Font` fell outside the captured text, no font was found, no
+ * ToUnicode CMap was loaded, and every glyph of a subset font came out as
+ * its raw glyph id. "Trading Strategy" extracted as
+ * "\u00007\u0000U\u0000D\u0000G\u0000L\u0000Q\u0000J" — which
+ * readableRatio then scored at 0.43 and the caller reported as "no
+ * readable text was found in this PDF — it is probably a scan".
+ *
+ * It was not a scan. It was every PDF written by a browser, Word, Google
+ * Docs, LaTeX or InDesign, because all of them emit at least one nested
+ * dictionary before /Font.
+ *
+ * A regular expression cannot match balanced delimiters. This counts them.
+ */
+function dictAt(text: string, start: number): string | null {
+  if (text[start] !== "<" || text[start + 1] !== "<") return null;
+  let depth = 0;
+  for (let i = start; i < text.length - 1; i++) {
+    // A `>>` inside a literal string is not a delimiter. Strings are
+    // skipped whole rather than counted, or a name like (a >> b) would
+    // close the dictionary early — the same class of bug one level down.
+    if (text[i] === "(") {
+      let esc = false;
+      for (i++; i < text.length; i++) {
+        if (esc) { esc = false; continue; }
+        if (text[i] === "\\") esc = true;
+        else if (text[i] === ")") break;
+      }
+      continue;
+    }
+    if (text[i] === "<" && text[i + 1] === "<") { depth++; i++; continue; }
+    if (text[i] === ">" && text[i + 1] === ">") {
+      depth--;
+      i++;
+      if (depth === 0) return text.slice(start, i + 1);
+      continue;
+    }
+  }
+  return null;
+}
+
+/** `/Key << ... >>` with the nesting respected, or null. */
+function dictValue(text: string, key: string): string | null {
+  const at = new RegExp(`\\/${key}\\s*(?=<<)`).exec(text);
+  if (!at) return null;
+  return dictAt(text, at.index + at[0].length);
+}
+
 /** The fonts a page's content stream can select, keyed by resource name. */
 function fontsForPage(objects: Objects, pageBody: string): Map<string, FontMap> {
   const fonts = new Map<string, FontMap>();
 
   // /Resources may be inline or a reference.
-  let resources = /\/Resources\s*(<<[\s\S]*?>>)/.exec(pageBody)?.[1];
+  let resources = dictValue(pageBody, "Resources") ?? undefined;
   if (!resources) {
     const ref = refsIn(/\/Resources\s+([^\/>]*)/.exec(pageBody)?.[1] ?? "")[0];
     if (ref !== undefined) resources = objects.get(ref)?.body ?? "";
   }
   if (!resources) return fonts;
 
-  let fontDict = /\/Font\s*(<<[\s\S]*?>>)/.exec(resources)?.[1];
+  let fontDict = dictValue(resources, "Font") ?? undefined;
   if (!fontDict) {
     const ref = refsIn(/\/Font\s+([^\/>]*)/.exec(resources)?.[1] ?? "")[0];
     if (ref !== undefined) fontDict = objects.get(ref)?.body ?? "";
@@ -480,10 +538,37 @@ function textFromContent(content: string, fonts: Map<string, FontMap>): string {
       continue;
     }
 
-    // End of a text object, or an explicit line move: both are line
-    // breaks as far as reading is concerned.
-    if ((c === "E" && content.startsWith("ET", i)) || (c === "T" && (content.startsWith("T*", i) || content.startsWith("Td", i) || content.startsWith("TD", i)))) {
+    // End of a text object, or an explicit NEW LINE.
+    //
+    // `T*` always starts a line, and `ET` ends the text object. `Td`/`TD`
+    // are the subtle ones: they move the text position by (tx, ty), and a
+    // move with ty = 0 is HORIZONTAL — kerning, a tab stop, the gap before
+    // a bold run — not a new line.
+    //
+    // Treating every Td as a break is why a browser-printed PDF extracted
+    // "Trading Strategy" as "T\nrading Strategy": Chromium emits the first
+    // glyph, a `Td` to nudge the pen, then the rest of the word. A reader
+    // sees one word; a search for "Trading" found nothing.
+    if (c === "E" && content.startsWith("ET", i)) {
       if (!out.endsWith("\n")) out += "\n";
+      i += 2;
+      continue;
+    }
+    if (c === "T" && content.startsWith("T*", i)) {
+      if (!out.endsWith("\n")) out += "\n";
+      i += 2;
+      continue;
+    }
+    if (c === "T" && (content.startsWith("Td", i) || content.startsWith("TD", i))) {
+      // The two operands sit immediately before the operator.
+      const operands = /(-?[\d.]+)\s+(-?[\d.]+)\s*$/.exec(content.slice(Math.max(0, i - 64), i));
+      const ty = operands ? Number(operands[2]) : NaN;
+      // Unreadable operands fall back to "it is a line break", which is
+      // the behaviour that shipped and is the safe direction: a spurious
+      // break is ugly, a missing one runs two lines together.
+      if (!Number.isFinite(ty) || ty !== 0) {
+        if (!out.endsWith("\n")) out += "\n";
+      }
       i += 2;
       continue;
     }

@@ -624,7 +624,8 @@
         "restore": "Reaktivieren",
         "endingIn": "{days, plural, =0 {Dein Abo endet heute.} one {Dein Abo endet in # Tag.} other {Dein Abo endet in # Tagen.}}"
       },
-      "creditsSplit": "{monthly} monatlich + {purchased} gekauft (verfallen nie)"
+      "creditsSplit": "{monthly} monatlich + {purchased} gekauft (verfallen nie)",
+      "noSubscriptionToCancel": "Kein Abo zum Kündigen — Inhaberzugang und Beta-Zeitraum enden von selbst."
     },
     "marginReport": {
       "title": "Margenbericht",

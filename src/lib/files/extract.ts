@@ -279,9 +279,27 @@ export function extractText(buf: Buffer, kind: FileKind): ExtractionResult {
         text: p.text,
       }));
       const joined = pages.map((p) => p.text).join("");
-      if (joined.trim().length < 20 || readableRatio(joined) < 0.6) {
+      // TWO DIFFERENT FAILURES, TWO DIFFERENT SENTENCES — and conflating
+      // them told a user their working document was a scan.
+      //
+      //   nothing came out          -> there is no text layer. A scan.
+      //   something came out, and   -> there IS a text layer and we could
+      //   it is not words              not decode it. Not the user's fault
+      //                                and not fixed by OCR.
+      //
+      // The second case is what a nested-dictionary bug in the Resources
+      // parser produced on every browser-, Word- and LaTeX-written PDF:
+      // 440 characters of raw glyph ids, scored 0.43, reported as a scan.
+      // Somebody following that advice would have gone looking for an OCR
+      // tool to fix a file that was never scanned.
+      if (joined.trim().length < 20) {
         throw new ExtractionError(
-          "no readable text was found in this PDF — it is probably a scan, and it would need OCR before the AI can read it"
+          "this PDF has no text layer — it is a scan or an image-only export, and it would need OCR before the AI can read it"
+        );
+      }
+      if (readableRatio(joined) < 0.6) {
+        throw new ExtractionError(
+          "this PDF has text in it, but its font encoding could not be decoded — this is a limitation on our side, not a problem with your file. Re-saving it from the original application, or printing it to a new PDF, usually produces one that can be read"
         );
       }
       result = {

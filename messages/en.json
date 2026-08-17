@@ -54,7 +54,15 @@
     "copy": "Copy",
     "copied": "Copied ✓",
     "copyFailed": "Your browser wouldn't let us copy. Select the text and copy it yourself.",
-    "copyNothing": "There's nothing to copy yet."
+    "copyNothing": "There's nothing to copy yet.",
+    "offline": {
+      "title": "You're offline.",
+      "showingCached": "Nothing on this page is updating.",
+      "showingCachedAge": "Nothing here is updating — this was loaded {minutes} min ago.",
+      "retry": "Try again",
+      "checking": "Checking…",
+      "stillOffline": "Still no connection."
+    }
   },
   "sidebar": {
     "groups": {

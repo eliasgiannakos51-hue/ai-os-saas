@@ -54,7 +54,15 @@
     "copy": "Copier",
     "copied": "Copié ✓",
     "copyFailed": "Votre navigateur n'a pas autorisé la copie. Sélectionnez le texte et copiez-le vous-même.",
-    "copyNothing": "Il n'y a encore rien à copier."
+    "copyNothing": "Il n'y a encore rien à copier.",
+    "offline": {
+      "title": "Vous êtes hors ligne.",
+      "showingCached": "Rien sur cette page ne se met à jour.",
+      "showingCachedAge": "Rien ici ne se met à jour — chargé il y a {minutes} min.",
+      "retry": "Réessayer",
+      "checking": "Vérification…",
+      "stillOffline": "Toujours pas de connexion."
+    }
   },
   "sidebar": {
     "groups": {

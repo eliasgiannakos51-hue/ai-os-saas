@@ -54,7 +54,15 @@
     "copy": "Kopieren",
     "copied": "Kopiert ✓",
     "copyFailed": "Dein Browser hat das Kopieren nicht zugelassen. Markiere den Text und kopiere ihn selbst.",
-    "copyNothing": "Es gibt noch nichts zu kopieren."
+    "copyNothing": "Es gibt noch nichts zu kopieren.",
+    "offline": {
+      "title": "Du bist offline.",
+      "showingCached": "Auf dieser Seite aktualisiert sich nichts.",
+      "showingCachedAge": "Hier aktualisiert sich nichts — geladen vor {minutes} Min.",
+      "retry": "Erneut versuchen",
+      "checking": "Prüfe…",
+      "stillOffline": "Immer noch keine Verbindung."
+    }
   },
   "sidebar": {
     "groups": {

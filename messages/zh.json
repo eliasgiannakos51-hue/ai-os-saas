@@ -54,7 +54,15 @@
     "copy": "复制",
     "copied": "已复制 ✓",
     "copyFailed": "浏览器不允许复制。请自行选中文本并复制。",
-    "copyNothing": "目前没有可复制的内容。"
+    "copyNothing": "目前没有可复制的内容。",
+    "offline": {
+      "title": "你已离线。",
+      "showingCached": "此页面上的内容不会更新。",
+      "showingCachedAge": "这里的内容不会更新 —— 于 {minutes} 分钟前加载。",
+      "retry": "重试",
+      "checking": "检查中…",
+      "stillOffline": "仍然没有连接。"
+    }
   },
   "sidebar": {
     "groups": {

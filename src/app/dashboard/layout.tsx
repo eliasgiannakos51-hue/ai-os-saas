@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import { SidebarProvider } from "@/components/dashboard/sidebar-context";
 import { ToastProvider } from "@/components/toast/toast-context";
 import { ToastContainer } from "@/components/toast/toast-container";
+import { OfflineBanner } from "@/components/network/offline-banner";
 import { CommandPalette } from "@/components/dashboard/command-palette";
 import { CommandPaletteProvider } from "@/components/dashboard/command-palette-context";
 import { CreditsProvider } from "@/components/credits/credits-context";
@@ -109,6 +110,13 @@ export default async function DashboardLayout({
             <div className="pointer-events-none fixed inset-0 z-0">
               <AmbientDots />
             </div>
+            {/* WHAT A PAGE SAYS WHEN IT CANNOT REACH THE SERVER.
+                Mounted once, above the whole dashboard, because the
+                service worker will happily serve the last version of any
+                page from cache — which is right, and is exactly why the
+                user has to be told that what they are reading stopped
+                updating. Renders nothing while the connection is fine. */}
+            <OfflineBanner />
             <div className="relative z-10 flex min-h-screen">
               <Sidebar email={user.email ?? ""} planName={plan.name} />
               <div className="flex min-w-0 flex-1 flex-col">

@@ -54,7 +54,15 @@
     "copy": "コピー",
     "copied": "コピーしました ✓",
     "copyFailed": "ブラウザがコピーを許可しませんでした。テキストを選択してご自身でコピーしてください。",
-    "copyNothing": "まだコピーできるものがありません。"
+    "copyNothing": "まだコピーできるものがありません。",
+    "offline": {
+      "title": "オフラインです。",
+      "showingCached": "このページの内容は更新されません。",
+      "showingCachedAge": "ここの内容は更新されません。{minutes} 分前に読み込まれたものです。",
+      "retry": "再試行",
+      "checking": "確認中…",
+      "stillOffline": "まだ接続できません。"
+    }
   },
   "sidebar": {
     "groups": {

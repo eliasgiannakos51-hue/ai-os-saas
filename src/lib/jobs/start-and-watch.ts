@@ -1,6 +1,7 @@
 "use client";
 
 import type { AiJob } from "@/lib/jobs/use-ai-job";
+import { reportNetworkFailure, reportNetworkSuccess } from "@/lib/network/network-status";
 
 /**
  * Starts a background job and follows it to an outcome.
@@ -34,14 +35,26 @@ export async function startAndWatchJob(
   body: unknown,
   options: { onProgress?: (job: AiJob) => void } = {}
 ): Promise<JobOutcome & { jobId?: string }> {
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    // keepalive so navigating away in the second between the press and the
-    // 202 cannot lose the request that creates the job.
-    keepalive: true,
-    body: JSON.stringify(body),
-  });
+  // Every AI action in the app starts here, which makes it the one place
+  // worth telling the offline banner about: a press that fails on the
+  // transport is the earliest honest evidence that the server cannot be
+  // reached, and it arrives before any poll.
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      // keepalive so navigating away in the second between the press and the
+      // 202 cannot lose the request that creates the job.
+      keepalive: true,
+      body: JSON.stringify(body),
+    });
+  } catch (error) {
+    reportNetworkFailure(error);
+    throw error;
+  }
+  // Answered at all — whatever it answered — so the connection is up.
+  reportNetworkSuccess();
   const started = await response.json();
   if (!started.ok || !started.jobId) {
     return { ok: false, error: String(started.error ?? started.message ?? ""), code: started.reason ?? null };
@@ -65,8 +78,12 @@ export async function watchJob(
     try {
       const data = await (await fetch(`/api/jobs/${jobId}`)).json();
       if (data.ok) job = data.job as AiJob;
-    } catch {
-      // A dropped poll is not a dead job — keep looking.
+      reportNetworkSuccess();
+    } catch (error) {
+      // A dropped poll is not a dead job — keep looking. It IS evidence
+      // about the connection though, and the banner is the only thing
+      // that will tell the user why the progress line stopped moving.
+      reportNetworkFailure(error);
       continue;
     }
     if (!job) continue;

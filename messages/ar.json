@@ -54,7 +54,15 @@
     "copy": "نسخ",
     "copied": "تم النسخ ✓",
     "copyFailed": "لم يسمح متصفحك بالنسخ. حدّد النص وانسخه بنفسك.",
-    "copyNothing": "لا يوجد شيء لنسخه بعد."
+    "copyNothing": "لا يوجد شيء لنسخه بعد.",
+    "offline": {
+      "title": "أنت غير متصل.",
+      "showingCached": "لا شيء في هذه الصفحة يتحدّث.",
+      "showingCachedAge": "لا شيء هنا يتحدّث — جرى تحميله قبل {minutes} دقيقة.",
+      "retry": "حاول مجددًا",
+      "checking": "جارٍ التحقق…",
+      "stillOffline": "لا يزال بلا اتصال."
+    }
   },
   "sidebar": {
     "groups": {

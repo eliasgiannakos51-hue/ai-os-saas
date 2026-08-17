@@ -1,6 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
+import { reportNetworkFailure, reportNetworkSuccess } from "@/lib/network/network-status";
 
 // Root cause of the repeated "Not authenticated" report on the
 // clarifying-questions flows (Website Builder, Create Anything,
@@ -52,7 +53,20 @@ export async function fetchWithAuthRetryImpl(
 // it.
 export async function fetchWithAuthRetry(input: string, init?: RequestInit): Promise<Response> {
   return fetchWithAuthRetryImpl(
-    (i, o) => fetch(i, o),
+    // The offline banner is told what happened here as well: these are
+    // the long, multi-step flows where a user composes answers for
+    // minutes at a time, which is exactly long enough for a connection
+    // to go away between one request and the next.
+    async (i, o) => {
+      try {
+        const response = await fetch(i, o);
+        reportNetworkSuccess();
+        return response;
+      } catch (error) {
+        reportNetworkFailure(error);
+        throw error;
+      }
+    },
     async () => {
       const supabase = createClient();
       const { data, error } = await supabase.auth.refreshSession();

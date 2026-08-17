@@ -183,6 +183,35 @@ try {
      where ns.nspname='public' and p.proname='grant_credits_idempotent'`));
   check("…and still leave exactly one overload", n2 === 1, `got ${n2}`);
 
+  console.log("\n== P0-4: the lockdown covers procedures and aggregates too ==");
+  // THE LOOP USED TO FILTER `prokind = 'f'`, which is exactly the shape of
+  // oversight the file exists to prevent: a rule that covers the case
+  // somebody thought of. A procedure and an aggregate created beside a
+  // plain function came out of it STILL EXECUTABLE by anon.
+  //
+  // Nothing was exposed — this schema has neither today. What matters is
+  // the first one somebody adds: `create procedure` is ordinary SQL,
+  // PostgREST exposes procedures as RPC endpoints, and there would have
+  // been nothing to notice. So the probe creates one of each and asks the
+  // database, rather than reading the migration and agreeing with it.
+  await sql(`create function public.probe_plain_fn() returns int language sql as $$ select 1 $$`);
+  await sql(`create procedure public.probe_procedure() language sql as $$ select 1 $$`);
+  await sql(`create function public.probe_sfunc(int, int) returns int language sql as $$ select $1 + $2 $$`);
+  await sql(`create aggregate public.probe_aggregate(int) (sfunc = public.probe_sfunc, stype = int, initcond = '0')`);
+  file("supabase/migrations/20260818000000_function_grants.sql");
+  for (const [kind, sig] of [
+    ["function", "public.probe_plain_fn()"],
+    ["procedure", "public.probe_procedure()"],
+    ["aggregate", "public.probe_aggregate(int)"],
+  ]) {
+    for (const role of ["anon", "authenticated"]) {
+      const can = await sql(`select has_function_privilege('${role}', '${sig}', 'execute')`);
+      check(`${role} cannot execute a bare ${kind}`, can === "f", `has_function_privilege = ${can}`);
+    }
+    const svc = await sql(`select has_function_privilege('service_role', '${sig}', 'execute')`);
+    check(`service_role CAN execute the ${kind}`, svc === "t", `has_function_privilege = ${svc}`);
+  }
+
   console.log(`\n${fails === 0 ? "ALL PASS" : `${fails} FAILED`}`);
   process.exit(fails === 0 ? 0 : 1);
 } finally {

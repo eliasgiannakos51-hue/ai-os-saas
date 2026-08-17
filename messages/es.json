@@ -624,7 +624,8 @@
         "restore": "Restaurar",
         "endingIn": "{days, plural, =0 {Tu suscripción termina hoy.} one {Tu suscripción termina en # día.} other {Tu suscripción termina en # días.}}"
       },
-      "creditsSplit": "{monthly} mensuales + {purchased} comprados (no caducan nunca)"
+      "creditsSplit": "{monthly} mensuales + {purchased} comprados (no caducan nunca)",
+      "noSubscriptionToCancel": "No hay suscripción que cancelar: el acceso de propietario y las ventanas beta terminan solos."
     },
     "marginReport": {
       "title": "Informe de Margen",

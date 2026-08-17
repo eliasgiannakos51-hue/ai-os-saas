@@ -624,7 +624,8 @@
         "restore": "Restaurar",
         "endingIn": "{days, plural, =0 {A sua subscrição termina hoje.} one {A sua subscrição termina daqui a # dia.} other {A sua subscrição termina daqui a # dias.}}"
       },
-      "creditsSplit": "{monthly} mensais + {purchased} comprados (nunca expiram)"
+      "creditsSplit": "{monthly} mensais + {purchased} comprados (nunca expiram)",
+      "noSubscriptionToCancel": "Não há subscrição para cancelar — o acesso de proprietário e o período beta terminam sozinhos."
     },
     "marginReport": {
       "title": "Relatório de Margem",

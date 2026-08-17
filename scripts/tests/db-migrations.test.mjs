@@ -93,10 +93,19 @@ check("a migration normalises grants across the whole schema", Boolean(grants));
 if (grants) {
   const g = stripSqlComments(grants.sql);
   check("it loops over pg_proc rather than naming functions", /from pg_proc/.test(g) && /for .* in/.test(g));
-  check("it revokes from public", /revoke all on function %s from public/.test(g));
+  // ON ROUTINE, not ON FUNCTION — that is the spelling that accepts a
+  // procedure and an aggregate as well as a function. The loop filtered
+  // `prokind = 'f'` until a probe on a real cluster showed a procedure and
+  // an aggregate coming out of it still executable by anon.
+  check("it revokes from public", /revoke all on routine %s from public/.test(g));
   check("and from anon", /from anon/.test(g));
   check("and from authenticated", /from authenticated/.test(g));
-  check("it grants to service_role", /grant execute on function %s to service_role/.test(g));
+  check("it grants to service_role", /grant execute on routine %s to service_role/.test(g));
+  check(
+    "and it covers procedures and aggregates, not only functions",
+    /prokind in \('f', 'p', 'a', 'w'\)/.test(g),
+    "credit-function-privileges.itest.mjs proves this against a real cluster"
+  );
   // Extension-owned functions must be left alone or pg_trgm's operators break.
   check("extension-owned functions are excluded", /deptype = 'e'/.test(g));
 }

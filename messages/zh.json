@@ -624,7 +624,8 @@
         "restore": "恢复",
         "endingIn": "{days, plural, =0 {你的订阅今天到期。} other {你的订阅将在 # 天后到期。}}"
       },
-      "creditsSplit": "每月 {monthly} + 已购买 {purchased}（永不过期）"
+      "creditsSplit": "每月 {monthly} + 已购买 {purchased}（永不过期）",
+      "noSubscriptionToCancel": "没有可取消的订阅——所有者权限和 Beta 期会自行结束。"
     },
     "marginReport": {
       "title": "利润率报告",

@@ -624,7 +624,8 @@
         "restore": "Restore",
         "endingIn": "{days, plural, =0 {Your subscription ends today.} one {Your subscription ends in # day.} other {Your subscription ends in # days.}}"
       },
-      "creditsSplit": "{monthly} monthly + {purchased} purchased (never expire)"
+      "creditsSplit": "{monthly} monthly + {purchased} purchased (never expire)",
+      "noSubscriptionToCancel": "No subscription to cancel — owner access and beta windows end on their own."
     },
     "marginReport": {
       "title": "Margin Report",

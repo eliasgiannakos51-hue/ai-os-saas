@@ -624,7 +624,8 @@
         "restore": "元に戻す",
         "endingIn": "{days, plural, =0 {サブスクリプションは本日終了します。} other {サブスクリプションはあと # 日で終了します。}}"
       },
-      "creditsSplit": "月次 {monthly} + 購入分 {purchased}（有効期限なし）"
+      "creditsSplit": "月次 {monthly} + 購入分 {purchased}（有効期限なし）",
+      "noSubscriptionToCancel": "解約する定期購入はありません。オーナー権限とベータ期間はそれぞれ自動的に終了します。"
     },
     "marginReport": {
       "title": "マージンレポート",

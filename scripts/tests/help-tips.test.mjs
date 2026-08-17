@@ -129,7 +129,18 @@ const subdomain = readFileSync("src/lib/publishing/subdomain.ts", "utf8");
 check("published sites really are path-based today", /Path-based today/.test(subdomain));
 // Files: extract.ts refuses a scan by name.
 const extract = readFileSync("src/lib/files/extract.ts", "utf8");
-check("a scanned PDF really is refused, and OCR named", /probably a scan[\s\S]{0,80}OCR/.test(extract));
+// The help tip promises "a scan needs OCR". The wording moved: the
+// message used to say "probably a scan" for BOTH a missing text layer and
+// a font we could not decode, and the second of those is not a scan and is
+// not fixed by OCR — it was every browser-, Word- and LaTeX-written PDF,
+// told to go find an OCR tool. The claim the tip makes is still true of
+// the case it describes, so this now pins that case by its own words.
+check("a scanned PDF really is refused, and OCR named", /no text layer[\s\S]{0,120}OCR/.test(extract));
+check(
+  "...and a font we cannot decode is NOT called a scan",
+  /font encoding could not be decoded/.test(extract) &&
+    !/probably a scan/.test(extract)
+);
 check("extraction really is capped", /MAX_EXTRACTED_CHARS/.test(extract));
 // Agents: the run handler says it emails the result and costs credits.
 const agentRun = readFileSync("src/lib/jobs/handlers/agent-run.ts", "utf8");

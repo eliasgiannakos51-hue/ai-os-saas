@@ -35,6 +35,7 @@ function checkTrue(name, cond) {
 
 const csv = await loadTs("src/lib/import/csv-parse.ts");
 const coerce = await loadTs("src/lib/import/coerce.ts");
+const { coerceDate, coerceNumber, normaliseDigits } = coerce;
 const exporter = await loadTs("src/lib/csv.ts");
 
 console.log("== 1. formula injection is defused on the way IN ==");
@@ -259,6 +260,72 @@ check("empty is null", coerce.coerceEnum("", ["long", "short"], dir), null);
 const type = coerce.ENUM_SYNONYMS.type;
 check("credit -> income", coerce.coerceEnum("Credit", ["income", "expense"], type), "income");
 check("debit -> expense", coerce.coerceEnum("DEBIT", ["income", "expense"], type), "expense");
+
+console.log("\n== A DATE IS NOT ENGLISH ==");
+// "12 Μαρτίου 2025" is what a Greek spreadsheet writes, on a product
+// whose interface is in Greek. The month map held `mar` and nothing else,
+// and `[a-z]{3,}` cannot match Μαρτίου at all — so the row missed the
+// named-date branch, fell through to the numeric one, missed that too,
+// and came back "not a date". Every row, for the whole file, with a
+// reason that pointed at the user's data instead of at us.
+{
+  const CASES = [
+    // el — genitive, because that is what a real date uses
+    ["12 Μαρτίου 2025", "2025-03-12"], ["3 Ιαν 2024", "2024-01-03"],
+    ["12 Μαΐου 2025", "2025-05-12"], ["1 Δεκεμβρίου 2024", "2024-12-01"],
+    ["ΜΑΡΤΙΟΥ 12, 2025", "2025-03-12"],
+    // de
+    ["12 März 2025", "2025-03-12"], ["1. Dezember 2024", "2024-12-01"],
+    ["5 Okt 2023", "2023-10-05"],
+    // fr
+    ["12 mars 2025", "2025-03-12"], ["3 août 2025", "2025-08-03"],
+    ["9 février 2024", "2024-02-09"],
+    // es
+    ["12 marzo 2025", "2025-03-12"], ["5 enero 2024", "2024-01-05"],
+    ["8 diciembre 2023", "2023-12-08"],
+    // it
+    ["12 maggio 2025", "2025-05-12"], ["9 giugno 2025", "2025-06-09"],
+    ["4 ottobre 2024", "2024-10-04"],
+    // en, unchanged
+    ["12 Mar 2025", "2025-03-12"], ["March 12, 2025", "2025-03-12"],
+  ];
+  for (const [input, expected] of CASES) {
+    const r = coerceDate(input);
+    check(`${JSON.stringify(input)}`, r.ok ? r.value.slice(0, 10) : `refused: ${r.reason}`, expected);
+  }
+
+  // THE ONE THAT A THREE-LETTER MAP GETS WRONG. "juin" and "juillet" both
+  // begin "jui", so a stem-only lookup makes every French July a June —
+  // a twelfth of the year silently moved, with no error anywhere.
+  check("fr: juin is June", coerceDate("3 juin 2025").value?.slice(5, 7), "06");
+  check("fr: juillet is July, NOT June", coerceDate("3 juillet 2025").value?.slice(5, 7), "07");
+
+  // Accents and case are folded, so a column written in caps still parses.
+  for (const [a, b] of [["12 Μαΐου 2025", "12 ΜΑΙΟΥ 2025"], ["12 février 2025", "12 FEVRIER 2025"]]) {
+    check(`${JSON.stringify(a)} === ${JSON.stringify(b)}`, coerceDate(a).value, coerceDate(b).value);
+  }
+
+  // A word that is not a month must still be refused rather than guessed.
+  for (const junk of ["12 Banana 2025", "12 Μπανάνα 2025", "12 xyz 2025"]) {
+    check(`${JSON.stringify(junk)} is refused`, coerceDate(junk).ok, false);
+  }
+}
+
+console.log("\n== DIGITS THAT ARE NOT 0-9 ==");
+// A sheet exported on an Arabic-locale machine writes ٢٠٢٥; a Japanese
+// one can write ２０２５. Both are digits to the person who typed them and
+// neither matches \d, so every number and every date in the file was
+// refused — the whole import, for a reason that read like bad data.
+{
+  check("Arabic-Indic date", coerceDate("٢٠٢٥-٠٣-١٢").value?.slice(0, 10), "2025-03-12");
+  check("Arabic-Indic number", coerceNumber("٤٢").value, 42);
+  check("fullwidth number", coerceNumber("１２３４.５６").value, 1234.56);
+  check("Persian digits", coerceNumber("۹۹").value, 99);
+  // Normalisation must not invent digits out of ordinary text.
+  check("a word is still not a number", coerceNumber("abc").ok, false);
+  check("normaliseDigits leaves Latin alone", normaliseDigits("2025-03-12"), "2025-03-12");
+  check("and leaves letters alone", normaliseDigits("Μαρτίου"), "Μαρτίου");
+}
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

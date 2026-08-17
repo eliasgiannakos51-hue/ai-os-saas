@@ -72,13 +72,24 @@ end $$;
 
 -- THE EXCEPTIONS, stated rather than assumed.
 --
--- Two functions are called by the browser through PostgREST as the signed-in
--- user, so they need EXECUTE for `authenticated` — and they are safe to
--- expose because each derives the caller's identity from auth.uid() rather
--- than taking a user id as an argument.
+-- ONE function is called by the browser: search_headline, over PostgREST,
+-- as the signed-in user. Accent-insensitive search over the caller's own
+-- rows; it reads nothing RLS does not already gate, and it refuses a table
+-- that is not RLS-secured rather than trusting its argument.
 --
--- search_headline / search_fold: accent-insensitive search over the
--- caller's own rows. They read nothing that RLS does not already gate.
+-- THE OTHER TWO ARE NOT CALLED BY ANYBODY. They are granted because
+-- search_headline is SECURITY INVOKER: its body runs as `authenticated`,
+-- and it calls search_fold, which calls immutable_unaccent. Without both
+-- grants the browser gets "permission denied for function search_fold"
+-- from inside a function it was allowed to call. Measured on PostgreSQL 16
+-- by revoking search_fold and watching exactly that.
+--
+-- SO THE GRANT BELOW IS LOAD-BEARING ON search_headline STAYING INVOKER.
+-- If it is ever made SECURITY DEFINER, its inner calls run as the definer
+-- and these two grants become exposure with no purpose — delete them then.
+-- The count was wrong here before ("two functions are called by the
+-- browser", listing three), which is how a grant nobody could justify
+-- would have survived.
 do $$
 begin
   if to_regprocedure('public.search_headline(text,text,text,int)') is not null then

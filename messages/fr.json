@@ -828,7 +828,11 @@
       "pin": "Épingler",
       "unpin": "Désépingler",
       "rename": "Renommer",
-      "deleteConfirm": "Supprimer « {title} » ? Action irréversible."
+      "deleteConfirm": "Supprimer « {title} » ? Action irréversible.",
+      "pinLimitReached": "Vous avez épinglé {limit} conversations, le maximum que votre offre garde en haut. Détachez-en une pour épingler celle-ci.",
+      "pinError": "L'épinglage n'a pas été enregistré. Réessayez.",
+      "renameError": "Le nouveau nom n'a pas été enregistré — l'ancien reste.",
+      "renameLabel": "Nouveau nom pour « {title} »"
     },
     "create": {
       "title": "Créer N'importe Quoi",

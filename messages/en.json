@@ -828,7 +828,11 @@
       "pin": "Pin",
       "unpin": "Unpin",
       "rename": "Rename",
-      "deleteConfirm": "Delete \"{title}\"? This can't be undone."
+      "deleteConfirm": "Delete \"{title}\"? This can't be undone.",
+      "pinLimitReached": "You've pinned {limit} conversations, which is the most your plan keeps at the top. Unpin one to pin this one.",
+      "pinError": "The pin didn't save. Try again.",
+      "renameError": "The new name didn't save — the old one is still there.",
+      "renameLabel": "New name for \"{title}\""
     },
     "create": {
       "title": "Create Anything",

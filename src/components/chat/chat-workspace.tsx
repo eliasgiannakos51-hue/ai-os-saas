@@ -214,6 +214,9 @@ export function ChatWorkspace({
     textareaRef.current?.focus();
   }
 
+  // Through the route rather than straight at the table: the per-plan cap
+  // on pinned conversations has to be decided by the server, or it is not
+  // a cap. RLS still owns the ownership half.
   async function togglePin(id: string) {
     const target = conversations.find((c) => c.id === id);
     if (!target) return;
@@ -221,16 +224,34 @@ export function ChatWorkspace({
     setConversations((prev) =>
       prev.map((c) => (c.id === id ? { ...c, is_pinned: nextPinned } : c))
     );
-    const supabase = createClient();
-    const { error: pinError } = await supabase
-      .from("chat_conversations")
-      .update({ is_pinned: nextPinned })
-      .eq("id", id);
-    if (pinError) {
+    const revert = () =>
       setConversations((prev) =>
         prev.map((c) => (c.id === id ? { ...c, is_pinned: !nextPinned } : c))
       );
-      setError(getErrorMessage(pinError, "Could not update pin."));
+    try {
+      const res = await fetch(`/api/conversations/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_pinned: nextPinned }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        revert();
+        // Hitting the pin cap is a tidiness problem, not a billing one,
+        // so it gets its own sentence with the numbers in it — never an
+        // upgrade prompt. Every other code falls to one translated line:
+        // the route returns identifiers rather than English prose, so
+        // there is nothing here that could leak an English sentence into
+        // a Greek sidebar.
+        setError(
+          data?.code === "pin_limit"
+            ? t("pinLimitReached", { limit: data.limit })
+            : t("pinError")
+        );
+      }
+    } catch {
+      revert();
+      setError(t("pinError"));
     }
   }
 
@@ -254,19 +275,42 @@ export function ChatWorkspace({
     );
   }
 
+  // Also through the route: the title length is capped there, so a
+  // 40,000-character name cannot be written by anything that skips this
+  // component. The optimistic update stays — a rename that waits for a
+  // round trip feels broken.
   async function renameConversation(id: string, title: string) {
     const previousTitle = conversations.find((c) => c.id === id)?.title;
     setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)));
-    const supabase = createClient();
-    const { error: renameError } = await supabase
-      .from("chat_conversations")
-      .update({ title })
-      .eq("id", id);
-    if (renameError && previousTitle !== undefined) {
+    try {
+      const res = await fetch(`/api/conversations/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        if (previousTitle !== undefined) {
+          setConversations((prev) =>
+            prev.map((c) => (c.id === id ? { ...c, title: previousTitle } : c))
+          );
+        }
+        setError(t("renameError"));
+        return;
+      }
+      // The server trims and truncates, so the row it returns is the
+      // truth — echoing it back stops the sidebar showing 120 characters
+      // of a title the database stored as 100.
       setConversations((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, title: previousTitle } : c))
+        prev.map((c) => (c.id === id ? { ...c, title: data.conversation.title } : c))
       );
-      setError(getErrorMessage(renameError, "Could not rename conversation."));
+    } catch {
+      if (previousTitle !== undefined) {
+        setConversations((prev) =>
+          prev.map((c) => (c.id === id ? { ...c, title: previousTitle } : c))
+        );
+      }
+      setError(t("renameError"));
     }
   }
 

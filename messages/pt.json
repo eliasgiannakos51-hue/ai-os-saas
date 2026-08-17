@@ -828,7 +828,11 @@
       "pin": "Fixar",
       "unpin": "Desafixar",
       "rename": "Mudar o nome",
-      "deleteConfirm": "Eliminar «{title}»? Não é possível anular."
+      "deleteConfirm": "Eliminar «{title}»? Não é possível anular.",
+      "pinLimitReached": "Fixou {limit} conversas, o máximo que o seu plano mantém no topo. Solte uma para fixar esta.",
+      "pinError": "A fixação não foi guardada. Tente de novo.",
+      "renameError": "O novo nome não foi guardado — fica o anterior.",
+      "renameLabel": "Novo nome para «{title}»"
     },
     "create": {
       "title": "Criar Qualquer Coisa",

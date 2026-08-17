@@ -828,7 +828,11 @@
       "pin": "置顶",
       "unpin": "取消置顶",
       "rename": "重命名",
-      "deleteConfirm": "确定删除“{title}”？此操作无法撤销。"
+      "deleteConfirm": "确定删除“{title}”？此操作无法撤销。",
+      "pinLimitReached": "你已置顶 {limit} 个对话，这是当前方案能置顶的上限。先取消一个，再置顶这个。",
+      "pinError": "置顶没有保存成功，请再试一次。",
+      "renameError": "新名称没有保存，仍然是原来的名称。",
+      "renameLabel": "「{title}」的新名称"
     },
     "create": {
       "title": "创建任何内容",

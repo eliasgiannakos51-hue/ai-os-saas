@@ -828,7 +828,11 @@
       "pin": "Fijar",
       "unpin": "No fijar",
       "rename": "Cambiar el nombre",
-      "deleteConfirm": "¿Eliminar «{title}»? No se puede deshacer."
+      "deleteConfirm": "¿Eliminar «{title}»? No se puede deshacer.",
+      "pinLimitReached": "Has fijado {limit} conversaciones, el máximo que tu plan mantiene arriba. Suelta una para fijar esta.",
+      "pinError": "No se guardó el anclaje. Inténtalo de nuevo.",
+      "renameError": "El nuevo nombre no se guardó: sigue el anterior.",
+      "renameLabel": "Nuevo nombre para «{title}»"
     },
     "create": {
       "title": "Crear Cualquier Cosa",

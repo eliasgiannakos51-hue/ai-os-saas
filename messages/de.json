@@ -828,7 +828,11 @@
       "pin": "Anheften",
       "unpin": "Lösen",
       "rename": "Umbenennen",
-      "deleteConfirm": "„{title}“ löschen? Das lässt sich nicht rückgängig machen."
+      "deleteConfirm": "„{title}“ löschen? Das lässt sich nicht rückgängig machen.",
+      "pinLimitReached": "Du hast {limit} Unterhaltungen angeheftet — mehr hält dein Tarif nicht oben. Löse eine, um diese anzuheften.",
+      "pinError": "Das Anheften wurde nicht gespeichert. Versuch es noch einmal.",
+      "renameError": "Der neue Name wurde nicht gespeichert — der alte bleibt.",
+      "renameLabel": "Neuer Name für „{title}“"
     },
     "create": {
       "title": "Alles Erstellen",

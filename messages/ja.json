@@ -828,7 +828,11 @@
       "pin": "ピン留め",
       "unpin": "ピン留めを解除",
       "rename": "名前を変更",
-      "deleteConfirm": "「{title}」を削除しますか？元に戻せません。"
+      "deleteConfirm": "「{title}」を削除しますか？元に戻せません。",
+      "pinLimitReached": "ピン留めは {limit} 件までで、いまのプランの上限です。ひとつ解除してから、こちらをピン留めしてください。",
+      "pinError": "ピン留めを保存できませんでした。もう一度お試しください。",
+      "renameError": "新しい名前を保存できませんでした。前の名前のままです。",
+      "renameLabel": "「{title}」の新しい名前"
     },
     "create": {
       "title": "何でも作成",

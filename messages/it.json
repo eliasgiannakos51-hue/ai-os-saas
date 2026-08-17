@@ -828,7 +828,11 @@
       "pin": "Fissa",
       "unpin": "Rimuovi",
       "rename": "Rinomina",
-      "deleteConfirm": "Eliminare «{title}»? L'operazione è irreversibile."
+      "deleteConfirm": "Eliminare «{title}»? L'operazione è irreversibile.",
+      "pinLimitReached": "Hai fissato {limit} conversazioni, il massimo che il tuo piano tiene in alto. Liberane una per fissare questa.",
+      "pinError": "Il fissaggio non è stato salvato. Riprova.",
+      "renameError": "Il nuovo nome non è stato salvato: resta quello precedente.",
+      "renameLabel": "Nuovo nome per «{title}»"
     },
     "create": {
       "title": "Crea Qualsiasi Cosa",

@@ -235,7 +235,29 @@ const ddlRaw = readFileSync("supabase/migrations/20260816_help_articles.sql", "u
 const ddl = ddlRaw.replace(/^\s*--.*$/gm, "");
 check("the table is created idempotently", /create table if not exists public\.help_articles/.test(ddl));
 check("unique on (slug, locale)", /create unique index if not exists[\s\S]{0,120}\(slug, locale\)/.test(ddl));
-check("RLS is on, and forced", /enable row level security/.test(ddl) && /force row level security/.test(ddl));
+// RLS ON, AND DELIBERATELY NOT FORCED.
+//
+// This asserted `force row level security` and was wrong to. FORCE makes
+// the policies apply to the table OWNER too, and there is no INSERT policy
+// by design — so the seed in the next migration file is refused with "new
+// row violates row-level security policy for table help_articles" on any
+// deployment whose migration runner is an ordinary owner rather than a
+// superuser.
+//
+// It looked right for the same reason the integration test looked green:
+// the only place it was ever exercised, psql was connected as a superuser,
+// and a superuser bypasses RLS whether FORCE is set or not. See section 2b
+// of help-articles.itest.mjs, which now applies both files as a
+// `nosuperuser nobypassrls` role.
+//
+// Protection where it matters is unchanged: the read policy and the revoke
+// below decide what anon and authenticated can do, and neither depends on
+// FORCE.
+check("RLS is on", /enable row level security/.test(ddl));
+check(
+  "...and NOT forced, which would make the table refuse its own seed",
+  !/force row level security/.test(ddl)
+);
 check("published rows are publicly readable", /for select[\s\S]{0,80}using \(published = true\)/.test(ddl));
 // Writes are service-role only: no write policy exists, and the grants
 // say so explicitly as well.

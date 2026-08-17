@@ -11,6 +11,7 @@
 //
 // Run: node scripts/tests/help-articles.itest.mjs
 import { execFile, execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { promisify } from "node:util";
 import { startEphemeralPostgres, psqlArgs } from "../lib/ephemeral-postgres.mjs";
 
@@ -126,7 +127,67 @@ try {
   );
   check("every slug exists in English", orphans === "", orphans);
 
-  console.log("\n== 3. (slug, locale) is the identity of a translation ==");
+  console.log("\n== 2b. it applies as a PLAIN OWNER, not only as a superuser ==");
+// THE CHECK THAT COULD NOT FAIL WHERE IT WAS BEING MADE.
+//
+// Every assertion above runs over a psql connected as `postgres`, which in
+// an ephemeral cluster is a SUPERUSER — and a superuser bypasses RLS
+// whether or not `force row level security` is set. So "the seed landed"
+// was true here and would have been false on any deployment whose
+// migration runner is an ordinary owner.
+//
+// It was false: the table carried FORCE, there is no INSERT policy by
+// design, and the seed in the next file was refused with "new row violates
+// row-level security policy for table help_articles". Running it again as
+// a `nosuperuser nobypassrls` role is what surfaced that, so that is what
+// this section does.
+{
+  await sql(`do $$ begin
+    if not exists (select 1 from pg_roles where rolname='migrator_probe') then
+      create role migrator_probe nosuperuser nobypassrls;
+    end if;
+  end $$;`);
+  await sql(`grant create, usage on schema public to migrator_probe`);
+  // A CLEAN SLATE, function included. The sections above already ran both
+  // files as the superuser, and `migrator_probe` cannot REVOKE on a
+  // function somebody else owns — "must be owner of function
+  // help_articles_touch_updated_at" is this test's own leftovers talking,
+  // not the migration. Dropping the table alone is not enough: the trigger
+  // function outlives it.
+  await sql(`drop table if exists public.help_articles cascade`);
+  await sql(`drop function if exists public.help_articles_touch_updated_at() cascade`);
+  const asOwner = (file) =>
+    execFileSync(pg.psql, [...ARGS, "-v", "ON_ERROR_STOP=1", "-q", "-f", "-"], {
+      input: `set role migrator_probe;\n` + readFileSync(`${ROOT}/${file}`, "utf8"),
+      encoding: "utf8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+  let ok = true;
+  let detail = "";
+  try {
+    asOwner(MIGRATION);
+    asOwner(SEED);
+  } catch (err) {
+    ok = false;
+    detail = String(err.stderr || err.stdout || err.message).split("\n").filter(Boolean).slice(0, 3).join(" | ");
+  }
+  check("both files apply as a nosuperuser, nobypassrls owner", ok, detail);
+  const seeded = ok ? Number(await sql(`select count(*)::int from public.help_articles`)) : 0;
+  check(`and the seed landed under that role (${seeded} rows)`, seeded > 100, String(seeded));
+  // Named, so re-adding FORCE fails here rather than at deploy time.
+  const forced = await sql(
+    `select relforcerowsecurity::text from pg_class where oid = 'public.help_articles'::regclass`
+  );
+  check("the table does not FORCE RLS, which would refuse its own seed", forced === "false", forced);
+  // Put the superuser-applied state back for the sections below, function
+  // and all — otherwise THEY inherit migrator_probe's objects and hit the
+  // same ownership wall from the other side.
+  await sql(`drop table if exists public.help_articles cascade`);
+  await sql(`drop function if exists public.help_articles_touch_updated_at() cascade`);
+  apply();
+}
+
+console.log("\n== 3. (slug, locale) is the identity of a translation ==");
   await expectError(
     "a duplicate (slug, locale) is refused",
     `insert into public.help_articles (slug, locale, title, body, category)

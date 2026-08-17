@@ -134,10 +134,30 @@ create index if not exists help_articles_locale_published_idx
   on public.help_articles (locale, published, category, "order");
 
 alter table public.help_articles enable row level security;
--- Belt and braces: RLS does not apply to the table owner, and FORCE makes
--- the policies apply even then. Cheap here because nothing legitimately
--- reads this table as the owner.
-alter table public.help_articles force row level security;
+
+-- NO `force row level security`, AND THAT IS THE FIX RATHER THAN AN
+-- OMISSION.
+--
+-- It was here, with the comment "cheap, because nothing legitimately reads
+-- this table as the owner". Reading was never the problem. Something
+-- legitimately WRITES to it as the owner — the seed, in the very next
+-- migration file — and FORCE makes the policies apply to the owner too.
+-- There is no INSERT policy, by design, so the seed is refused:
+--
+--   ERROR:  new row violates row-level security policy for table "help_articles"
+--
+-- Reproduced on PostgreSQL 16 by applying both files as a plain
+-- `nosuperuser nobypassrls` role, which is what a migration runner may
+-- well be. It passed every earlier run only because psql was connected as
+-- a superuser, and a superuser bypasses RLS whether FORCE is set or not —
+-- so the check could not fail in the place it was being checked.
+--
+-- Without FORCE the protection is unchanged where it matters: anon and
+-- authenticated still see published rows only, and still cannot write,
+-- because that is decided by the policy below and the revoke under it.
+-- What changes is that applying this schema no longer depends on the
+-- privileges of whoever applies it. It is also what every other RLS table
+-- in this schema does; this was the only one that differed.
 
 -- ----------------------------------------------------------------------
 -- RLS: public read of published rows, and no writes from a browser at all.

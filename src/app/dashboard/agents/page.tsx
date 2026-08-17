@@ -95,7 +95,7 @@ export default async function AgentsPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={MODULE_ICONS.agents} title={t("title")} description={t("description")} />
+        <PageHeader helpKey="help.agents" helpArticle="create-agent" icon={MODULE_ICONS.agents} title={t("title")} description={t("description")} />
 
         {/* EU AI Act Article 50 — the user has to know they are configuring
             an AI system and that everything it sends them is AI-generated.

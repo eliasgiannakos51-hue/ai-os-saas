@@ -2291,6 +2291,11 @@
       "is": "Where people will share the agents, site templates and workflows they have built.",
       "does": "Nothing yet. This page is a placeholder for a feature that has not been built.",
       "doesNot": "It is not empty because of your plan, and upgrading will not open it. The button below is disabled because there is nothing behind it."
+    },
+    "settings": {
+      "is": "Your account: the plan you are on, the credits you hold, and everything you have logged.",
+      "does": "Change your plan, buy credits, set the language and theme, name the assistant, and download every record in the account as one file.",
+      "doesNot": "It does not hold your records — each module keeps its own. And Delete account is not a way to clear them and start again: it ends the account, takes everything with it, and there is no undo. Export first."
     }
   },
   "helpCentre": {

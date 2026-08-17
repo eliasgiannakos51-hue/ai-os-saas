@@ -199,7 +199,7 @@ export default async function SettingsPage() {
   return (
     <main className="min-h-full">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
-        <PageHeader icon={SettingsIcon} title={t("title")} />
+        <PageHeader helpKey="help.settings" helpArticle="export-data" icon={SettingsIcon} title={t("title")} />
 
         {/* Every label here is the SAME key as the section heading it jumps
             to, not a second copy of the word. Three of the four used to be

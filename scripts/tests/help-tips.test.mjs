@@ -53,7 +53,12 @@ const { HELP_TIPS, helpTipKey } = await loadTs("src/lib/help-tips.ts");
 const PARTS = ["is", "does", "doesNot"];
 
 console.log("== 1. the registry describes real pages ==");
-check(`twelve pages carry a tip (${HELP_TIPS.length})`, HELP_TIPS.length === 12);
+// 12 -> 13. Settings joined when a second branch put a contextual "?" on
+// it: that branch pointed at the export-data article, this one had no tip
+// to hang it on, and the two together are the one page where the wrong
+// assumption is expensive — somebody reading "Delete account" as a way to
+// clear their records and start again.
+check(`thirteen pages carry a tip (${HELP_TIPS.length})`, HELP_TIPS.length === 13);
 checkList("every entry names a file that exists", HELP_TIPS.filter((t) => !existsSync(t.file)).map((t) => t.file));
 check("no two entries share an id", new Set(HELP_TIPS.map((t) => t.id)).size === HELP_TIPS.length);
 check("no two entries share a key prefix", new Set(HELP_TIPS.map((t) => t.keyPrefix)).size === HELP_TIPS.length);
@@ -151,9 +156,28 @@ for (const locale of LOCALES) {
 }
 
 console.log("\n== 5. the pages render it ==");
+// ON EVERY <PageHeader> THE PAGE HAS, not on one of them.
+//
+// THIS CHECK USED TO BE `src.includes(helpKey="...")` AND IT PASSED WHILE
+// THE FEATURE WAS BACKWARDS. Four of these pages render two headers: one
+// inside the `if (!isAdmin && cap <= 0)` branch — the upgrade wall — and
+// one for the working screen. The helpKey was on the upgrade wall alone,
+// so the "?" appeared only for people who cannot use the feature and was
+// absent for everyone who can. A substring search cannot see that; it
+// found the one occurrence and reported the page as done.
+//
+// Counting is what makes the claim honest: a tip on n-1 of n headers now
+// fails, and the failure names the file.
 for (const tip of HELP_TIPS) {
   const src = readFileSync(tip.file, "utf8");
-  check(`${tip.id}: its page passes helpKey`, src.includes(`helpKey="${tip.keyPrefix}"`), tip.file);
+  const headers = (src.match(/<PageHeader\b/g) ?? []).length;
+  const withKey = (src.match(new RegExp(`helpKey="${tip.keyPrefix}"`, "g")) ?? []).length;
+  check(`${tip.id}: its page passes helpKey`, withKey > 0, tip.file);
+  check(
+    `${tip.id}: on all ${headers} of its headers, not just the upgrade wall`,
+    withKey === headers,
+    `${withKey} of ${headers} <PageHeader> carry it — ${tip.file}`
+  );
 }
 const header = readFileSync("src/components/dashboard/page-header.tsx", "utf8");
 // One place, so the control never moves between pages — a help affordance
@@ -202,10 +226,10 @@ console.log("\n== 7. it answers on its own, and links on as an extra ==");
 // The articles are rows in help_articles now, one per locale, and /help
 // falls back to English visibly. So the link is allowed — but only as an
 // EXTRA. The three parts still have to answer on their own, because three
-// of the twelve pages have no article at all and because a tip that needs
+// of the thirteen pages have no article at all and because a tip that needs
 // a round trip to be useful is not a tip.
 const linkedTips = HELP_TIPS.filter((t) => t.article);
-check(`${linkedTips.length} of ${HELP_TIPS.length} tips link to an article`, linkedTips.length === 8);
+check(`${linkedTips.length} of ${HELP_TIPS.length} tips link to an article`, linkedTips.length === 9);
 check("the link is an anchor on /help, not the page itself", /\/help#\$\{articleSlug\}/.test(tip));
 check("and renders only when there is an article", /articleSlug && \(/.test(tip));
 for (const t of HELP_TIPS) {

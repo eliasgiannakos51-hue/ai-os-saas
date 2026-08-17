@@ -2291,6 +2291,11 @@
       "is": "O sítio onde as pessoas vão partilhar os agentes, modelos de site e fluxos que criaram.",
       "does": "Ainda nada. Esta página guarda o lugar de uma funcionalidade que não foi construída.",
       "doesNot": "Não está vazia por causa do seu plano, e mudar de plano não a vai abrir. O botão abaixo está desativado porque não há nada por trás dele."
+    },
+    "settings": {
+      "is": "A tua conta: o plano que tens, os créditos que te restam e tudo o que registaste.",
+      "does": "Muda de plano, compra créditos, define idioma e tema, dá um nome ao assistente e descarrega todos os registos da conta num único ficheiro.",
+      "doesNot": "Os teus registos não estão aqui — cada módulo guarda os seus. E Eliminar conta não é uma forma de os limpar e começar de novo: termina a conta, leva tudo com ela e não há como desfazer. Exporta primeiro."
     }
   },
   "helpCentre": {

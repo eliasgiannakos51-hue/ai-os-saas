@@ -2291,6 +2291,11 @@
       "is": "L'endroit où l'on partagera les agents, modèles de sites et workflows créés.",
       "does": "Rien pour l'instant. Cette page réserve la place d'une fonctionnalité qui n'existe pas encore.",
       "doesNot": "Elle n'est pas vide à cause de votre formule, et changer de formule ne l'ouvrira pas. Le bouton ci-dessous est désactivé parce qu'il n'y a rien derrière."
+    },
+    "settings": {
+      "is": "Votre compte : votre offre, les crédits qu'il vous reste et tout ce que vous avez consigné.",
+      "does": "Changez d'offre, achetez des crédits, choisissez la langue et le thème, nommez l'assistant et téléchargez chaque enregistrement du compte dans un seul fichier.",
+      "doesNot": "Vos enregistrements ne sont pas ici : chaque module garde les siens. Et Supprimer le compte n'est pas une façon de faire le ménage et de repartir de zéro : cela met fin au compte, emporte tout avec lui, et rien ne peut être annulé. Exportez d'abord."
     }
   },
   "helpCentre": {

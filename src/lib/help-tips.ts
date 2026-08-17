@@ -158,6 +158,16 @@ export const HELP_TIPS: HelpTip[] = [
     keyPrefix: "help.marketplace",
     corrects: "that the page is empty because of your plan",
   },
+  {
+    id: "settings",
+    article: "export-data",
+    file: "src/app/dashboard/settings/page.tsx",
+    keyPrefix: "help.settings",
+    corrects:
+      "that Delete account is a way to clear your data and start again — it ends the account, " +
+      "takes every record with it, and there is no undo. Export first is the thing this page has " +
+      "to say before somebody presses the red button, which is why its article is export-data.",
+  },
 ];
 
 export type HelpTipPart = "is" | "does" | "doesNot";

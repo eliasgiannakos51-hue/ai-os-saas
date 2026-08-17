@@ -2291,6 +2291,11 @@
       "is": "El lugar donde la gente compartirá los agentes, plantillas de sitios y flujos que ha creado.",
       "does": "Nada todavía. Esta página reserva el sitio para una función que no está construida.",
       "doesNot": "No está vacía por su plan, y mejorar de plan no la abrirá. El botón de abajo está desactivado porque no hay nada detrás."
+    },
+    "settings": {
+      "is": "Tu cuenta: el plan que tienes, los créditos que te quedan y todo lo que has registrado.",
+      "does": "Cambia de plan, compra créditos, elige idioma y tema, pon nombre al asistente y descarga cada registro de la cuenta en un solo archivo.",
+      "doesNot": "No guarda aquí tus registros: cada módulo guarda los suyos. Y Eliminar cuenta no es una forma de limpiarlos y empezar de cero: termina la cuenta, se lleva todo con ella y no se puede deshacer. Exporta antes."
     }
   },
   "helpCentre": {

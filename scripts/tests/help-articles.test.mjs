@@ -277,7 +277,7 @@ for (const locale of LOCALES) {
 console.log("\n== 8. the \"?\" links on, without depending on it ==");
 const { HELP_TIPS } = await loadTs("src/lib/help-tips.ts");
 const linked = HELP_TIPS.filter((t) => t.article);
-check(`${linked.length} of ${HELP_TIPS.length} tips link to an article`, linked.length === 8);
+check(`${linked.length} of ${HELP_TIPS.length} tips link to an article`, linked.length === 9);
 checkList("every linked slug is a real article", linked.filter((t) => !enSlugs.has(t.article)).map((t) => t.article));
 const tip = readFileSync("src/components/ui/help-tip.tsx", "utf8");
 check("the link is an anchor on /help", /\/help#\$\{articleSlug\}/.test(tip));

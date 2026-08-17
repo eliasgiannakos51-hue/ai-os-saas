@@ -2291,6 +2291,11 @@
       "is": "Il posto dove si condivideranno agent, modelli di sito e flussi già costruiti.",
       "does": "Ancora niente. Questa pagina tiene il posto per una funzione che non è stata costruita.",
       "doesNot": "Non è vuota per via del tuo piano, e passare a un piano superiore non la aprirà. Il pulsante qui sotto è disabilitato perché dietro non c'è nulla."
+    },
+    "settings": {
+      "is": "Il tuo account: il piano che hai, i crediti che ti restano e tutto ciò che hai registrato.",
+      "does": "Cambia piano, acquista crediti, imposta lingua e tema, dai un nome all'assistente e scarica ogni voce dell'account in un unico file.",
+      "doesNot": "Le tue voci non stanno qui: ogni modulo conserva le proprie. Ed Elimina account non è un modo per ripulirle e ricominciare: chiude l'account, si porta via tutto e non si può annullare. Prima esporta."
     }
   },
   "helpCentre": {

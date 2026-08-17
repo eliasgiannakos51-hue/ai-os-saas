@@ -2291,6 +2291,11 @@
       "is": "Der Ort, an dem Leute ihre Agents, Website-Vorlagen und Workflows teilen werden.",
       "does": "Noch nichts. Diese Seite hält den Platz für eine Funktion frei, die noch nicht gebaut ist.",
       "doesNot": "Sie ist nicht wegen deines Tarifs leer, und ein Upgrade öffnet sie nicht. Der Button unten ist deaktiviert, weil nichts dahinter liegt."
+    },
+    "settings": {
+      "is": "Dein Konto: dein Tarif, deine verbleibenden Credits und alles, was du erfasst hast.",
+      "does": "Tarif wechseln, Credits kaufen, Sprache und Design festlegen, dem Assistenten einen Namen geben und jeden Datensatz des Kontos als eine Datei herunterladen.",
+      "doesNot": "Deine Datensätze liegen nicht hier — jedes Modul verwaltet seine eigenen. Und Konto löschen ist kein Weg, sie zu bereinigen und neu anzufangen: es beendet das Konto, nimmt alles mit, und es gibt kein Zurück. Vorher exportieren."
     }
   },
   "helpCentre": {

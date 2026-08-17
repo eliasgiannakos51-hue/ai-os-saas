@@ -69,7 +69,22 @@ export default async function Home() {
           {t("description")}
         </p>
 
-        <div className="mt-10 flex w-full max-w-xs flex-col gap-3 sm:mx-auto sm:w-auto sm:flex-row">
+        {/* CENTRED AT EVERY WIDTH, and it was centred at none.
+            `sm:mx-auto` meant that below 640px a `w-full max-w-xs` block —
+            320px wide — was never centred: it sat at the container's left
+            padding with the remainder on the right. Measured at 375px:
+            16px on the left, 39px on the right. At 414px: 16 and 78.
+            From `sm` up it was wrong for the opposite reason. The parent
+            (`relative z-10`) has no width, so `sm:w-auto` on a flex
+            container inside a block resolves to the full parent width —
+            `mx-auto` then has nothing to centre, and the row's default
+            `justify-start` pinned both buttons to the left edge of the
+            <h1>. Measured at 1280px: 480px on the left, 596px on the
+            right, on a pair only 204px wide.
+            So: `mx-auto` unconditionally for the narrow case, and
+            `justify-center` for the wide one. Held by
+            scripts/tests/landing-alignment.prodtest.mjs at five widths. */}
+        <div className="mx-auto mt-10 flex w-full max-w-xs flex-col justify-center gap-3 sm:max-w-none sm:flex-row">
           <Link
             href="/login"
             className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border px-6 py-2.5 text-sm font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"

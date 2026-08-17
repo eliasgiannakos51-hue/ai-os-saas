@@ -105,7 +105,7 @@ export function DetailPanel({
               aria-controls={`detail-panel-${tab.key}`}
               tabIndex={active ? 0 : -1}
               onClick={() => onTabChange(tab.key)}
-              className={`-mb-px inline-flex min-h-[44px] shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2 text-xs font-medium transition-colors duration-150 sm:min-h-0 ${
+              className={`-mb-px inline-flex min-h-[44px] shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2 text-xs font-medium transition-colors duration-150 ${
                 active
                   ? "border-orange-500 text-orange-400"
                   : "border-transparent text-muted hover:text-foreground"

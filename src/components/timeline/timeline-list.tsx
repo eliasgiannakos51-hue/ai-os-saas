@@ -31,7 +31,13 @@ export function TimelineList({
   const favoritedSet = useMemo(() => new Set(favoritedKeys), [favoritedKeys]);
 
   if (entries.length === 0) {
-    return <EmptyState icon={History}>{t("emptyState")}</EmptyState>;
+    // No example to press: a timeline is written BY working, never typed
+    // into. A button here would have nowhere to put the text.
+    return (
+      <EmptyState icon={History} title={t("empty.title")}>
+        {t("empty.why")}
+      </EmptyState>
+    );
   }
 
   const totalPages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));

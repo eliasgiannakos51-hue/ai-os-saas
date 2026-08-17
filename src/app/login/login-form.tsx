@@ -54,7 +54,7 @@ export function LoginForm() {
       if (!res.ok || !data.ok) {
         // eslint-disable-next-line no-console
         console.error("Login error:", data?.error);
-        setError(getErrorMessage(data?.error));
+        setError(getErrorMessage(data?.error, t("failed")));
         return;
       }
 
@@ -71,7 +71,7 @@ export function LoginForm() {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Login threw:", err);
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err, t("failed")));
     } finally {
       setLoading(false);
     }

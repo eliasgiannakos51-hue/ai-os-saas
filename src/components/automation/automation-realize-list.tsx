@@ -7,7 +7,7 @@ import { Sparkles } from "lucide-react";
 import { useToast } from "@/components/toast/toast-context";
 import { useCredits } from "@/components/credits/credits-context";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
-import { appendClarificationAnswers } from "@/lib/clarification-client";
+import { appendClarificationAnswers, alignSuggestions } from "@/lib/clarification-client";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import type { ModuleRecord } from "@/types/module-record";
 import type { AutomationFrequency } from "@/lib/automation-schedule";
@@ -92,7 +92,11 @@ function RealizeForm({
   const [dayOfWeek, setDayOfWeek] = useState<number | "">("");
   const [dayOfMonth, setDayOfMonth] = useState<number | "">("");
   const [submitting, setSubmitting] = useState(false);
-  const [pendingClarification, setPendingClarification] = useState<{ questions: string[] } | null>(null);
+  const [pendingClarification, setPendingClarification] = useState<{
+    questions: string[];
+    /** Tappable answers, aligned by index with `questions`. */
+    suggestions: string[][];
+  } | null>(null);
   const { refresh: refreshCredits } = useCredits();
 
   const isComplete =
@@ -125,7 +129,10 @@ function RealizeForm({
         return;
       }
       if (data.needsClarification) {
-        setPendingClarification({ questions: data.questions as string[] });
+        setPendingClarification({
+          questions: data.questions as string[],
+          suggestions: alignSuggestions(data.questions as string[], data.questionSuggestions),
+        });
         void refreshCredits();
         return;
       }
@@ -224,6 +231,7 @@ function RealizeForm({
       {pendingClarification ? (
         <ClarificationQuestions
           questions={pendingClarification.questions}
+          suggestions={pendingClarification.suggestions}
           onAnswer={handleClarificationAnswer}
           onSkip={handleClarificationSkip}
           submitting={submitting}
@@ -237,7 +245,7 @@ function RealizeForm({
           type="button"
           onClick={handleSubmit}
           disabled={submitting || !isComplete}
-          className="inline-flex min-h-[36px] items-center justify-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? t("realizing") : t("confirmMakeReal")}
         </button>

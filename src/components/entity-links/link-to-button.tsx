@@ -16,6 +16,7 @@ export function LinkToButton({
   sourceHeadline,
   variant = "icon",
   onActivate,
+  onOpen,
 }: {
   sourceTable: string;
   sourceId: string;
@@ -24,6 +25,22 @@ export function LinkToButton({
   variant?: RecordActionVariant;
   /** Called before the modal opens — lets a host menu close itself. */
   onActivate?: () => void;
+  /**
+   * When provided, this button is a TRIGGER ONLY and the caller owns the
+   * modal.
+   *
+   * It exists because the self-contained version is unreachable from a
+   * card's "..." menu, which is where it is used most. CardMenu renders
+   * `menuExtra` inside `{open && (...)}`, and this button's onClick calls
+   * `onActivate()` — which closes that menu — before setting its own state.
+   * Both updates flush together, the dropdown unmounts, and the modal that
+   * lives in this component's own tree unmounts with it before it ever
+   * paints. The dialog was not slow or misplaced; it never existed.
+   *
+   * So the card keeps the modal, which outlives the menu, and the menu item
+   * only says "open it".
+   */
+  onOpen?: () => void;
 }) {
   const t = useTranslations("entityLinks");
   const [open, setOpen] = useState(false);
@@ -36,7 +53,8 @@ export function LinkToButton({
         role={variant === "menuItem" ? "menuitem" : undefined}
         onClick={() => {
           onActivate?.();
-          setOpen(true);
+          if (onOpen) onOpen();
+          else setOpen(true);
         }}
         aria-label={`${t("buttonLabel")}: ${sourceHeadline}`}
         title={t("buttonLabel")}
@@ -45,6 +63,7 @@ export function LinkToButton({
         <Link2 className={recordActionIconClasses(variant)} />
         {variant !== "icon" && t("buttonLabel")}
       </button>
+      {!onOpen && (
       <LinkToModal
         open={open}
         onClose={() => setOpen(false)}
@@ -52,6 +71,7 @@ export function LinkToButton({
         sourceId={sourceId}
         sourceHeadline={sourceHeadline}
       />
+      )}
     </>
   );
 }

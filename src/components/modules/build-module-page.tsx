@@ -31,10 +31,21 @@ export async function BuildModulePage({
   config: ModuleConfig;
   icon: LucideIcon;
 }) {
-  // The module's name is a key on the config, so the page resolves it in
-  // the request's locale rather than printing whatever English the
-  // registry used to hold.
+  // THE NAME THE USER READS, not the state key.
+  //
+  // This rendered `config.title` verbatim, so every one of these pages
+  // showed its English name in all ten locales while the sidebar beside
+  // it showed the translation — "Σημειώσεις εικόνων" in the nav, "Images"
+  // as the heading, on the same screen.
+  //
+  // `titleKey` is a FULL dotted key on the config ("sidebar.items.images"),
+  // the sidebar's own, so this resolves through the root translator and
+  // there is exactly one display name per module. There is no
+  // `?? config.title` fallback behind it any more: the English `title`
+  // field no longer exists, which makes that a property of the type rather
+  // than a convention.
   const t = await getTranslations();
+  const title = t(config.titleKey);
   const supabase = createClient();
 
   const {
@@ -53,9 +64,9 @@ export async function BuildModulePage({
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={icon} title={t(config.titleKey)} />
+          <PageHeader icon={icon} title={title} />
           <UpgradeRequired
-            featureName={t(config.titleKey)}
+            featureName={title}
             planName={requiredPlan?.name ?? config.minPlanSlug}
           />
         </div>
@@ -77,10 +88,10 @@ export async function BuildModulePage({
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={icon} title={t(config.titleKey)} />
+        <PageHeader icon={icon} title={title} />
 
 
-        {error && <ErrorMessage message={`loading ${config.table}: ${error.message}`} />}
+        {error && <ErrorMessage detail={`loading ${config.table}: ${error.message}`} />}
 
         <GenericList
           module={config}

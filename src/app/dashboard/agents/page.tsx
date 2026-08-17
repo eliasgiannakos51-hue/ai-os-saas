@@ -1,7 +1,9 @@
+import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
+import { listSlackChannels } from "@/lib/integrations/read";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
@@ -14,7 +16,9 @@ import type { AgentRun, UserAgent } from "@/lib/agents/agent-config";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "AI Agents" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.agents");
+}
 
 // Autonomous Agents.
 //
@@ -50,7 +54,7 @@ export default async function AgentsPage() {
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={MODULE_ICONS.agents} title={t("title")} description={t("description")} />
+          <PageHeader helpKey="help.agents" helpArticle="create-agent" icon={MODULE_ICONS.agents} title={t("title")} description={t("description")} />
           <UpgradeRequired featureName={t("title")} planName="Starter" />
         </div>
       </main>
@@ -74,6 +78,15 @@ export default async function AgentsPage() {
       .limit(RUN_HISTORY_LIMIT),
   ]);
 
+  // THE SLACK CHANNELS THE AGENT MAY BE POINTED AT, resolved server-side
+  // from this user's own connected workspace. Fetched here rather than by
+  // the picker so the browser is never the thing that decides which
+  // channels exist — and best-effort, because a Slack outage must not
+  // take the Agents page down with it.
+  const slackChannels = await listSlackChannels(user.id)
+    .then((result) => (result.ok ? result.channels : []))
+    .catch(() => []);
+
   // An admin is not capped, but the workspace needs a number to display
   // and to disable "+ New" against. The highest published allowance is the
   // honest one to show.
@@ -82,7 +95,7 @@ export default async function AgentsPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={MODULE_ICONS.agents} title={t("title")} description={t("description")} />
+        <PageHeader helpKey="help.agents" helpArticle="create-agent" icon={MODULE_ICONS.agents} title={t("title")} description={t("description")} />
 
         {/* EU AI Act Article 50 — the user has to know they are configuring
             an AI system and that everything it sends them is AI-generated.
@@ -92,14 +105,15 @@ export default async function AgentsPage() {
           {t("aiDisclosure")}
         </p>
 
-        {agentsError && <ErrorMessage message={`loading agents: ${agentsError.message}`} />}
-        {runsError && <ErrorMessage message={`loading agent runs: ${runsError.message}`} />}
+        {agentsError && <ErrorMessage detail={`loading agents: ${agentsError.message}`} />}
+        {runsError && <ErrorMessage detail={`loading agent runs: ${runsError.message}`} />}
 
         <AgentsWorkspace
           agents={(agents as UserAgent[] | null) ?? []}
           runs={(runs as AgentRun[] | null) ?? []}
           agentCap={cap}
           accountEmail={user.email ?? ""}
+          slackChannels={slackChannels}
         />
       </div>
     </main>

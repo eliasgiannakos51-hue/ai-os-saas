@@ -44,9 +44,20 @@ const USER = {
   created_at: "2026-01-01T00:00:00Z",
   updated_at: "2026-01-01T00:00:00Z",
   app_metadata: { provider: "email", providers: ["email"] },
+  // Free by default, because most of this file checks what a brand-new
+  // account sees. Section 4 raises it: Deep Research is Starter-and-above,
+  // so on a free account that page renders an upgrade wall and "the
+  // examples are missing" would be a true statement about the wrong
+  // screen. Asserting a feature is discoverable requires an account that
+  // can reach the feature.
   user_metadata: {},
   identities: [],
 };
+
+/** Swapped in for the sections that need a paying account. */
+function setPlan(tier) {
+  USER.user_metadata = tier ? { subscription_tier: tier } : {};
+}
 
 // --- a local stand-in for the Supabase project ------------------------
 // GoTrue's /auth/v1/user plus PostgREST table reads. Every table answers
@@ -72,6 +83,20 @@ const supa = http.createServer((req, res) => {
     if (url.pathname.startsWith("/rest/v1/")) {
       const table = url.pathname.slice("/rest/v1/".length);
       const rows = TABLE_ROWS[table] ?? [];
+      // COUNTS COME BACK IN A HEADER, not in the body — and a stand-in
+      // that skips it does not merely answer less, it answers WRONG.
+      // supabase-js reports `count: null` when Content-Range is absent,
+      // and dashboard/mission/page.tsx reads exactly that as a degraded
+      // session: it then renders "please reload" instead of the mission
+      // list, so an assertion about anything on that page was being made
+      // against an error screen. The page was right; the fake was not.
+      if ((req.headers.prefer ?? "").includes("count=")) {
+        res.writeHead(200, {
+          "Content-Type": "application/json",
+          "Content-Range": rows.length > 0 ? `0-${rows.length - 1}/${rows.length}` : `*/0`,
+        });
+        return res.end(JSON.stringify(req.method === "HEAD" ? null : rows));
+      }
       // PostgREST returns a bare object (not an array) for .single()
       const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
       if (single) return rows[0] ? json(200, rows[0]) : json(406, { message: "no rows" });
@@ -252,6 +277,18 @@ const DASHBOARD_ROUTES = [
   "/dashboard/trading-workflow",
 ];
 
+// The routes a new user actually lands on first, plus the two the
+// reported "the start is crooked on mobile" complaint points at.
+const TOUCH_ROUTES = [
+  "/dashboard",
+  "/dashboard/overview",
+  "/onboarding",
+  "/dashboard/create",
+  "/dashboard/chat",
+  "/dashboard/agents",
+  "/dashboard/settings",
+];
+
 const { chromium } = await import("playwright");
 const browser = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" });
 
@@ -305,16 +342,77 @@ async function inspect(context, route) {
   // 768px is the width where the sidebar appears while the header still
   // carries its full-width controls — the worst case, not an arbitrary
   // second sample.
+  // FOUR WIDTHS NOW, and each one earns its place: 375 is a phone, 768 is
+  // the tablet width the publish bug lived at, 1024 is a small laptop or a
+  // half-screen window, 1280 is the desktop everything was designed on.
+  //
+  // AND IT NAMES THE ELEMENT. "scrollWidth 565 > 375" tells you a page is
+  // broken and nothing about where to look; the publish bug was reported
+  // three times and the dialog was rebuilt twice because nobody could see
+  // which node was doing it.
   const measure = async (width, height) => {
     await page.setViewportSize({ width, height });
     await page.waitForTimeout(250);
-    return page.evaluate(() => ({
-      scrollWidth: document.documentElement.scrollWidth,
-      clientWidth: document.documentElement.clientWidth,
-    }));
+    return page.evaluate(() => {
+      const clientWidth = document.documentElement.clientWidth;
+      const scrollWidth = document.documentElement.scrollWidth;
+
+      // WHAT ACTUALLY PUSHES THE PAGE WIDE. An element sticking out
+      // inside an overflow-x:auto container is a scrollable region doing
+      // its job, not a defect — so any node with a scrolling or clipping
+      // ancestor is skipped, and only the DEEPEST remaining offenders are
+      // named. Reporting <body> would be true and useless.
+      const describe = (el) => {
+        const id = el.id ? `#${el.id}` : "";
+        const cls = (typeof el.className === "string" ? el.className : "")
+          .split(/\s+/).filter(Boolean).slice(0, 3).map((c) => `.${c}`).join("");
+        const testid = el.getAttribute("data-testid");
+        const text = (el.textContent ?? "").trim().replace(/\s+/g, " ").slice(0, 40);
+        return `${el.tagName.toLowerCase()}${id}${testid ? `[data-testid=${testid}]` : ""}${cls}${text ? ` "${text}"` : ""}`;
+      };
+      const contained = (el) => {
+        for (let node = el.parentElement; node; node = node.parentElement) {
+          const style = getComputedStyle(node);
+          if (/(auto|scroll|hidden|clip)/.test(style.overflowX)) return true;
+        }
+        return false;
+      };
+      const offenders = [];
+      for (const el of Array.from(document.querySelectorAll("body *"))) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) continue;
+        if (rect.right <= clientWidth + 1) continue;
+        const style = getComputedStyle(el);
+        if (style.position === "fixed" && style.visibility === "hidden") continue;
+        if (contained(el)) continue;
+        offenders.push({ node: describe(el), right: Math.round(rect.right), depth: (() => {
+          let d = 0;
+          for (let n = el.parentElement; n; n = n.parentElement) d++;
+          return d;
+        })() });
+      }
+      // Deepest first: the innermost node is the one to fix.
+      offenders.sort((a, b) => b.depth - a.depth || b.right - a.right);
+
+      // Touch targets, measured rather than assumed. Anything the user
+      // is meant to press that is under 44px in either direction.
+      const small = [];
+      for (const el of Array.from(document.querySelectorAll("button, a[href], [role=button], select"))) {
+        const rect = el.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) continue;
+        if (getComputedStyle(el).visibility === "hidden") continue;
+        if (rect.height >= 44 && rect.width >= 44) continue;
+        small.push(`${describe(el)} ${Math.round(rect.width)}x${Math.round(rect.height)}`);
+      }
+      return { scrollWidth, clientWidth, offenders: offenders.slice(0, 4), small };
+    });
   };
-  const overflow = await measure(375, 800);
-  const overflowTablet = await measure(768, 1024);
+  const byWidth = {};
+  for (const [width, height] of [[375, 800], [768, 1024], [1024, 800], [1280, 900]]) {
+    byWidth[width] = await measure(width, height);
+  }
+  const overflow = byWidth[375];
+  const overflowTablet = byWidth[768];
 
   // Noise that is not a defect in this environment: the stand-in Supabase
   // returns empty rows, and favicon/asset 404s are not route failures.
@@ -331,7 +429,7 @@ async function inspect(context, route) {
       !/Failed to fetch RSC payload[\s\S]*Falling back to browser navigation/i.test(e)
   );
   await page.close();
-  return { status, errors: real, keys, overflow, overflowTablet, landedOn };
+  return { status, errors: real, keys, overflow, overflowTablet, byWidth, landedOn };
 }
 
 console.log("\n== 1. public routes (logged out) ==");
@@ -341,16 +439,26 @@ for (const route of PUBLIC_ROUTES) {
   check(`${route}: 200`, r.status, 200);
   check(`${route}: no console errors`, r.errors, []);
   check(`${route}: no unresolved i18n keys`, r.keys, []);
-  checkTrue(
-    `${route}: no horizontal overflow @375px (${r.overflow?.scrollWidth}/${r.overflow?.clientWidth})`,
-    r.overflow && r.overflow.scrollWidth <= r.overflow.clientWidth + 1,
-    JSON.stringify(r.overflow)
-  );
-  checkTrue(
-    `${route}: no horizontal overflow @768px (${r.overflowTablet?.scrollWidth}/${r.overflowTablet?.clientWidth})`,
-    r.overflowTablet && r.overflowTablet.scrollWidth <= r.overflowTablet.clientWidth + 1,
-    JSON.stringify(r.overflowTablet)
-  );
+  // ALL FOUR WIDTHS, and the failure NAMES the node.
+  //
+  // Two widths was already one more than this file started with, and the
+  // reason is on the record: measuring 375 alone let the dashboard header
+  // overflow by up to 190px between 640 and 1023, reported three times as
+  // "the Publish bar is squeezed to the left" while the publish dialog —
+  // which was never the cause — got rebuilt twice. Sampling is how that
+  // survived; 1024 and 1280 were still unsampled until now.
+  //
+  // "scrollWidth 565 > 375" says a page is broken and nothing about where
+  // to look, so the offending element is printed with its deepest node
+  // first.
+  for (const width of [375, 768, 1024, 1280]) {
+    const m = r.byWidth?.[width];
+    checkTrue(
+      `${route}: no horizontal overflow @${width}px (${m?.scrollWidth}/${m?.clientWidth})`,
+      m && m.scrollWidth <= m.clientWidth + 1,
+      (m?.offenders ?? []).map((o) => `${o.node} → right edge ${o.right}px`).join("\n        ")
+    );
+  }
 }
 await anon.close();
 
@@ -367,16 +475,26 @@ for (const route of DASHBOARD_ROUTES) {
   checkTrue(`${route}: did not bounce to /login`, r.landedOn !== "/login", `landed on ${r.landedOn}`);
   check(`${route}: no console errors`, r.errors, []);
   check(`${route}: no unresolved i18n keys`, r.keys, []);
-  checkTrue(
-    `${route}: no horizontal overflow @375px (${r.overflow?.scrollWidth}/${r.overflow?.clientWidth})`,
-    r.overflow && r.overflow.scrollWidth <= r.overflow.clientWidth + 1,
-    JSON.stringify(r.overflow)
-  );
-  checkTrue(
-    `${route}: no horizontal overflow @768px (${r.overflowTablet?.scrollWidth}/${r.overflowTablet?.clientWidth})`,
-    r.overflowTablet && r.overflowTablet.scrollWidth <= r.overflowTablet.clientWidth + 1,
-    JSON.stringify(r.overflowTablet)
-  );
+  // ALL FOUR WIDTHS, and the failure NAMES the node.
+  //
+  // Two widths was already one more than this file started with, and the
+  // reason is on the record: measuring 375 alone let the dashboard header
+  // overflow by up to 190px between 640 and 1023, reported three times as
+  // "the Publish bar is squeezed to the left" while the publish dialog —
+  // which was never the cause — got rebuilt twice. Sampling is how that
+  // survived; 1024 and 1280 were still unsampled until now.
+  //
+  // "scrollWidth 565 > 375" says a page is broken and nothing about where
+  // to look, so the offending element is printed with its deepest node
+  // first.
+  for (const width of [375, 768, 1024, 1280]) {
+    const m = r.byWidth?.[width];
+    checkTrue(
+      `${route}: no horizontal overflow @${width}px (${m?.scrollWidth}/${m?.clientWidth})`,
+      m && m.scrollWidth <= m.clientWidth + 1,
+      (m?.offenders ?? []).map((o) => `${o.node} → right edge ${o.right}px`).join("\n        ")
+    );
+  }
 }
 // A route returning 200 says the page rendered. It does not say the
 // controls on it are FINDABLE, which is the thing that was actually
@@ -465,6 +583,258 @@ console.log("\n== 3. new controls are actually visible (production build, 375px)
   const body = await page.locator("body").innerText();
   checkTrue("no raw i18n key leaks into Deep Research", !/common\.aiGenerated/.test(body));
   await page.close();
+}
+
+// -------------------------------------------------------------------
+console.log("\n== 4. every AI box says what it accepts, and what it will not do ==");
+// -------------------------------------------------------------------
+// The reported failure was not a broken control: a tester came away
+// believing this product was "several LLMs in one, cheaper", and others
+// asked where to paste their API key. That is what an empty box which
+// accepts anything teaches. So each AI surface is opened in the
+// production build and checked for the two things that answer it — three
+// pressable examples, and one line saying what it will not do.
+//
+// At 375px, because a chip row that wraps into a wall of text on a phone
+// is not the same feature as one that reads as three options.
+{
+  // Growth, so every surface below is actually reachable. Restored at the
+  // end of the block so nothing after it inherits a paid account.
+  setPlan("growth");
+  const SURFACES = [
+    { name: "createStudio", url: "/dashboard/create", input: "#studio-input" },
+    { name: "mission", url: "/dashboard/mission", input: "#mission-goal", open: "New Mission" },
+    { name: "research", url: "/dashboard/deep-research", input: "#research-topic" },
+    { name: "chat", url: "/dashboard/chat", input: "textarea" },
+  ];
+  for (const surface of SURFACES) {
+    const page = await authed.newPage();
+    await page.setViewportSize({ width: 375, height: 812 });
+    try {
+      await page.goto(`http://127.0.0.1:${PORT}${surface.url}`, { waitUntil: "networkidle", timeout: 45000 });
+      if (surface.open) {
+        const opener = page.getByRole("button", { name: surface.open });
+        if ((await opener.count()) > 0) {
+          await opener.first().click();
+          await page.waitForTimeout(400);
+        }
+      }
+      const chips = page.locator(`[data-testid="examples-${surface.name}"] [data-testid="ai-example"]`);
+      const count = await chips.count();
+      if (count === 0) {
+        // WHAT THE PAGE ACTUALLY SHOWED. "0 examples" has three very
+        // different causes — the surface is behind a toggle, the account
+        // cannot reach the feature at all, or the chips genuinely are not
+        // rendered — and only the page can say which.
+        console.log(`        page said: ${(await page.locator("body").innerText()).replace(/\s+/g, " ").slice(0, 300)}`);
+      }
+      checkTrue(`${surface.name}: 3-4 examples are on the page (${count})`, count >= 3 && count <= 4);
+
+      const limits = page.locator(`[data-testid="examples-${surface.name}"] [data-testid="ai-limits"]`);
+      const limitsText = ((await limits.count()) > 0 ? await limits.first().innerText() : "").trim();
+      checkTrue(`${surface.name}: the limits line is readable ("${limitsText.slice(0, 46)}")`, limitsText.includes("·"));
+
+      // The whole point: pressing one fills the box the user then sends.
+      if (count > 0) {
+        const wanted = (await chips.first().innerText()).trim();
+        const box = page.locator(surface.input).first();
+        await box.fill("");
+        await chips.first().click();
+        await page.waitForTimeout(200);
+        const filled = (await box.inputValue()).trim();
+        checkTrue(`${surface.name}: clicking an example fills the input ("${filled.slice(0, 36)}")`, filled === wanted);
+      }
+
+      // A chip row must not push the page sideways on a phone.
+      const overflow = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        clientWidth: document.documentElement.clientWidth,
+      }));
+      checkTrue(
+        `${surface.name}: no horizontal overflow at 375px (${overflow.scrollWidth}/${overflow.clientWidth})`,
+        overflow.scrollWidth <= overflow.clientWidth + 1
+      );
+    } finally {
+      await page.close();
+    }
+  }
+  setPlan(null);
+}
+
+// -------------------------------------------------------------------
+console.log("\n== 5. the sidebar reads as Greek to a Greek user ==");
+// -------------------------------------------------------------------
+// SHOT IN GREEK ON PURPOSE. The fault this locks down is invisible in an
+// English render: sidebar-label-keys.ts mapped four group headings and
+// five item labels that sidebar-nav.ts does not use, so Workspace,
+// Build, Business, Strategy, Files, Deep Research, Published Sites,
+// Websites and Integrations printed raw English in all ten locales —
+// with correct translations sitting unreachable beside them.
+//
+// It also checks the other half of the same problem: a page filed under
+// "Build" that builds nothing now says so where the user can read it.
+{
+  const greek = await browser.newContext({
+    viewport: { width: 1280, height: 1000 },
+    locale: "el-GR",
+  });
+  await greek.addCookies([
+    { ...AUTH_COOKIE, domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+    { name: "NEXT_LOCALE", value: "el", domain: "127.0.0.1", path: "/", httpOnly: false, secure: false, sameSite: "Lax" },
+  ]);
+  const page = await greek.newPage();
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/coding`, { waitUntil: "networkidle", timeout: 45000 });
+
+  // Open every collapsed group so the whole nav is measurable at once.
+  for (const button of await page.locator("aside button[aria-expanded]").all()) {
+    if ((await button.getAttribute("aria-expanded")) === "false") {
+      await button.click();
+      await page.waitForTimeout(80);
+    }
+  }
+  await page.waitForTimeout(300);
+
+  const aside = page.locator("aside").first();
+  // innerText returns the CSS-TRANSFORMED text, and the group headings
+  // carry `uppercase`. Greek uppercasing also drops the tonos by
+  // typographic rule, so "Χώρος εργασίας" comes back as
+  // "ΧΩΡΟΣ ΕΡΓΑΣΙΑΣ" — comparing the raw strings fails on a page that is
+  // perfectly correct. Both sides are folded the same way instead.
+  const fold = (text) =>
+    text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+  const navText = await aside.innerText();
+  const foldedNav = fold(navText);
+  await aside.screenshot({ path: "/tmp/ionexa-sidebar-el.png" });
+
+  // Every heading, by the Greek it must now be showing.
+  for (const [english, greekWord] of [
+    ["Workspace", "Χώρος εργασίας"],
+    ["Build", "Δημιουργία"],
+    ["Tracking", "Παρακολούθηση"],
+    ["Business", "Επιχείρηση"],
+    ["Strategy", "Στρατηγική"],
+  ]) {
+    checkTrue(`heading "${english}" renders as "${greekWord}"`, foldedNav.includes(fold(greekWord)), navText.slice(0, 300));
+    checkTrue(`...and the English word is gone`, !new RegExp(`\\b${english}\\b`).test(navText));
+  }
+  // The five item labels that had no key at all.
+  for (const [english, greekWord] of [
+    ["Files", "Αρχεία"],
+    ["Deep Research", "Βαθιά Έρευνα"],
+    ["Integrations", "Συνδέσεις"],
+    ["Published Sites", "Ζωντανά site"],
+  ]) {
+    checkTrue(`item "${english}" renders as "${greekWord}"`, foldedNav.includes(fold(greekWord)), navText.slice(-400));
+  }
+  // The approved renames, as the user sees them.
+  for (const [was, now] of [
+    ["AI Memory", "Αναζήτηση"],
+    ["Mission Control", "Στόχοι & Σχέδια"],
+    ["Timeline", "Ιστορικό"],
+    ["Create Studio", "Φτιάξε κάτι"],
+  ]) {
+    checkTrue(`"${was}" now reads "${now}"`, foldedNav.includes(fold(now)), navText.slice(0, 400));
+  }
+
+  // THE HEADING AND THE SIDEBAR AGREE. This is the assertion that would
+  // have caught renaming one and not the other.
+  const heading = (await page.locator("main h1").first().innerText()).trim();
+  checkTrue(`the page heading is Greek too ("${heading}")`, /Αιτήματα κώδικα/.test(heading), heading);
+  checkTrue("...and matches what the sidebar calls it", foldedNav.includes(fold(heading)), `${heading} not in nav`);
+
+  // A tracking page states, on screen, that it produces nothing.
+  await page.screenshot({ path: "/tmp/ionexa-coding-el.png" });
+  const main = await page.locator("main").innerText();
+  checkTrue(
+    "the AI Coding page says it does not write code",
+    /δεν γράφει κώδικα/.test(main),
+    main.replace(/\s+/g, " ").slice(0, 300)
+  );
+  checkTrue("no raw i18n key leaks into it", !/module\.empty/.test(main));
+
+  // THE BROWSER TAB, in Greek. It was the last piece of English on an
+  // otherwise translated screen, and the piece that survives the page
+  // being scrolled away or buried behind twenty other tabs.
+  const tabTitle = await page.title();
+  checkTrue(`the tab title is Greek ("${tabTitle}")`, /Αιτήματα κώδικα/.test(tabTitle), tabTitle);
+
+  // THE SWITCHES, LOOKED AT. Their hit area was grown from 24px to 44 by
+  // padding the box and clipping the background back to the content
+  // box — the track must still paint at its original size, so this is
+  // measured rather than assumed.
+  await page.goto(`http://127.0.0.1:${PORT}/dashboard/settings`, { waitUntil: "networkidle", timeout: 45000 });
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: "/tmp/ionexa-settings-el.png", fullPage: false });
+  const track = await page.evaluate(() => {
+    const el = document.querySelector("button.rounded-full.w-11, button[class*='w-11'][class*='rounded-full']");
+    if (!el) return null;
+    const box = el.getBoundingClientRect();
+    const style = getComputedStyle(el);
+    return {
+      hit: `${Math.round(box.width)}x${Math.round(box.height)}`,
+      paddingY: style.paddingTop,
+      clip: style.backgroundClip,
+    };
+  });
+  checkTrue(`a switch has a 44px hit area (${track?.hit})`, track?.hit === "44x44", JSON.stringify(track));
+  checkTrue("...with the visible track clipped back to its old size", track?.clip === "content-box", JSON.stringify(track));
+
+  await page.close();
+  await greek.close();
+}
+
+// -------------------------------------------------------------------
+console.log("\n== 6. touch targets on a phone ==");
+// -------------------------------------------------------------------
+// 44px is the size a finger actually hits. The app already knows this —
+// its own buttons use `min-h-[44px] sm:min-h-0`, which is 44 on a phone
+// and smaller once there is a mouse — so anything under it at 375px is a
+// control that missed the pattern rather than a deliberate choice.
+//
+// Reported per route with the element NAMED, because "12 targets are too
+// small" is not something anyone can act on.
+{
+  const bySize = new Map();
+  for (const route of TOUCH_ROUTES) {
+    const page = await authed.newPage();
+    try {
+      await page.setViewportSize({ width: 375, height: 800 });
+      await page.goto(`http://127.0.0.1:${PORT}${route}`, { waitUntil: "networkidle", timeout: 45000 });
+      await page.waitForTimeout(250);
+      const small = await page.evaluate(() => {
+        const out = [];
+        for (const el of Array.from(document.querySelectorAll("button, a[href], [role=button], select"))) {
+          const rect = el.getBoundingClientRect();
+          if (rect.width <= 0 || rect.height <= 0) continue;
+          if (getComputedStyle(el).visibility === "hidden") continue;
+          if (rect.height >= 44) continue;
+          const id = el.id ? `#${el.id}` : "";
+          const testid = el.getAttribute("data-testid");
+          const label = (el.getAttribute("aria-label") ?? el.textContent ?? "").trim().replace(/\s+/g, " ").slice(0, 28);
+          out.push(`${el.tagName.toLowerCase()}${id}${testid ? `[${testid}]` : ""} "${label}" ${Math.round(rect.width)}x${Math.round(rect.height)}`);
+        }
+        return out;
+      });
+      if (small.length) bySize.set(route, small);
+    } finally {
+      await page.close();
+    }
+  }
+  const total = [...bySize.values()].reduce((n, list) => n + list.length, 0);
+  console.log(`        ${total} targets under 44px tall across ${bySize.size}/${TOUCH_ROUTES.length} routes`);
+  for (const [route, list] of bySize) {
+    console.log(`        ${route}: ${list.length}`);
+    for (const item of list.slice(0, 6)) console.log(`          - ${item}`);
+  }
+  // A HARD FLOOR, not the full 44. Raising every 36px control to 44 in one
+  // change would relayout most of the app; what is asserted here is the
+  // size below which a control is not reliably hittable at all, so the
+  // number can be tightened toward 44 without the gate ever going
+  // backwards.
+  const tiny = [...bySize.entries()].flatMap(([route, list]) =>
+    list.filter((item) => Number(item.match(/x(\d+)$/)?.[1] ?? 99) < 32).map((item) => `${route} ${item}`)
+  );
+  checkTrue(`no control under 32px tall on a phone (${tiny.length})`, tiny.length === 0, tiny.slice(0, 10).join("\n        "));
 }
 
 await authed.close();

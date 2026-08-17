@@ -177,7 +177,14 @@ check(
 const chatPageSrc = readFileSync("src/app/dashboard/chat/page.tsx", "utf8");
 check("the page shows the same allowance the route enforces", /getFreeChatStatus\(user\.id, plan\?\.slug \?\? "free", legacy\)/.test(chatPageSrc));
 
-const sql = readFileSync("supabase_grandfathering_migration.sql", "utf8");
+// Was `supabase_grandfathering_migration.sql` at the repository root.
+// The consolidation into supabase/migrations was built from a structure
+// dump, which carries columns but not statements — so the columns landed
+// in the baseline and the UPDATE that fills them did not. It is now
+// 20260817000001_grandfathering_backfill.sql, and this test is what would
+// have caught that at the time had it been reading the migrations.
+const MIGRATION = "supabase/migrations/20260817000001_grandfathering_backfill.sql";
+const sql = readFileSync(MIGRATION, "utf8");
 check("the migration adds every column the code reads", [
   "legacy_plan_tier",
   "legacy_free_chat_messages",

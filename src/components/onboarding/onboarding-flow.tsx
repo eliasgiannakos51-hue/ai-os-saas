@@ -233,7 +233,11 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
           <button
             type="button"
             onClick={() => void skip()}
-            className="text-[11px] font-medium text-muted underline decoration-dotted transition-colors duration-150 hover:text-foreground"
+            // 66x17 measured on a phone, on the first screen a new user
+            // meets. Seventeen pixels is not a target anyone hits on
+            // purpose — the padding is what makes it hittable; the text
+            // stays the same size so the layout is unchanged.
+            className="-my-2 inline-flex min-h-[44px] items-center px-2 text-[11px] font-medium text-muted underline decoration-dotted transition-colors duration-150 hover:text-foreground sm:min-h-0 sm:my-0 sm:px-0"
           >
             {t("skip")}
           </button>
@@ -249,7 +253,10 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                 key={value}
                 type="button"
                 onClick={() => void chooseGoal(value)}
-                className={`rounded-xl border p-3 text-left text-xs font-medium transition-colors duration-150 ${
+                // 343x42 measured — two pixels short of the size a finger
+                // reliably hits, on the screen that decides whether a new
+                // user gets past the first minute.
+                className={`flex min-h-[44px] items-center rounded-xl border p-3 text-left text-xs font-medium transition-colors duration-150 ${
                   goal === value
                     ? "border-orange-500 bg-orange-500/[0.06] text-foreground"
                     : "border-border bg-panel/60 text-muted hover:text-foreground"
@@ -327,7 +334,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                 type="button"
                 onClick={() => inputRef.current?.click()}
                 disabled={busy}
-                className="mt-3 inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+                className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
               >
                 {busy ? (
                   <>
@@ -363,7 +370,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                         key={order}
                         type="button"
                         onClick={() => setDateOrder(order)}
-                        className={`inline-flex min-h-[32px] items-center rounded-lg border px-3 py-1 text-[11px] font-medium transition-colors duration-150 ${
+                        className={`inline-flex min-h-[44px] items-center rounded-lg border px-3 py-1 text-[11px] font-medium transition-colors duration-150 ${
                           dateOrder === order
                             ? "border-orange-500 text-foreground"
                             : "border-border text-muted hover:text-foreground"
@@ -395,7 +402,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                           setMappings(next);
                         }}
                         aria-label={t("mapColumn", { column: entry.column })}
-                        className="min-h-[32px] rounded-lg border border-border bg-background px-2 py-1 text-[11px] text-foreground"
+                        className="min-h-[44px] rounded-lg border border-border bg-background px-2 py-1 text-[11px] text-foreground"
                       >
                         <option value="">{t("ignoreColumn")}</option>
                         {analysis.fields.map((field) => (
@@ -458,7 +465,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                   type="button"
                   onClick={() => void applyImport()}
                   disabled={busy || analysis.counts.readyRows === 0}
-                  className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
                 >
                   {busy ? (
                     <>
@@ -478,7 +485,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                     setAnalysis(null);
                     setFile(null);
                   }}
-                  className="inline-flex min-h-[36px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+                  className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
                 >
                   {t("chooseAnother")}
                 </button>
@@ -504,7 +511,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
             type="button"
             onClick={() => void applyPaste()}
             disabled={busy || pasteText.trim().length < MIN_PASTE_CHARS}
-            className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
           >
             {busy ? (
               <>
@@ -556,7 +563,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
           <button
             type="button"
             onClick={() => void finish()}
-            className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
           >
             {t("goToDashboard")}
             <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -588,7 +595,7 @@ function SourceCard({
     <button
       type="button"
       onClick={onSelect}
-      className="rounded-xl border border-border bg-panel/60 p-3 text-left transition-colors duration-150 hover:border-orange-500/40"
+      className="flex min-h-[44px] items-center rounded-xl border border-border bg-panel/60 p-3 text-left transition-colors duration-150 hover:border-orange-500/40"
     >
       <Icon className="mb-1.5 h-4 w-4 text-orange-400" aria-hidden="true" />
       <p className="text-xs font-semibold text-foreground">{title}</p>

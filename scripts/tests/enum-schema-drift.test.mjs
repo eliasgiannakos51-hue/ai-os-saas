@@ -123,34 +123,64 @@ for (const file of sqlFiles) {
 console.log(`  ....  found ${perFile.size} distinct enum constraints`);
 
 // ---------------------------------------------------------------------
-console.log("\n== 1. the same constraint must not disagree between files ==");
+console.log("\n== 1. no migration NARROWS a constraint an earlier one widened ==");
 // ---------------------------------------------------------------------
-// This is the shape the flagged bug took. Every file here drops the
-// constraint before re-adding it, so a file that defines it NARROWER
-// silently undoes a file that defined it correctly, depending only on which
-// was run last.
-const divergent = [];
+// THIS CHECK USED TO ASSERT SOMETHING STRONGER AND, SINCE THE
+// CONSOLIDATION, WRONG: that no two files may define a constraint
+// differently at all.
+//
+// That was exactly right for the twenty loose .sql files this file was
+// written against. They sat unnumbered in the repository root, each one
+// dropping the constraint before re-adding it, and nothing decided which
+// ran last — so a file defining a constraint narrower than its neighbour
+// was a live coin-flip, which is the shape the `flagged` bug took.
+//
+// supabase/migrations is not that. It is an ORDERED sequence, applied in
+// filename order, and widening a constraint in a later migration is the
+// normal way a schema grows: 20260803's baseline allows email and slack,
+// and 20260814_agent_delivery_channels adds discord, telegram and in_app.
+// Reporting that pair as drift is reporting the feature.
+//
+// So the invariant is restated as the thing that is still a bug: a later
+// migration may ADD values, and may not REMOVE one, because a row already
+// written with the removed value cannot be updated afterwards without a
+// migration nobody wrote.
+//
+// archive/ is excluded entirely. Those files are superseded by
+// construction — archive/README.md says so and db-inventory.test.mjs
+// asserts none of them is at the root any more — so comparing them with
+// the live schema compares history with the present.
+const MIGRATIONS = "supabase/migrations/";
+const narrowed = [];
+const trail = [];
 for (const [identity, byFile] of perFile) {
-  const sets = new Map();
-  for (const [file, values] of byFile) {
-    const key = [...values].sort().join("|");
-    if (!sets.has(key)) sets.set(key, []);
-    sets.get(key).push(file);
-  }
-  if (sets.size > 1) {
-    divergent.push({
-      constraint: identity,
-      variants: [...sets.entries()].map(([key, files]) => ({ values: key.split("|"), files })),
-    });
+  const steps = [...byFile.entries()]
+    .filter(([file]) => file.startsWith(MIGRATIONS))
+    .sort(([a], [b]) => (a < b ? -1 : 1));
+  if (steps.length < 2) continue;
+  trail.push(`${identity}: ${steps.map(([f, v]) => `${f.slice(MIGRATIONS.length)} -> ${v.length}`).join(", ")}`);
+  for (let i = 1; i < steps.length; i++) {
+    const [prevFile, prev] = steps[i - 1];
+    const [file, values] = steps[i];
+    const lost = prev.filter((v) => !values.includes(v));
+    if (lost.length > 0) {
+      narrowed.push({ constraint: identity, file, after: prevFile, removed: lost });
+    }
   }
 }
-check("no constraint is defined two different ways", divergent, []);
+for (const line of trail) console.log(`  ....  ${line}`);
+check("no migration removes a value an earlier one allowed", narrowed, []);
 
-// The gate has to be able to go red. This is the exact pair that shipped.
+// The gate has to be able to go red on the real shape. A later migration
+// that re-declares the delivery constraint WITHOUT discord silently makes
+// every agent already delivering there un-updatable.
 {
-  const narrow = ["pending", "processing", "completed", "failed"].sort().join("|");
-  const wide = ["pending", "processing", "completed", "failed", "flagged"].sort().join("|");
-  check("the gate would catch the pair that shipped", narrow !== wide, true);
+  const steps = [["a_baseline", ["email", "slack"]], ["b_later", ["email", "slack", "discord"]], ["c_last", ["email", "slack"]]];
+  const lost = [];
+  for (let i = 1; i < steps.length; i++) {
+    lost.push(...steps[i - 1][1].filter((v) => !steps[i][1].includes(v)));
+  }
+  check("the gate would catch a later migration dropping a value", lost, ["discord"]);
 }
 
 // ---------------------------------------------------------------------
@@ -166,11 +196,19 @@ for (const file of tsFiles) {
     .filter((line) => !/^\s*(\/\/|\*)/.test(line))
     .join("\n");
 
-  for (const m of code.matchAll(/export\s+type\s+(\w*(?:Status|DeliveryMethod))\s*=\s*([^;]+);/g)) {
+  // `Channel` joined `Status` and `DeliveryMethod` here because
+  // `DeliveryChannel` — the union that decides where an agent may send its
+  // output — matched neither, and the array beside it is typed
+  // (`: DeliveryChannel[] = [...]`) rather than `as const`, so it matched
+  // neither pattern either. A DB-backed union spelled with a word this
+  // file had not thought of is invisible to it, which is the same failure
+  // class as the drift it was written to catch: the check passes because
+  // it looked at nothing.
+  for (const m of code.matchAll(/export\s+type\s+(\w*(?:Status|DeliveryMethod|Channel))\s*=\s*([^;]+);/g)) {
     const values = [...m[2].matchAll(/"([^"]+)"/g)].map((v) => v[1]);
     if (values.length >= 2) unions.push({ name: m[1], file: path.relative(ROOT, file), values });
   }
-  for (const m of code.matchAll(/const\s+(\w*(?:STATUSES|METHODS))\s*=\s*\[([^\]]+)\]\s*as\s+const/g)) {
+  for (const m of code.matchAll(/const\s+(\w*(?:STATUSES|METHODS|CHANNELS))(?::[^=]+)?\s*=\s*\[([^\]]+)\]\s*(?:as\s+const)?;/g)) {
     const values = [...m[2].matchAll(/"([^"]+)"/g)].map((v) => v[1]);
     if (values.length >= 2) unions.push({ name: m[1], file: path.relative(ROOT, file), values });
   }
@@ -189,6 +227,8 @@ const MAPPING = {
   ResearchStatus: "research_reports_status_check",
   AgentDeliveryMethod: "user_agents_delivery_method_check",
   AGENT_DELIVERY_METHODS: "user_agents_delivery_method_check",
+  DeliveryChannel: "user_agents_delivery_method_check",
+  DELIVERY_CHANNELS: "user_agents_delivery_method_check",
 };
 
 const unmapped = [];
@@ -203,16 +243,32 @@ for (const union of unions) {
     check(`${union.name} -> ${constraintName}: constraint exists in SQL`, false, true);
     continue;
   }
-  // Every file's definition must accept every value the code can write —
-  // not just one of them, since any of these files may be the last one run.
-  for (const [file, allowed] of byFile) {
-    const missing = union.values.filter((v) => !allowed.includes(v));
-    check(`${union.name}: all ${union.values.length} values accepted by ${file}`, missing, []);
+  // AGAINST THE EFFECTIVE CONSTRAINT — the LAST migration to define it —
+  // and nothing else.
+  //
+  // This used to loop over every file, archive included, and pass if each
+  // one accepted the union. That was the weaker claim wearing more PASS
+  // lines: it reported "all 5 values accepted by archive/…" about a file
+  // nothing runs, while saying nothing about what the database will
+  // actually be after `supabase db push`. A superseded file agreeing is
+  // not evidence; the final one is the only definition Postgres will hold.
+  const migrationSteps = [...byFile.entries()]
+    .filter(([file]) => file.startsWith(MIGRATIONS))
+    .sort(([a], [b]) => (a < b ? -1 : 1));
+  if (migrationSteps.length === 0) {
+    check(`${union.name} -> ${constraintName}: defined by a migration, not only by archive/`, false, true);
+    continue;
   }
+  const [effectiveFile, effective] = migrationSteps[migrationSteps.length - 1];
+  const missing = union.values.filter((v) => !effective.includes(v));
+  check(
+    `${union.name}: all ${union.values.length} values accepted by the effective constraint (${effectiveFile})`,
+    missing,
+    []
+  );
   // And the reverse: a constraint value the code can never produce is dead
   // schema, or a rename someone forgot to finish.
-  const allAllowed = [...new Set([...byFile.values()].flat())];
-  const orphaned = allAllowed.filter((v) => !union.values.includes(v));
+  const orphaned = effective.filter((v) => !union.values.includes(v));
   check(`${union.name}: no value in SQL that the code cannot write`, orphaned, []);
 }
 

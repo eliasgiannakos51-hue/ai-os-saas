@@ -1,3 +1,4 @@
+import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -12,7 +13,9 @@ import { ResearchWorkspace, type ResearchReport } from "@/components/research/re
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Deep Research" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.deepResearch");
+}
 
 export default async function DeepResearchPage() {
   const supabase = createClient();
@@ -34,7 +37,7 @@ export default async function DeepResearchPage() {
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={Telescope} title={t("title")} description={t("description")} />
+          <PageHeader helpKey="help.deepResearch" icon={Telescope} title={t("title")} description={t("description")} />
           <UpgradeRequired featureName={t("title")} planName="Starter" />
         </div>
       </main>
@@ -65,7 +68,7 @@ export default async function DeepResearchPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-        <PageHeader icon={Telescope} title={t("title")} description={t("description")} />
+        <PageHeader helpKey="help.deepResearch" icon={Telescope} title={t("title")} description={t("description")} />
 
         {/* The two things a person should know before spending credits on
             this: it takes minutes, and it paraphrases rather than

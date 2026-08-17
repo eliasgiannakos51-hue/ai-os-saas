@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -12,6 +12,8 @@ import { useCredits } from "@/components/credits/credits-context";
 import { TextActionsTextarea } from "@/components/text-actions/text-actions-textarea";
 import { SuggestedLinksPrompt } from "@/components/entity-links/suggested-links-prompt";
 import { optionLabelKey } from "@/lib/modules";
+import { ApiError, isApiError, requestJson } from "@/lib/errors/api-error";
+import { useErrorText } from "@/lib/errors/use-error-text";
 
 function emptyFormFor(module: ModuleConfig): Record<string, string> {
   return Object.fromEntries(module.fields.map((f) => [f.key, ""]));
@@ -34,7 +36,24 @@ function isGatedModule(module: ModuleConfig): boolean {
   return Boolean(module.creditCost || module.minPlanSlug);
 }
 
-export function GenericAddForm({ module }: { module: ModuleConfig }) {
+export function GenericAddForm({
+  module,
+  prefill,
+}: {
+  module: ModuleConfig;
+  /**
+   * A worked example the user pressed on the empty screen
+   * (components/empty-state.tsx). Opens this form with the headline field
+   * already filled, so "here is what an entry looks like" and "you have
+   * started one" are the same click.
+   *
+   * Only the headline goes in, deliberately. The example is one line —
+   * "Advertising expense, €200" — and spreading a guess at it across
+   * amount, type and description would be the form inventing data the
+   * user did not type. The headline is the field the example IS.
+   */
+  prefill?: { text: string; nonce: number } | null;
+}) {
   const router = useRouter();
   const t = useTranslations("module");
   const tCommon = useTranslations("common");
@@ -44,8 +63,10 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
   const supabase = createClient();
   const { addToast } = useToast();
   const { refresh: refreshCredits } = useCredits();
+  const describe = useErrorText();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Record<string, string>>(() => emptyFormFor(module));
+
   const [error, setError] = useState<string | null>(null);
   const [upgradeRequired, setUpgradeRequired] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -54,6 +75,40 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
   // lib/entity-link-suggestions.ts. Never cleared afterward; a later
   // create just overwrites it and remounts the prompt via its key.
   const [newlyCreated, setNewlyCreated] = useState<{ table: string; id: string } | null>(null);
+  const headlineRef = useRef<HTMLInputElement | null>(null);
+  const focusOnOpen = useRef(false);
+
+  // Keyed on the nonce rather than on the text: pressing the same example
+  // twice is two requests, and both should open the form.
+  const nonce = prefill?.nonce;
+  useEffect(() => {
+    if (nonce === undefined || !prefill) return;
+    setForm({ ...emptyFormFor(module), [module.headlineKey]: prefill.text });
+    setOpen(true);
+    // The field is filled but not finished — the cursor belongs at the end
+    // of the example so the next keystroke edits it rather than replacing
+    // it, and a keyboard user is not left hunting for where the form went.
+    focusOnOpen.current = true;
+    // prefill is read through the nonce on purpose — see above. Adding the
+    // object itself would re-run this on every parent render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonce, module]);
+
+  // Focused in a SECOND effect, keyed on `open`, rather than inside the
+  // first: setOpen(true) is what mounts the input, and React has not
+  // committed that render by the time the effect that called it returns —
+  // so a focus() there (or in a requestAnimationFrame scheduled from
+  // there) reaches for a field that does not exist yet and silently does
+  // nothing. Measured, not assumed: the field filled correctly and the
+  // caret was nowhere.
+  useEffect(() => {
+    if (!open || !focusOnOpen.current) return;
+    focusOnOpen.current = false;
+    const input = headlineRef.current;
+    if (!input) return;
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+  }, [open]);
 
   function update(key: string) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -72,23 +127,15 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
 
     if (isGatedModule(module)) {
       try {
-        const res = await fetch("/api/modules/create", {
+        const data = await requestJson<{
+          record?: { id?: string };
+        }>("/api/modules/create", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ moduleSlug: module.slug, fields: form }),
         });
-        const data = await res.json();
 
         setLoading(false);
-
-        if (!res.ok || !data.ok) {
-          const message = data.error ?? "Something went wrong.";
-          setError(message);
-          setUpgradeRequired(Boolean(data.upgradeRequired || data.insufficientCredits));
-          addToast(`✗ ${message}`, "error");
-          return;
-        }
-
         setForm(emptyFormFor(module));
         setOpen(false);
         addToast(tCommon("created"));
@@ -97,9 +144,19 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
         if (data.record?.id) {
           setNewlyCreated({ table: module.table, id: String(data.record.id) });
         }
-      } catch {
+      } catch (err) {
         setLoading(false);
-        setError(tCommon("networkError"));
+        // The route's own English sentence is no longer what the user
+        // reads. `describe` turns the STATUS into three sentences in their
+        // language — what happened, what to do, and whether it cost them
+        // anything — which is the question this form used to answer with
+        // "Something went wrong."
+        const failure = describe(err);
+        setError(failure.text);
+        setUpgradeRequired(
+          isApiError(err) && (err.code === "forbidden" || err.code === "insufficientCredits")
+        );
+        addToast(`✗ ${failure.what}`, "error");
       }
       return;
     }
@@ -134,8 +191,13 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
     setLoading(false);
 
     if (error) {
-      setError(error.message);
-      addToast(`✗ ${tCommon("error")}: ${error.message}`, "error");
+      // Was `addToast("✗ error: " + error.message)`, which put a raw
+      // PostgREST string ("new row violates row-level security policy for
+      // table \"trades\"") in front of the user. It names internal tables,
+      // it is English, and it tells them nothing they can act on.
+      const failure = describe(new ApiError(500, { error: error.message }));
+      setError(failure.text);
+      addToast(`✗ ${failure.what}`, "error");
       return;
     }
 
@@ -154,9 +216,12 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
         >
-          <Plus className="h-4 w-4" /> {t("new", { title: tKey(module.titleKey) })}
+          {/* The module's own sentence, not "New " + the page title.
+              The title is plural and the grammar around it changes with
+              the noun — see ModuleConfig.newKey. */}
+          <Plus className="h-4 w-4" /> {tKey(module.newKey)}
         </button>
       ) : (
         <form
@@ -165,13 +230,13 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
         >
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-foreground">
-              {t("new", { title: tKey(module.titleKey) })}
+              {tKey(module.newKey)}
             </h2>
             <button
               type="button"
               onClick={() => setOpen(false)}
               aria-label={tCommon("cancel")}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
@@ -213,6 +278,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
                   </select>
                 ) : (
                   <input
+                    ref={field.key === module.headlineKey ? headlineRef : undefined}
                     type={field.type === "number" ? "number" : "text"}
                     required={field.required}
                     value={form[field.key]}
@@ -243,7 +309,7 @@ export function GenericAddForm({ module }: { module: ModuleConfig }) {
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
+            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:w-auto"
           >
             {loading ? t("saving") : t("save")}
           </button>

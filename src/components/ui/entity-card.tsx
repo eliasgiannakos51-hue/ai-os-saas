@@ -194,7 +194,17 @@ export function EntityCard({
             ))}
           </div>
           {status && tone && (
-            <span className={`inline-flex shrink-0 items-center gap-1.5 text-[11px] font-medium ${tone.text}`}>
+            // `shrink-0` with no width cap is what made this the widest
+            // element on the page: with a real record whose status label
+            // ran to 74 characters, the badge refused to shrink AND had
+            // nowhere to wrap, so it pushed /dashboard/trading-workflow to
+            // 1135px inside a 1024px window — sideways scroll on a laptop.
+            // Capped and truncated like the tags directly above it, which
+            // already had exactly this treatment.
+            <span
+              className={`inline-flex min-w-0 max-w-[12rem] shrink-0 items-center gap-1.5 truncate text-[11px] font-medium ${tone.text}`}
+              title={status.label}
+            >
               <span
                 aria-hidden="true"
                 className={`h-1.5 w-1.5 rounded-full ${tone.dot} ${status.pulse ? "stat-pulse" : ""}`}

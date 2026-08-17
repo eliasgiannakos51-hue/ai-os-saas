@@ -6,32 +6,40 @@ import { GlowOrb } from "@/components/ui/glow-orb";
 import { AppBackground } from "@/components/ui/app-background";
 import { Logo } from "@/components/logo";
 
-const TITLE = "Ionexa AI — Your business, organized with AI that actually helps.";
-const DESCRIPTION =
-  "Track ideas, finance, trading, research, decisions and more — all in one place, with an AI assistant that understands your data and helps you think it through.";
+// The landing page's title and description are the SAME sentences the
+// page itself renders (landing.hero / landing.description) rather than a
+// second English copy of them kept in this file. That copy was how a
+// Greek visitor could read a Greek hero under a tab that said "Your
+// business, organized with AI that actually helps." — and how the share
+// card said it too.
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("landing");
+  const title = `Ionexa AI — ${t("hero")}`;
+  const description = t("description");
 
-export const metadata: Metadata = {
-  title: { absolute: TITLE },
-  description: DESCRIPTION,
-  openGraph: {
-    // siteName has to be repeated here: Next.js REPLACES the whole
-    // openGraph object when a page declares one, it does not merge it
-    // field-by-field with the root layout's. Without this line the
-    // landing page — the one page a share sheet or a browser is most
-    // likely to read — ships no og:site_name at all, which is part of
-    // why the app was surfacing as the deployment host on mobile.
-    siteName: "Ionexa AI",
-    title: TITLE,
-    description: DESCRIPTION,
-    type: "website",
-    url: "/",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: TITLE,
-    description: DESCRIPTION,
-  },
-};
+  return {
+    title: { absolute: title },
+    description,
+    openGraph: {
+      // siteName has to be repeated here: Next.js REPLACES the whole
+      // openGraph object when a page declares one, it does not merge it
+      // field-by-field with the root layout's. Without this line the
+      // landing page — the one page a share sheet or a browser is most
+      // likely to read — ships no og:site_name at all, which is part of
+      // why the app was surfacing as the deployment host on mobile.
+      siteName: "Ionexa AI",
+      title,
+      description,
+      type: "website",
+      url: "/",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
+}
 
 export default async function Home() {
   const t = await getTranslations("landing");
@@ -64,13 +72,13 @@ export default async function Home() {
         <div className="mt-10 flex w-full max-w-xs flex-col gap-3 sm:mx-auto sm:w-auto sm:flex-row">
           <Link
             href="/login"
-            className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border px-6 py-2.5 text-sm font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
+            className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border px-6 py-2.5 text-sm font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
           >
             {t("logIn")}
           </Link>
           <Link
             href="/signup"
-            className="cta-amber inline-flex min-h-[44px] items-center justify-center rounded-xl px-6 py-2.5 text-sm font-semibold text-black sm:min-h-0"
+            className="cta-amber inline-flex min-h-[44px] items-center justify-center rounded-xl px-6 py-2.5 text-sm font-semibold text-black"
           >
             {t("signUp")}
           </Link>

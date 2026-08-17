@@ -61,8 +61,13 @@ create table if not exists public.user_agents (
   -- 'flagged' website status — see
   -- supabase/migrations/20260813_flagged_status_constraint.sql — and
   -- scripts/tests/enum-schema-drift.test.mjs now fails on either.
+  -- Widened again for Telegram, Discord and in-app delivery. Same reason
+  -- as the paragraph above, one feature later: a project built from this
+  -- file alone would otherwise reject every agent the delivery picker
+  -- lets someone create. Must match
+  -- supabase/migrations/20260814_agent_delivery_channels.sql exactly.
   delivery_method text not null default 'email'
-    check (delivery_method in ('email', 'slack')),
+    check (delivery_method in ('email', 'slack', 'telegram', 'discord', 'in_app')),
   -- Where the result goes. Constrained in application code to the account's
   -- OWN verified email address — see the anti-abuse note in
   -- lib/agents/agent-config.ts. Stored rather than derived so a future

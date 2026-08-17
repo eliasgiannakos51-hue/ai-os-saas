@@ -76,11 +76,13 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     ],
   },
   {
+    // BUILD MEANS SOMETHING IS PRODUCED, and after this change it is true
+    // of everything in here. Three entries: the agent builder, the site
+    // builder, and the sites it put live.
     heading: "Build",
     collapsible: true,
     items: [
       { href: "/dashboard/agents", label: "AI Agents", icon: MODULE_ICONS.agents , hintKey: "agents" },
-      { href: "/dashboard/websites", label: "Websites", icon: MODULE_ICONS.websites , hintKey: "websites" },
       {
         href: "/dashboard/website-builder",
         label: "Website Builder",
@@ -89,6 +91,26 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // published site IS a website that went live, and separating the two
       // would make "where did my site go" a navigation question.
       { href: "/dashboard/published", label: "Published Sites", icon: PUBLISHED_SITES_ICON, hintKey: "published" },
+    ],
+  },
+  {
+    // THE EIGHT THAT PRODUCE NOTHING.
+    //
+    // lib/build-modules.ts says it in its own words: "Each is purely a
+    // tracking/log table for now — no real AI generation happens yet".
+    // They sat under a heading called Build, next to two features that
+    // genuinely build things, with names like "AI Coding" and "Images".
+    // A user who opens AI Coding expecting code and finds a form to
+    // describe code they will write themselves has not met a limitation,
+    // they have met a claim that was not true — and it is the same
+    // sentence they will use about the features that DO work.
+    //
+    // Grouping them separately is the half of the fix that does not
+    // depend on agreeing new names for them.
+    heading: "Tracking",
+    collapsible: true,
+    items: [
+      { href: "/dashboard/websites", label: "Websites", icon: MODULE_ICONS.websites , hintKey: "websites" },
       { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps , hintKey: "apps" },
       { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images , hintKey: "images" },
       { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos , hintKey: "videos" },

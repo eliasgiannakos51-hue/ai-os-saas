@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
 import { SuggestedLinksPrompt } from "@/components/entity-links/suggested-links-prompt";
 import { useTranslations } from "next-intl";
+import { ApiError } from "@/lib/errors/api-error";
+import { useErrorText } from "@/lib/errors/use-error-text";
 
 const EMPTY_FORM = {
   name: "",
@@ -19,21 +21,57 @@ const EMPTY_FORM = {
   verdict: "",
 };
 
-export function AddIdeaForm() {
+export function AddIdeaForm({
+  prefill,
+}: {
+  /**
+   * A worked example the user pressed on the empty screen
+   * (components/ideas/ideas-section.tsx). Same contract as
+   * GenericAddForm's: the nonce is what makes a second press of the same
+   * example a second request rather than a no-op, and only the headline
+   * field is filled — the rest is the user's to write.
+   */
+  prefill?: { text: string; nonce: number } | null;
+} = {}) {
   const router = useRouter();
   const supabase = createClient();
   const { addToast } = useToast();
   const tCommon = useTranslations("common");
   const t = useTranslations("dashboard.ideas");
   const tModule = useTranslations("module");
+  const describe = useErrorText();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(false);
   // Set right after a successful create so SuggestedLinksPrompt (Knowledge
   // Graph "Smart Search") can offer related-entry links for it — see
   // lib/entity-link-suggestions.ts.
   const [newlyCreated, setNewlyCreated] = useState<{ table: string; id: string } | null>(null);
+  const nameRef = useRef<HTMLInputElement | null>(null);
+  const focusOnOpen = useRef(false);
+
+  const nonce = prefill?.nonce;
+  useEffect(() => {
+    if (nonce === undefined || !prefill) return;
+    setForm({ ...EMPTY_FORM, name: prefill.text });
+    setOpen(true);
+    focusOnOpen.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nonce]);
+
+  // See generic-add-form.tsx: the input does not exist until the render
+  // that setOpen(true) triggers has committed, so the focus is a second
+  // effect keyed on `open` rather than a line inside the first.
+  useEffect(() => {
+    if (!open || !focusOnOpen.current) return;
+    focusOnOpen.current = false;
+    const input = nameRef.current;
+    if (!input) return;
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+  }, [open]);
 
   function update(field: keyof typeof EMPTY_FORM) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -75,7 +113,7 @@ export function AddIdeaForm() {
 
     if (error) {
       setError(error.message);
-      addToast(`✗ ${tCommon("error")}: ${error.message}`, "error");
+      addToast(`✗ ${describe(new ApiError(500, { error: error.message })).what}`, "error");
       return;
     }
 
@@ -94,7 +132,7 @@ export function AddIdeaForm() {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
         >
           <Plus className="h-4 w-4" /> {t("new")}
         </button>
@@ -118,6 +156,7 @@ export function AddIdeaForm() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label={t("nameLabel")} required>
               <input
+                ref={nameRef}
                 required
                 value={form.name}
                 onChange={update("name")}
@@ -202,7 +241,7 @@ export function AddIdeaForm() {
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
+            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:w-auto"
           >
             {loading ? tModule("saving") : tModule("save")}
           </button>

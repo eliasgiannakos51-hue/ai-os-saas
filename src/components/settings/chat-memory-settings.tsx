@@ -89,7 +89,7 @@ export function ChatMemorySettings({
           aria-label={t("toggleLabel")}
           onClick={handleToggle}
           disabled={updating}
-          className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`relative -my-2.5 inline-flex h-11 w-11 shrink-0 items-center rounded-full bg-clip-content py-2.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
             enabled ? "bg-orange-500" : "bg-panel-hover"
           }`}
         >
@@ -109,7 +109,7 @@ export function ChatMemorySettings({
           type="button"
           onClick={handleClearAll}
           disabled={clearing || count === 0}
-          className="inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-red-500 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-red-500 hover:text-red-400 disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Trash2 className="h-3.5 w-3.5" /> {clearing ? t("clearing") : t("clearAll")}
         </button>

@@ -129,6 +129,30 @@ export function IntegrationsList({
           </p>
         )}
 
+        {/* Two different nothings, and they were being told apart by
+            nothing at all.
+
+            `rows` is the PROVIDER CATALOGUE filtered by the search box, so
+            it only empties out on a search that matched no provider —
+            which is what "No matches for 'x'" is for, and it stays. What
+            had no state of its own was the case a new account is actually
+            in: every provider listed, none of them connected. The page
+            answered that with a wall of cards and a "0 of 3 used" counter,
+            and never said what connecting one would get you.
+
+            So the empty-account message sits ABOVE the catalogue rather
+            than replacing it: the cards are the call to action, and
+            hiding them to explain them would be self-defeating. No
+            example here — the next step is an OAuth round trip, not a
+            form to type into, so EmptyState renders without one. */}
+        {connectedCount === 0 && rows.length > 0 && (
+          <div className="mb-4">
+            <EmptyState icon={Plug} title={t("emptyTitle")}>
+              {t("emptyBody")}
+            </EmptyState>
+          </div>
+        )}
+
         {rows.length === 0 ? (
           <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>
         ) : (
@@ -283,7 +307,7 @@ function ConsentPanel({
       <div className="flex flex-wrap gap-2">
         <a
           href={`/api/integrations/${provider.id}/connect`}
-          className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
         >
           <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
           {t("consentApprove", { name: provider.name })}
@@ -291,7 +315,7 @@ function ConsentPanel({
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex min-h-[36px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+          className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
         >
           {t("cancel")}
         </button>

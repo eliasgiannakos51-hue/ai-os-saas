@@ -1,3 +1,4 @@
+import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -16,7 +17,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Files" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.files");
+}
 
 export default async function FilesPage() {
   const supabase = createClient();
@@ -70,7 +73,7 @@ export default async function FilesPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-        <PageHeader icon={FolderOpen} title={t("title")} description={t("description")} />
+        <PageHeader helpKey="help.files" helpArticle="upload-files" icon={FolderOpen} title={t("title")} description={t("description")} />
 
         {/* Said once, at the top: this page is where somebody hands a
             contract to an AI, and the terms of that belong here rather

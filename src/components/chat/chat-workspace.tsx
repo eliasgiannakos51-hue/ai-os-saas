@@ -10,13 +10,17 @@ import {
 } from "react";
 import { ArrowUp, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
+import { AiActivity } from "@/components/ui/ai-activity";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { Tooltip } from "@/components/ui/tooltip";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
+import { InlineTitle } from "@/components/chat/inline-title";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { MessageContent } from "@/components/chat/message-content";
+import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useCredits } from "@/components/credits/credits-context";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
@@ -31,16 +35,6 @@ let localIdCounter = 0;
 function nextLocalId(prefix: string) {
   localIdCounter += 1;
   return `${prefix}-${localIdCounter}`;
-}
-
-function TypingDots() {
-  return (
-    <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-3.5">
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted [animation-delay:-0.3s]" />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted [animation-delay:-0.15s]" />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted" />
-    </div>
-  );
 }
 
 function AssistantAvatar() {
@@ -79,6 +73,8 @@ export function ChatWorkspace({
   initialFreeChatRemaining?: number;
 }) {
   const tTrading = useTranslations("dashboard.tradingWorkflow");
+  const describe = useErrorText();
+  const describeStatus = useErrorTextForStatus();
   const tCommon = useTranslations("common");
   const tProduct = useTranslations("dashboard.productWorkflow");
   const tFree = useTranslations("credits.freeChat");
@@ -87,6 +83,7 @@ export function ChatWorkspace({
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
   const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
+  const [headerRenaming, setHeaderRenaming] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState(() =>
     initialMentorPreset === "trading"
@@ -214,6 +211,9 @@ export function ChatWorkspace({
     textareaRef.current?.focus();
   }
 
+  // Through the route rather than straight at the table: the per-plan cap
+  // on pinned conversations has to be decided by the server, or it is not
+  // a cap. RLS still owns the ownership half.
   async function togglePin(id: string) {
     const target = conversations.find((c) => c.id === id);
     if (!target) return;
@@ -221,16 +221,34 @@ export function ChatWorkspace({
     setConversations((prev) =>
       prev.map((c) => (c.id === id ? { ...c, is_pinned: nextPinned } : c))
     );
-    const supabase = createClient();
-    const { error: pinError } = await supabase
-      .from("chat_conversations")
-      .update({ is_pinned: nextPinned })
-      .eq("id", id);
-    if (pinError) {
+    const revert = () =>
       setConversations((prev) =>
         prev.map((c) => (c.id === id ? { ...c, is_pinned: !nextPinned } : c))
       );
-      setError(getErrorMessage(pinError, "Could not update pin."));
+    try {
+      const res = await fetch(`/api/conversations/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_pinned: nextPinned }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        revert();
+        // Hitting the pin cap is a tidiness problem, not a billing one,
+        // so it gets its own sentence with the numbers in it — never an
+        // upgrade prompt. Every other code falls to one translated line:
+        // the route returns identifiers rather than English prose, so
+        // there is nothing here that could leak an English sentence into
+        // a Greek sidebar.
+        setError(
+          data?.code === "pin_limit"
+            ? t("pinLimitReached", { limit: data.limit })
+            : t("pinError")
+        );
+      }
+    } catch {
+      revert();
+      setError(t("pinError"));
     }
   }
 
@@ -254,19 +272,42 @@ export function ChatWorkspace({
     );
   }
 
+  // Also through the route: the title length is capped there, so a
+  // 40,000-character name cannot be written by anything that skips this
+  // component. The optimistic update stays — a rename that waits for a
+  // round trip feels broken.
   async function renameConversation(id: string, title: string) {
     const previousTitle = conversations.find((c) => c.id === id)?.title;
     setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)));
-    const supabase = createClient();
-    const { error: renameError } = await supabase
-      .from("chat_conversations")
-      .update({ title })
-      .eq("id", id);
-    if (renameError && previousTitle !== undefined) {
+    try {
+      const res = await fetch(`/api/conversations/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
+      });
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        if (previousTitle !== undefined) {
+          setConversations((prev) =>
+            prev.map((c) => (c.id === id ? { ...c, title: previousTitle } : c))
+          );
+        }
+        setError(t("renameError"));
+        return;
+      }
+      // The server trims and truncates, so the row it returns is the
+      // truth — echoing it back stops the sidebar showing 120 characters
+      // of a title the database stored as 100.
       setConversations((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, title: previousTitle } : c))
+        prev.map((c) => (c.id === id ? { ...c, title: data.conversation.title } : c))
       );
-      setError(getErrorMessage(renameError, "Could not rename conversation."));
+    } catch {
+      if (previousTitle !== undefined) {
+        setConversations((prev) =>
+          prev.map((c) => (c.id === id ? { ...c, title: previousTitle } : c))
+        );
+      }
+      setError(t("renameError"));
     }
   }
 
@@ -340,7 +381,7 @@ export function ChatWorkspace({
           setIsRateLimitNotice(true);
           setError(data.message);
         } else {
-          setError(getErrorMessage(data?.error, "Something went wrong."));
+          setError(describeStatus(res.status).text);
         }
         return;
       }
@@ -391,7 +432,7 @@ export function ChatWorkspace({
             setStreamingText(accumulatedText);
           }
         } else if (event.type === "error") {
-          streamError = typeof event.error === "string" ? event.error : "Something went wrong.";
+          streamError = describeStatus(500).text;
         }
       });
 
@@ -511,7 +552,7 @@ export function ChatWorkspace({
               onClick={toggleSidebar}
               aria-expanded={sidebarOpen}
               aria-label={sidebarOpen ? t("hideConversations") : t("showConversations")}
-              className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-2 text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg px-2 text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground sm:h-9"
             >
               {sidebarOpen ? (
                 <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -533,6 +574,25 @@ export function ChatWorkspace({
               The key includes the favourited flag so a toggle made in the
               sidebar re-mounts this copy instead of leaving the two
               stars disagreeing. */}
+          {/* THE NAME, WHERE YOU ARE READING THE CONVERSATION.
+              It was only ever in the sidebar — which is hidden in focus
+              mode and hidden by default at 375px, so on a phone the open
+              conversation had no name on screen at all and no way to
+              change it. Same component as the list, so the two cannot
+              drift apart. */}
+          {activeConversation && (
+            <div className="ml-3 flex min-w-0 flex-1 items-center">
+              <InlineTitle
+                testId="chat-header-title"
+                title={activeConversation.title}
+                editing={headerRenaming}
+                onEditingChange={setHeaderRenaming}
+                onRename={(next) => void renameConversation(activeConversation.id, next)}
+                className="min-w-0 truncate text-sm font-medium text-foreground"
+              />
+            </div>
+          )}
+
           {activeConversation && (
             <div className="ml-auto shrink-0">
               <FavoriteButton
@@ -559,7 +619,16 @@ export function ChatWorkspace({
                 <MessageCircle className="h-6 w-6" aria-hidden="true" />
               </span>
               <h1 className="mt-4 text-xl font-bold tracking-wide text-foreground">{t("title")}</h1>
-              <p className="mt-2 text-sm text-muted">{t("emptyBody")}</p>
+              {/* Was three hardcoded English sentences. A Greek user opening
+                  Chat met an English explanation of what it is for — which
+                  is the one moment the explanation has to land. */}
+              <p className="mt-2 text-sm text-muted">{t("emptyHint")}</p>
+              {/* AND WHAT TO ACTUALLY SAY. "Ask anything" is true and
+                  useless: the reported confusion was somebody deciding this
+                  product was "several LLMs in one, cheaper", which is
+                  exactly the conclusion you reach from a blank box that
+                  accepts anything. */}
+              <ExamplePrompts surface="chat" onPick={setInput} className="mt-5 w-full text-left" />
             </div>
           ) : (
             <div className="mx-auto max-w-2xl space-y-4">
@@ -599,7 +668,7 @@ export function ChatWorkspace({
                       <AiGeneratedNotice />
                     </div>
                   ) : (
-                    <TypingDots />
+                    <AiActivity kind="chat" className="rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-3.5" />
                   )}
                 </div>
               )}
@@ -617,7 +686,7 @@ export function ChatWorkspace({
                 onClick={() => setMentorMode((v) => !v)}
                 aria-pressed={mentorMode}
                 title={t("mentorModeHint")}
-                className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 ${
+                className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 ${
                   mentorMode
                     ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
                     : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
@@ -658,7 +727,7 @@ export function ChatWorkspace({
                   type="submit"
                   disabled={sending || !input.trim()}
                   aria-label={t("send")}
-                  className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+                  className="absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
                 >
                   {sending ? (
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />

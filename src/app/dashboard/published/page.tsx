@@ -1,3 +1,4 @@
+import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -18,7 +19,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Published Sites" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.published");
+}
 
 // Every site this account has live, with its traffic and its version
 // history.
@@ -111,7 +114,7 @@ export default async function PublishedSitesPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={Globe} title={t("title")} description={t("description")} />
+        <PageHeader helpKey="help.published" helpArticle="publish-website" icon={Globe} title={t("title")} description={t("description")} />
 
         {/* GDPR: what is and is not measured, said plainly on the page that
             shows the numbers rather than buried in a policy. */}
@@ -119,7 +122,7 @@ export default async function PublishedSitesPage() {
           {t("analyticsNotice")}
         </p>
 
-        {sitesError && <ErrorMessage message={`loading published sites: ${sitesError.message}`} />}
+        {sitesError && <ErrorMessage detail={`loading published sites: ${sitesError.message}`} />}
 
         <PublishedSitesList
           sites={rows}

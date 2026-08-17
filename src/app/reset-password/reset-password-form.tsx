@@ -102,7 +102,7 @@ export function ResetPasswordForm() {
             type: "recovery",
           });
           if (error) {
-            setInvalidReason(getErrorMessage(error));
+            setInvalidReason(getErrorMessage(error, t("linkInvalid")));
             setStatus("invalid");
           } else {
             setStatus("ready");
@@ -114,7 +114,7 @@ export function ResetPasswordForm() {
         if (code) {
           const { error } = await supabase.auth.exchangeCodeForSession(code);
           if (error) {
-            setInvalidReason(getErrorMessage(error));
+            setInvalidReason(getErrorMessage(error, t("linkInvalid")));
             setStatus("invalid");
           } else {
             setStatus("ready");
@@ -130,7 +130,7 @@ export function ResetPasswordForm() {
             refresh_token: refreshToken,
           });
           if (error) {
-            setInvalidReason(getErrorMessage(error));
+            setInvalidReason(getErrorMessage(error, t("linkInvalid")));
             setStatus("invalid");
           } else {
             setStatus("ready");
@@ -147,13 +147,19 @@ export function ResetPasswordForm() {
         );
         setStatus("invalid");
       } catch (err) {
-        setInvalidReason(getErrorMessage(err));
+        setInvalidReason(getErrorMessage(err, t("linkInvalid")));
         setStatus("invalid");
       }
     }
 
     verifyRecoveryLink();
-  }, [supabase]);
+    // `t` joins the deps because the effect now reads a translated string.
+    // next-intl's translator is stable for a given locale, so this does not
+    // re-verify the link on every render — but it DOES re-run if the reader
+    // switches language mid-verification, which is the correct behaviour:
+    // the message they end up reading should be in the language they are
+    // now reading in.
+  }, [supabase, t]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -169,7 +175,7 @@ export function ResetPasswordForm() {
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
-        setError(getErrorMessage(error));
+        setError(getErrorMessage(error, t("failed")));
         return;
       }
 
@@ -177,7 +183,7 @@ export function ResetPasswordForm() {
       router.push("/login?reset=success");
       router.refresh();
     } catch (err) {
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err, t("failed")));
     } finally {
       setLoading(false);
     }
@@ -207,7 +213,7 @@ export function ResetPasswordForm() {
               <p className="text-sm text-red-400">{invalidReason}</p>
               <Link
                 href="/forgot-password"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
               >
                 {t("requestNewLink")}
               </Link>

@@ -48,8 +48,6 @@ export type PlanCapabilities = {
   // feature that spends money while nobody is looking.
   maxAiAgents: number | "unlimited";
   websiteBuilder: boolean;
-  mobileSaasBuilder: boolean;
-  imageVideoGeneration: boolean;
   aiMemory: boolean;
   teamCollaboration: boolean;
   // How many chat_memory entries (see lib/chat/memory.ts) get loaded as
@@ -90,19 +88,14 @@ export const PLANS: Plan[] = [
     capabilities: {
       maxAiAgents: 0,
       websiteBuilder: false,
-      mobileSaasBuilder: false,
-      imageVideoGeneration: false,
       aiMemory: false,
       teamCollaboration: false,
       chatMemoryLimit: 0,
       customAiPersona: false,
     },
     features: [
-      { textKey: "1Workspace3Projects" },
       { textKey: "basicAiChat" },
       { textKey: "creditsPerMonth" },
-      { textKey: "marketplaceInstallOnly" },
-      { textKey: "communitySupport" },
     ],
   },
   {
@@ -114,21 +107,16 @@ export const PLANS: Plan[] = [
     capabilities: {
       maxAiAgents: 2,
       websiteBuilder: true,
-      mobileSaasBuilder: false,
-      imageVideoGeneration: true,
       aiMemory: true,
       teamCollaboration: false,
       chatMemoryLimit: 20,
       customAiPersona: false,
     },
     features: [
-      { textKey: "unlimitedProjects" },
       { textKey: "upTo2AiAgents" },
       { textKey: "aiMemory" },
       { textKey: "websiteAutomationBuilderAccess" },
-      { textKey: "imageVideoGenerationAccess" },
       { textKey: "creditsPerMonth" },
-      { textKey: "emailSupport" },
     ],
   },
   {
@@ -141,8 +129,6 @@ export const PLANS: Plan[] = [
     capabilities: {
       maxAiAgents: 5,
       websiteBuilder: true,
-      mobileSaasBuilder: true,
-      imageVideoGeneration: true,
       aiMemory: true,
       teamCollaboration: false,
       chatMemoryLimit: 20,
@@ -151,9 +137,7 @@ export const PLANS: Plan[] = [
     features: [
       { textKey: "everythingInStarter" },
       { textKey: "upTo5AiAgents" },
-      { textKey: "mobileSaasBuilderAccess" },
       { textKey: "creditsPerMonth" },
-      { textKey: "priorityProcessing" },
     ],
   },
   {
@@ -165,8 +149,6 @@ export const PLANS: Plan[] = [
     capabilities: {
       maxAiAgents: 15,
       websiteBuilder: true,
-      mobileSaasBuilder: true,
-      imageVideoGeneration: true,
       aiMemory: true,
       teamCollaboration: true,
       chatMemoryLimit: 20,
@@ -176,9 +158,7 @@ export const PLANS: Plan[] = [
       { textKey: "everythingInGrowth" },
       { textKey: "upTo15AiAgentsTeams" },
       { textKey: "teamCollaboration" },
-      { textKey: "sharedAiMemory" },
       { textKey: "creditsPerMonth" },
-      { textKey: "prioritySupport" },
     ],
   },
   {
@@ -191,8 +171,6 @@ export const PLANS: Plan[] = [
     capabilities: {
       maxAiAgents: 50,
       websiteBuilder: true,
-      mobileSaasBuilder: true,
-      imageVideoGeneration: true,
       aiMemory: true,
       teamCollaboration: true,
       chatMemoryLimit: 100,
@@ -205,7 +183,6 @@ export const PLANS: Plan[] = [
       { textKey: "extendedChatMemoryRetention100Vs20RecentFact" },
       { textKey: "customAiPersonaNameInIonexaChat" },
       { textKey: "creditsPerMonth" },
-      { textKey: "highestPriorityProcessing" },
     ],
   },
   {
@@ -218,8 +195,6 @@ export const PLANS: Plan[] = [
     capabilities: {
       maxAiAgents: 100,
       websiteBuilder: true,
-      mobileSaasBuilder: true,
-      imageVideoGeneration: true,
       aiMemory: true,
       teamCollaboration: true,
       chatMemoryLimit: 100,
@@ -229,7 +204,6 @@ export const PLANS: Plan[] = [
       { textKey: "everythingInUltimate" },
       { textKey: "upTo100AiAgents" },
       { textKey: "unlimitedMembers" },
-      { textKey: "dedicatedSupport" },
       { textKey: "customCredits" },
     ],
   },

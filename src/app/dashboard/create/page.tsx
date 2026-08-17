@@ -1,11 +1,12 @@
+import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CreateStudio } from "@/components/create/create-studio";
 
-export const metadata: Metadata = {
-  title: "Create Studio",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("common.createStudio");
+}
 
 // Create Studio replaces the old free-text "Create Anything" thread here.
 // The classifier behind it is the same one — /api/create still routes an

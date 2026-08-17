@@ -14,7 +14,7 @@ export type CreateResult =
   // flag had no visible effect — the UI showed the same red text as a
   // network drop.
   | { type: "outOfCredits"; message: string }
-  | { type: "needsClarification"; questions: string[] };
+  | { type: "needsClarification"; questions: string[]; suggestions: string[][] };
 
 // Shared submit logic for the "Create Anything" classifier, used by both
 // the lightweight home-page composer (CreateChat) and the full chat-thread
@@ -54,7 +54,11 @@ export function useCreateAnything() {
       }
 
       if (data.needsClarification) {
-        return { type: "needsClarification", questions: data.questions as string[] };
+        return {
+          type: "needsClarification",
+          questions: data.questions as string[],
+          suggestions: data.questionSuggestions ?? [],
+        };
       }
 
       if (data.matched) {

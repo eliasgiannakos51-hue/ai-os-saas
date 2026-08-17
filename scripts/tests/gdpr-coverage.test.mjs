@@ -49,6 +49,32 @@ for (const [, name, body] of blocks) {
   if (!cascadeByTable.has(name)) cascadeByTable.set(name, fk ? fk[1].toLowerCase() : null);
 }
 
+// A CASCADE DECLARED AS A SEPARATE STATEMENT COUNTS TOO.
+//
+// The loop above only sees `user_id uuid references auth.users(id) on
+// delete cascade` written INSIDE the create table. Postgres's own dump
+// format does not write it that way: it emits a bare column and then
+// `alter table ... add constraint ..._user_id_fkey foreign key (user_id)
+// references auth.users(id) on delete cascade` further down the file, and
+// the baseline migrations — which are transformed dumps — are full of them.
+//
+// Reading only the inline form reported security_check_log, user_favorites
+// and website_form_submissions as un-erasable when all three cascade
+// correctly. A false accusation in a data-protection check is not a safe
+// failure: it gets three tables added to an explicit-scrub list they do
+// not belong on, and the day one of them really loses its cascade the
+// check is already saying so.
+for (const m of SQL.matchAll(
+  /alter table (?:only )?(?:public\.)?"?([a-z_0-9]+)"?[\s\S]{0,200}?foreign key\s*\(\s*user_id\s*\)\s*references\s+auth\.users\s*\(\s*id\s*\)\s*on\s+delete\s+(\w+)/gi
+)) {
+  const [, table, action] = m;
+  if (!tablesWithUserId.has(table)) continue;
+  // An inline declaration and a separate one cannot disagree in practice
+  // — the constraint is one object — so the later statement simply fills
+  // in what the create table did not say.
+  if (!cascadeByTable.get(table)) cascadeByTable.set(table, action.toLowerCase());
+}
+
 console.log(`== 1. every table with a user_id is classified (${tablesWithUserId.size} found in schema) ==`);
 const classified = new Set(USER_DATA_TABLES.map((t) => t.table));
 const nonPersonal = new Set(NON_PERSONAL_TABLES);
@@ -102,7 +128,11 @@ for (const t of sensitive) {
 const columnsByTable = new Map();
 for (const [, name, body] of blocks) {
   if (!columnsByTable.has(name)) {
-    columnsByTable.set(name, new Set([...body.matchAll(/^\s{2}([a-z_][a-z0-9_]*)\s+/gm)].map((m) => m[1])));
+    // ANY leading indentation, not exactly two spaces. Postgres's dump
+    // format indents columns by four, so this read zero columns out of
+    // every table that came from the baseline migrations and reported
+    // production_errors' three real columns as phantoms.
+    columnsByTable.set(name, new Set([...body.matchAll(/^[ \t]+([a-z_][a-z0-9_]*)\s+/gm)].map((m) => m[1])));
   }
 }
 for (const t of sensitive) {

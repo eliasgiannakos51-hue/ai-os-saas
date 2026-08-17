@@ -61,7 +61,13 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
       )}
 
       {results.length === 0 ? (
-        <EmptyState>{t("empty")}</EmptyState>
+        /* No example, and this is the one that looks like it should have
+           one: there IS a text input directly above. It is a SEARCH box,
+           and this branch means there is nothing logged in ANY module — so
+           a button that filled it would search an empty set and find
+           nothing, every single time. The next step is logging something
+           on another page, not a keystroke here. */
+        <EmptyState title={t("empty.title")}>{t("empty.why")}</EmptyState>
       ) : filtered.length === 0 ? (
         <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>
       ) : (

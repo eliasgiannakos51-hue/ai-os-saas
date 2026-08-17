@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
+import { pageTitleAndDescription } from "@/lib/page-title";
 import { ResetPasswordForm } from "./reset-password-form";
 
-export const metadata: Metadata = {
-  title: "Set New Password",
-  description: "Set a new password for your Ionexa AI account.",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitleAndDescription("pageTitle.resetPassword", "pageTitle.resetPasswordDescription");
+}
 
 export default function ResetPasswordPage() {
   return <ResetPasswordForm />;

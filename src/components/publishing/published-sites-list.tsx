@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { Globe, ExternalLink, Copy, Check, History, SearchX, Undo2 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
+import { writeToClipboard } from "@/components/ui/copy-button";
 import { ListLayout } from "@/components/ui/list-layout";
 import { EmptyState } from "@/components/empty-state";
 import { SortToggle } from "@/components/sort-toggle";
@@ -77,14 +78,18 @@ export function PublishedSitesList({
 
   const liveCount = sites.filter((s) => s.status === "live").length;
 
+  // A menu item cannot be a CopyButton — it is an onSelect callback, not
+  // a component — but it can share the clipboard, and it must: the
+  // navigator.clipboard call this used to make is undefined on an
+  // insecure origin, so on plain http the item did nothing and said
+  // nothing.
   async function copyLink(site: PublishedSiteRow) {
-    try {
-      await navigator.clipboard.writeText(site.url);
+    if (await writeToClipboard(site.url)) {
       setCopiedId(site.id);
       setTimeout(() => setCopiedId(null), 2000);
-    } catch {
-      addToast(t("copyFailed"), "error");
+      return;
     }
+    addToast(t("copyFailed"), "error");
   }
 
   async function unpublish(site: PublishedSiteRow) {
@@ -163,7 +168,7 @@ export function PublishedSitesList({
         newAction={
           <Link
             href="/dashboard/website-builder"
-            className="inline-flex min-h-[40px] items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
           >
             <Globe className="h-4 w-4" aria-hidden="true" />
             {t("goToBuilder")}
@@ -182,9 +187,10 @@ export function PublishedSitesList({
         }
       >
         {sites.length === 0 ? (
-          <EmptyState icon={Globe}>
-            <p className="text-base font-semibold text-foreground">{t("emptyTitle")}</p>
-            <p className="mt-1 text-sm text-muted">{t("emptyHint")}</p>
+          /* No example: you publish a site that already exists, from the
+             Website Builder. There is nothing on this page to type into. */
+          <EmptyState icon={Globe} title={t("empty.title")}>
+            {t("empty.why")}
           </EmptyState>
         ) : filtered.length === 0 ? (
           <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>
@@ -309,7 +315,7 @@ export function PublishedSitesList({
                       type="button"
                       onClick={() => void rollback(selected, version)}
                       disabled={busyId === selected.id}
-                      className="inline-flex min-h-[32px] items-center gap-1.5 rounded-lg border border-border px-3 py-1 text-[11px] font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:opacity-40"
+                      className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-1 text-[11px] font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:opacity-40"
                     >
                       <Undo2 className="h-3 w-3" aria-hidden="true" />
                       {t("rollback")}

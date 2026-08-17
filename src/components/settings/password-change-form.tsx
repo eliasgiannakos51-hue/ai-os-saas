@@ -38,7 +38,7 @@ export function PasswordChangeForm() {
       if (error) {
         // eslint-disable-next-line no-console
         console.error("Password change error:", error);
-        setError(getErrorMessage(error));
+        setError(getErrorMessage(error, t("failed")));
         addToast(t("couldNotUpdate"), "error");
         return;
       }
@@ -49,7 +49,7 @@ export function PasswordChangeForm() {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Password change threw:", err);
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err, t("failed")));
       addToast(t("couldNotUpdate"), "error");
     } finally {
       setLoading(false);
@@ -106,7 +106,7 @@ export function PasswordChangeForm() {
       <button
         type="submit"
         disabled={loading}
-        className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0 sm:w-auto"
+        className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
       >
         {loading ? t("updating") : t("updatePassword")}
       </button>

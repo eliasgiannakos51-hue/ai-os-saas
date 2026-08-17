@@ -15,12 +15,14 @@ import {
   ListChecks,
 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { EmptyState } from "@/components/empty-state";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { MAX_TOPIC_CHARS } from "@/lib/research/research-limits";
+import { ExamplePrompts } from "@/components/ai/example-prompts";
 
 type Question = { question: string; why: string };
 type Source = { title: string; url: string };
@@ -89,6 +91,7 @@ export function ResearchWorkspace({
 
   const [reports, setReports] = useState(initialReports);
   const [topic, setTopic] = useState("");
+  const topicRef = useRef<HTMLTextAreaElement | null>(null);
   const [planning, setPlanning] = useState(false);
   const [draft, setDraft] = useState<{ report: ResearchReport; credits: number } | null>(null);
   const [running, setRunning] = useState<string | null>(null);
@@ -282,6 +285,7 @@ export function ResearchWorkspace({
         </label>
         <textarea
           id="research-topic"
+          ref={topicRef}
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           placeholder={t("topicPlaceholder")}
@@ -289,16 +293,21 @@ export function ResearchWorkspace({
           maxLength={MAX_TOPIC_CHARS}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
         />
+        {/* Three real research questions. Deep Research is the feature
+            most often mistaken for "a chat that searches" — an example
+            is the fastest way to show it wants a SUBJECT, not a query. */}
+        <ExamplePrompts surface="research" onPick={setTopic} />
+
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => void plan()}
             disabled={planning || !topic.trim() || capReached}
-            className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
           >
             {planning ? (
               <>
-                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                <ThinkingIndicator size="sm" tone="inherit" />
                 {t("planning")}
               </>
             ) : (
@@ -347,7 +356,7 @@ export function ResearchWorkspace({
             <button
               type="button"
               onClick={() => void run(draft.report.id)}
-              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
             >
               <Play className="h-3.5 w-3.5" aria-hidden="true" />
               {t("start")}
@@ -355,7 +364,7 @@ export function ResearchWorkspace({
             <button
               type="button"
               onClick={() => setDraft(null)}
-              className="inline-flex min-h-[36px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+              className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
             >
               {t("notNow")}
             </button>
@@ -364,7 +373,21 @@ export function ResearchWorkspace({
       )}
 
       {reports.length === 0 ? (
-        <EmptyState icon={Telescope}>{t("empty")}</EmptyState>
+        <EmptyState
+          icon={Telescope}
+          title={t("empty.title")}
+          example={t("empty.example")}
+          // The topic box is a few centimetres up the same page, so the
+          // press writes into it directly and puts the caret at the end —
+          // no state to lift, no form to open.
+          onExample={(text) => {
+            setTopic(text);
+            topicRef.current?.focus();
+            topicRef.current?.setSelectionRange(text.length, text.length);
+          }}
+        >
+          {t("empty.why")}
+        </EmptyState>
       ) : (
         <CardGrid>
           {reports.map((report, index) => (
@@ -527,7 +550,7 @@ export function ResearchWorkspace({
           {open.document_id && (
             <Link
               href={`/dashboard/documents/${open.document_id}`}
-              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
             >
               <FileText className="h-3.5 w-3.5" aria-hidden="true" />
               {t("openDocument")}

@@ -64,7 +64,14 @@ export function TeamMembersList({ members: initialMembers }: { members: TeamMemb
   }
 
   if (members.length === 0) {
-    return <EmptyState icon={Users}>{t("noMembers")}</EmptyState>;
+    // No example: inviting somebody is an email address and a role,
+    // handled by the invite form above — there is no free-text field for
+    // a worked example to land in.
+    return (
+      <EmptyState icon={Users} title={t("empty.title")}>
+        {t("empty.why")}
+      </EmptyState>
+    );
   }
 
   return (

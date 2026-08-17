@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
+import { autoTitleFromMessage } from "@/lib/chat/conversation-title";
 import { listIntegrations } from "@/lib/integrations/store";
 import {
   buildSearchTool,
@@ -50,6 +51,7 @@ import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/u
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 import { AI_CONDUCT_EL } from "@/lib/ai-conduct";
 import { matchCannedAnswer, type CannedMatch } from "@/lib/support/knowledge-base";
+import { loadCannedArticles } from "@/lib/support/help-articles";
 import { getLocale } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
@@ -148,11 +150,12 @@ const CANNED_THRESHOLD_MID_CONVERSATION = 0.92;
 const CONVERSATION_NOT_FOUND = "Conversation not found.";
 const CONVERSATION_CREATE_FAILED = "Could not start a new conversation.";
 
-function truncateTitle(message: string, maxLen = 40): string {
-  const trimmed = message.trim().replace(/\s+/g, " ");
-  if (trimmed.length <= maxLen) return trimmed;
-  return `${trimmed.slice(0, maxLen).trimEnd()}…`;
-}
+// Was a private helper here. It moved to lib/chat/conversation-title.ts
+// because api/conversations/[id] needs the SAME function: clearing a
+// title restores the automatic one, and "restores" has to mean the
+// identical string this route would have produced, not a second
+// implementation that rounds differently.
+const truncateTitle = autoTitleFromMessage;
 
 // Newline-delimited JSON: each line is one event. Chosen over SSE's
 // "data: " framing since it needs no extra parsing on the client beyond
@@ -218,8 +221,8 @@ async function answerFromKnowledgeBase(params: {
   // deliberately states no price, allowance or limit, and this is how the
   // user gets to them.
   const answer = match.article.href
-    ? `${match.article.answer}\n\n→ ${match.article.href}`
-    : match.article.answer;
+    ? `${match.article.body}\n\n→ ${match.article.href}`
+    : match.article.body;
 
   const finalConversationId = conversationId;
   const { error: saveError } = await supabase.from("chat_messages").insert([
@@ -237,7 +240,7 @@ async function answerFromKnowledgeBase(params: {
   diagLog(
     `[canned] chat answered without a model call: ${JSON.stringify({
       userId,
-      articleId: match.article.id,
+      articleId: match.article.slug,
       confidence: match.confidence,
     })}`
   );
@@ -252,7 +255,7 @@ async function answerFromKnowledgeBase(params: {
           title: newConversationTitle,
           // So the UI can say where the answer came from and link to the
           // full article rather than presenting it as a model reply.
-          cannedAnswer: { articleId: match.article.id, href: match.article.href ?? null },
+          cannedAnswer: { articleId: match.article.slug, href: match.article.href ?? null },
         })
       );
       controller.enqueue(ndjsonLine({ type: "delta", text: answer }));
@@ -342,11 +345,16 @@ export async function POST(request: Request) {
     // The knowledge base is Greek. Anyone else falls through to the model,
     // which answers in their own language — see CANNED_ANSWER_LOCALE.
     const locale = await getLocale();
+    // The articles for THIS user's language, not a global list. A locale
+    // with no articles yet loads none, matches nothing and falls through
+    // to the model — which is what the old CANNED_ANSWER_LOCALE guard did
+    // for nine locales, now as a consequence of the data rather than as a
+    // check somebody has to remember.
     const cannedMatch = mentorMode
       ? null
       : matchCannedAnswer(
           message,
-          locale,
+          await loadCannedArticles(locale),
           conversationId ? CANNED_THRESHOLD_MID_CONVERSATION : CANNED_THRESHOLD_NEW_CONVERSATION
         );
     if (cannedMatch) {

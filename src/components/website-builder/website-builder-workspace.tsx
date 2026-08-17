@@ -18,11 +18,13 @@ import {
 } from "lucide-react";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { useTranslations, useLocale } from "next-intl";
+import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { createClient } from "@/lib/supabase/client";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { FilePicker } from "@/components/ui/file-picker";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useCredits } from "@/components/credits/credits-context";
 import { useToast } from "@/components/toast/toast-context";
 import { EmptyState } from "@/components/empty-state";
@@ -39,7 +41,8 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import { DEFAULTS } from "@/lib/billing/pricing-config";
 import { isLargeGenerationRequest } from "@/lib/website-generation-limits";
-import { appendClarificationAnswers } from "@/lib/clarification-client";
+import { appendClarificationAnswers, alignSuggestions } from "@/lib/clarification-client";
+import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { SecurityCheckedBadge } from "@/components/security/security-checked-badge";
 import { DesignControls } from "@/components/website-builder/design-controls";
@@ -193,6 +196,8 @@ export function WebsiteBuilderWorkspace({
 }) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.websiteBuilder");
+  const describe = useErrorText();
+  const describeStatus = useErrorTextForStatus();
   const locale = useLocale();
   const tCommon = useTranslations("common");
   const tPublish = useTranslations("dashboard.publishing");
@@ -204,6 +209,18 @@ export function WebsiteBuilderWorkspace({
   const [websites, setWebsites] = useState<UserWebsite[]>(initialWebsites);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  // The description field only exists once showForm is true, and React has
+  // not committed that render when the handler returns — so the focus is a
+  // separate effect, same shape as generic-add-form.tsx.
+  const [prefillNonce, setPrefillNonce] = useState(0);
+  const descriptionRef = useRef<HTMLTextAreaElement | null>(null);
+  useEffect(() => {
+    if (prefillNonce === 0) return;
+    const field = descriptionRef.current;
+    if (!field) return;
+    field.focus();
+    field.setSelectionRange(field.value.length, field.value.length);
+  }, [prefillNonce]);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(initialWebsites[0]?.id ?? null);
@@ -242,6 +259,8 @@ export function WebsiteBuilderWorkspace({
   // resubmits without re-uploading images or losing the original text.
   const [pendingClarification, setPendingClarification] = useState<{
     questions: string[];
+    /** Tappable answers, aligned by index with `questions`. */
+    suggestions: string[][];
     name: string;
     description: string;
     referenceImagePaths: string[];
@@ -546,12 +565,16 @@ export function WebsiteBuilderWorkspace({
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        setError(getErrorMessage(data?.error, "Something went wrong — no credits were charged. Please try again."));
+        setError(describeStatus(res.status).text);
         return;
       }
       if (data.needsClarification) {
         setPendingClarification({
           questions: data.questions as string[],
+          // Realigned rather than trusted: a response written before
+          // suggestions existed carries none, and a mismatched array
+          // would put one question's answers under another.
+          suggestions: alignSuggestions(data.questions as string[], data.questionSuggestions),
           name: trimmedName,
           description: finalDescription,
           referenceImagePaths,
@@ -614,7 +637,7 @@ export function WebsiteBuilderWorkspace({
       setError(
         err instanceof TypeError
           ? tCommon("networkErrorCheckConnection")
-          : getErrorMessage(err, "Something went wrong — no credits were charged. Please try again.")
+          : describe(err).text
       );
     } finally {
       setGenerating(false);
@@ -681,7 +704,7 @@ export function WebsiteBuilderWorkspace({
       setError(
         err instanceof TypeError
           ? tCommon("networkErrorCheckConnection")
-          : getErrorMessage(err, "Something went wrong — no credits were charged. Please try again.")
+          : describe(err).text
       );
       setGenerating(false);
     }
@@ -992,7 +1015,7 @@ export function WebsiteBuilderWorkspace({
                 type="submit"
                 form={EDIT_FORM_ID}
                 disabled={editing || !editText.trim() || previewWebsite.status !== "completed"}
-                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {editing ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -1029,7 +1052,7 @@ export function WebsiteBuilderWorkspace({
                   type="button"
                   onClick={() => downloadHtml(previewWebsite)}
                   disabled={previewWebsite.status !== "completed"}
-                  className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0"
+                  className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Download className="h-3.5 w-3.5" aria-hidden="true" />
                   {t("downloadButton")}
@@ -1038,7 +1061,7 @@ export function WebsiteBuilderWorkspace({
                   type="button"
                   onClick={() => handleDelete(previewWebsite.id)}
                   disabled={deletingId === previewWebsite.id}
-                  className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-red-400 transition-colors duration-150 hover:border-red-500/60 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0"
+                  className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-red-400 transition-colors duration-150 hover:border-red-500/60 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                   {t("deleteButton")}
@@ -1085,7 +1108,7 @@ export function WebsiteBuilderWorkspace({
                 </div>
               ) : !viewingVersion && previewIsGenerating ? (
                 <div className="flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-border bg-input px-6 text-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-orange-400" aria-hidden="true" />
+                  <ThinkingIndicator className="scale-150" />
                   <p className="text-sm font-medium text-foreground">{t("generatingTitle")}</p>
                   <p className="max-w-md text-xs text-muted">{t("generatingBody")}</p>
                   <p className="text-xs text-orange-400/80" aria-live="polite">
@@ -1117,7 +1140,7 @@ export function WebsiteBuilderWorkspace({
                       type="button"
                       onClick={() => handleRegenerateFlagged(previewWebsite.id)}
                       disabled={regeneratingId === previewWebsite.id}
-                      className="inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-lg bg-amber-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg bg-amber-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {regeneratingId === previewWebsite.id ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -1314,6 +1337,7 @@ export function WebsiteBuilderWorkspace({
                 </label>
                 <textarea
                   id="website-description"
+                  ref={descriptionRef}
                   required
                   maxLength={MAX_DESCRIPTION_LENGTH}
                   value={description}
@@ -1321,6 +1345,12 @@ export function WebsiteBuilderWorkspace({
                   placeholder={t("descriptionPlaceholder")}
                   className="input min-h-32 resize-y"
                 />
+                {/* THREE REAL SITES, pressable — and the honest ceiling
+                    next to them. "Describe your website" invites anything,
+                    including a shop with payments, which this cannot make:
+                    one HTML page is what comes out. Saying so here is
+                    cheaper than a refund conversation later. */}
+                <ExamplePrompts surface="websiteBuilder" onPick={setDescription} className="mt-2" />
               </div>
 
               <div>
@@ -1408,6 +1438,7 @@ export function WebsiteBuilderWorkspace({
               {pendingClarification ? (
                 <ClarificationQuestions
                   questions={pendingClarification.questions}
+                  suggestions={pendingClarification.suggestions}
                   onAnswer={handleClarificationAnswer}
                   onSkip={handleClarificationSkip}
                   submitting={generating}
@@ -1420,7 +1451,7 @@ export function WebsiteBuilderWorkspace({
                 <button
                   type="submit"
                   disabled={generating || !name.trim() || !description.trim()}
-                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {generating ? (
                     <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -1438,7 +1469,7 @@ export function WebsiteBuilderWorkspace({
                 resetGenerationForm();
                 setShowForm(true);
               }}
-              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
+              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
             >
               <Plus className="h-4 w-4" aria-hidden="true" /> {t("newProject")}
             </button>
@@ -1454,7 +1485,7 @@ export function WebsiteBuilderWorkspace({
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               aria-label={tModule("filterBy", { label: t("statusLabel") })}
-              className="min-h-[36px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60 sm:min-h-0"
+              className="min-h-[44px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60"
             >
               <option value="">{tModule("filterAll", { label: t("statusLabel") })}</option>
               {WEBSITE_STATUSES.map((status) => (
@@ -1472,7 +1503,21 @@ export function WebsiteBuilderWorkspace({
         }
       >
         {websites.length === 0 ? (
-          <EmptyState icon={Layout}>{t("emptyState")}</EmptyState>
+          <EmptyState
+            icon={Layout}
+            title={t("empty.title")}
+            example={t("empty.example")}
+            // The brief IS the description field — that is the input the
+            // generator reads — so the press opens the form and writes
+            // there, rather than into the name box above it.
+            onExample={(text) => {
+              setShowForm(true);
+              setDescription(text.slice(0, MAX_DESCRIPTION_LENGTH));
+              setPrefillNonce((n) => n + 1);
+            }}
+          >
+            {t("empty.why")}
+          </EmptyState>
         ) : filteredWebsites.length === 0 ? (
           <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>
         ) : (

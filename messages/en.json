@@ -7,7 +7,7 @@
     "signOut": "Sign out",
     "jumpToPage": "Jump to a module or page...",
     "noMatches": "No matches for '{query}'",
-    "createStudio": "Create Studio",
+    "createStudio": "Make anything",
     "cancel": "Cancel",
     "save": "Save",
     "saving": "Saving...",
@@ -47,7 +47,26 @@
     "nextPage": "Next page",
     "previousPage": "Previous page",
     "toggleMenu": "Toggle menu",
-    "dismissToastAria": "{message} — press Enter to dismiss"
+    "dismissToastAria": "{message} — press Enter to dismiss",
+    "retry": "Try again",
+    "whatIsThisPage": "What is this page?",
+    "readMore": "Read more",
+    "copy": "Copy",
+    "copied": "Copied ✓",
+    "copyFailed": "Your browser wouldn't let us copy. Select the text and copy it yourself.",
+    "copyNothing": "There's nothing to copy yet.",
+    "offline": {
+      "title": "You're offline.",
+      "showingCached": "Nothing on this page is updating.",
+      "showingCachedAge": "Nothing here is updating — this was loaded {minutes} min ago.",
+      "retry": "Try again",
+      "checking": "Checking…",
+      "stillOffline": "Still no connection."
+    },
+    "creditsUnlimited": "Unlimited",
+    "whatIsThis": "What is this?",
+    "moreInHelp": "Read more in the Help Centre",
+    "examplesLabel": "Try:"
   },
   "sidebar": {
     "groups": {
@@ -61,29 +80,30 @@
       "create": "Create",
       "myBusiness": "My Business",
       "track": "Track",
-      "insights": "Insights"
+      "insights": "What I noticed",
+      "tracking": "Tracking"
     },
     "items": {
       "home": "Home",
       "chat": "Ionexa Chat",
-      "memory": "AI Memory",
-      "timeline": "Timeline",
+      "memory": "Search my records",
+      "timeline": "History",
       "favorites": "Favorites",
-      "missionControl": "Mission Control",
+      "missionControl": "Goals & Plans",
       "reflection": "Weekly Reflection",
       "settings": "Settings",
       "team": "Team",
       "agents": "AI Agents",
-      "websites": "Websites",
-      "websiteBuilder": "Website Builder",
-      "apps": "Apps",
-      "images": "Images",
-      "videos": "Videos",
-      "coding": "AI Coding",
-      "dataAnalysis": "Data Analysis",
+      "websites": "Website plans",
+      "websiteBuilder": "Build a site",
+      "apps": "App notes",
+      "images": "Image notes",
+      "videos": "Video notes",
+      "coding": "Coding notes",
+      "dataAnalysis": "Analysis notes",
       "documents": "Documents",
       "presentations": "Presentation Notes",
-      "campaigns": "Campaigns",
+      "campaigns": "Campaign notes",
       "analytics": "Analytics",
       "finance": "Finance",
       "content": "Content",
@@ -100,7 +120,7 @@
       "productWorkflow": "Product Workflow",
       "automation": "Automation",
       "marketplace": "Marketplace",
-      "published": "Published Sites",
+      "published": "Live sites",
       "integrations": "Integrations",
       "files": "Files",
       "deepResearch": "Deep Research",
@@ -194,8 +214,6 @@
       "creditsPerMonth": "Credits / month",
       "aiAgents": "AI agents",
       "websiteBuilder": "Website & Automation Builder",
-      "mobileSaasBuilder": "Mobile & SaaS Builder",
-      "imageVideo": "Image & video generation",
       "aiMemory": "AI Memory",
       "teamCollaboration": "Team collaboration",
       "teamSeatsAddOn": "Team seats",
@@ -216,32 +234,20 @@
     "businessFeatureManage": "Manage seats anytime from Team settings",
     "setUpTeam": "Set Up Team",
     "features": {
-      "1Workspace3Projects": "1 workspace, 3 projects",
       "basicAiChat": "Basic AI chat",
       "creditsPerMonth": "{count} credits/month",
-      "marketplaceInstallOnly": "Marketplace: install only",
-      "communitySupport": "Community support",
-      "unlimitedProjects": "Unlimited projects",
       "aiMemory": "AI Memory",
       "websiteAutomationBuilderAccess": "Website & Automation Builder access",
-      "imageVideoGenerationAccess": "Image & video generation access",
-      "emailSupport": "Email support",
       "everythingInStarter": "Everything in Starter",
       "upTo100AiAgents": "Up to 100 AI agents",
-      "mobileSaasBuilderAccess": "Mobile & SaaS Builder access",
-      "priorityProcessing": "Priority processing",
       "everythingInGrowth": "Everything in Growth",
       "teamCollaboration": "Team collaboration",
-      "sharedAiMemory": "Shared AI memory",
-      "prioritySupport": "Priority support",
       "everythingInProfessional": "Everything in Professional",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Unlimited team seats included — no per-member charge",
       "extendedChatMemoryRetention100Vs20RecentFact": "Extended chat memory retention (100 vs 20 recent facts)",
       "customAiPersonaNameInIonexaChat": "Custom AI persona name in Ionexa Chat",
-      "highestPriorityProcessing": "Highest priority processing",
       "everythingInUltimate": "Everything in Ultimate",
       "unlimitedMembers": "Unlimited members",
-      "dedicatedSupport": "Dedicated support",
       "customCredits": "Custom credits",
       "upTo2AiAgents": "Up to 2 AI agents",
       "upTo5AiAgents": "Up to 5 AI agents",
@@ -257,7 +263,8 @@
     "seatNote": {
       "included": "Unlimited team seats included — no per-member charge",
       "perMember": "+ {currency}{price}/month per team member — each member gets full access at your plan's tier"
-    }
+    },
+    "metaDescription": "Ionexa AI pricing — Free, Starter, Growth, Professional, Ultimate, and Enterprise plans."
   },
   "roadmap": {
     "title": "Roadmap",
@@ -357,7 +364,8 @@
         "title": "Cross-Platform Sync",
         "description": "A unified experience across web, mobile, and desktop."
       }
-    }
+    },
+    "metaDescription": "What's live in Ionexa AI today, what's coming next, and where we're headed."
   },
   "auth": {
     "login": {
@@ -369,7 +377,8 @@
       "noAccount": "No account yet?",
       "signUp": "Sign up",
       "forgotPassword": "Forgot password?",
-      "resetSuccess": "Password updated — sign in with your new password."
+      "resetSuccess": "Password updated — sign in with your new password.",
+      "failed": "We couldn't sign you in. Check the email and password, or reset your password if you're not sure."
     },
     "signup": {
       "chooseYourPlan": "Choose your plan",
@@ -396,7 +405,8 @@
       "createAccount": "Create Account",
       "mostPopular": "Most Popular",
       "mustAgreeToTerms": "You must agree to the Terms of Service and Privacy Policy to create an account.",
-      "passwordRequirementsNotMet": "Please choose a password that meets every requirement above."
+      "passwordRequirementsNotMet": "Please choose a password that meets every requirement above.",
+      "failed": "We couldn't create the account. Check the details and try again — you have not been charged."
     },
     "forgotPassword": {
       "title": "Reset password",
@@ -407,7 +417,8 @@
       "checkInbox": "If an account exists for <highlight>{emailAddress}</highlight>, a password reset link is on its way. Check your inbox.",
       "backToLogin": "Back to login",
       "rememberedIt": "Remembered it?",
-      "logIn": "Log in"
+      "logIn": "Log in",
+      "failed": "We couldn't send the reset email. Check the address and try again in a moment."
     },
     "resetPassword": {
       "title": "Set new password",
@@ -417,7 +428,9 @@
       "confirmPassword": "Confirm password",
       "saveNewPassword": "Save new password",
       "saving": "Saving...",
-      "passwordsDoNotMatch": "Passwords don't match."
+      "passwordsDoNotMatch": "Passwords don't match.",
+      "linkInvalid": "This reset link is no longer valid. Links expire after a short time — request a new one.",
+      "failed": "We couldn't set the new password. Try again, and request a new link if it keeps failing."
     },
     "social": {
       "continueWithGoogle": "Continue with Google",
@@ -430,7 +443,8 @@
       "warning": "This will permanently delete your account and every record you've logged. This can't be undone.",
       "deleting": "Deleting…",
       "confirmButton": "Permanently delete my account",
-      "cancel": "Cancel and go back"
+      "cancel": "Cancel and go back",
+      "confirmFailed": "We couldn't complete the deletion. Your account is still here — try the link again, or contact support."
     }
   },
   "settings": {
@@ -445,7 +459,8 @@
       "requirementsNotMet": "Please choose a password that meets every requirement below.",
       "passwordsDoNotMatch": "Passwords do not match.",
       "couldNotUpdate": "✗ could not update password",
-      "passwordUpdated": "✓ password updated"
+      "passwordUpdated": "✓ password updated",
+      "failed": "We couldn't change your password. Check the current one and try again."
     },
     "chatMemory": {
       "title": "Chat Memory",
@@ -526,7 +541,8 @@
       "sending": "Sending...",
       "checkEmail": "Check your email to confirm deletion — we sent a link to <highlight>{email}</highlight>. It expires in 1 hour; nothing is deleted until you click it.",
       "emailDoesNotMatch": "Email doesn't match.",
-      "couldNotStartDeletion": "✗ could not start account deletion"
+      "couldNotStartDeletion": "✗ could not start account deletion",
+      "failed": "We couldn't send the confirmation email. Try again in a moment — nothing has been deleted."
     },
     "emailNotifications": {
       "title": "Email notifications",
@@ -566,7 +582,8 @@
       "title": "AI Persona",
       "description": "Give the assistant a custom name.",
       "personaUpdated": "✓ persona name updated",
-      "couldNotSave": "✗ could not save the persona name"
+      "couldNotSave": "✗ could not save the persona name",
+      "saveFailed": "We couldn't save the persona name. Try again in a moment."
     },
     "billing": {
       "title": "Billing",
@@ -734,7 +751,12 @@
         }
       },
       "quickStartTemplates": "Quick Start templates",
-      "quickStartApplied": "✓ {count, plural, one {# example entry added} other {# example entries added}}"
+      "quickStartApplied": "✓ {count, plural, one {# example entry added} other {# example entries added}}",
+      "quickStart": "Quick Start",
+      "templateApplied": "Added {count} example {count, plural, one {entry} other {entries}}",
+      "templateFailed": "We couldn't apply that template. Try again in a moment — nothing was added.",
+      "quickStartBlurb": "Add a few example entries so you can see what a filled-in workspace looks like.",
+      "quickStartAdd": "Add"
     },
     "team": {
       "title": "Team",
@@ -743,7 +765,6 @@
       "emailPlaceholder": "teammate@company.com",
       "sendInvite": "Send Invite",
       "sending": "Sending...",
-      "noMembers": "No team members yet — invite someone above.",
       "inviteSent": "Invite sent to {email}.",
       "inviteFailed": "Could not send the invite.",
       "active": "Active",
@@ -761,23 +782,28 @@
       "rolePlaceholder": "What does this person do?",
       "workUseDisclaimer": "Team seats are intended for actual employees or collaborators working on your business — not personal/family use. By inviting a member, you confirm they are part of your team's work.",
       "memberRemoved": "✓ member removed",
-      "couldNotRemoveMember": "✗ could not remove member"
+      "couldNotRemoveMember": "✗ could not remove member",
+      "empty": {
+        "title": "Nobody else has been invited yet",
+        "why": "Invite someone by email and they get their own sign-in to this workspace — the same data, under their own account, not your password."
+      }
     },
     "memory": {
-      "title": "AI Memory",
+      "title": "Search my records",
       "description": "Search everything you've logged, across every module — no need to remember where you put it.",
       "searchPlaceholder": "Search everything you've logged...",
       "resultCount": "{count, plural, =0 {no results} one {# result} other {# results}} across every module",
       "resultCountForQuery": "{count, plural, =0 {no results} one {# result} other {# results}} for \"{query}\" across every module",
-      "empty": "Nothing logged yet — once you start using the modules, you'll be able to search across all of them here.",
+      "empty": {
+        "title": "Nothing logged yet, so nothing to find",
+        "why": "This searches every module at once — ideas, leads, expenses, trades. It fills up as you use the other pages; there is nothing here of its own."
+      },
       "truncated": "Showing the first {shown} of {total} matches — refine your search to narrow it down."
     },
     "documents": {
       "title": "Documents",
       "description": "Freeform notes and documents — write anything, it saves as you go.",
       "newDocument": "New Document",
-      "emptyTitle": "No documents yet",
-      "emptyHint": "Create your first document to start writing.",
       "untitled": "Untitled",
       "titlePlaceholder": "Untitled document",
       "contentPlaceholder": "Start writing…",
@@ -791,7 +817,13 @@
       "heading1": "Heading 1",
       "heading2": "Heading 2",
       "bulletList": "Bullet list",
-      "updatedAt": "Edited {when}"
+      "updatedAt": "Edited {when}",
+      "empty": {
+        "title": "A blank page that remembers",
+        "why": "Long-form writing that stays with your work — a brief, a draft, meeting notes — searchable next to everything else you have logged.",
+        "example": "Notes from Monday's meeting"
+      },
+      "createFailed": "We couldn't create the document. Try again in a moment — nothing was saved."
     },
     "chat": {
       "title": "Ionexa Chat",
@@ -816,7 +848,12 @@
       "pin": "Pin",
       "unpin": "Unpin",
       "rename": "Rename",
-      "deleteConfirm": "Delete \"{title}\"? This can't be undone."
+      "deleteConfirm": "Delete \"{title}\"? This can't be undone.",
+      "pinLimitReached": "You've pinned {limit} conversations, which is the most your plan keeps at the top. Unpin one to pin this one.",
+      "pinError": "The pin didn't save. Try again.",
+      "renameError": "The new name didn't save — the old one is still there.",
+      "renameLabel": "New name for \"{title}\"",
+      "emptyHint": "Ask anything — general knowledge, brainstorming, writing help, or just a conversation."
     },
     "create": {
       "title": "Create Anything",
@@ -825,30 +862,35 @@
       "viewModule": "View {module} →"
     },
     "timeline": {
-      "title": "Timeline",
+      "title": "History",
       "allModules": "All Modules",
       "showOnly": "Show only: {module}",
       "rangeToday": "Today",
       "rangeWeek": "This Week",
       "rangeMonth": "This Month",
       "rangeAll": "All Time",
-      "emptyState": "No entries in this range yet."
+      "empty": {
+        "title": "Your work, in the order it happened",
+        "why": "This writes itself. Everything you log in any module lands here in one stream, which is how you answer \"what did I actually do last month\"."
+      }
     },
     "favorites": {
       "title": "Favorites",
       "description": "Everything you've starred, across every module, in one place.",
-      "emptyState": "Nothing starred yet — tap the star on any entry to save it here.",
-      "starredAt": "Starred {when}"
+      "starredAt": "Starred {when}",
+      "empty": {
+        "title": "The shortlist you have not made yet",
+        "why": "Press the star on anything — an idea, a lead, a site — and it lands here, so the handful you keep coming back to are one click away instead of five."
+      }
     },
     "mission": {
-      "title": "Mission Control",
+      "title": "Goals & Plans",
       "started": "Started {time}",
       "description": "Planner → Builder → Reviewer — describe a goal, get a plan, then build it step by step with AI.",
       "goalLabel": "What's your goal?",
       "goalPlaceholder": "e.g. I want to start an online store for handmade jewelry",
       "createPlan": "Create Plan",
       "planning": "Planning...",
-      "emptyState": "No missions yet — use \"New Mission\" to describe a goal and get your first plan.",
       "createWithAi": "Create with AI",
       "creating": "Creating...",
       "openWebsiteBuilder": "Open Website Builder",
@@ -898,7 +940,12 @@
         "heldBack": "{count} heavier steps held back for now"
       },
       "stillPlanning": "Still planning — this is taking a while. It will keep going, and the plan will be on your missions list when it is ready.",
-      "planStalled": "That plan stopped unexpectedly. No credits were charged — please try again."
+      "planStalled": "That plan stopped unexpectedly. No credits were charged — please try again.",
+      "empty": {
+        "title": "One goal, broken into steps",
+        "why": "Say what you are trying to achieve and this turns it into a plan with dated steps you can tick off — not a wish list.",
+        "example": "Get the first 10 paying customers"
+      }
     },
     "reflection": {
       "title": "Weekly Reflection",
@@ -966,7 +1013,7 @@
       "levelLabel": "Energy level {level}"
     },
     "websiteBuilder": {
-      "title": "Website Builder",
+      "title": "Build a site",
       "description": "Describe what you want, and AI generates a real, complete website — instant preview, download the HTML.",
       "nameLabel": "Name",
       "namePlaceholder": "e.g. Coaching Landing Page",
@@ -997,7 +1044,6 @@
       "downloadButton": "Download HTML",
       "deleteButton": "Delete",
       "deleted": "Website deleted",
-      "emptyState": "No websites yet — use \"New Website\" to generate your first.",
       "editLabel": "Request a change",
       "editPlaceholder": "e.g. Make the hero section bigger, or change the colors to blue.",
       "editButton": "Apply changes",
@@ -1055,14 +1101,22 @@
       },
       "imageIntro": "Your logo, product shots, photos of the place — anything you want on the page or want the style taken from.",
       "regenerateAlreadyUsed": "You’ve already used the free regeneration for this site. Create a new website to try a different brief.",
-      "regenerateNoBrief": "This site was made before we started saving the original brief, so it can’t be regenerated automatically. Create a new website with the same description."
+      "regenerateNoBrief": "This site was made before we started saving the original brief, so it can’t be regenerated automatically. Create a new website with the same description.",
+      "empty": {
+        "title": "Describe the site, get the site",
+        "why": "Write what the site is for and who it is for — the pages, the copy and the layout are generated from that description, and you can keep editing in plain words.",
+        "example": "A one-page site for a small bakery, with menu and hours"
+      }
     },
     "marketplace": {
       "title": "Marketplace",
       "description": "Buy and sell agents, automations, and templates — coming soon.",
-      "emptyState": "No listings yet — be the first to publish.",
       "comingSoon": "Coming soon",
-      "publishButton": "Publish a Template"
+      "publishButton": "Publish a Template",
+      "empty": {
+        "title": "The Marketplace is not open yet",
+        "why": "The plan is to let people share the agents, website templates and workflows they have built. Nothing here is live — the button below is disabled because the feature does not exist yet, not because of your plan."
+      }
     },
     "automation": {
       "realizeSectionTitle": "Make an idea real",
@@ -1115,7 +1169,7 @@
       "clarifyAnswerPlaceholder": "Your answer..."
     },
     "createStudio": {
-      "title": "Create Studio",
+      "title": "Make anything",
       "subtitle": "Describe what you want in one sentence. No tool to pick — the studio works out what it is, shows you what it understood, and only then creates it.",
       "inputLabel": "What do you want to create?",
       "inputPlaceholder": "e.g. A landing page for my coaching business, warm and professional",
@@ -1211,8 +1265,6 @@
       "discard": "Discard",
       "createSuccess": "Agent created — it starts on its next scheduled run.",
       "createError": "Could not create the agent. Please try again.",
-      "emptyTitle": "No agents yet",
-      "emptyHint": "Describe something you want done for you regularly, and Ionexa builds the agent.",
       "statusActive": "Active",
       "statusPaused": "Paused",
       "statusDisabled": "Switched off",
@@ -1265,17 +1317,49 @@
         "monthly": "Day {day} of each month at {time}",
         "custom": "Schedule: {expression}"
       },
-      "buildStalled": "That build stopped unexpectedly. No credits were charged — please try again."
+      "buildStalled": "That build stopped unexpectedly. No credits were charged — please try again.",
+      "empty": {
+        "title": "Work that happens without you",
+        "why": "Describe a job in one sentence and it runs on a schedule from then on, delivering the result rather than reminding you to do it.",
+        "example": "Every Monday morning, summarise last week's sales"
+      },
+      "delivery": {
+        "label": "Where the result goes",
+        "channels": {
+          "email": "Email",
+          "slack": "Slack",
+          "telegram": "Telegram",
+          "discord": "Discord",
+          "in_app": "In the app"
+        },
+        "emailNote": "Sent to {email} — your account address.",
+        "inAppNote": "Kept in the app, in your notifications. Nothing leaves Ionexa.",
+        "slackNotConnected": "Connect Slack in Integrations first.",
+        "slackChannelLabel": "Slack channel",
+        "telegramHelp": "Create a bot with @BotFather, send it a message, then paste its token and your chat id.",
+        "telegramTokenPlaceholder": "Bot token",
+        "telegramChatPlaceholder": "Chat id, e.g. 123456789",
+        "telegramTokenInvalid": "That does not look like a Telegram bot token.",
+        "telegramChatInvalid": "That does not look like a Telegram chat id.",
+        "telegramConnected": "Connected to chat {chat} · token {hint}",
+        "discordHelp": "In your Discord channel: Settings → Integrations → Webhooks → New Webhook, then copy the address.",
+        "discordUrlPlaceholder": "Discord webhook address",
+        "discordUrlInvalid": "That is not a Discord webhook address.",
+        "discordConnected": "Connected · webhook {hint}",
+        "connect": "Connect and send a test",
+        "connectSuccess": "Connected — a test message was delivered.",
+        "connectFailed": "Could not connect that channel.",
+        "disconnect": "Disconnect",
+        "disconnected": "Disconnected."
+      }
     },
     "publishing": {
-      "title": "Published Sites",
+      "title": "Live sites",
       "description": "Your sites, live on the web.",
       "analyticsNotice": "We count page views per day and nothing else — no cookies, no visitor tracking, no personal data of any kind is recorded about the people who visit your sites.",
       "goToBuilder": "Website Builder",
       "sitesUsed": "{used} of {cap} live",
       "sitesUsedUnlimited": "{used} live",
-      "emptyTitle": "Nothing published yet",
-      "emptyHint": "Open a finished site in the Website Builder and press Publish — it gets a live address straight away.",
       "publish": "Publish",
       "republish": "Publish again",
       "publishNow": "Publish",
@@ -1324,10 +1408,16 @@
       "reasonTaken": "That address is already taken. Try a different one.",
       "disabledFlagged": "This site was held by our safety review, so it can’t go live. See the details below — you can regenerate it once for free.",
       "disabledFailed": "This site didn’t finish generating, so there’s nothing to publish yet.",
-      "disabledGenerating": "Still generating. You can publish as soon as it’s finished."
+      "disabledGenerating": "Still generating. You can publish as soon as it’s finished.",
+      "empty": {
+        "title": "Nothing is live yet",
+        "why": "A site you build stays private until you publish it. When you do, it gets a real address and its visitor numbers show up here."
+      }
     },
     "integrations": {
       "title": "Integrations",
+      "emptyTitle": "Nothing connected yet",
+      "emptyBody": "Connect an account and the AI can read from it — your mail, your calendar, your files — instead of only knowing what you typed in by hand.",
       "description": "Connect the tools you already use, so the AI can work with your real data.",
       "privacyNotice": "Connections are read-only unless stated otherwise. Tokens are encrypted with a key that is not stored in our database, they never appear in logs, and disconnecting revokes the access at the provider and deletes everything we hold — including the record of what was read.",
       "notConfigured": "Integrations aren't set up on this deployment yet, so connecting is disabled.",
@@ -1432,7 +1522,7 @@
       "notInDocuments": "The selected documents do not answer this. Nothing below comes from them.",
       "citations": "Sources in your documents",
       "removedCitations": "{count} reference(s) pointed at pages that were not supplied and were removed.",
-      "truncatedWarning": "Only part of the selection fitted, so the answer may be incomplete.",
+      "truncatedWarning": "Even read in parts, the selection was larger than one question can cover, so the answer may be incomplete. Ask about fewer files at a time.",
       "skippedFiles": "Skipped (no readable text): {names}",
       "creditsCharged": "{credits} credits",
       "stepsLabel": "How this page works",
@@ -1450,17 +1540,18 @@
       "emptyExample": "e.g. “What does the contract say about cancellation?”",
       "askDisabledNoFiles": "Tick at least one file above first.",
       "askDisabledNoQuestion": "Type your question to continue.",
-      "examplesLabel": "Try:",
-      "example1": "What does this say about cancellation?",
-      "example2": "Summarise the key points.",
-      "example3": "What are the deadlines and amounts?",
       "processingHint": "Reading this file — usually a few seconds. It can be asked about once it is ready.",
       "failedHint": "No readable text was found. Upload a version with selectable text.",
       "askStillRunning": "Still reading — this is taking a while. It keeps going with the page closed; come back and ask again to see the answer.",
       "askStalled": "That question stopped unexpectedly. No credits were charged — please try again.",
-      "stepReading": "Reading your files",
-      "stepAnswering": "Working out the answer",
-      "stepChecking": "Checking the references"
+      "questionLength": "{used, number} of {max, number} characters",
+      "questionAtLimit": "You've reached the {max, number}-character limit for one question.",
+      "readInParts": "Your documents were too long to read in one go, so they were read in {parts} parts and the answers combined.",
+      "copyAnswer": "Copy answer",
+      "copyCitation": "Copy this source",
+      "copyText": "Copy the text",
+      "copyTextError": "Could not read that file's text.",
+      "copyTextEmpty": "We haven't read any text out of that file."
     },
     "deepResearch": {
       "title": "Deep Research",
@@ -1496,7 +1587,11 @@
       "confirmDelete": "Delete the report on {name}? Any document it produced is kept.",
       "deleteSuccess": "Report deleted",
       "deleteError": "The report could not be deleted.",
-      "empty": "No reports yet. Describe a topic above to see what it would research.",
+      "empty": {
+        "title": "Ask something that takes real digging",
+        "why": "A question worth several hours: this reads a plan back to you first, then goes and does the work and comes back with sources.",
+        "example": "Who else sells this in Greece, and at what price"
+      },
       "usedThisMonth": "{used} of {cap} this month",
       "usedUnlimited": "{used} this month",
       "capReached": "You have used this month's research reports. It resets on the 1st.",
@@ -1584,7 +1679,11 @@
     "ideas": {
       "new": "New Idea",
       "edit": "Edit Idea",
-      "empty": "No ideas yet — use the button above to log your first one.",
+      "empty": {
+        "title": "Every idea, in one place",
+        "why": "Write it down while it is still rough — this page scores it, compares it against the others, and remembers the ones you decided against.",
+        "example": "A new service for small businesses"
+      },
       "loadError": "Could not load your ideas: {message}",
       "deleteConfirm": "Delete this idea? This can't be undone.",
       "editAria": "Edit idea: {name}",
@@ -1610,14 +1709,18 @@
       "cardCompetitors": "Competitors:",
       "cardMarketSize": "Market Size:",
       "cardMvp": "MVP:"
+    },
+    "backgroundWork": {
+      "working": "Still working on your last request — it will finish even if you leave this page.",
+      "finished": "Your last request finished while you were away.",
+      "open": "Open it",
+      "dismiss": "Dismiss"
     }
   },
   "module": {
     "searchPlaceholder": "Search...",
     "exportCsv": "Export CSV",
-    "noEntries": "No entries yet — use the button above to log your first one.",
     "noMatches": "No matches for '{query}'",
-    "new": "New {title}",
     "selectPlaceholder": "select...",
     "save": "Save",
     "saving": "Saving...",
@@ -1644,7 +1747,39 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyPresentationNotes": "Nothing here yet. This is a place to keep track of presentations you are planning or have already made — it does not generate slides for you. Use the button above to add one."
+    "emptyWhat": "Everything you record about {module} lives here.",
+    "emptyWhy": "Anything you log here joins your Timeline and becomes something the AI can use when you ask it a question about your work.",
+    "emptyExample": "Start with: “{example}”",
+    "examples": {
+      "competitors": "Notion — closest competitor on pricing",
+      "research": "Why our trial-to-paid rate dropped in June",
+      "finance": "September hosting invoice — €240",
+      "learning": "SQL window functions — finished chapter 4",
+      "trading": "EURUSD long, closed +1.8R",
+      "decisions": "Chose Postgres over MongoDB, and why",
+      "products": "Pro plan — annual billing option",
+      "content": "Launch email for the September release",
+      "sales": "Acme Ltd — demo booked for Tuesday",
+      "feedback": "Customer: export is too slow over 5k rows",
+      "analytics": "Signups this week: 142 (+18%)",
+      "automation": "Email me a summary every Monday morning",
+      "websites": "Landing page for the new pricing",
+      "apps": "Internal invoice tracker",
+      "images": "Hero image for the pricing page",
+      "videos": "60-second product walkthrough",
+      "coding": "Script to reconcile Stripe payouts",
+      "data-analysis": "Which plan has the lowest churn?",
+      "campaigns": "September launch — email + LinkedIn",
+      "presentations": "Q3 board update — talking points",
+      "ideas": "A newsletter for people who switched from spreadsheets"
+    },
+    "emptyWebsitePlans": "Nothing here yet. This is a place to note websites you are planning — it does not build them. To have one built for you, use Build a site.",
+    "emptyApps": "Nothing here yet. This is a place to keep track of apps you are planning or have already made — it does not build apps for you. Use the button above to add one.",
+    "emptyImages": "Nothing here yet. This is a place to keep track of images you need or have already made — it does not create images. Use the button above to add one.",
+    "emptyVideos": "Nothing here yet. This is a place to keep track of videos you are planning or have already made — it does not create videos. Use the button above to add one.",
+    "emptyCoding": "Nothing here yet. This is a place to keep track of coding work you are planning or have already done — it does not write code. Use the button above to add one.",
+    "emptyDataAnalysis": "Nothing here yet. This is a place to keep track of analyses you are planning or have already done — it does not analyse your data. Use the button above to add one.",
+    "emptyCampaigns": "Nothing here yet. This is a place to keep track of campaigns you are planning or have already run — it does not run campaigns. Use the button above to add one."
   },
   "askAi": {
     "buttonLabel": "Ask AI",
@@ -1901,6 +2036,423 @@
       "data-analysis": "Delete this analysis? This can't be undone.",
       "presentations": "Delete this presentation note? This can't be undone.",
       "campaigns": "Delete this campaign? This can't be undone."
+    },
+    "empty": {
+      "competitors": {
+        "title": "Know who you are up against",
+        "why": "One row per rival — what they sell, what they charge, who buys it. The gaps between the rows are where your positioning comes from.",
+        "example": "Who entered the market this year"
+      },
+      "sales": {
+        "title": "Every lead, followed up",
+        "why": "A lead you only remember is a lead you lose. Log the name, the score and the next step, and the follow-up email writes itself.",
+        "example": "Customer who closed in March"
+      },
+      "finance": {
+        "title": "Where the money actually goes",
+        "why": "Income and expenses in one list, so the month's real number is something you read rather than something you estimate.",
+        "example": "Advertising expense, €200"
+      },
+      "trading": {
+        "title": "The trade, and the reason for it",
+        "why": "Symbol, direction, result — and the note that says why you took it. The note is the part that makes the next trade better.",
+        "example": "EURUSD long, 1:2 risk-reward"
+      },
+      "research": {
+        "title": "What you found out, kept",
+        "why": "The answer you dug up once, somewhere you will find it again — instead of researching the same question in three months.",
+        "example": "What customers pay for this today"
+      },
+      "learning": {
+        "title": "What you learned, kept",
+        "why": "A lesson you did not write down is one you get to pay for twice. Topic, resources, and the quiz that proves it stuck.",
+        "example": "What I learned from the last launch"
+      },
+      "decisions": {
+        "title": "The decision, and the reasoning",
+        "why": "Write the options and the reasoning down before you choose. In six months, the reasoning is the only part you will want back.",
+        "example": "Hire, or outsource"
+      },
+      "products": {
+        "title": "From idea to shipped",
+        "why": "Audience, pricing, MVP scope and roadmap in one place, so the product you build is the one you described.",
+        "example": "A subscription tier for small teams"
+      },
+      "content": {
+        "title": "The content pipeline",
+        "why": "Every topic you plan to publish, with the caption, the thread and the hashtags already written when the day comes.",
+        "example": "Article: the 5 mistakes beginners make"
+      },
+      "feedback": {
+        "title": "What your users are telling you",
+        "why": "One row per piece of feedback, sorted by sentiment and priority — the ones that repeat are your roadmap.",
+        "example": "Customer asked for Excel export"
+      },
+      "analytics": {
+        "title": "The numbers you actually watch",
+        "why": "Pick the handful of metrics that decide something and log them regularly — a number without a history means nothing.",
+        "example": "Visits per channel, March"
+      },
+      "automation": {
+        "title": "The work you stop doing by hand",
+        "why": "Name a task you repeat and this drafts the workflow and the tools for it, with the hours saved written next to it.",
+        "example": "Every Monday, a sales summary"
+      },
+      "websites": {
+        "title": "Every site you are planning",
+        "why": "One row per site — the brief, the address and where it stands — so nothing important lives only in a browser tab. It does not build them.",
+        "example": "Landing page for the spring launch"
+      },
+      "apps": {
+        "title": "Every app on the list",
+        "why": "What it does, which platform it targets and how far along it is — from first sketch to live in the store. It does not build apps for you.",
+        "example": "iOS app for booking appointments"
+      },
+      "images": {
+        "title": "The images you need made",
+        "why": "Keep the prompt, not just the picture — a prompt you can read again is a prompt you can improve next time. It does not create images.",
+        "example": "Product photo on a white background"
+      },
+      "videos": {
+        "title": "The videos you have planned",
+        "why": "The brief for each video and how far it has got, so a shoot list is never something you keep in your head. It does not create videos.",
+        "example": "A 30-second product demo"
+      },
+      "coding": {
+        "title": "The things you want built",
+        "why": "Describe the feature or the fix, tag the language, and keep the whole backlog somewhere other than your head. It does not write code.",
+        "example": "A script that merges the monthly CSVs"
+      },
+      "dataAnalysis": {
+        "title": "The questions your data can answer",
+        "why": "The question, the source it goes to, and the finding when it comes back — so an answer is never found twice. It does not analyse your data.",
+        "example": "Which channel brings the customers who stay"
+      },
+      "presentations": {
+        "title": "A place to keep track of presentations",
+        "why": "Note the decks you are planning or have already given — this page does not generate slides for you. Use the button above to add one.",
+        "example": "Investor deck for the seed round"
+      },
+      "campaigns": {
+        "title": "Every campaign, and what it cost",
+        "why": "Channel, budget and status side by side, so the next budget decision is made from numbers rather than from feel. It does not run campaigns.",
+        "example": "Spring email campaign, €500 budget"
+      }
+    },
+    "new": {
+      "competitors": "New competitor",
+      "research": "New research note",
+      "finance": "New entry",
+      "learning": "New note",
+      "trading": "New trade",
+      "decisions": "New decision",
+      "products": "New product",
+      "content": "New content",
+      "sales": "New lead",
+      "feedback": "New feedback",
+      "analytics": "New metric",
+      "automation": "New automation",
+      "websites": "New website",
+      "apps": "New app",
+      "images": "New image",
+      "videos": "New video",
+      "coding": "New coding task",
+      "dataAnalysis": "New analysis",
+      "presentations": "New presentation note",
+      "campaigns": "New campaign"
+    }
+  },
+  "aiSteps": {
+    "starting": "Getting started…",
+    "agent_build": {
+      "understanding": "Working out what you need…",
+      "drafting": "Writing the agent…",
+      "checking": "Checking it over…",
+      "saving": "Saving it…"
+    },
+    "agent_run": {
+      "preparing": "Getting your data ready…",
+      "working": "Doing the work…",
+      "delivering": "Writing up the result…"
+    },
+    "mission_plan": {
+      "reading": "Reading what you have logged…",
+      "planning": "Breaking the goal into steps…",
+      "saving": "Saving your plan…"
+    },
+    "create": {
+      "understanding": "Working out what you asked for…",
+      "creating": "Writing the content…",
+      "saving": "Filing it where it belongs…"
+    },
+    "file_ask": {
+      "reading": "Reading your files…",
+      "answering": "Putting the answer together…",
+      "combining": "Combining what each part said…",
+      "checking": "Checking it against the files…"
+    },
+    "counter": "({step}/{total})",
+    "understanding": "Understanding what you asked",
+    "searching": "Looking for the information",
+    "reading": "Reading your files",
+    "planning": "Planning the steps",
+    "drafting": "Writing a first draft",
+    "creating": "Creating it",
+    "generating": "Generating",
+    "working": "Working on it",
+    "answering": "Working out the answer",
+    "rewriting": "Rewriting the text",
+    "summarising": "Summarising",
+    "checking": "Checking the result",
+    "saving": "Saving",
+    "delivering": "Sending it to you",
+    "publishing": "Putting the site live"
+  },
+  "problem": {
+    "out_of_credits": {
+      "what": "You have run out of credits",
+      "next": "Buy a credit pack or move to a bigger plan, and the same action will go through — nothing you have written is lost."
+    },
+    "rate_limited": {
+      "what": "Too many of these in the last hour",
+      "next": "There is an hourly cap on this action so one account cannot spend the shared budget. Wait a few minutes and try again — the cap slides, it does not reset on the hour."
+    },
+    "timeout": {
+      "what": "This took too long and was stopped",
+      "next": "Long jobs have a ceiling so a stuck one cannot run forever. Try again with a shorter or more specific request — that usually finishes well inside it."
+    },
+    "network": {
+      "what": "The reply never came back",
+      "next": "Check your connection and try again. If the work had already started it is still running in the background — reload the page rather than starting a second one."
+    },
+    "credits": {
+      "untouched": "No credits were used.",
+      "refunded": "The credits held for this have been returned.",
+      "charged": "The credits for the work already done have been used."
+    }
+  },
+  "help": {
+    "agents": {
+      "is": "An agent is a job that runs on a schedule without you.",
+      "does": "You describe the task once; it runs when you told it to, emails you the result and keeps a history of every run.",
+      "doesNot": "It does not run without limit. There is a cap on runs per hour and on how many agents your plan allows, and every run costs credits."
+    },
+    "websiteBuilder": {
+      "is": "A whole website, generated from a description.",
+      "does": "It writes the pages, the copy and the layout from what you describe, and you keep changing it in plain words.",
+      "doesNot": "It does not put anything on the internet. A generated site stays private until you publish it yourself."
+    },
+    "published": {
+      "is": "The sites you have made live.",
+      "does": "Publishing gives a site an address anyone can open, and counts its visitors here.",
+      "doesNot": "It does not give you a domain of your own. The address is a path on this site today, not yourdomain.com — pointing a real domain at it is separate."
+    },
+    "files": {
+      "is": "Your documents, readable by the AI.",
+      "does": "Upload a PDF, Word, Excel, CSV or text file; the text is pulled out and you can ask questions across the ones you pick.",
+      "doesNot": "It does not read scans. A PDF that is a photo of a page has no text to extract and needs OCR first, and very long documents are read up to a limit."
+    },
+    "deepResearch": {
+      "is": "Research that would cost you several hours.",
+      "does": "It shows you its plan first, then goes and does the work and comes back with sources you can check.",
+      "doesNot": "It does not answer while you wait. It runs in the background — leave the page, close the tab, it keeps going and is here when you return."
+    },
+    "memory": {
+      "is": "One search across everything you have logged.",
+      "does": "It looks through every module at once — ideas, leads, expenses, trades, sites — and takes you straight to the entry.",
+      "doesNot": "It does not store your conversations, and it keeps nothing of its own. Everything here is something you wrote in a module; nothing is added by the AI."
+    },
+    "mission": {
+      "is": "One goal, broken into dated steps.",
+      "does": "You write the goal; it produces a plan you can tick off, and any step can be handed to the AI or scheduled for a day.",
+      "doesNot": "It does not carry itself out. A plan sits still until you run a step or schedule one — nothing happens because time passed."
+    },
+    "integrations": {
+      "is": "Your own accounts, connected so the AI can read from them.",
+      "does": "Gmail and Google Drive are connected read-only. Slack reads the channels you invite the app into, and agents can post results back there.",
+      "doesNot": "It does not send your email, reply on your behalf, or delete anything. It never sees private Slack channels or direct messages."
+    },
+    "team": {
+      "is": "The people who share this workspace with you.",
+      "does": "You invite by email; each person signs in with their own account and sees the same data.",
+      "doesNot": "It is not free and it is not your login. Seats are billed per person, and nobody ever needs your password."
+    },
+    "timeline": {
+      "is": "Everything you have done, newest first.",
+      "does": "It writes itself from every module, so you can answer \"what did I actually do last month\" without opening five pages.",
+      "doesNot": "You do not write here. It is a record, not a diary — entries appear because you logged them elsewhere, and the order is when they happened."
+    },
+    "favorites": {
+      "is": "The short list you built by pressing stars.",
+      "does": "Anything you star anywhere shows up here, grouped by where it came from, so the few you keep returning to are one click away.",
+      "doesNot": "Starring does not copy or move anything. These are the same entries, shown twice — edit one here and you have edited the original."
+    },
+    "marketplace": {
+      "is": "Where people will share the agents, site templates and workflows they have built.",
+      "does": "Nothing yet. This page is a placeholder for a feature that has not been built.",
+      "doesNot": "It is not empty because of your plan, and upgrading will not open it. The button below is disabled because there is nothing behind it."
+    },
+    "settings": {
+      "is": "Your account: the plan you are on, the credits you hold, and everything you have logged.",
+      "does": "Change your plan, buy credits, set the language and theme, name the assistant, and download every record in the account as one file.",
+      "doesNot": "It does not hold your records — each module keeps its own. And Delete account is not a way to clear them and start again: it ends the account, takes everything with it, and there is no undo. Export first."
+    }
+  },
+  "helpCentre": {
+    "title": "Help Centre",
+    "intro": "Answers to the questions people ask most. Ask any of these in the chat and you get the same answer instantly, with no credits charged.",
+    "goThere": "Go there",
+    "shownInEnglish": "In English",
+    "notFoundTitle": "Not what you were looking for?",
+    "notFoundBody": "Ask in the chat — for anything about your own account or your own data, the answer comes from the AI rather than from this page.",
+    "openChat": "Open the chat",
+    "pricingLink": "Prices and plans",
+    "answerCount": "{count, plural, one {# answer} other {# answers}}",
+    "categories": {
+      "getting-started": "Getting started",
+      "billing": "Billing and plans",
+      "credits": "Credits",
+      "websites": "Websites",
+      "agents": "AI Agents",
+      "missions": "Missions",
+      "chat": "Chat",
+      "files": "Files",
+      "integrations": "Integrations",
+      "account": "Account",
+      "privacy": "Privacy and data"
+    }
+  },
+  "pageTitle": {
+    "document": "Document",
+    "systemHealth": "System Health",
+    "onboarding": "Get started",
+    "notFound": "Not Found",
+    "notFoundBody": "This page doesn't exist — the address may have been mistyped, or the page may have moved.",
+    "notFoundAction": "Back to Home",
+    "forgotPassword": "Forgot Password",
+    "resetPassword": "Set New Password",
+    "confirmDeletion": "Confirm Account Deletion",
+    "logInDescription": "Log in to Ionexa AI.",
+    "signUpDescription": "Choose a plan and create your Ionexa AI account.",
+    "forgotPasswordDescription": "Reset your Ionexa AI account password.",
+    "resetPasswordDescription": "Set a new password for your Ionexa AI account.",
+    "confirmDeletionDescription": "Confirm permanent deletion of your Ionexa AI account.",
+    "termsDescription": "Terms of Service for Ionexa AI.",
+    "privacyDescription": "Privacy Policy for Ionexa AI.",
+    "cookiesDescription": "Which cookies Ionexa AI sets, what each one does, and how long it lasts.",
+    "helpDescription": "Answers to the questions people ask most about Ionexa AI — pricing, credits, websites, agents, privacy."
+  },
+  "errors": {
+    "retry": "Try again",
+    "creditHistory": "See credit history",
+    "credits": {
+      "refunded": "Your credits were returned.",
+      "notCharged": "You were not charged.",
+      "charged": "This attempt used credits.",
+      "unverified": "We can't confirm from here whether this was charged."
+    },
+    "codes": {
+      "notAuthenticated": {
+        "what": "You're signed out.",
+        "next": "Sign in again and repeat the action — nothing you had entered is lost."
+      },
+      "forbidden": {
+        "what": "Your plan doesn't include this.",
+        "next": "Open Settings › Billing to see which plan covers it."
+      },
+      "notFound": {
+        "what": "This no longer exists.",
+        "next": "It was probably deleted. Go back to the list and pick another one."
+      },
+      "invalidInput": {
+        "what": "Something in the form wasn't accepted.",
+        "next": "Check the highlighted fields and send it again."
+      },
+      "rateLimited": {
+        "what": "Too many requests in a short time.",
+        "next": "Wait about a minute, then try once more."
+      },
+      "insufficientCredits": {
+        "what": "You don't have enough credits for this.",
+        "next": "Buy credits in Settings, or wait for your monthly reset."
+      },
+      "planLimit": {
+        "what": "You've reached the limit of your plan.",
+        "next": "Delete something you no longer need, or upgrade in Settings › Billing."
+      },
+      "fileTooLarge": {
+        "what": "That file is too big.",
+        "next": "Split it, or upload a smaller version."
+      },
+      "unsupportedType": {
+        "what": "That file type isn't supported.",
+        "next": "Convert it to PDF, DOCX, CSV or TXT and upload it again."
+      },
+      "conflict": {
+        "what": "Someone — or another tab — changed this while you were working on it.",
+        "next": "Reload the page to see the current version, then redo your change."
+      },
+      "upstreamUnavailable": {
+        "what": "The AI service isn't responding right now.",
+        "next": "This is on our side and usually clears within a few minutes."
+      },
+      "serverError": {
+        "what": "This broke on our side.",
+        "next": "It's been logged. Try again in a moment, and contact support if it keeps happening."
+      },
+      "offline": {
+        "what": "Your device couldn't reach us.",
+        "next": "Check your connection and try again."
+      },
+      "unknown": {
+        "what": "This action didn't complete.",
+        "next": "Try again, and contact support if it happens twice."
+      }
+    }
+  },
+  "aiExamples": {
+    "createStudio": {
+      "e1": "Build me a page for my shop",
+      "e2": "A plan for finding customers",
+      "e3": "Idea: a subscription for small businesses",
+      "e4": "Every Monday, remind me to check the finances",
+      "limits": "Creates things inside Ionexa · It won't touch anything you haven't connected"
+    },
+    "agents": {
+      "e1": "Every morning, send me the news about Nvidia",
+      "e2": "Every Monday, a summary of my competitors",
+      "e3": "Tell me if anyone writes about my industry",
+      "limits": "Searches the web and writes to you · It takes no actions, and sends only where you chose"
+    },
+    "mission": {
+      "e1": "Find 10 customers for my business",
+      "e2": "Prepare a launch plan for a new product",
+      "e3": "Grow sales by 20% in three months",
+      "limits": "Writes the plan and its steps · A step only runs when you schedule it"
+    },
+    "websiteBuilder": {
+      "e1": "A café in Thessaloniki with a menu and opening hours",
+      "e2": "A photographer's portfolio with a gallery",
+      "e3": "A landing page for a SaaS, with pricing",
+      "limits": "One page, not a shop or an app · It doesn't connect to your systems"
+    },
+    "files": {
+      "e1": "What does the contract say about cancellation?",
+      "e2": "Compare the two offers",
+      "e3": "What are the deadlines and amounts?",
+      "limits": "Answers only from the files you picked · It doesn't search the web"
+    },
+    "research": {
+      "e1": "Competitors in my industry in Greece",
+      "e2": "Why AI startups fail",
+      "e3": "SaaS pricing models in 2026",
+      "limits": "Reads public sources on the web · It can't see your files"
+    },
+    "chat": {
+      "e1": "What should I prioritise this week?",
+      "e2": "Explain this month's numbers to me",
+      "e3": "Write an email to a customer who is late paying",
+      "limits": "Sees your Ionexa data and whatever you've connected · It takes no actions on its own"
     }
   }
 }

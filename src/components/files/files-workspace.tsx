@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -14,19 +14,27 @@ import {
   Loader2,
   AlertTriangle,
   Check,
+  Copy,
 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { ListLayout } from "@/components/ui/list-layout";
 import { EmptyState } from "@/components/empty-state";
+import { CopyButton, writeToClipboard } from "@/components/ui/copy-button";
+import { stepLabelKey } from "@/lib/jobs/step-labels";
 import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
-import { startAndWatchJob } from "@/lib/jobs/start-and-watch";
+import { startAndWatchJob, watchJob } from "@/lib/jobs/start-and-watch";
+import { markJobConsumed } from "@/lib/jobs/consume";
+import { JobSeen } from "@/components/jobs/job-seen";
+import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { matchesSearch } from "@/lib/text/search-match";
 import {
   ACCEPT_ATTRIBUTE,
   MAX_FILE_BYTES,
   MAX_FILES_PER_QUESTION,
+  MAX_QUESTION_CHARS,
   formatBytes,
 } from "@/lib/files/file-types";
 
@@ -51,6 +59,21 @@ export type WorkspaceCollection = {
 
 type Citation = { filename: string; label: string };
 
+/**
+ * What "copy the answer" puts on the clipboard.
+ *
+ * The answer plus its sources, not the answer alone. Every claim in the
+ * text carries an inline [file, page] reference that was CHECKED against
+ * the pages the model was shown; pasting the prose without the list
+ * behind it turns a verifiable answer into an assertion, and the person
+ * it is pasted to has no way back to the document.
+ */
+function answerForClipboard(answer: Answer): string {
+  if (answer.citations.length === 0) return answer.text;
+  const sources = answer.citations.map((c) => `- ${c.filename} — ${c.label}`).join("\n");
+  return `${answer.text}\n\n${sources}`;
+}
+
 type Answer = {
   text: string;
   fromDocuments: boolean;
@@ -58,9 +81,48 @@ type Answer = {
   removedCitations: number;
   skippedFiles: string[];
   truncated: boolean;
+  /** How many passes the documents took to read. 1 for almost every
+   *  question; more means the answer was combined from parts. */
+  parts: number;
   credits: number;
   disclosure: string;
+  /** The job that produced it, carried so the answer can report itself
+   *  seen. An answer the user has read must not be offered back to them
+   *  on the next visit as if it were new. */
+  jobId: string | null;
 };
+
+/**
+ * One answer, built the same way whether it arrived on this page or is
+ * being picked back up from a job that finished while the user was
+ * elsewhere.
+ *
+ * Shared because the resumed path is the one that matters and the one
+ * nobody looks at: if it drifted from the inline path, the answer a user
+ * came back for would be missing its citations or its "not in your
+ * documents" warning — quietly, and only for people who navigated away.
+ */
+function answerFromResult(
+  result: Record<string, unknown>,
+  credits: number,
+  jobId: string | null
+): Answer {
+  return {
+    text: String(result.answer ?? ""),
+    fromDocuments: Boolean(result.answeredFromDocuments),
+    citations: (result.citations ?? []) as Citation[],
+    removedCitations: Number(result.removedCitations ?? 0),
+    skippedFiles: (result.skippedFiles ?? []) as string[],
+    truncated: Boolean(result.truncated),
+    // The multi-pass ask stitches an answer out of N passes and says so.
+    // Here rather than at the inline call site, or a resumed answer would
+    // silently claim to have read the whole document in one go.
+    parts: Number(result.parts ?? 1),
+    credits,
+    disclosure: String(result.disclosure ?? ""),
+    jobId,
+  };
+}
 
 /**
  * The File Workspace.
@@ -81,6 +143,9 @@ export function FilesWorkspace({
   usage: { fileCap: number | null; storageBytes: number; storageCap: number | null };
 }) {
   const t = useTranslations("dashboard.files");
+  const tCommon = useTranslations("common");
+  // Root translator: step-labels.ts returns FULL dotted keys (aiSteps.*).
+  const tKey = useTranslations();
   const tModule = useTranslations("module");
   const locale = useLocale();
   const router = useRouter();
@@ -101,15 +166,16 @@ export function FilesWorkspace({
   //
   // JOB_STEPS stores CODES ("reading", "answering", "checking"), not
   // sentences — a label written on the server is a label in one language,
-  // and this one is shown to the user at the moment they are waiting. The
-  // code is translated here.
+  // and this one is shown to the user at the moment they are waiting.
+  //
+  // The code-to-key map used to be three lines RIGHT HERE, which is why
+  // the other four job kinds went without one: a map inside a component is
+  // not somewhere the next feature looks. It lives in
+  // lib/jobs/step-labels.ts now, covering all five kinds, and this reads
+  // from it like everything else does.
   const [askStep, setAskStep] = useState<string | null>(null);
-  const ASK_STEP_KEY: Record<string, string> = {
-    reading: "stepReading",
-    answering: "stepAnswering",
-    checking: "stepChecking",
-  };
-  const askStepLabel = askStep && ASK_STEP_KEY[askStep] ? t(ASK_STEP_KEY[askStep]) : t("asking");
+  const askStepKey = stepLabelKey("file_ask", askStep);
+  const askStepLabel = askStepKey ? tKey(askStepKey) : t("asking");
 
   const [newCollectionName, setNewCollectionName] = useState("");
   const [creatingCollection, setCreatingCollection] = useState(false);
@@ -180,6 +246,43 @@ export function FilesWorkspace({
     router.refresh();
   }
 
+  /**
+   * Copy a file's extracted TEXT, not the file.
+   *
+   * Download hands back the original PDF; this hands back the thing we
+   * read out of it, which is what can be pasted into an email or a
+   * document. It is fetched on press rather than carried in the row —
+   * the list holds fifty files and a megabyte of text each would be a
+   * page that never finishes loading.
+   *
+   * Goes through writeToClipboard rather than navigator.clipboard, so it
+   * has the same insecure-origin fallback as every CopyButton on the
+   * page, and confirms with a toast because a menu item that has already
+   * closed has nowhere to show a tick.
+   */
+  async function copyFileText(id: string) {
+    setBusy(id);
+    try {
+      const response = await fetch(`/api/files/${id}`);
+      const data = await response.json().catch(() => null);
+      if (!response.ok || !data?.ok) {
+        addToast(t("copyTextError"), "error");
+        return;
+      }
+      const text = String(data.text ?? "");
+      if (!text.trim()) {
+        addToast(t("copyTextEmpty"), "error");
+        return;
+      }
+      const copied = await writeToClipboard(text);
+      addToast(copied ? tCommon("copied") : tCommon("copyFailed"), copied ? "success" : "error");
+    } catch {
+      addToast(t("copyTextError"), "error");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function download(id: string, filename: string) {
     setBusy(id);
     try {
@@ -226,6 +329,88 @@ export function FilesWorkspace({
     }
   }
 
+  // WHERE THE USER WAS, ASKED OF THE SERVER RATHER THAN THE BROWSER.
+  //
+  // A question over a large document set takes a minute. Leaving the page
+  // while it runs used to lose the answer completely: the worker finished
+  // and wrote the result, but nothing on this screen ever asked for it
+  // again, so the only way back to the answer was to buy it a second time.
+  //
+  // Two cases, one query. Still running: attach to it and show the real
+  // step. Finished and never seen: put the answer back on the screen.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const response = await fetch("/api/jobs?kind=file_ask");
+        const data = await response.json();
+        if (cancelled || !data.ok || !data.job) return;
+        const job = data.job as {
+          id: string;
+          status: string;
+          stepLabel: string | null;
+          input: Record<string, unknown> | null;
+          result: Record<string, unknown> | null;
+          creditsCharged: number | null;
+        };
+
+        // What was asked, and of which files — restored only if the user
+        // has not already started typing something else. Their current
+        // input always wins over a restored one.
+        const asked = job.input?.question;
+        if (typeof asked === "string" && asked.trim()) {
+          setQuestion((current) => (current.trim() ? current : asked));
+        }
+        const askedFiles = job.input?.fileIds;
+        if (Array.isArray(askedFiles)) {
+          const ids = askedFiles.filter((id): id is string => typeof id === "string");
+          setSelected((current) => (current.length > 0 ? current : ids));
+        }
+
+        if (job.status === "done") {
+          const result = (job.result ?? {}) as Record<string, unknown>;
+          if (result.answered) {
+            setAnswer(answerFromResult(result, Number(job.creditsCharged ?? 0), String(job.id)));
+          } else {
+            // A completed job with no answer in it renders nothing, so
+            // nothing would ever mark it seen and it would be handed back
+            // on every page open for a day.
+            void markJobConsumed(String(job.id));
+          }
+          return;
+        }
+
+        setAsking(true);
+        setAskStep(job.stepLabel);
+        const outcome = await watchJob(String(job.id), (running) => {
+          if (!cancelled) setAskStep(running.stepLabel);
+        });
+        if (cancelled) return;
+        setAsking(false);
+        if (outcome.ok) {
+          const result = outcome.result;
+          if (result.answered) {
+            setAnswer(answerFromResult(result, Number(outcome.creditsCharged ?? 0), String(job.id)));
+          } else {
+            addToast(t("askError"), "error");
+            void markJobConsumed(String(job.id));
+          }
+        } else if (outcome.code !== "still_running") {
+          addToast(outcome.code === "stalled" ? t("askStalled") : t("askError"), "error");
+        }
+      } catch {
+        // Nothing in flight is the common answer, and a failed check is
+        // not evidence of one. The page works either way.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // Mount only. Re-running this on every render of a translation
+    // function would re-attach to the same job and double the polling.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   async function ask() {
     if (selected.length === 0) {
       addToast(t("selectFirst"), "error");
@@ -262,16 +447,7 @@ export function FilesWorkspace({
         addToast(t("askError"), "error");
         return;
       }
-      setAnswer({
-        text: String(data.answer ?? ""),
-        fromDocuments: Boolean(data.answeredFromDocuments),
-        citations: (data.citations ?? []) as Citation[],
-        removedCitations: Number(data.removedCitations ?? 0),
-        skippedFiles: (data.skippedFiles ?? []) as string[],
-        truncated: Boolean(data.truncated),
-        credits: Number(outcome.creditsCharged ?? 0),
-        disclosure: String(data.disclosure ?? ""),
-      });
+      setAnswer(answerFromResult(data, Number(outcome.creditsCharged ?? 0), outcome.jobId ?? null));
       router.refresh();
     } catch (err) {
       addToast(getErrorMessage(err, t("askError")), "error");
@@ -328,8 +504,6 @@ export function FilesWorkspace({
         : selected.length > MAX_FILES_PER_QUESTION
           ? t("tooManySelected", { max: MAX_FILES_PER_QUESTION })
           : null;
-
-  const EXAMPLES = [t("example1"), t("example2"), t("example3")];
 
   return (
     <div className="space-y-5 pb-24">
@@ -429,7 +603,7 @@ export function FilesWorkspace({
           data-testid="files-upload-button"
           onClick={() => inputRef.current?.click()}
           disabled={Boolean(uploading)}
-          className="mt-3 inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+          className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-60"
         >
           {uploading ? (
             <>
@@ -486,7 +660,7 @@ export function FilesWorkspace({
                 type="button"
                 data-testid="files-empty-upload"
                 onClick={() => inputRef.current?.click()}
-                className="mt-4 inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+                className="mt-4 inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
               >
                 <Upload className="h-4 w-4" aria-hidden="true" />
                 {t("choose")}
@@ -524,6 +698,16 @@ export function FilesWorkspace({
                       icon: Download,
                       disabled: busy === file.id,
                       onSelect: () => void download(file.id, file.filename),
+                    },
+                    {
+                      key: "copy-text",
+                      label: t("copyText"),
+                      icon: Copy,
+                      // Only for a file we actually read. Offering it on a
+                      // pending or failed row is offering an empty
+                      // clipboard.
+                      disabled: busy === file.id || file.processing_status !== "ready",
+                      onSelect: () => void copyFileText(file.id),
                     },
                     {
                       key: "delete",
@@ -595,7 +779,7 @@ export function FilesWorkspace({
                 key={collection.id}
                 type="button"
                 onClick={() => setSelected(collection.fileIds)}
-                className="inline-flex min-h-[32px] items-center rounded-lg border border-border px-3 py-1 text-[11px] font-medium text-muted transition-colors duration-150 hover:text-foreground"
+                className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-3 py-1 text-[11px] font-medium text-muted transition-colors duration-150 hover:text-foreground"
               >
                 {collection.name} · {collection.fileIds.length}
               </button>
@@ -608,13 +792,13 @@ export function FilesWorkspace({
             onChange={(e) => setNewCollectionName(e.target.value)}
             placeholder={t("collectionPlaceholder")}
             maxLength={80}
-            className="min-h-[36px] flex-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted"
+            className="min-h-[44px] flex-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs text-foreground placeholder:text-muted"
           />
           <button
             type="button"
             onClick={() => void createCollection()}
             disabled={creatingCollection || !newCollectionName.trim()}
-            className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
           >
             <FolderPlus className="h-3.5 w-3.5" aria-hidden="true" />
             {t("saveSelection", { count: selected.length })}
@@ -649,29 +833,43 @@ export function FilesWorkspace({
           onChange={(e) => setQuestion(e.target.value)}
           placeholder={t("askPlaceholder")}
           rows={3}
-          maxLength={2000}
+          maxLength={MAX_QUESTION_CHARS}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
         />
 
-        {/* EXAMPLE QUESTIONS, clickable.
+        {/* THE LIMIT, WHERE IT CAN BE SEEN.
+            The textarea has always silently stopped accepting characters
+            at the cap. Silently is the problem: somebody pasting a long
+            clause gets a box that ignores their keystrokes with no
+            explanation, and the shorter the cap the more often that
+            happens. The cap is now 20,000 rather than 2,000, and it says
+            so — but only once the question is long enough for the number
+            to be worth reading, so a one-line question is not decorated
+            with a counter it will never approach. */}
+        {question.length >= MAX_QUESTION_CHARS / 2 && (
+          <p
+            data-testid="files-question-count"
+            className={`text-[11px] ${
+              question.length >= MAX_QUESTION_CHARS ? "text-amber-400" : "text-muted"
+            }`}
+          >
+            {question.length >= MAX_QUESTION_CHARS
+              ? t("questionAtLimit", { max: MAX_QUESTION_CHARS })
+              : t("questionLength", { used: question.length, max: MAX_QUESTION_CHARS })}
+          </p>
+        )}
+
+        {/* EXAMPLE QUESTIONS, clickable — the pattern this page proved and
+            every other AI surface now shares (components/ai/example-prompts).
             "What do these documents say about…?" as a placeholder tells
             somebody the shape of a question but not that this page answers
             specific ones. A question they can press is faster to understand
-            than any amount of instruction, and it costs one click to try. */}
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] text-muted">{t("examplesLabel")}</span>
-          {EXAMPLES.map((example) => (
-            <button
-              key={example}
-              type="button"
-              data-testid="files-example"
-              onClick={() => setQuestion(example)}
-              className="inline-flex min-h-[30px] items-center rounded-full border border-border px-3 py-1 text-[11px] text-muted transition-colors duration-150 hover:border-orange-500/50 hover:text-orange-300"
-            >
-              {example}
-            </button>
-          ))}
-        </div>
+            than any amount of instruction, and it costs one click to try.
+
+            The limits line comes with it: this box answers from the files
+            that are ticked and does not search the web, which is the single
+            most common wrong expectation about it. */}
+        <ExamplePrompts surface="files" onPick={setQuestion} />
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <button
@@ -682,7 +880,9 @@ export function FilesWorkspace({
             className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-6 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {asking ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              // tone="inherit" because this button's background IS the
+              // accent — an accent-coloured indicator here is invisible.
+              <ThinkingIndicator size="sm" tone="inherit" />
             ) : (
               <Sparkles className="h-4 w-4" aria-hidden="true" />
             )}
@@ -700,6 +900,10 @@ export function FilesWorkspace({
 
         {answer && (
           <div className="space-y-2 rounded-xl border border-border bg-panel/60 p-3">
+            {/* On screen, therefore seen. Inside the answer rather than in
+                an effect beside it, so an answer can only be marked read
+                by actually being rendered. */}
+            <JobSeen jobId={answer.jobId} />
             {/* Said FIRST, not in a footnote: whether the answer came out
                 of the documents at all is the most important thing about
                 it. */}
@@ -711,13 +915,42 @@ export function FilesWorkspace({
             )}
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{answer.text}</p>
 
+            {/* THE ANSWER, ON THE CLIPBOARD.
+                An answer that can only be read on this page is an answer
+                that gets retyped into the email it was needed for — and
+                a long one, now that answers are allowed to be long, gets
+                retyped badly. The citations go with it: an answer pasted
+                without its sources is a claim with nothing behind it,
+                which is the opposite of what this feature is for. */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <CopyButton
+                data-testid="files-copy-answer"
+                label={t("copyAnswer")}
+                text={() => answerForClipboard(answer)}
+              />
+            </div>
+
             {answer.citations.length > 0 && (
               <div>
                 <p className="mb-1 text-[11px] font-medium text-muted">{t("citations")}</p>
                 <ul className="space-y-0.5">
                   {answer.citations.map((citation, i) => (
-                    <li key={`${citation.filename}-${citation.label}-${i}`} className="text-[11px] text-muted">
-                      {citation.filename} — {citation.label}
+                    <li
+                      key={`${citation.filename}-${citation.label}-${i}`}
+                      className="flex items-center gap-1.5 text-[11px] text-muted"
+                    >
+                      <span className="min-w-0 truncate">
+                        {citation.filename} — {citation.label}
+                      </span>
+                      {/* Each one on its own, because a citation is what
+                          somebody pastes into a message to say "it is on
+                          this page of this file". */}
+                      <CopyButton
+                        data-testid="files-copy-citation"
+                        variant="icon"
+                        label={t("copyCitation")}
+                        text={`${citation.filename} — ${citation.label}`}
+                      />
                     </li>
                   ))}
                 </ul>
@@ -730,6 +963,16 @@ export function FilesWorkspace({
             {answer.removedCitations > 0 && (
               <p className="text-[11px] text-amber-400/90">
                 {t("removedCitations", { count: answer.removedCitations })}
+              </p>
+            )}
+            {/* Read in parts is a WEAKER guarantee than read whole: a
+                fact that only makes sense across two parts can be missed
+                by both. Said plainly rather than hidden, and separately
+                from the truncation warning, which now means something
+                much rarer — more text than five full passes could hold. */}
+            {answer.parts > 1 && !answer.truncated && (
+              <p data-testid="files-answer-parts" className="text-[11px] text-muted">
+                {t("readInParts", { parts: answer.parts })}
               </p>
             )}
             {answer.truncated && <p className="text-[11px] text-amber-400/90">{t("truncatedWarning")}</p>}
@@ -793,7 +1036,7 @@ export function FilesWorkspace({
                   350
                 );
               }}
-              className="inline-flex min-h-[40px] items-center gap-2 rounded-lg bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-5 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90"
             >
               <Sparkles className="h-4 w-4" aria-hidden="true" />
               {t("goToAsk")}

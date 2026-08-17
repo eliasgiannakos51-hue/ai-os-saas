@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { notFound, redirect } from "next/navigation";
 import { Activity } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
@@ -10,7 +11,9 @@ import { ErrorList, type ProductionErrorRow } from "@/components/system-health/e
 import { formatNumber } from "@/lib/format-number";
 import { getLocale } from "next-intl/server";
 
-export const metadata: Metadata = { title: "System Health" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("pageTitle.systemHealth");
+}
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 

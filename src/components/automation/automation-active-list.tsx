@@ -83,7 +83,7 @@ export function AutomationActiveList({ automations }: { automations: UserAutomat
               title={t("toggleActive")}
               onClick={() => toggleActive(automation)}
               disabled={busyId === automation.id}
-              className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
+              className={`relative -my-2.5 inline-flex h-11 w-11 shrink-0 items-center rounded-full bg-clip-content py-2.5 transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 ${
                 automation.is_active ? "bg-orange-500" : "bg-panel-hover"
               }`}
             >

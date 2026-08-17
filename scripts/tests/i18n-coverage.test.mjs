@@ -86,17 +86,145 @@ function stripComments(src) {
     .replace(/^\s*\/\/.*$/gm, "");
 }
 
+// TEMPLATE LITERALS COUNT, and until now they did not.
+//
+// This scanner matched `addToast("...")` only. `addToast(`...`)` is the
+// same string reaching the same user, and it is the form people reach for
+// the moment a message has a symbol or a value in it — which is most of
+// them. So `addToast(`✓ saved`)` shipped English past a check whose entire
+// job is to stop that, and the SECURITY.md line describing this gate ("a
+// user-facing string is hardcoded in a component fails the build") was
+// true of half the ways to write one.
+//
+// Interpolated segments are NOT prose: in `` `✗ ${failure.what}` `` the
+// words come from a translated variable and the literal parts are a symbol
+// and a space. So only the literal chunks between the interpolations are
+// tested, which is what separates that from `` `✗ could not save` ``.
+/**
+ * Is this string a SENTENCE somebody reads, or an identifier?
+ *
+ * The plain `[A-Za-z]{3,}` test above is right for the anchored forms —
+ * the first argument of addToast is prose by construction. It is wrong the
+ * moment the scan widens to "any literal near a ternary", because that
+ * sweeps up every `t("buildError")` key, every `?? "untitled"` sentinel and
+ * every Tailwind class list. The first version of this widening reported
+ * 124 items of which about a dozen were real, and a check with that ratio
+ * gets its baseline set to 124, which is the same as deleting it.
+ *
+ * So: prose has a space in it (`buildError`, `untitled`, `slack_error`,
+ * `/dashboard/overview` do not), is not a class list, and is not so long
+ * that it can only be markup.
+ */
+const TAILWIND = /(^|\s)(flex|grid|inline|text-|bg-|border|rounded|hover:|focus|min-h|max-w|h-\d|w-\d|px-|py-|mt-|absolute|relative|shrink)/;
+function isEnglishProse(text) {
+  if (!PROSE.test(text)) return false;
+  if (!text.includes(" ")) return false;
+  if (text.length > 120) return false;
+  if (TAILWIND.test(text)) return false;
+  return true;
+}
+
+// Brace-BALANCED, because `${[^}]*}` is not good enough here: a real
+// interpolation in this codebase looks like
+//   ${describe(new ApiError(500, { error: e.message })).what}
+// and a non-greedy scan stops at the object literal's first `}`, leaving
+// `})).what` behind as "literal text" — which contains letters, so the
+// check flags its own fix. Walking the braces is the only version that
+// tells an interpolation from the prose around it.
+function literalChunksOf(template) {
+  const chunks = [];
+  let buf = "";
+  for (let i = 0; i < template.length; i++) {
+    if (template[i] === "$" && template[i + 1] === "{") {
+      chunks.push(buf);
+      buf = "";
+      let depth = 1;
+      i += 2;
+      while (i < template.length && depth > 0) {
+        if (template[i] === "{") depth++;
+        else if (template[i] === "}") depth--;
+        if (depth > 0) i++;
+      }
+      continue;
+    }
+    buf += template[i];
+  }
+  chunks.push(buf);
+  return chunks;
+}
+
 const hardcoded = [];
 for (const file of sources) {
   const src = stripComments(readFileSync(file, "utf8"));
   for (const fn of USER_FACING_CALLS) {
-    const re = new RegExp(`\\b${fn}\\(\\s*"([^"]*)"`, "g");
-    for (const m of src.matchAll(re)) {
+    for (const m of src.matchAll(new RegExp(`\\b${fn}\\(\\s*"([^"]*)"`, "g"))) {
       if (PROSE.test(m[1])) hardcoded.push(`${file}: ${fn}("${m[1]}")`);
     }
+    for (const m of src.matchAll(new RegExp(`\\b${fn}\\(\\s*\`([^\`]*)\``, "g"))) {
+      if (literalChunksOf(m[1]).some((chunk) => PROSE.test(chunk))) {
+        hardcoded.push(`${file}: ${fn}(\`${m[1]}\`)`);
+      }
+    }
+    // A TERNARY IS TWO STRINGS, and the anchored patterns above see
+    // neither: `addToast(next ? "enabled" : "disabled")` does not start
+    // with a quote after the paren, so it matched nothing. Found by the
+    // audit immediately after this check was widened to template
+    // literals — the same defect, one syntax over, which is the argument
+    // for scanning the ARGUMENT rather than guessing its shape.
+    for (const m of src.matchAll(new RegExp(`\\b${fn}\\(([^;]{0,200}?)\\)[,;]`, "g"))) {
+      if (!m[1].includes("?")) continue;
+      for (const lit of m[1].matchAll(/"([^"]*)"|`([^`]*)`/g)) {
+        // A backtick branch gets the same interpolation-stripping as the
+        // anchored case: in `` `✗ ${message}` `` the words are in a
+        // variable, and the literal part is a symbol and a space.
+        const parts = lit[1] !== undefined ? [lit[1]] : literalChunksOf(lit[2] ?? "");
+        const text = parts.find(isEnglishProse);
+        if (text) hardcoded.push(`${file}: ${fn}(... ? "${text}" ...)`);
+      }
+    }
+  }
+
+  // `data.error ?? "Could not start checkout."` — the English is the
+  // FALLBACK for a server message, so it reads as a safety net and is
+  // exactly as user-facing as everything above. Counted by neither
+  // baseline: getErrorMessage's fallback ratchet only matches
+  // `getErrorMessage(x, "...")`, and this form does not call it.
+  for (const m of src.matchAll(/\?\?\s*"([^"]{8,})"/g)) {
+    if (isEnglishProse(m[1])) hardcoded.push(`${file}: ?? "${m[1]}"`);
   }
 }
-check(`no hardcoded prose in ${USER_FACING_CALLS.join("/")} (${sources.length} files scanned)`, hardcoded, []);
+// TWO CHECKS, because the two forms are at different stages.
+//
+// The ANCHORED forms — a quoted or templated first argument — are at zero
+// and stay at zero. That is the check this file has always made, widened
+// to backticks, and everything it found has been fixed.
+//
+// The INDIRECT forms — a ternary branch, or `?? "English"` — were found by
+// the audit and have never been enforced, so they are at 38 and ratcheted.
+// Splitting them is deliberate: rolling 38 known items into the same check
+// would take the zero-tolerance one off zero, and a check that is allowed
+// to be non-zero stops being read as "this must not happen".
+const anchoredOnly = hardcoded.filter((h) => !/\(\.\.\. \? |: \?\? /.test(h));
+const indirect = hardcoded.filter((h) => /\(\.\.\. \? |: \?\? /.test(h));
+
+check(
+  `no hardcoded prose in a ${USER_FACING_CALLS.join("/")} argument, quoted OR templated (${sources.length} files scanned)`,
+  anchoredOnly,
+  []
+);
+
+// 38 English sentences reached through a ternary branch or a `??`
+// fallback. Every one is real — "Could not start checkout.", "Could not
+// generate a reflection.", "✓ chat memory enabled" — and every one is
+// read by a Greek user in English. They are recorded rather than fixed in
+// this pass because closing them is 38 keys across ten locales, which is
+// a translation job, not a sweep; recording them is what stops a 39th.
+const INDIRECT_ENGLISH_BASELINE = 38;
+checkTrue(
+  `English reached through a ternary or ?? has not grown (${indirect.length} <= ${INDIRECT_ENGLISH_BASELINE})`,
+  indirect.length <= INDIRECT_ENGLISH_BASELINE,
+  indirect.join("\n        ")
+);
 
 // ---------------------------------------------------------------------
 // 1a. THE SAME CALLS, WRITTEN WITH BACKTICKS.
@@ -449,7 +577,32 @@ const clientFallbacks = sources.flatMap((f) => [
 // access, credits, data, and that it is reversible) are in
 // settings.billing.cancel.* in all ten locales; these are the fallbacks
 // shown only when the request itself fails.
-const SERVER_PROSE_BASELINE = 521;
+// 532 -> 540 once BOTH branches' routes are in one tree. The eight are
+// api/delivery-channels' and api/notifications' remaining replies plus
+// api/conversations/[id]'s — the last of which is worth naming, because it
+// is the one route here that deliberately returns CODES rather than prose
+// ("pin_limit", "title_too_long") and the eight counted below it are its
+// neighbours, not its own strings.
+const SERVER_PROSE_BASELINE = 540;
+// 520 -> 532 for the delivery-channel routes (api/delivery-channels,
+// api/notifications) and the ownership refusals they surface. Same
+// documented convention as every increment below — a route's error
+// replies are English and the calling component supplies the translated
+// wording — with ONE deliberate difference worth recording: the refusals
+// that say WHY a destination was rejected ("an agent can only post to a
+// channel in your own connected Slack workspace") are shown verbatim.
+// They are security answers, and a paraphrase that drifted from what the
+// server actually enforces would be worse than an untranslated sentence
+// that is exactly true. What the user READS on the delivery picker —
+// every label, every help line, every validation message they can hit by
+// typing — is translated in all ten locales.
+// 518 -> 520 for api/jobs/[id]/consume, the endpoint that records a
+// finished result as having been SEEN so the user is not made to pay for
+// it a second time. Its two counted strings are "Not authenticated." and
+// "Job not found." — the standard pair every other route here returns,
+// and neither is prose a user reads: the caller is a component that
+// renders nothing on failure, because a mark that did not land means only
+// that the result is offered once more, which is the safe direction.
 // 517 -> 518 for the "Not authenticated." reply added to
 // api/jobs/[id]/continue. That string is the standard one every other
 // route in the app already returns, and it appeared because
@@ -459,7 +612,23 @@ const SERVER_PROSE_BASELINE = 521;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.
-const CLIENT_FALLBACK_BASELINE = 38;
+// 38 -> 31. A ratchet is only worth having if it is TIGHTENED when the
+// number falls, so lowering it is part of the same change that lowered
+// the count — otherwise the seven slots stay available and the next
+// English fallback slips in under a green check.
+//
+// What closed: the eighteen call sites that passed no fallback at all and
+// silently got "Something went wrong. Please try again.", plus the five AI
+// surfaces, which now build their message from the response status
+// (lib/errors/use-error-text.ts) rather than carrying an English one.
+//
+// WHAT THE REMAINING 31 ARE, honestly: specific, useful sentences —
+// "Could not rename conversation.", "Could not upload the reference
+// images." — that are specific and useful IN ENGLISH. They are better
+// than a generic message and worse than a translated one, and closing
+// them means 31 new keys across ten locales rather than a mechanical
+// sweep. Recorded rather than quietly tolerated.
+const CLIENT_FALLBACK_BASELINE = 31;
 checkTrue(
   `server-side English error prose has not grown (${serverErrorProse.length} <= ${SERVER_PROSE_BASELINE})`,
   serverErrorProse.length <= SERVER_PROSE_BASELINE
@@ -491,11 +660,16 @@ checkTrue(
 //
 // A RATCHET, NOT A ZERO.
 //
-// 94 of these still ship — 162 when this landed, minus the 22 aria-label
+// 86 of these still ship — 162 when this landed, minus the 22 aria-label
 // attributes paid off in batch A1 (now held at zero by 1d above), the 25
 // in the Ideas module paid off in A2, the 19 in Chat, Memory and Create
-// paid off in A3, and the two `title=` attributes that came with the eight
-// template-literal strings 1a and 1d turned up.
+// paid off in A3, the two `title=` attributes that came with the eight
+// template-literal strings 1a and 1d turned up, and the seven across
+// not-found, error-message and the two Quick Start components that a
+// second branch had already translated — four entries deleted outright
+// rather than lowered, which is what the stale-baseline half of this
+// check exists to force — and one more on the upgrade wall, which stopped
+// naming the feature in English once the module heading became a key.
 // Failing the build on all of them would mean
 // this check could not land at all, and a check that cannot land protects
 // nothing. So the baseline below is per FILE: no file may get worse, and
@@ -511,20 +685,16 @@ const BARE_TEXT_BASELINE = {
     "src/app/cookies/page.tsx": 19,
     "src/app/dashboard/error.tsx": 1,
     "src/app/dashboard/system-health/page.tsx": 5,
-    "src/app/not-found.tsx": 2,
     "src/app/offline/page.tsx": 3,
     "src/app/privacy/page.tsx": 17,
     "src/app/terms/page.tsx": 10,
     "src/components/auth/generate-password-button.tsx": 1,
-    "src/components/billing/upgrade-required.tsx": 4,
+    "src/components/billing/upgrade-required.tsx": 3,
     "src/components/dashboard/command-palette.tsx": 3,
     "src/components/entity-links/link-to-modal.tsx": 1,
-    "src/components/error-message.tsx": 1,
     "src/components/landing/deleted-account-banner.tsx": 1,
     "src/components/legal/legal-layout.tsx": 3,
     "src/components/overview/beta-expiry-banner.tsx": 2,
-    "src/components/overview/quick-start-button.tsx": 1,
-    "src/components/overview/quick-start-modal.tsx": 3,
     "src/components/pagination-controls.tsx": 3,
     "src/components/pwa/pwa-provider.tsx": 4,
     "src/components/settings/buy-credits.tsx": 2,
@@ -708,6 +878,40 @@ check("no aria-* text attribute is a hardcoded string", literalAria, []);
     "Unlink",
   ]);
 }
+console.log("\n== 1e. the sentence that says nothing is gone from the client ==");
+// "Something went wrong. Please try again." was the DEFAULT second
+// argument of getErrorMessage, so it was reachable from eighteen call
+// sites that simply omitted it — and omitting an optional argument is not
+// a decision, it is what happens when the parameter is optional. It is
+// English in a Greek UI, and it answers neither "what do I do now" nor
+// the question people actually have after a failed AI action, which is
+// whether it cost them anything.
+//
+// The fallback is now REQUIRED (lib/get-error-message.ts) so the omission
+// cannot recur silently, and the AI surfaces build their message from the
+// response status instead (lib/errors/use-error-text.ts). This asserts the
+// string itself does not come back into anything the browser renders.
+//
+// SERVER ROUTES ARE NOT IN SCOPE HERE. They still return English prose —
+// that is the 518-string convention counted above, and the client no
+// longer shows it at the converted call sites.
+const clientFiles = sources.filter((f) => !f.startsWith("src/app/api/") && !f.startsWith("src/lib/"));
+const banned = [];
+for (const file of clientFiles) {
+  const src = stripComments(readFileSync(file, "utf8"));
+  for (const m of src.matchAll(/"([^"]*Something went wrong[^"]*)"/g)) {
+    banned.push(`${file}: "${m[1]}"`);
+  }
+}
+check(`no client component renders "Something went wrong" (${clientFiles.length} files)`, banned, []);
+
+// And the door it came through is shut: a required parameter cannot be
+// forgotten the way an optional one with a default can.
+const getErr = readFileSync("src/lib/get-error-message.ts", "utf8");
+checkTrue(
+  "getErrorMessage's fallback is required, not defaulted",
+  /export function getErrorMessage\(error: unknown, fallback: string\)/.test(getErr)
+);
 
 console.log("\n== 2. every t() call resolves to a real key ==");
 // next-intl renders the raw key path and logs to the console when a key is
@@ -819,8 +1023,24 @@ console.log("\n== 6. every key a DATA file names resolves, in all ten locales ==
   const seen = new Map(); // key -> where
   for (const file of DATA_FILES) {
     const src = stripComments(readFileSync(file, "utf8"));
-    for (const m of src.matchAll(/(?:labelKey|titleKey|placeholderKey):\s*"([^"]+)"/g)) {
+    // newKey is a leaf like labelKey — the whole "New competitor"
+    // sentence, per module, because "New " + the plural page title was
+    // ungrammatical in every language that inflects.
+    for (const m of src.matchAll(/(?:labelKey|titleKey|placeholderKey|newKey):\s*"([^"]+)"/g)) {
       if (!seen.has(m[1])) seen.set(m[1], file);
+    }
+    // emptyKey names a GROUP, not a leaf: the empty screen is three
+    // strings (title, why, example) and the component reads all three off
+    // the one key through emptyStateKey(). Expanded here for the same
+    // reason optionLabelKey() is expanded below — the parts are built in
+    // code, so a check that only looked at what a human typed would prove
+    // the existence of a key nothing ever renders and miss the three that
+    // are.
+    for (const m of src.matchAll(/emptyKey:\s*"([^"]+)"/g)) {
+      for (const part of ["title", "why", "example"]) {
+        const key = `${m[1]}.${part}`;
+        if (!seen.has(key)) seen.set(key, `${file} (emptyKey "${m[1]}")`);
+      }
     }
     // Stored option values become display keys through optionLabelKey().
     for (const m of src.matchAll(/options:\s*\[([^\]]+)\]/g)) {
@@ -883,6 +1103,19 @@ console.log("\n== 6. every key a DATA file names resolves, in all ten locales ==
   checkTrue(
     "ModuleConfig carries titleKey, and no `title`",
     /titleKey: ModuleTitleKey;/.test(modulesSrc) && !/^\s+title: string;$/m.test(modulesSrc)
+  );
+  // emptyKey was `emptyKey?: string` — optional, and therefore the empty
+  // screen twenty modules got was the generic one. Both halves matter:
+  // REQUIRED is what makes the twenty-first module answer the question
+  // too, and the KEY TYPE is what stops the answer being English prose
+  // typed into the registry, exactly as with labelKey above.
+  // Stripped, because the field's own doc comment quotes the shape it
+  // used to have — and a check that reads comments would be failed by the
+  // sentence explaining why it passes.
+  const modulesCode = stripComments(modulesSrc);
+  checkTrue(
+    "ModuleConfig carries a REQUIRED emptyKey, typed as a key",
+    /emptyKey: ModuleMessageKey;/.test(modulesCode) && !/emptyKey\?/.test(modulesCode)
   );
 }
 

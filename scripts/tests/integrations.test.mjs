@@ -22,6 +22,7 @@
 // Run: node scripts/tests/integrations.test.mjs
 import { readFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
+import { schemaSql, enablesRls } from "./lib/schema-sql.mjs";
 
 let pass = 0,
   fail = 0;
@@ -390,8 +391,19 @@ check("...and nonsense is refused", limits.maxIntegrationReadsPerHour({ INTEGRAT
 // ---------------------------------------------------------------------
 console.log("\n== 7. agents gained Slack, and the delivery rule did not weaken ==");
 // ---------------------------------------------------------------------
-check("both methods exist", agentConfig.AGENT_DELIVERY_METHODS, ["email", "slack"]);
-check("an unknown method is not one", agentConfig.isAgentDeliveryMethod("telegram"), false);
+// Five now, not two. This assertion is not being relaxed — it still pins
+// the EXACT list, so a channel cannot appear in the type without appearing
+// here; it is being updated because Telegram, Discord and in-app delivery
+// were added deliberately.
+check("every delivery method exists", agentConfig.AGENT_DELIVERY_METHODS, [
+  "email",
+  "slack",
+  "telegram",
+  "discord",
+  "in_app",
+]);
+check("an unknown method is still not one", agentConfig.isAgentDeliveryMethod("carrier_pigeon"), false);
+check("nor is a near-miss", agentConfig.isAgentDeliveryMethod("in-app"), false);
 
 // The email rule is untouched — the same five properties as before.
 check("the account address is allowed", agentConfig.isDeliveryTargetAllowed("a@b.com", "a@b.com"), true);
@@ -560,9 +572,16 @@ console.log("\n== 8. the wiring ==");
   // ownership proof as creating one.
   const patch = read("src/app/api/agents/[id]/route.ts");
   checkTrue("editing delivery is handled", /body\.deliveryMethod !== undefined/.test(patch));
-  checkTrue("...and the channel list comes from the DATABASE", /listSlackChannels\(user\.id\)/.test(patch));
+  // The property is unchanged — where an agent may deliver is resolved
+  // from the DATABASE, never from the request body — but both routes now
+  // ask one shared resolver instead of each calling listSlackChannels
+  // itself. That is what stopped Telegram and Discord arriving checked on
+  // create and unchecked on edit.
+  const ownership = read("src/lib/agents/delivery-ownership.ts");
+  checkTrue("...and the channel list comes from the DATABASE", /resolveDeliveryOwnership\(user\.id/.test(patch));
   const create = read("src/app/api/agents/route.ts");
-  checkTrue("creating with Slack resolves the channels server-side", /listSlackChannels\(user\.id\)/.test(create));
+  checkTrue("creating with Slack resolves the channels server-side", /resolveDeliveryOwnership\(user\.id/.test(create));
+  checkTrue("...and the resolver is the one that reads Slack", /listSlackChannels\(userId\)/.test(ownership));
   checkTrue("...and never trusts the body", !/allowedSlackChannels = draft\./.test(create));
 }
 
@@ -570,19 +589,29 @@ console.log("\n== 8. the wiring ==");
 console.log("\n== 9. the schema ==");
 // ---------------------------------------------------------------------
 {
-  const sql = read("v3_integrations_migration.sql");
+  // Was the loose `v3_integrations_migration.sql` at the repo root, which
+  // nothing ran. supabase/migrations is what builds the database.
+  const sql = schemaSql();
   checkTrue("the token columns are named as ciphertext", /access_token_encrypted text not null/.test(sql));
   checkTrue("...and the refresh one is nullable", /refresh_token_encrypted text,/.test(sql));
   checkTrue("no plaintext token column exists", !/\baccess_token text\b/.test(sql));
   checkTrue("one connection per provider per user", /unique index[^;]*user_integrations[^;]*\(user_id, provider\)/is.test(sql));
-  checkTrue("both tables enable RLS", (sql.match(/enable row level security/g) ?? []).length === 2);
+  // Was a COUNT of every `enable row level security` in a file that held
+  // only these two tables. Against the whole schema that number is 70,
+  // which is not a claim about user_integrations and integration_sync_log.
+  for (const table of ["user_integrations", "integration_sync_log"]) {
+    checkTrue(`${table} enables RLS`, enablesRls(sql, table));
+  }
   checkTrue("the migration is idempotent", !/create table (?!if not exists)/.test(sql));
   checkTrue(
     "the prune RPC is service-role only",
     /grant execute on function public\.prune_integration_sync_log[^;]*to service_role/i.test(sql) &&
       /revoke all on function public\.prune_integration_sync_log[^;]*from anon/i.test(sql)
   );
-  checkTrue("agents can now deliver to Slack", /delivery_method in \('email', 'slack'\)/.test(sql));
+  checkTrue(
+    "agents can deliver to every channel the code offers",
+    /delivery_method in \('email', 'slack', 'telegram', 'discord', 'in_app'\)/.test(sql)
+  );
 
   // The sync log is an audit trail of what the AI READ. It must not be
   // able to hold what it read.
@@ -600,13 +629,17 @@ console.log("\n== 9. the schema ==");
     checkTrue(`the sync log has no ${forbidden} column`, !new RegExp(`\\b${forbidden}\\b`, "i").test(logBlock));
   }
 
-  const backup = read("supabase_full_project_backup.sql");
+  const backup = sql;
   for (const table of ["user_integrations", "integration_sync_log"]) {
     checkTrue(`${table} is in the full schema file`, backup.includes(`create table if not exists public.${table}`));
   }
+  // Both files DROP this constraint by name before re-adding it, so
+  // whichever runs last wins. A narrower definition left behind in one of
+  // them would silently invalidate every Telegram, Discord and in-app
+  // agent row the moment somebody re-ran it.
   checkTrue(
     "the backup's delivery_method CHECK matches the migration",
-    /delivery_method in \('email', 'slack'\)/.test(backup)
+    /delivery_method in \('email', 'slack', 'telegram', 'discord', 'in_app'\)/.test(backup)
   );
 }
 

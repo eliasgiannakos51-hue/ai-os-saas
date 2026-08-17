@@ -1,3 +1,4 @@
+import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -7,7 +8,9 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { FavoritesList } from "@/components/favorites/favorites-list";
 import { groupFavorites, loadAllFavorites } from "@/lib/favorites";
 
-export const metadata: Metadata = { title: "Favorites" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.favorites");
+}
 
 // Same reasoning as dashboard/timeline and dashboard/mission — reads
 // live, frequently-changing data (favorites toggled from any module),
@@ -33,7 +36,7 @@ export default async function FavoritesPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={Star} title={t("title")} description={t("description")} />
+        <PageHeader helpKey="help.favorites" icon={Star} title={t("title")} description={t("description")} />
         <FavoritesList groups={groups} />
       </div>
     </main>

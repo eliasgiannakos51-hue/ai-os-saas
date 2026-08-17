@@ -11,7 +11,7 @@ import { useSmartSuggestions } from "@/lib/use-smart-suggestions";
 import { SmartSuggestions } from "@/components/create/smart-suggestions";
 import { NextStepSuggestion } from "@/components/create/next-step-suggestion";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
-import { appendClarificationAnswers } from "@/lib/clarification-client";
+import { appendClarificationAnswers, alignSuggestions } from "@/lib/clarification-client";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useToast } from "@/components/toast/toast-context";
@@ -231,6 +231,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
           {result.type === "needsClarification" && (
             <ClarificationQuestions
               questions={result.questions}
+              suggestions={alignSuggestions(result.questions, result.suggestions)}
               onAnswer={(answers) => handleClarificationAnswer(result.questions, answers)}
               onSkip={handleClarificationSkip}
               submitting={loading}
@@ -252,7 +253,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
                 <p className="mt-1 text-foreground/90">{result.message}</p>
                 <Link
                   href={result.href}
-                  className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-emerald-900/60 px-3 py-1.5 text-xs text-emerald-400 transition-colors duration-150 hover:border-emerald-500 sm:min-h-0"
+                  className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-emerald-900/60 px-3 py-1.5 text-xs text-emerald-400 transition-colors duration-150 hover:border-emerald-500"
                 >
                   {tCreate("viewModule", { module: result.moduleTitle })}
                 </Link>
@@ -273,7 +274,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0 sm:px-2.5"
+                      className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:px-2.5"
                     >
                       {tKey(item.titleKey)}
                     </Link>

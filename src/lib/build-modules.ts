@@ -11,6 +11,8 @@ import type { ModuleConfig } from "@/lib/modules";
 export const BUILD_MODULES: ModuleConfig[] = [
   {
     slug: "websites",
+    emptyKey: "moduleData.empty.websites",
+    newKey: "moduleData.new.websites",
     titleKey: "sidebar.items.websites",
     table: "ai_websites",
     headlineKey: "name",
@@ -31,6 +33,8 @@ export const BUILD_MODULES: ModuleConfig[] = [
   },
   {
     slug: "apps",
+    emptyKey: "moduleData.empty.apps",
+    newKey: "moduleData.new.apps",
     titleKey: "sidebar.items.apps",
     table: "ai_apps",
     headlineKey: "name",
@@ -57,6 +61,8 @@ export const BUILD_MODULES: ModuleConfig[] = [
   },
   {
     slug: "images",
+    emptyKey: "moduleData.empty.images",
+    newKey: "moduleData.new.images",
     titleKey: "sidebar.items.images",
     table: "ai_images",
     headlineKey: "prompt",
@@ -75,6 +81,8 @@ export const BUILD_MODULES: ModuleConfig[] = [
   },
   {
     slug: "videos",
+    emptyKey: "moduleData.empty.videos",
+    newKey: "moduleData.new.videos",
     titleKey: "sidebar.items.videos",
     table: "ai_videos",
     headlineKey: "prompt",
@@ -93,6 +101,8 @@ export const BUILD_MODULES: ModuleConfig[] = [
   },
   {
     slug: "coding",
+    emptyKey: "moduleData.empty.coding",
+    newKey: "moduleData.new.coding",
     titleKey: "sidebar.items.coding",
     table: "ai_coding_requests",
     headlineKey: "title",
@@ -117,6 +127,8 @@ export const BUILD_MODULES: ModuleConfig[] = [
   },
   {
     slug: "data-analysis",
+    emptyKey: "moduleData.empty.dataAnalysis",
+    newKey: "moduleData.new.dataAnalysis",
     titleKey: "sidebar.items.dataAnalysis",
     table: "ai_data_analysis_requests",
     headlineKey: "title",
@@ -141,6 +153,13 @@ export const BUILD_MODULES: ModuleConfig[] = [
   },
   {
     slug: "presentations",
+    // The one empty state that has to say what this module is NOT. It was
+    // the first module to get its own (module.emptyPresentationNotes, now
+    // moved into the shared moduleData.empty.* table with the other
+    // twenty); presentation-notes.test.mjs still holds it to saying
+    // "does not generate slides" in all ten locales.
+    emptyKey: "moduleData.empty.presentations",
+    newKey: "moduleData.new.presentations",
     // "Presentations" promised a generator this module does not contain.
     //
     // It is a CRUD tracker — a table of rows the user types by hand, with
@@ -155,7 +174,6 @@ export const BUILD_MODULES: ModuleConfig[] = [
     // belongs until it is real.
     titleKey: "sidebar.items.presentations",
     table: "ai_presentations",
-    emptyKey: "emptyPresentationNotes",
     headlineKey: "title",
     fields: [
       { key: "title", labelKey: "moduleData.fields.title", type: "text", required: true },
@@ -172,6 +190,8 @@ export const BUILD_MODULES: ModuleConfig[] = [
   },
   {
     slug: "campaigns",
+    emptyKey: "moduleData.empty.campaigns",
+    newKey: "moduleData.new.campaigns",
     titleKey: "sidebar.items.campaigns",
     table: "ai_campaigns",
     headlineKey: "name",

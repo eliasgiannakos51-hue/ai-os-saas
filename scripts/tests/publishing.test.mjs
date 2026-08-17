@@ -17,6 +17,7 @@
 //
 // Run: node scripts/tests/publishing.test.mjs
 import { readFileSync } from "node:fs";
+import { schemaSql, enablesRls } from "./lib/schema-sql.mjs";
 
 let pass = 0,
   fail = 0;
@@ -310,7 +311,9 @@ checkTrue("published sites are excluded from the auth middleware", /\|s\/\|/.tes
 // ---------------------------------------------------------------------
 console.log("\n== 6. analytics that cannot hold personal data ==");
 // ---------------------------------------------------------------------
-const sql = read("v3_website_hosting_migration.sql");
+// Was the loose `v3_website_hosting_migration.sql` at the repo root, which
+// nothing ran. supabase/migrations is what builds the database.
+const sql = schemaSql();
 const analyticsBlock = sql.slice(
   sql.indexOf("create table if not exists public.site_analytics"),
   sql.indexOf("create unique index if not exists site_analytics_site_date_key")
@@ -349,14 +352,18 @@ checkTrue(
   "one published site per website",
   /create unique index[^;]*published_sites_website_id_key[^;]*\(website_id\)/is.test(sql)
 );
-checkTrue("all three tables enable RLS", (sql.match(/enable row level security/g) ?? []).length === 3);
+// Was a COUNT over a file that held only these three tables. Against the
+// whole schema that number is 70 and says nothing about these three.
+for (const table of ["published_sites", "site_versions", "site_analytics"]) {
+  checkTrue(`${table} enables RLS`, enablesRls(sql, table));
+}
 checkTrue(
   "the view-counting RPC is executable only by the service role",
   /grant execute on function public\.record_site_view[^;]*to service_role/i.test(sql) &&
     /revoke all on function public\.record_site_view[^;]*from anon/i.test(sql)
 );
 checkTrue("the migration is idempotent", !/create table (?!if not exists)/.test(sql));
-const backup = read("supabase_full_project_backup.sql");
+const backup = sql;
 for (const table of ["published_sites", "site_versions", "site_analytics"]) {
   checkTrue(`${table} is in the full schema file`, backup.includes(`create table if not exists public.${table}`));
 }

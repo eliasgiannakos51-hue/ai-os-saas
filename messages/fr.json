@@ -7,7 +7,7 @@
     "signOut": "Se déconnecter",
     "jumpToPage": "Aller à un module ou une page...",
     "noMatches": "Aucun résultat pour '{query}'",
-    "createStudio": "Studio de création",
+    "createStudio": "Créer n’importe quoi",
     "cancel": "Annuler",
     "save": "Enregistrer",
     "saving": "Enregistrement...",
@@ -47,12 +47,31 @@
     "nextPage": "Page suivante",
     "previousPage": "Page précédente",
     "toggleMenu": "Afficher ou masquer le menu",
-    "dismissToastAria": "{message} — appuyez sur Entrée pour ignorer"
+    "dismissToastAria": "{message} — appuyez sur Entrée pour ignorer",
+    "retry": "Réessayer",
+    "whatIsThisPage": "Qu'est-ce que cette page ?",
+    "readMore": "En savoir plus",
+    "copy": "Copier",
+    "copied": "Copié ✓",
+    "copyFailed": "Votre navigateur n'a pas autorisé la copie. Sélectionnez le texte et copiez-le vous-même.",
+    "copyNothing": "Il n'y a encore rien à copier.",
+    "offline": {
+      "title": "Vous êtes hors ligne.",
+      "showingCached": "Rien sur cette page ne se met à jour.",
+      "showingCachedAge": "Rien ici ne se met à jour — chargé il y a {minutes} min.",
+      "retry": "Réessayer",
+      "checking": "Vérification…",
+      "stillOffline": "Toujours pas de connexion."
+    },
+    "creditsUnlimited": "Illimités",
+    "whatIsThis": "Qu'est-ce que c'est ?",
+    "moreInHelp": "En savoir plus dans le Centre d'aide",
+    "examplesLabel": "Essayez :"
   },
   "sidebar": {
     "groups": {
       "workspace": "Espace de travail",
-      "build": "Construire",
+      "build": "Créer",
       "business": "Entreprise",
       "strategy": "Stratégie",
       "operations": "Opérations",
@@ -61,31 +80,32 @@
       "create": "Créer",
       "myBusiness": "Mon activité",
       "track": "Suivre",
-      "insights": "Bilan"
+      "insights": "Ce que j’ai remarqué",
+      "tracking": "Suivi"
     },
     "items": {
       "home": "Accueil",
       "chat": "Ionexa Discussion",
-      "memory": "Mémoire IA",
-      "timeline": "Chronologie",
+      "memory": "Chercher dans mes données",
+      "timeline": "Historique",
       "favorites": "Favoris",
-      "missionControl": "Contrôle de Mission",
+      "missionControl": "Objectifs et plans",
       "reflection": "Bilan Hebdomadaire",
       "settings": "Paramètres",
       "team": "Équipe",
       "agents": "Agents IA",
-      "websites": "Sites web",
-      "websiteBuilder": "Générateur de Site",
-      "apps": "Applications",
-      "images": "Images",
-      "videos": "Vidéos",
-      "coding": "Codage IA",
-      "dataAnalysis": "Analyse de données",
+      "websites": "Projets de sites",
+      "websiteBuilder": "Créer un site",
+      "apps": "Notes d’applications",
+      "images": "Notes d’images",
+      "videos": "Notes de vidéos",
+      "coding": "Notes de développement",
+      "dataAnalysis": "Notes d’analyses",
       "documents": "Documents",
       "presentations": "Notes de présentation",
-      "campaigns": "Campagnes",
+      "campaigns": "Notes de campagnes",
       "analytics": "Analytique",
-      "finance": "Finance",
+      "finance": "Finances",
       "content": "Contenu",
       "sales": "Ventes",
       "products": "Produits",
@@ -100,7 +120,7 @@
       "productWorkflow": "Flux Produit",
       "automation": "Automatisation",
       "marketplace": "Place de marché",
-      "published": "Sites publiés",
+      "published": "Sites en ligne",
       "integrations": "Intégrations",
       "files": "Fichiers",
       "deepResearch": "Recherche approfondie",
@@ -194,8 +214,6 @@
       "creditsPerMonth": "Crédits / mois",
       "aiAgents": "Agents IA",
       "websiteBuilder": "Créateur de sites web et d'automatisations",
-      "mobileSaasBuilder": "Créateur d'apps mobiles et SaaS",
-      "imageVideo": "Génération d'images et de vidéos",
       "aiMemory": "Mémoire IA",
       "teamCollaboration": "Collaboration d'équipe",
       "teamSeatsAddOn": "Sièges d'équipe",
@@ -216,32 +234,20 @@
     "businessFeatureManage": "Gérez les sièges à tout moment depuis les paramètres d'équipe",
     "setUpTeam": "Configurer l'équipe",
     "features": {
-      "1Workspace3Projects": "1 espace de travail, 3 projets",
       "basicAiChat": "Chat IA basique",
       "creditsPerMonth": "{count} crédits/mois",
-      "marketplaceInstallOnly": "Marketplace : installation uniquement",
-      "communitySupport": "Assistance communautaire",
-      "unlimitedProjects": "Projets illimités",
       "aiMemory": "Mémoire IA",
       "websiteAutomationBuilderAccess": "Accès à Website & Automation Builder",
-      "imageVideoGenerationAccess": "Accès à la génération d'images et de vidéos",
-      "emailSupport": "Assistance par e-mail",
       "everythingInStarter": "Tout ce que contient Starter",
       "upTo100AiAgents": "Jusqu'à 100 agents IA",
-      "mobileSaasBuilderAccess": "Accès à Mobile & SaaS Builder",
-      "priorityProcessing": "Traitement prioritaire",
       "everythingInGrowth": "Tout ce que contient Growth",
       "teamCollaboration": "Collaboration d'équipe",
-      "sharedAiMemory": "Mémoire IA partagée",
-      "prioritySupport": "Assistance prioritaire",
       "everythingInProfessional": "Tout ce que contient Professional",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Sièges d'équipe illimités inclus — sans frais par membre",
       "extendedChatMemoryRetention100Vs20RecentFact": "Rétention de mémoire de conversation étendue (100 contre 20 faits récents)",
       "customAiPersonaNameInIonexaChat": "Nom d'assistant IA personnalisé dans Ionexa Chat",
-      "highestPriorityProcessing": "Traitement en priorité maximale",
       "everythingInUltimate": "Tout ce que contient Ultimate",
       "unlimitedMembers": "Membres illimités",
-      "dedicatedSupport": "Assistance dédiée",
       "customCredits": "Crédits personnalisés",
       "upTo2AiAgents": "Jusqu'à 2 agents IA",
       "upTo5AiAgents": "Jusqu'à 5 agents IA",
@@ -257,7 +263,8 @@
     "seatNote": {
       "included": "Sièges d'équipe illimités inclus — aucun frais par membre",
       "perMember": "+ {currency}{price}/mois par membre d'équipe — chaque membre bénéficie d'un accès complet au niveau de votre offre"
-    }
+    },
+    "metaDescription": "Tarifs Ionexa AI — formules Free, Starter, Growth, Professional, Ultimate et Enterprise."
   },
   "roadmap": {
     "title": "Feuille de route",
@@ -357,7 +364,8 @@
         "title": "Synchronisation multiplateforme",
         "description": "Une expérience unifiée sur le web, mobile et bureau."
       }
-    }
+    },
+    "metaDescription": "Ce qui fonctionne aujourd'hui dans Ionexa AI, ce qui arrive ensuite et où nous allons."
   },
   "auth": {
     "login": {
@@ -369,7 +377,8 @@
       "noAccount": "Pas encore de compte ?",
       "signUp": "Inscrivez-vous",
       "forgotPassword": "Mot de passe oublié ?",
-      "resetSuccess": "Mot de passe mis à jour — connectez-vous avec votre nouveau mot de passe."
+      "resetSuccess": "Mot de passe mis à jour — connectez-vous avec votre nouveau mot de passe.",
+      "failed": "Nous n'avons pas pu vous connecter. Vérifiez l'e-mail et le mot de passe, ou réinitialisez-le en cas de doute."
     },
     "signup": {
       "chooseYourPlan": "Choisissez votre forfait",
@@ -396,7 +405,8 @@
       "createAccount": "Créer le compte",
       "mostPopular": "Le plus populaire",
       "mustAgreeToTerms": "Vous devez accepter les Conditions d'utilisation et la Politique de confidentialité pour créer un compte.",
-      "passwordRequirementsNotMet": "Choisissez un mot de passe qui remplit toutes les conditions ci-dessus."
+      "passwordRequirementsNotMet": "Choisissez un mot de passe qui remplit toutes les conditions ci-dessus.",
+      "failed": "Nous n'avons pas pu créer le compte. Vérifiez les informations et réessayez — vous n'avez pas été débité."
     },
     "forgotPassword": {
       "title": "Réinitialiser le mot de passe",
@@ -407,7 +417,8 @@
       "checkInbox": "Si un compte existe pour <highlight>{emailAddress}</highlight>, un lien de réinitialisation est en route. Vérifiez votre boîte de réception.",
       "backToLogin": "Retour à la connexion",
       "rememberedIt": "Vous vous en souvenez ?",
-      "logIn": "Connexion"
+      "logIn": "Connexion",
+      "failed": "Nous n'avons pas pu envoyer l'e-mail de réinitialisation. Vérifiez l'adresse et réessayez dans un instant."
     },
     "resetPassword": {
       "title": "Définir un nouveau mot de passe",
@@ -417,7 +428,9 @@
       "confirmPassword": "Confirmer le mot de passe",
       "saveNewPassword": "Enregistrer le nouveau mot de passe",
       "saving": "Enregistrement...",
-      "passwordsDoNotMatch": "Les mots de passe ne correspondent pas."
+      "passwordsDoNotMatch": "Les mots de passe ne correspondent pas.",
+      "linkInvalid": "Ce lien de réinitialisation n'est plus valide. Les liens expirent rapidement — demandez-en un nouveau.",
+      "failed": "Nous n'avons pas pu définir le nouveau mot de passe. Réessayez, et demandez un nouveau lien si cela persiste."
     },
     "social": {
       "continueWithGoogle": "Continuer avec Google",
@@ -430,7 +443,8 @@
       "warning": "Cette action supprimera définitivement votre compte et tous les enregistrements que vous avez saisis. Elle est irréversible.",
       "deleting": "Suppression…",
       "confirmButton": "Supprimer définitivement mon compte",
-      "cancel": "Annuler et revenir"
+      "cancel": "Annuler et revenir",
+      "confirmFailed": "Nous n'avons pas pu terminer la suppression. Votre compte existe toujours — réessayez le lien ou contactez le support."
     }
   },
   "settings": {
@@ -445,7 +459,8 @@
       "requirementsNotMet": "Choisissez un mot de passe qui remplit toutes les conditions ci-dessous.",
       "passwordsDoNotMatch": "Les mots de passe ne correspondent pas.",
       "couldNotUpdate": "✗ impossible de mettre à jour le mot de passe",
-      "passwordUpdated": "✓ mot de passe mis à jour"
+      "passwordUpdated": "✓ mot de passe mis à jour",
+      "failed": "Nous n'avons pas pu changer votre mot de passe. Vérifiez l'actuel et réessayez."
     },
     "chatMemory": {
       "title": "Mémoire de chat",
@@ -526,7 +541,8 @@
       "sending": "Envoi...",
       "checkEmail": "Vérifiez votre e-mail pour confirmer la suppression — un lien a été envoyé à <highlight>{email}</highlight>. Il expire dans 1 heure ; rien n'est supprimé tant que vous ne cliquez pas dessus.",
       "emailDoesNotMatch": "L'e-mail ne correspond pas.",
-      "couldNotStartDeletion": "✗ impossible de lancer la suppression du compte"
+      "couldNotStartDeletion": "✗ impossible de lancer la suppression du compte",
+      "failed": "Nous n'avons pas pu envoyer l'e-mail de confirmation. Réessayez dans un instant — rien n'a été supprimé."
     },
     "emailNotifications": {
       "title": "Notifications par e-mail",
@@ -566,7 +582,8 @@
       "title": "Personnalité IA",
       "description": "Donnez un nom personnalisé à l'assistant.",
       "personaUpdated": "✓ nom de l'assistant mis à jour",
-      "couldNotSave": "✗ impossible d'enregistrer le nom"
+      "couldNotSave": "✗ impossible d'enregistrer le nom",
+      "saveFailed": "Nous n'avons pas pu enregistrer le nom. Réessayez dans un instant."
     },
     "billing": {
       "title": "Facturation",
@@ -734,7 +751,12 @@
         }
       },
       "quickStartTemplates": "Modèles de démarrage rapide",
-      "quickStartApplied": "✓ {count, plural, one {# entrée d'exemple ajoutée} other {# entrées d'exemple ajoutées}}"
+      "quickStartApplied": "✓ {count, plural, one {# entrée d'exemple ajoutée} other {# entrées d'exemple ajoutées}}",
+      "quickStart": "Démarrage rapide",
+      "templateApplied": "{count} exemples ajoutés",
+      "templateFailed": "Nous n'avons pas pu appliquer ce modèle. Réessayez dans un instant — rien n'a été ajouté.",
+      "quickStartBlurb": "Ajoutez quelques entrées d'exemple pour voir à quoi ressemble un espace de travail rempli.",
+      "quickStartAdd": "Ajouter"
     },
     "team": {
       "title": "Équipe",
@@ -743,7 +765,6 @@
       "emailPlaceholder": "collegue@entreprise.com",
       "sendInvite": "Envoyer l'invitation",
       "sending": "Envoi...",
-      "noMembers": "Aucun membre d'équipe pour l'instant — invitez quelqu'un ci-dessus.",
       "inviteSent": "Invitation envoyée à {email}.",
       "inviteFailed": "Impossible d'envoyer l'invitation.",
       "active": "Actif",
@@ -761,23 +782,28 @@
       "rolePlaceholder": "Que fait cette personne ?",
       "workUseDisclaimer": "Les sièges d'équipe sont destinés aux employés ou collaborateurs réels travaillant sur votre activité — pas à un usage personnel/familial. En invitant un membre, vous confirmez qu'il fait partie du travail de votre équipe.",
       "memberRemoved": "✓ membre retiré",
-      "couldNotRemoveMember": "✗ impossible de retirer le membre"
+      "couldNotRemoveMember": "✗ impossible de retirer le membre",
+      "empty": {
+        "title": "Personne n'a encore été invité",
+        "why": "Invitez quelqu'un par e-mail et il aura son propre accès à cet espace : les mêmes données, sous son compte, pas avec votre mot de passe."
+      }
     },
     "memory": {
-      "title": "Mémoire IA",
+      "title": "Chercher dans mes données",
       "description": "Recherchez tout ce que vous avez enregistré, dans tous les modules — sans avoir à vous souvenir d'où vous l'avez mis.",
       "searchPlaceholder": "Cherchez dans tout ce que vous avez enregistré...",
       "resultCount": "{count, plural, =0 {aucun résultat} one {# résultat} other {# résultats}} dans tous les modules",
       "resultCountForQuery": "{count, plural, =0 {aucun résultat} one {# résultat} other {# résultats}} pour « {query} » dans tous les modules",
-      "empty": "Rien d'enregistré pour l'instant — dès que vous utiliserez les modules, vous pourrez tous les fouiller depuis ici.",
+      "empty": {
+        "title": "Rien de consigné, donc rien à trouver",
+        "why": "Cela cherche dans tous les modules à la fois : idées, pistes, dépenses, positions. Cela se remplit à mesure que vous utilisez les autres pages ; rien ici ne lui appartient."
+      },
       "truncated": "Affichage des {shown} premiers résultats sur {total} — affinez votre recherche."
     },
     "documents": {
       "title": "Documents",
       "description": "Notes et documents libres — écrivez ce que vous voulez, ça s'enregistre au fur et à mesure.",
       "newDocument": "Nouveau document",
-      "emptyTitle": "Aucun document pour l'instant",
-      "emptyHint": "Créez votre premier document pour commencer à écrire.",
       "untitled": "Sans titre",
       "titlePlaceholder": "Document sans titre",
       "contentPlaceholder": "Commencez à écrire…",
@@ -791,7 +817,13 @@
       "heading1": "Titre 1",
       "heading2": "Titre 2",
       "bulletList": "Liste à puces",
-      "updatedAt": "Modifié {when}"
+      "updatedAt": "Modifié {when}",
+      "empty": {
+        "title": "Une page blanche qui retient",
+        "why": "Des textes longs qui restent avec votre travail — un brief, un brouillon, des notes de réunion — cherchables à côté de tout le reste.",
+        "example": "Notes de la réunion de lundi"
+      },
+      "createFailed": "Nous n'avons pas pu créer le document. Réessayez dans un instant — rien n'a été enregistré."
     },
     "chat": {
       "title": "Ionexa Discussion",
@@ -816,7 +848,12 @@
       "pin": "Épingler",
       "unpin": "Désépingler",
       "rename": "Renommer",
-      "deleteConfirm": "Supprimer « {title} » ? Action irréversible."
+      "deleteConfirm": "Supprimer « {title} » ? Action irréversible.",
+      "pinLimitReached": "Vous avez épinglé {limit} conversations, le maximum que votre offre garde en haut. Détachez-en une pour épingler celle-ci.",
+      "pinError": "L'épinglage n'a pas été enregistré. Réessayez.",
+      "renameError": "Le nouveau nom n'a pas été enregistré — l'ancien reste.",
+      "renameLabel": "Nouveau nom pour « {title} »",
+      "emptyHint": "Demandez ce que vous voulez : culture générale, idées, aide à la rédaction ou simple conversation."
     },
     "create": {
       "title": "Créer N'importe Quoi",
@@ -825,30 +862,35 @@
       "viewModule": "Ouvrir {module} →"
     },
     "timeline": {
-      "title": "Chronologie",
+      "title": "Historique",
       "allModules": "Tous les modules",
       "showOnly": "Afficher uniquement : {module}",
       "rangeToday": "Aujourd'hui",
       "rangeWeek": "Cette semaine",
       "rangeMonth": "Ce mois-ci",
       "rangeAll": "Toute la période",
-      "emptyState": "Aucune entrée sur cette période pour l'instant."
+      "empty": {
+        "title": "Votre travail, dans l'ordre où il s'est fait",
+        "why": "Cela s'écrit tout seul. Tout ce que vous consignez dans n'importe quel module arrive ici en un seul fil : c'est ainsi qu'on répond à « qu'ai-je fait le mois dernier »."
+      }
     },
     "favorites": {
       "title": "Favoris",
       "description": "Tout ce que vous avez marqué d'une étoile, dans tous les modules, au même endroit.",
-      "emptyState": "Rien en favori pour l'instant — appuyez sur l'étoile d'une entrée pour l'enregistrer ici.",
-      "starredAt": "Ajouté {when}"
+      "starredAt": "Ajouté {when}",
+      "empty": {
+        "title": "La liste courte que vous n'avez pas encore faite",
+        "why": "Appuyez sur l'étoile de n'importe quoi — une idée, une piste, un site — et cela atterrit ici : ce que vous rouvrez sans cesse est à un clic, pas à cinq."
+      }
     },
     "mission": {
-      "title": "Contrôle de Mission",
+      "title": "Objectifs et plans",
       "started": "Démarré {time}",
       "description": "Planner → Builder → Reviewer — décrivez un objectif, obtenez un plan, puis construisez-le étape par étape avec l'IA.",
       "goalLabel": "Quel est votre objectif ?",
       "goalPlaceholder": "ex. Je veux lancer une boutique en ligne de bijoux faits main",
       "createPlan": "Créer le Plan",
       "planning": "Planification...",
-      "emptyState": "Aucune mission pour l'instant — utilisez « Nouvelle mission » pour décrire un objectif.",
       "createWithAi": "Créer avec l'IA",
       "creating": "Création...",
       "openWebsiteBuilder": "Ouvrir Website Builder",
@@ -898,7 +940,12 @@
         "heldBack": "{count} étapes plus exigeantes mises de côté pour l'instant"
       },
       "stillPlanning": "Planification en cours — cela prend du temps. Le travail continue et le plan sera dans votre liste de missions une fois prêt.",
-      "planStalled": "Le plan s'est arrêté de façon inattendue. Aucun crédit n'a été débité — réessayez."
+      "planStalled": "Le plan s'est arrêté de façon inattendue. Aucun crédit n'a été débité — réessayez.",
+      "empty": {
+        "title": "Un objectif, découpé en étapes",
+        "why": "Dites ce que vous voulez atteindre : cela devient un plan avec des étapes datées à cocher, pas une liste de souhaits.",
+        "example": "Obtenir les 10 premiers clients payants"
+      }
     },
     "reflection": {
       "title": "Bilan Hebdomadaire",
@@ -966,7 +1013,7 @@
       "levelLabel": "Niveau d'énergie {level}"
     },
     "websiteBuilder": {
-      "title": "Générateur de Site",
+      "title": "Créer un site",
       "description": "Décrivez ce que vous voulez, et l'IA génère un vrai site web complet — aperçu instantané, téléchargez le HTML.",
       "nameLabel": "Nom",
       "namePlaceholder": "ex. Page d'Accueil Coaching",
@@ -997,7 +1044,6 @@
       "downloadButton": "Télécharger le HTML",
       "deleteButton": "Supprimer",
       "deleted": "Site supprimé",
-      "emptyState": "Aucun site web pour l'instant — utilisez « Nouveau site web » pour générer le premier.",
       "editLabel": "Demander une modification",
       "editPlaceholder": "ex. Agrandis la section hero, ou change les couleurs en bleu.",
       "editButton": "Appliquer les modifications",
@@ -1055,14 +1101,22 @@
       },
       "imageIntro": "Votre logo, vos photos de produits ou du lieu — ce que vous voulez voir sur la page ou qui doit inspirer le style.",
       "regenerateAlreadyUsed": "Vous avez déjà utilisé la régénération gratuite pour ce site. Créez un nouveau site avec une autre description.",
-      "regenerateNoBrief": "Ce site a été créé avant que nous enregistrions la description d’origine ; il ne peut donc pas être régénéré automatiquement. Créez un nouveau site avec la même description."
+      "regenerateNoBrief": "Ce site a été créé avant que nous enregistrions la description d’origine ; il ne peut donc pas être régénéré automatiquement. Créez un nouveau site avec la même description.",
+      "empty": {
+        "title": "Décrivez le site, obtenez le site",
+        "why": "Écrivez à quoi il sert et à qui il s'adresse : les pages, les textes et la mise en page en découlent, et vous continuez à modifier en langage courant.",
+        "example": "Site d'une page pour une boulangerie, avec carte et horaires"
+      }
     },
     "marketplace": {
       "title": "Place de marché",
       "description": "Achetez et vendez des agents, automatisations et modèles — bientôt disponible.",
-      "emptyState": "Aucune annonce pour l'instant — soyez le premier à publier.",
       "comingSoon": "Bientôt disponible",
-      "publishButton": "Publier un Modèle"
+      "publishButton": "Publier un Modèle",
+      "empty": {
+        "title": "La Marketplace n'est pas encore ouverte",
+        "why": "L'idée est de permettre de partager les agents, modèles de sites et workflows créés. Rien n'est actif ici : le bouton ci-dessous est désactivé parce que la fonctionnalité n'existe pas encore, pas à cause de votre formule."
+      }
     },
     "automation": {
       "realizeSectionTitle": "Concrétiser une idée",
@@ -1115,7 +1169,7 @@
       "clarifyAnswerPlaceholder": "Votre réponse..."
     },
     "createStudio": {
-      "title": "Studio de création",
+      "title": "Créer n’importe quoi",
       "subtitle": "Décrivez en une phrase ce que vous voulez. Aucun outil à choisir : le studio devine de quoi il s'agit, vous montre ce qu'il a compris, puis seulement le crée.",
       "inputLabel": "Que voulez-vous créer ?",
       "inputPlaceholder": "ex. Une page d'accueil pour mon activité de coaching, chaleureuse et professionnelle",
@@ -1211,8 +1265,6 @@
       "discard": "Abandonner",
       "createSuccess": "Agent créé — il démarrera à sa prochaine exécution planifiée.",
       "createError": "Impossible de créer l'agent. Réessayez.",
-      "emptyTitle": "Aucun agent pour l'instant",
-      "emptyHint": "Décrivez ce que vous voulez voir fait régulièrement, et Ionexa construit l'agent.",
       "statusActive": "Actif",
       "statusPaused": "En pause",
       "statusDisabled": "Désactivé",
@@ -1265,17 +1317,49 @@
         "monthly": "Le {day} de chaque mois à {time}",
         "custom": "Planning : {expression}"
       },
-      "buildStalled": "La création s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez."
+      "buildStalled": "La création s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez.",
+      "empty": {
+        "title": "Du travail qui se fait sans vous",
+        "why": "Décrivez une tâche en une phrase : elle s'exécute ensuite selon un calendrier et vous livre le résultat, au lieu de vous rappeler de la faire.",
+        "example": "Chaque lundi matin, un résumé des ventes de la semaine"
+      },
+      "delivery": {
+        "label": "Où arrive le résultat",
+        "channels": {
+          "email": "E-mail",
+          "slack": "Slack",
+          "telegram": "Telegram",
+          "discord": "Discord",
+          "in_app": "Dans l’application"
+        },
+        "emailNote": "Envoyé à {email}, l’adresse de votre compte.",
+        "inAppNote": "Conservé dans l’application, dans vos notifications. Rien ne quitte Ionexa.",
+        "slackNotConnected": "Connectez d’abord Slack dans Intégrations.",
+        "slackChannelLabel": "Canal Slack",
+        "telegramHelp": "Créez un bot avec @BotFather, envoyez-lui un message, puis collez son token et votre chat id.",
+        "telegramTokenPlaceholder": "Token du bot",
+        "telegramChatPlaceholder": "Chat id, ex. 123456789",
+        "telegramTokenInvalid": "Cela ne ressemble pas à un token de bot Telegram.",
+        "telegramChatInvalid": "Cela ne ressemble pas à un chat id Telegram.",
+        "telegramConnected": "Connecté à la conversation {chat} · token {hint}",
+        "discordHelp": "Dans votre canal Discord : Paramètres → Intégrations → Webhooks → Nouveau webhook, puis copiez l’adresse.",
+        "discordUrlPlaceholder": "Adresse du webhook Discord",
+        "discordUrlInvalid": "Ce n’est pas une adresse de webhook Discord.",
+        "discordConnected": "Connecté · webhook {hint}",
+        "connect": "Connecter et envoyer un test",
+        "connectSuccess": "Connecté — un message de test a été remis.",
+        "connectFailed": "Impossible de connecter ce canal.",
+        "disconnect": "Déconnecter",
+        "disconnected": "Déconnecté."
+      }
     },
     "publishing": {
-      "title": "Sites publiés",
+      "title": "Sites en ligne",
       "description": "Vos sites, en ligne sur le web.",
       "analyticsNotice": "Nous comptons les vues par jour, rien d'autre : aucun cookie, aucun suivi des visiteurs, aucune donnée personnelle enregistrée sur les personnes qui visitent vos sites.",
       "goToBuilder": "Créateur de sites",
       "sitesUsed": "{used} sur {cap} en ligne",
       "sitesUsedUnlimited": "{used} en ligne",
-      "emptyTitle": "Rien de publié pour l'instant",
-      "emptyHint": "Ouvrez un site terminé dans le créateur et cliquez sur Publier : il reçoit une adresse en ligne immédiatement.",
       "publish": "Publier",
       "republish": "Publier à nouveau",
       "publishNow": "Publier",
@@ -1324,10 +1408,16 @@
       "reasonTaken": "Cette adresse est déjà prise. Essayez-en une autre.",
       "disabledFlagged": "Ce site a été retenu par notre contrôle de sécurité et ne peut pas être mis en ligne. Voir les détails ci-dessous — vous pouvez le régénérer une fois gratuitement.",
       "disabledFailed": "La génération de ce site n’a pas abouti, il n’y a donc rien à publier.",
-      "disabledGenerating": "Génération en cours. Vous pourrez publier dès qu’elle sera terminée."
+      "disabledGenerating": "Génération en cours. Vous pourrez publier dès qu’elle sera terminée.",
+      "empty": {
+        "title": "Rien n'est encore en ligne",
+        "why": "Un site que vous créez reste privé jusqu'à sa publication. Une fois publié, il reçoit une vraie adresse et ses visites s'affichent ici."
+      }
     },
     "integrations": {
       "title": "Intégrations",
+      "emptyTitle": "Rien n'est encore connecté",
+      "emptyBody": "Connectez un compte et l'IA pourra y lire — vos e-mails, votre agenda, vos fichiers — au lieu de ne connaître que ce que vous avez saisi.",
       "description": "Connectez les outils que vous utilisez déjà, pour que l'IA travaille sur vos vraies données.",
       "privacyNotice": "Les connexions sont en lecture seule sauf mention contraire. Les jetons sont chiffrés avec une clé absente de notre base de données, n'apparaissent jamais dans les journaux, et la déconnexion révoque l'accès chez le fournisseur et supprime tout ce que nous conservons, y compris l'historique de ce qui a été lu.",
       "notConfigured": "Les intégrations ne sont pas encore configurées sur ce déploiement, la connexion est donc désactivée.",
@@ -1432,7 +1522,7 @@
       "notInDocuments": "Les documents sélectionnés ne répondent pas à cela. Rien ci-dessous n'en provient.",
       "citations": "Sources dans vos documents",
       "removedCitations": "{count} référence(s) pointaient vers des pages non fournies et ont été supprimées.",
-      "truncatedWarning": "Seule une partie de la sélection a tenu ; la réponse peut être incomplète.",
+      "truncatedWarning": "Même lue par parties, la sélection dépassait ce qu'une seule question peut couvrir, donc la réponse peut être incomplète. Interrogez moins de fichiers à la fois.",
       "skippedFiles": "Ignorés (aucun texte lisible) : {names}",
       "creditsCharged": "{credits} crédits",
       "stepsLabel": "Comment fonctionne cette page",
@@ -1450,17 +1540,18 @@
       "emptyExample": "Par ex. « Que dit le contrat sur l'annulation ? »",
       "askDisabledNoFiles": "Cochez d'abord au moins un fichier ci-dessus.",
       "askDisabledNoQuestion": "Saisissez votre question pour continuer.",
-      "examplesLabel": "Essayez :",
-      "example1": "Que dit ce document sur l'annulation ?",
-      "example2": "Résumez les points essentiels.",
-      "example3": "Quels sont les délais et les montants ?",
       "processingHint": "Lecture du fichier — quelques secondes en général. Vous pourrez l'interroger dès qu'il sera prêt.",
       "failedHint": "Aucun texte lisible trouvé. Importez une version au texte sélectionnable.",
       "askStillRunning": "Lecture en cours — cela prend du temps. Le travail continue même page fermée ; revenez et reposez la question pour voir la réponse.",
       "askStalled": "La question s'est arrêtée de façon inattendue. Aucun crédit n'a été débité — réessayez.",
-      "stepReading": "Lecture de vos fichiers",
-      "stepAnswering": "Élaboration de la réponse",
-      "stepChecking": "Vérification des références"
+      "questionLength": "{used, number} sur {max, number} caractères",
+      "questionAtLimit": "Vous avez atteint la limite de {max, number} caractères pour une question.",
+      "readInParts": "Vos documents étaient trop longs pour être lus d'un seul tenant : ils ont été lus en {parts} parties et les réponses combinées.",
+      "copyAnswer": "Copier la réponse",
+      "copyCitation": "Copier cette source",
+      "copyText": "Copier le texte",
+      "copyTextError": "Impossible de lire le texte de ce fichier.",
+      "copyTextEmpty": "Nous n'avons extrait aucun texte de ce fichier."
     },
     "deepResearch": {
       "title": "Recherche approfondie",
@@ -1496,7 +1587,11 @@
       "confirmDelete": "Supprimer le rapport sur {name} ? Le document produit est conservé.",
       "deleteSuccess": "Rapport supprimé",
       "deleteError": "Le rapport n'a pas pu être supprimé.",
-      "empty": "Aucun rapport. Décrivez un sujet ci-dessus pour voir ce qui serait recherché.",
+      "empty": {
+        "title": "Posez une question qui demande de creuser",
+        "why": "Une question à plusieurs heures : le plan vous est d'abord présenté, puis le travail est fait et revient avec ses sources.",
+        "example": "Qui d'autre vend cela en Grèce, et à quel prix"
+      },
       "usedThisMonth": "{used} sur {cap} ce mois-ci",
       "usedUnlimited": "{used} ce mois-ci",
       "capReached": "Vous avez utilisé les rapports de ce mois. Réinitialisation le 1er.",
@@ -1584,7 +1679,11 @@
     "ideas": {
       "new": "Nouvelle idée",
       "edit": "Modifier l'idée",
-      "empty": "Aucune idée pour l'instant — utilisez le bouton ci-dessus pour enregistrer la première.",
+      "empty": {
+        "title": "Toutes vos idées au même endroit",
+        "why": "Notez-la tant qu'elle est encore brute : elle est notée, comparée aux autres et conservée même si vous l'écartez.",
+        "example": "Un nouveau service pour les petites entreprises"
+      },
       "loadError": "Impossible de charger vos idées : {message}",
       "deleteConfirm": "Supprimer cette idée ? Action irréversible.",
       "editAria": "Modifier l'idée : {name}",
@@ -1610,14 +1709,18 @@
       "cardCompetitors": "Concurrents :",
       "cardMarketSize": "Taille du marché :",
       "cardMvp": "Produit minimum viable :"
+    },
+    "backgroundWork": {
+      "working": "Votre dernière demande est toujours en cours — elle aboutira même si vous quittez cette page.",
+      "finished": "Votre dernière demande s'est terminée pendant votre absence.",
+      "open": "Ouvrir",
+      "dismiss": "Ignorer"
     }
   },
   "module": {
     "searchPlaceholder": "Rechercher...",
     "exportCsv": "Exporter en CSV",
-    "noEntries": "Aucune entrée pour l'instant — utilisez le bouton ci-dessus pour enregistrer la première.",
     "noMatches": "Aucun résultat pour '{query}'",
-    "new": "Nouveau {title}",
     "selectPlaceholder": "sélectionner...",
     "save": "Enregistrer",
     "saving": "Enregistrement...",
@@ -1644,7 +1747,39 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyPresentationNotes": "Rien ici pour l’instant. Cet espace sert à suivre les présentations que vous préparez ou avez déjà faites — il ne génère pas de diapositives à votre place. Utilisez le bouton ci-dessus pour en ajouter une."
+    "emptyWhat": "Tout ce que vous consignez sur {module} vit ici.",
+    "emptyWhy": "Tout ce que vous consignez ici rejoint votre Chronologie et devient une information que l'IA peut utiliser lorsque vous l'interrogez sur votre travail.",
+    "emptyExample": "Commencez par : « {example} »",
+    "examples": {
+      "competitors": "Notion — le concurrent le plus proche sur les prix",
+      "research": "Pourquoi le taux de conversion a baissé en juin",
+      "finance": "Facture d'hébergement de septembre — 240 €",
+      "learning": "Fonctions de fenêtrage SQL — chapitre 4 terminé",
+      "trading": "EURUSD long, clôturé à +1,8R",
+      "decisions": "Choix de Postgres plutôt que MongoDB, et pourquoi",
+      "products": "Formule Pro — option de facturation annuelle",
+      "content": "E-mail de lancement de la version de septembre",
+      "sales": "Acme Ltd — démo prévue mardi",
+      "feedback": "Client : l'export est trop lent au-delà de 5 000 lignes",
+      "analytics": "Inscriptions cette semaine : 142 (+18 %)",
+      "automation": "M'envoyer un résumé chaque lundi matin",
+      "websites": "Page d'accueil pour la nouvelle grille tarifaire",
+      "apps": "Suivi interne des factures",
+      "images": "Image principale de la page tarifs",
+      "videos": "Présentation du produit en 60 secondes",
+      "coding": "Script de rapprochement des versements Stripe",
+      "data-analysis": "Quelle formule a le taux d'attrition le plus bas ?",
+      "campaigns": "Lancement de septembre — e-mail + LinkedIn",
+      "presentations": "Point trimestriel au conseil — éléments de langage",
+      "ideas": "Une newsletter pour ceux qui ont quitté les tableurs"
+    },
+    "emptyWebsitePlans": "Rien ici pour l’instant. C’est un endroit pour noter les sites que vous préparez — il ne les construit pas. Pour en faire créer un, utilisez « Créer un site ».",
+    "emptyApps": "Rien ici pour l’instant. C’est un endroit pour suivre les applications que vous préparez ou avez déjà faites — il n’en crée aucune. Utilisez le bouton ci-dessus.",
+    "emptyImages": "Rien ici pour l’instant. C’est un endroit pour suivre les images dont vous avez besoin ou que vous avez déjà faites — il n’en génère aucune. Utilisez le bouton ci-dessus.",
+    "emptyVideos": "Rien ici pour l’instant. C’est un endroit pour suivre les vidéos que vous préparez ou avez déjà faites — il n’en génère aucune. Utilisez le bouton ci-dessus.",
+    "emptyCoding": "Rien ici pour l’instant. C’est un endroit pour suivre le travail de développement que vous préparez ou avez déjà fait — il n’écrit pas de code. Utilisez le bouton ci-dessus.",
+    "emptyDataAnalysis": "Rien ici pour l’instant. C’est un endroit pour suivre les analyses que vous préparez ou avez déjà faites — il n’analyse pas vos données. Utilisez le bouton ci-dessus.",
+    "emptyCampaigns": "Rien ici pour l’instant. C’est un endroit pour suivre les campagnes que vous préparez ou avez déjà menées — il n’en lance aucune. Utilisez le bouton ci-dessus."
   },
   "askAi": {
     "buttonLabel": "Demander à l'IA",
@@ -1901,6 +2036,423 @@
       "data-analysis": "Supprimer cette analyse ? Action irréversible.",
       "presentations": "Supprimer cette note de présentation ? Action irréversible.",
       "campaigns": "Supprimer cette campagne ? Action irréversible."
+    },
+    "empty": {
+      "competitors": {
+        "title": "Sachez à qui vous faites face",
+        "why": "Une ligne par concurrent : ce qu'il vend, à quel prix, à qui. Les vides entre les lignes dessinent votre positionnement.",
+        "example": "Qui est entré sur le marché cette année"
+      },
+      "sales": {
+        "title": "Chaque piste, relancée",
+        "why": "Une piste que vous gardez en tête est une piste perdue. Notez le nom, le score et la prochaine étape : l'e-mail de relance s'écrit tout seul.",
+        "example": "Client signé en mars"
+      },
+      "finance": {
+        "title": "Où part vraiment l'argent",
+        "why": "Recettes et dépenses dans une seule liste : le vrai chiffre du mois se lit au lieu de s'estimer.",
+        "example": "Dépense publicitaire, 200 €"
+      },
+      "trading": {
+        "title": "La position, et sa raison d'être",
+        "why": "Symbole, sens, résultat — et la note qui dit pourquoi vous l'avez prise. C'est la note qui améliore la suivante.",
+        "example": "EURUSD à l'achat, ratio 1:2"
+      },
+      "research": {
+        "title": "Ce que vous avez trouvé, conservé",
+        "why": "La réponse que vous avez cherchée une fois, là où vous la retrouverez — plutôt que de refaire la même recherche dans trois mois.",
+        "example": "Ce que les clients paient pour cela aujourd'hui"
+      },
+      "learning": {
+        "title": "Ce que vous avez appris, noté",
+        "why": "Une leçon non écrite est une leçon que vous paierez deux fois. Le sujet, les ressources, et le quiz qui prouve qu'elle est acquise.",
+        "example": "Ce que j'ai appris du dernier lancement"
+      },
+      "decisions": {
+        "title": "La décision, et le raisonnement",
+        "why": "Écrivez les options et le raisonnement avant de trancher. Dans six mois, c'est le raisonnement que vous voudrez retrouver.",
+        "example": "Recruter ou externaliser"
+      },
+      "products": {
+        "title": "De l'idée à la mise en ligne",
+        "why": "Cible, tarifs, périmètre du MVP et feuille de route au même endroit : le produit que vous construisez est celui que vous aviez décrit.",
+        "example": "Une formule d'abonnement pour petites équipes"
+      },
+      "content": {
+        "title": "Le pipeline de contenus",
+        "why": "Chaque sujet que vous comptez publier, avec la légende, le fil et les hashtags déjà rédigés le jour venu.",
+        "example": "Article : les 5 erreurs des débutants"
+      },
+      "feedback": {
+        "title": "Ce que vos utilisateurs vous disent",
+        "why": "Une ligne par retour, triés par sentiment et priorité : ceux qui reviennent constituent votre feuille de route.",
+        "example": "Un client a demandé l'export Excel"
+      },
+      "analytics": {
+        "title": "Les chiffres que vous suivez vraiment",
+        "why": "Choisissez les quelques indicateurs qui décident de quelque chose et notez-les régulièrement : un chiffre sans historique ne veut rien dire.",
+        "example": "Visites par canal, mars"
+      },
+      "automation": {
+        "title": "Le travail que vous cessez de faire à la main",
+        "why": "Nommez une tâche que vous répétez : le flux et les outils sont rédigés pour vous, avec les heures gagnées à côté.",
+        "example": "Chaque lundi, un résumé des ventes"
+      },
+      "websites": {
+        "title": "Chaque site que vous préparez",
+        "why": "Une ligne par site : le brief, l'adresse et l'avancement, pour que rien d'important ne vive uniquement dans un onglet. Il ne les construit pas.",
+        "example": "Page d'atterrissage pour le lancement de printemps"
+      },
+      "apps": {
+        "title": "Chaque application de la liste",
+        "why": "Ce qu'elle fait, la plateforme visée et son avancement — du premier croquis à la mise en ligne sur le store. Il n’en crée aucune.",
+        "example": "Application iOS de prise de rendez-vous"
+      },
+      "images": {
+        "title": "Les images qu'il vous faut",
+        "why": "Gardez le prompt, pas seulement l'image : un prompt relisible est un prompt améliorable la fois suivante. Il n’en génère aucune.",
+        "example": "Photo de produit sur fond blanc"
+      },
+      "videos": {
+        "title": "Les vidéos que vous avez prévues",
+        "why": "Le brief de chaque vidéo et son état d'avancement, pour qu'un plan de tournage ne reste jamais dans votre tête. Il n’en génère aucune.",
+        "example": "Démo produit de 30 secondes"
+      },
+      "coding": {
+        "title": "Ce que vous voulez faire développer",
+        "why": "Décrivez la fonctionnalité ou le correctif, indiquez le langage, et gardez tout le backlog ailleurs que dans votre tête. Il n’écrit pas de code.",
+        "example": "Un script qui fusionne les CSV mensuels"
+      },
+      "dataAnalysis": {
+        "title": "Les questions auxquelles vos données répondent",
+        "why": "La question, la source interrogée et le résultat obtenu — pour qu'une réponse ne soit jamais trouvée deux fois. Il n’analyse pas vos données.",
+        "example": "Quel canal amène les clients qui restent"
+      },
+      "presentations": {
+        "title": "Un endroit pour suivre vos présentations",
+        "why": "Notez les présentations que vous préparez ou que vous avez déjà faites : cette page ne génère pas de diapositives à votre place. Utilisez le bouton ci-dessus pour en ajouter une.",
+        "example": "Présentation investisseurs pour le tour d'amorçage"
+      },
+      "campaigns": {
+        "title": "Chaque campagne, et ce qu'elle a coûté",
+        "why": "Canal, budget et statut côte à côte : la prochaine décision budgétaire se prend sur des chiffres, pas au feeling. Il n’en lance aucune.",
+        "example": "Campagne e-mail de printemps, budget 500 €"
+      }
+    },
+    "new": {
+      "competitors": "Nouveau concurrent",
+      "research": "Nouvelle recherche",
+      "finance": "Nouvelle écriture",
+      "learning": "Nouvelle note",
+      "trading": "Nouvelle transaction",
+      "decisions": "Nouvelle décision",
+      "products": "Nouveau produit",
+      "content": "Nouveau contenu",
+      "sales": "Nouveau prospect",
+      "feedback": "Nouveau retour",
+      "analytics": "Nouvelle métrique",
+      "automation": "Nouvelle automatisation",
+      "websites": "Nouveau site",
+      "apps": "Nouvelle application",
+      "images": "Nouvelle image",
+      "videos": "Nouvelle vidéo",
+      "coding": "Nouvelle tâche de code",
+      "dataAnalysis": "Nouvelle analyse",
+      "presentations": "Nouvelle note de présentation",
+      "campaigns": "Nouvelle campagne"
+    }
+  },
+  "aiSteps": {
+    "starting": "Je commence…",
+    "agent_build": {
+      "understanding": "Je comprends ce qu'il vous faut…",
+      "drafting": "J'écris l'agent…",
+      "checking": "Je le relis…",
+      "saving": "J'enregistre…"
+    },
+    "agent_run": {
+      "preparing": "Je prépare vos données…",
+      "working": "Je fais le travail…",
+      "delivering": "Je rédige le résultat…"
+    },
+    "mission_plan": {
+      "reading": "Je lis ce que vous avez consigné…",
+      "planning": "Je découpe l'objectif en étapes…",
+      "saving": "J'enregistre votre plan…"
+    },
+    "create": {
+      "understanding": "Je comprends votre demande…",
+      "creating": "Je rédige le contenu…",
+      "saving": "Je le range au bon endroit…"
+    },
+    "file_ask": {
+      "reading": "Je lis vos fichiers…",
+      "answering": "Je compose la réponse…",
+      "combining": "Je combine ce que chaque partie a trouvé…",
+      "checking": "Je la vérifie sur les fichiers…"
+    },
+    "counter": "({step}/{total})",
+    "understanding": "Compréhension de votre demande",
+    "searching": "Recherche des informations",
+    "reading": "Lecture de vos fichiers",
+    "planning": "Planification des étapes",
+    "drafting": "Rédaction d'un premier jet",
+    "creating": "Création en cours",
+    "generating": "Génération en cours",
+    "working": "Traitement en cours",
+    "answering": "Élaboration de la réponse",
+    "rewriting": "Réécriture du texte",
+    "summarising": "Synthèse en cours",
+    "checking": "Vérification du résultat",
+    "saving": "Enregistrement",
+    "delivering": "Envoi en cours",
+    "publishing": "Mise en ligne du site"
+  },
+  "problem": {
+    "out_of_credits": {
+      "what": "Vous n'avez plus de crédits",
+      "next": "Achetez un pack de crédits ou passez à une formule supérieure : la même action passera, et rien de ce que vous avez écrit n'est perdu."
+    },
+    "rate_limited": {
+      "what": "Trop d'actions de ce type dans la dernière heure",
+      "next": "Cette action a un plafond horaire pour qu'un compte ne consomme pas le budget partagé. Attendez quelques minutes et réessayez : le plafond glisse, il ne se remet pas à zéro à l'heure pile."
+    },
+    "timeout": {
+      "what": "Cela a pris trop de temps et a été arrêté",
+      "next": "Les traitements longs ont un plafond pour qu'un traitement bloqué ne tourne pas indéfiniment. Réessayez avec une demande plus courte ou plus précise : cela termine généralement bien avant."
+    },
+    "network": {
+      "what": "La réponse n'est jamais revenue",
+      "next": "Vérifiez votre connexion et réessayez. Si le traitement avait démarré, il continue en arrière-plan : rechargez la page plutôt que d'en lancer un second."
+    },
+    "credits": {
+      "untouched": "Aucun crédit n'a été utilisé.",
+      "refunded": "Les crédits réservés ont été restitués.",
+      "charged": "Les crédits du travail déjà effectué ont été utilisés."
+    }
+  },
+  "help": {
+    "agents": {
+      "is": "Un agent est une tâche qui s'exécute selon un calendrier, sans vous.",
+      "does": "Vous décrivez la tâche une fois : elle s'exécute au moment prévu, vous envoie le résultat par e-mail et conserve l'historique de chaque exécution.",
+      "doesNot": "Il ne s'exécute pas sans limite. Il existe un plafond d'exécutions par heure et un nombre d'agents par formule, et chaque exécution coûte des crédits."
+    },
+    "websiteBuilder": {
+      "is": "Un site entier, généré à partir d'une description.",
+      "does": "Il écrit les pages, les textes et la mise en page à partir de votre description, et vous continuez à le modifier en langage courant.",
+      "doesNot": "Il ne met rien en ligne. Un site généré reste privé tant que vous ne le publiez pas vous-même."
+    },
+    "published": {
+      "is": "Les sites que vous avez mis en ligne.",
+      "does": "Publier donne au site une adresse que tout le monde peut ouvrir, et compte ses visiteurs ici.",
+      "doesNot": "Cela ne vous donne pas de domaine à vous. L'adresse est aujourd'hui un chemin sur ce site, pas votredomaine.com — y faire pointer un vrai domaine est une autre étape."
+    },
+    "files": {
+      "is": "Vos documents, lisibles par l'IA.",
+      "does": "Déposez un PDF, Word, Excel, CSV ou texte : le texte est extrait et vous posez des questions sur ceux que vous sélectionnez.",
+      "doesNot": "Il ne lit pas les scans. Un PDF qui est une photo de page n'a aucun texte à extraire et demande d'abord un OCR, et les documents très longs sont lus jusqu'à une limite."
+    },
+    "deepResearch": {
+      "is": "Une recherche qui vous coûterait plusieurs heures.",
+      "does": "Il vous montre d'abord son plan, puis fait le travail et revient avec des sources vérifiables.",
+      "doesNot": "Il ne répond pas pendant que vous attendez. Il tourne en arrière-plan : quittez la page, fermez l'onglet, il continue et vous attend au retour."
+    },
+    "memory": {
+      "is": "Une seule recherche sur tout ce que vous avez consigné.",
+      "does": "Elle parcourt tous les modules à la fois — idées, pistes, dépenses, positions, sites — et vous mène directement à l'entrée.",
+      "doesNot": "Elle ne stocke pas vos conversations et ne retient rien d'elle-même. Tout ici a été écrit par vous dans un module ; l'IA n'ajoute rien."
+    },
+    "mission": {
+      "is": "Un objectif, découpé en étapes datées.",
+      "does": "Vous écrivez l'objectif : un plan à cocher est produit, et chaque étape peut être confiée à l'IA ou programmée pour un jour donné.",
+      "doesNot": "Il ne s'exécute pas tout seul. Un plan reste immobile tant que vous ne lancez ni ne programmez une étape — rien ne se produit parce que le temps passe."
+    },
+    "integrations": {
+      "is": "Vos propres comptes, connectés pour que l'IA puisse y lire.",
+      "does": "Gmail et Google Drive sont connectés en lecture seule. Slack lit les canaux où vous invitez l'application, et les agents peuvent y publier leurs résultats.",
+      "doesNot": "Elle n'envoie pas vos e-mails, ne répond pas à votre place et ne supprime rien. Elle ne voit jamais les canaux Slack privés ni les messages directs."
+    },
+    "team": {
+      "is": "Les personnes qui partagent cet espace avec vous.",
+      "does": "Vous invitez par e-mail ; chacun se connecte avec son propre compte et voit les mêmes données.",
+      "doesNot": "Ce n'est ni gratuit ni votre identifiant. Les sièges sont facturés par personne, et personne n'a jamais besoin de votre mot de passe."
+    },
+    "timeline": {
+      "is": "Tout ce que vous avez fait, du plus récent au plus ancien.",
+      "does": "Cela s'écrit tout seul depuis chaque module : vous répondez à « qu'ai-je fait le mois dernier » sans ouvrir cinq pages.",
+      "doesNot": "Vous n'écrivez pas ici. C'est un relevé, pas un journal : les entrées apparaissent parce que vous les avez consignées ailleurs, et l'ordre est celui des faits."
+    },
+    "favorites": {
+      "is": "La liste courte que vous avez constituée avec les étoiles.",
+      "does": "Tout ce que vous marquez, où que ce soit, apparaît ici, regroupé par provenance, pour que l'essentiel soit à un clic.",
+      "doesNot": "L'étoile ne copie ni ne déplace rien. Ce sont les mêmes entrées, affichées une seconde fois : modifier ici, c'est modifier l'original."
+    },
+    "marketplace": {
+      "is": "L'endroit où l'on partagera les agents, modèles de sites et workflows créés.",
+      "does": "Rien pour l'instant. Cette page réserve la place d'une fonctionnalité qui n'existe pas encore.",
+      "doesNot": "Elle n'est pas vide à cause de votre formule, et changer de formule ne l'ouvrira pas. Le bouton ci-dessous est désactivé parce qu'il n'y a rien derrière."
+    },
+    "settings": {
+      "is": "Votre compte : votre offre, les crédits qu'il vous reste et tout ce que vous avez consigné.",
+      "does": "Changez d'offre, achetez des crédits, choisissez la langue et le thème, nommez l'assistant et téléchargez chaque enregistrement du compte dans un seul fichier.",
+      "doesNot": "Vos enregistrements ne sont pas ici : chaque module garde les siens. Et Supprimer le compte n'est pas une façon de faire le ménage et de repartir de zéro : cela met fin au compte, emporte tout avec lui, et rien ne peut être annulé. Exportez d'abord."
+    }
+  },
+  "helpCentre": {
+    "title": "Centre d'aide",
+    "intro": "Les réponses aux questions les plus fréquentes. Posez-en une dans le chat et vous obtenez la même réponse immédiatement, sans crédits débités.",
+    "goThere": "Y aller",
+    "shownInEnglish": "En anglais",
+    "notFoundTitle": "Ce n'est pas ce que vous cherchiez ?",
+    "notFoundBody": "Demandez dans le chat : pour tout ce qui concerne votre compte ou vos données, la réponse vient de l'IA et non de cette page.",
+    "openChat": "Ouvrir le chat",
+    "pricingLink": "Tarifs et formules",
+    "answerCount": "{count, plural, one {# réponse} other {# réponses}}",
+    "categories": {
+      "getting-started": "Pour commencer",
+      "billing": "Facturation et formules",
+      "credits": "Crédits",
+      "websites": "Sites web",
+      "agents": "Agents IA",
+      "missions": "Missions",
+      "chat": "Chat",
+      "files": "Fichiers",
+      "integrations": "Connexions",
+      "account": "Compte",
+      "privacy": "Confidentialité et données"
+    }
+  },
+  "pageTitle": {
+    "document": "Document",
+    "systemHealth": "État du système",
+    "onboarding": "Commencer",
+    "notFound": "Introuvable",
+    "notFoundBody": "Cette page n'existe pas — l'adresse a peut-être été mal saisie, ou la page a été déplacée.",
+    "notFoundAction": "Retour à l'accueil",
+    "forgotPassword": "Mot de passe oublié",
+    "resetPassword": "Définir un nouveau mot de passe",
+    "confirmDeletion": "Confirmer la suppression du compte",
+    "logInDescription": "Connectez-vous à Ionexa AI.",
+    "signUpDescription": "Choisissez une formule et créez votre compte Ionexa AI.",
+    "forgotPasswordDescription": "Réinitialisez le mot de passe de votre compte Ionexa AI.",
+    "resetPasswordDescription": "Définissez un nouveau mot de passe pour votre compte Ionexa AI.",
+    "confirmDeletionDescription": "Confirmez la suppression définitive de votre compte Ionexa AI.",
+    "termsDescription": "Conditions d'utilisation d'Ionexa AI.",
+    "privacyDescription": "Politique de confidentialité d'Ionexa AI.",
+    "cookiesDescription": "Quels cookies Ionexa AI dépose, à quoi sert chacun d'eux et combien de temps ils durent.",
+    "helpDescription": "Réponses aux questions les plus fréquentes sur Ionexa AI — tarifs, crédits, sites web, agents, confidentialité."
+  },
+  "errors": {
+    "retry": "Réessayer",
+    "creditHistory": "Voir l'historique des crédits",
+    "credits": {
+      "refunded": "Vos crédits ont été restitués.",
+      "notCharged": "Vous n'avez pas été débité.",
+      "charged": "Cette tentative a consommé des crédits.",
+      "unverified": "Nous ne pouvons pas confirmer d'ici si cela a été débité."
+    },
+    "codes": {
+      "notAuthenticated": {
+        "what": "Vous êtes déconnecté.",
+        "next": "Reconnectez-vous et refaites l'action — rien de ce que vous aviez saisi n'est perdu."
+      },
+      "forbidden": {
+        "what": "Votre formule ne comprend pas cela.",
+        "next": "Ouvrez Paramètres › Facturation pour voir quelle formule le couvre."
+      },
+      "notFound": {
+        "what": "Ceci n'existe plus.",
+        "next": "L'élément a probablement été supprimé. Revenez à la liste et choisissez-en un autre."
+      },
+      "invalidInput": {
+        "what": "Un élément du formulaire n'a pas été accepté.",
+        "next": "Vérifiez les champs signalés et renvoyez-le."
+      },
+      "rateLimited": {
+        "what": "Trop de requêtes en peu de temps.",
+        "next": "Attendez environ une minute, puis réessayez."
+      },
+      "insufficientCredits": {
+        "what": "Vous n'avez pas assez de crédits pour cela.",
+        "next": "Achetez des crédits dans les Paramètres ou attendez votre renouvellement mensuel."
+      },
+      "planLimit": {
+        "what": "Vous avez atteint la limite de votre formule.",
+        "next": "Supprimez ce dont vous n'avez plus besoin, ou changez de formule dans Paramètres › Facturation."
+      },
+      "fileTooLarge": {
+        "what": "Ce fichier est trop volumineux.",
+        "next": "Divisez-le ou envoyez une version plus petite."
+      },
+      "unsupportedType": {
+        "what": "Ce type de fichier n'est pas pris en charge.",
+        "next": "Convertissez-le en PDF, DOCX, CSV ou TXT puis renvoyez-le."
+      },
+      "conflict": {
+        "what": "Quelqu'un — ou un autre onglet — l'a modifié pendant que vous y travailliez.",
+        "next": "Rechargez la page pour voir la version actuelle, puis refaites votre modification."
+      },
+      "upstreamUnavailable": {
+        "what": "Le service d'IA ne répond pas pour le moment.",
+        "next": "Cela vient de chez nous et se résout généralement en quelques minutes."
+      },
+      "serverError": {
+        "what": "Cela a échoué de notre côté.",
+        "next": "L'incident est enregistré. Réessayez dans un instant et contactez le support si cela persiste."
+      },
+      "offline": {
+        "what": "Votre appareil n'a pas pu nous joindre.",
+        "next": "Vérifiez votre connexion et réessayez."
+      },
+      "unknown": {
+        "what": "Cette action ne s'est pas terminée.",
+        "next": "Réessayez et contactez le support si cela se reproduit."
+      }
+    }
+  },
+  "aiExamples": {
+    "createStudio": {
+      "e1": "Crée-moi une page pour ma boutique",
+      "e2": "Un plan pour trouver des clients",
+      "e3": "Idée : un abonnement pour les petites entreprises",
+      "e4": "Chaque lundi, rappelle-moi de vérifier les finances",
+      "limits": "Crée des choses dans Ionexa · Ne touche à rien que vous n’avez pas connecté"
+    },
+    "agents": {
+      "e1": "Chaque matin, envoie-moi les actualités sur Nvidia",
+      "e2": "Chaque lundi, un résumé de mes concurrents",
+      "e3": "Préviens-moi si quelqu’un écrit sur mon secteur",
+      "limits": "Cherche sur le web et vous écrit · N’exécute aucune action et n’envoie que là où vous avez choisi"
+    },
+    "mission": {
+      "e1": "Trouve 10 clients pour mon entreprise",
+      "e2": "Prépare un plan de lancement pour un nouveau produit",
+      "e3": "Augmente les ventes de 20 % en trois mois",
+      "limits": "Écrit le plan et ses étapes · Une étape ne s’exécute que si vous la programmez"
+    },
+    "websiteBuilder": {
+      "e1": "Un café à Thessalonique avec la carte et les horaires",
+      "e2": "Le portfolio d’un photographe avec une galerie",
+      "e3": "Une landing page pour un SaaS, avec les tarifs",
+      "limits": "Une page, pas une boutique ni une application · Ne se connecte pas à vos systèmes"
+    },
+    "files": {
+      "e1": "Que dit le contrat au sujet de l’annulation ?",
+      "e2": "Compare les deux offres",
+      "e3": "Quels sont les délais et les montants ?",
+      "limits": "Répond uniquement à partir des fichiers choisis · Ne cherche pas sur le web"
+    },
+    "research": {
+      "e1": "Les concurrents de mon secteur en Grèce",
+      "e2": "Pourquoi les startups d’IA échouent",
+      "e3": "Les modèles tarifaires SaaS en 2026",
+      "limits": "Lit des sources publiques sur le web · Ne voit pas vos fichiers"
+    },
+    "chat": {
+      "e1": "Que dois-je prioriser cette semaine ?",
+      "e2": "Explique-moi les chiffres du mois",
+      "e3": "Rédige un e-mail à un client en retard de paiement",
+      "limits": "Voit vos données Ionexa et ce que vous avez connecté · N’agit pas de lui-même"
     }
   }
 }

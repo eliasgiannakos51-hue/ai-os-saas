@@ -19,10 +19,13 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { DetailPanel, type DetailTab } from "@/components/ui/detail-panel";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { OutOfCreditsNotice } from "@/components/credits/out-of-credits-notice";
 import { StudioChat } from "@/components/create/studio-chat";
 import { useCredits } from "@/components/credits/credits-context";
 import { useCreateStudio } from "@/lib/create-studio/use-create-studio";
+import { ResumedWorkNotice } from "@/components/jobs/resumed-work-notice";
+import { ExamplePrompts } from "@/components/ai/example-prompts";
 import {
   CREATE_STUDIO_TYPES,
   estimateCreditsFor,
@@ -159,7 +162,16 @@ export function CreateStudio() {
           <p className="mx-auto mt-2 max-w-md text-sm text-muted">{t("subtitle")}</p>
         </div>
 
-        <form onSubmit={handleDetect} className="mt-6">
+        {/* WHAT WAS ALREADY ASKED FOR. A create that was still running
+            when the user left this page finishes and saves itself — but a
+            blank composer looks exactly like a page where nothing was
+            started, and the honest response to that is to type it again
+            and pay for it twice. */}
+        <div className="mt-6">
+          <ResumedWorkNotice kind="create" />
+        </div>
+
+        <form onSubmit={handleDetect}>
           <label htmlFor="studio-input" className="sr-only">
             {t("inputLabel")}
           </label>
@@ -184,10 +196,17 @@ export function CreateStudio() {
             </div>
           )}
 
+          {/* FOUR EXAMPLES, one per kind this box can produce.
+              Create Studio is the front door and the one place where "you
+              write one sentence and it works out what you meant" has to be
+              believable before it is used. A page, a plan, an entry and a
+              recurring reminder — pressed rather than explained. */}
+          <ExamplePrompts surface="createStudio" onPick={setDescription} className="mt-3" />
+
           <button
             type="submit"
             disabled={detecting || !description.trim()}
-            className="mt-3 inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0 sm:w-auto"
+            className="mt-3 inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             {detecting ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -286,7 +305,7 @@ export function CreateStudio() {
                         setChangingType(false);
                       }}
                       aria-pressed={type === detection.type}
-                      className={`inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors duration-150 sm:min-h-0 ${
+                      className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors duration-150 ${
                         type === detection.type
                           ? "border-orange-500 text-orange-400"
                           : "border-border text-foreground hover:border-orange-500 hover:text-orange-400"
@@ -306,7 +325,7 @@ export function CreateStudio() {
               type="button"
               onClick={() => studio.create(detection, description.trim())}
               disabled={studio.running}
-              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {studio.running ? (
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -318,7 +337,7 @@ export function CreateStudio() {
             <button
               type="button"
               onClick={editDescription}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
             >
               <Pencil className="h-3.5 w-3.5" aria-hidden="true" />
               {t("editDescription")}
@@ -326,7 +345,7 @@ export function CreateStudio() {
             <button
               type="button"
               onClick={() => setChangingType((v) => !v)}
-              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
             >
               <Shuffle className="h-3.5 w-3.5" aria-hidden="true" />
               {t("changeType")}
@@ -381,7 +400,7 @@ export function CreateStudio() {
             {studio.result?.href && (
               <Link
                 href={studio.result.href}
-                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 sm:min-h-0"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
               >
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                 {t("openCreated")}
@@ -390,7 +409,7 @@ export function CreateStudio() {
             <button
               type="button"
               onClick={startOver}
-              className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
             >
               <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
               {t("createAnother")}
@@ -447,7 +466,7 @@ export function CreateStudio() {
                   ) : step.status === "failed" ? (
                     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" aria-hidden="true" />
                   ) : (
-                    <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-orange-400" aria-hidden="true" />
+                    <ThinkingIndicator size="sm" className="mt-1" />
                   )}
                   <div className="min-w-0">
                     <p className="text-sm text-foreground">{t(`progress.${step.labelKey}`)}</p>
@@ -482,7 +501,7 @@ export function CreateStudio() {
                 <button
                   type="button"
                   onClick={() => downloadHtml(website.name, website.html_content)}
-                  className="inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
+                  className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
                 >
                   <Download className="h-3.5 w-3.5" aria-hidden="true" />
                   {tCommon("save")}

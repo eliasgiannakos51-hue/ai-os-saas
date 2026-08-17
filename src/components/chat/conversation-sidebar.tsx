@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, MessageCircle, Pin, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import type { ChatConversation } from "@/types/chat";
 import { groupConversationsByDate } from "@/lib/chat/group-conversations";
+import { InlineTitle } from "@/components/chat/inline-title";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { useTranslations } from "next-intl";
 
@@ -30,7 +31,6 @@ export function ConversationSidebar({
   const tModule = useTranslations("module");
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
   const [renamingId, setRenamingId] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
 
   const pinned = conversations.filter((c) => c.is_pinned);
   const unpinned = conversations.filter((c) => !c.is_pinned);
@@ -44,18 +44,12 @@ export function ConversationSidebar({
     onSelect(id);
   }
 
+  // The menu's route into the same editor the title itself opens on a
+  // double-click or a long press. InlineTitle owns the field; who asked
+  // for it is the parent's business.
   function startRename(conversation: ChatConversation) {
     setRenamingId(conversation.id);
-    setRenameValue(conversation.title);
     setMenuOpenId(null);
-  }
-
-  function commitRename() {
-    if (renamingId) {
-      const trimmed = renameValue.trim();
-      if (trimmed) onRename(renamingId, trimmed);
-    }
-    setRenamingId(null);
   }
 
   function handleDelete(conversation: ChatConversation) {
@@ -71,7 +65,7 @@ export function ConversationSidebar({
         <button
           type="button"
           onClick={onNewChat}
-          className="inline-flex min-h-[40px] w-full items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
+          className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
         >
           <Plus className="h-4 w-4" /> {t("newChat")}
         </button>
@@ -94,32 +88,19 @@ export function ConversationSidebar({
                   const active = conversation.id === activeId;
                   const isRenaming = renamingId === conversation.id;
 
-                  if (isRenaming) {
-                    return (
-                      <input
-                        key={conversation.id}
-                        autoFocus
-                        value={renameValue}
-                        onChange={(e) => setRenameValue(e.target.value)}
-                        onBlur={commitRename}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            commitRename();
-                          }
-                          if (e.key === "Escape") setRenamingId(null);
-                        }}
-                        className="w-full rounded-lg border border-orange-500/60 bg-input px-2.5 py-[7px] text-sm text-foreground outline-none"
-                      />
-                    );
-                  }
-
                   return (
                     <div key={conversation.id} className="group/row relative flex items-center">
                       <button
                         type="button"
-                        onClick={() => handleSelect(conversation.id)}
-                        title={conversation.title}
+                        onClick={() => {
+                          // A long press opens the editor and THEN the
+                          // browser fires the click that ends the touch.
+                          // Without this guard that click navigates away
+                          // from the row being renamed, on the device
+                          // where the gesture was added for.
+                          if (isRenaming) return;
+                          handleSelect(conversation.id);
+                        }}
                         className={`flex min-w-0 flex-1 items-center gap-1.5 rounded-lg py-2 pl-2.5 pr-1 text-left text-sm transition-colors duration-150 ${
                           active
                             ? "bg-orange-500/10 font-medium text-orange-400"
@@ -132,7 +113,14 @@ export function ConversationSidebar({
                             aria-hidden="true"
                           />
                         )}
-                        <span className="min-w-0 flex-1 truncate">{conversation.title}</span>
+                        <InlineTitle
+                          testId="conversation-title"
+                          title={conversation.title}
+                          editing={isRenaming}
+                          onEditingChange={(on) => setRenamingId(on ? conversation.id : null)}
+                          onRename={(next) => onRename(conversation.id, next)}
+                          className="min-w-0 flex-1 truncate"
+                        />
                       </button>
                       {/* Starred conversations stay visible at rest; an
                           unstarred one only appears on hover, so the list
@@ -163,7 +151,7 @@ export function ConversationSidebar({
                         aria-label={tModule("actionsFor", { name: conversation.title })}
                         // 36px to match the star beside it — two adjacent
                         // controls at different sizes read as a mistake.
-                        className={`mr-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-muted opacity-0 transition-opacity duration-150 hover:bg-panel-hover hover:text-foreground group-hover/row:opacity-100 ${
+                        className={`mr-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-muted opacity-0 transition-opacity duration-150 hover:bg-panel-hover hover:text-foreground group-hover/row:opacity-100 ${
                           menuOpenId === conversation.id ? "opacity-100" : ""
                         }`}
                       >

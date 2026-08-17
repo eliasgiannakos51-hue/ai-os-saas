@@ -1,3 +1,4 @@
+import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -10,7 +11,9 @@ import { loadFavoriteIds } from "@/lib/favorites";
 import { documentPreviewText } from "@/lib/document-preview";
 import type { DocumentContent, UserDocument } from "@/types/document";
 
-export const metadata: Metadata = { title: "Documents" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.documents");
+}
 
 // Live, frequently-mutated per-user data (created/renamed/edited on every
 // visit) — same reasoning as dashboard/mission and dashboard/timeline for
@@ -64,7 +67,7 @@ export default async function DocumentsPage() {
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader icon={FileText} title={t("title")} description={t("description")} />
 
-        {error && <ErrorMessage message={`loading documents: ${error.message}`} />}
+        {error && <ErrorMessage detail={`loading documents: ${error.message}`} />}
 
         <DocumentsList documents={docs} favoritedIds={[...favoritedDocIds]} />
       </div>

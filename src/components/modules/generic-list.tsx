@@ -21,7 +21,7 @@ import { EmptyState } from "@/components/empty-state";
 import { ListLayout } from "@/components/ui/list-layout";
 import { CardGrid } from "@/components/ui/entity-card";
 import { matchesSearch } from "@/lib/text/search-match";
-import { optionLabelKey } from "@/lib/modules";
+import { emptyStateKey, optionLabelKey } from "@/lib/modules";
 import { enFieldLabel } from "@/lib/module-labels";
 
 function searchableText(module: ModuleConfig, record: ModuleRecord): string {
@@ -57,6 +57,15 @@ export function GenericList({
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [selected, setSelected] = useState<{ id: string; tab: RecordDetailTab } | null>(null);
+  // Pressing the worked example on the empty screen hands its text to the
+  // add form below, which opens with the headline field already filled.
+  //
+  // The nonce is the whole mechanism: the form reacts to a NEW prefill,
+  // and a user who dismisses the form and presses the same example again
+  // is asking for it a second time. Without a nonce the second press
+  // passes an identical value, React sees no change, and the button
+  // silently does nothing — which is worse than not offering it.
+  const [prefill, setPrefill] = useState<{ text: string; nonce: number } | null>(null);
 
   // The filter dropdown only appears for modules that actually have a
   // status-shaped field (the five Build modules, Trading's result) —
@@ -107,7 +116,7 @@ export function GenericList({
       )}
 
       <ListLayout
-        newAction={<GenericAddForm module={module} />}
+        newAction={<GenericAddForm module={module} prefill={prefill} />}
         searchValue={query}
         onSearchChange={setQuery}
         searchPlaceholder={t("searchPlaceholder")}
@@ -119,7 +128,7 @@ export function GenericList({
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
                 aria-label={t("filterBy", { label: tKey(statusField.labelKey) })}
-                className="min-h-[36px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60 sm:min-h-0"
+                className="min-h-[44px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60"
               >
                 <option value="">{t("filterAll", { label: tKey(statusField.labelKey) })}</option>
                 {statusField.options?.map((option) => (
@@ -140,7 +149,7 @@ export function GenericList({
               type="button"
               onClick={handleExport}
               disabled={filtered.length === 0}
-              className="inline-flex min-h-[36px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+              className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Download className="h-3.5 w-3.5" aria-hidden="true" /> {t("exportCsv")}
             </button>
@@ -148,7 +157,23 @@ export function GenericList({
         }
       >
         {records.length === 0 ? (
-          <EmptyState icon={MODULE_ICONS[module.slug]}>{t(module.emptyKey ?? "noEntries")}</EmptyState>
+          // Resolved through tKey, the root translator, for the reason
+          // every other config-carried key is: a module config holds FULL
+          // dotted keys, so they cannot be looked up inside the `module`
+          // namespace. There is no `?? "noEntries"` behind this any more —
+          // emptyKey is required, so there is no module for a fallback to
+          // catch, and leaving one there would only mean the twenty-first
+          // module could quietly go back to the generic sentence.
+          <EmptyState
+            icon={MODULE_ICONS[module.slug]}
+            title={tKey(emptyStateKey(module, "title"))}
+            example={tKey(emptyStateKey(module, "example"))}
+            onExample={(text) =>
+              setPrefill((current) => ({ text, nonce: (current?.nonce ?? 0) + 1 }))
+            }
+          >
+            {tKey(emptyStateKey(module, "why"))}
+          </EmptyState>
         ) : filtered.length === 0 ? (
           <EmptyState icon={SearchX}>{t("noMatches", { query })}</EmptyState>
         ) : (

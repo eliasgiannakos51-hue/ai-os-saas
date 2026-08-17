@@ -14,6 +14,7 @@ import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula"
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
+import { getUserFullContext, buildUserContextPromptAdditionEnglish } from "@/lib/user-context";
 import { AGENT_BUILDER_MODEL } from "@/lib/agents/agent-models";
 import { AGENT_LIMITS, normaliseDeliveryTarget } from "@/lib/agents/agent-config";
 import { isValidTimeZone } from "@/lib/agents/cron-expression";
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
     });
     if (!limited.allowed) {
       return NextResponse.json(
-        { ok: false, error: "Too many agent drafts in the last hour. Try again shortly." },
+        { ok: false, code: "rate_limited", error: "Too many agent drafts in the last hour. Try again shortly." },
         { status: 429 }
       );
     }
@@ -190,6 +191,36 @@ export async function POST(request: Request) {
     // Now: hold the credits, write a job row, kick a worker, return the
     // id. The work continues whether or not this connection survives, and
     // the client watches the row rather than the socket.
+    // WHAT THE APP ALREADY KNOWS, captured here and only here.
+    //
+    // (δ) of the brief: the clarifying-questions check must not ask for
+    // something the AI Life Context already answers. Two constraints
+    // decide where this runs:
+    //
+    //   It CANNOT run in the worker. getUserFullContext queries
+    //   ai_missions with no user_id filter and relies entirely on RLS to
+    //   scope it; the worker holds the service-role client, so the same
+    //   call there would fold every user's missions into this user's
+    //   prompt.
+    //
+    //   It only runs when the check will. On the resubmission
+    //   (skipClarification) there is no check to inform, and this is
+    //   ~15 queries — paying for them to build a string nobody reads is
+    //   latency on the one route whose whole point is answering fast.
+    //
+    // Best-effort throughout: a context lookup that fails costs the user
+    // a slightly less well-informed question, never their build.
+    let knownContext: string | null = null;
+    if (!skipClarification) {
+      try {
+        knownContext = buildUserContextPromptAdditionEnglish(
+          await getUserFullContext(supabase, user.id)
+        );
+      } catch (err) {
+        logApiError("/api/agents/build", err, { stage: "user_context" });
+      }
+    }
+
     const started = await startJob({
       userId: user.id,
       kind: "agent_build",
@@ -200,6 +231,7 @@ export async function POST(request: Request) {
         timezone,
         deliveryTarget,
         skipClarification,
+        knownContext,
         // Captured NOW, not looked up by the worker. The estimate the user
         // was quoted is the estimate the preview must show, and a plan
         // change between the press and the worker must not silently

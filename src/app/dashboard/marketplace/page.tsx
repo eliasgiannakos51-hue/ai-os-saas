@@ -1,3 +1,4 @@
+import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -7,9 +8,9 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { EmptyState } from "@/components/empty-state";
 import { MARKETPLACE_ICON } from "@/lib/module-icons";
 
-export const metadata: Metadata = {
-  title: "Marketplace",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.marketplace");
+}
 
 // No table, no listings, no buy/sell flow yet — the previous version of
 // this page showed hardcoded demo listings with "Coming Soon" badges,
@@ -31,17 +32,22 @@ export default async function MarketplacePage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={MARKETPLACE_ICON} title={t("title")} description={t("description")} />
+        <PageHeader helpKey="help.marketplace" icon={MARKETPLACE_ICON} title={t("title")} description={t("description")} />
 
-        <EmptyState icon={Store}>
-          <p>{t("emptyState")}</p>
+        {/* No worked example, and this page is the clearest case for why:
+            its own action is rendered DISABLED with a "Coming Soon" badge,
+            because the feature does not exist. A pressable example under a
+            disabled button would be the page contradicting itself in the
+            same breath. */}
+        <EmptyState icon={Store} title={t("empty.title")}>
+          <p>{t("empty.why")}</p>
           <div className="mt-4 flex flex-col items-center gap-2">
             <button
               type="button"
               disabled
               title={t("comingSoon")}
               aria-disabled="true"
-              className="inline-flex min-h-[44px] cursor-not-allowed items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-muted opacity-60 sm:min-h-0"
+              className="inline-flex min-h-[44px] cursor-not-allowed items-center justify-center rounded-xl border border-border px-4 py-2 text-sm font-semibold text-muted opacity-60"
             >
               {t("publishButton")}
             </button>

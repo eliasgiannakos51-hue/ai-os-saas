@@ -1,3 +1,4 @@
+import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -30,9 +31,9 @@ import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { BUILD_MODULES } from "@/lib/build-modules";
 import { getPlan } from "@/lib/billing/plans";
 
-export const metadata: Metadata = {
-  title: "Settings",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.settings");
+}
 
 export default async function SettingsPage() {
   const t = await getTranslations("settings");
@@ -40,6 +41,11 @@ export default async function SettingsPage() {
   // request's locale, the same way the sidebar does.
   const tKey = await getTranslations();
   const tBilling = await getTranslations("settings.billing");
+  // The jump-to-section nav below named three of its four links in
+  // hardcoded English while the fourth was already translated — the four
+  // chips sat side by side, three in English and one in Greek. Every key
+  // already existed; nothing was reaching them.
+  const tAchievements = await getTranslations("achievements");
   const supabase = createClient();
 
   const {
@@ -193,33 +199,28 @@ export default async function SettingsPage() {
   return (
     <main className="min-h-full">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
-        <PageHeader icon={SettingsIcon} title={t("title")} />
+        <PageHeader helpKey="help.settings" helpArticle="export-data" icon={SettingsIcon} title={t("title")} />
 
+        {/* Every label here is the SAME key as the section heading it jumps
+            to, not a second copy of the word. Three of the four used to be
+            English literals sitting directly above their own translated
+            headings, so a Greek reader got "Accessibility" as the link and
+            "Προσβασιμότητα" as the destination. */}
         <nav aria-label={t("jumpToSection")} className="mb-6 flex flex-wrap gap-2 text-xs">
-          <a
-            href="#accessibility"
-            className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
-          >
-            Accessibility
-          </a>
-          <a
-            href="#ai-usage"
-            className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
-          >
-            AI Usage
-          </a>
-          <a
-            href="#buy-credits"
-            className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
-          >
-            {tBilling("title")}
-          </a>
-          <a
-            href="#achievements"
-            className="rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
-          >
-            Achievements
-          </a>
+          {[
+            { href: "#accessibility", label: t("accessibility.title") },
+            { href: "#ai-usage", label: t("aiUsage.title") },
+            { href: "#buy-credits", label: tBilling("title") },
+            { href: "#achievements", label: tAchievements("title") },
+          ].map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1.5 text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+            >
+              {link.label}
+            </a>
+          ))}
         </nav>
 
         <div className="mb-6 rounded-2xl border border-border bg-panel p-5">

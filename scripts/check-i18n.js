@@ -46,11 +46,46 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // "Email" is the ordinary Italian word for it — Italian borrowed the
+  // noun whole, and "posta elettronica" is what a government form says,
+  // not what a person reading a settings panel expects. Scoped to Italian
+  // because every other locale here has its own word and uses it.
+  "it:dashboard.agents.delivery.channels.email",
+  // Greek borrowed the noun too, and this app's own Greek already says
+  // "Email" everywhere else it names the channel (settings.emailSupport,
+  // the account section). Translating it here alone would make one screen
+  // disagree with the rest of the Greek UI.
+  "el:dashboard.agents.delivery.channels.email",
   // Margin report, owner-only. "Bypass" is the loanword these languages
   // actually use for this concept — and it is also the literal value
   // stored in ai_cost_log's metadata (bypassCharge), so translating the
   // column heading away from the field name it reports would make the
   // table harder to reconcile with the data, not easier.
+  // Help Centre category headings that genuinely coincide with English in
+  // one language: "Chat" is the word in five of them, "Credits",
+  // "Missions" and "Websites" are the loanwords those languages use for
+  // these product concepts, "AI Agents" is what the Greek UI already says
+  // everywhere else, and "Account" is ordinary Italian. Scoped per locale
+  // rather than globally, because a coincidence in Italian says nothing
+  // about whether Greek was translated.
+  "es:helpCentre.categories.chat",
+  "fr:helpCentre.categories.chat",
+  "de:helpCentre.categories.chat",
+  "it:helpCentre.categories.chat",
+  "pt:helpCentre.categories.chat",
+  "de:helpCentre.categories.credits",
+  "it:helpCentre.categories.credits",
+  "pt:helpCentre.categories.credits",
+  "de:helpCentre.categories.websites",
+  "it:helpCentre.categories.websites",
+  "fr:helpCentre.categories.missions",
+  "it:helpCentre.categories.missions",
+  "el:helpCentre.categories.agents",
+  "el:helpCentre.categories.credits",
+  "el:helpCentre.categories.websites",
+  "el:helpCentre.categories.missions",
+  "el:helpCentre.categories.chat",
+  "it:helpCentre.categories.account",
   "el:settings.marginReport.colBypass",
   "es:settings.marginReport.colBypass",
   "fr:settings.marginReport.colBypass",
@@ -178,6 +213,10 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.documents.backToDocuments",
   "fr:dashboard.documents.deleteLabel",
   "fr:dashboard.documents.title",
+  // The singular, for the per-document page's browser tab. "Document" is
+  // the French word, spelled identically — the same cognate already
+  // allowed for the plural three lines above.
+  "fr:pageTitle.document",
   "fr:dashboard.overview.quickActions.trading.label",
   // "Actions" is the correct French word, spelled identically — a cognate,
   // not a translation that was skipped.
@@ -251,11 +290,26 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // the scheme is the same eight characters in every written language,
   // including the two that do not use the Latin alphabet at all.
   "moduleData.placeholders.httpsUrl",
+  // The three delivery destinations that are BRAND NAMES. "Slack",
+  // "Telegram" and "Discord" are what those products are called in every
+  // locale — including Arabic and Japanese, whose own interfaces use the
+  // Latin wordmark — and a user hunting for the Discord button is hunting
+  // for the word Discord. The label above them, the help text and every
+  // error message around them ARE translated; only the names are not.
+  "dashboard.agents.delivery.channels.slack",
+  "dashboard.agents.delivery.channels.telegram",
+  "dashboard.agents.delivery.channels.discord",
   // A hex colour code shown as the placeholder in the Website Builder's
   // colour field. It is a FORMAT example, not prose — "#1d4ed8" is the
   // same six characters in every language, and translating it would mean
   // showing a different colour per locale for no reason.
   "dashboard.websiteBuilder.design.hexPlaceholder",
+  // "(1/3)" next to an AI action's current step. Two numbers, a slash and
+  // a pair of brackets — there is no word in it to translate. The two
+  // locales that DO differ (zh, ja, which use full-width brackets) are
+  // translated and are not on this list, which is the whole reason this
+  // is an allowance per key rather than a rule about digits.
+  "aiSteps.counter",
   "landing.footer.roadmap",
   "roadmap.title",
   "roadmap.items.agentBuilder.title",
@@ -280,6 +334,14 @@ const INTENTIONALLY_IDENTICAL = new Set([
   "dashboard.productWorkflow.mentorButton",
   "dashboard.productWorkflow.reflectionTitle",
   "dashboard.productWorkflow.productsTitle",
+  // Help Centre category headings. These are the SAME WORD in the
+  // languages listed, not an untranslated string: "Chat" is chat in
+  // Italian and Portuguese, "Credits"/"Missions"/"Websites" are the
+  // loanwords those languages actually use for these product concepts,
+  // and "Account" is the ordinary Italian word. Scoped per locale on
+  // purpose — "Chat" coinciding in Italian says nothing about Greek,
+  // which translates the ones it has words for (Αρχεία, Συνδέσεις,
+  // Λογαριασμός) and keeps the loanwords it does not.
   "sidebar.items.content",
   "achievements.firstEnergyCheckin.title",
   "achievements.fiftyEntries.title",

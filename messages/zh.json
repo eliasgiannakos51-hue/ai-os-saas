@@ -7,7 +7,7 @@
     "signOut": "退出登录",
     "jumpToPage": "跳转到模块或页面...",
     "noMatches": "没有找到与 '{query}' 匹配的结果",
-    "createStudio": "创作工作室",
+    "createStudio": "创建任何东西",
     "cancel": "取消",
     "save": "保存",
     "saving": "保存中...",
@@ -47,12 +47,31 @@
     "nextPage": "下一页",
     "previousPage": "上一页",
     "toggleMenu": "切换菜单",
-    "dismissToastAria": "{message} — 按 Enter 键关闭"
+    "dismissToastAria": "{message} — 按 Enter 键关闭",
+    "retry": "再试一次",
+    "whatIsThisPage": "这个页面是什么？",
+    "readMore": "了解更多",
+    "copy": "复制",
+    "copied": "已复制 ✓",
+    "copyFailed": "浏览器不允许复制。请自行选中文本并复制。",
+    "copyNothing": "目前没有可复制的内容。",
+    "offline": {
+      "title": "你已离线。",
+      "showingCached": "此页面上的内容不会更新。",
+      "showingCachedAge": "这里的内容不会更新 —— 于 {minutes} 分钟前加载。",
+      "retry": "重试",
+      "checking": "检查中…",
+      "stillOffline": "仍然没有连接。"
+    },
+    "creditsUnlimited": "无限制",
+    "whatIsThis": "这是什么？",
+    "moreInHelp": "在帮助中心了解更多",
+    "examplesLabel": "试试："
   },
   "sidebar": {
     "groups": {
       "workspace": "工作区",
-      "build": "构建",
+      "build": "创建",
       "business": "业务",
       "strategy": "策略",
       "operations": "运营",
@@ -61,29 +80,30 @@
       "create": "创建",
       "myBusiness": "我的业务",
       "track": "记录",
-      "insights": "回顾"
+      "insights": "我注意到的",
+      "tracking": "记录"
     },
     "items": {
       "home": "主页",
       "chat": "Ionexa 聊天",
-      "memory": "AI 记忆",
-      "timeline": "时间线",
+      "memory": "搜索我的记录",
+      "timeline": "历史",
       "favorites": "收藏",
-      "missionControl": "任务控制中心",
+      "missionControl": "目标与计划",
       "reflection": "每周回顾",
       "settings": "设置",
       "team": "团队",
       "agents": "AI 智能体",
-      "websites": "网站",
-      "websiteBuilder": "网站生成器",
-      "apps": "应用",
-      "images": "图像",
-      "videos": "视频",
-      "coding": "AI 编程",
-      "dataAnalysis": "数据分析",
+      "websites": "网站计划",
+      "websiteBuilder": "做个网站",
+      "apps": "应用记录",
+      "images": "图片记录",
+      "videos": "视频记录",
+      "coding": "开发记录",
+      "dataAnalysis": "分析记录",
       "documents": "文档",
       "presentations": "演示文稿笔记",
-      "campaigns": "营销活动",
+      "campaigns": "营销记录",
       "analytics": "数据统计",
       "finance": "财务",
       "content": "内容",
@@ -100,7 +120,7 @@
       "productWorkflow": "产品工作流",
       "automation": "自动化",
       "marketplace": "市场",
-      "published": "已发布网站",
+      "published": "已上线网站",
       "integrations": "集成",
       "files": "文件",
       "deepResearch": "深度研究",
@@ -194,8 +214,6 @@
       "creditsPerMonth": "每月额度",
       "aiAgents": "AI 智能体",
       "websiteBuilder": "网站与自动化构建器",
-      "mobileSaasBuilder": "移动端与 SaaS 构建器",
-      "imageVideo": "图像与视频生成",
       "aiMemory": "AI 记忆",
       "teamCollaboration": "团队协作",
       "teamSeatsAddOn": "团队席位",
@@ -216,32 +234,20 @@
     "businessFeatureManage": "随时在团队设置中管理席位",
     "setUpTeam": "设置团队",
     "features": {
-      "1Workspace3Projects": "1 个工作区，3 个项目",
       "basicAiChat": "基础 AI 聊天",
       "creditsPerMonth": "{count} 积分/月",
-      "marketplaceInstallOnly": "市场：仅可安装",
-      "communitySupport": "社区支持",
-      "unlimitedProjects": "无限项目",
       "aiMemory": "AI 记忆",
       "websiteAutomationBuilderAccess": "网站与自动化构建器访问权限",
-      "imageVideoGenerationAccess": "图像与视频生成访问权限",
-      "emailSupport": "邮件支持",
       "everythingInStarter": "包含 Starter 的全部功能",
       "upTo100AiAgents": "最多 100 个 AI 智能体",
-      "mobileSaasBuilderAccess": "移动端与 SaaS 构建器访问权限",
-      "priorityProcessing": "优先处理",
       "everythingInGrowth": "包含 Growth 的全部功能",
       "teamCollaboration": "团队协作",
-      "sharedAiMemory": "共享 AI 记忆",
-      "prioritySupport": "优先支持",
       "everythingInProfessional": "包含 Professional 的全部功能",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "包含无限团队席位——不按成员收费",
       "extendedChatMemoryRetention100Vs20RecentFact": "扩展的聊天记忆保留（100 条对比 20 条近期信息）",
       "customAiPersonaNameInIonexaChat": "在 Ionexa Chat 中自定义 AI 名称",
-      "highestPriorityProcessing": "最高优先级处理",
       "everythingInUltimate": "包含 Ultimate 的全部功能",
       "unlimitedMembers": "无限成员",
-      "dedicatedSupport": "专属支持",
       "customCredits": "定制积分",
       "upTo2AiAgents": "最多 2 个 AI 智能体",
       "upTo5AiAgents": "最多 5 个 AI 智能体",
@@ -257,7 +263,8 @@
     "seatNote": {
       "included": "包含无限团队席位 — 无需按成员付费",
       "perMember": "+ 每位团队成员每月 {currency}{price} — 每位成员均可获得您所在套餐等级的完整访问权限"
-    }
+    },
+    "metaDescription": "Ionexa AI 价格 — Free、Starter、Growth、Professional、Ultimate 和 Enterprise 方案。"
   },
   "roadmap": {
     "title": "路线图",
@@ -357,7 +364,8 @@
         "title": "跨平台同步",
         "description": "在网页、移动端和桌面端获得统一的使用体验。"
       }
-    }
+    },
+    "metaDescription": "Ionexa AI 目前已上线的功能、接下来的计划，以及我们的方向。"
   },
   "auth": {
     "login": {
@@ -369,7 +377,8 @@
       "noAccount": "还没有账户？",
       "signUp": "注册",
       "forgotPassword": "忘记密码？",
-      "resetSuccess": "密码已更新——请使用新密码登录。"
+      "resetSuccess": "密码已更新——请使用新密码登录。",
+      "failed": "无法登录。请检查邮箱和密码，如不确定可重置密码。"
     },
     "signup": {
       "chooseYourPlan": "选择你的方案",
@@ -396,7 +405,8 @@
       "createAccount": "创建账户",
       "mostPopular": "最受欢迎",
       "mustAgreeToTerms": "您必须同意服务条款和隐私政策才能创建账户。",
-      "passwordRequirementsNotMet": "请选择满足以上所有要求的密码。"
+      "passwordRequirementsNotMet": "请选择满足以上所有要求的密码。",
+      "failed": "无法创建账户。请检查填写的信息后重试 — 未向你收费。"
     },
     "forgotPassword": {
       "title": "重置密码",
@@ -407,7 +417,8 @@
       "checkInbox": "如果 <highlight>{emailAddress}</highlight> 存在对应账户，重置链接即将发出。请查看你的收件箱。",
       "backToLogin": "返回登录",
       "rememberedIt": "想起密码了？",
-      "logIn": "登录"
+      "logIn": "登录",
+      "failed": "无法发送重置邮件。请检查邮箱地址，稍后再试。"
     },
     "resetPassword": {
       "title": "设置新密码",
@@ -417,7 +428,9 @@
       "confirmPassword": "确认密码",
       "saveNewPassword": "保存新密码",
       "saving": "保存中...",
-      "passwordsDoNotMatch": "两次输入的密码不一致。"
+      "passwordsDoNotMatch": "两次输入的密码不一致。",
+      "linkInvalid": "此重置链接已失效。链接会在短时间后过期 — 请重新申请一个。",
+      "failed": "无法设置新密码。请重试，若持续失败请重新申请链接。"
     },
     "social": {
       "continueWithGoogle": "使用 Google 继续",
@@ -430,7 +443,8 @@
       "warning": "此操作将永久删除您的账户以及您记录的所有条目，且无法撤销。",
       "deleting": "正在删除…",
       "confirmButton": "永久删除我的账户",
-      "cancel": "取消并返回"
+      "cancel": "取消并返回",
+      "confirmFailed": "无法完成删除。你的账户仍然存在 — 请重新点击链接，或联系客服。"
     }
   },
   "settings": {
@@ -445,7 +459,8 @@
       "requirementsNotMet": "请选择满足以下所有要求的密码。",
       "passwordsDoNotMatch": "两次输入的密码不一致。",
       "couldNotUpdate": "✗ 无法更新密码",
-      "passwordUpdated": "✓ 密码已更新"
+      "passwordUpdated": "✓ 密码已更新",
+      "failed": "无法修改密码。请确认当前密码后重试。"
     },
     "chatMemory": {
       "title": "对话记忆",
@@ -526,7 +541,8 @@
       "sending": "发送中...",
       "checkEmail": "请查看你的邮箱以确认删除——我们已向 <highlight>{email}</highlight> 发送了一个链接。该链接将在 1 小时后过期；在你点击之前不会删除任何内容。",
       "emailDoesNotMatch": "电子邮件地址不匹配。",
-      "couldNotStartDeletion": "✗ 无法开始删除账户"
+      "couldNotStartDeletion": "✗ 无法开始删除账户",
+      "failed": "无法发送确认邮件。请稍后重试 — 尚未删除任何内容。"
     },
     "emailNotifications": {
       "title": "邮件通知",
@@ -566,7 +582,8 @@
       "title": "AI 人格",
       "description": "为助手设置自定义名称。",
       "personaUpdated": "✓ 助手名称已更新",
-      "couldNotSave": "✗ 无法保存该名称"
+      "couldNotSave": "✗ 无法保存该名称",
+      "saveFailed": "无法保存该名称。请稍后重试。"
     },
     "billing": {
       "title": "账单",
@@ -734,7 +751,12 @@
         }
       },
       "quickStartTemplates": "快速开始模板",
-      "quickStartApplied": "✓ 已添加 {count} 条示例记录"
+      "quickStartApplied": "✓ 已添加 {count} 条示例记录",
+      "quickStart": "快速开始",
+      "templateApplied": "已添加 {count} 条示例",
+      "templateFailed": "无法应用该模板。请稍后重试 — 未添加任何内容。",
+      "quickStartBlurb": "添加几条示例记录，看看填充后的工作区是什么样子。",
+      "quickStartAdd": "添加"
     },
     "team": {
       "title": "团队",
@@ -743,7 +765,6 @@
       "emailPlaceholder": "teammate@company.com",
       "sendInvite": "发送邀请",
       "sending": "发送中...",
-      "noMembers": "目前还没有团队成员——在上方邀请一位吧。",
       "inviteSent": "邀请已发送至 {email}。",
       "inviteFailed": "邀请发送失败。",
       "active": "活跃",
@@ -761,23 +782,28 @@
       "rolePlaceholder": "此人负责什么工作?",
       "workUseDisclaimer": "团队席位仅供实际在您企业工作的员工或合作者使用 — 不可用于个人/家庭用途。邀请成员即表示您确认其为团队工作的一部分。",
       "memberRemoved": "✓ 已移除成员",
-      "couldNotRemoveMember": "✗ 无法移除成员"
+      "couldNotRemoveMember": "✗ 无法移除成员",
+      "empty": {
+        "title": "还没有邀请任何人",
+        "why": "用邮箱邀请同事，他们会有自己的登录方式进入这个工作区——同样的数据，用他们自己的账号，而不是你的密码。"
+      }
     },
     "memory": {
-      "title": "AI 记忆",
+      "title": "搜索我的记录",
       "description": "在所有模块中搜索你记录过的一切——无需记得存放在哪里。",
       "searchPlaceholder": "搜索你记录过的一切...",
       "resultCount": "在所有模块中共 {count} 条结果",
       "resultCountForQuery": "在所有模块中共 {count} 条与“{query}”匹配的结果",
-      "empty": "还没有任何记录——一旦你开始使用各个模块，就可以在这里统一搜索。",
+      "empty": {
+        "title": "还没记录任何东西，所以也搜不到什么",
+        "why": "它同时搜索所有模块——想法、线索、开支、交易。你用其他页面时它自然会充实起来；这里没有它自己的东西。"
+      },
       "truncated": "显示 {total} 条匹配结果中的前 {shown} 条——请细化搜索条件。"
     },
     "documents": {
       "title": "文档",
       "description": "自由形式的笔记和文档 — 随意书写,边写边自动保存。",
       "newDocument": "新建文档",
-      "emptyTitle": "还没有文档",
-      "emptyHint": "创建你的第一个文档,开始写作。",
       "untitled": "无标题",
       "titlePlaceholder": "无标题文档",
       "contentPlaceholder": "开始写作…",
@@ -791,7 +817,13 @@
       "heading1": "标题 1",
       "heading2": "标题 2",
       "bulletList": "项目符号列表",
-      "updatedAt": "编辑于 {when}"
+      "updatedAt": "编辑于 {when}",
+      "empty": {
+        "title": "一张会记事的空白页",
+        "why": "长篇的东西，和你的工作放在一起——一份需求、一版草稿、会议记录——和其他记录一起可搜。",
+        "example": "周一会议记录"
+      },
+      "createFailed": "无法创建文档。请稍后重试 — 未保存任何内容。"
     },
     "chat": {
       "title": "Ionexa 聊天",
@@ -804,7 +836,7 @@
       "showConversationsHint": "再次显示会话列表。",
       "send": "发送",
       "emptyBody": "什么都可以问——常识、头脑风暴、写作帮助，或者只是聊聊天。不与任何 Ionexa AI 模块绑定。",
-      "composerPlaceholder": "给 Ionexa 发消息...",
+      "composerPlaceholder": "给 Ionexa 发消息…",
       "mentorMode": "导师模式",
       "mentorModeHint": "导师模式：给出战略性的引导而不只是答案——指出风险、提出澄清问题、给出替代方案，并把你记录的数据作为上下文。",
       "newChat": "新建对话",
@@ -816,7 +848,12 @@
       "pin": "置顶",
       "unpin": "取消置顶",
       "rename": "重命名",
-      "deleteConfirm": "确定删除“{title}”？此操作无法撤销。"
+      "deleteConfirm": "确定删除“{title}”？此操作无法撤销。",
+      "pinLimitReached": "你已置顶 {limit} 个对话，这是当前方案能置顶的上限。先取消一个，再置顶这个。",
+      "pinError": "置顶没有保存成功，请再试一次。",
+      "renameError": "新名称没有保存，仍然是原来的名称。",
+      "renameLabel": "「{title}」的新名称",
+      "emptyHint": "随便问——常识、头脑风暴、写作帮助，或者只是聊聊。"
     },
     "create": {
       "title": "创建任何内容",
@@ -825,30 +862,35 @@
       "viewModule": "查看 {module} →"
     },
     "timeline": {
-      "title": "时间线",
+      "title": "历史",
       "allModules": "所有模块",
       "showOnly": "仅显示:{module}",
       "rangeToday": "今天",
       "rangeWeek": "本周",
       "rangeMonth": "本月",
       "rangeAll": "所有时间",
-      "emptyState": "此时间段内暂无记录。"
+      "empty": {
+        "title": "你的工作，按发生的先后排好",
+        "why": "它自己会写。你在任何模块里记的东西都会汇到这一条流里——「上个月我到底做了什么」就是这么答的。"
+      }
     },
     "favorites": {
       "title": "收藏",
       "description": "所有模块中你加星标的内容，都在这里集中展示。",
-      "emptyState": "还没有收藏 — 点击任意条目的星标即可保存到这里。",
-      "starredAt": "收藏于 {when}"
+      "starredAt": "收藏于 {when}",
+      "empty": {
+        "title": "你还没挑出来的那几个",
+        "why": "在任何东西上点一下星标——一个想法、一条线索、一个站点——它就会出现在这里，常回头看的那几个从此只隔一次点击。"
+      }
     },
     "mission": {
-      "title": "任务控制中心",
+      "title": "目标与计划",
       "started": "开始于 {time}",
       "description": "Planner → Builder → Reviewer — 描述一个目标,获取计划,然后用 AI 逐步构建。",
       "goalLabel": "你的目标是什么?",
       "goalPlaceholder": "例如:我想开一家手工珠宝在线商店",
       "createPlan": "创建计划",
       "planning": "规划中...",
-      "emptyState": "还没有任务——点击「新建任务」描述一个目标并获取第一份计划。",
       "createWithAi": "用 AI 创建",
       "creating": "创建中...",
       "openWebsiteBuilder": "打开网站构建器",
@@ -898,7 +940,12 @@
         "heldBack": "暂时搁置了 {count} 个较重的步骤"
       },
       "stillPlanning": "仍在规划中——需要一点时间。它会继续运行，完成后计划会出现在你的任务列表里。",
-      "planStalled": "该计划意外中断。未扣除任何积分——请重试。"
+      "planStalled": "该计划意外中断。未扣除任何积分——请重试。",
+      "empty": {
+        "title": "一个目标，拆成若干步",
+        "why": "说出你想达成什么，这里会把它变成有日期、可勾选的计划，而不是一张愿望清单。",
+        "example": "拿下头 10 个付费客户"
+      }
     },
     "reflection": {
       "title": "每周回顾",
@@ -966,7 +1013,7 @@
       "levelLabel": "能量等级 {level}"
     },
     "websiteBuilder": {
-      "title": "网站生成器",
+      "title": "做个网站",
       "description": "描述你想要的内容,AI 会生成一个真实、完整的网站 — 即时预览,下载 HTML。",
       "nameLabel": "名称",
       "namePlaceholder": "例如:教练业务落地页",
@@ -997,7 +1044,6 @@
       "downloadButton": "下载 HTML",
       "deleteButton": "删除",
       "deleted": "网站已删除",
-      "emptyState": "还没有网站——点击「新建网站」生成第一个。",
       "editLabel": "请求修改",
       "editPlaceholder": "例如：把主视觉区域放大，或把颜色改成蓝色。",
       "editButton": "应用更改",
@@ -1055,14 +1101,22 @@
       },
       "imageIntro": "你的标志、产品照片、店内照片——想放到页面上的，或想让它决定风格的。",
       "regenerateAlreadyUsed": "您已使用过此站点的免费重新生成。请用其他描述创建新站点。",
-      "regenerateNoBrief": "此站点创建于我们开始保存原始描述之前，因此无法自动重新生成。请用相同描述创建新站点。"
+      "regenerateNoBrief": "此站点创建于我们开始保存原始描述之前，因此无法自动重新生成。请用相同描述创建新站点。",
+      "empty": {
+        "title": "描述这个网站，拿到这个网站",
+        "why": "写清它是做什么的、给谁看——页面、文案和排版都由这段描述生成，之后还能用大白话继续改。",
+        "example": "面包店的单页网站，含产品和营业时间"
+      }
     },
     "marketplace": {
       "title": "市场",
       "description": "买卖代理、自动化和模板 — 即将推出。",
-      "emptyState": "还没有商品 — 成为第一个发布的人。",
       "comingSoon": "即将推出",
-      "publishButton": "发布模板"
+      "publishButton": "发布模板",
+      "empty": {
+        "title": "市场还没有开放",
+        "why": "计划是让大家分享自己做的 agent、网站模板和工作流。这里还没有任何东西上线——下方的按钮是灰的，因为功能还不存在，跟你的套餐无关。"
+      }
     },
     "automation": {
       "realizeSectionTitle": "将想法变为现实",
@@ -1115,7 +1169,7 @@
       "clarifyAnswerPlaceholder": "你的回答..."
     },
     "createStudio": {
-      "title": "创作工作室",
+      "title": "创建任何东西",
       "subtitle": "用一句话描述你想要什么。无需选择工具——工作室会判断它是什么，先告诉你它的理解，然后才动手创建。",
       "inputLabel": "你想创建什么？",
       "inputPlaceholder": "例如：为我的教练业务做一个温暖专业的落地页",
@@ -1211,8 +1265,6 @@
       "discard": "放弃",
       "createSuccess": "智能体已创建——将在下一次计划运行时启动。",
       "createError": "无法创建智能体，请重试。",
-      "emptyTitle": "还没有智能体",
-      "emptyHint": "描述你希望定期完成的事情，Ionexa 会替你搭建智能体。",
       "statusActive": "运行中",
       "statusPaused": "已暂停",
       "statusDisabled": "已关闭",
@@ -1265,17 +1317,49 @@
         "monthly": "每月 {day} 号 {time}",
         "custom": "计划：{expression}"
       },
-      "buildStalled": "创建意外中断。未扣除任何积分——请重试。"
+      "buildStalled": "创建意外中断。未扣除任何积分——请重试。",
+      "empty": {
+        "title": "不用你动手也会发生的工作",
+        "why": "用一句话描述一件事，之后它就按时自己跑，直接把结果交给你，而不是提醒你去做。",
+        "example": "每周一早上，汇总上周的销售情况"
+      },
+      "delivery": {
+        "label": "结果发送到哪里",
+        "channels": {
+          "email": "邮件",
+          "slack": "Slack",
+          "telegram": "Telegram",
+          "discord": "Discord",
+          "in_app": "应用内"
+        },
+        "emailNote": "发送至 {email}，即您的账户邮箱。",
+        "inAppNote": "保留在应用内的通知中，不会离开 Ionexa。",
+        "slackNotConnected": "请先在“集成”中连接 Slack。",
+        "slackChannelLabel": "Slack 频道",
+        "telegramHelp": "用 @BotFather 创建机器人，给它发一条消息，然后粘贴它的 token 和您的 chat id。",
+        "telegramTokenPlaceholder": "机器人 token",
+        "telegramChatPlaceholder": "Chat id，例如 123456789",
+        "telegramTokenInvalid": "这看起来不像 Telegram 机器人 token。",
+        "telegramChatInvalid": "这看起来不像 Telegram chat id。",
+        "telegramConnected": "已连接到会话 {chat} · token {hint}",
+        "discordHelp": "在您的 Discord 频道：设置 → 集成 → Webhook → 新建 Webhook，然后复制地址。",
+        "discordUrlPlaceholder": "Discord webhook 地址",
+        "discordUrlInvalid": "这不是 Discord webhook 地址。",
+        "discordConnected": "已连接 · webhook {hint}",
+        "connect": "连接并发送测试",
+        "connectSuccess": "已连接——测试消息已送达。",
+        "connectFailed": "无法连接该渠道。",
+        "disconnect": "断开连接",
+        "disconnected": "已断开连接。"
+      }
     },
     "publishing": {
-      "title": "已发布网站",
+      "title": "已上线网站",
       "description": "你的网站，已在互联网上线。",
       "analyticsNotice": "我们只按天统计页面浏览量，别无其他——不使用 Cookie，不追踪访客，也不会记录访问者的任何个人数据。",
       "goToBuilder": "网站生成器",
       "sitesUsed": "{used} / {cap} 个在线",
       "sitesUsedUnlimited": "{used} 个在线",
-      "emptyTitle": "还没有发布任何网站",
-      "emptyHint": "在网站生成器中打开已完成的网站并点击“发布”，立刻就能获得一个在线地址。",
       "publish": "发布",
       "republish": "重新发布",
       "publishNow": "发布",
@@ -1324,10 +1408,16 @@
       "reasonTaken": "该网址已被占用，请换一个。",
       "disabledFlagged": "此站点被安全审核暂留，因此无法上线。请查看下方详情 — 您可以免费重新生成一次。",
       "disabledFailed": "此站点尚未生成完成，暂无内容可发布。",
-      "disabledGenerating": "正在生成。完成后即可发布。"
+      "disabledGenerating": "正在生成。完成后即可发布。",
+      "empty": {
+        "title": "还没有任何站点上线",
+        "why": "你做的网站在发布前一直是私有的。发布之后它会有一个真实网址，访问量也会显示在这里。"
+      }
     },
     "integrations": {
       "title": "集成",
+      "emptyTitle": "还没有连接任何账户",
+      "emptyBody": "连接一个账户，AI 就能从中读取——邮件、日历、文件——而不是只知道你手工输入的内容。",
       "description": "连接你已经在用的工具，让 AI 处理你真实的数据。",
       "privacyNotice": "除非另有说明，连接均为只读。令牌使用不存放于我们数据库中的密钥加密，绝不会出现在日志里；断开连接会在服务商处撤销授权，并删除我们保存的一切，包括读取记录。",
       "notConfigured": "此部署尚未配置集成，因此无法连接。",
@@ -1432,7 +1522,7 @@
       "notInDocuments": "所选文档无法回答这个问题。以下内容并非出自它们。",
       "citations": "文档中的出处",
       "removedCitations": "有 {count} 处引用指向未提供的页面，已被移除。",
-      "truncatedWarning": "仅有部分所选内容被纳入，答案可能不完整。",
+      "truncatedWarning": "即使分成几部分阅读，所选文档仍超出一个问题能覆盖的范围，答案可能不完整。请一次针对更少的文件提问。",
       "skippedFiles": "已跳过（无可读文本）：{names}",
       "creditsCharged": "{credits} 积分",
       "stepsLabel": "本页使用方法",
@@ -1450,17 +1540,18 @@
       "emptyExample": "例如「合同里关于取消是怎么写的？」",
       "askDisabledNoFiles": "请先在上方勾选至少一个文件。",
       "askDisabledNoQuestion": "请输入你的问题以继续。",
-      "examplesLabel": "试试：",
-      "example1": "关于取消是怎么写的？",
-      "example2": "总结要点。",
-      "example3": "有哪些期限和金额？",
       "processingHint": "正在读取文件——通常只需几秒。准备好后即可提问。",
       "failedHint": "未找到可读文本。请上传文字可选中的版本。",
       "askStillRunning": "仍在阅读——需要一点时间。关闭页面后也会继续；稍后回来再问一次即可看到答案。",
       "askStalled": "该问题意外中断。未扣除任何积分——请重试。",
-      "stepReading": "正在读取你的文件",
-      "stepAnswering": "正在整理答案",
-      "stepChecking": "正在核对引用"
+      "questionLength": "{used, number} / {max, number} 个字符",
+      "questionAtLimit": "单个问题已达到 {max, number} 个字符的上限。",
+      "readInParts": "你的文档太长，无法一次读完，因此分成 {parts} 部分阅读，再把答案合并。",
+      "copyAnswer": "复制答案",
+      "copyCitation": "复制此来源",
+      "copyText": "复制文本",
+      "copyTextError": "无法读取该文件的文本。",
+      "copyTextEmpty": "我们没有从该文件中读出任何文本。"
     },
     "deepResearch": {
       "title": "深度研究",
@@ -1496,7 +1587,11 @@
       "confirmDelete": "删除关于 {name} 的报告？它生成的文档会被保留。",
       "deleteSuccess": "报告已删除",
       "deleteError": "无法删除该报告。",
-      "empty": "还没有报告。在上方描述一个主题，看看它会研究什么。",
+      "empty": {
+        "title": "问一个真要下功夫查的问题",
+        "why": "值得花几小时的问题：先把调研计划给你看，然后真的去查，带着出处回来。",
+        "example": "在希腊还有谁在卖这个，卖什么价"
+      },
       "usedThisMonth": "本月 {cap} 次中的 {used} 次",
       "usedUnlimited": "本月 {used} 次",
       "capReached": "你已用完本月的研究报告额度，将于每月 1 日重置。",
@@ -1584,7 +1679,11 @@
     "ideas": {
       "new": "新建创意",
       "edit": "编辑创意",
-      "empty": "目前还没有创意——使用上方按钮记录第一条。",
+      "empty": {
+        "title": "所有想法，集中一处",
+        "why": "趁想法还粗糙时先写下来——这里会给它评分、与其他想法比较，即使最后放弃了也会留档。",
+        "example": "面向小企业的新服务"
+      },
       "loadError": "无法加载你的创意：{message}",
       "deleteConfirm": "确定删除此创意？此操作无法撤销。",
       "editAria": "编辑创意：{name}",
@@ -1610,14 +1709,18 @@
       "cardCompetitors": "竞争对手：",
       "cardMarketSize": "市场规模：",
       "cardMvp": "最小可行产品："
+    },
+    "backgroundWork": {
+      "working": "您上一个请求仍在处理中——即使离开此页面也会完成。",
+      "finished": "您离开期间，上一个请求已经完成。",
+      "open": "打开",
+      "dismiss": "关闭"
     }
   },
   "module": {
     "searchPlaceholder": "搜索...",
     "exportCsv": "导出 CSV",
-    "noEntries": "目前还没有记录——使用上方按钮记录第一条。",
     "noMatches": "没有找到与 '{query}' 匹配的结果",
-    "new": "新建 {title}",
     "selectPlaceholder": "请选择...",
     "save": "保存",
     "saving": "保存中...",
@@ -1644,7 +1747,39 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyPresentationNotes": "这里还没有内容。这是用来记录你正在筹划或已经做好的演示文稿的地方——它不会替你生成幻灯片。点击上方按钮添加一条。"
+    "emptyWhat": "你记录的所有关于{module}的内容都在这里。",
+    "emptyWhy": "你在这里记录的一切都会进入时间线，并成为 AI 在你询问工作相关问题时可以使用的信息。",
+    "emptyExample": "从这条开始：「{example}」",
+    "examples": {
+      "competitors": "Notion — 定价上最接近的竞争对手",
+      "research": "6 月试用转付费率为什么下降",
+      "finance": "9 月主机账单 — 240 欧元",
+      "learning": "SQL 窗口函数 — 已完成第 4 章",
+      "trading": "EURUSD 做多，平仓 +1.8R",
+      "decisions": "选择 Postgres 而非 MongoDB，以及原因",
+      "products": "Pro 方案 — 年付选项",
+      "content": "9 月版本的发布邮件",
+      "sales": "Acme 有限公司 — 周二演示已预约",
+      "feedback": "客户反馈：超过 5000 行时导出太慢",
+      "analytics": "本周注册：142（+18%）",
+      "automation": "每周一早上给我发一份摘要",
+      "websites": "新定价的落地页",
+      "apps": "内部发票跟踪工具",
+      "images": "定价页的主视觉图",
+      "videos": "60 秒产品演示",
+      "coding": "对账 Stripe 付款的脚本",
+      "data-analysis": "哪个方案的流失率最低？",
+      "campaigns": "9 月发布 — 邮件 + LinkedIn",
+      "presentations": "第三季度董事会汇报 — 要点",
+      "ideas": "写给从电子表格转过来的人的通讯"
+    },
+    "emptyWebsitePlans": "这里还什么都没有。这里用来记录你打算做的网站——它不会帮你建站。要真正生成网站，请用“做个网站”。",
+    "emptyApps": "这里还什么都没有。这里用来记录你打算做或已经做过的应用——它不会帮你开发应用。请用上方按钮添加。",
+    "emptyImages": "这里还什么都没有。这里用来记录你需要或已经做好的图片——它不会生成图片。请用上方按钮添加。",
+    "emptyVideos": "这里还什么都没有。这里用来记录你打算做或已经做好的视频——它不会生成视频。请用上方按钮添加。",
+    "emptyCoding": "这里还什么都没有。这里用来记录你打算做或已经完成的开发工作——它不会写代码。请用上方按钮添加。",
+    "emptyDataAnalysis": "这里还什么都没有。这里用来记录你打算做或已经完成的分析——它不会分析你的数据。请用上方按钮添加。",
+    "emptyCampaigns": "这里还什么都没有。这里用来记录你打算做或已经投放过的营销活动——它不会替你投放。请用上方按钮添加。"
   },
   "askAi": {
     "buttonLabel": "问 AI",
@@ -1901,6 +2036,423 @@
       "data-analysis": "确定删除此分析？此操作无法撤销。",
       "presentations": "确定删除此演示记录？此操作无法撤销。",
       "campaigns": "确定删除此营销活动？此操作无法撤销。"
+    },
+    "empty": {
+      "competitors": {
+        "title": "看清你的对手",
+        "why": "每个对手一行——卖什么、收多少、谁在买。行与行之间的空白，就是你的定位。",
+        "example": "今年谁进入了这个市场"
+      },
+      "sales": {
+        "title": "每一条线索都有跟进",
+        "why": "只记在脑子里的线索，就是丢掉的线索。填上名字、评分和下一步，跟进邮件自己就写好了。",
+        "example": "三月成交的客户"
+      },
+      "finance": {
+        "title": "钱到底花在了哪里",
+        "why": "收入和支出放在同一份清单里，这个月的真实数字就是读出来的，而不是估出来的。",
+        "example": "广告支出 200 欧元"
+      },
+      "trading": {
+        "title": "这笔交易，以及做它的理由",
+        "why": "品种、方向、结果，还有你为什么进场的那条备注。让下一笔更好的，正是这条备注。",
+        "example": "EURUSD 做多，盈亏比 1:2"
+      },
+      "research": {
+        "title": "查到的东西，留得住",
+        "why": "费力查过一次的答案，放在你还能再找到的地方——省得三个月后又把同一个问题重查一遍。",
+        "example": "客户现在为此付多少钱"
+      },
+      "learning": {
+        "title": "学到的东西，留下来",
+        "why": "没写下来的教训，你会再付一次学费。主题、资料，以及证明真的记住了的小测。",
+        "example": "上次发布让我学到了什么"
+      },
+      "decisions": {
+        "title": "决定，以及做决定的理由",
+        "why": "在选之前把选项和理由写下来。半年后你想找回的，只会是当初的理由。",
+        "example": "自己招人，还是外包"
+      },
+      "products": {
+        "title": "从想法到上线",
+        "why": "受众、定价、MVP 范围和路线图放在一处，你做出来的产品才是你当初描述的那个。",
+        "example": "面向小团队的订阅套餐"
+      },
+      "content": {
+        "title": "内容流水线",
+        "why": "每一个打算发布的选题，文案、长贴和话题标签在那天到来之前就已经写好。",
+        "example": "文章：新手最常犯的 5 个错误"
+      },
+      "feedback": {
+        "title": "用户到底在告诉你什么",
+        "why": "每条反馈一行，按情绪和优先级排序——反复出现的那几条，就是你的路线图。",
+        "example": "客户希望能导出 Excel"
+      },
+      "analytics": {
+        "title": "你真正会看的那几个数",
+        "why": "挑出真正影响决策的少数几个指标，定期记录——没有历史的数字说明不了任何事。",
+        "example": "三月各渠道访问量"
+      },
+      "automation": {
+        "title": "不用再手工做的那些活",
+        "why": "说出一件你反复做的事，这里会替你拟好流程和工具，旁边标上省下的工时。",
+        "example": "每周一，一份销售摘要"
+      },
+      "websites": {
+        "title": "每一个在规划中的网站",
+        "why": "每个站点一行——需求、网址和当前进度——重要的东西不该只活在一个浏览器标签页里。它不会帮你建站。",
+        "example": "春季发布的落地页"
+      },
+      "apps": {
+        "title": "清单上的每一个应用",
+        "why": "它做什么、面向哪个平台、进展到哪一步——从第一版草图到上架。它不会帮你开发应用。",
+        "example": "预约挂号的 iOS 应用"
+      },
+      "images": {
+        "title": "你需要做出来的图",
+        "why": "留下提示词，而不只是图片——能再读一遍的提示词，下次才改得动。它不会生成图片。",
+        "example": "白底产品图"
+      },
+      "videos": {
+        "title": "已经排上日程的视频",
+        "why": "每条视频的需求和进度，拍摄清单不该只存在脑子里。它不会生成视频。",
+        "example": "30 秒的产品演示"
+      },
+      "coding": {
+        "title": "你想让人做出来的东西",
+        "why": "写清要做的功能或要修的问题，标上语言，把整个待办清单放在脑子以外的地方。它不会写代码。",
+        "example": "一个合并每月 CSV 的脚本"
+      },
+      "dataAnalysis": {
+        "title": "你的数据能回答的问题",
+        "why": "问题、查哪个数据源、以及拿回来的结论——同一个答案不该被找两遍。它不会分析你的数据。",
+        "example": "哪个渠道带来的客户留得住"
+      },
+      "presentations": {
+        "title": "记录演示文稿的地方",
+        "why": "把你正在准备或已经讲过的演示记在这里——本页不会替你生成幻灯片。用上方的按钮添加一条。",
+        "example": "种子轮的投资人演示"
+      },
+      "campaigns": {
+        "title": "每一次投放，以及它的花费",
+        "why": "渠道、预算和状态并排放着，下一次的预算决定就能靠数字，而不是靠感觉。它不会替你投放。",
+        "example": "春季邮件推广，预算 500 欧元"
+      }
+    },
+    "new": {
+      "competitors": "新增竞争对手",
+      "research": "新增研究记录",
+      "finance": "新增收支记录",
+      "learning": "新增学习笔记",
+      "trading": "新增交易",
+      "decisions": "新增决策",
+      "products": "新增产品",
+      "content": "新增内容",
+      "sales": "新增线索",
+      "feedback": "新增反馈",
+      "analytics": "新增指标",
+      "automation": "新增自动化",
+      "websites": "新增网站",
+      "apps": "新增应用",
+      "images": "新增图片",
+      "videos": "新增视频",
+      "coding": "新增编程任务",
+      "dataAnalysis": "新增分析",
+      "presentations": "新增演示备注",
+      "campaigns": "新增活动"
+    }
+  },
+  "aiSteps": {
+    "starting": "正在开始…",
+    "agent_build": {
+      "understanding": "正在理解你的需求…",
+      "drafting": "正在编写这个 agent…",
+      "checking": "正在检查…",
+      "saving": "正在保存…"
+    },
+    "agent_run": {
+      "preparing": "正在准备你的数据…",
+      "working": "正在干活…",
+      "delivering": "正在整理结果…"
+    },
+    "mission_plan": {
+      "reading": "正在读你记录过的内容…",
+      "planning": "正在把目标拆成步骤…",
+      "saving": "正在保存你的计划…"
+    },
+    "create": {
+      "understanding": "正在弄清你要什么…",
+      "creating": "正在写内容…",
+      "saving": "正在归到该去的地方…"
+    },
+    "file_ask": {
+      "reading": "正在读你的文件…",
+      "answering": "正在组织答案…",
+      "combining": "正在合并各部分的结果…",
+      "checking": "正在对照文件核实…"
+    },
+    "counter": "（{step}/{total}）",
+    "understanding": "正在理解你的问题",
+    "searching": "正在查找信息",
+    "reading": "正在读取你的文件",
+    "planning": "正在规划步骤",
+    "drafting": "正在写第一版草稿",
+    "creating": "正在创建",
+    "generating": "正在生成",
+    "working": "正在处理",
+    "answering": "正在整理答案",
+    "rewriting": "正在重写文本",
+    "summarising": "正在总结",
+    "checking": "正在检查结果",
+    "saving": "正在保存",
+    "delivering": "正在发送给你",
+    "publishing": "正在发布网站"
+  },
+  "problem": {
+    "out_of_credits": {
+      "what": "你的额度用完了",
+      "next": "买一个额度包，或者换一个更大的套餐，同样的操作就能通过——你写的内容一点都没丢。"
+    },
+    "rate_limited": {
+      "what": "过去一小时内这类操作太多了",
+      "next": "这个操作有每小时上限，免得单个账号占掉共享额度。等几分钟再试——上限是滚动计算的，不是整点清零。"
+    },
+    "timeout": {
+      "what": "这一步耗时过长，已经停止",
+      "next": "长任务有时间上限，免得卡住的任务一直跑。换一个更短或更具体的请求再试，通常都能在上限内跑完。"
+    },
+    "network": {
+      "what": "没有收到回应",
+      "next": "检查一下网络再试。如果任务已经开始了，它还在后台跑——刷新页面就好，别再开一个。"
+    },
+    "credits": {
+      "untouched": "没有扣任何额度。",
+      "refunded": "为此预留的额度已经退回。",
+      "charged": "已完成部分所对应的额度已经扣除。"
+    }
+  },
+  "help": {
+    "agents": {
+      "is": "agent 就是一件按时自动跑、不用你动手的工作。",
+      "does": "你只描述一次任务；它按你设定的时间运行，把结果邮件发给你，并保留每次运行的历史。",
+      "doesNot": "它不会无限制地跑。每小时的运行次数和每个套餐能有的 agent 数量都有上限，而且每次运行都消耗额度。"
+    },
+    "websiteBuilder": {
+      "is": "用一段描述生成一整个网站。",
+      "does": "根据你的描述写出页面、文案和排版，之后你还能用大白话继续改。",
+      "doesNot": "它不会把任何东西放到网上。生成的站点在你亲自发布之前一直是私有的。"
+    },
+    "published": {
+      "is": "你已经上线的站点。",
+      "does": "发布会给站点一个任何人都能打开的地址，并在这里统计访问量。",
+      "doesNot": "它不会给你自己的域名。目前的地址是本站下的一条路径，而不是 你的域名.com——把真实域名指过来是另一件事。"
+    },
+    "files": {
+      "is": "你的文档，AI 能读。",
+      "does": "上传 PDF、Word、Excel、CSV 或纯文本；系统提取其中的文字，你可以就选中的文件提问。",
+      "doesNot": "它读不了扫描件。整页是照片的 PDF 没有文字可提取，需要先做 OCR；超长文档也只读到一定长度为止。"
+    },
+    "deepResearch": {
+      "is": "要花你好几个小时的那种调研。",
+      "does": "先把调研计划给你看，然后真的去查，带着你能核对的出处回来。",
+      "doesNot": "它不会让你干等着出答案。它在后台跑——离开页面、关掉标签页都行，回来时它还在。"
+    },
+    "memory": {
+      "is": "一次搜索，覆盖你记录过的所有东西。",
+      "does": "同时翻遍所有模块——想法、线索、开支、交易、站点——并把你直接带到那条记录。",
+      "doesNot": "它不保存你的对话，也不自己留存任何东西。这里的每一条都是你在某个模块里写下的；AI 不会往里加东西。"
+    },
+    "mission": {
+      "is": "一个目标，拆成带日期的步骤。",
+      "does": "你写下目标，生成可勾选的计划；任何一步都能交给 AI，或者排到某一天。",
+      "doesNot": "它不会自己往前走。计划一直停着，直到你运行某一步或给它排期——时间过去了并不会自动发生什么。"
+    },
+    "integrations": {
+      "is": "你自己的账户，连接后 AI 可以从中读取。",
+      "does": "Gmail 和 Google Drive 是只读连接。Slack 只读你把应用拉进去的频道，agent 可以把结果发回那里。",
+      "doesNot": "它不会替你发邮件、不会代你回复、也不会删除任何东西。它永远看不到 Slack 私有频道和私信。"
+    },
+    "team": {
+      "is": "和你共用这个工作区的人。",
+      "does": "用邮箱邀请；每个人用自己的账号登录，看到同样的数据。",
+      "doesNot": "这不是免费的，也不是共用你的账号。席位按人计费，任何人都不需要你的密码。"
+    },
+    "timeline": {
+      "is": "你做过的一切，最新的在前面。",
+      "does": "它从每个模块自动汇总，让你不用翻五个页面就能回答「上个月我做了什么」。",
+      "doesNot": "这里不是让你写东西的。它是记录，不是日记——条目出现是因为你在别处记过，顺序是事情发生的时间。"
+    },
+    "favorites": {
+      "is": "你用星标攒出来的那份短名单。",
+      "does": "你在任何地方点的星标都会出现在这里，按来源分组，常回头看的那几个只隔一次点击。",
+      "doesNot": "加星标不会复制、也不会移动任何东西。这些就是同一批记录，换个地方再显示一次——你在这里改了，改的就是原件。"
+    },
+    "marketplace": {
+      "is": "以后大家分享自制 agent、网站模板和工作流的地方。",
+      "does": "目前还没有内容。这个页面是为一个尚未开发的功能占位的。",
+      "doesNot": "它空着不是因为你的套餐，升级也打不开它。下方的按钮是灰的，因为背后什么都还没有。"
+    },
+    "settings": {
+      "is": "你的账户：当前套餐、剩余额度，以及你记录过的一切。",
+      "does": "更换套餐、购买额度、设置语言与主题、给助手起名，并把账户里的每一条记录导出为一个文件。",
+      "doesNot": "你的记录不在这里——每个模块各自保存。而且「删除账户」不是清空重来的方式：它会结束账户、带走所有内容，并且无法撤销。请先导出。"
+    }
+  },
+  "helpCentre": {
+    "title": "帮助中心",
+    "intro": "最常被问到的问题的答案。在聊天里问其中任何一个，都会立刻得到同样的回答，而且不扣额度。",
+    "goThere": "去那里",
+    "shownInEnglish": "英文版",
+    "notFoundTitle": "没找到你要的？",
+    "notFoundBody": "到聊天里问吧——凡是关于你自己账号或数据的问题，答案来自 AI，而不是这个页面。",
+    "openChat": "打开聊天",
+    "pricingLink": "价格与套餐",
+    "answerCount": "{count} 条答案",
+    "categories": {
+      "getting-started": "新手入门",
+      "billing": "账单与套餐",
+      "credits": "额度",
+      "websites": "网站",
+      "agents": "AI 智能体",
+      "missions": "任务",
+      "chat": "聊天",
+      "files": "文件",
+      "integrations": "连接",
+      "account": "账号",
+      "privacy": "隐私与数据"
+    }
+  },
+  "pageTitle": {
+    "document": "文档",
+    "systemHealth": "系统状态",
+    "onboarding": "开始使用",
+    "notFound": "页面不存在",
+    "notFoundBody": "此页面不存在 — 可能是网址输入有误，或页面已被移动。",
+    "notFoundAction": "返回首页",
+    "forgotPassword": "忘记密码",
+    "resetPassword": "设置新密码",
+    "confirmDeletion": "确认删除账户",
+    "logInDescription": "登录 Ionexa AI。",
+    "signUpDescription": "选择方案并创建你的 Ionexa AI 账户。",
+    "forgotPasswordDescription": "重置你的 Ionexa AI 账户密码。",
+    "resetPasswordDescription": "为你的 Ionexa AI 账户设置新密码。",
+    "confirmDeletionDescription": "确认永久删除你的 Ionexa AI 账户。",
+    "termsDescription": "Ionexa AI 服务条款。",
+    "privacyDescription": "Ionexa AI 隐私政策。",
+    "cookiesDescription": "Ionexa AI 使用哪些 cookie、各自的用途以及保留多久。",
+    "helpDescription": "关于 Ionexa AI 最常见问题的解答 — 价格、credits、网站、agents、隐私。"
+  },
+  "errors": {
+    "retry": "重试",
+    "creditHistory": "查看 credits 记录",
+    "credits": {
+      "refunded": "你的 credits 已退回。",
+      "notCharged": "未向你收费。",
+      "charged": "此次尝试消耗了 credits。",
+      "unverified": "我们无法在此确认是否已扣费。"
+    },
+    "codes": {
+      "notAuthenticated": {
+        "what": "你已退出登录。",
+        "next": "请重新登录并再次执行该操作 — 你输入的内容都还在。"
+      },
+      "forbidden": {
+        "what": "你的方案不包含此功能。",
+        "next": "打开「设置 › 账单」查看哪个方案包含它。"
+      },
+      "notFound": {
+        "what": "该内容已不存在。",
+        "next": "它可能已被删除。请返回列表另选一项。"
+      },
+      "invalidInput": {
+        "what": "表单中有内容未被接受。",
+        "next": "请检查标记出的字段后重新提交。"
+      },
+      "rateLimited": {
+        "what": "短时间内请求过多。",
+        "next": "请等待约一分钟后再试一次。"
+      },
+      "insufficientCredits": {
+        "what": "你的 credits 不足以完成此操作。",
+        "next": "可在「设置」中购买 credits，或等待每月重置。"
+      },
+      "planLimit": {
+        "what": "你已达到当前方案的上限。",
+        "next": "删除不再需要的内容，或在「设置 › 账单」中升级。"
+      },
+      "fileTooLarge": {
+        "what": "该文件过大。",
+        "next": "请拆分文件，或上传较小的版本。"
+      },
+      "unsupportedType": {
+        "what": "不支持该文件类型。",
+        "next": "请转换为 PDF、DOCX、CSV 或 TXT 后重新上传。"
+      },
+      "conflict": {
+        "what": "在你操作期间，其他人或另一个标签页修改了它。",
+        "next": "请重新加载页面查看当前版本，然后重做你的修改。"
+      },
+      "upstreamUnavailable": {
+        "what": "AI 服务当前没有响应。",
+        "next": "这是我们这边的问题，通常几分钟内会恢复。"
+      },
+      "serverError": {
+        "what": "我们这边出错了。",
+        "next": "已记录该问题。请稍后重试，若持续出现请联系客服。"
+      },
+      "offline": {
+        "what": "你的设备无法连接到我们。",
+        "next": "请检查网络连接后重试。"
+      },
+      "unknown": {
+        "what": "此操作未能完成。",
+        "next": "请重试，若再次出现请联系客服。"
+      }
+    }
+  },
+  "aiExamples": {
+    "createStudio": {
+      "e1": "帮我做一个店铺页面",
+      "e2": "一个找客户的计划",
+      "e3": "想法：面向小企业的订阅服务",
+      "e4": "每周一提醒我查看财务",
+      "limits": "只在 Ionexa 内创建 · 不会碰你没有连接的任何东西"
+    },
+    "agents": {
+      "e1": "每天早上把英伟达的新闻发给我",
+      "e2": "每周一汇总我的竞争对手",
+      "e3": "如果有人写到我这个行业就通知我",
+      "limits": "在网上搜索并写给你 · 不执行任何操作，只发送到你指定的地方"
+    },
+    "mission": {
+      "e1": "为我的生意找 10 个客户",
+      "e2": "为新产品准备一个上线计划",
+      "e3": "三个月内把销售额提高 20%",
+      "limits": "写出计划和步骤 · 只有你安排后步骤才会执行"
+    },
+    "websiteBuilder": {
+      "e1": "塞萨洛尼基的一家咖啡馆，带菜单和营业时间",
+      "e2": "摄影师作品集，带图库",
+      "e3": "SaaS 落地页，含定价",
+      "limits": "一个页面，不是商店也不是应用 · 不会连接你的系统"
+    },
+    "files": {
+      "e1": "合同里关于解约是怎么写的？",
+      "e2": "比较这两份报价",
+      "e3": "有哪些期限和金额？",
+      "limits": "只根据你选中的文件回答 · 不会上网搜索"
+    },
+    "research": {
+      "e1": "我所在行业在希腊的竞争对手",
+      "e2": "AI 创业公司为什么会失败",
+      "e3": "2026 年的 SaaS 定价模式",
+      "limits": "阅读网上的公开来源 · 看不到你的文件"
+    },
+    "chat": {
+      "e1": "这周我该优先做什么？",
+      "e2": "给我讲讲这个月的数字",
+      "e3": "给一位付款逾期的客户写封邮件",
+      "limits": "能看到你在 Ionexa 的数据和你连接的内容 · 不会自行执行操作"
     }
   }
 }

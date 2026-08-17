@@ -11,6 +11,7 @@ import { CardGrid } from "@/components/ui/entity-card";
 import { MissionCard } from "@/components/mission/mission-card";
 import { MissionDetail, type MissionDetailTab } from "@/components/mission/mission-detail";
 import { MissionForm } from "@/components/mission/mission-form";
+import { ResumedWorkNotice } from "@/components/jobs/resumed-work-notice";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { isActiveMission } from "@/lib/mission-progress";
 import type { Mission, MissionStatus } from "@/types/mission";
@@ -46,6 +47,7 @@ export function MissionList({
   const tModule = useTranslations("module");
   const tCommon = useTranslations("common");
   const [showForm, setShowForm] = useState(missions.length === 0);
+  const [prefill, setPrefill] = useState<{ text: string; nonce: number } | null>(null);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [selected, setSelected] = useState<{ id: string; tab: MissionDetailTab } | null>(null);
@@ -103,13 +105,13 @@ export function MissionList({
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </button>
-              <MissionForm onCreated={() => setShowForm(false)} />
+              <MissionForm onCreated={() => setShowForm(false)} prefill={prefill} />
             </div>
           ) : (
             <button
               type="button"
               onClick={() => setShowForm(true)}
-              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
+              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
             >
               <Plus className="h-4 w-4" aria-hidden="true" /> {t("newMission")}
             </button>
@@ -125,7 +127,7 @@ export function MissionList({
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               aria-label={tModule("filterBy", { label: t("statusFilterLabel") })}
-              className="min-h-[36px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60 sm:min-h-0"
+              className="min-h-[44px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60"
             >
               <option value="">{tModule("filterAll", { label: t("statusFilterLabel") })}</option>
               {MISSION_STATUSES.map((status) => (
@@ -142,8 +144,29 @@ export function MissionList({
           </span>
         }
       >
+        {/* A PLAN THAT IS STILL BEING MADE. Outside the form on purpose:
+            the form is behind a toggle, and the moment this matters is
+            exactly the moment the user has come back to a closed form and
+            is deciding whether to open it and ask again. A plan costs real
+            credits; being told one is already on its way is what stops the
+            second one. */}
+        <ResumedWorkNotice kind="mission_plan" />
+
         {missions.length === 0 ? (
-          <EmptyState icon={Rocket}>{t("emptyState")}</EmptyState>
+          // The form is already on this page — collapsed when there are
+          // missions, open when there are none — so the press only has to
+          // make sure it is open and hand it the goal.
+          <EmptyState
+            icon={Rocket}
+            title={t("empty.title")}
+            example={t("empty.example")}
+            onExample={(text) => {
+              setShowForm(true);
+              setPrefill((current) => ({ text, nonce: (current?.nonce ?? 0) + 1 }));
+            }}
+          >
+            {t("empty.why")}
+          </EmptyState>
         ) : filtered.length === 0 ? (
           <EmptyState icon={SearchX}>{tModule("noMatches", { query })}</EmptyState>
         ) : (

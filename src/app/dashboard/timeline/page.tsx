@@ -1,3 +1,4 @@
+import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { diagLog } from "@/lib/diag";
 import { ErrorMessage } from "@/components/error-message";
@@ -12,7 +13,9 @@ import { TIMELINE_ICON } from "@/lib/module-icons";
 import { loadTimelineEntries, TIMELINE_RANGES, type TimelineRange } from "@/lib/timeline";
 import { loadFavoriteKeys } from "@/lib/favorites";
 
-export const metadata: Metadata = { title: "Timeline" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.timeline");
+}
 
 // See dashboard/mission/page.tsx for why this is explicit — this page
 // merges live data from every linkable module's table on every load.
@@ -80,7 +83,7 @@ export default async function TimelinePage({
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={TIMELINE_ICON} title={t("title")} />
+        <PageHeader helpKey="help.timeline" icon={TIMELINE_ICON} title={t("title")} />
         <TimelineFilters moduleSlug={moduleSlug} range={range} />
         {sessionDegraded ? (
           <ErrorMessage message={tMission("sessionExpired")} />

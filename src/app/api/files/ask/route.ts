@@ -22,14 +22,12 @@ import { FILE_ASK_MODEL } from "@/lib/files/file-models";
 import { maxFileQuestionsPerHour } from "@/lib/files/limits";
 import { fileIdsInCollection, loadReadableFiles } from "@/lib/files/store";
 import { MAX_FILES_PER_QUESTION, MAX_QUESTION_CHARS } from "@/lib/files/file-types";
-import { prepareContext } from "@/lib/files/ask";
+import { planContext } from "@/lib/files/ask";
 import { startJob } from "@/lib/jobs/start-job";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 export const maxDuration = 60;
-
-const MAX_OUTPUT_TOKENS = 2000;
 
 /**
  * Ask a question about the user's own documents.
@@ -132,8 +130,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const context = prepareContext(files);
-    if (!context.text) {
+    const context = planContext(files);
+    if (context.passes.length === 0) {
       return NextResponse.json(
         { ok: false, error: "None of the selected files have readable text yet." },
         { status: 400 }
@@ -158,9 +156,21 @@ export async function POST(request: Request) {
         );
 
     // Sized on the documents, not the question — see the file comment.
+    //
+    // ACROSS EVERY PASS. A corpus too large for one call is now read in
+    // several rather than truncated, and each pass sends its own text
+    // plus its own copy of the question. Pricing the first pass alone
+    // would under-reserve by a factor of the pass count on exactly the
+    // questions that cost the most — and an under-sized hold is not a
+    // discount, it is a settlement that overdraws an account which was
+    // told it could afford the question.
     const estimate = estimateForAction(
       "fileAsk",
-      { model: FILE_ASK_MODEL, inputChars: context.charCount + question.length, planSlug: plan?.slug ?? null },
+      {
+        model: FILE_ASK_MODEL,
+        inputChars: context.totalChars + question.length * context.passes.length,
+        planSlug: plan?.slug ?? null,
+      },
       pricingConfig,
       accountCreditPriceEur
     );
@@ -181,7 +191,11 @@ export async function POST(request: Request) {
       userId: user.id,
       kind: "file_ask",
       reserve: bypassCredits || !plan ? 0 : estimate.reserveCredits,
-      reserveMetadata: { files: files.length, estimatedCredits: estimate.estimatedCredits },
+      reserveMetadata: {
+        files: files.length,
+        estimatedCredits: estimate.estimatedCredits,
+        passes: context.passes.length,
+      },
       input: { question, language, fileIds: files.map((f) => f.id) },
     });
 

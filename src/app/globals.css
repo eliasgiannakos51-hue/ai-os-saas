@@ -191,7 +191,10 @@ body {
 
 @layer components {
   .input {
-    @apply w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500;
+    /* min-h-[44px]: px-3/py-2 renders 40px, and this class is what every
+       text field, textarea and select in the app is built from — so it was
+       twenty of the under-44px controls by itself. */
+    @apply min-h-[44px] w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500;
   }
 }
 
@@ -228,8 +231,27 @@ input:-webkit-autofill:focus {
     transform: translateY(0);
   }
 }
+/* `backwards`, NOT `both`, and the difference is a bug nobody could see.
+ *
+ * `both` keeps the LAST keyframe applied after the animation ends, so this
+ * wrapper — which components/page-transition.tsx puts around every page —
+ * permanently carries `transform: translateY(0)`. A transform of anything
+ * other than `none` makes the element a containing block for every
+ * `position: fixed` descendant. So every modal rendered inside a page was
+ * positioning itself against the page wrapper rather than the viewport.
+ *
+ * Measured, once a test finally opened one: the Quick Start dialog reported
+ * top 1380px inside an 812px viewport. Not misaligned — entirely below the
+ * fold. You press "Quick Start" on a phone and nothing appears.
+ *
+ * `backwards` still applies the FIRST keyframe before the animation starts,
+ * which is what stops the flash of un-animated content; it simply does not
+ * pin the last one afterwards. The resting state is identical either way
+ * (translateY(0) and opacity 1 are what the element already is), so nothing
+ * about the animation changes — only whether a transform is left behind.
+ */
 .page-enter {
-  animation: page-enter 350ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: page-enter 350ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 /* Skeleton loading shimmer — a light band sweeping left-to-right across
@@ -980,4 +1002,190 @@ input:-webkit-autofill:focus {
 }
 .tooltip-in {
   animation: tooltip-in 200ms ease-out 1;
+}
+
+/* ---------------------------------------------------------------------
+   ThinkingIndicator — the constellation, at fourteen pixels.
+
+   See components/ui/thinking-indicator.tsx for why this is not three
+   bouncing dots. The mechanics worth knowing here:
+
+   pathLength="1" on every <line> means stroke-dasharray and
+   stroke-dashoffset are expressed in fractions of the line's own length,
+   whatever that length is. Move a node and nothing needs recalculating.
+
+   Nodes scale with `transform`, never with the `r` attribute. CSS `r` is
+   animatable in SVG2 and supported unevenly; a transform runs on the
+   compositor and works everywhere. `transform-box: fill-box` is what
+   makes the origin the circle rather than the whole SVG.
+
+   The 0.37s stagger is the same one NetworkField uses between its own
+   nodes, so the indicator and the background are visibly in the same
+   family rather than two things that happen to be orange.
+
+   THE OPACITIES BELOW WERE MEASURED, NOT CHOSEN. Screenshots at both
+   themes, pixels sampled from the composited image, contrast computed
+   against a background probe in the same shot. Every number in the
+   comments is from that run:
+
+     dark  bg rgb(10,10,10)     orange-500  0.42 -> 2.04:1   0.60 -> 3.13:1
+     light bg rgb(247,247,248)  orange-500  0.42 -> 1.52:1   1.00 -> 2.62:1
+
+   Two things follow, and the second one is not what I expected.
+
+   FIRST: 0.42 IS TOO FAINT EVEN IN THE DARK. It is the opacity the
+   background field uses, and it is right there — NetworkField is
+   decorative, conveys nothing, and may be a whisper. This indicator
+   carries information, so it has to clear the 3:1 that WCAG 1.4.11 asks
+   of a non-text graphic. 0.60 is the first step that does.
+
+   SECOND: IN LIGHT MODE THE COLOUR CANNOT BE ORANGE-500 AT ALL. Not at
+   any opacity — at full strength it reaches 2.62:1 against the light
+   background and stops there, because that is simply what #f97316 is
+   worth on near-white. Raising opacity was the plan and the plan was
+   wrong. Light mode uses orange-700 (3.26:1 at 0.75) and purple-700
+   (4.11:1 at 0.75) instead: the same shapes, the same stagger, a darker
+   ink.
+   --------------------------------------------------------------------- */
+.ionexa-think {
+  display: inline-flex;
+  align-items: center;
+  color: #f97316;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.ionexa-think svg {
+  overflow: visible;
+}
+.ionexa-think .node {
+  fill: currentColor;
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 0 2.5px currentColor);
+  opacity: 0.6;
+  animation: ionexa-think-lift 2.4s ease-in-out infinite;
+}
+/* Every fourth node in NetworkField is purple. At three nodes that has
+   to become every third or the signature disappears. */
+.ionexa-think .node.alt {
+  fill: #a855f7;
+}
+.ionexa-think .edge {
+  stroke: currentColor;
+  stroke-width: 0.9;
+  fill: none;
+  opacity: 0.6;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: ionexa-think-draw 2.4s ease-in-out infinite;
+}
+.ionexa-think .e2,
+.ionexa-think .n2 {
+  animation-delay: 0.37s;
+}
+.ionexa-think .e3,
+.ionexa-think .n3 {
+  animation-delay: 0.74s;
+}
+
+@keyframes ionexa-think-draw {
+  0%,
+  8% {
+    stroke-dashoffset: 1;
+  }
+  42%,
+  66% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -1;
+  }
+}
+@keyframes ionexa-think-lift {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.22);
+  }
+}
+
+/* LIGHT THEME — a different ink, not a different opacity. See the
+   measurements above. The glow goes too: drop-shadow of a light colour
+   on a light background is a smudge with no edge. */
+:root:not([data-theme="dark"]) .ionexa-think,
+[data-theme="light"] .ionexa-think {
+  color: #c2410c;
+}
+:root:not([data-theme="dark"]) .ionexa-think .node.alt,
+[data-theme="light"] .ionexa-think .node.alt {
+  fill: #7e22ce;
+}
+:root:not([data-theme="dark"]) .ionexa-think .node,
+[data-theme="light"] .ionexa-think .node {
+  opacity: 0.75;
+  filter: none;
+}
+:root:not([data-theme="dark"]) .ionexa-think .edge,
+[data-theme="light"] .ionexa-think .edge {
+  opacity: 0.75;
+  stroke-width: 1.1;
+}
+:root:not([data-theme="dark"]) .ionexa-think .node,
+[data-theme="light"] .ionexa-think .node {
+  animation-name: ionexa-think-lift-light;
+}
+@keyframes ionexa-think-lift-light {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.22);
+  }
+}
+
+/* REDUCED MOTION. Not "hide it" — the user still has to know something
+   is happening. The animation stops on the frame that says the most:
+   every edge drawn, every node lit. A completed network is a picture of
+   work in progress; an empty box is a picture of nothing. The frozen
+   values are above 3:1 in both themes, which the animated resting state
+   also is — so nothing here is perceivable only while it moves. */
+@media (prefers-reduced-motion: reduce) {
+  .ionexa-think .edge,
+  .ionexa-think .node {
+    animation: none;
+  }
+  .ionexa-think .edge {
+    stroke-dashoffset: 0;
+    opacity: 0.75;
+  }
+  .ionexa-think .node {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ON AN ACCENT-COLOURED SURFACE. Found in a screenshot: the sm variant
+   inside the orange "Ask" button was orange on orange — the drawing was
+   there, in the DOM, animating, and invisible. `tone="inherit"` takes
+   the parent's text colour, which on that button is black. The purple
+   node goes with it: purple on orange is no more readable than orange
+   on orange. */
+.ionexa-think.is-inherit,
+:root:not([data-theme="dark"]) .ionexa-think.is-inherit,
+[data-theme="light"] .ionexa-think.is-inherit {
+  color: inherit;
+}
+.ionexa-think.is-inherit .node,
+.ionexa-think.is-inherit .node.alt,
+:root:not([data-theme="dark"]) .ionexa-think.is-inherit .node.alt,
+[data-theme="light"] .ionexa-think.is-inherit .node.alt {
+  fill: currentColor;
+  filter: none;
 }

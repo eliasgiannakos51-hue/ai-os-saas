@@ -2,6 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { ApiError } from "@/lib/errors/api-error";
+import { useErrorText } from "@/lib/errors/use-error-text";
 import { Pencil, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Idea } from "@/types/ideas";
@@ -70,6 +72,7 @@ export function IdeaRow({
   const t = useTranslations("dashboard.ideas");
   const tModule = useTranslations("module");
   const tSidebar = useTranslations("sidebar");
+  const describe = useErrorText();
   const locale = useLocale();
   const [isEditing, setIsEditing] = useState(false);
   const [form, setForm] = useState<FormState>(() => toFormState(idea));
@@ -120,7 +123,7 @@ export function IdeaRow({
 
     if (error) {
       setError(error.message);
-      addToast(`✗ ${tCommon("error")}: ${error.message}`, "error");
+      addToast(`✗ ${describe(new ApiError(500, { error: error.message })).what}`, "error");
       return;
     }
 
@@ -234,7 +237,7 @@ export function IdeaRow({
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
+          className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:w-auto"
         >
           {loading ? tModule("saving") : tModule("save")}
         </button>

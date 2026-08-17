@@ -1,3 +1,4 @@
+import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -14,9 +15,9 @@ import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/admin";
 
-export const metadata: Metadata = {
-  title: "AI Memory",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.memory");
+}
 
 // Every table with a ModuleConfig, across both the original 13 business
 // modules (CLASSIFIER_MODULES, which is ideas + lib/modules.ts's MODULES)
@@ -62,7 +63,7 @@ export default async function MemoryPage() {
     return (
       <main className="min-h-full bg-dot-grid">
         <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-          <PageHeader icon={MEMORY_ICON} title={t("title")} />
+          <PageHeader helpKey="help.memory" helpArticle="chat-memory" icon={MEMORY_ICON} title={t("title")} />
           <UpgradeRequired featureName={t("title")} planName={getPlan("starter")?.name ?? "Starter"} />
         </div>
       </main>
@@ -96,6 +97,8 @@ export default async function MemoryPage() {
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <PageHeader
+          helpKey="help.memory"
+          helpArticle="chat-memory"
           icon={MEMORY_ICON}
           title={t("title")}
           description={t("description")}

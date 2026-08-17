@@ -41,7 +41,15 @@ export function HealthScoreCard({
 
   return (
     <div className="glass-panel mt-6 flex flex-col gap-5 rounded-2xl p-5 sm:flex-row sm:items-center">
-      <div className="relative z-[1] flex shrink-0 items-center gap-4">
+      {/* `shrink-0` used to be on THIS row, which put it around the ring
+          AND the text beside it. The text block's own `min-w-0` below then
+          did nothing — a child cannot shrink inside a parent that has
+          refused to. In English it fit and nobody noticed; in Greek
+          "Σκορ Υγείας Επιχείρησης" pushed this card to 926px inside a
+          768px window, i.e. the whole page scrolled sideways on a tablet.
+          The ring itself is still `shrink-0` (on the <svg>), which is the
+          thing that genuinely must not squash. */}
+      <div className="relative z-[1] flex min-w-0 items-center gap-4">
         <svg
           viewBox="0 0 120 120"
           className="h-[104px] w-[104px] shrink-0 -rotate-90"

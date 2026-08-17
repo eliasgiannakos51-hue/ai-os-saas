@@ -21,6 +21,7 @@
 //
 // Run: node scripts/tests/credit-visibility.test.mjs
 import { readFileSync } from "node:fs";
+import { schemaSql } from "./lib/schema-sql.mjs";
 
 let pass = 0,
   fail = 0;
@@ -46,7 +47,9 @@ const messages = Object.fromEntries(
 );
 const page = readFileSync("src/app/dashboard/settings/page.tsx", "utf8");
 const panel = readFileSync("src/components/settings/credit-history.tsx", "utf8");
-const backup = readFileSync("supabase_full_project_backup.sql", "utf8");
+// Was `supabase_full_project_backup.sql` — a snapshot of one project at
+// one moment. The migrations are what a database is actually built from.
+const backup = schemaSql();
 
 console.log("== 1. the cause, asserted so it cannot be forgotten ==");
 // If this ever changes — if settle_reservation starts writing a

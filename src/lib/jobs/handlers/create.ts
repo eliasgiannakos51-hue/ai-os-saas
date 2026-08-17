@@ -65,7 +65,15 @@ export const createHandler: JobHandler = async (ctx: JobContext): Promise<JobHan
       const clarification = await checkNeedsClarification(ctx.apiKey, "create", message, ctx.costs);
       if (clarification.needsClarification) {
         return {
-          result: { matched: false, needsClarification: true, questions: clarification.questions },
+          result: {
+            matched: false,
+            needsClarification: true,
+            questions: clarification.questions,
+            // Carried alongside the questions so the screen that renders
+            // them can offer the tappable answers too. Without it the
+            // user meets three empty boxes and skips.
+            questionSuggestions: clarification.suggestions,
+          },
           // Its own feature, for the reason spelled out in
           // handlers/agent-build.ts: a run that stops at the pre-check and
           // a run that classifies are different actions with an order of

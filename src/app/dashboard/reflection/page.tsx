@@ -1,3 +1,4 @@
+import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -6,7 +7,9 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { ReflectionGenerator } from "@/components/reflection/reflection-generator";
 import { REFLECTION_ICON } from "@/lib/module-icons";
 
-export const metadata: Metadata = { title: "Weekly Reflection" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.reflection");
+}
 
 // "Execution gap" tool: what actually got done this week vs what was
 // planned, from real data only — no new table, nothing persisted. Every

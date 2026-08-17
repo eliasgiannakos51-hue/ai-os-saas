@@ -1,4 +1,15 @@
 import { validateAgentCron, isValidTimeZone } from "@/lib/agents/cron-expression";
+import {
+  DELIVERY_CHANNELS,
+  isDeliveryChannel,
+  isEmailTargetAllowed,
+  isSlackChannelIdAllowed,
+  normaliseEmailTarget,
+  normaliseSlackChannelId,
+  resolveDeliveryTarget,
+  type DeliveryChannel,
+  type DeliveryOwnership,
+} from "@/lib/agents/delivery-channels";
 import { INJECTION_PATTERNS } from "@/lib/agents/injection-patterns";
 import { foldForMatch } from "@/lib/text/unicode-patterns";
 
@@ -23,12 +34,16 @@ export const AGENT_LIMITS = {
   output: 20000,
 } as const;
 
-export type AgentDeliveryMethod = "email" | "slack";
+// WHERE AN AGENT SENDS is defined once, in delivery-channels.ts, and
+// re-exported here so the many existing importers keep working. Two lists
+// of allowed destinations is how a channel comes to be accepted by the
+// create route and rejected by the edit route.
+export type AgentDeliveryMethod = DeliveryChannel;
 
-export const AGENT_DELIVERY_METHODS: AgentDeliveryMethod[] = ["email", "slack"];
+export const AGENT_DELIVERY_METHODS: AgentDeliveryMethod[] = DELIVERY_CHANNELS;
 
 export function isAgentDeliveryMethod(value: unknown): value is AgentDeliveryMethod {
-  return typeof value === "string" && (AGENT_DELIVERY_METHODS as string[]).includes(value);
+  return isDeliveryChannel(value);
 }
 export type AgentStatus = "active" | "paused" | "disabled";
 
@@ -151,47 +166,16 @@ export function normaliseAgentConfig(raw: Partial<AgentConfigJson> | null | unde
 // user has not connected is refused exactly as a stranger's email address
 // is. What changed is the proof of ownership (a live OAuth grant instead
 // of a verified signup address), not the requirement for one.
-export function normaliseDeliveryTarget(accountEmail: string | null | undefined): string {
-  return (accountEmail ?? "").trim().toLowerCase();
-}
+// Moved to delivery-channels.ts UNCHANGED, so that all five destinations
+// are decided in one file, and re-exported under their original names so
+// no caller had to be touched to make room for three more channels.
+export const normaliseDeliveryTarget = normaliseEmailTarget;
+export const isDeliveryTargetAllowed = isEmailTargetAllowed;
 
-export function isDeliveryTargetAllowed(
-  target: string,
-  accountEmail: string | null | undefined
-): boolean {
-  const account = normaliseDeliveryTarget(accountEmail);
-  if (!account) return false;
-  return target.trim().toLowerCase() === account;
-}
-
-/**
- * A Slack channel id, normalised.
- *
- * Case-PRESERVING, unlike the email normaliser: Slack ids are
- * case-sensitive ("C01ABCDEF"), and lowercasing one produces an id that
- * silently addresses nothing.
- */
-export function normaliseSlackChannel(value: string | null | undefined): string {
-  return (value ?? "").trim();
-}
-
-/**
- * Is this channel one the caller's own connected workspace offers?
- *
- * `allowedChannels` comes from the caller's own user_integrations row, so
- * an id for a workspace they have not connected can never match. An empty
- * allow-list means no workspace is connected, which allows NOTHING — the
- * fail-closed direction.
- */
-export function isSlackChannelAllowed(
-  channelId: string,
-  allowedChannels: string[] | null | undefined
-): boolean {
-  const target = normaliseSlackChannel(channelId);
-  if (!target) return false;
-  if (!Array.isArray(allowedChannels) || allowedChannels.length === 0) return false;
-  return allowedChannels.some((c) => normaliseSlackChannel(c) === target);
-}
+// Same move, same reason: one place decides what a Slack channel id is
+// and whether this user's workspace offers it.
+export const normaliseSlackChannel = normaliseSlackChannelId;
+export const isSlackChannelAllowed = isSlackChannelIdAllowed;
 
 // ---------------------------------------------------------------------
 // Prompt-injection defence.
@@ -332,7 +316,7 @@ export function validateAgentDraft(
    * `accountEmail` stays a plain string, so every existing caller and every
    * existing test keeps working unchanged, and the Slack path is additive.
    */
-  options?: { allowedSlackChannels?: string[] }
+  options?: Pick<DeliveryOwnership, "allowedSlackChannels" | "telegramChat" | "hasDiscordWebhook">
 ): { ok: true; draft: AgentDraft } | { ok: false; issues: ValidationIssue[] } {
   const issues: ValidationIssue[] = [];
 
@@ -366,31 +350,26 @@ export function validateAgentDraft(
   if (draft.deliveryMethod !== undefined && !isAgentDeliveryMethod(draft.deliveryMethod))
     issues.push({ field: "deliveryMethod", message: "That delivery method is not available." });
 
-  let deliveryTarget: string;
-  if (deliveryMethod === "slack") {
-    deliveryTarget = normaliseSlackChannel(
-      typeof draft.deliveryTarget === "string" ? draft.deliveryTarget : ""
-    );
-    if (!deliveryTarget)
-      issues.push({ field: "deliveryTarget", message: "Choose a Slack channel to post to." });
-    else if (!isSlackChannelAllowed(deliveryTarget, options?.allowedSlackChannels))
-      issues.push({
-        field: "deliveryTarget",
-        message: "An agent can only post to a channel in your own connected Slack workspace.",
-      });
-  } else {
-    deliveryTarget = normaliseDeliveryTarget(
-      typeof draft.deliveryTarget === "string" && draft.deliveryTarget.trim()
-        ? draft.deliveryTarget
-        : accountEmail
-    );
-    if (!deliveryTarget)
-      issues.push({ field: "deliveryTarget", message: "Your account has no email address to send to." });
-    else if (!isDeliveryTargetAllowed(deliveryTarget, accountEmail))
-      issues.push({
-        field: "deliveryTarget",
-        message: "An agent can only send results to your own account email address.",
-      });
+  // ONE RESOLVER FOR ALL FIVE DESTINATIONS. Each channel proves ownership
+  // differently — the account's own email, a channel in the user's own
+  // Slack workspace, the chat saved with their own bot token, a webhook
+  // they added, or themselves — but a channel checked in two of the three
+  // write paths is a channel that is unchecked in the third, so all of
+  // them ask the same function.
+  //
+  // The ownership facts come from the CALLER, which resolved them from
+  // the database. Nothing here is taken from the draft except the request
+  // itself.
+  let deliveryTarget = "";
+  if (isAgentDeliveryMethod(deliveryMethod)) {
+    const decision = resolveDeliveryTarget(deliveryMethod, draft.deliveryTarget, {
+      accountEmail,
+      allowedSlackChannels: options?.allowedSlackChannels,
+      telegramChat: options?.telegramChat,
+      hasDiscordWebhook: options?.hasDiscordWebhook,
+    });
+    if (decision.ok) deliveryTarget = decision.target;
+    else issues.push({ field: "deliveryTarget", message: decision.message });
   }
 
   const rawConfig = (draft.config ?? {}) as Partial<AgentConfigJson>;

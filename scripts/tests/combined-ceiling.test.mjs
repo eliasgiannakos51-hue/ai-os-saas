@@ -307,6 +307,12 @@ const CLASSIFIED_PLAN_TABLES = {
   DEFAULT_RESEARCH_LIMITS: { kind: "capacity", why: "how many Deep Research runs may START; each is charged in credits" },
   DEFAULT_INTEGRATION_LIMITS: { kind: "capacity", why: "standing OAuth grants; syncs make no unbilled model call" },
   DEFAULT_PUBLISH_LIMITS: { kind: "capacity", why: "hosted pages — bandwidth, not Anthropic cost" },
+  // The only entry here that costs nothing at all to serve. It is a
+  // sort order on rows the account already has: pinning makes no model
+  // call, stores no bytes and creates no row. It is in this table
+  // because it is shaped like the others and the scanner is right to
+  // stop on anything shaped like a per-plan number.
+  DEFAULT_PIN_LIMITS: { kind: "capacity", why: "how many conversations sit at the top of the sidebar — a usability floor, no cost at all" },
   // Not a quota at all.
   PLAN_MARGIN_DEFAULTS: { kind: "policy", why: "the multiplier itself — the credit half of the ceiling" },
 };
@@ -428,7 +434,18 @@ const rowsBlock = pricingSrc.slice(
 );
 const rowLabels = [...rowsBlock.matchAll(/labelKey:\s*"([^"]+)"/g)].map((m) => m[1]);
 console.log(`        ${rowLabels.length} comparison rows: ${rowLabels.join(", ")}`);
-check("the pricing table still has rows", rowLabels.length >= 14, `${rowLabels.length}`);
+check("the pricing table still has rows", rowLabels.length >= 12, `${rowLabels.length}`);
+// 14 -> 12, and the two that went are a DELETION, not a regression.
+// `mobileSaasBuilder` and `imageVideo` were ticks for features that do not
+// exist — /dashboard/images and /videos are CRUD forms with no model call,
+// and `ai_apps` is a four-field notes table. A row that sells nothing is
+// worse than a missing row, so they are named here: this floor must never
+// be satisfied by bringing one of them back.
+check(
+  "and neither of the two deleted phantom features is back",
+  rowLabels.filter((l) => l === "mobileSaasBuilder" || l === "imageVideo"),
+  []
+);
 
 // Each quantitative claim, and the route that would refuse the action.
 const ENFORCED_ROWS = {

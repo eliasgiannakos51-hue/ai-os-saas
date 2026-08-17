@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
+import { pageTitleAndDescription } from "@/lib/page-title";
 import { ConfirmDeleteAccountForm } from "./confirm-delete-account-form";
 
-export const metadata: Metadata = {
-  title: "Confirm Account Deletion",
-  description: "Confirm permanent deletion of your Ionexa AI account.",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitleAndDescription("pageTitle.confirmDeletion", "pageTitle.confirmDeletionDescription");
+}
 
 export default function ConfirmDeleteAccountPage() {
   return <ConfirmDeleteAccountForm />;

@@ -6,7 +6,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
 import { logSecurityCheck } from "@/lib/security-check-log";
 import { validateAgentDraft, sanitiseAgentText, type AgentDraft } from "@/lib/agents/agent-config";
-import { listSlackChannels } from "@/lib/integrations/read";
+import { resolveDeliveryOwnership } from "@/lib/agents/delivery-ownership";
 import { nextRunAt } from "@/lib/agents/cron-expression";
 import { maxAgentsForPlan } from "@/lib/agents/agent-limits";
 
@@ -45,29 +45,24 @@ export async function POST(request: Request) {
     });
     if (!limited.allowed) {
       return NextResponse.json(
-        { ok: false, error: "Too many agents created in the last hour. Try again shortly." },
+        { ok: false, code: "rate_limited", error: "Too many agents created in the last hour. Try again shortly." },
         { status: 429 }
       );
     }
 
-    // The allowed Slack channels are resolved SERVER-SIDE, from the
-    // caller's own connected workspace, and handed to the validator — so a
-    // channel id in the request body can only be accepted if the user's own
-    // OAuth grant actually offers it. Fetched only when the draft asks for
-    // Slack, so an email agent costs no extra call.
-    let allowedSlackChannels: string[] | undefined;
-    if (draft.deliveryMethod === "slack") {
-      const channels = await listSlackChannels(user.id);
-      if (!channels.ok) {
-        return NextResponse.json(
-          { ok: false, error: "Connect Slack in Integrations before an agent can post to it." },
-          { status: 400 }
-        );
-      }
-      allowedSlackChannels = channels.channels.map((c) => c.id);
+    // WHERE THIS USER IS ALLOWED TO SEND, resolved SERVER-SIDE from their
+    // own rows and handed to the validator. Nothing here comes from the
+    // request body — that is the entire ownership guarantee: a Slack
+    // channel id, a Telegram chat or a Discord webhook in the body can
+    // only be accepted if the caller's own connection actually offers it.
+    //
+    // Fetched per channel, so an email agent still costs no extra call.
+    const ownership = await resolveDeliveryOwnership(user.id, draft.deliveryMethod);
+    if (!ownership.ok) {
+      return NextResponse.json({ ok: false, error: ownership.message }, { status: 400 });
     }
 
-    const validated = validateAgentDraft(draft, user.email, { allowedSlackChannels });
+    const validated = validateAgentDraft(draft, user.email, ownership.context);
     if (!validated.ok) {
       return NextResponse.json(
         { ok: false, error: validated.issues[0]?.message ?? "That agent isn't valid.", issues: validated.issues },

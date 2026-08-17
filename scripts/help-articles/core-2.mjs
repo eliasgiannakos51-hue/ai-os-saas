@@ -1,5 +1,6 @@
-// The 13 core articles in pt, zh, ja, ar. Same set and same rules as
-// core-1.mjs — see the header there.
+// The 14 core articles in pt, zh, ja, ar. Same set and same rules as
+// core-1.mjs — see the header there, including why chat-memory was
+// added late.
 export const CORE_2 = {
   pt: {
     "what-is-ionexa": { title:"O que é o Ionexa?", body:"Um espaço de trabalho onde a IA faz o trabalho em vez de apenas aconselhar: cria o seu site, corre agentes segundo um horário, divide os seus objetivos em passos, lê os seus ficheiros e responde sobre eles, e guarda tudo o que regista num único sítio pesquisável.", triggers:["o que é o ionexa","o que é isto","para que serve","o que faz","como funciona"] },
@@ -15,6 +16,7 @@ export const CORE_2 = {
     "connect-gmail": { title:"Como ligo o Gmail ou o Google Drive?", body:"Definições > Ligações. Escolha o serviço e aprove o acesso na janela da Google. Vê exatamente o que vai ser lido antes de aprovar, e pode desligar quando quiser — as chaves de acesso são apagadas de imediato.", triggers:["gmail","google drive","ligar","ligação","slack"] },
     "data-privacy": { title:"O que fazem com os meus dados?", body:"Os seus dados são seus. Não os vendemos, não os usamos para treinar modelos, e cada conta vê apenas os seus — isso é imposto na base de dados, não só na aplicação. Pode descarregá-los ou apagá-los quando quiser.", triggers:["os meus dados","privacidade","segurança","vendem os meus dados","treinar modelos"] },
     "delete-account": { title:"Como apago a minha conta?", body:"Definições > Conta > Eliminar conta. Ser-lhe-á pedida confirmação e depois apaga-se tudo: conversas, ficheiros, sites, agentes, histórico. Não é reversível. Se quiser uma cópia antes, descarregue os seus dados na mesma página.", triggers:["apagar conta","eliminar conta","fechar conta","apagar perfil"] },
+    "chat-memory": { title:"O chat lembra-se de conversas anteriores?", body:"Dentro da mesma conversa lembra-se sempre das mensagens anteriores. Entre conversas diferentes guarda apenas o que continua a ser útil — o seu nome, o que faz, as suas preferências — e isso existe nos planos pagos. Pode ver tudo o que guardou, e apagá-lo, em Definições > Memória.", triggers:["lembra","memória","conversas anteriores","esquece","não se lembra","histórico do chat"] },
   },
   zh: {
     "what-is-ionexa": { title:"Ionexa 是什么？", body:"一个由 AI 直接干活、而不只是给建议的工作空间：它替你做网站、按时运行 agent、把目标拆成步骤、读你的文件并回答相关问题，还把你记录过的一切放在一个可搜索的地方。", triggers:["ionexa是什么","这是什么","有什么用","能做什么","怎么用"] },
@@ -30,6 +32,7 @@ export const CORE_2 = {
     "connect-gmail": { title:"怎么连接 Gmail 或 Google Drive？", body:"设置 > 连接。选择服务，在 Google 自己的窗口里授权。授权之前你能看清它将读取什么，而且随时可以断开——断开时访问密钥立刻删除。", triggers:["gmail","google drive","连接","集成","slack"] },
     "data-privacy": { title:"你们拿我的数据做什么？", body:"你的数据是你的。我们不卖，也不拿来训练模型，而且每个账号只能看到自己的——这一点在数据库层面强制执行，不只是在应用里。你随时可以下载或删除。", triggers:["我的数据","隐私","安全","会卖我的数据吗","训练模型"] },
     "delete-account": { title:"怎么注销账号？", body:"设置 > 账号 > 删除账号。会要求你确认，之后全部删除：对话、文件、网站、agent、历史记录。不可恢复。如果想先留一份备份，在同一页面下载你的数据。", triggers:["删除账号","注销账号","关闭账号","销号"] },
+    "chat-memory": { title:"聊天会记得之前的对话吗？", body:"在同一个对话里，它始终记得前面的消息。在不同对话之间，它只保留长期有用的信息——你的名字、你的工作、你的偏好——这项功能属于付费方案。它保留的全部内容都可以在「设置 > 记忆」里查看，也可以随时删除。", triggers:["记得","记忆","之前的对话","会忘记吗","不记得","聊天记录"] },
   },
   ja: {
     "what-is-ionexa": { title:"Ionexaとは？", body:"AIが助言するだけでなく実際に作業するワークスペースです。サイトを作り、エージェントを決めた頻度で走らせ、目標を手順に分け、ファイルを読んでそれについて答え、記録したすべてを検索できる一か所にまとめます。", triggers:["ionexaとは","これは何","何ができる","何をするもの","使い方"] },
@@ -45,6 +48,7 @@ export const CORE_2 = {
     "connect-gmail": { title:"GmailやGoogle Driveはどう接続しますか？", body:"設定 > 連携。サービスを選び、Google自身の画面で許可します。許可の前に何を読むのかが正確に表示され、いつでも接続を解除できます。解除すると、アクセスキーはただちに削除されます。", triggers:["gmail","google drive","接続","連携","slack"] },
     "data-privacy": { title:"データはどう扱われますか？", body:"あなたのデータはあなたのものです。販売しません。モデルの学習にも使いません。各アカウントは自分のデータしか見られず、それはアプリだけでなくデータベース側で強制されています。いつでもダウンロードも削除もできます。", triggers:["私のデータ","プライバシー","セキュリティ","データを売る","学習に使う"] },
     "delete-account": { title:"アカウントはどう削除しますか？", body:"設定 > アカウント > アカウント削除。確認を求められ、そのあとすべて削除されます。会話、ファイル、サイト、エージェント、履歴。取り消せません。先に控えが必要なら、同じページからデータを書き出してください。", triggers:["アカウント削除","退会","アカウントを消す","解約して消したい"] },
+    "chat-memory": { title:"チャットは前の会話を覚えていますか？", body:"同じ会話の中では、前のメッセージを常に覚えています。別々の会話のあいだでは、長く役に立つことだけ——お名前、お仕事、好み——を保持します。これは有料プランの機能です。保持している内容は「設定 > メモリー」ですべて確認でき、削除もできます。", triggers:["覚えている","記憶","前の会話","忘れる","覚えていない","チャット履歴"] },
   },
   ar: {
     "what-is-ionexa": { title:"ما هو Ionexa؟", body:"مساحة عمل ينفّذ فيها الذكاء الاصطناعي العمل بدل أن يكتفي بالنصيحة: يبني موقعك، ويشغّل الوكلاء وفق جدول زمني، ويقسّم أهدافك إلى خطوات، ويقرأ ملفاتك ويجيب عنها، ويحفظ كل ما سجّلته في مكان واحد قابل للبحث.", triggers:["ما هو ionexa","ما هذا","ما فائدته","ماذا يفعل","كيف يعمل"] },
@@ -60,5 +64,6 @@ export const CORE_2 = {
     "connect-gmail": { title:"كيف أربط Gmail أو Google Drive؟", body:"الإعدادات > الاتصالات. اختر الخدمة ووافق على الوصول في نافذة Google نفسها. ترى بالضبط ما الذي سيُقرأ قبل الموافقة، ويمكنك فصل الاتصال متى شئت — وعندها تُحذف مفاتيح الوصول فورًا.", triggers:["gmail","google drive","ربط","اتصال","slack"] },
     "data-privacy": { title:"ماذا تفعلون ببياناتي؟", body:"بياناتك ملكك. لا نبيعها، ولا نستخدمها لتدريب النماذج، وكل حساب لا يرى إلا بياناته — وهذا مفروض في قاعدة البيانات لا في التطبيق وحده. ويمكنك تنزيلها أو حذفها متى شئت.", triggers:["بياناتي","الخصوصية","الأمان","هل تبيعون بياناتي","تدريب النماذج"] },
     "delete-account": { title:"كيف أحذف حسابي؟", body:"الإعدادات > الحساب > حذف الحساب. سيُطلب منك التأكيد، ثم يُحذف كل شيء: المحادثات والملفات والمواقع والوكلاء والسجل. ولا يمكن التراجع. وإن أردت نسخة أولًا، نزّل بياناتك من الصفحة نفسها.", triggers:["حذف الحساب","إلغاء الحساب","إغلاق الحساب","أريد حذف حسابي"] },
+    "chat-memory": { title:"هل تتذكر المحادثة ما دار سابقًا؟", body:"داخل المحادثة الواحدة يتذكّر الرسائل السابقة دائمًا. أما بين محادثة وأخرى فيحتفظ فقط بما يظل مفيدًا — اسمك، وما تعمل به، وتفضيلاتك — وهذا متاح في الخطط المدفوعة. يمكنك رؤية كل ما احتفظ به، وحذفه، من الإعدادات > الذاكرة.", triggers:["يتذكر","الذاكرة","المحادثات السابقة","ينسى","لا يتذكر","سجل المحادثة"] },
   },
 };

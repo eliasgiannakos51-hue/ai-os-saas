@@ -172,6 +172,61 @@ check("it never TRUNCATEs", !/\btruncate\b/i.test(seed));
 check("it never DELETEs", !/\bdelete\s+from\b/i.test(seed));
 check("apostrophes are doubled, not escaped with a backslash", !/\\'/.test(seed));
 
+// THE CHECK THAT WAS MISSING, and the reason this section could not have
+// caught what it was written to catch. Everything above counts rows and
+// looks for forbidden statements — none of it compares the CONTENT of
+// the committed file with the source files it claims to be generated
+// from. Edit a French body, forget to run the generator, and every
+// assertion above stays green while the .sql on disk and core-1.mjs say
+// different things.
+//
+// That is not hypothetical: chat-memory existed in the production table
+// in eight languages while CORE_SLUGS listed thirteen slugs, so the repo
+// could not reproduce the database. Byte-for-byte is the only comparison
+// that has no gap in it.
+const { buildSeedSql, OUT } = await import("../help-articles/generate.mjs");
+const rebuilt = buildSeedSql();
+const onDisk = readFileSync(OUT, "utf8");
+check(
+  "the committed seed is exactly what the generator emits today",
+  rebuilt.sql === onDisk,
+  rebuilt.sql.length === onDisk.length
+    ? "same length, different bytes — run: node scripts/help-articles/generate.mjs"
+    : `generated ${rebuilt.sql.length} bytes, file has ${onDisk.length} — run: node scripts/help-articles/generate.mjs`
+);
+check(`and it is ${rebuilt.rows.length} rows`, rebuilt.rows.length === expected, JSON.stringify(rebuilt.byLocale));
+
+console.log("\n== 5b. chat-memory, the article that lived only in the table ==");
+// Pinned by name rather than by count, because a count is what let it
+// disappear: thirteen was a number nobody could see was wrong.
+check("it is one of the core slugs", CORE_SLUGS.includes("chat-memory"));
+check(`there are ${CORE_SLUGS.length} core slugs now`, CORE_SLUGS.length === 14);
+checkList(
+  "every locale carries it",
+  LOCALES.filter((l) => !BY_LOCALE[l].some((r) => r.slug === "chat-memory"))
+);
+// Ten real translations, not ten copies of the English one. This is the
+// property the user checked by eye — each language in its own script —
+// and it is worth keeping mechanically.
+const memoryTitles = LOCALES.map((l) => ({
+  locale: l,
+  title: BY_LOCALE[l].find((r) => r.slug === "chat-memory").title,
+}));
+check(
+  "no two locales share its title",
+  new Set(memoryTitles.map((t) => t.title)).size === memoryTitles.length
+);
+// A Greek, Japanese, Chinese or Arabic title written in Latin letters is
+// the shape a placeholder takes when somebody runs out of time.
+const SCRIPTS = { el: /\p{Script=Greek}/u, ja: /\p{Script=Hiragana}|\p{Script=Katakana}|\p{Script=Han}/u, zh: /\p{Script=Han}/u, ar: /\p{Script=Arabic}/u };
+checkList(
+  "and each non-Latin locale is written in its own script",
+  memoryTitles.filter((t) => SCRIPTS[t.locale] && !SCRIPTS[t.locale].test(t.title)).map((t) => `${t.locale}: ${t.title}`)
+);
+// It is a Chat article and the category has to be a translated heading,
+// or it lands under a bare English word on a Japanese page.
+check("its category is one the UI translates", /"chat"/.test(JSON.stringify(Object.keys(JSON.parse(readFileSync("messages/ja.json", "utf8")).helpCentre.categories))));
+
 console.log("\n== 6. the schema says what it should ==");
 // Comments stripped before scanning. The file documents its own rules in
 // prose — "No DROP TABLE, no TRUNCATE", "Not SECURITY DEFINER" — and a

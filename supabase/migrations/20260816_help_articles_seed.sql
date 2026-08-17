@@ -11,11 +11,11 @@
 -- content from a seed is how a Help Centre loses an article nobody
 -- noticed was gone.
 --
--- ROWS: 158 total — en=27, el=27, es=13, fr=13, de=13, it=13, pt=13, zh=13, ja=13, ar=13
+-- ROWS: 166 total — en=27, el=27, es=14, fr=14, de=14, it=14, pt=14, zh=14, ja=14, ar=14
 --
 -- en is COMPLETE (all 27 slugs) because it is the fallback and there is
 -- nothing behind it. el is complete because it already existed. The other
--- eight carry the 13 core articles and fall back to English for the
+-- eight carry the 14 core articles and fall back to English for the
 -- rest — visibly, with a marker and a lang attribute, never silently.
 --
 -- NO NUMBERS THAT MOVE: the generator refuses to emit a body containing a
@@ -759,6 +759,17 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
+values ('chat-memory', 'es', '¿El chat recuerda conversaciones anteriores?', 'Dentro de una misma conversación siempre recuerda los mensajes anteriores. Entre conversaciones distintas guarda solo lo que sigue siendo útil — su nombre, a qué se dedica, sus preferencias — y eso está en los planes de pago. Puede ver todo lo que ha guardado, y borrarlo, en Ajustes > Memoria.', 'chat', 0, true, array['recuerda', 'memoria', 'conversaciones anteriores', 'se olvida', 'no recuerda', 'historial del chat']::text[], '/dashboard/memory')
+on conflict (slug, locale) do update set
+  title = excluded.title,
+  body = excluded.body,
+  category = excluded.category,
+  "order" = excluded."order",
+  published = excluded.published,
+  triggers = excluded.triggers,
+  href = excluded.href;
+
+insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('what-is-ionexa', 'fr', 'Qu''est-ce qu''Ionexa ?', 'Un espace de travail où l''IA fait le travail au lieu de seulement conseiller : elle crée votre site, exécute des agents selon un calendrier, découpe vos objectifs en étapes, lit vos fichiers et répond à vos questions dessus, et conserve tout ce que vous consignez en un seul endroit consultable.', 'getting-started', 2, true, array['qu''est-ce qu''ionexa', 'c''est quoi', 'à quoi ça sert', 'que fait-il', 'comment ça marche']::text[], null)
 on conflict (slug, locale) do update set
   title = excluded.title,
@@ -892,6 +903,17 @@ on conflict (slug, locale) do update set
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('delete-account', 'fr', 'Comment supprimer mon compte ?', 'Paramètres > Compte > Supprimer le compte. Une confirmation vous est demandée, puis tout est supprimé : conversations, fichiers, sites, agents, historique. C''est irréversible. Si vous voulez une copie avant, téléchargez vos données depuis la même page.', 'privacy', 0, true, array['supprimer mon compte', 'effacer mon compte', 'fermer mon compte', 'supprimer le compte']::text[], '/dashboard/settings')
+on conflict (slug, locale) do update set
+  title = excluded.title,
+  body = excluded.body,
+  category = excluded.category,
+  "order" = excluded."order",
+  published = excluded.published,
+  triggers = excluded.triggers,
+  href = excluded.href;
+
+insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
+values ('chat-memory', 'fr', 'Le chat se souvient-il des conversations précédentes ?', 'À l''intérieur d''une même conversation, il se souvient toujours des messages précédents. D''une conversation à l''autre, il ne garde que ce qui reste durablement utile — votre nom, votre métier, vos préférences — et cela existe sur les formules payantes. Vous pouvez voir tout ce qu''il a gardé, et le supprimer, dans Paramètres > Mémoire.', 'chat', 0, true, array['se souvient', 'mémoire', 'conversations précédentes', 'il oublie', 'il ne se souvient pas', 'historique du chat']::text[], '/dashboard/memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,
@@ -1045,6 +1067,17 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
+values ('chat-memory', 'de', 'Merkt sich der Chat frühere Unterhaltungen?', 'Innerhalb einer Unterhaltung merkt er sich die früheren Nachrichten immer. Zwischen verschiedenen Unterhaltungen behält er nur dauerhaft Nützliches — deinen Namen, was du machst, deine Vorlieben — und das gibt es in den bezahlten Tarifen. Was er behalten hat, kannst du unter Einstellungen > Erinnerung ansehen und löschen.', 'chat', 0, true, array['merkt sich', 'erinnert sich', 'gedächtnis', 'frühere unterhaltungen', 'vergisst', 'chatverlauf']::text[], '/dashboard/memory')
+on conflict (slug, locale) do update set
+  title = excluded.title,
+  body = excluded.body,
+  category = excluded.category,
+  "order" = excluded."order",
+  published = excluded.published,
+  triggers = excluded.triggers,
+  href = excluded.href;
+
+insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('what-is-ionexa', 'it', 'Che cos''è Ionexa?', 'Uno spazio di lavoro dove l''AI fa il lavoro invece di limitarsi a consigliare: crea il tuo sito, esegue agent secondo una pianificazione, divide i tuoi obiettivi in passi, legge i tuoi file e risponde su di essi, e tiene tutto ciò che registri in un unico posto ricercabile.', 'getting-started', 2, true, array['cos''è ionexa', 'che cos''è', 'a cosa serve', 'cosa fa', 'come funziona']::text[], null)
 on conflict (slug, locale) do update set
   title = excluded.title,
@@ -1178,6 +1211,17 @@ on conflict (slug, locale) do update set
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('delete-account', 'it', 'Come cancello il mio account?', 'Impostazioni > Account > Elimina account. Ti verrà chiesta conferma, poi viene cancellato tutto: conversazioni, file, siti, agent, cronologia. Non è reversibile. Se prima vuoi una copia, scarica i tuoi dati dalla stessa pagina.', 'privacy', 0, true, array['cancellare account', 'eliminare account', 'chiudere l''account', 'cancellare profilo']::text[], '/dashboard/settings')
+on conflict (slug, locale) do update set
+  title = excluded.title,
+  body = excluded.body,
+  category = excluded.category,
+  "order" = excluded."order",
+  published = excluded.published,
+  triggers = excluded.triggers,
+  href = excluded.href;
+
+insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
+values ('chat-memory', 'it', 'La chat ricorda le conversazioni precedenti?', 'All''interno della stessa conversazione ricorda sempre i messaggi precedenti. Tra conversazioni diverse conserva solo ciò che resta utile a lungo — il suo nome, di cosa si occupa, le sue preferenze — e questo è disponibile nei piani a pagamento. Può vedere tutto ciò che ha conservato, ed eliminarlo, in Impostazioni > Memoria.', 'chat', 0, true, array['ricorda', 'memoria', 'conversazioni precedenti', 'dimentica', 'non ricorda', 'cronologia della chat']::text[], '/dashboard/memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,
@@ -1331,6 +1375,17 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
+values ('chat-memory', 'pt', 'O chat lembra-se de conversas anteriores?', 'Dentro da mesma conversa lembra-se sempre das mensagens anteriores. Entre conversas diferentes guarda apenas o que continua a ser útil — o seu nome, o que faz, as suas preferências — e isso existe nos planos pagos. Pode ver tudo o que guardou, e apagá-lo, em Definições > Memória.', 'chat', 0, true, array['lembra', 'memória', 'conversas anteriores', 'esquece', 'não se lembra', 'histórico do chat']::text[], '/dashboard/memory')
+on conflict (slug, locale) do update set
+  title = excluded.title,
+  body = excluded.body,
+  category = excluded.category,
+  "order" = excluded."order",
+  published = excluded.published,
+  triggers = excluded.triggers,
+  href = excluded.href;
+
+insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('what-is-ionexa', 'zh', 'Ionexa 是什么？', '一个由 AI 直接干活、而不只是给建议的工作空间：它替你做网站、按时运行 agent、把目标拆成步骤、读你的文件并回答相关问题，还把你记录过的一切放在一个可搜索的地方。', 'getting-started', 2, true, array['ionexa是什么', '这是什么', '有什么用', '能做什么', '怎么用']::text[], null)
 on conflict (slug, locale) do update set
   title = excluded.title,
@@ -1464,6 +1519,17 @@ on conflict (slug, locale) do update set
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('delete-account', 'zh', '怎么注销账号？', '设置 > 账号 > 删除账号。会要求你确认，之后全部删除：对话、文件、网站、agent、历史记录。不可恢复。如果想先留一份备份，在同一页面下载你的数据。', 'privacy', 0, true, array['删除账号', '注销账号', '关闭账号', '销号']::text[], '/dashboard/settings')
+on conflict (slug, locale) do update set
+  title = excluded.title,
+  body = excluded.body,
+  category = excluded.category,
+  "order" = excluded."order",
+  published = excluded.published,
+  triggers = excluded.triggers,
+  href = excluded.href;
+
+insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
+values ('chat-memory', 'zh', '聊天会记得之前的对话吗？', '在同一个对话里，它始终记得前面的消息。在不同对话之间，它只保留长期有用的信息——你的名字、你的工作、你的偏好——这项功能属于付费方案。它保留的全部内容都可以在「设置 > 记忆」里查看，也可以随时删除。', 'chat', 0, true, array['记得', '记忆', '之前的对话', '会忘记吗', '不记得', '聊天记录']::text[], '/dashboard/memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,
@@ -1617,6 +1683,17 @@ on conflict (slug, locale) do update set
   href = excluded.href;
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
+values ('chat-memory', 'ja', 'チャットは前の会話を覚えていますか？', '同じ会話の中では、前のメッセージを常に覚えています。別々の会話のあいだでは、長く役に立つことだけ——お名前、お仕事、好み——を保持します。これは有料プランの機能です。保持している内容は「設定 > メモリー」ですべて確認でき、削除もできます。', 'chat', 0, true, array['覚えている', '記憶', '前の会話', '忘れる', '覚えていない', 'チャット履歴']::text[], '/dashboard/memory')
+on conflict (slug, locale) do update set
+  title = excluded.title,
+  body = excluded.body,
+  category = excluded.category,
+  "order" = excluded."order",
+  published = excluded.published,
+  triggers = excluded.triggers,
+  href = excluded.href;
+
+insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('what-is-ionexa', 'ar', 'ما هو Ionexa؟', 'مساحة عمل ينفّذ فيها الذكاء الاصطناعي العمل بدل أن يكتفي بالنصيحة: يبني موقعك، ويشغّل الوكلاء وفق جدول زمني، ويقسّم أهدافك إلى خطوات، ويقرأ ملفاتك ويجيب عنها، ويحفظ كل ما سجّلته في مكان واحد قابل للبحث.', 'getting-started', 2, true, array['ما هو ionexa', 'ما هذا', 'ما فائدته', 'ماذا يفعل', 'كيف يعمل']::text[], null)
 on conflict (slug, locale) do update set
   title = excluded.title,
@@ -1750,6 +1827,17 @@ on conflict (slug, locale) do update set
 
 insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
 values ('delete-account', 'ar', 'كيف أحذف حسابي؟', 'الإعدادات > الحساب > حذف الحساب. سيُطلب منك التأكيد، ثم يُحذف كل شيء: المحادثات والملفات والمواقع والوكلاء والسجل. ولا يمكن التراجع. وإن أردت نسخة أولًا، نزّل بياناتك من الصفحة نفسها.', 'privacy', 0, true, array['حذف الحساب', 'إلغاء الحساب', 'إغلاق الحساب', 'أريد حذف حسابي']::text[], '/dashboard/settings')
+on conflict (slug, locale) do update set
+  title = excluded.title,
+  body = excluded.body,
+  category = excluded.category,
+  "order" = excluded."order",
+  published = excluded.published,
+  triggers = excluded.triggers,
+  href = excluded.href;
+
+insert into public.help_articles (slug, locale, title, body, category, "order", published, triggers, href)
+values ('chat-memory', 'ar', 'هل تتذكر المحادثة ما دار سابقًا؟', 'داخل المحادثة الواحدة يتذكّر الرسائل السابقة دائمًا. أما بين محادثة وأخرى فيحتفظ فقط بما يظل مفيدًا — اسمك، وما تعمل به، وتفضيلاتك — وهذا متاح في الخطط المدفوعة. يمكنك رؤية كل ما احتفظ به، وحذفه، من الإعدادات > الذاكرة.', 'chat', 0, true, array['يتذكر', 'الذاكرة', 'المحادثات السابقة', 'ينسى', 'لا يتذكر', 'سجل المحادثة']::text[], '/dashboard/memory')
 on conflict (slug, locale) do update set
   title = excluded.title,
   body = excluded.body,

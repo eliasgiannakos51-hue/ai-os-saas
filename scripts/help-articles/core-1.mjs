@@ -1,10 +1,17 @@
-// The 13 core articles in es, fr, de, it.
+// The 14 core articles in es, fr, de, it.
 //
-// THIRTEEN, NOT TWENTY-SEVEN, and the choice is not arbitrary: what the
+// FOURTEEN, NOT TWENTY-SEVEN, and the choice is not arbitrary: what the
 // product is, everything about money, the four things people come here to
-// do, and how to leave with your data. The other fourteen fall back to
-// English, which the loader marks visibly rather than pretending it is a
-// translation.
+// do, whether the chat remembers you, and how to leave with your data.
+// The other thirteen fall back to English, which the loader marks visibly
+// rather than pretending it is a translation.
+//
+// chat-memory was the fourteenth, and it was in the TABLE before it was
+// in this file: eight locales carried it in production while the
+// generator here knew about thirteen slugs, so the next regeneration
+// would have emitted a seed that no longer mentioned it. The row would
+// have survived — the seed has no DELETE — but the repo could not
+// reproduce the database, which is the same thing as not having it.
 //
 // Triggers are what a speaker of THAT language actually types. Not a
 // translation of the English list — a Spanish user types "cancelar
@@ -13,6 +20,11 @@ export const CORE_SLUGS = [
   "what-is-ionexa", "pricing-overview", "what-are-credits", "credits-ran-out",
   "change-plan", "cancel", "create-website", "create-agent", "create-mission",
   "upload-files", "connect-gmail", "data-privacy", "delete-account",
+  // Last in the list, not last in importance: "does it remember me" is
+  // the question people ask about a chat before they trust it with
+  // anything. Appended rather than inserted so the diff that added it
+  // stays readable.
+  "chat-memory",
 ];
 
 export const CORE_1 = {
@@ -30,6 +42,7 @@ export const CORE_1 = {
     "connect-gmail": { title:"¿Cómo conecto Gmail o Google Drive?", body:"Ajustes > Conexiones. Elija el servicio y apruebe el acceso en la ventana de Google. Ve exactamente qué va a leer antes de aprobarlo, y puede desconectarlo cuando quiera: las claves de acceso se borran de inmediato.", triggers:["gmail","google drive","conectar","conexión","slack"] },
     "data-privacy": { title:"¿Qué hacen con mis datos?", body:"Sus datos son suyos. No los vendemos, no los usamos para entrenar modelos, y cada cuenta ve solo los suyos: eso se aplica en la base de datos, no solo en la aplicación. Puede descargarlos o borrarlos cuando quiera.", triggers:["mis datos","privacidad","seguridad","venden mis datos","entrenar modelos"] },
     "delete-account": { title:"¿Cómo borro mi cuenta?", body:"Ajustes > Cuenta > Eliminar cuenta. Se le pedirá confirmación y después se borra todo: conversaciones, archivos, webs, agentes, historial. No tiene vuelta atrás. Si quiere una copia antes, descargue sus datos desde la misma página.", triggers:["borrar cuenta","eliminar cuenta","cerrar cuenta","darme de baja del todo"] },
+    "chat-memory": { title:"¿El chat recuerda conversaciones anteriores?", body:"Dentro de una misma conversación siempre recuerda los mensajes anteriores. Entre conversaciones distintas guarda solo lo que sigue siendo útil — su nombre, a qué se dedica, sus preferencias — y eso está en los planes de pago. Puede ver todo lo que ha guardado, y borrarlo, en Ajustes > Memoria.", triggers:["recuerda","memoria","conversaciones anteriores","se olvida","no recuerda","historial del chat"] },
   },
   fr: {
     "what-is-ionexa": { title:"Qu'est-ce qu'Ionexa ?", body:"Un espace de travail où l'IA fait le travail au lieu de seulement conseiller : elle crée votre site, exécute des agents selon un calendrier, découpe vos objectifs en étapes, lit vos fichiers et répond à vos questions dessus, et conserve tout ce que vous consignez en un seul endroit consultable.", triggers:["qu'est-ce qu'ionexa","c'est quoi","à quoi ça sert","que fait-il","comment ça marche"] },
@@ -45,6 +58,7 @@ export const CORE_1 = {
     "connect-gmail": { title:"Comment connecter Gmail ou Google Drive ?", body:"Paramètres > Connexions. Choisissez le service et approuvez l'accès dans la fenêtre de Google. Vous voyez exactement ce qui sera lu avant d'approuver, et vous pouvez déconnecter quand vous voulez — les clés d'accès sont alors supprimées immédiatement.", triggers:["gmail","google drive","connecter","connexion","slack"] },
     "data-privacy": { title:"Que faites-vous de mes données ?", body:"Vos données sont à vous. Nous ne les vendons pas, nous ne nous en servons pas pour entraîner des modèles, et chaque compte ne voit que les siennes — c'est imposé dans la base de données, pas seulement dans l'application. Vous pouvez les télécharger ou les supprimer quand vous voulez.", triggers:["mes données","confidentialité","sécurité","vous vendez mes données","entraîner des modèles"] },
     "delete-account": { title:"Comment supprimer mon compte ?", body:"Paramètres > Compte > Supprimer le compte. Une confirmation vous est demandée, puis tout est supprimé : conversations, fichiers, sites, agents, historique. C'est irréversible. Si vous voulez une copie avant, téléchargez vos données depuis la même page.", triggers:["supprimer mon compte","effacer mon compte","fermer mon compte","supprimer le compte"] },
+    "chat-memory": { title:"Le chat se souvient-il des conversations précédentes ?", body:"À l'intérieur d'une même conversation, il se souvient toujours des messages précédents. D'une conversation à l'autre, il ne garde que ce qui reste durablement utile — votre nom, votre métier, vos préférences — et cela existe sur les formules payantes. Vous pouvez voir tout ce qu'il a gardé, et le supprimer, dans Paramètres > Mémoire.", triggers:["se souvient","mémoire","conversations précédentes","il oublie","il ne se souvient pas","historique du chat"] },
   },
   de: {
     "what-is-ionexa": { title:"Was ist Ionexa?", body:"Ein Arbeitsbereich, in dem die KI die Arbeit macht statt nur zu beraten: sie baut deine Website, lässt Agents nach Zeitplan laufen, zerlegt deine Ziele in Schritte, liest deine Dateien und beantwortet Fragen dazu, und hält alles Erfasste an einem durchsuchbaren Ort.", triggers:["was ist ionexa","was ist das","wofür ist das","was macht das","wie funktioniert das"] },
@@ -60,6 +74,7 @@ export const CORE_1 = {
     "connect-gmail": { title:"Wie verbinde ich Gmail oder Google Drive?", body:"Einstellungen > Verbindungen. Wähl den Dienst und bestätige den Zugriff in Googles eigenem Fenster. Du siehst vor der Bestätigung genau, was gelesen wird, und kannst jederzeit trennen — die Zugriffsschlüssel werden dann sofort gelöscht.", triggers:["gmail","google drive","verbinden","integration","slack"] },
     "data-privacy": { title:"Was macht ihr mit meinen Daten?", body:"Deine Daten gehören dir. Wir verkaufen sie nicht, wir trainieren keine Modelle damit, und jedes Konto sieht nur die eigenen — das wird in der Datenbank erzwungen, nicht bloß in der Anwendung. Du kannst sie jederzeit herunterladen oder löschen.", triggers:["meine daten","datenschutz","sicherheit","verkauft ihr meine daten","modelle trainieren"] },
     "delete-account": { title:"Wie lösche ich mein Konto?", body:"Einstellungen > Konto > Konto löschen. Du wirst um Bestätigung gebeten, danach ist alles weg: Unterhaltungen, Dateien, Websites, Agents, Verlauf. Das lässt sich nicht rückgängig machen. Wenn du vorher eine Kopie willst, lad deine Daten auf derselben Seite herunter.", triggers:["konto löschen","account löschen","konto schließen","profil löschen"] },
+    "chat-memory": { title:"Merkt sich der Chat frühere Unterhaltungen?", body:"Innerhalb einer Unterhaltung merkt er sich die früheren Nachrichten immer. Zwischen verschiedenen Unterhaltungen behält er nur dauerhaft Nützliches — deinen Namen, was du machst, deine Vorlieben — und das gibt es in den bezahlten Tarifen. Was er behalten hat, kannst du unter Einstellungen > Erinnerung ansehen und löschen.", triggers:["merkt sich","erinnert sich","gedächtnis","frühere unterhaltungen","vergisst","chatverlauf"] },
   },
   it: {
     "what-is-ionexa": { title:"Che cos'è Ionexa?", body:"Uno spazio di lavoro dove l'AI fa il lavoro invece di limitarsi a consigliare: crea il tuo sito, esegue agent secondo una pianificazione, divide i tuoi obiettivi in passi, legge i tuoi file e risponde su di essi, e tiene tutto ciò che registri in un unico posto ricercabile.", triggers:["cos'è ionexa","che cos'è","a cosa serve","cosa fa","come funziona"] },
@@ -75,5 +90,6 @@ export const CORE_1 = {
     "connect-gmail": { title:"Come collego Gmail o Google Drive?", body:"Impostazioni > Connessioni. Scegli il servizio e approva l'accesso nella finestra di Google. Vedi esattamente cosa verrà letto prima di approvare, e puoi scollegare quando vuoi — le chiavi di accesso vengono cancellate subito.", triggers:["gmail","google drive","collegare","connessione","slack"] },
     "data-privacy": { title:"Cosa fate con i miei dati?", body:"I tuoi dati sono tuoi. Non li vendiamo, non li usiamo per addestrare modelli, e ogni account vede solo i propri — è imposto nel database, non solo nell'applicazione. Puoi scaricarli o cancellarli quando vuoi.", triggers:["i miei dati","privacy","sicurezza","vendete i miei dati","addestrare modelli"] },
     "delete-account": { title:"Come cancello il mio account?", body:"Impostazioni > Account > Elimina account. Ti verrà chiesta conferma, poi viene cancellato tutto: conversazioni, file, siti, agent, cronologia. Non è reversibile. Se prima vuoi una copia, scarica i tuoi dati dalla stessa pagina.", triggers:["cancellare account","eliminare account","chiudere l'account","cancellare profilo"] },
+    "chat-memory": { title:"La chat ricorda le conversazioni precedenti?", body:"All'interno della stessa conversazione ricorda sempre i messaggi precedenti. Tra conversazioni diverse conserva solo ciò che resta utile a lungo — il suo nome, di cosa si occupa, le sue preferenze — e questo è disponibile nei piani a pagamento. Può vedere tutto ciò che ha conservato, ed eliminarlo, in Impostazioni > Memoria.", triggers:["ricorda","memoria","conversazioni precedenti","dimentica","non ricorda","cronologia della chat"] },
   },
 };

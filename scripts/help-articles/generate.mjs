@@ -19,6 +19,14 @@
 // loudly, and loud beats silent. Either way, count the rows per locale
 // after each piece — nothing else makes a partial run visible.
 //
+// BUILDING IS SEPARATE FROM WRITING. buildSeedSql() returns the string
+// and touches no file, so help-articles.test.mjs can compare it against
+// the committed .sql byte for byte. Without that comparison the suite
+// checked only the ROW COUNT — edit a French body, forget to regenerate,
+// and every check stayed green while the file on disk and the source
+// files said different things. That is the same class of drift that left
+// chat-memory in the database and in no source file.
+//
 // Run: node scripts/help-articles/generate.mjs
 import { writeFileSync } from "node:fs";
 import { EN } from "./en.mjs";
@@ -26,7 +34,7 @@ import { EL } from "./el.mjs";
 import { CORE_1, CORE_SLUGS } from "./core-1.mjs";
 import { CORE_2 } from "./core-2.mjs";
 
-const OUT = "supabase/migrations/20260816_help_articles_seed.sql";
+export const OUT = "supabase/migrations/20260816_help_articles_seed.sql";
 const CORE = { ...CORE_1, ...CORE_2 };
 
 /** Postgres string literal. Doubling the quote is the only escape a
@@ -39,6 +47,7 @@ function textArray(values) {
   return `array[${values.map(q).join(", ")}]::text[]`;
 }
 
+export function buildSeedSql() {
 // EN is the base and carries the category and order for every slug; the
 // other locales are translations of the same article and inherit both, so
 // a category can never drift between languages.
@@ -113,5 +122,12 @@ on conflict (slug, locale) do update set
   href = excluded.href;`
 );
 
-writeFileSync(OUT, header + statements.join("\n\n") + "\n");
-console.log(`${OUT}: ${rows.length} rows (${Object.entries(byLocale).map(([l, n]) => `${l}=${n}`).join(", ")})`);
+return { sql: header + statements.join("\n\n") + "\n", rows, byLocale };
+}
+
+// The CLI half. Nothing above it writes anything.
+if (process.argv[1] && process.argv[1].endsWith("generate.mjs")) {
+  const { sql, rows, byLocale } = buildSeedSql();
+  writeFileSync(OUT, sql);
+  console.log(`${OUT}: ${rows.length} rows (${Object.entries(byLocale).map(([l, n]) => `${l}=${n}`).join(", ")})`);
+}

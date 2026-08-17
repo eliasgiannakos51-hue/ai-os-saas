@@ -136,12 +136,31 @@ drop policy if exists "user_notifications_select_own" on public.user_notificatio
 create policy "user_notifications_select_own" on public.user_notifications
   for select using (auth.uid() = user_id);
 
--- Marking one read is the user's own action on their own row, and the
--- only column they may change. A user who could INSERT could write
--- themselves a notification claiming to be from us, with a link.
+-- Marking one read is the user's own action on their own row. There is no
+-- INSERT policy: a user who could insert could write themselves a
+-- notification claiming to be from us, with a link.
 drop policy if exists "user_notifications_update_own" on public.user_notifications;
 create policy "user_notifications_update_own" on public.user_notifications
   for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- AND read_at IS THE ONLY COLUMN THEY MAY CHANGE — which the policy above
+-- does NOT say, because an RLS policy cannot. It decides WHICH ROWS an
+-- UPDATE may touch, never which columns.
+--
+-- Measured on PostgreSQL 16 with that policy alone: `update
+-- user_notifications set url = 'https://evil.test', title = 'Ionexa
+-- Security'` as `authenticated` succeeded on the user's own row. That is
+-- the same outcome the missing INSERT policy exists to prevent — a
+-- notification that looks like it came from us, carrying a link — reached
+-- one step later, by editing a real one instead of writing a new one.
+-- Self-targeted, so not a route to another account, but the comment above
+-- claimed a restriction that was not there.
+--
+-- A column-level grant is the mechanism that can express it. With this,
+-- marking read still works and rewriting the title or the URL is
+-- "permission denied for table user_notifications".
+revoke update on public.user_notifications from anon, authenticated;
+grant update (read_at) on public.user_notifications to authenticated;
 
 drop policy if exists "user_notifications_delete_own" on public.user_notifications;
 create policy "user_notifications_delete_own" on public.user_notifications

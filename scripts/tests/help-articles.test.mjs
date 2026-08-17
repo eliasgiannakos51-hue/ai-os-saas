@@ -20,7 +20,7 @@
 // against the real seeded rows.
 //
 // Run: node scripts/tests/help-articles.test.mjs
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 
 let pass = 0;
 const failures = [];
@@ -226,6 +226,50 @@ checkList(
 // It is a Chat article and the category has to be a translated heading,
 // or it lands under a bare English word on a Japanese page.
 check("its category is one the UI translates", /"chat"/.test(JSON.stringify(Object.keys(JSON.parse(readFileSync("messages/ja.json", "utf8")).helpCentre.categories))));
+
+console.log("\n== 5c. the paste-sized parts are the same seed ==");
+// The seed is ~127 KB of UPSERTs. A browser SQL console that silently
+// truncates a large paste fails in the worst way available: the statements
+// it did receive succeed, the run reports success, and the table is short
+// a few articles nobody counts. So the seed is also shipped as parts.
+//
+// WHAT MAKES THEM TRUSTWORTHY IS THAT THEY ARE DERIVED, not maintained.
+// Two copies of 166 articles is two copies to keep in step, and the second
+// one always loses. These are regenerated here and compared, so an edit to
+// either that the other does not have fails the build.
+{
+  const { statementsOf, packIntoChunks, CHUNK_LIMIT_BYTES } = await import("../split-help-seed.mjs");
+  const seedSql = readFileSync("supabase/migrations/20260816_help_articles_seed.sql", "utf8");
+  const stmts = statementsOf(seedSql);
+  check(`the seed is ${stmts.length} independent statements`, stmts.length === 166, String(stmts.length));
+  // The hazard the parts exist for is a paste limit, NOT an oversized
+  // statement — no single statement here is close to one, and saying so is
+  // what stops somebody splitting inside a statement to "be safe".
+  const biggest = Math.max(...stmts.map((s) => Buffer.byteLength(s, "utf8")));
+  check(`no single statement is oversized (largest ${biggest} B)`, biggest < 4000, String(biggest));
+
+  const dir = "supabase/seed-chunks";
+  const onDisk = readdirSync(dir).filter((f) => f.endsWith(".sql")).sort();
+  const expected = packIntoChunks(stmts);
+  check(`${onDisk.length} parts on disk, ${expected.length} expected`, onDisk.length === expected.length);
+
+  // BYTES, NOT CHARACTERS. The first packer budgeted in string length; the
+  // articles are Greek, Japanese, Chinese and Arabic, which cost 2-3 bytes
+  // per character in UTF-8, so parts sized at "7,000 characters" measured
+  // 9,400 bytes — 34% over a budget that exists because something
+  // downstream counts bytes.
+  const oversize = onDisk.filter(
+    (f) => Buffer.byteLength(readFileSync(`${dir}/${f}`, "utf8"), "utf8") > CHUNK_LIMIT_BYTES
+  );
+  checkList(`every part is within ${CHUNK_LIMIT_BYTES} bytes`, oversize);
+
+  // Concatenated, the parts hold exactly the seed's statements, in order.
+  // Split ON A STATEMENT BOUNDARY, never inside one: a part that ends
+  // mid-INSERT is a syntax error, and one that ends after a complete
+  // statement is independently runnable, which is the whole point.
+  const fromParts = onDisk.flatMap((f) => statementsOf(readFileSync(`${dir}/${f}`, "utf8")));
+  check("the parts hold every statement, in order", fromParts.join("\n") === stmts.join("\n"));
+}
 
 console.log("\n== 6. the schema says what it should ==");
 // Comments stripped before scanning. The file documents its own rules in

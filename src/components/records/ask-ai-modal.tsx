@@ -10,6 +10,8 @@ import {
 } from "react";
 import { ArrowUp, Sparkles, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
+import { AiActivity } from "@/components/ui/ai-activity";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { MessageContent } from "@/components/chat/message-content";
@@ -22,14 +24,6 @@ let localIdCounter = 0;
 function nextLocalId(): number {
   localIdCounter += 1;
   return localIdCounter;
-}
-
-function TypingDots() {
-  return (
-    <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-3.5">
-      <ThinkingIndicator />
-    </div>
-  );
 }
 
 // Ephemeral, per-record mini-chat — every open/close cycle starts fresh
@@ -52,6 +46,8 @@ export function AskAiModal({
   recordHeadline: string;
 }) {
   const t = useTranslations("askAi");
+  const describe = useErrorText();
+  const describeStatus = useErrorTextForStatus();
   const tCommon = useTranslations("common");
   const { reportUsage } = useCredits();
   const [messages, setMessages] = useState<Turn[]>([]);
@@ -114,7 +110,7 @@ export function AskAiModal({
           setIsRateLimitNotice(true);
           setError(data.message);
         } else {
-          setError(getErrorMessage(data?.error, "Something went wrong."));
+          setError(describeStatus(res.status).text);
         }
         return;
       }
@@ -133,7 +129,7 @@ export function AskAiModal({
             setStreamingText(accumulatedText);
           }
         } else if (event.type === "error") {
-          streamError = typeof event.error === "string" ? event.error : "Something went wrong.";
+          streamError = describeStatus(500).text;
         }
       });
 
@@ -197,7 +193,7 @@ export function AskAiModal({
             type="button"
             onClick={onClose}
             aria-label={t("close")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
           >
             <X className="h-4 w-4" />
           </button>
@@ -243,7 +239,7 @@ export function AskAiModal({
                       <MessageContent content={streamingText} />
                     </div>
                   ) : (
-                    <TypingDots />
+                    <AiActivity kind="recordsAsk" className="rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-3.5" />
                   )}
                 </div>
               )}
@@ -280,7 +276,7 @@ export function AskAiModal({
                 type="submit"
                 disabled={sending || !input.trim()}
                 aria-label={t("send")}
-                className="absolute bottom-2 right-2 flex h-8 w-8 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+                className="absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
               >
                 {sending ? (
                   <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-black/30 border-t-black" />

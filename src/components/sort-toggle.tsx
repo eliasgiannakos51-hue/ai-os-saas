@@ -32,7 +32,7 @@ export function SortToggle({
             type="button"
             onClick={() => onChange(order)}
             aria-pressed={sortOrder === order}
-            className={`min-h-[36px] rounded-full px-3.5 py-1.5 font-medium transition-colors duration-150 sm:min-h-0 ${
+            className={`min-h-[44px] rounded-full px-3.5 py-1.5 font-medium transition-colors duration-150 ${
               sortOrder === order
                 ? "bg-orange-500 text-black"
                 : "text-muted hover:text-foreground"

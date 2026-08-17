@@ -157,5 +157,37 @@ for (const article of EN) {
   );
 }
 
+console.log("\n== every contextual '?' points at a real article ==");
+// PageHeader's `helpArticle` is a Help Centre SLUG, resolved at render
+// time into an anchor on /help. A miss is silent in the worst way: the
+// "?" still opens, the tip still reads, and the "read more" link lands
+// on /help scrolled nowhere — indistinguishable from a page whose
+// article was renamed out from under it.
+//
+// The pages ARE the route->article mapping — there is deliberately no
+// second registry listing them — so this is what makes that mapping
+// checkable. The complementary half (that every helpKey resolves to
+// is/does/doesNot in all ten locales) lives in help-tips.test.mjs.
+const KNOWN_SLUGS = new Set(EN.map((a) => a.slug));
+const helpRefs = [];
+for (const route of APP_ROUTES) {
+  const file = route === "/" ? "src/app/page.tsx" : `src/app${route}/page.tsx`;
+  let src;
+  try {
+    src = readFileSync(file, "utf8");
+  } catch {
+    continue;
+  }
+  for (const m of src.matchAll(/helpArticle="([^"]+)"/g)) helpRefs.push([route, m[1]]);
+}
+check(`at least one screen offers contextual help (${helpRefs.length})`, helpRefs.length > 0);
+for (const [route, slug] of helpRefs) {
+  check(
+    `${route}: helpArticle "${slug}" is a real article`,
+    KNOWN_SLUGS.has(slug),
+    `known slugs: ${[...KNOWN_SLUGS].join(", ")}`
+  );
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

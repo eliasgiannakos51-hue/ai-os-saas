@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -23,7 +24,9 @@ import {
 } from "@/lib/trading-pattern";
 import type { ModuleRecord } from "@/types/module-record";
 
-export const metadata: Metadata = { title: "Trading Workflow" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.tradingWorkflow");
+}
 
 const MINI_TIMELINE_LIMIT = 10;
 
@@ -168,7 +171,7 @@ export default async function TradingWorkflowPage() {
         <div className="mt-8">
           <h2 className="mb-3 text-sm font-semibold text-foreground">{t("tradesTitle")}</h2>
 
-          {error && <ErrorMessage message={`loading trades: ${error.message}`} />}
+          {error && <ErrorMessage detail={`loading trades: ${error.message}`} />}
 
 
           <GenericList module={tradingModule} records={tradeRows} linkedEntities={linkedEntities} />

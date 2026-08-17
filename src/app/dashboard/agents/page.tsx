@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
@@ -14,7 +15,9 @@ import type { AgentRun, UserAgent } from "@/lib/agents/agent-config";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "AI Agents" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.agents");
+}
 
 // Autonomous Agents.
 //
@@ -92,8 +95,8 @@ export default async function AgentsPage() {
           {t("aiDisclosure")}
         </p>
 
-        {agentsError && <ErrorMessage message={`loading agents: ${agentsError.message}`} />}
-        {runsError && <ErrorMessage message={`loading agent runs: ${runsError.message}`} />}
+        {agentsError && <ErrorMessage detail={`loading agents: ${agentsError.message}`} />}
+        {runsError && <ErrorMessage detail={`loading agent runs: ${runsError.message}`} />}
 
         <AgentsWorkspace
           agents={(agents as UserAgent[] | null) ?? []}

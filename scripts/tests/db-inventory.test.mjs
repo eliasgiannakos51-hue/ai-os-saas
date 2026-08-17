@@ -267,16 +267,22 @@ check(
   )
 );
 
-console.log("\n== 5. the snapshot files are still the dangerous ones ==");
-// Stated as a fact the build re-checks, so "just run supabase_schema.sql"
-// can never look like reasonable advice again.
+console.log("\n== 5. the dangerous snapshot files are gone, and stay gone ==");
+// THIS SECTION USED TO ASSERT THE OPPOSITE, and it was right to at the
+// time: twenty loose .sql files sat at the repository root, three of them
+// carrying 124 DROP TABLE statements between them, and the check recorded
+// that "just run supabase_schema.sql" destroys data — so the advice could
+// never look reasonable again.
+//
+// They no longer exist. The schema builds in one ordered pass from
+// supabase/migrations, so the fact worth pinning is the inverse: none of
+// them may come back, because a root .sql is a file nothing runs and
+// everything is tempted to.
 for (const f of ["supabase_schema.sql", "supabase_complete_schema.sql", "supabase_full_project_backup.sql"]) {
-  if (!existsSync(f)) continue;
-  const drops = (readFileSync(f, "utf8").match(/drop\s+table/gi) ?? []).length;
-  check(`${f} still carries DROP TABLE (${drops}) and is excluded from repair`, drops > 0);
+  check(`${f} is gone`, !existsSync(f));
 }
 const sqlFiles = readdirSync(".").filter((f) => f.endsWith(".sql"));
-check(`${sqlFiles.length} SQL files scanned at the repo root`, sqlFiles.length > 5);
+check(`no SQL file at the repo root (found ${sqlFiles.length})`, sqlFiles.length === 0, sqlFiles.join(", "));
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 if (failures.length) for (const f of failures) console.log("  - " + f);

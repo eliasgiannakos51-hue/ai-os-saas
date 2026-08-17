@@ -56,7 +56,7 @@ export function AchievementUnlockBridge({ unlockedKeys }: { unlockedKeys: string
           : t(ACHIEVEMENT_TITLE_KEYS[display.kind]);
       addToast(`🏆 ${t("unlockedToast", { achievement: title })}`);
     }
-  }, [unlockedKeys, t, addToast]);
+  }, [unlockedKeys, t, tKey, addToast]);
 
   if (!celebrating) return null;
 

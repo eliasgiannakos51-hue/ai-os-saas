@@ -32,7 +32,7 @@ export function AiPersonaSettings({ initialName }: { initialName: string }) {
     setSaving(false);
 
     if (error) {
-      addToast(t("couldNotSave"), "error");
+      addToast(`✗ ${t("saveFailed")}`, "error");
       return;
     }
 
@@ -63,7 +63,7 @@ export function AiPersonaSettings({ initialName }: { initialName: string }) {
         <button
           type="submit"
           disabled={saving}
-          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+          className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save"}
         </button>

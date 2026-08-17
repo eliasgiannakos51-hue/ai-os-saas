@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { useTranslations, useLocale } from "next-intl";
+import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { createClient } from "@/lib/supabase/client";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -194,6 +195,8 @@ export function WebsiteBuilderWorkspace({
 }) {
   const formatRelativeTime = useFormatRelativeTime();
   const t = useTranslations("dashboard.websiteBuilder");
+  const describe = useErrorText();
+  const describeStatus = useErrorTextForStatus();
   const locale = useLocale();
   const tCommon = useTranslations("common");
   const tPublish = useTranslations("dashboard.publishing");
@@ -559,7 +562,7 @@ export function WebsiteBuilderWorkspace({
       const data = await res.json();
 
       if (!res.ok || !data.ok) {
-        setError(getErrorMessage(data?.error, "Something went wrong — no credits were charged. Please try again."));
+        setError(describeStatus(res.status).text);
         return;
       }
       if (data.needsClarification) {
@@ -627,7 +630,7 @@ export function WebsiteBuilderWorkspace({
       setError(
         err instanceof TypeError
           ? tCommon("networkErrorCheckConnection")
-          : getErrorMessage(err, "Something went wrong — no credits were charged. Please try again.")
+          : describe(err).text
       );
     } finally {
       setGenerating(false);
@@ -694,7 +697,7 @@ export function WebsiteBuilderWorkspace({
       setError(
         err instanceof TypeError
           ? tCommon("networkErrorCheckConnection")
-          : getErrorMessage(err, "Something went wrong — no credits were charged. Please try again.")
+          : describe(err).text
       );
       setGenerating(false);
     }
@@ -1005,7 +1008,7 @@ export function WebsiteBuilderWorkspace({
                 type="submit"
                 form={EDIT_FORM_ID}
                 disabled={editing || !editText.trim() || previewWebsite.status !== "completed"}
-                className="inline-flex min-h-[40px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+                className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {editing ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -1042,7 +1045,7 @@ export function WebsiteBuilderWorkspace({
                   type="button"
                   onClick={() => downloadHtml(previewWebsite)}
                   disabled={previewWebsite.status !== "completed"}
-                  className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0"
+                  className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Download className="h-3.5 w-3.5" aria-hidden="true" />
                   {t("downloadButton")}
@@ -1051,7 +1054,7 @@ export function WebsiteBuilderWorkspace({
                   type="button"
                   onClick={() => handleDelete(previewWebsite.id)}
                   disabled={deletingId === previewWebsite.id}
-                  className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-red-400 transition-colors duration-150 hover:border-red-500/60 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-0"
+                  className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-red-400 transition-colors duration-150 hover:border-red-500/60 hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
                   {t("deleteButton")}
@@ -1130,7 +1133,7 @@ export function WebsiteBuilderWorkspace({
                       type="button"
                       onClick={() => handleRegenerateFlagged(previewWebsite.id)}
                       disabled={regeneratingId === previewWebsite.id}
-                      className="inline-flex min-h-[36px] items-center justify-center gap-1.5 rounded-lg bg-amber-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg bg-amber-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {regeneratingId === previewWebsite.id ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -1434,7 +1437,7 @@ export function WebsiteBuilderWorkspace({
                 <button
                   type="submit"
                   disabled={generating || !name.trim() || !description.trim()}
-                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+                  className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {generating ? (
                     <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
@@ -1452,7 +1455,7 @@ export function WebsiteBuilderWorkspace({
                 resetGenerationForm();
                 setShowForm(true);
               }}
-              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
+              className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
             >
               <Plus className="h-4 w-4" aria-hidden="true" /> {t("newProject")}
             </button>
@@ -1468,7 +1471,7 @@ export function WebsiteBuilderWorkspace({
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               aria-label={tModule("filterBy", { label: t("statusLabel") })}
-              className="min-h-[36px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60 sm:min-h-0"
+              className="min-h-[44px] rounded-full border border-border bg-input px-3 py-1.5 text-xs text-foreground outline-none transition-colors duration-150 focus:border-orange-500/60"
             >
               <option value="">{tModule("filterAll", { label: t("statusLabel") })}</option>
               {WEBSITE_STATUSES.map((status) => (

@@ -62,7 +62,10 @@
       "retry": "Riprova",
       "checking": "Controllo…",
       "stillOffline": "Ancora nessuna connessione."
-    }
+    },
+    "creditsUnlimited": "Illimitati",
+    "whatIsThis": "Che cos'è?",
+    "moreInHelp": "Leggi di più nel Centro assistenza"
   },
   "sidebar": {
     "groups": {
@@ -209,8 +212,6 @@
       "creditsPerMonth": "Crediti / mese",
       "aiAgents": "Agenti AI",
       "websiteBuilder": "Website Builder e automazioni",
-      "mobileSaasBuilder": "Mobile & SaaS Builder",
-      "imageVideo": "Generazione immagini e video",
       "aiMemory": "Memoria AI",
       "teamCollaboration": "Collaborazione in team",
       "teamSeatsAddOn": "Posti team",
@@ -231,32 +232,20 @@
     "businessFeatureManage": "Gestisci i posti in qualsiasi momento dalle impostazioni Team",
     "setUpTeam": "Configura Team",
     "features": {
-      "1Workspace3Projects": "1 area di lavoro, 3 progetti",
       "basicAiChat": "Chat IA di base",
       "creditsPerMonth": "{count} crediti/mese",
-      "marketplaceInstallOnly": "Marketplace: solo installazione",
-      "communitySupport": "Supporto della community",
-      "unlimitedProjects": "Progetti illimitati",
       "aiMemory": "Memoria IA",
       "websiteAutomationBuilderAccess": "Accesso a Website & Automation Builder",
-      "imageVideoGenerationAccess": "Accesso alla generazione di immagini e video",
-      "emailSupport": "Supporto via email",
       "everythingInStarter": "Tutto ciò che include Starter",
       "upTo100AiAgents": "Fino a 100 agenti IA",
-      "mobileSaasBuilderAccess": "Accesso a Mobile & SaaS Builder",
-      "priorityProcessing": "Elaborazione prioritaria",
       "everythingInGrowth": "Tutto ciò che include Growth",
       "teamCollaboration": "Collaborazione in team",
-      "sharedAiMemory": "Memoria IA condivisa",
-      "prioritySupport": "Supporto prioritario",
       "everythingInProfessional": "Tutto ciò che include Professional",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Postazioni team illimitate incluse — nessun costo per membro",
       "extendedChatMemoryRetention100Vs20RecentFact": "Conservazione estesa della memoria chat (100 contro 20 fatti recenti)",
       "customAiPersonaNameInIonexaChat": "Nome personalizzato dell'assistente in Ionexa Chat",
-      "highestPriorityProcessing": "Elaborazione a massima priorità",
       "everythingInUltimate": "Tutto ciò che include Ultimate",
       "unlimitedMembers": "Membri illimitati",
-      "dedicatedSupport": "Supporto dedicato",
       "customCredits": "Crediti personalizzati",
       "upTo2AiAgents": "Fino a 2 agenti IA",
       "upTo5AiAgents": "Fino a 5 agenti IA",
@@ -272,7 +261,8 @@
     "seatNote": {
       "included": "Postazioni team illimitate incluse — nessun addebito per membro",
       "perMember": "+ {currency}{price}/mese per membro del team — ogni membro ottiene accesso completo al livello del tuo piano"
-    }
+    },
+    "metaDescription": "Prezzi di Ionexa AI — piani Free, Starter, Growth, Professional, Ultimate ed Enterprise."
   },
   "roadmap": {
     "title": "Roadmap",
@@ -372,7 +362,8 @@
         "title": "Sincronizzazione multipiattaforma",
         "description": "Un'esperienza unificata su web, mobile e desktop."
       }
-    }
+    },
+    "metaDescription": "Cosa è già attivo oggi in Ionexa AI, cosa arriva dopo e dove stiamo andando."
   },
   "auth": {
     "login": {
@@ -384,7 +375,8 @@
       "noAccount": "Non hai ancora un account?",
       "signUp": "Registrati",
       "forgotPassword": "Password dimenticata?",
-      "resetSuccess": "Password aggiornata — accedi con la tua nuova password."
+      "resetSuccess": "Password aggiornata — accedi con la tua nuova password.",
+      "failed": "Non siamo riusciti ad accedere. Controlla email e password, oppure reimposta la password se non sei sicuro."
     },
     "signup": {
       "chooseYourPlan": "Scegli il tuo piano",
@@ -411,7 +403,8 @@
       "createAccount": "Crea account",
       "mostPopular": "Più popolare",
       "mustAgreeToTerms": "Devi accettare i Termini di servizio e l'Informativa sulla privacy per creare un account.",
-      "passwordRequirementsNotMet": "Scegli una password che soddisfi tutti i requisiti sopra indicati."
+      "passwordRequirementsNotMet": "Scegli una password che soddisfi tutti i requisiti sopra indicati.",
+      "failed": "Non siamo riusciti a creare l'account. Controlla i dati e riprova — non ti è stato addebitato nulla."
     },
     "forgotPassword": {
       "title": "Reimposta password",
@@ -422,7 +415,8 @@
       "checkInbox": "Se esiste un account per <highlight>{emailAddress}</highlight>, un link di reimpostazione è in arrivo. Controlla la tua casella di posta.",
       "backToLogin": "Torna al login",
       "rememberedIt": "Te la sei ricordata?",
-      "logIn": "Accedi"
+      "logIn": "Accedi",
+      "failed": "Non siamo riusciti a inviare l'email di reimpostazione. Controlla l'indirizzo e riprova tra poco."
     },
     "resetPassword": {
       "title": "Imposta nuova password",
@@ -432,7 +426,9 @@
       "confirmPassword": "Conferma password",
       "saveNewPassword": "Salva nuova password",
       "saving": "Salvataggio...",
-      "passwordsDoNotMatch": "Le password non coincidono."
+      "passwordsDoNotMatch": "Le password non coincidono.",
+      "linkInvalid": "Questo link non è più valido. I link scadono dopo poco — richiedine uno nuovo.",
+      "failed": "Non siamo riusciti a impostare la nuova password. Riprova e richiedi un nuovo link se continua."
     },
     "social": {
       "continueWithGoogle": "Continua con Google",
@@ -445,7 +441,8 @@
       "warning": "Questa operazione eliminerà definitivamente il tuo account e ogni voce registrata. Non è reversibile.",
       "deleting": "Eliminazione…",
       "confirmButton": "Elimina definitivamente il mio account",
-      "cancel": "Annulla e torna indietro"
+      "cancel": "Annulla e torna indietro",
+      "confirmFailed": "Non siamo riusciti a completare l'eliminazione. Il tuo account esiste ancora — riprova il link o contatta l'assistenza."
     }
   },
   "settings": {
@@ -460,7 +457,8 @@
       "requirementsNotMet": "Scegli una password che soddisfi tutti i requisiti seguenti.",
       "passwordsDoNotMatch": "Le password non coincidono.",
       "couldNotUpdate": "✗ impossibile aggiornare la password",
-      "passwordUpdated": "✓ password aggiornata"
+      "passwordUpdated": "✓ password aggiornata",
+      "failed": "Non siamo riusciti a cambiare la password. Controlla quella attuale e riprova."
     },
     "chatMemory": {
       "title": "Memoria chat",
@@ -541,7 +539,8 @@
       "sending": "Invio...",
       "checkEmail": "Controlla la tua email per confermare l'eliminazione — abbiamo inviato un link a <highlight>{email}</highlight>. Scade tra 1 ora; nulla verrà eliminato finché non ci clicchi sopra.",
       "emailDoesNotMatch": "L'email non corrisponde.",
-      "couldNotStartDeletion": "✗ impossibile avviare l'eliminazione dell'account"
+      "couldNotStartDeletion": "✗ impossibile avviare l'eliminazione dell'account",
+      "failed": "Non siamo riusciti a inviare l'email di conferma. Riprova tra poco — non è stato eliminato nulla."
     },
     "emailNotifications": {
       "title": "Notifiche email",
@@ -581,7 +580,8 @@
       "title": "Persona IA",
       "description": "Dai all'assistente un nome personalizzato.",
       "personaUpdated": "✓ nome dell'assistente aggiornato",
-      "couldNotSave": "✗ non è stato possibile salvare il nome"
+      "couldNotSave": "✗ non è stato possibile salvare il nome",
+      "saveFailed": "Non siamo riusciti a salvare il nome. Riprova tra poco."
     },
     "billing": {
       "title": "Fatturazione",
@@ -749,7 +749,12 @@
         }
       },
       "quickStartTemplates": "Modelli di avvio rapido",
-      "quickStartApplied": "✓ {count, plural, one {aggiunta # voce di esempio} other {aggiunte # voci di esempio}}"
+      "quickStartApplied": "✓ {count, plural, one {aggiunta # voce di esempio} other {aggiunte # voci di esempio}}",
+      "quickStart": "Avvio rapido",
+      "templateApplied": "Aggiunti {count} esempi",
+      "templateFailed": "Non siamo riusciti ad applicare questo modello. Riprova tra poco — non è stato aggiunto nulla.",
+      "quickStartBlurb": "Aggiungi qualche voce di esempio per vedere com'è fatto uno spazio di lavoro pieno.",
+      "quickStartAdd": "Aggiungi"
     },
     "team": {
       "title": "Team",
@@ -815,7 +820,8 @@
         "title": "Una pagina bianca che ricorda",
         "why": "Testi lunghi che restano insieme al tuo lavoro — un brief, una bozza, appunti di riunione — cercabili accanto a tutto il resto.",
         "example": "Appunti della riunione di lunedì"
-      }
+      },
+      "createFailed": "Non siamo riusciti a creare il documento. Riprova tra poco — non è stato salvato nulla."
     },
     "chat": {
       "title": "Ionexa Chat",
@@ -1706,6 +1712,32 @@
       "oldest": "Meno recenti",
       "az": "A–Z",
       "za": "Z–A"
+    },
+    "emptyWhat": "Qui vive tutto quello che annoti su {module}.",
+    "emptyWhy": "Tutto quello che annoti qui entra nella tua Cronologia e diventa qualcosa che l'IA può usare quando le fai una domanda sul tuo lavoro.",
+    "emptyExample": "Inizia con: «{example}»",
+    "examples": {
+      "competitors": "Notion — il concorrente più vicino sul prezzo",
+      "research": "Perché la conversione da prova a pagamento è calata a giugno",
+      "finance": "Fattura hosting di settembre — 240 €",
+      "learning": "Funzioni finestra in SQL — finito il capitolo 4",
+      "trading": "EURUSD long, chiuso a +1,8R",
+      "decisions": "Scelto Postgres invece di MongoDB, e perché",
+      "products": "Piano Pro — opzione di fatturazione annuale",
+      "content": "Email di lancio per la release di settembre",
+      "sales": "Acme Srl — demo fissata per martedì",
+      "feedback": "Cliente: l'export è troppo lento oltre le 5.000 righe",
+      "analytics": "Iscrizioni questa settimana: 142 (+18%)",
+      "automation": "Mandami un riepilogo ogni lunedì mattina",
+      "websites": "Landing page per i nuovi prezzi",
+      "apps": "Tracciamento interno delle fatture",
+      "images": "Immagine principale per la pagina prezzi",
+      "videos": "Panoramica del prodotto in 60 secondi",
+      "coding": "Script per riconciliare i pagamenti Stripe",
+      "data-analysis": "Quale piano ha il churn più basso?",
+      "campaigns": "Lancio di settembre — email + LinkedIn",
+      "presentations": "Aggiornamento al board Q3 — punti chiave",
+      "ideas": "Una newsletter per chi ha lasciato i fogli di calcolo"
     }
   },
   "askAi": {
@@ -2117,7 +2149,23 @@
       "answering": "Compongo la risposta…",
       "combining": "Combino quello che ha trovato ogni parte…",
       "checking": "La verifico sui file…"
-    }
+    },
+    "counter": "({step}/{total})",
+    "understanding": "Sto capendo cosa hai chiesto",
+    "searching": "Sto cercando le informazioni",
+    "reading": "Sto leggendo i tuoi file",
+    "planning": "Sto pianificando i passaggi",
+    "drafting": "Sto scrivendo una prima bozza",
+    "creating": "Lo sto creando",
+    "generating": "Sto generando",
+    "working": "Ci sto lavorando",
+    "answering": "Sto elaborando la risposta",
+    "rewriting": "Sto riscrivendo il testo",
+    "summarising": "Sto riassumendo",
+    "checking": "Sto verificando il risultato",
+    "saving": "Sto salvando",
+    "delivering": "Te lo sto inviando",
+    "publishing": "Sto pubblicando il sito"
   },
   "problem": {
     "out_of_credits": {
@@ -2226,6 +2274,94 @@
       "integrations": "Connessioni",
       "account": "Account",
       "privacy": "Privacy e dati"
+    }
+  },
+  "pageTitle": {
+    "document": "Documento",
+    "systemHealth": "Stato del sistema",
+    "onboarding": "Inizia",
+    "notFound": "Non trovata",
+    "notFoundBody": "Questa pagina non esiste — forse l'indirizzo è stato digitato male o la pagina è stata spostata.",
+    "notFoundAction": "Torna alla home",
+    "forgotPassword": "Password dimenticata",
+    "resetPassword": "Imposta una nuova password",
+    "confirmDeletion": "Conferma eliminazione account",
+    "logInDescription": "Accedi a Ionexa AI.",
+    "signUpDescription": "Scegli un piano e crea il tuo account Ionexa AI.",
+    "forgotPasswordDescription": "Reimposta la password del tuo account Ionexa AI.",
+    "resetPasswordDescription": "Imposta una nuova password per il tuo account Ionexa AI.",
+    "confirmDeletionDescription": "Conferma l'eliminazione definitiva del tuo account Ionexa AI.",
+    "termsDescription": "Termini di servizio di Ionexa AI.",
+    "privacyDescription": "Informativa sulla privacy di Ionexa AI.",
+    "cookiesDescription": "Quali cookie imposta Ionexa AI, a cosa serve ciascuno e quanto dura.",
+    "helpDescription": "Risposte alle domande più frequenti su Ionexa AI — prezzi, crediti, siti web, agent, privacy."
+  },
+  "errors": {
+    "retry": "Riprova",
+    "creditHistory": "Vedi la cronologia dei crediti",
+    "credits": {
+      "refunded": "I tuoi crediti sono stati restituiti.",
+      "notCharged": "Non ti è stato addebitato nulla.",
+      "charged": "Questo tentativo ha consumato crediti.",
+      "unverified": "Da qui non possiamo confermare se sia stato addebitato."
+    },
+    "codes": {
+      "notAuthenticated": {
+        "what": "Hai effettuato la disconnessione.",
+        "next": "Accedi di nuovo e ripeti l'operazione — non hai perso nulla di ciò che avevi scritto."
+      },
+      "forbidden": {
+        "what": "Il tuo piano non lo include.",
+        "next": "Apri Impostazioni › Fatturazione per vedere quale piano lo copre."
+      },
+      "notFound": {
+        "what": "Questo non esiste più.",
+        "next": "Probabilmente è stato eliminato. Torna all'elenco e scegline un altro."
+      },
+      "invalidInput": {
+        "what": "Qualcosa nel modulo non è stato accettato.",
+        "next": "Controlla i campi evidenziati e invialo di nuovo."
+      },
+      "rateLimited": {
+        "what": "Troppe richieste in poco tempo.",
+        "next": "Aspetta circa un minuto e riprova."
+      },
+      "insufficientCredits": {
+        "what": "Non hai crediti sufficienti per questo.",
+        "next": "Acquista crediti nelle Impostazioni oppure aspetta il rinnovo mensile."
+      },
+      "planLimit": {
+        "what": "Hai raggiunto il limite del tuo piano.",
+        "next": "Elimina qualcosa che non ti serve più, oppure passa a un piano superiore da Impostazioni › Fatturazione."
+      },
+      "fileTooLarge": {
+        "what": "Questo file è troppo grande.",
+        "next": "Dividilo oppure carica una versione più piccola."
+      },
+      "unsupportedType": {
+        "what": "Questo tipo di file non è supportato.",
+        "next": "Convertilo in PDF, DOCX, CSV o TXT e ricaricalo."
+      },
+      "conflict": {
+        "what": "Qualcuno — o un'altra scheda — l'ha modificato mentre ci stavi lavorando.",
+        "next": "Ricarica la pagina per vedere la versione attuale, poi rifai la tua modifica."
+      },
+      "upstreamUnavailable": {
+        "what": "Il servizio di IA non risponde in questo momento.",
+        "next": "Dipende da noi e di solito si risolve in pochi minuti."
+      },
+      "serverError": {
+        "what": "Si è rotto qualcosa dalla nostra parte.",
+        "next": "È stato registrato. Riprova tra poco e contatta l'assistenza se continua."
+      },
+      "offline": {
+        "what": "Il tuo dispositivo non è riuscito a raggiungerci.",
+        "next": "Controlla la connessione e riprova."
+      },
+      "unknown": {
+        "what": "Questa operazione non è stata completata.",
+        "next": "Riprova e contatta l'assistenza se succede di nuovo."
+      }
     }
   }
 }

@@ -10,7 +10,8 @@
 //   · only one side changed it        -> take that side
 //   · both changed it the same way    -> take it
 //   · both changed it DIFFERENTLY     -> take OURS, and print it
-//   · one side deleted, other changed -> keep the change, and print it
+//   · one side deleted, other UNTOUCHED -> the deletion stands
+//   · one side deleted, other CHANGED   -> keep the change, and print it
 //
 // The printing matters more than the rule. A silent "ours wins" is how a
 // translation somebody wrote gets dropped without anybody noticing; every
@@ -40,17 +41,41 @@ const theirs = read(theirsPath);
 const conflicts = [];
 const fromOurs = [];
 const fromTheirs = [];
+const deletions = [];
 
 const isObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 function merge(b, o, t, path = "") {
-  // A whole subtree added by one side only.
+  // ONE SIDE HAS NO VALUE HERE, and that means two different things.
+  //
+  // It is an ADDITION when the base has nothing either: the other side
+  // invented the key, and it is taken.
+  //
+  // It is a DELETION when the base DOES have it and this side's value is
+  // still the base's: somebody removed the key on purpose, and the other
+  // side simply never touched it. Returning the untouched copy — which is
+  // what this did before — resurrects every key either branch deleted,
+  // silently. That is how ten `dashboard.files.step*` keys came back after
+  // a merge and failed the test that asserts they are gone.
+  //
+  // A deletion on one side and a real EDIT on the other is the genuine
+  // disagreement: the edit is kept, and printed, because dropping somebody
+  // else's new translation is the one outcome nobody would notice.
   if (o === undefined) {
-    if (t !== undefined && !same(b, t)) fromTheirs.push(path);
+    if (t === undefined) return undefined;
+    if (b !== undefined && same(b, t)) {
+      deletions.push(`${path} (deleted by us)`);
+      return undefined;
+    }
+    if (!same(b, t)) fromTheirs.push(path);
     return t;
   }
   if (t === undefined) {
+    if (b !== undefined && same(b, o)) {
+      deletions.push(`${path} (deleted by them)`);
+      return undefined;
+    }
     if (!same(b, o)) fromOurs.push(path);
     return o;
   }
@@ -90,7 +115,8 @@ const countKeys = (o) =>
 
 console.log(
   `  ${outPath}: ${countKeys(merged)} keys ` +
-    `(+${fromTheirs.length} from theirs, +${fromOurs.length} ours)`
+    `(+${fromTheirs.length} from theirs, +${fromOurs.length} ours, ` +
+    `-${deletions.length} removed)`
 );
 if (conflicts.length > 0) {
   console.log(`  ⚠ ${conflicts.length} key(s) changed on BOTH sides — kept ours:`);

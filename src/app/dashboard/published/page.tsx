@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Globe } from "lucide-react";
@@ -18,7 +19,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Published Sites" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.published");
+}
 
 // Every site this account has live, with its traffic and its version
 // history.
@@ -119,7 +122,7 @@ export default async function PublishedSitesPage() {
           {t("analyticsNotice")}
         </p>
 
-        {sitesError && <ErrorMessage message={`loading published sites: ${sitesError.message}`} />}
+        {sitesError && <ErrorMessage detail={`loading published sites: ${sitesError.message}`} />}
 
         <PublishedSitesList
           sites={rows}

@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/toast/toast-context";
 import { SuggestedLinksPrompt } from "@/components/entity-links/suggested-links-prompt";
 import { useTranslations } from "next-intl";
+import { ApiError } from "@/lib/errors/api-error";
+import { useErrorText } from "@/lib/errors/use-error-text";
 
 const EMPTY_FORM = {
   name: "",
@@ -37,9 +39,11 @@ export function AddIdeaForm({
   const tCommon = useTranslations("common");
   const t = useTranslations("dashboard.ideas");
   const tModule = useTranslations("module");
+  const describe = useErrorText();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(false);
   // Set right after a successful create so SuggestedLinksPrompt (Knowledge
   // Graph "Smart Search") can offer related-entry links for it — see
@@ -109,7 +113,7 @@ export function AddIdeaForm({
 
     if (error) {
       setError(error.message);
-      addToast(`✗ ${tCommon("error")}: ${error.message}`, "error");
+      addToast(`✗ ${describe(new ApiError(500, { error: error.message })).what}`, "error");
       return;
     }
 
@@ -128,7 +132,7 @@ export function AddIdeaForm({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
         >
           <Plus className="h-4 w-4" /> {t("new")}
         </button>
@@ -237,7 +241,7 @@ export function AddIdeaForm({
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
+            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:w-auto"
           >
             {loading ? tModule("saving") : tModule("save")}
           </button>

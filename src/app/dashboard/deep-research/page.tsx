@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Telescope } from "lucide-react";
@@ -12,7 +13,9 @@ import { ResearchWorkspace, type ResearchReport } from "@/components/research/re
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Deep Research" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.deepResearch");
+}
 
 export default async function DeepResearchPage() {
   const supabase = createClient();

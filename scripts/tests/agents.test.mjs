@@ -709,7 +709,13 @@ check("so does a missing one", disclosure.aiGeneratedNotice(null), disclosure.ai
 console.log("\n== 14. the schema ==");
 // ---------------------------------------------------------------------
 {
-  const sql = read("v3_autonomous_agents_migration.sql");
+  // Was `v3_autonomous_agents_migration.sql` at the repository root. That
+  // file — and nineteen like it — no longer exists: the schema now builds
+  // in one ordered pass from supabase/migrations, and a loose root .sql
+  // that nothing runs is a claim about the database rather than a
+  // description of it. The assertions below are unchanged; only where they
+  // read from is.
+  const sql = read("supabase/migrations/20260803000000_baseline_schema.sql");
   for (const column of [
     "user_id",
     "name",
@@ -731,7 +737,15 @@ console.log("\n== 14. the schema ==");
   for (const column of ["started_at", "finished_at", "output", "error", "credits_charged", "tokens_used"]) {
     checkTrue(`agent_runs has ${column}`, sql.includes(column));
   }
-  checkTrue("both tables enable RLS", (sql.match(/enable row level security/g) ?? []).length === 2);
+  // Scoped to these two tables: the baseline holds all 70, so counting
+  // every `enable row level security` in the file would be counting the
+  // whole schema rather than this feature's half of it.
+  for (const table of ["user_agents", "agent_runs"]) {
+    checkTrue(
+      `${table} enables RLS`,
+      new RegExp(`alter table (public\\.)?${table} enable row level security`, "i").test(sql)
+    );
+  }
   checkTrue(
     "the indexes the cron and the dashboard actually query on exist",
     sql.includes("user_agents_status_next_run_at_idx") &&
@@ -739,10 +753,12 @@ console.log("\n== 14. the schema ==");
       sql.includes("agent_runs_user_id_started_at_idx")
   );
   checkTrue("the migration is idempotent", !/create table (?!if not exists)/.test(sql));
-  // The mirror in the full backup, which is what the RLS coverage check reads.
-  const backup = read("supabase_full_project_backup.sql");
-  checkTrue("user_agents is in the full schema file", backup.includes("create table if not exists public.user_agents"));
-  checkTrue("agent_runs is in the full schema file", backup.includes("create table if not exists public.agent_runs"));
+  // Both tables are created by the same one-pass build, so there is no
+  // second file to keep in step with this one any more — which is the
+  // point of the consolidation. Asserted here so a future split would
+  // fail rather than pass quietly.
+  checkTrue("user_agents is created by the migration", /create table if not exists public\.user_agents/.test(sql));
+  checkTrue("agent_runs is created by the migration", /create table if not exists public\.agent_runs/.test(sql));
 }
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitleAndDescription } from "@/lib/page-title";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { LifeBuoy, ArrowRight } from "lucide-react";
@@ -8,10 +9,9 @@ import { articlesByCategory } from "@/lib/support/knowledge-base";
 import { loadHelpArticles, type HelpArticle } from "@/lib/support/help-articles";
 import { getLocale } from "next-intl/server";
 
-export const metadata: Metadata = {
-  title: "Help Centre",
-  description: "Answers to the questions people ask most about Ionexa AI — pricing, credits, websites, agents, privacy.",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitleAndDescription("sidebar.items.help", "pageTitle.helpDescription");
+}
 
 // The Help Centre.
 //
@@ -156,7 +156,7 @@ export default async function HelpPage() {
             <a
               key={category}
               href={`#category-${category}`}
-              className="rounded-full border border-border px-3 py-1 text-xs font-medium text-muted transition-colors duration-150 hover:border-orange-500/40 hover:text-foreground"
+              className="inline-flex min-h-[44px] items-center rounded-full border border-border px-3 py-1 text-xs font-medium text-muted transition-colors duration-150 hover:border-orange-500/40 hover:text-foreground"
             >
               {t.has(`categories.${category}`) ? t(`categories.${category}`) : category}
             </a>
@@ -189,13 +189,13 @@ export default async function HelpPage() {
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
               href="/dashboard/chat"
-              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90"
             >
               {t("openChat")}
             </Link>
             <Link
               href="/pricing"
-              className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
             >
               {t("pricingLink")}
             </Link>

@@ -11,8 +11,8 @@ import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";
 import { EmptyState } from "@/components/empty-state";
-import { matchesSearch } from "@/lib/text/search-match";
 import { useTranslations } from "next-intl";
+import { matchesSearch } from "@/lib/text/search-match";
 
 const CSV_HEADERS = [
   "name",
@@ -111,7 +111,7 @@ export function IdeasList({
             type="button"
             onClick={handleExport}
             disabled={filtered.length === 0}
-            className="inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-0"
+            className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg border border-border px-3.5 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Download className="h-4 w-4" /> {t("exportCsv")}
           </button>

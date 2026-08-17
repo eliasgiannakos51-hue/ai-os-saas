@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { redirect } from "next/navigation";
 import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
@@ -34,9 +35,9 @@ import type { ModuleRecord } from "@/types/module-record";
 import type { Mission } from "@/types/mission";
 import { formatNumber } from "@/lib/format-number";
 
-export const metadata: Metadata = {
-  title: "Overview",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.home");
+}
 
 // See dashboard/mission/page.tsx for why this is explicit rather than
 // relying only on cookies() to imply it — this page's Active Missions

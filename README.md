@@ -13,8 +13,21 @@ on `/dashboard`. Every module gets the same feature set: create, inline
 edit, delete (all RLS-scoped to the logged-in user), live search,
 newest/oldest sorting with pagination, CSV export, toast notifications on
 every mutation, and loading/error states. The whole app is responsive
-(sidebar collapses to a hamburger overlay on small screens, 44px minimum
-touch targets) and works identically on mobile and desktop.
+(sidebar collapses to a hamburger overlay on small screens) and works on
+mobile and desktop.
+
+**Touch targets: measured, not claimed.** This paragraph used to assert
+"44px minimum touch targets" as a finished property. It was not one, and
+nothing checked it — the claim survived because every layout test in the
+repo ran against an empty account, where the only thing on screen is a
+centred empty state. `scripts/tests/layout-stress.prodtest.mjs` measures
+it against an account with real data in it, at four widths in two locales,
+and prints the count every run. It was 346. It is now 119, most of the
+remainder being inline links in prose (which WCAG 2.5.8 exempts) and
+controls 4px short. The number is pinned so it cannot grow, and the same
+file also measures three things nothing else does: text clipped with no
+way to read the rest, controls a tap physically cannot reach, and the
+modals.
 
 ## Product surface
 

@@ -65,10 +65,37 @@ const SITES = [
 ];
 
 console.log("== 1. every waiting surface uses it ==");
+// DIRECTLY, OR THROUGH AiActivity — and the difference is not a loophole.
+//
+// components/ui/ai-activity.tsx is the surface that pairs the motion with
+// the WORDS ("Looking for the information…", step 2 of 4) from
+// lib/jobs/ai-steps.ts, announced through role="status" aria-live="polite".
+// Chat and Ask-my-records render that instead of a bare indicator, so a
+// screen reader hears which step is running rather than nothing at all.
+// Requiring a literal <ThinkingIndicator> in those two files would push
+// them back to motion with no words.
+//
+// So the indirection is allowed exactly one level deep, and the wrapper is
+// pinned below: if AiActivity ever loses the indicator — goes back to the
+// `animate-spin` circle it shipped with — both surfaces fail here, which
+// is the property this section is actually about.
+const aiActivity = stripComments(readFileSync("src/components/ui/ai-activity.tsx", "utf8"));
+check(
+  "AiActivity, which two of the six render instead, is itself the indicator",
+  /<ThinkingIndicator/.test(aiActivity) && !/animate-spin/.test(aiActivity)
+);
 for (const [name, file] of SITES) {
-  const src = readFileSync(file, "utf8");
-  check(`${name} renders the indicator`, /<ThinkingIndicator/.test(stripComments(src)), file);
-  check(`${name} imports it`, /from "@\/components\/ui\/thinking-indicator"/.test(src), file);
+  const src = stripComments(readFileSync(file, "utf8"));
+  const direct = /<ThinkingIndicator/.test(src);
+  const viaActivity = /<AiActivity/.test(src);
+  check(`${name} renders the indicator`, direct || viaActivity, file);
+  check(
+    `${name} imports it`,
+    direct
+      ? /from "@\/components\/ui\/thinking-indicator"/.test(src)
+      : /from "@\/components\/ui\/ai-activity"/.test(src),
+    file
+  );
 }
 
 console.log("\n== 2. and nothing anywhere bounces ==");

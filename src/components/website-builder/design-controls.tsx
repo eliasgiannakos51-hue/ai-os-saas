@@ -123,7 +123,7 @@ export function DesignControls({
                 disabled={unavailable}
                 title={unavailable ? t("ownPhotoNeedsUpload") : undefined}
                 onClick={() => set("background", style as WebsiteBackgroundStyle)}
-                className={`min-h-[32px] rounded-full border px-3 py-1 text-[11px] font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
+                className={`min-h-[44px] rounded-full border px-3 py-1 text-[11px] font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
                   selected
                     ? "border-orange-500/60 bg-orange-500/10 text-orange-300"
                     : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
@@ -149,7 +149,7 @@ export function DesignControls({
                 type="button"
                 aria-pressed={value.referenceImageUse === use}
                 onClick={() => set("referenceImageUse", use as ReferenceImageUse)}
-                className={`min-h-[32px] rounded-full border px-3 py-1 text-[11px] font-medium transition-colors duration-150 ${
+                className={`min-h-[44px] rounded-full border px-3 py-1 text-[11px] font-medium transition-colors duration-150 ${
                   value.referenceImageUse === use
                     ? "border-orange-500/60 bg-orange-500/10 text-orange-300"
                     : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"

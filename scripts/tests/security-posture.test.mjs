@@ -19,6 +19,7 @@
 // Run: node scripts/tests/security-posture.test.mjs
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join } from "node:path";
+import { schemaSql } from "./lib/schema-sql.mjs";
 
 let pass = 0,
   fail = 0;
@@ -37,7 +38,10 @@ function checkTrue(name, cond) {
   check(name, Boolean(cond), true);
 }
 
-const sql = readFileSync("supabase_full_project_backup.sql", "utf8");
+// Was `supabase_full_project_backup.sql` — a snapshot of one project at
+// one moment, which nothing built a database from. supabase/migrations is
+// what does, so that is what the posture is measured against.
+const sql = schemaSql();
 
 console.log("== 1. Row Level Security covers every user-data table ==");
 
@@ -68,7 +72,24 @@ const created = new Set(
 
 // Tables that intentionally carry NO per-user rows readable by a client.
 // Each one is admin-client-only in application code — asserted below.
-const ADMIN_ONLY_TABLES = new Set(["rate_limit_log", "daily_ai_spend_tracking", "account_deletion_requests"]);
+// DENY-ALL BY DESIGN: RLS on, no policy, so a user-scoped client sees
+// nothing. Every one of these is read and written exclusively through
+// createAdminClient(), which section 2 below asserts file by file.
+//
+// `production_errors` joined the list when this test started reading the
+// real migrations instead of a hand-maintained backup snapshot. It was
+// always deny-all — supabase/migrations/20260804000001_baseline_gaps.sql
+// enables RLS on it and grants no policy — and the two places that touch
+// it (the admin-gated /dashboard/system-health page and
+// api/system-health/resolve) were always on the admin client. The old
+// source simply did not carry the ALTER TABLE, so the check had nothing
+// to see.
+const ADMIN_ONLY_TABLES = new Set([
+  "rate_limit_log",
+  "daily_ai_spend_tracking",
+  "account_deletion_requests",
+  "production_errors",
+]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();
 check(`no user-data table is missing RLS (${created.size} tables checked)`, missing, []);

@@ -191,7 +191,10 @@ body {
 
 @layer components {
   .input {
-    @apply w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500;
+    /* min-h-[44px]: px-3/py-2 renders 40px, and this class is what every
+       text field, textarea and select in the app is built from — so it was
+       twenty of the under-44px controls by itself. */
+    @apply min-h-[44px] w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500;
   }
 }
 
@@ -228,8 +231,27 @@ input:-webkit-autofill:focus {
     transform: translateY(0);
   }
 }
+/* `backwards`, NOT `both`, and the difference is a bug nobody could see.
+ *
+ * `both` keeps the LAST keyframe applied after the animation ends, so this
+ * wrapper — which components/page-transition.tsx puts around every page —
+ * permanently carries `transform: translateY(0)`. A transform of anything
+ * other than `none` makes the element a containing block for every
+ * `position: fixed` descendant. So every modal rendered inside a page was
+ * positioning itself against the page wrapper rather than the viewport.
+ *
+ * Measured, once a test finally opened one: the Quick Start dialog reported
+ * top 1380px inside an 812px viewport. Not misaligned — entirely below the
+ * fold. You press "Quick Start" on a phone and nothing appears.
+ *
+ * `backwards` still applies the FIRST keyframe before the animation starts,
+ * which is what stops the flash of un-animated content; it simply does not
+ * pin the last one afterwards. The resting state is identical either way
+ * (translateY(0) and opacity 1 are what the element already is), so nothing
+ * about the animation changes — only whether a transform is left behind.
+ */
 .page-enter {
-  animation: page-enter 350ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: page-enter 350ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 /* Skeleton loading shimmer — a light band sweeping left-to-right across

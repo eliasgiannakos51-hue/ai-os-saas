@@ -62,7 +62,10 @@
       "retry": "重试",
       "checking": "检查中…",
       "stillOffline": "仍然没有连接。"
-    }
+    },
+    "creditsUnlimited": "无限制",
+    "whatIsThis": "这是什么？",
+    "moreInHelp": "在帮助中心了解更多"
   },
   "sidebar": {
     "groups": {
@@ -209,8 +212,6 @@
       "creditsPerMonth": "每月额度",
       "aiAgents": "AI 智能体",
       "websiteBuilder": "网站与自动化构建器",
-      "mobileSaasBuilder": "移动端与 SaaS 构建器",
-      "imageVideo": "图像与视频生成",
       "aiMemory": "AI 记忆",
       "teamCollaboration": "团队协作",
       "teamSeatsAddOn": "团队席位",
@@ -231,32 +232,20 @@
     "businessFeatureManage": "随时在团队设置中管理席位",
     "setUpTeam": "设置团队",
     "features": {
-      "1Workspace3Projects": "1 个工作区，3 个项目",
       "basicAiChat": "基础 AI 聊天",
       "creditsPerMonth": "{count} 积分/月",
-      "marketplaceInstallOnly": "市场：仅可安装",
-      "communitySupport": "社区支持",
-      "unlimitedProjects": "无限项目",
       "aiMemory": "AI 记忆",
       "websiteAutomationBuilderAccess": "网站与自动化构建器访问权限",
-      "imageVideoGenerationAccess": "图像与视频生成访问权限",
-      "emailSupport": "邮件支持",
       "everythingInStarter": "包含 Starter 的全部功能",
       "upTo100AiAgents": "最多 100 个 AI 智能体",
-      "mobileSaasBuilderAccess": "移动端与 SaaS 构建器访问权限",
-      "priorityProcessing": "优先处理",
       "everythingInGrowth": "包含 Growth 的全部功能",
       "teamCollaboration": "团队协作",
-      "sharedAiMemory": "共享 AI 记忆",
-      "prioritySupport": "优先支持",
       "everythingInProfessional": "包含 Professional 的全部功能",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "包含无限团队席位——不按成员收费",
       "extendedChatMemoryRetention100Vs20RecentFact": "扩展的聊天记忆保留（100 条对比 20 条近期信息）",
       "customAiPersonaNameInIonexaChat": "在 Ionexa Chat 中自定义 AI 名称",
-      "highestPriorityProcessing": "最高优先级处理",
       "everythingInUltimate": "包含 Ultimate 的全部功能",
       "unlimitedMembers": "无限成员",
-      "dedicatedSupport": "专属支持",
       "customCredits": "定制积分",
       "upTo2AiAgents": "最多 2 个 AI 智能体",
       "upTo5AiAgents": "最多 5 个 AI 智能体",
@@ -272,7 +261,8 @@
     "seatNote": {
       "included": "包含无限团队席位 — 无需按成员付费",
       "perMember": "+ 每位团队成员每月 {currency}{price} — 每位成员均可获得您所在套餐等级的完整访问权限"
-    }
+    },
+    "metaDescription": "Ionexa AI 价格 — Free、Starter、Growth、Professional、Ultimate 和 Enterprise 方案。"
   },
   "roadmap": {
     "title": "路线图",
@@ -372,7 +362,8 @@
         "title": "跨平台同步",
         "description": "在网页、移动端和桌面端获得统一的使用体验。"
       }
-    }
+    },
+    "metaDescription": "Ionexa AI 目前已上线的功能、接下来的计划，以及我们的方向。"
   },
   "auth": {
     "login": {
@@ -384,7 +375,8 @@
       "noAccount": "还没有账户？",
       "signUp": "注册",
       "forgotPassword": "忘记密码？",
-      "resetSuccess": "密码已更新——请使用新密码登录。"
+      "resetSuccess": "密码已更新——请使用新密码登录。",
+      "failed": "无法登录。请检查邮箱和密码，如不确定可重置密码。"
     },
     "signup": {
       "chooseYourPlan": "选择你的方案",
@@ -411,7 +403,8 @@
       "createAccount": "创建账户",
       "mostPopular": "最受欢迎",
       "mustAgreeToTerms": "您必须同意服务条款和隐私政策才能创建账户。",
-      "passwordRequirementsNotMet": "请选择满足以上所有要求的密码。"
+      "passwordRequirementsNotMet": "请选择满足以上所有要求的密码。",
+      "failed": "无法创建账户。请检查填写的信息后重试 — 未向你收费。"
     },
     "forgotPassword": {
       "title": "重置密码",
@@ -422,7 +415,8 @@
       "checkInbox": "如果 <highlight>{emailAddress}</highlight> 存在对应账户，重置链接即将发出。请查看你的收件箱。",
       "backToLogin": "返回登录",
       "rememberedIt": "想起密码了？",
-      "logIn": "登录"
+      "logIn": "登录",
+      "failed": "无法发送重置邮件。请检查邮箱地址，稍后再试。"
     },
     "resetPassword": {
       "title": "设置新密码",
@@ -432,7 +426,9 @@
       "confirmPassword": "确认密码",
       "saveNewPassword": "保存新密码",
       "saving": "保存中...",
-      "passwordsDoNotMatch": "两次输入的密码不一致。"
+      "passwordsDoNotMatch": "两次输入的密码不一致。",
+      "linkInvalid": "此重置链接已失效。链接会在短时间后过期 — 请重新申请一个。",
+      "failed": "无法设置新密码。请重试，若持续失败请重新申请链接。"
     },
     "social": {
       "continueWithGoogle": "使用 Google 继续",
@@ -445,7 +441,8 @@
       "warning": "此操作将永久删除您的账户以及您记录的所有条目，且无法撤销。",
       "deleting": "正在删除…",
       "confirmButton": "永久删除我的账户",
-      "cancel": "取消并返回"
+      "cancel": "取消并返回",
+      "confirmFailed": "无法完成删除。你的账户仍然存在 — 请重新点击链接，或联系客服。"
     }
   },
   "settings": {
@@ -460,7 +457,8 @@
       "requirementsNotMet": "请选择满足以下所有要求的密码。",
       "passwordsDoNotMatch": "两次输入的密码不一致。",
       "couldNotUpdate": "✗ 无法更新密码",
-      "passwordUpdated": "✓ 密码已更新"
+      "passwordUpdated": "✓ 密码已更新",
+      "failed": "无法修改密码。请确认当前密码后重试。"
     },
     "chatMemory": {
       "title": "对话记忆",
@@ -541,7 +539,8 @@
       "sending": "发送中...",
       "checkEmail": "请查看你的邮箱以确认删除——我们已向 <highlight>{email}</highlight> 发送了一个链接。该链接将在 1 小时后过期；在你点击之前不会删除任何内容。",
       "emailDoesNotMatch": "电子邮件地址不匹配。",
-      "couldNotStartDeletion": "✗ 无法开始删除账户"
+      "couldNotStartDeletion": "✗ 无法开始删除账户",
+      "failed": "无法发送确认邮件。请稍后重试 — 尚未删除任何内容。"
     },
     "emailNotifications": {
       "title": "邮件通知",
@@ -581,7 +580,8 @@
       "title": "AI 人格",
       "description": "为助手设置自定义名称。",
       "personaUpdated": "✓ 助手名称已更新",
-      "couldNotSave": "✗ 无法保存该名称"
+      "couldNotSave": "✗ 无法保存该名称",
+      "saveFailed": "无法保存该名称。请稍后重试。"
     },
     "billing": {
       "title": "账单",
@@ -749,7 +749,12 @@
         }
       },
       "quickStartTemplates": "快速开始模板",
-      "quickStartApplied": "✓ 已添加 {count} 条示例记录"
+      "quickStartApplied": "✓ 已添加 {count} 条示例记录",
+      "quickStart": "快速开始",
+      "templateApplied": "已添加 {count} 条示例",
+      "templateFailed": "无法应用该模板。请稍后重试 — 未添加任何内容。",
+      "quickStartBlurb": "添加几条示例记录，看看填充后的工作区是什么样子。",
+      "quickStartAdd": "添加"
     },
     "team": {
       "title": "团队",
@@ -815,7 +820,8 @@
         "title": "一张会记事的空白页",
         "why": "长篇的东西，和你的工作放在一起——一份需求、一版草稿、会议记录——和其他记录一起可搜。",
         "example": "周一会议记录"
-      }
+      },
+      "createFailed": "无法创建文档。请稍后重试 — 未保存任何内容。"
     },
     "chat": {
       "title": "Ionexa 聊天",
@@ -1706,6 +1712,32 @@
       "oldest": "最早",
       "az": "A–Z",
       "za": "Z–A"
+    },
+    "emptyWhat": "你记录的所有关于{module}的内容都在这里。",
+    "emptyWhy": "你在这里记录的一切都会进入时间线，并成为 AI 在你询问工作相关问题时可以使用的信息。",
+    "emptyExample": "从这条开始：「{example}」",
+    "examples": {
+      "competitors": "Notion — 定价上最接近的竞争对手",
+      "research": "6 月试用转付费率为什么下降",
+      "finance": "9 月主机账单 — 240 欧元",
+      "learning": "SQL 窗口函数 — 已完成第 4 章",
+      "trading": "EURUSD 做多，平仓 +1.8R",
+      "decisions": "选择 Postgres 而非 MongoDB，以及原因",
+      "products": "Pro 方案 — 年付选项",
+      "content": "9 月版本的发布邮件",
+      "sales": "Acme 有限公司 — 周二演示已预约",
+      "feedback": "客户反馈：超过 5000 行时导出太慢",
+      "analytics": "本周注册：142（+18%）",
+      "automation": "每周一早上给我发一份摘要",
+      "websites": "新定价的落地页",
+      "apps": "内部发票跟踪工具",
+      "images": "定价页的主视觉图",
+      "videos": "60 秒产品演示",
+      "coding": "对账 Stripe 付款的脚本",
+      "data-analysis": "哪个方案的流失率最低？",
+      "campaigns": "9 月发布 — 邮件 + LinkedIn",
+      "presentations": "第三季度董事会汇报 — 要点",
+      "ideas": "写给从电子表格转过来的人的通讯"
     }
   },
   "askAi": {
@@ -2117,7 +2149,23 @@
       "answering": "正在组织答案…",
       "combining": "正在合并各部分的结果…",
       "checking": "正在对照文件核实…"
-    }
+    },
+    "counter": "（{step}/{total}）",
+    "understanding": "正在理解你的问题",
+    "searching": "正在查找信息",
+    "reading": "正在读取你的文件",
+    "planning": "正在规划步骤",
+    "drafting": "正在写第一版草稿",
+    "creating": "正在创建",
+    "generating": "正在生成",
+    "working": "正在处理",
+    "answering": "正在整理答案",
+    "rewriting": "正在重写文本",
+    "summarising": "正在总结",
+    "checking": "正在检查结果",
+    "saving": "正在保存",
+    "delivering": "正在发送给你",
+    "publishing": "正在发布网站"
   },
   "problem": {
     "out_of_credits": {
@@ -2226,6 +2274,94 @@
       "integrations": "连接",
       "account": "账号",
       "privacy": "隐私与数据"
+    }
+  },
+  "pageTitle": {
+    "document": "文档",
+    "systemHealth": "系统状态",
+    "onboarding": "开始使用",
+    "notFound": "页面不存在",
+    "notFoundBody": "此页面不存在 — 可能是网址输入有误，或页面已被移动。",
+    "notFoundAction": "返回首页",
+    "forgotPassword": "忘记密码",
+    "resetPassword": "设置新密码",
+    "confirmDeletion": "确认删除账户",
+    "logInDescription": "登录 Ionexa AI。",
+    "signUpDescription": "选择方案并创建你的 Ionexa AI 账户。",
+    "forgotPasswordDescription": "重置你的 Ionexa AI 账户密码。",
+    "resetPasswordDescription": "为你的 Ionexa AI 账户设置新密码。",
+    "confirmDeletionDescription": "确认永久删除你的 Ionexa AI 账户。",
+    "termsDescription": "Ionexa AI 服务条款。",
+    "privacyDescription": "Ionexa AI 隐私政策。",
+    "cookiesDescription": "Ionexa AI 使用哪些 cookie、各自的用途以及保留多久。",
+    "helpDescription": "关于 Ionexa AI 最常见问题的解答 — 价格、credits、网站、agents、隐私。"
+  },
+  "errors": {
+    "retry": "重试",
+    "creditHistory": "查看 credits 记录",
+    "credits": {
+      "refunded": "你的 credits 已退回。",
+      "notCharged": "未向你收费。",
+      "charged": "此次尝试消耗了 credits。",
+      "unverified": "我们无法在此确认是否已扣费。"
+    },
+    "codes": {
+      "notAuthenticated": {
+        "what": "你已退出登录。",
+        "next": "请重新登录并再次执行该操作 — 你输入的内容都还在。"
+      },
+      "forbidden": {
+        "what": "你的方案不包含此功能。",
+        "next": "打开「设置 › 账单」查看哪个方案包含它。"
+      },
+      "notFound": {
+        "what": "该内容已不存在。",
+        "next": "它可能已被删除。请返回列表另选一项。"
+      },
+      "invalidInput": {
+        "what": "表单中有内容未被接受。",
+        "next": "请检查标记出的字段后重新提交。"
+      },
+      "rateLimited": {
+        "what": "短时间内请求过多。",
+        "next": "请等待约一分钟后再试一次。"
+      },
+      "insufficientCredits": {
+        "what": "你的 credits 不足以完成此操作。",
+        "next": "可在「设置」中购买 credits，或等待每月重置。"
+      },
+      "planLimit": {
+        "what": "你已达到当前方案的上限。",
+        "next": "删除不再需要的内容，或在「设置 › 账单」中升级。"
+      },
+      "fileTooLarge": {
+        "what": "该文件过大。",
+        "next": "请拆分文件，或上传较小的版本。"
+      },
+      "unsupportedType": {
+        "what": "不支持该文件类型。",
+        "next": "请转换为 PDF、DOCX、CSV 或 TXT 后重新上传。"
+      },
+      "conflict": {
+        "what": "在你操作期间，其他人或另一个标签页修改了它。",
+        "next": "请重新加载页面查看当前版本，然后重做你的修改。"
+      },
+      "upstreamUnavailable": {
+        "what": "AI 服务当前没有响应。",
+        "next": "这是我们这边的问题，通常几分钟内会恢复。"
+      },
+      "serverError": {
+        "what": "我们这边出错了。",
+        "next": "已记录该问题。请稍后重试，若持续出现请联系客服。"
+      },
+      "offline": {
+        "what": "你的设备无法连接到我们。",
+        "next": "请检查网络连接后重试。"
+      },
+      "unknown": {
+        "what": "此操作未能完成。",
+        "next": "请重试，若再次出现请联系客服。"
+      }
     }
   }
 }

@@ -12,6 +12,8 @@ import { useCredits } from "@/components/credits/credits-context";
 import { TextActionsTextarea } from "@/components/text-actions/text-actions-textarea";
 import { SuggestedLinksPrompt } from "@/components/entity-links/suggested-links-prompt";
 import { optionLabelKey } from "@/lib/modules";
+import { ApiError, isApiError, requestJson } from "@/lib/errors/api-error";
+import { useErrorText } from "@/lib/errors/use-error-text";
 
 function emptyFormFor(module: ModuleConfig): Record<string, string> {
   return Object.fromEntries(module.fields.map((f) => [f.key, ""]));
@@ -61,8 +63,10 @@ export function GenericAddForm({
   const supabase = createClient();
   const { addToast } = useToast();
   const { refresh: refreshCredits } = useCredits();
+  const describe = useErrorText();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Record<string, string>>(() => emptyFormFor(module));
+
   const [error, setError] = useState<string | null>(null);
   const [upgradeRequired, setUpgradeRequired] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -123,23 +127,15 @@ export function GenericAddForm({
 
     if (isGatedModule(module)) {
       try {
-        const res = await fetch("/api/modules/create", {
+        const data = await requestJson<{
+          record?: { id?: string };
+        }>("/api/modules/create", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ moduleSlug: module.slug, fields: form }),
         });
-        const data = await res.json();
 
         setLoading(false);
-
-        if (!res.ok || !data.ok) {
-          const message = data.error ?? "Something went wrong.";
-          setError(message);
-          setUpgradeRequired(Boolean(data.upgradeRequired || data.insufficientCredits));
-          addToast(`✗ ${message}`, "error");
-          return;
-        }
-
         setForm(emptyFormFor(module));
         setOpen(false);
         addToast(tCommon("created"));
@@ -148,9 +144,19 @@ export function GenericAddForm({
         if (data.record?.id) {
           setNewlyCreated({ table: module.table, id: String(data.record.id) });
         }
-      } catch {
+      } catch (err) {
         setLoading(false);
-        setError(tCommon("networkError"));
+        // The route's own English sentence is no longer what the user
+        // reads. `describe` turns the STATUS into three sentences in their
+        // language — what happened, what to do, and whether it cost them
+        // anything — which is the question this form used to answer with
+        // "Something went wrong."
+        const failure = describe(err);
+        setError(failure.text);
+        setUpgradeRequired(
+          isApiError(err) && (err.code === "forbidden" || err.code === "insufficientCredits")
+        );
+        addToast(`✗ ${failure.what}`, "error");
       }
       return;
     }
@@ -185,8 +191,13 @@ export function GenericAddForm({
     setLoading(false);
 
     if (error) {
-      setError(error.message);
-      addToast(`✗ ${tCommon("error")}: ${error.message}`, "error");
+      // Was `addToast("✗ error: " + error.message)`, which put a raw
+      // PostgREST string ("new row violates row-level security policy for
+      // table \"trades\"") in front of the user. It names internal tables,
+      // it is English, and it tells them nothing they can act on.
+      const failure = describe(new ApiError(500, { error: error.message }));
+      setError(failure.text);
+      addToast(`✗ ${failure.what}`, "error");
       return;
     }
 
@@ -205,7 +216,7 @@ export function GenericAddForm({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] sm:min-h-0"
+          className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)]"
         >
           {/* The module's own sentence, not "New " + the page title.
               The title is plural and the grammar around it changes with
@@ -225,7 +236,7 @@ export function GenericAddForm({
               type="button"
               onClick={() => setOpen(false)}
               aria-label={tCommon("cancel")}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
@@ -298,7 +309,7 @@ export function GenericAddForm({
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:min-h-0 sm:w-auto"
+            className="inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:opacity-50 sm:w-auto"
           >
             {loading ? t("saving") : t("save")}
           </button>

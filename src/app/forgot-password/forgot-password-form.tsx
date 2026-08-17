@@ -29,7 +29,7 @@ export function ForgotPasswordForm() {
       if (error) {
         // eslint-disable-next-line no-console
         console.error("Reset password request error:", error);
-        setError(getErrorMessage(error));
+        setError(getErrorMessage(error, t("failed")));
         return;
       }
 
@@ -37,7 +37,7 @@ export function ForgotPasswordForm() {
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("Reset password request threw:", err);
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err, t("failed")));
     } finally {
       setLoading(false);
     }
@@ -66,7 +66,7 @@ export function ForgotPasswordForm() {
               </p>
               <Link
                 href="/login"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 sm:min-h-0"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-xl border border-border px-4 py-2 text-sm text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
               >
                 {t("backToLogin")}
               </Link>

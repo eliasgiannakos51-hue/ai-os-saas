@@ -185,7 +185,7 @@ export function DocumentEditor({
               aria-label={label}
               onMouseDown={(e) => e.preventDefault()}
               onClick={onClick}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              className="flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
             >
               <Icon className="h-4 w-4" aria-hidden="true" />
             </button>

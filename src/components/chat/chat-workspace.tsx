@@ -10,11 +10,12 @@ import {
 } from "react";
 import { ArrowUp, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
+import { AiActivity } from "@/components/ui/ai-activity";
 import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { Tooltip } from "@/components/ui/tooltip";
-import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { InlineTitle } from "@/components/chat/inline-title";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
@@ -33,17 +34,6 @@ let localIdCounter = 0;
 function nextLocalId(prefix: string) {
   localIdCounter += 1;
   return `${prefix}-${localIdCounter}`;
-}
-
-function TypingDots() {
-  // The name is kept so the diff is readable; the dots are not. Three
-  // bouncing dots is what every AI product uses — see
-  // components/ui/thinking-indicator.tsx for what replaced them and why.
-  return (
-    <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-3.5">
-      <ThinkingIndicator />
-    </div>
-  );
 }
 
 function AssistantAvatar() {
@@ -82,6 +72,8 @@ export function ChatWorkspace({
   initialFreeChatRemaining?: number;
 }) {
   const tTrading = useTranslations("dashboard.tradingWorkflow");
+  const describe = useErrorText();
+  const describeStatus = useErrorTextForStatus();
   const tCommon = useTranslations("common");
   const tProduct = useTranslations("dashboard.productWorkflow");
   const tFree = useTranslations("credits.freeChat");
@@ -388,7 +380,7 @@ export function ChatWorkspace({
           setIsRateLimitNotice(true);
           setError(data.message);
         } else {
-          setError(getErrorMessage(data?.error, "Something went wrong."));
+          setError(describeStatus(res.status).text);
         }
         return;
       }
@@ -439,7 +431,7 @@ export function ChatWorkspace({
             setStreamingText(accumulatedText);
           }
         } else if (event.type === "error") {
-          streamError = typeof event.error === "string" ? event.error : "Something went wrong.";
+          streamError = describeStatus(500).text;
         }
       });
 
@@ -666,7 +658,7 @@ export function ChatWorkspace({
                       <AiGeneratedNotice />
                     </div>
                   ) : (
-                    <TypingDots />
+                    <AiActivity kind="chat" className="rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-3.5" />
                   )}
                 </div>
               )}
@@ -684,7 +676,7 @@ export function ChatWorkspace({
                 onClick={() => setMentorMode((v) => !v)}
                 aria-pressed={mentorMode}
                 title={t("mentorModeHint")}
-                className={`inline-flex min-h-[36px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 ${
+                className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors duration-150 ${
                   mentorMode
                     ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
                     : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
@@ -725,7 +717,7 @@ export function ChatWorkspace({
                   type="submit"
                   disabled={sending || !input.trim()}
                   aria-label={t("send")}
-                  className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
+                  className="absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
                 >
                   {sending ? (
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { getErrorMessage } from "@/lib/get-error-message";
-import { useTranslations } from "next-intl";
 
 type Status = "idle" | "loading" | "done";
 
@@ -48,7 +48,7 @@ export function ConfirmDeleteAccountForm() {
       // eslint-disable-next-line no-console
       console.error("Delete account confirmation threw:", err);
       setStatus("idle");
-      setError(getErrorMessage(err));
+      setError(getErrorMessage(err, t("confirmFailed")));
     }
   }
 

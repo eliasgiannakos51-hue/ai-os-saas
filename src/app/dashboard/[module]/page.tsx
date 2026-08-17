@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { pageTitle } from "@/lib/page-title";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -14,15 +15,20 @@ import { AutomationRealizeList } from "@/components/automation/automation-realiz
 import { AutomationActiveList } from "@/components/automation/automation-active-list";
 import type { UserAutomation } from "@/types/user-automation";
 
+// The 12 business modules share this one route, so they shared one
+// English title too: `moduleConfig.title` is the author's string, not the
+// reader's. `titleKey` is the config's own `sidebar.items.*` key — the
+// same one the sidebar link and the favorites grouping read — so
+// /dashboard/finance puts the same word in the tab as in the nav that got
+// you there, and a renamed module cannot leave the tab behind.
 export async function generateMetadata({
   params,
 }: {
   params: { module: string };
 }): Promise<Metadata> {
   const moduleConfig = getModule(params.module);
-  if (!moduleConfig) return { title: "Not Found" };
-  const t = await getTranslations();
-  return { title: t(moduleConfig.titleKey) };
+  if (!moduleConfig) return pageTitle("pageTitle.notFound");
+  return pageTitle(moduleConfig.titleKey);
 }
 
 export default async function ModulePage({
@@ -79,7 +85,7 @@ export default async function ModulePage({
 
 
         {error && (
-          <ErrorMessage message={`loading ${moduleConfig.table}: ${error.message}`} />
+          <ErrorMessage detail={`loading ${moduleConfig.table}: ${error.message}`} />
         )}
 
         {isAutomationModule && <AutomationActiveList automations={userAutomations} />}

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { FolderOpen } from "lucide-react";
@@ -16,7 +17,9 @@ import {
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Files" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.files");
+}
 
 export default async function FilesPage() {
   const supabase = createClient();

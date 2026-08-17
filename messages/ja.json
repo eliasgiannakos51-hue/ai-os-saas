@@ -62,7 +62,10 @@
       "retry": "再試行",
       "checking": "確認中…",
       "stillOffline": "まだ接続できません。"
-    }
+    },
+    "creditsUnlimited": "無制限",
+    "whatIsThis": "これは何ですか？",
+    "moreInHelp": "ヘルプセンターで詳しく読む"
   },
   "sidebar": {
     "groups": {
@@ -209,8 +212,6 @@
       "creditsPerMonth": "クレジット / 月",
       "aiAgents": "AI エージェント",
       "websiteBuilder": "ウェブサイト＆自動化ビルダー",
-      "mobileSaasBuilder": "モバイル＆SaaSビルダー",
-      "imageVideo": "画像・動画生成",
       "aiMemory": "AI メモリー",
       "teamCollaboration": "チームコラボレーション",
       "teamSeatsAddOn": "チームシート",
@@ -231,32 +232,20 @@
     "businessFeatureManage": "チーム設定からいつでもシートを管理可能",
     "setUpTeam": "チームを設定",
     "features": {
-      "1Workspace3Projects": "ワークスペース1つ、プロジェクト3つ",
       "basicAiChat": "基本のAIチャット",
       "creditsPerMonth": "{count} クレジット/月",
-      "marketplaceInstallOnly": "マーケットプレイス：インストールのみ",
-      "communitySupport": "コミュニティサポート",
-      "unlimitedProjects": "プロジェクト無制限",
       "aiMemory": "AIメモリ",
       "websiteAutomationBuilderAccess": "ウェブサイト＆自動化ビルダーへのアクセス",
-      "imageVideoGenerationAccess": "画像・動画生成へのアクセス",
-      "emailSupport": "メールサポート",
       "everythingInStarter": "Starterのすべて",
       "upTo100AiAgents": "AIエージェント最大100体",
-      "mobileSaasBuilderAccess": "モバイル＆SaaSビルダーへのアクセス",
-      "priorityProcessing": "優先処理",
       "everythingInGrowth": "Growthのすべて",
       "teamCollaboration": "チームコラボレーション",
-      "sharedAiMemory": "共有AIメモリ",
-      "prioritySupport": "優先サポート",
       "everythingInProfessional": "Professionalのすべて",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "チーム席数無制限（メンバーごとの追加料金なし）",
       "extendedChatMemoryRetention100Vs20RecentFact": "チャットメモリの保持拡張（直近100件、通常は20件）",
       "customAiPersonaNameInIonexaChat": "Ionexa ChatでのAIペルソナ名のカスタマイズ",
-      "highestPriorityProcessing": "最優先の処理",
       "everythingInUltimate": "Ultimateのすべて",
       "unlimitedMembers": "メンバー無制限",
-      "dedicatedSupport": "専任サポート",
       "customCredits": "カスタムクレジット",
       "upTo2AiAgents": "AIエージェント最大2体",
       "upTo5AiAgents": "AIエージェント最大5体",
@@ -272,7 +261,8 @@
     "seatNote": {
       "included": "無制限のチームシートを含む — メンバーごとの追加料金なし",
       "perMember": "+ チームメンバー1人あたり月額{currency}{price} — 各メンバーはご利用プランの階層で全機能を利用できます"
-    }
+    },
+    "metaDescription": "Ionexa AI の料金 — Free、Starter、Growth、Professional、Ultimate、Enterprise の各プラン。"
   },
   "roadmap": {
     "title": "ロードマップ",
@@ -372,7 +362,8 @@
         "title": "クロスプラットフォーム同期",
         "description": "ウェブ・モバイル・デスクトップで統一された体験。"
       }
-    }
+    },
+    "metaDescription": "Ionexa AI で今使える機能、次に来るもの、そしてこれから向かう先。"
   },
   "auth": {
     "login": {
@@ -384,7 +375,8 @@
       "noAccount": "アカウントをお持ちでないですか？",
       "signUp": "新規登録",
       "forgotPassword": "パスワードをお忘れですか？",
-      "resetSuccess": "パスワードを更新しました — 新しいパスワードでログインしてください。"
+      "resetSuccess": "パスワードを更新しました — 新しいパスワードでログインしてください。",
+      "failed": "サインインできませんでした。メールアドレスとパスワードをご確認いただくか、不明な場合はパスワードを再設定してください。"
     },
     "signup": {
       "chooseYourPlan": "プランを選択",
@@ -411,7 +403,8 @@
       "createAccount": "アカウントを作成",
       "mostPopular": "一番人気",
       "mustAgreeToTerms": "アカウントを作成するには、利用規約とプライバシーポリシーに同意する必要があります。",
-      "passwordRequirementsNotMet": "上記のすべての条件を満たすパスワードを選んでください。"
+      "passwordRequirementsNotMet": "上記のすべての条件を満たすパスワードを選んでください。",
+      "failed": "アカウントを作成できませんでした。入力内容をご確認のうえお試しください — 請求は発生していません。"
     },
     "forgotPassword": {
       "title": "パスワードをリセット",
@@ -422,7 +415,8 @@
       "checkInbox": "<highlight>{emailAddress}</highlight> のアカウントが存在する場合、リセットリンクを送信しています。受信トレイをご確認ください。",
       "backToLogin": "ログインに戻る",
       "rememberedIt": "思い出しましたか？",
-      "logIn": "ログイン"
+      "logIn": "ログイン",
+      "failed": "再設定メールを送信できませんでした。アドレスをご確認のうえ、少し待ってからお試しください。"
     },
     "resetPassword": {
       "title": "新しいパスワードを設定",
@@ -432,7 +426,9 @@
       "confirmPassword": "パスワードの確認",
       "saveNewPassword": "新しいパスワードを保存",
       "saving": "保存中...",
-      "passwordsDoNotMatch": "パスワードが一致しません。"
+      "passwordsDoNotMatch": "パスワードが一致しません。",
+      "linkInvalid": "この再設定リンクは無効です。リンクは短時間で期限切れになります — 新しいリンクをリクエストしてください。",
+      "failed": "新しいパスワードを設定できませんでした。もう一度お試しいただき、続く場合は新しいリンクをリクエストしてください。"
     },
     "social": {
       "continueWithGoogle": "Googleで続行",
@@ -445,7 +441,8 @@
       "warning": "アカウントと記録したすべてのデータが完全に削除されます。この操作は取り消せません。",
       "deleting": "削除しています…",
       "confirmButton": "アカウントを完全に削除する",
-      "cancel": "キャンセルして戻る"
+      "cancel": "キャンセルして戻る",
+      "confirmFailed": "削除を完了できませんでした。アカウントは残っています — リンクをもう一度お試しいただくか、サポートにご連絡ください。"
     }
   },
   "settings": {
@@ -460,7 +457,8 @@
       "requirementsNotMet": "以下のすべての条件を満たすパスワードを選んでください。",
       "passwordsDoNotMatch": "パスワードが一致しません。",
       "couldNotUpdate": "✗ パスワードを更新できませんでした",
-      "passwordUpdated": "✓ パスワードを更新しました"
+      "passwordUpdated": "✓ パスワードを更新しました",
+      "failed": "パスワードを変更できませんでした。現在のパスワードをご確認のうえお試しください。"
     },
     "chatMemory": {
       "title": "チャットメモリー",
@@ -541,7 +539,8 @@
       "sending": "送信中...",
       "checkEmail": "削除を確認するにはメールをご確認ください — <highlight>{email}</highlight> にリンクを送信しました。1時間で期限切れになります。クリックするまで何も削除されません。",
       "emailDoesNotMatch": "メールアドレスが一致しません。",
-      "couldNotStartDeletion": "✗ アカウント削除を開始できませんでした"
+      "couldNotStartDeletion": "✗ アカウント削除を開始できませんでした",
+      "failed": "確認メールを送信できませんでした。少し待ってからお試しください — 何も削除されていません。"
     },
     "emailNotifications": {
       "title": "メール通知",
@@ -581,7 +580,8 @@
       "title": "AI ペルソナ",
       "description": "アシスタントに好きな名前を付けましょう。",
       "personaUpdated": "✓ アシスタント名を更新しました",
-      "couldNotSave": "✗ 名前を保存できませんでした"
+      "couldNotSave": "✗ 名前を保存できませんでした",
+      "saveFailed": "名前を保存できませんでした。少し待ってからお試しください。"
     },
     "billing": {
       "title": "請求",
@@ -749,7 +749,12 @@
         }
       },
       "quickStartTemplates": "クイックスタートのテンプレート",
-      "quickStartApplied": "✓ サンプルを {count} 件追加しました"
+      "quickStartApplied": "✓ サンプルを {count} 件追加しました",
+      "quickStart": "クイックスタート",
+      "templateApplied": "{count} 件のサンプルを追加しました",
+      "templateFailed": "このテンプレートを適用できませんでした。少し待ってからお試しください — 何も追加されていません。",
+      "quickStartBlurb": "サンプルをいくつか追加して、中身の入ったワークスペースがどう見えるか確かめてみてください。",
+      "quickStartAdd": "追加"
     },
     "team": {
       "title": "チーム",
@@ -815,7 +820,8 @@
         "title": "覚えていてくれる白紙",
         "why": "長い文章を、仕事と同じ場所に。企画書、下書き、議事録——ほかの記録と並べて検索できます。",
         "example": "月曜の打ち合わせメモ"
-      }
+      },
+      "createFailed": "ドキュメントを作成できませんでした。少し待ってからお試しください — 何も保存されていません。"
     },
     "chat": {
       "title": "Ionexa チャット",
@@ -1706,6 +1712,32 @@
       "oldest": "古い順",
       "az": "昇順",
       "za": "降順"
+    },
+    "emptyWhat": "{module} について記録したものはすべてここにあります。",
+    "emptyWhy": "ここに記録したものはタイムラインに加わり、仕事について AI に質問したときに AI が使える情報になります。",
+    "emptyExample": "この例から始める：「{example}」",
+    "examples": {
+      "competitors": "Notion — 価格面で最も近い競合",
+      "research": "6月に試用から有料への転換率が下がった理由",
+      "finance": "9月のホスティング請求 — 240ユーロ",
+      "learning": "SQL のウィンドウ関数 — 第4章を完了",
+      "trading": "EURUSD ロング、+1.8R で決済",
+      "decisions": "MongoDB ではなく Postgres を選んだ理由",
+      "products": "Pro プラン — 年払いオプション",
+      "content": "9月リリースの告知メール",
+      "sales": "Acme 社 — 火曜にデモを設定",
+      "feedback": "顧客の声：5,000行を超えるとエクスポートが遅い",
+      "analytics": "今週の登録数：142（+18%）",
+      "automation": "毎週月曜の朝にまとめを送って",
+      "websites": "新しい料金ページのランディングページ",
+      "apps": "社内の請求書管理ツール",
+      "images": "料金ページのメイン画像",
+      "videos": "60秒のプロダクト紹介",
+      "coding": "Stripe の入金を照合するスクリプト",
+      "data-analysis": "解約率がいちばん低いプランは？",
+      "campaigns": "9月のローンチ — メール＋LinkedIn",
+      "presentations": "第3四半期の取締役会報告 — 要点",
+      "ideas": "表計算から乗り換えた人向けのニュースレター"
     }
   },
   "askAi": {
@@ -2117,7 +2149,23 @@
       "answering": "回答をまとめています…",
       "combining": "各パートの結果をまとめています…",
       "checking": "ファイルと照らし合わせています…"
-    }
+    },
+    "counter": "（{step}/{total}）",
+    "understanding": "ご依頼の内容を理解しています",
+    "searching": "情報を探しています",
+    "reading": "ファイルを読んでいます",
+    "planning": "手順を組み立てています",
+    "drafting": "下書きを書いています",
+    "creating": "作成しています",
+    "generating": "生成しています",
+    "working": "処理しています",
+    "answering": "答えをまとめています",
+    "rewriting": "文章を書き直しています",
+    "summarising": "要約しています",
+    "checking": "結果を確認しています",
+    "saving": "保存しています",
+    "delivering": "お届けしています",
+    "publishing": "サイトを公開しています"
   },
   "problem": {
     "out_of_credits": {
@@ -2226,6 +2274,94 @@
       "integrations": "連携",
       "account": "アカウント",
       "privacy": "プライバシーとデータ"
+    }
+  },
+  "pageTitle": {
+    "document": "ドキュメント",
+    "systemHealth": "システム状態",
+    "onboarding": "はじめる",
+    "notFound": "ページが見つかりません",
+    "notFoundBody": "このページは存在しません。アドレスの入力ミスか、ページが移動された可能性があります。",
+    "notFoundAction": "ホームに戻る",
+    "forgotPassword": "パスワードをお忘れの方",
+    "resetPassword": "新しいパスワードを設定",
+    "confirmDeletion": "アカウント削除の確認",
+    "logInDescription": "Ionexa AI にログインします。",
+    "signUpDescription": "プランを選んで Ionexa AI のアカウントを作成します。",
+    "forgotPasswordDescription": "Ionexa AI アカウントのパスワードを再設定します。",
+    "resetPasswordDescription": "Ionexa AI アカウントに新しいパスワードを設定します。",
+    "confirmDeletionDescription": "Ionexa AI アカウントの完全な削除を確認します。",
+    "termsDescription": "Ionexa AI の利用規約。",
+    "privacyDescription": "Ionexa AI のプライバシーポリシー。",
+    "cookiesDescription": "Ionexa AI が使用する Cookie の種類、それぞれの目的、保存期間について。",
+    "helpDescription": "Ionexa AI について最もよく寄せられる質問への回答 — 料金、credits、ウェブサイト、agents、プライバシー。"
+  },
+  "errors": {
+    "retry": "もう一度試す",
+    "creditHistory": "credits の履歴を見る",
+    "credits": {
+      "refunded": "credits は返却されました。",
+      "notCharged": "請求は発生していません。",
+      "charged": "この試行で credits を消費しました。",
+      "unverified": "ここからは請求されたかどうかを確認できません。"
+    },
+    "codes": {
+      "notAuthenticated": {
+        "what": "サインアウトされています。",
+        "next": "もう一度サインインして操作をやり直してください。入力した内容は失われていません。"
+      },
+      "forbidden": {
+        "what": "現在のプランには含まれていません。",
+        "next": "「設定 › お支払い」でどのプランに含まれるか確認してください。"
+      },
+      "notFound": {
+        "what": "これはもう存在しません。",
+        "next": "削除された可能性があります。一覧に戻って別のものを選んでください。"
+      },
+      "invalidInput": {
+        "what": "フォームの内容が受け付けられませんでした。",
+        "next": "指摘された項目を確認して、もう一度送信してください。"
+      },
+      "rateLimited": {
+        "what": "短時間にリクエストが多すぎます。",
+        "next": "1分ほど待ってから、もう一度お試しください。"
+      },
+      "insufficientCredits": {
+        "what": "この操作に必要な credits が足りません。",
+        "next": "「設定」から credits を購入するか、毎月のリセットをお待ちください。"
+      },
+      "planLimit": {
+        "what": "プランの上限に達しました。",
+        "next": "不要なものを削除するか、「設定 › お支払い」でアップグレードしてください。"
+      },
+      "fileTooLarge": {
+        "what": "このファイルは大きすぎます。",
+        "next": "分割するか、より小さいものをアップロードしてください。"
+      },
+      "unsupportedType": {
+        "what": "このファイル形式には対応していません。",
+        "next": "PDF、DOCX、CSV、TXT のいずれかに変換して、もう一度アップロードしてください。"
+      },
+      "conflict": {
+        "what": "作業中に、他の人または別のタブがこれを変更しました。",
+        "next": "ページを再読み込みして最新の状態を確認し、変更をやり直してください。"
+      },
+      "upstreamUnavailable": {
+        "what": "AI サービスが現在応答していません。",
+        "next": "こちら側の問題で、通常は数分で復旧します。"
+      },
+      "serverError": {
+        "what": "こちら側で問題が発生しました。",
+        "next": "記録されました。少し待ってからもう一度お試しいただき、続く場合はサポートにご連絡ください。"
+      },
+      "offline": {
+        "what": "お使いの端末から接続できませんでした。",
+        "next": "接続を確認して、もう一度お試しください。"
+      },
+      "unknown": {
+        "what": "この操作は完了しませんでした。",
+        "next": "もう一度お試しいただき、再発する場合はサポートにご連絡ください。"
+      }
     }
   }
 }

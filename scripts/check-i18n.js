@@ -203,6 +203,10 @@ const LOCALE_ALLOWED = new Set([
   "fr:dashboard.documents.backToDocuments",
   "fr:dashboard.documents.deleteLabel",
   "fr:dashboard.documents.title",
+  // The singular, for the per-document page's browser tab. "Document" is
+  // the French word, spelled identically — the same cognate already
+  // allowed for the plural three lines above.
+  "fr:pageTitle.document",
   "fr:dashboard.overview.quickActions.trading.label",
   // "Actions" is the correct French word, spelled identically — a cognate,
   // not a translation that was skipped.
@@ -281,6 +285,12 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // same six characters in every language, and translating it would mean
   // showing a different colour per locale for no reason.
   "dashboard.websiteBuilder.design.hexPlaceholder",
+  // "(1/3)" next to an AI action's current step. Two numbers, a slash and
+  // a pair of brackets — there is no word in it to translate. The two
+  // locales that DO differ (zh, ja, which use full-width brackets) are
+  // translated and are not on this list, which is the whole reason this
+  // is an allowance per key rather than a rule about digits.
+  "aiSteps.counter",
   "landing.footer.roadmap",
   "roadmap.title",
   "roadmap.items.agentBuilder.title",

@@ -62,7 +62,10 @@
       "retry": "Try again",
       "checking": "Checking…",
       "stillOffline": "Still no connection."
-    }
+    },
+    "creditsUnlimited": "Unlimited",
+    "whatIsThis": "What is this?",
+    "moreInHelp": "Read more in the Help Centre"
   },
   "sidebar": {
     "groups": {
@@ -209,8 +212,6 @@
       "creditsPerMonth": "Credits / month",
       "aiAgents": "AI agents",
       "websiteBuilder": "Website & Automation Builder",
-      "mobileSaasBuilder": "Mobile & SaaS Builder",
-      "imageVideo": "Image & video generation",
       "aiMemory": "AI Memory",
       "teamCollaboration": "Team collaboration",
       "teamSeatsAddOn": "Team seats",
@@ -231,32 +232,20 @@
     "businessFeatureManage": "Manage seats anytime from Team settings",
     "setUpTeam": "Set Up Team",
     "features": {
-      "1Workspace3Projects": "1 workspace, 3 projects",
       "basicAiChat": "Basic AI chat",
       "creditsPerMonth": "{count} credits/month",
-      "marketplaceInstallOnly": "Marketplace: install only",
-      "communitySupport": "Community support",
-      "unlimitedProjects": "Unlimited projects",
       "aiMemory": "AI Memory",
       "websiteAutomationBuilderAccess": "Website & Automation Builder access",
-      "imageVideoGenerationAccess": "Image & video generation access",
-      "emailSupport": "Email support",
       "everythingInStarter": "Everything in Starter",
       "upTo100AiAgents": "Up to 100 AI agents",
-      "mobileSaasBuilderAccess": "Mobile & SaaS Builder access",
-      "priorityProcessing": "Priority processing",
       "everythingInGrowth": "Everything in Growth",
       "teamCollaboration": "Team collaboration",
-      "sharedAiMemory": "Shared AI memory",
-      "prioritySupport": "Priority support",
       "everythingInProfessional": "Everything in Professional",
       "unlimitedTeamSeatsIncludedNoPerMemberCharge": "Unlimited team seats included — no per-member charge",
       "extendedChatMemoryRetention100Vs20RecentFact": "Extended chat memory retention (100 vs 20 recent facts)",
       "customAiPersonaNameInIonexaChat": "Custom AI persona name in Ionexa Chat",
-      "highestPriorityProcessing": "Highest priority processing",
       "everythingInUltimate": "Everything in Ultimate",
       "unlimitedMembers": "Unlimited members",
-      "dedicatedSupport": "Dedicated support",
       "customCredits": "Custom credits",
       "upTo2AiAgents": "Up to 2 AI agents",
       "upTo5AiAgents": "Up to 5 AI agents",
@@ -272,7 +261,8 @@
     "seatNote": {
       "included": "Unlimited team seats included — no per-member charge",
       "perMember": "+ {currency}{price}/month per team member — each member gets full access at your plan's tier"
-    }
+    },
+    "metaDescription": "Ionexa AI pricing — Free, Starter, Growth, Professional, Ultimate, and Enterprise plans."
   },
   "roadmap": {
     "title": "Roadmap",
@@ -372,7 +362,8 @@
         "title": "Cross-Platform Sync",
         "description": "A unified experience across web, mobile, and desktop."
       }
-    }
+    },
+    "metaDescription": "What's live in Ionexa AI today, what's coming next, and where we're headed."
   },
   "auth": {
     "login": {
@@ -384,7 +375,8 @@
       "noAccount": "No account yet?",
       "signUp": "Sign up",
       "forgotPassword": "Forgot password?",
-      "resetSuccess": "Password updated — sign in with your new password."
+      "resetSuccess": "Password updated — sign in with your new password.",
+      "failed": "We couldn't sign you in. Check the email and password, or reset your password if you're not sure."
     },
     "signup": {
       "chooseYourPlan": "Choose your plan",
@@ -411,7 +403,8 @@
       "createAccount": "Create Account",
       "mostPopular": "Most Popular",
       "mustAgreeToTerms": "You must agree to the Terms of Service and Privacy Policy to create an account.",
-      "passwordRequirementsNotMet": "Please choose a password that meets every requirement above."
+      "passwordRequirementsNotMet": "Please choose a password that meets every requirement above.",
+      "failed": "We couldn't create the account. Check the details and try again — you have not been charged."
     },
     "forgotPassword": {
       "title": "Reset password",
@@ -422,7 +415,8 @@
       "checkInbox": "If an account exists for <highlight>{emailAddress}</highlight>, a password reset link is on its way. Check your inbox.",
       "backToLogin": "Back to login",
       "rememberedIt": "Remembered it?",
-      "logIn": "Log in"
+      "logIn": "Log in",
+      "failed": "We couldn't send the reset email. Check the address and try again in a moment."
     },
     "resetPassword": {
       "title": "Set new password",
@@ -432,7 +426,9 @@
       "confirmPassword": "Confirm password",
       "saveNewPassword": "Save new password",
       "saving": "Saving...",
-      "passwordsDoNotMatch": "Passwords don't match."
+      "passwordsDoNotMatch": "Passwords don't match.",
+      "linkInvalid": "This reset link is no longer valid. Links expire after a short time — request a new one.",
+      "failed": "We couldn't set the new password. Try again, and request a new link if it keeps failing."
     },
     "social": {
       "continueWithGoogle": "Continue with Google",
@@ -445,7 +441,8 @@
       "warning": "This will permanently delete your account and every record you've logged. This can't be undone.",
       "deleting": "Deleting…",
       "confirmButton": "Permanently delete my account",
-      "cancel": "Cancel and go back"
+      "cancel": "Cancel and go back",
+      "confirmFailed": "We couldn't complete the deletion. Your account is still here — try the link again, or contact support."
     }
   },
   "settings": {
@@ -460,7 +457,8 @@
       "requirementsNotMet": "Please choose a password that meets every requirement below.",
       "passwordsDoNotMatch": "Passwords do not match.",
       "couldNotUpdate": "✗ could not update password",
-      "passwordUpdated": "✓ password updated"
+      "passwordUpdated": "✓ password updated",
+      "failed": "We couldn't change your password. Check the current one and try again."
     },
     "chatMemory": {
       "title": "Chat Memory",
@@ -541,7 +539,8 @@
       "sending": "Sending...",
       "checkEmail": "Check your email to confirm deletion — we sent a link to <highlight>{email}</highlight>. It expires in 1 hour; nothing is deleted until you click it.",
       "emailDoesNotMatch": "Email doesn't match.",
-      "couldNotStartDeletion": "✗ could not start account deletion"
+      "couldNotStartDeletion": "✗ could not start account deletion",
+      "failed": "We couldn't send the confirmation email. Try again in a moment — nothing has been deleted."
     },
     "emailNotifications": {
       "title": "Email notifications",
@@ -581,7 +580,8 @@
       "title": "AI Persona",
       "description": "Give the assistant a custom name.",
       "personaUpdated": "✓ persona name updated",
-      "couldNotSave": "✗ could not save the persona name"
+      "couldNotSave": "✗ could not save the persona name",
+      "saveFailed": "We couldn't save the persona name. Try again in a moment."
     },
     "billing": {
       "title": "Billing",
@@ -749,7 +749,12 @@
         }
       },
       "quickStartTemplates": "Quick Start templates",
-      "quickStartApplied": "✓ {count, plural, one {# example entry added} other {# example entries added}}"
+      "quickStartApplied": "✓ {count, plural, one {# example entry added} other {# example entries added}}",
+      "quickStart": "Quick Start",
+      "templateApplied": "Added {count} example {count, plural, one {entry} other {entries}}",
+      "templateFailed": "We couldn't apply that template. Try again in a moment — nothing was added.",
+      "quickStartBlurb": "Add a few example entries so you can see what a filled-in workspace looks like.",
+      "quickStartAdd": "Add"
     },
     "team": {
       "title": "Team",
@@ -815,7 +820,8 @@
         "title": "A blank page that remembers",
         "why": "Long-form writing that stays with your work — a brief, a draft, meeting notes — searchable next to everything else you have logged.",
         "example": "Notes from Monday's meeting"
-      }
+      },
+      "createFailed": "We couldn't create the document. Try again in a moment — nothing was saved."
     },
     "chat": {
       "title": "Ionexa Chat",
@@ -1706,6 +1712,32 @@
       "oldest": "Oldest",
       "az": "A–Z",
       "za": "Z–A"
+    },
+    "emptyWhat": "Everything you record about {module} lives here.",
+    "emptyWhy": "Anything you log here joins your Timeline and becomes something the AI can use when you ask it a question about your work.",
+    "emptyExample": "Start with: “{example}”",
+    "examples": {
+      "competitors": "Notion — closest competitor on pricing",
+      "research": "Why our trial-to-paid rate dropped in June",
+      "finance": "September hosting invoice — €240",
+      "learning": "SQL window functions — finished chapter 4",
+      "trading": "EURUSD long, closed +1.8R",
+      "decisions": "Chose Postgres over MongoDB, and why",
+      "products": "Pro plan — annual billing option",
+      "content": "Launch email for the September release",
+      "sales": "Acme Ltd — demo booked for Tuesday",
+      "feedback": "Customer: export is too slow over 5k rows",
+      "analytics": "Signups this week: 142 (+18%)",
+      "automation": "Email me a summary every Monday morning",
+      "websites": "Landing page for the new pricing",
+      "apps": "Internal invoice tracker",
+      "images": "Hero image for the pricing page",
+      "videos": "60-second product walkthrough",
+      "coding": "Script to reconcile Stripe payouts",
+      "data-analysis": "Which plan has the lowest churn?",
+      "campaigns": "September launch — email + LinkedIn",
+      "presentations": "Q3 board update — talking points",
+      "ideas": "A newsletter for people who switched from spreadsheets"
     }
   },
   "askAi": {
@@ -2117,7 +2149,23 @@
       "answering": "Putting the answer together…",
       "combining": "Combining what each part said…",
       "checking": "Checking it against the files…"
-    }
+    },
+    "counter": "({step}/{total})",
+    "understanding": "Understanding what you asked",
+    "searching": "Looking for the information",
+    "reading": "Reading your files",
+    "planning": "Planning the steps",
+    "drafting": "Writing a first draft",
+    "creating": "Creating it",
+    "generating": "Generating",
+    "working": "Working on it",
+    "answering": "Working out the answer",
+    "rewriting": "Rewriting the text",
+    "summarising": "Summarising",
+    "checking": "Checking the result",
+    "saving": "Saving",
+    "delivering": "Sending it to you",
+    "publishing": "Putting the site live"
   },
   "problem": {
     "out_of_credits": {
@@ -2226,6 +2274,94 @@
       "integrations": "Integrations",
       "account": "Account",
       "privacy": "Privacy and data"
+    }
+  },
+  "pageTitle": {
+    "document": "Document",
+    "systemHealth": "System Health",
+    "onboarding": "Get started",
+    "notFound": "Not Found",
+    "notFoundBody": "This page doesn't exist — the address may have been mistyped, or the page may have moved.",
+    "notFoundAction": "Back to Home",
+    "forgotPassword": "Forgot Password",
+    "resetPassword": "Set New Password",
+    "confirmDeletion": "Confirm Account Deletion",
+    "logInDescription": "Log in to Ionexa AI.",
+    "signUpDescription": "Choose a plan and create your Ionexa AI account.",
+    "forgotPasswordDescription": "Reset your Ionexa AI account password.",
+    "resetPasswordDescription": "Set a new password for your Ionexa AI account.",
+    "confirmDeletionDescription": "Confirm permanent deletion of your Ionexa AI account.",
+    "termsDescription": "Terms of Service for Ionexa AI.",
+    "privacyDescription": "Privacy Policy for Ionexa AI.",
+    "cookiesDescription": "Which cookies Ionexa AI sets, what each one does, and how long it lasts.",
+    "helpDescription": "Answers to the questions people ask most about Ionexa AI — pricing, credits, websites, agents, privacy."
+  },
+  "errors": {
+    "retry": "Try again",
+    "creditHistory": "See credit history",
+    "credits": {
+      "refunded": "Your credits were returned.",
+      "notCharged": "You were not charged.",
+      "charged": "This attempt used credits.",
+      "unverified": "We can't confirm from here whether this was charged."
+    },
+    "codes": {
+      "notAuthenticated": {
+        "what": "You're signed out.",
+        "next": "Sign in again and repeat the action — nothing you had entered is lost."
+      },
+      "forbidden": {
+        "what": "Your plan doesn't include this.",
+        "next": "Open Settings › Billing to see which plan covers it."
+      },
+      "notFound": {
+        "what": "This no longer exists.",
+        "next": "It was probably deleted. Go back to the list and pick another one."
+      },
+      "invalidInput": {
+        "what": "Something in the form wasn't accepted.",
+        "next": "Check the highlighted fields and send it again."
+      },
+      "rateLimited": {
+        "what": "Too many requests in a short time.",
+        "next": "Wait about a minute, then try once more."
+      },
+      "insufficientCredits": {
+        "what": "You don't have enough credits for this.",
+        "next": "Buy credits in Settings, or wait for your monthly reset."
+      },
+      "planLimit": {
+        "what": "You've reached the limit of your plan.",
+        "next": "Delete something you no longer need, or upgrade in Settings › Billing."
+      },
+      "fileTooLarge": {
+        "what": "That file is too big.",
+        "next": "Split it, or upload a smaller version."
+      },
+      "unsupportedType": {
+        "what": "That file type isn't supported.",
+        "next": "Convert it to PDF, DOCX, CSV or TXT and upload it again."
+      },
+      "conflict": {
+        "what": "Someone — or another tab — changed this while you were working on it.",
+        "next": "Reload the page to see the current version, then redo your change."
+      },
+      "upstreamUnavailable": {
+        "what": "The AI service isn't responding right now.",
+        "next": "This is on our side and usually clears within a few minutes."
+      },
+      "serverError": {
+        "what": "This broke on our side.",
+        "next": "It's been logged. Try again in a moment, and contact support if it keeps happening."
+      },
+      "offline": {
+        "what": "Your device couldn't reach us.",
+        "next": "Check your connection and try again."
+      },
+      "unknown": {
+        "what": "This action didn't complete.",
+        "next": "Try again, and contact support if it happens twice."
+      }
     }
   }
 }

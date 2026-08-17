@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitleAndDescription } from "@/lib/page-title";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import type { LucideIcon } from "lucide-react";
@@ -29,10 +30,9 @@ import {
 import { Logo } from "@/components/logo";
 import { AppBackground } from "@/components/ui/app-background";
 
-export const metadata: Metadata = {
-  title: "Roadmap",
-  description: "What's live in Ionexa AI today, what's coming next, and where we're headed.",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitleAndDescription("roadmap.title", "roadmap.metaDescription");
+}
 
 type RoadmapStatus = "available" | "soon" | "future";
 
@@ -75,17 +75,25 @@ const SECTIONS: RoadmapSection[] = [
       { icon: MessageCircle, key: "chat" },
       { icon: Download, key: "export" },
       { icon: Users, key: "team" },
-    ],
-  },
-  {
-    status: "soon",
-    emoji: "🔜",
-    items: [
+      // MOVED UP FROM "soon", because they shipped and this page kept
+      // saying they had not. The contradiction ran in both directions at
+      // once: /pricing sold "Website & Automation Builder access" as an
+      // included Starter feature while this page, one click away, told the
+      // same visitor it was still coming. Understating a live feature is a
+      // smaller sin than the seven overstatements deleted today, but it is
+      // the same defect — a marketing surface that does not match the
+      // build — and the Website Builder is the one feature the EUR 50 tier
+      // is genuinely worth.
       { icon: Bot, key: "agentBuilder" },
       { icon: Globe, key: "websiteBuilder" },
       { icon: Workflow, key: "automationBuilder" },
       { icon: Brain, key: "aiMemory" },
     ],
+  },
+  {
+    status: "soon",
+    emoji: "🔜",
+    items: [],
   },
   {
     status: "future",
@@ -130,7 +138,12 @@ export default async function RoadmapPage() {
         </div>
 
         <div className="mt-14 space-y-14">
-          {SECTIONS.map((section) => {
+          {SECTIONS.filter((section) => section.items.length > 0).map((section) => {
+            // "Coming next" is empty today, because everything that was in
+            // it shipped. An empty section renders as a heading promising
+            // a list and then no list, which reads worse than not showing
+            // it — and the status stays in the type, ready for whatever is
+            // genuinely next.
             const styles = STATUS_STYLES[section.status];
             const sectionLabel = t(`sections.${section.status}`);
             return (

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { diagLog } from "@/lib/diag";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
@@ -13,7 +14,9 @@ import { MISSION_ICON } from "@/lib/module-icons";
 import type { Mission } from "@/types/mission";
 import type { ScheduledAgentRun } from "@/types/scheduled-agent-run";
 
-export const metadata: Metadata = { title: "Mission Control" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.missionControl");
+}
 
 // Explicit, not just implicit-via-cookies(): Next.js App Router's fetch
 // Data Cache can, in some versions/edge cases, still cache a GET request
@@ -139,7 +142,7 @@ export default async function MissionPage() {
 
         <ScheduledRunsList runs={pendingRuns} />
 
-        {error && <ErrorMessage message={`loading missions: ${error.message}`} />}
+        {error && <ErrorMessage detail={`loading missions: ${error.message}`} />}
 
         {/* A degraded session must never render as "you have no missions".
             Showing a reload prompt instead is the difference between the

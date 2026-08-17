@@ -104,7 +104,7 @@ export function CardMenu({
         // 36px, matching FavoriteButton's inline variant exactly — the two
         // sit side by side in every card corner, and 32px was a thin tap
         // target at 375px.
-        className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-muted shadow-[0_0_0_1px_rgba(255,255,255,0.09)] transition-all duration-200 hover:bg-panel-hover hover:text-foreground"
+        className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/[0.04] text-muted shadow-[0_0_0_1px_rgba(255,255,255,0.09)] transition-all duration-200 hover:bg-panel-hover hover:text-foreground"
       >
         <MoreHorizontal className="h-[18px] w-[18px]" aria-hidden="true" />
       </button>

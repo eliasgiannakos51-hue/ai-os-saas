@@ -48,7 +48,7 @@ export function ThemeSettings() {
               type="button"
               onClick={() => selectTheme(option)}
               aria-pressed={selected}
-              className={`flex min-h-[44px] items-center gap-2 rounded-xl border px-3 py-2.5 text-left transition-all duration-150 active:scale-[0.98] sm:min-h-0 ${
+              className={`flex min-h-[44px] items-center gap-2 rounded-xl border px-3 py-2.5 text-left transition-all duration-150 active:scale-[0.98] ${
                 selected
                   ? "border-orange-500 bg-orange-500/[0.06]"
                   : "border-border hover:border-orange-500/40"

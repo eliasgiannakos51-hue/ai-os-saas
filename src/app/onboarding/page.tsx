@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { pageTitle } from "@/lib/page-title";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Rocket } from "lucide-react";
@@ -9,7 +10,9 @@ import { OnboardingFlow } from "@/components/onboarding/onboarding-flow";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "Get started" };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("pageTitle.onboarding");
+}
 
 /**
  * The first two minutes.

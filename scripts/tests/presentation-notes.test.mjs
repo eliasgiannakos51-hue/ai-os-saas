@@ -97,7 +97,11 @@ check("the table is unchanged, so no data moves", module.table === "ai_presentat
 // The page header and the browser tab both resolve the config's key, so
 // that is what actually decides what the user sees.
 const page = readFileSync("src/app/dashboard/presentations/page.tsx", "utf8");
-check("the page takes its title from the config", /t\(CONFIG\.titleKey\)/.test(page));
+// Through the shared `pageTitle` helper — one place that reads the locale
+// cookie per request — but with the key coming from the module CONFIG
+// rather than written out as a literal, so a renamed module cannot leave
+// the browser tab behind.
+check("the page takes its title from the config", /pageTitle\(CONFIG\.titleKey\)/.test(page));
 check("and the header does too", /t\(config\.titleKey\)/.test(readFileSync("src/components/modules/build-module-page.tsx", "utf8")));
 
 console.log("\n== 2. the sidebar label and its lookup key agree ==");

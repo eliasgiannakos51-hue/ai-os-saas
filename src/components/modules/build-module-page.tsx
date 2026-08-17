@@ -80,7 +80,7 @@ export async function BuildModulePage({
         <PageHeader icon={icon} title={t(config.titleKey)} />
 
 
-        {error && <ErrorMessage message={`loading ${config.table}: ${error.message}`} />}
+        {error && <ErrorMessage detail={`loading ${config.table}: ${error.message}`} />}
 
         <GenericList
           module={config}

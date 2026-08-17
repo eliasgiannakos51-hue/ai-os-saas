@@ -38,7 +38,10 @@ export function PageHeader({
           <Icon className="h-5 w-5" aria-hidden="true" />
         </span>
       )}
-      <div className="min-w-0">
+      {/* `flex-1` so the title block claims the row's spare width; without
+          it a long title truncates against its own content box while the
+          header still has room to its right. */}
+      <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <h1 className="truncate text-2xl font-bold text-foreground">{title}</h1>
           {helpKey && <HelpTip helpKey={helpKey} articleSlug={helpArticle} />}

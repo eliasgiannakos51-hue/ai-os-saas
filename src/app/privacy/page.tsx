@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
+import { pageTitleAndDescription } from "@/lib/page-title";
 import { LegalLayout } from "@/components/legal/legal-layout";
 import { LegalSection } from "@/components/legal/legal-section";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: "Privacy Policy for Ionexa AI.",
-};
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitleAndDescription("landing.footer.privacy", "pageTitle.privacyDescription");
+}
 
 export default function PrivacyPage() {
   return (

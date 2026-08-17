@@ -281,7 +281,7 @@ export function CommandPalette() {
                   type="button"
                   onClick={() => goTo(entry.href)}
                   onMouseEnter={() => setActiveIndex(index)}
-                  className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors duration-150 ${
+                  className={`flex min-h-[44px] w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors duration-150 ${
                     active
                       ? "bg-orange-500/10 text-orange-400"
                       : "text-foreground hover:bg-panel-hover"

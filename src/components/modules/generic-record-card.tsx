@@ -1,12 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Pencil } from "lucide-react";
 import { iconForSlug } from "@/lib/module-icons";
 import { EntityCard } from "@/components/ui/entity-card";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { AskAiButton } from "@/components/records/ask-ai-button";
+import { AskAiModal } from "@/components/records/ask-ai-modal";
 import { LinkToButton } from "@/components/entity-links/link-to-button";
+import { LinkToModal } from "@/components/entity-links/link-to-modal";
 import { DeleteButton } from "@/components/delete-button";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
@@ -53,8 +56,14 @@ export function GenericRecordCard({
   const statusField = statusFieldFor(module, record);
   const statusValue = statusField ? String(record[statusField.key]) : null;
   const statusTone = statusValue ? statusToneForValue(statusValue) : null;
+  // Owned HERE, not by the menu items that open them — see the `onOpen`
+  // note on AskAiButton. A modal rendered inside CardMenu's dropdown is
+  // unmounted by the same click that opens it.
+  const [askOpen, setAskOpen] = useState(false);
+  const [linkOpen, setLinkOpen] = useState(false);
 
   return (
+    <>
     <EntityCard
       index={index}
       selected={selected}
@@ -88,9 +97,13 @@ export function GenericRecordCard({
       menu={[{ key: "edit", label: t("edit"), icon: Pencil, onSelect: () => onOpen("edit") }]}
       menuExtra={(close) => (
         <>
+          {/* Triggers only — the two modals are rendered by THIS card,
+              below and outside the menu, because the menu unmounts the
+              moment `close()` runs and would take them with it. */}
           <AskAiButton
             variant="menuItem"
             onActivate={close}
+            onOpen={() => setAskOpen(true)}
             moduleSlug={module.slug}
             moduleTitle={tKey(module.titleKey)}
             recordId={record.id}
@@ -99,6 +112,7 @@ export function GenericRecordCard({
           <LinkToButton
             variant="menuItem"
             onActivate={close}
+            onOpen={() => setLinkOpen(true)}
             sourceTable={module.table}
             sourceId={record.id}
             sourceHeadline={headline}
@@ -116,5 +130,21 @@ export function GenericRecordCard({
         </>
       )}
     />
+    <AskAiModal
+      open={askOpen}
+      onClose={() => setAskOpen(false)}
+      moduleSlug={module.slug}
+      moduleTitle={tKey(module.titleKey)}
+      recordId={record.id}
+      recordHeadline={headline}
+    />
+    <LinkToModal
+      open={linkOpen}
+      onClose={() => setLinkOpen(false)}
+      sourceTable={module.table}
+      sourceId={record.id}
+      sourceHeadline={headline}
+    />
+    </>
   );
 }

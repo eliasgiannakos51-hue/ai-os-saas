@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { pageTitle } from "@/lib/page-title";
 import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
@@ -13,9 +14,8 @@ import { loadFavoriteIds } from "@/lib/favorites";
 // The module name has exactly one source — the same key the sidebar
 // renders — so the tab title, the H1 and the "Ask AI about ..." heading
 // can never drift apart into three spellings of the same thing.
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("sidebar");
-  return { title: t("items.ideas") };
+export function generateMetadata(): Promise<Metadata> {
+  return pageTitle("sidebar.items.ideas");
 }
 
 export default async function DashboardPage() {

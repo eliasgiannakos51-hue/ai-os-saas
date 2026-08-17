@@ -422,7 +422,7 @@ export function AgentsWorkspace({
             type="button"
             onClick={() => (creating ? resetCreate() : setCreating(true))}
             disabled={atCapacity && !creating}
-            className="inline-flex min-h-[40px] items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Plus className="h-4 w-4" aria-hidden="true" />
             {creating ? t("cancel") : t("newAgent")}
@@ -530,7 +530,7 @@ export function AgentsWorkspace({
                     type="button"
                     onClick={createAgent}
                     disabled={savingAgent}
-                    className="inline-flex min-h-[36px] items-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex min-h-[44px] items-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {savingAgent ? t("creating") : t("createButton")}
                   </button>
@@ -538,7 +538,7 @@ export function AgentsWorkspace({
                     type="button"
                     onClick={() => setPreview(null)}
                     disabled={savingAgent}
-                    className="inline-flex min-h-[36px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
+                    className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
                   >
                     {t("discard")}
                   </button>
@@ -551,7 +551,7 @@ export function AgentsWorkspace({
                 type="button"
                 onClick={() => build(requestText, false)}
                 disabled={building || requestText.trim().length === 0}
-                className="inline-flex min-h-[38px] items-center rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex min-h-[44px] items-center rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {building ? t("designing") : t("designButton")}
               </button>
@@ -768,7 +768,7 @@ export function AgentsWorkspace({
                   type="button"
                   onClick={() => void saveEdit(selected)}
                   disabled={busyId === selected.id}
-                  className="inline-flex min-h-[36px] items-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-50"
+                  className="inline-flex min-h-[44px] items-center rounded-lg bg-orange-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:opacity-50"
                 >
                   {busyId === selected.id ? t("saving") : t("saveButton")}
                 </button>
@@ -778,7 +778,7 @@ export function AgentsWorkspace({
                     setEditing(false);
                     setEditDraft(null);
                   }}
-                  className="inline-flex min-h-[36px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
+                  className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground"
                 >
                   {t("cancel")}
                 </button>

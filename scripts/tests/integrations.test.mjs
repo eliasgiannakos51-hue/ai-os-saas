@@ -22,6 +22,7 @@
 // Run: node scripts/tests/integrations.test.mjs
 import { readFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
+import { schemaSql, enablesRls } from "./lib/schema-sql.mjs";
 
 let pass = 0,
   fail = 0;
@@ -570,12 +571,19 @@ console.log("\n== 8. the wiring ==");
 console.log("\n== 9. the schema ==");
 // ---------------------------------------------------------------------
 {
-  const sql = read("v3_integrations_migration.sql");
+  // Was the loose `v3_integrations_migration.sql` at the repo root, which
+  // nothing ran. supabase/migrations is what builds the database.
+  const sql = schemaSql();
   checkTrue("the token columns are named as ciphertext", /access_token_encrypted text not null/.test(sql));
   checkTrue("...and the refresh one is nullable", /refresh_token_encrypted text,/.test(sql));
   checkTrue("no plaintext token column exists", !/\baccess_token text\b/.test(sql));
   checkTrue("one connection per provider per user", /unique index[^;]*user_integrations[^;]*\(user_id, provider\)/is.test(sql));
-  checkTrue("both tables enable RLS", (sql.match(/enable row level security/g) ?? []).length === 2);
+  // Was a COUNT of every `enable row level security` in a file that held
+  // only these two tables. Against the whole schema that number is 70,
+  // which is not a claim about user_integrations and integration_sync_log.
+  for (const table of ["user_integrations", "integration_sync_log"]) {
+    checkTrue(`${table} enables RLS`, enablesRls(sql, table));
+  }
   checkTrue("the migration is idempotent", !/create table (?!if not exists)/.test(sql));
   checkTrue(
     "the prune RPC is service-role only",
@@ -600,7 +608,7 @@ console.log("\n== 9. the schema ==");
     checkTrue(`the sync log has no ${forbidden} column`, !new RegExp(`\\b${forbidden}\\b`, "i").test(logBlock));
   }
 
-  const backup = read("supabase_full_project_backup.sql");
+  const backup = sql;
   for (const table of ["user_integrations", "integration_sync_log"]) {
     checkTrue(`${table} is in the full schema file`, backup.includes(`create table if not exists public.${table}`));
   }

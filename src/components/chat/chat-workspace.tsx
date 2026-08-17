@@ -14,6 +14,7 @@ import { createClient } from "@/lib/supabase/client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { Tooltip } from "@/components/ui/tooltip";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { InlineTitle } from "@/components/chat/inline-title";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
@@ -35,11 +36,12 @@ function nextLocalId(prefix: string) {
 }
 
 function TypingDots() {
+  // The name is kept so the diff is readable; the dots are not. Three
+  // bouncing dots is what every AI product uses — see
+  // components/ui/thinking-indicator.tsx for what replaced them and why.
   return (
     <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-3.5">
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted [animation-delay:-0.3s]" />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted [animation-delay:-0.15s]" />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted" />
+      <ThinkingIndicator />
     </div>
   );
 }

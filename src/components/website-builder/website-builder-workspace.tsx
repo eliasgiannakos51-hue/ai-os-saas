@@ -23,6 +23,7 @@ import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import { FilePicker } from "@/components/ui/file-picker";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useCredits } from "@/components/credits/credits-context";
 import { useToast } from "@/components/toast/toast-context";
 import { EmptyState } from "@/components/empty-state";
@@ -1097,7 +1098,7 @@ export function WebsiteBuilderWorkspace({
                 </div>
               ) : !viewingVersion && previewIsGenerating ? (
                 <div className="flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-border bg-input px-6 text-center">
-                  <Loader2 className="h-8 w-8 animate-spin text-orange-400" aria-hidden="true" />
+                  <ThinkingIndicator className="scale-150" />
                   <p className="text-sm font-medium text-foreground">{t("generatingTitle")}</p>
                   <p className="max-w-md text-xs text-muted">{t("generatingBody")}</p>
                   <p className="text-xs text-orange-400/80" aria-live="polite">

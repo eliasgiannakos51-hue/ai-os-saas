@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { DetailPanel, type DetailTab } from "@/components/ui/detail-panel";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { OutOfCreditsNotice } from "@/components/credits/out-of-credits-notice";
 import { StudioChat } from "@/components/create/studio-chat";
 import { useCredits } from "@/components/credits/credits-context";
@@ -447,7 +448,7 @@ export function CreateStudio() {
                   ) : step.status === "failed" ? (
                     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-400" aria-hidden="true" />
                   ) : (
-                    <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-orange-400" aria-hidden="true" />
+                    <ThinkingIndicator size="sm" className="mt-1" />
                   )}
                   <div className="min-w-0">
                     <p className="text-sm text-foreground">{t(`progress.${step.labelKey}`)}</p>

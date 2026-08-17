@@ -15,6 +15,7 @@ import {
   ListChecks,
 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { EmptyState } from "@/components/empty-state";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useToast } from "@/components/toast/toast-context";
@@ -300,7 +301,7 @@ export function ResearchWorkspace({
           >
             {planning ? (
               <>
-                <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                <ThinkingIndicator size="sm" tone="inherit" />
                 {t("planning")}
               </>
             ) : (

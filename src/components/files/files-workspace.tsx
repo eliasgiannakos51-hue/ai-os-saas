@@ -17,6 +17,7 @@ import {
   Copy,
 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { ListLayout } from "@/components/ui/list-layout";
 import { EmptyState } from "@/components/empty-state";
 import { CopyButton, writeToClipboard } from "@/components/ui/copy-button";
@@ -778,7 +779,9 @@ export function FilesWorkspace({
             className="inline-flex min-h-[44px] items-center gap-2 rounded-lg bg-orange-500 px-6 py-2.5 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {asking ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              // tone="inherit" because this button's background IS the
+              // accent — an accent-coloured indicator here is invisible.
+              <ThinkingIndicator size="sm" tone="inherit" />
             ) : (
               <Sparkles className="h-4 w-4" aria-hidden="true" />
             )}

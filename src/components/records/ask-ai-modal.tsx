@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { MessageContent } from "@/components/chat/message-content";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useCredits } from "@/components/credits/credits-context";
 
 type Turn = { id: number; role: "user" | "assistant"; content: string };
@@ -26,9 +27,7 @@ function nextLocalId(): number {
 function TypingDots() {
   return (
     <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-3.5">
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted [animation-delay:-0.3s]" />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted [animation-delay:-0.15s]" />
-      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted" />
+      <ThinkingIndicator />
     </div>
   );
 }

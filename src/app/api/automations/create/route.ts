@@ -175,6 +175,7 @@ export async function POST(request: Request) {
                 created: false,
                 needsClarification: true,
                 questions: clarification.questions,
+                questionSuggestions: clarification.suggestions,
               });
             }
             safetyCheckRan = true;

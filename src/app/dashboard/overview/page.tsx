@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { pageTitle } from "@/lib/page-title";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";

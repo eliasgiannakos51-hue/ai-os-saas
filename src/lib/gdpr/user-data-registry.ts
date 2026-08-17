@@ -90,6 +90,10 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // exported and erased like any other.
   { table: "ai_jobs", label: "background_jobs", scope: "user_content" },
   { table: "user_insights", label: "insights", scope: "user_content" },
+  // In-app notifications. An agent delivering "in_app" writes its whole
+  // result into the body, so these rows hold the same content an emailed
+  // briefing would — user content in the ordinary sense.
+  { table: "user_notifications", label: "notifications", scope: "user_content" },
   { table: "user_favorites", label: "favorites", scope: "user_content" },
   { table: "entity_links", label: "entity_links", scope: "user_content" },
   { table: "user_energy_checkins", label: "energy_checkins", scope: "user_content" },
@@ -127,6 +131,19 @@ export const USER_DATA_TABLES: UserDataTable[] = [
     redactColumns: ["access_token_encrypted", "refresh_token_encrypted"],
   },
   { table: "integration_sync_log", label: "integration_sync_log", scope: "account" },
+  {
+    table: "user_delivery_channels",
+    label: "delivery_channels",
+    scope: "sensitive_redacted",
+    // Same reasoning as the OAuth tokens above, and if anything stronger.
+    // The user is entitled to know that a Telegram bot and a Discord
+    // webhook are connected, when, and to which chat — they are not
+    // served by a working bot token and a live webhook URL sitting in a
+    // JSON file in their Downloads folder, where the webhook in
+    // particular is a permanent right to post into their server that
+    // nothing revokes.
+    redactColumns: ["secret_encrypted"],
+  },
   {
     table: "push_subscriptions",
     label: "push_subscriptions",

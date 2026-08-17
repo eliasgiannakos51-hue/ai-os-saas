@@ -13,7 +13,7 @@ import { ClarificationQuestions } from "@/components/clarification/clarification
 import { useToast } from "@/components/toast/toast-context";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { formatDateTimeInZone, formatNumber } from "@/lib/format-number";
-import { appendClarificationAnswers } from "@/lib/clarification-client";
+import { appendClarificationAnswers, alignSuggestions } from "@/lib/clarification-client";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useAiJob } from "@/lib/jobs/use-ai-job";
 import { AiJobProgress } from "@/components/ui/ai-job-progress";
@@ -23,6 +23,11 @@ import {
   problemCodeForFetchFailure,
   type ProblemCode,
 } from "@/lib/errors/problem-codes";
+import { DeliveryPicker } from "@/components/agents/delivery-picker";
+import { ExamplePrompts } from "@/components/ai/example-prompts";
+import { isDeliveryChannel, type DeliveryChannel } from "@/lib/agents/delivery-channels";
+import { markJobConsumed } from "@/lib/jobs/consume";
+import { JobSeen } from "@/components/jobs/job-seen";
 import { resolveBrowserTimeZone, nextRuns } from "@/lib/agents/cron-expression";
 import type { AgentDraft, AgentRun, UserAgent } from "@/lib/agents/agent-config";
 import { matchesSearch } from "@/lib/text/search-match";
@@ -50,6 +55,8 @@ type BuildResponse = {
   built?: boolean;
   needsClarification?: boolean;
   questions?: string[];
+  /** Tappable answers, aligned by index with `questions`. */
+  questionSuggestions?: string[][];
   draft?: AgentDraft;
   understood?: string;
   unsupported?: string;
@@ -65,11 +72,16 @@ export function AgentsWorkspace({
   runs,
   agentCap,
   accountEmail,
+  slackChannels = [],
 }: {
   agents: UserAgent[];
   runs: AgentRun[];
   agentCap: number;
   accountEmail: string;
+  /** Channels from this user's own connected Slack workspace, resolved on
+   *  the server. Empty when Slack is not connected — which is what makes
+   *  the picker able to say so instead of offering an empty dropdown. */
+  slackChannels?: { id: string; name: string }[];
 }) {
   const t = useTranslations("dashboard.agents");
   const tModule = useTranslations("module");
@@ -95,7 +107,13 @@ export function AgentsWorkspace({
   const [runJobId, setRunJobId] = useState<string | null>(null);
   const { job: runJob, isRunning: runningNow } = useAiJob(runJobId);
   const [questions, setQuestions] = useState<string[] | null>(null);
+  const [questionSuggestions, setQuestionSuggestions] = useState<string[][]>([]);
   const [preview, setPreview] = useState<BuildResponse | null>(null);
+  // WHICH JOB THE THING ON SCREEN CAME FROM. jobId is cleared the moment
+  // the row reaches an outcome, but the draft it produced is still in
+  // front of the user and has not been paid for twice yet — this is the id
+  // that gets marked seen when it is rendered or discarded.
+  const [resultJobId, setResultJobId] = useState<string | null>(null);
   const [savingAgent, setSavingAgent] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -106,6 +124,11 @@ export function AgentsWorkspace({
     prompt: string;
     parts: ScheduleParts;
     needsWebSearch: boolean;
+    // WHERE IT SENDS, editable at last. The API has supported a second
+    // destination since Slack was added and the editor had no field for
+    // it, so every agent anyone could create emailed.
+    deliveryMethod: DeliveryChannel;
+    deliveryTarget: string;
   } | null>(null);
   const [lastRunOutput, setLastRunOutput] = useState<string | null>(null);
 
@@ -166,6 +189,7 @@ export function AgentsWorkspace({
       }
       setProblem(null);
       setQuestions(null);
+      setQuestionSuggestions([]);
       setPreview(null);
       setJobId(String(data.jobId));
     } catch (err) {
@@ -190,8 +214,17 @@ export function AgentsWorkspace({
       return;
     }
     const result = (job.result ?? {}) as BuildResponse;
+    // Kept after jobId is cleared, because it is what the preview reports
+    // as seen — and a draft the user has read must not be offered back to
+    // them tomorrow as if it were new.
+    setResultJobId(job.id);
     if (result.needsClarification && result.questions?.length) {
       setQuestions(result.questions);
+      // Realigned rather than trusted. A build that finished before
+      // suggestions existed carries none, and since a finished-but-unseen
+      // job is offered back for 24 hours (lib/jobs/resumable.ts), that
+      // older result shape can still arrive here after a deploy.
+      setQuestionSuggestions(alignSuggestions(result.questions, result.questionSuggestions));
       setPreview(null);
     } else if (result.built) {
       setQuestions(null);
@@ -199,18 +232,26 @@ export function AgentsWorkspace({
     } else {
       // The builder ran and could not design it. Real tokens were spent,
       // so this is a completed job carrying a refusal — not an error to
-      // retry for free.
+      // retry for free. Nothing will render it, so nothing else will ever
+      // mark it seen: it is marked here, or it comes back every time this
+      // page opens for the next day.
       addToast(result.error ?? t("buildError"), "error");
+      void markJobConsumed(job.id);
     }
     setJobId(null);
   }, [job, addToast, t]);
 
-  // WHAT MAKES CLOSING THE PAGE SAFE. On mount, ask the server whether
-  // this account already has a build running. Nothing is remembered in the
-  // browser, so it works in a second tab, in a different browser, and
-  // after a cleared cache — all three of which a localStorage id gets
-  // wrong by telling the user nothing is running while a worker spends
-  // their credits.
+  // WHAT MAKES CLOSING THE PAGE SAFE. On mount, ask the server what this
+  // account was in the middle of. Nothing is remembered in the browser, so
+  // it works in a second tab, in a different browser, and after a cleared
+  // cache — all three of which a localStorage id gets wrong by telling the
+  // user nothing is running while a worker spends their credits.
+  //
+  // THE ANSWER MAY BE A FINISHED BUILD, and that is the fix for the double
+  // charge. Until this query started returning them, a build that
+  // completed while the user was on another page was unreachable: the
+  // draft existed, was paid for, and nothing on this screen could show it.
+  // The only move left was to ask for it again, at full price.
   useEffect(() => {
     let cancelled = false;
     void (async () => {
@@ -219,6 +260,12 @@ export function AgentsWorkspace({
         const data = await response.json();
         if (!cancelled && data.ok && data.job) {
           setCreating(true);
+          // The sentence the user typed, back where they typed it. Without
+          // it a resumed clarifying-questions round would send the answers
+          // with nothing to attach them to — appendClarificationAnswers
+          // would be building on an empty request.
+          const request = (data.job.input as { request?: unknown } | null)?.request;
+          if (typeof request === "string" && request.trim()) setRequestText(request);
           setJobId(String(data.job.id));
         }
       } catch {
@@ -232,6 +279,12 @@ export function AgentsWorkspace({
   }, []);
 
   // The run's outcome arrives from its row, exactly like the build's.
+  //
+  // EVERY EXIT FROM HERE MARKS THE ROW SEEN. A run's output is saved in
+  // the run history, so nothing is lost if this never fires — but the row
+  // is now offered back by /api/jobs until someone says it has been shown,
+  // and an unmarked one would re-announce "your agent ran" on every single
+  // page open for a day.
   useEffect(() => {
     if (!runJob || runJob.status === "queued" || runJob.status === "running") return;
     if (runJob.status === "failed") {
@@ -240,6 +293,7 @@ export function AgentsWorkspace({
       router.refresh();
       return;
     }
+    void markJobConsumed(runJob.id);
     const result = (runJob.result ?? {}) as {
       ran?: boolean;
       output?: string;
@@ -299,10 +353,18 @@ export function AgentsWorkspace({
     }
   }
 
+  // Closing the create panel — by Cancel, or after the agent has been
+  // created from the draft. Either way the user is finished with that
+  // result, so it is marked seen: (δ) of the brief, "an explicit discard
+  // is marked immediately", rather than waiting for a preview render that
+  // is never going to happen again.
   function resetCreate() {
+    void markJobConsumed(resultJobId);
+    setResultJobId(null);
     setCreating(false);
     setRequestText("");
     setQuestions(null);
+    setQuestionSuggestions([]);
     setPreview(null);
   }
 
@@ -381,6 +443,8 @@ export function AgentsWorkspace({
       prompt: agent.prompt,
       parts: cronToParts(agent.schedule_cron) ?? DEFAULT_SCHEDULE_PARTS,
       needsWebSearch: agent.config?.needsWebSearch === true,
+      deliveryMethod: isDeliveryChannel(agent.delivery_method) ? agent.delivery_method : "email",
+      deliveryTarget: agent.delivery_target ?? "",
     });
   }
 
@@ -394,6 +458,12 @@ export function AgentsWorkspace({
         prompt: editDraft.prompt,
         scheduleCron: partsToCron(editDraft.parts),
         needsWebSearch: editDraft.needsWebSearch,
+        // Sent together, because the server resolves the TARGET from the
+        // method: a Discord agent's target is a constant, a Telegram
+        // agent's is the chat saved with the token, and sending one
+        // without the other would ask the route to guess.
+        deliveryMethod: editDraft.deliveryMethod,
+        deliveryTarget: editDraft.deliveryTarget,
       },
       t("updateSuccess")
     );
@@ -455,11 +525,23 @@ export function AgentsWorkspace({
                 disabled={building || savingAgent}
               />
               <p className="mt-1.5 text-[11px] text-muted">{t("deliveryNote", { email: accountEmail })}</p>
+              {/* WHAT AN AGENT IS FOR, as three things you can press.
+                  "Describe what the agent should do" is a label, not an
+                  answer — somebody who has never had a scheduled agent
+                  does not know whether this box wants a job title, a
+                  prompt, or a sentence. */}
+              <ExamplePrompts surface="agents" onPick={setRequestText} className="mt-2.5" />
             </div>
 
             {questions && (
+              <>
+              {/* Questions the user has read are as "seen" as a draft is:
+                  answering them starts a NEW job, and re-offering the old
+                  one tomorrow would ask the same thing twice. */}
+              <JobSeen jobId={resultJobId} />
               <ClarificationQuestions
                 questions={questions}
+                suggestions={questionSuggestions}
                 submitting={building}
                 title={t("clarificationTitle")}
                 skipLabel={t("clarificationSkip")}
@@ -470,10 +552,15 @@ export function AgentsWorkspace({
                 }
                 onSkip={() => build(requestText, true)}
               />
+              </>
             )}
 
             {preview?.draft && (
               <div className="space-y-3 rounded-xl border border-orange-500/30 bg-orange-500/[0.04] p-4">
+                {/* THE MOMENT THE USER SEES IT. Inside the preview rather
+                    than in an effect beside it, so a draft can only be
+                    marked seen by actually being on the screen. */}
+                <JobSeen jobId={resultJobId} />
                 <p className="text-sm font-semibold text-foreground">{t("previewTitle")}</p>
                 {preview.understood && (
                   <p className="text-sm leading-relaxed text-foreground">{preview.understood}</p>
@@ -536,7 +623,13 @@ export function AgentsWorkspace({
                   </button>
                   <button
                     type="button"
-                    onClick={() => setPreview(null)}
+                    onClick={() => {
+                      // Explicit discard — marked immediately, not on the
+                      // next render, because there will not be one.
+                      void markJobConsumed(resultJobId);
+                      setResultJobId(null);
+                      setPreview(null);
+                    }}
                     disabled={savingAgent}
                     className="inline-flex min-h-[44px] items-center rounded-lg border border-border px-4 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
                   >
@@ -743,6 +836,15 @@ export function AgentsWorkspace({
                   onChange={(e) => setEditDraft({ ...editDraft, prompt: e.target.value })}
                 />
               </div>
+              <DeliveryPicker
+                value={editDraft.deliveryMethod}
+                target={editDraft.deliveryTarget}
+                accountEmail={accountEmail}
+                slackChannels={slackChannels}
+                onChange={({ method, target }) =>
+                  setEditDraft({ ...editDraft, deliveryMethod: method, deliveryTarget: target })
+                }
+              />
               <ScheduleEditor
                 parts={editDraft.parts}
                 onChange={(parts) => setEditDraft({ ...editDraft, parts })}

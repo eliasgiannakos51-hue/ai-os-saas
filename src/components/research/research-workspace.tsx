@@ -22,6 +22,7 @@ import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { MAX_TOPIC_CHARS } from "@/lib/research/research-limits";
+import { ExamplePrompts } from "@/components/ai/example-prompts";
 
 type Question = { question: string; why: string };
 type Source = { title: string; url: string };
@@ -292,6 +293,11 @@ export function ResearchWorkspace({
           maxLength={MAX_TOPIC_CHARS}
           className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
         />
+        {/* Three real research questions. Deep Research is the feature
+            most often mistaken for "a chat that searches" — an example
+            is the fastest way to show it wants a SUBJECT, not a query. */}
+        <ExamplePrompts surface="research" onPick={setTopic} />
+
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"

@@ -243,7 +243,18 @@ console.log("\n== 7. the user is told which of the two happened ==");
 // Read whole and read in parts are different guarantees: a fact that only
 // makes sense across two parts can be missed by both.
 check("the handler reports the pass count", /parts: context\.passes\.length/.test(handlerCode));
-check("the client carries it through", /parts: Number\(data\.parts \?\? 1\)/.test(workspaceCode));
+// Through answerFromResult(), which is the one place an answer is built —
+// whether it arrived on this page or is being picked back up from a job
+// that finished while the user was elsewhere. It was an inline object
+// literal here and a second, hand-copied one on the resumed path; the
+// resumed answer is precisely the one nobody looks at, so `parts` living
+// in the shared builder is what stops a returning user being told their
+// answer was read whole when it was stitched from five passes.
+check("the client carries it through", /parts: Number\(result\.parts \?\? 1\)/.test(workspaceCode));
+check(
+  "...in the shared builder, so the resumed path cannot drift from the inline one",
+  /function answerFromResult\([\s\S]{0,700}parts: Number\(result\.parts/.test(workspaceCode)
+);
 check("and shows it only when there was more than one", /answer\.parts > 1 && !answer\.truncated/.test(workspaceCode));
 checkList(
   "the sentence exists in all ten locales",

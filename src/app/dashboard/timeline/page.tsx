@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { pageTitle } from "@/lib/page-title";
+import type { Metadata } from "next";
 import { diagLog } from "@/lib/diag";
 import { ErrorMessage } from "@/components/error-message";
 import { redirect } from "next/navigation";

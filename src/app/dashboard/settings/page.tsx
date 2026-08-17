@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { pageTitle } from "@/lib/page-title";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Settings as SettingsIcon } from "lucide-react";
@@ -41,6 +41,10 @@ export default async function SettingsPage() {
   // request's locale, the same way the sidebar does.
   const tKey = await getTranslations();
   const tBilling = await getTranslations("settings.billing");
+  // The jump-to-section nav below named three of its four links in
+  // hardcoded English while the fourth was already translated — the four
+  // chips sat side by side, three in English and one in Greek. Every key
+  // already existed; nothing was reaching them.
   const tAchievements = await getTranslations("achievements");
   const supabase = createClient();
 

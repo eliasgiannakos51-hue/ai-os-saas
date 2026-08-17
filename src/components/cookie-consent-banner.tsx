@@ -48,7 +48,7 @@ export function CookieConsentBanner() {
             type="button"
             onClick={() => setExpanded((e) => !e)}
             aria-expanded={expanded}
-            className="flex min-w-0 items-center gap-1.5 text-left text-xs text-muted transition-colors duration-150 hover:text-foreground"
+            className="flex min-h-[44px] min-w-0 items-center gap-1.5 text-left text-xs text-muted transition-colors duration-150 hover:text-foreground sm:min-h-0"
           >
             <span>{t("summary")}</span>
             <ChevronDown

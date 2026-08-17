@@ -7,7 +7,7 @@
     "signOut": "Sign out",
     "jumpToPage": "Jump to a module or page...",
     "noMatches": "No matches for '{query}'",
-    "createStudio": "Create Studio",
+    "createStudio": "Make anything",
     "cancel": "Cancel",
     "save": "Save",
     "saving": "Saving...",
@@ -65,7 +65,8 @@
     },
     "creditsUnlimited": "Unlimited",
     "whatIsThis": "What is this?",
-    "moreInHelp": "Read more in the Help Centre"
+    "moreInHelp": "Read more in the Help Centre",
+    "examplesLabel": "Try:"
   },
   "sidebar": {
     "groups": {
@@ -79,29 +80,30 @@
       "create": "Create",
       "myBusiness": "My Business",
       "track": "Track",
-      "insights": "Insights"
+      "insights": "What I noticed",
+      "tracking": "Tracking"
     },
     "items": {
       "home": "Home",
       "chat": "Ionexa Chat",
-      "memory": "AI Memory",
-      "timeline": "Timeline",
+      "memory": "Search my records",
+      "timeline": "History",
       "favorites": "Favorites",
-      "missionControl": "Mission Control",
+      "missionControl": "Goals & Plans",
       "reflection": "Weekly Reflection",
       "settings": "Settings",
       "team": "Team",
       "agents": "AI Agents",
-      "websites": "Websites",
-      "websiteBuilder": "Website Builder",
-      "apps": "Apps",
-      "images": "Images",
-      "videos": "Videos",
-      "coding": "AI Coding",
-      "dataAnalysis": "Data Analysis",
+      "websites": "Website plans",
+      "websiteBuilder": "Build a site",
+      "apps": "App notes",
+      "images": "Image notes",
+      "videos": "Video notes",
+      "coding": "Coding notes",
+      "dataAnalysis": "Analysis notes",
       "documents": "Documents",
       "presentations": "Presentation Notes",
-      "campaigns": "Campaigns",
+      "campaigns": "Campaign notes",
       "analytics": "Analytics",
       "finance": "Finance",
       "content": "Content",
@@ -118,7 +120,7 @@
       "productWorkflow": "Product Workflow",
       "automation": "Automation",
       "marketplace": "Marketplace",
-      "published": "Published Sites",
+      "published": "Live sites",
       "integrations": "Integrations",
       "files": "Files",
       "deepResearch": "Deep Research",
@@ -787,7 +789,7 @@
       }
     },
     "memory": {
-      "title": "AI Memory",
+      "title": "Search my records",
       "description": "Search everything you've logged, across every module — no need to remember where you put it.",
       "searchPlaceholder": "Search everything you've logged...",
       "resultCount": "{count, plural, =0 {no results} one {# result} other {# results}} across every module",
@@ -850,7 +852,8 @@
       "pinLimitReached": "You've pinned {limit} conversations, which is the most your plan keeps at the top. Unpin one to pin this one.",
       "pinError": "The pin didn't save. Try again.",
       "renameError": "The new name didn't save — the old one is still there.",
-      "renameLabel": "New name for \"{title}\""
+      "renameLabel": "New name for \"{title}\"",
+      "emptyHint": "Ask anything — general knowledge, brainstorming, writing help, or just a conversation."
     },
     "create": {
       "title": "Create Anything",
@@ -859,7 +862,7 @@
       "viewModule": "View {module} →"
     },
     "timeline": {
-      "title": "Timeline",
+      "title": "History",
       "allModules": "All Modules",
       "showOnly": "Show only: {module}",
       "rangeToday": "Today",
@@ -881,7 +884,7 @@
       }
     },
     "mission": {
-      "title": "Mission Control",
+      "title": "Goals & Plans",
       "started": "Started {time}",
       "description": "Planner → Builder → Reviewer — describe a goal, get a plan, then build it step by step with AI.",
       "goalLabel": "What's your goal?",
@@ -1010,7 +1013,7 @@
       "levelLabel": "Energy level {level}"
     },
     "websiteBuilder": {
-      "title": "Website Builder",
+      "title": "Build a site",
       "description": "Describe what you want, and AI generates a real, complete website — instant preview, download the HTML.",
       "nameLabel": "Name",
       "namePlaceholder": "e.g. Coaching Landing Page",
@@ -1166,7 +1169,7 @@
       "clarifyAnswerPlaceholder": "Your answer..."
     },
     "createStudio": {
-      "title": "Create Studio",
+      "title": "Make anything",
       "subtitle": "Describe what you want in one sentence. No tool to pick — the studio works out what it is, shows you what it understood, and only then creates it.",
       "inputLabel": "What do you want to create?",
       "inputPlaceholder": "e.g. A landing page for my coaching business, warm and professional",
@@ -1319,10 +1322,39 @@
         "title": "Work that happens without you",
         "why": "Describe a job in one sentence and it runs on a schedule from then on, delivering the result rather than reminding you to do it.",
         "example": "Every Monday morning, summarise last week's sales"
+      },
+      "delivery": {
+        "label": "Where the result goes",
+        "channels": {
+          "email": "Email",
+          "slack": "Slack",
+          "telegram": "Telegram",
+          "discord": "Discord",
+          "in_app": "In the app"
+        },
+        "emailNote": "Sent to {email} — your account address.",
+        "inAppNote": "Kept in the app, in your notifications. Nothing leaves Ionexa.",
+        "slackNotConnected": "Connect Slack in Integrations first.",
+        "slackChannelLabel": "Slack channel",
+        "telegramHelp": "Create a bot with @BotFather, send it a message, then paste its token and your chat id.",
+        "telegramTokenPlaceholder": "Bot token",
+        "telegramChatPlaceholder": "Chat id, e.g. 123456789",
+        "telegramTokenInvalid": "That does not look like a Telegram bot token.",
+        "telegramChatInvalid": "That does not look like a Telegram chat id.",
+        "telegramConnected": "Connected to chat {chat} · token {hint}",
+        "discordHelp": "In your Discord channel: Settings → Integrations → Webhooks → New Webhook, then copy the address.",
+        "discordUrlPlaceholder": "Discord webhook address",
+        "discordUrlInvalid": "That is not a Discord webhook address.",
+        "discordConnected": "Connected · webhook {hint}",
+        "connect": "Connect and send a test",
+        "connectSuccess": "Connected — a test message was delivered.",
+        "connectFailed": "Could not connect that channel.",
+        "disconnect": "Disconnect",
+        "disconnected": "Disconnected."
       }
     },
     "publishing": {
-      "title": "Published Sites",
+      "title": "Live sites",
       "description": "Your sites, live on the web.",
       "analyticsNotice": "We count page views per day and nothing else — no cookies, no visitor tracking, no personal data of any kind is recorded about the people who visit your sites.",
       "goToBuilder": "Website Builder",
@@ -1508,10 +1540,6 @@
       "emptyExample": "e.g. “What does the contract say about cancellation?”",
       "askDisabledNoFiles": "Tick at least one file above first.",
       "askDisabledNoQuestion": "Type your question to continue.",
-      "examplesLabel": "Try:",
-      "example1": "What does this say about cancellation?",
-      "example2": "Summarise the key points.",
-      "example3": "What are the deadlines and amounts?",
       "processingHint": "Reading this file — usually a few seconds. It can be asked about once it is ready.",
       "failedHint": "No readable text was found. Upload a version with selectable text.",
       "askStillRunning": "Still reading — this is taking a while. It keeps going with the page closed; come back and ask again to see the answer.",
@@ -1681,6 +1709,12 @@
       "cardCompetitors": "Competitors:",
       "cardMarketSize": "Market Size:",
       "cardMvp": "MVP:"
+    },
+    "backgroundWork": {
+      "working": "Still working on your last request — it will finish even if you leave this page.",
+      "finished": "Your last request finished while you were away.",
+      "open": "Open it",
+      "dismiss": "Dismiss"
     }
   },
   "module": {
@@ -1738,7 +1772,14 @@
       "campaigns": "September launch — email + LinkedIn",
       "presentations": "Q3 board update — talking points",
       "ideas": "A newsletter for people who switched from spreadsheets"
-    }
+    },
+    "emptyWebsitePlans": "Nothing here yet. This is a place to note websites you are planning — it does not build them. To have one built for you, use Build a site.",
+    "emptyApps": "Nothing here yet. This is a place to keep track of apps you are planning or have already made — it does not build apps for you. Use the button above to add one.",
+    "emptyImages": "Nothing here yet. This is a place to keep track of images you need or have already made — it does not create images. Use the button above to add one.",
+    "emptyVideos": "Nothing here yet. This is a place to keep track of videos you are planning or have already made — it does not create videos. Use the button above to add one.",
+    "emptyCoding": "Nothing here yet. This is a place to keep track of coding work you are planning or have already done — it does not write code. Use the button above to add one.",
+    "emptyDataAnalysis": "Nothing here yet. This is a place to keep track of analyses you are planning or have already done — it does not analyse your data. Use the button above to add one.",
+    "emptyCampaigns": "Nothing here yet. This is a place to keep track of campaigns you are planning or have already run — it does not run campaigns. Use the button above to add one."
   },
   "askAi": {
     "buttonLabel": "Ask AI",
@@ -2059,32 +2100,32 @@
       },
       "websites": {
         "title": "Every site you are planning",
-        "why": "One row per site — the brief, the address and where it stands — so nothing important lives only in a browser tab.",
+        "why": "One row per site — the brief, the address and where it stands — so nothing important lives only in a browser tab. It does not build them.",
         "example": "Landing page for the spring launch"
       },
       "apps": {
         "title": "Every app on the list",
-        "why": "What it does, which platform it targets and how far along it is — from first sketch to live in the store.",
+        "why": "What it does, which platform it targets and how far along it is — from first sketch to live in the store. It does not build apps for you.",
         "example": "iOS app for booking appointments"
       },
       "images": {
         "title": "The images you need made",
-        "why": "Keep the prompt, not just the picture — a prompt you can read again is a prompt you can improve next time.",
+        "why": "Keep the prompt, not just the picture — a prompt you can read again is a prompt you can improve next time. It does not create images.",
         "example": "Product photo on a white background"
       },
       "videos": {
         "title": "The videos you have planned",
-        "why": "The brief for each video and how far it has got, so a shoot list is never something you keep in your head.",
+        "why": "The brief for each video and how far it has got, so a shoot list is never something you keep in your head. It does not create videos.",
         "example": "A 30-second product demo"
       },
       "coding": {
         "title": "The things you want built",
-        "why": "Describe the feature or the fix, tag the language, and keep the whole backlog somewhere other than your head.",
+        "why": "Describe the feature or the fix, tag the language, and keep the whole backlog somewhere other than your head. It does not write code.",
         "example": "A script that merges the monthly CSVs"
       },
       "dataAnalysis": {
         "title": "The questions your data can answer",
-        "why": "The question, the source it goes to, and the finding when it comes back — so an answer is never found twice.",
+        "why": "The question, the source it goes to, and the finding when it comes back — so an answer is never found twice. It does not analyse your data.",
         "example": "Which channel brings the customers who stay"
       },
       "presentations": {
@@ -2094,7 +2135,7 @@
       },
       "campaigns": {
         "title": "Every campaign, and what it cost",
-        "why": "Channel, budget and status side by side, so the next budget decision is made from numbers rather than from feel.",
+        "why": "Channel, budget and status side by side, so the next budget decision is made from numbers rather than from feel. It does not run campaigns.",
         "example": "Spring email campaign, €500 budget"
       }
     },
@@ -2362,6 +2403,51 @@
         "what": "This action didn't complete.",
         "next": "Try again, and contact support if it happens twice."
       }
+    }
+  },
+  "aiExamples": {
+    "createStudio": {
+      "e1": "Build me a page for my shop",
+      "e2": "A plan for finding customers",
+      "e3": "Idea: a subscription for small businesses",
+      "e4": "Every Monday, remind me to check the finances",
+      "limits": "Creates things inside Ionexa · It won't touch anything you haven't connected"
+    },
+    "agents": {
+      "e1": "Every morning, send me the news about Nvidia",
+      "e2": "Every Monday, a summary of my competitors",
+      "e3": "Tell me if anyone writes about my industry",
+      "limits": "Searches the web and writes to you · It takes no actions, and sends only where you chose"
+    },
+    "mission": {
+      "e1": "Find 10 customers for my business",
+      "e2": "Prepare a launch plan for a new product",
+      "e3": "Grow sales by 20% in three months",
+      "limits": "Writes the plan and its steps · A step only runs when you schedule it"
+    },
+    "websiteBuilder": {
+      "e1": "A café in Thessaloniki with a menu and opening hours",
+      "e2": "A photographer's portfolio with a gallery",
+      "e3": "A landing page for a SaaS, with pricing",
+      "limits": "One page, not a shop or an app · It doesn't connect to your systems"
+    },
+    "files": {
+      "e1": "What does the contract say about cancellation?",
+      "e2": "Compare the two offers",
+      "e3": "What are the deadlines and amounts?",
+      "limits": "Answers only from the files you picked · It doesn't search the web"
+    },
+    "research": {
+      "e1": "Competitors in my industry in Greece",
+      "e2": "Why AI startups fail",
+      "e3": "SaaS pricing models in 2026",
+      "limits": "Reads public sources on the web · It can't see your files"
+    },
+    "chat": {
+      "e1": "What should I prioritise this week?",
+      "e2": "Explain this month's numbers to me",
+      "e3": "Write an email to a customer who is late paying",
+      "limits": "Sees your Ionexa data and whatever you've connected · It takes no actions on its own"
     }
   }
 }

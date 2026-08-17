@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
 import { pageTitle } from "@/lib/page-title";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
+import { listSlackChannels } from "@/lib/integrations/read";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
@@ -77,6 +78,15 @@ export default async function AgentsPage() {
       .limit(RUN_HISTORY_LIMIT),
   ]);
 
+  // THE SLACK CHANNELS THE AGENT MAY BE POINTED AT, resolved server-side
+  // from this user's own connected workspace. Fetched here rather than by
+  // the picker so the browser is never the thing that decides which
+  // channels exist — and best-effort, because a Slack outage must not
+  // take the Agents page down with it.
+  const slackChannels = await listSlackChannels(user.id)
+    .then((result) => (result.ok ? result.channels : []))
+    .catch(() => []);
+
   // An admin is not capped, but the workspace needs a number to display
   // and to disable "+ New" against. The highest published allowance is the
   // honest one to show.
@@ -103,6 +113,7 @@ export default async function AgentsPage() {
           runs={(runs as AgentRun[] | null) ?? []}
           agentCap={cap}
           accountEmail={user.email ?? ""}
+          slackChannels={slackChannels}
         />
       </div>
     </main>

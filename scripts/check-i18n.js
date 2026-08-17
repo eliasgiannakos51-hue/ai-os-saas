@@ -46,6 +46,16 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // "Email" is the ordinary Italian word for it — Italian borrowed the
+  // noun whole, and "posta elettronica" is what a government form says,
+  // not what a person reading a settings panel expects. Scoped to Italian
+  // because every other locale here has its own word and uses it.
+  "it:dashboard.agents.delivery.channels.email",
+  // Greek borrowed the noun too, and this app's own Greek already says
+  // "Email" everywhere else it names the channel (settings.emailSupport,
+  // the account section). Translating it here alone would make one screen
+  // disagree with the rest of the Greek UI.
+  "el:dashboard.agents.delivery.channels.email",
   // Margin report, owner-only. "Bypass" is the loanword these languages
   // actually use for this concept — and it is also the literal value
   // stored in ai_cost_log's metadata (bypassCharge), so translating the
@@ -280,6 +290,15 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // the scheme is the same eight characters in every written language,
   // including the two that do not use the Latin alphabet at all.
   "moduleData.placeholders.httpsUrl",
+  // The three delivery destinations that are BRAND NAMES. "Slack",
+  // "Telegram" and "Discord" are what those products are called in every
+  // locale — including Arabic and Japanese, whose own interfaces use the
+  // Latin wordmark — and a user hunting for the Discord button is hunting
+  // for the word Discord. The label above them, the help text and every
+  // error message around them ARE translated; only the names are not.
+  "dashboard.agents.delivery.channels.slack",
+  "dashboard.agents.delivery.channels.telegram",
+  "dashboard.agents.delivery.channels.discord",
   // A hex colour code shown as the placeholder in the Website Builder's
   // colour field. It is a FORMAT example, not prose — "#1d4ed8" is the
   // same six characters in every language, and translating it would mean

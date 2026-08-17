@@ -12,6 +12,7 @@ import { useCredits } from "@/components/credits/credits-context";
 import { CostEstimateHint, LargeActionConfirm, useCostEstimate } from "@/components/credits/cost-estimate";
 import { OutOfCreditsNotice } from "@/components/credits/out-of-credits-notice";
 import { useToast } from "@/components/toast/toast-context";
+import { ExamplePrompts } from "@/components/ai/example-prompts";
 
 const MAX_GOAL_LENGTH = 20000;
 
@@ -170,6 +171,11 @@ export function MissionForm({
             enough that one static word for all of them reads as a hang. */}
         <AiJobProgress job={job} />
       </div>
+
+      {/* THREE REAL GOALS, pressable. "What do you want to achieve?" is a
+          question anybody can read and few can answer cold — an example
+          shows the size and shape of goal this planner is built for. */}
+      <ExamplePrompts surface="mission" onPick={setGoal} />
 
       {/* Shown before submit, not after — the whole point is that the cost
           is never a surprise. */}

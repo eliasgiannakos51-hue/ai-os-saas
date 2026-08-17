@@ -11,6 +11,7 @@ import { CardGrid } from "@/components/ui/entity-card";
 import { MissionCard } from "@/components/mission/mission-card";
 import { MissionDetail, type MissionDetailTab } from "@/components/mission/mission-detail";
 import { MissionForm } from "@/components/mission/mission-form";
+import { ResumedWorkNotice } from "@/components/jobs/resumed-work-notice";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { isActiveMission } from "@/lib/mission-progress";
 import type { Mission, MissionStatus } from "@/types/mission";
@@ -143,6 +144,14 @@ export function MissionList({
           </span>
         }
       >
+        {/* A PLAN THAT IS STILL BEING MADE. Outside the form on purpose:
+            the form is behind a toggle, and the moment this matters is
+            exactly the moment the user has come back to a closed form and
+            is deciding whether to open it and ask again. A plan costs real
+            credits; being told one is already on its way is what stops the
+            second one. */}
+        <ResumedWorkNotice kind="mission_plan" />
+
         {missions.length === 0 ? (
           // The form is already on this page — collapsed when there are
           // missions, open when there are none — so the press only has to

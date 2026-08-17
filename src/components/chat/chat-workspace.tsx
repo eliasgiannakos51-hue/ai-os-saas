@@ -20,6 +20,7 @@ import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { InlineTitle } from "@/components/chat/inline-title";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { MessageContent } from "@/components/chat/message-content";
+import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useCredits } from "@/components/credits/credits-context";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
@@ -551,7 +552,7 @@ export function ChatWorkspace({
               onClick={toggleSidebar}
               aria-expanded={sidebarOpen}
               aria-label={sidebarOpen ? t("hideConversations") : t("showConversations")}
-              className="flex h-9 shrink-0 items-center gap-1.5 rounded-lg px-2 text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground"
+              className="flex h-11 shrink-0 items-center gap-1.5 rounded-lg px-2 text-muted transition-colors duration-150 hover:bg-panel-hover hover:text-foreground sm:h-9"
             >
               {sidebarOpen ? (
                 <PanelLeftClose className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -618,7 +619,16 @@ export function ChatWorkspace({
                 <MessageCircle className="h-6 w-6" aria-hidden="true" />
               </span>
               <h1 className="mt-4 text-xl font-bold tracking-wide text-foreground">{t("title")}</h1>
-              <p className="mt-2 text-sm text-muted">{t("emptyBody")}</p>
+              {/* Was three hardcoded English sentences. A Greek user opening
+                  Chat met an English explanation of what it is for — which
+                  is the one moment the explanation has to land. */}
+              <p className="mt-2 text-sm text-muted">{t("emptyHint")}</p>
+              {/* AND WHAT TO ACTUALLY SAY. "Ask anything" is true and
+                  useless: the reported confusion was somebody deciding this
+                  product was "several LLMs in one, cheaper", which is
+                  exactly the conclusion you reach from a blank box that
+                  accepts anything. */}
+              <ExamplePrompts surface="chat" onPick={setInput} className="mt-5 w-full text-left" />
             </div>
           ) : (
             <div className="mx-auto max-w-2xl space-y-4">

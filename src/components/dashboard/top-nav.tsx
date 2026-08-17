@@ -4,9 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
-import { Search, Bell, Plus, Zap } from "lucide-react";
+import { Search, Plus, Zap } from "lucide-react";
 import { CREATE_NAV_ITEM, OVERVIEW_NAV_ITEM } from "@/lib/modules";
 import { MenuButton } from "@/components/dashboard/menu-button";
+import { NotificationBell } from "@/components/dashboard/notification-bell";
 import { LogoutButton } from "@/components/logout-button";
 import { Logo } from "@/components/logo";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
@@ -22,7 +23,6 @@ export function TopNav({ email }: { email: string }) {
   const locale = useLocale();
   const { setOpen: setCommandPaletteOpen } = useCommandPalette();
   const { credits, isAdmin } = useCredits();
-  const [notifOpen, setNotifOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   function openCreate() {
@@ -37,10 +37,11 @@ export function TopNav({ email }: { email: string }) {
 
       <Link
         href={OVERVIEW_NAV_ITEM.href}
-        className="flex shrink-0 items-center gap-2"
+        // Height only — the bar has 64px of it and no spare width.
+        className="flex min-h-[44px] shrink-0 items-center gap-2"
       >
         <Logo iconOnly className="h-6 w-6" />
-        <span className="text-base font-bold tracking-tight text-foreground">
+        <span className="hidden text-base font-bold tracking-tight text-foreground min-[400px]:inline">
           IONEXA
         </span>
       </Link>
@@ -97,25 +98,9 @@ export function TopNav({ email }: { email: string }) {
           <ThemeToggle />
         </span>
 
-        <div className="relative">
-          <button
-            type="button"
-            onClick={() => {
-              setNotifOpen((v) => !v);
-              setUserMenuOpen(false);
-            }}
-            aria-label={t("notifications")}
-            aria-expanded={notifOpen}
-            className="flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors duration-150 hover:bg-panel hover:text-foreground"
-          >
-            <Bell className="h-[18px] w-[18px]" />
-          </button>
-          {notifOpen && (
-            <div className="absolute right-0 top-11 w-56 rounded-xl border border-border bg-panel p-3 text-xs text-muted shadow-lg">
-              {t("noNotifications")}
-            </div>
-          )}
-        </div>
+        {/* Was a hard-coded "No notifications" with no table behind it —
+            see components/dashboard/notification-bell.tsx. */}
+        <NotificationBell locale={locale} />
 
         <Link
           href="/dashboard/settings#buy-credits"
@@ -147,10 +132,9 @@ export function TopNav({ email }: { email: string }) {
         <div className="relative shrink-0">
           <button
             type="button"
-            onClick={() => {
-              setUserMenuOpen((v) => !v);
-              setNotifOpen(false);
-            }}
+            // NotificationBell owns its own open state now, so there is
+            // no sibling popover left here to close.
+            onClick={() => setUserMenuOpen((v) => !v)}
             aria-label={t("accountMenu")}
             aria-expanded={userMenuOpen}
             className="flex h-11 w-11 items-center justify-center rounded-full bg-orange-500/15 text-sm font-semibold text-orange-400 transition-colors duration-150 hover:bg-orange-500/25"

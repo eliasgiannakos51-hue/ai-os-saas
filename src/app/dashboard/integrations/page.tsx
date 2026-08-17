@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { pageTitle } from "@/lib/page-title";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";

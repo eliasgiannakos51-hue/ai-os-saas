@@ -34,6 +34,11 @@ export async function BillingSummary({
   /** How much of it was BOUGHT. Never expires; see the migration. */
   purchasedCredits?: number;
 }) {
+  // "Upgrade Plan" was hardcoded English on the billing panel while
+  // credits.outOfCredits.upgradePlan already carried it, translated, in
+  // all ten locales — the same shape as the settings jump links and the
+  // upgrade wall: the string existed and nothing reached it.
+  const tCredits = await getTranslations("credits.outOfCredits");
   const t = await getTranslations("settings.billing");
   const plan = getPlan(tier) ?? getPlan("free")!;
 

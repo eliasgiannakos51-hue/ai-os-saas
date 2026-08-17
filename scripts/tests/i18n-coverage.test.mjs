@@ -577,7 +577,32 @@ const clientFallbacks = sources.flatMap((f) => [
 // access, credits, data, and that it is reversible) are in
 // settings.billing.cancel.* in all ten locales; these are the fallbacks
 // shown only when the request itself fails.
-const SERVER_PROSE_BASELINE = 521;
+// 532 -> 540 once BOTH branches' routes are in one tree. The eight are
+// api/delivery-channels' and api/notifications' remaining replies plus
+// api/conversations/[id]'s — the last of which is worth naming, because it
+// is the one route here that deliberately returns CODES rather than prose
+// ("pin_limit", "title_too_long") and the eight counted below it are its
+// neighbours, not its own strings.
+const SERVER_PROSE_BASELINE = 540;
+// 520 -> 532 for the delivery-channel routes (api/delivery-channels,
+// api/notifications) and the ownership refusals they surface. Same
+// documented convention as every increment below — a route's error
+// replies are English and the calling component supplies the translated
+// wording — with ONE deliberate difference worth recording: the refusals
+// that say WHY a destination was rejected ("an agent can only post to a
+// channel in your own connected Slack workspace") are shown verbatim.
+// They are security answers, and a paraphrase that drifted from what the
+// server actually enforces would be worse than an untranslated sentence
+// that is exactly true. What the user READS on the delivery picker —
+// every label, every help line, every validation message they can hit by
+// typing — is translated in all ten locales.
+// 518 -> 520 for api/jobs/[id]/consume, the endpoint that records a
+// finished result as having been SEEN so the user is not made to pay for
+// it a second time. Its two counted strings are "Not authenticated." and
+// "Job not found." — the standard pair every other route here returns,
+// and neither is prose a user reads: the caller is a component that
+// renders nothing on failure, because a mark that did not land means only
+// that the result is offered once more, which is the safe direction.
 // 517 -> 518 for the "Not authenticated." reply added to
 // api/jobs/[id]/continue. That string is the standard one every other
 // route in the app already returns, and it appeared because
@@ -635,7 +660,7 @@ checkTrue(
 //
 // A RATCHET, NOT A ZERO.
 //
-// 87 of these still ship — 162 when this landed, minus the 22 aria-label
+// 86 of these still ship — 162 when this landed, minus the 22 aria-label
 // attributes paid off in batch A1 (now held at zero by 1d above), the 25
 // in the Ideas module paid off in A2, the 19 in Chat, Memory and Create
 // paid off in A3, the two `title=` attributes that came with the eight
@@ -643,7 +668,8 @@ checkTrue(
 // not-found, error-message and the two Quick Start components that a
 // second branch had already translated — four entries deleted outright
 // rather than lowered, which is what the stale-baseline half of this
-// check exists to force.
+// check exists to force — and one more on the upgrade wall, which stopped
+// naming the feature in English once the module heading became a key.
 // Failing the build on all of them would mean
 // this check could not land at all, and a check that cannot land protects
 // nothing. So the baseline below is per FILE: no file may get worse, and
@@ -663,7 +689,7 @@ const BARE_TEXT_BASELINE = {
     "src/app/privacy/page.tsx": 17,
     "src/app/terms/page.tsx": 10,
     "src/components/auth/generate-password-button.tsx": 1,
-    "src/components/billing/upgrade-required.tsx": 4,
+    "src/components/billing/upgrade-required.tsx": 3,
     "src/components/dashboard/command-palette.tsx": 3,
     "src/components/entity-links/link-to-modal.tsx": 1,
     "src/components/landing/deleted-account-banner.tsx": 1,

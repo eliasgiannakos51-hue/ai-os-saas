@@ -233,7 +233,11 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
           <button
             type="button"
             onClick={() => void skip()}
-            className="text-[11px] font-medium text-muted underline decoration-dotted transition-colors duration-150 hover:text-foreground"
+            // 66x17 measured on a phone, on the first screen a new user
+            // meets. Seventeen pixels is not a target anyone hits on
+            // purpose — the padding is what makes it hittable; the text
+            // stays the same size so the layout is unchanged.
+            className="-my-2 inline-flex min-h-[44px] items-center px-2 text-[11px] font-medium text-muted underline decoration-dotted transition-colors duration-150 hover:text-foreground sm:min-h-0 sm:my-0 sm:px-0"
           >
             {t("skip")}
           </button>
@@ -249,6 +253,9 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
                 key={value}
                 type="button"
                 onClick={() => void chooseGoal(value)}
+                // 343x42 measured — two pixels short of the size a finger
+                // reliably hits, on the screen that decides whether a new
+                // user gets past the first minute.
                 className={`flex min-h-[44px] items-center rounded-xl border p-3 text-left text-xs font-medium transition-colors duration-150 ${
                   goal === value
                     ? "border-orange-500 bg-orange-500/[0.06] text-foreground"

@@ -66,6 +66,7 @@ const messages = Object.fromEntries(
 
 const { loadTs } = await import("./load-ts.mjs");
 const { BUILD_MODULES, getBuildModule } = await loadTs("src/lib/build-modules.ts");
+const { MODULES } = await loadTs("src/lib/modules.ts");
 const module = getBuildModule("presentations");
 
 console.log("== 1. the module is renamed at its source ==");
@@ -103,6 +104,18 @@ const page = readFileSync("src/app/dashboard/presentations/page.tsx", "utf8");
 // the browser tab behind.
 check("the page takes its title from the config", /pageTitle\(CONFIG\.titleKey\)/.test(page));
 check("and the header does too", /t\(config\.titleKey\)/.test(readFileSync("src/components/modules/build-module-page.tsx", "utf8")));
+// The name itself, in the catalogue rather than in the config: `titleKey`
+// resolving is only half the claim, and the half that has never been the
+// bug. What broke twice is a rename that reached English and stopped —
+// so the value is checked in English and in three other scripts.
+check(
+  'it still reads "Presentation Notes" in English',
+  messages.en.sidebar.items.presentations === "Presentation Notes"
+);
+for (const locale of ["el", "de", "ja"]) {
+  const value = messages[locale].sidebar.items.presentations;
+  check(`${locale} has a name for it ("${value}")`, typeof value === "string" && value.length > 0);
+}
 
 console.log("\n== 2. the sidebar label and its lookup key agree ==");
 const nav = readFileSync("src/lib/sidebar-nav.ts", "utf8");

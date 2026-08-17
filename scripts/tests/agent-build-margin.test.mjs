@@ -263,9 +263,22 @@ check(
 // ---------------------------------------------------------------------------
 console.log("\n== 5. THE FIX: the two rows are no longer averaged together ==");
 const handler = readFileSync("src/lib/jobs/handlers/agent-build.ts", "utf8");
+// Scoped to the RETURN STATEMENT, not to a character budget. This used to
+// be `needsClarification: true[\s\S]{0,1400}feature: "…"`, and it went red
+// when the same return grew a questionSuggestions field and its comment —
+// the invariant was untouched, the window had simply run out. A test whose
+// pass depends on how much explanation sits between two lines fails for
+// reasons that have nothing to do with what it is checking.
+const clarificationReturn = (() => {
+  const start = handler.indexOf("if (clarification.needsClarification) {");
+  if (start === -1) return "";
+  const end = handler.indexOf("\n        };", start);
+  return end === -1 ? handler.slice(start) : handler.slice(start, end);
+})();
 check(
   "the clarification-only outcome settles as agent_build_precheck",
-  /needsClarification: true[\s\S]{0,1400}feature: "agent_build_precheck"/.test(handler)
+  /needsClarification: true/.test(clarificationReturn) &&
+    /feature: "agent_build_precheck"/.test(clarificationReturn)
 );
 check(
   "the full build does NOT override the feature — it stays agent_build",

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Rocket } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { startAndWatchJob } from "@/lib/jobs/start-and-watch";
 import { useCredits } from "@/components/credits/credits-context";
 import { useTranslations } from "next-intl";
 
@@ -34,18 +35,32 @@ export function TradingMissionButton({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/mission/plan", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ goal }),
-      });
-      const data = await res.json();
+      // PLANNING IS A BACKGROUND JOB, and this button did not know it.
+      //
+      // /api/mission/plan stopped answering `{ planned: true }` and started
+      // answering 202 `{ jobId }` when planning moved into a worker. The
+      // test below was `if (!data.planned)`, which is now never true — so
+      // this button reported "Could not create a plan." on every press
+      // while the worker planned the mission and charged for it. A user
+      // who believes it failed presses it again, and pays twice for the
+      // same plan. Same fix, same helper as mission-form.tsx and
+      // product-mission-button.tsx.
+      const outcome = await startAndWatchJob("/api/mission/plan", { goal });
       void refreshCredits();
 
-      if (!res.ok || !data.ok) {
-        setError(getErrorMessage(data?.error, "Could not create a plan."));
+      if (!outcome.ok) {
+        // "still_running" means the worker is fine and this page stopped
+        // watching. The missions list is where the plan appears, so
+        // sending the user there is the truthful answer — and it does not
+        // invite the duplicate press that "it failed" would.
+        if (outcome.code === "still_running") {
+          router.push("/dashboard/mission");
+          return;
+        }
+        setError(getErrorMessage(outcome.error, "Could not create a plan."));
         return;
       }
+      const data = outcome.result as { planned?: boolean; message?: string };
       if (!data.planned) {
         setError(data.message ?? "Could not create a plan.");
         return;

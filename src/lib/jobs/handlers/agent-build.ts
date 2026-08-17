@@ -50,10 +50,30 @@ export const agentBuildHandler: JobHandler = async (ctx: JobContext): Promise<Jo
   // the user got exactly what the step is for.
   if (!skipClarification) {
     try {
-      const clarification = await checkNeedsClarification(ctx.apiKey, "agent", request, ctx.costs);
+      const clarification = await checkNeedsClarification(
+        ctx.apiKey,
+        "agent",
+        request,
+        ctx.costs,
+        // (δ) of the brief: never ask for something the AI Life Context
+        // already answers. Captured by the ROUTE, through the user's own
+        // RLS-scoped client — getUserFullContext reads ai_missions with
+        // no user_id filter and relies entirely on RLS to scope it, so
+        // calling it here with the worker's admin client would put other
+        // people's missions into this user's prompt.
+        typeof ctx.input.knownContext === "string" ? ctx.input.knownContext : null
+      );
       if (clarification.needsClarification) {
         return {
-          result: { built: false, needsClarification: true, questions: clarification.questions },
+          result: {
+            built: false,
+            needsClarification: true,
+            questions: clarification.questions,
+            // Aligned by index with `questions` — the tappable answers,
+            // without which a clarifying question is just an empty box
+            // that costs more effort than the vague request did.
+            questionSuggestions: clarification.suggestions,
+          },
           // Settled as its OWN feature, not as agent_build.
           //
           // A build that stops here made one small classification call.

@@ -58,6 +58,31 @@ const user = () => ({
 const BUILD_DELAY_MS = 6000;
 let anthropicCalls = 0;
 
+// What the clarifying-questions pre-check comes back with.
+//
+// Mutable because the two things worth testing about it are opposites: a
+// clear request must sail past it (every section before 9), and a vague
+// one must stop and ASK — with answers the user can tap. Section 9 flips
+// this and drives the real UI against it.
+//
+// The field names are the tool schema's, not invented ones: needing a
+// second look at lib/clarification.ts to write this fake is the point,
+// because a stub that agrees with a schema nobody checked is how a parser
+// bug survives its own test.
+// needsClarification, camelCase — the field name in CLARIFICATION_TOOL's
+// input_schema. Written snake_case first, and the symptom was a build that
+// completed normally with no questions anywhere: parseClarificationResult
+// reads `input.needsClarification`, a snake_case key is simply absent, and
+// "absent" parses to "no questions needed". The fake was wrong, not the
+// parser — the same trap this file's build payload already documents, and
+// the reason a stub is only worth what it was checked against.
+let clarifyAnswer = { needsClarification: false, questions: [] };
+const CLARIFY_QUESTIONS = [
+  { question: "How often should it run?", suggestions: ["Every morning", "Weekly", "Every Monday"] },
+  { question: "Where should it look?", suggestions: ["Official sources", "Anywhere reputable"] },
+  { question: "What if there is nothing that day?", suggestions: ["Say nothing", "Tell me anyway"] },
+];
+
 const anthropic = http.createServer((req, res) => {
   let body = "";
   req.on("data", (c) => (body += c));
@@ -96,7 +121,7 @@ const anthropic = http.createServer((req, res) => {
           ],
         }
       : isClarify
-      ? { needs_clarification: false, questions: [] }
+      ? clarifyAnswer
       : {
           // The REAL field names from agent-builder's tool schema. My first
           // version used snake_case and the job completed with
@@ -190,6 +215,18 @@ function matches(row, params) {
     } else if (op === "in") {
       const list = value.replace(/^\(|\)$/g, "").split(",").map((v) => v.replace(/^"|"$/g, ""));
       if (!list.includes(String(row[key]))) return false;
+    } else if (op === "is") {
+      // `?consumed_at=is.null` — how PostgREST spells IS NULL, and the
+      // filter the "have they seen this yet?" query is built on. Handled
+      // as a real null test rather than as a string compare: `eq.null`
+      // would match the STRING "null", which is exactly the kind of stub
+      // shortcut that makes a broken filter look like a working one.
+      const want = value === "null" ? null : value === "true" ? true : value === "false" ? false : value;
+      if (want === null) {
+        if (row[key] !== null && row[key] !== undefined) return false;
+      } else if (row[key] !== want) {
+        return false;
+      }
     }
   }
   return true;
@@ -252,6 +289,10 @@ const supa = http.createServer((req, res) => {
           reservation_id: null,
           started_at: null,
           finished_at: null,
+          // Explicitly null, like the column's default. Leaving it absent
+          // would make `consumed_at=is.null` match on "the key is not
+          // there", which is not the same question the database answers.
+          consumed_at: null,
           created_at: now,
           updated_at: now,
           ...(parsed ?? {}),
@@ -465,11 +506,60 @@ try {
   console.log("\n== 6. coming back, the page finds the job by itself ==");
   // The mount query is what makes this work in a new tab, a new browser,
   // or after a cleared cache — none of which a localStorage id survives.
+  //
+  // THIS ASSERTION USED TO SAY THE OPPOSITE, and the old wording is the
+  // bug. It read "reports nothing running now that it is done" and passed
+  // — while the draft the user had just paid for sat in a row no screen in
+  // the app could reach. Being unable to see your own finished work is not
+  // a neutral outcome: the only move left is to ask for it again, and that
+  // second ask is a second real charge.
+  // SECTION 4 ALREADY PROVED THE FIRST HALF WITHOUT MEANING TO. It opened
+  // /dashboard/agents in this context — and that page found the finished
+  // draft, rendered it, and reported it seen. So the honest first
+  // assertion here is not "nothing is offered": it is that the draft was
+  // offered, shown, and marked, which is the whole mechanism running
+  // end-to-end without a single assertion asking it to.
+  check(
+    "the page opened in section 4 found the finished draft and marked it seen",
+    jobs.get(jobId)?.consumed_at != null,
+    `consumed_at=${jobs.get(jobId)?.consumed_at}`
+  );
   const recovered = await page2.evaluate(async () => (await (await fetch("/api/jobs?kind=agent_build")).json()));
-  check("the 'anything running?' query answers", recovered.ok === true);
-  check("and reports nothing running now that it is done", recovered.job === null);
+  check("the 'where was I?' query answers", recovered.ok === true);
+  check("and having been seen, it is not offered again", recovered.job === null, JSON.stringify(recovered.job ?? null).slice(0, 200));
+
+  // Put the ROW back to never-seen — a database state, not an app action —
+  // so the offer itself can be checked rather than the page that consumed
+  // it. Nothing else about the job is touched.
+  jobs.get(jobId).consumed_at = null;
+  const offered = await page2.evaluate(async () => (await (await fetch("/api/jobs?kind=agent_build")).json()));
+  check(
+    "an unseen finished draft IS handed back",
+    offered.job?.id === jobId && offered.job?.status === "done",
+    JSON.stringify(offered.job ?? null).slice(0, 200)
+  );
+  check("with the draft itself in it, ready to render", offered.job?.result?.draft?.name === "Nvidia Daily News");
+  check("and the request that was typed, so a resumed page is not blank", typeof offered.job?.input?.request === "string");
+  check("marked as never seen", offered.job?.consumedAt === null);
+
+  const marked = await page2.evaluate(
+    async (id) => (await (await fetch(`/api/jobs/${id}/consume`, { method: "POST" })).json()),
+    jobId
+  );
+  check("it can be marked seen", marked.ok === true && typeof marked.consumedAt === "string", JSON.stringify(marked));
+  const afterSeen = await page2.evaluate(async () => (await (await fetch("/api/jobs?kind=agent_build")).json()));
+  check("after which it is NOT offered again", afterSeen.job === null, JSON.stringify(afterSeen.job ?? null).slice(0, 200));
+  const markedTwice = await page2.evaluate(
+    async (id) => (await (await fetch(`/api/jobs/${id}/consume`, { method: "POST" })).json()),
+    jobId
+  );
+  check("marking it twice is fine, not an error", markedTwice.ok === true && markedTwice.alreadyConsumed === true);
+
+  // It is a mark, not a delete. The row, the result and the credit record
+  // are all exactly where they were.
   const done = await page2.evaluate(async () => (await (await fetch("/api/jobs?kind=agent_build&active=0")).json()));
   check("while the finished job is still findable", done.job?.id === jobId);
+  check("with its result intact", done.job?.result?.draft?.name === "Nvidia Daily News");
 
   console.log("\n== 6b. mission_plan: same test, same guarantees ==");
   {
@@ -587,6 +677,176 @@ try {
   check("neither re-ran the finished job", raced.every((r) => r.ran === false), JSON.stringify(raced));
   check(`and nothing settled again (${settlementsBeforeRace} -> ${settlements})`, settlements === settlementsBeforeRace);
   await ctx2.close();
+
+  // -------------------------------------------------------------------
+  console.log("\n== 8. THE ACCEPTANCE TEST, in a real browser, on the real UI ==");
+  // -------------------------------------------------------------------
+  // The four steps from the brief, in order, driven through the same
+  // buttons a person presses:
+  //
+  //   1. start an agent build
+  //   2. change page in the middle of it
+  //   3. come back — THE PREVIEW MUST BE THERE
+  //   4. see it, leave, come back again — IT MUST NOT COME BACK
+  //
+  // Step 3 is the money. Before consumed_at it failed: the page asked
+  // "anything running?", the answer was "no" because the job had
+  // finished, and the paid-for draft was unreachable. The user's only
+  // option was to press Design again and pay again.
+  {
+    const ctxA = await newContext();
+    const pageA = await ctxA.newPage();
+    const AGENTS = `http://127.0.0.1:${PORT}/dashboard/agents`;
+    const ELSEWHERE = `http://127.0.0.1:${PORT}/dashboard/mission`;
+    const bodyText = () => pageA.evaluate(() => document.body.innerText);
+
+    await pageA.goto(AGENTS, { waitUntil: "networkidle", timeout: 60000 });
+    await pageA.getByRole("button", { name: "New agent" }).click();
+    await pageA.locator("#agent-request").fill("Every morning, summarise the most important Nvidia news.");
+    const jobsBefore = jobs.size;
+    await pageA.getByRole("button", { name: "Design my agent" }).click();
+
+    // Wait for the ROW to exist rather than for a spinner: the row is what
+    // the rest of this depends on, and a spinner can be a render away from
+    // a request that never left.
+    let started = false;
+    for (let i = 0; i < 40 && !started; i++) {
+      await new Promise((r) => setTimeout(r, 250));
+      started = jobs.size > jobsBefore;
+    }
+    check("1. pressing Design starts a background job", started, `jobs=${jobs.size}, before=${jobsBefore}`);
+    const uiJobId = [...jobs.keys()].pop();
+
+    // 2. AWAY, mid-build. The worker is six seconds into a call that has
+    //    not returned.
+    await pageA.goto(ELSEWHERE, { waitUntil: "networkidle", timeout: 60000 });
+    const midFlight = jobs.get(uiJobId)?.status;
+    check(`2. the page changed while the build was still going (status=${midFlight})`, midFlight === "queued" || midFlight === "running");
+
+    await new Promise((r) => setTimeout(r, BUILD_DELAY_MS + 8000));
+    check(`   the worker finished anyway (status=${jobs.get(uiJobId)?.status})`, jobs.get(uiJobId)?.status === "done");
+    check("   and it was never seen", jobs.get(uiJobId)?.consumed_at == null);
+
+    // 3. BACK. This is the step that used to be impossible.
+    await pageA.goto(AGENTS, { waitUntil: "networkidle", timeout: 60000 });
+    const sawPreview = await pageA
+      .waitForFunction(() => document.body.innerText.includes("Here's what I'll build"), { timeout: 25000 })
+      .then(() => true)
+      .catch(() => false);
+    check("3. COMING BACK, THE PREVIEW IS THERE", sawPreview, (await bodyText()).slice(0, 700));
+    const previewBody = await bodyText();
+    check("   showing the agent that was designed", previewBody.includes("Nvidia Daily News"), previewBody.slice(0, 500));
+    check(
+      "   and the sentence that was typed, so the panel is not blank",
+      (await pageA.locator("#agent-request").inputValue()).includes("Nvidia")
+    );
+
+    // Rendering it IS the sighting — nothing was clicked.
+    let markedSeen = false;
+    for (let i = 0; i < 40 && !markedSeen; i++) {
+      await new Promise((r) => setTimeout(r, 250));
+      markedSeen = jobs.get(uiJobId)?.consumed_at != null;
+    }
+    check("   seeing it is what marks it seen — no click required", markedSeen, `consumed_at=${jobs.get(uiJobId)?.consumed_at}`);
+
+    // 4. AWAY AND BACK AGAIN.
+    await pageA.goto(ELSEWHERE, { waitUntil: "networkidle", timeout: 60000 });
+    await pageA.goto(AGENTS, { waitUntil: "networkidle", timeout: 60000 });
+    await pageA.waitForTimeout(5000);
+    const secondVisit = await bodyText();
+    check("4. IT DOES NOT COME BACK A SECOND TIME", !secondVisit.includes("Here's what I'll build"), secondVisit.slice(0, 500));
+    check("   and no draft is on the page at all", !secondVisit.includes("Nvidia Daily News"), secondVisit.slice(0, 500));
+
+    // And nothing was destroyed to achieve it.
+    const stillThere = await pageA.evaluate(async () => (await (await fetch("/api/jobs?kind=agent_build&active=0")).json()));
+    check("   the job row is untouched — this is a mark, not a delete", stillThere.job?.id === uiJobId, JSON.stringify(stillThere.job ?? null).slice(0, 200));
+    check(
+      `   and the build ran exactly once for one charge (${jobs.get(uiJobId)?.attempts} attempt)`,
+      jobs.get(uiJobId)?.attempts === 1
+    );
+    await ctxA.close();
+  }
+
+  // -------------------------------------------------------------------
+  console.log("\n== 9. the clarifying questions actually reach the screen ==");
+  // -------------------------------------------------------------------
+  // The reported symptom was "needsClarification exists in the build
+  // response but never fires". The cause was the system prompt, not the
+  // wiring — so this proves the wiring end to end by making the check say
+  // yes and then looking at what a real browser renders.
+  //
+  // Everything after the fake's answer is the real thing: the real
+  // handler, the real parser, the real job row, the real component.
+  {
+    clarifyAnswer = { needsClarification: true, questions: CLARIFY_QUESTIONS };
+    const ctxQ = await newContext();
+    const pageQ = await ctxQ.newPage();
+    const AGENTS = `http://127.0.0.1:${PORT}/dashboard/agents`;
+    await pageQ.goto(AGENTS, { waitUntil: "networkidle", timeout: 60000 });
+    await pageQ.getByRole("button", { name: "New agent" }).click();
+    await pageQ.locator("#agent-request").fill("Keep me updated on my competitors");
+    await pageQ.getByRole("button", { name: "Design my agent" }).click();
+
+    const asked = await pageQ
+      .waitForFunction(() => document.body.innerText.includes("How often should it run?"), { timeout: 40000 })
+      .then(() => true)
+      .catch(() => false);
+    const bodyQ = await pageQ.evaluate(() => document.body.innerText);
+    // The ROW, not just the pixels. "The questions did not appear" has
+    // three very different causes — the job failed, the check said no, or
+    // the screen dropped what it was given — and only the row can say
+    // which, so it is printed rather than guessed at.
+    const askJob = [...jobs.values()].filter((j) => j.kind === "agent_build").pop();
+    check(
+      "a vague request is asked about instead of guessed at",
+      asked,
+      `job=${JSON.stringify({ status: askJob?.status, error: askJob?.error, result: askJob?.result })}\n        page=${bodyQ.replace(/\s+/g, " ").slice(-400)}`
+    );
+    check("   all three questions are shown", /Where should it look\?/.test(bodyQ) && /nothing that day/.test(bodyQ));
+
+    // (γ) the answers are tappable, not an empty box.
+    const chip = pageQ.getByRole("button", { name: "Every morning", exact: true });
+    check("   the suggested answers are real buttons", (await chip.count()) === 1);
+    await chip.click();
+    await pageQ.waitForTimeout(200);
+    const filled = await pageQ.locator("#clarify-0").inputValue();
+    check(`   tapping one fills that answer ("${filled}")`, filled === "Every morning");
+    check("   and marks itself chosen", (await chip.getAttribute("aria-pressed")) === "true");
+    await chip.click();
+    await pageQ.waitForTimeout(200);
+    check("   tapping it again clears it", (await pageQ.locator("#clarify-0").inputValue()) === "");
+    await chip.click();
+    await pageQ.waitForTimeout(200);
+
+    // (γ) Skip is always there.
+    check("   Skip is on the screen", (await pageQ.getByRole("button", { name: "Skip, build it anyway" }).count()) === 1);
+
+    // The answer is folded back into the ORIGINAL request and resubmitted
+    // with skipClarification, so the second pass is not asked again.
+    const jobsBeforeAnswer = jobs.size;
+    await pageQ.getByRole("button", { name: "Continue", exact: true }).click();
+    let secondJob = null;
+    for (let i = 0; i < 60 && !secondJob; i++) {
+      await new Promise((r) => setTimeout(r, 250));
+      if (jobs.size > jobsBeforeAnswer) secondJob = [...jobs.values()].pop();
+    }
+    check("   answering starts a second, informed build", Boolean(secondJob));
+    check(
+      "   carrying the original sentence AND the answer",
+      /Keep me updated on my competitors/.test(secondJob?.input?.request ?? "") &&
+        /Every morning/.test(secondJob?.input?.request ?? ""),
+      String(secondJob?.input?.request ?? "").slice(0, 300)
+    );
+    check("   and it does not ask the same questions again", secondJob?.input?.skipClarification === true);
+    // (δ) the check is given what the app already knows, so it cannot ask
+    // for it — captured by the route, on the FIRST pass only.
+    const firstJob = [...jobs.values()].find((j) => j.kind === "agent_build" && j.input?.skipClarification === false);
+    check("   the first pass carried the AI Life Context", typeof firstJob?.input?.knownContext === "string" && firstJob.input.knownContext.length > 0);
+    check("   the resubmission did not pay for it again", secondJob?.input?.knownContext == null);
+
+    await ctxQ.close();
+    clarifyAnswer = { needsClarification: false, questions: [] };
+  }
 } catch (err) {
   failures.push("unhandled error");
   console.log(`  FAIL  unhandled error\n        ${err.stack ?? err.message}`);

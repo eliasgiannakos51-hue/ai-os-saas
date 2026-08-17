@@ -7,7 +7,7 @@
     "signOut": "Esci",
     "jumpToPage": "Vai a un modulo o pagina...",
     "noMatches": "Nessun risultato per '{query}'",
-    "createStudio": "Studio di creazione",
+    "createStudio": "Crea qualsiasi cosa",
     "cancel": "Annulla",
     "save": "Salva",
     "saving": "Salvataggio...",
@@ -65,7 +65,8 @@
     },
     "creditsUnlimited": "Illimitati",
     "whatIsThis": "Che cos'è?",
-    "moreInHelp": "Leggi di più nel Centro assistenza"
+    "moreInHelp": "Leggi di più nel Centro assistenza",
+    "examplesLabel": "Prova:"
   },
   "sidebar": {
     "groups": {
@@ -79,31 +80,32 @@
       "create": "Creare",
       "myBusiness": "La mia attività",
       "track": "Registrare",
-      "insights": "Analisi"
+      "insights": "Cosa ho notato",
+      "tracking": "Monitoraggio"
     },
     "items": {
       "home": "Home",
       "chat": "Ionexa Chat",
-      "memory": "Memoria AI",
+      "memory": "Cerca nei miei dati",
       "timeline": "Cronologia",
       "favorites": "Preferiti",
-      "missionControl": "Centro Missioni",
+      "missionControl": "Obiettivi e piani",
       "reflection": "Riflessione Settimanale",
       "settings": "Impostazioni",
       "team": "Team",
       "agents": "Agenti IA",
-      "websites": "Siti web",
-      "websiteBuilder": "Generatore di Siti",
-      "apps": "App",
-      "images": "Immagini",
-      "videos": "Video",
-      "coding": "Coding AI",
-      "dataAnalysis": "Analisi dati",
+      "websites": "Progetti di siti",
+      "websiteBuilder": "Crea un sito",
+      "apps": "Note sulle app",
+      "images": "Note sulle immagini",
+      "videos": "Note sui video",
+      "coding": "Note di sviluppo",
+      "dataAnalysis": "Note sulle analisi",
       "documents": "Documenti",
       "presentations": "Note di presentazione",
-      "campaigns": "Campagne",
+      "campaigns": "Note sulle campagne",
       "analytics": "Analytics",
-      "finance": "Agente Finanza",
+      "finance": "Finanze",
       "content": "Contenuti",
       "sales": "Vendite",
       "products": "Prodotti",
@@ -118,7 +120,7 @@
       "productWorkflow": "Flusso Prodotto",
       "automation": "Automazione",
       "marketplace": "Mercato",
-      "published": "Siti pubblicati",
+      "published": "Siti online",
       "integrations": "Integrazioni",
       "files": "File",
       "deepResearch": "Ricerca approfondita",
@@ -787,7 +789,7 @@
       }
     },
     "memory": {
-      "title": "Memoria AI",
+      "title": "Cerca nei miei dati",
       "description": "Cerca tutto ciò che hai registrato, in ogni modulo — senza dover ricordare dove l'hai messo.",
       "searchPlaceholder": "Cerca in tutto ciò che hai registrato...",
       "resultCount": "{count, plural, =0 {nessun risultato} one {# risultato} other {# risultati}} in tutti i moduli",
@@ -850,7 +852,8 @@
       "pinLimitReached": "Hai fissato {limit} conversazioni, il massimo che il tuo piano tiene in alto. Liberane una per fissare questa.",
       "pinError": "Il fissaggio non è stato salvato. Riprova.",
       "renameError": "Il nuovo nome non è stato salvato: resta quello precedente.",
-      "renameLabel": "Nuovo nome per «{title}»"
+      "renameLabel": "Nuovo nome per «{title}»",
+      "emptyHint": "Chiedi qualsiasi cosa: cultura generale, idee, aiuto nella scrittura o solo due chiacchiere."
     },
     "create": {
       "title": "Crea Qualsiasi Cosa",
@@ -881,7 +884,7 @@
       }
     },
     "mission": {
-      "title": "Centro Missioni",
+      "title": "Obiettivi e piani",
       "started": "Iniziato {time}",
       "description": "Planner → Builder → Reviewer — descrivi un obiettivo, ottieni un piano, poi costruiscilo passo dopo passo con l'AI.",
       "goalLabel": "Qual è il tuo obiettivo?",
@@ -1010,7 +1013,7 @@
       "levelLabel": "Livello di energia {level}"
     },
     "websiteBuilder": {
-      "title": "Generatore di Siti",
+      "title": "Crea un sito",
       "description": "Descrivi cosa vuoi e l'AI genera un sito web reale e completo — anteprima immediata, scarica l'HTML.",
       "nameLabel": "Nome",
       "namePlaceholder": "es. Landing Page Coaching",
@@ -1166,7 +1169,7 @@
       "clarifyAnswerPlaceholder": "La tua risposta..."
     },
     "createStudio": {
-      "title": "Studio di creazione",
+      "title": "Crea qualsiasi cosa",
       "subtitle": "Descrivi in una frase quello che vuoi. Nessuno strumento da scegliere: lo studio capisce di cosa si tratta, ti mostra cosa ha compreso e solo dopo lo crea.",
       "inputLabel": "Cosa vuoi creare?",
       "inputPlaceholder": "es. Una landing page per la mia attività di coaching, calda e professionale",
@@ -1319,10 +1322,39 @@
         "title": "Lavoro che avviene senza di te",
         "why": "Descrivi un compito in una frase: da lì in poi gira secondo una pianificazione e ti consegna il risultato, invece di ricordarti di farlo.",
         "example": "Ogni lunedì mattina, un riepilogo delle vendite della settimana"
+      },
+      "delivery": {
+        "label": "Dove arriva il risultato",
+        "channels": {
+          "email": "Email",
+          "slack": "Slack",
+          "telegram": "Telegram",
+          "discord": "Discord",
+          "in_app": "Nell’app"
+        },
+        "emailNote": "Inviato a {email}, l’indirizzo del tuo account.",
+        "inAppNote": "Resta nell’app, nelle tue notifiche. Niente esce da Ionexa.",
+        "slackNotConnected": "Collega prima Slack in Integrazioni.",
+        "slackChannelLabel": "Canale Slack",
+        "telegramHelp": "Crea un bot con @BotFather, mandagli un messaggio, poi incolla il token e il tuo chat id.",
+        "telegramTokenPlaceholder": "Token del bot",
+        "telegramChatPlaceholder": "Chat id, es. 123456789",
+        "telegramTokenInvalid": "Non sembra un token di bot Telegram.",
+        "telegramChatInvalid": "Non sembra un chat id di Telegram.",
+        "telegramConnected": "Collegato alla chat {chat} · token {hint}",
+        "discordHelp": "Nel tuo canale Discord: Impostazioni → Integrazioni → Webhook → Nuovo webhook, poi copia l’indirizzo.",
+        "discordUrlPlaceholder": "Indirizzo webhook di Discord",
+        "discordUrlInvalid": "Questo non è un indirizzo webhook di Discord.",
+        "discordConnected": "Collegato · webhook {hint}",
+        "connect": "Collega e invia una prova",
+        "connectSuccess": "Collegato — un messaggio di prova è arrivato.",
+        "connectFailed": "Non è stato possibile collegare quel canale.",
+        "disconnect": "Scollega",
+        "disconnected": "Scollegato."
       }
     },
     "publishing": {
-      "title": "Siti pubblicati",
+      "title": "Siti online",
       "description": "I tuoi siti, online sul web.",
       "analyticsNotice": "Contiamo le visualizzazioni al giorno e nient'altro: nessun cookie, nessun tracciamento dei visitatori, nessun dato personale registrato su chi visita i tuoi siti.",
       "goToBuilder": "Creatore di siti",
@@ -1508,10 +1540,6 @@
       "emptyExample": "Ad es. «Cosa dice il contratto sulla disdetta?»",
       "askDisabledNoFiles": "Spunta prima almeno un file qui sopra.",
       "askDisabledNoQuestion": "Scrivi la tua domanda per continuare.",
-      "examplesLabel": "Prova:",
-      "example1": "Cosa dice sulla disdetta?",
-      "example2": "Riassumi i punti principali.",
-      "example3": "Quali sono le scadenze e gli importi?",
       "processingHint": "Sto leggendo il file — di solito pochi secondi. Potrai interrogarlo appena è pronto.",
       "failedHint": "Nessun testo leggibile trovato. Carica una versione con testo selezionabile.",
       "askStillRunning": "Sta ancora leggendo — ci vuole un po'. Continua anche a pagina chiusa; torna e richiedi per vedere la risposta.",
@@ -1681,6 +1709,12 @@
       "cardCompetitors": "Concorrenti:",
       "cardMarketSize": "Dimensione del mercato:",
       "cardMvp": "Prodotto minimo funzionante:"
+    },
+    "backgroundWork": {
+      "working": "Sto ancora elaborando la tua ultima richiesta: si completerà anche se lasci questa pagina.",
+      "finished": "La tua ultima richiesta è stata completata mentre eri via.",
+      "open": "Aprila",
+      "dismiss": "Chiudi"
     }
   },
   "module": {
@@ -1738,7 +1772,14 @@
       "campaigns": "Lancio di settembre — email + LinkedIn",
       "presentations": "Aggiornamento al board Q3 — punti chiave",
       "ideas": "Una newsletter per chi ha lasciato i fogli di calcolo"
-    }
+    },
+    "emptyWebsitePlans": "Qui non c’è ancora nulla. È il posto dove annoti i siti che stai progettando: non li costruisce. Per farne creare uno, usa «Crea un sito».",
+    "emptyApps": "Qui non c’è ancora nulla. È il posto per tenere traccia delle app che stai progettando o hai già fatto: non le crea per te. Usa il pulsante sopra.",
+    "emptyImages": "Qui non c’è ancora nulla. È il posto per tenere traccia delle immagini che ti servono o hai già fatto: non genera immagini. Usa il pulsante sopra.",
+    "emptyVideos": "Qui non c’è ancora nulla. È il posto per tenere traccia dei video che stai progettando o hai già fatto: non genera video. Usa il pulsante sopra.",
+    "emptyCoding": "Qui non c’è ancora nulla. È il posto per tenere traccia del lavoro di sviluppo che stai progettando o hai già fatto: non scrive codice. Usa il pulsante sopra.",
+    "emptyDataAnalysis": "Qui non c’è ancora nulla. È il posto per tenere traccia delle analisi che stai progettando o hai già fatto: non analizza i tuoi dati. Usa il pulsante sopra.",
+    "emptyCampaigns": "Qui non c’è ancora nulla. È il posto per tenere traccia delle campagne che stai progettando o hai già fatto: non le esegue. Usa il pulsante sopra."
   },
   "askAi": {
     "buttonLabel": "Chiedi all'IA",
@@ -2059,32 +2100,32 @@
       },
       "websites": {
         "title": "Ogni sito che stai pianificando",
-        "why": "Una riga per sito: il brief, l'indirizzo e a che punto è, così niente di importante vive solo in una scheda del browser.",
+        "why": "Una riga per sito: il brief, l'indirizzo e a che punto è, così niente di importante vive solo in una scheda del browser. Non li costruisce.",
         "example": "Landing page per il lancio di primavera"
       },
       "apps": {
         "title": "Ogni app in elenco",
-        "why": "Cosa fa, a quale piattaforma punta e a che punto è: dal primo schizzo alla pubblicazione sullo store.",
+        "why": "Cosa fa, a quale piattaforma punta e a che punto è: dal primo schizzo alla pubblicazione sullo store. Non le crea per te.",
         "example": "App iOS per prenotare appuntamenti"
       },
       "images": {
         "title": "Le immagini che ti servono",
-        "why": "Conserva il prompt, non solo l'immagine: un prompt che puoi rileggere è un prompt che puoi migliorare.",
+        "why": "Conserva il prompt, non solo l'immagine: un prompt che puoi rileggere è un prompt che puoi migliorare. Non genera immagini.",
         "example": "Foto di prodotto su sfondo bianco"
       },
       "videos": {
         "title": "I video che hai in programma",
-        "why": "Il brief di ogni video e a che punto è, così la lista delle riprese non resta mai solo nella tua testa.",
+        "why": "Il brief di ogni video e a che punto è, così la lista delle riprese non resta mai solo nella tua testa. Non genera video.",
         "example": "Demo del prodotto da 30 secondi"
       },
       "coding": {
         "title": "Le cose che vuoi far costruire",
-        "why": "Descrivi la funzionalità o la correzione, indica il linguaggio e tieni tutto il backlog da qualche parte che non sia la tua testa.",
+        "why": "Descrivi la funzionalità o la correzione, indica il linguaggio e tieni tutto il backlog da qualche parte che non sia la tua testa. Non scrive codice.",
         "example": "Uno script che unisce i CSV mensili"
       },
       "dataAnalysis": {
         "title": "Le domande a cui i tuoi dati sanno rispondere",
-        "why": "La domanda, la fonte a cui va e il risultato quando torna: così una risposta non si trova mai due volte.",
+        "why": "La domanda, la fonte a cui va e il risultato quando torna: così una risposta non si trova mai due volte. Non analizza i tuoi dati.",
         "example": "Quale canale porta i clienti che restano"
       },
       "presentations": {
@@ -2094,7 +2135,7 @@
       },
       "campaigns": {
         "title": "Ogni campagna, e quanto è costata",
-        "why": "Canale, budget e stato uno accanto all'altro, così la prossima decisione di budget nasce dai numeri e non a sensazione.",
+        "why": "Canale, budget e stato uno accanto all'altro, così la prossima decisione di budget nasce dai numeri e non a sensazione. Non le esegue.",
         "example": "Campagna email di primavera, budget 500 €"
       }
     },
@@ -2362,6 +2403,51 @@
         "what": "Questa operazione non è stata completata.",
         "next": "Riprova e contatta l'assistenza se succede di nuovo."
       }
+    }
+  },
+  "aiExamples": {
+    "createStudio": {
+      "e1": "Creami una pagina per il mio negozio",
+      "e2": "Un piano per trovare clienti",
+      "e3": "Idea: un abbonamento per piccole imprese",
+      "e4": "Ogni lunedì ricordami di controllare i conti",
+      "limits": "Crea cose dentro Ionexa · Non tocca nulla che non hai collegato"
+    },
+    "agents": {
+      "e1": "Ogni mattina mandami le notizie su Nvidia",
+      "e2": "Ogni lunedì un riepilogo dei miei concorrenti",
+      "e3": "Avvisami se qualcuno scrive del mio settore",
+      "limits": "Cerca sul web e ti scrive · Non esegue azioni e invia solo dove hai scelto"
+    },
+    "mission": {
+      "e1": "Trova 10 clienti per la mia attività",
+      "e2": "Prepara un piano di lancio per un nuovo prodotto",
+      "e3": "Aumenta le vendite del 20% in tre mesi",
+      "limits": "Scrive il piano e i passi · Un passo parte solo quando lo programmi"
+    },
+    "websiteBuilder": {
+      "e1": "Un caffè a Salonicco con menù e orari",
+      "e2": "Il portfolio di un fotografo con galleria",
+      "e3": "Una landing page per un SaaS, con i prezzi",
+      "limits": "Una pagina, non un negozio né un’app · Non si collega ai tuoi sistemi"
+    },
+    "files": {
+      "e1": "Cosa dice il contratto sulla disdetta?",
+      "e2": "Confronta le due offerte",
+      "e3": "Quali sono le scadenze e gli importi?",
+      "limits": "Risponde solo dai file che hai scelto · Non cerca sul web"
+    },
+    "research": {
+      "e1": "Concorrenti del mio settore in Grecia",
+      "e2": "Perché falliscono le startup di IA",
+      "e3": "Modelli di prezzo SaaS nel 2026",
+      "limits": "Legge fonti pubbliche sul web · Non vede i tuoi file"
+    },
+    "chat": {
+      "e1": "Cosa dovrei mettere per primo questa settimana?",
+      "e2": "Spiegami i numeri del mese",
+      "e3": "Scrivi un’email a un cliente in ritardo con il pagamento",
+      "limits": "Vede i tuoi dati su Ionexa e ciò che hai collegato · Non agisce da solo"
     }
   }
 }

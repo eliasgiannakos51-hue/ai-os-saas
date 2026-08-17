@@ -1,3 +1,4 @@
+import "server-only";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
@@ -24,6 +25,10 @@ import { getTranslations } from "next-intl/server";
  *
  * The suffix — "%s — Ionexa AI" — stays in app/layout.tsx's title template
  * and stays untranslated on purpose: it is the product name.
+ *
+ * `server-only` because getTranslations is the SERVER translator: imported
+ * from a client component this fails at build time with a clear message,
+ * rather than at request time with a confusing one.
  */
 export async function pageTitle(titleKey: string): Promise<Metadata> {
   const t = await getTranslations();

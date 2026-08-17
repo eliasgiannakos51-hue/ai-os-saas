@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { pageTitle } from "@/lib/page-title";
+import type { Metadata } from "next";
 import { BuildModulePage } from "@/components/modules/build-module-page";
 import { BUILD_MODULES } from "@/lib/build-modules";
 import { MODULE_ICONS } from "@/lib/module-icons";

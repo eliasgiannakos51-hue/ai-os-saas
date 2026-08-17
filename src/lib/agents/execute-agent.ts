@@ -34,7 +34,7 @@ import {
   sendAgentPausedNoCreditsEmail,
 } from "@/lib/email/send-agent-emails";
 import { deliverAgentResult } from "@/lib/agents/deliver";
-import { normaliseAgentConfig, type UserAgent } from "@/lib/agents/agent-config";
+import { normaliseAgentConfig, type UserAgent, type AgentDeliveryMethod } from "@/lib/agents/agent-config";
 
 // ONE execution of one agent, end to end: rate limit, circuit breaker,
 // credit hold, run (with retries), settle, deliver, reschedule.
@@ -54,7 +54,7 @@ export type ExecuteAgentResult =
       /** True only when the result actually reached the user. Named for the
        *  outcome rather than the transport, since V3 Task 3 added Slack. */
       delivered: boolean;
-      deliveredVia: "email" | "slack" | null;
+      deliveredVia: AgentDeliveryMethod | null;
       /** Why it did not arrive, when it did not. */
       deliveryIssue?: string;
     }
@@ -350,7 +350,11 @@ export async function executeAgent(params: {
 
   // ---- success path (including "nothing to report") -----------------
   const output = outcome.ok ? outcome.output : null;
-  let delivery: { delivered: boolean; via: "email" | "slack" | null; reason?: string } = {
+  // Typed from the channel registry rather than from a literal union: the
+  // union here was "email" | "slack", and widening the registry without
+  // widening this would have been a type error at best and a silently
+  // mis-recorded delivery at worst.
+  let delivery: { delivered: boolean; via: AgentDeliveryMethod | null; reason?: string } = {
     delivered: false,
     via: null,
   };

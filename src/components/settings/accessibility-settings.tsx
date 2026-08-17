@@ -28,7 +28,7 @@ function ToggleSwitch({
       aria-checked={checked}
       aria-label={label}
       onClick={onChange}
-      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ${
+      className={`relative -my-2.5 inline-flex h-11 w-11 shrink-0 items-center rounded-full bg-clip-content py-2.5 transition-colors duration-200 ${
         checked ? "bg-orange-500" : "bg-panel-hover"
       }`}
     >

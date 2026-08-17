@@ -99,6 +99,36 @@ alter table public.help_articles add column if not exists href text;
 create unique index if not exists help_articles_slug_locale_uidx
   on public.help_articles (slug, locale);
 
+-- CATEGORY IS CLOSED. LOCALE IS NOT. The asymmetry is the point.
+--
+-- A new language must be an INSERT and never a schema change, so `locale`
+-- stays open text — that is what lets the eleventh language ship without a
+-- migration, and an unreachable row in a locale the app does not serve is
+-- simply never selected.
+--
+-- A category is different: /help GROUPS by it, so a typo'd category does
+-- not produce an unreachable row, it produces a row that renders under a
+-- heading nobody wrote, or vanishes from a grouped page while still
+-- existing in the table. There are eleven of them, they are a property of
+-- the page's layout rather than of the content, and adding one is a
+-- deliberate act. So it is checked.
+do $category_check$
+begin
+  if not exists (
+    select 1 from pg_constraint
+     where conname = 'help_articles_category_check'
+       and conrelid = 'public.help_articles'::regclass
+  ) then
+    alter table public.help_articles
+      add constraint help_articles_category_check
+      check (category in (
+        'getting-started', 'billing', 'credits', 'websites', 'agents',
+        'missions', 'account', 'chat', 'files', 'integrations', 'privacy'
+      ));
+  end if;
+end
+$category_check$;
+
 -- The loader's read path: everything published in one locale, in order.
 create index if not exists help_articles_locale_published_idx
   on public.help_articles (locale, published, category, "order");

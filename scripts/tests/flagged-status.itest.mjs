@@ -14,6 +14,19 @@ import { startEphemeralPostgres, psqlArgs } from "../lib/ephemeral-postgres.mjs"
 const execFileAsync = promisify(execFile);
 const ROOT = process.cwd();
 
+// THE FILE PRODUCTION ACTUALLY RAN, read from archive/ rather than from the
+// repository root, where it used to live.
+//
+// archive/README.md says nothing in that directory may be RUN against a
+// database, and that is right: between them those files carry 124
+// `drop table if exists ... cascade`. Reading one to REPLAY A PAST STATE
+// inside a throwaway cluster is the opposite situation — it is the only
+// honest way to ask "does the new constraint migration behave on a database
+// that ran the old one", because the old one is what the live database
+// ran. Copying its contents into this file instead would let the copy drift
+// into a version that conveniently passes.
+const OLD_STATUS_MIGRATION = "archive/website_status_migration.sql";
+
 // The statuses the application can write, read from the type itself rather
 // than copied — a copy would drift exactly the way the constraint did.
 const TYPE_SOURCE = readFileSync(path.join(ROOT, "src/types/user-website.ts"), "utf8");
@@ -113,7 +126,7 @@ try {
   // It used to install the narrow constraint — and because it drops before
   // re-adding, running it after a correct schema silently narrowed that too.
   await freshTable();
-  applyFile(path.join(ROOT, "website_status_migration.sql"));
+  applyFile(path.join(ROOT, OLD_STATUS_MIGRATION));
 
   const rejectedAfter = [];
   for (const status of STATUSES) if (!(await canWrite(status))) rejectedAfter.push(status);
@@ -133,11 +146,11 @@ try {
   // The order hazard, in the order that used to break.
   await freshTable();
   applyFile(path.join(ROOT, "supabase/migrations/20260813_flagged_status_constraint.sql"));
-  applyFile(path.join(ROOT, "website_status_migration.sql"));
+  applyFile(path.join(ROOT, OLD_STATUS_MIGRATION));
   check("'flagged' survives the standalone migration running last", await canWrite("flagged"), true);
 
   await freshTable();
-  applyFile(path.join(ROOT, "website_status_migration.sql"));
+  applyFile(path.join(ROOT, OLD_STATUS_MIGRATION));
   applyFile(path.join(ROOT, "supabase/migrations/20260813_flagged_status_constraint.sql"));
   check("'flagged' works in the other order too", await canWrite("flagged"), true);
 

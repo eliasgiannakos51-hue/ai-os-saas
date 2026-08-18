@@ -4,6 +4,28 @@ Work that is known, understood and deliberately not done yet. Each entry
 says what is wrong, what it costs to leave, and what fixing it involves —
 so a decision to defer stays a decision rather than becoming an accident.
 
+## V4: Changelog, Feature requests, Affiliate
+
+Pulled out of the V3 build list on explicit instruction — not being built
+in this pass. Recorded here so "not now" stays a decision on paper rather
+than something that has to be re-remembered from a chat log.
+
+- **Changelog.** A public page (or in-app panel) listing what shipped,
+  when. Nothing in the codebase produces this today — no structured
+  record of releases exists to render it from; it would need one built
+  first (a table, or a hand-maintained file) before any UI is worth
+  writing.
+- **Feature requests.** A place for users to submit and vote on what to
+  build next. No submission table, no voting mechanism, no moderation
+  path exist yet — this is a new subsystem, not a page.
+- **Affiliate (program).** Referral tracking, payout accounting, and
+  whatever UI a partner sees. Touches billing (payouts) and needs its own
+  data model; not a small addition on top of what exists.
+
+None of the three block anything already built or already promised on
+/roadmap or /pricing — they were never listed as shipped or as "soon"
+there. Revisit when V4 planning starts.
+
 ## Done: Help Centre migration to a table with a locale column
 
 `/help` used to show Greek to nine of the ten languages: the 27 articles

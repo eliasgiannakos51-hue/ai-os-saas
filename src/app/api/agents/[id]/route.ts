@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { isAdminEmail } from "@/lib/admin";
+import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
+import { maxAgentsForPlan } from "@/lib/agents/agent-limits";
+import { checkAgentActivationCap } from "@/lib/agents/agent-cap";
 import {
   AGENT_LIMITS,
   sanitiseAgentText,
@@ -150,6 +154,31 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       if (status === "active" && agent.consecutive_failures > 0) updates.consecutive_failures = 0;
     } else if (body.status !== undefined) {
       return NextResponse.json({ ok: false, error: "Invalid status." }, { status: 400 });
+    }
+
+    // A RESUME is the same capacity event as creating a new active agent —
+    // it moves a row from not-counted-as-active to counted-as-active — so
+    // it goes through the identical gate api/agents/route.ts uses on
+    // create. Only a genuine transition INTO active is checked: staying
+    // active (no-op) or moving to paused never consumes capacity, and an
+    // admin account has no cap to check against. See lib/agents/agent-cap.ts
+    // for why both the active and total-row checks exist, and for the
+    // known (documented, unfixed by design) TOCTOU gap shared by all three
+    // call sites of checkAgentActivationCap.
+    if (statusChanged && status === "active" && agent.status !== "active") {
+      const isAdmin = isAdminEmail(user.email);
+      if (!isAdmin) {
+        const planSlug = await resolveEffectivePlanSlug(user);
+        const cap = maxAgentsForPlan(planSlug);
+        const capCheck = await checkAgentActivationCap(user.id, cap);
+        if (!capCheck.ok) {
+          if (capCheck.reason === "check_failed") {
+            logApiError("/api/agents/[id]", new Error(capCheck.message), { stage: "count_agents", agentId });
+            return NextResponse.json({ ok: false, error: capCheck.message }, { status: 500 });
+          }
+          return NextResponse.json({ ok: false, limitReached: true, error: capCheck.message }, { status: 403 });
+        }
+      }
     }
 
     // Changing WHERE an agent sends goes through the same server-side

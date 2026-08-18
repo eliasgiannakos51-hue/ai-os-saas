@@ -7,6 +7,7 @@ import { Search, MessageCircle, FileText } from "lucide-react";
 import { ALL_SIDEBAR_GROUPS, type SidebarItem } from "@/lib/sidebar-nav";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
+import { normalizeForSearch } from "@/lib/text/search-match";
 
 // Every sidebar link is searchable here too, flattened out of its groups.
 // Every item is navigable again — the coming-soon exclusion that used to
@@ -45,14 +46,21 @@ function isFuzzyMatch(query: string, target: string): boolean {
 }
 
 function filterAndRankItems(items: SidebarItem[], rawQuery: string): SidebarItem[] {
-  const query = rawQuery.trim().toLowerCase();
+  // normalizeForSearch, not toLowerCase(): the command palette is the
+  // main way to jump anywhere in the app, and toLowerCase() alone leaves
+  // accents untouched — a Greek user typing "καφε" got no match for a
+  // sidebar item titled "Καφές". Same fold as every list search (see
+  // lib/text/search-match.ts's header for why toLowerCase is not enough),
+  // applied here to both the substring pass and the fuzzy pass below, so
+  // neither reintroduces the gap the other one closed.
+  const query = normalizeForSearch(rawQuery).trim();
   if (!query) return items;
 
   const substringMatches: { item: SidebarItem; index: number }[] = [];
   const fuzzyOnlyMatches: SidebarItem[] = [];
 
   for (const item of items) {
-    const label = item.label.toLowerCase();
+    const label = normalizeForSearch(item.label);
     const index = label.indexOf(query);
     if (index !== -1) {
       substringMatches.push({ item, index });

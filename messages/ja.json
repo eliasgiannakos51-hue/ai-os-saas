@@ -4,7 +4,6 @@
     "notifications": "通知",
     "noNotifications": "新しい通知はありません。",
     "newProject": "新規プロジェクト",
-    "signOut": "サインアウト",
     "jumpToPage": "モジュールやページに移動...",
     "noMatches": "'{query}' に一致する結果はありません",
     "createStudio": "何でもつくる",
@@ -65,7 +64,6 @@
     },
     "creditsUnlimited": "無制限",
     "whatIsThis": "これは何ですか？",
-    "moreInHelp": "ヘルプセンターで詳しく読む",
     "examplesLabel": "例："
   },
   "sidebar": {
@@ -129,7 +127,6 @@
     "groupHints": {
       "create": "サイトを生成し、目標を計画し、文書を書く。",
       "myBusiness": "お金、顧客、製品と、その状況。",
-      "track": "忘れる前にアイデア・調査・トレード・判断を残す。",
       "operations": "繰り返しの作業と複数ステップのワークフロー。",
       "insights": "やってきたことと、AI が覚えていることを振り返る。",
       "marketplace": "セットアップの共有と発見 — まだ公開していません。"
@@ -179,8 +176,6 @@
       "help": "よくある質問への回答です。クレジットは消費しません。"
     },
     "comingSoon": "近日公開",
-    "comingSoonToast": "{name} はまだ利用できません。ロードマップに入っています。",
-    "comingSoonBadge": "近日",
     "closeMenu": "メニューを閉じる"
   },
   "landing": {
@@ -588,7 +583,6 @@
       "title": "AI ペルソナ",
       "description": "アシスタントに好きな名前を付けましょう。",
       "personaUpdated": "✓ アシスタント名を更新しました",
-      "couldNotSave": "✗ 名前を保存できませんでした",
       "saveFailed": "名前を保存できませんでした。少し待ってからお試しください。"
     },
     "billing": {
@@ -641,7 +635,6 @@
       "unavailable": "レポートを読み込めませんでした。ai_cost_log が存在するか確認してください。",
       "colFeature": "機能",
       "colCalls": "操作数",
-      "colMargin": "平均マージン",
       "colCost": "実コスト",
       "hypotheticalNote": "* 課金対象外のアカウント（管理者・ベータ）を含みます。その場合の利益率は、そのプラン単価で得られたはずの値です。",
       "colCharged": "課金あり",
@@ -685,7 +678,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "最もアクティブなモジュール",
-      "totalEntriesThisWeek": "今週の合計エントリー数",
       "acrossAllModules": "全モジュール合計",
       "entry": "{count} 件のエントリー",
       "statRow": {
@@ -760,7 +752,6 @@
       "quickStartTemplates": "クイックスタートのテンプレート",
       "quickStartApplied": "✓ サンプルを {count} 件追加しました",
       "quickStart": "クイックスタート",
-      "templateApplied": "{count} 件のサンプルを追加しました",
       "templateFailed": "このテンプレートを適用できませんでした。少し待ってからお試しください — 何も追加されていません。",
       "quickStartBlurb": "サンプルをいくつか追加して、中身の入ったワークスペースがどう見えるか確かめてみてください。",
       "quickStartAdd": "追加"
@@ -872,10 +863,6 @@
       "title": "履歴",
       "allModules": "すべてのモジュール",
       "showOnly": "表示: {module}のみ",
-      "rangeToday": "今日",
-      "rangeWeek": "今週",
-      "rangeMonth": "今月",
-      "rangeAll": "すべての期間",
       "empty": {
         "title": "あなたの仕事を、起きた順に",
         "why": "自動的に書かれていきます。どのモジュールで記録したものもここに一本の流れとして集まり、「先月は結局なにをしたか」に答えられます。"
@@ -1056,7 +1043,6 @@
       "editButton": "変更を適用",
       "editApplying": "適用中...",
       "editApplied": "変更が適用されました",
-      "historyButton": "履歴",
       "historyLoading": "バージョンを読み込み中...",
       "historyEmpty": "まだバージョン履歴がありません。",
       "versionLabel": "v{number}",
@@ -1383,7 +1369,6 @@
       "confirmUnpublish": "このサイトを非公開にしますか？アドレスは保持されるので、あとで再公開できます。",
       "chooseAddress": "サイトのアドレスを決める",
       "addressLabel": "アドレス",
-      "willBeAt": "サイトのアドレスは {url} になります",
       "addressRules": "{min}〜{max} 文字。半角小文字・数字・ハイフンのみ。",
       "cancel": "キャンセル",
       "viewLive": "公開ページを見る",
@@ -1582,7 +1567,6 @@
       "finished": "レポートが完成しました",
       "inProgress": "検索して執筆中…",
       "statusPending": "計画済み",
-      "statusResearching": "調査中",
       "statusSynthesising": "執筆中",
       "statusReady": "完了",
       "statusFailed": "失敗",
@@ -1757,8 +1741,6 @@
       "az": "昇順",
       "za": "降順"
     },
-    "emptyWhat": "{module} について記録したものはすべてここにあります。",
-    "emptyWhy": "ここに記録したものはタイムラインに加わり、仕事について AI に質問したときに AI が使える情報になります。",
     "emptyExample": "この例から始める：「{example}」",
     "examples": {
       "competitors": "Notion — 価格面で最も近い競合",
@@ -1787,7 +1769,6 @@
     "emptyApps": "まだ何もありません。ここは計画中や作成済みのアプリを記録する場所で、アプリを作るわけではありません。上のボタンから追加してください。",
     "emptyImages": "まだ何もありません。ここは必要な画像や作成済みの画像を記録する場所で、画像を生成するわけではありません。上のボタンから追加してください。",
     "emptyVideos": "まだ何もありません。ここは計画中や作成済みの動画を記録する場所で、動画を生成するわけではありません。上のボタンから追加してください。",
-    "emptyCoding": "まだ何もありません。ここは計画中や完了した開発作業を記録する場所で、コードを書くわけではありません。上のボタンから追加してください。",
     "emptyDataAnalysis": "まだ何もありません。ここは計画中や実施済みの分析を記録する場所で、データを分析するわけではありません。上のボタンから追加してください。",
     "emptyCampaigns": "まだ何もありません。ここは計画中や実施済みのキャンペーンを記録する場所で、配信を行うわけではありません。上のボタンから追加してください。"
   },

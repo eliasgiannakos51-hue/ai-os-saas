@@ -4,7 +4,6 @@
     "notifications": "Notifications",
     "noNotifications": "Aucune nouvelle notification.",
     "newProject": "Nouveau projet",
-    "signOut": "Se déconnecter",
     "jumpToPage": "Aller à un module ou une page...",
     "noMatches": "Aucun résultat pour '{query}'",
     "createStudio": "Créer n’importe quoi",
@@ -65,7 +64,6 @@
     },
     "creditsUnlimited": "Illimités",
     "whatIsThis": "Qu'est-ce que c'est ?",
-    "moreInHelp": "En savoir plus dans le Centre d'aide",
     "examplesLabel": "Essayez :"
   },
   "sidebar": {
@@ -129,7 +127,6 @@
     "groupHints": {
       "create": "Générez un site, planifiez un objectif, rédigez un document.",
       "myBusiness": "Argent, clients, produits et comment ils se portent.",
-      "track": "Notez idées, recherches, trades et décisions avant de les oublier.",
       "operations": "Travail récurrent et flux en plusieurs étapes.",
       "insights": "Revoyez ce que vous avez fait et ce que l'IA retient.",
       "marketplace": "Partagez et découvrez des configurations — pas encore ouvert."
@@ -179,8 +176,6 @@
       "help": "Les réponses aux questions les plus fréquentes, sans consommer de crédits."
     },
     "comingSoon": "Bientôt",
-    "comingSoonToast": "{name} n'est pas encore disponible — c'est prévu dans la feuille de route.",
-    "comingSoonBadge": "Bientôt",
     "closeMenu": "Fermer le menu"
   },
   "landing": {
@@ -588,7 +583,6 @@
       "title": "Personnalité IA",
       "description": "Donnez un nom personnalisé à l'assistant.",
       "personaUpdated": "✓ nom de l'assistant mis à jour",
-      "couldNotSave": "✗ impossible d'enregistrer le nom",
       "saveFailed": "Nous n'avons pas pu enregistrer le nom. Réessayez dans un instant."
     },
     "billing": {
@@ -641,7 +635,6 @@
       "unavailable": "Impossible de charger le rapport. Vérifiez que ai_cost_log existe.",
       "colFeature": "Fonctionnalité",
       "colCalls": "Actions",
-      "colMargin": "Marge moy.",
       "colCost": "Coût réel",
       "hypotheticalNote": "* Inclut les comptes non facturés (admin, bêta). Pour eux, la marge affichée est celle qu’aurait rapportée l’action au tarif de leur formule.",
       "colCharged": "Facturées",
@@ -685,7 +678,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "Module le plus actif",
-      "totalEntriesThisWeek": "Total des entrées cette semaine",
       "acrossAllModules": "tous modules confondus",
       "entry": "{count, plural, one {# entrée} other {# entrées}}",
       "statRow": {
@@ -760,7 +752,6 @@
       "quickStartTemplates": "Modèles de démarrage rapide",
       "quickStartApplied": "✓ {count, plural, one {# entrée d'exemple ajoutée} other {# entrées d'exemple ajoutées}}",
       "quickStart": "Démarrage rapide",
-      "templateApplied": "{count} exemples ajoutés",
       "templateFailed": "Nous n'avons pas pu appliquer ce modèle. Réessayez dans un instant — rien n'a été ajouté.",
       "quickStartBlurb": "Ajoutez quelques entrées d'exemple pour voir à quoi ressemble un espace de travail rempli.",
       "quickStartAdd": "Ajouter"
@@ -872,10 +863,6 @@
       "title": "Historique",
       "allModules": "Tous les modules",
       "showOnly": "Afficher uniquement : {module}",
-      "rangeToday": "Aujourd'hui",
-      "rangeWeek": "Cette semaine",
-      "rangeMonth": "Ce mois-ci",
-      "rangeAll": "Toute la période",
       "empty": {
         "title": "Votre travail, dans l'ordre où il s'est fait",
         "why": "Cela s'écrit tout seul. Tout ce que vous consignez dans n'importe quel module arrive ici en un seul fil : c'est ainsi qu'on répond à « qu'ai-je fait le mois dernier »."
@@ -1056,7 +1043,6 @@
       "editButton": "Appliquer les modifications",
       "editApplying": "Application...",
       "editApplied": "Modification appliquée",
-      "historyButton": "Historique",
       "historyLoading": "Chargement des versions...",
       "historyEmpty": "Pas encore d'historique de versions.",
       "versionLabel": "v{number}",
@@ -1383,7 +1369,6 @@
       "confirmUnpublish": "Retirer ce site ? L'adresse est conservée, vous pourrez le republier.",
       "chooseAddress": "Choisissez l'adresse de votre site",
       "addressLabel": "Adresse",
-      "willBeAt": "Votre site sera à {url}",
       "addressRules": "{min}-{max} caractères. Minuscules, chiffres et tirets.",
       "cancel": "Annuler",
       "viewLive": "Voir en ligne",
@@ -1582,7 +1567,6 @@
       "finished": "Votre rapport est prêt",
       "inProgress": "Recherche et rédaction…",
       "statusPending": "Planifié",
-      "statusResearching": "Recherche en cours",
       "statusSynthesising": "Rédaction",
       "statusReady": "Prêt",
       "statusFailed": "Échec",
@@ -1757,8 +1741,6 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyWhat": "Tout ce que vous consignez sur {module} vit ici.",
-    "emptyWhy": "Tout ce que vous consignez ici rejoint votre Chronologie et devient une information que l'IA peut utiliser lorsque vous l'interrogez sur votre travail.",
     "emptyExample": "Commencez par : « {example} »",
     "examples": {
       "competitors": "Notion — le concurrent le plus proche sur les prix",
@@ -1787,7 +1769,6 @@
     "emptyApps": "Rien ici pour l’instant. C’est un endroit pour suivre les applications que vous préparez ou avez déjà faites — il n’en crée aucune. Utilisez le bouton ci-dessus.",
     "emptyImages": "Rien ici pour l’instant. C’est un endroit pour suivre les images dont vous avez besoin ou que vous avez déjà faites — il n’en génère aucune. Utilisez le bouton ci-dessus.",
     "emptyVideos": "Rien ici pour l’instant. C’est un endroit pour suivre les vidéos que vous préparez ou avez déjà faites — il n’en génère aucune. Utilisez le bouton ci-dessus.",
-    "emptyCoding": "Rien ici pour l’instant. C’est un endroit pour suivre le travail de développement que vous préparez ou avez déjà fait — il n’écrit pas de code. Utilisez le bouton ci-dessus.",
     "emptyDataAnalysis": "Rien ici pour l’instant. C’est un endroit pour suivre les analyses que vous préparez ou avez déjà faites — il n’analyse pas vos données. Utilisez le bouton ci-dessus.",
     "emptyCampaigns": "Rien ici pour l’instant. C’est un endroit pour suivre les campagnes que vous préparez ou avez déjà menées — il n’en lance aucune. Utilisez le bouton ci-dessus."
   },

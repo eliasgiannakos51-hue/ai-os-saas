@@ -3,6 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { ModuleConfig } from "@/lib/modules";
 import { LINKABLE_MODULES, getLinkableModuleByTable, moduleHref } from "@/lib/knowledge-graph";
 import { logApiError } from "@/lib/log-error";
+import { normalizeForSearch } from "@/lib/text/search-match";
 import type { ModuleTitleKey } from "@/lib/modules";
 
 // Bounded per-module scan, same trade-off as lib/chat/entity-mentions.ts —
@@ -75,8 +76,11 @@ function textFor(module: ModuleConfig, row: Record<string, unknown>): string {
 // range, so this works the same for Greek, English, or anything else
 // without special-casing a language.
 function extractKeywords(text: string): string[] {
-  const tokens = text
-    .toLowerCase()
+  // normalizeForSearch, not toLowerCase(): both this and candidateText
+  // below have to fold the SAME way or a Greek headline written two
+  // ordinary ways ("Καφές" vs "καφε") never overlaps itself — the exact
+  // bug documented in lib/text/search-match.ts's header, hit here too.
+  const tokens = normalizeForSearch(text)
     .split(/[^\p{L}\p{N}]+/u)
     .filter(Boolean);
   const unique = [...new Set(tokens)].filter(
@@ -85,7 +89,7 @@ function extractKeywords(text: string): string[] {
   return unique.slice(0, MAX_KEYWORDS);
 }
 
-// Knowledge Graph "Smart Search": simple case-insensitive keyword overlap
+// Knowledge Graph "Smart Search": accent- and case-insensitive keyword overlap
 // between a just-created record's title/description and every OTHER
 // module's recent records (same user) — no AI, no embeddings. Called
 // right after a successful create (see suggested-links-prompt.tsx).
@@ -135,7 +139,7 @@ export async function suggestEntityLinks(
         const headline = String(row[config.headlineKey] ?? "").trim();
         if (!headline) continue;
 
-        const candidateText = textFor(config, row).toLowerCase();
+        const candidateText = normalizeForSearch(textFor(config, row));
         const isMatch = keywords.some((kw) => candidateText.includes(kw));
         if (isMatch) {
           matches.push({

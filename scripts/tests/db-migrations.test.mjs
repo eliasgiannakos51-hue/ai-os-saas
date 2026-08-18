@@ -49,6 +49,46 @@ const allSql = migrations.map((m) => m.sql).join("\n");
 const stripSqlComments = (s) => s.replace(/^\s*--.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
 const code = stripSqlComments(allSql);
 
+// A SECOND, STRICTER STRIPPER — for parsing CREATE TABLE column lists
+// only. `stripSqlComments` above only removes a comment that is the
+// WHOLE line (`^\s*--`), on purpose: this file's own comments sometimes
+// quote SQL text worth matching against elsewhere. But a column
+// definition's TRAILING comment — `action_type text not null, -- e.g.
+// 'chat_message', 'create_anything',` — is exactly what breaks a
+// comma-splitting column parser: the comment's own commas get read as
+// column separators, and the words after them get read as column names.
+// Quote-aware, so a `--` inside a real string literal is not mistaken
+// for the start of a comment.
+function stripAllSqlComments(sqlText) {
+  let out = "";
+  let inStr = false;
+  for (let i = 0; i < sqlText.length; i++) {
+    const ch = sqlText[i];
+    if (inStr) {
+      out += ch;
+      if (ch === "'") {
+        if (sqlText[i + 1] === "'") { out += "'"; i++; } // escaped '' inside the string
+        else inStr = false;
+      }
+      continue;
+    }
+    if (ch === "'") { inStr = true; out += ch; continue; }
+    if (ch === "-" && sqlText[i + 1] === "-") {
+      while (i < sqlText.length && sqlText[i] !== "\n") i++;
+      out += "\n";
+      continue;
+    }
+    if (ch === "/" && sqlText[i + 1] === "*") {
+      const end = sqlText.indexOf("*/", i + 2);
+      i = end === -1 ? sqlText.length : end + 1;
+      continue;
+    }
+    out += ch;
+  }
+  return out;
+}
+const commentFreeCode = stripAllSqlComments(allSql);
+
 console.log("== 1. the migration directory is an ordered, complete path ==");
 check(`there are ${files.length} migrations`, files.length >= 18, files.join(", "));
 // Filename order has to be run order, so the names must sort the way the
@@ -121,7 +161,107 @@ function sourceFiles(dir, out = []) {
   }
   return out;
 }
-const src = sourceFiles("src").map((f) => readFileSync(f, "utf8")).join("\n");
+// Kept as (path, content) pairs — not just the joined blob the table/RPC
+// checks below still use — because the column checks (== 4b) need to
+// name a FILE. "user_imports.mappings does not exist" sends someone
+// hunting through 300 call sites; "src/app/api/import/csv/apply/route.ts:
+// user_imports.mappings" does not.
+const srcFilePairs = sourceFiles("src").map((f) => [f, readFileSync(f, "utf8")]);
+const src = srcFilePairs.map(([, c]) => c).join("\n");
+
+// ===========================================================================
+// COLUMN-LEVEL CHECKING — shared between the static pass below (== 4b,
+// parses columns out of the migration TEXT) and the live pass in section 7
+// (reads information_schema, which is authoritative). Both call the same
+// two functions so "how do we decide a call site is bad" is answered once.
+// ===========================================================================
+
+/**
+ * The top-level (depth-1) keys of the object literal that starts at
+ * `src[open]` (which must be "{"). Keys inside a NESTED object — a jsonb
+ * value like `mapping: { targetSlug, mappings }` — are invisible on
+ * purpose: `mappings` there is a VALUE, not a column, and the first
+ * version of this scan flagged it as one because it matched every
+ * `key:` in the payload regardless of depth.
+ */
+function topLevelKeys(str, open) {
+  const keys = [];
+  let depth = 0, inStr = null, key = "", collecting = true;
+  for (let i = open; i < str.length; i++) {
+    const ch = str[i];
+    if (inStr) { if (ch === "\\") i++; else if (ch === inStr) inStr = null; continue; }
+    if (ch === '"' || ch === "'" || ch === "`") { inStr = ch; continue; }
+    if (ch === "{" || ch === "[" || ch === "(") { depth++; if (depth > 1) collecting = false; continue; }
+    if (ch === "}" || ch === "]" || ch === ")") {
+      depth--;
+      if (depth === 1) { collecting = true; key = ""; }
+      if (depth === 0) break;
+      continue;
+    }
+    if (depth !== 1) continue;
+    if (ch === ",") { key = ""; collecting = true; continue; }
+    if (ch === ":" && collecting) {
+      const k = key.trim().replace(/^\.\.\..*/, "");
+      if (/^[a-z_][a-z0-9_]*$/.test(k)) keys.push(k);
+      key = ""; collecting = false;
+      continue;
+    }
+    if (collecting) key += ch;
+  }
+  return keys;
+}
+
+const SUPABASE_FILTER_METHODS = "eq|neq|gt|gte|lt|lte|like|ilike|is|in|contains|containedBy|order";
+
+/**
+ * Every table.column the file's Supabase chains touch, checked against
+ * `columnsByTable` (a Map<table, Set<column>>) — supplied by the caller,
+ * so this same function grades both the migration TEXT (static) and the
+ * live database (authoritative) without knowing which one it is looking
+ * at. Runtime strings — `.eq()`, `.order()`, `.select("a, b")`,
+ * `.insert({...})` — are exactly what the compiler cannot see, which is
+ * the reason this check exists at all.
+ */
+function columnIssuesIn(fileContent, columnsByTable, knownTables) {
+  const issues = [];
+  for (const m of fileContent.matchAll(/\.from\(\s*["'`]([a-z_][a-z0-9_]*)["'`]\s*\)/g)) {
+    const table = m[1];
+    if (!knownTables.has(table)) continue; // reported separately, by section 4/7's table check
+    const cols = columnsByTable.get(table);
+    if (!cols) continue;
+    const chainStart = m.index + m[0].length;
+    const chain = fileContent.slice(chainStart, chainStart + 1200).split(/\.from\(|\n\s*\n/)[0];
+
+    for (const f of chain.matchAll(
+      new RegExp(`\\.(${SUPABASE_FILTER_METHODS})\\(\\s*["'\`]([a-zA-Z_][a-zA-Z0-9_]*)["'\`]`, "g")
+    )) {
+      if (!cols.has(f[2])) issues.push(`${table}.${f[2]} via .${f[1]}()`);
+    }
+    for (const s of chain.matchAll(/\.select\(\s*["'`]([^"'`]*)["'`]/g)) {
+      if (s[1].includes("(")) continue; // embedded-resource syntax — out of scope
+      for (const raw of s[1].split(",")) {
+        const col = raw.trim().split(/[:\s]/)[0];
+        if (!col || col === "*" || col.startsWith("count")) continue;
+        if (!cols.has(col)) issues.push(`${table}.${col} via .select()`);
+      }
+    }
+    // WRITES, not just reads. A filter on a missing column returns an
+    // error object many call sites never check; an insert/update to one
+    // fails outright — worse, and just as invisible to tsc. TOP-LEVEL
+    // KEYS ONLY (topLevelKeys), so a jsonb value's own keys — `content:
+    // { html: "" }`, `mapping: { targetSlug, mappings }` — are never
+    // mistaken for columns. An earlier draft of this scan matched every
+    // depth and reported both as missing; neither is.
+    for (const w of chain.matchAll(/\.(insert|update|upsert)\(\s*(?:\[\s*)?\{/g)) {
+      const open = chain.indexOf("{", w.index + w[0].length - 1);
+      if (open === -1) continue;
+      for (const k of topLevelKeys(chain, open)) {
+        if (!cols.has(k)) issues.push(`${table}.${k} via .${w[1]}()`);
+      }
+    }
+  }
+  return issues;
+}
 
 // Supabase table names appear only as runtime strings — invisible to the
 // compiler, which is exactly why they need a check of their own.
@@ -147,6 +287,88 @@ checkList(
 checkList(
   "every RPC the code calls has a migration that creates it",
   [...usedRpcs].filter((f) => !createdFns.has(f)).sort()
+);
+
+console.log("\n== 4b. the code only writes/reads COLUMNS the migrations create ==");
+// THE GAP THIS CLOSES. Section 4 above checks that a TABLE exists. It
+// said nothing about whether the columns a call site actually touches
+// are among the ones the table has — which is exactly how
+// ai_missions.plan_steps_version, user_websites.editing_started_at,
+// user_websites.stuck_notified_at and user_automations.processing_
+// started_at went missing from every migration for as long as this repo
+// has had migrations: the TABLES were always there, so section 4 was
+// always green, while four ALTER TABLE statements that lived only in
+// archive/supabase_complete_schema.sql never crossed into
+// supabase/migrations/. A fresh database built from this directory alone
+// broke Mission Control's optimistic lock, the website edit-claim, the
+// stuck-generation notice and the automations cron claim — with nothing
+// in any existing gate able to say so.
+//
+// PARSED FROM THE MIGRATION TEXT, best-effort. `create table (...)` and
+// `alter table ... add column [if not exists] ...` cover the two shapes
+// this codebase actually uses; a constraint line inside a CREATE TABLE
+// (`primary key (...)`, `check (...)`, `foreign key (...)`) is excluded
+// so it is never mistaken for a column named "primary" or "check". This
+// is necessarily approximate — real precision needs a live database,
+// which is section 7 below — but it is what runs on every push with no
+// Postgres required, which is the whole point of section 4 existing.
+function tableColumnsFromMigrationText(sqlText) {
+  const byTable = new Map();
+  const ensure = (t) => {
+    if (!byTable.has(t)) byTable.set(t, new Set());
+    return byTable.get(t);
+  };
+  const CONSTRAINT_LINE = /^(primary key|unique|check|foreign key|constraint|exclude)\b/i;
+
+  const createRe = /create table (?:if not exists )?(?:public\.)?"?([a-z_][a-z0-9_]*)"?\s*\(/gi;
+  let m;
+  while ((m = createRe.exec(sqlText))) {
+    const table = m[1].toLowerCase();
+    const openIdx = sqlText.indexOf("(", m.index + m[0].length - 1);
+    if (openIdx === -1) continue;
+    let depth = 0, i = openIdx;
+    for (; i < sqlText.length; i++) {
+      if (sqlText[i] === "(") depth++;
+      else if (sqlText[i] === ")") { depth--; if (depth === 0) break; }
+    }
+    const body = sqlText.slice(openIdx + 1, i);
+    let d = 0, cur = "";
+    const parts = [];
+    for (const ch of body) {
+      if (ch === "(") d++;
+      else if (ch === ")") d--;
+      if (ch === "," && d === 0) { parts.push(cur); cur = ""; }
+      else cur += ch;
+    }
+    parts.push(cur);
+    const cols = ensure(table);
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (!trimmed || CONSTRAINT_LINE.test(trimmed)) continue;
+      const colMatch = trimmed.match(/^"?([a-z_][a-z0-9_]*)"?\s+/i);
+      if (colMatch) cols.add(colMatch[1].toLowerCase());
+    }
+  }
+
+  const alterRe =
+    /alter table (?:if exists )?(?:public\.)?"?([a-z_][a-z0-9_]*)"?\s+add column(?: if not exists)?\s+"?([a-z_][a-z0-9_]*)"?/gi;
+  while ((m = alterRe.exec(sqlText))) {
+    ensure(m[1].toLowerCase()).add(m[2].toLowerCase());
+  }
+  return byTable;
+}
+
+const staticColumns = tableColumnsFromMigrationText(commentFreeCode);
+const staticColumnIssues = [];
+for (const [file, content] of srcFilePairs) {
+  for (const issue of columnIssuesIn(content, staticColumns, createdTables)) {
+    staticColumnIssues.push(`${file}: ${issue}`);
+  }
+}
+console.log(`        ${staticColumns.size} tables' columns parsed from migration text`);
+checkList(
+  "every column a Supabase call touches exists on the table it names (static)",
+  [...new Set(staticColumnIssues)].sort()
 );
 
 console.log("\n== 5. RLS: countable only against a live database ==");
@@ -189,7 +411,15 @@ if (!DB) {
   const pols = n(`select count(*) from pg_policies where schemaname='public'`);
   const polsAll = n(`select count(*) from pg_policies where schemaname in ('public','storage')`);
   console.log(`        tables ${tables} · functions ${fns} · policies ${pols} (${polsAll} with storage)`);
-  check(`70 tables`, tables === 70, `got ${tables}`);
+  // A RATCHET, updated when a migration deliberately adds a table — most
+  // recently 20260817000002 (agent_runs.would_have_charged_credits'
+  // migration touches no new table, so that one didn't move this number;
+  // 20260814's delivery-channels migration is what took 70 to 72). It
+  // stayed 70 through two migrations that changed it, in two different
+  // files, which is exactly the failure a ratchet exists to prevent and
+  // exactly what a fresh count on every run below stops from happening
+  // again silently.
+  check(`72 tables`, tables === 72, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 
@@ -238,6 +468,34 @@ if (!DB) {
     sql(`select proname from pg_proc p join pg_namespace ns on ns.oid=p.pronamespace where ns.nspname='public'`).split("\n")
   );
   checkList("no RPC is missing", [...usedRpcs].filter((f) => !liveFns.has(f)).sort());
+
+  console.log("\n== 7b. every column a Supabase call touches really exists (live, authoritative) ==");
+  // THE STATIC CHECK IN == 4b IS A BEST EFFORT — a regex parse of CREATE
+  // TABLE and ADD COLUMN statements, approximate by construction. THIS is
+  // the one that cannot be wrong: information_schema.columns describes
+  // the database these migrations actually built, in this run, a moment
+  // ago. It is what caught plan_steps_version, editing_started_at,
+  // stuck_notified_at and processing_started_at in the first place — the
+  // static parser would have needed to already know to look for them.
+  const liveColumnRows = sql(
+    `select table_name || '|' || column_name from information_schema.columns where table_schema='public'`
+  );
+  const liveColumns = new Map();
+  for (const line of liveColumnRows ? liveColumnRows.split("\n") : []) {
+    const [t, c] = line.split("|");
+    if (!liveColumns.has(t)) liveColumns.set(t, new Set());
+    liveColumns.get(t).add(c);
+  }
+  const liveColumnIssues = [];
+  for (const [file, content] of srcFilePairs) {
+    for (const issue of columnIssuesIn(content, liveColumns, live)) {
+      liveColumnIssues.push(`${file}: ${issue}`);
+    }
+  }
+  checkList(
+    "every column a Supabase call touches exists on the table it names (live)",
+    [...new Set(liveColumnIssues)].sort()
+  );
 
   console.log("\n== 8. grants, measured rather than assumed ==");
   // The query the rule asks for: every project function, per role.

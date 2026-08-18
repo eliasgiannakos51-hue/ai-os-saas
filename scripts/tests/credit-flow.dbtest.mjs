@@ -37,9 +37,17 @@
 //   DATABASE_URL=postgres://…/ionexa_test node scripts/tests/credit-flow.dbtest.mjs
 //
 // It is a .dbtest.mjs rather than a .test.mjs because `npm run test:unit`
-// must stay runnable with no database. `npm run test:db` picks these up.
-// Skipping is NOT silent: with no DATABASE_URL it says so and exits 0,
-// and the suite gate reports it as skipped rather than passed.
+// must stay runnable with no database. `npm run test:db` picks these up —
+// and, since scripts/db/run-dbtests.mjs, provisions a throwaway Postgres
+// and runs this file for real rather than leaving it to skip forever.
+// `npm run verify` runs test:db, so this now actually executes in the
+// gate that is supposed to prove the credit system works.
+//
+// Skipping is not silent — with no DATABASE_URL and no local Postgres it
+// prints SKIPPED and exits 0 — but that is ALL it is. Nothing anywhere
+// distinguishes "skipped" from "passed" at the exit code; a claim to the
+// contrary used to sit here and was never true. Read the log if it
+// matters which one happened.
 import { execFileSync } from "node:child_process";
 
 const DB = process.env.DATABASE_URL ?? process.env.PGDATABASE;
@@ -122,7 +130,11 @@ const availableNow = () =>
   );
 
 console.log("== 0. the database really is the one the migrations build ==");
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 70);
+// Same ratchet as db-migrations.test.mjs's "70 tables" check, and the
+// same lesson: it stayed 70 through two migrations that added a table,
+// in two different files, because nothing here re-derived the number —
+// each just repeated what the last one said.
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 72);
 eq(
   "the credit functions exist",
   Number(

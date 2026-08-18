@@ -16,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
+import { normalizeForSearch } from "@/lib/text/search-match";
 import { createClient } from "@/lib/supabase/client";
 import { EnergySuggestion } from "@/components/mission/energy-suggestion";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -46,9 +47,19 @@ import { formatDateTime } from "@/lib/format-number";
 // mission's "Create a landing page" is actually actionable, not just
 // descriptive text nothing here can act on.
 const WEBSITE_STEP_KEYWORDS = ["landing page", "landing σελίδα", "σελίδα προορισμού", "website", "ιστοσελίδα"];
+// Folded once at module scope, not per call: this runs once per step
+// per render, and re-normalising five fixed strings on every call is
+// pointless work.
+const NORMALIZED_WEBSITE_STEP_KEYWORDS = WEBSITE_STEP_KEYWORDS.map(normalizeForSearch);
 function looksLikeWebsiteStep(text: string): boolean {
-  const lower = text.toLowerCase();
-  return WEBSITE_STEP_KEYWORDS.some((keyword) => lower.includes(keyword));
+  // normalizeForSearch, not toLowerCase(): the keyword list above mixes
+  // English with Greek ON PURPOSE, and plain toLowerCase() does not fold
+  // Greek accents — step text that arrived as unaccented capitals
+  // ("ΔΗΜΙΟΥΡΓΙΑ ΣΕΛΙΔΑΣ", which is how Greek is ordinarily written in
+  // caps) lower-cases to "σελιδασ", not "σελίδα", and never matched the
+  // accented keyword it was meant to.
+  const normalized = normalizeForSearch(text);
+  return NORMALIZED_WEBSITE_STEP_KEYWORDS.some((keyword) => normalized.includes(keyword));
 }
 
 // "AI Company" — translation key per agent role (see lib/agent-roles.ts),

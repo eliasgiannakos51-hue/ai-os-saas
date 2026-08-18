@@ -71,9 +71,32 @@ const MEASURE = () => {
     .map((href) => document.querySelector(`footer a[href="${href}"]`))
     .filter(Boolean);
 
-  // Every element that paints something, for the overflow sweep. Wrappers
-  // with zero size are skipped: a 0x0 box cannot be seen to overflow.
+  // Every element that paints CONTENT, for the overflow and clipping
+  // sweeps. Two exclusions, both narrow:
+  //
+  //   zero-size wrappers  a 0x0 box cannot be seen to overflow.
+  //
+  //   aria-hidden         the backdrop. AuthBackground's wireframe globe,
+  //                       NetworkField's constellation and GlowOrb are all
+  //                       DELIBERATELY larger than the viewport and are
+  //                       clipped on purpose — a 512px orb positioned at
+  //                       -translate-y-1/3 is meant to bleed off the top
+  //                       edge, and the globe's circles are meant to run
+  //                       past both sides. Measuring them reported five
+  //                       "overflows" and one "clipped" element per locale
+  //                       for art that is working exactly as drawn, which
+  //                       would have made this gate the kind people delete.
+  //                       Every one of those layers is aria-hidden="true"
+  //                       and pointer-events-none, so the filter is the
+  //                       same line a screen reader draws, not an ad-hoc
+  //                       allowlist.
+  //
+  // Genuine overflow from ANY source, decoration included, is still caught
+  // by the document-level scrollWidth check below — that is what says
+  // whether the page can be dragged sideways, which is the thing a person
+  // notices.
   const painted = Array.from(document.querySelectorAll("main *")).filter((el) => {
+    if (el.closest('[aria-hidden="true"]')) return false;
     const r = el.getBoundingClientRect();
     return r.width > 0 && r.height > 0 && getComputedStyle(el).visibility !== "hidden";
   });
@@ -104,6 +127,7 @@ const MEASURE = () => {
   return {
     vw,
     vh,
+    paintedCount: painted.length,
     docScrollWidth: document.documentElement.scrollWidth,
     docClientWidth: document.documentElement.clientWidth,
     mainOverflowY: main ? getComputedStyle(main).overflowY : null,
@@ -134,6 +158,7 @@ const overflowed = [];
 const clippedAnywhere = [];
 const smallTaps = [];
 let measured = 0;
+let minPainted = Infinity;
 
 try {
   for (const vp of VIEWPORTS) {
@@ -147,6 +172,7 @@ try {
       await page.waitForTimeout(700);
       const m = await page.evaluate(MEASURE);
       measured++;
+      minPainted = Math.min(minPainted, m.paintedCount);
 
       const where = `${vp.label} ${locale}`;
 
@@ -195,6 +221,10 @@ try {
 
   check(`the sweep ran the full cross-product (${VIEWPORTS.length}x${LOCALES.length})`,
     measured === VIEWPORTS.length * LOCALES.length, `measured ${measured}`);
+  // The aria-hidden filter above must not have swallowed the page. A
+  // sweep over nothing passes every check it makes.
+  check("content elements were actually measured, not filtered away",
+    minPainted >= 8, `fewest content elements on any run: ${minPainted}`);
   check("every block is horizontally centred in every locale", offCentre.length === 0,
     offCentre.slice(0, 12).join("\n        "));
   check("nothing overflows the viewport horizontally", overflowed.length === 0,

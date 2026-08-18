@@ -77,9 +77,28 @@ export function HelpTip({
         // aria-label literals at zero).
         aria-label={tCommon("whatIsThisPage")}
         data-testid={`help-tip-${helpKey.split(".").pop()}`}
-        className="flex h-7 w-7 items-center justify-center rounded-full border border-border text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 focus-visible:border-orange-500 focus-visible:text-orange-400"
+        // 44px OF HIT AREA AROUND A 28px CIRCLE. The button used to BE the
+        // circle: h-7 w-7, which is 28x28 — under the 44px floor the rest
+        // of this codebase uses, on the one affordance whose entire job is
+        // to be found and pressed by somebody who is already lost. Making
+        // the circle itself 44px would put a ring the size of a coin next
+        // to every page heading.
+        //
+        // So the button is 44x44 and transparent, with a NEGATIVE margin
+        // that cancels the extra 8px on each side — the icon lands exactly
+        // where it did before and the layout around it does not move. The
+        // border moves to the inner span, which is what is actually drawn.
+        // Same technique as the switches (globals.css), for the same
+        // reason: a target you can hit is not the same thing as a target
+        // you can see.
+        className="group -m-2 flex h-11 w-11 items-center justify-center text-muted transition-colors duration-150 hover:text-orange-400 focus-visible:text-orange-400"
       >
-        <HelpCircle className="h-4 w-4" aria-hidden="true" />
+        {/* border-current, so the ring follows the button's own text
+            colour on hover and focus instead of needing a second variant
+            for each state. */}
+        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-border transition-colors duration-150 group-hover:border-current group-focus-visible:border-current">
+          <HelpCircle className="h-4 w-4" aria-hidden="true" />
+        </span>
       </button>
 
       {open && (

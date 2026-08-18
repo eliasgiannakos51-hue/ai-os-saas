@@ -99,32 +99,60 @@ export default async function Home() {
           </Link>
         </div>
 
-        <footer className="mt-16 flex flex-col items-center gap-2 border-t border-border pt-6 text-xs text-muted sm:flex-row sm:gap-4">
-          <Link href="/pricing" className="transition-colors duration-150 hover:text-orange-400">
+        {/* TAPPABLE, not merely visible. These five links are 12px text,
+            which renders 16px tall — a third of the 44px floor the rest of
+            this codebase uses, stacked 8px apart on a phone. Nothing
+            overflowed and nothing overlapped, so every layout gate passed
+            them; landing-mobile.prodtest.mjs measures the HEIGHT of each
+            one at 375 in all ten locales.
+
+            The 44px lives on the links rather than on the footer, because
+            it is the link that gets tapped. `sm:min-h-0` puts the desktop
+            row back to text height: a 44px-tall inline footer on a laptop
+            would be a band of empty space nobody asked for, and gap-2
+            becomes gap-0 below sm because the padding now does the
+            separating. */}
+        <footer className="mt-16 flex flex-col items-center gap-0 border-t border-border pt-6 text-xs text-muted sm:flex-row sm:gap-4">
+          <Link
+            href="/pricing"
+            className="inline-flex min-h-[44px] items-center px-2 transition-colors duration-150 hover:text-orange-400 sm:min-h-0 sm:px-0"
+          >
             {t("footer.pricing")}
           </Link>
           <span className="hidden sm:inline" aria-hidden="true">
             ·
           </span>
-          <Link href="/roadmap" className="transition-colors duration-150 hover:text-orange-400">
+          <Link
+            href="/roadmap"
+            className="inline-flex min-h-[44px] items-center px-2 transition-colors duration-150 hover:text-orange-400 sm:min-h-0 sm:px-0"
+          >
             {t("footer.roadmap")}
           </Link>
           <span className="hidden sm:inline" aria-hidden="true">
             ·
           </span>
-          <Link href="/terms" className="transition-colors duration-150 hover:text-orange-400">
+          <Link
+            href="/terms"
+            className="inline-flex min-h-[44px] items-center px-2 transition-colors duration-150 hover:text-orange-400 sm:min-h-0 sm:px-0"
+          >
             {t("footer.terms")}
           </Link>
           <span className="hidden sm:inline" aria-hidden="true">
             ·
           </span>
-          <Link href="/privacy" className="transition-colors duration-150 hover:text-orange-400">
+          <Link
+            href="/privacy"
+            className="inline-flex min-h-[44px] items-center px-2 transition-colors duration-150 hover:text-orange-400 sm:min-h-0 sm:px-0"
+          >
             {t("footer.privacy")}
           </Link>
           <span className="hidden sm:inline" aria-hidden="true">
             ·
           </span>
-          <Link href="/cookies" className="transition-colors duration-150 hover:text-orange-400">
+          <Link
+            href="/cookies"
+            className="inline-flex min-h-[44px] items-center px-2 transition-colors duration-150 hover:text-orange-400 sm:min-h-0 sm:px-0"
+          >
             {t("footer.cookies")}
           </Link>
         </footer>

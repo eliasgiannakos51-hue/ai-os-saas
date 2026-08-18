@@ -9,6 +9,7 @@ import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { logApiError } from "@/lib/log-error";
 import { isAdminEmail } from "@/lib/admin";
+import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
   CREDIT_COSTS,
@@ -185,6 +186,18 @@ export async function POST(request: Request) {
     // The reservation is sized after the record is loaded, further down,
     // because the record is what the price depends on.
     const isAdmin = isAdminEmail(user.email);
+    // THE BYPASS EUR CEILING. This route bypasses on isAdmin ONLY —
+    // unlike every other AI route, it never checks hasActiveBetaBypass,
+    // so a beta tester is charged normally here. Not something this
+    // change is fixing (a separate inconsistency, out of scope for a
+    // spend ceiling), so the ceiling is wired to match what the route
+    // actually does: isAdmin only, isBeta always false.
+    if (isAdmin) {
+      const ceiling = await checkBypassCeiling(user.id, isAdmin, false);
+      if (!ceiling.allowed) {
+        return NextResponse.json({ ok: false, error: ceiling.reason }, { status: 429 });
+      }
+    }
     // Always resolved, never null — even for a bypass account.
     //
     // A null plan reached the cost log as planSlug: null, and made

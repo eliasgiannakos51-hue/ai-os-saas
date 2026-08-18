@@ -14,6 +14,7 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import {
   checkAiCallAllowed,
   fingerprintRequest,
@@ -72,6 +73,7 @@ export type ExecuteAgentResult =
         | "rate_limited"
         | "circuit_breaker"
         | "insufficient_credits"
+        | "bypass_ceiling"
         | "run_failed"
         | "no_api_key"
         | "internal";
@@ -170,6 +172,17 @@ export async function executeAgent(params: {
   // 3. Billing context.
   const isAdmin = isAdminEmail(user.email);
   const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+  // THE BYPASS EUR CEILING. checkAiCallAllowed above caps volume for
+  // every account; this caps real Anthropic SPEND specifically for the
+  // accounts credits do not — admin and active beta. See
+  // lib/billing/bypass-ceiling.ts for why this is one check in euros
+  // rather than a counter re-implemented per feature.
+  if (bypassCredits) {
+    const ceiling = await checkBypassCeiling(userId, isAdmin, bypassCredits && !isAdmin);
+    if (!ceiling.allowed) {
+      return { ok: false, reason: "bypass_ceiling", message: ceiling.reason };
+    }
+  }
   const plan = await resolveEffectivePlan(user);
   const pricingConfig = resolvePricingConfig();
   const accountCreditPriceEur = bypassCredits

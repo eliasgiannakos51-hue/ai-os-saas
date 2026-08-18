@@ -13,6 +13,7 @@ import {
 } from "@/lib/integrations/chat-tool";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
+import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
   CREDIT_COSTS,
@@ -489,6 +490,17 @@ export async function POST(request: Request) {
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
 
+    // THE BYPASS EUR CEILING. checkAiCallAllowed above caps volume for
+    // every account; this caps real Anthropic SPEND specifically for the
+    // accounts credits do not — admin and active beta. See
+    // lib/billing/bypass-ceiling.ts for why this is one check in euros
+    // rather than a counter re-implemented per feature.
+    if (bypassCredits) {
+      const ceiling = await checkBypassCeiling(user.id, isAdmin, bypassCredits && !isAdmin);
+      if (!ceiling.allowed) {
+        return NextResponse.json({ ok: false, error: ceiling.reason }, { status: 429 });
+      }
+    }
     // Estimated from the real size of THIS request — the message plus the
     // conversation history that gets re-sent with it, plus the system
     // prompt this route composes from memory/mentor/user context. The old

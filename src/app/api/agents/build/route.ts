@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
+import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import {
   hasEnoughCredits,
   resolveEffectivePlan,
@@ -153,6 +154,17 @@ export async function POST(request: Request) {
     }
 
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+    // THE BYPASS EUR CEILING. checkAiCallAllowed above caps volume for
+    // every account; this caps real Anthropic SPEND specifically for the
+    // accounts credits do not — admin and active beta. See
+    // lib/billing/bypass-ceiling.ts for why this is one check in euros
+    // rather than a counter re-implemented per feature.
+    if (bypassCredits) {
+      const ceiling = await checkBypassCeiling(user.id, isAdmin, bypassCredits && !isAdmin);
+      if (!ceiling.allowed) {
+        return NextResponse.json({ ok: false, error: ceiling.reason }, { status: 429 });
+      }
+    }
     const plan = await resolveEffectivePlan(user);
     const pricingConfig = resolvePricingConfig();
     const accountCreditPriceEur = bypassCredits

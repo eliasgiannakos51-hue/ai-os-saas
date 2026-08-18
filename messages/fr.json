@@ -503,6 +503,12 @@
         "carbon": "Carbon"
       }
     },
+    "language": {
+      "title": "Langue",
+      "description": "Choisis la langue dans laquelle toute l'application s'affiche.",
+      "savedToAccount": "Enregistrée sur ton compte, elle te suit sur chaque appareil où tu te connectes.",
+      "saveFailed": "Impossible d'enregistrer la langue — rien n'a été modifié."
+    },
     "accessibility": {
       "title": "Accessibilité",
       "fontSize": {
@@ -1282,6 +1288,8 @@
       "saveError": "Impossible d'enregistrer ce changement. Réessayez.",
       "confirmDelete": "Supprimer « {name} » ? Son historique d'exécutions part avec lui, et c'est irréversible.",
       "runSuccess": "Terminé — {credits} crédits. Le résultat vous a été envoyé par e-mail.",
+      "runSuccessUnlimitedCost": "Terminé — illimité sur ton compte (aurait coûté {credits} crédits). Le résultat t'a été envoyé par e-mail.",
+      "runSuccessUnlimited": "Terminé — illimité sur ton compte, aucun crédit débité. Le résultat t'a été envoyé par e-mail.",
       "runNothingToReport": "Rien de nouveau à signaler cette fois.",
       "runFailed": "L'exécution a échoué.",
       "close": "Fermer",
@@ -1302,6 +1310,7 @@
       "runManual": "Manuelle",
       "runScheduled": "Planifiée",
       "runCredits": "{credits} crédits",
+      "runCreditsUnlimited": "illimité (aurait coûté {credits})",
       "viewOutput": "Voir le résultat",
       "scheduleFrequencyLabel": "À quelle fréquence",
       "scheduleTimeLabel": "À",
@@ -1813,7 +1822,8 @@
     "remove": "Retirer des favoris"
   },
   "language": {
-    "label": "Langue"
+    "label": "Langue",
+    "saveFailed": "Impossible d'enregistrer la langue — rien n'a été modifié."
   },
   "achievements": {
     "title": "Succès",

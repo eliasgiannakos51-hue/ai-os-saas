@@ -4,6 +4,14 @@
 // bundle.
 export const LOCALE_COOKIE = "NEXT_LOCALE";
 
+// A year. The language somebody picked is not a session-scoped fact.
+//
+// Lives here rather than beside the writer in lib/locale-preference.ts
+// because middleware.ts also writes this cookie, and that file is a
+// "use client" module importing the Supabase browser client — pulling it
+// into the edge bundle for one integer.
+export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+
 // Every locale with a real messages/<locale>.json file — kept in sync
 // with lib/languages.ts's LANGUAGES list (the selector only ever shows
 // locales that are actually translated; see that file's comment for why).

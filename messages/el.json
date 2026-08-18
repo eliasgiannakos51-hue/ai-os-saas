@@ -503,6 +503,12 @@
         "carbon": "Carbon"
       }
     },
+    "language": {
+      "title": "Γλώσσα",
+      "description": "Διάλεξε τη γλώσσα σε όλη την εφαρμογή.",
+      "savedToAccount": "Αποθηκεύεται στον λογαριασμό σου, οπότε σε ακολουθεί σε κάθε συσκευή που συνδέεσαι.",
+      "saveFailed": "Δεν αποθηκεύτηκε η γλώσσα — δεν άλλαξε τίποτα."
+    },
     "accessibility": {
       "title": "Προσβασιμότητα",
       "fontSize": {
@@ -1282,6 +1288,8 @@
       "saveError": "Δεν ήταν δυνατή η αποθήκευση. Δοκίμασε ξανά.",
       "confirmDelete": "Διαγραφή του \"{name}\"; Διαγράφεται και το ιστορικό εκτελέσεων και δεν αναιρείται.",
       "runSuccess": "Έτοιμο — {credits} credits. Το αποτέλεσμα στάλθηκε στο email σου.",
+      "runSuccessUnlimitedCost": "Έτοιμο — απεριόριστο στον λογαριασμό σου (θα κόστιζε {credits} credits). Το αποτέλεσμα στάλθηκε στο email σου.",
+      "runSuccessUnlimited": "Έτοιμο — απεριόριστο στον λογαριασμό σου, χωρίς χρέωση credits. Το αποτέλεσμα στάλθηκε στο email σου.",
       "runNothingToReport": "Δεν υπάρχει κάτι νέο αυτή τη φορά.",
       "runFailed": "Η εκτέλεση απέτυχε.",
       "close": "Κλείσιμο",
@@ -1302,6 +1310,7 @@
       "runManual": "Χειροκίνητη",
       "runScheduled": "Προγραμματισμένη",
       "runCredits": "{credits} credits",
+      "runCreditsUnlimited": "απεριόριστο (θα κόστιζε {credits})",
       "viewOutput": "Δες το αποτέλεσμα",
       "scheduleFrequencyLabel": "Πόσο συχνά",
       "scheduleTimeLabel": "Στις",
@@ -1813,7 +1822,8 @@
     "remove": "Αφαίρεση από τα αγαπημένα"
   },
   "language": {
-    "label": "Γλώσσα"
+    "label": "Γλώσσα",
+    "saveFailed": "Δεν αποθηκεύτηκε η γλώσσα — δεν άλλαξε τίποτα."
   },
   "achievements": {
     "title": "Επιτεύγματα",

@@ -41,10 +41,61 @@ export { USER };
  *   stand-in PostgREST returns. Any table not named answers with [].
  * @param {number} [options.supaPort]  must be unique per concurrently-running
  *   harness; the value is inlined into the build, so it cannot be dynamic.
+ * @param {Record<string, unknown>} [options.userMetadata]  what
+ *   /auth/v1/user reports as raw_user_meta_data. Anything the app reads off
+ *   the ACCOUNT rather than off a table lives here — preferred_locale,
+ *   ai_persona_name, stripe_customer_id — and defaults to the empty object
+ *   every existing prodtest was written against.
  */
-export async function startProdHarness({ tableRows = {}, supaPort = 54331 } = {}) {
+export async function startProdHarness({
+  tableRows = {},
+  supaPort = 54331,
+  userMetadata = {},
+} = {}) {
+  // Mutable, so a test can change what the account says WITHOUT paying for
+  // a second `next build` (~90s). The build inlines the Supabase URL, not
+  // its answers.
+  let currentMetadata = { ...userMetadata };
+  /**
+   * Every write the app made to the account, in order. `updateUser()` is a
+   * PUT to /auth/v1/user, and "did the setting actually reach the account"
+   * is otherwise unobservable from the browser — the UI looks identical
+   * whether the value was persisted or only written to a cookie, which is
+   * precisely the bug this exists to catch.
+   */
+  const authWrites = [];
+
   // --- the stand-in Supabase project ----------------------------------
   const supa = http.createServer((req, res) => {
+    // CORS, because the page and this server are on different ports and a
+    // BROWSER call to Supabase is therefore cross-origin.
+    //
+    // Every prodtest before this one only ever reached Supabase from the
+    // SERVER — middleware and route handlers, where CORS does not exist —
+    // so a stand-in with no CORS headers looked complete for eight test
+    // files. The first browser-side write (supabase.auth.updateUser from a
+    // settings panel) produced a preflight this server answered 200 with
+    // no Access-Control-Allow-Origin, Chromium blocked the real request,
+    // and the app under test reported a perfectly correct "could not
+    // save". Hours were spent looking for that fault in the app.
+    //
+    // Real Supabase sends these headers. A stand-in that does not is not
+    // standing in for it.
+    res.setHeader("Access-Control-Allow-Origin", req.headers.origin ?? "*");
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "authorization, x-client-info, apikey, content-type, x-supabase-api-version, prefer, accept-profile, content-profile, range"
+    );
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS");
+    res.setHeader("Access-Control-Expose-Headers", "content-range, x-supabase-api-version");
+    res.setHeader("Access-Control-Max-Age", "600");
+    if (req.method === "OPTIONS") {
+      res.writeHead(204);
+      res.end();
+      return;
+    }
+
     let body = "";
     req.on("data", (c) => (body += c));
     req.on("end", () => {
@@ -53,8 +104,26 @@ export async function startProdHarness({ tableRows = {}, supaPort = 54331 } = {}
         res.writeHead(code, { "Content-Type": "application/json" });
         res.end(JSON.stringify(data));
       };
-      if (url.pathname === "/auth/v1/user") return json(200, USER);
-      if (url.pathname.startsWith("/auth/v1/")) return json(200, { user: USER, session: null });
+      const currentUser = () => ({ ...USER, user_metadata: { ...currentMetadata } });
+      if (url.pathname === "/auth/v1/user") {
+        // A PUT here is updateUser(). Record it and APPLY it, so a later
+        // read reflects the write exactly as the real auth server would.
+        if (req.method === "PUT") {
+          let parsed = null;
+          try {
+            parsed = JSON.parse(body || "{}");
+          } catch {
+            /* recorded as null; the assertion will say so */
+          }
+          authWrites.push({ method: "PUT", body: parsed });
+          if (parsed && typeof parsed.data === "object" && parsed.data) {
+            currentMetadata = { ...currentMetadata, ...parsed.data };
+          }
+        }
+        return json(200, currentUser());
+      }
+      if (url.pathname.startsWith("/auth/v1/"))
+        return json(200, { user: currentUser(), session: null });
       if (url.pathname.startsWith("/rest/v1/")) {
         const table = url.pathname.slice("/rest/v1/".length);
         const rows = tableRows[table] ?? [];
@@ -192,6 +261,11 @@ export async function startProdHarness({ tableRows = {}, supaPort = 54331 } = {}
     origin,
     AUTH_COOKIE,
     cleanup,
+    authWrites,
+    /** What the account says now. Changing it needs no rebuild. */
+    setUserMetadata(next) {
+      currentMetadata = { ...next };
+    },
     /** A Playwright context already carrying the session cookie. */
     async signedIn(browser, viewport = { width: 1280, height: 900 }) {
       const context = await browser.newContext({ viewport });

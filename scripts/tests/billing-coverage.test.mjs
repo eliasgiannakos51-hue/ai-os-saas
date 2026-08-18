@@ -572,9 +572,53 @@ console.log("\n== 16. a failed settlement never reports success ==");
 // SettlementResult whose creditsCharged said the user had been charged —
 // when the database had done nothing at all. The caller could not tell.
 checkTrue("SettlementResult says whether it actually settled", /settled: boolean/.test(res));
-checkTrue("an RPC error returns settled: false", /return \{ creditsCharged: 0[^}]*settled: false \}/.test(res));
+// MATCHED BY BRACES, ACROSS NEWLINES. The original pattern required the
+// whole return on ONE line, so adding a field to SettlementResult — which
+// reformatted the object over several lines and changed nothing about the
+// property being asserted — turned this red. A regex over a fixed window
+// is not the fix either: settleReservation's cost-log metadata object
+// repeats the same field names in the same order, so a substring count
+// reads one higher than the number of returns and a missing return can
+// hide behind it.
+function returnObjectsOf(body) {
+  const out = [];
+  let idx = 0;
+  while ((idx = body.indexOf("return {", idx)) !== -1) {
+    let depth = 0;
+    let j = idx + "return ".length;
+    for (; j < body.length; j++) {
+      if (body[j] === "{") depth++;
+      else if (body[j] === "}") {
+        depth--;
+        if (depth === 0) { j++; break; }
+      }
+    }
+    out.push(body.slice(idx, j));
+    idx = j;
+  }
+  return out;
+}
+const settleReturns = returnObjectsOf(res.slice(res.indexOf("export async function settleReservation")));
+const returnsWith = (needles) =>
+  settleReturns.filter((r) => needles.every((needle) => r.includes(needle)));
+checkTrue("settleReservation has exactly three returns", settleReturns.length === 3, String(settleReturns.length));
+checkTrue(
+  "both failure returns say settled: false and charge nothing",
+  returnsWith(["creditsCharged: 0", "settled: false"]).length === 2
+);
 checkTrue("so does an unhandled throw", (res.match(/settled: false/g) ?? []).length >= 2);
-checkTrue("and a real settlement returns settled: true", /achievedMargin: margin, settled: true \}/.test(res));
+checkTrue(
+  "and a real settlement returns settled: true, with the margin it achieved",
+  returnsWith(["achievedMargin: margin", "settled: true"]).length === 1
+);
+// The bypass figure has to come back out of settlement, not merely be
+// written to the cost log — a caller that cannot see it has no way to say
+// "unlimited (would have cost X)" and shows a bare 0 instead, which is
+// what every agent run on an owner's account reported.
+checkTrue(
+  "every settlement return says whether the account was charged at all",
+  returnsWith(["bypassCharge", "wouldHaveChargedCredits"]).length === 3
+);
 // A stale RPC in the database is the failure that looks like nothing,
 // because PostgREST resolves overloads by argument NAME.
 checkTrue("the error names the signature-mismatch possibility", /does not match the arguments sent here/.test(res));

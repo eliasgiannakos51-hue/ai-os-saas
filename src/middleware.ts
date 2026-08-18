@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { diagLog } from "@/lib/diag";
+import { LOCALE_COOKIE, LOCALE_COOKIE_MAX_AGE, SUPPORTED_LOCALES } from "@/i18n/constants";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
@@ -46,6 +47,51 @@ export async function middleware(request: NextRequest) {
     diagLog(`[middleware-diag] ${request.nextUrl.pathname} at ${new Date().toISOString()} -> user=${
         user?.id ?? "null"
       } error=${middlewareUserError?.message ?? "none"} cookieRefreshed=${cookieRefreshHappened}`);
+  }
+
+  // ------------------------------------------------------------------
+  // The account's language, pushed onto the cookie next-intl reads.
+  // ------------------------------------------------------------------
+  // i18n/request.ts resolves the locale from the NEXT_LOCALE cookie and
+  // nothing else, because it runs on EVERY server render and an auth round
+  // trip there would be a network call per page. This middleware already
+  // pays for exactly one getUser() per request, so the account's stored
+  // preference is free to read right here — and writing it back onto the
+  // cookie is what makes the setting an account setting rather than a
+  // per-browser one. A new phone, a new browser, or cleared site data all
+  // arrive with no cookie and get the right language on the FIRST render.
+  //
+  // The account wins over a differing cookie, deliberately. Changing the
+  // language on the laptop has to change it on the phone, which it cannot
+  // do if a stale cookie outranks the stored value. Both selectors write
+  // the account first and the cookie second (lib/locale-preference.ts), so
+  // the two only ever disagree when the account is the newer of the two.
+  //
+  // Nothing happens for a signed-out visitor, or for an account that has
+  // never picked a language: their cookie is the only opinion in the
+  // system and it is left exactly as it is.
+  const preferredLocale = user?.user_metadata?.preferred_locale;
+  if (
+    typeof preferredLocale === "string" &&
+    (SUPPORTED_LOCALES as readonly string[]).includes(preferredLocale) &&
+    request.cookies.get(LOCALE_COOKIE)?.value !== preferredLocale
+  ) {
+    // Two writes, and both are needed. The request cookie is what THIS
+    // render sees (the response is rebuilt from the mutated headers, the
+    // same trick setAll() above uses); the response cookie is what the
+    // browser keeps for the next request.
+    request.cookies.set(LOCALE_COOKIE, preferredLocale);
+    const rebuilt = NextResponse.next({ request: { headers: request.headers } });
+    // Carry over anything setAll() already wrote — rebuilding the response
+    // from scratch would drop a rotated Supabase refresh token, which is
+    // the exact failure DEFECT 1 below documents.
+    response.cookies.getAll().forEach((cookie) => rebuilt.cookies.set(cookie));
+    response = rebuilt;
+    response.cookies.set(LOCALE_COOKIE, preferredLocale, {
+      path: "/",
+      maxAge: LOCALE_COOKIE_MAX_AGE,
+      sameSite: "lax",
+    });
   }
 
   const isAuthRoute =

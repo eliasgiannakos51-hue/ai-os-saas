@@ -197,6 +197,61 @@ body {
     @apply min-h-[44px] w-full rounded-lg border border-border bg-input px-3 py-2 text-sm text-foreground outline-none transition-colors duration-150 focus:border-orange-500;
   }
 }
+/* ---------------------------------------------------------------------
+   THE 16px FLOOR ON ANYTHING YOU CAN TYPE INTO
+   ---------------------------------------------------------------------
+   iOS Safari zooms the whole page in when you focus a text field whose
+   font-size is under 16px. It is not configurable and it is not a bug in
+   the page: Safari has decided the text is too small to type into. The
+   page then stays zoomed — wider than the screen, every later tap off by
+   the difference — until the user pinches back out.
+
+   It fired on every form in this app, because `.input` above is `text-sm`
+   (14px) and `.input` is what every text field, textarea and select is
+   built from. Measured on a production build at 375px:
+   TWENTY-NINE controls across 38 routes, the login email and password
+   fields among them — so the very first thing a new user typed zoomed
+   the page.
+
+   NOT `maximum-scale=1`. The one-line fix everybody reaches for is a
+   viewport meta forbidding zoom. It does stop the auto-zoom, by taking
+   pinch-zoom away from everyone including the people who need it to read
+   at all — an accessibility regression traded for a layout annoyance.
+   app/layout.tsx's viewport export deliberately has no maximum-scale and
+   no user-scalable, and mobile-input-zoom.prodtest.mjs fails if either
+   ever appears.
+
+   WHY A GLOBAL RULE RATHER THAN EDITING `.input`. Half the offenders are
+   not `.input` at all — the login page builds its fields from raw
+   utilities, the chat composer is its own textarea, the colour pickers
+   are `font-mono text-xs`. A rule keyed on the TAG catches the ones
+   nobody remembered to look at, including every field inside a dialog
+   that has to be opened before it exists.
+
+   SPECIFICITY IS THE LOAD-BEARING PART. A Tailwind size utility is one
+   class, so `.text-xs` scores (0,1,0). Each `:not([attr])` here counts as
+   a class, so the input selector scores (0,5,1) and the textarea/select
+   selectors (0,1,1) — every one of them above a single utility, whatever
+   order the stylesheet ends up in. `:not([hidden])` on textarea and
+   select is there for exactly that reason and no other; drop it and
+   `text-xs` wins again.
+
+   TWO CONDITIONS, NOT ONE. Narrow viewports cover the ordinary case.
+   `(hover: none) and (pointer: coarse)` covers the one a width query
+   misses: an iPhone in LANDSCAPE is 844-932 CSS px wide and Safari still
+   auto-zooms there. A touch laptop matches the second condition too and
+   gets 16px fields, which is not a problem worth a narrower query.
+
+   The excluded input types have nothing to type into — Safari does not
+   zoom for them, and enlarging them would move real layout for nothing.
+   --------------------------------------------------------------------- */
+@media (max-width: 767.98px), (hover: none) and (pointer: coarse) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]),
+  textarea:not([hidden]),
+  select:not([hidden]) {
+    font-size: 16px;
+  }
+}
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
@@ -1189,3 +1244,5 @@ input:-webkit-autofill:focus {
   fill: currentColor;
   filter: none;
 }
+
+/* END ThinkingIndicator */

@@ -503,6 +503,12 @@
         "carbon": "Carbon"
       }
     },
+    "language": {
+      "title": "Sprache",
+      "description": "Wähle die Sprache, in der die gesamte App angezeigt wird.",
+      "savedToAccount": "Wird in deinem Konto gespeichert und begleitet dich auf jedem Gerät, auf dem du dich anmeldest.",
+      "saveFailed": "Die Sprache konnte nicht gespeichert werden – es wurde nichts geändert."
+    },
     "accessibility": {
       "title": "Barrierefreiheit",
       "fontSize": {
@@ -1282,6 +1288,8 @@
       "saveError": "Diese Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.",
       "confirmDelete": "„{name}“ löschen? Der Lauf-Verlauf geht mit, und das lässt sich nicht rückgängig machen.",
       "runSuccess": "Fertig — {credits} Credits. Das Ergebnis wurde Ihnen per E-Mail geschickt.",
+      "runSuccessUnlimitedCost": "Fertig – in deinem Konto unbegrenzt (hätte {credits} Credits gekostet). Das Ergebnis wurde dir per E-Mail geschickt.",
+      "runSuccessUnlimited": "Fertig – in deinem Konto unbegrenzt, keine Credits abgebucht. Das Ergebnis wurde dir per E-Mail geschickt.",
       "runNothingToReport": "Diesmal gibt es nichts Neues zu berichten.",
       "runFailed": "Der Lauf ist fehlgeschlagen.",
       "close": "Schließen",
@@ -1302,6 +1310,7 @@
       "runManual": "Manuell",
       "runScheduled": "Geplant",
       "runCredits": "{credits} Credits",
+      "runCreditsUnlimited": "unbegrenzt (hätte {credits} gekostet)",
       "viewOutput": "Ergebnis ansehen",
       "scheduleFrequencyLabel": "Wie oft",
       "scheduleTimeLabel": "Um",
@@ -1813,7 +1822,8 @@
     "remove": "Aus Favoriten entfernen"
   },
   "language": {
-    "label": "Sprache"
+    "label": "Sprache",
+    "saveFailed": "Die Sprache konnte nicht gespeichert werden – es wurde nichts geändert."
   },
   "achievements": {
     "title": "Erfolge",

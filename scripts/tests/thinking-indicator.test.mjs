@@ -49,7 +49,17 @@ function stripComments(src) {
 const componentCode = stripComments(component);
 // The CSS block only, so a rule elsewhere in a 1,000-line file cannot
 // satisfy a check about this component.
-const cssBlock = css.slice(css.indexOf("ThinkingIndicator — the constellation"));
+// BOUNDED AT BOTH ENDS. This used to slice to the end of the file, which
+// made the byte ratchet below a budget on "the ThinkingIndicator's CSS
+// plus whatever anyone appends to globals.css after it" — a mobile
+// font-size rule for form inputs, added at the bottom of the file for
+// reasons that have nothing to do with this component, put the ratchet
+// 156 bytes over and read as this component having grown. A ratchet that
+// can be tripped by an unrelated edit gets its number raised without
+// anyone reading it, which is the one thing a ratchet must not invite.
+const cssBlockStart = css.indexOf("ThinkingIndicator — the constellation");
+const cssBlockEnd = css.indexOf("/* END ThinkingIndicator */", cssBlockStart);
+const cssBlock = css.slice(cssBlockStart, cssBlockEnd === -1 ? undefined : cssBlockEnd);
 
 // The six places the app waits on a model. Five were named in the brief;
 // records/ask-ai-modal is the sixth, found by grepping for the dots
@@ -207,6 +217,8 @@ check("and it drops the purple too", /is-inherit \.node\.alt/.test(cssBlock));
 check("files uses it inside the orange button", /<ThinkingIndicator size="sm" tone="inherit"/.test(files));
 
 console.log("\n== 8. weight ==");
+check("globals.css marks where the ThinkingIndicator's CSS ends", cssBlockEnd !== -1,
+  "without /* END ThinkingIndicator */ this budget silently measures the rest of the file too");
 // A brand element that costs a library is not worth having.
 const bytes = statSync("src/components/ui/thinking-indicator.tsx").size;
 const cssBytes = Buffer.byteLength(cssBlock, "utf8");

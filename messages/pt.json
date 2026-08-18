@@ -503,6 +503,12 @@
         "carbon": "Carbon"
       }
     },
+    "language": {
+      "title": "Idioma",
+      "description": "Escolhe o idioma em que toda a aplicação é apresentada.",
+      "savedToAccount": "Fica guardado na tua conta, por isso acompanha-te em todos os dispositivos onde inicies sessão.",
+      "saveFailed": "Não foi possível guardar o idioma — nada foi alterado."
+    },
     "accessibility": {
       "title": "Acessibilidade",
       "fontSize": {
@@ -1282,6 +1288,8 @@
       "saveError": "Não foi possível guardar essa alteração. Tente novamente.",
       "confirmDelete": "Eliminar \"{name}\"? O histórico de execuções vai junto e não é reversível.",
       "runSuccess": "Pronto — {credits} créditos. O resultado foi-lhe enviado por email.",
+      "runSuccessUnlimitedCost": "Pronto — ilimitado na tua conta (teria custado {credits} créditos). O resultado foi enviado para o teu email.",
+      "runSuccessUnlimited": "Pronto — ilimitado na tua conta, sem créditos cobrados. O resultado foi enviado para o teu email.",
       "runNothingToReport": "Nada de novo a relatar desta vez.",
       "runFailed": "A execução falhou.",
       "close": "Fechar",
@@ -1302,6 +1310,7 @@
       "runManual": "Manual",
       "runScheduled": "Agendada",
       "runCredits": "{credits} créditos",
+      "runCreditsUnlimited": "ilimitado (teria custado {credits})",
       "viewOutput": "Ver o resultado",
       "scheduleFrequencyLabel": "Com que frequência",
       "scheduleTimeLabel": "Às",
@@ -1813,7 +1822,8 @@
     "remove": "Remover dos favoritos"
   },
   "language": {
-    "label": "Idioma"
+    "label": "Idioma",
+    "saveFailed": "Não foi possível guardar o idioma — nada foi alterado."
   },
   "achievements": {
     "title": "Conquistas",

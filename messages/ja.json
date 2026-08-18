@@ -503,6 +503,12 @@
         "carbon": "カーボン"
       }
     },
+    "language": {
+      "title": "言語",
+      "description": "アプリ全体を表示する言語を選びます。",
+      "savedToAccount": "アカウントに保存されるので、ログインしたどの端末でも引き継がれます。",
+      "saveFailed": "言語を保存できませんでした。変更は行われていません。"
+    },
     "accessibility": {
       "title": "アクセシビリティ",
       "fontSize": {
@@ -1282,6 +1288,8 @@
       "saveError": "変更を保存できませんでした。もう一度お試しください。",
       "confirmDelete": "「{name}」を削除しますか？実行履歴も一緒に消え、元に戻せません。",
       "runSuccess": "完了 — {credits} クレジット。結果をメールで送信しました。",
+      "runSuccessUnlimitedCost": "完了しました — このアカウントは無制限です（通常なら {credits} クレジット）。結果はメールで送信しました。",
+      "runSuccessUnlimited": "完了しました — このアカウントは無制限で、クレジットは消費していません。結果はメールで送信しました。",
       "runNothingToReport": "今回は新しくお伝えすることはありません。",
       "runFailed": "実行に失敗しました。",
       "close": "閉じる",
@@ -1302,6 +1310,7 @@
       "runManual": "手動",
       "runScheduled": "予定実行",
       "runCredits": "{credits} クレジット",
+      "runCreditsUnlimited": "無制限（通常なら {credits}）",
       "viewOutput": "結果を見る",
       "scheduleFrequencyLabel": "頻度",
       "scheduleTimeLabel": "時刻",
@@ -1813,7 +1822,8 @@
     "remove": "お気に入りから削除"
   },
   "language": {
-    "label": "言語"
+    "label": "言語",
+    "saveFailed": "言語を保存できませんでした。変更は行われていません。"
   },
   "achievements": {
     "title": "実績",

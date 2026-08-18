@@ -503,6 +503,12 @@
         "carbon": "Carbon"
       }
     },
+    "language": {
+      "title": "Lingua",
+      "description": "Scegli la lingua in cui viene mostrata tutta l'app.",
+      "savedToAccount": "Viene salvata nel tuo account, quindi ti segue su ogni dispositivo su cui accedi.",
+      "saveFailed": "Non è stato possibile salvare la lingua: non è stato modificato nulla."
+    },
     "accessibility": {
       "title": "Accessibilità",
       "fontSize": {
@@ -1282,6 +1288,8 @@
       "saveError": "Non è stato possibile salvare la modifica. Riprova.",
       "confirmDelete": "Eliminare \"{name}\"? Anche la cronologia delle esecuzioni verrà eliminata e non è reversibile.",
       "runSuccess": "Fatto — {credits} crediti. Il risultato ti è stato inviato via email.",
+      "runSuccessUnlimitedCost": "Fatto: illimitato sul tuo account (sarebbe costato {credits} crediti). Il risultato ti è stato inviato per email.",
+      "runSuccessUnlimited": "Fatto: illimitato sul tuo account, nessun credito addebitato. Il risultato ti è stato inviato per email.",
       "runNothingToReport": "Niente di nuovo da segnalare questa volta.",
       "runFailed": "L'esecuzione non è riuscita.",
       "close": "Chiudi",
@@ -1302,6 +1310,7 @@
       "runManual": "Manuale",
       "runScheduled": "Pianificata",
       "runCredits": "{credits} crediti",
+      "runCreditsUnlimited": "illimitato (sarebbe costato {credits})",
       "viewOutput": "Vedi il risultato",
       "scheduleFrequencyLabel": "Ogni quanto",
       "scheduleTimeLabel": "Alle",
@@ -1813,7 +1822,8 @@
     "remove": "Rimuovi dai preferiti"
   },
   "language": {
-    "label": "Lingua"
+    "label": "Lingua",
+    "saveFailed": "Non è stato possibile salvare la lingua: non è stato modificato nulla."
   },
   "achievements": {
     "title": "Obiettivi",

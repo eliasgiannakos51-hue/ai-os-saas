@@ -503,6 +503,12 @@
         "carbon": "Carbon"
       }
     },
+    "language": {
+      "title": "Language",
+      "description": "Choose the language the whole app is shown in.",
+      "savedToAccount": "Saved to your account, so it follows you to every device you sign in on.",
+      "saveFailed": "Couldn't save your language — nothing was changed."
+    },
     "accessibility": {
       "title": "Accessibility",
       "fontSize": {
@@ -1282,6 +1288,8 @@
       "saveError": "Could not save that change. Please try again.",
       "confirmDelete": "Delete \"{name}\"? Its run history goes with it, and this can't be undone.",
       "runSuccess": "Done — {credits} credits. The result was emailed to you.",
+      "runSuccessUnlimitedCost": "Done — unlimited on your account (would have cost {credits} credits). The result was emailed to you.",
+      "runSuccessUnlimited": "Done — unlimited on your account, no credits charged. The result was emailed to you.",
       "runNothingToReport": "Nothing new to report this time.",
       "runFailed": "The run failed.",
       "close": "Close",
@@ -1302,6 +1310,7 @@
       "runManual": "Run now",
       "runScheduled": "Scheduled",
       "runCredits": "{credits} credits",
+      "runCreditsUnlimited": "unlimited (would have cost {credits})",
       "viewOutput": "See the result",
       "scheduleFrequencyLabel": "How often",
       "scheduleTimeLabel": "At",
@@ -1813,7 +1822,8 @@
     "remove": "Remove from favorites"
   },
   "language": {
-    "label": "Language"
+    "label": "Language",
+    "saveFailed": "Couldn't save your language — nothing was changed."
   },
   "achievements": {
     "title": "Achievements",

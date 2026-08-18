@@ -97,6 +97,16 @@ export type SettlementResult = {
   realCostUsd: number;
   realCostEur: number;
   achievedMargin: number | null;
+  /** True when this account is not charged at all (admin, beta tester).
+   *  A caller that reports "0 credits" without this cannot tell "free for
+   *  you" from "billing did nothing", and neither can the user. */
+  bypassCharge: boolean;
+  /** On a bypass settlement, what the charge WOULD have been. Null when
+   *  the account really was charged (creditsCharged is the answer then).
+   *  Already stored in the cost-log row's metadata; returned as well so
+   *  the surface that just ran the action can say it out loud instead of
+   *  showing a bare zero. */
+  wouldHaveChargedCredits: number | null;
   /** False when the RPC failed — nothing was charged and no cost-log row
    *  exists, however healthy the other fields look. Callers that report a
    *  charge to the user must check this. */
@@ -359,7 +369,15 @@ export async function settleReservation(params: {
         // line of TypeScript above it ran perfectly.
         hint: "if this says the function was not found, the settle_reservation RPC in the database does not match the arguments sent here",
       });
-      return { creditsCharged: 0, realCostUsd, realCostEur, achievedMargin: null, settled: false };
+      return {
+        creditsCharged: 0,
+        realCostUsd,
+        realCostEur,
+        achievedMargin: null,
+        bypassCharge,
+        wouldHaveChargedCredits: wouldHaveCharged,
+        settled: false,
+      };
     }
     diagLog(
       `[billing] settled ${feature}: ${JSON.stringify({
@@ -381,10 +399,26 @@ export async function settleReservation(params: {
     );
   } catch (err) {
     logApiError("billing:settleReservation", err, { userId, feature, stage: "unhandled" });
-    return { creditsCharged: 0, realCostUsd, realCostEur, achievedMargin: null, settled: false };
+    return {
+      creditsCharged: 0,
+      realCostUsd,
+      realCostEur,
+      achievedMargin: null,
+      bypassCharge,
+      wouldHaveChargedCredits: wouldHaveCharged,
+      settled: false,
+    };
   }
 
-  return { creditsCharged, realCostUsd, realCostEur, achievedMargin: margin, settled: true };
+  return {
+    creditsCharged,
+    realCostUsd,
+    realCostEur,
+    achievedMargin: margin,
+    bypassCharge,
+    wouldHaveChargedCredits: wouldHaveCharged,
+    settled: true,
+  };
 }
 
 /**

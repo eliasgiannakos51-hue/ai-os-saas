@@ -503,6 +503,12 @@
         "carbon": "石墨灰"
       }
     },
+    "language": {
+      "title": "语言",
+      "description": "选择整个应用显示所用的语言。",
+      "savedToAccount": "已保存到你的账户，因此在你登录的每一台设备上都会沿用。",
+      "saveFailed": "无法保存语言设置——没有任何更改。"
+    },
     "accessibility": {
       "title": "无障碍功能",
       "fontSize": {
@@ -1282,6 +1288,8 @@
       "saveError": "无法保存该更改，请重试。",
       "confirmDelete": "删除“{name}”？运行历史也会一并删除，且无法撤销。",
       "runSuccess": "完成——{credits} 积分。结果已发送到你的邮箱。",
+      "runSuccessUnlimitedCost": "已完成——你的账户为无限额（本应消耗 {credits} 个积分）。结果已发送到你的邮箱。",
+      "runSuccessUnlimited": "已完成——你的账户为无限额，未扣除积分。结果已发送到你的邮箱。",
       "runNothingToReport": "这次没有新的内容可报告。",
       "runFailed": "运行失败。",
       "close": "关闭",
@@ -1302,6 +1310,7 @@
       "runManual": "手动",
       "runScheduled": "计划",
       "runCredits": "{credits} 积分",
+      "runCreditsUnlimited": "无限额（本应消耗 {credits}）",
       "viewOutput": "查看结果",
       "scheduleFrequencyLabel": "运行频率",
       "scheduleTimeLabel": "时间",
@@ -1813,7 +1822,8 @@
     "remove": "从收藏中移除"
   },
   "language": {
-    "label": "语言"
+    "label": "语言",
+    "saveFailed": "无法保存语言设置——没有任何更改。"
   },
   "achievements": {
     "title": "成就",

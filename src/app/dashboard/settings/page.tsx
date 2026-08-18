@@ -9,6 +9,7 @@ import { PasswordChangeForm } from "@/components/settings/password-change-form";
 import { ChatMemorySettings } from "@/components/settings/chat-memory-settings";
 import { AccessibilitySettings } from "@/components/settings/accessibility-settings";
 import { ThemeSettings } from "@/components/settings/theme-settings";
+import { LanguageSettings } from "@/components/settings/language-settings";
 import { LoginActivity, type KnownDevice } from "@/components/settings/login-activity";
 import { ExportDataButton } from "@/components/settings/export-data-button";
 import { DangerZone } from "@/components/settings/danger-zone";
@@ -208,6 +209,7 @@ export default async function SettingsPage() {
             "Προσβασιμότητα" as the destination. */}
         <nav aria-label={t("jumpToSection")} className="mb-6 flex flex-wrap gap-2 text-xs">
           {[
+            { href: "#language", label: t("language.title") },
             { href: "#accessibility", label: t("accessibility.title") },
             { href: "#ai-usage", label: t("aiUsage.title") },
             { href: "#buy-credits", label: tBilling("title") },
@@ -280,6 +282,8 @@ export default async function SettingsPage() {
         />
 
         {hasCustomAiPersona && <Reveal><AiPersonaSettings initialName={aiPersonaName} /></Reveal>}
+
+        <Reveal><LanguageSettings /></Reveal>
 
         <Reveal><ThemeSettings /></Reveal>
 

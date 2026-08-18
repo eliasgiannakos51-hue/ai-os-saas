@@ -503,6 +503,12 @@
         "carbon": "Carbon"
       }
     },
+    "language": {
+      "title": "اللغة",
+      "description": "اختر اللغة التي يُعرض بها التطبيق بأكمله.",
+      "savedToAccount": "يُحفظ في حسابك، لذا يرافقك على كل جهاز تسجّل الدخول منه.",
+      "saveFailed": "تعذّر حفظ اللغة — لم يتغيّر شيء."
+    },
     "accessibility": {
       "title": "إمكانية الوصول",
       "fontSize": {
@@ -1282,6 +1288,8 @@
       "saveError": "تعذّر حفظ هذا التغيير. حاول مرة أخرى.",
       "confirmDelete": "هل تريد حذف \"{name}\"؟ سيُحذف سجل التشغيل معه، ولا يمكن التراجع.",
       "runSuccess": "تم — {credits} رصيد. أُرسلت النتيجة إلى بريدك.",
+      "runSuccessUnlimitedCost": "تم — حسابك غير محدود (كان سيكلّف {credits} رصيدًا). أُرسلت النتيجة إلى بريدك.",
+      "runSuccessUnlimited": "تم — حسابك غير محدود، ولم تُخصم أي أرصدة. أُرسلت النتيجة إلى بريدك.",
       "runNothingToReport": "لا جديد لإبلاغك به هذه المرة.",
       "runFailed": "فشل التشغيل.",
       "close": "إغلاق",
@@ -1302,6 +1310,7 @@
       "runManual": "يدوي",
       "runScheduled": "مجدول",
       "runCredits": "{credits} رصيد",
+      "runCreditsUnlimited": "غير محدود (كان سيكلّف {credits})",
       "viewOutput": "اعرض النتيجة",
       "scheduleFrequencyLabel": "عدد المرات",
       "scheduleTimeLabel": "الساعة",
@@ -1813,7 +1822,8 @@
     "remove": "إزالة من المفضلة"
   },
   "language": {
-    "label": "اللغة"
+    "label": "اللغة",
+    "saveFailed": "تعذّر حفظ اللغة — لم يتغيّر شيء."
   },
   "achievements": {
     "title": "الإنجازات",

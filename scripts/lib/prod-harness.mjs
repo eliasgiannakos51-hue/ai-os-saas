@@ -36,6 +36,36 @@ const USER = {
 export { USER };
 
 /**
+ * Real PostgREST always serialises every column named in the query —
+ * `select("*")` included — filling an unset nullable column with explicit
+ * JSON `null`, never omitting the key. A fixture row that leaves a column
+ * out entirely is a JS object literal convenience, not what the wire
+ * actually carries; `JSON.stringify`ing it verbatim drops the key, and the
+ * client then sees `undefined` where production would hand it `null` —
+ * two values that read identically to a human skimming a fixture and
+ * disagree on every `=== null` check the UI makes. (Found the hard way:
+ * agents-ui.prodtest.mjs's run-history fixture omitted
+ * would_have_charged_credits, which made a genuinely-charged run's cost
+ * silently render as "would have been free" — true against this mock,
+ * false against a real database.)
+ *
+ * Filling to the union of keys seen ACROSS the table's rows, once, here,
+ * means no individual fixture has to remember to spell out every nullable
+ * column by hand — the shape one row establishes, every row in the same
+ * table gets held to.
+ */
+function uniformColumns(rows) {
+  if (rows.length === 0) return rows;
+  const allKeys = new Set();
+  for (const row of rows) for (const key of Object.keys(row)) allKeys.add(key);
+  return rows.map((row) => {
+    const filled = { ...row };
+    for (const key of allKeys) if (!(key in filled)) filled[key] = null;
+    return filled;
+  });
+}
+
+/**
  * @param {object} options
  * @param {Record<string, object[]>} options.tableRows  table name -> rows the
  *   stand-in PostgREST returns. Any table not named answers with [].
@@ -126,7 +156,7 @@ export async function startProdHarness({
         return json(200, { user: currentUser(), session: null });
       if (url.pathname.startsWith("/rest/v1/")) {
         const table = url.pathname.slice("/rest/v1/".length);
-        const rows = tableRows[table] ?? [];
+        const rows = uniformColumns(tableRows[table] ?? []);
         // PostgREST returns a bare object (not an array) for .single().
         const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
         if (single) return rows[0] ? json(200, rows[0]) : json(406, { message: "no rows" });

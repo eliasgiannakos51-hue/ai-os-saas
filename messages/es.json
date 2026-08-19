@@ -863,6 +863,10 @@
       "title": "Historial",
       "allModules": "Todos los módulos",
       "showOnly": "Mostrar solo: {module}",
+      "rangeToday": "Hoy",
+      "rangeWeek": "Esta semana",
+      "rangeMonth": "Este mes",
+      "rangeAll": "Todo el tiempo",
       "empty": {
         "title": "Su trabajo, en el orden en que ocurrió",
         "why": "Se escribe solo. Todo lo que registra en cualquier módulo llega aquí en un único flujo, que es como se responde a «qué hice realmente el mes pasado»."
@@ -1567,6 +1571,7 @@
       "finished": "Tu informe está listo",
       "inProgress": "Buscando y redactando…",
       "statusPending": "Planificado",
+      "statusResearching": "Investigando",
       "statusSynthesising": "Redactando",
       "statusReady": "Listo",
       "statusFailed": "Falló",
@@ -1741,6 +1746,8 @@
       "az": "A–Z",
       "za": "Z–A"
     },
+    "emptyWhat": "Aquí vive todo lo que registras sobre {module}.",
+    "emptyWhy": "Todo lo que registres aquí se añade a tu Cronología y pasa a ser algo que la IA puede usar cuando le preguntes sobre tu trabajo.",
     "emptyExample": "Empieza con: «{example}»",
     "examples": {
       "competitors": "Notion: el competidor más cercano en precio",
@@ -1769,6 +1776,7 @@
     "emptyApps": "Aquí no hay nada todavía. Es un sitio para llevar la cuenta de apps que planeas o ya has hecho: no crea apps por ti. Usa el botón de arriba.",
     "emptyImages": "Aquí no hay nada todavía. Es un sitio para llevar la cuenta de imágenes que necesitas o ya has hecho: no crea imágenes. Usa el botón de arriba.",
     "emptyVideos": "Aquí no hay nada todavía. Es un sitio para llevar la cuenta de vídeos que planeas o ya has hecho: no crea vídeos. Usa el botón de arriba.",
+    "emptyCoding": "Aquí no hay nada todavía. Es un sitio para llevar la cuenta del trabajo de programación que planeas o ya has hecho: no escribe código. Usa el botón de arriba.",
     "emptyDataAnalysis": "Aquí no hay nada todavía. Es un sitio para llevar la cuenta de análisis que planeas o ya has hecho: no analiza tus datos. Usa el botón de arriba.",
     "emptyCampaigns": "Aquí no hay nada todavía. Es un sitio para llevar la cuenta de campañas que planeas o ya has hecho: no ejecuta campañas. Usa el botón de arriba."
   },

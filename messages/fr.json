@@ -863,6 +863,10 @@
       "title": "Historique",
       "allModules": "Tous les modules",
       "showOnly": "Afficher uniquement : {module}",
+      "rangeToday": "Aujourd'hui",
+      "rangeWeek": "Cette semaine",
+      "rangeMonth": "Ce mois-ci",
+      "rangeAll": "Toute la période",
       "empty": {
         "title": "Votre travail, dans l'ordre où il s'est fait",
         "why": "Cela s'écrit tout seul. Tout ce que vous consignez dans n'importe quel module arrive ici en un seul fil : c'est ainsi qu'on répond à « qu'ai-je fait le mois dernier »."
@@ -1567,6 +1571,7 @@
       "finished": "Votre rapport est prêt",
       "inProgress": "Recherche et rédaction…",
       "statusPending": "Planifié",
+      "statusResearching": "Recherche en cours",
       "statusSynthesising": "Rédaction",
       "statusReady": "Prêt",
       "statusFailed": "Échec",
@@ -1741,6 +1746,8 @@
       "az": "A–Z",
       "za": "Z–A"
     },
+    "emptyWhat": "Tout ce que vous consignez sur {module} vit ici.",
+    "emptyWhy": "Tout ce que vous consignez ici rejoint votre Chronologie et devient une information que l'IA peut utiliser lorsque vous l'interrogez sur votre travail.",
     "emptyExample": "Commencez par : « {example} »",
     "examples": {
       "competitors": "Notion — le concurrent le plus proche sur les prix",
@@ -1769,6 +1776,7 @@
     "emptyApps": "Rien ici pour l’instant. C’est un endroit pour suivre les applications que vous préparez ou avez déjà faites — il n’en crée aucune. Utilisez le bouton ci-dessus.",
     "emptyImages": "Rien ici pour l’instant. C’est un endroit pour suivre les images dont vous avez besoin ou que vous avez déjà faites — il n’en génère aucune. Utilisez le bouton ci-dessus.",
     "emptyVideos": "Rien ici pour l’instant. C’est un endroit pour suivre les vidéos que vous préparez ou avez déjà faites — il n’en génère aucune. Utilisez le bouton ci-dessus.",
+    "emptyCoding": "Rien ici pour l’instant. C’est un endroit pour suivre le travail de développement que vous préparez ou avez déjà fait — il n’écrit pas de code. Utilisez le bouton ci-dessus.",
     "emptyDataAnalysis": "Rien ici pour l’instant. C’est un endroit pour suivre les analyses que vous préparez ou avez déjà faites — il n’analyse pas vos données. Utilisez le bouton ci-dessus.",
     "emptyCampaigns": "Rien ici pour l’instant. C’est un endroit pour suivre les campagnes que vous préparez ou avez déjà menées — il n’en lance aucune. Utilisez le bouton ci-dessus."
   },

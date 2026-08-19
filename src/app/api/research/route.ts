@@ -26,6 +26,7 @@ import { RESEARCH_MODEL } from "@/lib/files/file-models";
 import { maxResearchRunsForPlan } from "@/lib/files/limits";
 import { RESEARCH_MAX_SEARCHES } from "@/lib/research/research-limits";
 import { planResearch, validateTopic } from "@/lib/research/research";
+import { resolveLanguage } from "@/lib/text/resolve-language";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -84,7 +85,14 @@ export async function POST(request: Request) {
     if (!topicCheck.ok) {
       return NextResponse.json({ ok: false, error: topicCheck.error }, { status: 400 });
     }
-    const language = typeof body?.language === "string" ? body.language.slice(0, 12) : "en";
+    // THE TOPIC DECIDES, not the interface. `body.language` is the UI
+    // locale the browser sent; a Greek topic typed into an
+    // English-language interface used to produce an English report,
+    // because the settings were asked and the user was not. Resolved
+    // server-side rather than in the client so it holds for every caller
+    // of this route, and because the topic is right here.
+    const uiLocale = typeof body?.language === "string" ? body.language.slice(0, 12) : "en";
+    const language = resolveLanguage(topicCheck.topic, uiLocale);
 
     const isAdmin = isAdminEmail(user.email);
     const planSlug = await resolveEffectivePlanSlug(user);

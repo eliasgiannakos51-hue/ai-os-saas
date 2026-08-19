@@ -25,6 +25,7 @@ import { fileIdsInCollection, loadReadableFiles } from "@/lib/files/store";
 import { MAX_FILES_PER_QUESTION, MAX_QUESTION_CHARS } from "@/lib/files/file-types";
 import { planContext } from "@/lib/files/ask";
 import { startJob } from "@/lib/jobs/start-job";
+import { resolveLanguage } from "@/lib/text/resolve-language";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -71,7 +72,12 @@ export async function POST(request: Request) {
 
     const body = await request.json().catch(() => null);
     const question = typeof body?.question === "string" ? body.question.trim() : "";
-    const language = typeof body?.language === "string" ? body.language.slice(0, 12) : "en";
+    // THE QUESTION DECIDES, not the interface — the same fix as
+    // api/research, because this route had the identical bug: it sent the
+    // UI locale, so a Greek question asked from an English interface came
+    // back answered in English. lib/text/resolve-language.ts.
+    const uiLocale = typeof body?.language === "string" ? body.language.slice(0, 12) : "en";
+    const language = resolveLanguage(question, uiLocale);
 
     if (!question) {
       return NextResponse.json({ ok: false, error: "Ask a question first." }, { status: 400 });

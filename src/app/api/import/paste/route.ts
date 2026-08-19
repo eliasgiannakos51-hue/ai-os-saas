@@ -26,6 +26,7 @@ import { MAX_PASTE_CHARS, MIN_PASTE_CHARS } from "@/lib/import/paste-limits";
 import { extractFromPaste } from "@/lib/import/paste";
 import { applyRows } from "@/lib/import/apply";
 import { claimFreeActivationRun } from "@/lib/import/activation";
+import { resolveLanguage } from "@/lib/text/resolve-language";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -73,7 +74,12 @@ export async function POST(request: Request) {
 
     const body = await request.json().catch(() => null);
     const text = typeof body?.text === "string" ? body.text.trim() : "";
-    const language = typeof body?.language === "string" ? body.language.slice(0, 12) : "en";
+    // THE PASTED TEXT DECIDES, not the interface — the same fix as
+    // api/research and api/files/ask. Someone pasting a Greek invoice
+    // into an English interface wants the columns named in Greek.
+    // lib/text/resolve-language.ts.
+    const uiLocale = typeof body?.language === "string" ? body.language.slice(0, 12) : "en";
+    const language = resolveLanguage(text, uiLocale);
 
     if (text.length < MIN_PASTE_CHARS) {
       return NextResponse.json(

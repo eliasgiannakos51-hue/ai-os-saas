@@ -863,6 +863,10 @@
       "title": "Histórico",
       "allModules": "Todos os módulos",
       "showOnly": "Mostrar apenas: {module}",
+      "rangeToday": "Hoje",
+      "rangeWeek": "Esta semana",
+      "rangeMonth": "Este mês",
+      "rangeAll": "Todo o período",
       "empty": {
         "title": "O seu trabalho, pela ordem em que aconteceu",
         "why": "Escreve-se sozinho. Tudo o que regista em qualquer módulo chega aqui num único fluxo, que é como se responde a «o que fiz eu no mês passado»."
@@ -1567,6 +1571,7 @@
       "finished": "O teu relatório está pronto",
       "inProgress": "A pesquisar e a escrever…",
       "statusPending": "Planeado",
+      "statusResearching": "A investigar",
       "statusSynthesising": "A escrever",
       "statusReady": "Pronto",
       "statusFailed": "Falhou",
@@ -1741,6 +1746,8 @@
       "az": "A–Z",
       "za": "Z–A"
     },
+    "emptyWhat": "Aqui vive tudo o que registas sobre {module}.",
+    "emptyWhy": "Tudo o que registares aqui entra na tua Cronologia e passa a ser algo que a IA pode usar quando lhe fizeres uma pergunta sobre o teu trabalho.",
     "emptyExample": "Começa com: «{example}»",
     "examples": {
       "competitors": "Notion — o concorrente mais próximo no preço",
@@ -1769,6 +1776,7 @@
     "emptyApps": "Ainda não há nada aqui. É um sítio para acompanhares apps que estás a planear ou já fizeste — não as cria por ti. Usa o botão acima.",
     "emptyImages": "Ainda não há nada aqui. É um sítio para acompanhares imagens de que precisas ou já fizeste — não gera imagens. Usa o botão acima.",
     "emptyVideos": "Ainda não há nada aqui. É um sítio para acompanhares vídeos que estás a planear ou já fizeste — não gera vídeos. Usa o botão acima.",
+    "emptyCoding": "Ainda não há nada aqui. É um sítio para acompanhares trabalho de programação que estás a planear ou já fizeste — não escreve código. Usa o botão acima.",
     "emptyDataAnalysis": "Ainda não há nada aqui. É um sítio para acompanhares análises que estás a planear ou já fizeste — não analisa os teus dados. Usa o botão acima.",
     "emptyCampaigns": "Ainda não há nada aqui. É um sítio para acompanhares campanhas que estás a planear ou já fizeste — não as executa. Usa o botão acima."
   },

@@ -863,6 +863,10 @@
       "title": "Cronologia",
       "allModules": "Tutti i moduli",
       "showOnly": "Mostra solo: {module}",
+      "rangeToday": "Oggi",
+      "rangeWeek": "Questa settimana",
+      "rangeMonth": "Questo mese",
+      "rangeAll": "Sempre",
       "empty": {
         "title": "Il tuo lavoro, nell'ordine in cui è successo",
         "why": "Si scrive da sé. Tutto ciò che registri in qualunque modulo finisce qui in un unico flusso: è così che si risponde a «cosa ho fatto davvero il mese scorso»."
@@ -1567,6 +1571,7 @@
       "finished": "Il tuo report è pronto",
       "inProgress": "Ricerca e scrittura…",
       "statusPending": "Pianificato",
+      "statusResearching": "In ricerca",
       "statusSynthesising": "In scrittura",
       "statusReady": "Pronto",
       "statusFailed": "Non riuscito",
@@ -1741,6 +1746,8 @@
       "az": "A–Z",
       "za": "Z–A"
     },
+    "emptyWhat": "Qui vive tutto quello che annoti su {module}.",
+    "emptyWhy": "Tutto quello che annoti qui entra nella tua Cronologia e diventa qualcosa che l'IA può usare quando le fai una domanda sul tuo lavoro.",
     "emptyExample": "Inizia con: «{example}»",
     "examples": {
       "competitors": "Notion — il concorrente più vicino sul prezzo",
@@ -1769,6 +1776,7 @@
     "emptyApps": "Qui non c’è ancora nulla. È il posto per tenere traccia delle app che stai progettando o hai già fatto: non le crea per te. Usa il pulsante sopra.",
     "emptyImages": "Qui non c’è ancora nulla. È il posto per tenere traccia delle immagini che ti servono o hai già fatto: non genera immagini. Usa il pulsante sopra.",
     "emptyVideos": "Qui non c’è ancora nulla. È il posto per tenere traccia dei video che stai progettando o hai già fatto: non genera video. Usa il pulsante sopra.",
+    "emptyCoding": "Qui non c’è ancora nulla. È il posto per tenere traccia del lavoro di sviluppo che stai progettando o hai già fatto: non scrive codice. Usa il pulsante sopra.",
     "emptyDataAnalysis": "Qui non c’è ancora nulla. È il posto per tenere traccia delle analisi che stai progettando o hai già fatto: non analizza i tuoi dati. Usa il pulsante sopra.",
     "emptyCampaigns": "Qui non c’è ancora nulla. È il posto per tenere traccia delle campagne che stai progettando o hai già fatto: non le esegue. Usa il pulsante sopra."
   },

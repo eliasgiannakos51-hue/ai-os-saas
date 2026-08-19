@@ -179,6 +179,30 @@ for (const m of blob.matchAll(/`\$\{[^}]+\}([a-zA-Z][a-zA-Z0-9]*)`/g)) {
   concatSuffixes.add(m[1]);
 }
 
+// 3d. CONCATENATED THE OTHER WAY ROUND: `range${expr}` — a literal
+//    PREFIX with the variable at the END, no dot.
+//
+//    THIS RULE'S ABSENCE DELETED LIVE KEYS. Rule 3c above is its mirror
+//    image and was the only one of the pair that existed, so
+//    `t(\`range${cap(value)}\`)` in timeline-filters.tsx and
+//    `t(\`status${... ? "Synthesising" : "Researching"}\`)` in
+//    research-workspace.tsx read as "nothing constructs these" — and
+//    dashboard.timeline.rangeToday/Week/Month/All plus
+//    dashboard.deepResearch.statusResearching were deleted from all ten
+//    locales as orphans. They were not orphans. The timeline's range
+//    dropdown rendered the raw key names to every user in every
+//    language, with four MISSING_MESSAGE console errors per page load,
+//    until routes-smoke.prodtest.mjs caught it in a browser.
+//
+//    The lesson is the rule, not the keys: any half of a template
+//    literal that is a fixed string is a claim about which keys exist,
+//    and BOTH halves have to be read. A key is reachable if its leaf
+//    STARTS WITH a recorded prefix.
+const concatPrefixes = new Set();
+for (const m of blob.matchAll(/`([a-zA-Z][a-zA-Z0-9]*)\$\{/g)) {
+  concatPrefixes.add(m[1]);
+}
+
 // 4. optionLabelKey()'s own transform: moduleData.options.<camelCase of
 //    a raw option value>. Rather than re-implement camelCasing here (and
 //    risk it drifting from the real one in lib/modules.ts), every RAW
@@ -225,6 +249,10 @@ function isReachable(key) {
   if (bareLeafWords.has(leaf)) return true;
   for (const suffix of concatSuffixes) {
     if (leaf.endsWith(suffix) && leaf !== suffix) return true;
+  }
+  // The mirror of the line above — see rule 3d for what its absence cost.
+  for (const prefix of concatPrefixes) {
+    if (leaf.startsWith(prefix) && leaf !== prefix) return true;
   }
   return false;
 }

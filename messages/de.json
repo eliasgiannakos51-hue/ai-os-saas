@@ -863,6 +863,10 @@
       "title": "Verlauf",
       "allModules": "Alle Module",
       "showOnly": "Nur anzeigen: {module}",
+      "rangeToday": "Heute",
+      "rangeWeek": "Diese Woche",
+      "rangeMonth": "Diesen Monat",
+      "rangeAll": "Gesamter Zeitraum",
       "empty": {
         "title": "Deine Arbeit, in der Reihenfolge, in der sie passierte",
         "why": "Das schreibt sich von selbst. Alles, was du in irgendeinem Modul erfasst, landet hier in einem Strom — so beantwortest du \"was habe ich letzten Monat eigentlich getan\"."
@@ -1567,6 +1571,7 @@
       "finished": "Dein Bericht ist fertig",
       "inProgress": "Sucht und schreibt…",
       "statusPending": "Geplant",
+      "statusResearching": "Recherchiert",
       "statusSynthesising": "Schreibt",
       "statusReady": "Fertig",
       "statusFailed": "Fehlgeschlagen",
@@ -1741,6 +1746,8 @@
       "az": "A–Z",
       "za": "Z–A"
     },
+    "emptyWhat": "Hier lebt alles, was du zu {module} festhältst.",
+    "emptyWhy": "Alles, was du hier festhältst, landet in deiner Chronik und wird zu etwas, das die KI nutzen kann, wenn du sie zu deiner Arbeit befragst.",
     "emptyExample": "Fang an mit: „{example}“",
     "examples": {
       "competitors": "Notion — beim Preis der nächste Wettbewerber",
@@ -1769,6 +1776,7 @@
     "emptyApps": "Hier ist noch nichts. Ein Platz, um Apps zu erfassen, die du planst oder schon gebaut hast — gebaut werden sie hier nicht. Nutze den Button oben.",
     "emptyImages": "Hier ist noch nichts. Ein Platz, um Bilder zu erfassen, die du brauchst oder schon hast — erzeugt werden hier keine. Nutze den Button oben.",
     "emptyVideos": "Hier ist noch nichts. Ein Platz, um Videos zu erfassen, die du planst oder schon gemacht hast — erzeugt werden hier keine. Nutze den Button oben.",
+    "emptyCoding": "Hier ist noch nichts. Ein Platz, um Programmierarbeit zu erfassen, die du planst oder schon erledigt hast — Code schreibt es nicht. Nutze den Button oben.",
     "emptyDataAnalysis": "Hier ist noch nichts. Ein Platz, um Auswertungen zu erfassen, die du planst oder schon gemacht hast — deine Daten wertet es nicht aus. Nutze den Button oben.",
     "emptyCampaigns": "Hier ist noch nichts. Ein Platz, um Kampagnen zu erfassen, die du planst oder schon gefahren hast — ausgeführt werden sie hier nicht. Nutze den Button oben."
   },

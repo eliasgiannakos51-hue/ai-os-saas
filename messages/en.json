@@ -863,6 +863,10 @@
       "title": "History",
       "allModules": "All Modules",
       "showOnly": "Show only: {module}",
+      "rangeToday": "Today",
+      "rangeWeek": "This Week",
+      "rangeMonth": "This Month",
+      "rangeAll": "All Time",
       "empty": {
         "title": "Your work, in the order it happened",
         "why": "This writes itself. Everything you log in any module lands here in one stream, which is how you answer \"what did I actually do last month\"."
@@ -1567,6 +1571,7 @@
       "finished": "Your report is ready",
       "inProgress": "Searching and writing…",
       "statusPending": "Planned",
+      "statusResearching": "Researching",
       "statusSynthesising": "Writing",
       "statusReady": "Ready",
       "statusFailed": "Failed",
@@ -1741,6 +1746,8 @@
       "az": "A–Z",
       "za": "Z–A"
     },
+    "emptyWhat": "Everything you record about {module} lives here.",
+    "emptyWhy": "Anything you log here joins your Timeline and becomes something the AI can use when you ask it a question about your work.",
     "emptyExample": "Start with: “{example}”",
     "examples": {
       "competitors": "Notion — closest competitor on pricing",
@@ -1769,6 +1776,7 @@
     "emptyApps": "Nothing here yet. This is a place to keep track of apps you are planning or have already made — it does not build apps for you. Use the button above to add one.",
     "emptyImages": "Nothing here yet. This is a place to keep track of images you need or have already made — it does not create images. Use the button above to add one.",
     "emptyVideos": "Nothing here yet. This is a place to keep track of videos you are planning or have already made — it does not create videos. Use the button above to add one.",
+    "emptyCoding": "Nothing here yet. This is a place to keep track of coding work you are planning or have already done — it does not write code. Use the button above to add one.",
     "emptyDataAnalysis": "Nothing here yet. This is a place to keep track of analyses you are planning or have already done — it does not analyse your data. Use the button above to add one.",
     "emptyCampaigns": "Nothing here yet. This is a place to keep track of campaigns you are planning or have already run — it does not run campaigns. Use the button above to add one."
   },

@@ -4,7 +4,6 @@
     "notifications": "通知",
     "noNotifications": "没有新通知。",
     "newProject": "新建项目",
-    "signOut": "退出登录",
     "jumpToPage": "跳转到模块或页面...",
     "noMatches": "没有找到与 '{query}' 匹配的结果",
     "createStudio": "创建任何东西",
@@ -65,7 +64,6 @@
     },
     "creditsUnlimited": "无限制",
     "whatIsThis": "这是什么？",
-    "moreInHelp": "在帮助中心了解更多",
     "examplesLabel": "试试："
   },
   "sidebar": {
@@ -129,7 +127,6 @@
     "groupHints": {
       "create": "生成网站、规划目标、撰写文档。",
       "myBusiness": "资金、客户、产品，以及它们的表现。",
-      "track": "在忘记之前记下想法、研究、交易和决策。",
       "operations": "重复性工作和多步骤流程。",
       "insights": "回看你做过什么，以及 AI 记住了什么。",
       "marketplace": "分享与发现配置——尚未开放。"
@@ -179,8 +176,6 @@
       "help": "最常见问题的答案，不消耗额度。"
     },
     "comingSoon": "即将推出",
-    "comingSoonToast": "{name} 尚未推出——已列入路线图。",
-    "comingSoonBadge": "即将",
     "closeMenu": "关闭菜单"
   },
   "landing": {
@@ -503,6 +498,12 @@
         "carbon": "石墨灰"
       }
     },
+    "language": {
+      "title": "语言",
+      "description": "选择整个应用显示所用的语言。",
+      "savedToAccount": "已保存到你的账户，因此在你登录的每一台设备上都会沿用。",
+      "saveFailed": "无法保存语言设置——没有任何更改。"
+    },
     "accessibility": {
       "title": "无障碍功能",
       "fontSize": {
@@ -582,7 +583,6 @@
       "title": "AI 人格",
       "description": "为助手设置自定义名称。",
       "personaUpdated": "✓ 助手名称已更新",
-      "couldNotSave": "✗ 无法保存该名称",
       "saveFailed": "无法保存该名称。请稍后重试。"
     },
     "billing": {
@@ -635,7 +635,6 @@
       "unavailable": "无法加载报告。请确认 ai_cost_log 表存在。",
       "colFeature": "功能",
       "colCalls": "操作次数",
-      "colMargin": "平均利润率",
       "colCost": "真实成本",
       "hypotheticalNote": "* 包含免计费账户（管理员、Beta）。对这些账户，所示利润率是按其套餐费率本应获得的数值。",
       "colCharged": "已计费",
@@ -679,7 +678,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "最活跃模块",
-      "totalEntriesThisWeek": "本周总记录数",
       "acrossAllModules": "涵盖所有模块",
       "entry": "{count} 条记录",
       "statRow": {
@@ -754,7 +752,6 @@
       "quickStartTemplates": "快速开始模板",
       "quickStartApplied": "✓ 已添加 {count} 条示例记录",
       "quickStart": "快速开始",
-      "templateApplied": "已添加 {count} 条示例",
       "templateFailed": "无法应用该模板。请稍后重试 — 未添加任何内容。",
       "quickStartBlurb": "添加几条示例记录，看看填充后的工作区是什么样子。",
       "quickStartAdd": "添加"
@@ -866,10 +863,6 @@
       "title": "历史",
       "allModules": "所有模块",
       "showOnly": "仅显示:{module}",
-      "rangeToday": "今天",
-      "rangeWeek": "本周",
-      "rangeMonth": "本月",
-      "rangeAll": "所有时间",
       "empty": {
         "title": "你的工作，按发生的先后排好",
         "why": "它自己会写。你在任何模块里记的东西都会汇到这一条流里——「上个月我到底做了什么」就是这么答的。"
@@ -1050,7 +1043,6 @@
       "editButton": "应用更改",
       "editApplying": "应用中...",
       "editApplied": "更改已应用",
-      "historyButton": "历史记录",
       "historyLoading": "正在加载版本...",
       "historyEmpty": "暂无版本历史。",
       "versionLabel": "v{number}",
@@ -1282,6 +1274,8 @@
       "saveError": "无法保存该更改，请重试。",
       "confirmDelete": "删除“{name}”？运行历史也会一并删除，且无法撤销。",
       "runSuccess": "完成——{credits} 积分。结果已发送到你的邮箱。",
+      "runSuccessUnlimitedCost": "已完成——你的账户为无限额（本应消耗 {credits} 个积分）。结果已发送到你的邮箱。",
+      "runSuccessUnlimited": "已完成——你的账户为无限额，未扣除积分。结果已发送到你的邮箱。",
       "runNothingToReport": "这次没有新的内容可报告。",
       "runFailed": "运行失败。",
       "close": "关闭",
@@ -1302,6 +1296,7 @@
       "runManual": "手动",
       "runScheduled": "计划",
       "runCredits": "{credits} 积分",
+      "runCreditsUnlimited": "无限额（本应消耗 {credits}）",
       "viewOutput": "查看结果",
       "scheduleFrequencyLabel": "运行频率",
       "scheduleTimeLabel": "时间",
@@ -1374,7 +1369,6 @@
       "confirmUnpublish": "将该网站下线？地址会保留，之后仍可重新发布。",
       "chooseAddress": "选择网站地址",
       "addressLabel": "地址",
-      "willBeAt": "你的网站将位于 {url}",
       "addressRules": "{min}-{max} 个字符，仅限小写字母、数字和连字符。",
       "cancel": "取消",
       "viewLive": "查看线上版本",
@@ -1573,7 +1567,6 @@
       "finished": "你的报告已就绪",
       "inProgress": "正在搜索并撰写…",
       "statusPending": "已规划",
-      "statusResearching": "研究中",
       "statusSynthesising": "撰写中",
       "statusReady": "就绪",
       "statusFailed": "失败",
@@ -1748,8 +1741,6 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyWhat": "你记录的所有关于{module}的内容都在这里。",
-    "emptyWhy": "你在这里记录的一切都会进入时间线，并成为 AI 在你询问工作相关问题时可以使用的信息。",
     "emptyExample": "从这条开始：「{example}」",
     "examples": {
       "competitors": "Notion — 定价上最接近的竞争对手",
@@ -1778,7 +1769,6 @@
     "emptyApps": "这里还什么都没有。这里用来记录你打算做或已经做过的应用——它不会帮你开发应用。请用上方按钮添加。",
     "emptyImages": "这里还什么都没有。这里用来记录你需要或已经做好的图片——它不会生成图片。请用上方按钮添加。",
     "emptyVideos": "这里还什么都没有。这里用来记录你打算做或已经做好的视频——它不会生成视频。请用上方按钮添加。",
-    "emptyCoding": "这里还什么都没有。这里用来记录你打算做或已经完成的开发工作——它不会写代码。请用上方按钮添加。",
     "emptyDataAnalysis": "这里还什么都没有。这里用来记录你打算做或已经完成的分析——它不会分析你的数据。请用上方按钮添加。",
     "emptyCampaigns": "这里还什么都没有。这里用来记录你打算做或已经投放过的营销活动——它不会替你投放。请用上方按钮添加。"
   },
@@ -1813,7 +1803,8 @@
     "remove": "从收藏中移除"
   },
   "language": {
-    "label": "语言"
+    "label": "语言",
+    "saveFailed": "无法保存语言设置——没有任何更改。"
   },
   "achievements": {
     "title": "成就",

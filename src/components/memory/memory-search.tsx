@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { matchesSearch } from "@/lib/text/search-match";
 import Link from "next/link";
 import { Search, SearchX } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
@@ -19,9 +20,12 @@ export type MemoryResult = {
 
 const MAX_RESULTS_SHOWN = 100;
 
+// matchesSearch, not toLowerCase(): a Greek search for "καφε" (no accent)
+// has to find a memory whose headline is "Καφές" (with one) — see
+// lib/text/search-match.ts's header for the accent/sigma-folding this
+// closes that toLowerCase() alone cannot.
 function matches(result: MemoryResult, query: string): boolean {
-  const haystack = `${result.headline} ${result.snippet}`.toLowerCase();
-  return haystack.includes(query);
+  return matchesSearch(`${result.headline} ${result.snippet}`, query);
 }
 
 export function MemorySearch({ results }: { results: MemoryResult[] }) {
@@ -33,9 +37,10 @@ export function MemorySearch({ results }: { results: MemoryResult[] }) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return results;
-    return results.filter((result) => matches(result, q));
+    // matchesSearch normalises the query itself; the trim() here is only
+    // to skip the filter pass entirely on an empty box, same as before.
+    if (!query.trim()) return results;
+    return results.filter((result) => matches(result, query));
   }, [results, query]);
 
   return (

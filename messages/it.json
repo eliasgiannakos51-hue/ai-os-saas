@@ -4,7 +4,6 @@
     "notifications": "Notifiche",
     "noNotifications": "Nessuna nuova notifica.",
     "newProject": "Nuovo Progetto",
-    "signOut": "Esci",
     "jumpToPage": "Vai a un modulo o pagina...",
     "noMatches": "Nessun risultato per '{query}'",
     "createStudio": "Crea qualsiasi cosa",
@@ -65,7 +64,6 @@
     },
     "creditsUnlimited": "Illimitati",
     "whatIsThis": "Che cos'è?",
-    "moreInHelp": "Leggi di più nel Centro assistenza",
     "examplesLabel": "Prova:"
   },
   "sidebar": {
@@ -129,7 +127,6 @@
     "groupHints": {
       "create": "Genera un sito, pianifica un obiettivo, scrivi un documento.",
       "myBusiness": "Soldi, clienti, prodotti e come stanno andando.",
-      "track": "Annota idee, ricerche, trade e decisioni prima di dimenticarle.",
       "operations": "Lavoro ricorrente e i flussi a più passaggi.",
       "insights": "Rivedi cosa hai fatto e cosa ricorda l'IA.",
       "marketplace": "Condividi e scopri configurazioni — non ancora aperto."
@@ -179,8 +176,6 @@
       "help": "Le risposte alle domande più frequenti, senza consumare crediti."
     },
     "comingSoon": "In arrivo",
-    "comingSoonToast": "{name} non è ancora disponibile: è nella roadmap.",
-    "comingSoonBadge": "Presto",
     "closeMenu": "Chiudi il menu"
   },
   "landing": {
@@ -503,6 +498,12 @@
         "carbon": "Carbon"
       }
     },
+    "language": {
+      "title": "Lingua",
+      "description": "Scegli la lingua in cui viene mostrata tutta l'app.",
+      "savedToAccount": "Viene salvata nel tuo account, quindi ti segue su ogni dispositivo su cui accedi.",
+      "saveFailed": "Non è stato possibile salvare la lingua: non è stato modificato nulla."
+    },
     "accessibility": {
       "title": "Accessibilità",
       "fontSize": {
@@ -582,7 +583,6 @@
       "title": "Persona IA",
       "description": "Dai all'assistente un nome personalizzato.",
       "personaUpdated": "✓ nome dell'assistente aggiornato",
-      "couldNotSave": "✗ non è stato possibile salvare il nome",
       "saveFailed": "Non siamo riusciti a salvare il nome. Riprova tra poco."
     },
     "billing": {
@@ -635,7 +635,6 @@
       "unavailable": "Impossibile caricare il rapporto. Verifica che ai_cost_log esista.",
       "colFeature": "Funzione",
       "colCalls": "Azioni",
-      "colMargin": "Margine medio",
       "colCost": "Costo reale",
       "hypotheticalNote": "* Include account senza addebito (admin, beta). Per questi, il margine mostrato è quello che l’azione avrebbe reso alla tariffa del loro piano.",
       "colCharged": "Addebitate",
@@ -679,7 +678,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "Modulo più attivo",
-      "totalEntriesThisWeek": "Voci totali questa settimana",
       "acrossAllModules": "in tutti i moduli",
       "entry": "{count, plural, one {# voce} other {# voci}}",
       "statRow": {
@@ -754,7 +752,6 @@
       "quickStartTemplates": "Modelli di avvio rapido",
       "quickStartApplied": "✓ {count, plural, one {aggiunta # voce di esempio} other {aggiunte # voci di esempio}}",
       "quickStart": "Avvio rapido",
-      "templateApplied": "Aggiunti {count} esempi",
       "templateFailed": "Non siamo riusciti ad applicare questo modello. Riprova tra poco — non è stato aggiunto nulla.",
       "quickStartBlurb": "Aggiungi qualche voce di esempio per vedere com'è fatto uno spazio di lavoro pieno.",
       "quickStartAdd": "Aggiungi"
@@ -866,10 +863,6 @@
       "title": "Cronologia",
       "allModules": "Tutti i moduli",
       "showOnly": "Mostra solo: {module}",
-      "rangeToday": "Oggi",
-      "rangeWeek": "Questa settimana",
-      "rangeMonth": "Questo mese",
-      "rangeAll": "Sempre",
       "empty": {
         "title": "Il tuo lavoro, nell'ordine in cui è successo",
         "why": "Si scrive da sé. Tutto ciò che registri in qualunque modulo finisce qui in un unico flusso: è così che si risponde a «cosa ho fatto davvero il mese scorso»."
@@ -1050,7 +1043,6 @@
       "editButton": "Applica modifiche",
       "editApplying": "Applicazione...",
       "editApplied": "Modifica applicata",
-      "historyButton": "Cronologia",
       "historyLoading": "Caricamento versioni...",
       "historyEmpty": "Nessuna cronologia versioni ancora.",
       "versionLabel": "v{number}",
@@ -1282,6 +1274,8 @@
       "saveError": "Non è stato possibile salvare la modifica. Riprova.",
       "confirmDelete": "Eliminare \"{name}\"? Anche la cronologia delle esecuzioni verrà eliminata e non è reversibile.",
       "runSuccess": "Fatto — {credits} crediti. Il risultato ti è stato inviato via email.",
+      "runSuccessUnlimitedCost": "Fatto: illimitato sul tuo account (sarebbe costato {credits} crediti). Il risultato ti è stato inviato per email.",
+      "runSuccessUnlimited": "Fatto: illimitato sul tuo account, nessun credito addebitato. Il risultato ti è stato inviato per email.",
       "runNothingToReport": "Niente di nuovo da segnalare questa volta.",
       "runFailed": "L'esecuzione non è riuscita.",
       "close": "Chiudi",
@@ -1302,6 +1296,7 @@
       "runManual": "Manuale",
       "runScheduled": "Pianificata",
       "runCredits": "{credits} crediti",
+      "runCreditsUnlimited": "illimitato (sarebbe costato {credits})",
       "viewOutput": "Vedi il risultato",
       "scheduleFrequencyLabel": "Ogni quanto",
       "scheduleTimeLabel": "Alle",
@@ -1374,7 +1369,6 @@
       "confirmUnpublish": "Mettere offline questo sito? L'indirizzo viene conservato, potrai ripubblicarlo.",
       "chooseAddress": "Scegli l'indirizzo del tuo sito",
       "addressLabel": "Indirizzo",
-      "willBeAt": "Il tuo sito sarà su {url}",
       "addressRules": "{min}-{max} caratteri. Minuscole, numeri e trattini.",
       "cancel": "Annulla",
       "viewLive": "Vedi online",
@@ -1573,7 +1567,6 @@
       "finished": "Il tuo report è pronto",
       "inProgress": "Ricerca e scrittura…",
       "statusPending": "Pianificato",
-      "statusResearching": "In ricerca",
       "statusSynthesising": "In scrittura",
       "statusReady": "Pronto",
       "statusFailed": "Non riuscito",
@@ -1748,8 +1741,6 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyWhat": "Qui vive tutto quello che annoti su {module}.",
-    "emptyWhy": "Tutto quello che annoti qui entra nella tua Cronologia e diventa qualcosa che l'IA può usare quando le fai una domanda sul tuo lavoro.",
     "emptyExample": "Inizia con: «{example}»",
     "examples": {
       "competitors": "Notion — il concorrente più vicino sul prezzo",
@@ -1778,7 +1769,6 @@
     "emptyApps": "Qui non c’è ancora nulla. È il posto per tenere traccia delle app che stai progettando o hai già fatto: non le crea per te. Usa il pulsante sopra.",
     "emptyImages": "Qui non c’è ancora nulla. È il posto per tenere traccia delle immagini che ti servono o hai già fatto: non genera immagini. Usa il pulsante sopra.",
     "emptyVideos": "Qui non c’è ancora nulla. È il posto per tenere traccia dei video che stai progettando o hai già fatto: non genera video. Usa il pulsante sopra.",
-    "emptyCoding": "Qui non c’è ancora nulla. È il posto per tenere traccia del lavoro di sviluppo che stai progettando o hai già fatto: non scrive codice. Usa il pulsante sopra.",
     "emptyDataAnalysis": "Qui non c’è ancora nulla. È il posto per tenere traccia delle analisi che stai progettando o hai già fatto: non analizza i tuoi dati. Usa il pulsante sopra.",
     "emptyCampaigns": "Qui non c’è ancora nulla. È il posto per tenere traccia delle campagne che stai progettando o hai già fatto: non le esegue. Usa il pulsante sopra."
   },
@@ -1813,7 +1803,8 @@
     "remove": "Rimuovi dai preferiti"
   },
   "language": {
-    "label": "Lingua"
+    "label": "Lingua",
+    "saveFailed": "Non è stato possibile salvare la lingua: non è stato modificato nulla."
   },
   "achievements": {
     "title": "Obiettivi",

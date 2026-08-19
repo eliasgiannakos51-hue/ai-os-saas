@@ -151,6 +151,136 @@ for (const file of walk(path.join(ROOT, "src"))) {
 // it.
 check("no component compares user text with toLowerCase().includes()", offenders, []);
 
+// THE SHAPE THIS MISSES, and the shape command-palette.tsx,
+// memory-search.tsx and lib/chat/entity-mentions.ts actually had:
+//
+//   const query = rawQuery.trim().toLowerCase();   // lowered into a variable
+//   ...
+//   const index = label.indexOf(query);             // compared later, on a
+//                                                     // DIFFERENT expression
+//
+// `.toLowerCase()` and `.includes(`/`.indexOf(` are not adjacent in the
+// source text — there is an assignment, sometimes a whole function, in
+// between — so the chained-expression regex above never sees them as
+// connected. All three were genuine: a Greek "καφε" found nothing in
+// "Καφές" through the app's own command palette, the AI Memory search
+// box, and the "you already logged this" detector chat relies on to
+// attach linked entities. Fixing three call sites is worth nothing if a
+// fourth is written the same way next month, which is what this closes.
+//
+// TWO SUB-SHAPES, both real:
+//   A. the lowered value is bound to a name, then that name is later the
+//      receiver OR the argument of includes/indexOf/startsWith/endsWith.
+//   B. the lowering happens INLINE, as the argument to the comparison —
+//      `haystack.includes(needle.toLowerCase())` — which is exactly
+//      entity-mentions.ts's shape and is invisible to shape A's variable
+//      tracking because there is no variable.
+{
+  const COMPARE_METHODS = "includes|indexOf|startsWith|endsWith";
+  const indirectOffenders = [];
+
+  for (const file of walk(path.join(ROOT, "src"))) {
+    const rel = path.relative(ROOT, file);
+    const source = readFileSync(file, "utf8");
+    const code = source
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .split("\n")
+      .filter((line) => !/^\s*(\/\/|\*)/.test(line))
+      .join("\n");
+
+    // Shape B: toLowerCase() called INLINE as an argument to the comparison.
+    for (const m of code.matchAll(new RegExp(`\\.(${COMPARE_METHODS})\\([^)]*\\.toLowerCase\\(\\)[^)]*\\)`, "g"))) {
+      const line = code.slice(0, m.index).split("\n").length;
+      indirectOffenders.push(`${rel}:${line} (inline .toLowerCase() argument)`);
+    }
+
+    // Shape A: a name bound to `<expr>.toLowerCase()`, later used as
+    // either side of a comparison call anywhere else in the same file.
+    const lowered = new Set();
+    for (const m of code.matchAll(/(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*[^;\n]*\.toLowerCase\(\)/g)) {
+      lowered.add(m[1]);
+    }
+    for (const name of lowered) {
+      const asReceiver = new RegExp(`\\b${name}\\.(${COMPARE_METHODS})\\(`);
+      const asArgument = new RegExp(`\\.(${COMPARE_METHODS})\\([^)]*\\b${name}\\b[^)]*\\)`);
+      if (asReceiver.test(code) || asArgument.test(code)) {
+        indirectOffenders.push(`${rel}: "${name}" (lowered into a variable, compared elsewhere)`);
+      }
+    }
+  }
+
+  // Each entry below was checked, not assumed — the two Smart Search
+  // helpers this same sweep found (lib/entity-link-suggestions.ts,
+  // mission-detail.tsx's looksLikeWebsiteStep) were GENUINE instances of
+  // this bug and were fixed rather than excluded. What is left compares
+  // against a FIXED set of tokens the app itself defines, never against
+  // another piece of user-typed text — so there is nothing for either
+  // side to fail to fold consistently WITH:
+  //
+  //   lib/network/offline.ts     an error MESSAGE from the fetch API
+  //                              ("failed to fetch") — machine-generated
+  //                              ASCII, not user text.
+  //   lib/files/limits.ts        the literal "unlimited".
+  //   lib/admin.ts               an email against the admin allowlist —
+  //                              already excluded above for the chained
+  //                              shape; the inline-argument shape
+  //                              (`.includes(email.toLowerCase())`) is
+  //                              the same comparison, caught by the
+  //                              other detector, and excluded here too.
+  //   components/ideas/idea-row.tsx
+  //   lib/trading-pattern.ts     a free-text field classified against a
+  //                              small set of hardcoded ENGLISH keywords
+  //                              ("pursue"/"kill", "win"/"loss") — the
+  //                              field's own placeholder says "win /
+  //                              loss" in English. Folding accents would
+  //                              not make a Greek "Ζημιά" match the
+  //                              English word "loss"; that is a
+  //                              different, out-of-scope problem
+  //                              (English-only heuristic classifier),
+  //                              not an accent-folding one.
+  //   lib/import/coerce.ts       coerceEnum() against ENUM_SYNONYMS —
+  //   lib/import/paste.ts        every option and synonym is a fixed
+  //                              ASCII trading/accounting term
+  //                              ("buy", "tp", "stop loss").
+  //   lib/publishing/subdomain.ts  DNS subdomains cannot contain
+  //                              accented characters at all;
+  //                              suggestSubdomain() already NFD-strips
+  //                              combining marks on the way to one, so
+  //                              accent-folding a value that can only
+  //                              ever be a-z0-9- is a no-op wearing a
+  //                              comment.
+  //
+  // This list should shrink only when a case is genuinely not user text,
+  // never to silence a real one.
+  const ASCII_BY_CONSTRUCTION = [
+    "src/lib/network/offline.ts",
+    "src/lib/files/limits.ts",
+    "src/lib/admin.ts",
+    "src/components/ideas/idea-row.tsx",
+    "src/lib/trading-pattern.ts",
+    "src/lib/import/coerce.ts",
+    "src/lib/import/paste.ts",
+    "src/lib/publishing/subdomain.ts",
+  ];
+  const realOffenders = indirectOffenders.filter(
+    (o) => !ASCII_BY_CONSTRUCTION.some((f) => o === f || o.startsWith(f + ":"))
+  );
+  check("no component lower-cases user text into a variable and compares it elsewhere", realOffenders, []);
+
+  // The gate has to be able to go red on exactly what it replaced.
+  const WAS_COMMAND_PALETTE = `const query = rawQuery.trim().toLowerCase();
+  for (const item of items) {
+    const label = item.label.toLowerCase();
+    const index = label.indexOf(query);
+  }`;
+  const waslowered = new Set();
+  for (const m of WAS_COMMAND_PALETTE.matchAll(/(?:const|let)\s+([A-Za-z_$][\w$]*)\s*=\s*[^;\n]*\.toLowerCase\(\)/g)) waslowered.add(m[1]);
+  const caught = [...waslowered].some(
+    (name) => new RegExp(`\\b${name}\\.(${COMPARE_METHODS})\\(`).test(WAS_COMMAND_PALETTE)
+  );
+  check("the gate catches the exact command-palette shape it replaced", caught, true);
+}
+
 // The INDIRECT shape, which the check above cannot see: a helper that
 // builds a haystack out of several fields and lower-cases the result, with
 // the containment test in a different expression. That is exactly how

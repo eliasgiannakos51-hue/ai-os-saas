@@ -11,6 +11,7 @@ import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { useToast } from "@/components/toast/toast-context";
+import { useCredits } from "@/components/credits/credits-context";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { formatDateTimeInZone, formatNumber } from "@/lib/format-number";
 import { appendClarificationAnswers, alignSuggestions } from "@/lib/clarification-client";
@@ -88,6 +89,7 @@ export function AgentsWorkspace({
   const locale = useLocale();
   const router = useRouter();
   const { addToast } = useToast();
+  const { refresh: refreshCredits } = useCredits();
   const scheduleLabel = useScheduleLabel();
 
   const [query, setQuery] = useState("");
@@ -298,19 +300,46 @@ export function AgentsWorkspace({
       ran?: boolean;
       output?: string;
       creditsCharged?: number;
+      // Written by the agent_run handler in the same shape every other
+      // billed surface uses (lib/billing/usage-receipt.ts).
+      usage?: { creditsCharged?: number; bypass?: boolean; wouldHaveCharged?: number | null };
       error?: string;
     };
     if (!result.ran) {
       addToast(result.error ?? t("runFailed"), "error");
     } else if (result.output) {
       setLastRunOutput(result.output);
-      addToast(t("runSuccess", { credits: formatNumber(result.creditsCharged ?? 0, locale) }));
+      // "Done — 0 credits."
+      //
+      // That is what an owner, a beta tester and anyone else on an
+      // unlimited account was told after every run, because the toast read
+      // creditsCharged and a bypass account is charged nothing. Zero is
+      // arithmetically true and says the opposite of what happened: it
+      // reads as "billing is broken", which is exactly how it was
+      // reported. The number that means something to them is what the run
+      // WOULD have cost — already computed at settlement and already
+      // stored on the ai_cost_log row, and until now never returned to
+      // anybody.
+      addToast(
+        result.usage?.bypass
+          ? typeof result.usage.wouldHaveCharged === "number"
+            ? t("runSuccessUnlimitedCost", {
+                credits: formatNumber(result.usage.wouldHaveCharged, locale),
+              })
+            : t("runSuccessUnlimited")
+          : t("runSuccess", { credits: formatNumber(result.creditsCharged ?? 0, locale) })
+      );
     } else {
       addToast(t("runNothingToReport"));
     }
+    // The balance in the top nav is seeded once by the server and held in
+    // React state, so a run that spent credits left it showing the OLD
+    // number until a full reload. router.refresh() below re-renders the
+    // server tree but does not reseed that state.
+    void refreshCredits();
     setRunJobId(null);
     router.refresh();
-  }, [runJob, addToast, t, locale, router]);
+  }, [runJob, addToast, t, locale, router, refreshCredits]);
 
   // A run started before a reload is picked back up the same way a build is.
   useEffect(() => {
@@ -931,7 +960,15 @@ export function AgentsWorkspace({
                           <span className="text-[11px] text-muted">
                             {formatDateTimeInZone(run.started_at, locale, selected.timezone)} ·{" "}
                             {run.trigger_source === "manual" ? t("runManual") : t("runScheduled")} ·{" "}
-                            {t("runCredits", { credits: formatNumber(run.credits_charged, locale) })}
+                            {/* Same zero, second screen. The history row
+                                read credits_charged straight out, so an
+                                unlimited account saw "0 credits" against
+                                every run it had ever made. */}
+                            {run.would_have_charged_credits === null
+                              ? t("runCredits", { credits: formatNumber(run.credits_charged, locale) })
+                              : t("runCreditsUnlimited", {
+                                  credits: formatNumber(run.would_have_charged_credits, locale),
+                                })}
                           </span>
                         </div>
                         {run.error && <p className="mt-1.5 text-xs text-red-300">{run.error}</p>}

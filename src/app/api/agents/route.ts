@@ -9,6 +9,7 @@ import { validateAgentDraft, sanitiseAgentText, type AgentDraft } from "@/lib/ag
 import { resolveDeliveryOwnership } from "@/lib/agents/delivery-ownership";
 import { nextRunAt } from "@/lib/agents/cron-expression";
 import { maxAgentsForPlan } from "@/lib/agents/agent-limits";
+import { checkAgentActivationCap } from "@/lib/agents/agent-cap";
 
 export const dynamic = "force-dynamic";
 
@@ -82,25 +83,18 @@ export async function POST(request: Request) {
           { status: 403 }
         );
       }
-      // Counted through the user-scoped client, so RLS scopes it to this
-      // user's own rows — the count cannot be influenced by anyone else's.
-      const { count, error: countError } = await supabase
-        .from("user_agents")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id);
-      if (countError) {
-        logApiError("/api/agents", countError, { stage: "count_agents" });
-        return NextResponse.json({ ok: false, error: "Could not check your agent limit." }, { status: 500 });
-      }
-      if ((count ?? 0) >= cap) {
-        return NextResponse.json(
-          {
-            ok: false,
-            limitReached: true,
-            error: `You've reached your plan's limit of ${cap} agents — delete one or upgrade to add another.`,
-          },
-          { status: 403 }
-        );
+      // ACTIVE agents against the plan's capacity, and total rows
+      // (any status) against a generous multiple of it — see
+      // lib/agents/agent-cap.ts for why both checks exist. A new agent is
+      // created active, so this is the same gate a PATCH resume goes
+      // through in api/agents/[id]/route.ts.
+      const capCheck = await checkAgentActivationCap(user.id, cap);
+      if (!capCheck.ok) {
+        if (capCheck.reason === "check_failed") {
+          logApiError("/api/agents", new Error(capCheck.message), { stage: "count_agents" });
+          return NextResponse.json({ ok: false, error: capCheck.message }, { status: 500 });
+        }
+        return NextResponse.json({ ok: false, limitReached: true, error: capCheck.message }, { status: 403 });
       }
     }
 

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
+import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import {
   hasEnoughCredits,
   resolveEffectivePlan,
@@ -19,6 +20,7 @@ import { AGENT_BUILDER_MODEL } from "@/lib/agents/agent-models";
 import { AGENT_LIMITS, normaliseDeliveryTarget } from "@/lib/agents/agent-config";
 import { isValidTimeZone } from "@/lib/agents/cron-expression";
 import { maxAgentsForPlan } from "@/lib/agents/agent-limits";
+import { checkAgentActivationCap } from "@/lib/agents/agent-cap";
 import { startJob } from "@/lib/jobs/start-job";
 
 export const dynamic = "force-dynamic";
@@ -119,23 +121,18 @@ export async function POST(request: Request) {
       );
     }
     if (!isAdmin) {
-      const { count, error: countError } = await supabase
-        .from("user_agents")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id);
-      if (countError) {
-        logApiError("/api/agents/build", countError, { stage: "count_agents" });
-        return NextResponse.json({ ok: false, error: "Could not check your agent limit." }, { status: 500 });
-      }
-      if ((count ?? 0) >= agentCap) {
-        return NextResponse.json(
-          {
-            ok: false,
-            limitReached: true,
-            error: `You've reached your plan's limit of ${agentCap} agents — delete one or upgrade to add another.`,
-          },
-          { status: 403 }
-        );
+      // ACTIVE agents against the plan's capacity, and total rows (any
+      // status) against a generous multiple of it — see
+      // lib/agents/agent-cap.ts. Checked here, before the build, for the
+      // same reason the cap<=0 check above runs first: a preview the
+      // user can never turn into an agent is a charge for nothing.
+      const capCheck = await checkAgentActivationCap(user.id, agentCap);
+      if (!capCheck.ok) {
+        if (capCheck.reason === "check_failed") {
+          logApiError("/api/agents/build", new Error(capCheck.message), { stage: "count_agents" });
+          return NextResponse.json({ ok: false, error: capCheck.message }, { status: 500 });
+        }
+        return NextResponse.json({ ok: false, limitReached: true, error: capCheck.message }, { status: 403 });
       }
     }
 
@@ -153,6 +150,17 @@ export async function POST(request: Request) {
     }
 
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+    // THE BYPASS EUR CEILING. checkAiCallAllowed above caps volume for
+    // every account; this caps real Anthropic SPEND specifically for the
+    // accounts credits do not — admin and active beta. See
+    // lib/billing/bypass-ceiling.ts for why this is one check in euros
+    // rather than a counter re-implemented per feature.
+    if (bypassCredits) {
+      const ceiling = await checkBypassCeiling(user.id, isAdmin, bypassCredits && !isAdmin);
+      if (!ceiling.allowed) {
+        return NextResponse.json({ ok: false, error: ceiling.reason }, { status: 429 });
+      }
+    }
     const plan = await resolveEffectivePlan(user);
     const pricingConfig = resolvePricingConfig();
     const accountCreditPriceEur = bypassCredits

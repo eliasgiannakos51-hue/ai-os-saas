@@ -5,10 +5,18 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Globe, Check } from "lucide-react";
 import { LANGUAGES } from "@/lib/languages";
-import { LOCALE_COOKIE } from "@/i18n/constants";
+import { persistLocalePreference } from "@/lib/locale-preference";
 
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
-
+// The quick switcher: a globe in the nav and, on public pages, floating
+// over the top-right corner. It is the one an anonymous visitor on the
+// landing page has, which is why it stays.
+//
+// IT WRITES THE ACCOUNT TOO, via the shared helper, and that is not
+// tidiness. middleware.ts now pushes the account's preferred_locale onto
+// the NEXT_LOCALE cookie on every request, so a selector that wrote only
+// the cookie would have its choice reverted on the very next navigation —
+// the language would change and then change back. Both entry points write
+// the same two places or neither works.
 export function LanguageSelector({ className }: { className?: string }) {
   const router = useRouter();
   const locale = useLocale();
@@ -16,8 +24,18 @@ export function LanguageSelector({ className }: { className?: string }) {
   const tCommon = useTranslations("common");
   const [open, setOpen] = useState(false);
 
-  function selectLanguage(code: string) {
-    document.cookie = `${LOCALE_COOKIE}=${code}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+  const [failed, setFailed] = useState(false);
+
+  async function selectLanguage(code: string) {
+    setFailed(false);
+    const result = await persistLocalePreference(code);
+    if (result === "account-failed") {
+      // No toast here: this renders on the landing page, which is outside
+      // ToastProvider (mounted in dashboard/layout.tsx), so useToast would
+      // throw. The dropdown stays open and says so instead.
+      setFailed(true);
+      return;
+    }
     setOpen(false);
     // Re-runs the server layout with the new cookie value — next-intl's
     // request config (i18n/request.ts) picks it up from there.
@@ -49,12 +67,18 @@ export function LanguageSelector({ className }: { className?: string }) {
             className="fixed inset-0 z-40 cursor-default"
           />
           <div className="absolute right-0 top-11 z-50 max-h-80 w-48 overflow-y-auto rounded-xl border border-border bg-panel p-1.5 shadow-lg">
+            {failed && (
+              <p role="alert" className="px-3 py-2 text-xs text-red-400">
+                {t("saveFailed")}
+              </p>
+            )}
             {LANGUAGES.map((lang) => {
               const selected = lang.code === locale;
               return (
                 <button
                   key={lang.code}
                   type="button"
+                  lang={lang.code}
                   onClick={() => selectLanguage(lang.code)}
                   aria-pressed={selected}
                   className={`flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-sm transition-colors duration-150 ${

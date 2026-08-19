@@ -4,7 +4,6 @@
     "notifications": "Benachrichtigungen",
     "noNotifications": "Keine neuen Benachrichtigungen.",
     "newProject": "Neues Projekt",
-    "signOut": "Abmelden",
     "jumpToPage": "Zu einem Modul oder einer Seite springen...",
     "noMatches": "Keine Treffer für '{query}'",
     "createStudio": "Mach irgendwas",
@@ -65,7 +64,6 @@
     },
     "creditsUnlimited": "Unbegrenzt",
     "whatIsThis": "Was ist das?",
-    "moreInHelp": "Mehr im Hilfebereich lesen",
     "examplesLabel": "Probier:"
   },
   "sidebar": {
@@ -129,7 +127,6 @@
     "groupHints": {
       "create": "Eine Website erzeugen, ein Ziel planen, ein Dokument schreiben.",
       "myBusiness": "Geld, Kunden, Produkte — und wie sie laufen.",
-      "track": "Ideen, Recherche, Trades und Entscheidungen festhalten, bevor sie weg sind.",
       "operations": "Wiederkehrende Arbeit und die mehrstufigen Abläufe.",
       "insights": "Zurückschauen: was du getan hast und was die KI sich merkt.",
       "marketplace": "Setups teilen und entdecken — noch nicht offen."
@@ -179,8 +176,6 @@
       "help": "Antworten auf die häufigsten Fragen — ohne Credits zu verbrauchen."
     },
     "comingSoon": "Demnächst",
-    "comingSoonToast": "{name} ist noch nicht verfügbar — steht auf der Roadmap.",
-    "comingSoonBadge": "Bald",
     "closeMenu": "Menü schließen"
   },
   "landing": {
@@ -503,6 +498,12 @@
         "carbon": "Carbon"
       }
     },
+    "language": {
+      "title": "Sprache",
+      "description": "Wähle die Sprache, in der die gesamte App angezeigt wird.",
+      "savedToAccount": "Wird in deinem Konto gespeichert und begleitet dich auf jedem Gerät, auf dem du dich anmeldest.",
+      "saveFailed": "Die Sprache konnte nicht gespeichert werden – es wurde nichts geändert."
+    },
     "accessibility": {
       "title": "Barrierefreiheit",
       "fontSize": {
@@ -582,7 +583,6 @@
       "title": "KI-Persona",
       "description": "Gib dem Assistenten einen eigenen Namen.",
       "personaUpdated": "✓ Name des Assistenten aktualisiert",
-      "couldNotSave": "✗ Name konnte nicht gespeichert werden",
       "saveFailed": "Wir konnten den Namen nicht speichern. Versuch es gleich noch einmal."
     },
     "billing": {
@@ -635,7 +635,6 @@
       "unavailable": "Bericht konnte nicht geladen werden. Prüfe, ob ai_cost_log existiert.",
       "colFeature": "Funktion",
       "colCalls": "Aktionen",
-      "colMargin": "Ø Marge",
       "colCost": "Reale Kosten",
       "hypotheticalNote": "* Enthält nicht belastete Konten (Admin, Beta). Dort ist die gezeigte Marge das, was die Aktion zum Tarif dieses Kontos eingebracht hätte.",
       "colCharged": "Berechnet",
@@ -679,7 +678,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "Aktivstes Modul",
-      "totalEntriesThisWeek": "Einträge insgesamt diese Woche",
       "acrossAllModules": "über alle Module hinweg",
       "entry": "{count, plural, one {# Eintrag} other {# Einträge}}",
       "statRow": {
@@ -754,7 +752,6 @@
       "quickStartTemplates": "Schnellstart-Vorlagen",
       "quickStartApplied": "✓ {count, plural, one {# Beispieleintrag hinzugefügt} other {# Beispieleinträge hinzugefügt}}",
       "quickStart": "Schnellstart",
-      "templateApplied": "{count} Beispiele hinzugefügt",
       "templateFailed": "Wir konnten diese Vorlage nicht anwenden. Versuch es gleich noch einmal — es wurde nichts hinzugefügt.",
       "quickStartBlurb": "Füge ein paar Beispieleinträge hinzu, um zu sehen, wie ein gefüllter Arbeitsbereich aussieht.",
       "quickStartAdd": "Hinzufügen"
@@ -866,10 +863,6 @@
       "title": "Verlauf",
       "allModules": "Alle Module",
       "showOnly": "Nur anzeigen: {module}",
-      "rangeToday": "Heute",
-      "rangeWeek": "Diese Woche",
-      "rangeMonth": "Diesen Monat",
-      "rangeAll": "Gesamter Zeitraum",
       "empty": {
         "title": "Deine Arbeit, in der Reihenfolge, in der sie passierte",
         "why": "Das schreibt sich von selbst. Alles, was du in irgendeinem Modul erfasst, landet hier in einem Strom — so beantwortest du \"was habe ich letzten Monat eigentlich getan\"."
@@ -1050,7 +1043,6 @@
       "editButton": "Änderungen anwenden",
       "editApplying": "Wird angewendet...",
       "editApplied": "Änderung angewendet",
-      "historyButton": "Verlauf",
       "historyLoading": "Versionen werden geladen...",
       "historyEmpty": "Noch kein Versionsverlauf.",
       "versionLabel": "v{number}",
@@ -1282,6 +1274,8 @@
       "saveError": "Diese Änderung konnte nicht gespeichert werden. Bitte erneut versuchen.",
       "confirmDelete": "„{name}“ löschen? Der Lauf-Verlauf geht mit, und das lässt sich nicht rückgängig machen.",
       "runSuccess": "Fertig — {credits} Credits. Das Ergebnis wurde Ihnen per E-Mail geschickt.",
+      "runSuccessUnlimitedCost": "Fertig – in deinem Konto unbegrenzt (hätte {credits} Credits gekostet). Das Ergebnis wurde dir per E-Mail geschickt.",
+      "runSuccessUnlimited": "Fertig – in deinem Konto unbegrenzt, keine Credits abgebucht. Das Ergebnis wurde dir per E-Mail geschickt.",
       "runNothingToReport": "Diesmal gibt es nichts Neues zu berichten.",
       "runFailed": "Der Lauf ist fehlgeschlagen.",
       "close": "Schließen",
@@ -1302,6 +1296,7 @@
       "runManual": "Manuell",
       "runScheduled": "Geplant",
       "runCredits": "{credits} Credits",
+      "runCreditsUnlimited": "unbegrenzt (hätte {credits} gekostet)",
       "viewOutput": "Ergebnis ansehen",
       "scheduleFrequencyLabel": "Wie oft",
       "scheduleTimeLabel": "Um",
@@ -1374,7 +1369,6 @@
       "confirmUnpublish": "Diese Seite offline nehmen? Die Adresse bleibt erhalten, Sie können sie später wieder veröffentlichen.",
       "chooseAddress": "Adresse Ihrer Seite wählen",
       "addressLabel": "Adresse",
-      "willBeAt": "Ihre Seite liegt unter {url}",
       "addressRules": "{min}-{max} Zeichen. Kleinbuchstaben, Ziffern und Bindestriche.",
       "cancel": "Abbrechen",
       "viewLive": "Live ansehen",
@@ -1573,7 +1567,6 @@
       "finished": "Dein Bericht ist fertig",
       "inProgress": "Sucht und schreibt…",
       "statusPending": "Geplant",
-      "statusResearching": "Recherchiert",
       "statusSynthesising": "Schreibt",
       "statusReady": "Fertig",
       "statusFailed": "Fehlgeschlagen",
@@ -1748,8 +1741,6 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyWhat": "Hier lebt alles, was du zu {module} festhältst.",
-    "emptyWhy": "Alles, was du hier festhältst, landet in deiner Chronik und wird zu etwas, das die KI nutzen kann, wenn du sie zu deiner Arbeit befragst.",
     "emptyExample": "Fang an mit: „{example}“",
     "examples": {
       "competitors": "Notion — beim Preis der nächste Wettbewerber",
@@ -1778,7 +1769,6 @@
     "emptyApps": "Hier ist noch nichts. Ein Platz, um Apps zu erfassen, die du planst oder schon gebaut hast — gebaut werden sie hier nicht. Nutze den Button oben.",
     "emptyImages": "Hier ist noch nichts. Ein Platz, um Bilder zu erfassen, die du brauchst oder schon hast — erzeugt werden hier keine. Nutze den Button oben.",
     "emptyVideos": "Hier ist noch nichts. Ein Platz, um Videos zu erfassen, die du planst oder schon gemacht hast — erzeugt werden hier keine. Nutze den Button oben.",
-    "emptyCoding": "Hier ist noch nichts. Ein Platz, um Programmierarbeit zu erfassen, die du planst oder schon erledigt hast — Code schreibt es nicht. Nutze den Button oben.",
     "emptyDataAnalysis": "Hier ist noch nichts. Ein Platz, um Auswertungen zu erfassen, die du planst oder schon gemacht hast — deine Daten wertet es nicht aus. Nutze den Button oben.",
     "emptyCampaigns": "Hier ist noch nichts. Ein Platz, um Kampagnen zu erfassen, die du planst oder schon gefahren hast — ausgeführt werden sie hier nicht. Nutze den Button oben."
   },
@@ -1813,7 +1803,8 @@
     "remove": "Aus Favoriten entfernen"
   },
   "language": {
-    "label": "Sprache"
+    "label": "Sprache",
+    "saveFailed": "Die Sprache konnte nicht gespeichert werden – es wurde nichts geändert."
   },
   "achievements": {
     "title": "Erfolge",

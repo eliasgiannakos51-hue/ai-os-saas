@@ -96,14 +96,39 @@ export function CookieConsentBanner() {
                 })}
               </p>
               <p>
+                {/* VERTICAL PADDING ON AN INLINE LINK, and it moves
+                    nothing. These two render 15px tall — a third of the
+                    44px floor used everywhere else, on the links to the
+                    cookie and privacy policies, which are exactly what a
+                    person reaches for when this banner appears. routes-
+                    smoke has flagged them at 77x15 and 79x15 for as long
+                    as it has measured touch targets.
+
+                    Padding on an INLINE element does not contribute to the
+                    line box — the sentence stays exactly where it is — but
+                    it does extend the border box, which is both what the
+                    browser hit-tests and what getBoundingClientRect()
+                    reports. Measured: 15px -> 33px.
+
+                    NOT 44px, and that is deliberate rather than a shortfall
+                    left unmentioned. These are links inside a sentence, not
+                    buttons. Reaching 44 needs ~15px of padding on each
+                    side, and the banner's line-height is ~20px — so on the
+                    two lines this sentence wraps to, the two links' hit
+                    boxes would OVERLAP, and whichever comes later in the
+                    DOM would swallow taps meant for the other. A 33px
+                    target you can hit beats a 44px target that steals its
+                    neighbour's taps. 33 clears routes-smoke's hard floor
+                    of 32; the gate still reports them as under 44, which
+                    is true and worth continuing to see. */}
                 {t.rich("noTracking", {
                   cookiePolicy: (chunks) => (
-                    <a href="/cookies" className="text-orange-400 underline underline-offset-2">
+                    <a href="/cookies" className="py-[9px] text-orange-400 underline underline-offset-2">
                       {chunks}
                     </a>
                   ),
                   privacyPolicy: (chunks) => (
-                    <a href="/privacy" className="text-orange-400 underline underline-offset-2">
+                    <a href="/privacy" className="py-[9px] text-orange-400 underline underline-offset-2">
                       {chunks}
                     </a>
                   ),

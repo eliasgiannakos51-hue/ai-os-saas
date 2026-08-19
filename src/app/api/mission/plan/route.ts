@@ -17,6 +17,7 @@ import { diagLog } from "@/lib/diag";
 
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
+import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
   getPurchasedPackCreditPriceEur,
@@ -98,6 +99,17 @@ export async function POST(request: Request) {
     // api/chat, api/websites/edit, api/websites/generate/process.
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+    // THE BYPASS EUR CEILING. checkAiCallAllowed above caps volume for
+    // every account; this caps real Anthropic SPEND specifically for the
+    // accounts credits do not — admin and active beta. See
+    // lib/billing/bypass-ceiling.ts for why this is one check in euros
+    // rather than a counter re-implemented per feature.
+    if (bypassCredits) {
+      const ceiling = await checkBypassCeiling(user.id, isAdmin, bypassCredits && !isAdmin);
+      if (!ceiling.allowed) {
+        return NextResponse.json({ ok: false, error: ceiling.reason }, { status: 429 });
+      }
+    }
     let plan: Awaited<ReturnType<typeof resolveEffectivePlan>> | null = null;
 
     // A two-word goal and a 3,000-character one no longer cost the same

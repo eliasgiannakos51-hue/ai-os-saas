@@ -4,7 +4,6 @@
     "notifications": "Notifications",
     "noNotifications": "No new notifications.",
     "newProject": "New Project",
-    "signOut": "Sign out",
     "jumpToPage": "Jump to a module or page...",
     "noMatches": "No matches for '{query}'",
     "createStudio": "Make anything",
@@ -65,7 +64,6 @@
     },
     "creditsUnlimited": "Unlimited",
     "whatIsThis": "What is this?",
-    "moreInHelp": "Read more in the Help Centre",
     "examplesLabel": "Try:"
   },
   "sidebar": {
@@ -129,7 +127,6 @@
     "groupHints": {
       "create": "Generate a site, plan a goal, write a document.",
       "myBusiness": "Money, customers, products and how they're doing.",
-      "track": "Capture ideas, research, trades and decisions before you forget them.",
       "operations": "Recurring work and the multi-step workflows.",
       "insights": "Look back at what you've done and what the AI remembers.",
       "marketplace": "Share and discover setups — not open yet."
@@ -179,8 +176,6 @@
       "help": "Answers to the questions people ask most — no credits used."
     },
     "comingSoon": "Coming soon",
-    "comingSoonToast": "{name} isn't available yet — it's on the roadmap.",
-    "comingSoonBadge": "Soon",
     "closeMenu": "Close menu"
   },
   "landing": {
@@ -503,6 +498,12 @@
         "carbon": "Carbon"
       }
     },
+    "language": {
+      "title": "Language",
+      "description": "Choose the language the whole app is shown in.",
+      "savedToAccount": "Saved to your account, so it follows you to every device you sign in on.",
+      "saveFailed": "Couldn't save your language — nothing was changed."
+    },
     "accessibility": {
       "title": "Accessibility",
       "fontSize": {
@@ -582,7 +583,6 @@
       "title": "AI Persona",
       "description": "Give the assistant a custom name.",
       "personaUpdated": "✓ persona name updated",
-      "couldNotSave": "✗ could not save the persona name",
       "saveFailed": "We couldn't save the persona name. Try again in a moment."
     },
     "billing": {
@@ -635,7 +635,6 @@
       "unavailable": "Could not load the report. Check that ai_cost_log exists.",
       "colFeature": "Feature",
       "colCalls": "Actions",
-      "colMargin": "Avg margin",
       "colCost": "Real cost",
       "hypotheticalNote": "* Includes uncharged accounts (admin, beta). For those, the margin shown is what the action would have earned at that account’s plan rate.",
       "colCharged": "Charged",
@@ -679,7 +678,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "Most Active Module",
-      "totalEntriesThisWeek": "Total Entries This Week",
       "acrossAllModules": "across all modules",
       "entry": "{count, plural, one {# entry} other {# entries}}",
       "statRow": {
@@ -754,7 +752,6 @@
       "quickStartTemplates": "Quick Start templates",
       "quickStartApplied": "✓ {count, plural, one {# example entry added} other {# example entries added}}",
       "quickStart": "Quick Start",
-      "templateApplied": "Added {count} example {count, plural, one {entry} other {entries}}",
       "templateFailed": "We couldn't apply that template. Try again in a moment — nothing was added.",
       "quickStartBlurb": "Add a few example entries so you can see what a filled-in workspace looks like.",
       "quickStartAdd": "Add"
@@ -866,10 +863,6 @@
       "title": "History",
       "allModules": "All Modules",
       "showOnly": "Show only: {module}",
-      "rangeToday": "Today",
-      "rangeWeek": "This Week",
-      "rangeMonth": "This Month",
-      "rangeAll": "All Time",
       "empty": {
         "title": "Your work, in the order it happened",
         "why": "This writes itself. Everything you log in any module lands here in one stream, which is how you answer \"what did I actually do last month\"."
@@ -1050,7 +1043,6 @@
       "editButton": "Apply changes",
       "editApplying": "Applying...",
       "editApplied": "Change applied",
-      "historyButton": "History",
       "historyLoading": "Loading versions...",
       "historyEmpty": "No version history yet.",
       "versionLabel": "v{number}",
@@ -1282,6 +1274,8 @@
       "saveError": "Could not save that change. Please try again.",
       "confirmDelete": "Delete \"{name}\"? Its run history goes with it, and this can't be undone.",
       "runSuccess": "Done — {credits} credits. The result was emailed to you.",
+      "runSuccessUnlimitedCost": "Done — unlimited on your account (would have cost {credits} credits). The result was emailed to you.",
+      "runSuccessUnlimited": "Done — unlimited on your account, no credits charged. The result was emailed to you.",
       "runNothingToReport": "Nothing new to report this time.",
       "runFailed": "The run failed.",
       "close": "Close",
@@ -1302,6 +1296,7 @@
       "runManual": "Run now",
       "runScheduled": "Scheduled",
       "runCredits": "{credits} credits",
+      "runCreditsUnlimited": "unlimited (would have cost {credits})",
       "viewOutput": "See the result",
       "scheduleFrequencyLabel": "How often",
       "scheduleTimeLabel": "At",
@@ -1374,7 +1369,6 @@
       "confirmUnpublish": "Take this site offline? The address is kept, so you can publish it again later.",
       "chooseAddress": "Choose your site's address",
       "addressLabel": "Address",
-      "willBeAt": "Your site will be at {url}",
       "addressRules": "{min}-{max} characters. Lowercase letters, numbers and hyphens.",
       "cancel": "Cancel",
       "viewLive": "View live",
@@ -1573,7 +1567,6 @@
       "finished": "Your report is ready",
       "inProgress": "Searching and writing…",
       "statusPending": "Planned",
-      "statusResearching": "Researching",
       "statusSynthesising": "Writing",
       "statusReady": "Ready",
       "statusFailed": "Failed",
@@ -1748,8 +1741,6 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyWhat": "Everything you record about {module} lives here.",
-    "emptyWhy": "Anything you log here joins your Timeline and becomes something the AI can use when you ask it a question about your work.",
     "emptyExample": "Start with: “{example}”",
     "examples": {
       "competitors": "Notion — closest competitor on pricing",
@@ -1778,7 +1769,6 @@
     "emptyApps": "Nothing here yet. This is a place to keep track of apps you are planning or have already made — it does not build apps for you. Use the button above to add one.",
     "emptyImages": "Nothing here yet. This is a place to keep track of images you need or have already made — it does not create images. Use the button above to add one.",
     "emptyVideos": "Nothing here yet. This is a place to keep track of videos you are planning or have already made — it does not create videos. Use the button above to add one.",
-    "emptyCoding": "Nothing here yet. This is a place to keep track of coding work you are planning or have already done — it does not write code. Use the button above to add one.",
     "emptyDataAnalysis": "Nothing here yet. This is a place to keep track of analyses you are planning or have already done — it does not analyse your data. Use the button above to add one.",
     "emptyCampaigns": "Nothing here yet. This is a place to keep track of campaigns you are planning or have already run — it does not run campaigns. Use the button above to add one."
   },
@@ -1813,7 +1803,8 @@
     "remove": "Remove from favorites"
   },
   "language": {
-    "label": "Language"
+    "label": "Language",
+    "saveFailed": "Couldn't save your language — nothing was changed."
   },
   "achievements": {
     "title": "Achievements",

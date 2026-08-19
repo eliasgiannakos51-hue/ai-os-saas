@@ -3,6 +3,7 @@ import { sendPushToUser } from "@/lib/push/web-push";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
+import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { hasEnoughCredits, resolveEffectivePlan, getPurchasedPackCreditPriceEur } from "@/lib/billing/credits";
 import { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { estimateForAction } from "@/lib/billing/estimate";
@@ -126,6 +127,17 @@ export async function GET(request: Request) {
       const user = authUser.user;
       const isAdmin = isAdminEmail(user.email);
       const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+      // THE BYPASS EUR CEILING. This is a per-USER cron loop, not a
+      // request — refusing here means SKIP this user's due job on this
+      // tick (same shape as the load-failure `continue` right above),
+      // not an HTTP error nobody is listening for. The job stays queued
+      // and is picked up again once the account's spend resets next
+      // month, exactly like a live request would be told to retry
+      // later.
+      if (bypassCredits) {
+        const ceiling = await checkBypassCeiling(userId, isAdmin, bypassCredits && !isAdmin);
+        if (!ceiling.allowed) continue;
+      }
       const plan = await resolveEffectivePlan(user);
       // Sized from the step/automation text, at this account's own
       // per-credit rate — the flat CREDIT_COSTS.createAnything charged
@@ -406,6 +418,17 @@ export async function GET(request: Request) {
       const user = authUser.user;
       const isAdmin = isAdminEmail(user.email);
       const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+      // THE BYPASS EUR CEILING. This is a per-USER cron loop, not a
+      // request — refusing here means SKIP this user's due job on this
+      // tick (same shape as the load-failure `continue` right above),
+      // not an HTTP error nobody is listening for. The job stays queued
+      // and is picked up again once the account's spend resets next
+      // month, exactly like a live request would be told to retry
+      // later.
+      if (bypassCredits) {
+        const ceiling = await checkBypassCeiling(userId, isAdmin, bypassCredits && !isAdmin);
+        if (!ceiling.allowed) continue;
+      }
       const plan = await resolveEffectivePlan(user);
       // Sized from the step/automation text, at this account's own
       // per-credit rate — the flat CREDIT_COSTS.createAnything charged

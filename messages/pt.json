@@ -4,7 +4,6 @@
     "notifications": "Notificações",
     "noNotifications": "Nenhuma notificação nova.",
     "newProject": "Novo Projeto",
-    "signOut": "Sair",
     "jumpToPage": "Ir para um módulo ou página...",
     "noMatches": "Nenhum resultado para '{query}'",
     "createStudio": "Cria qualquer coisa",
@@ -65,7 +64,6 @@
     },
     "creditsUnlimited": "Ilimitados",
     "whatIsThis": "O que é isto?",
-    "moreInHelp": "Ler mais no Centro de Ajuda",
     "examplesLabel": "Experimenta:"
   },
   "sidebar": {
@@ -129,7 +127,6 @@
     "groupHints": {
       "create": "Gere um site, planeie um objetivo, escreva um documento.",
       "myBusiness": "Dinheiro, clientes, produtos e como estão a correr.",
-      "track": "Registe ideias, pesquisa, trades e decisões antes de as esquecer.",
       "operations": "Trabalho recorrente e os fluxos de vários passos.",
       "insights": "Veja o que fez e o que a IA se lembra.",
       "marketplace": "Partilhe e descubra configurações — ainda não está aberto."
@@ -179,8 +176,6 @@
       "help": "Respostas às perguntas mais frequentes, sem gastar créditos."
     },
     "comingSoon": "Em breve",
-    "comingSoonToast": "{name} ainda não está disponível — está no roteiro.",
-    "comingSoonBadge": "Em breve",
     "closeMenu": "Fechar o menu"
   },
   "landing": {
@@ -503,6 +498,12 @@
         "carbon": "Carbon"
       }
     },
+    "language": {
+      "title": "Idioma",
+      "description": "Escolhe o idioma em que toda a aplicação é apresentada.",
+      "savedToAccount": "Fica guardado na tua conta, por isso acompanha-te em todos os dispositivos onde inicies sessão.",
+      "saveFailed": "Não foi possível guardar o idioma — nada foi alterado."
+    },
     "accessibility": {
       "title": "Acessibilidade",
       "fontSize": {
@@ -582,7 +583,6 @@
       "title": "Persona de IA",
       "description": "Dá ao assistente um nome personalizado.",
       "personaUpdated": "✓ nome do assistente atualizado",
-      "couldNotSave": "✗ não foi possível guardar o nome",
       "saveFailed": "Não conseguimos guardar o nome. Tenta outra vez daqui a pouco."
     },
     "billing": {
@@ -635,7 +635,6 @@
       "unavailable": "Não foi possível carregar o relatório. Verifica se ai_cost_log existe.",
       "colFeature": "Funcionalidade",
       "colCalls": "Ações",
-      "colMargin": "Margem média",
       "colCost": "Custo real",
       "hypotheticalNote": "* Inclui contas sem cobrança (admin, beta). Para essas, a margem mostrada é a que a ação teria rendido à tarifa do respetivo plano.",
       "colCharged": "Cobradas",
@@ -679,7 +678,6 @@
   "dashboard": {
     "overview": {
       "mostActiveModule": "Módulo mais ativo",
-      "totalEntriesThisWeek": "Total de entradas esta semana",
       "acrossAllModules": "em todos os módulos",
       "entry": "{count, plural, one {# entrada} other {# entradas}}",
       "statRow": {
@@ -754,7 +752,6 @@
       "quickStartTemplates": "Modelos de início rápido",
       "quickStartApplied": "✓ {count, plural, one {# entrada de exemplo adicionada} other {# entradas de exemplo adicionadas}}",
       "quickStart": "Início rápido",
-      "templateApplied": "Foram adicionados {count} exemplos",
       "templateFailed": "Não conseguimos aplicar esse modelo. Tenta outra vez daqui a pouco — não foi adicionado nada.",
       "quickStartBlurb": "Adiciona algumas entradas de exemplo para veres como fica um espaço de trabalho preenchido.",
       "quickStartAdd": "Adicionar"
@@ -866,10 +863,6 @@
       "title": "Histórico",
       "allModules": "Todos os módulos",
       "showOnly": "Mostrar apenas: {module}",
-      "rangeToday": "Hoje",
-      "rangeWeek": "Esta semana",
-      "rangeMonth": "Este mês",
-      "rangeAll": "Todo o período",
       "empty": {
         "title": "O seu trabalho, pela ordem em que aconteceu",
         "why": "Escreve-se sozinho. Tudo o que regista em qualquer módulo chega aqui num único fluxo, que é como se responde a «o que fiz eu no mês passado»."
@@ -1050,7 +1043,6 @@
       "editButton": "Aplicar alterações",
       "editApplying": "Aplicando...",
       "editApplied": "Alteração aplicada",
-      "historyButton": "Histórico",
       "historyLoading": "Carregando versões...",
       "historyEmpty": "Ainda não há histórico de versões.",
       "versionLabel": "v{number}",
@@ -1282,6 +1274,8 @@
       "saveError": "Não foi possível guardar essa alteração. Tente novamente.",
       "confirmDelete": "Eliminar \"{name}\"? O histórico de execuções vai junto e não é reversível.",
       "runSuccess": "Pronto — {credits} créditos. O resultado foi-lhe enviado por email.",
+      "runSuccessUnlimitedCost": "Pronto — ilimitado na tua conta (teria custado {credits} créditos). O resultado foi enviado para o teu email.",
+      "runSuccessUnlimited": "Pronto — ilimitado na tua conta, sem créditos cobrados. O resultado foi enviado para o teu email.",
       "runNothingToReport": "Nada de novo a relatar desta vez.",
       "runFailed": "A execução falhou.",
       "close": "Fechar",
@@ -1302,6 +1296,7 @@
       "runManual": "Manual",
       "runScheduled": "Agendada",
       "runCredits": "{credits} créditos",
+      "runCreditsUnlimited": "ilimitado (teria custado {credits})",
       "viewOutput": "Ver o resultado",
       "scheduleFrequencyLabel": "Com que frequência",
       "scheduleTimeLabel": "Às",
@@ -1374,7 +1369,6 @@
       "confirmUnpublish": "Retirar este site? O endereço é mantido, pode publicá-lo outra vez.",
       "chooseAddress": "Escolha o endereço do seu site",
       "addressLabel": "Endereço",
-      "willBeAt": "O seu site ficará em {url}",
       "addressRules": "{min}-{max} caracteres. Minúsculas, números e hífenes.",
       "cancel": "Cancelar",
       "viewLive": "Ver no ar",
@@ -1573,7 +1567,6 @@
       "finished": "O teu relatório está pronto",
       "inProgress": "A pesquisar e a escrever…",
       "statusPending": "Planeado",
-      "statusResearching": "A investigar",
       "statusSynthesising": "A escrever",
       "statusReady": "Pronto",
       "statusFailed": "Falhou",
@@ -1748,8 +1741,6 @@
       "az": "A–Z",
       "za": "Z–A"
     },
-    "emptyWhat": "Aqui vive tudo o que registas sobre {module}.",
-    "emptyWhy": "Tudo o que registares aqui entra na tua Cronologia e passa a ser algo que a IA pode usar quando lhe fizeres uma pergunta sobre o teu trabalho.",
     "emptyExample": "Começa com: «{example}»",
     "examples": {
       "competitors": "Notion — o concorrente mais próximo no preço",
@@ -1778,7 +1769,6 @@
     "emptyApps": "Ainda não há nada aqui. É um sítio para acompanhares apps que estás a planear ou já fizeste — não as cria por ti. Usa o botão acima.",
     "emptyImages": "Ainda não há nada aqui. É um sítio para acompanhares imagens de que precisas ou já fizeste — não gera imagens. Usa o botão acima.",
     "emptyVideos": "Ainda não há nada aqui. É um sítio para acompanhares vídeos que estás a planear ou já fizeste — não gera vídeos. Usa o botão acima.",
-    "emptyCoding": "Ainda não há nada aqui. É um sítio para acompanhares trabalho de programação que estás a planear ou já fizeste — não escreve código. Usa o botão acima.",
     "emptyDataAnalysis": "Ainda não há nada aqui. É um sítio para acompanhares análises que estás a planear ou já fizeste — não analisa os teus dados. Usa o botão acima.",
     "emptyCampaigns": "Ainda não há nada aqui. É um sítio para acompanhares campanhas que estás a planear ou já fizeste — não as executa. Usa o botão acima."
   },
@@ -1813,7 +1803,8 @@
     "remove": "Remover dos favoritos"
   },
   "language": {
-    "label": "Idioma"
+    "label": "Idioma",
+    "saveFailed": "Não foi possível guardar o idioma — nada foi alterado."
   },
   "achievements": {
     "title": "Conquistas",

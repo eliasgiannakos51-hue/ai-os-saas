@@ -89,6 +89,15 @@ const RUNS = [
     output: "Nvidia announced the RTX 6090 at CES, with shipping in March.",
     error: null,
     credits_charged: 37,
+    // NOT omitted: this mock REST server (prod-harness.mjs) returns fixture
+    // rows verbatim, unlike real PostgREST's select("*") which always
+    // includes every column and serialises an unset nullable one as
+    // explicit JSON null. Leaving this key out here made the UI's
+    // `=== null` check see `undefined` instead — true against this
+    // fixture, false against production — and silently mask whatever this
+    // assertion was meant to catch. null here is what a genuinely charged
+    // run (not admin/beta bypass) looks like on the wire for real.
+    would_have_charged_credits: null,
     tokens_used: 8421,
     trigger_source: "schedule",
     attempts: 1,
@@ -103,6 +112,11 @@ const RUNS = [
     output: null,
     error: "The AI service could not be reached.",
     credits_charged: 0,
+    // Same reasoning as the run above — a failed run that was never
+    // settled (nothing was actually spent) still means "not a bypass
+    // account": would_have_charged_credits is about WHO pays, not whether
+    // the run succeeded.
+    would_have_charged_credits: null,
     tokens_used: 0,
     trigger_source: "schedule",
     attempts: 3,

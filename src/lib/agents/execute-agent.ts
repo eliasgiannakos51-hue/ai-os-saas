@@ -14,6 +14,7 @@ import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { reserveCredits, settleReservation, releaseReservation } from "@/lib/billing/reservations";
+import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import {
   checkAiCallAllowed,
   fingerprintRequest,
@@ -51,6 +52,14 @@ export type ExecuteAgentResult =
       runId: string;
       output: string | null;
       creditsCharged: number;
+      /** This account is never charged (admin, beta tester). Carried out
+       *  of here because "0 credits" and "free for you" are the same
+       *  number and a very different sentence — the agents workspace was
+       *  reporting the first one to an owner after every run. */
+      bypassCharge: boolean;
+      /** What the run WOULD have cost on a charging account. Null when the
+       *  account really was charged. */
+      wouldHaveChargedCredits: number | null;
       /** True only when the result actually reached the user. Named for the
        *  outcome rather than the transport, since V3 Task 3 added Slack. */
       delivered: boolean;
@@ -64,6 +73,7 @@ export type ExecuteAgentResult =
         | "rate_limited"
         | "circuit_breaker"
         | "insufficient_credits"
+        | "bypass_ceiling"
         | "run_failed"
         | "no_api_key"
         | "internal";
@@ -162,6 +172,17 @@ export async function executeAgent(params: {
   // 3. Billing context.
   const isAdmin = isAdminEmail(user.email);
   const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+  // THE BYPASS EUR CEILING. checkAiCallAllowed above caps volume for
+  // every account; this caps real Anthropic SPEND specifically for the
+  // accounts credits do not — admin and active beta. See
+  // lib/billing/bypass-ceiling.ts for why this is one check in euros
+  // rather than a counter re-implemented per feature.
+  if (bypassCredits) {
+    const ceiling = await checkBypassCeiling(userId, isAdmin, bypassCredits && !isAdmin);
+    if (!ceiling.allowed) {
+      return { ok: false, reason: "bypass_ceiling", message: ceiling.reason };
+    }
+  }
   const plan = await resolveEffectivePlan(user);
   const pricingConfig = resolvePricingConfig();
   const accountCreditPriceEur = bypassCredits
@@ -310,6 +331,9 @@ export async function executeAgent(params: {
         finished_at: finishedAt,
         error: outcome.failure.message,
         credits_charged: settlement.creditsCharged,
+      // Null when the account really was charged; a number only on a
+      // bypass account, where credits_charged is 0 and says nothing.
+      would_have_charged_credits: settlement.wouldHaveChargedCredits,
         tokens_used: tokensUsed,
         attempts,
       })
@@ -393,6 +417,9 @@ export async function executeAgent(params: {
       // history rather than inferred from an inbox that stayed empty.
       error: output && !delivery.delivered ? delivery.reason ?? null : null,
       credits_charged: settlement.creditsCharged,
+      // Null when the account really was charged; a number only on a
+      // bypass account, where credits_charged is 0 and says nothing.
+      would_have_charged_credits: settlement.wouldHaveChargedCredits,
       tokens_used: tokensUsed,
       attempts,
     })
@@ -419,6 +446,8 @@ export async function executeAgent(params: {
     runId,
     output,
     creditsCharged: settlement.creditsCharged,
+    bypassCharge: settlement.bypassCharge,
+    wouldHaveChargedCredits: settlement.wouldHaveChargedCredits,
     delivered: delivery.delivered,
     deliveredVia: delivery.via,
     ...(delivery.reason ? { deliveryIssue: delivery.reason } : {}),

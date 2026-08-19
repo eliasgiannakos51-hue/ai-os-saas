@@ -254,15 +254,49 @@ function stripComments(text) {
   return text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 }
 const bypassSites = [];
+// NOT A CALL SITE, and each exclusion is one shape rather than a pattern
+// broad enough to hide a real one:
+//
+//   `bypassCharge: boolean;`   a TYPE. SettlementResult and
+//                              ExecuteAgentResult both declare the field
+//                              so a caller can SEE whether an account was
+//                              charged — declaring a field decides
+//                              nothing. (`bypassCharge?: boolean` was
+//                              already excluded by the `?`; the
+//                              non-optional spelling was not, which is how
+//                              adding one field to a result type read as
+//                              "a feature now settles for zero credits for
+//                              a paying user".)
+//
+//   `bypassCharge: x.bypassCharge`  a READ of a decision made elsewhere,
+//                              copied out of a settlement result and into
+//                              the thing the UI renders. The site that
+//                              decided it is a separate match in this same
+//                              scan and is still checked.
+//
+// Anything else — a literal, a condition, a function call — is a decision
+// and is inventoried.
+const NOT_A_DECISION = [
+  /^boolean;?$/,
+  /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)*\.bypassCharge;?$/,
+];
+let excluded = 0;
 for (const file of SOURCES) {
   const text = stripComments(readFileSync(file, "utf8"));
   // Only the VALUE form at a call site. `bypassCharge?: boolean` (a type)
   // and `bypassCharge,` (shorthand in the implementation) are not calls.
   for (const m of text.matchAll(/bypassCharge:\s*([^,\n}]+)/g)) {
-    bypassSites.push({ file, expr: m[1].trim() });
+    const expr = m[1].trim();
+    if (NOT_A_DECISION.some((re) => re.test(expr))) { excluded++; continue; }
+    bypassSites.push({ file, expr });
   }
 }
-console.log(`        ${bypassSites.length} bypassCharge call site(s) found`);
+console.log(`        ${bypassSites.length} bypassCharge call site(s) found (${excluded} type/pass-through)`);
+// AN EXCLUSION MUST NEVER SHRINK COVERAGE. If a future edit makes one of
+// the patterns above swallow a real decision, this is what notices: the
+// number of inventoried sites can grow, never fall.
+check(`at least 20 bypassCharge decisions are still inventoried (${bypassSites.length})`,
+  bypassSites.length >= 20);
 const unregistered = [];
 for (const site of bypassSites) {
   const identifiers = site.expr.match(/[A-Za-z_$][\w$]*/g) ?? [];

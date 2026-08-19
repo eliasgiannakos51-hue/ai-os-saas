@@ -8,6 +8,7 @@ import { CostAccumulator, type CostEntry } from "@/lib/billing/cost-accumulator"
 import { settleReservation, releaseReservation } from "@/lib/billing/reservations";
 import { resolveEffectivePlan } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/admin";
+import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
 import { researchReportToDocumentHtml } from "@/lib/research/report-to-html";
@@ -169,6 +170,41 @@ export async function runResearchChunk(params: {
     return { done: true, status: "failed", reason: "not_found" };
   }
   const report = raw as ReportRow;
+
+  // THE BYPASS EUR CEILING, checked on EVERY chunk rather than only at
+  // the start of a run. Deep research is chunked across up to
+  // MAX_RESEARCH_CHUNKS invocations (api/research/route.ts starts one,
+  // api/research/[id]/run and api/research/[id]/continue resume one) —
+  // gating only the start route would leave every resumed chunk
+  // unchecked, and a resumed chunk spends exactly as much Anthropic
+  // budget as a fresh one. Checked here, once, is what covers all three
+  // entry points without repeating the check in each.
+  //
+  // isAdmin and isBeta resolved SEPARATELY, not folded into one bypass
+  // boolean — the two ceilings differ (€40 vs €5), and isBypass() below
+  // only ever returns whether EITHER is true, not which. Getting this
+  // wrong would apply the beta ceiling to an admin account.
+  const { data: reportOwner } = await admin.auth.admin.getUserById(report.user_id);
+  const reportOwnerIsAdmin = isAdminEmail(reportOwner?.user?.email);
+  const reportOwnerIsBeta = !reportOwnerIsAdmin && reportOwner?.user
+    ? await hasActiveBetaBypass(reportOwner.user)
+    : false;
+  if (reportOwnerIsAdmin || reportOwnerIsBeta) {
+    const ceiling = await checkBypassCeiling(report.user_id, reportOwnerIsAdmin, reportOwnerIsBeta);
+    if (!ceiling.allowed) {
+      if (report.reservation_id) await releaseReservation(report.user_id, report.reservation_id);
+      await admin
+        .from("research_reports")
+        .update({
+          status: "failed",
+          error: ceiling.reason,
+          completed_at: new Date().toISOString(),
+          chunk_running: false,
+        })
+        .eq("id", reportId);
+      return { done: true, status: "failed", reason: "bypass_ceiling" };
+    }
+  }
 
   const questions = Array.isArray(report.questions) ? report.questions : [];
   const findings: ResearchFinding[] = Array.isArray(report.partial_findings)

@@ -105,6 +105,11 @@ export type AgentRun = {
   output: string | null;
   error: string | null;
   credits_charged: number;
+  /** On an account that is never charged, what this run WOULD have cost.
+   *  Null when the run really was charged — credits_charged is the answer
+   *  then. Null on runs that predate the column, which is why the UI can
+   *  say "unlimited" with no figure rather than inventing one. */
+  would_have_charged_credits: number | null;
   tokens_used: number;
   trigger_source: "schedule" | "manual";
   attempts: number;

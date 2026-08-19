@@ -13,6 +13,7 @@ import { logApiError } from "@/lib/log-error";
 import { MAX_MESSAGE_LENGTH, MODEL } from "@/lib/create-studio/route-entry";
 import { startJob } from "@/lib/jobs/start-job";
 import { isAdminEmail } from "@/lib/admin";
+import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import {
@@ -134,7 +135,19 @@ export async function POST(request: Request) {
     // The billing picture, computed HERE because the user has to be told
     // now whether they can afford this — a 402 they can act on, rather
     // than a job id for work that dies in a worker they are not watching.
-    const bypassCredits = isAdminEmail(user.email) || (await hasActiveBetaBypass(user));
+    const isAdmin = isAdminEmail(user.email);
+    const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));
+    // THE BYPASS EUR CEILING. checkAiCallAllowed above caps volume for
+    // every account; this caps real Anthropic SPEND specifically for the
+    // accounts credits do not — admin and active beta. See
+    // lib/billing/bypass-ceiling.ts for why this is one check in euros
+    // rather than a counter re-implemented per feature.
+    if (bypassCredits) {
+      const ceiling = await checkBypassCeiling(user.id, isAdmin, bypassCredits && !isAdmin);
+      if (!ceiling.allowed) {
+        return NextResponse.json({ ok: false, error: ceiling.reason }, { status: 429 });
+      }
+    }
     // Resolved UNCONDITIONALLY, never `bypassCredits ? null : ...`. A
     // conditionally-null plan prices the estimate off the list credit rate
     // instead of the account's own, which is the shape billing-coverage

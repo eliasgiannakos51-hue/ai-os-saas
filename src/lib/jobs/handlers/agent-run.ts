@@ -85,6 +85,15 @@ export const agentRunHandler: JobHandler = async (ctx: JobContext): Promise<JobH
       runId: result.runId,
       output: result.output,
       creditsCharged: result.creditsCharged,
+      // The shape credits-context.tsx's readUsageReceipt already
+      // understands, so an agent run reports what it cost through the
+      // same path as chat, Create and the Website Builder instead of
+      // inventing a fourth way to say it.
+      usage: {
+        creditsCharged: result.creditsCharged,
+        bypass: result.bypassCharge,
+        wouldHaveCharged: result.wouldHaveChargedCredits,
+      },
       delivered: result.delivered,
       deliveredVia: result.deliveredVia,
       deliveryIssue: result.deliveryIssue ?? null,

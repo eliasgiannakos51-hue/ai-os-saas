@@ -4,13 +4,16 @@ import { LINKABLE_MODULES } from "@/lib/knowledge-graph";
 import { loadLinkedEntities } from "@/lib/entity-links";
 import { logApiError } from "@/lib/log-error";
 import { enModuleTitle } from "@/lib/module-labels";
+import { normalizeForSearch } from "@/lib/text/search-match";
 
 // Scans, per module, only this many of the user's most recent records —
 // keeps the per-message cost bounded regardless of how much data an
 // account has logged over time. Deliberately simple (no embeddings/semantic
-// search yet, per the brief): a headline "matches" when it appears
-// case-insensitively as a substring of the user's message, same idea as
-// the user typing the exact name of something they already logged.
+// search yet, per the brief): a headline "matches" when it appears as a
+// substring of the user's message, case-, accent- and sigma-folded (see
+// lib/text/search-match.ts's header) so a Greek user typing "καφε" still
+// mentions a record headlined "Καφές" — plain toLowerCase() alone leaves
+// the accent and never matches.
 const PER_MODULE_SCAN_LIMIT = 50;
 const MAX_MENTIONED_ENTITIES = 8;
 const MIN_HEADLINE_LENGTH = 3;
@@ -32,8 +35,11 @@ export async function findMentionedEntities(
   userId: string,
   message: string
 ): Promise<MentionedEntity[]> {
-  const lowerMessage = message.toLowerCase();
-  if (lowerMessage.trim().length < MIN_HEADLINE_LENGTH) return [];
+  if (message.trim().length < MIN_HEADLINE_LENGTH) return [];
+  // Normalised once and reused per headline below, rather than calling
+  // matchesSearch() per headline — that would re-fold this same message
+  // up to 50 times per module for no reason.
+  const normalizedMessage = normalizeForSearch(message);
 
   try {
     const perModule = await Promise.all(
@@ -58,7 +64,7 @@ export async function findMentionedEntities(
           .filter(
             (entity) =>
               entity.headline.length >= MIN_HEADLINE_LENGTH &&
-              lowerMessage.includes(entity.headline.toLowerCase())
+              normalizedMessage.includes(normalizeForSearch(entity.headline))
           );
       })
     );

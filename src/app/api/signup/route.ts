@@ -10,6 +10,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-client-ip";
 import { COUNTRIES } from "@/lib/countries";
 import { getBetaInviteCode, computeBetaExpiresAt } from "@/lib/beta";
+import { diagLog } from "@/lib/diag";
 
 // @service-role-justified pre-auth — account creation happens before a
 // session can exist. admin.auth.admin.createUser only creates the caller's
@@ -21,6 +22,13 @@ const SIGNUP_MAX_ATTEMPTS = 10;
 const SIGNUP_WINDOW_MINUTES = 60;
 
 export async function POST(request: Request) {
+  // Stage timing, visible with IONEXA_DIAG=1. "Signup takes 10 seconds"
+  // cannot be diagnosed from outside — five sequential network calls
+  // share the wall clock, and only the deployment itself can say which
+  // one ate it. Flip the env var, sign up once, read one log line.
+  const t0 = Date.now();
+  const marks: string[] = [];
+  const mark = (stage: string) => marks.push(`${stage}=${Date.now() - t0}ms`);
   try {
     const ip = getClientIp(request);
     const { allowed } = await checkRateLimit({
@@ -101,6 +109,7 @@ export async function POST(request: Request) {
     // the Supabase logs). admin.auth.admin.createUser() with
     // email_confirm: true creates an already-confirmed user in one step,
     // server-side, and does not trigger any auth email at all.
+    mark("rate_limit");
     const admin = createAdminClient();
     const { data: createData, error: createError } = await admin.auth.admin.createUser({
       email,
@@ -164,6 +173,7 @@ export async function POST(request: Request) {
       );
     }
 
+    mark("create_user");
     const supabase = createClient();
 
     // Grant the signup plan's monthly credits so user_credits exists from
@@ -198,10 +208,20 @@ export async function POST(request: Request) {
     } catch (err) {
       logApiError("/api/signup", err, { stage: "grant_credits" });
     }
+    mark("grant_credits");
 
     // Best-effort welcome email — sendWelcomeEmail never throws, so a failed
-    // send (missing RESEND_API_KEY, Resend outage, etc.) never blocks signup.
-    await sendWelcomeEmail(email);
+    // send never blocks signup. CAPPED AT 2.5s: the Resend call carries no
+    // timeout of its own, so a slow or hanging email API used to hold the
+    // whole signup hostage — a person watching a spinner for a marketing
+    // email they haven't asked for. Past the cap the send keeps running
+    // for whatever remains of this invocation, but the response no longer
+    // waits for it; the email is the least important thing in this route.
+    await Promise.race([
+      sendWelcomeEmail(email),
+      new Promise<void>((resolve) => setTimeout(resolve, 2500)),
+    ]);
+    mark("welcome_email");
 
     // Sign in on the same (cookie-aware) server client so the session lands
     // on this response and the browser is authenticated right away.
@@ -209,6 +229,8 @@ export async function POST(request: Request) {
       email,
       password,
     });
+    mark("sign_in");
+    diagLog(`[signup] stage timings: ${marks.join(" ")}`);
 
     if (signInError) {
       logApiError("/api/signup", signInError, { stage: "signInWithPassword" });

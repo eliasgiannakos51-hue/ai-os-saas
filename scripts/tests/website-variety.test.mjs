@@ -231,7 +231,21 @@ check(
 
 console.log("\n== 9. the brief is positioned last, in both directions ==");
 check("a labelled brief block is built", /function buildUserBriefBlock/.test(src));
-check("generation puts image metadata first", /buildReferenceImageUrlList\(images\)\.trim\(\)\}\\n\\n\$\{buildUserBriefBlock/.test(src));
+// The user text became an ordered array when the per-site variation draw
+// joined it: [image metadata, variation draw, brief], joined and
+// filtered. The ORDER is the property: images first, the brief LAST —
+// and the draw must sit between them, in the uncached user message.
+check(
+  "generation puts image metadata first and the brief last",
+  /const userText = \[\s*buildReferenceImageUrlList\(images\)\.trim\(\),\s*variationText\?\.trim\(\) \?\? "",\s*buildUserBriefBlock\(description\),\s*\]/.test(
+    src
+  )
+);
+check(
+  "the variation draw rides in the user message, never the cached system block",
+  /variationText/.test(src.slice(src.indexOf("export async function generateWebsiteHtml"))) &&
+    !/variation/i.test(src.slice(0, src.indexOf("const SYSTEM_PROMPT")))
+);
 check("the edit path puts the change request last", /\$\{buildReferenceImageUrlList\(images\)\}\\n\\nTHE USER'S CHANGE REQUEST/.test(src));
 check("and labels it as overriding too", /apply exactly this, and nothing else\. It overrides/.test(src));
 

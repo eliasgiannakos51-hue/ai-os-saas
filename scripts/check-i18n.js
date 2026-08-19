@@ -290,6 +290,10 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // the scheme is the same eight characters in every written language,
   // including the two that do not use the Latin alphabet at all.
   "moduleData.placeholders.httpsUrl",
+  // "Logo" is the word for logo in French (le logo), German (das Logo)
+  // and Italian (il logo) — the same loanword, not an untranslated
+  // leftover. Greek, Arabic, Japanese and Chinese DO translate it and do.
+  "dashboard.websiteBuilder.design.logoTitle",
   // The three delivery destinations that are BRAND NAMES. "Slack",
   // "Telegram" and "Discord" are what those products are called in every
   // locale — including Arabic and Japanese, whose own interfaces use the

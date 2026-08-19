@@ -64,7 +64,8 @@
     },
     "creditsUnlimited": "Illimitati",
     "whatIsThis": "Che cos'è?",
-    "examplesLabel": "Prova:"
+    "examplesLabel": "Prova:",
+    "newMessagesBelow": "Nuovo messaggio in basso"
   },
   "sidebar": {
     "groups": {
@@ -1056,7 +1057,7 @@
       "previewIncompleteTitle": "Anteprima non disponibile",
       "previewIncompleteBody": "Questa pagina generata sembra incompleta o è stata interrotta, quindi non può essere mostrata in modo sicuro. Prova a rigenerarla con una descrizione più breve, oppure modificala di nuovo.",
       "imageLabel": "Immagini di riferimento ({count}/{max}, opzionale)",
-      "imageHelp": "Fino a {max} immagini — un logo, foto dei prodotti o uno screenshot di stile di riferimento. JPG o PNG, fino a 5MB ciascuna. Usate solo per ispirare colori/stile, non verranno incorporate nel sito generato.",
+      "imageHelp": "Fino a {max} immagini — il tuo logo, foto dei prodotti o un riferimento di stile. JPG o PNG, max 5MB ciascuna. Di default vengono incorporate nel sito; qui sotto puoi usarle solo come ispirazione di stile.",
       "imageRemove": "Rimuovi immagine",
       "imageInvalidType": "Sono supportate solo immagini JPG o PNG.",
       "imageTooLarge": "Immagine troppo grande — scegli un file sotto i 5MB.",
@@ -1094,7 +1095,15 @@
         "imageUses": {
           "in-site": "Mettile nel sito",
           "style-only": "Solo come riferimento di stile"
-        }
+        },
+        "logoTitle": "Logo",
+        "logoChoices": {
+          "uploaded": "È tra le mie immagini",
+          "wordmark": "Nessun logo — usa il nome della mia attività",
+          "auto": "Decidi tu"
+        },
+        "logoHint": "Senza logo, il sito mostra il nome della tua attività come wordmark stilizzato — non inventa mai un logo al posto tuo.",
+        "logoNeedsUpload": "Carica prima il logo come immagine"
       },
       "imageIntro": "Il tuo logo, foto dei prodotti o del locale: quello che vuoi nella pagina o che deve dare lo stile.",
       "regenerateAlreadyUsed": "Hai già usato la rigenerazione gratuita per questo sito. Crea un nuovo sito con una descrizione diversa.",
@@ -1252,7 +1261,6 @@
       "previewTitle": "Ecco cosa costruirò",
       "previewName": "Nome",
       "previewSchedule": "Si esegue",
-      "previewDelivery": "Invia a",
       "previewCostPerRun": "Costo per esecuzione",
       "previewNextRuns": "Le prime tre esecuzioni",
       "previewTask": "Vedi il compito esatto",
@@ -1550,7 +1558,10 @@
       "copyCitation": "Copia questa fonte",
       "copyText": "Copia il testo",
       "copyTextError": "Non è stato possibile leggere il testo di quel file.",
-      "copyTextEmpty": "Non abbiamo estratto testo da quel file."
+      "copyTextEmpty": "Non abbiamo estratto testo da quel file.",
+      "uploadStorageMissing": "Lo storage dei file non è configurato su questa installazione: manca il bucket 'user-files'. Un amministratore deve eseguire l'SQL di riparazione (System Health → File storage).",
+      "uploadStoragePolicy": "Lo storage ha rifiutato il caricamento: mancano le politiche di accesso del bucket. Un amministratore deve eseguire l'SQL di riparazione (System Health → File storage).",
+      "tooLargeForTransfer": "La piattaforma di hosting ha rifiutato il caricamento prima che raggiungesse l'app. Riprova tra un momento."
     },
     "deepResearch": {
       "title": "Ricerca approfondita",
@@ -2206,7 +2217,8 @@
     "checking": "Sto verificando il risultato",
     "saving": "Sto salvando",
     "delivering": "Te lo sto inviando",
-    "publishing": "Sto pubblicando il sito"
+    "publishing": "Sto pubblicando il sito",
+    "watchFailed": "Al momento non è possibile mostrare l'avanzamento — il lavoro continua in background."
   },
   "problem": {
     "out_of_credits": {

@@ -221,7 +221,10 @@ check("the agents page asks on mount", /fetch\("\/api\/jobs\?kind=agent_build"\)
 check("and adopts the running job", /setJobId\(String\(data\.job\.id\)\)/.test(workspace));
 check(
   "what is 'building' comes from the job, not from a click",
-  /const \{ job, isRunning: building \} = useAiJob\(jobId\)/.test(workspace)
+  // watchLost joined the destructure when the silent-poll-failure fix
+  // landed; the property under test is unchanged — `building` is derived
+  // from the job row, never set by a click.
+  /const \{ job, isRunning: building(?:, watchLost: \w+)? \} = useAiJob\(jobId\)/.test(workspace)
 );
 check("the old boolean is gone", !/setBuilding\(/.test(workspace));
 check("the result is read off the row", /job\.result/.test(workspace));

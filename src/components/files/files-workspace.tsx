@@ -32,11 +32,14 @@ import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { matchesSearch } from "@/lib/text/search-match";
 import {
   ACCEPT_ATTRIBUTE,
+  FILE_BUCKET,
   MAX_FILE_BYTES,
   MAX_FILES_PER_QUESTION,
   MAX_QUESTION_CHARS,
+  extensionOf,
   formatBytes,
 } from "@/lib/files/file-types";
+import { createClient as createBrowserSupabase } from "@/lib/supabase/client";
 
 export type WorkspaceFile = {
   id: string;
@@ -203,6 +206,109 @@ export function FilesWorkspace({
     );
   }, []);
 
+  /** One uploaded-or-refused answer, whichever path the bytes took. */
+  type IngestResponse = {
+    ok?: boolean;
+    error?: string;
+    file?: WorkspaceFile;
+  };
+
+  function applyIngest(data: IngestResponse, file: File) {
+    if (!data.ok || !data.file) {
+      addToast(data.error ?? t("uploadError"), "error");
+      return;
+    }
+    setFiles((current) => [data.file as WorkspaceFile, ...current]);
+    // A file that stored but could not be READ is not a success, and
+    // saying "uploaded" over it is how somebody comes to believe the AI
+    // can see a scan that it cannot.
+    if (data.file.processing_status === "failed") {
+      addToast(data.file.error ?? t("uploadUnreadable", { name: file.name }), "error");
+    } else {
+      addToast(t("uploadSuccess", { name: data.file.filename }));
+    }
+  }
+
+  async function parseJson(response: Response): Promise<IngestResponse | null> {
+    try {
+      return (await response.json()) as IngestResponse;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * PRIMARY path: browser → bucket → /api/files/register.
+   *
+   * The bytes go straight from the browser into the caller's own folder of
+   * the private bucket (the bucket's RLS makes any other folder
+   * unwritable), and the register route reads them back, validates and
+   * writes the row. Direct because the alternative — the bytes inside a
+   * POST body — is capped by the host at ~4.5MB, which silently made
+   * every ordinary 5MB PDF unuploadable while the product promised 20MB.
+   *
+   * "fatal" means falling back would fail identically (the bucket or its
+   * policies are missing — a provisioning failure the user should see by
+   * name). "fallback" means the route path is still worth trying.
+   */
+  async function uploadDirect(
+    file: File
+  ): Promise<
+    | { kind: "done"; data: IngestResponse }
+    | { kind: "fatal"; message: string }
+    | { kind: "fallback"; message?: string }
+  > {
+    let path: string;
+    try {
+      const supabase = createBrowserSupabase();
+      const { data: sessionData } = await supabase.auth.getSession();
+      const userId = sessionData.session?.user?.id;
+      if (!userId) return { kind: "fallback" };
+      path = `${userId}/${crypto.randomUUID()}${extensionOf(file.name)}`;
+      const { error } = await supabase.storage.from(FILE_BUCKET).upload(path, file, {
+        contentType: file.type || "application/octet-stream",
+        upsert: false,
+      });
+      if (error) {
+        const message = error.message ?? "";
+        if (/bucket not found/i.test(message)) {
+          return { kind: "fatal", message: t("uploadStorageMissing") };
+        }
+        if (/row-level security|policy/i.test(message)) {
+          return { kind: "fatal", message: t("uploadStoragePolicy") };
+        }
+        return { kind: "fallback", message: message || undefined };
+      }
+    } catch {
+      return { kind: "fallback" };
+    }
+    const response = await fetch("/api/files/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ path, filename: file.name }),
+    });
+    const data = await parseJson(response);
+    return { kind: "done", data: data ?? { ok: false, error: t("uploadError") } };
+  }
+
+  /** FALLBACK path: the bytes in a multipart body. Kept because it needs
+   *  nothing from the client but a session cookie — but the host refuses
+   *  bodies over ~4.5MB before the route runs, with an HTML 413 that
+   *  response.json() cannot parse, so both limits are handled here. */
+  const ROUTE_BODY_LIMIT = 4 * 1024 * 1024;
+
+  async function uploadViaRoute(file: File): Promise<IngestResponse> {
+    const body = new FormData();
+    body.append("file", file);
+    const response = await fetch("/api/files/upload", { method: "POST", body });
+    const data = await parseJson(response);
+    if (data) return data;
+    return {
+      ok: false,
+      error: response.status === 413 ? t("tooLargeForTransfer") : t("uploadError"),
+    };
+  }
+
   async function uploadOne(file: File) {
     // Refused here as well as on the server, so a 19MB upload does not
     // have to travel before being told no.
@@ -212,23 +318,23 @@ export function FilesWorkspace({
     }
     setUploading(file.name);
     try {
-      const body = new FormData();
-      body.append("file", file);
-      const response = await fetch("/api/files/upload", { method: "POST", body });
-      const data = await response.json();
-      if (!data.ok) {
-        addToast(data.error ?? t("uploadError"), "error");
+      const direct = await uploadDirect(file);
+      if (direct.kind === "done") {
+        applyIngest(direct.data, file);
         return;
       }
-      setFiles((current) => [data.file as WorkspaceFile, ...current]);
-      // A file that stored but could not be READ is not a success, and
-      // saying "uploaded" over it is how somebody comes to believe the AI
-      // can see a scan that it cannot.
-      if (data.file.processing_status === "failed") {
-        addToast(data.file.error ?? t("uploadUnreadable", { name: file.name }), "error");
-      } else {
-        addToast(t("uploadSuccess", { name: data.file.filename }));
+      if (direct.kind === "fatal") {
+        addToast(direct.message, "error");
+        return;
       }
+      // Storage was unreachable in a recoverable way. The route can carry
+      // small files; a large one would die at the host's body limit, so
+      // the honest answer there is the storage failure, not a second one.
+      if (file.size > ROUTE_BODY_LIMIT) {
+        addToast(direct.message ?? t("uploadError"), "error");
+        return;
+      }
+      applyIngest(await uploadViaRoute(file), file);
     } catch (err) {
       addToast(getErrorMessage(err, t("uploadError")), "error");
     } finally {

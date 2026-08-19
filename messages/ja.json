@@ -64,7 +64,8 @@
     },
     "creditsUnlimited": "無制限",
     "whatIsThis": "これは何ですか？",
-    "examplesLabel": "例："
+    "examplesLabel": "例：",
+    "newMessagesBelow": "下に新しいメッセージ"
   },
   "sidebar": {
     "groups": {
@@ -1056,7 +1057,7 @@
       "previewIncompleteTitle": "プレビューを表示できません",
       "previewIncompleteBody": "生成されたページが不完全、または途中で切れているため、安全に表示できません。説明を短くして再生成するか、もう一度編集してください。",
       "imageLabel": "参考画像（{count}/{max}、任意）",
-      "imageHelp": "最大{max}枚まで — ロゴ、商品写真、スタイル参考のスクリーンショットなど。JPGまたはPNG、各5MBまで。色やスタイルの参考にのみ使用され、生成されたサイトには埋め込まれません。",
+      "imageHelp": "最大{max}枚 — ロゴ、商品写真、スタイルの参考画像。JPGまたはPNG、各5MBまで。既定ではサイトに埋め込まれます。下でスタイル参考のみに切り替えられます。",
       "imageRemove": "画像を削除",
       "imageInvalidType": "JPGまたはPNG画像のみサポートされています。",
       "imageTooLarge": "画像が大きすぎます — 5MB未満のファイルを選択してください。",
@@ -1094,7 +1095,15 @@
         "imageUses": {
           "in-site": "サイトに使う",
           "style-only": "スタイル参考のみ"
-        }
+        },
+        "logoTitle": "ロゴ",
+        "logoChoices": {
+          "uploaded": "画像に含まれています",
+          "wordmark": "ロゴなし — 店名・社名を使う",
+          "auto": "おまかせ"
+        },
+        "logoHint": "ロゴがない場合、サイトには社名をスタイル付きのワードマークとして表示します — 勝手にロゴを作ることはありません。",
+        "logoNeedsUpload": "まずロゴを画像としてアップロードしてください"
       },
       "imageIntro": "ロゴ、商品写真、店内の写真など。ページに載せたいもの、雰囲気の参考にしたいもの。",
       "regenerateAlreadyUsed": "このサイトの無料再生成はすでに使用済みです。別の内容で新しいサイトを作成してください。",
@@ -1252,7 +1261,6 @@
       "previewTitle": "作成する内容",
       "previewName": "名前",
       "previewSchedule": "実行タイミング",
-      "previewDelivery": "送信先",
       "previewCostPerRun": "1回あたりの費用",
       "previewNextRuns": "最初の3回の実行",
       "previewTask": "実際のタスクを見る",
@@ -1550,7 +1558,10 @@
       "copyCitation": "この出典をコピー",
       "copyText": "テキストをコピー",
       "copyTextError": "そのファイルのテキストを読み取れませんでした。",
-      "copyTextEmpty": "そのファイルからはテキストを読み取れていません。"
+      "copyTextEmpty": "そのファイルからはテキストを読み取れていません。",
+      "uploadStorageMissing": "このデプロイではファイルストレージが設定されていません — 'user-files' バケットがありません。管理者が修復SQLを実行する必要があります（System Health → File storage）。",
+      "uploadStoragePolicy": "ストレージがアップロードを拒否しました — バケットのアクセスポリシーがありません。管理者が修復SQLを実行する必要があります（System Health → File storage）。",
+      "tooLargeForTransfer": "ホスティングプラットフォームがアプリに届く前にアップロードを拒否しました。しばらくしてからもう一度お試しください。"
     },
     "deepResearch": {
       "title": "ディープリサーチ",
@@ -2206,7 +2217,8 @@
     "checking": "結果を確認しています",
     "saving": "保存しています",
     "delivering": "お届けしています",
-    "publishing": "サイトを公開しています"
+    "publishing": "サイトを公開しています",
+    "watchFailed": "現在進捗を表示できません — 処理はバックグラウンドで続いています。"
   },
   "problem": {
     "out_of_credits": {

@@ -94,3 +94,28 @@ export function applyResolvedImageUrls(html: string, resolved: Map<string, strin
   }
   return result;
 }
+
+// A query that is asking the stock library for a LOGO. The prompt forbids
+// the model from requesting one (LOGO — NEVER INVENT ONE), but the whole
+// point of the report was that prompt promises are not enforcement: a
+// stock photo presented as the business's logo is a wrong identity, so
+// the resolver refuses these outright.
+const LOGO_QUERY = /\b(logo|logotype|brand ?mark|wordmark|monogram|emblem|insignia)\b/i;
+
+export function isLogoLikeQuery(query: string): boolean {
+  return LOGO_QUERY.test(query);
+}
+
+/** Removes the ENTIRE <img> tag for the given placeholder slugs — used
+ *  for logo-like placeholders, where no stock photo is an acceptable
+ *  resolution and a visibly broken image would be worse than nothing. */
+export function stripPlaceholderImageTags(html: string, slugs: string[]): string {
+  let result = html;
+  for (const slug of slugs) {
+    result = result.replace(
+      new RegExp(`<img\\b[^>]*\\bsrc="PLACEHOLDER:${slug}"[^>]*>`, "g"),
+      ""
+    );
+  }
+  return result;
+}

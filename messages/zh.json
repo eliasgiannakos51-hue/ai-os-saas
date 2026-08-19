@@ -64,7 +64,8 @@
     },
     "creditsUnlimited": "无限制",
     "whatIsThis": "这是什么？",
-    "examplesLabel": "试试："
+    "examplesLabel": "试试：",
+    "newMessagesBelow": "下方有新消息"
   },
   "sidebar": {
     "groups": {
@@ -1056,7 +1057,7 @@
       "previewIncompleteTitle": "预览不可用",
       "previewIncompleteBody": "生成的页面似乎不完整或被截断，因此无法安全显示。请尝试用更简短的描述重新生成，或再次编辑。",
       "imageLabel": "参考图片（{count}/{max}，可选）",
-      "imageHelp": "最多{max}张图片 — 徽标、产品照片或风格参考截图。JPG或PNG格式，每张最大5MB。仅用于启发配色/风格，不会嵌入生成的网站中。",
+      "imageHelp": "最多{max}张图片 — 你的标志、产品照片或风格参考。JPG或PNG，每张最大5MB。默认会嵌入网站；可在下方改为仅作风格参考。",
       "imageRemove": "移除图片",
       "imageInvalidType": "仅支持 JPG 或 PNG 图片。",
       "imageTooLarge": "图片太大——请选择小于 5MB 的文件。",
@@ -1094,7 +1095,15 @@
         "imageUses": {
           "in-site": "放到网站上",
           "style-only": "仅作风格参考"
-        }
+        },
+        "logoTitle": "标志",
+        "logoChoices": {
+          "uploaded": "在我的图片里",
+          "wordmark": "没有标志 — 用我的商户名称",
+          "auto": "由你决定"
+        },
+        "logoHint": "没有标志时，网站会以精心设计的文字标识展示你的商户名称 — 绝不会替你虚构一个标志。",
+        "logoNeedsUpload": "请先将标志作为图片上传"
       },
       "imageIntro": "你的标志、产品照片、店内照片——想放到页面上的，或想让它决定风格的。",
       "regenerateAlreadyUsed": "您已使用过此站点的免费重新生成。请用其他描述创建新站点。",
@@ -1252,7 +1261,6 @@
       "previewTitle": "我将创建的内容",
       "previewName": "名称",
       "previewSchedule": "运行时间",
-      "previewDelivery": "发送至",
       "previewCostPerRun": "每次运行费用",
       "previewNextRuns": "前三次运行",
       "previewTask": "查看具体任务",
@@ -1550,7 +1558,10 @@
       "copyCitation": "复制此来源",
       "copyText": "复制文本",
       "copyTextError": "无法读取该文件的文本。",
-      "copyTextEmpty": "我们没有从该文件中读出任何文本。"
+      "copyTextEmpty": "我们没有从该文件中读出任何文本。",
+      "uploadStorageMissing": "此部署尚未配置文件存储 — 缺少 'user-files' 存储桶。管理员需要运行修复 SQL（System Health → File storage）。",
+      "uploadStoragePolicy": "存储拒绝了上传 — 缺少存储桶的访问策略。管理员需要运行修复 SQL（System Health → File storage）。",
+      "tooLargeForTransfer": "托管平台在上传到达应用之前拒绝了它。请稍后再试。"
     },
     "deepResearch": {
       "title": "深度研究",
@@ -2206,7 +2217,8 @@
     "checking": "正在检查结果",
     "saving": "正在保存",
     "delivering": "正在发送给你",
-    "publishing": "正在发布网站"
+    "publishing": "正在发布网站",
+    "watchFailed": "目前无法显示进度 — 任务仍在后台继续。"
   },
   "problem": {
     "out_of_credits": {

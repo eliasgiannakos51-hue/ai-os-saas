@@ -168,6 +168,7 @@ export function DeliveryPicker({
             <button
               key={channel}
               type="button"
+              data-testid={`delivery-channel-${channel}`}
               onClick={() => select(channel)}
               aria-pressed={active}
               className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-xl border px-3 py-2 text-xs transition-colors duration-150 sm:min-h-[36px] ${

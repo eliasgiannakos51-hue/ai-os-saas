@@ -5,6 +5,7 @@ import { Palette } from "lucide-react";
 import {
   BACKGROUND_STYLES,
   isValidHexColor,
+  type LogoChoice,
   type ReferenceImageUse,
   type WebsiteBackgroundStyle,
   type WebsiteDesignChoices,
@@ -134,6 +135,39 @@ export function DesignControls({
             );
           })}
         </div>
+      </div>
+
+      {/* The LOGO question, asked BEFORE generation. The reported bug:
+          with no logo supplied, the model invented a brand mark that
+          looked like OUR product's logo. The user must be ASKED — and a
+          skipped answer means "text wordmark", never "invent one". */}
+      <div data-testid="design-logo-choice">
+        <span className="mb-1 block text-[11px] text-muted">{t("logoTitle")}</span>
+        <div className="flex flex-wrap gap-1.5">
+          {(["uploaded", "wordmark", "auto"] as const).map((choice) => {
+            // "It's in my images" is only real once an image is attached.
+            const unavailable = choice === "uploaded" && imageCount === 0;
+            const selected = value.logo === choice;
+            return (
+              <button
+                key={choice}
+                type="button"
+                aria-pressed={selected}
+                disabled={unavailable}
+                title={unavailable ? t("logoNeedsUpload") : undefined}
+                onClick={() => set("logo", choice as LogoChoice)}
+                className={`min-h-[44px] rounded-full border px-3 py-1 text-[11px] font-medium transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40 ${
+                  selected
+                    ? "border-orange-500/60 bg-orange-500/10 text-orange-300"
+                    : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
+                }`}
+              >
+                {t(`logoChoices.${choice}`)}
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-1 text-[11px] text-muted">{t("logoHint")}</p>
       </div>
 
       {/* What to do with the uploaded photos — only once there are some. */}

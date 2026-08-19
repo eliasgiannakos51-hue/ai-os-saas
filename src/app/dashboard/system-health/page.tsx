@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { isAdminEmail } from "@/lib/admin";
 import { logApiError } from "@/lib/log-error";
 import { ErrorList, type ProductionErrorRow } from "@/components/system-health/error-list";
+import { StorageDiagnostics } from "@/components/system-health/storage-diagnostics";
 import { formatNumber } from "@/lib/format-number";
 import { getLocale } from "next-intl/server";
 
@@ -97,6 +98,8 @@ export default async function SystemHealthPage() {
             <ErrorList rows={rows} />
           </>
         )}
+
+        <StorageDiagnostics />
       </div>
     </main>
   );

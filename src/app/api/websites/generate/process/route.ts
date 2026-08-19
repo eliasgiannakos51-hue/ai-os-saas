@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { generateWebsiteHtml, WEBSITE_MODEL, type ReferenceImage } from "@/lib/website-builder";
+import { pickVariation, variationDirective } from "@/lib/website-variation";
 import { MAX_REFERENCE_IMAGES, referenceImagePathBelongsToUser } from "@/lib/website-reference-image";
 import { downloadReferenceImage } from "@/lib/website-reference-image-server";
 import { FIRST_VERSION_NUMBER } from "@/lib/website-versioning";
@@ -326,13 +327,28 @@ export async function POST(request: Request) {
       void recordAiCallForDailySpend(
         estimateWebsiteGenerationCost({ descriptionLength: description.length, imageCount: referenceImages.length })
       );
+      // The per-site design draw. Seeded by who is generating, how many
+      // sites they already have, and the brief — so a regenerate of the
+      // same brief reproduces the same draw, while their NEXT site draws
+      // differently. This is what actually varies hero/grid/rhythm/type/
+      // motion between sites; the system prompt only ever ASKED for
+      // variety and stayed byte-identical per call (see
+      // lib/website-variation.ts for the reported bug).
+      const { count: priorSites } = await supabase
+        .from("user_websites")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+      const variation = variationDirective(
+        pickVariation([user.id, priorSites ?? 0, description])
+      );
       htmlContent = await generateWebsiteHtml(
         apiKey,
         description,
         referenceImages,
         onDelta,
         formEndpointUrl,
-        costs
+        costs,
+        variation
       );
       // Real-photo placeholder resolution (Unsplash if configured, else
       // picsum.photos) — see lib/website-image-resolver.ts. A no-op when

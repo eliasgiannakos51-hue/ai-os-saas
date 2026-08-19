@@ -1,7 +1,25 @@
-# The three journeys
+# The journeys, and the reported-bugs sweep
 
-Three end-to-end specs that run against a **real deployment** with **real
+End-to-end specs that run against a **real deployment** with **real
 Anthropic keys** and **spend real credits**. Nothing is mocked.
+
+Besides the three journeys below, `reported-bugs.e2e.ts` carries **one
+test per bug reported from real production testing** — the empty-state
+example button, a real UI file upload into real storage, the chat scroll
+contract, typing latency (measured), the agent build's visible steps +
+delivery channels + counter honesty, the logo question, and TTFB/LCP per
+route. Each failure message names the deployment-side remedy (which
+repair SQL, which env var). Run it against production with:
+
+```sh
+E2E_BASE_URL=https://ai-os-saas-five.vercel.app \
+E2E_ALLOW_PRODUCTION=1 \
+E2E_EMAIL=... E2E_PASSWORD=... \
+npm run test:e2e -- reported-bugs
+```
+
+It costs one agent build (~5 credits); everything else in it is reads,
+one tiny text-file upload (deleted afterwards), and typing.
 
 They exist because the rest of the suite cannot answer one question: *can
 a person actually do the thing?* 76 unit files read source code and prove

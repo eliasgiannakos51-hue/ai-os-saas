@@ -43,12 +43,21 @@ export const BACKGROUND_STYLES: WebsiteBackgroundStyle[] = [
 /** What to do with the images the user attached. */
 export type ReferenceImageUse = "in-site" | "style-only";
 
+/** The logo question, asked BEFORE generation (reported bug: the model
+ *  invented a mark that looked like OUR logo instead of asking).
+ *  "uploaded": the first attached image IS the logo. "wordmark": the user
+ *  has none — the header carries a styled text wordmark of the name.
+ *  "auto": the user skipped the question; the prompt's own LOGO rule
+ *  still forbids inventing one, so this also lands on a wordmark. */
+export type LogoChoice = "uploaded" | "wordmark" | "auto";
+
 export type WebsiteDesignChoices = {
   /** #rrggbb, or empty for "you choose". */
   primaryColor: string;
   secondaryColor: string;
   background: WebsiteBackgroundStyle;
   referenceImageUse: ReferenceImageUse;
+  logo: LogoChoice;
   /** How many images were actually attached — "own-photo" and "in-site"
    *  are meaningless without any, and a brief that demands photos the
    *  model does not have produces an apology instead of a page. */
@@ -60,6 +69,7 @@ export const DEFAULT_DESIGN_CHOICES: WebsiteDesignChoices = {
   secondaryColor: "",
   background: "auto",
   referenceImageUse: "in-site",
+  logo: "auto",
   imageCount: 0,
 };
 
@@ -131,6 +141,19 @@ export function buildDesignBrief(choices: WebsiteDesignChoices): string {
   // Only meaningful when something was actually attached.
   if (choices.imageCount > 0) {
     lines.push(IMAGE_USE_INSTRUCTIONS[choices.referenceImageUse]);
+  }
+
+  // The logo answer. "uploaded" without any image attached is the same
+  // demoted case as "own-photo" above: asking the model to use a file
+  // that does not exist produces an apology instead of a page.
+  if (choices.logo === "uploaded" && choices.imageCount > 0) {
+    lines.push(
+      "LOGO: the FIRST attached reference image is the business's actual logo. Use exactly that image in the header, at a sensible size. Do NOT draw, generate or substitute any other mark."
+    );
+  } else if (choices.logo === "wordmark" || (choices.logo === "uploaded" && choices.imageCount === 0)) {
+    lines.push(
+      "LOGO: the user has NO logo. The header shows the business name as a styled TEXT WORDMARK only. Do not draw, generate or fetch any logo mark, monogram or brand icon."
+    );
   }
 
   if (lines.length === 0) return "";

@@ -28,6 +28,23 @@
   --muted: #8a8a8a;
   --input-bg: rgba(0, 0, 0, 0.4);
   color-scheme: dark;
+
+  /* ACCENT, now theme-aware — see the note below [data-theme="light"].
+     These are today's Tailwind values, unchanged, so the dark theme
+     renders byte-identically to before this became a variable.
+     Space-separated channels, not hex: Tailwind needs
+     `rgb(var(--x) / <alpha-value>)` for `text-orange-400/80` and
+     `border-orange-500/40` to keep working, and there are 246 such
+     usages. A plain hex here would silently drop every one of them. */
+  --accent-text: 251 146 60;          /* orange-400 */
+  --accent-text-soft: 253 186 116;    /* orange-300 */
+  --accent-text-softer: 254 215 170;  /* orange-200 */
+  --accent-text-strong: 249 115 22;   /* orange-500 */
+  --accent-amber-text: 251 191 36;    /* amber-400 */
+  --accent-amber-text-soft: 252 211 77;   /* amber-300 */
+  --accent-amber-text-softer: 253 230 138; /* amber-200 */
+  --accent-border: 249 115 22;        /* orange-500 */
+  --accent-amber-border: 245 158 11;  /* amber-500 */
 }
 
 [data-theme="light"] {
@@ -39,6 +56,43 @@
   --muted: #71717a;
   --input-bg: #f4f4f5;
   color-scheme: light;
+
+  /* THE LIGHT THEME'S OWN ACCENT VALUES — the fix for "nothing is
+     legible on white".
+     
+     The accent was deliberately excluded from this variable system for
+     brand consistency, which meant colours picked to glow on #0a0a0a
+     were used unchanged on #ffffff. Measured, every one of them failed:
+     text-orange-400 came out at 2.26:1 against a 4.5:1 requirement, and
+     border-orange-500 at 2.80:1 against 3:1 (2.62:1 over the page
+     background) — the number in the report.
+     
+     ONLY TEXT AND BORDERS MOVE. `bg-orange-500` is NOT redefined,
+     because it is not broken: it is a filled button carrying
+     `text-black`, and black on orange-500 is 7.49:1 in every theme —
+     the contrast there is between the label and the fill, not the fill
+     and the page. Darkening it to "fix" the border would have dropped
+     that pairing to 4.06:1 and broken the primary button while
+     appearing to improve accessibility.
+     
+     The ramp also COMPRESSES here, and that is not laziness. On a dark
+     background a paler orange reads as more prominent; on white the
+     relationship inverts, and every orange pale enough to be a "soft"
+     accent is too pale to be legible at all. 200/300/400 therefore
+     converge on one accessible ink, and hierarchy in light mode is
+     carried by weight and size instead of by tint. */
+  --accent-text: 194 65 12;           /* orange-700 — 5.18:1 on #fff */
+  --accent-text-soft: 194 65 12;      /* orange-700 */
+  --accent-text-softer: 194 65 12;    /* orange-700 */
+  --accent-text-strong: 154 52 18;    /* orange-800 — 7.31:1 */
+  --accent-amber-text: 180 83 9;      /* amber-700 — 5.02:1 */
+  --accent-amber-text-soft: 180 83 9; /* amber-700 */
+  --accent-amber-text-softer: 180 83 9;   /* amber-700 */
+  --accent-border: 234 88 12;         /* orange-600 — 3.56:1 */
+  /* amber-600 was 3.19:1 against the white panel but only 2.98:1 against
+     the #f7f7f8 page background — and a card border is seen against the
+     page, not the panel. amber-700 clears both. */
+  --accent-amber-border: 180 83 9;    /* amber-700 — 5.02:1 / 4.69:1 */
 }
 
 /* Premium theme variants (settings/theme-settings.tsx) — same variable

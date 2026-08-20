@@ -22,20 +22,70 @@ const ACHIEVEMENT_TITLE_KEYS: Record<AchievementDisplay["kind"], string> = {
   fiftyEntries: "fiftyEntries.title",
 };
 
-// Server → client bridge: dashboard/layout.tsx runs
-// checkAndUnlockAchievements (lib/achievements.ts) on every navigation and
-// passes down only the keys unlocked BY THAT CALL — which is empty on
-// every render except the one where an achievement was just earned, so
-// this naturally fires once per achievement, never again. The `firedRef`
-// guard is just belt-and-suspenders against a duplicate render of the
-// same props (e.g. React dev-mode double-invoke), not the primary
-// dedup mechanism (that's the query in lib/achievements.ts).
-export function AchievementUnlockBridge({ unlockedKeys }: { unlockedKeys: string[] }) {
+/** How long a tab waits before reconciling again. A user who earns
+ *  something mid-session sees it within this window; a user clicking
+ *  around the dashboard does not pay for the scan on every page. */
+const RECHECK_AFTER_MS = 5 * 60 * 1000;
+const LAST_CHECK_KEY = "ionexa:achievements:lastCheck";
+
+/**
+ * Asks the server whether anything was just unlocked — AFTER the page is
+ * on screen.
+ *
+ * THIS USED TO BE A PROP. dashboard/layout.tsx awaited
+ * checkAndUnlockAchievements on every navigation and passed the keys down,
+ * which meant ~20 counted reads and two streak scans across 14 tables ran
+ * BEFORE any dashboard page could render — on every page load, for every
+ * account that had not unlocked everything. The toast it produced fired on
+ * almost none of those loads.
+ *
+ * So the call moved here, behind requestIdleCallback, and is rate-limited
+ * per tab. The user sees the same celebration; they no longer wait for the
+ * scan that usually finds nothing. `firedRef` still guards against a
+ * duplicate render of the same keys.
+ */
+export function AchievementUnlockBridge() {
   const t = useTranslations("achievements");
   const tKey = useTranslations();
   const { addToast } = useToast();
   const firedRef = useRef<string>("");
   const [celebrating, setCelebrating] = useState(false);
+  const [unlockedKeys, setUnlockedKeys] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const reconcile = async () => {
+      try {
+        const last = Number(window.sessionStorage.getItem(LAST_CHECK_KEY) ?? "0");
+        if (Date.now() - last < RECHECK_AFTER_MS) return;
+        window.sessionStorage.setItem(LAST_CHECK_KEY, String(Date.now()));
+        const response = await fetch("/api/achievements/check", { method: "POST" });
+        const data = await response.json();
+        if (cancelled || !data?.ok || !Array.isArray(data.unlocked) || data.unlocked.length === 0) return;
+        setUnlockedKeys(data.unlocked as string[]);
+      } catch {
+        // A failed reconciliation is not something to tell anyone about:
+        // nothing the user did failed, and the next one picks it up.
+      }
+    };
+
+    // Behind idle, so it never competes with hydration for the main
+    // thread on the load it rides along with.
+    const idle =
+      typeof window.requestIdleCallback === "function"
+        ? window.requestIdleCallback(() => void reconcile(), { timeout: 3000 })
+        : window.setTimeout(() => void reconcile(), 1200);
+
+    return () => {
+      cancelled = true;
+      if (typeof window.cancelIdleCallback === "function" && typeof idle === "number") {
+        window.cancelIdleCallback(idle);
+      } else {
+        window.clearTimeout(idle as number);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (unlockedKeys.length === 0) return;

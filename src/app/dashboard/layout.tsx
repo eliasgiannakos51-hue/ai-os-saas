@@ -11,14 +11,13 @@ import { CommandPaletteProvider } from "@/components/dashboard/command-palette-c
 import { CreditsProvider } from "@/components/credits/credits-context";
 import { TopNav } from "@/components/dashboard/top-nav";
 import { acceptPendingTeamInvite } from "@/lib/team/accept-pending-invite";
-import { getOrInitCredits, resolveEffectivePlan, getPurchasedPackCreditPriceEur } from "@/lib/billing/credits";
+import { getOrInitCredits, resolveEffectivePlan, packCreditPriceEurFromRow } from "@/lib/billing/credits";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { isAdminEmail } from "@/lib/admin";
 import { logApiError } from "@/lib/log-error";
 import { AmbientDots } from "@/components/ui/ambient-dots";
 import { DashboardBackground } from "@/components/dashboard/dashboard-background";
-import { checkAndUnlockAchievements } from "@/lib/achievements";
 import { AchievementUnlockBridge } from "@/components/achievements/achievement-unlock-bridge";
 import { PageTransition } from "@/components/page-transition";
 
@@ -55,25 +54,25 @@ export default async function DashboardLayout({
   // to a zero balance instead so the shell still renders; admins are
   // unaffected since CreditsProvider treats isAdmin as unlimited regardless
   // of the numeric balance.
-  let credits: { credits_remaining: number; credits_total: number };
+  //
+  // ONE READ, NOT TWO. The credit price shown in the header needs the same
+  // user_credits row as the balance — min_pack_credit_price_eur lives on
+  // it — and it used to be fetched by a second call, awaited inside the
+  // JSX below, which put it AFTER the balance in the chain rather than
+  // beside it. Every dashboard navigation paid for that round trip.
+  let credits: {
+    credits_remaining: number;
+    credits_total: number;
+    min_pack_credit_price_eur?: number | string | null;
+  };
   try {
     credits = await getOrInitCredits(user.id, plan);
   } catch (err) {
     logApiError("/dashboard (layout)", err, { stage: "get_or_init_credits", userId: user.id });
-    credits = { credits_remaining: 0, credits_total: 0 };
+    credits = { credits_remaining: 0, credits_total: 0, min_pack_credit_price_eur: null };
   }
+  const packCreditPriceEur = packCreditPriceEurFromRow(credits);
 
-  // Gamification — no cron/background worker in this app, so achievements
-  // are reconciled opportunistically on every dashboard navigation (see
-  // lib/achievements.ts; it fast-paths to one query once everything is
-  // unlocked). Best-effort: a failure here just means no toast fires this
-  // request, not a broken dashboard.
-  let newlyUnlockedAchievements: string[] = [];
-  try {
-    newlyUnlockedAchievements = await checkAndUnlockAchievements(supabase, user.id);
-  } catch (err) {
-    logApiError("/dashboard (layout)", err, { stage: "check_achievements", userId: user.id });
-  }
 
   return (
     <ToastProvider>
@@ -84,7 +83,7 @@ export default async function DashboardLayout({
             initialTotal={credits.credits_total}
             initialCreditPriceEur={effectiveCreditPriceEurForAccount(
               plan,
-              await getPurchasedPackCreditPriceEur(user.id),
+              packCreditPriceEur,
               resolvePricingConfig()
             )}
             initialPlanSlug={plan.slug}
@@ -130,7 +129,7 @@ export default async function DashboardLayout({
               </div>
             </div>
             <ToastContainer />
-            <AchievementUnlockBridge unlockedKeys={newlyUnlockedAchievements} />
+            <AchievementUnlockBridge />
             <CommandPalette />
           </CreditsProvider>
           {/* Service worker + add-to-home-screen prompt. Mounted here, not

@@ -97,10 +97,17 @@ export default async function MissionPage() {
   // head-count that comes back null while getUser() reported a user is a
   // session problem, not an empty account — and must NOT render as the
   // friendly empty state.
-  const { count: ownedCount, error: countError } = await supabase
-    .from("ai_missions")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", user.id);
+  // The ownership count and the energy check-in do not depend on each
+  // other, or on the missions above; only the favourites lookup does,
+  // because it is keyed by the mission ids.
+  const [{ count: ownedCount, error: countError }, energyCheckIn] = await Promise.all([
+    supabase.from("ai_missions").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+    // The latest energy check-in, so the detail panel can suggest which
+    // open step to pick up. Best-effort and nullable by design: no
+    // check-in means the suggestion panel renders nothing at all rather
+    // than guessing (see components/mission/energy-suggestion.tsx).
+    loadLatestEnergyCheckIn(supabase, user.id),
+  ]);
 
   const sessionDegraded = countError !== null || ownedCount === null;
 
@@ -115,12 +122,6 @@ export default async function MissionPage() {
   // One batched lookup for every mission on the page — the star's state
   // has to come from the server or each card would flash unstarred.
   const missionRows = (missions as Mission[] | null) ?? [];
-
-  // The latest energy check-in, so the detail panel can suggest which
-  // open step to pick up. Best-effort and nullable by design: no
-  // check-in means the suggestion panel renders nothing at all rather
-  // than guessing (see components/mission/energy-suggestion.tsx).
-  const energyCheckIn = await loadLatestEnergyCheckIn(supabase, user.id);
 
   const favoritedMissionIds = [
     ...(await loadFavoriteIds(supabase, user.id, "ai_missions", missionRows.map((m) => m.id))),

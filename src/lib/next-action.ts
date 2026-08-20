@@ -49,6 +49,36 @@ export async function computeNextAction(
     }
   }
 
+  // Priorities 2 and 3 are checked in order but do not DEPEND on each
+  // other, so the third one starts now and is only read if the second
+  // finds nothing. Waiting for the entity_link check to come back empty
+  // before beginning the activity scan added a whole round trip to Home
+  // for exactly the accounts that have the least to show — the new ones.
+  const activityThresholdIso = new Date(Date.now() - STALE_THRESHOLD_MS).toISOString();
+  const activityFlagsPromise = Promise.all(
+    LINKABLE_MODULES.map(async (config) => {
+      const { data, error } = await supabase
+        .from(config.table)
+        .select("id")
+        .gte("created_at", activityThresholdIso)
+        .limit(1);
+      if (error) {
+        logApiError("next-action:computeNextAction", error, {
+          stage: "activity_check",
+          table: config.table,
+        });
+        return false;
+      }
+      return (data?.length ?? 0) > 0;
+    })
+  ).catch((err) => {
+    // Nothing awaits this when priority 2 wins, so an unhandled rejection
+    // here would surface as a process-level warning rather than a logged
+    // failure. Caught at the source instead.
+    logApiError("next-action:computeNextAction", err, { stage: "activity_check_unhandled" });
+    return LINKABLE_MODULES.map(() => false);
+  });
+
   // 2. Most recent entity_link older than the staleness threshold.
   const staleThresholdIso = new Date(Date.now() - STALE_THRESHOLD_MS).toISOString();
   try {
@@ -97,25 +127,8 @@ export async function computeNextAction(
     logApiError("next-action:computeNextAction", err, { stage: "stale_links_unhandled" });
   }
 
-  // 3. No new record anywhere in the last 3 days.
-  const activityThresholdIso = new Date(Date.now() - STALE_THRESHOLD_MS).toISOString();
-  const activityFlags = await Promise.all(
-    LINKABLE_MODULES.map(async (config) => {
-      const { data, error } = await supabase
-        .from(config.table)
-        .select("id")
-        .gte("created_at", activityThresholdIso)
-        .limit(1);
-      if (error) {
-        logApiError("next-action:computeNextAction", error, {
-          stage: "activity_check",
-          table: config.table,
-        });
-        return false;
-      }
-      return (data?.length ?? 0) > 0;
-    })
-  );
+  // 3. No new record anywhere in the last 3 days — already in flight.
+  const activityFlags = await activityFlagsPromise;
 
   if (!activityFlags.some(Boolean)) {
     return { kind: "start_new", href: "/dashboard/create" };

@@ -70,87 +70,91 @@ export default async function SettingsPage() {
   // negative/zero, at which point isBeta below is false and `tier` (via
   // resolveEffectivePlanSlug) has already collapsed back to "free" — the
   // badge simply stops appearing rather than showing a stale "0 days left".
-  const betaDaysRemaining = !isAdmin && isBetaTester(user) ? await getBetaDaysRemaining(user.id) : null;
-  const isBeta = !isAdmin && betaDaysRemaining !== null && betaDaysRemaining > 0;
-  const tier = isAdmin ? "enterprise" : await resolveEffectivePlanSlug(user);
-  const seatCount = (user.user_metadata?.seat_count as number | undefined) ?? 0;
-  const hasSubscription = Boolean(user.user_metadata?.stripe_customer_id);
-  const hasCustomAiPersona = getPlan(tier)?.capabilities.customAiPersona ?? false;
-  const aiPersonaName = (user.user_metadata?.ai_persona_name as string | undefined) ?? "";
-
-  const unlockedAchievements = await loadUnlockedAchievements(supabase, user.id);
-  // Live from Stripe — cancel_at_period_end is not mirrored locally, so a
-  // cancellation made from Stripe's own portal shows here too.
-  const subscriptionState = await loadSubscriptionState(user);
-
-  // No row until the user actually toggles something (see the panel's
-  // upsert) — an empty object means "all defaults on", the same thing
-  // lib/email/email-gate.ts concludes server-side for a missing row.
-  const { data: emailPrefs } = await supabase
-    .from("user_email_preferences")
-    .select("*")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  // The balance is what the running "balance after" column is derived
-  // from, walking backwards through the charges below. Nothing stores a
-  // per-row balance, and reconstructing it is exact as long as it only
-  // walks rows that actually moved the balance.
-  const { data: creditsRow } = await supabase
-    .from("user_credits")
-    .select("credits_remaining, purchased_credits")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  const { data: transactions } = await supabase
-    .from("credit_transactions")
-    .select("id, amount, action_type, description, created_at")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(20);
-
-  // AI actions that cost this account NOTHING — an admin/beta bypass, or a
-  // free chat message. settle_reservation only writes a credit_transactions
-  // row when it actually charges, which is right for a ledger of balance
-  // movements and is exactly why this panel read "No credit activity yet"
-  // on an account whose ai_cost_log was full: every row was a zero charge.
+  // ------------------------------------------------------------------
+  // ONE WAVE. Settings reads eleven independent things, and it used to
+  // await them one line at a time — the beta window, then the plan, then
+  // the achievements, then Stripe, then email preferences, then the
+  // balance, then the ledger, then the free actions, then the chat-memory
+  // count, then the devices. Measured against a database with a 25ms round
+  // trip, that queue was the longest serial chain in the app: nine deep,
+  // and Settings had the worst time-to-first-byte of any route because of
+  // it. None of the eleven needs any of the others.
   //
-  // Only credits_charged = 0 is taken from here. Rows that DID charge
-  // already have a credit_transactions row above, and reading both would
-  // show every charge twice.
-  const { data: freeAiActions } = await supabase
-    .from("ai_cost_log")
-    .select("id, feature, created_at, metadata")
-    .eq("user_id", user.id)
-    .eq("credits_charged", 0)
-    .order("created_at", { ascending: false })
-    .limit(20);
-
-  const chatMemoryEnabled = user.user_metadata?.chat_memory_enabled !== false;
-  const { count: chatMemoryCount } = await supabase
-    .from("chat_memory")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", user.id);
-
-  const { data: knownDevices } = await supabase
-    .from("known_devices")
-    .select("id, user_agent, ip_address, last_seen")
-    .eq("user_id", user.id)
-    .order("last_seen", { ascending: false });
-
-  // AI Usage — credits spent lifetime (soft-capped at 5000 rows; a simple
-  // sum, not a running ledger balance, good enough for a usage summary)
-  // plus a per-module entry count across every module with a ModuleConfig
-  // (same 23-table union the AI Memory page searches — see
-  // dashboard/memory/page.tsx), computed in parallel.
+  // Only the bypass ledger below stays behind, because whether to read it
+  // at all depends on the beta window this wave resolves.
+  // ------------------------------------------------------------------
   const usageModules = [...CLASSIFIER_MODULES, ...BUILD_MODULES];
-  const [{ data: usedTransactions }, moduleUsage] = await Promise.all([
+  const [
+    betaDaysRemaining,
+    tier,
+    unlockedAchievements,
+    subscriptionState,
+    { data: emailPrefs },
+    { data: creditsRow },
+    { data: transactions },
+    { data: freeAiActions },
+    { count: chatMemoryCount },
+    { data: knownDevices },
+    { data: usedTransactions },
+    moduleUsage,
+  ] = await Promise.all([
+    !isAdmin && isBetaTester(user) ? getBetaDaysRemaining(user.id) : Promise.resolve(null),
+    isAdmin ? Promise.resolve("enterprise" as const) : resolveEffectivePlanSlug(user),
+    loadUnlockedAchievements(supabase, user.id),
+    // Live from Stripe — cancel_at_period_end is not mirrored locally, so a
+    // cancellation made from Stripe's own portal shows here too.
+    loadSubscriptionState(user),
+    // No row until the user actually toggles something (see the panel's
+    // upsert) — an empty object means "all defaults on", the same thing
+    // lib/email/email-gate.ts concludes server-side for a missing row.
+    supabase.from("user_email_preferences").select("*").eq("user_id", user.id).maybeSingle(),
+    // The balance is what the running "balance after" column is derived
+    // from, walking backwards through the charges below. Nothing stores a
+    // per-row balance, and reconstructing it is exact as long as it only
+    // walks rows that actually moved the balance.
+    supabase
+      .from("user_credits")
+      .select("credits_remaining, purchased_credits")
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("credit_transactions")
+      .select("id, amount, action_type, description, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(20),
+    // AI actions that cost this account NOTHING — an admin/beta bypass, or
+    // a free chat message. settle_reservation only writes a
+    // credit_transactions row when it actually charges, which is right for
+    // a ledger of balance movements and is exactly why this panel read "No
+    // credit activity yet" on an account whose ai_cost_log was full: every
+    // row was a zero charge. Only credits_charged = 0 is taken from here;
+    // rows that DID charge already have a credit_transactions row above,
+    // and reading both would show every charge twice.
+    supabase
+      .from("ai_cost_log")
+      .select("id, feature, created_at, metadata")
+      .eq("user_id", user.id)
+      .eq("credits_charged", 0)
+      .order("created_at", { ascending: false })
+      .limit(20),
+    supabase.from("chat_memory").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+    supabase
+      .from("known_devices")
+      .select("id, user_agent, ip_address, last_seen")
+      .eq("user_id", user.id)
+      .order("last_seen", { ascending: false }),
+    // AI Usage — credits spent lifetime (soft-capped at 5000 rows; a simple
+    // sum, not a running ledger balance, good enough for a usage summary)…
     supabase
       .from("credit_transactions")
       .select("amount")
       .eq("user_id", user.id)
       .lt("amount", 0)
       .limit(5000),
+    // …plus a per-module entry count across every module with a
+    // ModuleConfig (same 23-table union the AI Memory page searches — see
+    // dashboard/memory/page.tsx).
     Promise.all(
       usageModules.map(async (module) => {
         const { count } = await supabase
@@ -161,6 +165,13 @@ export default async function SettingsPage() {
     ),
   ]);
 
+  const isBeta = !isAdmin && betaDaysRemaining !== null && betaDaysRemaining > 0;
+  const seatCount = (user.user_metadata?.seat_count as number | undefined) ?? 0;
+  const hasSubscription = Boolean(user.user_metadata?.stripe_customer_id);
+  const hasCustomAiPersona = getPlan(tier)?.capabilities.customAiPersona ?? false;
+  const aiPersonaName = (user.user_metadata?.ai_persona_name as string | undefined) ?? "";
+
+  const chatMemoryEnabled = user.user_metadata?.chat_memory_enabled !== false;
   const totalCreditsUsed = (usedTransactions ?? []).reduce(
     (sum, tx) => sum + Math.abs(tx.amount),
     0

@@ -302,5 +302,81 @@ checkList(
   })
 );
 
+console.log("\n== 9. a translated citation is RESOLVED, not stripped as fabricated ==");
+// THE PRODUCTION REPORT this section pins: a Greek question gets a Greek
+// answer, the model writes "Σελίδα 3" where the header said "Page 3",
+// and the old exact-match verifier stripped every citation — a correct
+// answer rendered with no sources at all. Tolerant matching resolves the
+// citation to the (file, page) pair we actually sent and rewrites it in
+// canonical form; what cannot be resolved is still stripped.
+const ALLOWED = [
+  { fileId: "1", filename: "lesson.pdf", page: 3, label: "Page 3" },
+  { fileId: "1", filename: "lesson.pdf", page: 7, label: "Page 7" },
+  { fileId: "2", filename: "budget.xlsx", page: 2, label: "Costs 2024" },
+];
+{
+  const r = verifyCitations(
+    "Μαθαίνεις πράγματα [lesson.pdf, Σελίδα 3] και [lesson.pdf, σελ. 7].",
+    ALLOWED
+  );
+  check("Greek labels verify (the reported case)", r.verified.length === 2 && r.fabricated.length === 0);
+  check("and are rewritten canonically in the text", r.answer.includes("[lesson.pdf, Page 3]") && r.answer.includes("[lesson.pdf, Page 7]"));
+  check("the citation list carries the canonical label", r.verified.every((c) => /^Page \d$/.test(c.label)));
+}
+{
+  const r = verifyCitations("Siehe [lesson.pdf, Seite 3] und [lesson.pdf, S. 7].", ALLOWED);
+  check("German labels verify", r.verified.length === 2 && r.fabricated.length === 0);
+}
+{
+  const r = verifyCitations("See [lesson, Page 3].", ALLOWED);
+  check("a filename cited without its extension resolves", r.verified.length === 1 && r.verified[0].filename === "lesson.pdf");
+}
+{
+  const r = verifyCitations("See [lesson.pdf, Σελίδα 99].", ALLOWED);
+  check("a page we never sent is STILL stripped", r.verified.length === 0 && r.fabricated.length === 1 && !r.answer.includes("99"));
+}
+{
+  const r = verifyCitations("See [ghost.pdf, Page 3].", ALLOWED);
+  check("a file we never sent is STILL stripped", r.verified.length === 0 && r.fabricated.length === 1);
+}
+{
+  const r = verifyCitations("Sheet [budget.xlsx, Costs 2024] and translated [budget.xlsx, Σελίδα 2].", ALLOWED);
+  check("an exact sheet label verifies", r.verified.some((c) => c.label === "Costs 2024"));
+  check("a numeric label resolves to the sheet at that position", r.verified.length === 2);
+}
+{
+  // Two DIFFERENT files sharing a stem: "report" alone is ambiguous and
+  // must resolve to neither — a guessed file is a fabricated citation.
+  const ambiguous = [
+    { fileId: "a", filename: "report.pdf", page: 1, label: "Page 1" },
+    { fileId: "b", filename: "report.docx", page: 1, label: "Page 1" },
+  ];
+  const r = verifyCitations("See [report, Page 1].", ambiguous);
+  check("an ambiguous stem resolves to neither file", r.verified.length === 0 && r.fabricated.length === 1);
+  const exact = verifyCitations("See [report.pdf, Page 1].", ambiguous);
+  check("while the full filename still resolves", exact.verified.length === 1);
+}
+
+console.log("\n== 10. the prompt forbids translated citations and uncited answers ==");
+const citePrompt = askSystemPrompt({ language: "el", filenames: ["lesson.pdf"], truncated: false });
+check("citations must be copied character-for-character", /character-for-character/.test(citePrompt));
+check("and never translated", /never a translated label/.test(citePrompt));
+check("summaries are NOT exempt from citing", /including summaries and overviews/.test(citePrompt));
+check("an uncited answer is declared unacceptable", /An answer without citations is not acceptable/.test(citePrompt));
+const synthPrompt = synthesisSystemPrompt({ language: "el", parts: 2, truncated: false });
+check("the synthesis forbids translating them too", /never translated/.test(synthPrompt));
+
+console.log("\n== 11. a from-the-documents answer with zero citations says so ==");
+check("the handler reports the uncited case", /uncited: !notFound && checked\.verified\.length === 0/.test(handlerCode));
+check(
+  "the workspace renders the warning",
+  /answer\.fromDocuments && answer\.citations\.length === 0[\s\S]{0,400}?files-answer-uncited/.test(workspaceCode) ||
+    /files-answer-uncited/.test(workspaceCode) && /answer\.fromDocuments && answer\.citations\.length === 0/.test(workspaceCode)
+);
+checkList(
+  "every locale has the uncited warning",
+  LOCALES.filter((l) => typeof messages[l].dashboard.files.uncitedAnswer !== "string")
+);
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

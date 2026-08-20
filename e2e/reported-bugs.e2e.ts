@@ -255,6 +255,52 @@ test("bug 9 — the logo question is asked before generation", async ({ browser 
   await context.close();
 });
 
+test("bug 11 — a Greek file-ask answer keeps its page citations", async ({ browser }) => {
+  // THE REPORT: a correct answer with no sources at all. Root cause: the
+  // model translates "Page 3" into the reply language and the verifier
+  // stripped every translated citation as fabricated. This asks a REAL
+  // question (one small model call) in Greek and requires visible sources.
+  test.setTimeout(TIMEOUTS.upload + TIMEOUTS.extraction + 180_000);
+  const context = await signedInContext(browser);
+  const page = await context.newPage();
+  await page.goto("/dashboard/files", { waitUntil: "networkidle" });
+
+  const name = `e2e-citations-${Date.now()}.txt`;
+  await page.setInputFiles('input[type="file"]', {
+    name,
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "Company policy handbook.\nVacation: employees receive 24 days of paid leave per year.\nRemote work: allowed up to 3 days per week.\n"
+    ),
+  });
+  const row = page.locator(`[data-testid="files-list"] :text("${name}")`).first();
+  await expect(row, "upload never appeared — storage problem, not a citations problem").toBeVisible({
+    timeout: TIMEOUTS.upload,
+  });
+
+  // Tick the file (the checkbox in its card), ask in GREEK — the language
+  // that reproduced the bug — and wait for the answer.
+  const card = page.locator(`[data-testid="files-list"] li, [data-testid="files-list"] > div`, { hasText: name }).first();
+  await card.locator('input[type="checkbox"]').check({ timeout: 10_000 });
+  await page.locator('[data-testid="files-question"]').fill("Πόσες ημέρες άδειας δικαιούμαι τον χρόνο;");
+  await page.locator('[data-testid="files-ask-button"]').click();
+
+  const citation = page.locator('[data-testid="files-copy-citation"]').first();
+  const uncited = page.locator('[data-testid="files-answer-uncited"]');
+  await expect(
+    citation,
+    "THE REPORTED BUG: the answer rendered without a single verifiable citation. " +
+      "If [data-testid=files-answer-uncited] is visible instead, the model answered without citing " +
+      "and the deployment predates the tolerant verifier (src/lib/files/ask.ts verifyCitations)."
+  ).toBeVisible({ timeout: 150_000 });
+  await expect(uncited, "the uncited warning must not show when citations rendered").toHaveCount(0);
+
+  const files = await (await page.request.get("/api/files")).json().catch(() => null);
+  const mine = files?.files?.find?.((f: { filename: string }) => f.filename === name);
+  if (mine) await page.request.delete(`/api/files/${mine.id}`);
+  await context.close();
+});
+
 test("bug 10 — TTFB and LCP on the real deployment, measured", async ({ browser }) => {
   test.setTimeout(120_000);
   const context = await signedInContext(browser);

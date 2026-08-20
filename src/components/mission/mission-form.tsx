@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { AiJobProgress } from "@/components/ui/ai-job-progress";
-import type { AiJob } from "@/lib/jobs/use-ai-job";
+import { useSmoothedJob, type AiJob } from "@/lib/jobs/use-ai-job";
 import { useRouter } from "next/navigation";
 import { Loader2, Rocket } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -62,6 +62,10 @@ export function MissionForm({
   // "Planning…" through all three steps. AiJobProgress needs the row
   // (status, step, stepTotal), so the row is what is kept.
   const [job, setJob] = useState<AiJob | null>(null);
+  // Smoothed, for the same reason the agent panel is: three planning
+  // steps can pass between two polls, and a step nobody can see is a step
+  // nobody believes happened.
+  const displayJob = useSmoothedJob(job);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -169,7 +173,7 @@ export function MissionForm({
         </button>
         {/* The worker's real step, under the button. Three steps take long
             enough that one static word for all of them reads as a hang. */}
-        <AiJobProgress job={job} />
+        <AiJobProgress job={displayJob} />
       </div>
 
       {/* THREE REAL GOALS, pressable. "What do you want to achieve?" is a

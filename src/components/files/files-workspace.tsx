@@ -22,6 +22,7 @@ import { ListLayout } from "@/components/ui/list-layout";
 import { EmptyState } from "@/components/empty-state";
 import { CopyButton, writeToClipboard } from "@/components/ui/copy-button";
 import { stepLabelKey } from "@/lib/jobs/step-labels";
+import { useHeldStepLabel } from "@/lib/jobs/use-ai-job";
 import { useToast } from "@/components/toast/toast-context";
 import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -38,6 +39,7 @@ import {
   MAX_QUESTION_CHARS,
   extensionOf,
   formatBytes,
+  kindFromExtension,
 } from "@/lib/files/file-types";
 import { createClient as createBrowserSupabase } from "@/lib/supabase/client";
 
@@ -177,7 +179,12 @@ export function FilesWorkspace({
   // lib/jobs/step-labels.ts now, covering all five kinds, and this reads
   // from it like everything else does.
   const [askStep, setAskStep] = useState<string | null>(null);
-  const askStepKey = stepLabelKey("file_ask", askStep);
+  // Held for a beat each. The worker crosses "reading" -> "answering" ->
+  // "checking" faster than the poll interval on a small file, so without
+  // this the button showed one word for the whole wait — the "I don't see
+  // the steps" report, on this surface.
+  const heldAskStep = useHeldStepLabel(askStep);
+  const askStepKey = stepLabelKey("file_ask", heldAskStep);
   const askStepLabel = askStepKey ? tKey(askStepKey) : t("asking");
 
   const [newCollectionName, setNewCollectionName] = useState("");
@@ -314,6 +321,18 @@ export function FilesWorkspace({
     // have to travel before being told no.
     if (file.size > MAX_FILE_BYTES) {
       addToast(t("tooLarge", { name: file.name, max: formatBytes(MAX_FILE_BYTES) }), "error");
+      return;
+    }
+    // The file picker filters by extension, but drag-and-drop does not go
+    // through the picker — an .exe dropped on the page used to travel all
+    // the way to the server before being refused. The server still sniffs
+    // the CONTENT (this is a courtesy, not the enforcement).
+    if (!kindFromExtension(file.name)) {
+      addToast(t("unsupportedType", { name: file.name }), "error");
+      return;
+    }
+    if (file.size === 0) {
+      addToast(t("emptyFile", { name: file.name }), "error");
       return;
     }
     setUploading(file.name);
@@ -1063,6 +1082,20 @@ export function FilesWorkspace({
               </div>
             )}
 
+            {/* An answer from the documents with NO verifiable page
+                reference is weaker than it looks, and saying so is the
+                whole point of this feature. Derived here rather than from
+                a result field, so answers stored before the field existed
+                get the same honesty. */}
+            {answer.fromDocuments && answer.citations.length === 0 && (
+              <p
+                data-testid="files-answer-uncited"
+                className="flex items-start gap-1.5 text-[11px] font-medium leading-relaxed text-amber-400"
+              >
+                <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
+                {t("uncitedAnswer")}
+              </p>
+            )}
             {/* Reported rather than swallowed: if the model invented
                 references, the reader is entitled to know the answer was
                 less grounded than it looked. */}

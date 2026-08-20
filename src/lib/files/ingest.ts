@@ -270,7 +270,9 @@ export async function ingestFileBytes(opts: {
       ok: false,
       status: 500,
       stage: "insert_row",
-      error: "The file could not be saved.",
+      // WHAT happened, and WHAT the user can do. Nothing was stored (the
+      // object was just removed), so trying again is safe and honest.
+      error: "The file was read but its record could not be saved. Nothing was stored — please try the upload again.",
       detail: insertError?.message,
     };
   }

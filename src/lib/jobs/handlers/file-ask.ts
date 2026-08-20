@@ -198,6 +198,11 @@ export const fileAskHandler: JobHandler = async (ctx: JobContext): Promise<JobHa
       // Reported, not hidden: if the model invented references, the user is
       // entitled to know its answer was less grounded than it looked.
       removedCitations: checked.fabricated.length,
+      // A from-the-documents answer with NO verifiable page reference is a
+      // weaker answer than it looks, and the UI must say so instead of
+      // rendering it like any other. (The citation contract makes this
+      // rare; when it happens, honesty beats silence.)
+      uncited: !notFound && checked.verified.length === 0,
       skippedFiles: context.skipped,
       truncated: context.truncated,
       // How many passes the documents took. Reported because it is the

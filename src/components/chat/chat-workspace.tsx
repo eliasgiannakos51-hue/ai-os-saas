@@ -1,14 +1,7 @@
 "use client";
 
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ChangeEvent,
-  type FormEvent,
-  type KeyboardEvent,
-} from "react";
-import { ArrowUp, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen, Zap } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowDown, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { AiActivity } from "@/components/ui/ai-activity";
@@ -20,9 +13,11 @@ import { ConversationSidebar } from "@/components/chat/conversation-sidebar";
 import { InlineTitle } from "@/components/chat/inline-title";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { MessageContent } from "@/components/chat/message-content";
+import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-composer";
 import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useCredits } from "@/components/credits/credits-context";
+import { useStickToBottom } from "@/hooks/use-stick-to-bottom";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
 
 // Remembered across visits, per the focus-mode toggle below.
@@ -85,13 +80,17 @@ export function ChatWorkspace({
   const activeConversation = conversations.find((c) => c.id === activeId) ?? null;
   const [headerRenaming, setHeaderRenaming] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [input, setInput] = useState(() =>
+  // The text being typed lives INSIDE ChatComposer, not here: as state on
+  // this component, every keystroke re-rendered the whole workspace —
+  // thread, sidebar, header — measured at 128ms median per key with a
+  // 40-message thread (input-latency.prodtest.mjs). The mentor prefill is
+  // the composer's initial value; later writes go through composerRef.
+  const composerInitialText =
     initialMentorPreset === "trading"
       ? tTrading("mentorChatPrefill")
       : initialMentorPreset === "product"
         ? tProduct("mentorChatPrefill")
-        : ""
-  );
+        : "";
   const [mentorPreset] = useState<"trading" | "product" | null>(initialMentorPreset ?? null);
   // How many free messages are left this month. Seeded by the server on
   // page load and then updated straight from the stream's meta line, so
@@ -114,8 +113,7 @@ export function ChatWorkspace({
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isRateLimitNotice, setIsRateLimitNotice] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const composerRef = useRef<ChatComposerHandle>(null);
 
   // Focus mode: hides the conversation list so the thread gets the full
   // width, the way ChatGPT and Claude do it.
@@ -163,9 +161,21 @@ export function ChatWorkspace({
   // — only the request whose token still matches gets to apply its result.
   const requestTokenRef = useRef(0);
 
+  // Follows new content ONLY while the reader is at the bottom. The old
+  // effect scrolled unconditionally on every change of streamingText —
+  // every chunk, several times a second — which made scrolling up during
+  // a reply physically impossible (the reported bug).
+  const {
+    containerRef: threadRef,
+    onScroll: onThreadScroll,
+    follow,
+    jumpToBottom,
+    resetToBottom,
+    newBelow,
+  } = useStickToBottom();
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, streamingText]);
+    follow();
+  }, [messages, streamingText, follow]);
 
   async function loadMessages(conversationId: string) {
     const token = ++requestTokenRef.current;
@@ -199,6 +209,9 @@ export function ChatWorkspace({
     if (id === activeId) return;
     setActiveId(id);
     setError(null);
+    // A different conversation opens at its latest message, wherever the
+    // reader had scrolled in the previous one.
+    resetToBottom();
     loadMessages(id);
   }
 
@@ -208,7 +221,8 @@ export function ChatWorkspace({
     setMessages([]);
     setError(null);
     setLoadingMessages(false);
-    textareaRef.current?.focus();
+    resetToBottom();
+    composerRef.current?.focus();
   }
 
   // Through the route rather than straight at the table: the per-plan cap
@@ -331,22 +345,11 @@ export function ChatWorkspace({
     }
   }
 
-  function handleTextareaInput(e: ChangeEvent<HTMLTextAreaElement>) {
-    setInput(e.target.value);
-    const el = e.target;
-    el.style.height = "auto";
-    el.style.height = `${el.scrollHeight}px`;
-  }
-
-  async function handleSend(e: FormEvent) {
-    e.preventDefault();
-    const text = input.trim();
+  async function handleSend(text: string) {
     if (!text || sending) return;
 
     setError(null);
     setIsRateLimitNotice(false);
-    setInput("");
-    if (textareaRef.current) textareaRef.current.style.height = "auto";
 
     const sentFromId = activeId;
     setMessages((m) => [
@@ -489,13 +492,6 @@ export function ChatWorkspace({
     }
   }
 
-  function handleTextareaKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend(e as unknown as FormEvent);
-    }
-  }
-
   return (
     <div className="relative flex h-full overflow-hidden">
       {/* On md+ the sidebar is a real in-flow column. Below md it is an
@@ -608,7 +604,13 @@ export function ChatWorkspace({
           )}
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
+        <div className="relative min-h-0 flex-1">
+        <div
+          ref={threadRef}
+          onScroll={onThreadScroll}
+          data-testid="chat-thread"
+          className="h-full overflow-y-auto px-4 py-6 sm:px-6"
+        >
           {loadingMessages ? (
             <div className="flex h-full items-center justify-center text-sm text-muted">
               {tCommon("loading")}
@@ -628,7 +630,11 @@ export function ChatWorkspace({
                   product was "several LLMs in one, cheaper", which is
                   exactly the conclusion you reach from a blank box that
                   accepts anything. */}
-              <ExamplePrompts surface="chat" onPick={setInput} className="mt-5 w-full text-left" />
+              <ExamplePrompts
+                surface="chat"
+                onPick={(text) => composerRef.current?.setText(text)}
+                className="mt-5 w-full text-left"
+              />
             </div>
           ) : (
             <div className="mx-auto max-w-2xl space-y-4">
@@ -673,9 +679,22 @@ export function ChatWorkspace({
                 </div>
               )}
 
-              <div ref={bottomRef} />
             </div>
           )}
+        </div>
+        {/* Content arrived while the reader was up in the history. An
+            offer to return, never a forced trip. */}
+        {newBelow && (
+          <button
+            type="button"
+            onClick={jumpToBottom}
+            data-testid="chat-jump-to-latest"
+            className="absolute bottom-3 left-1/2 z-10 inline-flex min-h-[36px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-orange-500/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-orange-300 shadow-lg transition-colors duration-150 hover:border-orange-500 hover:bg-orange-500/10"
+          >
+            <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
+            {tCommon("newMessagesBelow")}
+          </button>
+        )}
         </div>
 
         <div className="border-t border-border p-4 sm:p-6">
@@ -707,35 +726,12 @@ export function ChatWorkspace({
                 {error}
               </p>
             )}
-            <form onSubmit={handleSend}>
-              <div className="relative">
-                <textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={handleTextareaInput}
-                  onKeyDown={handleTextareaKeyDown}
-                  placeholder={t("composerPlaceholder")}
-                  rows={1}
-                  // max-h-40 (160px) was the whole complaint: a long message scrolled
-                  // inside a box a quarter the height of the thread above it. A
-                  // viewport-relative cap grows with the screen instead of
-                  // pinning the composer to one small absolute size.
-                  className="focus-glow max-h-[45vh] min-h-[60px] w-full resize-none overflow-y-auto rounded-2xl border border-border bg-panel px-4 py-3.5 pr-14 text-sm text-foreground outline-none placeholder:text-muted focus:border-orange-500/60"
-                  autoFocus
-                />
-                <button
-                  type="submit"
-                  disabled={sending || !input.trim()}
-                  aria-label={t("send")}
-                  className="absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
-                >
-                  {sending ? (
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />
-                  ) : (
-                    <ArrowUp className="h-4 w-4" />
-                  )}
-                </button>
-              </div>
+            <ChatComposer
+              ref={composerRef}
+              sending={sending}
+              onSend={(text) => void handleSend(text)}
+              initialText={composerInitialText}
+            >
               {largeMessageCredits !== null && (
                 <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-orange-300/90">
                   <Zap className="h-3 w-3 text-orange-400/80" aria-hidden="true" />
@@ -750,7 +746,7 @@ export function ChatWorkspace({
                     : tFree("exhausted")}
                 </p>
               )}
-            </form>
+            </ChatComposer>
           </div>
         </div>
       </div>

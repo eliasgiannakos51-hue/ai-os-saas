@@ -64,7 +64,8 @@
     },
     "creditsUnlimited": "Ilimitados",
     "whatIsThis": "¿Qué es esto?",
-    "examplesLabel": "Prueba:"
+    "examplesLabel": "Prueba:",
+    "newMessagesBelow": "Mensaje nuevo abajo"
   },
   "sidebar": {
     "groups": {
@@ -1056,7 +1057,7 @@
       "previewIncompleteTitle": "Vista previa no disponible",
       "previewIncompleteBody": "Esta página generada parece incompleta o se cortó, por lo que no se puede mostrar de forma segura. Intenta generarla de nuevo con una descripción más corta, o edítala otra vez.",
       "imageLabel": "Imágenes de referencia ({count}/{max}, opcional)",
-      "imageHelp": "Hasta {max} imágenes: un logo, fotos de productos o una captura de estilo de referencia. JPG o PNG, hasta 5MB cada una. Solo se usan para inspirar los colores/estilo, no se incrustan en el sitio generado.",
+      "imageHelp": "Hasta {max} imágenes — tu logotipo, fotos de productos o una referencia de estilo. JPG o PNG, hasta 5MB cada una. Por defecto se incrustan en el sitio; abajo puedes usarlas solo como inspiración de estilo.",
       "imageRemove": "Eliminar imagen",
       "imageInvalidType": "Solo se admiten imágenes JPG o PNG.",
       "imageTooLarge": "La imagen es demasiado grande — elige un archivo de menos de 5MB.",
@@ -1094,7 +1095,15 @@
         "imageUses": {
           "in-site": "Ponlas en la web",
           "style-only": "Solo como referencia de estilo"
-        }
+        },
+        "logoTitle": "Logotipo",
+        "logoChoices": {
+          "uploaded": "Está en mis imágenes",
+          "wordmark": "Sin logo — usa el nombre de mi negocio",
+          "auto": "Decide tú"
+        },
+        "logoHint": "Sin logotipo, el sitio muestra el nombre de tu negocio como una marca de texto estilizada — nunca inventa un logotipo por ti.",
+        "logoNeedsUpload": "Sube primero el logotipo como imagen"
       },
       "imageIntro": "Tu logo, fotos de producto o del local: lo que quieras que aparezca o que marque el estilo.",
       "regenerateAlreadyUsed": "Ya has usado la regeneración gratuita de este sitio. Crea un sitio nuevo con otra descripción.",
@@ -1252,7 +1261,6 @@
       "previewTitle": "Esto es lo que voy a crear",
       "previewName": "Nombre",
       "previewSchedule": "Se ejecuta",
-      "previewDelivery": "Envía a",
       "previewCostPerRun": "Coste por ejecución",
       "previewNextRuns": "Las tres primeras ejecuciones",
       "previewTask": "Ver la tarea exacta",
@@ -1550,7 +1558,10 @@
       "copyCitation": "Copiar esta fuente",
       "copyText": "Copiar el texto",
       "copyTextError": "No se pudo leer el texto de ese archivo.",
-      "copyTextEmpty": "No hemos extraído texto de ese archivo."
+      "copyTextEmpty": "No hemos extraído texto de ese archivo.",
+      "uploadStorageMissing": "El almacenamiento de archivos no está configurado en esta instalación: falta el bucket 'user-files'. Un administrador debe ejecutar el SQL de reparación (System Health → File storage).",
+      "uploadStoragePolicy": "El almacenamiento rechazó la subida: faltan las políticas de acceso del bucket. Un administrador debe ejecutar el SQL de reparación (System Health → File storage).",
+      "tooLargeForTransfer": "La plataforma de alojamiento rechazó la subida antes de llegar a la aplicación. Inténtalo de nuevo en un momento."
     },
     "deepResearch": {
       "title": "Investigación profunda",
@@ -2206,7 +2217,8 @@
     "checking": "Comprobando el resultado",
     "saving": "Guardando",
     "delivering": "Enviándotelo",
-    "publishing": "Publicando el sitio"
+    "publishing": "Publicando el sitio",
+    "watchFailed": "El progreso no se puede mostrar ahora mismo; el trabajo continúa en segundo plano."
   },
   "problem": {
     "out_of_credits": {

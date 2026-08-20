@@ -107,33 +107,153 @@ const FILES = [
 // Flipped by the test so the same server can serve an empty account.
 let serveEmpty = false;
 
+// STORAGE IS REAL HERE, not a blanket 200. The old mock answered every
+// unknown path with `200 {}` — which is exactly how "upload works, 42/42
+// PASS" was reported while the real deployment could not store a file at
+// all. This mock keeps object bytes, honours "the bucket does not exist",
+// and REFUSES paths it does not implement, so a code path that talks to
+// storage is exercised for real or fails loudly.
+let bucketExists = true;
+const objects = new Map(); // path inside user-files -> Buffer
+let storagePosts = 0;
+const unexpected = [];
+
 const TABLE_ROWS = () => ({
   user_credits: [{ user_id: USER_ID, credits_remaining: 2500, credits_total: 3000 }],
   user_files: serveEmpty ? [] : FILES,
   file_collections: [],
   file_collection_items: [],
   favorites: [],
+  rate_limit_log: [],
 });
 
+// A browser upload arrives as multipart/form-data (storage-js wraps a File
+// in FormData); a server-side Buffer upload arrives raw. Real Supabase
+// storage unwraps the former — so this mock must too, or the bytes it
+// "stores" are the multipart envelope and every later read of the object
+// is garbage.
+function extractMultipartFile(buf, contentType) {
+  const m = /boundary=(?:"([^"]+)"|([^;]+))/i.exec(contentType);
+  if (!m) return buf;
+  const boundary = Buffer.from(`--${m[1] ?? m[2]}`);
+  let largest = null;
+  let pos = buf.indexOf(boundary);
+  while (pos !== -1) {
+    const next = buf.indexOf(boundary, pos + boundary.length);
+    if (next === -1) break;
+    const part = buf.subarray(pos + boundary.length, next);
+    const headerEnd = part.indexOf("\r\n\r\n");
+    if (headerEnd !== -1) {
+      const headers = part.subarray(0, headerEnd).toString();
+      const partBody = part.subarray(headerEnd + 4, part.length - 2); // strip trailing \r\n
+      if (/filename=/i.test(headers)) return partBody;
+      if (largest === null || partBody.length > largest.length) largest = partBody;
+    }
+    pos = next;
+  }
+  return largest ?? buf;
+}
+
 const supa = http.createServer((req, res) => {
-  let body = "";
-  req.on("data", (c) => (body += c));
+  const chunks = [];
+  req.on("data", (c) => chunks.push(c));
   req.on("end", () => {
+    const body = Buffer.concat(chunks);
     const url = new URL(req.url, "http://x");
-    const json = (code, data) => {
-      res.writeHead(code, { "Content-Type": "application/json" });
+    // The browser talks to this server cross-origin (the app runs on
+    // another port), so the direct-upload path needs real CORS answers.
+    const cors = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "*",
+      "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS",
+    };
+    const json = (code, data, extra = {}) => {
+      res.writeHead(code, { "Content-Type": "application/json", ...cors, ...extra });
       res.end(JSON.stringify(data));
     };
+    if (req.method === "OPTIONS") {
+      res.writeHead(204, cors);
+      return res.end();
+    }
+
     if (url.pathname === "/auth/v1/user") return json(200, user());
     if (url.pathname.startsWith("/auth/v1/")) return json(200, { user: user(), session: null });
+
+    // ---- storage: implemented, not faked --------------------------------
+    if (url.pathname.startsWith("/storage/v1/object/user-files/")) {
+      const objectPath = decodeURIComponent(url.pathname.slice("/storage/v1/object/user-files/".length));
+      if (!bucketExists) {
+        return json(400, { statusCode: "404", error: "not_found", message: "Bucket not found" });
+      }
+      if (req.method === "POST" || req.method === "PUT") {
+        // Only a BROWSER request carries an Origin header. Counting those
+        // alone is what lets the test tell "the direct path worked" apart
+        // from "it silently fell back to the server route".
+        if (req.headers.origin) storagePosts++;
+        const ctype = req.headers["content-type"] ?? "";
+        objects.set(
+          objectPath,
+          ctype.startsWith("multipart/form-data") ? extractMultipartFile(body, ctype) : body
+        );
+        return json(200, { Key: `user-files/${objectPath}` });
+      }
+      if (req.method === "GET") {
+        const stored = objects.get(objectPath);
+        if (!stored) return json(400, { statusCode: "404", error: "not_found", message: "Object not found" });
+        res.writeHead(200, { "Content-Type": "application/octet-stream", ...cors });
+        return res.end(stored);
+      }
+      if (req.method === "DELETE") {
+        objects.delete(objectPath);
+        return json(200, []);
+      }
+    }
+    if (url.pathname === "/storage/v1/object/user-files" && req.method === "DELETE") {
+      if (!bucketExists) {
+        return json(400, { statusCode: "404", error: "not_found", message: "Bucket not found" });
+      }
+      try {
+        for (const p of JSON.parse(body.toString()).prefixes ?? []) objects.delete(p);
+      } catch {
+        /* empty body */
+      }
+      return json(200, []);
+    }
+    if (url.pathname.startsWith("/storage/v1/")) {
+      // A storage call this mock does not implement must FAIL the test,
+      // never silently succeed — that silence was the harness bug.
+      unexpected.push(`${req.method} ${url.pathname}`);
+      return json(500, { message: `mock: unimplemented storage path ${url.pathname}` });
+    }
+
+    // ---- PostgREST ------------------------------------------------------
     if (url.pathname.startsWith("/rest/v1/")) {
       const table = url.pathname.slice("/rest/v1/".length);
+      if (req.method === "POST" && table === "user_files") {
+        let row;
+        try {
+          row = JSON.parse(body.toString());
+        } catch {
+          return json(400, { message: "bad body" });
+        }
+        row.id = `dddddddd-4444-4444-8444-${String(FILES.length + 1).padStart(12, "0")}`;
+        row.uploaded_at = new Date().toISOString();
+        FILES.unshift(row);
+        return json(201, row);
+      }
+      if (req.method === "POST" && table === "rate_limit_log") return json(201, []);
+      if (req.method === "POST" || req.method === "PATCH" || req.method === "DELETE") {
+        if (table !== "rate_limit_log") unexpected.push(`${req.method} ${url.pathname}`);
+        return json(500, { message: `mock: unimplemented write to ${table}` });
+      }
       const rows = TABLE_ROWS()[table] ?? [];
       const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
       if (single) return rows[0] ? json(200, rows[0]) : json(406, { message: "no rows" });
-      return json(200, rows);
+      return json(200, rows, { "Content-Range": `0-${Math.max(rows.length - 1, 0)}/${rows.length}` });
     }
-    json(200, {});
+
+    unexpected.push(`${req.method} ${url.pathname}`);
+    json(500, { message: `mock: unimplemented path ${url.pathname}` });
   });
 });
 
@@ -419,6 +539,69 @@ try {
       overflow.scrollWidth <= overflow.clientWidth + 1
     );
     await mc.close();
+
+    // -----------------------------------------------------------------
+    // The two sections below exist because of a production incident: the
+    // old mock answered every storage call with `200 {}`, so this file
+    // said 42/42 PASS while the real deployment could not store a file at
+    // all. An upload now has to TRAVEL — browser to bucket to row — and a
+    // missing bucket has to produce the message that names the fix.
+    console.log("\n== 9. an upload actually travels: browser → storage → row ==");
+    {
+      const { context: upc, page: up } = await openFiles(1280, 900);
+      const postsBefore = storagePosts;
+      await up.setInputFiles('input[type="file"]', "scripts/tests/fixtures/browser-print.pdf");
+      const toast = up.locator('[role="status"]', { hasText: "is ready" });
+      await toast.first().waitFor({ state: "visible", timeout: 30000 }).catch(() => {});
+      check("the success toast appears", (await toast.count()) > 0,
+        `toasts on page: ${await up.locator('[role="status"]').allInnerTexts().then((t) => t.join(" | ")).catch(() => "?")}`);
+      check(
+        `the bytes reached the bucket over the direct path (${storagePosts - postsBefore} POSTs)`,
+        storagePosts - postsBefore === 1
+      );
+      check("the object is still in the bucket (register kept it)", objects.size === 1);
+      check(
+        "the row was written and carries the extracted text",
+        FILES.some((f) => f.filename === "browser-print.pdf" && f.processing_status === "ready" && (f.char_count ?? 0) > 0),
+        JSON.stringify(FILES[0])
+      );
+      const card = up.locator('[data-testid="files-list"]', { hasText: "browser-print.pdf" });
+      check("and the new file's card is on the page", (await card.count()) === 1);
+      await up.screenshot({ path: path.join(outDir, "after-1280-uploaded.png"), fullPage: true });
+      await upc.close();
+    }
+
+    console.log("\n== 10. a missing bucket says so, by name ==");
+    {
+      bucketExists = false;
+      const { context: bc, page: bp } = await openFiles(1280, 900);
+      await bp.setInputFiles('input[type="file"]', "scripts/tests/fixtures/browser-print.pdf");
+      const errToast = bp.locator('[role="status"]', { hasText: "bucket" });
+      await errToast.first().waitFor({ state: "visible", timeout: 15000 }).catch(() => {});
+      const toastText = await bp
+        .locator('[role="status"]')
+        .allInnerTexts()
+        .then((t) => t.join(" | "))
+        .catch(() => "");
+      // Not "could not be uploaded" — the message must NAME the missing
+      // bucket and point at the repair, or the next production incident
+      // is undiagnosable again. Weakening this to the generic message is
+      // the mutation this check exists to catch.
+      check(
+        `the error names the missing bucket ("${toastText.slice(0, 90)}")`,
+        /'user-files' bucket is missing/.test(toastText)
+      );
+      check("and points at the repair", /storage repair SQL/i.test(toastText));
+      bucketExists = true;
+      await bc.close();
+    }
+
+    console.log("\n== 11. the mock saw nothing it does not implement ==");
+    check(
+      `no unexpected backend calls (${unexpected.length})`,
+      unexpected.length === 0,
+      unexpected.slice(0, 10).join("\n        ")
+    );
   }
 } catch (err) {
   failures.push("unhandled error");

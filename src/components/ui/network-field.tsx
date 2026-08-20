@@ -109,69 +109,89 @@ export function NetworkField({ opacity = 0.5 }: { opacity?: number }) {
     };
   }, []);
 
+  // PERFORMANCE IS THE DESIGN CONSTRAINT HERE, measured rather than
+  // assumed: the previous version animated `animate-pulse` on circles
+  // INSIDE the SVG and ran every node through an feGaussianBlur filter.
+  // Content changing inside a filtered SVG cannot stay a cached texture —
+  // the browser re-rasterised the full-viewport SVG on the main thread
+  // every frame, forever, behind every dashboard page. Typing latency
+  // measured 120ms median per keystroke with this layer on and 8ms with
+  // it hidden (input-latency.prodtest.mjs / the A/B in the fix commit).
+  //
+  // So: the LINES live in one static SVG (rasterised once; the parallax
+  // drift transforms the cached texture). The NODES are small absolutely-
+  // positioned elements whose glow is a radial-gradient — no filter — and
+  // whose pulse animates only `opacity`, so each is its own tiny
+  // compositor layer and the page underneath never repaints.
   return (
     <div
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
       style={{ opacity }}
     >
-      <svg
-        viewBox={`0 0 ${VIEW} ${VIEW}`}
-        preserveAspectRatio="xMidYMid slice"
-        className="h-full w-full"
+      <div
+        className="absolute inset-0"
         // The whole field drifts as one; individual nodes then add their
         // own depth on top. transform is compositor-friendly, so this
         // never triggers layout.
         style={{
           transform: `translate3d(${offset.x * -14}px, ${offset.y * -14}px, 0)`,
           transition: "transform 700ms cubic-bezier(0.22, 1, 0.36, 1)",
+          willChange: "transform",
         }}
       >
-        <defs>
-          <linearGradient id="netLine" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#f97316" />
-            <stop offset="100%" stopColor="#a855f7" />
-          </linearGradient>
-          <filter id="netGlow" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="3" result="b" />
-            <feMerge>
-              <feMergeNode in="b" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
+        <svg
+          viewBox={`0 0 ${VIEW} ${VIEW}`}
+          preserveAspectRatio="none"
+          className="h-full w-full"
+        >
+          <defs>
+            <linearGradient id="netLine" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#f97316" />
+              <stop offset="100%" stopColor="#a855f7" />
+            </linearGradient>
+          </defs>
 
-        {LINKS.map((l, i) => (
-          <line
-            key={i}
-            x1={l.x1}
-            y1={l.y1}
-            x2={l.x2}
-            y2={l.y2}
-            stroke="url(#netLine)"
-            strokeWidth={0.9}
-            opacity={l.opacity * 0.55}
-          />
-        ))}
+          {LINKS.map((l, i) => (
+            <line
+              key={i}
+              x1={l.x1}
+              y1={l.y1}
+              x2={l.x2}
+              y2={l.y2}
+              stroke="url(#netLine)"
+              strokeWidth={1.1}
+              vectorEffect="non-scaling-stroke"
+              opacity={l.opacity * 0.55}
+            />
+          ))}
+        </svg>
 
-        {NODES.map((n, i) => (
-          <circle
-            key={i}
-            cx={n.x}
-            cy={n.y}
-            r={n.r}
-            fill={i % 4 === 0 ? "#a855f7" : "#f97316"}
-            filter="url(#netGlow)"
-            className="animate-pulse"
-            style={{
-              animationDelay: n.delay,
-              animationDuration: n.dur,
-              transform: `translate3d(${offset.x * n.depth * -26}px, ${offset.y * n.depth * -26}px, 0)`,
-              transition: "transform 900ms cubic-bezier(0.22, 1, 0.36, 1)",
-            }}
-          />
-        ))}
-      </svg>
+        {NODES.map((n, i) => {
+          const color = i % 4 === 0 ? "168, 85, 247" : "249, 115, 22";
+          const sizePx = Math.round(8 + n.r * 5);
+          return (
+            <span
+              key={i}
+              className="absolute animate-pulse rounded-full"
+              style={{
+                left: `${(n.x / VIEW) * 100}%`,
+                top: `${(n.y / VIEW) * 100}%`,
+                width: `${sizePx}px`,
+                height: `${sizePx}px`,
+                // The glow is painted INTO the gradient instead of blurred
+                // at runtime — same halo, zero per-frame filter work.
+                background: `radial-gradient(circle, rgba(${color}, 0.95) 0%, rgba(${color}, 0.4) 38%, transparent 70%)`,
+                animationDelay: n.delay,
+                animationDuration: n.dur,
+                transform: `translate(-50%, -50%) translate3d(${offset.x * n.depth * -26}px, ${offset.y * n.depth * -26}px, 0)`,
+                transition: "transform 900ms cubic-bezier(0.22, 1, 0.36, 1)",
+                willChange: "opacity",
+              }}
+            />
+          );
+        })}
+      </div>
     </div>
   );
 }

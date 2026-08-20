@@ -409,6 +409,11 @@ A visitor who cannot find a phone number does not become a customer, and a site 
 - NEVER invent a phone number, an email address, a street address, a price, an opening time, a company registration number or a review. A plausible-looking fake is far worse than a visible gap: the owner ships it without noticing.
 - Do not wrap a placeholder in tel:/mailto: — leave it as plain bracketed text so it is obviously a blank to fill in.
 
+LOGO — NEVER INVENT ONE:
+- If a reference image is identified as the business's logo, use exactly that image in the header.
+- Otherwise the header shows the business NAME as a styled text wordmark (a distinctive font-family/weight/letter-spacing treatment of the name is encouraged) — and nothing else.
+- NEVER draw, generate or fetch a logo: no abstract marks, no monograms, no icon standing in for the brand, no CSS/SVG shapes posing as a logo, no PLACEHOLDER image with a logo-like query. A wrong logo is a wrong identity — worse than no logo, because the owner ships it thinking it is theirs.
+
 CONTACT / BOOKING FORMS (only when the description implies one — not every site needs a form):
 - Every input needs a real, meaningful name attribute (name="name", name="email", name="phone", name="message", etc.) — never an unnamed input.
 - Add one hidden honeypot input, exactly: <input type="text" name="_hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;" aria-hidden="true">
@@ -442,7 +447,7 @@ IMAGES:
   * One query per distinct photo. Two placeholders that would return the same image are one photo.
 - IMPORTANT — if the description names or lists SPECIFIC photos to include (e.g. "photos of the rooms", "a picture of the pool", "show our 3 menu items", "team photos"), each one of those, individually, MUST get its own PLACEHOLDER tag with a query specific to THAT exact item — never fewer PLACEHOLDER tags than the number of specific photos actually requested, and never a single generic PLACEHOLDER standing in for several distinct requested photos. Before moving on from the IMAGES step, mentally list every specific photo the description asked for and confirm each one has its own tag.
 - NEVER invent a fake external image URL yourself (no made-up unsplash.com/cdn/placeholder links) — the ONLY two ways to include a photo are a listed reference-image URL, or the PLACEHOLDER convention above.
-- Purely decorative graphics (icons, simple shapes, dividers) should still be built with CSS/inline SVG as before, not the PLACEHOLDER convention — that's reserved for actual photos.`;
+- Purely decorative graphics (icons, simple shapes, dividers) should still be built with CSS/inline SVG as before, not the PLACEHOLDER convention — that's reserved for actual photos. This licence does NOT extend to brand marks: see LOGO — NEVER INVENT ONE.`;
 
 // MANDATORY RESEARCH — the section this whole feature's credibility rests
 // on, and the one that was getting ignored.
@@ -536,7 +541,7 @@ The only things the brief cannot override are: the output format (one complete H
 
 const PLACEHOLDER_DATA_SECTION = `
 DO NOT INVENT CRITICAL FACTS:
-- Never invent specific real-world facts that were not given and matter (exact prices, addresses, phone numbers, opening hours, specific named products/services) — a request needing such facts should already have been asked about before generation ever reaches you.
+- Never invent specific real-world facts that were not given and matter (exact prices, addresses, phone numbers, opening hours, specific named products/services) — a request needing such facts should already have been asked about before generation ever reaches you. A LOGO is a critical fact too: see LOGO — NEVER INVENT ONE.
 - The ONE exception: if the description explicitly says the user was asked and answered with something like "use whatever"/"I don't care"/"make it up" (look for this in any "Additional details: Q/A" section appended to the description), you may invent plausible placeholder facts — but you MUST mark them: wrap each invented fact in an HTML comment right before it, e.g. <!-- PLACEHOLDER: replace with your real price -->, AND add one small, visible banner just under the header reading "Sample content — edit before publishing" (subtle styling, not alarming). Only include this banner when placeholder data is actually present in the page.`;
 
 const SYSTEM_PROMPT = `You generate complete, production-ready single-file websites from a plain-text description.
@@ -809,17 +814,26 @@ export async function generateWebsiteHtml(
   referenceImages?: ReferenceImage[],
   onDelta?: (accumulatedText: string) => void,
   formEndpointUrl?: string,
-  costs?: CostAccumulator
+  costs?: CostAccumulator,
+  // The per-site design draw (lib/website-variation.ts), already rendered
+  // to text. In the USER message on purpose: the cached system prompt
+  // must stay byte-identical, and the draw differs per site — that
+  // difference IS the feature.
+  variationText?: string
 ): Promise<string> {
   const anthropic = new Anthropic({ apiKey });
   const images = referenceImages?.slice(0, MAX_REFERENCE_IMAGES) ?? [];
 
-  // Reference-image metadata FIRST, the user's brief LAST — see
-  // buildUserBriefBlock. The reverse order left a list of storage URLs as
-  // the final thing in context before the model answered.
-  const userText = buildReferenceImageUrlList(images).trim()
-    ? `${buildReferenceImageUrlList(images).trim()}\n\n${buildUserBriefBlock(description)}`
-    : buildUserBriefBlock(description);
+  // Reference-image metadata FIRST, then the variation draw, the user's
+  // brief LAST — see buildUserBriefBlock. The brief stays the final thing
+  // in context, so the person's own words still outrank the draw.
+  const userText = [
+    buildReferenceImageUrlList(images).trim(),
+    variationText?.trim() ?? "",
+    buildUserBriefBlock(description),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
   const content: Anthropic.MessageParam["content"] =
     images.length > 0
       ? [

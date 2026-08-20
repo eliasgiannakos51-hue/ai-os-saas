@@ -4,6 +4,8 @@ import {
   picsumFallbackUrl,
   applyResolvedImageUrls,
   broadenImageQuery,
+  isLogoLikeQuery,
+  stripPlaceholderImageTags,
 } from "@/lib/website-image-placeholders";
 import { searchUnsplashPhoto, isUnsplashConfigured } from "@/lib/unsplash";
 import { createUnsplashBudget, describeUnsplashHalt } from "@/lib/unsplash-budget";
@@ -19,7 +21,24 @@ import { logApiError } from "@/lib/log-error";
 // fake/broken link). A no-op (returns the input unchanged) when the HTML
 // contains no placeholders at all, which is the common case.
 export async function resolveWebsiteImagePlaceholders(html: string): Promise<string> {
-  const placeholders = findImagePlaceholders(html);
+  const all = findImagePlaceholders(html);
+  if (all.length === 0) return html;
+
+  // A placeholder asking for a LOGO never resolves to a stock photo — a
+  // random mark presented as the business's identity is the reported bug.
+  // The prompt already forbids emitting these; when one slips through,
+  // the tag is removed entirely (the header still carries the text
+  // wordmark the prompt requires).
+  const logoLike = all.filter((p) => isLogoLikeQuery(p.query));
+  const placeholders = all.filter((p) => !isLogoLikeQuery(p.query));
+  if (logoLike.length > 0) {
+    html = stripPlaceholderImageTags(html, logoLike.map((p) => p.slug));
+    logApiError(
+      "website-image-resolver",
+      new Error(`stripped ${logoLike.length} logo-like placeholder(s) the prompt forbids`),
+      { queries: logoLike.map((p) => p.query).join(" | ").slice(0, 200) }
+    );
+  }
   if (placeholders.length === 0) return html;
 
   // ONE budget for the whole document, not one per photo.

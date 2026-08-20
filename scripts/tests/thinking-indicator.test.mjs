@@ -171,7 +171,13 @@ check("edges declare pathLength so the maths survives a moved node", /pathLength
 check("the 0.37s stagger matches NetworkField", /animation-delay: 0\.37s/.test(cssBlock));
 const field = readFileSync("src/components/ui/network-field.tsx", "utf8");
 check("and NetworkField really uses 0.37", /i \* 0\.37/.test(field));
-check("and really makes every fourth node purple", /i % 4 === 0 \? "#a855f7"/.test(field));
+// The nodes became gradient-filled elements when the filter-free rewrite
+// landed (the colour is now an "r, g, b" component string) — the property
+// under test is unchanged: every fourth node draws in the purple.
+check(
+  "and really makes every fourth node purple",
+  /i % 4 === 0 \? ("#a855f7"|"168, 85, 247")/.test(field)
+);
 
 console.log("\n== 5. no spinner, no library, no layout thrash ==");
 check("nothing rotates", !/rotate|spin/i.test(cssBlock));

@@ -21,12 +21,26 @@ import type { AiJob } from "@/lib/jobs/use-ai-job";
  */
 export function AiJobProgress({
   job,
+  watchLost = false,
   className = "",
 }: {
   job: AiJob | null;
+  /** From useAiJob: the polls cannot SEE the job at all. On the broken
+   *  deployment that was a missing ai_jobs RLS policy — builds succeeded
+   *  while this component rendered null, forever. Saying so is the
+   *  difference between a diagnosable failure and a silent one. */
+  watchLost?: boolean;
   className?: string;
 }) {
   const t = useTranslations();
+
+  if (watchLost && (!job || job.status === "queued" || job.status === "running")) {
+    return (
+      <span className={`text-[11px] text-amber-400 ${className}`} data-testid="ai-progress-watch-lost">
+        {t("aiSteps.watchFailed")}
+      </span>
+    );
+  }
 
   if (!job || (job.status !== "queued" && job.status !== "running")) return null;
 
@@ -38,7 +52,19 @@ export function AiJobProgress({
 
   return (
     <span className={`inline-flex flex-wrap items-center gap-x-2 gap-y-1 ${className}`}>
-      <ThinkingIndicator label={label} />
+      <ThinkingIndicator />
+      {/* THE SENTENCE, VISIBLE. This component used to hand `label` to
+          ThinkingIndicator, which renders it as aria-label ONLY — for
+          screen readers, by design. Every sighted user therefore saw the
+          little constellation and nothing else, on every surface that
+          uses this component: the exact "I don't see the steps" report.
+          The step label is the point of this component; it renders as
+          text, and the drawing decorates it (so it carries no aria-label
+          of its own — announcing the same sentence twice is worse than
+          once). aria-live so a screen reader hears the step CHANGE too. */}
+      <span className="text-xs text-muted" aria-live="polite" data-testid="ai-progress-step">
+        {label}
+      </span>
       {/* The counter is the honest half of the pair: "2/4" says how much
           is left in a way a sentence cannot, and it comes from the same
           row, so it cannot run ahead of the label. Hidden until the first

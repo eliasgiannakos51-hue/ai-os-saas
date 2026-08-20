@@ -13,6 +13,14 @@ export type FileKind = "pdf" | "docx" | "xlsx" | "txt" | "csv" | "md";
 
 export const FILE_KINDS: FileKind[] = ["pdf", "docx", "xlsx", "txt", "csv", "md"];
 
+/** The PRIVATE bucket. Named once so no route can typo its way into a
+ *  different, possibly public, one. Lives in this client-safe file (and is
+ *  re-exported by the server-only store.ts) because the browser now writes
+ *  to the bucket directly: routing 20MB through a serverless function
+ *  never worked — the host refuses request bodies over ~4.5MB before the
+ *  route runs — so the byte transfer has to happen client → storage. */
+export const FILE_BUCKET = "user-files";
+
 /** 20MB, as specified. Enforced before a single byte is written. */
 export const MAX_FILE_BYTES = 20 * 1024 * 1024;
 

@@ -49,18 +49,36 @@ const NUDGE_AFTER_POLLS = 2;
 export function useAiJob(jobId: string | null): {
   job: AiJob | null;
   isRunning: boolean;
+  /** True when polls keep failing to SEE the job at all. The work may be
+   *  fine — this is "progress cannot be shown", which the UI must say
+   *  rather than showing nothing. */
+  watchLost: boolean;
   refresh: () => Promise<void>;
 } {
   const [job, setJob] = useState<AiJob | null>(null);
   const queuedPolls = useRef(0);
   const nudged = useRef(false);
+  // Consecutive polls that could not see the job AT ALL (404, 500). One
+  // or two is a race with the insert; a steady stream means the row is
+  // invisible to this user — on the broken deployment that was a missing
+  // RLS policy, and the UI showed NOTHING for a build that succeeded.
+  // watchLost turns that silence into a sentence.
+  const missedPolls = useRef(0);
+  const [watchLost, setWatchLost] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!jobId) return;
     try {
       const response = await fetch(`/api/jobs/${jobId}`);
       const data = await response.json();
-      if (data.ok) setJob(data.job as AiJob);
+      if (data.ok) {
+        setJob(data.job as AiJob);
+        missedPolls.current = 0;
+        setWatchLost(false);
+      } else {
+        missedPolls.current += 1;
+        if (missedPolls.current >= 4) setWatchLost(true);
+      }
     } catch {
       // A dropped poll is not a dead job. Leave the last known state and
       // let the next tick try again — clearing it here would make a
@@ -71,6 +89,8 @@ export function useAiJob(jobId: string | null): {
   useEffect(() => {
     queuedPolls.current = 0;
     nudged.current = false;
+    missedPolls.current = 0;
+    setWatchLost(false);
     setJob(null);
     if (!jobId) return;
 
@@ -113,6 +133,7 @@ export function useAiJob(jobId: string | null): {
   return {
     job,
     isRunning: Boolean(job && (job.status === "queued" || job.status === "running")),
+    watchLost,
     refresh,
   };
 }

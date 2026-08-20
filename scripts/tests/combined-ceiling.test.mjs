@@ -486,8 +486,11 @@ const ENFORCED_ROWS = {
   freeChatMessages: { accessor: "freeChatAllowance(", enforcedIn: "src/lib/billing/free-chat-usage.ts" },
   aiAgents: { accessor: "maxAgentsForPlan(", enforcedIn: "src/app/api/agents/route.ts" },
   deepResearch: { accessor: "maxResearchRunsForPlan(", enforcedIn: "src/app/api/research/route.ts" },
-  files: { accessor: "maxFilesForPlan(", enforcedIn: "src/app/api/files/upload/route.ts" },
-  storage: { accessor: "maxStorageBytesForPlan(", enforcedIn: "src/app/api/files/upload/route.ts" },
+  // The caps moved into the shared ingest when uploads gained a second
+  // path (browser → storage → /api/files/register): ONE implementation,
+  // called by both routes, instead of a copy per route that can drift.
+  files: { accessor: "maxFilesForPlan(", enforcedIn: "src/lib/files/ingest.ts" },
+  storage: { accessor: "maxStorageBytesForPlan(", enforcedIn: "src/lib/files/ingest.ts" },
   integrations: {
     accessor: "maxIntegrationsForPlan(",
     enforcedIn: "src/app/api/integrations/[provider]/connect/route.ts",

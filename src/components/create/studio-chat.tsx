@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import { useStickToBottom } from "@/hooks/use-stick-to-bottom";
 import { useTranslations } from "next-intl";
 import { MessageContent } from "@/components/chat/message-content";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
@@ -34,11 +35,14 @@ export function StudioChat({ context }: { context: string }) {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const conversationIdRef = useRef<string | null>(null);
-  const bottomRef = useRef<HTMLDivElement>(null);
 
+  // Follows new content only while the reader is at the bottom — the
+  // unconditional scrollIntoView here had the same "cannot scroll up
+  // during a reply" failure as the Chat page. See use-stick-to-bottom.ts.
+  const { containerRef, onScroll, follow, jumpToBottom, newBelow } = useStickToBottom();
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, streaming]);
+    follow();
+  }, [messages, streaming, follow]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -115,9 +119,16 @@ export function StudioChat({ context }: { context: string }) {
     }
   }
 
+  const tCommon = useTranslations("common");
+
   return (
     <div className="flex flex-col gap-3">
-      <div className="max-h-[420px] min-h-[120px] space-y-3 overflow-y-auto">
+      <div className="relative">
+      <div
+        ref={containerRef}
+        onScroll={onScroll}
+        className="max-h-[420px] min-h-[120px] space-y-3 overflow-y-auto"
+      >
         {messages.length === 0 && !streaming ? (
           <p className="text-sm text-muted">{t("chatEmpty")}</p>
         ) : (
@@ -141,7 +152,17 @@ export function StudioChat({ context }: { context: string }) {
           </div>
         )}
         {sending && !streaming && <ThinkingIndicator label={t("chatThinking")} />}
-        <div ref={bottomRef} />
+      </div>
+      {newBelow && (
+        <button
+          type="button"
+          onClick={jumpToBottom}
+          className="absolute bottom-2 left-1/2 z-10 inline-flex min-h-[36px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-orange-500/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-orange-300 shadow-lg transition-colors duration-150 hover:border-orange-500 hover:bg-orange-500/10"
+        >
+          <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
+          {tCommon("newMessagesBelow")}
+        </button>
+      )}
       </div>
 
       {error && (

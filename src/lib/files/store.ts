@@ -3,9 +3,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { logApiError } from "@/lib/log-error";
 import type { FileKind } from "@/lib/files/file-types";
 
-/** The PRIVATE bucket. Named once so no route can typo its way into a
- *  different, possibly public, one. */
-export const FILE_BUCKET = "user-files";
+// The bucket name moved to file-types.ts (client-safe) when the browser
+// began uploading to storage directly; re-exported so the many server-side
+// imports keep working unchanged.
+export { FILE_BUCKET } from "@/lib/files/file-types";
 
 /** How long a download link lives. Short on purpose: the URL is a bearer
  *  token for the file, it appears in browser history, and it is the kind

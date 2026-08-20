@@ -64,7 +64,8 @@
     },
     "creditsUnlimited": "Unbegrenzt",
     "whatIsThis": "Was ist das?",
-    "examplesLabel": "Probier:"
+    "examplesLabel": "Probier:",
+    "newMessagesBelow": "Neue Nachricht unten"
   },
   "sidebar": {
     "groups": {
@@ -1056,7 +1057,7 @@
       "previewIncompleteTitle": "Vorschau nicht verfügbar",
       "previewIncompleteBody": "Diese generierte Seite wirkt unvollständig oder wurde abgeschnitten und kann daher nicht sicher angezeigt werden. Versuche es mit einer kürzeren Beschreibung erneut oder bearbeite sie noch einmal.",
       "imageLabel": "Referenzbilder ({count}/{max}, optional)",
-      "imageHelp": "Bis zu {max} Bilder — Logo, Produktfotos oder ein Referenz-Screenshot. JPG oder PNG, je bis zu 5MB. Dient nur als Inspiration für Farben/Stil und wird nicht in die generierte Seite eingebettet.",
+      "imageHelp": "Bis zu {max} Bilder — dein Logo, Produktfotos oder eine Stilreferenz. JPG oder PNG, je bis 5MB. Standardmäßig werden sie in die Website eingebettet; unten kannst du sie auf reine Stil-Inspiration umstellen.",
       "imageRemove": "Bild entfernen",
       "imageInvalidType": "Nur JPG- oder PNG-Bilder werden unterstützt.",
       "imageTooLarge": "Bild ist zu groß — bitte wähle eine Datei unter 5MB.",
@@ -1094,7 +1095,15 @@
         "imageUses": {
           "in-site": "Auf die Seite setzen",
           "style-only": "Nur als Stilvorlage"
-        }
+        },
+        "logoTitle": "Logo",
+        "logoChoices": {
+          "uploaded": "Ist bei meinen Bildern",
+          "wordmark": "Kein Logo — nutze meinen Firmennamen",
+          "auto": "Entscheide du"
+        },
+        "logoHint": "Ohne Logo zeigt die Website deinen Firmennamen als gestaltete Wortmarke — sie erfindet nie ein Logo für dich.",
+        "logoNeedsUpload": "Lade das Logo zuerst als Bild hoch"
       },
       "imageIntro": "Ihr Logo, Produktfotos, Bilder vom Laden — alles, was auf die Seite soll oder den Stil vorgeben darf.",
       "regenerateAlreadyUsed": "Sie haben die kostenlose Neuerstellung für diese Website bereits genutzt. Erstellen Sie eine neue Website mit einer anderen Beschreibung.",
@@ -1252,7 +1261,6 @@
       "previewTitle": "Das werde ich bauen",
       "previewName": "Name",
       "previewSchedule": "Läuft",
-      "previewDelivery": "Sendet an",
       "previewCostPerRun": "Kosten pro Lauf",
       "previewNextRuns": "Die ersten drei Läufe",
       "previewTask": "Genaue Aufgabe ansehen",
@@ -1550,7 +1558,10 @@
       "copyCitation": "Diese Quelle kopieren",
       "copyText": "Den Text kopieren",
       "copyTextError": "Der Text dieser Datei konnte nicht gelesen werden.",
-      "copyTextEmpty": "Aus dieser Datei haben wir keinen Text gelesen."
+      "copyTextEmpty": "Aus dieser Datei haben wir keinen Text gelesen.",
+      "uploadStorageMissing": "Der Dateispeicher ist auf dieser Installation nicht eingerichtet — der Bucket 'user-files' fehlt. Ein Administrator muss das Reparatur-SQL ausführen (System Health → File storage).",
+      "uploadStoragePolicy": "Der Dateispeicher hat den Upload abgelehnt — die Zugriffsrichtlinien des Buckets fehlen. Ein Administrator muss das Reparatur-SQL ausführen (System Health → File storage).",
+      "tooLargeForTransfer": "Die Hosting-Plattform hat den Upload abgelehnt, bevor er die App erreichte. Bitte gleich noch einmal versuchen."
     },
     "deepResearch": {
       "title": "Tiefenrecherche",
@@ -2206,7 +2217,8 @@
     "checking": "Ich prüfe das Ergebnis",
     "saving": "Ich speichere",
     "delivering": "Ich schicke es dir",
-    "publishing": "Ich stelle die Website online"
+    "publishing": "Ich stelle die Website online",
+    "watchFailed": "Der Fortschritt kann gerade nicht angezeigt werden — die Arbeit läuft im Hintergrund weiter."
   },
   "problem": {
     "out_of_credits": {

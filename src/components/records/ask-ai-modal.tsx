@@ -8,7 +8,7 @@ import {
   type FormEvent,
   type KeyboardEvent,
 } from "react";
-import { ArrowUp, Sparkles, X } from "lucide-react";
+import { ArrowDown, ArrowUp, Sparkles, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { AiActivity } from "@/components/ui/ai-activity";
@@ -17,6 +17,7 @@ import { readNdjsonStream } from "@/lib/ndjson-stream";
 import { MessageContent } from "@/components/chat/message-content";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { useCredits } from "@/components/credits/credits-context";
+import { useStickToBottom } from "@/hooks/use-stick-to-bottom";
 
 type Turn = { id: number; role: "user" | "assistant"; content: string };
 
@@ -56,12 +57,15 @@ export function AskAiModal({
   const [streamingText, setStreamingText] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isRateLimitNotice, setIsRateLimitNotice] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Follows new content only while the reader is at the bottom — the
+  // unconditional scrollIntoView here had the same "cannot scroll up
+  // during a reply" failure as the Chat page. See use-stick-to-bottom.ts.
+  const { containerRef, onScroll, follow, jumpToBottom, newBelow } = useStickToBottom();
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, streamingText]);
+    follow();
+  }, [messages, streamingText, follow]);
 
   useEffect(() => {
     if (!open) return;
@@ -199,7 +203,8 @@ export function AskAiModal({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-5">
+        <div className="relative min-h-0 flex-1">
+        <div ref={containerRef} onScroll={onScroll} className="h-full overflow-y-auto px-4 py-4 sm:px-5">
           {messages.length === 0 && !sending ? (
             <p className="text-sm text-muted">{t("emptyState")}</p>
           ) : (
@@ -244,9 +249,19 @@ export function AskAiModal({
                 </div>
               )}
 
-              <div ref={bottomRef} />
             </div>
           )}
+        </div>
+        {newBelow && (
+          <button
+            type="button"
+            onClick={jumpToBottom}
+            className="absolute bottom-2 left-1/2 z-10 inline-flex min-h-[36px] -translate-x-1/2 items-center gap-1.5 rounded-full border border-orange-500/40 bg-panel px-3.5 py-1.5 text-xs font-medium text-orange-300 shadow-lg transition-colors duration-150 hover:border-orange-500 hover:bg-orange-500/10"
+          >
+            <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
+            {tCommon("newMessagesBelow")}
+          </button>
+        )}
         </div>
 
         <div className="border-t border-border p-4">

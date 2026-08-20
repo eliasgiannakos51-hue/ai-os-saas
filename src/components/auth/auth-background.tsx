@@ -24,18 +24,38 @@
 // value on every page that renders this (auth pages, landing, pricing,
 // roadmap, every dashboard page via dashboard/layout.tsx) for consistent
 // visual intensity across the whole app.
+// PERFORMANCE NOTE, measured not assumed. This used to pulse the eight
+// dots (animate-pulse) INSIDE the spinning SVG, each behind an
+// feGaussianBlur filter. Animated content inside a filtered SVG cannot be
+// cached as a texture, so the browser re-rasterised the whole 140vmin
+// graphic on the main thread continuously — behind every page. Combined
+// with NetworkField this measured as 120ms median keystroke latency in
+// the dashboard, against 8ms with the layers hidden. Now the wireframe is
+// STATIC SVG (rasterised once, the spin rotates the cached texture) and
+// the dots are separate elements: radial-gradient glow instead of a blur
+// filter, pulsing only `opacity`, each its own compositor layer.
+const DOTS = [
+  { cx: 200, cy: 32, delay: "0s" },
+  { cx: 322, cy: 140, delay: "0.6s" },
+  { cx: 288, cy: 305, delay: "1.2s" },
+  { cx: 128, cy: 322, delay: "1.8s" },
+  { cx: 68, cy: 195, delay: "2.4s" },
+  { cx: 245, cy: 82, delay: "3s" },
+  { cx: 155, cy: 258, delay: "3.6s" },
+  { cx: 300, cy: 225, delay: "4.2s" },
+];
+
 export function AuthBackground({ opacity = 0.38 }: { opacity?: number }) {
   return (
     <div
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 z-0 flex items-center justify-center overflow-hidden"
     >
-      <svg
-        viewBox="0 0 400 400"
-        className="h-[140vmin] w-[140vmin] animate-[spin_180s_linear_infinite]"
-        style={{ opacity }}
-        fill="none"
+      <div
+        className="relative h-[140vmin] w-[140vmin] animate-[spin_180s_linear_infinite]"
+        style={{ opacity, willChange: "transform" }}
       >
+      <svg viewBox="0 0 400 400" className="h-full w-full" fill="none">
         <defs>
           {/* userSpaceOnUse (not the SVG default objectBoundingBox) is
               required here — objectBoundingBox maps the gradient onto
@@ -58,17 +78,6 @@ export function AuthBackground({ opacity = 0.38 }: { opacity?: number }) {
             <stop offset="100%" stopColor="#f5a623" stopOpacity="0" />
           </radialGradient>
 
-          {/* Soft bloom around the connection dots. stdDeviation is in
-              the SVG's own 400x400 user space, so it scales with the
-              globe rather than being a fixed pixel blur — the dots keep
-              the same relative halo at every viewport size. */}
-          <filter id="globeDotGlow" x="-200%" y="-200%" width="500%" height="500%">
-            <feGaussianBlur stdDeviation="4.5" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
         </defs>
 
         <circle cx="200" cy="200" r="170" stroke="url(#globeGradient)" strokeWidth="1.4" />
@@ -141,33 +150,32 @@ export function AuthBackground({ opacity = 0.38 }: { opacity?: number }) {
         <line x1="30" y1="200" x2="370" y2="200" stroke="url(#globeGradient)" strokeWidth="0.95" />
         <line x1="200" y1="30" x2="200" y2="370" stroke="url(#globeGradient)" strokeWidth="0.95" />
 
-        {/* Decorative "connection" nodes — fixed points, gentle staggered
-            pulse, no data behind them. Radius raised 2.5 -> 4 and given a
-            gaussian bloom (r 2.5 -> 6) so they read as glowing nodes on the wireframe
-            rather than stray specks; that plus the higher globe opacity is
-            what makes the backdrop actually noticeable. */}
-        {[
-          { cx: 200, cy: 32, delay: "0s" },
-          { cx: 322, cy: 140, delay: "0.6s" },
-          { cx: 288, cy: 305, delay: "1.2s" },
-          { cx: 128, cy: 322, delay: "1.8s" },
-          { cx: 68, cy: 195, delay: "2.4s" },
-          { cx: 245, cy: 82, delay: "3s" },
-          { cx: 155, cy: 258, delay: "3.6s" },
-          { cx: 300, cy: 225, delay: "4.2s" },
-        ].map((dot) => (
-          <circle
-            key={`${dot.cx}-${dot.cy}`}
-            cx={dot.cx}
-            cy={dot.cy}
-            r="6"
-            fill="#f5a623"
-            filter="url(#globeDotGlow)"
-            className="animate-pulse"
-            style={{ animationDelay: dot.delay, animationDuration: "3.5s" }}
-          />
-        ))}
       </svg>
+
+      {/* Decorative "connection" nodes — fixed points on the wireframe
+          (they spin with it: same parent), gentle staggered pulse, no data
+          behind them. The bloom is a radial gradient rather than a runtime
+          blur — see the performance note above. Sized in % of the globe so
+          the halo keeps the same relative size at every viewport. */}
+      {DOTS.map((dot) => (
+        <span
+          key={`${dot.cx}-${dot.cy}`}
+          className="absolute animate-pulse rounded-full"
+          style={{
+            left: `${(dot.cx / 400) * 100}%`,
+            top: `${(dot.cy / 400) * 100}%`,
+            width: "6%",
+            height: "6%",
+            transform: "translate(-50%, -50%)",
+            background:
+              "radial-gradient(circle, rgba(245, 166, 35, 0.95) 0%, rgba(245, 166, 35, 0.45) 32%, transparent 68%)",
+            animationDelay: dot.delay,
+            animationDuration: "3.5s",
+            willChange: "opacity",
+          }}
+        />
+      ))}
+      </div>
     </div>
   );
 }

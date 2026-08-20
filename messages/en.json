@@ -64,7 +64,8 @@
     },
     "creditsUnlimited": "Unlimited",
     "whatIsThis": "What is this?",
-    "examplesLabel": "Try:"
+    "examplesLabel": "Try:",
+    "newMessagesBelow": "New message below"
   },
   "sidebar": {
     "groups": {
@@ -1056,7 +1057,7 @@
       "previewIncompleteTitle": "Preview unavailable",
       "previewIncompleteBody": "This generated page looks incomplete or got cut off, so it can't be shown safely. Try regenerating with a shorter description, or edit it again.",
       "imageLabel": "Reference images ({count}/{max}, optional)",
-      "imageHelp": "Up to {max} images — a logo, product photos, or a style-reference screenshot. JPG or PNG, up to 5MB each. Used to inspire the colors/style only, they won't be embedded in the generated site.",
+      "imageHelp": "Up to {max} images — your logo, product photos, or a style reference. JPG or PNG, up to 5MB each. By default they are embedded in the site; you can switch them to style-inspiration only below.",
       "imageRemove": "Remove image",
       "imageInvalidType": "Only JPG or PNG images are supported.",
       "imageTooLarge": "Image is too large — please choose a file under 5MB.",
@@ -1094,7 +1095,15 @@
         "imageUses": {
           "in-site": "Put them on the site",
           "style-only": "Style reference only"
-        }
+        },
+        "logoTitle": "Logo",
+        "logoChoices": {
+          "uploaded": "It's in my images",
+          "wordmark": "No logo — use my business name",
+          "auto": "Decide for me"
+        },
+        "logoHint": "Without a logo the site shows your business name as a styled wordmark — it never invents a logo for you.",
+        "logoNeedsUpload": "Attach the logo as an image first"
       },
       "imageIntro": "Your logo, product shots, photos of the place — anything you want on the page or want the style taken from.",
       "regenerateAlreadyUsed": "You’ve already used the free regeneration for this site. Create a new website to try a different brief.",
@@ -1252,7 +1261,6 @@
       "previewTitle": "Here's what I'll build",
       "previewName": "Name",
       "previewSchedule": "Runs",
-      "previewDelivery": "Sends to",
       "previewCostPerRun": "Cost per run",
       "previewNextRuns": "First three runs",
       "previewTask": "See the exact task",
@@ -1550,7 +1558,10 @@
       "copyCitation": "Copy this source",
       "copyText": "Copy the text",
       "copyTextError": "Could not read that file's text.",
-      "copyTextEmpty": "We haven't read any text out of that file."
+      "copyTextEmpty": "We haven't read any text out of that file.",
+      "uploadStorageMissing": "File storage is not set up on this deployment — the 'user-files' bucket is missing. An administrator must run the storage repair SQL (System Health → File storage).",
+      "uploadStoragePolicy": "File storage refused the upload — the bucket's access policies are missing. An administrator must run the storage repair SQL (System Health → File storage).",
+      "tooLargeForTransfer": "The hosting platform refused the upload before it reached the app. Try again in a moment."
     },
     "deepResearch": {
       "title": "Deep Research",
@@ -2206,7 +2217,8 @@
     "checking": "Checking the result",
     "saving": "Saving",
     "delivering": "Sending it to you",
-    "publishing": "Putting the site live"
+    "publishing": "Putting the site live",
+    "watchFailed": "Progress can't be shown right now — the work continues in the background."
   },
   "problem": {
     "out_of_credits": {

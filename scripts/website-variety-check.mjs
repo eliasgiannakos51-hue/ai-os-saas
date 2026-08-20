@@ -63,6 +63,7 @@ const {
   decisionsHonoured,
 } = await import("./lib/site-fingerprint.mjs");
 const wb = await loadTsWithDeps("src/lib/website-builder.ts");
+const variation = await loadTsWithDeps("src/lib/website-variation.ts");
 const { CostAccumulator } = await loadTsWithDeps("src/lib/billing/cost-accumulator.ts");
 
 // ---------------------------------------------------------------------
@@ -128,11 +129,18 @@ const COMPLIANCE_CHECKS = [
   },
 ];
 
-async function generate(slug, brief) {
+async function generate(slug, brief, siteIndex) {
   process.stdout.write(`  generating ${slug} ... `);
   const costs = new CostAccumulator();
   const started = Date.now();
-  const html = await wb.generateWebsiteHtml(apiKey, brief, undefined, () => {}, undefined, costs);
+  // The same per-site variation draw the process route applies — seeded
+  // here by the slug + index the way the route seeds by user + site
+  // count. Measuring variety WITHOUT the draw would measure the system
+  // as it no longer ships.
+  const draw = variation.variationDirective(
+    variation.pickVariation(["variety-check", siteIndex, brief])
+  );
+  const html = await wb.generateWebsiteHtml(apiKey, brief, undefined, () => {}, undefined, costs, draw);
   const totals = costs.totals();
   const file = path.join(outDir, `${slug}.html`);
   writeFileSync(file, html);
@@ -146,9 +154,9 @@ async function generate(slug, brief) {
 // ---------------------------------------------------------------------
 console.log("PART A — variety across three very different briefs\n");
 const results = [];
-for (const b of VARIETY_BRIEFS) {
+for (const [index, b] of VARIETY_BRIEFS.entries()) {
   try {
-    const { html, costs } = await generate(b.slug, b.brief);
+    const { html, costs } = await generate(b.slug, b.brief, index);
     results.push({ ...b, html, costs });
   } catch (err) {
     console.log(`  FAILED ${b.slug}: ${err.message}`);
@@ -249,7 +257,7 @@ if (anyGeneric.length) {
 console.log("\n\nPART B — does it follow five explicit instructions?\n");
 let complianceHtml = "";
 try {
-  complianceHtml = (await generate("compliance", COMPLIANCE_BRIEF)).html;
+  complianceHtml = (await generate("compliance", COMPLIANCE_BRIEF, VARIETY_BRIEFS.length)).html;
 } catch (err) {
   console.log(`  FAILED: ${err.message}`);
   process.exit(1);

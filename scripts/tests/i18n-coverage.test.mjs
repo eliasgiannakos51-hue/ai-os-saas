@@ -701,6 +701,9 @@ const BARE_TEXT_BASELINE = {
     "src/components/settings/danger-zone.tsx": 1,
     "src/components/settings/password-change-form.tsx": 1,
     "src/components/system-health/error-list.tsx": 2,
+    // Owner-only diagnostics, English on purpose like the rest of the
+    // system-health page it lives on.
+    "src/components/system-health/storage-diagnostics.tsx": 3,
     "src/components/text-actions/text-actions-textarea.tsx": 2,
     "src/components/ui/widget-boundary.tsx": 2,
   };

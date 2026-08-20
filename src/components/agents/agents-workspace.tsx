@@ -96,6 +96,20 @@ export function AgentsWorkspace({
   const [creating, setCreating] = useState(false);
   const [requestText, setRequestText] = useState("");
   const requestRef = useRef<HTMLTextAreaElement | null>(null);
+  // Set by the empty-state example press, which also OPENS the form. The
+  // focus has to wait for the textarea to mount — setCreating(true) has
+  // not committed by the time the press handler returns, so a focus()
+  // there reaches for a field that does not exist yet (the same trap
+  // generic-add-form.tsx documents).
+  const focusRequestOnOpen = useRef(false);
+  useEffect(() => {
+    if (!creating || !focusRequestOnOpen.current) return;
+    focusRequestOnOpen.current = false;
+    const input = requestRef.current;
+    if (!input) return;
+    input.focus();
+    input.setSelectionRange(input.value.length, input.value.length);
+  }, [creating]);
   // A toast was the wrong container for all four of these: it disappears,
   // it cannot hold three lines, and the third line is about the user's
   // money. The notice stays under the button they pressed until they act.
@@ -105,9 +119,9 @@ export function AgentsWorkspace({
   // exactly what made Deep Research look like it had stopped when the user
   // changed pages.
   const [jobId, setJobId] = useState<string | null>(null);
-  const { job, isRunning: building } = useAiJob(jobId);
+  const { job, isRunning: building, watchLost: buildWatchLost } = useAiJob(jobId);
   const [runJobId, setRunJobId] = useState<string | null>(null);
-  const { job: runJob, isRunning: runningNow } = useAiJob(runJobId);
+  const { job: runJob, isRunning: runningNow, watchLost: runWatchLost } = useAiJob(runJobId);
   const [questions, setQuestions] = useState<string[] | null>(null);
   const [questionSuggestions, setQuestionSuggestions] = useState<string[][]>([]);
   const [preview, setPreview] = useState<BuildResponse | null>(null);
@@ -519,6 +533,7 @@ export function AgentsWorkspace({
         newAction={
           <button
             type="button"
+            data-testid="agents-new"
             onClick={() => (creating ? resetCreate() : setCreating(true))}
             disabled={atCapacity && !creating}
             className="inline-flex min-h-[44px] items-center gap-2 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
@@ -532,7 +547,7 @@ export function AgentsWorkspace({
         searchPlaceholder={tModule("searchPlaceholder")}
         filters={<SortToggle sortOrder={sortOrder} onChange={setSortOrder} alphabetical={alphabetical} />}
         meta={
-          <span className="text-xs text-muted">
+          <span className="text-xs text-muted" data-testid="agents-cap-meta">
             {t("agentsUsed", { used: agents.length, cap: agentCap })}
           </span>
         }
@@ -611,10 +626,6 @@ export function AgentsWorkspace({
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-muted">{t("previewDelivery")}</dt>
-                    <dd className="break-all text-foreground">{preview.draft.deliveryTarget}</dd>
-                  </div>
-                  <div>
                     <dt className="text-muted">{t("previewCostPerRun")}</dt>
                     <dd className="text-foreground">
                       {t("creditsPerRun", {
@@ -623,6 +634,34 @@ export function AgentsWorkspace({
                     </dd>
                   </div>
                 </dl>
+                {/* WHERE THE RESULT GOES, decided at creation — not
+                    discovered later. The picker used to exist only in the
+                    edit panel of an already-created agent, which meant
+                    every agent was born emailing and the other four
+                    channels were reachable only by someone who already
+                    knew to go looking. The reported bug, verbatim: "I
+                    made an agent and saw no Telegram/Discord/Slack/in-app.
+                    Only email." */}
+                <DeliveryPicker
+                  value={
+                    isDeliveryChannel(preview.draft.deliveryMethod)
+                      ? preview.draft.deliveryMethod
+                      : "email"
+                  }
+                  target={preview.draft.deliveryTarget ?? ""}
+                  accountEmail={accountEmail}
+                  slackChannels={slackChannels}
+                  onChange={({ method, target }) =>
+                    setPreview((current) =>
+                      current?.draft
+                        ? {
+                            ...current,
+                            draft: { ...current.draft, deliveryMethod: method, deliveryTarget: target },
+                          }
+                        : current
+                    )
+                  }
+                />
                 {previewRuns.length > 0 && (
                   <div>
                     <p className="mb-1 text-xs text-muted">{t("previewNextRuns")}</p>
@@ -652,6 +691,7 @@ export function AgentsWorkspace({
                   </button>
                   <button
                     type="button"
+                    data-testid="agents-discard"
                     onClick={() => {
                       // Explicit discard — marked immediately, not on the
                       // next render, because there will not be one.
@@ -697,7 +737,7 @@ export function AgentsWorkspace({
                 saving — reported by the worker and, until now, discarded:
                 the button said "Designing…" for all of them and the job
                 row's stepLabel was never read. */}
-            <AiJobProgress job={job} className="w-full" />
+            <AiJobProgress job={job} watchLost={buildWatchLost} className="w-full" />
           </div>
         )}
 
@@ -706,7 +746,7 @@ export function AgentsWorkspace({
             that can take minutes. */}
         {runJob && (runJob.status === "queued" || runJob.status === "running") && (
           <div className="mb-4 rounded-xl border border-orange-500/25 bg-orange-500/5 px-3 py-2">
-            <AiJobProgress job={runJob} />
+            <AiJobProgress job={runJob} watchLost={runWatchLost} />
           </div>
         )}
 
@@ -716,9 +756,14 @@ export function AgentsWorkspace({
             title={t("empty.title")}
             example={t("empty.example")}
             onExample={(text) => {
+              // The build form only exists while `creating` is true — with
+              // zero agents it is CLOSED, so writing into requestText alone
+              // changed nothing the user could see (the textarea was not
+              // even mounted; requestRef.current was null). Open it first;
+              // the focus effect below runs after the mount.
+              setCreating(true);
               setRequestText(text);
-              requestRef.current?.focus();
-              requestRef.current?.setSelectionRange(text.length, text.length);
+              focusRequestOnOpen.current = true;
             }}
           >
             {t("empty.why")}

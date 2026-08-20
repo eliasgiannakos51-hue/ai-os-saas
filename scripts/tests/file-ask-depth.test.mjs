@@ -302,5 +302,127 @@ checkList(
   })
 );
 
+console.log("\n== 9. a translated citation is RESOLVED, not stripped as fabricated ==");
+// THE PRODUCTION REPORT this section pins: a Greek question gets a Greek
+// answer, the model writes "Σελίδα 3" where the header said "Page 3",
+// and the old exact-match verifier stripped every citation — a correct
+// answer rendered with no sources at all. Tolerant matching resolves the
+// citation to the (file, page) pair we actually sent and rewrites it in
+// canonical form; what cannot be resolved is still stripped.
+const ALLOWED = [
+  { fileId: "1", filename: "lesson.pdf", page: 3, label: "Page 3" },
+  { fileId: "1", filename: "lesson.pdf", page: 7, label: "Page 7" },
+  { fileId: "2", filename: "budget.xlsx", page: 2, label: "Costs 2024" },
+];
+{
+  const r = verifyCitations(
+    "Μαθαίνεις πράγματα [lesson.pdf, Σελίδα 3] και [lesson.pdf, σελ. 7].",
+    ALLOWED
+  );
+  check("Greek labels verify (the reported case)", r.verified.length === 2 && r.fabricated.length === 0);
+  check("and are rewritten canonically in the text", r.answer.includes("[lesson.pdf, Page 3]") && r.answer.includes("[lesson.pdf, Page 7]"));
+  check("the citation list carries the canonical label", r.verified.every((c) => /^Page \d$/.test(c.label)));
+}
+{
+  const r = verifyCitations("Siehe [lesson.pdf, Seite 3] und [lesson.pdf, S. 7].", ALLOWED);
+  check("German labels verify", r.verified.length === 2 && r.fabricated.length === 0);
+}
+{
+  const r = verifyCitations("See [lesson, Page 3].", ALLOWED);
+  check("a filename cited without its extension resolves", r.verified.length === 1 && r.verified[0].filename === "lesson.pdf");
+}
+{
+  const r = verifyCitations("See [lesson.pdf, Σελίδα 99].", ALLOWED);
+  check("a page we never sent is STILL stripped", r.verified.length === 0 && r.fabricated.length === 1 && !r.answer.includes("99"));
+}
+{
+  const r = verifyCitations("See [ghost.pdf, Page 3].", ALLOWED);
+  check("a file we never sent is STILL stripped", r.verified.length === 0 && r.fabricated.length === 1);
+}
+{
+  const r = verifyCitations("Sheet [budget.xlsx, Costs 2024] and translated [budget.xlsx, Σελίδα 2].", ALLOWED);
+  check("an exact sheet label verifies", r.verified.some((c) => c.label === "Costs 2024"));
+  check("a numeric label resolves to the sheet at that position", r.verified.length === 2);
+}
+{
+  // Two DIFFERENT files sharing a stem: "report" alone is ambiguous and
+  // must resolve to neither — a guessed file is a fabricated citation.
+  const ambiguous = [
+    { fileId: "a", filename: "report.pdf", page: 1, label: "Page 1" },
+    { fileId: "b", filename: "report.docx", page: 1, label: "Page 1" },
+  ];
+  const r = verifyCitations("See [report, Page 1].", ambiguous);
+  check("an ambiguous stem resolves to neither file", r.verified.length === 0 && r.fabricated.length === 1);
+  const exact = verifyCitations("See [report.pdf, Page 1].", ambiguous);
+  check("while the full filename still resolves", exact.verified.length === 1);
+}
+
+console.log("\n== 10. the prompt forbids translated citations and uncited answers ==");
+const citePrompt = askSystemPrompt({ language: "el", filenames: ["lesson.pdf"], truncated: false });
+check("citations must be copied character-for-character", /character-for-character/.test(citePrompt));
+check("and never translated", /never a translated label/.test(citePrompt));
+check("summaries are NOT exempt from citing", /including summaries and overviews/.test(citePrompt));
+check("an uncited answer is declared unacceptable", /An answer without citations is not acceptable/.test(citePrompt));
+const synthPrompt = synthesisSystemPrompt({ language: "el", parts: 2, truncated: false });
+check("the synthesis forbids translating them too", /never translated/.test(synthPrompt));
+
+console.log("\n== 11. a from-the-documents answer with zero citations says so ==");
+check("the handler reports the uncited case", /uncited: !notFound && checked\.verified\.length === 0/.test(handlerCode));
+check(
+  "the workspace renders the warning",
+  /answer\.fromDocuments && answer\.citations\.length === 0[\s\S]{0,400}?files-answer-uncited/.test(workspaceCode) ||
+    /files-answer-uncited/.test(workspaceCode) && /answer\.fromDocuments && answer\.citations\.length === 0/.test(workspaceCode)
+);
+checkList(
+  "every locale has the uncited warning",
+  LOCALES.filter((l) => typeof messages[l].dashboard.files.uncitedAnswer !== "string")
+);
+
+console.log("\n== 12. picking MORE THAN ONE file is stated, counted and bounded ==");
+// "I don't know if I can tick several" — the control worked, the UI never
+// said so. Every one of these is a sentence the user should not have had
+// to discover by experiment.
+check("the step says one OR MORE", /one or more files/i.test(messages.en.dashboard.files.step2Hint));
+checkList(
+  "in every locale (not the English sentence copied)",
+  LOCALES.filter((l) => {
+    const hint = messages[l].dashboard.files.step2Hint;
+    return typeof hint !== "string" || hint.length < 10 || (l !== "en" && hint === messages.en.dashboard.files.step2Hint);
+  })
+);
+check("the count is N of M, not a bare number", /\{count\}[\s\S]*\{total\}/.test(messages.en.dashboard.files.selectedOfTotal));
+check("the workspace renders it that way", /selectedOfTotal", \{ count: selected\.length, total: askableFiles\.length \}/.test(workspaceCode));
+check("only READY files count towards the total", /files\.filter\(\(f\) => f\.processing_status === "ready"\)/.test(workspaceCode));
+check("there is a Select all", /data-testid="files-select-all"/.test(workspaceCode));
+check("and it never selects past the limit", /askableFiles\.slice\(0, MAX_FILES_PER_QUESTION\)/.test(workspaceCode));
+check("there is still a Clear", /clearSelection/.test(workspaceCode));
+// The limit used to appear only once it was exceeded.
+check("the limit is shown BEFORE it is exceeded", /data-testid="files-max-hint"/.test(workspaceCode));
+checkList(
+  "every locale states the limit",
+  LOCALES.filter((l) => typeof messages[l].dashboard.files.maxPerQuestion !== "string")
+);
+// The real ceilings, from the source rather than from memory.
+const { MAX_FILES_PER_QUESTION } = await loadTs("src/lib/files/file-types.ts");
+check(`the per-question file limit is a real number (${MAX_FILES_PER_QUESTION})`, MAX_FILES_PER_QUESTION === 20);
+check(`one pass carries ${MAX_CONTEXT_CHARS} characters`, MAX_CONTEXT_CHARS === 400_000);
+check(`and a question may take ${MAX_PASSES} passes`, MAX_PASSES === 5);
+
+console.log("\n== 13. with several files, a citation names WHICH file ==");
+// Asking about three contracts and being told "Page 4" is not an answer.
+const MULTI = [
+  { fileId: "a", filename: "contract.pdf", page: 4, label: "Page 4" },
+  { fileId: "b", filename: "invoice.pdf", page: 4, label: "Page 4" },
+];
+{
+  const r = verifyCitations("Terms [contract.pdf, Page 4] and the amount [invoice.pdf, Page 4].", MULTI);
+  check("both files' citations survive", r.verified.length === 2);
+  check("and each names its own file", r.verified[0].filename === "contract.pdf" && r.verified[1].filename === "invoice.pdf");
+  check("the page alone, with no file, is not a citation", verifyCitations("See [Page 4].", MULTI).verified.length === 0);
+}
+check("the prompt requires the filename in the citation", /\[filename, Page 3\]/.test(askSystemPrompt({ language: "en", filenames: ["a.pdf", "b.pdf"], truncated: false })));
+check("and the header the model copies carries the filename", /--- FILE: \$\{file\.filename\} \| \$\{page\.label\} ---/.test(readFileSync("src/lib/files/ask.ts", "utf8")));
+check("the answer's source list shows file and page", /citation\.filename\} — \{citation\.label/.test(workspaceCode));
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

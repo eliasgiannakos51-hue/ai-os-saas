@@ -111,9 +111,25 @@ const genRoute = readFileSync("src/app/api/websites/generate/process/route.ts", 
 check("lib/unsplash.ts calls the real search API", /https:\/\/api\.unsplash\.com\/search\/photos/.test(unsplash));
 check("the resolver calls it", /searchUnsplashPhoto\(/.test(resolver));
 check("generation calls the resolver", /resolveWebsiteImagePlaceholders\(/.test(genRoute));
+// An unresolved placeholder used to become a picsum.photos image — a
+// live URL, but a photo of something else entirely, presented as the
+// business. Fewer relevant images beat more random ones: the tag is
+// removed instead, and picsum must never come back.
 check(
-  "and it degrades to a real, working photo rather than a broken link",
-  /picsumFallbackUrl/.test(resolver)
+  "an unresolved placeholder is REMOVED, not substituted",
+  /stripPlaceholderImageTags\(result, unresolved\.map\(/.test(resolver)
+);
+// Comments are stripped first: the resolver documents WHY picsum was
+// removed, and a scanner that fails on the rationale teaches people to
+// delete the rationale.
+check("picsum is gone from the resolver's code", !/picsum/i.test(resolver.replace(/\/\/[^\n]*/g, "")));
+check(
+  "and the picsum fallback function itself no longer exists",
+  !/picsumFallbackUrl/.test(readFileSync("src/lib/website-image-placeholders.ts", "utf8").replace(/\/\/[^\n]*/g, ""))
+);
+check(
+  "with no key configured every placeholder is stripped, with the reason logged",
+  /if \(!isUnsplashConfigured\(\)\) \{[\s\S]{0,700}?stripPlaceholderImageTags\(html, placeholders\.map\(/.test(resolver)
 );
 check(
   "with no key configured it makes no request at all",
@@ -191,13 +207,25 @@ check(
   /const budget = createUnsplashBudget\(\);/.test(resolver)
 );
 check(
-  "it is created OUTSIDE the per-photo loop",
-  resolver.indexOf("createUnsplashBudget()") < resolver.indexOf("placeholders.map(")
+  "it is created OUTSIDE the per-photo work",
+  resolver.indexOf("createUnsplashBudget()") < resolver.indexOf("searchUnsplashPhoto(")
 );
-check("every search is charged against it", /searchUnsplashPhoto\(attempt, budget\)/.test(resolver));
+check("every search is charged against it", /searchUnsplashPhoto\(attempts\[round\], budget\)/.test(resolver));
 check(
   "and broadening stops the moment it trips",
-  /if \(budget\.halted\) break;/.test(resolver)
+  /round < maxRounds && !budget\.halted/.test(resolver)
+);
+// BREADTH-FIRST: round 0 gives every photo its most specific query
+// before any photo is allowed a broader retry. Depth-first let one
+// unlucky photo spend four requests while the last photos in the
+// document arrived at an exhausted budget and got nothing.
+check(
+  "photos are resolved in rounds, most specific attempt first",
+  /for \(let round = 0; round < maxRounds/.test(resolver)
+);
+check(
+  "each round only retries photos still unresolved",
+  /!resolved\.has\(l\.slug\) && round < l\.attempts\.length/.test(resolver)
 );
 check("the fetch itself refuses to run when it cannot spend", /if \(budget && !budget\.canSpend\(\)\) return null;/.test(unsplash));
 check("a fatal status trips it", /budget\.halt\(fatal\)/.test(unsplash));
@@ -206,19 +234,64 @@ console.log("\n== 10. 'why are the photos generic' has a written answer ==");
 // Three different causes produce the identical symptom on the page. A log
 // line that does not distinguish them is worth nothing.
 check("the halt is logged", /logApiError\("website-image-resolver"/.test(resolver));
-check("with how many photos fell back", /fellBackToPicsum: fellBack/.test(resolver));
+check("with how many photos were removed", /removed: unresolved\.length/.test(resolver));
 check(
-  "a plain 'found nothing' is reported too, but only when a key exists",
-  /isUnsplashConfigured\(\)/.test(resolver)
+  "a plain 'found nothing' is reported too",
+  /found nothing on Unsplash/.test(resolver)
 );
 for (const reason of ["rate-limited", "unauthorised", "budget-exhausted"]) {
   const text = ub.describeUnsplashHalt(reason, 12);
   check(`${reason}: the message names the cause`, text.length > 40);
-  check(`${reason}: and says what to do about it`, /picsum|check UNSPLASH_ACCESS_KEY|production access|ceiling/.test(text));
+  check(`${reason}: and says what to do about it`, /check UNSPLASH_ACCESS_KEY|production access|ceiling/.test(text));
+  check(`${reason}: and says the placeholders were removed, not substituted`, /removed/.test(text));
 }
 check(
   "the quota message states the real demo limit",
   /50 requests\/hour/.test(ub.describeUnsplashHalt("rate-limited", 12))
+);
+
+console.log("\n== 10b. the blanks the site is left with are LISTED, not hunted for ==");
+// The prompt refuses to invent a phone number or a price and leaves a
+// bracketed placeholder instead. Correct — but the report was "it did
+// not put in the numbers", from somebody who never spotted them. The
+// page is scanned after generation and the blanks are named.
+const ph2 = await loadTs("src/lib/website-placeholders.ts");
+{
+  const html = `<!DOCTYPE html><html><head><style>a[href^="tel"]{color:red}</style>
+<script>const x = arr[0]; const y = list[1];</script></head>
+<body><h1>Taverna</h1><p>Call [Your phone number] or email [Your email].</p>
+<footer>[Your phone number] · [Ωράριο λειτουργίας]</footer></body></html>`;
+  const found = ph2.findUnfilledPlaceholders(html);
+  const texts = found.map((f) => f.text);
+  check("the phone blank is found", texts.includes("Your phone number"));
+  check("the email blank is found", texts.includes("Your email"));
+  check("a non-English blank is found too", texts.includes("Ωράριο λειτουργίας"));
+  check("the repeated one is counted, not duplicated", found.find((f) => f.text === "Your phone number")?.count === 2);
+  check("most frequent first", found[0].text === "Your phone number");
+  // A scanner that reported CSS attribute selectors or array indexing
+  // would tell the owner to "fill in" href^= and 0.
+  check("CSS inside <style> is not scanned", !texts.some((t) => t.includes("href")));
+  check("array indexing in <script> is not scanned", !texts.some((t) => /^\d+$/.test(t)));
+  check("a page with nothing missing reports nothing", ph2.findUnfilledPlaceholders("<p>All done.</p>").length === 0);
+}
+{
+  const ws = readFileSync("src/components/website-builder/website-builder-workspace.tsx", "utf8");
+  check("the workspace scans the displayed HTML", /findUnfilledPlaceholders\(displayedHtml\)/.test(ws));
+  check("and renders the list above the preview", /data-testid="website-unfilled"/.test(ws));
+  check("with the reason it is blank", /unfilledBody/.test(ws));
+}
+
+console.log("\n== 10c. the request ceiling is honest about the tier it fits ==");
+check(
+  "the ceiling is configurable",
+  /UNSPLASH_REQUESTS_PER_GENERATION/.test(readFileSync("src/lib/unsplash-budget.ts", "utf8"))
+);
+check("but defaults to the Demo-tier figure", ub.UNSPLASH_REQUESTS_PER_GENERATION === 12);
+check(
+  "and the env example says raising it needs a production app",
+  // Comment prose wraps across lines, so the check tolerates a line
+  // break and the leading "# " rather than demanding one long line.
+  /Raise this ONLY[\s\S]{0,120}?production Unsplash/.test(readFileSync(".env.local.example", "utf8"))
 );
 
 console.log("\n== 11. missing contact details become a visible gap, never a fake ==");

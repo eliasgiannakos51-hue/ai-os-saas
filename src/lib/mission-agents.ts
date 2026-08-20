@@ -46,7 +46,15 @@ export type StepEffort = (typeof STEP_EFFORTS)[number];
 // schema gave it no other option. clarificationNeeded/clarificationQuestion
 // give it one: for a goal too vague to break into REAL concrete actions,
 // it asks a short follow-up question instead of fabricating filler steps.
+// LANGUAGE. This prompt is written in Greek and, unlike the Reviewer
+// below, carried no instruction about the answer's language — so a
+// goal written in German came back as Greek steps. The user never
+// asked for a translation exercise. The rule is the Reviewer's,
+// verbatim: answer in the language the GOAL is written in, which is
+// the one thing the model can always see.
 const PLANNER_SYSTEM_PROMPT = `Είσαι ο Planner Agent. Ανάλυσε τον στόχο του χρήστη σε ${MIN_STEPS}-${MAX_STEPS} ΕΚΤΕΛΕΣΙΜΑ βήματα.
+
+ΓΛΩΣΣΑ: Γράψε ΚΑΘΕ βήμα (τίτλο και περιγραφή) και κάθε διευκρινιστική ερώτηση ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που είναι γραμμένος ο στόχος του χρήστη. Αν ο στόχος είναι στα αγγλικά, τα βήματα είναι στα αγγλικά· στα γερμανικά, στα γερμανικά. ΠΟΤΕ μη μεταφράζεις τον στόχο σε άλλη γλώσσα.
 
 ΤΙ ΣΗΜΑΙΝΕΙ "ΕΚΤΕΛΕΣΙΜΟ":
 Κάθε βήμα πρέπει να λέει ΤΙ ΑΚΡΙΒΩΣ κάνει ο χρήστης — με αριθμό, με όνομα, με συγκεκριμένη ενέργεια — και ΠΟΥ καταλήγει το αποτέλεσμα μέσα στην εφαρμογή.

@@ -330,14 +330,23 @@ export async function POST(request: Request) {
       .update({ html_content: updatedHtml })
       .eq("id", websiteId)
       .select()
-      .single();
+      // maybeSingle, not single: the site can be DELETED while the edit
+      // was generating. .single() reported that as PGRST116 ("Cannot
+      // coerce the result to a single JSON object") — see the same fix in
+      // generate/process.
+      .maybeSingle();
 
-    if (updateError) {
-      logApiError("/api/websites/edit", updateError, { stage: "update" });
+    if (updateError || !updatedRecord) {
+      if (updateError) logApiError("/api/websites/edit", updateError, { stage: "update" });
       await releaseReservation(user.id, reservationId);
       return NextResponse.json(
-        { ok: false, error: "Could not save the edit. No credits were charged — please try again." },
-        { status: 500 }
+        {
+          ok: false,
+          error: updateError
+            ? "Could not save the edit. No credits were charged — please try again."
+            : "This website no longer exists — it was deleted while the edit was running. Nothing was charged.",
+        },
+        { status: updateError ? 500 : 410 }
       );
     }
 

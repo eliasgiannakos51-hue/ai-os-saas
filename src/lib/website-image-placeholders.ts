@@ -48,17 +48,18 @@ export function findImagePlaceholders(html: string): ImagePlaceholder[] {
  *
  * The Unsplash search is exact enough that a good, specific query
  * ("handmade sourdough loaves cooling rack bakery") can legitimately
- * return zero results — and a zero-result search used to fall STRAIGHT to
- * picsum, i.e. to a photo with no relationship to the subject at all. That
- * is the "it puts the wrong images" report: not a broken integration, a
- * one-shot search with no second attempt.
+ * return zero results — and a zero-result search used to mean giving up
+ * on the photo after a single attempt. That is the "it puts the wrong
+ * images" report: not a broken integration, a one-shot search with no
+ * second attempt.
  *
  * Dropping trailing words keeps the head of the phrase, which is where the
  * subject lives — the system prompt asks for "SUBJECT then STYLE/SETTING",
  * so "sourdough loaves cooling rack bakery" degrades to "sourdough loaves
  * cooling" and then "sourdough loaves", each of which is still ABOUT the
- * bread. Stops at two words: one word is generic enough that picsum is no
- * worse and a real search costs a round trip.
+ * bread. Stops at two words: one word no longer describes the subject, so
+ * whatever it finds is as unrelated as no search at all — and an
+ * unresolved placeholder is REMOVED rather than guessed at.
  */
 export function broadenImageQuery(query: string): string[] {
   const words = query.trim().split(/\s+/).filter(Boolean);
@@ -73,15 +74,14 @@ export function broadenImageQuery(query: string): string[] {
   return attempts.slice(0, 4);
 }
 
-// Deterministic picsum.photos fallback — seeded by the query text itself,
-// so the SAME query always resolves to the SAME photo (stable across
-// re-renders/re-downloads of the same generated site) without any
-// external API call or key. picsum.photos is a real, live, working image
-// service — never a fake/broken link, unlike a made-up CDN URL.
-export function picsumFallbackUrl(query: string, width = 800, height = 600): string {
-  const seed = encodeURIComponent(query.toLowerCase().trim().slice(0, 60)) || "placeholder";
-  return `https://picsum.photos/seed/${seed}/${width}/${height}`;
-}
+// NOTE: there is deliberately NO generic fallback image URL here any
+// more. There used to be a picsumFallbackUrl() — a live, working
+// picsum.photos link seeded by the query — and every placeholder that
+// Unsplash could not resolve got one. A live URL, but a photo of
+// something else entirely: a random forest on a bakery's page, presented
+// as the bakery. Fewer relevant images beat more random ones, so an
+// unresolvable placeholder is now stripped (stripPlaceholderImageTags)
+// instead of substituted.
 
 // Replaces every PLACEHOLDER:<slug> occurrence with its resolved URL — a
 // plain string replace per slug (not a regex re-scan of the whole
@@ -107,8 +107,9 @@ export function isLogoLikeQuery(query: string): boolean {
 }
 
 /** Removes the ENTIRE <img> tag for the given placeholder slugs — used
- *  for logo-like placeholders, where no stock photo is an acceptable
- *  resolution and a visibly broken image would be worse than nothing. */
+ *  for logo-like placeholders (no stock photo is an acceptable identity)
+ *  and for every placeholder Unsplash could not resolve, where a random
+ *  substitute or a visibly broken image would be worse than nothing. */
 export function stripPlaceholderImageTags(html: string, slugs: string[]): string {
   let result = html;
   for (const slug of slugs) {

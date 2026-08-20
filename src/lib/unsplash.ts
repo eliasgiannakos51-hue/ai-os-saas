@@ -6,9 +6,9 @@ import { classifyUnsplashResponse, type UnsplashBudget } from "@/lib/unsplash-bu
 // copyright/ToS problem): Unsplash's API exists specifically to be used
 // this way, with a free developer account. See the README/env example for
 // exact setup instructions — this file no-ops entirely (never throws)
-// when UNSPLASH_ACCESS_KEY isn't configured, so the feature degrades to
-// the picsum.photos fallback (lib/website-image-placeholders.ts) rather
-// than failing a generation.
+// when UNSPLASH_ACCESS_KEY isn't configured: the resolver then removes
+// the photo placeholders (lib/website-image-resolver.ts) rather than
+// failing a generation or inventing unrelated images.
 const UNSPLASH_API_URL = "https://api.unsplash.com/search/photos";
 const UNSPLASH_TIMEOUT_MS = 8000;
 
@@ -18,9 +18,9 @@ export function isUnsplashConfigured(): boolean {
 
 // Returns a real, hotlinkable photo URL for the given search query, or
 // null if Unsplash isn't configured, the search came back empty, or the
-// request failed/timed out for any reason — callers always have a non-
-// throwing fallback path (picsumFallbackUrl) precisely because photo
-// resolution should never be able to fail a whole website generation.
+// request failed/timed out for any reason — a null never throws and the
+// caller removes the placeholder, precisely because photo resolution
+// should never be able to fail a whole website generation.
 export async function searchUnsplashPhoto(query: string, budget?: UnsplashBudget): Promise<string | null> {
   const accessKey = process.env.UNSPLASH_ACCESS_KEY;
   if (!accessKey || !query.trim()) return null;

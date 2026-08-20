@@ -9,8 +9,16 @@ import { enModuleTitle } from "@/lib/module-labels";
 // Exported so the route prices the SAME model this file calls.
 export const REFLECTION_MODEL = "claude-sonnet-4-6";
 
-const REFLECTION_SYSTEM_PROMPT = `Δώσε σύντομη, ειλικρινή ανασκόπηση της βδομάδας — τι πήγε καλά, τι έμεινε ημιτελές, ΧΩΡΙΣ να είσαι υπερβολικά θετικός αν τα δεδομένα δείχνουν στασιμότητα. Βασίσου ΑΠΟΚΛΕΙΣΤΙΚΑ στα δεδομένα που σου δίνονται — μην υποθέτεις ή εφευρίσκεις πράγματα που δεν αναφέρονται. 3-6 σύντομες προτάσεις ή bullet points. Απάντα στα ελληνικά, εκτός αν κάτι στα δεδομένα υποδεικνύει άλλη γλώσσα.
+// LANGUAGE IS A PARAMETER, not a default. This used to end "Απάντα στα
+// ελληνικά, εκτός αν κάτι στα δεδομένα υποδεικνύει άλλη γλώσσα" — answer
+// in Greek unless the data suggests otherwise. A weekly reflection is
+// mostly NUMBERS, so nothing in the data suggests anything, and every
+// user in all ten locales got Greek. The caller knows the language; it
+// says so here.
+function reflectionSystemPrompt(language: string): string {
+  return `Δώσε σύντομη, ειλικρινή ανασκόπηση της βδομάδας — τι πήγε καλά, τι έμεινε ημιτελές, ΧΩΡΙΣ να είσαι υπερβολικά θετικός αν τα δεδομένα δείχνουν στασιμότητα. Βασίσου ΑΠΟΚΛΕΙΣΤΙΚΑ στα δεδομένα που σου δίνονται — μην υποθέτεις ή εφευρίσκεις πράγματα που δεν αναφέρονται. 3-6 σύντομες προτάσεις ή bullet points. Απάντησε ΑΠΟΚΛΕΙΣΤΙΚΑ στη γλώσσα του χρήστη (${language}) — ΠΟΤΕ σε άλλη.
 ${AI_CONDUCT_EL}${AI_QUALITY_CHECKLIST_EL}`;
+}
 
 // Turns the computed stats (lib/reflection.ts) into the plain-text user
 // message the Reflection Agent actually reasons over — kept separate from
@@ -38,6 +46,8 @@ ${missionLine}`;
 export async function generateWeeklyReflection(
   apiKey: string,
   userMessage: string,
+  /** The user's language, e.g. "el" / "en" / "de". */
+  language: string,
   // This call recorded nothing at all — the route charged a flat 2
   // credits and the tokens never reached a cost log. See CREDITS.md.
   costs?: CostAccumulator
@@ -46,7 +56,7 @@ export async function generateWeeklyReflection(
   const response = await anthropic.messages.create({
     model: REFLECTION_MODEL,
     max_tokens: 700,
-    system: REFLECTION_SYSTEM_PROMPT,
+    system: reflectionSystemPrompt(language),
     messages: [{ role: "user", content: userMessage }],
   });
   // Before the parse below, which can still bail out on an empty reply.

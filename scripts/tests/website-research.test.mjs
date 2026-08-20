@@ -32,7 +32,7 @@ const { extractHtmlDocument, containsHtmlDocumentStart } = await loadTs(
   "src/lib/website-html-extract.ts"
 );
 const { looksLikeCompleteHtmlDocument } = await loadTs("src/lib/html-document-check.ts");
-const { broadenImageQuery, picsumFallbackUrl } = await loadTs(
+const { broadenImageQuery } = await loadTs(
   "src/lib/website-image-placeholders.ts"
 );
 
@@ -101,13 +101,29 @@ check(
   "a one-word query still produces one attempt",
   broadenImageQuery("espresso").length === 1 && broadenImageQuery("espresso")[0] === "espresso"
 );
-check("the final fallback is still a real, working URL", picsumFallbackUrl("espresso machine").startsWith("https://picsum.photos/seed/"));
+// The picsum fallback is GONE: an unresolvable placeholder is removed,
+// never substituted with a random photo of something else. Fewer
+// relevant images beat more random ones.
+check(
+  "the picsum fallback function no longer exists",
+  !/picsumFallbackUrl/.test(
+    readFileSync("src/lib/website-image-placeholders.ts", "utf8").replace(/\/\/[^\n]*/g, "")
+  )
+);
 
 console.log("\n== 5. the resolver actually uses the broadening ==");
 const resolverSrc = readFileSync("src/lib/website-image-resolver.ts", "utf8");
 check("broadenImageQuery is imported", /broadenImageQuery/.test(resolverSrc));
-check("and iterated, not called once", /for \(const attempt of broadenImageQuery\(query\)\)/.test(resolverSrc));
-check("picsum is only reached after every attempt", /resolved\.set\(slug, picsumFallbackUrl\(query\)\);\s*\}\s*\)/.test(resolverSrc));
+check("every photo gets its ladder of attempts", /attempts: broadenImageQuery\(p\.query\)/.test(resolverSrc));
+check(
+  "walked breadth-first: every photo's best query before anyone's retry",
+  /for \(let round = 0; round < maxRounds/.test(resolverSrc)
+);
+check("an unresolved placeholder is stripped, not guessed at", /stripPlaceholderImageTags\(result, unresolved\.map\(/.test(resolverSrc));
+check(
+  "picsum appears nowhere in the resolver's code (comments may explain its removal)",
+  !/picsum/i.test(resolverSrc.replace(/\/\/[^\n]*/g, ""))
+);
 
 console.log("\n== 6. the generation prompt orders research rather than permitting it ==");
 const builderSrc = readFileSync("src/lib/website-builder.ts", "utf8");

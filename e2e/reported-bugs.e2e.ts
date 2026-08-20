@@ -255,12 +255,70 @@ test("bug 9 — the logo question is asked before generation", async ({ browser 
   await context.close();
 });
 
-test("bug 10 — TTFB and LCP on the real deployment, measured", async ({ browser }) => {
-  test.setTimeout(120_000);
+test("bug 11 — a Greek file-ask answer keeps its page citations", async ({ browser }) => {
+  // THE REPORT: a correct answer with no sources at all. Root cause: the
+  // model translates "Page 3" into the reply language and the verifier
+  // stripped every translated citation as fabricated. This asks a REAL
+  // question (one small model call) in Greek and requires visible sources.
+  test.setTimeout(TIMEOUTS.upload + TIMEOUTS.extraction + 180_000);
   const context = await signedInContext(browser);
   const page = await context.newPage();
-  const rows: string[] = [];
-  for (const path of ["/login", "/dashboard", "/dashboard/chat", "/dashboard/agents"]) {
+  await page.goto("/dashboard/files", { waitUntil: "networkidle" });
+
+  const name = `e2e-citations-${Date.now()}.txt`;
+  await page.setInputFiles('input[type="file"]', {
+    name,
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "Company policy handbook.\nVacation: employees receive 24 days of paid leave per year.\nRemote work: allowed up to 3 days per week.\n"
+    ),
+  });
+  const row = page.locator(`[data-testid="files-list"] :text("${name}")`).first();
+  await expect(row, "upload never appeared — storage problem, not a citations problem").toBeVisible({
+    timeout: TIMEOUTS.upload,
+  });
+
+  // Tick the file (the checkbox in its card), ask in GREEK — the language
+  // that reproduced the bug — and wait for the answer.
+  const card = page.locator(`[data-testid="files-list"] li, [data-testid="files-list"] > div`, { hasText: name }).first();
+  await card.locator('input[type="checkbox"]').check({ timeout: 10_000 });
+  await page.locator('[data-testid="files-question"]').fill("Πόσες ημέρες άδειας δικαιούμαι τον χρόνο;");
+  await page.locator('[data-testid="files-ask-button"]').click();
+
+  const citation = page.locator('[data-testid="files-copy-citation"]').first();
+  const uncited = page.locator('[data-testid="files-answer-uncited"]');
+  await expect(
+    citation,
+    "THE REPORTED BUG: the answer rendered without a single verifiable citation. " +
+      "If [data-testid=files-answer-uncited] is visible instead, the model answered without citing " +
+      "and the deployment predates the tolerant verifier (src/lib/files/ask.ts verifyCitations)."
+  ).toBeVisible({ timeout: 150_000 });
+  await expect(uncited, "the uncited warning must not show when citations rendered").toHaveCount(0);
+
+  const files = await (await page.request.get("/api/files")).json().catch(() => null);
+  const mine = files?.files?.find?.((f: { filename: string }) => f.filename === name);
+  if (mine) await page.request.delete(`/api/files/${mine.id}`);
+  await context.close();
+});
+
+test("bug 10 — TTFB, LCP and INP on the real deployment, measured", async ({ browser }) => {
+  test.setTimeout(240_000);
+  const context = await signedInContext(browser);
+  const page = await context.newPage();
+  const rows: { path: string; ttfb: number; lcp: number; inp: number }[] = [];
+  // Every route the user moves through, not a sample of two: the report
+  // was about how the SITE feels, and an average hides the one page that
+  // is slow.
+  for (const path of [
+    "/login",
+    "/dashboard",
+    "/dashboard/chat",
+    "/dashboard/agents",
+    "/dashboard/files",
+    "/dashboard/websites",
+    "/dashboard/missions",
+    "/dashboard/settings",
+  ]) {
     await page.goto(path, { waitUntil: "load" });
     const m = await page.evaluate(
       () =>
@@ -273,12 +331,72 @@ test("bug 10 — TTFB and LCP on the real deployment, measured", async ({ browse
           setTimeout(() => resolve({ ttfb: nav.responseStart, lcp }), 3000);
         })
     );
-    rows.push(`${path}: TTFB ${m.ttfb.toFixed(0)}ms, LCP ${m.lcp.toFixed(0)}ms`);
+
+    // INP needs a real interaction, so one is made: the worst interaction
+    // latency across a handful of clicks on whatever this page offers.
+    // Measured with the Event Timing API — processingEnd - startTime is
+    // the main-thread half, which is the half a slow page owns (the
+    // to-paint half is polluted by the headless compositor's cadence).
+    const inp = await page.evaluate(async () => {
+      const worst = { value: 0 };
+      const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          const e = entry as PerformanceEventTiming;
+          const latency = e.processingEnd - e.startTime;
+          if (latency > worst.value) worst.value = latency;
+        }
+      });
+      observer.observe({ type: "event", durationThreshold: 16 } as PerformanceObserverInit);
+      const targets = [...document.querySelectorAll("button, a[href], input, textarea")].slice(0, 5);
+      for (const target of targets) {
+        (target as HTMLElement).dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+        (target as HTMLElement).dispatchEvent(new MouseEvent("pointerup", { bubbles: true }));
+        await new Promise((r) => setTimeout(r, 120));
+      }
+      await new Promise((r) => setTimeout(r, 400));
+      observer.disconnect();
+      return worst.value;
+    });
+
+    rows.push({ path, ttfb: m.ttfb, lcp: m.lcp, inp });
     // Loud budgets, deliberately generous for a serverless cold start —
     // red here means a person feels it, not that a lab metric slipped.
     expect.soft(m.ttfb, `${path} TTFB ${m.ttfb.toFixed(0)}ms > 2500ms`).toBeLessThanOrEqual(2500);
     expect.soft(m.lcp, `${path} LCP ${m.lcp.toFixed(0)}ms > 5000ms`).toBeLessThanOrEqual(5000);
+    expect.soft(inp, `${path} INP ${inp.toFixed(0)}ms > 200ms`).toBeLessThanOrEqual(200);
   }
-  console.log("      " + rows.join("\n      "));
+  // Printed as the table the report asked for.
+  console.log("      Route                     TTFB      LCP      INP");
+  for (const r of rows) {
+    console.log(
+      `      ${r.path.padEnd(24)} ${`${r.ttfb.toFixed(0)}ms`.padStart(7)} ${`${r.lcp.toFixed(0)}ms`.padStart(8)} ${`${r.inp.toFixed(0)}ms`.padStart(8)}`
+    );
+  }
+  await context.close();
+});
+
+test("bug 12 — signup end to end, measured against the 1.5s target", async ({ browser }) => {
+  // The stage timings live in the deployment's logs (IONEXA_DIAG=1); what
+  // this measures is the thing the person actually waits for: the POST.
+  // A fresh address every run, because a duplicate is a 409 in 200ms and
+  // would look like a triumph.
+  test.setTimeout(120_000);
+  const context = await browser.newContext({ baseURL: BASE() });
+  const page = await context.newPage();
+  const email = `e2e-signup-${Date.now()}@example-ionexa-test.com`;
+  const started = Date.now();
+  const response = await page.request.post("/api/signup", {
+    data: { email, password: `Ae1!${Math.random().toString(36).slice(2)}Zz`, termsAccepted: true },
+  });
+  const elapsed = Date.now() - started;
+  const body = await response.json().catch(() => ({}));
+  console.log(`      signup POST: ${elapsed}ms (status ${response.status()})`);
+  expect(
+    response.ok(),
+    `signup failed (${response.status()}): ${JSON.stringify(body).slice(0, 300)}`
+  ).toBe(true);
+  // The target the report set. Soft, because one cold start is not a
+  // regression — but it prints the number every run.
+  expect.soft(elapsed, `signup took ${elapsed}ms, target is 1500ms`).toBeLessThanOrEqual(1500);
   await context.close();
 });

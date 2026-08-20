@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import {
   AlertTriangle,
   Download,
@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
+import { findUnfilledPlaceholders, type UnfilledPlaceholder } from "@/lib/website-placeholders";
 import { useTranslations, useLocale } from "next-intl";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { createClient } from "@/lib/supabase/client";
@@ -871,6 +872,15 @@ export function WebsiteBuilderWorkspace({
   // that's somehow incomplete (e.g. a row saved before the server-side
   // truncation check below existed) — shows a clear message instead.
   const displayedHtmlIsComplete = looksLikeCompleteHtmlDocument(displayedHtml);
+  // WHAT IS STILL BLANK, read off the page itself. The prompt refuses to
+  // invent a phone number or a price and leaves a bracketed placeholder
+  // instead — correct, but a gap nobody notices is a gap that ships. The
+  // list is derived from the rendered HTML, so it cannot claim a blank
+  // the page does not have, nor miss one it does.
+  const unfilled = useMemo(
+    () => (displayedHtmlIsComplete ? findUnfilledPlaceholders(displayedHtml) : []),
+    [displayedHtml, displayedHtmlIsComplete]
+  );
 
   // Rotating progress messages for the pending/processing preview panel —
   // cycles through PROGRESS_MESSAGE_KEYS every PROGRESS_MESSAGE_INTERVAL_MS
@@ -1158,13 +1168,40 @@ export function WebsiteBuilderWorkspace({
                   )}
                 </div>
               ) : displayedHtmlIsComplete ? (
-                <iframe
-                  key={`${previewWebsite.id}:${viewingVersion?.id ?? "latest"}`}
-                  srcDoc={displayedHtml}
-                  sandbox=""
-                  title={previewWebsite.name}
-                  className="h-[500px] w-full rounded-xl border border-border bg-white"
-                />
+                <>
+                  {unfilled.length > 0 && (
+                    <div
+                      data-testid="website-unfilled"
+                      className="mb-3 rounded-xl border border-amber-500/30 bg-amber-500/[0.06] p-3"
+                    >
+                      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-amber-300">
+                        <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        {t("unfilledTitle", { count: unfilled.length })}
+                      </p>
+                      <p className="mb-2 text-[11px] leading-relaxed text-amber-200/80">
+                        {t("unfilledBody")}
+                      </p>
+                      <ul className="flex flex-wrap gap-1.5">
+                        {unfilled.map((item: UnfilledPlaceholder) => (
+                          <li
+                            key={item.text}
+                            className="rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-200"
+                          >
+                            {item.text}
+                            {item.count > 1 && <span className="ml-1 opacity-70">×{item.count}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <iframe
+                    key={`${previewWebsite.id}:${viewingVersion?.id ?? "latest"}`}
+                    srcDoc={displayedHtml}
+                    sandbox=""
+                    title={previewWebsite.name}
+                    className="h-[500px] w-full rounded-xl border border-border bg-white"
+                  />
+                </>
               ) : (
                 <div className="flex h-[500px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-red-800 bg-red-950/20 px-6 text-center">
                   <AlertTriangle className="h-8 w-8 text-red-400" aria-hidden="true" />

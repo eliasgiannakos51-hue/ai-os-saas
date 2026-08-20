@@ -254,5 +254,49 @@ check("connecting sends a real test message", /connectSuccess/.test(picker) && /
 // Touch targets on a phone.
 check("the channel buttons are tall enough to tap", /min-h-\[44px\]/.test(picker));
 
+console.log("\n== is it ACTUALLY sending? the button that answers that ==");
+// "The five channels are shown, but I do not know if they send." The
+// only proof used to be at the moment of pasting — and a bot token can be
+// revoked, a webhook deleted, a chat left, with nothing to tell us until
+// an agent's 08:00 delivery silently does not arrive.
+const route = readFileSync("src/app/api/delivery-channels/route.ts", "utf8");
+check("there is a test endpoint", /export async function PUT/.test(route));
+check("it calls the tester", /testDeliveryChannel\(user\.id, body\.channel\)/.test(route));
+check("it is rate limited on its own scope", /scope: "delivery_channel_test"/.test(route));
+check("an unknown channel is refused", /cannot be tested here/.test(route));
+check("a channel that was never connected is a 404", /result\.reason === "not_connected" \? 404/.test(route));
+check("the tester sends a REAL message via the same verifiers", /channel === "telegram"\s*\?\s*await verifyTelegram\(stored\.secret, stored\.target\)/.test(store));
+check("...and the same ones the SAVE path uses", /const proof = channel === "telegram" \? await verifyTelegram\(/.test(store));
+check("a passing test refreshes verified_at", /update\(\{ verified_at: new Date\(\)\.toISOString\(\) \}\)/.test(store));
+check("the secret is never returned to the browser", !/secret_encrypted/.test(route));
+check("the picker offers the button for Telegram", /data-testid="delivery-test-telegram"/.test(picker));
+check("and for Discord", /data-testid="delivery-test-discord"/.test(picker));
+check("success says WHERE to look", /testSentTelegram|testSentDiscord/.test(picker));
+
+console.log("\n== the setup instructions are steps, not one long sentence ==");
+// "The user does not know what @BotFather is" — and "create a bot with
+// @BotFather, send it a message, then paste its token" is one sentence
+// describing seven separate actions.
+const messages = Object.fromEntries(
+  ["en", "el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"].map((l) => [
+    l,
+    JSON.parse(readFileSync(`messages/${l}.json`, "utf8")).dashboard.agents.delivery,
+  ])
+);
+for (const [channel, count] of [["telegram", 7], ["discord", 5]]) {
+  for (let i = 1; i <= count; i++) {
+    const missing = Object.entries(messages).filter(([, m]) => typeof m[`${channel}Step${i}`] !== "string");
+    check(`${channel} step ${i} exists in all ten locales`, missing.length === 0, missing.map(([l]) => l).join(", "));
+  }
+  check(`the picker renders ${channel}'s steps as a list`, new RegExp(`"${channel}Step1"`).test(picker));
+}
+// A key built at runtime is invisible to the i18n scanner: a missing
+// translation would ship as the raw key on somebody's screen.
+check("no step key is assembled from a template literal", !/Step\$\{/.test(picker));
+check("the Telegram steps name BotFather", /BotFather/.test(messages.en.telegramStep1));
+check("and tell the user to /start their own bot", /\/start/.test(messages.en.telegramStep6));
+check("the Discord steps name the webhook menu path", /Integrations/i.test(messages.en.discordStep2));
+check("the old one-line help is gone", !/telegramHelp|discordHelp/.test(picker));
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

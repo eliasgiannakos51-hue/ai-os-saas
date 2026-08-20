@@ -111,6 +111,11 @@ export function sanitiseFilename(raw: string): string {
   const cleaned = base
     // eslint-disable-next-line no-control-regex
     .replace(/[\u0000-\u001f\u007f]/g, "")
+    // An UNPAIRED surrogate half is as unstorable as NUL: JSON-serialised
+    // it becomes an escape Postgres rejects (22P05) — the same crash the
+    // extracted text needed guarding against, on the same insert.
+    .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g, "")
+    .replace(/(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "")
     .replace(/\s+/g, " ")
     .trim();
   if (!cleaned) return "untitled";

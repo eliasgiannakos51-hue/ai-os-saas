@@ -404,6 +404,10 @@ async function buildOnce(requestText) {
   await page.fill("#agent-request", requestText);
   await page.evaluate(() => {
     window.__stepsSeen = [];
+    // WHEN each label was on screen, not merely THAT it was. The third
+    // "I don't see the steps" report was about duration: the labels were
+    // real and rendered, and some of them lived for less than one frame.
+    window.__stepTiming = {};
     const labels = [
       "Working out what you need…",
       "Writing the agent…",
@@ -412,10 +416,15 @@ async function buildOnce(requestText) {
       "Getting started…",
     ];
     const tick = () => {
+      const now = performance.now();
       const text = document.body.innerText;
       for (const label of labels) {
-        if (text.includes(label) && !window.__stepsSeen.includes(label)) {
+        if (!text.includes(label)) continue;
+        if (!window.__stepsSeen.includes(label)) {
           window.__stepsSeen.push(label);
+          window.__stepTiming[label] = { first: now, last: now };
+        } else {
+          window.__stepTiming[label].last = now;
         }
       }
       if (!window.__stepsDone) requestAnimationFrame(tick);
@@ -432,12 +441,11 @@ async function buildOnce(requestText) {
   await page
     .waitForSelector("text=what I'll build", { timeout: 60000 })
     .catch(() => {});
-  return new Set(
-    await page.evaluate(() => {
-      window.__stepsDone = true;
-      return window.__stepsSeen ?? [];
-    })
-  );
+  const collected = await page.evaluate(() => {
+    window.__stepsDone = true;
+    return { seen: window.__stepsSeen ?? [], timing: window.__stepTiming ?? {} };
+  });
+  return { seen: new Set(collected.seen), timing: collected.timing };
 }
 
 try {
@@ -447,11 +455,39 @@ try {
   check(`the counter is visible ("${await counter().innerText().catch(() => "?")}")`, /0 of \d+ agents/.test(await counter().innerText().catch(() => "")));
 
   console.log("\n== 2. the build shows its REAL steps, not a static word ==");
-  const seen = await buildOnce("Every Monday morning summarise last week's sales and email them to me");
+  const { seen, timing } = await buildOnce("Every Monday morning summarise last week's sales and email them to me");
   check(
     `step labels appeared during the build (${[...seen].join(" · ") || "none"})`,
     seen.size >= 2,
     `ai_jobs reads timeline:\n        ${jobReads.slice(-25).join("\n        ")}`
+  );
+  // EVERY step, not merely two of them: the client narrates the steps the
+  // polling jumped over (lib/jobs/use-ai-job.ts useSmoothedJob), so a
+  // build that crosses two steps between polls still shows both.
+  const BUILD_STEPS = [
+    "Working out what you need…",
+    "Writing the agent…",
+    "Checking it over…",
+    "Saving it…",
+  ];
+  check(
+    `all four build steps were shown (${BUILD_STEPS.filter((l) => seen.has(l)).length}/4)`,
+    BUILD_STEPS.every((l) => seen.has(l)),
+    `missing: ${BUILD_STEPS.filter((l) => !seen.has(l)).join(", ") || "none"}`
+  );
+  // AND LONG ENOUGH TO READ. Measured from the in-page collector, in
+  // milliseconds — the report was "it finished correctly but I saw
+  // nothing", which is what a 30ms label looks like. The floor is 500ms
+  // against a MIN_STEP_VISIBLE_MS of 800: frame jitter and the final
+  // swap-to-result both shave the tail of the last one.
+  const durations = Object.fromEntries(
+    Object.entries(timing).map(([label, t]) => [label, Math.round(t.last - t.first)])
+  );
+  const tooFast = Object.entries(durations).filter(([, ms]) => ms < 500);
+  check(
+    `every visible step lasted >= 500ms (${Object.entries(durations).map(([l, ms]) => `${l.slice(0, 14)}=${ms}ms`).join(" · ")})`,
+    tooFast.length === 0,
+    `too fast to read: ${tooFast.map(([l, ms]) => `${l} ${ms}ms`).join(", ")}`
   );
   check("the preview arrived", await page.locator("text=what I'll build").first().isVisible().catch(() => false));
   check(

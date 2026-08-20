@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { JOB_STEPS, type JobKind } from "@/lib/jobs/job-types";
 
 /**
  * Watches a background job and reports what it is doing.
@@ -46,8 +47,206 @@ const POLL_MS = 2000;
  *  to let a healthy kick land and short enough that nobody notices. */
 const NUDGE_AFTER_POLLS = 2;
 
+/**
+ * How long every step stays on screen, at minimum.
+ *
+ * THE THIRD "I don't see the steps" REPORT, and why it survived the
+ * first two fixes: the labels were real and rendered (fix one made them
+ * text, not aria-only) — but the client only SAMPLES the job row every
+ * POLL_MS. An agent build that crosses two steps between polls never
+ * shows the step in between, and when the terminal poll lands the whole
+ * panel swaps to the result in the same frame, so even a sampled label
+ * could be visible for 0ms. Fast work looked like no work.
+ *
+ * So the DISPLAYED job is allowed to lag the real one: every step —
+ * including the ones the polling jumped over, whose tokens are known
+ * from the JOB_STEPS catalogue — is shown for at least this long, and
+ * the completed state waits its turn behind them. The steps genuinely
+ * ran; showing each for 800ms narrates what happened rather than
+ * inventing anything.
+ */
+export const MIN_STEP_VISIBLE_MS = 800;
+
+/**
+ * The same minimum hold, for a surface that tracks only the step LABEL
+ * rather than the whole row (the file workspace's ask button).
+ *
+ * Each distinct value stays for MIN_STEP_VISIBLE_MS before the next one
+ * replaces it; values that arrive during a hold are queued, so a step is
+ * never skipped and never flashes. `null` means "no job", and it is
+ * applied immediately — clearing is not a step.
+ */
+export function useHeldStepLabel(value: string | null): string | null {
+  const [held, setHeld] = useState<string | null>(value);
+  const queue = useRef<string[]>([]);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const current = useRef<string | null>(value);
+
+  useEffect(() => {
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (value === null) {
+      queue.current = [];
+      if (timer.current) {
+        clearTimeout(timer.current);
+        timer.current = null;
+      }
+      current.current = null;
+      setHeld(null);
+      return;
+    }
+    if (value === current.current || queue.current[queue.current.length - 1] === value) return;
+
+    const pump = () => {
+      const next = queue.current.shift();
+      if (next === undefined) {
+        timer.current = null;
+        return;
+      }
+      current.current = next;
+      setHeld(next);
+      timer.current = setTimeout(pump, MIN_STEP_VISIBLE_MS);
+    };
+
+    queue.current.push(value);
+    if (!timer.current) pump();
+  }, [value]);
+
+  return held;
+}
+
+/**
+ * The smoothed VIEW of a job row: what the progress line should render.
+ *
+ * Give it the raw polled row; it returns a row that never skips a step
+ * and never leaves one visible for less than MIN_STEP_VISIBLE_MS. A job
+ * first observed already finished (a restored page) is shown finished
+ * immediately — the replay only happens for work this mount actually
+ * watched run.
+ */
+export function useSmoothedJob(raw: AiJob | null): AiJob | null {
+  const [display, setDisplay] = useState<AiJob | null>(null);
+  const queue = useRef<AiJob[]>([]);
+  const draining = useRef(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Highest step already displayed or enqueued for this job id. */
+  const lastStep = useRef(0);
+  /** True once this mount saw the job in a non-terminal state. */
+  const sawLive = useRef(false);
+  /** The terminal frame is enqueued exactly once per job. */
+  const finishedQueued = useRef(false);
+  const jobKey = useRef<string | null>(null);
+  // The drain reads through a ref so a frame arriving mid-drain is
+  // appended, not lost, and unmount stops the timer.
+  useEffect(() => {
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const key = raw?.id ?? null;
+    if (key !== jobKey.current) {
+      jobKey.current = key;
+      queue.current = [];
+      lastStep.current = 0;
+      sawLive.current = false;
+      finishedQueued.current = false;
+      draining.current = false;
+      if (timer.current) {
+        clearTimeout(timer.current);
+        timer.current = null;
+      }
+      setDisplay(null);
+    }
+    if (!raw) return;
+
+    const steps = JOB_STEPS[raw.kind as JobKind] ?? [];
+    const total = raw.stepTotal > 0 ? raw.stepTotal : steps.length;
+    const terminal = raw.status === "done" || raw.status === "failed";
+
+    const pump = () => {
+      const next = queue.current.shift();
+      if (!next) {
+        draining.current = false;
+        timer.current = null;
+        return;
+      }
+      draining.current = true;
+      setDisplay(next);
+      timer.current = setTimeout(pump, MIN_STEP_VISIBLE_MS);
+    };
+
+    if (terminal && !sawLive.current) {
+      // First sight of this job is its outcome — nothing to narrate.
+      lastStep.current = raw.step;
+      setDisplay(raw);
+      return;
+    }
+
+    if (!terminal) {
+      sawLive.current = true;
+      // Steps the polling jumped over, then the observed one.
+      for (let s = lastStep.current + 1; s <= raw.step; s++) {
+        queue.current.push({
+          ...raw,
+          status: "running",
+          step: s,
+          stepLabel: steps[s - 1] ?? raw.stepLabel,
+        });
+      }
+      if (raw.step > lastStep.current) {
+        lastStep.current = raw.step;
+      } else if (queue.current.length === 0 && !draining.current) {
+        // Same step, fresher row (percent moved): update in place, no hold.
+        setDisplay(raw);
+      }
+    } else {
+      // Finished while we watched: narrate the steps that ran between the
+      // last poll and the end, then show the outcome — once. Later polls
+      // of the same finished row must not re-enqueue it.
+      if (finishedQueued.current) return;
+      finishedQueued.current = true;
+      // ONLY ON SUCCESS. A job that completed really did pass every step,
+      // so showing the ones the polling missed is narration. A job that
+      // FAILED at step 1 did not reach steps 2-4, and showing them would
+      // be this component inventing work that never happened — the exact
+      // dishonesty the step counter exists to prevent. A failure jumps
+      // straight to the outcome, behind whatever is already queued.
+      if (raw.status === "done") {
+        for (let s = lastStep.current + 1; s <= total; s++) {
+          queue.current.push({
+            ...raw,
+            status: "running",
+            step: s,
+            stepLabel: steps[s - 1] ?? raw.stepLabel,
+          });
+        }
+        lastStep.current = total;
+      }
+      queue.current.push(raw);
+    }
+
+    if (!draining.current && queue.current.length > 0) pump();
+    // `display` is deliberately not a dependency: this effect reacts to
+    // fresh rows, the pump owns the cadence.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [raw]);
+
+  return display;
+}
+
 export function useAiJob(jobId: string | null): {
+  /** The SMOOTHED row — what progress UIs should render. It never skips
+   *  a step and holds each for MIN_STEP_VISIBLE_MS, so it can lag the
+   *  truth by a couple of seconds around completion. */
   job: AiJob | null;
+  /** The raw polled row, for logic that needs the truth immediately. */
+  rawJob: AiJob | null;
   isRunning: boolean;
   /** True when polls keep failing to SEE the job at all. The work may be
    *  fine — this is "progress cannot be shown", which the UI must say
@@ -130,9 +329,16 @@ export function useAiJob(jobId: string | null): {
     }
   }, [job, jobId]);
 
+  // What callers RENDER is the smoothed view; isRunning follows it so the
+  // surrounding panel keeps showing progress until the narration drains —
+  // swapping to the result on the raw row is how a step could be visible
+  // for 0ms.
+  const display = useSmoothedJob(job);
+
   return {
-    job,
-    isRunning: Boolean(job && (job.status === "queued" || job.status === "running")),
+    job: display,
+    rawJob: job,
+    isRunning: Boolean(display && (display.status === "queued" || display.status === "running")),
     watchLost,
     refresh,
   };

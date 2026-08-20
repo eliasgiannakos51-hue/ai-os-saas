@@ -163,6 +163,34 @@ console.log("\n== 9. mutation test — section 8 can actually go red ==");
     !/resolveLanguage\(/.test(stripComments(mutated)));
 }
 
+console.log("\n== no prompt decides the user's language FOR them ==");
+// Every one of these is a system prompt written in Greek. That is fine —
+// the prompt is instructions to the model, not text the user sees. What
+// is NOT fine is a Greek prompt with no rule about the ANSWER's language:
+// the model follows the prompt's language, so a German user's mission
+// plan came back in Greek, and the weekly reflection said outright
+// "Απάντα στα ελληνικά" ("answer in Greek") for all ten locales.
+{
+  const { readFileSync } = await import("node:fs");
+  // file -> the rule that must be present
+  const PROMPTS = [
+    ["src/lib/mission-agents.ts", "PLANNER_SYSTEM_PROMPT", /ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που είναι γραμμένος ο στόχος/],
+    ["src/lib/mission-agents.ts", "REVIEWER_SYSTEM_PROMPT", /ίδια γλώσσα που είναι γραμμένος ο στόχος/],
+    ["src/lib/reflection-agent.ts", "reflectionSystemPrompt", /στη γλώσσα του χρήστη \(\$\{language\}\)/],
+  ];
+  for (const [file, name, rule] of PROMPTS) {
+    const src = readFileSync(file, "utf8");
+    check(`${name} exists`, src.includes(name));
+    check(`${name} says which language to answer in`, rule.test(src));
+  }
+  // The reflection takes it as an argument rather than guessing.
+  const agent = readFileSync("src/lib/reflection-agent.ts", "utf8");
+  check("the reflection language is a parameter", /generateWeeklyReflection\([\s\S]{0,220}?language: string,/.test(agent));
+  check("and the old Greek default is gone", !/Απάντα στα ελληνικά/.test(agent));
+  const route = readFileSync("src/app/api/reflection/generate/route.ts", "utf8");
+  check("the route passes the user's real locale", /const locale = await getLocale\(\);[\s\S]{0,200}?generateWeeklyReflection\(apiKey, userMessage, locale/.test(route));
+}
+
 console.log(`\n${pass} passed, ${failures.length} failed`);
 if (failures.length) {
   console.log("FAILED: " + failures.join(" | "));

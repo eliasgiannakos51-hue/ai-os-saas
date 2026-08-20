@@ -28,6 +28,36 @@ export type ExtractionResult = {
 
 export class ExtractionError extends Error {}
 
+/**
+ * Make extracted text STORABLE.
+ *
+ * Postgres cannot hold U+0000 in a text column at all — through PostgREST
+ * the insert dies with 22P05, "unsupported Unicode escape sequence", which
+ * is exactly the production error /api/files/upload logged. An UNPAIRED
+ * surrogate half fails the same way: JSON.stringify emits it as "\ud800",
+ * and Postgres rejects the escape.
+ *
+ * Real documents produce both. A PDF text literal can carry NUL via an
+ * octal escape (pdf.ts decodes \\000 faithfully); OOXML can smuggle any
+ * code point as a numeric entity (safeCodePoint below also refuses these
+ * now, but this boundary must not depend on every decoder remembering);
+ * and a .txt is only sniffed for NUL in its first 8KB.
+ *
+ * NUL and the other C0 controls (except \t \n \r) are dropped — they are
+ * never content. A lone surrogate becomes U+FFFD, the replacement
+ * character, because something WAS there and a visible mark is more
+ * honest than silent deletion.
+ */
+export function sanitiseExtractedText(text: string): string {
+  return (
+    text
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "")
+      .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g, "�")
+      .replace(/(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "�")
+  );
+}
+
 /** Characters per synthetic page for the formats that have none. Roughly
  *  a printed page of prose, so "page 4" means something similar wherever
  *  it appears. */
@@ -61,6 +91,11 @@ function decodeXmlText(value: string): string {
 
 function safeCodePoint(value: number): string {
   if (!Number.isFinite(value) || value < 0 || value > 0x10ffff) return "";
+  // NUL is unstorable in Postgres text, and a surrogate code point
+  // produces an unpaired half that fails the same insert. Both are legal
+  // arguments to String.fromCodePoint, which is why the range check
+  // above was not enough — see sanitiseExtractedText.
+  if (value === 0 || (value >= 0xd800 && value <= 0xdfff)) return "";
   try {
     return String.fromCodePoint(value);
   } catch {
@@ -324,6 +359,19 @@ export function extractText(buf: Buffer, kind: FileKind): ExtractionResult {
   if (result.pages.length === 0) {
     throw new ExtractionError("this file appears to be empty");
   }
+
+  // ONE boundary for storability, whatever the format: every page's text
+  // and label pass through the sanitiser here, so no decoder above (nor a
+  // future fifth format) can hand Postgres a NUL or a lone surrogate.
+  // Before the size cap on purpose — the cap must count stored characters.
+  result = {
+    ...result,
+    pages: result.pages.map((page) => ({
+      pageNumber: page.pageNumber,
+      label: sanitiseExtractedText(page.label),
+      text: sanitiseExtractedText(page.text),
+    })),
+  };
 
   let total = 0;
   const kept: ExtractedPage[] = [];

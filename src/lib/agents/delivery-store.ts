@@ -174,6 +174,56 @@ export async function readDeliverySecret(
   }
 }
 
+/**
+ * Send a REAL message to an already-connected channel, on demand.
+ *
+ * The save path proves a credential once, at the moment it is pasted —
+ * but a bot token can be revoked, a webhook deleted, a chat left, and
+ * none of those tell us. Until this existed the only way to find out was
+ * to wait for an agent's 08:00 delivery to silently not arrive. The
+ * button that calls this is the answer to "is it actually working?", and
+ * it answers with the platform's own words when it is not.
+ *
+ * Uses the same verify functions as the save path, so a test cannot pass
+ * where a save would have failed, or vice versa.
+ */
+export async function testDeliveryChannel(
+  userId: string,
+  channel: CredentialChannel
+): Promise<{ ok: true } | { ok: false; reason: "not_connected" | "failed"; message: string }> {
+  const stored = await readDeliverySecret(userId, channel);
+  if (!stored) {
+    return {
+      ok: false,
+      reason: "not_connected",
+      message: "That channel is not connected yet.",
+    };
+  }
+  const proof =
+    channel === "telegram"
+      ? await verifyTelegram(stored.secret, stored.target)
+      : await verifyDiscord(stored.secret);
+  if (proof.ok) {
+    // The row's verified_at is what the settings page shows, so a
+    // successful test refreshes it — otherwise a channel proved working
+    // today still reads as last proved whenever it was pasted.
+    try {
+      const admin = createAdminClient();
+      await admin
+        .from("user_delivery_channels")
+        .update({ verified_at: new Date().toISOString() })
+        .eq("user_id", userId)
+        .eq("channel", channel);
+    } catch (err) {
+      // The message DID arrive; failing the test over a bookkeeping write
+      // would be a lie in the more alarming direction.
+      logApiError("agents:delivery-store", new Error(safeErrorDetail(err)), { userId, channel, stage: "test_touch" });
+    }
+    return { ok: true };
+  }
+  return { ok: false, reason: "failed", message: proof.message };
+}
+
 export async function deleteDeliveryChannel(userId: string, channel: CredentialChannel): Promise<boolean> {
   try {
     const admin = createAdminClient();

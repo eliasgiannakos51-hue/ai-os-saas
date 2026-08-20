@@ -205,11 +205,14 @@ export async function POST(request: Request) {
     // something the AI Life Context already answers. Two constraints
     // decide where this runs:
     //
-    //   It CANNOT run in the worker. getUserFullContext queries
-    //   ai_missions with no user_id filter and relies entirely on RLS to
-    //   scope it; the worker holds the service-role client, so the same
-    //   call there would fold every user's missions into this user's
-    //   prompt.
+    //   It no longer HAS to avoid the worker. This comment used to say
+    //   getUserFullContext queried ai_missions with no user_id filter and
+    //   relied entirely on RLS, so calling it from the worker (which
+    //   holds the service-role client) would fold every user's missions
+    //   into this user's prompt. That was true, and it was true of two
+    //   other handlers that did exactly that. The filter now lives inside
+    //   getUserFullContext, so the function is safe under either client —
+    //   see the note on it. Kept here anyway, for the second reason.
     //
     //   It only runs when the check will. On the resubmission
     //   (skipClarification) there is no check to inform, and this is

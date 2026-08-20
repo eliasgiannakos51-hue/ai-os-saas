@@ -858,7 +858,12 @@
       "title": "Alles Erstellen",
       "subtitle": "Beschreibe irgendetwas — eine Produktidee, einen Trade, das Feedback eines Nutzers, eine Kennzahl — und es landet automatisch im richtigen Modul.",
       "loggedTo": "Erfasst in:",
-      "viewModule": "{module} öffnen →"
+      "viewModule": "{module} öffnen →",
+      "answeredNotFiled": "Das war eine Frage — es wurde nichts abgelegt.",
+      "continueInChat": "Im Chat fortfahren",
+      "looksLikeQuestion": "Das sieht nach einer Frage aus. Soll ich sie beantworten oder ablegen?",
+      "answerItInstead": "Beantworten",
+      "recordItAnyway": "Trotzdem ablegen"
     },
     "timeline": {
       "title": "Verlauf",

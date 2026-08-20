@@ -858,7 +858,12 @@
       "title": "Create Anything",
       "subtitle": "Describe anything — a product idea, a trade, feedback from a user, a metric — and it lands in the right module automatically.",
       "loggedTo": "Logged to:",
-      "viewModule": "View {module} →"
+      "viewModule": "View {module} →",
+      "answeredNotFiled": "This was a question, so nothing was filed.",
+      "continueInChat": "Continue in Chat",
+      "looksLikeQuestion": "That looks like a question. Should I answer it, or record it?",
+      "answerItInstead": "Answer it",
+      "recordItAnyway": "Record it anyway"
     },
     "timeline": {
       "title": "History",

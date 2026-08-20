@@ -858,7 +858,12 @@
       "title": "何でも作成",
       "subtitle": "何でも書いてください — 製品のアイデア、トレード、ユーザーからのフィードバック、指標 — 自動的に適切なモジュールに入ります。",
       "loggedTo": "記録先:",
-      "viewModule": "{module} を開く →"
+      "viewModule": "{module} を開く →",
+      "answeredNotFiled": "これは質問だったため、何も記録していません。",
+      "continueInChat": "チャットで続ける",
+      "looksLikeQuestion": "これは質問のようです。答えますか、それとも記録しますか？",
+      "answerItInstead": "答える",
+      "recordItAnyway": "それでも記録する"
     },
     "timeline": {
       "title": "履歴",

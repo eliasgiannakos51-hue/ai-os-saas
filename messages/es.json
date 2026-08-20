@@ -858,7 +858,12 @@
       "title": "Crear Cualquier Cosa",
       "subtitle": "Describe cualquier cosa — una idea de producto, una operación, el comentario de un usuario, una métrica — y acaba automáticamente en el módulo correcto.",
       "loggedTo": "Registrado en:",
-      "viewModule": "Ver {module} →"
+      "viewModule": "Ver {module} →",
+      "answeredNotFiled": "Esto era una pregunta, así que no se archivó nada.",
+      "continueInChat": "Continuar en el Chat",
+      "looksLikeQuestion": "Eso parece una pregunta. ¿La respondo o la registro?",
+      "answerItInstead": "Responderla",
+      "recordItAnyway": "Registrarla igualmente"
     },
     "timeline": {
       "title": "Historial",

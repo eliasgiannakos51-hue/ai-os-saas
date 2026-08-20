@@ -858,7 +858,12 @@
       "title": "Créer N'importe Quoi",
       "subtitle": "Décrivez n'importe quoi — une idée de produit, une opération, le retour d'un utilisateur, un indicateur — et cela atterrit automatiquement dans le bon module.",
       "loggedTo": "Enregistré dans :",
-      "viewModule": "Ouvrir {module} →"
+      "viewModule": "Ouvrir {module} →",
+      "answeredNotFiled": "C'était une question : rien n'a été enregistré.",
+      "continueInChat": "Continuer dans le Chat",
+      "looksLikeQuestion": "Cela ressemble à une question. Dois-je y répondre ou l'enregistrer ?",
+      "answerItInstead": "Y répondre",
+      "recordItAnyway": "L'enregistrer quand même"
     },
     "timeline": {
       "title": "Historique",

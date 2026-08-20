@@ -858,7 +858,12 @@
       "title": "إنشاء أي شيء",
       "subtitle": "صف أي شيء — فكرة منتج، صفقة، ملاحظة من مستخدم، مؤشرًا — وسيصل تلقائيًا إلى الوحدة الصحيحة.",
       "loggedTo": "سُجّل في:",
-      "viewModule": "عرض {module} ←"
+      "viewModule": "عرض {module} ←",
+      "answeredNotFiled": "كان هذا سؤالًا، لذلك لم يُسجَّل شيء.",
+      "continueInChat": "تابع في الدردشة",
+      "looksLikeQuestion": "يبدو هذا سؤالًا. هل أجيب عنه أم أسجله؟",
+      "answerItInstead": "أجب عنه",
+      "recordItAnyway": "سجّله على أي حال"
     },
     "timeline": {
       "title": "السجل",

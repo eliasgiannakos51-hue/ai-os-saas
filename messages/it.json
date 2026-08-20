@@ -858,7 +858,12 @@
       "title": "Crea Qualsiasi Cosa",
       "subtitle": "Descrivi qualsiasi cosa — un'idea di prodotto, un'operazione, il feedback di un utente, una metrica — e finisce automaticamente nel modulo giusto.",
       "loggedTo": "Registrato in:",
-      "viewModule": "Apri {module} →"
+      "viewModule": "Apri {module} →",
+      "answeredNotFiled": "Questa era una domanda, quindi non è stato archiviato nulla.",
+      "continueInChat": "Continua nella Chat",
+      "looksLikeQuestion": "Sembra una domanda. La rispondo o la registro?",
+      "answerItInstead": "Rispondi",
+      "recordItAnyway": "Registrala comunque"
     },
     "timeline": {
       "title": "Cronologia",

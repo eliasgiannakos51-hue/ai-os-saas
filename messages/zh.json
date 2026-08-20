@@ -858,7 +858,12 @@
       "title": "创建任何内容",
       "subtitle": "描述任何内容——一个产品创意、一笔交易、一条用户反馈、一项指标——它会自动归入正确的模块。",
       "loggedTo": "已记录到：",
-      "viewModule": "查看 {module} →"
+      "viewModule": "查看 {module} →",
+      "answeredNotFiled": "这是一个问题，因此没有记录任何内容。",
+      "continueInChat": "在聊天中继续",
+      "looksLikeQuestion": "这看起来像一个问题。要回答它，还是记录它？",
+      "answerItInstead": "回答它",
+      "recordItAnyway": "仍然记录"
     },
     "timeline": {
       "title": "历史",

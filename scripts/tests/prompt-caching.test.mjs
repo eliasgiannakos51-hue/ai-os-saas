@@ -323,5 +323,27 @@ for (const col of ["input_tokens", "cache_read_tokens", "cache_write_tokens"]) {
 ok("it aggregates them", /aggregateCacheRows\(/.test(reportSrc));
 ok("and renders the hit rate", /cacheSummary\.hitRate/.test(reportSrc));
 
+// A PostgREST .select() is a runtime string: the compiler cannot see a
+// typo in it, and PostgREST answers a bad column with an error the panel
+// swallows into its "unavailable" branch. So the column names are checked
+// against the migration that actually declares them.
+const schemaSql = readFileSync("supabase/migrations/20260803000000_baseline_schema.sql", "utf8");
+const tableDdl = schemaSql
+  .slice(schemaSql.indexOf("create table if not exists public.ai_cost_log"))
+  .split("\n);")[0];
+const selected = (reportSrc.match(/"feature, achieved_margin[^"]*"/s)?.[0] ?? "")
+  .replace(/"/g, "")
+  .split(",")
+  .map((c) => c.trim())
+  .filter(Boolean);
+ok("the select string was found at all", selected.length > 0);
+for (const col of selected) {
+  ok(`ai_cost_log declares "${col}"`, new RegExp(`^\\s+${col}\\s`, "m").test(tableDdl));
+}
+// The three the panel depends on must specifically be there.
+for (const col of ["input_tokens", "cache_read_tokens", "cache_write_tokens"]) {
+  ok(`the panel actually selects "${col}"`, selected.includes(col));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

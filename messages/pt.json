@@ -1077,6 +1077,15 @@
       "previewIncompleteBody": "Esta página gerada parece incompleta ou foi cortada, por isso não pode ser exibida com segurança. Tente gerar novamente com uma descrição mais curta, ou edite-a de novo.",
       "unfilledTitle": "{count} item(ns) ainda por preencher",
       "unfilledBody": "A IA nunca inventa um telefone, um preço ou um horário — deixa um espaço visível. Usa «Pedir uma alteração» para os preencher, ou edita-os depois de publicar.",
+      "inventedTitle": "{count} número(s) na página que você não forneceu",
+      "inventedBody": "Aparecem na página mas não na sua descrição. A IA é instruída a nunca inventar um telefone, um preço, um horário ou um número — verifique cada um antes de publicar e corrija com «Pedir uma alteração».",
+      "inventedKind": {
+        "phone": "telefone",
+        "price": "preço",
+        "time": "horário",
+        "address": "endereço",
+        "stat": "número"
+      },
       "imageLabel": "Imagens de referência ({count}/{max}, opcional)",
       "imageHelp": "Até {max} imagens — o teu logótipo, fotos de produtos ou uma referência de estilo. JPG ou PNG, até 5MB cada. Por defeito são incorporadas no site; abaixo podes usá-las apenas como inspiração de estilo.",
       "imageRemove": "Remover imagem",

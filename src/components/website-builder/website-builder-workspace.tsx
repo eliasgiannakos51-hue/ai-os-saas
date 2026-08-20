@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { findUnfilledPlaceholders, type UnfilledPlaceholder } from "@/lib/website-placeholders";
+import { findInventedNumbers, type SuspectNumber } from "@/lib/website-invented-numbers";
 import { useTranslations, useLocale } from "next-intl";
 import { ApiError } from "@/lib/errors/api-error";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
@@ -883,6 +884,40 @@ export function WebsiteBuilderWorkspace({
     [displayedHtml, displayedHtmlIsComplete]
   );
 
+  // WHAT THE PAGE CLAIMS THAT THE BRIEF NEVER SAID. The other half of the
+  // same rule: leaving a blank is the honest outcome, and FILLING one with
+  // a number nobody gave is the dishonest one. This reads the rendered page
+  // against the description the user actually wrote and lists every number
+  // that is not in it — so an invented phone number is visible BEFORE the
+  // site is published, not after a customer dials it.
+  //
+  // THE BRIEF IS NOT JUST THE DESCRIPTION. "Ask for a change → add our
+  // phone 2310 555 123" is the owner GIVING a number; a page that then
+  // shows it is obeying, not inventing. Those requests live in the version
+  // history, so the check waits until the history is loaded rather than
+  // accusing the page of a number the owner typed themselves — a single
+  // false accusation is enough to make this whole panel ignorable.
+  const inventedNumbers = useMemo(() => {
+    if (!displayedHtmlIsComplete || !previewWebsite) return [] as SuspectNumber[];
+    if (activeVersions === undefined) return [] as SuspectNumber[];
+    const brief = [
+      previewWebsite.description ?? "",
+      ...activeVersions.map((v) => v.change_description ?? ""),
+    ].join("\n");
+    return findInventedNumbers(displayedHtml, brief);
+  }, [displayedHtml, displayedHtmlIsComplete, previewWebsite, activeVersions]);
+
+  // Which is why the history is fetched as soon as there is a page to
+  // check, not only when the History tab is opened. loadVersions returns
+  // immediately once a site's versions are in hand, so this costs one
+  // query per previewed site.
+  useEffect(() => {
+    if (previewId && displayedHtmlIsComplete) void loadVersions(previewId);
+    // loadVersions is redefined every render but early-returns once loaded;
+    // listing it here would re-run this effect on every render instead.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [previewId, displayedHtmlIsComplete]);
+
   // Rotating progress messages for the pending/processing preview panel —
   // cycles through PROGRESS_MESSAGE_KEYS every PROGRESS_MESSAGE_INTERVAL_MS
   // so a long generation reads as active progress instead of a single
@@ -1190,6 +1225,31 @@ export function WebsiteBuilderWorkspace({
                           >
                             {item.text}
                             {item.count > 1 && <span className="ml-1 opacity-70">×{item.count}</span>}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {inventedNumbers.length > 0 && (
+                    <div
+                      data-testid="website-invented-numbers"
+                      className="mb-3 rounded-xl border border-rose-500/30 bg-rose-500/[0.06] p-3"
+                    >
+                      <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-rose-300">
+                        <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        {t("inventedTitle", { count: inventedNumbers.length })}
+                      </p>
+                      <p className="mb-2 text-[11px] leading-relaxed text-rose-200/80">
+                        {t("inventedBody")}
+                      </p>
+                      <ul className="flex flex-wrap gap-1.5">
+                        {inventedNumbers.map((item: SuspectNumber) => (
+                          <li
+                            key={`${item.kind}:${item.text}`}
+                            className="rounded-md border border-rose-500/30 bg-rose-500/10 px-2 py-0.5 text-[11px] text-rose-200"
+                          >
+                            <span className="opacity-70">{t(`inventedKind.${item.kind}`)}</span>{" "}
+                            {item.text}
                           </li>
                         ))}
                       </ul>

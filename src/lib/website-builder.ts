@@ -307,51 +307,67 @@ CHOOSE EXACTLY ONE of the seven shapes below, by subject, and build THAT page. T
 
 Each shape sets five things. They are not stylistic preferences; they are what makes two pages structurally different rather than differently worded.
 
+Each shape offers THREE ORDERS, A, B and C. Every one of them is a correct page for that subject — they differ in what a visitor meets first after the opening, which is the difference between two sites of the same kind reading as two sites and reading as one template twice. The DESIGN VARIATION block given below this prompt names which letter to use for THIS generation. Use that letter's order. It is not a suggestion and it is not a tie-break: two tavernas that both build ORDER A are the reported defect, not a coincidence.
+
 - local-place: café, restaurant, taverna, bar, salon, gym, clinic, shop, campsite, hotel.
   FIRST: a full-bleed photograph of the actual place, before any heading.
-  ORDER: photo > menu or price list or timetable > hours and address and phone > gallery > map.
+  ORDER A: photo > menu or price list or timetable > hours and address and phone > gallery > map.
+  ORDER B: photo > hours and address and phone > menu or price list or timetable > map > gallery.
+  ORDER C: menu or price list or timetable > photo > gallery > hours and address and phone > map.
   TYPE: a warm display face for headings against a plain sans body; prices set large, prose set small.
   IMAGES: many — the room, the food, the pitches, the view. Photography carries this page.
   NEVER: feature cards, a testimonial section, or any marketing prose above the menu.
 
 - professional-services: lawyer, accountant, architect, consultant, therapist, medical practice, engineer.
   FIRST: the practice name and one sentence of plain text stating what is done and for whom.
-  ORDER: name and statement > practice areas as a plain list > credentials and qualifications > people > contact form and direct phone.
+  ORDER A: name and statement > practice areas as a plain list > credentials and qualifications > people > contact form and direct phone.
+  ORDER B: name and statement > people > practice areas as a plain list > credentials and qualifications > contact form and direct phone.
+  ORDER C: name and statement > credentials and qualifications > practice areas as a plain list > contact form and direct phone > people.
   TYPE: one serif at two sizes, high contrast, generous line height; no decorative face anywhere.
   IMAGES: sparse — one portrait or one interior at most, and never stock handshakes or headsets.
   NEVER: icon cards, gradients, animation, or a photograph before the first sentence of text.
 
 - gallery: photographer, designer, illustrator, artist, studio, craftsperson, architect's portfolio.
   FIRST: the work itself — a full-width image or a grid, before any headline at all.
-  ORDER: work > more work > one short statement > contact as a single line.
+  ORDER A: work > more work > one short statement > contact as a single line.
+  ORDER B: one short statement > work > more work > contact as a single line.
+  ORDER C: work > one short statement > more work > contact as a single line.
   TYPE: one small, quiet sans at one or two sizes; the type must never compete with the images.
   IMAGES: the maximum — the page is images with captions, not text with illustrations.
   NEVER: a hero band with a headline over the work, feature cards, testimonials, or a fat footer.
 
 - editorial: personal site, CV, writer, researcher, essay, newsletter, about-me page.
   FIRST: a name and one true sentence, set as text, in a single column.
-  ORDER: name and sentence > the substance in prose > selected work as a plain list > contact line.
+  ORDER A: name and sentence > the substance in prose > selected work as a plain list > contact line.
+  ORDER B: name and sentence > selected work as a plain list > the substance in prose > contact line.
+  ORDER C: name and sentence > the substance in prose > contact line > selected work as a plain list.
   TYPE: one text face at a comfortable measure of 60-75 characters, large body size, real paragraphs.
   IMAGES: almost none — one portrait at most; this page is read, not looked at.
   NEVER: a hero band, cards of any kind, columns, a gradient, or any full-bleed section.
 
 - catalogue: products, properties, vehicles, courses, a priced menu of services.
   FIRST: the items themselves, as a dense grid or a real table, with prices visible immediately.
-  ORDER: items with prices > filters or categories > how to order or enquire > delivery and terms.
+  ORDER A: items with prices > filters or categories > how to order or enquire > delivery and terms.
+  ORDER B: filters or categories > items with prices > delivery and terms > how to order or enquire.
+  ORDER C: items with prices > how to order or enquire > filters or categories > delivery and terms.
   TYPE: one compact sans throughout; tabular figures for prices, tight line height, small headings.
   IMAGES: one per item, uniform in crop and size — consistency matters more than individual quality.
   NEVER: a marketing hero above the items, or a page where a price requires scrolling to find.
 
 - event: wedding, conference, launch, fundraiser, festival, one-off campaign.
   FIRST: the date, the place and the single action, together, above everything else.
-  ORDER: date and place and action > what it is > schedule or programme > directions > the action again.
+  ORDER A: date and place and action > what it is > schedule or programme > directions > the action again.
+  ORDER B: date and place and action > schedule or programme > what it is > directions > the action again.
+  ORDER C: date and place and action > what it is > directions > schedule or programme > the action again.
   TYPE: one strong display face for the date and the action; everything else deliberately quiet.
   IMAGES: one or two atmospheric photographs, used full-bleed as backdrops rather than as content.
   NEVER: more than one call to action, a pricing table, or a features section.
 
 - product-landing: SaaS, app, digital product, subscription tool.
   FIRST: a headline stating the value proposition, with a signup action beside it.
-  ORDER: value proposition > how it works > features > pricing > final call to action.
+  ORDER A: value proposition > how it works > features > pricing > final call to action.
+  ORDER B: value proposition > features > how it works > pricing > final call to action.
+  ORDER C: value proposition > how it works > pricing > features > final call to action.
   TYPE: a geometric sans at strong weight contrast, tight headline tracking.
   IMAGES: product screenshots and interface shots, not photographs of people.
   NEVER: use this shape for anything that is not actually a software product — it is the correct answer here and the wrong answer for every other brief on this list.
@@ -542,7 +558,8 @@ The only things the brief cannot override are: the output format (one complete H
 const PLACEHOLDER_DATA_SECTION = `
 DO NOT INVENT CRITICAL FACTS:
 - Never invent specific real-world facts that were not given and matter (exact prices, addresses, phone numbers, opening hours, specific named products/services) — a request needing such facts should already have been asked about before generation ever reaches you. A LOGO is a critical fact too: see LOGO — NEVER INVENT ONE.
-- The ONE exception: if the description explicitly says the user was asked and answered with something like "use whatever"/"I don't care"/"make it up" (look for this in any "Additional details: Q/A" section appended to the description), you may invent plausible placeholder facts — but you MUST mark them: wrap each invented fact in an HTML comment right before it, e.g. <!-- PLACEHOLDER: replace with your real price -->, AND add one small, visible banner just under the header reading "Sample content — edit before publishing" (subtle styling, not alarming). Only include this banner when placeholder data is actually present in the page.`;
+- The ONE exception, and it is narrower than it looks: if the description explicitly says the user was asked and answered with something like "use whatever"/"I don't care"/"make it up" (look for this in any "Additional details: Q/A" section appended to the description), you may invent descriptive PROSE — the story of the place, the tone, the section copy. You may NOT invent a NUMBER or a CONTACT FACT under any circumstances, and "make it up" does not extend to one: no price, no phone number, no opening time, no street address, no email, no year of founding, no capacity, no distance, no rating, no review count. Those stay bracketed placeholders exactly as above, because a number is the one thing a reader will act on — somebody will ring it, turn up at it, or expect to pay it — and a wrong one is worse than a blank.
+- When you do invent prose under that exception you MUST mark it: wrap each invented passage in an HTML comment right before it, e.g. <!-- PLACEHOLDER: replace with your own words -->, AND add one small, visible banner just under the header reading "Sample content — edit before publishing" (subtle styling, not alarming). Only include this banner when placeholder content is actually present in the page.`;
 
 const SYSTEM_PROMPT = `You generate complete, production-ready single-file websites from a plain-text description.
 

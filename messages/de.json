@@ -1077,6 +1077,15 @@
       "previewIncompleteBody": "Diese generierte Seite wirkt unvollständig oder wurde abgeschnitten und kann daher nicht sicher angezeigt werden. Versuche es mit einer kürzeren Beschreibung erneut oder bearbeite sie noch einmal.",
       "unfilledTitle": "{count} Angabe(n) müssen noch ergänzt werden",
       "unfilledBody": "Die KI erfindet nie eine Telefonnummer, einen Preis oder Öffnungszeiten — sie lässt eine sichtbare Lücke. Nutze „Änderung anfragen“, um sie zu ergänzen, oder bearbeite sie nach der Veröffentlichung.",
+      "inventedTitle": "{count} Zahl(en) auf der Seite, die Sie nie angegeben haben",
+      "inventedBody": "Diese stehen auf der Seite, aber nicht in Ihrer Beschreibung. Die KI darf niemals eine Telefonnummer, einen Preis, eine Öffnungszeit oder eine Kennzahl erfinden — prüfen Sie jede vor der Veröffentlichung und korrigieren Sie sie über „Änderung anfragen“.",
+      "inventedKind": {
+        "phone": "Telefon",
+        "price": "Preis",
+        "time": "Uhrzeit",
+        "address": "Adresse",
+        "stat": "Zahl"
+      },
       "imageLabel": "Referenzbilder ({count}/{max}, optional)",
       "imageHelp": "Bis zu {max} Bilder — dein Logo, Produktfotos oder eine Stilreferenz. JPG oder PNG, je bis 5MB. Standardmäßig werden sie in die Website eingebettet; unten kannst du sie auf reine Stil-Inspiration umstellen.",
       "imageRemove": "Bild entfernen",

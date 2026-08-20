@@ -17,6 +17,7 @@ import { reserveCredits, settleReservation, releaseReservation } from "@/lib/bil
 import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import { MAX_GENERATION_ATTEMPTS } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
+import { findInventedNumbers } from "@/lib/website-invented-numbers";
 import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
 import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
 import {
@@ -356,6 +357,26 @@ export async function POST(request: Request) {
       // emit any PLACEHOLDER:<slug> images, which is the common case for
       // a description that didn't ask for real photos.
       htmlContent = await resolveWebsiteImagePlaceholders(htmlContent);
+
+      // NUMBERS THE USER NEVER GAVE. The prompt forbids inventing a price,
+      // a phone number, an opening time or an address, and a prompt is a
+      // request rather than a guarantee — this is what can see whether it
+      // was honoured. Reported, not silently rewritten: a number in the
+      // page might be one the model correctly read out of a reference
+      // image, and deleting it would be its own kind of wrong. The owner
+      // sees the list beside the preview and decides.
+      const inventedNumbers = findInventedNumbers(htmlContent, description);
+      if (inventedNumbers.length > 0) {
+        logApiError(
+          "/api/websites/generate/process",
+          new Error(`${inventedNumbers.length} number(s) on the page are not in the brief`),
+          {
+            websiteId,
+            kinds: inventedNumbers.map((n) => n.kind).join(","),
+            samples: inventedNumbers.slice(0, 5).map((n) => n.text).join(" | ").slice(0, 200),
+          }
+        );
+      }
 
       // Keep the site's own links inside the site.
       //

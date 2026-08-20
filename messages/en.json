@@ -1077,6 +1077,15 @@
       "previewIncompleteBody": "This generated page looks incomplete or got cut off, so it can't be shown safely. Try regenerating with a shorter description, or edit it again.",
       "unfilledTitle": "{count} thing(s) still to fill in",
       "unfilledBody": "The AI never invents a phone number, price or opening time — it leaves a visible blank instead. Use \"Ask for a change\" to fill these in, or edit them after publishing.",
+      "inventedTitle": "{count} number(s) on the page you never gave",
+      "inventedBody": "These appear on the page but not in your brief. The AI is told never to invent a phone number, price, opening time or figure — check each one before you publish, and use \"Ask for a change\" to correct it.",
+      "inventedKind": {
+        "phone": "phone",
+        "price": "price",
+        "time": "time",
+        "address": "address",
+        "stat": "figure"
+      },
       "imageLabel": "Reference images ({count}/{max}, optional)",
       "imageHelp": "Up to {max} images — your logo, product photos, or a style reference. JPG or PNG, up to 5MB each. By default they are embedded in the site; you can switch them to style-inspiration only below.",
       "imageRemove": "Remove image",

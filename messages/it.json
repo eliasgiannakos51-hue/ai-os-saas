@@ -1077,6 +1077,15 @@
       "previewIncompleteBody": "Questa pagina generata sembra incompleta o è stata interrotta, quindi non può essere mostrata in modo sicuro. Prova a rigenerarla con una descrizione più breve, oppure modificala di nuovo.",
       "unfilledTitle": "{count} elemento(i) ancora da compilare",
       "unfilledBody": "L'IA non inventa mai un numero di telefono, un prezzo o un orario: lascia uno spazio visibile. Usa «Chiedi una modifica» per completarli, oppure modificali dopo la pubblicazione.",
+      "inventedTitle": "{count} numero(i) sulla pagina che non hai fornito",
+      "inventedBody": "Compaiono sulla pagina ma non nella tua descrizione. All'IA è vietato inventare un numero di telefono, un prezzo, un orario o una cifra: controllali prima di pubblicare e correggili con «Chiedi una modifica».",
+      "inventedKind": {
+        "phone": "telefono",
+        "price": "prezzo",
+        "time": "orario",
+        "address": "indirizzo",
+        "stat": "cifra"
+      },
       "imageLabel": "Immagini di riferimento ({count}/{max}, opzionale)",
       "imageHelp": "Fino a {max} immagini — il tuo logo, foto dei prodotti o un riferimento di stile. JPG o PNG, max 5MB ciascuna. Di default vengono incorporate nel sito; qui sotto puoi usarle solo come ispirazione di stile.",
       "imageRemove": "Rimuovi immagine",

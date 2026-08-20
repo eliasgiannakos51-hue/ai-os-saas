@@ -1077,6 +1077,15 @@
       "previewIncompleteBody": "生成的页面似乎不完整或被截断，因此无法安全显示。请尝试用更简短的描述重新生成，或再次编辑。",
       "unfilledTitle": "还有 {count} 项待填写",
       "unfilledBody": "AI 从不编造电话、价格或营业时间，而是留下可见的空白。请使用“请求修改”来填写，或在发布后编辑。",
+      "inventedTitle": "页面上有 {count} 个你未提供的数字",
+      "inventedBody": "它们出现在页面上，但不在你的描述里。AI 被要求绝不虚构电话、价格、营业时间或数据——发布前请逐一核对，并用“请求修改”来更正。",
+      "inventedKind": {
+        "phone": "电话",
+        "price": "价格",
+        "time": "时间",
+        "address": "地址",
+        "stat": "数据"
+      },
       "imageLabel": "参考图片（{count}/{max}，可选）",
       "imageHelp": "最多{max}张图片 — 你的标志、产品照片或风格参考。JPG或PNG，每张最大5MB。默认会嵌入网站；可在下方改为仅作风格参考。",
       "imageRemove": "移除图片",

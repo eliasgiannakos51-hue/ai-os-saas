@@ -102,7 +102,7 @@ export function LinkToModal({
       cancelled = true;
       clearTimeout(timeout);
     };
-  }, [selectedModule, query, supabase, sourceTable, sourceId]);
+  }, [selectedModule, query, supabase, sourceTable, sourceId, describe]);
 
   async function handleLink(targetId: string) {
     if (!selectedModule) return;

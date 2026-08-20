@@ -83,14 +83,111 @@ export function broadenImageQuery(query: string): string[] {
 // unresolvable placeholder is now stripped (stripPlaceholderImageTags)
 // instead of substituted.
 
-// Replaces every PLACEHOLDER:<slug> occurrence with its resolved URL — a
-// plain string replace per slug (not a regex re-scan of the whole
-// document), so it can only ever touch the exact placeholder tokens
-// found by findImagePlaceholders, never anything else in the HTML.
-export function applyResolvedImageUrls(html: string, resolved: Map<string, string>): string {
+// ---------------------------------------------------------------------
+// Unsplash attribution
+// ---------------------------------------------------------------------
+//
+// Unsplash's API guidelines require every displayed photo to carry
+// "Photo by <name> on Unsplash", with BOTH links pointing back through
+// utm_source/utm_medium. It is one of the three conditions for
+// production access (50 -> 5000 requests/hour), and it was entirely
+// absent: lib/unsplash.ts used to discard the photographer before the
+// URL ever reached this file, so there was nothing to render even if
+// something had wanted to.
+
+/** The referral parameters Unsplash requires on attribution links. The
+ *  source is our application name as registered with them. */
+export const UNSPLASH_UTM = "utm_source=ionexa&utm_medium=referral";
+
+export const UNSPLASH_HOME_URL = `https://unsplash.com/?${UNSPLASH_UTM}`;
+
+/** Appends the referral parameters, respecting a URL that already has a
+ *  query string. Unsplash profile links do not today, but a link that
+ *  silently lost its own query would be a bug nobody would look for. */
+export function withUnsplashUtm(url: string): string {
+  return `${url}${url.includes("?") ? "&" : "?"}${UNSPLASH_UTM}`;
+}
+
+// The photographer's name arrives from a third-party API and is written
+// straight into a document we then publish on the customer's behalf.
+// Escaping is not politeness here: without it a display name containing
+// markup would be injected into every site that used that photo.
+// Same implementation as lib/research/report-to-html.ts, which escapes
+// third-party source titles for the same reason.
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+export type ResolvedPhoto = {
+  url: string;
+  photographerName: string;
+  photographerUrl: string;
+};
+
+// Styled INLINE rather than through a class in the document's <style>.
+//
+// These pages are generated fresh by a model every time; there is no
+// stylesheet this file can rely on, and a class name would be at the
+// mercy of whatever CSS the generation happened to produce (including a
+// `display:none` on a selector that incidentally matches). An inline
+// style wins the cascade outright, so the credit cannot be styled away.
+//
+// The dark chip is not decoration either: a credit is placed over
+// photographs whose brightness is unknown, and plain dark text on a dark
+// hero image is invisible — which is indistinguishable from having no
+// attribution at all.
+const CREDIT_STYLE =
+  "display:block;margin:4px 0 0;font-size:11px;line-height:1.4;" +
+  "font-family:system-ui,-apple-system,sans-serif;color:#fff;" +
+  "background:rgba(0,0,0,.55);padding:2px 6px;border-radius:3px;" +
+  "width:fit-content;max-width:100%;";
+const CREDIT_LINK_STYLE = "color:#fff;text-decoration:underline;";
+
+/**
+ * The "Photo by X on Unsplash" credit for one photo.
+ *
+ * `rel="noopener noreferrer"` because these open on a published customer
+ * site; `target="_blank"` so a visitor following a credit does not lose
+ * the page they were reading.
+ */
+export function buildUnsplashCreditHtml(photo: ResolvedPhoto): string {
+  const name = escapeHtml(photo.photographerName);
+  const profile = escapeHtml(withUnsplashUtm(photo.photographerUrl));
+  const link = (href: string, text: string) =>
+    `<a href="${href}" target="_blank" rel="noopener noreferrer" style="${CREDIT_LINK_STYLE}">${text}</a>`;
+  return (
+    `<span class="unsplash-credit" style="${CREDIT_STYLE}">` +
+    `Photo by ${link(profile, name)} on ${link(escapeHtml(UNSPLASH_HOME_URL), "Unsplash")}` +
+    `</span>`
+  );
+}
+
+// Replaces every resolved placeholder's <img> tag with the real photo AND
+// its attribution.
+//
+// THE WHOLE TAG IS REWRITTEN, not just the src token. The previous
+// version did `html.split("PLACEHOLDER:slug").join(url)`, which could
+// only ever change the URL — there was nowhere to put a credit. Matching
+// the tag means the credit can be emitted immediately after the image it
+// belongs to, which is where an attribution has to be to mean anything.
+//
+// Still narrow by construction: the pattern requires a literal
+// `src="PLACEHOLDER:<slug>"`, so it cannot match any other <img> on the
+// page, and a slug that appears in several tags gets all of them
+// credited rather than only the first.
+export function applyResolvedImageUrls(html: string, resolved: Map<string, ResolvedPhoto>): string {
   let result = html;
-  for (const [slug, url] of resolved) {
-    result = result.split(`PLACEHOLDER:${slug}`).join(url);
+  for (const [slug, photo] of resolved) {
+    const tagPattern = new RegExp(`<img\\b[^>]*\\bsrc="PLACEHOLDER:${slug}"[^>]*>`, "g");
+    result = result.replace(tagPattern, (tag) => {
+      const withUrl = tag.replace(`PLACEHOLDER:${slug}`, photo.url);
+      return `${withUrl}${buildUnsplashCreditHtml(photo)}`;
+    });
   }
   return result;
 }

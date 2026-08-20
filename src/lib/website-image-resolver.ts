@@ -6,7 +6,12 @@ import {
   isLogoLikeQuery,
   stripPlaceholderImageTags,
 } from "@/lib/website-image-placeholders";
-import { searchUnsplashPhoto, isUnsplashConfigured } from "@/lib/unsplash";
+import {
+  searchUnsplashPhoto,
+  triggerUnsplashDownload,
+  isUnsplashConfigured,
+  type UnsplashPhoto,
+} from "@/lib/unsplash";
 import { createUnsplashBudget, describeUnsplashHalt } from "@/lib/unsplash-budget";
 import { logApiError } from "@/lib/log-error";
 
@@ -68,7 +73,9 @@ export async function resolveWebsiteImagePlaceholders(html: string): Promise<str
   // budget across the resolutions is what makes the breaker work: the
   // first photo to be told "you are out" stops the other nine from asking.
   const budget = createUnsplashBudget();
-  const resolved = new Map<string, string>();
+  // Now holds the whole photo, not just its URL: the attribution needs
+  // the photographer, and the download trigger needs download_location.
+  const resolved = new Map<string, UnsplashPhoto>();
 
   // BREADTH-FIRST across photos, not depth-first per photo. Depth-first
   // let one unlucky photo spend four requests broadening while the last
@@ -83,8 +90,8 @@ export async function resolveWebsiteImagePlaceholders(html: string): Promise<str
     if (contenders.length === 0) break;
     await Promise.all(
       contenders.map(async ({ slug, attempts }) => {
-        const unsplashUrl = await searchUnsplashPhoto(attempts[round], budget);
-        if (unsplashUrl) resolved.set(slug, unsplashUrl);
+        const photo = await searchUnsplashPhoto(attempts[round], budget);
+        if (photo) resolved.set(slug, photo);
       })
     );
   }
@@ -107,6 +114,39 @@ export async function resolveWebsiteImagePlaceholders(html: string): Promise<str
         `${unresolved.length} of ${placeholders.length} photo(s) found nothing on Unsplash — their tags were removed rather than filled with unrelated images`
       ),
       { unsplashRequests: budget.spent }
+    );
+  }
+
+  // UNSPLASH API GUIDELINE: register a download for every photo that is
+  // actually used.
+  //
+  // AFTER resolution and only for the winners. A photo that lost to a
+  // broader query, or whose placeholder ended up stripped, was never
+  // displayed — counting it would inflate a photographer's stats with
+  // uses that never happened, which is the opposite of what the
+  // guideline is for.
+  //
+  // Sequential, not Promise.all: these share the generation budget with
+  // the searches, and firing them in parallel would race past the
+  // ceiling that exists to stop one generation eating the hour's quota.
+  // They are also the last thing this function does, so their latency
+  // costs the page nothing.
+  let credited = 0;
+  for (const photo of resolved.values()) {
+    if (budget.halted) break;
+    if (await triggerUnsplashDownload(photo, budget)) credited += 1;
+  }
+  if (credited < resolved.size) {
+    // Said out loud because nothing on the page looks different: the
+    // photos still appear and are still attributed. Only Unsplash's own
+    // records are short, and a production-access review is exactly where
+    // that gets noticed.
+    logApiError(
+      "website-image-resolver",
+      new Error(
+        `Unsplash download trigger did not complete for ${resolved.size - credited} of ${resolved.size} used photo(s) — attribution is still rendered, but the use was not registered with Unsplash`
+      ),
+      { halted: budget.halted ?? "none", unsplashRequests: budget.spent }
     );
   }
 

@@ -944,7 +944,21 @@
         "title": "一个目标，拆成若干步",
         "why": "说出你想达成什么，这里会把它变成有日期、可勾选的计划，而不是一张愿望清单。",
         "example": "拿下头 10 个付费客户"
-      }
+      },
+      "deleteMission": "删除任务",
+      "deleteConfirmMission": "删除任务“{goal}”？",
+      "deleteConfirmLoses": "这将删除 {steps} 个步骤（其中 {completed} 个已完成）和 {scheduled} 个预定执行。无法撤销。",
+      "deletedMission": "任务已删除",
+      "deleteFailed": "无法删除该任务。",
+      "deleteStep": "删除步骤",
+      "editStep": "编辑步骤",
+      "saveStep": "保存",
+      "cancelStepEdit": "取消",
+      "moveStepUp": "上移",
+      "moveStepDown": "下移",
+      "stepDeleted": "步骤已删除",
+      "undoWithSeconds": "撤销（{seconds}）",
+      "stepChangeFailed": "无法修改该步骤。"
     },
     "reflection": {
       "title": "每周回顾",

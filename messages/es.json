@@ -944,7 +944,21 @@
         "title": "Un objetivo, dividido en pasos",
         "why": "Diga qué quiere conseguir y esto lo convierte en un plan con pasos fechados que puede ir marcando, no en una lista de deseos.",
         "example": "Conseguir los 10 primeros clientes de pago"
-      }
+      },
+      "deleteMission": "Eliminar misión",
+      "deleteConfirmMission": "¿Eliminar la misión «{goal}»?",
+      "deleteConfirmLoses": "Se eliminan {steps} paso(s) — {completed} ya completados — y {scheduled} ejecución(es) programada(s). No se puede deshacer.",
+      "deletedMission": "Misión eliminada",
+      "deleteFailed": "No se pudo eliminar la misión.",
+      "deleteStep": "Eliminar paso",
+      "editStep": "Editar paso",
+      "saveStep": "Guardar",
+      "cancelStepEdit": "Cancelar",
+      "moveStepUp": "Subir",
+      "moveStepDown": "Bajar",
+      "stepDeleted": "Paso eliminado",
+      "undoWithSeconds": "Deshacer ({seconds})",
+      "stepChangeFailed": "No se pudo cambiar ese paso."
     },
     "reflection": {
       "title": "Reflexión Semanal",

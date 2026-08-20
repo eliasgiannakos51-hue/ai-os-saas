@@ -944,7 +944,21 @@
         "title": "ひとつの目標を、手順に分ける",
         "why": "達成したいことを書けば、日付つきでチェックできる手順に変わります。願望リストではありません。",
         "example": "最初の有料顧客10人を獲得する"
-      }
+      },
+      "deleteMission": "ミッションを削除",
+      "deleteConfirmMission": "ミッション「{goal}」を削除しますか？",
+      "deleteConfirmLoses": "ステップ {steps} 件（うち完了 {completed} 件）と予約実行 {scheduled} 件が削除されます。元に戻せません。",
+      "deletedMission": "ミッションを削除しました",
+      "deleteFailed": "ミッションを削除できませんでした。",
+      "deleteStep": "ステップを削除",
+      "editStep": "ステップを編集",
+      "saveStep": "保存",
+      "cancelStepEdit": "キャンセル",
+      "moveStepUp": "上へ移動",
+      "moveStepDown": "下へ移動",
+      "stepDeleted": "ステップを削除しました",
+      "undoWithSeconds": "元に戻す（{seconds}）",
+      "stepChangeFailed": "そのステップを変更できませんでした。"
     },
     "reflection": {
       "title": "週次振り返り",

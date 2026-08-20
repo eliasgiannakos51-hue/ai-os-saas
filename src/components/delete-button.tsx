@@ -1,5 +1,7 @@
 "use client";
 
+import { ApiError } from "@/lib/errors/api-error";
+import { useErrorText } from "@/lib/errors/use-error-text";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
@@ -46,6 +48,7 @@ export function DeleteButton({
   const t = useTranslations("module");
   const supabase = createClient();
   const { addToast } = useToast();
+  const describe = useErrorText();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const hostRef = useRef<HTMLDivElement>(null);
@@ -62,8 +65,8 @@ export function DeleteButton({
     setLoading(false);
 
     if (error) {
-      setError(error.message);
-      addToast(`✗ ${error.message}`, "error");
+      setError(describe(new ApiError(500, { error: error.message })).text);
+      addToast(`✗ ${describe(new ApiError(500, { error: error.message })).what}`, "error");
       return;
     }
 

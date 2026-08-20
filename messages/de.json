@@ -944,7 +944,21 @@
         "title": "Ein Ziel, in Schritte zerlegt",
         "why": "Sag, was du erreichen willst — daraus wird ein Plan mit datierten Schritten zum Abhaken, keine Wunschliste.",
         "example": "Die ersten 10 zahlenden Kunden gewinnen"
-      }
+      },
+      "deleteMission": "Mission löschen",
+      "deleteConfirmMission": "Mission „{goal}“ löschen?",
+      "deleteConfirmLoses": "Damit verschwinden {steps} Schritt(e) — {completed} davon abgeschlossen — und {scheduled} geplante Ausführung(en). Das lässt sich nicht rückgängig machen.",
+      "deletedMission": "Mission gelöscht",
+      "deleteFailed": "Die Mission konnte nicht gelöscht werden.",
+      "deleteStep": "Schritt löschen",
+      "editStep": "Schritt bearbeiten",
+      "saveStep": "Speichern",
+      "cancelStepEdit": "Abbrechen",
+      "moveStepUp": "Nach oben",
+      "moveStepDown": "Nach unten",
+      "stepDeleted": "Schritt gelöscht",
+      "undoWithSeconds": "Rückgängig ({seconds})",
+      "stepChangeFailed": "Der Schritt konnte nicht geändert werden."
     },
     "reflection": {
       "title": "Wöchentliche Reflexion",

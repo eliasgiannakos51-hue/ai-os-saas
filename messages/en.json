@@ -944,7 +944,21 @@
         "title": "One goal, broken into steps",
         "why": "Say what you are trying to achieve and this turns it into a plan with dated steps you can tick off — not a wish list.",
         "example": "Get the first 10 paying customers"
-      }
+      },
+      "deleteMission": "Delete mission",
+      "deleteConfirmMission": "Delete the mission “{goal}”?",
+      "deleteConfirmLoses": "This removes {steps} step(s) — {completed} already completed — and {scheduled} scheduled run(s). It cannot be undone.",
+      "deletedMission": "Mission deleted",
+      "deleteFailed": "Could not delete this mission.",
+      "deleteStep": "Delete step",
+      "editStep": "Edit step",
+      "saveStep": "Save",
+      "cancelStepEdit": "Cancel",
+      "moveStepUp": "Move up",
+      "moveStepDown": "Move down",
+      "stepDeleted": "Step deleted",
+      "undoWithSeconds": "Undo ({seconds})",
+      "stepChangeFailed": "Could not change that step."
     },
     "reflection": {
       "title": "Weekly Reflection",

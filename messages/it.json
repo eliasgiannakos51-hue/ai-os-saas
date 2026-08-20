@@ -944,7 +944,21 @@
         "title": "Un obiettivo, diviso in passi",
         "why": "Di' cosa vuoi ottenere e qui diventa un piano con passi datati da spuntare, non una lista dei desideri.",
         "example": "Ottenere i primi 10 clienti paganti"
-      }
+      },
+      "deleteMission": "Elimina missione",
+      "deleteConfirmMission": "Eliminare la missione «{goal}»?",
+      "deleteConfirmLoses": "Vengono rimossi {steps} passaggio(i) — {completed} già completati — e {scheduled} esecuzione(i) pianificata(e). Non è reversibile.",
+      "deletedMission": "Missione eliminata",
+      "deleteFailed": "Impossibile eliminare la missione.",
+      "deleteStep": "Elimina passaggio",
+      "editStep": "Modifica passaggio",
+      "saveStep": "Salva",
+      "cancelStepEdit": "Annulla",
+      "moveStepUp": "Sposta su",
+      "moveStepDown": "Sposta giù",
+      "stepDeleted": "Passaggio eliminato",
+      "undoWithSeconds": "Annulla ({seconds})",
+      "stepChangeFailed": "Impossibile modificare quel passaggio."
     },
     "reflection": {
       "title": "Riflessione Settimanale",

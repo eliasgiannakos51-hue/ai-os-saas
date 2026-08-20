@@ -85,7 +85,7 @@ export function LinkToModal({
       if (cancelled) return;
       setSearching(false);
       if (searchError) {
-        setError(searchError.message);
+        setError(describe(new ApiError(500, { error: searchError.message })).text);
         return;
       }
       setResults(
@@ -129,7 +129,7 @@ export function LinkToModal({
     setLinkingId(null);
 
     if (insertError) {
-      setError(insertError.message);
+      setError(describe(new ApiError(500, { error: insertError.message })).text);
       addToast(`✗ ${describe(new ApiError(500, { error: insertError.message })).what}`, "error");
       return;
     }

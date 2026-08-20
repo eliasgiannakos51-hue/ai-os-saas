@@ -944,7 +944,21 @@
         "title": "Un objectif, découpé en étapes",
         "why": "Dites ce que vous voulez atteindre : cela devient un plan avec des étapes datées à cocher, pas une liste de souhaits.",
         "example": "Obtenir les 10 premiers clients payants"
-      }
+      },
+      "deleteMission": "Supprimer la mission",
+      "deleteConfirmMission": "Supprimer la mission « {goal} » ?",
+      "deleteConfirmLoses": "Cela supprime {steps} étape(s) — dont {completed} terminées — et {scheduled} exécution(s) programmée(s). Irréversible.",
+      "deletedMission": "Mission supprimée",
+      "deleteFailed": "Impossible de supprimer la mission.",
+      "deleteStep": "Supprimer l'étape",
+      "editStep": "Modifier l'étape",
+      "saveStep": "Enregistrer",
+      "cancelStepEdit": "Annuler",
+      "moveStepUp": "Monter",
+      "moveStepDown": "Descendre",
+      "stepDeleted": "Étape supprimée",
+      "undoWithSeconds": "Annuler ({seconds})",
+      "stepChangeFailed": "Impossible de modifier cette étape."
     },
     "reflection": {
       "title": "Bilan Hebdomadaire",

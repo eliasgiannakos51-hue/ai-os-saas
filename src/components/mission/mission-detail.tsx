@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -18,8 +18,11 @@ import {
 import { useTranslations, useLocale } from "next-intl";
 import { normalizeForSearch } from "@/lib/text/search-match";
 import { createClient } from "@/lib/supabase/client";
+import { StepControls, StepUndoStrip, UNDO_WINDOW_MS, type PendingUndo } from "@/components/mission/step-controls";
+import { MissionDeleteButton } from "@/components/mission/mission-delete-button";
 import { EnergySuggestion } from "@/components/mission/energy-suggestion";
 import { getErrorMessage } from "@/lib/get-error-message";
+import { useToast } from "@/components/toast/toast-context";
 import { createViaJob } from "@/lib/create-studio/create-via-job";
 import { CelebrationBurst } from "@/components/celebration/celebration-burst";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
@@ -35,7 +38,7 @@ import { SecurityCheckedBadge } from "@/components/security/security-checked-bad
 import { MISSION_ICON, WEBSITE_BUILDER_ICON } from "@/lib/module-icons";
 import { DetailPanel, type DetailTab } from "@/components/ui/detail-panel";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
-import type { Mission } from "@/types/mission";
+import type { Mission, MissionStep } from "@/types/mission";
 import { formatDateTime } from "@/lib/format-number";
 
 // A step whose text is clearly about building a website/landing page
@@ -112,6 +115,7 @@ export function MissionDetail({
   const router = useRouter();
   const supabase = createClient();
   const { refresh: refreshCredits } = useCredits();
+  const { addToast } = useToast();
   const steps = mission.plan_steps?.steps ?? [];
   const review = mission.plan_steps?.review;
   const stuckStep = getStuckStep(mission);
@@ -135,6 +139,88 @@ export function MissionDetail({
 
   const allCompleted = steps.length > 0 && steps.every((s) => s.status === "completed");
   const completedCount = steps.filter((s) => s.status === "completed").length;
+
+  // EDITING THE PLAN ITSELF — remove a step, rewrite one, move one.
+  //
+  // Every one of these goes through /api/mission/[id]/steps rather than a
+  // client-side write, because none of them is only an array change:
+  // scheduled_agent_runs point at steps by INDEX, and the daily cron
+  // executes steps[run.step_index]. A step removed in the browser would
+  // leave tomorrow's run pointing at whatever slid into its place.
+  const [stepBusy, setStepBusy] = useState<number | null>(null);
+  const [undo, setUndo] = useState<PendingUndo | null>(null);
+  const [undoSeconds, setUndoSeconds] = useState(0);
+
+  // The countdown, and the offer expiring with it.
+  useEffect(() => {
+    if (!undo) return;
+    setUndoSeconds(Math.round(UNDO_WINDOW_MS / 1000));
+    const started = Date.now();
+    const timer = setInterval(() => {
+      const left = Math.ceil((UNDO_WINDOW_MS - (Date.now() - started)) / 1000);
+      if (left <= 0) {
+        clearInterval(timer);
+        setUndo(null);
+        return;
+      }
+      setUndoSeconds(left);
+    }, 250);
+    return () => clearInterval(timer);
+  }, [undo]);
+
+  async function stepAction(
+    index: number,
+    body: Record<string, unknown>
+  ): Promise<Record<string, unknown> | null> {
+    setStepBusy(index);
+    setError(null);
+    try {
+      const response = await fetch(`/api/mission/${mission.id}/steps`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ index, ...body }),
+      });
+      const data = (await response.json().catch(() => ({ ok: false }))) as Record<string, unknown>;
+      if (!data.ok) {
+        const message = String(data.error ?? t("stepChangeFailed"));
+        setError(message);
+        addToast(`✗ ${message}`, "error");
+        return null;
+      }
+      router.refresh();
+      return data;
+    } catch (err) {
+      const message = getErrorMessage(err, t("stepChangeFailed"));
+      setError(message);
+      addToast(`✗ ${message}`, "error");
+      return null;
+    } finally {
+      setStepBusy(null);
+    }
+  }
+
+  async function deleteStep(index: number) {
+    const data = await stepAction(index, { action: "delete" });
+    if (!data) return;
+    // The offer to put it back — including the scheduled runs that were
+    // removed with it, which an array splice alone could not restore.
+    setUndo({
+      index,
+      step: (data.removedStep ?? { text: "", status: "pending" }) as MissionStep,
+      runs: (data.removedRuns ?? []) as PendingUndo["runs"],
+    });
+  }
+
+  async function undoDelete() {
+    if (!undo) return;
+    const pending = undo;
+    setUndo(null);
+    await stepAction(pending.index, {
+      action: "restore",
+      step: pending.step,
+      runs: pending.runs,
+    });
+  }
 
   // Mission Control retry: persists the step's incremented attempt count
   // on failure (previously failures were purely ephemeral, never written
@@ -399,6 +485,14 @@ export function MissionDetail({
           <span className="text-xs text-muted">
             {t("stepsProgress", { done: completedCount, total: steps.length })}
           </span>
+          {/* On the mission's own screen as well as on its card: the
+              place somebody decides a mission was a mistake is usually
+              after opening it and reading the plan. */}
+          <MissionDeleteButton
+            mission={mission}
+            scheduledRuns={scheduledStepIndices.length}
+            onDeleted={onClose}
+          />
         </>
       }
     >
@@ -423,8 +517,13 @@ export function MissionDetail({
           ) : (
             <ul className="space-y-2">
               {steps.map((step, index) => (
+                <Fragment key={index}>
+                {/* The undo strip stands exactly where the deleted step
+                    was, so the offer is where the eye already is. */}
+                {undo && undo.index === index && (
+                  <StepUndoStrip seconds={undoSeconds} onUndo={() => void undoDelete()} />
+                )}
                 <li
-                  key={index}
                   className={`relative flex items-start gap-2.5 rounded-xl border border-border bg-input px-3 py-2.5 ${
                     celebratingIndex === index ? "celebration-pop" : ""
                   }`}
@@ -603,8 +702,27 @@ export function MissionDetail({
                       )}
                     </div>
                   )}
+                  {/* Remove, rewrite, reorder. Only for a step still to
+                      be done: a completed step is a record of what
+                      happened, and editing history is not editing a plan. */}
+                  {step.status !== "completed" && (
+                    <StepControls
+                      index={index}
+                      total={steps.length}
+                      text={step.text}
+                      busy={stepBusy === index}
+                      onDelete={() => void deleteStep(index)}
+                      onEdit={(text) => void stepAction(index, { action: "edit", text })}
+                      onMove={(direction) => void stepAction(index, { action: "move", direction })}
+                    />
+                  )}
                 </li>
+                </Fragment>
               ))}
+              {/* A step deleted from the END has no row left to sit above. */}
+              {undo && undo.index >= steps.length && (
+                <StepUndoStrip seconds={undoSeconds} onUndo={() => void undoDelete()} />
+              )}
             </ul>
           )}
         </>

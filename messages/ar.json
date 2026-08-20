@@ -944,7 +944,21 @@
         "title": "هدف واحد، مقسّم إلى خطوات",
         "why": "قل ما تريد تحقيقه، وسيتحوّل إلى خطة بخطوات مؤرّخة تشطبها واحدة تلو الأخرى، لا إلى قائمة أمنيات.",
         "example": "الوصول إلى أول 10 عملاء يدفعون"
-      }
+      },
+      "deleteMission": "حذف المهمة",
+      "deleteConfirmMission": "هل تريد حذف المهمة «{goal}»؟",
+      "deleteConfirmLoses": "سيؤدي هذا إلى حذف {steps} خطوة — منها {completed} مكتملة — و{scheduled} تشغيل مجدول. لا يمكن التراجع.",
+      "deletedMission": "تم حذف المهمة",
+      "deleteFailed": "تعذّر حذف المهمة.",
+      "deleteStep": "حذف الخطوة",
+      "editStep": "تعديل الخطوة",
+      "saveStep": "حفظ",
+      "cancelStepEdit": "إلغاء",
+      "moveStepUp": "تحريك لأعلى",
+      "moveStepDown": "تحريك لأسفل",
+      "stepDeleted": "تم حذف الخطوة",
+      "undoWithSeconds": "تراجع ({seconds})",
+      "stepChangeFailed": "تعذّر تغيير تلك الخطوة."
     },
     "reflection": {
       "title": "التأمل الأسبوعي",

@@ -19,6 +19,7 @@ import {
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { findUnfilledPlaceholders, type UnfilledPlaceholder } from "@/lib/website-placeholders";
 import { useTranslations, useLocale } from "next-intl";
+import { ApiError } from "@/lib/errors/api-error";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { createClient } from "@/lib/supabase/client";
 import { fetchWithAuthRetry } from "@/lib/fetch-with-auth-retry";
@@ -743,7 +744,7 @@ export function WebsiteBuilderWorkspace({
     setDeletingId(null);
 
     if (deleteError) {
-      addToast(`✗ ${deleteError.message}`, "error");
+      addToast(`✗ ${describe(new ApiError(500, { error: deleteError.message })).what}`, "error");
       return;
     }
 
@@ -854,7 +855,7 @@ export function WebsiteBuilderWorkspace({
     setLoadingVersionsFor(null);
 
     if (versionsError) {
-      addToast(`✗ ${versionsError.message}`, "error");
+      addToast(`✗ ${describe(new ApiError(500, { error: versionsError.message })).what}`, "error");
       return;
     }
     setVersionsByWebsite((prev) => ({ ...prev, [websiteId]: (data as WebsiteVersion[]) ?? [] }));

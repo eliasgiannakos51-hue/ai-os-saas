@@ -378,5 +378,51 @@ checkList(
   LOCALES.filter((l) => typeof messages[l].dashboard.files.uncitedAnswer !== "string")
 );
 
+console.log("\n== 12. picking MORE THAN ONE file is stated, counted and bounded ==");
+// "I don't know if I can tick several" — the control worked, the UI never
+// said so. Every one of these is a sentence the user should not have had
+// to discover by experiment.
+check("the step says one OR MORE", /one or more files/i.test(messages.en.dashboard.files.step2Hint));
+checkList(
+  "in every locale (not the English sentence copied)",
+  LOCALES.filter((l) => {
+    const hint = messages[l].dashboard.files.step2Hint;
+    return typeof hint !== "string" || hint.length < 10 || (l !== "en" && hint === messages.en.dashboard.files.step2Hint);
+  })
+);
+check("the count is N of M, not a bare number", /\{count\}[\s\S]*\{total\}/.test(messages.en.dashboard.files.selectedOfTotal));
+check("the workspace renders it that way", /selectedOfTotal", \{ count: selected\.length, total: askableFiles\.length \}/.test(workspaceCode));
+check("only READY files count towards the total", /files\.filter\(\(f\) => f\.processing_status === "ready"\)/.test(workspaceCode));
+check("there is a Select all", /data-testid="files-select-all"/.test(workspaceCode));
+check("and it never selects past the limit", /askableFiles\.slice\(0, MAX_FILES_PER_QUESTION\)/.test(workspaceCode));
+check("there is still a Clear", /clearSelection/.test(workspaceCode));
+// The limit used to appear only once it was exceeded.
+check("the limit is shown BEFORE it is exceeded", /data-testid="files-max-hint"/.test(workspaceCode));
+checkList(
+  "every locale states the limit",
+  LOCALES.filter((l) => typeof messages[l].dashboard.files.maxPerQuestion !== "string")
+);
+// The real ceilings, from the source rather than from memory.
+const { MAX_FILES_PER_QUESTION } = await loadTs("src/lib/files/file-types.ts");
+check(`the per-question file limit is a real number (${MAX_FILES_PER_QUESTION})`, MAX_FILES_PER_QUESTION === 20);
+check(`one pass carries ${MAX_CONTEXT_CHARS} characters`, MAX_CONTEXT_CHARS === 400_000);
+check(`and a question may take ${MAX_PASSES} passes`, MAX_PASSES === 5);
+
+console.log("\n== 13. with several files, a citation names WHICH file ==");
+// Asking about three contracts and being told "Page 4" is not an answer.
+const MULTI = [
+  { fileId: "a", filename: "contract.pdf", page: 4, label: "Page 4" },
+  { fileId: "b", filename: "invoice.pdf", page: 4, label: "Page 4" },
+];
+{
+  const r = verifyCitations("Terms [contract.pdf, Page 4] and the amount [invoice.pdf, Page 4].", MULTI);
+  check("both files' citations survive", r.verified.length === 2);
+  check("and each names its own file", r.verified[0].filename === "contract.pdf" && r.verified[1].filename === "invoice.pdf");
+  check("the page alone, with no file, is not a citation", verifyCitations("See [Page 4].", MULTI).verified.length === 0);
+}
+check("the prompt requires the filename in the citation", /\[filename, Page 3\]/.test(askSystemPrompt({ language: "en", filenames: ["a.pdf", "b.pdf"], truncated: false })));
+check("and the header the model copies carries the filename", /--- FILE: \$\{file\.filename\} \| \$\{page\.label\} ---/.test(readFileSync("src/lib/files/ask.ts", "utf8")));
+check("the answer's source list shows file and page", /citation\.filename\} — \{citation\.label/.test(workspaceCode));
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

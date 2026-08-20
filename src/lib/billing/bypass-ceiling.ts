@@ -74,7 +74,12 @@ export async function checkBypassCeiling(
     .from("ai_cost_log")
     .select("real_cost_eur")
     .eq("user_id", userId)
-    .gte("created_at", new Date(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1).toISOString());
+    // Date.UTC, not the local-time constructor: the old line read UTC
+    // year/month and then built a LOCAL midnight from them, so on any
+    // host not running UTC the window started hours early or late — and
+    // "which month a spend cap counts" is not something to leave to the
+    // deployment's timezone.
+    .gte("created_at", new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1)).toISOString());
 
   if (error) {
     // Fails OPEN, same tolerance every breaker in this file's sibling

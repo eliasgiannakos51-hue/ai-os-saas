@@ -148,7 +148,19 @@ export function AgentsWorkspace({
   } | null>(null);
   const [lastRunOutput, setLastRunOutput] = useState<string | null>(null);
 
-  const atCapacity = agents.length >= agentCap;
+  // WHAT THE COUNTER COUNTS must be what the SERVER enforces. The cap is
+  // on ACTIVE agents (lib/agents/agent-cap.ts counts status='active'),
+  // but this line counted every row — so two paused agents on a cap of 2
+  // disabled the create button the server would have allowed, and the
+  // "used" figure disagreed with the limit it was printed next to.
+  //
+  // Deleting an agent dropping the count to 0 is CORRECT, not the bug it
+  // was reported as: delete is a hard delete, and capacity means agents
+  // currently scheduled to run. The total row count is a separate, wider
+  // ceiling (3x), so it is shown separately when it differs rather than
+  // folded into the same number.
+  const activeCount = useMemo(() => agents.filter((a) => a.status === "active").length, [agents]);
+  const atCapacity = activeCount >= agentCap;
 
   const filtered = useMemo(() => {
     const q = query.trim();
@@ -548,7 +560,13 @@ export function AgentsWorkspace({
         filters={<SortToggle sortOrder={sortOrder} onChange={setSortOrder} alphabetical={alphabetical} />}
         meta={
           <span className="text-xs text-muted" data-testid="agents-cap-meta">
-            {t("agentsUsed", { used: agents.length, cap: agentCap })}
+            {t("agentsUsed", { used: activeCount, cap: agentCap })}
+            {agents.length > activeCount && (
+              <span data-testid="agents-total-meta">
+                {" · "}
+                {t("agentsTotal", { total: agents.length })}
+              </span>
+            )}
           </span>
         }
       >

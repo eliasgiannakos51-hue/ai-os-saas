@@ -144,6 +144,49 @@ console.log("\n== 6. mutation test — the completeness check actually goes red 
     !/checkAgentActivationCap\(/.test(stripComments(mutated)));
 }
 
+console.log("\n== the COUNTER shows what the CAP enforces ==");
+// THE FOURTH "counter went to 0/100" REPORT. Two separate facts, both
+// worth pinning:
+//
+//   1. 0 after deleting the only agent is CORRECT. Delete is a hard
+//      delete and capacity means agents currently scheduled to run.
+//   2. What was NOT correct: the UI counted every row (agents.length)
+//      while the server caps status='active' rows — so two paused agents
+//      on a cap of 2 disabled the create button the server would have
+//      allowed, and "2 of 2" was printed next to a limit it did not mean.
+{
+  const ws = stripComments(readFileSync("src/components/agents/agents-workspace.tsx", "utf8"));
+  check(
+    "the workspace counts ACTIVE agents",
+    /agents\.filter\(\(a\) => a\.status === "active"\)\.length/.test(ws)
+  );
+  check("the counter renders that count", /agentsUsed", \{ used: activeCount/.test(ws));
+  check("and the create button uses it too", /atCapacity = activeCount >= agentCap/.test(ws));
+  check("no raw row count is used as capacity", !/atCapacity = agents\.length/.test(ws));
+  // The wider ceiling is real and separate, so the total is shown when it
+  // differs rather than being folded into the same number.
+  check("the total is shown separately when it differs", /agents\.length > activeCount/.test(ws));
+  check("with its own label", /agentsTotal", \{ total: agents\.length \}/.test(ws));
+  // The server's own rule, restated here so the two cannot drift apart
+  // silently: this is the line the UI is now mirroring.
+  const capSrc = stripComments(readFileSync("src/lib/agents/agent-cap.ts", "utf8"));
+  check(
+    "the server still caps on status='active'",
+    /\.eq\("status", "active"\)/.test(capSrc)
+  );
+}
+
+console.log("\n== the monthly EUR ceiling counts a UTC month ==");
+{
+  const bypass = stripComments(readFileSync("src/lib/billing/bypass-ceiling.ts", "utf8"));
+  // The old line built a LOCAL midnight out of UTC year/month, so on a
+  // non-UTC host the window started at the wrong hour — which month a
+  // spend cap counts must not depend on the deployment's timezone.
+  check("the month boundary is built with Date.UTC", /Date\.UTC\(new Date\(\)\.getUTCFullYear\(\)/.test(bypass));
+  check("it sums real_cost_eur", /select\("real_cost_eur"\)/.test(bypass));
+  check("scoped to the one account", /\.eq\("user_id", userId\)/.test(bypass));
+}
+
 console.log(`\n${pass} passed, ${failures.length} failed`);
 if (failures.length) {
   console.log("FAILED: " + failures.join(" | "));

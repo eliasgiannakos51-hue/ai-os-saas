@@ -192,6 +192,14 @@ export function FilesWorkspace({
 
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // The files that CAN be asked about — the denominator of "3 of 12" and
+  // what "Select all" selects. A failed or still-processing row is not
+  // selectable, so counting it would promise capacity that is not there.
+  const askableFiles = useMemo(
+    () => files.filter((f) => f.processing_status === "ready"),
+    [files]
+  );
+
   const storageUsed = useMemo(
     () => files.reduce((sum, f) => sum + f.size_bytes, 0),
     [files]
@@ -1144,13 +1152,26 @@ export function FilesWorkspace({
       {selected.length > 0 && (
         <div className="fixed inset-x-0 bottom-0 z-40 border-t border-orange-500/30 bg-panel/95 px-4 py-3 backdrop-blur">
           <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-x-3 gap-y-2">
+            {/* "3 of 12 selected", not "3 files selected": the question the
+                user is actually asking is how much of what they uploaded
+                is included, and a bare count answers half of it. */}
             <span
               data-testid="files-selected-count"
               className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground"
             >
               <Check className="h-4 w-4 text-orange-400" aria-hidden="true" />
-              {t("selectedCount", { count: selected.length })}
+              {t("selectedOfTotal", { count: selected.length, total: askableFiles.length })}
             </span>
+            {selected.length < Math.min(askableFiles.length, MAX_FILES_PER_QUESTION) && (
+              <button
+                type="button"
+                data-testid="files-select-all"
+                onClick={() => setSelected(askableFiles.slice(0, MAX_FILES_PER_QUESTION).map((f) => f.id))}
+                className="text-xs text-muted underline-offset-2 transition-colors duration-150 hover:text-foreground hover:underline"
+              >
+                {t("selectAll")}
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setSelected([])}
@@ -1159,9 +1180,15 @@ export function FilesWorkspace({
               {t("clearSelection")}
             </button>
             <span className="grow" />
-            {selected.length > MAX_FILES_PER_QUESTION && (
+            {/* The limit is stated BEFORE it is hit — a rule you only meet
+                by breaking it is a rule the UI kept to itself. */}
+            {selected.length > MAX_FILES_PER_QUESTION ? (
               <span className="text-[11px] text-amber-400/90">
                 {t("tooManySelected", { max: MAX_FILES_PER_QUESTION })}
+              </span>
+            ) : (
+              <span data-testid="files-max-hint" className="text-[11px] text-muted">
+                {t("maxPerQuestion", { max: MAX_FILES_PER_QUESTION })}
               </span>
             )}
             <button

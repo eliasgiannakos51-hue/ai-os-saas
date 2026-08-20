@@ -38,7 +38,30 @@
  * more generations in the same hour. A production Unsplash application is
  * 5000/hour, where this ceiling is irrelevant and harmless.
  */
-export const UNSPLASH_REQUESTS_PER_GENERATION = 12;
+const DEFAULT_REQUESTS_PER_GENERATION = 12;
+
+function configuredCeiling(): number {
+  const raw = process.env.UNSPLASH_REQUESTS_PER_GENERATION;
+  if (raw === undefined || raw.trim() === "") return DEFAULT_REQUESTS_PER_GENERATION;
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 500) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      `[unsplash-budget] UNSPLASH_REQUESTS_PER_GENERATION="${raw}" ignored ` +
+        `(must be a whole number between 1 and 500) — using ${DEFAULT_REQUESTS_PER_GENERATION}.`
+    );
+    return DEFAULT_REQUESTS_PER_GENERATION;
+  }
+  return parsed;
+}
+
+/**
+ * Raise it ONLY with a production Unsplash application (5000/hour). On the
+ * free Demo tier (50/hour) a higher ceiling does not buy more photos — it
+ * spends the whole hour's quota on one generation and 403s the next
+ * three, which is the failure this ceiling exists to prevent.
+ */
+export const UNSPLASH_REQUESTS_PER_GENERATION = configuredCeiling();
 
 export type UnsplashHaltReason = "rate-limited" | "budget-exhausted" | "unauthorised";
 

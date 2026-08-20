@@ -250,6 +250,50 @@ check(
   /50 requests\/hour/.test(ub.describeUnsplashHalt("rate-limited", 12))
 );
 
+console.log("\n== 10b. the blanks the site is left with are LISTED, not hunted for ==");
+// The prompt refuses to invent a phone number or a price and leaves a
+// bracketed placeholder instead. Correct — but the report was "it did
+// not put in the numbers", from somebody who never spotted them. The
+// page is scanned after generation and the blanks are named.
+const ph2 = await loadTs("src/lib/website-placeholders.ts");
+{
+  const html = `<!DOCTYPE html><html><head><style>a[href^="tel"]{color:red}</style>
+<script>const x = arr[0]; const y = list[1];</script></head>
+<body><h1>Taverna</h1><p>Call [Your phone number] or email [Your email].</p>
+<footer>[Your phone number] · [Ωράριο λειτουργίας]</footer></body></html>`;
+  const found = ph2.findUnfilledPlaceholders(html);
+  const texts = found.map((f) => f.text);
+  check("the phone blank is found", texts.includes("Your phone number"));
+  check("the email blank is found", texts.includes("Your email"));
+  check("a non-English blank is found too", texts.includes("Ωράριο λειτουργίας"));
+  check("the repeated one is counted, not duplicated", found.find((f) => f.text === "Your phone number")?.count === 2);
+  check("most frequent first", found[0].text === "Your phone number");
+  // A scanner that reported CSS attribute selectors or array indexing
+  // would tell the owner to "fill in" href^= and 0.
+  check("CSS inside <style> is not scanned", !texts.some((t) => t.includes("href")));
+  check("array indexing in <script> is not scanned", !texts.some((t) => /^\d+$/.test(t)));
+  check("a page with nothing missing reports nothing", ph2.findUnfilledPlaceholders("<p>All done.</p>").length === 0);
+}
+{
+  const ws = readFileSync("src/components/website-builder/website-builder-workspace.tsx", "utf8");
+  check("the workspace scans the displayed HTML", /findUnfilledPlaceholders\(displayedHtml\)/.test(ws));
+  check("and renders the list above the preview", /data-testid="website-unfilled"/.test(ws));
+  check("with the reason it is blank", /unfilledBody/.test(ws));
+}
+
+console.log("\n== 10c. the request ceiling is honest about the tier it fits ==");
+check(
+  "the ceiling is configurable",
+  /UNSPLASH_REQUESTS_PER_GENERATION/.test(readFileSync("src/lib/unsplash-budget.ts", "utf8"))
+);
+check("but defaults to the Demo-tier figure", ub.UNSPLASH_REQUESTS_PER_GENERATION === 12);
+check(
+  "and the env example says raising it needs a production app",
+  // Comment prose wraps across lines, so the check tolerates a line
+  // break and the leading "# " rather than demanding one long line.
+  /Raise this ONLY[\s\S]{0,120}?production Unsplash/.test(readFileSync(".env.local.example", "utf8"))
+);
+
 console.log("\n== 11. missing contact details become a visible gap, never a fake ==");
 const builder = readFileSync("src/lib/website-builder.ts", "utf8");
 check("the prompt has a rule for details that were not given", /CONTACT DETAILS THAT WERE NOT GIVEN/.test(builder));

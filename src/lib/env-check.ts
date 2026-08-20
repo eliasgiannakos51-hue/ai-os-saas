@@ -113,7 +113,22 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
         : null,
   },
   { name: "ADMIN_EMAILS", level: "optional", what: "Extra admin accounts, comma-separated", fallback: "the hardcoded owner address" },
-  { name: "UNSPLASH_ACCESS_KEY", level: "optional", what: "Real photos in generated websites", fallback: "placeholder images" },
+  {
+    name: "UNSPLASH_ACCESS_KEY",
+    level: "optional",
+    what: "Real photos in generated websites",
+    fallback: "photo placeholders are REMOVED — a site with fewer, relevant images rather than random ones",
+  },
+  {
+    // Raising this on the free Demo tier does not buy more photos: it
+    // spends the hour's 50 requests on one generation and 403s the next
+    // three.
+    name: "UNSPLASH_REQUESTS_PER_GENERATION",
+    level: "optional",
+    what: "Unsplash searches one website generation may spend — raise only with a production Unsplash app (5000/hour)",
+    fallback: "12 (sized for the free Demo tier's 50/hour)",
+    suspicious: numberIn(1, 500),
+  },
   { name: "LARGE_ACTION_CONFIRM_THRESHOLD", level: "optional", what: "Credits above which an action asks for confirmation", fallback: "50" },
   { name: "RESERVE_BUFFER_PERCENT", level: "optional", what: "Headroom added to a reservation", fallback: "10" },
   // Autonomous Agents fair use. Optional, because every one of them has a

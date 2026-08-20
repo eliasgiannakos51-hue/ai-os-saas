@@ -551,6 +551,22 @@ r = envMod.checkEnv({ ...full, RESEND_FROM_EMAIL: undefined });
 checkTrue("an unset sender is a missing recommendation", r.missingRecommended.includes("RESEND_FROM_EMAIL"));
 r = envMod.checkEnv(full);
 check("a verified-domain sender is clean", r.suspicious, []);
+// A key of the wrong LENGTH is refused at every save with "secure storage
+// is not configured", which reads as "not set" and sends whoever set it
+// looking in the wrong place.
+r = envMod.checkEnv({ ...full, INTEGRATION_ENCRYPTION_KEY: "too-short" });
+check("a malformed encryption key is flagged", r.suspicious.map((x) => x.name), ["INTEGRATION_ENCRYPTION_KEY"]);
+checkTrue("with the fix in the message", /openssl rand -hex 32/.test(r.suspicious[0].reason));
+// ...and the key itself must not travel into a log to say so.
+checkTrue("the malformed key's VALUE is never echoed", !JSON.stringify(r).includes("too-short"));
+checkTrue(
+  "nor by the formatter",
+  !envMod.formatEnvReport(r).join(" ").includes("too-short")
+);
+r = envMod.checkEnv({ ...full, INTEGRATION_ENCRYPTION_KEY: "a".repeat(64) });
+check("a 64-hex key is accepted", r.suspicious, []);
+r = envMod.checkEnv({ ...full, INTEGRATION_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString("base64url") });
+check("and so is a 32-byte base64url key", r.suspicious, []);
 // Secrets must never be echoed into logs.
 r = envMod.checkEnv({ ...full, ANTHROPIC_API_KEY: "sk-ant-supersecret" });
 checkTrue("a secret's VALUE is never echoed", !JSON.stringify(r).includes("supersecret"));

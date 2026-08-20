@@ -57,6 +57,7 @@ export function DeliveryPicker({
   const [saved, setSaved] = useState<SavedChannel[]>([]);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState<DeliveryChannel | null>(null);
+  const [testing, setTesting] = useState<"telegram" | "discord" | null>(null);
   const [telegramToken, setTelegramToken] = useState("");
   const [telegramChat, setTelegramChat] = useState("");
   const [discordUrl, setDiscordUrl] = useState("");
@@ -127,6 +128,35 @@ export function DeliveryPicker({
       addToast(getErrorMessage(err, t("connectFailed")), "error");
     } finally {
       setConnecting(null);
+    }
+  }
+
+  /**
+   * Sends a REAL message to an already-connected channel.
+   *
+   * "The five channels are shown but I don't know if they send" — the
+   * only previous proof was at the moment of pasting, and a token can be
+   * revoked or a webhook deleted the day after. Success says where to
+   * look; failure says what the platform actually objected to.
+   */
+  async function test(channel: "telegram" | "discord") {
+    setTesting(channel);
+    try {
+      const response = await fetch("/api/delivery-channels", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ channel }),
+      });
+      const data = await response.json();
+      if (!data.ok) {
+        addToast(data.error ?? t("testFailed"), "error");
+        return;
+      }
+      addToast(t(channel === "telegram" ? "testSentTelegram" : "testSentDiscord"));
+    } catch (err) {
+      addToast(getErrorMessage(err, t("testFailed")), "error");
+    } finally {
+      setTesting(null);
     }
   }
 
@@ -224,18 +254,45 @@ export function DeliveryPicker({
                   hint: saved.find((c) => c.channel === "telegram")?.secretHint ?? "",
                 })}
               </p>
-              <button
-                type="button"
-                onClick={() => void disconnect("telegram")}
-                disabled={connecting === "telegram"}
-                className="inline-flex min-h-[36px] items-center rounded-lg border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
-              >
-                {t("disconnect")}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  data-testid="delivery-test-telegram"
+                  onClick={() => void test("telegram")}
+                  disabled={testing === "telegram" || connecting === "telegram"}
+                  className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-orange-500/40 px-3 py-1 text-xs font-medium text-orange-300 transition-colors duration-150 hover:bg-orange-500/10 disabled:opacity-50"
+                >
+                  {testing === "telegram" ? (
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Send className="h-3 w-3" aria-hidden="true" />
+                  )}
+                  {t("sendTest")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void disconnect("telegram")}
+                  disabled={connecting === "telegram"}
+                  className="inline-flex min-h-[36px] items-center rounded-lg border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
+                >
+                  {t("disconnect")}
+                </button>
+              </div>
             </div>
           ) : (
             <>
-              <p className="text-[11px] leading-relaxed text-muted">{t("telegramHelp")}</p>
+              {/* Numbered, because "create a bot with @BotFather" is one
+                  sentence describing seven actions, and somebody who has
+                  never heard of BotFather cannot start. */}
+              <ol className="list-decimal space-y-0.5 pl-4 text-[11px] leading-relaxed text-muted">
+                {/* The keys are written out, not built with a template
+                    literal: a key assembled at runtime is invisible to
+                    the i18n scanner, so a missing translation would ship
+                    as a raw key on the screen. */}
+                {(["telegramStep1", "telegramStep2", "telegramStep3", "telegramStep4", "telegramStep5", "telegramStep6", "telegramStep7"] as const).map((key) => (
+                  <li key={key}>{t(key)}</li>
+                ))}
+              </ol>
               <input
                 type="password"
                 value={telegramToken}
@@ -274,18 +331,45 @@ export function DeliveryPicker({
               <p className="text-[11px] text-muted">
                 {t("discordConnected", { hint: saved.find((c) => c.channel === "discord")?.secretHint ?? "" })}
               </p>
-              <button
-                type="button"
-                onClick={() => void disconnect("discord")}
-                disabled={connecting === "discord"}
-                className="inline-flex min-h-[36px] items-center rounded-lg border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
-              >
-                {t("disconnect")}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  data-testid="delivery-test-discord"
+                  onClick={() => void test("discord")}
+                  disabled={testing === "discord" || connecting === "discord"}
+                  className="inline-flex min-h-[36px] items-center gap-1.5 rounded-lg border border-orange-500/40 px-3 py-1 text-xs font-medium text-orange-300 transition-colors duration-150 hover:bg-orange-500/10 disabled:opacity-50"
+                >
+                  {testing === "discord" ? (
+                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                  ) : (
+                    <Send className="h-3 w-3" aria-hidden="true" />
+                  )}
+                  {t("sendTest")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void disconnect("discord")}
+                  disabled={connecting === "discord"}
+                  className="inline-flex min-h-[36px] items-center rounded-lg border border-border px-3 py-1 text-xs text-muted transition-colors duration-150 hover:text-foreground disabled:opacity-50"
+                >
+                  {t("disconnect")}
+                </button>
+              </div>
             </div>
           ) : (
             <>
-              <p className="text-[11px] leading-relaxed text-muted">{t("discordHelp")}</p>
+              {/* Numbered, because "create a bot with @BotFather" is one
+                  sentence describing seven actions, and somebody who has
+                  never heard of BotFather cannot start. */}
+              <ol className="list-decimal space-y-0.5 pl-4 text-[11px] leading-relaxed text-muted">
+                {/* The keys are written out, not built with a template
+                    literal: a key assembled at runtime is invisible to
+                    the i18n scanner, so a missing translation would ship
+                    as a raw key on the screen. */}
+                {(["discordStep1", "discordStep2", "discordStep3", "discordStep4", "discordStep5"] as const).map((key) => (
+                  <li key={key}>{t(key)}</li>
+                ))}
+              </ol>
               <input
                 type="password"
                 value={discordUrl}

@@ -21,6 +21,17 @@ export const dynamic = "force-dynamic";
 const SIGNUP_MAX_ATTEMPTS = 10;
 const SIGNUP_WINDOW_MINUTES = 60;
 
+/**
+ * How long the response will still wait for the welcome email once
+ * everything else is done.
+ *
+ * Small on purpose: by this point the send has already had the credit
+ * grant and the sign-in to complete in, so this is the tail, not the
+ * send. It exists at all because a promise abandoned at response time may
+ * never run to completion on a serverless platform.
+ */
+const WELCOME_EMAIL_RESIDUAL_MS = 300;
+
 export async function POST(request: Request) {
   // Stage timing, visible with IONEXA_DIAG=1. "Signup takes 10 seconds"
   // cannot be diagnosed from outside — five sequential network calls
@@ -174,6 +185,17 @@ export async function POST(request: Request) {
     }
 
     mark("create_user");
+    // STARTED HERE, AWAITED LAST. The email needs nothing but the address,
+    // so making it wait for the credit grant and the sign-in put its whole
+    // latency on the critical path — up to 2.5s of a signup nobody was
+    // waiting on an email for. Kicking it off now overlaps it with both.
+    //
+    // .catch is not optional: an unawaited rejection is a process-level
+    // unhandled rejection, and this promise is deliberately not awaited
+    // for another few statements.
+    const welcomeEmail = sendWelcomeEmail(email).catch((err) => {
+      logApiError("/api/signup", err, { stage: "welcome_email" });
+    });
     const supabase = createClient();
 
     // Grant the signup plan's monthly credits so user_credits exists from
@@ -210,18 +232,6 @@ export async function POST(request: Request) {
     }
     mark("grant_credits");
 
-    // Best-effort welcome email — sendWelcomeEmail never throws, so a failed
-    // send never blocks signup. CAPPED AT 2.5s: the Resend call carries no
-    // timeout of its own, so a slow or hanging email API used to hold the
-    // whole signup hostage — a person watching a spinner for a marketing
-    // email they haven't asked for. Past the cap the send keeps running
-    // for whatever remains of this invocation, but the response no longer
-    // waits for it; the email is the least important thing in this route.
-    await Promise.race([
-      sendWelcomeEmail(email),
-      new Promise<void>((resolve) => setTimeout(resolve, 2500)),
-    ]);
-    mark("welcome_email");
 
     // Sign in on the same (cookie-aware) server client so the session lands
     // on this response and the browser is authenticated right away.
@@ -230,6 +240,26 @@ export async function POST(request: Request) {
       password,
     });
     mark("sign_in");
+
+    // The welcome email now costs ~nothing, because it no longer WAITS its
+    // turn: it was started immediately after the account existed (above),
+    // and has been running while credits were granted and the session was
+    // created. Only whatever is left of it is waited for here, and only
+    // briefly.
+    //
+    // Why it is not simply fire-and-forget: this runs on a serverless
+    // platform where the invocation can be frozen the moment the response
+    // is returned, so an unawaited promise is an email that may never be
+    // sent. Next 14 has no `after()`/`waitUntil` to hand the work to. So
+    // the send overlaps the rest of the route instead — same reliability,
+    // none of the serial cost — and the residual wait is a floor, not the
+    // whole send: past it the response goes out and the send continues for
+    // whatever remains of the invocation.
+    await Promise.race([
+      welcomeEmail,
+      new Promise<void>((resolve) => setTimeout(resolve, WELCOME_EMAIL_RESIDUAL_MS)),
+    ]);
+    mark("welcome_email");
     diagLog(`[signup] stage timings: ${marks.join(" ")}`);
 
     if (signInError) {

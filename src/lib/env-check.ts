@@ -23,6 +23,11 @@ export type EnvRequirement = {
   fallback?: string;
   /** Returns a complaint string when the VALUE looks wrong. */
   suspicious?: (value: string) => string | null;
+  /** Never print the value, whatever the complaint says. A malformed
+   *  secret is still a secret: the reason is the useful half, and echoing
+   *  a key into a log to explain that it is the wrong LENGTH would put it
+   *  somewhere it was never meant to be. */
+  secret?: boolean;
 };
 
 function numberIn(min: number, max: number) {
@@ -173,8 +178,24 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
   {
     name: "INTEGRATION_ENCRYPTION_KEY",
     level: "optional",
-    what: "Encrypts stored third-party OAuth tokens. Without it, integrations refuse to connect",
-    fallback: "integrations disabled",
+    what:
+      "Encrypts stored third-party OAuth tokens and Telegram/Discord delivery credentials. " +
+      "Without it, integrations and those two channels refuse to connect",
+    fallback: "integrations and Telegram/Discord delivery disabled",
+    secret: true,
+    // A key of the wrong LENGTH is rejected at every save with "secure
+    // storage is not configured on the server" — which reads as "not set"
+    // and sends whoever set it looking in the wrong place. The same
+    // parser lib/integrations/crypto.ts uses, restated as a shape check
+    // so the health page can say "set, but wrong" instead of nothing.
+    suspicious: (value) => {
+      const hex = /^[0-9a-fA-F]{64}$/.test(value);
+      const b64 = /^[A-Za-z0-9+/]{43}=$/.test(value);
+      const b64url = /^[A-Za-z0-9_-]{43}$/.test(value);
+      return hex || b64 || b64url
+        ? null
+        : "not a 32-byte key — must be 64 hex characters or 32 bytes of base64 (openssl rand -hex 32). Integrations and Telegram/Discord delivery will refuse to connect";
+    },
   },
   {
     name: "GOOGLE_OAUTH_CLIENT_ID",
@@ -235,8 +256,10 @@ export function checkEnv(env: Record<string, string | undefined>): EnvReport {
     const reason = req.suspicious?.(raw.trim());
     // The VALUE is never echoed for anything that could be a secret —
     // only for the small set of numeric knobs, where the value is the
-    // whole point of the warning.
-    if (reason) report.suspicious.push({ name: req.name, value: raw.trim(), reason });
+    // whole point of the warning. `secret: true` requirements carry an
+    // empty value here, so a caller that renders the report without
+    // consulting formatEnvReport still cannot leak one.
+    if (reason) report.suspicious.push({ name: req.name, value: req.secret ? "" : raw.trim(), reason });
   }
   return report;
 }
@@ -254,7 +277,15 @@ export function formatEnvReport(report: EnvReport): string[] {
     );
   }
   for (const s of report.suspicious) {
-    lines.push(`[env] SUSPICIOUS ${s.name}="${s.value}" — ${s.reason}`);
+    const req = ENV_REQUIREMENTS.find((r) => r.name === s.name);
+    // The value is printed only for the numeric knobs, where the value IS
+    // the warning ("0.80 is below the floor"). Anything marked secret
+    // reports the complaint alone.
+    lines.push(
+      req?.secret
+        ? `[env] SUSPICIOUS ${s.name} — ${s.reason}`
+        : `[env] SUSPICIOUS ${s.name}="${s.value}" — ${s.reason}`
+    );
   }
   return lines;
 }

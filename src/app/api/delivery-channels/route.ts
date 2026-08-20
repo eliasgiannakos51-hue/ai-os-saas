@@ -6,6 +6,7 @@ import {
   saveDeliveryChannel,
   listDeliveryChannels,
   deleteDeliveryChannel,
+  testDeliveryChannel,
 } from "@/lib/agents/delivery-store";
 import { isCredentialChannel } from "@/lib/agents/delivery-channels";
 
@@ -91,6 +92,63 @@ export async function POST(request: Request) {
       );
     }
     return NextResponse.json({ ok: true, channel: saved.channel });
+  } catch (err) {
+    logApiError("/api/delivery-channels", err);
+    return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });
+  }
+}
+
+/**
+ * Send a real test message to an ALREADY-connected channel.
+ *
+ * Separate verb from POST because it is a different act: POST connects
+ * something new, PUT proves something existing still works. A credential
+ * can be revoked at any time and nothing tells us — without this, the
+ * first sign is an agent result that silently never arrived.
+ *
+ * Rate-limited on its own scope: it posts to a third party, and a button
+ * anyone can hold down is a button that posts to Telegram as fast as it
+ * can be clicked.
+ */
+export async function PUT(request: Request) {
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+
+    const limited = await checkRateLimit({
+      scope: "delivery_channel_test",
+      identifier: user.id,
+      maxAttempts: 10,
+      windowMinutes: 60,
+    });
+    if (!limited.allowed) {
+      return NextResponse.json(
+        { ok: false, error: "Too many test messages in the last hour. Try again shortly." },
+        { status: 429 }
+      );
+    }
+
+    let body: { channel?: unknown };
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
+    }
+    if (!isCredentialChannel(body.channel)) {
+      return NextResponse.json({ ok: false, error: "That channel cannot be tested here." }, { status: 400 });
+    }
+
+    const result = await testDeliveryChannel(user.id, body.channel);
+    if (!result.ok) {
+      return NextResponse.json(
+        { ok: false, error: result.message },
+        { status: result.reason === "not_connected" ? 404 : 400 }
+      );
+    }
+    return NextResponse.json({ ok: true });
   } catch (err) {
     logApiError("/api/delivery-channels", err);
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });

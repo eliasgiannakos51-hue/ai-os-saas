@@ -583,7 +583,21 @@ const clientFallbacks = sources.flatMap((f) => [
 // is the one route here that deliberately returns CODES rather than prose
 // ("pin_limit", "title_too_long") and the eight counted below it are its
 // neighbours, not its own strings.
-const SERVER_PROSE_BASELINE = 540;
+// 540 -> 541 for the delivery-channel TEST endpoint (api/delivery-channels
+// PUT and lib/agents/delivery-store's testDeliveryChannel): "that channel
+// cannot be tested here", "that channel is not connected yet", the
+// per-hour limit reply, and the ingest refusal that now says nothing was
+// stored and to retry. Same documented convention as every increment
+// above — the calling component surfaces and translates what it can.
+//
+// The honest caveat for these particular ones: when a test FAILS, the
+// most useful half of the message is the platform's own words ("chat not
+// found", "bot was blocked by the user"), which arrive from Telegram or
+// Discord in English and cannot be translated by us at all. The sentences
+// we own around them are in dashboard.agents.delivery.* in all ten
+// locales (sendTest, testSentTelegram, testSentDiscord, testFailed); what
+// is counted here is the server's reply when the request itself fails.
+const SERVER_PROSE_BASELINE = 541;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

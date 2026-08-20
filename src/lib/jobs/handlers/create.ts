@@ -1,6 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { buildCachedSystem } from "@/lib/ai/cached-system";
 import { logApiError } from "@/lib/log-error";
 import { checkNeedsClarification } from "@/lib/clarification";
 import { getUserFullContext, buildUserContextPromptAdditionEnglish } from "@/lib/user-context";
@@ -124,11 +125,19 @@ export const createHandler: JobHandler = async (ctx: JobContext): Promise<JobHan
   const response = await anthropic.messages.create({
     model: MODEL,
     max_tokens: 1024,
-    system:
-      buildSystemPrompt() +
-      agentRoleSystemPromptAddition(agentRole) +
-      userContext +
-      buildMissionContextSystemPromptAddition(priorStepsContext ?? ""),
+    // buildSystemPrompt() is the Create Studio module catalogue — 11,022
+    // characters (~2,756 tokens) generated from CLASSIFIER_MODULES, and
+    // identical on every Create Anything call in the app. The three
+    // additions after it are per-request and each starts with "\n\n" or
+    // is empty, so the split is byte-exact. See lib/ai/cached-system.ts.
+    system: buildCachedSystem({
+      staticPrefix: buildSystemPrompt(),
+      dynamicSuffix:
+        agentRoleSystemPromptAddition(agentRole) +
+        userContext +
+        buildMissionContextSystemPromptAddition(priorStepsContext ?? ""),
+      model: MODEL,
+    }),
     messages: [{ role: "user", content: userContent }],
     tools: [ROUTE_ENTRY_TOOL],
     tool_choice: { type: "tool", name: "route_entry" },

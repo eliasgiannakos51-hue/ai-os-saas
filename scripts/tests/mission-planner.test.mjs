@@ -37,6 +37,17 @@ function loadMissionAgents() {
     'const AI_CONDUCT_EL = "";'
   );
   src = src.replace(/import type \{ CostAccumulator \} from "@\/lib\/billing\/cost-accumulator";/, "");
+  // lib/ai/cached-system.ts is INLINED, not stubbed.
+  //
+  // It has no external imports at all (that is deliberate — see the note
+  // in that file), so the real implementation can be pasted in here and
+  // the module under test ends up calling the real buildCachedSystem
+  // rather than a lookalike. A stub would let this test keep passing
+  // while the actual block-splitting broke; the real thing cannot.
+  src = src.replace(
+    /import \{ buildCachedSystem \} from "@\/lib\/ai\/cached-system";/,
+    readFileSync("src/lib/ai/cached-system.ts", "utf8").replace(/^export /gm, "")
+  );
   const js = ts.transpileModule(src, {
     compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 },
   }).outputText;

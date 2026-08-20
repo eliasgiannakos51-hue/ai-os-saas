@@ -36,6 +36,7 @@ import {
 import { loadLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
 import type { PlanSlug } from "@/lib/billing/plans";
 import { CHAT_MODEL } from "@/lib/ai-models";
+import { buildCachedSystem } from "@/lib/ai/cached-system";
 import { consumeFreeChatMessage, releaseFreeChatMessage } from "@/lib/billing/free-chat-usage";
 import { diagLog } from "@/lib/diag";
 import {
@@ -467,8 +468,31 @@ export async function POST(request: Request) {
       logApiError("/api/chat", err, { stage: "integrations" });
     }
 
-    const systemPrompt =
-      (mentorMode ? buildMentorSystemPrompt(personaName) : buildSystemPrompt(personaName)) +
+    // Split in two on purpose — see lib/ai/cached-system.ts.
+    //
+    // The first half is byte-identical on every chat message in the app:
+    // persona line, web-search instruction, AI_CONDUCT_EL,
+    // AI_QUALITY_CHECKLIST_EL. Measured at 7,510 characters (~1,878
+    // tokens), it is comfortably over Sonnet's 1,024-token caching
+    // minimum, and it was being re-sent at full input price on every
+    // single message.
+    //
+    // The second half is per-request, and one part of it is per-MESSAGE,
+    // not merely per-user: buildEntityMentionPromptAddition is computed
+    // from the words in THIS message. That is what makes the block
+    // boundary load-bearing rather than cosmetic. Marking the end of the
+    // whole prompt would put those entities inside the cached prefix, so
+    // every message would write a fresh entry and none would ever read
+    // one — the 1.25x write premium, paid forever, for nothing.
+    //
+    // `personaName` sits inside the static half and defaults to "Ionexa"
+    // for everyone below Ultimate, so the overwhelming majority of
+    // accounts share one cache entry. A custom persona simply gets its
+    // own; it does not break anything, it just caches per-name.
+    const systemStaticPrefix = mentorMode
+      ? buildMentorSystemPrompt(personaName)
+      : buildSystemPrompt(personaName);
+    const systemDynamicSuffix =
       buildMemoryPromptAddition(memories) +
       buildEntityMentionPromptAddition(mentionedEntities) +
       mentorContext +
@@ -476,6 +500,12 @@ export async function POST(request: Request) {
       productMentorContext +
       userContext +
       integrationInstruction;
+    // Kept as the concatenation of the two halves, unchanged, because
+    // every cost estimate below sizes the request with
+    // `systemPrompt.length`. The split changes where the block boundary
+    // is, never how much text is sent, and this keeps the estimator
+    // measuring the same string it always did.
+    const systemPrompt = systemStaticPrefix + systemDynamicSuffix;
 
     // Credits: 1 credit per Ionexa Chat message, deducted from user_credits
     // (see lib/billing/credits.ts), the same shared budget Create Anything
@@ -783,7 +813,11 @@ export async function POST(request: Request) {
             const claudeStream = anthropic.messages.stream({
               model: MODEL,
               max_tokens: effectiveMaxTokens,
-              system: systemPrompt,
+              system: buildCachedSystem({
+                staticPrefix: systemStaticPrefix,
+                dynamicSuffix: systemDynamicSuffix,
+                model: MODEL,
+              }),
               messages: conversation,
               tools: effectiveTools,
             });

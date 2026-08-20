@@ -2,6 +2,7 @@ import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 import { AI_CONDUCT_EL } from "@/lib/ai-conduct";
+import { buildCachedSystem } from "@/lib/ai/cached-system";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 
 const MISSION_MODEL = "claude-sonnet-4-6";
@@ -335,7 +336,17 @@ export async function planMission(
   const response = await anthropic.messages.create({
     model: MISSION_MODEL,
     max_tokens: 2048,
-    system: PLANNER_SYSTEM_PROMPT + userContext + researchBlock,
+    // PLANNER_SYSTEM_PROMPT is 8,283 characters (~2,071 tokens) and does
+    // not vary at all — the only interpolations in it are MIN_STEPS and
+    // MAX_STEPS, both module constants. It is therefore the static half,
+    // and `userContext + researchBlock` (both start with "\n\n" or are
+    // empty) is the per-mission half. Same string, same order, same
+    // bytes — only the block boundary is new. See lib/ai/cached-system.ts.
+    system: buildCachedSystem({
+      staticPrefix: PLANNER_SYSTEM_PROMPT,
+      dynamicSuffix: userContext + researchBlock,
+      model: MISSION_MODEL,
+    }),
     messages: [{ role: "user", content: goal }],
     tools: [PLAN_MISSION_TOOL],
     tool_choice: { type: "tool", name: "create_plan" },
@@ -376,7 +387,9 @@ export async function reviewMission(
   const response = await anthropic.messages.create({
     model: MISSION_MODEL,
     max_tokens: 700,
-    system: REVIEWER_SYSTEM_PROMPT,
+    // Wholly static, 6,181 characters (~1,546 tokens) — one block, one
+    // breakpoint, nothing to split off. See lib/ai/cached-system.ts.
+    system: buildCachedSystem({ staticPrefix: REVIEWER_SYSTEM_PROMPT, model: MISSION_MODEL }),
     messages: [{ role: "user", content: userContent }],
   });
 

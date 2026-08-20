@@ -650,7 +650,15 @@
       "sumTop": "最贵的功能",
       "sumTopHint": "占总支出 {percent}%",
       "projectionOnly": "尚无计费操作——下方所有利润率均为免计费记录的推算值，并非实际收入。",
-      "belowTargetAlert": "{count} 个功能低于 {target}x 目标：{features}。已发送邮件告警。"
+      "belowTargetAlert": "{count} 个功能低于 {target}x 目标：{features}。已发送邮件告警。",
+      "cacheTitle": "提示词缓存",
+      "cacheDescription": "从缓存中读取而非按全价计费的提示词 token 占比。",
+      "cacheHitRate": "命中率",
+      "cacheColInput": "全价",
+      "cacheColRead": "来自缓存",
+      "cacheColWrite": "已写入",
+      "cacheEmpty": "尚未记录任何提示词 token。",
+      "cacheMiscachedAlert": "{features}：只写入缓存却读不回任何内容 — 断点落在每次请求都会变化的内容上。"
     },
     "pushNotifications": {
       "title": "推送通知",

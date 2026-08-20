@@ -650,7 +650,15 @@
       "sumTop": "Costliest feature",
       "sumTopHint": "{percent}% of all spend",
       "projectionOnly": "No charged actions yet — every margin below is a projection from bypass records, not revenue.",
-      "belowTargetAlert": "{count} feature(s) below the {target}x target: {features}. An alert has been emailed."
+      "belowTargetAlert": "{count} feature(s) below the {target}x target: {features}. An alert has been emailed.",
+      "cacheTitle": "Prompt cache",
+      "cacheDescription": "Share of prompt tokens served from cache instead of paid at full price.",
+      "cacheHitRate": "Hit rate",
+      "cacheColInput": "Full price",
+      "cacheColRead": "From cache",
+      "cacheColWrite": "Written",
+      "cacheEmpty": "No prompt tokens recorded yet.",
+      "cacheMiscachedAlert": "{features}: writing to cache but reading nothing back — the breakpoint is on content that changes every request."
     },
     "pushNotifications": {
       "title": "Push notifications",

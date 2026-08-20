@@ -650,7 +650,15 @@
       "sumTop": "Ακριβότερο feature",
       "sumTopHint": "{percent}% της συνολικής δαπάνης",
       "projectionOnly": "Δεν υπάρχουν χρεωμένες ενέργειες — κάθε margin παρακάτω είναι πρόβλεψη από bypass εγγραφές, όχι έσοδα.",
-      "belowTargetAlert": "{count} feature κάτω από τον στόχο {target}x: {features}. Στάλθηκε ειδοποίηση με email."
+      "belowTargetAlert": "{count} feature κάτω από τον στόχο {target}x: {features}. Στάλθηκε ειδοποίηση με email.",
+      "cacheTitle": "Προσωρινή μνήμη prompt",
+      "cacheDescription": "Ποσοστό των tokens του prompt που εξυπηρετήθηκαν από την cache αντί να χρεωθούν σε πλήρη τιμή.",
+      "cacheHitRate": "Ποσοστό επιτυχίας",
+      "cacheColInput": "Πλήρης τιμή",
+      "cacheColRead": "Από cache",
+      "cacheColWrite": "Εγγραφή",
+      "cacheEmpty": "Δεν έχουν καταγραφεί ακόμα tokens prompt.",
+      "cacheMiscachedAlert": "{features}: γράφει στην cache αλλά δεν διαβάζει τίποτα πίσω — το σημείο διακοπής βρίσκεται σε περιεχόμενο που αλλάζει σε κάθε αίτημα."
     },
     "pushNotifications": {
       "title": "Ειδοποιήσεις push",

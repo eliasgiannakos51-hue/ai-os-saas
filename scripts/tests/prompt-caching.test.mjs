@@ -247,5 +247,81 @@ ok(
   /cache_control: \{ type: "ephemeral" \}/.test(readFileSync("src/lib/website-builder.ts", "utf8"))
 );
 
+// ---------------------------------------------------------------------
+// 6. Cache efficiency reporting — the only way to know caching WORKS.
+// ---------------------------------------------------------------------
+//
+// Anthropic returns zeros rather than errors when caching silently fails,
+// so the measured hit rate is the whole evidence base. These fixtures use
+// STRING numerics on purpose: PostgREST returns numeric/integer columns as
+// strings, and a reader that forgot to coerce would sum "1000"+"2000" into
+// "10002000" and report a nonsense rate that still rendered fine.
+console.log("\nCache efficiency reporting");
+const mr = await loadTs("src/lib/billing/margin-report.ts");
+
+const cacheRows = mr.aggregateCacheRows([
+  // chat: healthy — most prompt tokens come back from cache.
+  { feature: "chat", input_tokens: "100", cache_read_tokens: "1800", cache_write_tokens: "100" },
+  { feature: "chat", input_tokens: 100, cache_read_tokens: 1800, cache_write_tokens: 0 },
+  // websites: writes a lot, reads nothing — a misplaced breakpoint.
+  { feature: "websites", input_tokens: "500", cache_read_tokens: "0", cache_write_tokens: "20000" },
+  // research: no caching at all.
+  { feature: "research", input_tokens: "3000", cache_read_tokens: 0, cache_write_tokens: 0 },
+]);
+const byFeature = Object.fromEntries(cacheRows.map((r) => [r.feature, r]));
+
+check("string numerics are coerced, not concatenated", byFeature.chat.cacheReadTokens, 3600);
+check("calls are counted per feature", byFeature.chat.calls, 2);
+// 3600 read / (200 input + 3600 read + 100 write) = 0.9230...
+check(
+  "hit rate is reads over ALL prompt tokens",
+  Number(byFeature.chat.hitRate.toFixed(4)),
+  Number((3600 / 3900).toFixed(4))
+);
+check("an uncached feature scores 0, not null", byFeature.research.hitRate, 0);
+ok("an uncached feature is not flagged as miscached", !byFeature.research.writingWithoutReading);
+ok("writing without reading IS flagged", byFeature.websites.writingWithoutReading);
+ok("a healthy feature is not flagged", !byFeature.chat.writingWithoutReading);
+// Biggest prompt-token consumer first — that is the order "where should
+// caching go next" is asked in.
+check("sorted by total prompt tokens, descending", cacheRows[0].feature, "websites");
+
+// A feature that sent no prompt tokens must read as "no data", never 0%.
+const emptyRows = mr.aggregateCacheRows([
+  { feature: "idle", input_tokens: 0, cache_read_tokens: 0, cache_write_tokens: 0 },
+]);
+check("no tokens at all yields null, not zero", emptyRows[0].hitRate, null);
+
+// Rows that never selected the token columns must not crash the panel.
+const legacyRows = mr.aggregateCacheRows([{ feature: "old", achieved_margin: "4.2" }]);
+check("rows without token columns coerce to zero", legacyRows[0].inputTokens, 0);
+check("...and report no data rather than 0%", legacyRows[0].hitRate, null);
+
+const cacheSummary = mr.summariseCacheReport(cacheRows);
+check("summary totals reads across features", cacheSummary.cacheReadTokens, 3600);
+check("summary names the miscached features", cacheSummary.miscached, ["websites"]);
+// Spelled out per component rather than as one literal, so the expected
+// value is derived the same way the reader would check it by hand:
+//   input  = 200 (chat) + 500 (websites) + 3000 (research) = 3700
+//   read   = 3600 (chat)
+//   write  = 100 (chat) + 20000 (websites)                 = 20100
+check("summary totals inputs across features", cacheSummary.inputTokens, 3700);
+check("summary totals writes across features", cacheSummary.cacheWriteTokens, 20100);
+check(
+  "overall hit rate spans every feature",
+  Number(cacheSummary.hitRate.toFixed(4)),
+  Number((3600 / (3700 + 3600 + 20100)).toFixed(4))
+);
+check("an empty report has a null rate, not 0", mr.summariseCacheReport([]).hitRate, null);
+
+// The panel is useless if the query never asks for the columns.
+console.log("\nCache panel wiring");
+const reportSrc = readFileSync("src/components/settings/margin-report.tsx", "utf8");
+for (const col of ["input_tokens", "cache_read_tokens", "cache_write_tokens"]) {
+  ok(`margin report selects ${col}`, new RegExp(col).test(reportSrc));
+}
+ok("it aggregates them", /aggregateCacheRows\(/.test(reportSrc));
+ok("and renders the hit rate", /cacheSummary\.hitRate/.test(reportSrc));
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

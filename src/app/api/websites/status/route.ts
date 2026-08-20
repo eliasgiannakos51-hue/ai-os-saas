@@ -126,6 +126,11 @@ export async function GET(request: Request) {
         logApiError("/api/websites/status", "stale website generation job force-failed", {
           websiteId: id,
           createdAt: typedRecord.created_at,
+          // Repeated stale force-fails almost always mean the worker was
+          // KILLED by the platform, not that the model hung: check that
+          // MAX_FUNCTION_DURATION matches the platform's real function
+          // timeout (it defaults to 800s, a Pro/Fluid figure).
+          hint: "if this recurs, verify MAX_FUNCTION_DURATION matches the platform's function timeout",
         });
         return NextResponse.json({ ok: true, record: failedRecord });
       }

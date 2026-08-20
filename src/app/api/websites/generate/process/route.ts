@@ -350,10 +350,11 @@ export async function POST(request: Request) {
         costs,
         variation
       );
-      // Real-photo placeholder resolution (Unsplash if configured, else
-      // picsum.photos) — see lib/website-image-resolver.ts. A no-op when
-      // the model didn't emit any PLACEHOLDER:<slug> images, which is the
-      // common case for a description that didn't ask for real photos.
+      // Real-photo placeholder resolution (Unsplash; unresolved
+      // placeholders are removed, never substituted with random images) —
+      // see lib/website-image-resolver.ts. A no-op when the model didn't
+      // emit any PLACEHOLDER:<slug> images, which is the common case for
+      // a description that didn't ask for real photos.
       htmlContent = await resolveWebsiteImagePlaceholders(htmlContent);
 
       // Keep the site's own links inside the site.
@@ -454,12 +455,32 @@ export async function POST(request: Request) {
       })
       .eq("id", websiteId)
       .select()
-      .single();
+      // maybeSingle, not single: the row can legitimately be GONE by now —
+      // the user deleted the site mid-generation, or the stale reaper and
+      // a retry raced. .single() turned that into PGRST116 ("Cannot
+      // coerce the result to a single JSON object") in the error log — a
+      // sentence about JSON for an incident about a vanished row.
+      .maybeSingle();
 
-    if (updateError) {
-      logApiError("/api/websites/generate/process", updateError, { stage: "update" });
+    if (updateError || !updatedRecord) {
+      if (updateError) {
+        logApiError("/api/websites/generate/process", updateError, { stage: "update" });
+      } else {
+        logApiError("/api/websites/generate/process", new Error("website row vanished before the result could be saved"), {
+          stage: "update",
+          websiteId,
+        });
+      }
       await releaseReservation(user.id, reservationId);
-      return NextResponse.json({ ok: false, error: "Could not save the generated website. Please try again." }, { status: 500 });
+      return NextResponse.json(
+        {
+          ok: false,
+          error: updateError
+            ? "Could not save the generated website. Please try again."
+            : "This website no longer exists — it was deleted while generating. Nothing was charged.",
+        },
+        { status: updateError ? 500 : 410 }
+      );
     }
 
     // Only now — the AI call succeeded AND the result is durably saved —

@@ -293,12 +293,13 @@ resolves to an actual, working photo URL — never a broken or invented link.
   interior"), via Unsplash's Search API. See `.env.local.example` for
   step-by-step instructions on getting a free key from
   [unsplash.com/developers](https://unsplash.com/developers).
-- **Without it** — falls back to [picsum.photos](https://picsum.photos), a
-  real, working photo service, seeded deterministically by the photo's
-  description so the same request always resolves to the same image.
+- **Without it** — the placeholder is removed and the site ships with
+  fewer photos. It used to fall back to [picsum.photos](https://picsum.photos)
+  — a live URL, but a photo of something else entirely, presented as the
+  business. Fewer relevant images beat more random ones.
 
-Both paths are real, legal, functioning images — this app never scrapes
-Google Images or hotlinks an unlicensed photo.
+Every photo that does appear is a real, legal, functioning image — this
+app never scrapes Google Images or hotlinks an unlicensed photo.
 
 ## Billing
 

@@ -520,6 +520,13 @@ const full = {
   USD_TO_EUR_RATE: "0.92",
   CREDIT_MARGIN_MULTIPLIER: "4",
   CREDIT_PRICE_EUR: "0.02",
+  // Recommended since the stale-generation incident: unset means the app
+  // assumes 800s invocations, which on a smaller platform kills website
+  // generations mid-work.
+  MAX_FUNCTION_DURATION: "800",
+  // Recommended since the refused-email incident: the resend.dev fallback
+  // is testing mode, which delivers only to the Resend account owner.
+  RESEND_FROM_EMAIL: "Ionexa AI <hello@ionexa.com>",
 };
 let r = envMod.checkEnv(full);
 check("a complete environment reports nothing missing", r.missingRequired, []);
@@ -533,6 +540,17 @@ check("USD_TO_EUR_RATE=0.80 is flagged", r.suspicious.map((x) => x.name), ["USD_
 checkTrue("with the reason spelled out", /outside the sane range/.test(r.suspicious[0].reason));
 r = envMod.checkEnv({ ...full, USD_TO_EUR_RATE: "0.92", CREDIT_MARGIN_MULTIPLIER: "2" });
 check("a healthy FX rate is not flagged", r.suspicious.map((x) => x.name), ["CREDIT_MARGIN_MULTIPLIER"]);
+// Production refused 20 real emails because the sender was Resend's
+// shared testing address — which delivers ONLY to the account owner.
+// The env report must call that out, and an unset sender must count as
+// a missing recommendation, not silence.
+r = envMod.checkEnv({ ...full, RESEND_FROM_EMAIL: "Ionexa AI <onboarding@resend.dev>" });
+check("the resend.dev testing sender is flagged", r.suspicious.map((x) => x.name), ["RESEND_FROM_EMAIL"]);
+checkTrue("with the refusal spelled out", /testing sender/.test(r.suspicious[0].reason));
+r = envMod.checkEnv({ ...full, RESEND_FROM_EMAIL: undefined });
+checkTrue("an unset sender is a missing recommendation", r.missingRecommended.includes("RESEND_FROM_EMAIL"));
+r = envMod.checkEnv(full);
+check("a verified-domain sender is clean", r.suspicious, []);
 // Secrets must never be echoed into logs.
 r = envMod.checkEnv({ ...full, ANTHROPIC_API_KEY: "sk-ant-supersecret" });
 checkTrue("a secret's VALUE is never echoed", !JSON.stringify(r).includes("supersecret"));
@@ -795,6 +813,25 @@ for (const file of ROUTES_THAT_SETTLE) {
     !/(bypassCredits|isAdmin|bypassCharge)\s*\?\s*null\s*:\s*await resolveEffectivePlan/.test(body) &&
       !/\|\s*null\s*=\s*(bypassCredits|isAdmin)\s*\n?\s*\?\s*null/.test(body)
   );
+}
+
+console.log("\n== 24. a vanished website row is a refund, not a JSON coercion error ==");
+// Production logged "Cannot coerce the result to a single JSON object"
+// (PGRST116): the post-generation save used .single(), so a row deleted
+// mid-generation — by the user, or by the stale reaper racing a retry —
+// surfaced as a JSON error and the response pretended the save merely
+// failed. Both save paths must treat the vanished row as its own case:
+// release the hold and say plainly that nothing was charged.
+for (const [label, file] of [
+  ["generate/process", "src/app/api/websites/generate/process/route.ts"],
+  ["edit", "src/app/api/websites/edit/route.ts"],
+]) {
+  const body = stripJsComments(readFileSync(file, "utf8"));
+  checkTrue(`${label}: the save-result update tolerates a vanished row`, /\.update\(\{[\s\S]{0,900}?\.select\(\)\s*\.maybeSingle\(\)/.test(body));
+  checkTrue(`${label}: no save-path .single() left to coerce`, !/\.update\(\{[\s\S]{0,900}?\.select\(\)\s*\.single\(\)/.test(body));
+  checkTrue(`${label}: a vanished row releases the hold`, /\(updateError \|\| !updatedRecord\)[\s\S]{0,700}?releaseReservation\(/.test(body));
+  checkTrue(`${label}: and says nothing was charged`, /Nothing was charged\./.test(body));
+  checkTrue(`${label}: as a 410, not a 500`, /status: updateError \? 500 : 410/.test(body));
 }
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);

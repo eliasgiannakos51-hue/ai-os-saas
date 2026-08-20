@@ -6,15 +6,16 @@
  * lib/website-image-resolver.ts resolves every PLACEHOLDER image in
  * parallel, and each one walks broadenImageQuery's ladder — up to FOUR
  * separate searches, because a specific query that returns nothing is
- * retried with a shorter one rather than dropped straight to picsum.
+ * retried with a shorter one rather than dropped on the first miss.
  *
  * Four searches per photo is the right behaviour for photo quality and it
  * multiplies: a site with ten photos whose queries all miss spends forty
  * requests. Two such generations exhaust the hourly quota, and from then
  * on every search in the account returns 403 — so every photo silently
- * becomes a picsum image with no relationship to the subject, which is
- * indistinguishable from "the integration was never wired up". That is
- * exactly the report: a generated site with no real photos.
+ * went unresolved (historically: became a random picsum image with no
+ * relationship to the subject), which is indistinguishable from "the
+ * integration was never wired up". That is exactly the report: a
+ * generated site with no real photos.
  *
  * Two things are needed and neither is a retry policy.
  *
@@ -111,10 +112,10 @@ export function classifyUnsplashResponse(
 export function describeUnsplashHalt(reason: UnsplashHaltReason, spent: number): string {
   switch (reason) {
     case "rate-limited":
-      return `Unsplash quota exhausted after ${spent} request(s) — remaining photos fell back to picsum. A demo Unsplash application allows 50 requests/hour; apply for production access (5000/hour) or wait for the window to reset.`;
+      return `Unsplash quota exhausted after ${spent} request(s) — the remaining photo placeholders were removed rather than filled with unrelated images. A demo Unsplash application allows 50 requests/hour; apply for production access (5000/hour) or wait for the window to reset.`;
     case "unauthorised":
-      return `Unsplash rejected the credentials after ${spent} request(s) — check UNSPLASH_ACCESS_KEY. All photos fell back to picsum.`;
+      return `Unsplash rejected the credentials after ${spent} request(s) — check UNSPLASH_ACCESS_KEY. All photo placeholders were removed.`;
     case "budget-exhausted":
-      return `This generation reached its ceiling of ${UNSPLASH_REQUESTS_PER_GENERATION} Unsplash requests — remaining photos fell back to picsum.`;
+      return `This generation reached its ceiling of ${UNSPLASH_REQUESTS_PER_GENERATION} Unsplash requests — the remaining photo placeholders were removed rather than filled with unrelated images.`;
   }
 }

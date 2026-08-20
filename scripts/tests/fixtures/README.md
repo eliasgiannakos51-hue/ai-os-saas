@@ -31,3 +31,22 @@ await p.pdf({ path: "browser-print.pdf", format: "A4" });
 
 Expected content: page 1 "Trading Strategy" + two sentences, page 2
 "Page Two" + one sentence.
+
+## multilingual.pdf, arabic-only.pdf, scanned-no-text-layer.pdf
+
+Three more REAL PDFs, produced the same way and committed as bytes,
+because "some PDFs are still rejected" came back a third time and the
+suite had exactly one real file to test against.
+
+- **multilingual.pdf** - Greek, Arabic (RTL) and Chinese in one document,
+  plus a euro sign and combining accents. Every script in one file is the
+  cheapest way to catch a decoder that silently drops one of them.
+- **arabic-only.pdf** - a whole document in Arabic, headings included.
+  The heading uses a different (bold) subset font from the body, which is
+  what exposed the unmapped-glyph-id defect.
+- **scanned-no-text-layer.pdf** - an image-only page, what a phone photo
+  of a receipt looks like to a parser. It must be REFUSED, with the
+  sentence that names OCR as the remedy.
+
+Same rule as browser-print.pdf: do not regenerate them to make a test
+pass.

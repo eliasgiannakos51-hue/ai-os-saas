@@ -282,5 +282,37 @@ check("a job stuck at queued is nudged", /NUDGE_AFTER_POLLS/.test(hookSrc));
 check("exactly once", /nudged\.current = true/.test(hookSrc));
 check("and the nudge is safe because the claim decides", /continue`, \{ method: "POST", keepalive: true \}/.test(hookSrc));
 
+console.log("\n== the progress line narrates, and never invents ==");
+// THE THIRD "I don't see the steps" REPORT: the labels were real and
+// rendered, but the client SAMPLES the row every 2s, so a build crossing
+// two steps between polls never showed the one in between — and the
+// terminal poll swapped the panel to the result in the same frame.
+check("there is a minimum visible time per step", /export const MIN_STEP_VISIBLE_MS = (\d+)/.test(hookSrc));
+check(
+  `and it is long enough to read (${/MIN_STEP_VISIBLE_MS = (\d+)/.exec(hookSrc)?.[1]}ms)`,
+  Number(/MIN_STEP_VISIBLE_MS = (\d+)/.exec(hookSrc)?.[1]) >= 600
+);
+check("steps the polling jumped over are filled in from the catalogue", /steps\[s - 1\] \?\? raw\.stepLabel/.test(hookSrc));
+check("what callers render is the smoothed row", /job: display,/.test(hookSrc));
+check("the raw row is still available for logic that needs the truth", /rawJob: job,/.test(hookSrc));
+check("and isRunning follows the smoothed row, so the panel waits for it", /isRunning: Boolean\(display &&/.test(hookSrc));
+// A job first SEEN finished (a restored page) has nothing to narrate.
+check("a job first seen finished is shown at once", /if \(terminal && !sawLive\.current\)/.test(hookSrc));
+// THE HONESTY LINE. A job that failed at step 1 never reached steps 2-4;
+// showing them would be this component inventing work that did not happen.
+check(
+  "only a job that SUCCEEDED has its missed steps narrated",
+  /if \(raw\.status === "done"\) \{[\s\S]{0,400}?for \(let s = lastStep\.current \+ 1; s <= total; s\+\+\)/.test(hookSrc)
+);
+check(
+  "a failure goes straight to the outcome",
+  /\}\s*queue\.current\.push\(raw\);/.test(hookSrc)
+);
+// The label-only surface (the file workspace's ask button) gets the same
+// hold, or its three steps flash past on a small file.
+check("there is a held-label hook for label-only surfaces", /export function useHeldStepLabel/.test(hookSrc));
+check("the files workspace uses it", /useHeldStepLabel\(askStep\)/.test(readFileSync("src/components/files/files-workspace.tsx", "utf8")));
+check("and the mission form smooths its whole row", /useSmoothedJob\(job\)/.test(readFileSync("src/components/mission/mission-form.tsx", "utf8")));
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

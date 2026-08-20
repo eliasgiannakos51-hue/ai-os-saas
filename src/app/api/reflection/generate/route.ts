@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { loadWeeklyReflectionStats } from "@/lib/reflection";
 import { buildReflectionUserMessage, generateWeeklyReflection, REFLECTION_MODEL } from "@/lib/reflection-agent";
@@ -155,7 +156,10 @@ export async function POST(request: Request) {
     let reflection: string;
     try {
       void recordAiCallForDailySpend(CREDIT_COSTS.weeklyReflection);
-      reflection = await generateWeeklyReflection(apiKey, userMessage, costs);
+      // The user's own language, the same way api/chat reads it. The
+      // reflection prompt used to default to Greek for everyone.
+      const locale = await getLocale();
+      reflection = await generateWeeklyReflection(apiKey, userMessage, locale, costs);
     } catch (err) {
       logApiError("/api/reflection/generate", err, { stage: "reflection_call" });
       await releaseReservation(user.id, reservationId);

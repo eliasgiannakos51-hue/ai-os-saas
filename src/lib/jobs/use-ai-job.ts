@@ -211,15 +211,23 @@ export function useSmoothedJob(raw: AiJob | null): AiJob | null {
       // of the same finished row must not re-enqueue it.
       if (finishedQueued.current) return;
       finishedQueued.current = true;
-      for (let s = lastStep.current + 1; s <= total; s++) {
-        queue.current.push({
-          ...raw,
-          status: "running",
-          step: s,
-          stepLabel: steps[s - 1] ?? raw.stepLabel,
-        });
+      // ONLY ON SUCCESS. A job that completed really did pass every step,
+      // so showing the ones the polling missed is narration. A job that
+      // FAILED at step 1 did not reach steps 2-4, and showing them would
+      // be this component inventing work that never happened — the exact
+      // dishonesty the step counter exists to prevent. A failure jumps
+      // straight to the outcome, behind whatever is already queued.
+      if (raw.status === "done") {
+        for (let s = lastStep.current + 1; s <= total; s++) {
+          queue.current.push({
+            ...raw,
+            status: "running",
+            step: s,
+            stepLabel: steps[s - 1] ?? raw.stepLabel,
+          });
+        }
+        lastStep.current = total;
       }
-      lastStep.current = total;
       queue.current.push(raw);
     }
 

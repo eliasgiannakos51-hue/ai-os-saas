@@ -21,6 +21,13 @@ export async function loadLatestEnergyCheckIn(
     const { data, error } = await supabase
       .from("user_energy_checkins")
       .select("energy_level, note, created_at")
+      // EXPLICIT. This takes a userId and used to use it only in a log
+      // line: the read itself was left to RLS. That holds for a client
+      // carrying the user's session and NOT for the service-role client,
+      // which two job handlers pass down this exact path — so the "latest
+      // check-in" folded into their prompt was the latest check-in of
+      // whoever in the whole database had made one most recently.
+      .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();

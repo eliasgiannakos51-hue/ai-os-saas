@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { FileText, Link2, Pencil, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { ApiError } from "@/lib/errors/api-error";
+import { useErrorText } from "@/lib/errors/use-error-text";
 import { iconForSlug } from "@/lib/module-icons";
 import { DetailPanel, type DetailTab } from "@/components/ui/detail-panel";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
@@ -67,6 +69,7 @@ export function GenericRecordDetail({
   const tCommon = useTranslations("common");
   const formatRelativeTime = useFormatRelativeTime();
   const router = useRouter();
+  const describe = useErrorText();
   const supabase = createClient();
   const { addToast } = useToast();
 
@@ -116,8 +119,14 @@ export function GenericRecordDetail({
     setSaving(false);
 
     if (updateError) {
-      setError(updateError.message);
-      addToast(`✗ ${updateError.message}`, "error");
+      // The SAME treatment the create path got: a raw PostgREST string
+      // ("new row violates row-level security policy for table \"trades\"")
+      // names an internal table, is English in a ten-language app, and
+      // tells the user nothing they can act on. Editing a record was the
+      // half of that fix nobody came back to.
+      const failure = describe(new ApiError(500, { error: updateError.message }));
+      setError(failure.text);
+      addToast(`✗ ${failure.what}`, "error");
       return;
     }
 

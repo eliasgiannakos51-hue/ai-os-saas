@@ -15,6 +15,7 @@ import { ProductMissionButton } from "@/components/product-workflow/product-miss
 import { getModule } from "@/lib/modules";
 import { PRODUCT_WORKFLOW_ICON } from "@/lib/module-icons";
 import { loadLinkedEntities } from "@/lib/entity-links";
+import { loadFavoriteIds } from "@/lib/favorites";
 import { loadTimelineEntries } from "@/lib/timeline";
 import { detectProductDetailInsight, type ProductForPattern } from "@/lib/product-pattern";
 import type { ModuleRecord } from "@/types/module-record";
@@ -60,12 +61,14 @@ export default async function ProductWorkflowPage() {
 
   const productRows = (products as ModuleRecord[] | null) ?? [];
 
-  const linkedEntities = await loadLinkedEntities(
-    supabase,
-    user.id,
-    "products",
-    productRows.map((r) => r.id)
-  );
+  // BOTH, in parallel. This page loaded links and not favourites,
+  // so GenericList fell back to `favoritedIds?.has(id) ?? false` and
+  // every star rendered empty — on records the user really had
+  // starred, and which show as starred on the module page.
+  const [linkedEntities, favoritedIds] = await Promise.all([
+    loadLinkedEntities(supabase, user.id, "products", productRows.map((r) => r.id)),
+    loadFavoriteIds(supabase, user.id, "products", productRows.map((r) => r.id)),
+  ]);
 
   const patternProducts: ProductForPattern[] = productRows.map((r) => ({
     id: r.id,
@@ -143,7 +146,7 @@ export default async function ProductWorkflowPage() {
           {error && <ErrorMessage detail={`loading products: ${error.message}`} />}
 
 
-          <GenericList module={productsModule} records={productRows} linkedEntities={linkedEntities} />
+          <GenericList module={productsModule} records={productRows} linkedEntities={linkedEntities} favoritedIds={favoritedIds} />
         </div>
       </div>
     </main>

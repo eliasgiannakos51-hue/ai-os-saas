@@ -15,6 +15,7 @@ import { TradingMissionButton } from "@/components/trading-workflow/trading-miss
 import { getModule } from "@/lib/modules";
 import { TRADING_WORKFLOW_ICON } from "@/lib/module-icons";
 import { loadLinkedEntities } from "@/lib/entity-links";
+import { loadFavoriteIds } from "@/lib/favorites";
 import { loadTimelineEntries } from "@/lib/timeline";
 import {
   detectDayOfWeekPattern,
@@ -60,12 +61,14 @@ export default async function TradingWorkflowPage() {
 
   const tradeRows = (trades as ModuleRecord[] | null) ?? [];
 
-  const linkedEntities = await loadLinkedEntities(
-    supabase,
-    user.id,
-    "trades",
-    tradeRows.map((r) => r.id)
-  );
+  // BOTH, in parallel. This page loaded links and not favourites,
+  // so GenericList fell back to `favoritedIds?.has(id) ?? false` and
+  // every star rendered empty — on records the user really had
+  // starred, and which show as starred on the module page.
+  const [linkedEntities, favoritedIds] = await Promise.all([
+    loadLinkedEntities(supabase, user.id, "trades", tradeRows.map((r) => r.id)),
+    loadFavoriteIds(supabase, user.id, "trades", tradeRows.map((r) => r.id)),
+  ]);
 
   const patternTrades = tradeRows.map((r) => ({
     id: r.id,
@@ -174,7 +177,7 @@ export default async function TradingWorkflowPage() {
           {error && <ErrorMessage detail={`loading trades: ${error.message}`} />}
 
 
-          <GenericList module={tradingModule} records={tradeRows} linkedEntities={linkedEntities} />
+          <GenericList module={tradingModule} records={tradeRows} linkedEntities={linkedEntities} favoritedIds={favoritedIds} />
         </div>
       </div>
     </main>

@@ -44,6 +44,12 @@ function buildSnippet(config: ModuleConfig, record: ModuleRecord): string {
     : joined;
 }
 
+/** The same bounds lib/timeline.ts uses, for the same reason: this page
+ *  reads every module table, and an unbounded read of 21 tables is a
+ *  page that stops loading once somebody has real data. */
+const PER_MODULE_LIMIT = 60;
+const MAX_MEMORY_RESULTS = 200;
+
 export default async function MemoryPage() {
   const t = await getTranslations("dashboard.memory");
   const supabase = createClient();
@@ -70,12 +76,20 @@ export default async function MemoryPage() {
     );
   }
 
+  // BOUNDED, like the surface it is a sibling of. This asked 21 tables for
+  // `select("*")` with no limit and then serialised every row of every one
+  // of them into the client as props — fine on a demo account, a page-load
+  // timeout on a real one. lib/timeline.ts solved the identical problem
+  // with the identical shape (60 per module, 200 shown); the same numbers
+  // are used here so the two cannot drift into disagreeing about what
+  // "recent" means.
   const perModule = await Promise.all(
     ALL_MODULES.map(async ({ config, href }) => {
       const { data } = await supabase
         .from(config.table)
         .select("*")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(PER_MODULE_LIMIT);
       return { config, href, records: (data as ModuleRecord[] | null) ?? [] };
     })
   );
@@ -91,7 +105,8 @@ export default async function MemoryPage() {
         createdAt: record.created_at,
       }))
     )
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, MAX_MEMORY_RESULTS);
 
   return (
     <main className="min-h-full bg-dot-grid">

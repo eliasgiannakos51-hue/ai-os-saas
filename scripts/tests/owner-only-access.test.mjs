@@ -207,5 +207,99 @@ for (const file of adminPages) {
   );
 }
 
+console.log("\n== a query that runs under the SERVICE-ROLE client scopes itself ==");
+// THE LEAK THIS PREVENTS. getUserFullContext relied entirely on RLS to
+// scope its ~15 reads — true for a client carrying the user's session,
+// and NOT true for the service-role client, which bypasses RLS. Two job
+// handlers passed exactly that client, so on any database with more than
+// one account the Create Anything classifier and the Mission Planner
+// built their prompts from the newest rows of EVERY user's ideas, leads,
+// finance entries, trades and missions, and the model answered out of
+// them. api/agents/build had noticed and worked around it at its own
+// call site; a workaround at one caller is not a fix.
+{
+  // Both files on this path: the context builder and the helper it calls.
+  // A scanner that saw only some of the queries would pass while the
+  // others leaked — which is what the first version of this check did
+  // (it matched 2 of 5 and reported all-clear).
+  for (const file of ["src/lib/user-context.ts", "src/lib/energy-checkins.ts"]) {
+    const code = readFileSync(file, "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/^\s*\/\/.*$/gm, "");
+    // EVERY .from(...) in the file, with the ~600 characters that follow
+    // it — enough to contain the whole chained call however it is wrapped.
+    const reads = [...code.matchAll(/\.from\(([^)]+)\)/g)].map((m) => ({
+      table: m[1].trim(),
+      chain: code.slice(m.index, m.index + 600),
+    }));
+    check(`${file.split("/").pop()}: reads found (${reads.length})`, reads.length > 0);
+    const unscoped = reads
+      .filter((r) => !/\.eq\("user_id", userId\)/.test(r.chain.split(";")[0]))
+      .map((r) => r.table);
+    check(
+      `${file.split("/").pop()}: no read is left to RLS alone`,
+      unscoped.length === 0,
+      `unscoped: ${unscoped.join(", ")}`
+    );
+  }
+  const code = readFileSync("src/lib/user-context.ts", "utf8");
+  // The per-module scan takes the id rather than closing over nothing.
+  check("the module scan receives the user id", /scanModule\(supabase, config, now, userId\)/.test(code));
+  check("and filters on it", /\.from\(config\.table\)[\s\S]{0,400}?\.eq\("user_id", userId\)/.test(code));
+
+  // The two handlers that pass the service-role client are still allowed
+  // to — that is the POINT of the filter being inside the function.
+  for (const handler of ["src/lib/jobs/handlers/create.ts", "src/lib/jobs/handlers/mission-plan.ts"]) {
+    const src = readFileSync(handler, "utf8");
+    check(
+      `${handler.split("/").pop()} still passes the worker's client (safe now)`,
+      /getUserFullContext\(admin, ctx\.userId\)/.test(src)
+    );
+  }
+}
+
+console.log("\n== a page that reads EVERY module table bounds itself ==");
+// dashboard/memory read 21 tables with select("*") and no limit, then
+// serialised every row into the client as props. Fine on a demo account,
+// a page-load timeout on a real one. lib/timeline.ts had already solved
+// the same problem with the same shape.
+{
+  const mem = readFileSync("src/app/dashboard/memory/page.tsx", "utf8");
+  check("the per-module read is limited", /\.order\("created_at", \{ ascending: false \}\)\s*\.limit\(PER_MODULE_LIMIT\)/.test(mem));
+  check("and the combined list is capped", /\.slice\(0, MAX_MEMORY_RESULTS\)/.test(mem));
+  const timeline = readFileSync("src/lib/timeline.ts", "utf8");
+  const memPer = /const PER_MODULE_LIMIT = (\d+)/.exec(mem)?.[1];
+  const tlPer = /const PER_MODULE_LIMIT = (\d+)/.exec(timeline)?.[1];
+  check(`both surfaces use the same per-module bound (${memPer} vs ${tlPer})`, memPer === tlPer);
+}
+
+console.log("\n== the star means the same thing on every page that shows one ==");
+// GenericList falls back to `favoritedIds?.has(id) ?? false`, so a page
+// that forgets the prop renders every star empty on records the user
+// really has starred.
+for (const page of [
+  "src/app/dashboard/[module]/page.tsx",
+  "src/app/dashboard/product-workflow/page.tsx",
+  "src/app/dashboard/trading-workflow/page.tsx",
+]) {
+  const src = readFileSync(page, "utf8");
+  const lists = (src.match(/<GenericList/g) ?? []).length;
+  const withFavs = (src.match(/favoritedIds=\{favoritedIds\}/g) ?? []).length;
+  check(`${page.split("/").slice(-2)[0]}: all ${lists} list(s) receive favoritedIds`, lists > 0 && withFavs === lists, `${withFavs} of ${lists}`);
+  check(`${page.split("/").slice(-2)[0]}: and it is really loaded`, /loadFavoriteIds\(/.test(src));
+}
+
+console.log("\n== editing a record cannot show a raw database error ==");
+// The create path was fixed to route PostgREST text through the error
+// describer; the update path in the same feature was not, so editing a
+// row still printed "new row violates row-level security policy for
+// table \"trades\"" at the user.
+{
+  const detail = readFileSync("src/components/modules/generic-record-detail.tsx", "utf8");
+  check("the update failure goes through the describer", /describe\(new ApiError\(500, \{ error: updateError\.message \}\)\)/.test(detail));
+  check("and the raw message is not rendered", !/setError\(updateError\.message\)/.test(detail));
+  check("nor toasted", !/addToast\(`✗ \$\{updateError\.message\}`/.test(detail));
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

@@ -38,6 +38,23 @@ type ModuleScan = {
 // throughout (same "small, per-module cap" trade-off as
 // lib/chat/mentor-context.ts) — this runs on every single AI request per
 // the brief, so keeping each query cheap matters more than usual.
+//
+// EVERY QUERY IN HERE FILTERS ON user_id EXPLICITLY, and that is not
+// belt-and-braces. It used to rely entirely on RLS, which is only true
+// for a client carrying the user's session — and TWO CALLERS pass the
+// SERVICE-ROLE client, for which RLS does not apply at all:
+// lib/jobs/handlers/create.ts and lib/jobs/handlers/mission-plan.ts both
+// run in the background worker, which has no session to hold. Under that
+// client the unfiltered `.from(table).select("*").limit(n)` returned the
+// newest rows in the TABLE rather than the newest rows of THIS USER — so
+// on any database with more than one account, one customer's ideas,
+// leads, finance entries and missions were folded into another
+// customer's prompt, and the model answered out of them.
+//
+// api/agents/build/route.ts had spotted the hazard and worked around it
+// by calling this from the route instead of the worker. A workaround at
+// one call site is not a fix: the guarantee belongs HERE, where it holds
+// whatever client is handed in.
 export async function getUserFullContext(
   supabase: SupabaseClient,
   userId: string
@@ -47,8 +64,8 @@ export async function getUserFullContext(
 
   const [perModule, missionsResult, latestEnergyCheckIn, totalLinksResult, recentLinksResult] =
     await Promise.all([
-      Promise.all(CLASSIFIER_MODULES.map((config) => scanModule(supabase, config, now))),
-      supabase.from("ai_missions").select("*"),
+      Promise.all(CLASSIFIER_MODULES.map((config) => scanModule(supabase, config, now, userId))),
+      supabase.from("ai_missions").select("*").eq("user_id", userId),
       loadLatestEnergyCheckIn(supabase, userId),
       supabase.from("entity_links").select("id", { count: "exact", head: true }).eq("user_id", userId),
       supabase
@@ -121,7 +138,8 @@ export async function getUserFullContext(
 async function scanModule(
   supabase: SupabaseClient,
   config: (typeof CLASSIFIER_MODULES)[number],
-  now: number
+  now: number,
+  userId: string
 ): Promise<ModuleScan> {
   const empty: ModuleScan = {
     title: enModuleTitle(config),
@@ -135,6 +153,10 @@ async function scanModule(
     const { data, error } = await supabase
       .from(config.table)
       .select("*")
+      // EXPLICIT, not left to RLS. See the note on getUserFullContext:
+      // this same query runs under the service-role client in two job
+      // handlers, where RLS does not apply at all.
+      .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(PER_MODULE_LIMIT);
 

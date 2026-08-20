@@ -135,9 +135,9 @@ export async function runMissionStepForUser(
       model: MODEL,
       max_tokens: 1024,
       // Same shape as lib/jobs/handlers/create.ts: this file's own copy of
-      // the module catalogue measures 5,900+ characters (~1,475+ tokens)
-      // and never varies, while both additions after it are per-step and
-      // each starts with "\n\n" or is empty. See lib/ai/cached-system.ts.
+      // the module catalogue measures 7,147 characters (~1,787 tokens) and
+      // never varies, while both additions after it are per-step and each
+      // starts with "\n\n" or is empty. See lib/ai/cached-system.ts.
       system: buildCachedSystem({
         staticPrefix: buildSystemPrompt(),
         dynamicSuffix:

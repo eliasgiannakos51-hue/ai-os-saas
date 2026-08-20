@@ -650,7 +650,15 @@
       "sumTop": "最も高額な機能",
       "sumTopHint": "総支出の {percent}%",
       "projectionOnly": "課金された操作はまだありません。以下の利益率はすべて課金対象外レコードからの推定であり、収益ではありません。",
-      "belowTargetAlert": "{count} 件の機能が目標 {target}x を下回っています: {features}。メールで通知しました。"
+      "belowTargetAlert": "{count} 件の機能が目標 {target}x を下回っています: {features}。メールで通知しました。",
+      "cacheTitle": "プロンプトキャッシュ",
+      "cacheDescription": "全額課金ではなくキャッシュから提供されたプロンプトトークンの割合。",
+      "cacheHitRate": "ヒット率",
+      "cacheColInput": "全額",
+      "cacheColRead": "キャッシュから",
+      "cacheColWrite": "書き込み",
+      "cacheEmpty": "プロンプトトークンはまだ記録されていません。",
+      "cacheMiscachedAlert": "{features}：キャッシュに書き込むだけで読み戻していません — ブレークポイントがリクエストごとに変わる内容の上にあります。"
     },
     "pushNotifications": {
       "title": "プッシュ通知",

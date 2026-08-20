@@ -8,6 +8,8 @@ import { formatNumber } from "@/lib/format-number";
 import { sendMarginAlertEmail } from "@/lib/email/margin-alert";
 import {
   aggregateMarginRows,
+  aggregateCacheRows,
+  summariseCacheReport,
   effectiveMargin,
   summariseMarginReport,
   MARGIN_REPORT_WINDOW_DAYS,
@@ -15,6 +17,8 @@ import {
   type MarginFeatureRow,
   type MarginLogRow,
   type MarginSummary,
+  type CacheFeatureRow,
+  type CacheSummary,
 } from "@/lib/billing/margin-report";
 
 /**
@@ -47,6 +51,7 @@ export async function MarginReport() {
   if (!user || !isAdminEmail(user.email)) return null;
 
   let rows: MarginFeatureRow[] = [];
+  let cacheRows: CacheFeatureRow[] = [];
   let failed = false;
 
   try {
@@ -59,13 +64,21 @@ export async function MarginReport() {
       // stores achieved_margin = null BY DESIGN, and the owner's own
       // account IS a bypass account — so without these the whole table
       // read "—" beside real euros of spend.
-      .select("feature, achieved_margin, real_cost_eur, credits_charged, metadata")
+      // The three token columns feed the prompt-cache panel. They have
+      // been written by every settlement since the baseline schema and
+      // were never read by anything — which is why a caching change could
+      // not be checked against reality until now.
+      .select(
+        "feature, achieved_margin, real_cost_eur, credits_charged, metadata, input_tokens, cache_read_tokens, cache_write_tokens"
+      )
       .gte("created_at", since)
       .limit(20000);
 
     if (error) throw error;
 
-    rows = aggregateMarginRows((data ?? []) as MarginLogRow[]);
+    const logRows = (data ?? []) as MarginLogRow[];
+    rows = aggregateMarginRows(logRows);
+    cacheRows = aggregateCacheRows(logRows);
   } catch (err) {
     logApiError("settings:MarginReport", err);
     failed = true;
@@ -95,7 +108,9 @@ export async function MarginReport() {
     });
   }
 
-  return <MarginReportView rows={rows} summary={summary} failed={failed} />;
+  return (
+    <MarginReportView rows={rows} summary={summary} cacheRows={cacheRows} failed={failed} />
+  );
 }
 
 /** A number that might not exist, rendered so a missing one is never
@@ -129,14 +144,19 @@ function SummaryTile({ label, value, hint }: { label: string; value: string; hin
 export async function MarginReportView({
   rows,
   summary,
+  cacheRows = [],
   failed,
 }: {
   rows: MarginFeatureRow[];
   summary: MarginSummary;
+  /** Defaulted so existing fixture renders of this view keep working —
+   *  the cache panel simply does not appear when nothing is passed. */
+  cacheRows?: CacheFeatureRow[];
   failed: boolean;
 }) {
   const t = await getTranslations("settings.marginReport");
   const locale = await getLocale();
+  const cacheSummary: CacheSummary = summariseCacheReport(cacheRows);
 
   return (
     <section id="margin-report" className="mb-6 rounded-2xl border border-border bg-panel p-5">
@@ -254,6 +274,96 @@ export async function MarginReportView({
           {rows.some((r) => r.wouldBeMargin !== null) && (
             <p className="mt-3 text-[11px] leading-relaxed text-muted">{t("hypotheticalNote")}</p>
           )}
+
+          {/* THE PROMPT CACHE PANEL.
+              Caching is the one optimisation whose success and failure look
+              identical from the outside: Anthropic does not error on a
+              prefix too short to cache, or on a breakpoint sitting on
+              content that changes every request. It just returns zeros. So
+              the only honest way to claim caching works is to show the
+              measured share of prompt tokens that came back from cache. */}
+          <div className="mt-6 border-t border-border pt-4">
+            <h3 className="text-xs font-semibold text-foreground">{t("cacheTitle")}</h3>
+            <p className="mt-1 text-[11px] leading-relaxed text-muted">{t("cacheDescription")}</p>
+
+            {cacheSummary.hitRate === null ? (
+              <p className="mt-3 text-xs text-muted">{t("cacheEmpty")}</p>
+            ) : (
+              <>
+                <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  <SummaryTile
+                    label={t("cacheHitRate")}
+                    value={`${(cacheSummary.hitRate * 100).toFixed(1)}%`}
+                  />
+                  <SummaryTile
+                    label={t("cacheColRead")}
+                    value={formatNumber(cacheSummary.cacheReadTokens, locale)}
+                  />
+                  <SummaryTile
+                    label={t("cacheColWrite")}
+                    value={formatNumber(cacheSummary.cacheWriteTokens, locale)}
+                  />
+                  <SummaryTile
+                    label={t("cacheColInput")}
+                    value={formatNumber(cacheSummary.inputTokens, locale)}
+                  />
+                </div>
+
+                {/* Writing without reading is WORSE than not caching: the
+                    1.25x write premium is paid on every call and nothing is
+                    ever served back. Named features, so the fix has an
+                    address. */}
+                {cacheSummary.miscached.length > 0 && (
+                  <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-red-800 bg-red-950/30 px-3 py-2 text-[11px] leading-relaxed text-red-300">
+                    <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
+                    {t("cacheMiscachedAlert", { features: cacheSummary.miscached.join(", ") })}
+                  </p>
+                )}
+
+                <div className="mt-3 overflow-x-auto">
+                  <table className="w-full min-w-[520px] text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-border text-muted">
+                        <th className="pb-2 font-medium">{t("colFeature")}</th>
+                        <th className="pb-2 pr-3 text-right font-medium">{t("cacheHitRate")}</th>
+                        <th className="pb-2 pr-3 text-right font-medium">{t("cacheColRead")}</th>
+                        <th className="pb-2 pr-3 text-right font-medium">{t("cacheColWrite")}</th>
+                        <th className="pb-2 text-right font-medium">{t("cacheColInput")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {cacheRows.map((row) => (
+                        <tr
+                          key={row.feature}
+                          className={`border-b border-border/50 last:border-0 ${row.writingWithoutReading ? "bg-red-950/20" : ""}`}
+                        >
+                          <td className="py-2 pr-3 text-foreground">{row.feature}</td>
+                          <td className="py-2 pr-3 text-right">
+                            {row.hitRate === null ? (
+                              <span className="text-muted">—</span>
+                            ) : (
+                              <span className={row.hitRate > 0 ? "text-emerald-400" : "text-muted"}>
+                                {(row.hitRate * 100).toFixed(1)}%
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-2 pr-3 text-right text-muted">
+                            {formatNumber(row.cacheReadTokens, locale)}
+                          </td>
+                          <td className="py-2 pr-3 text-right text-muted">
+                            {formatNumber(row.cacheWriteTokens, locale)}
+                          </td>
+                          <td className="py-2 text-right text-muted">
+                            {formatNumber(row.inputTokens, locale)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </div>
         </>
       )}
     </section>

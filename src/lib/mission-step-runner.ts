@@ -1,6 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { buildCachedSystem } from "@/lib/ai/cached-system";
 import { CLASSIFIER_MODULES, getClassifierModule, moduleHref } from "@/lib/classifier-modules";
 import type { FieldConfig } from "@/lib/modules";
 import { agentRoleSystemPromptAddition, type AgentRole } from "@/lib/agent-roles";
@@ -133,10 +134,17 @@ export async function runMissionStepForUser(
     const response = await anthropic.messages.create({
       model: MODEL,
       max_tokens: 1024,
-      system:
-        buildSystemPrompt() +
-        agentRoleSystemPromptAddition(agentRole) +
-        buildMissionContextSystemPromptAddition(priorStepsContext),
+      // Same shape as lib/jobs/handlers/create.ts: this file's own copy of
+      // the module catalogue measures 7,147 characters (~1,787 tokens) and
+      // never varies, while both additions after it are per-step and each
+      // starts with "\n\n" or is empty. See lib/ai/cached-system.ts.
+      system: buildCachedSystem({
+        staticPrefix: buildSystemPrompt(),
+        dynamicSuffix:
+          agentRoleSystemPromptAddition(agentRole) +
+          buildMissionContextSystemPromptAddition(priorStepsContext),
+        model: MODEL,
+      }),
       messages: [{ role: "user", content: stepText }],
       tools: [ROUTE_ENTRY_TOOL],
       tool_choice: { type: "tool", name: "route_entry" },

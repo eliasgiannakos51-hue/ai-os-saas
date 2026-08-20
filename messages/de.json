@@ -650,7 +650,15 @@
       "sumTop": "Teuerste Funktion",
       "sumTopHint": "{percent}% der Gesamtausgaben",
       "projectionOnly": "Noch keine berechneten Aktionen — jede Marge unten ist eine Hochrechnung aus Bypass-Einträgen, kein Umsatz.",
-      "belowTargetAlert": "{count} Funktion(en) unter dem Ziel von {target}x: {features}. Eine Warnung wurde per E-Mail versendet."
+      "belowTargetAlert": "{count} Funktion(en) unter dem Ziel von {target}x: {features}. Eine Warnung wurde per E-Mail versendet.",
+      "cacheTitle": "Prompt-Cache",
+      "cacheDescription": "Anteil der Prompt-Tokens, die aus dem Cache bedient statt zum vollen Preis abgerechnet wurden.",
+      "cacheHitRate": "Trefferquote",
+      "cacheColInput": "Voller Preis",
+      "cacheColRead": "Aus dem Cache",
+      "cacheColWrite": "Geschrieben",
+      "cacheEmpty": "Noch keine Prompt-Tokens erfasst.",
+      "cacheMiscachedAlert": "{features}: schreibt in den Cache, liest aber nichts zurück — der Haltepunkt liegt auf Inhalten, die sich bei jeder Anfrage ändern."
     },
     "pushNotifications": {
       "title": "Push-Benachrichtigungen",

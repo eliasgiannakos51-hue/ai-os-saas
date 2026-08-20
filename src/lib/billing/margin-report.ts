@@ -18,6 +18,12 @@ export type MarginLogRow = {
   real_cost_eur: number | string | null;
   /** What was actually taken from the user. Zero on every bypass row. */
   credits_charged?: number | string | null;
+  /** Prompt-token counts, summed across every sub-call of the action.
+   *  Optional because the cache panel is the only reader: a caller that
+   *  only needs margin does not have to select them. */
+  input_tokens?: number | string | null;
+  cache_read_tokens?: number | string | null;
+  cache_write_tokens?: number | string | null;
   /** settle_reservation's metadata. Only two keys are read here — see
    *  hypotheticalMargin below for why they have to be. */
   metadata?: {
@@ -248,3 +254,137 @@ export function summariseMarginReport(rows: MarginFeatureRow[]): MarginSummary {
   };
 }
 
+
+// ---------------------------------------------------------------------
+// Cache efficiency
+// ---------------------------------------------------------------------
+//
+// WHY THIS EXISTS. Prompt caching is the one cost optimisation whose
+// success and failure look identical from the outside. Anthropic does not
+// error when a prefix is too short to cache, or when a breakpoint sits on
+// content that changes every request — it just returns
+// cache_creation_input_tokens: 0, or writes an entry nothing ever reads.
+// The code still greps as "cached". The bill is the only witness.
+//
+// ai_cost_log has recorded cache_read_tokens and cache_write_tokens since
+// the baseline schema, and nothing in the product ever displayed them. So
+// the app has always had the evidence and never shown it. This turns those
+// two columns into the one number that answers "is caching actually
+// working": the share of prompt tokens that were served from cache.
+//
+// DELIBERATELY TOKENS, NOT EUROS. Converting a cached read into money
+// needs the input rate of the model that served it, and ai_cost_log does
+// not store a model id — only the measured totals. A euro figure here
+// would have to assume a model, and an assumed model is exactly what
+// produced the understated costs MODEL_PRICING_USD's comment describes.
+// A token share needs no such assumption and is the figure the before/
+// after comparison actually turns on.
+
+export type CacheFeatureRow = {
+  feature: string;
+  calls: number;
+  /** Prompt tokens paid at full price. */
+  inputTokens: number;
+  /** Prompt tokens served from cache, at roughly a tenth of full price. */
+  cacheReadTokens: number;
+  /** Prompt tokens written to cache, at 1.25x (5-minute) or 2x (1-hour). */
+  cacheWriteTokens: number;
+  /**
+   * cacheRead / (input + cacheRead + cacheWrite), as a 0-1 fraction.
+   *
+   * The denominator is EVERY prompt token, because that is the quantity
+   * caching is supposed to move: a feature reading nothing from cache
+   * scores 0 whether it is uncached or miscached, which is the honest
+   * answer in both cases. Null when the feature sent no prompt tokens at
+   * all, so "no data" cannot be mistaken for "0%".
+   */
+  hitRate: number | null;
+  /**
+   * True when this feature wrote to the cache but read essentially
+   * nothing back — the signature of a breakpoint placed on content that
+   * varies per request. Such a feature is paying the write premium on
+   * every call and getting nothing for it, which is strictly worse than
+   * not caching at all.
+   */
+  writingWithoutReading: boolean;
+};
+
+// A feature that has written this many tokens to cache has had ample
+// opportunity to read some back; below it, a zero read rate is more
+// likely to be a cold start than a misplaced breakpoint.
+const WRITE_WITHOUT_READ_MIN_TOKENS = 10_000;
+// Reads below this share of writes count as "essentially nothing".
+const WRITE_WITHOUT_READ_MAX_RATIO = 0.05;
+
+function tokenCount(value: number | string | null | undefined): number {
+  const n = Number(value ?? 0);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+/**
+ * Per-feature cache efficiency over the same rows the margin table reads.
+ *
+ * Sorted by total prompt tokens descending: the features with the most to
+ * gain appear first, which is the order the question "where is caching
+ * worth adding next" is actually asked in.
+ */
+export function aggregateCacheRows(data: MarginLogRow[]): CacheFeatureRow[] {
+  const byFeature = new Map<
+    string,
+    { calls: number; input: number; read: number; write: number }
+  >();
+
+  for (const row of data) {
+    const feature = row.feature || "unknown";
+    const acc = byFeature.get(feature) ?? { calls: 0, input: 0, read: 0, write: 0 };
+    acc.calls += 1;
+    acc.input += tokenCount(row.input_tokens);
+    acc.read += tokenCount(row.cache_read_tokens);
+    acc.write += tokenCount(row.cache_write_tokens);
+    byFeature.set(feature, acc);
+  }
+
+  return [...byFeature.entries()]
+    .map(([feature, a]) => {
+      const total = a.input + a.read + a.write;
+      return {
+        feature,
+        calls: a.calls,
+        inputTokens: a.input,
+        cacheReadTokens: a.read,
+        cacheWriteTokens: a.write,
+        hitRate: total > 0 ? a.read / total : null,
+        writingWithoutReading:
+          a.write >= WRITE_WITHOUT_READ_MIN_TOKENS &&
+          a.read < a.write * WRITE_WITHOUT_READ_MAX_RATIO,
+      };
+    })
+    .sort(
+      (x, y) =>
+        y.inputTokens + y.cacheReadTokens + y.cacheWriteTokens -
+        (x.inputTokens + x.cacheReadTokens + x.cacheWriteTokens)
+    );
+}
+
+export type CacheSummary = {
+  inputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  hitRate: number | null;
+  /** Features currently paying the write premium for nothing. */
+  miscached: string[];
+};
+
+export function summariseCacheReport(rows: CacheFeatureRow[]): CacheSummary {
+  const inputTokens = rows.reduce((s, r) => s + r.inputTokens, 0);
+  const cacheReadTokens = rows.reduce((s, r) => s + r.cacheReadTokens, 0);
+  const cacheWriteTokens = rows.reduce((s, r) => s + r.cacheWriteTokens, 0);
+  const total = inputTokens + cacheReadTokens + cacheWriteTokens;
+  return {
+    inputTokens,
+    cacheReadTokens,
+    cacheWriteTokens,
+    hitRate: total > 0 ? cacheReadTokens / total : null,
+    miscached: rows.filter((r) => r.writingWithoutReading).map((r) => r.feature),
+  };
+}

@@ -650,7 +650,15 @@
       "sumTop": "أغلى ميزة",
       "sumTopHint": "{percent}% من إجمالي الإنفاق",
       "projectionOnly": "لا توجد إجراءات محاسَبة بعد — كل هامش أدناه تقدير من سجلات بلا محاسبة، وليس إيرادًا.",
-      "belowTargetAlert": "{count} ميزة أقل من هدف {target}x: {features}. تم إرسال تنبيه بالبريد."
+      "belowTargetAlert": "{count} ميزة أقل من هدف {target}x: {features}. تم إرسال تنبيه بالبريد.",
+      "cacheTitle": "ذاكرة التخزين المؤقت للموجّه",
+      "cacheDescription": "نسبة رموز الموجّه التي جرى تقديمها من ذاكرة التخزين المؤقت بدلاً من احتسابها بالسعر الكامل.",
+      "cacheHitRate": "معدّل الإصابة",
+      "cacheColInput": "السعر الكامل",
+      "cacheColRead": "من الذاكرة المؤقتة",
+      "cacheColWrite": "مكتوبة",
+      "cacheEmpty": "لم تُسجَّل أي رموز موجّه حتى الآن.",
+      "cacheMiscachedAlert": "{features}: يكتب في الذاكرة المؤقتة دون قراءة أي شيء منها — نقطة التوقف على محتوى يتغيّر مع كل طلب."
     },
     "pushNotifications": {
       "title": "إشعارات الدفع",

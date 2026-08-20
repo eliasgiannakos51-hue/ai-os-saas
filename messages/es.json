@@ -650,7 +650,15 @@
       "sumTop": "Función más cara",
       "sumTopHint": "{percent}% del gasto total",
       "projectionOnly": "Aún no hay acciones cobradas: todos los márgenes siguientes son proyecciones de registros bypass, no ingresos.",
-      "belowTargetAlert": "{count} función(es) por debajo del objetivo {target}x: {features}. Se ha enviado una alerta por correo."
+      "belowTargetAlert": "{count} función(es) por debajo del objetivo {target}x: {features}. Se ha enviado una alerta por correo.",
+      "cacheTitle": "Caché de prompt",
+      "cacheDescription": "Proporción de tokens del prompt servidos desde la caché en lugar de pagarse a precio completo.",
+      "cacheHitRate": "Tasa de aciertos",
+      "cacheColInput": "Precio completo",
+      "cacheColRead": "Desde caché",
+      "cacheColWrite": "Escritos",
+      "cacheEmpty": "Aún no se han registrado tokens de prompt.",
+      "cacheMiscachedAlert": "{features}: escribe en la caché pero no lee nada de vuelta — el punto de corte está en contenido que cambia en cada solicitud."
     },
     "pushNotifications": {
       "title": "Notificaciones push",

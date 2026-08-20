@@ -1,0 +1,349 @@
+// Prompt caching: the breakpoint is where the saving is, and a prompt
+// under the model's minimum is not cached at all.
+//
+// WHAT THIS GUARDS. Before this test, exactly one of ~25 Anthropic call
+// sites in the app used prompt caching (lib/website-builder.ts). The rest
+// re-sent their whole system prompt at full input price on every call —
+// including api/chat, the highest-volume feature in the product, whose
+// static prefix measures 7,510 characters.
+//
+// Two failure modes make this worth a build gate rather than a one-off
+// edit, because BOTH of them look exactly like success:
+//
+//   1. BREAKPOINT ON THE VARYING BLOCK. Anthropic writes a cache entry
+//      only at the breakpoint, and reads only find entries earlier
+//      requests wrote. Mark the end of the WHOLE chat system prompt and
+//      the per-message part (the entities this message mentioned) is
+//      inside the hashed prefix: every request writes a new entry, none
+//      ever reads one, and the only effect is paying the 1.25x write
+//      premium forever. Nothing errors. The code still greps as "cached".
+//
+//   2. PROMPT UNDER THE MODEL MINIMUM. Anthropic will not cache a prefix
+//      below a per-model floor and returns NO error when asked to —
+//      cache_creation_input_tokens just comes back 0. Sonnet 4.6 needs
+//      1,024 tokens; Haiku 4.5 needs 4,096. So "route this to Haiku to
+//      save money" can silently switch caching OFF for a prompt that
+//      cached fine on Sonnet.
+//
+// Both are invisible in code review and invisible in the response unless
+// somebody reads the usage fields, which is why they are asserted here.
+//
+// Run: node scripts/tests/prompt-caching.test.mjs
+import { readFileSync } from "node:fs";
+import { loadTs } from "./load-ts.mjs";
+
+let pass = 0,
+  fail = 0;
+function check(name, actual, expected) {
+  const a = JSON.stringify(actual),
+    e = JSON.stringify(expected);
+  if (a === e) {
+    pass++;
+    console.log(`  PASS  ${name}`);
+  } else {
+    fail++;
+    console.log(`  FAIL  ${name}\n        expected ${e}\n        actual   ${a}`);
+  }
+}
+function ok(name, cond) {
+  check(name, Boolean(cond), true);
+}
+
+const cs = await loadTs("src/lib/ai/cached-system.ts");
+const conduct = await loadTs("src/lib/ai-conduct.ts");
+const checklist = await loadTs("src/lib/ai-quality-checklist.ts");
+
+const SONNET = "claude-sonnet-4-6";
+
+// ---------------------------------------------------------------------
+// 1. The model minimums, from Anthropic's published table.
+// ---------------------------------------------------------------------
+console.log("\nModel cache minimums");
+check("sonnet-4-6 minimum is 1024", cs.modelCacheMinimumTokens(SONNET), 1024);
+check("haiku-4-5 minimum is 4096", cs.modelCacheMinimumTokens("claude-haiku-4-5"), 4096);
+check("opus-5 minimum is 512", cs.modelCacheMinimumTokens("claude-opus-5"), 512);
+// Dated and variant spellings must resolve to the same row, exactly as
+// lib/billing/model-pricing.ts normalises them — otherwise a response
+// reporting "claude-haiku-4-5-20251001" would be judged against the
+// fallback instead of Haiku's real 4,096.
+check(
+  "dated snapshot resolves to its alias",
+  cs.modelCacheMinimumTokens("claude-haiku-4-5-20251001"),
+  4096
+);
+check("variant suffix resolves to its alias", cs.modelCacheMinimumTokens("claude-sonnet-4-6[1m]"), 1024);
+// An unknown model must assume the LARGEST minimum: guessing low would
+// place a marker that never caches while looking like it does.
+check(
+  "unknown model gets the largest known minimum",
+  cs.modelCacheMinimumTokens("claude-something-new"),
+  4096
+);
+check("undefined model gets the largest known minimum", cs.modelCacheMinimumTokens(undefined), 4096);
+
+// ---------------------------------------------------------------------
+// 2. Breakpoint placement — the failure that looks like success.
+// ---------------------------------------------------------------------
+console.log("\nBreakpoint placement");
+const bigStatic = "S".repeat(1024 * 4); // 1,024 tokens at 4 chars/token
+const suffix = "\n\nper-request tail";
+const blocks = cs.buildCachedSystem({
+  staticPrefix: bigStatic,
+  dynamicSuffix: suffix,
+  model: SONNET,
+});
+check("two blocks when there is a dynamic tail", blocks.length, 2);
+ok("breakpoint is on the STATIC block", blocks[0].cache_control?.type === "ephemeral");
+ok("no breakpoint on the DYNAMIC block", blocks[1].cache_control === undefined);
+// The whole point: what the model receives must be unchanged.
+check(
+  "blocks concatenate back to the original prompt",
+  blocks.map((b) => b.text).join(""),
+  bigStatic + suffix
+);
+
+// An empty tail must not produce an empty text block — Anthropic rejects
+// those, and an account with no memories, no mentioned entities and no
+// AI Life Context genuinely produces one.
+const noTail = cs.buildCachedSystem({ staticPrefix: bigStatic, dynamicSuffix: "", model: SONNET });
+check("empty tail yields exactly one block", noTail.length, 1);
+ok("that one block still carries the breakpoint", noTail[0].cache_control?.type === "ephemeral");
+ok(
+  "no block anywhere is empty text",
+  [...blocks, ...noTail].every((b) => b.text.length > 0)
+);
+
+// ---------------------------------------------------------------------
+// 3. The size rule — a marker below the minimum is worse than none.
+// ---------------------------------------------------------------------
+console.log("\nSize rule");
+const tooSmall = "S".repeat(1023 * 4);
+const smallBlocks = cs.buildCachedSystem({ staticPrefix: tooSmall, dynamicSuffix: suffix, model: SONNET });
+ok(
+  "under the minimum, NO cache_control is emitted",
+  smallBlocks.every((b) => b.cache_control === undefined)
+);
+check(
+  "under the minimum, the prompt is still sent whole and unchanged",
+  smallBlocks.map((b) => b.text).join(""),
+  tooSmall + suffix
+);
+// The same prefix that caches on Sonnet must NOT be marked on Haiku,
+// whose minimum is four times higher. This is the trap a cost-driven
+// model downgrade walks into.
+const haikuBlocks = cs.buildCachedSystem({
+  staticPrefix: bigStatic,
+  dynamicSuffix: suffix,
+  model: "claude-haiku-4-5",
+});
+ok(
+  "a Sonnet-sized prefix is NOT marked on Haiku",
+  haikuBlocks.every((b) => b.cache_control === undefined)
+);
+ok("the same prefix IS marked on Sonnet", blocks[0].cache_control?.type === "ephemeral");
+
+// ---------------------------------------------------------------------
+// 4. The REAL chat prompt, measured through the real source.
+// ---------------------------------------------------------------------
+// Built from the actual template literal in the route and the actual
+// exported conduct/checklist constants — not a hand-written fixture, so
+// editing any of them re-measures here instead of drifting from here.
+console.log("\nReal chat system prompt");
+const chatSrc = readFileSync("src/app/api/chat/route.ts", "utf8");
+const wsi = chatSrc.match(/const WEB_SEARCH_INSTRUCTION = `([\s\S]*?)`;/)?.[1] ?? "";
+const baseTpl =
+  chatSrc.match(/function buildSystemPrompt\(personaName: string\): string \{\s*return `([\s\S]*?)`;\s*\}/)?.[1] ??
+  "";
+ok("found WEB_SEARCH_INSTRUCTION in the route", wsi.length > 0);
+ok("found buildSystemPrompt in the route", baseTpl.length > 0);
+const chatStatic = baseTpl
+  .replace("${personaName}", "Ionexa")
+  .replace("${WEB_SEARCH_INSTRUCTION}", wsi)
+  .replace("${AI_CONDUCT_EL}", conduct.AI_CONDUCT_EL)
+  .replace("${AI_QUALITY_CHECKLIST_EL}", checklist.AI_QUALITY_CHECKLIST_EL);
+ok("no unresolved interpolation left in the measured prefix", !chatStatic.includes("${"));
+ok(
+  `chat static prefix (${chatStatic.length} chars, ~${cs.approximateTokens(chatStatic)} tokens) clears Sonnet's 1,024`,
+  cs.isWorthCaching(chatStatic, SONNET)
+);
+// If this ever goes false, chat caching has silently stopped paying and
+// the prefix needs to grow back or the breakpoint needs to move.
+check("chat prefix is judged cacheable on the model chat actually calls", cs.isWorthCaching(chatStatic, SONNET), true);
+
+// ---------------------------------------------------------------------
+// 5. Wiring — the constant exists AND the call site passes it.
+// ---------------------------------------------------------------------
+// `system:` is a runtime string as far as the compiler is concerned: a
+// route that stopped calling buildCachedSystem would typecheck cleanly
+// and silently return to full-price prompts. Rule: assert the wiring.
+console.log("\nCall-site wiring");
+ok("chat route imports buildCachedSystem", /import \{ buildCachedSystem \} from "@\/lib\/ai\/cached-system"/.test(chatSrc));
+ok("chat route passes it to system:", /system: buildCachedSystem\(\{/.test(chatSrc));
+ok(
+  "chat route splits static prefix from dynamic suffix",
+  /systemStaticPrefix/.test(chatSrc) && /systemDynamicSuffix/.test(chatSrc)
+);
+// The estimator must still size the FULL prompt, not just the cached
+// half — otherwise every chat reserve silently shrinks.
+ok(
+  "chat still estimates against the whole prompt",
+  /const systemPrompt = systemStaticPrefix \+ systemDynamicSuffix;/.test(chatSrc)
+);
+
+const missionSrc = readFileSync("src/lib/mission-agents.ts", "utf8");
+ok(
+  "mission-agents imports buildCachedSystem",
+  /import \{ buildCachedSystem \} from "@\/lib\/ai\/cached-system"/.test(missionSrc)
+);
+check(
+  "both mission calls go through it",
+  (missionSrc.match(/buildCachedSystem\(\{/g) ?? []).length,
+  2
+);
+
+// Create Anything routes through TWO separate copies of the module
+// catalogue (lib/create-studio/route-entry.ts and this file's own, a
+// deliberate duplication documented in mission-step-runner.ts). Both are
+// large and static, so both must be cached — caching one and forgetting
+// the other is exactly the drift that duplication invites.
+for (const [label, file] of [
+  ["jobs/handlers/create", "src/lib/jobs/handlers/create.ts"],
+  ["mission-step-runner", "src/lib/mission-step-runner.ts"],
+]) {
+  const src = readFileSync(file, "utf8");
+  ok(`${label} imports buildCachedSystem`, /from "@\/lib\/ai\/cached-system"/.test(src));
+  ok(`${label} passes it to system:`, /system: buildCachedSystem\(\{/.test(src));
+  // The catalogue must be the STATIC half. If someone folds the
+  // per-request additions into staticPrefix, the breakpoint starts
+  // hashing them and every call writes an entry nothing reads.
+  ok(
+    `${label} caches the catalogue, not the per-request additions`,
+    /staticPrefix: buildSystemPrompt\(\)/.test(src)
+  );
+  ok(
+    `${label} keeps agentRole/mission context in the dynamic half`,
+    /dynamicSuffix:[\s\S]{0,220}agentRoleSystemPromptAddition/.test(src)
+  );
+}
+
+// Every Anthropic system prompt this app sends that clears the model
+// minimum should be going through one of the two cached paths. This is
+// the count of call sites that do; it goes UP, never down.
+const CACHED_CALL_SITES = [
+  "src/app/api/chat/route.ts",
+  "src/lib/mission-agents.ts",
+  "src/lib/jobs/handlers/create.ts",
+  "src/lib/mission-step-runner.ts",
+];
+check(
+  "every expected call site is wired",
+  CACHED_CALL_SITES.filter((f) => /buildCachedSystem/.test(readFileSync(f, "utf8"))).length,
+  CACHED_CALL_SITES.length
+);
+// website-builder.ts predates this helper and marks cache_control
+// directly. It must stay cached either way.
+ok(
+  "website-builder still caches its own system prompt",
+  /cache_control: \{ type: "ephemeral" \}/.test(readFileSync("src/lib/website-builder.ts", "utf8"))
+);
+
+// ---------------------------------------------------------------------
+// 6. Cache efficiency reporting — the only way to know caching WORKS.
+// ---------------------------------------------------------------------
+//
+// Anthropic returns zeros rather than errors when caching silently fails,
+// so the measured hit rate is the whole evidence base. These fixtures use
+// STRING numerics on purpose: PostgREST returns numeric/integer columns as
+// strings, and a reader that forgot to coerce would sum "1000"+"2000" into
+// "10002000" and report a nonsense rate that still rendered fine.
+console.log("\nCache efficiency reporting");
+const mr = await loadTs("src/lib/billing/margin-report.ts");
+
+const cacheRows = mr.aggregateCacheRows([
+  // chat: healthy — most prompt tokens come back from cache.
+  { feature: "chat", input_tokens: "100", cache_read_tokens: "1800", cache_write_tokens: "100" },
+  { feature: "chat", input_tokens: 100, cache_read_tokens: 1800, cache_write_tokens: 0 },
+  // websites: writes a lot, reads nothing — a misplaced breakpoint.
+  { feature: "websites", input_tokens: "500", cache_read_tokens: "0", cache_write_tokens: "20000" },
+  // research: no caching at all.
+  { feature: "research", input_tokens: "3000", cache_read_tokens: 0, cache_write_tokens: 0 },
+]);
+const byFeature = Object.fromEntries(cacheRows.map((r) => [r.feature, r]));
+
+check("string numerics are coerced, not concatenated", byFeature.chat.cacheReadTokens, 3600);
+check("calls are counted per feature", byFeature.chat.calls, 2);
+// 3600 read / (200 input + 3600 read + 100 write) = 0.9230...
+check(
+  "hit rate is reads over ALL prompt tokens",
+  Number(byFeature.chat.hitRate.toFixed(4)),
+  Number((3600 / 3900).toFixed(4))
+);
+check("an uncached feature scores 0, not null", byFeature.research.hitRate, 0);
+ok("an uncached feature is not flagged as miscached", !byFeature.research.writingWithoutReading);
+ok("writing without reading IS flagged", byFeature.websites.writingWithoutReading);
+ok("a healthy feature is not flagged", !byFeature.chat.writingWithoutReading);
+// Biggest prompt-token consumer first — that is the order "where should
+// caching go next" is asked in.
+check("sorted by total prompt tokens, descending", cacheRows[0].feature, "websites");
+
+// A feature that sent no prompt tokens must read as "no data", never 0%.
+const emptyRows = mr.aggregateCacheRows([
+  { feature: "idle", input_tokens: 0, cache_read_tokens: 0, cache_write_tokens: 0 },
+]);
+check("no tokens at all yields null, not zero", emptyRows[0].hitRate, null);
+
+// Rows that never selected the token columns must not crash the panel.
+const legacyRows = mr.aggregateCacheRows([{ feature: "old", achieved_margin: "4.2" }]);
+check("rows without token columns coerce to zero", legacyRows[0].inputTokens, 0);
+check("...and report no data rather than 0%", legacyRows[0].hitRate, null);
+
+const cacheSummary = mr.summariseCacheReport(cacheRows);
+check("summary totals reads across features", cacheSummary.cacheReadTokens, 3600);
+check("summary names the miscached features", cacheSummary.miscached, ["websites"]);
+// Spelled out per component rather than as one literal, so the expected
+// value is derived the same way the reader would check it by hand:
+//   input  = 200 (chat) + 500 (websites) + 3000 (research) = 3700
+//   read   = 3600 (chat)
+//   write  = 100 (chat) + 20000 (websites)                 = 20100
+check("summary totals inputs across features", cacheSummary.inputTokens, 3700);
+check("summary totals writes across features", cacheSummary.cacheWriteTokens, 20100);
+check(
+  "overall hit rate spans every feature",
+  Number(cacheSummary.hitRate.toFixed(4)),
+  Number((3600 / (3700 + 3600 + 20100)).toFixed(4))
+);
+check("an empty report has a null rate, not 0", mr.summariseCacheReport([]).hitRate, null);
+
+// The panel is useless if the query never asks for the columns.
+console.log("\nCache panel wiring");
+const reportSrc = readFileSync("src/components/settings/margin-report.tsx", "utf8");
+for (const col of ["input_tokens", "cache_read_tokens", "cache_write_tokens"]) {
+  ok(`margin report selects ${col}`, new RegExp(col).test(reportSrc));
+}
+ok("it aggregates them", /aggregateCacheRows\(/.test(reportSrc));
+ok("and renders the hit rate", /cacheSummary\.hitRate/.test(reportSrc));
+
+// A PostgREST .select() is a runtime string: the compiler cannot see a
+// typo in it, and PostgREST answers a bad column with an error the panel
+// swallows into its "unavailable" branch. So the column names are checked
+// against the migration that actually declares them.
+const schemaSql = readFileSync("supabase/migrations/20260803000000_baseline_schema.sql", "utf8");
+const tableDdl = schemaSql
+  .slice(schemaSql.indexOf("create table if not exists public.ai_cost_log"))
+  .split("\n);")[0];
+const selected = (reportSrc.match(/"feature, achieved_margin[^"]*"/s)?.[0] ?? "")
+  .replace(/"/g, "")
+  .split(",")
+  .map((c) => c.trim())
+  .filter(Boolean);
+ok("the select string was found at all", selected.length > 0);
+for (const col of selected) {
+  ok(`ai_cost_log declares "${col}"`, new RegExp(`^\\s+${col}\\s`, "m").test(tableDdl));
+}
+// The three the panel depends on must specifically be there.
+for (const col of ["input_tokens", "cache_read_tokens", "cache_write_tokens"]) {
+  ok(`the panel actually selects "${col}"`, selected.includes(col));
+}
+
+console.log(`\n${pass} passed, ${fail} failed`);
+process.exit(fail === 0 ? 0 : 1);

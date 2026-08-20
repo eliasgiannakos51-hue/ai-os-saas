@@ -858,7 +858,12 @@
       "title": "Create Anything",
       "subtitle": "Describe anything — a product idea, a trade, feedback from a user, a metric — and it lands in the right module automatically.",
       "loggedTo": "Logged to:",
-      "viewModule": "View {module} →"
+      "viewModule": "View {module} →",
+      "answeredNotFiled": "This was a question, so nothing was filed.",
+      "continueInChat": "Continue in Chat",
+      "looksLikeQuestion": "That looks like a question. Should I answer it, or record it?",
+      "answerItInstead": "Answer it",
+      "recordItAnyway": "Record it anyway"
     },
     "timeline": {
       "title": "History",
@@ -944,7 +949,21 @@
         "title": "One goal, broken into steps",
         "why": "Say what you are trying to achieve and this turns it into a plan with dated steps you can tick off — not a wish list.",
         "example": "Get the first 10 paying customers"
-      }
+      },
+      "deleteMission": "Delete mission",
+      "deleteConfirmMission": "Delete the mission “{goal}”?",
+      "deleteConfirmLoses": "This removes {steps} step(s) — {completed} already completed — and {scheduled} scheduled run(s). It cannot be undone.",
+      "deletedMission": "Mission deleted",
+      "deleteFailed": "Could not delete this mission.",
+      "deleteStep": "Delete step",
+      "editStep": "Edit step",
+      "saveStep": "Save",
+      "cancelStepEdit": "Cancel",
+      "moveStepUp": "Move up",
+      "moveStepDown": "Move down",
+      "stepDeleted": "Step deleted",
+      "undoWithSeconds": "Undo ({seconds})",
+      "stepChangeFailed": "Could not change that step."
     },
     "reflection": {
       "title": "Weekly Reflection",
@@ -1058,6 +1077,15 @@
       "previewIncompleteBody": "This generated page looks incomplete or got cut off, so it can't be shown safely. Try regenerating with a shorter description, or edit it again.",
       "unfilledTitle": "{count} thing(s) still to fill in",
       "unfilledBody": "The AI never invents a phone number, price or opening time — it leaves a visible blank instead. Use \"Ask for a change\" to fill these in, or edit them after publishing.",
+      "inventedTitle": "{count} number(s) on the page you never gave",
+      "inventedBody": "These appear on the page but not in your brief. The AI is told never to invent a phone number, price, opening time or figure — check each one before you publish, and use \"Ask for a change\" to correct it.",
+      "inventedKind": {
+        "phone": "phone",
+        "price": "price",
+        "time": "time",
+        "address": "address",
+        "stat": "figure"
+      },
       "imageLabel": "Reference images ({count}/{max}, optional)",
       "imageHelp": "Up to {max} images — your logo, product photos, or a style reference. JPG or PNG, up to 5MB each. By default they are embedded in the site; you can switch them to style-inspiration only below.",
       "imageRemove": "Remove image",

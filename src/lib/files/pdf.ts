@@ -251,11 +251,23 @@ type FontMap = {
   codeBytes: number;
 };
 
-function parseHexString(hex: string): string {
+export function parseHexString(hex: string): string {
   let out = "";
   for (let i = 0; i + 3 < hex.length + 1; i += 4) {
     const unit = parseInt(hex.slice(i, i + 4), 16);
-    if (Number.isFinite(unit)) out += String.fromCharCode(unit);
+    if (!Number.isFinite(unit)) continue;
+    // U+FEFF IS NOT TEXT HERE. A ToUnicode value is UTF-16BE and the
+    // format permits a leading byte-order mark, so <FEFF0645> is one
+    // Arabic letter and not a letter preceded by a zero-width space.
+    //
+    // HONESTLY SCOPED: none of the real PDFs in scripts/tests/fixtures
+    // writes its CMap that way — I checked their decompressed streams,
+    // and the mojibake that was actually appearing mid-word came entirely
+    // from unmapped glyph ids below, not from this. This stays because it
+    // is what the format says and it costs one comparison, not because it
+    // fixed the reported symptom.
+    if (unit === 0xfeff) continue;
+    out += String.fromCharCode(unit);
   }
   return out;
 }
@@ -453,7 +465,27 @@ function applyFont(raw: string, font: FontMap | undefined): string {
   }
   for (let i = 0; i < raw.length; i++) {
     const code = raw.charCodeAt(i);
-    out += font.map.get(code) ?? raw[i];
+    const mapped = font.map.get(code);
+    if (mapped !== undefined) {
+      out += mapped;
+      continue;
+    }
+    // AN UNMAPPED CODE IN A FONT THAT HAS A CMAP IS NOT A CHARACTER.
+    //
+    // This used to emit the raw byte, which is right for a font with no
+    // ToUnicode at all (StandardEncoding: the byte IS the character —
+    // handled by the early return above) and wrong for a subset font that
+    // shipped one. Measured on a real Chromium-printed Arabic PDF, the
+    // heading came out as "ت¬®þÿ'ﺎ¬®þÿ9ﻌ" — every second character was a
+    // raw byte from the font's own numbering, printed as if it were text.
+    //
+    // NOTHING is emitted for it. Letting printable ASCII through was tried
+    // first, on the theory that some CMaps omit it — measured against
+    // every real fixture in scripts/tests/fixtures, that theory is wrong:
+    // it turned the Arabic heading into "الDمEب(يJع9ا'ت" where the strict
+    // rule gives "المبيعات", and it changed the English and Greek
+    // documents by exactly zero characters (220 and 177 either way). A
+    // font that shipped a CMap is trusted completely.
   }
   return out;
 }

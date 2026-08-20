@@ -1,5 +1,7 @@
 "use client";
 
+import { ApiError } from "@/lib/errors/api-error";
+import { useErrorText } from "@/lib/errors/use-error-text";
 import { useState } from "react";
 import { Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -17,6 +19,7 @@ type CheckIn = { energyLevel: number; note: string | null; createdAt: string };
 // way one gets created. No credit cost (a personal log entry, not an AI
 // call), same reasoning as Knowledge Graph links being free.
 export function EnergyCheckinWidget({ initialCheckIn }: { initialCheckIn: CheckIn | null }) {
+  const describe = useErrorText();
   const t = useTranslations("dashboard.energyCheckIn");
   const supabase = createClient();
   const { addToast } = useToast();
@@ -47,7 +50,7 @@ export function EnergyCheckinWidget({ initialCheckIn }: { initialCheckIn: CheckI
     setSubmitting(false);
 
     if (error) {
-      addToast(`✗ ${error.message}`, "error");
+      addToast(`✗ ${describe(new ApiError(500, { error: error.message })).what}`, "error");
       return;
     }
 

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ArrowUp, CheckCircle2, AlertCircle, XCircle, Paperclip, X } from "lucide-react";
+import { ArrowUp, CheckCircle2, AlertCircle, MessageCircle, XCircle, Paperclip, X } from "lucide-react";
 import { NAV_ITEMS } from "@/lib/modules";
 import { useCreateAnything, type CreateResult } from "@/lib/use-create-anything";
 import { OutOfCreditsNotice } from "@/components/credits/out-of-credits-notice";
@@ -109,6 +109,9 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
   // submitting) so a needsClarification follow-up still has the original
   // message to append answers to.
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
+  // The text as submitted, kept so "record it anyway" can send exactly
+  // what the user wrote rather than whatever is in the box now.
+  const [lastSubmitted, setLastSubmitted] = useState("");
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -116,6 +119,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
     if (!message) return;
 
     setResult(null);
+    setLastSubmitted(message);
     const imagePaths = await uploadAttachedImages();
     const outcome = await submit(message, false, imagePaths);
     setResult(outcome);
@@ -126,6 +130,15 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
       setInput("");
       setImageFiles([]);
     }
+  }
+
+  /** Resubmit the same text, telling the classifier the user has already
+   *  been asked and chose to file it. */
+  async function submitText(message: string, recordAnyway = false) {
+    if (!message.trim()) return;
+    setResult(null);
+    const outcome = await submit(recordAnyway ? `${message}\n\n[The user confirmed: record this, do not answer it.]` : message, true);
+    setResult(outcome);
   }
 
   async function handleClarificationAnswer(questions: string[], answers: string[]) {
@@ -258,6 +271,57 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
                   {tCreate("viewModule", { module: result.moduleTitle })}
                 </Link>
                 <NextStepSuggestion sourceHref={result.href} />
+              </div>
+            </div>
+          )}
+
+          {/* A QUESTION, ANSWERED. Nothing was filed — the whole point.
+              "τι ξέρεις για μένα" used to become a Document. */}
+          {result.type === "answered" && (
+            <div
+              data-testid="create-answer"
+              className="flex items-start gap-3 rounded-2xl border border-border bg-panel p-4 text-sm"
+            >
+              <MessageCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" aria-hidden="true" />
+              <div className="min-w-0">
+                <p className="whitespace-pre-wrap text-foreground/90">{result.answer}</p>
+                <p className="mt-2 text-[11px] text-muted">{tCreate("answeredNotFiled")}</p>
+                <Link
+                  href="/dashboard/chat"
+                  className="mt-3 inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:border-orange-500 hover:text-orange-400"
+                >
+                  {tCreate("continueInChat")}
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* GENUINELY UNCLEAR — ask, do not guess. Guessing wrong is how
+              a question became a document nobody asked for. */}
+          {result.type === "ambiguous" && (
+            <div
+              data-testid="create-ambiguous"
+              className="flex items-start gap-3 rounded-2xl border border-orange-900/50 bg-orange-500/5 p-4 text-sm"
+            >
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-orange-400" aria-hidden="true" />
+              <div className="min-w-0">
+                <p className="text-foreground/90">{result.message || tCreate("looksLikeQuestion")}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <Link
+                    href="/dashboard/chat"
+                    className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-orange-500/50 px-3 py-1.5 text-xs font-medium text-orange-300 transition-colors duration-150 hover:bg-orange-500/10"
+                  >
+                    {tCreate("answerItInstead")}
+                  </Link>
+                  <button
+                    type="button"
+                    data-testid="create-record-anyway"
+                    onClick={() => void submitText(lastSubmitted, true)}
+                    className="inline-flex min-h-[44px] items-center justify-center rounded-lg border border-border px-3 py-1.5 text-xs text-muted transition-colors duration-150 hover:text-foreground"
+                  >
+                    {tCreate("recordItAnyway")}
+                  </button>
+                </div>
               </div>
             </div>
           )}

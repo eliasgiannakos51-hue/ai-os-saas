@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { isApiError } from "./api-error";
 import { codeForStatus, creditOutcomeForStatus, type CreditOutcome, type ErrorCode } from "./error-codes";
@@ -55,19 +56,27 @@ function failureParts(
 }
 
 /** Turn whatever a catch block caught into the three sentences. */
+// STABLE ACROSS RENDERS, on purpose. Callers put `describe` inside effects
+// that report a failed query, and a function rebuilt on every render makes
+// every such effect re-run on every render — or, worse, gets left out of
+// the dependency array to stop that, which is how an effect ends up holding
+// a stale closure. It depends on nothing but the translator.
 export function useErrorText() {
   const t = useTranslations("errors");
 
-  return function describe(error: unknown): FailureText {
-    if (isApiError(error)) {
-      return failureParts(t, error.code, error.status, error.creditsRefunded);
-    }
-    // Anything that is not an ApiError never reached — or never came back
-    // from — a route: a thrown TypeError from fetch, a rejected promise, a
-    // bug in a handler. Status 0 keeps the credit answer honest, because
-    // a request that never arrived cannot have been charged.
-    return failureParts(t, "offline", 0, undefined);
-  };
+  return useCallback(
+    function describe(error: unknown): FailureText {
+      if (isApiError(error)) {
+        return failureParts(t, error.code, error.status, error.creditsRefunded);
+      }
+      // Anything that is not an ApiError never reached — or never came back
+      // from — a route: a thrown TypeError from fetch, a rejected promise, a
+      // bug in a handler. Status 0 keeps the credit answer honest, because
+      // a request that never arrived cannot have been charged.
+      return failureParts(t, "offline", 0, undefined);
+    },
+    [t]
+  );
 }
 
 /**
@@ -77,6 +86,9 @@ export function useErrorText() {
  */
 export function useErrorTextForStatus() {
   const t = useTranslations("errors");
-  return (status: number, creditsRefunded?: boolean): FailureText =>
-    failureParts(t, codeForStatus(status), status, creditsRefunded);
+  return useCallback(
+    (status: number, creditsRefunded?: boolean): FailureText =>
+      failureParts(t, codeForStatus(status), status, creditsRefunded),
+    [t]
+  );
 }

@@ -858,7 +858,12 @@
       "title": "Crea Qualsiasi Cosa",
       "subtitle": "Descrivi qualsiasi cosa — un'idea di prodotto, un'operazione, il feedback di un utente, una metrica — e finisce automaticamente nel modulo giusto.",
       "loggedTo": "Registrato in:",
-      "viewModule": "Apri {module} →"
+      "viewModule": "Apri {module} →",
+      "answeredNotFiled": "Questa era una domanda, quindi non è stato archiviato nulla.",
+      "continueInChat": "Continua nella Chat",
+      "looksLikeQuestion": "Sembra una domanda. La rispondo o la registro?",
+      "answerItInstead": "Rispondi",
+      "recordItAnyway": "Registrala comunque"
     },
     "timeline": {
       "title": "Cronologia",
@@ -944,7 +949,21 @@
         "title": "Un obiettivo, diviso in passi",
         "why": "Di' cosa vuoi ottenere e qui diventa un piano con passi datati da spuntare, non una lista dei desideri.",
         "example": "Ottenere i primi 10 clienti paganti"
-      }
+      },
+      "deleteMission": "Elimina missione",
+      "deleteConfirmMission": "Eliminare la missione «{goal}»?",
+      "deleteConfirmLoses": "Vengono rimossi {steps} passaggio(i) — {completed} già completati — e {scheduled} esecuzione(i) pianificata(e). Non è reversibile.",
+      "deletedMission": "Missione eliminata",
+      "deleteFailed": "Impossibile eliminare la missione.",
+      "deleteStep": "Elimina passaggio",
+      "editStep": "Modifica passaggio",
+      "saveStep": "Salva",
+      "cancelStepEdit": "Annulla",
+      "moveStepUp": "Sposta su",
+      "moveStepDown": "Sposta giù",
+      "stepDeleted": "Passaggio eliminato",
+      "undoWithSeconds": "Annulla ({seconds})",
+      "stepChangeFailed": "Impossibile modificare quel passaggio."
     },
     "reflection": {
       "title": "Riflessione Settimanale",
@@ -1058,6 +1077,15 @@
       "previewIncompleteBody": "Questa pagina generata sembra incompleta o è stata interrotta, quindi non può essere mostrata in modo sicuro. Prova a rigenerarla con una descrizione più breve, oppure modificala di nuovo.",
       "unfilledTitle": "{count} elemento(i) ancora da compilare",
       "unfilledBody": "L'IA non inventa mai un numero di telefono, un prezzo o un orario: lascia uno spazio visibile. Usa «Chiedi una modifica» per completarli, oppure modificali dopo la pubblicazione.",
+      "inventedTitle": "{count} numero(i) sulla pagina che non hai fornito",
+      "inventedBody": "Compaiono sulla pagina ma non nella tua descrizione. All'IA è vietato inventare un numero di telefono, un prezzo, un orario o una cifra: controllali prima di pubblicare e correggili con «Chiedi una modifica».",
+      "inventedKind": {
+        "phone": "telefono",
+        "price": "prezzo",
+        "time": "orario",
+        "address": "indirizzo",
+        "stat": "cifra"
+      },
       "imageLabel": "Immagini di riferimento ({count}/{max}, opzionale)",
       "imageHelp": "Fino a {max} immagini — il tuo logo, foto dei prodotti o un riferimento di stile. JPG o PNG, max 5MB ciascuna. Di default vengono incorporate nel sito; qui sotto puoi usarle solo come ispirazione di stile.",
       "imageRemove": "Rimuovi immagine",

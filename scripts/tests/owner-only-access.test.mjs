@@ -14,6 +14,7 @@
 //
 // Run: node scripts/tests/owner-only-access.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";
+import path from "node:path";
 
 let pass = 0;
 const failures = [];
@@ -287,6 +288,48 @@ for (const page of [
   const withFavs = (src.match(/favoritedIds=\{favoritedIds\}/g) ?? []).length;
   check(`${page.split("/").slice(-2)[0]}: all ${lists} list(s) receive favoritedIds`, lists > 0 && withFavs === lists, `${withFavs} of ${lists}`);
   check(`${page.split("/").slice(-2)[0]}: and it is really loaded`, /loadFavoriteIds\(/.test(src));
+}
+
+console.log("\n== NO component shows a raw database error, anywhere ==");
+// THE FOURTH TIME this defect was found by hand. Fixed once on the create
+// form, once on the record detail, then found again on delete-button, the
+// website workspace, the idea forms, the energy widget and the link
+// modal. Fixing instances is why it kept coming back; nothing stopped the
+// next one. This is the thing that stops it.
+//
+// A PostgREST message ("new row violates row-level security policy for
+// table \"trades\"") names an internal table, is English in a
+// ten-language app, and tells the user nothing they can act on. It goes
+// through lib/errors/use-error-text.ts, which turns it into what / next /
+// what-happened-to-the-money.
+{
+  const componentFiles = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir)) {
+      const full = path.join(dir, entry);
+      if (statSync(full).isDirectory()) walk(full);
+      else if (entry.endsWith(".tsx")) componentFiles.push(full);
+    }
+  };
+  walk("src/components");
+  walk("src/app");
+  // `<name>Error.message` or `error.message` handed straight to the user.
+  const RAW = /(?:setError\(\s*(\w*[eE]rror)\.message\s*\)|addToast\(\s*`[^`]*\$\{\s*(\w*[eE]rror)\.message\s*\})/;
+  const offenders = componentFiles.filter((f) => {
+    if (f.startsWith("src/app/api/")) return false; // routes reply in English by convention
+    const body = readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    return RAW.test(body);
+  });
+  check(
+    `no component renders a raw database error (${componentFiles.length} scanned)`,
+    offenders.length === 0,
+    offenders.join("\n        ")
+  );
+  // ...and the scanner must really be able to see one.
+  check(
+    "the scanner catches the shape it is looking for",
+    RAW.test('setError(insertError.message);') && RAW.test('addToast(`✗ ${deleteError.message}`, "error");')
+  );
 }
 
 console.log("\n== editing a record cannot show a raw database error ==");

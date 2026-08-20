@@ -7,6 +7,13 @@ import { createViaJob } from "@/lib/create-studio/create-via-job";
 export type CreateResult =
   | { type: "matched"; moduleTitle: string; href: string; message: string }
   | { type: "unmatched"; message: string }
+  // A QUESTION, answered — nothing was filed. "what do you know about me"
+  // used to come back as a Document; the classifier now says what the
+  // message WAS before choosing where to put it.
+  | { type: "answered"; answer: string; message: string }
+  // Genuinely could have been either. The user decides; nothing is
+  // created until they do.
+  | { type: "ambiguous"; message: string }
   | { type: "error"; message: string }
   // Distinct from "error" on purpose: running out of credits is not a
   // failure to be retried, it is a state with two specific recovery
@@ -59,6 +66,14 @@ export function useCreateAnything() {
           questions: data.questions as string[],
           suggestions: data.questionSuggestions ?? [],
         };
+      }
+
+      if (data.answered) {
+        return { type: "answered", answer: data.answer ?? "", message: data.message ?? "" };
+      }
+
+      if (data.ambiguous) {
+        return { type: "ambiguous", message: data.message ?? "" };
       }
 
       if (data.matched) {

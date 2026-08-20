@@ -143,9 +143,26 @@ const galleryShape = shapeBlock("gallery");
 // cafe -> menu and hours high, photo-led
 check("a cafe covers cafes", /caf|restaurant|taverna/i.test(localPlace));
 check("it leads with a photograph of the place", /FIRST:[^\n]*photograph/i.test(localPlace));
+// THREE orders per shape, not one. A single order per archetype is what
+// made two tavernas the same page — the shape decided the sections AND
+// their sequence, so every local-place site ever generated ran photo >
+// menu > hours > gallery > map. Each letter must exist, and no two of
+// them may be the same list.
+const localOrders = [...localPlace.matchAll(/ORDER ([ABC]):\s*(.+)/g)].map((m) => [m[1], m[2].trim()]);
+check(`local-place offers three orders (${localOrders.map(([l]) => l).join("")})`, localOrders.length === 3);
 check(
-  "the menu comes before anything else in its order",
-  /ORDER:\s*photo\s*>\s*menu/i.test(localPlace)
+  "ORDER A still leads with the photo and then the menu",
+  /^photo\s*>\s*menu/i.test(localOrders.find(([l]) => l === "A")?.[1] ?? "")
+);
+check(
+  "and the three are three different lists, not one list relabelled",
+  new Set(localOrders.map(([, list]) => list)).size === 3,
+  JSON.stringify(localOrders.map(([, l]) => l))
+);
+check(
+  "at least one order does NOT lead with the photo",
+  localOrders.some(([, list]) => !/^photo/i.test(list)),
+  "if every letter opens the same way, the letter is decoration"
 );
 check("with hours, address and phone as primary content", /hours and address and phone/i.test(localPlace));
 check("and marketing prose above the menu is forbidden", /NEVER:[^\n]*marketing prose above the menu/i.test(localPlace));
@@ -241,10 +258,27 @@ check(
     src
   )
 );
+// The property is about the per-call VALUE, not the word. The prompt is
+// allowed — required, even — to say "the DESIGN VARIATION block below
+// names which letter to use": that sentence is identical on every call, so
+// it caches. What must never appear above the cached constants is
+// `variationText`, the value that differs per site: interpolating it into
+// a cache_control block would re-prime the cache on every generation.
+const beforeConstants = src.slice(0, src.indexOf("const SYSTEM_PROMPT"));
 check(
-  "the variation draw rides in the user message, never the cached system block",
-  /variationText/.test(src.slice(src.indexOf("export async function generateWebsiteHtml"))) &&
-    !/variation/i.test(src.slice(0, src.indexOf("const SYSTEM_PROMPT")))
+  "the per-site draw is used by the request builder",
+  /variationText/.test(src.slice(src.indexOf("export async function generateWebsiteHtml")))
+);
+check(
+  "…and never inside a cached module constant",
+  !/variationText/.test(beforeConstants),
+  "a per-call value in a cache_control block re-primes the cache every generation"
+);
+check(
+  "no cached block interpolates anything at all",
+  !/\$\{[^}]*\}/.test(beforeConstants.slice(beforeConstants.indexOf("SITE_SHAPE_SECTION"))) ||
+    !/text:\s*`/.test(src),
+  "module constants must be literal strings, not templates over per-call state"
 );
 check("the edit path puts the change request last", /\$\{buildReferenceImageUrlList\(images\)\}\\n\\nTHE USER'S CHANGE REQUEST/.test(src));
 check("and labels it as overriding too", /apply exactly this, and nothing else\. It overrides/.test(src));

@@ -82,6 +82,12 @@ type CreditsRow = {
   credits_total: number;
   plan_tier: string;
   beta_expires_at: string | null;
+  /** The best per-credit price this account has ever bought a pack at.
+   *  Selected here rather than by a second read of the same row: the
+   *  dashboard layout needs both the balance and this price on every page
+   *  load, and asking user_credits twice for one row is a round trip the
+   *  user waits through on every navigation. */
+  min_pack_credit_price_eur?: number | string | null;
 };
 
 function planMonthlyCredits(plan: Plan): number {
@@ -95,7 +101,13 @@ export async function getOrInitCredits(userId: string, plan: Plan): Promise<Cred
   const admin = createAdminClient();
   const { data } = await admin
     .from("user_credits")
-    .select("credits_remaining, credits_total, plan_tier, beta_expires_at")
+    // `*`, not a column list, on purpose. Naming min_pack_credit_price_eur
+    // explicitly makes this read FAIL on a database where that column is
+    // missing — and a failed read here does not degrade, it falls through
+    // to the insert path, which loses to the unique index and returns the
+    // plan's monthly allotment as if it were the balance. A user would see
+    // a wrong number, not an error. `*` returns whatever the row has.
+    .select("*")
     .eq("user_id", userId)
     .maybeSingle();
 
@@ -110,7 +122,7 @@ export async function getOrInitCredits(userId: string, plan: Plan): Promise<Cred
       credits_total: initial,
       plan_tier: plan.slug,
     })
-    .select("credits_remaining, credits_total, plan_tier, beta_expires_at")
+    .select("*")
     .single();
 
   return (
@@ -119,8 +131,19 @@ export async function getOrInitCredits(userId: string, plan: Plan): Promise<Cred
       credits_total: initial,
       plan_tier: plan.slug,
       beta_expires_at: null,
+      min_pack_credit_price_eur: null,
     }
   );
+}
+
+/** The pack price out of a row already read, for the callers that have
+ *  one — same normalisation as getPurchasedPackCreditPriceEur, no query. */
+export function packCreditPriceEurFromRow(row: {
+  min_pack_credit_price_eur?: number | string | null;
+}): number | null {
+  const raw = row.min_pack_credit_price_eur;
+  const value = typeof raw === "string" ? Number(raw) : raw;
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : null;
 }
 
 // Read-only balance check — no write, no transaction log. Used to gate an

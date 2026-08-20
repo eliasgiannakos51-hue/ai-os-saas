@@ -143,6 +143,33 @@ export const createHandler: JobHandler = async (ctx: JobContext): Promise<JobHan
 
   await ctx.progress(3, steps[2]);
 
+  // A QUESTION IS NOT A THING TO FILE. "what do you know about me" used to
+  // come back as a Document, because the tool offered a module slug or
+  // "none" and nothing else — the model was never asked what the message
+  // WAS. It is now, and an answer is a first-class outcome: nothing is
+  // written to any module, and the answer (built from the same account
+  // context the classifier already had) is what the user gets.
+  //
+  // Still SETTLES rather than refunding: the model call happened and the
+  // answer is the thing the user wanted. Charging for it is honest;
+  // charging for a document they did not ask for was not.
+  if (toolInput.intent === "question") {
+    return {
+      result: {
+        matched: false,
+        answered: true,
+        answer: String(toolInput.answer ?? "").trim() || toolInput.message,
+        message: toolInput.message,
+      },
+    };
+  }
+
+  // GENUINELY UNCLEAR — so ask, rather than guess. The user picks, and
+  // the resubmission carries their choice (see api/create's askedIntent).
+  if (toolInput.intent === "ambiguous") {
+    return { result: { matched: false, ambiguous: true, message: toolInput.message } };
+  }
+
   // A classification that matched nothing is still a real answer the user
   // reads, so it settles rather than refunding.
   if (!toolInput.module || toolInput.module === "none") {

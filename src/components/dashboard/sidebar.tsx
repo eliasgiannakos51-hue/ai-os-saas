@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Tooltip } from "@/components/ui/tooltip";
 import { displayNameFromEmail } from "@/lib/greeting";
@@ -96,6 +96,19 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
   // collapsed state), matching the previous per-group behavior.
   const [openGroup, setOpenGroup] = useState<string | null | undefined>(undefined);
 
+  const router = useRouter();
+  /** Routes already asked for, so a pointer sweeping down the sidebar
+   *  cannot fire the same prefetch a dozen times. */
+  const warmed = useRef<Set<string>>(new Set());
+  const warm = useCallback(
+    (href: string) => {
+      if (warmed.current.has(href)) return;
+      warmed.current.add(href);
+      router.prefetch(href);
+    },
+    [router]
+  );
+
   useEffect(() => {
     const activeHeading = defaultOpenHeading(pathname);
     if (activeHeading) {
@@ -174,6 +187,28 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
                   <Link
                     href={item.href}
                     onClick={closeOnMobile}
+                    // WARM THE ROUTE THE POINTER IS HEADING FOR.
+                    //
+                    // Every dashboard route is force-dynamic, so Next's
+                    // default prefetch fetches only the loading boundary —
+                    // the page itself is still a full server round trip
+                    // AFTER the click, and that round trip is inside the
+                    // time the user experiences as "the transition". A
+                    // pointer arriving on a link is a few hundred
+                    // milliseconds of warning; spending them on the fetch
+                    // is what turns a click into an instant one.
+                    //
+                    // Not prefetch on ALL of them at render time: there are
+                    // twenty-odd links in this sidebar, and prefetching
+                    // every one would mean twenty-odd dynamic page renders
+                    // per visit. One, for the link actually being
+                    // approached, is the difference.
+                    //
+                    // Focus and touch get the same treatment, because a
+                    // keyboard or a phone never produces a hover.
+                    onMouseEnter={() => warm(item.href)}
+                    onFocus={() => warm(item.href)}
+                    onTouchStart={() => warm(item.href)}
                     // nav-item draws the active highlight and the leading
                     // rail as pseudo-elements so both can animate; the
                     // look is unchanged, it just slides in now.

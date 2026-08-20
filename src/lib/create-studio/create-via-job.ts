@@ -24,6 +24,14 @@ export type CreateOutcome = {
    *  report it as one or invite a duplicate submission. */
   stillRunning?: boolean;
   matched?: boolean;
+  /** The message was a QUESTION, so nothing was filed — `answer` is what
+   *  the user asked for. Filing a question as a Document is the defect
+   *  this exists to end. */
+  answered?: boolean;
+  answer?: string;
+  /** Genuinely could have been either, so the user is asked rather than
+   *  guessed at. */
+  ambiguous?: boolean;
   needsClarification?: boolean;
   questions?: string[];
   /** Tappable answers, aligned by index with `questions` — always the
@@ -70,6 +78,18 @@ export async function createViaJob(body: Record<string, unknown>): Promise<Creat
   // the user as "the AI could not place this" when in fact it could.
   if (r.insertFailed) {
     return { ok: false, error: "Could not save the entry. No credits were charged — please try again." };
+  }
+  if (r.answered) {
+    return {
+      ok: true,
+      matched: false,
+      answered: true,
+      answer: String(r.answer ?? ""),
+      message: String(r.message ?? ""),
+    };
+  }
+  if (r.ambiguous) {
+    return { ok: true, matched: false, ambiguous: true, message: String(r.message ?? "") };
   }
   return {
     ok: true,

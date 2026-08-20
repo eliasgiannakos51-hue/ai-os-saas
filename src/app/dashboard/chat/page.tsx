@@ -30,10 +30,21 @@ export default async function ChatPage({
     redirect("/login");
   }
 
-  const { data: conversationRows } = await supabase
-    .from("chat_conversations")
-    .select("id, title, is_pinned, created_at, updated_at")
-    .order("updated_at", { ascending: false });
+  // The conversation list, the plan and the bypass check are three
+  // independent reads and were three sequential waits. The favourites
+  // lookup below genuinely depends on the list — it is keyed by the ids —
+  // so it stays behind it; nothing else does.
+  const [{ data: conversationRows }, bypassesCredits, plan] = await Promise.all([
+    supabase
+      .from("chat_conversations")
+      .select("id, title, is_pinned, created_at, updated_at")
+      .order("updated_at", { ascending: false }),
+    // Admins and beta testers already pay nothing, so a "free messages
+    // left" counter would be meaningless noise for them — the route skips
+    // the allowance for those accounts entirely.
+    isAdminEmail(user.email) ? Promise.resolve(true) : hasActiveBetaBypass(user),
+    resolveEffectivePlan(user),
+  ]);
 
   // Starred state comes from user_favorites, not from a column here — one
   // batched read for the whole list rather than a query per row.
@@ -49,11 +60,6 @@ export default async function ChatPage({
     is_favorited: favoritedIds.has(c.id),
   }));
 
-  // Admins and beta testers already pay nothing, so a "free messages left"
-  // counter would be meaningless noise for them — the route skips the
-  // allowance for those accounts entirely.
-  const bypassesCredits = isAdminEmail(user.email) || (await hasActiveBetaBypass(user));
-  const plan = await resolveEffectivePlan(user);
   // Same entitlements the route honours, so the counter the user sees and
   // the allowance the server enforces cannot disagree for a grandfathered
   // account.

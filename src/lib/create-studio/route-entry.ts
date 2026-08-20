@@ -36,7 +36,18 @@ Available modules and their fields:
 
 ${moduleDocs}
 
-Rules:
+FIRST DECIDE WHAT THE MESSAGE IS. This comes before choosing a module, and getting it wrong is the failure this instruction exists to prevent: "what do you know about me" was filed as a Document, because the only answers available were a module slug or "none".
+
+- "question" — the user is ASKING something and wants an ANSWER. Signals: it ends in a question mark (? ？ ; ؟); it opens with or contains an interrogative (what / how / how many / who / when / why / where / which — τι, πώς, πόσα, ποιος, πότε, γιατί, πού — was, wie, wer, wann, warum, wo — qué, cómo, cuántos, quién — quoi, comment, combien, qui — cosa, come, quanti, chi — o que, como, quantos, quem — ما, كيف, كم, من, متى — 何, どう, いくつ, 誰, なぜ — 什么, 怎么, 多少, 谁, 为什么); or it asks what you know or remember ("do you know", "ξέρεις", "weißt du", "sabes", "覚えて", "知道吗").
+  Examples that are questions: "what do you know about me", "how many credits do I have", "how are sales going", "what did I do last week", "who is my best customer", "how much did I spend in March".
+- "record" — the user is TELLING you something to file, or INSTRUCTING you to make something. Signals: an imperative opener (make / build / write / log / add / note / save — φτιάξε, γράψε, κατέγραψε, πρόσθεσε — erstelle, schreibe, notiere — haz, escribe, anota), or a plain statement of fact ("Coffee shop in Athens, 40k revenue, 3 staff").
+  An imperative with a question mark is still "record": "make me a website?" is a polite instruction, not a question.
+- "ambiguous" — genuinely could be either, and you would be guessing. Say so; the user will be asked. Guessing wrong here creates a document nobody wanted.
+
+When intent is "question": put the ANSWER in "answer", in the user's own language, using only the account context supplied to you. Do NOT choose a module, do NOT extract fields, and never invent a number, a date or a name that is not in that context — if the context does not contain it, say plainly that you do not have it. Set module to "none".
+When intent is "ambiguous": set module to "none" and leave "answer" empty.
+
+Rules for the "record" case:
 - Pick exactly one module slug from the list above, or "none" if the message doesn't clearly fit any module.
 - Only include field keys that belong to the chosen module in the "fields" object. Do not invent keys.
 - Number-type fields must be JSON numbers, not strings.
@@ -49,10 +60,21 @@ ${AI_CONDUCT_EN}${AI_QUALITY_CHECKLIST_EN}`;
 export const ROUTE_ENTRY_TOOL: Anthropic.Tool = {
   name: "route_entry",
   description:
-    "Classify the user's message into exactly one Ionexa AI module (or none) and extract the structured fields for that module's table.",
+    "Decide whether the user is asking a question or giving something to record. If recording, classify it into exactly one Ionexa AI module (or none) and extract the structured fields for that module's table. If asking, answer it.",
   input_schema: {
     type: "object",
     properties: {
+      intent: {
+        type: "string",
+        enum: ["record", "question", "ambiguous"],
+        description:
+          'What the message IS. "record" = file it or build it. "question" = the user wants an answer, not a new row. "ambiguous" = genuinely unclear, so ask rather than guess.',
+      },
+      answer: {
+        type: "string",
+        description:
+          'When intent is "question": the answer, in the user\'s own language, from the supplied account context only. Empty otherwise.',
+      },
       module: {
         type: "string",
         enum: [...CLASSIFIER_MODULES.map((m) => m.slug), "none"],
@@ -70,11 +92,15 @@ export const ROUTE_ENTRY_TOOL: Anthropic.Tool = {
           "A short, friendly 1-2 sentence response to show the user.",
       },
     },
-    required: ["module", "fields", "message"],
+    required: ["intent", "module", "fields", "message"],
   },
 };
 
 export type RouteEntryInput = {
+  /** What the message IS — decided before any module is chosen. */
+  intent?: "record" | "question" | "ambiguous";
+  /** Present when intent is "question". */
+  answer?: string;
   module: string;
   fields: Record<string, unknown>;
   message: string;

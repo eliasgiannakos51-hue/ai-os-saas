@@ -597,7 +597,16 @@ const clientFallbacks = sources.flatMap((f) => [
 // we own around them are in dashboard.agents.delivery.* in all ten
 // locales (sendTest, testSentTelegram, testSentDiscord, testFailed); what
 // is counted here is the server's reply when the request itself fails.
-const SERVER_PROSE_BASELINE = 541;
+// 541 -> 558 for the two new mission routes (api/mission/[id] and
+// api/mission/[id]/steps): the not-authenticated and not-found replies,
+// the four "which step / which way / unknown action" refusals, the
+// step-text length and emptiness refusals, and the 409 that says the plan
+// changed somewhere else. Same documented convention as every increment
+// above — the calling component surfaces them, and the sentences the user
+// actually reads while deleting (the confirmation, what is lost, the
+// undo, every control's label) are in dashboard.mission.* in all ten
+// locales, checked by scripts/tests/mission-editing.test.mjs.
+const SERVER_PROSE_BASELINE = 558;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

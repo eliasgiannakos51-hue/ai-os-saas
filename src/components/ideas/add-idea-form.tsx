@@ -112,7 +112,7 @@ export function AddIdeaForm({
     setLoading(false);
 
     if (error) {
-      setError(error.message);
+      setError(describe(new ApiError(500, { error: error.message })).text);
       addToast(`✗ ${describe(new ApiError(500, { error: error.message })).what}`, "error");
       return;
     }

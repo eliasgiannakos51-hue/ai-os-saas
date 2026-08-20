@@ -858,7 +858,12 @@
       "title": "何でも作成",
       "subtitle": "何でも書いてください — 製品のアイデア、トレード、ユーザーからのフィードバック、指標 — 自動的に適切なモジュールに入ります。",
       "loggedTo": "記録先:",
-      "viewModule": "{module} を開く →"
+      "viewModule": "{module} を開く →",
+      "answeredNotFiled": "これは質問だったため、何も記録していません。",
+      "continueInChat": "チャットで続ける",
+      "looksLikeQuestion": "これは質問のようです。答えますか、それとも記録しますか？",
+      "answerItInstead": "答える",
+      "recordItAnyway": "それでも記録する"
     },
     "timeline": {
       "title": "履歴",
@@ -944,7 +949,21 @@
         "title": "ひとつの目標を、手順に分ける",
         "why": "達成したいことを書けば、日付つきでチェックできる手順に変わります。願望リストではありません。",
         "example": "最初の有料顧客10人を獲得する"
-      }
+      },
+      "deleteMission": "ミッションを削除",
+      "deleteConfirmMission": "ミッション「{goal}」を削除しますか？",
+      "deleteConfirmLoses": "ステップ {steps} 件（うち完了 {completed} 件）と予約実行 {scheduled} 件が削除されます。元に戻せません。",
+      "deletedMission": "ミッションを削除しました",
+      "deleteFailed": "ミッションを削除できませんでした。",
+      "deleteStep": "ステップを削除",
+      "editStep": "ステップを編集",
+      "saveStep": "保存",
+      "cancelStepEdit": "キャンセル",
+      "moveStepUp": "上へ移動",
+      "moveStepDown": "下へ移動",
+      "stepDeleted": "ステップを削除しました",
+      "undoWithSeconds": "元に戻す（{seconds}）",
+      "stepChangeFailed": "そのステップを変更できませんでした。"
     },
     "reflection": {
       "title": "週次振り返り",
@@ -1058,6 +1077,15 @@
       "previewIncompleteBody": "生成されたページが不完全、または途中で切れているため、安全に表示できません。説明を短くして再生成するか、もう一度編集してください。",
       "unfilledTitle": "未入力の項目が {count} 件あります",
       "unfilledBody": "AI は電話番号・価格・営業時間を決して創作せず、目に見える空欄を残します。「変更を依頼」で埋めるか、公開後に編集してください。",
+      "inventedTitle": "ページ上に、指定していない数値が {count} 件あります",
+      "inventedBody": "これらはページには出ていますが、入力した説明にはありません。AI には電話番号・価格・営業時間・数値を決して創作しないよう指示しています。公開前に一つずつ確認し、「変更を依頼」で修正してください。",
+      "inventedKind": {
+        "phone": "電話番号",
+        "price": "価格",
+        "time": "時間",
+        "address": "住所",
+        "stat": "数値"
+      },
       "imageLabel": "参考画像（{count}/{max}、任意）",
       "imageHelp": "最大{max}枚 — ロゴ、商品写真、スタイルの参考画像。JPGまたはPNG、各5MBまで。既定ではサイトに埋め込まれます。下でスタイル参考のみに切り替えられます。",
       "imageRemove": "画像を削除",

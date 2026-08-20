@@ -302,6 +302,47 @@ export function extractPlainText(buf: Buffer, kind: FileKind): ExtractionResult 
  * claiming to have read it, is the failure mode this whole feature exists
  * to avoid.
  */
+/**
+ * Arabic and Hebrew, as they were written rather than as they were drawn.
+ *
+ * A PDF stores text in VISUAL order — the order the glyphs sit on the
+ * page — and a right-to-left script is drawn right to left. It also
+ * stores the CONTEXTUAL FORM of each letter (initial/medial/final), not
+ * the letter: "المقهى" is drawn as the presentation forms U+FEF0 U+FEE8
+ * U+FED8 U+FEE4 U+FEDF U+FE8D, in that order.
+ *
+ * Extracted literally, that is what lands in the database: a string that
+ * no search matches, that no reader recognises, and that the model is
+ * then asked questions about. Measured on a real Chromium-printed Arabic
+ * PDF, "حقق المقهى في أثينا إيرادات" came out as
+ * "ﻰﻬﻘﻤﻟا ﻲﻓ ﺎﻨﻴﺛأ ﻖﻘﺣ تاداﺮﻳإ" — every word present, every word
+ * unusable.
+ *
+ * NFKC maps every presentation form back to its base letter (that is
+ * exactly what the compatibility decomposition is for), and reversing the
+ * run restores logical order. Applied ONLY to runs that are actually RTL,
+ * so a Latin or Greek document is not touched at all.
+ */
+const RTL_LETTER = /[\u0590-\u05FF\u0600-\u06FF\u0700-\u074F\uFB1D-\uFB4F\uFB50-\uFDFF\uFE70-\uFEFF]/;
+const PRESENTATION_FORM = /[\uFB50-\uFDFF\uFE70-\uFEFF]/;
+
+export function repairRightToLeftText(text: string): string {
+  if (!PRESENTATION_FORM.test(text)) return text;
+  return text
+    .split("\n")
+    .map((line) => {
+      // Only a line whose letters are RTL gets reordered. A line with a
+      // single Arabic word inside an English sentence is left alone —
+      // reversing that would break the English.
+      const letters = [...line].filter((ch) => /\p{L}/u.test(ch));
+      if (letters.length === 0) return line;
+      const rtlShare = letters.filter((ch) => RTL_LETTER.test(ch)).length / letters.length;
+      if (rtlShare < 0.5) return line;
+      return [...line.normalize("NFKC")].reverse().join("");
+    })
+    .join("\n");
+}
+
 export function extractText(buf: Buffer, kind: FileKind): ExtractionResult {
   let result: ExtractionResult;
 
@@ -369,7 +410,10 @@ export function extractText(buf: Buffer, kind: FileKind): ExtractionResult {
     pages: result.pages.map((page) => ({
       pageNumber: page.pageNumber,
       label: sanitiseExtractedText(page.label),
-      text: sanitiseExtractedText(page.text),
+      // RTL repair BEFORE the sanitiser, so the reordering sees the text
+      // it was measured against and the sanitiser still has the last word
+      // on what may be stored.
+      text: sanitiseExtractedText(repairRightToLeftText(page.text)),
     })),
   };
 

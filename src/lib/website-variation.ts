@@ -25,6 +25,9 @@ export type SiteVariation = {
   rhythm: string;
   typeScale: string;
   motion: string;
+  /** Which of the chosen archetype's three section orders to build. THE
+   *  STRUCTURAL AXIS — the other five are composition. */
+  order: string;
 };
 
 // Aligned with the self-declaration enum in website-builder.ts
@@ -49,6 +52,27 @@ export const SECTION_RHYTHMS = [
   "even — the same vertical padding on every section",
   "syncopated — alternating tight and airy sections",
   "crescendo — sections get progressively airier toward the final call to action",
+] as const;
+
+/**
+ * THE AXIS THAT WAS MISSING, and the reason "same template" was reported a
+ * fifth time after the other five axes were added.
+ *
+ * Every SITE SHAPE in website-builder.ts used to hard-code ONE section
+ * order, so two cafés were both `local-place` and were both instructed
+ * into "photo > menu > hours > gallery > map". Hero, grid, rhythm, type
+ * and motion all varied — and all five are COMPOSITION. The skeleton was
+ * identical by construction, which is exactly what a person means when
+ * they say two sites feel like the same template.
+ *
+ * Each shape now offers three orders, every one of them correct for that
+ * subject, and this draw says which. That is a structural difference, not
+ * a stylistic one.
+ */
+export const SECTION_ORDERS = [
+  "A — the archetype's ORDER A, exactly as listed for the shape you chose",
+  "B — the archetype's ORDER B, exactly as listed for the shape you chose",
+  "C — the archetype's ORDER C, exactly as listed for the shape you chose",
 ] as const;
 
 export const TYPE_SCALES = [
@@ -94,6 +118,7 @@ export function pickVariation(seedParts: (string | number)[]): SiteVariation {
     rhythm: pick(SECTION_RHYTHMS, "rhythm"),
     typeScale: pick(TYPE_SCALES, "type"),
     motion: pick(MOTION_VOCABULARIES, "motion"),
+    order: pick(SECTION_ORDERS, "order"),
   };
 }
 
@@ -103,10 +128,11 @@ export function pickVariation(seedParts: (string | number)[]): SiteVariation {
  */
 export function variationDirective(v: SiteVariation): string {
   return `DESIGN VARIATION FOR THIS SITE — drawn for this generation specifically; a different site gets a different draw. This is what keeps two sites from feeling like the same template, so treat each line as a decision already made:
+- SECTION ORDER: ${v.order}
 - HERO: ${v.hero}
 - LAYOUT GRID: ${v.grid}
 - SECTION RHYTHM: ${v.rhythm}
 - TYPE SCALE: ${v.typeScale}
 - MOTION VOCABULARY: ${v.motion}
-Where these conflict with the chosen SITE SHAPE's ORDER or FIRST guidance, THESE win — the shape decides what sections exist, this draw decides how they are composed. The shape's NEVER list still stands: if it forbids animation or gradients, use static motion regardless of the draw. And if THE USER'S BRIEF below asks for something different, the brief beats everything here.`;
+SECTION ORDER is the structural line and the one that is not negotiable: pick your archetype by subject as instructed, then build ITS order of the letter named above — not the first one listed, not the one you would have chosen. Two sites of the same kind built in the same order is the "same template" defect, and it is what this line exists to prevent. The other five lines decide how those sections are composed. The shape's NEVER list still stands: if it forbids animation or gradients, use static motion regardless of the draw. And if THE USER'S BRIEF below asks for something different, the brief beats everything here.`;
 }

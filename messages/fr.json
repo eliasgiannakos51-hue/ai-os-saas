@@ -858,7 +858,12 @@
       "title": "Créer N'importe Quoi",
       "subtitle": "Décrivez n'importe quoi — une idée de produit, une opération, le retour d'un utilisateur, un indicateur — et cela atterrit automatiquement dans le bon module.",
       "loggedTo": "Enregistré dans :",
-      "viewModule": "Ouvrir {module} →"
+      "viewModule": "Ouvrir {module} →",
+      "answeredNotFiled": "C'était une question : rien n'a été enregistré.",
+      "continueInChat": "Continuer dans le Chat",
+      "looksLikeQuestion": "Cela ressemble à une question. Dois-je y répondre ou l'enregistrer ?",
+      "answerItInstead": "Y répondre",
+      "recordItAnyway": "L'enregistrer quand même"
     },
     "timeline": {
       "title": "Historique",
@@ -944,7 +949,21 @@
         "title": "Un objectif, découpé en étapes",
         "why": "Dites ce que vous voulez atteindre : cela devient un plan avec des étapes datées à cocher, pas une liste de souhaits.",
         "example": "Obtenir les 10 premiers clients payants"
-      }
+      },
+      "deleteMission": "Supprimer la mission",
+      "deleteConfirmMission": "Supprimer la mission « {goal} » ?",
+      "deleteConfirmLoses": "Cela supprime {steps} étape(s) — dont {completed} terminées — et {scheduled} exécution(s) programmée(s). Irréversible.",
+      "deletedMission": "Mission supprimée",
+      "deleteFailed": "Impossible de supprimer la mission.",
+      "deleteStep": "Supprimer l'étape",
+      "editStep": "Modifier l'étape",
+      "saveStep": "Enregistrer",
+      "cancelStepEdit": "Annuler",
+      "moveStepUp": "Monter",
+      "moveStepDown": "Descendre",
+      "stepDeleted": "Étape supprimée",
+      "undoWithSeconds": "Annuler ({seconds})",
+      "stepChangeFailed": "Impossible de modifier cette étape."
     },
     "reflection": {
       "title": "Bilan Hebdomadaire",
@@ -1058,6 +1077,15 @@
       "previewIncompleteBody": "Cette page générée semble incomplète ou a été coupée, elle ne peut donc pas être affichée en toute sécurité. Essayez de la régénérer avec une description plus courte, ou modifiez-la à nouveau.",
       "unfilledTitle": "{count} élément(s) restent à compléter",
       "unfilledBody": "L'IA n'invente jamais un numéro, un prix ou des horaires : elle laisse un blanc visible. Utilisez « Demander une modification » pour les compléter, ou modifiez-les après publication.",
+      "inventedTitle": "{count} nombre(s) sur la page que vous n'avez jamais donné(s)",
+      "inventedBody": "Ils figurent sur la page mais pas dans votre description. L'IA a pour consigne de ne jamais inventer un numéro de téléphone, un prix, un horaire ou un chiffre — vérifiez-les avant de publier et corrigez-les via « Demander une modification ».",
+      "inventedKind": {
+        "phone": "téléphone",
+        "price": "prix",
+        "time": "horaire",
+        "address": "adresse",
+        "stat": "chiffre"
+      },
       "imageLabel": "Images de référence ({count}/{max}, optionnel)",
       "imageHelp": "Jusqu'à {max} images — votre logo, des photos produits ou une référence de style. JPG ou PNG, 5MB max chacune. Par défaut elles sont intégrées au site ; vous pouvez les limiter à l'inspiration de style ci-dessous.",
       "imageRemove": "Retirer l'image",

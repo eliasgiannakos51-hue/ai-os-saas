@@ -858,7 +858,12 @@
       "title": "创建任何内容",
       "subtitle": "描述任何内容——一个产品创意、一笔交易、一条用户反馈、一项指标——它会自动归入正确的模块。",
       "loggedTo": "已记录到：",
-      "viewModule": "查看 {module} →"
+      "viewModule": "查看 {module} →",
+      "answeredNotFiled": "这是一个问题，因此没有记录任何内容。",
+      "continueInChat": "在聊天中继续",
+      "looksLikeQuestion": "这看起来像一个问题。要回答它，还是记录它？",
+      "answerItInstead": "回答它",
+      "recordItAnyway": "仍然记录"
     },
     "timeline": {
       "title": "历史",
@@ -944,7 +949,21 @@
         "title": "一个目标，拆成若干步",
         "why": "说出你想达成什么，这里会把它变成有日期、可勾选的计划，而不是一张愿望清单。",
         "example": "拿下头 10 个付费客户"
-      }
+      },
+      "deleteMission": "删除任务",
+      "deleteConfirmMission": "删除任务“{goal}”？",
+      "deleteConfirmLoses": "这将删除 {steps} 个步骤（其中 {completed} 个已完成）和 {scheduled} 个预定执行。无法撤销。",
+      "deletedMission": "任务已删除",
+      "deleteFailed": "无法删除该任务。",
+      "deleteStep": "删除步骤",
+      "editStep": "编辑步骤",
+      "saveStep": "保存",
+      "cancelStepEdit": "取消",
+      "moveStepUp": "上移",
+      "moveStepDown": "下移",
+      "stepDeleted": "步骤已删除",
+      "undoWithSeconds": "撤销（{seconds}）",
+      "stepChangeFailed": "无法修改该步骤。"
     },
     "reflection": {
       "title": "每周回顾",
@@ -1058,6 +1077,15 @@
       "previewIncompleteBody": "生成的页面似乎不完整或被截断，因此无法安全显示。请尝试用更简短的描述重新生成，或再次编辑。",
       "unfilledTitle": "还有 {count} 项待填写",
       "unfilledBody": "AI 从不编造电话、价格或营业时间，而是留下可见的空白。请使用“请求修改”来填写，或在发布后编辑。",
+      "inventedTitle": "页面上有 {count} 个你未提供的数字",
+      "inventedBody": "它们出现在页面上，但不在你的描述里。AI 被要求绝不虚构电话、价格、营业时间或数据——发布前请逐一核对，并用“请求修改”来更正。",
+      "inventedKind": {
+        "phone": "电话",
+        "price": "价格",
+        "time": "时间",
+        "address": "地址",
+        "stat": "数据"
+      },
       "imageLabel": "参考图片（{count}/{max}，可选）",
       "imageHelp": "最多{max}张图片 — 你的标志、产品照片或风格参考。JPG或PNG，每张最大5MB。默认会嵌入网站；可在下方改为仅作风格参考。",
       "imageRemove": "移除图片",

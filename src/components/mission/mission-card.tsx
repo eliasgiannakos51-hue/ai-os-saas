@@ -1,12 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { ClipboardCheck, ListChecks } from "lucide-react";
+import { ClipboardCheck, ListChecks, Trash2 } from "lucide-react";
 import { MISSION_ICON } from "@/lib/module-icons";
 import { EntityCard, type EntityCardStatusTone } from "@/components/ui/entity-card";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { getStuckStep } from "@/lib/mission-progress";
 import type { Mission, MissionStatus } from "@/types/mission";
+import { useMissionDelete } from "@/components/mission/use-mission-delete";
 
 const STATUS_LABEL_KEYS: Record<MissionStatus, string> = {
   planning: "statusPlanning",
@@ -46,6 +47,10 @@ export function MissionCard({
 }) {
   const t = useTranslations("dashboard.mission");
   const tModule = useTranslations("module");
+  // Deleting from the card, through the same confirmation and the same
+  // endpoint as the detail screen's button — one behaviour, two places
+  // to reach it.
+  const { confirmAndDelete, deleting } = useMissionDelete(mission);
 
   const steps = mission.plan_steps?.steps ?? [];
   const review = mission.plan_steps?.review;
@@ -96,6 +101,14 @@ export function MissionCard({
           label: t("tabReview"),
           icon: ClipboardCheck,
           onSelect: () => onOpen("review"),
+        },
+        {
+          key: "delete",
+          label: t("deleteMission"),
+          icon: Trash2,
+          destructive: true,
+          disabled: deleting,
+          onSelect: () => void confirmAndDelete(),
         },
       ]}
     />

@@ -96,15 +96,11 @@ export default async function OverviewPage() {
     redirect("/onboarding");
   }
 
-  // The insights card. Dismissed ones are excluded by the query, so a
-  // pattern the user has said they know about does not come back.
-  const { data: activeInsights } = await supabase
-    .from("user_insights")
-    .select("id, detector, module_slug, headline, detail, evidence, sample_size")
-    .eq("user_id", user.id)
-    .is("dismissed_at", null)
-    .order("created_at", { ascending: false })
-    .limit(3);
+  const now = Date.now();
+  const oneDayAgoMs = now - 24 * 60 * 60 * 1000;
+  const sevenDaysAgoMs = now - 7 * 24 * 60 * 60 * 1000;
+  const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const fourteenDaysAgo = new Date(now - 14 * 24 * 60 * 60 * 1000).toISOString();
 
   // Real account age (auth user's own created_at, not a separate stored
   // field) — 3 days is a threshold, not a stored flag, so it just
@@ -113,20 +109,6 @@ export default async function OverviewPage() {
   const accountAgeMs = Date.now() - new Date(user.created_at).getTime();
   const showBetaFeedbackBanner = isBetaTester(user) && accountAgeMs >= 3 * 24 * 60 * 60 * 1000;
   const betaFeedbackUrl = process.env.BETA_FEEDBACK_URL || "mailto:feedback@ionexa.ai";
-
-  // "Expires soon" banner — only in the final 3 days of an active beta
-  // window (0 already-expired accounts fall back to Free elsewhere and
-  // have nothing to warn about here). getBetaDaysRemaining reads the real
-  // beta_expires_at, so this stays correct without any manual upkeep.
-  const betaDaysRemaining = isBetaTester(user) ? await getBetaDaysRemaining(user.id) : null;
-  const showBetaExpiryBanner =
-    betaDaysRemaining !== null && betaDaysRemaining > 0 && betaDaysRemaining <= 3;
-
-  const now = Date.now();
-  const oneDayAgoMs = now - 24 * 60 * 60 * 1000;
-  const sevenDaysAgoMs = now - 7 * 24 * 60 * 60 * 1000;
-  const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const fourteenDaysAgo = new Date(now - 14 * 24 * 60 * 60 * 1000).toISOString();
 
   type ModuleSummary = {
     module: (typeof CLASSIFIER_MODULES)[number];
@@ -146,38 +128,44 @@ export default async function OverviewPage() {
   // crashing the render for every other module too. The two queries below
   // are also caught individually (not as a pair) so a Runtime Log failure
   // names the exact query that failed, not just "something in this module".
-  const summaries: ModuleSummary[] = await Promise.all(
+  const loadSummaries = (): Promise<ModuleSummary[]> =>
+    Promise.all(
     CLASSIFIER_MODULES.map(async (module): Promise<ModuleSummary> => {
       const base = { module, href: moduleHref(module.slug) };
 
+      // TOGETHER, not one after the other. These two reads do not depend on
+      // each other and never did; awaiting them in sequence made every
+      // module cost two round trips instead of one, and there are fourteen
+      // modules. Each is still caught on its own, so one table erroring
+      // still leaves the other's answer usable — that property is what the
+      // separate try/catch blocks below preserve.
       let count = 0;
       let rows: ModuleRecord[] = [];
-      try {
-        const recentRowsResult = await supabase
+      let last30DaysMs: number[] = [];
+      const [recentRowsSettled, last30DaysSettled] = await Promise.allSettled([
+        supabase
           .from(module.table)
           .select("*", { count: "exact" })
           .order("created_at", { ascending: false })
-          .limit(5);
-        count = recentRowsResult.count ?? 0;
-        rows = (recentRowsResult.data as ModuleRecord[] | null) ?? [];
-      } catch (err) {
-        logApiError("/dashboard/overview", err, {
+          .limit(5),
+        supabase.from(module.table).select("created_at").gte("created_at", thirtyDaysAgo),
+      ]);
+      if (recentRowsSettled.status === "fulfilled") {
+        count = recentRowsSettled.value.count ?? 0;
+        rows = (recentRowsSettled.value.data as ModuleRecord[] | null) ?? [];
+      } else {
+        logApiError("/dashboard/overview", recentRowsSettled.reason, {
           stage: "recent_rows_query",
           moduleSlug: module.slug,
           table: module.table,
         });
       }
-
-      let last30DaysMs: number[] = [];
-      try {
-        const last30DaysResult = await supabase
-          .from(module.table)
-          .select("created_at")
-          .gte("created_at", thirtyDaysAgo);
-        const last30DaysTimestamps = (last30DaysResult.data as { created_at: string }[] | null) ?? [];
+      if (last30DaysSettled.status === "fulfilled") {
+        const last30DaysTimestamps =
+          (last30DaysSettled.value.data as { created_at: string }[] | null) ?? [];
         last30DaysMs = last30DaysTimestamps.map((r) => new Date(r.created_at).getTime());
-      } catch (err) {
-        logApiError("/dashboard/overview", err, {
+      } else {
+        logApiError("/dashboard/overview", last30DaysSettled.reason, {
           stage: "last_30_days_query",
           moduleSlug: module.slug,
           table: module.table,
@@ -195,6 +183,54 @@ export default async function OverviewPage() {
       };
     })
   );
+
+  // ------------------------------------------------------------------
+  // ONE WAVE, NOT A QUEUE.
+  //
+  // Everything below was awaited one statement at a time: insights, then
+  // the beta window, then fourteen modules, then the active mission, then
+  // the missions touched recently, then the energy check-in. None of them
+  // needs any of the others — the queue was an accident of the order the
+  // features were written in, and it cost the user one database round trip
+  // per line on every visit to Home.
+  //
+  // The onboarding read above deliberately stays where it is: it decides
+  // whether this page renders at all, and doing this work first for an
+  // account that is about to be redirected would be work nobody sees.
+  // ------------------------------------------------------------------
+  const [
+    activeInsightsResult,
+    betaDaysRemaining,
+    summaries,
+    activeMissionResult,
+    recentMissionResult,
+    latestEnergyCheckIn,
+  ] = await Promise.all([
+    supabase
+      .from("user_insights")
+      .select("id, detector, module_slug, headline, detail, evidence, sample_size")
+      .eq("user_id", user.id)
+      .is("dismissed_at", null)
+      .order("created_at", { ascending: false })
+      .limit(3),
+    isBetaTester(user) ? getBetaDaysRemaining(user.id) : Promise.resolve(null),
+    loadSummaries(),
+    supabase
+      .from("ai_missions")
+      .select("*")
+      .in("status", ["planning", "in_progress"])
+      .order("created_at", { ascending: false })
+      .limit(1),
+    supabase.from("ai_missions").select("plan_steps").gte("updated_at", fourteenDaysAgo),
+    loadLatestEnergyCheckIn(supabase, user.id),
+  ]);
+  const activeInsights = activeInsightsResult.data;
+  // "Expires soon" banner — only in the final 3 days of an active beta
+  // window (already-expired accounts fall back to Free elsewhere and have
+  // nothing to warn about here). getBetaDaysRemaining reads the real
+  // beta_expires_at, so this stays correct without any manual upkeep.
+  const showBetaExpiryBanner =
+    betaDaysRemaining !== null && betaDaysRemaining > 0 && betaDaysRemaining <= 3;
 
   // Real daily-entry counts for the last 7 days, across every module —
   // powers the sparkline on the Total Entries / This Week stat cards
@@ -238,12 +274,7 @@ export default async function OverviewPage() {
   // "planning" or "in_progress" (see lib/mission-progress.ts). Reads the
   // exact same ai_missions data Mission Control itself uses; nothing here
   // mutates a mission or changes its status.
-  const { data: activeMissionRows, error: activeMissionError } = await supabase
-    .from("ai_missions")
-    .select("*")
-    .in("status", ["planning", "in_progress"])
-    .order("created_at", { ascending: false })
-    .limit(1);
+  const { data: activeMissionRows, error: activeMissionError } = activeMissionResult;
   if (activeMissionError) {
     logApiError("/dashboard/overview", activeMissionError, { stage: "active_mission_query" });
   }
@@ -278,10 +309,7 @@ export default async function OverviewPage() {
   // days" is the closest real signal available without a schema change.
   let missionStepsCompletedRecent = 0;
   try {
-    const { data: recentMissionRows, error: recentMissionError } = await supabase
-      .from("ai_missions")
-      .select("plan_steps")
-      .gte("updated_at", fourteenDaysAgo);
+    const { data: recentMissionRows, error: recentMissionError } = recentMissionResult;
     if (recentMissionError) {
       logApiError("/dashboard/overview", recentMissionError, { stage: "recent_mission_steps_query" });
     } else {
@@ -308,10 +336,6 @@ export default async function OverviewPage() {
     activeDaysThisWeek: weeklySparkline.filter((count) => count > 0).length,
   });
 
-  // "AI Life Context" — feeds lib/user-context.ts's getUserFullContext, so
-  // every AI-calling endpoint can reference the user's latest energy
-  // check-in. This widget is the only place a check-in gets created.
-  const latestEnergyCheckIn = await loadLatestEnergyCheckIn(supabase, user.id);
 
   const healthScoreRangeLabel =
     healthScore.label === "justStarting"

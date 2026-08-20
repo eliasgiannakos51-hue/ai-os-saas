@@ -142,7 +142,7 @@ for (const a of archetypes) {
 // than differently worded. Each definition must set all of them.
 const AXES = [
   ["FIRST", /FIRST:/],
-  ["ORDER", /ORDER:/],
+  ["ORDER", /ORDER [ABC]:/],
   ["TYPE", /TYPE:/],
   ["IMAGES", /IMAGES:/],
   ["NEVER", /NEVER:/],
@@ -159,6 +159,16 @@ for (const def of definitions) {
   for (const [axis, re] of AXES) {
     check(`${name}: states ${axis}`, re.test(def), def.slice(0, 160));
   }
+  // THREE orders, not one. One order per archetype is what made two
+  // tavernas the same page: the shape fixed the sections AND their
+  // sequence, so the per-site draw had nothing structural left to vary.
+  const orders = [...def.matchAll(/ORDER ([ABC]):\s*([^\n]+)/g)].map((m) => [m[1], m[2].trim()]);
+  check(`${name}: offers all three orders (${orders.map(([l]) => l).join("") || "none"})`, orders.length === 3);
+  check(
+    `${name}: and its three orders are three different lists`,
+    orders.length === 3 && new Set(orders.map(([, list]) => list)).size === 3,
+    JSON.stringify(orders.map(([, l]) => l))
+  );
 }
 
 console.log("\n== 5. the archetypes are actually different from each other ==");
@@ -166,6 +176,14 @@ console.log("\n== 5. the archetypes are actually different from each other ==");
 // thing in different words, which would produce six identical pages and
 // six confident declarations.
 function axisValue(def, axis) {
+  // ORDER is three lines per archetype now; the axis VALUE is all three
+  // taken together, so "distinct across archetypes" still means what it
+  // meant — no two archetypes propose the same set of page orders.
+  if (axis === "ORDER") {
+    return [...def.matchAll(/ORDER [ABC]:\s*([^\n]+)/g)]
+      .map((m) => m[1].toLowerCase().trim())
+      .join(" | ");
+  }
   return (def.match(new RegExp(`${axis}:\\s*([^\\n]+)`))?.[1] ?? "").toLowerCase().trim();
 }
 for (const [axis] of AXES) {

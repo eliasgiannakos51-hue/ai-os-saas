@@ -858,7 +858,12 @@
       "title": "Alles Erstellen",
       "subtitle": "Beschreibe irgendetwas — eine Produktidee, einen Trade, das Feedback eines Nutzers, eine Kennzahl — und es landet automatisch im richtigen Modul.",
       "loggedTo": "Erfasst in:",
-      "viewModule": "{module} öffnen →"
+      "viewModule": "{module} öffnen →",
+      "answeredNotFiled": "Das war eine Frage — es wurde nichts abgelegt.",
+      "continueInChat": "Im Chat fortfahren",
+      "looksLikeQuestion": "Das sieht nach einer Frage aus. Soll ich sie beantworten oder ablegen?",
+      "answerItInstead": "Beantworten",
+      "recordItAnyway": "Trotzdem ablegen"
     },
     "timeline": {
       "title": "Verlauf",
@@ -944,7 +949,21 @@
         "title": "Ein Ziel, in Schritte zerlegt",
         "why": "Sag, was du erreichen willst — daraus wird ein Plan mit datierten Schritten zum Abhaken, keine Wunschliste.",
         "example": "Die ersten 10 zahlenden Kunden gewinnen"
-      }
+      },
+      "deleteMission": "Mission löschen",
+      "deleteConfirmMission": "Mission „{goal}“ löschen?",
+      "deleteConfirmLoses": "Damit verschwinden {steps} Schritt(e) — {completed} davon abgeschlossen — und {scheduled} geplante Ausführung(en). Das lässt sich nicht rückgängig machen.",
+      "deletedMission": "Mission gelöscht",
+      "deleteFailed": "Die Mission konnte nicht gelöscht werden.",
+      "deleteStep": "Schritt löschen",
+      "editStep": "Schritt bearbeiten",
+      "saveStep": "Speichern",
+      "cancelStepEdit": "Abbrechen",
+      "moveStepUp": "Nach oben",
+      "moveStepDown": "Nach unten",
+      "stepDeleted": "Schritt gelöscht",
+      "undoWithSeconds": "Rückgängig ({seconds})",
+      "stepChangeFailed": "Der Schritt konnte nicht geändert werden."
     },
     "reflection": {
       "title": "Wöchentliche Reflexion",
@@ -1058,6 +1077,15 @@
       "previewIncompleteBody": "Diese generierte Seite wirkt unvollständig oder wurde abgeschnitten und kann daher nicht sicher angezeigt werden. Versuche es mit einer kürzeren Beschreibung erneut oder bearbeite sie noch einmal.",
       "unfilledTitle": "{count} Angabe(n) müssen noch ergänzt werden",
       "unfilledBody": "Die KI erfindet nie eine Telefonnummer, einen Preis oder Öffnungszeiten — sie lässt eine sichtbare Lücke. Nutze „Änderung anfragen“, um sie zu ergänzen, oder bearbeite sie nach der Veröffentlichung.",
+      "inventedTitle": "{count} Zahl(en) auf der Seite, die Sie nie angegeben haben",
+      "inventedBody": "Diese stehen auf der Seite, aber nicht in Ihrer Beschreibung. Die KI darf niemals eine Telefonnummer, einen Preis, eine Öffnungszeit oder eine Kennzahl erfinden — prüfen Sie jede vor der Veröffentlichung und korrigieren Sie sie über „Änderung anfragen“.",
+      "inventedKind": {
+        "phone": "Telefon",
+        "price": "Preis",
+        "time": "Uhrzeit",
+        "address": "Adresse",
+        "stat": "Zahl"
+      },
       "imageLabel": "Referenzbilder ({count}/{max}, optional)",
       "imageHelp": "Bis zu {max} Bilder — dein Logo, Produktfotos oder eine Stilreferenz. JPG oder PNG, je bis 5MB. Standardmäßig werden sie in die Website eingebettet; unten kannst du sie auf reine Stil-Inspiration umstellen.",
       "imageRemove": "Bild entfernen",

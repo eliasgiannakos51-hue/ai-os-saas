@@ -27,7 +27,9 @@ import { createHash } from "node:crypto";
 //     <script src="//evil"> is blocked by the browser even if it somehow
 //     survived the static scan.
 //   img-src allows data: and https: because generated pages use inline
-//     SVGs and real photos from Unsplash/picsum.
+//     SVGs and real photos from Unsplash. (There is no picsum fallback any
+//     more — an unresolved photo placeholder has its <img> removed rather
+//     than filled with a random image; see lib/website-image-resolver.ts.)
 //   frame-src is the same allowlist the static scan enforces (maps,
 //     video), so the two cannot disagree.
 //   form-action is restricted to self, so a page cannot POST a visitor's

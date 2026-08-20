@@ -74,8 +74,18 @@ check(`hero and motion combine freely (${combos.size} combos in 60 draws, >= 12)
 
 console.log("\n== 5. the directive says who wins ==");
 const text = variationDirective(a);
-check("it carries all five axes", ["HERO:", "LAYOUT GRID:", "SECTION RHYTHM:", "TYPE SCALE:", "MOTION VOCABULARY:"].every((k) => text.includes(k)));
-check("it beats the shape's default order", /THESE win/.test(text));
+check(
+  "it carries all six axes",
+  ["SECTION ORDER:", "HERO:", "LAYOUT GRID:", "SECTION RHYTHM:", "TYPE SCALE:", "MOTION VOCABULARY:"].every((k) =>
+    text.includes(k)
+  )
+);
+// THE STRUCTURAL AXIS. Five composition axes were not enough — "same
+// template" was reported a fifth time, because every archetype hard-coded
+// ONE section order, so two cafés were both instructed into the same
+// skeleton and only their surface differed.
+check("the section order is named as non-negotiable", /not negotiable/.test(text));
+check("and it says why: two of a kind in one order IS the defect", /same template. defect/.test(text));
 check("the shape's NEVER list still stands", /NEVER list still stands/.test(text));
 check("the user's brief beats everything", /the brief beats everything/.test(text));
 
@@ -94,10 +104,31 @@ check(
   "the builder puts the draw in the USER message, brief still last",
   /variationText\?\.trim\(\) \?\? "",\s*buildUserBriefBlock\(description\)/.test(builder)
 );
-check(
-  "the cached system prompt stays variation-free (cache must keep hitting)",
-  !/variation/i.test(builder.slice(0, builder.indexOf("const SYSTEM_PROMPT")))
-);
+// THE REAL PROPERTY, not a word search. The old check looked for the
+// string "variation" anywhere above SYSTEM_PROMPT, which a static
+// sentence mentioning the directive trips without changing anything that
+// matters. What matters is that the CACHED block is built from a
+// module-level constant and never from the per-call draw — so that is
+// what is measured, from the function that assembles it.
+{
+  const fn = builder.slice(builder.indexOf("function buildGenerateSystemBlocks"));
+  const body = fn.slice(0, fn.indexOf("\n}"));
+  const cachedLines = body.split("\n").filter((l) => l.includes("cache_control"));
+  check(`there really is a cached block (${cachedLines.length})`, cachedLines.length >= 1);
+  check(
+    "every cached block is a bare module constant, not a per-call value",
+    cachedLines.every((l) => /text: [A-Z_]+,/.test(l))
+  );
+  check(
+    "the per-call draw is not in the system blocks at all",
+    !/variationText|variationDirective/.test(body)
+  );
+  // ...and it really does reach the model, in the user message.
+  check(
+    "it rides in the user message instead",
+    /variationText\?\.trim\(\) \?\? ""/.test(builder)
+  );
+}
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

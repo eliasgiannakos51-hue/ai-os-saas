@@ -286,5 +286,87 @@ ok(
 ok("no accent token is declared as a bare var() colour",
   !/(textColor|borderColor):\s*\{[\s\S]{0,600}?:\s*"var\(--accent/.test(config));
 
+// =====================================================================
+console.log("\n== The focus ring (WCAG 1.4.11 — 3:1, keyboard users) ==");
+// This one failed in BOTH themes, not just light: the ring was
+// `0 0 0 1px rgba(249,115,22,0.45)`, which composites to 1.6:1 on the
+// white panel and 2.23:1 on the dark one. It is asserted composited,
+// because a 45% ring is not its token.
+const focusRule = css.match(/\.focus-glow:focus,\s*\n\.focus-glow:focus-within \{([\s\S]*?)\n\}/);
+ok("the focus rule exists", Boolean(focusRule));
+ok(
+  "the focus ring is a SOLID token, not a translucent orange",
+  /box-shadow:\s*0 0 0 2px rgb\(var\(--accent-border\)\)/.test(focusRule?.[1] ?? ""),
+  "a focus indicator drawn at partial alpha cannot reach 3:1 on white"
+);
+for (const theme of ["light", "dark"]) {
+  const ink = varOf(theme === "light" ? LIGHT : DARK, "accent-border");
+  for (const [surfaceName, surface] of Object.entries(surfaces[theme])) {
+    const v = c.checkContrast(ink, surface, c.WCAG_UI_MIN);
+    ok(`focus ring on ${theme} ${surfaceName} — ${v.ratio}:1`, v.passes);
+  }
+}
+// The old value, kept as an explicit regression guard: if anyone restores
+// a 45%-alpha ring, this says why it is wrong rather than just going red.
+const oldRing = c.compositeOver("#f97316", 0.45, "#ffffff");
+ok(
+  `the previous 45% ring really was too faint — ${c.checkContrast(oldRing, "#ffffff", 3).ratio}:1 on white`,
+  !c.checkContrast(oldRing, "#ffffff", c.WCAG_UI_MIN).passes
+);
+
+// =====================================================================
+console.log("\n== Every coloured glow has a light-theme answer ==");
+// THE COMPLETENESS GUARD, and the reason this section exists at all.
+//
+// Ten rules carried a wide orange glow and not one had a light override —
+// including `.glass-card:hover`, whose resting state DID have one. Fixing
+// the ten by hand fixes today; this makes the eleventh impossible to add
+// silently, which is the failure that produced the report.
+const GLOW = /(249,\s*115,\s*22|251,\s*191,\s*36|245,\s*158,\s*11)/;
+// Declarations are JOINED to their continuation lines first. A
+// box-shadow routinely wraps, and scanning line-by-line missed any glow
+// whose colour sat on the second line — `.focus-glow:focus-within` hid
+// there exactly, so the first version of this scanner reported nine
+// glows where there were ten.
+const lines = [];
+for (const raw of css.split("\n")) {
+  const prev = lines[lines.length - 1];
+  if (prev !== undefined && /:\s*[^;{}]*$/.test(prev) && !/[{}]/.test(raw)) {
+    lines[lines.length - 1] = `${prev} ${raw.trim()}`;
+  } else {
+    lines.push(raw);
+  }
+}
+let currentSelector = null;
+let inLight = false;
+const glowingSelectors = new Set();
+const lightOverridden = new Set();
+for (const line of lines) {
+  const sel = line.match(/^([^\s@/].*?)\s*\{\s*$/);
+  if (sel) {
+    currentSelector = sel[1];
+    inLight = currentSelector.includes('[data-theme="light"]');
+  }
+  if (!currentSelector) continue;
+  if (/box-shadow|animation-name/.test(line)) {
+    // Normalise to the bare selector so a light override matches its
+    // dark original: `[data-theme="light"] .card-lift:hover` -> `.card-lift:hover`.
+    const bare = currentSelector.replace(/\[data-theme="light"\]\s*/g, "").trim();
+    if (inLight) lightOverridden.add(bare);
+    else if (GLOW.test(line)) glowingSelectors.add(bare);
+  }
+}
+ok("glow-bearing rules were actually found (the scanner works)", glowingSelectors.size >= 10,
+  `only found ${glowingSelectors.size}`);
+for (const sel of [...glowingSelectors].sort()) {
+  // A keyframe body is overridden by re-pointing animation-name, so the
+  // owning class counts as covered.
+  const covered =
+    lightOverridden.has(sel) ||
+    [...lightOverridden].some((o) => o.split(",")[0].trim() === sel.split(",")[0].trim());
+  ok(`${sel} has a light-theme override`, covered,
+    `this rule paints a coloured glow and light mode inherits it unchanged`);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

@@ -1081,5 +1081,188 @@ for (const file of sourceFiles) {
   check(`${file.split("/").pop()} reads the channel variables through rgb()`, bare, []);
 }
 
+// ---------------------------------------------------------------------
+// THE TWO HALVES OF THE LIGHT THEME, MERGED RATHER THAN CHOSEN.
+//
+// Everything above came from the pass that fixed the COLOUR: tokens
+// declared in channel form so Tailwind can apply an alpha to them.
+// Everything below came from the pass that fixed the ELEVATION: the
+// coloured glows that read as a smudge on white, and a focus ring that
+// turned out to fail in both themes. They were written against the same
+// file at the same time and git could not join them, because both ended
+// inside an unclosed `for` loop that shared one closing brace.
+//
+// Neither side was weakened to make them fit. Both scanners run.
+// =====================================================================
+console.log("\n== The .focus-glow ring (WCAG 1.4.11 — 3:1, keyboard users) ==");
+// This one failed in BOTH themes, not just light: the ring was
+// `0 0 0 1px rgba(249,115,22,0.45)`, which composites to 1.6:1 on the
+// white panel and 2.23:1 on the dark one. It is asserted composited,
+// because a 45% ring is not its token.
+const focusGlowRule = css.match(/\.focus-glow:focus,\s*\n\.focus-glow:focus-within \{([\s\S]*?)\n\}/);
+// A SECOND MECHANISM, NOT A SECOND COPY. The section far above checks
+// `:focus-visible { outline: ... }`. This checks `.focus-glow`, which
+// draws its ring as a box-shadow on specific components. They collided
+// in the merge only on the variable name; both rules exist in
+// globals.css and both can fail independently, so both are asserted.
+ok("the .focus-glow rule exists", Boolean(focusGlowRule));
+ok(
+  "the focus ring is a SOLID token, not a translucent orange",
+  /box-shadow:\s*0 0 0 2px rgb\(var\(--accent-border\)\)/.test(focusGlowRule?.[1] ?? ""),
+  "a focus indicator drawn at partial alpha cannot reach 3:1 on white"
+);
+for (const theme of ["light", "dark"]) {
+  const ink = varOf(theme === "light" ? LIGHT : DARK, "accent-border");
+  for (const [surfaceName, surface] of Object.entries(surfaces[theme])) {
+    const v = c.checkContrast(ink, surface, c.WCAG_UI_MIN);
+    ok(`.focus-glow ring on ${theme} ${surfaceName} — ${v.ratio}:1`, v.passes);
+  }
+}
+// The old value, kept as an explicit regression guard: if anyone restores
+// a 45%-alpha ring, this says why it is wrong rather than just going red.
+const oldRing = c.compositeOver("#f97316", 0.45, "#ffffff");
+ok(
+  `the previous 45% ring really was too faint — ${c.checkContrast(oldRing, "#ffffff", 3).ratio}:1 on white`,
+  !c.checkContrast(oldRing, "#ffffff", c.WCAG_UI_MIN).passes
+);
+
+// =====================================================================
+console.log("\n== Every coloured glow has a light-theme answer ==");
+// THE COMPLETENESS GUARD, and the reason this section exists at all.
+//
+// Ten rules carried a wide orange glow and not one had a light override —
+// including `.glass-card:hover`, whose resting state DID have one. Fixing
+// the ten by hand fixes today; this makes the eleventh impossible to add
+// silently, which is the failure that produced the report.
+const GLOW = /(249,\s*115,\s*22|251,\s*191,\s*36|245,\s*158,\s*11)/;
+// Declarations are JOINED to their continuation lines first. A
+// box-shadow routinely wraps, and scanning line-by-line missed any glow
+// whose colour sat on the second line — `.focus-glow:focus-within` hid
+// there exactly, so the first version of this scanner reported nine
+// glows where there were ten.
+const lines = [];
+for (const raw of css.split("\n")) {
+  const prev = lines[lines.length - 1];
+  if (prev !== undefined && /:\s*[^;{}]*$/.test(prev) && !/[{}]/.test(raw)) {
+    lines[lines.length - 1] = `${prev} ${raw.trim()}`;
+  } else {
+    lines.push(raw);
+  }
+}
+// THE SCANNER FOLLOWS VARIABLES, and it did not until this merge exposed
+// why it must.
+//
+// `.cta-amber` used to say `box-shadow: 0 4px 18px -4px rgba(249,115,22,.45)`
+// and the scanner saw it. On the trunk it says `box-shadow: var(--cta-glow-rest)`
+// — the same glow, one level of indirection away — and the scanner went
+// blind to it. The count dropped from ten to nine and the "the scanner
+// works" guard is what caught it.
+//
+// The threshold was NOT lowered to nine. Moving a colour behind a
+// variable must not be a way out of this check, or the guard is worth
+// nothing: six box-shadow declarations in globals.css already resolve
+// through var(), and every one of them was invisible.
+//
+// So box-shadow values are resolved to their variables' DARK definitions
+// before the glow test runs.
+//
+// A SECOND MECHANISM WAS WRITTEN HERE AND REMOVED, and the reason is
+// recorded so it is not re-added on a hunch. It treated a variable
+// redefined inside a light block as a light answer for every rule
+// reading it. Measured: nothing in globals.css needs that. Every
+// consumer of --cta-glow-rest/peak/hover already carries its own
+// selector-level light override (`[data-theme="light"] .cta-amber` sets
+// box-shadow directly, and the keyframe pair is answered by re-pointing
+// `animation`), so the light values of those three variables are never
+// what covers anything. Deleting that code path left the suite green on
+// every assertion — the definition of a line no test can defend.
+const darkVarValue = new Map();
+{
+  let inLightBlock = false;
+  let depth = 0;
+  for (const line of lines) {
+    const sel = line.match(/^([^\s@/].*?)\s*\{\s*$/);
+    if (sel) {
+      if (depth === 0) inLightBlock = sel[1].includes('[data-theme="light"]');
+      depth += 1;
+    } else if (/^\s*\}/.test(line)) {
+      depth = Math.max(0, depth - 1);
+      if (depth === 0) inLightBlock = false;
+    }
+    const decl = line.match(/^\s*(--[a-z0-9-]+):\s*(.+?);?\s*$/i);
+    if (!decl) continue;
+    // The DARK definition is what a rule resolves to unless a light
+    // block overrides the rule itself, so light redefinitions are skipped
+    // rather than recorded.
+    if (!inLightBlock && !darkVarValue.has(decl[1])) darkVarValue.set(decl[1], decl[2]);
+  }
+}
+// One hop is enough for this file and a cycle would hang the suite, so
+// the expansion is bounded rather than recursive-until-fixed-point.
+const expand = (value) => {
+  let out = value;
+  for (let hop = 0; hop < 4 && /var\(--/.test(out); hop += 1) {
+    out = out.replace(/var\((--[a-z0-9-]+)\)/gi, (whole, name) => darkVarValue.get(name) ?? whole);
+  }
+  return out;
+};
+
+let currentSelector = null;
+let inLight = false;
+const glowingSelectors = new Set();
+const lightOverridden = new Set();
+const lightGlowOffenders = new Set();
+for (const line of lines) {
+  const sel = line.match(/^([^\s@/].*?)\s*\{\s*$/);
+  if (sel) {
+    currentSelector = sel[1];
+    inLight = currentSelector.includes('[data-theme="light"]');
+  }
+  if (!currentSelector) continue;
+  if (/box-shadow|animation-name/.test(line)) {
+    // Normalise to the bare selector so a light override matches its
+    // dark original: `[data-theme="light"] .card-lift:hover` -> `.card-lift:hover`.
+    const bare = currentSelector.replace(/\[data-theme="light"\]\s*/g, "").trim();
+    const resolved = expand(line);
+    if (inLight) {
+      lightOverridden.add(bare);
+      // AND WHAT THE OVERRIDE ACTUALLY SAYS. Existence was the only thing
+      // checked here, which let a light rule re-state the very glow it
+      // exists to replace: putting `0 4px 18px -4px rgba(249,115,22,.45)`
+      // back into `[data-theme="light"] .cta-amber` kept every assertion
+      // green, because the rule was still there. Presence is not an
+      // answer; the value is.
+      if (GLOW.test(resolved)) lightGlowOffenders.add(`${bare} -> ${line.trim()}`);
+    } else if (GLOW.test(resolved)) {
+      glowingSelectors.add(bare);
+    }
+  }
+}
+// The count is a floor on the SCANNER, not on the stylesheet: it fails
+// if the scanner stops seeing what it used to see. Ten is what globals.css
+// carried when this guard was written, and `.cta-amber` returning to the
+// list is what proves following variables works.
+check(
+  "no light-theme rule paints a coloured glow of its own",
+  [...lightGlowOffenders].sort(),
+  []
+);
+ok("glow-bearing rules were actually found (the scanner works)", glowingSelectors.size >= 10,
+  `only found ${glowingSelectors.size}`);
+ok(
+  "and glows reached through a variable are seen (.cta-amber resolves through --cta-glow-rest)",
+  glowingSelectors.has(".cta-amber"),
+  "the scanner stopped following var(), so any glow can hide one hop away"
+);
+for (const sel of [...glowingSelectors].sort()) {
+  // A keyframe body is overridden by re-pointing animation-name, so the
+  // owning class counts as covered.
+  const covered =
+    lightOverridden.has(sel) ||
+    [...lightOverridden].some((o) => o.split(",")[0].trim() === sel.split(",")[0].trim());
+  ok(`${sel} has a light-theme override`, covered,
+    `this rule paints a coloured glow and light mode inherits it unchanged`);
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

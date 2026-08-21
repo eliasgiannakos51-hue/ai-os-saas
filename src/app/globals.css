@@ -1494,9 +1494,24 @@ input:-webkit-autofill:focus {
 .focus-glow {
   transition: box-shadow 240ms ease-out, border-color 240ms ease-out;
 }
+/* THE RING IS SOLID AND 2px, and that is an accessibility fix rather
+   than a style change.
+   
+   It used to be `0 0 0 1px rgba(249, 115, 22, 0.45)`. A focus indicator
+   is non-text UI under WCAG 1.4.11 and needs 3:1 against what it sits on;
+   composited, that 45% orange measured 1.6:1 on the white panel and
+   2.23:1 on the dark one. It failed in BOTH themes — this was never only
+   a light-theme problem, and the default theme is the dark one.
+   
+   `rgb(var(--accent-border))` at full opacity is the token
+   scripts/tests/light-theme-contrast.test.mjs already proves clears 3:1
+   against both surfaces in both themes, so the ring inherits that proof
+   instead of introducing a fourth hand-picked orange. The soft outer
+   halo stays in dark only (see the light override below) — it is
+   decoration sitting outside the ring that carries the meaning. */
 .focus-glow:focus,
 .focus-glow:focus-within {
-  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.45),
+  box-shadow: 0 0 0 2px rgb(var(--accent-border)),
     0 0 22px -4px rgba(249, 115, 22, 0.45);
 }
 
@@ -1746,3 +1761,123 @@ html[data-motion="reduce"] .ionexa-globe.is-spinning .globe-orbit-group {
   filter: none;
 }
 /* END GlobeMark */
+
+/* =====================================================================
+   LIGHT THEME — SHADOWS AND GLOWS
+   =====================================================================
+   
+   "Στο άσπρο θέμα το glow είναι μουτζούρα." It is, and the reason is
+   structural rather than a matter of taste.
+   
+   Every elevation effect in this file is a COLOURED GLOW: a wide, soft
+   orange spread (`0 18px 44px -12px rgba(249,115,22,.65)` and friends).
+   On #0a0a0a that reads as light emitted by the element. On #ffffff
+   there is no darkness for it to emit into, so the same shadow lands as
+   a flat orange haze around the card — a smudge, not an elevation.
+   
+   Measured, ten separate rules carried an orange glow and not one of
+   them had a light-theme override; `.glass-card` had one for its resting
+   state but not for `:hover`, which is where its largest glow lives.
+   
+   THE SUBSTITUTION, per the brief: thin shadows + borders.
+     - Elevation becomes a NEUTRAL dark shadow at low alpha with a small
+       blur and a real offset — the only thing that reads as depth on a
+       light ground.
+     - Identity moves to the BORDER, which is where an accent belongs on
+       white: a 1px accent edge is legible where a 40px accent haze is
+       not.
+   
+   The accent used here is `--accent-border`, the same token the contrast
+   test already proves clears 3:1 on both light surfaces. Nothing in this
+   section invents a colour.
+   
+   Dark is untouched: every rule below is scoped to [data-theme="light"].
+   ===================================================================== */
+
+[data-theme="light"] {
+  /* Neutral elevation, slate-tinted rather than pure black — pure black
+     shadows on white read as grey dirt, a faint blue-grey reads as depth. */
+  --elev-1: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.1);
+  --elev-2: 0 2px 4px rgba(15, 23, 42, 0.06), 0 6px 16px -6px rgba(15, 23, 42, 0.14);
+  --elev-3: 0 4px 8px rgba(15, 23, 42, 0.06), 0 12px 28px -10px rgba(15, 23, 42, 0.18);
+}
+
+/* Card hover: a 1px accent edge plus real elevation, instead of a 44px
+   orange spread. */
+[data-theme="light"] .card-lift:hover {
+  border-color: rgb(var(--accent-border));
+  box-shadow: 0 0 0 1px rgb(var(--accent-border)), var(--elev-2);
+}
+
+/* The primary CTA keeps its gradient fill — that is the brand, and it is
+   legible on white. Only the halo around it changes. The pulse is
+   re-pointed at a light keyframe rather than switched off: losing the
+   idle attention cue in one theme would make the two themes behave
+   differently, not just look different. */
+[data-theme="light"] .cta-amber {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1), 0 4px 10px -3px rgba(194, 65, 12, 0.3);
+  animation: cta-pulse-light 2.8s ease-in-out infinite;
+}
+@keyframes cta-pulse-light {
+  0%,
+  100% {
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1), 0 4px 10px -3px rgba(194, 65, 12, 0.3);
+  }
+  50% {
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1), 0 6px 16px -3px rgba(194, 65, 12, 0.45);
+  }
+}
+[data-theme="light"] .cta-amber:hover:not(:disabled) {
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.12), 0 8px 20px -6px rgba(194, 65, 12, 0.4);
+  /* brightness(1.06) on an already-light gradient washes it out; on white
+     the readable direction is very slightly darker, not brighter. */
+  filter: brightness(0.97);
+}
+
+[data-theme="light"] .glass-card:hover {
+  box-shadow: 0 0 0 1px rgb(var(--accent-border) / 0.5), var(--elev-3);
+}
+
+/* The composer. Its animated gradient border is the identity and stays;
+   the 46px + 70px twin haloes underneath it do not survive on white. */
+[data-theme="light"] .prompt-glow {
+  box-shadow: var(--elev-1);
+}
+[data-theme="light"] .prompt-glow[data-active="true"] {
+  box-shadow: var(--elev-2);
+}
+
+/* Active nav row: a solid accent rail and a flat tint, no bloom. */
+[data-theme="light"] .nav-item::before {
+  background: rgb(var(--accent-border) / 0.1);
+  box-shadow: inset 0 0 0 1px rgb(var(--accent-border) / 0.35);
+}
+[data-theme="light"] .nav-item::after {
+  background: rgb(var(--accent-border));
+  box-shadow: none;
+}
+
+/* Focus: the 2px solid ring (set above, theme-aware and proven >=3:1)
+   carries the whole indicator here. The outer halo is dropped — on white
+   it blurs the edge of the very thing that has to be crisp. */
+[data-theme="light"] .focus-glow:focus,
+[data-theme="light"] .focus-glow:focus-within {
+  box-shadow: 0 0 0 2px rgb(var(--accent-border));
+}
+
+/* One-shot success flash. Kept as a ring that contracts, with no spread
+   bloom — the motion is the signal. */
+[data-theme="light"] .celebration-ring {
+  animation-name: celebration-ring-light;
+}
+@keyframes celebration-ring-light {
+  0% {
+    box-shadow: 0 0 0 0 rgb(var(--accent-amber-border) / 0.7);
+  }
+  40% {
+    box-shadow: 0 0 0 6px rgb(var(--accent-amber-border) / 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgb(var(--accent-amber-border) / 0);
+  }
+}

@@ -121,9 +121,40 @@ check("shorthand hex expands", c.toHex(c.parseColor("#fff")), "#ffffff");
 
 // =====================================================================
 console.log("\n== The surfaces each theme paints on ==");
+// EVERY SURFACE THE APP PAINTS, not two of them.
+//
+// This set used to be {panel, background}, under a comment two blocks
+// down that says "cross-product, not a sample". The surface list WAS the
+// sample: --panel-hover and --input-bg were missing, and both carry body
+// text — hover rows, recessed inputs, code blocks, kbd badges. What hid
+// there was not exotic. --muted measured 4.83:1 on the panel and 4.32:1
+// on --panel-hover, and text-amber-400's themed ink measured 5.02:1 on
+// white and 4.49:1 there. Both shipped as passing.
+//
+// --input-bg is a colour in light and rgba(0,0,0,0.4) in dark; the dark
+// one is composited over the panel it sits in before being used, because
+// a translucent surface is not a surface until you say what is behind it.
+function inputSurface(selector) {
+  const raw = varOf(selector, "input-bg");
+  const m = raw.match(/rgba?\(\s*(\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\s*\)/);
+  if (!m) return raw;
+  const behind = c.parseColor(varOf(selector, "panel"));
+  const a = +m[4];
+  return `${Math.round(+m[1] * a + behind.r * (1 - a))} ${Math.round(+m[2] * a + behind.g * (1 - a))} ${Math.round(+m[3] * a + behind.b * (1 - a))}`;
+}
 const surfaces = {
-  dark: { panel: varOf(DARK, "panel"), background: varOf(DARK, "background") },
-  light: { panel: varOf(LIGHT, "panel"), background: varOf(LIGHT, "background") },
+  dark: {
+    panel: varOf(DARK, "panel"),
+    background: varOf(DARK, "background"),
+    "panel-hover": varOf(DARK, "panel-hover"),
+    input: inputSurface(DARK),
+  },
+  light: {
+    panel: varOf(LIGHT, "panel"),
+    background: varOf(LIGHT, "background"),
+    "panel-hover": varOf(LIGHT, "panel-hover"),
+    input: inputSurface(LIGHT),
+  },
 };
 check("light panel is white", surfaces.light.panel, "#ffffff");
 check("light page background", surfaces.light.background, "#f7f7f8");
@@ -184,11 +215,71 @@ console.log("\n== The filled button: label against fill, not against page ==");
 // light enough for black text; a future "accessibility fix" that darkens
 // it to clear 3:1 against white would fail here, which is the point.
 const BUTTON_FILL = "#f97316"; // literal in tailwind.config — not themed
+
+// This used to read `backgroundColor must not mention orange at all`,
+// which is a proxy for the real rule and forbids more than the rule does:
+// `bg-orange-950/20` is a notice tint, carries no black label, and was
+// producing rgb(210,201,199) mud on white precisely BECAUSE it was left
+// unthemed. The rule is about the FILLED BUTTON, so state it about the
+// filled button — and about the shades a filled button can use, since
+// that is what a future edit would reach for.
+const bgBlock = (() => {
+  const at = config.indexOf("backgroundColor: {");
+  if (at < 0) return "";
+  let depth = 0;
+  for (let i = config.indexOf("{", at); i < config.length; i++) {
+    if (config[i] === "{") depth++;
+    else if (config[i] === "}") { depth--; if (!depth) return config.slice(at, i); }
+  }
+  return config.slice(at);
+})();
+const themedBgShades = [...bgBlock.matchAll(/(\d{2,3}):\s*"rgb\(var\(/g)].map((m) => Number(m[1]));
 ok(
-  "bg-orange-500 is NOT redefined per theme",
-  !/backgroundColor:\s*\{[\s\S]*?orange/.test(config),
-  "backgroundColor.orange was themed — the filled button's contrast is label-vs-fill and must not move"
+  "no filled-button shade is themed in backgroundColor",
+  !themedBgShades.some((sh) => sh >= 300 && sh <= 700),
+  `backgroundColor themes shade(s) ${themedBgShades.filter((sh) => sh >= 300 && sh <= 700).join(", ")} — ` +
+    "a filled button's contrast is label-vs-fill and must not move with the theme"
 );
+// Anything that IS themed there has to survive its own alpha modifiers,
+// which is the failure the light theme actually had. Checked against the
+// alphas written in src/, not against a guess at which ones exist.
+const INK_FOR_TINT = {
+  "accent-tint": "accent-text",
+  "accent-amber-tint": "accent-amber-text",
+  "success-tint": "success-text",
+  "danger-tint": "danger-text",
+};
+const { execSync: run } = await import("node:child_process");
+for (const [tintVar, inkVar] of Object.entries(INK_FOR_TINT)) {
+  const family = { "accent-tint": "orange", "accent-amber-tint": "amber", "success-tint": "emerald", "danger-tint": "red" }[tintVar];
+  // The alphas these fills are ACTUALLY written with. Guessing the set
+  // would test combinations nobody ships and miss the one that breaks.
+  const alphas = [
+    ...new Set(
+      run(`grep -rhoE "\\bbg-${family}-950/[0-9]{1,3}" src --include=*.ts --include=*.tsx | sort -u || true`, { encoding: "utf8" })
+        .split("\n").filter(Boolean).map((cls) => Number(cls.split("/")[1]) / 100)
+    ),
+  ];
+  if (!alphas.length) continue;
+  const tint = c.parseColor(varOf(LIGHT, tintVar));
+  const ink = varOf(LIGHT, inkVar);
+  for (const a of alphas.sort()) {
+    for (const [surfaceName, surface] of Object.entries(surfaces.light)) {
+      const base = c.parseColor(surface);
+      const composited = {
+        r: tint.r * a + base.r * (1 - a),
+        g: tint.g * a + base.g * (1 - a),
+        b: tint.b * a + base.b * (1 - a),
+      };
+      const v = c.checkContrast(ink, composited, c.WCAG_TEXT_MIN);
+      ok(
+        `bg-${family}-950/${Math.round(a * 100)} on light ${surfaceName}: its own ink reads ${v.ratio}:1`,
+        v.passes,
+        `${v.ratio}:1 is below ${v.required}:1 — the notice tint is too heavy for the ink it carries`
+      );
+    }
+  }
+}
 for (const label of ["#000000"]) {
   const v = c.checkContrast(label, BUTTON_FILL, c.WCAG_TEXT_MIN);
   ok(`black label on the orange fill — ${v.ratio}:1`, v.passes);
@@ -229,6 +320,7 @@ for (const dir of ["src"]) {
   void dir;
 }
 const { execSync } = await import("node:child_process");
+const run0 = execSync;
 const usedText = execSync(
   `grep -rhoE "\\btext-(orange|amber)-[0-9]{2,3}" src --include=*.ts --include=*.tsx | sort -u`,
   { encoding: "utf8" }
@@ -247,6 +339,87 @@ for (const cls of usedText) {
   ok(`${cls} is covered by a theme-aware token`, themedText.has(cls),
     `${cls} is used in the app but resolves to a fixed dark-theme value`);
 }
+
+// EVERY FAMILY, not the two the accent happened to use.
+//
+// The grep above is scoped to orange|amber, which is why twenty-six
+// module badge hues sat at 1.3-2.7:1 on light without anything noticing:
+// they were never looked at. Mutation testing confirmed the gap — a
+// module hue could be dropped back to its dark-only value and this suite
+// stayed green. Scoped to text- utilities on real colour families, and
+// every one must resolve through a token that globals.css themes.
+function themedTextVars() {
+  const at = config.indexOf("textColor: {");
+  let depth = 0, end = config.length;
+  for (let i = config.indexOf("{", at); i < config.length; i++) {
+    if (config[i] === "{") depth++;
+    else if (config[i] === "}") { depth--; if (!depth) { end = i; break; } }
+  }
+  const body = config.slice(at, end).replace(/\/\/[^\n]*/g, "");
+  const out = {};
+  let family = null;
+  for (const line of body.split("\n")) {
+    const fam = line.match(/^\s*([a-z]+):\s*\{/);
+    if (fam && fam[1] !== "textColor") family = fam[1];
+    for (const m of line.matchAll(/(\d{2,3}):\s*"rgb\(var\(--([a-z-]+)\)/g)) {
+      if (family) out[`text-${family}-${m[1]}`] = m[2];
+    }
+  }
+  return out;
+}
+const THEMED_TEXT_VARS = themedTextVars();
+// Greys are the theme tokens' own job (--foreground/--muted), and
+// text-white/text-black are not palette entries. Everything else is a hue
+// that has to answer for itself.
+const GREY_FAMILIES = new Set(["zinc", "neutral", "gray", "stone", "white", "black"]);
+const usedAnyText = run0(
+  `grep -rhoE "\\btext-[a-z]+-[0-9]{2,3}" src --include=*.ts --include=*.tsx | sort -u`,
+  { encoding: "utf8" }
+).split("\n").filter(Boolean);
+let familyChecked = 0;
+for (const cls of usedAnyText) {
+  const family = cls.split("-")[1];
+  if (GREY_FAMILIES.has(family)) continue;
+  familyChecked++;
+  const tokenName = THEMED_TEXT_VARS[cls];
+  ok(
+    `${cls} resolves through a themed token`,
+    Boolean(tokenName),
+    `${cls} is written in src/ but resolves to a fixed value, so one theme gets an ink chosen for the other`
+  );
+  if (!tokenName) continue;
+  for (const [themeName, selector] of [["light", LIGHT], ["dark", DARK]]) {
+    const ink = varOf(selector, tokenName);
+    for (const [surfaceName, surface] of Object.entries(surfaces[themeName])) {
+      const v = c.checkContrast(ink, surface, c.WCAG_TEXT_MIN);
+      ok(
+        `${cls} on ${themeName} ${surfaceName} — ${v.ratio}:1`,
+        v.passes,
+        `${v.ratio}:1 is below ${v.required}:1`
+      );
+    }
+  }
+}
+ok(`every non-grey text hue was checked (${familyChecked})`, familyChecked > 20,
+  "the family sweep matched almost nothing, which usually means the grep stopped matching");
+
+// ---- HOLE 3: the alpha-neutralising rules must exist and be complete.
+// Removing one of them left the suite green, because the inventory that
+// generated them is not what ships — globals.css is.
+const alphaClasses = run0(
+  `grep -rhoE "\\btext-(orange|amber|emerald|red|rose)-[0-9]{2,3}/[0-9]{1,3}" src --include=*.ts --include=*.tsx | sort -u`,
+  { encoding: "utf8" }
+).split("\n").filter(Boolean);
+for (const cls of alphaClasses) {
+  const escaped = cls.replace("/", "\\/");
+  ok(
+    `${cls} has a light-theme rule dropping its alpha`,
+    css.includes(`[data-theme="light"] .${escaped}`),
+    `${cls} keeps its alpha in light, where alpha washes toward white instead of dimming toward black`
+  );
+}
+ok(`alpha-modified themed text utilities were found to check (${alphaClasses.length})`,
+  alphaClasses.length > 10, "the alpha grep matched almost nothing");
 // Borders are allowed to be un-themed ONLY when the fixed value already
 // clears 3:1 on white by itself.
 const FIXED_BORDER_OK = {
@@ -256,10 +429,91 @@ const FIXED_BORDER_OK = {
   "border-amber-600": "#d97706",
   "border-amber-800": "#92400e",
 };
-const themedBorder = new Set(BORDER_TOKENS.map(([cls]) => cls));
+// WHAT COUNTS AS "THEMED" IS READ FROM THE CONFIG, not from the list of
+// tokens this file spot-checks above. Deriving it from BORDER_TOKENS made
+// the set a second copy that goes stale — and it did: when
+// border-orange-900 moved onto --accent-border-deep, this loop still did
+// not recognise it as themed, fell through to FIXED_BORDER_OK, and
+// asserted against #7c2d12, a value the light theme had stopped shipping.
+// It passed. That is the exact failure this file's own header warns about.
+function themedBorderVars() {
+  const at = config.indexOf("borderColor: {");
+  if (at < 0) return {};
+  let depth = 0, end = config.length;
+  for (let i = config.indexOf("{", at); i < config.length; i++) {
+    if (config[i] === "{") depth++;
+    else if (config[i] === "}") { depth--; if (!depth) { end = i; break; } }
+  }
+  const body = config.slice(at, end).replace(/\/\/[^\n]*/g, "");
+  const out = {};
+  let family = null;
+  for (const line of body.split("\n")) {
+    const fam = line.match(/^\s*([a-z]+):\s*\{/);
+    if (fam && fam[1] !== "borderColor") family = fam[1];
+    for (const m of line.matchAll(/(\d{2,3}):\s*"rgb\(var\(--([a-z-]+)\)/g)) {
+      if (family) out[`border-${family}-${m[1]}`] = m[2];
+    }
+  }
+  return out;
+}
+const THEMED_BORDER_VARS = themedBorderVars();
+// The exemption above rests on "a notice box is identified by its fill".
+// Check that, rather than believing the comment: if deep-bordered boxes
+// stop carrying fills, the exemption stops being true and this fails.
+{
+  const { execSync: run2 } = await import("node:child_process");
+  const lines = run2(
+    `grep -rhoE 'className="[^"]*border-(red|orange|emerald|amber)-(800|900)[^"]*"' src --include=*.tsx || true`,
+    { encoding: "utf8" }
+  ).split("\n").filter(Boolean);
+  const withFill = lines.filter((l) => /\bbg-/.test(l)).length;
+  ok(
+    `deep-bordered notices carry their own fill — ${withFill}/${lines.length}`,
+    lines.length > 0 && withFill / lines.length >= 0.9,
+    `only ${withFill} of ${lines.length} deep-bordered boxes have a fill; the edge is doing the identifying and owes 3:1 in dark too`
+  );
+}
+ok(
+  "the config's borderColor block parses",
+  Object.keys(THEMED_BORDER_VARS).length > 0,
+  "parsed no themed borderColor entries — the parser and the config have diverged"
+);
 for (const cls of usedBorder) {
-  if (themedBorder.has(cls)) {
-    ok(`${cls} is theme-aware`, true);
+  const themedVar = THEMED_BORDER_VARS[cls];
+  if (themedVar) {
+    // WHICH THRESHOLD APPLIES DEPENDS ON WHAT THE BORDER IS DOING.
+    //
+    // The --*-border tokens are component edges — inputs, cards, the
+    // things a border is the boundary of. WCAG 1.4.11's 3:1 is theirs in
+    // every theme.
+    //
+    // The --*-border-deep tokens are notice-box edges, and a notice box
+    // is not identified by its edge: 60 of the 63 usages carry a fill and
+    // coloured text in the same class string (counted, not assumed —
+    // the grep is below). Holding a decorative reinforcement to the
+    // identification threshold would demand brightening 63 dark notices
+    // that nobody reported a problem with. So for -deep the assertion is
+    // 3:1 in LIGHT, where the fills are now pale and the edge IS what
+    // carries the box, and identifiability-by-fill in dark.
+    //
+    // The dark ratio is printed either way. An exemption that hides its
+    // number is how the 2.62:1 border survived the last review.
+    const isNotice = themedVar.endsWith("-border-deep");
+    for (const theme of ["light", "dark"]) {
+      const ink = varOf(theme === "light" ? LIGHT : DARK, themedVar);
+      for (const [surfaceName, surface] of Object.entries(surfaces[theme])) {
+        const v = c.checkContrast(ink, surface, c.WCAG_UI_MIN);
+        if (isNotice && theme === "dark") {
+          console.log(`  NOTE  ${cls} (--${themedVar}) on dark ${surfaceName} — ${v.ratio}:1, decorative edge on a filled notice`);
+          continue;
+        }
+        ok(
+          `${cls} (--${themedVar}) on ${theme} ${surfaceName} — ${v.ratio}:1`,
+          v.passes,
+          `${v.ratio}:1 is below ${v.required}:1`
+        );
+      }
+    }
     continue;
   }
   const fixed = FIXED_BORDER_OK[cls];
@@ -268,6 +522,255 @@ for (const cls of usedBorder) {
     const v = c.checkContrast(fixed, "#ffffff", c.WCAG_UI_MIN);
     ok(`${cls} clears 3:1 on white unaided — ${v.ratio}:1`, v.passes);
   }
+}
+
+// =====================================================================
+console.log("\n== Body text on every surface the app paints ==");
+// THE CHECK THAT WAS MISSING. Every earlier measurement of the light
+// theme compared ink against #ffffff. The app paints three surfaces —
+// --background, --panel and --panel-hover — and secondary text lands on
+// all of them. Against #ffffff, --muted read 4.83:1 and looked fine;
+// against --panel-hover it was 4.32:1 and had been failing WCAG 1.4.3
+// since the light theme shipped. Nothing was wrong with the value that a
+// second surface would not have revealed, and nothing looked at one.
+for (const [themeName, selector] of [["light", LIGHT], ["dark", DARK]]) {
+  for (const token of ["foreground", "muted"]) {
+    const ink = varOf(selector, token);
+    for (const [surfaceName, surface] of Object.entries(surfaces[themeName])) {
+      const v = c.checkContrast(ink, surface, c.WCAG_TEXT_MIN);
+      ok(
+        `--${token} on ${themeName} ${surfaceName} — ${v.ratio}:1`,
+        v.passes,
+        `${v.ratio}:1 is below ${v.required}:1`
+      );
+    }
+  }
+}
+
+// =====================================================================
+console.log("\n== The keyboard focus ring ==");
+// MEASURED ON THE DEPLOYMENT FIRST, not derived from the stylesheet:
+// tabbing through ten production pages and reading the ring that actually
+// painted gave 1.73:1 on 59 of 60 stops in light and 2.80:1 in dark. It
+// was `rgba(249, 115, 22, 0.55)` — and 55% of anything is a wash, in both
+// directions. WCAG 2.4.11 wants 3:1 for the indicator against what it is
+// drawn on, and this is the one control that keyboard-only users depend
+// on completely.
+const focusRule = (() => {
+  const m = css.match(/:focus-visible\s*\{[^}]*outline:\s*([^;]+);/);
+  return m ? m[1].trim() : null;
+})();
+ok("a focus-visible outline is declared", Boolean(focusRule), "no :focus-visible outline rule in globals.css");
+ok(
+  `the focus ring is opaque — "${focusRule}"`,
+  Boolean(focusRule) && !/rgba?\([^)]*,\s*0?\.\d+\s*\)/.test(focusRule) && !/\/\s*0?\.\d+/.test(focusRule),
+  "the ring carries an alpha modifier; a translucent indicator composites toward the background in both themes"
+);
+const focusVar = focusRule && focusRule.match(/var\(--([a-z-]+)\)/);
+ok(
+  "the focus ring resolves through a themed token",
+  Boolean(focusVar),
+  "the ring is a fixed colour, so one theme necessarily gets a value chosen for the other"
+);
+if (focusVar) {
+  for (const theme of ["light", "dark"]) {
+    const ink = varOf(theme === "light" ? LIGHT : DARK, focusVar[1]);
+    for (const [surfaceName, surface] of Object.entries(surfaces[theme])) {
+      const v = c.checkContrast(ink, surface, c.WCAG_UI_MIN);
+      ok(
+        `focus ring on ${theme} ${surfaceName} — ${v.ratio}:1`,
+        v.passes,
+        `${v.ratio}:1 is below the ${v.required}:1 WCAG 2.4.11 requires of a focus indicator`
+      );
+    }
+  }
+}
+
+// =====================================================================
+console.log("\n== The backdrop, and the text it sits under ==");
+// The globe, its dots and .ambient-corners were never themed. Measured on
+// production, they shifted 33% of the viewport past the just-noticeable
+// threshold with a warm bias of +2.9 (r-b) — IDENTICALLY in both themes,
+// which is the whole diagnosis: the same warm translucent layer adds light
+// to #0a0a0a and tints #f7f7f8.
+//
+// The assertion is not "the backdrop is dimmer". It is the CONSEQUENCE:
+// --muted body text, measured on the page background AS THE BACKDROP
+// LEAVES IT, must still clear 4.5:1. Production had it at 4.35:1 against
+// 4.51:1 on a clean background — a real failure caused by decoration.
+for (const [themeName, selector] of [["light", LIGHT], ["dark", DARK]]) {
+  const scale = Number(varOf(selector, "backdrop-scale"));
+  ok(`--backdrop-scale is a number in ${themeName} (${scale})`, Number.isFinite(scale) && scale > 0);
+}
+ok(
+  "light dims the backdrop relative to dark",
+  Number(varOf(LIGHT, "backdrop-scale")) < Number(varOf(DARK, "backdrop-scale")),
+  "light reuses dark's backdrop intensity, which is exactly what produced the haze"
+);
+ok(
+  "the globe carries its own ink per theme",
+  varOf(LIGHT, "globe-ink") !== varOf(DARK, "globe-ink"),
+  "both themes draw the wireframe in the same ink; dimming alone makes it vanish rather than legible"
+);
+// .ambient-corners composited onto the page, then --muted on top of that.
+function ambientAlphas(selector) {
+  const b = selector === DARK ? block(":root") : null;
+  const re = selector === LIGHT
+    ? /\[data-theme="light"\]\s*\.ambient-corners\s*\{([\s\S]*?)\n\}/
+    : /\n\.ambient-corners\s*\{([\s\S]*?)\n\}/;
+  const m = css.match(re);
+  void b;
+  if (!m) throw new Error(`no .ambient-corners rule for ${selector}`);
+  return [...m[1].matchAll(/rgba\(\s*(\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\s*\)/g)]
+    .map((x) => ({ r: +x[1], g: +x[2], b: +x[3], a: +x[4] }));
+}
+for (const [themeName, selector, pageVar] of [["light", LIGHT, "background"], ["dark", DARK, "background"]]) {
+  const page = c.parseColor(varOf(selector, pageVar));
+  const pools = ambientAlphas(selector);
+  // THE STRONGEST SINGLE POOL, at full strength, over the page.
+  //
+  // This began as "the two strongest, stacked", which is not a place that
+  // exists: the four gradients sit at the four corners with radii that
+  // fade to transparent at 60%, so no pixel sees two of them at full
+  // strength. Modelling an impossible pixel makes the bound arbitrary —
+  // it fails for a reason the user could never see. A corner at full
+  // strength is real, and it is the worst thing that actually renders.
+  const strongest = pools.sort((x, y) => y.a - x.a)[0];
+  const stacked = {
+    r: strongest.r * strongest.a + page.r * (1 - strongest.a),
+    g: strongest.g * strongest.a + page.g * (1 - strongest.a),
+    b: strongest.b * strongest.a + page.b * (1 - strongest.a),
+  };
+  const v = c.checkContrast(varOf(selector, "muted"), stacked, c.WCAG_TEXT_MIN);
+  ok(
+    `${themeName}: --muted over the tinted page — ${v.ratio}:1`,
+    v.passes,
+    `${v.ratio}:1 — the corner pools tint the page far enough to push body text below ${v.required}:1`
+  );
+
+  // AND THE TINT ITSELF, not only what it does to one token.
+  //
+  // Asserting this through --muted alone is not enough: once --muted was
+  // darkened it had so much headroom that restoring the dark corner-pool
+  // alphas kept the suite green. Mutation testing caught exactly that.
+  // The complaint was "there is an orange fog", which is a statement
+  // about the page looking tinted, and it stays true whether or not some
+  // particular ink survives it.
+  //
+  // 3/255 per channel: 2 is roughly where a flat tint over a large area
+  // becomes visible on an sRGB display, and one step of slack keeps this
+  // from tripping on rounding. Light only — on #0a0a0a the same layer is
+  // a glow rather than a stain, which is the asymmetry this whole block
+  // exists to record.
+  if (themeName === "light") {
+    const dev = Math.max(Math.abs(stacked.r - page.r), Math.abs(stacked.g - page.g), Math.abs(stacked.b - page.b));
+    const warm = (stacked.r - stacked.b) - (page.r - page.b);
+    ok(
+      `light: the strongest corner pool shifts the page by ${dev.toFixed(2)}/255 (warm ${warm.toFixed(2)})`,
+      dev <= 3.5 && warm <= 3.5,
+      `the pool moves the page background by ${dev.toFixed(2)}/255 with a warm bias of ${warm.toFixed(2)}; ` +
+        `on a near-neutral surface that reads as a colour cast, which is the haze — dark's own pool measures 21.5 and 20.4 there, and is a glow rather than a stain because it is adding light to black`
+    );
+  }
+}
+
+// =====================================================================
+console.log("\n== The wordmark ==");
+// The brand name shipped at #f5f5f5 — near-white — in a theme whose page
+// is #f7f7f8. That is 1.02:1: not dim, absent. It survived because the
+// unthemed backdrop haze darkened the area behind it just enough to
+// suggest letters, so the bug and its camouflage were the same defect.
+// Cleaning the haze is what made it visible, by making it disappear.
+//
+// It also slipped past the rendered audit, which read `color` for every
+// element. SVG glyphs are painted by `fill`.
+for (const [themeName, selector] of [["light", LIGHT], ["dark", DARK]]) {
+  for (const token of ["logo-ink", "logo-accent"]) {
+    const ink = varOf(selector, token);
+    // The wordmark is set at 34 units in a scaled viewBox and renders
+    // well above 24px in every placement, so it is large text: 3:1.
+    const v = c.checkContrast(ink, varOf(selector, "background"), c.WCAG_LARGE_TEXT_MIN);
+    ok(
+      `--${token} on the ${themeName} page — ${v.ratio}:1`,
+      v.passes,
+      `${v.ratio}:1 is below ${v.required}:1 — the brand name is not legible on its own page`
+    );
+  }
+}
+{
+  const { execSync: run3 } = await import("node:child_process");
+  const logo = readFileSync("src/components/logo.tsx", "utf8");
+  // Every fill in the WORDMARK half must go through a token. The mark's
+  // amber ring is a stroke on a shape and keeps its literal.
+  const wordmarkLiterals = [...logo.matchAll(/fill="(#[0-9a-fA-F]{3,6})"/g)].map((m) => m[1]);
+  ok(
+    `the wordmark carries no near-white literal fill (${wordmarkLiterals.length} literal fills left)`,
+    !wordmarkLiterals.some((hex) => c.relativeLuminance(hex) > 0.7),
+    `logo.tsx still fills something with ${wordmarkLiterals.filter((h) => c.relativeLuminance(h) > 0.7).join(", ")}, which vanishes on a white page`
+  );
+  void run3;
+}
+
+// =====================================================================
+console.log("\n== The decorative glow layers ==");
+// FOUND LAST, AND ONLY BY LOOKING. The globe, the constellation and the
+// corner pools were all dimmed, the automated pass reported the haze down
+// 76%, and the screenshot still had a peach cloud across the top of the
+// landing page. It was GlowOrb — `absolute`, not `fixed inset-0`, so the
+// backdrop measurement's selectors never matched it and it was never in
+// any number that was reported. Sampled at the top of the page it read
+// rgb(244,199,180) against rgb(247,247,248), and read the same with every
+// other layer hidden.
+//
+// So the assertion is on the layer itself, not on an aggregate that can
+// silently omit it: the densest stop of each decorative gradient,
+// composited onto the page it is drawn over.
+function densestStop(value) {
+  const stops = [...value.matchAll(/rgba\(\s*(\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\s*\)/g)]
+    .map((m) => ({ r: +m[1], g: +m[2], b: +m[3], a: +m[4] }));
+  if (!stops.length) throw new Error("no rgba stops in " + value.slice(0, 60));
+  return stops.sort((x, y) => y.a - x.a)[0];
+}
+for (const [themeName, selector, limit] of [["light", LIGHT, 5], ["dark", DARK, Infinity]]) {
+  const page = c.parseColor(varOf(selector, "background"));
+  const stop = densestStop(varOf(selector, "glow-orb"));
+  const on = {
+    r: stop.r * stop.a + page.r * (1 - stop.a),
+    g: stop.g * stop.a + page.g * (1 - stop.a),
+    b: stop.b * stop.a + page.b * (1 - stop.a),
+  };
+  const dev = Math.max(Math.abs(on.r - page.r), Math.abs(on.g - page.g), Math.abs(on.b - page.b));
+  if (limit === Infinity) {
+    console.log(`  NOTE  ${themeName}: the hero orb moves the page by ${dev.toFixed(1)}/255 — a light source on black, which is what it is for`);
+    continue;
+  }
+  ok(
+    `${themeName}: the hero orb moves the page by ${dev.toFixed(1)}/255`,
+    dev <= limit,
+    `${dev.toFixed(1)}/255 is a colour wash, not a glow — on a near-white page a large soft warm layer reads as haze`
+  );
+}
+ok(
+  "the hero orb is themed at all",
+  varOf(LIGHT, "glow-orb") !== varOf(DARK, "glow-orb"),
+  "both themes draw the hero orb with the same ink and alpha"
+);
+// The CTA's pulse is the same kind of layer: a 30px 75% bloom that
+// breathes on a loop. On white it is a moving smear.
+ok(
+  "the primary CTA's glow is themed",
+  varOf(LIGHT, "cta-glow-peak") !== varOf(DARK, "cta-glow-peak"),
+  "the CTA pulses the same coloured bloom in both themes"
+);
+{
+  const peak = varOf(LIGHT, "cta-glow-peak");
+  const blurs = [...peak.matchAll(/(\d+)px/g)].map((m) => Number(m[1]));
+  const maxBlur = Math.max(...blurs);
+  ok(
+    `light's CTA glow is a shadow, not a bloom — largest blur ${maxBlur}px`,
+    maxBlur <= 14,
+    `${maxBlur}px of blur under a button on a near-white page is a smear; dark's is 30px and belongs there`
+  );
 }
 
 // =====================================================================

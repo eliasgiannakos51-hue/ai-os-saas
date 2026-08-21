@@ -53,7 +53,17 @@ export function AuthBackground({ opacity = 0.38 }: { opacity?: number }) {
     >
       <div
         className="relative h-[140vmin] w-[140vmin] animate-[spin_180s_linear_infinite]"
-        style={{ opacity, willChange: "transform" }}
+        style={{
+          // Scaled by the theme, not fixed. The value passed in is a
+          // DARK-theme intensity; light multiplies it down (globals.css,
+          // --backdrop-scale) because the same translucent warm layer adds
+          // light on #0a0a0a and tints on #f7f7f8. Measured on production
+          // before this: the backdrop pushed 33% of the viewport past the
+          // just-noticeable threshold in both themes, and dropped #71717a
+          // body text from 4.51:1 to 4.35:1 in light.
+          opacity: `calc(${opacity} * var(--backdrop-scale, 1))`,
+          willChange: "transform",
+        }}
       >
       <svg viewBox="0 0 400 400" className="h-full w-full" fill="none">
         <defs>
@@ -73,9 +83,14 @@ export function AuthBackground({ opacity = 0.38 }: { opacity?: number }) {
             cy="200"
             r="170"
           >
-            <stop offset="0%" stopColor="#f5a623" stopOpacity="0.9" />
-            <stop offset="65%" stopColor="#f5a623" stopOpacity="0.45" />
-            <stop offset="100%" stopColor="#f5a623" stopOpacity="0" />
+            {/* --globe-ink, not a literal: dimming alone would have taken
+                the wireframe below visibility in light, losing the one
+                brand element on the page. Light re-inks it to orange-800
+                instead, which reads as line art on white where a bright
+                amber reads as haze. */}
+            <stop offset="0%" stopColor="var(--globe-ink, #f5a623)" stopOpacity="0.9" />
+            <stop offset="65%" stopColor="var(--globe-ink, #f5a623)" stopOpacity="0.45" />
+            <stop offset="100%" stopColor="var(--globe-ink, #f5a623)" stopOpacity="0" />
           </radialGradient>
 
         </defs>
@@ -167,8 +182,11 @@ export function AuthBackground({ opacity = 0.38 }: { opacity?: number }) {
             width: "6%",
             height: "6%",
             transform: "translate(-50%, -50%)",
-            background:
-              "radial-gradient(circle, rgba(245, 166, 35, 0.95) 0%, rgba(245, 166, 35, 0.45) 32%, transparent 68%)",
+            // Themed for the same reason as the wireframe: at 6% of a
+            // 140vmin globe these are large soft blobs, and a 95%-opaque
+            // amber blob on white is the single most visible part of the
+            // "orange fog" in the screenshots.
+            background: "var(--globe-dot)",
             animationDelay: dot.delay,
             animationDuration: "3.5s",
             willChange: "opacity",

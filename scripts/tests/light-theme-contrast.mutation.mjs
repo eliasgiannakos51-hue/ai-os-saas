@@ -20,6 +20,48 @@ const CSS = "src/app/globals.css";
 const CFG = "tailwind.config.ts";
 
 const MUTANTS = [
+  // ------------------------------------------------------------------
+  // THE ELEVATION HALF, which arrived with PR #33 and shipped with no
+  // mutants of its own. The glow guard, the .focus-glow ring and the
+  // variable-following scanner were all undefended until here.
+  // ------------------------------------------------------------------
+  {
+    // THIS ONE ALREADY HAPPENED. `.cta-amber` moved its glow behind
+    // `var(--cta-glow-rest)` on the trunk and the line-scanner went blind
+    // to it — ten glows became nine. Disabling the expansion puts that
+    // blindness back.
+    name: "the glow scanner stops following var() (a glow one hop away becomes invisible)",
+    file: TARGET,
+    from: "  for (let hop = 0; hop < 4 && /var\\(--/.test(out); hop += 1) {",
+    to: "  for (let hop = 0; hop < 0 && /var\\(--/.test(out); hop += 1) {",
+  },
+  // A MUTANT WAS WRITTEN HERE AND WITHDRAWN, recorded rather than quietly
+  // dropped. It deleted the LIGHT value of --cta-glow-rest, on the theory
+  // that the variable is what covers `.cta-amber` in light. It is not:
+  // `[data-theme="light"] .cta-amber` sets box-shadow directly, and the
+  // pulse is answered by re-pointing `animation`. The mutation left every
+  // assertion green because it changes nothing — an equivalent mutant,
+  // and one that would have read as a caught bug. The dead code path it
+  // was written to defend has been removed from the test instead.
+  {
+    // The light answer that IS load-bearing for the button.
+    name: "the direct light override on the CTA is dropped (the button keeps its dark bloom on white)",
+    file: CSS,
+    from: "  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1), 0 4px 10px -3px rgba(194, 65, 12, 0.3);",
+    to: "  box-shadow: 0 4px 18px -4px rgba(249, 115, 22, 0.45);",
+  },
+  {
+    name: "a selector-level light override is dropped (the eleventh glow ships unanswered)",
+    file: CSS,
+    from: '[data-theme="light"] .card-lift:hover',
+    to: '[data-theme="light"] .card-lift-removed:hover',
+  },
+  {
+    name: "the .focus-glow ring goes back to a 45% orange (1.60:1 on white)",
+    file: CSS,
+    from: "  box-shadow: 0 0 0 2px rgb(var(--accent-border))",
+    to: "  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.45)",
+  },
   {
     name: "light --muted back to zinc-500 (4.32:1 on panel-hover)",
     file: CSS, from: "  --muted: 82 82 91;", to: "  --muted: 113 113 122;",

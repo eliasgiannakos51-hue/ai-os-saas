@@ -28,7 +28,7 @@
 //      silently wreck dark, where the same ink sits on #0a0a0a.
 //
 // Run: node scripts/tests/light-theme-contrast.test.mjs
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 
 let pass = 0,
@@ -57,6 +57,18 @@ function ok(name, cond, detail) {
 const c = await loadTs("src/lib/contrast.ts");
 const css = readFileSync("src/app/globals.css", "utf8");
 const config = readFileSync("tailwind.config.ts", "utf8");
+
+/** Every .ts/.tsx under src/ — the whole tree, because a class name that
+ *  emits no CSS is invisible in exactly the file nobody thought to open. */
+function walkSource(dir = "src", out = []) {
+  for (const entry of readdirSync(dir)) {
+    const full = `${dir}/${entry}`;
+    if (statSync(full).isDirectory()) walkSource(full, out);
+    else if (/\.(ts|tsx)$/.test(entry)) out.push(full);
+  }
+  return out;
+}
+const sourceFiles = walkSource();
 
 // Read the REAL values out of globals.css rather than restating them
 // here. A test carrying its own copy of the palette passes forever while
@@ -156,8 +168,13 @@ const surfaces = {
     input: inputSurface(LIGHT),
   },
 };
-check("light panel is white", surfaces.light.panel, "#ffffff");
-check("light page background", surfaces.light.background, "#f7f7f8");
+// STILL LOAD-BEARING, just written in the channel form the variables now
+// use: these two literals are what exposed the block() reader silently
+// returning the DARK block, and they have to keep naming exact values or
+// they stop being able to.
+check("light panel is white", c.toHex(c.parseColor(surfaces.light.panel)), "#ffffff");
+check("light page background", c.toHex(c.parseColor(surfaces.light.background)), "#f7f7f8");
+check("light panel is declared as channels", surfaces.light.panel, "255 255 255");
 ok("dark panel is dark", c.relativeLuminance(surfaces.dark.panel) < 0.1);
 
 // =====================================================================
@@ -207,6 +224,97 @@ for (const [cls, token, uses] of BORDER_TOKENS) {
       );
     }
   }
+}
+
+// =====================================================================
+console.log("\n== THE STRUCTURAL BORDER — every theme, every surface ==");
+// ---------------------------------------------------------------------
+// THE MOST-USED BORDER IN THE APP, AND NOTHING ABOVE THIS LINE TOUCHED
+// IT.
+//
+// The section above checks --accent-border and --accent-amber-border:
+// 149 and 11 usages. It never checked --border, which `border-border`
+// resolves to and which appears 317 times across 127 files. It is the
+// outline of every card, input, button, table row and divider in the
+// product.
+//
+// Measured on https://ai-os-saas-five.vercel.app with data-theme=light,
+// walking the rendered DOM of ten pages (scripts/prod-light-theme-audit
+// .mjs): 2,504 elements scanned, 0 text failures, 0 focus failures — and
+// 160 BORDER failures, 157 of them this one token, at
+//
+//     rgb(228,228,231) on rgb(247,247,248) = 1.19:1   (121 elements)
+//     rgb(228,228,231) on rgb(255,255,255) = 1.27:1   ( 36 elements)
+//
+// against a 3:1 requirement. That is the report "στο άσπρο θέμα δεν
+// διακρίνονται τα στοιχεία" in numbers: a white card on a #f7f7f8 page
+// is 1.06:1 of fill difference, so the border is the ONLY thing saying
+// where the card ends — and it was invisible.
+//
+// The same token fails identically in dark (#242424 is 1.12:1 on
+// --panel-hover), which nobody had measured because nobody had looked.
+//
+// ALL FOUR THEMES, not the two the rest of this file checks. midnight and
+// carbon are shipped themes with their own --border, and "cross-product,
+// not a sample" has to include them or it is a sample again.
+const ALL_THEMES = {
+  dark: DARK,
+  light: LIGHT,
+  midnight: '[data-theme="midnight"]',
+  carbon: '[data-theme="carbon"]',
+};
+for (const [theme, selector] of Object.entries(ALL_THEMES)) {
+  const themeSurfaces =
+    surfaces[theme] ??
+    {
+      panel: varOf(selector, "panel"),
+      background: varOf(selector, "background"),
+      "panel-hover": varOf(selector, "panel-hover"),
+      input: inputSurface(selector),
+    };
+  const ink = varOf(selector, "border");
+  for (const [surfaceName, surface] of Object.entries(themeSurfaces)) {
+    const v = c.checkContrast(ink, surface, c.WCAG_UI_MIN);
+    ok(
+      `border-border on ${theme} ${surfaceName} — ${v.ratio}:1 (317 usages)`,
+      v.passes,
+      `${v.ratio}:1 is below the required ${v.required}:1`
+    );
+  }
+}
+
+// HEADROOM, so the next surface tweak cannot silently push it back under.
+// --muted was already living on 0.01 of headroom when the backdrop was
+// added, and that is how it went under without a single test changing.
+for (const [theme, selector] of Object.entries(ALL_THEMES)) {
+  const themeSurfaces =
+    surfaces[theme] ??
+    {
+      panel: varOf(selector, "panel"),
+      background: varOf(selector, "background"),
+      "panel-hover": varOf(selector, "panel-hover"),
+      input: inputSurface(selector),
+    };
+  const worst = Math.min(
+    ...Object.values(themeSurfaces).map((s) => c.contrastRatio(varOf(selector, "border"), s))
+  );
+  ok(
+    `${theme}'s border keeps headroom above the threshold — worst ${Math.round(worst * 100) / 100}:1`,
+    worst >= 3.15,
+    `worst surface is ${Math.round(worst * 100) / 100}:1, under the 3.15 working minimum`
+  );
+}
+
+// A border nobody can see is the same defect whichever direction it is
+// invisible in: this catches a "fix" that simply painted it the colour of
+// the page.
+for (const [theme, selector] of Object.entries(ALL_THEMES)) {
+  const border = c.parseColor(varOf(selector, "border"));
+  const panel = c.parseColor(varOf(selector, "panel"));
+  ok(
+    `${theme}'s border is not simply its panel colour`,
+    Math.abs(border.r - panel.r) + Math.abs(border.g - panel.g) + Math.abs(border.b - panel.b) > 30
+  );
 }
 
 // =====================================================================
@@ -420,6 +528,112 @@ for (const cls of alphaClasses) {
 }
 ok(`alpha-modified themed text utilities were found to check (${alphaClasses.length})`,
   alphaClasses.length > 10, "the alpha grep matched almost nothing");
+
+// ---- THE SAME HOLE, FOR BORDERS. The check above walks TEXT only. The
+// border half of the alpha-neutralising block could be deleted whole and
+// nothing here noticed — the mutation run proved it, twice: removing the
+// accent border rule and dropping a module hue back to the raw palette
+// both left the suite green.
+//
+// The rule being defended: a border in its RESTING state, written with an
+// alpha modifier, is between 1.19:1 and 2.16:1 in light once composited,
+// and no colour choice fixes it below 50% alpha (a 40% border over white
+// is at most 153 in every channel even if the colour is black — 2.80:1).
+// So in light the alpha has to go, and the value it lands on has to clear
+// 3:1 on every surface.
+//
+// hover:/focus:/group-hover: variants are excluded by construction: they
+// compile to a different selector, the component is already identifiable
+// at rest by --border, and a state change is not what 1.4.11 is about.
+//
+// The one exemption is NAMED. Four `ring-<hue>-400/25` in
+// components/overview/quick-action-card.tsx are `ring-1 ring-inset` on a
+// 44x44 decorative icon chip inside a card that has its own border. They
+// identify nothing; 1.4.11 exempts pure decoration. globals.css carries
+// the same list and the same reason, so this is a decision in two places
+// rather than a silence in one.
+const DECORATIVE_RINGS = new Set([
+  "ring-orange-400/25",
+  "ring-purple-400/25",
+  "ring-sky-400/25",
+  "ring-emerald-400/25",
+]);
+const restingAlphaBorders = new Set();
+for (const file of sourceFiles) {
+  const text = readFileSync(file, "utf8");
+  for (const m of text.matchAll(
+    /(?<![-\w:])((?:[a-z-]+(?:\[[^\]]*\])?:)*)(border|ring|outline|divide)-([a-z]+)-(\d{2,3})\/(\d{1,3})\b/g
+  )) {
+    if (m[1]) continue; // hover:/focus:/... — a state, not the resting boundary
+    restingAlphaBorders.add(`${m[2]}-${m[3]}-${m[4]}/${m[5]}`);
+  }
+}
+// EVERY FAMILY USED AS A BORDER MUST BE THEMED IN borderColor, checked
+// separately from the light-theme rules below. Deleting a module family's
+// borderColor entry leaves the LIGHT rule intact — it names the token
+// directly — while DARK silently falls back to the raw Tailwind palette,
+// a hue chosen to sit on #0a0a0a. The light-only assertions cannot see
+// that, and the mutation run proved it by removing the cyan entry and
+// staying green.
+const borderFamilies = new Set();
+for (const cls of restingAlphaBorders) {
+  const m = cls.match(/^(?:border|ring|outline|divide)-([a-z]+)-(\d{2,3})\//);
+  if (m && !DECORATIVE_RINGS.has(cls)) borderFamilies.add(`${m[1]}-${m[2]}`);
+}
+const borderColorBlock = config.slice(config.indexOf("borderColor:"), config.indexOf("backgroundColor:"));
+for (const famShade of [...borderFamilies].sort()) {
+  const [family, shade] = famShade.split("-");
+  const themed = new RegExp(`\\b${family}:\\s*\\{[\\s\\S]*?\\b${shade}:\\s*"rgb\\(var\\(--`).test(borderColorBlock);
+  ok(
+    `border-${famShade} resolves through a theme token in BOTH themes`,
+    themed,
+    `borderColor has no themed entry for ${family} ${shade}, so dark uses the raw palette value`
+  );
+}
+
+ok(
+  `resting-state alpha borders were found to check (${restingAlphaBorders.size})`,
+  restingAlphaBorders.size > 30,
+  "the border grep matched almost nothing, which usually means it stopped matching"
+);
+for (const cls of [...restingAlphaBorders].sort()) {
+  if (DECORATIVE_RINGS.has(cls)) {
+    ok(`${cls} is the named decorative exemption, and globals.css says so`, css.includes("quick-action-card"));
+    continue;
+  }
+  const escaped = cls.replace("/", "\\/");
+  // A DELIMITER IS REQUIRED AFTER THE CLASS. `includes` is a substring
+  // test and the mutation run walked straight through it: renaming the
+  // selector to `.border-orange-500\/40-removed` still CONTAINS
+  // `.border-orange-500\/40`, so the rule could be deleted in effect
+  // while this assertion stayed green.
+  const selector = new RegExp(
+    `\\[data-theme="light"\\] \\.${escaped.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*[,{\n]`
+  );
+  const rule = selector.test(css);
+  ok(
+    `${cls} has a light-theme rule dropping its alpha`,
+    rule,
+    `${cls} keeps its alpha in light: composited it cannot reach the 3:1 of WCAG 1.4.11`
+  );
+  if (!rule) continue;
+  // AND the colour it lands on has to actually pass. A rule pointing at a
+  // token that is itself too light is a rule that changes nothing.
+  const at = css.search(selector);
+  const decl = css.slice(at, css.indexOf("}", at));
+  const token = decl.match(/rgb\(var\(--([a-z-]+)\)\)/)?.[1];
+  ok(`${cls} resolves to a theme token`, Boolean(token), `no rgb(var(--token)) in: ${decl.slice(0, 120)}`);
+  if (!token) continue;
+  const ink = varOf(LIGHT, token);
+  for (const [surfaceName, surface] of Object.entries(surfaces.light)) {
+    const v = c.checkContrast(ink, surface, c.WCAG_UI_MIN);
+    ok(
+      `${cls} -> --${token} on light ${surfaceName} — ${v.ratio}:1`,
+      v.passes,
+      `${v.ratio}:1 is below the required ${v.required}:1`
+    );
+  }
+}
 // Borders are allowed to be un-themed ONLY when the fixed value already
 // clears 3:1 on white by itself.
 const FIXED_BORDER_OK = {
@@ -775,9 +989,20 @@ ok(
 
 // =====================================================================
 console.log("\n== The config wiring the compiler cannot check ==");
-// `rgb(var(--x) / <alpha-value>)` vs a bare `var(--x)` is the difference
-// between 246 opacity-modified usages working and silently becoming
-// fully opaque. Neither tsc nor eslint can see it.
+// `rgb(var(--x) / <alpha-value>)` vs a bare `var(--x)` decides whether an
+// opacity-modified class exists at all. Neither tsc nor eslint can see it.
+//
+// CORRECTION TO WHAT THIS COMMENT USED TO SAY. It said the modifier
+// "silently becomes fully opaque". That is not what happens, and the
+// difference matters: Tailwind emits NO RULE AT ALL for the modified
+// class, so the element does not get the token's colour at any opacity —
+// it keeps whatever it INHERITED, which is usually a different colour
+// entirely. Verified against the deployed stylesheet rather than
+// reasoned about: `.text-orange-400\\/70` is present (that token is in
+// channel form) and `.text-foreground\\/90` is absent, while 27 elements
+// in src/ ask for it. So 27 pieces of intentionally-softened text were
+// rendering at full --foreground strength, and `text-muted/70` was not
+// rendering as --muted at all.
 ok(
   "textColor uses the alpha-value placeholder",
   /textColor:\s*\{[\s\S]*?rgb\(var\(--accent-text\) \/ <alpha-value>\)/.test(config)
@@ -788,6 +1013,73 @@ ok(
 );
 ok("no accent token is declared as a bare var() colour",
   !/(textColor|borderColor):\s*\{[\s\S]{0,600}?:\s*"var\(--accent/.test(config));
+
+// ---------------------------------------------------------------------
+// THE GENERAL FORM OF THAT BUG, not the four tokens that happened to
+// have it.
+//
+// The assertion above only ever looked at --accent* inside textColor and
+// borderColor. `border`, `foreground`, `muted` and `input` live in the
+// plain `colors` block and were all declared as bare var()s, so 62
+// alpha-modified usages across src/ emitted nothing:
+//
+//     text-foreground/90  x27      text-muted/80  x14
+//     text-muted/70       x3       text-muted/60  x2
+//     text-muted/50       x3       text-foreground/80 x6
+//     border-border/50    x3       border-border/70   x1
+//     bg-input/40         x2       bg-muted/10        x1
+//
+// So this checks the RULE rather than the instances: every colour name
+// used anywhere in src/ with an alpha modifier must be declared in a form
+// Tailwind can actually apply an alpha to.
+const bareVarTokens = new Set();
+for (const m of config.matchAll(/(?:^|[{,\s])([a-zA-Z][\w-]*)\s*:\s*"var\(--[^"]*\)"/g)) {
+  bareVarTokens.add(m[1]);
+}
+const UTILITY = "(?:text|bg|border|divide|ring|from|via|to|placeholder|decoration|outline|fill|stroke|caret|accent|shadow)";
+const alphaUses = new Map();
+for (const file of sourceFiles) {
+  const text = readFileSync(file, "utf8");
+  for (const m of text.matchAll(new RegExp(`\\b${UTILITY}-([a-zA-Z][\\w-]*?)(?:-\\d{2,3})?/(\\d{1,3})\\b`, "g"))) {
+    const name = m[1];
+    if (!bareVarTokens.has(name)) continue;
+    const key = `${name}/${m[2]}`;
+    alphaUses.set(key, (alphaUses.get(key) ?? 0) + 1);
+  }
+}
+check(
+  "no alpha-modified class refers to a bare var() token",
+  [...alphaUses.entries()].map(([k, n]) => `${k} (${n})`).sort(),
+  []
+);
+// And the four that had it are named, so a revert is unmistakable rather
+// than just "one more failing assertion".
+for (const token of ["border", "foreground", "muted", "background", "panel", "panel-hover"]) {
+  ok(
+    `--${token} is declared in channel form`,
+    new RegExp(`"?${token}"?:\\s*"rgb\\(var\\(--${token}\\) / <alpha-value>\\)"`).test(config)
+  );
+}
+// A channel-form variable is THREE NUMBERS. Leaving a hex behind in one
+// theme block makes `rgb(#86868f / 0.7)` — invalid, so the colour drops
+// out entirely and only in that theme.
+for (const token of ["border", "foreground", "muted", "background", "panel", "panel-hover"]) {
+  // ANCHORED TO THE START OF A LINE. globals.css explains itself in
+  // comments, and one of them contains the text "--foreground:" — an
+  // unanchored scan read that prose as a seventh declaration and failed
+  // on it.
+  const declarations = [...css.matchAll(new RegExp(`^\\s*--${token}:\\s*([^;]+);`, "gm"))].map((m) => m[1].trim());
+  ok(`every --${token} declaration is channels, not hex (${declarations.length} found)`, declarations.length > 0 && declarations.every((d) => /^\d{1,3} \d{1,3} \d{1,3}$/.test(d)));
+}
+// The variables are also read directly from TSX — Recharts stroke/fill and
+// inline styles — where the compiler sees only a string. Those consumers
+// must have moved to rgb(var(--x)) in the same change, or the chart axis
+// silently renders with an invalid colour.
+for (const file of sourceFiles) {
+  const text = readFileSync(file, "utf8");
+  const bare = [...text.matchAll(/(?<!rgb\()var\(--(border|foreground|muted|background|panel|panel-hover)\)/g)].map((m) => m[1]);
+  check(`${file.split("/").pop()} reads the channel variables through rgb()`, bare, []);
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

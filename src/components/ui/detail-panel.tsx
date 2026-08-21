@@ -133,7 +133,7 @@ export function DetailPanel({
       </div>
 
       {actions ? (
-        <footer className="flex flex-wrap items-center gap-2 border-t border-border bg-input/40 px-5 py-3">
+        <footer className="flex flex-wrap items-center gap-2 border-t border-border bg-input px-5 py-3">
           {actions}
         </footer>
       ) : null}

@@ -246,7 +246,7 @@ export function IdeaRow({
   }
 
   return (
-    <div className="card-lift card-lift-row relative rounded-2xl border border-border bg-[linear-gradient(160deg,var(--panel)_0%,var(--panel)_65%,rgba(249,115,22,0.035)_100%)] p-4">
+    <div className="card-lift card-lift-row relative rounded-2xl border border-border bg-[linear-gradient(160deg,rgb(var(--panel))_0%,rgb(var(--panel))_65%,rgba(249,115,22,0.035)_100%)] p-4">
       {/* Pinned to the card corner, not buried in the bottom
           action row — see favorite-button.tsx for what that
           position cost. The card root is `relative` for this. */}

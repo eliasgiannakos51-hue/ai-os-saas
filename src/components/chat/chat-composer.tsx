@@ -11,6 +11,7 @@ import {
 } from "react";
 import { ArrowUp } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 
 /**
  * The chat's text box, owning its own keystrokes.
@@ -117,7 +118,7 @@ export const ChatComposer = forwardRef<
           className="absolute bottom-2 right-2 flex h-11 w-11 items-center justify-center rounded-full bg-orange-500 text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.4)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
         >
           {sending ? (
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />
+            <ThinkingIndicator size="sm" tone="inherit" />
           ) : (
             <ArrowUp className="h-4 w-4" />
           )}

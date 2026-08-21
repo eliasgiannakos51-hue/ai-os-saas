@@ -660,7 +660,7 @@ export function MissionDetail({
                             className="inline-flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors duration-150 hover:border-orange-500 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             {buildingIndex === index ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                              <ThinkingIndicator size="sm" />
                             ) : (step.attempts ?? 0) > 0 ? (
                               <RotateCw className="h-3.5 w-3.5" aria-hidden="true" />
                             ) : (

@@ -295,6 +295,89 @@ function tsxFiles(dir, out = []) {
   return out;
 }
 const allTsx = tsxFiles("src");
+
+// =====================================================================
+// EVERY CALL SITE, NOT A SAMPLE: does each one pick the right tone?
+//
+// globe-mark.prodtest.mjs measures that `inherit` reads 7.49:1 on an
+// orange button and that the accent tone reads 1.01:1 there — invisible,
+// which is what actually shipped once. That proves the two tones behave;
+// it does not prove any given call site chose correctly. This does, by
+// looking at the surface each one sits on.
+//
+// A SOLID bright fill only. `hover:bg-orange-500/10` is a tint on a dark
+// panel and an accent-coloured mark is right there; the first version of
+// this check matched it and would have demanded the opposite.
+{
+  const SOLID = /(?<!hover:)(?<!focus:)(?<!group-hover:)\bbg-(orange|amber)-500(?![/\w])|bg-\[linear-gradient/;
+  const wrong = [];
+  for (const f of allTsx) {
+    const lines = stripComments(readFileSync(f, "utf8")).split("\n");
+    lines.forEach((line, i) => {
+      if (!/<ThinkingIndicator/.test(line)) return;
+      // The surface is an ANCESTOR, so look back, not at the line itself.
+      const above = lines.slice(Math.max(0, i - 12), i).join("\n");
+      const bright = SOLID.test(above) && /text-black/.test(above);
+      const inherits = /tone="inherit"/.test(line);
+      if (bright !== inherits) {
+        wrong.push(`${f}:${i + 1} sits on ${bright ? "a bright" : "a dark"} surface but asks for tone=${inherits ? "inherit" : "accent"}`);
+      }
+    });
+  }
+  checkList("every indicator takes its tone from the surface under it", wrong);
+}
+
+// =====================================================================
+// WHERE THE GLOBE GOES, AND WHERE IT DELIBERATELY DOES NOT.
+//
+// "Globe everywhere" cannot mean every spinner, and pretending otherwise
+// would be the sampling this file exists to prevent. The line drawn here
+// is about WHAT THE WAIT IS:
+//
+//   THE GLOBE means Ionexa is thinking — an AI job, a generation, an
+//   analysis, a research run. The product is doing something on the
+//   user's behalf and the mark says whose product it is.
+//
+//   A PLAIN SPINNER means a mechanical round-trip — saving, deleting,
+//   uploading, publishing, connecting an account, retrying a request,
+//   checking storage. A globe on a delete button would spend the mark on
+//   a database write, and a signature that appears on everything signs
+//   nothing.
+//
+// FIRST: no file may hand-roll the indicator. Five did — a
+// `animate-spin rounded-full border-2` ring, drawn four different ways in
+// four different files, which is the same four-copies problem the whole
+// change exists to end. All five are now the indicator.
+checkList(
+  "nobody hand-rolls a ring spinner",
+  allTsx.filter((f) => /animate-spin[^"]*rounded-full[^"]*border/.test(stripComments(readFileSync(f, "utf8"))))
+);
+// SECOND: the mechanical set is an EXACT list, not a filter. If a new
+// file starts spinning, this fails and somebody has to decide which side
+// of the line it is on. That is the point — the decision gets made once,
+// visibly, instead of being inherited from whatever screen was copied.
+const MECHANICAL = [
+  "src/components/agents/delivery-picker.tsx",
+  "src/components/auth/social-auth-buttons.tsx",
+  "src/components/documents/document-editor.tsx",
+  "src/components/documents/new-document-button.tsx",
+  "src/components/files/files-workspace.tsx",
+  "src/components/mission/mission-delete-button.tsx",
+  "src/components/mission/mission-detail.tsx",
+  "src/components/mission/mission-form.tsx",
+  "src/components/mission/step-controls.tsx",
+  "src/components/network/offline-banner.tsx",
+  "src/components/onboarding/onboarding-flow.tsx",
+  "src/components/publishing/publish-control.tsx",
+  "src/components/system-health/storage-diagnostics.tsx",
+  "src/components/website-builder/website-builder-workspace.tsx",
+];
+{
+  const spinning = allTsx.filter((f) => /animate-spin/.test(stripComments(readFileSync(f, "utf8")))).sort();
+  checkList("no new file started spinning without a decision", spinning.filter((f) => !MECHANICAL.includes(f)));
+  checkList("and the list has no entries that stopped spinning", MECHANICAL.filter((f) => !spinning.includes(f)));
+}
+
 checkList(
   "no component uses animate-bounce",
   allTsx.filter((f) => /animate-bounce/.test(stripComments(readFileSync(f, "utf8"))))
@@ -506,9 +589,11 @@ check(`the mark costs no more than 1 KB over what it replaced (${delta >= 0 ? "+
 // THE NUMBER THAT ACTUALLY DECIDES THIS IS NOT IN THIS FILE. Source bytes
 // are a proxy; what ships is the built client bundle. Measured by
 // building HEAD and this tree and summing .next/static/chunks:
-// 2,683,919 B -> 2,666,919 B raw, 742,879 B -> 742,641 B gzipped. The
-// bundle got SMALLER, because what this deleted was bigger than what it
-// added once the empty-state ring markup went too.
+// 2,683,919 B -> 2,666,372 B raw, 742,879 B -> 741,628 B gzipped. The
+// bundle got SMALLER by 17,547 B raw and 1,251 B gzipped, because what
+// this deleted -- the constellation, its CSS, the empty-state rings and
+// five hand-rolled ring spinners -- was bigger than the one shared mark
+// that replaced all of it.
 check(`and stays under 5 KB in absolute terms (${shipped} B)`, shipped < 5120, `${shipped} B`);
 
 console.log(`\n${pass} passed, ${failures.length} failed`);

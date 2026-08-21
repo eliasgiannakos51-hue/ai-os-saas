@@ -197,6 +197,31 @@ const MUTANTS = [
     from: ".ionexa-globe.is-spinning .globe-orbit-group {\n  animation: ionexa-globe-spin 3.2s linear infinite;\n}",
     to: ".ionexa-globe.is-spinning .globe-orbit-group {\n  animation: ionexa-globe-spin 3.2s linear infinite;\n}\n.ionexa-globe.is-spinning svg {\n  animation: ionexa-globe-spin 8s linear infinite;\n}",
   },
+  // ------------------------------------------------------------------
+  // THE SIXTEEN CALL SITES. "Globe everywhere" is only true if the sites
+  // are enforced rather than counted once.
+  // ------------------------------------------------------------------
+  {
+    name: "a call site on an orange button loses tone=inherit, so the mark is orange on orange",
+    suites: [UNIT],
+    file: "src/components/chat/chat-composer.tsx",
+    from: '<ThinkingIndicator size="sm" tone="inherit" />',
+    to: '<ThinkingIndicator size="sm" />',
+  },
+  {
+    name: "somebody hand-rolls the ring spinner again",
+    suites: [UNIT],
+    file: "src/components/chat/chat-composer.tsx",
+    from: '<ThinkingIndicator size="sm" tone="inherit" />',
+    to: '<span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />',
+  },
+  {
+    name: "a new file starts spinning without anyone deciding which side of the line it is on",
+    suites: [UNIT],
+    file: "src/components/loading-state.tsx",
+    from: "<GlobeMark",
+    to: '<span className="animate-spin" />;\n  void 0;\n  const _unused = <GlobeMark',
+  },
   {
     name: "a labelled indicator is hidden from screen readers",
     suites: [BROWSER],

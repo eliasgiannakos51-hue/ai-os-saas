@@ -124,7 +124,25 @@ const MARKUP = renderToStaticMarkup(
     // 18px inside the Ask button; `md` is 26px beside body copy. These are
     // the most-seen instances of the mark in the product.
     React.createElement("div", { id: "sm" }, React.createElement(GlobeMark, { size: 18 })),
-    React.createElement("div", { id: "md" }, React.createElement(GlobeMark, { size: 26 }))
+    React.createElement("div", { id: "md" }, React.createElement(GlobeMark, { size: 26 })),
+    // THE ACCENT-ON-ACCENT CASE, which is in here because it already
+    // happened once: the `sm` indicator sits inside the orange "Ask"
+    // button, and drawn in the accent colour it was orange on orange and
+    // simply was not there. Sixteen call sites now choose `inherit` or
+    // `accent` from the surface they sit on, and that choice is a source
+    // -level judgement until something measures the pixels. This is that.
+    React.createElement(
+      "button",
+      { id: "on-accent", style: { background: "#f97316", color: "#000", border: 0, padding: "10px" } },
+      React.createElement(ThinkingIndicator, { size: "sm", tone: "inherit" })
+    ),
+    // And the mistake it guards against, rendered deliberately so the
+    // threshold below is known to be able to reject something.
+    React.createElement(
+      "button",
+      { id: "on-accent-wrong", style: { background: "#f97316", color: "#000", border: 0, padding: "10px" } },
+      React.createElement(ThinkingIndicator, { size: "sm" })
+    )
   )
 );
 ok("the component server-renders to an <svg>", /<svg/.test(MARKUP), MARKUP.slice(0, 200));
@@ -273,6 +291,25 @@ console.log("\n== 375px ==");
   ok("every mark keeps its requested size at 375px", sizes.every((s) => s.w === s.h && s.w >= 18), JSON.stringify(sizes));
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   ok("and nothing overflows the viewport", !overflow);
+  await ctx.close();
+}
+
+// =====================================================================
+console.log("\n== the mark on an accent button ==");
+{
+  const ctx = await browser.newContext({ viewport: { width: 800, height: 900 }, reducedMotion: "reduce" });
+  const page = await ctx.newPage();
+  await page.goto(`${base}/dark`, { waitUntil: "networkidle" });
+  const right = await measure(page, "#on-accent");
+  const wrong = await measure(page, "#on-accent-wrong");
+  console.log(`        tone="inherit": ink rgb(${right.ink}) on rgb(${right.background}) = ${right.ratio}:1`);
+  console.log(`        tone="accent" : ink rgb(${wrong.ink}) on rgb(${wrong.background}) = ${wrong.ratio}:1`);
+  ok(`tone="inherit" clears 3:1 on the accent button (${right.ratio}:1)`, right.ratio >= 3, JSON.stringify(right));
+  // THE INSTRUMENT HAS TO BE ABLE TO SAY NO. If the accent-coloured mark
+  // also passed here, this measurement would be proving nothing about
+  // either one.
+  ok(`and the accent-coloured mark does NOT (${wrong.ratio}:1)`, wrong.ratio < 3, JSON.stringify(wrong));
+  await page.screenshot({ path: path.join(OUT, "globe-on-accent.png") });
   await ctx.close();
 }
 

@@ -21,6 +21,7 @@ import {
   CREATE_ATTACHMENT_BUCKET,
   MAX_ATTACHMENT_IMAGES,
 } from "@/lib/create-attachment-image";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 
 export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
   const t = useTranslations("dashboard.createAnything");
@@ -225,7 +226,7 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
             className="absolute bottom-3 right-3 z-[2] flex h-11 w-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,#fcd34d_0%,#f97316_60%,#dc4a04_100%)] text-black shadow-[0_4px_18px_-4px_rgba(249,115,22,0.7)] transition-all duration-200 hover:brightness-110 hover:shadow-[0_6px_26px_-4px_rgba(249,115,22,0.9)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none"
           >
             {loading ? (
-              <span className="h-4 w-4 animate-spin rounded-full border-2 border-black/30 border-t-black" />
+              <ThinkingIndicator size="sm" tone="inherit" />
             ) : (
               <ArrowUp className="h-5 w-5" />
             )}

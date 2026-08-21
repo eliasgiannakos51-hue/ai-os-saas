@@ -29,6 +29,45 @@ const config: Config = {
         muted: "var(--muted)",
         input: "var(--input-bg)",
       },
+      // ACCENT COLOURS, SPLIT BY ROLE — the light theme's actual fix.
+      //
+      // Tailwind resolves `text-orange-400`, `bg-orange-400` and
+      // `border-orange-400` from ONE palette entry, which is why the
+      // light theme could not be fixed by editing a palette: the three
+      // roles need different answers. `bg-orange-500` is a filled button
+      // with black text and measures 7.49:1 — correct as it is. The same
+      // colour as TEXT on white is 2.80:1 and as a BORDER 2.62:1 over the
+      // page background — both failing.
+      //
+      // Overriding `textColor` and `borderColor` separately (a first-class
+      // Tailwind feature) lets each role carry its own theme-aware value
+      // while every class name in the app stays exactly as written. No
+      // component changed; ~700 usages were corrected by these two blocks.
+      //
+      // `rgb(var(--x) / <alpha-value>)` and not `var(--x)`: 246 of those
+      // usages carry an opacity modifier (`border-orange-500/40`,
+      // `text-amber-400/90`). With a plain var() Tailwind emits no alpha
+      // channel and every one of them silently becomes fully opaque.
+      textColor: {
+        orange: {
+          200: "rgb(var(--accent-text-softer) / <alpha-value>)",
+          300: "rgb(var(--accent-text-soft) / <alpha-value>)",
+          400: "rgb(var(--accent-text) / <alpha-value>)",
+          500: "rgb(var(--accent-text-strong) / <alpha-value>)",
+        },
+        amber: {
+          200: "rgb(var(--accent-amber-text-softer) / <alpha-value>)",
+          300: "rgb(var(--accent-amber-text-soft) / <alpha-value>)",
+          400: "rgb(var(--accent-amber-text) / <alpha-value>)",
+        },
+      },
+      borderColor: {
+        // Only the 500s. The 600/800/900 accent borders already measure
+        // 3.19:1 or better on white and are left alone — a theme
+        // override that changes nothing is a lie in the source.
+        orange: { 500: "rgb(var(--accent-border) / <alpha-value>)" },
+        amber: { 500: "rgb(var(--accent-amber-border) / <alpha-value>)" },
+      },
       fontFamily: {
         sans: [
           "'Inter'",

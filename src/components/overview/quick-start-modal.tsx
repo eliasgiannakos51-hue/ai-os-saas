@@ -6,6 +6,7 @@ import { X, Rocket, Check } from "lucide-react";
 import { WORKSPACE_TEMPLATES } from "@/lib/workspace-templates";
 import { useToast } from "@/components/toast/toast-context";
 import { useTranslations } from "next-intl";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 
 export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const router = useRouter();
@@ -89,7 +90,7 @@ export function QuickStartModal({ open, onClose }: { open: boolean; onClose: () 
                 className="inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {applyingId === template.id ? (
-                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-black/30 border-t-black" />
+                  <ThinkingIndicator size="sm" tone="inherit" />
                 ) : (
                   <Check className="h-3.5 w-3.5" />
                 )}

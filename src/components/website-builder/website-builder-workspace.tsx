@@ -145,7 +145,7 @@ function WebsiteThumbnail({ website }: { website: UserWebsite }) {
         ) : website.status === "flagged" ? (
           <AlertTriangle className="h-4 w-4 text-amber-400" />
         ) : (
-          <Loader2 className="h-4 w-4 animate-spin text-muted" />
+          <ThinkingIndicator size="sm" />
         )}
       </div>
     );
@@ -1064,7 +1064,7 @@ export function WebsiteBuilderWorkspace({
                 className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {editing ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                  <ThinkingIndicator size="sm" tone="inherit" />
                 ) : (
                   <Wand2 className="h-3.5 w-3.5" aria-hidden="true" />
                 )}
@@ -1148,7 +1148,7 @@ export function WebsiteBuilderWorkspace({
                     className="h-full w-full rounded-xl border border-border bg-white"
                   />
                   <div className="absolute left-1/2 top-3 flex -translate-x-1/2 items-center gap-1.5 rounded-full border border-orange-500/40 bg-black/80 px-3 py-1.5 text-xs font-medium text-orange-300 shadow-lg backdrop-blur">
-                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                    <ThinkingIndicator size="sm" />
                     {t("livePreviewBadge")}
                   </div>
                 </div>
@@ -1189,7 +1189,7 @@ export function WebsiteBuilderWorkspace({
                       className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-lg bg-amber-500 px-4 py-1.5 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {regeneratingId === previewWebsite.id ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                        <ThinkingIndicator size="sm" tone="inherit" />
                       ) : (
                         <Wand2 className="h-3.5 w-3.5" aria-hidden="true" />
                       )}
@@ -1552,7 +1552,7 @@ export function WebsiteBuilderWorkspace({
                   className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {generating ? (
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    <ThinkingIndicator size="sm" tone="inherit" />
                   ) : (
                     <Sparkles className="h-4 w-4" aria-hidden="true" />
                   )}

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, type ChangeEvent } from "react";
-import { Wand2, Languages, Sparkles, HelpCircle, Check, X, Loader2 } from "lucide-react";
+import { Wand2, Languages, Sparkles, HelpCircle, Check, X } from "lucide-react";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useTranslations } from "next-intl";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { useCredits } from "@/components/credits/credits-context";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 
 const ACTIONS = [
   { id: "rewrite", label: "Rewrite", icon: Wand2 },
@@ -145,7 +146,7 @@ export function TextActionsTextarea({
               className="flex h-7 w-7 items-center justify-center rounded-md text-muted transition-colors duration-150 hover:bg-orange-500/10 hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {pendingAction === id ? (
-                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                <ThinkingIndicator size="sm" />
               ) : (
                 <Icon className="h-3.5 w-3.5" />
               )}

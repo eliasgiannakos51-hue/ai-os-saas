@@ -19,6 +19,7 @@ import { MAX_GENERATION_ATTEMPTS } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { findInventedNumbers } from "@/lib/website-invented-numbers";
 import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
+import { enforceUnsplashAttribution } from "@/lib/website-image-placeholders";
 import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
 import {
   describeSecurityScanIssue,
@@ -389,6 +390,27 @@ export async function POST(request: Request) {
       // it. See lib/website-link-safety.ts for why <base href> cannot be
       // the fix here.
       htmlContent = makeGeneratedLinksSafe(htmlContent).html;
+
+      // Every Unsplash photo in the document we are about to store
+      // carries its photographer. Generation already emits the credit, so
+      // this is normally a no-op here — it runs on this path anyway
+      // because "whatever stores a document enforces this" is a rule with
+      // no exception to remember, and because the edit path (which is
+      // where credits actually go missing) shares the same guarantee. See
+      // lib/website-image-placeholders.ts.
+      {
+        const attribution = enforceUnsplashAttribution(htmlContent);
+        htmlContent = attribution.html;
+        if (attribution.restored > 0 || attribution.removed > 0) {
+          logApiError(
+            "/api/websites/generate/process",
+            new Error(
+              `Unsplash attribution enforced: ${attribution.restored} credit(s) rebuilt, ${attribution.removed} photo(s) removed as unattributable`
+            ),
+            { websiteId }
+          );
+        }
+      }
 
       // AI Output Protection Layer — defense in depth beyond the
       // sandboxed preview iframe (sandbox="", the strictest possible

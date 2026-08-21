@@ -4,6 +4,7 @@ import { editWebsiteHtml } from "@/lib/website-builder";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { downloadReferenceImages } from "@/lib/website-reference-image-server";
 import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
+import { enforceUnsplashAttribution } from "@/lib/website-image-placeholders";
 import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
 import {
   describeSecurityScanIssue,
@@ -266,6 +267,27 @@ export async function POST(request: Request) {
       // can, and the result is the same — the customer's menu pointing at
       // our login page. See lib/website-link-safety.ts.
       updatedHtml = makeGeneratedLinksSafe(updatedHtml).html;
+
+      // THE PATH THIS EXISTS FOR. editWebsiteHtml returns a whole new
+      // document, and a model rewriting a section routinely drops the
+      // <span class="unsplash-credit"> beside a photo it kept — leaving a
+      // hotlinked Unsplash image with nobody's name on it on a live
+      // customer site, with nothing red anywhere. The prompt now asks; this
+      // makes it true, the same way lib/website-link-safety.ts does for
+      // internal links. See lib/website-image-placeholders.ts.
+      {
+        const attribution = enforceUnsplashAttribution(updatedHtml);
+        updatedHtml = attribution.html;
+        if (attribution.restored > 0 || attribution.removed > 0) {
+          logApiError(
+            "/api/websites/edit",
+            new Error(
+              `Unsplash attribution enforced after edit: ${attribution.restored} credit(s) rebuilt, ${attribution.removed} photo(s) removed as unattributable`
+            ),
+            { websiteId }
+          );
+        }
+      }
 
       // AI Output Protection Layer — same two-layer check as generation
       // (see api/websites/generate/process/route.ts's file comment for

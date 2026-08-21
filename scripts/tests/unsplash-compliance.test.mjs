@@ -45,6 +45,32 @@ function ok(name, cond) {
   check(name, Boolean(cond), true);
 }
 
+/**
+ * The source of ONE function, brace-matched from its declaration.
+ *
+ * Needed because these assertions are regexes over source, and a regex
+ * anchored on a function NAME also matches that name in a comment — which
+ * is how "it authenticates with the access key" came to be asserting
+ * something about a different function entirely. Returns "" if the
+ * declaration is not found, so a rename fails the test loudly instead of
+ * matching the whole file.
+ */
+function functionBody(source, declaration) {
+  const start = source.indexOf(declaration);
+  if (start === -1) return "";
+  const open = source.indexOf("{", start + declaration.length);
+  if (open === -1) return "";
+  let depth = 0;
+  for (let i = open; i < source.length; i++) {
+    if (source[i] === "{") depth++;
+    else if (source[i] === "}") {
+      depth--;
+      if (depth === 0) return source.slice(open, i + 1);
+    }
+  }
+  return "";
+}
+
 const ph = await loadTs("src/lib/website-image-placeholders.ts");
 const uns = await loadTs("src/lib/unsplash.ts");
 
@@ -123,9 +149,25 @@ ok(
   "it requests the photo's downloadLocation",
   /fetch\(photo\.downloadLocation/.test(unsplashSrc)
 );
+// SCOPED TO THE FUNCTION BODY, and that is the whole point of this
+// version. The previous assertion searched from the first occurrence of
+// the string "triggerUnsplashDownload" — which is in the FILE HEADER
+// COMMENT, twenty lines above searchUnsplashPhoto. A non-greedy match
+// from there found searchUnsplashPhoto's Authorization header and passed,
+// so removing the auth header from the trigger itself left the suite
+// green. scripts/tests/unsplash-attribution.mutation.mjs re-introduced
+// exactly that and the suite did not notice; this is the repair.
+// An unauthenticated GET to download_location registers nothing with
+// Unsplash, which is invisible from the product and fatal at review.
+const triggerBody = functionBody(unsplashSrc, "export async function triggerUnsplashDownload");
+ok("the trigger function body was located", triggerBody.length > 0);
 ok(
   "it authenticates with the access key",
-  /triggerUnsplashDownload[\s\S]*?Authorization: `Client-ID \$\{accessKey\}`/.test(unsplashSrc)
+  /Authorization: `Client-ID \$\{accessKey\}`/.test(triggerBody)
+);
+ok(
+  "it reads the key from the environment itself",
+  /const accessKey = process\.env\.UNSPLASH_ACCESS_KEY;/.test(triggerBody)
 );
 // Only photos that SHIP get credited. Crediting every search result would
 // report uses that never happened.
@@ -140,7 +182,8 @@ ok(
 // UNCREDITED photos once broadening searches ate the allowance.
 ok(
   "the trigger is not blocked by the search ceiling",
-  /triggerUnsplashDownload[\s\S]*?if \(budget\?\.halted\) return false;/.test(unsplashSrc)
+  /if \(budget\?\.halted\) return false;/.test(triggerBody) &&
+    !/budget && !budget\.canSpend\(\)/.test(triggerBody)
 );
 ok(
   "the search IS still bounded by the ceiling",

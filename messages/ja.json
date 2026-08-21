@@ -664,7 +664,10 @@
       "cacheColRead": "キャッシュから",
       "cacheColWrite": "書き込み",
       "cacheEmpty": "プロンプトトークンはまだ記録されていません。",
-      "cacheMiscachedAlert": "{features}：キャッシュに書き込むだけで読み戻していません — ブレークポイントがリクエストごとに変わる内容の上にあります。"
+      "cacheMiscachedAlert": "{features}：キャッシュに書き込むだけで読み戻していません — ブレークポイントがリクエストごとに変わる内容の上にあります。",
+      "absorbedRefusals": "吸収した拒否: {calls} 件のエージェント実行がタスクを拒否し、課金されませんでした — €{cost} のモデル費用は当社負担です。",
+      "absorbedRefusalsShare": "これはこの期間の収益の {share}% です。確認しきい値は {limit}% です。",
+      "absorbedRefusalsShareUnknown": "収益に対する割合は表示されません: このレポートには比較する収益の数値がありません。"
     },
     "pushNotifications": {
       "title": "プッシュ通知",

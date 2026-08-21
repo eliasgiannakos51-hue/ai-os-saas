@@ -664,7 +664,10 @@
       "cacheColRead": "Dalla cache",
       "cacheColWrite": "Scritti",
       "cacheEmpty": "Nessun token di prompt registrato finora.",
-      "cacheMiscachedAlert": "{features}: scrive nella cache ma non legge nulla — il punto di interruzione è su contenuto che cambia a ogni richiesta."
+      "cacheMiscachedAlert": "{features}: scrive nella cache ma non legge nulla — il punto di interruzione è su contenuto che cambia a ogni richiesta.",
+      "absorbedRefusals": "Rifiuti assorbiti: {calls} esecuzione/i di agente hanno rifiutato il compito e non sono state addebitate — €{cost} di costo del modello a nostro carico.",
+      "absorbedRefusalsShare": "Pari al {share}% dei ricavi in questo periodo; la soglia di revisione è {limit}%.",
+      "absorbedRefusalsShareUnknown": "La quota sui ricavi non viene mostrata: questo report non ha un dato di ricavo con cui confrontarla."
     },
     "pushNotifications": {
       "title": "Notifiche push",

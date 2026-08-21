@@ -12,6 +12,7 @@ import {
   summariseCacheReport,
   effectiveMargin,
   summariseMarginReport,
+  ABSORBED_REFUSAL_REVENUE_LIMIT,
   MARGIN_REPORT_WINDOW_DAYS,
   MARGIN_TARGET,
   type MarginFeatureRow,
@@ -215,6 +216,36 @@ export async function MarginReportView({
             <p className="mt-3 flex items-start gap-1.5 rounded-lg border border-orange-500/30 bg-orange-500/[0.05] px-3 py-2 text-[11px] leading-relaxed text-orange-300">
               <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
               {t("projectionOnly")}
+            </p>
+          )}
+
+          {/* ABSORBED REFUSALS, on their own line rather than buried in the
+              table. A refused agent run charges nothing and costs us the
+              tokens it burned before refusing; that is a deliberate
+              absorption, not a pricing fault, and reading it as one row
+              among twenty is how a deliberate cost turns into an
+              unexamined one. */}
+          {summary.absorbedRefusals && (
+            <p
+              className={`mt-3 flex items-start gap-1.5 rounded-lg border px-3 py-2 text-[11px] leading-relaxed ${
+                summary.absorbedRefusals.overBudget
+                  ? "border-red-800 bg-red-950/30 text-red-300"
+                  : "border-border bg-panel/60 text-muted"
+              }`}
+            >
+              <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0" aria-hidden="true" />
+              <span>
+                {t("absorbedRefusals", {
+                  calls: summary.absorbedRefusals.calls,
+                  cost: summary.absorbedRefusals.costEur.toFixed(2),
+                })}{" "}
+                {summary.absorbedRefusals.shareOfRevenue === null
+                  ? t("absorbedRefusalsShareUnknown")
+                  : t("absorbedRefusalsShare", {
+                      share: (summary.absorbedRefusals.shareOfRevenue * 100).toFixed(2),
+                      limit: (ABSORBED_REFUSAL_REVENUE_LIMIT * 100).toFixed(0),
+                    })}
+              </span>
             </p>
           )}
 

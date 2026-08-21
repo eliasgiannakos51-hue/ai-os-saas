@@ -664,7 +664,10 @@
       "cacheColRead": "From cache",
       "cacheColWrite": "Written",
       "cacheEmpty": "No prompt tokens recorded yet.",
-      "cacheMiscachedAlert": "{features}: writing to cache but reading nothing back — the breakpoint is on content that changes every request."
+      "cacheMiscachedAlert": "{features}: writing to cache but reading nothing back — the breakpoint is on content that changes every request.",
+      "absorbedRefusals": "Absorbed refusals: {calls} agent run(s) refused the task and were not charged — €{cost} of model cost carried by us.",
+      "absorbedRefusalsShare": "That is {share}% of revenue in this window; the review threshold is {limit}%.",
+      "absorbedRefusalsShareUnknown": "Share of revenue is not shown: this report has no revenue figure to measure against."
     },
     "pushNotifications": {
       "title": "Push notifications",

@@ -664,7 +664,10 @@
       "cacheColRead": "Da cache",
       "cacheColWrite": "Escritos",
       "cacheEmpty": "Ainda não há tokens de prompt registados.",
-      "cacheMiscachedAlert": "{features}: escreve na cache mas não lê nada de volta — o ponto de corte está em conteúdo que muda a cada pedido."
+      "cacheMiscachedAlert": "{features}: escreve na cache mas não lê nada de volta — o ponto de corte está em conteúdo que muda a cada pedido.",
+      "absorbedRefusals": "Recusas absorvidas: {calls} execução(ões) de agente recusaram a tarefa e não foram cobradas — €{cost} de custo de modelo suportado por nós.",
+      "absorbedRefusalsShare": "Isso é {share}% da receita neste período; o limite de revisão é {limit}%.",
+      "absorbedRefusalsShareUnknown": "A percentagem da receita não é mostrada: este relatório não tem um valor de receita com que a comparar."
     },
     "pushNotifications": {
       "title": "Notificações push",

@@ -664,7 +664,10 @@
       "cacheColRead": "来自缓存",
       "cacheColWrite": "已写入",
       "cacheEmpty": "尚未记录任何提示词 token。",
-      "cacheMiscachedAlert": "{features}：只写入缓存却读不回任何内容 — 断点落在每次请求都会变化的内容上。"
+      "cacheMiscachedAlert": "{features}：只写入缓存却读不回任何内容 — 断点落在每次请求都会变化的内容上。",
+      "absorbedRefusals": "已吸收的拒绝：{calls} 次代理运行拒绝了任务且未计费 —— €{cost} 的模型成本由我们承担。",
+      "absorbedRefusalsShare": "占该期间收入的 {share}%；复核阈值为 {limit}%。",
+      "absorbedRefusalsShareUnknown": "未显示占收入的比例：本报告没有可对比的收入数字。"
     },
     "pushNotifications": {
       "title": "推送通知",

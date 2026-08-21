@@ -664,7 +664,10 @@
       "cacheColRead": "Depuis le cache",
       "cacheColWrite": "Écrits",
       "cacheEmpty": "Aucun jeton de prompt enregistré pour l'instant.",
-      "cacheMiscachedAlert": "{features} : écrit dans le cache mais ne lit rien en retour — le point de coupure porte sur du contenu qui change à chaque requête."
+      "cacheMiscachedAlert": "{features} : écrit dans le cache mais ne lit rien en retour — le point de coupure porte sur du contenu qui change à chaque requête.",
+      "absorbedRefusals": "Refus absorbés : {calls} exécution(s) d’agent ont refusé la tâche sans être facturées — €{cost} de coût modèle à notre charge.",
+      "absorbedRefusalsShare": "Soit {share}% du chiffre d’affaires sur cette période ; le seuil d’examen est de {limit}%.",
+      "absorbedRefusalsShareUnknown": "La part du chiffre d’affaires n’est pas affichée : ce rapport n’a aucun chiffre d’affaires de référence."
     },
     "pushNotifications": {
       "title": "Notifications push",

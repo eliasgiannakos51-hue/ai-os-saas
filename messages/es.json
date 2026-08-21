@@ -664,7 +664,10 @@
       "cacheColRead": "Desde caché",
       "cacheColWrite": "Escritos",
       "cacheEmpty": "Aún no se han registrado tokens de prompt.",
-      "cacheMiscachedAlert": "{features}: escribe en la caché pero no lee nada de vuelta — el punto de corte está en contenido que cambia en cada solicitud."
+      "cacheMiscachedAlert": "{features}: escribe en la caché pero no lee nada de vuelta — el punto de corte está en contenido que cambia en cada solicitud.",
+      "absorbedRefusals": "Rechazos absorbidos: {calls} ejecución(es) de agente rechazaron la tarea y no se cobraron — €{cost} de coste de modelo asumido por nosotros.",
+      "absorbedRefusalsShare": "Es el {share}% de los ingresos de este periodo; el umbral de revisión es {limit}%.",
+      "absorbedRefusalsShareUnknown": "No se muestra el porcentaje sobre ingresos: este informe no tiene una cifra de ingresos con la que compararlo."
     },
     "pushNotifications": {
       "title": "Notificaciones push",

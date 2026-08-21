@@ -664,7 +664,10 @@
       "cacheColRead": "Aus dem Cache",
       "cacheColWrite": "Geschrieben",
       "cacheEmpty": "Noch keine Prompt-Tokens erfasst.",
-      "cacheMiscachedAlert": "{features}: schreibt in den Cache, liest aber nichts zurück — der Haltepunkt liegt auf Inhalten, die sich bei jeder Anfrage ändern."
+      "cacheMiscachedAlert": "{features}: schreibt in den Cache, liest aber nichts zurück — der Haltepunkt liegt auf Inhalten, die sich bei jeder Anfrage ändern.",
+      "absorbedRefusals": "Aufgefangene Ablehnungen: {calls} Agentenlauf/-läufe haben die Aufgabe abgelehnt und wurden nicht berechnet — €{cost} Modellkosten tragen wir.",
+      "absorbedRefusalsShare": "Das sind {share}% des Umsatzes in diesem Zeitraum; die Prüfschwelle liegt bei {limit}%.",
+      "absorbedRefusalsShareUnknown": "Der Umsatzanteil wird nicht angezeigt: diesem Bericht fehlt eine Umsatzgröße als Bezug."
     },
     "pushNotifications": {
       "title": "Push-Benachrichtigungen",

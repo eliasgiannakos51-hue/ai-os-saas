@@ -246,6 +246,52 @@ const REGISTERED_BYPASS_IDENTIFIERS = new Set(
   FREE_ALLOWANCES.flatMap((a) => a.bypassIdentifiers)
 );
 
+// ---------------------------------------------------------------------
+// SELF-LIMITING BYPASSES: a third category, and the narrowest of the three.
+//
+// `cannotComplete` is not admin, and it is not a free quota either. A
+// refused agent run charges nothing because the task was impossible when
+// we let the user create it — but the model has ALREADY RUN, so the
+// Anthropic cost is real and we absorb it. On the face of it that is
+// exactly the unbounded giveaway this gate exists to stop.
+//
+// It is bounded, and by the code rather than by a number someone picked:
+// execute-agent DISABLES the agent on the first refusal, so one agent can
+// produce at most one absorbed refusal in its lifetime. The ceiling is
+// therefore the plan's agent limit, which is already enforced elsewhere —
+// 50 agents on Ultimate at a worst-case €0.1652 is €8.26 against €200,
+// 4.1%, and only if every agent a customer ever made refused on its first
+// run.
+//
+// THAT ARGUMENT IS THE ONLY THING MAKING THIS SAFE, so it is asserted
+// rather than trusted. Delete the disable and this list stops applying:
+// the bypass goes back to being unregistered and the build fails. See the
+// mutation in combined-ceiling.mutation.mjs.
+const SELF_LIMITING_BYPASSES = {
+  cannotComplete: {
+    file: "src/lib/agents/execute-agent.ts",
+    // The refusal must reach `shouldDisable`, and shouldDisable must be
+    // what writes status "disabled" — in the same function, so there is no
+    // window in which a refusal is free and the agent still scheduled.
+    requires: [
+      /const shouldDisable = cannotComplete \|\|/,
+      /shouldDisable \? \{ status: "disabled" as const \} : \{\}/,
+      // and the schedule cleared, or a disabled agent still has a next run
+      /next_run_at: shouldDisable \? null/,
+    ],
+  },
+};
+for (const [identifier, spec] of Object.entries(SELF_LIMITING_BYPASSES)) {
+  const src = readFileSync(spec.file, "utf8");
+  for (const [i, re] of spec.requires.entries()) {
+    check(
+      `${identifier} is only free because the agent is disabled in the same call (${i + 1}/${spec.requires.length})`,
+      re.test(src),
+      `${spec.file} no longer matches ${re} — without it the refusal is an unbounded free path`
+    );
+  }
+}
+
 // Comments are stripped first. A file that DOCUMENTS the rule ("every
 // `bypassCharge:` expression is inventoried") is not a call site, and a
 // scan that cannot tell the difference reports the documentation as a
@@ -300,10 +346,15 @@ check(`at least 20 bypassCharge decisions are still inventoried (${bypassSites.l
 const unregistered = [];
 for (const site of bypassSites) {
   const identifiers = site.expr.match(/[A-Za-z_$][\w$]*/g) ?? [];
-  const unknown = identifiers.filter(
+  const selfLimiting = new Set(Object.keys(SELF_LIMITING_BYPASSES));
+    const unknown = identifiers.filter(
     (id) =>
       !ADMIN_BYPASS_IDENTIFIERS.has(id) &&
       !REGISTERED_BYPASS_IDENTIFIERS.has(id) &&
+      // Accepted ONLY while the assertions above still hold. If the
+      // disable is removed those go red first, so this can never be the
+      // reason an unbounded free path ships.
+      !selfLimiting.has(id) &&
       // structural words in the expression, not conditions
       !["await", "true", "false", "null", "undefined", "report", "user_id"].includes(id)
   );

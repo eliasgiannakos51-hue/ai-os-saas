@@ -12,6 +12,34 @@ export const MARGIN_REPORT_WINDOW_DAYS = 30;
 /** Below this the margin is flagged — it is the target the pricing math aims at. */
 export const MARGIN_TARGET = 4;
 
+/**
+ * The settlement feature a refused agent run logs under.
+ *
+ * A `cannot_complete` run charges nothing: the task was impossible when we
+ * let the user create it, so charging for the discovery would be charging
+ * for our own gap. The model has ALREADY RUN by then, though, so the
+ * Anthropic cost is real and we absorb it. Kept on its own feature name so
+ * it lands as its own row here rather than dragging agent_run's margin
+ * down and looking like a pricing fault.
+ */
+export const ABSORBED_REFUSAL_FEATURE = "agent_run_cannot_complete";
+
+/**
+ * The share of monthly revenue absorbed refusals may reach before this
+ * stops being noise.
+ *
+ * WHY THIS IS EXPECTED TO STAY FAR BELOW IT. execute-agent disables an
+ * agent on its FIRST capability refusal (`shouldDisable = cannotComplete
+ * || …`, setting status "disabled" and next_run_at null), so one agent can
+ * produce at most one absorbed refusal — ever, not per month. The ceiling
+ * is therefore the plan's agent limit, which is already enforced: 50 on
+ * Ultimate, at a worst-case €0.1652 a run, is €8.26 against €200 — 4.1%,
+ * and only if every agent a customer ever created refused on its first
+ * run. Crossing 2% of real revenue would mean that theory is wrong, which
+ * is exactly when someone should look.
+ */
+export const ABSORBED_REFUSAL_REVENUE_LIMIT = 0.02;
+
 export type MarginLogRow = {
   feature: string;
   achieved_margin: number | string | null;
@@ -106,6 +134,22 @@ export type MarginSummary = {
    *  is below target. These are the rows that go red and trigger the
    *  alert. */
   belowTarget: { feature: string; margin: number; hypothetical: boolean }[];
+  /**
+   * Refused agent runs, absorbed rather than charged. Null when there were
+   * none in the window.
+   *
+   * `shareOfRevenue` is null when no revenue figure was supplied — this
+   * module has no MRR source of its own, and a share computed against a
+   * zero it invented would read as a reassuring 0%. Null says "not known",
+   * which is the truth, and `overBudget` stays false rather than firing an
+   * alert on a number nobody produced.
+   */
+  absorbedRefusals: {
+    calls: number;
+    costEur: number;
+    shareOfRevenue: number | null;
+    overBudget: boolean;
+  } | null;
 };
 
 /**
@@ -220,7 +264,10 @@ export function effectiveMargin(row: MarginFeatureRow): { margin: number | null;
 
 /** The figures above the table: what the last 30 days actually cost, what
  *  they earned or would have earned, and where the money went. */
-export function summariseMarginReport(rows: MarginFeatureRow[]): MarginSummary {
+export function summariseMarginReport(
+  rows: MarginFeatureRow[],
+  options: { monthlyRevenueEur?: number | null } = {}
+): MarginSummary {
   const totalCostEur = rows.reduce((sum, r) => sum + r.totalCostEur, 0);
   const totalWouldBeCredits = rows.reduce((sum, r) => sum + r.wouldBeCredits, 0);
   const totalChargedCredits = rows.reduce((sum, r) => sum + r.chargedCredits, 0);
@@ -251,6 +298,21 @@ export function summariseMarginReport(rows: MarginFeatureRow[]): MarginSummary {
         : null,
     projectionOnly: rows.length > 0 && rows.every((r) => r.chargedCalls === 0),
     belowTarget,
+    absorbedRefusals: (() => {
+      const row = rows.find((r) => r.feature === ABSORBED_REFUSAL_FEATURE);
+      if (!row) return null;
+      const revenue = options.monthlyRevenueEur;
+      const share =
+        typeof revenue === "number" && Number.isFinite(revenue) && revenue > 0
+          ? row.totalCostEur / revenue
+          : null;
+      return {
+        calls: row.chargedCalls + row.bypassCalls,
+        costEur: row.totalCostEur,
+        shareOfRevenue: share,
+        overBudget: share !== null && share > ABSORBED_REFUSAL_REVENUE_LIMIT,
+      };
+    })(),
   };
 }
 

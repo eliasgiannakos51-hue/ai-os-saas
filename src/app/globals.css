@@ -20,12 +20,12 @@
    script in layout.tsx (before paint, to avoid a flash) and by
    theme-toggle.tsx afterwards. */
 :root {
-  --background: #0a0a0a;
-  --panel: #141414;
-  --panel-hover: #1a1a1a;
-  --border: #242424;
-  --foreground: #e5e5e5;
-  --muted: #8a8a8a;
+  --background: 10 10 10;
+  --panel: 20 20 20;
+  --panel-hover: 26 26 26;
+  --border: 106 106 113;
+  --foreground: 229 229 229;
+  --muted: 138 138 138;
   --input-bg: rgba(0, 0, 0, 0.4);
   color-scheme: dark;
 
@@ -153,11 +153,11 @@
 }
 
 [data-theme="light"] {
-  --background: #f7f7f8;
-  --panel: #ffffff;
-  --panel-hover: #f2f2f4;
-  --border: #e4e4e7;
-  --foreground: #18181b;
+  --background: 247 247 248;
+  --panel: 255 255 255;
+  --panel-hover: 242 242 244;
+  --border: 134 134 143;
+  --foreground: 24 24 27;
   /* zinc-600, not zinc-500. THIS WAS ALWAYS BELOW THRESHOLD and nothing
      caught it, because every check measured secondary text against
      #ffffff. #71717a is 4.83:1 on the panel, 4.51:1 on the page and
@@ -168,7 +168,7 @@
      and it did — production measured 4.35:1 under the corner pools.
      zinc-600 is 6.91:1 on the worst surface and tolerates a corner-pool
      alpha up to 0.26 before it would drop below 4.5:1 again. */
-  --muted: #52525b;
+  --muted: 82 82 91;
   --input-bg: #f4f4f5;
   color-scheme: light;
 
@@ -320,23 +320,23 @@
    a variable) deliberately isn't part of this system, so it stays
    identical across every theme for brand consistency. */
 [data-theme="midnight"] {
-  --background: #05070f;
-  --panel: #0d1220;
-  --panel-hover: #131a2c;
-  --border: #1f2740;
-  --foreground: #e6e9f5;
-  --muted: #8188a8;
+  --background: 5 7 15;
+  --panel: 13 18 32;
+  --panel-hover: 19 26 44;
+  --border: 99 105 131;
+  --foreground: 230 233 245;
+  --muted: 129 136 168;
   --input-bg: rgba(5, 10, 25, 0.5);
   color-scheme: dark;
 }
 
 [data-theme="carbon"] {
-  --background: #1a1a1c;
-  --panel: #232326;
-  --panel-hover: #2a2a2e;
-  --border: #38383c;
-  --foreground: #eeeeef;
-  --muted: #9c9ca3;
+  --background: 26 26 28;
+  --panel: 35 35 38;
+  --panel-hover: 42 42 46;
+  --border: 122 122 130;
+  --foreground: 238 238 239;
+  --muted: 156 156 163;
   --input-bg: rgba(255, 255, 255, 0.04);
   color-scheme: dark;
 }
@@ -457,26 +457,186 @@ html {
   font-size: var(--app-font-size);
 }
 
+
+/* ALPHA DOES NOT CARRY HIERARCHY IN LIGHT — THE BORDERS TOO.
+   
+   The block above did this for TEXT and stopped there. Borders got the
+   same alpha treatment and none of the same attention, and they are the
+   only thing separating a white card from a #f7f7f8 page.
+   
+   Measured on the deployment (scripts/light-border-before-after.mjs, ten
+   pages, 551 painted border sides): every resting-state alpha accent
+   border lands between 1.19:1 and 2.16:1 once composited, against the
+   3:1 of WCAG 1.4.11. Not one of them passes.
+   
+   AND MOST OF THEM CANNOT BE FIXED BY PICKING A DARKER COLOUR — that is
+   arithmetic. A border at 40% over white is at most 255*0.6 = 153 in
+   every channel even if the colour is pure black, which is 2.80:1. At
+   30% the ceiling is 2.03:1, at 20% it is 1.60:1. There is no orange, no
+   red and no emerald that clears 3:1 at those alphas, so the alpha is
+   what has to go in light.
+   
+   HOVER AND FOCUS VARIANTS ARE DELIBERATELY NOT LISTED. Tailwind emits
+   those as `.hover\:border-orange-500\/40:hover`, a different selector,
+   so they keep their translucency — correct, because the component is
+   already identifiable at rest by --border and a state change is not the
+   thing 1.4.11 is about.
+   
+   ONE EXEMPTION, NAMED RATHER THAN OMITTED: the four
+   `ring-<hue>-400/25` in components/overview/quick-action-card.tsx are
+   `ring-1 ring-inset` on a 44x44 decorative icon chip that sits inside a
+   card with its own border. They identify nothing, WCAG 1.4.11 exempts
+   pure decoration, and forcing them opaque would put a hard coloured
+   outline around every dashboard icon. scripts/tests/light-theme-
+   contrast.test.mjs carries the same list, so this stays a decision
+   rather than an oversight.
+   
+   Generated from the measured inventory; the test fails if a new
+   resting-state alpha border appears without a line here. */
+
+/* 11 usage(s) across 4 class(es) */
+[data-theme="light"] .border-amber-500\/30,
+[data-theme="light"] .border-amber-500\/40,
+[data-theme="light"] .border-amber-500\/50,
+[data-theme="light"] .border-amber-600\/40 {
+  border-color: rgb(var(--accent-amber-border));
+}
+
+/* 3 usage(s) across 2 class(es) */
+[data-theme="light"] .border-amber-800\/40,
+[data-theme="light"] .border-amber-800\/50 {
+  border-color: rgb(var(--accent-amber-border-deep));
+}
+
+/* 51 usage(s) across 9 class(es) */
+[data-theme="light"] .border-orange-500\/15,
+[data-theme="light"] .border-orange-500\/20,
+[data-theme="light"] .border-orange-500\/25,
+[data-theme="light"] .border-orange-500\/30,
+[data-theme="light"] .border-orange-500\/35,
+[data-theme="light"] .border-orange-500\/40,
+[data-theme="light"] .border-orange-500\/50,
+[data-theme="light"] .border-orange-500\/60,
+[data-theme="light"] .border-orange-600\/40 {
+  border-color: rgb(var(--accent-border));
+}
+
+/* 6 usage(s) across 2 class(es) */
+[data-theme="light"] .border-orange-900\/50,
+[data-theme="light"] .border-orange-900\/60 {
+  border-color: rgb(var(--accent-border-deep));
+}
+
+/* 11 usage(s) across 6 class(es) */
+[data-theme="light"] .border-red-500\/25,
+[data-theme="light"] .border-red-500\/30,
+[data-theme="light"] .border-red-500\/35,
+[data-theme="light"] .border-red-500\/40,
+[data-theme="light"] .border-rose-500\/30,
+[data-theme="light"] .border-rose-500\/40 {
+  border-color: rgb(var(--danger-border));
+}
+
+/* 5 usage(s) across 2 class(es) */
+[data-theme="light"] .border-red-900\/50,
+[data-theme="light"] .border-red-900\/60 {
+  border-color: rgb(var(--danger-border-deep));
+}
+
+/* 1 usage(s) across 1 class(es) */
+[data-theme="light"] .border-blue-500\/40 {
+  border-color: rgb(var(--module-blue));
+}
+
+/* 3 usage(s) across 2 class(es) */
+[data-theme="light"] .border-cyan-500\/40,
+[data-theme="light"] .border-cyan-600\/40 {
+  border-color: rgb(var(--module-cyan));
+}
+
+/* 2 usage(s) across 2 class(es) */
+[data-theme="light"] .border-fuchsia-500\/40,
+[data-theme="light"] .border-fuchsia-600\/40 {
+  border-color: rgb(var(--module-fuchsia));
+}
+
+/* 2 usage(s) across 2 class(es) */
+[data-theme="light"] .border-indigo-500\/40,
+[data-theme="light"] .border-indigo-600\/40 {
+  border-color: rgb(var(--module-indigo));
+}
+
+/* 1 usage(s) across 1 class(es) */
+[data-theme="light"] .border-lime-500\/40 {
+  border-color: rgb(var(--module-lime));
+}
+
+/* 2 usage(s) across 2 class(es) */
+[data-theme="light"] .border-pink-500\/40,
+[data-theme="light"] .border-pink-600\/40 {
+  border-color: rgb(var(--module-pink));
+}
+
+/* 1 usage(s) across 1 class(es) */
+[data-theme="light"] .border-purple-500\/40 {
+  border-color: rgb(var(--module-purple));
+}
+
+/* 2 usage(s) across 2 class(es) */
+[data-theme="light"] .border-sky-500\/40,
+[data-theme="light"] .border-sky-600\/40 {
+  border-color: rgb(var(--module-sky));
+}
+
+/* 1 usage(s) across 1 class(es) */
+[data-theme="light"] .border-slate-500\/40 {
+  border-color: rgb(var(--module-slate));
+}
+
+/* 1 usage(s) across 1 class(es) */
+[data-theme="light"] .border-teal-500\/40 {
+  border-color: rgb(var(--module-teal));
+}
+
+/* 1 usage(s) across 1 class(es) */
+[data-theme="light"] .border-violet-500\/40 {
+  border-color: rgb(var(--module-violet));
+}
+
+/* 5 usage(s) across 4 class(es) */
+[data-theme="light"] .border-emerald-500\/30,
+[data-theme="light"] .border-emerald-500\/40,
+[data-theme="light"] .border-emerald-500\/50,
+[data-theme="light"] .border-emerald-600\/40 {
+  border-color: rgb(var(--success-border));
+}
+
+/* 4 usage(s) across 2 class(es) */
+[data-theme="light"] .border-emerald-900\/50,
+[data-theme="light"] .border-emerald-900\/60 {
+  border-color: rgb(var(--success-border-deep));
+}
+
 /* Accessibility: high contrast — set on <html> via data-contrast="high".
    Pushes foreground/background to near-pure black/white and darkens/
    lightens the "muted" gray (used everywhere for secondary text) so it
    reads closer to full-strength text instead of a low-contrast hint.
    Combined with data-theme since both live on <html> at once. */
 html[data-contrast="high"] {
-  --foreground: #ffffff;
-  --muted: #d4d4d4;
-  --border: #4a4a4a;
-  --background: #000000;
-  --panel: #0a0a0a;
-  --panel-hover: #1c1c1c;
+  --foreground: 255 255 255;
+  --muted: 212 212 212;
+  --border: 106 106 113;
+  --background: 0 0 0;
+  --panel: 10 10 10;
+  --panel-hover: 28 28 28;
 }
 html[data-theme="light"][data-contrast="high"] {
-  --foreground: #000000;
-  --muted: #3f3f46;
-  --border: #a1a1aa;
-  --background: #ffffff;
-  --panel: #ffffff;
-  --panel-hover: #ececee;
+  --foreground: 0 0 0;
+  --muted: 63 63 70;
+  --border: 118 118 128;
+  --background: 255 255 255;
+  --panel: 255 255 255;
+  --panel-hover: 236 236 238;
 }
 
 /* Accessibility: reduce motion — set on <html> via data-motion="reduce".
@@ -506,8 +666,8 @@ body {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: rgb(var(--background));
+  color: rgb(var(--foreground));
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
 }
@@ -637,8 +797,8 @@ body {
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--foreground);
-  -webkit-box-shadow: 0 0 0px 1000px var(--panel) inset;
+  -webkit-text-fill-color: rgb(var(--foreground));
+  -webkit-box-shadow: 0 0 0px 1000px rgb(var(--panel)) inset;
   transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -854,7 +1014,7 @@ input:-webkit-autofill:focus {
    contentEditable elements have no `::placeholder` pseudo-element. */
 .document-editor-content:empty:before {
   content: attr(data-placeholder);
-  color: var(--muted);
+  color: rgb(var(--muted));
   pointer-events: none;
 }
 .document-editor-content h1 {

@@ -22,7 +22,7 @@ const CFG = "tailwind.config.ts";
 const MUTANTS = [
   {
     name: "light --muted back to zinc-500 (4.32:1 on panel-hover)",
-    file: CSS, from: "  --muted: #52525b;", to: "  --muted: #71717a;",
+    file: CSS, from: "  --muted: 82 82 91;", to: "  --muted: 113 113 122;",
   },
   {
     name: "amber text ink back to amber-700 (4.49:1 on panel-hover)",
@@ -98,6 +98,74 @@ const MUTANTS = [
     from: '[data-theme="light"] .text-orange-400\\/70,',
     to: "",
   },
+  // ------------------------------------------------------------------
+  // The structural border, and the bare-var() class of bug.
+  // ------------------------------------------------------------------
+  {
+    name: "light --border back to zinc-200 (1.13:1 on panel-hover, 157 measured failures)",
+    file: CSS, from: "  --border: 134 134 143;", to: "  --border: 228 228 231;",
+  },
+  {
+    name: "dark --border back to #242424 (1.12:1 on panel-hover)",
+    file: CSS, from: "  --border: 106 106 113;", to: "  --border: 36 36 36;",
+  },
+  {
+    name: "midnight's border left at its dark-only value",
+    file: CSS, from: "  --border: 99 105 131;", to: "  --border: 31 39 64;",
+  },
+  {
+    name: "carbon's border left at its dark-only value",
+    file: CSS, from: "  --border: 122 122 130;", to: "  --border: 56 56 60;",
+  },
+  {
+    name: "--border loses its headroom (3.02:1 — passes, but nothing left for the next backdrop)",
+    file: CSS, from: "  --border: 134 134 143;", to: "  --border: 139 139 148;",
+  },
+  {
+    name: "the border token goes back to a bare var() (every border-border/N dies)",
+    file: CFG,
+    from: 'border: "rgb(var(--border) / <alpha-value>)"',
+    to: 'border: "var(--border)"',
+  },
+  {
+    name: "--muted goes back to a bare var() (22 alpha usages emit nothing)",
+    file: CFG,
+    from: 'muted: "rgb(var(--muted) / <alpha-value>)"',
+    to: 'muted: "var(--muted)"',
+  },
+  {
+    name: "--panel goes back to a bare var() (34 alpha usages emit nothing)",
+    file: CFG,
+    from: 'panel: "rgb(var(--panel) / <alpha-value>)"',
+    to: 'panel: "var(--panel)"',
+  },
+  {
+    name: "a channel variable left as hex in ONE theme (rgb(#86868f / .5) is invalid)",
+    file: CSS, from: "  --border: 134 134 143;", to: "  --border: #86868f;",
+  },
+  {
+    name: "Recharts reads the raw channel variable again (invalid stroke colour)",
+    file: "src/components/settings/ai-usage-settings.tsx",
+    from: 'stroke="rgb(var(--border))"', to: 'stroke="var(--border)"',
+  },
+  {
+    name: "a gradient reads the raw channel variable again",
+    file: "src/components/ui/entity-card.tsx",
+    from: "rgb(var(--panel))_0%", to: "var(--panel)_0%",
+  },
+  {
+    name: "the border alpha-neutralising rule for the accent is removed",
+    file: CSS,
+    from: '[data-theme="light"] .border-orange-500\\/40',
+    to: '[data-theme="light"] .border-orange-500\\/40-removed',
+  },
+  {
+    name: "a module hue's border edge left on the raw palette (cyan-500 is 1.40:1 at 40%)",
+    file: CFG,
+    from: 'cyan: { 500: "rgb(var(--module-cyan) / <alpha-value>)", 600: "rgb(var(--module-cyan) / <alpha-value>)" },',
+    to: "",
+  },
+
 ];
 
 let caught = 0, missed = [];

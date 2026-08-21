@@ -3,7 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { editWebsiteHtml } from "@/lib/website-builder";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { downloadReferenceImages } from "@/lib/website-reference-image-server";
-import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
+import { resolveWebsiteImagePlaceholders, type ImageResolution } from "@/lib/website-image-resolver";
+import { enforceUnsplashAttribution } from "@/lib/website-image-placeholders";
+import { registerUnsplashUses } from "@/lib/website-image-resolver";
 import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
 import {
   describeSecurityScanIssue,
@@ -254,18 +256,44 @@ export async function POST(request: Request) {
 
     let updatedHtml: string;
     let usedCheapPatch = false;
+    // Out here for the same reason as generation: the photos are
+    // registered with Unsplash after the edit is SAVED, and a safety-
+    // rejected edit returns below without ever saving.
+    let images: ImageResolution = { html: "", used: [], halted: null };
     try {
       void recordAiCallForDailySpend(estimate.estimatedCredits);
       const editResult = await editWebsiteHtml(apiKey, website.html_content, changeRequest, referenceImages, formEndpointUrl, costs);
       updatedHtml = editResult.html;
       usedCheapPatch = editResult.usedCheapPatch;
-      updatedHtml = await resolveWebsiteImagePlaceholders(updatedHtml);
+      images = await resolveWebsiteImagePlaceholders(updatedHtml);
+      updatedHtml = images.html;
 
       // Same enforcement as generation: an edit that adds a nav item can
       // reintroduce <a href="/about"> just as easily as a fresh generation
       // can, and the result is the same — the customer's menu pointing at
       // our login page. See lib/website-link-safety.ts.
       updatedHtml = makeGeneratedLinksSafe(updatedHtml).html;
+
+      // THE PATH THIS EXISTS FOR. editWebsiteHtml returns a whole new
+      // document, and a model rewriting a section routinely drops the
+      // <span class="unsplash-credit"> beside a photo it kept — leaving a
+      // hotlinked Unsplash image with nobody's name on it on a live
+      // customer site, with nothing red anywhere. The prompt now asks; this
+      // makes it true, the same way lib/website-link-safety.ts does for
+      // internal links. See lib/website-image-placeholders.ts.
+      {
+        const attribution = enforceUnsplashAttribution(updatedHtml);
+        updatedHtml = attribution.html;
+        if (attribution.restored > 0 || attribution.removed > 0) {
+          logApiError(
+            "/api/websites/edit",
+            new Error(
+              `Unsplash attribution enforced after edit: ${attribution.restored} credit(s) rebuilt, ${attribution.removed} photo(s) removed as unattributable`
+            ),
+            { websiteId }
+          );
+        }
+      }
 
       // AI Output Protection Layer — same two-layer check as generation
       // (see api/websites/generate/process/route.ts's file comment for
@@ -336,6 +364,19 @@ export async function POST(request: Request) {
       // coerce the result to a single JSON object") — see the same fix in
       // generate/process.
       .maybeSingle();
+
+    // UNSPLASH GUIDELINE 2 — after the edit is SAVED, never before.
+    //
+    // This route can reject the whole document: a safety-flagged edit
+    // returns above with html_content untouched and the owner told their
+    // site is unchanged. Registering at resolution time counted those
+    // photos as used when nothing was ever stored or shown.
+    if (!updateError && updatedRecord) {
+      await registerUnsplashUses(
+        images.used.filter((photo) => updatedHtml.includes(photo.url)),
+        images.halted
+      );
+    }
 
     if (updateError || !updatedRecord) {
       if (updateError) logApiError("/api/websites/edit", updateError, { stage: "update" });

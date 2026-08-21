@@ -113,21 +113,21 @@ export function AiUsageSettings({
         <div className="h-64 pt-1">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={chartData} layout="vertical" margin={{ left: 8, right: 16 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" horizontal={false} />
-              <XAxis type="number" allowDecimals={false} tick={{ fill: "var(--muted)", fontSize: 11 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgb(var(--border))" horizontal={false} />
+              <XAxis type="number" allowDecimals={false} tick={{ fill: "rgb(var(--muted))", fontSize: 11 }} />
               <YAxis
                 type="category"
                 dataKey="title"
                 width={100}
-                tick={{ fill: "var(--muted)", fontSize: 11 }}
+                tick={{ fill: "rgb(var(--muted))", fontSize: 11 }}
               />
               <Tooltip
                 contentStyle={{
-                  background: "var(--panel)",
-                  border: "1px solid var(--border)",
+                  background: "rgb(var(--panel))",
+                  border: "1px solid rgb(var(--border))",
                   borderRadius: 8,
                   fontSize: 12,
-                  color: "var(--foreground)",
+                  color: "rgb(var(--foreground))",
                 }}
                 cursor={{ fill: "rgba(249,115,22,0.06)" }}
               />

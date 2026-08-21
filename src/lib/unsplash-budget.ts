@@ -65,15 +65,42 @@ export const UNSPLASH_REQUESTS_PER_GENERATION = configuredCeiling();
 
 export type UnsplashHaltReason = "rate-limited" | "budget-exhausted" | "unauthorised";
 
+/**
+ * THE CEILING AND THE BREAKER ARE TWO DIFFERENT THINGS, and conflating
+ * them into one flag was a real, silent compliance failure.
+ *
+ * The ceiling is OURS: a self-imposed cap so one generation cannot spend
+ * the whole hour's quota on broadening searches. Reaching it says nothing
+ * about Unsplash, which is healthy and would happily answer.
+ *
+ * The breaker is UNSPLASH'S: a 403/429/401 means further requests are
+ * refused no matter what we do.
+ *
+ * canSpend() used to set `halted = "budget-exhausted"` when it found the
+ * ceiling reached — so ASKING about the ceiling tripped the breaker. The
+ * mandatory download trigger obeys the breaker (correctly: a refused
+ * request registers nothing), and so a generation that merely used up its
+ * own search allowance stopped registering downloads while its photos
+ * still shipped. lib/unsplash.ts describes at length why the trigger must
+ * survive the ceiling; this is the flag that made it not.
+ *
+ * So canSpend() is a QUERY with no side effects, and the ceiling is
+ * reported through its own property.
+ */
 export type UnsplashBudget = {
-  /** False once the ceiling is reached or the breaker has tripped. */
+  /** False once the ceiling is reached or the breaker has tripped. Pure —
+   *  asking never changes anything. */
   canSpend(): boolean;
   /** Records one request about to be made. */
   spend(): void;
   /** Trips the breaker: no further requests this generation. */
   halt(reason: UnsplashHaltReason): void;
   readonly spent: number;
+  /** Set only by halt() — i.e. only when UNSPLASH refused. */
   readonly halted: UnsplashHaltReason | null;
+  /** True once our own per-generation allowance is used up. Never implies
+   *  anything about Unsplash's willingness to answer. */
+  readonly ceilingReached: boolean;
 };
 
 export function createUnsplashBudget(limit: number = UNSPLASH_REQUESTS_PER_GENERATION): UnsplashBudget {
@@ -81,12 +108,7 @@ export function createUnsplashBudget(limit: number = UNSPLASH_REQUESTS_PER_GENER
   let halted: UnsplashHaltReason | null = null;
   return {
     canSpend() {
-      if (halted) return false;
-      if (spent >= limit) {
-        halted = "budget-exhausted";
-        return false;
-      }
-      return true;
+      return !halted && spent < limit;
     },
     spend() {
       spent += 1;
@@ -99,6 +121,9 @@ export function createUnsplashBudget(limit: number = UNSPLASH_REQUESTS_PER_GENER
     },
     get halted() {
       return halted;
+    },
+    get ceilingReached() {
+      return spent >= limit;
     },
   };
 }

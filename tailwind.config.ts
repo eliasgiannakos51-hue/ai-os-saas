@@ -21,12 +21,25 @@ const config: Config = {
         // variable values, not every component's color classes. `input`
         // is the shared "recessed surface" used by every input/textarea/
         // select/code block/kbd badge (previously hardcoded bg-black/NN).
-        background: "var(--background)",
-        panel: "var(--panel)",
-        "panel-hover": "var(--panel-hover)",
-        border: "var(--border)",
-        foreground: "var(--foreground)",
-        muted: "var(--muted)",
+        background: "rgb(var(--background) / <alpha-value>)",
+        panel: "rgb(var(--panel) / <alpha-value>)",
+        "panel-hover": "rgb(var(--panel-hover) / <alpha-value>)",
+        // CHANNEL FORM, not a bare var(), and the difference was 62 dead
+        // utility classes. Tailwind can only apply an alpha modifier
+        // (`text-muted/70`) to a colour it can rewrite, so a bare
+        // `var(--muted)` makes `text-muted/70` emit NO CSS AT ALL — the
+        // element silently keeps whatever colour it inherited. Verified
+        // against the deployed stylesheet: `.text-orange-400\/70` is in
+        // it (that token was already in channel form) and
+        // `.text-foreground\/90` is not, though 27 elements ask for it.
+        // That is why secondary text looked the same weight as primary.
+        // The accent tokens below have always been written this way, and
+        // "no accent token is declared as a bare var() colour" is already
+        // asserted at the bottom of light-theme-contrast.test.mjs — these
+        // three were simply never included.
+        border: "rgb(var(--border) / <alpha-value>)",
+        foreground: "rgb(var(--foreground) / <alpha-value>)",
+        muted: "rgb(var(--muted) / <alpha-value>)",
         input: "var(--input-bg)",
       },
       // ACCENT COLOURS, SPLIT BY ROLE — the light theme's actual fix.
@@ -46,8 +59,12 @@ const config: Config = {
       //
       // `rgb(var(--x) / <alpha-value>)` and not `var(--x)`: 246 of those
       // usages carry an opacity modifier (`border-orange-500/40`,
-      // `text-amber-400/90`). With a plain var() Tailwind emits no alpha
-      // channel and every one of them silently becomes fully opaque.
+      // `text-amber-400/90`). CORRECTION TO WHAT THIS COMMENT USED TO
+      // SAY: with a plain var() the modified class does not become fully
+      // opaque, it does not EXIST — Tailwind emits no rule for it at all,
+      // so the element keeps whatever it inherited. Verified in the
+      // deployed stylesheet: `.text-orange-400\/70` is present and
+      // `.text-foreground\/90` is absent though 27 elements ask for it.
       // SEMANTIC FAMILIES GET THE SAME TREATMENT AS THE ACCENT.
       //
       // When the accent moved into this system, success and danger did
@@ -139,6 +156,12 @@ const config: Config = {
       borderColor: {
         orange: {
           500: "rgb(var(--accent-border) / <alpha-value>)",
+          // 600 is a module badge edge (lib/module-colors.ts). It was
+          // un-themed and only survived review through the "known-safe
+          // fixed value" list; routing it through the token is strictly
+          // better, and it is what the light-theme alpha rule already
+          // resolves it to.
+          600: "rgb(var(--accent-border) / <alpha-value>)",
           // The 800/900s are the notice-box edges. Solid, they measure
           // 8:1+ on white and "pass" — but a near-black rule around a
           // pale notice is not what a coloured edge is for, and the same
@@ -148,10 +171,12 @@ const config: Config = {
         },
         amber: {
           500: "rgb(var(--accent-amber-border) / <alpha-value>)",
+          600: "rgb(var(--accent-amber-border) / <alpha-value>)",
           800: "rgb(var(--accent-amber-border-deep) / <alpha-value>)",
         },
         emerald: {
           500: "rgb(var(--success-border) / <alpha-value>)",
+          600: "rgb(var(--success-border) / <alpha-value>)",
           800: "rgb(var(--success-border-deep) / <alpha-value>)",
           900: "rgb(var(--success-border-deep) / <alpha-value>)",
         },
@@ -161,6 +186,26 @@ const config: Config = {
           900: "rgb(var(--danger-border-deep) / <alpha-value>)",
         },
         rose: { 500: "rgb(var(--danger-border) / <alpha-value>)" },
+        // THE PER-MODULE BADGE EDGES (lib/module-colors.ts). textColor
+        // already themes these eleven families at 300/400; borderColor
+        // never did, so every module badge outline resolved to the raw
+        // Tailwind palette in both themes — colours chosen to sit on
+        // #0a0a0a. Measured on white at the 40% these are written with:
+        // cyan-500 1.40:1, sky-500 1.46:1, blue-500 1.57:1. The light
+        // values of --module-* are the 600/700 ends of each hue and
+        // measure 4.62:1 to 6.78:1 solid, which is what the
+        // alpha-neutralising block in globals.css then makes them use.
+        sky: { 500: "rgb(var(--module-sky) / <alpha-value>)", 600: "rgb(var(--module-sky) / <alpha-value>)" },
+        indigo: { 500: "rgb(var(--module-indigo) / <alpha-value>)", 600: "rgb(var(--module-indigo) / <alpha-value>)" },
+        lime: { 500: "rgb(var(--module-lime) / <alpha-value>)" },
+        fuchsia: { 500: "rgb(var(--module-fuchsia) / <alpha-value>)", 600: "rgb(var(--module-fuchsia) / <alpha-value>)" },
+        cyan: { 500: "rgb(var(--module-cyan) / <alpha-value>)", 600: "rgb(var(--module-cyan) / <alpha-value>)" },
+        pink: { 500: "rgb(var(--module-pink) / <alpha-value>)", 600: "rgb(var(--module-pink) / <alpha-value>)" },
+        teal: { 500: "rgb(var(--module-teal) / <alpha-value>)" },
+        violet: { 500: "rgb(var(--module-violet) / <alpha-value>)" },
+        blue: { 500: "rgb(var(--module-blue) / <alpha-value>)" },
+        purple: { 500: "rgb(var(--module-purple) / <alpha-value>)" },
+        slate: { 500: "rgb(var(--module-slate) / <alpha-value>)" },
       },
       // NOTICE FILLS. Only the 950s — `bg-orange-500` is a filled button
       // and stays the raw palette, exactly as the accent block above

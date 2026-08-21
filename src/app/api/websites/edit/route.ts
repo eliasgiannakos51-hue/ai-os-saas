@@ -3,8 +3,9 @@ import { createClient } from "@/lib/supabase/server";
 import { editWebsiteHtml } from "@/lib/website-builder";
 import { MAX_REFERENCE_IMAGES } from "@/lib/website-reference-image";
 import { downloadReferenceImages } from "@/lib/website-reference-image-server";
-import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
+import { resolveWebsiteImagePlaceholders, type ImageResolution } from "@/lib/website-image-resolver";
 import { enforceUnsplashAttribution } from "@/lib/website-image-placeholders";
+import { registerUnsplashUses } from "@/lib/website-image-resolver";
 import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
 import {
   describeSecurityScanIssue,
@@ -255,12 +256,17 @@ export async function POST(request: Request) {
 
     let updatedHtml: string;
     let usedCheapPatch = false;
+    // Out here for the same reason as generation: the photos are
+    // registered with Unsplash after the edit is SAVED, and a safety-
+    // rejected edit returns below without ever saving.
+    let images: ImageResolution = { html: "", used: [], halted: null };
     try {
       void recordAiCallForDailySpend(estimate.estimatedCredits);
       const editResult = await editWebsiteHtml(apiKey, website.html_content, changeRequest, referenceImages, formEndpointUrl, costs);
       updatedHtml = editResult.html;
       usedCheapPatch = editResult.usedCheapPatch;
-      updatedHtml = await resolveWebsiteImagePlaceholders(updatedHtml);
+      images = await resolveWebsiteImagePlaceholders(updatedHtml);
+      updatedHtml = images.html;
 
       // Same enforcement as generation: an edit that adds a nav item can
       // reintroduce <a href="/about"> just as easily as a fresh generation
@@ -358,6 +364,19 @@ export async function POST(request: Request) {
       // coerce the result to a single JSON object") — see the same fix in
       // generate/process.
       .maybeSingle();
+
+    // UNSPLASH GUIDELINE 2 — after the edit is SAVED, never before.
+    //
+    // This route can reject the whole document: a safety-flagged edit
+    // returns above with html_content untouched and the owner told their
+    // site is unchanged. Registering at resolution time counted those
+    // photos as used when nothing was ever stored or shown.
+    if (!updateError && updatedRecord) {
+      await registerUnsplashUses(
+        images.used.filter((photo) => updatedHtml.includes(photo.url)),
+        images.halted
+      );
+    }
 
     if (updateError || !updatedRecord) {
       if (updateError) logApiError("/api/websites/edit", updateError, { stage: "update" });

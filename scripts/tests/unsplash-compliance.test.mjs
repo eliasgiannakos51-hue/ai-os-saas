@@ -169,13 +169,27 @@ ok(
   "it reads the key from the environment itself",
   /const accessKey = process\.env\.UNSPLASH_ACCESS_KEY;/.test(triggerBody)
 );
-// Only photos that SHIP get credited. Crediting every search result would
-// report uses that never happened.
+// Only photos that SHIP get registered, and "ship" means the document was
+// KEPT — which the resolver cannot know. So the trigger no longer lives
+// inside it: resolveWebsiteImagePlaceholders reports the photos it used
+// and the routes register them once the row is written. See
+// scripts/tests/unsplash-download-registration.test.mjs, which counts the
+// actual requests rather than reading the source.
 ok(
-  "the resolver triggers downloads from the resolved set only",
-  /for \(const photo of resolved\.values\(\)\)[\s\S]{0,200}?triggerUnsplashDownload\(photo, budget\)/.test(
-    resolverSrc
-  )
+  "the resolver reports the photos it used instead of registering them itself",
+  /used: \[\.\.\.resolved\.values\(\)\]/.test(resolverSrc)
+);
+ok(
+  "registration is its own exported step",
+  /export async function registerUnsplashUses\(/.test(resolverSrc)
+);
+ok(
+  "and it is what calls the trigger",
+  /registerUnsplashUses[\s\S]*?triggerUnsplashDownload\(photo, budget\)/.test(resolverSrc)
+);
+ok(
+  "resolution itself no longer triggers anything",
+  !/for \(const photo of resolved\.values\(\)\)/.test(resolverSrc)
 );
 // The trigger must survive the per-generation search ceiling. Charging it
 // against the same 12-request budget would let a photo-heavy site ship

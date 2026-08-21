@@ -18,8 +18,9 @@ import { estimateWebsiteGenerationCost } from "@/lib/website-generation-cost";
 import { MAX_GENERATION_ATTEMPTS } from "@/lib/website-generation-limits";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { findInventedNumbers } from "@/lib/website-invented-numbers";
-import { resolveWebsiteImagePlaceholders } from "@/lib/website-image-resolver";
+import { resolveWebsiteImagePlaceholders, type ImageResolution } from "@/lib/website-image-resolver";
 import { enforceUnsplashAttribution } from "@/lib/website-image-placeholders";
+import { registerUnsplashUses } from "@/lib/website-image-resolver";
 import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
 import {
   describeSecurityScanIssue,
@@ -325,6 +326,11 @@ export async function POST(request: Request) {
     let htmlContent: string;
     let isFlagged = false;
     let flaggedSummary = "";
+    // Declared out here, not inside the generation block, because the
+    // photos are registered with Unsplash only once this document is
+    // STORED — which happens below, outside that block. See
+    // registerUnsplashUses in lib/website-image-resolver.ts.
+    let images: ImageResolution = { html: "", used: [], halted: null };
     try {
       void recordAiCallForDailySpend(
         estimateWebsiteGenerationCost({ descriptionLength: description.length, imageCount: referenceImages.length })
@@ -357,7 +363,8 @@ export async function POST(request: Request) {
       // see lib/website-image-resolver.ts. A no-op when the model didn't
       // emit any PLACEHOLDER:<slug> images, which is the common case for
       // a description that didn't ask for real photos.
-      htmlContent = await resolveWebsiteImagePlaceholders(htmlContent);
+      images = await resolveWebsiteImagePlaceholders(htmlContent);
+      htmlContent = images.html;
 
       // NUMBERS THE USER NEVER GAVE. The prompt forbids inventing a price,
       // a phone number, an opening time or an address, and a prompt is a
@@ -504,6 +511,27 @@ export async function POST(request: Request) {
       // coerce the result to a single JSON object") in the error log — a
       // sentence about JSON for an incident about a vanished row.
       .maybeSingle();
+
+    // UNSPLASH GUIDELINE 2 — the use is registered HERE, after the
+    // document is in the database, and not when the photos were resolved.
+    //
+    // A flagged generation is stored but never displayed: the workspace
+    // replaces its preview with a warning panel and disables publish and
+    // download (components/website-builder/website-builder-workspace.tsx).
+    // Nobody sees those photos, so counting them would add uses that never
+    // happened to a photographer's stats — the opposite of what the
+    // guideline is for. Awaited, not fire-and-forget: a serverless
+    // function is frozen the moment its response returns, so work
+    // scheduled after that point silently never runs on a cold instance
+    // (the same reason recordView is awaited in /s/[subdomain]).
+    if (!updateError && updatedRecord && !isFlagged) {
+      await registerUnsplashUses(
+        // Photos removed by the attribution pass never reached the stored
+        // page, so they were never used.
+        images.used.filter((photo) => htmlContent.includes(photo.url)),
+        images.halted
+      );
+    }
 
     if (updateError || !updatedRecord) {
       if (updateError) {

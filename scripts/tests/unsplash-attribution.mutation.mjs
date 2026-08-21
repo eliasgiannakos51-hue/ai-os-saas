@@ -30,6 +30,8 @@ const RESOLVER = "src/lib/website-image-resolver.ts";
 const EDIT_ROUTE = "src/app/api/websites/edit/route.ts";
 const GEN_ROUTE = "src/app/api/websites/generate/process/route.ts";
 const BUILDER = "src/lib/website-builder.ts";
+const BUDGET = "src/lib/unsplash-budget.ts";
+const REGISTRATION = "scripts/tests/unsplash-download-registration.test.mjs";
 
 const MUTANTS = [
   // ------------------------------------------------------------------
@@ -113,8 +115,8 @@ const MUTANTS = [
     name: "enforcement runs BEFORE the photos exist (ordered wrong)",
     suites: [DURABILITY],
     file: EDIT_ROUTE,
-    from: "      updatedHtml = await resolveWebsiteImagePlaceholders(updatedHtml);",
-    to: "      updatedHtml = enforceUnsplashAttribution(updatedHtml).html;\n      updatedHtml = await resolveWebsiteImagePlaceholders(updatedHtml);",
+    from: "      images = await resolveWebsiteImagePlaceholders(updatedHtml);",
+    to: "      updatedHtml = enforceUnsplashAttribution(updatedHtml).html;\n      images = await resolveWebsiteImagePlaceholders(updatedHtml);",
     // The anchor the test asserts on is the resolve call's position; moving
     // enforcement in front of it must be noticed.
     reorder: true,
@@ -146,10 +148,10 @@ const MUTANTS = [
   },
   {
     name: "the resolver stops triggering downloads at all",
-    suites: [COMPLIANCE],
+    suites: [COMPLIANCE, REGISTRATION],
     file: RESOLVER,
-    from: "    if (await triggerUnsplashDownload(photo, budget)) credited += 1;",
-    to: "    credited += 1;",
+    from: "  const results = await Promise.all(photos.map((photo) => triggerUnsplashDownload(photo, budget)));",
+    to: "  const results = photos.map(() => true);",
   },
   {
     name: "the trigger is charged against the search ceiling again (silently uncredited photos)",
@@ -157,6 +159,59 @@ const MUTANTS = [
     file: UNSPLASH,
     from: "  if (budget?.halted) return false;",
     to: "  if (budget && !budget.canSpend()) return false;",
+  },
+
+  // ------------------------------------------------------------------
+  // The ceiling / breaker split. Every one of these was live behaviour.
+  // ------------------------------------------------------------------
+  {
+    name: "canSpend() mutates again — our own ceiling trips Unsplash's breaker",
+    suites: [REGISTRATION],
+    file: BUDGET,
+    from: "    canSpend() {\n      return !halted && spent < limit;\n    },",
+    to: '    canSpend() {\n      if (halted) return false;\n      if (spent >= limit) {\n        halted = "budget-exhausted";\n        return false;\n      }\n      return true;\n    },',
+  },
+  {
+    name: "the ceiling is reported through the halt flag again",
+    suites: [REGISTRATION],
+    file: BUDGET,
+    from: "    get ceilingReached() {\n      return spent >= limit;\n    },",
+    to: "    get ceilingReached() {\n      return halted === \"budget-exhausted\";\n    },",
+  },
+  // NOTE, so nobody re-adds it: "createUnsplashBudget(photos.length)" ->
+  // "createUnsplashBudget(0)" is an EQUIVALENT MUTANT here, not a hole.
+  // triggerUnsplashDownload consults budget.halted and never canSpend(),
+  // so shrinking the limit changes no behaviour — which is precisely the
+  // property that makes capping registration structurally impossible. The
+  // mutation that DOES break it is "the trigger is charged against the
+  // search ceiling again" above, on lib/unsplash.ts.
+  {
+    name: "registration fires for photos that never reached the page",
+    suites: [REGISTRATION],
+    file: RESOLVER,
+    from: "  return { html: result, used: [...resolved.values()], halted: budget.halted };",
+    to: "  return { html: result, used: [...resolved.values(), ...resolved.values()], halted: budget.halted };",
+  },
+  {
+    name: "registration runs even when the edit was never saved",
+    suites: [REGISTRATION],
+    file: EDIT_ROUTE,
+    from: "    if (!updateError && updatedRecord) {\n      await registerUnsplashUses(",
+    to: "    if (false && updatedRecord) {\n      await registerUnsplashUses(",
+  },
+  {
+    name: "a FLAGGED generation registers its photos anyway",
+    suites: [REGISTRATION],
+    file: GEN_ROUTE,
+    from: "    if (!updateError && updatedRecord && !isFlagged) {",
+    to: "    if (!updateError && updatedRecord) {",
+  },
+  {
+    name: "a halted generation fires doomed registrations instead of saying so",
+    suites: [REGISTRATION],
+    file: RESOLVER,
+    from: "  if (halted) {\n    logApiError(",
+    to: "  if (false) {\n    logApiError(",
   },
 
   // ------------------------------------------------------------------

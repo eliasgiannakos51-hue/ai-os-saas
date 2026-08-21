@@ -469,7 +469,10 @@
       "couldNotClearMemory": "✗ 无法清除记忆",
       "memoryCleared": "✓ 记忆已清除",
       "memoryEnabled": "✓ 已开启聊天记忆",
-      "memoryDisabled": "✓ 已关闭聊天记忆"
+      "memoryDisabled": "✓ 已关闭聊天记忆",
+      "planExcludes": "您当前的套餐不包含聊天记忆，因此不会保存任何内容。Starter 及以上套餐可跨对话记忆。",
+      "switchedOff": "记忆已关闭，因此不会从您的对话中保存任何内容。",
+      "nothingYet": "尚未保存任何内容。记忆已开启并正常工作 — 当对话中出现您的姓名、工作或偏好等长期有用的信息时就会记住。"
     },
     "loginActivity": {
       "title": "登录活动",

@@ -185,7 +185,15 @@ export function applyResolvedImageUrls(html: string, resolved: Map<string, Resol
   for (const [slug, photo] of resolved) {
     const tagPattern = new RegExp(`<img\\b[^>]*\\bsrc="PLACEHOLDER:${slug}"[^>]*>`, "g");
     result = result.replace(tagPattern, (tag) => {
-      const withUrl = tag.replace(`PLACEHOLDER:${slug}`, photo.url);
+      // A FUNCTION replacer, not a replacement string, and the difference
+      // is an HTML injection. String.replace() expands $&, $`, $', $$ and
+      // $1-$99 inside a replacement STRING, and photo.url is third-party
+      // text straight out of Unsplash's urls.regular. A url containing
+      // "$`" expands to everything before the match — the rest of the
+      // <img> tag — which closes the src attribute and writes new markup
+      // into a page we publish on a customer's domain. A function replacer
+      // is never scanned for those patterns.
+      const withUrl = tag.replace(`PLACEHOLDER:${slug}`, () => photo.url);
       // The photographer is written onto the IMAGE, not only into the
       // credit beside it. See enforceUnsplashAttribution below for why
       // the document has to be able to describe its own photos.

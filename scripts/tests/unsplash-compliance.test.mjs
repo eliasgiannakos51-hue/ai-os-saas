@@ -135,6 +135,23 @@ for (const [label, src] of [
   ok(`${label} never reads the image body`, !/arrayBuffer\(\)|\.blob\(\)/.test(src));
 }
 
+// The three-file grep above cannot see the two ways this app could
+// plausibly START re-hosting: Next's image optimiser (which proxies the
+// bytes through /_next/image on OUR origin) and a service worker caching
+// them. Both would be a licence breach that looks like a performance win,
+// so they are asserted where they would be configured.
+{
+  const nextConfig = readFileSync("next.config.mjs", "utf8");
+  ok(
+    "next.config.mjs does not allow Unsplash through the image optimiser",
+    !/unsplash/i.test(nextConfig)
+  );
+  ok("no remotePatterns entry exists at all", !/remotePatterns/.test(nextConfig));
+  const sw = readFileSync("public/sw.js", "utf8");
+  ok("the service worker never caches a cross-origin response", /url\.origin !== self\.location\.origin/.test(sw));
+  ok("and it names no image CDN to cache", !/unsplash/i.test(sw));
+}
+
 // =====================================================================
 console.log("\n== Requirement 2: TRIGGER DOWNLOAD ==");
 check(
@@ -267,6 +284,29 @@ check("each photo gets its own credit", (both.match(/Photo by/g) ?? []).length, 
 ok("the second photographer is named", both.includes("Ada Lovelace"));
 
 // =====================================================================
+console.log("\n== A hostile photo URL cannot write markup into the page ==");
+// urls.regular is third-party text. String.replace() expands $&, $`, $'
+// and $1-$99 inside a replacement STRING, so passing the url as one let a
+// url containing "$`" paste everything before the match — the rest of the
+// <img> tag — into the attribute, closing src and injecting markup onto a
+// customer's published page. Demonstrated rather than described: this
+// exact url produced `<img src="…<img src="evil'…` before the fix.
+{
+  const hostile = {
+    url: "https://images.unsplash.com/photo-x?a=$`evil$'&b=$&x",
+    photographerName: "Ada",
+    photographerUrl: "https://unsplash.com/@ada",
+  };
+  const out = ph.applyResolvedImageUrls(
+    `<img src="PLACEHOLDER:hero" alt="a photo">`,
+    new Map([["hero", hostile]])
+  );
+  check("the url is written verbatim, unexpanded", out.includes(`src="${hostile.url}"`), true);
+  ok("no second <img> was conjured", (out.match(/<img\b/g) || []).length === 1);
+  ok("the placeholder token did not survive the expansion", !out.includes("PLACEHOLDER:hero"));
+  ok("the credit still follows it", /<span[^>]*class="unsplash-credit"/.test(out));
+}
+
 console.log("\n== A photo we cannot credit is not used ==");
 // Displaying an uncreditable photo is the breach this guards. Each of the
 // four fields is load-bearing, so each is removed in turn — a single

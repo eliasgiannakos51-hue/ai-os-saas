@@ -1640,190 +1640,109 @@ input:-webkit-autofill:focus {
   animation: tooltip-in 200ms ease-out 1;
 }
 
-/* ---------------------------------------------------------------------
-   ThinkingIndicator — the constellation, at fourteen pixels.
-
-   See components/ui/thinking-indicator.tsx for why this is not three
-   bouncing dots. The mechanics worth knowing here:
-
-   pathLength="1" on every <line> means stroke-dasharray and
-   stroke-dashoffset are expressed in fractions of the line's own length,
-   whatever that length is. Move a node and nothing needs recalculating.
-
-   Nodes scale with `transform`, never with the `r` attribute. CSS `r` is
-   animatable in SVG2 and supported unevenly; a transform runs on the
-   compositor and works everywhere. `transform-box: fill-box` is what
-   makes the origin the circle rather than the whole SVG.
-
-   The 0.37s stagger is the same one NetworkField uses between its own
-   nodes, so the indicator and the background are visibly in the same
-   family rather than two things that happen to be orange.
-
-   THE OPACITIES BELOW WERE MEASURED, NOT CHOSEN. Screenshots at both
-   themes, pixels sampled from the composited image, contrast computed
-   against a background probe in the same shot. Every number in the
-   comments is from that run:
-
-     dark  bg rgb(10,10,10)     orange-500  0.42 -> 2.04:1   0.60 -> 3.13:1
-     light bg rgb(247,247,248)  orange-500  0.42 -> 1.52:1   1.00 -> 2.62:1
-
-   Two things follow, and the second one is not what I expected.
-
-   FIRST: 0.42 IS TOO FAINT EVEN IN THE DARK. It is the opacity the
-   background field uses, and it is right there — NetworkField is
-   decorative, conveys nothing, and may be a whisper. This indicator
-   carries information, so it has to clear the 3:1 that WCAG 1.4.11 asks
-   of a non-text graphic. 0.60 is the first step that does.
-
-   SECOND: IN LIGHT MODE THE COLOUR CANNOT BE ORANGE-500 AT ALL. Not at
-   any opacity — at full strength it reaches 2.62:1 against the light
-   background and stops there, because that is simply what #f97316 is
-   worth on near-white. Raising opacity was the plan and the plan was
-   wrong. Light mode uses orange-700 (3.26:1 at 0.75) and purple-700
-   (4.11:1 at 0.75) instead: the same shapes, the same stagger, a darker
-   ink.
-   --------------------------------------------------------------------- */
-.ionexa-think {
+/* THE GLOBE MARK — components/ui/globe-mark.tsx.
+   
+   Geometry lives in lib/brand/globe.ts and is shared with the favicon and
+   the email logo; only motion and colour are here.
+   
+   ONLY THE ORBIT GROUP MOVES, and only by `transform`. The sphere and its
+   bands are rotationally symmetric — spinning them costs repaints and
+   looks identical — so they stay still and the SVG's cached texture is
+   reused. This is the opposite of what NetworkField and AuthBackground
+   used to do (animated content inside a full-viewport filtered SVG, 120ms
+   keystroke latency); here the SVG is 16-48px and carries no filter.
+   
+   Colour is `currentColor` throughout, so a caller inside the orange CTA
+   sets `color` to the button's black text and the whole mark follows —
+   the same escape hatch the constellation indicator needed when it was
+   drawn orange-on-orange and simply was not there. */
+.ionexa-globe {
   display: inline-flex;
   align-items: center;
-  color: #f97316;
+  justify-content: center;
+  color: rgb(var(--accent-border));
   vertical-align: middle;
   flex-shrink: 0;
 }
-.ionexa-think svg {
+.ionexa-globe svg {
   overflow: visible;
 }
-.ionexa-think .node {
-  fill: currentColor;
-  transform-box: fill-box;
-  transform-origin: center;
-  filter: drop-shadow(0 0 2.5px currentColor);
-  opacity: 0.6;
-  animation: ionexa-think-lift 2.4s ease-in-out infinite;
+.ionexa-globe .globe-node {
+  filter: drop-shadow(0 0 2px currentColor);
 }
-/* Every fourth node in NetworkField is purple. At three nodes that has
-   to become every third or the signature disappears. */
-.ionexa-think .node.alt {
-  fill: #a855f7;
+.ionexa-globe .globe-orbit-group {
+  transform-origin: 50px 50px;
 }
-.ionexa-think .edge {
-  stroke: currentColor;
-  stroke-width: 0.9;
-  fill: none;
-  opacity: 0.6;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: ionexa-think-draw 2.4s ease-in-out infinite;
-}
-.ionexa-think .e2,
-.ionexa-think .n2 {
-  animation-delay: 0.37s;
-}
-.ionexa-think .e3,
-.ionexa-think .n3 {
-  animation-delay: 0.74s;
+.ionexa-globe.is-spinning .globe-orbit-group {
+  animation: ionexa-globe-spin 3.2s linear infinite;
 }
 
-@keyframes ionexa-think-draw {
-  0%,
-  8% {
-    stroke-dashoffset: 1;
+@keyframes ionexa-globe-spin {
+  from {
+    transform: rotate(0deg);
   }
-  42%,
-  66% {
-    stroke-dashoffset: 0;
-  }
-  100% {
-    stroke-dashoffset: -1;
-  }
-}
-@keyframes ionexa-think-lift {
-  0%,
-  100% {
-    opacity: 0.6;
-    transform: scale(1);
-  }
-  45% {
-    opacity: 1;
-    transform: scale(1.22);
+  to {
+    transform: rotate(360deg);
   }
 }
 
-/* LIGHT THEME — a different ink, not a different opacity. See the
-   measurements above. The glow goes too: drop-shadow of a light colour
-   on a light background is a smudge with no edge. */
-:root:not([data-theme="dark"]) .ionexa-think,
-[data-theme="light"] .ionexa-think {
-  color: #c2410c;
-}
-:root:not([data-theme="dark"]) .ionexa-think .node.alt,
-[data-theme="light"] .ionexa-think .node.alt {
-  fill: #7e22ce;
-}
-:root:not([data-theme="dark"]) .ionexa-think .node,
-[data-theme="light"] .ionexa-think .node {
-  opacity: 0.75;
-  filter: none;
-}
-:root:not([data-theme="dark"]) .ionexa-think .edge,
-[data-theme="light"] .ionexa-think .edge {
-  opacity: 0.75;
-  stroke-width: 1.1;
-}
-:root:not([data-theme="dark"]) .ionexa-think .node,
-[data-theme="light"] .ionexa-think .node {
-  animation-name: ionexa-think-lift-light;
-}
-@keyframes ionexa-think-lift-light {
-  0%,
-  100% {
-    opacity: 0.75;
-    transform: scale(1);
-  }
-  45% {
-    opacity: 1;
-    transform: scale(1.22);
-  }
-}
+/* Stated explicitly as well as covered by the two global kill-switches:
+   those zero the DURATION, which leaves a rotation frozen at whatever
+   angle it had reached. The orbit is drawn at -20deg for a reason, so
+   reduced motion returns it there rather than leaving it wherever the
+   clock stopped. */
+/* SPECIFICITY, and the browser found this rather than review.
+   `.ionexa-globe.is-spinning .globe-orbit-group` is (0,3,0); these were
+   written as `.ionexa-globe .globe-orbit-group`, which is (0,2,0), so
+   they LOST to the rule they were supposed to override and the orbit kept
+   turning under prefers-reduced-motion. The two global kill-switches in
+   this file use !important and would have stopped the animation, leaving
+   the transform frozen mid-sweep — the exact state these rules exist to
+   prevent. Measured in Chromium with reducedMotion: "reduce":
+   animationName was still ionexa-globe-spin and transform was a rotation
+   matrix. Matching the selector is the fix; !important here would only
+   hide the mismatch.
 
-/* REDUCED MOTION. Not "hide it" — the user still has to know something
-   is happening. The animation stops on the frame that says the most:
-   every edge drawn, every node lit. A completed network is a picture of
-   work in progress; an empty box is a picture of nothing. The frozen
-   values are above 3:1 in both themes, which the animated resting state
-   also is — so nothing here is perceivable only while it moves. */
+   These rules used to also say `transform: none`. It was unreachable:
+   with the animation off there is no animated transform to override, and
+   the element has none of its own — the mutation that deleted it left
+   both suites green, which is the definition of a line no test can
+   defend. The prodtest still ASSERTS the computed transform is none, so
+   an orbit frozen mid-sweep would still be caught; it just is not caused
+   by this declaration. */
 @media (prefers-reduced-motion: reduce) {
-  .ionexa-think .edge,
-  .ionexa-think .node {
+  .ionexa-globe.is-spinning .globe-orbit-group {
     animation: none;
   }
-  .ionexa-think .edge {
-    stroke-dashoffset: 0;
-    opacity: 0.75;
-  }
-  .ionexa-think .node {
-    opacity: 1;
-    transform: none;
-  }
 }
-
-/* ON AN ACCENT-COLOURED SURFACE. Found in a screenshot: the sm variant
-   inside the orange "Ask" button was orange on orange — the drawing was
-   there, in the DOM, animating, and invisible. `tone="inherit"` takes
-   the parent's text colour, which on that button is black. The purple
-   node goes with it: purple on orange is no more readable than orange
-   on orange. */
-.ionexa-think.is-inherit,
-:root:not([data-theme="dark"]) .ionexa-think.is-inherit,
-[data-theme="light"] .ionexa-think.is-inherit {
+html[data-motion="reduce"] .ionexa-globe.is-spinning .globe-orbit-group {
+  animation: none;
+}
+/* Accent-on-accent. The `sm` indicator sits inside the orange "Ask"
+   button, whose background IS the accent, so an accent-coloured mark was
+   drawn orange-on-orange and simply was not there. Nothing in the code
+   said so; a screenshot did. `inherit` takes the button's own text
+   colour, which is black there — roughly 8:1. */
+.ionexa-globe.is-inherit {
   color: inherit;
 }
-.ionexa-think.is-inherit .node,
-.ionexa-think.is-inherit .node.alt,
-:root:not([data-theme="dark"]) .ionexa-think.is-inherit .node.alt,
-[data-theme="light"] .ionexa-think.is-inherit .node.alt {
-  fill: currentColor;
+.ionexa-globe.is-inherit .globe-node {
+  /* A glow in the parent's colour on a surface of that colour is a
+     smudge, not a highlight. */
   filter: none;
 }
 
-/* END ThinkingIndicator */
+/* LIGHT USES A DARKER INK, NOT A LOWER OPACITY, and that is the same
+   finding as everywhere else in this theme: orange-500 measures 2.62:1
+   on #f7f7f8 and cannot reach the 3:1 of WCAG 1.4.11 at any opacity,
+   because opacity moves it TOWARD the background. --accent-border is
+   orange-600 in light (3.18:1 on the worst surface the app paints) and
+   orange-500 in dark, so `color` alone carries both themes and there is
+   no second colour to keep in step.
+   The drop-shadow goes in light for the same reason it went on the
+   constellation: a warm halo on white is haze. */
+:root:not([data-theme="dark"]) .ionexa-globe .globe-node,
+[data-theme="light"] .ionexa-globe .globe-node {
+  filter: none;
+}
+/* END GlobeMark */

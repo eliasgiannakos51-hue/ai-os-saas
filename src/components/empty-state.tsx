@@ -1,5 +1,6 @@
 import { Inbox, CornerDownRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { GlobeMark } from "@/components/ui/globe-mark";
 
 // The pulsing ring + gently bobbing icon are pure CSS animation — both
 // collapse to a static state automatically under the "reduce motion"
@@ -53,11 +54,23 @@ export function EmptyState({
             "radial-gradient(circle, rgba(249,115,22,0.18) 0%, rgba(220,38,38,0.06) 50%, transparent 75%)",
         }}
       />
+      {/* THE MODULE ICON STAYS; THE DECORATION BECOMES THE BRAND.
+          The two rings behind the icon were an `animate-ping` wash and a
+          border circle — pure decoration carrying no meaning. They are
+          now the globe (lib/brand/globe.ts), so an empty page is drawn in
+          the same shape as the favicon, the loading state and the
+          thinking state. The Lucide icon in front is NOT replaced: it is
+          the one part of this that says which module you are looking at,
+          and swapping it for a globe would make twenty-one empty pages
+          identical. */}
       <span className="relative mx-auto mb-5 flex h-20 w-20 items-center justify-center">
-        <span className="absolute inset-0 animate-ping rounded-full bg-orange-500/10" />
-        <span className="absolute inset-2 rounded-full border border-orange-500/15" />
-        <span className="relative flex h-20 w-20 animate-[float_3s_ease-in-out_infinite] items-center justify-center rounded-full bg-orange-500/10">
-          <Icon className="h-9 w-9 text-orange-400/80" aria-hidden="true" />
+        <GlobeMark
+          size={80}
+          detail="full"
+          className="absolute inset-0 opacity-40"
+        />
+        <span className="relative flex h-11 w-11 animate-[float_3s_ease-in-out_infinite] items-center justify-center rounded-full bg-orange-500/10">
+          <Icon className="h-6 w-6 text-orange-400" aria-hidden="true" />
         </span>
       </span>
       <div className="relative">

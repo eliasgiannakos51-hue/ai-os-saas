@@ -288,8 +288,32 @@ if (typeof enforce === "function") {
   console.log("\n== It is idempotent ==");
   const once = enforce(generated).html;
   const twice = enforce(once).html;
-  check("enforcing an already-correct document changes nothing", once, generated);
+  // The property is a FIXED POINT, not "the input is unchanged": the
+  // first pass legitimately adds the page-level credits block that
+  // applyResolvedImageUrls does not emit (see buildPageCreditsBlock —
+  // the credit beside the photo is invisible on two of the four layouts
+  // a model writes, so the block is the guarantee). Stated as the fixed
+  // point AND as "the only difference is that block", so the pass cannot
+  // start quietly changing anything else.
   check("enforcing twice equals enforcing once", twice, once);
+  check(
+    "the only thing the first pass added is the page credits block",
+    once.replace(/<div\b[^>]*class="unsplash-page-credits"[\s\S]*?<\/div>/, ""),
+    generated
+  );
+  ok("and there is exactly one of them", (once.match(/unsplash-page-credits/g) || []).length === 1);
+  // ASSERTED ON THE STRING, because the browser cannot tell the
+  // difference. A block appended after </html> is hoisted into <body> by
+  // the HTML parser and renders identically, so the rendered check in
+  // unsplash-credit-visible.prodtest.mjs stays green either way — that
+  // mutation survived until this line existed. Where the bytes put it is
+  // the property the code actually claims.
+  ok(
+    "the block sits INSIDE </body>, not appended after the document",
+    once.indexOf('class="unsplash-page-credits"') < once.lastIndexOf("</body>")
+  );
+  ok("the document still ends properly", once.trimEnd().endsWith("</html>"));
+  ok("still exactly one after a second pass", (twice.match(/unsplash-page-credits/g) || []).length === 1);
   check("a correct document reports no repairs", enforce(generated).restored, 0);
   ok("exactly one credit per photo after two passes", (twice.match(/unsplash-credit/g) || []).length === 2);
 

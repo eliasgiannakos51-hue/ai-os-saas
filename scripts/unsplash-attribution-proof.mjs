@@ -170,6 +170,19 @@ const PAGE = `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <figure><img src="PLACEHOLDER:hero" alt="Coffee being poured at the bar" data-image-query="${QUERY}"></figure>
 </body></html>`;
 
+// THE LAYOUT THIS PAGE USES IS THE ONE THE CREDIT SURVIVES ON, and that
+// was not a choice — it was luck, and it made this script's evidence
+// unrepresentative for months. Measured in Chromium under this same CSP
+// (scripts/tests/unsplash-credit-visible.prodtest.mjs): a fixed-height
+// media box with overflow:hidden clips the credit to ZERO visible
+// pixels, and a full-bleed hero (HERO_PATTERNS[0], drawn for roughly one
+// site in five) has the absolutely-positioned <img> paint over its own
+// credit. This plain <figure> is the only one of four that rendered it.
+//
+// The page-level credits block added by enforceUnsplashAttribution is
+// what makes every layout compliant, and it is visible in the
+// screenshots below because it is the last thing in <body>.
+
 const generated = ph.applyResolvedImageUrls(PAGE, new Map([["hero", photo]]));
 
 console.log("\n=== 3. ATTRIBUTION — in the page that ships ===");

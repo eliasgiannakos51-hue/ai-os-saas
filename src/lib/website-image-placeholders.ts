@@ -135,14 +135,38 @@ export type ResolvedPhoto = {
 // stylesheet this file can rely on, and a class name would be at the
 // mercy of whatever CSS the generation happened to produce (including a
 // `display:none` on a selector that incidentally matches). An inline
-// style wins the cascade outright, so the credit cannot be styled away.
+// style wins the cascade outright.
+//
+// CORRECTION, MEASURED IN A BROWSER. This comment used to end "so the
+// credit cannot be styled away", and that was wrong in the way that
+// mattered. An inline style beats `display:none` on the span itself. It
+// cannot beat the ANCESTOR, and clipping and stacking are ancestor
+// properties:
+//
+//   .media{height:260px;overflow:hidden}  -> the credit sits below the
+//     clip and has ZERO visible pixels.
+//   .hero{position:relative} .hero img{position:absolute;inset:0}  -> a
+//     non-positioned in-flow span paints before a positioned descendant,
+//     so THE IMAGE PAINTS OVER ITS OWN CREDIT. No overlay needed.
+//
+// Both were measured on this exact markup under the real published-site
+// CSP (scripts/tests/unsplash-credit-visible.prodtest.mjs), and neither
+// is exotic: HERO_PATTERNS[0] in lib/website-variation.ts is literally
+// "full-bleed-photo", drawn for roughly one site in five.
+//
+// `position:relative` below is the minimal cure for the second shape: it
+// promotes the span into the positioned-descendant paint step, where DOM
+// order puts it after the image it belongs to. No z-index, deliberately —
+// a large z-index would win against the model's own heading as well, and
+// covering the page's <h1> to show a credit is not an improvement.
+// Clipping it cannot fix, which is why buildPageCreditsBlock exists.
 //
 // The dark chip is not decoration either: a credit is placed over
 // photographs whose brightness is unknown, and plain dark text on a dark
 // hero image is invisible — which is indistinguishable from having no
 // attribution at all.
 const CREDIT_STYLE =
-  "display:block;margin:4px 0 0;font-size:11px;line-height:1.4;" +
+  "display:block;position:relative;margin:4px 0 0;font-size:11px;line-height:1.4;" +
   "font-family:system-ui,-apple-system,sans-serif;color:#fff;" +
   "background:rgba(0,0,0,.55);padding:2px 6px;border-radius:3px;" +
   "width:fit-content;max-width:100%;";
@@ -341,6 +365,79 @@ function recoverPhoto(tag: string, trailingCredit: string): ResolvedPhoto | null
   return { url: src, photographerName: recoveredName, photographerUrl: recoveredProfile };
 }
 
+// ---------------------------------------------------------------------
+// THE CREDIT THE PAGE'S OWN CSS CANNOT REACH.
+// ---------------------------------------------------------------------
+//
+// The credit beside the photo is the right place for it and it is not a
+// GUARANTEE, because whether it renders is decided by CSS a model wrote
+// (see the note on CREDIT_STYLE). Two of the four layouts a model
+// actually produces hide it completely, and one of those two is the hero
+// pattern the generator deliberately asks for.
+//
+// So every document also gets ONE credits block as the last thing in
+// <body>. It is outside every media container, so no `overflow:hidden`
+// on a hero clips it and no absolutely-positioned image paints over it;
+// it is the last child, so nothing that comes later can cover it in DOM
+// order; and it carries its own high-contrast colours rather than
+// inheriting whatever the page set.
+//
+// This is a normal way for a site to credit photographs — a small line at
+// the foot of the page — and Unsplash's guidelines are satisfied by a
+// visible "Photo by <name> on Unsplash" with both links carrying the
+// referral parameters, which this is. The per-photo credit stays as well:
+// when it renders it is better, and when it does not this is what a
+// reviewer sees.
+//
+// One line per DISTINCT photographer, in the order they first appear:
+// two photos by the same person is one credit, not two identical ones.
+const CREDITS_BLOCK_STYLE =
+  "display:block;position:relative;z-index:2147483647;margin:0;padding:10px 16px;" +
+  "background:#f4f4f5;color:#3f3f46;border-top:1px solid #d4d4d8;" +
+  "font-family:system-ui,-apple-system,sans-serif;font-size:12px;line-height:1.7;" +
+  "text-align:left;";
+const CREDITS_LINK_STYLE = "color:#27272a;text-decoration:underline;";
+
+/** The block, or "" when the document uses no Unsplash photos. */
+export function buildPageCreditsBlock(photos: ResolvedPhoto[]): string {
+  const seen = new Set<string>();
+  const unique = photos.filter((photo) => {
+    const key = `${photo.photographerName}\u0000${photo.photographerUrl}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  if (unique.length === 0) return "";
+
+  const link = (href: string, text: string) =>
+    `<a href="${href}" target="_blank" rel="noopener noreferrer" style="${CREDITS_LINK_STYLE}">${text}</a>`;
+  const lines = unique.map(
+    (photo) =>
+      `<span style="display:block">Photo by ${link(
+        escapeHtml(withUnsplashUtm(photo.photographerUrl)),
+        escapeHtml(photo.photographerName)
+      )} on ${link(escapeHtml(UNSPLASH_HOME_URL), "Unsplash")}</span>`
+  );
+  return `<div class="unsplash-page-credits" style="${CREDITS_BLOCK_STYLE}">${lines.join("")}</div>`;
+}
+
+const PAGE_CREDITS_BLOCK =
+  /<div\b[^>]*class="unsplash-page-credits"[^>]*>[\s\S]*?<\/div>\s*/g;
+
+/** Drops any block already present, so the rebuild is idempotent. */
+function withoutPageCreditsBlock(html: string): string {
+  return html.replace(PAGE_CREDITS_BLOCK, "");
+}
+
+/** Puts the block last inside <body>, or at the very end of a fragment
+ *  that has no </body> (which is what the unit tests hand it). */
+function withPageCreditsBlock(html: string, block: string): string {
+  if (!block) return html;
+  const close = html.lastIndexOf("</body>");
+  if (close === -1) return `${html}${block}`;
+  return `${html.slice(0, close)}${block}${html.slice(close)}`;
+}
+
 export type AttributionEnforcement = {
   html: string;
   /** Photos whose credit was rebuilt (including ones that were already
@@ -361,14 +458,29 @@ export type AttributionEnforcement = {
  * enforces this" is a rule with no exceptions to remember — the same
  * shape as makeGeneratedLinksSafe.
  *
- * IDEMPOTENT by construction: it rebuilds each credit from the
- * provenance rather than patching what it finds, so a document that is
- * already correct comes back byte-identical, and a document that goes
- * through twice is not double-credited.
+ * TWO PLACES, because one of them is not reliable. The credit beside the
+ * photo is rebuilt from the provenance, AND one page-level credits block
+ * is placed last in <body> — see buildPageCreditsBlock for why the first
+ * one alone was not enough (measured: it is invisible on two of the four
+ * layouts a model actually writes, one of which the generator asks for by
+ * name).
+ *
+ * IDEMPOTENT by construction: it strips any existing page block, rebuilds
+ * each credit from the provenance rather than patching what it finds, and
+ * appends exactly one block. Running it twice gives the same bytes as
+ * running it once.
  */
 export function enforceUnsplashAttribution(html: string): AttributionEnforcement {
   let restored = 0;
   let removed = 0;
+  // Every photo that survives, in page order — the page-level credits
+  // block is built from this at the end.
+  const surviving: ResolvedPhoto[] = [];
+
+  // Any block from a previous pass comes off first, so the one added
+  // below is the only one and this stays idempotent. It also has to go
+  // before the <img> walk, or the block's own markup would be scanned.
+  html = withoutPageCreditsBlock(html);
 
   IMG_TAG.lastIndex = 0;
   let out = "";
@@ -390,6 +502,7 @@ export function enforceUnsplashAttribution(html: string): AttributionEnforcement
       const rebuilt = `${stampProvenance(tag, photo)}${buildUnsplashCreditHtml(photo)}`;
       const wasAlreadyRight = rebuilt === `${tag}${existing}`;
       if (!wasAlreadyRight) restored += 1;
+      surviving.push(photo);
       out += rebuilt;
     } else {
       // Nothing left to credit with: the image goes, and so does the
@@ -401,5 +514,9 @@ export function enforceUnsplashAttribution(html: string): AttributionEnforcement
   }
   out += html.slice(cursor);
 
-  return { html: out, restored, removed };
+  return {
+    html: withPageCreditsBlock(out, buildPageCreditsBlock(surviving)),
+    restored,
+    removed,
+  };
 }

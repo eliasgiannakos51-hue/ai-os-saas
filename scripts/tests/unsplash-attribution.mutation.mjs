@@ -32,6 +32,7 @@ const GEN_ROUTE = "src/app/api/websites/generate/process/route.ts";
 const BUILDER = "src/lib/website-builder.ts";
 const BUDGET = "src/lib/unsplash-budget.ts";
 const REGISTRATION = "scripts/tests/unsplash-download-registration.test.mjs";
+const VISIBLE = "scripts/tests/unsplash-credit-visible.prodtest.mjs";
 
 const MUTANTS = [
   // ------------------------------------------------------------------
@@ -231,6 +232,50 @@ const MUTANTS = [
     from: "  const url = nonEmptyString(raw?.urls?.regular);",
     to: '  const url = nonEmptyString(raw?.urls?.regular)?.replace("https://images.unsplash.com/", "https://our-cdn.example/") ?? null;',
   },
+  // ------------------------------------------------------------------
+  // VISIBILITY. Every one of these was the live behaviour until it was
+  // measured in a browser; each leaves the credit STRING in the document
+  // and takes its pixels away.
+  // ------------------------------------------------------------------
+  {
+    name: "the page-level credits block is never added (clipped and scrimmed heroes go uncredited)",
+    suites: [VISIBLE],
+    file: PLACEHOLDERS,
+    from: "    html: withPageCreditsBlock(out, buildPageCreditsBlock(surviving)),",
+    to: "    html: out,",
+  },
+  {
+    name: "the block is built but placed outside <body> where a page can hide it",
+    // DURABILITY, not VISIBLE: the HTML parser hoists a block appended
+    // after </html> back into <body>, so it renders identically and no
+    // browser check can tell. The byte placement is the property.
+    suites: [DURABILITY],
+    file: PLACEHOLDERS,
+    from: '  const close = html.lastIndexOf("</body>");',
+    to: '  const close = -1; void html.lastIndexOf("</body>");',
+  },
+  {
+    name: "surviving photos are never collected, so the block is always empty",
+    suites: [VISIBLE],
+    file: PLACEHOLDERS,
+    from: "      surviving.push(photo);",
+    to: "",
+  },
+  {
+    name: "the block loses its stacking context (a sticky footer covers it)",
+    suites: [VISIBLE],
+    file: PLACEHOLDERS,
+    from: '  "display:block;position:relative;z-index:2147483647;margin:0;padding:10px 16px;" +',
+    to: '  "display:block;margin:0;padding:10px 16px;" +',
+  },
+  {
+    name: "the per-photo credit goes back to static (the image paints over it)",
+    suites: [VISIBLE],
+    file: PLACEHOLDERS,
+    from: '  "display:block;position:relative;margin:4px 0 0;font-size:11px;line-height:1.4;" +',
+    to: '  "display:block;margin:4px 0 0;font-size:11px;line-height:1.4;" +',
+  },
+
 ];
 
 let caught = 0;

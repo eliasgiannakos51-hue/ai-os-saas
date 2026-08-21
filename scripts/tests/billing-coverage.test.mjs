@@ -773,9 +773,34 @@ checkTrue("...matching what the rest of the app already calls an admin",
 // It used to fall back to the LIST price — the most EXPENSIVE rate in the
 // product, and therefore the least safe guess for a bulk contract.
 const ENT = PLANS[5];
-check("Enterprise now prices at the cheapest published rate", Number(formula.effectiveCreditPriceEur(ENT, config).toFixed(6)), 0.008);
-check("so the real production row is 132 credits, not 53", formula.creditsForRealCostOnAccount(realEur, ENT, null, config), 132);
-checkTrue("which clears the bar", formula.achievedMarginOnAccount(132, realEur, ENT, null, config) >= M);
+// THE NUMBER MOVED WHEN ANNUAL BILLING SHIPPED, and it moved in the safe
+// direction. "The cheapest published rate" was Ultimate monthly
+// (EUR 200 / 25,000 = EUR 0.008) until annual existed; annual Ultimate
+// sells the same credits at EUR 1,920 / 300,000 = EUR 0.0064, so that is
+// now the cheapest rate a customer can actually reach and therefore the
+// only safe assumption for a negotiated Enterprise contract.
+//
+// The assertions below are written against the DERIVED value rather than
+// a fresh hardcoded one, so the next plan or interval that undercuts it
+// updates this test's expectation by construction instead of turning it
+// red. What is pinned is the property: Enterprise never prices above the
+// cheapest reachable rate, and the charge never goes DOWN when a cheaper
+// rate appears.
+const cheapest = formula.cheapestPublishedCreditPriceEur(config);
+check("the cheapest published rate now includes annual", Number(cheapest.toFixed(6)), 0.0064);
+check(
+  "Enterprise prices at exactly that rate",
+  Number(formula.effectiveCreditPriceEur(ENT, config).toFixed(8)),
+  Number(cheapest.toFixed(8))
+);
+const entCredits = formula.creditsForRealCostOnAccount(realEur, ENT, null, config);
+check("so the real production row is 165 credits, not 53", entCredits, 165);
+checkTrue(
+  "and never fewer than the 132 it was before annual existed",
+  entCredits >= 132,
+  `got ${entCredits}`
+);
+checkTrue("which clears the bar", formula.achievedMarginOnAccount(entCredits, realEur, ENT, null, config) >= M);
 checkTrue("and the helper is derived from PLANS, not hardcoded",
   /for \(const plan of PLANS\)/.test(readFileSync("src/lib/billing/credit-formula.ts", "utf8")));
 // Free is a real rate, not an unknown one: its allowance is a marketing

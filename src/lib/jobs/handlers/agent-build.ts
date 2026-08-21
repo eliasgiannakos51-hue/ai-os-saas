@@ -115,6 +115,34 @@ export const agentBuildHandler: JobHandler = async (ctx: JobContext): Promise<Jo
   await ctx.progress(3, steps[2]);
 
   if (!result.ok) {
+    if (result.reason === "not_feasible") {
+      // THE ONE OUTCOME THAT REFUNDS.
+      //
+      // Not because no work happened — two model calls ran and we paid
+      // Anthropic for both — but because the user asked for something
+      // this product cannot do and we took their money to find that out.
+      // The cost of discovering "no" belongs to us: the deterministic
+      // gate in api/agents/build should have caught it for free, and
+      // every request that reaches here is one that gate missed.
+      //
+      // It cannot be farmed for free AI calls: the route rate-limits
+      // agent_build to 20 an hour per user, and the refund path still
+      // writes the real cost to ai_cost_log (see run-job.ts), so what
+      // refusals cost us stays visible in the margin report instead of
+      // vanishing.
+      return {
+        refund: true,
+        result: {
+          built: false,
+          reason: "not_feasible",
+          // The model's own sentence, in the user's own language, naming
+          // the part that cannot be done. Empty is tolerated — the client
+          // falls back to the generic i18n string rather than showing a
+          // blank panel.
+          unsupported: result.detail,
+        },
+      };
+    }
     // The builder ran and cost real tokens even though it produced nothing
     // usable, so this is a settled job with a refusal in it — NOT a
     // refund. Returning it as a job failure would give the credits back

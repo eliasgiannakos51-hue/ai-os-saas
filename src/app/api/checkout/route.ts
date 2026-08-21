@@ -3,8 +3,14 @@ import { diagLog } from "@/lib/diag";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createStripeClient } from "@/lib/stripe/server";
-import { getPlan, isPaidPlanSlug } from "@/lib/billing/plans";
-import { getPlanPriceId, getTeamSeatPriceId } from "@/lib/billing/price-ids";
+import {
+  getPlan,
+  isPaidPlanSlug,
+  isBillingInterval,
+  annualPriceEur,
+  type BillingInterval,
+} from "@/lib/billing/plans";
+import { getPlanPriceId, getPlanFromPriceId, getTeamSeatPriceId } from "@/lib/billing/price-ids";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getSiteUrl } from "@/lib/site-url";
@@ -27,9 +33,14 @@ export async function POST(request: Request) {
     let plan: string;
     let discountCode: string;
     let successPath: string;
+    let interval: BillingInterval;
     try {
       const body = await request.json();
       plan = typeof body?.plan === "string" ? body.plan : "";
+      // Monthly unless the client explicitly asks for annual. Validated
+      // against the union rather than trusted, because it selects a
+      // Stripe price and therefore an amount to charge.
+      interval = isBillingInterval(body?.interval) ? body.interval : "month";
       discountCode =
         typeof body?.discountCode === "string" ? body.discountCode.trim().slice(0, 100) : "";
       successPath =
@@ -70,7 +81,7 @@ export async function POST(request: Request) {
     }
 
     const planDefinition = getPlan(plan);
-    const planPriceId = getPlanPriceId(plan);
+    const planPriceId = getPlanPriceId(plan, interval);
     // Team seats are only a paid, purchasable add-on for plans that both
     // support team collaboration AND don't already include seats for free
     // (Professional: pay-per-seat; Ultimate/Enterprise: teamSeatsIncluded,
@@ -137,6 +148,89 @@ export async function POST(request: Request) {
 
     const siteUrl = getSiteUrl();
 
+    // ------------------------------------------------------------------
+    // ALREADY SUBSCRIBED? CHANGE THE SUBSCRIPTION, DO NOT SELL A SECOND ONE.
+    // ------------------------------------------------------------------
+    //
+    // This route only ever created Checkout Sessions. A customer on
+    // Starter who pressed "Growth" therefore got a SECOND active
+    // subscription: billed for both, credited for neither correctly (the
+    // webhook re-derives the tier from whichever subscription the event
+    // was about), and with no proration for the Starter time they had
+    // already paid for. That is the pre-existing shape "add proration on
+    // upgrade/downgrade" runs into first — there was nothing to prorate
+    // because nothing was being changed.
+    //
+    // Updating the existing subscription item is what makes proration
+    // possible at all, and Stripe then does the arithmetic:
+    //   UPGRADE  -> always_invoice: the customer gets the bigger plan now
+    //               and pays the difference now, minus credit for the
+    //               unused remainder of what they already bought.
+    //   DOWNGRADE-> create_prorations: the unused remainder becomes a
+    //               credit balance applied to their next invoice. Nobody
+    //               expects a refund to arrive as a card charge.
+    const existingSubscriptionId =
+      typeof user.user_metadata?.stripe_subscription_id === "string"
+        ? user.user_metadata.stripe_subscription_id
+        : "";
+    if (existingSubscriptionId) {
+      try {
+        const existing = await stripe.subscriptions.retrieve(existingSubscriptionId);
+        const live = existing.status === "active" || existing.status === "trialing";
+        // The plan line, as opposed to the team-seat line.
+        const planItem = existing.items.data.find((item) => getPlanFromPriceId(item.price.id));
+        const current = planItem ? getPlanFromPriceId(planItem.price.id) : null;
+
+        if (live && planItem && current) {
+          if (planItem.price.id === planPriceId) {
+            // Nothing to change. Returned as a success with no url so the
+            // client shows "you are already on this plan" rather than
+            // bouncing the user through a Stripe page that would create a
+            // duplicate subscription.
+            return NextResponse.json({ ok: true, unchanged: true, redirectPath: successPath });
+          }
+
+          // Which direction, measured on what the account actually pays
+          // per month — so month→year counts as an upgrade (a year up
+          // front) even though the monthly-equivalent is lower.
+          const currentMonthly =
+            current.interval === "year"
+              ? (annualPriceEur(getPlan(current.slug) ?? { price: 0 }) ?? 0)
+              : (typeof getPlan(current.slug)?.price === "number"
+                  ? (getPlan(current.slug)!.price as number)
+                  : 0);
+          const nextMonthly =
+            interval === "year"
+              ? (annualPriceEur(planDefinition ?? { price: 0 }) ?? 0)
+              : (typeof planDefinition?.price === "number" ? planDefinition.price : 0);
+          const isUpgrade = nextMonthly > currentMonthly;
+
+          await stripe.subscriptions.update(existingSubscriptionId, {
+            items: [{ id: planItem.id, price: planPriceId, quantity: 1 }],
+            proration_behavior: isUpgrade ? "always_invoice" : "create_prorations",
+            // Stripe otherwise keeps the old anniversary when moving
+            // between intervals, which bills a full year on a date the
+            // customer has no reason to expect.
+            ...(current.interval !== interval ? { billing_cycle_anchor: "now" as const } : {}),
+            metadata: { supabase_user_id: user.id, plan, interval },
+          });
+
+          diagLog(
+            `[checkout-diag] subscription updated id=${existingSubscriptionId} ${current.slug}/${current.interval} -> ${plan}/${interval} upgrade=${isUpgrade}`
+          );
+          // The webhook (customer.subscription.updated) owns the tier and
+          // the credits from here — the same path a renewal takes, so a
+          // plan change and a renewal cannot diverge.
+          return NextResponse.json({ ok: true, updated: true, redirectPath: successPath });
+        }
+      } catch (err) {
+        // A subscription id that Stripe no longer knows (deleted in the
+        // dashboard, wrong environment) must not block the customer from
+        // buying. Fall through to a normal Checkout Session.
+        logApiError("/api/checkout", err, { stage: "update_existing_subscription" });
+      }
+    }
+
     // Stripe's own "Add promotion code" field (allow_promotion_codes) and a
     // pre-applied discount (discounts) are mutually exclusive on a Checkout
     // Session — a code typed in the signup flow resolves to a Stripe
@@ -175,9 +269,9 @@ export async function POST(request: Request) {
       ],
       success_url: `${siteUrl}${successPath}`,
       cancel_url: `${siteUrl}/pricing?checkout=cancelled`,
-      metadata: { supabase_user_id: user.id, plan },
+      metadata: { supabase_user_id: user.id, plan, interval },
       subscription_data: {
-        metadata: { supabase_user_id: user.id, plan },
+        metadata: { supabase_user_id: user.id, plan, interval },
       },
     });
 

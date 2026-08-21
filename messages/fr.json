@@ -260,7 +260,13 @@
       "included": "Sièges d'équipe illimités inclus — aucun frais par membre",
       "perMember": "+ {currency}{price}/mois par membre d'équipe — chaque membre bénéficie d'un accès complet au niveau de votre offre"
     },
-    "metaDescription": "Tarifs Ionexa AI — formules Free, Starter, Growth, Professional, Ultimate et Enterprise."
+    "metaDescription": "Tarifs Ionexa AI — formules Free, Starter, Growth, Professional, Ultimate et Enterprise.",
+    "billingMonthly": "Mensuel",
+    "billingAnnual": "Annuel",
+    "billingIntervalLabel": "Période de facturation",
+    "billingAnnualSaving": "Économisez {percent} % — deux mois offerts",
+    "billedAnnually": "Facturé {total} une fois par an — vous économisez {saving}",
+    "checkoutFailed": "Impossible de démarrer le paiement. Veuillez réessayer."
   },
   "roadmap": {
     "title": "Feuille de route",
@@ -1412,6 +1418,42 @@
         "testSentTelegram": "Envoyé — regardez votre Telegram.",
         "testSentDiscord": "Envoyé — regardez votre salon Discord.",
         "testFailed": "Le message de test n'a pas pu être envoyé."
+      },
+      "runCannotComplete": "Cet agent ne peut pas effectuer cette tâche, il a donc été désactivé. Aucun crédit n'a été débité.",
+      "capability": {
+        "canTitle": "Un agent peut",
+        "cannotTitle": "Un agent ne peut pas",
+        "can": {
+          "search": "Chercher des informations actuelles sur le web",
+          "analyse": "Lire et analyser ce qu'il trouve",
+          "summarise": "Résumer, comparer et tirer des conclusions",
+          "monitor": "Suivre un sujet dans la durée et signaler ce qui a changé",
+          "schedule": "Faire tout cela de façon planifiée et vous envoyer le résultat par e-mail"
+        },
+        "cannot": {
+          "code": "Écrire ou exécuter du code, créer des logiciels ou des sites, lancer des tests, corriger des bugs",
+          "system_access": "Accéder à votre ordinateur, vos fichiers, vos comptes ou vos systèmes",
+          "other_platforms": "Agir sur d'autres plateformes : publier, écrire à quelqu'un, réserver ou commander",
+          "physical": "Faire quoi que ce soit dans le monde physique",
+          "financial": "Déplacer de l'argent, acheter ou vendre quoi que ce soit",
+          "phone": "Passer des appels téléphoniques"
+        },
+        "refusedTitle": "Cela, un agent ne peut pas le faire",
+        "refusedBody": "Tout ce que vous demandez nécessite quelque chose hors du champ d'un agent :",
+        "detectedIn": "Détecté dans ce que vous avez écrit : {words}",
+        "noCharge": "Rien ne vous a été débité — rien n'a été exécuté.",
+        "noChargeYet": "Rien n'a encore été débité.",
+        "tryInstead": "Essayez plutôt de demander une recherche, une veille ou un résumé — par exemple, « chaque lundi, résume les nouveautés de mon secteur ».",
+        "rephrase": "Je veux reformuler ma demande",
+        "partialTitle": "Une partie de ceci est impossible",
+        "partialWillDo": "À la place, l'agent ferait ceci : {parts}",
+        "partialContinue": "Créer la partie réalisable",
+        "previewWhatItDoes": "Ce qu'il fait à chaque exécution",
+        "previewWillNotDo": "Ce qu'il ne fera pas",
+        "stepSearch": "Cherche sur le web des informations actuelles sur le sujet.",
+        "stepNoSearch": "Travaille uniquement à partir du texte de la tâche, sans recherche web.",
+        "stepWrite": "Rédige le résultat et le confronte à ce qu'il a trouvé.",
+        "stepDeliver": "L'envoie par e-mail à {target}, {when}."
       }
     },
     "publishing": {

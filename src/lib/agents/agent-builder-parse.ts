@@ -29,7 +29,25 @@ export type BuiltAgent = {
 
 export type BuildAgentResult =
   | { ok: true; built: BuiltAgent }
-  | { ok: false; reason: "malformed" | "invalid_schedule"; detail: string };
+  | {
+      ok: false;
+      /**
+       * `not_feasible` is the outcome that did not exist before.
+       *
+       * The builder always had an `unsupported` field, and it was free
+       * text with NO EFFECT: a request that was 100% outside what an
+       * agent can do still came back `ok: true` with a complete draft,
+       * a schedule and a cost estimate, and the user could press Create.
+       * That is how an agent got built for "make an MVP, run the tests,
+       * fix the errors" — the model said, in `unsupported`, that it
+       * could not do any of it, and nothing read the sentence.
+       *
+       * Now the model's own verdict decides the return type, so the
+       * impossible case cannot be turned into an agent by any caller.
+       */
+      reason: "malformed" | "invalid_schedule" | "not_feasible";
+      detail: string;
+    };
 
 /**
  * Deterministic interpretation of the tool input, split out so it is unit
@@ -45,6 +63,30 @@ export function parseBuiltAgent(
 ): BuildAgentResult {
   const str = (v: unknown, max: number): string =>
     typeof v === "string" ? v.trim().slice(0, max) : "";
+
+  const unsupported = str(input.unsupported, AGENT_LIMITS.description);
+
+  // FEASIBILITY IS CHECKED FIRST, before the fields are even validated.
+  //
+  // A request the model judged impossible must not be able to fail any
+  // later check into a different outcome — "malformed" would read to the
+  // user as "try rewording it", which is precisely the wrong advice for
+  // something no rewording can make possible.
+  //
+  // An ABSENT feasibility is treated as "full", not as a refusal. The
+  // field is `required` in the tool schema so it is always present in
+  // practice, but a model that omitted it would otherwise make every
+  // agent in the product unbuildable — and failing closed on a
+  // never-charged, never-created preview is the wrong direction to fail
+  // in. The deterministic gate in api/agents/build runs before this and
+  // does not depend on the model at all.
+  if (input.feasibility === "none") {
+    return {
+      ok: false,
+      reason: "not_feasible",
+      detail: unsupported,
+    };
+  }
 
   const name = str(input.name, AGENT_LIMITS.name);
   const taskPrompt = str(input.taskPrompt, AGENT_LIMITS.prompt);
@@ -92,7 +134,7 @@ export function parseBuiltAgent(
         },
       },
       understood: str(input.understood, AGENT_LIMITS.description),
-      unsupported: str(input.unsupported, AGENT_LIMITS.description),
+      unsupported,
     },
   };
 }

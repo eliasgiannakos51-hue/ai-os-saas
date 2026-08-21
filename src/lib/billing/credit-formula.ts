@@ -1,5 +1,5 @@
 import { resolvePricingConfig, type PricingConfig } from "@/lib/billing/pricing-config";
-import { PLANS } from "@/lib/billing/plans";
+import { PLANS, planCreditPriceEur } from "@/lib/billing/plans";
 
 // THE formula. Everything the app charges for an AI action goes through
 // here, so the margin guarantee is a property of one function rather than
@@ -121,7 +121,18 @@ export function cheapestPublishedCreditPriceEur(config?: PricingConfig): number 
   for (const plan of PLANS) {
     if (typeof plan.price !== "number" || typeof plan.monthlyCredits !== "number") continue;
     if (plan.price <= 0 || plan.monthlyCredits <= 0) continue;
-    cheapest = Math.min(cheapest, plan.price / plan.monthlyCredits);
+    // BOTH intervals. Annual is 20% cheaper per credit, so the moment
+    // annual billing existed, "the cheapest rate any published plan sells
+    // at" stopped being the monthly one — and this function's entire
+    // purpose is to be that floor for Enterprise, whose real negotiated
+    // rate is unknowable. Iterating only the monthly prices would have
+    // left Enterprise priced 25% above the cheapest rate a customer can
+    // actually reach, which is an under-charge on the highest-value
+    // accounts and exactly the failure this function was written for.
+    for (const interval of ["month", "year"] as const) {
+      const rate = planCreditPriceEur(plan, interval);
+      if (rate !== null) cheapest = Math.min(cheapest, rate);
+    }
   }
   return cheapest;
 }

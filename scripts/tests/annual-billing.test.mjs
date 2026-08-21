@@ -1,10 +1,11 @@
-// Annual plans at -20%, and the two things that quietly break when you
+// Annual plans at TWO MONTHS FREE, and the two things that quietly break
+// when you
 // add them.
 //
 // THE FIRST is margin. Every credit-price divisor in this app is
 // `plan.price / plan.monthlyCredits`, and the 4x guarantee rests on that
 // divisor being what the customer really pays. Annual sells the same
-// credits for 20% less. Leaving the catalogue price in place would drop
+// credits for two months less. Leaving the catalogue price in place would drop
 // every annual settlement to 3.2x — invisibly, because the stored
 // achieved_margin is computed from the same wrong divisor and reads
 // healthy. Identical in shape to the plan-rate and credit-pack leaks
@@ -40,6 +41,8 @@ const {
   PLANS,
   getPlan,
   ANNUAL_DISCOUNT_PERCENT,
+  ANNUAL_MONTHS_CHARGED,
+  ANNUAL_MONTHS_FREE,
   annualPriceEur,
   annualMonthlyEquivalentEur,
   annualSavingsEur,
@@ -51,10 +54,20 @@ const PAID = ["starter", "growth", "professional", "ultimate"];
 
 // ---------------------------------------------------------------------------
 console.log("== 1. the prices, including the one from the brief ==");
-check("the discount is 20%", ANNUAL_DISCOUNT_PERCENT === 20);
+// THE OFFER IS MONTHS, NOT A PERCENTAGE. This asserted 20 while the badge
+// beside it read "two months free" — 20% of twelve months is 2.4, so the
+// two numbers described different offers and nothing tied them together.
+// Anchored on the months, with the percentage checked as a DISPLAY of
+// them, so a change to one cannot leave the other behind.
+check("two of the twelve months are free", ANNUAL_MONTHS_FREE === 2);
+check("so ten are charged", ANNUAL_MONTHS_CHARGED === 10);
 check(
-  "Starter €20/month becomes €192/year — the figure in the brief",
-  annualPriceEur(getPlan("starter")) === 192
+  `and the badge shows that as ${ANNUAL_DISCOUNT_PERCENT}%`,
+  ANNUAL_DISCOUNT_PERCENT === Math.round((ANNUAL_MONTHS_FREE / 12) * 100)
+);
+check(
+  "Starter €20/month becomes €200/year — ten monthly payments",
+  annualPriceEur(getPlan("starter")) === getPlan("starter").price * ANNUAL_MONTHS_CHARGED
 );
 console.log("        plan          monthly   annual   /month   saves");
 for (const slug of PAID) {
@@ -65,9 +78,23 @@ for (const slug of PAID) {
   console.log(
     `        ${slug.padEnd(13)} €${String(plan.price).padStart(4)}   €${String(annual).padStart(5)}   €${String(perMonth).padStart(4)}   €${saving}`
   );
-  check(`${slug}: annual is exactly 12 months less 20%`, annual === Math.round(plan.price * 12 * 0.8));
-  check(`${slug}: the saving equals two months`, saving === plan.price * 2 * 1.2 - plan.price * 0.4 || saving === plan.price * 12 - annual);
-  check(`${slug}: the per-month figure is a whole number of euros`, Number.isInteger(perMonth));
+  // EXACT, not "within rounding of a percentage": ten payments of the
+  // monthly price is a number the customer can check on their own.
+  check(`${slug}: annual is exactly ${ANNUAL_MONTHS_CHARGED} x €${plan.price}`, annual === plan.price * ANNUAL_MONTHS_CHARGED);
+  // THIS WAS AN `||` OF TWO DIFFERENT ARITHMETICS — `price*2*1.2 - price*0.4`
+  // (2.4 months, the 20% era) OR `price*12 - annual`. An assertion that
+  // accepts either cannot fail for the thing it names. One equality now.
+  check(`${slug}: the saving is exactly ${ANNUAL_MONTHS_FREE} months`, saving === plan.price * ANNUAL_MONTHS_FREE);
+  // WAS "the per-month figure is a whole number of euros", which held only
+  // because 20% of twelve happens to divide evenly. Ten months over twelve
+  // does not: €200/yr is €16.67/month, and that is the correct number to
+  // show. What actually matters to a customer is that the amount BILLED is
+  // a clean figure and the per-month display reconciles to it.
+  check(`${slug}: the amount actually billed is whole euros (€${annual})`, Number.isInteger(annual));
+  check(
+    `${slug}: the /month figure reconciles to it within a cent (€${perMonth.toFixed(2)} x 12)`,
+    Math.abs(perMonth * 12 - annual) < 0.01
+  );
   check(`${slug}: paying annually is never more than paying monthly`, annual < plan.price * 12);
 }
 check("Free has no annual price", annualPriceEur(getPlan("free")) === null);
@@ -76,15 +103,15 @@ check("the interval type guard rejects junk", !isBillingInterval("annual") && is
 
 // ---------------------------------------------------------------------------
 console.log("\n== 2. THE MARGIN LEAK: an annual credit is cheaper, and settlement must know ==");
-// The whole point. A 20% cheaper credit against an unchanged divisor is a
-// 20% smaller multiplier.
+// The whole point. A credit made cheaper by two months against an
+// unchanged divisor is a proportionally smaller multiplier.
 for (const slug of PAID) {
   const plan = getPlan(slug);
   const monthlyRate = planCreditPriceEur(plan, "month");
   const annualRate = planCreditPriceEur(plan, "year");
   check(
-    `${slug}: the annual credit rate is 20% below the monthly one (€${annualRate.toFixed(6)} vs €${monthlyRate.toFixed(6)})`,
-    Math.abs(annualRate - monthlyRate * 0.8) < 1e-9
+    `${slug}: the annual credit rate is ${ANNUAL_MONTHS_CHARGED}/12 of the monthly one (€${annualRate.toFixed(6)} vs €${monthlyRate.toFixed(6)})`,
+    Math.abs(annualRate - monthlyRate * (ANNUAL_MONTHS_CHARGED / 12)) < 1e-9
   );
 }
 
@@ -139,8 +166,8 @@ check(
   "this is the bug the fix exists for — if it does not reproduce, the test is not testing it"
 );
 check(
-  "…which is 80% of target, exactly the discount",
-  Math.abs(leakedMargin / leakTarget - 0.8) < 0.02
+  `…which is ${ANNUAL_MONTHS_CHARGED}/12 of target, exactly the discount`,
+  Math.abs(leakedMargin / leakTarget - ANNUAL_MONTHS_CHARGED / 12) < 0.02
 );
 
 // ---------------------------------------------------------------------------
@@ -150,7 +177,10 @@ console.log("\n== 3. Enterprise tracks the cheapest rate a customer can reach ==
 // looked at monthly prices it would now be 25% above the real floor —
 // an under-charge on the highest-value accounts.
 const cheapest = cf.cheapestPublishedCreditPriceEur(C);
-check("the cheapest published rate is annual Ultimate, €0.0064", Math.abs(cheapest - 1920 / 300_000) < 1e-9);
+check(
+  `the cheapest published rate is annual Ultimate, €${cheapest.toFixed(6)}`,
+  Math.abs(cheapest - (200 * ANNUAL_MONTHS_CHARGED) / 300_000) < 1e-9
+);
 check("…which is below the cheapest MONTHLY rate", cheapest < 200 / 25_000);
 check(
   "Enterprise prices at it",

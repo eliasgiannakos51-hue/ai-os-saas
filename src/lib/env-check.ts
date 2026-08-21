@@ -124,10 +124,10 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
   // breaks and nothing half-works — the failure mode of a partially
   // configured toggle would be a buy button that 500s on a price id
   // that does not exist.
-  { name: "STRIPE_PRICE_STARTER_ANNUAL", level: "optional", what: "Starter billed yearly (€192)", fallback: "annual billing is not offered at all" },
-  { name: "STRIPE_PRICE_GROWTH_ANNUAL", level: "optional", what: "Growth billed yearly (€480)", fallback: "annual billing is not offered at all" },
-  { name: "STRIPE_PRICE_PROFESSIONAL_ANNUAL", level: "optional", what: "Professional billed yearly (€960)", fallback: "annual billing is not offered at all" },
-  { name: "STRIPE_PRICE_ULTIMATE_ANNUAL", level: "optional", what: "Ultimate billed yearly (€1,920)", fallback: "annual billing is not offered at all" },
+  { name: "STRIPE_PRICE_STARTER_ANNUAL", level: "optional", what: "Starter billed yearly (€200 — ten months)", fallback: "annual billing is not offered at all" },
+  { name: "STRIPE_PRICE_GROWTH_ANNUAL", level: "optional", what: "Growth billed yearly (€500 — ten months)", fallback: "annual billing is not offered at all" },
+  { name: "STRIPE_PRICE_PROFESSIONAL_ANNUAL", level: "optional", what: "Professional billed yearly (€1,000 — ten months)", fallback: "annual billing is not offered at all" },
+  { name: "STRIPE_PRICE_ULTIMATE_ANNUAL", level: "optional", what: "Ultimate billed yearly (€2,000 — ten months)", fallback: "annual billing is not offered at all" },
   { name: "ADMIN_EMAILS", level: "optional", what: "Extra admin accounts, comma-separated", fallback: "the hardcoded owner address" },
   {
     name: "UNSPLASH_ACCESS_KEY",

@@ -222,7 +222,7 @@ checkTrue("an unaffordable classification degrades, it does not 4xx", /if \(affo
 // the GENERAL multiplier for every row, and the section below reported
 // every plan at 4x when the shipped policy is 5x. A suite that duplicates
 // the thing it verifies eventually verifies the duplicate.
-const { PLANS } = await loadTs("src/lib/billing/plans.ts");
+const { PLANS, ANNUAL_MONTHS_CHARGED } = await loadTs("src/lib/billing/plans.ts");
 checkTrue("the plan table is the real one, with slugs", PLANS.every((p) => typeof p.slug === "string"));
 checkTrue("…in the published order the indices below assume",
   PLANS.map((p) => p.slug).join(",") === "free,starter,growth,professional,ultimate,enterprise");
@@ -776,7 +776,7 @@ const ENT = PLANS[5];
 // THE NUMBER MOVED WHEN ANNUAL BILLING SHIPPED, and it moved in the safe
 // direction. "The cheapest published rate" was Ultimate monthly
 // (EUR 200 / 25,000 = EUR 0.008) until annual existed; annual Ultimate
-// sells the same credits at EUR 1,920 / 300,000 = EUR 0.0064, so that is
+// sells the same credits at ten monthly payments over 300,000, so that is
 // now the cheapest rate a customer can actually reach and therefore the
 // only safe assumption for a negotiated Enterprise contract.
 //
@@ -787,14 +787,30 @@ const ENT = PLANS[5];
 // cheapest reachable rate, and the charge never goes DOWN when a cheaper
 // rate appears.
 const cheapest = formula.cheapestPublishedCreditPriceEur(config);
-check("the cheapest published rate now includes annual", Number(cheapest.toFixed(6)), 0.0064);
+// DERIVED, because this was the literal 0.0064 — true only while the
+// annual discount was 20%. Two months free makes it 0.006667, and a
+// pinned literal turns a correct pricing change into a red build.
+check(
+  "the cheapest published rate now includes annual",
+  Number(cheapest.toFixed(6)),
+  Number(((200 * ANNUAL_MONTHS_CHARGED) / 300_000).toFixed(6))
+);
 check(
   "Enterprise prices at exactly that rate",
   Number(formula.effectiveCreditPriceEur(ENT, config).toFixed(8)),
   Number(cheapest.toFixed(8))
 );
 const entCredits = formula.creditsForRealCostOnAccount(realEur, ENT, null, config);
-check("so the real production row is 165 credits, not 53", entCredits, 165);
+// Same shape: 165 was this row at the 20% floor. The charge scales
+// inversely with the rate, so it is asserted against the pre-annual 132
+// scaled by how far the floor moved, not against a fresh literal.
+const PRE_ANNUAL_ROW = 132;
+const PRE_ANNUAL_FLOOR = 200 / 25_000; // Ultimate MONTHLY
+check(
+  `so the real production row is ${PRE_ANNUAL_ROW} scaled by the floor (${entCredits}), not 53`,
+  Math.abs(entCredits - PRE_ANNUAL_ROW * (PRE_ANNUAL_FLOOR / cheapest)) <= 1,
+  true
+);
 checkTrue(
   "and never fewer than the 132 it was before annual existed",
   entCredits >= 132,

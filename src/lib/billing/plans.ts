@@ -101,7 +101,23 @@ export function isBillingInterval(value: unknown): value is BillingInterval {
   return value === "month" || value === "year";
 }
 
-export const ANNUAL_DISCOUNT_PERCENT = 20;
+/**
+ * TWO MONTHS FREE, and the price is derived from that rather than from a
+ * percentage chosen next to it.
+ *
+ * This was `ANNUAL_DISCOUNT_PERCENT = 20` while the badge beside it read
+ * "Save {percent}% — two months free". Those disagreed: 20% off twelve
+ * months is 2.4 months free, so the copy understated what the customer
+ * actually got and the two numbers had no way to stay in step. Anchoring
+ * on the MONTHS makes the sentence literally true and leaves the
+ * percentage as a display of it, not a second source of truth.
+ */
+export const ANNUAL_MONTHS_CHARGED = 10;
+export const ANNUAL_MONTHS_FREE = 12 - ANNUAL_MONTHS_CHARGED;
+
+/** 2/12 is 16.67%, which the pricing badge shows as 17. Derived, so the
+ *  badge cannot drift from the amount billed. */
+export const ANNUAL_DISCOUNT_PERCENT = Math.round((ANNUAL_MONTHS_FREE / 12) * 100);
 
 /** What a year costs up front. Null for Free and Enterprise. */
 export function annualPriceEur(plan: Pick<Plan, "price">): number | null {
@@ -110,7 +126,10 @@ export function annualPriceEur(plan: Pick<Plan, "price">): number | null {
   // number and 20% of 12x a whole number always is too, but rounding here
   // means a future 15% or a 19.99 price cannot produce a Stripe amount
   // with sub-cent drift.
-  return Math.round(plan.price * 12 * (1 - ANNUAL_DISCOUNT_PERCENT / 100));
+  // Charged for ten months. NOT `price * 12 * (1 - percent/100)`, which
+  // rounds a percentage back into euros and lands on €192 for a €20 plan
+  // — a number no customer can derive from "two months free".
+  return Math.round(plan.price * ANNUAL_MONTHS_CHARGED);
 }
 
 /** The "€16/month, billed annually" figure. Null where annual does not

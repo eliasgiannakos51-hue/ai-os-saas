@@ -102,10 +102,29 @@ check(`Enterprise charges ${ent.credits}, not ${REPORTED_CREDITS}`, ent.credits 
 // cheaper option updates this by construction — what is pinned is that
 // Enterprise tracks the floor and never charges less than it used to.
 const cheapestRate = cf.cheapestPublishedCreditPriceEur(config);
-check("Enterprise charges 253", ent.credits === 253);
-check("never fewer than the 203 it charged before annual existed", ent.credits >= 203);
+const plansMod = await loadTs("src/lib/billing/plans.ts");
+// THE COMMENT ABOVE SAID "asserted against the derived rate rather than a
+// fresh literal" and the two lines under it were both fresh literals —
+// 253 credits and €0.0064/credit, each true only while the annual
+// discount was 20%. Changing that discount to two-months-free (16.67%)
+// moved the floor to €0.006667 and the charge to 243, and both assertions
+// went red for a change that was correct. They are derived now, so the
+// comment is true and the next change to the cheapest rate updates them
+// by construction.
+const PRE_ANNUAL_CREDITS = 203;
+const PRE_ANNUAL_RATE = MONTHLY_ERA_RATE; // Ultimate MONTHLY — the floor before annual existed
 check("at the cheapest published rate", Math.abs(ent.rate - cheapestRate) < 1e-9);
-check("which is €0.0064/credit — annual Ultimate", Math.abs(ent.rate - 0.0064) < 1e-9);
+check(
+  `the floor is Ultimate ANNUAL — €${ent.rate.toFixed(6)}/credit`,
+  Math.abs(ent.rate - PRE_ANNUAL_RATE * (plansMod.ANNUAL_MONTHS_CHARGED / 12)) < 1e-9
+);
+// The charge scales inversely with the floor: a credit worth less money
+// buys less Anthropic cost, so the same generation needs more of them.
+check(
+  `Enterprise charges ${ent.credits}, which is ${PRE_ANNUAL_CREDITS} scaled by the floor`,
+  Math.abs(ent.credits - PRE_ANNUAL_CREDITS * (PRE_ANNUAL_RATE / ent.rate)) <= 1
+);
+check(`never fewer than the ${PRE_ANNUAL_CREDITS} it charged before annual existed`, ent.credits >= PRE_ANNUAL_CREDITS);
 check("achieving at least 4x", ent.achieved >= 4);
 check(
   "so the reported 2.2x mixes Growth's charge with Enterprise's rate",

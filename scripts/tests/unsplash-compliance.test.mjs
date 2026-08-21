@@ -45,6 +45,32 @@ function ok(name, cond) {
   check(name, Boolean(cond), true);
 }
 
+/**
+ * The source of ONE function, brace-matched from its declaration.
+ *
+ * Needed because these assertions are regexes over source, and a regex
+ * anchored on a function NAME also matches that name in a comment — which
+ * is how "it authenticates with the access key" came to be asserting
+ * something about a different function entirely. Returns "" if the
+ * declaration is not found, so a rename fails the test loudly instead of
+ * matching the whole file.
+ */
+function functionBody(source, declaration) {
+  const start = source.indexOf(declaration);
+  if (start === -1) return "";
+  const open = source.indexOf("{", start + declaration.length);
+  if (open === -1) return "";
+  let depth = 0;
+  for (let i = open; i < source.length; i++) {
+    if (source[i] === "{") depth++;
+    else if (source[i] === "}") {
+      depth--;
+      if (depth === 0) return source.slice(open, i + 1);
+    }
+  }
+  return "";
+}
+
 const ph = await loadTs("src/lib/website-image-placeholders.ts");
 const uns = await loadTs("src/lib/unsplash.ts");
 
@@ -109,6 +135,23 @@ for (const [label, src] of [
   ok(`${label} never reads the image body`, !/arrayBuffer\(\)|\.blob\(\)/.test(src));
 }
 
+// The three-file grep above cannot see the two ways this app could
+// plausibly START re-hosting: Next's image optimiser (which proxies the
+// bytes through /_next/image on OUR origin) and a service worker caching
+// them. Both would be a licence breach that looks like a performance win,
+// so they are asserted where they would be configured.
+{
+  const nextConfig = readFileSync("next.config.mjs", "utf8");
+  ok(
+    "next.config.mjs does not allow Unsplash through the image optimiser",
+    !/unsplash/i.test(nextConfig)
+  );
+  ok("no remotePatterns entry exists at all", !/remotePatterns/.test(nextConfig));
+  const sw = readFileSync("public/sw.js", "utf8");
+  ok("the service worker never caches a cross-origin response", /url\.origin !== self\.location\.origin/.test(sw));
+  ok("and it names no image CDN to cache", !/unsplash/i.test(sw));
+}
+
 // =====================================================================
 console.log("\n== Requirement 2: TRIGGER DOWNLOAD ==");
 check(
@@ -123,24 +166,55 @@ ok(
   "it requests the photo's downloadLocation",
   /fetch\(photo\.downloadLocation/.test(unsplashSrc)
 );
+// SCOPED TO THE FUNCTION BODY, and that is the whole point of this
+// version. The previous assertion searched from the first occurrence of
+// the string "triggerUnsplashDownload" — which is in the FILE HEADER
+// COMMENT, twenty lines above searchUnsplashPhoto. A non-greedy match
+// from there found searchUnsplashPhoto's Authorization header and passed,
+// so removing the auth header from the trigger itself left the suite
+// green. scripts/tests/unsplash-attribution.mutation.mjs re-introduced
+// exactly that and the suite did not notice; this is the repair.
+// An unauthenticated GET to download_location registers nothing with
+// Unsplash, which is invisible from the product and fatal at review.
+const triggerBody = functionBody(unsplashSrc, "export async function triggerUnsplashDownload");
+ok("the trigger function body was located", triggerBody.length > 0);
 ok(
   "it authenticates with the access key",
-  /triggerUnsplashDownload[\s\S]*?Authorization: `Client-ID \$\{accessKey\}`/.test(unsplashSrc)
+  /Authorization: `Client-ID \$\{accessKey\}`/.test(triggerBody)
 );
-// Only photos that SHIP get credited. Crediting every search result would
-// report uses that never happened.
 ok(
-  "the resolver triggers downloads from the resolved set only",
-  /for \(const photo of resolved\.values\(\)\)[\s\S]{0,200}?triggerUnsplashDownload\(photo, budget\)/.test(
-    resolverSrc
-  )
+  "it reads the key from the environment itself",
+  /const accessKey = process\.env\.UNSPLASH_ACCESS_KEY;/.test(triggerBody)
+);
+// Only photos that SHIP get registered, and "ship" means the document was
+// KEPT — which the resolver cannot know. So the trigger no longer lives
+// inside it: resolveWebsiteImagePlaceholders reports the photos it used
+// and the routes register them once the row is written. See
+// scripts/tests/unsplash-download-registration.test.mjs, which counts the
+// actual requests rather than reading the source.
+ok(
+  "the resolver reports the photos it used instead of registering them itself",
+  /used: \[\.\.\.resolved\.values\(\)\]/.test(resolverSrc)
+);
+ok(
+  "registration is its own exported step",
+  /export async function registerUnsplashUses\(/.test(resolverSrc)
+);
+ok(
+  "and it is what calls the trigger",
+  /registerUnsplashUses[\s\S]*?triggerUnsplashDownload\(photo, budget\)/.test(resolverSrc)
+);
+ok(
+  "resolution itself no longer triggers anything",
+  !/for \(const photo of resolved\.values\(\)\)/.test(resolverSrc)
 );
 // The trigger must survive the per-generation search ceiling. Charging it
 // against the same 12-request budget would let a photo-heavy site ship
 // UNCREDITED photos once broadening searches ate the allowance.
 ok(
   "the trigger is not blocked by the search ceiling",
-  /triggerUnsplashDownload[\s\S]*?if \(budget\?\.halted\) return false;/.test(unsplashSrc)
+  /if \(budget\?\.halted\) return false;/.test(triggerBody) &&
+    !/budget && !budget\.canSpend\(\)/.test(triggerBody)
 );
 ok(
   "the search IS still bounded by the ceiling",
@@ -210,6 +284,29 @@ check("each photo gets its own credit", (both.match(/Photo by/g) ?? []).length, 
 ok("the second photographer is named", both.includes("Ada Lovelace"));
 
 // =====================================================================
+console.log("\n== A hostile photo URL cannot write markup into the page ==");
+// urls.regular is third-party text. String.replace() expands $&, $`, $'
+// and $1-$99 inside a replacement STRING, so passing the url as one let a
+// url containing "$`" paste everything before the match — the rest of the
+// <img> tag — into the attribute, closing src and injecting markup onto a
+// customer's published page. Demonstrated rather than described: this
+// exact url produced `<img src="…<img src="evil'…` before the fix.
+{
+  const hostile = {
+    url: "https://images.unsplash.com/photo-x?a=$`evil$'&b=$&x",
+    photographerName: "Ada",
+    photographerUrl: "https://unsplash.com/@ada",
+  };
+  const out = ph.applyResolvedImageUrls(
+    `<img src="PLACEHOLDER:hero" alt="a photo">`,
+    new Map([["hero", hostile]])
+  );
+  check("the url is written verbatim, unexpanded", out.includes(`src="${hostile.url}"`), true);
+  ok("no second <img> was conjured", (out.match(/<img\b/g) || []).length === 1);
+  ok("the placeholder token did not survive the expansion", !out.includes("PLACEHOLDER:hero"));
+  ok("the credit still follows it", /<span[^>]*class="unsplash-credit"/.test(out));
+}
+
 console.log("\n== A photo we cannot credit is not used ==");
 // Displaying an uncreditable photo is the breach this guards. Each of the
 // four fields is load-bearing, so each is removed in turn — a single

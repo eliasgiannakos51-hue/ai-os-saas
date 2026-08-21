@@ -894,6 +894,7 @@ CORE RULES:
 - You will be given the website's CURRENT complete HTML document, followed by a plain-text change request.
 - Output the FULL, updated HTML document: <!DOCTYPE html> through </html>. Nothing else — no explanation, no markdown code fences, no commentary before or after.
 - Apply ONLY the requested change. Keep every other section, all copy, and the overall structure and design exactly as they were unless the change necessarily affects them.
+- PHOTO CREDITS ARE NOT DECORATION. Any <span class="unsplash-credit"> and any data-unsplash-* attribute on an <img> is a legal attribution required by Unsplash's licence. Copy them forward EXACTLY as they are, next to the image they belong to, including every link and every URL parameter. If you move or resize an image, its credit moves with it. Never delete one, never reword one, never "tidy" its links.
 - Keep following the same rules the original site was built under: all CSS inline in a single <style> tag, no external stylesheets/fonts/scripts except the specific exceptions below, responsive with a viewport meta tag, semantic HTML5.
 ${FONTS_SECTION}
 ${ANIMATIONS_SECTION}

@@ -48,7 +48,7 @@ export function DesignControls({
   }
 
   return (
-    <div className="space-y-3 rounded-xl border border-border bg-input/40 p-3">
+    <div className="space-y-3 rounded-xl border border-border bg-input p-3">
       <div className="flex items-center gap-1.5">
         <Palette className="h-3.5 w-3.5 text-orange-400" aria-hidden="true" />
         <h3 className="text-xs font-semibold text-foreground">{t("title")}</h3>

@@ -1377,6 +1377,8 @@
       "runSucceeded": "成功",
       "runFailedLabel": "失败",
       "runRunning": "运行中",
+      "runQueued": "排队中",
+      "runQueuedHint": "已提交至更便宜的批量处理。结果将在 24 小时内送达，通常快得多。",
       "runManual": "手动",
       "runScheduled": "计划",
       "runCredits": "{credits} 积分",

@@ -27,6 +27,10 @@
     {
       "path": "/api/cron/website-storage-cleanup",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/agent-batches",
+      "schedule": "*/10 * * * *"
     }
   ]
 }

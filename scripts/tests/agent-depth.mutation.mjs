@@ -134,16 +134,25 @@ const MUTANTS = [
   // THE RUNNER DRIFTS FROM THE TIER.
   // ------------------------------------------------------------------
   {
+    // Re-anchored on the unified request shape: the generation call now
+    // goes through the provider layer (V4 #12) and spells these
+    // `model:`/`maxTokens:` inside runCompletion's argument.
     name: "the runner goes back to one model for every tier",
     file: RUNNER,
-    from: "      model: spec.model,\n      max_tokens: spec.outputTokens,",
-    to: "      model: AGENT_RUNNER_MODEL,\n      max_tokens: spec.outputTokens,",
+    from: "      model: spec.model,\n      maxTokens: spec.outputTokens,",
+    to: "      model: \"claude-sonnet-4-6\",\n      maxTokens: spec.outputTokens,",
   },
   {
     name: "the output cap stops following the tier",
     file: RUNNER,
-    from: "      max_tokens: spec.outputTokens,",
-    to: "      max_tokens: 3000,",
+    from: "      maxTokens: spec.outputTokens,",
+    to: "      maxTokens: 3000,",
+  },
+  {
+    name: "the research budget stops following the tier",
+    file: RUNNER,
+    from: "      max_tokens: spec.researchTokens,",
+    to: "      max_tokens: 1500,",
   },
   {
     name: "the research cap stops following the tier",

@@ -12,6 +12,7 @@ import {
   type AgentOutputFormat,
 } from "@/lib/agents/agent-config";
 import { logApiError } from "@/lib/log-error";
+import { runCompletion } from "@/lib/ai/providers/complete";
 import {
   AGENT_CANNOT_COMPLETE_MARKER,
   detectCapabilityRefusal,
@@ -79,7 +80,7 @@ const FORMAT_INSTRUCTIONS: Record<AgentOutputFormat, string> = {
     "Write a short structured report: 2-4 sections, each with a plain-text heading line followed by its content.",
 };
 
-function runnerSystemPrompt(config: AgentConfigJson): string {
+export function runnerSystemPrompt(config: AgentConfigJson): string {
   return `You are an autonomous agent running on a schedule for one user. You run unattended: nobody reviews your output before it reaches them, so everything in it must be something you can actually stand behind.
 
 WHAT YOU PRODUCE: the finished result itself. No greeting, no sign-off, no "here is your summary", no meta-commentary about being an AI or about the task. The user asked for a thing; produce the thing.
@@ -188,6 +189,9 @@ export async function runAgentTask(params: {
   prompt: string;
   config: Partial<AgentConfigJson> | null | undefined;
   costs: CostAccumulator;
+  /** For the routing log only (ai_provider_log). Never sent to any
+   *  provider — the model is shown the prompt, not who asked. */
+  userId?: string;
   /** THIS RUN's depth, which is not necessarily the agent's. A manual
    *  run can ask for a deeper pass once without changing the schedule
    *  (see api/agents/[id]/run). Omitted, the agent's own is used. */
@@ -233,29 +237,55 @@ export async function runAgentTask(params: {
     ? `TASK (data):\n${wrapUntrusted(safePrompt)}\n\nRESEARCH FINDINGS gathered from the web for this run:\n${wrapUntrusted(findings)}`
     : `TASK (data):\n${wrapUntrusted(safePrompt)}`;
 
-  let response: Anthropic.Message;
-  try {
-    response = await anthropic.messages.create({
+  // THROUGH THE PROVIDER LAYER, not the SDK directly (V4 #12).
+  //
+  // This is the call the abstraction was built for: one system prompt,
+  // one user message, no streaming, no server tools — the shape three of
+  // the four providers can serve identically. If Anthropic is overloaded
+  // at 06:00 when a hundred scheduled agents fire at once, a configured
+  // second provider answers and the user's morning briefing arrives; with
+  // no second provider configured the behaviour is exactly what it was.
+  //
+  // THE RESEARCH PASS ABOVE IS DELIBERATELY NOT ROUTED. It needs
+  // server-side web search, which only Anthropic offers in the catalog,
+  // and an adapter that quietly answered without searching would return a
+  // confident unsourced report that looks exactly like a researched one.
+  // The layer refuses that rather than degrading it — see
+  // adapters/shared.ts's refuseUnsupported.
+  const outcome = await runCompletion(
+    {
+      purpose: "agent_run",
       model: spec.model,
-      max_tokens: spec.outputTokens,
-      system: runnerSystemPrompt(config),
+      maxTokens: spec.outputTokens,
+      system: [{ type: "text", text: runnerSystemPrompt(config) }],
       messages: [{ role: "user", content: userContent }],
+    },
+    { userId: params.userId }
+  );
+
+  if (!outcome.ok) {
+    logApiError("agents:run", new Error(outcome.detail), {
+      depth,
+      kind: outcome.kind,
+      attempts: outcome.attempts.map((a) => `${a.provider}/${a.outcome}`).join(","),
     });
-  } catch (err) {
-    logApiError("agents:run", err, { depth });
     return {
       ok: false,
+      // THE SAME SENTENCE AS BEFORE. The user never learns that there
+      // were three providers, which of them failed, or that there was a
+      // chain at all — the brief's (ε).
       failure: { kind: "api_error", message: "The AI service could not be reached." },
     };
   }
 
-  costs.record("generation", response.usage, response.model || spec.model);
+  // reportedModel, not the catalog id: when a provider serves a dated
+  // snapshot or substitutes a model, that is what was actually billed.
+  // normalizeModelId maps a snapshot back to its alias, and anything
+  // genuinely unknown prices at the most expensive known rate and raises
+  // the unpriced-model alert — the safe direction, unchanged.
+  costs.record("generation", outcome.usage, outcome.reportedModel || outcome.model);
 
-  const text = response.content
-    .filter((block): block is Anthropic.TextBlock => block.type === "text")
-    .map((block) => block.text)
-    .join("\n")
-    .trim();
+  const text = outcome.text.trim();
 
   // CHECKED BEFORE validateAgentOutput, and that order is the fix.
   //

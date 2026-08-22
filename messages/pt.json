@@ -1377,6 +1377,8 @@
       "runSucceeded": "Bem-sucedida",
       "runFailedLabel": "Falhou",
       "runRunning": "A correr",
+      "runQueued": "Em fila",
+      "runQueuedHint": "Enviado para processamento em lote, mais barato. O resultado chega dentro de 24 horas, normalmente muito antes.",
       "runManual": "Manual",
       "runScheduled": "Agendada",
       "runCredits": "{credits} créditos",

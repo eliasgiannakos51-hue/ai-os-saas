@@ -130,6 +130,12 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // own consumption record, the same as ai_cost_log beside it; removed
   // by the auth.users cascade, so no explicit erasure.
   { table: "voice_usage", label: "voice_minutes", scope: "account" },
+  // Which provider served which of this account's model calls, and why
+  // (V4 #12). ACCOUNT scope: it is an operational record OF this user's
+  // requests, so it is theirs, and it carries no prompt, no completion
+  // and no tool arguments — nothing the model was shown or said. Removed
+  // by the auth.users cascade.
+  { table: "ai_provider_log", label: "ai_provider_routing", scope: "account" },
   { table: "user_onboarding", label: "onboarding", scope: "account" },
   { table: "user_email_preferences", label: "email_preferences", scope: "account" },
   { table: "email_send_log", label: "emails_sent_to_you", scope: "account" },

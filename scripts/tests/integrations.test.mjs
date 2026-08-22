@@ -483,7 +483,11 @@ check("...unlike email, which is folded", agentConfig.normaliseDeliveryTarget(" 
     outputFormat: "report",
     language: "el",
   });
-  const KNOWN = ["needsWebSearch", "depth", "outputFormat", "language", "builderSummary"];
+  // batchOptOut joined the shape with V4 #13: whether this agent declines
+  // the cheaper, slower batch path. Declared here rather than the check
+  // widened, which is the whole point of a named key set — a
+  // `slackChannel` smuggled in beside the others must still break it.
+  const KNOWN = ["needsWebSearch", "depth", "batchOptOut", "outputFormat", "language", "builderSummary"];
   const unexpected = Object.keys(shape).filter((k) => !KNOWN.includes(k));
   check("the agent config has no key nobody declared", unexpected, []);
   // The real point: nothing about WHERE the result goes lives in here.

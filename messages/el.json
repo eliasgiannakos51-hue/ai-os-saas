@@ -1377,6 +1377,8 @@
       "runSucceeded": "Επιτυχής",
       "runFailedLabel": "Απέτυχε",
       "runRunning": "Εκτελείται",
+      "runQueued": "Σε ουρά",
+      "runQueuedHint": "Στάλθηκε για φθηνότερη ομαδική επεξεργασία. Το αποτέλεσμα φτάνει μέσα σε 24 ώρες, συνήθως πολύ νωρίτερα.",
       "runManual": "Χειροκίνητη",
       "runScheduled": "Προγραμματισμένη",
       "runCredits": "{credits} credits",

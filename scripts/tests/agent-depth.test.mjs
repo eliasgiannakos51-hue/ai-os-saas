@@ -144,7 +144,15 @@ console.log("\n3. The runner does what the tier says");
   // time, and every one of them typechecks either way.
   ok("the model comes from the spec", /model: spec\.model/.test(runnerSrc));
   ok("...for the research pass too", (runnerSrc.match(/model: spec\.model/g) ?? []).length === 2);
-  ok("the output cap comes from the spec", /max_tokens: spec\.outputTokens/.test(runnerSrc));
+  // BOTH SPELLINGS, because the generation call now goes through the
+  // provider layer (V4 #12) and speaks its unified request shape while
+  // the research pass still calls the SDK directly. Accepting either
+  // would let the cap be dropped from one of them; requiring both is
+  // what keeps the tier's budget attached to the tier.
+  ok("the output cap comes from the spec, on the routed generation call",
+    /maxTokens: spec\.outputTokens/.test(runnerSrc));
+  ok("...and the research budget comes from the spec on the direct call",
+    /max_tokens: spec\.researchTokens/.test(runnerSrc));
   ok("the research cap comes from the spec", /max_tokens: spec\.researchTokens/.test(runnerSrc));
   ok("the search cap comes from the round budget", /webSearchTool\(searches\)/.test(runnerSrc));
   // BOTH SITES. The research return truncates, and so does the

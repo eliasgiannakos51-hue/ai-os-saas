@@ -65,6 +65,19 @@ export type AgentConfigJson = {
    * resolves to `standard`, which is exactly what it was already doing.
    */
   depth?: AgentDepth;
+  /**
+   * Per-agent opt-out from batched execution (V4 #13).
+   *
+   * OPT-OUT RATHER THAN OPT-IN, and only because the deployment-level
+   * switch is already off by default: AI_BATCH_ENABLED has to be turned
+   * on before this field means anything at all. Once an operator has
+   * decided their scheduled agents may take the cheap, slower path, an
+   * individual agent whose timing genuinely matters can say no.
+   *
+   * Absent means "follow the deployment", which is what every agent
+   * created before this field existed will be.
+   */
+  batchOptOut?: boolean;
   outputFormat: AgentOutputFormat;
   /** BCP-47-ish tag of the language the result should be written in —
    *  taken from the language the user wrote their request in, so a Greek
@@ -112,7 +125,11 @@ export type AgentRun = {
   user_id: string;
   started_at: string;
   finished_at: string | null;
-  status: "running" | "success" | "failed";
+  /** 'queued' is a batched run waiting in the vendor's queue (V4 #13) —
+   *  a real state, not a flavour of 'running'. Mirrors the check
+   *  constraint in supabase/migrations/20260829000000_agent_run_batches.sql;
+   *  scripts/tests/ai-providers.test.mjs asserts the two agree. */
+  status: "running" | "queued" | "success" | "failed";
   output: string | null;
   error: string | null;
   credits_charged: number;
@@ -150,6 +167,9 @@ export function normaliseAgentConfig(raw: Partial<AgentConfigJson> | null | unde
     // Never absent after this, and never an unrecognised string: the
     // runner indexes AGENT_DEPTH_SPECS with it.
     depth: parseAgentDepth(source.depth),
+    // Only ever true when it is literally true. A jsonb column can hold
+    // the string "false", which is truthy.
+    batchOptOut: source.batchOptOut === true,
     outputFormat: isAgentOutputFormat(source.outputFormat) ? source.outputFormat : "summary",
     language:
       typeof source.language === "string" && source.language.trim()

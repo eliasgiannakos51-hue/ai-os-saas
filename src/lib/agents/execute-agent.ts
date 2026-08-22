@@ -324,7 +324,7 @@ export async function executeAgent(params: {
   //    failed the safety shape check, and retrying a safety failure until
   //    it passes is how a safety check becomes a formality.
   let attempts = 0;
-  let outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth });
+  let outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth, userId });
   attempts = 1;
   while (
     !outcome.ok &&
@@ -332,7 +332,7 @@ export async function executeAgent(params: {
     attempts < AGENT_MAX_ATTEMPTS
   ) {
     attempts++;
-    outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth });
+    outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth, userId });
   }
 
   // 8. Settle. Always — every attempt above spent real tokens, including

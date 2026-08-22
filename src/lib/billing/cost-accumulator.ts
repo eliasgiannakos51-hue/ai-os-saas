@@ -1,3 +1,4 @@
+import { batchAdjustedUsd } from "@/lib/ai/batch/batch-policy";
 import {
   priceUsage,
   isKnownModel,
@@ -43,6 +44,18 @@ export type CostStage =
  *  token table. See CostAccumulator.recordExternal. */
 export function isExternalModel(model: string): boolean {
   return typeof model === "string" && model.startsWith("external:");
+}
+
+/** A call served through the Batch API, at half price. See
+ *  CostAccumulator.recordBatch. */
+export function isBatchModel(model: string): boolean {
+  return typeof model === "string" && model.startsWith("batch:");
+}
+
+/** The model id inside a `batch:` or `external:` marker, for pricing. */
+export function bareModelId(model: string): string {
+  if (isBatchModel(model)) return model.slice("batch:".length);
+  return model;
 }
 
 export type CostEntry = {
@@ -127,6 +140,54 @@ export class CostAccumulator {
   }
 
   /**
+   * A CALL SERVED BY THE BATCH API, at half price (V4 #13).
+   *
+   * WHY IT TAKES A BATCH ID IT DOES NOT USE. The discount is only true if
+   * the call really was batched, and a mistaken halving is an
+   * under-charge of exactly 2x that no alert can see: the achieved margin
+   * is computed from the same halved cost and reads a healthy 4x. Making
+   * the id a required argument means this method cannot be reached from a
+   * synchronous path — there is no batch id to pass — so the mistake has
+   * to be deliberate rather than a copy-paste.
+   *
+   * THE TOKEN COUNTS STAY TRUE. Only the USD figure is discounted: the
+   * tokens really were consumed, and halving them would corrupt the usage
+   * dashboards and the context-size work that reads them. What was cheap
+   * is the price per token, not the number of them.
+   *
+   * NOT ADDED TO `unpriced`. `batch:claude-sonnet-4-6` is not an unknown
+   * model — it is a known model on a known discount — and flagging it
+   * would raise an incident on every batched run forever, which is an
+   * alert somebody turns off.
+   */
+  recordBatch(
+    stage: CostStage,
+    usage: AnthropicUsageLike | null | undefined,
+    model: string,
+    batchId: string
+  ): void {
+    if (!batchId) {
+      // No id means the caller does not actually know this was batched.
+      // Charging full price is the safe direction and the loud one: the
+      // cost log will show a standard-rate row where a batch row was
+      // expected, which is a discrepancy somebody can see.
+      this.record(stage, usage, model);
+      return;
+    }
+    const bare = bareModelId(model);
+    if (!isKnownModel(bare)) this.unpriced.add(normalizeModelId(bare));
+    if (isUnpricedServiceTier(usage)) {
+      this.unpricedTierUsage.add(`${normalizeModelId(bare)}@${String(usage?.service_tier)}`);
+    }
+    const priced = priceUsage(usage, bare);
+    this.entries.push({
+      stage,
+      model: `batch:${bare}`,
+      usage: { ...priced, usdCost: batchAdjustedUsd(priced.usdCost) },
+    });
+  }
+
+  /**
    * Merges a breakdown produced elsewhere (e.g. a helper that already
    * priced its own call) without re-pricing it.
    */
@@ -135,7 +196,10 @@ export class CostAccumulator {
     // not from a token table, so an unknown-model incident on one would
     // be an alert that fires on every voice call forever. See
     // recordExternal.
-    if (!isExternalModel(model) && !isKnownModel(model)) {
+    // `batch:` entries carry a known model on a known discount, already
+    // priced by recordBatch — flagging them would raise an incident on
+    // every batched run forever.
+    if (!isExternalModel(model) && !isBatchModel(model) && !isKnownModel(model)) {
       this.unpriced.add(normalizeModelId(model));
     }
     this.entries.push({ stage, model, usage });

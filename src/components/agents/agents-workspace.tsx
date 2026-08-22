@@ -1481,20 +1481,30 @@ export function AgentsWorkspace({
                     {selectedRuns.map((run) => (
                       <li key={run.id} className="rounded-xl border border-border p-3">
                         <div className="flex flex-wrap items-center justify-between gap-2">
+                          {/* 'queued' IS ITS OWN STATE, not a flavour of
+                              running (V4 #13). A run submitted to the
+                              batch API is waiting in somebody else's
+                              queue, not working — and showing "Running"
+                              for up to 24 hours would be a progress
+                              indicator that is simply untrue. */}
                           <span
                             className={`text-xs font-medium ${
                               run.status === "success"
                                 ? "text-emerald-400"
                                 : run.status === "failed"
                                   ? "text-red-400"
-                                  : "text-amber-400"
+                                  : run.status === "queued"
+                                    ? "text-sky-400"
+                                    : "text-amber-400"
                             }`}
                           >
                             {run.status === "success"
                               ? t("runSucceeded")
                               : run.status === "failed"
                                 ? t("runFailedLabel")
-                                : t("runRunning")}
+                                : run.status === "queued"
+                                  ? t("runQueued")
+                                  : t("runRunning")}
                           </span>
                           <span className="text-[11px] text-muted">
                             {formatDateTimeInZone(run.started_at, locale, selected.timezone)} ·{" "}
@@ -1511,6 +1521,9 @@ export function AgentsWorkspace({
                           </span>
                         </div>
                         {run.error && <p className="mt-1.5 text-xs text-red-300">{run.error}</p>}
+                        {run.status === "queued" && (
+                          <p className="mt-1.5 text-xs text-muted">{t("runQueuedHint")}</p>
+                        )}
                         {run.status === "success" && !run.output && (
                           <p className="mt-1.5 text-xs text-muted">{t("runNothingToReport")}</p>
                         )}

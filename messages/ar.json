@@ -1377,6 +1377,8 @@
       "runSucceeded": "ناجح",
       "runFailedLabel": "فاشل",
       "runRunning": "قيد التشغيل",
+      "runQueued": "في قائمة الانتظار",
+      "runQueuedHint": "أُرسل للمعالجة المجمّعة الأرخص. تصل النتيجة خلال 24 ساعة، وعادةً أسرع من ذلك بكثير.",
       "runManual": "يدوي",
       "runScheduled": "مجدول",
       "runCredits": "{credits} رصيد",

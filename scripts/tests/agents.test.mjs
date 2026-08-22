@@ -320,7 +320,12 @@ for (const [raw, why] of [
 check(
   "a real config is preserved",
   config.normaliseAgentConfig({ needsWebSearch: true, outputFormat: "report", language: "el" }),
-  { needsWebSearch: true, depth: "standard", outputFormat: "report", language: "el" }
+  // batchOptOut joined the shape with V4 #13 and defaults to false — an
+  // agent that never said anything about batching has not opted out. The
+  // whole object is compared rather than field by field precisely so a
+  // new field cannot appear without somebody deciding what its default
+  // means.
+  { needsWebSearch: true, depth: "standard", batchOptOut: false, outputFormat: "report", language: "el" }
 );
 // THE DEPTH DEFAULT IS LOAD-BEARING, and standard is the only safe one:
 // every agent that existed before the tier field ran with Sonnet, four
@@ -618,8 +623,28 @@ console.log("\n== 12. the wiring, asserted rather than assumed ==");
   // meant renaming the identifier failed the check while ADDING a second
   // tool to the same helper would not have. Every tool the runner can
   // ever construct is enumerated from its `type:` fields instead.
-  const toolTypes = [...runner.matchAll(/type:\s*"([a-z_0-9]+)"/g)].map((m) => m[1]);
-  check("...and every tool it can construct is a web search", [...new Set(toolTypes)], ["web_search_20250305"]);
+  // ENUMERATED FROM THE WHOLE FILE, then split into tools and not-tools.
+  //
+  // The previous version compared every `type:` literal in the file
+  // against one value, which was right until the generation call moved
+  // onto the provider layer and started building `{ type: "text" }`
+  // system blocks (V4 #12) — a change that has nothing to do with tools
+  // and turned the check red. Widening it to "ignore anything that is not
+  // a tool" would have been the weak fix: it would also ignore a SECOND
+  // server tool added tomorrow.
+  //
+  // So the allowlist below is of NON-TOOL uses, spelled out, and anything
+  // else must be the web search. Adding `type: "code_execution_20250825"`
+  // anywhere in this file still fails.
+  const NON_TOOL_TYPES = ["text"];
+  const allTypes = [...new Set([...runner.matchAll(/type:\s*"([a-z_0-9]+)"/g)].map((m) => m[1]))];
+  const toolTypes = allTypes.filter((t) => !NON_TOOL_TYPES.includes(t));
+  check("...and every tool it can construct is a web search", toolTypes, ["web_search_20250305"]);
+  check(
+    "...and the non-tool type literals are only the ones accounted for",
+    allTypes.filter((t) => NON_TOOL_TYPES.includes(t)),
+    ["text"]
+  );
   checkTrue("...built through one helper, so the cap cannot be set twice",
     (runner.match(/function webSearchTool\(/g) ?? []).length === 1);
   // THE CAP IS THE TIER'S, not a constant. A tool built with a fixed

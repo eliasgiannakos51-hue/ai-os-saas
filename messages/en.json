@@ -1377,6 +1377,8 @@
       "runSucceeded": "Succeeded",
       "runFailedLabel": "Failed",
       "runRunning": "Running",
+      "runQueued": "Queued",
+      "runQueuedHint": "Submitted for cheaper batch processing. The result arrives within 24 hours, usually much sooner.",
       "runManual": "Run now",
       "runScheduled": "Scheduled",
       "runCredits": "{credits} credits",

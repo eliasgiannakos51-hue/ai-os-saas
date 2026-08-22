@@ -1377,6 +1377,8 @@
       "runSucceeded": "Erfolgreich",
       "runFailedLabel": "Fehlgeschlagen",
       "runRunning": "Läuft",
+      "runQueued": "In der Warteschlange",
+      "runQueuedHint": "Zur günstigeren Stapelverarbeitung eingereicht. Das Ergebnis kommt innerhalb von 24 Stunden, meist deutlich früher.",
       "runManual": "Manuell",
       "runScheduled": "Geplant",
       "runCredits": "{credits} Credits",

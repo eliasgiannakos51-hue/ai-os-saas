@@ -1377,6 +1377,8 @@
       "runSucceeded": "成功",
       "runFailedLabel": "失敗",
       "runRunning": "実行中",
+      "runQueued": "順番待ち",
+      "runQueuedHint": "より安いバッチ処理に送りました。結果は24時間以内、たいていはもっと早く届きます。",
       "runManual": "手動",
       "runScheduled": "予定実行",
       "runCredits": "{credits} クレジット",

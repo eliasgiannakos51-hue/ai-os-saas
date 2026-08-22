@@ -3,6 +3,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { checkCronAuth } from "@/lib/cron-auth";
 import { logApiError } from "@/lib/log-error";
 import { executeAgent, pauseAgentForNoCredits } from "@/lib/agents/execute-agent";
+import { trySubmitAsBatch } from "@/lib/ai/batch/agent-batch";
+import { batchEnabled } from "@/lib/ai/batch/batch-policy";
 import { nextRunAt } from "@/lib/agents/cron-expression";
 import type { UserAgent } from "@/lib/agents/agent-config";
 
@@ -87,6 +89,7 @@ export async function GET(request: Request) {
     let failed = 0;
     let skipped = 0;
     let pausedForCredits = 0;
+    let batched = 0;
 
     for (const [userId, userAgents] of perUser) {
       const { data: authUser, error: authUserError } = await admin.auth.admin.getUserById(userId);
@@ -113,6 +116,33 @@ export async function GET(request: Request) {
         }
 
         try {
+          // THE CHEAP PATH (V4 #13), and it is unreachable unless an
+          // operator turned it on: batchEnabled() is false by default, so
+          // with no configuration this branch never executes and the tick
+          // behaves exactly as it did before.
+          //
+          // trySubmitAsBatch decides for itself whether THIS agent
+          // qualifies — scheduled, daily or slower, no web research, no
+          // batch already in flight, affordable — and says why when it
+          // does not. A queued agent is finished for this tick: its
+          // result is collected by api/cron/agent-batches.
+          if (batchEnabled(process.env)) {
+            const queued = await trySubmitAsBatch({ admin, apiKey, user, agent });
+            if (queued.queued) {
+              // Rescheduled here rather than at collection: the agent's
+              // NEXT run is a function of its schedule, not of when this
+              // batch happens to come back. Skipping it would leave the
+              // agent permanently due and re-submitting on every tick.
+              const next = nextRunAt(agent.schedule_cron, new Date(), agent.timezone);
+              await admin
+                .from("user_agents")
+                .update({ last_run_at: new Date().toISOString(), next_run_at: next?.toISOString() ?? null })
+                .eq("id", agent.id);
+              batched++;
+              continue;
+            }
+          }
+
           const result = await executeAgent({
             admin,
             user,
@@ -173,6 +203,12 @@ export async function GET(request: Request) {
     // Housekeeping: a run row still 'running' long after any possible
     // maxDuration belonged to an invocation the platform killed. Left
     // alone it shows in the user's history as permanently in progress.
+    //
+    // 'running' EXACTLY, never "anything unfinished". A batched run sits
+    // at 'queued' for up to 24 hours by design, and widening this filter
+    // to catch it would close every outstanding batch an hour after
+    // submission — silently, on a schedule, for every user at once.
+    // api/cron/agent-batches owns expiry for those (batchHasExpired).
     const stuckCutoff = new Date(Date.now() - 60 * 60 * 1000).toISOString();
     const { error: stuckError, count: stuckCount } = await admin
       .from("agent_runs")
@@ -197,6 +233,7 @@ export async function GET(request: Request) {
       failed,
       skipped,
       pausedForCredits,
+      batched,
       stuckRunsClosed: stuckCount ?? 0,
     });
   } catch (err) {

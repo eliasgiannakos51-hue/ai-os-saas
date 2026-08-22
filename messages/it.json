@@ -1377,6 +1377,8 @@
       "runSucceeded": "Riuscita",
       "runFailedLabel": "Fallita",
       "runRunning": "In corso",
+      "runQueued": "In coda",
+      "runQueuedHint": "Inviato all'elaborazione in blocco, più economica. Il risultato arriva entro 24 ore, di solito molto prima.",
       "runManual": "Manuale",
       "runScheduled": "Pianificata",
       "runCredits": "{credits} crediti",

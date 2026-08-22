@@ -184,6 +184,8 @@ modals.
    UNSPLASH_ACCESS_KEY=your-unsplash-access-key
    OPENAI_API_KEY=your-openai-api-key
    ELEVENLABS_API_KEY=your-elevenlabs-api-key
+   GOOGLE_API_KEY=your-google-ai-api-key
+   GROQ_API_KEY=your-groq-api-key
 - `IONEXA_DIAG` — optional. Set to `1` to enable verbose request tracing for the auth middleware, Stripe checkout/webhook, the team-page gate, and the Mission Control/Timeline data loads (see `src/lib/diag.ts`). Off by default: middleware runs on every request, so leaving this on writes a log line per page view. Turn it on, redeploy, reproduce the issue, read the logs, turn it off again.
 - `CREDIT_MARGIN_MULTIPLIER` — optional, default `4`, allowed range `4`-`10`. Multiplier applied to an action's real API cost before converting to credits. Anything outside the range (or unparseable) is ignored with a logged warning and the default is used.
 - `CREDIT_PRICE_EUR` — optional, default `0.02`. List price of one credit, in EUR.
@@ -206,6 +208,124 @@ Requires `supabase_free_chat_migration.sql` to have been applied. Without it the
 - `FREE_CHAT_MESSAGES_ENTERPRISE` — optional, default `1200`.
 
   Each accepts a non-negative integer; `0` disables the allowance for that plan. An unparseable or negative value is ignored and the default is used. The allowance resets on the first of each calendar month (UTC).
+
+#### Model providers and failover
+
+One interface, several providers (V4 #12). Every model call can go through
+`src/lib/ai/providers/`, which picks a provider per *purpose*, translates
+the request, and fails over when one is having an incident. **The user
+never sees any of this** — the same answer, the same error sentence,
+whoever served it.
+
+**Off unless you turn it on.** With no configuration the chain is
+Anthropic alone and behaviour is exactly what it was. Adding a provider is
+an explicit act: a key added for something else (`OPENAI_API_KEY` is also
+what Voice transcription uses) does **not** silently reroute your chat.
+
+- `OPENAI_API_KEY` — optional. Also used by Voice. Without it OpenAI is
+  dropped from any chain that names it, with the reason logged.
+- `GOOGLE_API_KEY` — optional. Gemini.
+- `GROQ_API_KEY` — optional. Open models, fast and cheap, **no prompt
+  cache** — see the warning below.
+- `AI_PROVIDER_ORDER` — optional, default `anthropic`. Comma-separated,
+  tried in order, e.g. `anthropic,openai,groq`. An unknown name is
+  **warned about and skipped**; the rest of the chain still stands, because
+  a typo here must not take every AI feature down at once.
+- `AI_PROVIDER_ORDER_<PURPOSE>` — optional per-purpose override, beating
+  the global chain. Purposes: `CHAT`, `AGENT_RUN`, `AGENT_BUILD`,
+  `RESEARCH`, `WEBSITE_BUILD`, `CREATE`, `FILE_ASK`, `CLASSIFICATION`,
+  `SUMMARISATION`. Example: `AI_PROVIDER_ORDER_CLASSIFICATION=groq,anthropic`.
+- `AI_FAILOVER_ENABLED` — optional, default `true`. Set to `false` for
+  deterministic single-provider behaviour.
+
+**What fails over and what does not.** 5xx, 529, 429, timeouts and network
+failures move to the next provider. A **400 does not** — it is our bug, and
+paying a second vendor to reject the same malformed request hides it. A
+**404 does not** — it means the model catalog is wrong, permanently. An
+error nobody can classify does not either.
+
+> ### ⚠️ The cache minimum, and why a cheaper provider can cost more
+>
+> Prompt caching fails **silently**. Below a model's minimum prefix
+> length the provider does not cache, reports nothing unusual, and bills
+> full price.
+>
+> | Model | Minimum cacheable prefix |
+> | --- | --- |
+> | `claude-sonnet-4-6` | 1,024 tokens |
+> | `claude-haiku-4-5` | **4,096 tokens** |
+> | `openai/gpt-*` | 1,024 tokens (automatic, no markers) |
+> | `google/gemini-2.5-flash` | 1,024 tokens |
+> | `google/gemini-2.5-pro` | 2,048 tokens |
+> | `groq/*` | **no prompt cache at all** |
+>
+> The minimum is **not** monotonic with price. Routing a call with a
+> 2,000-token cached prefix from Sonnet "down" to Haiku to save money:
+>
+> ```
+> on Sonnet   2,000 cached read tokens  @ $0.30/MTok  = $0.00060
+> on Haiku    2,000 FULL input tokens   @ $1.00/MTok  = $0.00200
+> ```
+>
+> The cheaper model is **3.3x more expensive** for that prefix, on every
+> request, and nothing reports it. `src/lib/ai/providers/cache-policy.ts`
+> computes this before a route is taken, `comparedRequestCostUsd()`
+> answers "is it actually cheaper for *this* request", and every attempt
+> in `ai_provider_log` carries a `cache_kept` column — the only trace a
+> silent failover leaves.
+
+**Prices are not verified.** The non-Anthropic rows in
+`src/lib/ai/providers/catalog.ts` are published list prices written down
+without an account to check them against. Every credit charge is computed
+from them. **Check them before serving real traffic** — the app logs a
+warning naming that file the first time an unverified provider is enabled.
+
+**Who served what** is in `public.ai_provider_log`: one row per *attempt*,
+with the provider, model, outcome, HTTP status, latency, why that provider
+was tried, and whether the cache survived. No prompt, no completion — the
+table has no column that could hold either. Requires
+`supabase/migrations/20260828000000_ai_provider_log.sql`; without it
+routing still works and the log write fails quietly (it never blocks a
+call).
+
+#### Batch API for scheduled agents
+
+Scheduled agent runs can go through Anthropic's Message Batches API at
+**half price** (V4 #13), collected by `/api/cron/agent-batches`.
+
+- `AI_BATCH_ENABLED` — optional, **default `false`**. Must be exactly the
+  string `true`. Off by default because it changes *when* results arrive,
+  and deciding on somebody's behalf that a delay does not matter to them is
+  not an optimisation, it is a product change.
+
+**What qualifies**, and nothing else does: a **scheduled** run (not
+manual — somebody is watching a spinner), on an agent that runs **daily or
+slower** (an hourly agent could have 24 submissions outstanding), that
+does **not need live web research** (a batch cannot use the server-side
+search tool, and answering from training data instead produces a
+confident, unsourced report that looks exactly like a real one), with **no
+batch already in flight** — enforced by a partial unique index in SQL, not
+by application code, because it is a race between cron invocations.
+
+**The delay is named, not hidden.** A batched run is written as `queued`
+with its submission time and shown as "Queued" in the agent's history,
+never as "Running". Individual agents can opt out with `batchOptOut` in
+their config.
+
+**When it fails.** The batch expires (24h), a request inside it errors, or
+it is cancelled → that run is closed with a sentence the owner can read and
+the agent is made due immediately, so the ordinary synchronous path runs it
+at full price. Submission itself failing queues nothing and the agent runs
+synchronously in the same tick. There is no second executor and no retry
+loop of its own.
+
+**Credits are not held across the window.** A reservation lives 60 minutes
+and a batch may take 24 hours. Affordability is checked at submission and
+the charge is taken at settlement from measured usage, at the batch rate.
+The gap is real: a user who spends their balance in between is charged
+against what is left. The exposure is one run of one agent at half price.
+
+Requires `supabase/migrations/20260829000000_agent_run_batches.sql`.
 
 #### Voice
 
@@ -285,7 +405,11 @@ afterwards.
    real photo. `OPENAI_API_KEY` and `ELEVENLABS_API_KEY` are optional —
    see [Voice](#voice) above; without them the microphone and "Listen"
    controls do not render at all and every surface stays fully usable by
-   typing and reading. See [Billing](#billing) and
+   typing and reading. `GOOGLE_API_KEY` and `GROQ_API_KEY` are optional
+   too — see
+   [Model providers and failover](#model-providers-and-failover); a
+   provider with no key is dropped from the routing chain cleanly, with
+   the reason logged, and never causes a failed call. See [Billing](#billing) and
    [Credits](#credits) below for how the Stripe vars are used and how to
    create the required Price IDs.
 

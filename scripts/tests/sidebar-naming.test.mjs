@@ -122,11 +122,30 @@ console.log(`        Build now holds: ${buildHrefs.join(", ")}`);
 check("Build still holds the agent builder", buildHrefs.includes("/dashboard/agents"));
 check("...the website builder", buildHrefs.includes("/dashboard/website-builder"));
 check("...and what it published", buildHrefs.includes("/dashboard/published"));
+// AN ALLOWLIST, NOT A COUNT. This was `buildHrefs.length === 3`, which
+// passes just as happily if somebody swaps one entry for another — the
+// number is the same and the group now contains a tracker again, which
+// is the single thing this section exists to prevent. Naming them makes
+// a new entry a decision somebody has to write down.
+const BUILD_ALLOWED = {
+  "/dashboard/agents": "the agent builder — really builds agents",
+  "/dashboard/website-builder": "the site builder — really builds sites",
+  "/dashboard/published": "what the builder put live",
+  // Not a generator itself, and here on purpose: these are what a
+  // published site PRODUCED. Filing the leads a site brings in anywhere
+  // other than beside the site would make "where did my enquiries go" a
+  // navigation question — which it already was, for as long as the table
+  // had no screen at all.
+  "/dashboard/form-submissions": "what the published sites produced",
+};
+const unexpected = buildHrefs.filter((href) => !(href in BUILD_ALLOWED));
 check(
-  "and nothing else — every remaining item generates something",
-  buildHrefs.length === 3,
-  buildHrefs.join(", ")
+  "and nothing else — every remaining Build item is one somebody justified",
+  unexpected.length === 0,
+  unexpected.length ? `not in the allowlist: ${unexpected.join(", ")}` : ""
 );
+const missing = Object.keys(BUILD_ALLOWED).filter((href) => !buildHrefs.includes(href));
+check("...and every justified item is still there", missing.length === 0, missing.join(", "));
 
 console.log("\n== 4. each tracking page says, on screen, that it produces nothing ==");
 // A comment in a source file is not a disclosure. The person who needed

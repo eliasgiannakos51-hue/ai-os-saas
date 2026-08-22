@@ -123,7 +123,8 @@
       "integrations": "集成",
       "files": "文件",
       "deepResearch": "深度研究",
-      "help": "帮助中心"
+      "help": "帮助中心",
+      "formSubmissions": "表单提交"
     },
     "groupHints": {
       "create": "生成网站、规划目标、撰写文档。",
@@ -174,7 +175,8 @@
       "integrations": "连接 Gmail、Drive 与 Slack，让 AI 处理你真实的数据",
       "files": "上传 PDF、Word 和 Excel 文件，然后向 AI 提问",
       "deepResearch": "给一个主题，它会搜索、交叉核对并写出带来源的报告",
-      "help": "最常见问题的答案，不消耗额度。"
+      "help": "最常见问题的答案，不消耗额度。",
+      "formSubmissions": "访客通过已发布网站上的表单提交的全部内容"
     },
     "comingSoon": "即将推出",
     "closeMenu": "关闭菜单"
@@ -1874,6 +1876,49 @@
         "7d": "7 天",
         "30d": "30 天",
         "365d": "1 年"
+      }
+    },
+    "formSubmissions": {
+      "title": "表单提交",
+      "description": "访客通过你网站上的表单提交的全部内容。",
+      "deletedWebsite": "已删除的网站",
+      "searchPlaceholder": "搜索姓名、邮箱、留言...",
+      "filterType": "按表单类型筛选",
+      "filterSite": "按网站筛选",
+      "allTypes": "全部类型",
+      "allSites": "全部网站",
+      "countMeta": "显示 {shown} 条 · 未读 {unread} 条",
+      "exportCsv": "导出 CSV",
+      "noName": "提交",
+      "new": "新",
+      "noMatches": "没有匹配项",
+      "noMatchesBody": "试试更短的搜索词，或清除筛选。",
+      "delete": "删除",
+      "deleteConfirm": "删除这条提交？无法撤销。",
+      "deleted": "提交已删除。",
+      "deleteFailed": "无法删除该提交。",
+      "markReadFailed": "无法标记为已读。",
+      "consentGiven": "已获得同意",
+      "consentMissing": "未记录同意",
+      "consentRecorded": "同意内容：{text}",
+      "consentNoText": "（未记录具体文字）",
+      "consentMissingBody": "这位访客没有勾选同意框，或表单本身没有同意框。",
+      "empty": {
+        "title": "还没有提交",
+        "body": "当有人在你已发布的网站上填写表单时，就会出现在这里——即使通知邮件发不出去。"
+      },
+      "types": {
+        "contact": "联系",
+        "newsletter": "订阅",
+        "quote": "报价请求",
+        "other": "其他"
+      },
+      "delivery": {
+        "sent": "邮件已发送",
+        "no_key": "没有发送任何邮件：此部署没有邮件 API 密钥。",
+        "unverified_domain": "邮件没有送达：发件域名未验证。",
+        "failed": "部分通知邮件发送失败。",
+        "affected": "有 {count} 条提交已保存在这里，但从未通过邮件发给你。没有任何内容丢失。"
       }
     }
   },

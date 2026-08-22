@@ -1,46 +1,47 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  Lightbulb,
-  Target,
-  Search,
-  DollarSign,
-  GraduationCap,
-  TrendingUp,
-  GitBranch,
-  Package,
-  PenTool,
-  Users,
-  MessageSquare,
-  MessageCircle,
   BarChart3,
-  Zap,
-  Home,
-  Sparkles,
-  Settings,
   Bot,
-  Globe,
-  Smartphone,
-  Image as ImageIcon,
-  Video,
-  Store,
+  Brain,
+  CalendarClock,
   Code2,
   Database,
+  DollarSign,
   FileText,
-  Presentation,
-  Megaphone,
-  Brain,
+  Flag,
+  FolderOpen,
+  GitBranch,
+  Globe,
+  GraduationCap,
   History,
+  Home,
+  Image as ImageIcon,
+  Inbox,
+  Layout,
+  LifeBuoy,
+  Lightbulb,
+  LineChart,
+  Megaphone,
+  MessageCircle,
+  MessageSquare,
+  Package,
+  PenTool,
   Plug,
+  Presentation,
   Radio,
   Rocket,
-  CalendarClock,
-  LineChart,
-  Layout,
-  Flag,
+  Search,
+  Settings,
+  Smartphone,
+  Sparkles,
   Star,
-  FolderOpen,
+  Store,
+  Target,
   Telescope,
-  LifeBuoy,
+  TrendingUp,
+  Users,
+  Video,
+  Zap,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -105,6 +106,10 @@ export const INTEGRATIONS_ICON: LucideIcon = Plug;
 // Distinct from MODULE_ICONS.documents (FileText, documents the AI wrote
 // FOR you) — these are files the user brought IN for the AI to read.
 export const FILES_ICON: LucideIcon = FolderOpen;
+// What visitors sent through a form on a published site. An inbox, not a
+// letter: the page is a list of arrivals, and the envelope icon already
+// means "email" everywhere else in this product.
+export const FORM_SUBMISSIONS_ICON: LucideIcon = Inbox;
 // Distinct from MODULE_ICONS.research (the Knowledge tracker at
 // /dashboard/research, a place to save links and notes by hand) — this is
 // the autonomous multi-search job that writes a report. Two different

@@ -123,7 +123,8 @@
       "integrations": "Intégrations",
       "files": "Fichiers",
       "deepResearch": "Recherche approfondie",
-      "help": "Centre d’aide"
+      "help": "Centre d’aide",
+      "formSubmissions": "Envois de formulaires"
     },
     "groupHints": {
       "create": "Générez un site, planifiez un objectif, rédigez un document.",
@@ -174,7 +175,8 @@
       "integrations": "Connectez Gmail, Drive et Slack pour que l'IA travaille sur vos vraies données",
       "files": "Importez des PDF, Word et Excel et posez des questions à l'IA",
       "deepResearch": "Donnez un sujet : il cherche, recoupe et rédige un rapport sourcé",
-      "help": "Les réponses aux questions les plus fréquentes, sans consommer de crédits."
+      "help": "Les réponses aux questions les plus fréquentes, sans consommer de crédits.",
+      "formSubmissions": "Tout ce que les visiteurs ont envoyé via un formulaire sur vos sites publiés"
     },
     "comingSoon": "Bientôt",
     "closeMenu": "Fermer le menu"
@@ -1874,6 +1876,49 @@
         "7d": "7 jours",
         "30d": "30 jours",
         "365d": "1 an"
+      }
+    },
+    "formSubmissions": {
+      "title": "Envois de formulaires",
+      "description": "Tout ce que les visiteurs ont envoyé via un formulaire sur vos sites.",
+      "deletedWebsite": "Site supprimé",
+      "searchPlaceholder": "Rechercher noms, e-mails, messages...",
+      "filterType": "Filtrer par type de formulaire",
+      "filterSite": "Filtrer par site",
+      "allTypes": "Tous les types",
+      "allSites": "Tous les sites",
+      "countMeta": "{shown} affichés · {unread} non lus",
+      "exportCsv": "Exporter en CSV",
+      "noName": "Envoi",
+      "new": "Nouveau",
+      "noMatches": "Aucune correspondance",
+      "noMatchesBody": "Essayez une recherche plus courte ou retirez les filtres.",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer cet envoi ? C'est irréversible.",
+      "deleted": "Envoi supprimé.",
+      "deleteFailed": "L'envoi n'a pas pu être supprimé.",
+      "markReadFailed": "Impossible de marquer comme lu.",
+      "consentGiven": "Consentement donné",
+      "consentMissing": "Aucun consentement enregistré",
+      "consentRecorded": "A consenti à : {text}",
+      "consentNoText": "(le texte n'a pas été enregistré)",
+      "consentMissingBody": "Ce visiteur n'a pas coché de case de consentement, ou le formulaire n'en avait pas.",
+      "empty": {
+        "title": "Aucun envoi pour l'instant",
+        "body": "Quand quelqu'un remplit un formulaire sur l'un de vos sites publiés, il apparaît ici, même si l'e-mail de notification ne peut pas partir."
+      },
+      "types": {
+        "contact": "Contact",
+        "newsletter": "Infolettre",
+        "quote": "Demande de devis",
+        "other": "Autre"
+      },
+      "delivery": {
+        "sent": "E-mail envoyé",
+        "no_key": "Aucun e-mail n'est envoyé : ce déploiement n'a pas de clé d'API e-mail.",
+        "unverified_domain": "Les e-mails n'arrivent pas : le domaine d'envoi n'est pas vérifié.",
+        "failed": "Certains e-mails de notification n'ont pas pu être envoyés.",
+        "affected": "{count} envoi(s) sont enregistrés ici mais ne vous ont jamais été envoyés par e-mail. Rien n'a été perdu."
       }
     }
   },

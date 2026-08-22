@@ -123,7 +123,8 @@
       "integrations": "連携",
       "files": "ファイル",
       "deepResearch": "ディープリサーチ",
-      "help": "ヘルプセンター"
+      "help": "ヘルプセンター",
+      "formSubmissions": "フォーム送信"
     },
     "groupHints": {
       "create": "サイトを生成し、目標を計画し、文書を書く。",
@@ -174,7 +175,8 @@
       "integrations": "Gmail・Drive・Slack を接続して、AI が実際のデータを扱えるようにします",
       "files": "PDF・Word・Excel をアップロードして、AI に内容を質問できます",
       "deepResearch": "トピックを渡すと検索・照合して出典付きのレポートを書きます",
-      "help": "よくある質問への回答です。クレジットは消費しません。"
+      "help": "よくある質問への回答です。クレジットは消費しません。",
+      "formSubmissions": "公開サイトのフォームから訪問者が送った内容のすべて"
     },
     "comingSoon": "近日公開",
     "closeMenu": "メニューを閉じる"
@@ -1874,6 +1876,49 @@
         "7d": "7日間",
         "30d": "30日間",
         "365d": "1年"
+      }
+    },
+    "formSubmissions": {
+      "title": "フォーム送信",
+      "description": "サイトのフォームから訪問者が送った内容のすべて。",
+      "deletedWebsite": "削除されたサイト",
+      "searchPlaceholder": "名前・メール・メッセージを検索...",
+      "filterType": "フォーム種別で絞り込む",
+      "filterSite": "サイトで絞り込む",
+      "allTypes": "すべての種別",
+      "allSites": "すべてのサイト",
+      "countMeta": "{shown} 件表示 · 未読 {unread} 件",
+      "exportCsv": "CSVを書き出す",
+      "noName": "送信",
+      "new": "新着",
+      "noMatches": "一致するものがありません",
+      "noMatchesBody": "検索語を短くするか、絞り込みを解除してください。",
+      "delete": "削除",
+      "deleteConfirm": "この送信を削除しますか？元に戻せません。",
+      "deleted": "送信を削除しました。",
+      "deleteFailed": "送信を削除できませんでした。",
+      "markReadFailed": "既読にできませんでした。",
+      "consentGiven": "同意あり",
+      "consentMissing": "同意の記録なし",
+      "consentRecorded": "同意した内容: {text}",
+      "consentNoText": "（文言は記録されていません）",
+      "consentMissingBody": "この訪問者は同意欄にチェックしていないか、フォームに同意欄がありませんでした。",
+      "empty": {
+        "title": "まだ送信はありません",
+        "body": "公開サイトのフォームに誰かが入力すると、ここに表示されます。通知メールが送れない場合でも残ります。"
+      },
+      "types": {
+        "contact": "お問い合わせ",
+        "newsletter": "ニュースレター",
+        "quote": "見積依頼",
+        "other": "その他"
+      },
+      "delivery": {
+        "sent": "メール送信済み",
+        "no_key": "メールは一切送信されていません。このデプロイにメールAPIキーがありません。",
+        "unverified_domain": "メールが届いていません。送信ドメインが未認証です。",
+        "failed": "一部の通知メールを送信できませんでした。",
+        "affected": "{count} 件はここに保存されていますが、メールは届いていません。データは失われていません。"
       }
     }
   },

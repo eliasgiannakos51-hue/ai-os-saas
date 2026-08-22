@@ -25,6 +25,7 @@ import {
   WEBSITE_BUILDER_ICON,
   PRODUCT_WORKFLOW_ICON,
   PUBLISHED_SITES_ICON,
+  FORM_SUBMISSIONS_ICON,
   INTEGRATIONS_ICON,
   FILES_ICON,
   DEEP_RESEARCH_ICON,
@@ -91,6 +92,18 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       // published site IS a website that went live, and separating the two
       // would make "where did my site go" a navigation question.
       { href: "/dashboard/published", label: "Published Sites", icon: PUBLISHED_SITES_ICON, hintKey: "published" },
+      // Directly under Published Sites, for the same reason Published
+      // Sites sits under the Builder: a form submission is what a
+      // published site produced, and until this entry existed the table
+      // it lands in had no screen at all — the owner's only evidence a
+      // form worked was an email that, without a verified sending
+      // domain, never arrived.
+      {
+        href: "/dashboard/form-submissions",
+        label: "Form Submissions",
+        icon: FORM_SUBMISSIONS_ICON,
+        hintKey: "formSubmissions",
+      },
     ],
   },
   {

@@ -1,19 +1,34 @@
 import "server-only";
-import { createResendClient } from "@/lib/resend";
+import { Resend } from "resend";
 import { websiteFormSubmissionEmailHtml } from "@/lib/email/templates";
 import { getSiteUrl } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
 import { checkEmailAllowed, recordEmailSend } from "@/lib/email/email-gate";
+import {
+  classifySendFailure,
+  usesSharedTestSender,
+  type FormEmailStatus,
+} from "@/lib/websites/form-delivery";
 
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
 
-// Sent by api/websites/[id]/submit-form/route.ts whenever a real visitor
-// submits a contact/booking form on one of the user's published,
-// downloaded websites — this is the entire point of that endpoint
-// existing (see lib/website-builder.ts's FUNCTIONAL_ELEMENTS_SECTION):
-// the form isn't decorative, it actually reaches the owner. Best-effort,
-// same pattern as every other transactional email in this app: never
-// throws, just logs.
+export type FormEmailResult = { status: FormEmailStatus; detail: string | null };
+
+/**
+ * Sent by api/websites/[id]/submit-form/route.ts whenever a real visitor
+ * submits a form on one of the user's published websites.
+ *
+ * IT RETURNS WHAT HAPPENED. Every other sender in lib/email/ returns
+ * void and logs on failure, which is right for a welcome email — nobody
+ * is waiting for it and nothing downstream changes. It is wrong here.
+ * This message IS the lead. A site owner whose sending domain is not
+ * verified sees a working form, a filling dashboard and an empty inbox,
+ * and the only record of why is a server log they cannot read.
+ *
+ * So the outcome goes back to the caller, onto the submission row, and
+ * onto the screen. Still never throws: the visitor's form must not fail
+ * because our mail provider did.
+ */
 export async function sendWebsiteFormSubmissionEmail({
   email,
   userId,
@@ -26,13 +41,34 @@ export async function sendWebsiteFormSubmissionEmail({
   websiteName: string;
   fields: Record<string, string>;
   classification: string | null;
-}): Promise<void> {
-  if (!email) return;
+}): Promise<FormEmailResult> {
+  if (!email) return { status: "failed", detail: "The account has no email address." };
+
+  // CHECKED BY NAME, BEFORE THE CLIENT IS BUILT. `new Resend(undefined)`
+  // throws from its constructor, so a deployment with no RESEND_API_KEY
+  // fails identically to a network error — inside the catch, as a log
+  // line. Naming the cause here is the difference between "email is
+  // broken" and "set RESEND_API_KEY".
+  if (!process.env.RESEND_API_KEY) {
+    return {
+      status: "no_key",
+      detail: "RESEND_API_KEY is not set on this deployment, so no email can be sent.",
+    };
+  }
+
   try {
     const gate = await checkEmailAllowed(userId, "website_form_submission");
-    if (!gate.allowed) return;
+    if (!gate.allowed) {
+      return {
+        status: gate.reason === "opted_out" ? "opted_out" : "daily_cap",
+        detail:
+          gate.reason === "opted_out"
+            ? "Form-submission emails are switched off in your email settings."
+            : "The daily email limit for this account was already reached.",
+      };
+    }
 
-    const resend = createResendClient();
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const { error } = await resend.emails.send({
       from: FROM_ADDRESS,
       to: email,
@@ -41,16 +77,35 @@ export async function sendWebsiteFormSubmissionEmail({
         websiteName,
         fields,
         classification,
-        dashboardUrl: `${getSiteUrl()}/dashboard/website-builder`,
+        dashboardUrl: `${getSiteUrl()}/dashboard/form-submissions`,
       }),
     });
 
     if (error) {
+      const classified = classifySendFailure(error);
       logApiError("email:send-website-form-submission", error, { stage: "resend_error" });
-    } else {
-      await recordEmailSend(userId, "website_form_submission");
+      return classified;
     }
+
+    // ACCEPTED IS NOT DELIVERED, and the one case where that gap is
+    // predictable is worth saying out loud rather than reporting 'sent'.
+    // The shared sender only ever reaches the address that owns the
+    // Resend account; for anyone else Resend usually refuses above, but
+    // a deployment where it does NOT refuse is one where the owner is
+    // the account holder and everybody else silently gets nothing.
+    if (usesSharedTestSender(FROM_ADDRESS)) {
+      await recordEmailSend(userId, "website_form_submission");
+      return {
+        status: "unverified_domain",
+        detail:
+          "Sent from the shared Resend test address, which only delivers to the Resend account owner. Set RESEND_FROM_EMAIL to an address on a verified domain.",
+      };
+    }
+
+    await recordEmailSend(userId, "website_form_submission");
+    return { status: "sent", detail: null };
   } catch (err) {
     logApiError("email:send-website-form-submission", err, { stage: "unhandled" });
+    return classifySendFailure(err);
   }
 }

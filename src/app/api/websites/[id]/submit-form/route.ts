@@ -8,6 +8,12 @@ import { settleReservation } from "@/lib/billing/reservations";
 import { hasEnoughCredits, resolveEffectivePlan } from "@/lib/billing/credits";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getClientIp } from "@/lib/get-client-ip";
+import { createNotification } from "@/lib/notifications/store";
+import {
+  MAX_CONSENT_TEXT_LENGTH,
+  parseFormType,
+  submissionHeadline,
+} from "@/lib/websites/form-types";
 
 // @service-role-justified public — this is the contact form on a PUBLISHED
 // site, submitted by strangers who have no account. Scoped to the one
@@ -88,9 +94,29 @@ export async function POST(request: Request, { params }: { params: { id: string 
     }
 
     let rawFields: Record<string, unknown>;
+    let formType: string;
+    let consent = false;
+    let consentText: string | null = null;
     try {
       const body = await request.json();
       rawFields = typeof body?.fields === "object" && body.fields !== null ? body.fields : {};
+      // VALIDATED, NOT TRUSTED. Everything in this request comes from a
+      // page a stranger's browser is running, and the form type reaches
+      // a CHECK constraint — an unrecognised value would fail the insert
+      // and lose the submission, so it becomes 'contact' instead.
+      formType = parseFormType(body?.formType);
+      // BOTH PLACES. `consent` at the top level is what the prompt asks
+      // for; `fields._consent` is where a checkbox ends up when the
+      // generated script just serialises the form. Reading only the
+      // first would record "no consent" for a visitor who ticked the
+      // box, which is worse than useless as a record.
+      const rawConsent =
+        body?.consent ?? (typeof rawFields._consent === "string" ? rawFields._consent : undefined);
+      consent = rawConsent === true || rawConsent === "true" || rawConsent === "on";
+      consentText =
+        typeof body?.consentText === "string" && body.consentText.trim()
+          ? body.consentText.trim().slice(0, MAX_CONSENT_TEXT_LENGTH)
+          : null;
     } catch {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400, headers });
     }
@@ -104,10 +130,17 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ ok: true, submitted: true }, { headers });
     }
 
+    // The two underscore-prefixed inputs are MACHINERY, not answers: _hp
+    // is the honeypot and _consent is the GDPR tick, and both are read
+    // above. The prompt tells the model to keep them out of `fields`,
+    // which is exactly the kind of instruction that holds until it does
+    // not — so they are stripped here too. Without this, every
+    // submission's stored data ends with a field called "_consent" whose
+    // value is the string "on", and it lands in the owner's CSV export.
     const fields: Record<string, string> = {};
     let fieldCount = 0;
     for (const [key, value] of Object.entries(rawFields)) {
-      if (key === "_hp") continue;
+      if (key === "_hp" || key === "_consent") continue;
       if (fieldCount >= MAX_FIELDS) break;
       if (typeof value !== "string") continue;
       const trimmed = value.trim().slice(0, MAX_FIELD_LENGTH);
@@ -228,26 +261,73 @@ export async function POST(request: Request, { params }: { params: { id: string 
       }
     }
 
-    const { error: insertError } = await admin.from("website_form_submissions").insert({
-      website_id: websiteId,
-      user_id: website.user_id,
-      fields,
-      classification,
-    });
+    // THE ROW IS WRITTEN FIRST, AND ITS ID COMES BACK.
+    //
+    // Storing before sending is the whole fallback: if the email cannot
+    // go out — no API key, no verified domain, Resend down — the lead is
+    // already saved and reachable, and the failure becomes a fact on the
+    // row rather than a line in a log. Reversing these two would mean an
+    // outage loses the submission and the owner never learns it existed.
+    const { data: inserted, error: insertError } = await admin
+      .from("website_form_submissions")
+      .insert({
+        website_id: websiteId,
+        user_id: website.user_id,
+        fields,
+        classification,
+        form_type: formType,
+        consent,
+        consent_text: consentText,
+      })
+      .select("id")
+      .maybeSingle();
     if (insertError) {
       logApiError("/api/websites/[id]/submit-form", insertError, { stage: "insert" });
     }
 
+    // AWAITED, not fired and forgotten.
+    //
+    // It used to be `void sendWebsiteFormSubmissionEmail(...)` — the
+    // response went back before the send resolved, which on a serverless
+    // runtime means the function can be frozen mid-flight and the email
+    // simply never happens. It also meant the outcome was unknowable by
+    // construction. The visitor waits for one email call; the caps above
+    // are what stop that from being a lever.
     const ownerEmail = owner?.email;
-    if (ownerEmail) {
-      void sendWebsiteFormSubmissionEmail({
-        email: ownerEmail,
-        userId: website.user_id,
-        websiteName: website.name,
-        fields,
-        classification,
-      });
+    const delivery = ownerEmail
+      ? await sendWebsiteFormSubmissionEmail({
+          email: ownerEmail,
+          userId: website.user_id,
+          websiteName: website.name,
+          fields,
+          classification,
+        })
+      : { status: "failed" as const, detail: "The account has no email address." };
+
+    if (inserted?.id) {
+      const { error: statusError } = await admin
+        .from("website_form_submissions")
+        .update({ email_status: delivery.status, email_detail: delivery.detail })
+        .eq("id", inserted.id);
+      if (statusError) {
+        logApiError("/api/websites/[id]/submit-form", statusError, { stage: "email_status" });
+      }
     }
+
+    // THE IN-APP NOTIFICATION IS THE FALLBACK THAT DOES NOT DEPEND ON
+    // EMAIL AT ALL. It is created on every submission, not only when the
+    // email failed: an owner who never set up a sending domain would
+    // otherwise get a notification only for the submissions they were
+    // already not being told about, which is the same silence one step
+    // further in.
+    const who = submissionHeadline(fields);
+    await createNotification({
+      userId: website.user_id,
+      source: "website_form",
+      title: `New ${formType} submission on "${website.name}"`,
+      body: who ? `From ${who}.` : "Open it to see what they sent.",
+      url: "/dashboard/form-submissions",
+    });
 
     return NextResponse.json({ ok: true, submitted: true }, { headers });
   } catch (err) {

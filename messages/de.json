@@ -123,7 +123,8 @@
       "integrations": "Integrationen",
       "files": "Dateien",
       "deepResearch": "Tiefenrecherche",
-      "help": "Hilfe-Center"
+      "help": "Hilfe-Center",
+      "formSubmissions": "Formulareingänge"
     },
     "groupHints": {
       "create": "Eine Website erzeugen, ein Ziel planen, ein Dokument schreiben.",
@@ -174,7 +175,8 @@
       "integrations": "Gmail, Drive und Slack verbinden, damit die KI mit Ihren echten Daten arbeitet",
       "files": "PDFs, Word- und Excel-Dateien hochladen und das KI dazu befragen",
       "deepResearch": "Thema angeben — es recherchiert, gleicht ab und schreibt einen belegten Bericht",
-      "help": "Antworten auf die häufigsten Fragen — ohne Credits zu verbrauchen."
+      "help": "Antworten auf die häufigsten Fragen — ohne Credits zu verbrauchen.",
+      "formSubmissions": "Alles, was Besucher über ein Formular auf Ihren veröffentlichten Seiten gesendet haben"
     },
     "comingSoon": "Demnächst",
     "closeMenu": "Menü schließen"
@@ -1874,6 +1876,49 @@
         "7d": "7 Tage",
         "30d": "30 Tage",
         "365d": "1 Jahr"
+      }
+    },
+    "formSubmissions": {
+      "title": "Formulareingänge",
+      "description": "Alles, was Besucher über ein Formular auf Ihren Seiten gesendet haben.",
+      "deletedWebsite": "Gelöschte Seite",
+      "searchPlaceholder": "Namen, E-Mails, Nachrichten durchsuchen...",
+      "filterType": "Nach Formulartyp filtern",
+      "filterSite": "Nach Seite filtern",
+      "allTypes": "Alle Typen",
+      "allSites": "Alle Seiten",
+      "countMeta": "{shown} angezeigt · {unread} ungelesen",
+      "exportCsv": "CSV exportieren",
+      "noName": "Eingang",
+      "new": "Neu",
+      "noMatches": "Keine Treffer",
+      "noMatchesBody": "Versuchen Sie eine kürzere Suche oder entfernen Sie die Filter.",
+      "delete": "Löschen",
+      "deleteConfirm": "Diesen Eingang löschen? Das lässt sich nicht rückgängig machen.",
+      "deleted": "Eingang gelöscht.",
+      "deleteFailed": "Der Eingang konnte nicht gelöscht werden.",
+      "markReadFailed": "Konnte nicht als gelesen markiert werden.",
+      "consentGiven": "Einwilligung erteilt",
+      "consentMissing": "Keine Einwilligung erfasst",
+      "consentRecorded": "Eingewilligt in: {text}",
+      "consentNoText": "(der Wortlaut wurde nicht erfasst)",
+      "consentMissingBody": "Dieser Besucher hat kein Einwilligungsfeld angekreuzt, oder das Formular hatte keines.",
+      "empty": {
+        "title": "Noch keine Eingänge",
+        "body": "Wenn jemand ein Formular auf einer Ihrer veröffentlichten Seiten ausfüllt, erscheint es hier — auch wenn die Benachrichtigungs-E-Mail nicht versendet werden kann."
+      },
+      "types": {
+        "contact": "Kontakt",
+        "newsletter": "Newsletter",
+        "quote": "Angebotsanfrage",
+        "other": "Sonstiges"
+      },
+      "delivery": {
+        "sent": "E-Mail gesendet",
+        "no_key": "Es werden keine E-Mails gesendet: diese Bereitstellung hat keinen E-Mail-API-Schlüssel.",
+        "unverified_domain": "E-Mails kommen nicht an: die Absenderdomain ist nicht verifiziert.",
+        "failed": "Einige Benachrichtigungs-E-Mails konnten nicht gesendet werden.",
+        "affected": "{count} Eingang/Eingänge sind hier gespeichert, wurden Ihnen aber nie per E-Mail geschickt. Es ist nichts verloren gegangen."
       }
     }
   },

@@ -46,6 +46,24 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // Form submissions (V4 #4). Two coincidences, both checked by hand:
+  //
+  //   "Newsletter" is the word Greek, German, Italian and Portuguese all
+  //   use for this. Greek's own alternative, "ενημερωτικό δελτίο", is
+  //   what a formal document says; a sign-up box on a bakery's website
+  //   says Newsletter, and this file's Greek already uses the loanword
+  //   elsewhere. Every other string in the same block DOES differ in all
+  //   four languages (Επικοινωνία, Kontakt, Contatto, Contato;
+  //   Αίτημα προσφοράς, Angebotsanfrage, Richiesta di preventivo,
+  //   Pedido de orçamento), which is what makes this one a coincidence
+  //   rather than a skipped locale.
+  //
+  //   "Contact" is spelled identically in French.
+  "el:dashboard.formSubmissions.types.newsletter",
+  "de:dashboard.formSubmissions.types.newsletter",
+  "it:dashboard.formSubmissions.types.newsletter",
+  "pt:dashboard.formSubmissions.types.newsletter",
+  "fr:dashboard.formSubmissions.types.contact",
   // Unified search (V4 #17). The command palette's group headings and
   // filter labels. Each checked by hand against the language, not waved
   // through as a batch:

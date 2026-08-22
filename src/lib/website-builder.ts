@@ -10,6 +10,7 @@ import { AI_SAFETY_BOUNDARIES_EN } from "@/lib/ai-conduct";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import type { CostAccumulator, CostStage } from "@/lib/billing/cost-accumulator";
 import { multipageInstruction } from "@/lib/website-multipage";
+import { QUOTE_FIELDS_BY_INDUSTRY } from "@/lib/websites/form-types";
 import { seoInstruction } from "@/lib/seo/prompt";
 
 const MODEL = WEBSITE_BUILDER_MODEL;
@@ -430,11 +431,7 @@ LOGO — NEVER INVENT ONE:
 - Otherwise the header shows the business NAME as a styled text wordmark (a distinctive font-family/weight/letter-spacing treatment of the name is encouraged) — and nothing else.
 - NEVER draw, generate or fetch a logo: no abstract marks, no monograms, no icon standing in for the brand, no CSS/SVG shapes posing as a logo, no PLACEHOLDER image with a logo-like query. A wrong logo is a wrong identity — worse than no logo, because the owner ships it thinking it is theirs.
 
-CONTACT / BOOKING FORMS (only when the description implies one — not every site needs a form):
-- Every input needs a real, meaningful name attribute (name="name", name="email", name="phone", name="message", etc.) — never an unnamed input.
-- Add one hidden honeypot input, exactly: <input type="text" name="_hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;" aria-hidden="true">
-- Do not set a form action attribute.
-- For exactly how to wire up the form's submission (the endpoint URL and the script that calls it), see the FORM SUBMISSION INSTRUCTIONS given as a separate block after this system prompt.`;
+FORMS: see the FORM INSTRUCTIONS block given after this system prompt — what kinds of form exist, which fields each one needs, the consent line, the honeypot and how to wire up the submission are all there.`;
 
 // Kept as a SEPARATE trailing content block (not interpolated into
 // SYSTEM_PROMPT/EDIT_SYSTEM_PROMPT above) specifically so those prompts
@@ -443,12 +440,45 @@ CONTACT / BOOKING FORMS (only when the description implies one — not every sit
 // endpoint URL embeds the website's own id). Splitting it out is what
 // makes prompt caching on the (much larger, fully static) rest of the
 // system prompt actually work: see buildSystemBlocks below.
+//
+// WHY THE WHOLE FORM SPEC LIVES HERE rather than in SYSTEM_PROMPT: the
+// static prompt is at 29.4k characters against a 30k ceiling
+// (scripts/tests/website-variety.test.ts's last section), and that
+// ceiling exists because every character of general instruction competes
+// with the user's own brief for the model's attention. Forms are also
+// the one subject where the instruction and the per-website endpoint URL
+// belong in the same breath — "build this, send it there" — so moving
+// the spec down here makes the cached prefix SMALLER, not larger.
+const FORM_KINDS = `FORM INSTRUCTIONS
+
+Build a form only when the description implies one — not every site needs one. There are THREE kinds; pick whichever the business actually needs, and more than one is fine (a contact form and a newsletter box is a normal pairing).
+
+1. CONTACT — the default. Fields: name, email, phone (optional), message. Heading and button in the site's language.
+2. NEWSLETTER — email alone, or first name + email. One line of honest copy about what gets sent and how often. Never claim a discount, a gift or a frequency the description did not mention.
+3. QUOTE REQUEST — the one that must NOT be a contact form with a different heading. Ask for what this trade actually needs in order to price the job, adapting these to the business:
+${Object.entries(QUOTE_FIELDS_BY_INDUSTRY)
+  .map(([industry, fields]) => `   - ${industry}: ${fields.join(", ")}`)
+  .join("\n")}
+   Plus name and a way to reply. 4-7 fields total: a quote form nobody finishes is worth less than a contact form somebody does.
+
+BOOKING FORMS: do not build one. A form that takes a date and time without real availability behind it double-books people and sends them to a closed door. If the description asks for bookings, build a CONTACT form whose copy says a booking will be confirmed by reply, and never render a calendar.
+
+EVERY FORM, WITHOUT EXCEPTION:
+- Every input needs a real, meaningful name attribute (name="name", name="email", name="phone", name="message") — never an unnamed input. Use these English attribute names even when the visible labels are in another language, so the owner's dashboard can tell a name from an email.
+- Add one hidden honeypot input, exactly: <input type="text" name="_hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;" aria-hidden="true">
+- A CONSENT CHECKBOX, required, unticked, immediately above the submit button: <input type="checkbox" name="_consent" required> with a short visible sentence in the site's language saying the data is sent to <the business name> so they can reply, and is not passed to anyone else. It must be genuinely unticked and genuinely required — a pre-ticked box is not consent.
+- Do not set a form action attribute. Never ask for anything you do not need: no date of birth, no ID number, no payment details.`;
+
 function buildFormEndpointInstruction(formEndpointUrl: string | undefined): string {
   if (!formEndpointUrl) {
-    return `FORM SUBMISSION INSTRUCTIONS:\n- No submission endpoint is available for this generation — build the form visually complete (all fields, honeypot, a submit button) but do NOT add a fetch/submission script, and add an HTML comment near it: <!-- Form is not yet wired to a backend -->.`;
+    return `${FORM_KINDS}\n\nSUBMISSION: no submission endpoint is available for this generation — build the form visually complete (all fields, consent checkbox, honeypot, a submit button) but do NOT add a fetch/submission script, and add an HTML comment near it: <!-- Form is not yet wired to a backend -->.`;
   }
-  return `FORM SUBMISSION INSTRUCTIONS:\n- Add exactly one inline <script> block (placed once, right before </body>) that: listens for the form's 'submit' event, calls preventDefault(), collects every named field (including _hp) into a plain object, and POSTs it as JSON { "fields": { ... } } via fetch to EXACTLY this URL: ${formEndpointUrl}
-  On a successful response, replace the form's contents with a clear confirmation message (e.g. "Thanks — we'll be in touch soon."). On failure, show a clear inline retry message near the form. Never use alert() or confirm().`;
+  return `${FORM_KINDS}
+
+SUBMISSION: add exactly one inline <script> block (placed once, right before </body>) that listens for the submit event of EVERY form on the page, calls preventDefault(), and POSTs JSON via fetch to EXACTLY this URL: ${formEndpointUrl}
+The body is { "fields": { ...every named text/email/tel/textarea/select field including _hp... }, "formType": "contact" | "newsletter" | "quote", "consent": <true if the consent box is ticked>, "consentText": "<the exact consent sentence shown next to it>" }.
+Set formType from what that particular form is for; if a page has two forms, each sends its own. Do not put _consent inside "fields".
+On a successful response, replace that form's contents with a clear confirmation message in the site's language. On failure, show an inline retry message near the form. Never use alert() or confirm().`;
 }
 
 const IMAGE_RULES_HEADER = `

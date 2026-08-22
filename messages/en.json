@@ -123,7 +123,8 @@
       "integrations": "Integrations",
       "files": "Files",
       "deepResearch": "Deep Research",
-      "help": "Help Centre"
+      "help": "Help Centre",
+      "formSubmissions": "Form submissions"
     },
     "groupHints": {
       "create": "Generate a site, plan a goal, write a document.",
@@ -174,7 +175,8 @@
       "integrations": "Connect Gmail, Drive and Slack so the AI can work with your real data",
       "files": "Upload PDFs, Word and Excel files and ask the AI questions about them",
       "deepResearch": "Give it a topic and it searches, cross-checks and writes a sourced report",
-      "help": "Answers to the questions people ask most — no credits used."
+      "help": "Answers to the questions people ask most — no credits used.",
+      "formSubmissions": "Everything visitors sent through a form on your published sites"
     },
     "comingSoon": "Coming soon",
     "closeMenu": "Close menu"
@@ -1874,6 +1876,49 @@
         "7d": "7 days",
         "30d": "30 days",
         "365d": "1 year"
+      }
+    },
+    "formSubmissions": {
+      "title": "Form submissions",
+      "description": "Everything visitors sent through a form on your sites.",
+      "deletedWebsite": "Deleted site",
+      "searchPlaceholder": "Search names, emails, messages...",
+      "filterType": "Filter by form type",
+      "filterSite": "Filter by site",
+      "allTypes": "All types",
+      "allSites": "All sites",
+      "countMeta": "{shown} shown · {unread} unread",
+      "exportCsv": "Export CSV",
+      "noName": "Submission",
+      "new": "New",
+      "noMatches": "Nothing matches that",
+      "noMatchesBody": "Try a shorter search, or clear the filters.",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this submission? This cannot be undone.",
+      "deleted": "Submission deleted.",
+      "deleteFailed": "The submission could not be deleted.",
+      "markReadFailed": "Could not mark this as read.",
+      "consentGiven": "Consent given",
+      "consentMissing": "No consent recorded",
+      "consentRecorded": "Consented to: {text}",
+      "consentNoText": "(the wording was not recorded)",
+      "consentMissingBody": "This visitor did not tick a consent box, or the form did not have one.",
+      "empty": {
+        "title": "No submissions yet",
+        "body": "When somebody fills in a form on one of your published sites, it appears here — even if the notification email cannot be sent."
+      },
+      "types": {
+        "contact": "Contact",
+        "newsletter": "Newsletter",
+        "quote": "Quote request",
+        "other": "Other"
+      },
+      "delivery": {
+        "sent": "Email sent",
+        "no_key": "No emails are being sent: this deployment has no email API key.",
+        "unverified_domain": "Emails are not arriving: the sending domain is not verified.",
+        "failed": "Some notification emails could not be sent.",
+        "affected": "{count} submission(s) are saved here but were never emailed to you. Nothing has been lost."
       }
     }
   },

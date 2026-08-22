@@ -55,6 +55,7 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   Files: "files",
   "Deep Research": "deepResearch",
   "Published Sites": "published",
+  "Form Submissions": "formSubmissions",
   Websites: "websites",
   Integrations: "integrations",
   "Ionexa Chat": "chat",

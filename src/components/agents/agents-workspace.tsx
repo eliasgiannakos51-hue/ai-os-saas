@@ -24,6 +24,10 @@ import { PaginationControls } from "@/components/pagination-controls";
 import { ClarificationQuestions } from "@/components/clarification/clarification-questions";
 import { useToast } from "@/components/toast/toast-context";
 import { useCredits } from "@/components/credits/credits-context";
+import { DepthPicker, type DepthFacts } from "@/components/agents/depth-picker";
+import { TemplateMatches, type TemplateMatch } from "@/components/agents/template-matches";
+import { ShareTemplate } from "@/components/agents/share-template";
+import { parseAgentDepth, type AgentDepth } from "@/lib/agents/agent-depth";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { formatDateTimeInZone, formatNumber } from "@/lib/format-number";
 import { appendClarificationAnswers, alignSuggestions } from "@/lib/clarification-client";
@@ -113,6 +117,9 @@ export function AgentsWorkspace({
   agentCap,
   accountEmail,
   slackChannels = [],
+  depthFacts,
+  templateCredits,
+  buildCredits,
 }: {
   agents: UserAgent[];
   runs: AgentRun[];
@@ -122,6 +129,16 @@ export function AgentsWorkspace({
    *  the server. Empty when Slack is not connected — which is what makes
    *  the picker able to say so instead of offering an empty dropdown. */
   slackChannels?: { id: string; name: string }[];
+  /** Model, steps, sources, seconds and CREDITS per tier, priced on the
+   *  server by the same function that sizes the hold. Required, because a
+   *  picker whose options differ twelvefold and shows only adjectives is
+   *  a picker that sells the expensive one. */
+  depthFacts: DepthFacts;
+  /** What "use a ready-made one" costs, and what "build a new one" costs.
+   *  Both from the server, so the comparison the user makes is between
+   *  the two numbers that will actually be charged. */
+  templateCredits: number;
+  buildCredits: number;
 }) {
   const t = useTranslations("dashboard.agents");
   const tModule = useTranslations("module");
@@ -182,6 +199,7 @@ export function AgentsWorkspace({
     prompt: string;
     parts: ScheduleParts;
     needsWebSearch: boolean;
+    depth: AgentDepth;
     // WHERE IT SENDS, editable at last. The API has supported a second
     // destination since Slack was added and the editor had no field for
     // it, so every agent anyone could create emailed.
@@ -189,6 +207,16 @@ export function AgentsWorkspace({
     deliveryTarget: string;
   } | null>(null);
   const [lastRunOutput, setLastRunOutput] = useState<string | null>(null);
+  // THE DEPTH ON THE PREVIEW SCREEN, separate from the draft the builder
+  // returned so the user can change it before creating without the change
+  // being lost by a re-render of the preview.
+  const [previewDepth, setPreviewDepth] = useState<AgentDepth>("standard");
+  // ONE RUN, DEEPER — never written to the agent. Reset to the agent's own
+  // depth whenever the selection changes, so a deeper run of one agent
+  // cannot silently become the default for the next one you open.
+  const [runDepth, setRunDepth] = useState<AgentDepth>("standard");
+  const [matches, setMatches] = useState<TemplateMatch[]>([]);
+  const [adopting, setAdopting] = useState(false);
 
   // WHAT THE COUNTER COUNTS must be what the SERVER enforces. The cap is
   // on ACTIVE agents (lib/agents/agent-cap.ts counts status='active'),
@@ -333,6 +361,10 @@ export function AgentsWorkspace({
     } else if (result.built) {
       setQuestions(null);
       setPreview({ ...result, ok: true });
+      // The builder's suggestion becomes the selection — and is LABELLED
+      // as a suggestion in the picker, so it is visibly a proposal the
+      // user is agreeing to rather than a default they never saw.
+      setPreviewDepth(parseAgentDepth(result.draft?.config?.depth));
     } else {
       // The builder ran and could not design it. Real tokens were spent,
       // so this is a completed job carrying a refusal — not an error to
@@ -473,7 +505,16 @@ export function AgentsWorkspace({
       const response = await fetch("/api/agents", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ draft: preview.draft }),
+        // THE DEPTH THE USER SELECTED, not the one the builder proposed.
+        // Sending preview.draft unchanged would make the picker
+        // decorative — it would move, show a different price, and create
+        // an agent at the builder's tier.
+        body: JSON.stringify({
+          draft: {
+            ...preview.draft,
+            config: { ...preview.draft.config, depth: previewDepth },
+          },
+        }),
       });
       const data = await response.json();
       if (!data.ok) {
@@ -490,6 +531,73 @@ export function AgentsWorkspace({
     }
   }
 
+  /**
+   * LOOKING FOR A READY-MADE ONE, WHILE THEY TYPE.
+   *
+   * Free — the ranking is Postgres full-text over the template library,
+   * no model call — and it happens BEFORE the builder runs, because
+   * offering a cheaper route after the expensive one has been paid for
+   * is offering a refund.
+   *
+   * Debounced, and last-one-wins for the same reason the command palette
+   * is: responses do not arrive in the order they were sent, and a stale
+   * answer overwriting a fresher one would offer a template for a
+   * sentence the user has already replaced.
+   */
+  const matchTokenRef = useRef(0);
+  useEffect(() => {
+    const q = requestText.trim();
+    if (!creating || q.length < 3 || preview || questions) {
+      setMatches([]);
+      return;
+    }
+    const token = ++matchTokenRef.current;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/agents/templates?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        if (token !== matchTokenRef.current) return;
+        setMatches(Array.isArray(data?.matches) ? (data.matches as TemplateMatch[]) : []);
+      } catch {
+        // A library that cannot be reached must not stop somebody
+        // building an agent: no matches, and "build a new one" is
+        // rendered unconditionally anyway.
+        if (token === matchTokenRef.current) setMatches([]);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [requestText, creating, preview, questions]);
+
+  async function adoptTemplate(match: TemplateMatch) {
+    setAdopting(true);
+    setProblem(null);
+    try {
+      const response = await fetch("/api/agents/templates/adopt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        body: JSON.stringify({
+          slug: match.slug,
+          request: requestText.trim(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+        }),
+      });
+      const data = await response.json();
+      if (!data.ok) {
+        addToast(data.error ?? t("templates.adoptError"), "error");
+        return;
+      }
+      addToast(t("templates.adopted", { subject: String(data.subject ?? "") }));
+      resetCreate();
+      refreshCredits();
+      router.refresh();
+    } catch (err) {
+      addToast(getErrorMessage(err, t("templates.adoptError")), "error");
+    } finally {
+      setAdopting(false);
+    }
+  }
+
   // Closing the create panel — by Cancel, or after the agent has been
   // created from the draft. Either way the user is finished with that
   // result, so it is marked seen: (δ) of the brief, "an explicit discard
@@ -500,6 +608,7 @@ export function AgentsWorkspace({
     setResultJobId(null);
     setCreating(false);
     setRequestText("");
+    setMatches([]);
     setQuestions(null);
     setQuestionSuggestions([]);
     setPreview(null);
@@ -556,11 +665,22 @@ export function AgentsWorkspace({
   // search-enabled run plus a retry plus an email is the slowest thing
   // this feature does, and awaiting it meant closing the tab aborted the
   // fetch while the run itself carried on unseen.
-  async function runNow(agent: UserAgent) {
+  async function runNow(agent: UserAgent, depth?: AgentDepth) {
     setLastRunOutput(null);
     setSelectedId(agent.id);
     try {
-      const response = await fetch(`/api/agents/${agent.id}/run`, { method: "POST", keepalive: true });
+      const response = await fetch(`/api/agents/${agent.id}/run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        keepalive: true,
+        // SENT ONLY WHEN IT DIFFERS from the agent's own. An override
+        // equal to the stored depth is not an override; sending it
+        // anyway would put depthOverridden: true on a cost row for a run
+        // that was entirely ordinary.
+        body: JSON.stringify(
+          depth && depth !== parseAgentDepth(agent.config?.depth) ? { depth } : {}
+        ),
+      });
       const data = await response.json();
       if (!data.ok) {
         addToast(data.error ?? t("runFailed"), "error");
@@ -581,9 +701,13 @@ export function AgentsWorkspace({
       prompt: agent.prompt,
       parts: cronToParts(agent.schedule_cron) ?? DEFAULT_SCHEDULE_PARTS,
       needsWebSearch: agent.config?.needsWebSearch === true,
+      depth: parseAgentDepth(agent.config?.depth),
       deliveryMethod: isDeliveryChannel(agent.delivery_method) ? agent.delivery_method : "email",
       deliveryTarget: agent.delivery_target ?? "",
     });
+    // A per-run override belongs to the agent you are looking at, not to
+    // the session. Opening another agent resets it to that agent's own.
+    setRunDepth(parseAgentDepth(agent.config?.depth));
   }
 
   async function saveEdit(agent: UserAgent) {
@@ -596,6 +720,7 @@ export function AgentsWorkspace({
         prompt: editDraft.prompt,
         scheduleCron: partsToCron(editDraft.parts),
         needsWebSearch: editDraft.needsWebSearch,
+        depth: editDraft.depth,
         // Sent together, because the server resolves the TARGET from the
         // method: a Discord agent's target is a constant, a Telegram
         // agent's is the chat saved with the token, and sending one
@@ -893,12 +1018,32 @@ export function AgentsWorkspace({
                   <div>
                     <dt className="text-muted">{t("previewCostPerRun")}</dt>
                     <dd className="text-foreground">
+                      {/* THE SELECTED TIER'S PRICE, not the one the
+                          builder happened to suggest. Changing the
+                          picker below and leaving this line showing the
+                          old figure is a quote for something else. */}
                       {t("creditsPerRun", {
-                        credits: formatNumber(preview.estimatedCreditsPerRun ?? 0, locale),
+                        credits: formatNumber(
+                          depthFacts[previewDepth]?.credits ?? preview.estimatedCreditsPerRun ?? 0,
+                          locale
+                        ),
                       })}
                     </dd>
                   </div>
                 </dl>
+
+                {/* HOW HARD IT WORKS — chosen BEFORE it is created, with
+                    every option's price beside it. */}
+                <div className="mt-3 space-y-2">
+                  <p className="text-xs font-medium text-foreground">{t("depth.legend")}</p>
+                  <DepthPicker
+                    value={previewDepth}
+                    onChange={setPreviewDepth}
+                    facts={depthFacts}
+                    suggested={parseAgentDepth(preview.draft.config?.depth)}
+                    disabled={savingAgent}
+                  />
+                </div>
                 {/* WHERE THE RESULT GOES, decided at creation — not
                     discovered later. The picker used to exist only in the
                     edit panel of an already-created agent, which meant
@@ -973,14 +1118,29 @@ export function AgentsWorkspace({
               </div>
             )}
 
-            {!questions && !preview && (
+            {/* READY-MADE FIRST, BUILD ALWAYS. TemplateMatches renders
+                "build a new one" unconditionally — outside its own
+                matches branch — so no match, a poor match and a perfect
+                one all leave the same button in the same place. */}
+            {!questions && !preview && requestText.trim().length > 0 && (
+              <TemplateMatches
+                matches={matches}
+                onUse={(match) => void adoptTemplate(match)}
+                onBuildNew={() => build(requestText, false)}
+                templateCredits={templateCredits}
+                buildNewLabel={
+                  building ? t("designing") : t("templates.buildNew", { credits: buildCredits })
+                }
+                busy={building || adopting}
+              />
+            )}
+            {!questions && !preview && requestText.trim().length === 0 && (
               <button
                 type="button"
-                onClick={() => build(requestText, false)}
-                disabled={building || requestText.trim().length === 0}
-                className="inline-flex min-h-[44px] items-center rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black transition-all duration-200 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled
+                className="inline-flex min-h-[44px] cursor-not-allowed items-center rounded-lg bg-orange-500 px-4 py-2 text-xs font-semibold text-black opacity-50"
               >
-                {building ? t("designing") : t("designButton")}
+                {t("designButton")}
               </button>
             )}
             {problem && (
@@ -1075,7 +1235,7 @@ export function AgentsWorkspace({
                       // Driven by the job row rather than a local flag, so a
                       // run started before a reload still reads as running.
                       disabled: busyId === agent.id || runningNow,
-                      onSelect: () => void runNow(agent),
+                      onSelect: () => void runNow(agent, runDepth),
                     },
                     {
                       key: "toggle",
@@ -1196,6 +1356,18 @@ export function AgentsWorkspace({
                 />
                 {t("webSearchLabel")}
               </label>
+              {/* CHANGEABLE AFTER CREATION (#21 a). An agent whose tier
+                  could only be chosen once is an agent you delete and
+                  rebuild when it turns out to need less. */}
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-foreground">{t("depth.legend")}</p>
+                <DepthPicker
+                  value={editDraft.depth}
+                  onChange={(depth) => setEditDraft({ ...editDraft, depth })}
+                  facts={depthFacts}
+                  disabled={busyId === selected.id}
+                />
+              </div>
               <p className="text-[11px] text-muted">
                 {t("nextRunPreview", {
                   when:
@@ -1230,6 +1402,32 @@ export function AgentsWorkspace({
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
                 {selected.prompt}
               </p>
+
+              {/* ONE RUN, DEEPER — requirement (δ). Changing this does NOT
+                  change the agent: the next scheduled run still uses the
+                  tier in its config, which is why the label says "this
+                  run" and why the value resets to the agent's own every
+                  time a different agent is opened. */}
+              <div className="space-y-2 rounded-xl border border-border p-3">
+                <p className="text-xs font-medium text-foreground">{t("depth.runOnce")}</p>
+                <p className="text-[11px] leading-relaxed text-muted">
+                  {t("depth.runOnceHint", {
+                    depth: t(`depth.${parseAgentDepth(selected.config?.depth)}.title`),
+                  })}
+                </p>
+                <DepthPicker
+                  value={runDepth}
+                  onChange={setRunDepth}
+                  facts={depthFacts}
+                  disabled={runningNow || busyId === selected.id}
+                  compact
+                />
+              </div>
+
+              {/* OPT-IN SHARING. Collapsed, never pre-ticked, and it
+                  shows the exact sentence that would be published before
+                  anybody agrees to publish it. */}
+              <ShareTemplate agentId={selected.id} prompt={selected.prompt} />
 
               {lastRunOutput && (
                 <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/[0.05] p-3">

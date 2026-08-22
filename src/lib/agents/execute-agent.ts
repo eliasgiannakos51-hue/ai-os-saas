@@ -22,8 +22,13 @@ import {
 } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
 import { diagLog } from "@/lib/diag";
-import { AGENT_RUNNER_MODEL } from "@/lib/agents/agent-models";
-import { runAgentTask, AGENT_MAX_WEB_SEARCHES } from "@/lib/agents/agent-runner";
+import {
+  AGENT_DEPTHS,
+  AGENT_DEPTH_SPECS,
+  parseAgentDepth,
+  type AgentDepth,
+} from "@/lib/agents/agent-depth";
+import { runAgentTask } from "@/lib/agents/agent-runner";
 import { nextRunAt } from "@/lib/agents/cron-expression";
 import {
   AGENT_MAX_ATTEMPTS,
@@ -100,19 +105,34 @@ export type ExecuteAgentResult =
  * negative case the three-phase billing exists to prevent. Over-holding
  * costs the user nothing; the unused remainder is released at settlement.
  */
+const DEPTH_PROFILE = {
+  simple: "agentRunSimple",
+  standard: "agentRunStandard",
+  deep: "agentRunDeep",
+} as const;
+
 export function estimateAgentRun(params: {
   promptChars: number;
   needsWebSearch: boolean;
   accountCreditPriceEur: number;
   planSlug?: string | null;
+  /** Omitted, this prices the standard tier — which is what an agent
+   *  with no depth recorded actually runs as. */
+  depth?: AgentDepth;
 }) {
   const config = resolvePricingConfig();
+  const depth = parseAgentDepth(params.depth);
+  const spec = AGENT_DEPTH_SPECS[depth];
   const single = estimateForAction(
-    "agentRun",
+    DEPTH_PROFILE[depth],
     {
-      model: AGENT_RUNNER_MODEL,
+      // THE TIER'S MODEL, not a constant. Pricing every tier against
+      // Sonnet would over-charge `simple` by three and under-reserve
+      // `deep` by nearly half — and the under-reserve is the one that
+      // ends with a balance going negative mid-run.
+      model: spec.model,
       inputChars: params.promptChars,
-      expectedWebSearches: params.needsWebSearch ? AGENT_MAX_WEB_SEARCHES : 0,
+      expectedWebSearches: params.needsWebSearch ? spec.maxSearches : 0,
       planSlug: params.planSlug ?? null,
     },
     config,
@@ -122,6 +142,32 @@ export function estimateAgentRun(params: {
     estimatedCredits: single.estimatedCredits,
     reserveCredits: single.reserveCredits * AGENT_MAX_ATTEMPTS,
   };
+}
+
+/**
+ * ALL THREE TIERS, PRICED THE SAME WAY THE RUN WILL BE.
+ *
+ * The picker has to put a number beside every option — that is the whole
+ * of requirement (b) — and a number computed in the browser would be a
+ * second implementation of the pricing, drifting from the one that
+ * charges. So the server prices all three and the component renders what
+ * it is given.
+ *
+ * `promptChars` is the task the agent will actually run. Before an agent
+ * exists (the create screen) the draft's prompt is the right input;
+ * afterwards it is the stored one.
+ */
+export function agentRunEstimatesByDepth(params: {
+  promptChars: number;
+  needsWebSearch: boolean;
+  accountCreditPriceEur: number;
+  planSlug?: string | null;
+}): Record<AgentDepth, number> {
+  const out = {} as Record<AgentDepth, number>;
+  for (const depth of AGENT_DEPTHS) {
+    out[depth] = estimateAgentRun({ ...params, depth }).estimatedCredits;
+  }
+  return out;
 }
 
 /** Executions this user has started in the trailing hour, whatever the source. */
@@ -148,6 +194,10 @@ export async function executeAgent(params: {
   agent: UserAgent;
   triggerSource: "schedule" | "manual";
   apiKey: string;
+  /** ONE RUN AT A DIFFERENT DEPTH, without touching the schedule.
+   *  Validated by the route before it gets here; parseAgentDepth below
+   *  is the second line, because this is what sizes the hold. */
+  depthOverride?: AgentDepth;
 }): Promise<ExecuteAgentResult> {
   const { admin, user, agent, triggerSource, apiKey } = params;
   const userId = user.id;
@@ -202,11 +252,16 @@ export async function executeAgent(params: {
         pricingConfig
       );
   const agentConfig = normaliseAgentConfig(agent.config);
+  // ONE depth for the whole execution — the hold, the run and the
+  // receipt. Reading the override in one place and passing it down is
+  // what stops a run being HELD at standard and EXECUTED at deep.
+  const runDepth = parseAgentDepth(params.depthOverride ?? agentConfig.depth);
   const estimate = estimateAgentRun({
     promptChars: agent.prompt.length,
     needsWebSearch: agentConfig.needsWebSearch,
     accountCreditPriceEur,
     planSlug: plan?.slug ?? null,
+    depth: runDepth,
   });
 
   // 4. Read-only affordability check before anything is held or called.
@@ -269,7 +324,7 @@ export async function executeAgent(params: {
   //    failed the safety shape check, and retrying a safety failure until
   //    it passes is how a safety check becomes a formality.
   let attempts = 0;
-  let outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs });
+  let outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth });
   attempts = 1;
   while (
     !outcome.ok &&
@@ -277,7 +332,7 @@ export async function executeAgent(params: {
     attempts < AGENT_MAX_ATTEMPTS
   ) {
     attempts++;
-    outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs });
+    outcome = await runAgentTask({ apiKey, prompt: agent.prompt, config: agentConfig, costs, depth: runDepth });
   }
 
   // 8. Settle. Always — every attempt above spent real tokens, including
@@ -309,6 +364,13 @@ export async function executeAgent(params: {
       triggerSource,
       attempts,
       estimatedCredits: estimate.estimatedCredits,
+      // ON THE COST ROW, not only in the estimate. The margin report
+      // groups by feature, and without this a `deep` run and a `simple`
+      // run are one undifferentiated "agent_run" average — which is the
+      // number somebody would use to decide whether the tiers pay for
+      // themselves.
+      depth: runDepth,
+      depthOverridden: params.depthOverride ? true : undefined,
       ...(cannotComplete ? { refunded: true, cannotComplete: true } : {}),
     },
   });

@@ -142,6 +142,11 @@ const DECLARED = {
     billing: "settled",
     note: "V3 Task 16 Instant Value. Phrases findings the DETECTORS already computed — the patterns are found by lib/insights/detectors.ts, and this call is given the numbers and asked for grammar. Every number it writes is checked against the evidence and a narration that invents one is discarded in favour of the detector's own wording, so a model failure degrades the prose and never the correctness. Settled by api/insights/generate; when the detectors find nothing this call is never made and nothing is charged.",
   },
+  "src/lib/agents/template-fill.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V4 #22 Template library. ONE forced-tool-use call on the smallest model (Haiku), reached from api/agents/templates/adopt. It fills a template's {subject} slot from the user's own sentence and names the agent in their language — it never writes the task, the schedule or the search flag, all of which come from the template. That is what makes adopting genuinely cheaper than building rather than a discount on the same work: the full builder is a Sonnet call deciding ten fields, this is a Haiku call deciding four, and the margin multiplier is identical (agent_build, via ACTION_TO_FEATURE). Settled by the adopt route AFTER the agent row exists, so a fill whose insert then failed charges nothing; a call that threw before any response records nothing on the accumulator and the reservation is released instead. NO call at all — and nothing charged — when the user typed the subject themselves or ANTHROPIC_API_KEY is absent, which is why the route creates the agent either way.",
+  },
   "src/lib/lead-classification.ts": {
     calls: 1,
     billing: "settled",

@@ -320,8 +320,20 @@ for (const [raw, why] of [
 check(
   "a real config is preserved",
   config.normaliseAgentConfig({ needsWebSearch: true, outputFormat: "report", language: "el" }),
-  { needsWebSearch: true, outputFormat: "report", language: "el" }
+  { needsWebSearch: true, depth: "standard", outputFormat: "report", language: "el" }
 );
+// THE DEPTH DEFAULT IS LOAD-BEARING, and standard is the only safe one:
+// every agent that existed before the tier field ran with Sonnet, four
+// searches and a 3,000-token answer, which IS the standard tier. Any
+// other default would silently change what those agents do and what they
+// cost, on a schedule, without anybody asking.
+check("a config with no depth resolves to standard",
+  config.normaliseAgentConfig({ needsWebSearch: true }).depth, "standard");
+check("...and so does a nonsense one",
+  config.normaliseAgentConfig({ depth: "exhaustive" }).depth, "standard");
+for (const depth of ["simple", "standard", "deep"]) {
+  check(`a real depth survives: ${depth}`, config.normaliseAgentConfig({ depth }).depth, depth);
+}
 // ...and the runner must actually use it, not the raw column.
 checkTrue(
   "the runner normalises before building its prompt",
@@ -601,7 +613,19 @@ console.log("\n== 12. the wiring, asserted rather than assumed ==");
   // web_search tool is ever offered.
   const toolLists = [...runner.matchAll(/tools:\s*\[([^\]]*)\]/g)].map((m) => m[1].trim());
   check("the runner offers exactly one tool list", toolLists.length, 1);
-  check("...and it is only web_search", toolLists[0], "WEB_SEARCH_TOOL");
+  // ASSERTED ON THE TOOL'S TYPE, not on the name of the constant holding
+  // it. This used to compare against the literal "WEB_SEARCH_TOOL", which
+  // meant renaming the identifier failed the check while ADDING a second
+  // tool to the same helper would not have. Every tool the runner can
+  // ever construct is enumerated from its `type:` fields instead.
+  const toolTypes = [...runner.matchAll(/type:\s*"([a-z_0-9]+)"/g)].map((m) => m[1]);
+  check("...and every tool it can construct is a web search", [...new Set(toolTypes)], ["web_search_20250305"]);
+  checkTrue("...built through one helper, so the cap cannot be set twice",
+    (runner.match(/function webSearchTool\(/g) ?? []).length === 1);
+  // THE CAP IS THE TIER'S, not a constant. A tool built with a fixed
+  // max_uses would let `deep` be held for ten searches and run with four.
+  checkTrue("...whose cap comes from the depth spec",
+    /webSearchTool\(searches\)/.test(runner) && /searchesForRound\(depth, round\)/.test(runner));
   checkTrue("every model call is recorded onto the accumulator", (runner.match(/costs\.record\(/g) ?? []).length >= 2);
   checkTrue("the task text is fenced as untrusted", /wrapUntrusted\(safePrompt\)/.test(runner));
   checkTrue("web findings are fenced as untrusted", /wrapUntrusted\(findings\)/.test(runner));

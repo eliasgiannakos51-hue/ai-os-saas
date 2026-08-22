@@ -1481,6 +1481,57 @@
         "stepNoSearch": "Travaille uniquement à partir du texte de la tâche, sans recherche web.",
         "stepWrite": "Rédige le résultat et le confronte à ce qu'il a trouvé.",
         "stepDeliver": "L'envoie par e-mail à {target}, {when}."
+      },
+      "depth": {
+        "legend": "Profondeur du travail",
+        "perRun": "par exécution",
+        "suggested": "Suggéré",
+        "facts": "{sources} sources · {steps} étapes · environ {seconds}s",
+        "runOnce": "Exécuter une fois en",
+        "runOnceHint": "Cette exécution seulement. La planification garde {depth}.",
+        "simple": {
+          "title": "Simple",
+          "what": "Une source, réponse courte. Pour une question à une seule bonne réponse."
+        },
+        "standard": {
+          "title": "Standard",
+          "what": "Quelques sources recoupées. Ce qu'il faut pour la plupart des veilles."
+        },
+        "deep": {
+          "title": "Approfondi",
+          "what": "Dix sources ou plus en deux passes de recherche, et un rapport complet."
+        }
+      },
+      "templates": {
+        "found": "{count} agent(s) prêts font déjà cela",
+        "use": "Utiliser celui-ci — {credits} crédits",
+        "buildNew": "En créer un nouveau — {credits} crédits",
+        "adopted": "Agent créé, surveille : {subject}",
+        "adoptError": "Ce modèle n'a pas pu être utilisé. Rien n'a été créé."
+      },
+      "share": {
+        "open": "Partager la structure de cet agent",
+        "title": "Partager comme modèle",
+        "explainer": "Seule la structure est publiée : la tâche avec votre sujet remplacé par un emplacement, plus la planification et la profondeur. Jamais le nom de l'agent, votre e-mail, ni la destination.",
+        "subjectLabel": "Quels mots de la tâche vous sont propres ?",
+        "subjectPlaceholder": "ex. Acme SARL",
+        "titleLabel": "Titre pour la bibliothèque",
+        "descriptionLabel": "Une phrase qui le décrit",
+        "previewLabel": "Ce qui sera publié",
+        "shareButton": "Partager",
+        "sharing": "Partage...",
+        "cancel": "Annuler",
+        "shared": "Partagé. Vous pouvez le retirer à tout moment.",
+        "failed": "Le partage a échoué. Rien n'a été publié.",
+        "slotNote": "Celui qui l'utilise remplit {slot} avec son propre sujet.",
+        "refused": {
+          "no_slot": "Écrivez les mots qui vous sont propres : ce sont eux qui sont remplacés et qui ne quittent jamais votre compte.",
+          "subject_still_present": "Cette formulation apparaît encore ailleurs dans la tâche, écrite autrement. Modifiez d'abord la tâche.",
+          "contains_contact_details": "La tâche contient une adresse e-mail, un lien ou un @pseudo. Retirez-le avant de partager.",
+          "contains_numbers": "La tâche contient un long nombre — un téléphone, un compte ou une référence. Retirez-le.",
+          "too_short": "Ce qu'il reste est trop court pour aider quiconque.",
+          "too_long": "Cette tâche est trop longue à partager."
+        }
       }
     },
     "publishing": {

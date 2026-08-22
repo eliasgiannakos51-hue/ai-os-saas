@@ -245,6 +245,19 @@ export const ACTION_PROFILES = {
   // Anthropic bills those per query rather than per token. The unused
   // remainder is released at settlement, so over-holding costs the user
   // nothing.
+  // THREE PROFILES, ONE PER DEPTH TIER (lib/agents/agent-depth.ts).
+  //
+  // `agentRun` was one profile because every agent ran identically. It
+  // still exists, unchanged, and is still what an agent with no depth
+  // recorded is priced at — which is correct, because the standard tier
+  // IS what those agents do.
+  //
+  // Each number below is read off the tier's real caps rather than
+  // chosen: the auxiliary call is that tier's research pass at its
+  // research-token ceiling, there is one per research round, and
+  // baseOutputChars is the tier's output ceiling in characters
+  // (outputTokens x CHARS_PER_TOKEN). A profile tuned to hit a price
+  // instead would be a hold that does not cover what the run does.
   agentRun: {
     systemPromptTokens: 800,
     auxiliaryCalls: [{ inputTokens: 900, outputTokens: 900 }],
@@ -253,6 +266,43 @@ export const ACTION_PROFILES = {
     // for the same reason as websiteGenerate's baseOutputChars.
     baseOutputChars: 12000,
     outputCharsPerInputChar: 2,
+  },
+  // simple: 1 research pass at 1,500 tokens, 1,500-token answer.
+  agentRunSimple: {
+    systemPromptTokens: 800,
+    auxiliaryCalls: [{ inputTokens: 400, outputTokens: 1500 }],
+    baseOutputChars: 6000,
+    outputCharsPerInputChar: 2,
+  },
+  // standard: 1 research pass at 1,500 tokens, 3,000-token answer.
+  agentRunStandard: {
+    systemPromptTokens: 800,
+    auxiliaryCalls: [{ inputTokens: 400, outputTokens: 1500 }],
+    baseOutputChars: 12000,
+    outputCharsPerInputChar: 2,
+  },
+  // deep: TWO research passes at 2,500 tokens each — the second is given
+  // the first's findings, which is why its input allowance is larger —
+  // and a 4,000-token answer.
+  agentRunDeep: {
+    systemPromptTokens: 1000,
+    auxiliaryCalls: [
+      { inputTokens: 600, outputTokens: 2500 },
+      { inputTokens: 900, outputTokens: 2500 },
+    ],
+    baseOutputChars: 16000,
+    outputCharsPerInputChar: 2,
+  },
+  // Filling a TEMPLATE's slots from the user's own sentence
+  // (api/agents/templates/adopt). One small call on the smallest model:
+  // read a request and a pattern, return the subject and a name. This is
+  // what makes "use this one" genuinely cheaper than "build a new one"
+  // rather than merely priced as if it were.
+  agentTemplateFill: {
+    systemPromptTokens: 500,
+    auxiliaryCalls: [],
+    baseOutputChars: 600,
+    outputCharsPerInputChar: 0,
   },
   // Ask AI about a record (api/records/ask). The user's question is
   // short; the INPUT is dominated by the record itself, which the route

@@ -224,6 +224,15 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   automationCreate: "automation_run",
   agentBuild: "agent_build",
   agentRun: "agent_run",
+  // The three depth tiers settle under the SAME feature as the untiered
+  // profile, so CREDIT_MARGIN_AGENT_RUN still governs all of them — a
+  // per-tier margin key would let one tier quietly drop below the floor
+  // while the feature it belongs to looked configured.
+  agentRunSimple: "agent_run",
+  agentRunStandard: "agent_run",
+  agentRunDeep: "agent_run",
+  // Adopting a template is a build, not a run: it produces an agent.
+  agentTemplateFill: "agent_build",
   recordAsk: "ask_ai_record",
   textAction: "text_action",
   weeklyReflection: "weekly_reflection",

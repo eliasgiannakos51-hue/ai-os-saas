@@ -432,12 +432,12 @@ if (!DB) {
   // migration touches no new table, so that one didn't move this number;
   // 20260814's delivery-channels migration is what took 70 to 72;
   // 20260823's cost_alert_log took 72 to 73; 20260824's search_index
-  // took 73 to 74). It
+  // took 73 to 74; 20260826's agent_templates took 74 to 75). It
   // stayed 70 through two migrations that changed it, in two different
   // files, which is exactly the failure a ratchet exists to prevent and
   // exactly what a fresh count on every run below stops from happening
   // again silently.
-  check(`74 tables`, tables === 74, `got ${tables}`);
+  check(`75 tables`, tables === 75, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 
@@ -545,6 +545,20 @@ if (!DB) {
     "immutable_unaccent",
     "search_all",
     "search_query",
+    // match_agent_templates is how a signed-in browser finds a ready-made
+    // agent. SECURITY INVOKER, so the agent_templates select policy is
+    // what scopes it — and that policy already lets every signed-in user
+    // read every template, because a library nobody can read is not one.
+    "match_agent_templates",
+    // immutable_join is a pure array_to_string wrapper, needed only
+    // because the built-in is STABLE and a generated column requires
+    // IMMUTABLE. It reads nothing, touches no table, and is granted
+    // because the generated column on agent_templates is evaluated in
+    // the caller's context. Same reasoning as immutable_unaccent above.
+    "immutable_join",
+    // NOT record_template_use: it is SECURITY DEFINER and writes to a
+    // table nobody may update, so it is service_role only and must stay
+    // off this list.
   ];
   const unexpected = leaky
     ? leaky.split(", ").filter((s) => !ALLOWED.some((a) => s.startsWith(`${a}(`)))

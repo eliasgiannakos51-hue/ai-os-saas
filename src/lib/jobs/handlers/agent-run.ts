@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { executeAgent } from "@/lib/agents/execute-agent";
+import { isAgentDepth } from "@/lib/agents/agent-depth";
 import { JOB_STEPS } from "@/lib/jobs/job-types";
 import type { JobContext, JobHandler, JobHandlerResult } from "@/lib/jobs/run-job";
 import type { UserAgent } from "@/lib/agents/agent-config";
@@ -51,12 +52,19 @@ export const agentRunHandler: JobHandler = async (ctx: JobContext): Promise<JobH
 
   await ctx.progress(2, steps[1]);
 
+  // RE-VALIDATED HERE TOO. The job input is a jsonb column: it was
+  // written by the route, but it is read back by a worker that has no
+  // idea what wrote it, and this value chooses a model and a search
+  // budget. isAgentDepth is cheap; an unrecognised string reaching
+  // AGENT_DEPTH_SPECS is not.
+  const rawDepth = ctx.input.depth;
   const result = await executeAgent({
     admin,
     user: userData.user,
     agent,
     triggerSource: "manual",
     apiKey: ctx.apiKey,
+    ...(isAgentDepth(rawDepth) ? { depthOverride: rawDepth } : {}),
   });
 
   await ctx.progress(3, steps[2]);

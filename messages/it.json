@@ -1481,6 +1481,57 @@
         "stepNoSearch": "Lavora solo sul testo del compito, senza ricerca web.",
         "stepWrite": "Scrive il risultato e lo verifica con quanto ha trovato.",
         "stepDeliver": "Lo invia via e-mail a {target}, {when}."
+      },
+      "depth": {
+        "legend": "Quanto lavora",
+        "perRun": "per esecuzione",
+        "suggested": "Suggerito",
+        "facts": "{sources} fonti · {steps} passaggi · circa {seconds}s",
+        "runOnce": "Esegui una volta come",
+        "runOnceHint": "Solo questa esecuzione. La pianificazione resta su {depth}.",
+        "simple": {
+          "title": "Semplice",
+          "what": "Una fonte, risposta breve. Per una domanda con una sola risposta giusta."
+        },
+        "standard": {
+          "title": "Standard",
+          "what": "Alcune fonti, verificate a incrocio. Giusto per la maggior parte dei monitoraggi."
+        },
+        "deep": {
+          "title": "Approfondito",
+          "what": "Dieci o più fonti in due giri di ricerca, e un rapporto completo."
+        }
+      },
+      "templates": {
+        "found": "{count} agenti pronti fanno già questo",
+        "use": "Usa questo — {credits} crediti",
+        "buildNew": "Creane uno nuovo — {credits} crediti",
+        "adopted": "Agente creato, osserva: {subject}",
+        "adoptError": "Non è stato possibile usare quel modello. Non è stato creato nulla."
+      },
+      "share": {
+        "open": "Condividi la struttura di questo agente",
+        "title": "Condividi come modello",
+        "explainer": "Viene pubblicata solo la struttura: il compito con il tuo argomento sostituito da uno spazio, più pianificazione e profondità. Mai il nome dell'agente, la tua email o la destinazione.",
+        "subjectLabel": "Quali parole del compito sono specifiche tue?",
+        "subjectPlaceholder": "es. Acme Srl",
+        "titleLabel": "Titolo per la libreria",
+        "descriptionLabel": "Una frase che lo descrive",
+        "previewLabel": "Cosa verrà pubblicato",
+        "shareButton": "Condividi",
+        "sharing": "Condivisione...",
+        "cancel": "Annulla",
+        "shared": "Condiviso. Puoi ritirarlo quando vuoi.",
+        "failed": "Non è stato possibile condividere. Non è stato pubblicato nulla.",
+        "slotNote": "Chi lo usa riempie {slot} con il proprio argomento.",
+        "refused": {
+          "no_slot": "Scrivi le parole che sono tue: sono quelle sostituite e quelle che non lasciano mai il tuo account.",
+          "subject_still_present": "Quella formulazione compare ancora altrove nel compito, scritta diversamente. Modifica prima il compito.",
+          "contains_contact_details": "Il compito contiene un'email, un link o un @handle. Rimuovilo prima di condividere.",
+          "contains_numbers": "Il compito contiene un numero lungo — telefono, conto o riferimento. Rimuovilo.",
+          "too_short": "Quel che resta è troppo breve per essere utile ad altri.",
+          "too_long": "Quel compito è troppo lungo da condividere."
+        }
       }
     },
     "publishing": {

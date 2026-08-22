@@ -1481,6 +1481,57 @@
         "stepNoSearch": "Trabaja solo con el texto de la tarea, sin búsqueda web.",
         "stepWrite": "Redacta el resultado y lo contrasta con lo que ha encontrado.",
         "stepDeliver": "Lo envía por correo a {target}, {when}."
+      },
+      "depth": {
+        "legend": "Cuánto trabaja",
+        "perRun": "por ejecución",
+        "suggested": "Sugerido",
+        "facts": "{sources} fuentes · {steps} pasos · unos {seconds}s",
+        "runOnce": "Ejecutar una vez en",
+        "runOnceHint": "Solo esta ejecución. El calendario sigue usando {depth}.",
+        "simple": {
+          "title": "Simple",
+          "what": "Una fuente, respuesta breve. Para una pregunta con una sola respuesta correcta."
+        },
+        "standard": {
+          "title": "Estándar",
+          "what": "Varias fuentes contrastadas. Lo adecuado para la mayoría de informes y seguimientos."
+        },
+        "deep": {
+          "title": "Profundo",
+          "what": "Diez o más fuentes en dos rondas de investigación, e informe completo."
+        }
+      },
+      "templates": {
+        "found": "{count} agente(s) ya hacen esto",
+        "use": "Usar este — {credits} créditos",
+        "buildNew": "Crear uno nuevo — {credits} créditos",
+        "adopted": "Agente creado, vigilando: {subject}",
+        "adoptError": "No se pudo usar esa plantilla. No se creó nada."
+      },
+      "share": {
+        "open": "Compartir la estructura de este agente",
+        "title": "Compartir como plantilla",
+        "explainer": "Solo se publica la estructura: la tarea con tu asunto sustituido por un hueco, más el calendario y la profundidad. Nunca el nombre del agente, tu correo, ni adónde envía.",
+        "subjectLabel": "¿Qué palabras de la tarea son específicas tuyas?",
+        "subjectPlaceholder": "p. ej. Acme S.L.",
+        "titleLabel": "Título para la biblioteca",
+        "descriptionLabel": "Una frase que lo describa",
+        "previewLabel": "Lo que se publicará",
+        "shareButton": "Compartir",
+        "sharing": "Compartiendo...",
+        "cancel": "Cancelar",
+        "shared": "Compartido. Puedes retirarlo cuando quieras.",
+        "failed": "No se pudo compartir. No se publicó nada.",
+        "slotNote": "Quien la use rellena {slot} con su propio asunto.",
+        "refused": {
+          "no_slot": "Escribe las palabras que son tuyas: son las que se sustituyen y las que nunca salen de tu cuenta.",
+          "subject_still_present": "Esa expresión sigue apareciendo en la tarea, escrita de otra forma. Edita la tarea primero.",
+          "contains_contact_details": "La tarea contiene un correo, un enlace o un @usuario. Quítalo antes de compartir.",
+          "contains_numbers": "La tarea contiene un número largo: un teléfono, una cuenta o una referencia. Quítalo.",
+          "too_short": "Lo que queda es demasiado corto para servirle a nadie.",
+          "too_long": "Esa tarea es demasiado larga para compartirla."
+        }
       }
     },
     "publishing": {

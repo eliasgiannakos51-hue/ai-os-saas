@@ -1481,6 +1481,57 @@
         "stepNoSearch": "Arbeitet allein mit dem Aufgabentext — ohne Websuche.",
         "stepWrite": "Schreibt das Ergebnis und gleicht es mit dem Gefundenen ab.",
         "stepDeliver": "Schickt es per E-Mail an {target}, {when}."
+      },
+      "depth": {
+        "legend": "Wie gründlich",
+        "perRun": "pro Lauf",
+        "suggested": "Vorgeschlagen",
+        "facts": "{sources} Quellen · {steps} Schritte · etwa {seconds}s",
+        "runOnce": "Einmal ausführen als",
+        "runOnceHint": "Nur dieser Lauf. Der Zeitplan bleibt bei {depth}.",
+        "simple": {
+          "title": "Einfach",
+          "what": "Eine Quelle, kurze Antwort. Für eine Frage mit genau einer richtigen Antwort."
+        },
+        "standard": {
+          "title": "Standard",
+          "what": "Einige Quellen, gegengeprüft. Richtig für die meisten Briefings und Beobachtungen."
+        },
+        "deep": {
+          "title": "Tief",
+          "what": "Zehn und mehr Quellen in zwei Rechercheläufen, plus vollständiger Bericht."
+        }
+      },
+      "templates": {
+        "found": "{count} fertige Agenten machen das bereits",
+        "use": "Diesen nehmen — {credits} Credits",
+        "buildNew": "Neuen bauen — {credits} Credits",
+        "adopted": "Agent erstellt, beobachtet: {subject}",
+        "adoptError": "Diese Vorlage konnte nicht verwendet werden. Es wurde nichts erstellt."
+      },
+      "share": {
+        "open": "Struktur dieses Agenten teilen",
+        "title": "Als Vorlage teilen",
+        "explainer": "Veröffentlicht wird nur die Struktur: die Aufgabe mit Ihrem Thema als Platzhalter, dazu Zeitplan und Tiefe. Nie der Name des Agenten, Ihre E-Mail oder das Ziel.",
+        "subjectLabel": "Welche Wörter in der Aufgabe sind speziell Ihre?",
+        "subjectPlaceholder": "z. B. Acme GmbH",
+        "titleLabel": "Titel für die Bibliothek",
+        "descriptionLabel": "Ein Satz zur Beschreibung",
+        "previewLabel": "Was veröffentlicht wird",
+        "shareButton": "Teilen",
+        "sharing": "Wird geteilt...",
+        "cancel": "Abbrechen",
+        "shared": "Geteilt. Sie können es jederzeit zurückziehen.",
+        "failed": "Konnte nicht geteilt werden. Es wurde nichts veröffentlicht.",
+        "slotNote": "Wer sie nutzt, füllt {slot} mit dem eigenen Thema.",
+        "refused": {
+          "no_slot": "Schreiben Sie die Wörter, die Ihre sind — genau sie werden ersetzt und verlassen Ihr Konto nie.",
+          "subject_still_present": "Diese Formulierung steht noch an anderer Stelle in der Aufgabe, anders geschrieben. Bearbeiten Sie zuerst die Aufgabe.",
+          "contains_contact_details": "Die Aufgabe enthält eine E-Mail-Adresse, einen Link oder ein @Handle. Entfernen Sie es vor dem Teilen.",
+          "contains_numbers": "Die Aufgabe enthält eine lange Zahl — Telefon, Konto oder Referenz. Entfernen Sie sie.",
+          "too_short": "Was übrig bleibt, ist zu kurz, um jemandem zu helfen.",
+          "too_long": "Diese Aufgabe ist zu lang zum Teilen."
+        }
       }
     },
     "publishing": {

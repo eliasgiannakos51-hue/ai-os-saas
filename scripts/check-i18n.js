@@ -46,6 +46,17 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // Agent depth tiers (V4 #21). "Simple" is the Spanish and French word;
+  // "Standard" is the French, German and Italian one. Checked against the
+  // rest of the same block, which DOES differ in every one of those
+  // languages (Profundo/Approfondi/Tief/Approfondito, and Greek
+  // Απλό/Κανονικό/Βαθύ), so these are cognates rather than a locale
+  // somebody skipped.
+  "es:dashboard.agents.depth.simple.title",
+  "fr:dashboard.agents.depth.simple.title",
+  "fr:dashboard.agents.depth.standard.title",
+  "de:dashboard.agents.depth.standard.title",
+  "it:dashboard.agents.depth.standard.title",
   // Form submissions (V4 #4). Two coincidences, both checked by hand:
   //
   //   "Newsletter" is the word Greek, German, Italian and Portuguese all

@@ -636,7 +636,27 @@ const clientFallbacks = sources.flatMap((f) => [
 // workspace fails open on anything that is not a usable figure, because
 // this gates an upload and a storage hiccup must not stop somebody
 // adding a photograph to their own site. Nobody reads this sentence.
-const SERVER_PROSE_BASELINE = 552;
+// 552 -> 575, from three new agent-template routes (V4 #22): the
+// matcher, adopt, and share. Twenty-three strings, and here is what they
+// actually are rather than a round number waved through:
+//
+//   THE ONES A USER READS AND ACTS ON ARE NOT AMONG THEM. The share
+//   refusals — "that wording still appears in the task", "remove the
+//   email address" — are the sentences that tell somebody how to fix
+//   their share, so the route returns a CODE and the component looks up
+//   dashboard.agents.share.refused.<code> in all ten locales. What is
+//   left in the route under those codes is a short English fallback for
+//   a client that does not know the code.
+//
+//   THE REST are the standard replies every other route here already
+//   returns — "Not authenticated.", "Invalid request body.", "Something
+//   went wrong." — plus a handful of states a user cannot reach without
+//   a broken client ("Missing template.", "That template no longer
+//   exists.").
+//
+// Raised rather than suppressed, and raised by exactly the number added,
+// so the next route that grows this without saying why still fails.
+const SERVER_PROSE_BASELINE = 575;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

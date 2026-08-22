@@ -11,6 +11,7 @@ import {
   type DeliveryOwnership,
 } from "@/lib/agents/delivery-channels";
 import { INJECTION_PATTERNS } from "@/lib/agents/injection-patterns";
+import { parseAgentDepth, type AgentDepth } from "@/lib/agents/agent-depth";
 import { foldForMatch } from "@/lib/text/unicode-patterns";
 
 // Shape, validation and prompt-injection defence for Autonomous Agents.
@@ -54,6 +55,16 @@ export type AgentConfigJson = {
    *  the builder, editable by the user, and the single thing that makes a
    *  run expensive — so it is explicit rather than inferred per run. */
   needsWebSearch: boolean;
+  /**
+   * How hard this agent works, and therefore what it costs — the model,
+   * the search budget, the number of research passes and the length of
+   * the answer. See lib/agents/agent-depth.ts.
+   *
+   * OPTIONAL ON THE TYPE, mandatory in behaviour: normaliseAgentConfig
+   * always returns one, and an agent created before this field existed
+   * resolves to `standard`, which is exactly what it was already doing.
+   */
+  depth?: AgentDepth;
   outputFormat: AgentOutputFormat;
   /** BCP-47-ish tag of the language the result should be written in —
    *  taken from the language the user wrote their request in, so a Greek
@@ -136,6 +147,9 @@ export function normaliseAgentConfig(raw: Partial<AgentConfigJson> | null | unde
   const source = raw ?? {};
   return {
     needsWebSearch: source.needsWebSearch === true,
+    // Never absent after this, and never an unrecognised string: the
+    // runner indexes AGENT_DEPTH_SPECS with it.
+    depth: parseAgentDepth(source.depth),
     outputFormat: isAgentOutputFormat(source.outputFormat) ? source.outputFormat : "summary",
     language:
       typeof source.language === "string" && source.language.trim()
@@ -380,6 +394,13 @@ export function validateAgentDraft(
   const rawConfig = (draft.config ?? {}) as Partial<AgentConfigJson>;
   const config: AgentConfigJson = {
     needsWebSearch: rawConfig.needsWebSearch === true,
+    // NOT AN ISSUE WHEN IT IS WRONG, a fallback to standard. Every other
+    // field here that a user can get wrong is something they typed; the
+    // depth arrives from a picker whose options are the only three that
+    // exist, so an unrecognised value is a malformed request rather than
+    // a mistake to explain — and refusing the whole save over it would
+    // lose the edits beside it.
+    depth: parseAgentDepth(rawConfig.depth),
     outputFormat: isAgentOutputFormat(rawConfig.outputFormat) ? rawConfig.outputFormat : "summary",
     language:
       typeof rawConfig.language === "string" && rawConfig.language.trim()

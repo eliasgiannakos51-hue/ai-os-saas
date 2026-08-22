@@ -1481,6 +1481,57 @@
         "stepNoSearch": "Works from the task text alone — no web search.",
         "stepWrite": "Writes the result and checks it against what it found.",
         "stepDeliver": "Emails it to {target}, {when}."
+      },
+      "depth": {
+        "legend": "How hard it works",
+        "perRun": "per run",
+        "suggested": "Suggested",
+        "facts": "{sources} sources · {steps} steps · about {seconds}s",
+        "runOnce": "Run once at",
+        "runOnceHint": "Only this run. The schedule keeps using {depth}.",
+        "simple": {
+          "title": "Simple",
+          "what": "One source, a short answer. For a question with one right answer."
+        },
+        "standard": {
+          "title": "Standard",
+          "what": "A handful of sources, cross-checked. Right for most briefings and watches."
+        },
+        "deep": {
+          "title": "Deep",
+          "what": "Ten-plus sources over two research passes, and a full report."
+        }
+      },
+      "templates": {
+        "found": "{count} ready-made agent(s) already do this",
+        "use": "Use this one — {credits} credits",
+        "buildNew": "Build a new one — {credits} credits",
+        "adopted": "Agent created, watching: {subject}",
+        "adoptError": "That template could not be used. Nothing was created."
+      },
+      "share": {
+        "open": "Share this agent's shape",
+        "title": "Share as a template",
+        "explainer": "Only the structure is published: the task with your own subject replaced by a slot, plus the schedule and the depth. Never the agent's name, your email, or where it sends.",
+        "subjectLabel": "Which words in the task are specific to you?",
+        "subjectPlaceholder": "e.g. Acme Ltd",
+        "titleLabel": "Title for the library",
+        "descriptionLabel": "One sentence describing it",
+        "previewLabel": "What will be published",
+        "shareButton": "Share it",
+        "sharing": "Sharing...",
+        "cancel": "Cancel",
+        "shared": "Shared. You can withdraw it at any time.",
+        "failed": "That could not be shared. Nothing was published.",
+        "slotNote": "Whoever uses it fills {slot} with their own subject.",
+        "refused": {
+          "no_slot": "Type the words that are specific to you — they are what gets replaced, and what never leaves your account.",
+          "subject_still_present": "That wording still appears elsewhere in the task, spelled differently. Edit the task first.",
+          "contains_contact_details": "The task contains an email address, a link or an @handle. Remove it before sharing.",
+          "contains_numbers": "The task contains a long number — a phone, an account or a reference. Remove it before sharing.",
+          "too_short": "What is left is too short to help anybody else.",
+          "too_long": "That task is too long to share."
+        }
       }
     },
     "publishing": {

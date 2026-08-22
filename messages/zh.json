@@ -1481,6 +1481,57 @@
         "stepNoSearch": "仅根据任务文本工作，不进行网络搜索。",
         "stepWrite": "撰写结果，并与查到的内容核对。",
         "stepDeliver": "{when}，通过电子邮件发送到 {target}。"
+      },
+      "depth": {
+        "legend": "工作深度",
+        "perRun": "每次运行",
+        "suggested": "推荐",
+        "facts": "{sources} 个来源 · {steps} 步 · 约 {seconds} 秒",
+        "runOnce": "仅这次运行使用",
+        "runOnceHint": "只影响这一次。定时任务仍使用{depth}。",
+        "simple": {
+          "title": "简单",
+          "what": "一个来源，简短回答。适合只有一个正确答案的问题。"
+        },
+        "standard": {
+          "title": "标准",
+          "what": "若干来源交叉核对。适合大多数简报和监控。"
+        },
+        "deep": {
+          "title": "深入",
+          "what": "两轮检索、十个以上来源，外加完整报告。"
+        }
+      },
+      "templates": {
+        "found": "已有 {count} 个现成智能体在做这件事",
+        "use": "用这个 — {credits} 积分",
+        "buildNew": "新建一个 — {credits} 积分",
+        "adopted": "智能体已创建，关注：{subject}",
+        "adoptError": "无法使用该模板。没有创建任何内容。"
+      },
+      "share": {
+        "open": "分享这个智能体的结构",
+        "title": "作为模板分享",
+        "explainer": "只发布结构：把你的主题换成占位符后的任务，以及排程和深度。绝不包含智能体名称、你的邮箱或发送目标。",
+        "subjectLabel": "任务里哪些词是你特有的？",
+        "subjectPlaceholder": "例如：Acme 公司",
+        "titleLabel": "在模板库中的标题",
+        "descriptionLabel": "一句话描述",
+        "previewLabel": "将要发布的内容",
+        "shareButton": "分享",
+        "sharing": "分享中...",
+        "cancel": "取消",
+        "shared": "已分享。你随时可以撤回。",
+        "failed": "分享失败，没有发布任何内容。",
+        "slotNote": "使用的人会把 {slot} 填成自己的主题。",
+        "refused": {
+          "no_slot": "写出属于你的词——被替换的正是它们，它们不会离开你的账户。",
+          "subject_still_present": "这个说法在任务的其他地方仍然出现，只是写法不同。请先修改任务。",
+          "contains_contact_details": "任务里含有邮箱、链接或 @用户名。分享前请删除。",
+          "contains_numbers": "任务里含有长数字——电话、账号或参考编号。请删除。",
+          "too_short": "剩下的内容太短，对别人没有帮助。",
+          "too_long": "这个任务太长，无法作为模板分享。"
+        }
       }
     },
     "publishing": {

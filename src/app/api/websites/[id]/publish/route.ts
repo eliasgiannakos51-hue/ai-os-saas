@@ -10,8 +10,16 @@ import {
   stripDisallowedExternalScripts,
   describeSecurityScanIssue,
 } from "@/lib/website-html-security-scan";
-import { validateSubdomain, publishedSiteUrl, SUBDOMAIN_TOKEN } from "@/lib/publishing/subdomain";
+import {
+  validateSubdomain,
+  publishedSiteUrl,
+  publishedSiteBasePath,
+  SUBDOMAIN_TOKEN,
+} from "@/lib/publishing/subdomain";
 import { makeGeneratedLinksSafe } from "@/lib/website-link-safety";
+import { enforceSeoHead } from "@/lib/seo/head";
+import { enforceImageAltText } from "@/lib/seo/alt-text";
+import { siteNap } from "@/lib/seo/nap";
 import {
   maxPublishedSitesForPlan,
   MAX_SITE_VERSIONS,
@@ -242,18 +250,34 @@ export async function POST(request: Request, { params }: { params: { id: string 
     // 3.28ms on a 135KB document — negligible once, wasteful on every
     // uncached page view of a popular site. It is idempotent, so paying it
     // again on republish costs nothing.
-    const html = makeGeneratedLinksSafe(stripDisallowedExternalScripts(website.html_content)).html;
+    //
+    // THE PAGE LINKS ARE RESOLVED HERE, and only here, because this is
+    // the first moment the site's address is known. The model writes the
+    // nav relative (href="about"), which is right on a sub-page and
+    // WRONG on the home page: /s/acme has no trailing slash, so a
+    // browser resolves "about" against /s/ and drops the site. Publishing
+    // rewrites them to absolute paths under the site's own base — which
+    // also means a site keeps working after its address changes, since
+    // this runs again on every publish.
+    const { pages: draftPages } = normalisePages(website.pages);
+    const siteContext = {
+      pageSlugs: draftPages.map((pg) => pg.slug),
+      basePath: publishedSiteBasePath(subdomain),
+    };
+    const html = makeGeneratedLinksSafe(
+      stripDisallowedExternalScripts(website.html_content),
+      siteContext
+    ).html;
     // THE SAME TREATMENT FOR EVERY PAGE, and the same scan. published_sites
     // is a SNAPSHOT — /s/<subdomain> reads it, not user_websites — so a
     // page that is not copied here is a navigation link to a 404, and a
     // page copied without this pass is a page that skipped the checks its
     // home page passed.
-    const { pages: draftPages } = normalisePages(website.pages);
-    const publishedPages = draftPages.map((pg) => ({
+    const safePages = draftPages.map((pg) => ({
       ...pg,
-      html: makeGeneratedLinksSafe(stripDisallowedExternalScripts(pg.html)).html,
+      html: makeGeneratedLinksSafe(stripDisallowedExternalScripts(pg.html), siteContext).html,
     }));
-    const issues = [html, ...publishedPages.map((pg) => pg.html)].flatMap((doc) =>
+    const issues = [html, ...safePages.map((pg) => pg.html)].flatMap((doc) =>
       scanWebsiteHtmlForSecurityIssues(doc)
     );
     if (issues.length > 0) {
@@ -274,6 +298,65 @@ export async function POST(request: Request, { params }: { params: { id: string 
         { status: 422 }
       );
     }
+
+    // ---------------------------------------------------------------
+    // THE HALF OF SEO THAT NEEDS AN ADDRESS.
+    //
+    // Generation already wrote the title, the description, the alt text
+    // and the schema that depend only on the page. Everything below
+    // depends on WHERE the site lives, which is not known until this
+    // moment — and changes when the owner changes their address, which
+    // is why it is redone on every publish rather than baked in once.
+    // Getting it wrong is not visible on the page: a canonical URL
+    // pointing at a previous address tells a search engine that the live
+    // site is a copy of one that no longer exists.
+    //
+    // NAP FIRST, so every page's structured data gives ONE name, address
+    // and phone (lib/seo/nap.ts). A multi-page site is the first time
+    // this could go wrong here: four documents written in one turn agree
+    // by luck, not by construction.
+    const siteBaseUrl = publishedSiteUrl(subdomain, getSiteUrl(), process.env.PUBLISHED_SITE_DOMAIN);
+    const napReport = siteNap([
+      { label: "home", html },
+      ...safePages.map((pg) => ({ label: pg.slug, html: pg.html })),
+    ]);
+    if (napReport.disagreements.length > 0) {
+      // Reported, never rewritten: the visible text is the owner's, and
+      // silently editing a customer's contact details is worse than the
+      // inconsistency. The schema uses the home page's answer.
+      logApiError(
+        "/api/websites/[id]/publish",
+        new Error(`${napReport.disagreements.length} page(s) state a different name, address or phone`),
+        {
+          websiteId,
+          subdomain,
+          detail: napReport.disagreements
+            .map((d) => `${d.page}:${d.field} "${d.page_value}" vs home "${d.home}"`)
+            .join(" | ")
+            .slice(0, 400),
+        }
+      );
+    }
+
+    const homeCrumb = { name: napReport.nap.name ?? subdomain, url: siteBaseUrl };
+    const seoFor = (doc: string, pageUrl: string, crumbs: { name: string; url: string }[]) =>
+      enforceSeoHead(enforceImageAltText(doc).html, {
+        canonicalUrl: pageUrl,
+        siteUrl: siteBaseUrl,
+        siteName: napReport.nap.name ?? null,
+        breadcrumb: crumbs,
+        nap: napReport.nap,
+      }).html;
+
+    const publishedHtml = seoFor(html, siteBaseUrl, []);
+    const publishedPages = safePages.map((pg) => ({
+      ...pg,
+      html: seoFor(pg.html, `${siteBaseUrl.replace(/\/+$/, "")}/${pg.slug}`, [
+        homeCrumb,
+        { name: pg.label, url: `${siteBaseUrl.replace(/\/+$/, "")}/${pg.slug}` },
+      ]),
+    }));
+    // ---------------------------------------------------------------
 
     const nowIso = new Date().toISOString();
     let publishedSiteId: string;
@@ -296,7 +379,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         .from("published_sites")
         .update({
           subdomain,
-          html_content: html,
+          html_content: publishedHtml,
       pages: publishedPages.length > 0 ? publishedPages : null,
           status: "live",
           is_active: true,
@@ -324,7 +407,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
           website_id: websiteId,
           user_id: user.id,
           subdomain,
-          html_content: html,
+          html_content: publishedHtml,
       pages: publishedPages.length > 0 ? publishedPages : null,
           status: "live",
           is_active: true,
@@ -357,7 +440,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const { error: versionError } = await supabase.from("site_versions").insert({
       published_site_id: publishedSiteId,
       user_id: user.id,
-      html_content: html,
+      html_content: publishedHtml,
       pages: publishedPages.length > 0 ? publishedPages : null,
       version_number: versionNumber,
       change_description: changeDescription || null,

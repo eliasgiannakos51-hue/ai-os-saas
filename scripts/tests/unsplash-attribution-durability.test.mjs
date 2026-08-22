@@ -380,10 +380,44 @@ ok(
   "...and feeds each enforced document back",
   /cleaned\[i\] = attributions\[i\]\.html;/.test(generateRoute)
 );
+// THE WHOLE CHAIN, not its first link. Generation now runs
+// cleaned -> stripped -> optimised -> stored, and the old assertion
+// stopped at `stripped` — so a later stage could have dropped the credit
+// and this file would have stayed green while pointing at the stage that
+// added it.
 ok(
-  "...and what is stored comes from that array",
-  /const stripped = cleaned\.map\(/.test(generateRoute) && /htmlContent = stripped\[0\];/.test(generateRoute)
+  "...and what is stored comes from that array, through every stage after it",
+  /const stripped = cleaned\.map\(/.test(generateRoute) &&
+    /const optimised = stripped\.map\(/.test(generateRoute) &&
+    /htmlContent = optimised\[0\];/.test(generateRoute) &&
+    /html: optimised\[i \+ 1\]/.test(generateRoute)
 );
+
+// AND THE STAGES THEMSELVES DO NOT EAT THE CREDIT. Executed, because
+// "the pass runs afterwards" says nothing about what it does: the SEO
+// pass rewrites the <head> and touches every <img> on the page, which is
+// exactly where a credit and its data-unsplash-* provenance live.
+{
+  const seoHead = await loadTs("src/lib/seo/head.ts");
+  const altText = await loadTs("src/lib/seo/alt-text.ts");
+  const credited = `<!DOCTYPE html><html lang="en"><head><title>Acme</title></head><body>
+<h1>Acme</h1><p>${"A neighbourhood bakery. ".repeat(4)}</p>
+<img src="https://images.unsplash.com/photo-x" data-unsplash-photographer="Jo Ma" data-unsplash-profile="https://unsplash.com/@joma?utm_source=ionexa&amp;utm_medium=referral">
+<span class="unsplash-credit">Photo by <a href="https://unsplash.com/@joma?utm_source=ionexa&amp;utm_medium=referral">Jo Ma</a> on <a href="https://unsplash.com/?utm_source=ionexa&amp;utm_medium=referral">Unsplash</a></span>
+</body></html>`;
+  const after = seoHead.enforceSeoHead(altText.enforceImageAltText(credited).html, {
+    canonicalUrl: "https://x.test/s/acme",
+    siteUrl: "https://x.test/s/acme",
+    siteName: "Acme",
+  }).html;
+  ok("the credit element survives the SEO pass", /class="unsplash-credit"/.test(after));
+  ok("...with the photographer still named", /Jo Ma<\/a>/.test(after));
+  ok("...and both referral parameters intact",
+    (after.match(/utm_source=ionexa&amp;utm_medium=referral/g) ?? []).length >= 3,
+    String((after.match(/utm_source=ionexa&amp;utm_medium=referral/g) ?? []).length));
+  ok("...and the provenance attributes still on the <img>",
+    /data-unsplash-photographer="Jo Ma"/.test(after) && /data-unsplash-profile="/.test(after));
+}
 {
   const variable = "updatedHtml";
   ok("edit imports the enforcement pass", /enforceUnsplashAttribution/.test(editRoute));

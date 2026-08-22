@@ -36,6 +36,8 @@ import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } fro
 import { logApiError } from "@/lib/log-error";
 import { findInventedNumbers } from "@/lib/website-invented-numbers";
 import { normalisePages } from "@/lib/publishing/website-pages";
+import { enforceSeoHead } from "@/lib/seo/head";
+import { enforceImageAltText } from "@/lib/seo/alt-text";
 import { applyEditedDocument, resolveEditTarget, HOME_INDEX } from "@/lib/publishing/page-edit-target";
 
 export const dynamic = "force-dynamic";
@@ -321,7 +323,12 @@ export async function POST(request: Request) {
       // reintroduce <a href="/about"> just as easily as a fresh generation
       // can, and the result is the same — the customer's menu pointing at
       // our login page. See lib/website-link-safety.ts.
-      updatedHtml = makeGeneratedLinksSafe(updatedHtml).html;
+      // The site's OTHER pages, so an edit that touches the navigation
+      // does not flatten it — see the generate path for what happens
+      // without this. Still relative: publish resolves them.
+      updatedHtml = makeGeneratedLinksSafe(updatedHtml, {
+        pageSlugs: sitePages.map((pg) => pg.slug),
+      }).html;
 
       // THE PATH THIS EXISTS FOR. editWebsiteHtml returns a whole new
       // document, and a model rewriting a section routinely drops the
@@ -386,6 +393,25 @@ export async function POST(request: Request) {
           flagged: true,
           message: `This edit was blocked by our safety review and wasn't applied: ${allIssueDescriptions.join("; ")}. No credits were charged — your website is unchanged.`,
         });
+      }
+
+      // FINDABLE ON THE WEB, re-established after every edit.
+      //
+      // This is the path where SEO actually goes missing. An edit
+      // returns a WHOLE new document, and a model rewriting a section
+      // routinely drops the <meta name="description"> or the alt on a
+      // photo it kept — the same failure mode as the Unsplash credits
+      // above, with the same silence: the page looks identical and the
+      // search listing degrades weeks later. The prompt asks; this makes
+      // it true. Idempotent, so an edit that changed nothing about the
+      // head produces the same head.
+      //
+      // AFTER the safety review, so a rejected edit never had this work
+      // done on it, and so the review reads the model's document rather
+      // than ours.
+      {
+        const withAlt = enforceImageAltText(updatedHtml);
+        updatedHtml = enforceSeoHead(withAlt.html).html;
       }
     } catch (err) {
       logApiError("/api/websites/edit", err, { stage: "anthropic_call" });

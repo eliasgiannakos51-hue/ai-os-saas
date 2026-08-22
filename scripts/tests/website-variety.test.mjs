@@ -34,6 +34,7 @@
 //
 // Run: node scripts/tests/website-variety.test.mjs
 import { readFileSync } from "node:fs";
+import { loadTs } from "./load-ts.mjs";
 
 let pass = 0;
 const failures = [];
@@ -48,6 +49,13 @@ function check(name, cond, detail) {
 }
 
 const src = readFileSync("src/lib/website-builder.ts", "utf8");
+/** A prompt section that lives in its own module: called for real, so
+ *  what is measured is what the model is sent. */
+async function composed(file, exportName) {
+  const mod = await loadTs(file);
+  return String(mod[exportName]());
+}
+
 function section(name) {
   const start = src.indexOf(`const ${name} = \``);
   if (start < 0) return "";
@@ -312,11 +320,29 @@ const SECTIONS = [
   "PLACEHOLDER_DATA_SECTION",
   "FINAL_SELF_CHECK_SECTION",
 ];
+// THE SECTIONS THAT LIVE IN THEIR OWN FILES COUNT TOO.
+//
+// This list used to be the const declarations in website-builder.ts, and
+// it read as "the prompt". It was not: the multi-page section arrived in
+// its own module and the SEO section after it, both composed into the
+// same system prompt, and neither was measured. The ceiling was
+// therefore guarding a number that was smaller than the thing it was
+// guarding — the exact instrument failure this file exists to catch in
+// the prompt itself.
+const COMPOSED = [
+  ["multipageInstruction()", await composed("src/lib/website-multipage.ts", "multipageInstruction")],
+  ["seoInstruction()", await composed("src/lib/seo/prompt.ts", "seoInstruction")],
+];
 let total = 0;
 for (const name of SECTIONS) {
   const len = section(name).length;
   total += len;
   console.log(`        ${name.padEnd(30)} ${String(len).padStart(6)} chars`);
+}
+for (const [name, text] of COMPOSED) {
+  check(`${name} is actually composed into the system prompt`, src.includes(`\${${name}}`), name);
+  total += text.length;
+  console.log(`        ${name.padEnd(30)} ${String(text.length).padStart(6)} chars`);
 }
 console.log(`        ${"TOTAL (sections only)".padEnd(30)} ${String(total).padStart(6)} chars ~ ${Math.round(total / 4)} tokens`);
 check(

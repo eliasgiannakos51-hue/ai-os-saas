@@ -108,5 +108,5 @@ MULTIPLE PAGES
 - label: what the navigation link says, in the same language as the site.
 - EVERY page carries the SAME <style> block, the same header and the same footer. A visitor must not be able to tell that the pages were written separately.
 - The navigation appears on every page, links to every page, and marks the current one. Links are relative: href="about", and href="." for home.
-- Each page gets its OWN <title> and its own <meta name="description"> describing THAT page. Repeating the home page's title on every page is the single most common way a multi-page site is built wrong.`;
+- The per-page <title> and <meta name="description"> under SEO are not optional here: repeating the home page's title on every page is the commonest way a multi-page site is built wrong.`;
 }

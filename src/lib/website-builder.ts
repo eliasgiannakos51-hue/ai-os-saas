@@ -10,6 +10,7 @@ import { AI_SAFETY_BOUNDARIES_EN } from "@/lib/ai-conduct";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import type { CostAccumulator, CostStage } from "@/lib/billing/cost-accumulator";
 import { multipageInstruction } from "@/lib/website-multipage";
+import { seoInstruction } from "@/lib/seo/prompt";
 
 const MODEL = WEBSITE_BUILDER_MODEL;
 // Re-exported so the route's billing estimate prices the same model this
@@ -405,12 +406,10 @@ Rules for it:
 - Never copy an example from this prompt as your answer. There are no default values here.`;
 
 const FUNCTIONAL_ELEMENTS_SECTION = `
-INTERNAL LINKS — THIS PAGE IS THE WHOLE SITE:
-You are producing ONE single file. There is no /about page, no /contact page and no second file, so a link to one is a link to nothing.
-- Every link to another part of THIS site must be a fragment: <a href="#section-id">, pointing at an id that exists on this page.
-- NEVER write href="/about", href="/contact", href="about.html", href="./services" or href="/". A published site is served from a sub-path, so a browser resolves those against the hosting domain and the visitor LEAVES the site entirely — they land on a sign-in page belonging to someone else. This has happened on a real customer site.
-- A logo or "home" link goes to href="#" or to the id of the top section.
-- Give every section you link to a real id: <section id="rooms">, then <a href="#rooms">.
+INTERNAL LINKS — ONLY TWO FORMS ARE VALID:
+- To a SECTION of the page you are writing: a fragment, <a href="#rooms">, pointing at an id that exists there — so give every linked section a real id, <section id="rooms">.
+- To ANOTHER PAGE of this site: the bare slug of a page you actually wrote under MULTIPLE PAGES, <a href="about">; home is <a href=".">. One document means no other pages, so every internal link is a fragment and "home" is href="#".
+- NEVER href="/about", href="/contact", href="about.html" or href="/". A published site is served from a sub-path, so a browser resolves a leading slash against the hosting domain and the visitor LEAVES the site — onto a sign-in page belonging to someone else. This has happened on a real customer site.
 - Absolute links to OTHER people's sites are fine and often wanted — a Google Maps pin, a Facebook page, a booking platform. Write those in full, starting with https://.
 - tel:, mailto: and sms: links are not navigation; use them exactly as described below.
 
@@ -423,7 +422,7 @@ CONTACT DETAILS THAT WERE NOT GIVEN — SHOW A GAP, NEVER HIDE ONE:
 A visitor who cannot find a phone number does not become a customer, and a site owner who cannot see that the number is missing will never add it. So:
 - If no phone number was given, still build the place where it belongs and write a visible, obviously-unfinished placeholder in the language of the site — e.g. [Your phone number] / [Το τηλέφωνό σας]. Square brackets, always.
 - Same for a missing email, street address, opening hours or price list: a bracketed placeholder in the right position, never a section quietly dropped and never an invented value.
-- NEVER invent a phone number, an email address, a street address, a price, an opening time, a company registration number or a review. A plausible-looking fake is far worse than a visible gap: the owner ships it without noticing.
+- Never invent any of these (see DO NOT INVENT CRITICAL FACTS): a plausible-looking fake is far worse than a visible gap, because the owner ships it without noticing.
 - Do not wrap a placeholder in tel:/mailto: — leave it as plain bracketed text so it is obviously a blank to fill in.
 
 LOGO — NEVER INVENT ONE:
@@ -580,6 +579,7 @@ ${IMAGE_RULES_HEADER}
 ${WEB_SEARCH_SECTION}
 ${FUNCTIONAL_ELEMENTS_SECTION}
 ${PLACEHOLDER_DATA_SECTION}
+${seoInstruction()}
 ${FINAL_SELF_CHECK_SECTION}
 ${AI_SAFETY_BOUNDARIES_EN}${AI_QUALITY_CHECKLIST_EN}`;
 
@@ -904,6 +904,8 @@ ${IMAGE_RULES_HEADER}
 ${WEB_SEARCH_SECTION}
 ${FUNCTIONAL_ELEMENTS_SECTION}
 ${PLACEHOLDER_DATA_SECTION}
+${seoInstruction()}
+- THE SEO MARKUP IS NOT DECORATION EITHER. Every data-seo-* attribute, every <address>, every alt, every <details>/<summary> FAQ and every tel:/mailto: link in the current document is what this site's search listing and its map entry are built from. Carry them forward exactly unless the change is ABOUT them. A change to the phone number changes it in every place it appears, including data-seo-* — one page disagreeing with the others is what splits a business in two as far as a search engine is concerned.
 If the change request asks to add a photo, a font, an animation, contact info, or a form, apply the same rules above as if generating fresh — e.g. a newly-requested photo still uses the PLACEHOLDER convention (or a newly-attached reference image's real URL) rather than an invented link.
 ${FINAL_SELF_CHECK_SECTION}
 ${AI_SAFETY_BOUNDARIES_EN}${AI_QUALITY_CHECKLIST_EN}`;

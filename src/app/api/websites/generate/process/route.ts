@@ -33,6 +33,8 @@ import { getSiteUrl } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
 import { diagLog } from "@/lib/diag";
 import { splitGeneratedPages } from "@/lib/website-multipage";
+import { enforceSeoHead } from "@/lib/seo/head";
+import { enforceImageAltText } from "@/lib/seo/alt-text";
 import type { WebsitePage } from "@/lib/publishing/website-pages";
 
 export const dynamic = "force-dynamic";
@@ -425,7 +427,17 @@ export async function POST(request: Request) {
       // EVERY DOCUMENT, not just the first. `.map` rather than one call is
       // the difference between a four-page site being checked and a
       // four-page site having its front page checked.
-      const cleaned = documents.map((doc) => makeGeneratedLinksSafe(doc).html);
+      // THE SITE'S OWN PAGES ARE PASSED IN. Without them a nav link to
+      // another page of this site (href="about") is indistinguishable
+      // from the broken href="/about" this pass exists to catch, and was
+      // rewritten to "#" — the pages were generated, stored and served,
+      // and nothing linked to any of them. The links stay RELATIVE here:
+      // the address is not known until publish, which is where they are
+      // resolved to absolute paths.
+      const generatedSlugs = split.pages.map((pg) => pg.slug);
+      const cleaned = documents.map(
+        (doc) => makeGeneratedLinksSafe(doc, { pageSlugs: generatedSlugs }).html
+      );
 
       // Every Unsplash photo in the document we are about to store
       // carries its photographer. Generation already emits the credit, so
@@ -468,8 +480,29 @@ export async function POST(request: Request) {
       // single generation, unconditionally — this is not an opt-in
       // toggle.
       const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc));
-      htmlContent = stripped[0];
-      extraPages = split.pages.map((pg, i) => ({ ...pg, html: stripped[i + 1] }));
+
+      // FINDABLE ON THE WEB. The prompt asks for a real title, a real
+      // description and a real alt on every photo; this is what makes it
+      // TRUE, on every page and not just the home page. All of it is
+      // built from what the model actually wrote (lib/seo/facts.ts) —
+      // nothing here invents a fact, and a page that says nothing about
+      // its address gets no address in its schema.
+      //
+      // AFTER the security pass, deliberately: the JSON-LD this emits is
+      // ours, built and escaped by lib/seo/structured-data.ts, and
+      // running it through a scan for model-written scripts would be
+      // scanning our own output for someone else's mistake. BEFORE the
+      // store, because a document reaches four tables from here.
+      //
+      // The URL-dependent half — canonical, og:url, the breadcrumb — is
+      // NOT done here: the site has no address until it is published.
+      // See api/websites/[id]/publish.
+      const optimised = stripped.map((doc) => {
+        const withAlt = enforceImageAltText(doc);
+        return enforceSeoHead(withAlt.html).html;
+      });
+      htmlContent = optimised[0];
+      extraPages = split.pages.map((pg, i) => ({ ...pg, html: optimised[i + 1] }));
       const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc));
       // ONE AI CALL FOR THE WHOLE SITE, not one per page. The review reads
       // content for what a deterministic scan cannot see, and content is

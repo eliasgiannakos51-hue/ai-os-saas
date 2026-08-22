@@ -252,9 +252,29 @@ check("the sanitiser runs before the finished document is stored", sanitiseAt > 
 // Publish is the boundary that matters most: it is where HTML becomes a
 // public page, and it is the only place that can repair a site generated
 // before this fix existed.
+// FOLLOWED TO WHAT IS ACTUALLY STORED. Publishing gained a stage — the
+// address-dependent SEO pass — between sanitising and writing, so an
+// assertion that stopped at the sanitiser would go on passing while the
+// stored value came from somewhere else entirely.
 check(
-  "publish sanitises the exact value it stores",
-  /const html = makeGeneratedLinksSafe\(stripDisallowedExternalScripts\(website\.html_content\)\)\.html;/.test(publishRoute)
+  "publish sanitises the home document",
+  /const html = makeGeneratedLinksSafe\(\s*stripDisallowedExternalScripts\(website\.html_content\),\s*siteContext\s*\)\.html;/.test(publishRoute)
+);
+check(
+  "...and the value it stores is derived from it",
+  /const publishedHtml = seoFor\(html, siteBaseUrl, \[\]\);/.test(publishRoute) &&
+    (publishRoute.match(/html_content: publishedHtml,/g) ?? []).length === 3
+);
+check(
+  "...and every sub-page is sanitised the same way",
+  /html: makeGeneratedLinksSafe\(stripDisallowedExternalScripts\(pg\.html\), siteContext\)\.html,/.test(publishRoute)
+);
+// THE SITE CONTEXT IS WHAT MAKES A NAV LINK SURVIVABLE. Without it every
+// link to another page of the site was rewritten to "#".
+check(
+  "...knowing the site's own pages and where it is served",
+  /pageSlugs: draftPages\.map\(\(pg\) => pg\.slug\),/.test(publishRoute) &&
+    /basePath: publishedSiteBasePath\(subdomain\),/.test(publishRoute)
 );
 check("and a partial generation can never be published at all", /website\.status !== "completed"/.test(publishRoute));
 
@@ -263,7 +283,15 @@ console.log("\n== 11. the prompt asks for it too ==");
 // producing a nav whose every item has to be rewritten.
 const builder = readFileSync("src/lib/website-builder.ts", "utf8");
 check("the system prompt forbids root-relative internal links", /INTERNAL LINKS/.test(builder));
-check("and says what to use instead", /href="#/.test(builder) && /single file/i.test(builder));
+// TWO FORMS NOW, and naming only one is how the prompt came to
+// contradict itself: it told the model "there is no /about page" in this
+// section while asking for a nav linking to every page in another.
+check("and says what to use for a section of the page", /href="#/.test(builder));
+check("and what to use for another page of the site",
+  /bare slug of a page you actually wrote/.test(builder) && /href="about"/.test(builder));
+check("and no longer claims one file is the whole site",
+  !/single file is the whole site/i.test(builder) && !/THIS PAGE IS THE WHOLE SITE/.test(builder));
+check("while still naming the form that breaks", /NEVER href="\/about"/.test(builder));
 
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

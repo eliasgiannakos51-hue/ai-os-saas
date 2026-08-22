@@ -93,7 +93,10 @@ console.log("\n== 4. EVERY page goes through EVERY check ==");
     gen.indexOf("resolveWebsiteImagePlaceholders(") < gen.indexOf("splitGeneratedPages("));
   const PER_PAGE = [
     ["invented numbers", /documents\.flatMap\(\(doc\) => findInventedNumbers\(doc, description\)\)/],
-    ["link safety", /documents\.map\(\(doc\) => makeGeneratedLinksSafe\(doc\)\.html\)/],
+    // AND WITH THE SITE'S OWN PAGES. Without that argument a nav link to
+    // another page of this site is indistinguishable from the broken
+    // /about form this pass rewrites, and every one of them became "#".
+    ["link safety", /documents\.map\(\s*\(doc\) => makeGeneratedLinksSafe\(doc, \{ pageSlugs: generatedSlugs \}\)\.html\s*\)/],
     ["unsplash attribution", /cleaned\.map\(\(doc\) => enforceUnsplashAttribution\(doc\)\)/],
     ["script stripping", /cleaned\.map\(\(doc\) => stripDisallowedExternalScripts\(doc\)\)/],
     ["security scan", /stripped\.flatMap\(\(doc\) => scanWebsiteHtmlForSecurityIssues\(doc\)\)/],
@@ -144,10 +147,17 @@ console.log("\n== 5. all FOUR tables that carry a site's HTML ==");
   ok("...and there is no fourth write that could be forgotten",
     publish.split(PAGE_WRITE).length - 1 === WRITE_SITES.length,
     String(publish.split(PAGE_WRITE).length - 1));
+  // The safety stage and the published snapshot are now two names:
+  // safePages is what the security scan reads, publishedPages is that
+  // with the address-dependent SEO resolved onto it. Both are asserted,
+  // because collapsing them again would mean either scanning our own
+  // injected tags or storing documents the scan never saw.
   ok("...after putting each through the same safety pass",
-    /publishedPages = draftPages\.map\(\(pg\) => \(\{[\s\S]{0,200}stripDisallowedExternalScripts\(pg\.html\)/.test(publish));
+    /safePages = draftPages\.map\(\(pg\) => \(\{[\s\S]{0,200}stripDisallowedExternalScripts\(pg\.html\)/.test(publish));
   ok("...and scanning every one of them",
-    /\[html, \.\.\.publishedPages\.map\(\(pg\) => pg\.html\)\]\.flatMap\(/.test(publish));
+    /\[html, \.\.\.safePages\.map\(\(pg\) => pg\.html\)\]\.flatMap\(/.test(publish));
+  ok("...and what is stored is those same documents, seo-resolved",
+    /publishedPages = safePages\.map\(\(pg\) => \(\{[\s\S]{0,120}html: seoFor\(pg\.html,/.test(publish));
 }
 
 console.log("\n== 6. the route serves them, and refuses what it should ==");
@@ -308,8 +318,16 @@ console.log("\n== 7. the prompt asks for what the parser expects ==");
   // CASE-INSENSITIVE. The prompt emphasises with capitals — "its OWN
   // <title>" — and a case-sensitive pattern failed on a sentence that
   // says exactly what it is asked to say.
+  // ASKED OF THE WHOLE PROMPT, not of one section. The requirement moved
+  // to the SEO section when the two said the same thing twice, and a
+  // check pinned to one section would have gone red for a prompt that
+  // still says it — or, worse, stayed green while both sections lost it.
+  const seoInstruction = (await loadTs("src/lib/seo/prompt.ts")).seoInstruction();
+  const wholePrompt = `${instruction}\n${seoInstruction}`;
   ok("...asks for per-page title and description",
-    /own <title>[\s\S]{0,120}meta name="description"/i.test(instruction), instruction.match(/[^\n]*<title>[^\n]*/)?.[0]);
+    /own <title>[\s\S]{0,200}meta name="description"/i.test(wholePrompt), wholePrompt.match(/[^\n]*<title>[^\n]*/)?.[0]);
+  ok("...and the multi-page section still points at it",
+    /per-page <title>[\s\S]{0,80}description/i.test(instruction));
   ok("...asks for the same style on every page", /SAME <style>/.test(instruction));
   ok("...and for navigation that marks the current page", /marks the current one/.test(instruction));
   const builder = readFileSync("src/lib/website-builder.ts", "utf8");
@@ -377,6 +395,102 @@ console.log("\n== 9. THE PAGE CAP IS COVERED BY THE CREDIT HOLD ==");
     maxTokens >= capChars / CHARS_PER_TOKEN,
     `${maxTokens} tokens vs ${Math.ceil(capChars / CHARS_PER_TOKEN)} needed`
   );
+}
+
+console.log("\n== 10. THE NAVIGATION ACTUALLY GOES SOMEWHERE ==");
+// THE BUG THIS SECTION EXISTS FOR, found by running the prompt's own
+// example through the pass that guards published links.
+//
+// makeGeneratedLinksSafe rewrites anything that LOOKS like an internal
+// path, because href="/about" on a one-file site sends the visitor to
+// our login page. A multi-page site's nav is href="about" — which
+// arrived looking identical. Every navigation link on every generated
+// multi-page site was rewritten to "#". The pages were generated,
+// stored in four tables and served at their own URLs, and nothing on
+// the site linked to any of them.
+//
+// It was invisible from either end: the multi-page tests checked the
+// pages existed and the link tests checked internal paths were
+// neutralised, and both were right.
+{
+  const ls = await loadTs("src/lib/website-link-safety.ts");
+  const NAV = `<!DOCTYPE html><html><body><nav>` +
+    `<a href=".">Home</a><a href="about">About</a><a href="services">Services</a>` +
+    `<a href="about#team">Team</a><a href="/about">Absolute</a><a href="#top">Top</a>` +
+    `<a href="pricing">Not a page</a><a href="https://maps.google.com/x">Map</a>` +
+    `<a href="mailto:a@b.c">Mail</a></nav><h2 id="top">T</h2></body></html>`;
+  const SLUGS = ["about", "services"];
+  const hrefs = (html) => [...html.matchAll(/<a href="([^"]*)"/g)].map((m) => m[1]);
+
+  // GENERATION: the address is not known, so the relative form SURVIVES.
+  const atGeneration = hrefs(ls.makeGeneratedLinksSafe(NAV, { pageSlugs: SLUGS }).html);
+  ok("a page link survives generation untouched", atGeneration[1] === "about", atGeneration[1]);
+  ok("...and so does home", atGeneration[0] === ".", atGeneration[0]);
+  ok("a link to something that is NOT a page is still neutralised",
+    atGeneration[6] === "#", atGeneration[6]);
+
+  // PUBLISH: resolved to absolute paths under the site's own base.
+  const published = hrefs(ls.makeGeneratedLinksSafe(NAV, { pageSlugs: SLUGS, basePath: "/s/acme" }).html);
+  ok("home resolves to the site root", published[0] === "/s/acme", published[0]);
+  ok("a page resolves under the site", published[1] === "/s/acme/about", published[1]);
+  ok("...and so does the second", published[2] === "/s/acme/services", published[2]);
+  // A fragment on a page link is where the visitor asked to land.
+  ok("a fragment on a page link is preserved", published[3] === "/s/acme/about#team", published[3]);
+  // The broken absolute form now finds the real page rather than "#".
+  ok("the absolute form is repaired to the real page", published[4] === "/s/acme/about", published[4]);
+  ok("an in-page anchor is left alone", published[5] === "#top", published[5]);
+  ok("a non-page internal link is still neutralised", published[6] === "#", published[6]);
+  ok("an external link is untouched", published[7] === "https://maps.google.com/x", published[7]);
+  ok("a mailto: is untouched", published[8] === "mailto:a@b.c", published[8]);
+
+  // NO TRAILING SLASH ON HOME. /s/acme/ answers with a 308 to /s/acme,
+  // so every visitor clicking "Home" would pay a redirect on a link we
+  // wrote ourselves.
+  ok("home carries no trailing slash", !published[0].endsWith("/"), published[0]);
+
+  // A SITE ON ITS OWN HOST.
+  const onHost = hrefs(ls.makeGeneratedLinksSafe(NAV, { pageSlugs: SLUGS, basePath: "/" }).html);
+  ok("home is / on a site with its own domain", onHost[0] === "/", onHost[0]);
+  ok("...and a page is /about", onHost[1] === "/about", onHost[1]);
+
+  // A ONE-PAGE SITE BEHAVES EXACTLY AS IT ALWAYS DID.
+  const onePage = hrefs(ls.makeGeneratedLinksSafe(NAV).html);
+  ok("with no pages, every internal link is still a fragment",
+    onePage.slice(0, 5).every((h) => h.startsWith("#")), onePage.join(" "));
+
+  // AND THE PROMPT NO LONGER CONTRADICTS ITSELF. It used to say "there
+  // is no /about page, so a link to one is a link to nothing" in one
+  // section while asking for exactly that nav in another.
+  const builder = readFileSync("src/lib/website-builder.ts", "utf8");
+  ok("the prompt no longer claims one file is the whole site",
+    !/THIS PAGE IS THE WHOLE SITE/.test(builder));
+  ok("...and tells the model which two link forms are valid",
+    /ONLY TWO FORMS ARE VALID/.test(builder));
+  ok("...naming the bare-slug form for another page",
+    /bare slug of a page you actually wrote/.test(builder));
+  ok("...while still forbidding the leading slash",
+    /NEVER href="\/about"/.test(builder));
+
+  // WIRED IN AT BOTH MOMENTS.
+  // AND THE SLUGS COME FROM THE SPLIT ITSELF. Passing the argument is
+  // not the same as passing the right value: an empty array satisfies
+  // every pattern above while flattening the nav exactly as before.
+  const genSrc = readFileSync("src/app/api/websites/generate/process/route.ts", "utf8");
+  ok("generation derives the page slugs from the split it just made",
+    /const generatedSlugs = split\.pages\.map\(\(pg\) => pg\.slug\);/.test(genSrc),
+    genSrc.match(/[^\n]*generatedSlugs =[^\n]*/)?.[0]);
+  ok("...the same split the stored pages come from",
+    /extraPages = split\.pages\.map\(/.test(genSrc));
+
+  const publish = readFileSync("src/app/api/websites/[id]/publish/route.ts", "utf8");
+  ok("publishing knows the site's pages and its base path",
+    /pageSlugs: draftPages\.map\(\(pg\) => pg\.slug\),\s*\n\s*basePath: publishedSiteBasePath\(subdomain\),/.test(publish));
+  ok("...and applies it to the home page and every sub-page",
+    /makeGeneratedLinksSafe\(\s*stripDisallowedExternalScripts\(website\.html_content\),\s*siteContext\s*\)/.test(publish) &&
+    /makeGeneratedLinksSafe\(stripDisallowedExternalScripts\(pg\.html\), siteContext\)/.test(publish));
+  const editSrc = readFileSync("src/app/api/websites/edit/route.ts", "utf8");
+  ok("an edit does not flatten the nav either",
+    /makeGeneratedLinksSafe\(updatedHtml, \{\s*\n?\s*pageSlugs: sitePages\.map\(\(pg\) => pg\.slug\),/.test(editSrc));
 }
 
 console.log(`\n${pass} passed, ${failures.length} failed`);

@@ -21,6 +21,8 @@ const PAGES = "src/lib/publishing/website-pages.ts";
 const MULTI = "src/lib/website-multipage.ts";
 const MIGRATION = "supabase/migrations/20260822000000_website_pages.sql";
 const BUILDER = "src/lib/website-builder.ts";
+const LINKSAFETY = "src/lib/website-link-safety.ts";
+const SEOPROMPT = "src/lib/seo/prompt.ts";
 const TARGET = "src/lib/publishing/page-edit-target.ts";
 const EDIT = "src/app/api/websites/edit/route.ts";
 const WORKSPACE = "src/components/website-builder/website-builder-workspace.tsx";
@@ -32,8 +34,8 @@ const MUTANTS = [
   {
     name: "link safety runs on the home page only",
     file: GEN,
-    from: "const cleaned = documents.map((doc) => makeGeneratedLinksSafe(doc).html);",
-    to: "const cleaned = [makeGeneratedLinksSafe(documents[0]).html, ...documents.slice(1)];",
+    from: "      const cleaned = documents.map(\n        (doc) => makeGeneratedLinksSafe(doc, { pageSlugs: generatedSlugs }).html\n      );",
+    to: "      const cleaned = [makeGeneratedLinksSafe(documents[0], { pageSlugs: generatedSlugs }).html, ...documents.slice(1)];",
   },
   {
     name: "the security scan sees the home page only",
@@ -130,7 +132,7 @@ const MUTANTS = [
   {
     name: "published pages skip the safety pass the home page gets",
     file: PUBLISH,
-    from: "      html: makeGeneratedLinksSafe(stripDisallowedExternalScripts(pg.html)).html,",
+    from: "      html: makeGeneratedLinksSafe(stripDisallowedExternalScripts(pg.html), siteContext).html,",
     to: "      html: pg.html,",
   },
   {
@@ -155,10 +157,52 @@ const MUTANTS = [
     to: "  <!-- PAGE: about -->",
   },
   {
+    // The requirement now lives in the SEO section, which the multi-page
+    // section points at — so the mutant moved with it.
     name: "the prompt stops asking for a per-page title",
-    file: MULTI,
-    from: "- Each page gets its OWN <title> and its own <meta name=\"description\"> describing THAT page.",
-    to: "- Give the site a title.",
+    file: SEOPROMPT,
+    from: "- Every page gets its OWN <title>",
+    to: "- The site gets a <title>",
+  },
+  // ------------------------------------------------------------------
+  // THE NAVIGATION GOES NOWHERE. The pages exist, are served, and
+  // nothing links to them. This shipped.
+  // ------------------------------------------------------------------
+  {
+    name: "link safety stops being told which pages the site has",
+    file: PUBLISH,
+    from: "      pageSlugs: draftPages.map((pg) => pg.slug),",
+    to: "      pageSlugs: [],",
+  },
+  {
+    name: "the nav is left relative, so home resolves one directory up",
+    file: PUBLISH,
+    from: "      basePath: publishedSiteBasePath(subdomain),",
+    to: "      basePath: null,",
+  },
+  {
+    name: "a page link is treated as a section again",
+    file: LINKSAFETY,
+    from: "      const page = pageLinkTarget(href, pageSlugs);",
+    to: "      const page = null; void pageLinkTarget;",
+  },
+  {
+    name: "the home link gains a trailing slash, so every visit is a redirect",
+    file: LINKSAFETY,
+    from: "function homeHref(basePath: string): string {\n  return basePath;",
+    to: "function homeHref(basePath: string): string {\n  return `${basePath}/`;",
+  },
+  {
+    name: "a fragment on a page link is dropped",
+    file: LINKSAFETY,
+    from: "        const to = `${path}${fragment}`;",
+    to: "        const to = path;",
+  },
+  {
+    name: "the generate path forgets the site's own pages",
+    file: GEN,
+    from: "      const generatedSlugs = split.pages.map((pg) => pg.slug);",
+    to: "      const generatedSlugs: string[] = [];",
   },
   // ------------------------------------------------------------------
   // THE CAP DRIFTS AWAY FROM WHAT THE HOLD COVERS. Nothing renders

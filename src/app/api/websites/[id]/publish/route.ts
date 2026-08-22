@@ -19,6 +19,7 @@ import {
 } from "@/lib/publishing/publish-limits";
 import { getSiteUrl } from "@/lib/site-url";
 import type { UserWebsite } from "@/types/user-website";
+import { normalisePages } from "@/lib/publishing/website-pages";
 
 export const dynamic = "force-dynamic";
 
@@ -242,7 +243,19 @@ export async function POST(request: Request, { params }: { params: { id: string 
     // uncached page view of a popular site. It is idempotent, so paying it
     // again on republish costs nothing.
     const html = makeGeneratedLinksSafe(stripDisallowedExternalScripts(website.html_content)).html;
-    const issues = scanWebsiteHtmlForSecurityIssues(html);
+    // THE SAME TREATMENT FOR EVERY PAGE, and the same scan. published_sites
+    // is a SNAPSHOT — /s/<subdomain> reads it, not user_websites — so a
+    // page that is not copied here is a navigation link to a 404, and a
+    // page copied without this pass is a page that skipped the checks its
+    // home page passed.
+    const { pages: draftPages } = normalisePages(website.pages);
+    const publishedPages = draftPages.map((pg) => ({
+      ...pg,
+      html: makeGeneratedLinksSafe(stripDisallowedExternalScripts(pg.html)).html,
+    }));
+    const issues = [html, ...publishedPages.map((pg) => pg.html)].flatMap((doc) =>
+      scanWebsiteHtmlForSecurityIssues(doc)
+    );
     if (issues.length > 0) {
       const described = issues.map(describeSecurityScanIssue);
       void logSecurityCheck(supabase, {
@@ -284,6 +297,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         .update({
           subdomain,
           html_content: html,
+      pages: publishedPages.length > 0 ? publishedPages : null,
           status: "live",
           is_active: true,
           updated_at: nowIso,
@@ -311,6 +325,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
           user_id: user.id,
           subdomain,
           html_content: html,
+      pages: publishedPages.length > 0 ? publishedPages : null,
           status: "live",
           is_active: true,
           published_at: nowIso,
@@ -343,6 +358,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       published_site_id: publishedSiteId,
       user_id: user.id,
       html_content: html,
+      pages: publishedPages.length > 0 ? publishedPages : null,
       version_number: versionNumber,
       change_description: changeDescription || null,
       published_at: nowIso,

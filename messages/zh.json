@@ -1082,6 +1082,9 @@
       "downloadButton": "下载 HTML",
       "deleteButton": "删除",
       "deleted": "网站已删除",
+      "pageSelectLabel": "本站页面",
+      "pageHome": "首页",
+      "editPageGone": "该页面已不属于此站点 — 请重新打开以查看当前页面。",
       "editLabel": "请求修改",
       "editPlaceholder": "例如：把主视觉区域放大，或把颜色改成蓝色。",
       "editButton": "应用更改",
@@ -2552,7 +2555,7 @@
       "e1": "塞萨洛尼基的一家咖啡馆，带菜单和营业时间",
       "e2": "摄影师作品集，带图库",
       "e3": "SaaS 落地页，含定价",
-      "limits": "一个页面，不是商店也不是应用 · 不会连接你的系统"
+      "limits": "几个页面，不是商店或应用 · 不会连接到你的系统"
     },
     "files": {
       "e1": "合同里关于解约是怎么写的？",

@@ -1082,6 +1082,9 @@
       "downloadButton": "Télécharger le HTML",
       "deleteButton": "Supprimer",
       "deleted": "Site supprimé",
+      "pageSelectLabel": "Pages de ce site",
+      "pageHome": "Accueil",
+      "editPageGone": "Cette page ne fait plus partie de ce site — rouvrez-le pour voir les pages actuelles.",
       "editLabel": "Demander une modification",
       "editPlaceholder": "ex. Agrandis la section hero, ou change les couleurs en bleu.",
       "editButton": "Appliquer les modifications",
@@ -2552,7 +2555,7 @@
       "e1": "Un café à Thessalonique avec la carte et les horaires",
       "e2": "Le portfolio d’un photographe avec une galerie",
       "e3": "Une landing page pour un SaaS, avec les tarifs",
-      "limits": "Une page, pas une boutique ni une application · Ne se connecte pas à vos systèmes"
+      "limits": "Quelques pages, pas une boutique ni une application · Il ne se connecte pas à vos systèmes"
     },
     "files": {
       "e1": "Que dit le contrat au sujet de l’annulation ?",

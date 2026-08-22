@@ -1082,6 +1082,9 @@
       "downloadButton": "Scarica HTML",
       "deleteButton": "Elimina",
       "deleted": "Sito eliminato",
+      "pageSelectLabel": "Pagine di questo sito",
+      "pageHome": "Home",
+      "editPageGone": "Questa pagina non fa più parte di questo sito: riaprilo per vedere le pagine attuali.",
       "editLabel": "Richiedi una modifica",
       "editPlaceholder": "es. Rendi la sezione hero più grande, o cambia i colori in blu.",
       "editButton": "Applica modifiche",
@@ -2552,7 +2555,7 @@
       "e1": "Un caffè a Salonicco con menù e orari",
       "e2": "Il portfolio di un fotografo con galleria",
       "e3": "Una landing page per un SaaS, con i prezzi",
-      "limits": "Una pagina, non un negozio né un’app · Non si collega ai tuoi sistemi"
+      "limits": "Poche pagine, non un negozio o un'app · Non si collega ai tuoi sistemi"
     },
     "files": {
       "e1": "Cosa dice il contratto sulla disdetta?",

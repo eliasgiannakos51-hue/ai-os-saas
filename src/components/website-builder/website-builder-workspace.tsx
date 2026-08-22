@@ -20,6 +20,7 @@ import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
 import { findUnfilledPlaceholders, type UnfilledPlaceholder } from "@/lib/website-placeholders";
 import { findInventedNumbers, type SuspectNumber } from "@/lib/website-invented-numbers";
 import { useTranslations, useLocale } from "next-intl";
+import { normalisePages, type WebsitePage } from "@/lib/publishing/website-pages";
 import { ApiError } from "@/lib/errors/api-error";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { createClient } from "@/lib/supabase/client";
@@ -287,6 +288,7 @@ export function WebsiteBuilderWorkspace({
   const [versionsByWebsite, setVersionsByWebsite] = useState<Record<string, WebsiteVersion[]>>({});
   const [loadingVersionsFor, setLoadingVersionsFor] = useState<string | null>(null);
   const [viewingVersion, setViewingVersion] = useState<WebsiteVersion | null>(null);
+  const [pageSlug, setPageSlug] = useState("");
 
   // Guards every poll's setState against firing after this component has
   // unmounted (e.g. the user navigated to a different dashboard page
@@ -760,6 +762,9 @@ export function WebsiteBuilderWorkspace({
   }
 
   function selectWebsite(id: string, tab: DetailTabKey = "preview") {
+    // A different site's pages are different pages — carrying the slug
+    // over would silently show the home page under another page's name.
+    setPageSlug("");
     setPreviewId(id);
     setDetailTab(tab);
     if (tab === "history") void loadVersions(id);
@@ -808,12 +813,28 @@ export function WebsiteBuilderWorkspace({
       const res = await fetchWithAuthRetry("/api/websites/edit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ websiteId, changeRequest: trimmedChangeRequest, referenceImagePaths }),
+        body: JSON.stringify({
+          websiteId,
+          changeRequest: trimmedChangeRequest,
+          referenceImagePaths,
+          // THE PAGE THE OWNER IS LOOKING AT. Omitted-as-"" means the
+          // home page, which is what every request sent before pages
+          // existed meant too.
+          pageSlug,
+        }),
       });
       const data = await res.json();
       void refreshCredits();
 
       if (!res.ok || !data.ok) {
+        // The one refusal the user can actually reach: the page list they
+        // are looking at is older than the site. Translated, because
+        // "That page is not part of this site." is a sentence a Greek or
+        // Japanese customer would be shown in English otherwise.
+        if (data?.reason === "unknown_page" || data?.reason === "invalid_page") {
+          setEditError(t("editPageGone"));
+          return;
+        }
         setEditError(getErrorMessage(data?.error, "Could not apply that change."));
         return;
       }
@@ -869,7 +890,22 @@ export function WebsiteBuilderWorkspace({
 
   const previewWebsite = websites.find((w) => w.id === previewId) ?? null;
   const activeVersions = previewWebsite ? versionsByWebsite[previewWebsite.id] : undefined;
-  const displayedHtml = viewingVersion?.html_content ?? previewWebsite?.html_content ?? "";
+  // WHICH PAGE OF THE SITE IS ON SCREEN — and therefore which document
+  // an edit is applied to. "" is the home page, which is html_content
+  // itself; a single-page site has no other option and renders no picker.
+  //
+  // Derived, not stored-and-trusted: if the selected slug is not in the
+  // pages being shown (a version from before that page existed, a page
+  // removed by a later generation), this falls back to the home page
+  // instead of showing an empty frame.
+  const displayedSource: { html_content: string; pages?: unknown } | null =
+    viewingVersion ?? previewWebsite;
+  const displayedPages: WebsitePage[] = useMemo(
+    () => normalisePages(displayedSource?.pages).pages,
+    [displayedSource]
+  );
+  const activePage = displayedPages.find((pg) => pg.slug === pageSlug) ?? null;
+  const displayedHtml = activePage?.html ?? displayedSource?.html_content ?? "";
   // Guards the iframe against rendering a blank/broken page for content
   // that's somehow incomplete (e.g. a row saved before the server-side
   // truncation check below existed) — shows a clear message instead.
@@ -906,6 +942,39 @@ export function WebsiteBuilderWorkspace({
     ].join("\n");
     return findInventedNumbers(displayedHtml, brief);
   }, [displayedHtml, displayedHtmlIsComplete, previewWebsite, activeVersions]);
+
+  // ONE PICKER, TWO TABS. The preview shows a page and the edit form
+  // changes THAT page, so they must never disagree about which one is
+  // selected — rendering the same element from the same state is the
+  // only way that stays true. A site with no sub-pages renders nothing
+  // here and behaves exactly as it did before pages existed.
+  const pageTabs =
+    displayedPages.length > 0 ? (
+      <nav
+        data-testid="website-page-tabs"
+        aria-label={t("pageSelectLabel")}
+        className="mb-3 flex flex-wrap gap-1.5"
+      >
+        {[{ slug: "", label: t("pageHome") }, ...displayedPages].map((item) => {
+          const isCurrent = pageSlug === item.slug;
+          return (
+            <button
+              key={item.slug || "home"}
+              type="button"
+              onClick={() => setPageSlug(item.slug)}
+              aria-current={isCurrent ? "page" : undefined}
+              className={`rounded-lg border px-2.5 py-1 text-xs transition-colors duration-150 ${
+                isCurrent
+                  ? "border-orange-500/50 bg-orange-500/[0.07] text-foreground"
+                  : "border-border bg-input text-muted hover:text-foreground"
+              }`}
+            >
+              {item.label}
+            </button>
+          );
+        })}
+      </nav>
+    ) : null;
 
   // Which is why the history is fetched as soon as there is a page to
   // check, not only when the History tab is opened. loadVersions returns
@@ -1255,8 +1324,9 @@ export function WebsiteBuilderWorkspace({
                       </ul>
                     </div>
                   )}
+                  {pageTabs}
                   <iframe
-                    key={`${previewWebsite.id}:${viewingVersion?.id ?? "latest"}`}
+                    key={`${previewWebsite.id}:${viewingVersion?.id ?? "latest"}:${pageSlug || "home"}`}
                     srcDoc={displayedHtml}
                     sandbox=""
                     title={previewWebsite.name}
@@ -1327,6 +1397,7 @@ export function WebsiteBuilderWorkspace({
                   {t("editUnavailable")}
                 </p>
               )}
+              {pageTabs}
               <label htmlFor="website-edit" className="block text-xs text-muted">
                 {t("editLabel")}
               </label>

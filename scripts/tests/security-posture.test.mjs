@@ -344,6 +344,8 @@ const NO_SESSION_BY_DESIGN = {
     "the OAuth/magic-link landing. It CREATES the session by exchanging a single-use code — requiring one first is a contradiction. Surfaced by widening this scan beyond src/app/api; it was never checked before, and reading it line by line confirmed everything after the exchange acts on the user that exchange returned, never on an id from the request.",
   "src/app/s/[subdomain]/route.ts":
     "the public web: serves a published site to anonymous visitors. Reads through the admin client and selects only the columns a visitor needs; published_sites has no public RLS policy, so a visitor cannot read the table at all. In-memory rate limited, and every response carries a restrictive CSP.",
+  "src/app/s/[subdomain]/[page]/route.ts":
+    "the same public site, one page further in. Identical posture to the parent route — admin client, named columns, rate limit, CSP — with one addition that is the reason this exists separately: the page segment is a URL path, so it goes through validatePageSlug BEFORE any lookup. The slug must match ^[a-z0-9]+(-[a-z0-9]+)*$, which rejects ../admin, a/b, %2e%2e and a leading dot on SHAPE rather than by reasoning about path semantics — a rule written as 'does not contain ..' falls to encoding, and one written on the decoded string falls to double encoding. An unknown slug is a 404, never a fallback to the home page, so a crawler is not told that every URL under the site exists.",
 };
 
 for (const file of routes) {

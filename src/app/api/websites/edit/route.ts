@@ -35,6 +35,8 @@ import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
 import { findInventedNumbers } from "@/lib/website-invented-numbers";
+import { normalisePages } from "@/lib/publishing/website-pages";
+import { applyEditedDocument, resolveEditTarget, HOME_INDEX } from "@/lib/publishing/page-edit-target";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +45,8 @@ export const dynamic = "force-dynamic";
 // this single request directly, so it had NO explicit maxDuration at
 // all before this (silently inheriting the platform default, as low as
 // 10s on some tiers) despite calling editWebsiteHtml with the same
-// WEBSITE_MAX_TOKENS (32000) ceiling as full generation, now also
+// WEBSITE_MAX_TOKENS ceiling as full generation (32000 when this was
+// written, 128000 since ce6e60a), now also
 // potentially downloading/resizing new reference images and resolving
 // image placeholders afterward. This was the single biggest real gap
 // found in this pass's timeout audit — a large edit (long change
@@ -77,6 +80,10 @@ export async function POST(request: Request) {
     let websiteId: string;
     let changeRequest: string;
     let referenceImagePaths: string[];
+    // WHICH page. Absent (or the literal "home") means the home
+    // document, which is what every existing caller sends — a site with
+    // no sub-pages behaves exactly as it did.
+    let pageSlugRaw: string;
     try {
       const body = await request.json();
       websiteId = typeof body?.websiteId === "string" ? body.websiteId : "";
@@ -87,6 +94,7 @@ export async function POST(request: Request) {
       referenceImagePaths = Array.isArray(body?.referenceImagePaths)
         ? body.referenceImagePaths.filter((p: unknown): p is string => typeof p === "string").slice(0, MAX_REFERENCE_IMAGES)
         : [];
+      pageSlugRaw = typeof body?.pageSlug === "string" ? body.pageSlug.trim().toLowerCase() : "";
     } catch {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
@@ -111,7 +119,10 @@ export async function POST(request: Request) {
     const breakerCheck = await checkAiCallAllowed(
       user.id,
       "website_edit",
-      fingerprintRequest(websiteId, changeRequest)
+      // The PAGE is part of what makes this request distinct: "make the
+      // heading bigger" on /services is not a repeat of the same words on
+      // the home page, and the breaker would otherwise treat it as one.
+      fingerprintRequest(websiteId, `${pageSlugRaw}\n${changeRequest}`)
     );
     if (!breakerCheck.allowed) {
       return NextResponse.json({ ok: true, edited: false, rateLimited: true, message: breakerCheck.reason });
@@ -119,13 +130,51 @@ export async function POST(request: Request) {
 
     const { data: website, error: fetchError } = await supabase
       .from("user_websites")
-      .select("id, html_content, description")
+      .select("id, html_content, description, pages")
       .eq("id", websiteId)
       .single();
 
     if (fetchError || !website) {
       return NextResponse.json({ ok: false, error: "Website not found." }, { status: 404 });
     }
+
+    // WHICH DOCUMENT IS BEING EDITED.
+    //
+    // Resolved here, before the edit lock below, so a request naming a
+    // page this site does not have is a 404 that leaves the site
+    // editable rather than one that locks it for two minutes.
+    //
+    // The home page is the site's html_content; every other page lives
+    // in the `pages` array. "home" is a RESERVED slug (it is not a URL
+    // under /s/<subdomain>/), so it is matched literally here instead of
+    // being handed to validatePageSlug, which would reject it.
+    const { pages: sitePages } = normalisePages(website.pages);
+    const target = resolveEditTarget(website.html_content, sitePages, pageSlugRaw);
+    if (!target.ok) {
+      // A MACHINE-READABLE REASON BESIDE THE SENTENCE. The English here
+      // is developer-facing: the workspace only ever offers pages the
+      // site actually has, so a caller reaching this either hand-built
+      // the request or is looking at a stale list. The client renders a
+      // TRANSLATED sentence off `reason` (dashboard.websiteBuilder.
+      // editPageGone) — see the workspace's handleEdit — rather than
+      // showing either of these strings to a user.
+      return target.reason === "invalid_slug"
+        ? NextResponse.json(
+            { ok: false, reason: "invalid_page", error: "That is not a page address." },
+            { status: 400 }
+          )
+        : NextResponse.json(
+            { ok: false, reason: "unknown_page", error: "That page is not part of this site." },
+            { status: 404 }
+          );
+    }
+    const targetIndex = target.index;
+    // THE ONE DOCUMENT THE EDIT SEES. Every use of the site's HTML below
+    // — the estimate, the model call, the safety passes — reads this,
+    // never website.html_content, because sending the home page and
+    // saving the result onto a sub-page is precisely the bug this
+    // resolution exists to prevent.
+    const sourceHtml = target.html;
 
     // Idempotency guard — a real, atomic DB-level claim, not a check-
     // then-act race: this single UPDATE only succeeds (returns a row) if
@@ -201,7 +250,7 @@ export async function POST(request: Request) {
       "websiteEdit",
       {
         model: WEBSITE_BUILDER_MODEL,
-        inputChars: website.html_content.length + changeRequest.length,
+        inputChars: sourceHtml.length + changeRequest.length,
         imageCount: referenceImagePaths.length,
         planSlug: plan?.slug ?? null,
       },
@@ -262,7 +311,7 @@ export async function POST(request: Request) {
     let images: ImageResolution = { html: "", used: [], halted: null };
     try {
       void recordAiCallForDailySpend(estimate.estimatedCredits);
-      const editResult = await editWebsiteHtml(apiKey, website.html_content, changeRequest, referenceImages, formEndpointUrl, costs);
+      const editResult = await editWebsiteHtml(apiKey, sourceHtml, changeRequest, referenceImages, formEndpointUrl, costs);
       updatedHtml = editResult.html;
       usedCheapPatch = editResult.usedCheapPatch;
       images = await resolveWebsiteImagePlaceholders(updatedHtml);
@@ -354,9 +403,19 @@ export async function POST(request: Request) {
       .eq("website_id", websiteId);
     const versionNumber = nextVersionNumber(existingVersionCount ?? 0);
 
+    // ONE EDITED DOCUMENT, WRITTEN BACK WHERE IT CAME FROM. A sub-page
+    // edit leaves html_content untouched and replaces one entry of the
+    // pages array; a home edit does the opposite. Writing updatedHtml
+    // into html_content unconditionally would put a sub-page's HTML on
+    // the front page — the site would still render, which is what makes
+    // it worth being explicit about.
+    const saved = applyEditedDocument(website.html_content, sitePages, targetIndex, updatedHtml);
+    const nextPages = saved.pages;
+    const nextHomeHtml = saved.htmlContent;
+
     const { data: updatedRecord, error: updateError } = await supabase
       .from("user_websites")
-      .update({ html_content: updatedHtml })
+      .update({ html_content: nextHomeHtml, pages: nextPages.length > 0 ? nextPages : null })
       .eq("id", websiteId)
       .select()
       // maybeSingle, not single: the site can be DELETED while the edit
@@ -444,12 +503,18 @@ export async function POST(request: Request) {
       );
     }
 
+    // THE WHOLE SITE, not the page that changed. A version is what
+    // rollback restores, and restoring one edited sub-page over a site
+    // whose other pages have since moved on is not a previous state of
+    // anything.
     const { error: versionError } = await supabase.from("website_versions").insert({
       user_id: user.id,
       website_id: websiteId,
       version_number: versionNumber,
-      html_content: updatedHtml,
-      change_description: changeRequest,
+      html_content: nextHomeHtml,
+      pages: nextPages.length > 0 ? nextPages : null,
+      change_description:
+        targetIndex === HOME_INDEX ? changeRequest : `[${sitePages[targetIndex].slug}] ${changeRequest}`,
     });
     if (versionError) {
       logApiError("/api/websites/edit", versionError, { stage: "insert_version" });

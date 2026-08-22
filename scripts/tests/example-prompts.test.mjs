@@ -159,13 +159,36 @@ for (const surface of reg.AI_SURFACES) {
 // "doesn't write code" would have been a false sentence on the one screen
 // where somebody decides whether to trust it with their business page.
 const websiteLib = readFileSync("src/lib/website-builder.ts", "utf8");
+// THE COPY SAID "One page" AND THE BUILDER NOW WRITES SEVERAL. This gate
+// caught it, which is what it is for: the sentence on the screen where
+// somebody decides whether to trust this with their business page has to
+// describe what the thing actually does. Understating is as wrong as
+// overstating — a user who needs four pages would have read that line and
+// gone elsewhere.
+// FOLLOWED TO WHERE IT LIVES. The instruction is composed into the system
+// prompt from lib/website-multipage.ts, so scanning website-builder.ts
+// alone for the marker found nothing and would have let the copy claim a
+// capability the prompt never asked for.
+const multipageLib = readFileSync("src/lib/website-multipage.ts", "utf8");
 check(
-  "the Website Builder really does emit one HTML document",
-  /Output ONE complete HTML document/.test(websiteLib)
+  "the Website Builder really can emit more than one document",
+  /multipageInstruction\(\)/.test(websiteLib) && /MULTIPLE PAGES/.test(multipageLib) && /IONEXA:PAGE/.test(multipageLib)
 );
 check(
-  "...so its limit says 'one page', not 'no code'",
-  /one page/i.test(limits.websiteBuilder) && !/code/i.test(limits.websiteBuilder),
+  "...and still says 'documents', not 'document', in its core rule",
+  /Output complete HTML documents/.test(websiteLib)
+);
+check(
+  "...so its limit says pages, plural, and still not 'no code'",
+  /pages/i.test(limits.websiteBuilder) && !/code/i.test(limits.websiteBuilder),
+  limits.websiteBuilder
+);
+// AND NOT AN UNBOUNDED PROMISE. "A few" is the honest word: the cap is
+// MAX_PAGES_PER_SITE, and copy reading "as many pages as you like" would
+// be the next false sentence on the same screen.
+check(
+  "...without promising unlimited pages",
+  !/unlimited|any number|as many/i.test(limits.websiteBuilder),
   limits.websiteBuilder
 );
 // It cannot take payments: one static page, no backend of its own.

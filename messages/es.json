@@ -1082,6 +1082,9 @@
       "downloadButton": "Descargar HTML",
       "deleteButton": "Eliminar",
       "deleted": "Sitio eliminado",
+      "pageSelectLabel": "Páginas de este sitio",
+      "pageHome": "Inicio",
+      "editPageGone": "Esa página ya no forma parte de este sitio: vuelve a abrirlo para ver las páginas actuales.",
       "editLabel": "Solicitar un cambio",
       "editPlaceholder": "ej. Haz la sección hero más grande, o cambia los colores a azul.",
       "editButton": "Aplicar cambios",
@@ -2552,7 +2555,7 @@
       "e1": "Una cafetería en Salónica con carta y horarios",
       "e2": "El portafolio de un fotógrafo con galería",
       "e3": "Una landing para un SaaS, con precios",
-      "limits": "Una página, no una tienda ni una app · No se conecta a tus sistemas"
+      "limits": "Unas pocas páginas, no una tienda ni una app · No se conecta con tus sistemas"
     },
     "files": {
       "e1": "¿Qué dice el contrato sobre la cancelación?",

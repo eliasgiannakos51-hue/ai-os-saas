@@ -1082,6 +1082,9 @@
       "downloadButton": "HTML Herunterladen",
       "deleteButton": "Löschen",
       "deleted": "Website gelöscht",
+      "pageSelectLabel": "Seiten dieser Website",
+      "pageHome": "Startseite",
+      "editPageGone": "Diese Seite gehört nicht mehr zu dieser Website – öffne sie erneut, um die aktuellen Seiten zu sehen.",
       "editLabel": "Änderung anfordern",
       "editPlaceholder": "z. B. Mach den Hero-Bereich größer oder ändere die Farben zu Blau.",
       "editButton": "Änderungen anwenden",
@@ -2552,7 +2555,7 @@
       "e1": "Ein Café in Thessaloniki mit Karte und Öffnungszeiten",
       "e2": "Das Portfolio eines Fotografen mit Galerie",
       "e3": "Eine Landingpage für ein SaaS, mit Preisen",
-      "limits": "Eine Seite, kein Shop und keine App · Verbindet sich nicht mit deinen Systemen"
+      "limits": "Ein paar Seiten, kein Shop und keine App · Es verbindet sich nicht mit Ihren Systemen"
     },
     "files": {
       "e1": "Was steht im Vertrag zur Kündigung?",

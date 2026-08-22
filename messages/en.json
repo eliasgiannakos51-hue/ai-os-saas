@@ -1082,6 +1082,9 @@
       "downloadButton": "Download HTML",
       "deleteButton": "Delete",
       "deleted": "Website deleted",
+      "pageSelectLabel": "Pages of this site",
+      "pageHome": "Home",
+      "editPageGone": "That page is no longer part of this site — reopen it to see the current pages.",
       "editLabel": "Request a change",
       "editPlaceholder": "e.g. Make the hero section bigger, or change the colors to blue.",
       "editButton": "Apply changes",
@@ -2552,7 +2555,7 @@
       "e1": "A café in Thessaloniki with a menu and opening hours",
       "e2": "A photographer's portfolio with a gallery",
       "e3": "A landing page for a SaaS, with pricing",
-      "limits": "One page, not a shop or an app · It doesn't connect to your systems"
+      "limits": "A few pages, not a shop or an app · It doesn't connect to your systems"
     },
     "files": {
       "e1": "What does the contract say about cancellation?",

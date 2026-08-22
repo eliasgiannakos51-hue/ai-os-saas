@@ -9,6 +9,7 @@ import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 import { AI_SAFETY_BOUNDARIES_EN } from "@/lib/ai-conduct";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import type { CostAccumulator, CostStage } from "@/lib/billing/cost-accumulator";
+import { multipageInstruction } from "@/lib/website-multipage";
 
 const MODEL = WEBSITE_BUILDER_MODEL;
 // Re-exported so the route's billing estimate prices the same model this
@@ -564,7 +565,7 @@ DO NOT INVENT CRITICAL FACTS:
 const SYSTEM_PROMPT = `You generate complete, production-ready single-file websites from a plain-text description.
 
 CORE RULES:
-- Output ONE complete HTML document: <!DOCTYPE html> through </html>. Nothing else — no explanation, no markdown code fences, no commentary before or after.
+- Output complete HTML documents: <!DOCTYPE html> through </html>. Nothing else — no explanation, no markdown code fences, no commentary before or after. Most sites are ONE document; see MULTIPLE PAGES below for when to write more and how to separate them.
 - All CSS must be inline in a single <style> tag in <head>. The ONLY external resources ever allowed are Google Fonts links (see FONTS below) and photo URLs (see IMAGES below) — no other external stylesheets, no external JS libraries/CDNs, no icon fonts from a CDN.
 - No <script> tags EXCEPT the two specific, narrow exceptions described in ANIMATIONS (scroll-reveal) and the contact-form handler described in FUNCTIONAL CONTACT ELEMENTS below — nothing else may use JavaScript. Everything else must be a static page.
 - Must be responsive: include a <meta name="viewport"> tag and use relative units / flexbox / grid / media queries so it looks good on both mobile and desktop.
@@ -572,6 +573,7 @@ CORE RULES:
 - Use placeholder text/content that fits the description where specific non-critical content wasn't given — never leave Lorem Ipsum, always write real-sounding copy relevant to the request. See DO NOT INVENT CRITICAL FACTS below for the difference between ordinary filler copy (fine) and specific real-world facts (not fine unless explicitly authorized).
 - Fill in a <title> tag that fits the description.
 ${SITE_SHAPE_SECTION}
+${multipageInstruction()}
 ${FONTS_SECTION}
 ${ANIMATIONS_SECTION}
 ${IMAGE_RULES_HEADER}

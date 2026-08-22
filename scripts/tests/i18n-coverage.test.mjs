@@ -620,7 +620,17 @@ const clientFallbacks = sources.flatMap((f) => [
 // at 558 while the count dropped to 549 would have left nine free slots —
 // nine English sentences that could reach a user without this number
 // moving. A ratchet with slack in it is not a ratchet.
-const SERVER_PROSE_BASELINE = 549;
+// 549 -> 551 for api/websites/edit's two page refusals: "That is not a
+// page address." (400) and "That page is not part of this site." (404),
+// added with per-page live editing. RAISED WITH THE USER-FACING HALF
+// CLOSED IN THE SAME CHANGE, which is the only reason this is an
+// increment rather than a regression: both replies now carry a machine-
+// readable `reason` ("invalid_page" / "unknown_page") and the workspace
+// renders dashboard.websiteBuilder.editPageGone off it, translated in
+// all ten locales — so neither English sentence can reach a user. They
+// are counted here because they are still English strings in a route,
+// and pretending otherwise is how a ratchet stops meaning anything.
+const SERVER_PROSE_BASELINE = 551;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

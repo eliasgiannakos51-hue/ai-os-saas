@@ -120,6 +120,22 @@ for (const m of migrations) {
   const bareDeletes = [...body.matchAll(/^\s*delete\s+from\s+(\S+)\s*;/gim)].map((x) => x[0].trim());
   checkList(`${m.name}: no DROP TABLE`, drops);
   checkList(`${m.name}: no TRUNCATE`, truncs);
+  // IDEMPOTENCE, which is the other half of "safe to re-run" and was not
+  // checked here. All 73 CREATE TABLE statements in this directory
+  // already say IF NOT EXISTS; nothing was holding them there, so the
+  // seventy-fourth could drop it and the second run of the migration
+  // path would abort on "relation already exists".
+  //
+  // This assertion came from schema-safety.test.mjs on the
+  // five-prioritized-fixes branch. The other four checks on that file
+  // are already covered: no DROP TABLE and no TRUNCATE are the two lines
+  // above, and its remaining two were about the root schema files, which
+  // this repository has since moved to archive/ behind a README rather
+  // than made re-runnable. Only this one had nothing equivalent.
+  checkList(
+    `${m.name}: every CREATE TABLE says IF NOT EXISTS`,
+    [...body.matchAll(/create\s+table\s+(?!if\s+not\s+exists)([^\s(]+)/gi)].map((x) => x[1])
+  );
   checkList(`${m.name}: no unqualified DELETE`, bareDeletes);
 }
 

@@ -469,7 +469,10 @@
       "couldNotClearMemory": "✗ Speicher konnte nicht gelöscht werden",
       "memoryCleared": "✓ Speicher gelöscht",
       "memoryEnabled": "✓ Chat-Speicher aktiviert",
-      "memoryDisabled": "✓ Chat-Speicher deaktiviert"
+      "memoryDisabled": "✓ Chat-Speicher deaktiviert",
+      "planExcludes": "Ihr aktueller Tarif enthält kein Chat-Gedächtnis, daher wird nichts gespeichert. Ab Starter wird über Unterhaltungen hinweg erinnert.",
+      "switchedOff": "Das Gedächtnis ist ausgeschaltet, daher wird nichts aus Ihren Unterhaltungen gespeichert.",
+      "nothingYet": "Noch nichts gespeichert. Das Gedächtnis ist aktiv — es merkt sich Dauerhaftes wie Ihren Namen, Ihre Arbeit oder eine Vorliebe, sobald eine Unterhaltung so etwas enthält."
     },
     "loginActivity": {
       "title": "Anmeldeaktivität",

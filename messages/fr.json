@@ -469,7 +469,10 @@
       "couldNotClearMemory": "✗ impossible d'effacer la mémoire",
       "memoryCleared": "✓ mémoire effacée",
       "memoryEnabled": "✓ mémoire de conversation activée",
-      "memoryDisabled": "✓ mémoire de conversation désactivée"
+      "memoryDisabled": "✓ mémoire de conversation désactivée",
+      "planExcludes": "Votre forfait actuel n’inclut pas la mémoire de conversation, rien n’est donc enregistré. À partir de Starter, la mémoire est conservée d’une conversation à l’autre.",
+      "switchedOff": "La mémoire est désactivée, rien n’est donc enregistré depuis vos conversations.",
+      "nothingYet": "Rien d’enregistré pour l’instant. La mémoire est active — elle retient les éléments durables comme votre nom, votre métier ou une préférence, dès qu’une conversation en mentionne un."
     },
     "loginActivity": {
       "title": "Activité de connexion",

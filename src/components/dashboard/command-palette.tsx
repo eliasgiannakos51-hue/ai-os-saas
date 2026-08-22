@@ -3,23 +3,52 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Search, MessageCircle, FileText } from "lucide-react";
+import {
+  Search,
+  MessageCircle,
+  FileText,
+  LayoutGrid,
+  Globe,
+  Bot,
+  Microscope,
+  Target,
+  HelpCircle,
+  type LucideIcon,
+} from "lucide-react";
 import { ALL_SIDEBAR_GROUPS, type SidebarItem } from "@/lib/sidebar-nav";
 import { ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 import { useCommandPalette } from "@/components/dashboard/command-palette-context";
 import { normalizeForSearch } from "@/lib/text/search-match";
+import { MODULE_TITLE_KEYS } from "@/lib/search/module-title-keys";
+import {
+  DATE_RANGES,
+  MIN_QUERY_LENGTH,
+  SEARCH_KINDS,
+  flattenGroups,
+  groupResults,
+  sinceForRange,
+  snippetSegments,
+  type DateRange,
+  type SearchKind,
+  type SearchResult,
+} from "@/lib/search/unified-search";
 
 // Every sidebar link is searchable here too, flattened out of its groups.
 // Every item is navigable again — the coming-soon exclusion that used to
 // filter this list is gone along with the greyed-out states themselves.
 const PALETTE_ITEMS: SidebarItem[] = ALL_SIDEBAR_GROUPS.flatMap((group) => group.items);
 
-type ContentResult = {
-  id: string;
-  type: "module" | "chat";
-  title: string;
-  subtitle: string;
-  href: string;
+// One icon per kind, so a glance down the list tells you what sort of
+// thing each row is without reading the heading above it.
+const KIND_ICONS: Record<SearchKind, LucideIcon> = {
+  module: LayoutGrid,
+  file: FileText,
+  chat: MessageCircle,
+  website: Globe,
+  agent: Bot,
+  research: Microscope,
+  mission: Target,
+  help: HelpCircle,
 };
 
 // One shape both page-nav items and content search results render as, so
@@ -29,10 +58,28 @@ type PaletteEntry = {
   key: string;
   href: string;
   label: string;
-  sublabel?: string;
-  badge?: string;
+  /** Set on the FIRST row of each kind, so the heading is rendered from
+   *  the same list the arrow keys walk rather than from a parallel one
+   *  that could disagree with it about where a group starts. */
+  groupHeading?: string | null;
   render: (active: boolean) => React.ReactNode;
 };
+
+// Which facets to offer, taken from an ACTUAL unfiltered response for
+// this query — never a fixed list of all eight kinds and all twenty-one
+// modules. A chip that returns nothing is a chip that lies.
+type Facets = { kinds: SearchKind[]; modules: string[] };
+const NO_FACETS: Facets = { kinds: [], modules: [] };
+
+function facetsOf(results: SearchResult[]): Facets {
+  const kinds = SEARCH_KINDS.filter((kind) => results.some((r) => r.kind === kind));
+  const modules: string[] = [];
+  for (const result of results) {
+    if (result.moduleSlug && !modules.includes(result.moduleSlug)) modules.push(result.moduleSlug);
+  }
+  modules.sort();
+  return { kinds, modules };
+}
 
 // Subsequence match — every character of the query appears in the target,
 // in order, not necessarily contiguous. A plain substring match is just a
@@ -89,11 +136,18 @@ export function CommandPalette() {
   const router = useRouter();
   const tCommon = useTranslations("common");
   const tSidebar = useTranslations("sidebar");
+  const tSearch = useTranslations("dashboard.search");
+  const tKey = useTranslations();
   const { open, setOpen } = useCommandPalette();
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
-  const [contentResults, setContentResults] = useState<ContentResult[]>([]);
+  const [contentResults, setContentResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
+  const [kindFilter, setKindFilter] = useState<SearchKind | "">("");
+  const [moduleFilter, setModuleFilter] = useState<string>("");
+  const [dateFilter, setDateFilter] = useState<DateRange>("any");
+  const [facets, setFacets] = useState<Facets>(NO_FACETS);
+  const searchCacheRef = useRef(new Map<string, SearchResult[]>());
   const inputRef = useRef<HTMLInputElement>(null);
   const searchTokenRef = useRef(0);
 
@@ -103,15 +157,50 @@ export function CommandPalette() {
     return key ? tSidebar(`items.${key}`) : label;
   }
 
+  function moduleLabel(slug: string): string {
+    const key = MODULE_TITLE_KEYS[slug];
+    return key ? tKey(key) : slug;
+  }
+
   const pageResults = useMemo(() => filterAndRankItems(PALETTE_ITEMS, query), [query]);
 
-  // Content search (entries inside modules + chat conversation titles) —
-  // debounced so it doesn't fire a request per keystroke, and only once
-  // the query is long enough to be worth a round trip.
+  // ONE REQUEST, debounced, cached, and last-one-wins.
+  //
+  // Three separate things, and dropping any of them shows:
+  //
+  //   DEBOUNCE, or it is a request per keystroke.
+  //   A CACHE keyed by the whole request, because backspacing is how
+  //   people search — "invoicee" -> "invoice" should not be a round trip
+  //   for something answered a moment ago.
+  //   A TOKEN, because responses do not arrive in the order they were
+  //   sent: without it a slow answer for "inv" can land after the answer
+  //   for "invoice" and replace it with a staler list.
   useEffect(() => {
     const q = query.trim();
-    if (q.length < 2) {
+    if (q.length < MIN_QUERY_LENGTH) {
       setContentResults([]);
+      setFacets(NO_FACETS);
+      setSearching(false);
+      return;
+    }
+
+    const params = new URLSearchParams({ q });
+    if (kindFilter) params.set("kinds", kindFilter);
+    if (moduleFilter) params.set("module", moduleFilter);
+    const since = sinceForRange(dateFilter, Date.now());
+    // Bucketed to the hour: a since= that changes every millisecond is a
+    // cache key that never repeats, which is a cache that never hits.
+    if (since) params.set("since", since.slice(0, 13) + ":00:00.000Z");
+    const key = params.toString();
+    // The facets come from a response fetched with NEITHER narrowing
+    // filter applied. Reading them off a filtered response would delete
+    // the chips you would need in order to undo the filter.
+    const unnarrowed = !kindFilter && !moduleFilter;
+
+    const cached = searchCacheRef.current.get(key);
+    if (cached) {
+      setContentResults(cached);
+      if (unnarrowed) setFacets(facetsOf(cached));
       setSearching(false);
       return;
     }
@@ -120,25 +209,35 @@ export function CommandPalette() {
     const token = ++searchTokenRef.current;
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+        const res = await fetch(`/api/search?${key}`);
         const data = await res.json();
         if (token !== searchTokenRef.current) return;
-        setContentResults(res.ok && data.ok ? data.results : []);
+        const results: SearchResult[] = res.ok && data.ok ? data.results : [];
+        // Bounded: a palette left open through a long session should not
+        // grow a cache of every query anybody ever typed.
+        if (searchCacheRef.current.size > 40) searchCacheRef.current.clear();
+        searchCacheRef.current.set(key, results);
+        setContentResults(results);
+        if (unnarrowed) setFacets(facetsOf(results));
       } catch {
         if (token === searchTokenRef.current) setContentResults([]);
       } finally {
         if (token === searchTokenRef.current) setSearching(false);
       }
-    }, 300);
+    }, 200);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, kindFilter, moduleFilter, dateFilter]);
 
   function close() {
     setOpen(false);
     setQuery("");
     setActiveIndex(0);
     setContentResults([]);
+    setFacets(NO_FACETS);
+    setKindFilter("");
+    setModuleFilter("");
+    setDateFilter("any");
   }
 
   function goTo(href: string) {
@@ -147,10 +246,11 @@ export function CommandPalette() {
   }
 
   const entries: PaletteEntry[] = useMemo(() => {
-    const pageEntries: PaletteEntry[] = pageResults.map((item) => ({
+    const pageEntries: PaletteEntry[] = pageResults.map((item, index) => ({
       key: `page-${item.href}`,
       href: item.href,
       label: translatedLabel(item.label),
+      groupHeading: index === 0 ? tSearch("kinds.page") : null,
       render: (active) => {
         const Icon = item.icon;
         return (
@@ -165,23 +265,50 @@ export function CommandPalette() {
       },
     }));
 
-    const contentEntries: PaletteEntry[] = contentResults.map((result) => ({
-      key: `content-${result.id}`,
-      href: result.href,
-      label: result.title,
-      render: () => {
-        const Icon = result.type === "chat" ? MessageCircle : FileText;
-        return (
-          <>
-            <Icon className="h-4 w-4 shrink-0 text-orange-500/40" aria-hidden="true" />
-            <span className="min-w-0 flex-1 truncate">{result.title}</span>
-            <span className="shrink-0 rounded-full border border-border px-1.5 py-0.5 text-[10px] text-muted">
-              {result.subtitle}
-            </span>
-          </>
-        );
-      },
-    }));
+    // GROUPED BY KIND, ranked within each group, groups in a fixed
+    // order — so the fourth row stays the fourth row between keystrokes
+    // and the arrow keys can be aimed. See lib/search/unified-search.ts.
+    const contentEntries: PaletteEntry[] = flattenGroups(groupResults(contentResults)).map(
+      (result, index, all) => {
+        const first = index === 0 || all[index - 1].kind !== result.kind;
+        return {
+          key: `content-${result.sourceTable}-${result.sourceId}`,
+          href: result.href,
+          label: result.title,
+          groupHeading: first ? tSearch(`kinds.${result.kind}`) : null,
+          render: () => {
+            const Icon = KIND_ICONS[result.kind] ?? FileText;
+            const segments = snippetSegments(result.snippet);
+            return (
+              <div className="flex min-w-0 flex-1 items-start gap-2">
+                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-orange-500/40" aria-hidden="true" />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate">{result.title}</span>
+                  {/* THE PREVIEW. Rendered as text nodes and a <mark>,
+                      never as HTML — ts_headline's <<…>> markers are
+                      split in lib/search/unified-search.ts precisely so
+                      nothing calls dangerouslySetInnerHTML on a string
+                      that came out of a database. */}
+                  {segments.length > 0 && (
+                    <span className="mt-0.5 block truncate text-[11px] text-muted">
+                      {segments.map((seg, i) =>
+                        seg.match ? (
+                          <mark key={i} className="bg-orange-500/25 text-foreground">
+                            {seg.text}
+                          </mark>
+                        ) : (
+                          <span key={i}>{seg.text}</span>
+                        )
+                      )}
+                    </span>
+                  )}
+                </span>
+              </div>
+            );
+          },
+        };
+      }
+    );
 
     return [...pageEntries, ...contentEntries];
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -228,9 +355,13 @@ export function CommandPalette() {
     }
   }, [open]);
 
+  // The selection goes back to the top whenever the LIST changes under
+  // it — a new query or a new filter. Without the filter half, clicking
+  // "Files" while row 9 was selected leaves the highlight past the end
+  // of a three-row list and Enter opens nothing.
   useEffect(() => {
     setActiveIndex(0);
-  }, [query]);
+  }, [query, kindFilter, moduleFilter, dateFilter]);
 
   function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "ArrowDown") {
@@ -247,6 +378,20 @@ export function CommandPalette() {
   }
 
   if (!open) return null;
+
+  const showFilters = query.trim().length >= MIN_QUERY_LENGTH && facets.kinds.length > 0;
+
+  // Chips must not steal focus from the input, or the arrow keys stop
+  // working the moment somebody narrows the list — which is exactly when
+  // they want to walk it. onMouseDown/preventDefault keeps the caret put;
+  // onClick still fires.
+  function chipClass(selected: boolean): string {
+    return `rounded-full border px-2.5 py-1 text-[11px] transition-colors duration-150 ${
+      selected
+        ? "border-orange-500/40 bg-orange-500/15 text-orange-300"
+        : "border-border text-muted hover:text-foreground"
+    }`;
+  }
 
   return (
     <div className="fixed inset-0 z-[60] flex items-start justify-center px-4 pt-[12vh]">
@@ -275,6 +420,87 @@ export function CommandPalette() {
           />
         </div>
 
+        {showFilters && (
+          <div className="space-y-1.5 border-b border-border px-3 py-2.5">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-0.5 text-[11px] text-muted">{tSearch("filters.type")}</span>
+              <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => {
+                  setKindFilter("");
+                  setModuleFilter("");
+                }}
+                className={chipClass(kindFilter === "")}
+              >
+                {tSearch("filters.all")}
+              </button>
+              {facets.kinds.map((kind) => (
+                <button
+                  key={kind}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => {
+                    const next = kindFilter === kind ? "" : kind;
+                    setKindFilter(next);
+                    // The module filter only means anything inside
+                    // kind=module; leaving it set while filtering to
+                    // Files gives an empty list and no way to see why.
+                    if (next !== "module") setModuleFilter("");
+                  }}
+                  className={chipClass(kindFilter === kind)}
+                >
+                  {tSearch(`kinds.${kind}`)}
+                </button>
+              ))}
+            </div>
+
+            {/* Only where a module means anything. module_slug is null on
+                every kind except "module", so offering the row beside
+                "Files" or "Chats" is offering a filter that can only ever
+                empty the list. */}
+            {facets.modules.length > 0 && (kindFilter === "" || kindFilter === "module") && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="mr-0.5 text-[11px] text-muted">{tSearch("filters.module")}</span>
+                <button
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => setModuleFilter("")}
+                  className={chipClass(moduleFilter === "")}
+                >
+                  {tSearch("filters.all")}
+                </button>
+                {facets.modules.map((slug) => (
+                  <button
+                    key={slug}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => setModuleFilter(moduleFilter === slug ? "" : slug)}
+                    className={chipClass(moduleFilter === slug)}
+                  >
+                    {moduleLabel(slug)}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-0.5 text-[11px] text-muted">{tSearch("filters.date")}</span>
+              {DATE_RANGES.map((range) => (
+                <button
+                  key={range}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
+                  onClick={() => setDateFilter(range)}
+                  className={chipClass(dateFilter === range)}
+                >
+                  {tSearch(`dates.${range}`)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="max-h-96 overflow-y-auto p-2">
           {entries.length === 0 ? (
             <p className="px-3 py-6 text-center text-sm text-muted">
@@ -284,21 +510,30 @@ export function CommandPalette() {
             entries.map((entry, index) => {
               const active = index === activeIndex;
               return (
-                <button
-                  key={entry.key}
-                  type="button"
-                  onClick={() => goTo(entry.href)}
-                  onMouseEnter={() => setActiveIndex(index)}
-                  className={`flex min-h-[44px] w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors duration-150 ${
-                    active
-                      ? "bg-orange-500/10 text-orange-400"
-                      : "text-foreground hover:bg-panel-hover"
-                  }`}
-                >
-                  {entry.render(active)}
-                </button>
+                <div key={entry.key}>
+                  {entry.groupHeading && (
+                    <p className="px-3 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted">
+                      {entry.groupHeading}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => goTo(entry.href)}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    className={`flex min-h-[44px] w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-left text-sm transition-colors duration-150 ${
+                      active
+                        ? "bg-orange-500/10 text-orange-400"
+                        : "text-foreground hover:bg-panel-hover"
+                    }`}
+                  >
+                    {entry.render(active)}
+                  </button>
+                </div>
               );
             })
+          )}
+          {searching && entries.length > 0 && (
+            <p className="px-3 py-2 text-center text-[11px] text-muted">{tCommon("loading")}</p>
           )}
         </div>
 

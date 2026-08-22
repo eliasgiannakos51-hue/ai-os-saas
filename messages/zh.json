@@ -1850,6 +1850,31 @@
       "finished": "您离开期间，上一个请求已经完成。",
       "open": "打开",
       "dismiss": "关闭"
+    },
+    "search": {
+      "kinds": {
+        "page": "页面",
+        "module": "记录",
+        "file": "文件",
+        "chat": "对话",
+        "website": "网站",
+        "agent": "智能体",
+        "research": "研究",
+        "mission": "任务",
+        "help": "帮助"
+      },
+      "filters": {
+        "type": "类型",
+        "module": "模块",
+        "date": "日期",
+        "all": "全部"
+      },
+      "dates": {
+        "any": "不限时间",
+        "7d": "7 天",
+        "30d": "30 天",
+        "365d": "1 年"
+      }
     }
   },
   "module": {

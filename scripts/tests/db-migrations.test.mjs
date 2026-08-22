@@ -431,12 +431,13 @@ if (!DB) {
   // recently 20260817000002 (agent_runs.would_have_charged_credits'
   // migration touches no new table, so that one didn't move this number;
   // 20260814's delivery-channels migration is what took 70 to 72;
-  // 20260823's cost_alert_log took 72 to 73). It
+  // 20260823's cost_alert_log took 72 to 73; 20260824's search_index
+  // took 73 to 74). It
   // stayed 70 through two migrations that changed it, in two different
   // files, which is exactly the failure a ratchet exists to prevent and
   // exactly what a fresh count on every run below stops from happening
   // again silently.
-  check(`73 tables`, tables === 73, `got ${tables}`);
+  check(`74 tables`, tables === 74, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 
@@ -531,7 +532,20 @@ if (!DB) {
   // search_headline / search_fold / immutable_unaccent are granted to
   // authenticated on purpose — they derive identity from auth.uid() and
   // read nothing RLS does not already gate.
-  const ALLOWED = ["search_headline", "search_fold", "immutable_unaccent"];
+  // search_all and search_query join them for the same reason: search_all
+  // is SECURITY INVOKER, so the RLS policy on search_index is what scopes
+  // every row it can see, and search_query is a pure text-to-tsquery
+  // transform that touches no table at all. They are how a signed-in
+  // browser searches; granting them to service_role only would mean
+  // routing every keystroke through an admin client, which is the
+  // arrangement that actually leaks.
+  const ALLOWED = [
+    "search_headline",
+    "search_fold",
+    "immutable_unaccent",
+    "search_all",
+    "search_query",
+  ];
   const unexpected = leaky
     ? leaky.split(", ").filter((s) => !ALLOWED.some((a) => s.startsWith(`${a}(`)))
     : [];

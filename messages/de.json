@@ -1850,6 +1850,31 @@
       "finished": "Deine letzte Anfrage wurde fertig, während du weg warst.",
       "open": "Öffnen",
       "dismiss": "Ausblenden"
+    },
+    "search": {
+      "kinds": {
+        "page": "Seiten",
+        "module": "Einträge",
+        "file": "Dateien",
+        "chat": "Unterhaltungen",
+        "website": "Websites",
+        "agent": "Agenten",
+        "research": "Recherche",
+        "mission": "Missionen",
+        "help": "Hilfe"
+      },
+      "filters": {
+        "type": "Typ",
+        "module": "Modul",
+        "date": "Datum",
+        "all": "Alle"
+      },
+      "dates": {
+        "any": "Jederzeit",
+        "7d": "7 Tage",
+        "30d": "30 Tage",
+        "365d": "1 Jahr"
+      }
     }
   },
   "module": {

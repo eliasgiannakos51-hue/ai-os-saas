@@ -1850,6 +1850,31 @@
       "finished": "Tu última petición terminó mientras no estabas.",
       "open": "Ábrelo",
       "dismiss": "Descartar"
+    },
+    "search": {
+      "kinds": {
+        "page": "Páginas",
+        "module": "Registros",
+        "file": "Archivos",
+        "chat": "Conversaciones",
+        "website": "Sitios web",
+        "agent": "Agentes",
+        "research": "Investigación",
+        "mission": "Misiones",
+        "help": "Ayuda"
+      },
+      "filters": {
+        "type": "Tipo",
+        "module": "Módulo",
+        "date": "Fecha",
+        "all": "Todo"
+      },
+      "dates": {
+        "any": "Cualquier fecha",
+        "7d": "7 días",
+        "30d": "30 días",
+        "365d": "1 año"
+      }
     }
   },
   "module": {

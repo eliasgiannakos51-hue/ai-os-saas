@@ -1850,6 +1850,31 @@
       "finished": "Votre dernière demande s'est terminée pendant votre absence.",
       "open": "Ouvrir",
       "dismiss": "Ignorer"
+    },
+    "search": {
+      "kinds": {
+        "page": "Pages",
+        "module": "Enregistrements",
+        "file": "Fichiers",
+        "chat": "Conversations",
+        "website": "Sites web",
+        "agent": "Agents",
+        "research": "Recherche",
+        "mission": "Missions",
+        "help": "Aide"
+      },
+      "filters": {
+        "type": "Type",
+        "module": "Module",
+        "date": "Date",
+        "all": "Tout"
+      },
+      "dates": {
+        "any": "À tout moment",
+        "7d": "7 jours",
+        "30d": "30 jours",
+        "365d": "1 an"
+      }
     }
   },
   "module": {

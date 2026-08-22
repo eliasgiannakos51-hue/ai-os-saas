@@ -1850,6 +1850,31 @@
       "finished": "O teu último pedido terminou enquanto estavas fora.",
       "open": "Abrir",
       "dismiss": "Dispensar"
+    },
+    "search": {
+      "kinds": {
+        "page": "Páginas",
+        "module": "Registros",
+        "file": "Arquivos",
+        "chat": "Conversas",
+        "website": "Sites",
+        "agent": "Agentes",
+        "research": "Pesquisa",
+        "mission": "Missões",
+        "help": "Ajuda"
+      },
+      "filters": {
+        "type": "Tipo",
+        "module": "Módulo",
+        "date": "Data",
+        "all": "Tudo"
+      },
+      "dates": {
+        "any": "Qualquer data",
+        "7d": "7 dias",
+        "30d": "30 dias",
+        "365d": "1 ano"
+      }
     }
   },
   "module": {

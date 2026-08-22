@@ -1850,6 +1850,31 @@
       "finished": "La tua ultima richiesta è stata completata mentre eri via.",
       "open": "Aprila",
       "dismiss": "Chiudi"
+    },
+    "search": {
+      "kinds": {
+        "page": "Pagine",
+        "module": "Voci",
+        "file": "File",
+        "chat": "Conversazioni",
+        "website": "Siti web",
+        "agent": "Agenti",
+        "research": "Ricerca",
+        "mission": "Missioni",
+        "help": "Aiuto"
+      },
+      "filters": {
+        "type": "Tipo",
+        "module": "Modulo",
+        "date": "Data",
+        "all": "Tutto"
+      },
+      "dates": {
+        "any": "Sempre",
+        "7d": "7 giorni",
+        "30d": "30 giorni",
+        "365d": "1 anno"
+      }
     }
   },
   "module": {

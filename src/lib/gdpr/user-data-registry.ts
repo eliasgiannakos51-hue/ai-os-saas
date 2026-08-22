@@ -28,7 +28,13 @@ export type UserDataScope =
    *  redacted rather than dumped verbatim (tokens, device fingerprints). */
   | "sensitive_redacted"
   /** Not personal data: aggregate counters with no user column. */
-  | "not_personal";
+  | "not_personal"
+  /** PERSONAL DATA that is a DERIVED COPY of rows exported elsewhere
+   *  under their own labels. Not exported — an export containing the
+   *  same sentence twice, once as the record and once as its search
+   *  entry, is a worse answer to "give me my data" than one containing
+   *  it once. Erased by the same cascade as the row it copies. */
+  | "derived_index";
 
 export type UserDataTable = {
   table: string;
@@ -180,6 +186,23 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // that carries user_id would be a claim the schema contradicts. The FK
   // is on delete cascade, so erasure needs no explicit pass.
   { table: "subscription_cancellations", label: "subscription_cancellations", scope: "account" },
+
+  // --- Derived ---
+  //
+  // The unified search index (20260824). Every row here is a COPY of the
+  // title and body of a row in one of the tables above, written by a
+  // trigger, so it is unquestionably personal data — and equally
+  // unquestionably already in the export, under the label of the table
+  // it came from. Exporting it as well would hand the user each of their
+  // own sentences twice.
+  //
+  // ERASURE IS THE CASCADE. search_index.user_id is
+  // `references auth.users(id) on delete cascade`, so deleting the
+  // account removes the index entries with it — which is why this is not
+  // marked needsExplicitErasure. That is not taken on trust: section 7
+  // of scripts/tests/unified-search.dbtest.mjs deletes a user against a
+  // real PostgreSQL and asserts the rows are gone.
+  { table: "search_index", label: "search_index", scope: "derived_index" },
 ];
 
 /** Tables with no user column at all — recorded so the coverage test can
@@ -196,7 +219,9 @@ export const NON_PERSONAL_TABLES = [
 
 /** Everything the export route reads. */
 export function exportableTables(): UserDataTable[] {
-  return USER_DATA_TABLES.filter((t) => t.scope !== "not_personal");
+  return USER_DATA_TABLES.filter(
+    (t) => t.scope !== "not_personal" && t.scope !== "derived_index"
+  );
 }
 
 /** Tables that deleteUser()'s cascade will NOT clear. */

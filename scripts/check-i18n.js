@@ -46,6 +46,40 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // Unified search (V4 #17). The command palette's group headings and
+  // filter labels. Each checked by hand against the language, not waved
+  // through as a batch:
+  //
+  //   French spells "pages", "conversations", "agents", "missions",
+  //   "type", "module" and "date" exactly as English does — they are the
+  //   ordinary French words, not untranslated leftovers. Every other
+  //   French string in this block (Enregistrements, Fichiers, Sites web,
+  //   Recherche, Aide, Tout, "À tout moment") DOES differ, which is what
+  //   makes these seven a coincidence rather than a skipped locale.
+  //
+  //   German uses "Websites" for websites; its own eight neighbours in
+  //   the same block (Seiten, Einträge, Dateien, Unterhaltungen, Agenten,
+  //   Recherche, Missionen, Hilfe) are all translated.
+  "fr:dashboard.search.kinds.page",
+  "fr:dashboard.search.kinds.chat",
+  "fr:dashboard.search.kinds.agent",
+  "fr:dashboard.search.kinds.mission",
+  "fr:dashboard.search.filters.type",
+  "fr:dashboard.search.filters.module",
+  "fr:dashboard.search.filters.date",
+  "de:dashboard.search.kinds.website",
+  // The Home page of a generated multi-page website, in the page list.
+  // Italian websites say "Home" — it is the word Italian uses for a
+  // site's landing page, and the nine other locales here all translate it
+  // (Αρχική, Inicio, Accueil, Startseite, Início, الرئيسية, ホーム, 首页),
+  // which is what makes this one locale a genuine loanword rather than a
+  // forgotten row.
+  //
+  // NOTE: this key shipped in commit 9fa79c1 without an allowance, which
+  // left `npm run build` red on this branch from that commit until this
+  // one. It was never a runtime defect — the Italian UI says the right
+  // word — but the gate was failing and the failure was not reported.
+  "it:dashboard.websiteBuilder.pageHome",
   // "Email" is the ordinary Italian word for it — Italian borrowed the
   // noun whole, and "posta elettronica" is what a government form says,
   // not what a person reading a settings panel expects. Scoped to Italian

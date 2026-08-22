@@ -1850,6 +1850,31 @@
       "finished": "Your last request finished while you were away.",
       "open": "Open it",
       "dismiss": "Dismiss"
+    },
+    "search": {
+      "kinds": {
+        "page": "Pages",
+        "module": "Records",
+        "file": "Files",
+        "chat": "Conversations",
+        "website": "Websites",
+        "agent": "Agents",
+        "research": "Research",
+        "mission": "Missions",
+        "help": "Help"
+      },
+      "filters": {
+        "type": "Type",
+        "module": "Module",
+        "date": "Date",
+        "all": "All"
+      },
+      "dates": {
+        "any": "Any time",
+        "7d": "7 days",
+        "30d": "30 days",
+        "365d": "1 year"
+      }
     }
   },
   "module": {

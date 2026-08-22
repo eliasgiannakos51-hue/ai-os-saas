@@ -89,6 +89,12 @@ const ADMIN_ONLY_TABLES = new Set([
   "daily_ai_spend_tracking",
   "account_deletion_requests",
   "production_errors",
+  // What every customer's spend triggered, with the numbers. RLS on with
+  // NO policy is deny-all, which is stricter than any policy could be and
+  // is exactly right here: a customer who could read this would learn the
+  // shape of the whole business. Written and read only through
+  // createAdminClient(), behind an isAdminEmail() gate on the page.
+  "cost_alert_log",
 ]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();
@@ -346,6 +352,8 @@ const NO_SESSION_BY_DESIGN = {
     "the public web: serves a published site to anonymous visitors. Reads through the admin client and selects only the columns a visitor needs; published_sites has no public RLS policy, so a visitor cannot read the table at all. In-memory rate limited, and every response carries a restrictive CSP.",
   "src/app/s/[subdomain]/[page]/route.ts":
     "the same public site, one page further in. Identical posture to the parent route — admin client, named columns, rate limit, CSP — with one addition that is the reason this exists separately: the page segment is a URL path, so it goes through validatePageSlug BEFORE any lookup. The slug must match ^[a-z0-9]+(-[a-z0-9]+)*$, which rejects ../admin, a/b, %2e%2e and a leading dot on SHAPE rather than by reasoning about path semantics — a rule written as 'does not contain ..' falls to encoding, and one written on the decoded string falls to double encoding. An unknown slug is a 404, never a fallback to the home page, so a crawler is not told that every URL under the site exists.",
+  "src/app/api/cron/cost-alerts/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED — with no secret configured the route refuses to run on any deployment. It reads aggregates across every account's spend and can send email, so it is in the same class as the other cron routes and not a lighter one.",
   "src/app/s/[subdomain]/sitemap.xml/route.ts":
     "the public site's own sitemap, for its owner to submit to Search Console. Same posture as the routes above — admin client, rate limit, subdomain validated before any lookup — and it selects only `pages, status, is_active, updated_at`: the page SLUGS and a timestamp, never html_content, so nothing about a site's contents is reachable here that /s/<subdomain>/<page> does not already serve publicly. A site that is not live is a 404 rather than an empty sitemap, so this cannot be used to learn that a withdrawn address once existed.",
   "src/app/s/[subdomain]/robots.txt/route.ts":

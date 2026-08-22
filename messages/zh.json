@@ -2446,6 +2446,7 @@
   "pageTitle": {
     "document": "文档",
     "systemHealth": "系统状态",
+    "costs": "成本",
     "onboarding": "开始使用",
     "notFound": "页面不存在",
     "notFoundBody": "此页面不存在 — 可能是网址输入有误，或页面已被移动。",

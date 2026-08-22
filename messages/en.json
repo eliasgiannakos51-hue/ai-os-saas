@@ -2446,6 +2446,7 @@
   "pageTitle": {
     "document": "Document",
     "systemHealth": "System Health",
+    "costs": "Costs",
     "onboarding": "Get started",
     "notFound": "Not Found",
     "notFoundBody": "This page doesn't exist — the address may have been mistyped, or the page may have moved.",

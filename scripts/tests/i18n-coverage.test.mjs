@@ -747,6 +747,13 @@ const BARE_TEXT_BASELINE = {
     "src/components/settings/buy-credits.tsx": 2,
     "src/components/settings/danger-zone.tsx": 1,
     "src/components/settings/password-change-form.tsx": 1,
+    // Owner-only cost diagnostics, English for the same reason as
+    // system-health below: the audience is the hardcoded ADMIN_EMAILS
+    // list — one person — and the page is unreachable (notFound) for
+    // everybody else. Ten locale entries per label would be translation
+    // nobody can ever read, and the labels are operational terms
+    // ("margin", "MRR") that are English in the code they describe.
+    "src/components/costs/cost-dashboard.tsx": 12,
     "src/components/system-health/error-list.tsx": 2,
     // Owner-only diagnostics, English on purpose like the rest of the
     // system-health page it lives on.

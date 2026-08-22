@@ -2446,6 +2446,7 @@
   "pageTitle": {
     "document": "Documento",
     "systemHealth": "Estado do sistema",
+    "costs": "Custos",
     "onboarding": "Começar",
     "notFound": "Não encontrada",
     "notFoundBody": "Esta página não existe — o endereço pode ter sido mal escrito ou a página pode ter mudado.",

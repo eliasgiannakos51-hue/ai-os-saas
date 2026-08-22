@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { PaidPlanSlug } from "@/lib/billing/plans";
+import type { BillingInterval, PaidPlanSlug } from "@/lib/billing/plans";
 import { useTranslations } from "next-intl";
 
 // Redirects to the Stripe-hosted Checkout Session URL returned by
@@ -14,10 +14,14 @@ export function SubscribeButton({
   label,
   className,
   successPath,
+  interval = "month",
 }: {
   plan: PaidPlanSlug;
   label: string;
   className: string;
+  /** Which Stripe price to buy. Server-validated — this only decides what
+   *  the request asks for, never what it is allowed to charge. */
+  interval?: BillingInterval;
   // Where Stripe sends the browser back after a successful payment —
   // omit to keep the existing default (/dashboard/settings?checkout=success,
   // set server-side in api/checkout). Forwarded to /signup's own checkout
@@ -27,6 +31,7 @@ export function SubscribeButton({
 }) {
   const router = useRouter();
   const tCommon = useTranslations("common");
+  const t = useTranslations("pricing");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,11 +42,11 @@ export function SubscribeButton({
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan, ...(successPath ? { successPath } : {}) }),
+        body: JSON.stringify({ plan, interval, ...(successPath ? { successPath } : {}) }),
       });
 
       if (res.status === 401) {
-        const params = new URLSearchParams({ plan });
+        const params = new URLSearchParams({ plan, interval });
         if (successPath) params.set("successPath", successPath);
         router.push(`/signup?${params.toString()}`);
         return;
@@ -49,7 +54,18 @@ export function SubscribeButton({
 
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setError(data.error ?? "Could not start checkout.");
+        setError(data.error ?? t("checkoutFailed"));
+        return;
+      }
+
+      // An EXISTING subscriber does not go to Stripe at all — the plan
+      // change happened server-side, prorated, on the subscription they
+      // already have (see api/checkout). There is no session url to
+      // follow, and following `undefined` would navigate the browser to
+      // the string "undefined".
+      if (data.updated || data.unchanged) {
+        router.push(String(data.redirectPath ?? successPath ?? "/dashboard/settings"));
+        router.refresh();
         return;
       }
 
@@ -64,7 +80,7 @@ export function SubscribeButton({
   return (
     <div>
       <button type="button" onClick={handleClick} disabled={loading} className={className}>
-        {loading ? "Loading..." : label}
+        {loading ? tCommon("loading") : label}
       </button>
       {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
     </div>

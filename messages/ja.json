@@ -260,7 +260,13 @@
       "included": "無制限のチームシートを含む — メンバーごとの追加料金なし",
       "perMember": "+ チームメンバー1人あたり月額{currency}{price} — 各メンバーはご利用プランの階層で全機能を利用できます"
     },
-    "metaDescription": "Ionexa AI の料金 — Free、Starter、Growth、Professional、Ultimate、Enterprise の各プラン。"
+    "metaDescription": "Ionexa AI の料金 — Free、Starter、Growth、Professional、Ultimate、Enterprise の各プラン。",
+    "billingMonthly": "月額",
+    "billingAnnual": "年額",
+    "billingIntervalLabel": "請求サイクル",
+    "billingAnnualSaving": "{percent}% お得 — 2か月分無料",
+    "billedAnnually": "年1回 {total} のご請求 — {saving} お得です",
+    "checkoutFailed": "決済を開始できませんでした。もう一度お試しください。"
   },
   "roadmap": {
     "title": "ロードマップ",
@@ -661,7 +667,10 @@
       "cacheColRead": "キャッシュから",
       "cacheColWrite": "書き込み",
       "cacheEmpty": "プロンプトトークンはまだ記録されていません。",
-      "cacheMiscachedAlert": "{features}：キャッシュに書き込むだけで読み戻していません — ブレークポイントがリクエストごとに変わる内容の上にあります。"
+      "cacheMiscachedAlert": "{features}：キャッシュに書き込むだけで読み戻していません — ブレークポイントがリクエストごとに変わる内容の上にあります。",
+      "absorbedRefusals": "吸収した拒否: {calls} 件のエージェント実行がタスクを拒否し、課金されませんでした — €{cost} のモデル費用は当社負担です。",
+      "absorbedRefusalsShare": "これはこの期間の収益の {share}% です。確認しきい値は {limit}% です。",
+      "absorbedRefusalsShareUnknown": "収益に対する割合は表示されません: このレポートには比較する収益の数値がありません。"
     },
     "pushNotifications": {
       "title": "プッシュ通知",
@@ -1415,6 +1424,42 @@
         "testSentTelegram": "送信しました。Telegram を確認してください。",
         "testSentDiscord": "送信しました。Discord のチャンネルを確認してください。",
         "testFailed": "テストメッセージを送信できませんでした。"
+      },
+      "runCannotComplete": "このエージェントはそのタスクを実行できないため、停止しました。クレジットは請求されていません。",
+      "capability": {
+        "canTitle": "エージェントにできること",
+        "cannotTitle": "エージェントにできないこと",
+        "can": {
+          "search": "ウェブで最新の情報を検索する",
+          "analyse": "見つけた内容を読んで分析する",
+          "summarise": "要約し、比較し、結論を導く",
+          "monitor": "トピックを継続的に追い、変化を報告する",
+          "schedule": "以上をスケジュールどおりに実行し、結果をメールで送る"
+        },
+        "cannot": {
+          "code": "コードの記述や実行、ソフトウェアやサイトの制作、テストの実行、バグの修正",
+          "system_access": "あなたのパソコン・ファイル・アカウント・システムへのアクセス",
+          "other_platforms": "他のプラットフォームでの操作（投稿、誰かへの連絡、予約、注文）",
+          "physical": "現実世界での作業",
+          "financial": "送金、売買",
+          "phone": "電話をかけること"
+        },
+        "refusedTitle": "これはエージェントには実行できません",
+        "refusedBody": "ご依頼の内容はすべて、エージェントの能力の外にあることを必要とします:",
+        "detectedIn": "入力内容から検出: {words}",
+        "noCharge": "請求は発生していません — 何も実行されていません。",
+        "noChargeYet": "まだ何も請求されていません。",
+        "tryInstead": "代わりに調査・monitoring・要約を依頼してみてください。例:「毎週月曜に、業界の最新動向をまとめて」",
+        "rephrase": "依頼を書き直す",
+        "partialTitle": "この一部は実行できません",
+        "partialWillDo": "エージェントは代わりにこれを行います: {parts}",
+        "partialContinue": "実行できる部分だけ作成",
+        "previewWhatItDoes": "毎回の実行内容",
+        "previewWillNotDo": "行わないこと",
+        "stepSearch": "そのトピックの最新情報をウェブで検索します。",
+        "stepNoSearch": "タスクの文面だけで作業します（ウェブ検索なし）。",
+        "stepWrite": "結果を書き、見つけた内容と照合します。",
+        "stepDeliver": "{when}、{target} にメールで送ります。"
       }
     },
     "publishing": {

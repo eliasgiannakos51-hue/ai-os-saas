@@ -260,7 +260,13 @@
       "included": "Postazioni team illimitate incluse — nessun addebito per membro",
       "perMember": "+ {currency}{price}/mese per membro del team — ogni membro ottiene accesso completo al livello del tuo piano"
     },
-    "metaDescription": "Prezzi di Ionexa AI — piani Free, Starter, Growth, Professional, Ultimate ed Enterprise."
+    "metaDescription": "Prezzi di Ionexa AI — piani Free, Starter, Growth, Professional, Ultimate ed Enterprise.",
+    "billingMonthly": "Mensile",
+    "billingAnnual": "Annuale",
+    "billingIntervalLabel": "Periodo di fatturazione",
+    "billingAnnualSaving": "Risparmia il {percent}% — due mesi gratis",
+    "billedAnnually": "Addebito di {total} una volta all'anno — risparmi {saving}",
+    "checkoutFailed": "Impossibile avviare il pagamento. Riprova."
   },
   "roadmap": {
     "title": "Roadmap",
@@ -661,7 +667,10 @@
       "cacheColRead": "Dalla cache",
       "cacheColWrite": "Scritti",
       "cacheEmpty": "Nessun token di prompt registrato finora.",
-      "cacheMiscachedAlert": "{features}: scrive nella cache ma non legge nulla — il punto di interruzione è su contenuto che cambia a ogni richiesta."
+      "cacheMiscachedAlert": "{features}: scrive nella cache ma non legge nulla — il punto di interruzione è su contenuto che cambia a ogni richiesta.",
+      "absorbedRefusals": "Rifiuti assorbiti: {calls} esecuzione/i di agente hanno rifiutato il compito e non sono state addebitate — €{cost} di costo del modello a nostro carico.",
+      "absorbedRefusalsShare": "Pari al {share}% dei ricavi in questo periodo; la soglia di revisione è {limit}%.",
+      "absorbedRefusalsShareUnknown": "La quota sui ricavi non viene mostrata: questo report non ha un dato di ricavo con cui confrontarla."
     },
     "pushNotifications": {
       "title": "Notifiche push",
@@ -1415,6 +1424,42 @@
         "testSentTelegram": "Inviato: controlla il tuo Telegram.",
         "testSentDiscord": "Inviato: controlla il tuo canale Discord.",
         "testFailed": "Impossibile inviare il messaggio di prova."
+      },
+      "runCannotComplete": "Questo agente non può svolgere quel compito, quindi è stato disattivato. Non è stato addebitato alcun credito.",
+      "capability": {
+        "canTitle": "Un agente può",
+        "cannotTitle": "Un agente non può",
+        "can": {
+          "search": "Cercare informazioni aggiornate sul web",
+          "analyse": "Leggere e analizzare ciò che trova",
+          "summarise": "Riassumere, confrontare e trarre conclusioni",
+          "monitor": "Seguire un argomento nel tempo e segnalare cosa è cambiato",
+          "schedule": "Fare tutto questo a intervalli programmati e inviarti il risultato via e-mail"
+        },
+        "cannot": {
+          "code": "Scrivere o eseguire codice, creare software o siti, lanciare test, correggere bug",
+          "system_access": "Accedere al tuo computer, ai tuoi file, account o sistemi",
+          "other_platforms": "Agire su altre piattaforme: pubblicare, scrivere a qualcuno, prenotare o ordinare",
+          "physical": "Fare qualsiasi cosa nel mondo fisico",
+          "financial": "Spostare denaro, comprare o vendere",
+          "phone": "Fare telefonate"
+        },
+        "refusedTitle": "Questo un agente non può farlo",
+        "refusedBody": "Tutto ciò che hai chiesto richiede qualcosa fuori da ciò che un agente sa fare:",
+        "detectedIn": "Rilevato in ciò che hai scritto: {words}",
+        "noCharge": "Non ti è stato addebitato nulla: non è stato eseguito niente.",
+        "noChargeYet": "Finora non è stato addebitato nulla.",
+        "tryInstead": "Prova invece a chiedere una ricerca, un monitoraggio o un riassunto — per esempio: «ogni lunedì, riassumi le novità del mio settore».",
+        "rephrase": "Voglio riscrivere la richiesta",
+        "partialTitle": "Una parte di questo non è possibile",
+        "partialWillDo": "L'agente farebbe invece questo: {parts}",
+        "partialContinue": "Crea solo la parte fattibile",
+        "previewWhatItDoes": "Cosa fa a ogni esecuzione",
+        "previewWillNotDo": "Cosa non farà",
+        "stepSearch": "Cerca sul web informazioni aggiornate sull'argomento.",
+        "stepNoSearch": "Lavora solo sul testo del compito, senza ricerca web.",
+        "stepWrite": "Scrive il risultato e lo verifica con quanto ha trovato.",
+        "stepDeliver": "Lo invia via e-mail a {target}, {when}."
       }
     },
     "publishing": {

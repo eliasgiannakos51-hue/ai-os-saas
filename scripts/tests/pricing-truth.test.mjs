@@ -39,7 +39,7 @@
  *
  * Run: node scripts/tests/pricing-truth.test.mjs
  */
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
 
 let pass = 0,
@@ -237,6 +237,42 @@ for (const file of SURFACES) {
   }
 }
 check("no surface still advertises a deleted feature", claimsElsewhere, []);
+
+// =====================================================================
+console.log("\n== the annual badge and the annual price say the same thing ==");
+// THE BADGE READ "Save {percent}% — two months free" WHILE THE CODE TOOK
+// 20% OFF. Those are different offers: 20% of twelve months is 2.4 months,
+// so the sentence understated what was actually billed, and nothing tied
+// the two together. Both now derive from ANNUAL_MONTHS_CHARGED, and this
+// is what stops them separating again.
+{
+  const plansMod = await loadTs("src/lib/billing/plans.ts");
+  const free = plansMod.ANNUAL_MONTHS_FREE;
+  const charged = plansMod.ANNUAL_MONTHS_CHARGED;
+  checkTrue(`the year is ${charged} months charged and ${free} free`, charged + free === 12);
+  checkTrue(
+    `the badge's percent is derived from those months (${plansMod.ANNUAL_DISCOUNT_PERCENT}%)`,
+    plansMod.ANNUAL_DISCOUNT_PERCENT === Math.round((free / 12) * 100)
+  );
+  for (const plan of plansMod.PLANS) {
+    if (typeof plan.price !== "number" || plan.price <= 0) continue;
+    const annual = plansMod.annualPriceEur(plan);
+    // THE SENTENCE, CHECKED AS ARITHMETIC. "Two months free" means the
+    // yearly total is exactly ten monthly payments — not "about 17% off".
+    checkTrue(`${plan.slug}: EUR ${annual}/yr is exactly ${charged} x EUR ${plan.price}`,
+      annual === plan.price * charged);
+    checkTrue(`${plan.slug}: the saving shown is exactly ${free} months (EUR ${plansMod.annualSavingsEur(plan)})`,
+      plansMod.annualSavingsEur(plan) === plan.price * free);
+  }
+  // And every locale still phrases it with the placeholder — a
+  // translation that froze the number would leave a percentage standing
+  // alone as the whole claim, free to drift from the price again.
+  for (const file of readdirSync("messages").filter((f) => f.endsWith(".json")).map((f) => `messages/${f}`)) {
+    const msgs = JSON.parse(readFileSync(file, "utf8"));
+    const line = msgs?.pricing?.billingAnnualSaving ?? "";
+    checkTrue(`${file}: the annual badge is parameterised, not a frozen number`, line.includes("{percent}"), line);
+  }
+}
 
 console.log(`\n${fail === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

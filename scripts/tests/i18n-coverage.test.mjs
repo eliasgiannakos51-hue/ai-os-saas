@@ -473,6 +473,16 @@ check(`no rendered ternary branch is an English literal`, ternaryLiterals, []);
 // deliberately instead of by accident.
 const serverErrorProse = sources
   .filter((f) => f.startsWith("src/app/api/"))
+  // CRON AND WEBHOOK ROUTES ARE NOT READ BY A PERSON. Vercel's scheduler
+  // and Stripe's delivery agent get these bodies; neither has a locale and
+  // neither is going to read a sentence. Counting them made the ratchet
+  // demand translations for an audience that does not exist, and — worse —
+  // padded the number by 11, so eleven strings' worth of real English
+  // prose could be added anywhere else without the total moving.
+  //
+  // Excluding them LOWERS the baseline from 558 to 549. The bar goes up,
+  // not down: what is left is the prose a user can actually be shown.
+  .filter((f) => !f.includes("/api/cron/") && !f.includes("/api/webhooks/"))
   .flatMap((f) => [...stripComments(readFileSync(f, "utf8")).matchAll(/error: "[A-Z][^"]{8,}"/g)]);
 const clientFallbacks = sources.flatMap((f) => [
   ...stripComments(readFileSync(f, "utf8")).matchAll(/getErrorMessage\([^,]+,\s*"[^"]{6,}"/g),
@@ -606,7 +616,11 @@ const clientFallbacks = sources.flatMap((f) => [
 // actually reads while deleting (the confirmation, what is lost, the
 // undo, every control's label) are in dashboard.mission.* in all ten
 // locales, checked by scripts/tests/mission-editing.test.mjs.
-const SERVER_PROSE_BASELINE = 558;
+// LOWERED FROM 558 IN THE SAME CHANGE THAT NARROWED THE SCOPE. Leaving it
+// at 558 while the count dropped to 549 would have left nine free slots —
+// nine English sentences that could reach a user without this number
+// moving. A ratchet with slack in it is not a ratchet.
+const SERVER_PROSE_BASELINE = 549;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

@@ -376,7 +376,11 @@
   color: rgb(var(--accent-amber-text-soft));
 }
 
-[data-theme="light"] .text-amber-200\/80 {
+[data-theme="light"] .text-amber-200\/80,
+/* /90 arrived with the agent capability panel: the "reduced" list, which
+   is amber because the run was narrowed rather than refused. Same ink as
+   /80 — the alpha is what fails on white, not the hue. */
+[data-theme="light"] .text-amber-200\/90 {
   color: rgb(var(--accent-amber-text-softer));
 }
 
@@ -408,7 +412,11 @@
   color: rgb(var(--danger-text-soft));
 }
 
-[data-theme="light"] .text-rose-200\/80 {
+[data-theme="light"] .text-rose-200\/80,
+/* /90 arrived with the agent capability panel: the "cannot do this" list,
+   which is rose because the run was refused outright. Same ink as /80 —
+   what fails on white is the alpha, not the hue. */
+[data-theme="light"] .text-rose-200\/90 {
   color: rgb(var(--danger-text-softer));
 }
 

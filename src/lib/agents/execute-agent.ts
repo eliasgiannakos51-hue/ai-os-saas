@@ -75,6 +75,15 @@ export type ExecuteAgentResult =
         | "insufficient_credits"
         | "bypass_ceiling"
         | "run_failed"
+        /**
+         * The agent cannot do this task, ever. Separate from "run_failed"
+         * because the two need opposite words in the UI: a failed run
+         * says "try again", and this one must say "this agent cannot do
+         * that — it has been switched off and you were not charged".
+         * Telling a user to retry something impossible is how they end
+         * up retrying it.
+         */
+        | "cannot_complete"
         | "no_api_key"
         | "internal";
       message: string;
@@ -274,21 +283,43 @@ export async function executeAgent(params: {
   // 8. Settle. Always — every attempt above spent real tokens, including
   //    the ones that produced nothing, and a failed run that charges zero
   //    is a run the margin report cannot see.
+  //
+  //    THE ONE EXCEPTION: the agent said it cannot do this task at all.
+  //
+  //    Every other failure is bad luck — an overloaded API, an empty
+  //    response, a page that would not load — and the user still asked
+  //    for something we can do. A capability refusal is different in
+  //    kind: the task is impossible, it was impossible when we let them
+  //    create it, and it will be impossible on every future run. Charging
+  //    for the discovery is charging for our own gap. So this settles as
+  //    a bypass row — the real cost stays visible in the margin report,
+  //    which is what tells us how much these gaps cost — and the hold is
+  //    released whole below.
+  const cannotComplete = !outcome.ok && outcome.failure.kind === "cannot_complete";
   const settlement = await settleReservation({
     userId,
-    reservationId,
-    feature: "agent_run",
+    reservationId: cannotComplete ? "" : reservationId,
+    feature: cannotComplete ? "agent_run_cannot_complete" : "agent_run",
     costs,
     plan,
-    bypassCharge: bypassCredits || !plan,
+    bypassCharge: bypassCredits || !plan || cannotComplete,
     metadata: {
       agentId: agent.id,
       runId,
       triggerSource,
       attempts,
       estimatedCredits: estimate.estimatedCredits,
+      ...(cannotComplete ? { refunded: true, cannotComplete: true } : {}),
     },
   });
+  if (cannotComplete) {
+    // Released AFTER settlement, not instead of it: settleReservation was
+    // passed an empty reservation id precisely so it would charge nothing
+    // and leave the hold alone, and this is the release. Doing it the
+    // other way round — release first, settle second — is the ordering
+    // that can charge against a hold that is already gone.
+    await releaseReservation(userId, reservationId);
+  }
   diagLog(
     `[billing] agent_run settled: ${JSON.stringify({
       userId,
@@ -322,14 +353,25 @@ export async function executeAgent(params: {
   // ---- failure path -------------------------------------------------
   if (!outcome.ok && outcome.failure.kind !== "nothing_to_report") {
     const consecutiveFailures = agent.consecutive_failures + 1;
-    const shouldDisable = consecutiveFailures >= AGENT_MAX_CONSECUTIVE_FAILURES;
+    // A capability refusal disables the agent on the FIRST occurrence.
+    //
+    // The five-failure rule is calibrated for flakiness: five bad days in
+    // a row probably means something is really wrong. An impossible task
+    // is not flaky — it fails identically forever — so waiting for five
+    // means five more scheduled runs, five more emails telling the user
+    // their agent cannot do the thing, and five more sets of tokens we
+    // pay for and refund. Once is enough to know.
+    const shouldDisable = cannotComplete || consecutiveFailures >= AGENT_MAX_CONSECUTIVE_FAILURES;
 
     await admin
       .from("agent_runs")
       .update({
         status: "failed",
         finished_at: finishedAt,
-        error: outcome.failure.message,
+        // A code the client can translate, not the model's own sentence:
+        // that sentence is already stored below as the disable reason,
+        // and the run list needs a label in the reader's language.
+        error: cannotComplete ? "cannot_complete" : outcome.failure.message,
         credits_charged: settlement.creditsCharged,
       // Null when the account really was charged; a number only on a
       // bypass account, where credits_charged is 0 and says nothing.
@@ -342,7 +384,12 @@ export async function executeAgent(params: {
     // A manual "Run now" must not be able to disable an agent or advance
     // its schedule — it is a test, not a scheduled execution. Only its
     // cost and its history row are real.
-    if (triggerSource === "schedule") {
+    //
+    // `cannotComplete` is the exception, and for the same reason it skips
+    // the five-failure count: pressing "Run now" is exactly how a user
+    // discovers the agent is impossible, and leaving it scheduled after
+    // that guarantees it runs anyway tomorrow morning.
+    if (triggerSource === "schedule" || cannotComplete) {
       await admin
         .from("user_agents")
         .update({
@@ -366,7 +413,7 @@ export async function executeAgent(params: {
 
     return {
       ok: false,
-      reason: "run_failed",
+      reason: cannotComplete ? "cannot_complete" : "run_failed",
       message: outcome.failure.message,
       runId,
     };

@@ -20,6 +20,7 @@ import { MAX_CSV_BYTES } from "@/lib/import/csv-parse";
 import { MAX_PASTE_CHARS, MIN_PASTE_CHARS } from "@/lib/import/paste-limits";
 import { formatBytes } from "@/lib/files/file-types";
 import { InsightList, type Insight } from "@/components/onboarding/insight-list";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 
 type Step = "goal" | "source" | "csv" | "paste" | "quick" | "analysing" | "insights";
 
@@ -527,7 +528,7 @@ export function OnboardingFlow({ activationFree }: { activationFree: boolean }) 
 
       {step === "analysing" && (
         <section className="space-y-2 rounded-2xl border border-orange-500/30 bg-orange-500/[0.04] p-6 text-center">
-          <Loader2 className="mx-auto h-5 w-5 animate-spin text-orange-400" aria-hidden="true" />
+          <ThinkingIndicator className="mx-auto" />
           <p className="text-sm font-medium text-foreground">{t("analysing")}</p>
           <p className="text-[11px] leading-relaxed text-muted">{t("analysingHint")}</p>
         </section>

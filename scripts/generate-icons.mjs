@@ -31,26 +31,37 @@
  * Run: node scripts/generate-icons.mjs
  */
 import sharp from "sharp";
+import { loadTs } from "./tests/load-ts.mjs";
 import { writeFileSync } from "node:fs";
 import path from "node:path";
 
 const APP_DIR = path.join(process.cwd(), "src", "app");
 
-// The brand mark, identical in geometry to src/app/icon.svg. Stroke widths
-// are given per target size rather than scaled from one source: a 3px
-// stroke on a 512px canvas vanishes at 16px, so the small sizes need
-// proportionally heavier lines to stay legible in a tab strip.
-function markSvg(size, strokeScale) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="270 95 140 140">
-  <rect x="270" y="95" width="140" height="140" rx="24" fill="#0a0a0a"/>
-  <circle cx="340" cy="165" r="42" fill="none" stroke="#f5a623" stroke-width="${3 * strokeScale}"/>
-  <circle cx="340" cy="123" r="${6 * Math.max(1, strokeScale * 0.8)}" fill="#f5a623"/>
-  <ellipse cx="340" cy="165" rx="60" ry="22" fill="none" stroke="#f5a623" stroke-width="${2 * strokeScale}" opacity="0.5" transform="rotate(-20 340 165)"/>
-</svg>`;
+// THE MARK COMES FROM lib/brand/globe.ts, not from a copy of it here.
+//
+// It used to be a literal SVG string in this file, a second literal in
+// scripts/generate-email-logo.mjs, and a third in src/app/icon.svg — three
+// hand-maintained copies of "the same" drawing, next to a fourth shape in
+// the ThinkingIndicator and a fifth in the page backdrop. Editing one of
+// them changed the icon and left the email logo behind, and nothing said
+// so. scripts/tests/globe-mark.test.mjs now asserts every one of these
+// files matches what globeSvg() produces.
+//
+// Stroke widths are still given per target size rather than scaled from
+// one source: a 3px stroke on a 512px canvas vanishes at 16px, so the
+// small sizes need proportionally heavier lines to stay legible in a tab
+// strip. That is a rendering decision per size, not a different shape.
+const { globeSvg } = await loadTs("src/lib/brand/globe-svg.ts");
+
+const INK = "#f5a623";
+const PLATE = "#0a0a0a";
+
+function markSvg(size, baseStroke, { background = PLATE, radius = 17.14, nodeScale = 1 } = {}) {
+  return globeSvg({ size, baseStroke, ink: INK, background, radius, nodeScale, detail: "mark" });
 }
 
-async function png(size, strokeScale) {
-  return sharp(Buffer.from(markSvg(size, strokeScale))).resize(size, size).png().toBuffer();
+async function png(size, baseStroke, options) {
+  return sharp(Buffer.from(markSvg(size, baseStroke, options))).resize(size, size).png().toBuffer();
 }
 
 // ---------------------------------------------------------------------------
@@ -89,15 +100,19 @@ function buildIco(images) {
 // 16/32/48 are the sizes browsers actually request for tabs, bookmarks and
 // desktop shortcuts. Heavier strokes at the small end so the orbit still
 // reads as an orbit rather than a smudge.
+// baseStroke is in viewBox units (the box is 100 wide), so 8.6 at 16px
+// paints a ~1.4px sphere outline and 4.3 at 48px paints ~2px.
+// nodeScale grows the dot as the canvas shrinks, for the same reason the
+// strokes do: at 16px the unscaled 4.29-unit node is 0.7 of a pixel.
 const ICO_SIZES = [
-  { size: 16, strokeScale: 4 },
-  { size: 32, strokeScale: 2.5 },
-  { size: 48, strokeScale: 2 },
+  { size: 16, baseStroke: 8.6, nodeScale: 3.2 },
+  { size: 32, baseStroke: 5.4, nodeScale: 2 },
+  { size: 48, baseStroke: 4.3, nodeScale: 1.6 },
 ];
 
 const icoImages = [];
-for (const { size, strokeScale } of ICO_SIZES) {
-  icoImages.push({ size, data: await png(size, strokeScale) });
+for (const { size, baseStroke, nodeScale } of ICO_SIZES) {
+  icoImages.push({ size, data: await png(size, baseStroke, { nodeScale }) });
 }
 const icoPath = path.join(APP_DIR, "favicon.ico");
 writeFileSync(icoPath, buildIco(icoImages));
@@ -112,5 +127,17 @@ console.log(`favicon.ico  ${ICO_SIZES.map((s) => `${s.size}x${s.size}`).join(", 
 // as a black square on some backgrounds.
 // ---------------------------------------------------------------------------
 const applePath = path.join(APP_DIR, "apple-icon.png");
-writeFileSync(applePath, await png(180, 1));
+// 3.0 viewBox units at 180px is a ~5.4px sphere outline — the same
+// visual weight the old literal drew with stroke-width 3 in its 140-unit
+// box. iOS applies its own mask, so the plate is square here.
+writeFileSync(applePath, await png(180, 3, { radius: 0 }));
 console.log("apple-icon.png  180x180");
+
+// ---------------------------------------------------------------------------
+// icon.svg — the scalable one Next emits alongside the .ico. Written here
+// rather than edited by hand, because a hand-edited copy is exactly how
+// the four marks drifted apart in the first place.
+// ---------------------------------------------------------------------------
+const svgPath = path.join(APP_DIR, "icon.svg");
+writeFileSync(svgPath, markSvg(140, 3.5));
+console.log("icon.svg  140x140");

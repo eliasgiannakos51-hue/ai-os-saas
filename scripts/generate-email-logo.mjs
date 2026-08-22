@@ -15,6 +15,7 @@
  * Run: node scripts/generate-email-logo.mjs
  */
 import sharp from "sharp";
+import { loadTs } from "./tests/load-ts.mjs";
 import { mkdirSync } from "node:fs";
 import path from "node:path";
 
@@ -22,17 +23,29 @@ const SIZE = 256;
 const OUT_DIR = path.join(process.cwd(), "public");
 const OUT_FILE = path.join(OUT_DIR, "ionexa-email-logo.png");
 
-// Same mark as src/app/icon.svg / apple-icon, with the ~3x heavier strokes
-// that survive being scaled down to 56px in an inbox. The background is
-// opaque and matches the email body's BG (see lib/email/templates.ts) so
-// the tile disappears into the layout instead of showing as a dark square
-// in clients that ignore border-radius.
-const MARK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="272 97 136 136">
-  <rect x="272" y="97" width="136" height="136" fill="#090909"/>
-  <circle cx="340" cy="167" r="46" fill="none" stroke="#f5a623" stroke-width="9"/>
-  <circle cx="340" cy="115" r="11" fill="#f5a623"/>
-  <ellipse cx="340" cy="167" rx="64" ry="24" fill="none" stroke="#f5a623" stroke-width="7" opacity="0.85" transform="rotate(-20 340 167)"/>
-</svg>`;
+// THE SAME MARK AS THE FAVICON, FROM THE SAME SOURCE — lib/brand/globe.ts.
+//
+// This file used to carry its own literal copy of the SVG, which is how
+// it came to differ from src/app/icon.svg in stroke weight, dot size and
+// plate colour without anyone deciding that. globeSvg() is now the only
+// place the drawing exists, and scripts/tests/globe-mark.test.mjs fails if
+// this file grows a second one.
+//
+// The strokes are ~3x heavier than the favicon's because this is scaled
+// down to 56px in an inbox from a 256px source. The background is opaque
+// and matches the email body's BG (see lib/email/templates.ts) so the tile
+// disappears into the layout instead of showing as a dark square in
+// clients that ignore border-radius.
+const { globeSvg } = await loadTs("src/lib/brand/globe-svg.ts");
+
+const MARK_SVG = globeSvg({
+  size: SIZE,
+  baseStroke: 6.6,
+  ink: "#f5a623",
+  background: "#090909",
+  radius: 0,
+  detail: "mark",
+});
 
 mkdirSync(OUT_DIR, { recursive: true });
 

@@ -209,6 +209,87 @@ Requires `supabase_free_chat_migration.sql` to have been applied. Without it the
 
   Each accepts a non-negative integer; `0` disables the allowance for that plan. An unparseable or negative value is ignored and the default is used. The allowance resets on the first of each calendar month (UTC).
 
+#### Trading journal and the Strategy Guardian
+
+Your own trades, your own rules, counted (V4 #14). Lives at
+`/dashboard/trading-journal`; the schema extends the existing `trades`
+module table rather than forking it, so one question has one answer.
+
+**The Guardian parses once and counts in code.** You write your rules the
+way you would say them — *"Max 2% risk. Only London. RR at least 1:2. Max
+3 trades a day."* — and they are turned into a checkable form **in the
+browser, with no model call** (`src/lib/trading/rules.ts` is pure). What
+was understood is shown beside your own sentence *before* anything is
+saved, and a sentence that cannot be made checkable is **refused rather
+than stored**: a rule sitting in the list marked active that can never
+fire is worse than no rule, because you would believe you were being
+watched.
+
+Every trade is then evaluated by arithmetic (`src/lib/trading/guardian.ts`),
+so *"you broke this rule eight times in March"* is a number you can check
+one trade at a time — not a model's impression of 200 rows, which would be
+different tomorrow.
+
+**Three things it gets right that are easy to get wrong:**
+
+- **The London/New York overlap.** London runs 07:00–16:00 UTC and New
+  York 12:00–21:00, so a 13:00 trade is in *both*. A rule of "only London"
+  is checked against **every** session containing the entry; the
+  statistics group by a **single** primary session, so no trade is counted
+  twice.
+- **Risk-reward is measured on the plan, not the outcome.** Computing it
+  from the exit price would mark every trade that hit its stop as a rule
+  violation — punishing you for the stop working.
+- **A figure that cannot be computed honestly is absent.** A win rate
+  under five decisive trades, a profit factor with no losses in the
+  sample, a percentage drawdown with no starting balance: each is `null`
+  and rendered as a sentence explaining why, never as a number.
+
+#### Bank connections and crypto wallets
+
+Read-only, always (V4 #15). Requires
+`supabase/migrations/20260831000000_bank_crypto.sql`.
+
+**Six rules, each enforced by something that fails when it stops being
+true — not by a promise in a comment:**
+
+1. **Read-only, without exception.** No column in the schema could carry a
+   payment instruction. `bank_connections.access_mode` is a CHECK
+   constraint pinned to `read_only`, the `scopes` array is constrained to
+   four read scopes, and `src/lib/finance/read-only.ts` is the only way
+   this codebase calls a financial provider — it refuses any method but
+   GET/POST and any path containing `transfer`, `payment`, `payout`,
+   `withdraw`, `beneficiar`, `sign` and a dozen more.
+2. **Never a private key, never a seed phrase.** `crypto_wallets` has one
+   address column and no jsonb to hide one in;
+   `src/lib/finance/secret-guard.ts` recognises BIP-39 mnemonics, raw hex
+   keys, WIF and `xprv` **by shape** and refuses them **without echoing
+   the value** into an error, a log or the DOM. The database refuses them
+   again: the address column forbids whitespace and is bounded at 128
+   characters. A watch-only `xpub` is deliberately *not* refused.
+3. **Never investment advice.** `src/lib/trading/conduct.ts` constrains
+   every trading-related model call in both languages **and** scans the
+   output before it reaches a user. A response that recommends is
+   *replaced*, not edited — editing an advisory sentence leaves the advice
+   and removes the evidence.
+4. **Never a market prediction.** Same layer, same treatment.
+5. **An explicit disclaimer everywhere.** `TradingDisclaimer` is a
+   **server** component with no dismiss control, and the build gate fails
+   if any dashboard surface reading trading, bank or crypto data omits it.
+   Its text is checked in all ten locales for all three claims: not
+   advice, not a forecast, risk of loss.
+6. **Credentials never in a log.** Tokens are ciphertext through the
+   **existing** AES-256-GCM module (`src/lib/integrations/crypto.ts`) —
+   not a second implementation, because one encryption path means one
+   place for a key to be mishandled. The build gate asserts that nothing
+   in `src/lib/trading/` or `src/lib/finance/` writes to the console at
+   all.
+
+**No provider keys are wired yet.** No bank was ever connected, no wallet
+balance was ever read, and no aggregator credential exists in this
+codebase. The schema, the guards and the read-only layer are in place and
+tested; the sync itself is the next piece.
+
 #### Model providers and failover
 
 One interface, several providers (V4 #12). Every model call can go through

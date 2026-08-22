@@ -672,7 +672,15 @@ const clientFallbacks = sources.flatMap((f) => [
 // it is what a curl, a log line and a bug report get. It is not what a
 // user is shown. The regex cannot tell those apart, so the number goes
 // up and the reason is written down instead.
-const SERVER_PROSE_BASELINE = 596;
+// 596 -> 613: V4 #14 added api/trading/rules and api/trading/guardian,
+// whose 17 refusals are English prose in the same shape as the 596
+// before them — and, like the voice routes, every one of them also
+// carries a stable `code` that the browser translates through
+// dashboard.trading.errors.* in all ten locales
+// (components/trading/use-trading-error.ts). The English is what a curl
+// and a log line get; it is not what a user is shown. The regex cannot
+// tell those apart, so the number goes up and the reason is written down.
+const SERVER_PROSE_BASELINE = 613;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

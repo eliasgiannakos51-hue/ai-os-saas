@@ -438,8 +438,9 @@ if (!DB) {
   // exactly what a fresh count on every run below stops from happening
   // again silently.
   // 20260827's voice_usage took 75 to 76; 20260828's ai_provider_log
-  // took 76 to 77.
-  check(`77 tables`, tables === 77, `got ${tables}`);
+  // took 76 to 77; 20260830's trading journal and 20260831's bank/crypto
+  // tables took 77 to 83.
+  check(`83 tables`, tables === 83, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 

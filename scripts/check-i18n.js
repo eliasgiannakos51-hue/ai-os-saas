@@ -46,6 +46,43 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // Trading journal (V4 #14). Two classes, both checked by hand.
+  //
+  //   CITY NAMES. Sydney, Tokyo, London and New York are spelled the same
+  //   in French, German, Italian and Portuguese as in English — they are
+  //   proper nouns, not untranslated strings. The locales that DO have
+  //   their own forms use them (Greek Σίδνεϊ/Τόκιο/Λονδίνο/Νέα Υόρκη,
+  //   Spanish Sídney/Tokio/Londres/Nueva York, Arabic سيدني, Japanese
+  //   シドニー, Chinese 悉尼), which is what makes these coincidences
+  //   rather than a block somebody skipped.
+  //
+  //   TRADING LOANWORDS. "Trades", "Sessions", "Instruments" and
+  //   "Profit factor" are the words traders in those languages actually
+  //   use — a French trader says "les trades" and "profit factor", not
+  //   "les opérations" and "facteur de profit". Every other string in the
+  //   same block DOES differ (Taux de réussite, Trefferquote,
+  //   Percentuale di successo; Gain moyen, Durchschnittsgewinn), so this
+  //   is vocabulary rather than an untranslated section. German "Name" is
+  //   simply the German word.
+  "el:dashboard.trading.stats.profitFactor",
+  "el:dashboard.trading.ruleKinds.allowed_sessions",
+  "fr:dashboard.trading.sessions.sydney",
+  "fr:dashboard.trading.sessions.tokyo",
+  "fr:dashboard.trading.sessions.new_york",
+  "fr:dashboard.trading.stats.trades",
+  "fr:dashboard.trading.ruleKinds.allowed_sessions",
+  "fr:dashboard.trading.ruleKinds.allowed_instruments",
+  "de:dashboard.trading.table.key",
+  "de:dashboard.trading.sessions.sydney",
+  "de:dashboard.trading.sessions.london",
+  "de:dashboard.trading.sessions.new_york",
+  "de:dashboard.trading.stats.trades",
+  "de:dashboard.trading.ruleKinds.allowed_sessions",
+  "it:dashboard.trading.sessions.sydney",
+  "it:dashboard.trading.sessions.tokyo",
+  "it:dashboard.trading.sessions.new_york",
+  "it:dashboard.trading.stats.profitFactor",
+  "pt:dashboard.trading.sessions.sydney",
   // Voice (V4 #19/#23/#2). Four cognates, each checked against the rest
   // of its own block:
   //

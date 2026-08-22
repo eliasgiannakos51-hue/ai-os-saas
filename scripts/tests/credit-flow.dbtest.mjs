@@ -138,7 +138,10 @@ console.log("== 0. the database really is the one the migrations build ==");
 // ledger, supabase/migrations/20260827000000_voice_usage.sql).
 // 76 -> 77: V4 #12 added public.ai_provider_log (which provider served
 // which call, and why).
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 77);
+// 77 -> 83: V4 #14 added trading_accounts, trading_rules and
+// rule_violations; V4 #15 added bank_connections, bank_transactions and
+// crypto_wallets.
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 83);
 eq(
   "the credit functions exist",
   Number(

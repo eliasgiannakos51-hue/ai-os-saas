@@ -1973,6 +1973,106 @@
         "failed": "部分通知邮件发送失败。",
         "affected": "有 {count} 条提交已保存在这里，但从未通过邮件发给你。没有任何内容丢失。"
       }
+    },
+    "trading": {
+      "title": "交易日志",
+      "subtitle": "你自己的交易、你自己的规则，逐条统计。",
+      "disclaimerTitle": "这是记录，不是建议",
+      "disclaimer": "这里的一切都在描述你已经完成的交易和你自己写下的规则。它不是投资建议，不是预测，也不会说任何市场将会如何。交易存在亏损风险。",
+      "adviceRefused": "那属于投资建议或市场预测，本产品不提供。可以问我关于你自己记录的问题。",
+      "empty": "还没有记录任何交易。",
+      "emptyCta": "添加第一笔交易",
+      "byInstrument": "按品种",
+      "bySession": "按时段",
+      "accounts": {
+        "title": "账户",
+        "all": "全部账户"
+      },
+      "table": {
+        "key": "名称"
+      },
+      "equity": {
+        "title": "资金曲线"
+      },
+      "sessions": {
+        "sydney": "悉尼",
+        "tokyo": "东京",
+        "london": "伦敦",
+        "new_york": "纽约",
+        "other": "时段之外"
+      },
+      "stats": {
+        "trades": "交易笔数",
+        "winRate": "胜率",
+        "netPnl": "净盈亏",
+        "profitFactor": "盈利因子",
+        "avgWin": "平均盈利",
+        "avgLoss": "平均亏损",
+        "maxDrawdown": "最大回撤",
+        "avgDuration": "平均持仓时间",
+        "notEnough": "交易还不够多（需要 5 笔）",
+        "notEnoughShort": "太少",
+        "noLosses": "此样本中没有亏损交易",
+        "beforeCosts": "这些数字未扣除手续费——在交易中填入手续费即可看到净值。",
+        "afterCosts": "这些数字已扣除你记录的手续费。",
+        "unscoreable": "{count} 笔交易无法计算（缺少价格或盈亏）"
+      },
+      "pattern": {
+        "title": "亏损之后",
+        "comparison": "紧接在亏损之后开的交易胜率为 {after}%（{afterCount} 笔），其他情况下为 {baseline}%（{baselineCount} 笔）。",
+        "observationOnly": "这是记录显示的内容。它不说明原因，也不是关于下一步该做什么的建议。",
+        "notEnough": "比较的两侧交易数量都还不够。"
+      },
+      "rules": {
+        "title": "你的规则",
+        "explainer": "用你平常说话的方式写下规则。每笔交易都会用算术来核对，而不是靠模型的印象——所以这些数字你可以自己复核。",
+        "placeholder": "最大风险 2%。只做伦敦时段。盈亏比至少 1:2。每天最多 3 笔。",
+        "understood": "理解为",
+        "couldNotParse": "其中没有内容能转换成可核对的规则，因此不会保存。请试试更短、更具体的句子。",
+        "add": "添加规则",
+        "empty": "还没有规则。在上面写一条，之后每笔交易都会据此核对。",
+        "delete": "删除规则",
+        "saved": "已保存 {count} 条规则",
+        "saveFailed": "无法保存该规则。",
+        "deleteFailed": "无法删除该规则。"
+      },
+      "ruleKinds": {
+        "max_risk_percent": "每笔风险",
+        "max_trades_per_day": "每日交易数",
+        "min_risk_reward": "盈亏比",
+        "allowed_sessions": "时段",
+        "allowed_instruments": "品种",
+        "max_daily_loss": "每日亏损上限",
+        "no_trade_after_loss": "亏损后暂停",
+        "max_position_size": "仓位大小"
+      },
+      "ruleSummary": {
+        "max_risk_percent": "每笔最多冒 {percent}% 的风险",
+        "max_trades_per_day": "每天最多 {count} 笔交易",
+        "min_risk_reward": "回报至少为风险的 {ratio} 倍",
+        "allowed_sessions": "只做这些时段：{sessions}",
+        "allowed_instruments": "只做这些品种：{instruments}",
+        "max_daily_loss": "单日亏损达到 {amount} 后停手",
+        "no_trade_after_loss": "亏损后等待 {minutes} 分钟",
+        "max_position_size": "仓位最大 {size}"
+      },
+      "violations": {
+        "count": "违反了 {count} 次",
+        "none": "未违反",
+        "uncheckable": "有 {count} 项核对未能进行，因为交易缺少价格、风险金额或时间。"
+      },
+      "errors": {
+        "bad_request": "无法读取该请求。",
+        "delete_failed": "无法删除该规则。",
+        "empty_rule": "请先用你自己的话写下规则。",
+        "failed": "出了点问题。",
+        "not_understood": "这无法转换成可核对的规则，因此没有保存。请试试更短、更具体的句子。",
+        "rate_limited": "过去一小时内改动过多，请稍后再试。",
+        "recheck_failed": "无法刷新规则核对。",
+        "save_failed": "无法保存该规则。",
+        "too_long": "这比一条规则需要的长度长太多了。",
+        "unauthenticated": "你已退出登录。请重新登录后再试。"
+      }
     }
   },
   "module": {

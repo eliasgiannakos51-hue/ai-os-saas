@@ -136,6 +136,39 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // and no tool arguments — nothing the model was shown or said. Removed
   // by the auth.users cascade.
   { table: "ai_provider_log", label: "ai_provider_routing", scope: "account" },
+
+  // --- Trading journal (V4 #14) ---
+  //
+  // USER_CONTENT, every one of them: a trade is something the user did
+  // and recorded, a rule is something they wrote, and a violation is
+  // arithmetic over the two. All of it is theirs and all of it is
+  // exported in full. Removed by the auth.users cascade.
+  { table: "trading_accounts", label: "trading_accounts", scope: "user_content" },
+  { table: "trading_rules", label: "trading_rules", scope: "user_content" },
+  { table: "rule_violations", label: "trading_rule_violations", scope: "user_content" },
+
+  // --- Bank and crypto (V4 #15) ---
+  //
+  // SENSITIVE_REDACTED, and the redaction is the point:
+  // access_token_encrypted is a key to a different building, and an
+  // export is a file the user emails to themselves. The ciphertext is
+  // stripped; everything that describes the CONNECTION — which bank,
+  // when, what scopes, what state — is exported, because that is what
+  // somebody asking "what do you hold about me" needs to see.
+  {
+    table: "bank_connections",
+    label: "bank_connections",
+    scope: "sensitive_redacted",
+    redactColumns: ["access_token_encrypted"],
+  },
+  // The transactions themselves are ordinary personal data and are
+  // exported whole. There is deliberately no account number or IBAN in
+  // this table to redact.
+  { table: "bank_transactions", label: "bank_transactions", scope: "user_content" },
+  // A PUBLIC address. Nothing here is secret — the schema has nowhere to
+  // put a private key — so there is nothing to redact, and saying so is
+  // more useful than a redactColumns list that would imply there is.
+  { table: "crypto_wallets", label: "crypto_wallets", scope: "user_content" },
   { table: "user_onboarding", label: "onboarding", scope: "account" },
   { table: "user_email_preferences", label: "email_preferences", scope: "account" },
   { table: "email_send_log", label: "emails_sent_to_you", scope: "account" },

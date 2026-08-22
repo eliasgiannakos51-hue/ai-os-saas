@@ -1973,6 +1973,106 @@
         "failed": "Einige Benachrichtigungs-E-Mails konnten nicht gesendet werden.",
         "affected": "{count} Eingang/Eingänge sind hier gespeichert, wurden Ihnen aber nie per E-Mail geschickt. Es ist nichts verloren gegangen."
       }
+    },
+    "trading": {
+      "title": "Trading-Journal",
+      "subtitle": "Deine Trades, deine Regeln, gezählt.",
+      "disclaimerTitle": "Das ist eine Aufzeichnung, keine Beratung",
+      "disclaimer": "Alles hier beschreibt Trades, die du bereits gemacht hast, und Regeln, die du selbst geschrieben hast. Es ist keine Anlageberatung, keine Prognose, und es sagt nichts darüber, was irgendein Markt tun wird. Trading birgt Verlustrisiko.",
+      "adviceRefused": "Das wäre Anlageberatung oder eine Marktprognose, die dieses Produkt nicht gibt. Frag mich stattdessen nach deiner eigenen Aufzeichnung.",
+      "empty": "Noch keine Trades erfasst.",
+      "emptyCta": "Ersten Trade hinzufügen",
+      "byInstrument": "Nach Instrument",
+      "bySession": "Nach Session",
+      "accounts": {
+        "title": "Konten",
+        "all": "Alle Konten"
+      },
+      "table": {
+        "key": "Name"
+      },
+      "equity": {
+        "title": "Kapitalkurve"
+      },
+      "sessions": {
+        "sydney": "Sydney",
+        "tokyo": "Tokio",
+        "london": "London",
+        "new_york": "New York",
+        "other": "Außerhalb der Sessions"
+      },
+      "stats": {
+        "trades": "Trades",
+        "winRate": "Trefferquote",
+        "netPnl": "Netto-P&L",
+        "profitFactor": "Profitfaktor",
+        "avgWin": "Durchschnittsgewinn",
+        "avgLoss": "Durchschnittsverlust",
+        "maxDrawdown": "Maximaler Drawdown",
+        "avgDuration": "Durchschnittliche Haltedauer",
+        "notEnough": "Noch nicht genug Trades (5 nötig)",
+        "notEnoughShort": "zu wenige",
+        "noLosses": "Kein Verlusttrade in dieser Stichprobe",
+        "beforeCosts": "Diese Zahlen sind vor Gebühren — trag sie bei deinen Trades ein, um sie netto zu sehen.",
+        "afterCosts": "Diese Zahlen sind netto nach den Gebühren, die du erfasst hast.",
+        "unscoreable": "{count} Trades konnten nicht berechnet werden (Preise oder P&L fehlen)"
+      },
+      "pattern": {
+        "title": "Nach einem Verlust",
+        "comparison": "Trades direkt nach einem Verlust gewannen in {after}% der Fälle ({afterCount} Trades), sonst in {baseline}% ({baselineCount} Trades).",
+        "observationOnly": "Das zeigt die Aufzeichnung. Sie sagt nicht warum, und sie ist kein Vorschlag.",
+        "notEnough": "Noch nicht genug Trades auf beiden Seiten des Vergleichs."
+      },
+      "rules": {
+        "title": "Deine Regeln",
+        "explainer": "Schreib deine Regeln so, wie du sie sagen würdest. Sie werden bei jedem Trade rechnerisch geprüft, nicht nach dem Eindruck eines Modells — die Zahlen kannst du also selbst nachprüfen.",
+        "placeholder": "Max 2% Risiko. Nur London. RR mindestens 1:2. Max 3 Trades pro Tag.",
+        "understood": "Verstanden als",
+        "couldNotParse": "Nichts davon ließ sich prüfbar machen, also wird nichts gespeichert. Versuch einen kürzeren, konkreteren Satz.",
+        "add": "Regel hinzufügen",
+        "empty": "Noch keine Regeln. Schreib oben eine, und jeder Trade wird daran geprüft.",
+        "delete": "Regel löschen",
+        "saved": "{count} Regeln gespeichert",
+        "saveFailed": "Die Regel konnte nicht gespeichert werden.",
+        "deleteFailed": "Die Regel konnte nicht gelöscht werden."
+      },
+      "ruleKinds": {
+        "max_risk_percent": "Risiko pro Trade",
+        "max_trades_per_day": "Trades pro Tag",
+        "min_risk_reward": "Chance-Risiko",
+        "allowed_sessions": "Sessions",
+        "allowed_instruments": "Instrumente",
+        "max_daily_loss": "Tagesverlustgrenze",
+        "no_trade_after_loss": "Pause nach einem Verlust",
+        "max_position_size": "Positionsgröße"
+      },
+      "ruleSummary": {
+        "max_risk_percent": "Höchstens {percent}% Risiko pro Trade",
+        "max_trades_per_day": "Höchstens {count} Trades pro Tag",
+        "min_risk_reward": "Gewinn mindestens {ratio}x das Risiko",
+        "allowed_sessions": "Nur diese Sessions: {sessions}",
+        "allowed_instruments": "Nur diese Instrumente: {instruments}",
+        "max_daily_loss": "Aufhören, nachdem {amount} an einem Tag verloren sind",
+        "no_trade_after_loss": "{minutes} Minuten nach einem Verlust warten",
+        "max_position_size": "Positionsgröße höchstens {size}"
+      },
+      "violations": {
+        "count": "{count}-mal gebrochen",
+        "none": "Nicht gebrochen",
+        "uncheckable": "{count} Prüfungen liefen nicht, weil bei den Trades ein Preis, ein Risikobetrag oder eine Uhrzeit fehlte."
+      },
+      "errors": {
+        "bad_request": "Diese Anfrage konnte nicht gelesen werden.",
+        "delete_failed": "Die Regel konnte nicht gelöscht werden.",
+        "empty_rule": "Schreib die Regel zuerst in eigenen Worten.",
+        "failed": "Etwas ist schiefgelaufen.",
+        "not_understood": "Das ließ sich nicht prüfbar machen und wurde deshalb nicht gespeichert. Versuch einen kürzeren, konkreteren Satz.",
+        "rate_limited": "Zu viele Änderungen in der letzten Stunde. Versuch es gleich noch einmal.",
+        "recheck_failed": "Die Regelprüfung konnte nicht aktualisiert werden.",
+        "save_failed": "Die Regel konnte nicht gespeichert werden.",
+        "too_long": "Das ist länger, als eine Regel sein muss.",
+        "unauthenticated": "Du bist abgemeldet. Melde dich an und versuch es erneut."
+      }
     }
   },
   "module": {

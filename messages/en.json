@@ -1973,6 +1973,106 @@
         "failed": "Some notification emails could not be sent.",
         "affected": "{count} submission(s) are saved here but were never emailed to you. Nothing has been lost."
       }
+    },
+    "trading": {
+      "title": "Trading journal",
+      "subtitle": "Your own trades, your own rules, counted.",
+      "disclaimerTitle": "This is a record, not advice",
+      "disclaimer": "Everything here describes trades you have already made and rules you wrote yourself. It is not investment advice, it is not a forecast, and it says nothing about what any market will do. Trading carries risk of loss.",
+      "adviceRefused": "That would be investment advice or a market forecast, which this product does not give. Ask about your own record instead.",
+      "empty": "No trades recorded yet.",
+      "emptyCta": "Add your first trade",
+      "byInstrument": "By instrument",
+      "bySession": "By session",
+      "accounts": {
+        "title": "Accounts",
+        "all": "All accounts"
+      },
+      "table": {
+        "key": "Name"
+      },
+      "equity": {
+        "title": "Equity curve"
+      },
+      "sessions": {
+        "sydney": "Sydney",
+        "tokyo": "Tokyo",
+        "london": "London",
+        "new_york": "New York",
+        "other": "Outside sessions"
+      },
+      "stats": {
+        "trades": "Trades",
+        "winRate": "Win rate",
+        "netPnl": "Net P&L",
+        "profitFactor": "Profit factor",
+        "avgWin": "Average win",
+        "avgLoss": "Average loss",
+        "maxDrawdown": "Max drawdown",
+        "avgDuration": "Average hold",
+        "notEnough": "Not enough trades yet (5 needed)",
+        "notEnoughShort": "too few",
+        "noLosses": "No losing trades in this sample",
+        "beforeCosts": "These figures are before commission — add it to your trades to see them net.",
+        "afterCosts": "These figures are net of the commission you recorded.",
+        "unscoreable": "{count} trades could not be scored (missing prices or P&L)"
+      },
+      "pattern": {
+        "title": "After a loss",
+        "comparison": "Trades opened straight after a loss won {after}% of the time ({afterCount} trades), against {baseline}% otherwise ({baselineCount} trades).",
+        "observationOnly": "That is what the record shows. It does not say why, and it is not a suggestion about what to do next.",
+        "notEnough": "Not enough trades on both sides of the comparison yet."
+      },
+      "rules": {
+        "title": "Your rules",
+        "explainer": "Write your rules the way you would say them. They are checked against every trade by arithmetic, not by a model's impression — so the counts are ones you can check yourself.",
+        "placeholder": "Max 2% risk. Only London. RR at least 1:2. Max 3 trades a day.",
+        "understood": "Understood as",
+        "couldNotParse": "None of that could be turned into something checkable, so nothing will be saved. Try a shorter, more specific sentence.",
+        "add": "Add rule",
+        "empty": "No rules yet. Write one above and every trade will be checked against it.",
+        "delete": "Delete rule",
+        "saved": "{count} rules saved",
+        "saveFailed": "Could not save that rule.",
+        "deleteFailed": "Could not delete that rule."
+      },
+      "ruleKinds": {
+        "max_risk_percent": "Risk per trade",
+        "max_trades_per_day": "Trades per day",
+        "min_risk_reward": "Risk-reward",
+        "allowed_sessions": "Sessions",
+        "allowed_instruments": "Instruments",
+        "max_daily_loss": "Daily loss limit",
+        "no_trade_after_loss": "Pause after a loss",
+        "max_position_size": "Position size"
+      },
+      "ruleSummary": {
+        "max_risk_percent": "Risk at most {percent}% per trade",
+        "max_trades_per_day": "At most {count} trades a day",
+        "min_risk_reward": "Reward at least {ratio}x the risk",
+        "allowed_sessions": "Only these sessions: {sessions}",
+        "allowed_instruments": "Only these instruments: {instruments}",
+        "max_daily_loss": "Stop after losing {amount} in a day",
+        "no_trade_after_loss": "Wait {minutes} minutes after a loss",
+        "max_position_size": "Position size at most {size}"
+      },
+      "violations": {
+        "count": "Broken {count} times",
+        "none": "Not broken",
+        "uncheckable": "{count} checks could not run because the trades were missing a price, a risk amount or a time."
+      },
+      "errors": {
+        "bad_request": "That request could not be read.",
+        "delete_failed": "Could not delete that rule.",
+        "empty_rule": "Write the rule in your own words first.",
+        "failed": "Something went wrong.",
+        "not_understood": "That could not be turned into something checkable, so it was not saved. Try a shorter, more specific sentence.",
+        "rate_limited": "Too many changes in the last hour. Try again shortly.",
+        "recheck_failed": "Could not refresh the rule check.",
+        "save_failed": "Could not save that rule.",
+        "too_long": "That is longer than a rule needs to be.",
+        "unauthenticated": "You are signed out. Sign in and try again."
+      }
     }
   },
   "module": {

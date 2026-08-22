@@ -1973,6 +1973,106 @@
         "failed": "一部の通知メールを送信できませんでした。",
         "affected": "{count} 件はここに保存されていますが、メールは届いていません。データは失われていません。"
       }
+    },
+    "trading": {
+      "title": "トレード日誌",
+      "subtitle": "あなた自身の取引と、あなた自身のルールを数えます。",
+      "disclaimerTitle": "これは記録であって、助言ではありません",
+      "disclaimer": "ここにあるのはすべて、あなたがすでに行った取引と、あなた自身が書いたルールの記述です。投資助言でも予測でもなく、どの市場がどうなるかについては何も述べていません。取引には損失の risk があります。",
+      "adviceRefused": "それは投資助言または市場予測にあたり、この製品では行いません。代わりにご自身の記録についてお尋ねください。",
+      "empty": "まだ取引が記録されていません。",
+      "emptyCta": "最初の取引を追加",
+      "byInstrument": "銘柄別",
+      "bySession": "セッション別",
+      "accounts": {
+        "title": "口座",
+        "all": "すべての口座"
+      },
+      "table": {
+        "key": "名称"
+      },
+      "equity": {
+        "title": "資産曲線"
+      },
+      "sessions": {
+        "sydney": "シドニー",
+        "tokyo": "東京",
+        "london": "ロンドン",
+        "new_york": "ニューヨーク",
+        "other": "セッション外"
+      },
+      "stats": {
+        "trades": "取引数",
+        "winRate": "勝率",
+        "netPnl": "純損益",
+        "profitFactor": "プロフィットファクター",
+        "avgWin": "平均利益",
+        "avgLoss": "平均損失",
+        "maxDrawdown": "最大ドローダウン",
+        "avgDuration": "平均保有時間",
+        "notEnough": "取引数がまだ足りません（5件必要）",
+        "notEnoughShort": "少なすぎ",
+        "noLosses": "この標本に負け取引はありません",
+        "beforeCosts": "これらの数値は手数料を含みません — 取引に手数料を入力すると純額で表示されます。",
+        "afterCosts": "これらの数値は記録された手数料を差し引いた純額です。",
+        "unscoreable": "{count}件の取引は計算できませんでした（価格または損益が不足）"
+      },
+      "pattern": {
+        "title": "損失のあと",
+        "comparison": "損失の直後に入った取引の勝率は{after}%（{afterCount}件）で、それ以外は{baseline}%（{baselineCount}件）でした。",
+        "observationOnly": "記録が示しているのはここまでです。理由は述べませんし、次にどうすべきかの提案でもありません。",
+        "notEnough": "比較の両側とも、まだ取引数が足りません。"
+      },
+      "rules": {
+        "title": "あなたのルール",
+        "explainer": "普段話すとおりにルールを書いてください。各取引に対して算術で照合します — モデルの印象ではないので、数字はご自身で確かめられます。",
+        "placeholder": "リスクは最大2%。ロンドンのみ。RRは1:2以上。1日最大3取引。",
+        "understood": "こう解釈しました",
+        "couldNotParse": "照合できる形にできたものがないため、何も保存されません。もっと短く具体的な文でお試しください。",
+        "add": "ルールを追加",
+        "empty": "まだルールがありません。上に書けば、以降すべての取引が照合されます。",
+        "delete": "ルールを削除",
+        "saved": "{count}件のルールを保存しました",
+        "saveFailed": "そのルールを保存できませんでした。",
+        "deleteFailed": "そのルールを削除できませんでした。"
+      },
+      "ruleKinds": {
+        "max_risk_percent": "1取引あたりのリスク",
+        "max_trades_per_day": "1日の取引数",
+        "min_risk_reward": "リスクリワード",
+        "allowed_sessions": "セッション",
+        "allowed_instruments": "銘柄",
+        "max_daily_loss": "1日の損失上限",
+        "no_trade_after_loss": "損失後の休止",
+        "max_position_size": "ポジションサイズ"
+      },
+      "ruleSummary": {
+        "max_risk_percent": "1取引あたりのリスクは最大{percent}%",
+        "max_trades_per_day": "1日最大{count}取引",
+        "min_risk_reward": "リワードはリスクの{ratio}倍以上",
+        "allowed_sessions": "このセッションのみ: {sessions}",
+        "allowed_instruments": "この銘柄のみ: {instruments}",
+        "max_daily_loss": "1日に{amount}負けたら止める",
+        "no_trade_after_loss": "損失後は{minutes}分待つ",
+        "max_position_size": "ポジションサイズは最大{size}"
+      },
+      "violations": {
+        "count": "{count}回破られました",
+        "none": "破られていません",
+        "uncheckable": "取引に価格・リスク額・時刻のいずれかが欠けていたため、{count}件の照合ができませんでした。"
+      },
+      "errors": {
+        "bad_request": "そのリクエストを読み取れませんでした。",
+        "delete_failed": "そのルールを削除できませんでした。",
+        "empty_rule": "まずご自身の言葉でルールを書いてください。",
+        "failed": "問題が発生しました。",
+        "not_understood": "照合できる形にできなかったため、保存しませんでした。もっと短く具体的な文でお試しください。",
+        "rate_limited": "直近1時間の変更が多すぎます。少し待ってからお試しください。",
+        "recheck_failed": "ルールの照合を更新できませんでした。",
+        "save_failed": "そのルールを保存できませんでした。",
+        "too_long": "ルールに必要な長さを超えています。",
+        "unauthenticated": "サインアウトしています。サインインしてからお試しください。"
+      }
     }
   },
   "module": {

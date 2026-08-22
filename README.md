@@ -182,6 +182,8 @@ modals.
    BETA_INVITE_CODE=your-beta-invite-code
    BETA_FEEDBACK_URL=mailto:feedback@yourdomain.com
    UNSPLASH_ACCESS_KEY=your-unsplash-access-key
+   OPENAI_API_KEY=your-openai-api-key
+   ELEVENLABS_API_KEY=your-elevenlabs-api-key
 - `IONEXA_DIAG` — optional. Set to `1` to enable verbose request tracing for the auth middleware, Stripe checkout/webhook, the team-page gate, and the Mission Control/Timeline data loads (see `src/lib/diag.ts`). Off by default: middleware runs on every request, so leaving this on writes a log line per page view. Turn it on, redeploy, reproduce the issue, read the logs, turn it off again.
 - `CREDIT_MARGIN_MULTIPLIER` — optional, default `4`, allowed range `4`-`10`. Multiplier applied to an action's real API cost before converting to credits. Anything outside the range (or unparseable) is ignored with a logged warning and the default is used.
 - `CREDIT_PRICE_EUR` — optional, default `0.02`. List price of one credit, in EUR.
@@ -204,6 +206,66 @@ Requires `supabase_free_chat_migration.sql` to have been applied. Without it the
 - `FREE_CHAT_MESSAGES_ENTERPRISE` — optional, default `1200`.
 
   Each accepts a non-negative integer; `0` disables the allowance for that plan. An unparseable or negative value is ignored and the default is used. The allowance resets on the first of each calendar month (UTC).
+
+#### Voice
+
+Speaking to the app instead of typing, and having answers read back
+(V4 #19, #23, #2). Two provider keys, both **optional to the deployment
+and mandatory to the feature**:
+
+- `OPENAI_API_KEY` — optional, no default. Transcription (`whisper-1`).
+  **Without it, no microphone button renders anywhere.** Not a broken
+  button and not an error toast: `/api/voice/usage` reports
+  `configured.transcribe: false`, and every `VoiceInput` returns `null`.
+  Typing is unaffected everywhere, because the microphone was never the
+  only way in.
+- `ELEVENLABS_API_KEY` — optional, no default. Speech (`eleven_turbo_v2_5`).
+  **Without it, no "Listen" button renders** and the hands-free
+  conversation entry point in Chat is hidden, since a loop that can hear
+  but not answer aloud is not the thing that button promises. Reports
+  `configured.speak: false`.
+
+Both keys are checked **by name, before any client is constructed** — the
+`new Resend(undefined)` lesson: a provider SDK that throws from its own
+constructor makes "the key is missing" indistinguishable from "the
+network is down".
+
+**The audio is stored nowhere.** It is streamed to the provider for
+transcription and the transcript comes back to the browser for the user
+to edit; nothing is written to Supabase, to storage, or to a log. The
+same is true in reverse for speech: the clip is a response body and a
+blob URL that is revoked when the component unmounts.
+
+**Minutes per plan**, a capacity ceiling on top of the credit charge (the
+providers bill per minute and per character, so a tab holding a
+microphone open is somebody else's invoice). Each accepts a non-negative
+integer; `0` disables voice for that plan entirely, and the UI then says
+"not included on your plan" rather than hiding the reason. Requires
+`supabase/migrations/20260827000000_voice_usage.sql`; without it the
+`voice_usage` ledger cannot be read and the routes **fail closed** — the
+month reports as fully used and voice refuses, which is the safe
+direction for a metered external cost.
+
+- `VOICE_MINUTES_FREE` — optional, default `0` (voice is not on the free plan).
+- `VOICE_MINUTES_STARTER` — optional, default `30`.
+- `VOICE_MINUTES_GROWTH` — optional, default `90`.
+- `VOICE_MINUTES_PROFESSIONAL` — optional, default `300`.
+- `VOICE_MINUTES_ULTIMATE` — optional, default `900`.
+- `VOICE_MINUTES_ENTERPRISE` — optional, default `2000`.
+
+**What it costs, in credits, at the default margin.** Listening is cheap
+and speaking is not, by roughly sixteen times, so the price is on the
+button before it is pressed:
+
+| Action | Provider price | Credits per minute (M=4) | (M=5) | (M=6) |
+| --- | --- | --- | --- | --- |
+| Transcribe | $0.006/min | 2 | 2 | 2 |
+| Speak | $0.15/1k chars | 25 | 32 | 38 |
+
+A 30-second dictation is 1 credit. A 1,200-character answer read aloud is
+42 credits at M=5 — more than a standard agent run, which is exactly why
+that number is rendered on the "Listen" control rather than discovered
+afterwards.
    ```
 
    `.env.local` is gitignored — never commit real credentials.
@@ -220,7 +282,10 @@ Requires `supabase_free_chat_migration.sql` to have been applied. Without it the
    [Beta testers](#beta-testers) below. `UNSPLASH_ACCESS_KEY` is optional —
    see [Website Builder photos](#website-builder-photos) below; without it,
    image resolution falls back to a solid-color placeholder instead of a
-   real photo. See [Billing](#billing) and
+   real photo. `OPENAI_API_KEY` and `ELEVENLABS_API_KEY` are optional —
+   see [Voice](#voice) above; without them the microphone and "Listen"
+   controls do not render at all and every surface stays fully usable by
+   typing and reading. See [Billing](#billing) and
    [Credits](#credits) below for how the Stripe vars are used and how to
    create the required Price IDs.
 

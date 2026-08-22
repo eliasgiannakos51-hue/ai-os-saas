@@ -2713,5 +2713,90 @@
       "e3": "Escribe un correo a un cliente que se retrasa en pagar",
       "limits": "Ve tus datos de Ionexa y lo que hayas conectado · No ejecuta acciones por su cuenta"
     }
+  },
+  "voice": {
+    "listen": "Escuchar",
+    "listenFor": "Escuchar · {credits} créditos",
+    "pause": "Pausa",
+    "speed": "Velocidad de reproducción",
+    "voice": "Voz",
+    "listening": "Escuchando",
+    "listeningHint": "Habla y luego pulsa Detener. No se envía nada hasta que lo hayas leído.",
+    "startListening": "Habla en lugar de escribir",
+    "stopListening": "Detener",
+    "costPerMinute": "{credits} créditos por minuto de habla",
+    "outOfMinutes": "No quedan minutos de voz este mes",
+    "states": {
+      "idle": "Listo",
+      "listening": "Te está escuchando",
+      "thinking": "Pensando",
+      "speaking": "Hablando"
+    },
+    "errors": {
+      "bad_request": "No se ha podido leer esa petición.",
+      "capacity": "El servicio está muy ocupado ahora mismo. Inténtalo en un momento.",
+      "denied": "No se permitió el micrófono. Siempre puedes escribir.",
+      "empty": "No se oyó nada en esa grabación.",
+      "failed": "La voz no está disponible ahora mismo. Siempre puedes escribir.",
+      "insufficient_credits": "No hay créditos suficientes.",
+      "no_recording": "No se envió ninguna grabación.",
+      "no_speech": "No se grabó nada.",
+      "not_configured": "La voz no está configurada en esta instalación.",
+      "not_included": "La voz no está incluida en tu plan.",
+      "out_of_minutes": "Se han agotado los minutos de voz de este mes.",
+      "provider_error": "No se ha podido contactar con el servicio de voz.",
+      "rate_limited": "Demasiadas grabaciones en la última hora. Inténtalo en un momento.",
+      "reserve_failed": "No se han podido reservar los créditos para esto.",
+      "too_large": "Esa grabación es demasiado larga.",
+      "unauthenticated": "Has cerrado la sesión. Inicia sesión y vuelve a intentarlo.",
+      "unsupported": "Este navegador no puede grabar audio. Siempre puedes escribir.",
+      "unsupported_type": "Ese formato de audio no está admitido.",
+      "usage_unavailable": "Ahora mismo no se han podido comprobar los minutos de voz."
+    },
+    "permission": {
+      "title": "Antes de abrir el micrófono",
+      "pressToStart": "La grabación empieza solo cuando pulsas y se detiene cuando vuelves a pulsar.",
+      "notStored": "El audio se envía para transcribirlo y no se guarda en ningún sitio, ni por nosotros ni después.",
+      "editFirst": "Lees y corriges el texto antes de que se envíe nada.",
+      "cost": "{credits} créditos por minuto, {minutes} minutos al mes en tu plan.",
+      "allow": "Abrir el micrófono",
+      "cancel": "Ahora no"
+    },
+    "draft": {
+      "title": "Lo que se ha oído",
+      "use": "Usar este texto",
+      "discard": "Descartar",
+      "notSent": "No se ha enviado nada. Corrige el texto y envíalo tú."
+    },
+    "voices": {
+      "neutral": "Neutra",
+      "warm": "Cálida",
+      "deep": "Grave",
+      "bright": "Brillante"
+    },
+    "conversation": {
+      "title": "Conversación con las manos libres",
+      "start": "Hablar",
+      "close": "Terminar la conversación",
+      "speak": "Pulsa y habla",
+      "interrupt": "Interrumpir",
+      "tapToSpeak": "Pulsa en cualquier sitio y habla. Deja de escuchar solo cuando paras.",
+      "tapToInterrupt": "Pulsa en cualquier sitio para interrumpir y volver a hablar.",
+      "hint": "Habla con normalidad: el turno termina cuando paras.",
+      "empty": "Todo lo dicho aparece aquí también como texto."
+    },
+    "settings": {
+      "description": "Habla en lugar de escribir y escucha las respuestas. Escribir y leer nunca se quitan: cada control de voz está junto al texto, no en su lugar.",
+      "exhausted": "No quedan minutos este mes. Se renuevan el día uno.",
+      "notConfigured": "La voz no está configurada en esta instalación, así que los botones de micrófono y Escuchar no aparecen.",
+      "notIncluded": "La voz no está incluida en tu plan. Todo esto se puede seguir escribiendo y leyendo.",
+      "perMinute": "{credits} créditos por minuto",
+      "privacy": "La grabación solo empieza cuando pulsas. El audio se envía para transcribirlo y no se guarda en ningún sitio: conservamos los segundos y nada más.",
+      "remaining": "Quedan {minutes} minutos",
+      "speakLabel": "Que te lea",
+      "title": "Voz",
+      "transcribeLabel": "Hablarle",
+      "used": "{used} de {limit} minutos usados este mes"
+    }
   }
 }

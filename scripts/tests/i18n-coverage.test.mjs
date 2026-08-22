@@ -656,7 +656,23 @@ const clientFallbacks = sources.flatMap((f) => [
 //
 // Raised rather than suppressed, and raised by exactly the number added,
 // so the next route that grows this without saying why still fails.
-const SERVER_PROSE_BASELINE = 575;
+// 575 -> 596: V4 #19/#2 added api/voice/transcribe, api/voice/speak and
+// api/voice/usage, and their 21 refusals are English prose in the same
+// shape as the 575 before them.
+//
+// WITH ONE DIFFERENCE THAT IS THE POINT OF RAISING IT RATHER THAN
+// PRETENDING IT AWAY: every one of these 21 responses also carries a
+// stable `code`, and the browser never renders the English. The voice
+// components translate the code through voice.errors.* in all ten
+// locales (components/voice/use-voice-error-text.ts) and fall back to
+// the server's sentence only for a code this build has no word for —
+// which today is none of them.
+//
+// So the prose is still there, still counted, and still English, because
+// it is what a curl, a log line and a bug report get. It is not what a
+// user is shown. The regex cannot tell those apart, so the number goes
+// up and the reason is written down instead.
+const SERVER_PROSE_BASELINE = 596;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

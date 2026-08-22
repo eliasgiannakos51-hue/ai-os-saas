@@ -2713,5 +2713,90 @@
       "e3": "Schreib eine E-Mail an einen Kunden, der zu spät zahlt",
       "limits": "Sieht deine Ionexa-Daten und was du verbunden hast · Handelt nicht von selbst"
     }
+  },
+  "voice": {
+    "listen": "Anhören",
+    "listenFor": "Anhören · {credits} Credits",
+    "pause": "Pause",
+    "speed": "Wiedergabetempo",
+    "voice": "Stimme",
+    "listening": "Hört zu",
+    "listeningHint": "Sprich und drücke dann auf Stopp. Nichts wird gesendet, bevor du es gelesen hast.",
+    "startListening": "Sprechen statt tippen",
+    "stopListening": "Stopp",
+    "costPerMinute": "{credits} Credits pro Minute Sprache",
+    "outOfMinutes": "Diesen Monat sind keine Sprachminuten mehr übrig",
+    "states": {
+      "idle": "Bereit",
+      "listening": "Hört dir zu",
+      "thinking": "Denkt nach",
+      "speaking": "Spricht"
+    },
+    "errors": {
+      "bad_request": "Diese Anfrage konnte nicht gelesen werden.",
+      "capacity": "Der Dienst ist gerade stark ausgelastet. Versuch es gleich noch einmal.",
+      "denied": "Das Mikrofon wurde nicht erlaubt. Tippen geht weiterhin.",
+      "empty": "In dieser Aufnahme war nichts zu hören.",
+      "failed": "Sprache ist gerade nicht verfügbar. Tippen geht weiterhin.",
+      "insufficient_credits": "Nicht genügend Credits.",
+      "no_recording": "Es wurde keine Aufnahme gesendet.",
+      "no_speech": "Es wurde nichts aufgenommen.",
+      "not_configured": "Sprache ist auf dieser Installation nicht eingerichtet.",
+      "not_included": "Sprache ist in deinem Tarif nicht enthalten.",
+      "out_of_minutes": "Die Sprachminuten dieses Monats sind aufgebraucht.",
+      "provider_error": "Der Sprachdienst war nicht erreichbar.",
+      "rate_limited": "Zu viele Aufnahmen in der letzten Stunde. Versuch es gleich noch einmal.",
+      "reserve_failed": "Dafür konnten keine Credits reserviert werden.",
+      "too_large": "Diese Aufnahme ist zu lang.",
+      "unauthenticated": "Du bist abgemeldet. Melde dich an und versuch es erneut.",
+      "unsupported": "Dieser Browser kann kein Audio aufnehmen. Tippen geht weiterhin.",
+      "unsupported_type": "Dieses Audioformat wird nicht unterstützt.",
+      "usage_unavailable": "Die Sprachminuten konnten gerade nicht geprüft werden."
+    },
+    "permission": {
+      "title": "Bevor das Mikrofon geöffnet wird",
+      "pressToStart": "Die Aufnahme startet nur auf Knopfdruck und endet beim nächsten Druck.",
+      "notStored": "Das Audio wird zur Transkription gesendet und nirgendwo gespeichert — weder bei uns noch danach.",
+      "editFirst": "Du liest und korrigierst den Text, bevor irgendetwas gesendet wird.",
+      "cost": "{credits} Credits pro Minute, {minutes} Minuten im Monat in deinem Tarif.",
+      "allow": "Mikrofon öffnen",
+      "cancel": "Jetzt nicht"
+    },
+    "draft": {
+      "title": "Was gehört wurde",
+      "use": "Diesen Text verwenden",
+      "discard": "Verwerfen",
+      "notSent": "Es wurde nichts gesendet. Korrigiere den Text und sende ihn selbst."
+    },
+    "voices": {
+      "neutral": "Neutral",
+      "warm": "Warm",
+      "deep": "Tief",
+      "bright": "Hell"
+    },
+    "conversation": {
+      "title": "Freihändiges Gespräch",
+      "start": "Sprechen",
+      "close": "Gespräch beenden",
+      "speak": "Drücken und sprechen",
+      "interrupt": "Unterbrechen",
+      "tapToSpeak": "Drücke irgendwo und sprich. Das Zuhören endet von selbst, wenn du aufhörst.",
+      "tapToInterrupt": "Drücke irgendwo, um zu unterbrechen und wieder zu sprechen.",
+      "hint": "Sprich normal — der Zug endet, wenn du aufhörst.",
+      "empty": "Alles Gesagte erscheint hier auch als Text."
+    },
+    "settings": {
+      "description": "Sprich statt zu tippen und lass dir Antworten vorlesen. Tippen und Lesen werden nie ersetzt — jedes Sprachelement steht neben dem Text, nicht an seiner Stelle.",
+      "exhausted": "Diesen Monat keine Minuten mehr. Sie erneuern sich am Ersten.",
+      "notConfigured": "Sprache ist auf dieser Installation nicht eingerichtet, deshalb erscheinen Mikrofon und Anhören nicht.",
+      "notIncluded": "Sprache ist in deinem Tarif nicht enthalten. Alles hier lässt sich weiterhin tippen und lesen.",
+      "perMinute": "{credits} Credits pro Minute",
+      "privacy": "Die Aufnahme startet nur auf Knopfdruck. Das Audio wird zur Transkription gesendet und nirgendwo gespeichert — wir behalten die Sekundenzahl und sonst nichts.",
+      "remaining": "Noch {minutes} Minuten",
+      "speakLabel": "Vorlesen lassen",
+      "title": "Sprache",
+      "transcribeLabel": "Mit ihm sprechen",
+      "used": "{used} von {limit} Minuten diesen Monat genutzt"
+    }
   }
 }

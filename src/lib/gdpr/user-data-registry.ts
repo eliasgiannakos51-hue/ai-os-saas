@@ -121,6 +121,15 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "credit_transactions", label: "credit_transactions", scope: "account" },
   { table: "credit_reservations", label: "credit_reservations", scope: "account" },
   { table: "ai_cost_log", label: "ai_usage_log", scope: "account" },
+  // Voice minutes (V4 #19/#2). ACCOUNT scope, and it is a short row: the
+  // seconds of speech in and out this month and last, and nothing else.
+  // No audio, no transcript, no language, no device — the table has
+  // nowhere to put them (see
+  // supabase/migrations/20260827000000_voice_usage.sql), which is why
+  // there is nothing here to redact. Exported because it is the user's
+  // own consumption record, the same as ai_cost_log beside it; removed
+  // by the auth.users cascade, so no explicit erasure.
+  { table: "voice_usage", label: "voice_minutes", scope: "account" },
   { table: "user_onboarding", label: "onboarding", scope: "account" },
   { table: "user_email_preferences", label: "email_preferences", scope: "account" },
   { table: "email_send_log", label: "emails_sent_to_you", scope: "account" },

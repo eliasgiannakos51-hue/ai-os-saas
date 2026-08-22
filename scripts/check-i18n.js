@@ -46,6 +46,22 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // Voice (V4 #19/#23/#2). Four cognates, each checked against the rest
+  // of its own block:
+  //
+  //   "Pause" is the French and German word for the playback control.
+  //   French has "faire une pause" as a verb but the button on a media
+  //   player is "Pause" in both languages, and the sibling keys in the
+  //   same block DO differ everywhere (Écouter/Anhören,
+  //   Vitesse de lecture/Wiedergabetempo, Voix/Stimme).
+  //
+  //   "Neutral" and "Warm" are the German words for those two voice
+  //   timbres. The other two in the same list differ (Tief, Hell), which
+  //   is what makes these two coincidences rather than a skipped block.
+  "fr:voice.pause",
+  "de:voice.pause",
+  "de:voice.voices.neutral",
+  "de:voice.voices.warm",
   // Agent depth tiers (V4 #21). "Simple" is the Spanish and French word;
   // "Standard" is the French, German and Italian one. Checked against the
   // rest of the same block, which DOES differ in every one of those

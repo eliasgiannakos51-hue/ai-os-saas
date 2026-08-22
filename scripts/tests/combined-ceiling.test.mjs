@@ -392,6 +392,17 @@ const CLASSIFIED_PLAN_TABLES = {
   DEFAULT_RESEARCH_LIMITS: { kind: "capacity", why: "how many Deep Research runs may START; each is charged in credits" },
   DEFAULT_INTEGRATION_LIMITS: { kind: "capacity", why: "standing OAuth grants; syncs make no unbilled model call" },
   DEFAULT_PUBLISH_LIMITS: { kind: "capacity", why: "hosted pages — bandwidth, not Anthropic cost" },
+  // Voice (V4 #19/#2). A CAPACITY limit, not a free allowance: every
+  // second counted against it has already been charged in credits at the
+  // margin (transcription and speech both reserve, call, then settle).
+  // The minutes exist because the providers are billed per minute and
+  // per character by somebody else — a runaway tab holding a microphone
+  // open is a bill, and a per-plan ceiling is what stops it — not
+  // because any of those minutes are given away.
+  DEFAULT_VOICE_MINUTE_LIMITS: {
+    kind: "capacity",
+    why: "minutes of speech a month; every minute is charged in credits",
+  },
   // The only entry here that costs nothing at all to serve. It is a
   // sort order on rows the account already has: pinning makes no model
   // call, stores no bytes and creates no row. It is in this table

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowDown, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen, Zap } from "lucide-react";
+import { ArrowDown, AudioLines, Compass, Gift, MessageCircle, PanelLeftClose, PanelLeftOpen, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { AiActivity } from "@/components/ui/ai-activity";
@@ -17,6 +17,9 @@ import { ChatComposer, type ChatComposerHandle } from "@/components/chat/chat-co
 import { ExamplePrompts } from "@/components/ai/example-prompts";
 import { AiGeneratedNotice } from "@/components/ai/ai-generated-notice";
 import { useCredits } from "@/components/credits/credits-context";
+import { VoicePlayer } from "@/components/voice/voice-player";
+import { VoiceConversation } from "@/components/voice/voice-conversation";
+import { useVoiceAvailability } from "@/components/voice/voice-availability";
 import { useStickToBottom } from "@/hooks/use-stick-to-bottom";
 import type { ChatConversation, ChatMessage } from "@/types/chat";
 
@@ -74,6 +77,7 @@ export function ChatWorkspace({
   const tProduct = useTranslations("dashboard.productWorkflow");
   const tFree = useTranslations("credits.freeChat");
   const t = useTranslations("dashboard.chat");
+  const tVoice = useTranslations("voice");
   const { refresh: refreshCredits, reportUsage } = useCredits();
   const [conversations, setConversations] = useState<ChatConversation[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -114,6 +118,11 @@ export function ChatWorkspace({
   const [error, setError] = useState<string | null>(null);
   const [isRateLimitNotice, setIsRateLimitNotice] = useState(false);
   const composerRef = useRef<ChatComposerHandle>(null);
+  // The hands-free loop (#2). Opened by a press, never by anything else,
+  // and every turn it completes is written back into the thread below so
+  // that closing it leaves a normal, readable conversation behind.
+  const [talking, setTalking] = useState(false);
+  const voiceAvailability = useVoiceAvailability();
 
   // Focus mode: hides the conversation list so the thread gets the full
   // width, the way ChatGPT and Claude do it.
@@ -659,6 +668,13 @@ export function ChatWorkspace({
                         belonging to the next message. */}
                     <div className="max-w-[80%] rounded-2xl rounded-tl-sm border border-border bg-panel px-4 py-2.5 text-foreground/90">
                       <MessageContent content={msg.content} />
+                      {/* "LISTEN" — on the finished answer only. Never on
+                          the one still streaming: half a sentence read
+                          aloud is a clip charged for text that changed a
+                          second later. */}
+                      <div className="mt-2">
+                        <VoicePlayer text={msg.content} compact />
+                      </div>
                       <AiGeneratedNotice />
                     </div>
                   </div>
@@ -699,7 +715,23 @@ export function ChatWorkspace({
 
         <div className="border-t border-border p-4 sm:p-6">
           <div className="mx-auto max-w-2xl">
-            <div className="mb-2 flex justify-end">
+            <div className="mb-2 flex flex-wrap justify-end gap-2">
+              {/* PRESS ONCE, THEN TALK (#2). Hidden entirely unless both
+                  halves of voice are usable here — a hands-free loop that
+                  can listen but not answer aloud is not the thing this
+                  button promises. */}
+              {voiceAvailability.transcribeAvailable && voiceAvailability.speakAvailable && (
+                <button
+                  type="button"
+                  onClick={() => setTalking(true)}
+                  disabled={sending || !voiceAvailability.hasMinutes}
+                  title={voiceAvailability.hasMinutes ? undefined : tVoice("outOfMinutes")}
+                  className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted transition-colors duration-150 hover:border-orange-500/40 hover:text-foreground disabled:opacity-40"
+                >
+                  <AudioLines className="h-3.5 w-3.5" aria-hidden="true" />
+                  {tVoice("conversation.start")}
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setMentorMode((v) => !v)}
@@ -750,6 +782,27 @@ export function ChatWorkspace({
           </div>
         </div>
       </div>
+
+      {/* THE HANDS-FREE LOOP. Seeded with the conversation that is open,
+          so what is said out loud lands in the same thread rather than in
+          a second one nobody asked for, and every completed turn is
+          pushed into the messages above — close it and the exchange is
+          still there to read. */}
+      {talking && (
+        <VoiceConversation
+          conversationId={activeId}
+          onConversationId={(id) => setActiveId(id)}
+          onClose={() => setTalking(false)}
+          onExchange={({ question, answer }) => {
+            setMessages((m) => [
+              ...m,
+              { id: nextLocalId("user"), role: "user", content: question } as ChatMessage,
+              { id: nextLocalId("assistant"), role: "assistant", content: answer } as ChatMessage,
+            ]);
+            refreshCredits();
+          }}
+        />
+      )}
     </div>
   );
 }

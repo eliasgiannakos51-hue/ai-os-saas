@@ -17,6 +17,7 @@ import { BillingSummary } from "@/components/settings/billing-summary";
 import { BuyCredits } from "@/components/settings/buy-credits";
 import { CreditHistory, type CreditTransaction } from "@/components/settings/credit-history";
 import { AiUsageSettings } from "@/components/settings/ai-usage-settings";
+import { VoiceSettings } from "@/components/settings/voice-settings";
 import { Reveal } from "@/components/ui/reveal";
 import { MarginReport } from "@/components/settings/margin-report";
 import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
@@ -47,6 +48,7 @@ export default async function SettingsPage() {
   // chips sat side by side, three in English and one in Greek. Every key
   // already existed; nothing was reaching them.
   const tAchievements = await getTranslations("achievements");
+  const tVoice = await getTranslations("voice");
   const supabase = createClient();
 
   const {
@@ -223,6 +225,7 @@ export default async function SettingsPage() {
             { href: "#language", label: t("language.title") },
             { href: "#accessibility", label: t("accessibility.title") },
             { href: "#ai-usage", label: t("aiUsage.title") },
+            { href: "#voice", label: tVoice("settings.title") },
             { href: "#buy-credits", label: tBilling("title") },
             { href: "#achievements", label: tAchievements("title") },
           ].map((link) => (
@@ -304,6 +307,10 @@ export default async function SettingsPage() {
         <Reveal><ThemeSettings /></Reveal>
 
         <Reveal><AccessibilitySettings /></Reveal>
+
+        {/* Minutes left this month and what each kind of voice work
+            costs — the half of "visible cost" that is not on a button. */}
+        <Reveal><VoiceSettings /></Reveal>
 
         <Reveal>
           <AiUsageSettings

@@ -437,7 +437,8 @@ if (!DB) {
   // files, which is exactly the failure a ratchet exists to prevent and
   // exactly what a fresh count on every run below stops from happening
   // again silently.
-  check(`75 tables`, tables === 75, `got ${tables}`);
+  // 20260827's voice_usage took 75 to 76.
+  check(`76 tables`, tables === 76, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 
@@ -559,6 +560,18 @@ if (!DB) {
     // NOT record_template_use: it is SECURITY DEFINER and writes to a
     // table nobody may update, so it is service_role only and must stay
     // off this list.
+    //
+    // voice_usage_this_month is how the settings screen reads "12 of 90
+    // minutes used". SECURITY INVOKER, so the voice_usage select policy
+    // (auth.uid() = user_id) is what scopes it — passing somebody else's
+    // uuid returns zeroes, which scripts/tests/voice.dbtest.mjs asserts
+    // against a real database rather than assuming.
+    //
+    // NOT consume_voice_seconds: it is SECURITY DEFINER and writes the
+    // ledger the monthly cap is enforced against, so it is service_role
+    // only and must stay off this list. A signed-in user who could call
+    // it could consume somebody else's month.
+    "voice_usage_this_month",
   ];
   const unexpected = leaky
     ? leaky.split(", ").filter((s) => !ALLOWED.some((a) => s.startsWith(`${a}(`)))

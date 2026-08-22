@@ -2713,5 +2713,90 @@
       "e3": "给一位付款逾期的客户写封邮件",
       "limits": "能看到你在 Ionexa 的数据和你连接的内容 · 不会自行执行操作"
     }
+  },
+  "voice": {
+    "listen": "朗读",
+    "listenFor": "朗读 · {credits} 个积分",
+    "pause": "暂停",
+    "speed": "播放速度",
+    "voice": "音色",
+    "listening": "正在收听",
+    "listeningHint": "说完后按停止。在你读过之前，什么都不会发送。",
+    "startListening": "用说的，不用打字",
+    "stopListening": "停止",
+    "costPerMinute": "每分钟语音 {credits} 个积分",
+    "outOfMinutes": "本月的语音分钟数已用完",
+    "states": {
+      "idle": "就绪",
+      "listening": "正在听你说",
+      "thinking": "正在思考",
+      "speaking": "正在说话"
+    },
+    "errors": {
+      "bad_request": "无法读取该请求。",
+      "capacity": "服务当前繁忙，请稍后再试。",
+      "denied": "麦克风未获授权。你仍然可以打字。",
+      "empty": "这段录音里没有听到任何内容。",
+      "failed": "语音功能暂时不可用。你仍然可以打字。",
+      "insufficient_credits": "积分不足。",
+      "no_recording": "没有发送任何录音。",
+      "no_speech": "没有录到任何声音。",
+      "not_configured": "此部署尚未配置语音功能。",
+      "not_included": "你的方案不包含语音功能。",
+      "out_of_minutes": "本月的语音分钟数已用完。",
+      "provider_error": "无法连接到语音服务。",
+      "rate_limited": "过去一小时内录音次数过多。请稍后再试。",
+      "reserve_failed": "无法为此预留积分。",
+      "too_large": "这段录音太长了。",
+      "unauthenticated": "你已退出登录。请重新登录后再试。",
+      "unsupported": "此浏览器无法录音。你仍然可以打字。",
+      "unsupported_type": "不支持这种音频格式。",
+      "usage_unavailable": "目前无法查询语音分钟数。"
+    },
+    "permission": {
+      "title": "在打开麦克风之前",
+      "pressToStart": "只有你按下时才开始录音，再按一次即停止。",
+      "notStored": "音频仅用于转写，不会被保存在任何地方——我们不存，之后也不存。",
+      "editFirst": "在发送任何内容之前，由你阅读并修改文字。",
+      "cost": "每分钟 {credits} 个积分，你的方案每月 {minutes} 分钟。",
+      "allow": "打开麦克风",
+      "cancel": "暂不"
+    },
+    "draft": {
+      "title": "听到的内容",
+      "use": "使用这段文字",
+      "discard": "丢弃",
+      "notSent": "还没有发送任何内容。先修改文字，再由你自己发送。"
+    },
+    "voices": {
+      "neutral": "中性",
+      "warm": "温暖",
+      "deep": "低沉",
+      "bright": "明亮"
+    },
+    "conversation": {
+      "title": "免提对话",
+      "start": "开口说",
+      "close": "结束对话",
+      "speak": "按一下再开口",
+      "interrupt": "打断",
+      "tapToSpeak": "在任意位置按一下再开口。你停下时它会自己停止收听。",
+      "tapToInterrupt": "在任意位置按一下即可打断并重新开口。",
+      "hint": "正常说话——你停下时这一轮就结束。",
+      "empty": "说过的内容也会在这里以文字呈现。"
+    },
+    "settings": {
+      "description": "用说的代替打字，也可以让它把答案读给你听。打字和阅读永远不会被取代——每个语音控件都在文字旁边，而不是取代它。",
+      "exhausted": "本月分钟数已用完，将于每月一号重置。",
+      "notConfigured": "此部署尚未配置语音，因此不会出现麦克风和朗读按钮。",
+      "notIncluded": "你的方案不包含语音。这里的一切仍然可以打字和阅读。",
+      "perMinute": "每分钟 {credits} 个积分",
+      "privacy": "只有你按下时才开始录音。音频仅用于转写，不会保存在任何地方——我们只保留秒数，别的都不留。",
+      "remaining": "还剩 {minutes} 分钟",
+      "speakLabel": "让它读给你听",
+      "title": "语音",
+      "transcribeLabel": "对它说",
+      "used": "本月已使用 {used} / {limit} 分钟"
+    }
   }
 }

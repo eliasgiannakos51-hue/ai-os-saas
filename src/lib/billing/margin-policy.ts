@@ -224,6 +224,11 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   automationCreate: "automation_run",
   agentBuild: "agent_build",
   agentRun: "agent_run",
+  // Voice. Both settle under one feature so CREDIT_MARGIN_VOICE governs
+  // speech in and speech out together — they are the same product
+  // decision, and a per-direction key would let one drift.
+  voiceTranscribe: "voice",
+  voiceSpeak: "voice",
   // The three depth tiers settle under the SAME feature as the untiered
   // profile, so CREDIT_MARGIN_AGENT_RUN still governs all of them — a
   // per-tier margin key would let one tier quietly drop below the floor

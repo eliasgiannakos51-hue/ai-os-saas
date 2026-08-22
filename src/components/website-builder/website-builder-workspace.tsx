@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { looksLikeCompleteHtmlDocument } from "@/lib/html-document-check";
+import { VoiceInput } from "@/components/voice/voice-input";
 import { findUnfilledPlaceholders, type UnfilledPlaceholder } from "@/lib/website-placeholders";
 import { findInventedNumbers, type SuspectNumber } from "@/lib/website-invented-numbers";
 import { useTranslations, useLocale } from "next-intl";
@@ -1470,15 +1471,29 @@ export function WebsiteBuilderWorkspace({
               <label htmlFor="website-edit" className="block text-xs text-muted">
                 {t("editLabel")}
               </label>
-              <textarea
-                id="website-edit"
-                maxLength={MAX_CHANGE_REQUEST_LENGTH}
-                value={editText}
-                onChange={(e) => setEditText(e.target.value.slice(0, MAX_CHANGE_REQUEST_LENGTH))}
-                placeholder={t("editPlaceholder")}
-                disabled={previewWebsite.status !== "completed"}
-                className="input min-h-28 resize-y"
-              />
+              <div className="flex items-start gap-2">
+                <textarea
+                  id="website-edit"
+                  maxLength={MAX_CHANGE_REQUEST_LENGTH}
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value.slice(0, MAX_CHANGE_REQUEST_LENGTH))}
+                  placeholder={t("editPlaceholder")}
+                  disabled={previewWebsite.status !== "completed"}
+                  className="input min-h-28 min-w-0 flex-1 resize-y"
+                />
+                <VoiceInput
+                  compact
+                  disabled={previewWebsite.status !== "completed"}
+                  onTranscript={(text) =>
+                    setEditText((current) =>
+                      (current.trim() ? `${current.trim()} ${text}` : text).slice(
+                        0,
+                        MAX_CHANGE_REQUEST_LENGTH
+                      )
+                    )
+                  }
+                />
+              </div>
 
               <div>
                 <label htmlFor="website-edit-image" className="mb-1 block text-xs text-muted">
@@ -1573,16 +1588,29 @@ export function WebsiteBuilderWorkspace({
                 <label htmlFor="website-description" className="mb-1 block text-xs text-muted">
                   {t("descriptionLabel")}
                 </label>
-                <textarea
-                  id="website-description"
-                  ref={descriptionRef}
-                  required
-                  maxLength={MAX_DESCRIPTION_LENGTH}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_LENGTH))}
-                  placeholder={t("descriptionPlaceholder")}
-                  className="input min-h-32 resize-y"
-                />
+                <div className="flex items-start gap-2">
+                  <textarea
+                    id="website-description"
+                    ref={descriptionRef}
+                    required
+                    maxLength={MAX_DESCRIPTION_LENGTH}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value.slice(0, MAX_DESCRIPTION_LENGTH))}
+                    placeholder={t("descriptionPlaceholder")}
+                    className="input min-h-32 min-w-0 flex-1 resize-y"
+                  />
+                  <VoiceInput
+                    compact
+                    onTranscript={(text) =>
+                      setDescription((current) =>
+                        (current.trim() ? `${current.trim()} ${text}` : text).slice(
+                          0,
+                          MAX_DESCRIPTION_LENGTH
+                        )
+                      )
+                    }
+                  />
+                </div>
                 {/* THREE REAL SITES, pressable — and the honest ceiling
                     next to them. "Describe your website" invites anything,
                     including a shop with payments, which this cannot make:

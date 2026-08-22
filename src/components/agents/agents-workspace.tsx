@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
 import { ListLayout } from "@/components/ui/list-layout";
+import { VoiceInput } from "@/components/voice/voice-input";
+import { VoicePlayer } from "@/components/voice/voice-player";
 import { EmptyState } from "@/components/empty-state";
 import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";
@@ -784,16 +786,25 @@ export function AgentsWorkspace({
               <label htmlFor="agent-request" className="mb-1 block text-xs font-medium text-muted">
                 {t("requestLabel")}
               </label>
-              <textarea
-                id="agent-request"
-                ref={requestRef}
-                value={requestText}
-                onChange={(e) => setRequestText(e.target.value)}
-                placeholder={t("requestPlaceholder")}
-                rows={3}
-                className="input"
-                disabled={building || savingAgent}
-              />
+              <div className="flex items-start gap-2">
+                <textarea
+                  id="agent-request"
+                  ref={requestRef}
+                  value={requestText}
+                  onChange={(e) => setRequestText(e.target.value)}
+                  placeholder={t("requestPlaceholder")}
+                  rows={3}
+                  className="input min-w-0 flex-1"
+                  disabled={building || savingAgent}
+                />
+                <VoiceInput
+                  compact
+                  disabled={building || savingAgent}
+                  onTranscript={(text) =>
+                    setRequestText((current) => (current.trim() ? `${current.trim()} ${text}` : text))
+                  }
+                />
+              </div>
               <p className="mt-1.5 text-[11px] text-muted">{t("deliveryNote", { email: accountEmail })}</p>
               {/* WHAT AN AGENT IS FOR, as three things you can press.
                   "Describe what the agent should do" is a label, not an
@@ -1327,13 +1338,28 @@ export function AgentsWorkspace({
                 <label htmlFor="edit-prompt" className="mb-1 block text-xs font-medium text-muted">
                   {t("taskLabel")}
                 </label>
-                <textarea
-                  id="edit-prompt"
-                  rows={5}
-                  className="input"
-                  value={editDraft.prompt}
-                  onChange={(e) => setEditDraft({ ...editDraft, prompt: e.target.value })}
-                />
+                <div className="flex items-start gap-2">
+                  <textarea
+                    id="edit-prompt"
+                    rows={5}
+                    className="input min-w-0 flex-1"
+                    value={editDraft.prompt}
+                    onChange={(e) => setEditDraft({ ...editDraft, prompt: e.target.value })}
+                  />
+                  <VoiceInput
+                    compact
+                    onTranscript={(text) =>
+                      setEditDraft((draft) =>
+                        draft
+                          ? {
+                              ...draft,
+                              prompt: draft.prompt.trim() ? `${draft.prompt.trim()} ${text}` : text,
+                            }
+                          : draft
+                      )
+                    }
+                  />
+                </div>
               </div>
               <DeliveryPicker
                 value={editDraft.deliveryMethod}
@@ -1435,6 +1461,11 @@ export function AgentsWorkspace({
                   <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
                     {lastRunOutput}
                   </p>
+                  {/* An agent that ran while nobody was looking is
+                      exactly the summary somebody wants read to them. */}
+                  <div className="mt-2">
+                    <VoicePlayer text={lastRunOutput} compact />
+                  </div>
                 </div>
               )}
 
@@ -1491,6 +1522,9 @@ export function AgentsWorkspace({
                             <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
                               {run.output}
                             </p>
+                            <div className="mt-2">
+                              <VoicePlayer text={run.output} compact />
+                            </div>
                           </details>
                         )}
                       </li>

@@ -27,6 +27,9 @@ import {
 
 export type CostStage =
   | "clarification"
+  /** Speech in, speech out. Not Anthropic — see recordExternal. */
+  | "transcribe"
+  | "speak"
   | "classification"
   | "generation"
   | "edit"
@@ -35,6 +38,12 @@ export type CostStage =
   | "web_search"
   | "retry"
   | "other";
+
+/** A cost recorded from a provider's published rate rather than from a
+ *  token table. See CostAccumulator.recordExternal. */
+export function isExternalModel(model: string): boolean {
+  return typeof model === "string" && model.startsWith("external:");
+}
 
 export type CostEntry = {
   stage: CostStage;
@@ -72,11 +81,63 @@ export class CostAccumulator {
   }
 
   /**
+   * A SUB-CALL TO A PROVIDER THAT IS NOT ANTHROPIC.
+   *
+   * Voice is the first of these: transcription is billed per second of
+   * audio and speech per character of text, so model-pricing.ts cannot
+   * price either — there are no tokens to price. The cost is computed by
+   * lib/voice/voice-pricing.ts from the provider's published rate and
+   * arrives here already in USD.
+   *
+   * WHY IT GOES THROUGH THIS CLASS AT ALL rather than settling on its
+   * own path: settleReservation is the single place the margin formula
+   * is applied and the single place an ai_cost_log row is written. A
+   * second settlement path for voice would be a second place for the
+   * margin to be got wrong, and a category of spend the cost dashboard
+   * and the cost alerts could not see. One path, one formula, one log.
+   *
+   * NOT ADDED TO `unpriced`. That list means "a MODEL we could not price,
+   * so the cost is a guess" and settlement raises an incident on it. An
+   * external cost is not a guess — it is arithmetic on a published rate —
+   * so flagging it would be an alert that fires on every voice call
+   * forever, which is an alert somebody turns off.
+   *
+   * The model string is prefixed `external:` so a cost row says which
+   * provider it went to, and so nothing mistakes it for an Anthropic id.
+   */
+  recordExternal(
+    stage: CostStage,
+    params: { provider: string; usdCost: number; units: number; unit: string }
+  ): void {
+    const usd = Number.isFinite(params.usdCost) && params.usdCost > 0 ? params.usdCost : 0;
+    this.entries.push({
+      stage,
+      model: `external:${params.provider}`,
+      usage: {
+        inputTokens: 0,
+        outputTokens: 0,
+        cacheWriteTokens: 0,
+        cacheWrite1hTokens: 0,
+        cacheReadTokens: 0,
+        webSearches: 0,
+        webFetches: 0,
+        usdCost: usd,
+      },
+    });
+  }
+
+  /**
    * Merges a breakdown produced elsewhere (e.g. a helper that already
    * priced its own call) without re-pricing it.
    */
   addBreakdown(stage: CostStage, model: string, usage: UsageBreakdown): void {
-    if (!isKnownModel(model)) this.unpriced.add(normalizeModelId(model));
+    // `external:` entries are priced from a provider's published rate,
+    // not from a token table, so an unknown-model incident on one would
+    // be an alert that fires on every voice call forever. See
+    // recordExternal.
+    if (!isExternalModel(model) && !isKnownModel(model)) {
+      this.unpriced.add(normalizeModelId(model));
+    }
     this.entries.push({ stage, model, usage });
   }
 

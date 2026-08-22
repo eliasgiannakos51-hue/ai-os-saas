@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
+import { VoiceInput } from "@/components/voice/voice-input";
 import { ListLayout } from "@/components/ui/list-layout";
 import { EmptyState } from "@/components/empty-state";
 import { CopyButton, writeToClipboard } from "@/components/ui/copy-button";
@@ -960,15 +961,25 @@ export function FilesWorkspace({
               })}
         </p>
 
-        <textarea
-          data-testid="files-question"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          placeholder={t("askPlaceholder")}
-          rows={3}
-          maxLength={MAX_QUESTION_CHARS}
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
-        />
+        <div className="flex items-start gap-2">
+          <textarea
+            data-testid="files-question"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            placeholder={t("askPlaceholder")}
+            rows={3}
+            maxLength={MAX_QUESTION_CHARS}
+            className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
+          />
+          <VoiceInput
+            compact
+            onTranscript={(text) =>
+              setQuestion((current) =>
+                (current.trim() ? `${current.trim()} ${text}` : text).slice(0, MAX_QUESTION_CHARS)
+              )
+            }
+          />
+        </div>
 
         {/* THE LIMIT, WHERE IT CAN BE SEEN.
             The textarea has always silently stopped accepting characters

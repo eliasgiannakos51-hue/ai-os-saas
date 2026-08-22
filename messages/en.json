@@ -2713,5 +2713,90 @@
       "e3": "Write an email to a customer who is late paying",
       "limits": "Sees your Ionexa data and whatever you've connected · It takes no actions on its own"
     }
+  },
+  "voice": {
+    "listen": "Listen",
+    "listenFor": "Listen · {credits} credits",
+    "pause": "Pause",
+    "speed": "Playback speed",
+    "voice": "Voice",
+    "listening": "Listening",
+    "listeningHint": "Speak, then press Stop. Nothing is sent until you have read it.",
+    "startListening": "Speak instead of typing",
+    "stopListening": "Stop",
+    "costPerMinute": "{credits} credits per minute of speech",
+    "outOfMinutes": "No voice minutes left this month",
+    "states": {
+      "idle": "Ready",
+      "listening": "Listening to you",
+      "thinking": "Thinking",
+      "speaking": "Speaking"
+    },
+    "errors": {
+      "bad_request": "That request could not be read.",
+      "capacity": "The service is busy right now. Try again shortly.",
+      "denied": "The microphone was not allowed. You can still type.",
+      "empty": "Nothing could be heard in that recording.",
+      "failed": "Voice is unavailable right now. You can still type.",
+      "insufficient_credits": "Not enough credits.",
+      "no_recording": "No recording was sent.",
+      "no_speech": "Nothing was recorded.",
+      "not_configured": "Voice is not set up on this deployment.",
+      "not_included": "Voice is not included on your plan.",
+      "out_of_minutes": "This month's voice minutes are used up.",
+      "provider_error": "The voice service could not be reached.",
+      "rate_limited": "Too many recordings in the last hour. Try again shortly.",
+      "reserve_failed": "Credits could not be held for this.",
+      "too_large": "That recording is too long.",
+      "unauthenticated": "You are signed out. Sign in and try again.",
+      "unsupported": "This browser cannot record audio. You can still type.",
+      "unsupported_type": "That audio format is not supported.",
+      "usage_unavailable": "Voice minutes could not be checked right now."
+    },
+    "permission": {
+      "title": "Before the microphone opens",
+      "pressToStart": "Recording starts only when you press, and stops when you press again.",
+      "notStored": "The audio is sent for transcription and stored nowhere — not by us, not afterwards.",
+      "editFirst": "You read and correct the text before anything is sent.",
+      "cost": "{credits} credits per minute, {minutes} minutes a month on your plan.",
+      "allow": "Open the microphone",
+      "cancel": "Not now"
+    },
+    "draft": {
+      "title": "What was heard",
+      "use": "Use this text",
+      "discard": "Discard",
+      "notSent": "Nothing has been sent. Correct the text first, then send it yourself."
+    },
+    "voices": {
+      "neutral": "Neutral",
+      "warm": "Warm",
+      "deep": "Deep",
+      "bright": "Bright"
+    },
+    "conversation": {
+      "title": "Hands-free conversation",
+      "start": "Talk",
+      "close": "End the conversation",
+      "speak": "Press and speak",
+      "interrupt": "Interrupt",
+      "tapToSpeak": "Press anywhere and speak. It stops listening by itself when you stop.",
+      "tapToInterrupt": "Press anywhere to interrupt and speak again.",
+      "hint": "Speak normally — the turn ends when you stop.",
+      "empty": "Everything said appears here as text as well."
+    },
+    "settings": {
+      "description": "Speak instead of typing, and have answers read back. Typing and reading are never taken away — every voice control sits beside the text one.",
+      "exhausted": "No minutes left this month. They reset on the first.",
+      "notConfigured": "Voice is not set up on this deployment, so the microphone and Listen buttons do not appear.",
+      "notIncluded": "Voice is not included on your plan. Everything here can still be typed and read.",
+      "perMinute": "{credits} credits a minute",
+      "privacy": "Recording only ever starts when you press. The audio is sent for transcription and stored nowhere — we keep the number of seconds, and nothing else.",
+      "remaining": "{minutes} minutes left",
+      "speakLabel": "Having it read to you",
+      "title": "Voice",
+      "transcribeLabel": "Speaking to it",
+      "used": "{used} of {limit} minutes used this month"
+    }
   }
 }

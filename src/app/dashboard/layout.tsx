@@ -9,6 +9,7 @@ import { OfflineBanner } from "@/components/network/offline-banner";
 import { CommandPalette } from "@/components/dashboard/command-palette";
 import { CommandPaletteProvider } from "@/components/dashboard/command-palette-context";
 import { CreditsProvider } from "@/components/credits/credits-context";
+import { VoiceAvailabilityProvider } from "@/components/voice/voice-availability";
 import { TopNav } from "@/components/dashboard/top-nav";
 import { acceptPendingTeamInvite } from "@/lib/team/accept-pending-invite";
 import { getOrInitCredits, resolveEffectivePlan, packCreditPriceEurFromRow } from "@/lib/billing/credits";
@@ -100,6 +101,15 @@ export default async function DashboardLayout({
                 stacking fix. DashboardBackground (not AuthBackground
                 directly) picks the opacity per-route, since Chat/Create
                 need a higher one — see its own comment for why. */}
+            {/* WHETHER VOICE EXISTS HERE AT ALL — one read, shared by
+                every microphone button and every "Listen" button below
+                it. Two provider keys are optional to a deployment and
+                mandatory to the feature, so the controls have to know
+                before they render whether pressing them could work; a
+                fetch per button would be a fetch per button. Mounted
+                inside CreditsProvider because the voice controls show a
+                price and refresh the balance after spending it. */}
+            <VoiceAvailabilityProvider>
             <DashboardBackground />
             {/* A second, much quieter ambient layer above the globe: ten
                 slowly drifting dots and two breathing glows, pure CSS. The
@@ -131,6 +141,7 @@ export default async function DashboardLayout({
             <ToastContainer />
             <AchievementUnlockBridge />
             <CommandPalette />
+            </VoiceAvailabilityProvider>
           </CreditsProvider>
           {/* Service worker + add-to-home-screen prompt. Mounted here, not
               in the root layout, so the offline shell and push are

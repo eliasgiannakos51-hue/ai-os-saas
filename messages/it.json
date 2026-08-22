@@ -2713,5 +2713,90 @@
       "e3": "Scrivi un’email a un cliente in ritardo con il pagamento",
       "limits": "Vede i tuoi dati su Ionexa e ciò che hai collegato · Non agisce da solo"
     }
+  },
+  "voice": {
+    "listen": "Ascolta",
+    "listenFor": "Ascolta · {credits} crediti",
+    "pause": "Pausa",
+    "speed": "Velocità di riproduzione",
+    "voice": "Voce",
+    "listening": "In ascolto",
+    "listeningHint": "Parla, poi premi Ferma. Nulla viene inviato prima che tu l'abbia letto.",
+    "startListening": "Parla invece di scrivere",
+    "stopListening": "Ferma",
+    "costPerMinute": "{credits} crediti al minuto di parlato",
+    "outOfMinutes": "Nessun minuto di voce rimasto questo mese",
+    "states": {
+      "idle": "Pronto",
+      "listening": "Ti sta ascoltando",
+      "thinking": "Sta pensando",
+      "speaking": "Sta parlando"
+    },
+    "errors": {
+      "bad_request": "Non è stato possibile leggere quella richiesta.",
+      "capacity": "Il servizio è molto occupato in questo momento. Riprova tra poco.",
+      "denied": "Il microfono non è stato autorizzato. Puoi sempre scrivere.",
+      "empty": "In quella registrazione non si è sentito nulla.",
+      "failed": "La voce non è disponibile in questo momento. Puoi sempre scrivere.",
+      "insufficient_credits": "Crediti insufficienti.",
+      "no_recording": "Non è stata inviata alcuna registrazione.",
+      "no_speech": "Non è stato registrato nulla.",
+      "not_configured": "La voce non è configurata su questa installazione.",
+      "not_included": "La voce non è inclusa nel tuo piano.",
+      "out_of_minutes": "I minuti di voce di questo mese sono esauriti.",
+      "provider_error": "Non è stato possibile raggiungere il servizio vocale.",
+      "rate_limited": "Troppe registrazioni nell'ultima ora. Riprova tra poco.",
+      "reserve_failed": "Non è stato possibile riservare i crediti per questo.",
+      "too_large": "Quella registrazione è troppo lunga.",
+      "unauthenticated": "Hai effettuato la disconnessione. Accedi e riprova.",
+      "unsupported": "Questo browser non può registrare audio. Puoi sempre scrivere.",
+      "unsupported_type": "Quel formato audio non è supportato.",
+      "usage_unavailable": "Non è stato possibile controllare i minuti di voce in questo momento."
+    },
+    "permission": {
+      "title": "Prima che si apra il microfono",
+      "pressToStart": "La registrazione parte solo quando premi e si ferma quando premi di nuovo.",
+      "notStored": "L'audio viene inviato per la trascrizione e non viene conservato da nessuna parte — né da noi né dopo.",
+      "editFirst": "Leggi e correggi il testo prima che venga inviato qualsiasi cosa.",
+      "cost": "{credits} crediti al minuto, {minutes} minuti al mese nel tuo piano.",
+      "allow": "Apri il microfono",
+      "cancel": "Non ora"
+    },
+    "draft": {
+      "title": "Ciò che è stato sentito",
+      "use": "Usa questo testo",
+      "discard": "Scarta",
+      "notSent": "Non è stato inviato nulla. Correggi il testo e invialo tu."
+    },
+    "voices": {
+      "neutral": "Neutra",
+      "warm": "Calda",
+      "deep": "Profonda",
+      "bright": "Brillante"
+    },
+    "conversation": {
+      "title": "Conversazione a mani libere",
+      "start": "Parla",
+      "close": "Termina la conversazione",
+      "speak": "Premi e parla",
+      "interrupt": "Interrompi",
+      "tapToSpeak": "Premi ovunque e parla. Smette di ascoltare da solo quando ti fermi.",
+      "tapToInterrupt": "Premi ovunque per interrompere e riprendere a parlare.",
+      "hint": "Parla normalmente: il turno finisce quando ti fermi.",
+      "empty": "Tutto ciò che viene detto appare anche qui come testo."
+    },
+    "settings": {
+      "description": "Parla invece di scrivere e fatti leggere le risposte. Scrivere e leggere non vengono mai tolti: ogni comando vocale sta accanto al testo, non al suo posto.",
+      "exhausted": "Nessun minuto rimasto questo mese. Si rinnovano il primo.",
+      "notConfigured": "La voce non è configurata su questa installazione, quindi i pulsanti microfono e Ascolta non compaiono.",
+      "notIncluded": "La voce non è inclusa nel tuo piano. Tutto qui si può comunque scrivere e leggere.",
+      "perMinute": "{credits} crediti al minuto",
+      "privacy": "La registrazione parte solo quando premi. L'audio viene inviato per la trascrizione e non viene conservato da nessuna parte: teniamo i secondi e nient'altro.",
+      "remaining": "Restano {minutes} minuti",
+      "speakLabel": "Farsi leggere",
+      "title": "Voce",
+      "transcribeLabel": "Parlargli",
+      "used": "{used} di {limit} minuti usati questo mese"
+    }
   }
 }

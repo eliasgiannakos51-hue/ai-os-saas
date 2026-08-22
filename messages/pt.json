@@ -2713,5 +2713,90 @@
       "e3": "Escreve um email a um cliente atrasado no pagamento",
       "limits": "Vê os teus dados no Ionexa e o que ligaste · Não age sozinho"
     }
+  },
+  "voice": {
+    "listen": "Ouvir",
+    "listenFor": "Ouvir · {credits} créditos",
+    "pause": "Pausa",
+    "speed": "Velocidade de reprodução",
+    "voice": "Voz",
+    "listening": "A ouvir",
+    "listeningHint": "Fala e depois carrega em Parar. Nada é enviado antes de o teres lido.",
+    "startListening": "Fala em vez de escrever",
+    "stopListening": "Parar",
+    "costPerMinute": "{credits} créditos por minuto de fala",
+    "outOfMinutes": "Sem minutos de voz este mês",
+    "states": {
+      "idle": "Pronto",
+      "listening": "A ouvir-te",
+      "thinking": "A pensar",
+      "speaking": "A falar"
+    },
+    "errors": {
+      "bad_request": "Não foi possível ler esse pedido.",
+      "capacity": "O serviço está muito ocupado neste momento. Tenta daqui a pouco.",
+      "denied": "O microfone não foi autorizado. Podes sempre escrever.",
+      "empty": "Não se ouviu nada nessa gravação.",
+      "failed": "A voz não está disponível neste momento. Podes sempre escrever.",
+      "insufficient_credits": "Créditos insuficientes.",
+      "no_recording": "Não foi enviada nenhuma gravação.",
+      "no_speech": "Não foi gravado nada.",
+      "not_configured": "A voz não está configurada nesta instalação.",
+      "not_included": "A voz não está incluída no teu plano.",
+      "out_of_minutes": "Os minutos de voz deste mês acabaram.",
+      "provider_error": "Não foi possível contactar o serviço de voz.",
+      "rate_limited": "Demasiadas gravações na última hora. Tenta daqui a pouco.",
+      "reserve_failed": "Não foi possível reservar créditos para isto.",
+      "too_large": "Essa gravação é demasiado longa.",
+      "unauthenticated": "A tua sessão terminou. Inicia sessão e tenta de novo.",
+      "unsupported": "Este navegador não consegue gravar áudio. Podes sempre escrever.",
+      "unsupported_type": "Esse formato de áudio não é suportado.",
+      "usage_unavailable": "Não foi possível verificar os minutos de voz neste momento."
+    },
+    "permission": {
+      "title": "Antes de o microfone abrir",
+      "pressToStart": "A gravação só começa quando carregas e para quando carregas de novo.",
+      "notStored": "O áudio é enviado para transcrição e não é guardado em lado nenhum — nem por nós, nem depois.",
+      "editFirst": "Lês e corriges o texto antes de ser enviado seja o que for.",
+      "cost": "{credits} créditos por minuto, {minutes} minutos por mês no teu plano.",
+      "allow": "Abrir o microfone",
+      "cancel": "Agora não"
+    },
+    "draft": {
+      "title": "O que foi ouvido",
+      "use": "Usar este texto",
+      "discard": "Descartar",
+      "notSent": "Não foi enviado nada. Corrige o texto e envia-o tu."
+    },
+    "voices": {
+      "neutral": "Neutra",
+      "warm": "Quente",
+      "deep": "Grave",
+      "bright": "Clara"
+    },
+    "conversation": {
+      "title": "Conversa sem mãos",
+      "start": "Falar",
+      "close": "Terminar a conversa",
+      "speak": "Carrega e fala",
+      "interrupt": "Interromper",
+      "tapToSpeak": "Carrega em qualquer sítio e fala. Deixa de ouvir sozinho quando paras.",
+      "tapToInterrupt": "Carrega em qualquer sítio para interromper e voltar a falar.",
+      "hint": "Fala normalmente — a vez termina quando paras.",
+      "empty": "Tudo o que é dito aparece aqui também como texto."
+    },
+    "settings": {
+      "description": "Fala em vez de escrever e ouve as respostas. Escrever e ler nunca são retirados — cada controlo de voz fica ao lado do texto, não no lugar dele.",
+      "exhausted": "Sem minutos este mês. Renovam-se no dia um.",
+      "notConfigured": "A voz não está configurada nesta instalação, por isso os botões de microfone e Ouvir não aparecem.",
+      "notIncluded": "A voz não está incluída no teu plano. Tudo aqui continua a poder ser escrito e lido.",
+      "perMinute": "{credits} créditos por minuto",
+      "privacy": "A gravação só começa quando carregas. O áudio é enviado para transcrição e não é guardado em lado nenhum — guardamos os segundos e mais nada.",
+      "remaining": "Faltam {minutes} minutos",
+      "speakLabel": "Ouvir a leitura",
+      "title": "Voz",
+      "transcribeLabel": "Falar com ele",
+      "used": "{used} de {limit} minutos usados este mês"
+    }
   }
 }

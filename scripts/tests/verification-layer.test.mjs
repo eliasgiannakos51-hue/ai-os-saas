@@ -82,13 +82,19 @@ console.log("\n== 3. IT IS IN THE PATH — the part that gets skipped ==");
 {
   const runner = readFileSync("src/lib/research/run-research.ts", "utf8");
   ok("run-research imports the check", /from "@\/lib\/verification\/citations"/.test(runner));
-  ok("...and calls it on the synthesis the model produced",
-    /checkCitations\(synthesis\.markdown, sources\.length\)/.test(runner));
+  // ON THE TEXT THAT IS ACTUALLY RENDERED. This named synthesis.markdown
+  // until the truncation notice arrived; the notice is part of the
+  // finished document, so the citation check has to see the same string
+  // the reader does, not the one before it was appended.
+  ok("...and calls it on the text that will be rendered",
+    /checkCitations\(reportMarkdown, sources\.length\)/.test(runner));
+  ok("...which is the synthesis plus any truncation notice",
+    /const reportMarkdown = synthesis\.truncated/.test(runner));
   ok("...before the document is rendered, not after",
     runner.indexOf("checkCitations(") < runner.indexOf("researchReportToDocumentHtml({"));
   ok("a failing check is logged, not swallowed", /stage: "citation_check"/.test(runner));
   ok("and the rendered markdown is the annotated one",
-    /annotateDanglingCitations\(synthesis\.markdown, sources\.length\)/.test(runner));
+    /annotateDanglingCitations\(reportMarkdown, sources\.length\)/.test(runner));
 }
 
 // =====================================================================

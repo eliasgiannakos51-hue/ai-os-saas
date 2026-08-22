@@ -13,6 +13,7 @@ import { hasActiveBetaBypass } from "@/lib/beta";
 import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
 import { researchReportToDocumentHtml } from "@/lib/research/report-to-html";
 import { checkCitations, annotateDanglingCitations } from "@/lib/verification/citations";
+import { truncationNotice } from "@/lib/verification/truncation";
 import {
   functionBudgetMs,
   hasBudgetFor,
@@ -389,7 +390,27 @@ export async function runResearchChunk(params: {
   // point the claim at whatever source sits at that index and invent a
   // provenance. Keeping it visible is the only option that tells the
   // reader the truth about the document.
-  const citations = checkCitations(synthesis.markdown, sources.length);
+  // THE REPORT MAY BE SEVERED, and until now nothing said so. The
+  // synthesiser allows 8,000 tokens and validated its output with a
+  // length check, so a report that stopped at the ceiling mid-sentence
+  // was written to a document and delivered as finished.
+  //
+  // Labelled rather than discarded: the partial report is real work the
+  // user paid for, and a retry costs the same again with no reason to
+  // end differently. What the reader must not be able to do is mistake
+  // where it stopped for where the author meant it to.
+  const reportMarkdown = synthesis.truncated
+    ? `${synthesis.markdown}\n\n_${truncationNotice(language)}_`
+    : synthesis.markdown;
+  if (synthesis.truncated) {
+    logApiError("research:runChunk", new Error("synthesis hit its token ceiling"), {
+      stage: "truncation",
+      reportId,
+      chars: synthesis.markdown.length,
+    });
+  }
+
+  const citations = checkCitations(reportMarkdown, sources.length);
   if (!citations.ok) {
     logApiError(
       "research:runChunk",
@@ -407,8 +428,8 @@ export async function runResearchChunk(params: {
 
   const documentHtml = researchReportToDocumentHtml({
     markdown: citations.ok
-      ? synthesis.markdown
-      : annotateDanglingCitations(synthesis.markdown, sources.length),
+      ? reportMarkdown
+      : annotateDanglingCitations(reportMarkdown, sources.length),
     sources,
     disclosure,
     sourcesHeading: "Sources",

@@ -1,11 +1,19 @@
-const DAY_MS = 24 * 60 * 60 * 1000;
+import { DAY_MS } from "@/lib/time-constants";
 
 // How long each recency-style factor takes to decay to 0 — kept in one
 // place so the four factors share a coherent time horizon rather than
 // each picking an arbitrary window.
 const RECENCY_FULL_DECAY_DAYS = 14;
 const MISSION_STEPS_TARGET = 5;
-const CONSISTENCY_WINDOW_DAYS = 7;
+/**
+ * The window "activeDaysThisWeek" is counted over.
+ *
+ * EXPORTED, because lib/user-context.ts is what COUNTS those days and had
+ * its own copy of the 7. Two files agreeing about the size of the window
+ * only by coincidence is how a score comes to be computed over a
+ * different period than the one it is scaled against.
+ */
+export const CONSISTENCY_WINDOW_DAYS = 7;
 
 export type HealthScoreFactor = "recency" | "coverage" | "missionSteps" | "consistency";
 

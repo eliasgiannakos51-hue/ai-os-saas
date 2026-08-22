@@ -3,8 +3,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { LINKABLE_MODULES, getLinkableModuleByTable, moduleHref } from "@/lib/knowledge-graph";
 import { logApiError } from "@/lib/log-error";
 import type { Mission } from "@/types/mission";
+import { DAY_MS } from "@/lib/time-constants";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 const STALE_THRESHOLD_MS = 3 * DAY_MS;
 
 // Structured, not pre-formatted — the actual sentence gets built by the

@@ -29,7 +29,7 @@ function resolveSpecifier(spec, fromFile) {
   else if (spec.startsWith(".")) base = path.resolve(path.dirname(fromFile), spec);
   else return null; // node_modules — left to the real resolver
 
-  for (const ext of [".ts", ".tsx", "/index.ts", ".js"]) {
+  for (const ext of [".ts", ".tsx", "/index.ts", ".js", ".json"]) {
     if (existsSync(base + ext)) return base + ext;
   }
   if (existsSync(base)) return base;
@@ -43,6 +43,17 @@ function collect(file, seen, out, allowExternals = false) {
   seen.add(abs);
 
   const source = readFileSync(abs, "utf8");
+
+  // A .json import is DATA, and the real data is inlined rather than
+  // stubbed. lib/module-labels.ts imports messages/en.json to derive the
+  // English module names every prompt uses; handing it a `{}` would make
+  // every one of those names undefined while the module still loaded,
+  // which is the quiet kind of wrong this harness exists to avoid.
+  //
+  // Found while measuring what a chat request sends: the loader threw
+  // "Debug Failure. Output generation failed" — TypeScript being asked to
+  // transpile JSON — and the measuring script caught it and printed a
+  // zero. Two bugs, and the zero was the worse one.
   const sf = ts.createSourceFile(abs, source, ts.ScriptTarget.ES2022, true);
 
   // Depth-first: dependencies are emitted before the module that needs them,
@@ -54,7 +65,39 @@ function collect(file, seen, out, allowExternals = false) {
       ts.isStringLiteral(stmt.moduleSpecifier)
     ) {
       const resolved = resolveSpecifier(stmt.moduleSpecifier.text, abs);
-      if (resolved) collect(resolved, seen, out, allowExternals);
+      if (!resolved) continue;
+      // A .json import is DATA, and the REAL data is inlined — never a
+      // stub. lib/module-labels.ts imports messages/en.json to derive the
+      // English module names every prompt uses; handing it `{}` would
+      // leave every one of those names undefined while the module still
+      // loaded, which is the quiet kind of wrong this harness exists to
+      // avoid.
+      //
+      // Bound to the importer's own local name, because the bundle is a
+      // concatenation: the import statement is stripped, so the binding
+      // has to already exist under the name that file used.
+      //
+      // Found while measuring what a chat request sends — the loader threw
+      // "Debug Failure. Output generation failed" (TypeScript asked to
+      // transpile JSON) and the measuring script caught it and printed a
+      // zero. Two bugs, and the zero was the worse one.
+      if (resolved.endsWith(".json")) {
+        if (seen.has(resolved)) continue;
+        seen.add(resolved);
+        const local =
+          ts.isImportDeclaration(stmt) && stmt.importClause?.name
+            ? stmt.importClause.name.text
+            : null;
+        if (!local) {
+          throw new Error(
+            `${abs} imports ${stmt.moduleSpecifier.text} without a default binding; ` +
+              "only `import name from \"...json\"` is supported."
+          );
+        }
+        out.push(`const ${local} = ${readFileSync(resolved, "utf8")};`);
+        continue;
+      }
+      collect(resolved, seen, out, allowExternals);
     }
   }
 

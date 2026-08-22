@@ -36,7 +36,7 @@ import {
 import { loadLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
 import type { PlanSlug } from "@/lib/billing/plans";
 import { CHAT_MODEL } from "@/lib/ai-models";
-import { buildCachedSystem } from "@/lib/ai/cached-system";
+import { buildCachedSystem, buildCachedMessages } from "@/lib/ai/cached-system";
 import { consumeFreeChatMessage, releaseFreeChatMessage } from "@/lib/billing/free-chat-usage";
 import { diagLog } from "@/lib/diag";
 import {
@@ -50,6 +50,8 @@ import { loadMentorContext } from "@/lib/chat/mentor-context";
 import { loadTradingMentorContext } from "@/lib/chat/trading-mentor-context";
 import { loadProductMentorContext } from "@/lib/chat/product-mentor-context";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
+import { selectRelevantModules, resolveSelectionConfig } from "@/lib/ai/context-relevance";
+import { moduleVocabulary } from "@/lib/ai/module-vocabulary";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 import { AI_CONDUCT_EL } from "@/lib/ai-conduct";
 import { matchCannedAnswer, type CannedMatch } from "@/lib/support/knowledge-base";
@@ -443,7 +445,30 @@ export async function POST(request: Request) {
     let userContext = "";
     try {
       const fullContext = await getUserFullContext(supabase, user.id);
-      userContext = buildUserContextPromptAdditionGreek(fullContext);
+      // NARROWING IS OFF BY DEFAULT — see lib/ai/context-relevance.ts.
+      //
+      // With CONTEXT_RELEVANCE unset (which is every deployment until
+      // somebody measures quality) this returns every module and the
+      // prompt is byte-identical to what it was. That is deliberate: this
+      // is the one change in the context work that can make an ANSWER
+      // worse, and the value of a cross-module assistant is the
+      // cross-module part.
+      const selection = selectRelevantModules(
+        message,
+        fullContext.moduleSummaries,
+        moduleVocabulary(),
+        resolveSelectionConfig()
+      );
+      if (selection.mode === "narrowed") {
+        diagLog(
+          `[context] narrowed ${fullContext.moduleSummaries.length} -> ${selection.keep.length} modules ` +
+            `(dropped ${selection.droppedSlugs.join(",")}; ${selection.reason})`
+        );
+      }
+      userContext = buildUserContextPromptAdditionGreek({
+        ...fullContext,
+        moduleSummaries: selection.keep,
+      });
     } catch (err) {
       logApiError("/api/chat", err, { stage: "user_full_context" });
     }
@@ -492,20 +517,34 @@ export async function POST(request: Request) {
     const systemStaticPrefix = mentorMode
       ? buildMentorSystemPrompt(personaName)
       : buildSystemPrompt(personaName);
-    const systemDynamicSuffix =
+    // THREE TIERS NOW, not two, and the middle one is where the money is.
+    //
+    // Measured with scripts/measure-context.mjs: of everything a chat
+    // request sends, 33% is the static prefix (already cached), 39% is
+    // conversation history and 28% is this. Within that 28%, the AI Life
+    // Context alone is 4,817 characters — and it changes when the user
+    // adds an entry, not when they send a message.
+    //
+    // ENTITY MENTIONS MOVE TO THE END. They are computed from the words
+    // in THIS message (findMentionedEntities above), so they are the one
+    // genuinely per-message part. With them in the middle, as they were,
+    // the prefix differs on every message and nothing after them can ever
+    // be cached — which is why this reorder is a requirement rather than
+    // a tidy-up. Nothing is added or removed; the same text is sent.
+    const systemPerUser =
       buildMemoryPromptAddition(memories) +
-      buildEntityMentionPromptAddition(mentionedEntities) +
       mentorContext +
       tradingMentorContext +
       productMentorContext +
       userContext +
       integrationInstruction;
+    const systemDynamicSuffix = buildEntityMentionPromptAddition(mentionedEntities);
     // Kept as the concatenation of the two halves, unchanged, because
     // every cost estimate below sizes the request with
     // `systemPrompt.length`. The split changes where the block boundary
     // is, never how much text is sent, and this keeps the estimator
     // measuring the same string it always did.
-    const systemPrompt = systemStaticPrefix + systemDynamicSuffix;
+    const systemPrompt = systemStaticPrefix + systemPerUser + systemDynamicSuffix;
 
     // Credits: 1 credit per Ionexa Chat message, deducted from user_credits
     // (see lib/billing/credits.ts), the same shared budget Create Anything
@@ -804,10 +843,18 @@ export async function POST(request: Request) {
           // result. Without a connected integration this loop runs exactly
           // once and is indistinguishable from the single call that was
           // here before.
-          const conversation: Anthropic.MessageParam[] = [
-            ...effectiveHistory.map((m) => ({ role: m.role, content: m.content })),
-            { role: "user" as const, content: message },
-          ];
+          // THE HISTORY IS CACHED TOO — the single largest block a chat
+          // request sends (39% of it at twenty turns), and every one of
+          // those turns is text the model was already sent verbatim on
+          // the previous request. A conversation is append-only, which is
+          // the shape a prefix cache wants: the breakpoint goes on the
+          // last history turn, so this request reads what the previous
+          // one wrote. See lib/ai/cached-system.ts.
+          const conversation = buildCachedMessages(
+            effectiveHistory,
+            message,
+            MODEL
+          ) as Anthropic.MessageParam[];
 
           for (let round = 0; round <= MAX_TOOL_ROUNDS; round++) {
             const claudeStream = anthropic.messages.stream({
@@ -815,6 +862,7 @@ export async function POST(request: Request) {
               max_tokens: effectiveMaxTokens,
               system: buildCachedSystem({
                 staticPrefix: systemStaticPrefix,
+                perUserBlock: systemPerUser,
                 dynamicSuffix: systemDynamicSuffix,
                 model: MODEL,
               }),

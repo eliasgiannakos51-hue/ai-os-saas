@@ -43,6 +43,57 @@ export const BACKGROUND_STYLES: WebsiteBackgroundStyle[] = [
 /** What to do with the images the user attached. */
 export type ReferenceImageUse = "in-site" | "style-only";
 
+/**
+ * WHERE THE PHOTOS COME FROM — asked BEFORE generation, because after it
+ * the answer is a regeneration.
+ *
+ * Unsplash has no photograph of THIS bakery. It has a bakery, and the
+ * difference is the whole point of a site for a real business: a stock
+ * interior is a stand-in the owner recognises instantly and a customer
+ * eventually does too.
+ *
+ *   "own"   — the user is uploading. Theirs go in the hero and the
+ *             gallery; anything left over falls back to stock.
+ *   "stock" — what the app did before this existed, and the default, so
+ *             an untouched form produces the generation it always did.
+ *   "none"  — a page with no photographs at all. This is the one choice
+ *             that has to be ENFORCED rather than asked for: the prompt
+ *             can be ignored, and a single PLACEHOLDER slipping through
+ *             costs an Unsplash request and puts a photo on a page whose
+ *             owner said they did not want one.
+ */
+export type PhotoSource = "own" | "stock" | "none";
+
+export const PHOTO_SOURCES: PhotoSource[] = ["own", "stock", "none"];
+
+/**
+ * Roughly how many photographs a generated site uses.
+ *
+ * Shown in the control ("I will need about 6 photographs") so the choice
+ * is made against a real number rather than in the abstract. Derived from
+ * the shape the prompt asks for — a hero, a few section illustrations, a
+ * small gallery — and deliberately approximate: the model decides the
+ * real count from the brief, and a promise of exactly six would be a
+ * number the page then contradicts.
+ */
+export const TYPICAL_SITE_PHOTO_COUNT = 6;
+
+/**
+ * The machine-readable line the brief carries so the SERVER can enforce
+ * the "none" choice.
+ *
+ * The design choices are compiled into the description and never stored
+ * as columns — that is this module's whole design, and it is why the
+ * generation worker cannot see them. Rather than add a column, a
+ * migration and a second place where "what the user asked for" lives,
+ * the brief states the answer in a form our own code can read back.
+ *
+ * The same trick as the page markers in lib/website-multipage.ts, and it
+ * earns its keep the same way: build and parse are one round trip, tested
+ * over every value, so the two halves cannot drift.
+ */
+export const PHOTO_SOURCE_MARKER = "PHOTOS:";
+
 /** The logo question, asked BEFORE generation (reported bug: the model
  *  invented a mark that looked like OUR logo instead of asking).
  *  "uploaded": the first attached image IS the logo. "wordmark": the user
@@ -62,6 +113,8 @@ export type WebsiteDesignChoices = {
    *  are meaningless without any, and a brief that demands photos the
    *  model does not have produces an apology instead of a page. */
   imageCount: number;
+  /** Where the page's photographs come from. See PhotoSource. */
+  photoSource: PhotoSource;
 };
 
 export const DEFAULT_DESIGN_CHOICES: WebsiteDesignChoices = {
@@ -71,7 +124,21 @@ export const DEFAULT_DESIGN_CHOICES: WebsiteDesignChoices = {
   referenceImageUse: "in-site",
   logo: "auto",
   imageCount: 0,
+  // The default is what the app did before this choice existed, so an
+  // untouched form still produces a byte-identical brief.
+  photoSource: "stock",
 };
+
+/**
+ * The header this module writes above the compiled brief, and the anchor
+ * parsePhotoSource searches from.
+ *
+ * One constant rather than a literal in each half: a header that drifted
+ * between the writer and the reader would make every choice silently stop
+ * applying, and nothing would look wrong.
+ */
+export const DESIGN_BRIEF_HEADER =
+  "DESIGN BRIEF (the user chose these explicitly — follow them exactly, they override your own aesthetic judgement):";
 
 const HEX_COLOR = /^#[0-9a-f]{6}$/i;
 
@@ -143,6 +210,27 @@ export function buildDesignBrief(choices: WebsiteDesignChoices): string {
     lines.push(IMAGE_USE_INSTRUCTIONS[choices.referenceImageUse]);
   }
 
+  // WHERE THE PHOTOS COME FROM.
+  //
+  // "stock" says nothing: it is the behaviour every prompt rule already
+  // describes, and a line repeating it would only add tokens. The other
+  // two both change what the page contains.
+  //
+  // "own" with nothing attached is the same demoted case as "own-photo"
+  // and "uploaded" above — asking for photographs that do not exist
+  // produces an apology instead of a page.
+  const photoSource: PhotoSource =
+    choices.photoSource === "own" && choices.imageCount === 0 ? "stock" : choices.photoSource;
+  if (photoSource === "own") {
+    lines.push(
+      `${PHOTO_SOURCE_MARKER} own. The user's ${choices.imageCount} uploaded photograph(s) are the site's real photographs. Put them in the positions that matter FIRST — the hero, then any gallery, then section illustrations — before considering any other image. Only once every uploaded photo is placed may you use the PLACEHOLDER convention for what is still missing.`
+    );
+  } else if (photoSource === "none") {
+    lines.push(
+      `${PHOTO_SOURCE_MARKER} none. This page has NO photographs at all. Do not emit a single PLACEHOLDER image and do not reference any photo URL. Carry the page on typography, colour, spacing, CSS shapes and inline SVG icons instead — a deliberate illustration-free design, not a page with gaps where pictures should be.`
+    );
+  }
+
   // The logo answer. "uploaded" without any image attached is the same
   // demoted case as "own-photo" above: asking the model to use a file
   // that does not exist produces an apology instead of a page.
@@ -158,7 +246,7 @@ export function buildDesignBrief(choices: WebsiteDesignChoices): string {
 
   if (lines.length === 0) return "";
 
-  return `\n\nDESIGN BRIEF (the user chose these explicitly — follow them exactly, they override your own aesthetic judgement):\n${lines
+  return `\n\n${DESIGN_BRIEF_HEADER}\n${lines
     .map((line) => `- ${line}`)
     .join("\n")}`;
 }
@@ -166,4 +254,42 @@ export function buildDesignBrief(choices: WebsiteDesignChoices): string {
 /** The description as submitted: the user's own words plus the brief. */
 export function applyDesignBrief(description: string, choices: WebsiteDesignChoices): string {
   return `${description}${buildDesignBrief(choices)}`;
+}
+
+/**
+ * The photo source a description was submitted with, read back off the
+ * brief our own code wrote into it.
+ *
+ * WHY READ IT BACK RATHER THAN PASS IT. The description is the one thing
+ * that reaches the generation worker; the design choices are compiled
+ * into it and deliberately never stored as columns. A new column would be
+ * a migration, a request field, a worker parameter and a second place
+ * where "what the user asked for" lives — and the two could then
+ * disagree. There is exactly one source of truth here and this reads it.
+ *
+ * DEFAULTS TO "stock", which is the pre-existing behaviour: a description
+ * written before this feature existed, or by anything that does not
+ * compile a brief, must generate exactly as it always did.
+ *
+ * Anchored to the start of a line so the words "photos: none" inside a
+ * user's own description cannot silently switch their images off.
+ */
+export function parsePhotoSource(description: string): PhotoSource {
+  if (typeof description !== "string") return "stock";
+
+  // READ ONLY INSIDE OUR OWN BLOCK.
+  //
+  // Anchoring to the start of a line was not enough: a description that
+  // simply BEGINS "photos: none — that is what my competitor does" parsed
+  // as a choice, and that owner's photographs would have been silently
+  // switched off. The marker only means anything where this module put
+  // it, so the search starts after the header this module writes.
+  const header = description.lastIndexOf(DESIGN_BRIEF_HEADER);
+  if (header === -1) return "stock";
+
+  const block = description.slice(header);
+  const re = new RegExp(`^-\\s*${PHOTO_SOURCE_MARKER}\\s*(own|stock|none)\\b`, "im");
+  const match = re.exec(block);
+  const value = match?.[1]?.toLowerCase();
+  return value === "own" || value === "none" ? value : "stock";
 }

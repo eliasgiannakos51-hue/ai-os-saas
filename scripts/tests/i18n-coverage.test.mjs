@@ -630,7 +630,13 @@ const clientFallbacks = sources.flatMap((f) => [
 // all ten locales — so neither English sentence can reach a user. They
 // are counted here because they are still English strings in a route,
 // and pretending otherwise is how a ratchet stops meaning anything.
-const SERVER_PROSE_BASELINE = 551;
+// 551 -> 552 for api/websites/storage-usage's "Not authenticated." —
+// the standard string every other route in this app returns for the same
+// case, on an endpoint whose CALLER ignores the body entirely: the
+// workspace fails open on anything that is not a usable figure, because
+// this gates an upload and a storage hiccup must not stop somebody
+// adding a photograph to their own site. Nobody reads this sentence.
+const SERVER_PROSE_BASELINE = 552;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

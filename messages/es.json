@@ -1156,7 +1156,19 @@
           "auto": "Decide tú"
         },
         "logoHint": "Sin logotipo, el sitio muestra el nombre de tu negocio como una marca de texto estilizada — nunca inventa un logotipo por ti.",
-        "logoNeedsUpload": "Sube primero el logotipo como imagen"
+        "logoNeedsUpload": "Sube primero el logotipo como imagen",
+        "photoSourceTitle": "Fotografías — este sitio usará unas {count}",
+        "photoSourceChoices": {
+          "own": "Subir las mías",
+          "stock": "Fotos de stock",
+          "none": "Sin fotos"
+        },
+        "photoSourceHint": {
+          "own": "Las tuyas van primero al hero y a la galería. Lo que falte se completa con stock.",
+          "stock": "Fotos de stock elegidas para cada sección.",
+          "none": "Un diseño con tipografía, color y formas — sin fotografías."
+        },
+        "photoSourceNeedsUpload": "Adjunta tus fotos arriba, o se usarán fotos de stock."
       },
       "imageIntro": "Tu logo, fotos de producto o del local: lo que quieras que aparezca o que marque el estilo.",
       "regenerateAlreadyUsed": "Ya has usado la regeneración gratuita de este sitio. Crea un sitio nuevo con otra descripción.",
@@ -1165,7 +1177,11 @@
         "title": "Describa el sitio y tendrá el sitio",
         "why": "Escriba para qué sirve y a quién va dirigido: las páginas, los textos y el diseño salen de esa descripción, y puede seguir editando con palabras normales.",
         "example": "Sitio de una página para una panadería, con carta y horario"
-      }
+      },
+      "stockNoticeTitle": "{count} fotos de stock en este sitio",
+      "stockNoticeBody": "Sube las tuyas para un resultado más auténtico — Unsplash tiene un negocio como el tuyo, no el tuyo.",
+      "stockNoticeAction": "Subir fotos",
+      "storageFull": "No hay espacio para estas imágenes — se necesitan {needed}, libres {free}."
     },
     "marketplace": {
       "title": "Mercado",

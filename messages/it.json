@@ -1156,7 +1156,19 @@
           "auto": "Decidi tu"
         },
         "logoHint": "Senza logo, il sito mostra il nome della tua attività come wordmark stilizzato — non inventa mai un logo al posto tuo.",
-        "logoNeedsUpload": "Carica prima il logo come immagine"
+        "logoNeedsUpload": "Carica prima il logo come immagine",
+        "photoSourceTitle": "Fotografie — questo sito ne userà circa {count}",
+        "photoSourceChoices": {
+          "own": "Carica le mie",
+          "stock": "Foto stock",
+          "none": "Senza foto"
+        },
+        "photoSourceHint": {
+          "own": "Le tue vanno prima nell'hero e nella galleria. Ciò che manca è coperto da foto stock.",
+          "stock": "Foto stock scelte per ogni sezione.",
+          "none": "Un design fatto di tipografia, colore e forme — senza fotografie."
+        },
+        "photoSourceNeedsUpload": "Allega le tue foto sopra, altrimenti verranno usate foto stock."
       },
       "imageIntro": "Il tuo logo, foto dei prodotti o del locale: quello che vuoi nella pagina o che deve dare lo stile.",
       "regenerateAlreadyUsed": "Hai già usato la rigenerazione gratuita per questo sito. Crea un nuovo sito con una descrizione diversa.",
@@ -1165,7 +1177,11 @@
         "title": "Descrivi il sito, ottieni il sito",
         "why": "Scrivi a cosa serve e a chi si rivolge: pagine, testi e impaginazione nascono da quella descrizione, e continui a modificarli a parole.",
         "example": "Sito di una pagina per un piccolo forno, con menù e orari"
-      }
+      },
+      "stockNoticeTitle": "{count} foto stock su questo sito",
+      "stockNoticeBody": "Carica le tue per un risultato più autentico — Unsplash ha un'attività come la tua, non la tua.",
+      "stockNoticeAction": "Carica foto",
+      "storageFull": "Spazio insufficiente per queste immagini — servono {needed}, liberi {free}."
     },
     "marketplace": {
       "title": "Mercato",

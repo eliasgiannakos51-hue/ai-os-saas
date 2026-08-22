@@ -21,6 +21,8 @@ import { findUnfilledPlaceholders, type UnfilledPlaceholder } from "@/lib/websit
 import { findInventedNumbers, type SuspectNumber } from "@/lib/website-invented-numbers";
 import { useTranslations, useLocale } from "next-intl";
 import { normalisePages, type WebsitePage } from "@/lib/publishing/website-pages";
+import { censusSiteImages, shouldOfferOwnPhotos } from "@/lib/website-image-census";
+import { canUpload, formatBytes, type StorageUsage } from "@/lib/websites/storage-quota";
 import { ApiError } from "@/lib/errors/api-error";
 import { useErrorText, useErrorTextForStatus } from "@/lib/errors/use-error-text";
 import { createClient } from "@/lib/supabase/client";
@@ -674,6 +676,42 @@ export function WebsiteBuilderWorkspace({
           return;
         }
 
+        // DOES THIS ACCOUNT HAVE ROOM? Asked before the first byte goes
+        // up, and judged on the WHOLE batch — six photographs that each
+        // fit individually and do not fit together is exactly the upload
+        // a per-file check waves through and then half-completes, which
+        // looks to the owner like the model ignoring their photos.
+        //
+        // ADVISORY, and worth being exact about: Storage RLS lets a user
+        // write into their own folder, so this stops the ordinary case
+        // rather than a determined one. What bounds growth for real is
+        // the nightly cleanup of files nothing references.
+        //
+        // Fails OPEN. A storage hiccup must not stop somebody adding a
+        // photograph to their own site.
+        try {
+          const res = await fetchWithAuthRetry("/api/websites/storage-usage");
+          const data = await res.json().catch(() => null);
+          if (data?.ok && !data.degraded) {
+            const decision = canUpload(
+              data.usage as StorageUsage,
+              referenceImageFiles.map((f) => f.size)
+            );
+            if (!decision.ok) {
+              setError(
+                t("storageFull", {
+                  needed: formatBytes(decision.neededBytes),
+                  free: formatBytes(decision.remainingBytes),
+                })
+              );
+              setGenerating(false);
+              return;
+            }
+          }
+        } catch {
+          /* fails open — see above */
+        }
+
         // Upload every selected image before calling generate — if ANY
         // upload fails, abort rather than generate with a partial/wrong
         // set of images silently.
@@ -910,6 +948,16 @@ export function WebsiteBuilderWorkspace({
   // that's somehow incomplete (e.g. a row saved before the server-side
   // truncation check below existed) — shows a clear message instead.
   const displayedHtmlIsComplete = looksLikeCompleteHtmlDocument(displayedHtml);
+  // WHOSE PHOTOGRAPHS ARE ON THIS PAGE, counted off the page itself.
+  //
+  // Not recorded at generation time: the number has to survive an edit, a
+  // regeneration and a rollback, and anything stored once slowly stops
+  // describing the document. "I used five stock photographs" is only
+  // honest if the five is real.
+  const imageCensus = useMemo(
+    () => (displayedHtmlIsComplete ? censusSiteImages(displayedHtml) : null),
+    [displayedHtml, displayedHtmlIsComplete]
+  );
   // WHAT IS STILL BLANK, read off the page itself. The prompt refuses to
   // invent a phone number or a price and leaves a bracketed placeholder
   // instead — correct, but a gap nobody notices is a gap that ships. The
@@ -1325,6 +1373,27 @@ export function WebsiteBuilderWorkspace({
                     </div>
                   )}
                   {pageTabs}
+                  {imageCensus && shouldOfferOwnPhotos(imageCensus) && (
+                    <div
+                      data-testid="stock-photo-notice"
+                      className="mb-3 rounded-xl border border-border bg-input px-3 py-2.5"
+                    >
+                      <p className="text-xs font-medium text-foreground">
+                        {t("stockNoticeTitle", { count: imageCensus.stock })}
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-muted">{t("stockNoticeBody")}</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          selectDetailTab("edit");
+                          editImageInputRef.current?.click();
+                        }}
+                        className="mt-1.5 text-[11px] font-medium text-orange-400 underline-offset-2 hover:underline"
+                      >
+                        {t("stockNoticeAction")}
+                      </button>
+                    </div>
+                  )}
                   <iframe
                     key={`${previewWebsite.id}:${viewingVersion?.id ?? "latest"}:${pageSlug || "home"}`}
                     srcDoc={displayedHtml}

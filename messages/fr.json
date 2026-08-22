@@ -1156,7 +1156,19 @@
           "auto": "Décide pour moi"
         },
         "logoHint": "Sans logo, le site affiche le nom de votre entreprise en marque textuelle stylisée — il n'invente jamais de logo à votre place.",
-        "logoNeedsUpload": "Téléversez d'abord le logo comme image"
+        "logoNeedsUpload": "Téléversez d'abord le logo comme image",
+        "photoSourceTitle": "Photographies — ce site en utilisera environ {count}",
+        "photoSourceChoices": {
+          "own": "Envoyer les miennes",
+          "stock": "Photos de stock",
+          "none": "Sans photos"
+        },
+        "photoSourceHint": {
+          "own": "Les vôtres passent d'abord dans le hero et la galerie. Le reste est complété par du stock.",
+          "stock": "Des photos de stock choisies pour chaque section.",
+          "none": "Un design porté par la typographie, la couleur et les formes — sans photographies."
+        },
+        "photoSourceNeedsUpload": "Ajoutez vos photos ci-dessus, sinon des photos de stock seront utilisées."
       },
       "imageIntro": "Votre logo, vos photos de produits ou du lieu — ce que vous voulez voir sur la page ou qui doit inspirer le style.",
       "regenerateAlreadyUsed": "Vous avez déjà utilisé la régénération gratuite pour ce site. Créez un nouveau site avec une autre description.",
@@ -1165,7 +1177,11 @@
         "title": "Décrivez le site, obtenez le site",
         "why": "Écrivez à quoi il sert et à qui il s'adresse : les pages, les textes et la mise en page en découlent, et vous continuez à modifier en langage courant.",
         "example": "Site d'une page pour une boulangerie, avec carte et horaires"
-      }
+      },
+      "stockNoticeTitle": "{count} photos de stock sur ce site",
+      "stockNoticeBody": "Envoyez les vôtres pour un résultat plus authentique — Unsplash a un commerce comme le vôtre, pas le vôtre.",
+      "stockNoticeAction": "Envoyer des photos",
+      "storageFull": "Pas assez d'espace pour ces images — {needed} nécessaires, {free} libres."
     },
     "marketplace": {
       "title": "Place de marché",

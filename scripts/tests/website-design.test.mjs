@@ -115,7 +115,19 @@ check("it says EVERY listed URL must appear", /EVERY listed reference-image URL 
 check("and asks the model to count them", /Count them before you finish/.test(inSite));
 check(
   "which matches the rule already in the system prompt",
-  /EVERY listed reference-image URL MUST appear in the output/.test(builder)
+  /every listed URL MUST appear in an <img src="\.\.\."> copied character for character/.test(builder)
+);
+// AND THE PROMPT KNOWS THE BRIEF CAN OVERRIDE IT. The two used to state
+// the same rule twice and were merged; if the system prompt demanded
+// every image unconditionally, the style-only choice below would be a
+// control that contradicts the instruction it sits under.
+check(
+  "and the prompt defers to the brief's style-only choice",
+  /Unless the DESIGN BRIEF says style-reference-only/.test(builder)
+);
+check(
+  "the owner's own photographs are placed before any stock one",
+  /THE USER'S OWN PHOTOGRAPHS GO IN THE POSITIONS THAT MATTER, FIRST/.test(builder)
 );
 const styleOnly = d.buildDesignBrief({ ...d.DEFAULT_DESIGN_CHOICES, referenceImageUse: "style-only", imageCount: 4 });
 check("style-only says the opposite, explicitly", /do NOT embed them in the page/.test(styleOnly));

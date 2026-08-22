@@ -36,6 +36,7 @@ import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } fro
 import { logApiError } from "@/lib/log-error";
 import { findInventedNumbers } from "@/lib/website-invented-numbers";
 import { normalisePages } from "@/lib/publishing/website-pages";
+import { parsePhotoSource } from "@/lib/website-design-brief";
 import { enforceSeoHead } from "@/lib/seo/head";
 import { enforceImageAltText } from "@/lib/seo/alt-text";
 import { applyEditedDocument, resolveEditTarget, HOME_INDEX } from "@/lib/publishing/page-edit-target";
@@ -311,12 +312,17 @@ export async function POST(request: Request) {
     // registered with Unsplash after the edit is SAVED, and a safety-
     // rejected edit returns below without ever saving.
     let images: ImageResolution = { html: "", used: [], halted: null };
+    // THE CHOICE SURVIVES AN EDIT. Without this, an owner who asked for a
+    // page with no photographs gets one the first time somebody asks for
+    // any change — the edit prompt is not the generation prompt, and the
+    // resolver would happily fill a placeholder the model invented.
+    const photoSource = parsePhotoSource(website.description ?? "");
     try {
       void recordAiCallForDailySpend(estimate.estimatedCredits);
       const editResult = await editWebsiteHtml(apiKey, sourceHtml, changeRequest, referenceImages, formEndpointUrl, costs);
       updatedHtml = editResult.html;
       usedCheapPatch = editResult.usedCheapPatch;
-      images = await resolveWebsiteImagePlaceholders(updatedHtml);
+      images = await resolveWebsiteImagePlaceholders(updatedHtml, { photoSource });
       updatedHtml = images.html;
 
       // Same enforcement as generation: an edit that adds a nav item can

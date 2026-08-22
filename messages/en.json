@@ -1156,7 +1156,19 @@
           "auto": "Decide for me"
         },
         "logoHint": "Without a logo the site shows your business name as a styled wordmark — it never invents a logo for you.",
-        "logoNeedsUpload": "Attach the logo as an image first"
+        "logoNeedsUpload": "Attach the logo as an image first",
+        "photoSourceTitle": "Photographs — this site will use about {count}",
+        "photoSourceChoices": {
+          "own": "Upload my own",
+          "stock": "Stock photos",
+          "none": "No photos"
+        },
+        "photoSourceHint": {
+          "own": "Yours go in the hero and the gallery first. Anything still missing falls back to stock.",
+          "stock": "Stock photographs chosen to match each section.",
+          "none": "A design carried by type, colour and shape — no photographs at all."
+        },
+        "photoSourceNeedsUpload": "Attach your photos above, or this falls back to stock."
       },
       "imageIntro": "Your logo, product shots, photos of the place — anything you want on the page or want the style taken from.",
       "regenerateAlreadyUsed": "You’ve already used the free regeneration for this site. Create a new website to try a different brief.",
@@ -1165,7 +1177,11 @@
         "title": "Describe the site, get the site",
         "why": "Write what the site is for and who it is for — the pages, the copy and the layout are generated from that description, and you can keep editing in plain words.",
         "example": "A one-page site for a small bakery, with menu and hours"
-      }
+      },
+      "stockNoticeTitle": "{count} stock photographs on this site",
+      "stockNoticeBody": "Upload your own for a more authentic result — Unsplash has a business like yours, not yours.",
+      "stockNoticeAction": "Upload photos",
+      "storageFull": "Not enough space for these images — {needed} needed, {free} free."
     },
     "marketplace": {
       "title": "Marketplace",

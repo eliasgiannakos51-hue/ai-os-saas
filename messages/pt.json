@@ -1156,7 +1156,19 @@
           "auto": "Decide tu"
         },
         "logoHint": "Sem logótipo, o site mostra o nome do teu negócio como wordmark estilizado — nunca inventa um logótipo por ti.",
-        "logoNeedsUpload": "Carrega primeiro o logótipo como imagem"
+        "logoNeedsUpload": "Carrega primeiro o logótipo como imagem",
+        "photoSourceTitle": "Fotografias — este site vai usar cerca de {count}",
+        "photoSourceChoices": {
+          "own": "Enviar as minhas",
+          "stock": "Fotos de stock",
+          "none": "Sem fotos"
+        },
+        "photoSourceHint": {
+          "own": "As tuas vão primeiro para o hero e a galeria. O que faltar é preenchido com stock.",
+          "stock": "Fotos de stock escolhidas para cada secção.",
+          "none": "Um design feito de tipografia, cor e formas — sem fotografias."
+        },
+        "photoSourceNeedsUpload": "Anexa as tuas fotos acima, ou serão usadas fotos de stock."
       },
       "imageIntro": "O seu logótipo, fotos de produto ou do espaço — o que quiser na página ou que defina o estilo.",
       "regenerateAlreadyUsed": "Já usou a regeneração gratuita deste site. Crie um novo site com outra descrição.",
@@ -1165,7 +1177,11 @@
         "title": "Descreva o site e receba o site",
         "why": "Escreva para que serve e a quem se dirige — as páginas, os textos e o layout saem dessa descrição, e continua a editar por palavras.",
         "example": "Site de uma página para uma padaria, com ementa e horário"
-      }
+      },
+      "stockNoticeTitle": "{count} fotos de stock neste site",
+      "stockNoticeBody": "Envia as tuas para um resultado mais autêntico — o Unsplash tem um negócio como o teu, não o teu.",
+      "stockNoticeAction": "Enviar fotos",
+      "storageFull": "Não há espaço para estas imagens — precisas de {needed}, livres {free}."
     },
     "marketplace": {
       "title": "Mercado",

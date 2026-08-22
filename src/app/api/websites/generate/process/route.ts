@@ -33,6 +33,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
 import { diagLog } from "@/lib/diag";
 import { splitGeneratedPages } from "@/lib/website-multipage";
+import { parsePhotoSource } from "@/lib/website-design-brief";
 import { enforceSeoHead } from "@/lib/seo/head";
 import { enforceImageAltText } from "@/lib/seo/alt-text";
 import type { WebsitePage } from "@/lib/publishing/website-pages";
@@ -339,6 +340,11 @@ export async function POST(request: Request) {
     // STORED — which happens below, outside that block. See
     // registerUnsplashUses in lib/website-image-resolver.ts.
     let images: ImageResolution = { html: "", used: [], halted: null };
+    // WHERE THE PHOTOS COME FROM, read back off the description the
+    // design controls compiled it into (lib/website-design-brief.ts).
+    // Defaults to "stock" for every description written before the
+    // choice existed, so nothing changes for them.
+    const photoSource = parsePhotoSource(description);
     try {
       void recordAiCallForDailySpend(
         estimateWebsiteGenerationCost({ descriptionLength: description.length, imageCount: referenceImages.length })
@@ -371,7 +377,7 @@ export async function POST(request: Request) {
       // see lib/website-image-resolver.ts. A no-op when the model didn't
       // emit any PLACEHOLDER:<slug> images, which is the common case for
       // a description that didn't ask for real photos.
-      images = await resolveWebsiteImagePlaceholders(htmlContent);
+      images = await resolveWebsiteImagePlaceholders(htmlContent, { photoSource });
       htmlContent = images.html;
 
       // NUMBERS THE USER NEVER GAVE. The prompt forbids inventing a price,

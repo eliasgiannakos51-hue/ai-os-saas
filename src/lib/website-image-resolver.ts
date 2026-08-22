@@ -50,9 +50,33 @@ export type ImageResolution = {
   halted: UnsplashHaltReason | null;
 };
 
-export async function resolveWebsiteImagePlaceholders(html: string): Promise<ImageResolution> {
+export async function resolveWebsiteImagePlaceholders(
+  html: string,
+  options: {
+    /**
+     * "none" when the owner asked for a page with no photographs.
+     *
+     * ENFORCED HERE, not asked for in the prompt. A prompt rule is a
+     * strong prior and this is a promise: a single PLACEHOLDER slipping
+     * through costs an Unsplash request against a shared hourly quota
+     * and puts a photograph on a page whose owner said they did not want
+     * one. The tags are removed and no request is made at all — which is
+     * also the only version of this that a test can prove, because "the
+     * model did not emit any" is not something code can check.
+     */
+    photoSource?: "own" | "stock" | "none";
+  } = {}
+): Promise<ImageResolution> {
   const all = findImagePlaceholders(html);
   if (all.length === 0) return { html, used: [], halted: null };
+
+  if (options.photoSource === "none") {
+    return {
+      html: stripPlaceholderImageTags(html, all.map((p) => p.slug)),
+      used: [],
+      halted: null,
+    };
+  }
 
   // A placeholder asking for a LOGO never resolves to a stock photo — a
   // random mark presented as the business's identity is the reported bug.

@@ -1156,7 +1156,19 @@
           "auto": "由你决定"
         },
         "logoHint": "没有标志时，网站会以精心设计的文字标识展示你的商户名称 — 绝不会替你虚构一个标志。",
-        "logoNeedsUpload": "请先将标志作为图片上传"
+        "logoNeedsUpload": "请先将标志作为图片上传",
+        "photoSourceTitle": "照片 — 本站大约需要 {count} 张",
+        "photoSourceChoices": {
+          "own": "上传我自己的",
+          "stock": "图库照片",
+          "none": "不用照片"
+        },
+        "photoSourceHint": {
+          "own": "你的照片优先放在主视觉和相册，缺的部分用图库照片补足。",
+          "stock": "为每个版块挑选的图库照片。",
+          "none": "以字体、色彩和图形构成的设计 — 完全不用照片。"
+        },
+        "photoSourceNeedsUpload": "请在上方添加照片，否则将使用图库照片。"
       },
       "imageIntro": "你的标志、产品照片、店内照片——想放到页面上的，或想让它决定风格的。",
       "regenerateAlreadyUsed": "您已使用过此站点的免费重新生成。请用其他描述创建新站点。",
@@ -1165,7 +1177,11 @@
         "title": "描述这个网站，拿到这个网站",
         "why": "写清它是做什么的、给谁看——页面、文案和排版都由这段描述生成，之后还能用大白话继续改。",
         "example": "面包店的单页网站，含产品和营业时间"
-      }
+      },
+      "stockNoticeTitle": "本站有 {count} 张图库照片",
+      "stockNoticeBody": "上传你自己的照片会更真实 — Unsplash 有同类的店，但没有你的店。",
+      "stockNoticeAction": "上传照片",
+      "storageFull": "这些图片空间不足 — 需要 {needed}，剩余 {free}。"
     },
     "marketplace": {
       "title": "市场",

@@ -120,8 +120,8 @@ const MUTANTS = [
     name: "enforcement runs BEFORE the photos exist (ordered wrong)",
     suites: [DURABILITY],
     file: EDIT_ROUTE,
-    from: "      images = await resolveWebsiteImagePlaceholders(updatedHtml);",
-    to: "      updatedHtml = enforceUnsplashAttribution(updatedHtml).html;\n      images = await resolveWebsiteImagePlaceholders(updatedHtml);",
+    from: "      images = await resolveWebsiteImagePlaceholders(updatedHtml, { photoSource });",
+    to: "      updatedHtml = enforceUnsplashAttribution(updatedHtml).html;\n      images = await resolveWebsiteImagePlaceholders(updatedHtml, { photoSource });",
     // The anchor the test asserts on is the resolve call's position; moving
     // enforcement in front of it must be noticed.
     reorder: true,

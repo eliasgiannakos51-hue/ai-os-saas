@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { isSupportedReferenceImageMediaType, type ReferenceImage } from "@/lib/website-builder";
 import { MAX_REFERENCE_IMAGE_BYTES, REFERENCE_IMAGE_BUCKET } from "@/lib/website-reference-image";
 import { logApiError } from "@/lib/log-error";
+import { WEB_IMAGE_SUFFIX } from "@/lib/websites/web-image-suffix";
 
 // Shared server-side reference-image download/resize logic — originally
 // lived only in api/websites/generate/process/route.ts; extracted here so
@@ -19,6 +20,63 @@ import { logApiError } from "@/lib/log-error";
 // quality beyond that point, it only adds base64-encoding size, network
 // transfer time, and vision-input processing time.
 const REFERENCE_IMAGE_MAX_DIMENSION = 1568;
+
+/**
+ * The size the PUBLISHED PAGE serves, which is a different question from
+ * the size the model reads.
+ *
+ * THE GAP THIS CLOSES. The resize above shrinks the copy sent to Claude
+ * and nothing else — the file a visitor downloads is the original upload,
+ * up to 5MB of phone photograph, embedded in a customer's live site.
+ * Every visitor pays for it on every view, and the owner never sees it
+ * because their own browser cached it the moment they uploaded.
+ *
+ * 1600px on the long edge is a full-bleed hero on a 2x display and is
+ * generous for anything smaller. WebP at quality 82 is visually
+ * indistinguishable from the JPEG it replaces at a fraction of the bytes.
+ */
+export const WEB_IMAGE_MAX_DIMENSION = 1600;
+export const WEB_IMAGE_QUALITY = 82;
+/** Re-exported from its own module so the pure orphan-cleanup logic can
+ *  use it without importing sharp. Deterministic, so a re-generation
+ *  reuses the derivative already stored instead of writing another. */
+export { WEB_IMAGE_SUFFIX } from "@/lib/websites/web-image-suffix";
+
+/**
+ * A WebP derivative sized for the web, or null if it would not be an
+ * improvement.
+ *
+ * RETURNS NULL RATHER THAN A BIGGER FILE. WebP is not smaller for every
+ * input — a small, already-optimised PNG of flat colour can come out
+ * larger — and swapping in a derivative that costs the visitor MORE is
+ * the opposite of the point. The comparison is measured per image, not
+ * assumed.
+ */
+export async function optimiseForWeb(buffer: Buffer): Promise<Buffer | null> {
+  try {
+    const out = await sharp(buffer)
+      .resize({
+        width: WEB_IMAGE_MAX_DIMENSION,
+        height: WEB_IMAGE_MAX_DIMENSION,
+        fit: "inside",
+        withoutEnlargement: true,
+      })
+      .webp({ quality: WEB_IMAGE_QUALITY })
+      .toBuffer();
+    return out.length < buffer.length ? out : null;
+  } catch (err) {
+    // A corrupt or unusual file degrades to the original, which still
+    // works. It must never take the generation down.
+    logApiError("website-reference-image-server", err, { stage: "web_image_optimise" });
+    return null;
+  }
+}
+
+/** `<path>.web.webp` — beside the original, in the same user folder, so
+ *  the storage RLS policy that scopes the folder covers it unchanged. */
+export function webDerivativePath(path: string): string {
+  return `${path}${WEB_IMAGE_SUFFIX}`;
+}
 
 // Resizes only if the image is actually larger than the target — never
 // upscales a smaller image (withoutEnlargement), and any resize failure
@@ -103,8 +161,37 @@ export async function downloadReferenceImage(
     }
 
     const arrayBuffer = await imageBlob.arrayBuffer();
-    const resizedBuffer = await resizeReferenceImageIfNeeded(Buffer.from(arrayBuffer));
-    const { data: publicUrlData } = supabase.storage.from(REFERENCE_IMAGE_BUCKET).getPublicUrl(path);
+    const original = Buffer.from(arrayBuffer);
+    const resizedBuffer = await resizeReferenceImageIfNeeded(original);
+
+    // THE URL THE PAGE EMBEDS IS THE OPTIMISED ONE, when there is one.
+    //
+    // Written here rather than at upload time on purpose: the upload goes
+    // straight from the browser to Storage, so a server-side optimisation
+    // there would mean routing every file through us. This path already
+    // has the bytes in memory for the model, and the derivative is
+    // deterministic — a regeneration finds the one already stored instead
+    // of writing another.
+    //
+    // Best-effort throughout. Every failure falls back to the original
+    // URL, which is what shipped before this existed.
+    let servedPath = path;
+    const optimised = await optimiseForWeb(original);
+    if (optimised) {
+      const derivative = webDerivativePath(path);
+      const { error: uploadError } = await supabase.storage
+        .from(REFERENCE_IMAGE_BUCKET)
+        .upload(derivative, optimised, { contentType: "image/webp", upsert: true });
+      if (uploadError) {
+        logApiError(callerContext, uploadError, { stage: "web_image_upload" });
+      } else {
+        servedPath = derivative;
+      }
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from(REFERENCE_IMAGE_BUCKET)
+      .getPublicUrl(servedPath);
     const url = publicUrlData?.publicUrl;
 
     // getPublicUrl() is a pure string builder — it returns a

@@ -78,7 +78,7 @@ const MUTANTS = [
     file: GEN,
     edits: [
       {
-        from: "      images = await resolveWebsiteImagePlaceholders(htmlContent);\n      htmlContent = images.html;",
+        from: "      images = await resolveWebsiteImagePlaceholders(htmlContent, { photoSource });\n      htmlContent = images.html;",
         to: "      // moved below the split",
       },
       {
@@ -86,7 +86,7 @@ const MUTANTS = [
         to:
           "      const resolvedDocs: string[] = [];\n" +
           "      for (const rawDoc of [split.home, ...split.pages.map((pg) => pg.html)]) {\n" +
-          "        images = await resolveWebsiteImagePlaceholders(rawDoc);\n" +
+          "        images = await resolveWebsiteImagePlaceholders(rawDoc, { photoSource });\n" +
           "        resolvedDocs.push(images.html);\n" +
           "      }\n" +
           "      const documents: string[] = resolvedDocs;",

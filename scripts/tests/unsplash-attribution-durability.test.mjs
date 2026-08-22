@@ -461,9 +461,13 @@ for (const [label, src, variable] of [
   ["generation", generateRoute, "htmlContent"],
   ["edit", editRoute, "updatedHtml"],
 ]) {
-  const resolveAt = src.indexOf(`await resolveWebsiteImagePlaceholders(${variable})`);
+  // The call gained an argument (the owner's photo-source choice), so the
+  // anchor is the call HEAD rather than the whole call — pinned to the
+  // opening paren so it cannot match a mention in a comment.
+  const resolveAt = src.indexOf(`await resolveWebsiteImagePlaceholders(${variable},`);
   const enforceAt = src.indexOf("enforceUnsplashAttribution(");
-  ok(`${label}: enforcement runs after placeholder resolution`, resolveAt !== -1 && enforceAt > resolveAt);
+  ok(`${label}: enforcement runs after placeholder resolution`, resolveAt !== -1 && enforceAt > resolveAt,
+    `resolve at ${resolveAt}, enforce at ${enforceAt}`);
 }
 
 // The edit prompt should ask as well as be enforced — the same

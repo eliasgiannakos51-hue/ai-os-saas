@@ -1156,7 +1156,19 @@
           "auto": "Entscheide du"
         },
         "logoHint": "Ohne Logo zeigt die Website deinen Firmennamen als gestaltete Wortmarke — sie erfindet nie ein Logo für dich.",
-        "logoNeedsUpload": "Lade das Logo zuerst als Bild hoch"
+        "logoNeedsUpload": "Lade das Logo zuerst als Bild hoch",
+        "photoSourceTitle": "Fotos — diese Website nutzt etwa {count}",
+        "photoSourceChoices": {
+          "own": "Eigene hochladen",
+          "stock": "Stockfotos",
+          "none": "Ohne Fotos"
+        },
+        "photoSourceHint": {
+          "own": "Deine kommen zuerst in Hero und Galerie. Was fehlt, wird durch Stockfotos ergänzt.",
+          "stock": "Stockfotos, passend zu jedem Abschnitt.",
+          "none": "Ein Design aus Typografie, Farbe und Formen — ganz ohne Fotos."
+        },
+        "photoSourceNeedsUpload": "Lade oben deine Fotos hoch, sonst werden Stockfotos verwendet."
       },
       "imageIntro": "Ihr Logo, Produktfotos, Bilder vom Laden — alles, was auf die Seite soll oder den Stil vorgeben darf.",
       "regenerateAlreadyUsed": "Sie haben die kostenlose Neuerstellung für diese Website bereits genutzt. Erstellen Sie eine neue Website mit einer anderen Beschreibung.",
@@ -1165,7 +1177,11 @@
         "title": "Beschreib die Website, bekomm die Website",
         "why": "Schreib, wofür sie da ist und für wen — Seiten, Texte und Layout entstehen aus dieser Beschreibung, und du änderst sie weiter in normalen Worten.",
         "example": "Einseitige Website für eine Bäckerei, mit Sortiment und Öffnungszeiten"
-      }
+      },
+      "stockNoticeTitle": "{count} Stockfotos auf dieser Website",
+      "stockNoticeBody": "Lade eigene hoch für ein authentischeres Ergebnis — Unsplash hat ein Geschäft wie deins, nicht deins.",
+      "stockNoticeAction": "Fotos hochladen",
+      "storageFull": "Nicht genug Platz für diese Bilder — {needed} nötig, {free} frei."
     },
     "marketplace": {
       "title": "Marktplatz",

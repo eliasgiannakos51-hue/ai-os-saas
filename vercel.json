@@ -23,6 +23,10 @@
     {
       "path": "/api/cron/cost-alerts",
       "schedule": "5 * * * *"
+    },
+    {
+      "path": "/api/cron/website-storage-cleanup",
+      "schedule": "0 4 * * *"
     }
   ]
 }

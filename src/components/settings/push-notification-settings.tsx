@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Bell, BellOff } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useToast } from "@/components/toast/toast-context";
+import { detectPlatform, isApplePhoneOrTablet } from "@/lib/pwa/platform";
+import { readDisplayMode } from "@/lib/pwa/telemetry";
 
 // Per-type push opt-in for THIS browser.
 //
@@ -41,22 +43,61 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
     Object.fromEntries(TYPES.map((t) => [t.key, true]))
   );
   const [endpoint, setEndpoint] = useState<string | null>(null);
+  /** iPhone/iPad, not yet added to the Home Screen. iOS grants Web Push
+   *  ONLY to an installed web app, so on this device the toggle below
+   *  cannot work no matter what the user does — and saying nothing is how
+   *  "notifications don't arrive on my iPhone" becomes a bug report about
+   *  the wrong thing. */
+  const [iosNeedsInstall, setIosNeedsInstall] = useState(false);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const platform = detectPlatform(navigator.userAgent, {
+      maxTouchPoints: navigator.maxTouchPoints,
+      platformHint: (navigator as unknown as { platform?: string }).platform,
+    });
+    const onApple = isApplePhoneOrTablet(platform);
+    setIosNeedsInstall(onApple && readDisplayMode() === "browser");
+
     const ok =
-      typeof window !== "undefined" &&
       "serviceWorker" in navigator &&
       "PushManager" in window &&
+      // Notification is ABSENT on iOS Safari outside an installed app, and
+      // enable() calls Notification.requestPermission() unguarded — which
+      // is a ReferenceError, not a refusal, exactly where the product most
+      // needs to explain itself.
+      typeof Notification !== "undefined" &&
       Boolean(vapidPublicKey);
     setSupported(ok);
     if (!ok) return;
+
+    let cancelled = false;
     navigator.serviceWorker.ready
       .then((reg) => reg.pushManager.getSubscription())
-      .then((sub) => {
+      .then(async (sub) => {
+        if (cancelled) return;
         setSubscribed(Boolean(sub));
         setEndpoint(sub?.endpoint ?? null);
+        if (!sub) return;
+        // The toggles below show what the SERVER has, not an optimistic
+        // all-on default — see the GET handler in the route for what that
+        // default was quietly getting wrong.
+        try {
+          const res = await fetch(`/api/push/subscribe?endpoint=${encodeURIComponent(sub.endpoint)}`);
+          const data = await res.json();
+          if (!cancelled && data?.ok && data.preferences) {
+            setPrefs(data.preferences as Record<string, boolean>);
+          }
+        } catch {
+          // Leave the toggles as they are rather than showing a wrong
+          // state confidently; the next load will try again.
+        }
       })
       .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
   }, [vapidPublicKey]);
 
   const enable = useCallback(async () => {
@@ -81,6 +122,17 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
       if (!res.ok) throw new Error("save failed");
       setSubscribed(true);
       setEndpoint(sub.endpoint);
+      // A brand-new row really is all-on (the column defaults say so), but
+      // a RE-subscribe from a browser that had opted things out keeps the
+      // old row and its choices. Read them rather than guess.
+      try {
+        const stored = await fetch(
+          `/api/push/subscribe?endpoint=${encodeURIComponent(sub.endpoint)}`
+        ).then((r) => r.json());
+        if (stored?.ok && stored.preferences) setPrefs(stored.preferences as Record<string, boolean>);
+      } catch {
+        // Keep the defaults on screen; they match a fresh subscription.
+      }
       addToast(t("enabled"), "success");
     } catch {
       addToast(t("enableError"), "error");
@@ -138,7 +190,11 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
           {t("title")}
         </h2>
         <p className="mt-2 text-xs text-muted">
-          {vapidPublicKey ? t("unsupported") : t("notConfigured")}
+          {iosNeedsInstall
+            ? t("iosNeedsInstall")
+            : vapidPublicKey
+              ? t("unsupported")
+              : t("notConfigured")}
         </p>
       </div>
     );
@@ -153,6 +209,11 @@ export function PushNotificationSettings({ vapidPublicKey }: { vapidPublicKey: s
             {t("title")}
           </h2>
           <p className="mt-1 text-xs text-muted">{t("perDevice")}</p>
+          {iosNeedsInstall && (
+            <p className="mt-2 rounded-lg border border-border bg-black/20 px-2.5 py-2 text-[11px] leading-relaxed text-muted">
+              {t("iosNeedsInstall")}
+            </p>
+          )}
         </div>
         <button
           type="button"

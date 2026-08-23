@@ -527,10 +527,34 @@ const full = {
   // Recommended since the refused-email incident: the resend.dev fallback
   // is testing mode, which delivers only to the Resend account owner.
   RESEND_FROM_EMAIL: "Ionexa AI <hello@ionexa.com>",
+  // Recommended since the PWA audit: with no VAPID pair, lib/push
+  // /web-push.ts turns every send into a silent no-op — an agent finishes,
+  // a mission is due, and nothing reaches the phone that was told it
+  // would. A deployment that does not want push should decide that, not
+  // discover it. (A published example key: 65 bytes of P-256 point, which
+  // is 87 base64url characters.)
+  NEXT_PUBLIC_VAPID_PUBLIC_KEY: "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U",
+  VAPID_PRIVATE_KEY: "set",
 };
 let r = envMod.checkEnv(full);
 check("a complete environment reports nothing missing", r.missingRequired, []);
 check("...and nothing recommended missing", r.missingRecommended, []);
+// A truncated or wrongly-pasted VAPID public key fails in the BROWSER, at
+// subscribe() time, with an opaque InvalidCharacterError — which is the
+// kind of failure an env check exists to move forward in time.
+r = envMod.checkEnv({ ...full, NEXT_PUBLIC_VAPID_PUBLIC_KEY: "too-short" });
+check(
+  "a malformed VAPID public key is flagged",
+  r.suspicious.map((x) => x.name),
+  ["NEXT_PUBLIC_VAPID_PUBLIC_KEY"]
+);
+checkTrue("with the expected length named", /87 base64url characters/.test(r.suspicious[0].reason));
+r = envMod.checkEnv({ ...full, VAPID_PRIVATE_KEY: "" });
+checkTrue(
+  "a missing VAPID private key is reported, not assumed",
+  r.missingRecommended.includes("VAPID_PRIVATE_KEY")
+);
+
 r = envMod.checkEnv({});
 check("an empty environment names every required variable", r.missingRequired.length, 5);
 checkTrue("including the Anthropic key", r.missingRequired.includes("ANTHROPIC_API_KEY"));
@@ -763,9 +787,23 @@ console.log("\n== 21. plan resolution: the tier decides the rate, so it must be 
 // unset and the function fell through to "free". Admin status lives in
 // ADMIN_EMAILS, a completely separate axis, which billing never consulted
 // even though pricing/page.tsx, team/invite and dashboard/team all do.
-const credits = readFileSync("src/lib/billing/credits.ts", "utf8");
-checkTrue("the only source is user_metadata.subscription_tier", /user\?\.user_metadata\?\.subscription_tier/.test(credits));
-checkTrue("an admin no longer falls through to free", /if \(isAdminEmail\(user\?\.email\)\) return "enterprise";/.test(credits));
+// The rule moved to lib/billing/plan-resolution.ts — pure, so it can be
+// unit-tested without a Supabase client, which credits.ts cannot.
+// credits.ts re-exports it, so no caller changed.
+const planResolution = readFileSync("src/lib/billing/plan-resolution.ts", "utf8");
+checkTrue(
+  "credits.ts still exports it, so no caller had to change",
+  /export \{ resolvePlanSlug, resolvePlan \}/.test(readFileSync("src/lib/billing/credits.ts", "utf8"))
+);
+checkTrue("subscription_tier is read", /user\?\.user_metadata\?\.subscription_tier/.test(planResolution));
+// AND A SECOND SOURCE, deliberately. `subscription_tier` is what the
+// account pays for; `team_granted_tier` is what a team owner lends it.
+// They used to be ONE field, and each write destroyed the other — which is
+// how leaving a team cancelled a subscription Stripe was still charging
+// for. The answer is the HIGHER of the two, never the more recent.
+checkTrue("...and so is team_granted_tier", /user\?\.user_metadata\?\.team_granted_tier/.test(planResolution));
+checkTrue("...combined by taking the higher", /higherPlanSlug\(/.test(planResolution));
+checkTrue("an admin no longer falls through to free", /if \(isAdminEmail\(user\?\.email\)\) return "enterprise";/.test(planResolution));
 checkTrue("...matching what the rest of the app already calls an admin",
   /isAdmin \? "enterprise"/.test(readFileSync("src/app/pricing/page.tsx", "utf8")));
 

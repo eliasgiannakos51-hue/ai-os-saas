@@ -159,6 +159,16 @@ export const USER_DATA_TABLES: UserDataTable[] = [
     redactColumns: ["secret_encrypted"],
   },
   {
+    table: "pwa_client_stats",
+    label: "pwa_devices",
+    // One row per browser this account has used, holding what KIND of
+    // device it is — not which device. There is no user agent, no IP and
+    // no fingerprint in it, and client_id is a random value minted by the
+    // browser itself. It is still the user's data and is exported in full;
+    // the cascade on user_id clears it on erasure.
+    scope: "user_content",
+  },
+  {
     table: "push_subscriptions",
     label: "push_subscriptions",
     scope: "sensitive_redacted",

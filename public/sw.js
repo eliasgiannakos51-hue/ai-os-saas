@@ -14,6 +14,14 @@
  *    show a stale credit count as if it were live, and a cached POST is
  *    meaningless. Only GET navigations and static assets are stored.
  *
+ *    THE TRADE THIS MAKES, stated rather than left implicit: the cached
+ *    navigations ARE personalised HTML — a dashboard with the signed-in
+ *    account's figures in it. That is the only way an offline dashboard
+ *    can exist at all, and it is safe for exactly as long as the cache
+ *    belongs to the person who filled it. Two things keep that true: the
+ *    page cache is dropped on every activate (below), and it is dropped
+ *    on sign-out by lib/pwa/cache-reset.ts.
+ *
  * 2. PUSH. Renders notifications and focuses (or opens) the right page
  *    when one is clicked.
  */
@@ -44,11 +52,28 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
-      // Drop caches from older versions — otherwise a deploy leaves the
-      // previous build's HTML in a cache nothing ever evicts.
       const names = await caches.keys();
       await Promise.all(
-        names.filter((n) => !n.startsWith(VERSION)).map((n) => caches.delete(n))
+        names
+          .filter(
+            (n) =>
+              // Caches from an older VERSION prefix.
+              !n.startsWith(VERSION) ||
+              // ...and the page cache, EVERY time, regardless of version.
+              //
+              // This is the fix for a staleness that the version prefix
+              // could not reach: VERSION is a literal in this file, so it
+              // does not change when the app is redeployed, so the filter
+              // above matched nothing and last month's dashboard HTML sat
+              // in the cache forever. Nothing is lost by dropping it —
+              // navigations are network-first, so the page cache is only
+              // ever read when there is no network, and it refills as the
+              // user browses. The registration in pwa-provider.tsx carries
+              // a build stamp so that this handler actually runs on each
+              // deploy.
+              n.endsWith("-pages")
+          )
+          .map((n) => caches.delete(n))
       );
       await self.clients.claim();
     })()

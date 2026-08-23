@@ -4,12 +4,20 @@ import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import type { AutomationFrequency } from "@/lib/automation-schedule";
 
 /**
- * The five things Create Studio can make.
+ * The six things Create Studio can make.
  *
- * Deliberately the five that already exist as real features — a website
- * the Website Builder generates, a mission Mission Control plans, an
- * entry in one of the 18 modules, a scheduled automation, a document.
- * Nothing here is a placeholder for a feature that hasn't been built.
+ * Deliberately the six that already exist as real features — a website the
+ * Website Builder generates, a mission Mission Control plans, an entry in
+ * one of the modules, a scheduled automation, a document, and an AI agent
+ * the Agent Builder designs. Nothing here is a placeholder for a feature
+ * that hasn't been built.
+ *
+ * "agent" WAS MISSING, and its absence was not a gap — it was a wrong
+ * answer. Create Studio has no "none": the prompt says to pick the closest
+ * kind. So "build me an agent that checks my competitors every Monday"
+ * could only come back as an automation or a mission, and the user got a
+ * thing they did not ask for while the feature they DID ask for sat one
+ * page away, fully built, with its own cap, preview and delivery channels.
  */
 export const CREATE_STUDIO_TYPES = [
   "website",
@@ -17,6 +25,7 @@ export const CREATE_STUDIO_TYPES = [
   "moduleEntry",
   "automation",
   "document",
+  "agent",
 ] as const;
 
 export type CreateStudioType = (typeof CREATE_STUDIO_TYPES)[number];
@@ -55,6 +64,11 @@ export const STUDIO_ACTION_PROFILE: Record<CreateStudioType, ActionProfileKey | 
   moduleEntry: "createAnything",
   automation: "automationCreate",
   document: null,
+  // The DESIGN call, which is the only one Create Studio makes. Creating
+  // the agent afterwards is a plain insert and charges nothing (see
+  // api/agents/route.ts) — and each RUN is estimated and charged
+  // separately, which is why the preview here must not include it.
+  agent: "agentBuild",
 };
 
 // Both the detection route and the preview UI price against the same

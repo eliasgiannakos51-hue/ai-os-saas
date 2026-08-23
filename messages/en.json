@@ -41,7 +41,6 @@
     "commandPalette": "Command palette",
     "dismiss": "Dismiss",
     "dismissSuggestion": "Dismiss suggestion",
-    "installIonexa": "Install Ionexa",
     "loadingContent": "Loading content",
     "nextPage": "Next page",
     "previousPage": "Previous page",
@@ -694,7 +693,8 @@
       "lowCredits": "Low credits",
       "lowCreditsHint": "When work stops because the balance ran out",
       "collaboration": "Collaboration",
-      "collaborationHint": "Team invites and shared-workspace activity"
+      "collaborationHint": "Team invites and shared-workspace activity",
+      "iosNeedsInstall": "On iPhone and iPad, notifications only work after Ionexa is added to the Home Screen."
     },
     "jumpToSection": "Jump to section"
   },
@@ -1280,7 +1280,9 @@
         "planningMission": "Planning the mission",
         "routingEntry": "Routing it to the right module",
         "schedulingAutomation": "Scheduling the automation",
-        "creatingDocument": "Creating the document"
+        "creatingDocument": "Creating the document",
+        "designingAgent": "Designing the agent",
+        "savingAgent": "Saving the agent"
       },
       "filesEmpty": "Nothing downloadable here — this one lives in the app rather than as a file.",
       "chatEmpty": "Ask anything about what you just created.",
@@ -1291,7 +1293,12 @@
       "chatNetworkError": "Network error — please try again.",
       "chatContext": "Context: I just created a {type} called \"{title}\" in Ionexa AI. My original request was: {request}",
       "streamInterrupted": "The connection dropped before the reply finished.",
-      "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete."
+      "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete.",
+      "shareError": "That share could not be read. Paste it here instead.",
+      "typeAgent": "AI Agent",
+      "agentDesignFailed": "Could not design that agent.",
+      "agentSaveFailed": "The agent was designed but could not be saved.",
+      "unsupportedType": "Create Studio cannot make that yet."
     },
     "agents": {
       "title": "AI Agents",
@@ -1669,7 +1676,13 @@
       "copyTextEmpty": "We haven't read any text out of that file.",
       "uploadStorageMissing": "File storage is not set up on this deployment — the 'user-files' bucket is missing. An administrator must run the storage repair SQL (System Health → File storage).",
       "uploadStoragePolicy": "File storage refused the upload — the bucket's access policies are missing. An administrator must run the storage repair SQL (System Health → File storage).",
-      "tooLargeForTransfer": "The hosting platform refused the upload before it reached the app. Try again in a moment."
+      "tooLargeForTransfer": "The hosting platform refused the upload before it reached the app. Try again in a moment.",
+      "sharedStored": "{count, plural, one {# file} other {# files}} added from the share.",
+      "sharedFailed": "{count, plural, one {# file} other {# files}} could not be added.",
+      "sharedReason": "Why: {reason}",
+      "sharedRateLimit": "Too many uploads in the last hour. Try sharing again shortly.",
+      "sharedDropped": "Only the first {max} files were taken.",
+      "openedFromDevice": "{count, plural, one {# file} other {# files}} opened from your device."
     },
     "deepResearch": {
       "title": "Deep Research",
@@ -2604,5 +2617,21 @@
       "e3": "Write an email to a customer who is late paying",
       "limits": "Sees your Ionexa data and whatever you've connected · It takes no actions on its own"
     }
+  },
+  "pwa": {
+    "installTitle": "Install Ionexa",
+    "installBody": "Add it to your home screen — full screen, and notifications that actually reach you.",
+    "install": "Install",
+    "notNow": "Not now",
+    "iosTitle": "Add Ionexa to your Home Screen",
+    "iosBody": "Safari never offers this on its own — it takes three taps.",
+    "iosStep1": "Tap the Share button in Safari's toolbar",
+    "iosStep2": "Scroll down and tap “Add to Home Screen”",
+    "iosStep3": "Tap Add — Ionexa appears with your other apps",
+    "iosWhy": "Until you do, iPhone cannot send you notifications, and Safari may clear your saved work after 7 unused days.",
+    "iosGotIt": "Got it",
+    "showHow": "Show me how",
+    "installedHere": "Ionexa is installed on this device.",
+    "installUnavailable": "Your browser has not offered to install yet. You can also use its menu → Install app."
   }
 }

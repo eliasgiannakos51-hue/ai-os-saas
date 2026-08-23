@@ -138,6 +138,11 @@ function answerFromResult(
  * only reassuring if you can see which ones. A picker hidden behind a
  * modal would let somebody ask about the wrong contract and never know.
  */
+/** Mirrors MAX_SHARED_FILES in src/app/share/route.ts — the cap the share
+ *  target enforces, repeated here so the message about it and the OS file
+ *  handler agree with what the server actually accepted. */
+const MAX_SHARED_FILES = 5;
+
 export function FilesWorkspace({
   initialFiles,
   initialCollections,
@@ -369,7 +374,7 @@ export function FilesWorkspace({
     }
   }
 
-  async function uploadMany(list: FileList | null) {
+  async function uploadMany(list: FileList | File[] | null) {
     if (!list) return;
     // Sequentially: each upload runs a CPU-bound extraction, and firing
     // ten at once is how a browser drop of a folder becomes a timeout.
@@ -378,6 +383,89 @@ export function FilesWorkspace({
     }
     router.refresh();
   }
+
+  /**
+   * Files handed to us by the OPERATING SYSTEM, not by the file picker.
+   *
+   * Two doors lead here and both are declared in the manifest:
+   *
+   *   `share_target` — someone chose Ionexa from another app's share
+   *   sheet. Those files are uploaded server-side by /share before this
+   *   page loads, so all that arrives here is the outcome, in the query
+   *   string.
+   *
+   *   `file_handlers` — someone double-clicked a CSV in their file
+   *   manager and picked Ionexa. THAT arrives as live file handles on
+   *   window.launchQueue, and has to be uploaded here, by this component,
+   *   through exactly the same uploadOne() as a drag-and-drop.
+   */
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has("shared") && !params.has("share_error")) return;
+
+    const stored = Number(params.get("shared") ?? 0);
+    const failed = Number(params.get("share_failed") ?? 0);
+    const dropped = Number(params.get("share_dropped") ?? 0);
+    const reason = params.get("share_reason");
+
+    if (params.get("share_error") === "rate_limit") {
+      addToast(t("sharedRateLimit"), "error");
+    } else {
+      if (stored > 0) addToast(t("sharedStored", { count: stored }), "success");
+      if (failed > 0) {
+        // The COUNT and the reason, not just "some failed": the refusal
+        // text is the one thing that tells the user what to change.
+        addToast(
+          reason
+            ? `${t("sharedFailed", { count: failed })} ${t("sharedReason", { reason })}`
+            : t("sharedFailed", { count: failed }),
+          "error"
+        );
+      }
+      if (dropped > 0) addToast(t("sharedDropped", { max: MAX_SHARED_FILES }), "error");
+    }
+
+    // Strip the parameters so a reload does not re-announce a share that
+    // already happened.
+    window.history.replaceState(null, "", window.location.pathname);
+    if (stored > 0) router.refresh();
+    // Runs once, on the load that carried the share back.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    const queue = (
+      window as unknown as {
+        launchQueue?: {
+          setConsumer: (cb: (params: { files?: FileSystemFileHandle[] }) => void) => void;
+        };
+      }
+    ).launchQueue;
+    if (!queue) return;
+
+    queue.setConsumer((launchParams) => {
+      const handles = launchParams.files ?? [];
+      if (handles.length === 0) return;
+      void (async () => {
+        const opened: File[] = [];
+        for (const handle of handles.slice(0, MAX_SHARED_FILES)) {
+          try {
+            opened.push(await handle.getFile());
+          } catch {
+            // The permission the launch carried can be withdrawn between
+            // the OS handing us the handle and us reading it. One
+            // unreadable handle must not abandon the rest.
+          }
+        }
+        if (opened.length === 0) return;
+        addToast(t("openedFromDevice", { count: opened.length }), "success");
+        await uploadMany(opened);
+      })();
+    });
+    // setConsumer is registered once per mount; the callback closes over
+    // uploadOne, which reads its own state through refs and setState.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /**
    * Copy a file's extracted TEXT, not the file.

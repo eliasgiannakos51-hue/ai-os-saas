@@ -5,6 +5,7 @@ import { hasActiveBetaBypass, isBetaTester } from "@/lib/beta";
 import { diagLog } from "@/lib/diag";
 import {
   getPlan,
+  higherPlanSlug,
   annualMonthlyEquivalentEur,
   type BillingInterval,
   type Plan,
@@ -13,51 +14,11 @@ import {
 import { isAdminEmail } from "@/lib/admin";
 import { clearLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
 
-// The plan a user is on lives in user_metadata.subscription_tier, written
-// by the Stripe webhook on checkout/subscription events (see
-// api/webhooks/stripe/route.ts) or set to "free" directly at signup. Falls
-// back to "free" for anything missing or unrecognized — same default
-// dashboard/settings/page.tsx already uses to display the current plan.
-//
-// This is the RAW tier only — it does not know about beta access expiring.
-// A beta grant sets subscription_tier: "ultimate" at signup and nothing
-// ever writes it back to "free" when the 30-day window closes, so this
-// alone would keep reporting "ultimate" forever. Anywhere that resolved
-// plan actually gates a feature or a credit cost should use
-// resolveEffectivePlanSlug/resolveEffectivePlan below instead, which layer
-// the live beta-expiry check on top of this.
-export function resolvePlanSlug(
-  user: { email?: string | null; user_metadata?: Record<string, unknown> | null } | null | undefined
-): PlanSlug {
-  const raw = user?.user_metadata?.subscription_tier;
-  if (typeof raw === "string" && getPlan(raw)) return raw as PlanSlug;
-
-  // An owner/admin account has no subscription_tier, because it never
-  // bought a subscription — admin status lives in ADMIN_EMAILS, which is
-  // an entirely separate axis. Falling through to "free" therefore
-  // labelled the owner a free user.
-  //
-  // That is not merely cosmetic. The plan is what settlement divides by,
-  // so it decides what a credit is worth: an owner's generation reported
-  // wouldHaveChargedCredits at the FREE/list rate (EUR 0.02 -> 53
-  // credits) when their real tier prices it at EUR 0.008 -> 132. The one
-  // number available for checking the margin on admin traffic was 60%
-  // low, which is the opposite of what a safety figure should do.
-  //
-  // "enterprise" rather than a paid tier because that is already what the
-  // rest of the app calls an admin — see pricing/page.tsx, team/invite
-  // and dashboard/team, all of which read `isAdmin ? "enterprise" : ...`.
-  // Billing was the only place that disagreed.
-  if (isAdminEmail(user?.email)) return "enterprise";
-
-  return "free";
-}
-
-export function resolvePlan(
-  user: { email?: string | null; user_metadata?: Record<string, unknown> | null } | null | undefined
-): Plan {
-  return getPlan(resolvePlanSlug(user)) ?? getPlan("free")!;
-}
+// The plan an account is on is resolved in lib/billing/plan-resolution.ts
+// — pure, and therefore unit-testable, which this module is not. Re-exported
+// so every existing `from "@/lib/billing/credits"` import keeps working.
+import { resolvePlanSlug, resolvePlan } from "@/lib/billing/plan-resolution";
+export { resolvePlanSlug, resolvePlan };
 
 // The tier actually in effect right now — same as resolvePlanSlug, except
 // a beta-granted tier collapses to "free" once beta_expires_at (see

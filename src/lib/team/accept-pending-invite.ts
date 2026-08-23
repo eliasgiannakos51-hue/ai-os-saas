@@ -42,11 +42,20 @@ export async function acceptPendingTeamInvite(userId: string, email: string): Pr
       return;
     }
 
+    // THE GRANT GOES IN ITS OWN FIELD. It used to be written over
+    // `subscription_tier` — the member's OWN plan — which destroyed the
+    // only record that they paid for anything. Two consequences, both
+    // silent: a member on a higher plan than the owner was downgraded the
+    // moment they accepted, and leaving the team later wrote "free" over a
+    // subscription Stripe was still charging for.
+    //
+    // resolvePlanSlug now returns the HIGHER of the two, so a grant can
+    // only ever add.
     const { data: memberData } = await admin.auth.admin.getUserById(userId);
     const { error: updateUserError } = await admin.auth.admin.updateUserById(userId, {
       user_metadata: {
         ...memberData?.user?.user_metadata,
-        subscription_tier: ownerTier,
+        team_granted_tier: ownerTier,
         team_owner_id: pending.owner_id,
       },
     });

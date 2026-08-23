@@ -629,7 +629,14 @@ const clientFallbacks = sources.flatMap((f) => [
 // client-side, which is a refactor of every route rather than something
 // to start inside one salvaged feature. What the user READS on
 // /dashboard/affiliate is translated in all ten locales.
-const SERVER_PROSE_BASELINE = 562;
+// 562 -> 571: merging V4-23 (PWA) and the three P0s. The share
+// target (src/app/share), the PWA telemetry route and the push
+// preferences GET each answer with English refusal strings, exactly as
+// every route above does. The number is MEASURED after the merge rather
+// than added to 562 by hand: this branch's +9 was counted under the OLD,
+// wider scanner, and arithmetic across two different counters is how a
+// ratchet quietly gains slack.
+const SERVER_PROSE_BASELINE = 571;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error
@@ -742,7 +749,11 @@ const BARE_TEXT_BASELINE = {
     "src/components/legal/legal-layout.tsx": 3,
     "src/components/overview/beta-expiry-banner.tsx": 2,
     "src/components/pagination-controls.tsx": 3,
-    "src/components/pwa/pwa-provider.tsx": 4,
+    // (was 4) src/components/pwa/pwa-provider.tsx — the install card's
+    // "Install Ionexa" / "Install" / "Not now" / "Add it to your home
+    // screen" were English literals inside the provider. They now live in
+    // components/pwa/install-invitation.tsx behind the `pwa` namespace, in
+    // all ten locales, so the entry is deleted rather than lowered.
     "src/components/settings/buy-credits.tsx": 2,
     "src/components/settings/danger-zone.tsx": 1,
     "src/components/settings/password-change-form.tsx": 1,
@@ -750,6 +761,11 @@ const BARE_TEXT_BASELINE = {
     // Owner-only diagnostics, English on purpose like the rest of the
     // system-health page it lives on.
     "src/components/system-health/storage-diagnostics.tsx": 3,
+    // Same page, same reason: the PWA adoption figures are read by the
+    // owner only, and the labels ("Push granted", "display-mode is not
+    // 'browser'") name browser concepts that would be less clear
+    // translated than left alone.
+    "src/components/system-health/pwa-adoption.tsx": 8,
     "src/components/text-actions/text-actions-textarea.tsx": 2,
     "src/components/ui/widget-boundary.tsx": 2,
   };

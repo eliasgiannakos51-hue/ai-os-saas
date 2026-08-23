@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { clearPrivatePwaCaches } from "@/lib/pwa/cache-reset";
 
 export function LogoutButton() {
   const router = useRouter();
@@ -12,6 +13,11 @@ export function LogoutButton() {
   async function handleLogout() {
     setLoading(true);
     await supabase.auth.signOut();
+    // BEFORE leaving: the service worker keeps the HTML of dashboard pages
+    // so they still open with no network, and that HTML is this account's.
+    // Signing out has to take it with it, or the next person on this
+    // browser can read it by going offline.
+    await clearPrivatePwaCaches();
     router.push("/login");
     router.refresh();
   }

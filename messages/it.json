@@ -41,7 +41,6 @@
     "commandPalette": "Riquadro dei comandi",
     "dismiss": "Ignora",
     "dismissSuggestion": "Ignora il suggerimento",
-    "installIonexa": "Installa Ionexa",
     "loadingContent": "Caricamento dei contenuti",
     "nextPage": "Pagina successiva",
     "previousPage": "Pagina precedente",
@@ -694,7 +693,8 @@
       "lowCredits": "Crediti bassi",
       "lowCreditsHint": "Quando il lavoro si ferma perché il saldo è esaurito",
       "collaboration": "Collaborazione",
-      "collaborationHint": "Inviti al team e attività dello spazio condiviso"
+      "collaborationHint": "Inviti al team e attività dello spazio condiviso",
+      "iosNeedsInstall": "Su iPhone e iPad le notifiche funzionano solo dopo aver aggiunto Ionexa alla schermata Home."
     },
     "jumpToSection": "Vai a una sezione"
   },
@@ -1280,7 +1280,9 @@
         "planningMission": "Pianificazione della missione",
         "routingEntry": "Instradamento al modulo giusto",
         "schedulingAutomation": "Pianificazione dell'automazione",
-        "creatingDocument": "Creazione del documento"
+        "creatingDocument": "Creazione del documento",
+        "designingAgent": "Progetto l'agente",
+        "savingAgent": "Salvo l'agente"
       },
       "filesEmpty": "Niente da scaricare qui: questo vive nell'app, non come file.",
       "chatEmpty": "Chiedi qualsiasi cosa su ciò che hai appena creato.",
@@ -1291,7 +1293,12 @@
       "chatNetworkError": "Errore di rete — riprova.",
       "chatContext": "Contesto: ho appena creato un {type} chiamato «{title}» in Ionexa AI. La mia richiesta iniziale era: {request}",
       "streamInterrupted": "La connessione si è interrotta prima che la risposta fosse completata.",
-      "streamInterruptedPartial": "La connessione si è interrotta — la risposta qui sopra potrebbe essere incompleta."
+      "streamInterruptedPartial": "La connessione si è interrotta — la risposta qui sopra potrebbe essere incompleta.",
+      "shareError": "Non è stato possibile leggere la condivisione. Incollala qui.",
+      "typeAgent": "Agente IA",
+      "agentDesignFailed": "Non è stato possibile progettare quell'agente.",
+      "agentSaveFailed": "L'agente è stato progettato ma non è stato salvato.",
+      "unsupportedType": "Create Studio non può ancora crearlo."
     },
     "agents": {
       "title": "Agenti IA",
@@ -1669,7 +1676,13 @@
       "copyTextEmpty": "Non abbiamo estratto testo da quel file.",
       "uploadStorageMissing": "Lo storage dei file non è configurato su questa installazione: manca il bucket 'user-files'. Un amministratore deve eseguire l'SQL di riparazione (System Health → File storage).",
       "uploadStoragePolicy": "Lo storage ha rifiutato il caricamento: mancano le politiche di accesso del bucket. Un amministratore deve eseguire l'SQL di riparazione (System Health → File storage).",
-      "tooLargeForTransfer": "La piattaforma di hosting ha rifiutato il caricamento prima che raggiungesse l'app. Riprova tra un momento."
+      "tooLargeForTransfer": "La piattaforma di hosting ha rifiutato il caricamento prima che raggiungesse l'app. Riprova tra un momento.",
+      "sharedStored": "{count, plural, one {# file aggiunto} other {# file aggiunti}} dalla condivisione.",
+      "sharedFailed": "{count, plural, one {# file non è stato aggiunto} other {# file non sono stati aggiunti}}.",
+      "sharedReason": "Motivo: {reason}",
+      "sharedRateLimit": "Troppi caricamenti nell'ultima ora. Riprova a condividere fra poco.",
+      "sharedDropped": "Sono stati presi solo i primi {max} file.",
+      "openedFromDevice": "{count, plural, one {# file aperto} other {# file aperti}} dal tuo dispositivo."
     },
     "deepResearch": {
       "title": "Ricerca approfondita",
@@ -2604,5 +2617,21 @@
       "e3": "Scrivi un’email a un cliente in ritardo con il pagamento",
       "limits": "Vede i tuoi dati su Ionexa e ciò che hai collegato · Non agisce da solo"
     }
+  },
+  "pwa": {
+    "installTitle": "Installa Ionexa",
+    "installBody": "Mettilo nella schermata Home: schermo intero e notifiche che arrivano davvero.",
+    "install": "Installa",
+    "notNow": "Non ora",
+    "iosTitle": "Aggiungi Ionexa alla schermata Home",
+    "iosBody": "Safari non lo propone mai da solo: bastano tre tocchi.",
+    "iosStep1": "Tocca il pulsante Condividi nella barra di Safari",
+    "iosStep2": "Scorri e tocca «Aggiungi a Home»",
+    "iosStep3": "Tocca Aggiungi — Ionexa comparirà con le altre app",
+    "iosWhy": "Fino ad allora l'iPhone non può inviarti notifiche e Safari potrebbe cancellare i dati salvati dopo 7 giorni di inutilizzo.",
+    "iosGotIt": "Ho capito",
+    "showHow": "Mostrami come",
+    "installedHere": "Ionexa è installata su questo dispositivo.",
+    "installUnavailable": "Il tuo browser non ha ancora proposto l'installazione. Puoi anche usare il suo menu → Installa app."
   }
 }

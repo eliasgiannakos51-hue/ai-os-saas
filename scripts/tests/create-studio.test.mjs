@@ -42,14 +42,21 @@ function checkTrue(name, cond) {
   check(name, Boolean(cond), true);
 }
 
-console.log("== 1. the five types are the five real features ==");
-check("exactly five types", CREATE_STUDIO_TYPES.length, 5);
+console.log("== 1. the six types are the six real features ==");
+// SIX since "agent" was added. It was missing, and its absence was not a
+// gap but a WRONG ANSWER: Create Studio has no "none", so a request for an
+// agent came back as the closest other kind — usually an automation,
+// because both recur — while the Agent Builder sat one page away, fully
+// built. scripts/tests/create-studio-agent.test.mjs proves each of the six
+// is actually wired, and that a seventh cannot be added without wiring it.
+check("exactly six types", CREATE_STUDIO_TYPES.length, 6);
 check("types", [...CREATE_STUDIO_TYPES], [
   "website",
   "mission",
   "moduleEntry",
   "automation",
   "document",
+  "agent",
 ]);
 check("guard accepts a real type", isCreateStudioType("website"), true);
 check("guard rejects an invented type", isCreateStudioType("presentation"), false);

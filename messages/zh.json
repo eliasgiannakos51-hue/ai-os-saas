@@ -41,7 +41,6 @@
     "commandPalette": "命令面板",
     "dismiss": "关闭",
     "dismissSuggestion": "关闭建议",
-    "installIonexa": "安装 Ionexa",
     "loadingContent": "正在加载内容",
     "nextPage": "下一页",
     "previousPage": "上一页",
@@ -694,7 +693,8 @@
       "lowCredits": "积分不足",
       "lowCreditsHint": "当余额用尽导致工作停止时",
       "collaboration": "协作",
-      "collaborationHint": "团队邀请与共享工作区动态"
+      "collaborationHint": "团队邀请与共享工作区动态",
+      "iosNeedsInstall": "在 iPhone 和 iPad 上，只有将 Ionexa 添加到主屏幕后通知才能送达。"
     },
     "jumpToSection": "跳转到某个部分"
   },
@@ -1280,7 +1280,9 @@
         "planningMission": "正在规划任务",
         "routingEntry": "正在归入合适的模块",
         "schedulingAutomation": "正在安排自动化",
-        "creatingDocument": "正在创建文档"
+        "creatingDocument": "正在创建文档",
+        "designingAgent": "正在设计智能体",
+        "savingAgent": "正在保存智能体"
       },
       "filesEmpty": "这里没有可下载的内容——它存在于应用中，而不是文件。",
       "chatEmpty": "关于刚刚创建的内容，随便问。",
@@ -1291,7 +1293,12 @@
       "chatNetworkError": "网络错误——请重试。",
       "chatContext": "背景：我刚在 Ionexa AI 中创建了一个名为「{title}」的{type}。我最初的请求是：{request}",
       "streamInterrupted": "连接在回复完成前中断。",
-      "streamInterruptedPartial": "连接已中断——上面的回复可能不完整。"
+      "streamInterruptedPartial": "连接已中断——上面的回复可能不完整。",
+      "shareError": "无法读取该共享内容，请直接粘贴到这里。",
+      "typeAgent": "AI 智能体",
+      "agentDesignFailed": "无法设计该智能体。",
+      "agentSaveFailed": "智能体已设计完成，但保存失败。",
+      "unsupportedType": "Create Studio 还无法创建该内容。"
     },
     "agents": {
       "title": "AI 智能体",
@@ -1669,7 +1676,13 @@
       "copyTextEmpty": "我们没有从该文件中读出任何文本。",
       "uploadStorageMissing": "此部署尚未配置文件存储 — 缺少 'user-files' 存储桶。管理员需要运行修复 SQL（System Health → File storage）。",
       "uploadStoragePolicy": "存储拒绝了上传 — 缺少存储桶的访问策略。管理员需要运行修复 SQL（System Health → File storage）。",
-      "tooLargeForTransfer": "托管平台在上传到达应用之前拒绝了它。请稍后再试。"
+      "tooLargeForTransfer": "托管平台在上传到达应用之前拒绝了它。请稍后再试。",
+      "sharedStored": "已从共享添加 {count} 个文件。",
+      "sharedFailed": "有 {count} 个文件无法添加。",
+      "sharedReason": "原因：{reason}",
+      "sharedRateLimit": "过去一小时上传次数过多，请稍后再共享。",
+      "sharedDropped": "仅接收了前 {max} 个文件。",
+      "openedFromDevice": "已从你的设备打开 {count} 个文件。"
     },
     "deepResearch": {
       "title": "深度研究",
@@ -2604,5 +2617,21 @@
       "e3": "给一位付款逾期的客户写封邮件",
       "limits": "能看到你在 Ionexa 的数据和你连接的内容 · 不会自行执行操作"
     }
+  },
+  "pwa": {
+    "installTitle": "安装 Ionexa",
+    "installBody": "添加到主屏幕：全屏使用，通知也能真正收到。",
+    "install": "安装",
+    "notNow": "以后再说",
+    "iosTitle": "将 Ionexa 添加到主屏幕",
+    "iosBody": "Safari 从不会主动提示，三步即可完成。",
+    "iosStep1": "点按 Safari 工具栏中的“共享”按钮",
+    "iosStep2": "向下滚动，点按“添加到主屏幕”",
+    "iosStep3": "点按“添加”，Ionexa 就会和其他应用放在一起",
+    "iosWhy": "在此之前，iPhone 无法向你发送通知，Safari 也可能在 7 天未使用后清除已保存的数据。",
+    "iosGotIt": "知道了",
+    "showHow": "看看怎么做",
+    "installedHere": "本设备已安装 Ionexa。",
+    "installUnavailable": "浏览器尚未提示安装。你也可以从它的菜单 →“安装应用”。"
   }
 }

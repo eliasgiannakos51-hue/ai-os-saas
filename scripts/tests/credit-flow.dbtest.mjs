@@ -134,7 +134,9 @@ console.log("== 0. the database really is the one the migrations build ==");
 // same lesson: it stayed 70 through two migrations that added a table,
 // in two different files, because nothing here re-derived the number —
 // each just repeated what the last one said.
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 72);
+// 77 (see db-migrations.test.mjs, which carries the same ratchet and the
+// reasons it moved).
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 77);
 eq(
   "the credit functions exist",
   Number(

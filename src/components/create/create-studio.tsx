@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
@@ -22,6 +22,7 @@ import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 import { OutOfCreditsNotice } from "@/components/credits/out-of-credits-notice";
 import { StudioChat } from "@/components/create/studio-chat";
 import { useCredits } from "@/components/credits/credits-context";
+import { readSharedTextFromHash } from "@/lib/pwa/share-payload";
 import { useCreateStudio } from "@/lib/create-studio/use-create-studio";
 import { ResumedWorkNotice } from "@/components/jobs/resumed-work-notice";
 import { ExamplePrompts } from "@/components/ai/example-prompts";
@@ -48,6 +49,7 @@ const TYPE_META: Record<CreateStudioType, TypeMeta> = {
   moduleEntry: { icon: Layers, accentSlug: "createStudio", labelKey: "typeModuleEntry" },
   automation: { icon: MODULE_ICONS.automation, accentSlug: "automation", labelKey: "typeAutomation" },
   document: { icon: FileText, accentSlug: "documents", labelKey: "typeDocument" },
+  agent: { icon: MODULE_ICONS.agents, accentSlug: "agents", labelKey: "typeAgent" },
 };
 
 type WorkspaceTab = "overview" | "progress" | "chat" | "files";
@@ -85,6 +87,34 @@ export function CreateStudio() {
   const [outOfCredits, setOutOfCredits] = useState(false);
   const [changingType, setChangingType] = useState(false);
   const [tab, setTab] = useState<WorkspaceTab>("overview");
+
+  // A share that arrived from the operating system's share sheet.
+  //
+  // /share (the Web Share Target route) redirects here with the shared
+  // text in the URL FRAGMENT, which never reaches the server. Reading it
+  // and immediately replacing the history entry is what keeps it that way:
+  // a fragment survives reloads and back-navigation, and re-applying
+  // someone's shared text every time they return to this page would be a
+  // small haunting.
+  useEffect(() => {
+    // A share that could not be read at all. /share sends the user here
+    // anyway rather than to a dead end — but silently pasting nothing into
+    // an empty box would look like the share simply did not happen, so it
+    // says so and invites the obvious fallback.
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("share_error")) {
+      setDetectError(t("shareError"));
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+
+    const shared = readSharedTextFromHash(window.location.hash);
+    if (!shared) return;
+    setDescription(shared.slice(0, MAX_DESCRIPTION_LENGTH));
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    document.getElementById("studio-input")?.focus();
+    // Runs once, on the load that carried the share.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const phase: "input" | "preview" | "workspace" =
     studio.result || studio.steps.length > 0 ? "workspace" : detection ? "preview" : "input";

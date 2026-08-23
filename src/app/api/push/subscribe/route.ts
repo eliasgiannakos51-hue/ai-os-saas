@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 
 // Register / update / remove this browser's push subscription.
 //
+// GET    — the per-type opt-in this browser already has.
 // POST   — store (or refresh) the subscription this browser just created.
 // PATCH  — change the per-type opt-in for this browser.
 // DELETE — the user turned notifications off here.
@@ -32,6 +33,59 @@ function readSubscription(body: SubscriptionBody): { endpoint: string; p256dh: s
   if (!endpoint.startsWith("https://") || !p256dh || !auth) return null;
   if (endpoint.length > 2000) return null;
   return { endpoint, p256dh, auth };
+}
+
+/**
+ * What this browser's opt-in actually IS.
+ *
+ * The panel used to open with every toggle drawn ON, because the client
+ * initialised its state to all-true and nothing ever asked the server.
+ * Someone who turned off low-credit alerts on their laptop saw them
+ * switched back on at the next reload — the UI said one thing, the row
+ * said another, and the row was what decided whether a notification was
+ * sent. A control that misreports its own state is worse than no control.
+ */
+export async function GET(request: Request) {
+  try {
+    const supabase = createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ ok: false, error: "Not authenticated." }, { status: 401 });
+
+    const endpoint = new URL(request.url).searchParams.get("endpoint") ?? "";
+    if (!endpoint) return NextResponse.json({ ok: false, error: "Missing endpoint." }, { status: 400 });
+
+    const { data, error } = await supabase
+      .from("push_subscriptions")
+      .select(
+        "notify_agent_results, notify_mission_reminders, notify_low_credits, notify_collaboration, revoked_at"
+      )
+      .eq("endpoint", endpoint)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (error) {
+      logApiError("/api/push/subscribe", error, { stage: "get" });
+      return NextResponse.json({ ok: false, error: "Could not read the preferences." }, { status: 500 });
+    }
+    if (!data) return NextResponse.json({ ok: true, known: false, preferences: null });
+
+    return NextResponse.json({
+      ok: true,
+      known: true,
+      revoked: data.revoked_at !== null,
+      preferences: {
+        agent_results: data.notify_agent_results !== false,
+        mission_reminders: data.notify_mission_reminders !== false,
+        low_credits: data.notify_low_credits !== false,
+        collaboration: data.notify_collaboration !== false,
+      },
+    });
+  } catch (err) {
+    logApiError("/api/push/subscribe", err, { stage: "get_unhandled" });
+    return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {

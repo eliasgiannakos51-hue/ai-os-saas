@@ -203,6 +203,41 @@ check("the new column is named in its own query, not merged into one", /TWO NARR
 check("and a missing column degrades instead of failing the page", /42703/.test(listSrc));
 check("with the migration named in the log, so the fix is obvious", /20260814_job_consumed_at\.sql/.test(listSrc));
 
+// WHICH WAY THE DEGRADATION FALLS, and this is the whole of it.
+//
+// The fallback used to be "active only" — described in the code as
+// reverting to the behaviour that shipped before the feature. That
+// behaviour IS the double charge. On any database where the SQL above has
+// not been applied yet, /api/jobs answered "nothing is waiting for you"
+// for a build that had finished and been paid for, and did it silently:
+// the hint went to a server log and the response looked identical to
+// having no work at all.
+//
+// Without consumed_at the ONE thing that is lost is the memory of having
+// been shown. So the fallback drops exactly that and keeps the rest: the
+// finished job is still offered, and may be offered again on the next
+// visit because nothing can record that it was seen. Re-offering is an
+// annoyance. Not offering is a charge on a card. A degradation that has
+// to land on one side lands on the annoyance.
+const fallback = listSrc.slice(listSrc.indexOf("missingColumn"));
+check(
+  "the fallback still asks for the finished job, without the seen filter",
+  /\.eq\("status", "done"\)/.test(fallback) && !/\.is\("consumed_at", null\)/.test(fallback),
+  fallback.slice(0, 200)
+);
+check(
+  "...so an un-migrated database re-offers a result rather than losing it",
+  /unseenRow = \(anyFinished/.test(fallback)
+);
+check("and the response says it is degraded, rather than hiding it", /degraded: true/.test(listSrc));
+// The comment that justified the old fallback said reverting was safe. It
+// was the bug. A false comment is why nobody looked at this line.
+check(
+  "no comment still calls reverting to the old behaviour a safe degradation",
+  !/degrade to the old behaviour/.test(listSrc),
+  listSrc.match(/.{0,80}degrade to the old behaviour.{0,40}/)?.[0]
+);
+
 console.log("\n== 5. marking a result seen is owner-checked ==");
 check("ownership is decided by RLS, not by an admin read", /const \{ data: job, error \} = await supabase[\s\S]{0,120}\.from\("ai_jobs"\)/.test(consumeSrc));
 check("a job that is not yours is 404, not 403", /status: 404/.test(consumeSrc) && !/status: 403/.test(consumeSrc));

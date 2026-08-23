@@ -1280,7 +1280,8 @@
         "planningMission": "正在规划任务",
         "routingEntry": "正在归入合适的模块",
         "schedulingAutomation": "正在安排自动化",
-        "creatingDocument": "正在创建文档"
+        "creatingDocument": "正在创建文档",
+        "designingAgent": "正在设计智能体"
       },
       "filesEmpty": "这里没有可下载的内容——它存在于应用中，而不是文件。",
       "chatEmpty": "关于刚刚创建的内容，随便问。",
@@ -1291,7 +1292,11 @@
       "chatNetworkError": "网络错误——请重试。",
       "chatContext": "背景：我刚在 Ionexa AI 中创建了一个名为「{title}」的{type}。我最初的请求是：{request}",
       "streamInterrupted": "连接在回复完成前中断。",
-      "streamInterruptedPartial": "连接已中断——上面的回复可能不完整。"
+      "streamInterruptedPartial": "连接已中断——上面的回复可能不完整。",
+      "typeAgent": "自主智能体",
+      "agentDraftWaiting": "草稿已就绪，正在“智能体”页面等待你——在你确认之前不会运行任何内容。",
+      "agentNeedsAnswers": "返回了几个问题——在“智能体”页面回答后即可得到草稿。",
+      "agentBuildFailed": "无法设计该智能体。"
     },
     "agents": {
       "title": "AI 智能体",
@@ -2566,7 +2571,9 @@
       "e2": "一个找客户的计划",
       "e3": "想法：面向小企业的订阅服务",
       "e4": "每周一提醒我查看财务",
-      "limits": "只在 Ionexa 内创建 · 不会碰你没有连接的任何东西"
+      "limits": "只在 Ionexa 内创建 · 不会碰你没有连接的任何东西",
+      "e5": "每天早上把英伟达的新闻发到我邮箱",
+      "e6": "今天会议的笔记，我自己来写"
     },
     "agents": {
       "e1": "每天早上把英伟达的新闻发给我",

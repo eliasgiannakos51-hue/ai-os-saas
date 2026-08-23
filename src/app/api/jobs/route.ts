@@ -70,10 +70,12 @@ export async function GET(request: Request) {
     // from now. Worse, it makes the un-migrated case fatal: PostgREST
     // fails the WHOLE query when a filtered column does not exist, so a
     // deployment that shipped before the SQL was applied would 500 on
-    // every page open rather than degrade to the old behaviour.
+    // every page open.
     //
     // Split, the second query is the only one that names the new column,
-    // and its failure costs exactly the feature it powers.
+    // and its failure costs exactly the feature it powers — the memory of
+    // having been shown — instead of the protection that feature exists
+    // to provide. See the fallback below.
     const { data: activeRows, error: activeError } = await supabase
       .from("ai_jobs")
       .select("*")
@@ -98,20 +100,47 @@ export async function GET(request: Request) {
       .is("consumed_at", null)
       .order("created_at", { ascending: false })
       .limit(1);
+    let degraded = false;
     if (unseenError) {
       // The un-migrated case, and the only one that is not an outage: the
-      // column is not there yet. Degrade to "active only" — which is the
-      // behaviour that shipped before this feature — rather than failing
-      // the page open.
+      // column is not there yet.
       const missingColumn =
         unseenError.code === "42703" || /consumed_at/.test(unseenError.message ?? "");
       if (!missingColumn) {
         logApiError("/api/jobs", unseenError, { kind });
         return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });
       }
+
+      // THIS USED TO DEGRADE TO "ACTIVE ONLY", and that was the wrong way
+      // round. "The behaviour that shipped before this feature" is not a
+      // safe fallback here — it IS the bug. A database where the migration
+      // has not been applied yet silently serves the exact double charge
+      // this whole file exists to prevent: the build finishes, the page
+      // cannot see it, and the user's only move is to buy it again.
+      //
+      // Worse, it did so invisibly. The hint went into a server log, the
+      // response was indistinguishable from "nothing is waiting for you",
+      // and the person paying twice had no way to know why.
+      //
+      // So the fallback drops the ONE thing the missing column provides —
+      // the record of having been seen — and keeps the part that protects
+      // money. Without consumed_at a finished result is offered again on
+      // the next visit, because nothing can remember it was shown. That is
+      // an annoyance. Not offering it at all is a charge. When a
+      // degradation has to land on one side, it lands on the annoyance.
+      degraded = true;
+      const { data: anyFinished } = await supabase
+        .from("ai_jobs")
+        .select("*")
+        .eq("kind", kind)
+        .eq("status", "done")
+        .order("created_at", { ascending: false })
+        .limit(1);
+      unseenRow = (anyFinished ?? [])[0] as Record<string, unknown> | undefined;
+
       logApiError("/api/jobs", unseenError, {
         kind,
-        hint: "run supabase/migrations/20260814_job_consumed_at.sql — finished results cannot be resumed until then",
+        hint: "run supabase/migrations/20260814_job_consumed_at.sql — until then a finished result is re-offered on every visit, because nothing can record that it was shown",
       });
     } else {
       unseenRow = (unseenRows ?? [])[0] as Record<string, unknown> | undefined;
@@ -122,7 +151,12 @@ export async function GET(request: Request) {
       unseenRow,
     ]);
 
-    return NextResponse.json({ ok: true, job: shape(row) });
+    // `degraded` is reported, not hidden. A caller that cannot tell the
+    // difference between "you have seen this already" and "this database
+    // cannot remember whether you have" will present a re-offered result
+    // as new, and the test that proves the fallback works needs something
+    // to assert on other than a log line.
+    return NextResponse.json({ ok: true, job: shape(row), ...(degraded ? { degraded: true } : {}) });
   } catch (err) {
     logApiError("/api/jobs", err);
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });

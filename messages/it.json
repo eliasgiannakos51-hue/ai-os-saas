@@ -1280,7 +1280,8 @@
         "planningMission": "Pianificazione della missione",
         "routingEntry": "Instradamento al modulo giusto",
         "schedulingAutomation": "Pianificazione dell'automazione",
-        "creatingDocument": "Creazione del documento"
+        "creatingDocument": "Creazione del documento",
+        "designingAgent": "Progettazione dell'agente"
       },
       "filesEmpty": "Niente da scaricare qui: questo vive nell'app, non come file.",
       "chatEmpty": "Chiedi qualsiasi cosa su ciò che hai appena creato.",
@@ -1291,7 +1292,11 @@
       "chatNetworkError": "Errore di rete — riprova.",
       "chatContext": "Contesto: ho appena creato un {type} chiamato «{title}» in Ionexa AI. La mia richiesta iniziale era: {request}",
       "streamInterrupted": "La connessione si è interrotta prima che la risposta fosse completata.",
-      "streamInterruptedPartial": "La connessione si è interrotta — la risposta qui sopra potrebbe essere incompleta."
+      "streamInterruptedPartial": "La connessione si è interrotta — la risposta qui sopra potrebbe essere incompleta.",
+      "typeAgent": "Agente autonomo",
+      "agentDraftWaiting": "La bozza è pronta e ti aspetta nella pagina Agenti: non parte nulla finché non la confermi lì.",
+      "agentNeedsAnswers": "Sono tornate un paio di domande: rispondi nella pagina Agenti e la bozza è pronta.",
+      "agentBuildFailed": "Non è stato possibile progettare quell'agente."
     },
     "agents": {
       "title": "Agenti IA",
@@ -2566,7 +2571,9 @@
       "e2": "Un piano per trovare clienti",
       "e3": "Idea: un abbonamento per piccole imprese",
       "e4": "Ogni lunedì ricordami di controllare i conti",
-      "limits": "Crea cose dentro Ionexa · Non tocca nulla che non hai collegato"
+      "limits": "Crea cose dentro Ionexa · Non tocca nulla che non hai collegato",
+      "e5": "Inviami ogni mattina per email le notizie su Nvidia",
+      "e6": "Appunti della riunione di oggi, li scrivo io"
     },
     "agents": {
       "e1": "Ogni mattina mandami le notizie su Nvidia",

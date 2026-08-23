@@ -4,12 +4,25 @@ import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import type { AutomationFrequency } from "@/lib/automation-schedule";
 
 /**
- * The five things Create Studio can make.
+ * The six things Create Studio can make.
  *
- * Deliberately the five that already exist as real features — a website
+ * Deliberately the six that already exist as real features — a website
  * the Website Builder generates, a mission Mission Control plans, an
- * entry in one of the 18 modules, a scheduled automation, a document.
- * Nothing here is a placeholder for a feature that hasn't been built.
+ * entry in one of the modules, a scheduled automation, a document, and an
+ * autonomous agent. Nothing here is a placeholder for a feature that
+ * hasn't been built.
+ *
+ * "agent" WAS MISSING, and the sentence above used to say "five" — which
+ * had stopped being true the day Autonomous Agents shipped. The effect
+ * was not that agents were unavailable from this box; it was worse than
+ * that. The detector must pick exactly one kind and has no "none", and
+ * the closest survivor was "automation", so "send me the Nvidia news
+ * every morning by email" was confidently filed as a recurring workspace
+ * task. The user pressed Create, saw a green tick, and owned something
+ * that was not the thing they asked for and could not deliver anywhere.
+ *
+ * A missing option in a forced-choice enum is never a gap the user sees
+ * as a gap. It is a wrong answer delivered with full confidence.
  */
 export const CREATE_STUDIO_TYPES = [
   "website",
@@ -17,6 +30,7 @@ export const CREATE_STUDIO_TYPES = [
   "moduleEntry",
   "automation",
   "document",
+  "agent",
 ] as const;
 
 export type CreateStudioType = (typeof CREATE_STUDIO_TYPES)[number];
@@ -55,6 +69,12 @@ export const STUDIO_ACTION_PROFILE: Record<CreateStudioType, ActionProfileKey | 
   moduleEntry: "createAnything",
   automation: "automationCreate",
   document: null,
+  // The DESIGN call, which is all pressing Create here pays for. The
+  // agent's own runs are charged per run, later, and only once the user
+  // has confirmed the draft on the Agents page — quoting the recurring
+  // cost in this preview would be quoting a price for something this
+  // button does not buy.
+  agent: "agentBuild",
 };
 
 // Both the detection route and the preview UI price against the same

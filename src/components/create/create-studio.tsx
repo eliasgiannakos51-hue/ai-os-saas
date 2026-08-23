@@ -48,6 +48,7 @@ const TYPE_META: Record<CreateStudioType, TypeMeta> = {
   moduleEntry: { icon: Layers, accentSlug: "createStudio", labelKey: "typeModuleEntry" },
   automation: { icon: MODULE_ICONS.automation, accentSlug: "automation", labelKey: "typeAutomation" },
   document: { icon: FileText, accentSlug: "documents", labelKey: "typeDocument" },
+  agent: { icon: MODULE_ICONS.agents, accentSlug: "agents", labelKey: "typeAgent" },
 };
 
 type WorkspaceTab = "overview" | "progress" | "chat" | "files";
@@ -195,11 +196,16 @@ export function CreateStudio() {
             </div>
           )}
 
-          {/* FOUR EXAMPLES, one per kind this box can produce.
+          {/* ONE EXAMPLE PER KIND THIS BOX CAN PRODUCE.
               Create Studio is the front door and the one place where "you
               write one sentence and it works out what you meant" has to be
-              believable before it is used. A page, a plan, an entry and a
-              recurring reminder — pressed rather than explained. */}
+              believable before it is used. A page, a plan, an entry, a
+              recurring reminder and an agent that emails you — pressed
+              rather than explained.
+              The agent example names its delivery address on purpose:
+              that is exactly the signal the detector uses to tell an agent
+              from an automation, so the example teaches the distinction by
+              being one. */}
           <ExamplePrompts surface="createStudio" onPick={setDescription} className="mt-3" />
 
           <button

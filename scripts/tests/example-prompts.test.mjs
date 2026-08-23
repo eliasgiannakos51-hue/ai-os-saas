@@ -89,26 +89,59 @@ check(
   [...used].filter((s) => !reg.AI_SURFACES.includes(s)).join(", ")
 );
 
-console.log("\n== 2. three or four examples, never one and never eight ==");
-// One reads as the only thing the box accepts. More than four is a menu to
-// be read rather than a prompt to be tried.
+// Read from the plan itself rather than restated here, so adding a
+// seventh kind without an example fails this file instead of shipping
+// an undiscoverable capability.
+const CREATE_STUDIO_KIND_COUNT = (
+  readFileSync("src/lib/create-studio/plan.ts", "utf8").match(
+    /export const CREATE_STUDIO_TYPES = \[([\s\S]*?)\] as const;/
+  )?.[1].match(/"[a-zA-Z]+"/g) ?? []
+).length;
+
+console.log("\n== 2. at least three, and never more than the box can do ==");
+// One reads as the only thing the box accepts. A long list is a menu to be
+// read rather than a prompt to be tried.
+//
+// THE CEILING IS NOT A MAGIC NUMBER ANY MORE. It used to be a flat 3-4,
+// written when Create Studio routed to five kinds and showed four. Adding
+// the sixth kind — an autonomous agent, which is what this box was
+// silently filing as an "automation" — made the flat bound fail for a
+// change that made the box MORE honest, which is a bound testing the wrong
+// thing.
+//
+// What actually matters is that no example is padding: every chip must
+// correspond to something the surface can really produce. That is a
+// STRONGER rule than 3-4, because a flat count never checked whether the
+// examples meant anything, and it is what keeps the list from growing for
+// its own sake.
 for (const surface of reg.AI_SURFACES) {
   const count = reg.EXAMPLE_COUNTS[surface];
+  const ceiling = reg.MAX_EXAMPLES_FOR(surface);
   check(
-    `${surface}: ${count} examples`,
-    count >= reg.MIN_EXAMPLES && count <= reg.MAX_EXAMPLES,
-    `expected ${reg.MIN_EXAMPLES}-${reg.MAX_EXAMPLES}`
+    `${surface}: ${count} examples (max ${ceiling})`,
+    count >= reg.MIN_EXAMPLES && count <= ceiling,
+    `expected ${reg.MIN_EXAMPLES}-${ceiling}`
   );
   check(`${surface}: keys match the count`, reg.exampleKeys(surface).length === count);
 }
-// Create Studio's fourth is not padding: it is the one box that routes to
-// five different kinds of thing, and its examples are the only place the
-// range is visible.
-check("Create Studio shows the widest range", reg.EXAMPLE_COUNTS.createStudio === 4);
+// Create Studio shows one per kind it routes to, and that is the whole
+// point of its list: it is the only place the range is visible before you
+// have tried it. A kind with no example is a kind nobody discovers — which
+// is exactly how "make me an agent" went unanswered for as long as it did.
+check(
+  "Create Studio shows one example per kind it can produce",
+  reg.EXAMPLE_COUNTS.createStudio === CREATE_STUDIO_KIND_COUNT,
+  `${reg.EXAMPLE_COUNTS.createStudio} examples vs ${CREATE_STUDIO_KIND_COUNT} kinds`
+);
 
 console.log("\n== 3. every string exists, in every locale, actually translated ==");
 const keys = reg.allExampleKeys();
-check(`${keys.length} message keys are required`, keys.length === 29, String(keys.length));
+// Derived, not typed: this number moves every time a surface gains an
+// example, and a hardcoded one turns a real addition into a failure that
+// says nothing about what broke.
+const expectedKeyCount =
+  reg.AI_SURFACES.reduce((sum, s) => sum + reg.EXAMPLE_COUNTS[s], 0) + reg.AI_SURFACES.length;
+check(`${keys.length} message keys are required`, keys.length === expectedKeyCount, `${keys.length} vs ${expectedKeyCount}`);
 const missing = [];
 const untranslated = [];
 for (const key of keys) {

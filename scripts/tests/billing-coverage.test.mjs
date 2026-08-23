@@ -57,6 +57,7 @@ const formula = await loadTs("src/lib/billing/credit-formula.ts");
 const pricing = await loadTs("src/lib/billing/model-pricing.ts");
 const configMod = await loadTs("src/lib/billing/pricing-config.ts");
 const margin = await loadTs("src/lib/billing/margin-policy.ts");
+const planRes = await loadTs("src/lib/billing/plan-resolution.ts");
 const config = configMod.resolvePricingConfig();
 const M = config.marginMultiplier;
 
@@ -764,8 +765,34 @@ console.log("\n== 21. plan resolution: the tier decides the rate, so it must be 
 // ADMIN_EMAILS, a completely separate axis, which billing never consulted
 // even though pricing/page.tsx, team/invite and dashboard/team all do.
 const credits = readFileSync("src/lib/billing/credits.ts", "utf8");
-checkTrue("the only source is user_metadata.subscription_tier", /user\?\.user_metadata\?\.subscription_tier/.test(credits));
-checkTrue("an admin no longer falls through to free", /if \(isAdminEmail\(user\?\.email\)\) return "enterprise";/.test(credits));
+// CHECKED AS BEHAVIOUR, not as a string in one file. Both of these used
+// to grep credits.ts, and both went red the moment the rule moved into
+// lib/billing/plan-resolution.ts to make it testable at all — while the
+// properties they protect were still perfectly true. A guard that fails on
+// a refactor and passes on a regression is pointed at the wrong thing.
+const planResMod = await loadTs("src/lib/billing/plan-resolution.ts");
+check(
+  "the only source is user_metadata.subscription_tier",
+  planResMod.resolvePlanResolution(
+    { email: "user@example.com", user_metadata: { subscription_tier: "growth" }, plan: "ultimate", tier: "ultimate" },
+    { isAdmin: false }
+  ).slug,
+  "growth"
+);
+check(
+  "...and nothing else on the user can set it",
+  planResMod.resolvePlanResolution(
+    { email: "user@example.com", user_metadata: { plan: "ultimate", tier: "ultimate", subscription: "growth" } },
+    { isAdmin: false }
+  ).slug,
+  "free"
+);
+check(
+  "an admin no longer falls through to free",
+  planResMod.resolvePlanResolution({ email: "owner@example.com", user_metadata: {} }, { isAdmin: true }).slug,
+  "enterprise"
+);
+checkTrue("and credits.ts still routes through that one rule", /resolvePlanResolution\(/.test(credits));
 checkTrue("...matching what the rest of the app already calls an admin",
   /isAdmin \? "enterprise"/.test(readFileSync("src/app/pricing/page.tsx", "utf8")));
 
@@ -843,6 +870,99 @@ const stripeHook = readFileSync("src/app/api/webhooks/stripe/route.ts", "utf8");
 checkTrue("the Stripe webhook writes subscription_tier", /subscription_tier: planSlug/.test(stripeHook));
 checkTrue("signup seeds a tier so the field is never absent", /subscription_tier:/.test(readFileSync("src/app/api/signup/route.ts", "utf8")));
 checkTrue("and the auth callback backfills one for older accounts", /subscription_tier: "free"/.test(readFileSync("src/app/auth/callback/route.ts", "utf8")));
+
+console.log("\n== 22b. a plan slug PLANS no longer has (the silent downgrade) ==");
+// THE BUG: `if (getPlan(raw)) return raw; ... return "free"`. The only way
+// getPlan fails on a non-empty string is that the slug was renamed or
+// removed from PLANS — editing a TypeScript file. Stripe never hears about
+// that, so the customer keeps being charged while every gate closes, the
+// monthly allowance collapses to free's, and settlement starts dividing by
+// the free credit price. Nothing logged it and nothing showed it.
+//
+// The cross-product, not a sample: the fallback has to be right for a
+// paying account AND wrong-free for an account with no payment behind it,
+// because user_metadata is writable by the account holder through
+// supabase.auth.updateUser — "any unrecognised string earns a paid plan"
+// would be a free upgrade for anyone who typed one.
+// The real slug order, parsed from plans.ts rather than taken from the
+// function under test — an expectation computed by the code being checked
+// proves only that it agrees with itself.
+const REAL_SLUGS = [
+  ...readFileSync("src/lib/billing/plans.ts", "utf8").matchAll(/^\s{4}slug: "([a-z]+)"/gm),
+].map((m) => m[1]);
+const PAID_FLOOR = REAL_SLUGS.find((slug) => slug !== "free" && slug !== "enterprise");
+checkTrue(`the real plan order was parsed (${REAL_SLUGS.join(" < ")})`, REAL_SLUGS.length >= 5 && Boolean(PAID_FLOOR));
+const TIER_VALUES = [
+  ["a live slug", "growth", true],
+  ["a slug that was removed", "pro-legacy", false],
+  ["a renamed slug", "business", false],
+  ["empty string", "", false],
+  ["whitespace", "   ", false],
+];
+const PAYING = [
+  ["pays Stripe", { stripe_customer_id: "cus_123" }],
+  ["never paid", {}],
+];
+for (const [tierLabel, tier, known] of TIER_VALUES) {
+  for (const [payLabel, payMeta] of PAYING) {
+    const u = { id: "u", email: "user@example.com", user_metadata: { subscription_tier: tier, ...payMeta } };
+    const actual = planRes.resolvePlanResolution(u, { isAdmin: false }).slug;
+    // The rule, restated independently of the implementation: a known slug
+    // is itself; an unknown one keeps PAID access only when there is a
+    // Stripe relationship behind it; everything else is free.
+    const expected = known ? tier : payMeta.stripe_customer_id && tier.trim() ? PAID_FLOOR : "free";
+    check(`${tierLabel} + ${payLabel} -> ${expected}`, actual, expected);
+  }
+}
+// The two that carry the whole fix, named so a regression says which.
+check(
+  "a paying customer whose tier vanished is NOT downgraded to free",
+  planRes.resolvePlanResolution(
+    { email: "p@example.com", user_metadata: { subscription_tier: "pro-legacy", stripe_customer_id: "cus_1" } },
+    { isAdmin: false }
+  ).slug !== "free",
+  true
+);
+check(
+  "...and a non-paying account cannot buy a tier by typing one",
+  planRes.resolvePlanResolution(
+    { email: "f@example.com", user_metadata: { subscription_tier: "ultimate-plus" } },
+    { isAdmin: false }
+  ).slug,
+  "free"
+);
+// Loud, not silent: the owner sees it in System Health rather than finding
+// out from a support message.
+checkTrue(
+  "the mismatch is logged where the owner will see it",
+  /logApiError\("resolvePlanSlug"/.test(credits),
+  credits.slice(0, 0)
+);
+const planResSrc = readFileSync("src/lib/billing/plan-resolution.ts", "utf8");
+checkTrue(
+  "and the floor is derived from PLANS rather than written down",
+  /PLANS\.find\(\(p\) => p\.slug !== "free" && p\.slug !== "enterprise"\)/.test(planResSrc)
+);
+// The rule must stay reachable from a test — which is why it was moved
+// out of credits.ts at all. server-only there makes it unloadable.
+// Import lines only: the file's own comments talk about Supabase, and a
+// scanner that reads its documentation as a dependency is a scanner people
+// delete the documentation around.
+const planResImports = planResSrc.split("\n").filter((l) => l.startsWith("import "));
+checkTrue(
+  "the rule imports nothing server-only",
+  !planResImports.some((l) => /server-only|supabase|log-error/.test(l)),
+  planResImports.join(" | ")
+);
+// The Stripe check is what stops the fallback becoming a free upgrade for
+// anyone who edits their own user_metadata.
+checkTrue("the paid floor requires evidence of payment", /stripe_customer_id/.test(planResSrc));
+// The old comment described falling back to free as the intended default.
+// It was the bug.
+checkTrue(
+  "no comment still calls falling back to free the right default",
+  !/Falls\s*\n?\/\/ back to "free" for anything missing or unrecognized/.test(credits)
+);
 
 console.log("\n== 23. planSlug is never null in a settled row ==");
 // Two production rows logged planSlug null, because several routes did

@@ -1280,7 +1280,8 @@
         "planningMission": "Planification de la mission",
         "routingEntry": "Acheminement vers le bon module",
         "schedulingAutomation": "Programmation de l'automatisation",
-        "creatingDocument": "Création du document"
+        "creatingDocument": "Création du document",
+        "designingAgent": "Conception de l'agent"
       },
       "filesEmpty": "Rien à télécharger ici — ceci vit dans l'application, pas sous forme de fichier.",
       "chatEmpty": "Posez n'importe quelle question sur ce que vous venez de créer.",
@@ -1291,7 +1292,11 @@
       "chatNetworkError": "Erreur réseau — veuillez réessayer.",
       "chatContext": "Contexte : je viens de créer un {type} nommé « {title} » dans Ionexa AI. Ma demande initiale était : {request}",
       "streamInterrupted": "La connexion a été interrompue avant la fin de la réponse.",
-      "streamInterruptedPartial": "La connexion a été interrompue — la réponse ci-dessus est peut-être incomplète."
+      "streamInterruptedPartial": "La connexion a été interrompue — la réponse ci-dessus est peut-être incomplète.",
+      "typeAgent": "Agent autonome",
+      "agentDraftWaiting": "Le brouillon est prêt et vous attend sur la page Agents — rien ne s'exécute tant que vous ne l'avez pas confirmé.",
+      "agentNeedsAnswers": "Quelques questions sont revenues — répondez-y sur la page Agents et le brouillon est à vous.",
+      "agentBuildFailed": "Impossible de concevoir cet agent."
     },
     "agents": {
       "title": "Agents IA",
@@ -2566,7 +2571,9 @@
       "e2": "Un plan pour trouver des clients",
       "e3": "Idée : un abonnement pour les petites entreprises",
       "e4": "Chaque lundi, rappelle-moi de vérifier les finances",
-      "limits": "Crée des choses dans Ionexa · Ne touche à rien que vous n’avez pas connecté"
+      "limits": "Crée des choses dans Ionexa · Ne touche à rien que vous n’avez pas connecté",
+      "e5": "Envoie-moi par e-mail l'actu Nvidia chaque matin",
+      "e6": "Notes de la réunion d'aujourd'hui, je les écris moi-même"
     },
     "agents": {
       "e1": "Chaque matin, envoie-moi les actualités sur Nvidia",

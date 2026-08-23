@@ -1,3 +1,5 @@
+import { CREATE_STUDIO_TYPES } from "@/lib/create-studio/plan";
+
 /**
  * "What can I even ask it?" — answered on the screen where it is asked.
  *
@@ -40,12 +42,14 @@ export type AiSurface = (typeof AI_SURFACES)[number];
  * prompt to be tried, and the point is to get somebody to a first result
  * rather than to enumerate the product.
  *
- * Create Studio gets four because it is the one box that routes to five
- * different kinds of thing — its examples are doing double duty as the
- * only place the RANGE is visible.
+ * Create Studio gets ONE PER KIND it routes to, because its examples are
+ * doing double duty as the only place the RANGE is visible before anyone
+ * has tried it. A kind with no example is a kind nobody discovers: agents
+ * were reachable from this box for exactly as long as nobody could tell,
+ * and requests for one were quietly filed as "automation" instead.
  */
 export const EXAMPLE_COUNTS: Record<AiSurface, number> = {
-  createStudio: 4,
+  createStudio: 6,
   agents: 3,
   mission: 3,
   websiteBuilder: 3,
@@ -55,7 +59,19 @@ export const EXAMPLE_COUNTS: Record<AiSurface, number> = {
 };
 
 export const MIN_EXAMPLES = 3;
-export const MAX_EXAMPLES = 4;
+
+/**
+ * The ceiling for one surface.
+ *
+ * Four everywhere except Create Studio, whose list is bounded by what it
+ * can actually produce rather than by a flat number. A flat 4 was a bound
+ * on the wrong thing: it would have blocked showing the sixth kind — the
+ * one whose absence was the bug — while never once checking that any of
+ * the four corresponded to a real capability.
+ */
+export function MAX_EXAMPLES_FOR(surface: AiSurface): number {
+  return surface === "createStudio" ? CREATE_STUDIO_TYPES.length : 4;
+}
 
 /** The message keys for one surface, under `aiExamples.<surface>`. */
 export function exampleKeys(surface: AiSurface): string[] {

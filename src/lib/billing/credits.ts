@@ -10,14 +10,19 @@ import {
   type Plan,
   type PlanSlug,
 } from "./plans";
+import { resolvePlanResolution } from "./plan-resolution";
 import { isAdminEmail } from "@/lib/admin";
 import { clearLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
 
 // The plan a user is on lives in user_metadata.subscription_tier, written
 // by the Stripe webhook on checkout/subscription events (see
-// api/webhooks/stripe/route.ts) or set to "free" directly at signup. Falls
-// back to "free" for anything missing or unrecognized — same default
-// dashboard/settings/page.tsx already uses to display the current plan.
+// api/webhooks/stripe/route.ts) or set to "free" directly at signup.
+//
+// THE DECISION ITSELF lives in ./plan-resolution.ts, with no server-only
+// import in it so it can be tested directly — including the case that used
+// to be a silent downgrade of a paying customer, which nothing could reach
+// from here. This function is the same rule plus the two things a pure
+// module must not do: read ADMIN_EMAILS, and write a log.
 //
 // This is the RAW tier only — it does not know about beta access expiring.
 // A beta grant sets subscription_tier: "ultimate" at signup and nothing
@@ -29,28 +34,22 @@ import { clearLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
 export function resolvePlanSlug(
   user: { email?: string | null; user_metadata?: Record<string, unknown> | null } | null | undefined
 ): PlanSlug {
-  const raw = user?.user_metadata?.subscription_tier;
-  if (typeof raw === "string" && getPlan(raw)) return raw as PlanSlug;
+  const { slug, unknownTier } = resolvePlanResolution(user, {
+    isAdmin: isAdminEmail(user?.email),
+  });
 
-  // An owner/admin account has no subscription_tier, because it never
-  // bought a subscription — admin status lives in ADMIN_EMAILS, which is
-  // an entirely separate axis. Falling through to "free" therefore
-  // labelled the owner a free user.
-  //
-  // That is not merely cosmetic. The plan is what settlement divides by,
-  // so it decides what a credit is worth: an owner's generation reported
-  // wouldHaveChargedCredits at the FREE/list rate (EUR 0.02 -> 53
-  // credits) when their real tier prices it at EUR 0.008 -> 132. The one
-  // number available for checking the margin on admin traffic was 60%
-  // low, which is the opposite of what a safety figure should do.
-  //
-  // "enterprise" rather than a paid tier because that is already what the
-  // rest of the app calls an admin — see pricing/page.tsx, team/invite
-  // and dashboard/team, all of which read `isAdmin ? "enterprise" : ...`.
-  // Billing was the only place that disagreed.
-  if (isAdminEmail(user?.email)) return "enterprise";
+  // LOUD, because the whole failure was that it was silent. This lands in
+  // production_errors, which is the owner-only System Health page — so a
+  // tier removed from PLANS while somebody is still paying for it shows up
+  // there rather than in a support message weeks later.
+  if (unknownTier) {
+    logApiError("resolvePlanSlug", new Error(`unknown subscription_tier "${unknownTier}"`), {
+      stage: "plan-resolution",
+      hint: `This account pays Stripe but its tier is not in PLANS. Serving "${slug}" so paid access is not silently revoked. Restore the slug in lib/billing/plans.ts, or migrate the affected accounts' user_metadata.subscription_tier.`,
+    });
+  }
 
-  return "free";
+  return slug;
 }
 
 export function resolvePlan(

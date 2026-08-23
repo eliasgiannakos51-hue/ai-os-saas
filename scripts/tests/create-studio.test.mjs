@@ -10,7 +10,7 @@
 //
 // Run: node scripts/tests/create-studio.test.mjs
 import { loadTs } from "./load-ts.mjs";
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 
 const plan = await loadTs("src/lib/create-studio/plan.ts");
 const pricing = await loadTs("src/lib/billing/pricing-config.ts");
@@ -43,14 +43,62 @@ function checkTrue(name, cond) {
 }
 
 console.log("== 1. the five types are the five real features ==");
-check("exactly five types", CREATE_STUDIO_TYPES.length, 5);
 check("types", [...CREATE_STUDIO_TYPES], [
   "website",
   "mission",
   "moduleEntry",
   "automation",
   "document",
+  "agent",
 ]);
+
+// THE LIST USED TO BE PINNED BY COUNT ALONE ("exactly five types"), and a
+// count is the one thing that cannot catch what actually went wrong here.
+//
+// Autonomous Agents shipped as a full feature — its own page, its own
+// build route, its own scheduler, its own delivery channels — and was
+// never added to this list. Nothing failed. The detector has no "none"
+// and must pick one of the kinds it is given, so "email me the Nvidia
+// news every morning" was confidently classified as an "automation" and
+// filed as a recurring workspace task. The user pressed Create, got a
+// green tick, and owned something that could not deliver anywhere.
+//
+// A missing option in a forced-choice enum is not experienced as a
+// missing option. It is a wrong answer given with full confidence, and
+// the only guard that can see it is one that compares this list against
+// the routes that really exist. Both directions are checked below,
+// because the reverse — a type here with no route behind it — is how the
+// list would come to promise something the product cannot do.
+const CREATABLE = {
+  website: "src/app/api/websites/generate/route.ts",
+  mission: "src/app/api/mission/plan/route.ts",
+  moduleEntry: "src/app/api/create/route.ts",
+  automation: "src/app/api/automations/create/route.ts",
+  document: "src/app/api/documents/route.ts",
+  agent: "src/app/api/agents/build/route.ts",
+};
+for (const [type, route] of Object.entries(CREATABLE)) {
+  check(`${type}: the route behind it exists`, existsSync(route), true);
+  check(`${type}: is offered in Create Studio`, CREATE_STUDIO_TYPES.includes(type), true);
+}
+check(
+  "no type is offered without a route behind it",
+  CREATE_STUDIO_TYPES.filter((t) => !CREATABLE[t]),
+  []
+);
+// The branch that runs it must exist too — a type in the enum with no
+// case in the switch detects fine and then silently does nothing.
+const studioHook = readFileSync("src/lib/create-studio/use-create-studio.ts", "utf8");
+for (const type of CREATE_STUDIO_TYPES) {
+  check(`${type}: has a branch that creates it`, studioHook.includes(`case "${type}":`), true);
+}
+// ...and it must go through the feature's OWN route, not a second copy of
+// the plan cap, the credit reservation and the rate limit.
+check(
+  "the agent branch calls the real build route",
+  /startAndWatchJob\("\/api\/agents\/build"/.test(studioHook),
+  true
+);
 check("guard accepts a real type", isCreateStudioType("website"), true);
 check("guard rejects an invented type", isCreateStudioType("presentation"), false);
 check("guard rejects non-strings", isCreateStudioType(null), false);

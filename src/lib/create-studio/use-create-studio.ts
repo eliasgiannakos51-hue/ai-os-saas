@@ -50,6 +50,7 @@ const POLL_INTERVAL_MS = 2500;
  */
 export function useCreateStudio() {
   const tCommon = useTranslations("common");
+  const tStudio = useTranslations("dashboard.createStudio");
   const { refresh: refreshCredits } = useCredits();
   const [steps, setSteps] = useState<StudioProgressStep[]>([]);
   const [result, setResult] = useState<StudioResult | null>(null);
@@ -303,6 +304,82 @@ export function useCreateStudio() {
             });
             return;
           }
+
+          case "agent": {
+            // THROUGH /api/agents/build, not around it.
+            //
+            // That route is where the agent cap for the plan, the credit
+            // reservation, the rate limit and the circuit breaker live. A
+            // second "create an agent" path in this file would be a second
+            // place all four have to stay correct, and the first one to be
+            // forgotten in a later edit — the same reasoning that made
+            // every other branch here call the feature's own route.
+            //
+            // NOT skipClarification. Every other branch skips it because
+            // the studio preview already restated the request, but an
+            // agent's schedule, its delivery address and what counts as
+            // "the news" are things the preview never asked about, and
+            // getting them wrong produces something that spends credits
+            // every morning. The questions are answerable on the Agents
+            // page, which is where this branch sends the user anyway.
+            pushStep({ key: "design", labelKey: "designingAgent", status: "running" });
+            const outcome = await startAndWatchJob("/api/agents/build", { request: description });
+            void refreshCredits();
+
+            // Every exit below lands on /dashboard/agents and NONE of them
+            // marks the job consumed. That is deliberate: the page reads
+            // /api/jobs?kind=agent_build on mount and restores whatever
+            // the build produced — the draft to confirm, or the clarifying
+            // questions to answer — so the work follows the user there
+            // instead of being stranded on this screen.
+            const toAgents = (title: string, message: string | null) => {
+              setResult({
+                type: "agent",
+                title,
+                href: "/dashboard/agents",
+                website: null,
+                moduleTitle: null,
+                message,
+              });
+            };
+
+            if (!outcome.ok) {
+              // The worker is fine, this page stopped watching. Sending
+              // them to the Agents page is the truthful answer, because
+              // that is where the draft appears.
+              if (outcome.code === "still_running") {
+                finishStep("design", "done");
+                toAgents(detection.title, tStudio("agentDraftWaiting"));
+                return;
+              }
+              finishStep("design", "failed");
+              setError(getErrorMessage(outcome.error, tStudio("agentBuildFailed")));
+              return;
+            }
+
+            const built = (outcome.result ?? {}) as {
+              built?: boolean;
+              needsClarification?: boolean;
+              error?: string;
+              draft?: { name?: string };
+            };
+            // A build that came back asking questions is not a failure —
+            // it is the step doing its job, and the answers belong on the
+            // Agents page.
+            if (built.needsClarification) {
+              finishStep("design", "done");
+              toAgents(detection.title, tStudio("agentNeedsAnswers"));
+              return;
+            }
+            if (!built.built) {
+              finishStep("design", "failed");
+              setError(built.error ?? tStudio("agentBuildFailed"));
+              return;
+            }
+            finishStep("design", "done");
+            toAgents(built.draft?.name ?? detection.title, tStudio("agentDraftWaiting"));
+            return;
+          }
         }
       } catch {
         setError(tCommon("networkError"));
@@ -310,7 +387,7 @@ export function useCreateStudio() {
         setRunning(false);
       }
     },
-    [finishStep, pollWebsite, pushStep, refreshCredits, tCommon]
+    [finishStep, pollWebsite, pushStep, refreshCredits, tCommon, tStudio]
   );
 
   return { create, reset, steps, result, error, running, setError, mountedRef };

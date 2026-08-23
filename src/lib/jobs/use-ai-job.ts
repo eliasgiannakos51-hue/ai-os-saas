@@ -252,7 +252,9 @@ export function useAiJob(jobId: string | null): {
    *  fine — this is "progress cannot be shown", which the UI must say
    *  rather than showing nothing. */
   watchLost: boolean;
-  refresh: () => Promise<void>;
+  /** Resolves true once the row has reached an outcome, so a caller
+   *  driving its own loop can stop asking. */
+  refresh: () => Promise<boolean>;
 } {
   const [job, setJob] = useState<AiJob | null>(null);
   const queuedPolls = useRef(0);
@@ -265,15 +267,19 @@ export function useAiJob(jobId: string | null): {
   const missedPolls = useRef(0);
   const [watchLost, setWatchLost] = useState(false);
 
-  const refresh = useCallback(async () => {
-    if (!jobId) return;
+  /** Resolves true once the row has reached an outcome, so the caller can
+   *  stop asking. */
+  const refresh = useCallback(async (): Promise<boolean> => {
+    if (!jobId) return false;
     try {
       const response = await fetch(`/api/jobs/${jobId}`);
       const data = await response.json();
       if (data.ok) {
-        setJob(data.job as AiJob);
+        const next = data.job as AiJob | null;
+        setJob(next);
         missedPolls.current = 0;
         setWatchLost(false);
+        return next?.status === "done" || next?.status === "failed";
       } else {
         missedPolls.current += 1;
         if (missedPolls.current >= 4) setWatchLost(true);
@@ -283,6 +289,7 @@ export function useAiJob(jobId: string | null): {
       // let the next tick try again — clearing it here would make a
       // flaky network look exactly like a job that vanished.
     }
+    return false;
   }, [jobId]);
 
   useEffect(() => {
@@ -296,10 +303,15 @@ export function useAiJob(jobId: string | null): {
     let cancelled = false;
     void refresh();
 
+    // A finished job cannot change, so the interval clears itself the
+    // first time it reads one. Checked against the fetched row rather than
+    // against React state, because state set inside this effect is not
+    // visible to the closure that set it.
     const timer = setInterval(() => {
       if (cancelled) return;
       void (async () => {
-        await refresh();
+        const settled = await refresh();
+        if (settled) clearInterval(timer);
       })();
     }, POLL_MS);
 
@@ -309,8 +321,16 @@ export function useAiJob(jobId: string | null): {
     };
   }, [jobId, refresh]);
 
-  // Stop polling the moment there is an outcome. A finished job cannot
-  // change, and a page left open on a completed job should not keep asking.
+  // THE NUDGE, and only the nudge. This block used to be introduced as
+  // "stop polling the moment there is an outcome" — which it never did.
+  // The early return below leaves THIS effect; the interval above is the
+  // thing that polls, and nothing cancelled it, so a page left open on a
+  // finished job asked the server for the same unchanging row every two
+  // seconds until it was closed. The comment described an optimisation
+  // that did not exist, which is worse than no comment: it is the reason
+  // nobody looked.
+  //
+  // The interval now really does stop — see `settled` in the effect above.
   useEffect(() => {
     if (!job) return;
     if (job.status === "done" || job.status === "failed") return;

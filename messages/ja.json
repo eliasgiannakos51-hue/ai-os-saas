@@ -1280,7 +1280,8 @@
         "planningMission": "ミッションを計画中",
         "routingEntry": "適切なモジュールへ振り分け中",
         "schedulingAutomation": "自動化をスケジュール中",
-        "creatingDocument": "ドキュメントを作成中"
+        "creatingDocument": "ドキュメントを作成中",
+        "designingAgent": "エージェントを設計中"
       },
       "filesEmpty": "ダウンロードできるものはありません。これはファイルではなくアプリ内に存在します。",
       "chatEmpty": "作成したものについて何でも質問してください。",
@@ -1291,7 +1292,11 @@
       "chatNetworkError": "ネットワークエラー — もう一度お試しください。",
       "chatContext": "背景: Ionexa AI で「{title}」という{type}を作成しました。元のリクエストは次のとおりです: {request}",
       "streamInterrupted": "応答が完了する前に接続が切断されました。",
-      "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。"
+      "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。",
+      "typeAgent": "自律エージェント",
+      "agentDraftWaiting": "下書きが「エージェント」ページで待っています。そこで確認するまで何も実行されません。",
+      "agentNeedsAnswers": "いくつか質問が返ってきました。「エージェント」ページで答えれば下書きが完成します。",
+      "agentBuildFailed": "そのエージェントを設計できませんでした。"
     },
     "agents": {
       "title": "AI エージェント",
@@ -2566,7 +2571,9 @@
       "e2": "顧客を見つけるための計画",
       "e3": "アイデア：小規模事業者向けのサブスク",
       "e4": "毎週月曜に会計の確認をリマインドして",
-      "limits": "Ionexa の中に作ります · 接続していないものには一切触れません"
+      "limits": "Ionexa の中に作ります · 接続していないものには一切触れません",
+      "e5": "毎朝 Nvidia のニュースをメールで送って",
+      "e6": "今日の打ち合わせのメモ、自分で書きます"
     },
     "agents": {
       "e1": "毎朝、Nvidia のニュースを送って",

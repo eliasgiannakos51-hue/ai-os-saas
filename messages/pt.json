@@ -1280,7 +1280,8 @@
         "planningMission": "A planear a missão",
         "routingEntry": "A encaminhar para o módulo certo",
         "schedulingAutomation": "A agendar a automatização",
-        "creatingDocument": "A criar o documento"
+        "creatingDocument": "A criar o documento",
+        "designingAgent": "A desenhar o agente"
       },
       "filesEmpty": "Nada para descarregar aqui — isto vive na aplicação e não como ficheiro.",
       "chatEmpty": "Pergunte o que quiser sobre o que acabou de criar.",
@@ -1291,7 +1292,11 @@
       "chatNetworkError": "Erro de rede — tente novamente.",
       "chatContext": "Contexto: acabei de criar um {type} chamado «{title}» no Ionexa AI. O meu pedido original foi: {request}",
       "streamInterrupted": "A ligação foi interrompida antes de a resposta terminar.",
-      "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta."
+      "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta.",
+      "typeAgent": "Agente autónomo",
+      "agentDraftWaiting": "O rascunho está pronto e à tua espera na página de Agentes — nada corre até o confirmares lá.",
+      "agentNeedsAnswers": "Voltaram algumas perguntas — responde-lhes na página de Agentes e o rascunho fica pronto.",
+      "agentBuildFailed": "Não foi possível desenhar esse agente."
     },
     "agents": {
       "title": "Agentes de IA",
@@ -2566,7 +2571,9 @@
       "e2": "Um plano para encontrar clientes",
       "e3": "Ideia: uma subscrição para pequenos negócios",
       "e4": "Todas as segundas, lembra-me de ver as finanças",
-      "limits": "Cria coisas dentro do Ionexa · Não mexe em nada que não tenhas ligado"
+      "limits": "Cria coisas dentro do Ionexa · Não mexe em nada que não tenhas ligado",
+      "e5": "Envia-me por email as notícias da Nvidia todas as manhãs",
+      "e6": "Notas da reunião de hoje, escrevo-as eu"
     },
     "agents": {
       "e1": "Todas as manhãs, envia-me as notícias sobre a Nvidia",

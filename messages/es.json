@@ -1280,7 +1280,8 @@
         "planningMission": "Planificando la misión",
         "routingEntry": "Enviándolo al módulo correcto",
         "schedulingAutomation": "Programando la automatización",
-        "creatingDocument": "Creando el documento"
+        "creatingDocument": "Creando el documento",
+        "designingAgent": "Diseñando el agente"
       },
       "filesEmpty": "Nada descargable aquí: esto vive en la aplicación, no como archivo.",
       "chatEmpty": "Pregunta lo que quieras sobre lo que acabas de crear.",
@@ -1291,7 +1292,11 @@
       "chatNetworkError": "Error de red: inténtalo de nuevo.",
       "chatContext": "Contexto: acabo de crear un {type} llamado «{title}» en Ionexa AI. Mi petición original fue: {request}",
       "streamInterrupted": "La conexión se interrumpió antes de que terminara la respuesta.",
-      "streamInterruptedPartial": "La conexión se interrumpió: la respuesta anterior puede estar incompleta."
+      "streamInterruptedPartial": "La conexión se interrumpió: la respuesta anterior puede estar incompleta.",
+      "typeAgent": "Agente autónomo",
+      "agentDraftWaiting": "El borrador está listo y te espera en la página de Agentes: no se ejecuta nada hasta que lo confirmes allí.",
+      "agentNeedsAnswers": "Han surgido un par de preguntas: respóndelas en la página de Agentes y tendrás el borrador.",
+      "agentBuildFailed": "No se ha podido diseñar ese agente."
     },
     "agents": {
       "title": "Agentes IA",
@@ -2566,7 +2571,9 @@
       "e2": "Un plan para encontrar clientes",
       "e3": "Idea: una suscripción para pequeños negocios",
       "e4": "Cada lunes, recuérdame revisar las finanzas",
-      "limits": "Crea cosas dentro de Ionexa · No toca nada que no hayas conectado"
+      "limits": "Crea cosas dentro de Ionexa · No toca nada que no hayas conectado",
+      "e5": "Envíame por correo las noticias de Nvidia cada mañana",
+      "e6": "Notas de la reunión de hoy, las escribo yo"
     },
     "agents": {
       "e1": "Cada mañana, envíame las noticias sobre Nvidia",

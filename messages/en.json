@@ -1280,7 +1280,8 @@
         "planningMission": "Planning the mission",
         "routingEntry": "Routing it to the right module",
         "schedulingAutomation": "Scheduling the automation",
-        "creatingDocument": "Creating the document"
+        "creatingDocument": "Creating the document",
+        "designingAgent": "Designing the agent"
       },
       "filesEmpty": "Nothing downloadable here — this one lives in the app rather than as a file.",
       "chatEmpty": "Ask anything about what you just created.",
@@ -1291,7 +1292,11 @@
       "chatNetworkError": "Network error — please try again.",
       "chatContext": "Context: I just created a {type} called \"{title}\" in Ionexa AI. My original request was: {request}",
       "streamInterrupted": "The connection dropped before the reply finished.",
-      "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete."
+      "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete.",
+      "typeAgent": "Autonomous agent",
+      "agentDraftWaiting": "The draft is ready and waiting on the Agents page — nothing runs until you confirm it there.",
+      "agentNeedsAnswers": "A couple of questions came back — answer them on the Agents page and the draft is yours.",
+      "agentBuildFailed": "Could not design that agent."
     },
     "agents": {
       "title": "AI Agents",
@@ -2566,7 +2571,9 @@
       "e2": "A plan for finding customers",
       "e3": "Idea: a subscription for small businesses",
       "e4": "Every Monday, remind me to check the finances",
-      "limits": "Creates things inside Ionexa · It won't touch anything you haven't connected"
+      "limits": "Creates things inside Ionexa · It won't touch anything you haven't connected",
+      "e5": "Email me the Nvidia news every morning",
+      "e6": "Notes from today's meeting, I'll write them myself"
     },
     "agents": {
       "e1": "Every morning, send me the news about Nvidia",

@@ -1280,7 +1280,8 @@
         "planningMission": "Mission wird geplant",
         "routingEntry": "Wird dem richtigen Modul zugeordnet",
         "schedulingAutomation": "Automatisierung wird eingeplant",
-        "creatingDocument": "Dokument wird angelegt"
+        "creatingDocument": "Dokument wird angelegt",
+        "designingAgent": "Agent wird entworfen"
       },
       "filesEmpty": "Hier gibt es nichts zum Herunterladen — das lebt in der App und nicht als Datei.",
       "chatEmpty": "Frag alles zu dem, was du gerade erstellt hast.",
@@ -1291,7 +1292,11 @@
       "chatNetworkError": "Netzwerkfehler — bitte erneut versuchen.",
       "chatContext": "Kontext: Ich habe gerade ein {type} namens „{title}“ in Ionexa AI erstellt. Meine ursprüngliche Anfrage war: {request}",
       "streamInterrupted": "Die Verbindung wurde unterbrochen, bevor die Antwort fertig war.",
-      "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig."
+      "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig.",
+      "typeAgent": "Autonomer Agent",
+      "agentDraftWaiting": "Der Entwurf liegt fertig auf der Agenten-Seite — es läuft nichts, bis du ihn dort bestätigst.",
+      "agentNeedsAnswers": "Es kamen ein paar Rückfragen — beantworte sie auf der Agenten-Seite, dann steht der Entwurf.",
+      "agentBuildFailed": "Dieser Agent konnte nicht entworfen werden."
     },
     "agents": {
       "title": "KI-Agenten",
@@ -2566,7 +2571,9 @@
       "e2": "Ein Plan, um Kunden zu finden",
       "e3": "Idee: ein Abo für kleine Betriebe",
       "e4": "Erinnere mich jeden Montag an die Finanzen",
-      "limits": "Erstellt Dinge innerhalb von Ionexa · Rührt nichts an, was du nicht verbunden hast"
+      "limits": "Erstellt Dinge innerhalb von Ionexa · Rührt nichts an, was du nicht verbunden hast",
+      "e5": "Schick mir jeden Morgen die Nvidia-News per E-Mail",
+      "e6": "Notizen zum heutigen Meeting, die schreibe ich selbst"
     },
     "agents": {
       "e1": "Schick mir jeden Morgen die Nachrichten zu Nvidia",

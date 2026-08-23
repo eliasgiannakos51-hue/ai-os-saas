@@ -184,6 +184,26 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
   { name: "STRIPE_PRICE_GROWTH_ANNUAL", level: "optional", what: "Growth billed yearly (€500 — ten months)", fallback: "annual billing is not offered at all" },
   { name: "STRIPE_PRICE_PROFESSIONAL_ANNUAL", level: "optional", what: "Professional billed yearly (€1,000 — ten months)", fallback: "annual billing is not offered at all" },
   { name: "STRIPE_PRICE_ULTIMATE_ANNUAL", level: "optional", what: "Ultimate billed yearly (€2,000 — ten months)", fallback: "annual billing is not offered at all" },
+  {
+    // V4 #2 (voice). OPTIONAL and cleanly absent: transcribeAvailable() is
+    // false, the microphone button renders nothing at all rather than a
+    // control that fails on press, and /api/voice/transcribe answers with
+    // "OPENAI_API_KEY is not set on this deployment". Listed here because
+    // the ABSENCE is otherwise invisible to the owner: a deployment with
+    // no key looks identical to one where the feature was never built.
+    name: "OPENAI_API_KEY",
+    level: "optional",
+    what: "Speech-to-text (Whisper). Voice INPUT everywhere: chat, module forms, the agent builder",
+    fallback: "the microphone button is not rendered; every text path is unaffected",
+    secret: true,
+  },
+  {
+    name: "ELEVENLABS_API_KEY",
+    level: "optional",
+    what: "Text-to-speech. Voice OUTPUT: reading an agent run or a chat reply aloud, and the hands-free loop",
+    fallback: "the speaker button is not rendered, and the hands-free conversation cannot be started",
+    secret: true,
+  },
   { name: "ADMIN_EMAILS", level: "optional", what: "Extra admin accounts, comma-separated", fallback: "the hardcoded owner address" },
   {
     name: "UNSPLASH_ACCESS_KEY",

@@ -302,7 +302,49 @@ The coding notes were *copied* into `code_sessions` (marked
 `source = 'note'`, idempotently, keyed on `imported_from`), and the
 analysis notes are listed on the new page under "your earlier notes".
 
-#### Email delivery: the verified sending domain
+##### Quality baseline
+
+`scripts/evals/` is the measured answer to "is it getting better?".
+**154 cases across seven capabilities** — chat, create, website, agents,
+research, files, mission — 22 each, every one carrying the specific
+failure it exists to catch. Almost every check is **mechanical** (a
+regex, a structural property, a numeric bound), so the number is
+reproducible and can be argued with by reading it.
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-... node scripts/evals/run.mjs
+ANTHROPIC_API_KEY=sk-ant-... node scripts/evals/run.mjs --capability chat --model claude-haiku-4-5-20251001
+ANTHROPIC_API_KEY=sk-ant-... node scripts/evals/run.mjs --out baseline.json
+ANTHROPIC_API_KEY=sk-ant-... node scripts/evals/run.mjs --compare baseline.json
+```
+
+It prints **Capability | Success rate | Avg score | Median & p90 latency |
+Cost**. `--compare` is the rollback decision: it re-runs, diffs against a
+stored baseline, and **exits non-zero if any capability lost more than
+10% of its success rate**.
+
+Four properties make the number trustworthy, and each is enforced by a
+test:
+
+- **An error is not a failure.** A rate limit is excluded from every rate
+  and reported on its own. Counting it as zero would make an outage read
+  as a quality regression — and the rollback is automatic.
+- **A rate over zero cases is `null`, never 0%.** Printing 0% would read
+  as total failure when the truth is "nothing ran".
+- **Latency is the median and p90, never the mean.** One 40-second
+  timeout makes a mean describe nobody.
+- **Cost comes from the response's own `usage`.** An unpriced model
+  reports *unknown*, not a confident zero.
+
+Like the website variety check, this makes **real, billed calls** and is
+deliberately not in `scripts/tests/`. The **scorer** is fully tested
+without a key (`scripts/tests/evals.test.mjs`, 92 assertions), including
+that every one of the 154 cases parses, has a stated reason, compiles its
+regexes, and **cannot be satisfied by an empty answer** — an
+injection-refusal case that a blank response would pass is the most
+dangerous kind of false green.
+
+## Email delivery: the verified sending domain
 
 **Nothing leaves the building without this.** The default sender,
 `onboarding@resend.dev`, is Resend's shared TESTING address: it delivers

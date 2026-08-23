@@ -620,7 +620,16 @@ const clientFallbacks = sources.flatMap((f) => [
 // at 558 while the count dropped to 549 would have left nine free slots —
 // nine English sentences that could reach a user without this number
 // moving. A ratchet with slack in it is not a ratchet.
-const SERVER_PROSE_BASELINE = 549;
+// 549 -> 562: the affiliate programme, salvaged from the
+// three-bugs-landing-page branch. Its routes (join, Connect onboarding,
+// the payout cron and the share link) carry the same
+// not-authenticated / rate-limit / not-configured / failure sentences as
+// every increment above, and the same recorded decision applies: the fix
+// is stable error CODES across the whole API surface with translation
+// client-side, which is a refactor of every route rather than something
+// to start inside one salvaged feature. What the user READS on
+// /dashboard/affiliate is translated in all ten locales.
+const SERVER_PROSE_BASELINE = 562;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error

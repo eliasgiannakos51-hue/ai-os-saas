@@ -258,6 +258,7 @@ const DASHBOARD_ROUTES = [
   "/dashboard/marketplace",
   "/dashboard/settings",
   "/dashboard/team",
+  "/dashboard/affiliate",
   "/dashboard/reflection",
   "/dashboard/agents",
   "/dashboard/published",

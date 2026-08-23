@@ -123,7 +123,8 @@
       "integrations": "集成",
       "files": "文件",
       "deepResearch": "深度研究",
-      "help": "帮助中心"
+      "help": "帮助中心",
+      "affiliate": "推广合作"
     },
     "groupHints": {
       "create": "生成网站、规划目标、撰写文档。",
@@ -174,7 +175,8 @@
       "integrations": "连接 Gmail、Drive 与 Slack，让 AI 处理你真实的数据",
       "files": "上传 PDF、Word 和 Excel 文件，然后向 AI 提问",
       "deepResearch": "给一个主题，它会搜索、交叉核对并写出带来源的报告",
-      "help": "最常见问题的答案，不消耗额度。"
+      "help": "最常见问题的答案，不消耗额度。",
+      "affiliate": "你的推广链接、已赚金额，以及如何收款。"
     },
     "comingSoon": "即将推出",
     "closeMenu": "关闭菜单"
@@ -1831,6 +1833,36 @@
       "finished": "您离开期间，上一个请求已经完成。",
       "open": "打开",
       "dismiss": "关闭"
+    },
+    "affiliate": {
+      "title": "推广合作",
+      "description": "分享 Ionexa，从你带来的人持续付费中获得分成。",
+      "pitch": "你推荐的人每次付费，你都能拿 {percent}%，按月结算，持续 {months} 个月。",
+      "pitchTerms": "不能推荐自己，每个人只计一次。佣金从对方第一次付费开始计算。",
+      "join": "获取我的链接",
+      "joining": "正在创建…",
+      "joinError": "创建失败，请重试。",
+      "yourLink": "你的链接",
+      "copy": "复制",
+      "copied": "已复制",
+      "terms": "每笔付费的 {percent}%，从对方首次付费起 {months} 个月。",
+      "suspended": "该推广账号已被暂停，不再产生新佣金。如有疑问请联系我们。",
+      "stat": {
+        "signups": "注册",
+        "paying": "付费",
+        "owed": "应付你",
+        "paidOut": "已支付"
+      },
+      "payouts": "结算方式",
+      "payoutsUnavailable": "此部署尚未开通结算功能。",
+      "payoutsNotSetUp": "通过 Stripe 设置结算即可收款。你的资料由 Stripe 直接收集——我们看不到。",
+      "payoutsIncomplete": "Stripe 还需要一些资料才能付款给你。完成设置后这里会更新。",
+      "payoutsReady": "每月结算一次。超过 {minimum} 的金额会打到你的银行账户。",
+      "setUpPayouts": "设置结算",
+      "finishSetup": "完成结算设置",
+      "opening": "正在打开 Stripe…",
+      "connectError": "无法打开结算设置，请重试。",
+      "rules": "佣金按实际收到的款项计算。退款和争议扣款会被冲回。自我推荐以及对同一个人的重复推荐不产生佣金。"
     }
   },
   "module": {

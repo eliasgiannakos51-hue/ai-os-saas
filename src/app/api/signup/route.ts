@@ -3,6 +3,8 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendWelcomeEmail } from "@/lib/email/send-welcome-email";
 import { logApiError } from "@/lib/log-error";
+import { attributeReferral } from "@/lib/affiliate/store";
+import { REFERRAL_COOKIE } from "@/lib/affiliate/cookie";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { grantCredits } from "@/lib/billing/credits";
 import { getPlan } from "@/lib/billing/plans";
@@ -196,6 +198,28 @@ export async function POST(request: Request) {
     const welcomeEmail = sendWelcomeEmail(email).catch((err) => {
       logApiError("/api/signup", err, { stage: "welcome_email" });
     });
+
+    // Affiliate attribution, if they arrived through somebody's link.
+    //
+    // STARTED HERE, AWAITED AT THE END, for exactly the reason the
+    // welcome email is: nobody presses "Create account" to wait for
+    // somebody else's commission to be recorded. Reading the cookie is
+    // free; the write overlaps the credit grant and the sign-in rather
+    // than adding a round trip to the chain the user is waiting on.
+    //
+    // Every refusal (self-referral, already attributed, unknown code) is
+    // a normal outcome and none may fail a signup.
+    const referralCode = request.headers
+      .get("cookie")
+      ?.split(";")
+      .map((c) => c.trim())
+      .find((c) => c.startsWith(`${REFERRAL_COOKIE}=`))
+      ?.slice(REFERRAL_COOKIE.length + 1);
+    const referralAttribution = referralCode
+      ? attributeReferral({ referredUserId: createData.user.id, code: referralCode }).catch((err) => {
+          logApiError("/api/signup", err, { stage: "affiliate_attribution" });
+        })
+      : Promise.resolve();
     const supabase = createClient();
 
     // Grant the signup plan's monthly credits so user_credits exists from
@@ -232,7 +256,6 @@ export async function POST(request: Request) {
     }
     mark("grant_credits");
 
-
     // Sign in on the same (cookie-aware) server client so the session lands
     // on this response and the browser is authenticated right away.
     const { error: signInError } = await supabase.auth.signInWithPassword({
@@ -256,7 +279,7 @@ export async function POST(request: Request) {
     // whole send: past it the response goes out and the send continues for
     // whatever remains of the invocation.
     await Promise.race([
-      welcomeEmail,
+      Promise.all([welcomeEmail, referralAttribution]).then(() => undefined),
       new Promise<void>((resolve) => setTimeout(resolve, WELCOME_EMAIL_RESIDUAL_MS)),
     ]);
     mark("welcome_email");

@@ -5,6 +5,8 @@ import { grantCredits } from "@/lib/billing/credits";
 import { getPlan } from "@/lib/billing/plans";
 import { sendWelcomeEmail } from "@/lib/email/send-welcome-email";
 import { logApiError } from "@/lib/log-error";
+import { attributeReferral } from "@/lib/affiliate/store";
+import { REFERRAL_COOKIE } from "@/lib/affiliate/cookie";
 
 export const dynamic = "force-dynamic";
 
@@ -93,6 +95,25 @@ export async function GET(request: Request) {
 
     // Best-effort, exactly as in api/signup — never throws, so a missing
     // RESEND_API_KEY can't break the login redirect.
+    // Affiliate attribution — same rules and the same cookie as
+    // api/signup. Inside the needsBootstrap branch on purpose: this route
+    // runs on every OAuth LOGIN, not only the first one, and attributing
+    // on a login would let an existing user pick up a referral cookie
+    // years later. Only a brand-new account can be referred.
+    const referralCode = request.headers
+      .get("cookie")
+      ?.split(";")
+      .map((c) => c.trim())
+      .find((c) => c.startsWith(`${REFERRAL_COOKIE}=`))
+      ?.slice(REFERRAL_COOKIE.length + 1);
+    if (referralCode) {
+      try {
+        await attributeReferral({ referredUserId: user.id, code: referralCode });
+      } catch (err) {
+        logApiError("/auth/callback", err, { stage: "affiliate_attribution" });
+      }
+    }
+
     if (user.email) {
       await sendWelcomeEmail(user.email);
     }

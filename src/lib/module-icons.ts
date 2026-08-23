@@ -41,6 +41,7 @@ import {
   FolderOpen,
   Telescope,
   LifeBuoy,
+  Share2,
 } from "lucide-react";
 
 // Single source of truth for module iconography, keyed by module slug (see
@@ -115,6 +116,10 @@ export const DEEP_RESEARCH_ICON: LucideIcon = Telescope;
 // Help Centre (app/help/page.tsx) — a life ring, not a question mark:
 // a "?" reads as "what is this control" and this is "I need help".
 export const HELP_ICON: LucideIcon = LifeBuoy;
+
+// Affiliate programme — a share arrow, not a money symbol: the thing the
+// user does here is share a link; the money is a consequence.
+export const AFFILIATE_ICON: LucideIcon = Share2;
 
 /**
  * The icon for any slug that can appear on a card, including the

@@ -369,6 +369,8 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",
   "src/app/api/websites/[id]/submit-form/route.ts": "public contact form on generated sites; write-only, honeypot + 30/hr cap",
   "src/app/api/client-error/route.ts": "browser error beacon; fires when there may be no session",
+  "src/app/api/health/route.ts":
+    "the uptime probe, and the one route whose intended caller IS a stranger: an external monitor has no session, and a health check behind auth monitors the auth rather than the app. It returns up-or-down and nothing else — no version, no counts, no table names, no error text. Its single query reads one column of one row of agent_templates, the public catalogue of starter agents, so the row it touches discloses nothing about any account even in principle. It is not rate-limited and that is deliberate: checkRateLimit is itself a database round trip, so it would double the cost it bounds, and a monitor handed a 429 records an outage that did not happen. Instead the probe result is cached in process for five seconds, which collapses a flood to one query per five seconds per instance while keeping the answer fresher than any monitor's polling interval.",
   "src/app/auth/callback/route.ts":
     "the OAuth/magic-link landing. It CREATES the session by exchanging a single-use code — requiring one first is a contradiction. Surfaced by widening this scan beyond src/app/api; it was never checked before, and reading it line by line confirmed everything after the exchange acts on the user that exchange returned, never on an id from the request.",
   "src/app/s/[subdomain]/route.ts":

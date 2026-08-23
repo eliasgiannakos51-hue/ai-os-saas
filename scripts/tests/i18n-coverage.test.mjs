@@ -751,7 +751,10 @@ const BARE_TEXT_BASELINE = {
     // system-health page it lives on.
     "src/components/system-health/storage-diagnostics.tsx": 3,
     "src/components/text-actions/text-actions-textarea.tsx": 2,
-    "src/components/ui/widget-boundary.tsx": 2,
+    // Was 2: both sentences of the error-boundary fallback were English.
+    // They are now common.widgetError.* — which matters more than most,
+    // because it is the one message a user sees at the moment something
+    // has already gone wrong, and so the one they most need to read.
   };
 // Derived, not typed. The printed total used to be a hand-written 162 in a
 // template string, which is a second number that can disagree with the

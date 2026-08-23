@@ -30,6 +30,7 @@ import { computeHealthScore } from "@/lib/health-score";
 import { HealthScoreCard } from "@/components/overview/health-score-card";
 import { loadLatestEnergyCheckIn } from "@/lib/energy-checkins";
 import { EnergyCheckinWidget } from "@/components/overview/energy-checkin-widget";
+import { WidgetBoundary } from "@/components/ui/widget-boundary";
 import { Database, TrendingUp, Layers } from "lucide-react";
 import type { ModuleRecord } from "@/types/module-record";
 import type { Mission } from "@/types/mission";
@@ -427,7 +428,9 @@ export default async function OverviewPage() {
           trend={weeklySparkline}
         />
 
-        <EnergyCheckinWidget initialCheckIn={latestEnergyCheckIn} />
+        <WidgetBoundary label="energy-checkin">
+          <EnergyCheckinWidget initialCheckIn={latestEnergyCheckIn} />
+        </WidgetBoundary>
 
         {nextAction && nextActionMessage && (
           <NextActionCard
@@ -469,7 +472,9 @@ export default async function OverviewPage() {
         )}
 
         <div className="mt-6">
-          <CreateChat showHeading={false} />
+          <WidgetBoundary label="create-chat">
+            <CreateChat showHeading={false} />
+          </WidgetBoundary>
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">

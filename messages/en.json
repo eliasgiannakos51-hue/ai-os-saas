@@ -65,7 +65,13 @@
     "creditsUnlimited": "Unlimited",
     "whatIsThis": "What is this?",
     "examplesLabel": "Try:",
-    "newMessagesBelow": "New message below"
+    "newMessagesBelow": "New message below",
+    "signOut": "Sign out",
+    "signingOut": "Signing out...",
+    "widgetError": {
+      "title": "This section could not be displayed.",
+      "body": "The rest of the page is unaffected. Reloading usually fixes it."
+    }
   },
   "sidebar": {
     "groups": {
@@ -127,11 +133,14 @@
       "affiliate": "Affiliate"
     },
     "groupHints": {
-      "create": "Generate a site, plan a goal, write a document.",
-      "myBusiness": "Money, customers, products and how they're doing.",
+      "workspace": "Everything you do day to day — chat, ideas, goals, documents.",
+      "build": "Things the AI makes for you: agents, websites, and what you published.",
+      "tracking": "Capture ideas, research, trades and decisions before you forget them.",
+      "business": "Money, customers, products and how they're doing.",
+      "strategy": "Look back at what you've done and what the AI remembers.",
       "operations": "Recurring work and the multi-step workflows.",
-      "insights": "Look back at what you've done and what the AI remembers.",
-      "marketplace": "Share and discover setups — not open yet."
+      "marketplace": "Share and discover setups — not open yet.",
+      "settings": "Your account, your plan, and how the app behaves."
     },
     "hints": {
       "chat": "Ask anything — not tied to any module.",

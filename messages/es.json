@@ -65,7 +65,13 @@
     "creditsUnlimited": "Ilimitados",
     "whatIsThis": "¿Qué es esto?",
     "examplesLabel": "Prueba:",
-    "newMessagesBelow": "Mensaje nuevo abajo"
+    "newMessagesBelow": "Mensaje nuevo abajo",
+    "signOut": "Cerrar sesión",
+    "signingOut": "Cerrando sesión...",
+    "widgetError": {
+      "title": "No se ha podido mostrar esta sección.",
+      "body": "El resto de la página no se ve afectado. Recargar suele solucionarlo."
+    }
   },
   "sidebar": {
     "groups": {
@@ -127,11 +133,14 @@
       "affiliate": "Afiliados"
     },
     "groupHints": {
-      "create": "Genera un sitio, planifica un objetivo, escribe un documento.",
-      "myBusiness": "Dinero, clientes, productos y cómo van.",
+      "workspace": "Todo lo del día a día: chat, ideas, objetivos y documentos.",
+      "build": "Lo que la IA crea para ti: agentes, sitios web y lo que has publicado.",
+      "tracking": "Captura ideas, investigación, operaciones y decisiones antes de olvidarlas.",
+      "business": "Dinero, clientes, productos y cómo van.",
+      "strategy": "Mira lo que has hecho y lo que la IA recuerda.",
       "operations": "Trabajo recurrente y los flujos de varios pasos.",
-      "insights": "Mira lo que has hecho y lo que la IA recuerda.",
-      "marketplace": "Comparte y descubre configuraciones — aún no está abierto."
+      "marketplace": "Comparte y descubre configuraciones — aún no está abierto.",
+      "settings": "Tu cuenta, tu plan y cómo se comporta la aplicación."
     },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",

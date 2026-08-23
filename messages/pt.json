@@ -65,7 +65,13 @@
     "creditsUnlimited": "Ilimitados",
     "whatIsThis": "O que é isto?",
     "examplesLabel": "Experimenta:",
-    "newMessagesBelow": "Nova mensagem abaixo"
+    "newMessagesBelow": "Nova mensagem abaixo",
+    "signOut": "Terminar sessão",
+    "signingOut": "A terminar sessão...",
+    "widgetError": {
+      "title": "Não foi possível exibir esta secção.",
+      "body": "O resto da página não é afetado. Recarregar costuma resolver."
+    }
   },
   "sidebar": {
     "groups": {
@@ -127,11 +133,14 @@
       "affiliate": "Afiliados"
     },
     "groupHints": {
-      "create": "Gere um site, planeie um objetivo, escreva um documento.",
-      "myBusiness": "Dinheiro, clientes, produtos e como estão a correr.",
+      "workspace": "Tudo o que fazes no dia a dia — conversa, ideias, objetivos, documentos.",
+      "build": "O que a IA cria para ti: agentes, sites e aquilo que publicaste.",
+      "tracking": "Regista ideias, pesquisa, operações e decisões antes de as esqueceres.",
+      "business": "Dinheiro, clientes, produtos e como estão a correr.",
+      "strategy": "Veja o que fez e o que a IA se lembra.",
       "operations": "Trabalho recorrente e os fluxos de vários passos.",
-      "insights": "Veja o que fez e o que a IA se lembra.",
-      "marketplace": "Partilhe e descubra configurações — ainda não está aberto."
+      "marketplace": "Partilhe e descubra configurações — ainda não está aberto.",
+      "settings": "A tua conta, o teu plano e como a aplicação se comporta."
     },
     "hints": {
       "chat": "Pergunte qualquer coisa — sem ligação a nenhum módulo.",

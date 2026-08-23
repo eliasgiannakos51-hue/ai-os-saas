@@ -53,11 +53,17 @@ function storageKey(heading: string) {
 // so the JIT compiler can actually see them.
 function groupTone(heading: string): string {
   switch (heading) {
-    case "Create":
+    // THESE THREE WERE "Create", "My Business" AND "Insights" — the group
+    // headings from before the renaming pass. No group has been called any
+    // of those since, so every case fell through to the default and the
+    // whole sidebar rendered in one tone: the grouping this function exists
+    // to show had silently stopped showing. Nothing failed, which is why it
+    // survived — a switch on a renamed string just quietly stops matching.
+    case "Build":
       return "text-purple-400/55";
-    case "My Business":
+    case "Business":
       return "text-sky-400/55";
-    case "Insights":
+    case "Strategy":
       return "text-amber-400/55";
     default:
       return "text-emerald-400/50";
@@ -75,6 +81,15 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
   function translatedHeading(heading: string): string {
     const key = GROUP_HEADING_KEYS[heading];
     return key ? t(`groups.${key}`) : heading;
+  }
+
+  /** The one-line description under a group heading, or "" for a heading
+   *  with no key. t.has keeps an unmapped heading from rendering the raw
+   *  key path at the user. */
+  function groupHint(heading: string): string {
+    const key = GROUP_HEADING_KEYS[heading];
+    if (!key) return "";
+    return t.has(`groupHints.${key}`) ? t(`groupHints.${key}`) : "";
   }
 
   function translatedLabel(label: string): string {
@@ -165,6 +180,22 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
           }`}
         >
           <div className="min-h-0 overflow-hidden">
+            {/* One line saying what this group is FOR.
+                sidebar.groupHints has existed, translated into all ten
+                locales, since the first i18n pass — and nothing in src ever
+                read it, so nobody has seen a word of it. Its keys were also
+                still the PRE-RENAME heading names, so even a caller would
+                have missed on four of the eight.
+                It answers the question the group names raise on their own:
+                "Tracking" and "Strategy" are short enough to be ambiguous
+                until something says what goes in them.
+                Rendered inside the collapse wrapper, so it costs height
+                only for the group that is actually open. */}
+            {groupHint(group.heading) && (
+              <p className="px-3 pb-1.5 text-[10px] leading-snug text-muted/70">
+                {groupHint(group.heading)}
+              </p>
+            )}
             <div className="space-y-0.5 pb-0.5">
               {group.items.map((item) => renderItem(item, groupTone(group.heading)))}
             </div>

@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { createClient } from "@/lib/supabase/client";
 
 export function LogoutButton() {
   const router = useRouter();
   const supabase = createClient();
+  const t = useTranslations("common");
   const [loading, setLoading] = useState(false);
 
   async function handleLogout() {
@@ -23,7 +25,7 @@ export function LogoutButton() {
       disabled={loading}
       className="inline-flex min-h-[44px] items-center justify-center rounded border border-border px-3 py-1.5 text-xs text-muted transition-colors hover:border-orange-500 hover:text-orange-400 disabled:opacity-50"
     >
-      {loading ? "logging_out..." : "logout()"}
+      {loading ? t("signingOut") : t("signOut")}
     </button>
   );
 }

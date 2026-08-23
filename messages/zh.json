@@ -65,7 +65,13 @@
     "creditsUnlimited": "无限制",
     "whatIsThis": "这是什么？",
     "examplesLabel": "试试：",
-    "newMessagesBelow": "下方有新消息"
+    "newMessagesBelow": "下方有新消息",
+    "signOut": "退出登录",
+    "signingOut": "正在退出...",
+    "widgetError": {
+      "title": "此部分无法显示。",
+      "body": "页面其余部分不受影响。刷新通常即可解决。"
+    }
   },
   "sidebar": {
     "groups": {
@@ -127,11 +133,14 @@
       "affiliate": "推广合作"
     },
     "groupHints": {
-      "create": "生成网站、规划目标、撰写文档。",
-      "myBusiness": "资金、客户、产品，以及它们的表现。",
+      "workspace": "日常使用的一切——对话、想法、目标、文档。",
+      "build": "AI 为你生成的内容：智能体、网站，以及你已发布的成果。",
+      "tracking": "在忘记之前记下想法、研究、交易和决定。",
+      "business": "资金、客户、产品，以及它们的表现。",
+      "strategy": "回看你做过什么，以及 AI 记住了什么。",
       "operations": "重复性工作和多步骤流程。",
-      "insights": "回看你做过什么，以及 AI 记住了什么。",
-      "marketplace": "分享与发现配置——尚未开放。"
+      "marketplace": "分享与发现配置——尚未开放。",
+      "settings": "你的账户、方案，以及应用的行为设置。"
     },
     "hints": {
       "chat": "什么都可以问——不绑定任何模块。",

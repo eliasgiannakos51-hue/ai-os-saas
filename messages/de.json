@@ -65,7 +65,13 @@
     "creditsUnlimited": "Unbegrenzt",
     "whatIsThis": "Was ist das?",
     "examplesLabel": "Probier:",
-    "newMessagesBelow": "Neue Nachricht unten"
+    "newMessagesBelow": "Neue Nachricht unten",
+    "signOut": "Abmelden",
+    "signingOut": "Wird abgemeldet...",
+    "widgetError": {
+      "title": "Dieser Bereich konnte nicht angezeigt werden.",
+      "body": "Der Rest der Seite ist nicht betroffen. Ein Neuladen behebt es meist."
+    }
   },
   "sidebar": {
     "groups": {
@@ -127,11 +133,14 @@
       "affiliate": "Partnerprogramm"
     },
     "groupHints": {
-      "create": "Eine Website erzeugen, ein Ziel planen, ein Dokument schreiben.",
-      "myBusiness": "Geld, Kunden, Produkte — und wie sie laufen.",
+      "workspace": "Alles für den Alltag — Chat, Ideen, Ziele, Dokumente.",
+      "build": "Was die KI für dich baut: Agenten, Websites und alles Veröffentlichte.",
+      "tracking": "Halte Ideen, Recherche, Trades und Entscheidungen fest, bevor du sie vergisst.",
+      "business": "Geld, Kunden, Produkte — und wie sie laufen.",
+      "strategy": "Zurückschauen: was du getan hast und was die KI sich merkt.",
       "operations": "Wiederkehrende Arbeit und die mehrstufigen Abläufe.",
-      "insights": "Zurückschauen: was du getan hast und was die KI sich merkt.",
-      "marketplace": "Setups teilen und entdecken — noch nicht offen."
+      "marketplace": "Setups teilen und entdecken — noch nicht offen.",
+      "settings": "Dein Konto, dein Tarif und wie sich die App verhält."
     },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",

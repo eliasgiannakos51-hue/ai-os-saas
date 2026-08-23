@@ -65,7 +65,13 @@
     "creditsUnlimited": "Illimités",
     "whatIsThis": "Qu'est-ce que c'est ?",
     "examplesLabel": "Essayez :",
-    "newMessagesBelow": "Nouveau message en bas"
+    "newMessagesBelow": "Nouveau message en bas",
+    "signOut": "Se déconnecter",
+    "signingOut": "Déconnexion...",
+    "widgetError": {
+      "title": "Cette section n'a pas pu s'afficher.",
+      "body": "Le reste de la page n'est pas affecté. Recharger suffit généralement."
+    }
   },
   "sidebar": {
     "groups": {
@@ -127,11 +133,14 @@
       "affiliate": "Affiliation"
     },
     "groupHints": {
-      "create": "Générez un site, planifiez un objectif, rédigez un document.",
-      "myBusiness": "Argent, clients, produits et comment ils se portent.",
+      "workspace": "Tout votre quotidien — discussion, idées, objectifs, documents.",
+      "build": "Ce que l'IA crée pour vous : agents, sites web et vos publications.",
+      "tracking": "Notez idées, recherches, opérations et décisions avant de les oublier.",
+      "business": "Argent, clients, produits et comment ils se portent.",
+      "strategy": "Revoyez ce que vous avez fait et ce que l'IA retient.",
       "operations": "Travail récurrent et flux en plusieurs étapes.",
-      "insights": "Revoyez ce que vous avez fait et ce que l'IA retient.",
-      "marketplace": "Partagez et découvrez des configurations — pas encore ouvert."
+      "marketplace": "Partagez et découvrez des configurations — pas encore ouvert.",
+      "settings": "Votre compte, votre forfait et le comportement de l'application."
     },
     "hints": {
       "chat": "Demandez n'importe quoi — sans lien avec un module.",

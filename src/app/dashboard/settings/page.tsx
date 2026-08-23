@@ -15,6 +15,8 @@ import { ExportDataButton } from "@/components/settings/export-data-button";
 import { DangerZone } from "@/components/settings/danger-zone";
 import { BillingSummary } from "@/components/settings/billing-summary";
 import { BuyCredits } from "@/components/settings/buy-credits";
+import { OverageSettings } from "@/components/settings/overage-settings";
+import { AddonsSettings } from "@/components/settings/addons-settings";
 import { CreditHistory, type CreditTransaction } from "@/components/settings/credit-history";
 import { AiUsageSettings } from "@/components/settings/ai-usage-settings";
 import { VoiceSettings } from "@/components/settings/voice-settings";
@@ -44,6 +46,8 @@ export default async function SettingsPage() {
   // request's locale, the same way the sidebar does.
   const tKey = await getTranslations();
   const tBilling = await getTranslations("settings.billing");
+  const tAddons = await getTranslations("settings.addons");
+  const tOverage = await getTranslations("settings.overage");
   // The jump-to-section nav below named three of its four links in
   // hardcoded English while the fourth was already translated — the four
   // chips sat side by side, three in English and one in Greek. Every key
@@ -228,6 +232,8 @@ export default async function SettingsPage() {
             { href: "#ai-usage", label: t("aiUsage.title") },
             { href: "#voice", label: tVoice("settings.title") },
             { href: "#buy-credits", label: tBilling("title") },
+            { href: "#addons", label: tAddons("title") },
+            { href: "#overage", label: tOverage("title") },
             { href: "#achievements", label: tAchievements("title") },
           ].map((link) => (
             <a
@@ -255,6 +261,10 @@ export default async function SettingsPage() {
         />
 
         <BuyCredits />
+
+        <AddonsSettings />
+
+        <OverageSettings />
 
         <CreditHistory
           transactions={(transactions as CreditTransaction[] | null) ?? []}

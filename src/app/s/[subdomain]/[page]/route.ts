@@ -8,6 +8,8 @@ import {
   isLikelyNewVisitor,
   publicRequestAllowed,
 } from "@/lib/publishing/public-serving";
+import { injectBadge } from "@/lib/publishing/badge";
+import { readOwnerTier } from "@/lib/publishing/owner-tier";
 
 export const dynamic = "force-dynamic";
 // force-no-store is NOT redundant next to force-dynamic, and finding that
@@ -119,9 +121,15 @@ export async function GET(request: Request, { params }: { params: { subdomain: s
     // they arrived.
     if (!page) return notFoundResponse();
 
-    await recordView(admin, site.id, site.user_id, isLikelyNewVisitor(request, String(site.id)));
+    // Same as the site root: the owner's CURRENT plan decides the badge,
+    // read beside the view-count write so it costs the visitor nothing.
+    // A multi-page site badges every page, not only its home page.
+    const [, ownerTier] = await Promise.all([
+      recordView(admin, site.id, site.user_id, isLikelyNewVisitor(request, String(site.id))),
+      readOwnerTier(admin, site.user_id),
+    ]);
 
-    return new Response(page.html, {
+    return new Response(injectBadge(page.html, { planSlug: ownerTier }), {
       status: 200,
       headers: {
         ...publishedSiteHeaders(),

@@ -200,6 +200,13 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // tracker (source = 'note'). ai_coding_requests stays registered too —
   // the import copied rows, it did not move them.
   { table: "code_sessions", label: "code_sessions", scope: "user_content" },
+  // V4 #25. What the customer agreed to and what they were charged for
+  // it. Both are theirs and both are exported: an overage bill they
+  // cannot reconstruct is a bill they have to take on trust, and the
+  // consent row is the record of what they agreed to and when.
+  { table: "usage_overage_settings", label: "usage_overage_consent", scope: "account" },
+  { table: "usage_overage_ledger", label: "usage_overage_charges", scope: "account" },
+  { table: "account_addons", label: "addons", scope: "account" },
   { table: "user_onboarding", label: "onboarding", scope: "account" },
   { table: "user_email_preferences", label: "email_preferences", scope: "account" },
   { table: "email_send_log", label: "emails_sent_to_you", scope: "account" },
@@ -294,6 +301,23 @@ export const NON_PERSONAL_TABLES = [
   // Keyed by team + invited email; rows belong to the team owner's
   // account and are covered via the team tables' own cascade.
   "team_members",
+  // V4 #26. Both carry a user_id and NEITHER is exported, which needs
+  // saying rather than assuming.
+  //
+  // They are OUR bookkeeping about a customer, not the customer's own
+  // data: what their plan change did to our revenue, and what their
+  // subscription contributed to our MRR in a given month. The facts they
+  // are derived from — the plan, the price, the invoices — the customer
+  // already has, from Stripe and from their own account page, in the form
+  // that is actually about them.
+  //
+  // Exporting these would hand somebody our internal revenue model of
+  // them, including the euro figures we attribute to their account, which
+  // is a disclosure about the BUSINESS dressed as a subject access
+  // request. They are erased with the account either way: both cascade on
+  // auth.users, which gdpr-coverage.test.mjs checks separately.
+  "subscription_events",
+  "subscriber_months",
 ];
 
 /** Everything the export route reads. */

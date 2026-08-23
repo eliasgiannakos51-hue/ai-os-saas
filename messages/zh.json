@@ -767,6 +767,59 @@
           "placeholder": "https://discord.com/api/webhooks/…"
         }
       }
+    },
+    "overage": {
+      "title": "超额用量",
+      "description": "额度用完后，可按每点数 €{price} 继续使用——仅在你主动同意时。",
+      "offNow": "超额用量已关闭。不会产生任何额外费用：额度用完后操作即停止。",
+      "capLabel": "你的每月上限（€）",
+      "capPlaceholder": "例如 20",
+      "capHint": "介于 €{min} 与 €{max} 之间。",
+      "preview": {
+        "heading": "你将同意的内容",
+        "rate": "每点数 €{price}，按今日价格锁定。",
+        "cap": "同一自然月内绝不超过 €{cap}。",
+        "credits": "这最多可换 {credits} 点额外额度。",
+        "invoice": "在下一张账单上单列一行，与套餐分开计费。"
+      },
+      "agree": "开启超额用量",
+      "saved": "已保存。你随时可以关闭。",
+      "thisMonth": "本月额外用量",
+      "ofCap": "／€{cap}",
+      "agreedRate": "按你同意的价格，每点数 €{price}。",
+      "capReached": "已达上限。在你调高之前不会再产生费用。",
+      "turnOff": "关闭超额用量",
+      "turnOffNote": "关闭后不再产生新费用。本月已使用的部分仍会计入账单。"
+    },
+    "addons": {
+      "title": "附加包",
+      "description": "在套餐之外增加容量。按月计费的附加包可随时取消。",
+      "perMonth": "/月",
+      "oneOff": "（一次性）",
+      "owned": "你拥有 {count} 份",
+      "notConfigured": "此部署不可用（未设置 {envVar}）。",
+      "buy": "购买",
+      "subscribe": "添加",
+      "cancel": "取消",
+      "oneOffNote": "额度包即时到账，无法取消。",
+      "items": {
+        "credits_1000": {
+          "name": "1,000 点额度",
+          "grants": "一次性充值"
+        },
+        "agents_5": {
+          "name": "多 5 个智能体",
+          "grants": "提高智能体上限"
+        },
+        "storage_10gb": {
+          "name": "10 GB 存储",
+          "grants": "更多文件空间"
+        },
+        "priority": {
+          "name": "优先执行",
+          "grants": "你的任务优先运行"
+        }
+      }
     }
   },
   "dashboard": {
@@ -3079,6 +3132,57 @@
       "output": "输出",
       "importedNote": "以前的笔记",
       "failed": "失败"
+    }
+  },
+  "finance": {
+    "title": "财务",
+    "description": "每个数字都由真实数据算出，算不出来的会说明原因。",
+    "needsInput": "还需要：{fields}",
+    "needsHistory": "需要 {need} 个月的历史数据——目前有 {have} 个月。",
+    "noChangeYet": "暂无变化",
+    "notEnoughDays": "目前只有 {days} 天的历史数据。",
+    "provenance": "历史从上线那天开始：{months} 个月的订阅数据和 {days} 份每日快照。不做回填——回填出来的数字，是用今天的价格套在没人记录过的过去上。",
+    "inputs": {
+      "marketing_spend": "营销支出",
+      "fixed_costs": "固定成本",
+      "cash_balance": "现金余额"
+    },
+    "trends": {
+      "mrr30": "MRR，30 天",
+      "mrr90": "MRR，90 天",
+      "aiCost30": "AI 成本，30 天",
+      "subscribers90": "付费订阅者，90 天"
+    },
+    "form": {
+      "title": "{month} 的数字",
+      "description": "三件这个数据库无法知道的事。留空即可——需要它的指标会说明缺什么，而不是当作零来计算。",
+      "marketing": "营销支出",
+      "marketingHint": "本月为获取客户花掉的全部费用。",
+      "fixed": "固定成本",
+      "fixedHint": "薪资、托管、工具——除营销和 AI 之外的一切。",
+      "cash": "现金余额",
+      "cashHint": "月末银行里的余额。",
+      "save": "保存",
+      "saving": "保存中…",
+      "saved": "已保存",
+      "saveError": "保存失败——请再试一次。"
+    },
+    "metrics": {
+      "mrr": "月度经常性收入",
+      "arr": "年度经常性收入",
+      "arpu": "每用户收入",
+      "grossMarginPercent": "毛利率",
+      "aiCostPerUserEur": "每用户 AI 成本",
+      "costPerSuccessfulTaskEur": "每完成任务成本",
+      "churnPercent": "流失率",
+      "retentionPercent": "留存率",
+      "nrrPercent": "净收入留存",
+      "ltvEur": "客户终身价值",
+      "cacEur": "获客成本",
+      "paybackMonths": "回本周期",
+      "ruleOf40": "40 法则",
+      "burnEur": "每月消耗",
+      "runwayMonths": "资金可用月数"
     }
   }
 }

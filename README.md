@@ -177,6 +177,10 @@ modals.
    STRIPE_PRICE_CREDITS_25=price_...
    STRIPE_PRICE_CREDITS_50=price_...
    STRIPE_PRICE_CREDITS_100=price_...
+   STRIPE_PRICE_ADDON_CREDITS_1000=price_...
+   STRIPE_PRICE_ADDON_AGENTS_5=price_...
+   STRIPE_PRICE_ADDON_STORAGE_10GB=price_...
+   STRIPE_PRICE_ADDON_PRIORITY=price_...
    CRON_SECRET=your-cron-secret
    ADMIN_EMAILS=owner@example.com,cofounder@example.com
    BETA_INVITE_CODE=your-beta-invite-code
@@ -813,7 +817,60 @@ Billing Portal — no card data ever touches this app's servers.
 - **Settings** (`/dashboard/settings`) shows the current plan/seat count,
   a "Manage Billing" button that opens a Stripe Billing Portal session
   (`/api/billing-portal`) for anyone with a `stripe_customer_id` already
-  on file, a "Buy Credits" section, and the last 20 credit transactions.
+  on file, a "Buy Credits" section, the add-ons panel, the usage-overage
+  opt-in, and the last 20 credit transactions.
+
+### Add-ons
+
+Four optional purchases sit alongside the plan
+(`src/lib/billing/addons.ts`): **+1,000 credits** (EUR15, one-off),
+**+5 agents** (EUR10/month), **+10 GB storage** (EUR5/month) and
+**priority execution** (EUR20/month, not stackable). Each needs its own
+Stripe price ID:
+
+| Env var | Add-on | Default | Without it |
+| --- | --- | --- | --- |
+| `STRIPE_PRICE_ADDON_CREDITS_1000` | +1,000 credits | unset | The add-on is listed as unavailable and the buy button is disabled; the panel names the missing variable. Nothing else is affected. |
+| `STRIPE_PRICE_ADDON_AGENTS_5` | +5 agents | unset | Same — and every agent cap stays at the plan's own number. |
+| `STRIPE_PRICE_ADDON_STORAGE_10GB` | +10 GB storage | unset | Same. |
+| `STRIPE_PRICE_ADDON_PRIORITY` | Priority execution | unset | Same. |
+
+All four are **optional**. An unset variable never 500s a checkout: the
+route refuses with `not_configured` and names the variable, because a buy
+button that reaches Stripe with an undefined price reads to a customer as
+"this product is broken" rather than "this is not set up".
+
+Agent caps are read through `maxAgentsForAccount()`, which is the plan cap
+plus whatever `agents_5` add-ons the account holds — no creator route
+reads `maxAgentsForPlan()` directly any more.
+
+### Usage overage (opt-in)
+
+When an action needs more credits than the balance holds,
+`reserveCredits()` — the one function every paid action already goes
+through — asks `decideOverage()` whether the shortfall may be bought at
+EUR0.03/credit. It says no unless **all** of the following are true, and
+the default with no settings row is no:
+
+- the account has explicitly turned overage on in Settings,
+- under the **current** `OVERAGE_CONSENT_VERSION` (a change to the terms
+  invalidates old consent and the user is asked again),
+- with a monthly cap **they typed themselves** (there is no default cap),
+- and this whole shortfall fits under that cap — an action that would
+  cross it is refused whole, never part-charged.
+
+The price is snapshotted at consent, so a list-price rise never applies to
+standing consent. Warnings go out at **80%** and **100%** of the cap
+through the one notification path, once each per calendar month. Each
+month's overage becomes **one separate line on the next Stripe invoice**
+("Usage overage — N extra credits"), created by the daily cron once the
+month has closed and keyed for idempotency on customer plus month.
+Turning it off is one click and deletes the settings row; the ledger is
+never touched, because deleting it would be deleting an invoice.
+
+No new environment variable is required — EUR0.03/credit, the EUR1
+minimum cap and the EUR10,000 maximum are constants in
+`src/lib/billing/overage.ts`.
 
 ## Credits
 

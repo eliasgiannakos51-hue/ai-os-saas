@@ -440,7 +440,7 @@ if (!DB) {
   // 20260827's voice_usage took 75 to 76; 20260828's ai_provider_log
   // took 76 to 77; 20260830's trading journal and 20260831's bank/crypto
   // tables took 77 to 83; 20260901's notification tables took 83 to 87.
-  check(`91 tables`, tables === 91, `got ${tables}`);
+  check(`98 tables`, tables === 98, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 
@@ -466,6 +466,16 @@ if (!DB) {
     production_errors: "stack traces and affected user ids; admin-only page reads it via service role",
     cost_alert_log:
       "what every customer's spend triggered, with the numbers; owner-only page reads it via service role, and a customer who could read it would learn the shape of the whole business",
+    // V4 #26. The four tables the financial dashboard is built from. Each
+    // is deny-all rather than owner-policied on purpose: "owner" is
+    // decided in TypeScript by isAdminEmail (the same gate the margin
+    // report uses), and adding a second notion of owner to the database
+    // would be a second thing to keep in step — one that, if it drifted,
+    // would hand a customer the whole company's revenue.
+    subscription_events: "who upgraded, downgraded and cancelled; a customer reading it learns every other customer's plan changes",
+    subscriber_months: "per-account monthly revenue — the single most sensitive table in the product",
+    revenue_snapshots: "the company's daily MRR, ARR and AI cost; nothing a customer has any claim on",
+    business_inputs: "marketing spend, fixed costs and the bank balance, typed in by the owner",
   };
   const noPolicy = sql(`select coalesce(string_agg(c.relname, ', '), '') from pg_class c
       join pg_namespace ns on ns.oid = c.relnamespace

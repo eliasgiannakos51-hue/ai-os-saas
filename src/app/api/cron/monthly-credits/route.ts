@@ -4,6 +4,8 @@ import { checkCronAuth } from "@/lib/cron-auth";
 import { creditMonthKey, grantMonthlyPlanCredits, resolveBillingInterval } from "@/lib/billing/credits";
 import { getPlan } from "@/lib/billing/plans";
 import { logApiError } from "@/lib/log-error";
+import { writeDailySnapshot } from "@/lib/billing/revenue-history";
+import { billOverageForClosedMonth } from "@/lib/billing/overage-invoice";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // @function-limit 300
@@ -93,7 +95,37 @@ export async function GET(request: Request) {
       page++;
     }
 
-    return NextResponse.json({ ok: true, monthKey, scanned, granted, skipped });
+    // THE DAY'S REVENUE SNAPSHOT (V4 #26). It rides on this cron rather
+    // than taking its own schedule slot for the same reason the deferred
+    // notification drain rides on the agent cron: this one already runs
+    // daily, the work is one aggregate and one upsert per paying account,
+    // and a ninth cron entry is a platform limit somebody hits later.
+    //
+    // AFTER the credit grants, deliberately. The snapshot records what the
+    // day looked like, and looking before the grants would record a state
+    // that existed for two seconds.
+    let snapshot: Awaited<ReturnType<typeof writeDailySnapshot>> = null;
+    try {
+      snapshot = await writeDailySnapshot();
+    } catch (snapshotError) {
+      // A REPORT MUST NEVER BREAK A GRANT. The credits are the customer's
+      // entitlement; the snapshot is our own bookkeeping.
+      logApiError("/api/cron/monthly-credits", snapshotError, { stage: "revenue_snapshot" });
+    }
+
+    // LAST MONTH'S OVERAGE, ONTO THE NEXT INVOICE (V4 #25, rule δ). Only
+    // ever for a month that has CLOSED, and only for ledger rows not
+    // already billed. Runs after the snapshot because it changes nothing
+    // the snapshot reads, and it is wrapped for the same reason: a
+    // billing run that threw must not cost anybody their monthly credits.
+    let overageInvoicing: Awaited<ReturnType<typeof billOverageForClosedMonth>> | null = null;
+    try {
+      overageInvoicing = await billOverageForClosedMonth();
+    } catch (invoiceError) {
+      logApiError("/api/cron/monthly-credits", invoiceError, { stage: "overage_invoice" });
+    }
+
+    return NextResponse.json({ ok: true, monthKey, scanned, granted, skipped, snapshot, overageInvoicing });
   } catch (err) {
     logApiError("/api/cron/monthly-credits", err);
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });

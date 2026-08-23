@@ -767,6 +767,59 @@
           "placeholder": "https://discord.com/api/webhooks/…"
         }
       }
+    },
+    "overage": {
+      "title": "Utilizzo extra",
+      "description": "Quando i crediti finiscono, continua a {price} € per credito — solo se lo chiedi tu.",
+      "offNow": "L'utilizzo extra è disattivato. Non può essere addebitato nulla in più: finiti i crediti, le azioni si fermano.",
+      "capLabel": "Il tuo limite mensile (€)",
+      "capPlaceholder": "es. 20",
+      "capHint": "Tra {min} € e {max} €.",
+      "preview": {
+        "heading": "Che cosa stai accettando",
+        "rate": "{price} € per credito, bloccato al prezzo di oggi.",
+        "cap": "Mai più di {cap} € in un mese solare.",
+        "credits": "Bastano per {credits} crediti aggiuntivi.",
+        "invoice": "Addebitato come voce separata sulla prossima fattura, distinta dal piano."
+      },
+      "agree": "Attiva l'utilizzo extra",
+      "saved": "Salvato. Puoi disattivarlo quando vuoi.",
+      "thisMonth": "Utilizzo extra di questo mese",
+      "ofCap": "su {cap} €",
+      "agreedRate": "A {price} € per credito, la tariffa che hai accettato.",
+      "capReached": "Hai raggiunto il tuo limite. Non verrà addebitato altro finché non lo aumenti.",
+      "turnOff": "Disattiva l'utilizzo extra",
+      "turnOffNote": "Disattivarlo ferma gli addebiti futuri. Quanto già usato questo mese resta fatturato."
+    },
+    "addons": {
+      "title": "Componenti aggiuntivi",
+      "description": "Capacità in più oltre al tuo piano. Annulla un componente mensile quando vuoi.",
+      "perMonth": "/mese",
+      "oneOff": " una tantum",
+      "owned": "Ne hai {count}",
+      "notConfigured": "Non disponibile su questa installazione ({envVar} non è impostato).",
+      "buy": "Acquista",
+      "subscribe": "Aggiungi",
+      "cancel": "Annulla",
+      "oneOffNote": "Un pacchetto di crediti viene accreditato subito e non è annullabile.",
+      "items": {
+        "credits_1000": {
+          "name": "1.000 crediti",
+          "grants": "ricarica una tantum"
+        },
+        "agents_5": {
+          "name": "5 agent in più",
+          "grants": "alza il limite di agent"
+        },
+        "storage_10gb": {
+          "name": "10 GB di spazio",
+          "grants": "più spazio per i file"
+        },
+        "priority": {
+          "name": "Esecuzione prioritaria",
+          "grants": "i tuoi lavori partono per primi"
+        }
+      }
     }
   },
   "dashboard": {
@@ -3079,6 +3132,57 @@
       "output": "Uscita",
       "importedNote": "nota precedente",
       "failed": "fallito"
+    }
+  },
+  "finance": {
+    "title": "Finanze",
+    "description": "Ogni cifra è calcolata da righe reali, o dice perché non può esserlo.",
+    "needsInput": "Serve: {fields}",
+    "needsHistory": "Servono {need} mesi di storico — ne abbiamo {have}.",
+    "noChangeYet": "nessuna variazione ancora",
+    "notEnoughDays": "{days} giorno/i di storico finora.",
+    "provenance": "Lo storico inizia il giorno in cui questo è stato pubblicato: {months} mese/i di dati sugli abbonati e {days} istantanee giornaliere. Niente viene ricostruito a ritroso — una cifra retroattiva sarebbero i prezzi di oggi applicati a un passato che nessuno ha registrato.",
+    "inputs": {
+      "marketing_spend": "spesa di marketing",
+      "fixed_costs": "costi fissi",
+      "cash_balance": "saldo di cassa"
+    },
+    "trends": {
+      "mrr30": "MRR, 30 giorni",
+      "mrr90": "MRR, 90 giorni",
+      "aiCost30": "Costo IA, 30 giorni",
+      "subscribers90": "Abbonati paganti, 90 giorni"
+    },
+    "form": {
+      "title": "I tuoi numeri per {month}",
+      "description": "Tre cose che questo database non può sapere. Lascia un campo vuoto e le metriche che ne hanno bisogno lo diranno, invece di calcolare da uno zero.",
+      "marketing": "Spesa di marketing",
+      "marketingHint": "Tutto ciò che è stato speso per acquisire clienti questo mese.",
+      "fixed": "Costi fissi",
+      "fixedHint": "Stipendi, hosting, strumenti — tutto ciò che non è marketing né IA.",
+      "cash": "Saldo di cassa",
+      "cashHint": "Quanto c'è in banca a fine mese.",
+      "save": "Salva",
+      "saving": "Salvataggio…",
+      "saved": "Salvato",
+      "saveError": "Non è stato possibile salvare — riprova."
+    },
+    "metrics": {
+      "mrr": "MRR",
+      "arr": "ARR",
+      "arpu": "Ricavi per utente",
+      "grossMarginPercent": "Margine lordo",
+      "aiCostPerUserEur": "Costo IA per utente",
+      "costPerSuccessfulTaskEur": "Costo per attività completata",
+      "churnPercent": "Abbandono",
+      "retentionPercent": "Fidelizzazione",
+      "nrrPercent": "Ritenzione netta dei ricavi",
+      "ltvEur": "Valore nel tempo",
+      "cacEur": "Costo di acquisizione cliente",
+      "paybackMonths": "Periodo di rientro",
+      "ruleOf40": "Regola del 40",
+      "burnEur": "Consumo mensile",
+      "runwayMonths": "Autonomia"
     }
   }
 }

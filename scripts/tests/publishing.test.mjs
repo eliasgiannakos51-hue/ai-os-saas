@@ -290,7 +290,45 @@ checkTrue(
 // response returns, so an unawaited write runs on a warm instance and
 // silently never on a cold one. recordView swallows its own errors, so
 // awaiting it still cannot fail the page.
-checkTrue("the view write is awaited", /await recordView\(/.test(publicRoute));
+// CHECKED BY SHAPE, NOT BY SPELLING. This was `/await recordView\(/`,
+// which went red when the call moved inside a Promise.all — beside the
+// owner-tier read the badge needs — even though the property it exists
+// for was not only intact but clearer. What matters is that the write is
+// awaited and that it happens BEFORE the response is returned; whether
+// the await is on the call or on a Promise.all containing it is a
+// formatting choice.
+{
+  // COMMENTS STRIPPED FIRST. Both routes explain this very rule — one of
+  // them by QUOTING the wrong form, "`void recordView(...)` reads as the
+  // cheaper option and is wrong here" — so a scan of the raw text finds
+  // the mistake inside the sentence warning against it, and finds the
+  // first `recordView(` in prose rather than in code.
+  const strip = (text) => text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  for (const [label, route] of [
+    ["the site root", strip(publicRoute)],
+    ["a site page", strip(readFileSync("src/app/s/[subdomain]/[page]/route.ts", "utf8"))],
+  ]) {
+    const at = route.indexOf("recordView(");
+    checkTrue(`${label}: records the view`, at > 0);
+    if (at <= 0) continue;
+    // The 200 characters before the call: enough to reach an `await` on
+    // the same statement, short enough not to reach an unrelated one.
+    const before = route.slice(Math.max(0, at - 200), at);
+    checkTrue(`${label}: the view write is awaited`, /await\s/.test(before));
+    checkTrue(
+      `${label}: and NOT fire-and-forget, which never runs on a cold instance`,
+      !/void\s+recordView\(/.test(route)
+    );
+    // AGAINST THE SUCCESS RESPONSE, not the first one in the file. Both
+    // routes return early for a rate limit and for a database error long
+    // before they get near a view to record, so comparing with
+    // indexOf("return new Response") compares with a refusal.
+    checkTrue(
+      `${label}: the page is returned AFTER the view is recorded`,
+      route.indexOf("return new Response", at) > at
+    );
+  }
+}
 checkTrue(
   "...and cannot fail the response",
   /async function recordView[\s\S]{0,900}catch \(err\)[\s\S]{0,200}logApiError/.test(publicRoute)

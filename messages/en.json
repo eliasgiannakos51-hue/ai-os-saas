@@ -104,7 +104,7 @@
       "presentations": "Presentation Notes",
       "campaigns": "Campaign notes",
       "analytics": "Analytics",
-      "finance": "Finance",
+      "finance": "Finances",
       "content": "Content",
       "sales": "Sales",
       "products": "Products",
@@ -765,6 +765,59 @@
         "discord": {
           "help": "Paste a Discord webhook URL for the channel you want.",
           "placeholder": "https://discord.com/api/webhooks/…"
+        }
+      }
+    },
+    "overage": {
+      "title": "Usage overage",
+      "description": "When your credits run out, keep going at €{price} per credit — only if you say so.",
+      "offNow": "Overage is off. Nothing extra can be charged: when your credits run out, actions stop.",
+      "capLabel": "Your monthly limit (€)",
+      "capPlaceholder": "e.g. 20",
+      "capHint": "Between €{min} and €{max}.",
+      "preview": {
+        "heading": "What you are agreeing to",
+        "rate": "€{price} per credit, fixed at today's price.",
+        "cap": "Never more than €{cap} in one calendar month.",
+        "credits": "That buys up to {credits} extra credits.",
+        "invoice": "Charged as its own line on your next invoice, separate from your plan."
+      },
+      "agree": "Turn on overage",
+      "saved": "Saved. You can turn this off at any time.",
+      "thisMonth": "Extra usage this month",
+      "ofCap": "of €{cap}",
+      "agreedRate": "At €{price} per credit, the rate you agreed to.",
+      "capReached": "You have reached your limit. Nothing further will be charged until you raise it.",
+      "turnOff": "Turn off overage",
+      "turnOffNote": "Turning it off stops future charges. Anything already used this month is still invoiced."
+    },
+    "addons": {
+      "title": "Add-ons",
+      "description": "Extra capacity on top of your plan. Cancel a monthly add-on at any time.",
+      "perMonth": "/month",
+      "oneOff": " once",
+      "owned": "You have {count}",
+      "notConfigured": "Not available on this deployment ({envVar} is not set).",
+      "buy": "Buy",
+      "subscribe": "Add",
+      "cancel": "Cancel",
+      "oneOffNote": "A credit pack is granted immediately and cannot be cancelled.",
+      "items": {
+        "credits_1000": {
+          "name": "1,000 credits",
+          "grants": "one-time top-up"
+        },
+        "agents_5": {
+          "name": "5 extra agents",
+          "grants": "raises your agent limit"
+        },
+        "storage_10gb": {
+          "name": "10 GB storage",
+          "grants": "more room for files"
+        },
+        "priority": {
+          "name": "Priority execution",
+          "grants": "your jobs run first"
         }
       }
     }
@@ -3079,6 +3132,57 @@
       "output": "Output",
       "importedNote": "note from before",
       "failed": "failed"
+    }
+  },
+  "finance": {
+    "title": "Finances",
+    "description": "Every figure is computed from real rows, or says why it cannot be.",
+    "needsInput": "Needs: {fields}",
+    "needsHistory": "Needs {need} months of history — we have {have}.",
+    "noChangeYet": "no change yet",
+    "notEnoughDays": "{days} day(s) of history so far.",
+    "provenance": "History began the day this shipped: {months} month(s) of subscriber data and {days} daily snapshots. Nothing is back-filled — a back-filled figure would be today's prices applied to a past nobody recorded.",
+    "inputs": {
+      "marketing_spend": "marketing spend",
+      "fixed_costs": "fixed costs",
+      "cash_balance": "cash balance"
+    },
+    "trends": {
+      "mrr30": "MRR, 30 days",
+      "mrr90": "MRR, 90 days",
+      "aiCost30": "AI cost, 30 days",
+      "subscribers90": "Paying subscribers, 90 days"
+    },
+    "form": {
+      "title": "Your numbers for {month}",
+      "description": "Three things this database cannot know. Leave a field empty and the metrics that need it will say so, rather than computing from a zero.",
+      "marketing": "Marketing spend",
+      "marketingHint": "Everything spent to win customers this month.",
+      "fixed": "Fixed costs",
+      "fixedHint": "Salaries, hosting, tools — everything that is not marketing or AI.",
+      "cash": "Cash balance",
+      "cashHint": "What is in the bank at the end of this month.",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved",
+      "saveError": "Couldn't save — try again."
+    },
+    "metrics": {
+      "mrr": "MRR",
+      "arr": "ARR",
+      "arpu": "Revenue per user",
+      "grossMarginPercent": "Gross margin",
+      "aiCostPerUserEur": "AI cost per user",
+      "costPerSuccessfulTaskEur": "Cost per completed task",
+      "churnPercent": "Churn",
+      "retentionPercent": "Retention",
+      "nrrPercent": "Net revenue retention",
+      "ltvEur": "Lifetime value",
+      "cacEur": "Cost to acquire a customer",
+      "paybackMonths": "Payback period",
+      "ruleOf40": "Rule of 40",
+      "burnEur": "Monthly burn",
+      "runwayMonths": "Runway"
     }
   }
 }

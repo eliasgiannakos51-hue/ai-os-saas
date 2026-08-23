@@ -95,6 +95,18 @@ const ADMIN_ONLY_TABLES = new Set([
   // shape of the whole business. Written and read only through
   // createAdminClient(), behind an isAdminEmail() gate on the page.
   "cost_alert_log",
+  // V4 #26. The owner's view of the business: what every account pays,
+  // what the whole book is worth, what it costs to run, and what the
+  // owner typed in as marketing spend and cash in the bank. RLS on with
+  // NO policy is deny-all — stricter than any policy could be, and the
+  // right answer here because "owner" is decided in TypeScript by
+  // isAdminEmail() and a second notion of owner living in the database is
+  // one more thing to drift out of step with the first. Reached only
+  // through createAdminClient(), behind that gate.
+  "subscription_events",
+  "subscriber_months",
+  "revenue_snapshots",
+  "business_inputs",
 ]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();

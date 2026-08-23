@@ -22,7 +22,7 @@ import { logApiError } from "@/lib/log-error";
 import { validateAgentDraft, type AgentDraft } from "@/lib/agents/agent-config";
 import { resolveDeliveryOwnership } from "@/lib/agents/delivery-ownership";
 import { isValidTimeZone, nextRunAt } from "@/lib/agents/cron-expression";
-import { maxAgentsForPlan } from "@/lib/agents/agent-limits";
+import { maxAgentsForAccount } from "@/lib/agents/agent-limits";
 import { checkAgentActivationCap } from "@/lib/agents/agent-cap";
 import { parseAgentDepth, TEMPLATE_FILL_MODEL } from "@/lib/agents/agent-depth";
 import { fillTemplate, TEMPLATE_SLOT } from "@/lib/agents/agent-templates";
@@ -112,7 +112,9 @@ export async function POST(request: Request) {
     // a user at their cap must not pay for a fill call that cannot become
     // an agent.
     const planSlug = await resolveEffectivePlanSlug(user);
-    const cap = isAdminEmail(user.email) ? Number.POSITIVE_INFINITY : maxAgentsForPlan(planSlug);
+    const cap = isAdminEmail(user.email)
+      ? Number.POSITIVE_INFINITY
+      : await maxAgentsForAccount(user.id, planSlug);
     const capCheck = await checkAgentActivationCap(user.id, cap);
     if (!capCheck.ok) {
       return NextResponse.json({ ok: false, code: capCheck.reason, error: capCheck.message }, { status: 403 });

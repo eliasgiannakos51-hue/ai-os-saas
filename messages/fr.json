@@ -767,6 +767,59 @@
           "placeholder": "https://discord.com/api/webhooks/…"
         }
       }
+    },
+    "overage": {
+      "title": "Dépassement d'usage",
+      "description": "Quand vos crédits sont épuisés, continuez à {price} € par crédit — uniquement si vous le demandez.",
+      "offNow": "Le dépassement est désactivé. Rien de plus ne peut être facturé : quand les crédits sont épuisés, les actions s'arrêtent.",
+      "capLabel": "Votre plafond mensuel (€)",
+      "capPlaceholder": "ex. 20",
+      "capHint": "Entre {min} € et {max} €.",
+      "preview": {
+        "heading": "Ce que vous acceptez",
+        "rate": "{price} € par crédit, figé au tarif du jour.",
+        "cap": "Jamais plus de {cap} € sur un mois civil.",
+        "credits": "Cela représente jusqu'à {credits} crédits supplémentaires.",
+        "invoice": "Facturé sur une ligne distincte de votre prochaine facture, séparément de votre forfait."
+      },
+      "agree": "Activer le dépassement",
+      "saved": "Enregistré. Vous pouvez le désactiver à tout moment.",
+      "thisMonth": "Usage supplémentaire ce mois-ci",
+      "ofCap": "sur {cap} €",
+      "agreedRate": "À {price} € par crédit, le tarif que vous avez accepté.",
+      "capReached": "Vous avez atteint votre plafond. Rien ne sera facturé de plus tant que vous ne l'aurez pas relevé.",
+      "turnOff": "Désactiver le dépassement",
+      "turnOffNote": "La désactivation arrête les prochains frais. Ce qui a déjà été utilisé ce mois-ci reste facturé."
+    },
+    "addons": {
+      "title": "Options",
+      "description": "De la capacité en plus de votre forfait. Annulez une option mensuelle quand vous voulez.",
+      "perMonth": "/mois",
+      "oneOff": " une fois",
+      "owned": "Vous en avez {count}",
+      "notConfigured": "Indisponible sur ce déploiement ({envVar} n'est pas défini).",
+      "buy": "Acheter",
+      "subscribe": "Ajouter",
+      "cancel": "Annuler",
+      "oneOffNote": "Un pack de crédits est attribué immédiatement et ne peut pas être annulé.",
+      "items": {
+        "credits_1000": {
+          "name": "1 000 crédits",
+          "grants": "recharge unique"
+        },
+        "agents_5": {
+          "name": "5 agents de plus",
+          "grants": "relève votre limite d'agents"
+        },
+        "storage_10gb": {
+          "name": "10 Go de stockage",
+          "grants": "plus de place pour vos fichiers"
+        },
+        "priority": {
+          "name": "Exécution prioritaire",
+          "grants": "vos tâches passent en premier"
+        }
+      }
     }
   },
   "dashboard": {
@@ -3079,6 +3132,57 @@
       "output": "Sortie",
       "importedNote": "note d'avant",
       "failed": "échec"
+    }
+  },
+  "finance": {
+    "title": "Finances",
+    "description": "Chaque chiffre est calculé à partir de vraies lignes, ou dit pourquoi il ne peut pas l'être.",
+    "needsInput": "Il manque : {fields}",
+    "needsHistory": "Il faut {need} mois d'historique — nous en avons {have}.",
+    "noChangeYet": "pas encore de variation",
+    "notEnoughDays": "{days} jour(s) d'historique pour l'instant.",
+    "provenance": "L'historique a commencé le jour de la mise en ligne : {months} mois de données d'abonnés et {days} instantanés quotidiens. Rien n'est reconstitué — un chiffre rétroactif serait les prix d'aujourd'hui appliqués à un passé que personne n'a enregistré.",
+    "inputs": {
+      "marketing_spend": "dépenses marketing",
+      "fixed_costs": "charges fixes",
+      "cash_balance": "trésorerie"
+    },
+    "trends": {
+      "mrr30": "MRR, 30 jours",
+      "mrr90": "MRR, 90 jours",
+      "aiCost30": "Coût IA, 30 jours",
+      "subscribers90": "Abonnés payants, 90 jours"
+    },
+    "form": {
+      "title": "Vos chiffres pour {month}",
+      "description": "Trois choses que cette base ne peut pas connaître. Laissez un champ vide et les indicateurs qui en dépendent le diront, au lieu de calculer à partir d'un zéro.",
+      "marketing": "Dépenses marketing",
+      "marketingHint": "Tout ce qui a été dépensé pour gagner des clients ce mois-ci.",
+      "fixed": "Charges fixes",
+      "fixedHint": "Salaires, hébergement, outils — tout ce qui n'est ni marketing ni IA.",
+      "cash": "Trésorerie",
+      "cashHint": "Ce qu'il y a en banque à la fin du mois.",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "saved": "Enregistré",
+      "saveError": "Enregistrement impossible — réessayez."
+    },
+    "metrics": {
+      "mrr": "MRR",
+      "arr": "ARR",
+      "arpu": "Revenu par utilisateur",
+      "grossMarginPercent": "Marge brute",
+      "aiCostPerUserEur": "Coût IA par utilisateur",
+      "costPerSuccessfulTaskEur": "Coût par tâche terminée",
+      "churnPercent": "Attrition",
+      "retentionPercent": "Rétention",
+      "nrrPercent": "Rétention nette du revenu",
+      "ltvEur": "Valeur à vie",
+      "cacEur": "Coût d'acquisition client",
+      "paybackMonths": "Délai de retour",
+      "ruleOf40": "Règle des 40",
+      "burnEur": "Consommation mensuelle",
+      "runwayMonths": "Autonomie"
     }
   }
 }

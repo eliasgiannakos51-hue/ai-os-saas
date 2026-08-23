@@ -201,13 +201,43 @@ export function packCreditPriceEurFromRow(row: {
 // api/create/route.ts and api/chat/route.ts for the two-step pattern this
 // enables: check-then-call-then-deduct, instead of the old deduct-then-
 // call (which charged the user even when the call itself failed).
+/**
+ * Can this account afford `amount` right now?
+ *
+ * OVERAGE HEADROOM COUNTS, AND IS NOT SPENT HERE. Ten routes ask this
+ * question BEFORE they call reserveCredits, so a balance-only answer
+ * would refuse the action and reserveCredits — the one place overage
+ * actually happens — would never be reached. An account that consented to
+ * overage, under a cap with room in it, can afford this.
+ *
+ * NOTHING IS CHARGED BY ASKING. This reads the settings and the month's
+ * ledger and returns a verdict; the charge is made once, later, inside
+ * reserveCredits. A pre-check that took money would charge for actions
+ * that were then refused for some other reason entirely.
+ *
+ * `overageWouldCover` lets the caller say so — "you are out of credits,
+ * this will use your overage" is a different message from "you are out of
+ * credits".
+ */
 export async function hasEnoughCredits(
   userId: string,
   amount: number,
   plan: Plan
-): Promise<{ ok: boolean; remaining: number }> {
+): Promise<{ ok: boolean; remaining: number; overageWouldCover?: boolean }> {
   const row = await getOrInitCredits(userId, plan);
-  return { ok: row.credits_remaining >= amount, remaining: row.credits_remaining };
+  if (row.credits_remaining >= amount) return { ok: true, remaining: row.credits_remaining };
+
+  try {
+    const { checkOverage } = await import("@/lib/billing/overage-store");
+    const shortfall = Math.max(0, Math.ceil(amount - row.credits_remaining));
+    const { decision } = await checkOverage({ userId, shortfall });
+    if (decision.allowed) return { ok: true, remaining: row.credits_remaining, overageWouldCover: true };
+  } catch {
+    // FAILS TO REFUSE. An unreadable overage state means the account is
+    // treated as it was before overage existed — out of credits — which
+    // is the same thing reserveCredits would conclude a moment later.
+  }
+  return { ok: false, remaining: row.credits_remaining };
 }
 
 // Deducts `amount` credits and logs the transaction. Atomic — calls

@@ -110,6 +110,47 @@ export function maxAgentsForPlan(slug: PlanSlug | null | undefined): number {
   return limits[slug] ?? DEFAULT_AGENT_LIMITS.free;
 }
 
+/**
+ * THE CAP AN ACCOUNT ACTUALLY HAS — plan plus whatever it bought.
+ *
+ * V4 #25 sells "+5 agents, EUR10/month". Every cap check in the app read
+ * maxAgentsForPlan, which knows nothing about add-ons — so the day that
+ * add-on shipped, a customer who paid for it would have hit the plan's
+ * ceiling and been told to upgrade. The failure is silent, at the point
+ * of use, and looks exactly like the plan working correctly.
+ *
+ * So the five call sites read THIS instead, and
+ * scripts/tests/revenue-engine.test.mjs asserts that none of them has
+ * gone back to reading the plan alone.
+ *
+ * It is async because the add-ons are a row; maxAgentsForPlan stays for
+ * the places that genuinely mean "what does this PLAN include" — the
+ * pricing page and the upgrade prompt, which are talking about the plan
+ * rather than about this account.
+ */
+export async function maxAgentsForAccount(
+  userId: string,
+  slug: PlanSlug | null | undefined
+): Promise<number> {
+  const planCap = maxAgentsForPlan(slug);
+  try {
+    const { loadAddons } = await import("@/lib/billing/addon-store");
+    const { resolveEntitlements } = await import("@/lib/billing/addons");
+    const entitlements = resolveEntitlements({ plan: null, addons: await loadAddons(userId) });
+    // Only the ADD-ON contribution is taken from the resolver: the plan's
+    // own cap comes from maxAgentsForPlan above, which honours the
+    // AGENT_LIMIT_* environment overrides that plans.ts does not know
+    // about. Reading the plan through both would apply one of them twice.
+    return planCap + entitlements.fromAddons.agents;
+  } catch {
+    // FAILS TO THE PLAN. An unreadable add-on table gives the customer
+    // what they had before they bought anything — wrong, visible to them,
+    // and recoverable. The other direction hands out agents nobody paid
+    // for, forever, silently.
+    return planCap;
+  }
+}
+
 // ---------------------------------------------------------------------
 // Execution rate limit — the second half of fair use.
 // ---------------------------------------------------------------------

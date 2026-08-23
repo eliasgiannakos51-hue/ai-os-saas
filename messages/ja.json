@@ -767,6 +767,59 @@
           "placeholder": "https://discord.com/api/webhooks/…"
         }
       }
+    },
+    "overage": {
+      "title": "追加利用",
+      "description": "クレジットを使い切ったあとも、1クレジットあたり€{price}で続行できます — ご自身が希望した場合のみ。",
+      "offNow": "追加利用はオフです。追加請求は発生しません。クレジットが尽きると処理は停止します。",
+      "capLabel": "月間の上限（€）",
+      "capPlaceholder": "例: 20",
+      "capHint": "€{min}〜€{max}の範囲で。",
+      "preview": {
+        "heading": "同意する内容",
+        "rate": "1クレジットあたり€{price}、本日の価格で固定されます。",
+        "cap": "暦月あたり€{cap}を超えることはありません。",
+        "credits": "最大{credits}クレジット分に相当します。",
+        "invoice": "次回の請求書にプランとは別の明細行として計上されます。"
+      },
+      "agree": "追加利用をオンにする",
+      "saved": "保存しました。いつでもオフにできます。",
+      "thisMonth": "今月の追加利用",
+      "ofCap": "／€{cap}",
+      "agreedRate": "同意された価格、1クレジットあたり€{price}です。",
+      "capReached": "上限に達しました。引き上げるまで追加の請求は発生しません。",
+      "turnOff": "追加利用をオフにする",
+      "turnOffNote": "オフにすると今後の請求は止まります。今月すでに使った分は請求されます。"
+    },
+    "addons": {
+      "title": "アドオン",
+      "description": "プランに上乗せする追加容量です。月額アドオンはいつでも解約できます。",
+      "perMonth": "／月",
+      "oneOff": "（買い切り）",
+      "owned": "保有数: {count}",
+      "notConfigured": "この環境では利用できません（{envVar} が未設定）。",
+      "buy": "購入",
+      "subscribe": "追加",
+      "cancel": "解約",
+      "oneOffNote": "クレジットパックは即時付与され、解約はできません。",
+      "items": {
+        "credits_1000": {
+          "name": "1,000クレジット",
+          "grants": "一度きりの追加"
+        },
+        "agents_5": {
+          "name": "エージェント5体追加",
+          "grants": "エージェント上限が増えます"
+        },
+        "storage_10gb": {
+          "name": "ストレージ10GB",
+          "grants": "ファイル用の容量が増えます"
+        },
+        "priority": {
+          "name": "優先実行",
+          "grants": "あなたのジョブが先に実行されます"
+        }
+      }
     }
   },
   "dashboard": {
@@ -3079,6 +3132,57 @@
       "output": "出力",
       "importedNote": "以前のメモ",
       "failed": "失敗"
+    }
+  },
+  "finance": {
+    "title": "財務",
+    "description": "すべての数字は実際の行から計算します。計算できないものは、その理由を書きます。",
+    "needsInput": "不足：{fields}",
+    "needsHistory": "{need} か月分の履歴が必要です。現在 {have} か月分あります。",
+    "noChangeYet": "まだ変化なし",
+    "notEnoughDays": "現在の履歴は {days} 日分です。",
+    "provenance": "履歴は公開した日から始まります：購読データ {months} か月分、日次スナップショット {days} 件。さかのぼって埋めることはしません — 遡及的な数字は、誰も記録していない過去に今日の価格を当てたものだからです。",
+    "inputs": {
+      "marketing_spend": "マーケティング費用",
+      "fixed_costs": "固定費",
+      "cash_balance": "現金残高"
+    },
+    "trends": {
+      "mrr30": "MRR・30日",
+      "mrr90": "MRR・90日",
+      "aiCost30": "AI コスト・30日",
+      "subscribers90": "有料購読者・90日"
+    },
+    "form": {
+      "title": "{month} の数字",
+      "description": "このデータベースには分からない三つのこと。空欄のままにすれば、それを必要とする指標がそう表示します。ゼロとして計算はしません。",
+      "marketing": "マーケティング費用",
+      "marketingHint": "今月、顧客獲得のために使った金額のすべて。",
+      "fixed": "固定費",
+      "fixedHint": "給与、ホスティング、ツール — マーケティングと AI 以外のすべて。",
+      "cash": "現金残高",
+      "cashHint": "月末時点の銀行残高。",
+      "save": "保存",
+      "saving": "保存中…",
+      "saved": "保存しました",
+      "saveError": "保存できませんでした。もう一度お試しください。"
+    },
+    "metrics": {
+      "mrr": "MRR",
+      "arr": "ARR",
+      "arpu": "ユーザーあたり収益",
+      "grossMarginPercent": "粗利率",
+      "aiCostPerUserEur": "ユーザーあたり AI コスト",
+      "costPerSuccessfulTaskEur": "完了タスクあたりコスト",
+      "churnPercent": "解約率",
+      "retentionPercent": "継続率",
+      "nrrPercent": "純収益維持率",
+      "ltvEur": "顧客生涯価値",
+      "cacEur": "顧客獲得コスト",
+      "paybackMonths": "回収期間",
+      "ruleOf40": "ルール・オブ・40",
+      "burnEur": "月次バーン",
+      "runwayMonths": "ランウェイ"
     }
   }
 }

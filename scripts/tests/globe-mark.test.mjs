@@ -378,6 +378,12 @@ const MECHANICAL = [
   // use the globe, which is why this file appears here rather than being
   // exempted wholesale.
   "src/components/data-analysis/analysis-workspace.tsx",
+  // V4 #25. Saving a consent row and opening a Stripe checkout are both
+  // mechanical waits on a POST — nothing is thinking. The globe is the
+  // mark of the model working, and spending it on a settings save would
+  // make it mean "busy", which is what it exists NOT to mean.
+  "src/components/settings/overage-settings.tsx",
+  "src/components/settings/addons-settings.tsx",
 ];
 {
   const spinning = allTsx.filter((f) => /animate-spin/.test(stripComments(readFileSync(f, "utf8")))).sort();

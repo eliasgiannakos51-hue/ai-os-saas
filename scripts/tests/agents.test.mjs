@@ -722,7 +722,35 @@ console.log("\n== 12. the wiring, asserted rather than assumed ==");
   );
   const createRoute = read("src/app/api/agents/route.ts");
   checkTrue("create re-validates the draft server-side", /validateAgentDraft\(/.test(createRoute));
-  checkTrue("create enforces the plan cap", /maxAgentsForPlan\(/.test(createRoute));
+  // THE CAP IS THE ACCOUNT'S, NOT THE PLAN'S — and this check names the
+  // function that knows the difference.
+  //
+  // It used to require `maxAgentsForPlan(`, which was the whole answer
+  // until V4 #25 started selling "+5 agents, EUR10/month". A route still
+  // reading the plan alone would tell a customer who PAID for five more
+  // agents that they had hit their limit — silently, at the point of use,
+  // looking exactly like the plan working correctly.
+  //
+  // So it is checked in both directions, across every route that can
+  // create one: each must call maxAgentsForAccount, and none may call
+  // maxAgentsForPlan. The plan-only function still exists for the pricing
+  // page and the upgrade prompt, which really are talking about the plan.
+  {
+    const AGENT_CREATORS = [
+      "src/app/api/agents/route.ts",
+      "src/app/api/agents/[id]/route.ts",
+      "src/app/api/agents/build/route.ts",
+      "src/app/api/agents/templates/adopt/route.ts",
+    ];
+    for (const file of AGENT_CREATORS) {
+      const src = read(file);
+      checkTrue(`${file}: enforces the cap the ACCOUNT has`, /maxAgentsForAccount\(/.test(src));
+      checkTrue(
+        `${file}: and not the plan's alone, which would ignore a paid add-on`,
+        !/maxAgentsForPlan\(/.test(src)
+      );
+    }
+  }
   checkTrue("create records a security-check row", /logSecurityCheck\(/.test(createRoute));
   checkTrue("create suppresses a double submit", /duplicateSuppressed/.test(createRoute));
 }

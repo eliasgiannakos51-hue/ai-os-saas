@@ -767,6 +767,59 @@
           "placeholder": "https://discord.com/api/webhooks/…"
         }
       }
+    },
+    "overage": {
+      "title": "Zusatznutzung",
+      "description": "Wenn Ihre Credits aufgebraucht sind, weiter für {price} € pro Credit — nur wenn Sie es verlangen.",
+      "offNow": "Die Zusatznutzung ist aus. Es kann nichts zusätzlich berechnet werden: Sind die Credits aufgebraucht, stoppen die Aktionen.",
+      "capLabel": "Ihr Monatslimit (€)",
+      "capPlaceholder": "z. B. 20",
+      "capHint": "Zwischen {min} € und {max} €.",
+      "preview": {
+        "heading": "Dem stimmen Sie zu",
+        "rate": "{price} € pro Credit, festgeschrieben zum heutigen Preis.",
+        "cap": "Nie mehr als {cap} € in einem Kalendermonat.",
+        "credits": "Das reicht für bis zu {credits} zusätzliche Credits.",
+        "invoice": "Wird als eigene Position auf Ihrer nächsten Rechnung berechnet, getrennt von Ihrem Tarif."
+      },
+      "agree": "Zusatznutzung aktivieren",
+      "saved": "Gespeichert. Sie können das jederzeit abschalten.",
+      "thisMonth": "Zusatznutzung diesen Monat",
+      "ofCap": "von {cap} €",
+      "agreedRate": "Zu {price} € pro Credit, dem von Ihnen zugestimmten Preis.",
+      "capReached": "Sie haben Ihr Limit erreicht. Es wird nichts weiter berechnet, bis Sie es anheben.",
+      "turnOff": "Zusatznutzung abschalten",
+      "turnOffNote": "Das Abschalten stoppt künftige Kosten. Bereits genutzte Beträge dieses Monats werden weiterhin berechnet."
+    },
+    "addons": {
+      "title": "Zusatzpakete",
+      "description": "Mehr Kapazität zusätzlich zu Ihrem Tarif. Monatliche Pakete jederzeit kündbar.",
+      "perMonth": "/Monat",
+      "oneOff": " einmalig",
+      "owned": "Sie haben {count}",
+      "notConfigured": "Auf dieser Installation nicht verfügbar ({envVar} ist nicht gesetzt).",
+      "buy": "Kaufen",
+      "subscribe": "Hinzufügen",
+      "cancel": "Kündigen",
+      "oneOffNote": "Ein Credit-Paket wird sofort gutgeschrieben und kann nicht storniert werden.",
+      "items": {
+        "credits_1000": {
+          "name": "1.000 Credits",
+          "grants": "einmalige Aufladung"
+        },
+        "agents_5": {
+          "name": "5 weitere Agents",
+          "grants": "erhöht Ihr Agent-Limit"
+        },
+        "storage_10gb": {
+          "name": "10 GB Speicher",
+          "grants": "mehr Platz für Dateien"
+        },
+        "priority": {
+          "name": "Vorrangige Ausführung",
+          "grants": "Ihre Aufträge laufen zuerst"
+        }
+      }
     }
   },
   "dashboard": {
@@ -3079,6 +3132,57 @@
       "output": "Ausgabe",
       "importedNote": "frühere Notiz",
       "failed": "fehlgeschlagen"
+    }
+  },
+  "finance": {
+    "title": "Finanzen",
+    "description": "Jede Zahl wird aus echten Zeilen berechnet — oder sagt, warum sie es nicht kann.",
+    "needsInput": "Fehlt: {fields}",
+    "needsHistory": "Braucht {need} Monate Historie — wir haben {have}.",
+    "noChangeYet": "noch keine Veränderung",
+    "notEnoughDays": "Bisher {days} Tag(e) Historie.",
+    "provenance": "Die Historie beginnt am Tag der Veröffentlichung: {months} Monat(e) Abonnentendaten und {days} Tages-Snapshots. Nichts wird rückwirkend ergänzt — eine rückwirkende Zahl wären heutige Preise auf eine Vergangenheit, die niemand aufgezeichnet hat.",
+    "inputs": {
+      "marketing_spend": "Marketingausgaben",
+      "fixed_costs": "Fixkosten",
+      "cash_balance": "Kontostand"
+    },
+    "trends": {
+      "mrr30": "MRR, 30 Tage",
+      "mrr90": "MRR, 90 Tage",
+      "aiCost30": "KI-Kosten, 30 Tage",
+      "subscribers90": "Zahlende Abonnenten, 90 Tage"
+    },
+    "form": {
+      "title": "Deine Zahlen für {month}",
+      "description": "Drei Dinge, die diese Datenbank nicht wissen kann. Lass ein Feld leer, und die Kennzahlen, die es brauchen, sagen das — statt mit einer Null zu rechnen.",
+      "marketing": "Marketingausgaben",
+      "marketingHint": "Alles, was diesen Monat für neue Kunden ausgegeben wurde.",
+      "fixed": "Fixkosten",
+      "fixedHint": "Gehälter, Hosting, Tools — alles außer Marketing und KI.",
+      "cash": "Kontostand",
+      "cashHint": "Was am Monatsende auf der Bank ist.",
+      "save": "Speichern",
+      "saving": "Speichere…",
+      "saved": "Gespeichert",
+      "saveError": "Konnte nicht gespeichert werden — versuch es noch einmal."
+    },
+    "metrics": {
+      "mrr": "MRR",
+      "arr": "ARR",
+      "arpu": "Umsatz pro Nutzer",
+      "grossMarginPercent": "Bruttomarge",
+      "aiCostPerUserEur": "KI-Kosten pro Nutzer",
+      "costPerSuccessfulTaskEur": "Kosten pro erledigter Aufgabe",
+      "churnPercent": "Abwanderung",
+      "retentionPercent": "Bindung",
+      "nrrPercent": "Netto-Umsatzbindung",
+      "ltvEur": "Kundenwert",
+      "cacEur": "Kosten pro Neukunde",
+      "paybackMonths": "Amortisationszeit",
+      "ruleOf40": "Rule of 40",
+      "burnEur": "Monatlicher Verbrauch",
+      "runwayMonths": "Reichweite"
     }
   }
 }

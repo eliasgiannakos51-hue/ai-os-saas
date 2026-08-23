@@ -411,6 +411,12 @@ const LOCALE_ALLOWED = new Set([
   // French and German. The nine other locales translate all four and are
   // not listed, which is what keeps this an allowance per locale rather
   // than a rule about short words.
+  // V4 #26. "Finances" is the ordinary French word, and "Rule of 40" is
+  // what German-speaking founders and investors call it — the German
+  // financial press uses the English term. The other locales translate
+  // both.
+  "fr:finance.title",
+  "de:finance.metrics.ruleOf40",
   "fr:dataAnalysis.columns.type",
   "fr:dataAnalysis.types.date",
   "fr:coding.code",
@@ -457,6 +463,15 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // locales that DO differ (zh, ja, which use full-width brackets) are
   // translated and are not on this list, which is the whole reason this
   // is an allowance per key rather than a rule about digits.
+  // V4 #26. MRR and ARR are the acronyms every founder, investor and
+  // accountant uses in every one of these markets — "Ricavi Ricorrenti
+  // Mensili" is a translation nobody would recognise on a dashboard. The
+  // four locales that DO have a settled local form (el uses the acronym
+  // too, but zh, ar and the descriptive labels around them are
+  // translated) are not on this list, which is why this is a per-key
+  // allowance rather than a rule about acronyms.
+  "finance.metrics.mrr",
+  "finance.metrics.arr",
   "aiSteps.counter",
   "landing.footer.roadmap",
   "roadmap.title",

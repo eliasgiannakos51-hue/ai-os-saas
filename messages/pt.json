@@ -767,6 +767,59 @@
           "placeholder": "https://discord.com/api/webhooks/…"
         }
       }
+    },
+    "overage": {
+      "title": "Uso adicional",
+      "description": "Quando os créditos acabarem, continue a {price} € por crédito — só se você pedir.",
+      "offNow": "O uso adicional está desligado. Nada extra pode ser cobrado: quando os créditos acabam, as ações param.",
+      "capLabel": "O seu limite mensal (€)",
+      "capPlaceholder": "ex.: 20",
+      "capHint": "Entre {min} € e {max} €.",
+      "preview": {
+        "heading": "O que você está a aceitar",
+        "rate": "{price} € por crédito, fixado ao preço de hoje.",
+        "cap": "Nunca mais de {cap} € num mês de calendário.",
+        "credits": "Isso dá até {credits} créditos adicionais.",
+        "invoice": "Cobrado numa linha própria da próxima fatura, separada do seu plano."
+      },
+      "agree": "Ativar uso adicional",
+      "saved": "Guardado. Pode desligar quando quiser.",
+      "thisMonth": "Uso adicional este mês",
+      "ofCap": "de {cap} €",
+      "agreedRate": "A {price} € por crédito, a tarifa que aceitou.",
+      "capReached": "Atingiu o seu limite. Nada mais será cobrado até o aumentar.",
+      "turnOff": "Desligar uso adicional",
+      "turnOffNote": "Desligar para as cobranças futuras. O que já foi usado este mês continua a ser faturado."
+    },
+    "addons": {
+      "title": "Extras",
+      "description": "Capacidade adicional além do seu plano. Cancele um extra mensal quando quiser.",
+      "perMonth": "/mês",
+      "oneOff": " uma vez",
+      "owned": "Você tem {count}",
+      "notConfigured": "Indisponível nesta instalação ({envVar} não está definido).",
+      "buy": "Comprar",
+      "subscribe": "Adicionar",
+      "cancel": "Cancelar",
+      "oneOffNote": "Um pacote de créditos é atribuído de imediato e não pode ser cancelado.",
+      "items": {
+        "credits_1000": {
+          "name": "1.000 créditos",
+          "grants": "recarga única"
+        },
+        "agents_5": {
+          "name": "Mais 5 agentes",
+          "grants": "aumenta o seu limite de agentes"
+        },
+        "storage_10gb": {
+          "name": "10 GB de armazenamento",
+          "grants": "mais espaço para ficheiros"
+        },
+        "priority": {
+          "name": "Execução prioritária",
+          "grants": "as suas tarefas correm primeiro"
+        }
+      }
     }
   },
   "dashboard": {
@@ -3079,6 +3132,57 @@
       "output": "Saída",
       "importedNote": "nota anterior",
       "failed": "falhou"
+    }
+  },
+  "finance": {
+    "title": "Finanças",
+    "description": "Cada número é calculado a partir de linhas reais, ou diz porque não pode ser.",
+    "needsInput": "Falta: {fields}",
+    "needsHistory": "Precisa de {need} meses de histórico — temos {have}.",
+    "noChangeYet": "ainda sem variação",
+    "notEnoughDays": "{days} dia(s) de histórico até agora.",
+    "provenance": "O histórico começou no dia em que isto entrou: {months} mês(es) de dados de subscritores e {days} instantâneos diários. Nada é preenchido retroativamente — um número retroativo seriam os preços de hoje aplicados a um passado que ninguém registou.",
+    "inputs": {
+      "marketing_spend": "gasto em marketing",
+      "fixed_costs": "custos fixos",
+      "cash_balance": "saldo em caixa"
+    },
+    "trends": {
+      "mrr30": "MRR, 30 dias",
+      "mrr90": "MRR, 90 dias",
+      "aiCost30": "Custo de IA, 30 dias",
+      "subscribers90": "Subscritores pagantes, 90 dias"
+    },
+    "form": {
+      "title": "Os teus números de {month}",
+      "description": "Três coisas que esta base de dados não pode saber. Deixa um campo vazio e as métricas que dele precisam vão dizê-lo, em vez de calcular a partir de zero.",
+      "marketing": "Gasto em marketing",
+      "marketingHint": "Tudo o que foi gasto para ganhar clientes este mês.",
+      "fixed": "Custos fixos",
+      "fixedHint": "Salários, alojamento, ferramentas — tudo o que não é marketing nem IA.",
+      "cash": "Saldo em caixa",
+      "cashHint": "O que está no banco no fim do mês.",
+      "save": "Guardar",
+      "saving": "A guardar…",
+      "saved": "Guardado",
+      "saveError": "Não foi possível guardar — tenta outra vez."
+    },
+    "metrics": {
+      "mrr": "MRR",
+      "arr": "ARR",
+      "arpu": "Receita por utilizador",
+      "grossMarginPercent": "Margem bruta",
+      "aiCostPerUserEur": "Custo de IA por utilizador",
+      "costPerSuccessfulTaskEur": "Custo por tarefa concluída",
+      "churnPercent": "Cancelamento",
+      "retentionPercent": "Retenção",
+      "nrrPercent": "Retenção líquida de receita",
+      "ltvEur": "Valor vitalício",
+      "cacEur": "Custo de aquisição de cliente",
+      "paybackMonths": "Período de retorno",
+      "ruleOf40": "Regra dos 40",
+      "burnEur": "Consumo mensal",
+      "runwayMonths": "Autonomia"
     }
   }
 }

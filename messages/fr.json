@@ -696,7 +696,78 @@
       "collaboration": "Collaboration",
       "collaborationHint": "Invitations d'équipe et activité de l'espace partagé"
     },
-    "jumpToSection": "Aller à une section"
+    "jumpToSection": "Aller à une section",
+    "notifications": {
+      "title": "Notifications",
+      "description": "Choisissez ce qui vous parvient, et où. Nous n'envoyons quelque chose que lorsqu'il y a quelque chose à dire.",
+      "saved": "Enregistré",
+      "saveError": "Enregistrement impossible — réessayez.",
+      "criticalNote": "Les problèmes de paiement, les crédits faibles et les erreurs qui vous concernent laissent toujours une trace ici dans l'application, même si vous désactivez le type.",
+      "channels": {
+        "in_app": "Dans l'app",
+        "email": "E-mail",
+        "telegram": "Telegram",
+        "discord": "Discord"
+      },
+      "types": {
+        "agent_completed": {
+          "label": "L'agent a trouvé quelque chose",
+          "description": "Uniquement lorsqu'une exécution a produit un vrai résultat — jamais parce qu'elle s'est simplement lancée."
+        },
+        "website_published": {
+          "label": "Site publié",
+          "description": "Quand l'un de vos sites est mis en ligne."
+        },
+        "research_ready": {
+          "label": "Recherche prête",
+          "description": "Quand un rapport de recherche approfondie est terminé."
+        },
+        "credits_low": {
+          "label": "Crédits bientôt épuisés",
+          "description": "À 80% puis à 100%, pour que votre travail programmé ne s'arrête pas sans prévenir."
+        },
+        "payment_failed": {
+          "label": "Paiement échoué",
+          "description": "Quand une carte est refusée et que votre abonnement est menacé."
+        },
+        "team_member_joined": {
+          "label": "Nouveau membre",
+          "description": "Quand quelqu'un accepte votre invitation."
+        },
+        "error_needs_attention": {
+          "label": "Quelque chose vous attend",
+          "description": "Quand quelque chose a cassé d'une façon que vous seul pouvez réparer."
+        }
+      },
+      "quiet": {
+        "title": "Heures calmes",
+        "description": "Rien ne vous interrompra entre ces horaires.",
+        "enable": "Utiliser les heures calmes",
+        "from": "De",
+        "to": "À",
+        "offset": "Votre fuseau horaire",
+        "deferNote": "Retenues, pas supprimées : tout ce qui survient pendant les heures calmes arrive à la fin de la plage. Les problèmes de paiement et les erreurs qui vous concernent passent quand même."
+      },
+      "chat": {
+        "title": "Telegram et Discord",
+        "description": "Envoyez les notifications dans un chat plutôt que dans une boîte mail. Désactivé par défaut pour chaque type, même une fois connecté.",
+        "connect": "Connecter",
+        "connecting": "Connexion…",
+        "disconnect": "Déconnecter",
+        "connected": "Connecté",
+        "notConfigured": "Telegram n'est pas configuré sur ce déploiement.",
+        "testSent": "Connecté — cherchez notre message de test.",
+        "testFailed": "Nous n'avons pas pu y livrer de message de test, donc rien n'a été enregistré.",
+        "telegram": {
+          "help": "Écrivez à notre bot, puis collez l'identifiant de discussion qu'il vous renvoie.",
+          "placeholder": "Identifiant de discussion"
+        },
+        "discord": {
+          "help": "Collez une URL de webhook Discord pour le salon souhaité.",
+          "placeholder": "https://discord.com/api/webhooks/…"
+        }
+      }
+    }
   },
   "dashboard": {
     "overview": {

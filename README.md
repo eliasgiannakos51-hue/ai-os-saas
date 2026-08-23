@@ -186,12 +186,113 @@ modals.
    ELEVENLABS_API_KEY=your-elevenlabs-api-key
    GOOGLE_API_KEY=your-google-ai-api-key
    GROQ_API_KEY=your-groq-api-key
+   TELEGRAM_BOT_TOKEN=your-telegram-bot-token
 - `IONEXA_DIAG` — optional. Set to `1` to enable verbose request tracing for the auth middleware, Stripe checkout/webhook, the team-page gate, and the Mission Control/Timeline data loads (see `src/lib/diag.ts`). Off by default: middleware runs on every request, so leaving this on writes a log line per page view. Turn it on, redeploy, reproduce the issue, read the logs, turn it off again.
 - `CREDIT_MARGIN_MULTIPLIER` — optional, default `4`, allowed range `4`-`10`. Multiplier applied to an action's real API cost before converting to credits. Anything outside the range (or unparseable) is ignored with a logged warning and the default is used.
 - `CREDIT_PRICE_EUR` — optional, default `0.02`. List price of one credit, in EUR.
 - `USD_TO_EUR_RATE` — optional, default `0.92`. Anthropic bills in USD; credits are priced in EUR.
 - `LARGE_ACTION_CONFIRM_THRESHOLD` — optional, default `50`. Estimates above this many credits require explicit user confirmation before the action starts.
 - `RESERVE_BUFFER_PERCENT` — optional, default `10`. Extra percentage held (not charged) when reserving credits, released at settlement.
+
+#### Notifications (V4 #18)
+
+Seven things worth interrupting somebody for — an agent that FOUND
+something (never one that merely ran), a website published, research
+ready, credits at 80% and 100%, a failed payment, a new team member, and
+an error that needs the user. Each one goes wherever that user said, per
+type: in-app, email, Telegram, Discord. See `src/lib/notify/`.
+
+The rules are code rather than intentions: `worth-sending.ts` refuses a
+notification with nothing in it, `grouping.ts` collapses five agent
+results into one, `quiet-hours.ts` DEFERS rather than drops (the held
+notifications are drained by `/api/cron/agent-runs`, so "held until 08:00"
+means 08:00), and `engagement.ts` reports the click rate per type so
+"under 10% and the type is not worth sending" is a query rather than an
+opinion.
+
+- `TELEGRAM_BOT_TOKEN` — optional. The bot that delivers Telegram
+  notifications. **Without it the Telegram channel is disabled cleanly**:
+  `telegramConfigured()` is false, Settings says Telegram is not set up on
+  this deployment instead of offering a field that cannot work, and the
+  dispatcher drops the channel however a preference reads. Every other
+  channel is unaffected. Get one from @BotFather; the user then messages
+  the bot and pastes back the chat id, and a test message must actually
+  arrive before the channel is stored as verified.
+- Discord needs **no server-side variable**. The credential is the webhook
+  URL, which each user supplies; it is validated against Discord's own
+  hosts and path shape (an SSRF guard), stored encrypted per user with
+  `INTEGRATION_ENCRYPTION_KEY`, and re-validated at send time.
+- Both chat targets need `INTEGRATION_ENCRYPTION_KEY` (already required by
+  the OAuth integrations). Without it, connecting a chat channel is
+  REFUSED rather than stored in plaintext.
+
+Email notifications share the existing Resend setup and the same
+20-per-day-per-user cap as every other email. **They will not leave the
+building without a verified sending domain** — see "Email delivery" below.
+
+#### Email delivery: the verified sending domain
+
+**Nothing leaves the building without this.** The default sender,
+`onboarding@resend.dev`, is Resend's shared TESTING address: it delivers
+ONLY to the email address of the Resend account owner. Every other
+message — welcome, digest, agent result, notification — is refused with
+*"You can only send testing emails to your own address"*. Production
+logged twenty of those before `RESEND_FROM_EMAIL` was upgraded from
+optional to recommended in `src/lib/env-check.ts`.
+
+It is not a code problem and there is no code fix for it. It is a DNS
+problem, and this is exactly what to do:
+
+1. **Pick a subdomain to send from**, not the root domain — `send.example.com`
+   or `mail.example.com`. Sending reputation attaches to whatever you sign
+   with, and keeping it off the root means a bad week for marketing mail
+   never affects the domain your normal business email arrives from.
+2. **Add the domain in Resend**: <https://resend.com/domains> → *Add
+   Domain* → enter the subdomain → pick the region closest to your users
+   (it changes one of the records below).
+3. **Resend then shows you three or four records.** Copy them EXACTLY as
+   shown — the values are generated for your domain and are not
+   guessable, so do not copy them from any documentation including this
+   file. What you will see:
+   - a **DKIM** record — type `TXT`, name `resend._domainkey`, value a
+     long `p=MIG...` public key. This is what signs the mail as yours.
+   - an **SPF** record — type `TXT`, on the sending subdomain, value
+     `v=spf1 include:amazonses.com ~all`. This is what says Resend's
+     servers may send as you.
+   - an **MX** record — on the same subdomain, pointing at
+     `feedback-smtp.<your-region>.amazonses.com`, priority `10`. This is
+     where bounces and complaints go; without it you never learn that an
+     address is dead.
+   - optionally a **DMARC** record — type `TXT`, name `_dmarc`, value
+     `v=DMARC1; p=none;` to start. Add it AFTER the first three verify,
+     and leave it at `p=none` until you have looked at a few reports.
+4. **Add each record at your DNS provider** (Cloudflare, Namecheap, your
+   registrar). Two things that bite here: some providers append the
+   domain to the name automatically, so entering
+   `resend._domainkey.example.com` produces
+   `resend._domainkey.example.com.example.com` — enter just
+   `resend._domainkey`. And on Cloudflare, DNS records for mail must be
+   **DNS only (grey cloud)**, never proxied.
+5. **Click Verify in Resend.** It is usually minutes; DNS propagation can
+   take up to 72 hours. The dashboard shows per-record status, so a single
+   failing row tells you which one was typed wrong.
+6. **Set the sender** once the domain shows *Verified*:
+
+   ```
+   RESEND_FROM_EMAIL="Ionexa AI <hello@send.example.com>"
+   ```
+
+   in Vercel → Project → Settings → Environment Variables (Production),
+   then **redeploy** — environment variables are read at build/boot, so an
+   existing deployment keeps the old value until it is rebuilt.
+7. **Check it worked.** `src/lib/env-check.ts` flags any address still
+   ending in `@resend.dev` as suspicious, so the startup check will say
+   so. Then trigger one real email (sign up a test account) and confirm
+   it arrives at an address that is NOT the Resend account owner's.
+
+Until step 6 is done, the notification system's email channel is a
+correctly-built path with nothing at the end of it. In-app notifications,
+Telegram and Discord are unaffected — they do not go through Resend.
 
 #### Free chat
 

@@ -304,40 +304,75 @@ export function newDeviceLoginEmailHtml({
   });
 }
 
+// V4 #18 — THE DIGEST, FROM REAL DATA.
+//
+// It replaced a table of module row counts, which was true and told
+// nobody anything: "Ideas 3, Leads 1" is a database report, not a week.
+// What goes in now is what a person would actually say about the week —
+// how many agents ran and how many of them found something, what the site
+// did, what was spent against what this account normally spends — plus a
+// short "what I noticed" list of things worth acting on.
+//
+// Lines and observations both arrive pre-composed from lib/notify/digest.ts
+// so that the decision about WHAT IS WORTH SAYING is made in one pure,
+// testable place rather than half here in string templates. A digest with
+// no lines is never rendered: the route does not call this.
 export function weeklyDigestEmailHtml({
-  email,
-  moduleCounts,
+  lines,
+  observations,
   periodLabel,
+  dashboardUrl,
 }: {
-  email: string;
-  moduleCounts: { title: string; count: number }[];
+  lines: { key: string; text: string }[];
+  observations: { key: string; text: string }[];
   periodLabel: string;
+  dashboardUrl: string;
 }): string {
-  const total = moduleCounts.reduce((sum, m) => sum + m.count, 0);
-
-  const rows = moduleCounts
-    .filter((m) => m.count > 0)
+  const rows = lines
     .map(
-      (m) => `
+      (line) => `
               <tr>
-                <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${FOREGROUND}; font-size:13px;">${m.title}</td>
-                <td style="padding:6px 0; border-bottom:1px solid ${BORDER}; color:${ORANGE}; font-size:13px; text-align:right;">${m.count}</td>
+                <td style="padding:8px 0; border-bottom:1px solid ${BORDER}; color:${FOREGROUND}; font-size:14px;">${escapeHtml(line.text)}</td>
               </tr>`
     )
     .join("");
 
-  const bodyHtml = `
-    <span style="color:${MUTED}; font-size:12px;">digest · ${periodLabel}</span>
-    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">your week on Ionexa AI</h1>
-    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
-      ${total} new ${total === 1 ? "entry" : "entries"} logged for ${email} this week.
-    </p>
+  const noticed =
+    observations.length > 0
+      ? `
+    <p style="color:${MUTED}; font-size:12px; margin:24px 0 8px; text-transform:uppercase; letter-spacing:1px;">what I noticed</p>
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-      ${rows || `<tr><td style="color:${MUTED}; font-size:13px; padding:6px 0;">Nothing logged this week.</td></tr>`}
+      ${observations
+        .map(
+          (o) => `
+              <tr>
+                <td style="padding:6px 0; color:${ORANGE}; font-size:13px;">${escapeHtml(o.text)}</td>
+              </tr>`
+        )
+        .join("")}
+    </table>`
+      : "";
+
+  const bodyHtml = `
+    <span style="color:${MUTED}; font-size:12px;">digest · ${escapeHtml(periodLabel)}</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">this week</h1>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+      ${rows}
     </table>
+    ${noticed}
+    <p style="margin:24px 0 0;">
+      <a href="${dashboardUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        Open your dashboard
+      </a>
+    </p>
   `;
 
-  return layout({ preheader: `Your Ionexa AI weekly digest — ${total} new entries.`, bodyHtml });
+  return layout({
+    // The preheader is the first line of the digest itself, so the inbox
+    // preview says what happened rather than "your weekly digest".
+    preheader: lines[0]?.text ?? periodLabel,
+    bodyHtml,
+  });
 }
 
 // Basic escaping for stepText/detail below — unlike this file's other
@@ -631,4 +666,61 @@ export function agentPausedNoCreditsEmailHtml({
     preheader: `"${agentName}" is paused — your account is out of credits.`,
     bodyHtml,
   });
+}
+
+// V4 #18 — the email face of a notification. One template for all seven
+// types rather than seven near-identical ones: the type is already
+// carried by the title, and a user who gets two different-looking emails
+// for "your agent finished" and "your research is ready" learns nothing
+// from the difference.
+//
+// The button is the ONLY link, and it points at the click-tracking
+// redirect (/api/n/<id>), which is what makes the click rate in
+// engagement.ts a measurement rather than a guess.
+export function notificationEmailHtml({
+  title,
+  body,
+  actionUrl,
+  actionLabel,
+  extraCount,
+  settingsUrl,
+}: {
+  title: string;
+  body: string;
+  actionUrl: string | null;
+  actionLabel: string;
+  /** "and 4 others" — rule 2's grouping, stated rather than hidden. */
+  extraCount: number;
+  settingsUrl: string;
+}): string {
+  const safeTitle = escapeHtml(title);
+  const safeBody = escapeHtml(body)
+    .split("\n")
+    .filter((line) => line.trim().length > 0)
+    .map((line) => `<p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 10px;">${line}</p>`)
+    .join("");
+
+  const bodyHtml = `
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:0 0 16px;">${safeTitle}</h1>
+    ${safeBody}
+    ${
+      extraCount > 0
+        ? `<p style="color:${MUTED}; font-size:12px; margin:0 0 16px;">+ ${extraCount} more like this</p>`
+        : ""
+    }
+    ${
+      actionUrl
+        ? `<p style="margin:16px 0 0;">
+      <a href="${actionUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        ${escapeHtml(actionLabel)}
+      </a>
+    </p>`
+        : ""
+    }
+    <p style="color:${MUTED}; font-size:11px; margin:24px 0 0; border-top:1px solid ${BORDER}; padding-top:16px;">
+      <a href="${settingsUrl}" style="color:${MUTED};">Choose which notifications reach you</a>
+    </p>
+  `;
+
+  return layout({ preheader: title, bodyHtml });
 }

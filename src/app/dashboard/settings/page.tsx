@@ -23,6 +23,7 @@ import { MarginReport } from "@/components/settings/margin-report";
 import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
 import { EmailNotificationSettings } from "@/components/settings/email-notification-settings";
 import { PushNotificationSettings } from "@/components/settings/push-notification-settings";
+import { NotificationSettings } from "@/components/settings/notification-settings";
 import { AchievementsSection } from "@/components/settings/achievements-section";
 import { loadUnlockedAchievements } from "@/lib/achievements";
 import { isAdminEmail } from "@/lib/admin";
@@ -286,6 +287,12 @@ export default async function SettingsPage() {
         </div>
 
         <LoginActivity devices={(knownDevices as KnownDevice[] | null) ?? []} />
+
+        {/* Per TYPE, per CHANNEL (V4 #18) — which of the seven things
+            worth interrupting somebody for reach them, and where. It
+            sits above the email panel because the email panel is now the
+            narrower question: which of OUR emails you want at all. */}
+        <NotificationSettings userId={user.id} />
 
         <EmailNotificationSettings
           userId={user.id}

@@ -117,6 +117,22 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
         ? "resend.dev is Resend's testing sender — emails to anyone but the account owner are refused"
         : null,
   },
+  {
+    // V4 #18. OPTIONAL and cleanly absent: without it telegramConfigured()
+    // is false, the Settings panel says so instead of offering a field
+    // that cannot work, loadNotifyContext never marks Telegram available,
+    // and resolveChannels drops it however the user's preference reads.
+    // Nothing half-works — the failure mode this avoids is a user who
+    // connects a chat id, sees "connected", and never receives anything.
+    //
+    // Discord needs NO server-side key at all: the credential is the
+    // webhook URL, which each user supplies and which is stored encrypted
+    // per user.
+    name: "TELEGRAM_BOT_TOKEN",
+    level: "optional",
+    what: "Sends notifications to Telegram. Without it the Telegram channel is disabled and says so",
+    fallback: "Telegram is offered nowhere in Settings; every other channel is unaffected",
+  },
   // Annual billing. OPTIONAL, and the fallback is the whole design: with
   // any of the four missing, annualBillingAvailable() is false, /pricing
   // renders no Monthly/Annual toggle, ?billing=annual does nothing, and

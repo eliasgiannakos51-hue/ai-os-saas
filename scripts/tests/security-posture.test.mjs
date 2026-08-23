@@ -386,8 +386,30 @@ for (const file of routes) {
   // to email write `if (!user || !user.email)`, which is strictly
   // stronger, so the match is on the `!user` test rather than the whole
   // condition.
+  //
+  // WHAT THE REJECTION MAY BE, and why this is now two shapes rather than
+  // one. Almost every route here is called by fetch() and answers 401.
+  // A route the BROWSER navigates to — /api/n/<id>, the notification
+  // click redirect — cannot: a 401 JSON body in the address bar is a dead
+  // end for somebody who clicked a link in their email, and the correct
+  // answer is to send them to log in and come back. So a redirect whose
+  // target is the login page counts as a rejection too.
+  //
+  // AND THE REJECTION MUST BE IN THE GUARD. The old form of this check
+  // was `/if \(!user\b/.test(src) && /401/.test(src)` — the two halves
+  // tested independently, anywhere in the file, so a route with a `!user`
+  // guard that fell through and a 401 for some unrelated reason two
+  // hundred lines later passed. The span after the guard is what is
+  // searched now, which is strictly narrower than before: every route
+  // that passed the old check on merit still passes, and one that passed
+  // it by coincidence no longer does.
   if (authenticates) {
-    checkTrue(`  ${key} rejects a missing user with 401`, /if \(!user\b/.test(src) && /401/.test(src));
+    const guard = src.match(/if \(!user\b[^)]*\)\s*\{?([\s\S]{0,400})/);
+    const rejection = guard ? guard[1] : "";
+    checkTrue(
+      `  ${key} rejects a missing user in the guard (401, or a redirect to login)`,
+      Boolean(guard) && (/401/.test(rejection) || /\/login/.test(rejection))
+    );
   }
 }
 

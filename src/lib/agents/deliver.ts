@@ -189,7 +189,10 @@ export async function deliverAgentResult(params: {
     // The destination that cannot be got wrong: the user themselves.
     // Nothing leaves the product, there is no address to validate, and
     // there is no third party to be offline.
-    const created = await createNotification({
+    // createNotification returns the new row's id (null on failure) so
+    // the notification dispatcher can attach engagement events to it;
+    // this path only cares whether it landed.
+    const createdId = await createNotification({
       userId,
       source: "agent",
       title: agentName,
@@ -197,9 +200,9 @@ export async function deliverAgentResult(params: {
       url: "/dashboard/agents",
     });
     return {
-      delivered: created,
+      delivered: createdId !== null,
       via: "in_app",
-      ...(created ? {} : { reason: "Could not save the result to your notifications." }),
+      ...(createdId !== null ? {} : { reason: "Could not save the result to your notifications." }),
     };
   }
 

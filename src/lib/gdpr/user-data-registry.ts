@@ -169,6 +169,24 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // put a private key — so there is nothing to redact, and saying so is
   // more useful than a redactColumns list that would imply there is.
   { table: "crypto_wallets", label: "crypto_wallets", scope: "user_content" },
+
+  // --- Notifications (V4 #18) ---
+  //
+  // Settings and per-type preferences are the user's own choices and are
+  // exported whole. notification_channels holds CIPHERTEXT — a Discord
+  // webhook is a credential anybody holding it can post through — so the
+  // encrypted target is stripped and everything describing the
+  // connection is kept. notification_events is the record of what was
+  // sent to them and whether they opened it, which is theirs to see.
+  { table: "notification_settings", label: "notification_settings", scope: "account" },
+  { table: "notification_preferences", label: "notification_preferences", scope: "account" },
+  {
+    table: "notification_channels",
+    label: "notification_channels",
+    scope: "sensitive_redacted",
+    redactColumns: ["target_encrypted"],
+  },
+  { table: "notification_events", label: "notification_delivery_log", scope: "account" },
   { table: "user_onboarding", label: "onboarding", scope: "account" },
   { table: "user_email_preferences", label: "email_preferences", scope: "account" },
   { table: "email_send_log", label: "emails_sent_to_you", scope: "account" },

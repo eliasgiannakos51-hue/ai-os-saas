@@ -118,10 +118,34 @@ console.log("\n== 4. the reset cannot double-grant paid accounts ==");
 }
 {
   // The digest must not mail a table of zeroes to everyone every Monday.
+  //
+  // THIS CHECK USED TO NAME AN EXPRESSION: `every((m) => m.count === 0)`,
+  // the exact shape the route happened to be written in. That made it a
+  // spelling test — it would have gone red on a rewrite that kept the
+  // behaviour, and green on one that kept the expression and mailed
+  // anyway (the guard could have been inverted, or its `continue`
+  // deleted, and the regex would not have noticed). It now checks the
+  // PROPERTY, in both of the two places that must independently refuse.
   const source = readFileSync(path.join(ROOT, "src/app/api/weekly-digest/route.ts"), "utf8");
+
+  // 1. The route asks whether the week is worth sending at all...
+  check("the digest asks whether the week was worth an email", /digest\.worth\.worth/.test(source), true);
+  // ...and a week with no lines is not one, whatever the counters said.
+  check("an empty digest is not sent", /digest\.lines\.length === 0/.test(source), true);
+  // ...and the answer is acted on by SKIPPING, not merely computed.
   check(
-    "the digest skips accounts with no activity",
-    /every\(\(m\) => m\.count === 0\)/.test(source),
+    "the refusal actually skips the user",
+    /if \(!digest\.worth\.worth \|\| digest\.lines\.length === 0\)[\s\S]{0,80}continue;/.test(source),
+    true
+  );
+
+  // 2. The sender refuses again on its own. Defence in depth here is not
+  // ceremony: this function is the last thing between a decision and
+  // somebody's inbox, and it is reachable from anywhere.
+  const sender = readFileSync(path.join(ROOT, "src/lib/email/send-weekly-digest-email.ts"), "utf8");
+  check(
+    "the sender refuses an empty digest independently of the route",
+    /if \(!digest\.worth\.worth \|\| digest\.lines\.length === 0\) return false;/.test(sender),
     true
   );
 }

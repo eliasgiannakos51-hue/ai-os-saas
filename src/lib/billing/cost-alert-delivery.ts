@@ -136,14 +136,14 @@ async function notifyOwners(alert: CostAlert): Promise<boolean> {
   if (ids.length === 0) return false;
   let any = false;
   for (const id of ids) {
-    const done = await createNotification({
+    const doneId = await createNotification({
       userId: id,
       source: "cost-alert",
       title: alert.title,
       body: alert.body,
       url: "/dashboard/costs",
     });
-    any = any || done;
+    any = any || doneId !== null;
   }
   return any;
 }

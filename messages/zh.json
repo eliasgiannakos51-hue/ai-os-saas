@@ -696,7 +696,78 @@
       "collaboration": "协作",
       "collaborationHint": "团队邀请与共享工作区动态"
     },
-    "jumpToSection": "跳转到某个部分"
+    "jumpToSection": "跳转到某个部分",
+    "notifications": {
+      "title": "通知",
+      "description": "选择哪些内容会送到你手上，以及送到哪里。只有真的有事要说时我们才会发送。",
+      "saved": "已保存",
+      "saveError": "保存失败——请再试一次。",
+      "criticalNote": "付款问题、额度不足以及需要你处理的错误，即使你关闭了该类型，也始终会在应用内留下记录。",
+      "channels": {
+        "in_app": "应用内",
+        "email": "邮件",
+        "telegram": "Telegram",
+        "discord": "Discord"
+      },
+      "types": {
+        "agent_completed": {
+          "label": "智能体有发现",
+          "description": "只有当一次运行真的产出了结果时才通知——绝不会只因为它运行过。"
+        },
+        "website_published": {
+          "label": "网站已发布",
+          "description": "当你的某个网站上线时。"
+        },
+        "research_ready": {
+          "label": "研究已完成",
+          "description": "当一份深度研究报告完成时。"
+        },
+        "credits_low": {
+          "label": "额度即将用完",
+          "description": "在 80% 和 100% 各提醒一次，让你的定时任务不会毫无预警地停下。"
+        },
+        "payment_failed": {
+          "label": "付款失败",
+          "description": "当银行卡被拒、订阅面临中断时。"
+        },
+        "team_member_joined": {
+          "label": "新成员加入",
+          "description": "当有人接受了你的邀请时。"
+        },
+        "error_needs_attention": {
+          "label": "有事需要你处理",
+          "description": "当出现了只有你才能修复的问题时。"
+        }
+      },
+      "quiet": {
+        "title": "免打扰时段",
+        "description": "在这两个时间之间不会有任何打扰。",
+        "enable": "启用免打扰时段",
+        "from": "从",
+        "to": "到",
+        "offset": "你的时区",
+        "deferNote": "是暂缓，不是丢弃：免打扰时段内产生的内容会在时段结束时送达。付款问题和需要你处理的错误仍然会立即送到。"
+      },
+      "chat": {
+        "title": "Telegram 与 Discord",
+        "description": "把通知发到聊天里，而不是收件箱。即使连接后，所有类型默认仍是关闭的。",
+        "connect": "连接",
+        "connecting": "正在连接…",
+        "disconnect": "断开连接",
+        "connected": "已连接",
+        "notConfigured": "此部署尚未配置 Telegram。",
+        "testSent": "已连接——请查收我们的测试消息。",
+        "testFailed": "我们无法向那里投递测试消息，因此什么都没有保存。",
+        "telegram": {
+          "help": "给我们的机器人发条消息，然后粘贴它回复的 chat ID。",
+          "placeholder": "会话 ID"
+        },
+        "discord": {
+          "help": "粘贴你想要的频道的 Discord webhook 地址。",
+          "placeholder": "https://discord.com/api/webhooks/…"
+        }
+      }
+    }
   },
   "dashboard": {
     "overview": {

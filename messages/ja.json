@@ -696,7 +696,78 @@
       "collaboration": "コラボレーション",
       "collaborationHint": "チーム招待と共有ワークスペースのアクティビティ"
     },
-    "jumpToSection": "セクションへ移動"
+    "jumpToSection": "セクションへ移動",
+    "notifications": {
+      "title": "通知",
+      "description": "何をどこで受け取るかを選べます。お伝えすることがあるときだけ送ります。",
+      "saved": "保存しました",
+      "saveError": "保存できませんでした — もう一度お試しください。",
+      "criticalNote": "支払いの問題、クレジット残量の不足、対応が必要なエラーは、種類をオフにしていてもアプリ内に必ず記録が残ります。",
+      "channels": {
+        "in_app": "アプリ内",
+        "email": "メール",
+        "telegram": "Telegram",
+        "discord": "Discord"
+      },
+      "types": {
+        "agent_completed": {
+          "label": "エージェントが何かを見つけた",
+          "description": "実行が実際に結果を出したときだけです — 走ったというだけでは通知しません。"
+        },
+        "website_published": {
+          "label": "サイトを公開した",
+          "description": "あなたのサイトのどれかが公開されたとき。"
+        },
+        "research_ready": {
+          "label": "リサーチが完了",
+          "description": "ディープリサーチのレポートが仕上がったとき。"
+        },
+        "credits_low": {
+          "label": "クレジットが残りわずか",
+          "description": "80% と 100% でそれぞれ一度ずつ。予約した処理が予告なく止まらないように。"
+        },
+        "payment_failed": {
+          "label": "支払いに失敗",
+          "description": "カードが拒否され、サブスクリプションが危うくなったとき。"
+        },
+        "team_member_joined": {
+          "label": "新しいメンバー",
+          "description": "招待を誰かが承諾したとき。"
+        },
+        "error_needs_attention": {
+          "label": "対応が必要です",
+          "description": "あなたにしか直せない形で何かが壊れたとき。"
+        }
+      },
+      "quiet": {
+        "title": "通知しない時間帯",
+        "description": "この時間のあいだは何にも邪魔されません。",
+        "enable": "通知しない時間帯を使う",
+        "from": "開始",
+        "to": "終了",
+        "offset": "タイムゾーン",
+        "deferNote": "破棄ではなく保留です。この時間帯に発生したものは、時間帯が終わったときに届きます。支払いの問題と対応が必要なエラーはそのまま届きます。"
+      },
+      "chat": {
+        "title": "Telegram と Discord",
+        "description": "受信トレイではなくチャットに通知を送ります。接続後も、すべての種類が既定ではオフのままです。",
+        "connect": "接続",
+        "connecting": "接続中…",
+        "disconnect": "切断",
+        "connected": "接続済み",
+        "notConfigured": "この環境では Telegram が設定されていません。",
+        "testSent": "接続しました — テストメッセージをご確認ください。",
+        "testFailed": "そこへテストメッセージを届けられなかったため、何も保存していません。",
+        "telegram": {
+          "help": "ボットにメッセージを送り、返ってきた chat ID を貼り付けてください。",
+          "placeholder": "チャット ID"
+        },
+        "discord": {
+          "help": "使いたいチャンネルの Discord webhook URL を貼り付けてください。",
+          "placeholder": "https://discord.com/api/webhooks/…"
+        }
+      }
+    }
   },
   "dashboard": {
     "overview": {

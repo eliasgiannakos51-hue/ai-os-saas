@@ -141,7 +141,9 @@ console.log("== 0. the database really is the one the migrations build ==");
 // 77 -> 83: V4 #14 added trading_accounts, trading_rules and
 // rule_violations; V4 #15 added bank_connections, bank_transactions and
 // crypto_wallets.
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 83);
+// 83 -> 87: V4 #18 added notification_settings, notification_preferences,
+// notification_channels and notification_events.
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 87);
 eq(
   "the credit functions exist",
   Number(

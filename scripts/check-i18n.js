@@ -399,6 +399,16 @@ const LOCALE_ALLOWED = new Set([
   "pt:moduleData.fields.marketing",
   "pt:moduleData.options.final",
   "pt:moduleData.options.web",
+  // V4 #18. Three real linguistic facts rather than three skipped
+  // translations: "email" is the ordinary Greek and Italian word for
+  // email (Greek's own "ηλεκτρονικό ταχυδρομείο" is what a government
+  // form says, not what anybody labels a checkbox), and "Notifications"
+  // is spelled identically in French. The other nine locales translate
+  // all three and are not listed here — which is why this is an
+  // allowance per locale rather than a rule about short words.
+  "el:settings.notifications.channels.email",
+  "it:settings.notifications.channels.email",
+  "fr:settings.notifications.title",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
@@ -419,6 +429,15 @@ const INTENTIONALLY_IDENTICAL = new Set([
   "dashboard.agents.delivery.channels.slack",
   "dashboard.agents.delivery.channels.telegram",
   "dashboard.agents.delivery.channels.discord",
+  // The same two brand names in the V4 #18 notification matrix, for the
+  // same reason. The column headers next to them ("In-app", "Email") ARE
+  // translated everywhere, which is why those two are not on this list.
+  "settings.notifications.channels.telegram",
+  "settings.notifications.channels.discord",
+  // A Discord webhook URL shown as a placeholder. A FORMAT, not prose —
+  // and unlike most placeholders this one is copied literally, so a
+  // "translated" version would be a wrong example.
+  "settings.notifications.chat.discord.placeholder",
   // A hex colour code shown as the placeholder in the Website Builder's
   // colour field. It is a FORMAT example, not prose — "#1d4ed8" is the
   // same six characters in every language, and translating it would mean

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { checkCronAuth } from "@/lib/cron-auth";
 import { logApiError } from "@/lib/log-error";
+import { drainDeferredNotifications } from "@/lib/notify/dispatch";
 import { executeAgent, pauseAgentForNoCredits } from "@/lib/agents/execute-agent";
 import { trySubmitAsBatch } from "@/lib/ai/batch/agent-batch";
 import { batchEnabled } from "@/lib/ai/batch/batch-policy";
@@ -226,6 +227,20 @@ export async function GET(request: Request) {
       logApiError("/api/cron/agent-runs", stuckError, { stage: "sweep_stuck_runs" });
     }
 
+    // THE OTHER HALF OF QUIET HOURS (V4 #18). A notification held
+    // overnight is only "deferred" rather than "dropped" if something
+    // later picks it up, and this is the only sweep that runs often
+    // enough for a window that ends at 08:00 to mean 08:00 rather than
+    // "some time tomorrow". It rides on this cron instead of taking its
+    // own schedule slot because it is a few hundred milliseconds of work
+    // and a ninth cron entry is a platform limit somebody hits later.
+    let deferredNotifications = { examined: 0, sent: 0 };
+    try {
+      deferredNotifications = await drainDeferredNotifications();
+    } catch (drainError) {
+      logApiError("/api/cron/agent-runs", drainError, { stage: "drain_deferred_notifications" });
+    }
+
     return NextResponse.json({
       ok: true,
       due: agents.length,
@@ -235,6 +250,7 @@ export async function GET(request: Request) {
       pausedForCredits,
       batched,
       stuckRunsClosed: stuckCount ?? 0,
+      deferredNotifications,
     });
   } catch (err) {
     logApiError("/api/cron/agent-runs", err);

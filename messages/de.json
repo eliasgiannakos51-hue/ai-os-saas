@@ -696,7 +696,78 @@
       "collaboration": "Zusammenarbeit",
       "collaborationHint": "Team-Einladungen und Aktivität im geteilten Workspace"
     },
-    "jumpToSection": "Zu einem Abschnitt springen"
+    "jumpToSection": "Zu einem Abschnitt springen",
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "description": "Wähle, was dich erreicht und wo. Wir senden nur, wenn es etwas zu sagen gibt.",
+      "saved": "Gespeichert",
+      "saveError": "Konnte nicht gespeichert werden — versuch es noch einmal.",
+      "criticalNote": "Zahlungsprobleme, niedrige Credits und Fehler, die dich brauchen, hinterlassen immer einen Eintrag hier in der App — auch wenn du den Typ ausschaltest.",
+      "channels": {
+        "in_app": "In der App",
+        "email": "E-Mail",
+        "telegram": "Telegram",
+        "discord": "Discord"
+      },
+      "types": {
+        "agent_completed": {
+          "label": "Agent hat etwas gefunden",
+          "description": "Nur wenn ein Lauf wirklich ein Ergebnis geliefert hat — nie, weil er einfach gelaufen ist."
+        },
+        "website_published": {
+          "label": "Website veröffentlicht",
+          "description": "Wenn eine deiner Seiten online geht."
+        },
+        "research_ready": {
+          "label": "Recherche fertig",
+          "description": "Wenn ein Deep-Research-Bericht abgeschlossen ist."
+        },
+        "credits_low": {
+          "label": "Credits werden knapp",
+          "description": "Bei 80% und noch einmal bei 100%, damit deine geplante Arbeit nicht ohne Vorwarnung stoppt."
+        },
+        "payment_failed": {
+          "label": "Zahlung fehlgeschlagen",
+          "description": "Wenn eine Karte abgelehnt wird und dein Abo in Gefahr ist."
+        },
+        "team_member_joined": {
+          "label": "Neues Teammitglied",
+          "description": "Wenn jemand deine Einladung annimmt."
+        },
+        "error_needs_attention": {
+          "label": "Etwas braucht dich",
+          "description": "Wenn etwas so kaputtgegangen ist, dass nur du es beheben kannst."
+        }
+      },
+      "quiet": {
+        "title": "Ruhezeiten",
+        "description": "Zwischen diesen Zeiten unterbricht dich nichts.",
+        "enable": "Ruhezeiten verwenden",
+        "from": "Von",
+        "to": "Bis",
+        "offset": "Deine Zeitzone",
+        "deferNote": "Zurückgehalten, nicht verworfen: Alles, was während der Ruhezeit anfällt, kommt an, sobald das Fenster endet. Zahlungsprobleme und Fehler, die dich brauchen, kommen trotzdem sofort durch."
+      },
+      "chat": {
+        "title": "Telegram und Discord",
+        "description": "Schicke Benachrichtigungen in einen Chat statt ins Postfach. Standardmäßig für jeden Typ aus, auch nach dem Verbinden.",
+        "connect": "Verbinden",
+        "connecting": "Verbinde…",
+        "disconnect": "Trennen",
+        "connected": "Verbunden",
+        "notConfigured": "Telegram ist auf dieser Installation nicht eingerichtet.",
+        "testSent": "Verbunden — schau nach unserer Testnachricht.",
+        "testFailed": "Wir konnten dort keine Testnachricht zustellen, deshalb wurde nichts gespeichert.",
+        "telegram": {
+          "help": "Schreib unserem Bot und füge die Chat-ID ein, die er dir antwortet.",
+          "placeholder": "Chat-ID"
+        },
+        "discord": {
+          "help": "Füge eine Discord-Webhook-URL für den gewünschten Kanal ein.",
+          "placeholder": "https://discord.com/api/webhooks/…"
+        }
+      }
+    }
   },
   "dashboard": {
     "overview": {

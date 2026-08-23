@@ -696,7 +696,78 @@
       "collaboration": "Collaboration",
       "collaborationHint": "Team invites and shared-workspace activity"
     },
-    "jumpToSection": "Jump to section"
+    "jumpToSection": "Jump to section",
+    "notifications": {
+      "title": "Notifications",
+      "description": "Choose what reaches you, and where. We only send something when there is something to say.",
+      "saved": "Saved",
+      "saveError": "Couldn't save that — try again.",
+      "criticalNote": "Payment problems, low credits and errors that need you always leave a record here in the app, even when you turn the type off.",
+      "channels": {
+        "in_app": "In-app",
+        "email": "Email",
+        "telegram": "Telegram",
+        "discord": "Discord"
+      },
+      "types": {
+        "agent_completed": {
+          "label": "Agent found something",
+          "description": "Only when a run actually produced a result — never just because it ran."
+        },
+        "website_published": {
+          "label": "Website published",
+          "description": "When one of your sites goes live."
+        },
+        "research_ready": {
+          "label": "Research ready",
+          "description": "When a deep research report has finished."
+        },
+        "credits_low": {
+          "label": "Credits running low",
+          "description": "At 80% and again at 100%, so your scheduled work doesn't stop without warning."
+        },
+        "payment_failed": {
+          "label": "Payment failed",
+          "description": "When a card is declined and your subscription is at risk."
+        },
+        "team_member_joined": {
+          "label": "New team member",
+          "description": "When somebody accepts your invitation."
+        },
+        "error_needs_attention": {
+          "label": "Something needs you",
+          "description": "When something broke in a way only you can fix."
+        }
+      },
+      "quiet": {
+        "title": "Quiet hours",
+        "description": "Nothing will interrupt you between these times.",
+        "enable": "Use quiet hours",
+        "from": "From",
+        "to": "To",
+        "offset": "Your time zone",
+        "deferNote": "Held, not dropped: anything raised during quiet hours arrives when the window ends. Payment problems and errors that need you still come straight through."
+      },
+      "chat": {
+        "title": "Telegram and Discord",
+        "description": "Send notifications to a chat instead of an inbox. Off by default for every type, even once connected.",
+        "connect": "Connect",
+        "connecting": "Connecting…",
+        "disconnect": "Disconnect",
+        "connected": "Connected",
+        "notConfigured": "Telegram isn't set up on this deployment.",
+        "testSent": "Connected — check for our test message.",
+        "testFailed": "We couldn't deliver a test message there, so nothing was saved.",
+        "telegram": {
+          "help": "Message our bot, then paste the chat ID it replies with.",
+          "placeholder": "Chat ID"
+        },
+        "discord": {
+          "help": "Paste a Discord webhook URL for the channel you want.",
+          "placeholder": "https://discord.com/api/webhooks/…"
+        }
+      }
+    }
   },
   "dashboard": {
     "overview": {

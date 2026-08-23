@@ -696,7 +696,78 @@
       "collaboration": "Colaboración",
       "collaborationHint": "Invitaciones de equipo y actividad del espacio compartido"
     },
-    "jumpToSection": "Ir a una sección"
+    "jumpToSection": "Ir a una sección",
+    "notifications": {
+      "title": "Notificaciones",
+      "description": "Elige qué te llega y dónde. Solo enviamos algo cuando hay algo que decir.",
+      "saved": "Guardado",
+      "saveError": "No se pudo guardar — inténtalo de nuevo.",
+      "criticalNote": "Los problemas de pago, los créditos bajos y los errores que te necesitan siempre dejan constancia aquí en la app, aunque desactives ese tipo.",
+      "channels": {
+        "in_app": "En la app",
+        "email": "Correo",
+        "telegram": "Telegram",
+        "discord": "Discord"
+      },
+      "types": {
+        "agent_completed": {
+          "label": "El agente encontró algo",
+          "description": "Solo cuando una ejecución dio un resultado real — nunca solo porque se ejecutó."
+        },
+        "website_published": {
+          "label": "Sitio publicado",
+          "description": "Cuando uno de tus sitios se pone en línea."
+        },
+        "research_ready": {
+          "label": "Investigación lista",
+          "description": "Cuando termina un informe de investigación profunda."
+        },
+        "credits_low": {
+          "label": "Quedan pocos créditos",
+          "description": "Al 80% y otra vez al 100%, para que tu trabajo programado no se detenga sin aviso."
+        },
+        "payment_failed": {
+          "label": "Pago fallido",
+          "description": "Cuando se rechaza una tarjeta y tu suscripción está en riesgo."
+        },
+        "team_member_joined": {
+          "label": "Nuevo miembro del equipo",
+          "description": "Cuando alguien acepta tu invitación."
+        },
+        "error_needs_attention": {
+          "label": "Algo te necesita",
+          "description": "Cuando algo falló de una forma que solo tú puedes arreglar."
+        }
+      },
+      "quiet": {
+        "title": "Horas de silencio",
+        "description": "Nada te interrumpirá entre estas horas.",
+        "enable": "Usar horas de silencio",
+        "from": "Desde",
+        "to": "Hasta",
+        "offset": "Tu zona horaria",
+        "deferNote": "Se retienen, no se descartan: lo que surja durante las horas de silencio llega cuando termina la ventana. Los problemas de pago y los errores que te necesitan pasan igualmente."
+      },
+      "chat": {
+        "title": "Telegram y Discord",
+        "description": "Envía notificaciones a un chat en lugar de al correo. Desactivado por defecto para todos los tipos, incluso una vez conectado.",
+        "connect": "Conectar",
+        "connecting": "Conectando…",
+        "disconnect": "Desconectar",
+        "connected": "Conectado",
+        "notConfigured": "Telegram no está configurado en esta instalación.",
+        "testSent": "Conectado — busca nuestro mensaje de prueba.",
+        "testFailed": "No pudimos entregar un mensaje de prueba ahí, así que no se guardó nada.",
+        "telegram": {
+          "help": "Escribe a nuestro bot y pega el ID de chat que te responda.",
+          "placeholder": "ID de chat"
+        },
+        "discord": {
+          "help": "Pega una URL de webhook de Discord para el canal que quieras.",
+          "placeholder": "https://discord.com/api/webhooks/…"
+        }
+      }
+    }
   },
   "dashboard": {
     "overview": {

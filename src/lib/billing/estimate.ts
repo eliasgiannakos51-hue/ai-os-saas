@@ -245,6 +245,19 @@ export const ACTION_PROFILES = {
   // Anthropic bills those per query rather than per token. The unused
   // remainder is released at settlement, so over-holding costs the user
   // nothing.
+  // THREE PROFILES, ONE PER DEPTH TIER (lib/agents/agent-depth.ts).
+  //
+  // `agentRun` was one profile because every agent ran identically. It
+  // still exists, unchanged, and is still what an agent with no depth
+  // recorded is priced at — which is correct, because the standard tier
+  // IS what those agents do.
+  //
+  // Each number below is read off the tier's real caps rather than
+  // chosen: the auxiliary call is that tier's research pass at its
+  // research-token ceiling, there is one per research round, and
+  // baseOutputChars is the tier's output ceiling in characters
+  // (outputTokens x CHARS_PER_TOKEN). A profile tuned to hit a price
+  // instead would be a hold that does not cover what the run does.
   agentRun: {
     systemPromptTokens: 800,
     auxiliaryCalls: [{ inputTokens: 900, outputTokens: 900 }],
@@ -253,6 +266,43 @@ export const ACTION_PROFILES = {
     // for the same reason as websiteGenerate's baseOutputChars.
     baseOutputChars: 12000,
     outputCharsPerInputChar: 2,
+  },
+  // simple: 1 research pass at 1,500 tokens, 1,500-token answer.
+  agentRunSimple: {
+    systemPromptTokens: 800,
+    auxiliaryCalls: [{ inputTokens: 400, outputTokens: 1500 }],
+    baseOutputChars: 6000,
+    outputCharsPerInputChar: 2,
+  },
+  // standard: 1 research pass at 1,500 tokens, 3,000-token answer.
+  agentRunStandard: {
+    systemPromptTokens: 800,
+    auxiliaryCalls: [{ inputTokens: 400, outputTokens: 1500 }],
+    baseOutputChars: 12000,
+    outputCharsPerInputChar: 2,
+  },
+  // deep: TWO research passes at 2,500 tokens each — the second is given
+  // the first's findings, which is why its input allowance is larger —
+  // and a 4,000-token answer.
+  agentRunDeep: {
+    systemPromptTokens: 1000,
+    auxiliaryCalls: [
+      { inputTokens: 600, outputTokens: 2500 },
+      { inputTokens: 900, outputTokens: 2500 },
+    ],
+    baseOutputChars: 16000,
+    outputCharsPerInputChar: 2,
+  },
+  // Filling a TEMPLATE's slots from the user's own sentence
+  // (api/agents/templates/adopt). One small call on the smallest model:
+  // read a request and a pattern, return the subject and a name. This is
+  // what makes "use this one" genuinely cheaper than "build a new one"
+  // rather than merely priced as if it were.
+  agentTemplateFill: {
+    systemPromptTokens: 500,
+    auxiliaryCalls: [],
+    baseOutputChars: 600,
+    outputCharsPerInputChar: 0,
   },
   // Ask AI about a record (api/records/ask). The user's question is
   // short; the INPUT is dominated by the record itself, which the route
@@ -359,6 +409,46 @@ export const ACTION_PROFILES = {
     // The synthesis call's own output: a full report.
     baseOutputChars: 16000,
     outputCharsPerInputChar: 1,
+  },
+  // Reading a dataset's PROFILE and saying what it means
+  // (api/data-analysis/[id]/analyse). The model never sees a row — it is
+  // handed the column types, the statistics and the correlations that
+  // lib/data-analysis/profile.ts computed, plus a handful of sample rows
+  // for flavour. So the input is bounded by the number of COLUMNS, not by
+  // the size of the upload: a 50,000-row file and a 200-row file with the
+  // same columns cost the same to analyse, which is the honest shape for
+  // a price and the reason this profile does not scale with rows.
+  dataAnalyse: {
+    systemPromptTokens: 1600,
+    auxiliaryCalls: [],
+    baseOutputChars: 4000,
+    outputCharsPerInputChar: 1,
+  },
+  // One question about a dataset (api/data-analysis/[id]/ask). The
+  // question is short; the context is the profile again. The ANSWER does
+  // not grow with the file — "which region sold most" is one sentence
+  // whatever the row count — so output does not scale with input, for the
+  // same reason fileAsk's does not.
+  dataQuestion: {
+    systemPromptTokens: 1400,
+    auxiliaryCalls: [],
+    baseOutputChars: 1200,
+    outputCharsPerInputChar: 0,
+  },
+  // One coding operation (api/coding/run): generate, explain, find bugs,
+  // convert or write tests.
+  //
+  // OUTPUT SCALES WITH INPUT ABOVE 1, and that is not padding. Two of the
+  // five operations RE-EMIT the input: converting a file to another
+  // language returns something the same size or larger, and "write tests
+  // for this" reliably returns more code than it was given. A ratio at or
+  // below 1 would under-reserve exactly the two operations people use on
+  // their longest files.
+  codeAssist: {
+    systemPromptTokens: 1200,
+    auxiliaryCalls: [],
+    baseOutputChars: 1500,
+    outputCharsPerInputChar: 2,
   },
 } as const;
 

@@ -123,7 +123,9 @@
       "files": "File",
       "deepResearch": "Ricerca approfondita",
       "help": "Centro assistenza",
-      "affiliate": "Affiliazione"
+      "affiliate": "Affiliazione",
+      "formSubmissions": "Invii dei moduli",
+      "routing": "Instradamento dei modelli"
     },
     "groupHints": {
       "create": "Genera un sito, pianifica un obiettivo, scrivi un documento.",
@@ -175,7 +177,8 @@
       "files": "Carica PDF, Word ed Excel e fai domande all'IA su di essi",
       "deepResearch": "Dai un argomento: cerca, verifica e scrive un report con le fonti",
       "help": "Le risposte alle domande più frequenti, senza consumare crediti.",
-      "affiliate": "Il tuo link di invito, quanto hai guadagnato e come vieni pagato."
+      "affiliate": "Il tuo link di invito, quanto hai guadagnato e come vieni pagato.",
+      "formSubmissions": "Tutto ciò che i visitatori hanno inviato tramite un modulo sui tuoi siti pubblicati"
     },
     "comingSoon": "In arrivo",
     "closeMenu": "Chiudi il menu"
@@ -696,7 +699,131 @@
       "collaborationHint": "Inviti al team e attività dello spazio condiviso",
       "iosNeedsInstall": "Su iPhone e iPad le notifiche funzionano solo dopo aver aggiunto Ionexa alla schermata Home."
     },
-    "jumpToSection": "Vai a una sezione"
+    "jumpToSection": "Vai a una sezione",
+    "notifications": {
+      "title": "Notifiche",
+      "description": "Scegli cosa ti arriva e dove. Mandiamo qualcosa solo quando c'è qualcosa da dire.",
+      "saved": "Salvato",
+      "saveError": "Non è stato possibile salvare — riprova.",
+      "criticalNote": "Problemi di pagamento, crediti bassi ed errori che richiedono te lasciano sempre traccia qui nell'app, anche se disattivi il tipo.",
+      "channels": {
+        "in_app": "Nell'app",
+        "email": "Email",
+        "telegram": "Telegram",
+        "discord": "Discord"
+      },
+      "types": {
+        "agent_completed": {
+          "label": "L'agente ha trovato qualcosa",
+          "description": "Solo quando un'esecuzione ha prodotto un risultato vero — mai solo perché è partita."
+        },
+        "website_published": {
+          "label": "Sito pubblicato",
+          "description": "Quando uno dei tuoi siti va online."
+        },
+        "research_ready": {
+          "label": "Ricerca pronta",
+          "description": "Quando un report di ricerca approfondita è finito."
+        },
+        "credits_low": {
+          "label": "Crediti in esaurimento",
+          "description": "All'80% e di nuovo al 100%, così il lavoro programmato non si ferma senza preavviso."
+        },
+        "payment_failed": {
+          "label": "Pagamento fallito",
+          "description": "Quando una carta viene rifiutata e il tuo abbonamento è a rischio."
+        },
+        "team_member_joined": {
+          "label": "Nuovo membro del team",
+          "description": "Quando qualcuno accetta il tuo invito."
+        },
+        "error_needs_attention": {
+          "label": "Qualcosa ha bisogno di te",
+          "description": "Quando qualcosa si è rotto in un modo che solo tu puoi sistemare."
+        }
+      },
+      "quiet": {
+        "title": "Ore di silenzio",
+        "description": "Niente ti interromperà tra questi orari.",
+        "enable": "Usa le ore di silenzio",
+        "from": "Da",
+        "to": "A",
+        "offset": "Il tuo fuso orario",
+        "deferNote": "Trattenute, non buttate: tutto ciò che succede durante le ore di silenzio arriva quando la finestra finisce. I problemi di pagamento e gli errori che richiedono te passano comunque."
+      },
+      "chat": {
+        "title": "Telegram e Discord",
+        "description": "Manda le notifiche in una chat invece che nella posta. Disattivato per impostazione predefinita per ogni tipo, anche dopo il collegamento.",
+        "connect": "Collega",
+        "connecting": "Collegamento…",
+        "disconnect": "Scollega",
+        "connected": "Collegato",
+        "notConfigured": "Telegram non è configurato su questa installazione.",
+        "testSent": "Collegato — cerca il nostro messaggio di prova.",
+        "testFailed": "Non siamo riusciti a consegnare un messaggio di prova lì, quindi non è stato salvato nulla.",
+        "telegram": {
+          "help": "Scrivi al nostro bot e incolla l'ID chat che ti risponde.",
+          "placeholder": "ID chat"
+        },
+        "discord": {
+          "help": "Incolla un URL webhook di Discord per il canale che vuoi.",
+          "placeholder": "https://discord.com/api/webhooks/…"
+        }
+      }
+    },
+    "overage": {
+      "title": "Utilizzo extra",
+      "description": "Quando i crediti finiscono, continua a {price} € per credito — solo se lo chiedi tu.",
+      "offNow": "L'utilizzo extra è disattivato. Non può essere addebitato nulla in più: finiti i crediti, le azioni si fermano.",
+      "capLabel": "Il tuo limite mensile (€)",
+      "capPlaceholder": "es. 20",
+      "capHint": "Tra {min} € e {max} €.",
+      "preview": {
+        "heading": "Che cosa stai accettando",
+        "rate": "{price} € per credito, bloccato al prezzo di oggi.",
+        "cap": "Mai più di {cap} € in un mese solare.",
+        "credits": "Bastano per {credits} crediti aggiuntivi.",
+        "invoice": "Addebitato come voce separata sulla prossima fattura, distinta dal piano."
+      },
+      "agree": "Attiva l'utilizzo extra",
+      "saved": "Salvato. Puoi disattivarlo quando vuoi.",
+      "thisMonth": "Utilizzo extra di questo mese",
+      "ofCap": "su {cap} €",
+      "agreedRate": "A {price} € per credito, la tariffa che hai accettato.",
+      "capReached": "Hai raggiunto il tuo limite. Non verrà addebitato altro finché non lo aumenti.",
+      "turnOff": "Disattiva l'utilizzo extra",
+      "turnOffNote": "Disattivarlo ferma gli addebiti futuri. Quanto già usato questo mese resta fatturato."
+    },
+    "addons": {
+      "title": "Componenti aggiuntivi",
+      "description": "Capacità in più oltre al tuo piano. Annulla un componente mensile quando vuoi.",
+      "perMonth": "/mese",
+      "oneOff": " una tantum",
+      "owned": "Ne hai {count}",
+      "notConfigured": "Non disponibile su questa installazione ({envVar} non è impostato).",
+      "buy": "Acquista",
+      "subscribe": "Aggiungi",
+      "cancel": "Annulla",
+      "oneOffNote": "Un pacchetto di crediti viene accreditato subito e non è annullabile.",
+      "items": {
+        "credits_1000": {
+          "name": "1.000 crediti",
+          "grants": "ricarica una tantum"
+        },
+        "agents_5": {
+          "name": "5 agent in più",
+          "grants": "alza il limite di agent"
+        },
+        "storage_10gb": {
+          "name": "10 GB di spazio",
+          "grants": "più spazio per i file"
+        },
+        "priority": {
+          "name": "Esecuzione prioritaria",
+          "grants": "i tuoi lavori partono per primi"
+        }
+      }
+    }
   },
   "dashboard": {
     "overview": {
@@ -1155,7 +1282,19 @@
           "auto": "Decidi tu"
         },
         "logoHint": "Senza logo, il sito mostra il nome della tua attività come wordmark stilizzato — non inventa mai un logo al posto tuo.",
-        "logoNeedsUpload": "Carica prima il logo come immagine"
+        "logoNeedsUpload": "Carica prima il logo come immagine",
+        "photoSourceTitle": "Fotografie — questo sito ne userà circa {count}",
+        "photoSourceChoices": {
+          "own": "Carica le mie",
+          "stock": "Foto stock",
+          "none": "Senza foto"
+        },
+        "photoSourceHint": {
+          "own": "Le tue vanno prima nell'hero e nella galleria. Ciò che manca è coperto da foto stock.",
+          "stock": "Foto stock scelte per ogni sezione.",
+          "none": "Un design fatto di tipografia, colore e forme — senza fotografie."
+        },
+        "photoSourceNeedsUpload": "Allega le tue foto sopra, altrimenti verranno usate foto stock."
       },
       "imageIntro": "Il tuo logo, foto dei prodotti o del locale: quello che vuoi nella pagina o che deve dare lo stile.",
       "regenerateAlreadyUsed": "Hai già usato la rigenerazione gratuita per questo sito. Crea un nuovo sito con una descrizione diversa.",
@@ -1164,7 +1303,14 @@
         "title": "Descrivi il sito, ottieni il sito",
         "why": "Scrivi a cosa serve e a chi si rivolge: pagine, testi e impaginazione nascono da quella descrizione, e continui a modificarli a parole.",
         "example": "Sito di una pagina per un piccolo forno, con menù e orari"
-      }
+      },
+      "pageSelectLabel": "Pagine di questo sito",
+      "pageHome": "Home",
+      "editPageGone": "Questa pagina non fa più parte di questo sito: riaprilo per vedere le pagine attuali.",
+      "stockNoticeTitle": "{count} foto stock su questo sito",
+      "stockNoticeBody": "Carica le tue per un risultato più autentico — Unsplash ha un'attività come la tua, non la tua.",
+      "stockNoticeAction": "Carica foto",
+      "storageFull": "Spazio insufficiente per queste immagini — servono {needed}, liberi {free}."
     },
     "marketplace": {
       "title": "Mercato",
@@ -1469,6 +1615,59 @@
         "stepNoSearch": "Lavora solo sul testo del compito, senza ricerca web.",
         "stepWrite": "Scrive il risultato e lo verifica con quanto ha trovato.",
         "stepDeliver": "Lo invia via e-mail a {target}, {when}."
+      },
+      "runQueued": "In coda",
+      "runQueuedHint": "Inviato all'elaborazione in blocco, più economica. Il risultato arriva entro 24 ore, di solito molto prima.",
+      "depth": {
+        "legend": "Quanto lavora",
+        "perRun": "per esecuzione",
+        "suggested": "Suggerito",
+        "facts": "{sources} fonti · {steps} passaggi · circa {seconds}s",
+        "runOnce": "Esegui una volta come",
+        "runOnceHint": "Solo questa esecuzione. La pianificazione resta su {depth}.",
+        "simple": {
+          "title": "Semplice",
+          "what": "Una fonte, risposta breve. Per una domanda con una sola risposta giusta."
+        },
+        "standard": {
+          "title": "Standard",
+          "what": "Alcune fonti, verificate a incrocio. Giusto per la maggior parte dei monitoraggi."
+        },
+        "deep": {
+          "title": "Approfondito",
+          "what": "Dieci o più fonti in due giri di ricerca, e un rapporto completo."
+        }
+      },
+      "templates": {
+        "found": "{count} agenti pronti fanno già questo",
+        "use": "Usa questo — {credits} crediti",
+        "buildNew": "Creane uno nuovo — {credits} crediti",
+        "adopted": "Agente creato, osserva: {subject}",
+        "adoptError": "Non è stato possibile usare quel modello. Non è stato creato nulla."
+      },
+      "share": {
+        "open": "Condividi la struttura di questo agente",
+        "title": "Condividi come modello",
+        "explainer": "Viene pubblicata solo la struttura: il compito con il tuo argomento sostituito da uno spazio, più pianificazione e profondità. Mai il nome dell'agente, la tua email o la destinazione.",
+        "subjectLabel": "Quali parole del compito sono specifiche tue?",
+        "subjectPlaceholder": "es. Acme Srl",
+        "titleLabel": "Titolo per la libreria",
+        "descriptionLabel": "Una frase che lo descrive",
+        "previewLabel": "Cosa verrà pubblicato",
+        "shareButton": "Condividi",
+        "sharing": "Condivisione...",
+        "cancel": "Annulla",
+        "shared": "Condiviso. Puoi ritirarlo quando vuoi.",
+        "failed": "Non è stato possibile condividere. Non è stato pubblicato nulla.",
+        "slotNote": "Chi lo usa riempie {slot} con il proprio argomento.",
+        "refused": {
+          "no_slot": "Scrivi le parole che sono tue: sono quelle sostituite e quelle che non lasciano mai il tuo account.",
+          "subject_still_present": "Quella formulazione compare ancora altrove nel compito, scritta diversamente. Modifica prima il compito.",
+          "contains_contact_details": "Il compito contiene un'email, un link o un @handle. Rimuovilo prima di condividere.",
+          "contains_numbers": "Il compito contiene un numero lungo — telefono, conto o riferimento. Rimuovilo.",
+          "too_short": "Quel che resta è troppo breve per essere utile ad altri.",
+          "too_long": "Quel compito è troppo lungo da condividere."
+        }
       }
     },
     "publishing": {
@@ -1876,6 +2075,174 @@
       "opening": "Apertura di Stripe…",
       "connectError": "Non è stato possibile aprire la configurazione. Riprova.",
       "rules": "La commissione si calcola sui pagamenti effettivamente incassati. Rimborsi e contestazioni vengono stornati. Auto-segnalazioni e seconde segnalazioni della stessa persona non producono nulla."
+    },
+    "search": {
+      "kinds": {
+        "page": "Pagine",
+        "module": "Voci",
+        "file": "File",
+        "chat": "Conversazioni",
+        "website": "Siti web",
+        "agent": "Agenti",
+        "research": "Ricerca",
+        "mission": "Missioni",
+        "help": "Aiuto"
+      },
+      "filters": {
+        "type": "Tipo",
+        "module": "Modulo",
+        "date": "Data",
+        "all": "Tutto"
+      },
+      "dates": {
+        "any": "Sempre",
+        "7d": "7 giorni",
+        "30d": "30 giorni",
+        "365d": "1 anno"
+      }
+    },
+    "formSubmissions": {
+      "title": "Invii dei moduli",
+      "description": "Tutto ciò che i visitatori hanno inviato tramite un modulo sui tuoi siti.",
+      "deletedWebsite": "Sito eliminato",
+      "searchPlaceholder": "Cerca nomi, email, messaggi...",
+      "filterType": "Filtra per tipo di modulo",
+      "filterSite": "Filtra per sito",
+      "allTypes": "Tutti i tipi",
+      "allSites": "Tutti i siti",
+      "countMeta": "{shown} mostrati · {unread} non letti",
+      "exportCsv": "Esporta CSV",
+      "noName": "Invio",
+      "new": "Nuovo",
+      "noMatches": "Nessuna corrispondenza",
+      "noMatchesBody": "Prova una ricerca più breve o togli i filtri.",
+      "delete": "Elimina",
+      "deleteConfirm": "Eliminare questo invio? Non si può annullare.",
+      "deleted": "Invio eliminato.",
+      "deleteFailed": "Non è stato possibile eliminare l'invio.",
+      "markReadFailed": "Impossibile segnare come letto.",
+      "consentGiven": "Consenso dato",
+      "consentMissing": "Nessun consenso registrato",
+      "consentRecorded": "Ha acconsentito a: {text}",
+      "consentNoText": "(il testo non è stato registrato)",
+      "consentMissingBody": "Questo visitatore non ha spuntato una casella di consenso, o il modulo non ne aveva una.",
+      "empty": {
+        "title": "Ancora nessun invio",
+        "body": "Quando qualcuno compila un modulo su uno dei tuoi siti pubblicati, appare qui — anche se l'email di notifica non può partire."
+      },
+      "types": {
+        "contact": "Contatto",
+        "newsletter": "Newsletter",
+        "quote": "Richiesta di preventivo",
+        "other": "Altro"
+      },
+      "delivery": {
+        "sent": "Email inviata",
+        "no_key": "Non viene inviata nessuna email: questo deployment non ha una chiave API per le email.",
+        "unverified_domain": "Le email non arrivano: il dominio di invio non è verificato.",
+        "failed": "Alcune email di notifica non sono state inviate.",
+        "affected": "{count} invio/i sono salvati qui ma non ti sono mai stati inviati per email. Non è andato perso nulla."
+      }
+    },
+    "trading": {
+      "title": "Diario di trading",
+      "subtitle": "Le tue operazioni, le tue regole, contate.",
+      "disclaimerTitle": "Questa è una registrazione, non un consiglio",
+      "disclaimer": "Tutto ciò che vedi qui descrive operazioni che hai già fatto e regole che hai scritto tu. Non è consulenza finanziaria, non è una previsione e non dice nulla su cosa farà un mercato. Il trading comporta rischio di perdita.",
+      "adviceRefused": "Sarebbe consulenza finanziaria o una previsione di mercato, che questo prodotto non fornisce. Chiedimi invece del tuo storico.",
+      "empty": "Nessuna operazione registrata finora.",
+      "emptyCta": "Aggiungi la tua prima operazione",
+      "byInstrument": "Per strumento",
+      "bySession": "Per sessione",
+      "accounts": {
+        "title": "Conti",
+        "all": "Tutti i conti"
+      },
+      "table": {
+        "key": "Nome"
+      },
+      "equity": {
+        "title": "Curva del capitale"
+      },
+      "sessions": {
+        "sydney": "Sydney",
+        "tokyo": "Tokyo",
+        "london": "Londra",
+        "new_york": "New York",
+        "other": "Fuori sessione"
+      },
+      "stats": {
+        "trades": "Operazioni",
+        "winRate": "Percentuale di successo",
+        "netPnl": "P&L netto",
+        "profitFactor": "Profit factor",
+        "avgWin": "Guadagno medio",
+        "avgLoss": "Perdita media",
+        "maxDrawdown": "Drawdown massimo",
+        "avgDuration": "Durata media",
+        "notEnough": "Non ci sono ancora abbastanza operazioni (ne servono 5)",
+        "notEnoughShort": "poche",
+        "noLosses": "Nessuna operazione in perdita in questo campione",
+        "beforeCosts": "Queste cifre sono al lordo delle commissioni — inseriscile nelle operazioni per vederle nette.",
+        "afterCosts": "Queste cifre sono al netto delle commissioni che hai registrato.",
+        "unscoreable": "{count} operazioni non sono state calcolate (mancano prezzi o P&L)"
+      },
+      "pattern": {
+        "title": "Dopo una perdita",
+        "comparison": "Le operazioni aperte subito dopo una perdita hanno vinto nel {after}% dei casi ({afterCount} operazioni), contro il {baseline}% negli altri casi ({baselineCount} operazioni).",
+        "observationOnly": "Questo è ciò che mostra lo storico. Non dice perché, e non è un suggerimento su cosa fare.",
+        "notEnough": "Non ci sono ancora abbastanza operazioni da entrambi i lati del confronto."
+      },
+      "rules": {
+        "title": "Le tue regole",
+        "explainer": "Scrivi le tue regole come le diresti. Vengono verificate su ogni operazione con l'aritmetica, non con l'impressione di un modello — così i numeri puoi controllarli tu.",
+        "placeholder": "Max 2% di rischio. Solo Londra. RR almeno 1:2. Max 3 operazioni al giorno.",
+        "understood": "Interpretato come",
+        "couldNotParse": "Nulla di tutto ciò è stato reso verificabile, quindi non verrà salvato niente. Prova una frase più breve e specifica.",
+        "add": "Aggiungi regola",
+        "empty": "Nessuna regola per ora. Scrivine una sopra e ogni operazione sarà verificata.",
+        "delete": "Elimina regola",
+        "saved": "{count} regole salvate",
+        "saveFailed": "Non è stato possibile salvare la regola.",
+        "deleteFailed": "Non è stato possibile eliminare la regola."
+      },
+      "ruleKinds": {
+        "max_risk_percent": "Rischio per operazione",
+        "max_trades_per_day": "Operazioni al giorno",
+        "min_risk_reward": "Rischio-rendimento",
+        "allowed_sessions": "Sessioni",
+        "allowed_instruments": "Strumenti",
+        "max_daily_loss": "Limite di perdita giornaliera",
+        "no_trade_after_loss": "Pausa dopo una perdita",
+        "max_position_size": "Dimensione della posizione"
+      },
+      "ruleSummary": {
+        "max_risk_percent": "Rischiare al massimo il {percent}% per operazione",
+        "max_trades_per_day": "Al massimo {count} operazioni al giorno",
+        "min_risk_reward": "Rendimento almeno {ratio}x il rischio",
+        "allowed_sessions": "Solo queste sessioni: {sessions}",
+        "allowed_instruments": "Solo questi strumenti: {instruments}",
+        "max_daily_loss": "Fermarsi dopo aver perso {amount} in un giorno",
+        "no_trade_after_loss": "Aspettare {minutes} minuti dopo una perdita",
+        "max_position_size": "Dimensione della posizione al massimo {size}"
+      },
+      "violations": {
+        "count": "Infranta {count} volte",
+        "none": "Non infranta",
+        "uncheckable": "{count} verifiche non sono state eseguite perché alle operazioni mancava un prezzo, un importo di rischio o un orario."
+      },
+      "errors": {
+        "bad_request": "Non è stato possibile leggere quella richiesta.",
+        "delete_failed": "Non è stato possibile eliminare la regola.",
+        "empty_rule": "Scrivi prima la regola con parole tue.",
+        "failed": "Qualcosa è andato storto.",
+        "not_understood": "Non è stato possibile renderlo verificabile, quindi non è stato salvato. Prova una frase più breve e specifica.",
+        "rate_limited": "Troppe modifiche nell'ultima ora. Riprova tra poco.",
+        "recheck_failed": "Non è stato possibile aggiornare il controllo delle regole.",
+        "save_failed": "Non è stato possibile salvare la regola.",
+        "too_long": "È più lungo di quanto serva a una regola.",
+        "unauthenticated": "Hai effettuato la disconnessione. Accedi e riprova."
+      }
     }
   },
   "module": {
@@ -2089,15 +2456,12 @@
       "company": "Azienda",
       "contentIdeas": "Idee di contenuto",
       "customers": "Clienti",
-      "dataSource": "Fonte dei dati",
       "description": "Descrizione",
       "direction": "Direzione",
-      "findings": "Risultati",
       "followUpEmail": "Email di follow-up",
       "hashtags": "Hashtag",
       "idea": "Idea",
       "ideaNames": "Nomi delle idee",
-      "language": "Linguaggio",
       "launchPlan": "Piano di lancio",
       "leadName": "Nome del contatto",
       "marketing": "Marketing",
@@ -2173,9 +2537,7 @@
     "placeholders": {
       "longShort": "lunga / corta",
       "winLoss": "vincita / perdita",
-      "httpsUrl": "https://...",
-      "codingLanguages": "es. Python, TypeScript, Go",
-      "dataSources": "es. esportazione CSV, Stripe, Google Analytics"
+      "httpsUrl": "https://..."
     },
     "deleteConfirm": {
       "competitors": "Eliminare questo concorrente? L'operazione è irreversibile.",
@@ -2194,8 +2556,6 @@
       "apps": "Eliminare questa applicazione? L'operazione è irreversibile.",
       "images": "Eliminare questa immagine? L'operazione è irreversibile.",
       "videos": "Eliminare questo video? L'operazione è irreversibile.",
-      "coding": "Eliminare questa richiesta di codice? L'operazione è irreversibile.",
-      "data-analysis": "Eliminare questa analisi? L'operazione è irreversibile.",
       "presentations": "Eliminare questa nota di presentazione? L'operazione è irreversibile.",
       "campaigns": "Eliminare questa campagna? L'operazione è irreversibile."
     },
@@ -2280,16 +2640,6 @@
         "why": "Il brief di ogni video e a che punto è, così la lista delle riprese non resta mai solo nella tua testa. Non genera video.",
         "example": "Demo del prodotto da 30 secondi"
       },
-      "coding": {
-        "title": "Le cose che vuoi far costruire",
-        "why": "Descrivi la funzionalità o la correzione, indica il linguaggio e tieni tutto il backlog da qualche parte che non sia la tua testa. Non scrive codice.",
-        "example": "Uno script che unisce i CSV mensili"
-      },
-      "dataAnalysis": {
-        "title": "Le domande a cui i tuoi dati sanno rispondere",
-        "why": "La domanda, la fonte a cui va e il risultato quando torna: così una risposta non si trova mai due volte. Non analizza i tuoi dati.",
-        "example": "Quale canale porta i clienti che restano"
-      },
       "presentations": {
         "title": "Un posto per tenere traccia delle presentazioni",
         "why": "Annota le presentazioni che stai preparando o che hai già tenuto: questa pagina non genera diapositive al posto tuo. Usa il pulsante qui sopra per aggiungerne una.",
@@ -2318,8 +2668,6 @@
       "apps": "Nuova app",
       "images": "Nuova immagine",
       "videos": "Nuovo video",
-      "coding": "Nuova attività di codice",
-      "dataAnalysis": "Nuova analisi",
       "presentations": "Nuova nota di presentazione",
       "campaigns": "Nuova campagna"
     }
@@ -2503,7 +2851,8 @@
     "termsDescription": "Termini di servizio di Ionexa AI.",
     "privacyDescription": "Informativa sulla privacy di Ionexa AI.",
     "cookiesDescription": "Quali cookie imposta Ionexa AI, a cosa serve ciascuno e quanto dura.",
-    "helpDescription": "Risposte alle domande più frequenti su Ionexa AI — prezzi, crediti, siti web, agent, privacy."
+    "helpDescription": "Risposte alle domande più frequenti su Ionexa AI — prezzi, crediti, siti web, agent, privacy.",
+    "costs": "Costi"
   },
   "errors": {
     "retry": "Riprova",
@@ -2597,7 +2946,7 @@
       "e1": "Un caffè a Salonicco con menù e orari",
       "e2": "Il portfolio di un fotografo con galleria",
       "e3": "Una landing page per un SaaS, con i prezzi",
-      "limits": "Una pagina, non un negozio né un’app · Non si collega ai tuoi sistemi"
+      "limits": "Poche pagine, non un negozio o un'app · Non si collega ai tuoi sistemi"
     },
     "files": {
       "e1": "Cosa dice il contratto sulla disdetta?",
@@ -2633,5 +2982,301 @@
     "showHow": "Mostrami come",
     "installedHere": "Ionexa è installata su questo dispositivo.",
     "installUnavailable": "Il tuo browser non ha ancora proposto l'installazione. Puoi anche usare il suo menu → Installa app."
+  },
+  "voice": {
+    "listen": "Ascolta",
+    "listenFor": "Ascolta · {credits} crediti",
+    "pause": "Pausa",
+    "speed": "Velocità di riproduzione",
+    "voice": "Voce",
+    "listening": "In ascolto",
+    "listeningHint": "Parla, poi premi Ferma. Nulla viene inviato prima che tu l'abbia letto.",
+    "startListening": "Parla invece di scrivere",
+    "stopListening": "Ferma",
+    "costPerMinute": "{credits} crediti al minuto di parlato",
+    "outOfMinutes": "Nessun minuto di voce rimasto questo mese",
+    "states": {
+      "idle": "Pronto",
+      "listening": "Ti sta ascoltando",
+      "thinking": "Sta pensando",
+      "speaking": "Sta parlando"
+    },
+    "errors": {
+      "bad_request": "Non è stato possibile leggere quella richiesta.",
+      "capacity": "Il servizio è molto occupato in questo momento. Riprova tra poco.",
+      "denied": "Il microfono non è stato autorizzato. Puoi sempre scrivere.",
+      "empty": "In quella registrazione non si è sentito nulla.",
+      "failed": "La voce non è disponibile in questo momento. Puoi sempre scrivere.",
+      "insufficient_credits": "Crediti insufficienti.",
+      "no_recording": "Non è stata inviata alcuna registrazione.",
+      "no_speech": "Non è stato registrato nulla.",
+      "not_configured": "La voce non è configurata su questa installazione.",
+      "not_included": "La voce non è inclusa nel tuo piano.",
+      "out_of_minutes": "I minuti di voce di questo mese sono esauriti.",
+      "provider_error": "Non è stato possibile raggiungere il servizio vocale.",
+      "rate_limited": "Troppe registrazioni nell'ultima ora. Riprova tra poco.",
+      "reserve_failed": "Non è stato possibile riservare i crediti per questo.",
+      "too_large": "Quella registrazione è troppo lunga.",
+      "unauthenticated": "Hai effettuato la disconnessione. Accedi e riprova.",
+      "unsupported": "Questo browser non può registrare audio. Puoi sempre scrivere.",
+      "unsupported_type": "Quel formato audio non è supportato.",
+      "usage_unavailable": "Non è stato possibile controllare i minuti di voce in questo momento."
+    },
+    "permission": {
+      "title": "Prima che si apra il microfono",
+      "pressToStart": "La registrazione parte solo quando premi e si ferma quando premi di nuovo.",
+      "notStored": "L'audio viene inviato per la trascrizione e non viene conservato da nessuna parte — né da noi né dopo.",
+      "editFirst": "Leggi e correggi il testo prima che venga inviato qualsiasi cosa.",
+      "cost": "{credits} crediti al minuto, {minutes} minuti al mese nel tuo piano.",
+      "allow": "Apri il microfono",
+      "cancel": "Non ora"
+    },
+    "draft": {
+      "title": "Ciò che è stato sentito",
+      "use": "Usa questo testo",
+      "discard": "Scarta",
+      "notSent": "Non è stato inviato nulla. Correggi il testo e invialo tu."
+    },
+    "voices": {
+      "neutral": "Neutra",
+      "warm": "Calda",
+      "deep": "Profonda",
+      "bright": "Brillante"
+    },
+    "conversation": {
+      "title": "Conversazione a mani libere",
+      "start": "Parla",
+      "close": "Termina la conversazione",
+      "speak": "Premi e parla",
+      "interrupt": "Interrompi",
+      "tapToSpeak": "Premi ovunque e parla. Smette di ascoltare da solo quando ti fermi.",
+      "tapToInterrupt": "Premi ovunque per interrompere e riprendere a parlare.",
+      "hint": "Parla normalmente: il turno finisce quando ti fermi.",
+      "empty": "Tutto ciò che viene detto appare anche qui come testo."
+    },
+    "settings": {
+      "description": "Parla invece di scrivere e fatti leggere le risposte. Scrivere e leggere non vengono mai tolti: ogni comando vocale sta accanto al testo, non al suo posto.",
+      "exhausted": "Nessun minuto rimasto questo mese. Si rinnovano il primo.",
+      "notConfigured": "La voce non è configurata su questa installazione, quindi i pulsanti microfono e Ascolta non compaiono.",
+      "notIncluded": "La voce non è inclusa nel tuo piano. Tutto qui si può comunque scrivere e leggere.",
+      "perMinute": "{credits} crediti al minuto",
+      "privacy": "La registrazione parte solo quando premi. L'audio viene inviato per la trascrizione e non viene conservato da nessuna parte: teniamo i secondi e nient'altro.",
+      "remaining": "Restano {minutes} minuti",
+      "speakLabel": "Farsi leggere",
+      "title": "Voce",
+      "transcribeLabel": "Parlargli",
+      "used": "{used} di {limit} minuti usati questo mese"
+    }
+  },
+  "dataAnalysis": {
+    "title": "Analisi dei dati",
+    "description": "Carica un foglio di calcolo. Ogni statistica è calcolata sull'intero file, mai indovinata.",
+    "upload": {
+      "title": "Carica un file",
+      "description": "CSV o Excel, fino a 8 MB. Leggere un file non costa nulla.",
+      "button": "Scegli un file",
+      "working": "Sto leggendo…",
+      "done": "Lette {rows} righe",
+      "failed": "Non è stato possibile leggere quel file.",
+      "tooLarge": "Quel file è troppo grande — il limite è 8 MB."
+    },
+    "summary": {
+      "counts": "{rows} righe · {columns} colonne",
+      "duplicates": "{count} righe esattamente duplicate",
+      "truncated": "Abbiamo letto le prime 50.000 righe. I grafici descrivono quelle, non tutto il file.",
+      "ragged": "{count} righe non combaciavano con l'intestazione — controlla il separatore usato al salvataggio."
+    },
+    "columns": {
+      "name": "Colonna",
+      "type": "Tipo",
+      "filled": "Compilate",
+      "distinct": "Distinti",
+      "stats": "Intervallo",
+      "missing": "mancanti"
+    },
+    "types": {
+      "number": "numero",
+      "integer": "intero",
+      "date": "data",
+      "boolean": "sì/no",
+      "text": "testo",
+      "empty": "vuota"
+    },
+    "analyse": {
+      "button": "Trova schemi",
+      "working": "Sto guardando…",
+      "done": "Analisi pronta",
+      "failed": "L'analisi non è arrivata in fondo.",
+      "unavailable": "Il servizio AI non è raggiungibile. Non è stato addebitato nulla."
+    },
+    "findings": {
+      "title": "Cosa contiene",
+      "none": "Non è stato ancora analizzato nulla. Le colonne e i grafici sopra sono calcolati dal file stesso."
+    },
+    "ask": {
+      "title": "Chiedi ai dati",
+      "description": "La tua domanda diventa una query che gira sulle righe vere. I numeri vengono dal file, non dal modello.",
+      "placeholder": "Quale regione ha venduto di più?",
+      "button": "Chiedi",
+      "working": "Sto chiedendo…",
+      "failed": "Non è stato possibile rispondere.",
+      "matched": "{matched} righe su {total} corrispondono",
+      "rowCount": "{count} righe"
+    },
+    "legacy": {
+      "title": "Le tue note precedenti",
+      "description": "Scritte nella versione precedente di questa pagina, quando era una tabella di note. Conservate come erano."
+    },
+    "chart": {
+      "nothingToPlot": "Qui non c'è nulla da tracciare.",
+      "truncated": "Mostriamo i {count} maggiori; il resto è raggruppato o omesso."
+    }
+  },
+  "coding": {
+    "title": "Codice con l'IA",
+    "description": "Cinque cose che fa e quattro che non fa. Tutto lavora esattamente sul testo nella casella.",
+    "code": "Codice",
+    "copy": "Copia",
+    "copied": "Copiato",
+    "language": "Linguaggio",
+    "targetLanguage": "Converti in",
+    "useWorkspace": "Usa i miei altri moduli come contesto",
+    "run": "Esegui",
+    "running": "Sto lavorando…",
+    "result": "Risultato",
+    "limits": {
+      "title": "Cosa NON fa",
+      "no_repository": "Non ha un repository. Non vede il tuo codice né il file accanto a quello che incolli.",
+      "no_execution": "Non esegue nulla. Né il tuo codice, né quello che scrive, né i test che scrive.",
+      "no_commits": "Non fa commit, branch o pull request.",
+      "no_whole_project": "Non costruisce un progetto. Una funzione, un file, un incolla.",
+      "later": "Quelle quattro sono la prossima versione, non questa."
+    },
+    "operations": {
+      "generate": {
+        "label": "Scrivi uno snippet",
+        "description": "Descrivi cosa ti serve e ricevi una funzione, con le sue assunzioni e i suoi limiti dichiarati.",
+        "placeholder": "Una funzione che prende una lista di ordini e restituisce il margine per cliente…"
+      },
+      "explain": {
+        "label": "Spiegami questo",
+        "description": "Incolla del codice e ricevi cosa fa, in ordine, nominando le righe di cui parla.",
+        "placeholder": "Incolla il codice da spiegare…"
+      },
+      "find_bugs": {
+        "label": "Trova bug",
+        "description": "Ogni risultato nomina l'input o lo stato che lo provoca. Un risultato senza caso di errore è una preferenza.",
+        "placeholder": "Incolla il codice da controllare…"
+      },
+      "convert": {
+        "label": "Converti",
+        "description": "Riscrivilo in un altro linguaggio, con l'elenco di tutto ciò che NON si trasferisce.",
+        "placeholder": "Incolla il codice da convertire…"
+      },
+      "write_tests": {
+        "label": "Scrivi test",
+        "description": "Il caso normale, i limiti e i modi in cui rompe. Non solo il percorso felice.",
+        "placeholder": "Incolla il codice da testare…"
+      }
+    },
+    "errors": {
+      "tooLong": "Supera i {limit} caratteri. Questo lavora su un file, non su un progetto.",
+      "unavailable": "Il servizio AI non è raggiungibile. Non è stato addebitato nulla.",
+      "failed": "Non ha funzionato — riprova."
+    },
+    "history": {
+      "title": "Cronologia",
+      "search": "Cerca",
+      "folder": "Cartella",
+      "allFolders": "Tutte le cartelle",
+      "empty": "Qui non c'è ancora niente.",
+      "input": "Ingresso",
+      "output": "Uscita",
+      "importedNote": "nota precedente",
+      "failed": "fallito"
+    }
+  },
+  "finance": {
+    "title": "Finanze",
+    "description": "Ogni cifra è calcolata da righe reali, o dice perché non può esserlo.",
+    "needsInput": "Serve: {fields}",
+    "needsHistory": "Servono {need} mesi di storico — ne abbiamo {have}.",
+    "noChangeYet": "nessuna variazione ancora",
+    "notEnoughDays": "{days} giorno/i di storico finora.",
+    "provenance": "Lo storico inizia il giorno in cui questo è stato pubblicato: {months} mese/i di dati sugli abbonati e {days} istantanee giornaliere. Niente viene ricostruito a ritroso — una cifra retroattiva sarebbero i prezzi di oggi applicati a un passato che nessuno ha registrato.",
+    "inputs": {
+      "marketing_spend": "spesa di marketing",
+      "fixed_costs": "costi fissi",
+      "cash_balance": "saldo di cassa"
+    },
+    "trends": {
+      "mrr30": "MRR, 30 giorni",
+      "mrr90": "MRR, 90 giorni",
+      "aiCost30": "Costo IA, 30 giorni",
+      "subscribers90": "Abbonati paganti, 90 giorni"
+    },
+    "form": {
+      "title": "I tuoi numeri per {month}",
+      "description": "Tre cose che questo database non può sapere. Lascia un campo vuoto e le metriche che ne hanno bisogno lo diranno, invece di calcolare da uno zero.",
+      "marketing": "Spesa di marketing",
+      "marketingHint": "Tutto ciò che è stato speso per acquisire clienti questo mese.",
+      "fixed": "Costi fissi",
+      "fixedHint": "Stipendi, hosting, strumenti — tutto ciò che non è marketing né IA.",
+      "cash": "Saldo di cassa",
+      "cashHint": "Quanto c'è in banca a fine mese.",
+      "save": "Salva",
+      "saving": "Salvataggio…",
+      "saved": "Salvato",
+      "saveError": "Non è stato possibile salvare — riprova."
+    },
+    "metrics": {
+      "mrr": "MRR",
+      "arr": "ARR",
+      "arpu": "Ricavi per utente",
+      "grossMarginPercent": "Margine lordo",
+      "aiCostPerUserEur": "Costo IA per utente",
+      "costPerSuccessfulTaskEur": "Costo per attività completata",
+      "churnPercent": "Abbandono",
+      "retentionPercent": "Fidelizzazione",
+      "nrrPercent": "Ritenzione netta dei ricavi",
+      "ltvEur": "Valore nel tempo",
+      "cacEur": "Costo di acquisizione cliente",
+      "paybackMonths": "Periodo di rientro",
+      "ruleOf40": "Regola del 40",
+      "burnEur": "Consumo mensile",
+      "runwayMonths": "Autonomia"
+    }
+  },
+  "routing": {
+    "title": "Instradamento dei modelli",
+    "description": "Quale modello ha servito quale richiesta negli ultimi 30 giorni, quanto è costato e quanto ha risparmiato l'instradamento.",
+    "empty": "Non è ancora stata registrata alcuna decisione di instradamento. Questa tabella si riempie quando le richieste iniziano a passare dal router: non mostra zeri, non mostra nulla.",
+    "decisions": "Decisioni",
+    "charged": "Addebitato ai clienti",
+    "absorbed": "Assorbito da noi",
+    "absorbedNote": "tentativi economici falliti non addebitati al cliente",
+    "saved": "Risparmiato dalla regola della cache",
+    "savedNote": "declassamenti rifiutati perché sarebbero costati di più",
+    "model": "Modello",
+    "overrides": "Deroghe",
+    "overrideSaving": "Risparmio da deroga",
+    "learnedTitle": "Cosa ha imparato il router",
+    "learnedIntro": "Tasso di successo per capacità e modello su 30 giorni. Un modello sotto il {rate}% smette di essere scelto per quella capacità, ma solo dopo almeno {samples} esecuzioni, perché due fallimenti su due non sono una prova.",
+    "learnedEmpty": "Niente di conclusivo per ora. Finché una coppia capacità-modello non ha abbastanza esecuzioni, l'instradamento resta sulla sua mappa statica dei livelli.",
+    "runs": "{rate}% su {samples} esecuzioni",
+    "routedUp": "instradato più in alto",
+    "notEnough": "non ancora sufficiente"
+  },
+  "publishing": {
+    "badge": {
+      "includedInPlan": "Il tuo piano rimuove già il badge: non serve acquistare nulla.",
+      "removedThisMonth": "Badge rimosso questo mese.",
+      "cancelledKeepsMonth": "Il rinnovo automatico è disattivato. Il badge resta nascosto fino a fine mese, poi torna.",
+      "stopRenewing": "Interrompi il rinnovo",
+      "offer": "Rimuovi il badge «Made with Ionexa» da questo sito per {credits} crediti al mese (circa {eur} €).",
+      "affordable": "Hai {balance} crediti: circa {months} mese/i per questo sito.",
+      "notEnough": "Hai {balance} crediti e ne servono {needed}.",
+      "remove": "Rimuovi il badge"
+    }
   }
 }

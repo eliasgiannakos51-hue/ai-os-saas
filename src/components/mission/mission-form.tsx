@@ -13,6 +13,7 @@ import { CostEstimateHint, LargeActionConfirm, useCostEstimate } from "@/compone
 import { OutOfCreditsNotice } from "@/components/credits/out-of-credits-notice";
 import { useToast } from "@/components/toast/toast-context";
 import { ExamplePrompts } from "@/components/ai/example-prompts";
+import { VoiceInput } from "@/components/voice/voice-input";
 
 const MAX_GOAL_LENGTH = 20000;
 
@@ -149,16 +150,27 @@ export function MissionForm({
         {t("goalLabel")}
       </label>
       <div className="flex flex-col gap-2">
-        <textarea
-          id="mission-goal"
-          ref={goalRef}
-          required
-          maxLength={MAX_GOAL_LENGTH}
-          value={goal}
-          onChange={(e) => setGoal(e.target.value)}
-          placeholder={t("goalPlaceholder")}
-          className="input min-h-24 resize-y"
-        />
+        <div className="flex items-start gap-2">
+          <textarea
+            id="mission-goal"
+            ref={goalRef}
+            required
+            maxLength={MAX_GOAL_LENGTH}
+            value={goal}
+            onChange={(e) => setGoal(e.target.value)}
+            placeholder={t("goalPlaceholder")}
+            className="input min-h-24 min-w-0 flex-1 resize-y"
+          />
+          <VoiceInput
+            compact
+            disabled={loading}
+            onTranscript={(text) =>
+              setGoal((current) =>
+                (current.trim() ? `${current.trim()} ${text}` : text).slice(0, MAX_GOAL_LENGTH)
+              )
+            }
+          />
+        </div>
         <button
           type="submit"
           disabled={loading || !goal.trim()}

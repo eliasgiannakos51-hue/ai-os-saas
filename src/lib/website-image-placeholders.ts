@@ -294,7 +294,17 @@ export function stripPlaceholderImageTags(html: string, slugs: string[]): string
 // visible, fixable disappointment; shipping an uncredited one is a
 // licence breach on the customer's own domain.
 
-const UNSPLASH_CDN_PREFIX = "https://images.unsplash.com/";
+/**
+ * Every Unsplash photo URL this app can produce comes from their CDN, and
+ * this prefix is how anything downstream tells a stock photograph from
+ * the owner's own upload.
+ *
+ * EXPORTED because lib/website-image-census.ts had its own copy. One
+ * duplicated constant is how a change to it becomes a change to half the
+ * places that depend on it — the same failure DAY_MS produced across six
+ * modules, found the same week.
+ */
+export const UNSPLASH_CDN_PREFIX = "https://images.unsplash.com/";
 const PROVENANCE_NAME_ATTR = "data-unsplash-photographer";
 const PROVENANCE_PROFILE_ATTR = "data-unsplash-profile";
 

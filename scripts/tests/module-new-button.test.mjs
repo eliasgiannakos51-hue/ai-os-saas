@@ -80,7 +80,17 @@ check("the form no longer builds the label from the page title", !/t\("new", \{ 
 check("it reads the module's own phrase", /tKey\(module\.newKey\)/.test(formCode));
 
 console.log("\n== 2. every module answers for itself ==");
-check(`there are ${ALL.length} modules to answer`, ALL.length >= 21, `found ${ALL.length}`);
+// A FLOOR ON THE REGISTRIES, not a count of them. `>= 21` was a
+// restatement of how many modules there happened to be, so V4 #19 + #20
+// moving two out of build-modules.ts — because they became tools with
+// bespoke pages — read as a regression. What matters here is that both
+// registries were really loaded and that every module in them answers
+// for itself; the number is not the property.
+check(
+  `both registries loaded (${CLASSIFIER_MODULES.length} classifier + ${BUILD_MODULES.length} tracking = ${ALL.length})`,
+  CLASSIFIER_MODULES.length >= 13 && BUILD_MODULES.length >= 5,
+  `found ${CLASSIFIER_MODULES.length} + ${BUILD_MODULES.length}`
+);
 checkList("every one declares a newKey", ALL.filter((m) => !m.newKey).map((m) => m.slug));
 // Required, not optional — the same argument emptyKey settled. An
 // optional key means the twenty-second module silently gets nothing.

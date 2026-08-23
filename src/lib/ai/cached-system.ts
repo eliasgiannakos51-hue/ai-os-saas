@@ -146,10 +146,34 @@ export function isWorthCaching(staticPrefix: string, model: string | undefined):
  */
 export function buildCachedSystem(params: {
   staticPrefix: string;
+  /**
+   * The half of the context that is stable FOR THIS USER but not across
+   * users: their memories, their mentor context, their AI Life Context.
+   *
+   * A SECOND BREAKPOINT, and the reason it is worth one. Measured with
+   * scripts/measure-context.mjs, this block is 5,857 characters — 82% of
+   * everything a chat request sends that is not already cached, and
+   * 4,817 of those characters are the AI Life Context. It changes when
+   * the user adds an entry, which is to say roughly never within a
+   * conversation, and it was being re-sent at full input price on every
+   * message of it.
+   *
+   * ORDERING IS WHAT MAKES THIS POSSIBLE, and it is a real constraint
+   * rather than a preference. Anthropic matches a cache entry by PREFIX,
+   * so everything before a breakpoint must be identical for it to hit.
+   * The per-MESSAGE part (the entities this message happens to mention)
+   * therefore has to come after this block, not before it — with it in
+   * the middle, as it was, every message produces a different prefix and
+   * no request can ever read what the last one wrote.
+   *
+   * Optional: a caller that has no such block passes nothing and gets
+   * exactly the two-block behaviour it had before.
+   */
+  perUserBlock?: string;
   dynamicSuffix?: string;
   model: string | undefined;
 }): SystemTextBlock[] {
-  const { staticPrefix, dynamicSuffix = "", model } = params;
+  const { staticPrefix, perUserBlock = "", dynamicSuffix = "", model } = params;
 
   // Below the minimum the marker is not merely useless, it is misleading:
   // it would show up in a grep for cache_control as evidence this call
@@ -157,13 +181,82 @@ export function buildCachedSystem(params: {
   // single plain block instead, so "no marker" honestly means "not
   // cached here".
   if (!isWorthCaching(staticPrefix, model)) {
-    const whole = staticPrefix + dynamicSuffix;
+    const whole = staticPrefix + perUserBlock + dynamicSuffix;
     return whole ? [{ type: "text", text: whole }] : [];
   }
 
   const blocks: SystemTextBlock[] = [
     { type: "text", text: staticPrefix, cache_control: { type: "ephemeral" } },
   ];
+
+  if (perUserBlock) {
+    // THE MINIMUM IS ON THE CUMULATIVE PREFIX, not on this block alone —
+    // everything up to and including it is what gets cached. Checked
+    // against the total anyway, because the safe direction here is to
+    // decline a breakpoint that would not cache: a marker Anthropic
+    // ignores costs nothing but reads, to anyone grepping, as an
+    // optimisation that is in place.
+    const cacheable = isWorthCaching(staticPrefix + perUserBlock, model);
+    blocks.push(
+      cacheable
+        ? { type: "text", text: perUserBlock, cache_control: { type: "ephemeral" } }
+        : { type: "text", text: perUserBlock }
+    );
+  }
+
   if (dynamicSuffix) blocks.push({ type: "text", text: dynamicSuffix });
   return blocks;
+}
+
+/**
+ * The conversation, with its already-said part cached.
+ *
+ * THE LARGEST SINGLE BLOCK A CHAT REQUEST SENDS. Measured with
+ * scripts/measure-context.mjs: twenty turns is 8,000 characters, 39% of
+ * the whole request — and every one of those turns is a message the
+ * model was already sent, verbatim, on the previous request. It was
+ * being re-sent at full input price every time.
+ *
+ * A conversation is append-only, which is the ideal shape for a prefix
+ * cache: the breakpoint goes on the LAST message of the history, so this
+ * request reads everything the previous one wrote and writes one turn
+ * more. The new user message stays outside it, because a breakpoint
+ * after it would write an entry whose prefix can never recur.
+ *
+ * NO CACHING OF A SHORT HISTORY. Under the model's minimum the marker is
+ * ignored and the 1.25x write premium is not — the same trap
+ * buildCachedSystem exists to avoid, one layer down.
+ *
+ * NOTHING IS REORDERED OR REWRITTEN. The returned array is the messages
+ * the caller assembled, in order, with a cache_control on one of them.
+ * That is why it cannot change what the model is asked.
+ */
+export function buildCachedMessages<T extends { role: "user" | "assistant"; content: string }>(
+  history: T[],
+  currentMessage: string,
+  model: string | undefined
+): { role: "user" | "assistant"; content: string | { type: "text"; text: string; cache_control?: { type: "ephemeral" } }[] }[] {
+  const current = { role: "user" as const, content: currentMessage };
+  if (history.length === 0) return [current];
+
+  // The cached prefix is everything up to and including the last history
+  // turn. The system prompt is cached separately and does not count
+  // toward this decision — a cache entry is keyed by the whole prefix,
+  // but the minimum this checks is the part this function controls.
+  const historyChars = history.reduce((sum, m) => sum + m.content.length, 0);
+  if (!isWorthCaching("x".repeat(historyChars), model)) {
+    return [...history.map((m) => ({ role: m.role, content: m.content })), current];
+  }
+
+  const out = history.map((m, i) =>
+    i === history.length - 1
+      ? {
+          role: m.role,
+          content: [
+            { type: "text" as const, text: m.content, cache_control: { type: "ephemeral" as const } },
+          ],
+        }
+      : { role: m.role, content: m.content }
+  );
+  return [...out, current];
 }

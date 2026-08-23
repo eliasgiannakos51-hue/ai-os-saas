@@ -177,17 +177,40 @@ check("chat prefix is judged cacheable on the model chat actually calls", cs.isW
 // route that stopped calling buildCachedSystem would typecheck cleanly
 // and silently return to full-price prompts. Rule: assert the wiring.
 console.log("\nCall-site wiring");
-ok("chat route imports buildCachedSystem", /import \{ buildCachedSystem \} from "@\/lib\/ai\/cached-system"/.test(chatSrc));
+ok("chat route imports buildCachedSystem", /import \{ buildCachedSystem, buildCachedMessages \} from "@\/lib\/ai\/cached-system"/.test(chatSrc));
 ok("chat route passes it to system:", /system: buildCachedSystem\(\{/.test(chatSrc));
 ok(
   "chat route splits static prefix from dynamic suffix",
   /systemStaticPrefix/.test(chatSrc) && /systemDynamicSuffix/.test(chatSrc)
 );
+// THREE TIERS NOW. The middle one — memories, mentor context, AI Life
+// Context — is stable for a user across a conversation and was the
+// largest uncached block in the request. It only caches while the
+// per-MESSAGE part stays behind it.
+ok("chat route has a per-user tier", /perUserBlock: systemPerUser/.test(chatSrc));
+// THE PER-MESSAGE TIER IS EVERYTHING SELECTED FROM THIS MESSAGE.
+//
+// It was only the entity mentions until V4 #36 added the coding context,
+// which is chosen BY the question and so belongs here for exactly the
+// same reason. The invariant is not the list — it is that nothing which
+// varies per message sits in front of the cache breakpoint, which is
+// what the second check states directly.
+ok(
+  "…and the per-message tier carries the entity mentions and the coding context",
+  /const systemDynamicSuffix = buildEntityMentionPromptAddition\(mentionedEntities\) \+ codingContext;/.test(chatSrc)
+);
+ok(
+  "…and nothing per-message leaked into the cached per-user tier",
+  !/const systemPerUser =[\s\S]{0,400}codingContext/.test(chatSrc)
+);
+// The conversation is the single biggest block a chat request sends and
+// is append-only, which is the shape a prefix cache wants.
+ok("chat route caches the conversation too", /buildCachedMessages\(/.test(chatSrc));
 // The estimator must still size the FULL prompt, not just the cached
 // half — otherwise every chat reserve silently shrinks.
 ok(
   "chat still estimates against the whole prompt",
-  /const systemPrompt = systemStaticPrefix \+ systemDynamicSuffix;/.test(chatSrc)
+  /const systemPrompt = systemStaticPrefix \+ systemPerUser \+ systemDynamicSuffix;/.test(chatSrc)
 );
 
 const missionSrc = readFileSync("src/lib/mission-agents.ts", "utf8");

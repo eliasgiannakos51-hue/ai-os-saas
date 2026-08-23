@@ -5,6 +5,7 @@ import { LINKABLE_MODULES, moduleHref } from "@/lib/knowledge-graph";
 import { loadLinkedEntities, type LinkedEntity } from "@/lib/entity-links";
 import { logApiError } from "@/lib/log-error";
 import type { ModuleTitleKey } from "@/lib/modules";
+import { DAY_MS } from "@/lib/time-constants";
 
 export type TimelineRange = "today" | "week" | "month" | "all";
 
@@ -35,7 +36,6 @@ const EXCERPT_LENGTH = 140;
 // filter, not a precise report.
 function rangeCutoffIso(range: TimelineRange): string | null {
   if (range === "all") return null;
-  const DAY_MS = 24 * 60 * 60 * 1000;
   const windowMs = range === "today" ? DAY_MS : range === "week" ? 7 * DAY_MS : 30 * DAY_MS;
   return new Date(Date.now() - windowMs).toISOString();
 }

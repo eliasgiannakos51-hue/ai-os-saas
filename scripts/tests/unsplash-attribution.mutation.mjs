@@ -109,15 +109,19 @@ const MUTANTS = [
     name: "enforcement is dropped from the GENERATE path",
     suites: [DURABILITY],
     file: GEN_ROUTE,
-    from: "        const attribution = enforceUnsplashAttribution(htmlContent);\n        htmlContent = attribution.html;",
-    to: "        const attribution = enforceUnsplashAttribution(htmlContent);",
+    // The generate path enforces over an ARRAY since websites gained more
+    // than one page, so the defect to re-introduce is dropping the
+    // feed-back loop: the repair is computed for every document and
+    // thrown away for all of them.
+    from: "        const attributions = cleaned.map((doc) => enforceUnsplashAttribution(doc));\n        for (let i = 0; i < cleaned.length; i += 1) cleaned[i] = attributions[i].html;",
+    to: "        const attributions = cleaned.map((doc) => enforceUnsplashAttribution(doc));",
   },
   {
     name: "enforcement runs BEFORE the photos exist (ordered wrong)",
     suites: [DURABILITY],
     file: EDIT_ROUTE,
-    from: "      images = await resolveWebsiteImagePlaceholders(updatedHtml);",
-    to: "      updatedHtml = enforceUnsplashAttribution(updatedHtml).html;\n      images = await resolveWebsiteImagePlaceholders(updatedHtml);",
+    from: "      images = await resolveWebsiteImagePlaceholders(updatedHtml, { photoSource });",
+    to: "      updatedHtml = enforceUnsplashAttribution(updatedHtml).html;\n      images = await resolveWebsiteImagePlaceholders(updatedHtml, { photoSource });",
     // The anchor the test asserts on is the resolve call's position; moving
     // enforcement in front of it must be noticed.
     reorder: true,

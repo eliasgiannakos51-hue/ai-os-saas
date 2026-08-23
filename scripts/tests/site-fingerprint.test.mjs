@@ -206,5 +206,129 @@ check(
   /Never copy an example from this prompt as your answer/.test(builder)
 );
 
+
+// =====================================================================
+console.log("\n== THE VISUAL AXES — the instrument for the sixth report ==");
+// =====================================================================
+//
+// The structural half of this file was green for five rounds while the
+// complaint stood. These four functions measure what a person perceives
+// in the first second, so they are tested the same way: hand-built HTML
+// with known answers, BOTH directions — a page that should score high
+// and a page that should score low. An instrument that only ever says
+// "different" is as useless as one that only ever says "same".
+
+const SAME_A = `<html><head>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400&family=Karla:wght@400" rel="stylesheet">
+</head><body><style>
+section { padding: 120px 24px; }
+.reveal { opacity:0; transform: translateY(24px); transition: opacity 0.7s ease-out; }
+</style><section style="background:#1a1a2e;color:#e94560">alpha</section></body></html>`;
+
+const SAME_B = `<html><head>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400&family=Karla:wght@400" rel="stylesheet">
+</head><body><style>
+section { padding: 120px 24px; }
+.reveal { opacity:0; transform: translateY(24px); transition: opacity 0.7s ease-out; }
+</style><section style="background:#16213e;color:#e94560">beta</section></body></html>`;
+
+const DIFFERENT = `<html><head>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans" rel="stylesheet">
+</head><body><style>
+section { padding: 48px 16px; }
+.s { opacity:0; transform: translateY(6px); transition: opacity 180ms ease; }
+</style><section style="background:#fdf6e3;color:#2f6f4e">gamma</section></body></html>`;
+
+// ---- typePairing ----------------------------------------------------
+check("the loaded families are read in order", JSON.stringify(fp.typePairing(SAME_A)) === '["Fraunces","Karla"]', JSON.stringify(fp.typePairing(SAME_A)));
+check("a page loading no font reports none", fp.typePairing("<html><body>x</body></html>").length === 0);
+check("the same family twice is counted once", fp.typePairing('<link href="?family=Lora&family=Lora">').length === 1);
+
+// ---- spacingScale ---------------------------------------------------
+check("section padding is picked up", fp.spacingScale(SAME_A).includes(120));
+check("component-scale padding is excluded", !fp.spacingScale(SAME_A).includes(24) || fp.spacingScale(SAME_A)[0] >= 24);
+// rem AND px must be comparable, or a page written in rem scores as
+// having no spacing at all against one written in px.
+check("rem is converted at 16px", fp.spacingScale("<style>section{padding:5rem 0}</style>").includes(80), JSON.stringify(fp.spacingScale("<style>section{padding:5rem 0}</style>")));
+check("values below 24px are dropped as component padding", JSON.stringify(fp.spacingScale("<style>a{padding:8px}</style>")) === "[]");
+
+// ---- motionSignature ------------------------------------------------
+{
+  const m = fp.motionSignature(SAME_A);
+  check("seconds are normalised to ms", m.durationsMs.includes(700), JSON.stringify(m.durationsMs));
+  check("translate distance is read", m.distancesPx.includes(24), JSON.stringify(m.distancesPx));
+  const d = fp.motionSignature(DIFFERENT);
+  check("ms stays ms", d.durationsMs.includes(180), JSON.stringify(d.durationsMs));
+  // A STATIC PAGE MUST REPORT STATIC, not "no data". "No motion" is a
+  // design decision the draw can make, and scoring it as unknown would
+  // let a static page look varied against anything.
+  const none = fp.motionSignature("<html><body>plain</body></html>");
+  check("a static page has an empty signature", none.durationsMs.length === 0 && none.distancesPx.length === 0);
+}
+
+// ---- paletteCharacter -----------------------------------------------
+{
+  const a = fp.paletteCharacter(SAME_A);
+  check("a dark page is called dark", a.ground === "dark", JSON.stringify(a));
+  const c = fp.paletteCharacter(DIFFERENT);
+  check("a light page is called light", c.ground === "light", JSON.stringify(c));
+  // THE GROUND IS THE BACKGROUND, NOT THE MOST FREQUENT HEX. An accent
+  // repeated twenty times does not make a dark page light. Deciding this
+  // by raw frequency left the verdict to document order on a tie, which
+  // is not a fact about the design.
+  const accentHeavy = `<style>body{background:#101014}
+    a{color:#ff6b35}b{color:#ff6b35}i{color:#ff6b35}u{color:#ff6b35}s{color:#ff6b35}
+    p{color:#ff6b35}h1{color:#ff6b35}h2{color:#ff6b35}h3{color:#ff6b35}h4{color:#ff6b35}</style>`;
+  check("an accent used ten times does not make a dark page light",
+    fp.paletteCharacter(accentHeavy).ground === "dark", JSON.stringify(fp.paletteCharacter(accentHeavy)));
+  check("…and the reverse holds too",
+    fp.paletteCharacter(accentHeavy.replace("#101014", "#fbfbf8")).ground === "light");
+  // NEAR-GREYS CARRY NO HUE. Bucketing #1a1a1b as "red" because its red
+  // channel is one higher would make every neutral page score as a
+  // coloured one.
+  const grey = fp.paletteCharacter('<style>a{color:#1a1a1b;background:#2b2b2c}</style>');
+  check("a near-grey page is achromatic", grey.achromatic === true, JSON.stringify(grey));
+  check("…and hues are empty there", grey.hues.length === 0);
+  // Two oranges a person cannot tell apart must bucket together, or the
+  // instrument reports variety that nobody can see.
+  const o1 = fp.paletteCharacter('<style>a{color:#b45309}</style>');
+  const o2 = fp.paletteCharacter('<style>a{color:#c2610a}</style>');
+  check("two indistinguishable oranges share a bucket", JSON.stringify(o1.hues) === JSON.stringify(o2.hues), `${o1.hues} vs ${o2.hues}`);
+}
+
+// ---- visualSimilarity, BOTH DIRECTIONS ------------------------------
+{
+  const same = fp.visualSimilarity(SAME_A, SAME_B);
+  const diff = fp.visualSimilarity(SAME_A, DIFFERENT);
+  check(`two pages with the same look score high (${same.overall})`, same.overall >= 0.85, JSON.stringify(same));
+  check(`two genuinely different pages score low (${diff.overall})`, diff.overall <= 0.3, JSON.stringify(diff));
+  check("identical fonts score 1", same.fonts === 1);
+  check("different fonts score 0", diff.fonts === 0);
+  check("identical motion scores 1", same.motion === 1);
+  check("a page is identical to itself", fp.visualSimilarity(SAME_A, SAME_A).overall === 1);
+  // THE AXES ARE REPORTED SEPARATELY. A blended figure is how a 0.2
+  // structural score hid a 0.95 visual one for five rounds.
+  check("every axis is reported on its own", ["fonts", "colour", "spacing", "motion", "overall"].every((k) => typeof same[k] === "number"));
+}
+
+// ---- and the axes are actually DRAWN, not asked for ------------------
+{
+  const variation = await import("../../src/lib/website-variation.ts").catch(() => null);
+  const { loadTs } = await import("./load-ts.mjs");
+  const v = await loadTs("src/lib/website-variation.ts");
+  const draws = [];
+  for (let i = 0; i < 400; i++) draws.push(v.pickVariation([`user${i % 40}`, i, `brief ${i}`]));
+  for (const [axis, min] of [["palette", 5], ["typeface", 8], ["spacing", 4], ["motionTiming", 5]]) {
+    const distinct = new Set(draws.map((d) => d[axis])).size;
+    check(`${axis} actually spreads over 400 seeds (${distinct})`, distinct >= min, String(distinct));
+  }
+  // INDEPENDENCE. Without a per-axis salt, lists whose lengths share a
+  // factor correlate — the same seed picking index 2 everywhere — and
+  // four axes would collapse into one.
+  const pairs = new Set(draws.map((d) => `${d.palette}|${d.spacing}`));
+  check(`palette and spacing are independent (${pairs.size} combos)`, pairs.size >= 20, String(pairs.size));
+  void variation;
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

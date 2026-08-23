@@ -160,11 +160,16 @@ export const agentBuildHandler: JobHandler = async (ctx: JobContext): Promise<Jo
   }
 
   const { draft, understood, unsupported } = result.built;
+  // PRICED AT THE DEPTH THE BUILDER CHOSE, not at a default. The preview
+  // screen's "N credits per run" is the number the user decides on, and
+  // showing the standard tier's price for an agent configured as simple
+  // is a quote for something else.
   const perRun = estimateAgentRun({
     promptChars: draft.prompt.length,
     needsWebSearch: draft.config.needsWebSearch,
     accountCreditPriceEur,
     planSlug,
+    depth: draft.config.depth,
   });
 
   await ctx.progress(4, steps[3]);

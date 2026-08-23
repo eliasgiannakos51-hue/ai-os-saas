@@ -4,7 +4,7 @@ import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { isAdminEmail } from "@/lib/admin";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
-import { maxAgentsForPlan } from "@/lib/agents/agent-limits";
+import { maxAgentsForAccount } from "@/lib/agents/agent-limits";
 import { checkAgentActivationCap } from "@/lib/agents/agent-cap";
 import {
   AGENT_LIMITS,
@@ -169,7 +169,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       const isAdmin = isAdminEmail(user.email);
       if (!isAdmin) {
         const planSlug = await resolveEffectivePlanSlug(user);
-        const cap = maxAgentsForPlan(planSlug);
+        const cap = await maxAgentsForAccount(user.id, planSlug);
         const capCheck = await checkAgentActivationCap(user.id, cap);
         if (!capCheck.ok) {
           if (capCheck.reason === "check_failed") {

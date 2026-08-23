@@ -1,20 +1,32 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
-import { computeHealthScore, type HealthScoreResult } from "@/lib/health-score";
+import { computeHealthScore, CONSISTENCY_WINDOW_DAYS, type HealthScoreResult } from "@/lib/health-score";
 import { loadLatestEnergyCheckIn, type EnergyCheckIn } from "@/lib/energy-checkins";
 import { logApiError } from "@/lib/log-error";
 import type { Mission } from "@/types/mission";
 import { enModuleTitle } from "@/lib/module-labels";
+import { DAY_MS } from "@/lib/time-constants";
 
 const PER_MODULE_LIMIT = 5;
 const MAX_HEADLINE_LENGTH = 60;
-const DAY_MS = 24 * 60 * 60 * 1000;
+
 const MISSION_RECENT_DAYS = 14;
-const CONSISTENCY_WINDOW_DAYS = 7;
 
 export type UserFullContext = {
-  moduleSummaries: { title: string; headlines: string[] }[];
+  /** `slug` is carried alongside the display title so a caller can
+   *  decide which modules to send (lib/ai/context-relevance.ts) without
+   *  matching on a translated string. */
+  moduleSummaries: {
+    slug: string;
+    title: string;
+    headlines: string[];
+    /** When this module was last written in. Carried so a caller
+     *  narrowing the context can keep the modules the user is actually
+     *  working in, rather than the ones that happen to come first in a
+     *  config array. Null when nothing is dated. */
+    lastActivityMs: number | null;
+  }[];
   activeMissions: { goal: string; stepsCompleted: number; stepsTotal: number }[];
   latestEnergyCheckIn: EnergyCheckIn | null;
   healthScore: HealthScoreResult;
@@ -23,6 +35,7 @@ export type UserFullContext = {
 };
 
 type ModuleScan = {
+  slug: string;
   title: string;
   headlines: string[];
   hasRows: boolean;
@@ -123,7 +136,12 @@ export async function getUserFullContext(
 
   const moduleSummaries = perModule
     .filter((m) => m.headlines.length > 0)
-    .map((m) => ({ title: m.title, headlines: m.headlines }));
+    .map((m) => ({
+      slug: m.slug,
+      title: m.title,
+      headlines: m.headlines,
+      lastActivityMs: m.lastActivityMs,
+    }));
 
   return {
     moduleSummaries,
@@ -142,6 +160,7 @@ async function scanModule(
   userId: string
 ): Promise<ModuleScan> {
   const empty: ModuleScan = {
+    slug: config.slug,
     title: enModuleTitle(config),
     headlines: [],
     hasRows: false,
@@ -181,7 +200,14 @@ async function scanModule(
       }
     }
 
-    return { title: enModuleTitle(config), headlines, hasRows: rows.length > 0, lastActivityMs, activeDays };
+    return {
+      slug: config.slug,
+      title: enModuleTitle(config),
+      headlines,
+      hasRows: rows.length > 0,
+      lastActivityMs,
+      activeDays,
+    };
   } catch (err) {
     logApiError("user-context:scanModule", err, { table: config.table });
     return empty;

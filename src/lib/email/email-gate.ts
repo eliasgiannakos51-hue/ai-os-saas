@@ -119,3 +119,54 @@ export async function recordEmailSend(userId: string, type: EmailType): Promise<
     logApiError("email:gate", err, { stage: "record_send_unhandled", type });
   }
 }
+
+// ---------------------------------------------------------------------
+// V4 #18 — the notification system's email channel.
+// ---------------------------------------------------------------------
+//
+// It shares the CAP and nothing else. A user has one inbox, so twenty a
+// day is twenty a day whether they came from a scheduled agent email or
+// from the notification dispatcher — counting them separately would let
+// the two systems add up to forty and call each one "capped".
+//
+// It deliberately does NOT consult user_email_preferences: which
+// notification types may use email is stored per type in
+// notification_preferences and has already been asked by the time
+// dispatch.ts gets here. Two switches for the same decision is how a user
+// turns something off and keeps receiving it.
+export async function checkNotificationEmailAllowed(userId: string): Promise<EmailGateDecision> {
+  try {
+    const admin = createAdminClient();
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { count, error } = await admin
+      .from("email_send_log")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .gte("sent_at", since);
+    // Unreadable count = cap not enforced, same fail-open reading as
+    // checkEmailAllowed above.
+    if (error) {
+      logApiError("email:gate", error, { stage: "notification_count" });
+      return { allowed: true };
+    }
+    if ((count ?? 0) >= MAX_EMAILS_PER_DAY) return { allowed: false, reason: "daily_cap" };
+    return { allowed: true };
+  } catch (err) {
+    logApiError("email:gate", err, { stage: "notification_unhandled" });
+    return { allowed: true };
+  }
+}
+
+// Recorded under a namespaced type so the log stays a truthful history of
+// WHAT was sent, while still counting towards the one shared cap.
+export async function recordNotificationEmailSend(userId: string, notificationType: string): Promise<void> {
+  try {
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from("email_send_log")
+      .insert({ user_id: userId, email_type: `notify:${notificationType}`.slice(0, 60) });
+    if (error) logApiError("email:gate", error, { stage: "record_notification_send" });
+  } catch (err) {
+    logApiError("email:gate", err, { stage: "record_notification_send_unhandled" });
+  }
+}

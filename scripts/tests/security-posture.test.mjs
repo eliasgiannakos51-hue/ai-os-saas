@@ -89,6 +89,31 @@ const ADMIN_ONLY_TABLES = new Set([
   "daily_ai_spend_tracking",
   "account_deletion_requests",
   "production_errors",
+  // What every customer's spend triggered, with the numbers. RLS on with
+  // NO policy is deny-all, which is stricter than any policy could be and
+  // is exactly right here: a customer who could read this would learn the
+  // shape of the whole business. Written and read only through
+  // createAdminClient(), behind an isAdminEmail() gate on the page.
+  "cost_alert_log",
+  // V4 #26. The owner's view of the business: what every account pays,
+  // what the whole book is worth, what it costs to run, and what the
+  // owner typed in as marketing spend and cash in the bank. RLS on with
+  // NO policy is deny-all — stricter than any policy could be, and the
+  // right answer here because "owner" is decided in TypeScript by
+  // isAdminEmail() and a second notion of owner living in the database is
+  // one more thing to drift out of step with the first. Reached only
+  // through createAdminClient(), behind that gate.
+  "subscription_events",
+  "subscriber_months",
+  "revenue_snapshots",
+  "business_inputs",
+  // V4 #34/#35. Which model served which request, what the customer was
+  // charged, and — the column that matters — what OUR failed cheap
+  // attempts cost us. Deny-all for the same reason as the four above:
+  // "owner" is decided in TypeScript by isAdminEmail(), and a customer
+  // who could read it would learn our per-request margin. Reached only
+  // through createAdminClient(), behind that gate.
+  "routing_decisions",
 ]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();
@@ -348,6 +373,18 @@ const NO_SESSION_BY_DESIGN = {
     "the OAuth/magic-link landing. It CREATES the session by exchanging a single-use code — requiring one first is a contradiction. Surfaced by widening this scan beyond src/app/api; it was never checked before, and reading it line by line confirmed everything after the exchange acts on the user that exchange returned, never on an id from the request.",
   "src/app/s/[subdomain]/route.ts":
     "the public web: serves a published site to anonymous visitors. Reads through the admin client and selects only the columns a visitor needs; published_sites has no public RLS policy, so a visitor cannot read the table at all. In-memory rate limited, and every response carries a restrictive CSP.",
+  "src/app/s/[subdomain]/[page]/route.ts":
+    "the same public site, one page further in. Identical posture to the parent route — admin client, named columns, rate limit, CSP — with one addition that is the reason this exists separately: the page segment is a URL path, so it goes through validatePageSlug BEFORE any lookup. The slug must match ^[a-z0-9]+(-[a-z0-9]+)*$, which rejects ../admin, a/b, %2e%2e and a leading dot on SHAPE rather than by reasoning about path semantics — a rule written as 'does not contain ..' falls to encoding, and one written on the decoded string falls to double encoding. An unknown slug is a 404, never a fallback to the home page, so a crawler is not told that every URL under the site exists.",
+  "src/app/api/cron/website-storage-cleanup/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED. It DELETES from Storage, which is the one operation in this app that cannot be undone — so the decision about what may go lives in lib/websites/orphan-images.ts, is pure, and is tested without deleting anything: a file is removed only when no document embeds it, no surviving website row names it, it is not the derivative of something still referenced, and it is over a day old (an upload in flight is referenced by nothing at all in the window between the browser storing it and generate using it).",
+  "src/app/api/cron/agent-batches/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED. It collects Anthropic Batch API results for scheduled agent runs and SETTLES the charge for each one, so an unauthenticated call would take money from other people's accounts and deliver their agents' output. It reads no request body: everything it acts on is rows it finds in agent_runs with status 'queued'.",
+  "src/app/api/cron/cost-alerts/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts), which fails CLOSED — with no secret configured the route refuses to run on any deployment. It reads aggregates across every account's spend and can send email, so it is in the same class as the other cron routes and not a lighter one.",
+  "src/app/s/[subdomain]/sitemap.xml/route.ts":
+    "the public site's own sitemap, for its owner to submit to Search Console. Same posture as the routes above — admin client, rate limit, subdomain validated before any lookup — and it selects only `pages, status, is_active, updated_at`: the page SLUGS and a timestamp, never html_content, so nothing about a site's contents is reachable here that /s/<subdomain>/<page> does not already serve publicly. A site that is not live is a 404 rather than an empty sitemap, so this cannot be used to learn that a withdrawn address once existed.",
+  "src/app/s/[subdomain]/robots.txt/route.ts":
+    "the same, for robots.txt. It reads only `status, is_active` and returns a fixed two-line file built from the address in the request — it discloses nothing that requesting the site itself does not. Worth stating plainly: a crawler reads robots.txt from the HOST ROOT, so while sites are served at /s/<subdomain> the file that actually governs them is the app's own /robots.txt; this one exists for Search Console and for the day a wildcard domain makes it the root file.",
 };
 
 // Routes a BROWSER navigates to, rather than fetches. Their rejection is a
@@ -355,6 +392,8 @@ const NO_SESSION_BY_DESIGN = {
 const REJECTS_BY_REDIRECT = {
   "src/app/share/route.ts":
     "the Web Share Target: the operating system POSTs a form here and the browser follows the answer",
+  "src/app/api/n/[id]/route.ts":
+    "the notification click: somebody followed a link from their email, and JSON in the address bar is a dead end",
 };
 
 for (const file of routes) {
@@ -379,18 +418,41 @@ for (const file of routes) {
   // to email write `if (!user || !user.email)`, which is strictly
   // stronger, so the match is on the `!user` test rather than the whole
   // condition.
-  if (authenticates && key in REJECTS_BY_REDIRECT) {
-    // A 401 is the right answer to fetch(), and the WRONG answer to a
-    // browser navigation: the OS share sheet POSTs a real form here, and a
-    // JSON body is what the person would then be looking at. These routes
-    // reject by sending them somewhere they can sign in — which is checked
-    // here, so "redirects instead" cannot become "does not check at all".
+  //
+  // WHAT THE REJECTION MAY BE, and why this is two shapes rather than one.
+  // Almost every route here is called by fetch() and answers 401. A route
+  // the BROWSER navigates to cannot: a 401 JSON body in the address bar is
+  // a dead end for somebody who clicked a link in their email or chose
+  // Ionexa from a share sheet, and the correct answer is to send them to
+  // log in. So a redirect whose target is the login page counts as a
+  // rejection too. Two such routes exist: /api/n/<id> (the notification
+  // click redirect) and /share (the Web Share Target, which receives a
+  // real form POST from the operating system).
+  //
+  // AND THE REJECTION MUST BE IN THE GUARD. The old form was
+  // `/if \(!user\b/.test(src) && /401/.test(src)` — the two halves tested
+  // independently, anywhere in the file, so a route with a `!user` guard
+  // that fell through and a 401 two hundred lines later for an unrelated
+  // reason passed. The span after the guard is what is searched now, which
+  // is strictly narrower: every route that passed on merit still passes,
+  // and one that passed by coincidence no longer does.
+  if (authenticates) {
+    const guard = src.match(/if \(!user\b[^)]*\)\s*\{?([\s\S]{0,400})/);
+    const rejection = guard ? guard[1] : "";
     checkTrue(
-      `  ${key} rejects a missing user by sending them to sign in (${REJECTS_BY_REDIRECT[key]})`,
-      /if \(!user\b/.test(src) && /\/login/.test(src)
+      `  ${key} rejects a missing user in the guard (401, or a redirect to login)`,
+      Boolean(guard) && (/401/.test(rejection) || /\/login/.test(rejection))
     );
-  } else if (authenticates) {
-    checkTrue(`  ${key} rejects a missing user with 401`, /if \(!user\b/.test(src) && /401/.test(src));
+    // AND, for the routes that reject by redirect, that they really do —
+    // the generic rule above accepts either shape, so without this a
+    // navigation route could silently start answering 401 and nobody
+    // would notice until a user was staring at JSON.
+    if (key in REJECTS_BY_REDIRECT) {
+      checkTrue(
+        `  ${key} rejects by SENDING THEM TO SIGN IN, not with JSON (${REJECTS_BY_REDIRECT[key]})`,
+        /\/login/.test(rejection)
+      );
+    }
   }
 }
 

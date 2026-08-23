@@ -16,8 +16,8 @@ import {
   FIFTY_ENTRIES_ACHIEVEMENT_KEY,
 } from "@/lib/achievement-metadata";
 import { logApiError } from "@/lib/log-error";
+import { DAY_MS } from "@/lib/time-constants";
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 const STREAK_DAYS = 7;
 const LONG_STREAK_DAYS = 30;
 const STREAK_PER_MODULE_LIMIT = 200;

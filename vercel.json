@@ -1,28 +1,40 @@
 {
   "crons": [
     {
-      "path": "/api/cron/scheduled-runs",
-      "schedule": "0 9 * * *"
+      "path": "/api/cron/affiliate-payouts",
+      "schedule": "0 6 1 * *"
+    },
+    {
+      "path": "/api/cron/agent-batches",
+      "schedule": "*/10 * * * *"
     },
     {
       "path": "/api/cron/agent-runs",
       "schedule": "*/15 * * * *"
     },
     {
-      "path": "/api/cron/reset-credits",
-      "schedule": "0 3 1 * *"
-    },
-    {
-      "path": "/api/weekly-digest",
-      "schedule": "0 8 * * 1"
+      "path": "/api/cron/cost-alerts",
+      "schedule": "5 * * * *"
     },
     {
       "path": "/api/cron/monthly-credits",
       "schedule": "0 3 * * *"
     },
     {
-      "path": "/api/cron/affiliate-payouts",
-      "schedule": "0 6 1 * *"
+      "path": "/api/cron/reset-credits",
+      "schedule": "0 3 1 * *"
+    },
+    {
+      "path": "/api/cron/scheduled-runs",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/website-storage-cleanup",
+      "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/weekly-digest",
+      "schedule": "0 8 * * 1"
     }
   ]
 }

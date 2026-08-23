@@ -636,7 +636,71 @@ const clientFallbacks = sources.flatMap((f) => [
 // than added to 562 by hand: this branch's +9 was counted under the OLD,
 // wider scanner, and arithmetic across two different counters is how a
 // ratchet quietly gains slack.
-const SERVER_PROSE_BASELINE = 571;
+// 549 -> 551 for api/websites/edit's two page refusals: "That is not a
+// page address." (400) and "That page is not part of this site." (404),
+// added with per-page live editing. RAISED WITH THE USER-FACING HALF
+// CLOSED IN THE SAME CHANGE, which is the only reason this is an
+// increment rather than a regression: both replies now carry a machine-
+// readable `reason` ("invalid_page" / "unknown_page") and the workspace
+// renders dashboard.websiteBuilder.editPageGone off it, translated in
+// all ten locales — so neither English sentence can reach a user. They
+// are counted here because they are still English strings in a route,
+// and pretending otherwise is how a ratchet stops meaning anything.
+// 551 -> 552 for api/websites/storage-usage's "Not authenticated." —
+// the standard string every other route in this app returns for the same
+// case, on an endpoint whose CALLER ignores the body entirely: the
+// workspace fails open on anything that is not a usable figure, because
+// this gates an upload and a storage hiccup must not stop somebody
+// adding a photograph to their own site. Nobody reads this sentence.
+// 552 -> 575, from three new agent-template routes (V4 #22): the
+// matcher, adopt, and share. Twenty-three strings, and here is what they
+// actually are rather than a round number waved through:
+//
+//   THE ONES A USER READS AND ACTS ON ARE NOT AMONG THEM. The share
+//   refusals — "that wording still appears in the task", "remove the
+//   email address" — are the sentences that tell somebody how to fix
+//   their share, so the route returns a CODE and the component looks up
+//   dashboard.agents.share.refused.<code> in all ten locales. What is
+//   left in the route under those codes is a short English fallback for
+//   a client that does not know the code.
+//
+//   THE REST are the standard replies every other route here already
+//   returns — "Not authenticated.", "Invalid request body.", "Something
+//   went wrong." — plus a handful of states a user cannot reach without
+//   a broken client ("Missing template.", "That template no longer
+//   exists.").
+//
+// Raised rather than suppressed, and raised by exactly the number added,
+// so the next route that grows this without saying why still fails.
+// 575 -> 596: V4 #19/#2 added api/voice/transcribe, api/voice/speak and
+// api/voice/usage, and their 21 refusals are English prose in the same
+// shape as the 575 before them.
+//
+// WITH ONE DIFFERENCE THAT IS THE POINT OF RAISING IT RATHER THAN
+// PRETENDING IT AWAY: every one of these 21 responses also carries a
+// stable `code`, and the browser never renders the English. The voice
+// components translate the code through voice.errors.* in all ten
+// locales (components/voice/use-voice-error-text.ts) and fall back to
+// the server's sentence only for a code this build has no word for —
+// which today is none of them.
+//
+// So the prose is still there, still counted, and still English, because
+// it is what a curl, a log line and a bug report get. It is not what a
+// user is shown. The regex cannot tell those apart, so the number goes
+// up and the reason is written down instead.
+// 596 -> 613: V4 #14 added api/trading/rules and api/trading/guardian,
+// whose 17 refusals are English prose in the same shape as the 596
+// before them — and, like the voice routes, every one of them also
+// carries a stable `code` that the browser translates through
+// dashboard.trading.errors.* in all ten locales
+// (components/trading/use-trading-error.ts). The English is what a curl
+// and a log line get; it is not what a user is shown. The regex cannot
+// tell those apart, so the number goes up and the reason is written down.
+// MEASURED ON THE MERGED TREE, not added. Each branch's increment was
+// counted against its own scanner and its own route set; adding 571 and
+// the multi-page number would be arithmetic across two different
+// counters, which is how a ratchet quietly gains slack.
+const SERVER_PROSE_BASELINE = 635;
 // 520 -> 532 for the delivery-channel routes (api/delivery-channels,
 // api/notifications) and the ownership refusals they surface. Same
 // documented convention as every increment below — a route's error
@@ -757,6 +821,13 @@ const BARE_TEXT_BASELINE = {
     "src/components/settings/buy-credits.tsx": 2,
     "src/components/settings/danger-zone.tsx": 1,
     "src/components/settings/password-change-form.tsx": 1,
+    // Owner-only cost diagnostics, English for the same reason as
+    // system-health below: the audience is the hardcoded ADMIN_EMAILS
+    // list — one person — and the page is unreachable (notFound) for
+    // everybody else. Ten locale entries per label would be translation
+    // nobody can ever read, and the labels are operational terms
+    // ("margin", "MRR") that are English in the code they describe.
+    "src/components/costs/cost-dashboard.tsx": 12,
     "src/components/system-health/error-list.tsx": 2,
     // Owner-only diagnostics, English on purpose like the rest of the
     // system-health page it lives on.

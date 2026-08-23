@@ -99,8 +99,32 @@ console.log("\n== 3. CROSS-PRODUCT: every stop reason x every state ==");
 console.log("\n== 4. stopping is not failing ==");
 {
   const runner = readFileSync("src/lib/agents/agent-runner.ts", "utf8");
-  ok("the check happens BEFORE the write call, not after both",
-    runner.indexOf("budgetStop(") < runner.indexOf("max_tokens: MAX_OUTPUT_TOKENS"));
+  // AGAINST THE WRITE CALL AS IT ACTUALLY IS, and there must be exactly
+  // one of it.
+  //
+  // This used to compare positions against the literal
+  // `max_tokens: MAX_OUTPUT_TOKENS`. The multi-provider work replaced the
+  // direct Anthropic call with runCompletion(), so that string vanished,
+  // indexOf returned -1, and the comparison became `something < -1` —
+  // permanently false. The gate went red while the property it guards was
+  // untouched, which is the worst way for an instrument to fail: it looks
+  // like the code broke. Naming the real call fixes that AND adds a claim
+  // the old form could not make — that there is only ONE write, so a
+  // second one cannot be added below the budget check where nothing
+  // would notice.
+  const writeCalls = (runner.match(/runCompletion\(/g) ?? []).length;
+  ok(`there is exactly one write call in the runner (${writeCalls})`, writeCalls === 1);
+  ok(
+    "the budget is checked BEFORE it, not after both calls",
+    runner.indexOf("budgetStop(") > 0 && runner.indexOf("budgetStop(") < runner.indexOf("runCompletion(")
+  );
+  // The research call is the CHEAP half and comes first by design; the
+  // ordering above is only meaningful if the research call is genuinely
+  // before the budget check.
+  ok(
+    "...and after the research pass, so it can see what that cost",
+    runner.indexOf("const result = await research(") < runner.indexOf("budgetStop(")
+  );
   // AND THE LIMITS COME FROM THE RESOLVER. Handing budgetStop a literal
   // {maxCostEur: Infinity} keeps the call, the ordering and this gate
   // intact while the limit can never be reached.
@@ -143,7 +167,22 @@ console.log("\n== 6. no max-steps knob was invented ==");
 {
   const runner = readFileSync("src/lib/agents/agent-runner.ts", "utf8");
   const budgetSrc = readFileSync("src/lib/agents/agent-budget.ts", "utf8");
-  ok("the runner still has no step loop to limit", !/for \(|while \(/.test(runner.replace(/\/\*[\s\S]*?\*\//g, "")));
+  // EVERY LOOP IS BOUNDED BY A DECLARED SPEC FIELD.
+  //
+  // This used to assert the runner contained no `for (` or `while (` at
+  // all. That was a proxy for "there is no agentic step loop", and the
+  // proxy stopped holding the moment agent depth tiers added a research
+  // loop bounded by spec.researchRounds — a fixed per-tier number, which
+  // is exactly the kind of loop AGENT_MAX_STEPS was never needed for. The
+  // claim is now the real one: no unbounded loop, and no `while` at all.
+  const code = runner.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  const loops = [...code.matchAll(/(for|while)\s*\(([^)]*)\)/g)].map((m) => ({ kind: m[1], head: m[2] }));
+  ok(`every loop is a bounded for-loop (${loops.length} loop${loops.length === 1 ? "" : "s"})`,
+    loops.every((l) => l.kind === "for" && /<\s*spec\.[A-Za-z]+|<\s*[A-Z_]{3,}/.test(l.head)),
+    loops.map((l) => `${l.kind}(${l.head})`).join(" ; ")
+  );
+  ok("there is no while-loop at all", !loops.some((l) => l.kind === "while"), loops.map((l) => l.kind).join(","));
+  ok("and no `for (;;)` / `while (true)`", !/for\s*\(\s*;\s*;|while\s*\(\s*true\s*\)/.test(code));
   // COMMENTS STRIPPED FIRST. The paragraph in agent-budget.ts that
   // explains why AGENT_MAX_STEPS is absent contains the words
   // "AGENT_MAX_STEPS", so a raw scan read the explanation of an absence

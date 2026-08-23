@@ -33,7 +33,7 @@
 // work, so that is checked too.
 //
 // Run: node scripts/tests/empty-states.test.mjs
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 
 let pass = 0;
 const failures = [];
@@ -95,7 +95,58 @@ check(
   `the baseline is not stale (${generic.length} === ${BASELINE} — if lower, lower this number)`,
   generic.length === BASELINE
 );
-check(`all twenty-one list surfaces are covered (${ALL.length})`, ALL.length === 21);
+// COUNTED AGAINST THE PAGES, NOT AGAINST A NUMBER.
+//
+// This was `ALL.length === 21`, which is a spelling test on a constant:
+// it went red when V4 #19 + #20 turned two trackers into tools and moved
+// them out of BUILD_MODULES, even though nothing had regressed — and it
+// would have stayed green if a module had been dropped from the registry
+// while another was added on the same day.
+//
+// The property it was reaching for is "every tracker page has an empty
+// state of its own", so that is what is checked, against the PAGES. A
+// page rendering the shared BuildModulePage IS a tracker by construction,
+// whatever any registry says.
+{
+  const dashboard = "src/app/dashboard";
+  const slugs = readdirSync(dashboard).filter((entry) => {
+    try {
+      return statSync(`${dashboard}/${entry}`).isDirectory() && existsSync(`${dashboard}/${entry}/page.tsx`);
+    } catch {
+      return false;
+    }
+  });
+
+  const trackerPages = slugs.filter((slug) =>
+    /BuildModulePage/.test(readFileSync(`${dashboard}/${slug}/page.tsx`, "utf8"))
+  );
+  const covered = new Set(ALL.map((m) => m.slug));
+  const uncovered = trackerPages.filter((slug) => !covered.has(slug));
+  check(
+    `every tracker page has its own empty state (${trackerPages.length} pages)`,
+    uncovered.length === 0,
+    uncovered.join(", ")
+  );
+
+  // The mirror: a module in BUILD_MODULES with no page of its own is a
+  // sidebar link to a 404.
+  const missingPages = BUILD_MODULES.filter((m) => !trackerPages.includes(m.slug));
+  check(
+    "every tracking module still has its page",
+    missingPages.length === 0,
+    missingPages.map((m) => m.slug).join(", ")
+  );
+
+  // THE TWO THAT LEFT. They must NOT be in the tracker registry, must NOT
+  // render the tracker page, and must still HAVE a page — otherwise
+  // "we turned it into a tool" would be indistinguishable from
+  // "we deleted it".
+  for (const slug of ["coding", "data-analysis"]) {
+    check(`${slug} is no longer a tracking module`, !covered.has(slug));
+    check(`${slug} no longer renders the tracker page`, !trackerPages.includes(slug));
+    check(`${slug} still has a page of its own`, existsSync(`${dashboard}/${slug}/page.tsx`));
+  }
+}
 
 console.log("\n== 2. the type is what keeps it that way ==");
 // A baseline held by a test alone is held until someone adds a module on

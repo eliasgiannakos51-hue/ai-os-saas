@@ -8,7 +8,7 @@ import { logSecurityCheck } from "@/lib/security-check-log";
 import { validateAgentDraft, sanitiseAgentText, type AgentDraft } from "@/lib/agents/agent-config";
 import { resolveDeliveryOwnership } from "@/lib/agents/delivery-ownership";
 import { nextRunAt } from "@/lib/agents/cron-expression";
-import { maxAgentsForPlan } from "@/lib/agents/agent-limits";
+import { maxAgentsForAccount } from "@/lib/agents/agent-limits";
 import { checkAgentActivationCap } from "@/lib/agents/agent-cap";
 
 export const dynamic = "force-dynamic";
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
 
     const isAdmin = isAdminEmail(user.email);
     const planSlug = await resolveEffectivePlanSlug(user);
-    const cap = maxAgentsForPlan(planSlug);
+    const cap = await maxAgentsForAccount(user.id, planSlug);
 
     if (!isAdmin) {
       if (cap <= 0) {

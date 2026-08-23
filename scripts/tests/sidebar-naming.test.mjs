@@ -122,11 +122,196 @@ console.log(`        Build now holds: ${buildHrefs.join(", ")}`);
 check("Build still holds the agent builder", buildHrefs.includes("/dashboard/agents"));
 check("...the website builder", buildHrefs.includes("/dashboard/website-builder"));
 check("...and what it published", buildHrefs.includes("/dashboard/published"));
+// AN ALLOWLIST, NOT A COUNT. This was `buildHrefs.length === 3`, which
+// passes just as happily if somebody swaps one entry for another — the
+// number is the same and the group now contains a tracker again, which
+// is the single thing this section exists to prevent. Naming them makes
+// a new entry a decision somebody has to write down.
+const BUILD_ALLOWED = {
+  "/dashboard/agents": "the agent builder — really builds agents",
+  "/dashboard/website-builder": "the site builder — really builds sites",
+  "/dashboard/published": "what the builder put live",
+  // Not a generator itself, and here on purpose: these are what a
+  // published site PRODUCED. Filing the leads a site brings in anywhere
+  // other than beside the site would make "where did my enquiries go" a
+  // navigation question — which it already was, for as long as the table
+  // had no screen at all.
+  "/dashboard/form-submissions": "what the published sites produced",
+  // V4 #19 + #20. Both were trackers and both stopped being one: the
+  // analysis page parses a real uploaded spreadsheet, profiles every
+  // column in TypeScript and draws charts from the real rows; the coding
+  // page runs five operations that return code, an explanation, a bug
+  // list, a conversion or tests. Neither is in build-modules.ts any more,
+  // and section 3b below proves the claim from the CODE rather than from
+  // this comment.
+  "/dashboard/data-analysis": "parses, profiles and charts a real uploaded file",
+  "/dashboard/coding": "five operations that really produce code",
+};
+const unexpected = buildHrefs.filter((href) => !(href in BUILD_ALLOWED));
 check(
-  "and nothing else — every remaining item generates something",
-  buildHrefs.length === 3,
-  buildHrefs.join(", ")
+  "and nothing else — every remaining Build item is one somebody justified",
+  unexpected.length === 0,
+  unexpected.length ? `not in the allowlist: ${unexpected.join(", ")}` : ""
 );
+const missing = Object.keys(BUILD_ALLOWED).filter((href) => !buildHrefs.includes(href));
+check("...and every justified item is still there", missing.length === 0, missing.join(", "));
+
+console.log("\n== 3b. BUILD IS PROVEN FROM THE CODE, NOT FROM A LIST ==");
+// The rule this file has always been reaching for is "an item under Build
+// produces something". Until now that was an ALLOWLIST — a list somebody
+// edits, which cannot tell you whether the thing behind the entry is real.
+// A tracker moved into Build with a justification string next to it would
+// have passed.
+//
+// So it is checked mechanically, in BOTH directions:
+//
+//   FORWARD: every Build item must have an API route that actually calls
+//   a model, or be declared as downstream of one that does.
+//   BACKWARD: every module in build-modules.ts must have NO such route.
+//   That is the one that catches the real drift — a tracker that quietly
+//   gained a generator and stayed filed under Tracking, which is the
+//   mirror image of the fault this whole file was written for.
+{
+  // A CALL, NOT A DEFINITION. `/runCompletion\(/` matched
+  // lib/ai/providers/complete.ts's own `export async function
+  // runCompletion(` — so any file that merely IMPORTED the entry point
+  // counted as producing, and a route that stopped calling it stayed
+  // green. Requiring `await` in front is what distinguishes the two, and
+  // it is the shape every real call site has: the function returns a
+  // promise carrying the outcome, so nothing useful is done with it
+  // unawaited.
+  const AI_CALL = /await\s+runCompletion\(|anthropic\.messages\.(create|stream)\(|\.messages\.(create|stream)\(/;
+
+  // Downstream of a producer rather than a producer: these two show what
+  // something else made. Declared here, in the check, so adding a third
+  // is a decision rather than a quiet exemption.
+  const DOWNSTREAM = {
+    "/dashboard/published": "shows what the website builder put live",
+    "/dashboard/form-submissions": "shows what a published site received",
+  };
+
+  const ALL_ROUTES = (() => {
+    const out = [];
+    const walk = (path) => {
+      let entries = [];
+      try {
+        entries = readdirSync(path);
+      } catch {
+        return;
+      }
+      for (const entry of entries) {
+        const full = `${path}/${entry}`;
+        if (statSync(full).isDirectory()) walk(full);
+        else if (entry === "route.ts") out.push(full);
+      }
+    };
+    walk("src/app/api");
+    return out;
+  })();
+
+  /** Resolves a `@/lib/...` import to a file on disk. */
+  const resolveLib = (spec) => {
+    const base = `src/${spec.slice(2)}`;
+    for (const ext of [".ts", ".tsx", "/index.ts"]) if (existsSync(base + ext)) return base + ext;
+    return null;
+  };
+
+  /**
+   * Does this file, or anything it imports from @/lib (two levels), call a
+   * model? Two levels is what it takes to reach the real callers: the
+   * agent route calls lib/agents/agent-runner, and the website route calls
+   * lib/websites/*, neither of which has the SDK in the route file itself.
+   */
+  const callsModel = (file, depth = 0, seen = new Set()) => {
+    if (!file || seen.has(file) || depth > 2 || !existsSync(file)) return false;
+    seen.add(file);
+    const src = readFileSync(file, "utf8");
+    if (AI_CALL.test(src)) return true;
+    for (const m of src.matchAll(/from "(@\/lib\/[\w./[\]-]+)"/g)) {
+      // THE PROVIDER LAYER IS A LEAF, NEVER A STEP. Recursing into
+      // lib/ai/providers reaches the adapter that really calls the SDK —
+      // so every file that merely IMPORTED the entry point counted as
+      // producing, and a route that stopped calling it stayed green. A
+      // file produces only if IT (or an ordinary lib it uses) awaits the
+      // entry point itself.
+      if (m[1].startsWith("@/lib/ai/providers") || m[1].startsWith("@/lib/ai/batch")) continue;
+      if (callsModel(resolveLib(m[1]), depth + 1, seen)) return true;
+    }
+    return false;
+  };
+
+  /** The API routes a page (or its components) actually fetches. */
+  const routesFetchedBy = (slug) => {
+    const roots = [`src/app/dashboard/${slug}`, `src/components/${slug}`];
+    const files = [];
+    const walk = (path) => {
+      let entries = [];
+      try {
+        entries = readdirSync(path);
+      } catch {
+        return;
+      }
+      for (const entry of entries) {
+        const full = `${path}/${entry}`;
+        if (statSync(full).isDirectory()) walk(full);
+        else if (/\.tsx?$/.test(entry)) files.push(full);
+      }
+    };
+    for (const root of roots) walk(root);
+
+    const paths = new Set();
+    for (const file of files) {
+      const src = readFileSync(file, "utf8");
+      for (const m of src.matchAll(/["`](\/api\/[\w/[\]$.{}-]+)/g)) {
+        paths.add(m[1].split("?")[0]);
+      }
+    }
+    // MATCHED BY WHAT THE PAGE FETCHES, never by "the API folder has the
+    // same name". /dashboard/websites is the TRACKER (Website plans) and
+    // /api/websites belongs to the website BUILDER: a name-prefix rule
+    // reported the tracker as a generator, which is the exact false
+    // positive that would have taught somebody to loosen this check.
+    const matched = ALL_ROUTES.filter((route) => {
+      const routePath = route.replace("src/app/api/", "/api/").replace("/route.ts", "");
+      return [...paths].some((p) => {
+        const normalised = routePath.replace(/\[[^\]]+\]/g, "*");
+        const wanted = p.replace(/\$\{[^}]*\}/g, "*");
+        return wanted === normalised || wanted.startsWith(`${normalised}/`);
+      });
+    });
+    return matched;
+  };
+
+  const producesFor = (slug) => {
+    const sources = [
+      ...routesFetchedBy(slug),
+      ...(existsSync(`src/app/dashboard/${slug}/page.tsx`) ? [`src/app/dashboard/${slug}/page.tsx`] : []),
+    ];
+    return sources.some((file) => callsModel(file));
+  };
+
+  for (const href of buildHrefs) {
+    const slug = href.replace("/dashboard/", "");
+    if (href in DOWNSTREAM) {
+      check(`${href} is downstream of a producer: ${DOWNSTREAM[href]}`, true);
+      continue;
+    }
+    check(
+      `${href} really produces something (a route it calls reaches a model)`,
+      producesFor(slug),
+      `no runCompletion/anthropic call reachable from the routes ${slug} fetches`
+    );
+  }
+
+  // THE OTHER DIRECTION. A tracker with a producing route behind it is a
+  // feature filed under the heading that says it does nothing.
+  const secretlyProducing = trackingSlugs.filter((slug) => producesFor(slug));
+  check(
+    "no tracking module has quietly grown a generator",
+    secretlyProducing.length === 0,
+    secretlyProducing.length ? `these produce something but sit under "Tracking": ${secretlyProducing.join(", ")}` : ""
+  );
+}
 
 console.log("\n== 4. each tracking page says, on screen, that it produces nothing ==");
 // A comment in a source file is not a disclosure. The person who needed
@@ -181,8 +366,6 @@ const NEGATIONS = {
   apps: /does not build apps/i,
   images: /does not create images/i,
   videos: /does not create videos/i,
-  coding: /does not write code/i,
-  "data-analysis": /does not analyse/i,
   campaigns: /does not run campaigns/i,
   presentations: /does not generate slides/i,
 };
@@ -246,12 +429,14 @@ check("and every one resolves in all 10 locales", badKey.length === 0, badKey.ma
 console.log("\n== 4c. the eight trackers no longer promise generation ==");
 // The approved names. "AI Coding" was the worst of them: it is a table
 // of rows the user types by hand.
+// V4 #19 + #20: `coding` and `dataAnalysis` are NOT here any more,
+// because they are not trackers any more — they are tools, they sit under
+// Build, and section 3b proves it from the code. Their names are checked
+// below under their own rule: a tool MAY promise what it does, and must.
 const TRACKER_NAMES = {
-  coding: ["Coding notes", "Αιτήματα κώδικα (σημειώσεις)"],
   images: ["Image notes", "Σημειώσεις εικόνων"],
   videos: ["Video notes", "Σημειώσεις βίντεο"],
   apps: ["App notes", "Σημειώσεις εφαρμογών"],
-  dataAnalysis: ["Analysis notes", "Σημειώσεις αναλύσεων"],
   campaigns: ["Campaign notes", "Σημειώσεις καμπανιών"],
   websites: ["Website plans", "Σχέδια ιστότοπων"],
 };

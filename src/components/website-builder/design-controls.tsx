@@ -9,6 +9,8 @@ import {
   type ReferenceImageUse,
   type WebsiteBackgroundStyle,
   type WebsiteDesignChoices,
+  PHOTO_SOURCES,
+  TYPICAL_SITE_PHOTO_COUNT,
 } from "@/lib/website-design-brief";
 
 /**
@@ -135,6 +137,46 @@ export function DesignControls({
             );
           })}
         </div>
+      </div>
+
+      {/* WHERE THE PHOTOGRAPHS COME FROM, asked BEFORE generation —
+          because afterwards the answer is a regeneration, and because a
+          person deciding "shall I dig out my photos" wants to know how
+          many are wanted. Unsplash has a bakery; it does not have THIS
+          bakery. */}
+      <div data-testid="design-photo-source">
+        <span className="mb-1 block text-[11px] text-muted">
+          {t("photoSourceTitle", { count: TYPICAL_SITE_PHOTO_COUNT })}
+        </span>
+        <div className="flex flex-wrap gap-1.5">
+          {PHOTO_SOURCES.map((choice) => {
+            const selected = value.photoSource === choice;
+            return (
+              <button
+                key={choice}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => set("photoSource", choice)}
+                className={`min-h-[44px] rounded-full border px-3 py-1 text-[11px] font-medium transition-colors duration-150 ${
+                  selected
+                    ? "border-orange-500/60 bg-orange-500/10 text-orange-300"
+                    : "border-border text-muted hover:border-orange-500/40 hover:text-foreground"
+                }`}
+              >
+                {t(`photoSourceChoices.${choice}`)}
+              </button>
+            );
+          })}
+        </div>
+        {/* Said plainly rather than left to be discovered: choosing "my
+            own" with nothing attached silently becomes stock, and a
+            control that quietly does something else is worse than one
+            that explains itself. */}
+        <p className="mt-1 text-[11px] text-muted">
+          {value.photoSource === "own" && imageCount === 0
+            ? t("photoSourceNeedsUpload")
+            : t(`photoSourceHint.${value.photoSource}`)}
+        </p>
       </div>
 
       {/* The LOGO question, asked BEFORE generation. The reported bug:

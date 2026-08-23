@@ -1075,8 +1075,14 @@ for (const token of ["border", "foreground", "muted", "background", "panel", "pa
 // inline styles — where the compiler sees only a string. Those consumers
 // must have moved to rgb(var(--x)) in the same change, or the chart axis
 // silently renders with an invalid colour.
+// COMMENTS STRIPPED FIRST. A file that explains this very rule — "a bare
+// var(--muted) here renders no colour" — was failed BY THE SENTENCE
+// recording that it passes. A scan that cannot tell prose from code
+// punishes the files whose authors understood it, which is the opposite
+// of what a gate is for.
+const withoutComments = (text) => text.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 for (const file of sourceFiles) {
-  const text = readFileSync(file, "utf8");
+  const text = withoutComments(readFileSync(file, "utf8"));
   const bare = [...text.matchAll(/(?<!rgb\()var\(--(border|foreground|muted|background|panel|panel-hover)\)/g)].map((m) => m[1]);
   check(`${file.split("/").pop()} reads the channel variables through rgb()`, bare, []);
 }

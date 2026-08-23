@@ -123,7 +123,9 @@
       "files": "文件",
       "deepResearch": "深度研究",
       "help": "帮助中心",
-      "affiliate": "推广合作"
+      "affiliate": "推广合作",
+      "formSubmissions": "表单提交",
+      "routing": "模型路由"
     },
     "groupHints": {
       "create": "生成网站、规划目标、撰写文档。",
@@ -175,7 +177,8 @@
       "files": "上传 PDF、Word 和 Excel 文件，然后向 AI 提问",
       "deepResearch": "给一个主题，它会搜索、交叉核对并写出带来源的报告",
       "help": "最常见问题的答案，不消耗额度。",
-      "affiliate": "你的推广链接、已赚金额，以及如何收款。"
+      "affiliate": "你的推广链接、已赚金额，以及如何收款。",
+      "formSubmissions": "访客通过已发布网站上的表单提交的全部内容"
     },
     "comingSoon": "即将推出",
     "closeMenu": "关闭菜单"
@@ -696,7 +699,131 @@
       "collaborationHint": "团队邀请与共享工作区动态",
       "iosNeedsInstall": "在 iPhone 和 iPad 上，只有将 Ionexa 添加到主屏幕后通知才能送达。"
     },
-    "jumpToSection": "跳转到某个部分"
+    "jumpToSection": "跳转到某个部分",
+    "notifications": {
+      "title": "通知",
+      "description": "选择哪些内容会送到你手上，以及送到哪里。只有真的有事要说时我们才会发送。",
+      "saved": "已保存",
+      "saveError": "保存失败——请再试一次。",
+      "criticalNote": "付款问题、额度不足以及需要你处理的错误，即使你关闭了该类型，也始终会在应用内留下记录。",
+      "channels": {
+        "in_app": "应用内",
+        "email": "邮件",
+        "telegram": "Telegram",
+        "discord": "Discord"
+      },
+      "types": {
+        "agent_completed": {
+          "label": "智能体有发现",
+          "description": "只有当一次运行真的产出了结果时才通知——绝不会只因为它运行过。"
+        },
+        "website_published": {
+          "label": "网站已发布",
+          "description": "当你的某个网站上线时。"
+        },
+        "research_ready": {
+          "label": "研究已完成",
+          "description": "当一份深度研究报告完成时。"
+        },
+        "credits_low": {
+          "label": "额度即将用完",
+          "description": "在 80% 和 100% 各提醒一次，让你的定时任务不会毫无预警地停下。"
+        },
+        "payment_failed": {
+          "label": "付款失败",
+          "description": "当银行卡被拒、订阅面临中断时。"
+        },
+        "team_member_joined": {
+          "label": "新成员加入",
+          "description": "当有人接受了你的邀请时。"
+        },
+        "error_needs_attention": {
+          "label": "有事需要你处理",
+          "description": "当出现了只有你才能修复的问题时。"
+        }
+      },
+      "quiet": {
+        "title": "免打扰时段",
+        "description": "在这两个时间之间不会有任何打扰。",
+        "enable": "启用免打扰时段",
+        "from": "从",
+        "to": "到",
+        "offset": "你的时区",
+        "deferNote": "是暂缓，不是丢弃：免打扰时段内产生的内容会在时段结束时送达。付款问题和需要你处理的错误仍然会立即送到。"
+      },
+      "chat": {
+        "title": "Telegram 与 Discord",
+        "description": "把通知发到聊天里，而不是收件箱。即使连接后，所有类型默认仍是关闭的。",
+        "connect": "连接",
+        "connecting": "正在连接…",
+        "disconnect": "断开连接",
+        "connected": "已连接",
+        "notConfigured": "此部署尚未配置 Telegram。",
+        "testSent": "已连接——请查收我们的测试消息。",
+        "testFailed": "我们无法向那里投递测试消息，因此什么都没有保存。",
+        "telegram": {
+          "help": "给我们的机器人发条消息，然后粘贴它回复的 chat ID。",
+          "placeholder": "会话 ID"
+        },
+        "discord": {
+          "help": "粘贴你想要的频道的 Discord webhook 地址。",
+          "placeholder": "https://discord.com/api/webhooks/…"
+        }
+      }
+    },
+    "overage": {
+      "title": "超额用量",
+      "description": "额度用完后，可按每点数 €{price} 继续使用——仅在你主动同意时。",
+      "offNow": "超额用量已关闭。不会产生任何额外费用：额度用完后操作即停止。",
+      "capLabel": "你的每月上限（€）",
+      "capPlaceholder": "例如 20",
+      "capHint": "介于 €{min} 与 €{max} 之间。",
+      "preview": {
+        "heading": "你将同意的内容",
+        "rate": "每点数 €{price}，按今日价格锁定。",
+        "cap": "同一自然月内绝不超过 €{cap}。",
+        "credits": "这最多可换 {credits} 点额外额度。",
+        "invoice": "在下一张账单上单列一行，与套餐分开计费。"
+      },
+      "agree": "开启超额用量",
+      "saved": "已保存。你随时可以关闭。",
+      "thisMonth": "本月额外用量",
+      "ofCap": "／€{cap}",
+      "agreedRate": "按你同意的价格，每点数 €{price}。",
+      "capReached": "已达上限。在你调高之前不会再产生费用。",
+      "turnOff": "关闭超额用量",
+      "turnOffNote": "关闭后不再产生新费用。本月已使用的部分仍会计入账单。"
+    },
+    "addons": {
+      "title": "附加包",
+      "description": "在套餐之外增加容量。按月计费的附加包可随时取消。",
+      "perMonth": "/月",
+      "oneOff": "（一次性）",
+      "owned": "你拥有 {count} 份",
+      "notConfigured": "此部署不可用（未设置 {envVar}）。",
+      "buy": "购买",
+      "subscribe": "添加",
+      "cancel": "取消",
+      "oneOffNote": "额度包即时到账，无法取消。",
+      "items": {
+        "credits_1000": {
+          "name": "1,000 点额度",
+          "grants": "一次性充值"
+        },
+        "agents_5": {
+          "name": "多 5 个智能体",
+          "grants": "提高智能体上限"
+        },
+        "storage_10gb": {
+          "name": "10 GB 存储",
+          "grants": "更多文件空间"
+        },
+        "priority": {
+          "name": "优先执行",
+          "grants": "你的任务优先运行"
+        }
+      }
+    }
   },
   "dashboard": {
     "overview": {
@@ -1155,7 +1282,19 @@
           "auto": "由你决定"
         },
         "logoHint": "没有标志时，网站会以精心设计的文字标识展示你的商户名称 — 绝不会替你虚构一个标志。",
-        "logoNeedsUpload": "请先将标志作为图片上传"
+        "logoNeedsUpload": "请先将标志作为图片上传",
+        "photoSourceTitle": "照片 — 本站大约需要 {count} 张",
+        "photoSourceChoices": {
+          "own": "上传我自己的",
+          "stock": "图库照片",
+          "none": "不用照片"
+        },
+        "photoSourceHint": {
+          "own": "你的照片优先放在主视觉和相册，缺的部分用图库照片补足。",
+          "stock": "为每个版块挑选的图库照片。",
+          "none": "以字体、色彩和图形构成的设计 — 完全不用照片。"
+        },
+        "photoSourceNeedsUpload": "请在上方添加照片，否则将使用图库照片。"
       },
       "imageIntro": "你的标志、产品照片、店内照片——想放到页面上的，或想让它决定风格的。",
       "regenerateAlreadyUsed": "您已使用过此站点的免费重新生成。请用其他描述创建新站点。",
@@ -1164,7 +1303,14 @@
         "title": "描述这个网站，拿到这个网站",
         "why": "写清它是做什么的、给谁看——页面、文案和排版都由这段描述生成，之后还能用大白话继续改。",
         "example": "面包店的单页网站，含产品和营业时间"
-      }
+      },
+      "pageSelectLabel": "本站页面",
+      "pageHome": "首页",
+      "editPageGone": "该页面已不属于此站点 — 请重新打开以查看当前页面。",
+      "stockNoticeTitle": "本站有 {count} 张图库照片",
+      "stockNoticeBody": "上传你自己的照片会更真实 — Unsplash 有同类的店，但没有你的店。",
+      "stockNoticeAction": "上传照片",
+      "storageFull": "这些图片空间不足 — 需要 {needed}，剩余 {free}。"
     },
     "marketplace": {
       "title": "市场",
@@ -1469,6 +1615,59 @@
         "stepNoSearch": "仅根据任务文本工作，不进行网络搜索。",
         "stepWrite": "撰写结果，并与查到的内容核对。",
         "stepDeliver": "{when}，通过电子邮件发送到 {target}。"
+      },
+      "runQueued": "排队中",
+      "runQueuedHint": "已提交至更便宜的批量处理。结果将在 24 小时内送达，通常快得多。",
+      "depth": {
+        "legend": "工作深度",
+        "perRun": "每次运行",
+        "suggested": "推荐",
+        "facts": "{sources} 个来源 · {steps} 步 · 约 {seconds} 秒",
+        "runOnce": "仅这次运行使用",
+        "runOnceHint": "只影响这一次。定时任务仍使用{depth}。",
+        "simple": {
+          "title": "简单",
+          "what": "一个来源，简短回答。适合只有一个正确答案的问题。"
+        },
+        "standard": {
+          "title": "标准",
+          "what": "若干来源交叉核对。适合大多数简报和监控。"
+        },
+        "deep": {
+          "title": "深入",
+          "what": "两轮检索、十个以上来源，外加完整报告。"
+        }
+      },
+      "templates": {
+        "found": "已有 {count} 个现成智能体在做这件事",
+        "use": "用这个 — {credits} 积分",
+        "buildNew": "新建一个 — {credits} 积分",
+        "adopted": "智能体已创建，关注：{subject}",
+        "adoptError": "无法使用该模板。没有创建任何内容。"
+      },
+      "share": {
+        "open": "分享这个智能体的结构",
+        "title": "作为模板分享",
+        "explainer": "只发布结构：把你的主题换成占位符后的任务，以及排程和深度。绝不包含智能体名称、你的邮箱或发送目标。",
+        "subjectLabel": "任务里哪些词是你特有的？",
+        "subjectPlaceholder": "例如：Acme 公司",
+        "titleLabel": "在模板库中的标题",
+        "descriptionLabel": "一句话描述",
+        "previewLabel": "将要发布的内容",
+        "shareButton": "分享",
+        "sharing": "分享中...",
+        "cancel": "取消",
+        "shared": "已分享。你随时可以撤回。",
+        "failed": "分享失败，没有发布任何内容。",
+        "slotNote": "使用的人会把 {slot} 填成自己的主题。",
+        "refused": {
+          "no_slot": "写出属于你的词——被替换的正是它们，它们不会离开你的账户。",
+          "subject_still_present": "这个说法在任务的其他地方仍然出现，只是写法不同。请先修改任务。",
+          "contains_contact_details": "任务里含有邮箱、链接或 @用户名。分享前请删除。",
+          "contains_numbers": "任务里含有长数字——电话、账号或参考编号。请删除。",
+          "too_short": "剩下的内容太短，对别人没有帮助。",
+          "too_long": "这个任务太长，无法作为模板分享。"
+        }
       }
     },
     "publishing": {
@@ -1876,6 +2075,174 @@
       "opening": "正在打开 Stripe…",
       "connectError": "无法打开结算设置，请重试。",
       "rules": "佣金按实际收到的款项计算。退款和争议扣款会被冲回。自我推荐以及对同一个人的重复推荐不产生佣金。"
+    },
+    "search": {
+      "kinds": {
+        "page": "页面",
+        "module": "记录",
+        "file": "文件",
+        "chat": "对话",
+        "website": "网站",
+        "agent": "智能体",
+        "research": "研究",
+        "mission": "任务",
+        "help": "帮助"
+      },
+      "filters": {
+        "type": "类型",
+        "module": "模块",
+        "date": "日期",
+        "all": "全部"
+      },
+      "dates": {
+        "any": "不限时间",
+        "7d": "7 天",
+        "30d": "30 天",
+        "365d": "1 年"
+      }
+    },
+    "formSubmissions": {
+      "title": "表单提交",
+      "description": "访客通过你网站上的表单提交的全部内容。",
+      "deletedWebsite": "已删除的网站",
+      "searchPlaceholder": "搜索姓名、邮箱、留言...",
+      "filterType": "按表单类型筛选",
+      "filterSite": "按网站筛选",
+      "allTypes": "全部类型",
+      "allSites": "全部网站",
+      "countMeta": "显示 {shown} 条 · 未读 {unread} 条",
+      "exportCsv": "导出 CSV",
+      "noName": "提交",
+      "new": "新",
+      "noMatches": "没有匹配项",
+      "noMatchesBody": "试试更短的搜索词，或清除筛选。",
+      "delete": "删除",
+      "deleteConfirm": "删除这条提交？无法撤销。",
+      "deleted": "提交已删除。",
+      "deleteFailed": "无法删除该提交。",
+      "markReadFailed": "无法标记为已读。",
+      "consentGiven": "已获得同意",
+      "consentMissing": "未记录同意",
+      "consentRecorded": "同意内容：{text}",
+      "consentNoText": "（未记录具体文字）",
+      "consentMissingBody": "这位访客没有勾选同意框，或表单本身没有同意框。",
+      "empty": {
+        "title": "还没有提交",
+        "body": "当有人在你已发布的网站上填写表单时，就会出现在这里——即使通知邮件发不出去。"
+      },
+      "types": {
+        "contact": "联系",
+        "newsletter": "订阅",
+        "quote": "报价请求",
+        "other": "其他"
+      },
+      "delivery": {
+        "sent": "邮件已发送",
+        "no_key": "没有发送任何邮件：此部署没有邮件 API 密钥。",
+        "unverified_domain": "邮件没有送达：发件域名未验证。",
+        "failed": "部分通知邮件发送失败。",
+        "affected": "有 {count} 条提交已保存在这里，但从未通过邮件发给你。没有任何内容丢失。"
+      }
+    },
+    "trading": {
+      "title": "交易日志",
+      "subtitle": "你自己的交易、你自己的规则，逐条统计。",
+      "disclaimerTitle": "这是记录，不是建议",
+      "disclaimer": "这里的一切都在描述你已经完成的交易和你自己写下的规则。它不是投资建议，不是预测，也不会说任何市场将会如何。交易存在亏损风险。",
+      "adviceRefused": "那属于投资建议或市场预测，本产品不提供。可以问我关于你自己记录的问题。",
+      "empty": "还没有记录任何交易。",
+      "emptyCta": "添加第一笔交易",
+      "byInstrument": "按品种",
+      "bySession": "按时段",
+      "accounts": {
+        "title": "账户",
+        "all": "全部账户"
+      },
+      "table": {
+        "key": "名称"
+      },
+      "equity": {
+        "title": "资金曲线"
+      },
+      "sessions": {
+        "sydney": "悉尼",
+        "tokyo": "东京",
+        "london": "伦敦",
+        "new_york": "纽约",
+        "other": "时段之外"
+      },
+      "stats": {
+        "trades": "交易笔数",
+        "winRate": "胜率",
+        "netPnl": "净盈亏",
+        "profitFactor": "盈利因子",
+        "avgWin": "平均盈利",
+        "avgLoss": "平均亏损",
+        "maxDrawdown": "最大回撤",
+        "avgDuration": "平均持仓时间",
+        "notEnough": "交易还不够多（需要 5 笔）",
+        "notEnoughShort": "太少",
+        "noLosses": "此样本中没有亏损交易",
+        "beforeCosts": "这些数字未扣除手续费——在交易中填入手续费即可看到净值。",
+        "afterCosts": "这些数字已扣除你记录的手续费。",
+        "unscoreable": "{count} 笔交易无法计算（缺少价格或盈亏）"
+      },
+      "pattern": {
+        "title": "亏损之后",
+        "comparison": "紧接在亏损之后开的交易胜率为 {after}%（{afterCount} 笔），其他情况下为 {baseline}%（{baselineCount} 笔）。",
+        "observationOnly": "这是记录显示的内容。它不说明原因，也不是关于下一步该做什么的建议。",
+        "notEnough": "比较的两侧交易数量都还不够。"
+      },
+      "rules": {
+        "title": "你的规则",
+        "explainer": "用你平常说话的方式写下规则。每笔交易都会用算术来核对，而不是靠模型的印象——所以这些数字你可以自己复核。",
+        "placeholder": "最大风险 2%。只做伦敦时段。盈亏比至少 1:2。每天最多 3 笔。",
+        "understood": "理解为",
+        "couldNotParse": "其中没有内容能转换成可核对的规则，因此不会保存。请试试更短、更具体的句子。",
+        "add": "添加规则",
+        "empty": "还没有规则。在上面写一条，之后每笔交易都会据此核对。",
+        "delete": "删除规则",
+        "saved": "已保存 {count} 条规则",
+        "saveFailed": "无法保存该规则。",
+        "deleteFailed": "无法删除该规则。"
+      },
+      "ruleKinds": {
+        "max_risk_percent": "每笔风险",
+        "max_trades_per_day": "每日交易数",
+        "min_risk_reward": "盈亏比",
+        "allowed_sessions": "时段",
+        "allowed_instruments": "品种",
+        "max_daily_loss": "每日亏损上限",
+        "no_trade_after_loss": "亏损后暂停",
+        "max_position_size": "仓位大小"
+      },
+      "ruleSummary": {
+        "max_risk_percent": "每笔最多冒 {percent}% 的风险",
+        "max_trades_per_day": "每天最多 {count} 笔交易",
+        "min_risk_reward": "回报至少为风险的 {ratio} 倍",
+        "allowed_sessions": "只做这些时段：{sessions}",
+        "allowed_instruments": "只做这些品种：{instruments}",
+        "max_daily_loss": "单日亏损达到 {amount} 后停手",
+        "no_trade_after_loss": "亏损后等待 {minutes} 分钟",
+        "max_position_size": "仓位最大 {size}"
+      },
+      "violations": {
+        "count": "违反了 {count} 次",
+        "none": "未违反",
+        "uncheckable": "有 {count} 项核对未能进行，因为交易缺少价格、风险金额或时间。"
+      },
+      "errors": {
+        "bad_request": "无法读取该请求。",
+        "delete_failed": "无法删除该规则。",
+        "empty_rule": "请先用你自己的话写下规则。",
+        "failed": "出了点问题。",
+        "not_understood": "这无法转换成可核对的规则，因此没有保存。请试试更短、更具体的句子。",
+        "rate_limited": "过去一小时内改动过多，请稍后再试。",
+        "recheck_failed": "无法刷新规则核对。",
+        "save_failed": "无法保存该规则。",
+        "too_long": "这比一条规则需要的长度长太多了。",
+        "unauthenticated": "你已退出登录。请重新登录后再试。"
+      }
     }
   },
   "module": {
@@ -2089,15 +2456,12 @@
       "company": "公司",
       "contentIdeas": "内容创意",
       "customers": "客户",
-      "dataSource": "数据来源",
       "description": "描述",
       "direction": "方向",
-      "findings": "发现",
       "followUpEmail": "跟进邮件",
       "hashtags": "话题标签",
       "idea": "创意",
       "ideaNames": "创意名称",
-      "language": "语言",
       "launchPlan": "发布计划",
       "leadName": "线索名称",
       "marketing": "营销",
@@ -2173,9 +2537,7 @@
     "placeholders": {
       "longShort": "做多 / 做空",
       "winLoss": "盈利 / 亏损",
-      "httpsUrl": "https://...",
-      "codingLanguages": "例如 Python、TypeScript、Go",
-      "dataSources": "例如 CSV 导出、Stripe、Google Analytics"
+      "httpsUrl": "https://..."
     },
     "deleteConfirm": {
       "competitors": "确定删除此竞争对手？此操作无法撤销。",
@@ -2194,8 +2556,6 @@
       "apps": "确定删除此应用？此操作无法撤销。",
       "images": "确定删除此图片？此操作无法撤销。",
       "videos": "确定删除此视频？此操作无法撤销。",
-      "coding": "确定删除此编码请求？此操作无法撤销。",
-      "data-analysis": "确定删除此分析？此操作无法撤销。",
       "presentations": "确定删除此演示记录？此操作无法撤销。",
       "campaigns": "确定删除此营销活动？此操作无法撤销。"
     },
@@ -2280,16 +2640,6 @@
         "why": "每条视频的需求和进度，拍摄清单不该只存在脑子里。它不会生成视频。",
         "example": "30 秒的产品演示"
       },
-      "coding": {
-        "title": "你想让人做出来的东西",
-        "why": "写清要做的功能或要修的问题，标上语言，把整个待办清单放在脑子以外的地方。它不会写代码。",
-        "example": "一个合并每月 CSV 的脚本"
-      },
-      "dataAnalysis": {
-        "title": "你的数据能回答的问题",
-        "why": "问题、查哪个数据源、以及拿回来的结论——同一个答案不该被找两遍。它不会分析你的数据。",
-        "example": "哪个渠道带来的客户留得住"
-      },
       "presentations": {
         "title": "记录演示文稿的地方",
         "why": "把你正在准备或已经讲过的演示记在这里——本页不会替你生成幻灯片。用上方的按钮添加一条。",
@@ -2318,8 +2668,6 @@
       "apps": "新增应用",
       "images": "新增图片",
       "videos": "新增视频",
-      "coding": "新增编程任务",
-      "dataAnalysis": "新增分析",
       "presentations": "新增演示备注",
       "campaigns": "新增活动"
     }
@@ -2503,7 +2851,8 @@
     "termsDescription": "Ionexa AI 服务条款。",
     "privacyDescription": "Ionexa AI 隐私政策。",
     "cookiesDescription": "Ionexa AI 使用哪些 cookie、各自的用途以及保留多久。",
-    "helpDescription": "关于 Ionexa AI 最常见问题的解答 — 价格、credits、网站、agents、隐私。"
+    "helpDescription": "关于 Ionexa AI 最常见问题的解答 — 价格、credits、网站、agents、隐私。",
+    "costs": "成本"
   },
   "errors": {
     "retry": "重试",
@@ -2597,7 +2946,7 @@
       "e1": "塞萨洛尼基的一家咖啡馆，带菜单和营业时间",
       "e2": "摄影师作品集，带图库",
       "e3": "SaaS 落地页，含定价",
-      "limits": "一个页面，不是商店也不是应用 · 不会连接你的系统"
+      "limits": "几个页面，不是商店或应用 · 不会连接到你的系统"
     },
     "files": {
       "e1": "合同里关于解约是怎么写的？",
@@ -2633,5 +2982,301 @@
     "showHow": "看看怎么做",
     "installedHere": "本设备已安装 Ionexa。",
     "installUnavailable": "浏览器尚未提示安装。你也可以从它的菜单 →“安装应用”。"
+  },
+  "voice": {
+    "listen": "朗读",
+    "listenFor": "朗读 · {credits} 个积分",
+    "pause": "暂停",
+    "speed": "播放速度",
+    "voice": "音色",
+    "listening": "正在收听",
+    "listeningHint": "说完后按停止。在你读过之前，什么都不会发送。",
+    "startListening": "用说的，不用打字",
+    "stopListening": "停止",
+    "costPerMinute": "每分钟语音 {credits} 个积分",
+    "outOfMinutes": "本月的语音分钟数已用完",
+    "states": {
+      "idle": "就绪",
+      "listening": "正在听你说",
+      "thinking": "正在思考",
+      "speaking": "正在说话"
+    },
+    "errors": {
+      "bad_request": "无法读取该请求。",
+      "capacity": "服务当前繁忙，请稍后再试。",
+      "denied": "麦克风未获授权。你仍然可以打字。",
+      "empty": "这段录音里没有听到任何内容。",
+      "failed": "语音功能暂时不可用。你仍然可以打字。",
+      "insufficient_credits": "积分不足。",
+      "no_recording": "没有发送任何录音。",
+      "no_speech": "没有录到任何声音。",
+      "not_configured": "此部署尚未配置语音功能。",
+      "not_included": "你的方案不包含语音功能。",
+      "out_of_minutes": "本月的语音分钟数已用完。",
+      "provider_error": "无法连接到语音服务。",
+      "rate_limited": "过去一小时内录音次数过多。请稍后再试。",
+      "reserve_failed": "无法为此预留积分。",
+      "too_large": "这段录音太长了。",
+      "unauthenticated": "你已退出登录。请重新登录后再试。",
+      "unsupported": "此浏览器无法录音。你仍然可以打字。",
+      "unsupported_type": "不支持这种音频格式。",
+      "usage_unavailable": "目前无法查询语音分钟数。"
+    },
+    "permission": {
+      "title": "在打开麦克风之前",
+      "pressToStart": "只有你按下时才开始录音，再按一次即停止。",
+      "notStored": "音频仅用于转写，不会被保存在任何地方——我们不存，之后也不存。",
+      "editFirst": "在发送任何内容之前，由你阅读并修改文字。",
+      "cost": "每分钟 {credits} 个积分，你的方案每月 {minutes} 分钟。",
+      "allow": "打开麦克风",
+      "cancel": "暂不"
+    },
+    "draft": {
+      "title": "听到的内容",
+      "use": "使用这段文字",
+      "discard": "丢弃",
+      "notSent": "还没有发送任何内容。先修改文字，再由你自己发送。"
+    },
+    "voices": {
+      "neutral": "中性",
+      "warm": "温暖",
+      "deep": "低沉",
+      "bright": "明亮"
+    },
+    "conversation": {
+      "title": "免提对话",
+      "start": "开口说",
+      "close": "结束对话",
+      "speak": "按一下再开口",
+      "interrupt": "打断",
+      "tapToSpeak": "在任意位置按一下再开口。你停下时它会自己停止收听。",
+      "tapToInterrupt": "在任意位置按一下即可打断并重新开口。",
+      "hint": "正常说话——你停下时这一轮就结束。",
+      "empty": "说过的内容也会在这里以文字呈现。"
+    },
+    "settings": {
+      "description": "用说的代替打字，也可以让它把答案读给你听。打字和阅读永远不会被取代——每个语音控件都在文字旁边，而不是取代它。",
+      "exhausted": "本月分钟数已用完，将于每月一号重置。",
+      "notConfigured": "此部署尚未配置语音，因此不会出现麦克风和朗读按钮。",
+      "notIncluded": "你的方案不包含语音。这里的一切仍然可以打字和阅读。",
+      "perMinute": "每分钟 {credits} 个积分",
+      "privacy": "只有你按下时才开始录音。音频仅用于转写，不会保存在任何地方——我们只保留秒数，别的都不留。",
+      "remaining": "还剩 {minutes} 分钟",
+      "speakLabel": "让它读给你听",
+      "title": "语音",
+      "transcribeLabel": "对它说",
+      "used": "本月已使用 {used} / {limit} 分钟"
+    }
+  },
+  "dataAnalysis": {
+    "title": "数据分析",
+    "description": "上传一份表格。每一项统计都基于整份文件计算得出，绝不猜测。",
+    "upload": {
+      "title": "上传文件",
+      "description": "CSV 或 Excel，最大 8 MB。读取文件不收费。",
+      "button": "选择文件",
+      "working": "正在读取…",
+      "done": "已读取 {rows} 行",
+      "failed": "这个文件无法读取。",
+      "tooLarge": "文件太大了——上限是 8 MB。"
+    },
+    "summary": {
+      "counts": "{rows} 行 · {columns} 列",
+      "duplicates": "{count} 行完全重复",
+      "truncated": "我们读取了前 50,000 行。图表描述的是这些行，而不是整份文件。",
+      "ragged": "有 {count} 行与表头对不上——请检查保存时用的分隔符。"
+    },
+    "columns": {
+      "name": "列",
+      "type": "类型",
+      "filled": "已填",
+      "distinct": "不同值",
+      "stats": "范围",
+      "missing": "缺失"
+    },
+    "types": {
+      "number": "数字",
+      "integer": "整数",
+      "date": "日期",
+      "boolean": "是/否",
+      "text": "文本",
+      "empty": "空"
+    },
+    "analyse": {
+      "button": "寻找规律",
+      "working": "正在查看…",
+      "done": "分析完成",
+      "failed": "分析没有完成。",
+      "unavailable": "无法连接 AI 服务。未产生任何费用。"
+    },
+    "findings": {
+      "title": "里面有什么",
+      "none": "还没有分析过。上面的列和图表都是直接从文件算出来的。"
+    },
+    "ask": {
+      "title": "向数据提问",
+      "description": "你的问题会变成一次在真实行上运行的查询。数字来自文件，而不是模型。",
+      "placeholder": "哪个地区卖得最多？",
+      "button": "提问",
+      "working": "正在提问…",
+      "failed": "这个问题无法回答。",
+      "matched": "{total} 行中有 {matched} 行匹配",
+      "rowCount": "{count} 行"
+    },
+    "legacy": {
+      "title": "你以前的笔记",
+      "description": "写于本页的上一个版本，当时它还是一张笔记表。原样保留。"
+    },
+    "chart": {
+      "nothingToPlot": "这一项没有可绘制的内容。",
+      "truncated": "显示最大的 {count} 项；其余的已归类或略去。"
+    }
+  },
+  "coding": {
+    "title": "AI 编程",
+    "description": "五件它会做的事，四件它不做的事。所有操作都只针对框里的那段文本。",
+    "code": "代码",
+    "copy": "复制",
+    "copied": "已复制",
+    "language": "语言",
+    "targetLanguage": "转换为",
+    "useWorkspace": "用我的其他模块作为上下文",
+    "run": "运行",
+    "running": "处理中…",
+    "result": "结果",
+    "limits": {
+      "title": "它不做什么",
+      "no_repository": "它没有代码仓库。看不到你的代码库，也看不到你粘贴的那个文件旁边的文件。",
+      "no_execution": "它不运行任何东西。不运行你的代码，不运行它写的代码，也不运行它写的测试。",
+      "no_commits": "它不做提交、分支或合并请求。",
+      "no_whole_project": "它不搭建整个项目。一个函数、一个文件、一次粘贴。",
+      "later": "这四项属于下一个版本，不属于这一版。"
+    },
+    "operations": {
+      "generate": {
+        "label": "写一段代码",
+        "description": "描述你要什么，得到一个函数，并写明它的假设和没有覆盖的地方。",
+        "placeholder": "一个接收订单列表并返回每位客户利润率的函数…"
+      },
+      "explain": {
+        "label": "解释这段",
+        "description": "粘贴代码，按顺序说明它做了什么，并指名所讲的那几行。",
+        "placeholder": "粘贴你想让它解释的代码…"
+      },
+      "find_bugs": {
+        "label": "找出缺陷",
+        "description": "每条结论都要指明触发它的输入或状态。没有失败用例的结论只是偏好。",
+        "placeholder": "粘贴你想检查的代码…"
+      },
+      "convert": {
+        "label": "转换语言",
+        "description": "用另一种语言重写，并列出所有无法直接迁移的部分。",
+        "placeholder": "粘贴你想转换的代码…"
+      },
+      "write_tests": {
+        "label": "写测试",
+        "description": "常规情况、边界情况，以及它失败的方式。不只是顺利路径。",
+        "placeholder": "粘贴你想测试的代码…"
+      }
+    },
+    "errors": {
+      "tooLong": "超过了 {limit} 个字符。这个功能针对单个文件，不是整个项目。",
+      "unavailable": "无法连接 AI 服务。未产生任何费用。",
+      "failed": "没有成功——请再试一次。"
+    },
+    "history": {
+      "title": "历史",
+      "search": "搜索",
+      "folder": "文件夹",
+      "allFolders": "全部文件夹",
+      "empty": "这里还没有内容。",
+      "input": "输入",
+      "output": "输出",
+      "importedNote": "以前的笔记",
+      "failed": "失败"
+    }
+  },
+  "finance": {
+    "title": "财务",
+    "description": "每个数字都由真实数据算出，算不出来的会说明原因。",
+    "needsInput": "还需要：{fields}",
+    "needsHistory": "需要 {need} 个月的历史数据——目前有 {have} 个月。",
+    "noChangeYet": "暂无变化",
+    "notEnoughDays": "目前只有 {days} 天的历史数据。",
+    "provenance": "历史从上线那天开始：{months} 个月的订阅数据和 {days} 份每日快照。不做回填——回填出来的数字，是用今天的价格套在没人记录过的过去上。",
+    "inputs": {
+      "marketing_spend": "营销支出",
+      "fixed_costs": "固定成本",
+      "cash_balance": "现金余额"
+    },
+    "trends": {
+      "mrr30": "MRR，30 天",
+      "mrr90": "MRR，90 天",
+      "aiCost30": "AI 成本，30 天",
+      "subscribers90": "付费订阅者，90 天"
+    },
+    "form": {
+      "title": "{month} 的数字",
+      "description": "三件这个数据库无法知道的事。留空即可——需要它的指标会说明缺什么，而不是当作零来计算。",
+      "marketing": "营销支出",
+      "marketingHint": "本月为获取客户花掉的全部费用。",
+      "fixed": "固定成本",
+      "fixedHint": "薪资、托管、工具——除营销和 AI 之外的一切。",
+      "cash": "现金余额",
+      "cashHint": "月末银行里的余额。",
+      "save": "保存",
+      "saving": "保存中…",
+      "saved": "已保存",
+      "saveError": "保存失败——请再试一次。"
+    },
+    "metrics": {
+      "mrr": "月度经常性收入",
+      "arr": "年度经常性收入",
+      "arpu": "每用户收入",
+      "grossMarginPercent": "毛利率",
+      "aiCostPerUserEur": "每用户 AI 成本",
+      "costPerSuccessfulTaskEur": "每完成任务成本",
+      "churnPercent": "流失率",
+      "retentionPercent": "留存率",
+      "nrrPercent": "净收入留存",
+      "ltvEur": "客户终身价值",
+      "cacEur": "获客成本",
+      "paybackMonths": "回本周期",
+      "ruleOf40": "40 法则",
+      "burnEur": "每月消耗",
+      "runwayMonths": "资金可用月数"
+    }
+  },
+  "routing": {
+    "title": "模型路由",
+    "description": "过去 30 天内哪个模型处理了哪些请求、花费多少，以及路由节省了多少。",
+    "empty": "尚未记录任何路由决策。当请求开始经过路由器时，此表会自动填充——它显示的不是零，而是空。",
+    "decisions": "决策数",
+    "charged": "向客户收取",
+    "absorbed": "由我们承担",
+    "absorbedNote": "未向客户收费的失败低价尝试",
+    "saved": "缓存规则节省",
+    "savedNote": "因反而更贵而被拒绝的降级",
+    "model": "模型",
+    "overrides": "覆盖",
+    "overrideSaving": "覆盖节省",
+    "learnedTitle": "路由器学到了什么",
+    "learnedIntro": "30 天内按能力与模型统计的成功率。低于 {rate}% 的模型不再被该能力选用——但需至少 {samples} 次运行，因为两次中失败两次不构成证据。",
+    "learnedEmpty": "目前还没有确定性结论。在某个能力与模型组合累积足够运行次数之前，路由将保持其静态分级映射。",
+    "runs": "{samples} 次运行中 {rate}%",
+    "routedUp": "已上调",
+    "notEnough": "样本仍不足"
+  },
+  "publishing": {
+    "badge": {
+      "includedInPlan": "你的套餐已移除徽标，无需购买。",
+      "removedThisMonth": "本月已移除徽标。",
+      "cancelledKeepsMonth": "自动续订已关闭。徽标在本月底前保持隐藏，之后会重新出现。",
+      "stopRenewing": "停止续订",
+      "offer": "以每月 {credits} 点数（约 €{eur}）移除本站点的“Made with Ionexa”徽标。",
+      "affordable": "你有 {balance} 点数——够这个站点约 {months} 个月。",
+      "notEnough": "你有 {balance} 点数，需要 {needed}。",
+      "remove": "移除徽标"
+    }
   }
 }

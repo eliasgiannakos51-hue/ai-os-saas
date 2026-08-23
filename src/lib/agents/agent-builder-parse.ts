@@ -6,6 +6,7 @@ import {
   type AgentOutputFormat,
 } from "@/lib/agents/agent-config";
 import { validateAgentCron, isValidTimeZone } from "@/lib/agents/cron-expression";
+import { parseAgentDepth, type AgentDepth } from "@/lib/agents/agent-depth";
 
 // The pure half of the Agent Builder — everything that turns the model's
 // tool input into a configuration, with no Anthropic client anywhere near
@@ -108,6 +109,14 @@ export function parseBuiltAgent(
     ? input.outputFormat
     : "summary";
 
+  // THE MODEL'S SUGGESTION, and only a suggestion — the user sees all
+  // three tiers with their prices and confirms before anything is
+  // created. parseAgentDepth turns anything unrecognised into
+  // `standard`, which is the tier that can answer most things and the
+  // one every agent used to run at: a malformed answer must never
+  // silently pick the twelve-times-more-expensive one.
+  const depth: AgentDepth = parseAgentDepth(input.depth);
+
   const timezone = isValidTimeZone(context.timezone) ? context.timezone : "UTC";
 
   // The task prompt is sanitised here as well as in validateAgentDraft:
@@ -128,6 +137,7 @@ export function parseBuiltAgent(
         deliveryTarget: context.deliveryTarget,
         config: {
           needsWebSearch: input.needsWebSearch === true,
+          depth,
           outputFormat,
           language: str(input.language, 20) || "en",
           builderSummary: str(input.understood, AGENT_LIMITS.description),

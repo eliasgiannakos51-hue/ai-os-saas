@@ -36,6 +36,16 @@
      `rgb(var(--x) / <alpha-value>)` for `text-orange-400/80` and
      `border-orange-500/40` to keep working, and there are 246 such
      usages. A plain hex here would silently drop every one of them. */
+  /* VOICE STATES (V4 #23). Four colours, and the one that matters is
+     that LISTENING and SPEAKING are visibly different: one of them means
+     the microphone is open, and a user must never have to read a label
+     to tell which. Listening is the product's own orange; speaking is a
+     cool blue, which no other state in this app uses. */
+  --voice-idle: 138 138 138;          /* muted */
+  --voice-listening: 251 146 60;      /* orange-400 */
+  --voice-thinking: 168 162 158;      /* stone-400 */
+  --voice-speaking: 96 165 250;       /* blue-400 */
+
   --accent-text: 251 146 60;          /* orange-400 */
   --accent-text-soft: 253 186 116;    /* orange-300 */
   --accent-text-softer: 254 215 170;  /* orange-200 */
@@ -171,6 +181,14 @@
   --muted: 82 82 91;
   --input-bg: #f4f4f5;
   color-scheme: light;
+
+  /* Darker than the dark theme's, for the same reason every other light
+     value here is: these paint on white, and the -400 shades that read
+     as vivid on #0a0a0a read as washed out on #ffffff. */
+  --voice-idle: 82 82 91;             /* zinc-600, matching --muted */
+  --voice-listening: 234 88 12;       /* orange-600 */
+  --voice-thinking: 120 113 108;      /* stone-500 */
+  --voice-speaking: 37 99 235;        /* blue-600 */
 
   /* THE LIGHT THEME'S OWN ACCENT VALUES — the fix for "nothing is
      legible on white".
@@ -1887,5 +1905,91 @@ html[data-motion="reduce"] .ionexa-globe.is-spinning .globe-orbit-group {
   }
   100% {
     box-shadow: 0 0 0 12px rgb(var(--accent-amber-border) / 0);
+  }
+}
+
+
+/* ============================================================================
+   THE VOICE ORB (V4 #23)
+   ============================================================================
+
+   EVERY ANIMATED PROPERTY HERE IS transform OR opacity. That is not a
+   style preference — it is the whole performance argument. Those two are
+   the only properties a browser can animate on the compositor, off the
+   main thread. A width, a filter, a box-shadow or a background-position
+   driven from an audio signal at 60fps re-runs layout or paint every
+   frame on the same thread that handles typing, which is precisely how
+   this app's old full-viewport backdrop measured 120ms of keystroke
+   latency.
+
+   The three custom properties are written by components/voice/voice-orb.tsx
+   from a requestAnimationFrame loop. React is not involved per frame.
+
+   will-change is declared ONCE, on the two elements that really move.
+   Declaring it broadly is the classic way to make a page slower: every
+   promoted layer is memory on the GPU. */
+
+.voice-orb {
+  --orb-scale: 1;
+  --orb-halo: 0;
+  --orb-rotate: 0deg;
+  color: rgb(var(--orb-color));
+}
+
+.voice-orb-globe {
+  display: block;
+  transform: scale(var(--orb-scale));
+  will-change: transform;
+  color: rgb(var(--orb-color));
+}
+
+.voice-orb-halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgb(var(--orb-color) / 0.55) 0%,
+    rgb(var(--orb-color) / 0.12) 55%,
+    transparent 72%
+  );
+  opacity: var(--orb-halo);
+  transform: scale(var(--orb-scale));
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+/* The ring rotates. A stroked circle rather than a gradient, so the
+   rotation is visible without any part of it being a repaint. */
+.voice-orb-ring {
+  position: absolute;
+  inset: 12%;
+  border-radius: 9999px;
+  border: 1px solid rgb(var(--orb-color) / 0.35);
+  border-top-color: rgb(var(--orb-color) / 0.9);
+  transform: rotate(var(--orb-rotate));
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* REDUCED MOTION: the same globe, still, and still coloured by its
+   state. voice-orb.tsx already stops writing the frame loop under both
+   switches; this is the belt to that braces, so a component that somehow
+   kept writing cannot animate anyway. */
+html[data-motion="reduce"] .voice-orb-globe,
+html[data-motion="reduce"] .voice-orb-halo,
+html[data-motion="reduce"] .voice-orb-ring {
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) .voice-orb-globe,
+  html:not([data-motion="full"]) .voice-orb-halo,
+  html:not([data-motion="full"]) .voice-orb-ring {
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
   }
 }

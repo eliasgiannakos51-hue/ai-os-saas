@@ -1,6 +1,8 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { validateSubdomain } from "@/lib/publishing/subdomain";
+import { injectBadge } from "@/lib/publishing/badge";
+import { readSiteShowsBadge } from "@/lib/publishing/badge-decision";
 import {
   publishedSiteHeaders,
   notFoundHeaders,
@@ -101,9 +103,25 @@ export async function GET(request: Request, { params }: { params: { subdomain: s
     // awaiting it cannot fail the page — it only makes the write actually
     // happen. One indexed upsert against the site's own row is a
     // sub-millisecond cost on a response that already did a select.
-    await recordView(admin, site.id, site.user_id, isLikelyNewVisitor(request, String(site.id)));
+    // THE BADGE IS DECIDED HERE, NOT STORED. See lib/publishing/badge.ts:
+    // a badge baked into html_content survives an upgrade, misses a
+    // downgrade, and sits in the Website Builder's editor with a delete
+    // key next to it. The owner's CURRENT plan is what decides, on every
+    // request.
+    //
+    // IN PARALLEL WITH THE VIEW COUNT, so it costs a visitor nothing: the
+    // route already awaits one write, and this read happens beside it
+    // rather than after it.
+    // ONE question, not two. The plan AND the current month's badge
+    // purchase are both inside site_shows_badge() — see
+    // lib/publishing/badge-decision.ts for why a second query per view
+    // was not acceptable on this path.
+    const [, showsBadge] = await Promise.all([
+      recordView(admin, site.id, site.user_id, isLikelyNewVisitor(request, String(site.id))),
+      readSiteShowsBadge(admin, String(site.id)),
+    ]);
 
-    return new Response(site.html_content, {
+    return new Response(injectBadge(site.html_content, { showBadge: showsBadge }), {
       status: 200,
       headers: {
         ...publishedSiteHeaders(),

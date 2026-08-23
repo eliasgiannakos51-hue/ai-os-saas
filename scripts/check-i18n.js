@@ -46,6 +46,122 @@ const LOCALES = ["el", "es", "fr", "de", "it", "pt", "zh", "ja", "ar"];
 // German, "Ideas" in Spanish). Scoped per locale on purpose: "Documents"
 // being correct French says nothing about whether Greek was translated.
 const LOCALE_ALLOWED = new Set([
+  // Trading journal (V4 #14). Two classes, both checked by hand.
+  //
+  //   CITY NAMES. Sydney, Tokyo, London and New York are spelled the same
+  //   in French, German, Italian and Portuguese as in English — they are
+  //   proper nouns, not untranslated strings. The locales that DO have
+  //   their own forms use them (Greek Σίδνεϊ/Τόκιο/Λονδίνο/Νέα Υόρκη,
+  //   Spanish Sídney/Tokio/Londres/Nueva York, Arabic سيدني, Japanese
+  //   シドニー, Chinese 悉尼), which is what makes these coincidences
+  //   rather than a block somebody skipped.
+  //
+  //   TRADING LOANWORDS. "Trades", "Sessions", "Instruments" and
+  //   "Profit factor" are the words traders in those languages actually
+  //   use — a French trader says "les trades" and "profit factor", not
+  //   "les opérations" and "facteur de profit". Every other string in the
+  //   same block DOES differ (Taux de réussite, Trefferquote,
+  //   Percentuale di successo; Gain moyen, Durchschnittsgewinn), so this
+  //   is vocabulary rather than an untranslated section. German "Name" is
+  //   simply the German word.
+  "el:dashboard.trading.stats.profitFactor",
+  "el:dashboard.trading.ruleKinds.allowed_sessions",
+  "fr:dashboard.trading.sessions.sydney",
+  "fr:dashboard.trading.sessions.tokyo",
+  "fr:dashboard.trading.sessions.new_york",
+  "fr:dashboard.trading.stats.trades",
+  "fr:dashboard.trading.ruleKinds.allowed_sessions",
+  "fr:dashboard.trading.ruleKinds.allowed_instruments",
+  "de:dashboard.trading.table.key",
+  "de:dashboard.trading.sessions.sydney",
+  "de:dashboard.trading.sessions.london",
+  "de:dashboard.trading.sessions.new_york",
+  "de:dashboard.trading.stats.trades",
+  "de:dashboard.trading.ruleKinds.allowed_sessions",
+  "it:dashboard.trading.sessions.sydney",
+  "it:dashboard.trading.sessions.tokyo",
+  "it:dashboard.trading.sessions.new_york",
+  "it:dashboard.trading.stats.profitFactor",
+  "pt:dashboard.trading.sessions.sydney",
+  // Voice (V4 #19/#23/#2). Four cognates, each checked against the rest
+  // of its own block:
+  //
+  //   "Pause" is the French and German word for the playback control.
+  //   French has "faire une pause" as a verb but the button on a media
+  //   player is "Pause" in both languages, and the sibling keys in the
+  //   same block DO differ everywhere (Écouter/Anhören,
+  //   Vitesse de lecture/Wiedergabetempo, Voix/Stimme).
+  //
+  //   "Neutral" and "Warm" are the German words for those two voice
+  //   timbres. The other two in the same list differ (Tief, Hell), which
+  //   is what makes these two coincidences rather than a skipped block.
+  "fr:voice.pause",
+  "de:voice.pause",
+  "de:voice.voices.neutral",
+  "de:voice.voices.warm",
+  // Agent depth tiers (V4 #21). "Simple" is the Spanish and French word;
+  // "Standard" is the French, German and Italian one. Checked against the
+  // rest of the same block, which DOES differ in every one of those
+  // languages (Profundo/Approfondi/Tief/Approfondito, and Greek
+  // Απλό/Κανονικό/Βαθύ), so these are cognates rather than a locale
+  // somebody skipped.
+  "es:dashboard.agents.depth.simple.title",
+  "fr:dashboard.agents.depth.simple.title",
+  "fr:dashboard.agents.depth.standard.title",
+  "de:dashboard.agents.depth.standard.title",
+  "it:dashboard.agents.depth.standard.title",
+  // Form submissions (V4 #4). Two coincidences, both checked by hand:
+  //
+  //   "Newsletter" is the word Greek, German, Italian and Portuguese all
+  //   use for this. Greek's own alternative, "ενημερωτικό δελτίο", is
+  //   what a formal document says; a sign-up box on a bakery's website
+  //   says Newsletter, and this file's Greek already uses the loanword
+  //   elsewhere. Every other string in the same block DOES differ in all
+  //   four languages (Επικοινωνία, Kontakt, Contatto, Contato;
+  //   Αίτημα προσφοράς, Angebotsanfrage, Richiesta di preventivo,
+  //   Pedido de orçamento), which is what makes this one a coincidence
+  //   rather than a skipped locale.
+  //
+  //   "Contact" is spelled identically in French.
+  "el:dashboard.formSubmissions.types.newsletter",
+  "de:dashboard.formSubmissions.types.newsletter",
+  "it:dashboard.formSubmissions.types.newsletter",
+  "pt:dashboard.formSubmissions.types.newsletter",
+  "fr:dashboard.formSubmissions.types.contact",
+  // Unified search (V4 #17). The command palette's group headings and
+  // filter labels. Each checked by hand against the language, not waved
+  // through as a batch:
+  //
+  //   French spells "pages", "conversations", "agents", "missions",
+  //   "type", "module" and "date" exactly as English does — they are the
+  //   ordinary French words, not untranslated leftovers. Every other
+  //   French string in this block (Enregistrements, Fichiers, Sites web,
+  //   Recherche, Aide, Tout, "À tout moment") DOES differ, which is what
+  //   makes these seven a coincidence rather than a skipped locale.
+  //
+  //   German uses "Websites" for websites; its own eight neighbours in
+  //   the same block (Seiten, Einträge, Dateien, Unterhaltungen, Agenten,
+  //   Recherche, Missionen, Hilfe) are all translated.
+  "fr:dashboard.search.kinds.page",
+  "fr:dashboard.search.kinds.chat",
+  "fr:dashboard.search.kinds.agent",
+  "fr:dashboard.search.kinds.mission",
+  "fr:dashboard.search.filters.type",
+  "fr:dashboard.search.filters.module",
+  "fr:dashboard.search.filters.date",
+  "de:dashboard.search.kinds.website",
+  // The Home page of a generated multi-page website, in the page list.
+  // Italian websites say "Home" — it is the word Italian uses for a
+  // site's landing page, and the nine other locales here all translate it
+  // (Αρχική, Inicio, Accueil, Startseite, Início, الرئيسية, ホーム, 首页),
+  // which is what makes this one locale a genuine loanword rather than a
+  // forgotten row.
+  //
+  // NOTE: this key shipped in commit 9fa79c1 without an allowance, which
+  // left `npm run build` red on this branch from that commit until this
+  // one. It was never a runtime defect — the Italian UI says the right
+  // word — but the gate was failing and the failure was not reported.
+  "it:dashboard.websiteBuilder.pageHome",
   // "Email" is the ordinary Italian word for it — Italian borrowed the
   // noun whole, and "posta elettronica" is what a government form says,
   // not what a person reading a settings panel expects. Scoped to Italian
@@ -283,6 +399,31 @@ const LOCALE_ALLOWED = new Set([
   "pt:moduleData.fields.marketing",
   "pt:moduleData.options.final",
   "pt:moduleData.options.web",
+  // V4 #18. Three real linguistic facts rather than three skipped
+  // translations: "email" is the ordinary Greek and Italian word for
+  // email (Greek's own "ηλεκτρονικό ταχυδρομείο" is what a government
+  // form says, not what anybody labels a checkbox), and "Notifications"
+  // is spelled identically in French. The other nine locales translate
+  // all three and are not listed here — which is why this is an
+  // allowance per locale rather than a rule about short words.
+  // V4 #19 + #20. Four more real linguistic facts: "Type" and "date" are
+  // spelled identically in French, and "Code" is the ordinary word in
+  // French and German. The nine other locales translate all four and are
+  // not listed, which is what keeps this an allowance per locale rather
+  // than a rule about short words.
+  // V4 #26. "Finances" is the ordinary French word, and "Rule of 40" is
+  // what German-speaking founders and investors call it — the German
+  // financial press uses the English term. The other locales translate
+  // both.
+  "fr:finance.title",
+  "de:finance.metrics.ruleOf40",
+  "fr:dataAnalysis.columns.type",
+  "fr:dataAnalysis.types.date",
+  "fr:coding.code",
+  "de:coding.code",
+  "el:settings.notifications.channels.email",
+  "it:settings.notifications.channels.email",
+  "fr:settings.notifications.title",
 ]);
 
 const INTENTIONALLY_IDENTICAL = new Set([
@@ -303,6 +444,15 @@ const INTENTIONALLY_IDENTICAL = new Set([
   "dashboard.agents.delivery.channels.slack",
   "dashboard.agents.delivery.channels.telegram",
   "dashboard.agents.delivery.channels.discord",
+  // The same two brand names in the V4 #18 notification matrix, for the
+  // same reason. The column headers next to them ("In-app", "Email") ARE
+  // translated everywhere, which is why those two are not on this list.
+  "settings.notifications.channels.telegram",
+  "settings.notifications.channels.discord",
+  // A Discord webhook URL shown as a placeholder. A FORMAT, not prose —
+  // and unlike most placeholders this one is copied literally, so a
+  // "translated" version would be a wrong example.
+  "settings.notifications.chat.discord.placeholder",
   // A hex colour code shown as the placeholder in the Website Builder's
   // colour field. It is a FORMAT example, not prose — "#1d4ed8" is the
   // same six characters in every language, and translating it would mean
@@ -313,6 +463,15 @@ const INTENTIONALLY_IDENTICAL = new Set([
   // locales that DO differ (zh, ja, which use full-width brackets) are
   // translated and are not on this list, which is the whole reason this
   // is an allowance per key rather than a rule about digits.
+  // V4 #26. MRR and ARR are the acronyms every founder, investor and
+  // accountant uses in every one of these markets — "Ricavi Ricorrenti
+  // Mensili" is a translation nobody would recognise on a dashboard. The
+  // four locales that DO have a settled local form (el uses the acronym
+  // too, but zh, ar and the descriptive labels around them are
+  // translated) are not on this list, which is why this is a per-key
+  // allowance rather than a rule about acronyms.
+  "finance.metrics.mrr",
+  "finance.metrics.arr",
   "aiSteps.counter",
   "landing.footer.roadmap",
   "roadmap.title",

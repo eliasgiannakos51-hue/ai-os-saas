@@ -1,32 +1,36 @@
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { checkCronAuth } from "@/lib/cron-auth";
 import { sendWeeklyDigestEmail } from "@/lib/email/send-weekly-digest-email";
 import { logApiError } from "@/lib/log-error";
-import { enModuleTitle } from "@/lib/module-labels";
+import { collectDigestFacts } from "@/lib/notify/digest-data";
+import { buildDigest } from "@/lib/notify/digest";
 
 export const dynamic = "force-dynamic";
 
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
-
-// SCHEDULED, as of this change, in vercel.json: "0 8 * * 1" — 08:00 UTC
-// every Monday, covering the seven days behind it. It was a placeholder
-// wired to nothing, so the digest never went out.
+// SCHEDULED in vercel.json: "0 8 * * 1" — 08:00 UTC every Monday,
+// covering the seven days behind it.
 //
-// SILENT ON A QUIET WEEK. Turning this on unchanged would have mailed every
-// account a table of zeroes every Monday — a weekly reminder that nothing
-// happened, which is worse than no email at all and is the fastest way to
-// get a sender marked as spam. An account with no activity in the window is
-// skipped entirely. (Users can also switch the digest off in Settings; the
-// email gate in lib/email/email-gate.ts already enforces that and the daily
-// cap. This is on top of both, because "no news" is not news.)
+// WHAT CHANGED IN V4 #18. It used to send a table of module row counts:
+// "Ideas 3, Leads 1, Research 2". Every number was true and the email
+// said nothing — it was a database report with a greeting on it, and the
+// brief is explicit that the digest must be built FROM REAL DATA, NEVER
+// GENERIC. So it now reads what actually happened (lib/notify/digest-data.ts)
+// and composes what is worth saying about it (lib/notify/digest.ts):
+// agents that ran and how many found something, new records, the site's
+// visits, credits spent against THIS user's own average, and a short
+// "what I noticed" list — leads with no follow-up, spending that moved.
+//
+// SILENT ON A QUIET WEEK, still and more strictly. isDigestWorthSending
+// refuses a week whose counters are all zero, and a digest with no lines
+// is never handed to the sender. A weekly reminder that nothing happened
+// is the fastest way to get a sending domain marked as spam.
 //
 // Callers must send CRON_SECRET as `Authorization: Bearer <CRON_SECRET>`
-// (the header Vercel Cron sends automatically when a cron job has a secret
-// configured) or as `x-cron-secret`. Without CRON_SECRET configured the
-// route refuses to run on any deployment, so a stray request can't email
-// every user. See lib/cron-auth.ts.
+// (the header Vercel Cron sends automatically when a cron job has a
+// secret configured) or as `x-cron-secret`. Without CRON_SECRET
+// configured the route refuses to run on any deployment, so a stray
+// request cannot email every user. See lib/cron-auth.ts.
 export async function GET(request: Request) {
   try {
     const auth = checkCronAuth(request);
@@ -42,40 +46,45 @@ export async function GET(request: Request) {
       return NextResponse.json({ ok: false, error: "Could not load users." }, { status: 500 });
     }
 
-    const since = new Date(Date.now() - SEVEN_DAYS_MS).toISOString();
+    const now = new Date();
     let sent = 0;
     let skipped = 0;
+    let failed = 0;
 
     for (const user of usersData.users) {
       if (!user.email) continue;
 
-      const moduleCounts = await Promise.all(
-        CLASSIFIER_MODULES.map(async (m) => {
-          const { count } = await admin
-            .from(m.table)
-            .select("id", { count: "exact", head: true })
-            .eq("user_id", user.id)
-            .gte("created_at", since);
-          return { title: enModuleTitle(m), count: count ?? 0 };
-        })
-      );
+      try {
+        const facts = await collectDigestFacts({ userId: user.id, now });
+        const digest = buildDigest(facts);
 
-      // Nothing happened this week — say nothing.
-      if (moduleCounts.every((m) => m.count === 0)) {
-        skipped++;
-        continue;
+        if (!digest.worth.worth || digest.lines.length === 0) {
+          skipped++;
+          continue;
+        }
+
+        const ok = await sendWeeklyDigestEmail({
+          email: user.email,
+          userId: user.id,
+          digest,
+          periodLabel: "7d",
+        });
+        if (ok) sent++;
+        else skipped++;
+      } catch (err) {
+        // ONE USER'S BAD WEEK DOES NOT STOP EVERYONE ELSE'S DIGEST. The
+        // old loop had no per-user try, so a single unreadable row would
+        // have taken the whole Monday send down after the users it had
+        // already reached — a partial send with no record of where it
+        // stopped.
+        failed++;
+        logApiError("/api/weekly-digest", err, { stage: "user_digest" });
       }
-
-      await sendWeeklyDigestEmail({ email: user.email, userId: user.id, moduleCounts, periodLabel: "7d" });
-      sent++;
     }
 
-    return NextResponse.json({ ok: true, sent, skippedNoActivity: skipped });
+    return NextResponse.json({ ok: true, sent, skippedNoActivity: skipped, failed });
   } catch (err) {
     logApiError("/api/weekly-digest", err);
-    return NextResponse.json(
-      { ok: false, error: "Something went wrong." },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });
   }
 }

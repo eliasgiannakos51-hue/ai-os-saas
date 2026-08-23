@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { startJob } from "@/lib/jobs/start-job";
+import { isAgentDepth } from "@/lib/agents/agent-depth";
 
 export const dynamic = "force-dynamic";
 // A run with web search plus a retry is the slowest thing this feature
@@ -19,7 +20,7 @@ export const maxDuration = 300; // @function-limit 300
 // agent's schedule or its failure streak — a user pressing "Run now" three
 // times while tweaking a task must never be able to auto-disable their own
 // agent, and must never shift when it next fires on its own.
-export async function POST(_request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
     const agentId = params.id;
     if (!agentId) {
@@ -85,11 +86,27 @@ export async function POST(_request: Request, { params }: { params: { id: string
     // run, because a SCHEDULED run happens with no request at all. See
     // selfBilled in lib/jobs/run-job.ts for why settling twice would be
     // worse than not settling here.
+    // ONE RUN AT A DIFFERENT DEPTH (#21 d). Validated here, against the
+    // only three values that exist, and carried as an override rather
+    // than written to the agent: "run this one deeper, this once" must
+    // not silently change what every scheduled run costs from now on.
+    //
+    // An absent or unrecognised value is simply no override — the agent
+    // runs at its own depth. A 400 here would fail a "Run now" over a
+    // field the user did not knowingly send.
+    let depthOverride: string | undefined;
+    try {
+      const body = await request.json();
+      if (isAgentDepth(body?.depth)) depthOverride = body.depth;
+    } catch {
+      // No body at all is the ordinary case: the button sends none.
+    }
+
     const started = await startJob({
       userId: user.id,
       kind: "agent_run",
       reserve: 0,
-      input: { agentId },
+      input: depthOverride ? { agentId, depth: depthOverride } : { agentId },
     });
 
     if (!started.ok) {

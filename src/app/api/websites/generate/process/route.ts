@@ -32,6 +32,11 @@ import { logSecurityCheck } from "@/lib/security-check-log";
 import { getSiteUrl } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
 import { diagLog } from "@/lib/diag";
+import { splitGeneratedPages } from "@/lib/website-multipage";
+import { parsePhotoSource } from "@/lib/website-design-brief";
+import { enforceSeoHead } from "@/lib/seo/head";
+import { enforceImageAltText } from "@/lib/seo/alt-text";
+import type { WebsitePage } from "@/lib/publishing/website-pages";
 
 export const dynamic = "force-dynamic";
 
@@ -324,6 +329,10 @@ export async function POST(request: Request) {
     const formEndpointUrl = `${getSiteUrl()}/api/websites/${websiteId}/submit-form`;
 
     let htmlContent: string;
+    // Declared beside htmlContent because it is stored beside it: the
+    // home page and its pages are one site, and a scope that held one
+    // without the other is how they get written out of step.
+    let extraPages: WebsitePage[] = [];
     let isFlagged = false;
     let flaggedSummary = "";
     // Declared out here, not inside the generation block, because the
@@ -331,6 +340,11 @@ export async function POST(request: Request) {
     // STORED — which happens below, outside that block. See
     // registerUnsplashUses in lib/website-image-resolver.ts.
     let images: ImageResolution = { html: "", used: [], halted: null };
+    // WHERE THE PHOTOS COME FROM, read back off the description the
+    // design controls compiled it into (lib/website-design-brief.ts).
+    // Defaults to "stock" for every description written before the
+    // choice existed, so nothing changes for them.
+    const photoSource = parsePhotoSource(description);
     try {
       void recordAiCallForDailySpend(
         estimateWebsiteGenerationCost({ descriptionLength: description.length, imageCount: referenceImages.length })
@@ -363,7 +377,7 @@ export async function POST(request: Request) {
       // see lib/website-image-resolver.ts. A no-op when the model didn't
       // emit any PLACEHOLDER:<slug> images, which is the common case for
       // a description that didn't ask for real photos.
-      images = await resolveWebsiteImagePlaceholders(htmlContent);
+      images = await resolveWebsiteImagePlaceholders(htmlContent, { photoSource });
       htmlContent = images.html;
 
       // NUMBERS THE USER NEVER GAVE. The prompt forbids inventing a price,
@@ -373,7 +387,27 @@ export async function POST(request: Request) {
       // page might be one the model correctly read out of a reference
       // image, and deleting it would be its own kind of wrong. The owner
       // sees the list beside the preview and decides.
-      const inventedNumbers = findInventedNumbers(htmlContent, description);
+      // SPLIT HERE, AFTER THE IMAGES AND BEFORE EVERYTHING ELSE.
+      //
+      // The order is the whole safety argument. Image resolution runs on
+      // the WHOLE response first, so all pages share one Unsplash budget
+      // rather than each page opening its own — the markers are HTML
+      // comments and survive it untouched. Every check BELOW then runs on
+      // each page separately, because a check that only ever saw the home
+      // page would let a sub-page ship with unsafe links, invented
+      // numbers, an unattributed photo or an injected script. That is not
+      // hypothetical: it is what splitting at the end would have produced.
+      const split = splitGeneratedPages(htmlContent);
+      if (split.dropped.length > 0) {
+        logApiError(
+          "/api/websites/generate/process",
+          new Error(`${split.dropped.length} generated page(s) could not be used`),
+          { websiteId, dropped: split.dropped.join(" | ").slice(0, 300) }
+        );
+      }
+      const documents: string[] = [split.home, ...split.pages.map((pg) => pg.html)];
+
+      const inventedNumbers = documents.flatMap((doc) => findInventedNumbers(doc, description));
       if (inventedNumbers.length > 0) {
         logApiError(
           "/api/websites/generate/process",
@@ -396,7 +430,20 @@ export async function POST(request: Request) {
       // failure is silent and it is the customer's live site that carries
       // it. See lib/website-link-safety.ts for why <base href> cannot be
       // the fix here.
-      htmlContent = makeGeneratedLinksSafe(htmlContent).html;
+      // EVERY DOCUMENT, not just the first. `.map` rather than one call is
+      // the difference between a four-page site being checked and a
+      // four-page site having its front page checked.
+      // THE SITE'S OWN PAGES ARE PASSED IN. Without them a nav link to
+      // another page of this site (href="about") is indistinguishable
+      // from the broken href="/about" this pass exists to catch, and was
+      // rewritten to "#" — the pages were generated, stored and served,
+      // and nothing linked to any of them. The links stay RELATIVE here:
+      // the address is not known until publish, which is where they are
+      // resolved to absolute paths.
+      const generatedSlugs = split.pages.map((pg) => pg.slug);
+      const cleaned = documents.map(
+        (doc) => makeGeneratedLinksSafe(doc, { pageSlugs: generatedSlugs }).html
+      );
 
       // Every Unsplash photo in the document we are about to store
       // carries its photographer. Generation already emits the credit, so
@@ -406,8 +453,12 @@ export async function POST(request: Request) {
       // where credits actually go missing) shares the same guarantee. See
       // lib/website-image-placeholders.ts.
       {
-        const attribution = enforceUnsplashAttribution(htmlContent);
-        htmlContent = attribution.html;
+        const attributions = cleaned.map((doc) => enforceUnsplashAttribution(doc));
+        for (let i = 0; i < cleaned.length; i += 1) cleaned[i] = attributions[i].html;
+        const attribution = {
+          restored: attributions.reduce((n, x) => n + x.restored, 0),
+          removed: attributions.reduce((n, x) => n + x.removed, 0),
+        };
         if (attribution.restored > 0 || attribution.removed > 0) {
           logApiError(
             "/api/websites/generate/process",
@@ -434,9 +485,40 @@ export async function POST(request: Request) {
       // detect (lib/website-security-review.ts). Both layers run every
       // single generation, unconditionally — this is not an opt-in
       // toggle.
-      htmlContent = stripDisallowedExternalScripts(htmlContent);
-      const securityIssues = scanWebsiteHtmlForSecurityIssues(htmlContent);
-      const contentReview = await reviewWebsiteContentSafety(apiKey, htmlContent, costs);
+      const stripped = cleaned.map((doc) => stripDisallowedExternalScripts(doc));
+
+      // FINDABLE ON THE WEB. The prompt asks for a real title, a real
+      // description and a real alt on every photo; this is what makes it
+      // TRUE, on every page and not just the home page. All of it is
+      // built from what the model actually wrote (lib/seo/facts.ts) —
+      // nothing here invents a fact, and a page that says nothing about
+      // its address gets no address in its schema.
+      //
+      // AFTER the security pass, deliberately: the JSON-LD this emits is
+      // ours, built and escaped by lib/seo/structured-data.ts, and
+      // running it through a scan for model-written scripts would be
+      // scanning our own output for someone else's mistake. BEFORE the
+      // store, because a document reaches four tables from here.
+      //
+      // The URL-dependent half — canonical, og:url, the breadcrumb — is
+      // NOT done here: the site has no address until it is published.
+      // See api/websites/[id]/publish.
+      const optimised = stripped.map((doc) => {
+        const withAlt = enforceImageAltText(doc);
+        return enforceSeoHead(withAlt.html).html;
+      });
+      htmlContent = optimised[0];
+      extraPages = split.pages.map((pg, i) => ({ ...pg, html: optimised[i + 1] }));
+      const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc));
+      // ONE AI CALL FOR THE WHOLE SITE, not one per page. The review reads
+      // content for what a deterministic scan cannot see, and content is
+      // content wherever it sits — four separate reviews would cost four
+      // times as much to answer the same question.
+      const contentReview = await reviewWebsiteContentSafety(
+        apiKey,
+        stripped.length === 1 ? stripped[0] : stripped.join("\n"),
+        costs
+      );
 
       const allIssueDescriptions = [
         ...securityIssues.map(describeSecurityScanIssue),
@@ -491,6 +573,10 @@ export async function POST(request: Request) {
       .from("user_websites")
       .update({
         html_content: htmlContent,
+        // Null rather than [] for a single-page site: the column's absence
+        // keeps an existing row indistinguishable from a new one, and an
+        // empty array would read as "pages were asked for and none survived".
+        pages: extraPages.length > 0 ? extraPages : null,
         // Still "processing" here on purpose. The client polls this row
         // and, the moment it stops being pending/processing, refreshes the
         // credits counter — but settlement runs BELOW this update, so

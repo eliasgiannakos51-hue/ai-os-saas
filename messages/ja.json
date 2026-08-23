@@ -123,7 +123,9 @@
       "files": "ファイル",
       "deepResearch": "ディープリサーチ",
       "help": "ヘルプセンター",
-      "affiliate": "アフィリエイト"
+      "affiliate": "アフィリエイト",
+      "formSubmissions": "フォーム送信",
+      "routing": "モデルルーティング"
     },
     "groupHints": {
       "create": "サイトを生成し、目標を計画し、文書を書く。",
@@ -175,7 +177,8 @@
       "files": "PDF・Word・Excel をアップロードして、AI に内容を質問できます",
       "deepResearch": "トピックを渡すと検索・照合して出典付きのレポートを書きます",
       "help": "よくある質問への回答です。クレジットは消費しません。",
-      "affiliate": "紹介リンク、これまでの報酬、受け取り方法。"
+      "affiliate": "紹介リンク、これまでの報酬、受け取り方法。",
+      "formSubmissions": "公開サイトのフォームから訪問者が送った内容のすべて"
     },
     "comingSoon": "近日公開",
     "closeMenu": "メニューを閉じる"
@@ -696,7 +699,131 @@
       "collaborationHint": "チーム招待と共有ワークスペースのアクティビティ",
       "iosNeedsInstall": "iPhone と iPad では、Ionexa をホーム画面に追加した後でのみ通知が届きます。"
     },
-    "jumpToSection": "セクションへ移動"
+    "jumpToSection": "セクションへ移動",
+    "notifications": {
+      "title": "通知",
+      "description": "何をどこで受け取るかを選べます。お伝えすることがあるときだけ送ります。",
+      "saved": "保存しました",
+      "saveError": "保存できませんでした — もう一度お試しください。",
+      "criticalNote": "支払いの問題、クレジット残量の不足、対応が必要なエラーは、種類をオフにしていてもアプリ内に必ず記録が残ります。",
+      "channels": {
+        "in_app": "アプリ内",
+        "email": "メール",
+        "telegram": "Telegram",
+        "discord": "Discord"
+      },
+      "types": {
+        "agent_completed": {
+          "label": "エージェントが何かを見つけた",
+          "description": "実行が実際に結果を出したときだけです — 走ったというだけでは通知しません。"
+        },
+        "website_published": {
+          "label": "サイトを公開した",
+          "description": "あなたのサイトのどれかが公開されたとき。"
+        },
+        "research_ready": {
+          "label": "リサーチが完了",
+          "description": "ディープリサーチのレポートが仕上がったとき。"
+        },
+        "credits_low": {
+          "label": "クレジットが残りわずか",
+          "description": "80% と 100% でそれぞれ一度ずつ。予約した処理が予告なく止まらないように。"
+        },
+        "payment_failed": {
+          "label": "支払いに失敗",
+          "description": "カードが拒否され、サブスクリプションが危うくなったとき。"
+        },
+        "team_member_joined": {
+          "label": "新しいメンバー",
+          "description": "招待を誰かが承諾したとき。"
+        },
+        "error_needs_attention": {
+          "label": "対応が必要です",
+          "description": "あなたにしか直せない形で何かが壊れたとき。"
+        }
+      },
+      "quiet": {
+        "title": "通知しない時間帯",
+        "description": "この時間のあいだは何にも邪魔されません。",
+        "enable": "通知しない時間帯を使う",
+        "from": "開始",
+        "to": "終了",
+        "offset": "タイムゾーン",
+        "deferNote": "破棄ではなく保留です。この時間帯に発生したものは、時間帯が終わったときに届きます。支払いの問題と対応が必要なエラーはそのまま届きます。"
+      },
+      "chat": {
+        "title": "Telegram と Discord",
+        "description": "受信トレイではなくチャットに通知を送ります。接続後も、すべての種類が既定ではオフのままです。",
+        "connect": "接続",
+        "connecting": "接続中…",
+        "disconnect": "切断",
+        "connected": "接続済み",
+        "notConfigured": "この環境では Telegram が設定されていません。",
+        "testSent": "接続しました — テストメッセージをご確認ください。",
+        "testFailed": "そこへテストメッセージを届けられなかったため、何も保存していません。",
+        "telegram": {
+          "help": "ボットにメッセージを送り、返ってきた chat ID を貼り付けてください。",
+          "placeholder": "チャット ID"
+        },
+        "discord": {
+          "help": "使いたいチャンネルの Discord webhook URL を貼り付けてください。",
+          "placeholder": "https://discord.com/api/webhooks/…"
+        }
+      }
+    },
+    "overage": {
+      "title": "追加利用",
+      "description": "クレジットを使い切ったあとも、1クレジットあたり€{price}で続行できます — ご自身が希望した場合のみ。",
+      "offNow": "追加利用はオフです。追加請求は発生しません。クレジットが尽きると処理は停止します。",
+      "capLabel": "月間の上限（€）",
+      "capPlaceholder": "例: 20",
+      "capHint": "€{min}〜€{max}の範囲で。",
+      "preview": {
+        "heading": "同意する内容",
+        "rate": "1クレジットあたり€{price}、本日の価格で固定されます。",
+        "cap": "暦月あたり€{cap}を超えることはありません。",
+        "credits": "最大{credits}クレジット分に相当します。",
+        "invoice": "次回の請求書にプランとは別の明細行として計上されます。"
+      },
+      "agree": "追加利用をオンにする",
+      "saved": "保存しました。いつでもオフにできます。",
+      "thisMonth": "今月の追加利用",
+      "ofCap": "／€{cap}",
+      "agreedRate": "同意された価格、1クレジットあたり€{price}です。",
+      "capReached": "上限に達しました。引き上げるまで追加の請求は発生しません。",
+      "turnOff": "追加利用をオフにする",
+      "turnOffNote": "オフにすると今後の請求は止まります。今月すでに使った分は請求されます。"
+    },
+    "addons": {
+      "title": "アドオン",
+      "description": "プランに上乗せする追加容量です。月額アドオンはいつでも解約できます。",
+      "perMonth": "／月",
+      "oneOff": "（買い切り）",
+      "owned": "保有数: {count}",
+      "notConfigured": "この環境では利用できません（{envVar} が未設定）。",
+      "buy": "購入",
+      "subscribe": "追加",
+      "cancel": "解約",
+      "oneOffNote": "クレジットパックは即時付与され、解約はできません。",
+      "items": {
+        "credits_1000": {
+          "name": "1,000クレジット",
+          "grants": "一度きりの追加"
+        },
+        "agents_5": {
+          "name": "エージェント5体追加",
+          "grants": "エージェント上限が増えます"
+        },
+        "storage_10gb": {
+          "name": "ストレージ10GB",
+          "grants": "ファイル用の容量が増えます"
+        },
+        "priority": {
+          "name": "優先実行",
+          "grants": "あなたのジョブが先に実行されます"
+        }
+      }
+    }
   },
   "dashboard": {
     "overview": {
@@ -1155,7 +1282,19 @@
           "auto": "おまかせ"
         },
         "logoHint": "ロゴがない場合、サイトには社名をスタイル付きのワードマークとして表示します — 勝手にロゴを作ることはありません。",
-        "logoNeedsUpload": "まずロゴを画像としてアップロードしてください"
+        "logoNeedsUpload": "まずロゴを画像としてアップロードしてください",
+        "photoSourceTitle": "写真 — このサイトでは約{count}枚使います",
+        "photoSourceChoices": {
+          "own": "自分の写真を使う",
+          "stock": "ストック写真",
+          "none": "写真なし"
+        },
+        "photoSourceHint": {
+          "own": "あなたの写真をヒーローとギャラリーに優先して配置します。足りない分はストック写真で補います。",
+          "stock": "各セクションに合わせて選んだストック写真。",
+          "none": "写真を使わず、文字・色・図形で構成したデザイン。"
+        },
+        "photoSourceNeedsUpload": "上で写真を追加してください。なければストック写真になります。"
       },
       "imageIntro": "ロゴ、商品写真、店内の写真など。ページに載せたいもの、雰囲気の参考にしたいもの。",
       "regenerateAlreadyUsed": "このサイトの無料再生成はすでに使用済みです。別の内容で新しいサイトを作成してください。",
@@ -1164,7 +1303,14 @@
         "title": "サイトを説明すれば、サイトができる",
         "why": "何のための、誰に向けたサイトかを書けば、ページも文章もレイアウトもそこから作られます。あとは普通の言葉で直せます。",
         "example": "パン屋の1ページサイト、商品と営業時間つき"
-      }
+      },
+      "pageSelectLabel": "このサイトのページ",
+      "pageHome": "ホーム",
+      "editPageGone": "このページはもうこのサイトにありません。開き直して現在のページを確認してください。",
+      "stockNoticeTitle": "このサイトにはストック写真が{count}枚あります",
+      "stockNoticeBody": "自分の写真を使うとより本物らしくなります。Unsplashにあるのは「同業の店」であって、あなたの店ではありません。",
+      "stockNoticeAction": "写真をアップロード",
+      "storageFull": "この画像には容量が足りません — 必要 {needed}、空き {free}。"
     },
     "marketplace": {
       "title": "マーケットプレイス",
@@ -1469,6 +1615,59 @@
         "stepNoSearch": "タスクの文面だけで作業します（ウェブ検索なし）。",
         "stepWrite": "結果を書き、見つけた内容と照合します。",
         "stepDeliver": "{when}、{target} にメールで送ります。"
+      },
+      "runQueued": "順番待ち",
+      "runQueuedHint": "より安いバッチ処理に送りました。結果は24時間以内、たいていはもっと早く届きます。",
+      "depth": {
+        "legend": "調査の深さ",
+        "perRun": "1回あたり",
+        "suggested": "おすすめ",
+        "facts": "{sources} 件の情報源 · {steps} ステップ · 約 {seconds} 秒",
+        "runOnce": "今回だけ実行する深さ",
+        "runOnceHint": "この実行だけです。スケジュールは {depth} のままです。",
+        "simple": {
+          "title": "シンプル",
+          "what": "情報源1件、短い回答。答えが1つに決まる質問向け。"
+        },
+        "standard": {
+          "title": "標準",
+          "what": "数件の情報源を突き合わせ。ほとんどの定期レポートに適しています。"
+        },
+        "deep": {
+          "title": "詳細",
+          "what": "2回の調査で10件以上の情報源、そして完全なレポート。"
+        }
+      },
+      "templates": {
+        "found": "同じことをする既製のエージェントが {count} 件あります",
+        "use": "これを使う — {credits} クレジット",
+        "buildNew": "新しく作る — {credits} クレジット",
+        "adopted": "エージェントを作成しました。対象: {subject}",
+        "adoptError": "そのテンプレートは使えませんでした。何も作成されていません。"
+      },
+      "share": {
+        "open": "このエージェントの構成を共有",
+        "title": "テンプレートとして共有",
+        "explainer": "公開されるのは構成だけです。あなたの対象を空欄に置き換えたタスク、スケジュール、深さ。エージェント名やメール、送信先は含みません。",
+        "subjectLabel": "タスクの中であなた固有の語はどれですか？",
+        "subjectPlaceholder": "例: Acme株式会社",
+        "titleLabel": "ライブラリでの名前",
+        "descriptionLabel": "内容を表す一文",
+        "previewLabel": "公開される内容",
+        "shareButton": "共有する",
+        "sharing": "共有中...",
+        "cancel": "キャンセル",
+        "shared": "共有しました。いつでも取り下げられます。",
+        "failed": "共有できませんでした。何も公開されていません。",
+        "slotNote": "使う人が {slot} に自分の対象を入れます。",
+        "refused": {
+          "no_slot": "あなた固有の語を入力してください。置き換えられるのはその語で、アカウントの外には出ません。",
+          "subject_still_present": "その表記がタスクの別の箇所に別の書き方で残っています。先にタスクを直してください。",
+          "contains_contact_details": "タスクにメールアドレス・リンク・@ハンドルが含まれています。共有前に削除してください。",
+          "contains_numbers": "タスクに長い数字（電話番号・口座・参照番号）が含まれています。削除してください。",
+          "too_short": "残る文が短すぎて、他の人の役に立ちません。",
+          "too_long": "このタスクは共有するには長すぎます。"
+        }
       }
     },
     "publishing": {
@@ -1876,6 +2075,174 @@
       "opening": "Stripe を開いています…",
       "connectError": "設定を開けませんでした。もう一度お試しください。",
       "rules": "報酬は実際に入金された支払いに対して発生します。返金や不服申立ての分は取り消されます。自己紹介と同じ人の二重紹介には報酬がつきません。"
+    },
+    "search": {
+      "kinds": {
+        "page": "ページ",
+        "module": "レコード",
+        "file": "ファイル",
+        "chat": "会話",
+        "website": "ウェブサイト",
+        "agent": "エージェント",
+        "research": "リサーチ",
+        "mission": "ミッション",
+        "help": "ヘルプ"
+      },
+      "filters": {
+        "type": "種類",
+        "module": "モジュール",
+        "date": "日付",
+        "all": "すべて"
+      },
+      "dates": {
+        "any": "すべての期間",
+        "7d": "7日間",
+        "30d": "30日間",
+        "365d": "1年"
+      }
+    },
+    "formSubmissions": {
+      "title": "フォーム送信",
+      "description": "サイトのフォームから訪問者が送った内容のすべて。",
+      "deletedWebsite": "削除されたサイト",
+      "searchPlaceholder": "名前・メール・メッセージを検索...",
+      "filterType": "フォーム種別で絞り込む",
+      "filterSite": "サイトで絞り込む",
+      "allTypes": "すべての種別",
+      "allSites": "すべてのサイト",
+      "countMeta": "{shown} 件表示 · 未読 {unread} 件",
+      "exportCsv": "CSVを書き出す",
+      "noName": "送信",
+      "new": "新着",
+      "noMatches": "一致するものがありません",
+      "noMatchesBody": "検索語を短くするか、絞り込みを解除してください。",
+      "delete": "削除",
+      "deleteConfirm": "この送信を削除しますか？元に戻せません。",
+      "deleted": "送信を削除しました。",
+      "deleteFailed": "送信を削除できませんでした。",
+      "markReadFailed": "既読にできませんでした。",
+      "consentGiven": "同意あり",
+      "consentMissing": "同意の記録なし",
+      "consentRecorded": "同意した内容: {text}",
+      "consentNoText": "（文言は記録されていません）",
+      "consentMissingBody": "この訪問者は同意欄にチェックしていないか、フォームに同意欄がありませんでした。",
+      "empty": {
+        "title": "まだ送信はありません",
+        "body": "公開サイトのフォームに誰かが入力すると、ここに表示されます。通知メールが送れない場合でも残ります。"
+      },
+      "types": {
+        "contact": "お問い合わせ",
+        "newsletter": "ニュースレター",
+        "quote": "見積依頼",
+        "other": "その他"
+      },
+      "delivery": {
+        "sent": "メール送信済み",
+        "no_key": "メールは一切送信されていません。このデプロイにメールAPIキーがありません。",
+        "unverified_domain": "メールが届いていません。送信ドメインが未認証です。",
+        "failed": "一部の通知メールを送信できませんでした。",
+        "affected": "{count} 件はここに保存されていますが、メールは届いていません。データは失われていません。"
+      }
+    },
+    "trading": {
+      "title": "トレード日誌",
+      "subtitle": "あなた自身の取引と、あなた自身のルールを数えます。",
+      "disclaimerTitle": "これは記録であって、助言ではありません",
+      "disclaimer": "ここにあるのはすべて、あなたがすでに行った取引と、あなた自身が書いたルールの記述です。投資助言でも予測でもなく、どの市場がどうなるかについては何も述べていません。取引には損失の risk があります。",
+      "adviceRefused": "それは投資助言または市場予測にあたり、この製品では行いません。代わりにご自身の記録についてお尋ねください。",
+      "empty": "まだ取引が記録されていません。",
+      "emptyCta": "最初の取引を追加",
+      "byInstrument": "銘柄別",
+      "bySession": "セッション別",
+      "accounts": {
+        "title": "口座",
+        "all": "すべての口座"
+      },
+      "table": {
+        "key": "名称"
+      },
+      "equity": {
+        "title": "資産曲線"
+      },
+      "sessions": {
+        "sydney": "シドニー",
+        "tokyo": "東京",
+        "london": "ロンドン",
+        "new_york": "ニューヨーク",
+        "other": "セッション外"
+      },
+      "stats": {
+        "trades": "取引数",
+        "winRate": "勝率",
+        "netPnl": "純損益",
+        "profitFactor": "プロフィットファクター",
+        "avgWin": "平均利益",
+        "avgLoss": "平均損失",
+        "maxDrawdown": "最大ドローダウン",
+        "avgDuration": "平均保有時間",
+        "notEnough": "取引数がまだ足りません（5件必要）",
+        "notEnoughShort": "少なすぎ",
+        "noLosses": "この標本に負け取引はありません",
+        "beforeCosts": "これらの数値は手数料を含みません — 取引に手数料を入力すると純額で表示されます。",
+        "afterCosts": "これらの数値は記録された手数料を差し引いた純額です。",
+        "unscoreable": "{count}件の取引は計算できませんでした（価格または損益が不足）"
+      },
+      "pattern": {
+        "title": "損失のあと",
+        "comparison": "損失の直後に入った取引の勝率は{after}%（{afterCount}件）で、それ以外は{baseline}%（{baselineCount}件）でした。",
+        "observationOnly": "記録が示しているのはここまでです。理由は述べませんし、次にどうすべきかの提案でもありません。",
+        "notEnough": "比較の両側とも、まだ取引数が足りません。"
+      },
+      "rules": {
+        "title": "あなたのルール",
+        "explainer": "普段話すとおりにルールを書いてください。各取引に対して算術で照合します — モデルの印象ではないので、数字はご自身で確かめられます。",
+        "placeholder": "リスクは最大2%。ロンドンのみ。RRは1:2以上。1日最大3取引。",
+        "understood": "こう解釈しました",
+        "couldNotParse": "照合できる形にできたものがないため、何も保存されません。もっと短く具体的な文でお試しください。",
+        "add": "ルールを追加",
+        "empty": "まだルールがありません。上に書けば、以降すべての取引が照合されます。",
+        "delete": "ルールを削除",
+        "saved": "{count}件のルールを保存しました",
+        "saveFailed": "そのルールを保存できませんでした。",
+        "deleteFailed": "そのルールを削除できませんでした。"
+      },
+      "ruleKinds": {
+        "max_risk_percent": "1取引あたりのリスク",
+        "max_trades_per_day": "1日の取引数",
+        "min_risk_reward": "リスクリワード",
+        "allowed_sessions": "セッション",
+        "allowed_instruments": "銘柄",
+        "max_daily_loss": "1日の損失上限",
+        "no_trade_after_loss": "損失後の休止",
+        "max_position_size": "ポジションサイズ"
+      },
+      "ruleSummary": {
+        "max_risk_percent": "1取引あたりのリスクは最大{percent}%",
+        "max_trades_per_day": "1日最大{count}取引",
+        "min_risk_reward": "リワードはリスクの{ratio}倍以上",
+        "allowed_sessions": "このセッションのみ: {sessions}",
+        "allowed_instruments": "この銘柄のみ: {instruments}",
+        "max_daily_loss": "1日に{amount}負けたら止める",
+        "no_trade_after_loss": "損失後は{minutes}分待つ",
+        "max_position_size": "ポジションサイズは最大{size}"
+      },
+      "violations": {
+        "count": "{count}回破られました",
+        "none": "破られていません",
+        "uncheckable": "取引に価格・リスク額・時刻のいずれかが欠けていたため、{count}件の照合ができませんでした。"
+      },
+      "errors": {
+        "bad_request": "そのリクエストを読み取れませんでした。",
+        "delete_failed": "そのルールを削除できませんでした。",
+        "empty_rule": "まずご自身の言葉でルールを書いてください。",
+        "failed": "問題が発生しました。",
+        "not_understood": "照合できる形にできなかったため、保存しませんでした。もっと短く具体的な文でお試しください。",
+        "rate_limited": "直近1時間の変更が多すぎます。少し待ってからお試しください。",
+        "recheck_failed": "ルールの照合を更新できませんでした。",
+        "save_failed": "そのルールを保存できませんでした。",
+        "too_long": "ルールに必要な長さを超えています。",
+        "unauthenticated": "サインアウトしています。サインインしてからお試しください。"
+      }
     }
   },
   "module": {
@@ -2089,15 +2456,12 @@
       "company": "企業",
       "contentIdeas": "コンテンツのアイデア",
       "customers": "顧客",
-      "dataSource": "データソース",
       "description": "説明",
       "direction": "方向",
-      "findings": "分かったこと",
       "followUpEmail": "フォローアップメール",
       "hashtags": "ハッシュタグ",
       "idea": "アイデア",
       "ideaNames": "アイデア名",
-      "language": "言語",
       "launchPlan": "ローンチ計画",
       "leadName": "リード名",
       "marketing": "マーケティング",
@@ -2173,9 +2537,7 @@
     "placeholders": {
       "longShort": "買い / 売り",
       "winLoss": "勝ち / 負け",
-      "httpsUrl": "https://...",
-      "codingLanguages": "例: Python, TypeScript, Go",
-      "dataSources": "例: CSV エクスポート, Stripe, Google Analytics"
+      "httpsUrl": "https://..."
     },
     "deleteConfirm": {
       "competitors": "この競合を削除しますか？元に戻せません。",
@@ -2194,8 +2556,6 @@
       "apps": "このアプリを削除しますか？元に戻せません。",
       "images": "この画像を削除しますか？元に戻せません。",
       "videos": "この動画を削除しますか？元に戻せません。",
-      "coding": "このコーディング依頼を削除しますか？元に戻せません。",
-      "data-analysis": "この分析を削除しますか？元に戻せません。",
       "presentations": "このプレゼンのメモを削除しますか？元に戻せません。",
       "campaigns": "このキャンペーンを削除しますか？元に戻せません。"
     },
@@ -2280,16 +2640,6 @@
         "why": "動画ごとの企画と進み具合。撮影リストを頭の中だけに置かないために。動画を生成するわけではありません。",
         "example": "30秒の製品デモ"
       },
-      "coding": {
-        "title": "作ってほしいもの",
-        "why": "機能や修正の内容を書き、言語をタグ付けする。バックログ全体を、頭の中以外の場所に置いておくために。コードを書くわけではありません。",
-        "example": "月次CSVを結合するスクリプト"
-      },
-      "dataAnalysis": {
-        "title": "データが答えられる問い",
-        "why": "問い、当たるデータソース、そして返ってきた発見。同じ答えを二度探さずに済みます。データを分析するわけではありません。",
-        "example": "定着する顧客はどのチャネルから来るか"
-      },
       "presentations": {
         "title": "プレゼンを記録しておく場所",
         "why": "これから準備するプレゼンや、すでに行ったプレゼンを書き留める場所です。このページがスライドを作るわけではありません。上のボタンから追加してください。",
@@ -2318,8 +2668,6 @@
       "apps": "アプリを追加",
       "images": "画像を追加",
       "videos": "動画を追加",
-      "coding": "コーディング項目を追加",
-      "dataAnalysis": "分析を追加",
       "presentations": "発表メモを追加",
       "campaigns": "キャンペーンを追加"
     }
@@ -2503,7 +2851,8 @@
     "termsDescription": "Ionexa AI の利用規約。",
     "privacyDescription": "Ionexa AI のプライバシーポリシー。",
     "cookiesDescription": "Ionexa AI が使用する Cookie の種類、それぞれの目的、保存期間について。",
-    "helpDescription": "Ionexa AI について最もよく寄せられる質問への回答 — 料金、credits、ウェブサイト、agents、プライバシー。"
+    "helpDescription": "Ionexa AI について最もよく寄せられる質問への回答 — 料金、credits、ウェブサイト、agents、プライバシー。",
+    "costs": "コスト"
   },
   "errors": {
     "retry": "もう一度試す",
@@ -2597,7 +2946,7 @@
       "e1": "テッサロニキのカフェ、メニューと営業時間つき",
       "e2": "写真家のポートフォリオ、ギャラリーつき",
       "e3": "SaaS のランディングページ、料金つき",
-      "limits": "1ページです。店舗でもアプリでもありません · あなたのシステムには接続しません"
+      "limits": "数ページ、ショップやアプリではありません · お使いのシステムには接続しません"
     },
     "files": {
       "e1": "契約書の解約について何と書いてありますか？",
@@ -2633,5 +2982,301 @@
     "showHow": "手順を見る",
     "installedHere": "この端末には Ionexa がインストールされています。",
     "installUnavailable": "ブラウザからのインストール案内はまだ出ていません。メニュー →「アプリをインストール」からも実行できます。"
+  },
+  "voice": {
+    "listen": "聞く",
+    "listenFor": "聞く · {credits} クレジット",
+    "pause": "一時停止",
+    "speed": "再生速度",
+    "voice": "声",
+    "listening": "聞いています",
+    "listeningHint": "話し終えたら停止を押してください。読み終えるまで何も送信されません。",
+    "startListening": "入力せずに話す",
+    "stopListening": "停止",
+    "costPerMinute": "音声1分あたり {credits} クレジット",
+    "outOfMinutes": "今月の音声の残り時間がありません",
+    "states": {
+      "idle": "準備完了",
+      "listening": "あなたの声を聞いています",
+      "thinking": "考えています",
+      "speaking": "話しています"
+    },
+    "errors": {
+      "bad_request": "そのリクエストを読み取れませんでした。",
+      "capacity": "ただいま混み合っています。少し待ってからお試しください。",
+      "denied": "マイクが許可されませんでした。入力はこれまでどおり使えます。",
+      "empty": "その録音からは何も聞き取れませんでした。",
+      "failed": "音声は現在利用できません。入力はこれまでどおり使えます。",
+      "insufficient_credits": "クレジットが足りません。",
+      "no_recording": "録音が送信されていません。",
+      "no_speech": "何も録音されませんでした。",
+      "not_configured": "この環境では音声が設定されていません。",
+      "not_included": "お使いのプランに音声は含まれていません。",
+      "out_of_minutes": "今月の音声の残り時間を使い切りました。",
+      "provider_error": "音声サービスに接続できませんでした。",
+      "rate_limited": "直近1時間の録音が多すぎます。少し待ってからお試しください。",
+      "reserve_failed": "この処理のためにクレジットを確保できませんでした。",
+      "too_large": "その録音は長すぎます。",
+      "unauthenticated": "サインアウトしています。サインインしてからお試しください。",
+      "unsupported": "このブラウザーは録音できません。入力はこれまでどおり使えます。",
+      "unsupported_type": "その音声形式には対応していません。",
+      "usage_unavailable": "音声の残り時間を今は確認できませんでした。"
+    },
+    "permission": {
+      "title": "マイクを開く前に",
+      "pressToStart": "録音は押したときだけ始まり、もう一度押すと止まります。",
+      "notStored": "音声は文字起こしのために送られ、どこにも保存されません — 当方でも、その後も。",
+      "editFirst": "何かが送信される前に、あなたが文章を読んで直します。",
+      "cost": "1分あたり {credits} クレジット、あなたのプランでは月 {minutes} 分。",
+      "allow": "マイクを開く",
+      "cancel": "今はしない"
+    },
+    "draft": {
+      "title": "聞き取った内容",
+      "use": "この文章を使う",
+      "discard": "破棄",
+      "notSent": "まだ何も送信されていません。文章を直してから、ご自身で送ってください。"
+    },
+    "voices": {
+      "neutral": "ニュートラル",
+      "warm": "やわらかい",
+      "deep": "低め",
+      "bright": "明るい"
+    },
+    "conversation": {
+      "title": "ハンズフリーの会話",
+      "start": "話す",
+      "close": "会話を終える",
+      "speak": "押して話す",
+      "interrupt": "割り込む",
+      "tapToSpeak": "どこでも押して話してください。話し終えると自動で聞き取りを止めます。",
+      "tapToInterrupt": "どこでも押すと割り込んでもう一度話せます。",
+      "hint": "普通に話してください — 話し終えるとその番は終わります。",
+      "empty": "話した内容はここにも文字で表示されます。"
+    },
+    "settings": {
+      "description": "入力の代わりに話し、答えを読み上げてもらえます。入力と読むことは決して取り上げられません — 音声の操作はいつも文字の隣にあり、置き換えるものではありません。",
+      "exhausted": "今月の残り時間はありません。毎月1日にリセットされます。",
+      "notConfigured": "この環境では音声が設定されていないため、マイクと「聞く」のボタンは表示されません。",
+      "notIncluded": "お使いのプランに音声は含まれていません。ここにあるものはすべて、これまでどおり入力して読めます。",
+      "perMinute": "1分あたり {credits} クレジット",
+      "privacy": "録音は押したときだけ始まります。音声は文字起こしのために送られ、どこにも保存されません — 残すのは秒数だけです。",
+      "remaining": "残り {minutes} 分",
+      "speakLabel": "読み上げてもらう",
+      "title": "音声",
+      "transcribeLabel": "話しかける",
+      "used": "今月は {limit} 分のうち {used} 分を使用"
+    }
+  },
+  "dataAnalysis": {
+    "title": "データ分析",
+    "description": "表計算ファイルをアップロードしてください。統計はすべてファイル全体から計算します。推測はしません。",
+    "upload": {
+      "title": "ファイルをアップロード",
+      "description": "CSV または Excel、8 MB まで。ファイルの読み込みに料金はかかりません。",
+      "button": "ファイルを選ぶ",
+      "working": "読み込み中…",
+      "done": "{rows} 行を読み込みました",
+      "failed": "そのファイルは読み込めませんでした。",
+      "tooLarge": "ファイルが大きすぎます。上限は 8 MB です。"
+    },
+    "summary": {
+      "counts": "{rows} 行 · {columns} 列",
+      "duplicates": "完全に重複した行が {count} 件",
+      "truncated": "最初の 50,000 行を読み込みました。グラフはその範囲のもので、ファイル全体ではありません。",
+      "ragged": "{count} 行がヘッダーと一致しませんでした。保存時の区切り文字を確認してください。"
+    },
+    "columns": {
+      "name": "列",
+      "type": "種類",
+      "filled": "入力あり",
+      "distinct": "種類数",
+      "stats": "範囲",
+      "missing": "欠損"
+    },
+    "types": {
+      "number": "数値",
+      "integer": "整数",
+      "date": "日付",
+      "boolean": "はい/いいえ",
+      "text": "テキスト",
+      "empty": "空"
+    },
+    "analyse": {
+      "button": "パターンを探す",
+      "working": "確認中…",
+      "done": "分析ができました",
+      "failed": "分析を最後まで実行できませんでした。",
+      "unavailable": "AI サービスに接続できませんでした。料金は発生していません。"
+    },
+    "findings": {
+      "title": "中身",
+      "none": "まだ分析していません。上の列とグラフはファイルそのものから計算したものです。"
+    },
+    "ask": {
+      "title": "データに質問する",
+      "description": "質問はクエリになり、実際の行に対して実行されます。数値はファイルから出たもので、モデルが作ったものではありません。",
+      "placeholder": "どの地域が一番売れましたか？",
+      "button": "質問する",
+      "working": "質問中…",
+      "failed": "その質問には答えられませんでした。",
+      "matched": "{total} 行のうち {matched} 行が一致",
+      "rowCount": "{count} 行"
+    },
+    "legacy": {
+      "title": "以前のメモ",
+      "description": "このページがメモ表だった頃に書かれたものです。そのまま残しています。"
+    },
+    "chart": {
+      "nothingToPlot": "これについて描けるものがありません。",
+      "truncated": "上位 {count} 件を表示しています。残りはまとめたか省いています。"
+    }
+  },
+  "coding": {
+    "title": "AI コーディング",
+    "description": "できること五つ、しないこと四つ。すべて入力欄のテキストだけを対象にします。",
+    "code": "コード",
+    "copy": "コピー",
+    "copied": "コピーしました",
+    "language": "言語",
+    "targetLanguage": "変換先",
+    "useWorkspace": "ほかのモジュールを文脈として使う",
+    "run": "実行",
+    "running": "処理中…",
+    "result": "結果",
+    "limits": {
+      "title": "これがしないこと",
+      "no_repository": "リポジトリを持ちません。あなたのコードベースも、貼り付けたファイルの隣のファイルも見えません。",
+      "no_execution": "何も実行しません。あなたのコードも、書いたコードも、書いたテストもです。",
+      "no_commits": "コミット、ブランチ、プルリクエストは作りません。",
+      "no_whole_project": "プロジェクトは作りません。関数ひとつ、ファイルひとつ、貼り付けひとつです。",
+      "later": "この四つは次のバージョンの話で、今回のものではありません。"
+    },
+    "operations": {
+      "generate": {
+        "label": "スニペットを書く",
+        "description": "必要なものを説明すると関数がひとつ返り、前提と対応していない点も書かれます。",
+        "placeholder": "注文のリストを受け取り、顧客ごとの利益率を返す関数…"
+      },
+      "explain": {
+        "label": "これを説明",
+        "description": "コードを貼ると、何をしているかを順に、対象の行を挙げて説明します。",
+        "placeholder": "説明してほしいコードを貼り付けてください…"
+      },
+      "find_bugs": {
+        "label": "バグを探す",
+        "description": "どの指摘にも、それが起きる入力や状態を挙げます。失敗例のない指摘はただの好みです。",
+        "placeholder": "確認してほしいコードを貼り付けてください…"
+      },
+      "convert": {
+        "label": "変換する",
+        "description": "別の言語で書き直し、移し替えられないものを一覧にします。",
+        "placeholder": "変換したいコードを貼り付けてください…"
+      },
+      "write_tests": {
+        "label": "テストを書く",
+        "description": "通常のケース、境界、そして壊れ方。うまくいく経路だけではありません。",
+        "placeholder": "テストしたいコードを貼り付けてください…"
+      }
+    },
+    "errors": {
+      "tooLong": "{limit} 文字を超えています。これはファイル単位のもので、プロジェクト単位ではありません。",
+      "unavailable": "AI サービスに接続できませんでした。料金は発生していません。",
+      "failed": "うまくいきませんでした。もう一度お試しください。"
+    },
+    "history": {
+      "title": "履歴",
+      "search": "検索",
+      "folder": "フォルダ",
+      "allFolders": "すべてのフォルダ",
+      "empty": "まだ何もありません。",
+      "input": "入力",
+      "output": "出力",
+      "importedNote": "以前のメモ",
+      "failed": "失敗"
+    }
+  },
+  "finance": {
+    "title": "財務",
+    "description": "すべての数字は実際の行から計算します。計算できないものは、その理由を書きます。",
+    "needsInput": "不足：{fields}",
+    "needsHistory": "{need} か月分の履歴が必要です。現在 {have} か月分あります。",
+    "noChangeYet": "まだ変化なし",
+    "notEnoughDays": "現在の履歴は {days} 日分です。",
+    "provenance": "履歴は公開した日から始まります：購読データ {months} か月分、日次スナップショット {days} 件。さかのぼって埋めることはしません — 遡及的な数字は、誰も記録していない過去に今日の価格を当てたものだからです。",
+    "inputs": {
+      "marketing_spend": "マーケティング費用",
+      "fixed_costs": "固定費",
+      "cash_balance": "現金残高"
+    },
+    "trends": {
+      "mrr30": "MRR・30日",
+      "mrr90": "MRR・90日",
+      "aiCost30": "AI コスト・30日",
+      "subscribers90": "有料購読者・90日"
+    },
+    "form": {
+      "title": "{month} の数字",
+      "description": "このデータベースには分からない三つのこと。空欄のままにすれば、それを必要とする指標がそう表示します。ゼロとして計算はしません。",
+      "marketing": "マーケティング費用",
+      "marketingHint": "今月、顧客獲得のために使った金額のすべて。",
+      "fixed": "固定費",
+      "fixedHint": "給与、ホスティング、ツール — マーケティングと AI 以外のすべて。",
+      "cash": "現金残高",
+      "cashHint": "月末時点の銀行残高。",
+      "save": "保存",
+      "saving": "保存中…",
+      "saved": "保存しました",
+      "saveError": "保存できませんでした。もう一度お試しください。"
+    },
+    "metrics": {
+      "mrr": "MRR",
+      "arr": "ARR",
+      "arpu": "ユーザーあたり収益",
+      "grossMarginPercent": "粗利率",
+      "aiCostPerUserEur": "ユーザーあたり AI コスト",
+      "costPerSuccessfulTaskEur": "完了タスクあたりコスト",
+      "churnPercent": "解約率",
+      "retentionPercent": "継続率",
+      "nrrPercent": "純収益維持率",
+      "ltvEur": "顧客生涯価値",
+      "cacEur": "顧客獲得コスト",
+      "paybackMonths": "回収期間",
+      "ruleOf40": "ルール・オブ・40",
+      "burnEur": "月次バーン",
+      "runwayMonths": "ランウェイ"
+    }
+  },
+  "routing": {
+    "title": "モデルルーティング",
+    "description": "直近30日間でどのモデルがどのリクエストを処理し、いくらかかり、ルーティングでいくら節約できたか。",
+    "empty": "ルーティングの判断はまだ記録されていません。リクエストがルーターを通り始めるとこの表が埋まります。ゼロを表示しているのではなく、何も表示していません。",
+    "decisions": "判断回数",
+    "charged": "顧客への請求",
+    "absorbed": "当社負担",
+    "absorbedNote": "顧客に請求しなかった、失敗した安価な試行",
+    "saved": "キャッシュ規則による節約",
+    "savedNote": "かえって高くつくため拒否したダウングレード",
+    "model": "モデル",
+    "overrides": "上書き",
+    "overrideSaving": "上書きによる節約",
+    "learnedTitle": "ルーターが学習した内容",
+    "learnedIntro": "30日間の機能・モデル別の成功率です。{rate}%を下回るモデルはその機能に選ばれなくなります — ただし{samples}回以上の実行があってからです。2回中2回の失敗は根拠になりません。",
+    "learnedEmpty": "まだ確定的なものはありません。機能とモデルの組み合わせに十分な実行数が貯まるまで、ルーティングは静的なティア表のままです。",
+    "runs": "{samples}回中 {rate}%",
+    "routedUp": "上位へ回送",
+    "notEnough": "まだ不足"
+  },
+  "publishing": {
+    "badge": {
+      "includedInPlan": "ご利用のプランではバッジがすでに非表示です。購入は不要です。",
+      "removedThisMonth": "今月はバッジを非表示にしています。",
+      "cancelledKeepsMonth": "自動更新はオフです。今月末まではバッジは表示されず、その後戻ります。",
+      "stopRenewing": "更新を停止",
+      "offer": "このサイトから「Made with Ionexa」バッジを月{credits}クレジット（約€{eur}）で非表示にします。",
+      "affordable": "残高は{balance}クレジット — このサイトで約{months}か月分です。",
+      "notEnough": "残高は{balance}クレジットで、{needed}必要です。",
+      "remove": "バッジを非表示にする"
+    }
   }
 }

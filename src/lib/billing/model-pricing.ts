@@ -1,3 +1,5 @@
+import { AI_CATALOG } from "@/lib/ai/providers/catalog";
+
 // Anthropic list prices, in USD, for every model and billable server tool
 // this app actually calls. Everything downstream (cost accumulation,
 // credit charging, margin reporting) derives from these numbers, so this
@@ -45,7 +47,38 @@ function tier(inputPerMTok: number, outputPerMTok: number): ModelPricing {
   };
 }
 
+/**
+ * NON-ANTHROPIC MODELS, folded in from the routing catalog.
+ *
+ * WHY THEY LIVE IN THE SAME TABLE. Everything downstream of this file —
+ * priceUsage, CostAccumulator, settleReservation, the margin report —
+ * prices by MODEL ID and knows nothing about providers, which is exactly
+ * the property that let lib/ai/providers/ be added without a second
+ * settlement path. A separate table for "the other providers" would be a
+ * second place for the margin to be got wrong, and the first one already
+ * cost this project a real incident.
+ *
+ * The cache-write and cache-read rates are derived by tier() from the
+ * input rate, as they are for Anthropic. OpenAI and Google charge no
+ * write premium and Groq has no cache at all, so those two fields are
+ * never exercised for these rows — their adapters do not report the
+ * fields that would price them. Derived rather than zeroed so an unknown
+ * future field cannot be priced at nothing.
+ *
+ * READ catalog.ts's header before enabling any of these providers: the
+ * numbers were never confirmed against a bill.
+ */
+function fromCatalog(): Record<string, ModelPricing> {
+  const out: Record<string, ModelPricing> = {};
+  for (const model of AI_CATALOG) {
+    if (model.provider === "anthropic") continue;
+    out[model.id] = tier(model.inputPerMTok, model.outputPerMTok);
+  }
+  return out;
+}
+
 export const MODEL_PRICING_USD: Record<string, ModelPricing> = {
+  ...fromCatalog(),
   // Sonnet tier — $3 / $15 per MTok.
   // claude-sonnet-4-6 is what every AI feature in this app requests today
   // (see lib/ai-models.ts, lib/website-builder.ts, api/chat, api/create).

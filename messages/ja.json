@@ -1309,6 +1309,24 @@
         "applyError": "変更を適用できませんでした。",
         "applied": "変更が公開されました。",
         "discard": "破棄"
+      },
+      "badge": {
+        "includedTitle": "このサイトに Ionexa バッジはありません",
+        "includedHint": "現在のプランでは、このサイトはすでに「Made with Ionexa」バッジなしで配信されています。購入は不要です。",
+        "visibleTitle": "「Made with Ionexa」バッジが表示中です",
+        "removedTitle": "このサイトに Ionexa バッジはありません",
+        "offerHint": "訪問者には隅に小さな「Made with Ionexa」リンクが見えます。月 {credits} クレジットで、このサイトだけ削除できます。",
+        "paidRenewing": "{date} まで非表示 — 残り {days} 日。{credits} クレジットで自動更新されます。",
+        "paidEnding": "{date} まで非表示 — 残り {days} 日。自動更新はオフなので、その日にバッジが戻ります。",
+        "lapsedHint": "有償期間は {date} に終了し、バッジがページに戻っています。もう一ヶ月購入すると再び削除できます。",
+        "buyButton": "月 {credits} クレジットで削除",
+        "extendButton": "一ヶ月追加（{credits} クレジット）",
+        "cancelRenewal": "自動更新をオフにする",
+        "confirmCancel": "更新を停止しますか？すでに支払った日数はそのまま残ります — 使い切るとバッジが戻ります。",
+        "bought": "このサイトからバッジを削除しました。",
+        "buyError": "バッジを削除できませんでした。もう一度お試しください。",
+        "cancelled": "自動更新をオフにしました。有償期間が終わるとバッジが戻ります。",
+        "cancelError": "自動更新をオフにできませんでした。もう一度お試しください。"
       }
     },
     "integrations": {

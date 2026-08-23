@@ -1309,6 +1309,24 @@
         "applyError": "No se pudo aplicar el cambio.",
         "applied": "Tu cambio está en vivo.",
         "discard": "Descartar"
+      },
+      "badge": {
+        "includedTitle": "Sin insignia de Ionexa en este sitio",
+        "includedHint": "Tu plan ya sirve este sitio sin la insignia «Made with Ionexa». No hay nada que comprar.",
+        "visibleTitle": "La insignia «Made with Ionexa» está visible",
+        "removedTitle": "Sin insignia de Ionexa en este sitio",
+        "offerHint": "Los visitantes ven un pequeño enlace «Made with Ionexa» en la esquina. Quítalo por {credits} créditos al mes, solo para este sitio.",
+        "paidRenewing": "Retirada hasta el {date}: quedan {days} días. Se renueva automáticamente por {credits} créditos.",
+        "paidEnding": "Retirada hasta el {date}: quedan {days} días. La renovación está desactivada, así que la insignia vuelve ese día.",
+        "lapsedHint": "El mes pagado terminó el {date}, así que la insignia ha vuelto a la página. Compra otro mes para quitarla de nuevo.",
+        "buyButton": "Quitar por {credits} créditos/mes",
+        "extendButton": "Añadir un mes ({credits} créditos)",
+        "cancelRenewal": "Desactivar la renovación",
+        "confirmCancel": "¿Dejar de renovar? Conservas los días que ya has pagado: la insignia vuelve cuando se acaben.",
+        "bought": "La insignia ya no aparece en este sitio.",
+        "buyError": "No se pudo quitar la insignia. Inténtalo de nuevo.",
+        "cancelled": "Renovación desactivada. La insignia vuelve al terminar el mes pagado.",
+        "cancelError": "No se pudo desactivar la renovación. Inténtalo de nuevo."
       }
     },
     "integrations": {

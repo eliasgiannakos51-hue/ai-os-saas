@@ -266,8 +266,15 @@ checkTrue("it never reads a session", !/auth\.getUser\(\)/.test(publicRoute));
 checkTrue("it reads through the admin client", /createAdminClient\(\)/.test(publicRoute));
 checkTrue(
   "it selects only what a visitor needs, never the whole row",
-  /\.select\("id, user_id, html_content, status, is_active, updated_at"\)/.test(publicRoute)
+  /\.select\("id, user_id, html_content, status, is_active, updated_at, badge_removal_paid_until"\)/.test(
+    publicRoute
+  )
 );
+// badge_removal_paid_until joined that list in V4 #25 and it is the ONLY
+// addition since: the badge has to be decided from live state on every
+// request, so the column it is decided from has to be read on every
+// request. Pinned by exact string rather than by "includes" so a future
+// widening of the select is a deliberate edit here, not a silent one.
 checkTrue("it refuses anything that is not live", /status !== "live"/.test(publicRoute));
 checkTrue("...or not active", /is_active !== true/.test(publicRoute));
 checkTrue("it is rate limited before it touches the database",
@@ -289,7 +296,24 @@ checkTrue(
 // response returns, so an unawaited write runs on a warm instance and
 // silently never on a cold one. recordView swallows its own errors, so
 // awaiting it still cannot fail the page.
-checkTrue("the view write is awaited", /await recordView\(/.test(publicRoute));
+// Since V4 #25 it is awaited as part of a Promise.all that also resolves
+// the owner's plan for the badge decision — so the assertion is that
+// recordView appears inside an awaited expression, not that it is
+// preceded by the literal word `await`.
+checkTrue(
+  "the view write is awaited",
+  /await Promise\.all\(\[\s*recordView\(/.test(publicRoute) || /await recordView\(/.test(publicRoute),
+  publicRoute.slice(publicRoute.indexOf("recordView("), publicRoute.indexOf("recordView(") + 200)
+);
+// Checked against the CODE, not the file: the route's own comment quotes
+// `void recordView(...)` while explaining why it must not be written that
+// way, and an assertion that a comment can satisfy is not an assertion.
+const serveCode = publicRoute.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^[ \t]*\/\/.*$/gm, "");
+checkTrue(
+  "...and nothing on the serve path is fire-and-forget",
+  !/void recordView\(/.test(serveCode) && !/void loadOwnerPlanSlug\(/.test(serveCode),
+  serveCode.slice(serveCode.indexOf("recordView("), serveCode.indexOf("recordView(") + 120)
+);
 checkTrue(
   "...and cannot fail the response",
   /async function recordView[\s\S]{0,900}catch \(err\)[\s\S]{0,200}logApiError/.test(publicRoute)

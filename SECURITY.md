@@ -171,9 +171,31 @@ exceptions.
 - Retries record onto the **same** accumulator, so the hold must cover
   `MAX_ATTEMPTS × single`.
 
+**A charge that costs no tokens still lives inside the credit system.**
+Badge removal (V4 #25) makes no model call, so it has no AI cost and no
+margin ratio to satisfy — but it is charged through `deductCredits` like
+everything else, which puts it in `credit_transactions` (where the user
+reads their history and where the ceiling applies) and deliberately NOT in
+`ai_cost_log` (where a zero-cost row would flatter the AI margin report).
+
+**State a visitor pays for is read at serve time, never baked into stored
+bytes.** `published_sites.html_content` is a snapshot and `site_versions`
+holds twenty more that a rollback can promote back to live. Anything that
+depends on "has this account paid?" — today that is the "Made with Ionexa"
+badge — is resolved per request from the current plan and the current
+`badge_removal_paid_until`, by `lib/publishing/badge.ts`, which strips any
+badge the stored copy contains before deciding. A lapsed period therefore
+restores the badge with no write anywhere; there is nothing to forget to
+run.
+
 *Gate: `scripts/tests/billing-coverage.test.mjs` — scans for every
 `anthropic.messages.*` call site in `src/`, and fails on any file not
 DECLARED with its call count and billing mode.*
+
+*Gate: `scripts/tests/badge-removal.test.mjs` — asserts no write path
+stores a badge, that the serve path decides it from live state, and that a
+plan which includes badge removal is refused at purchase and skipped at
+renewal.*
 
 ## ζ. Secrets
 
@@ -481,6 +503,11 @@ before `next build`. A new feature fails the build if:
 | A new Anthropic call site is not DECLARED with its billing mode | `billing-coverage.test.mjs` §1 |
 | A declared call site's call count changes | `billing-coverage.test.mjs` §1 |
 | Generated HTML would bypass the security scan | `publishing.test.mjs` |
+| The public serve route widens its column select | `publishing.test.mjs` §5 |
+| A write path bakes the "Made with Ionexa" badge into stored HTML | `badge-removal.test.mjs` §4 |
+| The badge stops being decided from live plan + expiry at serve time | `badge-removal.test.mjs` §4 |
+| A plan that includes badge removal could be charged for it | `badge-removal.test.mjs` §5 |
+| The badge renewal cron loses its `checkCronAuth` or its schedule | `badge-removal.test.mjs` §5 |
 | A deck theme's text drops below WCAG AA on its own background | `presentations.test.mjs` §1 |
 | A presentation route loses its auth, ownership filter or rate limit | `presentations.test.mjs` §8 |
 | The PPTX export would fetch an image from an unallowlisted host | `presentations.test.mjs` §5 |

@@ -230,7 +230,17 @@ const clientFallbacks = sources.flatMap((f) => [
 // message that names the specific issues. Same recorded decision as
 // every API-error increment above; the live-editor UI shows its own
 // translated dashboard.publishing.liveEdit strings for the happy path.
-const SERVER_PROSE_BASELINE = 638;
+// 638 -> 650: V4 #25's badge-removal purchase route
+// (/api/published/[id]/badge-removal) and its daily renewal cron
+// (/api/cron/badge-renewals). The purchase route's not-found,
+// rate-limit, insufficient-credits and "your credits were not charged"
+// sentences, plus the plan-includes-it refusal that names the plan. Same
+// recorded decision as every API-error increment above: the BadgeControl
+// UI shows its own fully-translated dashboard.publishing.badge strings in
+// all ten locales for every state a user normally sees, and the English
+// here is the fallback reached only when that JSON cannot be parsed. The
+// cron is machine-facing — nobody reads its responses but the scheduler.
+const SERVER_PROSE_BASELINE = 650;
 // Measured by the regex above, not by an outside grep: a line-based grep
 // misses the calls whose arguments span lines, and a baseline taken with a
 // different instrument than the check is just a slow-motion false alarm.

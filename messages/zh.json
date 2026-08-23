@@ -1309,6 +1309,24 @@
         "applyError": "无法应用该更改。",
         "applied": "你的更改已上线。",
         "discard": "放弃"
+      },
+      "badge": {
+        "includedTitle": "此站点无 Ionexa 标记",
+        "includedHint": "你的套餐已经在不带“Made with Ionexa”标记的情况下提供此站点，无需购买。",
+        "visibleTitle": "“Made with Ionexa”标记正在显示",
+        "removedTitle": "此站点无 Ionexa 标记",
+        "offerHint": "访客会在角落看到一个小小的“Made with Ionexa”链接。每月 {credits} 积分即可移除，仅限此站点。",
+        "paidRenewing": "已移除至 {date}，还剩 {days} 天。将以 {credits} 积分自动续订。",
+        "paidEnding": "已移除至 {date}，还剩 {days} 天。自动续订已关闭，标记将在当天重新出现。",
+        "lapsedHint": "付费月份已于 {date} 结束，标记已重新出现在页面上。再购买一个月即可再次移除。",
+        "buyButton": "每月 {credits} 积分移除",
+        "extendButton": "再加一个月（{credits} 积分）",
+        "cancelRenewal": "关闭自动续订",
+        "confirmCancel": "停止续订？已付费的天数仍然保留 — 用完后标记会重新出现。",
+        "bought": "标记已从此站点移除。",
+        "buyError": "无法移除标记，请重试。",
+        "cancelled": "自动续订已关闭。付费月份结束后标记会重新出现。",
+        "cancelError": "无法关闭自动续订，请重试。"
       }
     },
     "integrations": {

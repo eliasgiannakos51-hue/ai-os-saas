@@ -60,6 +60,26 @@ export type PlanCapabilities = {
   // Settings > AI Persona, wired into api/chat's system prompt) — one of
   // Ultimate's real differentiators vs Professional.
   customAiPersona: boolean;
+  // Whether a published site on this plan is served WITHOUT the "Made with
+  // Ionexa" badge at no extra charge (V4 #25).
+  //
+  // This boolean is the ONLY place the free/paid boundary for the badge
+  // lives. lib/publishing/badge.ts reads it for the serve-time decision,
+  // api/published/[id]/badge-removal reads it to REFUSE a charge someone
+  // does not owe, and the renewal cron reads it to stop renewing an
+  // upgraded account. Moving the line between tiers is therefore this one
+  // edit and nothing else.
+  //
+  // Free is the only `false` today, which makes the paid path narrower
+  // than it looks and is worth stating plainly: DEFAULT_PUBLISH_LIMITS.free
+  // is 0 and `websiteBuilder` is false here, so a Free account cannot
+  // build or publish a site in the first place. The accounts that actually
+  // reach the buy-with-credits path are the ones that published while
+  // paying and later downgraded — their sites stay live, the badge comes
+  // back, and 200 credits/month per site is the way to take it off again
+  // without re-subscribing. If Free is ever given a published site, this
+  // flag is already the switch that decides what it looks like.
+  freeBadgeRemoval: boolean;
 };
 
 export type Plan = {
@@ -96,6 +116,7 @@ export const PLANS: Plan[] = [
       teamCollaboration: false,
       chatMemoryLimit: 0,
       customAiPersona: false,
+      freeBadgeRemoval: false,
     },
     features: [
       { textKey: "1Workspace3Projects" },
@@ -120,6 +141,7 @@ export const PLANS: Plan[] = [
       teamCollaboration: false,
       chatMemoryLimit: 20,
       customAiPersona: false,
+      freeBadgeRemoval: true,
     },
     features: [
       { textKey: "unlimitedProjects" },
@@ -147,6 +169,7 @@ export const PLANS: Plan[] = [
       teamCollaboration: false,
       chatMemoryLimit: 20,
       customAiPersona: false,
+      freeBadgeRemoval: true,
     },
     features: [
       { textKey: "everythingInStarter" },
@@ -171,6 +194,7 @@ export const PLANS: Plan[] = [
       teamCollaboration: true,
       chatMemoryLimit: 20,
       customAiPersona: false,
+      freeBadgeRemoval: true,
     },
     features: [
       { textKey: "everythingInGrowth" },
@@ -197,6 +221,7 @@ export const PLANS: Plan[] = [
       teamCollaboration: true,
       chatMemoryLimit: 100,
       customAiPersona: true,
+      freeBadgeRemoval: true,
     },
     features: [
       { textKey: "everythingInProfessional" },
@@ -224,6 +249,7 @@ export const PLANS: Plan[] = [
       teamCollaboration: true,
       chatMemoryLimit: 100,
       customAiPersona: true,
+      freeBadgeRemoval: true,
     },
     features: [
       { textKey: "everythingInUltimate" },

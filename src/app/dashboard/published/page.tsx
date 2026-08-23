@@ -9,6 +9,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { maxPublishedSitesForPlan, MAX_SITE_VERSIONS } from "@/lib/publishing/publish-limits";
 import { publishedSiteUrl } from "@/lib/publishing/subdomain";
+import { badgeRemovalCreditsPerMonth, resolveBadgeState } from "@/lib/publishing/badge";
 import { getSiteUrl } from "@/lib/site-url";
 import {
   PublishedSitesList,
@@ -53,7 +54,9 @@ export default async function PublishedSitesPage() {
   const [{ data: sites, error: sitesError }, { data: analytics }] = await Promise.all([
     supabase
       .from("published_sites")
-      .select("id, website_id, subdomain, status, view_count, published_at, updated_at")
+      .select(
+        "id, website_id, subdomain, status, view_count, published_at, updated_at, badge_removal_paid_until, badge_removal_auto_renew"
+      )
       .eq("user_id", user.id)
       .order("published_at", { ascending: false }),
     supabase
@@ -89,6 +92,12 @@ export default async function PublishedSitesPage() {
   }
 
   const publishedDomain = process.env.PUBLISHED_SITE_DOMAIN;
+  // The badge state shown here is computed with the SAME function
+  // /s/[subdomain] serves with, from the same two inputs. A dashboard that
+  // derived it any other way could tell someone their badge was gone while
+  // the public page still carried it, which is the one thing this panel
+  // must never do.
+  const badgeNow = new Date();
   const rows: PublishedSiteRow[] = siteRows.map((site) => ({
     id: site.id,
     website_id: site.website_id,
@@ -104,6 +113,21 @@ export default async function PublishedSitesPage() {
     url: publishedSiteUrl(site.subdomain, getSiteUrl(), publishedDomain),
     website_name: nameById.get(site.website_id) ?? site.subdomain,
     views_this_week: weekViews.get(site.id) ?? 0,
+    badge: (() => {
+      const state = resolveBadgeState({
+        planSlug,
+        paidUntil: site.badge_removal_paid_until ?? null,
+        now: badgeNow,
+      });
+      return {
+        showBadge: state.showBadge,
+        reason: state.reason,
+        paidUntil: state.paidUntil ? state.paidUntil.toISOString() : null,
+        daysRemaining: state.daysRemaining,
+        includedInPlan: state.includedInPlan,
+        autoRenew: site.badge_removal_auto_renew !== false,
+      };
+    })(),
   }));
 
   const cap = isAdmin ? Number.POSITIVE_INFINITY : planCap;
@@ -125,6 +149,7 @@ export default async function PublishedSitesPage() {
           sites={rows}
           versions={(versions ?? []) as SiteVersionRow[]}
           cap={cap}
+          badgeCredits={badgeRemovalCreditsPerMonth()}
         />
       </div>
     </main>

@@ -1309,6 +1309,24 @@
         "applyError": "Änderung konnte nicht angewendet werden.",
         "applied": "Deine Änderung ist live.",
         "discard": "Verwerfen"
+      },
+      "badge": {
+        "includedTitle": "Kein Ionexa-Badge auf dieser Website",
+        "includedHint": "Dein Tarif liefert diese Website bereits ohne das „Made with Ionexa“-Badge aus. Es gibt nichts zu kaufen.",
+        "visibleTitle": "Das „Made with Ionexa“-Badge ist sichtbar",
+        "removedTitle": "Kein Ionexa-Badge auf dieser Website",
+        "offerHint": "Besucher sehen in der Ecke einen kleinen „Made with Ionexa“-Link. Entferne ihn für {credits} Credits im Monat — nur für diese Website.",
+        "paidRenewing": "Entfernt bis {date} — noch {days} Tage. Verlängert sich automatisch für {credits} Credits.",
+        "paidEnding": "Entfernt bis {date} — noch {days} Tage. Die Verlängerung ist aus, das Badge kommt an diesem Tag zurück.",
+        "lapsedHint": "Der bezahlte Monat endete am {date}, das Badge ist wieder auf der Seite. Kaufe einen weiteren Monat, um es erneut zu entfernen.",
+        "buyButton": "Für {credits} Credits/Monat entfernen",
+        "extendButton": "Einen Monat hinzufügen ({credits} Credits)",
+        "cancelRenewal": "Verlängerung ausschalten",
+        "confirmCancel": "Verlängerung stoppen? Die bereits bezahlten Tage bleiben dir — das Badge kommt zurück, wenn sie aufgebraucht sind.",
+        "bought": "Das Badge ist von dieser Website entfernt.",
+        "buyError": "Das Badge konnte nicht entfernt werden. Bitte versuche es erneut.",
+        "cancelled": "Verlängerung ist aus. Das Badge kehrt am Ende des bezahlten Monats zurück.",
+        "cancelError": "Die Verlängerung konnte nicht ausgeschaltet werden. Bitte versuche es erneut."
       }
     },
     "integrations": {

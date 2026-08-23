@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { Globe, ExternalLink, Copy, Check, History, SearchX, Sparkles, Undo2 } from "lucide-react";
 import { LiveEditor } from "@/components/publishing/live-editor";
+import { BadgeControl } from "@/components/publishing/badge-control";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
 import { ListLayout } from "@/components/ui/list-layout";
 import { EmptyState } from "@/components/empty-state";
@@ -15,6 +16,18 @@ import { useToast } from "@/components/toast/toast-context";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { formatDateTime, formatNumber } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
+
+/** The badge answer for one site, computed server-side with the SAME
+ *  resolveBadgeState() the public route serves with. Never derived in the
+ *  browser: the dashboard must not be able to disagree with the page. */
+export type SiteBadgeState = {
+  showBadge: boolean;
+  reason: "included_in_plan" | "paid" | "lapsed" | "never_purchased";
+  paidUntil: string | null;
+  daysRemaining: number | null;
+  includedInPlan: boolean;
+  autoRenew: boolean;
+};
 
 export type PublishedSiteRow = {
   id: string;
@@ -29,6 +42,7 @@ export type PublishedSiteRow = {
   website_name: string;
   /** Views in the trailing 7 days, summed from site_analytics. */
   views_this_week: number;
+  badge: SiteBadgeState;
 };
 
 export type SiteVersionRow = {
@@ -43,11 +57,14 @@ export function PublishedSitesList({
   sites,
   versions,
   cap,
+  badgeCredits,
 }: {
   sites: PublishedSiteRow[];
   versions: SiteVersionRow[];
   /** Infinity renders as "unlimited" rather than as a number. */
   cap: number;
+  /** Credits per month to remove the "Made with Ionexa" badge, per site. */
+  badgeCredits: number;
 }) {
   const t = useTranslations("dashboard.publishing");
   const tModule = useTranslations("module");
@@ -282,6 +299,13 @@ export function PublishedSitesList({
               {t("close")}
             </button>
           </div>
+
+          {/* Badge removal (V4 #25) — shown for a LIVE site only, because
+              the badge is a property of the page a visitor receives and an
+              offline site has no such page. */}
+          {selected.status === "live" && (
+            <BadgeControl siteId={selected.id} badge={selected.badge} credits={badgeCredits} />
+          )}
 
           {/* Live editing (V3 Task 12): describe a change, preview it in
               split view, approve → live immediately. Only for a site that

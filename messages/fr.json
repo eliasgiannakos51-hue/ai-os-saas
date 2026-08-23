@@ -1309,6 +1309,24 @@
         "applyError": "Impossible d'appliquer ce changement.",
         "applied": "Votre changement est en ligne.",
         "discard": "Annuler"
+      },
+      "badge": {
+        "includedTitle": "Aucun badge Ionexa sur ce site",
+        "includedHint": "Votre offre sert déjà ce site sans le badge « Made with Ionexa ». Rien à acheter.",
+        "visibleTitle": "Le badge « Made with Ionexa » est visible",
+        "removedTitle": "Aucun badge Ionexa sur ce site",
+        "offerHint": "Les visiteurs voient un petit lien « Made with Ionexa » dans le coin. Retirez-le pour {credits} crédits par mois, pour ce site uniquement.",
+        "paidRenewing": "Retiré jusqu'au {date} — il reste {days} jours. Renouvellement automatique pour {credits} crédits.",
+        "paidEnding": "Retiré jusqu'au {date} — il reste {days} jours. Le renouvellement est désactivé, le badge revient donc ce jour-là.",
+        "lapsedHint": "Le mois payé s'est terminé le {date}, le badge est donc revenu sur la page. Achetez un autre mois pour le retirer à nouveau.",
+        "buyButton": "Retirer pour {credits} crédits/mois",
+        "extendButton": "Ajouter un mois ({credits} crédits)",
+        "cancelRenewal": "Désactiver le renouvellement",
+        "confirmCancel": "Arrêter le renouvellement ? Vous gardez les jours déjà payés — le badge revient une fois épuisés.",
+        "bought": "Le badge a été retiré de ce site.",
+        "buyError": "Impossible de retirer le badge. Réessayez.",
+        "cancelled": "Renouvellement désactivé. Le badge revient à la fin du mois payé.",
+        "cancelError": "Impossible de désactiver le renouvellement. Réessayez."
       }
     },
     "integrations": {

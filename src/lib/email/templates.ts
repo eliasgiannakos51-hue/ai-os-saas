@@ -348,6 +348,79 @@ export function weeklyDigestEmailHtml({
 // bounded/parsed strings), a mission step's text and an AI-generated
 // result summary are genuinely freeform user/AI content, so this one
 // actually needs it before interpolating into HTML.
+export function badgeExpiringEmailHtml({
+  subdomain,
+  siteUrl,
+  daysRemaining,
+  credits,
+  autoRenew,
+  manageUrl,
+}: {
+  subdomain: string;
+  siteUrl: string;
+  daysRemaining: number;
+  credits: number;
+  autoRenew: boolean;
+  manageUrl: string;
+}): string {
+  const safeSubdomain = escapeHtml(subdomain);
+  const safeSiteUrl = escapeHtml(siteUrl);
+  const days = daysRemaining === 1 ? "1 day" : `${daysRemaining} days`;
+
+  // Two genuinely different emails, because the action the reader needs to
+  // take is the opposite in each case. With auto-renew ON this is a notice
+  // that money is about to move and they may want to stop it; with it OFF
+  // it is a warning that their page is about to change and they may want
+  // to prevent that. Sending one vague message for both would be useless
+  // for either.
+  const bodyHtml = autoRenew
+    ? `
+    <span style="color:${MUTED}; font-size:12px;">renewing soon</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">${safeSubdomain} renews in ${days}</h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      Your site <a href="${safeSiteUrl}" style="color:${ORANGE}; text-decoration:none;">/s/${safeSubdomain}</a>
+      is served without the &ldquo;Made with Ionexa&rdquo; badge. In ${days} we'll
+      renew that for another month and take
+      <span style="color:${FOREGROUND};">${credits} credits</span> from your balance.
+    </p>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      Nothing to do if that's what you want. If your balance is short when
+      the day comes, the renewal is skipped and the badge comes back — it
+      never puts your account into the negative.
+    </p>
+    <p style="margin:0 0 20px;">
+      <a href="${manageUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        Manage this site
+      </a>
+    </p>
+  `
+    : `
+    <span style="color:${MUTED}; font-size:12px;">expiring soon</span>
+    <h1 style="color:${FOREGROUND}; font-size:20px; margin:12px 0 16px;">The badge returns to ${safeSubdomain} in ${days}</h1>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      Badge removal for <a href="${safeSiteUrl}" style="color:${ORANGE}; text-decoration:none;">/s/${safeSubdomain}</a>
+      ends in ${days}, and automatic renewal is off. When it ends, the
+      &ldquo;Made with Ionexa&rdquo; badge goes back on the page.
+    </p>
+    <p style="color:${MUTED}; font-size:14px; line-height:1.6; margin:0 0 20px;">
+      Renewing costs <span style="color:${FOREGROUND};">${credits} credits</span> for
+      another month, and renewing early doesn't lose the days you've already paid for.
+    </p>
+    <p style="margin:0 0 20px;">
+      <a href="${manageUrl}" style="display:inline-block; background-color:${ORANGE}; color:#000; font-size:13px; font-weight:600; padding:10px 20px; border-radius:6px; text-decoration:none;">
+        Keep it off
+      </a>
+    </p>
+  `;
+
+  return layout({
+    preheader: autoRenew
+      ? `${subdomain} renews in ${days} for ${credits} credits.`
+      : `The Ionexa badge returns to ${subdomain} in ${days}.`,
+    bodyHtml,
+  });
+}
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")

@@ -1309,6 +1309,24 @@
         "applyError": "Impossibile applicare la modifica.",
         "applied": "La tua modifica è live.",
         "discard": "Scarta"
+      },
+      "badge": {
+        "includedTitle": "Nessun badge Ionexa su questo sito",
+        "includedHint": "Il tuo piano serve già questo sito senza il badge «Made with Ionexa». Non c'è nulla da acquistare.",
+        "visibleTitle": "Il badge «Made with Ionexa» è visibile",
+        "removedTitle": "Nessun badge Ionexa su questo sito",
+        "offerHint": "I visitatori vedono un piccolo link «Made with Ionexa» nell'angolo. Rimuovilo per {credits} crediti al mese, solo per questo sito.",
+        "paidRenewing": "Rimosso fino al {date} — mancano {days} giorni. Si rinnova automaticamente per {credits} crediti.",
+        "paidEnding": "Rimosso fino al {date} — mancano {days} giorni. Il rinnovo è disattivato, quindi il badge torna quel giorno.",
+        "lapsedHint": "Il mese pagato è terminato il {date}, quindi il badge è tornato sulla pagina. Acquista un altro mese per rimuoverlo di nuovo.",
+        "buyButton": "Rimuovi per {credits} crediti/mese",
+        "extendButton": "Aggiungi un mese ({credits} crediti)",
+        "cancelRenewal": "Disattiva il rinnovo",
+        "confirmCancel": "Vuoi interrompere il rinnovo? Mantieni i giorni già pagati: il badge torna quando finiscono.",
+        "bought": "Il badge è stato tolto da questo sito.",
+        "buyError": "Non è stato possibile rimuovere il badge. Riprova.",
+        "cancelled": "Rinnovo disattivato. Il badge torna alla fine del mese pagato.",
+        "cancelError": "Non è stato possibile disattivare il rinnovo. Riprova."
       }
     },
     "integrations": {

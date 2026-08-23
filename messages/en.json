@@ -1309,6 +1309,24 @@
         "applyError": "Couldn't apply that change.",
         "applied": "Your change is live.",
         "discard": "Discard"
+      },
+      "badge": {
+        "includedTitle": "No Ionexa badge on this site",
+        "includedHint": "Your plan already serves this site without the “Made with Ionexa” badge. Nothing to buy.",
+        "visibleTitle": "“Made with Ionexa” badge is showing",
+        "removedTitle": "No Ionexa badge on this site",
+        "offerHint": "Visitors see a small “Made with Ionexa” link in the corner. Remove it for {credits} credits a month, for this site only.",
+        "paidRenewing": "Removed until {date} — {days} days left. Renews automatically for {credits} credits.",
+        "paidEnding": "Removed until {date} — {days} days left. Renewal is off, so the badge comes back that day.",
+        "lapsedHint": "The paid month ended on {date}, so the badge is back on the page. Buy another month to take it off again.",
+        "buyButton": "Remove for {credits} credits/month",
+        "extendButton": "Add a month ({credits} credits)",
+        "cancelRenewal": "Turn off renewal",
+        "confirmCancel": "Stop renewing? You keep the days you've already paid for — the badge comes back when they run out.",
+        "bought": "The badge is off this site.",
+        "buyError": "Could not remove the badge. Please try again.",
+        "cancelled": "Renewal is off. The badge returns when the paid month ends.",
+        "cancelError": "Could not turn off renewal. Please try again."
       }
     },
     "integrations": {

@@ -39,6 +39,19 @@ export const EMAIL_TYPES = {
   // 20-email cap — is a user who stops receiving what they built and does
   // not find out for weeks.
   agent_disabled: { critical: true },
+  // V4 #25 — "badge removal for this site expires in 7 days".
+  //
+  // Critical for the same reason agent_disabled is, and one more. It is
+  // the only warning before either (a) credits leave the balance on a
+  // recurring charge, or (b) a live public page visibly changes. A person
+  // must be able to stop a recurring charge, and they cannot stop one they
+  // were never told about — so this must not be suppressible by a
+  // preference toggle or by a busy day hitting the 20-email cap.
+  //
+  // It cannot become a nuisance either way: it is sent at most once per
+  // paid period per site (guarded by badge_removal_expiry_notified_at), so
+  // "critical" here buys no extra volume at all.
+  badge_expiring: { critical: true },
 } as const;
 
 export type EmailType = keyof typeof EMAIL_TYPES;

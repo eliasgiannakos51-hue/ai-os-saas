@@ -266,6 +266,8 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/agent-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts); executes every due Autonomous Agent, so it spends real money on many accounts per call",
   "src/app/api/weekly-digest/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
+  "src/app/api/cron/badge-renewals/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts). Like agent-runs it SPENDS REAL CREDITS on many accounts per call, so the secret is the whole of its access control: it renews badge removal on every site whose paid period has lapsed with auto-renew on. It takes no input from the request at all — no id, no body, no query — so there is nothing a caller could steer even if they held the secret; the set of rows it touches is decided entirely by the database. Every charge goes through deductCredits, which refuses rather than overdrawing.",
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",
   "src/app/api/websites/[id]/submit-form/route.ts": "public contact form on generated sites; write-only, honeypot + 30/hr cap",
   "src/app/api/demo/preview/route.ts":

@@ -1309,6 +1309,24 @@
         "applyError": "Não foi possível aplicar a alteração.",
         "applied": "A tua alteração está online.",
         "discard": "Descartar"
+      },
+      "badge": {
+        "includedTitle": "Sem selo da Ionexa neste site",
+        "includedHint": "O seu plano já serve este site sem o selo “Made with Ionexa”. Não há nada para comprar.",
+        "visibleTitle": "O selo “Made with Ionexa” está visível",
+        "removedTitle": "Sem selo da Ionexa neste site",
+        "offerHint": "Os visitantes veem um pequeno link “Made with Ionexa” no canto. Remova-o por {credits} créditos por mês, apenas para este site.",
+        "paidRenewing": "Removido até {date} — faltam {days} dias. Renova automaticamente por {credits} créditos.",
+        "paidEnding": "Removido até {date} — faltam {days} dias. A renovação está desligada, por isso o selo volta nesse dia.",
+        "lapsedHint": "O mês pago terminou a {date}, por isso o selo voltou à página. Compre outro mês para o tirar de novo.",
+        "buyButton": "Remover por {credits} créditos/mês",
+        "extendButton": "Adicionar um mês ({credits} créditos)",
+        "cancelRenewal": "Desligar a renovação",
+        "confirmCancel": "Parar a renovação? Fica com os dias que já pagou — o selo volta quando acabarem.",
+        "bought": "O selo saiu deste site.",
+        "buyError": "Não foi possível remover o selo. Tente novamente.",
+        "cancelled": "Renovação desligada. O selo volta quando o mês pago terminar.",
+        "cancelError": "Não foi possível desligar a renovação. Tente novamente."
       }
     },
     "integrations": {

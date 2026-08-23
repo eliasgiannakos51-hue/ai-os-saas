@@ -29,15 +29,53 @@ function checkTrue(name, cond, detail) {
 }
 
 const USER_ID = "00000000-0000-4000-8000-000000000001";
+const STARTER_USER_ID = "00000000-0000-4000-8000-000000000002";
 const SITE_ID = "44444444-4444-4444-8444-444444444444";
 const SITE_HTML =
   "<!doctype html><html><head><title>Acme Cafe</title></head><body><h1>Acme Cafe</h1><p>Open daily.</p></body></html>";
 
+const BADGE_MARKER = "data-ionexa-badge";
+const DAY = 86_400_000;
+const FUTURE = new Date(Date.now() + 10 * DAY).toISOString();
+const PAST = new Date(Date.now() - 2 * DAY).toISOString();
+
+// A stored document that ALREADY contains a badge — the state the whole
+// feature forbids. Serving must strip it and re-decide from live state.
+const POISONED_HTML = SITE_HTML.replace(
+  "</body>",
+  `<a ${BADGE_MARKER}="1" href="https://ionexa.ai" style="position:fixed">Made with Ionexa</a></body>`
+);
+
 // The row the public route reads, keyed by the subdomain it filters on.
+const site = (over) => ({
+  id: SITE_ID,
+  user_id: USER_ID,
+  html_content: SITE_HTML,
+  status: "live",
+  is_active: true,
+  updated_at: "2026-01-14T10:00:00Z",
+  badge_removal_paid_until: null,
+  ...over,
+});
+
 const SITES = {
-  acme: { id: SITE_ID, user_id: USER_ID, html_content: SITE_HTML, status: "live", is_active: true, updated_at: "2026-01-14T10:00:00Z" },
-  gone: { id: "55555555-5555-4555-8555-555555555555", user_id: USER_ID, html_content: SITE_HTML, status: "unpublished", is_active: false, updated_at: "2026-01-14T10:00:00Z" },
+  // V4 #25 — the four badge states, each an independently addressable site.
+  acme: site({}), // free owner, never bought -> badge
+  paid: site({ id: "44444444-4444-4444-8444-44444444a001", badge_removal_paid_until: FUTURE }),
+  lapsed: site({ id: "44444444-4444-4444-8444-44444444a002", badge_removal_paid_until: PAST }),
+  included: site({ id: "44444444-4444-4444-8444-44444444a003", user_id: STARTER_USER_ID }),
+  // Paid, but the stored bytes carry a badge from "an older snapshot".
+  poisoned: site({
+    id: "44444444-4444-4444-8444-44444444a004",
+    html_content: POISONED_HTML,
+    badge_removal_paid_until: FUTURE,
+  }),
+  gone: site({ id: "55555555-5555-4555-8555-555555555555", status: "unpublished", is_active: false }),
 };
+
+// user_credits.plan_tier is what the serve path reads to learn the owner's
+// plan (see lib/publishing/badge-server.ts).
+const PLAN_TIERS = { [USER_ID]: "free", [STARTER_USER_ID]: "starter" };
 
 const rpcCalls = [];
 const allHits = [];
@@ -57,6 +95,15 @@ const supa = http.createServer((req, res) => {
     if (url.pathname === "/rest/v1/rpc/record_site_view") {
       rpcCalls.push(body);
       return json(200, null);
+    }
+    if (url.pathname === "/rest/v1/user_credits") {
+      const filter = url.searchParams.get("user_id") ?? "";
+      const wanted = filter.startsWith("eq.") ? filter.slice(3) : "";
+      const tier = PLAN_TIERS[wanted];
+      const row = tier ? { plan_tier: tier } : null;
+      const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
+      if (single) return row ? json(200, row) : json(406, { message: "no rows" });
+      return json(200, row ? [row] : []);
     }
     if (url.pathname === "/rest/v1/published_sites") {
       // PostgREST puts the filter in the query string: subdomain=eq.acme
@@ -149,13 +196,49 @@ try {
   const res = await fetch(`${base}/s/acme`);
   check("200", res.status, 200);
   const html = await res.text();
-  check("the bytes are the published HTML, not a wrapper", html, SITE_HTML);
+  checkTrue(
+    "the bytes are the published HTML, not a wrapper",
+    html.includes("<h1>Acme Cafe</h1>") && html.includes("<p>Open daily.</p>"),
+    html.slice(0, 300)
+  );
   checkTrue(
     "...served as its own document, not embedded in ours",
     !html.includes("__next") && !html.includes("_next/static"),
     html.slice(0, 200)
   );
   check("Content-Type", res.headers.get("content-type"), "text/html; charset=utf-8");
+
+  console.log("\n== V4 #25: the badge is decided at SERVE time, every request ==");
+  // The full verification the requirement asks for, against the real
+  // production server: free site with a badge -> paid -> badge gone ->
+  // lapsed -> badge back. Four separate rows, one fetch each, real bytes.
+  {
+    check("free + never bought  -> badge IS on the page", html.includes(BADGE_MARKER), true);
+    checkTrue("...and it says what it should", html.includes("Made with Ionexa"), html.slice(-300));
+    check("...exactly once", html.split(BADGE_MARKER).length - 1, 1);
+    checkTrue("...injected before </body>", /data-ionexa-badge[\s\S]*<\/body>/i.test(html), html.slice(-300));
+
+    const paid = await (await fetch(`${base}/s/paid`)).text();
+    check("free + inside a paid period -> badge GONE", paid.includes(BADGE_MARKER), false);
+    check("...and the document is otherwise untouched", paid, SITE_HTML);
+
+    const lapsed = await (await fetch(`${base}/s/lapsed`)).text();
+    check("free + credits ran out (period lapsed) -> badge is BACK", lapsed.includes(BADGE_MARKER), true);
+
+    const included = await (await fetch(`${base}/s/included`)).text();
+    check("starter (included in plan) -> no badge, nothing bought", included.includes(BADGE_MARKER), false);
+
+    // The anti-snapshot proof. The row is PAID and the STORED html already
+    // contains a badge; if the stored bytes could decide this, the paying
+    // customer would keep seeing a badge forever.
+    const poisoned = await (await fetch(`${base}/s/poisoned`)).text();
+    check("a paid site whose STORED html carries a badge is served WITHOUT one", poisoned.includes(BADGE_MARKER), false);
+    check("...restored to the clean document", poisoned, SITE_HTML);
+
+    // Same URL twice: the badge must not accumulate.
+    const again = await (await fetch(`${base}/s/acme`)).text();
+    check("a second request still produces exactly one badge", again.split(BADGE_MARKER).length - 1, 1);
+  }
 
   console.log("\n== the headers a browser actually receives ==");
   const csp = res.headers.get("content-security-policy") ?? "";

@@ -7,6 +7,9 @@ import {
   isLikelyNewVisitor,
   publicRequestAllowed,
 } from "@/lib/publishing/public-serving";
+import { applyBadgeToServedHtml } from "@/lib/publishing/badge";
+import { loadOwnerPlanSlug } from "@/lib/publishing/badge-server";
+import { getSiteUrl } from "@/lib/site-url";
 
 export const dynamic = "force-dynamic";
 // force-no-store is NOT redundant next to force-dynamic, and finding that
@@ -69,7 +72,7 @@ export async function GET(request: Request, { params }: { params: { subdomain: s
     const admin = createAdminClient();
     const { data: site, error } = await admin
       .from("published_sites")
-      .select("id, user_id, html_content, status, is_active, updated_at")
+      .select("id, user_id, html_content, status, is_active, updated_at, badge_removal_paid_until")
       .eq("subdomain", check.subdomain)
       .maybeSingle();
 
@@ -101,15 +104,49 @@ export async function GET(request: Request, { params }: { params: { subdomain: s
     // awaiting it cannot fail the page — it only makes the write actually
     // happen. One indexed upsert against the site's own row is a
     // sub-millisecond cost on a response that already did a select.
-    await recordView(admin, site.id, site.user_id, isLikelyNewVisitor(request, String(site.id)));
+    //
+    // The plan lookup rides along in the SAME await, so the badge decision
+    // costs this response no extra wall-clock at all — it resolves while
+    // the view is being counted, and both finish before the first byte.
+    const [, ownerPlanSlug] = await Promise.all([
+      recordView(admin, site.id, site.user_id, isLikelyNewVisitor(request, String(site.id))),
+      loadOwnerPlanSlug(admin, site.user_id),
+    ]);
 
-    return new Response(site.html_content, {
+    // THE BADGE IS DECIDED HERE AND NOWHERE ELSE (V4 #25).
+    //
+    // Not at publish time, not at generation time, not at live-edit time —
+    // at SERVE time, from the state as it is this second. The stored bytes
+    // are a snapshot that a rollback can rewind twenty versions; if they
+    // carried the answer, a page paid for in March would stay badge-free
+    // through a lapsed April and nothing anywhere would say so. Instead
+    // applyBadgeToServedHtml strips any badge the stored copy contains and
+    // re-adds one only if the CURRENT plan and the CURRENT paid-through
+    // date say it belongs there.
+    const { html } = applyBadgeToServedHtml({
+      html: site.html_content,
+      planSlug: ownerPlanSlug,
+      paidUntil: site.badge_removal_paid_until,
+      now: new Date(),
+      siteUrl: getSiteUrl(),
+    });
+
+    return new Response(html, {
       status: 200,
       headers: {
         ...publishedSiteHeaders(),
         // Lets a CDN and a browser skip the body entirely on a repeat
         // visit to an unchanged page.
-        "Last-Modified": new Date(site.updated_at).toUTCString(),
+        //
+        // It has to account for the badge, though. The document a visitor
+        // receives changes the instant a paid period ends, and updated_at
+        // does not move for that — nobody edited the site. Sending the
+        // stale updated_at would let a conditional request answer 304 with
+        // the badge-free copy for as long as the client kept revalidating.
+        // Taking the LATER of the two makes the lapse itself a
+        // modification, which is exactly what it is from the visitor's
+        // side.
+        "Last-Modified": lastModified(site.updated_at, site.badge_removal_paid_until).toUTCString(),
       },
     });
   } catch (err) {
@@ -119,6 +156,25 @@ export async function GET(request: Request, { params }: { params: { subdomain: s
       headers: { ...notFoundHeaders(), "Retry-After": "30" },
     });
   }
+}
+
+/**
+ * The later of "the owner last changed the page" and "the badge state last
+ * flipped", clamped to never claim the future.
+ *
+ * A paid_until still ahead of now has not happened yet, so it is not a
+ * modification date — using it would send a Last-Modified in the future,
+ * which caches are entitled to treat as nonsense.
+ */
+function lastModified(updatedAt: string, badgePaidUntil: string | null): Date {
+  const updated = new Date(updatedAt);
+  const base = Number.isNaN(updated.getTime()) ? new Date(0) : updated;
+  if (!badgePaidUntil) return base;
+  const lapse = new Date(badgePaidUntil);
+  if (Number.isNaN(lapse.getTime())) return base;
+  const now = Date.now();
+  if (lapse.getTime() > now) return base;
+  return lapse.getTime() > base.getTime() ? lapse : base;
 }
 
 async function recordView(

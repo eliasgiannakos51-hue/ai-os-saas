@@ -41,7 +41,6 @@
     "commandPalette": "Paleta de comandos",
     "dismiss": "Descartar",
     "dismissSuggestion": "Descartar la sugerencia",
-    "installIonexa": "Instalar Ionexa",
     "loadingContent": "Cargando el contenido",
     "nextPage": "Página siguiente",
     "previousPage": "Página anterior",
@@ -672,7 +671,8 @@
       "lowCredits": "Pocos créditos",
       "lowCreditsHint": "Cuando el trabajo se detiene porque se acabó el saldo",
       "collaboration": "Colaboración",
-      "collaborationHint": "Invitaciones de equipo y actividad del espacio compartido"
+      "collaborationHint": "Invitaciones de equipo y actividad del espacio compartido",
+      "iosNeedsInstall": "En iPhone y iPad las notificaciones solo funcionan tras añadir Ionexa a la pantalla de inicio."
     },
     "jumpToSection": "Ir a una sección"
   },
@@ -1269,7 +1269,8 @@
       "chatNetworkError": "Error de red: inténtalo de nuevo.",
       "chatContext": "Contexto: acabo de crear un {type} llamado «{title}» en Ionexa AI. Mi petición original fue: {request}",
       "streamInterrupted": "La conexión se interrumpió antes de que terminara la respuesta.",
-      "streamInterruptedPartial": "La conexión se interrumpió: la respuesta anterior puede estar incompleta."
+      "streamInterruptedPartial": "La conexión se interrumpió: la respuesta anterior puede estar incompleta.",
+      "shareError": "No se pudo leer lo compartido. Pégalo aquí."
     },
     "agents": {
       "title": "Agentes IA",
@@ -1611,7 +1612,13 @@
       "copyTextEmpty": "No hemos extraído texto de ese archivo.",
       "uploadStorageMissing": "El almacenamiento de archivos no está configurado en esta instalación: falta el bucket 'user-files'. Un administrador debe ejecutar el SQL de reparación (System Health → File storage).",
       "uploadStoragePolicy": "El almacenamiento rechazó la subida: faltan las políticas de acceso del bucket. Un administrador debe ejecutar el SQL de reparación (System Health → File storage).",
-      "tooLargeForTransfer": "La plataforma de alojamiento rechazó la subida antes de llegar a la aplicación. Inténtalo de nuevo en un momento."
+      "tooLargeForTransfer": "La plataforma de alojamiento rechazó la subida antes de llegar a la aplicación. Inténtalo de nuevo en un momento.",
+      "sharedStored": "{count, plural, one {# archivo añadido} other {# archivos añadidos}} desde la compartición.",
+      "sharedFailed": "{count, plural, one {# archivo no se pudo añadir} other {# archivos no se pudieron añadir}}.",
+      "sharedReason": "Motivo: {reason}",
+      "sharedRateLimit": "Demasiadas subidas en la última hora. Vuelve a compartir en un momento.",
+      "sharedDropped": "Solo se tomaron los primeros {max} archivos.",
+      "openedFromDevice": "{count, plural, one {# archivo abierto} other {# archivos abiertos}} desde tu dispositivo."
     },
     "deepResearch": {
       "title": "Investigación profunda",
@@ -2516,5 +2523,21 @@
       "e3": "Escribe un correo a un cliente que se retrasa en pagar",
       "limits": "Ve tus datos de Ionexa y lo que hayas conectado · No ejecuta acciones por su cuenta"
     }
+  },
+  "pwa": {
+    "installTitle": "Instalar Ionexa",
+    "installBody": "Añádelo a la pantalla de inicio: pantalla completa y notificaciones que sí llegan.",
+    "install": "Instalar",
+    "notNow": "Ahora no",
+    "iosTitle": "Añadir Ionexa a la pantalla de inicio",
+    "iosBody": "Safari nunca lo ofrece por su cuenta: son tres toques.",
+    "iosStep1": "Toca el botón Compartir en la barra de Safari",
+    "iosStep2": "Baja y toca «Añadir a pantalla de inicio»",
+    "iosStep3": "Toca Añadir: Ionexa aparecerá junto a tus otras apps",
+    "iosWhy": "Hasta entonces, el iPhone no puede enviarte notificaciones y Safari puede borrar lo guardado tras 7 días sin uso.",
+    "iosGotIt": "Entendido",
+    "showHow": "Enséñame cómo",
+    "installedHere": "Ionexa está instalada en este dispositivo.",
+    "installUnavailable": "Tu navegador aún no ha ofrecido instalarla. También puedes usar su menú → Instalar aplicación."
   }
 }

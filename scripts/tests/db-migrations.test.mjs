@@ -419,7 +419,10 @@ if (!DB) {
   // files, which is exactly the failure a ratchet exists to prevent and
   // exactly what a fresh count on every run below stops from happening
   // again silently.
-  check(`72 tables`, tables === 72, `got ${tables}`);
+  // 73 since 20260823000000_pwa_client_stats: one row per browser, so the
+  // "native app or not" question can be answered from measurements
+  // instead of impressions.
+  check(`73 tables`, tables === 73, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 

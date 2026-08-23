@@ -41,7 +41,6 @@
     "commandPalette": "コマンドパレット",
     "dismiss": "閉じる",
     "dismissSuggestion": "提案を閉じる",
-    "installIonexa": "Ionexa をインストール",
     "loadingContent": "コンテンツを読み込んでいます",
     "nextPage": "次のページ",
     "previousPage": "前のページ",
@@ -672,7 +671,8 @@
       "lowCredits": "クレジット残量わずか",
       "lowCreditsHint": "残高が尽きて処理が停止したとき",
       "collaboration": "コラボレーション",
-      "collaborationHint": "チーム招待と共有ワークスペースのアクティビティ"
+      "collaborationHint": "チーム招待と共有ワークスペースのアクティビティ",
+      "iosNeedsInstall": "iPhone と iPad では、Ionexa をホーム画面に追加した後でのみ通知が届きます。"
     },
     "jumpToSection": "セクションへ移動"
   },
@@ -1269,7 +1269,8 @@
       "chatNetworkError": "ネットワークエラー — もう一度お試しください。",
       "chatContext": "背景: Ionexa AI で「{title}」という{type}を作成しました。元のリクエストは次のとおりです: {request}",
       "streamInterrupted": "応答が完了する前に接続が切断されました。",
-      "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。"
+      "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。",
+      "shareError": "この共有を読み取れませんでした。ここに貼り付けてください。"
     },
     "agents": {
       "title": "AI エージェント",
@@ -1611,7 +1612,13 @@
       "copyTextEmpty": "そのファイルからはテキストを読み取れていません。",
       "uploadStorageMissing": "このデプロイではファイルストレージが設定されていません — 'user-files' バケットがありません。管理者が修復SQLを実行する必要があります（System Health → File storage）。",
       "uploadStoragePolicy": "ストレージがアップロードを拒否しました — バケットのアクセスポリシーがありません。管理者が修復SQLを実行する必要があります（System Health → File storage）。",
-      "tooLargeForTransfer": "ホスティングプラットフォームがアプリに届く前にアップロードを拒否しました。しばらくしてからもう一度お試しください。"
+      "tooLargeForTransfer": "ホスティングプラットフォームがアプリに届く前にアップロードを拒否しました。しばらくしてからもう一度お試しください。",
+      "sharedStored": "共有から {count} 件のファイルを追加しました。",
+      "sharedFailed": "{count} 件のファイルを追加できませんでした。",
+      "sharedReason": "理由: {reason}",
+      "sharedRateLimit": "直近 1 時間のアップロードが多すぎます。少し待って共有し直してください。",
+      "sharedDropped": "最初の {max} 件のみを取り込みました。",
+      "openedFromDevice": "端末から {count} 件のファイルを開きました。"
     },
     "deepResearch": {
       "title": "ディープリサーチ",
@@ -2516,5 +2523,21 @@
       "e3": "支払いが遅れている顧客へのメールを書いて",
       "limits": "Ionexa のデータと接続済みのものを見ます · 自分から操作はしません"
     }
+  },
+  "pwa": {
+    "installTitle": "Ionexa をインストール",
+    "installBody": "ホーム画面に追加すると、全画面表示と通知が使えます。",
+    "install": "インストール",
+    "notNow": "後で",
+    "iosTitle": "Ionexa をホーム画面に追加",
+    "iosBody": "Safari からは案内されません。3 タップで完了します。",
+    "iosStep1": "Safari のツールバーで共有ボタンをタップ",
+    "iosStep2": "下にスクロールして「ホーム画面に追加」をタップ",
+    "iosStep3": "「追加」をタップすると、他のアプリと並びます",
+    "iosWhy": "追加するまで iPhone に通知は届かず、7 日間使わないと Safari が保存データを消すことがあります。",
+    "iosGotIt": "わかりました",
+    "showHow": "手順を見る",
+    "installedHere": "この端末には Ionexa がインストールされています。",
+    "installUnavailable": "ブラウザからのインストール案内はまだ出ていません。メニュー →「アプリをインストール」からも実行できます。"
   }
 }

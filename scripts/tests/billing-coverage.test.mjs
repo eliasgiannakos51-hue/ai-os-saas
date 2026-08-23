@@ -527,10 +527,34 @@ const full = {
   // Recommended since the refused-email incident: the resend.dev fallback
   // is testing mode, which delivers only to the Resend account owner.
   RESEND_FROM_EMAIL: "Ionexa AI <hello@ionexa.com>",
+  // Recommended since the PWA audit: with no VAPID pair, lib/push
+  // /web-push.ts turns every send into a silent no-op — an agent finishes,
+  // a mission is due, and nothing reaches the phone that was told it
+  // would. A deployment that does not want push should decide that, not
+  // discover it. (A published example key: 65 bytes of P-256 point, which
+  // is 87 base64url characters.)
+  NEXT_PUBLIC_VAPID_PUBLIC_KEY: "BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U",
+  VAPID_PRIVATE_KEY: "set",
 };
 let r = envMod.checkEnv(full);
 check("a complete environment reports nothing missing", r.missingRequired, []);
 check("...and nothing recommended missing", r.missingRecommended, []);
+// A truncated or wrongly-pasted VAPID public key fails in the BROWSER, at
+// subscribe() time, with an opaque InvalidCharacterError — which is the
+// kind of failure an env check exists to move forward in time.
+r = envMod.checkEnv({ ...full, NEXT_PUBLIC_VAPID_PUBLIC_KEY: "too-short" });
+check(
+  "a malformed VAPID public key is flagged",
+  r.suspicious.map((x) => x.name),
+  ["NEXT_PUBLIC_VAPID_PUBLIC_KEY"]
+);
+checkTrue("with the expected length named", /87 base64url characters/.test(r.suspicious[0].reason));
+r = envMod.checkEnv({ ...full, VAPID_PRIVATE_KEY: "" });
+checkTrue(
+  "a missing VAPID private key is reported, not assumed",
+  r.missingRecommended.includes("VAPID_PRIVATE_KEY")
+);
+
 r = envMod.checkEnv({});
 check("an empty environment names every required variable", r.missingRequired.length, 5);
 checkTrue("including the Anthropic key", r.missingRequired.includes("ANTHROPIC_API_KEY"));

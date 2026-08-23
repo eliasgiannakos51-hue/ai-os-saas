@@ -41,7 +41,6 @@
     "commandPalette": "Palette de commandes",
     "dismiss": "Ignorer",
     "dismissSuggestion": "Ignorer la suggestion",
-    "installIonexa": "Installer Ionexa",
     "loadingContent": "Chargement du contenu",
     "nextPage": "Page suivante",
     "previousPage": "Page précédente",
@@ -672,7 +671,8 @@
       "lowCredits": "Crédits faibles",
       "lowCreditsHint": "Quand le travail s'arrête faute de solde",
       "collaboration": "Collaboration",
-      "collaborationHint": "Invitations d'équipe et activité de l'espace partagé"
+      "collaborationHint": "Invitations d'équipe et activité de l'espace partagé",
+      "iosNeedsInstall": "Sur iPhone et iPad, les notifications ne fonctionnent qu'après l'ajout d'Ionexa à l'écran d'accueil."
     },
     "jumpToSection": "Aller à une section"
   },
@@ -1269,7 +1269,8 @@
       "chatNetworkError": "Erreur réseau — veuillez réessayer.",
       "chatContext": "Contexte : je viens de créer un {type} nommé « {title} » dans Ionexa AI. Ma demande initiale était : {request}",
       "streamInterrupted": "La connexion a été interrompue avant la fin de la réponse.",
-      "streamInterruptedPartial": "La connexion a été interrompue — la réponse ci-dessus est peut-être incomplète."
+      "streamInterruptedPartial": "La connexion a été interrompue — la réponse ci-dessus est peut-être incomplète.",
+      "shareError": "Ce partage n'a pas pu être lu. Collez-le ici."
     },
     "agents": {
       "title": "Agents IA",
@@ -1611,7 +1612,13 @@
       "copyTextEmpty": "Nous n'avons extrait aucun texte de ce fichier.",
       "uploadStorageMissing": "Le stockage de fichiers n'est pas configuré sur ce déploiement — le bucket 'user-files' est manquant. Un administrateur doit exécuter le SQL de réparation (System Health → File storage).",
       "uploadStoragePolicy": "Le stockage a refusé l'envoi — les politiques d'accès du bucket sont manquantes. Un administrateur doit exécuter le SQL de réparation (System Health → File storage).",
-      "tooLargeForTransfer": "La plateforme d'hébergement a refusé l'envoi avant qu'il n'atteigne l'application. Réessayez dans un instant."
+      "tooLargeForTransfer": "La plateforme d'hébergement a refusé l'envoi avant qu'il n'atteigne l'application. Réessayez dans un instant.",
+      "sharedStored": "{count, plural, one {# fichier ajouté} other {# fichiers ajoutés}} depuis le partage.",
+      "sharedFailed": "{count, plural, one {# fichier n'a pas pu être ajouté} other {# fichiers n'ont pas pu être ajoutés}}.",
+      "sharedReason": "Raison : {reason}",
+      "sharedRateLimit": "Trop d'envois dans la dernière heure. Réessayez le partage dans un instant.",
+      "sharedDropped": "Seuls les {max} premiers fichiers ont été pris.",
+      "openedFromDevice": "{count, plural, one {# fichier ouvert} other {# fichiers ouverts}} depuis votre appareil."
     },
     "deepResearch": {
       "title": "Recherche approfondie",
@@ -2516,5 +2523,21 @@
       "e3": "Rédige un e-mail à un client en retard de paiement",
       "limits": "Voit vos données Ionexa et ce que vous avez connecté · N’agit pas de lui-même"
     }
+  },
+  "pwa": {
+    "installTitle": "Installer Ionexa",
+    "installBody": "Ajoutez-le à l'écran d'accueil : plein écran et notifications qui arrivent vraiment.",
+    "install": "Installer",
+    "notNow": "Pas maintenant",
+    "iosTitle": "Ajouter Ionexa à l'écran d'accueil",
+    "iosBody": "Safari ne le propose jamais de lui-même — trois touches suffisent.",
+    "iosStep1": "Touchez le bouton Partager dans la barre de Safari",
+    "iosStep2": "Faites défiler et touchez « Sur l'écran d'accueil »",
+    "iosStep3": "Touchez Ajouter — Ionexa rejoint vos autres apps",
+    "iosWhy": "D'ici là, l'iPhone ne peut pas vous envoyer de notifications et Safari peut effacer vos données après 7 jours sans usage.",
+    "iosGotIt": "Compris",
+    "showHow": "Montrez-moi comment",
+    "installedHere": "Ionexa est installée sur cet appareil.",
+    "installUnavailable": "Votre navigateur n'a pas encore proposé l'installation. Vous pouvez aussi passer par son menu → Installer l'application."
   }
 }

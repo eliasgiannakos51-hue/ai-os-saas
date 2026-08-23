@@ -41,7 +41,6 @@
     "commandPalette": "Befehlspalette",
     "dismiss": "Ausblenden",
     "dismissSuggestion": "Vorschlag ausblenden",
-    "installIonexa": "Ionexa installieren",
     "loadingContent": "Inhalt wird geladen",
     "nextPage": "Nächste Seite",
     "previousPage": "Vorherige Seite",
@@ -672,7 +671,8 @@
       "lowCredits": "Wenig Credits",
       "lowCreditsHint": "Wenn die Arbeit stoppt, weil das Guthaben aufgebraucht ist",
       "collaboration": "Zusammenarbeit",
-      "collaborationHint": "Team-Einladungen und Aktivität im geteilten Workspace"
+      "collaborationHint": "Team-Einladungen und Aktivität im geteilten Workspace",
+      "iosNeedsInstall": "Auf iPhone und iPad funktionieren Benachrichtigungen erst, wenn Ionexa zum Home-Bildschirm hinzugefügt wurde."
     },
     "jumpToSection": "Zu einem Abschnitt springen"
   },
@@ -1269,7 +1269,8 @@
       "chatNetworkError": "Netzwerkfehler — bitte erneut versuchen.",
       "chatContext": "Kontext: Ich habe gerade ein {type} namens „{title}“ in Ionexa AI erstellt. Meine ursprüngliche Anfrage war: {request}",
       "streamInterrupted": "Die Verbindung wurde unterbrochen, bevor die Antwort fertig war.",
-      "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig."
+      "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig.",
+      "shareError": "Diese Freigabe konnte nicht gelesen werden. Fügen Sie sie stattdessen hier ein."
     },
     "agents": {
       "title": "KI-Agenten",
@@ -1611,7 +1612,13 @@
       "copyTextEmpty": "Aus dieser Datei haben wir keinen Text gelesen.",
       "uploadStorageMissing": "Der Dateispeicher ist auf dieser Installation nicht eingerichtet — der Bucket 'user-files' fehlt. Ein Administrator muss das Reparatur-SQL ausführen (System Health → File storage).",
       "uploadStoragePolicy": "Der Dateispeicher hat den Upload abgelehnt — die Zugriffsrichtlinien des Buckets fehlen. Ein Administrator muss das Reparatur-SQL ausführen (System Health → File storage).",
-      "tooLargeForTransfer": "Die Hosting-Plattform hat den Upload abgelehnt, bevor er die App erreichte. Bitte gleich noch einmal versuchen."
+      "tooLargeForTransfer": "Die Hosting-Plattform hat den Upload abgelehnt, bevor er die App erreichte. Bitte gleich noch einmal versuchen.",
+      "sharedStored": "{count, plural, one {# Datei} other {# Dateien}} aus der Freigabe hinzugefügt.",
+      "sharedFailed": "{count, plural, one {# Datei} other {# Dateien}} konnten nicht hinzugefügt werden.",
+      "sharedReason": "Grund: {reason}",
+      "sharedRateLimit": "Zu viele Uploads in der letzten Stunde. Versuchen Sie es gleich noch einmal.",
+      "sharedDropped": "Es wurden nur die ersten {max} Dateien übernommen.",
+      "openedFromDevice": "{count, plural, one {# Datei} other {# Dateien}} von Ihrem Gerät geöffnet."
     },
     "deepResearch": {
       "title": "Tiefenrecherche",
@@ -2516,5 +2523,21 @@
       "e3": "Schreib eine E-Mail an einen Kunden, der zu spät zahlt",
       "limits": "Sieht deine Ionexa-Daten und was du verbunden hast · Handelt nicht von selbst"
     }
+  },
+  "pwa": {
+    "installTitle": "Ionexa installieren",
+    "installBody": "Auf den Startbildschirm legen — Vollbild und Benachrichtigungen, die wirklich ankommen.",
+    "install": "Installieren",
+    "notNow": "Jetzt nicht",
+    "iosTitle": "Ionexa zum Home-Bildschirm hinzufügen",
+    "iosBody": "Safari bietet das nie von selbst an — es sind drei Tipps.",
+    "iosStep1": "Tippen Sie in der Safari-Leiste auf „Teilen“",
+    "iosStep2": "Scrollen Sie nach unten und tippen Sie auf „Zum Home-Bildschirm“",
+    "iosStep3": "Tippen Sie auf „Hinzufügen“ — Ionexa erscheint bei Ihren anderen Apps",
+    "iosWhy": "Bis dahin kann Ihr iPhone keine Benachrichtigungen senden, und Safari löscht gespeicherte Daten unter Umständen nach 7 ungenutzten Tagen.",
+    "iosGotIt": "Verstanden",
+    "showHow": "Zeig mir wie",
+    "installedHere": "Ionexa ist auf diesem Gerät installiert.",
+    "installUnavailable": "Ihr Browser hat die Installation noch nicht angeboten. Sie können auch das Menü → App installieren verwenden."
   }
 }

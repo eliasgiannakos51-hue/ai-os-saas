@@ -41,7 +41,6 @@
     "commandPalette": "Paleta de comandos",
     "dismiss": "Dispensar",
     "dismissSuggestion": "Dispensar a sugestão",
-    "installIonexa": "Instalar o Ionexa",
     "loadingContent": "Carregando o conteúdo",
     "nextPage": "Próxima página",
     "previousPage": "Página anterior",
@@ -672,7 +671,8 @@
       "lowCredits": "Créditos baixos",
       "lowCreditsHint": "Quando o trabalho para porque o saldo acabou",
       "collaboration": "Colaboração",
-      "collaborationHint": "Convites de equipa e atividade do espaço partilhado"
+      "collaborationHint": "Convites de equipa e atividade do espaço partilhado",
+      "iosNeedsInstall": "Em iPhone e iPad, as notificações só funcionam depois de adicionar o Ionexa ao ecrã principal."
     },
     "jumpToSection": "Ir para uma seção"
   },
@@ -1269,7 +1269,8 @@
       "chatNetworkError": "Erro de rede — tente novamente.",
       "chatContext": "Contexto: acabei de criar um {type} chamado «{title}» no Ionexa AI. O meu pedido original foi: {request}",
       "streamInterrupted": "A ligação foi interrompida antes de a resposta terminar.",
-      "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta."
+      "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta.",
+      "shareError": "Não foi possível ler essa partilha. Cole aqui."
     },
     "agents": {
       "title": "Agentes de IA",
@@ -1611,7 +1612,13 @@
       "copyTextEmpty": "Não extraímos texto desse ficheiro.",
       "uploadStorageMissing": "O armazenamento de ficheiros não está configurado nesta instalação — falta o bucket 'user-files'. Um administrador deve executar o SQL de reparação (System Health → File storage).",
       "uploadStoragePolicy": "O armazenamento recusou o envio — faltam as políticas de acesso do bucket. Um administrador deve executar o SQL de reparação (System Health → File storage).",
-      "tooLargeForTransfer": "A plataforma de alojamento recusou o envio antes de chegar à aplicação. Tente novamente daqui a pouco."
+      "tooLargeForTransfer": "A plataforma de alojamento recusou o envio antes de chegar à aplicação. Tente novamente daqui a pouco.",
+      "sharedStored": "{count, plural, one {# ficheiro adicionado} other {# ficheiros adicionados}} a partir da partilha.",
+      "sharedFailed": "{count, plural, one {# ficheiro não pôde ser adicionado} other {# ficheiros não puderam ser adicionados}}.",
+      "sharedReason": "Motivo: {reason}",
+      "sharedRateLimit": "Demasiados carregamentos na última hora. Tente partilhar daqui a pouco.",
+      "sharedDropped": "Só foram aceites os primeiros {max} ficheiros.",
+      "openedFromDevice": "{count, plural, one {# ficheiro aberto} other {# ficheiros abertos}} do seu dispositivo."
     },
     "deepResearch": {
       "title": "Investigação profunda",
@@ -2516,5 +2523,21 @@
       "e3": "Escreve um email a um cliente atrasado no pagamento",
       "limits": "Vê os teus dados no Ionexa e o que ligaste · Não age sozinho"
     }
+  },
+  "pwa": {
+    "installTitle": "Instalar o Ionexa",
+    "installBody": "Coloque-o no ecrã principal: ecrã inteiro e notificações que chegam mesmo.",
+    "install": "Instalar",
+    "notNow": "Agora não",
+    "iosTitle": "Adicionar o Ionexa ao ecrã principal",
+    "iosBody": "O Safari nunca sugere isto sozinho — são três toques.",
+    "iosStep1": "Toque no botão Partilhar na barra do Safari",
+    "iosStep2": "Desça e toque em «Adicionar ao ecrã principal»",
+    "iosStep3": "Toque em Adicionar — o Ionexa aparece com as outras apps",
+    "iosWhy": "Até lá, o iPhone não pode enviar-lhe notificações e o Safari pode apagar o que guardou ao fim de 7 dias sem uso.",
+    "iosGotIt": "Percebi",
+    "showHow": "Mostrar como",
+    "installedHere": "O Ionexa está instalado neste dispositivo.",
+    "installUnavailable": "O seu navegador ainda não sugeriu a instalação. Também pode usar o menu dele → Instalar aplicação."
   }
 }

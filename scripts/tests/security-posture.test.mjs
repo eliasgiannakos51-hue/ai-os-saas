@@ -344,6 +344,13 @@ const NO_SESSION_BY_DESIGN = {
     "the public web: serves a published site to anonymous visitors. Reads through the admin client and selects only the columns a visitor needs; published_sites has no public RLS policy, so a visitor cannot read the table at all. In-memory rate limited, and every response carries a restrictive CSP.",
 };
 
+// Routes a BROWSER navigates to, rather than fetches. Their rejection is a
+// redirect, not a status code — see the check below.
+const REJECTS_BY_REDIRECT = {
+  "src/app/share/route.ts":
+    "the Web Share Target: the operating system POSTs a form here and the browser follows the answer",
+};
+
 for (const file of routes) {
   const src = readFileSync(file, "utf8");
   const key = file.replace(/\\/g, "/");
@@ -366,7 +373,17 @@ for (const file of routes) {
   // to email write `if (!user || !user.email)`, which is strictly
   // stronger, so the match is on the `!user` test rather than the whole
   // condition.
-  if (authenticates) {
+  if (authenticates && key in REJECTS_BY_REDIRECT) {
+    // A 401 is the right answer to fetch(), and the WRONG answer to a
+    // browser navigation: the OS share sheet POSTs a real form here, and a
+    // JSON body is what the person would then be looking at. These routes
+    // reject by sending them somewhere they can sign in — which is checked
+    // here, so "redirects instead" cannot become "does not check at all".
+    checkTrue(
+      `  ${key} rejects a missing user by sending them to sign in (${REJECTS_BY_REDIRECT[key]})`,
+      /if \(!user\b/.test(src) && /\/login/.test(src)
+    );
+  } else if (authenticates) {
     checkTrue(`  ${key} rejects a missing user with 401`, /if \(!user\b/.test(src) && /401/.test(src));
   }
 }

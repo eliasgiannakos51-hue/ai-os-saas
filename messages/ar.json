@@ -41,7 +41,6 @@
     "commandPalette": "لوحة الأوامر",
     "dismiss": "تجاهل",
     "dismissSuggestion": "تجاهل الاقتراح",
-    "installIonexa": "تثبيت Ionexa",
     "loadingContent": "جارٍ تحميل المحتوى",
     "nextPage": "الصفحة التالية",
     "previousPage": "الصفحة السابقة",
@@ -672,7 +671,8 @@
       "lowCredits": "رصيد منخفض",
       "lowCreditsHint": "عند توقف العمل بسبب نفاد الرصيد",
       "collaboration": "التعاون",
-      "collaborationHint": "دعوات الفريق ونشاط مساحة العمل المشتركة"
+      "collaborationHint": "دعوات الفريق ونشاط مساحة العمل المشتركة",
+      "iosNeedsInstall": "على iPhone وiPad لا تعمل الإشعارات إلا بعد إضافة Ionexa إلى الشاشة الرئيسية."
     },
     "jumpToSection": "الانتقال إلى قسم"
   },
@@ -1269,7 +1269,8 @@
       "chatNetworkError": "خطأ في الشبكة — يُرجى المحاولة مجددًا.",
       "chatContext": "السياق: أنشأتُ للتو {type} باسم «{title}» في Ionexa AI. طلبي الأصلي كان: {request}",
       "streamInterrupted": "انقطع الاتصال قبل اكتمال الرد.",
-      "streamInterruptedPartial": "انقطع الاتصال — قد يكون الرد أعلاه غير مكتمل."
+      "streamInterruptedPartial": "انقطع الاتصال — قد يكون الرد أعلاه غير مكتمل.",
+      "shareError": "تعذّرت قراءة هذه المشاركة. الصقها هنا بدلاً من ذلك."
     },
     "agents": {
       "title": "وكلاء الذكاء الاصطناعي",
@@ -1611,7 +1612,13 @@
       "copyTextEmpty": "لم نستخرج أي نص من هذا الملف.",
       "uploadStorageMissing": "لم يتم إعداد تخزين الملفات في هذا النشر — حاوية 'user-files' غير موجودة. يجب على المسؤول تشغيل SQL الإصلاح (System Health → File storage).",
       "uploadStoragePolicy": "رفض التخزين عملية الرفع — سياسات الوصول الخاصة بالحاوية غير موجودة. يجب على المسؤول تشغيل SQL الإصلاح (System Health → File storage).",
-      "tooLargeForTransfer": "رفضت منصة الاستضافة عملية الرفع قبل وصولها إلى التطبيق. حاول مرة أخرى بعد قليل."
+      "tooLargeForTransfer": "رفضت منصة الاستضافة عملية الرفع قبل وصولها إلى التطبيق. حاول مرة أخرى بعد قليل.",
+      "sharedStored": "{count, plural, zero {لم تُضف ملفات} one {أُضيف ملف واحد} two {أُضيف ملفان} few {أُضيفت # ملفات} many {أُضيف # ملفاً} other {أُضيف # ملف}} من المشاركة.",
+      "sharedFailed": "{count, plural, zero {لم يتعذّر شيء} one {تعذّرت إضافة ملف واحد} two {تعذّرت إضافة ملفين} few {تعذّرت إضافة # ملفات} many {تعذّرت إضافة # ملفاً} other {تعذّرت إضافة # ملف}}.",
+      "sharedReason": "السبب: {reason}",
+      "sharedRateLimit": "عدد كبير من الرفعات خلال الساعة الأخيرة. أعد المحاولة بعد قليل.",
+      "sharedDropped": "لم تُؤخذ سوى أول {max} ملفات.",
+      "openedFromDevice": "{count, plural, zero {لم يُفتح شيء} one {فُتح ملف واحد} two {فُتح ملفان} few {فُتحت # ملفات} many {فُتح # ملفاً} other {فُتح # ملف}} من جهازك."
     },
     "deepResearch": {
       "title": "بحث معمّق",
@@ -2516,5 +2523,21 @@
       "e3": "اكتب بريدًا لعميل متأخر في السداد",
       "limits": "يرى بياناتك في Ionexa وما ربطته · لا ينفّذ إجراءات من تلقاء نفسه"
     }
+  },
+  "pwa": {
+    "installTitle": "تثبيت Ionexa",
+    "installBody": "أضِفه إلى الشاشة الرئيسية: شاشة كاملة وإشعارات تصلك فعلاً.",
+    "install": "تثبيت",
+    "notNow": "ليس الآن",
+    "iosTitle": "أضف Ionexa إلى الشاشة الرئيسية",
+    "iosBody": "لا يقترح Safari ذلك من تلقاء نفسه — ثلاث نقرات فقط.",
+    "iosStep1": "اضغط زر المشاركة في شريط Safari",
+    "iosStep2": "مرّر للأسفل واضغط «إضافة إلى الشاشة الرئيسية»",
+    "iosStep3": "اضغط إضافة — سيظهر Ionexa مع بقية تطبيقاتك",
+    "iosWhy": "قبل ذلك لا يستطيع الـ iPhone إرسال الإشعارات، وقد يمسح Safari بياناتك المحفوظة بعد 7 أيام دون استخدام.",
+    "iosGotIt": "فهمت",
+    "showHow": "أرِني الطريقة",
+    "installedHere": "Ionexa مثبَّت على هذا الجهاز.",
+    "installUnavailable": "لم يقترح متصفحك التثبيت بعد. يمكنك أيضاً من قائمته ← تثبيت التطبيق."
   }
 }

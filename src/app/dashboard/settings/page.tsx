@@ -22,6 +22,7 @@ import { MarginReport } from "@/components/settings/margin-report";
 import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
 import { EmailNotificationSettings } from "@/components/settings/email-notification-settings";
 import { PushNotificationSettings } from "@/components/settings/push-notification-settings";
+import { InstallSection } from "@/components/pwa/install-section";
 import { AchievementsSection } from "@/components/settings/achievements-section";
 import { loadUnlockedAchievements } from "@/lib/achievements";
 import { isAdminEmail } from "@/lib/admin";
@@ -291,6 +292,12 @@ export default async function SettingsPage() {
         <PushNotificationSettings
           vapidPublicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? null}
         />
+
+        {/* Directly above push, and not by accident: on iPhone the answer
+            to "why don't notifications arrive" is "the app is not on the
+            Home Screen yet", and the fix should be the next thing on the
+            page rather than somewhere else entirely. */}
+        <InstallSection />
 
         {hasCustomAiPersona && <Reveal><AiPersonaSettings initialName={aiPersonaName} /></Reveal>}
 

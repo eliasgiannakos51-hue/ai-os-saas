@@ -9,6 +9,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { logApiError } from "@/lib/log-error";
 import { ErrorList, type ProductionErrorRow } from "@/components/system-health/error-list";
 import { StorageDiagnostics } from "@/components/system-health/storage-diagnostics";
+import { PwaAdoption, type PwaAdoptionRow } from "@/components/system-health/pwa-adoption";
 import { formatNumber } from "@/lib/format-number";
 import { getLocale } from "next-intl/server";
 
@@ -19,6 +20,9 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 const RECENT_LIMIT = 100;
+/** The adoption window. Long enough to include people who visit weekly,
+ *  short enough that a number is about the product as it is now. */
+const PWA_WINDOW_DAYS = 30;
 
 export default async function SystemHealthPage() {
   const locale = await getLocale();
@@ -69,6 +73,38 @@ export default async function SystemHealthPage() {
 
   const unresolved = rows.filter((r) => !r.resolved);
 
+  // The three PWA figures. Read with the service-role client because the
+  // summary function is SECURITY DEFINER and revoked from every signed-in
+  // role — it counts across all accounts, so no user may call it.
+  let pwa: PwaAdoptionRow | null = null;
+  try {
+    const admin = createAdminClient();
+    const { data, error } = await admin.rpc("pwa_adoption_summary", { p_days: PWA_WINDOW_DAYS });
+    if (error) throw error;
+    const first = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | undefined;
+    if (first) {
+      const num = (v: unknown) => Number(v ?? 0);
+      const pct = (v: unknown) => (v === null || v === undefined ? null : Number(v));
+      pwa = {
+        devices: num(first.devices),
+        iosDevices: num(first.ios_devices),
+        iosPercent: pct(first.ios_percent),
+        installedDevices: num(first.installed_devices),
+        installedPercent: pct(first.installed_percent),
+        pushGrantedDevices: num(first.push_granted_devices),
+        pushGrantedPercent: pct(first.push_granted_percent),
+        pushSubscribedDevices: num(first.push_subscribed_devices),
+        pushSubscribedPercent: pct(first.push_subscribed_percent),
+        iosInstalledDevices: num(first.ios_installed_devices),
+        iosInstalledPercent: pct(first.ios_installed_percent),
+      };
+    }
+  } catch (err) {
+    // Same reasoning as above: do not log this into a table whose own read
+    // may be what failed. A null row renders as "apply the migration".
+    console.error("system-health: could not read pwa_adoption_summary", err);
+  }
+
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -98,6 +134,8 @@ export default async function SystemHealthPage() {
             <ErrorList rows={rows} />
           </>
         )}
+
+        <PwaAdoption row={pwa} days={PWA_WINDOW_DAYS} />
 
         <StorageDiagnostics />
       </div>

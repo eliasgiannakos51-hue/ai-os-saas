@@ -117,6 +117,46 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
         ? "resend.dev is Resend's testing sender — emails to anyone but the account owner are refused"
         : null,
   },
+  {
+    // A VAPID pair is what makes push possible AT ALL, and its absence is
+    // completely silent by design: lib/push/web-push.ts logs once and every
+    // send becomes a no-op. That is right for a deployment that does not
+    // want push, and indistinguishable from a broken one for a deployment
+    // that does — which is exactly what an env check is for.
+    name: "NEXT_PUBLIC_VAPID_PUBLIC_KEY",
+    level: "recommended",
+    what: "Web Push. The BROWSER needs this one to create a subscription at all",
+    fallback: "the settings panel says 'not configured' and no notification is ever sent",
+    suspicious: (value) =>
+      // An uncompressed P-256 point is 65 bytes, which is 87 base64url
+      // characters. A pasted private key or a truncated copy is the
+      // failure this catches, and it fails at subscribe() time in the
+      // browser with an opaque InvalidCharacterError.
+      value.trim().length !== 87
+        ? `expected 87 base64url characters (a 65-byte P-256 public key), got ${value.trim().length}`
+        : null,
+  },
+  {
+    name: "VAPID_PRIVATE_KEY",
+    level: "recommended",
+    what: "Web Push, server side. Signs the JWT every push service demands",
+    fallback: "sends are skipped as 'unconfigured' — agent results and reminders never reach a phone",
+    secret: true,
+  },
+  {
+    name: "VAPID_SUBJECT",
+    level: "optional",
+    what: "The mailto: or https: URL identifying the sender in push JWTs",
+    fallback: "mailto: built from RESEND_FROM_EMAIL, or support@ionexa.ai",
+  },
+  {
+    // Set automatically by Vercel for Next.js projects; listed so the
+    // fallback is documented rather than discovered.
+    name: "NEXT_PUBLIC_BUILD_ID",
+    level: "optional",
+    what: "Stamps the service-worker registration URL so a deploy reaches the worker",
+    fallback: "NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA, then \"dev\" — on a host that sets neither, the offline page cache is not purged on deploy",
+  },
   { name: "ADMIN_EMAILS", level: "optional", what: "Extra admin accounts, comma-separated", fallback: "the hardcoded owner address" },
   {
     name: "UNSPLASH_ACCESS_KEY",

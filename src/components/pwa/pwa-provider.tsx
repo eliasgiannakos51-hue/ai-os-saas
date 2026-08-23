@@ -1,8 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Download, X } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   INSTALL_STATE_STORAGE_KEY,
   parseInstallState,
@@ -10,13 +8,31 @@ import {
   shouldShowInstallPrompt,
   type InstallPromptState,
 } from "@/lib/pwa/install-prompt";
+import {
+  installSurface,
+  isInstalledDisplayMode,
+  type DisplayMode,
+  type InstallSurface,
+  type Platform,
+} from "@/lib/pwa/platform";
+import { readPwaClientState, reportPwaState } from "@/lib/pwa/telemetry";
+import { InstallInvitation } from "@/components/pwa/install-invitation";
 
-// Registers the service worker and owns the add-to-home-screen prompt.
+// Registers the service worker, decides whether to invite an install, and
+// records what this browser is.
 //
 // Mounted once, in the dashboard layout rather than the root layout: the
-// offline shell and push are features of the signed-in app, and a
-// service worker registered on the marketing pages would start caching
-// navigations for visitors who never log in.
+// offline shell and push are features of the signed-in app, and a service
+// worker registered on the marketing pages would start caching navigations
+// for visitors who never log in.
+//
+// WHAT CHANGED AND WHY. The invitation used to live entirely inside the
+// `beforeinstallprompt` handler — so on any browser that never fires that
+// event, the card could not appear at all. Safari never fires it. Every
+// iPhone therefore fell through to nothing: no invitation, and, because
+// iOS grants web push only to a Home-Screen app, no notifications either.
+// The decision now starts from the DEVICE (lib/pwa/platform.ts) and the
+// event is only one of the things that can satisfy it.
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -35,15 +51,18 @@ function writeState(state: InstallPromptState) {
   try {
     window.localStorage.setItem(INSTALL_STATE_STORAGE_KEY, JSON.stringify(state));
   } catch {
-    // Private browsing — the prompt just won't remember, which is a
-    // better failure than throwing inside a layout.
+    // Private browsing — the prompt just won't remember, which is a better
+    // failure than throwing inside a layout.
   }
 }
 
 export function PwaProvider() {
-  const t = useTranslations("common");
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
+  const [surface, setSurface] = useState<InstallSurface>("none");
   const [visible, setVisible] = useState(false);
+  /** Telemetry is sent once per mount at most; the throttle inside
+   *  reportPwaState decides whether it actually goes. */
+  const reported = useRef(false);
 
   // 1. Service worker.
   useEffect(() => {
@@ -51,7 +70,18 @@ export function PwaProvider() {
     // Registered after load so it never competes with the first paint for
     // bandwidth on a slow connection.
     const register = () => {
-      navigator.serviceWorker.register("/sw.js").catch(() => {
+      // The build stamp is what makes a redeploy REACH the worker.
+      //
+      // public/sw.js is byte-identical between deploys, so the browser saw
+      // no update, never ran `activate`, and the cache-purge in it never
+      // fired — a user who had been offline could open last month's
+      // dashboard HTML indefinitely. A changing script URL is what the
+      // browser treats as a new script for the same scope. Vercel injects
+      // the commit SHA; locally it is "dev", which is stable across a
+      // dev session and that is the right behaviour there.
+      const build =
+        process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA ?? process.env.NEXT_PUBLIC_BUILD_ID ?? "dev";
+      navigator.serviceWorker.register(`/sw.js?build=${encodeURIComponent(build)}`).catch(() => {
         // A failed registration means no offline shell and no push. Both
         // are enhancements; the app itself keeps working.
       });
@@ -63,44 +93,85 @@ export function PwaProvider() {
     }
   }, []);
 
-  // 2. Visit counting + install prompt eligibility.
-  useEffect(() => {
-    const isStandalone =
-      window.matchMedia?.("(display-mode: standalone)").matches ||
-      // iOS Safari's own flag — it does not implement display-mode for
-      // installed web apps in older versions.
-      (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+  // 2. What this device is, whether to invite it, and what to record.
+  //
+  // The decision has two inputs that arrive in either order: the device
+  // (resolved asynchronously, because reading the push subscription needs
+  // the worker) and the browser's install event (which may fire before or
+  // after that, or never). So both are kept in refs and `decide` is called
+  // whenever either lands — rather than the old arrangement, where the
+  // event handler WAS the decision and a device that never fires one could
+  // not be offered anything.
+  const nativePrompt = useRef<BeforeInstallPromptEvent | null>(null);
+  const device = useRef<{ platform: Platform; displayMode: DisplayMode } | null>(null);
 
-    const next = recordVisit(readState(), Date.now());
-    writeState(next);
+  const decide = useCallback(() => {
+    const seen = device.current;
+    if (!seen) return;
+    const next = installSurface({
+      platform: seen.platform,
+      displayMode: seen.displayMode,
+      hasNativePrompt: Boolean(nativePrompt.current),
+    });
+    setSurface(next);
+    if (next === "none") {
+      setVisible(false);
+      return;
+    }
+    if (
+      shouldShowInstallPrompt(readState(), Date.now(), {
+        alreadyInstalled: isInstalledDisplayMode(seen.displayMode),
+        canPrompt: true,
+      })
+    ) {
+      setVisible(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
 
     const onBeforeInstall = (event: Event) => {
       // Suppress Chrome's own mini-infobar; we decide the timing.
       event.preventDefault();
-      const promptEvent = event as BeforeInstallPromptEvent;
-      setDeferred(promptEvent);
-      if (
-        shouldShowInstallPrompt(readState(), Date.now(), {
-          alreadyInstalled: isStandalone,
-          canPrompt: true,
-        })
-      ) {
-        setVisible(true);
-      }
+      nativePrompt.current = event as BeforeInstallPromptEvent;
+      setDeferred(event as BeforeInstallPromptEvent);
+      decide();
     };
     const onInstalled = () => {
       writeState({ ...readState(), installed: true });
       setVisible(false);
       setDeferred(null);
+      nativePrompt.current = null;
+      void readPwaClientState({ installSurface: "native", installOutcome: "accepted" }).then(
+        reportPwaState
+      );
     };
 
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
     window.addEventListener("appinstalled", onInstalled);
+
+    void (async () => {
+      const resolved = await readPwaClientState();
+      if (cancelled) return;
+      device.current = { platform: resolved.platform, displayMode: resolved.displayMode };
+
+      // The visit is counted once per mount, BEFORE any decision reads it.
+      writeState(recordVisit(readState(), Date.now()));
+
+      if (!reported.current) {
+        reported.current = true;
+        void reportPwaState(resolved);
+      }
+      decide();
+    })();
+
     return () => {
+      cancelled = true;
       window.removeEventListener("beforeinstallprompt", onBeforeInstall);
       window.removeEventListener("appinstalled", onInstalled);
     };
-  }, []);
+  }, [decide]);
 
   const install = useCallback(async () => {
     if (!deferred) return;
@@ -110,57 +181,27 @@ export function PwaProvider() {
     if (choice.outcome === "dismissed") {
       writeState({ ...readState(), dismissedAt: Date.now() });
     }
+    void readPwaClientState({ installSurface: "native", installOutcome: choice.outcome }).then(
+      reportPwaState
+    );
     setDeferred(null);
   }, [deferred]);
 
   const dismiss = useCallback(() => {
     writeState({ ...readState(), dismissedAt: Date.now() });
     setVisible(false);
-  }, []);
+    if (surface !== "none") {
+      // On iOS "dismiss" covers both buttons — there is no event that can
+      // tell us whether the person went on to add it. The next visit's
+      // display_mode is what answers that, which is why it is recorded
+      // rather than assumed here.
+      void readPwaClientState({ installSurface: surface, installOutcome: "dismissed" }).then(
+        reportPwaState
+      );
+    }
+  }, [surface]);
 
-  if (!visible) return null;
+  if (!visible || surface === "none") return null;
 
-  return (
-    <div
-      role="dialog"
-      aria-label={t("installIonexa")}
-      className="fixed inset-x-3 bottom-3 z-50 mx-auto max-w-sm rounded-xl border border-border bg-panel p-4 shadow-lg md:left-auto md:right-4 md:mx-0"
-    >
-      <div className="flex items-start gap-3">
-        <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-orange-500/10 text-orange-400">
-          <Download className="h-4 w-4" aria-hidden="true" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold">Install Ionexa</p>
-          <p className="mt-0.5 text-xs text-muted">
-            Add it to your home screen for full-screen access and notifications.
-          </p>
-          <div className="mt-3 flex gap-2">
-            <button
-              type="button"
-              onClick={install}
-              className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-black transition hover:bg-orange-400"
-            >
-              Install
-            </button>
-            <button
-              type="button"
-              onClick={dismiss}
-              className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted transition hover:text-foreground"
-            >
-              Not now
-            </button>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={dismiss}
-          aria-label={t("dismiss")}
-          className="text-muted transition hover:text-foreground"
-        >
-          <X className="h-4 w-4" />
-        </button>
-      </div>
-    </div>
-  );
+  return <InstallInvitation surface={surface} onInstall={install} onDismiss={dismiss} />;
 }

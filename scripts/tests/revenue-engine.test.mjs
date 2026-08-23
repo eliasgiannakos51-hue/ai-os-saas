@@ -49,6 +49,11 @@ const eq = (name, actual, expected) =>
 const overage = await loadTs("src/lib/billing/overage.ts");
 const addons = await loadTs("src/lib/billing/addons.ts");
 const badge = await loadTs("src/lib/publishing/badge.ts");
+// NAMED badgeCredits, NOT credits. A local `const credits` further
+// down this file holds the SOURCE TEXT of billing/credits.ts, and two
+// bindings of one name in one suite is how an assertion silently reads
+// the wrong thing. scripts/tests/test-instruments.test.mjs caught it.
+const badgeCredits = await loadTs("src/lib/publishing/badge-credits.ts");
 const metrics = await loadTs("src/lib/billing/metrics.ts");
 const subLog = await loadTs("src/lib/billing/subscription-kind.ts");
 const plans = await loadTs("src/lib/billing/plans.ts");
@@ -326,41 +331,92 @@ console.log("\n== 4. the badge: at serve time, never stored ==");
 
 const PAGE = "<!doctype html><html><head></head><body><h1>Hi</h1></body></html>";
 
+// THE DECISION AND THE PLACEMENT ARE TWO DIFFERENT QUESTIONS, and this
+// section used to conflate them: injectBadge took a plan slug and asked
+// planShowsBadge itself.
+//
+// Credit-based badge removal added a SECOND input — has this site been
+// paid off for this calendar month — so passing a plan slug to
+// injectBadge would now be passing half the question, and the half that
+// says "free" for an account that has paid. The signature changed to
+// take the ANSWER, and these assertions split to match:
+//
+//   planShowsBadge   — the plan half, still pure, still here
+//   siteShowsBadge   — the whole decision, plan AND purchase
+//   injectBadge      — placement only, given a decision
+//
+// The old shape would now pass VACUOUSLY: `{ planSlug: "starter" }`
+// leaves `showBadge` undefined, which is falsy, so every "paid gets no
+// badge" case would go green for the wrong reason while every free case
+// went red. That is exactly the direction a signature change must not be
+// allowed to fail in.
 {
-  const free = badge.injectBadge(PAGE, { planSlug: "free" });
-  ok("a free site gets the badge", free.includes("Made with Ionexa"));
+  ok("a decision of true puts the badge in", badge.injectBadge(PAGE, { showBadge: true }).includes("Made with Ionexa"));
+  const free = badge.injectBadge(PAGE, { showBadge: true });
   ok("…inside the document, before </body>", free.indexOf("Made with Ionexa") < free.lastIndexOf("</body>"));
   ok("…as a real link", free.includes(badge.BADGE_HREF));
   ok("…that cannot navigate the opener", free.includes('rel="noopener noreferrer"'));
   ok("…and is bottom right", free.includes("right:12px") && free.includes("bottom:12px"));
-
-  for (const paid of ["starter", "growth", "professional", "ultimate", "enterprise"]) {
-    eq(`${paid} gets NO badge`, badge.injectBadge(PAGE, { planSlug: paid }), PAGE);
-  }
+  eq("a decision of false leaves the page untouched", badge.injectBadge(PAGE, { showBadge: false }), PAGE);
 }
 {
+  // THE PLAN HALF.
+  ok("free shows the badge", badge.planShowsBadge("free"));
+  for (const paid of ["starter", "growth", "professional", "ultimate", "enterprise"]) {
+    ok(`${paid} does not`, !badge.planShowsBadge(paid));
+  }
   // AN UNREADABLE PLAN IS NOT A PAID ONE. Failing the other way gives
   // away the upsell on every free site whenever auth.users is slow.
-  ok("no plan at all is treated as free", badge.injectBadge(PAGE, { planSlug: null }).includes("Made with Ionexa"));
-  ok("…and so is an empty string", badge.injectBadge(PAGE, { planSlug: "" }).includes("Made with Ionexa"));
-  ok("…case does not matter", !badge.injectBadge(PAGE, { planSlug: "STARTER" }).includes("Made with Ionexa"));
+  ok("no plan at all is treated as free", badge.planShowsBadge(null));
+  ok("…and so is an empty string", badge.planShowsBadge(""));
+  ok("…case does not matter", !badge.planShowsBadge("STARTER"));
+}
+{
+  // THE WHOLE DECISION, INCLUDING RULE (ε): a paid plan never reaches
+  // the credit question, so it can never be double-charged.
+  const paid = { siteId: "s1", coversMonth: "2026-03-01", active: true, cancelledAt: null };
+  ok("free with no purchase shows the badge", badgeCredits.siteShowsBadge({ planSlug: "free", removal: null }));
+  ok("free WITH a purchase does not", !badgeCredits.siteShowsBadge({ planSlug: "free", removal: paid }));
+  ok("starter does not, purchase or no purchase", !badgeCredits.siteShowsBadge({ planSlug: "starter", removal: null }));
+  ok("…and still does not with one", !badgeCredits.siteShowsBadge({ planSlug: "starter", removal: paid }));
+  // A row that exists but is not active is not cover.
+  ok(
+    "an inactive row is not cover",
+    badgeCredits.siteShowsBadge({ planSlug: "free", removal: { ...paid, active: false } })
+  );
+  // CANCELLED IS NOT EXPIRED. Turning auto-renewal off stops the NEXT
+  // charge; it never takes back a month already paid for.
+  ok(
+    "a cancelled but paid month still hides the badge",
+    !badgeCredits.siteShowsBadge({ planSlug: "free", removal: { ...paid, cancelledAt: "2026-03-10T00:00:00Z" } })
+  );
+}
+{
+  // THE THREE PLACES "free" IS WRITTEN MUST AGREE. badge.ts decides the
+  // plan half, badge-credits.ts decides who may buy removal, and the SQL
+  // decides it on the serve path. Three copies of one fact is three
+  // things to drift; this is the check that they have not.
+  eq("badge.ts and badge-credits.ts name the same badged plans",
+    [...badge.BADGED_PLANS].sort(), [...badgeCredits.BADGE_REMOVAL_APPLIES_TO].sort());
+  const badgeSql = stripSql(read("supabase/migrations/20260905000000_badge_removal_credits.sql"));
+  ok("…and the SQL checks the same one", /account_tier\(s\.user_id\)[\s\S]{0,80}<> 'free'/.test(badgeSql), "site_shows_badge");
 }
 {
   // NEVER TWICE.
-  const once = badge.injectBadge(PAGE, { planSlug: "free" });
-  const twice = badge.injectBadge(once, { planSlug: "free" });
+  const once = badge.injectBadge(PAGE, { showBadge: true });
+  const twice = badge.injectBadge(once, { showBadge: true });
   eq("injecting twice changes nothing", twice, once);
 }
 {
   // A page containing the literal text "</body>" in a code sample. The
   // FIRST match would put the badge in the middle of the page.
   const withSample = "<html><body><pre>&lt;/body&gt;</pre><p>real</p></body></html>";
-  const out = badge.injectBadge(withSample, { planSlug: "free" });
+  const out = badge.injectBadge(withSample, { showBadge: true });
   ok("the badge goes before the LAST </body>", out.indexOf("Made with Ionexa") > out.indexOf("<p>real</p>"));
 
   const fragment = "<div>just a partial</div>";
-  ok("a fragment with no closing tag still gets one", badge.injectBadge(fragment, { planSlug: "free" }).includes("Made with Ionexa"));
-  eq("an empty page is left alone", badge.injectBadge("", { planSlug: "free" }), "");
+  ok("a fragment with no closing tag still gets one", badge.injectBadge(fragment, { showBadge: true }).includes("Made with Ionexa"));
+  eq("an empty page is left alone", badge.injectBadge("", { showBadge: true }), "");
 }
 {
   // THE BADGE IS NEVER STORED. A badge in html_content survives an
@@ -369,7 +425,14 @@ const PAGE = "<!doctype html><html><head></head><body><h1>Hi</h1></body></html>"
   for (const route of ["src/app/s/[subdomain]/route.ts", "src/app/s/[subdomain]/[page]/route.ts"]) {
     const src = strip(read(route));
     ok(`${route}: injects the badge when SERVING`, /injectBadge\(/.test(src));
-    ok(`${route}: from the owner's CURRENT plan`, /readOwnerTier\(/.test(src));
+    // FROM THE CURRENT STATE — and that is now BOTH inputs, not just the
+    // plan. This used to require readOwnerTier(), which answered half the
+    // question; a route still calling it would badge every free site that
+    // had paid to remove it. One call, both halves, one round trip.
+    ok(`${route}: from the CURRENT state, plan and purchase together`, /readSiteShowsBadge\(/.test(src));
+    ok(`${route}: and not from the half-question it replaced`, !/readOwnerTier\(/.test(src));
+    // THE DECISION IS PASSED IN, never re-derived at the injection site.
+    ok(`${route}: injectBadge is given the answer`, /injectBadge\([^)]*\{ showBadge:/.test(src));
   }
 
   // NOTHING THAT WRITES html_content MAY KNOW ABOUT THE BADGE. The scan

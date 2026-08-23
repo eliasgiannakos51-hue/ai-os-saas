@@ -147,6 +147,12 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // aggregate. The aggregate is our business; the row names a person and
   // says what they asked for and when, and that is theirs.
   { table: "routing_decisions", label: "model_routing", scope: "account" },
+  // Which of the user's published sites they paid to un-badge, in which
+  // month, for how many credits. ACCOUNT scope: it is a record of a
+  // purchase they made, so it is theirs and it belongs in an export —
+  // the same reading as credit_transactions beside it. Removed by the
+  // auth.users cascade.
+  { table: "site_badge_removals", label: "badge_removals", scope: "account" },
 
   // --- Trading journal (V4 #14) ---
   //

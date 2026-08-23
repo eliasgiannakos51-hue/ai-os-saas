@@ -258,10 +258,10 @@ const MUTANTS = [
   },
   {
     gate: GATE,
-    name: "the serve route stops reading the owner's CURRENT plan",
+    name: "the serve route stops reading the site's CURRENT badge state",
     file: "src/app/s/[subdomain]/route.ts",
-    from: "readOwnerTier(admin, site.user_id),",
-    to: "Promise.resolve(\"free\"),",
+    from: "readSiteShowsBadge(admin, String(site.id)),",
+    to: "Promise.resolve(true),",
   },
 
   // ------------------------------------------------------------------

@@ -3205,5 +3205,17 @@
     "runs": "{samples} 次运行中 {rate}%",
     "routedUp": "已上调",
     "notEnough": "样本仍不足"
+  },
+  "publishing": {
+    "badge": {
+      "includedInPlan": "你的套餐已移除徽标，无需购买。",
+      "removedThisMonth": "本月已移除徽标。",
+      "cancelledKeepsMonth": "自动续订已关闭。徽标在本月底前保持隐藏，之后会重新出现。",
+      "stopRenewing": "停止续订",
+      "offer": "以每月 {credits} 点数（约 €{eur}）移除本站点的“Made with Ionexa”徽标。",
+      "affordable": "你有 {balance} 点数——够这个站点约 {months} 个月。",
+      "notEnough": "你有 {balance} 点数，需要 {needed}。",
+      "remove": "移除徽标"
+    }
   }
 }

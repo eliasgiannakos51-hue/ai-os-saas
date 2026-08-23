@@ -51,6 +51,7 @@ import { loadTradingMentorContext } from "@/lib/chat/trading-mentor-context";
 import { loadProductMentorContext } from "@/lib/chat/product-mentor-context";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
 import { selectRelevantModules, resolveSelectionConfig } from "@/lib/ai/context-relevance";
+import { loadCodingContextForChat } from "@/lib/ai/cross-module-store";
 import { moduleVocabulary } from "@/lib/ai/module-vocabulary";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
 import { AI_CONDUCT_EL } from "@/lib/ai-conduct";
@@ -472,6 +473,35 @@ export async function POST(request: Request) {
     } catch (err) {
       logApiError("/api/chat", err, { stage: "user_full_context" });
     }
+
+    // WHAT THE USER AND THE MODEL HAVE ALREADY BUILT TOGETHER (V4 #36).
+    //
+    // Without this, "remember the function you wrote?" has exactly one
+    // honest answer, and it is no: the AI Coding module's history is a
+    // table chat never reads. This adds the sessions THIS question is
+    // about — never all of them.
+    //
+    // ALMOST EVERY REQUEST ADDS NOTHING, and that is the design. A
+    // question about last month's revenue matches no coding session, so
+    // the block is empty and the prompt is byte-identical to what it was
+    // before this feature existed. The whole feature is capped at
+    // MAX_CROSS_CONTEXT_CHARS (900) against a request that already sends
+    // 20,725 — see scripts/measure-context.mjs, which measures the
+    // before and after rather than asserting them.
+    let codingContext = "";
+    try {
+      const coding = await loadCodingContextForChat(supabase, message);
+      codingContext = coding.text ? `\n\n${coding.text}` : "";
+      if (coding.selection.chosen.length > 0) {
+        diagLog(
+          `[context] coding: ${coding.selection.chosen.length} of ${coding.pool} session(s), ` +
+            `${codingContext.length} chars (${coding.selection.reason})`
+        );
+      }
+    } catch (err) {
+      // An enhancement must never cost the user their message.
+      logApiError("/api/chat", err, { stage: "coding_context" });
+    }
     // V3 Task 3 — the user's own connected accounts.
     //
     // Both the tool and its instruction are built from what is ACTUALLY
@@ -538,7 +568,17 @@ export async function POST(request: Request) {
       productMentorContext +
       userContext +
       integrationInstruction;
-    const systemDynamicSuffix = buildEntityMentionPromptAddition(mentionedEntities);
+    // THE CODING BLOCK IS PER-MESSAGE, SO IT GOES LAST, beside the entity
+    // mentions and never inside systemPerUser.
+    //
+    // This was in the per-user block first, with a comment claiming that
+    // was deliberate. It was wrong, and expensively so: the per-user
+    // block is 1,385 tokens that CACHE, and a block that changes with
+    // every question would have broken that cache on every single turn —
+    // paying ~1,246 full-price tokens a message to save at most 177.
+    // scripts/tests/context-optimization.test.mjs caught it, which is
+    // exactly what that gate is for.
+    const systemDynamicSuffix = buildEntityMentionPromptAddition(mentionedEntities) + codingContext;
     // Kept as the concatenation of the two halves, unchanged, because
     // every cost estimate below sizes the request with
     // `systemPrompt.length`. The split changes where the block boundary

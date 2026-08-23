@@ -188,9 +188,20 @@ ok(
 // largest uncached block in the request. It only caches while the
 // per-MESSAGE part stays behind it.
 ok("chat route has a per-user tier", /perUserBlock: systemPerUser/.test(chatSrc));
+// THE PER-MESSAGE TIER IS EVERYTHING SELECTED FROM THIS MESSAGE.
+//
+// It was only the entity mentions until V4 #36 added the coding context,
+// which is chosen BY the question and so belongs here for exactly the
+// same reason. The invariant is not the list — it is that nothing which
+// varies per message sits in front of the cache breakpoint, which is
+// what the second check states directly.
 ok(
-  "…and the per-message tier is only the entity mentions",
-  /const systemDynamicSuffix = buildEntityMentionPromptAddition\(mentionedEntities\);/.test(chatSrc)
+  "…and the per-message tier carries the entity mentions and the coding context",
+  /const systemDynamicSuffix = buildEntityMentionPromptAddition\(mentionedEntities\) \+ codingContext;/.test(chatSrc)
+);
+ok(
+  "…and nothing per-message leaked into the cached per-user tier",
+  !/const systemPerUser =[\s\S]{0,400}codingContext/.test(chatSrc)
 );
 // The conversation is the single biggest block a chat request sends and
 // is append-only, which is the shape a prefix cache wants.

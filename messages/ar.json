@@ -3205,5 +3205,17 @@
     "runs": "{rate}% عبر {samples} تشغيلة",
     "routedUp": "وُجِّه لأعلى",
     "notEnough": "غير كافٍ بعد"
+  },
+  "publishing": {
+    "badge": {
+      "includedInPlan": "خطتك تزيل الشارة بالفعل — لا حاجة للشراء.",
+      "removedThisMonth": "أُزيلت الشارة هذا الشهر.",
+      "cancelledKeepsMonth": "التجديد التلقائي متوقف. تبقى الشارة مخفية حتى نهاية الشهر ثم تعود.",
+      "stopRenewing": "إيقاف التجديد",
+      "offer": "أزل شارة «Made with Ionexa» من هذا الموقع مقابل {credits} نقطة شهرياً (نحو {eur} يورو).",
+      "affordable": "لديك {balance} نقطة — نحو {months} شهر لهذا الموقع.",
+      "notEnough": "لديك {balance} نقطة وتحتاج {needed}.",
+      "remove": "إزالة الشارة"
+    }
   }
 }

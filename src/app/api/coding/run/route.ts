@@ -19,6 +19,7 @@ import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula"
 import { releaseReservation, reserveCredits, settleReservation } from "@/lib/billing/reservations";
 import { runCompletion } from "@/lib/ai/providers/complete";
 import { loadWorkspaceContext, renderWorkspaceContext } from "@/lib/ai/workspace-context";
+import { loadChatContextForCoding } from "@/lib/ai/cross-module-store";
 import {
   MAX_INPUT_CHARS,
   OPERATION_SPECS,
@@ -76,7 +77,24 @@ export async function POST(request: Request) {
     // The workspace read happens BEFORE the prompt is built, because the
     // context is part of what is priced.
     const workspace = await loadWorkspaceContext(supabase, { include: useWorkspace });
-    const contextText = renderWorkspaceContext(workspace);
+
+    // THE OTHER HALF OF THE CONVERSATION (V4 #36). The workspace context
+    // says what the user is BUILDING; this says what they and the model
+    // already SAID about it — which is the only place the answer to "why
+    // did you do it that way?" exists.
+    //
+    // Behind the same toggle as the workspace read, and gated by the same
+    // relevance rule: a request that mentions nothing the user has
+    // discussed adds nothing, and the prompt is byte-identical to what it
+    // was before this existed. Through the RLS-scoped client, never the
+    // admin one.
+    const chatContext = useWorkspace
+      ? await loadChatContextForCoding(supabase, `${input} ${operation}`)
+      : { text: "", selection: { chosen: [], reason: "workspace off", chars: 0 }, pool: 0 };
+
+    const contextText = [renderWorkspaceContext(workspace), chatContext.text]
+      .filter((part) => part.trim() !== "")
+      .join("\n\n");
 
     const prompt = buildCodePrompt({ operation, input, language, targetLanguage }, contextText);
     if (!prompt.ok) {
@@ -169,7 +187,11 @@ export async function POST(request: Request) {
       costs,
       plan,
       bypassCharge: bypass,
-      metadata: { operation, workspaceModules: workspace.facts.length },
+      metadata: {
+        operation,
+        workspaceModules: workspace.facts.length,
+        chatTurnsUsed: chatContext.selection.chosen.length,
+      },
     });
 
     const { data: row, error: saveError } = await admin
@@ -198,6 +220,9 @@ export async function POST(request: Request) {
       /** So the panel can say "using 4 of your modules" rather than
        *  leaving the user to wonder what it read. */
       workspaceModulesUsed: workspace.facts.length,
+      /** So the panel can say "and 2 turns from your chat" rather than
+       *  silently reading the user's conversation into a code request. */
+      chatTurnsUsed: chatContext.selection.chosen.length,
     });
   } catch (err) {
     logApiError("/api/coding/run", err);

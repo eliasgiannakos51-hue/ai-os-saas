@@ -75,6 +75,55 @@ export type Selection<T> = {
 };
 
 /**
+ * THE TWO SCORING PRIMITIVES, EXPORTED — because there is now a second
+ * caller and there must not be a second implementation.
+ *
+ * Module selection asks "which of thirteen modules is this question
+ * about". Cross-module context (V4 #36) asks "which of fifty past coding
+ * sessions is this question about". Different policies — different
+ * floors, different caps, different consequences for getting it wrong —
+ * but IDENTICAL matching: fold, split into words of three characters or
+ * more, count whole-word hits.
+ *
+ * Copying those four lines into the second caller is how the two drift:
+ * a folding fix applied in one place, a minimum length changed in the
+ * other, and two features that claim to use "the same relevance rule"
+ * quietly stop agreeing. So the rule lives here once and the policies
+ * live with their callers.
+ */
+
+/** The words of a question worth matching on. `question` must ALREADY be
+ *  folded — the caller folds once and reuses it, because folding is the
+ *  expensive part and doing it per candidate is doing it fifty times. */
+export function questionWords(foldedQuestion: string): Set<string> {
+  return new Set(foldedQuestion.split(/[^\p{L}\p{N}]+/u).filter((w) => w.length >= 3));
+}
+
+/**
+ * How many of `terms` this question mentions.
+ *
+ * WHOLE WORDS ONLY. A substring test makes "art" match "start", and then
+ * every candidate matches every question and the whole mechanism is a
+ * slower way of selecting everything. Multi-word terms are the one
+ * exception and are matched against the folded question directly,
+ * because "cash flow" cannot be found in a set of single words.
+ */
+export function scoreTerms(
+  words: ReadonlySet<string>,
+  foldedQuestion: string,
+  terms: readonly string[]
+): number {
+  let score = 0;
+  for (const term of terms) {
+    const folded = foldForMatch(term);
+    if (folded.length < 3) continue;
+    if (words.has(folded)) score += 1;
+    else if (folded.includes(" ") && foldedQuestion.includes(folded)) score += 1;
+  }
+  return score;
+}
+
+/**
  * Which of a user's modules this question is about.
  *
  * `summaries` are matched to `vocabulary` by slug; anything with no
@@ -111,7 +160,7 @@ export function selectRelevantModules<T extends { slug: string; lastActivityMs?:
   const q = foldForMatch(question ?? "");
   if (q.length < config.minQuestionChars) return all("question too short to judge");
 
-  const words = new Set(q.split(/[^\p{L}\p{N}]+/u).filter((w) => w.length >= 3));
+  const words = questionWords(q);
   if (words.size === 0) return all("no words to match on");
 
   const byslug = new Map(vocabulary.map((v) => [v.slug, v]));
@@ -122,16 +171,7 @@ export function selectRelevantModules<T extends { slug: string; lastActivityMs?:
     // irrelevant — the difference between "we did not find it" and "it
     // is not there".
     if (!vocab) return { item: s, score: 1, unjudgeable: true };
-    let score = 0;
-    for (const term of vocab.terms) {
-      const folded = foldForMatch(term);
-      if (folded.length < 3) continue;
-      // Whole words only. A substring test makes "art" match "start"
-      // and every module matches every question.
-      if (words.has(folded)) score += 1;
-      else if (folded.includes(" ") && q.includes(folded)) score += 1;
-    }
-    return { item: s, score, unjudgeable: false };
+    return { item: s, score: scoreTerms(words, q, vocab.terms), unjudgeable: false };
   });
 
   const matched = scored.filter((s) => s.score > 0);

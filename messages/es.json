@@ -3205,5 +3205,17 @@
     "runs": "{rate}% en {samples} ejecuciones",
     "routedUp": "enrutado hacia arriba",
     "notEnough": "aún insuficiente"
+  },
+  "publishing": {
+    "badge": {
+      "includedInPlan": "Tu plan ya quita la insignia: no hay nada que comprar.",
+      "removedThisMonth": "Insignia quitada este mes.",
+      "cancelledKeepsMonth": "La renovación automática está desactivada. La insignia seguirá oculta hasta fin de mes y luego volverá.",
+      "stopRenewing": "Dejar de renovar",
+      "offer": "Quita la insignia «Made with Ionexa» de este sitio por {credits} créditos al mes (unos {eur} €).",
+      "affordable": "Tienes {balance} créditos: unos {months} mes(es) para este sitio.",
+      "notEnough": "Tienes {balance} créditos y necesitas {needed}.",
+      "remove": "Quitar la insignia"
+    }
   }
 }

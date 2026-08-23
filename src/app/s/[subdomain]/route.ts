@@ -2,7 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { logApiError } from "@/lib/log-error";
 import { validateSubdomain } from "@/lib/publishing/subdomain";
 import { injectBadge } from "@/lib/publishing/badge";
-import { readOwnerTier } from "@/lib/publishing/owner-tier";
+import { readSiteShowsBadge } from "@/lib/publishing/badge-decision";
 import {
   publishedSiteHeaders,
   notFoundHeaders,
@@ -112,12 +112,16 @@ export async function GET(request: Request, { params }: { params: { subdomain: s
     // IN PARALLEL WITH THE VIEW COUNT, so it costs a visitor nothing: the
     // route already awaits one write, and this read happens beside it
     // rather than after it.
-    const [, ownerTier] = await Promise.all([
+    // ONE question, not two. The plan AND the current month's badge
+    // purchase are both inside site_shows_badge() — see
+    // lib/publishing/badge-decision.ts for why a second query per view
+    // was not acceptable on this path.
+    const [, showsBadge] = await Promise.all([
       recordView(admin, site.id, site.user_id, isLikelyNewVisitor(request, String(site.id))),
-      readOwnerTier(admin, site.user_id),
+      readSiteShowsBadge(admin, String(site.id)),
     ]);
 
-    return new Response(injectBadge(site.html_content, { planSlug: ownerTier }), {
+    return new Response(injectBadge(site.html_content, { showBadge: showsBadge }), {
       status: 200,
       headers: {
         ...publishedSiteHeaders(),

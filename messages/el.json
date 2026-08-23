@@ -3205,5 +3205,17 @@
     "runs": "{rate}% σε {samples} εκτελέσεις",
     "routedUp": "δρομολογήθηκε ψηλότερα",
     "notEnough": "όχι αρκετά ακόμη"
+  },
+  "publishing": {
+    "badge": {
+      "includedInPlan": "Το πλάνο σου αφαιρεί ήδη το σήμα — δεν χρειάζεται αγορά.",
+      "removedThisMonth": "Το σήμα αφαιρέθηκε αυτόν τον μήνα.",
+      "cancelledKeepsMonth": "Η αυτόματη ανανέωση είναι κλειστή. Το σήμα μένει κρυμμένο μέχρι το τέλος του μήνα και μετά επιστρέφει.",
+      "stopRenewing": "Διακοπή ανανέωσης",
+      "offer": "Αφαίρεσε το σήμα «Made with Ionexa» από αυτό το site με {credits} credits τον μήνα (περίπου €{eur}).",
+      "affordable": "Έχεις {balance} credits — περίπου {months} μήνα(ες) για αυτό το site.",
+      "notEnough": "Έχεις {balance} credits και χρειάζονται {needed}.",
+      "remove": "Αφαίρεση σήματος"
+    }
   }
 }

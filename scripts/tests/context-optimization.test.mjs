@@ -283,8 +283,19 @@ console.log("\n== 5. wired in, and wired in the right order ==");
   ok("the system prompt has a per-user tier", /perUserBlock: systemPerUser/.test(route));
   // ENTITY MENTIONS LAST. They are computed from THIS message, so
   // anything after them can never be cached.
-  ok("the per-message block is ONLY the entity mentions",
-    /const systemDynamicSuffix = buildEntityMentionPromptAddition\(mentionedEntities\);/.test(route));
+  // THE PER-MESSAGE BLOCK IS EVERYTHING THAT VARIES WITH THE QUESTION,
+  // and nothing that does not.
+  //
+  // It was only the entity mentions until V4 #36 added the coding
+  // context, which is selected FROM the question and therefore belongs
+  // here too. The rule this asserts is not "these two things" — it is
+  // that anything per-message is in this block and nothing per-message
+  // is in the cached one, which is what the two checks below say
+  // together.
+  ok("the per-message block is the entity mentions and the coding context",
+    /const systemDynamicSuffix = buildEntityMentionPromptAddition\(mentionedEntities\) \+ codingContext;/.test(route));
+  ok("...and nothing question-dependent leaked into the cached per-user block",
+    !/const systemPerUser =[\s\S]{0,400}codingContext/.test(route));
   ok("...and the per-user block carries the rest",
     /const systemPerUser =\s*\n\s*buildMemoryPromptAddition\(memories\) \+[\s\S]{0,220}userContext \+\s*\n\s*integrationInstruction;/.test(route));
   ok("the cost estimate still sizes the WHOLE prompt",

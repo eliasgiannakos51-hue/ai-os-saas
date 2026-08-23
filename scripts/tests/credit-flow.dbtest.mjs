@@ -152,7 +152,8 @@ console.log("== 0. the database really is the one the migrations build ==");
 // notification_channels and notification_events.
 // 98 -> 99: V4 #34 + #35 added routing_decisions — every routing
 // decision and what came of it, which is what the router learns from.
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 99);
+// 99 -> 100: badge removal with credits added site_badge_removals.
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 100);
 eq(
   "the credit functions exist",
   Number(

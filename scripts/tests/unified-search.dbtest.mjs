@@ -269,11 +269,32 @@ console.log("\n== 8. speed, on more than a thousand rows ==");
   ok("a search over 1,200+ rows stays well under 200ms",
     median < 200, `${median}ms`);
 
-  const inner = sql(`explain (analyze, format text) select * from public.search_all('propos')`)
-    .match(/Execution Time: ([\d.]+) ms/)?.[1];
-  console.log(`        Postgres execution time: ${inner}ms`);
+  // THE MEDIAN OF FIVE, NOT ONE SAMPLE.
+  //
+  // This took a SINGLE `explain analyze` and required it under 50ms, and
+  // it was flaky in the way that matters least and costs most: the same
+  // unchanged code measured 40.6ms (pass) and 51.6ms (fail) minutes
+  // apart, because this Postgres is a throwaway sharing a machine with
+  // whatever else is running. A gate that cannot decide makes every
+  // future red ambiguous — the next person to see it assumes flake, and
+  // one day they are wrong.
+  //
+  // Five samples and the median is a STRICTLY BETTER MEASUREMENT of the
+  // same claim, not a looser bound: a query that genuinely regressed
+  // past 50ms fails all five, while one scheduler hiccup no longer
+  // decides the build. The threshold is unchanged.
+  const inners = [];
+  for (let i = 0; i < 5; i += 1) {
+    const ms = sql(`explain (analyze, format text) select * from public.search_all('propos')`)
+      .match(/Execution Time: ([\d.]+) ms/)?.[1];
+    if (ms !== undefined) inners.push(Number(ms));
+  }
+  inners.sort((a, b) => a - b);
+  const inner = inners[Math.floor(inners.length / 2)];
+  console.log(`        Postgres execution time: median ${inner}ms of ${inners.length} (${inners.join(", ")})`);
+  ok("the timing was actually sampled", inners.length === 5, String(inners.length));
   ok("...and the query itself is a small fraction of that",
-    Number(inner) < 50, `${inner}ms`);
+    Number(inner) < 50, `${inner}ms of ${inners.join(", ")}`);
 }
 
 console.log("\n== 9. every stored href, and re-running the migration ==");

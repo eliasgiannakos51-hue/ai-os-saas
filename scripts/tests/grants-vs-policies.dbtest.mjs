@@ -21,7 +21,8 @@
 // one file appears to say.
 //
 // CROSS-PRODUCT, NOT SAMPLING: every RLS table x every verb granted to
-// `authenticated`.
+// `authenticated` — table-wide OR on a single column, because a column
+// grant is still a grant and does not appear in table_privileges.
 //
 // Run: node scripts/tests/grants-vs-policies.dbtest.mjs   (needs a
 // database; run through `npm run test:db`, which provisions one)
@@ -41,19 +42,34 @@ const dbArgs = () => (process.env.DATABASE_URL ? ["-d", process.env.DATABASE_URL
 // is only counted when it applies to `authenticated` or to PUBLIC — a
 // policy scoped to some other role does not unlock this grant.
 const QUERY = `
-select p.table_name, p.privilege_type,
+with granted as (
+  select p.table_name, p.privilege_type
+  from information_schema.table_privileges p
+  where p.table_schema = 'public'
+    and p.grantee = 'authenticated'
+    and p.privilege_type in ('SELECT', 'INSERT', 'UPDATE', 'DELETE')
+  union
+  -- COLUMN-LEVEL GRANTS ARE GRANTS. \`grant update (read_at)\` never shows
+  -- up in table_privileges at all, so the narrow grant — the one written
+  -- precisely because the table-wide one was too much — was invisible to
+  -- the check that exists to find a grant with no policy behind it. Two
+  -- tables already use that form.
+  select cp.table_name, cp.privilege_type
+  from information_schema.column_privileges cp
+  where cp.table_schema = 'public'
+    and cp.grantee = 'authenticated'
+    and cp.privilege_type in ('SELECT', 'INSERT', 'UPDATE', 'DELETE')
+)
+select g.table_name, g.privilege_type,
   coalesce((select string_agg(distinct pol.cmd, ',') from pg_policies pol
             where pol.schemaname = 'public'
-              and pol.tablename = p.table_name
+              and pol.tablename = g.table_name
               and (pol.roles @> array['authenticated']::name[]
                    or pol.roles @> array['public']::name[])), 'NONE')
-from information_schema.table_privileges p
-join pg_class c on c.relname = p.table_name
+from granted g
+join pg_class c on c.relname = g.table_name
 join pg_namespace n on n.oid = c.relnamespace and n.nspname = 'public'
-where p.table_schema = 'public'
-  and p.grantee = 'authenticated'
-  and c.relrowsecurity
-  and p.privilege_type in ('SELECT', 'INSERT', 'UPDATE', 'DELETE')
+where c.relrowsecurity
 order by 1, 2;`;
 
 const out = execFileSync("psql", [...dbArgs(), "-v", "ON_ERROR_STOP=1", "-tAF|", "-c", QUERY], {

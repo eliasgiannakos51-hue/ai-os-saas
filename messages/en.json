@@ -3205,5 +3205,17 @@
     "runs": "{rate}% over {samples} runs",
     "routedUp": "routed up",
     "notEnough": "not enough yet"
+  },
+  "publishing": {
+    "badge": {
+      "includedInPlan": "Your plan already removes the badge — nothing to buy.",
+      "removedThisMonth": "Badge removed this month.",
+      "cancelledKeepsMonth": "Auto-renewal is off. The badge stays away until the end of this month, then returns.",
+      "stopRenewing": "Stop renewing",
+      "offer": "Remove the \"Made with Ionexa\" badge from this site for {credits} credits a month (about €{eur}).",
+      "affordable": "You have {balance} credits — about {months} month(s) for this site.",
+      "notEnough": "You have {balance} credits and need {needed}.",
+      "remove": "Remove the badge"
+    }
   }
 }

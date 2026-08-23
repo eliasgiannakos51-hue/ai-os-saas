@@ -3205,5 +3205,17 @@
     "runs": "{rate}% em {samples} execuções",
     "routedUp": "encaminhado para cima",
     "notEnough": "ainda insuficiente"
+  },
+  "publishing": {
+    "badge": {
+      "includedInPlan": "O seu plano já remove o emblema — não há nada para comprar.",
+      "removedThisMonth": "Emblema removido este mês.",
+      "cancelledKeepsMonth": "A renovação automática está desligada. O emblema fica oculto até ao fim do mês e depois regressa.",
+      "stopRenewing": "Parar a renovação",
+      "offer": "Remova o emblema «Made with Ionexa» deste site por {credits} créditos por mês (cerca de {eur} €).",
+      "affordable": "Tem {balance} créditos — cerca de {months} mês(es) para este site.",
+      "notEnough": "Tem {balance} créditos e precisa de {needed}.",
+      "remove": "Remover o emblema"
+    }
   }
 }

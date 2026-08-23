@@ -302,7 +302,50 @@ The coding notes were *copied* into `code_sessions` (marked
 `source = 'note'`, idempotently, keyed on `imported_from`), and the
 analysis notes are listed on the new page under "your earlier notes".
 
-##### Quality baseline
+##### Cross-module context: Coding ↔ Chat
+
+Chat can see the AI Coding module's history, and Coding can see the
+relevant chat turns (`src/lib/ai/cross-module-context.ts`). That is what
+makes *"remember the function you wrote?"* and *"why did you do it that
+way?"* answerable — the second one especially, because the reason lives
+in what the model **said**, not in the code it produced.
+
+**Only the relevant, never everything.** Selection uses the same matching
+rule as module selection — `questionWords` and `scoreTerms`, imported
+from `context-relevance.ts` rather than reimplemented — but a different
+policy. Module selection has a **floor** (at least six modules, because a
+question about sales is still asked by somebody whose business is all of
+them). Item selection has **no floor and starts at zero**: nothing
+matching means nothing is added, and the request goes out byte-identical
+to what it was before this existed.
+
+Measured by `node scripts/measure-context.mjs`, against the 20,725
+characters a chat request already sends:
+
+| Question | Items kept | Added | Share |
+| --- | --- | --- | --- |
+| about code, specific | 2 | 707 chars | **3.4%** |
+| about code, vague | 0 | 0 | 0% |
+| not about code | 0 | 0 | 0% |
+| under 20 characters | 0 | 0 | 0% |
+
+Worst case **707 characters (~177 tokens), 3.4%** — an order of magnitude
+inside the "must not double the context" rule. Budget is 900 characters
+for the **whole block, header included**; a first version budgeted only
+the items and rendered 1,151, which the measurement caught.
+
+Two placement rules, both load-bearing:
+
+- **The block sits in the per-message tier**, with the entity mentions —
+  never in the cached per-user block or the static prefix. It is selected
+  *from the question*, so caching it would break that cache on every turn:
+  ~1,246 full-price tokens a message to save at most 177.
+- **The header says it is a subset.** Without "these are only the sessions
+  matching this question, not all of them", the model answers *"no, I have
+  not written you any functions"* when the ones it got were not the ones
+  meant — a confident denial of something that did happen.
+
+### Quality baseline
 
 `scripts/evals/` is the measured answer to "is it getting better?".
 **154 cases across seven capabilities** — chat, create, website, agents,
@@ -1011,6 +1054,51 @@ never touched, because deleting it would be deleting an invoice.
 No new environment variable is required — EUR0.03/credit, the EUR1
 minimum cap and the EUR10,000 maximum are constants in
 `src/lib/billing/overage.ts`.
+
+### Removing the badge with credits
+
+The "Made with Ionexa" badge comes off two ways: upgrade to Starter, or
+pay **200 credits per site per calendar month**
+(`src/lib/publishing/badge-credits.ts`). The price is **derived, not
+chosen**:
+
+- **The floor is the free plan's own grant.** Free accounts get 100
+  credits a month, and the monthly reset *replaces* the grant rather than
+  adding to it, so granted credits never accumulate. At any price at or
+  below 100 a free user would remove the badge with credits we gave them,
+  every month, for ever. At 200 it **always requires a purchase**.
+- **The ceiling is Starter.** At the list rate that is €4.00/month per
+  site, so five sites cost exactly Starter's €20 — and Starter also
+  carries 1,000 credits, the builder, AI memory and five agents. Cheaper
+  would cannibalise Starter; dearer would not be bought.
+
+**Margin ≥4x holds by construction**: badge removal makes **no model
+call**, so it consumes none of the 25% AI-spend ceiling. Credits spent
+here are credits not spent on inference, and on the free plan they must
+have been purchased — revenue at €0.02/credit against €0.00 of cost. The
+gate asserts this as a *property* (nothing in the badge-credit path may
+import a completion) rather than as a number somebody typed.
+
+What the badge itself earns in referrals is **not modelled**: nothing in
+this codebase counts badge click-through, so the opportunity cost of
+removal is unknown and any figure for it would be invented.
+
+The rules, each enforced by a test:
+
+- **Per site, not per account** — one row per `(site_id, covers_month)`,
+  unique at the database level.
+- **Starter+ is never charged**, and never even offered: the plan is
+  checked *before* the credit question, in TypeScript and in the SQL, so
+  the double charge is unreachable rather than merely avoided.
+- **Warned 7 days out, once per month**, through the existing
+  `credits_low` notification — and *not* warned when the credits are
+  there, because a warning that is not true is how a channel gets muted.
+- **Cancelling never takes back a paid month.** It stops the next charge;
+  the badge stays away until the month ends.
+- **Still decided at serve time.** `public.site_shows_badge(site_id)`
+  answers plan *and* purchase in one round trip on the hottest path in
+  the product, and fails **towards** the badge. Nothing is ever written
+  into `html_content`.
 
 ## Credits
 

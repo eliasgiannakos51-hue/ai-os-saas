@@ -384,6 +384,10 @@ const MECHANICAL = [
   // make it mean "busy", which is what it exists NOT to mean.
   "src/components/settings/overage-settings.tsx",
   "src/components/settings/addons-settings.tsx",
+  // Badge removal: a credit deduction and a row write. Nothing is
+  // thinking, so the globe would be spent on a POST — and the mark means
+  // "the model is working", which is what it exists NOT to dilute.
+  "src/components/publishing/badge-removal.tsx",
 ];
 {
   const spinning = allTsx.filter((f) => /animate-spin/.test(stripComments(readFileSync(f, "utf8")))).sort();

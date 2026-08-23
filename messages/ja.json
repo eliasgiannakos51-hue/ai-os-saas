@@ -3205,5 +3205,17 @@
     "runs": "{samples}回中 {rate}%",
     "routedUp": "上位へ回送",
     "notEnough": "まだ不足"
+  },
+  "publishing": {
+    "badge": {
+      "includedInPlan": "ご利用のプランではバッジがすでに非表示です。購入は不要です。",
+      "removedThisMonth": "今月はバッジを非表示にしています。",
+      "cancelledKeepsMonth": "自動更新はオフです。今月末まではバッジは表示されず、その後戻ります。",
+      "stopRenewing": "更新を停止",
+      "offer": "このサイトから「Made with Ionexa」バッジを月{credits}クレジット（約€{eur}）で非表示にします。",
+      "affordable": "残高は{balance}クレジット — このサイトで約{months}か月分です。",
+      "notEnough": "残高は{balance}クレジットで、{needed}必要です。",
+      "remove": "バッジを非表示にする"
+    }
   }
 }

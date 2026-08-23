@@ -258,6 +258,65 @@ console.log("=".repeat(78));
   void cached; void MODEL;
 }
 
+// =====================================================================
+// WHAT CROSS-MODULE CONTEXT ADDS (V4 #36)
+// =====================================================================
+//
+// The brief's rule: measure tokens before and after, and if it doubles
+// the context, find a narrower criterion. This is that measurement, run
+// against the real selector on realistic questions rather than asserted.
+{
+  const cross = await loadTs("src/lib/ai/cross-module-context.ts");
+
+  // Forty sessions is the pool the store actually loads. Half of them
+  // are about the same subject as the question, which is far more
+  // generous than reality — a real account's history is mostly about
+  // other things.
+  const candidates = Array.from({ length: 40 }, (_, i) => {
+    const aboutMargin = i % 2 === 0;
+    return {
+      id: `s${i}`,
+      atMs: Date.now() - i * 86_400_000,
+      terms: aboutMargin
+        ? ["margin", "calculate", "typescript", "generate", "pricing", "credits"]
+        : ["parser", "csv", "python", "explain", "encoding"],
+      text: aboutMargin
+        ? `2026-03-0${(i % 9) + 1} generate (typescript): margin helper\n  asked: write a function that calculates the margin from cost and price\n  produced: export function margin(cost: number, price: number) { return (price - cost) / price; }`
+        : `2026-03-0${(i % 9) + 1} explain (python): csv parser\n  asked: explain this csv parser\n  produced: it reads the file line by line and splits on commas`,
+    };
+  });
+
+  const QUESTIONS = [
+    ["about code, specific", "remember the margin function you wrote in typescript? why did you calculate it that way"],
+    ["about code, vague", "what did you write for me"],
+    ["not about code", "what was my revenue last month and which module should I focus on"],
+    ["too short", "why?"],
+  ];
+
+  const CHAT_REQUEST_CHARS = 20_725; // measured above, one full chat request
+
+  console.log("\n==============================================================================");
+  console.log("CROSS-MODULE CONTEXT (V4 #36) — what it adds to a chat request");
+  console.log("==============================================================================");
+  console.log(`  A chat request already sends ${CHAT_REQUEST_CHARS} chars. Budget is ${cross.MAX_CROSS_CONTEXT_CHARS}.`);
+  console.log("\n  question                     kept  added chars   share of request");
+  let worst = 0;
+  for (const [label, question] of QUESTIONS) {
+    const selection = cross.selectCrossContext({ question, candidates, kind: "coding" });
+    const chars = cross.crossContextChars(selection, "coding");
+    worst = Math.max(worst, chars);
+    const share = ((chars / CHAT_REQUEST_CHARS) * 100).toFixed(1);
+    console.log(
+      `  ${label.padEnd(28)} ${String(selection.chosen.length).padStart(2)}   ${String(chars).padStart(6)}       ${share.padStart(5)}%   ${selection.reason}`
+    );
+  }
+  console.log(`\n  WORST CASE ${worst} chars = ${((worst / CHAT_REQUEST_CHARS) * 100).toFixed(1)}% of the request, ~${Math.round(worst / 4)} tokens.`);
+  console.log("  The brief's threshold is DOUBLING (+100%). This is an order of magnitude inside it.");
+  console.log("  It is also UNCACHED — it varies per message, so it sits in the per-user");
+  console.log("  block by design; putting it in the static prefix would break the cache");
+  console.log("  on every turn, which would cost far more than the block itself.");
+}
+
 console.log("\nNOTE: characters are exact. Tokens are chars/4, the app's own");
 console.log("assumption (lib/billing/estimate.ts). That figure is calibrated for");
 console.log("English; the Greek blocks above tokenize worse, and by how much is");

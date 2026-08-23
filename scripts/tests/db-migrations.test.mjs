@@ -442,7 +442,8 @@ if (!DB) {
   // tables took 77 to 83; 20260901's notification tables took 83 to 87.
   // 20260903's revenue engine took 91 to 98; 20260904's routing_decisions
   // took 98 to 99.
-  check(`99 tables`, tables === 99, `got ${tables}`);
+  // 20260905's site_badge_removals took 99 to 100.
+  check(`100 tables`, tables === 100, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 

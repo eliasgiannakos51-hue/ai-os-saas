@@ -70,8 +70,23 @@ const BADGE_HTML = `<a href="${BADGE_HREF}" target="_blank" rel="noopener norefe
 export const BADGE_MARKER = "data-ionexa-badge";
 const MARKED_BADGE = BADGE_HTML.replace("<a ", `<a ${BADGE_MARKER}="1" `);
 
-export function injectBadge(html: string, options: { planSlug: string | null | undefined }): string {
-  if (!planShowsBadge(options.planSlug)) return html;
+/**
+ * `showBadge` IS THE DECISION, ALREADY MADE — never a plan slug.
+ *
+ * This used to take `{ planSlug }` and ask planShowsBadge() itself,
+ * which was right while the plan was the only input. Credit-based
+ * removal added a second one (this site's purchase for this calendar
+ * month), and the two are answered TOGETHER by one SQL call on the serve
+ * path — see lib/publishing/badge-decision.ts.
+ *
+ * Passing a plan slug here now would be passing HALF the question, and
+ * the half that says "free" for an account that has paid: every free
+ * site with removal would be badged anyway, and the feature would look
+ * broken rather than absent. So the parameter is the answer, and this
+ * function does one thing — put the markup in the right place.
+ */
+export function injectBadge(html: string, options: { showBadge: boolean }): string {
+  if (!options.showBadge) return html;
   if (typeof html !== "string" || html.trim() === "") return html;
   if (html.includes(BADGE_MARKER)) return html;
 

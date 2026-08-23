@@ -9,7 +9,7 @@ import {
   publicRequestAllowed,
 } from "@/lib/publishing/public-serving";
 import { injectBadge } from "@/lib/publishing/badge";
-import { readOwnerTier } from "@/lib/publishing/owner-tier";
+import { readSiteShowsBadge } from "@/lib/publishing/badge-decision";
 
 export const dynamic = "force-dynamic";
 // force-no-store is NOT redundant next to force-dynamic, and finding that
@@ -121,15 +121,18 @@ export async function GET(request: Request, { params }: { params: { subdomain: s
     // they arrived.
     if (!page) return notFoundResponse();
 
-    // Same as the site root: the owner's CURRENT plan decides the badge,
-    // read beside the view-count write so it costs the visitor nothing.
-    // A multi-page site badges every page, not only its home page.
-    const [, ownerTier] = await Promise.all([
+    // Same as the site root: the CURRENT state decides the badge — the
+    // owner's plan and this month's credit purchase, both inside one
+    // call — read beside the view-count write so it costs the visitor
+    // nothing. A multi-page site badges every page, not only its home
+    // page, and it is bought off per SITE, so every page of a site with
+    // removal is clean and every page of one without still carries it.
+    const [, showsBadge] = await Promise.all([
       recordView(admin, site.id, site.user_id, isLikelyNewVisitor(request, String(site.id))),
-      readOwnerTier(admin, site.user_id),
+      readSiteShowsBadge(admin, String(site.id)),
     ]);
 
-    return new Response(injectBadge(page.html, { planSlug: ownerTier }), {
+    return new Response(injectBadge(page.html, { showBadge: showsBadge }), {
       status: 200,
       headers: {
         ...publishedSiteHeaders(),

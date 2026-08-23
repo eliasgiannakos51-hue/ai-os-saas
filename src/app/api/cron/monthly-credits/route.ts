@@ -6,6 +6,7 @@ import { getPlan } from "@/lib/billing/plans";
 import { logApiError } from "@/lib/log-error";
 import { writeDailySnapshot } from "@/lib/billing/revenue-history";
 import { billOverageForClosedMonth } from "@/lib/billing/overage-invoice";
+import { runBadgeRenewals } from "@/lib/publishing/badge-renewal";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300; // @function-limit 300
@@ -125,7 +126,21 @@ export async function GET(request: Request) {
       logApiError("/api/cron/monthly-credits", invoiceError, { stage: "overage_invoice" });
     }
 
-    return NextResponse.json({ ok: true, monthKey, scanned, granted, skipped, snapshot, overageInvoicing });
+    // BADGE REMOVAL: warn seven days out, renew on expiry, or let it
+    // lapse. Rides on this daily cron rather than a ninth schedule slot,
+    // same as the snapshot and the overage invoicing above, and wrapped
+    // for the same reason: a renewal that threw must not cost anybody
+    // their monthly credits.
+    let badgeRenewals: Awaited<ReturnType<typeof runBadgeRenewals>> | null = null;
+    try {
+      badgeRenewals = await runBadgeRenewals();
+    } catch (badgeError) {
+      logApiError("/api/cron/monthly-credits", badgeError, { stage: "badge_renewals" });
+    }
+
+    return NextResponse.json({
+      ok: true, monthKey, scanned, granted, skipped, snapshot, overageInvoicing, badgeRenewals,
+    });
   } catch (err) {
     logApiError("/api/cron/monthly-credits", err);
     return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });

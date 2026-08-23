@@ -11,7 +11,30 @@
 //      not an accident — see resolve-language.ts's header)
 //   3. Latin brand names inside non-Latin text do not flip the answer
 //   4. Japanese is not called Chinese, which the first version did
-//   5. every route that takes user text and asks an AI to reply uses it
+//   5. every route that READS A LANGUAGE OFF THE REQUEST BODY uses it
+//
+// THAT FIFTH LINE USED TO CLAIM MORE THAN SECTION 8 CHECKS. It said
+// "every route that takes user text and asks an AI to reply", and section
+// 8 has never asserted that — it enumerates the routes that read
+// body.language (or replyLanguage/outputLanguage) and requires each to
+// resolve it. The narrower rule is the defensible one and is argued for
+// where it is implemented; what was wrong was the summary at the top,
+// which is the half a reader trusts without scrolling.
+//
+// THE ROUTES THE NARROW RULE DOES NOT REACH, recorded here because a gap
+// nobody wrote down is a gap nobody fixes. These six take user text,
+// call a model, and make no language decision at all — they do not read
+// body.language, so section 8 never sees them:
+//
+//     api/data-analysis/[id]/analyse   api/data-analysis/[id]/ask
+//     api/import/csv/analyse           api/records/ask
+//     api/websites/edit                api/websites/generate/process
+//
+// They are not the bug this file was written for and are less severe
+// than it: that bug sent an explicit WRONG instruction ("write in the
+// user's language (en)" over a Greek topic), whereas a prompt with no
+// language line at all usually mirrors the language it was written in.
+// "Usually" is not "always", and none of them is gated.
 //
 // Run: node scripts/tests/resolve-language.test.mjs
 import { readFileSync, readdirSync, statSync } from "node:fs";

@@ -1258,7 +1258,9 @@
         "planningMission": "正在规划任务",
         "routingEntry": "正在归入合适的模块",
         "schedulingAutomation": "正在安排自动化",
-        "creatingDocument": "正在创建文档"
+        "creatingDocument": "正在创建文档",
+        "designingAgent": "正在设计智能体",
+        "savingAgent": "正在保存智能体"
       },
       "filesEmpty": "这里没有可下载的内容——它存在于应用中，而不是文件。",
       "chatEmpty": "关于刚刚创建的内容，随便问。",
@@ -1270,7 +1272,11 @@
       "chatContext": "背景：我刚在 Ionexa AI 中创建了一个名为「{title}」的{type}。我最初的请求是：{request}",
       "streamInterrupted": "连接在回复完成前中断。",
       "streamInterruptedPartial": "连接已中断——上面的回复可能不完整。",
-      "shareError": "无法读取该共享内容，请直接粘贴到这里。"
+      "shareError": "无法读取该共享内容，请直接粘贴到这里。",
+      "typeAgent": "AI 智能体",
+      "agentDesignFailed": "无法设计该智能体。",
+      "agentSaveFailed": "智能体已设计完成，但保存失败。",
+      "unsupportedType": "Create Studio 还无法创建该内容。"
     },
     "agents": {
       "title": "AI 智能体",

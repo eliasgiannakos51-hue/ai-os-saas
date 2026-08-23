@@ -125,15 +125,37 @@ check("a null row is not offered", !r.isResumableRow(null, NOW));
 check("consumed_at = true counts as seen", !r.isResumableRow({ status: "done", consumed_at: true, finished_at: at(60_000) }, NOW));
 
 console.log("\n== 3. which job a returning page adopts (cross-product of pairs) ==");
+// updated_at is on every fixture ON PURPOSE. It is the heartbeat, and it is
+// what separates a job that is still working from one whose worker the
+// platform killed — a distinction this rule did not make, which is how a
+// three-day-old corpse outranked a build that had finished an hour ago and
+// been paid for.
 const CANDIDATES = {
-  running: { id: "running", status: "running", consumed_at: null, created_at: at(10 * 60_000), finished_at: null },
-  queued: { id: "queued", status: "queued", consumed_at: null, created_at: at(9 * 60_000), finished_at: null },
-  unseen: { id: "unseen", status: "done", consumed_at: null, created_at: at(8 * 60_000), finished_at: at(7 * 60_000) },
-  seen: { id: "seen", status: "done", consumed_at: at(60_000), created_at: at(6 * 60_000), finished_at: at(5 * 60_000) },
-  stale: { id: "stale", status: "done", consumed_at: null, created_at: at(30 * 3_600_000), finished_at: at(30 * 3_600_000) },
-  failed: { id: "failed", status: "failed", consumed_at: null, created_at: at(4 * 60_000), finished_at: at(3 * 60_000) },
+  running: { id: "running", status: "running", consumed_at: null, created_at: at(10 * 60_000), updated_at: at(20_000), finished_at: null },
+  queued: { id: "queued", status: "queued", consumed_at: null, created_at: at(9 * 60_000), updated_at: at(15_000), finished_at: null },
+  // Still "running" by status, silent for three days. Not spending
+  // anything, never going to answer.
+  deadRunning: { id: "deadRunning", status: "running", consumed_at: null, created_at: at(72 * 3_600_000), updated_at: at(72 * 3_600_000), finished_at: null },
+  // Queued for three days: the kick never landed and never will.
+  // 71 hours, not 72: two fixtures sharing a created_at make the tie-break
+  // a coin flip and the expectation order-dependent, which tests the
+  // engine's sort stability rather than the rule.
+  deadQueued: { id: "deadQueued", status: "queued", consumed_at: null, created_at: at(71 * 3_600_000), updated_at: at(71 * 3_600_000), finished_at: null },
+  unseen: { id: "unseen", status: "done", consumed_at: null, created_at: at(8 * 60_000), updated_at: at(7 * 60_000), finished_at: at(7 * 60_000) },
+  seen: { id: "seen", status: "done", consumed_at: at(60_000), created_at: at(6 * 60_000), updated_at: at(5 * 60_000), finished_at: at(5 * 60_000) },
+  stale: { id: "stale", status: "done", consumed_at: null, created_at: at(30 * 3_600_000), updated_at: at(30 * 3_600_000), finished_at: at(30 * 3_600_000) },
+  failed: { id: "failed", status: "failed", consumed_at: null, created_at: at(4 * 60_000), updated_at: at(3 * 60_000), finished_at: at(3 * 60_000) },
 };
-const RANK = { running: 3, queued: 3, unseen: 2, seen: 0, stale: 0, failed: 0 };
+// LIVE (3) beats UNSEEN-FINISHED (2) beats DEAD-ACTIVE (1) beats nothing.
+// The dead row is still offered when there is nothing better — adopting it
+// is what gets it reaped and the credit hold given back — but it must
+// never stand in front of work the user has already paid for.
+const RANK = {
+  running: 3, queued: 3,
+  unseen: 2,
+  deadRunning: 1, deadQueued: 1,
+  seen: 0, stale: 0, failed: 0,
+};
 const names = Object.keys(CANDIDATES);
 let pairs = 0;
 const pairWrong = [];
@@ -166,12 +188,63 @@ check(`all ${pairs} orderings pick the right job`, pairWrong.length === 0, pairW
 // spending money rather than to the newer finished row.
 const overlapping = r.pickResumableJob(
   [
-    { id: "still-going", status: "running", created_at: at(20 * 60_000), consumed_at: null },
+    // Started 20 minutes ago and wrote 10 seconds ago: alive.
+    { id: "still-going", status: "running", created_at: at(20 * 60_000), updated_at: at(10_000), consumed_at: null },
     { id: "finished-later", status: "done", created_at: at(2 * 60_000), finished_at: at(60_000), consumed_at: null },
   ],
   NOW
 );
-eq("an older RUNNING job beats a newer finished one", overlapping?.id, "still-going");
+eq("an older LIVE job beats a newer finished one", overlapping?.id, "still-going");
+
+// THE MIRROR, and the bug. Same two rows, except the "running" one has
+// written nothing for three days. Preferring it means telling the user
+// their build stalled when it actually finished, and charging them again
+// for the draft sitting right there.
+const masked = r.pickResumableJob(
+  [
+    { id: "dead-worker", status: "running", created_at: at(72 * 3_600_000), updated_at: at(72 * 3_600_000), consumed_at: null },
+    { id: "finished-build", status: "done", created_at: at(2 * 60_000), finished_at: at(60_000), consumed_at: null },
+  ],
+  NOW
+);
+eq("a DEAD 'running' job does NOT mask a finished build", masked?.id, "finished-build");
+
+// ...and the same for a job that was queued and never picked up.
+const neverStarted = r.pickResumableJob(
+  [
+    { id: "never-kicked", status: "queued", created_at: at(72 * 3_600_000), updated_at: at(72 * 3_600_000), consumed_at: null },
+    { id: "finished-build", status: "done", created_at: at(2 * 60_000), finished_at: at(60_000), consumed_at: null },
+  ],
+  NOW
+);
+eq("a job QUEUED three days ago does not either", neverStarted?.id, "finished-build");
+
+// The dead row is not thrown away: with nothing else on offer it is still
+// adopted, because adopting it is what reaps it and returns the hold.
+const onlyDead = r.pickResumableJob(
+  [{ id: "dead-worker", status: "running", created_at: at(72 * 3_600_000), updated_at: at(72 * 3_600_000), consumed_at: null }],
+  NOW
+);
+eq("with nothing better, the dead job IS adopted (so it gets reaped)", onlyDead?.id, "dead-worker");
+
+// One definition of "dead", shared with the reaper. Two would drift, and a
+// row this rule called alive while the reaper called it dead is exactly
+// the row that masks a finished build forever.
+check(
+  "staleness comes from isJobStale, not a second copy of the rule",
+  /import \{ isJobStale \} from "@\/lib\/jobs\/job-types"/.test(
+    readFileSync("src/lib/jobs/resumable.ts", "utf8")
+  )
+);
+{
+  const jt = await loadTs("src/lib/jobs/job-types.ts");
+  const boundary = jt.JOB_STALE_MS;
+  const justAlive = { id: "x", status: "running", created_at: at(boundary + 60_000), updated_at: at(boundary - 1000), consumed_at: null };
+  const justDead = { id: "x", status: "running", created_at: at(boundary + 60_000), updated_at: at(boundary + 1000), consumed_at: null };
+  check(`a heartbeat ${Math.round(boundary / 60000)}m-1s old is alive`, r.isLiveRow(justAlive, NOW) === true);
+  check(`a heartbeat ${Math.round(boundary / 60000)}m+1s old is dead`, r.isLiveRow(justDead, NOW) === false);
+  check("a finished row is never 'live'", r.isLiveRow(CANDIDATES.unseen, NOW) === false);
+}
 
 check("nothing to resume returns null", r.pickResumableJob([], NOW) === null);
 check("all-null candidates return null", r.pickResumableJob([null, undefined], NOW) === null);
@@ -185,6 +258,23 @@ const undateable = r.pickResumableJob(
   NOW
 );
 check("undateable rows still resolve to one of them, not to undefined", undateable !== null && ["a", "b"].includes(undateable.id));
+
+console.log("\n== 3b. the list route reaps the corpse instead of serving it ==");
+// The rule above stops a dead row masking a finished build. This is the
+// other half: the dead row still holds credits, and until something polls
+// it nothing gives them back. api/jobs/[id] reaps, but only for a job the
+// page ADOPTED — and now that a finished build outranks the corpse, the
+// corpse would never be adopted at all.
+check("the list route imports the reaper", /import \{ reapJob \}/.test(listSrc));
+check("...and asks whether the active row is stale", /isJobStale\(/.test(listSrc));
+check(
+  "...reaping it before the pick, not after",
+  listSrc.indexOf("reapJob({") > 0 && listSrc.indexOf("reapJob({") < listSrc.indexOf("pickResumableJob(")
+);
+check(
+  "...and marks the reaped row failed, so it cannot be picked",
+  /status: "failed", error: "stalled", credits_charged: 0/.test(listSrc)
+);
 
 console.log("\n== 4. /api/jobs asks both questions ==");
 check("it still returns work in flight", /\.in\("status", \["queued", "running"\]\)/.test(listSrc));

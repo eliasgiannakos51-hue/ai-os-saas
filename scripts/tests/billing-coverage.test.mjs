@@ -787,9 +787,23 @@ console.log("\n== 21. plan resolution: the tier decides the rate, so it must be 
 // unset and the function fell through to "free". Admin status lives in
 // ADMIN_EMAILS, a completely separate axis, which billing never consulted
 // even though pricing/page.tsx, team/invite and dashboard/team all do.
-const credits = readFileSync("src/lib/billing/credits.ts", "utf8");
-checkTrue("the only source is user_metadata.subscription_tier", /user\?\.user_metadata\?\.subscription_tier/.test(credits));
-checkTrue("an admin no longer falls through to free", /if \(isAdminEmail\(user\?\.email\)\) return "enterprise";/.test(credits));
+// The rule moved to lib/billing/plan-resolution.ts — pure, so it can be
+// unit-tested without a Supabase client, which credits.ts cannot.
+// credits.ts re-exports it, so no caller changed.
+const planResolution = readFileSync("src/lib/billing/plan-resolution.ts", "utf8");
+checkTrue(
+  "credits.ts still exports it, so no caller had to change",
+  /export \{ resolvePlanSlug, resolvePlan \}/.test(readFileSync("src/lib/billing/credits.ts", "utf8"))
+);
+checkTrue("subscription_tier is read", /user\?\.user_metadata\?\.subscription_tier/.test(planResolution));
+// AND A SECOND SOURCE, deliberately. `subscription_tier` is what the
+// account pays for; `team_granted_tier` is what a team owner lends it.
+// They used to be ONE field, and each write destroyed the other — which is
+// how leaving a team cancelled a subscription Stripe was still charging
+// for. The answer is the HIGHER of the two, never the more recent.
+checkTrue("...and so is team_granted_tier", /user\?\.user_metadata\?\.team_granted_tier/.test(planResolution));
+checkTrue("...combined by taking the higher", /higherPlanSlug\(/.test(planResolution));
+checkTrue("an admin no longer falls through to free", /if \(isAdminEmail\(user\?\.email\)\) return "enterprise";/.test(planResolution));
 checkTrue("...matching what the rest of the app already calls an admin",
   /isAdmin \? "enterprise"/.test(readFileSync("src/app/pricing/page.tsx", "utf8")));
 

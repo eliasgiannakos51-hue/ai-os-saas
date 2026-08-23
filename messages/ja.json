@@ -1258,7 +1258,9 @@
         "planningMission": "ミッションを計画中",
         "routingEntry": "適切なモジュールへ振り分け中",
         "schedulingAutomation": "自動化をスケジュール中",
-        "creatingDocument": "ドキュメントを作成中"
+        "creatingDocument": "ドキュメントを作成中",
+        "designingAgent": "エージェントを設計中",
+        "savingAgent": "エージェントを保存中"
       },
       "filesEmpty": "ダウンロードできるものはありません。これはファイルではなくアプリ内に存在します。",
       "chatEmpty": "作成したものについて何でも質問してください。",
@@ -1270,7 +1272,11 @@
       "chatContext": "背景: Ionexa AI で「{title}」という{type}を作成しました。元のリクエストは次のとおりです: {request}",
       "streamInterrupted": "応答が完了する前に接続が切断されました。",
       "streamInterruptedPartial": "接続が切断されました。上記の応答は不完全な可能性があります。",
-      "shareError": "この共有を読み取れませんでした。ここに貼り付けてください。"
+      "shareError": "この共有を読み取れませんでした。ここに貼り付けてください。",
+      "typeAgent": "AI エージェント",
+      "agentDesignFailed": "そのエージェントを設計できませんでした。",
+      "agentSaveFailed": "エージェントは設計されましたが、保存できませんでした。",
+      "unsupportedType": "Create Studio はまだそれを作成できません。"
     },
     "agents": {
       "title": "AI エージェント",

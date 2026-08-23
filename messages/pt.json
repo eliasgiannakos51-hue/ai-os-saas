@@ -1258,7 +1258,9 @@
         "planningMission": "A planear a missão",
         "routingEntry": "A encaminhar para o módulo certo",
         "schedulingAutomation": "A agendar a automatização",
-        "creatingDocument": "A criar o documento"
+        "creatingDocument": "A criar o documento",
+        "designingAgent": "A desenhar o agente",
+        "savingAgent": "A guardar o agente"
       },
       "filesEmpty": "Nada para descarregar aqui — isto vive na aplicação e não como ficheiro.",
       "chatEmpty": "Pergunte o que quiser sobre o que acabou de criar.",
@@ -1270,7 +1272,11 @@
       "chatContext": "Contexto: acabei de criar um {type} chamado «{title}» no Ionexa AI. O meu pedido original foi: {request}",
       "streamInterrupted": "A ligação foi interrompida antes de a resposta terminar.",
       "streamInterruptedPartial": "A ligação foi interrompida — a resposta acima pode estar incompleta.",
-      "shareError": "Não foi possível ler essa partilha. Cole aqui."
+      "shareError": "Não foi possível ler essa partilha. Cole aqui.",
+      "typeAgent": "Agente de IA",
+      "agentDesignFailed": "Não foi possível desenhar esse agente.",
+      "agentSaveFailed": "O agente foi desenhado mas não foi possível guardá-lo.",
+      "unsupportedType": "O Create Studio ainda não consegue criar isso."
     },
     "agents": {
       "title": "Agentes de IA",

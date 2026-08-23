@@ -50,6 +50,7 @@ const POLL_INTERVAL_MS = 2500;
  */
 export function useCreateStudio() {
   const tCommon = useTranslations("common");
+  const tStudio = useTranslations("dashboard.createStudio");
   const { refresh: refreshCredits } = useCredits();
   const [steps, setSteps] = useState<StudioProgressStep[]>([]);
   const [result, setResult] = useState<StudioResult | null>(null);
@@ -271,6 +272,94 @@ export function useCreateStudio() {
             return;
           }
 
+          case "agent": {
+            // THE AGENT BUILDER ALREADY EXISTS, and Create Studio could not
+            // reach it. "agent" was not one of the kinds detection could
+            // return, and Create Studio has no "none" — so a request for an
+            // agent came back as the closest OTHER kind (usually an
+            // automation, because both recur) and the user was handed
+            // something they did not ask for.
+            //
+            // Two calls, in this order, because that is the shape the
+            // feature already has: /api/agents/build DESIGNS (one AI call,
+            // charged) and /api/agents SAVES (no AI call, charges nothing).
+            // The per-plan agent cap is checked by the build route BEFORE
+            // it starts the job, so a capped account is refused without
+            // paying for a design it cannot keep.
+            pushStep({ key: "designAgent", labelKey: "designingAgent", status: "running" });
+            const outcome = await startAndWatchJob("/api/agents/build", {
+              request: description,
+              // Create Studio already showed its restatement and let the
+              // user edit it, so the clarifying pass would ask twice.
+              skipClarification: true,
+              // The agent's schedule is stored with a timezone; without
+              // this every agent would run on UTC and "every morning"
+              // would arrive at the wrong hour.
+              timezone: resolveTimeZone(),
+            });
+            void refreshCredits();
+
+            if (!outcome.ok) {
+              // Not a failure: the worker is still designing and this page
+              // stopped watching. The agents list is where it appears.
+              if (outcome.code === "still_running") {
+                finishStep("designAgent", "done");
+                setResult({
+                  type: "agent",
+                  title: detection.title,
+                  href: "/dashboard/agents",
+                  website: null,
+                  moduleTitle: null,
+                  message: null,
+                });
+                return;
+              }
+              finishStep("designAgent", "failed");
+              setError(getErrorMessage(outcome.error, tStudio("agentDesignFailed")));
+              return;
+            }
+
+            const built = outcome.result as {
+              built?: boolean;
+              draft?: Record<string, unknown>;
+              error?: string;
+            };
+            if (!built.built || !built.draft) {
+              finishStep("designAgent", "failed");
+              setError(built.error ?? tStudio("agentDesignFailed"));
+              return;
+            }
+            finishStep("designAgent", "done");
+
+            pushStep({ key: "saveAgent", labelKey: "savingAgent", status: "running" });
+            const res = await fetchWithAuthRetry("/api/agents", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ draft: built.draft }),
+            });
+            const data = await res.json();
+            if (!res.ok || !data.ok || !data.agent?.id) {
+              // The design was charged and this save was not. Say so —
+              // silently reporting "could not create" would leave the user
+              // to guess whether they were billed.
+              finishStep("saveAgent", "failed");
+              setError(getErrorMessage(data?.error, tStudio("agentSaveFailed")));
+              return;
+            }
+            finishStep("saveAgent", "done");
+            setResult({
+              type: "agent",
+              // The builder's own name for it, which is what the agents
+              // list will show — not the detector's guess.
+              title: typeof built.draft.name === "string" ? built.draft.name : detection.title,
+              href: `/dashboard/agents?agent=${data.agent.id}`,
+              website: null,
+              moduleTitle: null,
+              message: null,
+            });
+            return;
+          }
+
           case "document": {
             pushStep({ key: "document", labelKey: "creatingDocument", status: "running" });
             const res = await fetchWithAuthRetry("/api/documents", { method: "POST" });
@@ -303,6 +392,21 @@ export function useCreateStudio() {
             });
             return;
           }
+
+          default: {
+            // EXHAUSTIVENESS, enforced by the compiler.
+            //
+            // This switch had no default and no never-check, so adding a
+            // sixth kind to CREATE_STUDIO_TYPES compiled cleanly and did
+            // NOTHING at runtime — press Create, watch the spinner stop,
+            // no result, no error. That is how "agent" could be added to
+            // the list and still not be creatable. `never` makes the next
+            // kind a compile error instead of a silent no-op.
+            const exhaustive: never = detection.type;
+            void exhaustive;
+            setError(tStudio("unsupportedType"));
+            return;
+          }
         }
       } catch {
         setError(tCommon("networkError"));
@@ -310,10 +414,25 @@ export function useCreateStudio() {
         setRunning(false);
       }
     },
-    [finishStep, pollWebsite, pushStep, refreshCredits, tCommon]
+    [finishStep, pollWebsite, pushStep, refreshCredits, tCommon, tStudio]
   );
 
   return { create, reset, steps, result, error, running, setError, mountedRef };
+}
+
+/**
+ * This browser's IANA timezone, or UTC.
+ *
+ * An agent's schedule is stored WITH a timezone; without one, "every
+ * morning" is 08:00 UTC, which for the account this product is built
+ * around is three hours before the morning it meant.
+ */
+function resolveTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch {
+    return "UTC";
+  }
 }
 
 function escapeHtml(value: string): string {

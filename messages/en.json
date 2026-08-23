@@ -1258,7 +1258,9 @@
         "planningMission": "Planning the mission",
         "routingEntry": "Routing it to the right module",
         "schedulingAutomation": "Scheduling the automation",
-        "creatingDocument": "Creating the document"
+        "creatingDocument": "Creating the document",
+        "designingAgent": "Designing the agent",
+        "savingAgent": "Saving the agent"
       },
       "filesEmpty": "Nothing downloadable here — this one lives in the app rather than as a file.",
       "chatEmpty": "Ask anything about what you just created.",
@@ -1270,7 +1272,11 @@
       "chatContext": "Context: I just created a {type} called \"{title}\" in Ionexa AI. My original request was: {request}",
       "streamInterrupted": "The connection dropped before the reply finished.",
       "streamInterruptedPartial": "The connection dropped — the reply above may be incomplete.",
-      "shareError": "That share could not be read. Paste it here instead."
+      "shareError": "That share could not be read. Paste it here instead.",
+      "typeAgent": "AI Agent",
+      "agentDesignFailed": "Could not design that agent.",
+      "agentSaveFailed": "The agent was designed but could not be saved.",
+      "unsupportedType": "Create Studio cannot make that yet."
     },
     "agents": {
       "title": "AI Agents",

@@ -50,6 +50,7 @@ const TYPE_META: Record<CreateStudioType, TypeMeta> = {
   moduleEntry: { icon: Layers, accentSlug: "createStudio", labelKey: "typeModuleEntry" },
   automation: { icon: MODULE_ICONS.automation, accentSlug: "automation", labelKey: "typeAutomation" },
   document: { icon: FileText, accentSlug: "documents", labelKey: "typeDocument" },
+  agent: { icon: MODULE_ICONS.agents, accentSlug: "agents", labelKey: "typeAgent" },
 };
 
 type WorkspaceTab = "overview" | "progress" | "chat" | "files";

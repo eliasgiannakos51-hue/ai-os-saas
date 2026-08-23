@@ -1258,7 +1258,9 @@
         "planningMission": "جارٍ تخطيط المهمة",
         "routingEntry": "جارٍ توجيهه إلى الوحدة المناسبة",
         "schedulingAutomation": "جارٍ جدولة الأتمتة",
-        "creatingDocument": "جارٍ إنشاء المستند"
+        "creatingDocument": "جارٍ إنشاء المستند",
+        "designingAgent": "تصميم الوكيل",
+        "savingAgent": "حفظ الوكيل"
       },
       "filesEmpty": "لا شيء قابل للتنزيل هنا — هذا يوجد داخل التطبيق وليس كملف.",
       "chatEmpty": "اسأل أي شيء عمّا أنشأته للتو.",
@@ -1270,7 +1272,11 @@
       "chatContext": "السياق: أنشأتُ للتو {type} باسم «{title}» في Ionexa AI. طلبي الأصلي كان: {request}",
       "streamInterrupted": "انقطع الاتصال قبل اكتمال الرد.",
       "streamInterruptedPartial": "انقطع الاتصال — قد يكون الرد أعلاه غير مكتمل.",
-      "shareError": "تعذّرت قراءة هذه المشاركة. الصقها هنا بدلاً من ذلك."
+      "shareError": "تعذّرت قراءة هذه المشاركة. الصقها هنا بدلاً من ذلك.",
+      "typeAgent": "وكيل ذكاء اصطناعي",
+      "agentDesignFailed": "تعذّر تصميم هذا الوكيل.",
+      "agentSaveFailed": "تم تصميم الوكيل لكن تعذّر حفظه.",
+      "unsupportedType": "لا يستطيع Create Studio إنشاء ذلك بعد."
     },
     "agents": {
       "title": "وكلاء الذكاء الاصطناعي",

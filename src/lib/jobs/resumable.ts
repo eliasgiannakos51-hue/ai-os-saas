@@ -20,7 +20,19 @@
  *   Without the window, opening the Agents page a week later greets you
  *   with a draft you forgot asking for, and "Create" on it does something
  *   you no longer want.
+ *
+ * AND THE HALF THAT WAS STILL MISSING: "active" can be a lie. A row stuck
+ * at queued or running past JOB_STALE_MS is not spending credits — its
+ * worker is dead. The rule below used to prefer ANY active row over a
+ * finished one, so a job killed by the platform three days ago outranked a
+ * build that had completed an hour ago and been paid for. The page adopted
+ * the corpse, polled it, was told "stalled", and showed that — a false
+ * report of failure for work that had actually succeeded. The finished
+ * draft was never offered, and the only move left was to buy it again.
+ * Measured, not supposed: see scripts/tests/job-resume.test.mjs, scenarios
+ * B and C.
  */
+import { isJobStale } from "@/lib/jobs/job-types";
 
 /**
  * How long a finished-but-unseen result stays on offer.
@@ -40,12 +52,34 @@ export type ResumableJobRow = {
   consumed_at?: unknown;
   finished_at?: unknown;
   created_at?: unknown;
+  /** The heartbeat. Present on every row the poll returns (`select *`),
+   *  and what separates a slow job from a dead one. */
+  updated_at?: unknown;
 };
 
-/** Still owed an outcome — always shown, whatever else is true of it. */
+/** Still owed an outcome, by its status alone. */
 export function isActiveRow(row: ResumableJobRow | null | undefined): boolean {
   const status = String(row?.status ?? "");
   return status === "queued" || status === "running";
+}
+
+/**
+ * Active AND still breathing.
+ *
+ * Staleness comes from isJobStale rather than a second rule of its own —
+ * one definition of "dead", used by the reaper and by this. Two would
+ * drift, and the drift would be invisible: a row this file called alive
+ * and the reaper called dead is exactly the row that masks a finished
+ * build forever.
+ */
+export function isLiveRow(row: ResumableJobRow | null | undefined, now: Date = new Date()): boolean {
+  if (!isActiveRow(row)) return false;
+  return isJobStale(
+    String(row?.status ?? ""),
+    typeof row?.updated_at === "string" ? row.updated_at : null,
+    typeof row?.created_at === "string" ? row.created_at : null,
+    now
+  ) === false;
 }
 
 /**
@@ -92,11 +126,18 @@ export function isResumableRow(
  * The one decision, made once: of the candidate rows, which is the job
  * this page should adopt?
  *
- * ACTIVE BEATS FINISHED, always. Two jobs of one kind can overlap — start
- * one, start another, the second finishes first — and in that case the
- * page must attach to the one still spending credits, not to the one that
- * has already stopped. Ordering by created_at alone gets this wrong
- * exactly when it matters most.
+ * LIVE BEATS FINISHED BEATS DEAD, in that order.
+ *
+ * Two jobs of one kind can overlap — start one, start another, the second
+ * finishes first — and the page must attach to the one still spending
+ * credits, not to the one that has already stopped. Ordering by created_at
+ * alone gets this wrong exactly when it matters most.
+ *
+ * But a DEAD active row must not outrank a finished one. It is not
+ * spending anything, its result will never arrive, and putting it first
+ * means a completed build the user has already paid for is never shown.
+ * It comes last rather than being dropped: when there is nothing else,
+ * adopting it is what gets it reaped and the credit hold given back.
  */
 export function pickResumableJob<T extends ResumableJobRow & { created_at?: unknown }>(
   rows: readonly (T | null | undefined)[],
@@ -124,8 +165,9 @@ export function pickResumableJob<T extends ResumableJobRow & { created_at?: unkn
     return left === right ? 0 : right > left ? 1 : -1;
   });
   return (
-    newestFirst.find((row) => isActiveRow(row)) ??
+    newestFirst.find((row) => isLiveRow(row, now)) ??
     newestFirst.find((row) => isResumableRow(row, now)) ??
+    newestFirst.find((row) => isActiveRow(row)) ??
     null
   );
 }

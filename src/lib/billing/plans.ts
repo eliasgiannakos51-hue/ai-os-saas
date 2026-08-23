@@ -213,6 +213,26 @@ export const PLANS: Plan[] = [
 // gating, feature gating) — index in this array, higher is better.
 const PLAN_RANK: PlanSlug[] = ["free", "starter", "growth", "professional", "ultimate", "enterprise"];
 
+/**
+ * The better of two tiers.
+ *
+ * Exists because an account can hold entitlements from two independent
+ * sources — what they pay for themselves, and what a team owner grants
+ * them — and the answer has to be the higher of the two rather than
+ * whichever was written last. Writing one over the other is what let
+ * leaving a team take away a subscription the person was still paying
+ * for.
+ *
+ * An unknown slug ranks below "free", so a corrupt value can never win.
+ */
+export function higherPlanSlug(a: string | null | undefined, b: string | null | undefined): PlanSlug {
+  const rank = (slug: string | null | undefined) => PLAN_RANK.indexOf(String(slug ?? "") as PlanSlug);
+  const rankA = rank(a);
+  const rankB = rank(b);
+  if (rankA < 0 && rankB < 0) return "free";
+  return rankA >= rankB ? (a as PlanSlug) : (b as PlanSlug);
+}
+
 export function getPlan(slug: string): Plan | undefined {
   return PLANS.find((p) => p.slug === slug);
 }

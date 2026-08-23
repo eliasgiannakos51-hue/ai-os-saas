@@ -1258,7 +1258,9 @@
         "planningMission": "Mission wird geplant",
         "routingEntry": "Wird dem richtigen Modul zugeordnet",
         "schedulingAutomation": "Automatisierung wird eingeplant",
-        "creatingDocument": "Dokument wird angelegt"
+        "creatingDocument": "Dokument wird angelegt",
+        "designingAgent": "Agent wird entworfen",
+        "savingAgent": "Agent wird gespeichert"
       },
       "filesEmpty": "Hier gibt es nichts zum Herunterladen — das lebt in der App und nicht als Datei.",
       "chatEmpty": "Frag alles zu dem, was du gerade erstellt hast.",
@@ -1270,7 +1272,11 @@
       "chatContext": "Kontext: Ich habe gerade ein {type} namens „{title}“ in Ionexa AI erstellt. Meine ursprüngliche Anfrage war: {request}",
       "streamInterrupted": "Die Verbindung wurde unterbrochen, bevor die Antwort fertig war.",
       "streamInterruptedPartial": "Die Verbindung wurde unterbrochen — die obige Antwort ist möglicherweise unvollständig.",
-      "shareError": "Diese Freigabe konnte nicht gelesen werden. Fügen Sie sie stattdessen hier ein."
+      "shareError": "Diese Freigabe konnte nicht gelesen werden. Fügen Sie sie stattdessen hier ein.",
+      "typeAgent": "KI-Agent",
+      "agentDesignFailed": "Dieser Agent konnte nicht entworfen werden.",
+      "agentSaveFailed": "Der Agent wurde entworfen, konnte aber nicht gespeichert werden.",
+      "unsupportedType": "Create Studio kann das noch nicht erstellen."
     },
     "agents": {
       "title": "KI-Agenten",

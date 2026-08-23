@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
-import { isJobKind, jobPercent } from "@/lib/jobs/job-types";
+import { isJobKind, isJobStale, jobPercent } from "@/lib/jobs/job-types";
 import { pickResumableJob } from "@/lib/jobs/resumable";
+import { reapJob } from "@/lib/jobs/run-job";
 
 export const dynamic = "force-dynamic";
 
@@ -117,10 +118,37 @@ export async function GET(request: Request) {
       unseenRow = (unseenRows ?? [])[0] as Record<string, unknown> | undefined;
     }
 
-    const row = pickResumableJob([
-      (activeRows ?? [])[0] as Record<string, unknown> | undefined,
-      unseenRow,
-    ]);
+    // A DEAD "ACTIVE" ROW IS REAPED HERE, not left to mask a finished build.
+    //
+    // The reaper already lives on the per-job poll (api/jobs/[id]) for the
+    // same reason it lives anywhere: a worker killed by the platform writes
+    // nothing, so the row sits at "running" forever with the credit hold
+    // still on it. But that poll only runs for a job the page ADOPTED —
+    // and until pickResumableJob learned about staleness, adopting the
+    // corpse was exactly what happened, and the completed build behind it
+    // was never shown. Reaping it here refunds the hold now AND takes it
+    // out of the running, so the finished result is what comes back.
+    let activeRow = (activeRows ?? [])[0] as Record<string, unknown> | undefined;
+    if (
+      activeRow &&
+      isJobStale(
+        String(activeRow.status),
+        (activeRow.updated_at as string | null) ?? null,
+        (activeRow.created_at as string | null) ?? null
+      )
+    ) {
+      const reaped = await reapJob({
+        id: String(activeRow.id),
+        user_id: String(activeRow.user_id),
+        status: String(activeRow.status),
+        reservation_id: (activeRow.reservation_id as string | null) ?? null,
+      });
+      if (reaped) {
+        activeRow = { ...activeRow, status: "failed", error: "stalled", credits_charged: 0 };
+      }
+    }
+
+    const row = pickResumableJob([activeRow, unseenRow]);
 
     return NextResponse.json({ ok: true, job: shape(row) });
   } catch (err) {

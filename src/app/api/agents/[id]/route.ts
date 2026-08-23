@@ -15,7 +15,7 @@ import {
 } from "@/lib/agents/agent-config";
 import { resolveDeliveryOwnership } from "@/lib/agents/delivery-ownership";
 import { resolveDeliveryTarget } from "@/lib/agents/delivery-channels";
-import { validateAgentCron, isValidTimeZone, nextRunAt } from "@/lib/agents/cron-expression";
+import { validateAgentCron, isValidTimeZone, nextRunAt, UNSCHEDULABLE_MESSAGE } from "@/lib/agents/cron-expression";
 
 export const dynamic = "force-dynamic";
 
@@ -233,7 +233,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         const next = nextRunAt(scheduleCron, new Date(), timezone);
         if (!next) {
           return NextResponse.json(
-            { ok: false, error: "That schedule never fires — pick a different one." },
+            { ok: false, error: UNSCHEDULABLE_MESSAGE },
             { status: 400 }
           );
         }

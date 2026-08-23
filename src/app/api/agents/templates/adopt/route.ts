@@ -21,7 +21,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
 import { validateAgentDraft, type AgentDraft } from "@/lib/agents/agent-config";
 import { resolveDeliveryOwnership } from "@/lib/agents/delivery-ownership";
-import { isValidTimeZone, nextRunAt } from "@/lib/agents/cron-expression";
+import { isValidTimeZone, nextRunAt, UNSCHEDULABLE_MESSAGE } from "@/lib/agents/cron-expression";
 import { maxAgentsForAccount } from "@/lib/agents/agent-limits";
 import { checkAgentActivationCap } from "@/lib/agents/agent-cap";
 import { parseAgentDepth, TEMPLATE_FILL_MODEL } from "@/lib/agents/agent-depth";
@@ -253,6 +253,39 @@ export async function POST(request: Request) {
       );
     }
 
+    // AN ACTIVE AGENT WITH NO next_run_at IS AN AGENT THAT NEVER RUNS.
+    //
+    // The dispatcher selects on `.not("next_run_at","is","null")`, and
+    // nothing ever recomputes the column, so a null written here is
+    // permanent — the row sits in the list looking active while the cron
+    // can never see it. This used to be `?? null`, which turned a
+    // schedule that could not be resolved into exactly that row, AFTER
+    // the fill had been reserved for.
+    //
+    // validateAgentDraft above now rejects an impossible date through
+    // validateAgentCron, and the timezone was normalised to UTC if it did
+    // not parse, so reaching this branch means something changed that
+    // this route has not been taught about. It refuses and releases the
+    // reservation rather than charging for an agent that cannot run.
+    const nextRun = nextRunAt(
+      validated.draft.scheduleCron,
+      new Date(),
+      validated.draft.timezone
+    );
+    if (!nextRun) {
+      await releaseReservation(user.id, reservationId);
+      logApiError("/api/agents/templates/adopt", new Error("unresolvable_schedule"), {
+        stage: "next_run_at",
+        slug,
+        scheduleCron: validated.draft.scheduleCron,
+        timezone: validated.draft.timezone,
+      });
+      return NextResponse.json(
+        { ok: false, error: UNSCHEDULABLE_MESSAGE },
+        { status: 400 }
+      );
+    }
+
     const admin = createAdminClient();
     const { data: created, error: insertError } = await admin
       .from("user_agents")
@@ -267,7 +300,7 @@ export async function POST(request: Request) {
         delivery_target: validated.draft.deliveryTarget,
         status: "active",
         config: validated.draft.config,
-        next_run_at: nextRunAt(validated.draft.scheduleCron, new Date(), validated.draft.timezone)?.toISOString() ?? null,
+        next_run_at: nextRun.toISOString(),
       })
       .select("*")
       .maybeSingle();

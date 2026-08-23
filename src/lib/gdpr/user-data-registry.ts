@@ -187,6 +187,19 @@ export const USER_DATA_TABLES: UserDataTable[] = [
     redactColumns: ["target_encrypted"],
   },
   { table: "notification_events", label: "notification_delivery_log", scope: "account" },
+  // V4 #19 + #20. data_analyses carries the user's UPLOADED FILE, parsed
+  // — the rows themselves, not a summary — so it is the single largest
+  // piece of their own content in the export and the one they would most
+  // want back. Exported whole for the same reason: an export that
+  // returned a column profile without the data would be a description of
+  // their file rather than their file.
+  { table: "data_analyses", label: "data_analyses", scope: "user_content" },
+  { table: "data_analysis_charts", label: "data_analysis_charts", scope: "user_content" },
+  { table: "data_analysis_questions", label: "data_analysis_questions", scope: "user_content" },
+  // Every coding operation, including the notes imported from the old
+  // tracker (source = 'note'). ai_coding_requests stays registered too —
+  // the import copied rows, it did not move them.
+  { table: "code_sessions", label: "code_sessions", scope: "user_content" },
   { table: "user_onboarding", label: "onboarding", scope: "account" },
   { table: "user_email_preferences", label: "email_preferences", scope: "account" },
   { table: "email_send_log", label: "emails_sent_to_you", scope: "account" },

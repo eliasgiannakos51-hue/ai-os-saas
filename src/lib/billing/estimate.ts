@@ -410,6 +410,46 @@ export const ACTION_PROFILES = {
     baseOutputChars: 16000,
     outputCharsPerInputChar: 1,
   },
+  // Reading a dataset's PROFILE and saying what it means
+  // (api/data-analysis/[id]/analyse). The model never sees a row — it is
+  // handed the column types, the statistics and the correlations that
+  // lib/data-analysis/profile.ts computed, plus a handful of sample rows
+  // for flavour. So the input is bounded by the number of COLUMNS, not by
+  // the size of the upload: a 50,000-row file and a 200-row file with the
+  // same columns cost the same to analyse, which is the honest shape for
+  // a price and the reason this profile does not scale with rows.
+  dataAnalyse: {
+    systemPromptTokens: 1600,
+    auxiliaryCalls: [],
+    baseOutputChars: 4000,
+    outputCharsPerInputChar: 1,
+  },
+  // One question about a dataset (api/data-analysis/[id]/ask). The
+  // question is short; the context is the profile again. The ANSWER does
+  // not grow with the file — "which region sold most" is one sentence
+  // whatever the row count — so output does not scale with input, for the
+  // same reason fileAsk's does not.
+  dataQuestion: {
+    systemPromptTokens: 1400,
+    auxiliaryCalls: [],
+    baseOutputChars: 1200,
+    outputCharsPerInputChar: 0,
+  },
+  // One coding operation (api/coding/run): generate, explain, find bugs,
+  // convert or write tests.
+  //
+  // OUTPUT SCALES WITH INPUT ABOVE 1, and that is not padding. Two of the
+  // five operations RE-EMIT the input: converting a file to another
+  // language returns something the same size or larger, and "write tests
+  // for this" reliably returns more code than it was given. A ratio at or
+  // below 1 would under-reserve exactly the two operations people use on
+  // their longest files.
+  codeAssist: {
+    systemPromptTokens: 1200,
+    auxiliaryCalls: [],
+    baseOutputChars: 1500,
+    outputCharsPerInputChar: 2,
+  },
 } as const;
 
 export type ActionProfileKey = keyof typeof ACTION_PROFILES;

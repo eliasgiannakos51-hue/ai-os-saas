@@ -2357,15 +2357,12 @@
       "company": "公司",
       "contentIdeas": "内容创意",
       "customers": "客户",
-      "dataSource": "数据来源",
       "description": "描述",
       "direction": "方向",
-      "findings": "发现",
       "followUpEmail": "跟进邮件",
       "hashtags": "话题标签",
       "idea": "创意",
       "ideaNames": "创意名称",
-      "language": "语言",
       "launchPlan": "发布计划",
       "leadName": "线索名称",
       "marketing": "营销",
@@ -2441,9 +2438,7 @@
     "placeholders": {
       "longShort": "做多 / 做空",
       "winLoss": "盈利 / 亏损",
-      "httpsUrl": "https://...",
-      "codingLanguages": "例如 Python、TypeScript、Go",
-      "dataSources": "例如 CSV 导出、Stripe、Google Analytics"
+      "httpsUrl": "https://..."
     },
     "deleteConfirm": {
       "competitors": "确定删除此竞争对手？此操作无法撤销。",
@@ -2462,8 +2457,6 @@
       "apps": "确定删除此应用？此操作无法撤销。",
       "images": "确定删除此图片？此操作无法撤销。",
       "videos": "确定删除此视频？此操作无法撤销。",
-      "coding": "确定删除此编码请求？此操作无法撤销。",
-      "data-analysis": "确定删除此分析？此操作无法撤销。",
       "presentations": "确定删除此演示记录？此操作无法撤销。",
       "campaigns": "确定删除此营销活动？此操作无法撤销。"
     },
@@ -2548,16 +2541,6 @@
         "why": "每条视频的需求和进度，拍摄清单不该只存在脑子里。它不会生成视频。",
         "example": "30 秒的产品演示"
       },
-      "coding": {
-        "title": "你想让人做出来的东西",
-        "why": "写清要做的功能或要修的问题，标上语言，把整个待办清单放在脑子以外的地方。它不会写代码。",
-        "example": "一个合并每月 CSV 的脚本"
-      },
-      "dataAnalysis": {
-        "title": "你的数据能回答的问题",
-        "why": "问题、查哪个数据源、以及拿回来的结论——同一个答案不该被找两遍。它不会分析你的数据。",
-        "example": "哪个渠道带来的客户留得住"
-      },
       "presentations": {
         "title": "记录演示文稿的地方",
         "why": "把你正在准备或已经讲过的演示记在这里——本页不会替你生成幻灯片。用上方的按钮添加一条。",
@@ -2586,8 +2569,6 @@
       "apps": "新增应用",
       "images": "新增图片",
       "videos": "新增视频",
-      "coding": "新增编程任务",
-      "dataAnalysis": "新增分析",
       "presentations": "新增演示备注",
       "campaigns": "新增活动"
     }
@@ -2970,6 +2951,134 @@
       "title": "语音",
       "transcribeLabel": "对它说",
       "used": "本月已使用 {used} / {limit} 分钟"
+    }
+  },
+  "dataAnalysis": {
+    "title": "数据分析",
+    "description": "上传一份表格。每一项统计都基于整份文件计算得出，绝不猜测。",
+    "upload": {
+      "title": "上传文件",
+      "description": "CSV 或 Excel，最大 8 MB。读取文件不收费。",
+      "button": "选择文件",
+      "working": "正在读取…",
+      "done": "已读取 {rows} 行",
+      "failed": "这个文件无法读取。",
+      "tooLarge": "文件太大了——上限是 8 MB。"
+    },
+    "summary": {
+      "counts": "{rows} 行 · {columns} 列",
+      "duplicates": "{count} 行完全重复",
+      "truncated": "我们读取了前 50,000 行。图表描述的是这些行，而不是整份文件。",
+      "ragged": "有 {count} 行与表头对不上——请检查保存时用的分隔符。"
+    },
+    "columns": {
+      "name": "列",
+      "type": "类型",
+      "filled": "已填",
+      "distinct": "不同值",
+      "stats": "范围",
+      "missing": "缺失"
+    },
+    "types": {
+      "number": "数字",
+      "integer": "整数",
+      "date": "日期",
+      "boolean": "是/否",
+      "text": "文本",
+      "empty": "空"
+    },
+    "analyse": {
+      "button": "寻找规律",
+      "working": "正在查看…",
+      "done": "分析完成",
+      "failed": "分析没有完成。",
+      "unavailable": "无法连接 AI 服务。未产生任何费用。"
+    },
+    "findings": {
+      "title": "里面有什么",
+      "none": "还没有分析过。上面的列和图表都是直接从文件算出来的。"
+    },
+    "ask": {
+      "title": "向数据提问",
+      "description": "你的问题会变成一次在真实行上运行的查询。数字来自文件，而不是模型。",
+      "placeholder": "哪个地区卖得最多？",
+      "button": "提问",
+      "working": "正在提问…",
+      "failed": "这个问题无法回答。",
+      "matched": "{total} 行中有 {matched} 行匹配",
+      "rowCount": "{count} 行"
+    },
+    "legacy": {
+      "title": "你以前的笔记",
+      "description": "写于本页的上一个版本，当时它还是一张笔记表。原样保留。"
+    },
+    "chart": {
+      "nothingToPlot": "这一项没有可绘制的内容。",
+      "truncated": "显示最大的 {count} 项；其余的已归类或略去。"
+    }
+  },
+  "coding": {
+    "title": "AI 编程",
+    "description": "五件它会做的事，四件它不做的事。所有操作都只针对框里的那段文本。",
+    "code": "代码",
+    "copy": "复制",
+    "copied": "已复制",
+    "language": "语言",
+    "targetLanguage": "转换为",
+    "useWorkspace": "用我的其他模块作为上下文",
+    "run": "运行",
+    "running": "处理中…",
+    "result": "结果",
+    "limits": {
+      "title": "它不做什么",
+      "no_repository": "它没有代码仓库。看不到你的代码库，也看不到你粘贴的那个文件旁边的文件。",
+      "no_execution": "它不运行任何东西。不运行你的代码，不运行它写的代码，也不运行它写的测试。",
+      "no_commits": "它不做提交、分支或合并请求。",
+      "no_whole_project": "它不搭建整个项目。一个函数、一个文件、一次粘贴。",
+      "later": "这四项属于下一个版本，不属于这一版。"
+    },
+    "operations": {
+      "generate": {
+        "label": "写一段代码",
+        "description": "描述你要什么，得到一个函数，并写明它的假设和没有覆盖的地方。",
+        "placeholder": "一个接收订单列表并返回每位客户利润率的函数…"
+      },
+      "explain": {
+        "label": "解释这段",
+        "description": "粘贴代码，按顺序说明它做了什么，并指名所讲的那几行。",
+        "placeholder": "粘贴你想让它解释的代码…"
+      },
+      "find_bugs": {
+        "label": "找出缺陷",
+        "description": "每条结论都要指明触发它的输入或状态。没有失败用例的结论只是偏好。",
+        "placeholder": "粘贴你想检查的代码…"
+      },
+      "convert": {
+        "label": "转换语言",
+        "description": "用另一种语言重写，并列出所有无法直接迁移的部分。",
+        "placeholder": "粘贴你想转换的代码…"
+      },
+      "write_tests": {
+        "label": "写测试",
+        "description": "常规情况、边界情况，以及它失败的方式。不只是顺利路径。",
+        "placeholder": "粘贴你想测试的代码…"
+      }
+    },
+    "errors": {
+      "tooLong": "超过了 {limit} 个字符。这个功能针对单个文件，不是整个项目。",
+      "unavailable": "无法连接 AI 服务。未产生任何费用。",
+      "failed": "没有成功——请再试一次。"
+    },
+    "history": {
+      "title": "历史",
+      "search": "搜索",
+      "folder": "文件夹",
+      "allFolders": "全部文件夹",
+      "empty": "这里还没有内容。",
+      "input": "输入",
+      "output": "输出",
+      "importedNote": "以前的笔记",
+      "failed": "失败"
     }
   }
 }

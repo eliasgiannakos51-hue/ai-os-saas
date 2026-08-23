@@ -2357,15 +2357,12 @@
       "company": "企業",
       "contentIdeas": "コンテンツのアイデア",
       "customers": "顧客",
-      "dataSource": "データソース",
       "description": "説明",
       "direction": "方向",
-      "findings": "分かったこと",
       "followUpEmail": "フォローアップメール",
       "hashtags": "ハッシュタグ",
       "idea": "アイデア",
       "ideaNames": "アイデア名",
-      "language": "言語",
       "launchPlan": "ローンチ計画",
       "leadName": "リード名",
       "marketing": "マーケティング",
@@ -2441,9 +2438,7 @@
     "placeholders": {
       "longShort": "買い / 売り",
       "winLoss": "勝ち / 負け",
-      "httpsUrl": "https://...",
-      "codingLanguages": "例: Python, TypeScript, Go",
-      "dataSources": "例: CSV エクスポート, Stripe, Google Analytics"
+      "httpsUrl": "https://..."
     },
     "deleteConfirm": {
       "competitors": "この競合を削除しますか？元に戻せません。",
@@ -2462,8 +2457,6 @@
       "apps": "このアプリを削除しますか？元に戻せません。",
       "images": "この画像を削除しますか？元に戻せません。",
       "videos": "この動画を削除しますか？元に戻せません。",
-      "coding": "このコーディング依頼を削除しますか？元に戻せません。",
-      "data-analysis": "この分析を削除しますか？元に戻せません。",
       "presentations": "このプレゼンのメモを削除しますか？元に戻せません。",
       "campaigns": "このキャンペーンを削除しますか？元に戻せません。"
     },
@@ -2548,16 +2541,6 @@
         "why": "動画ごとの企画と進み具合。撮影リストを頭の中だけに置かないために。動画を生成するわけではありません。",
         "example": "30秒の製品デモ"
       },
-      "coding": {
-        "title": "作ってほしいもの",
-        "why": "機能や修正の内容を書き、言語をタグ付けする。バックログ全体を、頭の中以外の場所に置いておくために。コードを書くわけではありません。",
-        "example": "月次CSVを結合するスクリプト"
-      },
-      "dataAnalysis": {
-        "title": "データが答えられる問い",
-        "why": "問い、当たるデータソース、そして返ってきた発見。同じ答えを二度探さずに済みます。データを分析するわけではありません。",
-        "example": "定着する顧客はどのチャネルから来るか"
-      },
       "presentations": {
         "title": "プレゼンを記録しておく場所",
         "why": "これから準備するプレゼンや、すでに行ったプレゼンを書き留める場所です。このページがスライドを作るわけではありません。上のボタンから追加してください。",
@@ -2586,8 +2569,6 @@
       "apps": "アプリを追加",
       "images": "画像を追加",
       "videos": "動画を追加",
-      "coding": "コーディング項目を追加",
-      "dataAnalysis": "分析を追加",
       "presentations": "発表メモを追加",
       "campaigns": "キャンペーンを追加"
     }
@@ -2970,6 +2951,134 @@
       "title": "音声",
       "transcribeLabel": "話しかける",
       "used": "今月は {limit} 分のうち {used} 分を使用"
+    }
+  },
+  "dataAnalysis": {
+    "title": "データ分析",
+    "description": "表計算ファイルをアップロードしてください。統計はすべてファイル全体から計算します。推測はしません。",
+    "upload": {
+      "title": "ファイルをアップロード",
+      "description": "CSV または Excel、8 MB まで。ファイルの読み込みに料金はかかりません。",
+      "button": "ファイルを選ぶ",
+      "working": "読み込み中…",
+      "done": "{rows} 行を読み込みました",
+      "failed": "そのファイルは読み込めませんでした。",
+      "tooLarge": "ファイルが大きすぎます。上限は 8 MB です。"
+    },
+    "summary": {
+      "counts": "{rows} 行 · {columns} 列",
+      "duplicates": "完全に重複した行が {count} 件",
+      "truncated": "最初の 50,000 行を読み込みました。グラフはその範囲のもので、ファイル全体ではありません。",
+      "ragged": "{count} 行がヘッダーと一致しませんでした。保存時の区切り文字を確認してください。"
+    },
+    "columns": {
+      "name": "列",
+      "type": "種類",
+      "filled": "入力あり",
+      "distinct": "種類数",
+      "stats": "範囲",
+      "missing": "欠損"
+    },
+    "types": {
+      "number": "数値",
+      "integer": "整数",
+      "date": "日付",
+      "boolean": "はい/いいえ",
+      "text": "テキスト",
+      "empty": "空"
+    },
+    "analyse": {
+      "button": "パターンを探す",
+      "working": "確認中…",
+      "done": "分析ができました",
+      "failed": "分析を最後まで実行できませんでした。",
+      "unavailable": "AI サービスに接続できませんでした。料金は発生していません。"
+    },
+    "findings": {
+      "title": "中身",
+      "none": "まだ分析していません。上の列とグラフはファイルそのものから計算したものです。"
+    },
+    "ask": {
+      "title": "データに質問する",
+      "description": "質問はクエリになり、実際の行に対して実行されます。数値はファイルから出たもので、モデルが作ったものではありません。",
+      "placeholder": "どの地域が一番売れましたか？",
+      "button": "質問する",
+      "working": "質問中…",
+      "failed": "その質問には答えられませんでした。",
+      "matched": "{total} 行のうち {matched} 行が一致",
+      "rowCount": "{count} 行"
+    },
+    "legacy": {
+      "title": "以前のメモ",
+      "description": "このページがメモ表だった頃に書かれたものです。そのまま残しています。"
+    },
+    "chart": {
+      "nothingToPlot": "これについて描けるものがありません。",
+      "truncated": "上位 {count} 件を表示しています。残りはまとめたか省いています。"
+    }
+  },
+  "coding": {
+    "title": "AI コーディング",
+    "description": "できること五つ、しないこと四つ。すべて入力欄のテキストだけを対象にします。",
+    "code": "コード",
+    "copy": "コピー",
+    "copied": "コピーしました",
+    "language": "言語",
+    "targetLanguage": "変換先",
+    "useWorkspace": "ほかのモジュールを文脈として使う",
+    "run": "実行",
+    "running": "処理中…",
+    "result": "結果",
+    "limits": {
+      "title": "これがしないこと",
+      "no_repository": "リポジトリを持ちません。あなたのコードベースも、貼り付けたファイルの隣のファイルも見えません。",
+      "no_execution": "何も実行しません。あなたのコードも、書いたコードも、書いたテストもです。",
+      "no_commits": "コミット、ブランチ、プルリクエストは作りません。",
+      "no_whole_project": "プロジェクトは作りません。関数ひとつ、ファイルひとつ、貼り付けひとつです。",
+      "later": "この四つは次のバージョンの話で、今回のものではありません。"
+    },
+    "operations": {
+      "generate": {
+        "label": "スニペットを書く",
+        "description": "必要なものを説明すると関数がひとつ返り、前提と対応していない点も書かれます。",
+        "placeholder": "注文のリストを受け取り、顧客ごとの利益率を返す関数…"
+      },
+      "explain": {
+        "label": "これを説明",
+        "description": "コードを貼ると、何をしているかを順に、対象の行を挙げて説明します。",
+        "placeholder": "説明してほしいコードを貼り付けてください…"
+      },
+      "find_bugs": {
+        "label": "バグを探す",
+        "description": "どの指摘にも、それが起きる入力や状態を挙げます。失敗例のない指摘はただの好みです。",
+        "placeholder": "確認してほしいコードを貼り付けてください…"
+      },
+      "convert": {
+        "label": "変換する",
+        "description": "別の言語で書き直し、移し替えられないものを一覧にします。",
+        "placeholder": "変換したいコードを貼り付けてください…"
+      },
+      "write_tests": {
+        "label": "テストを書く",
+        "description": "通常のケース、境界、そして壊れ方。うまくいく経路だけではありません。",
+        "placeholder": "テストしたいコードを貼り付けてください…"
+      }
+    },
+    "errors": {
+      "tooLong": "{limit} 文字を超えています。これはファイル単位のもので、プロジェクト単位ではありません。",
+      "unavailable": "AI サービスに接続できませんでした。料金は発生していません。",
+      "failed": "うまくいきませんでした。もう一度お試しください。"
+    },
+    "history": {
+      "title": "履歴",
+      "search": "検索",
+      "folder": "フォルダ",
+      "allFolders": "すべてのフォルダ",
+      "empty": "まだ何もありません。",
+      "input": "入力",
+      "output": "出力",
+      "importedNote": "以前のメモ",
+      "failed": "失敗"
     }
   }
 }

@@ -77,9 +77,12 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
     ],
   },
   {
-    // BUILD MEANS SOMETHING IS PRODUCED, and after this change it is true
-    // of everything in here. Three entries: the agent builder, the site
-    // builder, and the sites it put live.
+    // BUILD MEANS SOMETHING IS PRODUCED, and the gate proves it rather
+    // than trusting it: every href here must have an API route behind it
+    // that actually calls a model, and every module in
+    // lib/build-modules.ts must NOT. The agent builder, the site builder,
+    // what it published, what those sites produced, and — since V4 #19 +
+    // #20 — the two former trackers that became real tools.
     heading: "Build",
     collapsible: true,
     items: [
@@ -104,6 +107,22 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
         icon: FORM_SUBMISSIONS_ICON,
         hintKey: "formSubmissions",
       },
+      // MOVED UP FROM TRACKING IN V4 #19 + #20, because they stopped
+      // being logs. Data Analysis parses a real uploaded spreadsheet,
+      // profiles every column in TypeScript and draws charts from the
+      // real rows; Coding runs five operations that return code, an
+      // explanation, a bug list, a conversion or tests. Both have an API
+      // route that makes a model call, which is what
+      // scripts/tests/sidebar-naming.test.mjs now REQUIRES of anything
+      // filed here — the heading is checked against the code rather than
+      // against a list somebody keeps up to date.
+      {
+        href: "/dashboard/data-analysis",
+        label: "Data Analysis",
+        icon: MODULE_ICONS["data-analysis"],
+        hintKey: "dataAnalysis",
+      },
+      { href: "/dashboard/coding", label: "AI Coding", icon: MODULE_ICONS.coding, hintKey: "coding" },
     ],
   },
   {
@@ -127,11 +146,6 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: "/dashboard/apps", label: "Apps", icon: MODULE_ICONS.apps , hintKey: "apps" },
       { href: "/dashboard/images", label: "Images", icon: MODULE_ICONS.images , hintKey: "images" },
       { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos , hintKey: "videos" },
-      { href: "/dashboard/coding", label: "AI Coding", icon: MODULE_ICONS.coding , hintKey: "coding" },
-      {
-        href: "/dashboard/data-analysis",
-        label: "Data Analysis",
-        icon: MODULE_ICONS["data-analysis"], hintKey: "dataAnalysis" },
       {
         href: "/dashboard/presentations",
         label: "Presentation Notes",

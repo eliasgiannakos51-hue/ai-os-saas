@@ -106,7 +106,18 @@ for (const [label, file] of [
 // shows up as that module, not as a count that moved.
 // "agents" is deliberately absent — see the AI Agents entry among the
 // direct consumers above.
-for (const m of ["apps", "images", "videos", "coding"]) {
+// DERIVED FROM THE REGISTRY, not written out. The hardcoded list went red
+// when V4 #19 + #20 moved `coding` out of build-modules.ts and gave it a
+// bespoke page — a true change that this check reported as a regression,
+// which is the failure mode of a list that names things instead of asking
+// where they are. Reading the registry means a new tracker is covered the
+// day it is added and a departing one stops being demanded.
+//
+// "agents" is deliberately not in the registry — see the AI Agents entry
+// among the direct consumers above.
+const TRACKER_SLUGS = [...read("src/lib/build-modules.ts").matchAll(/slug: "([^"]+)"/g)].map((m) => m[1]);
+checkTrue(`the tracker registry was read (${TRACKER_SLUGS.length} modules)`, TRACKER_SLUGS.length >= 5);
+for (const m of TRACKER_SLUGS) {
   checkTrue(`/${m} uses the shared BuildModulePage`, /BuildModulePage/.test(read(`src/app/dashboard/${m}/page.tsx`)));
 }
 

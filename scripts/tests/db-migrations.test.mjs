@@ -440,7 +440,7 @@ if (!DB) {
   // 20260827's voice_usage took 75 to 76; 20260828's ai_provider_log
   // took 76 to 77; 20260830's trading journal and 20260831's bank/crypto
   // tables took 77 to 83; 20260901's notification tables took 83 to 87.
-  check(`87 tables`, tables === 87, `got ${tables}`);
+  check(`91 tables`, tables === 91, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 

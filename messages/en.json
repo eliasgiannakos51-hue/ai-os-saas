@@ -2357,15 +2357,12 @@
       "company": "Company",
       "contentIdeas": "Content Ideas",
       "customers": "Customers",
-      "dataSource": "Data Source",
       "description": "Description",
       "direction": "Direction",
-      "findings": "Findings",
       "followUpEmail": "Follow-up Email",
       "hashtags": "Hashtags",
       "idea": "Idea",
       "ideaNames": "Idea Names",
-      "language": "Language",
       "launchPlan": "Launch Plan",
       "leadName": "Lead Name",
       "marketing": "Marketing",
@@ -2441,9 +2438,7 @@
     "placeholders": {
       "longShort": "long / short",
       "winLoss": "win / loss",
-      "httpsUrl": "https://...",
-      "codingLanguages": "e.g. Python, TypeScript, Go",
-      "dataSources": "e.g. CSV export, Stripe, Google Analytics"
+      "httpsUrl": "https://..."
     },
     "deleteConfirm": {
       "competitors": "Delete this competitor? This can't be undone.",
@@ -2462,8 +2457,6 @@
       "apps": "Delete this app? This can't be undone.",
       "images": "Delete this image? This can't be undone.",
       "videos": "Delete this video? This can't be undone.",
-      "coding": "Delete this coding request? This can't be undone.",
-      "data-analysis": "Delete this analysis? This can't be undone.",
       "presentations": "Delete this presentation note? This can't be undone.",
       "campaigns": "Delete this campaign? This can't be undone."
     },
@@ -2548,16 +2541,6 @@
         "why": "The brief for each video and how far it has got, so a shoot list is never something you keep in your head. It does not create videos.",
         "example": "A 30-second product demo"
       },
-      "coding": {
-        "title": "The things you want built",
-        "why": "Describe the feature or the fix, tag the language, and keep the whole backlog somewhere other than your head. It does not write code.",
-        "example": "A script that merges the monthly CSVs"
-      },
-      "dataAnalysis": {
-        "title": "The questions your data can answer",
-        "why": "The question, the source it goes to, and the finding when it comes back — so an answer is never found twice. It does not analyse your data.",
-        "example": "Which channel brings the customers who stay"
-      },
       "presentations": {
         "title": "A place to keep track of presentations",
         "why": "Note the decks you are planning or have already given — this page does not generate slides for you. Use the button above to add one.",
@@ -2586,8 +2569,6 @@
       "apps": "New app",
       "images": "New image",
       "videos": "New video",
-      "coding": "New coding task",
-      "dataAnalysis": "New analysis",
       "presentations": "New presentation note",
       "campaigns": "New campaign"
     }
@@ -2970,6 +2951,134 @@
       "title": "Voice",
       "transcribeLabel": "Speaking to it",
       "used": "{used} of {limit} minutes used this month"
+    }
+  },
+  "dataAnalysis": {
+    "title": "Data Analysis",
+    "description": "Upload a spreadsheet. Every statistic is computed from the whole file — never guessed.",
+    "upload": {
+      "title": "Upload a file",
+      "description": "CSV or Excel, up to 8 MB. Nothing is charged for reading a file.",
+      "button": "Choose a file",
+      "working": "Reading…",
+      "done": "Read {rows} rows",
+      "failed": "That file couldn't be read.",
+      "tooLarge": "That file is too big — 8 MB is the limit."
+    },
+    "summary": {
+      "counts": "{rows} rows · {columns} columns",
+      "duplicates": "{count} exact duplicate rows",
+      "truncated": "We read the first 50,000 rows. The charts describe those, not the whole file.",
+      "ragged": "{count} rows didn't line up with the header — check the file was saved with the right separator."
+    },
+    "columns": {
+      "name": "Column",
+      "type": "Type",
+      "filled": "Filled",
+      "distinct": "Distinct",
+      "stats": "Range",
+      "missing": "missing"
+    },
+    "types": {
+      "number": "number",
+      "integer": "whole number",
+      "date": "date",
+      "boolean": "yes/no",
+      "text": "text",
+      "empty": "empty"
+    },
+    "analyse": {
+      "button": "Find patterns",
+      "working": "Looking…",
+      "done": "Analysis ready",
+      "failed": "The analysis didn't finish.",
+      "unavailable": "The AI service couldn't be reached. Nothing was charged."
+    },
+    "findings": {
+      "title": "What's in it",
+      "none": "Nothing analysed yet. The columns and charts above are computed from the file itself."
+    },
+    "ask": {
+      "title": "Ask the data",
+      "description": "Your question becomes a query that runs over the real rows. The numbers come from the file, not from the model.",
+      "placeholder": "Which region sold the most?",
+      "button": "Ask",
+      "working": "Asking…",
+      "failed": "That question couldn't be answered.",
+      "matched": "{matched} of {total} rows matched",
+      "rowCount": "{count} rows"
+    },
+    "legacy": {
+      "title": "Your earlier notes",
+      "description": "Written in the previous version of this page, when it was a notes table. Kept exactly as they were."
+    },
+    "chart": {
+      "nothingToPlot": "Nothing to plot for this one.",
+      "truncated": "Showing the largest {count}; the rest are grouped or left out."
+    }
+  },
+  "coding": {
+    "title": "AI Coding",
+    "description": "Five things it does, and four it doesn't. Everything works on exactly the text in the box.",
+    "code": "Code",
+    "copy": "Copy",
+    "copied": "Copied",
+    "language": "Language",
+    "targetLanguage": "Convert to",
+    "useWorkspace": "Use my other modules for context",
+    "run": "Run",
+    "running": "Working…",
+    "result": "Result",
+    "limits": {
+      "title": "What this does NOT do",
+      "no_repository": "It has no repository. It cannot see your codebase or the file next to the one you paste.",
+      "no_execution": "It runs nothing. Not your code, not the code it writes, not the tests it writes.",
+      "no_commits": "It makes no commits, branches or pull requests.",
+      "no_whole_project": "It does not build a project. One function, one file, one paste.",
+      "later": "Those four are the next version, not this one."
+    },
+    "operations": {
+      "generate": {
+        "label": "Write a snippet",
+        "description": "Describe what you need and get one function, with its assumptions and its gaps stated.",
+        "placeholder": "A function that takes a list of orders and returns the margin per customer…"
+      },
+      "explain": {
+        "label": "Explain this",
+        "description": "Paste code and get what it does, in order, naming the lines it is talking about.",
+        "placeholder": "Paste the code you want explained…"
+      },
+      "find_bugs": {
+        "label": "Find bugs",
+        "description": "Every finding names the input or state that makes it go wrong. A finding with no failing case is a preference.",
+        "placeholder": "Paste the code you want checked…"
+      },
+      "convert": {
+        "label": "Convert",
+        "description": "Rewrite it in another language, with a list of everything that does not carry across.",
+        "placeholder": "Paste the code you want converted…"
+      },
+      "write_tests": {
+        "label": "Write tests",
+        "description": "The ordinary case, the boundaries, and the ways it fails. Not just the happy path.",
+        "placeholder": "Paste the code you want tested…"
+      }
+    },
+    "errors": {
+      "tooLong": "That's longer than {limit} characters. This works on one file, not a project.",
+      "unavailable": "The AI service couldn't be reached. Nothing was charged.",
+      "failed": "That didn't work — try again."
+    },
+    "history": {
+      "title": "History",
+      "search": "Search",
+      "folder": "Folder",
+      "allFolders": "All folders",
+      "empty": "Nothing here yet.",
+      "input": "Input",
+      "output": "Output",
+      "importedNote": "note from before",
+      "failed": "failed"
     }
   }
 }

@@ -141,9 +141,12 @@ console.log("== 0. the database really is the one the migrations build ==");
 // 77 -> 83: V4 #14 added trading_accounts, trading_rules and
 // rule_violations; V4 #15 added bank_connections, bank_transactions and
 // crypto_wallets.
+// 87 -> 91: V4 #19 + #20 turned two trackers into two tools —
+// data_analyses, data_analysis_charts, data_analysis_questions and
+// code_sessions. The old tracker tables are untouched and still counted.
 // 83 -> 87: V4 #18 added notification_settings, notification_preferences,
 // notification_channels and notification_events.
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 87);
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 91);
 eq(
   "the credit functions exist",
   Number(

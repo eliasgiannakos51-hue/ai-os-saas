@@ -406,6 +406,15 @@ const LOCALE_ALLOWED = new Set([
   // is spelled identically in French. The other nine locales translate
   // all three and are not listed here — which is why this is an
   // allowance per locale rather than a rule about short words.
+  // V4 #19 + #20. Four more real linguistic facts: "Type" and "date" are
+  // spelled identically in French, and "Code" is the ordinary word in
+  // French and German. The nine other locales translate all four and are
+  // not listed, which is what keeps this an allowance per locale rather
+  // than a rule about short words.
+  "fr:dataAnalysis.columns.type",
+  "fr:dataAnalysis.types.date",
+  "fr:coding.code",
+  "de:coding.code",
   "el:settings.notifications.channels.email",
   "it:settings.notifications.channels.email",
   "fr:settings.notifications.title",

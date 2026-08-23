@@ -2357,15 +2357,12 @@
       "company": "Unternehmen",
       "contentIdeas": "Content-Ideen",
       "customers": "Kundschaft",
-      "dataSource": "Datenquelle",
       "description": "Beschreibung",
       "direction": "Richtung",
-      "findings": "Erkenntnisse",
       "followUpEmail": "Follow-up-E-Mail",
       "hashtags": "Hashtags",
       "idea": "Idee",
       "ideaNames": "Namen der Ideen",
-      "language": "Sprache",
       "launchPlan": "Launch-Plan",
       "leadName": "Name des Leads",
       "marketing": "Marketing",
@@ -2441,9 +2438,7 @@
     "placeholders": {
       "longShort": "Long / Short",
       "winLoss": "Gewinn / Verlust",
-      "httpsUrl": "https://...",
-      "codingLanguages": "z. B. Python, TypeScript, Go",
-      "dataSources": "z. B. CSV-Export, Stripe, Google Analytics"
+      "httpsUrl": "https://..."
     },
     "deleteConfirm": {
       "competitors": "Diesen Wettbewerber löschen? Das lässt sich nicht rückgängig machen.",
@@ -2462,8 +2457,6 @@
       "apps": "Diese App löschen? Das lässt sich nicht rückgängig machen.",
       "images": "Dieses Bild löschen? Das lässt sich nicht rückgängig machen.",
       "videos": "Dieses Video löschen? Das lässt sich nicht rückgängig machen.",
-      "coding": "Diese Coding-Anfrage löschen? Das lässt sich nicht rückgängig machen.",
-      "data-analysis": "Diese Analyse löschen? Das lässt sich nicht rückgängig machen.",
       "presentations": "Diese Präsentationsnotiz löschen? Das lässt sich nicht rückgängig machen.",
       "campaigns": "Diese Kampagne löschen? Das lässt sich nicht rückgängig machen."
     },
@@ -2548,16 +2541,6 @@
         "why": "Das Briefing je Video und wie weit es ist — damit eine Drehliste nie nur in deinem Kopf existiert. Erzeugt werden hier keine.",
         "example": "30-Sekunden-Produktdemo"
       },
-      "coding": {
-        "title": "Was gebaut werden soll",
-        "why": "Beschreib das Feature oder den Fix, halt die Sprache fest, und leg das ganze Backlog woanders ab als in deinem Kopf. Code schreibt es nicht.",
-        "example": "Ein Skript, das die Monats-CSVs zusammenführt"
-      },
-      "dataAnalysis": {
-        "title": "Die Fragen, die deine Daten beantworten",
-        "why": "Die Frage, die Quelle, an die sie geht, und der Befund, wenn er zurückkommt — damit eine Antwort nie zweimal gefunden wird. Deine Daten wertet es nicht aus.",
-        "example": "Welcher Kanal die Kunden bringt, die bleiben"
-      },
       "presentations": {
         "title": "Ein Ort, um Präsentationen im Blick zu behalten",
         "why": "Notiere die Decks, die du planst oder schon gehalten hast — diese Seite erstellt keine Folien für dich. Nutze den Button oben, um eines hinzuzufügen.",
@@ -2586,8 +2569,6 @@
       "apps": "Neue App",
       "images": "Neues Bild",
       "videos": "Neues Video",
-      "coding": "Neue Coding-Aufgabe",
-      "dataAnalysis": "Neue Analyse",
       "presentations": "Neue Präsentationsnotiz",
       "campaigns": "Neue Kampagne"
     }
@@ -2970,6 +2951,134 @@
       "title": "Sprache",
       "transcribeLabel": "Mit ihm sprechen",
       "used": "{used} von {limit} Minuten diesen Monat genutzt"
+    }
+  },
+  "dataAnalysis": {
+    "title": "Datenanalyse",
+    "description": "Lade eine Tabelle hoch. Jede Kennzahl wird aus der GANZEN Datei berechnet — nie geraten.",
+    "upload": {
+      "title": "Datei hochladen",
+      "description": "CSV oder Excel, bis 8 MB. Das Lesen einer Datei kostet nichts.",
+      "button": "Datei wählen",
+      "working": "Lese…",
+      "done": "{rows} Zeilen gelesen",
+      "failed": "Diese Datei konnte nicht gelesen werden.",
+      "tooLarge": "Diese Datei ist zu groß — das Limit sind 8 MB."
+    },
+    "summary": {
+      "counts": "{rows} Zeilen · {columns} Spalten",
+      "duplicates": "{count} exakt doppelte Zeilen",
+      "truncated": "Wir haben die ersten 50.000 Zeilen gelesen. Die Diagramme beschreiben diese, nicht die ganze Datei.",
+      "ragged": "{count} Zeilen passten nicht zur Kopfzeile — prüfe, ob die Datei mit dem richtigen Trennzeichen gespeichert wurde."
+    },
+    "columns": {
+      "name": "Spalte",
+      "type": "Typ",
+      "filled": "Gefüllt",
+      "distinct": "Verschieden",
+      "stats": "Bereich",
+      "missing": "leer"
+    },
+    "types": {
+      "number": "Zahl",
+      "integer": "ganze Zahl",
+      "date": "Datum",
+      "boolean": "ja/nein",
+      "text": "Text",
+      "empty": "leer"
+    },
+    "analyse": {
+      "button": "Muster finden",
+      "working": "Suche…",
+      "done": "Analyse fertig",
+      "failed": "Die Analyse wurde nicht fertig.",
+      "unavailable": "Der KI-Dienst war nicht erreichbar. Es wurde nichts berechnet."
+    },
+    "findings": {
+      "title": "Was drinsteht",
+      "none": "Noch nichts analysiert. Die Spalten und Diagramme oben stammen aus der Datei selbst."
+    },
+    "ask": {
+      "title": "Die Daten fragen",
+      "description": "Deine Frage wird zu einer Abfrage über die echten Zeilen. Die Zahlen kommen aus der Datei, nicht aus dem Modell.",
+      "placeholder": "Welche Region hat am meisten verkauft?",
+      "button": "Fragen",
+      "working": "Frage…",
+      "failed": "Diese Frage konnte nicht beantwortet werden.",
+      "matched": "{matched} von {total} Zeilen passten",
+      "rowCount": "{count} Zeilen"
+    },
+    "legacy": {
+      "title": "Deine früheren Notizen",
+      "description": "Geschrieben in der vorherigen Version dieser Seite, als sie eine Notiztabelle war. Unverändert erhalten."
+    },
+    "chart": {
+      "nothingToPlot": "Hier gibt es nichts zu zeichnen.",
+      "truncated": "Zeigt die größten {count}; der Rest ist gruppiert oder weggelassen."
+    }
+  },
+  "coding": {
+    "title": "Programmieren mit KI",
+    "description": "Fünf Dinge, die es tut, und vier, die es nicht tut. Alles arbeitet genau auf dem Text im Feld.",
+    "code": "Code",
+    "copy": "Kopieren",
+    "copied": "Kopiert",
+    "language": "Sprache",
+    "targetLanguage": "Umwandeln in",
+    "useWorkspace": "Meine anderen Module als Kontext nutzen",
+    "run": "Ausführen",
+    "running": "Arbeite…",
+    "result": "Ergebnis",
+    "limits": {
+      "title": "Was es NICHT tut",
+      "no_repository": "Es hat kein Repository. Es sieht weder deine Codebasis noch die Datei nebenan.",
+      "no_execution": "Es führt nichts aus. Weder deinen Code, noch den geschriebenen, noch die Tests.",
+      "no_commits": "Es macht keine Commits, Branches oder Pull Requests.",
+      "no_whole_project": "Es baut kein Projekt. Eine Funktion, eine Datei, ein Einfügen.",
+      "later": "Diese vier sind die nächste Version, nicht diese."
+    },
+    "operations": {
+      "generate": {
+        "label": "Schnipsel schreiben",
+        "description": "Beschreibe, was du brauchst, und bekomme eine Funktion — mit genannten Annahmen und Lücken.",
+        "placeholder": "Eine Funktion, die eine Liste von Bestellungen nimmt und die Marge pro Kunde zurückgibt…"
+      },
+      "explain": {
+        "label": "Das erklären",
+        "description": "Code einfügen und erfahren, was er tut — der Reihe nach, mit Nennung der Zeilen.",
+        "placeholder": "Füge den Code ein, der erklärt werden soll…"
+      },
+      "find_bugs": {
+        "label": "Fehler finden",
+        "description": "Jeder Befund nennt die Eingabe oder den Zustand, der ihn auslöst. Ein Befund ohne Fehlerfall ist eine Vorliebe.",
+        "placeholder": "Füge den zu prüfenden Code ein…"
+      },
+      "convert": {
+        "label": "Umwandeln",
+        "description": "Schreib ihn in einer anderen Sprache neu — mit der Liste von allem, was NICHT übertragbar ist.",
+        "placeholder": "Füge den umzuwandelnden Code ein…"
+      },
+      "write_tests": {
+        "label": "Tests schreiben",
+        "description": "Der Normalfall, die Grenzen und die Fehlerwege. Nicht nur der glückliche Pfad.",
+        "placeholder": "Füge den zu testenden Code ein…"
+      }
+    },
+    "errors": {
+      "tooLong": "Das sind mehr als {limit} Zeichen. Das hier arbeitet auf einer Datei, nicht auf einem Projekt.",
+      "unavailable": "Der KI-Dienst war nicht erreichbar. Es wurde nichts berechnet.",
+      "failed": "Hat nicht geklappt — versuch es noch einmal."
+    },
+    "history": {
+      "title": "Verlauf",
+      "search": "Suchen",
+      "folder": "Ordner",
+      "allFolders": "Alle Ordner",
+      "empty": "Hier ist noch nichts.",
+      "input": "Eingabe",
+      "output": "Ausgabe",
+      "importedNote": "frühere Notiz",
+      "failed": "fehlgeschlagen"
     }
   }
 }

@@ -19,6 +19,16 @@ import { BUILD_MODULES } from "@/lib/build-modules";
  */
 export const MODULE_TITLE_KEYS: Record<string, string> = {
   ideas: "sidebar.items.ideas",
+  // THE TWO THAT LEFT BUILD_MODULES IN V4 #19 + #20, and had to stay
+  // here. `coding` and `data-analysis` are no longer tracking modules —
+  // they are tools with bespoke pages — but the search index still
+  // carries their OLD tables (ai_coding_requests,
+  // ai_data_analysis_requests), because those rows still exist and are
+  // still the user's own content. Dropping the labels would have left
+  // real search results with a raw slug for a filter chip in all ten
+  // languages, which is the one thing this file exists to prevent.
+  coding: "sidebar.items.coding",
+  "data-analysis": "sidebar.items.dataAnalysis",
   ...Object.fromEntries(
     [...MODULES, ...BUILD_MODULES].map((module) => [module.slug, module.titleKey])
   ),

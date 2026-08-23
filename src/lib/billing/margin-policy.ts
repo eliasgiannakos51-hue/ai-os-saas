@@ -246,4 +246,12 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   insightNarrate: "insight_narrate",
   fileAsk: "file_ask",
   deepResearch: "deep_research",
+  // V4 #19. Both settle under ONE feature, so CREDIT_MARGIN_DATA_ANALYSIS
+  // governs the first pass and every follow-up question together — they
+  // are the same product decision, and a per-call key would let the
+  // cheap one drift below the floor while the feature looked configured.
+  dataAnalyse: "data_analysis",
+  dataQuestion: "data_analysis",
+  // V4 #20.
+  codeAssist: "code_assist",
 };

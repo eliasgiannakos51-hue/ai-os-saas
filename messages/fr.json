@@ -2357,15 +2357,12 @@
       "company": "Entreprise",
       "contentIdeas": "Idées de contenu",
       "customers": "Clients",
-      "dataSource": "Source de données",
       "description": "Description",
       "direction": "Sens",
-      "findings": "Constats",
       "followUpEmail": "E-mail de relance",
       "hashtags": "Mots-dièse",
       "idea": "Idée",
       "ideaNames": "Noms des idées",
-      "language": "Langage",
       "launchPlan": "Plan de lancement",
       "leadName": "Nom du prospect",
       "marketing": "Marketing",
@@ -2441,9 +2438,7 @@
     "placeholders": {
       "longShort": "achat / vente",
       "winLoss": "gain / perte",
-      "httpsUrl": "https://...",
-      "codingLanguages": "p. ex. Python, TypeScript, Go",
-      "dataSources": "p. ex. export CSV, Stripe, Google Analytics"
+      "httpsUrl": "https://..."
     },
     "deleteConfirm": {
       "competitors": "Supprimer ce concurrent ? Action irréversible.",
@@ -2462,8 +2457,6 @@
       "apps": "Supprimer cette application ? Action irréversible.",
       "images": "Supprimer cette image ? Action irréversible.",
       "videos": "Supprimer cette vidéo ? Action irréversible.",
-      "coding": "Supprimer cette demande de code ? Action irréversible.",
-      "data-analysis": "Supprimer cette analyse ? Action irréversible.",
       "presentations": "Supprimer cette note de présentation ? Action irréversible.",
       "campaigns": "Supprimer cette campagne ? Action irréversible."
     },
@@ -2548,16 +2541,6 @@
         "why": "Le brief de chaque vidéo et son état d'avancement, pour qu'un plan de tournage ne reste jamais dans votre tête. Il n’en génère aucune.",
         "example": "Démo produit de 30 secondes"
       },
-      "coding": {
-        "title": "Ce que vous voulez faire développer",
-        "why": "Décrivez la fonctionnalité ou le correctif, indiquez le langage, et gardez tout le backlog ailleurs que dans votre tête. Il n’écrit pas de code.",
-        "example": "Un script qui fusionne les CSV mensuels"
-      },
-      "dataAnalysis": {
-        "title": "Les questions auxquelles vos données répondent",
-        "why": "La question, la source interrogée et le résultat obtenu — pour qu'une réponse ne soit jamais trouvée deux fois. Il n’analyse pas vos données.",
-        "example": "Quel canal amène les clients qui restent"
-      },
       "presentations": {
         "title": "Un endroit pour suivre vos présentations",
         "why": "Notez les présentations que vous préparez ou que vous avez déjà faites : cette page ne génère pas de diapositives à votre place. Utilisez le bouton ci-dessus pour en ajouter une.",
@@ -2586,8 +2569,6 @@
       "apps": "Nouvelle application",
       "images": "Nouvelle image",
       "videos": "Nouvelle vidéo",
-      "coding": "Nouvelle tâche de code",
-      "dataAnalysis": "Nouvelle analyse",
       "presentations": "Nouvelle note de présentation",
       "campaigns": "Nouvelle campagne"
     }
@@ -2970,6 +2951,134 @@
       "title": "Voix",
       "transcribeLabel": "Lui parler",
       "used": "{used} minutes sur {limit} utilisées ce mois-ci"
+    }
+  },
+  "dataAnalysis": {
+    "title": "Analyse de données",
+    "description": "Importez un tableur. Chaque statistique est calculée sur tout le fichier, jamais devinée.",
+    "upload": {
+      "title": "Importer un fichier",
+      "description": "CSV ou Excel, jusqu'à 8 Mo. Lire un fichier ne coûte rien.",
+      "button": "Choisir un fichier",
+      "working": "Lecture…",
+      "done": "{rows} lignes lues",
+      "failed": "Ce fichier n'a pas pu être lu.",
+      "tooLarge": "Ce fichier est trop volumineux — la limite est de 8 Mo."
+    },
+    "summary": {
+      "counts": "{rows} lignes · {columns} colonnes",
+      "duplicates": "{count} lignes strictement identiques",
+      "truncated": "Nous avons lu les 50 000 premières lignes. Les graphiques décrivent celles-ci, pas tout le fichier.",
+      "ragged": "{count} lignes ne correspondaient pas à l'en-tête — vérifiez le séparateur utilisé à l'enregistrement."
+    },
+    "columns": {
+      "name": "Colonne",
+      "type": "Type",
+      "filled": "Remplies",
+      "distinct": "Distinctes",
+      "stats": "Plage",
+      "missing": "vides"
+    },
+    "types": {
+      "number": "nombre",
+      "integer": "entier",
+      "date": "date",
+      "boolean": "oui/non",
+      "text": "texte",
+      "empty": "vide"
+    },
+    "analyse": {
+      "button": "Trouver des motifs",
+      "working": "Recherche…",
+      "done": "Analyse prête",
+      "failed": "L'analyse n'a pas abouti.",
+      "unavailable": "Le service d'IA est injoignable. Rien n'a été facturé."
+    },
+    "findings": {
+      "title": "Ce qu'il contient",
+      "none": "Rien n'a encore été analysé. Les colonnes et graphiques ci-dessus sont calculés à partir du fichier lui-même."
+    },
+    "ask": {
+      "title": "Interroger les données",
+      "description": "Votre question devient une requête exécutée sur les vraies lignes. Les chiffres viennent du fichier, pas du modèle.",
+      "placeholder": "Quelle région a le plus vendu ?",
+      "button": "Demander",
+      "working": "En cours…",
+      "failed": "Impossible de répondre à cette question.",
+      "matched": "{matched} lignes sur {total} correspondent",
+      "rowCount": "{count} lignes"
+    },
+    "legacy": {
+      "title": "Vos anciennes notes",
+      "description": "Écrites dans la version précédente de cette page, quand c'était un tableau de notes. Conservées telles quelles."
+    },
+    "chart": {
+      "nothingToPlot": "Rien à tracer pour celui-ci.",
+      "truncated": "Affichage des {count} plus grands ; le reste est regroupé ou omis."
+    }
+  },
+  "coding": {
+    "title": "Code avec l'IA",
+    "description": "Cinq choses qu'il fait, quatre qu'il ne fait pas. Tout porte exactement sur le texte de la zone.",
+    "code": "Code",
+    "copy": "Copier",
+    "copied": "Copié",
+    "language": "Langage",
+    "targetLanguage": "Convertir en",
+    "useWorkspace": "Utiliser mes autres modules comme contexte",
+    "run": "Exécuter",
+    "running": "En cours…",
+    "result": "Résultat",
+    "limits": {
+      "title": "Ce qu'il ne fait PAS",
+      "no_repository": "Il n'a pas de dépôt. Il ne voit ni votre base de code ni le fichier d'à côté.",
+      "no_execution": "Il n'exécute rien. Ni votre code, ni celui qu'il écrit, ni les tests qu'il écrit.",
+      "no_commits": "Il ne fait ni commit, ni branche, ni pull request.",
+      "no_whole_project": "Il ne construit pas de projet. Une fonction, un fichier, un collage.",
+      "later": "Ces quatre-là, c'est la version suivante, pas celle-ci."
+    },
+    "operations": {
+      "generate": {
+        "label": "Écrire un extrait",
+        "description": "Décrivez ce qu'il vous faut et recevez une fonction, avec ses hypothèses et ses manques énoncés.",
+        "placeholder": "Une fonction qui prend une liste de commandes et renvoie la marge par client…"
+      },
+      "explain": {
+        "label": "Expliquer ceci",
+        "description": "Collez du code et recevez ce qu'il fait, dans l'ordre, en nommant les lignes concernées.",
+        "placeholder": "Collez le code à expliquer…"
+      },
+      "find_bugs": {
+        "label": "Trouver des bugs",
+        "description": "Chaque constat nomme l'entrée ou l'état qui le déclenche. Un constat sans cas d'échec est une préférence.",
+        "placeholder": "Collez le code à vérifier…"
+      },
+      "convert": {
+        "label": "Convertir",
+        "description": "Réécrivez-le dans un autre langage, avec la liste de tout ce qui NE passe PAS.",
+        "placeholder": "Collez le code à convertir…"
+      },
+      "write_tests": {
+        "label": "Écrire des tests",
+        "description": "Le cas ordinaire, les bornes et les façons d'échouer. Pas seulement le chemin heureux.",
+        "placeholder": "Collez le code à tester…"
+      }
+    },
+    "errors": {
+      "tooLong": "Cela dépasse {limit} caractères. Ceci porte sur un fichier, pas un projet.",
+      "unavailable": "Le service d'IA est injoignable. Rien n'a été facturé.",
+      "failed": "Ça n'a pas marché — réessayez."
+    },
+    "history": {
+      "title": "Historique",
+      "search": "Rechercher",
+      "folder": "Dossier",
+      "allFolders": "Tous les dossiers",
+      "empty": "Rien ici pour l'instant.",
+      "input": "Entrée",
+      "output": "Sortie",
+      "importedNote": "note d'avant",
+      "failed": "échec"
     }
   }
 }

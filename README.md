@@ -230,6 +230,74 @@ Email notifications share the existing Resend setup and the same
 20-per-day-per-user cap as every other email. **They will not leave the
 building without a verified sending domain** — see "Email delivery" below.
 
+#### Data Analysis and AI Coding (V4 #19 + #20)
+
+Two pages that were CRUD trackers — a form for typing your own findings,
+and a form for describing code you would then go and write yourself — and
+are now tools. Both moved from the sidebar's **Tracking** group to
+**Build**, and `scripts/tests/sidebar-naming.test.mjs` now proves that
+claim from the code rather than from a list: every item under Build must
+have an API route it fetches that actually reaches a model, and every
+module still in `lib/build-modules.ts` must NOT.
+
+**Data Analysis** (`/dashboard/data-analysis`). Upload a CSV or an Excel
+file up to 8 MB; it is parsed, every column profiled, and charts drawn
+from the real rows. The division of labour is the point:
+
+- **Every number is computed in TypeScript.** `lib/data-analysis/profile.ts`
+  does the types, means, medians, standard deviations, outliers and
+  Pearson correlations over the whole file. A mean produced by a language
+  model is indistinguishable from a real one until somebody's decision
+  depends on it.
+- **The model only interprets.** It is handed the profile — never the rows
+  — and asked what it means. Every chart it proposes is validated against
+  the real column list before it is stored, and a finding naming a column
+  the file does not have is dropped.
+- **Questions are answered from the data.** Your question becomes a
+  *query*, which this server runs over the real rows; the model then
+  writes one framing sentence, and any figure in that sentence that is not
+  in the computed result is removed and reported. That last check is what
+  stops the fluent invented number every "chat with your spreadsheet"
+  feature produces.
+- **No dependency was added.** The CSV parser (RFC 4180), the ZIP reader
+  and the .xlsx reader are in `lib/data-analysis/`. A spreadsheet parser
+  is a file-format parser running on files strangers upload, which is the
+  highest-risk dependency class there is; this one does read only, two
+  compression methods, and refuses everything else by name.
+- Uploading, profiling, charting and exporting cost **nothing** and work
+  with no API key. Only "find patterns" and asking a question call a model.
+
+**AI Coding** (`/dashboard/coding`). Five operations: write a snippet,
+explain this, find bugs, convert, write tests. And four things it does
+NOT do, stated on the screen in all ten languages rather than in a
+comment:
+
+- it has **no repository** — it cannot see your codebase or the file next
+  to the one you paste;
+- it **runs nothing** — not your code, not the code it writes, not the
+  tests it writes;
+- it makes **no commits**, branches or pull requests;
+- it does **not build a project** — one function, one file, one paste.
+
+Those four are V5. Syntax highlighting is a tokeniser in
+`lib/coding/highlight.ts` that returns TOKENS rather than an HTML string,
+so the component maps them to `<span>` elements and pasted code goes
+through React's normal escaping — there is no `dangerouslySetInnerHTML`
+anywhere near a paste box.
+
+**The advantage** (`lib/ai/workspace-context.ts`). Both tools can read a
+short, bounded list of headlines from the user's OWN modules, so "a
+function that calculates the margin" can mean what margin means in this
+account. Four rules: the caller's own RLS-scoped client (never the admin
+one), headline fields only, capped per module and in total, and only when
+the caller explicitly asks — the panel has a visible toggle.
+
+**Nothing was deleted.** `ai_coding_requests` and
+`ai_data_analysis_requests` are untouched and still in the GDPR export.
+The coding notes were *copied* into `code_sessions` (marked
+`source = 'note'`, idempotently, keyed on `imported_from`), and the
+analysis notes are listed on the new page under "your earlier notes".
+
 #### Email delivery: the verified sending domain
 
 **Nothing leaves the building without this.** The default sender,

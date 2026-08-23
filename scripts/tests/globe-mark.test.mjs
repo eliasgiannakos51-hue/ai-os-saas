@@ -371,6 +371,13 @@ const MECHANICAL = [
   "src/components/publishing/publish-control.tsx",
   "src/components/system-health/storage-diagnostics.tsx",
   "src/components/website-builder/website-builder-workspace.tsx",
+  // V4 #19. The UPLOAD button, and only that one: reading a file and
+  // posting it is a mechanical wait, and marking it with the signature
+  // would spend the mark on a POST. The two waits on this page that ARE
+  // the model thinking — "find patterns" and asking the data a question —
+  // use the globe, which is why this file appears here rather than being
+  // exempted wholesale.
+  "src/components/data-analysis/analysis-workspace.tsx",
 ];
 {
   const spinning = allTsx.filter((f) => /animate-spin/.test(stripComments(readFileSync(f, "utf8")))).sort();

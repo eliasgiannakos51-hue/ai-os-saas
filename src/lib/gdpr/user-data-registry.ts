@@ -72,6 +72,15 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "published_sites", label: "published_sites", scope: "user_content" },
   { table: "site_versions", label: "published_site_versions", scope: "user_content" },
   { table: "site_analytics", label: "published_site_analytics", scope: "user_content" },
+  // Navigation telemetry: one row per sidebar click, holding a page path
+  // and a timestamp and nothing else (supabase/migrations/
+  // 20260817000004_nav_events.sql spells out what is deliberately not
+  // there). Exported IN FULL rather than redacted — there is nothing in
+  // it to redact, and "we collected this about you" is precisely what an
+  // Article 15 export is for. Cascades with auth.users like the rest, so
+  // no explicit erasure; separately deleted after 90 days by
+  // api/cron/prune-nav-events, and switchable off in Settings.
+  { table: "nav_events", label: "navigation_history", scope: "user_content" },
   { table: "website_form_submissions", label: "website_form_submissions", scope: "user_content" },
   { table: "website_reference_images", label: "website_reference_images", scope: "user_content" },
   { table: "user_agents", label: "agents", scope: "user_content" },

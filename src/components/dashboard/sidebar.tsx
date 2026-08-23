@@ -17,6 +17,7 @@ import {
 } from "@/lib/sidebar-nav";
 import { useSidebar } from "@/components/dashboard/sidebar-context";
 import { useToast } from "@/components/toast/toast-context";
+import { recordNavEvent } from "@/lib/nav-analytics-client";
 import { Logo } from "@/components/logo";
 import { GROUP_HEADING_KEYS, ITEM_LABEL_KEYS } from "@/lib/sidebar-label-keys";
 
@@ -173,7 +174,23 @@ export function Sidebar({ email = "", planName = "" }: { email?: string; planNam
                   <Tooltip key={item.href} content={hint} side="right">
                   <Link
                     href={item.href}
-                    onClick={closeOnMobile}
+                    // THE ONLY PLACE NAVIGATION IS RECORDED, and the
+                    // reason renderItem exists as one function: every
+                    // nav row, pinned or grouped, goes through here, so
+                    // there is no second copy to forget.
+                    //
+                    // SIDEBAR ITEMS ONLY, deliberately. The question
+                    // this measures is "which of these rows does anyone
+                    // click", so recording the command palette or a
+                    // logo link here would answer a different question
+                    // (did anyone reach this page, by any route) with
+                    // the same rows, and make "never clicked" mean
+                    // neither thing clearly. If page reach is wanted
+                    // later it is a separate surface, recorded as such.
+                    onClick={() => {
+                      recordNavEvent(item.href);
+                      closeOnMobile();
+                    }}
                     // nav-item draws the active highlight and the leading
                     // rail as pseudo-elements so both can animate; the
                     // look is unchanged, it just slides in now.

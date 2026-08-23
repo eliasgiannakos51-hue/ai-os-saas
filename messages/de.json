@@ -673,7 +673,21 @@
       "collaboration": "Zusammenarbeit",
       "collaborationHint": "Team-Einladungen und Aktivität im geteilten Workspace"
     },
-    "jumpToSection": "Zu einem Abschnitt springen"
+    "jumpToSection": "Zu einem Abschnitt springen",
+    "navAnalytics": {
+      "title": "Navigationsverlauf",
+      "whatIsCollected": "Wenn Sie etwas über die Seitenleiste öffnen, erfassen wir welche Seite und wann — sonst nichts. Keine IP-Adresse, keine Gerätedaten, keine Suchbegriffe. Es zeigt uns, welche Teile von Ionexa es wert sind, erhalten zu bleiben.",
+      "toggleLabel": "Erfassen, welche Seiten ich öffne",
+      "toggleDescription": "Nur Links der Seitenleiste, nur der Seitenpfad und die Uhrzeit.",
+      "retentionNote": "Wird nach 90 Tagen automatisch gelöscht.",
+      "clearAll": "Meinen Verlauf löschen",
+      "clearing": "Wird gelöscht…",
+      "cleared": "Ihr Navigationsverlauf wurde gelöscht.",
+      "couldNotClear": "Ihr Navigationsverlauf konnte nicht gelöscht werden.",
+      "recordingEnabled": "Navigationsverlauf ist aktiviert.",
+      "recordingDisabled": "Navigationsverlauf ist deaktiviert.",
+      "couldNotUpdatePreference": "Diese Einstellung konnte nicht gespeichert werden."
+    }
   },
   "dashboard": {
     "overview": {

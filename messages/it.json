@@ -673,7 +673,21 @@
       "collaboration": "Collaborazione",
       "collaborationHint": "Inviti al team e attività dello spazio condiviso"
     },
-    "jumpToSection": "Vai a una sezione"
+    "jumpToSection": "Vai a una sezione",
+    "navAnalytics": {
+      "title": "Cronologia di navigazione",
+      "whatIsCollected": "Quando apri qualcosa dalla barra laterale, registriamo quale pagina e quando — nient'altro. Nessun indirizzo IP, nessun dettaglio del dispositivo, nessun termine di ricerca. Ci dice quali parti di Ionexa vale la pena mantenere.",
+      "toggleLabel": "Registra quali pagine apro",
+      "toggleDescription": "Solo i link della barra laterale, solo il percorso della pagina e l'ora.",
+      "retentionNote": "Eliminata automaticamente dopo 90 giorni.",
+      "clearAll": "Elimina la mia cronologia",
+      "clearing": "Eliminazione…",
+      "cleared": "La tua cronologia di navigazione è stata eliminata.",
+      "couldNotClear": "Impossibile eliminare la tua cronologia di navigazione.",
+      "recordingEnabled": "La cronologia di navigazione è attiva.",
+      "recordingDisabled": "La cronologia di navigazione è disattivata.",
+      "couldNotUpdatePreference": "Impossibile salvare questa preferenza."
+    }
   },
   "dashboard": {
     "overview": {

@@ -673,7 +673,21 @@
       "collaboration": "Collaboration",
       "collaborationHint": "Team invites and shared-workspace activity"
     },
-    "jumpToSection": "Jump to section"
+    "jumpToSection": "Jump to section",
+    "navAnalytics": {
+      "title": "Navigation history",
+      "whatIsCollected": "When you open something from the sidebar, we record which page and when — nothing else. No IP address, no device details, no search terms. It tells us which parts of Ionexa are worth keeping.",
+      "toggleLabel": "Record which pages I open",
+      "toggleDescription": "Only sidebar links, only the page path and the time.",
+      "retentionNote": "Deleted automatically after 90 days.",
+      "clearAll": "Delete my history",
+      "clearing": "Deleting…",
+      "cleared": "Your navigation history was deleted.",
+      "couldNotClear": "Could not delete your navigation history.",
+      "recordingEnabled": "Navigation history is on.",
+      "recordingDisabled": "Navigation history is off.",
+      "couldNotUpdatePreference": "Could not save that preference."
+    }
   },
   "dashboard": {
     "overview": {

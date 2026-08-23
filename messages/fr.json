@@ -673,7 +673,21 @@
       "collaboration": "Collaboration",
       "collaborationHint": "Invitations d'équipe et activité de l'espace partagé"
     },
-    "jumpToSection": "Aller à une section"
+    "jumpToSection": "Aller à une section",
+    "navAnalytics": {
+      "title": "Historique de navigation",
+      "whatIsCollected": "Quand vous ouvrez quelque chose depuis la barre latérale, nous enregistrons quelle page et quand — rien d'autre. Aucune adresse IP, aucun détail d'appareil, aucun terme de recherche. Cela nous indique quelles parties d'Ionexa méritent d'être conservées.",
+      "toggleLabel": "Enregistrer les pages que j'ouvre",
+      "toggleDescription": "Uniquement les liens de la barre latérale, uniquement le chemin de la page et l'heure.",
+      "retentionNote": "Supprimé automatiquement après 90 jours.",
+      "clearAll": "Supprimer mon historique",
+      "clearing": "Suppression…",
+      "cleared": "Votre historique de navigation a été supprimé.",
+      "couldNotClear": "Impossible de supprimer votre historique de navigation.",
+      "recordingEnabled": "L'historique de navigation est activé.",
+      "recordingDisabled": "L'historique de navigation est désactivé.",
+      "couldNotUpdatePreference": "Impossible d'enregistrer cette préférence."
+    }
   },
   "dashboard": {
     "overview": {

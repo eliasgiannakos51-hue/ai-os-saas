@@ -673,7 +673,21 @@
       "collaboration": "コラボレーション",
       "collaborationHint": "チーム招待と共有ワークスペースのアクティビティ"
     },
-    "jumpToSection": "セクションへ移動"
+    "jumpToSection": "セクションへ移動",
+    "navAnalytics": {
+      "title": "ナビゲーション履歴",
+      "whatIsCollected": "サイドバーから何かを開いたとき、どのページをいつ開いたかだけを記録します。それ以外は記録しません。IPアドレス、デバイス情報、検索語はいずれも記録しません。Ionexa のどの部分を残す価値があるかを判断するために使います。",
+      "toggleLabel": "開いたページを記録する",
+      "toggleDescription": "サイドバーのリンクのみ、ページのパスと時刻のみ。",
+      "retentionNote": "90日後に自動的に削除されます。",
+      "clearAll": "履歴を削除",
+      "clearing": "削除中…",
+      "cleared": "ナビゲーション履歴を削除しました。",
+      "couldNotClear": "ナビゲーション履歴を削除できませんでした。",
+      "recordingEnabled": "ナビゲーション履歴は有効です。",
+      "recordingDisabled": "ナビゲーション履歴は無効です。",
+      "couldNotUpdatePreference": "設定を保存できませんでした。"
+    }
   },
   "dashboard": {
     "overview": {

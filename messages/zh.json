@@ -673,7 +673,21 @@
       "collaboration": "协作",
       "collaborationHint": "团队邀请与共享工作区动态"
     },
-    "jumpToSection": "跳转到某个部分"
+    "jumpToSection": "跳转到某个部分",
+    "navAnalytics": {
+      "title": "导航记录",
+      "whatIsCollected": "当你从侧边栏打开内容时，我们只记录打开了哪个页面以及时间，仅此而已。不记录 IP 地址、设备信息或搜索词。这能告诉我们 Ionexa 的哪些部分值得保留。",
+      "toggleLabel": "记录我打开的页面",
+      "toggleDescription": "仅限侧边栏链接，仅记录页面路径和时间。",
+      "retentionNote": "90 天后自动删除。",
+      "clearAll": "删除我的记录",
+      "clearing": "正在删除…",
+      "cleared": "你的导航记录已删除。",
+      "couldNotClear": "无法删除你的导航记录。",
+      "recordingEnabled": "导航记录已开启。",
+      "recordingDisabled": "导航记录已关闭。",
+      "couldNotUpdatePreference": "无法保存该偏好设置。"
+    }
   },
   "dashboard": {
     "overview": {

@@ -17,6 +17,9 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 
 let pass = 0;
 const failures = [];
+/** Source with comments removed — see hasCronAuth for why that matters. */
+const stripComments = (s) =>
+  s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 function check(name, cond, detail) {
   if (cond) {
     pass++;
@@ -119,7 +122,18 @@ for (const file of routes) {
   // The research continuation authenticates with the internal token when
   // called by our own infrastructure, and by ownership otherwise.
   const hasInternalToken = /internalHandoffToken\(\)/.test(src);
-  const hasCronAuth = /requireCronAuth|CRON_SECRET/.test(src);
+  // THE ACTUAL CALL, on comment-stripped source — not the string
+  // "CRON_SECRET" anywhere in the file.
+  //
+  // This check used to be /requireCronAuth|CRON_SECRET/ against the raw
+  // text, and NOT ONE of the five cron routes contains "CRON_SECRET" in
+  // its code: every one of them satisfied it purely from a prose comment
+  // explaining how cron auth works. A new cron route with a copied
+  // explanatory header and no guard at all would have passed, which is
+  // the precise opposite of what this gate is for. checkCronAuth() is
+  // the guard (lib/cron-auth.ts, fail-closed when CRON_SECRET is
+  // unset), so the call is what gets asserted.
+  const hasCronAuth = /requireCronAuth\(|checkCronAuth\(/.test(stripComments(src));
   const hasAdminCheck = /isAdminEmail\(/.test(src);
   // Scoping every query to the authenticated user is the other legitimate
   // pattern: the service-role client is used to write across RLS, but the

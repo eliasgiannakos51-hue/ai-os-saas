@@ -673,7 +673,21 @@
       "collaboration": "Colaboração",
       "collaborationHint": "Convites de equipa e atividade do espaço partilhado"
     },
-    "jumpToSection": "Ir para uma seção"
+    "jumpToSection": "Ir para uma seção",
+    "navAnalytics": {
+      "title": "Histórico de navegação",
+      "whatIsCollected": "Quando você abre algo pela barra lateral, registramos qual página e quando — nada mais. Sem endereço IP, sem detalhes do dispositivo, sem termos de busca. Isso nos diz quais partes do Ionexa vale a pena manter.",
+      "toggleLabel": "Registrar quais páginas eu abro",
+      "toggleDescription": "Apenas links da barra lateral, apenas o caminho da página e a hora.",
+      "retentionNote": "Excluído automaticamente após 90 dias.",
+      "clearAll": "Excluir meu histórico",
+      "clearing": "Excluindo…",
+      "cleared": "Seu histórico de navegação foi excluído.",
+      "couldNotClear": "Não foi possível excluir seu histórico de navegação.",
+      "recordingEnabled": "O histórico de navegação está ativado.",
+      "recordingDisabled": "O histórico de navegação está desativado.",
+      "couldNotUpdatePreference": "Não foi possível salvar essa preferência."
+    }
   },
   "dashboard": {
     "overview": {

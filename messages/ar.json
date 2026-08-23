@@ -673,7 +673,21 @@
       "collaboration": "التعاون",
       "collaborationHint": "دعوات الفريق ونشاط مساحة العمل المشتركة"
     },
-    "jumpToSection": "الانتقال إلى قسم"
+    "jumpToSection": "الانتقال إلى قسم",
+    "navAnalytics": {
+      "title": "سجل التنقل",
+      "whatIsCollected": "عندما تفتح شيئًا من الشريط الجانبي، نسجّل الصفحة والوقت فقط — لا شيء غير ذلك. لا عنوان IP، ولا تفاصيل الجهاز، ولا كلمات البحث. هذا يوضّح لنا أي أجزاء من Ionexa تستحق الإبقاء عليها.",
+      "toggleLabel": "تسجيل الصفحات التي أفتحها",
+      "toggleDescription": "روابط الشريط الجانبي فقط، ومسار الصفحة والوقت فقط.",
+      "retentionNote": "يُحذف تلقائيًا بعد 90 يومًا.",
+      "clearAll": "حذف سجلّي",
+      "clearing": "جارٍ الحذف…",
+      "cleared": "تم حذف سجل التنقل الخاص بك.",
+      "couldNotClear": "تعذّر حذف سجل التنقل الخاص بك.",
+      "recordingEnabled": "سجل التنقل مُفعّل.",
+      "recordingDisabled": "سجل التنقل مُعطّل.",
+      "couldNotUpdatePreference": "تعذّر حفظ هذا التفضيل."
+    }
   },
   "dashboard": {
     "overview": {

@@ -335,6 +335,8 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/agent-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts); executes every due Autonomous Agent, so it spends real money on many accounts per call",
   "src/app/api/weekly-digest/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
+  "src/app/api/cron/prune-nav-events/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts); deletes nav_events older than 90 days across all accounts, filtered by age alone",
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",
   "src/app/api/websites/[id]/submit-form/route.ts": "public contact form on generated sites; write-only, honeypot + 30/hr cap",
   "src/app/api/client-error/route.ts": "browser error beacon; fires when there may be no session",

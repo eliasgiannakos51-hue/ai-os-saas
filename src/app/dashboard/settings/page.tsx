@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { PasswordChangeForm } from "@/components/settings/password-change-form";
 import { ChatMemorySettings } from "@/components/settings/chat-memory-settings";
+import { NavAnalyticsSettings } from "@/components/settings/nav-analytics-settings";
+import { hasOptedOutOfNavAnalytics } from "@/lib/nav-analytics";
 import { AccessibilitySettings } from "@/components/settings/accessibility-settings";
 import { ThemeSettings } from "@/components/settings/theme-settings";
 import { LanguageSettings } from "@/components/settings/language-settings";
@@ -127,6 +129,7 @@ export default async function SettingsPage() {
     .limit(20);
 
   const chatMemoryEnabled = user.user_metadata?.chat_memory_enabled !== false;
+  const navAnalyticsOptedOut = hasOptedOutOfNavAnalytics(user.user_metadata);
   const { count: chatMemoryCount } = await supabase
     .from("chat_memory")
     .select("id", { count: "exact", head: true })
@@ -211,6 +214,7 @@ export default async function SettingsPage() {
           {[
             { href: "#language", label: t("language.title") },
             { href: "#accessibility", label: t("accessibility.title") },
+            { href: "#navigation-analytics", label: t("navAnalytics.title") },
             { href: "#ai-usage", label: t("aiUsage.title") },
             { href: "#buy-credits", label: tBilling("title") },
             { href: "#achievements", label: tAchievements("title") },
@@ -265,6 +269,8 @@ export default async function SettingsPage() {
             initialCount={chatMemoryCount ?? 0}
           />
         </div>
+
+        <NavAnalyticsSettings userId={user.id} initialOptedOut={navAnalyticsOptedOut} />
 
         <LoginActivity devices={(knownDevices as KnownDevice[] | null) ?? []} />
 

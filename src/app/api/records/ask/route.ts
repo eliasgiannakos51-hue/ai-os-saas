@@ -8,6 +8,10 @@ import { getBuildModule } from "@/lib/build-modules";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { logApiError } from "@/lib/log-error";
+import {
+  loadRecordConversationContext,
+  buildRecordConversationPromptAddition,
+} from "@/lib/chat/record-conversation-context";
 import { isAdminEmail } from "@/lib/admin";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
@@ -102,10 +106,17 @@ const WEB_SEARCH_TOOL: Anthropic.WebSearchTool20250305 = {
   max_uses: 3,
 };
 
-function buildSystemPrompt(moduleConfig: ModuleConfig, record: ModuleRecord): string {
+function buildSystemPrompt(
+  moduleConfig: ModuleConfig,
+  record: ModuleRecord,
+  // What the user already said about THIS record, in chat. Empty string
+  // when nothing was relevant — see lib/chat/record-conversation-context.ts
+  // for why an empty heading is worse than no heading.
+  conversationAddition = ""
+): string {
   return `Έχεις πρόσβαση στα ακόλουθα δεδομένα μιας συγκεκριμένης καταγραφής (module: ${enModuleTitle(moduleConfig)}):
 
-${formatRecordForPrompt(moduleConfig, record)}
+${formatRecordForPrompt(moduleConfig, record)}${conversationAddition}
 
 Δώσε αντικειμενική, ειλικρινή γνώμη/ανάλυση όταν ρωτηθείς, χωρίς να επιβεβαιώνεις αυτόματα ό,τι λέει ο χρήστης. ΑΠΑΝΤΑ ΠΑΝΤΑ ΣΤΗΝ ΙΔΙΑ ΓΛΩΣΣΑ που σου γράφει ο χρήστης (ανίχνευσε αυτόματα τη γλώσσα του μηνύματος). Μείνε εστιασμένος/η σε αυτή τη συγκεκριμένη καταγραφή, εκτός αν ο χρήστης ζητήσει ρητά κάτι άσχετο με αυτήν.${WEB_SEARCH_INSTRUCTION}${AI_CONDUCT_EL}${AI_QUALITY_CHECKLIST_EL}`;
 }
@@ -228,7 +239,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, error: "Record not found." }, { status: 404 });
     }
 
-    const systemPrompt = buildSystemPrompt(moduleConfig, record as ModuleRecord);
+    // THE OTHER HALF OF THE PICTURE. Until now this endpoint saw the row
+    // and nothing else, so "why did I do it this way?" was answered from a
+    // status field. The conversation where the decision was actually made
+    // lives in chat_messages, and it is the same user's own data.
+    //
+    // Awaited rather than raced with the model call: it goes INTO the
+    // prompt, so there is nothing to overlap it with. Bounded by
+    // RECORD_CONVERSATION_RELEVANCE and never throws — a slow or empty
+    // scan costs a thinner answer, not a failed request.
+    const headlineValue = (record as ModuleRecord)[moduleConfig.headlineKey];
+    const recordConversation = await loadRecordConversationContext(
+      supabase,
+      user.id,
+      typeof headlineValue === "string" ? headlineValue : "",
+      message
+    );
+    const systemPrompt = buildSystemPrompt(
+      moduleConfig,
+      record as ModuleRecord,
+      buildRecordConversationPromptAddition(recordConversation)
+    );
     const anthropic = new Anthropic({ apiKey });
 
     // Sized from what will actually be sent: the serialised record (which

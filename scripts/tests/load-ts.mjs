@@ -36,6 +36,35 @@ function resolveSpecifier(spec, fromFile) {
   throw new Error(`Cannot resolve ${spec} from ${fromFile}`);
 }
 
+/**
+ * Emits a JSON dependency as a plain binding.
+ *
+ * Keyed by file AND local name: the same JSON imported as `en` in one
+ * module and `messages` in another needs both bindings, and emitting it
+ * once under one name would leave the other module referencing an
+ * undeclared identifier at evaluation time — a ReferenceError blamed on
+ * the module under test rather than on the bundling.
+ *
+ * Default imports only. A named import from JSON (`import { a } from
+ * "./x.json"`) is not something Next or the TS resolver supports here
+ * either, so failing loudly beats emitting a binding that silently is not
+ * what the source asked for.
+ */
+function collectJson(file, stmt, seen, out) {
+  const localName = stmt.importClause?.name?.text;
+  if (!localName) {
+    throw new Error(
+      `Only a default import is supported for JSON (${path.relative(ROOT, file)}); ` +
+        `saw: ${stmt.getText().slice(0, 80)}`
+    );
+  }
+  const key = `${path.resolve(file)}::${localName}`;
+  if (seen.has(key)) return;
+  seen.add(key);
+  const data = JSON.parse(readFileSync(file, "utf8"));
+  out.push(`const ${localName} = ${JSON.stringify(data)};`);
+}
+
 /** Transpiles `file` and every local module it imports into one ES module. */
 function collect(file, seen, out, allowExternals = false) {
   const abs = path.resolve(file);
@@ -54,7 +83,20 @@ function collect(file, seen, out, allowExternals = false) {
       ts.isStringLiteral(stmt.moduleSpecifier)
     ) {
       const resolved = resolveSpecifier(stmt.moduleSpecifier.text, abs);
-      if (resolved) collect(resolved, seen, out, allowExternals);
+      if (!resolved) continue;
+      // A JSON import is data, not a module. ts.transpileModule returns
+      // undefined for a .json file, which surfaces as "Debug Failure.
+      // Output generation failed" naming nothing — so before this, ANY
+      // module that reached lib/module-labels.ts (which imports
+      // messages/en.json for the English field labels) simply could not be
+      // loaded, and the reason was unreadable. Emitted as a binding under
+      // the name the importer used, because local imports are stripped and
+      // satisfied by concatenation.
+      if (resolved.endsWith(".json")) {
+        collectJson(resolved, stmt, seen, out);
+        continue;
+      }
+      collect(resolved, seen, out, allowExternals);
     }
   }
 

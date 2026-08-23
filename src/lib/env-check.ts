@@ -157,6 +157,17 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
     what: "Stamps the service-worker registration URL so a deploy reaches the worker",
     fallback: "NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA, then \"dev\" — on a host that sets neither, the offline page cache is not purged on deploy",
   },
+  // Annual billing. OPTIONAL, and the fallback is the whole design: with
+  // any of the four missing, annualBillingAvailable() is false, /pricing
+  // renders no Monthly/Annual toggle, ?billing=annual does nothing, and
+  // the product sells exactly as it did before annual existed. Nothing
+  // breaks and nothing half-works — the failure mode of a partially
+  // configured toggle would be a buy button that 500s on a price id
+  // that does not exist.
+  { name: "STRIPE_PRICE_STARTER_ANNUAL", level: "optional", what: "Starter billed yearly (€200 — ten months)", fallback: "annual billing is not offered at all" },
+  { name: "STRIPE_PRICE_GROWTH_ANNUAL", level: "optional", what: "Growth billed yearly (€500 — ten months)", fallback: "annual billing is not offered at all" },
+  { name: "STRIPE_PRICE_PROFESSIONAL_ANNUAL", level: "optional", what: "Professional billed yearly (€1,000 — ten months)", fallback: "annual billing is not offered at all" },
+  { name: "STRIPE_PRICE_ULTIMATE_ANNUAL", level: "optional", what: "Ultimate billed yearly (€2,000 — ten months)", fallback: "annual billing is not offered at all" },
   { name: "ADMIN_EMAILS", level: "optional", what: "Extra admin accounts, comma-separated", fallback: "the hardcoded owner address" },
   {
     name: "UNSPLASH_ACCESS_KEY",

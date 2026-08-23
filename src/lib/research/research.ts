@@ -1,6 +1,7 @@
 import "server-only";
 import { AI_SAFETY_BOUNDARIES_EN } from "@/lib/ai-conduct";
 import Anthropic from "@anthropic-ai/sdk";
+import { modelText } from "@/lib/verification/truncation";
 import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 import { RESEARCH_MODEL } from "@/lib/files/file-models";
 import { wrapUntrusted } from "@/lib/agents/agent-config";
@@ -217,11 +218,11 @@ export async function researchQuestion(params: {
     );
     params.costs.record("generation", response.usage, response.model || RESEARCH_MODEL);
 
-    const summary = response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === "text")
-      .map((block) => block.text)
-      .join("")
-      .trim();
+    // Through modelText like every other call in this file. This one is a
+    // per-question summary rather than the report, so a cut is less
+    // visible — which is exactly why it should not be the one place the
+    // stop reason is unavailable.
+    const summary = modelText(response).text.trim();
 
     return {
       finding: {
@@ -313,7 +314,11 @@ export async function synthesiseReport(params: {
   sources: ResearchSource[];
   language: string;
   costs: CostAccumulator;
-}): Promise<{ ok: true; markdown: string } | { ok: false; reason: string }> {
+  // `truncated` is on the SUCCESS shape deliberately. A severed report is
+  // still a report — throwing it away loses eight thousand tokens the
+  // user has paid for, and a retry costs the same again with no reason to
+  // end differently. The caller decides what to say about it.
+}): Promise<{ ok: true; markdown: string; truncated: boolean } | { ok: false; reason: string }> {
   try {
     const response = await params.anthropic.messages.create(
       {
@@ -326,14 +331,16 @@ export async function synthesiseReport(params: {
     );
     params.costs.record("generation", response.usage, response.model || RESEARCH_MODEL);
 
-    const markdown = response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === "text")
-      .map((block) => block.text)
-      .join("")
-      .trim();
+    // TAKEN THROUGH modelText SO THE stop_reason CANNOT BE SKIPPED. This
+    // validated its output with `markdown.length < 100` and nothing else,
+    // so a report severed at the 8,000-token ceiling — far longer than
+    // 100 characters — passed as finished and was written to a document
+    // with a conclusion that does not exist.
+    const synthesised = modelText(response);
+    const markdown = synthesised.text.trim();
 
     if (markdown.length < 100) return { ok: false, reason: "empty_report" };
-    return { ok: true, markdown };
+    return { ok: true, markdown, truncated: synthesised.truncated };
   } catch {
     return { ok: false, reason: "api_error" };
   }

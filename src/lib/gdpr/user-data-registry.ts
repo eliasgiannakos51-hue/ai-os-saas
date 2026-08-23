@@ -118,6 +118,20 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "user_onboarding", label: "onboarding", scope: "account" },
   { table: "user_email_preferences", label: "email_preferences", scope: "account" },
   { table: "email_send_log", label: "emails_sent_to_you", scope: "account" },
+
+  // Affiliate programme.
+  //
+  // ONLY `affiliates` is registered, because this registry addresses
+  // tables by a literal `user_id` column and the other three key off
+  // `affiliate_id` instead. That is not a gap in ERASURE — affiliates
+  // cascades from auth.users and the children cascade from affiliates,
+  // so deleting the account removes all four — but it IS a gap in the
+  // EXPORT: an affiliate's referral, commission and payout history is
+  // their own data and is currently not written into their download.
+  // Closing it needs the registry to grow a per-table scoping column;
+  // recorded here rather than papered over with entries that would
+  // export nothing while looking covered.
+  { table: "affiliates", label: "affiliate_account", scope: "account" },
   { table: "account_deletion_requests", label: "account_deletion_requests", scope: "account" },
 
   // --- Sensitive: exported, but with the secret columns stripped ---

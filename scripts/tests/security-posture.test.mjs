@@ -334,7 +334,13 @@ const NO_SESSION_BY_DESIGN = {
   "src/app/api/cron/reset-credits/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/scheduled-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
   "src/app/api/cron/agent-runs/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts); executes every due Autonomous Agent, so it spends real money on many accounts per call",
+  "src/app/api/cron/affiliate-payouts/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts); moves real money to affiliates' Stripe Connect accounts, so the claim of accrued commissions is atomic (claim_affiliate_commissions) and each transfer carries an idempotency key",
+  "src/app/r/[code]/route.ts":
+    "the affiliate share link. The visitor is a stranger by definition — requiring a session would defeat the only thing the URL is for. It touches NO database (so a million hits write nothing), never validates the code against the table (which would make it an oracle for enumerating real codes), and always redirects to /signup rather than anywhere the code asks for.",
   "src/app/api/weekly-digest/route.ts": "authenticated by CRON_SECRET (lib/cron-auth.ts)",
+  "src/app/api/cron/monthly-credits/route.ts":
+    "authenticated by CRON_SECRET (lib/cron-auth.ts); grants every annual subscriber their monthly credit allowance, so it moves real entitlement across many accounts per call",
   "src/app/api/delete-account/confirm/route.ts": "single-use emailed token, atomically claimed",
   "src/app/api/websites/[id]/submit-form/route.ts": "public contact form on generated sites; write-only, honeypot + 30/hr cap",
   "src/app/api/client-error/route.ts": "browser error beacon; fires when there may be no session",

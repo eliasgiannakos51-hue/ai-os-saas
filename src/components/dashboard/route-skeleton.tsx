@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { GlobeMark } from "@/components/ui/globe-mark";
 
 /**
  * What a dashboard route looks like while it is arriving.
@@ -30,7 +31,13 @@ export function RouteSkeleton() {
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6" role="status" aria-label={t("loadingContent")}>
         {/* The header row: icon tile, title, subtitle. */}
         <div className="mb-6 flex items-center gap-3">
-          <div className="skeleton h-11 w-11 shrink-0 rounded-xl" />
+          {/* The one place this furniture is allowed to say something:
+              WHOSE page is arriving. It is the brand mark, not a claim
+              about the content — the icon tile beside it stays a blank
+              skeleton because that one WOULD be a claim. */}
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border">
+            <GlobeMark size={22} spin />
+          </span>
           <div className="min-w-0 flex-1">
             <div className="skeleton h-6 w-48 rounded" />
             <div className="skeleton mt-2 h-3 w-72 max-w-full rounded" style={{ animationDelay: "90ms" }} />

@@ -78,6 +78,99 @@ export type Plan = {
 
 export const TEAM_SEAT_PRICE = 20;
 
+// ---------------------------------------------------------------------
+// Annual billing
+// ---------------------------------------------------------------------
+//
+// Two months free, expressed as a 20% discount on twelve months:
+// Starter 20 x 12 = 240 -> 192. The percentage is the single source of
+// truth and every displayed figure is derived from it, so the pricing
+// page, the checkout and the Stripe setup instructions cannot drift apart
+// the way three hand-typed numbers would.
+//
+// WHAT ANNUAL DOES *NOT* CHANGE: the credit allowance. An annual customer
+// gets `monthlyCredits` every month, not 12x in one lump on day one. A
+// year's credits handed over at once is a year's cost we might absorb in
+// week one, and it turns a refund request into an arithmetic problem.
+// Enforced in api/cron/monthly-credits, which is the only thing that
+// grants an annual subscriber's monthly allowance.
+
+export type BillingInterval = "month" | "year";
+
+export function isBillingInterval(value: unknown): value is BillingInterval {
+  return value === "month" || value === "year";
+}
+
+/**
+ * TWO MONTHS FREE, and the price is derived from that rather than from a
+ * percentage chosen next to it.
+ *
+ * This was `ANNUAL_DISCOUNT_PERCENT = 20` while the badge beside it read
+ * "Save {percent}% — two months free". Those disagreed: 20% off twelve
+ * months is 2.4 months free, so the copy understated what the customer
+ * actually got and the two numbers had no way to stay in step. Anchoring
+ * on the MONTHS makes the sentence literally true and leaves the
+ * percentage as a display of it, not a second source of truth.
+ */
+export const ANNUAL_MONTHS_CHARGED = 10;
+export const ANNUAL_MONTHS_FREE = 12 - ANNUAL_MONTHS_CHARGED;
+
+/** 2/12 is 16.67%, which the pricing badge shows as 17. Derived, so the
+ *  badge cannot drift from the amount billed. */
+export const ANNUAL_DISCOUNT_PERCENT = Math.round((ANNUAL_MONTHS_FREE / 12) * 100);
+
+/** What a year costs up front. Null for Free and Enterprise. */
+export function annualPriceEur(plan: Pick<Plan, "price">): number | null {
+  if (typeof plan.price !== "number" || plan.price <= 0) return null;
+  // Rounded to whole euros: every monthly price in this product is a whole
+  // number and 20% of 12x a whole number always is too, but rounding here
+  // means a future 15% or a 19.99 price cannot produce a Stripe amount
+  // with sub-cent drift.
+  // Charged for ten months. NOT `price * 12 * (1 - percent/100)`, which
+  // rounds a percentage back into euros and lands on €192 for a €20 plan
+  // — a number no customer can derive from "two months free".
+  return Math.round(plan.price * ANNUAL_MONTHS_CHARGED);
+}
+
+/** The "€16/month, billed annually" figure. Null where annual does not
+ *  apply. Not rounded — it is a display of a division, and rounding it
+ *  would make 12x it disagree with the price actually charged. */
+export function annualMonthlyEquivalentEur(plan: Pick<Plan, "price">): number | null {
+  const annual = annualPriceEur(plan);
+  return annual === null ? null : annual / 12;
+}
+
+/** Euros saved over a year by paying annually. */
+export function annualSavingsEur(plan: Pick<Plan, "price">): number | null {
+  const annual = annualPriceEur(plan);
+  if (annual === null || typeof plan.price !== "number") return null;
+  return plan.price * 12 - annual;
+}
+
+/**
+ * What a credit is WORTH on this plan at this interval — the divisor the
+ * margin guarantee is taken against.
+ *
+ * Annual billing sells the same credits for 20% less, so an annual
+ * subscriber's credit is cheaper and the settlement formula has to divide
+ * by the smaller number or the multiplier quietly drops by that 20%. This
+ * is the identical leak the plan-rate and credit-pack fixes already
+ * closed, arriving through a third door — see credit-formula.ts.
+ */
+export function planCreditPriceEur(
+  plan: Pick<Plan, "price" | "monthlyCredits"> | null | undefined,
+  interval: BillingInterval
+): number | null {
+  if (!plan) return null;
+  if (typeof plan.price !== "number" || typeof plan.monthlyCredits !== "number") return null;
+  if (plan.price <= 0 || plan.monthlyCredits <= 0) return null;
+  if (interval === "month") return plan.price / plan.monthlyCredits;
+  const annual = annualPriceEur(plan);
+  if (annual === null) return null;
+  // A year's money over a year's credits.
+  return annual / (plan.monthlyCredits * 12);
+}
+
 export const PLANS: Plan[] = [
   {
     slug: "free",

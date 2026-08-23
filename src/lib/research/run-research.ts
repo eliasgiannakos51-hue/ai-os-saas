@@ -12,6 +12,8 @@ import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";
 import { researchReportToDocumentHtml } from "@/lib/research/report-to-html";
+import { checkCitations, annotateDanglingCitations } from "@/lib/verification/citations";
+import { truncationNotice } from "@/lib/verification/truncation";
 import {
   functionBudgetMs,
   hasBudgetFor,
@@ -372,8 +374,62 @@ export async function runResearchChunk(params: {
 
   const sections = splitSections(synthesis.markdown);
   const disclosure = aiGeneratedNotice(language);
+
+  // THE SECOND PASS. Costs no model call and no credit: it is arithmetic
+  // on the text the synthesis already produced.
+  //
+  // The sources themselves are sound — they come from Anthropic's own
+  // citation blocks, so they are pages that were really read. What was
+  // never checked is whether the MARKERS point at any of them. A body
+  // citing [7] against five sources renders a marker that looks exactly
+  // like the working ones and leads nowhere, and a reader who does not
+  // click it has counted an unbacked claim as a cited one.
+  //
+  // A dangling marker is MARKED, not deleted. Deleting it would leave the
+  // sentence reading as the model's own assertion; renumbering would
+  // point the claim at whatever source sits at that index and invent a
+  // provenance. Keeping it visible is the only option that tells the
+  // reader the truth about the document.
+  // THE REPORT MAY BE SEVERED, and until now nothing said so. The
+  // synthesiser allows 8,000 tokens and validated its output with a
+  // length check, so a report that stopped at the ceiling mid-sentence
+  // was written to a document and delivered as finished.
+  //
+  // Labelled rather than discarded: the partial report is real work the
+  // user paid for, and a retry costs the same again with no reason to
+  // end differently. What the reader must not be able to do is mistake
+  // where it stopped for where the author meant it to.
+  const reportMarkdown = synthesis.truncated
+    ? `${synthesis.markdown}\n\n_${truncationNotice(language)}_`
+    : synthesis.markdown;
+  if (synthesis.truncated) {
+    logApiError("research:runChunk", new Error("synthesis hit its token ceiling"), {
+      stage: "truncation",
+      reportId,
+      chars: synthesis.markdown.length,
+    });
+  }
+
+  const citations = checkCitations(reportMarkdown, sources.length);
+  if (!citations.ok) {
+    logApiError(
+      "research:runChunk",
+      new Error(
+        `report cites ${citations.issues.filter((i) => i.kind === "dangling").length} source(s) it does not have`
+      ),
+      {
+        stage: "citation_check",
+        reportId,
+        markers: citations.markers.join(","),
+        sources: sources.length,
+      }
+    );
+  }
+
   const documentHtml = researchReportToDocumentHtml({
-    markdown: synthesis.markdown,
+    markdown: citations.ok
+      ? reportMarkdown
+      : annotateDanglingCitations(reportMarkdown, sources.length),
     sources,
     disclosure,
     sourcesHeading: "Sources",

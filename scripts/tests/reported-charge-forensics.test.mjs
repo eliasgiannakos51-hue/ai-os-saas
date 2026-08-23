@@ -41,6 +41,11 @@ const { PLANS, getPlan } = await loadTs("src/lib/billing/plans.ts");
 const config = pc.DEFAULTS;
 const REPORTED_USD = 0.44;
 const REPORTED_CREDITS = 110;
+// The cheapest published €/credit at the time the 110 was reported —
+// before annual billing existed, so before there was a cheaper rate than
+// monthly Ultimate. Kept as a named constant because the assertion below
+// derives from it rather than restating a number that has since moved.
+const MONTHLY_ERA_RATE = 0.008;
 const eur = cf.usdToEur(REPORTED_USD, config);
 
 // THE POLICY THE REPORT WAS FILED UNDER.
@@ -88,8 +93,38 @@ check("the USD->EUR rate is the documented 0.92", config.usdToEurRate === 0.92);
 console.log("\n== 1. 110 credits is NOT what Enterprise would have charged ==");
 const ent = chargeThen("enterprise");
 check(`Enterprise charges ${ent.credits}, not ${REPORTED_CREDITS}`, ent.credits !== REPORTED_CREDITS);
-check("Enterprise charges 203", ent.credits === 203);
-check("at €0.008/credit", Math.abs(ent.rate - 0.008) < 1e-9);
+// Enterprise is priced at the cheapest rate any published plan sells at,
+// because its own negotiated rate is unknowable and under-guessing it is
+// the only unsafe direction. That rate was Ultimate monthly (EUR 0.008)
+// when this file was written; annual billing made it Ultimate annual
+// (EUR 1,920 / 300,000 = EUR 0.0064), so the charge went UP. Asserted
+// against the derived rate rather than a fresh literal, so the next
+// cheaper option updates this by construction — what is pinned is that
+// Enterprise tracks the floor and never charges less than it used to.
+const cheapestRate = cf.cheapestPublishedCreditPriceEur(config);
+const plansMod = await loadTs("src/lib/billing/plans.ts");
+// THE COMMENT ABOVE SAID "asserted against the derived rate rather than a
+// fresh literal" and the two lines under it were both fresh literals —
+// 253 credits and €0.0064/credit, each true only while the annual
+// discount was 20%. Changing that discount to two-months-free (16.67%)
+// moved the floor to €0.006667 and the charge to 243, and both assertions
+// went red for a change that was correct. They are derived now, so the
+// comment is true and the next change to the cheapest rate updates them
+// by construction.
+const PRE_ANNUAL_CREDITS = 203;
+const PRE_ANNUAL_RATE = MONTHLY_ERA_RATE; // Ultimate MONTHLY — the floor before annual existed
+check("at the cheapest published rate", Math.abs(ent.rate - cheapestRate) < 1e-9);
+check(
+  `the floor is Ultimate ANNUAL — €${ent.rate.toFixed(6)}/credit`,
+  Math.abs(ent.rate - PRE_ANNUAL_RATE * (plansMod.ANNUAL_MONTHS_CHARGED / 12)) < 1e-9
+);
+// The charge scales inversely with the floor: a credit worth less money
+// buys less Anthropic cost, so the same generation needs more of them.
+check(
+  `Enterprise charges ${ent.credits}, which is ${PRE_ANNUAL_CREDITS} scaled by the floor`,
+  Math.abs(ent.credits - PRE_ANNUAL_CREDITS * (PRE_ANNUAL_RATE / ent.rate)) <= 1
+);
+check(`never fewer than the ${PRE_ANNUAL_CREDITS} it charged before annual existed`, ent.credits >= PRE_ANNUAL_CREDITS);
 check("achieving at least 4x", ent.achieved >= 4);
 check(
   "so the reported 2.2x mixes Growth's charge with Enterprise's rate",
@@ -145,10 +180,34 @@ const entEstimate = est.estimateForAction(
   ent.rate,
   INCIDENT_PLAN_MARGINS.enterprise
 );
+// The estimate tracks the same rate, so it moved with it. The point this
+// assertion carries is unchanged: on Enterprise the pre-generation
+// ESTIMATE lands in the same neighbourhood as the reported 110, which is
+// the other way the reported pair can arise — and why the answer asks for
+// the settled website_generate row rather than whatever was on screen.
+// THE ANCHOR MOVED, AND IT MOVED FOR A REASON WORTH WRITING DOWN.
+//
+// This read `Math.abs(estimate - 110) <= 15` and went red at 140 when
+// annual billing landed. The number is not drifting: the cheapest
+// PUBLISHED rate a customer can buy is now annual Ultimate at
+// €0.0064/credit, 20% below the €0.008 monthly rate this assertion was
+// written against. A credit worth 20% less money buys 20% less Anthropic
+// cost, so the same generation has to cost proportionally MORE credits.
+//
+// 110 / 0.8 = 137.5, and the estimate rounds to 140 — a 2.5-credit
+// rounding difference, not a regression.
+//
+// The branch this merges widened the window to "between 110 and 220"
+// instead. That accepts a silent 2x drift in a number shown to a customer
+// before they buy, which is the opposite of what this file is for. It is
+// re-anchored on the DERIVATION rather than a constant, so it stays tight
+// and follows ANNUAL_DISCOUNT_PERCENT if that ever changes.
+const cheapestRatio = ent.rate / MONTHLY_ERA_RATE;
+const expectedCredits = REPORTED_CREDITS / cheapestRatio;
 check(
-  `the Enterprise estimate for a short brief is near 110 (${entEstimate.estimatedCredits})`,
-  Math.abs(entEstimate.estimatedCredits - REPORTED_CREDITS) <= 15,
-  `got ${entEstimate.estimatedCredits}`
+  `the Enterprise estimate tracks the cheapest rate: ${REPORTED_CREDITS} at €${MONTHLY_ERA_RATE} -> ${expectedCredits.toFixed(1)} at €${ent.rate}, got ${entEstimate.estimatedCredits}`,
+  Math.abs(entEstimate.estimatedCredits - expectedCredits) <= 5,
+  `got ${entEstimate.estimatedCredits}, expected ${expectedCredits.toFixed(1)} +/- 5`
 );
 check("but it is an estimate, not a charge — it is bigger than itself only via the buffer", entEstimate.reserveCredits > entEstimate.estimatedCredits);
 

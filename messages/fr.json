@@ -122,7 +122,8 @@
       "integrations": "Intégrations",
       "files": "Fichiers",
       "deepResearch": "Recherche approfondie",
-      "help": "Centre d’aide"
+      "help": "Centre d’aide",
+      "affiliate": "Affiliation"
     },
     "groupHints": {
       "create": "Générez un site, planifiez un objectif, rédigez un document.",
@@ -173,7 +174,8 @@
       "integrations": "Connectez Gmail, Drive et Slack pour que l'IA travaille sur vos vraies données",
       "files": "Importez des PDF, Word et Excel et posez des questions à l'IA",
       "deepResearch": "Donnez un sujet : il cherche, recoupe et rédige un rapport sourcé",
-      "help": "Les réponses aux questions les plus fréquentes, sans consommer de crédits."
+      "help": "Les réponses aux questions les plus fréquentes, sans consommer de crédits.",
+      "affiliate": "Votre lien de parrainage, vos gains et comment vous êtes payé."
     },
     "comingSoon": "Bientôt",
     "closeMenu": "Fermer le menu"
@@ -259,7 +261,13 @@
       "included": "Sièges d'équipe illimités inclus — aucun frais par membre",
       "perMember": "+ {currency}{price}/mois par membre d'équipe — chaque membre bénéficie d'un accès complet au niveau de votre offre"
     },
-    "metaDescription": "Tarifs Ionexa AI — formules Free, Starter, Growth, Professional, Ultimate et Enterprise."
+    "metaDescription": "Tarifs Ionexa AI — formules Free, Starter, Growth, Professional, Ultimate et Enterprise.",
+    "billingMonthly": "Mensuel",
+    "billingAnnual": "Annuel",
+    "billingIntervalLabel": "Période de facturation",
+    "billingAnnualSaving": "Économisez {percent} % — deux mois offerts",
+    "billedAnnually": "Facturé {total} une fois par an — vous économisez {saving}",
+    "checkoutFailed": "Impossible de démarrer le paiement. Veuillez réessayer."
   },
   "roadmap": {
     "title": "Feuille de route",
@@ -468,7 +476,10 @@
       "couldNotClearMemory": "✗ impossible d'effacer la mémoire",
       "memoryCleared": "✓ mémoire effacée",
       "memoryEnabled": "✓ mémoire de conversation activée",
-      "memoryDisabled": "✓ mémoire de conversation désactivée"
+      "memoryDisabled": "✓ mémoire de conversation désactivée",
+      "planExcludes": "Votre forfait actuel n’inclut pas la mémoire de conversation, rien n’est donc enregistré. À partir de Starter, la mémoire est conservée d’une conversation à l’autre.",
+      "switchedOff": "La mémoire est désactivée, rien n’est donc enregistré depuis vos conversations.",
+      "nothingYet": "Rien d’enregistré pour l’instant. La mémoire est active — elle retient les éléments durables comme votre nom, votre métier ou une préférence, dès qu’une conversation en mentionne un."
     },
     "loginActivity": {
       "title": "Activité de connexion",
@@ -649,7 +660,18 @@
       "sumTop": "Fonction la plus coûteuse",
       "sumTopHint": "{percent}% des dépenses",
       "projectionOnly": "Aucune action facturée pour l’instant — toutes les marges ci-dessous sont des projections issues d’enregistrements bypass, pas des revenus.",
-      "belowTargetAlert": "{count} fonction(s) sous l’objectif de {target}x : {features}. Une alerte a été envoyée par e-mail."
+      "belowTargetAlert": "{count} fonction(s) sous l’objectif de {target}x : {features}. Une alerte a été envoyée par e-mail.",
+      "cacheTitle": "Cache de prompt",
+      "cacheDescription": "Part des jetons du prompt servis depuis le cache au lieu d'être facturés au prix fort.",
+      "cacheHitRate": "Taux de succès",
+      "cacheColInput": "Prix fort",
+      "cacheColRead": "Depuis le cache",
+      "cacheColWrite": "Écrits",
+      "cacheEmpty": "Aucun jeton de prompt enregistré pour l'instant.",
+      "cacheMiscachedAlert": "{features} : écrit dans le cache mais ne lit rien en retour — le point de coupure porte sur du contenu qui change à chaque requête.",
+      "absorbedRefusals": "Refus absorbés : {calls} exécution(s) d’agent ont refusé la tâche sans être facturées — €{cost} de coût modèle à notre charge.",
+      "absorbedRefusalsShare": "Soit {share}% du chiffre d’affaires sur cette période ; le seuil d’examen est de {limit}%.",
+      "absorbedRefusalsShareUnknown": "La part du chiffre d’affaires n’est pas affichée : ce rapport n’a aucun chiffre d’affaires de référence."
     },
     "pushNotifications": {
       "title": "Notifications push",
@@ -1411,6 +1433,42 @@
         "testSentTelegram": "Envoyé — regardez votre Telegram.",
         "testSentDiscord": "Envoyé — regardez votre salon Discord.",
         "testFailed": "Le message de test n'a pas pu être envoyé."
+      },
+      "runCannotComplete": "Cet agent ne peut pas effectuer cette tâche, il a donc été désactivé. Aucun crédit n'a été débité.",
+      "capability": {
+        "canTitle": "Un agent peut",
+        "cannotTitle": "Un agent ne peut pas",
+        "can": {
+          "search": "Chercher des informations actuelles sur le web",
+          "analyse": "Lire et analyser ce qu'il trouve",
+          "summarise": "Résumer, comparer et tirer des conclusions",
+          "monitor": "Suivre un sujet dans la durée et signaler ce qui a changé",
+          "schedule": "Faire tout cela de façon planifiée et vous envoyer le résultat par e-mail"
+        },
+        "cannot": {
+          "code": "Écrire ou exécuter du code, créer des logiciels ou des sites, lancer des tests, corriger des bugs",
+          "system_access": "Accéder à votre ordinateur, vos fichiers, vos comptes ou vos systèmes",
+          "other_platforms": "Agir sur d'autres plateformes : publier, écrire à quelqu'un, réserver ou commander",
+          "physical": "Faire quoi que ce soit dans le monde physique",
+          "financial": "Déplacer de l'argent, acheter ou vendre quoi que ce soit",
+          "phone": "Passer des appels téléphoniques"
+        },
+        "refusedTitle": "Cela, un agent ne peut pas le faire",
+        "refusedBody": "Tout ce que vous demandez nécessite quelque chose hors du champ d'un agent :",
+        "detectedIn": "Détecté dans ce que vous avez écrit : {words}",
+        "noCharge": "Rien ne vous a été débité — rien n'a été exécuté.",
+        "noChargeYet": "Rien n'a encore été débité.",
+        "tryInstead": "Essayez plutôt de demander une recherche, une veille ou un résumé — par exemple, « chaque lundi, résume les nouveautés de mon secteur ».",
+        "rephrase": "Je veux reformuler ma demande",
+        "partialTitle": "Une partie de ceci est impossible",
+        "partialWillDo": "À la place, l'agent ferait ceci : {parts}",
+        "partialContinue": "Créer la partie réalisable",
+        "previewWhatItDoes": "Ce qu'il fait à chaque exécution",
+        "previewWillNotDo": "Ce qu'il ne fera pas",
+        "stepSearch": "Cherche sur le web des informations actuelles sur le sujet.",
+        "stepNoSearch": "Travaille uniquement à partir du texte de la tâche, sans recherche web.",
+        "stepWrite": "Rédige le résultat et le confronte à ce qu'il a trouvé.",
+        "stepDeliver": "L'envoie par e-mail à {target}, {when}."
       }
     },
     "publishing": {
@@ -1788,6 +1846,36 @@
       "finished": "Votre dernière demande s'est terminée pendant votre absence.",
       "open": "Ouvrir",
       "dismiss": "Ignorer"
+    },
+    "affiliate": {
+      "title": "Affiliation",
+      "description": "Partagez Ionexa et touchez une part de ce que paient les personnes que vous amenez.",
+      "pitch": "Touchez {percent}% de chaque paiement de vos filleuls, chaque mois, pendant {months} mois.",
+      "pitchTerms": "Vous ne pouvez pas vous parrainer vous-même, et chaque personne ne compte qu'une fois. La commission démarre à leur premier paiement.",
+      "join": "Obtenir mon lien",
+      "joining": "Préparation…",
+      "joinError": "Échec. Réessayez.",
+      "yourLink": "Votre lien",
+      "copy": "Copier",
+      "copied": "Copié",
+      "terms": "{percent}% de chaque paiement, pendant {months} mois à partir du premier.",
+      "suspended": "Ce compte d'affilié est suspendu, aucune nouvelle commission n'est générée. Écrivez-nous si c'est une erreur.",
+      "stat": {
+        "signups": "Inscriptions",
+        "paying": "Payants",
+        "owed": "Dû",
+        "paidOut": "Versé"
+      },
+      "payouts": "Être payé",
+      "payoutsUnavailable": "Les versements ne sont pas encore configurés sur ce déploiement.",
+      "payoutsNotSetUp": "Configurez les versements avec Stripe pour recevoir vos gains. Stripe recueille vos informations directement — nous ne les voyons jamais.",
+      "payoutsIncomplete": "Stripe a encore besoin de quelques informations avant de pouvoir vous payer. Terminez la configuration et ceci se mettra à jour.",
+      "payoutsReady": "Les versements ont lieu chaque mois. Tout montant supérieur à {minimum} part vers votre compte bancaire.",
+      "setUpPayouts": "Configurer les versements",
+      "finishSetup": "Terminer la configuration",
+      "opening": "Ouverture de Stripe…",
+      "connectError": "Impossible d'ouvrir la configuration. Réessayez.",
+      "rules": "La commission porte sur les paiements réellement encaissés. Les remboursements et litiges sont annulés. Un auto-parrainage ou un second parrainage de la même personne ne rapporte rien."
     }
   },
   "module": {

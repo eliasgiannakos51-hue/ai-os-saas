@@ -12,12 +12,46 @@ export const MARGIN_REPORT_WINDOW_DAYS = 30;
 /** Below this the margin is flagged — it is the target the pricing math aims at. */
 export const MARGIN_TARGET = 4;
 
+/**
+ * The settlement feature a refused agent run logs under.
+ *
+ * A `cannot_complete` run charges nothing: the task was impossible when we
+ * let the user create it, so charging for the discovery would be charging
+ * for our own gap. The model has ALREADY RUN by then, though, so the
+ * Anthropic cost is real and we absorb it. Kept on its own feature name so
+ * it lands as its own row here rather than dragging agent_run's margin
+ * down and looking like a pricing fault.
+ */
+export const ABSORBED_REFUSAL_FEATURE = "agent_run_cannot_complete";
+
+/**
+ * The share of monthly revenue absorbed refusals may reach before this
+ * stops being noise.
+ *
+ * WHY THIS IS EXPECTED TO STAY FAR BELOW IT. execute-agent disables an
+ * agent on its FIRST capability refusal (`shouldDisable = cannotComplete
+ * || …`, setting status "disabled" and next_run_at null), so one agent can
+ * produce at most one absorbed refusal — ever, not per month. The ceiling
+ * is therefore the plan's agent limit, which is already enforced: 50 on
+ * Ultimate, at a worst-case €0.1652 a run, is €8.26 against €200 — 4.1%,
+ * and only if every agent a customer ever created refused on its first
+ * run. Crossing 2% of real revenue would mean that theory is wrong, which
+ * is exactly when someone should look.
+ */
+export const ABSORBED_REFUSAL_REVENUE_LIMIT = 0.02;
+
 export type MarginLogRow = {
   feature: string;
   achieved_margin: number | string | null;
   real_cost_eur: number | string | null;
   /** What was actually taken from the user. Zero on every bypass row. */
   credits_charged?: number | string | null;
+  /** Prompt-token counts, summed across every sub-call of the action.
+   *  Optional because the cache panel is the only reader: a caller that
+   *  only needs margin does not have to select them. */
+  input_tokens?: number | string | null;
+  cache_read_tokens?: number | string | null;
+  cache_write_tokens?: number | string | null;
   /** settle_reservation's metadata. Only two keys are read here — see
    *  hypotheticalMargin below for why they have to be. */
   metadata?: {
@@ -100,6 +134,22 @@ export type MarginSummary = {
    *  is below target. These are the rows that go red and trigger the
    *  alert. */
   belowTarget: { feature: string; margin: number; hypothetical: boolean }[];
+  /**
+   * Refused agent runs, absorbed rather than charged. Null when there were
+   * none in the window.
+   *
+   * `shareOfRevenue` is null when no revenue figure was supplied — this
+   * module has no MRR source of its own, and a share computed against a
+   * zero it invented would read as a reassuring 0%. Null says "not known",
+   * which is the truth, and `overBudget` stays false rather than firing an
+   * alert on a number nobody produced.
+   */
+  absorbedRefusals: {
+    calls: number;
+    costEur: number;
+    shareOfRevenue: number | null;
+    overBudget: boolean;
+  } | null;
 };
 
 /**
@@ -214,7 +264,10 @@ export function effectiveMargin(row: MarginFeatureRow): { margin: number | null;
 
 /** The figures above the table: what the last 30 days actually cost, what
  *  they earned or would have earned, and where the money went. */
-export function summariseMarginReport(rows: MarginFeatureRow[]): MarginSummary {
+export function summariseMarginReport(
+  rows: MarginFeatureRow[],
+  options: { monthlyRevenueEur?: number | null } = {}
+): MarginSummary {
   const totalCostEur = rows.reduce((sum, r) => sum + r.totalCostEur, 0);
   const totalWouldBeCredits = rows.reduce((sum, r) => sum + r.wouldBeCredits, 0);
   const totalChargedCredits = rows.reduce((sum, r) => sum + r.chargedCredits, 0);
@@ -245,6 +298,155 @@ export function summariseMarginReport(rows: MarginFeatureRow[]): MarginSummary {
         : null,
     projectionOnly: rows.length > 0 && rows.every((r) => r.chargedCalls === 0),
     belowTarget,
+    absorbedRefusals: (() => {
+      const row = rows.find((r) => r.feature === ABSORBED_REFUSAL_FEATURE);
+      if (!row) return null;
+      const revenue = options.monthlyRevenueEur;
+      const share =
+        typeof revenue === "number" && Number.isFinite(revenue) && revenue > 0
+          ? row.totalCostEur / revenue
+          : null;
+      return {
+        calls: row.chargedCalls + row.bypassCalls,
+        costEur: row.totalCostEur,
+        shareOfRevenue: share,
+        overBudget: share !== null && share > ABSORBED_REFUSAL_REVENUE_LIMIT,
+      };
+    })(),
   };
 }
 
+
+// ---------------------------------------------------------------------
+// Cache efficiency
+// ---------------------------------------------------------------------
+//
+// WHY THIS EXISTS. Prompt caching is the one cost optimisation whose
+// success and failure look identical from the outside. Anthropic does not
+// error when a prefix is too short to cache, or when a breakpoint sits on
+// content that changes every request — it just returns
+// cache_creation_input_tokens: 0, or writes an entry nothing ever reads.
+// The code still greps as "cached". The bill is the only witness.
+//
+// ai_cost_log has recorded cache_read_tokens and cache_write_tokens since
+// the baseline schema, and nothing in the product ever displayed them. So
+// the app has always had the evidence and never shown it. This turns those
+// two columns into the one number that answers "is caching actually
+// working": the share of prompt tokens that were served from cache.
+//
+// DELIBERATELY TOKENS, NOT EUROS. Converting a cached read into money
+// needs the input rate of the model that served it, and ai_cost_log does
+// not store a model id — only the measured totals. A euro figure here
+// would have to assume a model, and an assumed model is exactly what
+// produced the understated costs MODEL_PRICING_USD's comment describes.
+// A token share needs no such assumption and is the figure the before/
+// after comparison actually turns on.
+
+export type CacheFeatureRow = {
+  feature: string;
+  calls: number;
+  /** Prompt tokens paid at full price. */
+  inputTokens: number;
+  /** Prompt tokens served from cache, at roughly a tenth of full price. */
+  cacheReadTokens: number;
+  /** Prompt tokens written to cache, at 1.25x (5-minute) or 2x (1-hour). */
+  cacheWriteTokens: number;
+  /**
+   * cacheRead / (input + cacheRead + cacheWrite), as a 0-1 fraction.
+   *
+   * The denominator is EVERY prompt token, because that is the quantity
+   * caching is supposed to move: a feature reading nothing from cache
+   * scores 0 whether it is uncached or miscached, which is the honest
+   * answer in both cases. Null when the feature sent no prompt tokens at
+   * all, so "no data" cannot be mistaken for "0%".
+   */
+  hitRate: number | null;
+  /**
+   * True when this feature wrote to the cache but read essentially
+   * nothing back — the signature of a breakpoint placed on content that
+   * varies per request. Such a feature is paying the write premium on
+   * every call and getting nothing for it, which is strictly worse than
+   * not caching at all.
+   */
+  writingWithoutReading: boolean;
+};
+
+// A feature that has written this many tokens to cache has had ample
+// opportunity to read some back; below it, a zero read rate is more
+// likely to be a cold start than a misplaced breakpoint.
+const WRITE_WITHOUT_READ_MIN_TOKENS = 10_000;
+// Reads below this share of writes count as "essentially nothing".
+const WRITE_WITHOUT_READ_MAX_RATIO = 0.05;
+
+function tokenCount(value: number | string | null | undefined): number {
+  const n = Number(value ?? 0);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+/**
+ * Per-feature cache efficiency over the same rows the margin table reads.
+ *
+ * Sorted by total prompt tokens descending: the features with the most to
+ * gain appear first, which is the order the question "where is caching
+ * worth adding next" is actually asked in.
+ */
+export function aggregateCacheRows(data: MarginLogRow[]): CacheFeatureRow[] {
+  const byFeature = new Map<
+    string,
+    { calls: number; input: number; read: number; write: number }
+  >();
+
+  for (const row of data) {
+    const feature = row.feature || "unknown";
+    const acc = byFeature.get(feature) ?? { calls: 0, input: 0, read: 0, write: 0 };
+    acc.calls += 1;
+    acc.input += tokenCount(row.input_tokens);
+    acc.read += tokenCount(row.cache_read_tokens);
+    acc.write += tokenCount(row.cache_write_tokens);
+    byFeature.set(feature, acc);
+  }
+
+  return [...byFeature.entries()]
+    .map(([feature, a]) => {
+      const total = a.input + a.read + a.write;
+      return {
+        feature,
+        calls: a.calls,
+        inputTokens: a.input,
+        cacheReadTokens: a.read,
+        cacheWriteTokens: a.write,
+        hitRate: total > 0 ? a.read / total : null,
+        writingWithoutReading:
+          a.write >= WRITE_WITHOUT_READ_MIN_TOKENS &&
+          a.read < a.write * WRITE_WITHOUT_READ_MAX_RATIO,
+      };
+    })
+    .sort(
+      (x, y) =>
+        y.inputTokens + y.cacheReadTokens + y.cacheWriteTokens -
+        (x.inputTokens + x.cacheReadTokens + x.cacheWriteTokens)
+    );
+}
+
+export type CacheSummary = {
+  inputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  hitRate: number | null;
+  /** Features currently paying the write premium for nothing. */
+  miscached: string[];
+};
+
+export function summariseCacheReport(rows: CacheFeatureRow[]): CacheSummary {
+  const inputTokens = rows.reduce((s, r) => s + r.inputTokens, 0);
+  const cacheReadTokens = rows.reduce((s, r) => s + r.cacheReadTokens, 0);
+  const cacheWriteTokens = rows.reduce((s, r) => s + r.cacheWriteTokens, 0);
+  const total = inputTokens + cacheReadTokens + cacheWriteTokens;
+  return {
+    inputTokens,
+    cacheReadTokens,
+    cacheWriteTokens,
+    hitRate: total > 0 ? cacheReadTokens / total : null,
+    miscached: rows.filter((r) => r.writingWithoutReading).map((r) => r.feature),
+  };
+}

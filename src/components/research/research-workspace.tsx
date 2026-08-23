@@ -6,7 +6,6 @@ import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import {
   Telescope,
-  Loader2,
   Play,
   Trash2,
   FileText,
@@ -455,7 +454,7 @@ export function ResearchWorkspace({
               {(isRunning(report) || running === report.id) && (
                 <div className="space-y-1">
                   <p className="flex items-center gap-1.5 text-[11px] text-muted">
-                    <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                    <ThinkingIndicator size="sm" />
                     {typeof report.questions_total === "number" && report.questions_total > 0
                       ? t("progressStep", {
                           done: Math.min((report.questions_done ?? 0) + 1, report.questions_total),

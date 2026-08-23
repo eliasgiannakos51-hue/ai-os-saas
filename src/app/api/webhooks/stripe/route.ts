@@ -4,10 +4,24 @@ import { diagLog } from "@/lib/diag";
 import type Stripe from "stripe";
 import { createStripeClient } from "@/lib/stripe/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getPlanSlugFromPriceId, getTeamSeatPriceId } from "@/lib/billing/price-ids";
-import { getCreditPack, creditPackPriceEurPerCredit, type PlanSlug } from "@/lib/billing/plans";
-import { grantCredits, syncCreditsForPlan, recordPackPurchaseRate } from "@/lib/billing/credits";
+import { getPlanFromPriceId, getTeamSeatPriceId } from "@/lib/billing/price-ids";
+import {
+  getCreditPack,
+  creditPackPriceEurPerCredit,
+  type BillingInterval,
+  type PlanSlug,
+} from "@/lib/billing/plans";
+import {
+  grantCredits,
+  grantMonthlyPlanCredits,
+  syncCreditsForPlan,
+  recordPackPurchaseRate,
+} from "@/lib/billing/credits";
 import { logApiError } from "@/lib/log-error";
+import {
+  recordCommissionForInvoice,
+  reverseCommissionForInvoice,
+} from "@/lib/affiliate/store";
 
 export const dynamic = "force-dynamic";
 
@@ -87,13 +101,20 @@ async function syncSubscriptionToUser(
 
   let planSlug: PlanSlug = "free";
   let seatCount = 0;
+  // Monthly unless a matched price says otherwise. Read from the
+  // subscription's own price, never from checkout metadata — metadata is
+  // whatever we wrote at session creation, and a customer who later
+  // switched interval in the Stripe portal would keep the stale value
+  // forever. The price id is the fact.
+  let interval: BillingInterval = "month";
 
   if (isActive) {
     for (const item of subscription.items.data) {
       const priceId = item.price.id;
-      const matchedPlan = getPlanSlugFromPriceId(priceId);
-      if (matchedPlan) {
-        planSlug = matchedPlan;
+      const matched = getPlanFromPriceId(priceId);
+      if (matched) {
+        planSlug = matched.slug;
+        interval = matched.interval;
       } else if (teamSeatPriceId && priceId === teamSeatPriceId) {
         seatCount = item.quantity ?? 0;
       }
@@ -121,6 +142,9 @@ async function syncSubscriptionToUser(
       stripe_subscription_id: isActive ? subscription.id : null,
       subscription_tier: planSlug,
       seat_count: seatCount,
+      // Reset to "month" when the subscription ends, so a lapsed annual
+      // customer is not left being priced at the annual credit rate.
+      billing_interval: isActive ? interval : "month",
     },
   });
   if (updateError) {
@@ -128,20 +152,42 @@ async function syncSubscriptionToUser(
   }
   diagLog(`[webhook-diag] syncSubscriptionToUser result supabaseUserId=${supabaseUserId} planSlug=${planSlug} isActive=${isActive} seatCount=${seatCount} updateError=${updateError?.message ?? "none"}`);
 
-  // Resets the credit balance to the (new) plan's monthly allotment — on a
-  // brand-new subscription, a plan change, a cancellation (Free's allotment,
-  // since planSlug is "free" when !isActive), and a recurring renewal.
+  // CREDITS — a GATE and, inside it, TWO PATHS. Both halves of a merge,
+  // and together they are stricter than either side was alone.
   //
-  // NOT on every other customer.subscription.updated. Stripe fires that for
-  // a card update, a coupon, an added team seat and for setting
-  // cancel_at_period_end, and this used to rewrite credits_remaining on all
-  // of them — which destroyed the balance of anyone who had bought a credit
-  // pack, because a pack ADDS above the plan total and the reset clamps back
-  // down to it. See lib/billing/subscription-sync.ts.
+  // THE GATE (from the trunk). Stripe fires customer.subscription.updated
+  // for a card update, a coupon, an added seat and for setting
+  // cancel_at_period_end. Resetting on all of them destroyed the balance
+  // of anyone who had bought a credit pack, because a pack ADDS above the
+  // plan total and a reset clamps back down to it. creditSyncDecision
+  // returns "reset" only for invoice.paid, checkout.session.completed,
+  // customer.subscription.deleted, and for a real change of tier.
+  //
+  // THE TWO PATHS (from the annual-billing branch). Monthly, and every
+  // cancellation whatever the interval: reset to the plan's allotment, as
+  // before — one invoice a month is one reset a month. Annual: Stripe
+  // fires invoice.paid once a YEAR, so a reset would give eleven months
+  // of nothing. The annual account gets THIS MONTH's allowance through
+  // the same idempotent, month-keyed grant the cron uses, so the first
+  // month lands at checkout and a second call inside the same month is a
+  // no-op.
+  //
+  // The branch's own version had no gate: `isActive && interval === "year"`
+  // on every event would have granted a fresh month every time an annual
+  // customer opened the billing portal. The gate is what makes the annual
+  // path safe, so they are not independent — this is why both are here.
   const decision = creditSyncDecision({ eventType, previousTier, nextTier: planSlug });
   if (decision === "reset") {
     try {
-      await syncCreditsForPlan(supabaseUserId, planSlug, `Subscription ${isActive ? "active" : "ended"}: ${planSlug} plan`);
+      if (isActive && interval === "year") {
+        await grantMonthlyPlanCredits(supabaseUserId, planSlug);
+      } else {
+        await syncCreditsForPlan(
+          supabaseUserId,
+          planSlug,
+          `Subscription ${isActive ? "active" : "ended"}: ${planSlug} plan`
+        );
+      }
     } catch (err) {
       logApiError("/api/webhooks/stripe", err, { stage: "sync_credits", supabaseUserId });
     }
@@ -197,6 +243,43 @@ async function grantPurchasedCredits(session: Stripe.Checkout.Session, eventId: 
   const pack = getCreditPack(packId);
   if (pack) {
     await recordPackPurchaseRate(supabaseUserId, creditPackPriceEurPerCredit(pack));
+  }
+}
+
+/**
+ * Turns a paid invoice into affiliate commission, if the payer was
+ * referred (salvaged from the three-bugs-landing-page branch).
+ *
+ * Resolving WHO paid goes through the Stripe customer's
+ * `supabase_user_id` metadata — the same link syncSubscriptionToUser
+ * uses — because the invoice itself carries no Supabase id. A customer
+ * without that metadata predates the convention; nothing to attribute.
+ *
+ * Never throws: an affiliate bookkeeping failure must not stop a
+ * subscription from being synced.
+ */
+async function recordAffiliateCommission(stripe: Stripe, invoice: Stripe.Invoice): Promise<void> {
+  try {
+    const amountCents = invoice.amount_paid ?? 0;
+    if (amountCents <= 0 || !invoice.id) return;
+
+    const customerRef = invoice.customer;
+    const customerId = typeof customerRef === "string" ? customerRef : customerRef?.id;
+    if (!customerId) return;
+
+    const customer = await stripe.customers.retrieve(customerId);
+    if (customer.deleted) return;
+    const supabaseUserId = customer.metadata?.supabase_user_id;
+    if (!supabaseUserId) return;
+
+    await recordCommissionForInvoice({
+      referredUserId: supabaseUserId,
+      stripeInvoiceId: invoice.id,
+      amountCents,
+      paidAt: new Date((invoice.status_transitions?.paid_at ?? invoice.created) * 1000),
+    });
+  } catch (err) {
+    logApiError("/api/webhooks/stripe", err, { stage: "affiliate_commission" });
   }
 }
 
@@ -265,6 +348,28 @@ export async function POST(request: Request) {
         if (subscriptionId) {
           await syncSubscriptionToUser(stripe, subscriptionId, event.type);
         }
+        // Affiliate commission accrues from the invoice that was actually
+        // PAID, not from the plan's list price — a discounted or prorated
+        // invoice settles for less than list, and paying a percentage of
+        // list would send out more than came in.
+        await recordAffiliateCommission(stripe, invoice);
+        break;
+      }
+      // Money that came back has to take the commission with it.
+      case "charge.refunded":
+      case "charge.dispute.closed": {
+        // The SDK's Charge/Dispute types do not expose `invoice`, and the
+        // two events carry it in different places — a refund on the charge
+        // itself, a dispute one level down under `charge`. Read both
+        // shapes rather than trusting either.
+        const object = event.data.object as unknown as {
+          invoice?: string | { id?: string } | null;
+          charge?: string | { invoice?: string | { id?: string } | null } | null;
+        };
+        const raw =
+          object.invoice ?? (typeof object.charge === "object" ? object.charge?.invoice : null);
+        const invoiceId = typeof raw === "string" ? raw : raw?.id;
+        if (invoiceId) await reverseCommissionForInvoice(invoiceId);
         break;
       }
       default:

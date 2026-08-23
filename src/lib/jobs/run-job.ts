@@ -254,6 +254,33 @@ export async function runJob(params: { jobId: string; apiKey: string }): Promise
     if (handled.refund) {
       // Produced nothing worth charging for. The hold goes back whole.
       if (job.reservation_id) await releaseReservation(job.user_id, job.reservation_id);
+
+      // …but the WORK still happened, and we still paid Anthropic for it.
+      //
+      // This branch used to return here, writing credits_charged = 0 and
+      // no cost-log row at all. The refund was correct and the silence
+      // was not: a refunded job's real spend appeared in nobody's
+      // margin report, so the one number that says how much saying "no"
+      // costs us was structurally unobservable. As refunds become a
+      // deliberate product behaviour — a request an agent cannot do is
+      // now refunded on purpose — that blind spot stops being academic.
+      //
+      // Settled with bypassCharge, which is the existing mechanism for
+      // exactly this shape: log the real cost, charge nothing, and
+      // record what it WOULD have cost. The hold is already released
+      // above, so an empty reservation id is passed and the RPC treats
+      // it as charge-only.
+      if (costs.callCount > 0) {
+        await settleReservation({
+          userId: job.user_id,
+          reservationId: "",
+          feature: `${handled.feature ?? kind}_refunded`,
+          costs,
+          plan,
+          bypassCharge: true,
+          metadata: { jobId, kind, attempts, refunded: true },
+        });
+      }
       await admin
         .from("ai_jobs")
         .update({

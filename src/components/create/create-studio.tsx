@@ -11,7 +11,6 @@ import {
   Download,
   FileText,
   Layers,
-  Loader2,
   MessageCircle,
   Pencil,
   Shuffle,
@@ -239,7 +238,7 @@ export function CreateStudio() {
             className="mt-3 inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
             {detecting ? (
-              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              <ThinkingIndicator size="sm" tone="inherit" />
             ) : (
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             )}
@@ -358,7 +357,7 @@ export function CreateStudio() {
               className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl bg-orange-500 px-4 py-2 text-sm font-semibold text-black transition-all duration-200 hover:opacity-90 hover:shadow-[0_0_16px_rgba(249,115,22,0.35)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {studio.running ? (
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                <ThinkingIndicator size="sm" tone="inherit" />
               ) : (
                 <Sparkles className="h-4 w-4" aria-hidden="true" />
               )}

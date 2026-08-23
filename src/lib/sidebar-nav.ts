@@ -14,6 +14,7 @@ import {
   CHAT_ICON,
   CREATE_ICON,
   SETTINGS_ICON,
+  AFFILIATE_ICON,
   MARKETPLACE_ICON,
   TEAM_ICON,
   MEMORY_ICON,
@@ -185,6 +186,7 @@ export const SETTINGS_GROUP: SidebarGroupConfig = {
   items: [
     { href: SETTINGS_NAV_ITEM.href, label: "Settings", icon: SETTINGS_ICON, hintKey: "settings" },
     { href: "/dashboard/team", label: "Team", icon: TEAM_ICON , hintKey: "team" },
+    { href: "/dashboard/affiliate", label: "Affiliate", icon: AFFILIATE_ICON, hintKey: "affiliate" },
     // The Help Centre (app/help/page.tsx) — the same 27 answers the chat
     // replies with, as a page. Listed here so it is also reachable from
     // the command palette, which is built from these same groups.

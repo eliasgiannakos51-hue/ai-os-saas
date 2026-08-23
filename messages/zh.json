@@ -122,7 +122,8 @@
       "integrations": "集成",
       "files": "文件",
       "deepResearch": "深度研究",
-      "help": "帮助中心"
+      "help": "帮助中心",
+      "affiliate": "推广合作"
     },
     "groupHints": {
       "create": "生成网站、规划目标、撰写文档。",
@@ -173,7 +174,8 @@
       "integrations": "连接 Gmail、Drive 与 Slack，让 AI 处理你真实的数据",
       "files": "上传 PDF、Word 和 Excel 文件，然后向 AI 提问",
       "deepResearch": "给一个主题，它会搜索、交叉核对并写出带来源的报告",
-      "help": "最常见问题的答案，不消耗额度。"
+      "help": "最常见问题的答案，不消耗额度。",
+      "affiliate": "你的推广链接、已赚金额，以及如何收款。"
     },
     "comingSoon": "即将推出",
     "closeMenu": "关闭菜单"
@@ -259,7 +261,13 @@
       "included": "包含无限团队席位 — 无需按成员付费",
       "perMember": "+ 每位团队成员每月 {currency}{price} — 每位成员均可获得您所在套餐等级的完整访问权限"
     },
-    "metaDescription": "Ionexa AI 价格 — Free、Starter、Growth、Professional、Ultimate 和 Enterprise 方案。"
+    "metaDescription": "Ionexa AI 价格 — Free、Starter、Growth、Professional、Ultimate 和 Enterprise 方案。",
+    "billingMonthly": "按月",
+    "billingAnnual": "按年",
+    "billingIntervalLabel": "计费周期",
+    "billingAnnualSaving": "立省 {percent}%——相当于免费两个月",
+    "billedAnnually": "每年收取 {total}，为你节省 {saving}",
+    "checkoutFailed": "无法开始结账，请重试。"
   },
   "roadmap": {
     "title": "路线图",
@@ -468,7 +476,10 @@
       "couldNotClearMemory": "✗ 无法清除记忆",
       "memoryCleared": "✓ 记忆已清除",
       "memoryEnabled": "✓ 已开启聊天记忆",
-      "memoryDisabled": "✓ 已关闭聊天记忆"
+      "memoryDisabled": "✓ 已关闭聊天记忆",
+      "planExcludes": "您当前的套餐不包含聊天记忆，因此不会保存任何内容。Starter 及以上套餐可跨对话记忆。",
+      "switchedOff": "记忆已关闭，因此不会从您的对话中保存任何内容。",
+      "nothingYet": "尚未保存任何内容。记忆已开启并正常工作 — 当对话中出现您的姓名、工作或偏好等长期有用的信息时就会记住。"
     },
     "loginActivity": {
       "title": "登录活动",
@@ -649,7 +660,18 @@
       "sumTop": "最贵的功能",
       "sumTopHint": "占总支出 {percent}%",
       "projectionOnly": "尚无计费操作——下方所有利润率均为免计费记录的推算值，并非实际收入。",
-      "belowTargetAlert": "{count} 个功能低于 {target}x 目标：{features}。已发送邮件告警。"
+      "belowTargetAlert": "{count} 个功能低于 {target}x 目标：{features}。已发送邮件告警。",
+      "cacheTitle": "提示词缓存",
+      "cacheDescription": "从缓存中读取而非按全价计费的提示词 token 占比。",
+      "cacheHitRate": "命中率",
+      "cacheColInput": "全价",
+      "cacheColRead": "来自缓存",
+      "cacheColWrite": "已写入",
+      "cacheEmpty": "尚未记录任何提示词 token。",
+      "cacheMiscachedAlert": "{features}：只写入缓存却读不回任何内容 — 断点落在每次请求都会变化的内容上。",
+      "absorbedRefusals": "已吸收的拒绝：{calls} 次代理运行拒绝了任务且未计费 —— €{cost} 的模型成本由我们承担。",
+      "absorbedRefusalsShare": "占该期间收入的 {share}%；复核阈值为 {limit}%。",
+      "absorbedRefusalsShareUnknown": "未显示占收入的比例：本报告没有可对比的收入数字。"
     },
     "pushNotifications": {
       "title": "推送通知",
@@ -1411,6 +1433,42 @@
         "testSentTelegram": "已发送——请查看你的 Telegram。",
         "testSentDiscord": "已发送——请查看你的 Discord 频道。",
         "testFailed": "测试消息发送失败。"
+      },
+      "runCannotComplete": "该智能体无法完成这项任务，已被停用。未扣除任何积分。",
+      "capability": {
+        "canTitle": "智能体可以",
+        "cannotTitle": "智能体不能",
+        "can": {
+          "search": "在网上搜索最新信息",
+          "analyse": "阅读并分析找到的内容",
+          "summarise": "归纳、对比并得出结论",
+          "monitor": "持续关注某个主题并报告变化",
+          "schedule": "按计划完成上述工作，并把结果发到你的邮箱"
+        },
+        "cannot": {
+          "code": "编写或运行代码、开发软件或网站、跑测试、修复缺陷",
+          "system_access": "访问你的电脑、文件、账户或系统",
+          "other_platforms": "在其他平台上操作——发帖、给人发消息、预订或下单",
+          "physical": "做任何现实世界中的事情",
+          "financial": "转移资金、买入或卖出",
+          "phone": "拨打电话"
+        },
+        "refusedTitle": "这件事智能体做不了",
+        "refusedBody": "你要求的全部内容都需要智能体能力之外的东西：",
+        "detectedIn": "在你写的内容中发现：{words}",
+        "noCharge": "未向你收费——什么都没有运行。",
+        "noChargeYet": "目前尚未收取任何费用。",
+        "tryInstead": "换成研究、监测或摘要类的请求试试——例如「每周一，总结我所在行业的最新动态」。",
+        "rephrase": "我想重写请求",
+        "partialTitle": "其中一部分无法完成",
+        "partialWillDo": "智能体会改为做这些：{parts}",
+        "partialContinue": "只创建可行的部分",
+        "previewWhatItDoes": "每次运行时它会做什么",
+        "previewWillNotDo": "它不会做什么",
+        "stepSearch": "在网上搜索该主题的最新信息。",
+        "stepNoSearch": "仅根据任务文本工作，不进行网络搜索。",
+        "stepWrite": "撰写结果，并与查到的内容核对。",
+        "stepDeliver": "{when}，通过电子邮件发送到 {target}。"
       }
     },
     "publishing": {
@@ -1788,6 +1846,36 @@
       "finished": "您离开期间，上一个请求已经完成。",
       "open": "打开",
       "dismiss": "关闭"
+    },
+    "affiliate": {
+      "title": "推广合作",
+      "description": "分享 Ionexa，从你带来的人持续付费中获得分成。",
+      "pitch": "你推荐的人每次付费，你都能拿 {percent}%，按月结算，持续 {months} 个月。",
+      "pitchTerms": "不能推荐自己，每个人只计一次。佣金从对方第一次付费开始计算。",
+      "join": "获取我的链接",
+      "joining": "正在创建…",
+      "joinError": "创建失败，请重试。",
+      "yourLink": "你的链接",
+      "copy": "复制",
+      "copied": "已复制",
+      "terms": "每笔付费的 {percent}%，从对方首次付费起 {months} 个月。",
+      "suspended": "该推广账号已被暂停，不再产生新佣金。如有疑问请联系我们。",
+      "stat": {
+        "signups": "注册",
+        "paying": "付费",
+        "owed": "应付你",
+        "paidOut": "已支付"
+      },
+      "payouts": "结算方式",
+      "payoutsUnavailable": "此部署尚未开通结算功能。",
+      "payoutsNotSetUp": "通过 Stripe 设置结算即可收款。你的资料由 Stripe 直接收集——我们看不到。",
+      "payoutsIncomplete": "Stripe 还需要一些资料才能付款给你。完成设置后这里会更新。",
+      "payoutsReady": "每月结算一次。超过 {minimum} 的金额会打到你的银行账户。",
+      "setUpPayouts": "设置结算",
+      "finishSetup": "完成结算设置",
+      "opening": "正在打开 Stripe…",
+      "connectError": "无法打开结算设置，请重试。",
+      "rules": "佣金按实际收到的款项计算。退款和争议扣款会被冲回。自我推荐以及对同一个人的重复推荐不产生佣金。"
     }
   },
   "module": {

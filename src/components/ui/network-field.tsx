@@ -127,7 +127,7 @@ export function NetworkField({ opacity = 0.5 }: { opacity?: number }) {
     <div
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
-      style={{ opacity }}
+      style={{ opacity: `calc(${opacity} * var(--backdrop-scale, 1))` }}
     >
       <div
         className="absolute inset-0"

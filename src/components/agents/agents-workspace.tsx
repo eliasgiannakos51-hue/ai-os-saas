@@ -3,7 +3,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Bot, Plus, Play, Pause, Pencil, Trash2, SearchX, History } from "lucide-react";
+import {
+  Bot,
+  Plus,
+  Play,
+  Pause,
+  Pencil,
+  Trash2,
+  SearchX,
+  History,
+  Check,
+  Ban,
+  AlertTriangle,
+} from "lucide-react";
 import { EntityCard, CardGrid, type EntityCardStatus } from "@/components/ui/entity-card";
 import { ListLayout } from "@/components/ui/list-layout";
 import { EmptyState } from "@/components/empty-state";
@@ -30,6 +42,7 @@ import { isDeliveryChannel, type DeliveryChannel } from "@/lib/agents/delivery-c
 import { markJobConsumed } from "@/lib/jobs/consume";
 import { JobSeen } from "@/components/jobs/job-seen";
 import { resolveBrowserTimeZone, nextRuns } from "@/lib/agents/cron-expression";
+import { AGENT_CAN_IDS, AGENT_CANNOT_IDS } from "@/lib/agents/agent-capability";
 import type { AgentDraft, AgentRun, UserAgent } from "@/lib/agents/agent-config";
 import { matchesSearch } from "@/lib/text/search-match";
 import {
@@ -51,6 +64,8 @@ import {
 // card, the list chrome, the clarification prompt, the schedule editor)
 // are separate components and shared with the rest of the app.
 
+type CapabilityEvidenceItem = { category: string; matched: string };
+
 type BuildResponse = {
   ok: boolean;
   built?: boolean;
@@ -60,12 +75,36 @@ type BuildResponse = {
   questionSuggestions?: string[][];
   draft?: AgentDraft;
   understood?: string;
+  /** The model's one-sentence note about the part that cannot be done. */
   unsupported?: string;
   upcomingRuns?: string[];
   estimatedCreditsPerRun?: number;
   error?: string;
   upgradeRequired?: boolean;
   limitReached?: boolean;
+  /** The builder itself judged the request impossible. Credits refunded. */
+  reason?: string;
+};
+
+/**
+ * The pre-charge verdict from api/agents/build.
+ *
+ * Arrives INSTEAD of a job id, which is the point: no job means no
+ * reservation, no AI call and nothing charged. `blocked` and `evidence`
+ * are ids and matched words, never sentences — the prose is looked up
+ * here so a Greek user reads Greek.
+ */
+type CapabilityResponse = {
+  capabilityBlocked?: boolean;
+  capabilityPartial?: boolean;
+  blocked?: string[];
+  evidence?: CapabilityEvidenceItem[];
+  doableParts?: string[];
+  /** The builder model's own sentence, already in the user's language.
+   *  Only set on the layer-2 path, where there are no category ids to
+   *  look up because the verdict came from reading the request rather
+   *  than from matching words in it. */
+  modelNote?: string;
 };
 
 export function AgentsWorkspace({
@@ -130,6 +169,9 @@ export function AgentsWorkspace({
   // front of the user and has not been paid for twice yet — this is the id
   // that gets marked seen when it is rendered or discarded.
   const [resultJobId, setResultJobId] = useState<string | null>(null);
+  // The capability verdict, when the request was refused or reduced
+  // BEFORE anything was reserved. Null the rest of the time.
+  const [capability, setCapability] = useState<CapabilityResponse | null>(null);
   const [savingAgent, setSavingAgent] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -190,7 +232,7 @@ export function AgentsWorkspace({
   // one fetch, so closing the tab aborted it and a platform kill left the
   // credit hold stranded with nothing written anywhere. The route returns
   // a job id immediately; the row is the record; this only watches it.
-  async function build(text: string, skipClarification: boolean) {
+  async function build(text: string, skipClarification: boolean, acknowledgedLimits = false) {
     try {
       const response = await fetch("/api/agents/build", {
         method: "POST",
@@ -202,6 +244,7 @@ export function AgentsWorkspace({
           request: text,
           skipClarification,
           timezone: resolveBrowserTimeZone(),
+          acknowledgedLimits,
         }),
       });
       const data = await response.json();
@@ -216,9 +259,24 @@ export function AgentsWorkspace({
         return;
       }
       setProblem(null);
+
+      // THE CAPABILITY VERDICT, and it arrives instead of a job id.
+      //
+      // Handled before anything else because the whole value of it is
+      // that nothing happened: no job row to watch, no reservation to
+      // release, nothing charged. Falling through to `setJobId(undefined)`
+      // would leave the user watching a job that does not exist.
+      if (data.capabilityBlocked || data.capabilityPartial) {
+        setQuestions(null);
+        setPreview(null);
+        setCapability(data as CapabilityResponse);
+        return;
+      }
+
       setQuestions(null);
       setQuestionSuggestions([]);
       setPreview(null);
+      setCapability(null);
       setJobId(String(data.jobId));
     } catch (err) {
       // Never reached a route, so it can carry no code from one — the only
@@ -254,6 +312,24 @@ export function AgentsWorkspace({
       // older result shape can still arrive here after a deploy.
       setQuestionSuggestions(alignSuggestions(result.questions, result.questionSuggestions));
       setPreview(null);
+    } else if (result.reason === "not_feasible") {
+      // LAYER 2's verdict: the deterministic gate let this through, and
+      // the builder itself judged it impossible. The credits are already
+      // back (the job refunded), so this is shown as an explanation with
+      // that fact stated — not as an error the user should retry, which
+      // is what "Couldn't design that agent, try rewording" invited them
+      // to do with something no rewording can fix.
+      setQuestions(null);
+      setPreview(null);
+      setCapability({
+        capabilityBlocked: true,
+        blocked: [],
+        evidence: [],
+        // Already in the user's language — the builder is told to write
+        // it that way. Empty is fine: the panel's generic body stands on
+        // its own.
+        modelNote: result.unsupported,
+      });
     } else if (result.built) {
       setQuestions(null);
       setPreview({ ...result, ok: true });
@@ -330,8 +406,14 @@ export function AgentsWorkspace({
       // billed surface uses (lib/billing/usage-receipt.ts).
       usage?: { creditsCharged?: number; bypass?: boolean; wouldHaveCharged?: number | null };
       error?: string;
+      reason?: string;
     };
-    if (!result.ran) {
+    if (result.reason === "cannot_complete") {
+      // The agent said it cannot do this task. It has been refunded and
+      // switched off server-side, so the message says both — "the run
+      // failed, try again" would be false on every count.
+      addToast(t("runCannotComplete"), "error");
+    } else if (!result.ran) {
       addToast(result.error ?? t("runFailed"), "error");
     } else if (result.output) {
       setLastRunOutput(result.output);
@@ -421,6 +503,7 @@ export function AgentsWorkspace({
     setQuestions(null);
     setQuestionSuggestions([]);
     setPreview(null);
+    setCapability(null);
   }
 
   // ---- per-agent actions ---------------------------------------------
@@ -595,6 +678,134 @@ export function AgentsWorkspace({
               <ExamplePrompts surface="agents" onPick={setRequestText} className="mt-2.5" />
             </div>
 
+            {/*
+              WHAT AN AGENT IS, BEFORE THE USER DESCRIBES ONE.
+              Not a tooltip and not a help article: visible on the create
+              screen, above the button, without a click. The reported
+              incident started with a user who had no way to know that
+              "runs tests and fixes errors" was outside the product — and
+              nothing on this screen told them.
+            */}
+            <div className="grid gap-3 rounded-xl border border-border bg-surface/40 p-3 sm:grid-cols-2">
+              <div>
+                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+                  <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                  {t("capability.canTitle")}
+                </p>
+                <ul className="space-y-1">
+                  {AGENT_CAN_IDS.map((id) => (
+                    <li key={id} className="text-[11px] leading-relaxed text-muted">
+                      {t(`capability.can.${id}`)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-rose-400">
+                  <Ban className="h-3.5 w-3.5" aria-hidden="true" />
+                  {t("capability.cannotTitle")}
+                </p>
+                <ul className="space-y-1">
+                  {AGENT_CANNOT_IDS.map((id) => (
+                    <li key={id} className="text-[11px] leading-relaxed text-muted">
+                      {t(`capability.cannot.${id}`)}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/*
+              REFUSED — and nothing was spent. The "no charge" line is not
+              reassurance boilerplate: it is the difference between this
+              screen and the incident that produced it.
+            */}
+            {capability?.capabilityBlocked && (
+              <div className="space-y-2 rounded-xl border border-rose-500/40 bg-rose-500/[0.06] p-4">
+                <p className="flex items-center gap-2 text-sm font-semibold text-rose-300">
+                  <Ban className="h-4 w-4" aria-hidden="true" />
+                  {t("capability.refusedTitle")}
+                </p>
+                <p className="text-sm leading-relaxed text-foreground">{t("capability.refusedBody")}</p>
+                {capability.modelNote && (
+                  <p className="text-sm leading-relaxed text-rose-200/90">{capability.modelNote}</p>
+                )}
+                {(capability.blocked ?? []).length > 0 && (
+                  <ul className="space-y-1">
+                    {(capability.blocked ?? []).map((id) => (
+                      <li key={id} className="text-xs leading-relaxed text-rose-200/90">
+                        • {t(`capability.cannot.${id}`)}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {(capability.evidence ?? []).length > 0 && (
+                  <p className="text-[11px] leading-relaxed text-muted">
+                    {t("capability.detectedIn", {
+                      words: (capability.evidence ?? []).map((e) => e.matched).join("; "),
+                    })}
+                  </p>
+                )}
+                <p className="text-xs font-medium text-emerald-400">{t("capability.noCharge")}</p>
+                <p className="text-xs leading-relaxed text-muted">{t("capability.tryInstead")}</p>
+                <button
+                  type="button"
+                  onClick={() => setCapability(null)}
+                  className="min-h-[36px] rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-surface"
+                >
+                  {t("capability.rephrase")}
+                </button>
+              </div>
+            )}
+
+            {/*
+              PARTIAL — the counter-offer. Requirement 1γ verbatim: name
+              the part that is not supported, say what the agent will do
+              instead, and ask whether to continue.
+            */}
+            {capability?.capabilityPartial && (
+              <div className="space-y-2 rounded-xl border border-amber-500/40 bg-amber-500/[0.06] p-4">
+                <p className="flex items-center gap-2 text-sm font-semibold text-amber-300">
+                  <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+                  {t("capability.partialTitle")}
+                </p>
+                <ul className="space-y-1">
+                  {(capability.blocked ?? []).map((id) => (
+                    <li key={id} className="text-xs leading-relaxed text-amber-200/90">
+                      • {t(`capability.cannot.${id}`)}
+                    </li>
+                  ))}
+                </ul>
+                {(capability.doableParts ?? []).length > 0 && (
+                  <p className="text-sm leading-relaxed text-foreground">
+                    {t("capability.partialWillDo", {
+                      parts: (capability.doableParts ?? []).join("; "),
+                    })}
+                  </p>
+                )}
+                <p className="text-xs font-medium text-emerald-400">{t("capability.noChargeYet")}</p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCapability(null);
+                      void build(requestText, true, true);
+                    }}
+                    className="min-h-[36px] rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-semibold text-black transition-opacity hover:opacity-90"
+                  >
+                    {t("capability.partialContinue")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCapability(null)}
+                    className="min-h-[36px] rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-surface"
+                  >
+                    {t("capability.rephrase")}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {questions && (
               <>
               {/* Questions the user has read are as "seen" as a draft is:
@@ -628,10 +839,46 @@ export function AgentsWorkspace({
                   <p className="text-sm leading-relaxed text-foreground">{preview.understood}</p>
                 )}
                 {preview.unsupported && (
-                  <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2.5 text-xs leading-relaxed text-amber-300">
-                    {preview.unsupported}
-                  </p>
+                  <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-2.5">
+                    <p className="mb-0.5 text-[11px] font-semibold uppercase tracking-wide text-amber-400">
+                      {t("capability.previewWillNotDo")}
+                    </p>
+                    <p className="text-xs leading-relaxed text-amber-300">{preview.unsupported}</p>
+                  </div>
                 )}
+
+                {/*
+                  WHAT IT WILL ACTUALLY DO, EVERY RUN — in sentences, not
+                  in a name and a price.
+                  The preview used to show what the agent was CALLED, when
+                  it would run and what it would cost, and left "what does
+                  it actually do" to a collapsed <details> holding the raw
+                  task prompt. A user pressing Create was agreeing to a
+                  label. These three lines are the thing they are agreeing
+                  to, spelled out in the order the agent performs them.
+                */}
+                <div className="rounded-lg border border-border bg-surface/40 p-2.5">
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-muted">
+                    {t("capability.previewWhatItDoes")}
+                  </p>
+                  <ol className="space-y-1 text-xs leading-relaxed text-foreground">
+                    <li>
+                      1.{" "}
+                      {preview.draft.config?.needsWebSearch
+                        ? t("capability.stepSearch")
+                        : t("capability.stepNoSearch")}
+                    </li>
+                    <li>2. {t("capability.stepWrite")}</li>
+                    <li>
+                      3.{" "}
+                      {t("capability.stepDeliver", {
+                        target: preview.draft.deliveryTarget,
+                        when: scheduleLabel(preview.draft.scheduleCron),
+                      })}
+                    </li>
+                  </ol>
+                </div>
+
                 <dl className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
                   <div>
                     <dt className="text-muted">{t("previewName")}</dt>

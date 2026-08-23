@@ -122,7 +122,8 @@
       "integrations": "Integrations",
       "files": "Files",
       "deepResearch": "Deep Research",
-      "help": "Help Centre"
+      "help": "Help Centre",
+      "affiliate": "Affiliate"
     },
     "groupHints": {
       "create": "Generate a site, plan a goal, write a document.",
@@ -173,7 +174,8 @@
       "integrations": "Connect Gmail, Drive and Slack so the AI can work with your real data",
       "files": "Upload PDFs, Word and Excel files and ask the AI questions about them",
       "deepResearch": "Give it a topic and it searches, cross-checks and writes a sourced report",
-      "help": "Answers to the questions people ask most — no credits used."
+      "help": "Answers to the questions people ask most — no credits used.",
+      "affiliate": "Your referral link, what you've earned, and how you get paid."
     },
     "comingSoon": "Coming soon",
     "closeMenu": "Close menu"
@@ -259,7 +261,13 @@
       "included": "Unlimited team seats included — no per-member charge",
       "perMember": "+ {currency}{price}/month per team member — each member gets full access at your plan's tier"
     },
-    "metaDescription": "Ionexa AI pricing — Free, Starter, Growth, Professional, Ultimate, and Enterprise plans."
+    "metaDescription": "Ionexa AI pricing — Free, Starter, Growth, Professional, Ultimate, and Enterprise plans.",
+    "billingMonthly": "Monthly",
+    "billingAnnual": "Annual",
+    "billingIntervalLabel": "Billing period",
+    "billingAnnualSaving": "Save {percent}% — two months free",
+    "billedAnnually": "Billed {total} once a year — you save {saving}",
+    "checkoutFailed": "Could not start checkout. Please try again."
   },
   "roadmap": {
     "title": "Roadmap",
@@ -468,7 +476,10 @@
       "couldNotClearMemory": "✗ could not clear memory",
       "memoryCleared": "✓ memory cleared",
       "memoryEnabled": "✓ chat memory enabled",
-      "memoryDisabled": "✓ chat memory disabled"
+      "memoryDisabled": "✓ chat memory disabled",
+      "planExcludes": "Your current plan doesn’t include chat memory, so nothing is being saved. Plans from Starter up remember across conversations.",
+      "switchedOff": "Memory is switched off, so nothing is being saved from your conversations.",
+      "nothingYet": "Nothing saved yet. Memory is on and working — it keeps durable things like your name, your work or a preference, once a conversation mentions one."
     },
     "loginActivity": {
       "title": "Login Activity",
@@ -649,7 +660,18 @@
       "sumTop": "Costliest feature",
       "sumTopHint": "{percent}% of all spend",
       "projectionOnly": "No charged actions yet — every margin below is a projection from bypass records, not revenue.",
-      "belowTargetAlert": "{count} feature(s) below the {target}x target: {features}. An alert has been emailed."
+      "belowTargetAlert": "{count} feature(s) below the {target}x target: {features}. An alert has been emailed.",
+      "cacheTitle": "Prompt cache",
+      "cacheDescription": "Share of prompt tokens served from cache instead of paid at full price.",
+      "cacheHitRate": "Hit rate",
+      "cacheColInput": "Full price",
+      "cacheColRead": "From cache",
+      "cacheColWrite": "Written",
+      "cacheEmpty": "No prompt tokens recorded yet.",
+      "cacheMiscachedAlert": "{features}: writing to cache but reading nothing back — the breakpoint is on content that changes every request.",
+      "absorbedRefusals": "Absorbed refusals: {calls} agent run(s) refused the task and were not charged — €{cost} of model cost carried by us.",
+      "absorbedRefusalsShare": "That is {share}% of revenue in this window; the review threshold is {limit}%.",
+      "absorbedRefusalsShareUnknown": "Share of revenue is not shown: this report has no revenue figure to measure against."
     },
     "pushNotifications": {
       "title": "Push notifications",
@@ -1411,6 +1433,42 @@
         "testSentTelegram": "Sent — check your Telegram.",
         "testSentDiscord": "Sent — check your Discord channel.",
         "testFailed": "The test message could not be sent."
+      },
+      "runCannotComplete": "This agent can't do that task, so it has been switched off. No credits were charged.",
+      "capability": {
+        "canTitle": "An agent can",
+        "cannotTitle": "An agent cannot",
+        "can": {
+          "search": "Search the web for current information",
+          "analyse": "Read and analyse what it finds",
+          "summarise": "Summarise, compare and draw conclusions",
+          "monitor": "Watch a topic over time and report what changed",
+          "schedule": "Do all of that on a schedule and email you the result"
+        },
+        "cannot": {
+          "code": "Write or run code, build software or websites, run tests, fix bugs",
+          "system_access": "Reach your computer, files, accounts or systems",
+          "other_platforms": "Act on other platforms — post, message someone, book or order",
+          "physical": "Do anything in the physical world",
+          "financial": "Move money, buy or sell anything",
+          "phone": "Make phone calls"
+        },
+        "refusedTitle": "An agent can't do this one",
+        "refusedBody": "Everything you asked for needs something outside what an agent can do:",
+        "detectedIn": "Found in what you wrote: {words}",
+        "noCharge": "You have not been charged — nothing ran.",
+        "noChargeYet": "Nothing has been charged yet.",
+        "tryInstead": "Try asking for research, monitoring or a summary instead — for example, \"every Monday, summarise what's new in my industry\".",
+        "rephrase": "Rewrite my request",
+        "partialTitle": "Part of this can't be done",
+        "partialWillDo": "The agent would do this instead: {parts}",
+        "partialContinue": "Build the part that works",
+        "previewWhatItDoes": "What it does on every run",
+        "previewWillNotDo": "What it will not do",
+        "stepSearch": "Searches the web for current information on the topic.",
+        "stepNoSearch": "Works from the task text alone — no web search.",
+        "stepWrite": "Writes the result and checks it against what it found.",
+        "stepDeliver": "Emails it to {target}, {when}."
       }
     },
     "publishing": {
@@ -1788,6 +1846,36 @@
       "finished": "Your last request finished while you were away.",
       "open": "Open it",
       "dismiss": "Dismiss"
+    },
+    "affiliate": {
+      "title": "Affiliate",
+      "description": "Share Ionexa, earn a share of what the people you send keep paying.",
+      "pitch": "Earn {percent}% of every payment your referrals make, every month, for {months} months.",
+      "pitchTerms": "You can't refer yourself, and each person can only be referred once. Commission starts on their first payment.",
+      "join": "Get my link",
+      "joining": "Setting up…",
+      "joinError": "Could not set that up. Please try again.",
+      "yourLink": "Your link",
+      "copy": "Copy",
+      "copied": "Copied",
+      "terms": "{percent}% of every payment, for {months} months from their first one.",
+      "suspended": "This affiliate account is suspended, so no new commission is being earned. Contact support if you think that's wrong.",
+      "stat": {
+        "signups": "Signed up",
+        "paying": "Paying",
+        "owed": "Owed to you",
+        "paidOut": "Paid out"
+      },
+      "payouts": "Getting paid",
+      "payoutsUnavailable": "Payouts aren't set up on this deployment yet.",
+      "payoutsNotSetUp": "Set up payouts with Stripe to receive what you earn. Stripe collects your details directly — we never see them.",
+      "payoutsIncomplete": "Stripe still needs a few details before it can pay you. Finish the setup and this will update.",
+      "payoutsReady": "Payouts run monthly. Anything over {minimum} is sent to your bank account.",
+      "setUpPayouts": "Set up payouts",
+      "finishSetup": "Finish payout setup",
+      "opening": "Opening Stripe…",
+      "connectError": "Could not open payout setup. Please try again.",
+      "rules": "Commission is earned on payments actually received. Refunded and disputed payments are reversed. Self-referrals and second referrals of the same person earn nothing."
     }
   },
   "module": {

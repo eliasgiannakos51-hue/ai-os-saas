@@ -20,25 +20,298 @@
    script in layout.tsx (before paint, to avoid a flash) and by
    theme-toggle.tsx afterwards. */
 :root {
-  --background: #0a0a0a;
-  --panel: #141414;
-  --panel-hover: #1a1a1a;
-  --border: #242424;
-  --foreground: #e5e5e5;
-  --muted: #8a8a8a;
+  --background: 10 10 10;
+  --panel: 20 20 20;
+  --panel-hover: 26 26 26;
+  --border: 106 106 113;
+  --foreground: 229 229 229;
+  --muted: 138 138 138;
   --input-bg: rgba(0, 0, 0, 0.4);
   color-scheme: dark;
+
+  /* ACCENT, now theme-aware — see the note below [data-theme="light"].
+     These are today's Tailwind values, unchanged, so the dark theme
+     renders byte-identically to before this became a variable.
+     Space-separated channels, not hex: Tailwind needs
+     `rgb(var(--x) / <alpha-value>)` for `text-orange-400/80` and
+     `border-orange-500/40` to keep working, and there are 246 such
+     usages. A plain hex here would silently drop every one of them. */
+  --accent-text: 251 146 60;          /* orange-400 */
+  --accent-text-soft: 253 186 116;    /* orange-300 */
+  --accent-text-softer: 254 215 170;  /* orange-200 */
+  --accent-text-strong: 249 115 22;   /* orange-500 */
+  --accent-amber-text: 251 191 36;    /* amber-400 */
+  --accent-amber-text-soft: 252 211 77;   /* amber-300 */
+  --accent-amber-text-softer: 253 230 138; /* amber-200 */
+  --accent-border: 249 115 22;        /* orange-500 */
+  --accent-amber-border: 245 158 11;  /* amber-500 */
+
+  /* SEMANTIC COLOURS, same role split as the accent above.
+     Success and danger were left out of the theme system when the accent
+     went in, so 165 text usages and 81 border usages still resolved to
+     colours picked for #0a0a0a. Measured on the light surfaces:
+     text-emerald-400 came out at 1.72:1 and text-red-400 at 2.47:1
+     against a 4.5:1 requirement — the same defect as the accent, one
+     colour family over. These are today's values, so dark is unchanged. */
+  --success-text: 52 211 153;         /* emerald-400 */
+  --success-text-soft: 110 231 183;   /* emerald-300 */
+  --success-text-softer: 167 243 208; /* emerald-200 */
+  --success-border: 16 185 129;       /* emerald-500 */
+  --danger-text: 248 113 113;         /* red-400 */
+  --danger-text-soft: 252 165 165;    /* red-300 */
+  --danger-text-softer: 254 202 202;  /* red-200 */
+  --danger-text-softest: 254 226 226; /* red-100 */
+  --danger-border: 239 68 68;         /* red-500 */
+
+  /* NOTICE SURFACES. `bg-red-950/40` and friends (61 usages) are the
+     other half of the same omission: a near-black tint is a correct
+     notice fill on #0a0a0a and produces mud on white. Measured on the
+     real deployment, the legal banner's `bg-orange-950/20` composited to
+     rgb(210,201,199) and its text landed at 2.60:1.
+     In dark these are the literal 950s, so nothing moves. */
+  --accent-tint: 67 20 7;             /* orange-950 */
+  --accent-amber-tint: 69 26 3;       /* amber-950 */
+  --success-tint: 2 44 34;            /* emerald-950 */
+  --danger-tint: 69 10 10;            /* red-950 */
+
+  /* The deep borders those notices carry (`border-red-900`, 42 usages).
+     Separate from --*-border because dark needs the 800/900 and light
+     needs a mid shade: on white a 900 is nearly black, which reads as a
+     hard rule rather than a coloured notice edge. */
+  --accent-border-deep: 124 45 18;    /* orange-900 */
+  --accent-amber-border-deep: 146 64 14; /* amber-800 */
+  --success-border-deep: 6 78 59;     /* emerald-900 */
+  --danger-border-deep: 127 29 29;    /* red-900 */
+
+  /* MODULE BADGE INKS (lib/module-colors.ts). Twenty-six modules each
+     carry their own hue so a badge is recognisable at a glance; the map's
+     own comment says the colours were "picked to stay legible against the
+     panel background and hover states", which was true of the only theme
+     that existed when it was written. On light they are not legible at
+     all — text-cyan-400 measures 1.62:1, text-slate-300 1.33:1.
+     Each family keeps its identity and changes its ink, the same move the
+     accent made. Dark values are the current ones exactly. */
+  --module-sky-soft: 125 211 252; /* sky-300 */
+  --module-sky: 56 189 248; /* sky-400 */
+  --module-indigo-soft: 165 180 252; /* indigo-300 */
+  --module-indigo: 129 140 248; /* indigo-400 */
+  --module-lime: 163 230 53; /* lime-400 */
+  --module-fuchsia-soft: 240 171 252; /* fuchsia-300 */
+  --module-fuchsia: 232 121 249; /* fuchsia-400 */
+  --module-cyan-soft: 103 232 249; /* cyan-300 */
+  --module-cyan: 34 211 238; /* cyan-400 */
+  --module-pink-soft: 249 168 212; /* pink-300 */
+  --module-pink: 244 114 182; /* pink-400 */
+  --module-teal: 45 212 191; /* teal-400 */
+  --module-violet: 167 139 250; /* violet-400 */
+  --module-blue: 96 165 250; /* blue-400 */
+  --module-purple-soft: 216 180 254; /* purple-300 */
+  --module-purple: 192 132 252; /* purple-400 */
+  --module-slate: 203 213 225; /* slate-300 */
+
+  /* THE BACKDROP (auth-background.tsx globe + dots, .ambient-corners).
+     Same story again: an amber wireframe at 38% opacity reads as ambient
+     light on #0a0a0a and as haze on #f7f7f8, because a warm translucent
+     layer ADDS light to black and TINTS white. Measured on production,
+     the backdrop shifted 33% of the viewport past the just-noticeable
+     threshold with a warm bias of +2.9 (r-b) in BOTH themes — identical,
+     because none of it was themed. The consequence is not only cosmetic:
+     #71717a body text measures 4.51:1 on a clean #f7f7f8 and 4.35:1 on
+     the tinted background the backdrop actually produced.
+     Light gets a darker ink at lower opacity, so the globe stays a
+     legible wireframe instead of becoming fog. */
+  --globe-ink: #f5a623;
+  /* A MULTIPLIER, not an absolute opacity. The backdrop's own opacity is
+     passed per route (dashboard-background.tsx brightens chat/create, and
+     NetworkField sits at 0.62 of the globe), so an absolute value here
+     would flatten decisions that were made deliberately. Dark is 1, which
+     makes this change byte-identical in dark. */
+  --backdrop-scale: 1;
+  --globe-dot: radial-gradient(
+    circle,
+    rgba(245, 166, 35, 0.95) 0%,
+    rgba(245, 166, 35, 0.45) 32%,
+    transparent 68%
+  );
+
+  /* The primary CTA's glow — see the note at @keyframes cta-pulse. */
+  --cta-glow-rest: 0 4px 18px -4px rgba(249, 115, 22, 0.45);
+  --cta-glow-peak: 0 4px 30px 0 rgba(249, 115, 22, 0.75);
+  --cta-glow-hover: 0 6px 28px -4px rgba(249, 115, 22, 0.7);
+
+  /* components/logo.tsx — the wordmark's ink. */
+  --logo-ink: #f5f5f5;
+  --logo-accent: #f5a623;
+
+  /* components/ui/glow-orb.tsx — the decorative hero orb. */
+  --glow-orb: radial-gradient(
+    circle,
+    rgba(249, 115, 22, 0.45) 0%,
+    rgba(220, 38, 38, 0.18) 45%,
+    transparent 75%
+  );
 }
 
 [data-theme="light"] {
-  --background: #f7f7f8;
-  --panel: #ffffff;
-  --panel-hover: #f2f2f4;
-  --border: #e4e4e7;
-  --foreground: #18181b;
-  --muted: #71717a;
+  --background: 247 247 248;
+  --panel: 255 255 255;
+  --panel-hover: 242 242 244;
+  --border: 134 134 143;
+  --foreground: 24 24 27;
+  /* zinc-600, not zinc-500. THIS WAS ALWAYS BELOW THRESHOLD and nothing
+     caught it, because every check measured secondary text against
+     #ffffff. #71717a is 4.83:1 on the panel, 4.51:1 on the page and
+     4.32:1 on --panel-hover — so on one of the three surfaces the app
+     actually paints, body-sized secondary text has been failing WCAG
+     1.4.3 the whole time. It is also why the backdrop mattered so much:
+     with 0.01 of headroom on the page, ANY decoration pushed it under,
+     and it did — production measured 4.35:1 under the corner pools.
+     zinc-600 is 6.91:1 on the worst surface and tolerates a corner-pool
+     alpha up to 0.26 before it would drop below 4.5:1 again. */
+  --muted: 82 82 91;
   --input-bg: #f4f4f5;
   color-scheme: light;
+
+  /* THE LIGHT THEME'S OWN ACCENT VALUES — the fix for "nothing is
+     legible on white".
+     
+     The accent was deliberately excluded from this variable system for
+     brand consistency, which meant colours picked to glow on #0a0a0a
+     were used unchanged on #ffffff. Measured, every one of them failed:
+     text-orange-400 came out at 2.26:1 against a 4.5:1 requirement, and
+     border-orange-500 at 2.80:1 against 3:1 (2.62:1 over the page
+     background) — the number in the report.
+     
+     ONLY TEXT AND BORDERS MOVE. `bg-orange-500` is NOT redefined,
+     because it is not broken: it is a filled button carrying
+     `text-black`, and black on orange-500 is 7.49:1 in every theme —
+     the contrast there is between the label and the fill, not the fill
+     and the page. Darkening it to "fix" the border would have dropped
+     that pairing to 4.06:1 and broken the primary button while
+     appearing to improve accessibility.
+     
+     The ramp also COMPRESSES here, and that is not laziness. On a dark
+     background a paler orange reads as more prominent; on white the
+     relationship inverts, and every orange pale enough to be a "soft"
+     accent is too pale to be legible at all. 200/300/400 therefore
+     converge on one accessible ink, and hierarchy in light mode is
+     carried by weight and size instead of by tint. */
+  --accent-text: 194 65 12;           /* orange-700 — 5.18:1 on #fff */
+  --accent-text-soft: 194 65 12;      /* orange-700 */
+  --accent-text-softer: 194 65 12;    /* orange-700 */
+  --accent-text-strong: 154 52 18;    /* orange-800 — 7.31:1 */
+  /* amber-800, not amber-700. amber-700 is 5.02:1 on #ffffff and 4.69:1
+     on the page — both quoted correctly when it went in — but 4.49:1 on
+     --panel-hover (#f2f2f4), a surface body text sits on that was never
+     measured. It misses 4.5:1 by 0.01 across 29 usages. amber-800 clears
+     every light surface, worst case 6.34:1. */
+  --accent-amber-text: 146 64 14;     /* amber-800 — 6.34:1 worst */
+  --accent-amber-text-soft: 146 64 14;
+  --accent-amber-text-softer: 146 64 14;
+  --accent-border: 234 88 12;         /* orange-600 — 3.56:1 */
+  /* amber-600 was 3.19:1 against the white panel but only 2.98:1 against
+     the #f7f7f8 page background — and a card border is seen against the
+     page, not the panel. amber-700 clears both. */
+  --accent-amber-border: 180 83 9;    /* amber-700 — 5.02:1 / 4.69:1 */
+
+  /* Semantic families, chosen the same way the accent was: the darkest
+     shade is not automatically right, the SHALLOWEST one that clears the
+     threshold on the WORST light surface is. Worst-surface ratios:
+       emerald-700  4.90:1   emerald-600  3.37:1 (border, needs 3)
+       red-700      5.79:1   red-500      3.37:1 (border, needs 3)
+       rose-700     5.62:1   rose-500     3.19:1 (border, needs 3)
+     The ramp compresses here for the same reason the accent's does: on
+     white every green pale enough to read as a "soft" success tint is
+     too pale to read at all. */
+  --success-text: 4 120 87;           /* emerald-700 — 4.90:1 */
+  --success-text-soft: 4 120 87;
+  --success-text-softer: 4 120 87;
+  --success-border: 5 150 105;        /* emerald-600 — 3.37:1 */
+  --danger-text: 185 28 28;           /* red-700 — 5.79:1 */
+  --danger-text-soft: 185 28 28;
+  --danger-text-softer: 185 28 28;
+  --danger-text-softest: 185 28 28;
+  --danger-border: 239 68 68;         /* red-500 — 3.37:1 */
+
+  /* Notice fills become pale washes, and the notice takes its identity
+     from the BORDER instead of from a dark fill — which is how a light
+     theme carries this pattern. The pale end is not timidity: it is what
+     keeps the themed ink above 4.5:1 at every alpha these fills are
+     written with (/20 /30 /40 /70 /90). */
+  --accent-tint: 255 237 213;         /* orange-100 */
+  --accent-amber-tint: 254 243 199;   /* amber-100 */
+  --success-tint: 209 250 229;        /* emerald-100 */
+  --danger-tint: 254 226 226;         /* red-100 */
+
+  --accent-border-deep: 234 88 12;    /* orange-600 — 3.18:1 */
+  --accent-amber-border-deep: 180 83 9;  /* amber-700 — 4.49:1 */
+  --success-border-deep: 5 150 105;   /* emerald-600 — 3.37:1 */
+  --danger-border-deep: 239 68 68;    /* red-500 — 3.37:1 */
+
+  /* Module inks on light. Per family, the SHALLOWEST shade that clears
+     4.5:1 on the worst of the three light surfaces — not the darkest,
+     which would flatten twenty-six hues into one near-black. Worst-case
+     ratios: cyan-700 4.79, blue-600 4.62, teal-700 4.90, purple-600 4.81,
+     violet-600 5.10, pink-700 5.40, sky-700 5.31, fuchsia-700 5.66,
+     indigo-600 5.62, lime-800 6.33, slate-600 6.78.
+     The 300/400 pair collapses to one ink for the reason the accent's
+     ramp does: on white a pale tint is not a softer version of a colour,
+     it is an absent one. */
+  --module-sky-soft: 3 105 161;
+  --module-sky: 3 105 161;
+  --module-indigo-soft: 79 70 229;
+  --module-indigo: 79 70 229;
+  --module-lime: 63 98 18;
+  --module-fuchsia-soft: 162 28 175;
+  --module-fuchsia: 162 28 175;
+  --module-cyan-soft: 14 116 144;
+  --module-cyan: 14 116 144;
+  --module-pink-soft: 190 24 93;
+  --module-pink: 190 24 93;
+  --module-teal: 15 118 110;
+  --module-violet: 124 58 237;
+  --module-blue: 37 99 235;
+  --module-purple-soft: 147 51 234;
+  --module-purple: 147 51 234;
+  --module-slate: 71 85 105;
+
+  /* The backdrop, re-inked rather than merely dimmed. Dimming alone
+     would have taken the globe below the point where it is visible at
+     all, which loses the one brand element on the page; a darker ink at
+     lower opacity keeps it a wireframe and stops it being a wash. */
+  --globe-ink: #9a3412;               /* orange-800 */
+  --backdrop-scale: 0.42;
+  --globe-dot: radial-gradient(
+    circle,
+    rgba(154, 52, 18, 0.5) 0%,
+    rgba(154, 52, 18, 0.22) 32%,
+    transparent 68%
+  );
+
+  /* Neutral ink and an eighth of the spread: a shadow, not a bloom. The
+     small warm second layer keeps the button feeling amber without
+     painting the page around it. */
+  --cta-glow-rest: 0 1px 2px rgba(24, 24, 27, 0.08), 0 2px 6px -2px rgba(124, 45, 18, 0.18);
+  --cta-glow-peak: 0 1px 3px rgba(24, 24, 27, 0.1), 0 4px 10px -3px rgba(124, 45, 18, 0.26);
+  --cta-glow-hover: 0 2px 4px rgba(24, 24, 27, 0.12), 0 6px 14px -4px rgba(124, 45, 18, 0.3);
+
+  /* #18181b, the same ink as --foreground: 16.6:1 on the page. The old
+     #f5f5f5 measured 1.02:1 here — the brand name was not dim, it was
+     absent. The "ai" half moves to orange-800 for the same reason the
+     rest of the accent did; at 6.5:1 it stays clearly the accent half of
+     the wordmark without being the only legible one. */
+  --logo-ink: #18181b;
+  --logo-accent: #9a3412;
+
+  /* A hint of warmth where the hero sits, not a cloud over it. Dark ink
+     at a fifteenth of the alpha: at 0.45 the orb moved the page by 68/255
+     in the blue channel, which is not a glow, it is a colour wash. */
+  --glow-orb: radial-gradient(
+    circle,
+    rgba(154, 52, 18, 0.018) 0%,
+    rgba(153, 27, 27, 0.008) 45%,
+    transparent 75%
+  );
 }
 
 /* Premium theme variants (settings/theme-settings.tsx) — same variable
@@ -47,25 +320,123 @@
    a variable) deliberately isn't part of this system, so it stays
    identical across every theme for brand consistency. */
 [data-theme="midnight"] {
-  --background: #05070f;
-  --panel: #0d1220;
-  --panel-hover: #131a2c;
-  --border: #1f2740;
-  --foreground: #e6e9f5;
-  --muted: #8188a8;
+  --background: 5 7 15;
+  --panel: 13 18 32;
+  --panel-hover: 19 26 44;
+  --border: 99 105 131;
+  --foreground: 230 233 245;
+  --muted: 129 136 168;
   --input-bg: rgba(5, 10, 25, 0.5);
   color-scheme: dark;
 }
 
 [data-theme="carbon"] {
-  --background: #1a1a1c;
-  --panel: #232326;
-  --panel-hover: #2a2a2e;
-  --border: #38383c;
-  --foreground: #eeeeef;
-  --muted: #9c9ca3;
+  --background: 26 26 28;
+  --panel: 35 35 38;
+  --panel-hover: 42 42 46;
+  --border: 122 122 130;
+  --foreground: 238 238 239;
+  --muted: 156 156 163;
   --input-bg: rgba(255, 255, 255, 0.04);
   color-scheme: dark;
+}
+
+/* ALPHA DOES NOT CARRY HIERARCHY IN LIGHT.
+   
+   `text-orange-400/70` dims orange toward the background. On #0a0a0a that
+   is a dim — the ink moves toward black and stays an ink. On #f7f7f8 the
+   same 70% moves it toward white, which is a wash: measured, the themed
+   inks land between 1.96:1 and 4.39:1 once an alpha modifier is applied,
+   against 4.5:1. Twenty-five utilities across thirty-nine usages.
+   
+   This is the same decision the shade ramp already made one block up —
+   light collapses 200/300/400 onto one ink because a pale accent on white
+   is not a softer accent, it is an absent one. Alpha is the same device
+   and gets the same answer; hierarchy in light is weight and size.
+   
+   Applied to EVERY alpha-modified themed text utility, not only the ones
+   failing today: a rule applied to /80 but not /90 is not a rule, and /90
+   already measures 4.02:1. Generated from the measured inventory
+   (scripts/light-colour-inventory.mjs), and the test in
+   scripts/tests/light-theme-contrast.test.mjs fails if a new one appears
+   without a line here.
+   
+   Unlayered on purpose: Tailwind's utilities live in @layer utilities, and
+   unlayered rules win over layered ones regardless of order. The
+   [data-theme] prefix also raises specificity, so this holds either way. */
+[data-theme="light"] .text-amber-400\/55,
+[data-theme="light"] .text-amber-400\/80,
+[data-theme="light"] .text-amber-400\/90 {
+  color: rgb(var(--accent-amber-text));
+}
+
+[data-theme="light"] .text-amber-300\/70,
+[data-theme="light"] .text-amber-300\/80,
+[data-theme="light"] .text-amber-300\/90 {
+  color: rgb(var(--accent-amber-text-soft));
+}
+
+[data-theme="light"] .text-amber-200\/80,
+/* /90 arrived with the agent capability panel: the "reduced" list, which
+   is amber because the run was narrowed rather than refused. Same ink as
+   /80 — the alpha is what fails on white, not the hue. */
+[data-theme="light"] .text-amber-200\/90 {
+  color: rgb(var(--accent-amber-text-softer));
+}
+
+[data-theme="light"] .text-orange-400\/70,
+[data-theme="light"] .text-orange-400\/80 {
+  color: rgb(var(--accent-text));
+}
+
+[data-theme="light"] .text-orange-300\/90 {
+  color: rgb(var(--accent-text-soft));
+}
+
+[data-theme="light"] .text-orange-200\/80,
+[data-theme="light"] .text-orange-200\/90 {
+  color: rgb(var(--accent-text-softer));
+}
+
+[data-theme="light"] .text-orange-500\/40,
+[data-theme="light"] .text-orange-500\/80 {
+  color: rgb(var(--accent-text-strong));
+}
+
+[data-theme="light"] .text-red-400\/70,
+[data-theme="light"] .text-red-400\/90 {
+  color: rgb(var(--danger-text));
+}
+
+[data-theme="light"] .text-red-300\/80 {
+  color: rgb(var(--danger-text-soft));
+}
+
+[data-theme="light"] .text-rose-200\/80,
+/* /90 arrived with the agent capability panel: the "cannot do this" list,
+   which is rose because the run was refused outright. Same ink as /80 —
+   what fails on white is the alpha, not the hue. */
+[data-theme="light"] .text-rose-200\/90 {
+  color: rgb(var(--danger-text-softer));
+}
+
+[data-theme="light"] .text-purple-400\/55 {
+  color: rgb(var(--module-purple));
+}
+
+[data-theme="light"] .text-sky-400\/55 {
+  color: rgb(var(--module-sky));
+}
+
+[data-theme="light"] .text-emerald-400\/50,
+[data-theme="light"] .text-emerald-400\/70,
+[data-theme="light"] .text-emerald-400\/80,
+[data-theme="light"] .text-emerald-400\/90 {
+  color: rgb(var(--success-text));
+}
+
+[data-theme="light"] .text-emerald-200\/90 {
+  color: rgb(var(--success-text-softer));
 }
 
 /* Accessibility: font size — set on <html> via data-font-size (see
@@ -94,26 +465,186 @@ html {
   font-size: var(--app-font-size);
 }
 
+
+/* ALPHA DOES NOT CARRY HIERARCHY IN LIGHT — THE BORDERS TOO.
+   
+   The block above did this for TEXT and stopped there. Borders got the
+   same alpha treatment and none of the same attention, and they are the
+   only thing separating a white card from a #f7f7f8 page.
+   
+   Measured on the deployment (scripts/light-border-before-after.mjs, ten
+   pages, 551 painted border sides): every resting-state alpha accent
+   border lands between 1.19:1 and 2.16:1 once composited, against the
+   3:1 of WCAG 1.4.11. Not one of them passes.
+   
+   AND MOST OF THEM CANNOT BE FIXED BY PICKING A DARKER COLOUR — that is
+   arithmetic. A border at 40% over white is at most 255*0.6 = 153 in
+   every channel even if the colour is pure black, which is 2.80:1. At
+   30% the ceiling is 2.03:1, at 20% it is 1.60:1. There is no orange, no
+   red and no emerald that clears 3:1 at those alphas, so the alpha is
+   what has to go in light.
+   
+   HOVER AND FOCUS VARIANTS ARE DELIBERATELY NOT LISTED. Tailwind emits
+   those as `.hover\:border-orange-500\/40:hover`, a different selector,
+   so they keep their translucency — correct, because the component is
+   already identifiable at rest by --border and a state change is not the
+   thing 1.4.11 is about.
+   
+   ONE EXEMPTION, NAMED RATHER THAN OMITTED: the four
+   `ring-<hue>-400/25` in components/overview/quick-action-card.tsx are
+   `ring-1 ring-inset` on a 44x44 decorative icon chip that sits inside a
+   card with its own border. They identify nothing, WCAG 1.4.11 exempts
+   pure decoration, and forcing them opaque would put a hard coloured
+   outline around every dashboard icon. scripts/tests/light-theme-
+   contrast.test.mjs carries the same list, so this stays a decision
+   rather than an oversight.
+   
+   Generated from the measured inventory; the test fails if a new
+   resting-state alpha border appears without a line here. */
+
+/* 11 usage(s) across 4 class(es) */
+[data-theme="light"] .border-amber-500\/30,
+[data-theme="light"] .border-amber-500\/40,
+[data-theme="light"] .border-amber-500\/50,
+[data-theme="light"] .border-amber-600\/40 {
+  border-color: rgb(var(--accent-amber-border));
+}
+
+/* 3 usage(s) across 2 class(es) */
+[data-theme="light"] .border-amber-800\/40,
+[data-theme="light"] .border-amber-800\/50 {
+  border-color: rgb(var(--accent-amber-border-deep));
+}
+
+/* 51 usage(s) across 9 class(es) */
+[data-theme="light"] .border-orange-500\/15,
+[data-theme="light"] .border-orange-500\/20,
+[data-theme="light"] .border-orange-500\/25,
+[data-theme="light"] .border-orange-500\/30,
+[data-theme="light"] .border-orange-500\/35,
+[data-theme="light"] .border-orange-500\/40,
+[data-theme="light"] .border-orange-500\/50,
+[data-theme="light"] .border-orange-500\/60,
+[data-theme="light"] .border-orange-600\/40 {
+  border-color: rgb(var(--accent-border));
+}
+
+/* 6 usage(s) across 2 class(es) */
+[data-theme="light"] .border-orange-900\/50,
+[data-theme="light"] .border-orange-900\/60 {
+  border-color: rgb(var(--accent-border-deep));
+}
+
+/* 11 usage(s) across 6 class(es) */
+[data-theme="light"] .border-red-500\/25,
+[data-theme="light"] .border-red-500\/30,
+[data-theme="light"] .border-red-500\/35,
+[data-theme="light"] .border-red-500\/40,
+[data-theme="light"] .border-rose-500\/30,
+[data-theme="light"] .border-rose-500\/40 {
+  border-color: rgb(var(--danger-border));
+}
+
+/* 5 usage(s) across 2 class(es) */
+[data-theme="light"] .border-red-900\/50,
+[data-theme="light"] .border-red-900\/60 {
+  border-color: rgb(var(--danger-border-deep));
+}
+
+/* 1 usage(s) across 1 class(es) */
+[data-theme="light"] .border-blue-500\/40 {
+  border-color: rgb(var(--module-blue));
+}
+
+/* 3 usage(s) across 2 class(es) */
+[data-theme="light"] .border-cyan-500\/40,
+[data-theme="light"] .border-cyan-600\/40 {
+  border-color: rgb(var(--module-cyan));
+}
+
+/* 2 usage(s) across 2 class(es) */
+[data-theme="light"] .border-fuchsia-500\/40,
+[data-theme="light"] .border-fuchsia-600\/40 {
+  border-color: rgb(var(--module-fuchsia));
+}
+
+/* 2 usage(s) across 2 class(es) */
+[data-theme="light"] .border-indigo-500\/40,
+[data-theme="light"] .border-indigo-600\/40 {
+  border-color: rgb(var(--module-indigo));
+}
+
+/* 1 usage(s) across 1 class(es) */
+[data-theme="light"] .border-lime-500\/40 {
+  border-color: rgb(var(--module-lime));
+}
+
+/* 2 usage(s) across 2 class(es) */
+[data-theme="light"] .border-pink-500\/40,
+[data-theme="light"] .border-pink-600\/40 {
+  border-color: rgb(var(--module-pink));
+}
+
+/* 1 usage(s) across 1 class(es) */
+[data-theme="light"] .border-purple-500\/40 {
+  border-color: rgb(var(--module-purple));
+}
+
+/* 2 usage(s) across 2 class(es) */
+[data-theme="light"] .border-sky-500\/40,
+[data-theme="light"] .border-sky-600\/40 {
+  border-color: rgb(var(--module-sky));
+}
+
+/* 1 usage(s) across 1 class(es) */
+[data-theme="light"] .border-slate-500\/40 {
+  border-color: rgb(var(--module-slate));
+}
+
+/* 1 usage(s) across 1 class(es) */
+[data-theme="light"] .border-teal-500\/40 {
+  border-color: rgb(var(--module-teal));
+}
+
+/* 1 usage(s) across 1 class(es) */
+[data-theme="light"] .border-violet-500\/40 {
+  border-color: rgb(var(--module-violet));
+}
+
+/* 5 usage(s) across 4 class(es) */
+[data-theme="light"] .border-emerald-500\/30,
+[data-theme="light"] .border-emerald-500\/40,
+[data-theme="light"] .border-emerald-500\/50,
+[data-theme="light"] .border-emerald-600\/40 {
+  border-color: rgb(var(--success-border));
+}
+
+/* 4 usage(s) across 2 class(es) */
+[data-theme="light"] .border-emerald-900\/50,
+[data-theme="light"] .border-emerald-900\/60 {
+  border-color: rgb(var(--success-border-deep));
+}
+
 /* Accessibility: high contrast — set on <html> via data-contrast="high".
    Pushes foreground/background to near-pure black/white and darkens/
    lightens the "muted" gray (used everywhere for secondary text) so it
    reads closer to full-strength text instead of a low-contrast hint.
    Combined with data-theme since both live on <html> at once. */
 html[data-contrast="high"] {
-  --foreground: #ffffff;
-  --muted: #d4d4d4;
-  --border: #4a4a4a;
-  --background: #000000;
-  --panel: #0a0a0a;
-  --panel-hover: #1c1c1c;
+  --foreground: 255 255 255;
+  --muted: 212 212 212;
+  --border: 106 106 113;
+  --background: 0 0 0;
+  --panel: 10 10 10;
+  --panel-hover: 28 28 28;
 }
 html[data-theme="light"][data-contrast="high"] {
-  --foreground: #000000;
-  --muted: #3f3f46;
-  --border: #a1a1aa;
-  --background: #ffffff;
-  --panel: #ffffff;
-  --panel-hover: #ececee;
+  --foreground: 0 0 0;
+  --muted: 63 63 70;
+  --border: 118 118 128;
+  --background: 255 255 255;
+  --panel: 255 255 255;
+  --panel-hover: 236 236 238;
 }
 
 /* Accessibility: reduce motion — set on <html> via data-motion="reduce".
@@ -143,8 +674,8 @@ body {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: rgb(var(--background));
+  color: rgb(var(--foreground));
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
 }
@@ -154,16 +685,34 @@ body {
   color: #0a0a0a;
 }
 
-/* Consistent, visible-but-not-aggressive keyboard focus ring for every
-   interactive element, without needing to touch each component. Mouse/touch
-   activation never shows it (:focus-visible only fires for keyboard nav). */
+/* Consistent keyboard focus ring for every interactive element, without
+   needing to touch each component. Mouse/touch activation never shows it
+   (:focus-visible only fires for keyboard nav).
+   
+   THIS RULE USED TO FAIL WCAG 2.4.11 IN BOTH THEMES, not just in light.
+   It was `rgba(249, 115, 22, 0.55)` — orange-500 at 55% — and a focus
+   indicator must reach 3:1 against what it is drawn on. Tabbing through
+   the real deployment and measuring the ring that actually painted, 59 of
+   60 stops came back at 1.73:1 in light and 2.80:1 in dark. The alpha is
+   what did it: 55% orange over #f7f7f8 composites to rgb(248,174,124),
+   which is barely distinguishable from the page.
+   
+   Solid --accent-border instead. That variable is already themed, so this
+   is one rule and not two, and it measures orange-500 at 7.06:1 on
+   #0a0a0a / 6.57:1 on the panel in dark, and orange-600 at 3.32:1 on the
+   page / 3.56:1 on the panel in light. Every stop clears 3:1.
+   
+   The offset needs its own colour. `outline-offset` exposes the page
+   through the gap, so on a panel the ring reads against the panel and on
+   the page against the page — both are covered by the numbers above. */
 @layer base {
   a:focus-visible,
   button:focus-visible,
   input:focus-visible,
   textarea:focus-visible,
-  select:focus-visible {
-    outline: 2px solid rgba(249, 115, 22, 0.55);
+  select:focus-visible,
+  [tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: 2px solid rgb(var(--accent-border));
     outline-offset: 2px;
   }
 }
@@ -256,8 +805,8 @@ body {
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--foreground);
-  -webkit-box-shadow: 0 0 0px 1000px var(--panel) inset;
+  -webkit-text-fill-color: rgb(var(--foreground));
+  -webkit-box-shadow: 0 0 0px 1000px rgb(var(--panel)) inset;
   transition: background-color 5000s ease-in-out 0s;
 }
 
@@ -391,7 +940,7 @@ input:-webkit-autofill:focus {
      gradient at button height rather than reading as one flat orange. */
   background-image: linear-gradient(135deg, #fcd34d 0%, #fbbf24 25%, #f97316 65%, #dc4a04 100%);
   background-size: 160% 160%;
-  box-shadow: 0 4px 18px -4px rgba(249, 115, 22, 0.45);
+  box-shadow: var(--cta-glow-rest);
   /* Idle attention pulse — the glow breathes, the button never moves.
      Scaling a primary CTA on a loop would make the page feel unstable
      and shift anything laid out next to it. */
@@ -400,13 +949,26 @@ input:-webkit-autofill:focus {
   transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
   transition-duration: 200ms;
 }
+/* THE GLOW IS A VARIABLE BECAUSE A GLOW IS A DARK-THEME DEVICE.
+   
+   A 30px bloom at 75% orange under a button is light spilling onto black.
+   Put the same thing on #f7f7f8 and it is a smear — and this one BREATHES
+   on a 2.8s loop, so it is a smear that moves. It is visible in the
+   production screenshots as the halo under Sign Up, and it is the reason
+   the automated pass kept reporting "orange fog" on pages where the
+   backdrop had already been dimmed.
+   
+   Light gets what a light theme uses to lift a control off the page: a
+   tight, mostly-neutral drop shadow, with just enough warmth that the
+   button still looks like it belongs to the brand. The pulse survives —
+   it is the same shape, an eighth of the spread. */
 @keyframes cta-pulse {
   0%,
   100% {
-    box-shadow: 0 4px 18px -4px rgba(249, 115, 22, 0.45);
+    box-shadow: var(--cta-glow-rest);
   }
   50% {
-    box-shadow: 0 4px 30px 0 rgba(249, 115, 22, 0.75);
+    box-shadow: var(--cta-glow-peak);
   }
 }
 /* Hover takes over from the pulse entirely — a hovered button that is
@@ -415,7 +977,7 @@ input:-webkit-autofill:focus {
   animation: none;
 }
 .cta-amber:hover:not(:disabled) {
-  box-shadow: 0 6px 28px -4px rgba(249, 115, 22, 0.7);
+  box-shadow: var(--cta-glow-hover);
   filter: brightness(1.06);
 }
 
@@ -460,7 +1022,7 @@ input:-webkit-autofill:focus {
    contentEditable elements have no `::placeholder` pseudo-element. */
 .document-editor-content:empty:before {
   content: attr(data-placeholder);
-  color: var(--muted);
+  color: rgb(var(--muted));
   pointer-events: none;
 }
 .document-editor-content h1 {
@@ -741,6 +1303,20 @@ input:-webkit-autofill:focus {
     radial-gradient(60rem 40rem at 100% 100%, rgba(249, 115, 22, 0.07), transparent 60%);
 }
 
+/* The corner pools, like the globe, were written for #0a0a0a and left
+   unthemed. A 9% orange wash is a glow on black and a stain on #f7f7f8 —
+   and it is a stain that lands on body copy: #71717a measures 4.51:1 on a
+   clean page background and 4.35:1 once these gradients have tinted it.
+   Roughly a third of the alpha, so the corners still shape the page
+   without moving what sits on top of them across a threshold. */
+[data-theme="light"] .ambient-corners {
+  background:
+    radial-gradient(60rem 40rem at 0% 0%, rgba(249, 115, 22, 0.013), transparent 60%),
+    radial-gradient(55rem 38rem at 100% 0%, rgba(168, 85, 247, 0.011), transparent 60%),
+    radial-gradient(55rem 38rem at 0% 100%, rgba(168, 85, 247, 0.008), transparent 60%),
+    radial-gradient(60rem 40rem at 100% 100%, rgba(249, 115, 22, 0.01), transparent 60%);
+}
+
 /* Sparklines draw themselves in on mount by animating the dash offset
    from "fully hidden" to zero. `pathLength="1"` on the <path> normalises
    the geometry so one keyframe works for any line shape. */
@@ -926,9 +1502,24 @@ input:-webkit-autofill:focus {
 .focus-glow {
   transition: box-shadow 240ms ease-out, border-color 240ms ease-out;
 }
+/* THE RING IS SOLID AND 2px, and that is an accessibility fix rather
+   than a style change.
+   
+   It used to be `0 0 0 1px rgba(249, 115, 22, 0.45)`. A focus indicator
+   is non-text UI under WCAG 1.4.11 and needs 3:1 against what it sits on;
+   composited, that 45% orange measured 1.6:1 on the white panel and
+   2.23:1 on the dark one. It failed in BOTH themes — this was never only
+   a light-theme problem, and the default theme is the dark one.
+   
+   `rgb(var(--accent-border))` at full opacity is the token
+   scripts/tests/light-theme-contrast.test.mjs already proves clears 3:1
+   against both surfaces in both themes, so the ring inherits that proof
+   instead of introducing a fourth hand-picked orange. The soft outer
+   halo stays in dark only (see the light override below) — it is
+   decoration sitting outside the ring that carries the meaning. */
 .focus-glow:focus,
 .focus-glow:focus-within {
-  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.45),
+  box-shadow: 0 0 0 2px rgb(var(--accent-border)),
     0 0 22px -4px rgba(249, 115, 22, 0.45);
 }
 
@@ -1072,190 +1663,229 @@ input:-webkit-autofill:focus {
   animation: tooltip-in 200ms ease-out 1;
 }
 
-/* ---------------------------------------------------------------------
-   ThinkingIndicator — the constellation, at fourteen pixels.
-
-   See components/ui/thinking-indicator.tsx for why this is not three
-   bouncing dots. The mechanics worth knowing here:
-
-   pathLength="1" on every <line> means stroke-dasharray and
-   stroke-dashoffset are expressed in fractions of the line's own length,
-   whatever that length is. Move a node and nothing needs recalculating.
-
-   Nodes scale with `transform`, never with the `r` attribute. CSS `r` is
-   animatable in SVG2 and supported unevenly; a transform runs on the
-   compositor and works everywhere. `transform-box: fill-box` is what
-   makes the origin the circle rather than the whole SVG.
-
-   The 0.37s stagger is the same one NetworkField uses between its own
-   nodes, so the indicator and the background are visibly in the same
-   family rather than two things that happen to be orange.
-
-   THE OPACITIES BELOW WERE MEASURED, NOT CHOSEN. Screenshots at both
-   themes, pixels sampled from the composited image, contrast computed
-   against a background probe in the same shot. Every number in the
-   comments is from that run:
-
-     dark  bg rgb(10,10,10)     orange-500  0.42 -> 2.04:1   0.60 -> 3.13:1
-     light bg rgb(247,247,248)  orange-500  0.42 -> 1.52:1   1.00 -> 2.62:1
-
-   Two things follow, and the second one is not what I expected.
-
-   FIRST: 0.42 IS TOO FAINT EVEN IN THE DARK. It is the opacity the
-   background field uses, and it is right there — NetworkField is
-   decorative, conveys nothing, and may be a whisper. This indicator
-   carries information, so it has to clear the 3:1 that WCAG 1.4.11 asks
-   of a non-text graphic. 0.60 is the first step that does.
-
-   SECOND: IN LIGHT MODE THE COLOUR CANNOT BE ORANGE-500 AT ALL. Not at
-   any opacity — at full strength it reaches 2.62:1 against the light
-   background and stops there, because that is simply what #f97316 is
-   worth on near-white. Raising opacity was the plan and the plan was
-   wrong. Light mode uses orange-700 (3.26:1 at 0.75) and purple-700
-   (4.11:1 at 0.75) instead: the same shapes, the same stagger, a darker
-   ink.
-   --------------------------------------------------------------------- */
-.ionexa-think {
+/* THE GLOBE MARK — components/ui/globe-mark.tsx.
+   
+   Geometry lives in lib/brand/globe.ts and is shared with the favicon and
+   the email logo; only motion and colour are here.
+   
+   ONLY THE ORBIT GROUP MOVES, and only by `transform`. The sphere and its
+   bands are rotationally symmetric — spinning them costs repaints and
+   looks identical — so they stay still and the SVG's cached texture is
+   reused. This is the opposite of what NetworkField and AuthBackground
+   used to do (animated content inside a full-viewport filtered SVG, 120ms
+   keystroke latency); here the SVG is 16-48px and carries no filter.
+   
+   Colour is `currentColor` throughout, so a caller inside the orange CTA
+   sets `color` to the button's black text and the whole mark follows —
+   the same escape hatch the constellation indicator needed when it was
+   drawn orange-on-orange and simply was not there. */
+.ionexa-globe {
   display: inline-flex;
   align-items: center;
-  color: #f97316;
+  justify-content: center;
+  color: rgb(var(--accent-border));
   vertical-align: middle;
   flex-shrink: 0;
 }
-.ionexa-think svg {
+.ionexa-globe svg {
   overflow: visible;
 }
-.ionexa-think .node {
-  fill: currentColor;
-  transform-box: fill-box;
-  transform-origin: center;
-  filter: drop-shadow(0 0 2.5px currentColor);
-  opacity: 0.6;
-  animation: ionexa-think-lift 2.4s ease-in-out infinite;
+.ionexa-globe .globe-node {
+  filter: drop-shadow(0 0 2px currentColor);
 }
-/* Every fourth node in NetworkField is purple. At three nodes that has
-   to become every third or the signature disappears. */
-.ionexa-think .node.alt {
-  fill: #a855f7;
+.ionexa-globe .globe-orbit-group {
+  transform-origin: 50px 50px;
 }
-.ionexa-think .edge {
-  stroke: currentColor;
-  stroke-width: 0.9;
-  fill: none;
-  opacity: 0.6;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: ionexa-think-draw 2.4s ease-in-out infinite;
-}
-.ionexa-think .e2,
-.ionexa-think .n2 {
-  animation-delay: 0.37s;
-}
-.ionexa-think .e3,
-.ionexa-think .n3 {
-  animation-delay: 0.74s;
+.ionexa-globe.is-spinning .globe-orbit-group {
+  animation: ionexa-globe-spin 3.2s linear infinite;
 }
 
-@keyframes ionexa-think-draw {
-  0%,
-  8% {
-    stroke-dashoffset: 1;
+@keyframes ionexa-globe-spin {
+  from {
+    transform: rotate(0deg);
   }
-  42%,
-  66% {
-    stroke-dashoffset: 0;
-  }
-  100% {
-    stroke-dashoffset: -1;
-  }
-}
-@keyframes ionexa-think-lift {
-  0%,
-  100% {
-    opacity: 0.6;
-    transform: scale(1);
-  }
-  45% {
-    opacity: 1;
-    transform: scale(1.22);
+  to {
+    transform: rotate(360deg);
   }
 }
 
-/* LIGHT THEME — a different ink, not a different opacity. See the
-   measurements above. The glow goes too: drop-shadow of a light colour
-   on a light background is a smudge with no edge. */
-:root:not([data-theme="dark"]) .ionexa-think,
-[data-theme="light"] .ionexa-think {
-  color: #c2410c;
-}
-:root:not([data-theme="dark"]) .ionexa-think .node.alt,
-[data-theme="light"] .ionexa-think .node.alt {
-  fill: #7e22ce;
-}
-:root:not([data-theme="dark"]) .ionexa-think .node,
-[data-theme="light"] .ionexa-think .node {
-  opacity: 0.75;
-  filter: none;
-}
-:root:not([data-theme="dark"]) .ionexa-think .edge,
-[data-theme="light"] .ionexa-think .edge {
-  opacity: 0.75;
-  stroke-width: 1.1;
-}
-:root:not([data-theme="dark"]) .ionexa-think .node,
-[data-theme="light"] .ionexa-think .node {
-  animation-name: ionexa-think-lift-light;
-}
-@keyframes ionexa-think-lift-light {
-  0%,
-  100% {
-    opacity: 0.75;
-    transform: scale(1);
-  }
-  45% {
-    opacity: 1;
-    transform: scale(1.22);
-  }
-}
+/* Stated explicitly as well as covered by the two global kill-switches:
+   those zero the DURATION, which leaves a rotation frozen at whatever
+   angle it had reached. The orbit is drawn at -20deg for a reason, so
+   reduced motion returns it there rather than leaving it wherever the
+   clock stopped. */
+/* SPECIFICITY, and the browser found this rather than review.
+   `.ionexa-globe.is-spinning .globe-orbit-group` is (0,3,0); these were
+   written as `.ionexa-globe .globe-orbit-group`, which is (0,2,0), so
+   they LOST to the rule they were supposed to override and the orbit kept
+   turning under prefers-reduced-motion. The two global kill-switches in
+   this file use !important and would have stopped the animation, leaving
+   the transform frozen mid-sweep — the exact state these rules exist to
+   prevent. Measured in Chromium with reducedMotion: "reduce":
+   animationName was still ionexa-globe-spin and transform was a rotation
+   matrix. Matching the selector is the fix; !important here would only
+   hide the mismatch.
 
-/* REDUCED MOTION. Not "hide it" — the user still has to know something
-   is happening. The animation stops on the frame that says the most:
-   every edge drawn, every node lit. A completed network is a picture of
-   work in progress; an empty box is a picture of nothing. The frozen
-   values are above 3:1 in both themes, which the animated resting state
-   also is — so nothing here is perceivable only while it moves. */
+   These rules used to also say `transform: none`. It was unreachable:
+   with the animation off there is no animated transform to override, and
+   the element has none of its own — the mutation that deleted it left
+   both suites green, which is the definition of a line no test can
+   defend. The prodtest still ASSERTS the computed transform is none, so
+   an orbit frozen mid-sweep would still be caught; it just is not caused
+   by this declaration. */
 @media (prefers-reduced-motion: reduce) {
-  .ionexa-think .edge,
-  .ionexa-think .node {
+  .ionexa-globe.is-spinning .globe-orbit-group {
     animation: none;
   }
-  .ionexa-think .edge {
-    stroke-dashoffset: 0;
-    opacity: 0.75;
-  }
-  .ionexa-think .node {
-    opacity: 1;
-    transform: none;
-  }
 }
-
-/* ON AN ACCENT-COLOURED SURFACE. Found in a screenshot: the sm variant
-   inside the orange "Ask" button was orange on orange — the drawing was
-   there, in the DOM, animating, and invisible. `tone="inherit"` takes
-   the parent's text colour, which on that button is black. The purple
-   node goes with it: purple on orange is no more readable than orange
-   on orange. */
-.ionexa-think.is-inherit,
-:root:not([data-theme="dark"]) .ionexa-think.is-inherit,
-[data-theme="light"] .ionexa-think.is-inherit {
+html[data-motion="reduce"] .ionexa-globe.is-spinning .globe-orbit-group {
+  animation: none;
+}
+/* Accent-on-accent. The `sm` indicator sits inside the orange "Ask"
+   button, whose background IS the accent, so an accent-coloured mark was
+   drawn orange-on-orange and simply was not there. Nothing in the code
+   said so; a screenshot did. `inherit` takes the button's own text
+   colour, which is black there — roughly 8:1. */
+.ionexa-globe.is-inherit {
   color: inherit;
 }
-.ionexa-think.is-inherit .node,
-.ionexa-think.is-inherit .node.alt,
-:root:not([data-theme="dark"]) .ionexa-think.is-inherit .node.alt,
-[data-theme="light"] .ionexa-think.is-inherit .node.alt {
-  fill: currentColor;
+.ionexa-globe.is-inherit .globe-node {
+  /* A glow in the parent's colour on a surface of that colour is a
+     smudge, not a highlight. */
   filter: none;
 }
 
-/* END ThinkingIndicator */
+/* LIGHT USES A DARKER INK, NOT A LOWER OPACITY, and that is the same
+   finding as everywhere else in this theme: orange-500 measures 2.62:1
+   on #f7f7f8 and cannot reach the 3:1 of WCAG 1.4.11 at any opacity,
+   because opacity moves it TOWARD the background. --accent-border is
+   orange-600 in light (3.18:1 on the worst surface the app paints) and
+   orange-500 in dark, so `color` alone carries both themes and there is
+   no second colour to keep in step.
+   The drop-shadow goes in light for the same reason it went on the
+   constellation: a warm halo on white is haze. */
+:root:not([data-theme="dark"]) .ionexa-globe .globe-node,
+[data-theme="light"] .ionexa-globe .globe-node {
+  filter: none;
+}
+/* END GlobeMark */
+
+/* =====================================================================
+   LIGHT THEME — SHADOWS AND GLOWS
+   =====================================================================
+   
+   "Στο άσπρο θέμα το glow είναι μουτζούρα." It is, and the reason is
+   structural rather than a matter of taste.
+   
+   Every elevation effect in this file is a COLOURED GLOW: a wide, soft
+   orange spread (`0 18px 44px -12px rgba(249,115,22,.65)` and friends).
+   On #0a0a0a that reads as light emitted by the element. On #ffffff
+   there is no darkness for it to emit into, so the same shadow lands as
+   a flat orange haze around the card — a smudge, not an elevation.
+   
+   Measured, ten separate rules carried an orange glow and not one of
+   them had a light-theme override; `.glass-card` had one for its resting
+   state but not for `:hover`, which is where its largest glow lives.
+   
+   THE SUBSTITUTION, per the brief: thin shadows + borders.
+     - Elevation becomes a NEUTRAL dark shadow at low alpha with a small
+       blur and a real offset — the only thing that reads as depth on a
+       light ground.
+     - Identity moves to the BORDER, which is where an accent belongs on
+       white: a 1px accent edge is legible where a 40px accent haze is
+       not.
+   
+   The accent used here is `--accent-border`, the same token the contrast
+   test already proves clears 3:1 on both light surfaces. Nothing in this
+   section invents a colour.
+   
+   Dark is untouched: every rule below is scoped to [data-theme="light"].
+   ===================================================================== */
+
+[data-theme="light"] {
+  /* Neutral elevation, slate-tinted rather than pure black — pure black
+     shadows on white read as grey dirt, a faint blue-grey reads as depth. */
+  --elev-1: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.1);
+  --elev-2: 0 2px 4px rgba(15, 23, 42, 0.06), 0 6px 16px -6px rgba(15, 23, 42, 0.14);
+  --elev-3: 0 4px 8px rgba(15, 23, 42, 0.06), 0 12px 28px -10px rgba(15, 23, 42, 0.18);
+}
+
+/* Card hover: a 1px accent edge plus real elevation, instead of a 44px
+   orange spread. */
+[data-theme="light"] .card-lift:hover {
+  border-color: rgb(var(--accent-border));
+  box-shadow: 0 0 0 1px rgb(var(--accent-border)), var(--elev-2);
+}
+
+/* The primary CTA keeps its gradient fill — that is the brand, and it is
+   legible on white. Only the halo around it changes. The pulse is
+   re-pointed at a light keyframe rather than switched off: losing the
+   idle attention cue in one theme would make the two themes behave
+   differently, not just look different. */
+[data-theme="light"] .cta-amber {
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1), 0 4px 10px -3px rgba(194, 65, 12, 0.3);
+  animation: cta-pulse-light 2.8s ease-in-out infinite;
+}
+@keyframes cta-pulse-light {
+  0%,
+  100% {
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1), 0 4px 10px -3px rgba(194, 65, 12, 0.3);
+  }
+  50% {
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.1), 0 6px 16px -3px rgba(194, 65, 12, 0.45);
+  }
+}
+[data-theme="light"] .cta-amber:hover:not(:disabled) {
+  box-shadow: 0 2px 4px rgba(15, 23, 42, 0.12), 0 8px 20px -6px rgba(194, 65, 12, 0.4);
+  /* brightness(1.06) on an already-light gradient washes it out; on white
+     the readable direction is very slightly darker, not brighter. */
+  filter: brightness(0.97);
+}
+
+[data-theme="light"] .glass-card:hover {
+  box-shadow: 0 0 0 1px rgb(var(--accent-border) / 0.5), var(--elev-3);
+}
+
+/* The composer. Its animated gradient border is the identity and stays;
+   the 46px + 70px twin haloes underneath it do not survive on white. */
+[data-theme="light"] .prompt-glow {
+  box-shadow: var(--elev-1);
+}
+[data-theme="light"] .prompt-glow[data-active="true"] {
+  box-shadow: var(--elev-2);
+}
+
+/* Active nav row: a solid accent rail and a flat tint, no bloom. */
+[data-theme="light"] .nav-item::before {
+  background: rgb(var(--accent-border) / 0.1);
+  box-shadow: inset 0 0 0 1px rgb(var(--accent-border) / 0.35);
+}
+[data-theme="light"] .nav-item::after {
+  background: rgb(var(--accent-border));
+  box-shadow: none;
+}
+
+/* Focus: the 2px solid ring (set above, theme-aware and proven >=3:1)
+   carries the whole indicator here. The outer halo is dropped — on white
+   it blurs the edge of the very thing that has to be crisp. */
+[data-theme="light"] .focus-glow:focus,
+[data-theme="light"] .focus-glow:focus-within {
+  box-shadow: 0 0 0 2px rgb(var(--accent-border));
+}
+
+/* One-shot success flash. Kept as a ring that contracts, with no spread
+   bloom — the motion is the signal. */
+[data-theme="light"] .celebration-ring {
+  animation-name: celebration-ring-light;
+}
+@keyframes celebration-ring-light {
+  0% {
+    box-shadow: 0 0 0 0 rgb(var(--accent-amber-border) / 0.7);
+  }
+  40% {
+    box-shadow: 0 0 0 6px rgb(var(--accent-amber-border) / 0.2);
+  }
+  100% {
+    box-shadow: 0 0 0 12px rgb(var(--accent-amber-border) / 0);
+  }
+}

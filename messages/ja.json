@@ -122,7 +122,8 @@
       "integrations": "連携",
       "files": "ファイル",
       "deepResearch": "ディープリサーチ",
-      "help": "ヘルプセンター"
+      "help": "ヘルプセンター",
+      "affiliate": "アフィリエイト"
     },
     "groupHints": {
       "create": "サイトを生成し、目標を計画し、文書を書く。",
@@ -173,7 +174,8 @@
       "integrations": "Gmail・Drive・Slack を接続して、AI が実際のデータを扱えるようにします",
       "files": "PDF・Word・Excel をアップロードして、AI に内容を質問できます",
       "deepResearch": "トピックを渡すと検索・照合して出典付きのレポートを書きます",
-      "help": "よくある質問への回答です。クレジットは消費しません。"
+      "help": "よくある質問への回答です。クレジットは消費しません。",
+      "affiliate": "紹介リンク、これまでの報酬、受け取り方法。"
     },
     "comingSoon": "近日公開",
     "closeMenu": "メニューを閉じる"
@@ -259,7 +261,13 @@
       "included": "無制限のチームシートを含む — メンバーごとの追加料金なし",
       "perMember": "+ チームメンバー1人あたり月額{currency}{price} — 各メンバーはご利用プランの階層で全機能を利用できます"
     },
-    "metaDescription": "Ionexa AI の料金 — Free、Starter、Growth、Professional、Ultimate、Enterprise の各プラン。"
+    "metaDescription": "Ionexa AI の料金 — Free、Starter、Growth、Professional、Ultimate、Enterprise の各プラン。",
+    "billingMonthly": "月額",
+    "billingAnnual": "年額",
+    "billingIntervalLabel": "請求サイクル",
+    "billingAnnualSaving": "{percent}% お得 — 2か月分無料",
+    "billedAnnually": "年1回 {total} のご請求 — {saving} お得です",
+    "checkoutFailed": "決済を開始できませんでした。もう一度お試しください。"
   },
   "roadmap": {
     "title": "ロードマップ",
@@ -468,7 +476,10 @@
       "couldNotClearMemory": "✗ メモリを消去できませんでした",
       "memoryCleared": "✓ メモリを消去しました",
       "memoryEnabled": "✓ チャットメモリを有効にしました",
-      "memoryDisabled": "✓ チャットメモリを無効にしました"
+      "memoryDisabled": "✓ チャットメモリを無効にしました",
+      "planExcludes": "現在のプランにはチャットメモリが含まれていないため、何も保存されません。Starter 以上のプランでは会話をまたいで記憶します。",
+      "switchedOff": "メモリがオフのため、会話から何も保存されません。",
+      "nothingYet": "まだ何も保存されていません。メモリは有効です — 会話にお名前・お仕事・好みなど長く役立つ情報が出てきた時点で記憶します。"
     },
     "loginActivity": {
       "title": "ログインアクティビティ",
@@ -649,7 +660,18 @@
       "sumTop": "最も高額な機能",
       "sumTopHint": "総支出の {percent}%",
       "projectionOnly": "課金された操作はまだありません。以下の利益率はすべて課金対象外レコードからの推定であり、収益ではありません。",
-      "belowTargetAlert": "{count} 件の機能が目標 {target}x を下回っています: {features}。メールで通知しました。"
+      "belowTargetAlert": "{count} 件の機能が目標 {target}x を下回っています: {features}。メールで通知しました。",
+      "cacheTitle": "プロンプトキャッシュ",
+      "cacheDescription": "全額課金ではなくキャッシュから提供されたプロンプトトークンの割合。",
+      "cacheHitRate": "ヒット率",
+      "cacheColInput": "全額",
+      "cacheColRead": "キャッシュから",
+      "cacheColWrite": "書き込み",
+      "cacheEmpty": "プロンプトトークンはまだ記録されていません。",
+      "cacheMiscachedAlert": "{features}：キャッシュに書き込むだけで読み戻していません — ブレークポイントがリクエストごとに変わる内容の上にあります。",
+      "absorbedRefusals": "吸収した拒否: {calls} 件のエージェント実行がタスクを拒否し、課金されませんでした — €{cost} のモデル費用は当社負担です。",
+      "absorbedRefusalsShare": "これはこの期間の収益の {share}% です。確認しきい値は {limit}% です。",
+      "absorbedRefusalsShareUnknown": "収益に対する割合は表示されません: このレポートには比較する収益の数値がありません。"
     },
     "pushNotifications": {
       "title": "プッシュ通知",
@@ -1411,6 +1433,42 @@
         "testSentTelegram": "送信しました。Telegram を確認してください。",
         "testSentDiscord": "送信しました。Discord のチャンネルを確認してください。",
         "testFailed": "テストメッセージを送信できませんでした。"
+      },
+      "runCannotComplete": "このエージェントはそのタスクを実行できないため、停止しました。クレジットは請求されていません。",
+      "capability": {
+        "canTitle": "エージェントにできること",
+        "cannotTitle": "エージェントにできないこと",
+        "can": {
+          "search": "ウェブで最新の情報を検索する",
+          "analyse": "見つけた内容を読んで分析する",
+          "summarise": "要約し、比較し、結論を導く",
+          "monitor": "トピックを継続的に追い、変化を報告する",
+          "schedule": "以上をスケジュールどおりに実行し、結果をメールで送る"
+        },
+        "cannot": {
+          "code": "コードの記述や実行、ソフトウェアやサイトの制作、テストの実行、バグの修正",
+          "system_access": "あなたのパソコン・ファイル・アカウント・システムへのアクセス",
+          "other_platforms": "他のプラットフォームでの操作（投稿、誰かへの連絡、予約、注文）",
+          "physical": "現実世界での作業",
+          "financial": "送金、売買",
+          "phone": "電話をかけること"
+        },
+        "refusedTitle": "これはエージェントには実行できません",
+        "refusedBody": "ご依頼の内容はすべて、エージェントの能力の外にあることを必要とします:",
+        "detectedIn": "入力内容から検出: {words}",
+        "noCharge": "請求は発生していません — 何も実行されていません。",
+        "noChargeYet": "まだ何も請求されていません。",
+        "tryInstead": "代わりに調査・monitoring・要約を依頼してみてください。例:「毎週月曜に、業界の最新動向をまとめて」",
+        "rephrase": "依頼を書き直す",
+        "partialTitle": "この一部は実行できません",
+        "partialWillDo": "エージェントは代わりにこれを行います: {parts}",
+        "partialContinue": "実行できる部分だけ作成",
+        "previewWhatItDoes": "毎回の実行内容",
+        "previewWillNotDo": "行わないこと",
+        "stepSearch": "そのトピックの最新情報をウェブで検索します。",
+        "stepNoSearch": "タスクの文面だけで作業します（ウェブ検索なし）。",
+        "stepWrite": "結果を書き、見つけた内容と照合します。",
+        "stepDeliver": "{when}、{target} にメールで送ります。"
       }
     },
     "publishing": {
@@ -1788,6 +1846,36 @@
       "finished": "離れている間に、前回のリクエストが完了しました。",
       "open": "開く",
       "dismiss": "閉じる"
+    },
+    "affiliate": {
+      "title": "アフィリエイト",
+      "description": "Ionexa を紹介して、紹介した人が払い続ける分の一部を受け取れます。",
+      "pitch": "紹介した人の支払いごとに {percent}%。毎月、{months} か月間受け取れます。",
+      "pitchTerms": "自分自身は紹介できません。同じ人がカウントされるのは一度だけです。報酬はその人の初回支払いから始まります。",
+      "join": "リンクを受け取る",
+      "joining": "作成中…",
+      "joinError": "できませんでした。もう一度お試しください。",
+      "yourLink": "あなたのリンク",
+      "copy": "コピー",
+      "copied": "コピーしました",
+      "terms": "支払いごとに {percent}%。初回支払いから {months} か月間。",
+      "suspended": "このアフィリエイトアカウントは停止中のため、新しい報酬は発生しません。心当たりがなければご連絡ください。",
+      "stat": {
+        "signups": "登録",
+        "paying": "支払い中",
+        "owed": "未払い残高",
+        "paidOut": "支払い済み"
+      },
+      "payouts": "受け取り方",
+      "payoutsUnavailable": "この環境では受け取りの設定がまだ有効になっていません。",
+      "payoutsNotSetUp": "Stripe で受け取りを設定すると報酬を受け取れます。情報は Stripe が直接扱い、こちらでは見えません。",
+      "payoutsIncomplete": "支払いにはあと少し情報が必要だと Stripe が言っています。設定を終えるとここが更新されます。",
+      "payoutsReady": "支払いは毎月です。{minimum} を超えた分が口座に振り込まれます。",
+      "setUpPayouts": "受け取りを設定",
+      "finishSetup": "設定を完了する",
+      "opening": "Stripe を開いています…",
+      "connectError": "設定を開けませんでした。もう一度お試しください。",
+      "rules": "報酬は実際に入金された支払いに対して発生します。返金や不服申立ての分は取り消されます。自己紹介と同じ人の二重紹介には報酬がつきません。"
     }
   },
   "module": {

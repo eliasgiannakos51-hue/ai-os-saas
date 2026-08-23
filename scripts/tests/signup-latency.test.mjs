@@ -35,18 +35,49 @@ function check(name, cond, detail) {
 const raw = readFileSync("src/app/api/signup/route.ts", "utf8");
 const src = raw.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
 
-console.log("== 1. the email overlaps the work, instead of following it ==");
-const startedAt = src.indexOf("const welcomeEmail = sendWelcomeEmail(email)");
+// EVERY job the route starts early, not just the email.
+//
+// The email was the first one, and while it was the only one this suite
+// could get away with asserting the literal shape `Promise.race([
+// welcomeEmail,` at the end. It is not the only one any more: a signup
+// that arrived through a referral link also starts the affiliate
+// attribution write early, for exactly the same reason (nobody presses
+// "Create account" to wait for somebody else's commission to be
+// recorded).
+//
+// So the property is the general one: every promise started before the
+// critical path must be inside the ONE residual race at the end. A
+// background job left out of it is a write that a frozen serverless
+// invocation may simply never perform — the failure the residual wait
+// exists to prevent — and it would leave this file's shape assertions
+// entirely happy.
+const BACKGROUND_JOBS = [
+  { name: "the welcome email", promise: "welcomeEmail", startedBy: "const welcomeEmail = sendWelcomeEmail(email)" },
+  {
+    name: "the affiliate attribution",
+    promise: "referralAttribution",
+    startedBy: "const referralAttribution = referralCode",
+  },
+];
+
+console.log("== 1. the background work overlaps the critical path, instead of following it ==");
 const grantAt = src.indexOf("await grantCredits(");
 const signInAt = src.indexOf("supabase.auth.signInWithPassword(");
-const awaitedAt = src.indexOf("await Promise.race([\n      welcomeEmail,");
-check("the send is started", startedAt > 0);
-check("BEFORE the credit grant", startedAt > 0 && grantAt > 0 && startedAt < grantAt);
-check("and before the sign-in", startedAt > 0 && signInAt > 0 && startedAt < signInAt);
-check("but only awaited after both", awaitedAt > grantAt && awaitedAt > signInAt);
+const raceMatch = /await Promise\.race\(\[[\s\S]*?\n {4}\]\);/.exec(src);
+const awaitedAt = raceMatch ? raceMatch.index : -1;
+const raceBlock = raceMatch?.[0] ?? "";
+for (const job of BACKGROUND_JOBS) {
+  const startedAt = src.indexOf(job.startedBy);
+  check(`${job.name} is started`, startedAt > 0);
+  check(`  BEFORE the credit grant`, startedAt > 0 && grantAt > 0 && startedAt < grantAt);
+  check(`  and before the sign-in`, startedAt > 0 && signInAt > 0 && startedAt < signInAt);
+  check(`  but only awaited after both`, awaitedAt > grantAt && awaitedAt > signInAt);
+  check(`  and it IS awaited — inside the residual race`, new RegExp(`\\b${job.promise}\\b`).test(raceBlock));
+}
 // Started-and-not-awaited-for-several-statements is exactly the shape that
 // takes a process down on an unexpected rejection.
-check("the started promise cannot reject unhandled", /sendWelcomeEmail\(email\)\.catch\(/.test(src));
+check("the welcome email cannot reject unhandled", /sendWelcomeEmail\(email\)\.catch\(/.test(src));
+check("nor can the attribution write", /attributeReferral\(\{[\s\S]*?\}\)\.catch\(/.test(src));
 
 console.log("\n== 2. the residual wait is a tail, not the whole send ==");
 const residual = /const WELCOME_EMAIL_RESIDUAL_MS = (\d+);/.exec(src);
@@ -58,7 +89,17 @@ check(
 check("the old 2.5s serial cap is gone", !/setTimeout\(resolve, 2500\)/.test(src));
 // A promise abandoned at response time may never run to completion on a
 // serverless platform — hence a residual wait rather than none at all.
-check("it is still awaited, not fired and forgotten", /await Promise\.race\(\[\s*welcomeEmail/.test(src));
+check(
+  "it is still awaited, not fired and forgotten",
+  /await Promise\.race\(\[/.test(src) && /setTimeout\(resolve, WELCOME_EMAIL_RESIDUAL_MS\)/.test(raceBlock)
+);
+// And the race is a FLOOR on the background work, not a race between the
+// jobs: Promise.all, so the shorter one finishing does not release the
+// wait while the other is still in flight.
+check(
+  "the residual budget covers all the background work, not the first job to finish",
+  BACKGROUND_JOBS.length < 2 || /Promise\.all\(\[/.test(raceBlock)
+);
 
 console.log("\n== 3. every stage is still measurable from the deployment ==");
 for (const stage of ["rate_limit", "create_user", "grant_credits", "welcome_email", "sign_in"]) {

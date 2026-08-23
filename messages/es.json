@@ -122,7 +122,8 @@
       "integrations": "Integraciones",
       "files": "Archivos",
       "deepResearch": "Investigación profunda",
-      "help": "Centro de ayuda"
+      "help": "Centro de ayuda",
+      "affiliate": "Afiliados"
     },
     "groupHints": {
       "create": "Genera un sitio, planifica un objetivo, escribe un documento.",
@@ -173,7 +174,8 @@
       "integrations": "Conecta Gmail, Drive y Slack para que la IA trabaje con tus datos reales",
       "files": "Sube PDF, Word y Excel y hazle preguntas a la IA sobre ellos",
       "deepResearch": "Dale un tema: busca, contrasta y escribe un informe con fuentes",
-      "help": "Respuestas a las preguntas más frecuentes, sin gastar créditos."
+      "help": "Respuestas a las preguntas más frecuentes, sin gastar créditos.",
+      "affiliate": "Tu enlace de referido, lo que has ganado y cómo cobras."
     },
     "comingSoon": "Próximamente",
     "closeMenu": "Cerrar el menú"
@@ -259,7 +261,13 @@
       "included": "Puestos de equipo ilimitados incluidos: sin cargo por miembro",
       "perMember": "+ {currency}{price}/mes por miembro del equipo: cada miembro obtiene acceso completo al nivel de tu plan"
     },
-    "metaDescription": "Precios de Ionexa AI: planes Free, Starter, Growth, Professional, Ultimate y Enterprise."
+    "metaDescription": "Precios de Ionexa AI: planes Free, Starter, Growth, Professional, Ultimate y Enterprise.",
+    "billingMonthly": "Mensual",
+    "billingAnnual": "Anual",
+    "billingIntervalLabel": "Periodo de facturación",
+    "billingAnnualSaving": "Ahorra un {percent}%: dos meses gratis",
+    "billedAnnually": "Se cobra {total} una vez al año: ahorras {saving}",
+    "checkoutFailed": "No se pudo iniciar el pago. Inténtalo de nuevo."
   },
   "roadmap": {
     "title": "Hoja de ruta",
@@ -468,7 +476,10 @@
       "couldNotClearMemory": "✗ no se pudo borrar la memoria",
       "memoryCleared": "✓ memoria borrada",
       "memoryEnabled": "✓ memoria de chat activada",
-      "memoryDisabled": "✓ memoria de chat desactivada"
+      "memoryDisabled": "✓ memoria de chat desactivada",
+      "planExcludes": "Tu plan actual no incluye memoria de chat, así que no se guarda nada. Los planes desde Starter recuerdan entre conversaciones.",
+      "switchedOff": "La memoria está desactivada, así que no se guarda nada de tus conversaciones.",
+      "nothingYet": "Todavía no se ha guardado nada. La memoria está activa: retiene cosas duraderas como tu nombre, tu trabajo o una preferencia, en cuanto una conversación menciona alguna."
     },
     "loginActivity": {
       "title": "Actividad de inicio de sesión",
@@ -649,7 +660,18 @@
       "sumTop": "Función más cara",
       "sumTopHint": "{percent}% del gasto total",
       "projectionOnly": "Aún no hay acciones cobradas: todos los márgenes siguientes son proyecciones de registros bypass, no ingresos.",
-      "belowTargetAlert": "{count} función(es) por debajo del objetivo {target}x: {features}. Se ha enviado una alerta por correo."
+      "belowTargetAlert": "{count} función(es) por debajo del objetivo {target}x: {features}. Se ha enviado una alerta por correo.",
+      "cacheTitle": "Caché de prompt",
+      "cacheDescription": "Proporción de tokens del prompt servidos desde la caché en lugar de pagarse a precio completo.",
+      "cacheHitRate": "Tasa de aciertos",
+      "cacheColInput": "Precio completo",
+      "cacheColRead": "Desde caché",
+      "cacheColWrite": "Escritos",
+      "cacheEmpty": "Aún no se han registrado tokens de prompt.",
+      "cacheMiscachedAlert": "{features}: escribe en la caché pero no lee nada de vuelta — el punto de corte está en contenido que cambia en cada solicitud.",
+      "absorbedRefusals": "Rechazos absorbidos: {calls} ejecución(es) de agente rechazaron la tarea y no se cobraron — €{cost} de coste de modelo asumido por nosotros.",
+      "absorbedRefusalsShare": "Es el {share}% de los ingresos de este periodo; el umbral de revisión es {limit}%.",
+      "absorbedRefusalsShareUnknown": "No se muestra el porcentaje sobre ingresos: este informe no tiene una cifra de ingresos con la que compararlo."
     },
     "pushNotifications": {
       "title": "Notificaciones push",
@@ -1411,6 +1433,42 @@
         "testSentTelegram": "Enviado: mira tu Telegram.",
         "testSentDiscord": "Enviado: mira tu canal de Discord.",
         "testFailed": "No se pudo enviar el mensaje de prueba."
+      },
+      "runCannotComplete": "Este agente no puede realizar esa tarea, así que se ha desactivado. No se han cobrado créditos.",
+      "capability": {
+        "canTitle": "Un agente puede",
+        "cannotTitle": "Un agente no puede",
+        "can": {
+          "search": "Buscar información actual en la web",
+          "analyse": "Leer y analizar lo que encuentra",
+          "summarise": "Resumir, comparar y sacar conclusiones",
+          "monitor": "Vigilar un tema a lo largo del tiempo e informar de los cambios",
+          "schedule": "Hacer todo eso de forma programada y enviarte el resultado por correo"
+        },
+        "cannot": {
+          "code": "Escribir o ejecutar código, crear software o sitios web, ejecutar pruebas, corregir errores",
+          "system_access": "Acceder a tu ordenador, archivos, cuentas o sistemas",
+          "other_platforms": "Actuar en otras plataformas: publicar, escribir a alguien, reservar o pedir",
+          "physical": "Hacer cualquier cosa en el mundo físico",
+          "financial": "Mover dinero, comprar o vender nada",
+          "phone": "Hacer llamadas telefónicas"
+        },
+        "refusedTitle": "Esto un agente no puede hacerlo",
+        "refusedBody": "Todo lo que has pedido necesita algo fuera de lo que un agente puede hacer:",
+        "detectedIn": "Detectado en lo que escribiste: {words}",
+        "noCharge": "No se te ha cobrado nada: no se ha ejecutado nada.",
+        "noChargeYet": "Todavía no se ha cobrado nada.",
+        "tryInstead": "Prueba a pedir investigación, seguimiento o un resumen; por ejemplo, «cada lunes, resume las novedades de mi sector».",
+        "rephrase": "Quiero reescribir mi petición",
+        "partialTitle": "Una parte de esto no se puede hacer",
+        "partialWillDo": "En su lugar, el agente haría esto: {parts}",
+        "partialContinue": "Crear solo la parte que funciona",
+        "previewWhatItDoes": "Qué hace en cada ejecución",
+        "previewWillNotDo": "Qué no hará",
+        "stepSearch": "Busca en la web información actual sobre el tema.",
+        "stepNoSearch": "Trabaja solo con el texto de la tarea, sin búsqueda web.",
+        "stepWrite": "Redacta el resultado y lo contrasta con lo que ha encontrado.",
+        "stepDeliver": "Lo envía por correo a {target}, {when}."
       }
     },
     "publishing": {
@@ -1788,6 +1846,36 @@
       "finished": "Tu última petición terminó mientras no estabas.",
       "open": "Ábrelo",
       "dismiss": "Descartar"
+    },
+    "affiliate": {
+      "title": "Afiliados",
+      "description": "Comparte Ionexa y gana parte de lo que sigan pagando las personas que traigas.",
+      "pitch": "Gana el {percent}% de cada pago de tus referidos, cada mes, durante {months} meses.",
+      "pitchTerms": "No puedes referirte a ti mismo, y cada persona solo cuenta una vez. La comisión empieza con su primer pago.",
+      "join": "Quiero mi enlace",
+      "joining": "Preparando…",
+      "joinError": "No se pudo. Inténtalo de nuevo.",
+      "yourLink": "Tu enlace",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "terms": "{percent}% de cada pago, durante {months} meses desde el primero.",
+      "suspended": "Esta cuenta de afiliado está suspendida, así que no se genera comisión nueva. Escríbenos si crees que es un error.",
+      "stat": {
+        "signups": "Registros",
+        "paying": "Pagando",
+        "owed": "Te debemos",
+        "paidOut": "Pagado"
+      },
+      "payouts": "Cómo cobras",
+      "payoutsUnavailable": "Los pagos aún no están configurados en esta instalación.",
+      "payoutsNotSetUp": "Configura los pagos con Stripe para recibir lo que ganes. Stripe recoge tus datos directamente — nosotros no los vemos.",
+      "payoutsIncomplete": "Stripe todavía necesita algunos datos para poder pagarte. Termina la configuración y esto se actualizará.",
+      "payoutsReady": "Los pagos se hacen cada mes. Todo lo que supere {minimum} se envía a tu cuenta.",
+      "setUpPayouts": "Configurar pagos",
+      "finishSetup": "Terminar configuración",
+      "opening": "Abriendo Stripe…",
+      "connectError": "No se pudo abrir la configuración de pagos. Inténtalo de nuevo.",
+      "rules": "La comisión se calcula sobre pagos realmente cobrados. Los reembolsos y las disputas se revierten. Auto-referencias y segundas referencias de la misma persona no generan nada."
     }
   },
   "module": {

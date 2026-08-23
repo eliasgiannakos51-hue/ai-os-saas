@@ -4,11 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { Loader2, CheckCircle2, X } from "lucide-react";
+import { CheckCircle2, X } from "lucide-react";
 import { watchJob } from "@/lib/jobs/start-and-watch";
 import { markJobConsumed } from "@/lib/jobs/consume";
 import { JobSeen } from "@/components/jobs/job-seen";
 import type { JobKind } from "@/lib/jobs/job-types";
+import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
 
 /**
  * "You already asked for this — here is where it got to."
@@ -92,7 +93,7 @@ export function ResumedWorkNotice({ kind }: { kind: JobKind }) {
   return (
     <div className="mb-3 flex items-start gap-2.5 rounded-xl border border-border bg-panel/60 px-3 py-2.5">
       {state.phase === "working" ? (
-        <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-orange-400" aria-hidden="true" />
+        <ThinkingIndicator size="sm" className="mt-0.5 shrink-0" />
       ) : (
         <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" aria-hidden="true" />
       )}

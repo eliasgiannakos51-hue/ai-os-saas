@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/logo";
+import { GlobeMark } from "@/components/ui/globe-mark";
 
 const MESSAGES = ["Loading workspace...", "Syncing data...", "Ready."];
 const STEP_MS = 380;
@@ -25,10 +26,10 @@ export function LoginSplash({ onDone }: { onDone: () => void }) {
   return (
     <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-4 bg-background">
       <Logo iconOnly className="h-10 w-10" />
-      <div
-        className="h-8 w-8 animate-spin rounded-full border-2 border-orange-500/25 border-t-orange-500"
-        aria-hidden="true"
-      />
+      {/* 32px crosses the threshold where the interior bands stop being
+          noise, so this is the full globe rather than the mark — the one
+          place in the product where a person is looking at nothing else. */}
+      <GlobeMark size={32} spin />
       <p className="text-sm text-muted transition-opacity duration-200" aria-live="polite">
         {MESSAGES[step]}
       </p>

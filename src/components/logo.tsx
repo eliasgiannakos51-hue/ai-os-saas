@@ -1,5 +1,14 @@
 // Reproduces the brand mark exactly: the orbit/ion mark (a ringed sphere
 // with an offset elliptical orbit) plus the "ionexa" / "ai" wordmark in
+// THE WORDMARK IS NOT A LITERAL COLOUR ANY MORE. It was #f5f5f5 —
+// near-white — which is correct on #0a0a0a and invisible on #f7f7f8:
+// 1.02:1. It shipped that way, and it went unnoticed because the light
+// theme's backdrop haze darkened the area behind it just enough to make
+// the letters faintly visible. Cleaning the haze made the brand name
+// disappear completely, which is how it was finally seen. The amber mark
+// keeps its colour in both themes — it is a stroke on a shape, and it
+// measures 3.4:1 against the light page.
+//
 // the brand's amber (#f5a623). `iconOnly` renders just the mark, cropped
 // to its own square viewBox, for small contexts (sidebar header, favicon
 // source) — both share the same source coordinate system (circle/ellipse
@@ -93,15 +102,15 @@ export function Logo({
           (r=2.6). "onexa" keeps the identical x-start (263.9) the second
           half of "ionexa" already had, so nothing else in the wordmark
           shifts. */}
-      <rect x="255.6" y="252" width="2.9" height="18" rx="1" fill="#f5f5f5" />
-      <circle cx="257.05" cy="246.6" r="2.6" fill="#f5f5f5" />
+      <rect x="255.6" y="252" width="2.9" height="18" rx="1" fill="var(--logo-ink, #f5f5f5)" />
+      <circle cx="257.05" cy="246.6" r="2.6" fill="var(--logo-ink, #f5f5f5)" />
       <text
         x="263.9"
         y="270"
         fontFamily="Arial, sans-serif"
         fontSize="34"
         fontWeight="400"
-        fill="#f5f5f5"
+        fill="var(--logo-ink, #f5f5f5)"
         letterSpacing="3"
       >
         onexa
@@ -114,7 +123,7 @@ export function Logo({
         fontFamily="Arial, sans-serif"
         fontSize="34"
         fontWeight="400"
-        fill="#f5a623"
+        fill="var(--logo-accent, #f5a623)"
         letterSpacing="3"
       >
         ai

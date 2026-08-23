@@ -168,7 +168,23 @@ for (let i = 0; i < 10; i++) {
   allowed++;
 }
 eq("a budget of 3 permits exactly 3 requests", allowed, 3);
-eq("and then reports why it stopped", budget.halted, "budget-exhausted");
+eq("and it reports that ITS OWN ceiling is what stopped it", budget.ceilingReached, true);
+// THIS ASSERTION USED TO BE THE OPPOSITE, and being the opposite was a
+// silent compliance failure. canSpend() set halted = "budget-exhausted"
+// when it found the ceiling reached, so the breaker — the flag that means
+// UNSPLASH REFUSED US — was tripped by our own bookkeeping. The mandatory
+// download registration obeys the breaker, correctly, because a refused
+// request registers nothing; it therefore also obeyed the ceiling, and a
+// photo-heavy generation shipped photos that Unsplash was never told
+// about. lib/unsplash.ts describes at length why the registration must
+// survive the ceiling; this flag was the reason it did not.
+eq("reaching OUR ceiling does not trip UNSPLASH's breaker", budget.halted, null);
+eq("asking again still does not trip it", (budget.canSpend(), budget.halted), null);
+// The distinction has to survive in both directions.
+const refused = ub.createUnsplashBudget(50);
+refused.halt("rate-limited");
+eq("a real refusal is reported as a halt", refused.halted, "rate-limited");
+eq("and does not claim the ceiling was reached", refused.ceilingReached, false);
 
 console.log("\n== 8. the breaker tells apart 'wait an hour' from 'fix your key' ==");
 // Unsplash does NOT answer 429 for quota. It answers 403 with

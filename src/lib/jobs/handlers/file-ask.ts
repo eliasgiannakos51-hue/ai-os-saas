@@ -16,6 +16,7 @@ import {
 import { wrapUntrusted } from "@/lib/agents/agent-config";
 import { JOB_STEPS } from "@/lib/jobs/job-types";
 import type { JobContext, JobHandler, JobHandlerResult } from "@/lib/jobs/run-job";
+import { modelText, truncationNotice } from "@/lib/verification/truncation";
 
 /**
  * Room for the answer.
@@ -93,12 +94,15 @@ export const fileAskHandler: JobHandler = async (ctx: JobContext): Promise<JobHa
   const anthropic = new Anthropic({ apiKey: ctx.apiKey });
   const filenames = files.map((f) => f.filename);
 
+  // ONE PLACE, because this file makes up to three calls — a single pass,
+  // a per-part pass, and a synthesis over the parts. Any of them can hit
+  // its ceiling, and the answer the user reads is built from whichever
+  // ran. A flag set here catches all three without three checks.
+  let hitTokenCeiling = false;
   function textOf(response: Anthropic.Message): string {
-    return response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === "text")
-      .map((block) => block.text)
-      .join("")
-      .trim();
+    const extracted = modelText(response);
+    if (extracted.truncated) hitTokenCeiling = true;
+    return extracted.text.trim();
   }
 
   // ONE PASS IS STILL ONE CALL. Nearly every question is this, and it
@@ -172,6 +176,15 @@ export const fileAskHandler: JobHandler = async (ctx: JobContext): Promise<JobHa
       ctx.costs.record("generation", response.usage, response.model || FILE_ASK_MODEL);
       answer = textOf(response);
     }
+  }
+
+  // The answer is the deliverable here — it is what the user reads about
+  // their own documents — so a cut one is marked rather than presented as
+  // complete. `context.truncated` above is a different thing: that says
+  // the SOURCE documents were too large to send whole, and it is already
+  // told to the model in the system prompt.
+  if (answer && hitTokenCeiling) {
+    answer = `${answer}\n\n_${truncationNotice(language)}_`;
   }
 
   await ctx.progress(4, steps[3]);

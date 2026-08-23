@@ -36,6 +36,7 @@ import {
 } from "@/lib/email/send-agent-emails";
 import { deliverAgentResult } from "@/lib/agents/deliver";
 import { normaliseAgentConfig, type UserAgent, type AgentDeliveryMethod } from "@/lib/agents/agent-config";
+import { truncationNotice } from "@/lib/verification/truncation";
 
 // ONE execution of one agent, end to end: rate limit, circuit breaker,
 // credit hold, run (with retries), settle, deliver, reschedule.
@@ -420,7 +421,15 @@ export async function executeAgent(params: {
   }
 
   // ---- success path (including "nothing to report") -----------------
-  const output = outcome.ok ? outcome.output : null;
+  // A RESULT THAT RAN OUT OF ROOM SAYS SO, in the agent's own language.
+  // This is emailed and stored; a scheduled agent delivering half an
+  // answer every morning with nothing to mark the cut is the failure that
+  // makes a working feature look unreliable for reasons nobody can name.
+  const output = outcome.ok
+    ? outcome.truncated
+      ? `${outcome.output}\n\n_${truncationNotice(agentConfig.language)}_`
+      : outcome.output
+    : null;
   // Typed from the channel registry rather than from a literal union: the
   // union here was "email" | "slack", and widening the registry without
   // widening this would have been a type error at best and a silently

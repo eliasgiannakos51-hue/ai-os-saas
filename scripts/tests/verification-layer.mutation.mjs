@@ -26,8 +26,8 @@ const MUTANTS = [
   {
     name: "the check is computed and its result ignored (the classic dead verifier)",
     file: RUNNER,
-    from: "    markdown: citations.ok\n      ? synthesis.markdown\n      : annotateDanglingCitations(synthesis.markdown, sources.length),",
-    to: "    markdown: synthesis.markdown,",
+    from: "    markdown: citations.ok\n      ? reportMarkdown\n      : annotateDanglingCitations(reportMarkdown, sources.length),",
+    to: "    markdown: reportMarkdown,",
   },
   {
     name: "the failure is swallowed instead of logged",
@@ -38,7 +38,7 @@ const MUTANTS = [
   {
     name: "the check moves AFTER the document is rendered, so it cannot affect it",
     file: RUNNER,
-    from: "  const citations = checkCitations(synthesis.markdown, sources.length);",
+    from: "  const citations = checkCitations(reportMarkdown, sources.length);",
     to: "  const citations = { ok: true, markers: [], issues: [] };\n  void checkCitations;",
   },
   {

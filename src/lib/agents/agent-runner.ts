@@ -12,6 +12,9 @@ import {
   type AgentOutputFormat,
 } from "@/lib/agents/agent-config";
 import { logApiError } from "@/lib/log-error";
+import { modelText } from "@/lib/verification/truncation";
+import { resolveAgentBudget, budgetStop, budgetStopNotice } from "@/lib/agents/agent-budget";
+import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import {
   AGENT_CANNOT_COMPLETE_MARKER,
   detectCapabilityRefusal,
@@ -112,7 +115,18 @@ export type AgentRunFailure =
   | { kind: "api_error"; message: string };
 
 export type AgentRunOutcome =
-  | { ok: true; output: string; searchCount: number }
+  // `truncated` rides on the SUCCESS shape: a severed result is still a
+  // result, and discarding it would throw away tokens the account has
+  // already been charged for. execute-agent decides what to say about it.
+  | {
+      ok: true;
+      output: string;
+      searchCount: number;
+      truncated: boolean;
+      /** Set when the run stopped at a limit rather than finishing. The
+       *  output is what it had at that point. */
+      stoppedAtBudget?: "cost" | "tool_calls";
+    }
   | { ok: false; failure: AgentRunFailure };
 
 /**
@@ -137,11 +151,10 @@ async function research(
     costs.record("web_search", response.usage, response.model || AGENT_RUNNER_MODEL);
     const searchCount = response.usage.server_tool_use?.web_search_requests ?? 0;
 
-    const text = response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === "text")
-      .map((block) => block.text)
-      .join("\n")
-      .trim();
+    // The research step, through the same function as the writing step. Its
+    // findings feed the deliverable, so a silently cut research pass
+    // produces a confident answer built on half the evidence.
+    const text = modelText(response).text.trim();
 
     if (!text || text.toUpperCase().startsWith("NONE")) return { findings: "", searchCount };
     return { findings: text.slice(0, MAX_RESEARCH_CHARS), searchCount };
@@ -184,6 +197,31 @@ export async function runAgentTask(params: {
     searchCount = result.searchCount;
   }
 
+  // THE BUDGET IS CHECKED HERE, BETWEEN THE TWO CALLS, and the position
+  // is the whole point. Asked after both, it would report what had
+  // already been spent; asked here, it can decline to spend the second
+  // half. The write step is the expensive one.
+  //
+  // Stopping is not failing. The research findings are real work the
+  // account has been charged for, so they are RETURNED with a note
+  // saying where the run stopped — not discarded, and not presented as a
+  // finished answer.
+  const budget = resolveAgentBudget();
+  const spentSoFar = costs.totals();
+  const verdict = budgetStop(
+    { costEur: spentSoFar.usdCost * resolvePricingConfig().usdToEurRate, toolCalls: searchCount },
+    budget
+  );
+  if (verdict.stop) {
+    return {
+      ok: true,
+      output: `${budgetStopNotice(config.language)}\n\n${findings}`.trim(),
+      searchCount,
+      truncated: false,
+      stoppedAtBudget: verdict.reason,
+    };
+  }
+
   const userContent = findings
     ? `TASK (data):\n${wrapUntrusted(safePrompt)}\n\nRESEARCH FINDINGS gathered from the web for this run:\n${wrapUntrusted(findings)}`
     : `TASK (data):\n${wrapUntrusted(safePrompt)}`;
@@ -206,11 +244,12 @@ export async function runAgentTask(params: {
 
   costs.record("generation", response.usage, response.model || AGENT_RUNNER_MODEL);
 
-  const text = response.content
-    .filter((block): block is Anthropic.TextBlock => block.type === "text")
-    .map((block) => block.text)
-    .join("\n")
-    .trim();
+  // THROUGH modelText, so a run that hit its 3,000-token ceiling cannot
+  // be delivered as a finished result. This text is emailed to the user
+  // as the agent's output; a severed one arriving with no mark on it is
+  // a scheduled agent quietly reporting half an answer every morning.
+  const generated = modelText(response);
+  const text = generated.text.trim();
 
   // CHECKED BEFORE validateAgentOutput, and that order is the fix.
   //
@@ -261,5 +300,5 @@ export async function runAgentTask(params: {
     };
   }
 
-  return { ok: true, output: checked.output, searchCount };
+  return { ok: true, output: checked.output, searchCount, truncated: generated.truncated };
 }

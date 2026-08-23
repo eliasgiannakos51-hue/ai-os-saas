@@ -124,8 +124,8 @@ export function EntityCard({
         "card-lift group relative flex flex-col rounded-2xl border p-4 transition-colors duration-200",
         index === undefined ? "" : "list-slide-in",
         selected
-          ? "border-orange-500/50 bg-[linear-gradient(160deg,var(--panel)_0%,var(--panel)_60%,rgba(249,115,22,0.07)_100%)]"
-          : "border-border bg-[linear-gradient(160deg,var(--panel)_0%,var(--panel)_65%,rgba(249,115,22,0.035)_100%)] hover:border-orange-500/40",
+          ? "border-orange-500/50 bg-[linear-gradient(160deg,rgb(var(--panel))_0%,rgb(var(--panel))_60%,rgba(249,115,22,0.07)_100%)]"
+          : "border-border bg-[linear-gradient(160deg,rgb(var(--panel))_0%,rgb(var(--panel))_65%,rgba(249,115,22,0.035)_100%)] hover:border-orange-500/40",
       ].join(" ")}
     >
       <div className="flex items-start justify-between gap-2">

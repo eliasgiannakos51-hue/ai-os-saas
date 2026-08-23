@@ -299,7 +299,30 @@ resolves to an actual, working photo URL — never a broken or invented link.
   business. Fewer relevant images beat more random ones.
 
 Every photo that does appear is a real, legal, functioning image — this
-app never scrapes Google Images or hotlinks an unlicensed photo.
+app never scrapes Google Images and never uses a photo it has no licence
+for.
+
+**Unsplash's three API guidelines are requirements, not suggestions**, and
+they are what a production application (50 -> 5,000 requests/hour) is
+granted on. All three are enforced in code:
+
+1. **Hotlinking** — photos load from `images.unsplash.com` and are never
+   copied into our storage. This is an obligation, so do not "optimise" it
+   by caching the bytes or routing them through `next/image`.
+2. **Registering the use** — every photo that reaches a stored page gets a
+   request to its `links.download_location`
+   (`registerUnsplashUses`, `src/lib/website-image-resolver.ts`). It fires
+   after the document is saved, so a rejected edit or a flagged generation
+   never counts as a use.
+3. **Attribution** — every photo carries "Photo by *name* on Unsplash"
+   with `utm_source=ionexa&utm_medium=referral` on both links, rebuilt
+   from the photographer carried on the `<img>` itself every time a
+   document is stored, so an AI edit cannot quietly drop it.
+
+`node scripts/unsplash-attribution-proof.mjs` renders all three in a real
+browser under the published-site CSP; with `UNSPLASH_ACCESS_KEY` set it
+uses the live API and its screenshots are what the application is made
+with.
 
 ## Billing
 

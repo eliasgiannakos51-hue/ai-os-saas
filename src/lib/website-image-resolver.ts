@@ -12,7 +12,11 @@ import {
   isUnsplashConfigured,
   type UnsplashPhoto,
 } from "@/lib/unsplash";
-import { createUnsplashBudget, describeUnsplashHalt } from "@/lib/unsplash-budget";
+import {
+  createUnsplashBudget,
+  describeUnsplashHalt,
+  type UnsplashHaltReason,
+} from "@/lib/unsplash-budget";
 import { logApiError } from "@/lib/log-error";
 
 // Runs after generateWebsiteHtml/editWebsiteHtml (lib/website-builder.ts)
@@ -30,9 +34,25 @@ import { logApiError } from "@/lib/log-error";
 // entirely, and on a business site a random photo presented as the
 // business is worse than no photo. Fewer relevant images beat more
 // random ones.
-export async function resolveWebsiteImagePlaceholders(html: string): Promise<string> {
+/**
+ * What a resolution produced, and what still owes Unsplash a request.
+ *
+ * `used` is the list the caller must pass to registerUnsplashUses ONCE
+ * the document is kept. It is deliberately not registered here — see the
+ * note on registerUnsplashUses.
+ */
+export type ImageResolution = {
+  html: string;
+  /** Exactly the photos that reached the returned HTML. */
+  used: UnsplashPhoto[];
+  /** Set only if UNSPLASH refused (403/429/401). Passed on so the caller
+   *  does not fire registrations that would be refused too. */
+  halted: UnsplashHaltReason | null;
+};
+
+export async function resolveWebsiteImagePlaceholders(html: string): Promise<ImageResolution> {
   const all = findImagePlaceholders(html);
-  if (all.length === 0) return html;
+  if (all.length === 0) return { html, used: [], halted: null };
 
   // A placeholder asking for a LOGO never resolves to a stock photo — a
   // random mark presented as the business's identity is the reported bug.
@@ -49,7 +69,7 @@ export async function resolveWebsiteImagePlaceholders(html: string): Promise<str
       { queries: logoLike.map((p) => p.query).join(" | ").slice(0, 200) }
     );
   }
-  if (placeholders.length === 0) return html;
+  if (placeholders.length === 0) return { html, used: [], halted: null };
 
   // Without a key there is nothing to search with, and no reason to
   // pretend otherwise: every placeholder is removed and the log says why.
@@ -61,7 +81,7 @@ export async function resolveWebsiteImagePlaceholders(html: string): Promise<str
       ),
       { placeholders: placeholders.length }
     );
-    return stripPlaceholderImageTags(html, placeholders.map((p) => p.slug));
+    return { html: stripPlaceholderImageTags(html, placeholders.map((p) => p.slug)), used: [], halted: null };
   }
 
   // ONE budget for the whole document, not one per photo.
@@ -85,7 +105,7 @@ export async function resolveWebsiteImagePlaceholders(html: string): Promise<str
   // relevant — query before any photo is allowed a second, broader try.
   const ladders = placeholders.map((p) => ({ slug: p.slug, attempts: broadenImageQuery(p.query) }));
   const maxRounds = ladders.reduce((max, l) => Math.max(max, l.attempts.length), 0);
-  for (let round = 0; round < maxRounds && !budget.halted; round++) {
+  for (let round = 0; round < maxRounds && !budget.halted && !budget.ceilingReached; round++) {
     const contenders = ladders.filter((l) => !resolved.has(l.slug) && round < l.attempts.length);
     if (contenders.length === 0) break;
     await Promise.all(
@@ -107,6 +127,15 @@ export async function resolveWebsiteImagePlaceholders(html: string): Promise<str
       placeholders: placeholders.length,
       removed: unresolved.length,
     });
+  } else if (budget.ceilingReached) {
+    // Reported through its own branch because it is no longer a halt
+    // reason: reaching OUR ceiling says nothing about Unsplash, and the
+    // flag that used to conflate the two silently cancelled every
+    // mandatory download registration. See lib/unsplash-budget.ts.
+    logApiError("website-image-resolver", new Error(describeUnsplashHalt("budget-exhausted", budget.spent)), {
+      placeholders: placeholders.length,
+      removed: unresolved.length,
+    });
   } else if (unresolved.length > 0) {
     logApiError(
       "website-image-resolver",
@@ -117,42 +146,92 @@ export async function resolveWebsiteImagePlaceholders(html: string): Promise<str
     );
   }
 
-  // UNSPLASH API GUIDELINE: register a download for every photo that is
-  // actually used.
-  //
-  // AFTER resolution and only for the winners. A photo that lost to a
-  // broader query, or whose placeholder ended up stripped, was never
-  // displayed — counting it would inflate a photographer's stats with
-  // uses that never happened, which is the opposite of what the
-  // guideline is for.
-  //
-  // Sequential, not Promise.all: these share the generation budget with
-  // the searches, and firing them in parallel would race past the
-  // ceiling that exists to stop one generation eating the hour's quota.
-  // They are also the last thing this function does, so their latency
-  // costs the page nothing.
-  let credited = 0;
-  for (const photo of resolved.values()) {
-    if (budget.halted) break;
-    if (await triggerUnsplashDownload(photo, budget)) credited += 1;
+  // NOTHING IS REGISTERED WITH UNSPLASH HERE. See registerUnsplashUses.
+  let result = applyResolvedImageUrls(html, resolved);
+  if (unresolved.length > 0) {
+    result = stripPlaceholderImageTags(result, unresolved.map((p) => p.slug));
   }
-  if (credited < resolved.size) {
-    // Said out loud because nothing on the page looks different: the
+  return { html: result, used: [...resolved.values()], halted: budget.halted };
+}
+
+/**
+ * UNSPLASH API GUIDELINE 2 — register that a photo was actually USED.
+ *
+ * Called by the routes, AFTER the document has been stored, and that
+ * placement is the whole point of this function existing separately.
+ *
+ * WHAT A "USE" IS. Unsplash asks for one request per photo an application
+ * genuinely uses — that is how a photographer's download count reflects
+ * reality. It is not a count of photos we searched for, nor of photos we
+ * assembled into a candidate document.
+ *
+ * WHY IT CANNOT LIVE IN THE RESOLVER. The resolver runs long before
+ * anyone knows whether the document survives. Both routes then send it
+ * through an AI content-safety review, and both can throw it away:
+ * api/websites/edit returns without writing anything and tells the owner
+ * their site is unchanged, and api/websites/generate/process saves a
+ * flagged generation whose preview is replaced by a warning panel with
+ * publish and download disabled. Registering at resolution time counted
+ * every one of those as a use — photos nobody ever saw, added to somebody
+ * else's stats. Generation can also simply time out
+ * (maxDuration 800) between resolving and storing, with the same result.
+ *
+ * PARALLEL, and that is now correct where it was not before. These used
+ * to be fired sequentially because they shared the per-generation search
+ * budget and racing them could overshoot its ceiling. They are no longer
+ * charged against it — a registration is mandatory rather than
+ * speculative, and self-limiting, since there is exactly one per photo
+ * that already won a search. Sequential 4-second timeouts across six
+ * photos is up to twenty-four seconds bolted onto a request the user is
+ * watching (the edit route is not backgrounded); in parallel the worst
+ * case is one timeout for the whole set.
+ *
+ * NEVER THROWS. A missed registration is worth logging and moving on, not
+ * worth failing a customer's website over — the page is already stored
+ * and already correctly attributed.
+ */
+export async function registerUnsplashUses(
+  photos: UnsplashPhoto[],
+  halted: UnsplashHaltReason | null = null
+): Promise<{ attempted: number; registered: number }> {
+  if (photos.length === 0) return { attempted: 0, registered: 0 };
+
+  // Unsplash has already refused during this generation, so every
+  // registration would be refused too. Firing them buys nothing but
+  // latency on a request someone is waiting for — but it must be SAID,
+  // because the photos shipped and their uses are genuinely unrecorded.
+  if (halted) {
+    logApiError(
+      "website-image-resolver",
+      new Error(
+        `Unsplash was unavailable (${halted}) — ${photos.length} used photo(s) shipped without their use being registered. They are still attributed on the page.`
+      ),
+      { photos: photos.length }
+    );
+    return { attempted: 0, registered: 0 };
+  }
+
+  // A breaker but NO ceiling: one request per photo that already shipped
+  // cannot run away, and capping it is exactly what used to leave photos
+  // unregistered. The breaker still matters — once Unsplash says "you are
+  // out", the rest of the batch buys nothing.
+  const budget = createUnsplashBudget(photos.length);
+  const results = await Promise.all(photos.map((photo) => triggerUnsplashDownload(photo, budget)));
+  const registered = results.filter(Boolean).length;
+
+  if (registered < photos.length) {
+    // Said out loud because NOTHING on the page looks different: the
     // photos still appear and are still attributed. Only Unsplash's own
     // records are short, and a production-access review is exactly where
     // that gets noticed.
     logApiError(
       "website-image-resolver",
       new Error(
-        `Unsplash download trigger did not complete for ${resolved.size - credited} of ${resolved.size} used photo(s) — attribution is still rendered, but the use was not registered with Unsplash`
+        `Unsplash download registration did not complete for ${photos.length - registered} of ${photos.length} used photo(s) — attribution is still rendered, but the use was not registered with Unsplash`
       ),
       { halted: budget.halted ?? "none", unsplashRequests: budget.spent }
     );
   }
 
-  let result = applyResolvedImageUrls(html, resolved);
-  if (unresolved.length > 0) {
-    result = stripPlaceholderImageTags(result, unresolved.map((p) => p.slug));
-  }
-  return result;
+  return { attempted: photos.length, registered };
 }

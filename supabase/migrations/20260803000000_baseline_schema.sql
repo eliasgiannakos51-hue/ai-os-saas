@@ -2010,8 +2010,17 @@ create table if not exists public.published_sites (
   -- ever reaches here; the CHECK is the backstop that makes a bypassed
   -- validator a database error rather than a live site at /s/admin.
   subdomain text not null,
-  -- Infrastructure only for now: there is no domain to point at yet, so
-  -- the verification flow exists and nothing serves from it.
+  -- COLUMNS ONLY. There is no verification flow behind these and nothing
+  -- serves from them: as of this line, no code in src/ reads or writes
+  -- custom_domain at all. An earlier version of this comment claimed "the
+  -- verification flow exists", which was never true and is exactly the
+  -- kind of false note that makes someone skip building the thing.
+  --
+  -- lib/publishing/custom-domain.ts (validation) and
+  -- lib/publishing/domain-verification.ts (the DNS checks) are the first
+  -- half of it. What is still missing is the host side — registering the
+  -- domain with the platform that terminates TLS for it — and the route
+  -- that resolves an incoming Host header to a row.
   custom_domain text,
   custom_domain_verification_token text,
   custom_domain_verified_at timestamptz,

@@ -65,6 +65,7 @@ export const ITEM_LABEL_KEYS: Record<string, string> = {
   "AI Memory": "memory",
   Settings: "settings",
   Team: "team",
+  Affiliate: "affiliate",
   "Help Centre": "help",
   "AI Agents": "agents",
   "Website Builder": "websiteBuilder",

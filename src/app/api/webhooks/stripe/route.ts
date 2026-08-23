@@ -18,6 +18,10 @@ import {
   recordPackPurchaseRate,
 } from "@/lib/billing/credits";
 import { logApiError } from "@/lib/log-error";
+import {
+  recordCommissionForInvoice,
+  reverseCommissionForInvoice,
+} from "@/lib/affiliate/store";
 
 export const dynamic = "force-dynamic";
 
@@ -242,6 +246,43 @@ async function grantPurchasedCredits(session: Stripe.Checkout.Session, eventId: 
   }
 }
 
+/**
+ * Turns a paid invoice into affiliate commission, if the payer was
+ * referred (salvaged from the three-bugs-landing-page branch).
+ *
+ * Resolving WHO paid goes through the Stripe customer's
+ * `supabase_user_id` metadata — the same link syncSubscriptionToUser
+ * uses — because the invoice itself carries no Supabase id. A customer
+ * without that metadata predates the convention; nothing to attribute.
+ *
+ * Never throws: an affiliate bookkeeping failure must not stop a
+ * subscription from being synced.
+ */
+async function recordAffiliateCommission(stripe: Stripe, invoice: Stripe.Invoice): Promise<void> {
+  try {
+    const amountCents = invoice.amount_paid ?? 0;
+    if (amountCents <= 0 || !invoice.id) return;
+
+    const customerRef = invoice.customer;
+    const customerId = typeof customerRef === "string" ? customerRef : customerRef?.id;
+    if (!customerId) return;
+
+    const customer = await stripe.customers.retrieve(customerId);
+    if (customer.deleted) return;
+    const supabaseUserId = customer.metadata?.supabase_user_id;
+    if (!supabaseUserId) return;
+
+    await recordCommissionForInvoice({
+      referredUserId: supabaseUserId,
+      stripeInvoiceId: invoice.id,
+      amountCents,
+      paidAt: new Date((invoice.status_transitions?.paid_at ?? invoice.created) * 1000),
+    });
+  } catch (err) {
+    logApiError("/api/webhooks/stripe", err, { stage: "affiliate_commission" });
+  }
+}
+
 export async function POST(request: Request) {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
   const signature = request.headers.get("stripe-signature");
@@ -307,6 +348,28 @@ export async function POST(request: Request) {
         if (subscriptionId) {
           await syncSubscriptionToUser(stripe, subscriptionId, event.type);
         }
+        // Affiliate commission accrues from the invoice that was actually
+        // PAID, not from the plan's list price — a discounted or prorated
+        // invoice settles for less than list, and paying a percentage of
+        // list would send out more than came in.
+        await recordAffiliateCommission(stripe, invoice);
+        break;
+      }
+      // Money that came back has to take the commission with it.
+      case "charge.refunded":
+      case "charge.dispute.closed": {
+        // The SDK's Charge/Dispute types do not expose `invoice`, and the
+        // two events carry it in different places — a refund on the charge
+        // itself, a dispute one level down under `charge`. Read both
+        // shapes rather than trusting either.
+        const object = event.data.object as unknown as {
+          invoice?: string | { id?: string } | null;
+          charge?: string | { invoice?: string | { id?: string } | null } | null;
+        };
+        const raw =
+          object.invoice ?? (typeof object.charge === "object" ? object.charge?.invoice : null);
+        const invoiceId = typeof raw === "string" ? raw : raw?.id;
+        if (invoiceId) await reverseCommissionForInvoice(invoiceId);
         break;
       }
       default:

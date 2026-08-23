@@ -123,7 +123,8 @@
       "integrations": "Integrationen",
       "files": "Dateien",
       "deepResearch": "Tiefenrecherche",
-      "help": "Hilfe-Center"
+      "help": "Hilfe-Center",
+      "affiliate": "Partnerprogramm"
     },
     "groupHints": {
       "create": "Eine Website erzeugen, ein Ziel planen, ein Dokument schreiben.",
@@ -174,7 +175,8 @@
       "integrations": "Gmail, Drive und Slack verbinden, damit die KI mit Ihren echten Daten arbeitet",
       "files": "PDFs, Word- und Excel-Dateien hochladen und das KI dazu befragen",
       "deepResearch": "Thema angeben — es recherchiert, gleicht ab und schreibt einen belegten Bericht",
-      "help": "Antworten auf die häufigsten Fragen — ohne Credits zu verbrauchen."
+      "help": "Antworten auf die häufigsten Fragen — ohne Credits zu verbrauchen.",
+      "affiliate": "Dein Empfehlungslink, dein Verdienst und wie du ausgezahlt wirst."
     },
     "comingSoon": "Demnächst",
     "closeMenu": "Menü schließen"
@@ -1831,6 +1833,36 @@
       "finished": "Deine letzte Anfrage wurde fertig, während du weg warst.",
       "open": "Öffnen",
       "dismiss": "Ausblenden"
+    },
+    "affiliate": {
+      "title": "Partnerprogramm",
+      "description": "Teile Ionexa und verdiene an dem, was die Leute zahlen, die du bringst.",
+      "pitch": "Verdiene {percent}% jeder Zahlung deiner Empfohlenen, jeden Monat, {months} Monate lang.",
+      "pitchTerms": "Du kannst dich nicht selbst empfehlen, und jede Person zählt nur einmal. Die Provision beginnt mit ihrer ersten Zahlung.",
+      "join": "Meinen Link holen",
+      "joining": "Wird eingerichtet …",
+      "joinError": "Hat nicht geklappt. Bitte erneut versuchen.",
+      "yourLink": "Dein Link",
+      "copy": "Kopieren",
+      "copied": "Kopiert",
+      "terms": "{percent}% jeder Zahlung, {months} Monate ab ihrer ersten.",
+      "suspended": "Dieses Partnerkonto ist gesperrt, es wird keine neue Provision verdient. Melde dich, wenn das ein Fehler ist.",
+      "stat": {
+        "signups": "Registriert",
+        "paying": "Zahlend",
+        "owed": "Offen für dich",
+        "paidOut": "Ausgezahlt"
+      },
+      "payouts": "Auszahlung",
+      "payoutsUnavailable": "Auszahlungen sind auf dieser Installation noch nicht eingerichtet.",
+      "payoutsNotSetUp": "Richte Auszahlungen über Stripe ein, um dein Guthaben zu erhalten. Stripe erhebt deine Daten direkt — wir sehen sie nie.",
+      "payoutsIncomplete": "Stripe braucht noch ein paar Angaben, bevor es dich auszahlen kann. Schließe die Einrichtung ab, dann aktualisiert sich das hier.",
+      "payoutsReady": "Auszahlungen laufen monatlich. Alles über {minimum} geht auf dein Bankkonto.",
+      "setUpPayouts": "Auszahlungen einrichten",
+      "finishSetup": "Einrichtung abschließen",
+      "opening": "Stripe wird geöffnet …",
+      "connectError": "Einrichtung konnte nicht geöffnet werden. Bitte erneut versuchen.",
+      "rules": "Provision entsteht auf tatsächlich vereinnahmte Zahlungen. Rückerstattungen und Rückbuchungen werden storniert. Selbstempfehlungen und Zweitempfehlungen derselben Person bringen nichts."
     }
   },
   "module": {

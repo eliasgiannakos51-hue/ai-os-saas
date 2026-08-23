@@ -123,7 +123,8 @@
       "integrations": "Intégrations",
       "files": "Fichiers",
       "deepResearch": "Recherche approfondie",
-      "help": "Centre d’aide"
+      "help": "Centre d’aide",
+      "affiliate": "Affiliation"
     },
     "groupHints": {
       "create": "Générez un site, planifiez un objectif, rédigez un document.",
@@ -174,7 +175,8 @@
       "integrations": "Connectez Gmail, Drive et Slack pour que l'IA travaille sur vos vraies données",
       "files": "Importez des PDF, Word et Excel et posez des questions à l'IA",
       "deepResearch": "Donnez un sujet : il cherche, recoupe et rédige un rapport sourcé",
-      "help": "Les réponses aux questions les plus fréquentes, sans consommer de crédits."
+      "help": "Les réponses aux questions les plus fréquentes, sans consommer de crédits.",
+      "affiliate": "Votre lien de parrainage, vos gains et comment vous êtes payé."
     },
     "comingSoon": "Bientôt",
     "closeMenu": "Fermer le menu"
@@ -1831,6 +1833,36 @@
       "finished": "Votre dernière demande s'est terminée pendant votre absence.",
       "open": "Ouvrir",
       "dismiss": "Ignorer"
+    },
+    "affiliate": {
+      "title": "Affiliation",
+      "description": "Partagez Ionexa et touchez une part de ce que paient les personnes que vous amenez.",
+      "pitch": "Touchez {percent}% de chaque paiement de vos filleuls, chaque mois, pendant {months} mois.",
+      "pitchTerms": "Vous ne pouvez pas vous parrainer vous-même, et chaque personne ne compte qu'une fois. La commission démarre à leur premier paiement.",
+      "join": "Obtenir mon lien",
+      "joining": "Préparation…",
+      "joinError": "Échec. Réessayez.",
+      "yourLink": "Votre lien",
+      "copy": "Copier",
+      "copied": "Copié",
+      "terms": "{percent}% de chaque paiement, pendant {months} mois à partir du premier.",
+      "suspended": "Ce compte d'affilié est suspendu, aucune nouvelle commission n'est générée. Écrivez-nous si c'est une erreur.",
+      "stat": {
+        "signups": "Inscriptions",
+        "paying": "Payants",
+        "owed": "Dû",
+        "paidOut": "Versé"
+      },
+      "payouts": "Être payé",
+      "payoutsUnavailable": "Les versements ne sont pas encore configurés sur ce déploiement.",
+      "payoutsNotSetUp": "Configurez les versements avec Stripe pour recevoir vos gains. Stripe recueille vos informations directement — nous ne les voyons jamais.",
+      "payoutsIncomplete": "Stripe a encore besoin de quelques informations avant de pouvoir vous payer. Terminez la configuration et ceci se mettra à jour.",
+      "payoutsReady": "Les versements ont lieu chaque mois. Tout montant supérieur à {minimum} part vers votre compte bancaire.",
+      "setUpPayouts": "Configurer les versements",
+      "finishSetup": "Terminer la configuration",
+      "opening": "Ouverture de Stripe…",
+      "connectError": "Impossible d'ouvrir la configuration. Réessayez.",
+      "rules": "La commission porte sur les paiements réellement encaissés. Les remboursements et litiges sont annulés. Un auto-parrainage ou un second parrainage de la même personne ne rapporte rien."
     }
   },
   "module": {

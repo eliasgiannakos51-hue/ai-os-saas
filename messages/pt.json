@@ -123,7 +123,9 @@
       "files": "Ficheiros",
       "deepResearch": "Investigação profunda",
       "help": "Centro de ajuda",
-      "affiliate": "Afiliados"
+      "affiliate": "Afiliados",
+      "formSubmissions": "Envios de formulários",
+      "routing": "Encaminhamento de modelos"
     },
     "groupHints": {
       "create": "Gere um site, planeie um objetivo, escreva um documento.",
@@ -175,7 +177,8 @@
       "files": "Carrega PDF, Word e Excel e faz perguntas à IA sobre eles",
       "deepResearch": "Dá um tema: pesquisa, cruza fontes e escreve um relatório com referências",
       "help": "Respostas às perguntas mais frequentes, sem gastar créditos.",
-      "affiliate": "O teu link de referência, o que ganhaste e como recebes."
+      "affiliate": "O teu link de referência, o que ganhaste e como recebes.",
+      "formSubmissions": "Tudo o que os visitantes enviaram por um formulário nos seus sites publicados"
     },
     "comingSoon": "Em breve",
     "closeMenu": "Fechar o menu"
@@ -696,7 +699,131 @@
       "collaborationHint": "Convites de equipa e atividade do espaço partilhado",
       "iosNeedsInstall": "Em iPhone e iPad, as notificações só funcionam depois de adicionar o Ionexa ao ecrã principal."
     },
-    "jumpToSection": "Ir para uma seção"
+    "jumpToSection": "Ir para uma seção",
+    "notifications": {
+      "title": "Notificações",
+      "description": "Escolhe o que te chega e onde. Só enviamos alguma coisa quando há algo a dizer.",
+      "saved": "Guardado",
+      "saveError": "Não foi possível guardar — tenta outra vez.",
+      "criticalNote": "Problemas de pagamento, créditos baixos e erros que precisam de ti deixam sempre registo aqui na aplicação, mesmo que desligues o tipo.",
+      "channels": {
+        "in_app": "Na aplicação",
+        "email": "E-mail",
+        "telegram": "Telegram",
+        "discord": "Discord"
+      },
+      "types": {
+        "agent_completed": {
+          "label": "O agente encontrou algo",
+          "description": "Só quando uma execução produziu um resultado real — nunca apenas porque correu."
+        },
+        "website_published": {
+          "label": "Site publicado",
+          "description": "Quando um dos teus sites fica online."
+        },
+        "research_ready": {
+          "label": "Pesquisa pronta",
+          "description": "Quando um relatório de pesquisa profunda termina."
+        },
+        "credits_low": {
+          "label": "Créditos a acabar",
+          "description": "Aos 80% e outra vez aos 100%, para o teu trabalho agendado não parar sem aviso."
+        },
+        "payment_failed": {
+          "label": "Pagamento falhou",
+          "description": "Quando um cartão é recusado e a tua subscrição está em risco."
+        },
+        "team_member_joined": {
+          "label": "Novo membro da equipa",
+          "description": "Quando alguém aceita o teu convite."
+        },
+        "error_needs_attention": {
+          "label": "Algo precisa de ti",
+          "description": "Quando algo se partiu de uma forma que só tu podes resolver."
+        }
+      },
+      "quiet": {
+        "title": "Horas de silêncio",
+        "description": "Nada te vai interromper entre estas horas.",
+        "enable": "Usar horas de silêncio",
+        "from": "Das",
+        "to": "Às",
+        "offset": "O teu fuso horário",
+        "deferNote": "Ficam retidas, não são deitadas fora: tudo o que surgir durante as horas de silêncio chega quando a janela termina. Problemas de pagamento e erros que precisam de ti passam à mesma."
+      },
+      "chat": {
+        "title": "Telegram e Discord",
+        "description": "Envia notificações para um chat em vez do e-mail. Desligado por omissão para todos os tipos, mesmo depois de ligado.",
+        "connect": "Ligar",
+        "connecting": "A ligar…",
+        "disconnect": "Desligar",
+        "connected": "Ligado",
+        "notConfigured": "O Telegram não está configurado nesta instalação.",
+        "testSent": "Ligado — procura a nossa mensagem de teste.",
+        "testFailed": "Não conseguimos entregar uma mensagem de teste aí, por isso nada foi guardado.",
+        "telegram": {
+          "help": "Escreve ao nosso bot e cola o ID de chat que ele responder.",
+          "placeholder": "ID de chat"
+        },
+        "discord": {
+          "help": "Cola um URL de webhook do Discord para o canal que quiseres.",
+          "placeholder": "https://discord.com/api/webhooks/…"
+        }
+      }
+    },
+    "overage": {
+      "title": "Uso adicional",
+      "description": "Quando os créditos acabarem, continue a {price} € por crédito — só se você pedir.",
+      "offNow": "O uso adicional está desligado. Nada extra pode ser cobrado: quando os créditos acabam, as ações param.",
+      "capLabel": "O seu limite mensal (€)",
+      "capPlaceholder": "ex.: 20",
+      "capHint": "Entre {min} € e {max} €.",
+      "preview": {
+        "heading": "O que você está a aceitar",
+        "rate": "{price} € por crédito, fixado ao preço de hoje.",
+        "cap": "Nunca mais de {cap} € num mês de calendário.",
+        "credits": "Isso dá até {credits} créditos adicionais.",
+        "invoice": "Cobrado numa linha própria da próxima fatura, separada do seu plano."
+      },
+      "agree": "Ativar uso adicional",
+      "saved": "Guardado. Pode desligar quando quiser.",
+      "thisMonth": "Uso adicional este mês",
+      "ofCap": "de {cap} €",
+      "agreedRate": "A {price} € por crédito, a tarifa que aceitou.",
+      "capReached": "Atingiu o seu limite. Nada mais será cobrado até o aumentar.",
+      "turnOff": "Desligar uso adicional",
+      "turnOffNote": "Desligar para as cobranças futuras. O que já foi usado este mês continua a ser faturado."
+    },
+    "addons": {
+      "title": "Extras",
+      "description": "Capacidade adicional além do seu plano. Cancele um extra mensal quando quiser.",
+      "perMonth": "/mês",
+      "oneOff": " uma vez",
+      "owned": "Você tem {count}",
+      "notConfigured": "Indisponível nesta instalação ({envVar} não está definido).",
+      "buy": "Comprar",
+      "subscribe": "Adicionar",
+      "cancel": "Cancelar",
+      "oneOffNote": "Um pacote de créditos é atribuído de imediato e não pode ser cancelado.",
+      "items": {
+        "credits_1000": {
+          "name": "1.000 créditos",
+          "grants": "recarga única"
+        },
+        "agents_5": {
+          "name": "Mais 5 agentes",
+          "grants": "aumenta o seu limite de agentes"
+        },
+        "storage_10gb": {
+          "name": "10 GB de armazenamento",
+          "grants": "mais espaço para ficheiros"
+        },
+        "priority": {
+          "name": "Execução prioritária",
+          "grants": "as suas tarefas correm primeiro"
+        }
+      }
+    }
   },
   "dashboard": {
     "overview": {
@@ -1155,7 +1282,19 @@
           "auto": "Decide tu"
         },
         "logoHint": "Sem logótipo, o site mostra o nome do teu negócio como wordmark estilizado — nunca inventa um logótipo por ti.",
-        "logoNeedsUpload": "Carrega primeiro o logótipo como imagem"
+        "logoNeedsUpload": "Carrega primeiro o logótipo como imagem",
+        "photoSourceTitle": "Fotografias — este site vai usar cerca de {count}",
+        "photoSourceChoices": {
+          "own": "Enviar as minhas",
+          "stock": "Fotos de stock",
+          "none": "Sem fotos"
+        },
+        "photoSourceHint": {
+          "own": "As tuas vão primeiro para o hero e a galeria. O que faltar é preenchido com stock.",
+          "stock": "Fotos de stock escolhidas para cada secção.",
+          "none": "Um design feito de tipografia, cor e formas — sem fotografias."
+        },
+        "photoSourceNeedsUpload": "Anexa as tuas fotos acima, ou serão usadas fotos de stock."
       },
       "imageIntro": "O seu logótipo, fotos de produto ou do espaço — o que quiser na página ou que defina o estilo.",
       "regenerateAlreadyUsed": "Já usou a regeneração gratuita deste site. Crie um novo site com outra descrição.",
@@ -1164,7 +1303,14 @@
         "title": "Descreva o site e receba o site",
         "why": "Escreva para que serve e a quem se dirige — as páginas, os textos e o layout saem dessa descrição, e continua a editar por palavras.",
         "example": "Site de uma página para uma padaria, com ementa e horário"
-      }
+      },
+      "pageSelectLabel": "Páginas deste site",
+      "pageHome": "Início",
+      "editPageGone": "Essa página já não faz parte deste site — reabra-o para ver as páginas atuais.",
+      "stockNoticeTitle": "{count} fotos de stock neste site",
+      "stockNoticeBody": "Envia as tuas para um resultado mais autêntico — o Unsplash tem um negócio como o teu, não o teu.",
+      "stockNoticeAction": "Enviar fotos",
+      "storageFull": "Não há espaço para estas imagens — precisas de {needed}, livres {free}."
     },
     "marketplace": {
       "title": "Mercado",
@@ -1469,6 +1615,59 @@
         "stepNoSearch": "Trabalha apenas com o texto da tarefa, sem pesquisa na web.",
         "stepWrite": "Escreve o resultado e confronta-o com o que encontrou.",
         "stepDeliver": "Envia-o por e-mail para {target}, {when}."
+      },
+      "runQueued": "Em fila",
+      "runQueuedHint": "Enviado para processamento em lote, mais barato. O resultado chega dentro de 24 horas, normalmente muito antes.",
+      "depth": {
+        "legend": "Quanto trabalha",
+        "perRun": "por execução",
+        "suggested": "Sugerido",
+        "facts": "{sources} fontes · {steps} passos · cerca de {seconds}s",
+        "runOnce": "Executar uma vez como",
+        "runOnceHint": "Só esta execução. O agendamento continua com {depth}.",
+        "simple": {
+          "title": "Simples",
+          "what": "Uma fonte, resposta curta. Para uma pergunta com uma única resposta certa."
+        },
+        "standard": {
+          "title": "Padrão",
+          "what": "Algumas fontes, cruzadas. Certo para a maioria dos acompanhamentos."
+        },
+        "deep": {
+          "title": "Profundo",
+          "what": "Dez ou mais fontes em duas rodadas de pesquisa, e um relatório completo."
+        }
+      },
+      "templates": {
+        "found": "{count} agente(s) prontos já fazem isso",
+        "use": "Usar este — {credits} créditos",
+        "buildNew": "Criar um novo — {credits} créditos",
+        "adopted": "Agente criado, acompanhando: {subject}",
+        "adoptError": "Não foi possível usar esse modelo. Nada foi criado."
+      },
+      "share": {
+        "open": "Compartilhar a estrutura deste agente",
+        "title": "Compartilhar como modelo",
+        "explainer": "Só a estrutura é publicada: a tarefa com o seu assunto substituído por um espaço, mais o agendamento e a profundidade. Nunca o nome do agente, seu e-mail, ou para onde envia.",
+        "subjectLabel": "Quais palavras da tarefa são específicas suas?",
+        "subjectPlaceholder": "ex. Acme Ltda",
+        "titleLabel": "Título para a biblioteca",
+        "descriptionLabel": "Uma frase que a descreve",
+        "previewLabel": "O que será publicado",
+        "shareButton": "Compartilhar",
+        "sharing": "Compartilhando...",
+        "cancel": "Cancelar",
+        "shared": "Compartilhado. Você pode retirá-lo quando quiser.",
+        "failed": "Não foi possível compartilhar. Nada foi publicado.",
+        "slotNote": "Quem usar preenche {slot} com o próprio assunto.",
+        "refused": {
+          "no_slot": "Escreva as palavras que são suas — são elas que são substituídas e que nunca saem da sua conta.",
+          "subject_still_present": "Essa expressão ainda aparece em outro ponto da tarefa, escrita de outra forma. Edite a tarefa primeiro.",
+          "contains_contact_details": "A tarefa contém um e-mail, um link ou um @usuário. Remova antes de compartilhar.",
+          "contains_numbers": "A tarefa contém um número longo — telefone, conta ou referência. Remova.",
+          "too_short": "O que sobra é curto demais para ajudar alguém.",
+          "too_long": "Essa tarefa é longa demais para compartilhar."
+        }
       }
     },
     "publishing": {
@@ -1876,6 +2075,174 @@
       "opening": "A abrir a Stripe…",
       "connectError": "Não foi possível abrir a configuração. Tenta outra vez.",
       "rules": "A comissão incide sobre pagamentos efetivamente recebidos. Reembolsos e disputas são revertidos. Auto-referências e segundas referências da mesma pessoa não rendem nada."
+    },
+    "search": {
+      "kinds": {
+        "page": "Páginas",
+        "module": "Registros",
+        "file": "Arquivos",
+        "chat": "Conversas",
+        "website": "Sites",
+        "agent": "Agentes",
+        "research": "Pesquisa",
+        "mission": "Missões",
+        "help": "Ajuda"
+      },
+      "filters": {
+        "type": "Tipo",
+        "module": "Módulo",
+        "date": "Data",
+        "all": "Tudo"
+      },
+      "dates": {
+        "any": "Qualquer data",
+        "7d": "7 dias",
+        "30d": "30 dias",
+        "365d": "1 ano"
+      }
+    },
+    "formSubmissions": {
+      "title": "Envios de formulários",
+      "description": "Tudo o que os visitantes enviaram por um formulário nos seus sites.",
+      "deletedWebsite": "Site excluído",
+      "searchPlaceholder": "Pesquisar nomes, e-mails, mensagens...",
+      "filterType": "Filtrar por tipo de formulário",
+      "filterSite": "Filtrar por site",
+      "allTypes": "Todos os tipos",
+      "allSites": "Todos os sites",
+      "countMeta": "{shown} exibidos · {unread} não lidos",
+      "exportCsv": "Exportar CSV",
+      "noName": "Envio",
+      "new": "Novo",
+      "noMatches": "Nada corresponde",
+      "noMatchesBody": "Tente uma pesquisa mais curta ou limpe os filtros.",
+      "delete": "Excluir",
+      "deleteConfirm": "Excluir este envio? Isso não pode ser desfeito.",
+      "deleted": "Envio excluído.",
+      "deleteFailed": "Não foi possível excluir o envio.",
+      "markReadFailed": "Não foi possível marcar como lido.",
+      "consentGiven": "Consentimento dado",
+      "consentMissing": "Nenhum consentimento registrado",
+      "consentRecorded": "Consentiu com: {text}",
+      "consentNoText": "(o texto não foi registrado)",
+      "consentMissingBody": "Este visitante não marcou uma caixa de consentimento, ou o formulário não tinha uma.",
+      "empty": {
+        "title": "Ainda sem envios",
+        "body": "Quando alguém preencher um formulário em um dos seus sites publicados, ele aparece aqui — mesmo que o e-mail de aviso não possa ser enviado."
+      },
+      "types": {
+        "contact": "Contato",
+        "newsletter": "Newsletter",
+        "quote": "Pedido de orçamento",
+        "other": "Outro"
+      },
+      "delivery": {
+        "sent": "E-mail enviado",
+        "no_key": "Nenhum e-mail está sendo enviado: esta implantação não tem chave de API de e-mail.",
+        "unverified_domain": "Os e-mails não chegam: o domínio de envio não está verificado.",
+        "failed": "Alguns e-mails de aviso não puderam ser enviados.",
+        "affected": "{count} envio(s) estão salvos aqui, mas nunca foram enviados a você por e-mail. Nada foi perdido."
+      }
+    },
+    "trading": {
+      "title": "Diário de trading",
+      "subtitle": "As tuas operações, as tuas regras, contadas.",
+      "disclaimerTitle": "Isto é um registo, não um conselho",
+      "disclaimer": "Tudo aqui descreve operações que já fizeste e regras que escreveste. Não é aconselhamento de investimento, não é uma previsão e não diz nada sobre o que qualquer mercado vai fazer. Operar acarreta risco de perda.",
+      "adviceRefused": "Isso seria aconselhamento de investimento ou uma previsão de mercado, que este produto não dá. Pergunta-me antes sobre o teu registo.",
+      "empty": "Ainda não há operações registadas.",
+      "emptyCta": "Adiciona a tua primeira operação",
+      "byInstrument": "Por instrumento",
+      "bySession": "Por sessão",
+      "accounts": {
+        "title": "Contas",
+        "all": "Todas as contas"
+      },
+      "table": {
+        "key": "Nome"
+      },
+      "equity": {
+        "title": "Curva de capital"
+      },
+      "sessions": {
+        "sydney": "Sydney",
+        "tokyo": "Tóquio",
+        "london": "Londres",
+        "new_york": "Nova Iorque",
+        "other": "Fora de sessão"
+      },
+      "stats": {
+        "trades": "Operações",
+        "winRate": "Taxa de acerto",
+        "netPnl": "P&L líquido",
+        "profitFactor": "Fator de lucro",
+        "avgWin": "Ganho médio",
+        "avgLoss": "Perda média",
+        "maxDrawdown": "Drawdown máximo",
+        "avgDuration": "Duração média",
+        "notEnough": "Ainda não há operações suficientes (são precisas 5)",
+        "notEnoughShort": "poucas",
+        "noLosses": "Nenhuma operação perdedora nesta amostra",
+        "beforeCosts": "Estes números são antes de comissões — acrescenta-as às operações para os veres líquidos.",
+        "afterCosts": "Estes números são líquidos das comissões que registaste.",
+        "unscoreable": "{count} operações não puderam ser calculadas (faltam preços ou P&L)"
+      },
+      "pattern": {
+        "title": "Depois de uma perda",
+        "comparison": "As operações abertas logo a seguir a uma perda ganharam {after}% das vezes ({afterCount} operações), contra {baseline}% nas restantes ({baselineCount} operações).",
+        "observationOnly": "É o que mostra o registo. Não diz porquê, e não é uma sugestão do que fazer.",
+        "notEnough": "Ainda não há operações suficientes dos dois lados da comparação."
+      },
+      "rules": {
+        "title": "As tuas regras",
+        "explainer": "Escreve as tuas regras como as dirias. São verificadas em cada operação por aritmética, não pela impressão de um modelo — por isso podes conferir os números tu próprio.",
+        "placeholder": "Máx 2% de risco. Só Londres. RR pelo menos 1:2. Máx 3 operações por dia.",
+        "understood": "Entendido como",
+        "couldNotParse": "Nada disso pôde ser tornado verificável, por isso não será guardado nada. Tenta uma frase mais curta e específica.",
+        "add": "Adicionar regra",
+        "empty": "Ainda não há regras. Escreve uma acima e cada operação será verificada.",
+        "delete": "Eliminar regra",
+        "saved": "{count} regras guardadas",
+        "saveFailed": "Não foi possível guardar essa regra.",
+        "deleteFailed": "Não foi possível eliminar essa regra."
+      },
+      "ruleKinds": {
+        "max_risk_percent": "Risco por operação",
+        "max_trades_per_day": "Operações por dia",
+        "min_risk_reward": "Risco-retorno",
+        "allowed_sessions": "Sessões",
+        "allowed_instruments": "Instrumentos",
+        "max_daily_loss": "Limite de perda diária",
+        "no_trade_after_loss": "Pausa após uma perda",
+        "max_position_size": "Tamanho da posição"
+      },
+      "ruleSummary": {
+        "max_risk_percent": "Arriscar no máximo {percent}% por operação",
+        "max_trades_per_day": "No máximo {count} operações por dia",
+        "min_risk_reward": "Retorno de pelo menos {ratio}x o risco",
+        "allowed_sessions": "Só estas sessões: {sessions}",
+        "allowed_instruments": "Só estes instrumentos: {instruments}",
+        "max_daily_loss": "Parar depois de perder {amount} num dia",
+        "no_trade_after_loss": "Esperar {minutes} minutos depois de uma perda",
+        "max_position_size": "Tamanho da posição no máximo {size}"
+      },
+      "violations": {
+        "count": "Quebrada {count} vezes",
+        "none": "Não quebrada",
+        "uncheckable": "{count} verificações não correram porque faltava às operações um preço, um valor de risco ou uma hora."
+      },
+      "errors": {
+        "bad_request": "Não foi possível ler esse pedido.",
+        "delete_failed": "Não foi possível eliminar essa regra.",
+        "empty_rule": "Escreve primeiro a regra por tuas palavras.",
+        "failed": "Algo correu mal.",
+        "not_understood": "Isso não pôde ser tornado verificável, por isso não foi guardado. Tenta uma frase mais curta e específica.",
+        "rate_limited": "Demasiadas alterações na última hora. Tenta daqui a pouco.",
+        "recheck_failed": "Não foi possível atualizar a verificação de regras.",
+        "save_failed": "Não foi possível guardar essa regra.",
+        "too_long": "Isso é mais longo do que uma regra precisa.",
+        "unauthenticated": "A tua sessão terminou. Inicia sessão e tenta de novo."
+      }
     }
   },
   "module": {
@@ -2089,15 +2456,12 @@
       "company": "Empresa",
       "contentIdeas": "Ideias de conteúdo",
       "customers": "Clientes",
-      "dataSource": "Fonte de dados",
       "description": "Descrição",
       "direction": "Direção",
-      "findings": "Conclusões",
       "followUpEmail": "E-mail de seguimento",
       "hashtags": "Etiquetas",
       "idea": "Ideia",
       "ideaNames": "Nomes das ideias",
-      "language": "Linguagem",
       "launchPlan": "Plano de lançamento",
       "leadName": "Nome do contacto",
       "marketing": "Marketing",
@@ -2173,9 +2537,7 @@
     "placeholders": {
       "longShort": "compra / venda",
       "winLoss": "ganho / perda",
-      "httpsUrl": "https://...",
-      "codingLanguages": "ex.: Python, TypeScript, Go",
-      "dataSources": "ex.: exportação CSV, Stripe, Google Analytics"
+      "httpsUrl": "https://..."
     },
     "deleteConfirm": {
       "competitors": "Eliminar este concorrente? Não é possível anular.",
@@ -2194,8 +2556,6 @@
       "apps": "Eliminar esta aplicação? Não é possível anular.",
       "images": "Eliminar esta imagem? Não é possível anular.",
       "videos": "Eliminar este vídeo? Não é possível anular.",
-      "coding": "Eliminar este pedido de código? Não é possível anular.",
-      "data-analysis": "Eliminar esta análise? Não é possível anular.",
       "presentations": "Eliminar esta nota de apresentação? Não é possível anular.",
       "campaigns": "Eliminar esta campanha? Não é possível anular."
     },
@@ -2280,16 +2640,6 @@
         "why": "O briefing de cada vídeo e até onde chegou, para que o plano de gravações nunca fique só na sua cabeça. Não gera vídeos.",
         "example": "Demo do produto de 30 segundos"
       },
-      "coding": {
-        "title": "As coisas que quer ver construídas",
-        "why": "Descreva a funcionalidade ou a correção, marque a linguagem e guarde todo o backlog num sítio que não seja a sua cabeça. Não escreve código.",
-        "example": "Um script que junta os CSV mensais"
-      },
-      "dataAnalysis": {
-        "title": "As perguntas que os seus dados respondem",
-        "why": "A pergunta, a fonte a que vai e a conclusão quando volta — para que nenhuma resposta seja encontrada duas vezes. Não analisa os teus dados.",
-        "example": "Que canal traz os clientes que ficam"
-      },
       "presentations": {
         "title": "Um sítio para acompanhar as suas apresentações",
         "why": "Anote as apresentações que está a preparar ou que já fez — esta página não gera diapositivos por si. Use o botão acima para adicionar uma.",
@@ -2318,8 +2668,6 @@
       "apps": "Nova aplicação",
       "images": "Nova imagem",
       "videos": "Novo vídeo",
-      "coding": "Nova tarefa de código",
-      "dataAnalysis": "Nova análise",
       "presentations": "Nova nota de apresentação",
       "campaigns": "Nova campanha"
     }
@@ -2503,7 +2851,8 @@
     "termsDescription": "Termos de Serviço do Ionexa AI.",
     "privacyDescription": "Política de Privacidade do Ionexa AI.",
     "cookiesDescription": "Que cookies o Ionexa AI define, o que faz cada um e quanto tempo duram.",
-    "helpDescription": "Respostas às perguntas mais frequentes sobre o Ionexa AI — preços, créditos, sites, agents, privacidade."
+    "helpDescription": "Respostas às perguntas mais frequentes sobre o Ionexa AI — preços, créditos, sites, agents, privacidade.",
+    "costs": "Custos"
   },
   "errors": {
     "retry": "Tentar de novo",
@@ -2597,7 +2946,7 @@
       "e1": "Um café em Salonica com ementa e horários",
       "e2": "O portefólio de um fotógrafo com galeria",
       "e3": "Uma landing page para um SaaS, com preços",
-      "limits": "Uma página, não uma loja nem uma app · Não se liga aos teus sistemas"
+      "limits": "Algumas páginas, não uma loja ou uma app · Não se liga aos teus sistemas"
     },
     "files": {
       "e1": "O que diz o contrato sobre o cancelamento?",
@@ -2633,5 +2982,301 @@
     "showHow": "Mostrar como",
     "installedHere": "O Ionexa está instalado neste dispositivo.",
     "installUnavailable": "O seu navegador ainda não sugeriu a instalação. Também pode usar o menu dele → Instalar aplicação."
+  },
+  "voice": {
+    "listen": "Ouvir",
+    "listenFor": "Ouvir · {credits} créditos",
+    "pause": "Pausa",
+    "speed": "Velocidade de reprodução",
+    "voice": "Voz",
+    "listening": "A ouvir",
+    "listeningHint": "Fala e depois carrega em Parar. Nada é enviado antes de o teres lido.",
+    "startListening": "Fala em vez de escrever",
+    "stopListening": "Parar",
+    "costPerMinute": "{credits} créditos por minuto de fala",
+    "outOfMinutes": "Sem minutos de voz este mês",
+    "states": {
+      "idle": "Pronto",
+      "listening": "A ouvir-te",
+      "thinking": "A pensar",
+      "speaking": "A falar"
+    },
+    "errors": {
+      "bad_request": "Não foi possível ler esse pedido.",
+      "capacity": "O serviço está muito ocupado neste momento. Tenta daqui a pouco.",
+      "denied": "O microfone não foi autorizado. Podes sempre escrever.",
+      "empty": "Não se ouviu nada nessa gravação.",
+      "failed": "A voz não está disponível neste momento. Podes sempre escrever.",
+      "insufficient_credits": "Créditos insuficientes.",
+      "no_recording": "Não foi enviada nenhuma gravação.",
+      "no_speech": "Não foi gravado nada.",
+      "not_configured": "A voz não está configurada nesta instalação.",
+      "not_included": "A voz não está incluída no teu plano.",
+      "out_of_minutes": "Os minutos de voz deste mês acabaram.",
+      "provider_error": "Não foi possível contactar o serviço de voz.",
+      "rate_limited": "Demasiadas gravações na última hora. Tenta daqui a pouco.",
+      "reserve_failed": "Não foi possível reservar créditos para isto.",
+      "too_large": "Essa gravação é demasiado longa.",
+      "unauthenticated": "A tua sessão terminou. Inicia sessão e tenta de novo.",
+      "unsupported": "Este navegador não consegue gravar áudio. Podes sempre escrever.",
+      "unsupported_type": "Esse formato de áudio não é suportado.",
+      "usage_unavailable": "Não foi possível verificar os minutos de voz neste momento."
+    },
+    "permission": {
+      "title": "Antes de o microfone abrir",
+      "pressToStart": "A gravação só começa quando carregas e para quando carregas de novo.",
+      "notStored": "O áudio é enviado para transcrição e não é guardado em lado nenhum — nem por nós, nem depois.",
+      "editFirst": "Lês e corriges o texto antes de ser enviado seja o que for.",
+      "cost": "{credits} créditos por minuto, {minutes} minutos por mês no teu plano.",
+      "allow": "Abrir o microfone",
+      "cancel": "Agora não"
+    },
+    "draft": {
+      "title": "O que foi ouvido",
+      "use": "Usar este texto",
+      "discard": "Descartar",
+      "notSent": "Não foi enviado nada. Corrige o texto e envia-o tu."
+    },
+    "voices": {
+      "neutral": "Neutra",
+      "warm": "Quente",
+      "deep": "Grave",
+      "bright": "Clara"
+    },
+    "conversation": {
+      "title": "Conversa sem mãos",
+      "start": "Falar",
+      "close": "Terminar a conversa",
+      "speak": "Carrega e fala",
+      "interrupt": "Interromper",
+      "tapToSpeak": "Carrega em qualquer sítio e fala. Deixa de ouvir sozinho quando paras.",
+      "tapToInterrupt": "Carrega em qualquer sítio para interromper e voltar a falar.",
+      "hint": "Fala normalmente — a vez termina quando paras.",
+      "empty": "Tudo o que é dito aparece aqui também como texto."
+    },
+    "settings": {
+      "description": "Fala em vez de escrever e ouve as respostas. Escrever e ler nunca são retirados — cada controlo de voz fica ao lado do texto, não no lugar dele.",
+      "exhausted": "Sem minutos este mês. Renovam-se no dia um.",
+      "notConfigured": "A voz não está configurada nesta instalação, por isso os botões de microfone e Ouvir não aparecem.",
+      "notIncluded": "A voz não está incluída no teu plano. Tudo aqui continua a poder ser escrito e lido.",
+      "perMinute": "{credits} créditos por minuto",
+      "privacy": "A gravação só começa quando carregas. O áudio é enviado para transcrição e não é guardado em lado nenhum — guardamos os segundos e mais nada.",
+      "remaining": "Faltam {minutes} minutos",
+      "speakLabel": "Ouvir a leitura",
+      "title": "Voz",
+      "transcribeLabel": "Falar com ele",
+      "used": "{used} de {limit} minutos usados este mês"
+    }
+  },
+  "dataAnalysis": {
+    "title": "Análise de dados",
+    "description": "Carrega uma folha de cálculo. Cada estatística é calculada sobre o ficheiro inteiro — nunca adivinhada.",
+    "upload": {
+      "title": "Carregar um ficheiro",
+      "description": "CSV ou Excel, até 8 MB. Ler um ficheiro não custa nada.",
+      "button": "Escolher ficheiro",
+      "working": "A ler…",
+      "done": "Lidas {rows} linhas",
+      "failed": "Não foi possível ler esse ficheiro.",
+      "tooLarge": "Esse ficheiro é demasiado grande — o limite são 8 MB."
+    },
+    "summary": {
+      "counts": "{rows} linhas · {columns} colunas",
+      "duplicates": "{count} linhas exatamente duplicadas",
+      "truncated": "Lemos as primeiras 50.000 linhas. Os gráficos descrevem essas, não o ficheiro todo.",
+      "ragged": "{count} linhas não bateram certo com o cabeçalho — confirma o separador usado ao gravar."
+    },
+    "columns": {
+      "name": "Coluna",
+      "type": "Tipo",
+      "filled": "Preenchidas",
+      "distinct": "Distintos",
+      "stats": "Intervalo",
+      "missing": "em falta"
+    },
+    "types": {
+      "number": "número",
+      "integer": "inteiro",
+      "date": "data",
+      "boolean": "sim/não",
+      "text": "texto",
+      "empty": "vazia"
+    },
+    "analyse": {
+      "button": "Encontrar padrões",
+      "working": "A procurar…",
+      "done": "Análise pronta",
+      "failed": "A análise não terminou.",
+      "unavailable": "Não foi possível contactar o serviço de IA. Não foi cobrado nada."
+    },
+    "findings": {
+      "title": "O que lá está",
+      "none": "Ainda nada analisado. As colunas e os gráficos acima são calculados do próprio ficheiro."
+    },
+    "ask": {
+      "title": "Perguntar aos dados",
+      "description": "A tua pergunta transforma-se numa consulta que corre sobre as linhas reais. Os números vêm do ficheiro, não do modelo.",
+      "placeholder": "Que região vendeu mais?",
+      "button": "Perguntar",
+      "working": "A perguntar…",
+      "failed": "Não foi possível responder a essa pergunta.",
+      "matched": "{matched} de {total} linhas corresponderam",
+      "rowCount": "{count} linhas"
+    },
+    "legacy": {
+      "title": "As tuas notas antigas",
+      "description": "Escritas na versão anterior desta página, quando era uma tabela de notas. Mantidas tal como estavam."
+    },
+    "chart": {
+      "nothingToPlot": "Não há nada para desenhar aqui.",
+      "truncated": "A mostrar os {count} maiores; o resto fica agrupado ou de fora."
+    }
+  },
+  "coding": {
+    "title": "Programar com IA",
+    "description": "Cinco coisas que faz e quatro que não faz. Tudo trabalha exatamente sobre o texto da caixa.",
+    "code": "Código",
+    "copy": "Copiar",
+    "copied": "Copiado",
+    "language": "Linguagem",
+    "targetLanguage": "Converter para",
+    "useWorkspace": "Usar os meus outros módulos como contexto",
+    "run": "Executar",
+    "running": "A trabalhar…",
+    "result": "Resultado",
+    "limits": {
+      "title": "O que NÃO faz",
+      "no_repository": "Não tem repositório. Não vê o teu código nem o ficheiro ao lado do que colaste.",
+      "no_execution": "Não executa nada. Nem o teu código, nem o que escreve, nem os testes que escreve.",
+      "no_commits": "Não faz commits, ramos nem pull requests.",
+      "no_whole_project": "Não constrói um projeto. Uma função, um ficheiro, uma colagem.",
+      "later": "Esses quatro são a próxima versão, não esta."
+    },
+    "operations": {
+      "generate": {
+        "label": "Escrever um excerto",
+        "description": "Descreve o que precisas e recebe uma função, com os pressupostos e as falhas ditos.",
+        "placeholder": "Uma função que recebe uma lista de encomendas e devolve a margem por cliente…"
+      },
+      "explain": {
+        "label": "Explica isto",
+        "description": "Cola código e recebe o que ele faz, por ordem, nomeando as linhas de que fala.",
+        "placeholder": "Cola o código que queres explicado…"
+      },
+      "find_bugs": {
+        "label": "Encontrar erros",
+        "description": "Cada achado nomeia a entrada ou o estado que o provoca. Um achado sem caso que falhe é uma preferência.",
+        "placeholder": "Cola o código que queres verificado…"
+      },
+      "convert": {
+        "label": "Converter",
+        "description": "Reescreve-o noutra linguagem, com a lista de tudo o que NÃO transita.",
+        "placeholder": "Cola o código que queres converter…"
+      },
+      "write_tests": {
+        "label": "Escrever testes",
+        "description": "O caso normal, os limites e as formas de falhar. Não só o caminho feliz.",
+        "placeholder": "Cola o código que queres testar…"
+      }
+    },
+    "errors": {
+      "tooLong": "Isso tem mais de {limit} caracteres. Isto trabalha sobre um ficheiro, não um projeto.",
+      "unavailable": "Não foi possível contactar o serviço de IA. Não foi cobrado nada.",
+      "failed": "Não resultou — tenta outra vez."
+    },
+    "history": {
+      "title": "Histórico",
+      "search": "Procurar",
+      "folder": "Pasta",
+      "allFolders": "Todas as pastas",
+      "empty": "Ainda não há nada aqui.",
+      "input": "Entrada",
+      "output": "Saída",
+      "importedNote": "nota anterior",
+      "failed": "falhou"
+    }
+  },
+  "finance": {
+    "title": "Finanças",
+    "description": "Cada número é calculado a partir de linhas reais, ou diz porque não pode ser.",
+    "needsInput": "Falta: {fields}",
+    "needsHistory": "Precisa de {need} meses de histórico — temos {have}.",
+    "noChangeYet": "ainda sem variação",
+    "notEnoughDays": "{days} dia(s) de histórico até agora.",
+    "provenance": "O histórico começou no dia em que isto entrou: {months} mês(es) de dados de subscritores e {days} instantâneos diários. Nada é preenchido retroativamente — um número retroativo seriam os preços de hoje aplicados a um passado que ninguém registou.",
+    "inputs": {
+      "marketing_spend": "gasto em marketing",
+      "fixed_costs": "custos fixos",
+      "cash_balance": "saldo em caixa"
+    },
+    "trends": {
+      "mrr30": "MRR, 30 dias",
+      "mrr90": "MRR, 90 dias",
+      "aiCost30": "Custo de IA, 30 dias",
+      "subscribers90": "Subscritores pagantes, 90 dias"
+    },
+    "form": {
+      "title": "Os teus números de {month}",
+      "description": "Três coisas que esta base de dados não pode saber. Deixa um campo vazio e as métricas que dele precisam vão dizê-lo, em vez de calcular a partir de zero.",
+      "marketing": "Gasto em marketing",
+      "marketingHint": "Tudo o que foi gasto para ganhar clientes este mês.",
+      "fixed": "Custos fixos",
+      "fixedHint": "Salários, alojamento, ferramentas — tudo o que não é marketing nem IA.",
+      "cash": "Saldo em caixa",
+      "cashHint": "O que está no banco no fim do mês.",
+      "save": "Guardar",
+      "saving": "A guardar…",
+      "saved": "Guardado",
+      "saveError": "Não foi possível guardar — tenta outra vez."
+    },
+    "metrics": {
+      "mrr": "MRR",
+      "arr": "ARR",
+      "arpu": "Receita por utilizador",
+      "grossMarginPercent": "Margem bruta",
+      "aiCostPerUserEur": "Custo de IA por utilizador",
+      "costPerSuccessfulTaskEur": "Custo por tarefa concluída",
+      "churnPercent": "Cancelamento",
+      "retentionPercent": "Retenção",
+      "nrrPercent": "Retenção líquida de receita",
+      "ltvEur": "Valor vitalício",
+      "cacEur": "Custo de aquisição de cliente",
+      "paybackMonths": "Período de retorno",
+      "ruleOf40": "Regra dos 40",
+      "burnEur": "Consumo mensal",
+      "runwayMonths": "Autonomia"
+    }
+  },
+  "routing": {
+    "title": "Encaminhamento de modelos",
+    "description": "Que modelo atendeu cada pedido nos últimos 30 dias, quanto custou e quanto o encaminhamento poupou.",
+    "empty": "Ainda não foi registada nenhuma decisão de encaminhamento. Esta tabela preenche-se quando os pedidos começarem a passar pelo encaminhador — não mostra zeros, não mostra nada.",
+    "decisions": "Decisões",
+    "charged": "Cobrado aos clientes",
+    "absorbed": "Absorvido por nós",
+    "absorbedNote": "tentativas baratas falhadas que não foram cobradas ao cliente",
+    "saved": "Poupado pela regra de cache",
+    "savedNote": "despromoções recusadas por ficarem mais caras",
+    "model": "Modelo",
+    "overrides": "Substituições",
+    "overrideSaving": "Poupança da substituição",
+    "learnedTitle": "O que o encaminhador aprendeu",
+    "learnedIntro": "Taxa de sucesso por capacidade e modelo em 30 dias. Um modelo abaixo de {rate}% deixa de ser escolhido para essa capacidade — mas só a partir de {samples} execuções, porque duas falhas em duas não são prova.",
+    "learnedEmpty": "Nada conclusivo ainda. Até um par de capacidade e modelo ter execuções suficientes, o encaminhamento mantém-se no seu mapa estático de níveis.",
+    "runs": "{rate}% em {samples} execuções",
+    "routedUp": "encaminhado para cima",
+    "notEnough": "ainda insuficiente"
+  },
+  "publishing": {
+    "badge": {
+      "includedInPlan": "O seu plano já remove o emblema — não há nada para comprar.",
+      "removedThisMonth": "Emblema removido este mês.",
+      "cancelledKeepsMonth": "A renovação automática está desligada. O emblema fica oculto até ao fim do mês e depois regressa.",
+      "stopRenewing": "Parar a renovação",
+      "offer": "Remova o emblema «Made with Ionexa» deste site por {credits} créditos por mês (cerca de {eur} €).",
+      "affordable": "Tem {balance} créditos — cerca de {months} mês(es) para este site.",
+      "notEnough": "Tem {balance} créditos e precisa de {needed}.",
+      "remove": "Remover o emblema"
+    }
   }
 }

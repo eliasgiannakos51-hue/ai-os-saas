@@ -9,7 +9,7 @@ import {
   achievedMarginOnAccount,
   effectiveCreditPriceEurForAccount,
 } from "@/lib/billing/credit-formula";
-import { getPurchasedPackCreditPriceEur } from "@/lib/billing/credits";
+import { getPurchasedPackCreditPriceEur, grantCredits } from "@/lib/billing/credits";
 import { resolveMarginFor } from "@/lib/billing/margin-policy";
 import type { Plan } from "@/lib/billing/plans";
 import { sendMarginAlertEmail } from "@/lib/email/margin-alert";
@@ -35,9 +35,35 @@ import type { CostAccumulator } from "@/lib/billing/cost-accumulator";
 export const RESERVATION_TTL_MINUTES = 60;
 
 export type ReservationResult =
-  | { ok: true; reservationId: string; reserved: number }
-  | { ok: false; reason: "insufficient"; available: number; needed: number }
+  | {
+      ok: true;
+      reservationId: string;
+      reserved: number;
+      /** Set only when part of this hold was paid for with overage, so
+       *  the surface that ran the action can say so rather than showing a
+       *  balance that silently went up. */
+      overage?: { credits: number; amountEur: number; pricePerCreditEur: number };
+    }
+  | {
+      ok: false;
+      reason: "insufficient";
+      available: number;
+      needed: number;
+      /** WHY OVERAGE DID NOT COVER THIS. "not_enabled" is the case that
+       *  earns a dialog — the user has never been asked. "cap_reached"
+       *  and "would_exceed_cap" earn a different one: they agreed, and
+       *  their own limit is what stopped it. Without this the UI can only
+       *  say "out of credits" and the opt-in can never be offered at the
+       *  moment it is relevant. */
+      overage: OverageRefusal;
+    }
   | { ok: false; reason: "error"; message: string };
+
+export type OverageRefusal = {
+  reason: "not_enabled" | "consent_out_of_date" | "cap_reached" | "would_exceed_cap" | "nothing_to_charge" | "unavailable";
+  spentEur: number;
+  capEur: number | null;
+};
 
 /**
  * Holds `credits` against the user's balance.
@@ -78,17 +104,144 @@ export async function reserveCredits(
 
     const row = Array.isArray(data) ? data[0] : data;
     if (!row?.reservation_id) {
+      const available = Number(row?.available ?? 0);
+      // OUT OF CREDITS IS WHERE OVERAGE LIVES — here, in the ONE function
+      // every paid action already goes through, and nowhere else. Putting
+      // it in the twenty-four call sites would mean twenty-four chances
+      // to charge somebody who never agreed.
+      const topUp = await tryOverage({ userId, action, needed: credits, available, metadata });
+      if (topUp.ok) {
+        const retry = await admin.rpc("reserve_credits", {
+          p_user_id: userId,
+          p_credits: credits,
+          p_action: action,
+          p_expires_at: expiresAt,
+          p_metadata: { ...metadata, overage_ledger_id: topUp.ledgerId },
+        });
+        const retryRow = Array.isArray(retry.data) ? retry.data[0] : retry.data;
+        if (!retry.error && retryRow?.reservation_id) {
+          return {
+            ok: true,
+            reservationId: String(retryRow.reservation_id),
+            reserved: credits,
+            overage: {
+              credits: topUp.credits,
+              amountEur: topUp.amountEur,
+              pricePerCreditEur: topUp.pricePerCreditEur,
+            },
+          };
+        }
+        // THE CREDITS WERE GRANTED AND THE HOLD STILL FAILED. They stay
+        // on the balance and the charge stands: the customer has what
+        // they paid for, and the next attempt uses it. Refunding here
+        // would need a second write that could fail in the same way.
+        logApiError("billing:reserveCredits", new Error("Overage top-up did not unblock the reserve"), {
+          userId,
+          action,
+          credits,
+          ledgerId: topUp.ledgerId,
+        });
+      }
       return {
         ok: false,
         reason: "insufficient",
-        available: Number(row?.available ?? 0),
+        available,
         needed: credits,
+        overage: topUp.ok
+          ? { reason: "unavailable", spentEur: 0, capEur: null }
+          : topUp.refusal,
       };
     }
     return { ok: true, reservationId: String(row.reservation_id), reserved: credits };
   } catch (err) {
     logApiError("billing:reserveCredits", err, { userId, action, credits, stage: "unhandled" });
     return { ok: false, reason: "error", message: "Could not reserve credits." };
+  }
+}
+
+type OverageTopUp =
+  | { ok: true; ledgerId: string; credits: number; amountEur: number; pricePerCreditEur: number }
+  | { ok: false; refusal: OverageRefusal };
+
+/**
+ * The overage attempt, in the order that decides who loses if the process
+ * dies half way.
+ *
+ *   1. ASK. decideOverage says no unless the account has consented under
+ *      the current terms, set a cap, and has room under it for the WHOLE
+ *      shortfall. A part-charged action is a half-finished thing somebody
+ *      paid for.
+ *   2. WRITE THE LEDGER ROW — the money owed — BEFORE the credits exist.
+ *      A crash here bills for work that did not happen: visible, and a
+ *      refund. The other order loses the charge for work that DID happen,
+ *      silently, and nothing would ever notice.
+ *   3. GRANT the credits, idempotently on the ledger row's own id, so a
+ *      retry cannot grant twice.
+ *   4. WARN at 80% and 100%, after the number moved rather than on a
+ *      nightly sweep that tells somebody at 3am about lunchtime.
+ *
+ * Never throws. Any failure is a refusal, and a refusal is the behaviour
+ * the account had before overage existed.
+ */
+async function tryOverage(params: {
+  userId: string;
+  action: string;
+  needed: number;
+  available: number;
+  metadata: Record<string, unknown>;
+}): Promise<OverageTopUp> {
+  const unavailable: OverageTopUp = {
+    ok: false,
+    refusal: { reason: "unavailable", spentEur: 0, capEur: null },
+  };
+  try {
+    const shortfall = Math.max(0, Math.ceil(params.needed - params.available));
+    if (shortfall <= 0) return unavailable;
+
+    const { checkOverage, recordOverage, sendOverageWarnings, loadOverageState } = await import(
+      "@/lib/billing/overage-store"
+    );
+    const { decision, state } = await checkOverage({ userId: params.userId, shortfall });
+    if (!decision.allowed) {
+      return {
+        ok: false,
+        refusal: { reason: decision.reason, spentEur: decision.spentEur, capEur: decision.capEur },
+      };
+    }
+
+    const ledgerId = await recordOverage({
+      userId: params.userId,
+      credits: decision.credits,
+      pricePerCreditEur: decision.pricePerCreditEur,
+      amountEur: decision.amountEur,
+      feature: params.action,
+    });
+    // A LEDGER WRITE THAT FAILED STOPS THE ACTION. Doing paid work with no
+    // record that it was paid for is the one outcome there is no way back
+    // from.
+    if (!ledgerId) return unavailable;
+
+    const { granted } = await grantCredits(
+      params.userId,
+      decision.credits,
+      "overage",
+      `Usage overage: ${decision.credits} credits at EUR${decision.pricePerCreditEur}/credit`,
+      { purchased: true, idempotencyKey: `overage:${ledgerId}` }
+    );
+    if (!granted) return unavailable;
+
+    await sendOverageWarnings({ userId: params.userId, state: await loadOverageState(params.userId) });
+
+    return {
+      ok: true,
+      ledgerId,
+      credits: decision.credits,
+      amountEur: decision.amountEur,
+      pricePerCreditEur: decision.pricePerCreditEur,
+    };
+  } catch (err) {
+    logApiError("billing:overage", err, { userId: params.userId, stage: "top_up" });
+    return unavailable;
   }
 }
 

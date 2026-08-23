@@ -112,10 +112,23 @@ const DECLARED = {
     billing: "settled",
     note: "V3 Autonomous Agents. One forced-tool-use call that designs the agent; recorded onto the same CostAccumulator as the clarification pre-check and settled once by api/agents/build. A build that returns an unusable configuration still SETTLES rather than releasing — the tokens were spent.",
   },
-  "src/lib/agents/agent-runner.ts": {
-    calls: 2,
+  "src/lib/ai/providers/adapters/anthropic.ts": {
+    calls: 1,
     billing: "settled",
-    note: "V3 Autonomous Agents. The optional web_search research pass plus the main run, both recorded onto one accumulator per execution. Retries record onto the SAME accumulator, so a run that tried three times is charged for three attempts — which is why executeAgent reserves AGENT_MAX_ATTEMPTS x the single-run estimate.",
+    note:
+      "V4 #12. THE SHARED ADAPTER, and the one entry in this table that is not a feature. " +
+      "It is the Anthropic half of lib/ai/providers/, so the call here is made ON BEHALF OF whichever " +
+      "purpose asked — and that is a real weakening of this file's premise, which is that every call " +
+      "site declares how it bills. One adapter now serves many callers, and a caller that forgets to " +
+      "record its usage would bill nothing while this row still said 'settled'. " +
+      "THE HOLE IS CLOSED BELOW rather than noted: the check after this table requires every " +
+      "runCompletion() call site to feed the returned usage to a CostAccumulator. The adapter itself " +
+      "settles nothing and reserves nothing; it returns tokens and the caller pays for them.",
+  },
+  "src/lib/agents/agent-runner.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V4 #12: 2 -> 1 direct calls. The main generation moved onto lib/ai/providers/ (runCompletion), so only the optional web_search research pass still speaks to the SDK here — it needs the server-side search tool, which no other provider in the catalog offers, and an adapter that answered without searching would return a confident unsourced report. Both halves still record onto ONE accumulator per execution. V3 note, unchanged: the optional web_search research pass plus the main run, both recorded onto one accumulator per execution. Retries record onto the SAME accumulator, so a run that tried three times is charged for three attempts — which is why executeAgent reserves AGENT_MAX_ATTEMPTS x the single-run estimate.",
   },
   "src/lib/jobs/handlers/file-ask.ts": {
     calls: 3,
@@ -141,6 +154,11 @@ const DECLARED = {
     calls: 1,
     billing: "settled",
     note: "V3 Task 16 Instant Value. Phrases findings the DETECTORS already computed — the patterns are found by lib/insights/detectors.ts, and this call is given the numbers and asked for grammar. Every number it writes is checked against the evidence and a narration that invents one is discarded in favour of the detector's own wording, so a model failure degrades the prose and never the correctness. Settled by api/insights/generate; when the detectors find nothing this call is never made and nothing is charged.",
+  },
+  "src/lib/agents/template-fill.ts": {
+    calls: 1,
+    billing: "settled",
+    note: "V4 #22 Template library. ONE forced-tool-use call on the smallest model (Haiku), reached from api/agents/templates/adopt. It fills a template's {subject} slot from the user's own sentence and names the agent in their language — it never writes the task, the schedule or the search flag, all of which come from the template. That is what makes adopting genuinely cheaper than building rather than a discount on the same work: the full builder is a Sonnet call deciding ten fields, this is a Haiku call deciding four, and the margin multiplier is identical (agent_build, via ACTION_TO_FEATURE). Settled by the adopt route AFTER the agent row exists, so a fill whose insert then failed charges nothing; a call that threw before any response records nothing on the accumulator and the reservation is released instead. NO call at all — and nothing charged — when the user typed the subject themselves or ANTHROPIC_API_KEY is absent, which is why the route creates the agent either way.",
   },
   "src/lib/lead-classification.ts": {
     calls: 1,
@@ -176,6 +194,38 @@ check("no declared site has disappeared", vanished, []);
 for (const [file, meta] of Object.entries(DECLARED)) {
   if (!found[file]) continue;
   check(`${file}: ${meta.calls} call(s)`, found[file], meta.calls);
+}
+
+// ---------------------------------------------------------------------
+// THE HOLE THE SHARED ADAPTER OPENED, CLOSED.
+//
+// Until V4 #12 every entry above was a FEATURE, and "this file declares
+// how it bills" meant something. lib/ai/providers/adapters/anthropic.ts
+// is not a feature: it makes the call on behalf of whoever asked, so the
+// declaration has to move to the ASKERS. A call site that invokes
+// runCompletion() and never records the usage bills nothing at all, and
+// the table above would still read 'settled'.
+//
+// So every runCompletion() caller is inventoried from the source and
+// required to feed the result to a CostAccumulator. Not a proof that the
+// amount is right — sections 3 and 4 do the margin arithmetic — but a
+// proof that the tokens reach the one settlement path at all, which is
+// the property the adapter could otherwise have quietly removed.
+console.log("\n== 1b. every runCompletion() caller pays for what it used ==");
+{
+  const callers = walk("src")
+    .map((f) => f.split(path.sep).join("/"))
+    .filter((f) => /\brunCompletion\(/.test(readFileSync(f, "utf8")))
+    .filter((f) => !f.includes("lib/ai/providers/"));
+  check("at least one feature uses the provider layer", callers.length > 0, true);
+  const silent = callers.filter((f) => {
+    const text = readFileSync(f, "utf8");
+    // The usage must reach an accumulator: `costs.record(...)`,
+    // `costs.recordBatch(...)` or `addBreakdown(...)` with the outcome's
+    // usage. Anything else is a call whose tokens are never charged.
+    return !/costs\.(record|recordBatch|addBreakdown)\([^)]*outcome\.usage/s.test(text);
+  });
+  check("no runCompletion() call site drops its usage on the floor", silent, []);
 }
 
 console.log("\n== 2. the billing mode of each site ==");

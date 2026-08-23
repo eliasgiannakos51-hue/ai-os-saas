@@ -95,6 +95,13 @@ const EXPECTED_CALL_SITES = [
   "src/app/api/agents/route.ts",
   "src/app/api/agents/build/route.ts",
   "src/app/api/agents/[id]/route.ts",
+  // FOUR NOW. Adopting a template creates an ACTIVE agent in one step —
+  // no preview, no separate confirm — so it is a fourth way a row
+  // becomes active and needs the same cap. This gate is what caught it:
+  // the route was written with the check, and the "no OTHER file calls
+  // it" assertion below is what proved the inventory had to grow rather
+  // than the route being wrong.
+  "src/app/api/agents/templates/adopt/route.ts",
 ];
 for (const f of EXPECTED_CALL_SITES) {
   check(`${f} calls checkAgentActivationCap`,

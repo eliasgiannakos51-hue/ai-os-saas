@@ -22,11 +22,17 @@ import {
   MAX_ATTACHMENT_IMAGES,
 } from "@/lib/create-attachment-image";
 import { ThinkingIndicator } from "@/components/ui/thinking-indicator";
+import { VoiceInput } from "@/components/voice/voice-input";
+import { useVoiceAvailability } from "@/components/voice/voice-availability";
 
 export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
   const t = useTranslations("dashboard.createAnything");
   const tKey = useTranslations();
   const tCreate = useTranslations("dashboard.create");
+  // Only decides how much room the box leaves on the right: with no
+  // transcription provider VoiceInput draws nothing, and padding for a
+  // button that was never there is dead space.
+  const { transcribeAvailable: micHere } = useVoiceAvailability();
   const { submit, loading } = useCreateAnything();
   const [input, setInput] = useState("");
   const [focused, setFocused] = useState(false);
@@ -205,9 +211,24 @@ export function CreateChat({ showHeading = true }: { showHeading?: boolean }) {
             maxLength={20000}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            className="relative z-[1] min-h-32 max-h-[60vh] w-full resize-y rounded-2xl border-0 bg-panel/85 px-4 py-4 pr-28 text-base text-foreground outline-none backdrop-blur-sm transition-all duration-200 placeholder:text-muted"
+            className={`relative z-[1] min-h-32 max-h-[60vh] w-full resize-y rounded-2xl border-0 bg-panel/85 px-4 py-4 text-base text-foreground outline-none backdrop-blur-sm transition-all duration-200 placeholder:text-muted ${
+              micHere ? "pr-[9.5rem]" : "pr-28"
+            }`}
             autoFocus
           />
+          {/* THE MICROPHONE, BESIDE THE BOX. Its transcript lands in the
+              textarea to be read and corrected — Create spends real
+              credits on the first press of Send, so a mishearing that
+              went straight through would cost money. */}
+          <div className="absolute bottom-3 right-[6.75rem] z-[2]">
+            <VoiceInput
+              compact
+              disabled={loading}
+              onTranscript={(text) =>
+                setInput((current) => (current.trim() ? `${current.trim()} ${text}` : text))
+              }
+            />
+          </div>
           {imageFiles.length < MAX_ATTACHMENT_IMAGES && (
             <button
               type="button"

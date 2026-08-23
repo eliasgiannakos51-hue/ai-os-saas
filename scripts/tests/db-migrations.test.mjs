@@ -430,7 +430,9 @@ if (!DB) {
   // A RATCHET, updated when a migration deliberately adds a table — most
   // recently 20260817000002 (agent_runs.would_have_charged_credits'
   // migration touches no new table, so that one didn't move this number;
-  // 20260814's delivery-channels migration is what took 70 to 72). It
+  // 20260814's delivery-channels migration is what took 70 to 72;
+  // 20260823's cost_alert_log took 72 to 73; 20260824's search_index
+  // took 73 to 74; 20260826's agent_templates took 74 to 75). It
   // stayed 70 through two migrations that changed it, in two different
   // files, which is exactly the failure a ratchet exists to prevent and
   // exactly what a fresh count on every run below stops from happening
@@ -446,7 +448,17 @@ if (!DB) {
   // moved neither this number nor credit-flow.dbtest's. That is exactly
   // the failure the comment below describes happening again, and it is
   // corrected here rather than carried forward.
-  check(`77 tables`, tables === 77, `got ${tables}`);
+  // 20260827's voice_usage took 75 to 76; 20260828's ai_provider_log
+  // took 76 to 77; 20260830's trading journal and 20260831's bank/crypto
+  // tables took 77 to 83; 20260901's notification tables took 83 to 87.
+  // 20260903's revenue engine took 91 to 98; 20260904's routing_decisions
+  // took 98 to 99.
+  // 20260905's site_badge_removals took 99 to 100.
+  // MEASURED ON THE MERGED TREE, not added. Each branch counted against
+  // its own migration set; summing two ratchets is arithmetic across two
+  // different schemas. Built from bootstrap-supabase.sql plus all 43
+  // migrations on a real Postgres 16: 105.
+  check(`105 tables`, tables === 105, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 
@@ -466,10 +478,24 @@ if (!DB) {
   // createAdminClient(), and production_errors is additionally behind an
   // isAdminEmail() gate on the page that shows it.
   const DENY_ALL_BY_DESIGN = {
+    routing_decisions:
+      "which model served which request, what it cost and what the failed cheap attempt cost US — the platform's own routing ledger, not the customer's; the owner-only page reads it via service role",
     rate_limit_log: "login and cron throttling — a user who could read it could time their retries",
     account_deletion_requests: "erasure queue; the requester already knows, nobody else may",
     daily_ai_spend_tracking: "the platform's own spend ledger, not the customer's",
     production_errors: "stack traces and affected user ids; admin-only page reads it via service role",
+    cost_alert_log:
+      "what every customer's spend triggered, with the numbers; owner-only page reads it via service role, and a customer who could read it would learn the shape of the whole business",
+    // V4 #26. The four tables the financial dashboard is built from. Each
+    // is deny-all rather than owner-policied on purpose: "owner" is
+    // decided in TypeScript by isAdminEmail (the same gate the margin
+    // report uses), and adding a second notion of owner to the database
+    // would be a second thing to keep in step — one that, if it drifted,
+    // would hand a customer the whole company's revenue.
+    subscription_events: "who upgraded, downgraded and cancelled; a customer reading it learns every other customer's plan changes",
+    subscriber_months: "per-account monthly revenue — the single most sensitive table in the product",
+    revenue_snapshots: "the company's daily MRR, ARR and AI cost; nothing a customer has any claim on",
+    business_inputs: "marketing spend, fixed costs and the bank balance, typed in by the owner",
   };
   const noPolicy = sql(`select coalesce(string_agg(c.relname, ', '), '') from pg_class c
       join pg_namespace ns on ns.oid = c.relnamespace
@@ -539,7 +565,46 @@ if (!DB) {
   // search_headline / search_fold / immutable_unaccent are granted to
   // authenticated on purpose — they derive identity from auth.uid() and
   // read nothing RLS does not already gate.
-  const ALLOWED = ["search_headline", "search_fold", "immutable_unaccent"];
+  // search_all and search_query join them for the same reason: search_all
+  // is SECURITY INVOKER, so the RLS policy on search_index is what scopes
+  // every row it can see, and search_query is a pure text-to-tsquery
+  // transform that touches no table at all. They are how a signed-in
+  // browser searches; granting them to service_role only would mean
+  // routing every keystroke through an admin client, which is the
+  // arrangement that actually leaks.
+  const ALLOWED = [
+    "search_headline",
+    "search_fold",
+    "immutable_unaccent",
+    "search_all",
+    "search_query",
+    // match_agent_templates is how a signed-in browser finds a ready-made
+    // agent. SECURITY INVOKER, so the agent_templates select policy is
+    // what scopes it — and that policy already lets every signed-in user
+    // read every template, because a library nobody can read is not one.
+    "match_agent_templates",
+    // immutable_join is a pure array_to_string wrapper, needed only
+    // because the built-in is STABLE and a generated column requires
+    // IMMUTABLE. It reads nothing, touches no table, and is granted
+    // because the generated column on agent_templates is evaluated in
+    // the caller's context. Same reasoning as immutable_unaccent above.
+    "immutable_join",
+    // NOT record_template_use: it is SECURITY DEFINER and writes to a
+    // table nobody may update, so it is service_role only and must stay
+    // off this list.
+    //
+    // voice_usage_this_month is how the settings screen reads "12 of 90
+    // minutes used". SECURITY INVOKER, so the voice_usage select policy
+    // (auth.uid() = user_id) is what scopes it — passing somebody else's
+    // uuid returns zeroes, which scripts/tests/voice.dbtest.mjs asserts
+    // against a real database rather than assuming.
+    //
+    // NOT consume_voice_seconds: it is SECURITY DEFINER and writes the
+    // ledger the monthly cap is enforced against, so it is service_role
+    // only and must stay off this list. A signed-in user who could call
+    // it could consume somebody else's month.
+    "voice_usage_this_month",
+  ];
   const unexpected = leaky
     ? leaky.split(", ").filter((s) => !ALLOWED.some((a) => s.startsWith(`${a}(`)))
     : [];

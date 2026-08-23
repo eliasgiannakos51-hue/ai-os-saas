@@ -10,6 +10,7 @@ import type { ModuleConfig } from "@/lib/modules";
 import { useToast } from "@/components/toast/toast-context";
 import { useCredits } from "@/components/credits/credits-context";
 import { TextActionsTextarea } from "@/components/text-actions/text-actions-textarea";
+import { VoiceInput } from "@/components/voice/voice-input";
 import { SuggestedLinksPrompt } from "@/components/entity-links/suggested-links-prompt";
 import { optionLabelKey } from "@/lib/modules";
 import { ApiError, isApiError, requestJson } from "@/lib/errors/api-error";
@@ -253,13 +254,34 @@ export function GenericAddForm({
                   {field.required && <span className="text-red-400"> *</span>}
                 </span>
                 {field.type === "textarea" ? (
-                  <TextActionsTextarea
-                    required={field.required}
-                    value={form[field.key]}
-                    onChange={(v) => updateValue(field.key, v.slice(0, MAX_TEXTAREA_LENGTH))}
-                    className="input min-h-32 resize-y"
-                    placeholder={field.placeholderKey ? tKey(field.placeholderKey) : undefined}
-                  />
+                  /* EVERY MODULE FORM, not a hand-picked few: the fields
+                     here are generated from the module config, so one
+                     microphone in this branch is a microphone on all of
+                     them. Dictated text lands in the field and is still
+                     saved by the same Save button. */
+                  <div className="flex items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <TextActionsTextarea
+                        required={field.required}
+                        value={form[field.key]}
+                        onChange={(v) => updateValue(field.key, v.slice(0, MAX_TEXTAREA_LENGTH))}
+                        className="input min-h-32 resize-y"
+                        placeholder={field.placeholderKey ? tKey(field.placeholderKey) : undefined}
+                      />
+                    </div>
+                    <VoiceInput
+                      compact
+                      onTranscript={(text) =>
+                        updateValue(
+                          field.key,
+                          (form[field.key].trim()
+                            ? `${form[field.key].trim()} ${text}`
+                            : text
+                          ).slice(0, MAX_TEXTAREA_LENGTH)
+                        )
+                      }
+                    />
+                  </div>
                 ) : field.type === "select" ? (
                   <select
                     required={field.required}

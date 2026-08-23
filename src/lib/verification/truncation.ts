@@ -39,6 +39,10 @@ export type ModelText = {
  * build one without constructing an entire Message, and so a streaming
  * accumulator with the same two fields works unchanged.
  */
+/** The one string that means "cut off at the ceiling". Named so the two
+ *  entry points below cannot disagree about it. */
+export const TRUNCATION_STOP_REASON = "max_tokens";
+
 export function modelText(response: {
   content: Array<{ type: string; text?: string }> | Anthropic.ContentBlock[];
   stop_reason?: string | null;
@@ -48,7 +52,28 @@ export function modelText(response: {
     .map((block) => block.text ?? "")
     .join("");
   const stopReason = response.stop_reason ?? null;
-  return { text, truncated: stopReason === "max_tokens", stopReason };
+  return { text, truncated: stopReason === TRUNCATION_STOP_REASON, stopReason };
+}
+
+/**
+ * The same rule, for a completion that has ALREADY been flattened to text.
+ *
+ * The provider layer (lib/ai/providers/complete.ts) returns
+ * `{ text, stopReason }` rather than Anthropic's content blocks, so
+ * modelText cannot read it — and the agent runner needs both: the
+ * provider abstraction that routes across vendors, AND the guarantee that
+ * a run cut off at its token ceiling is never delivered as a finished
+ * result. Two copies of "truncated means stop_reason === max_tokens"
+ * would drift, and the drift would be silent: one caller marking a
+ * severed report and another emailing it clean. So this is a second DOOR
+ * onto the same rule, not a second rule.
+ */
+export function modelTextFrom(completion: { text: string; stopReason: string | null }): ModelText {
+  return {
+    text: completion.text,
+    truncated: completion.stopReason === TRUNCATION_STOP_REASON,
+    stopReason: completion.stopReason,
+  };
 }
 
 /**

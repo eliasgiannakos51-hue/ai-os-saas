@@ -22,6 +22,8 @@ import { formatDateTime } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { MAX_TOPIC_CHARS } from "@/lib/research/research-limits";
 import { ExamplePrompts } from "@/components/ai/example-prompts";
+import { VoiceInput } from "@/components/voice/voice-input";
+import { VoicePlayer } from "@/components/voice/voice-player";
 
 type Question = { question: string; why: string };
 type Source = { title: string; url: string };
@@ -282,16 +284,28 @@ export function ResearchWorkspace({
         <label htmlFor="research-topic" className="text-sm font-semibold text-foreground">
           {t("topicLabel")}
         </label>
-        <textarea
-          id="research-topic"
-          ref={topicRef}
-          value={topic}
-          onChange={(e) => setTopic(e.target.value)}
-          placeholder={t("topicPlaceholder")}
-          rows={3}
-          maxLength={MAX_TOPIC_CHARS}
-          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
-        />
+        <div className="flex items-start gap-2">
+          <textarea
+            id="research-topic"
+            ref={topicRef}
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            placeholder={t("topicPlaceholder")}
+            rows={3}
+            maxLength={MAX_TOPIC_CHARS}
+            className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted"
+          />
+          {/* Dictating a research subject and correcting it before
+              pressing Plan — the transcript never starts a run. */}
+          <VoiceInput
+            compact
+            onTranscript={(text) =>
+              setTopic((current) =>
+                (current.trim() ? `${current.trim()} ${text}` : text).slice(0, MAX_TOPIC_CHARS)
+              )
+            }
+          />
+        </div>
         {/* Three real research questions. Deep Research is the feature
             most often mistaken for "a chat that searches" — an example
             is the fastest way to show it wants a SUBJECT, not a query. */}
@@ -511,6 +525,20 @@ export function ResearchWorkspace({
               why it needs the notice on screen and not only in the
               Document copy's markdown. */}
           <AiGeneratedNotice variant="block" />
+
+          {/* "LISTEN" TO THE REPORT. Headings and bodies only — the
+              source list is a column of URLs and reading it aloud is a
+              minute of credits spent on punctuation. */}
+          <VoicePlayer
+            text={[
+              open.topic,
+              ...(open.sections ?? []).map((section) =>
+                [section.heading, section.body].filter(Boolean).join(". ")
+              ),
+            ]
+              .filter(Boolean)
+              .join("\n\n")}
+          />
 
           {(open.sections ?? []).map((section, i) => (
             <div key={`${section.heading}-${i}`} className="space-y-1">

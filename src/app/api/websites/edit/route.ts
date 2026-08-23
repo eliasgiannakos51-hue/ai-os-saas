@@ -35,6 +35,11 @@ import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
 import { findInventedNumbers } from "@/lib/website-invented-numbers";
+import { normalisePages } from "@/lib/publishing/website-pages";
+import { parsePhotoSource } from "@/lib/website-design-brief";
+import { enforceSeoHead } from "@/lib/seo/head";
+import { enforceImageAltText } from "@/lib/seo/alt-text";
+import { applyEditedDocument, resolveEditTarget, HOME_INDEX } from "@/lib/publishing/page-edit-target";
 
 export const dynamic = "force-dynamic";
 
@@ -43,7 +48,8 @@ export const dynamic = "force-dynamic";
 // this single request directly, so it had NO explicit maxDuration at
 // all before this (silently inheriting the platform default, as low as
 // 10s on some tiers) despite calling editWebsiteHtml with the same
-// WEBSITE_MAX_TOKENS (32000) ceiling as full generation, now also
+// WEBSITE_MAX_TOKENS ceiling as full generation (32000 when this was
+// written, 128000 since ce6e60a), now also
 // potentially downloading/resizing new reference images and resolving
 // image placeholders afterward. This was the single biggest real gap
 // found in this pass's timeout audit — a large edit (long change
@@ -77,6 +83,10 @@ export async function POST(request: Request) {
     let websiteId: string;
     let changeRequest: string;
     let referenceImagePaths: string[];
+    // WHICH page. Absent (or the literal "home") means the home
+    // document, which is what every existing caller sends — a site with
+    // no sub-pages behaves exactly as it did.
+    let pageSlugRaw: string;
     try {
       const body = await request.json();
       websiteId = typeof body?.websiteId === "string" ? body.websiteId : "";
@@ -87,6 +97,7 @@ export async function POST(request: Request) {
       referenceImagePaths = Array.isArray(body?.referenceImagePaths)
         ? body.referenceImagePaths.filter((p: unknown): p is string => typeof p === "string").slice(0, MAX_REFERENCE_IMAGES)
         : [];
+      pageSlugRaw = typeof body?.pageSlug === "string" ? body.pageSlug.trim().toLowerCase() : "";
     } catch {
       return NextResponse.json({ ok: false, error: "Invalid request body." }, { status: 400 });
     }
@@ -111,7 +122,10 @@ export async function POST(request: Request) {
     const breakerCheck = await checkAiCallAllowed(
       user.id,
       "website_edit",
-      fingerprintRequest(websiteId, changeRequest)
+      // The PAGE is part of what makes this request distinct: "make the
+      // heading bigger" on /services is not a repeat of the same words on
+      // the home page, and the breaker would otherwise treat it as one.
+      fingerprintRequest(websiteId, `${pageSlugRaw}\n${changeRequest}`)
     );
     if (!breakerCheck.allowed) {
       return NextResponse.json({ ok: true, edited: false, rateLimited: true, message: breakerCheck.reason });
@@ -119,13 +133,51 @@ export async function POST(request: Request) {
 
     const { data: website, error: fetchError } = await supabase
       .from("user_websites")
-      .select("id, html_content, description")
+      .select("id, html_content, description, pages")
       .eq("id", websiteId)
       .single();
 
     if (fetchError || !website) {
       return NextResponse.json({ ok: false, error: "Website not found." }, { status: 404 });
     }
+
+    // WHICH DOCUMENT IS BEING EDITED.
+    //
+    // Resolved here, before the edit lock below, so a request naming a
+    // page this site does not have is a 404 that leaves the site
+    // editable rather than one that locks it for two minutes.
+    //
+    // The home page is the site's html_content; every other page lives
+    // in the `pages` array. "home" is a RESERVED slug (it is not a URL
+    // under /s/<subdomain>/), so it is matched literally here instead of
+    // being handed to validatePageSlug, which would reject it.
+    const { pages: sitePages } = normalisePages(website.pages);
+    const target = resolveEditTarget(website.html_content, sitePages, pageSlugRaw);
+    if (!target.ok) {
+      // A MACHINE-READABLE REASON BESIDE THE SENTENCE. The English here
+      // is developer-facing: the workspace only ever offers pages the
+      // site actually has, so a caller reaching this either hand-built
+      // the request or is looking at a stale list. The client renders a
+      // TRANSLATED sentence off `reason` (dashboard.websiteBuilder.
+      // editPageGone) — see the workspace's handleEdit — rather than
+      // showing either of these strings to a user.
+      return target.reason === "invalid_slug"
+        ? NextResponse.json(
+            { ok: false, reason: "invalid_page", error: "That is not a page address." },
+            { status: 400 }
+          )
+        : NextResponse.json(
+            { ok: false, reason: "unknown_page", error: "That page is not part of this site." },
+            { status: 404 }
+          );
+    }
+    const targetIndex = target.index;
+    // THE ONE DOCUMENT THE EDIT SEES. Every use of the site's HTML below
+    // — the estimate, the model call, the safety passes — reads this,
+    // never website.html_content, because sending the home page and
+    // saving the result onto a sub-page is precisely the bug this
+    // resolution exists to prevent.
+    const sourceHtml = target.html;
 
     // Idempotency guard — a real, atomic DB-level claim, not a check-
     // then-act race: this single UPDATE only succeeds (returns a row) if
@@ -201,7 +253,7 @@ export async function POST(request: Request) {
       "websiteEdit",
       {
         model: WEBSITE_BUILDER_MODEL,
-        inputChars: website.html_content.length + changeRequest.length,
+        inputChars: sourceHtml.length + changeRequest.length,
         imageCount: referenceImagePaths.length,
         planSlug: plan?.slug ?? null,
       },
@@ -260,19 +312,29 @@ export async function POST(request: Request) {
     // registered with Unsplash after the edit is SAVED, and a safety-
     // rejected edit returns below without ever saving.
     let images: ImageResolution = { html: "", used: [], halted: null };
+    // THE CHOICE SURVIVES AN EDIT. Without this, an owner who asked for a
+    // page with no photographs gets one the first time somebody asks for
+    // any change — the edit prompt is not the generation prompt, and the
+    // resolver would happily fill a placeholder the model invented.
+    const photoSource = parsePhotoSource(website.description ?? "");
     try {
       void recordAiCallForDailySpend(estimate.estimatedCredits);
-      const editResult = await editWebsiteHtml(apiKey, website.html_content, changeRequest, referenceImages, formEndpointUrl, costs);
+      const editResult = await editWebsiteHtml(apiKey, sourceHtml, changeRequest, referenceImages, formEndpointUrl, costs);
       updatedHtml = editResult.html;
       usedCheapPatch = editResult.usedCheapPatch;
-      images = await resolveWebsiteImagePlaceholders(updatedHtml);
+      images = await resolveWebsiteImagePlaceholders(updatedHtml, { photoSource });
       updatedHtml = images.html;
 
       // Same enforcement as generation: an edit that adds a nav item can
       // reintroduce <a href="/about"> just as easily as a fresh generation
       // can, and the result is the same — the customer's menu pointing at
       // our login page. See lib/website-link-safety.ts.
-      updatedHtml = makeGeneratedLinksSafe(updatedHtml).html;
+      // The site's OTHER pages, so an edit that touches the navigation
+      // does not flatten it — see the generate path for what happens
+      // without this. Still relative: publish resolves them.
+      updatedHtml = makeGeneratedLinksSafe(updatedHtml, {
+        pageSlugs: sitePages.map((pg) => pg.slug),
+      }).html;
 
       // THE PATH THIS EXISTS FOR. editWebsiteHtml returns a whole new
       // document, and a model rewriting a section routinely drops the
@@ -338,6 +400,25 @@ export async function POST(request: Request) {
           message: `This edit was blocked by our safety review and wasn't applied: ${allIssueDescriptions.join("; ")}. No credits were charged — your website is unchanged.`,
         });
       }
+
+      // FINDABLE ON THE WEB, re-established after every edit.
+      //
+      // This is the path where SEO actually goes missing. An edit
+      // returns a WHOLE new document, and a model rewriting a section
+      // routinely drops the <meta name="description"> or the alt on a
+      // photo it kept — the same failure mode as the Unsplash credits
+      // above, with the same silence: the page looks identical and the
+      // search listing degrades weeks later. The prompt asks; this makes
+      // it true. Idempotent, so an edit that changed nothing about the
+      // head produces the same head.
+      //
+      // AFTER the safety review, so a rejected edit never had this work
+      // done on it, and so the review reads the model's document rather
+      // than ours.
+      {
+        const withAlt = enforceImageAltText(updatedHtml);
+        updatedHtml = enforceSeoHead(withAlt.html).html;
+      }
     } catch (err) {
       logApiError("/api/websites/edit", err, { stage: "anthropic_call" });
       await releaseReservation(user.id, reservationId);
@@ -354,9 +435,19 @@ export async function POST(request: Request) {
       .eq("website_id", websiteId);
     const versionNumber = nextVersionNumber(existingVersionCount ?? 0);
 
+    // ONE EDITED DOCUMENT, WRITTEN BACK WHERE IT CAME FROM. A sub-page
+    // edit leaves html_content untouched and replaces one entry of the
+    // pages array; a home edit does the opposite. Writing updatedHtml
+    // into html_content unconditionally would put a sub-page's HTML on
+    // the front page — the site would still render, which is what makes
+    // it worth being explicit about.
+    const saved = applyEditedDocument(website.html_content, sitePages, targetIndex, updatedHtml);
+    const nextPages = saved.pages;
+    const nextHomeHtml = saved.htmlContent;
+
     const { data: updatedRecord, error: updateError } = await supabase
       .from("user_websites")
-      .update({ html_content: updatedHtml })
+      .update({ html_content: nextHomeHtml, pages: nextPages.length > 0 ? nextPages : null })
       .eq("id", websiteId)
       .select()
       // maybeSingle, not single: the site can be DELETED while the edit
@@ -444,12 +535,18 @@ export async function POST(request: Request) {
       );
     }
 
+    // THE WHOLE SITE, not the page that changed. A version is what
+    // rollback restores, and restoring one edited sub-page over a site
+    // whose other pages have since moved on is not a previous state of
+    // anything.
     const { error: versionError } = await supabase.from("website_versions").insert({
       user_id: user.id,
       website_id: websiteId,
       version_number: versionNumber,
-      html_content: updatedHtml,
-      change_description: changeRequest,
+      html_content: nextHomeHtml,
+      pages: nextPages.length > 0 ? nextPages : null,
+      change_description:
+        targetIndex === HOME_INDEX ? changeRequest : `[${sitePages[targetIndex].slug}] ${changeRequest}`,
     });
     if (versionError) {
       logApiError("/api/websites/edit", versionError, { stage: "insert_version" });

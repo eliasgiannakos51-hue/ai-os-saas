@@ -150,3 +150,25 @@ export function publishedSiteUrl(subdomain: string, siteUrl: string, domain?: st
   }
   return `${siteUrl.replace(/\/+$/, "")}/s/${subdomain}`;
 }
+
+/**
+ * The absolute PATH a published site is served under — "/s/acme", or "/"
+ * when a wildcard domain puts the site on its own host.
+ *
+ * Derived from publishedSiteUrl rather than rebuilt, so the two can never
+ * disagree about which shape is configured. It is what turns a page link
+ * into something a browser resolves the same way from every page of the
+ * site: a nav written relative is right on /s/acme/services and wrong on
+ * /s/acme, and no amount of care in the prompt fixes that.
+ */
+export function publishedSiteBasePath(subdomain: string): string {
+  const url = publishedSiteUrl(subdomain, "https://example.invalid", process.env.PUBLISHED_SITE_DOMAIN);
+  try {
+    const path = new URL(url).pathname.replace(/\/+$/, "");
+    return path === "" ? "/" : path;
+  } catch {
+    // Unreachable with a validated subdomain; a link left relative is a
+    // far better failure than one pointing at a path built from a throw.
+    return "/";
+  }
+}

@@ -119,7 +119,19 @@ function walk(dir, out = []) {
 }
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 const ROUTES = walk("src/app/api").map((f) => f.split(path.sep).join("/"));
-const readsBodyLanguage = ROUTES.filter((f) => /body\?\.language|body\.language/.test(stripComments(readFileSync(f, "utf8"))));
+// WIDENED, not narrowed. `body.language` is the shape this check was
+// written for, but a route that renamed the field to replyLanguage or
+// outputLanguage would answer in the interface locale just as wrongly and
+// slip straight past. Neither name is in use today, so adding them costs
+// nothing now and closes the rename that would otherwise look like a fix.
+//
+// A route whose `language` is a PROGRAMMING language (api/coding/run) is
+// not exempted here — it calls the field `codeLanguage`, because two
+// different meanings behind one field name is exactly how somebody later
+// wires it into resolveLanguage.
+const readsBodyLanguage = ROUTES.filter((f) =>
+  /body\??\.(language|replyLanguage|outputLanguage)\b/.test(stripComments(readFileSync(f, "utf8")))
+);
 console.log(`        ${readsBodyLanguage.length} routes read a language off the request body`);
 
 // ONE documented exception, stated rather than silently skipped.

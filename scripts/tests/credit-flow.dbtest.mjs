@@ -136,7 +136,30 @@ console.log("== 0. the database really is the one the migrations build ==");
 // each just repeated what the last one said.
 // 77 (see db-migrations.test.mjs, which carries the same ratchet and the
 // reasons it moved).
-eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 77);
+// 75 -> 76: V4 #19/#2 added public.voice_usage (the monthly minute
+// ledger, supabase/migrations/20260827000000_voice_usage.sql).
+// 76 -> 77: V4 #12 added public.ai_provider_log (which provider served
+// which call, and why).
+// 77 -> 83: V4 #14 added trading_accounts, trading_rules and
+// rule_violations; V4 #15 added bank_connections, bank_transactions and
+// crypto_wallets.
+// 91 -> 98: V4 #25 + #26 — subscription_events, subscriber_months,
+// revenue_snapshots, business_inputs, usage_overage_settings,
+// usage_overage_ledger and account_addons. The first four are the HISTORY
+// auth.users cannot hold; the last three are the revenue engine.
+// 87 -> 91: V4 #19 + #20 turned two trackers into two tools —
+// data_analyses, data_analysis_charts, data_analysis_questions and
+// code_sessions. The old tracker tables are untouched and still counted.
+// 83 -> 87: V4 #18 added notification_settings, notification_preferences,
+// notification_channels and notification_events.
+// 98 -> 99: V4 #34 + #35 added routing_decisions — every routing
+// decision and what came of it, which is what the router learns from.
+// 99 -> 100: badge removal with credits added site_badge_removals.
+// MEASURED ON THE MERGED TREE, not added. Each branch counted against
+// its own migration set; summing two ratchets is arithmetic across two
+// different schemas. Built from bootstrap-supabase.sql plus all 43
+// migrations on a real Postgres 16: 105.
+eq("tables in public", Number(sql(`select count(*) from pg_tables where schemaname='public'`)), 105);
 eq(
   "the credit functions exist",
   Number(

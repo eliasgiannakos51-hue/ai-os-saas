@@ -242,6 +242,24 @@ check("no component compares user text with toLowerCase().includes()", offenders
   //   lib/import/paste.ts        every option and synonym is a fixed
   //                              ASCII trading/accounting term
   //                              ("buy", "tp", "stop loss").
+  //   lib/seo/facts.ts          a URL's .host against a fixed list of
+  //                              social networks. URL.host is punycode
+  //                              for any non-ASCII domain, so there is
+  //                              no accent left to fold by the time it
+  //                              is read.
+  //   lib/seo/head.ts            an HTML attribute NAME ("description",
+  //                              "og:title") against the fixed list of
+  //                              tags the SEO pass owns. These are
+  //                              spec-defined ASCII identifiers, not
+  //                              anybody's text — a meta tag named with
+  //                              an accent is not a meta tag we own.
+  //
+  //   NOT ADDED: lib/website-link-safety.ts, which this sweep flagged
+  //   because a new function bound `slug` to a lowered value while an
+  //   OLD one compared a differently-derived `slug` with includes().
+  //   Two meanings, one name, one file — the variable was renamed
+  //   rather than excluded, because the report was about the code being
+  //   confusing and it was right.
   //   lib/publishing/subdomain.ts  DNS subdomains cannot contain
   //                              accented characters at all;
   //                              suggestSubdomain() already NFD-strips
@@ -261,6 +279,8 @@ check("no component compares user text with toLowerCase().includes()", offenders
     "src/lib/import/coerce.ts",
     "src/lib/import/paste.ts",
     "src/lib/publishing/subdomain.ts",
+    "src/lib/seo/facts.ts",
+    "src/lib/seo/head.ts",
   ];
   const realOffenders = indirectOffenders.filter(
     (o) => !ASCII_BY_CONSTRUCTION.some((f) => o === f || o.startsWith(f + ":"))

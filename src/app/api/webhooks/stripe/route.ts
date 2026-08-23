@@ -4,6 +4,8 @@ import { diagLog } from "@/lib/diag";
 import type Stripe from "stripe";
 import { createStripeClient } from "@/lib/stripe/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { recordSubscriptionEvent } from "@/lib/billing/subscription-log";
+import { ADDONS, isAddonSlug } from "@/lib/billing/addons";
 import { getPlanFromPriceId, getTeamSeatPriceId } from "@/lib/billing/price-ids";
 import {
   getCreditPack,
@@ -53,7 +55,10 @@ async function syncSubscriptionToUser(
    */
   eventType: string,
   subscriptionHint?: Stripe.Subscription,
-  fallbackSupabaseUserId?: string
+  fallbackSupabaseUserId?: string,
+  /** Stripe's own event id, so the revenue log is idempotent: a retried
+   *  webhook must not become a second cancellation in the churn count. */
+  stripeEventId?: string
 ) {
   const subscription =
     subscriptionHint ?? (await stripe.subscriptions.retrieve(subscriptionId));
@@ -176,6 +181,28 @@ async function syncSubscriptionToUser(
   // on every event would have granted a fresh month every time an annual
   // customer opened the billing portal. The gate is what makes the annual
   // path safe, so they are not independent — this is why both are here.
+  // THE REVENUE LOG, written here because this is the one place both the
+  // old tier and the new one are known — a second later the old value is
+  // gone from auth.users forever. It never throws and its failure never
+  // touches the entitlement above it: a missing row is a gap in a report,
+  // and a failed entitlement write is a customer who paid and cannot use
+  // what they paid for.
+  const previousInterval = (userData.user.user_metadata?.billing_interval as string | undefined) ?? null;
+  const previousSeats =
+    userData.user.user_metadata?.seat_count === undefined
+      ? null
+      : Number(userData.user.user_metadata.seat_count) || 0;
+  await recordSubscriptionEvent({
+    userId: supabaseUserId,
+    fromTier: previousTier,
+    toTier: planSlug,
+    fromInterval: previousInterval,
+    toInterval: isActive ? interval : "month",
+    fromSeats: previousSeats,
+    toSeats: seatCount,
+    stripeEventId,
+  });
+
   const decision = creditSyncDecision({ eventType, previousTier, nextTier: planSlug });
   if (decision === "reset") {
     try {
@@ -193,6 +220,83 @@ async function syncSubscriptionToUser(
     }
   }
   diagLog(`[webhook-diag] creditSync decision=${decision} eventType=${eventType} previousTier=${previousTier ?? "none"} nextTier=${planSlug}`);
+}
+
+/**
+ * An add-on the customer just bought (api/billing/addons).
+ *
+ * IDEMPOTENT ON STRIPE'S EVENT ID. Stripe retries; a retried
+ * checkout.session.completed must not grant five more agents twice. The
+ * unique constraint on account_addons.stripe_event_id is what enforces
+ * it — a duplicate insert fails, and that failure is the guard working
+ * rather than an error.
+ */
+async function grantAddon(session: Stripe.Checkout.Session, eventId: string) {
+  const supabaseUserId = session.metadata?.supabase_user_id;
+  const slug = session.metadata?.addon_slug;
+  if (!supabaseUserId || !isAddonSlug(slug)) {
+    logApiError("/api/webhooks/stripe", new Error("addon session missing metadata"), {
+      stage: "grant_addon",
+      eventId,
+    });
+    return;
+  }
+
+  const admin = createAdminClient();
+  // For a recurring add-on, the subscription item is what cancelling has
+  // to remove later. Read from the session's line items rather than
+  // guessed at.
+  let subscriptionItemId: string | null = null;
+  try {
+    if (session.mode === "subscription" && session.subscription) {
+      const subscriptionId =
+        typeof session.subscription === "string" ? session.subscription : session.subscription.id;
+      const stripe = createStripeClient();
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      const priceId = process.env[ADDONS[slug].priceEnvVar];
+      const item = subscription.items.data.find((i) => i.price.id === priceId);
+      subscriptionItemId = item?.id ?? null;
+    }
+  } catch (err) {
+    logApiError("/api/webhooks/stripe", err, { stage: "grant_addon_item", slug });
+  }
+
+  const { error } = await admin.from("account_addons").insert({
+    user_id: supabaseUserId,
+    addon_slug: slug,
+    quantity: 1,
+    status: "active",
+    stripe_subscription_item_id: subscriptionItemId,
+    stripe_event_id: eventId,
+  });
+  if (error && !String(error.message ?? "").includes("duplicate key")) {
+    logApiError("/api/webhooks/stripe", error, { stage: "grant_addon", slug, supabaseUserId });
+    return;
+  }
+
+  // A CREDIT PACK ADD-ON GRANTS CREDITS, and it does so through the same
+  // path the standalone credit pack uses — one place where credits are
+  // added, one place for the arithmetic to be wrong.
+  const grants = ADDONS[slug].grants;
+  if (grants.kind === "credits") {
+    try {
+      // KEYED ON THE SESSION, exactly like the standalone credit pack
+      // above, and for the same reason: one purchase is one session, but
+      // Stripe can deliver several EVENTS that refer to it.
+      const { granted } = await grantCredits(
+        supabaseUserId,
+        grants.amount,
+        "purchase",
+        `Add-on: ${slug}`,
+        { idempotencyKey: `stripe_addon:${session.id}`, purchased: true }
+      );
+      if (!granted) {
+        diagLog(`[webhook-diag] duplicate addon credit grant suppressed session=${session.id} event=${eventId}`);
+      }
+    } catch (err) {
+      logApiError("/api/webhooks/stripe", err, { stage: "grant_addon_credits", slug });
+    }
+  }
 }
 
 // One-time credit pack purchase (api/credits/checkout, mode: "payment") —
@@ -325,17 +429,28 @@ export async function POST(request: Request) {
             subscriptionId,
             event.type,
             undefined,
-            session.metadata?.supabase_user_id
+            session.metadata?.supabase_user_id,
+            event.id
           );
         } else if (session.mode === "payment") {
-          await grantPurchasedCredits(session, event.id);
+          // An add-on pack and a credit pack are both one-off payments,
+          // and they are told apart by the metadata the checkout put on
+          // the session — not by the amount, which two products could
+          // share.
+          if (session.metadata?.addon_slug) await grantAddon(session, event.id);
+          else await grantPurchasedCredits(session, event.id);
         }
+        // A SUBSCRIPTION CHECKOUT CAN ALSO BE AN ADD-ON. The branch above
+        // syncs the plan; a session carrying addon_slug is a recurring
+        // add-on bought on top of it, and without this it would be paid
+        // for and never granted.
+        if (session.metadata?.addon_slug) await grantAddon(session, event.id);
         break;
       }
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const subscription = event.data.object as Stripe.Subscription;
-        await syncSubscriptionToUser(stripe, subscription.id, event.type, subscription);
+        await syncSubscriptionToUser(stripe, subscription.id, event.type, subscription, undefined, event.id);
         break;
       }
       case "invoice.paid": {
@@ -346,7 +461,7 @@ export async function POST(request: Request) {
         const subscriptionRef = invoice.parent?.subscription_details?.subscription;
         const subscriptionId = typeof subscriptionRef === "string" ? subscriptionRef : subscriptionRef?.id;
         if (subscriptionId) {
-          await syncSubscriptionToUser(stripe, subscriptionId, event.type);
+          await syncSubscriptionToUser(stripe, subscriptionId, event.type, undefined, undefined, event.id);
         }
         // Affiliate commission accrues from the invoice that was actually
         // PAID, not from the plan's list price — a discounted or prorated

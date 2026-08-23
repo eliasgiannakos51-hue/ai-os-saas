@@ -59,6 +59,11 @@ const {
   genericShapeSignals,
   jaccard,
   sequenceSimilarity,
+  visualSimilarity,
+  typePairing,
+  spacingScale,
+  motionSignature,
+  paletteCharacter,
   designDecisions,
   decisionsHonoured,
 } = await import("./lib/site-fingerprint.mjs");
@@ -219,18 +224,40 @@ if (missingBlock.length) {
   console.log(`  WARNING: ${missingBlock.join(", ")} produced no DESIGN DECISIONS block at all.`);
 }
 
+// WHAT EACH PAGE ACTUALLY LOOKS LIKE, printed before any score. Five
+// rounds of this were argued from summary numbers; the raw values are
+// short enough to read and they are what the numbers are computed from.
+console.log("\n  what each page actually looks like\n");
+for (const r of results) {
+  const m = motionSignature(r.html);
+  const c = paletteCharacter(r.html);
+  console.log(`    ${r.slug}`);
+  console.log(`      fonts    ${typePairing(r.html).join(" + ") || "(none loaded)"}`);
+  console.log(`      colour   ${c.ground} ground, ${c.achromatic ? "achromatic" : c.hues.join("/")}`);
+  console.log(`      spacing  ${spacingScale(r.html).join(", ") || "(none >= 24px)"}`);
+  console.log(`      motion   ${m.durationsMs.join("ms, ") || "(static)"}${m.durationsMs.length ? "ms" : ""}` +
+    `${m.distancesPx.length ? " / " + m.distancesPx.join("px, ") + "px" : ""}`);
+}
+
 console.log("\n  pairwise similarity (0 = nothing in common, 1 = identical)\n");
-console.log("    pair                          structure  fonts  palette");
+console.log("    pair                          structure | fonts colour space motion  VISUAL");
 let worstStructure = 0;
+let worstVisual = 0;
 for (let i = 0; i < results.length; i++) {
   for (let j = i + 1; j < results.length; j++) {
     const s = sequenceSimilarity(results[i].structure, results[j].structure);
-    const f = jaccard(results[i].fonts, results[j].fonts);
-    const p = jaccard(results[i].palette, results[j].palette);
+    // THE FOUR AXES A PERSON SEES FIRST, reported SEPARATELY from the
+    // structural score and never averaged into it. Folding them together
+    // is how five previous rounds shipped a good headline number while
+    // the complaint stayed true: a 0.2 structural score hid a 0.95 visual
+    // one, because nothing was computing the second.
+    const v = visualSimilarity(results[i].html, results[j].html);
     worstStructure = Math.max(worstStructure, s);
+    worstVisual = Math.max(worstVisual, v.overall);
     console.log(
       `    ${(results[i].slug + " vs " + results[j].slug).padEnd(29)} ` +
-        `${s.toFixed(2).padEnd(10)} ${f.toFixed(2).padEnd(6)} ${p.toFixed(2)}`
+        `${s.toFixed(2).padEnd(9)} | ${v.fonts.toFixed(2).padEnd(5)} ${v.colour.toFixed(2).padEnd(6)} ` +
+        `${v.spacing.toFixed(2).padEnd(5)} ${v.motion.toFixed(2).padEnd(6)}  ${v.overall.toFixed(2)}`
     );
   }
 }
@@ -246,6 +273,20 @@ console.log(
         ? "similar skeletons; look at the pages before accepting this."
         : "genuinely different shapes.")
 );
+// THE SECOND VERDICT, and the one the sixth report was about. Target
+// < 0.3, stated by the brief. Two pages can have different section
+// orders and still be the same product to a visitor if they are the same
+// colour, in the same fonts, at the same density, moving at the same
+// speed.
+console.log(
+  `  VERDICT: worst VISUAL similarity ${worstVisual.toFixed(2)} — ` +
+    (worstVisual > 0.7
+      ? "SAME LOOK. The structure varies and nobody can tell."
+      : worstVisual > 0.3
+        ? "above the 0.3 target; open the pages side by side."
+        : "genuinely different looks.")
+);
+
 const anyGeneric = results.filter((r) => Object.values(r.generic).filter(Boolean).length >= 3);
 if (anyGeneric.length) {
   console.log(

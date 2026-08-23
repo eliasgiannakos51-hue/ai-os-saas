@@ -366,21 +366,92 @@ const editRoute = readFileSync("src/app/api/websites/edit/route.ts", "utf8");
 // file stayed green. So the assertion is now about the DOCUMENT: the
 // variable that gets stored must be reassigned from the enforcement's
 // own result.
-for (const [label, src, variable] of [
-  ["generation", generateRoute, "htmlContent"],
-  ["edit", editRoute, "updatedHtml"],
-]) {
-  ok(`${label} imports the enforcement pass`, /enforceUnsplashAttribution/.test(src));
+// GENERATION NOW ENFORCES OVER AN ARRAY, because a site can have more
+// than one page and a pass that only ever saw the home page would let a
+// sub-page ship an uncredited photograph. The shape differs between the
+// two routes, so each is asserted against the shape it actually has —
+// what is common is that the enforced result is what gets stored.
+ok("generation imports the enforcement pass", /enforceUnsplashAttribution/.test(generateRoute));
+ok(
+  "generation enforces on EVERY document, not just the home page",
+  /const attributions = cleaned\.map\(\(doc\) => enforceUnsplashAttribution\(doc\)\);/.test(generateRoute)
+);
+ok(
+  "...and feeds each enforced document back",
+  /cleaned\[i\] = attributions\[i\]\.html;/.test(generateRoute)
+);
+// THE WHOLE CHAIN, not its first link. Generation now runs
+// cleaned -> stripped -> optimised -> stored, and the old assertion
+// stopped at `stripped` — so a later stage could have dropped the credit
+// and this file would have stayed green while pointing at the stage that
+// added it.
+ok(
+  "...and what is stored comes from that array, through every stage after it",
+  /const stripped = cleaned\.map\(/.test(generateRoute) &&
+    /const optimised = stripped\.map\(/.test(generateRoute) &&
+    /htmlContent = optimised\[0\];/.test(generateRoute) &&
+    /html: optimised\[i \+ 1\]/.test(generateRoute)
+);
+
+// AND THE STAGES THEMSELVES DO NOT EAT THE CREDIT. Executed, because
+// "the pass runs afterwards" says nothing about what it does: the SEO
+// pass rewrites the <head> and touches every <img> on the page, which is
+// exactly where a credit and its data-unsplash-* provenance live.
+{
+  const seoHead = await loadTs("src/lib/seo/head.ts");
+  const altText = await loadTs("src/lib/seo/alt-text.ts");
+  const credited = `<!DOCTYPE html><html lang="en"><head><title>Acme</title></head><body>
+<h1>Acme</h1><p>${"A neighbourhood bakery. ".repeat(4)}</p>
+<img src="https://images.unsplash.com/photo-x" data-unsplash-photographer="Jo Ma" data-unsplash-profile="https://unsplash.com/@joma?utm_source=ionexa&amp;utm_medium=referral">
+<span class="unsplash-credit">Photo by <a href="https://unsplash.com/@joma?utm_source=ionexa&amp;utm_medium=referral">Jo Ma</a> on <a href="https://unsplash.com/?utm_source=ionexa&amp;utm_medium=referral">Unsplash</a></span>
+</body></html>`;
+  const after = seoHead.enforceSeoHead(altText.enforceImageAltText(credited).html, {
+    canonicalUrl: "https://x.test/s/acme",
+    siteUrl: "https://x.test/s/acme",
+    siteName: "Acme",
+  }).html;
+  ok("the credit element survives the SEO pass", /class="unsplash-credit"/.test(after));
+  ok("...with the photographer still named", /Jo Ma<\/a>/.test(after));
+  ok("...and both referral parameters intact",
+    (after.match(/utm_source=ionexa&amp;utm_medium=referral/g) ?? []).length >= 3,
+    String((after.match(/utm_source=ionexa&amp;utm_medium=referral/g) ?? []).length));
+  ok("...and the provenance attributes still on the <img>",
+    /data-unsplash-photographer="Jo Ma"/.test(after) && /data-unsplash-profile="/.test(after));
+}
+{
+  const variable = "updatedHtml";
+  ok("edit imports the enforcement pass", /enforceUnsplashAttribution/.test(editRoute));
   const call = new RegExp(
     `const (\\w+) = enforceUnsplashAttribution\\(${variable}\\);[\\s\\S]{0,120}?${variable} = \\1\\.html;`
   );
-  ok(`${label} feeds the enforced document back into what is stored`, call.test(src));
-  // And the stored value is that same variable — otherwise the repair is
-  // applied to something the database never sees.
+  ok("edit feeds the enforced document back into what is stored", call.test(editRoute));
+  // AND THE STORED VALUE IS THAT SAME DOCUMENT. This used to read
+  // `html_content: updatedHtml`, which stopped being the whole truth when
+  // an edit gained a target: the edited document now goes to
+  // html_content OR to one entry of the pages array, and the old
+  // assertion was blind to the second — a sub-page could have been
+  // stored without the enforcement and this file would have stayed
+  // green. So both destinations are asserted, through the one function
+  // that decides between them.
   ok(
-    `${label} stores that variable`,
-    new RegExp(`html_content:\\s*${variable}\\b`).test(src)
+    "edit hands the enforced document to the writer",
+    new RegExp(`applyEditedDocument\\([^)]*, ${variable}\\)`).test(editRoute)
   );
+  ok(
+    "...and BOTH of that writer's outputs are what get stored",
+    /const saved = applyEditedDocument\(/.test(editRoute) &&
+      /const nextPages = saved\.pages;/.test(editRoute) &&
+      /const nextHomeHtml = saved\.htmlContent;/.test(editRoute) &&
+      /html_content: nextHomeHtml, pages: nextPages\.length > 0 \? nextPages : null/.test(editRoute)
+  );
+  // The writer must actually put it somewhere — a version that returned
+  // the site untouched would satisfy every regex above.
+  const target = await loadTs("src/lib/publishing/page-edit-target.ts");
+  const PAGES = [{ slug: "a", label: "A", html: "<old-a>" }];
+  const home = target.applyEditedDocument("<old-home>", PAGES, -1, "<enforced>");
+  ok("...and a home edit really stores the enforced document", home.htmlContent === "<enforced>");
+  const sub = target.applyEditedDocument("<old-home>", PAGES, 0, "<enforced>");
+  ok("...and a sub-page edit really stores it too", sub.pages[0].html === "<enforced>");
 }
 
 // Order matters and the compiler cannot see it: enforcement has to run
@@ -390,9 +461,13 @@ for (const [label, src, variable] of [
   ["generation", generateRoute, "htmlContent"],
   ["edit", editRoute, "updatedHtml"],
 ]) {
-  const resolveAt = src.indexOf(`await resolveWebsiteImagePlaceholders(${variable})`);
+  // The call gained an argument (the owner's photo-source choice), so the
+  // anchor is the call HEAD rather than the whole call — pinned to the
+  // opening paren so it cannot match a mention in a comment.
+  const resolveAt = src.indexOf(`await resolveWebsiteImagePlaceholders(${variable},`);
   const enforceAt = src.indexOf("enforceUnsplashAttribution(");
-  ok(`${label}: enforcement runs after placeholder resolution`, resolveAt !== -1 && enforceAt > resolveAt);
+  ok(`${label}: enforcement runs after placeholder resolution`, resolveAt !== -1 && enforceAt > resolveAt,
+    `resolve at ${resolveAt}, enforce at ${enforceAt}`);
 }
 
 // The edit prompt should ask as well as be enforced — the same

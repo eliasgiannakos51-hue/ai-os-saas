@@ -371,6 +371,23 @@ const MECHANICAL = [
   "src/components/publishing/publish-control.tsx",
   "src/components/system-health/storage-diagnostics.tsx",
   "src/components/website-builder/website-builder-workspace.tsx",
+  // V4 #19. The UPLOAD button, and only that one: reading a file and
+  // posting it is a mechanical wait, and marking it with the signature
+  // would spend the mark on a POST. The two waits on this page that ARE
+  // the model thinking — "find patterns" and asking the data a question —
+  // use the globe, which is why this file appears here rather than being
+  // exempted wholesale.
+  "src/components/data-analysis/analysis-workspace.tsx",
+  // V4 #25. Saving a consent row and opening a Stripe checkout are both
+  // mechanical waits on a POST — nothing is thinking. The globe is the
+  // mark of the model working, and spending it on a settings save would
+  // make it mean "busy", which is what it exists NOT to mean.
+  "src/components/settings/overage-settings.tsx",
+  "src/components/settings/addons-settings.tsx",
+  // Badge removal: a credit deduction and a row write. Nothing is
+  // thinking, so the globe would be spent on a POST — and the mark means
+  // "the model is working", which is what it exists NOT to dilute.
+  "src/components/publishing/badge-removal.tsx",
 ];
 {
   const spinning = allTsx.filter((f) => /animate-spin/.test(stripComments(readFileSync(f, "utf8")))).sort();

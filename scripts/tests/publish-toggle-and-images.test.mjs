@@ -314,7 +314,23 @@ console.log("\n== 11. missing contact details become a visible gap, never a fake
 const builder = readFileSync("src/lib/website-builder.ts", "utf8");
 check("the prompt has a rule for details that were not given", /CONTACT DETAILS THAT WERE NOT GIVEN/.test(builder));
 check("a missing phone gets a bracketed placeholder", /\[Your phone number\]/.test(builder));
-check("inventing a phone number is forbidden outright", /NEVER invent a phone number/.test(builder));
+// ASKED OF THE WHOLE PROMPT. This used to pin one sentence in one
+// section, and that sentence was a duplicate of the canonical rule under
+// DO NOT INVENT CRITICAL FACTS — so it could be removed as duplication
+// (which it was) while the rule stood, and it could equally have been
+// removed FROM the canonical section while the duplicate stood. Neither
+// is a state this check should be blind to.
+const seoSection = (await loadTs("src/lib/seo/prompt.ts")).seoInstruction();
+const wholePrompt = `${builder}\n${seoSection}`;
+check(
+  "inventing a phone number is forbidden outright",
+  /never invent[^.]{0,200}phone number/i.test(wholePrompt),
+  wholePrompt.match(/[^\n]*[Nn]ever invent[^\n]*/)?.[0]
+);
+check(
+  "...in the section that owns the rule, not only in a restatement",
+  /DO NOT INVENT CRITICAL FACTS[\s\S]{0,900}phone numbers/.test(builder)
+);
 check(
   "and a placeholder is not wrapped in tel:, so it cannot look real",
   /Do not wrap a placeholder in tel:\/mailto:/.test(builder)

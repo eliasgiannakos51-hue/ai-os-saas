@@ -53,27 +53,60 @@ export function safeNotificationUrl(value: unknown): string | null {
   return trimmed.slice(0, 300);
 }
 
+/**
+ * THE ONE WRITER for public.user_notifications.
+ *
+ * dispatch.ts calls this after the worth-sending rule, the per-type
+ * channel preference and quiet hours have all had their say; the older
+ * agent-delivery path calls it with just a title and a body. Keeping both
+ * on one function is what stops the typed columns added by the V4 #18
+ * migration from being set by one caller and quietly left null by the
+ * other.
+ *
+ * Returns the row id so the caller can attach engagement events to it —
+ * null when the insert failed, which callers treat as "not delivered
+ * in-app" rather than throwing.
+ */
 export async function createNotification(params: {
   userId: string;
   source?: string;
   title: string;
   body?: string;
   url?: string | null;
-}): Promise<boolean> {
+  /** One of NOTIFICATION_TYPES. Absent for the legacy agent path. */
+  type?: string | null;
+  groupKey?: string | null;
+  /** How many real events this one row stands for (rule 2). */
+  groupCount?: number;
+  /** When the interrupting channels may fire. The row itself is visible
+   *  in the bell immediately whatever this says — a bell filling up
+   *  overnight interrupts nobody. */
+  deliverAt?: Date | null;
+}): Promise<string | null> {
   try {
     const admin = createAdminClient();
-    const { error } = await admin.from("user_notifications").insert({
-      user_id: params.userId,
-      source: (params.source ?? "agent").slice(0, 40),
-      title: params.title.trim().slice(0, NOTIFICATION_LIMITS.title),
-      body: (params.body ?? "").trim().slice(0, NOTIFICATION_LIMITS.body),
-      url: safeNotificationUrl(params.url),
-    });
+    const { data, error } = await admin
+      .from("user_notifications")
+      .insert({
+        user_id: params.userId,
+        source: (params.source ?? "agent").slice(0, 40),
+        title: params.title.trim().slice(0, NOTIFICATION_LIMITS.title),
+        body: (params.body ?? "").trim().slice(0, NOTIFICATION_LIMITS.body),
+        url: safeNotificationUrl(params.url),
+        type: params.type ?? null,
+        group_key: params.groupKey ?? null,
+        // The CHECK on the column is >= 1, so a caller passing 0 would
+        // fail the insert rather than write a nonsense count.
+        group_count: Math.max(1, Math.trunc(params.groupCount ?? 1)),
+        deliver_at: params.deliverAt ? params.deliverAt.toISOString() : null,
+      })
+      .select("id")
+      .single();
     if (error) throw error;
-    return true;
+    return data ? String(data.id) : null;
   } catch (err) {
     logApiError("notifications:create", err, { userId: params.userId, source: params.source });
-    return false;
+    return null;
   }
 }
 

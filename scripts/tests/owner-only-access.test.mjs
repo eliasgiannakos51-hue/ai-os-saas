@@ -115,7 +115,6 @@ for (const file of routes) {
   const src = readFileSync(file, "utf8");
   if (!/createAdminClient\(/.test(src)) continue;
 
-  const isCron = file.includes("/api/cron/");
   const isWebhook = file.includes("/api/webhooks/");
   // The research continuation authenticates with the internal token when
   // called by our own infrastructure, and by ownership otherwise.
@@ -130,6 +129,17 @@ for (const file of routes) {
   // true description of the pattern. Verified against all five cron-shaped
   // routes (api/cron/* and api/weekly-digest).
   const hasCronAuth = /\b(?:check|require)CronAuth\s*\(/.test(src);
+  // CRON-SHAPED IS ABOUT THE GUARD, NOT THE FOLDER. This used to be
+  // `file.includes("/api/cron/")`, and api/weekly-digest — which the
+  // comment above already counts as one of the five cron routes — passed
+  // only because it happened to contain a `.eq("user_id", ...)` in its
+  // own body. When that query moved into a lib, the route lost its
+  // authorisation in this check's eyes while losing nothing in reality.
+  // Keying off the CALL is both correct and stricter: a route under
+  // /api/cron/ that does not call the guard is still an offender below,
+  // and a route anywhere else now has to actually call it rather than
+  // inherit safety from a user-scoped query it may later stop making.
+  const isCron = file.includes("/api/cron/") || hasCronAuth;
   const hasAdminCheck = /isAdminEmail\(/.test(src);
   // Scoping every query to the authenticated user is the other legitimate
   // pattern: the service-role client is used to write across RLS, but the

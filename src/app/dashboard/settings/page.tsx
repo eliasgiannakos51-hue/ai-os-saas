@@ -15,14 +15,18 @@ import { ExportDataButton } from "@/components/settings/export-data-button";
 import { DangerZone } from "@/components/settings/danger-zone";
 import { BillingSummary } from "@/components/settings/billing-summary";
 import { BuyCredits } from "@/components/settings/buy-credits";
+import { OverageSettings } from "@/components/settings/overage-settings";
+import { AddonsSettings } from "@/components/settings/addons-settings";
 import { CreditHistory, type CreditTransaction } from "@/components/settings/credit-history";
 import { AiUsageSettings } from "@/components/settings/ai-usage-settings";
+import { VoiceSettings } from "@/components/settings/voice-settings";
 import { Reveal } from "@/components/ui/reveal";
 import { MarginReport } from "@/components/settings/margin-report";
 import { AiPersonaSettings } from "@/components/settings/ai-persona-settings";
 import { EmailNotificationSettings } from "@/components/settings/email-notification-settings";
 import { PushNotificationSettings } from "@/components/settings/push-notification-settings";
 import { InstallSection } from "@/components/pwa/install-section";
+import { NotificationSettings } from "@/components/settings/notification-settings";
 import { AchievementsSection } from "@/components/settings/achievements-section";
 import { loadUnlockedAchievements } from "@/lib/achievements";
 import { isAdminEmail } from "@/lib/admin";
@@ -43,11 +47,14 @@ export default async function SettingsPage() {
   // request's locale, the same way the sidebar does.
   const tKey = await getTranslations();
   const tBilling = await getTranslations("settings.billing");
+  const tAddons = await getTranslations("settings.addons");
+  const tOverage = await getTranslations("settings.overage");
   // The jump-to-section nav below named three of its four links in
   // hardcoded English while the fourth was already translated — the four
   // chips sat side by side, three in English and one in Greek. Every key
   // already existed; nothing was reaching them.
   const tAchievements = await getTranslations("achievements");
+  const tVoice = await getTranslations("voice");
   const supabase = createClient();
 
   const {
@@ -224,7 +231,10 @@ export default async function SettingsPage() {
             { href: "#language", label: t("language.title") },
             { href: "#accessibility", label: t("accessibility.title") },
             { href: "#ai-usage", label: t("aiUsage.title") },
+            { href: "#voice", label: tVoice("settings.title") },
             { href: "#buy-credits", label: tBilling("title") },
+            { href: "#addons", label: tAddons("title") },
+            { href: "#overage", label: tOverage("title") },
             { href: "#achievements", label: tAchievements("title") },
           ].map((link) => (
             <a
@@ -252,6 +262,10 @@ export default async function SettingsPage() {
         />
 
         <BuyCredits />
+
+        <AddonsSettings />
+
+        <OverageSettings />
 
         <CreditHistory
           transactions={(transactions as CreditTransaction[] | null) ?? []}
@@ -285,6 +299,12 @@ export default async function SettingsPage() {
 
         <LoginActivity devices={(knownDevices as KnownDevice[] | null) ?? []} />
 
+        {/* Per TYPE, per CHANNEL (V4 #18) — which of the seven things
+            worth interrupting somebody for reach them, and where. It
+            sits above the email panel because the email panel is now the
+            narrower question: which of OUR emails you want at all. */}
+        <NotificationSettings userId={user.id} />
+
         <EmailNotificationSettings
           userId={user.id}
           initialPrefs={(emailPrefs as Record<string, boolean> | null) ?? {}}
@@ -311,6 +331,10 @@ export default async function SettingsPage() {
         <Reveal><ThemeSettings /></Reveal>
 
         <Reveal><AccessibilitySettings /></Reveal>
+
+        {/* Minutes left this month and what each kind of voice work
+            costs — the half of "visible cost" that is not on a button. */}
+        <Reveal><VoiceSettings /></Reveal>
 
         <Reveal>
           <AiUsageSettings

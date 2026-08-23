@@ -38,6 +38,7 @@ YOUR OUTPUT:
 - "taskPrompt": the instruction the agent follows on EVERY run. Write it as a standalone brief addressed to the agent — it will be executed months from now with no other context, so it must name the subject explicitly and never say "as discussed" or "the above". State what to look for, what to leave out, and what the result should contain. Do NOT include the schedule or the delivery method here.
 - "scheduleCron": a standard 5-field cron expression (minute hour day-of-month month day-of-week, Sunday=0), interpreted in the user's own timezone. The minute field MUST be a single number — an agent may run at most once an hour. Use a sensible waking hour when the user says "every morning"/"daily" without naming a time: 8 for a morning briefing, 18 for an evening summary. Examples: daily 08:00 = "0 8 * * *"; every Monday 09:00 = "0 9 * * 1"; the 1st of each month at 09:00 = "0 9 1 * *"; hourly = "0 * * * *".
 - "needsWebSearch": true when the task depends on information that changes — news, prices, releases, competitors, anything "latest" or "today". False for a task the model can do from the text alone.
+- "depth": how much work each run needs, and therefore what it costs the user EVERY TIME IT RUNS. "simple" = one source, a short answer — a price, a rate, a score, one headline. "standard" = a handful of sources cross-checked — the right answer for most briefings and watches. "deep" = ten-plus sources and a full report — only for a genuinely broad question that a handful of sources cannot answer, like a market landscape or a full competitive picture. WHEN IN DOUBT CHOOSE "standard": this runs on a schedule forever, and the difference between the tiers is roughly twelvefold, so choosing "deep" for something a handful of sources would have answered is a decision the user pays for every single day.
 - "outputFormat": "summary" for prose, "bullets" for a scannable list, "report" for something with sections and headings.
 - "language": the BCP-47 tag of the language the USER WROTE IN, because that is the language they will want to read the result in. "el" for Greek, "en" for English, "es", "de", and so on.
 - "understood": one sentence, in the user's own language, restating what this agent will do. The user reads this before confirming, so it is the last chance to catch a misunderstanding — make it concrete and specific, not a paraphrase of the schema.
@@ -87,6 +88,12 @@ const BUILD_AGENT_TOOL: Anthropic.Tool = {
         type: "boolean",
         description: "True when the task depends on current information from the web.",
       },
+      depth: {
+        type: "string",
+        enum: ["simple", "standard", "deep"],
+        description:
+          "How much work each run needs. 'simple' one source, 'standard' a handful cross-checked, 'deep' ten-plus and a full report. Default to 'standard' unless the task is plainly one of the extremes — this cost recurs on every run.",
+      },
       outputFormat: {
         type: "string",
         enum: ["summary", "bullets", "report"],
@@ -113,6 +120,7 @@ const BUILD_AGENT_TOOL: Anthropic.Tool = {
       "taskPrompt",
       "scheduleCron",
       "needsWebSearch",
+      "depth",
       "outputFormat",
       "language",
       "understood",

@@ -17,6 +17,11 @@ export type UserWebsite = {
   user_id: string;
   name: string;
   html_content: string;
+  /** Additional pages beyond the home page, which is html_content itself.
+   *  Null on every site built before multi-page support and on every
+   *  single-page site since — the column's absence is what makes those
+   *  two indistinguishable, which is why there was no backfill. */
+  pages?: unknown;
   status: UserWebsiteStatus;
   error_message: string | null;
   // Superseded by website_reference_images (below) — no longer written by
@@ -64,6 +69,10 @@ export type WebsiteVersion = {
   website_id: string;
   version_number: number;
   html_content: string;
+  /** The site's other pages AS OF THIS VERSION. Rollback restores the
+   *  whole site, so a version that carried only the home page would
+   *  restore a site whose navigation points at pages that are gone. */
+  pages?: unknown;
   change_description: string | null;
   created_at: string;
 };

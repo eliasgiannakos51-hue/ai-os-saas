@@ -12,6 +12,7 @@ import { EmptyState } from "@/components/empty-state";
 import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";
 import { useToast } from "@/components/toast/toast-context";
+import { BadgeRemoval } from "@/components/publishing/badge-removal";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { formatDateTime, formatNumber } from "@/lib/format-number";
 import { getErrorMessage } from "@/lib/get-error-message";
@@ -286,6 +287,12 @@ export function PublishedSitesList({
               {t("close")}
             </button>
           </div>
+
+          {/* ON THE SITE IT APPLIES TO. Badge removal is bought per SITE,
+              so the control belongs on the site's own panel — a switch in
+              Settings would either charge for every site or leave the
+              user guessing which one it applied to. */}
+          <BadgeRemoval siteId={selected.id} />
 
           <h3 className="flex items-center gap-1.5 text-xs font-semibold text-muted">
             <History className="h-3.5 w-3.5" aria-hidden="true" />

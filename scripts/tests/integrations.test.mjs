@@ -467,14 +467,38 @@ check("...unlike email, which is folded", agentConfig.normaliseDeliveryTarget(" 
   check("...and still defaults to email", email.ok && email.draft.deliveryMethod, "email");
 }
 
-// The config jsonb must NOT have grown a key: normaliseAgentConfig is
-// deep-compared elsewhere, and the Slack channel belongs in the existing
-// delivery_target column.
-check(
-  "the agent config shape is unchanged",
-  agentConfig.normaliseAgentConfig({ needsWebSearch: true, outputFormat: "report", language: "el" }),
-  { needsWebSearch: true, outputFormat: "report", language: "el" }
-);
+// The Slack channel must NOT have moved into the config jsonb — it
+// belongs in the existing delivery_target column, where the ownership
+// check reads it.
+//
+// THIS USED TO BE A FROZEN SNAPSHOT of the whole config object, which
+// says "the shape is unchanged" and actually asserts "nobody has added
+// any key for any reason" — so an unrelated field (the depth tier) broke
+// it while a `slackChannel` key smuggled in beside the others would have
+// broken it identically, telling you nothing about which happened. Named
+// key sets say what is meant.
+{
+  const shape = agentConfig.normaliseAgentConfig({
+    needsWebSearch: true,
+    outputFormat: "report",
+    language: "el",
+  });
+  // batchOptOut joined the shape with V4 #13: whether this agent declines
+  // the cheaper, slower batch path. Declared here rather than the check
+  // widened, which is the whole point of a named key set — a
+  // `slackChannel` smuggled in beside the others must still break it.
+  const KNOWN = ["needsWebSearch", "depth", "batchOptOut", "outputFormat", "language", "builderSummary"];
+  const unexpected = Object.keys(shape).filter((k) => !KNOWN.includes(k));
+  check("the agent config has no key nobody declared", unexpected, []);
+  // The real point: nothing about WHERE the result goes lives in here.
+  const DELIVERY_ISH = /slack|channel|webhook|telegram|discord|email|target|recipient/i;
+  check(
+    "...and nothing delivery-related is in the config jsonb",
+    Object.keys(shape).filter((k) => DELIVERY_ISH.test(k)),
+    []
+  );
+  check("...the values still survive normalisation", [shape.needsWebSearch, shape.outputFormat, shape.language], [true, "report", "el"]);
+}
 
 // ---------------------------------------------------------------------
 console.log("\n== 8. the wiring ==");

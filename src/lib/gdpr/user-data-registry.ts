@@ -28,7 +28,13 @@ export type UserDataScope =
    *  redacted rather than dumped verbatim (tokens, device fingerprints). */
   | "sensitive_redacted"
   /** Not personal data: aggregate counters with no user column. */
-  | "not_personal";
+  | "not_personal"
+  /** PERSONAL DATA that is a DERIVED COPY of rows exported elsewhere
+   *  under their own labels. Not exported — an export containing the
+   *  same sentence twice, once as the record and once as its search
+   *  entry, is a worse answer to "give me my data" than one containing
+   *  it once. Erased by the same cascade as the row it copies. */
+  | "derived_index";
 
 export type UserDataTable = {
   table: string;
@@ -115,6 +121,109 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "credit_transactions", label: "credit_transactions", scope: "account" },
   { table: "credit_reservations", label: "credit_reservations", scope: "account" },
   { table: "ai_cost_log", label: "ai_usage_log", scope: "account" },
+  // Voice minutes (V4 #19/#2). ACCOUNT scope, and it is a short row: the
+  // seconds of speech in and out this month and last, and nothing else.
+  // No audio, no transcript, no language, no device — the table has
+  // nowhere to put them (see
+  // supabase/migrations/20260827000000_voice_usage.sql), which is why
+  // there is nothing here to redact. Exported because it is the user's
+  // own consumption record, the same as ai_cost_log beside it; removed
+  // by the auth.users cascade, so no explicit erasure.
+  { table: "voice_usage", label: "voice_minutes", scope: "account" },
+  // Which provider served which of this account's model calls, and why
+  // (V4 #12). ACCOUNT scope: it is an operational record OF this user's
+  // requests, so it is theirs, and it carries no prompt, no completion
+  // and no tool arguments — nothing the model was shown or said. Removed
+  // by the auth.users cascade.
+  { table: "ai_provider_log", label: "ai_provider_routing", scope: "account" },
+  // Which MODEL served which of this account's calls, at which tier, and
+  // what it cost (V4 #34/#35). ACCOUNT scope for exactly the reason
+  // ai_provider_log above is: it is an operational record OF this user's
+  // requests, so it is theirs, and it carries no prompt, no completion
+  // and no tool arguments — only the feature name, the rule that chose
+  // the model, and money. Removed by the auth.users cascade.
+  //
+  // NOT non-personal, even though the ROUTER only ever reads it in
+  // aggregate. The aggregate is our business; the row names a person and
+  // says what they asked for and when, and that is theirs.
+  { table: "routing_decisions", label: "model_routing", scope: "account" },
+  // Which of the user's published sites they paid to un-badge, in which
+  // month, for how many credits. ACCOUNT scope: it is a record of a
+  // purchase they made, so it is theirs and it belongs in an export —
+  // the same reading as credit_transactions beside it. Removed by the
+  // auth.users cascade.
+  { table: "site_badge_removals", label: "badge_removals", scope: "account" },
+
+  // --- Trading journal (V4 #14) ---
+  //
+  // USER_CONTENT, every one of them: a trade is something the user did
+  // and recorded, a rule is something they wrote, and a violation is
+  // arithmetic over the two. All of it is theirs and all of it is
+  // exported in full. Removed by the auth.users cascade.
+  { table: "trading_accounts", label: "trading_accounts", scope: "user_content" },
+  { table: "trading_rules", label: "trading_rules", scope: "user_content" },
+  { table: "rule_violations", label: "trading_rule_violations", scope: "user_content" },
+
+  // --- Bank and crypto (V4 #15) ---
+  //
+  // SENSITIVE_REDACTED, and the redaction is the point:
+  // access_token_encrypted is a key to a different building, and an
+  // export is a file the user emails to themselves. The ciphertext is
+  // stripped; everything that describes the CONNECTION — which bank,
+  // when, what scopes, what state — is exported, because that is what
+  // somebody asking "what do you hold about me" needs to see.
+  {
+    table: "bank_connections",
+    label: "bank_connections",
+    scope: "sensitive_redacted",
+    redactColumns: ["access_token_encrypted"],
+  },
+  // The transactions themselves are ordinary personal data and are
+  // exported whole. There is deliberately no account number or IBAN in
+  // this table to redact.
+  { table: "bank_transactions", label: "bank_transactions", scope: "user_content" },
+  // A PUBLIC address. Nothing here is secret — the schema has nowhere to
+  // put a private key — so there is nothing to redact, and saying so is
+  // more useful than a redactColumns list that would imply there is.
+  { table: "crypto_wallets", label: "crypto_wallets", scope: "user_content" },
+
+  // --- Notifications (V4 #18) ---
+  //
+  // Settings and per-type preferences are the user's own choices and are
+  // exported whole. notification_channels holds CIPHERTEXT — a Discord
+  // webhook is a credential anybody holding it can post through — so the
+  // encrypted target is stripped and everything describing the
+  // connection is kept. notification_events is the record of what was
+  // sent to them and whether they opened it, which is theirs to see.
+  { table: "notification_settings", label: "notification_settings", scope: "account" },
+  { table: "notification_preferences", label: "notification_preferences", scope: "account" },
+  {
+    table: "notification_channels",
+    label: "notification_channels",
+    scope: "sensitive_redacted",
+    redactColumns: ["target_encrypted"],
+  },
+  { table: "notification_events", label: "notification_delivery_log", scope: "account" },
+  // V4 #19 + #20. data_analyses carries the user's UPLOADED FILE, parsed
+  // — the rows themselves, not a summary — so it is the single largest
+  // piece of their own content in the export and the one they would most
+  // want back. Exported whole for the same reason: an export that
+  // returned a column profile without the data would be a description of
+  // their file rather than their file.
+  { table: "data_analyses", label: "data_analyses", scope: "user_content" },
+  { table: "data_analysis_charts", label: "data_analysis_charts", scope: "user_content" },
+  { table: "data_analysis_questions", label: "data_analysis_questions", scope: "user_content" },
+  // Every coding operation, including the notes imported from the old
+  // tracker (source = 'note'). ai_coding_requests stays registered too —
+  // the import copied rows, it did not move them.
+  { table: "code_sessions", label: "code_sessions", scope: "user_content" },
+  // V4 #25. What the customer agreed to and what they were charged for
+  // it. Both are theirs and both are exported: an overage bill they
+  // cannot reconstruct is a bill they have to take on trust, and the
+  // consent row is the record of what they agreed to and when.
+  { table: "usage_overage_settings", label: "usage_overage_consent", scope: "account" },
+  { table: "usage_overage_ledger", label: "usage_overage_charges", scope: "account" },
+  { table: "account_addons", label: "addons", scope: "account" },
   { table: "user_onboarding", label: "onboarding", scope: "account" },
   { table: "user_email_preferences", label: "email_preferences", scope: "account" },
   { table: "email_send_log", label: "emails_sent_to_you", scope: "account" },
@@ -204,6 +313,23 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // that carries user_id would be a claim the schema contradicts. The FK
   // is on delete cascade, so erasure needs no explicit pass.
   { table: "subscription_cancellations", label: "subscription_cancellations", scope: "account" },
+
+  // --- Derived ---
+  //
+  // The unified search index (20260824). Every row here is a COPY of the
+  // title and body of a row in one of the tables above, written by a
+  // trigger, so it is unquestionably personal data — and equally
+  // unquestionably already in the export, under the label of the table
+  // it came from. Exporting it as well would hand the user each of their
+  // own sentences twice.
+  //
+  // ERASURE IS THE CASCADE. search_index.user_id is
+  // `references auth.users(id) on delete cascade`, so deleting the
+  // account removes the index entries with it — which is why this is not
+  // marked needsExplicitErasure. That is not taken on trust: section 7
+  // of scripts/tests/unified-search.dbtest.mjs deletes a user against a
+  // real PostgreSQL and asserts the rows are gone.
+  { table: "search_index", label: "search_index", scope: "derived_index" },
 ];
 
 /** Tables with no user column at all — recorded so the coverage test can
@@ -216,11 +342,30 @@ export const NON_PERSONAL_TABLES = [
   // Keyed by team + invited email; rows belong to the team owner's
   // account and are covered via the team tables' own cascade.
   "team_members",
+  // V4 #26. Both carry a user_id and NEITHER is exported, which needs
+  // saying rather than assuming.
+  //
+  // They are OUR bookkeeping about a customer, not the customer's own
+  // data: what their plan change did to our revenue, and what their
+  // subscription contributed to our MRR in a given month. The facts they
+  // are derived from — the plan, the price, the invoices — the customer
+  // already has, from Stripe and from their own account page, in the form
+  // that is actually about them.
+  //
+  // Exporting these would hand somebody our internal revenue model of
+  // them, including the euro figures we attribute to their account, which
+  // is a disclosure about the BUSINESS dressed as a subject access
+  // request. They are erased with the account either way: both cascade on
+  // auth.users, which gdpr-coverage.test.mjs checks separately.
+  "subscription_events",
+  "subscriber_months",
 ];
 
 /** Everything the export route reads. */
 export function exportableTables(): UserDataTable[] {
-  return USER_DATA_TABLES.filter((t) => t.scope !== "not_personal");
+  return USER_DATA_TABLES.filter(
+    (t) => t.scope !== "not_personal" && t.scope !== "derived_index"
+  );
 }
 
 /** Tables that deleteUser()'s cascade will NOT clear. */

@@ -157,6 +157,22 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
     what: "Stamps the service-worker registration URL so a deploy reaches the worker",
     fallback: "NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA, then \"dev\" — on a host that sets neither, the offline page cache is not purged on deploy",
   },
+  {
+    // V4 #18. OPTIONAL and cleanly absent: without it telegramConfigured()
+    // is false, the Settings panel says so instead of offering a field
+    // that cannot work, loadNotifyContext never marks Telegram available,
+    // and resolveChannels drops it however the user's preference reads.
+    // Nothing half-works — the failure mode this avoids is a user who
+    // connects a chat id, sees "connected", and never receives anything.
+    //
+    // Discord needs NO server-side key at all: the credential is the
+    // webhook URL, which each user supplies and which is stored encrypted
+    // per user.
+    name: "TELEGRAM_BOT_TOKEN",
+    level: "optional",
+    what: "Sends notifications to Telegram. Without it the Telegram channel is disabled and says so",
+    fallback: "Telegram is offered nowhere in Settings; every other channel is unaffected",
+  },
   // Annual billing. OPTIONAL, and the fallback is the whole design: with
   // any of the four missing, annualBillingAvailable() is false, /pricing
   // renders no Monthly/Annual toggle, ?billing=annual does nothing, and
@@ -168,6 +184,26 @@ export const ENV_REQUIREMENTS: EnvRequirement[] = [
   { name: "STRIPE_PRICE_GROWTH_ANNUAL", level: "optional", what: "Growth billed yearly (€500 — ten months)", fallback: "annual billing is not offered at all" },
   { name: "STRIPE_PRICE_PROFESSIONAL_ANNUAL", level: "optional", what: "Professional billed yearly (€1,000 — ten months)", fallback: "annual billing is not offered at all" },
   { name: "STRIPE_PRICE_ULTIMATE_ANNUAL", level: "optional", what: "Ultimate billed yearly (€2,000 — ten months)", fallback: "annual billing is not offered at all" },
+  {
+    // V4 #2 (voice). OPTIONAL and cleanly absent: transcribeAvailable() is
+    // false, the microphone button renders nothing at all rather than a
+    // control that fails on press, and /api/voice/transcribe answers with
+    // "OPENAI_API_KEY is not set on this deployment". Listed here because
+    // the ABSENCE is otherwise invisible to the owner: a deployment with
+    // no key looks identical to one where the feature was never built.
+    name: "OPENAI_API_KEY",
+    level: "optional",
+    what: "Speech-to-text (Whisper). Voice INPUT everywhere: chat, module forms, the agent builder",
+    fallback: "the microphone button is not rendered; every text path is unaffected",
+    secret: true,
+  },
+  {
+    name: "ELEVENLABS_API_KEY",
+    level: "optional",
+    what: "Text-to-speech. Voice OUTPUT: reading an agent run or a chat reply aloud, and the hands-free loop",
+    fallback: "the speaker button is not rendered, and the hands-free conversation cannot be started",
+    secret: true,
+  },
   { name: "ADMIN_EMAILS", level: "optional", what: "Extra admin accounts, comma-separated", fallback: "the hardcoded owner address" },
   {
     name: "UNSPLASH_ACCESS_KEY",

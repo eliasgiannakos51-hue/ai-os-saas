@@ -139,7 +139,21 @@ const finalStatusAt = worker.indexOf('status: isFlagged ? "flagged" : "completed
 checkTrue("the worker settles", settleAt > 0);
 checkTrue("the final status exists", finalStatusAt > 0);
 checkTrue("and is written only AFTER settlement", finalStatusAt > settleAt);
-checkTrue("the save before settlement leaves it processing", /html_content: htmlContent,[\s\S]{0,500}status: "processing",/.test(worker));
+// STRUCTURAL, NOT A DISTANCE. This was
+// `/html_content: htmlContent,[\s\S]{0,500}status: "processing",/` — the
+// two lines had to be within 500 characters of each other, so adding a
+// field and a comment between them broke an assertion about ORDER by
+// changing DISTANCE. What matters is that both are in the SAME update
+// object: a `status: "processing"` in a different call would satisfy any
+// proximity rule while leaving this save writing a final status.
+{
+  const at = worker.indexOf("html_content: htmlContent,");
+  // The object runs to its closing brace at the same indentation.
+  const objectEnd = worker.indexOf("\n      })", at);
+  const sameObject = at > 0 && objectEnd > at ? worker.slice(at, objectEnd) : "";
+  checkTrue("the save before settlement leaves it processing", /status: "processing",/.test(sameObject));
+  checkTrue("...and does not write a final status in that same call", !/status: isFlagged/.test(sameObject));
+}
 // The client's trigger, so the pairing is asserted from both ends.
 const wb = readFileSync("src/components/website-builder/website-builder-workspace.tsx", "utf8");
 checkTrue("the client keeps polling while processing", /status === "pending" \|\| record\.status === "processing"/.test(wb));

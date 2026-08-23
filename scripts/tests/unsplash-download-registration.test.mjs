@@ -311,7 +311,13 @@ for (const [label, src, storedMarker, guard] of [
   // that only checked ORDER stayed green both times. Position says the
   // call is in the right place; the guard says it only runs when the
   // document was actually kept and is actually shown.
-  ["edit", editRoute, "html_content: updatedHtml", "if (!updateError && updatedRecord) {"],
+  // The edit's stored marker is the WHOLE write, both columns. An edit
+  // now lands on the home page or on one entry of the pages array, and
+  // a marker naming only html_content would still be found while the
+  // page a photo actually went into was never stored — which is exactly
+  // the "registered a photo nobody ever saw" failure this file exists
+  // for, one level down.
+  ["edit", editRoute, "html_content: nextHomeHtml, pages: nextPages.length > 0 ? nextPages : null", "if (!updateError && updatedRecord) {"],
   ["generation", genRoute, "html_content: htmlContent", "if (!updateError && updatedRecord && !isFlagged) {"],
 ]) {
   const registerAt = src.indexOf("registerUnsplashUses(");
@@ -348,7 +354,7 @@ ok(
 // out before the store when the safety review objects.
 const editRejection = editRoute.slice(
   editRoute.indexOf("if (allIssueDescriptions.length > 0) {"),
-  editRoute.indexOf("html_content: updatedHtml")
+  editRoute.indexOf("html_content: nextHomeHtml, pages: nextPages.length > 0 ? nextPages : null")
 );
 ok(
   "a safety-rejected edit returns before anything is registered",

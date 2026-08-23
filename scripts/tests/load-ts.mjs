@@ -29,7 +29,7 @@ function resolveSpecifier(spec, fromFile) {
   else if (spec.startsWith(".")) base = path.resolve(path.dirname(fromFile), spec);
   else return null; // node_modules — left to the real resolver
 
-  for (const ext of [".ts", ".tsx", "/index.ts", ".js"]) {
+  for (const ext of [".ts", ".tsx", "/index.ts", ".js", ".json"]) {
     if (existsSync(base + ext)) return base + ext;
   }
   if (existsSync(base)) return base;
@@ -72,6 +72,17 @@ function collect(file, seen, out, allowExternals = false) {
   seen.add(abs);
 
   const source = readFileSync(abs, "utf8");
+
+  // A .json import is DATA, and the real data is inlined rather than
+  // stubbed. lib/module-labels.ts imports messages/en.json to derive the
+  // English module names every prompt uses; handing it a `{}` would make
+  // every one of those names undefined while the module still loaded,
+  // which is the quiet kind of wrong this harness exists to avoid.
+  //
+  // Found while measuring what a chat request sends: the loader threw
+  // "Debug Failure. Output generation failed" — TypeScript being asked to
+  // transpile JSON — and the measuring script caught it and printed a
+  // zero. Two bugs, and the zero was the worse one.
   const sf = ts.createSourceFile(abs, source, ts.ScriptTarget.ES2022, true);
 
   // Depth-first: dependencies are emitted before the module that needs them,
@@ -84,14 +95,22 @@ function collect(file, seen, out, allowExternals = false) {
     ) {
       const resolved = resolveSpecifier(stmt.moduleSpecifier.text, abs);
       if (!resolved) continue;
-      // A JSON import is data, not a module. ts.transpileModule returns
-      // undefined for a .json file, which surfaces as "Debug Failure.
-      // Output generation failed" naming nothing — so before this, ANY
-      // module that reached lib/module-labels.ts (which imports
-      // messages/en.json for the English field labels) simply could not be
-      // loaded, and the reason was unreadable. Emitted as a binding under
-      // the name the importer used, because local imports are stripped and
-      // satisfied by concatenation.
+      // A .json import is DATA, and the REAL data is inlined — never a
+      // stub. lib/module-labels.ts imports messages/en.json to derive the
+      // English module names every prompt uses; handing it `{}` would
+      // leave every one of those names undefined while the module still
+      // loaded, which is the quiet kind of wrong this harness exists to
+      // avoid. ts.transpileModule returns undefined for a .json file, and
+      // that surfaces as "Debug Failure. Output generation failed" naming
+      // nothing at all.
+      //
+      // Bound to the importer's own local name, because the bundle is a
+      // concatenation: the import statement is stripped, so the binding
+      // has to already exist under the name that file used. collectJson
+      // keys its dedup on file::localName rather than on the file alone,
+      // which is the case the inline version could not serve: two modules
+      // importing the SAME json under DIFFERENT names each need their own
+      // binding, and keying by path emits only the first.
       if (resolved.endsWith(".json")) {
         collectJson(resolved, stmt, seen, out);
         continue;

@@ -40,7 +40,41 @@
 export type LinkRewrite = {
   from: string;
   to: string;
-  reason: "internal-path" | "dangerous-scheme" | "base-tag" | "form-action";
+  reason: "internal-path" | "dangerous-scheme" | "base-tag" | "form-action" | "page-link";
+};
+
+/**
+ * WHAT THIS DOCUMENT IS PART OF.
+ *
+ * Without it, every link is judged as if the site were one file — which
+ * it was, until sites gained pages. `href="about"` on a multi-page site
+ * is a REAL link to a REAL page, and it arrived here looking identical
+ * to the broken `href="/about"` this file exists to catch. It was turned
+ * into `href="#"`: the pages were generated, stored and served at their
+ * own URLs, and nothing linked to any of them.
+ */
+export type SiteContext = {
+  /** The slugs of the site's other pages. Empty for a one-page site,
+   *  which is every site built before this existed — and with it empty
+   *  this file behaves exactly as it did. */
+  pageSlugs?: string[];
+  /**
+   * The absolute path the site is served under — "/s/acme", or "/" for a
+   * site on its own domain. Given, page links become ABSOLUTE paths.
+   *
+   * WHY ABSOLUTE AND NOT THE RELATIVE FORM THE MODEL WROTE. A browser
+   * resolves `href="about"` against the current URL, and the home page
+   * is served at /s/acme with NO trailing slash — so it resolves to
+   * /s/ABOUT, dropping the site. The same link from /s/acme/services
+   * resolves correctly. A relative nav is therefore right on the
+   * sub-pages and wrong on the home page, which is the single hardest
+   * kind of bug to see: three of the four pages work.
+   *
+   * Null at generation time, when the subdomain is not known yet — the
+   * relative form is kept and rewritten at publish, which is also what
+   * makes a site keep working after its address changes.
+   */
+  basePath?: string | null;
 };
 
 export type LinkSafetyResult = {
@@ -148,6 +182,51 @@ export function resolveInternalHref(rawHref: string, ids: string[]): string {
   return "#";
 }
 
+/**
+ * Is this href a link to another page of THIS site, and which one?
+ *
+ * Returns the slug, "" for the home page, or null for "not a page link"
+ * — which is the ordinary case and sends the href to the fragment
+ * resolver exactly as before.
+ *
+ * A QUERY OR A FRAGMENT DOES NOT DISQUALIFY IT: `about#team` is a link
+ * to the about page, at its team section. The fragment is preserved by
+ * the caller only when it is a page link, because appending a fragment
+ * to a fragment is how `#about#team` gets written.
+ */
+export function pageLinkTarget(rawHref: string, pageSlugs: Set<string>): string | null {
+  const href = rawHref.trim();
+  // A link that STARTS with a fragment is an in-page anchor, never a page.
+  if (href.startsWith("#")) return null;
+  const path = href.split("#")[0].split("?")[0].replace(/^\.\//, "").replace(/\/+$/, "");
+  // "." and "./" and "index.html" and "" all mean the home page — but
+  // only on a site that HAS other pages, or "" would start matching the
+  // in-page anchors this file has always resolved.
+  if (pageSlugs.size === 0) return null;
+  const last = path.split("/").filter(Boolean).pop() ?? "";
+  const withoutExt = last.replace(/\.(html?|php|aspx?|jsp)$/i, "");
+  if (!withoutExt || /^index$/i.test(withoutExt) || path === "." || path === "") return "";
+  const wantedSlug = withoutExt.trim().toLowerCase();
+  return pageSlugs.has(wantedSlug) ? wantedSlug : null;
+}
+
+/** "/s/acme" from "/s/acme/", "/" from "" or "/". Null stays null. */
+function normaliseBasePath(raw: string | null | undefined): string | null {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  const withSlash = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  const stripped = withSlash.replace(/\/+$/, "");
+  return stripped === "" ? "/" : stripped;
+}
+
+/** The home page's own href. NO trailing slash on a path-served site:
+ *  /s/acme/ answers with a 308 to /s/acme, so every visitor clicking
+ *  "Home" would pay a redirect for a link we control. */
+function homeHref(basePath: string): string {
+  return basePath;
+}
+
 const HREF_ATTR = /\bhref\s*=\s*("([^"]*)"|'([^']*)')/gi;
 const ACTION_ATTR = /\baction\s*=\s*("([^"]*)"|'([^']*)')/gi;
 
@@ -155,10 +234,12 @@ const ACTION_ATTR = /\baction\s*=\s*("([^"]*)"|'([^']*)')/gi;
  * The enforcement pass. Runs on every generated and every edited document,
  * immediately before it is stored.
  */
-export function makeGeneratedLinksSafe(html: string): LinkSafetyResult {
+export function makeGeneratedLinksSafe(html: string, site: SiteContext = {}): LinkSafetyResult {
   const rewrites: LinkRewrite[] = [];
   const externalHosts = new Set<string>();
   const ids = collectAnchorTargets(html);
+  const pageSlugs = new Set((site.pageSlugs ?? []).map((s) => s.trim().toLowerCase()).filter(Boolean));
+  const basePath = normaliseBasePath(site.basePath);
 
   // A <base> tag re-points every relative URL on the page, which is the
   // same bug by another route — and the CSP blocks it, so it is dead
@@ -184,6 +265,25 @@ export function makeGeneratedLinksSafe(html: string): LinkSafetyResult {
         /* an unparseable absolute URL is left exactly as written */
       }
       return tag;
+    }
+
+    // A LINK TO ANOTHER PAGE OF THIS SITE, before the fragment fallback
+    // gets to it. Checked first because both look the same from here and
+    // only one of them is broken.
+    if (kind === "internal-path") {
+      const page = pageLinkTarget(href, pageSlugs);
+      if (page !== null) {
+        if (!basePath) return tag; // generation time: keep it relative
+        // `about#team` is a link to the about PAGE, at its team section.
+        // Dropping the fragment would land the visitor at the top of a
+        // long page instead of the thing they clicked for.
+        const hashAt = href.indexOf("#");
+        const fragment = hashAt === -1 ? "" : href.slice(hashAt);
+        const path = page === "" ? homeHref(basePath) : `${basePath === "/" ? "" : basePath}/${page}`;
+        const to = `${path}${fragment}`;
+        rewrites.push({ from: href, to, reason: "page-link" });
+        return tag.replace(HREF_ATTR, `href=${quote}${to}${quote}`);
+      }
     }
 
     const to = kind === "dangerous-scheme" ? "#" : resolveInternalHref(href, ids);

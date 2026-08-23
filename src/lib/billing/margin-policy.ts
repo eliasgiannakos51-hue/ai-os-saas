@@ -224,6 +224,20 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   automationCreate: "automation_run",
   agentBuild: "agent_build",
   agentRun: "agent_run",
+  // Voice. Both settle under one feature so CREDIT_MARGIN_VOICE governs
+  // speech in and speech out together — they are the same product
+  // decision, and a per-direction key would let one drift.
+  voiceTranscribe: "voice",
+  voiceSpeak: "voice",
+  // The three depth tiers settle under the SAME feature as the untiered
+  // profile, so CREDIT_MARGIN_AGENT_RUN still governs all of them — a
+  // per-tier margin key would let one tier quietly drop below the floor
+  // while the feature it belongs to looked configured.
+  agentRunSimple: "agent_run",
+  agentRunStandard: "agent_run",
+  agentRunDeep: "agent_run",
+  // Adopting a template is a build, not a run: it produces an agent.
+  agentTemplateFill: "agent_build",
   recordAsk: "ask_ai_record",
   textAction: "text_action",
   weeklyReflection: "weekly_reflection",
@@ -232,4 +246,12 @@ export const ACTION_TO_FEATURE: Record<string, string> = {
   insightNarrate: "insight_narrate",
   fileAsk: "file_ask",
   deepResearch: "deep_research",
+  // V4 #19. Both settle under ONE feature, so CREDIT_MARGIN_DATA_ANALYSIS
+  // governs the first pass and every follow-up question together — they
+  // are the same product decision, and a per-call key would let the
+  // cheap one drift below the floor while the feature looked configured.
+  dataAnalyse: "data_analysis",
+  dataQuestion: "data_analysis",
+  // V4 #20.
+  codeAssist: "code_assist",
 };

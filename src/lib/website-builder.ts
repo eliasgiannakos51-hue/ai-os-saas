@@ -9,6 +9,9 @@ import { AI_QUALITY_CHECKLIST_EN } from "@/lib/ai-quality-checklist";
 import { AI_SAFETY_BOUNDARIES_EN } from "@/lib/ai-conduct";
 import { WEBSITE_BUILDER_MODEL } from "@/lib/ai-models";
 import type { CostAccumulator, CostStage } from "@/lib/billing/cost-accumulator";
+import { multipageInstruction } from "@/lib/website-multipage";
+import { QUOTE_FIELDS_BY_INDUSTRY } from "@/lib/websites/form-types";
+import { seoInstruction } from "@/lib/seo/prompt";
 
 const MODEL = WEBSITE_BUILDER_MODEL;
 // Re-exported so the route's billing estimate prices the same model this
@@ -219,14 +222,7 @@ FONTS (Google Fonts):
 Available named fonts you recognize and can use exactly by this name: ${GOOGLE_FONTS_LIST}.
 - If the user names a specific one of these (or something close/misspelled), use that exact font.
 - If the user names a font NOT in this list, use the closest visual match from the list instead (never invent a fake font-family name).
-- If the user names no font, choose the pairing from the SITE SHAPE and the subject, not from habit. Three mappings used to be listed here and the result was three looks across every site ever generated, so treat the following as a starting range and pick deliberately:
-  * elegant / luxury / hospitality -> serif display headings (Playfair Display, Cormorant Garamond, Bodoni Moda, Prata) + a quiet sans body (Inter, Karla, Work Sans)
-  * legal / medical / financial / institutional -> a restrained serif throughout (Libre Baskerville, Merriweather, Spectral, Domine) or a sober grotesk (IBM Plex Sans, Source Sans 3, Archivo) — authority reads as understatement, not as a display face
-  * modern / tech / product -> geometric sans (Space Grotesk, Manrope, Outfit, Plus Jakarta Sans, Sora)
-  * warm / family / neighbourhood -> rounded sans (Nunito, Quicksand, Rubik) or a friendly slab (Zilla Slab)
-  * editorial / writing / personal -> a reading serif (Crimson Pro, Lora, Spectral, Merriweather) at a generous size, single column
-  * bold / nightlife / sport / streetwear -> condensed display (Oswald, Bebas Neue, Archivo) + a neutral sans body
-  * gallery / architecture / minimal -> one grotesk at two weights (Epilogue, Urbanist, Barlow), heavy reliance on scale and space rather than on a second family
+- If the user names no font, use the TYPE PAIRING named in this site's DESIGN VARIATION block (it arrives with the brief) and load exactly those families. A seven-way subject-to-font mapping used to live here; it is gone because it produced the same seven looks across every site ever generated, which is what the drawn pairing exists to replace. If no pairing was supplied, pick deliberately from the list above by subject — never Inter by default.
 - Inter is a perfectly good body face and it is also the most over-used font on the web. Do not reach for it by default — choose it when it is right, not when nothing else came to mind.
 - To actually load a font, add BOTH of these to <head> (this is the one and only external-resource exception in this document — see the rules above):
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -252,7 +248,7 @@ ANIMATIONS (pure CSS). These are REFERENCE IMPLEMENTATIONS, not a checklist — 
 
 1) Scroll-reveal fade-in — add class="reveal" to a section, plus this CSS and this exact tiny script (the ONLY two purposes an inline <script> may ever be used for in this document are this effect and the contact-form handler described below):
    CSS:
-     .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
+     .reveal { opacity: 0; transform: translateY(MOTION_DISTANCE); transition: opacity MOTION_DURATION MOTION_EASING, transform MOTION_DURATION MOTION_EASING; }
      .reveal.is-visible { opacity: 1; transform: translateY(0); }
    Script (place once, right before </body>):
      <script>
@@ -267,18 +263,19 @@ ANIMATIONS (pure CSS). These are REFERENCE IMPLEMENTATIONS, not a checklist — 
      .parallax-section { background-image: url('...'); background-attachment: fixed; background-size: cover; background-position: center; }
 
 3) Smooth hover lift — for whatever element this page actually has that should respond to a pointer. Name the class after that element in THIS design; do not introduce a card because a hover effect exists.
-     .lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-     .lift:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+     .lift { transition: transform MOTION_DURATION MOTION_EASING, box-shadow MOTION_DURATION MOTION_EASING; }
+     .lift:hover { transform: translateY(calc(-1 * MOTION_DISTANCE)) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
 
 4) Animated gradient — for any large colour field this design already calls for. The four colour stops below are written as PLACEHOLDERS on purpose: substitute four real colours from THIS site's own palette. Emitting a literal purple/orange gradient on a law firm or a bakery is exactly the kind of copied default this section exists to prevent. Several shapes above forbid a gradient outright; the shape you chose wins over this snippet.
-     .gradient-bg { background: linear-gradient(-45deg, COLOR_1, COLOR_2, COLOR_3, COLOR_4); background-size: 400% 400%; animation: gradientShift 12s ease infinite; }
+     .gradient-bg { background: linear-gradient(-45deg, COLOR_1, COLOR_2, COLOR_3, COLOR_4); background-size: 400% 400%; animation: gradientShift MOTION_AMBIENT ease infinite; }
      @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
 5) Staggered entrance for a list — write one delay rule per item the list ACTUALLY has, however many that is. The count below is an illustration of the pattern, not a target:
-     .stagger-item { opacity: 0; animation: fadeInUp 0.6s ease forwards; }
-     .stagger-item:nth-child(n) { animation-delay: calc(n * 0.1s); }  /* i.e. one rule per real item */
-     @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+     .stagger-item { opacity: 0; animation: fadeInUp MOTION_DURATION MOTION_EASING forwards; }
+     .stagger-item:nth-child(n) { animation-delay: calc(n * MOTION_STAGGER); }  /* i.e. one rule per real item */
+     @keyframes fadeInUp { from { opacity: 0; transform: translateY(MOTION_DISTANCE); } to { opacity: 1; transform: translateY(0); } }
 
+MOTION_DURATION, MOTION_DISTANCE, MOTION_EASING, MOTION_STAGGER and MOTION_AMBIENT are PLACEHOLDERS, like the gradient's COLOR_1..COLOR_4: substitute the numbers from the MOTION TIMING line of this site's DESIGN VARIATION block, never literals. Every site moving at the same speed reads as the same template however different its layout is.
 Reach for these when the description asks for "impressive"/"modern"/"animated" or similar. A restrained, serious or editorial site is BETTER with no animation at all — do not add motion to prove effort.`;
 
 // THE SECTION THAT DID NOT EXIST, and whose absence is the real reason
@@ -378,7 +375,7 @@ VARY THESE DELIBERATELY, driven by the subject rather than by habit:
 - HERO: full-bleed photograph / split text-and-image / purely typographic with no image / asymmetric offset / no hero at all, opening straight into the work or the menu.
 - NAVIGATION: a normal top bar / a logo alone / anchored section links / none, for a short single-purpose page.
 - SECTION RHYTHM: alternating left-right blocks / full-bleed colour bands / a card grid / one continuous editorial column / an overlapping asymmetric layout.
-- PALETTE: derive it from the actual subject — a taverna is not a fintech. Warm earth tones, deep monochrome, high-contrast black and white, a single accent on near-white, muted naturals are all available. Avoid the default indigo-to-violet gradient unless the brief asks for it.
+- PALETTE: build it inside the PALETTE STRATEGY named in this site's DESIGN VARIATION block, deriving the actual hex values from the subject — a taverna is not a fintech. Never the default indigo-to-violet gradient unless the brief asks for it.
 - TYPOGRAPHY: vary the pairing, the scale and the weight contrast per the shape above; see FONTS.
 - DENSITY: a listings page should be dense; a portfolio should be sparse. Do not apply the same vertical rhythm to both.
 
@@ -404,12 +401,10 @@ Rules for it:
 - Never copy an example from this prompt as your answer. There are no default values here.`;
 
 const FUNCTIONAL_ELEMENTS_SECTION = `
-INTERNAL LINKS — THIS PAGE IS THE WHOLE SITE:
-You are producing ONE single file. There is no /about page, no /contact page and no second file, so a link to one is a link to nothing.
-- Every link to another part of THIS site must be a fragment: <a href="#section-id">, pointing at an id that exists on this page.
-- NEVER write href="/about", href="/contact", href="about.html", href="./services" or href="/". A published site is served from a sub-path, so a browser resolves those against the hosting domain and the visitor LEAVES the site entirely — they land on a sign-in page belonging to someone else. This has happened on a real customer site.
-- A logo or "home" link goes to href="#" or to the id of the top section.
-- Give every section you link to a real id: <section id="rooms">, then <a href="#rooms">.
+INTERNAL LINKS — ONLY TWO FORMS ARE VALID:
+- To a SECTION of the page you are writing: a fragment, <a href="#rooms">, pointing at an id that exists there — so give every linked section a real id, <section id="rooms">.
+- To ANOTHER PAGE of this site: the bare slug of a page you actually wrote under MULTIPLE PAGES, <a href="about">; home is <a href=".">. One document means no other pages, so every internal link is a fragment and "home" is href="#".
+- NEVER href="/about", href="/contact", href="about.html" or href="/". A published site is served from a sub-path, so a browser resolves a leading slash against the hosting domain and the visitor LEAVES the site — onto a sign-in page belonging to someone else. This has happened on a real customer site.
 - Absolute links to OTHER people's sites are fine and often wanted — a Google Maps pin, a Facebook page, a booking platform. Write those in full, starting with https://.
 - tel:, mailto: and sms: links are not navigation; use them exactly as described below.
 
@@ -422,7 +417,7 @@ CONTACT DETAILS THAT WERE NOT GIVEN — SHOW A GAP, NEVER HIDE ONE:
 A visitor who cannot find a phone number does not become a customer, and a site owner who cannot see that the number is missing will never add it. So:
 - If no phone number was given, still build the place where it belongs and write a visible, obviously-unfinished placeholder in the language of the site — e.g. [Your phone number] / [Το τηλέφωνό σας]. Square brackets, always.
 - Same for a missing email, street address, opening hours or price list: a bracketed placeholder in the right position, never a section quietly dropped and never an invented value.
-- NEVER invent a phone number, an email address, a street address, a price, an opening time, a company registration number or a review. A plausible-looking fake is far worse than a visible gap: the owner ships it without noticing.
+- Never invent any of these (see DO NOT INVENT CRITICAL FACTS): a plausible-looking fake is far worse than a visible gap, because the owner ships it without noticing.
 - Do not wrap a placeholder in tel:/mailto: — leave it as plain bracketed text so it is obviously a blank to fill in.
 
 LOGO — NEVER INVENT ONE:
@@ -430,11 +425,7 @@ LOGO — NEVER INVENT ONE:
 - Otherwise the header shows the business NAME as a styled text wordmark (a distinctive font-family/weight/letter-spacing treatment of the name is encouraged) — and nothing else.
 - NEVER draw, generate or fetch a logo: no abstract marks, no monograms, no icon standing in for the brand, no CSS/SVG shapes posing as a logo, no PLACEHOLDER image with a logo-like query. A wrong logo is a wrong identity — worse than no logo, because the owner ships it thinking it is theirs.
 
-CONTACT / BOOKING FORMS (only when the description implies one — not every site needs a form):
-- Every input needs a real, meaningful name attribute (name="name", name="email", name="phone", name="message", etc.) — never an unnamed input.
-- Add one hidden honeypot input, exactly: <input type="text" name="_hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;" aria-hidden="true">
-- Do not set a form action attribute.
-- For exactly how to wire up the form's submission (the endpoint URL and the script that calls it), see the FORM SUBMISSION INSTRUCTIONS given as a separate block after this system prompt.`;
+FORMS: see the FORM INSTRUCTIONS block given after this system prompt — what kinds of form exist, which fields each one needs, the consent line, the honeypot and how to wire up the submission are all there.`;
 
 // Kept as a SEPARATE trailing content block (not interpolated into
 // SYSTEM_PROMPT/EDIT_SYSTEM_PROMPT above) specifically so those prompts
@@ -443,25 +434,58 @@ CONTACT / BOOKING FORMS (only when the description implies one — not every sit
 // endpoint URL embeds the website's own id). Splitting it out is what
 // makes prompt caching on the (much larger, fully static) rest of the
 // system prompt actually work: see buildSystemBlocks below.
+//
+// WHY THE WHOLE FORM SPEC LIVES HERE rather than in SYSTEM_PROMPT: the
+// static prompt is at 29.4k characters against a 30k ceiling
+// (scripts/tests/website-variety.test.ts's last section), and that
+// ceiling exists because every character of general instruction competes
+// with the user's own brief for the model's attention. Forms are also
+// the one subject where the instruction and the per-website endpoint URL
+// belong in the same breath — "build this, send it there" — so moving
+// the spec down here makes the cached prefix SMALLER, not larger.
+const FORM_KINDS = `FORM INSTRUCTIONS
+
+Build a form only when the description implies one — not every site needs one. There are THREE kinds; pick whichever the business actually needs, and more than one is fine (a contact form and a newsletter box is a normal pairing).
+
+1. CONTACT — the default. Fields: name, email, phone (optional), message. Heading and button in the site's language.
+2. NEWSLETTER — email alone, or first name + email. One line of honest copy about what gets sent and how often. Never claim a discount, a gift or a frequency the description did not mention.
+3. QUOTE REQUEST — the one that must NOT be a contact form with a different heading. Ask for what this trade actually needs in order to price the job, adapting these to the business:
+${Object.entries(QUOTE_FIELDS_BY_INDUSTRY)
+  .map(([industry, fields]) => `   - ${industry}: ${fields.join(", ")}`)
+  .join("\n")}
+   Plus name and a way to reply. 4-7 fields total: a quote form nobody finishes is worth less than a contact form somebody does.
+
+BOOKING FORMS: do not build one. A form that takes a date and time without real availability behind it double-books people and sends them to a closed door. If the description asks for bookings, build a CONTACT form whose copy says a booking will be confirmed by reply, and never render a calendar.
+
+EVERY FORM, WITHOUT EXCEPTION:
+- Every input needs a real, meaningful name attribute (name="name", name="email", name="phone", name="message") — never an unnamed input. Use these English attribute names even when the visible labels are in another language, so the owner's dashboard can tell a name from an email.
+- Add one hidden honeypot input, exactly: <input type="text" name="_hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0;" aria-hidden="true">
+- A CONSENT CHECKBOX, required, unticked, immediately above the submit button: <input type="checkbox" name="_consent" required> with a short visible sentence in the site's language saying the data is sent to <the business name> so they can reply, and is not passed to anyone else. It must be genuinely unticked and genuinely required — a pre-ticked box is not consent.
+- Do not set a form action attribute. Never ask for anything you do not need: no date of birth, no ID number, no payment details.`;
+
 function buildFormEndpointInstruction(formEndpointUrl: string | undefined): string {
   if (!formEndpointUrl) {
-    return `FORM SUBMISSION INSTRUCTIONS:\n- No submission endpoint is available for this generation — build the form visually complete (all fields, honeypot, a submit button) but do NOT add a fetch/submission script, and add an HTML comment near it: <!-- Form is not yet wired to a backend -->.`;
+    return `${FORM_KINDS}\n\nSUBMISSION: no submission endpoint is available for this generation — build the form visually complete (all fields, consent checkbox, honeypot, a submit button) but do NOT add a fetch/submission script, and add an HTML comment near it: <!-- Form is not yet wired to a backend -->.`;
   }
-  return `FORM SUBMISSION INSTRUCTIONS:\n- Add exactly one inline <script> block (placed once, right before </body>) that: listens for the form's 'submit' event, calls preventDefault(), collects every named field (including _hp) into a plain object, and POSTs it as JSON { "fields": { ... } } via fetch to EXACTLY this URL: ${formEndpointUrl}
-  On a successful response, replace the form's contents with a clear confirmation message (e.g. "Thanks — we'll be in touch soon."). On failure, show a clear inline retry message near the form. Never use alert() or confirm().`;
+  return `${FORM_KINDS}
+
+SUBMISSION: add exactly one inline <script> block (placed once, right before </body>) that listens for the submit event of EVERY form on the page, calls preventDefault(), and POSTs JSON via fetch to EXACTLY this URL: ${formEndpointUrl}
+The body is { "fields": { ...every named text/email/tel/textarea/select field including _hp... }, "formType": "contact" | "newsletter" | "quote", "consent": <true if the consent box is ticked>, "consentText": "<the exact consent sentence shown next to it>" }.
+Set formType from what that particular form is for; if a page has two forms, each sends its own. Do not put _consent inside "fields".
+On a successful response, replace that form's contents with a clear confirmation message in the site's language. On failure, show an inline retry message near the form. Never use alert() or confirm().`;
 }
 
 const IMAGE_RULES_HEADER = `
 IMAGES:
-- If REFERENCE IMAGES are listed below with exact URLs, use them directly via <img src="EXACT_URL"> wherever they fit (hero photo, gallery, a logo in the header, etc. — infer which image is which from context). Never alter the given URL, and never fabricate additional reference-image URLs beyond what's listed.
-- MANDATORY — if the description asks for the attached/uploaded images to appear on the site at all ("put these photos in the hero", "use my images", "add these to the gallery", "βάλε αυτές τις φωτογραφίες"), then EVERY listed reference-image URL MUST appear in the output inside an <img src="..."> tag, copied character for character. Treating them as style inspiration only is WRONG in that case. Before finishing, count the listed URLs and confirm the same number appear in your HTML.
+- If REFERENCE IMAGES are listed below with exact URLs, use them directly via <img src="EXACT_URL">. Never alter the given URL, and never fabricate additional reference-image URLs beyond what's listed.
+- THE USER'S OWN PHOTOGRAPHS GO IN THE POSITIONS THAT MATTER, FIRST. A stock library has a bakery, not THIS bakery, and that difference is what the page is for. Place EVERY listed reference image before considering a PLACEHOLDER — hero, then gallery, then section illustrations — choosing where each belongs from what is IN it (a wide interior is a hero; a close-up of a product goes beside that product). Only what is still missing becomes a PLACEHOLDER. Unless the DESIGN BRIEF says style-reference-only, every listed URL MUST appear in an <img src="..."> copied character for character; count them before you finish.
 - For any OTHER real photo the site should show (a product shot, a room, food, a team photo, an interior/exterior) that no reference image already covers, output exactly: <img src="PLACEHOLDER:short-slug" data-image-query="concise English search phrase describing exactly what the photo should show" alt="...">  — a short slug unique within this document, and a real, specific search phrase. A post-processing step automatically replaces this with a real, working photo from a stock photo library.
 - WRITING A GOOD data-image-query (this decides whether the photo actually matches the site):
   * ALWAYS IN ENGLISH, even when the page itself is in another language — the photo library is searched in English, and a Greek or German query returns nothing and falls back to a random photo. This is the single most common reason a generated site ends up with unrelated images.
   * 3-6 words, concrete and visual: "specialty coffee shop interior wooden", not "coffee" and not "a nice photo of the inside of our lovely café".
-  * Name the SUBJECT and the STYLE/SETTING, not the business: "greek mezze plates taverna table" — never the trading name, and never a city name unless the shot is genuinely of that skyline (a place name inside a subject query usually returns tourist postcards instead of the subject).
+  * Name the SUBJECT and the STYLE/SETTING, not the business: "greek mezze plates taverna table" — never the trading name, and never a city name unless the shot really is that skyline (a place name usually returns tourist postcards instead of the subject).
   * One query per distinct photo. Two placeholders that would return the same image are one photo.
-- IMPORTANT — if the description names or lists SPECIFIC photos to include (e.g. "photos of the rooms", "a picture of the pool", "show our 3 menu items", "team photos"), each one of those, individually, MUST get its own PLACEHOLDER tag with a query specific to THAT exact item — never fewer PLACEHOLDER tags than the number of specific photos actually requested, and never a single generic PLACEHOLDER standing in for several distinct requested photos. Before moving on from the IMAGES step, mentally list every specific photo the description asked for and confirm each one has its own tag.
+- IMPORTANT — if the description lists SPECIFIC photos ("photos of the rooms", "a picture of the pool", "our 3 menu items"), each one individually gets its own PLACEHOLDER with a query specific to THAT item — never fewer tags than photos requested, never one generic tag standing in for several. List them and confirm each has a tag before moving on.
 - NEVER invent a fake external image URL yourself (no made-up unsplash.com/cdn/placeholder links) — the ONLY two ways to include a photo are a listed reference-image URL, or the PLACEHOLDER convention above.
 - Purely decorative graphics (icons, simple shapes, dividers) should still be built with CSS/inline SVG as before, not the PLACEHOLDER convention — that's reserved for actual photos. This licence does NOT extend to brand marks: see LOGO — NEVER INVENT ONE.`;
 
@@ -564,7 +588,7 @@ DO NOT INVENT CRITICAL FACTS:
 const SYSTEM_PROMPT = `You generate complete, production-ready single-file websites from a plain-text description.
 
 CORE RULES:
-- Output ONE complete HTML document: <!DOCTYPE html> through </html>. Nothing else — no explanation, no markdown code fences, no commentary before or after.
+- Output complete HTML documents: <!DOCTYPE html> through </html>. Nothing else — no explanation, no markdown code fences, no commentary before or after. Most sites are ONE document; see MULTIPLE PAGES below for when to write more and how to separate them.
 - All CSS must be inline in a single <style> tag in <head>. The ONLY external resources ever allowed are Google Fonts links (see FONTS below) and photo URLs (see IMAGES below) — no other external stylesheets, no external JS libraries/CDNs, no icon fonts from a CDN.
 - No <script> tags EXCEPT the two specific, narrow exceptions described in ANIMATIONS (scroll-reveal) and the contact-form handler described in FUNCTIONAL CONTACT ELEMENTS below — nothing else may use JavaScript. Everything else must be a static page.
 - Must be responsive: include a <meta name="viewport"> tag and use relative units / flexbox / grid / media queries so it looks good on both mobile and desktop.
@@ -572,12 +596,14 @@ CORE RULES:
 - Use placeholder text/content that fits the description where specific non-critical content wasn't given — never leave Lorem Ipsum, always write real-sounding copy relevant to the request. See DO NOT INVENT CRITICAL FACTS below for the difference between ordinary filler copy (fine) and specific real-world facts (not fine unless explicitly authorized).
 - Fill in a <title> tag that fits the description.
 ${SITE_SHAPE_SECTION}
+${multipageInstruction()}
 ${FONTS_SECTION}
 ${ANIMATIONS_SECTION}
 ${IMAGE_RULES_HEADER}
 ${WEB_SEARCH_SECTION}
 ${FUNCTIONAL_ELEMENTS_SECTION}
 ${PLACEHOLDER_DATA_SECTION}
+${seoInstruction()}
 ${FINAL_SELF_CHECK_SECTION}
 ${AI_SAFETY_BOUNDARIES_EN}${AI_QUALITY_CHECKLIST_EN}`;
 
@@ -902,6 +928,8 @@ ${IMAGE_RULES_HEADER}
 ${WEB_SEARCH_SECTION}
 ${FUNCTIONAL_ELEMENTS_SECTION}
 ${PLACEHOLDER_DATA_SECTION}
+${seoInstruction()}
+- THE SEO MARKUP IS NOT DECORATION EITHER. Every data-seo-* attribute, every <address>, every alt, every <details>/<summary> FAQ and every tel:/mailto: link in the current document is what this site's search listing and its map entry are built from. Carry them forward exactly unless the change is ABOUT them. A change to the phone number changes it in every place it appears, including data-seo-* — one page disagreeing with the others is what splits a business in two as far as a search engine is concerned.
 If the change request asks to add a photo, a font, an animation, contact info, or a form, apply the same rules above as if generating fresh — e.g. a newly-requested photo still uses the PLACEHOLDER convention (or a newly-attached reference image's real URL) rather than an invented link.
 ${FINAL_SELF_CHECK_SECTION}
 ${AI_SAFETY_BOUNDARIES_EN}${AI_QUALITY_CHECKLIST_EN}`;

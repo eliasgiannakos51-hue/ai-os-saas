@@ -16,8 +16,19 @@ create table if not exists auth.users (
   id uuid primary key default gen_random_uuid(),
   email text unique,
   raw_user_meta_data jsonb default '{}'::jsonb,
+  -- SOFT DELETE. GoTrue sets this rather than removing the row, and a
+  -- migration that reads auth.users has to exclude them or a deleted
+  -- account still counts as a customer. It was missing here, which made
+  -- this stub disagree with the real thing in a direction that hides a
+  -- bug: SQL filtering on it failed loudly against this database and
+  -- would have worked in production, so the gap was found. The reverse —
+  -- a stub with a column production lacks — is the one that ships.
+  deleted_at timestamptz,
   created_at timestamptz default now()
 );
+-- Added separately so an existing throwaway database from before this
+-- line gains the column too.
+alter table auth.users add column if not exists deleted_at timestamptz;
 create or replace function auth.uid() returns uuid language sql stable as $$
   select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
 $$;

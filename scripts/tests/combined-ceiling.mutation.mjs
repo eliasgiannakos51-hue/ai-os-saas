@@ -77,16 +77,27 @@ for (const m of MUTANTS) {
     continue;
   }
   writeFileSync(m.file, original.replace(m.from, m.to));
-  let detail = null;
+  // CAUGHT IS DECIDED BY THE EXIT CODE, not by the text.
+  //
+  // This used to be `let detail = null` … `if (detail)`, which asks "did
+  // we manage to find a line saying FAIL in the child's stdout" and
+  // treats a no as "the mutation was missed". A gate that exits non-zero
+  // while its stdout arrives empty or truncated — which happened, twice,
+  // on different mutants of the same run — was then reported as a HOLE
+  // that is not there. An intermittently red mutation gate is worse than
+  // none: it teaches you to re-run it until it is green.
+  let failed = false;
+  let detail = "";
   try {
     execFileSync("node", [GATE], { encoding: "utf8", stdio: "pipe" });
   } catch (e) {
+    failed = true;
     const out = String(e.stdout || "") + String(e.stderr || "");
     detail = (out.split("\n").find((l) => l.includes("FAIL")) || out.split("\n")[0] || "").trim();
   } finally {
     writeFileSync(m.file, original);
   }
-  if (detail) {
+  if (failed) {
     caught++;
     console.log(`  CAUGHT  ${m.name}\n          ${detail.slice(0, 130)}`);
   } else {

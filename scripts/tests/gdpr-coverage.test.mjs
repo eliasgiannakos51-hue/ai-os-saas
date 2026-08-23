@@ -91,6 +91,21 @@ check(
 const ghosts = USER_DATA_TABLES.map((t) => t.table).filter((t) => !tablesWithUserId.has(t));
 check("no registry entry points at a table that does not exist", ghosts.length === 0, ghosts.join(", "));
 
+// THE "derived_index" SCOPE IS THE ONE THAT COULD BE ABUSED. It is the
+// only classification that says "personal data, deliberately NOT in the
+// export", and its whole justification is that the same text is exported
+// under the source table's own label and erased by the source row's
+// cascade. Both halves are checked here, so the scope cannot become a
+// quiet way to drop a table out of a subject access request.
+const derived = USER_DATA_TABLES.filter((t) => t.scope === "derived_index");
+for (const t of derived) {
+  check(`${t.table} is kept out of the export`, !exportableTables().some((e) => e.table === t.table));
+  check(`${t.table} is erased by the auth.users cascade`,
+    cascadeByTable.get(t.table) === "cascade",
+    `on delete ${cascadeByTable.get(t.table) ?? "(no FK to auth.users found)"} — a derived index that does not cascade is personal data that survives account deletion`);
+  check(`${t.table} does not also claim to need explicit erasure`, !t.needsExplicitErasure);
+}
+
 console.log("\n== 2. the export actually covers what the old one missed ==");
 const labels = new Set(exportableTables().map((t) => t.label));
 // The specific omissions named in the brief.

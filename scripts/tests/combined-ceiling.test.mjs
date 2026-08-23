@@ -392,6 +392,17 @@ const CLASSIFIED_PLAN_TABLES = {
   DEFAULT_RESEARCH_LIMITS: { kind: "capacity", why: "how many Deep Research runs may START; each is charged in credits" },
   DEFAULT_INTEGRATION_LIMITS: { kind: "capacity", why: "standing OAuth grants; syncs make no unbilled model call" },
   DEFAULT_PUBLISH_LIMITS: { kind: "capacity", why: "hosted pages — bandwidth, not Anthropic cost" },
+  // Voice (V4 #19/#2). A CAPACITY limit, not a free allowance: every
+  // second counted against it has already been charged in credits at the
+  // margin (transcription and speech both reserve, call, then settle).
+  // The minutes exist because the providers are billed per minute and
+  // per character by somebody else — a runaway tab holding a microphone
+  // open is a bill, and a per-plan ceiling is what stops it — not
+  // because any of those minutes are given away.
+  DEFAULT_VOICE_MINUTE_LIMITS: {
+    kind: "capacity",
+    why: "minutes of speech a month; every minute is charged in credits",
+  },
   // The only entry here that costs nothing at all to serve. It is a
   // sort order on rows the account already has: pinning makes no model
   // call, stores no bytes and creates no row. It is in this table
@@ -535,7 +546,18 @@ check(
 // Each quantitative claim, and the route that would refuse the action.
 const ENFORCED_ROWS = {
   freeChatMessages: { accessor: "freeChatAllowance(", enforcedIn: "src/lib/billing/free-chat-usage.ts" },
-  aiAgents: { accessor: "maxAgentsForPlan(", enforcedIn: "src/app/api/agents/route.ts" },
+  // THE PRICING PAGE AND THE ROUTE ASK DIFFERENT QUESTIONS, and after
+  // V4 #25 that is not a discrepancy but the point. The page says what
+  // the PLAN includes — maxAgentsForPlan — because that is what somebody
+  // comparing plans wants to know. The route must enforce what the
+  // ACCOUNT has, plan plus any "+5 agents" add-on they bought, or a
+  // paying customer hits the plan's ceiling and is told to upgrade to
+  // something they already paid for.
+  aiAgents: {
+    accessor: "maxAgentsForPlan(",
+    enforcedIn: "src/app/api/agents/route.ts",
+    enforcedBy: "maxAgentsForAccount(",
+  },
   deepResearch: { accessor: "maxResearchRunsForPlan(", enforcedIn: "src/app/api/research/route.ts" },
   // The caps moved into the shared ingest when uploads gained a second
   // path (browser → storage → /api/files/register): ONE implementation,
@@ -551,16 +573,25 @@ const ENFORCED_ROWS = {
     enforcedIn: "src/app/api/websites/[id]/publish/route.ts",
   },
 };
-for (const [labelKey, { accessor, enforcedIn }] of Object.entries(ENFORCED_ROWS)) {
+// Plain JavaScript: no type annotation here. `enforcedBy` is simply
+// undefined on the rows that do not declare one, and the ?? below reads
+// that as "same name as the accessor".
+for (const [labelKey, { accessor, enforcedIn, enforcedBy }] of Object.entries(ENFORCED_ROWS)) {
   check(`pricing shows "${labelKey}"`, rowLabels.includes(labelKey));
   check(
     `"${labelKey}" reads ${accessor}) rather than a typed-in number`,
     rowsBlock.includes(accessor),
     `not found in COMPARISON_ROWS`
   );
-  // free-chat-usage.ts reaches the allowance through freeChatAllowanceForAccount.
+  // THE ENFORCER MAY HAVE A DIFFERENT NAME FROM THE DISPLAY ACCESSOR, and
+  // where it does, the map says so. free-chat-usage.ts reaches the
+  // allowance through freeChatAllowanceForAccount; the agent route
+  // reaches the cap through maxAgentsForAccount. Declared per row rather
+  // than as a growing chain of ternaries, so a third one is a line in the
+  // table instead of another special case nobody notices.
   const enforcingSrc = readFileSync(enforcedIn, "utf8");
-  const enforcingName = labelKey === "freeChatMessages" ? "freeChatAllowanceForAccount(" : accessor;
+  const enforcingName =
+    enforcedBy ?? (labelKey === "freeChatMessages" ? "freeChatAllowanceForAccount(" : accessor);
   check(
     `"${labelKey}" is really refused by ${enforcedIn}`,
     enforcingSrc.includes(enforcingName),

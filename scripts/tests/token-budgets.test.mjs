@@ -80,6 +80,7 @@ const CLASSIFIED = {
     "src/lib/website-builder.ts",
   ],
   structured: [
+    "src/lib/agents/template-fill.ts",
     "src/lib/agents/agent-builder.ts",
     "src/lib/import/map-columns.ts",
     "src/lib/import/paste.ts",
@@ -100,6 +101,35 @@ const CLASSIFIED = {
     "src/app/api/text-actions/route.ts",
   ],
 };
+//   passthrough — chooses NO budget of its own. The provider adapters and
+//                 the batch client hand on whatever the caller asked for,
+//                 so there is nothing here to classify by outcome — and a
+//                 hardcoded number in one of them WOULD be a bug: it would
+//                 silently cap every caller that routes through it,
+//                 including the deliverable ones above, and the cut would
+//                 be invisible to modelText because the caller never asked
+//                 for that ceiling. Checked below.
+CLASSIFIED.passthrough = [
+  "src/lib/ai/providers/adapters/anthropic.ts",
+  "src/lib/ai/providers/adapters/groq.ts",
+  "src/lib/ai/batch/batch-client.ts",
+];
+{
+  const literal = CLASSIFIED.passthrough.filter((f) => {
+    const src = strip(readFileSync(f, "utf8"));
+    return /max_tokens\s*:\s*(\d|[A-Z_]{3,})/.test(src);
+  });
+  list("a passthrough never chooses a budget of its own", literal);
+  const forwards = CLASSIFIED.passthrough.filter((f) =>
+    /max_tokens\s*:\s*[a-z][A-Za-z.]*maxTokens/.test(strip(readFileSync(f, "utf8")))
+  );
+  ok(
+    `every passthrough forwards the caller's ceiling (${forwards.length}/${CLASSIFIED.passthrough.length})`,
+    forwards.length === CLASSIFIED.passthrough.length,
+    CLASSIFIED.passthrough.filter((f) => !forwards.includes(f)).join(", ")
+  );
+}
+
 const KNOWN = new Set(Object.values(CLASSIFIED).flat());
 const withBudget = SOURCES.filter((f) => /max_tokens\s*:/.test(strip(readFileSync(f, "utf8"))));
 ok(`call sites were actually found (${withBudget.length})`, withBudget.length >= 20, String(withBudget.length));

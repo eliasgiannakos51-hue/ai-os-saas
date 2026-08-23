@@ -20,7 +20,7 @@ import { AGENT_BUILDER_MODEL } from "@/lib/agents/agent-models";
 import { AGENT_LIMITS, normaliseDeliveryTarget } from "@/lib/agents/agent-config";
 import { classifyAgentRequest } from "@/lib/agents/agent-capability";
 import { isValidTimeZone } from "@/lib/agents/cron-expression";
-import { maxAgentsForPlan } from "@/lib/agents/agent-limits";
+import { maxAgentsForAccount } from "@/lib/agents/agent-limits";
 import { checkAgentActivationCap } from "@/lib/agents/agent-cap";
 import { startJob } from "@/lib/jobs/start-job";
 
@@ -159,7 +159,7 @@ export async function POST(request: Request) {
 
     const isAdmin = isAdminEmail(user.email);
     const planSlug = await resolveEffectivePlanSlug(user);
-    const agentCap = maxAgentsForPlan(planSlug);
+    const agentCap = await maxAgentsForAccount(user.id, planSlug);
 
     // Refuse before spending anything if this plan cannot own an agent at
     // all. Building a preview the user can never turn into an agent is a

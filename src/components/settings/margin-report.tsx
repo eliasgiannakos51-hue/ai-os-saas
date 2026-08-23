@@ -2,6 +2,7 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdminEmail } from "@/lib/admin";
+import { monthlyRecurringRevenue } from "@/lib/billing/monthly-revenue";
 import { logApiError } from "@/lib/log-error";
 import { TrendingUp, AlertTriangle } from "lucide-react";
 import { formatNumber } from "@/lib/format-number";
@@ -53,6 +54,7 @@ export async function MarginReport() {
 
   let rows: MarginFeatureRow[] = [];
   let cacheRows: CacheFeatureRow[] = [];
+  let revenue: number | null = null;
   let failed = false;
 
   try {
@@ -80,12 +82,36 @@ export async function MarginReport() {
     const logRows = (data ?? []) as MarginLogRow[];
     rows = aggregateMarginRows(logRows);
     cacheRows = aggregateCacheRows(logRows);
+
+    // THE DENOMINATOR THAT WAS MISSING. absorbedRefusals.shareOfRevenue
+    // has read null since the day it was added, because there was no way
+    // to ask what monthly revenue is — subscription_tier lives in
+    // auth.users.raw_user_meta_data and nothing aggregated it. The
+    // mrr_inputs() function does now (see the 20260823 migration), and
+    // lib/billing/monthly-revenue.ts turns its counts into euros.
+    //
+    // AN INCOMPLETE FIGURE IS NOT PASSED. A revenue number missing the
+    // enterprise tier is too SMALL, which makes every share computed
+    // against it too BIG — and the first thing this share decides is
+    // whether a business assumption has broken. Null with a stated
+    // reason beats a confident wrong percentage.
+    const { data: mrrRows, error: mrrError } = await admin.rpc("mrr_inputs", {});
+    if (mrrError) throw mrrError;
+    const rev = monthlyRecurringRevenue(
+      ((mrrRows ?? []) as Record<string, unknown>[]).map((r) => ({
+        tier: String(r.tier ?? ""),
+        billingInterval: String(r.billing_interval ?? "month"),
+        subscribers: Number(r.subscribers ?? 0),
+        seats: Number(r.seats ?? 0),
+      }))
+    );
+    revenue = rev.complete && rev.eur > 0 ? rev.eur : null;
   } catch (err) {
     logApiError("settings:MarginReport", err);
     failed = true;
   }
 
-  const summary = summariseMarginReport(rows);
+  const summary = summariseMarginReport(rows, { monthlyRevenueEur: revenue });
 
   // A shortfall that only exists on a page nobody has open is a shortfall
   // that keeps costing money. settleReservation alerts per settlement;

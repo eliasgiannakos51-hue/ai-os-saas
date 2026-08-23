@@ -124,7 +124,8 @@
       "files": "File",
       "deepResearch": "Ricerca approfondita",
       "help": "Centro assistenza",
-      "formSubmissions": "Invii dei moduli"
+      "formSubmissions": "Invii dei moduli",
+      "routing": "Instradamento dei modelli"
     },
     "groupHints": {
       "create": "Genera un sito, pianifica un obiettivo, scrivi un documento.",
@@ -3184,5 +3185,25 @@
       "burnEur": "Consumo mensile",
       "runwayMonths": "Autonomia"
     }
+  },
+  "routing": {
+    "title": "Instradamento dei modelli",
+    "description": "Quale modello ha servito quale richiesta negli ultimi 30 giorni, quanto è costato e quanto ha risparmiato l'instradamento.",
+    "empty": "Non è ancora stata registrata alcuna decisione di instradamento. Questa tabella si riempie quando le richieste iniziano a passare dal router: non mostra zeri, non mostra nulla.",
+    "decisions": "Decisioni",
+    "charged": "Addebitato ai clienti",
+    "absorbed": "Assorbito da noi",
+    "absorbedNote": "tentativi economici falliti non addebitati al cliente",
+    "saved": "Risparmiato dalla regola della cache",
+    "savedNote": "declassamenti rifiutati perché sarebbero costati di più",
+    "model": "Modello",
+    "overrides": "Deroghe",
+    "overrideSaving": "Risparmio da deroga",
+    "learnedTitle": "Cosa ha imparato il router",
+    "learnedIntro": "Tasso di successo per capacità e modello su 30 giorni. Un modello sotto il {rate}% smette di essere scelto per quella capacità, ma solo dopo almeno {samples} esecuzioni, perché due fallimenti su due non sono una prova.",
+    "learnedEmpty": "Niente di conclusivo per ora. Finché una coppia capacità-modello non ha abbastanza esecuzioni, l'instradamento resta sulla sua mappa statica dei livelli.",
+    "runs": "{rate}% su {samples} esecuzioni",
+    "routedUp": "instradato più in alto",
+    "notEnough": "non ancora sufficiente"
   }
 }

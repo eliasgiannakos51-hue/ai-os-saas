@@ -106,6 +106,25 @@ function inputCostUsd(model: CatalogModel, tokens: number, cached: boolean): num
 }
 
 /**
+ * What `tokens` of prefix cost at `modelId`, with this model's own cache
+ * minimum applied.
+ *
+ * EXPORTED SO THE ROUTER USES THIS COST MODEL AND NOT A SECOND ONE. The
+ * router (lib/ai/routing/route.ts) has to compare two models on the same
+ * prefix to decide whether a downgrade is genuinely cheaper, and a
+ * private copy of `rate = cached ? x * ratio : x` there would be a second
+ * source of truth for the number that decides every route.
+ *
+ * Null for a model the catalog does not know: an unpriced model must not
+ * be reported as free.
+ */
+export function prefixInputCostUsd(modelId: string | undefined, tokens: number): number | null {
+  const model = catalogModel(modelId);
+  if (!model) return null;
+  return inputCostUsd(model, tokens, cachesOn(tokens, modelId));
+}
+
+/**
  * What moving this request from one model to another does to the cached
  * part of its prompt.
  *

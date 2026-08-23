@@ -136,6 +136,17 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   // and no tool arguments — nothing the model was shown or said. Removed
   // by the auth.users cascade.
   { table: "ai_provider_log", label: "ai_provider_routing", scope: "account" },
+  // Which MODEL served which of this account's calls, at which tier, and
+  // what it cost (V4 #34/#35). ACCOUNT scope for exactly the reason
+  // ai_provider_log above is: it is an operational record OF this user's
+  // requests, so it is theirs, and it carries no prompt, no completion
+  // and no tool arguments — only the feature name, the rule that chose
+  // the model, and money. Removed by the auth.users cascade.
+  //
+  // NOT non-personal, even though the ROUTER only ever reads it in
+  // aggregate. The aggregate is our business; the row names a person and
+  // says what they asked for and when, and that is theirs.
+  { table: "routing_decisions", label: "model_routing", scope: "account" },
 
   // --- Trading journal (V4 #14) ---
   //

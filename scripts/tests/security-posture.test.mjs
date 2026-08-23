@@ -107,6 +107,13 @@ const ADMIN_ONLY_TABLES = new Set([
   "subscriber_months",
   "revenue_snapshots",
   "business_inputs",
+  // V4 #34/#35. Which model served which request, what the customer was
+  // charged, and — the column that matters — what OUR failed cheap
+  // attempts cost us. Deny-all for the same reason as the four above:
+  // "owner" is decided in TypeScript by isAdminEmail(), and a customer
+  // who could read it would learn our per-request margin. Reached only
+  // through createAdminClient(), behind that gate.
+  "routing_decisions",
 ]);
 
 const missing = [...created].filter((t) => !rlsEnabled.has(t)).sort();

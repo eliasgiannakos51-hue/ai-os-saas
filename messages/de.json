@@ -124,7 +124,8 @@
       "files": "Dateien",
       "deepResearch": "Tiefenrecherche",
       "help": "Hilfe-Center",
-      "formSubmissions": "Formulareingänge"
+      "formSubmissions": "Formulareingänge",
+      "routing": "Modell-Routing"
     },
     "groupHints": {
       "create": "Eine Website erzeugen, ein Ziel planen, ein Dokument schreiben.",
@@ -3184,5 +3185,25 @@
       "burnEur": "Monatlicher Verbrauch",
       "runwayMonths": "Reichweite"
     }
+  },
+  "routing": {
+    "title": "Modell-Routing",
+    "description": "Welches Modell welche Anfrage in den letzten 30 Tagen bedient hat, was es gekostet und was das Routing gespart hat.",
+    "empty": "Es wurden noch keine Routing-Entscheidungen erfasst. Diese Tabelle füllt sich, sobald Anfragen durch den Router laufen — sie zeigt keine Nullen, sie zeigt nichts.",
+    "decisions": "Entscheidungen",
+    "charged": "Kunden berechnet",
+    "absorbed": "Von uns getragen",
+    "absorbedNote": "fehlgeschlagene günstige Versuche, die dem Kunden nicht berechnet wurden",
+    "saved": "Durch die Cache-Regel gespart",
+    "savedNote": "Herabstufungen, die abgelehnt wurden, weil sie mehr gekostet hätten",
+    "model": "Modell",
+    "overrides": "Überschreibungen",
+    "overrideSaving": "Ersparnis durch Überschreibung",
+    "learnedTitle": "Was der Router gelernt hat",
+    "learnedIntro": "Erfolgsquote je Fähigkeit und Modell über 30 Tage. Ein Modell unter {rate}% wird für diese Fähigkeit nicht mehr gewählt — aber erst ab {samples} Durchläufen, denn zwei Fehlschläge von zwei sind kein Beleg.",
+    "learnedEmpty": "Noch nichts Belastbares. Bis ein Paar aus Fähigkeit und Modell genug Durchläufe hat, bleibt das Routing bei seiner statischen Stufenzuordnung.",
+    "runs": "{rate}% über {samples} Durchläufe",
+    "routedUp": "höher geroutet",
+    "notEnough": "noch nicht genug"
   }
 }

@@ -124,7 +124,8 @@
       "files": "Ficheiros",
       "deepResearch": "Investigação profunda",
       "help": "Centro de ajuda",
-      "formSubmissions": "Envios de formulários"
+      "formSubmissions": "Envios de formulários",
+      "routing": "Encaminhamento de modelos"
     },
     "groupHints": {
       "create": "Gere um site, planeie um objetivo, escreva um documento.",
@@ -3184,5 +3185,25 @@
       "burnEur": "Consumo mensal",
       "runwayMonths": "Autonomia"
     }
+  },
+  "routing": {
+    "title": "Encaminhamento de modelos",
+    "description": "Que modelo atendeu cada pedido nos últimos 30 dias, quanto custou e quanto o encaminhamento poupou.",
+    "empty": "Ainda não foi registada nenhuma decisão de encaminhamento. Esta tabela preenche-se quando os pedidos começarem a passar pelo encaminhador — não mostra zeros, não mostra nada.",
+    "decisions": "Decisões",
+    "charged": "Cobrado aos clientes",
+    "absorbed": "Absorvido por nós",
+    "absorbedNote": "tentativas baratas falhadas que não foram cobradas ao cliente",
+    "saved": "Poupado pela regra de cache",
+    "savedNote": "despromoções recusadas por ficarem mais caras",
+    "model": "Modelo",
+    "overrides": "Substituições",
+    "overrideSaving": "Poupança da substituição",
+    "learnedTitle": "O que o encaminhador aprendeu",
+    "learnedIntro": "Taxa de sucesso por capacidade e modelo em 30 dias. Um modelo abaixo de {rate}% deixa de ser escolhido para essa capacidade — mas só a partir de {samples} execuções, porque duas falhas em duas não são prova.",
+    "learnedEmpty": "Nada conclusivo ainda. Até um par de capacidade e modelo ter execuções suficientes, o encaminhamento mantém-se no seu mapa estático de níveis.",
+    "runs": "{rate}% em {samples} execuções",
+    "routedUp": "encaminhado para cima",
+    "notEnough": "ainda insuficiente"
   }
 }

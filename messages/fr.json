@@ -124,7 +124,8 @@
       "files": "Fichiers",
       "deepResearch": "Recherche approfondie",
       "help": "Centre d’aide",
-      "formSubmissions": "Envois de formulaires"
+      "formSubmissions": "Envois de formulaires",
+      "routing": "Routage des modèles"
     },
     "groupHints": {
       "create": "Générez un site, planifiez un objectif, rédigez un document.",
@@ -3184,5 +3185,25 @@
       "burnEur": "Consommation mensuelle",
       "runwayMonths": "Autonomie"
     }
+  },
+  "routing": {
+    "title": "Routage des modèles",
+    "description": "Quel modèle a servi quelle requête sur les 30 derniers jours, ce que cela a coûté et ce que le routage a économisé.",
+    "empty": "Aucune décision de routage n'a encore été enregistrée. Ce tableau se remplit dès que des requêtes passent par le routeur — il n'affiche pas des zéros, il n'affiche rien.",
+    "decisions": "Décisions",
+    "charged": "Facturé aux clients",
+    "absorbed": "Absorbé par nous",
+    "absorbedNote": "tentatives économiques ratées non facturées au client",
+    "saved": "Économisé par la règle de cache",
+    "savedNote": "rétrogradations refusées parce qu'elles auraient coûté plus cher",
+    "model": "Modèle",
+    "overrides": "Dérogations",
+    "overrideSaving": "Économie de dérogation",
+    "learnedTitle": "Ce que le routeur a appris",
+    "learnedIntro": "Taux de réussite par capacité et par modèle sur 30 jours. Un modèle sous {rate}% cesse d'être choisi pour cette capacité — mais seulement à partir de {samples} exécutions, car deux échecs sur deux ne sont pas une preuve.",
+    "learnedEmpty": "Rien de concluant pour l'instant. Tant qu'un couple capacité/modèle n'a pas assez d'exécutions, le routage reste sur sa carte de niveaux statique.",
+    "runs": "{rate}% sur {samples} exécutions",
+    "routedUp": "routé plus haut",
+    "notEnough": "pas encore assez"
   }
 }

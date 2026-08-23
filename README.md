@@ -344,6 +344,65 @@ regexes, and **cannot be satisfied by an empty answer** — an
 injection-refusal case that a blank response would pass is the most
 dangerous kind of false green.
 
+### Model routing
+
+`src/lib/ai/routing/` decides which model serves which request. Every
+request is classified **trivial / simple / complex / expert** by
+deterministic rules — the feature, the prefix size, the input length,
+whether the output is structured, whether anyone will read it — and only
+an unrecognised feature falls through to a classifier call. The whole
+decision is pure and costs **0.002ms**, against the 50ms budget.
+
+**When in doubt it goes UP.** An under-routed request produces a bad
+answer the user paid for; an over-routed one costs a fraction of a cent.
+Unattended work (a scheduled agent, an automation step) never runs on the
+cheapest rung, because nobody is going to read the bad answer and try
+again.
+
+**The cache-minimum trap, which is the whole reason this is not a lookup
+table.** Haiku's prompt cache needs **4,096** tokens of prefix; Sonnet's
+needs **1,024**. A request with a 2,000-token system prefix caches on
+Sonnet and does **not** cache on Haiku:
+
+| Prefix | Haiku (min 4096) | Sonnet (min 1024) | |
+| --- | --- | --- | --- |
+| 500 | $0.000500 | $0.001500 | Haiku cheaper |
+| 1,024 | $0.001024 | $0.000307 | **Haiku costs 3.3× more** |
+| 2,000 | $0.002000 | $0.000600 | **Haiku costs 3.3× more** |
+| 4,095 | $0.004095 | $0.001229 | **Haiku costs 3.3× more** |
+| 4,096 | $0.000410 | $0.001229 | Haiku cheaper |
+
+Between those two numbers the "downgrade" costs **3.3× more for the
+prefix on every single call**, while the per-token rate went down and
+every report says the change worked. The router prices both models on the
+actual prefix and refuses any downgrade that is not really cheaper. The
+arithmetic is asserted in `scripts/tests/model-routing.test.mjs`.
+
+**Escalation is charged once.** If the cheap model fails in a way a
+stronger one could fix — malformed output, a declined capability, a
+truncation, a failed verification — the router climbs **one** rung. A
+safety refusal, a rate limit or an auth error does **not** escalate:
+retrying a refusal on a stronger model is shopping for a different answer
+to a question that was already answered. The customer is charged for the
+attempt that **succeeded**; the failed cheap attempt is absorbed by us,
+because they never chose the cheap model — our routing did.
+
+**It learns, without oscillating.** `routing_decisions` records every
+decision and its outcome, and `routing_success_rates()` aggregates the
+last 30 days. A model below **90%** on a feature stops being chosen for
+it — but only after at least **20** runs, because two failures out of two
+is not evidence.
+
+`/dashboard/routing` (owner-only, 404 not 403) shows which model went
+where, what customers were charged, **what our own failed attempts cost
+us**, and what the cache rule saved. That third column is the one that
+matters: a router that saves money by charging users for its own failed
+guesses is not saving money, it is moving the cost.
+
+Changes here are validated by the eval baseline above —
+`node scripts/evals/run.mjs --compare baseline.json` exits non-zero if
+any capability lost more than 10% of its success rate.
+
 ## Email delivery: the verified sending domain
 
 **Nothing leaves the building without this.** The default sender,

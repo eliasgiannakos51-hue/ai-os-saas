@@ -440,7 +440,9 @@ if (!DB) {
   // 20260827's voice_usage took 75 to 76; 20260828's ai_provider_log
   // took 76 to 77; 20260830's trading journal and 20260831's bank/crypto
   // tables took 77 to 83; 20260901's notification tables took 83 to 87.
-  check(`98 tables`, tables === 98, `got ${tables}`);
+  // 20260903's revenue engine took 91 to 98; 20260904's routing_decisions
+  // took 98 to 99.
+  check(`99 tables`, tables === 99, `got ${tables}`);
   check(`at least 18 RPC-callable functions`, fns >= 18, `got ${fns}`);
   check(`at least 200 policies in public`, pols >= 200, `got ${pols}`);
 
@@ -460,6 +462,8 @@ if (!DB) {
   // createAdminClient(), and production_errors is additionally behind an
   // isAdminEmail() gate on the page that shows it.
   const DENY_ALL_BY_DESIGN = {
+    routing_decisions:
+      "which model served which request, what it cost and what the failed cheap attempt cost US — the platform's own routing ledger, not the customer's; the owner-only page reads it via service role",
     rate_limit_log: "login and cron throttling — a user who could read it could time their retries",
     account_deletion_requests: "erasure queue; the requester already knows, nobody else may",
     daily_ai_spend_tracking: "the platform's own spend ledger, not the customer's",

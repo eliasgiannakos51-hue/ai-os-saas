@@ -124,7 +124,8 @@
       "files": "Files",
       "deepResearch": "Deep Research",
       "help": "Help Centre",
-      "formSubmissions": "Form submissions"
+      "formSubmissions": "Form submissions",
+      "routing": "Model routing"
     },
     "groupHints": {
       "create": "Generate a site, plan a goal, write a document.",
@@ -3184,5 +3185,25 @@
       "burnEur": "Monthly burn",
       "runwayMonths": "Runway"
     }
+  },
+  "routing": {
+    "title": "Model routing",
+    "description": "Which model served which request over the last 30 days, what it cost, and what routing saved.",
+    "empty": "No routing decisions have been recorded yet. This table fills in once requests start flowing through the router — it is not showing zeros, it is showing nothing.",
+    "decisions": "Decisions",
+    "charged": "Charged to customers",
+    "absorbed": "Absorbed by us",
+    "absorbedNote": "failed cheap attempts the customer was not charged for",
+    "saved": "Saved by the cache rule",
+    "savedNote": "downgrades refused because they would have cost more",
+    "model": "Model",
+    "overrides": "Overrides",
+    "overrideSaving": "Override saving",
+    "learnedTitle": "What the router has learned",
+    "learnedIntro": "Success rate per feature and model over 30 days. A model below {rate}% stops being chosen for that feature — but only once it has at least {samples} runs, because two failures out of two is not evidence.",
+    "learnedEmpty": "Nothing conclusive yet. Until a feature and model pair has enough runs, routing stays on its static tier map.",
+    "runs": "{rate}% over {samples} runs",
+    "routedUp": "routed up",
+    "notEnough": "not enough yet"
   }
 }

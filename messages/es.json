@@ -124,7 +124,8 @@
       "files": "Archivos",
       "deepResearch": "Investigación profunda",
       "help": "Centro de ayuda",
-      "formSubmissions": "Envíos de formularios"
+      "formSubmissions": "Envíos de formularios",
+      "routing": "Enrutado de modelos"
     },
     "groupHints": {
       "create": "Genera un sitio, planifica un objetivo, escribe un documento.",
@@ -3184,5 +3185,25 @@
       "burnEur": "Consumo mensual",
       "runwayMonths": "Autonomía"
     }
+  },
+  "routing": {
+    "title": "Enrutado de modelos",
+    "description": "Qué modelo atendió cada solicitud en los últimos 30 días, cuánto costó y cuánto ahorró el enrutado.",
+    "empty": "Aún no se ha registrado ninguna decisión de enrutado. Esta tabla se llena cuando las solicitudes empiecen a pasar por el enrutador: no muestra ceros, no muestra nada.",
+    "decisions": "Decisiones",
+    "charged": "Cobrado a los clientes",
+    "absorbed": "Asumido por nosotros",
+    "absorbedNote": "intentos baratos fallidos que no se cobraron al cliente",
+    "saved": "Ahorrado por la regla de caché",
+    "savedNote": "rebajas rechazadas porque habrían costado más",
+    "model": "Modelo",
+    "overrides": "Anulaciones",
+    "overrideSaving": "Ahorro por anulación",
+    "learnedTitle": "Lo que ha aprendido el enrutador",
+    "learnedIntro": "Tasa de éxito por capacidad y modelo en 30 días. Un modelo por debajo del {rate}% deja de elegirse para esa capacidad, pero solo cuando tenga al menos {samples} ejecuciones, porque dos fallos de dos no son evidencia.",
+    "learnedEmpty": "Nada concluyente todavía. Hasta que un par de capacidad y modelo tenga suficientes ejecuciones, el enrutado se mantiene en su mapa estático de niveles.",
+    "runs": "{rate}% en {samples} ejecuciones",
+    "routedUp": "enrutado hacia arriba",
+    "notEnough": "aún insuficiente"
   }
 }

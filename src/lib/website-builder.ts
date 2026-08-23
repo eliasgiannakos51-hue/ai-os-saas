@@ -222,14 +222,7 @@ FONTS (Google Fonts):
 Available named fonts you recognize and can use exactly by this name: ${GOOGLE_FONTS_LIST}.
 - If the user names a specific one of these (or something close/misspelled), use that exact font.
 - If the user names a font NOT in this list, use the closest visual match from the list instead (never invent a fake font-family name).
-- If the user names no font, choose the pairing from the SITE SHAPE and the subject, not from habit. Three mappings used to be listed here and the result was three looks across every site ever generated, so treat the following as a starting range and pick deliberately:
-  * elegant / luxury / hospitality -> serif display headings (Playfair Display, Cormorant Garamond, Bodoni Moda, Prata) + a quiet sans body (Inter, Karla, Work Sans)
-  * legal / medical / financial / institutional -> a restrained serif throughout (Libre Baskerville, Merriweather, Spectral, Domine) or a sober grotesk (IBM Plex Sans, Source Sans 3, Archivo) — authority reads as understatement, not as a display face
-  * modern / tech / product -> geometric sans (Space Grotesk, Manrope, Outfit, Plus Jakarta Sans, Sora)
-  * warm / family / neighbourhood -> rounded sans (Nunito, Quicksand, Rubik) or a friendly slab (Zilla Slab)
-  * editorial / writing / personal -> a reading serif (Crimson Pro, Lora, Spectral, Merriweather) at a generous size, single column
-  * bold / nightlife / sport / streetwear -> condensed display (Oswald, Bebas Neue, Archivo) + a neutral sans body
-  * gallery / architecture / minimal -> one grotesk at two weights (Epilogue, Urbanist, Barlow), heavy reliance on scale and space rather than on a second family
+- If the user names no font, use the TYPE PAIRING named in this site's DESIGN VARIATION block (it arrives with the brief) and load exactly those families. A seven-way subject-to-font mapping used to live here; it is gone because it produced the same seven looks across every site ever generated, which is what the drawn pairing exists to replace. If no pairing was supplied, pick deliberately from the list above by subject — never Inter by default.
 - Inter is a perfectly good body face and it is also the most over-used font on the web. Do not reach for it by default — choose it when it is right, not when nothing else came to mind.
 - To actually load a font, add BOTH of these to <head> (this is the one and only external-resource exception in this document — see the rules above):
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -255,7 +248,7 @@ ANIMATIONS (pure CSS). These are REFERENCE IMPLEMENTATIONS, not a checklist — 
 
 1) Scroll-reveal fade-in — add class="reveal" to a section, plus this CSS and this exact tiny script (the ONLY two purposes an inline <script> may ever be used for in this document are this effect and the contact-form handler described below):
    CSS:
-     .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease-out, transform 0.7s ease-out; }
+     .reveal { opacity: 0; transform: translateY(MOTION_DISTANCE); transition: opacity MOTION_DURATION MOTION_EASING, transform MOTION_DURATION MOTION_EASING; }
      .reveal.is-visible { opacity: 1; transform: translateY(0); }
    Script (place once, right before </body>):
      <script>
@@ -270,18 +263,19 @@ ANIMATIONS (pure CSS). These are REFERENCE IMPLEMENTATIONS, not a checklist — 
      .parallax-section { background-image: url('...'); background-attachment: fixed; background-size: cover; background-position: center; }
 
 3) Smooth hover lift — for whatever element this page actually has that should respond to a pointer. Name the class after that element in THIS design; do not introduce a card because a hover effect exists.
-     .lift { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-     .lift:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+     .lift { transition: transform MOTION_DURATION MOTION_EASING, box-shadow MOTION_DURATION MOTION_EASING; }
+     .lift:hover { transform: translateY(calc(-1 * MOTION_DISTANCE)) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
 
 4) Animated gradient — for any large colour field this design already calls for. The four colour stops below are written as PLACEHOLDERS on purpose: substitute four real colours from THIS site's own palette. Emitting a literal purple/orange gradient on a law firm or a bakery is exactly the kind of copied default this section exists to prevent. Several shapes above forbid a gradient outright; the shape you chose wins over this snippet.
-     .gradient-bg { background: linear-gradient(-45deg, COLOR_1, COLOR_2, COLOR_3, COLOR_4); background-size: 400% 400%; animation: gradientShift 12s ease infinite; }
+     .gradient-bg { background: linear-gradient(-45deg, COLOR_1, COLOR_2, COLOR_3, COLOR_4); background-size: 400% 400%; animation: gradientShift MOTION_AMBIENT ease infinite; }
      @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
 5) Staggered entrance for a list — write one delay rule per item the list ACTUALLY has, however many that is. The count below is an illustration of the pattern, not a target:
-     .stagger-item { opacity: 0; animation: fadeInUp 0.6s ease forwards; }
-     .stagger-item:nth-child(n) { animation-delay: calc(n * 0.1s); }  /* i.e. one rule per real item */
-     @keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+     .stagger-item { opacity: 0; animation: fadeInUp MOTION_DURATION MOTION_EASING forwards; }
+     .stagger-item:nth-child(n) { animation-delay: calc(n * MOTION_STAGGER); }  /* i.e. one rule per real item */
+     @keyframes fadeInUp { from { opacity: 0; transform: translateY(MOTION_DISTANCE); } to { opacity: 1; transform: translateY(0); } }
 
+MOTION_DURATION, MOTION_DISTANCE, MOTION_EASING, MOTION_STAGGER and MOTION_AMBIENT are PLACEHOLDERS, like the gradient's COLOR_1..COLOR_4: substitute the numbers from the MOTION TIMING line of this site's DESIGN VARIATION block, never literals. Every site moving at the same speed reads as the same template however different its layout is.
 Reach for these when the description asks for "impressive"/"modern"/"animated" or similar. A restrained, serious or editorial site is BETTER with no animation at all — do not add motion to prove effort.`;
 
 // THE SECTION THAT DID NOT EXIST, and whose absence is the real reason
@@ -381,7 +375,7 @@ VARY THESE DELIBERATELY, driven by the subject rather than by habit:
 - HERO: full-bleed photograph / split text-and-image / purely typographic with no image / asymmetric offset / no hero at all, opening straight into the work or the menu.
 - NAVIGATION: a normal top bar / a logo alone / anchored section links / none, for a short single-purpose page.
 - SECTION RHYTHM: alternating left-right blocks / full-bleed colour bands / a card grid / one continuous editorial column / an overlapping asymmetric layout.
-- PALETTE: derive it from the actual subject — a taverna is not a fintech. Warm earth tones, deep monochrome, high-contrast black and white, a single accent on near-white, muted naturals are all available. Avoid the default indigo-to-violet gradient unless the brief asks for it.
+- PALETTE: build it inside the PALETTE STRATEGY named in this site's DESIGN VARIATION block, deriving the actual hex values from the subject — a taverna is not a fintech. Never the default indigo-to-violet gradient unless the brief asks for it.
 - TYPOGRAPHY: vary the pairing, the scale and the weight contrast per the shape above; see FONTS.
 - DENSITY: a listings page should be dense; a portfolio should be sparse. Do not apply the same vertical rhythm to both.
 

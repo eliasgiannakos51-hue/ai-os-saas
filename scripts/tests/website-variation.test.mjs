@@ -130,5 +130,43 @@ check(
   );
 }
 
+
+console.log("\n== THE VISUAL LINES REACH THE MODEL (V4 #32) ==");
+{
+  // Drawing an axis and not sending it is the same as not drawing it.
+  // The mutation suite removed all four lines from the directive and
+  // every gate stayed green — because every gate was checking that the
+  // AXES EXIST, and none was checking that they are DELIVERED.
+  const drawn = pickVariation(["visual-check", 7, "a bakery in Thessaloniki"]);
+  const directive = variationDirective(drawn);
+  for (const [label, value] of [
+    ["PALETTE STRATEGY", drawn.palette],
+    ["TYPE PAIRING", drawn.typeface],
+    ["SPACING SCALE", drawn.spacing],
+    ["MOTION TIMING", drawn.motionTiming],
+  ]) {
+    check(`${label} is a labelled line in the directive`, directive.includes(`- ${label}: `));
+    // THE DRAWN VALUE ITSELF, not just the label. A directive with the
+    // right headings and the wrong values reads as correct to every
+    // regex and tells the model nothing.
+    check(`…carrying the value actually drawn`, directive.includes(value), value.slice(0, 40));
+  }
+  check(
+    "the four are named as decisions, not suggestions",
+    /are the VISUAL lines, and they are decisions, not suggestions/.test(directive)
+  );
+  check(
+    "the motion placeholders are pointed at the timing line",
+    /MOTION_DURATION, MOTION_DISTANCE, MOTION_EASING, MOTION_STAGGER or MOTION_AMBIENT/.test(directive)
+  );
+  // A STATIC DRAW MUST BEAT A TIMING DRAW. The two axes are independent,
+  // so "static" and "700ms" co-occur; without this the model is told to
+  // animate at 700ms and not to animate, in the same block.
+  check(
+    "static motion overrides the drawn timing",
+    /is "static", emit no motion at all and ignore the timing/.test(directive)
+  );
+}
+
 console.log(`\n${failures.length === 0 ? "ALL PASS" : "FAILURES"}: ${pass} passed, ${failures.length} failed`);
 process.exit(failures.length === 0 ? 0 : 1);

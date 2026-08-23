@@ -226,16 +226,79 @@ console.log("\n== 6. variety is required on every axis, not just structure ==");
 for (const axis of ["HERO:", "NAVIGATION:", "SECTION RHYTHM:", "PALETTE:", "TYPOGRAPHY:", "DENSITY:"]) {
   check(`${axis} is a named axis of variation`, shape.includes(axis));
 }
-check("the over-used SaaS palette is called out", /Avoid the default indigo-to-violet gradient/.test(shape));
+check("the over-used SaaS palette is called out", /indigo-to-violet gradient/.test(shape));
+// AND THE PALETTE IS NOW DRAWN, not merely asked for. "Derive it from the
+// subject" is an instruction in a BYTE-IDENTICAL cached prompt, so it is
+// the same instruction on every call and gets the same answer — the
+// mechanism website-variation.ts was created to replace, applied to five
+// axes and not to this one. V4 #32, sixth report.
+check("the palette points at the per-site strategy", /PALETTE STRATEGY named in this site's DESIGN VARIATION block/.test(shape));
 
-console.log("\n== 7. typography has more than three outcomes ==");
+// NO MOTION LITERAL SURVIVES IN THE CACHED PROMPT.
+//
+// The ANIMATIONS section used to hand the model copy-pasteable CSS
+// containing 0.7s, 0.3s, 24px, -6px and calc(n * 0.1s), while the drawn
+// MOTION VOCABULARY promised 400-600ms and 60-90ms. A concrete snippet
+// beats a prose range every time, so every animated site ever generated
+// moved at exactly the same speed — invisible to five rounds of
+// structural gates. The numbers are placeholders now; these check they
+// stay that way.
+for (const [token, why] of [
+  ["MOTION_DURATION", "how long"],
+  ["MOTION_DISTANCE", "how far"],
+  ["MOTION_EASING", "what curve"],
+  ["MOTION_STAGGER", "how far apart"],
+  ["MOTION_AMBIENT", "how long an ambient loop takes"],
+]) {
+  check(`${token} is a placeholder (${why})`, animations.includes(token));
+}
+const literals = animations.match(/(?:transition|animation)[^;]*?\b\d+(?:\.\d+)?m?s\b/g) ?? [];
+check(
+  `no transition or animation carries a hard-coded duration (${literals.length})`,
+  literals.length === 0,
+  literals.join(" | ")
+);
+check(
+  "the reveal distance is a placeholder too",
+  !/translateY\(\s*-?\d+px\s*\)/.test(animations),
+  (animations.match(/translateY\([^)]*\)/g) ?? []).join(" | ")
+);
+check("and the rule is stated once", /are PLACEHOLDERS, like the gradient's COLOR_1\.\.COLOR_4/.test(animations));
+
+console.log("\n== 7. typography has more than three outcomes, AND THEY ARE DRAWN ==");
 const fonts = section("FONTS_SECTION");
-const mappings = (fonts.match(/^\s*\* /gm) ?? []).length;
-check(`there are more than three vibe mappings (${mappings})`, mappings >= 6);
-check("legal/medical gets its own, distinct direction", /legal \/ medical \/ financial \/ institutional/.test(fonts));
-check("editorial gets its own", /editorial \/ writing \/ personal/.test(fonts));
-check("and the over-used default is named", /most over-used font on the web/.test(fonts));
-check("with the reason it was three before", /three mappings used to be listed here/i.test(fonts));
+check("the over-used default is named", /most over-used font on the web/.test(fonts));
+
+// WHAT THIS SECTION USED TO CHECK, and why it changed.
+//
+// It counted the seven subject-to-font mappings in the prompt and
+// required at least six. That was the right INTENT — typography must have
+// more than three outcomes — tested by the wrong PROPERTY: a mapping in a
+// byte-identical cached prompt is prose, and prose is what the sixth
+// "same template" report says the model reads past. Seven mappings
+// produced seven looks.
+//
+// The mappings are gone and the pairing is DRAWN by code, one per site.
+// So the count moved to where the choice is actually made, and the bar
+// went UP: ten pairings selected deterministically beats seven suggested.
+const variationSrc = readFileSync("src/lib/website-variation.ts", "utf8");
+const pairings = (variationSrc.match(/^\s{2}"'[^"]+for headings/gm) ?? []).length;
+check(`the type pairings are drawn, not suggested (${pairings})`, pairings >= 8);
+check("…and TYPE_PAIRINGS is one of the drawn axes", /typeface: pick\(TYPE_PAIRINGS, "typeface"\)/.test(variationSrc));
+check("the prompt defers to the drawn pairing", /TYPE PAIRING named in this site's DESIGN VARIATION block/.test(fonts));
+check("…and says why the seven mappings were removed", /same seven looks across every site/.test(fonts));
+
+// EVERY DRAWN FONT MUST BE LOADABLE. A pairing naming a family that is
+// not in GOOGLE_FONTS_LIST is a page with a font-family the browser
+// silently falls back on — invisible in every source gate, and the
+// generated site quietly renders in Times New Roman.
+const availableFonts = new Set(
+  [...src.matchAll(/"([A-Z][A-Za-z0-9 +]+)"/g)].map((m) => m[1])
+);
+const namedFonts = [...new Set([...variationSrc.matchAll(/'([A-Z][A-Za-z0-9 ]+)'/g)].map((m) => m[1]))];
+const unloadable = namedFonts.filter((f) => !availableFonts.has(f));
+check(`every drawn font is in GOOGLE_FONTS_LIST (${namedFonts.length} named)`, unloadable.length === 0, unloadable.join(", "));
+check("the scan actually found the drawn fonts", namedFonts.length >= 10, String(namedFonts.length));
 
 console.log("\n== 8. the user's brief is stated to outrank the prompt ==");
 const precedence = section("USER_BRIEF_PRECEDENCE");

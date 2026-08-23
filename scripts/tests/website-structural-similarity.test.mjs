@@ -272,10 +272,32 @@ for (const description of ["a taverna in Thessaloniki", "a law office", "a weddi
     Object.keys(counts).length === 3,
     JSON.stringify(counts)
   );
+  // WHAT 30 SITES PROVE, AND WHAT THEY DO NOT.
+  //
+  // "All three appear over 30 sites" is a claim about a real person's
+  // experience and 30 is the right sample for it.
+  //
+  // "No order takes more than half of 30" was NOT such a claim. With
+  // three equally likely outcomes and n=30 the standard deviation is
+  // 2.36, so a PERFECTLY UNIFORM draw exceeds 15 about 4% of the time
+  // per description — near 1 in 8 across the three tested here. It fired
+  // the moment the hash was corrected (16/30 for the photographer) while
+  // the same draw measures 34.0% over 300 and 35.1% over 3,000. It was
+  // reporting noise, and it had passed for months against a hash whose
+  // axes were provably correlated.
+  //
+  // Balance is a claim about the DRAW, so it is now tested at a sample
+  // size where it means something — and the bar is TIGHTER than the old
+  // one in the only sense that matters: at n=600 a 40% share is far
+  // beyond sampling error, where 50% of 30 was inside it.
+  const large = Array.from({ length: 600 }, (_, i) => letterOf(pickVariation(["user-1", i, description])));
+  const largeCounts = large.reduce((acc, c) => ((acc[c] = (acc[c] ?? 0) + 1), acc), {});
+  const largestShare = Math.max(...Object.values(largeCounts)) / large.length;
+  const smallestShare = Math.min(...Object.values(largeCounts)) / large.length;
   check(
-    `${description}: no order takes more than half (${commonest}/30)`,
-    commonest <= 15,
-    JSON.stringify(counts)
+    `${description}: the draw is balanced at n=600 (${(largestShare * 100).toFixed(1)}% / ${(smallestShare * 100).toFixed(1)}%)`,
+    largestShare <= 0.4 && smallestShare >= 0.26,
+    JSON.stringify(largeCounts)
   );
 }
 

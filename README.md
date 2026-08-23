@@ -705,6 +705,45 @@ real signup flow, so it needs a working `.env.local` with real Supabase
 credentials (see Setup above) — if signup can't reach Supabase, those
 tests report as **skipped** with the reason, not failed.
 
+### "Do the generated sites all look the same?"
+
+`scripts/website-variety-check.mjs` answers it with numbers instead of
+opinions. It is deliberately **not** in `scripts/tests/`: it makes four
+real, billed Anthropic calls (~$1.50), so it must never run in the build
+gate.
+
+```bash
+ANTHROPIC_API_KEY=sk-ant-... node scripts/website-variety-check.mjs --out ./variety-out
+```
+
+It generates a cafe, a law firm and a photographer, writes one `.html`
+per brief (open them side by side — that is the screenshot), and prints
+**two independent verdicts**:
+
+- **structural similarity** — the landmark sequence. Target ≤ 0.7.
+- **visual similarity** — fonts, colour, spacing and motion timing, each
+  reported on its own axis and never averaged into the structural score.
+  Target **< 0.3**.
+
+The two are kept apart on purpose. Five earlier rounds shipped a good
+structural number while the complaint stood, because nothing was
+computing the second one: two pages can have different section orders
+and still be the same product to a visitor if they are the same colour,
+in the same fonts, at the same density, moving at the same speed.
+
+Ten design axes are drawn **by code** per site
+(`src/lib/website-variation.ts`) and delivered in the uncached user
+message, so the cached system prompt stays byte-identical and the prompt
+cache keeps hitting. Six are structural/compositional (section order,
+hero, grid, rhythm, type scale, motion vocabulary); four are visual
+(palette strategy, type pairing, spacing scale, motion timing). Anything
+left as prose in the system prompt is the same instruction on every call
+and gets the same answer — which is the whole reason the draw exists.
+
+The instrument itself is unit-tested without an API key
+(`scripts/tests/site-fingerprint.test.mjs`), in both directions: two
+pages that should score alike and two that should not.
+
 ## Email
 
 Transactional email is sent via [Resend](https://resend.com).

@@ -7,7 +7,7 @@ import { logApiError } from "@/lib/log-error";
 import { logSecurityCheck } from "@/lib/security-check-log";
 import { validateAgentDraft, sanitiseAgentText, type AgentDraft } from "@/lib/agents/agent-config";
 import { resolveDeliveryOwnership } from "@/lib/agents/delivery-ownership";
-import { nextRunAt } from "@/lib/agents/cron-expression";
+import { nextRunAt, UNSCHEDULABLE_MESSAGE } from "@/lib/agents/cron-expression";
 import { maxAgentsForAccount } from "@/lib/agents/agent-limits";
 import { checkAgentActivationCap } from "@/lib/agents/agent-cap";
 
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
     const next = nextRunAt(agent.scheduleCron, new Date(), agent.timezone);
     if (!next) {
       return NextResponse.json(
-        { ok: false, error: "That schedule never fires — pick a different one." },
+        { ok: false, error: UNSCHEDULABLE_MESSAGE },
         { status: 400 }
       );
     }

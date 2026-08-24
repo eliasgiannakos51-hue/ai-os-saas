@@ -95,6 +95,12 @@ export async function startProdHarness({
    */
   const authWrites = [];
 
+  /** Tables currently answering 500 — see setTableFailing(). */
+  const failingTables = new Set();
+  /** Every table PostgREST was asked for, in order. Lets a test MEASURE
+   *  how many queries a route really makes instead of asserting it. */
+  const tableReads = [];
+
   // --- the stand-in Supabase project ----------------------------------
   const supa = http.createServer((req, res) => {
     // CORS, because the page and this server are on different ports and a
@@ -156,6 +162,19 @@ export async function startProdHarness({
         return json(200, { user: currentUser(), session: null });
       if (url.pathname.startsWith("/rest/v1/")) {
         const table = url.pathname.slice("/rest/v1/".length);
+        tableReads.push(table);
+        // A TABLE MADE TO FAIL ON PURPOSE.
+        //
+        // Every prodtest before this one could only exercise the happy
+        // path, because the stand-in always answered 200. That leaves the
+        // half of the code that handles a database that is DOWN — the
+        // half users meet during an incident — never once executed under
+        // test. PostgREST answers a server-side fault with a 500 and a
+        // JSON body carrying `message`, which is what supabase-js turns
+        // into the `error` its callers check.
+        if (failingTables.has(table)) {
+          return json(500, { message: "simulated database failure", code: "XX000" });
+        }
         const rows = uniformColumns(tableRows[table] ?? []);
         // PostgREST returns a bare object (not an array) for .single().
         const single = (req.headers.accept ?? "").includes("vnd.pgrst.object");
@@ -295,6 +314,18 @@ export async function startProdHarness({
     /** What the account says now. Changing it needs no rebuild. */
     setUserMetadata(next) {
       currentMetadata = { ...next };
+    },
+    /** Make one table answer 500 (or stop). No rebuild needed — this
+     *  changes what the stand-in SAYS, not what the build inlined. */
+    setTableFailing(table, failing = true) {
+      if (failing) failingTables.add(table);
+      else failingTables.delete(table);
+    },
+    /** Every table read so far, in order. */
+    tableReads,
+    /** How many times one table has been read. */
+    readCount(table) {
+      return tableReads.filter((t) => t === table).length;
     },
     /** A Playwright context already carrying the session cookie. */
     async signedIn(browser, viewport = { width: 1280, height: 900 }) {

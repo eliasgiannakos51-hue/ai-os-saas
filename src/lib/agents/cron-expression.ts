@@ -150,6 +150,16 @@ export function parseCronExpression(expression: string): CronParseResult {
 // value: "0 * * * *" (hourly) is fine, "*/5 * * * *" is not.
 export const MAX_RUNS_PER_HOUR_PER_AGENT = 1;
 
+/**
+ * What the product says when a schedule cannot ever run.
+ *
+ * Exported so the three routes that create or edit an agent and this
+ * validator cannot drift into two sentences for one situation — which is
+ * how a user gets a different explanation depending on which door they
+ * came through.
+ */
+export const UNSCHEDULABLE_MESSAGE = "That schedule never fires — pick a different one.";
+
 export function validateAgentCron(expression: string): { ok: true } | { ok: false; error: string } {
   const parsed = parseCronExpression(expression);
   if (!parsed.ok) return { ok: false, error: parsed.error };
@@ -158,6 +168,31 @@ export function validateAgentCron(expression: string): { ok: true } | { ok: fals
       ok: false,
       error: "An agent can run at most once per hour — pick a single minute (e.g. \"0 9 * * *\").",
     };
+  }
+  // THE IMPOSSIBLE-DATE CHECK LIVES HERE, not at the call sites.
+  //
+  // Two of the three routes that create an agent used to test the result
+  // of nextRunAt() themselves and reject a null. The third —
+  // api/agents/templates/adopt — did not: it wrote `next_run_at: null`
+  // and carried on, after charging for the template fill. The dispatcher
+  // selects on `.not("next_run_at","is",null).lte("next_run_at", now)`,
+  // so that row was unreachable forever, and nothing recomputes
+  // next_run_at, so there was no eventual consistency to wait for.
+  //
+  // A guard repeated at N call sites is a guard the N+1th forgets. Every
+  // path that creates or edits an agent already validates the expression
+  // through this function, so this is the one place where the check
+  // cannot be skipped by a route nobody thought about.
+  if (!canEverFire(parsed.fields)) {
+    // THE SAME SENTENCE THE ROUTES ALREADY SHOW for an unschedulable
+    // cron, deliberately reused rather than written afresh. One
+    // situation should have one message: a user who hits this through
+    // Create, through Edit or through adopting a template is in
+    // identical trouble and there is nothing useful that distinguishes
+    // "the 31st of February" from "this never fires" for them. Reusing
+    // it also means this fix added no new untranslated English prose to
+    // a server-side surface that has no locale to translate against.
+    return { ok: false, error: UNSCHEDULABLE_MESSAGE };
   }
   return { ok: true };
 }
@@ -282,14 +317,78 @@ function matchesDay(fields: CronFields, year: number, month: number, day: number
   return true;
 }
 
-/** Days scanned before giving up. A month field of a single month plus a
- *  day-of-month of 29-31 can legitimately need ~11 months. */
-const MAX_DAYS_AHEAD = 400;
+/**
+ * The most days a month can have. February is 29 BECAUSE LEAP YEARS
+ * EXIST: "0 0 29 2 *" is a real schedule that fires on a leap day, and
+ * treating February as 28 here would reject it as impossible.
+ */
+function maxDayInMonth(month: number): number {
+  if (month === 2) return 29;
+  return month === 4 || month === 6 || month === 9 || month === 11 ? 30 : 31;
+}
+
+/**
+ * Can this expression EVER fire — asked of the calendar, not of a search.
+ *
+ * "0 8 31 2 *" parses cleanly: 31 is inside dayOfMonth's 1-31 range and 2
+ * is inside month's 1-12. Every field is individually legal and the
+ * COMBINATION is not a date. The 31st of February does not happen.
+ *
+ * DERIVED, NEVER LISTED. Exactly six day/month pairs are impossible —
+ * (30,2), (31,2), (31,4), (31,6), (31,9), (31,11) — and it would be
+ * shorter to write them down. They are computed instead, because a
+ * hand-written list is a list that stops being checked, and because the
+ * one pair people get wrong is (29,2), which IS possible and which a list
+ * written from memory tends to include.
+ *
+ * ONLY THE dom-RESTRICTED, dow-UNRESTRICTED CASE CAN FAIL. Vixie cron ORs
+ * the two day fields when both are restricted (see matchesDay), so
+ * "0 0 30 2 1" still fires every Monday and is perfectly valid. When
+ * neither is restricted every day matches. So an impossible day/month
+ * pair only makes an expression dead when day-of-month is the only day
+ * rule there is.
+ */
+export function canEverFire(fields: CronFields): boolean {
+  if (!fields.dayOfMonthRestricted || fields.dayOfWeekRestricted) return true;
+  return fields.month.some((month) =>
+    fields.dayOfMonth.some((day) => day <= maxDayInMonth(month))
+  );
+}
+
+/**
+ * Days scanned before giving up.
+ *
+ * THIS NUMBER USED TO BE 400, and 400 is wrong for one real schedule.
+ * "0 0 29 2 *" fires on 29 February, and the gap between two consecutive
+ * 29ths of February is not always four years: century years divisible by
+ * 100 but not 400 are not leap years, so 2096 -> 2104 is a gap of 2921
+ * days. At 400 the scan gave up and returned null, and every caller reads
+ * null as "this schedule never fires" — so the product told a user their
+ * real leap-day schedule was impossible, and refused to create it.
+ *
+ * 2922 is that worst real gap plus a day, measured over four centuries of
+ * the Gregorian calendar rather than reasoned about. The scan is a cheap
+ * integer comparison per day and only reaches the hour/minute loops on a
+ * day that already matched, so the cost of the larger horizon is paid
+ * only by the expressions that need it.
+ *
+ * With canEverFire() rejecting the dead expressions up front, a null from
+ * this function no longer means "impossible" — it means the timezone or
+ * the expression itself was invalid.
+ */
+const MAX_DAYS_AHEAD = 2922;
 
 /**
  * The first instant strictly after `from` at which `expression` fires,
- * interpreted in `timeZone`. Null when the expression is invalid or can
- * never fire (e.g. "0 0 30 2 *" — the 30th of February).
+ * interpreted in `timeZone`. Null when the expression is invalid, the
+ * timezone is not a real IANA zone, or the expression can never fire
+ * (e.g. "0 0 30 2 *" — the 30th of February).
+ *
+ * CALLERS MUST NOT READ NULL AS "IMPOSSIBLE" ON ITS OWN, and that is not
+ * a style note: they used to, and the horizon below was shorter than a
+ * real leap-day gap, so a valid schedule came back null and the user was
+ * told it never fires. Impossibility is canEverFire()'s answer, asked of
+ * the calendar; this function's null is "I could not resolve it".
  */
 export function nextRunAt(
   expression: string,

@@ -139,10 +139,18 @@ declare
   can_insert boolean;
   leftovers int;
 begin
-  execute 'create table public.zz_anon_default_probe (a int)';
+  -- DROPPED FIRST, AND CREATED WITH IF NOT EXISTS. Caught by
+  -- db-migrations.test.mjs, which is right for a reason beyond style: a run
+  -- that died between the create and the drop below would leave the probe
+  -- table behind, and the next run would fail on a name collision — a
+  -- migration that cannot be re-run after an interrupted attempt is not
+  -- idempotent. The drop also means the probe never inspects a table left
+  -- over from an older run with older privileges.
+  execute 'drop table if exists public.zz_anon_default_probe';
+  execute 'create table if not exists public.zz_anon_default_probe (a int)';
   can_select := has_table_privilege('anon', 'public.zz_anon_default_probe', 'select');
   can_insert := has_table_privilege('anon', 'public.zz_anon_default_probe', 'insert');
-  execute 'drop table public.zz_anon_default_probe';
+  execute 'drop table if exists public.zz_anon_default_probe';
 
   select count(*) into leftovers
     from pg_default_acl

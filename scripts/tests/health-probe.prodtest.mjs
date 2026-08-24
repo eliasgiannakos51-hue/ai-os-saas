@@ -44,7 +44,7 @@ check("PROBE_CACHE_MS was read from the route source", Number.isFinite(cacheMs) 
 
 const harness = await startProdHarness({
   supaPort: 54348,
-  tableRows: { agent_templates: [{ slug: "daily-briefing" }] },
+  tableRows: { user_onboarding: [{ user_id: "00000000-0000-0000-0000-000000000001" }] },
 });
 const url = `${harness.origin}/api/health`;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -74,10 +74,12 @@ try {
   // "commit" or "tables". The allowed set is closed.
   const keys = Object.keys(b1).sort();
   check(
-    "the body has exactly {ok, db, ms} and nothing else",
-    JSON.stringify(keys) === JSON.stringify(["db", "ms", "ok"]),
+    "the body has exactly {ok, db, ms, reason, stage} and nothing else",
+    JSON.stringify(keys) === JSON.stringify(["db", "ms", "ok", "reason", "stage"]),
     `keys were ${JSON.stringify(keys)}`
   );
+  check("a healthy answer says so in the vocabulary", b1.reason === "ok" && b1.stage === "query", JSON.stringify(b1));
+  check("no detail reaches an anonymous caller on a healthy probe", !("detail" in b1));
   const bodyText = JSON.stringify(b1);
   check(
     "no table name, no error text, no version string anywhere in the body",
@@ -91,20 +93,38 @@ try {
   // The half of this route that only runs during an incident, which is
   // the half that has never been executed in any test in this repository
   // before now.
-  harness.setTableFailing("agent_templates", true);
+  harness.setTableMissing("user_onboarding", true);
   await sleep(cacheMs + 500);
   const r2 = await fetch(url);
   const b2 = await r2.json();
-  check("503 when the database is unreachable", r2.status === 503, `got ${r2.status}`);
-  check("and says so in the body", b2.ok === false && b2.db === false, JSON.stringify(b2));
+  check("503 when the schema is behind", r2.status === 503, `got ${r2.status}`);
+  check("ok is false — the app IS broken", b2.ok === false, JSON.stringify(b2));
+  // THE DISTINCTION THIS WHOLE CHANGE EXISTS FOR. Production answered
+  // db:false for a missing table while the database was entirely healthy.
+  // A missing table ANSWERED, so db stays true and `reason` carries it.
   check(
-    "the failure body still discloses nothing",
-    JSON.stringify(Object.keys(b2).sort()) === JSON.stringify(["db", "ms", "ok"]) &&
-      !/simulated|XX000|message/i.test(JSON.stringify(b2)),
+    "db stays TRUE — a missing table is not a dead database",
+    b2.db === true,
+    `db=${b2.db}; reporting false here sends the on-call engineer to a green dashboard`
+  );
+  check("the reason names the schema, not the network", b2.reason === "schema_missing", JSON.stringify(b2));
+  check("the stage names the step that failed", b2.stage === "query", JSON.stringify(b2));
+  check(
+    "the failure body still discloses NOTHING an anonymous caller can map",
+    JSON.stringify(Object.keys(b2).sort()) === JSON.stringify(["db", "ms", "ok", "reason", "stage"]) &&
+      !/PGRST205|schema cache|user_onboarding|public\./i.test(JSON.stringify(b2)),
     JSON.stringify(b2)
   );
+  // ...and verbose without the secret changes nothing.
+  const rV = await fetch(url + "?verbose=1");
+  const bV = await rV.json();
+  check(
+    "?verbose=1 without the bearer token is refused silently — same closed body",
+    !("detail" in bV) && !/PGRST205|schema cache/i.test(JSON.stringify(bV)),
+    JSON.stringify(bV)
+  );
 
-  harness.setTableFailing("agent_templates", false);
+  harness.setTableMissing("user_onboarding", false);
   await sleep(cacheMs + 500);
   const r3 = await fetch(url);
   check(
@@ -119,10 +139,10 @@ try {
   // MEASURED. Fifty requests inside one cache window; the stand-in counts
   // how many actually reached the database.
   await sleep(cacheMs + 500);
-  const before = harness.readCount("agent_templates");
+  const before = harness.readCount("user_onboarding");
   const FLOOD = 50;
   const responses = await Promise.all(Array.from({ length: FLOOD }, () => fetch(url)));
-  const queries = harness.readCount("agent_templates") - before;
+  const queries = harness.readCount("user_onboarding") - before;
   check(`all ${FLOOD} flood requests were answered`, responses.every((r) => r.status === 200));
   // ONE. Not "fewer than fifty" — a result-only cache already gives
   // "fewer", and that is exactly the answer that looked fine here while
@@ -137,11 +157,11 @@ try {
   // after the window it MUST query again, or the probe is reporting a
   // memory of health rather than health.
   await sleep(cacheMs + 500);
-  const beforeAfterWindow = harness.readCount("agent_templates");
+  const beforeAfterWindow = harness.readCount("user_onboarding");
   await fetch(url);
   check(
     "after the window it queries the database again",
-    harness.readCount("agent_templates") > beforeAfterWindow,
+    harness.readCount("user_onboarding") > beforeAfterWindow,
     "a probe that stops querying is reporting a memory, not the system"
   );
 } finally {

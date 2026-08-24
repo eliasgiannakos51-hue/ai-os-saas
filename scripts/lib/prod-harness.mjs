@@ -95,8 +95,8 @@ export async function startProdHarness({
    */
   const authWrites = [];
 
-  /** Tables currently answering 500 — see setTableFailing(). */
-  const failingTables = new Set();
+  /** table -> { status, body } it should answer with. See setTableFailing(). */
+  const failingTables = new Map();
   /** Every table PostgREST was asked for, in order. Lets a test MEASURE
    *  how many queries a route really makes instead of asserting it. */
   const tableReads = [];
@@ -173,7 +173,14 @@ export async function startProdHarness({
         // JSON body carrying `message`, which is what supabase-js turns
         // into the `error` its callers check.
         if (failingTables.has(table)) {
-          return json(500, { message: "simulated database failure", code: "XX000" });
+          // The failure a test asked for, verbatim. A stand-in that can
+          // only produce ONE kind of failure lets a caller's error
+          // handling look right while never meeting the error that
+          // actually happened — and the one that actually happened here
+          // was PGRST205, "not found in the schema cache", from a
+          // migration that had not been run.
+          const f = failingTables.get(table);
+          return json(f.status, f.body);
         }
         const rows = uniformColumns(tableRows[table] ?? []);
         // PostgREST returns a bare object (not an array) for .single().
@@ -317,9 +324,26 @@ export async function startProdHarness({
     },
     /** Make one table answer 500 (or stop). No rebuild needed — this
      *  changes what the stand-in SAYS, not what the build inlined. */
-    setTableFailing(table, failing = true) {
-      if (failing) failingTables.add(table);
-      else failingTables.delete(table);
+    setTableFailing(table, failing = true, shape = {}) {
+      if (!failing) { failingTables.delete(table); return; }
+      // Defaults to a generic server fault; pass `shape` for a specific
+      // one, e.g. the schema-cache miss PostgREST really returns.
+      failingTables.set(table, {
+        status: shape.status ?? 500,
+        body: shape.body ?? { message: "simulated database failure", code: "XX000" },
+      });
+    },
+    /** The exact answer PostgREST gives when a migration has not run. */
+    setTableMissing(table, missing = true) {
+      this.setTableFailing(table, missing, {
+        status: 404,
+        body: {
+          code: "PGRST205",
+          message: `Could not find the table 'public.${table}' in the schema cache`,
+          hint: null,
+          details: null,
+        },
+      });
     },
     /** Every table read so far, in order. */
     tableReads,

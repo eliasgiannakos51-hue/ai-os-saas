@@ -47,6 +47,7 @@
 -- Idempotent. No DROP TABLE, no TRUNCATE, no unqualified DELETE.
 -- ============================================================================
 
+-- First six built-ins.
 update public.agent_templates t
    set keywords = v.keywords
   from (values
@@ -86,7 +87,18 @@ update public.agent_templates t
     'industries', 'sector', 'sectors', 'overview', 'overviews',
     'research', 'monthly', 'αγορα', 'αγορες', 'κλαδος', 'κλαδοι',
     'ερευνα', 'ερευνες', 'mercado', 'mercados', 'marché', 'marchés',
-    'markt', 'märkte', 'mercato', 'mercati', '市場', '市场', 'سوق', 'أسواق']),
+    'markt', 'märkte', 'mercato', 'mercati', '市場', '市场', 'سوق', 'أسواق'])
+) as v(slug, keywords)
+ where t.slug = v.slug
+   and t.shared_by is null
+   and t.keywords is distinct from v.keywords;
+
+-- The other six. TWO STATEMENTS, NOT ONE: a single VALUES list of all
+-- twelve is one indivisible ~7KB statement, which cannot be pasted into a
+-- SQL editor in pieces. Split at a point that changes nothing semantically.
+update public.agent_templates t
+   set keywords = v.keywords
+  from (values
   ('price-check', array[
     'price', 'prices', 'cost', 'costs', 'rate', 'rates', 'quote',
     'quotes', 'value', 'values', 'exchange', 'exchanges', 'τιμη', 'τιμες',
@@ -124,11 +136,7 @@ update public.agent_templates t
     'spiegare', '説明', '解释', 'شرح', 'شروح'])
 ) as v(slug, keywords)
  where t.slug = v.slug
-   -- BUILT-INS ONLY. A shared template belongs to the account that shared
-   -- it; this file knows nothing about its subject and must not rewrite it.
    and t.shared_by is null
-   -- Idempotent AND quiet: a second run updates zero rows rather than
-   -- rewriting twelve `document` tsvectors for no change.
    and t.keywords is distinct from v.keywords;
 
 -- Say what happened, loudly enough to notice it did not.

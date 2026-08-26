@@ -88,6 +88,26 @@ for (const file of suites) {
   const stdout = run.stdout ?? "";
   const missed = [...stdout.matchAll(/^\s*MISSED\s+(.*)$/gm)].map((m) => m[1].trim());
 
+  // STALE IS NOT THE SAME KIND OF RED AS MISSED, and reporting them in one
+  // bucket is how a broken instrument reads as a coverage number.
+  //
+  // A mutation whose `from` string no longer appears in the source cannot
+  // re-introduce anything. Every suite counts that as a miss and exits
+  // non-zero — verified by redirecting one used file constant at an empty
+  // file in each of the thirty — but the line the reader sees is "28 of 30
+  // mutations caught", which looks like coverage slipping rather than "two
+  // of your mutations stopped applying when somebody moved a line".
+  //
+  // Four suites were in exactly that state and it took running all thirty
+  // to notice. Named separately now.
+  const stale = [
+    ...stdout.matchAll(/^\s*STALE\s+(.*)$/gm),
+    ...stdout.matchAll(/^\s*ERROR\s+(.*?): target not found.*$/gm),
+  ].map((m) => m[1].trim());
+  const staleFromSummary = [...stdout.matchAll(/^\s*-\s*(.*)\n\s*the mutation target no longer exists.*$/gm)]
+    .map((m) => m[1].trim());
+  for (const s of staleFromSummary) if (!stale.includes(s)) stale.push(s);
+
   // The tree, before the next suite gets blamed for this one's leftovers.
   const after = trackedDirty();
   const leaked = (after ?? []).filter((f) => !baseline.has(f));
@@ -96,17 +116,19 @@ for (const file of suites) {
   }
 
   const ok = run.status === 0 && leaked.length === 0;
-  results.push({ name, ok, code: run.status, seconds, missed, leaked, killed: Boolean(run.error) });
+  results.push({ name, ok, code: run.status, seconds, missed, stale, leaked, killed: Boolean(run.error) });
   const flag = ok ? "OK " : "RED";
   const note = leaked.length > 0 ? `LEFT ${leaked.length} FILE(S) MUTATED: ${leaked.join(", ")}` : "";
   console.log(
-    `${flag}  ${name.padEnd(42)} ${String(seconds).padStart(4)}s  ${missed.length ? `missed=${missed.length}` : ""} ${note}`
+    `${flag}  ${name.padEnd(42)} ${String(seconds).padStart(4)}s  ${missed.length ? `missed=${missed.length}` : ""}${stale.length ? ` STALE=${stale.length}` : ""} ${note}`
   );
   for (const m of missed) console.log(`         MISSED  ${m}`);
+  for (const m of stale) console.log(`         STALE   ${m}  <- the anchor is gone; this mutation applies to nothing`);
 }
 
 const red = results.filter((r) => !r.ok);
 const leaky = results.filter((r) => r.leaked.length > 0);
+const stalest = results.filter((r) => r.stale.length > 0);
 
 console.log(`\n${"=".repeat(70)}`);
 console.log(`${results.length} suites · ${results.length - red.length} green · ${red.length} red`);
@@ -117,6 +139,14 @@ if (red.length > 0) {
       `  ${r.name}  (exit ${r.code}${r.killed ? ", killed" : ""}${r.missed.length ? `, ${r.missed.length} mutation(s) not caught` : ""})`
     );
   }
+}
+if (stalest.length > 0) {
+  console.log("\nSTALE ANCHORS — these suites are broken, not the code they guard:");
+  for (const r of stalest) {
+    console.log(`  ${r.name}: ${r.stale.length} mutation(s) whose target no longer exists`);
+    for (const m of r.stale) console.log(`    - ${m}`);
+  }
+  console.log("  Re-anchor them on the line as it is now, and add a mutation for whatever moved it.");
 }
 if (leaky.length > 0) {
   console.log("\nLEFT THE WORKING TREE MUTATED (restored by this runner):");

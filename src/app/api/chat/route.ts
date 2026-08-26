@@ -50,7 +50,7 @@ import { loadMentorContext } from "@/lib/chat/mentor-context";
 import { loadTradingMentorContext } from "@/lib/chat/trading-mentor-context";
 import { loadProductMentorContext } from "@/lib/chat/product-mentor-context";
 import { getUserFullContext, buildUserContextPromptAdditionGreek } from "@/lib/user-context";
-import { selectRelevantModules, resolveSelectionConfig } from "@/lib/ai/context-relevance";
+import { selectRelevantModules, resolveSelectionConfig } from "@/lib/ai/module-relevance";
 import { loadCodingContextForChat } from "@/lib/ai/cross-module-store";
 import { moduleVocabulary } from "@/lib/ai/module-vocabulary";
 import { AI_QUALITY_CHECKLIST_EL } from "@/lib/ai-quality-checklist";
@@ -446,7 +446,7 @@ export async function POST(request: Request) {
     let userContext = "";
     try {
       const fullContext = await getUserFullContext(supabase, user.id);
-      // NARROWING IS OFF BY DEFAULT — see lib/ai/context-relevance.ts.
+      // NARROWING IS OFF BY DEFAULT — see lib/ai/module-relevance.ts.
       //
       // With CONTEXT_RELEVANCE unset (which is every deployment until
       // somebody measures quality) this returns every module and the

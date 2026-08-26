@@ -40,7 +40,7 @@ const eq = (name, actual, expected) =>
   ok(name, JSON.stringify(actual) === JSON.stringify(expected), `expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
 
 const x = await loadTs("src/lib/ai/cross-module-context.ts");
-const rel = await loadTs("src/lib/ai/context-relevance.ts");
+const rel = await loadTs("src/lib/ai/module-relevance.ts");
 
 const item = (id, terms, text, ageDays = 1) => ({
   id,
@@ -221,7 +221,7 @@ console.log("\n== 6. ONE RELEVANCE RULE, NOT TWO ==");
 // =====================================================================
 {
   const src = readFileSync("src/lib/ai/cross-module-context.ts", "utf8");
-  ok("item selection imports the shared primitives", /from "@\/lib\/ai\/context-relevance"/.test(src));
+  ok("item selection imports the shared primitives", /from "@\/lib\/ai\/module-relevance"/.test(src));
   ok("…and does not reimplement the word split", !/split\(\/\[\^\\p\{L\}/.test(src.replace(/^\s*\/\/.*$/gm, "")));
 
   // THE SAME INPUT MUST SCORE THE SAME WAY on both paths, or "we use the

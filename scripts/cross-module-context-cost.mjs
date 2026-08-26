@@ -25,7 +25,7 @@
  */
 import { loadTs } from "./tests/load-ts.mjs";
 
-const rel = await loadTs("src/lib/context-relevance.ts");
+const rel = await loadTs("src/lib/text/relevance-budget.ts");
 const mentions = await loadTs("src/lib/chat/entity-mentions.ts");
 const convo = await loadTs("src/lib/chat/record-conversation-context.ts");
 const build = await loadTs("src/lib/build-modules.ts");

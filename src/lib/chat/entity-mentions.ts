@@ -6,7 +6,7 @@ import { logApiError } from "@/lib/log-error";
 import { enModuleTitle } from "@/lib/module-labels";
 import { normalizeForSearch } from "@/lib/text/search-match";
 import { enFieldLabel } from "@/lib/module-labels";
-import { selectWithinBudget } from "@/lib/context-relevance";
+import { selectWithinBudget } from "@/lib/text/relevance-budget";
 
 // Scans, per module, only this many of the user's most recent records —
 // keeps the per-message cost bounded regardless of how much data an

@@ -1,5 +1,5 @@
 import { foldForMatch } from "@/lib/text/unicode-patterns";
-import { questionWords, scoreTerms } from "@/lib/ai/context-relevance";
+import { questionWords, scoreTerms } from "@/lib/ai/module-relevance";
 
 /**
  * CODING AND CHAT, EACH SEEING THE OTHER (V4 #36).
@@ -29,7 +29,7 @@ import { questionWords, scoreTerms } from "@/lib/ai/context-relevance";
  *
  * So selection runs first, and it uses THE SAME matching rule as module
  * selection — questionWords and scoreTerms, imported from
- * context-relevance.ts rather than reimplemented, because two copies of
+ * module-relevance.ts rather than reimplemented, because two copies of
  * "fold, split, count whole words" is two things to drift.
  *
  * What differs from module selection is the POLICY, and it differs in the

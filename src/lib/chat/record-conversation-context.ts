@@ -2,7 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { logApiError } from "@/lib/log-error";
 import { normalizeForSearch } from "@/lib/text/search-match";
-import { selectWithinBudget, estimateTokens } from "@/lib/context-relevance";
+import { selectWithinBudget, estimateTokens } from "@/lib/text/relevance-budget";
 
 // THE DIRECTION THAT DID NOT EXIST.
 //

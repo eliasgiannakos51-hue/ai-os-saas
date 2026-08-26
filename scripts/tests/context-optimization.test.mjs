@@ -27,7 +27,7 @@ const ok = (name, cond, detail) => {
 };
 
 const cached = await loadTs("src/lib/ai/cached-system.ts");
-const cr = await loadTs("src/lib/ai/context-relevance.ts");
+const cr = await loadTs("src/lib/ai/module-relevance.ts");
 const uc = await loadTs("src/lib/user-context.ts");
 const cm = await loadTs("src/lib/classifier-modules.ts");
 const en = JSON.parse(readFileSync("messages/en.json", "utf8"));
@@ -309,7 +309,7 @@ console.log("\n== 5. wired in, and wired in the right order ==");
   ok("...and a narrowing is logged, so it is never silent",
     /if \(selection\.mode === "narrowed"\) \{[\s\S]{0,200}diagLog\(/.test(route));
 
-  const ctxSrc = readFileSync("src/lib/ai/context-relevance.ts", "utf8");
+  const ctxSrc = readFileSync("src/lib/ai/module-relevance.ts", "utf8");
   ok("the selector says plainly that it is off until quality is measured",
     /DEFAULT_SELECTION_CONFIG\.enabled\s*\n \* is false/.test(ctxSrc) || /is false/.test(ctxSrc));
   const harness = readFileSync("scripts/context-quality.mjs", "utf8");

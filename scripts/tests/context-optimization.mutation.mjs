@@ -19,7 +19,7 @@ import { execFileSync } from "node:child_process";
 
 const GATE = "scripts/tests/context-optimization.test.mjs";
 const CACHED = "src/lib/ai/cached-system.ts";
-const RELEVANCE = "src/lib/ai/context-relevance.ts";
+const RELEVANCE = "src/lib/ai/module-relevance.ts";
 const CONTEXT = "src/lib/user-context.ts";
 const ROUTE = "src/app/api/chat/route.ts";
 const MEASURE = "scripts/measure-context.mjs";

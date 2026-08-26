@@ -18,21 +18,26 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 
-// THE TARGET WAS THE WRONG GATE, AND THAT IS WHY THIS SUITE CAUGHT 0 OF 14.
+// THE TARGET WAS THE WRONG GATE BY ONE SUFFIX, AND THAT IS WHY THIS SUITE
+// CAUGHT 0 OF 14.
 //
-// It pointed at cross-module-context.test.mjs, which loads
-// src/lib/ai/context-relevance.ts and src/lib/ai/cross-module-context.ts —
+// It said scripts/tests/cross-module-context.test.mjs. That file loads
+// src/lib/ai/module-relevance.ts and src/lib/ai/cross-module-context.ts —
 // different modules with a different API (selectRelevantModules,
 // buildModuleVocabulary). The three files mutated below are the OTHER
-// implementation: the one api/chat/route.ts and api/records/ask/route.ts
-// actually import. Every mutation applied cleanly and the gate stayed green
-// because the gate never loads the files being mutated.
+// implementation, the one api/chat/route.ts and api/records/ask/route.ts
+// import. Every mutation applied cleanly and the gate stayed green because
+// the gate never loaded the files being mutated.
 //
-// Nothing about the mutations was wrong; they had no gate. That gate is
-// scripts/tests/chat-context-selection.test.mjs now, and it exercises the
-// three modules by calling them rather than by reading them.
-const TARGET = "scripts/tests/chat-context-selection.test.mjs";
-const RELEVANCE = "src/lib/context-relevance.ts";
+// The gate that DOES load them has this suite's own name and always did:
+// cross-module-context-chat-coding.test.mjs. Losing the "-chat-coding"
+// suffix from this constant was the whole defect.
+//
+// scripts/tests/mutation-suite-shape.test.mjs now refuses a suite that
+// points away from its same-named gate when that gate exists, which is the
+// shape of this bug rather than this instance of it.
+const TARGET = "scripts/tests/cross-module-context-chat-coding.test.mjs";
+const RELEVANCE = "src/lib/text/relevance-budget.ts";
 const MENTIONS = "src/lib/chat/entity-mentions.ts";
 const CONVO = "src/lib/chat/record-conversation-context.ts";
 

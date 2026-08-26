@@ -20,6 +20,7 @@ import {
   recordPackPurchaseRate,
 } from "@/lib/billing/credits";
 import { logApiError } from "@/lib/log-error";
+import { mergeUserMetadata } from "@/lib/auth/user-metadata";
 import {
   recordCommissionForInvoice,
   reverseCommissionForInvoice,
@@ -140,9 +141,24 @@ async function syncSubscriptionToUser(
   // no-op that still looks correct.
   const previousTier = (userData.user.user_metadata?.subscription_tier as PlanSlug | undefined) ?? null;
 
-  const { error: updateError } = await admin.auth.admin.updateUserById(supabaseUserId, {
-    user_metadata: {
-      ...userData.user.user_metadata,
+  // A MERGE, NOT A REPLACE. This used to spread `userData.user.user_metadata`
+  // — the snapshot read a few lines up — over the five keys below and hand
+  // the whole object to updateUserById, which replaces user_metadata
+  // wholesale. Stripe delivers customer.subscription.updated and invoice.paid
+  // inside the same second and Vercel runs them as two concurrent
+  // invocations of this handler, so both read the same snapshot and the
+  // second write erased whatever the first had added. Anything written
+  // between the read and the write by ANOTHER route went the same way: a
+  // team grant accepted in that window (team_granted_tier, team_owner_id)
+  // vanished, and the member silently lost the plan their owner pays for.
+  //
+  // mergeUserMetadata does the same five-key merge in one UPDATE statement,
+  // under the row lock that statement takes, so there is no window.
+  // The snapshot above is still read — previousTier, previousInterval and
+  // previousSeats below need it — but it is no longer what gets written.
+  const merged = await mergeUserMetadata(
+    supabaseUserId,
+    {
       stripe_customer_id: customerId,
       stripe_subscription_id: isActive ? subscription.id : null,
       subscription_tier: planSlug,
@@ -151,10 +167,9 @@ async function syncSubscriptionToUser(
       // customer is not left being priced at the annual credit rate.
       billing_interval: isActive ? interval : "month",
     },
-  });
-  if (updateError) {
-    logApiError("/api/webhooks/stripe", updateError, { stage: "update_user", supabaseUserId });
-  }
+    { context: "/api/webhooks/stripe" }
+  );
+  const updateError = merged ? null : new Error("merge_user_metadata failed");
   diagLog(`[webhook-diag] syncSubscriptionToUser result supabaseUserId=${supabaseUserId} planSlug=${planSlug} isActive=${isActive} seatCount=${seatCount} updateError=${updateError?.message ?? "none"}`);
 
   // CREDITS — a GATE and, inside it, TWO PATHS. Both halves of a merge,

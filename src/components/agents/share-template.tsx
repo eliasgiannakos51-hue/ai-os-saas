@@ -34,7 +34,14 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [busy, setBusy] = useState(false);
-  const [shared, setShared] = useState(false);
+  // THE SLUG, NOT A BOOLEAN. The panel used to set `shared = true` and then
+  // tell the user "Shared. You can withdraw it at any time." with no control
+  // to do it — while api/agents/templates/share had had a DELETE handler,
+  // scoped by the agent_templates_delete_own policy, the whole time. Nothing
+  // in the app called it. Keeping the slug the POST returns is what makes
+  // that sentence true.
+  const [sharedSlug, setSharedSlug] = useState<string | null>(null);
+  const [withdrawing, setWithdrawing] = useState(false);
 
   const preview = useMemo(() => anonymiseTaskPrompt(prompt, subject), [prompt, subject]);
 
@@ -58,7 +65,8 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
         addToast(known ? t(`refused.${code}`) : (data.error ?? t("failed")), "error");
         return;
       }
-      setShared(true);
+      const slug = typeof data?.template?.slug === "string" ? data.template.slug : null;
+      setSharedSlug(slug);
       addToast(t("shared"));
     } catch (err) {
       addToast(getErrorMessage(err, t("failed")), "error");
@@ -67,11 +75,45 @@ export function ShareTemplate({ agentId, prompt }: { agentId: string; prompt: st
     }
   }
 
-  if (shared) {
+  async function withdraw() {
+    if (!sharedSlug) return;
+    setWithdrawing(true);
+    try {
+      const response = await fetch(
+        `/api/agents/templates/share?slug=${encodeURIComponent(sharedSlug)}`,
+        { method: "DELETE" }
+      );
+      const data = await response.json();
+      if (!data.ok) {
+        addToast(t("withdrawFailed"), "error");
+        return;
+      }
+      // Back to the closed share panel, not to a third state: the template
+      // is gone from the library and sharing it again is the same act it
+      // was the first time.
+      setSharedSlug(null);
+      setOpen(false);
+      addToast(t("withdrawn"));
+    } catch (err) {
+      addToast(getErrorMessage(err, t("withdrawFailed")), "error");
+    } finally {
+      setWithdrawing(false);
+    }
+  }
+
+  if (sharedSlug) {
     return (
-      <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/[0.05] p-3 text-xs text-emerald-300">
-        {t("shared")}
-      </p>
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.05] p-3">
+        <p className="text-xs text-emerald-300">{t("shared")}</p>
+        <button
+          type="button"
+          onClick={withdraw}
+          disabled={withdrawing}
+          className="min-h-[36px] rounded-lg border border-emerald-500/40 px-2.5 text-xs text-emerald-200 transition-colors hover:bg-emerald-500/10 disabled:opacity-60"
+        >
+          {withdrawing ? t("withdrawing") : t("withdraw")}
+        </button>
+      </div>
     );
   }
 

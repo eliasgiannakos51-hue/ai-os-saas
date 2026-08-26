@@ -202,8 +202,46 @@ const entEstimate = est.estimateForAction(
 // before they buy, which is the opposite of what this file is for. It is
 // re-anchored on the DERIVATION rather than a constant, so it stays tight
 // and follows ANNUAL_DISCOUNT_PERCENT if that ever changes.
+// THE ANCHOR MOVED A SECOND TIME, AND FOR A SECOND REASON WORTH WRITING
+// DOWN. It went red at 177 when websiteGenerate's continuationRounds was
+// corrected from 2 to 4.
+//
+// Two was never right. lib/website-builder.ts has always had
+// MAX_CONTINUATION_ROUNDS = 4 and a loop that runs `round <= MAX`, so one
+// initial call plus up to four continuations — and estimate.ts carried a
+// comment asserting the constant was 2, which is how the two stayed out of
+// step. The hold was 26-32% short of what a full-length generation can
+// cost, on every plan; the fix raises what is RESERVED, not what is
+// charged, and the estimate the user is shown moves with it.
+//
+// So the derivation gains a second factor, computed from the estimator
+// itself rather than typed in as a number, for the same reason the rate
+// factor is: an anchor that has to be hand-updated is one somebody widens
+// instead. Two rounds is what the incident-era estimate used; whatever
+// ACTION_PROFILES.websiteGenerate says today is what it uses now.
+const roundsEraEstimate = est.estimateActionCost(
+  {
+    model: "claude-sonnet-4-6",
+    inputChars: 200,
+    systemPromptTokens: est.ACTION_PROFILES.websiteGenerate.systemPromptTokens,
+    auxiliaryCalls: [...est.ACTION_PROFILES.websiteGenerate.auxiliaryCalls],
+    expectedOutputChars:
+      est.ACTION_PROFILES.websiteGenerate.baseOutputChars +
+      200 * est.ACTION_PROFILES.websiteGenerate.outputCharsPerInputChar,
+    continuationRounds: 2,
+  },
+  config,
+  ent.rate,
+  INCIDENT_PLAN_MARGINS.enterprise
+);
+const roundsRatio = entEstimate.estimatedCredits / roundsEraEstimate.estimatedCredits;
+check(
+  `the continuation-round correction is what moved it (x${roundsRatio.toFixed(3)})`,
+  roundsRatio > 1,
+  "four continuation rounds must estimate above two"
+);
 const cheapestRatio = ent.rate / MONTHLY_ERA_RATE;
-const expectedCredits = REPORTED_CREDITS / cheapestRatio;
+const expectedCredits = (REPORTED_CREDITS / cheapestRatio) * roundsRatio;
 check(
   `the Enterprise estimate tracks the cheapest rate: ${REPORTED_CREDITS} at €${MONTHLY_ERA_RATE} -> ${expectedCredits.toFixed(1)} at €${ent.rate}, got ${entEstimate.estimatedCredits}`,
   Math.abs(entEstimate.estimatedCredits - expectedCredits) <= 5,

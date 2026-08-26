@@ -127,13 +127,6 @@
       "formSubmissions": "Formulareingänge",
       "routing": "Modell-Routing"
     },
-    "groupHints": {
-      "create": "Eine Website erzeugen, ein Ziel planen, ein Dokument schreiben.",
-      "myBusiness": "Geld, Kunden, Produkte — und wie sie laufen.",
-      "operations": "Wiederkehrende Arbeit und die mehrstufigen Abläufe.",
-      "insights": "Zurückschauen: was du getan hast und was die KI sich merkt.",
-      "marketplace": "Setups teilen und entdecken — noch nicht offen."
-    },
     "hints": {
       "chat": "Frag alles — an kein Modul gebunden.",
       "create": "Beschreibe in einem Satz, was du willst; den Rest findet es heraus.",
@@ -163,12 +156,12 @@
       "reflection": "Eine wöchentliche Zusammenfassung deines Fortschritts.",
       "memory": "Was die KI sich über dich merkt.",
       "favorites": "Alles, was du markiert hast.",
-      "marketplace": "Setups teilen und entdecken — noch nicht offen.",
+      "marketplace": "Teilen Sie die Form eines Agenten als Vorlage und starten Sie mit einer, die jemand anders geteilt hat.",
       "team": "Lade Leute in deinen Arbeitsbereich ein.",
-      "apps": "Beschreibe eine App und bekomme sie wirklich gebaut. Noch nicht fertig.",
-      "images": "Bilder aus einer Beschreibung erzeugen. Noch nicht fertig.",
-      "videos": "Video aus einer Beschreibung erzeugen. Noch nicht fertig.",
-      "coding": "Beschreibe, was du brauchst, und bekomme funktionierenden Code. Noch nicht fertig.",
+      "apps": "Behalten Sie geplante oder bereits veröffentlichte Apps im Blick. Baut sie nicht.",
+      "images": "Behalten Sie geplante oder bereits erstellte Bilder im Blick. Erzeugt sie nicht.",
+      "videos": "Behalten Sie geplante oder bereits erstellte Videos im Blick. Erzeugt sie nicht.",
+      "coding": "Codeausschnitte schreiben, erklären, korrigieren, umwandeln und testen. Führt keinen Code aus und öffnet kein Repository.",
       "presentations": "Behalten Sie geplante oder bereits erstellte Präsentationen im Blick. Erstellt keine Folien.",
       "home": "Ihr Dashboard — Aktivität, Statistiken und Schnellaktionen.",
       "settings": "Konto, Abrechnung, Sprache und Einstellungen.",
@@ -1667,7 +1660,11 @@
           "contains_numbers": "Die Aufgabe enthält eine lange Zahl — Telefon, Konto oder Referenz. Entfernen Sie sie.",
           "too_short": "Was übrig bleibt, ist zu kurz, um jemandem zu helfen.",
           "too_long": "Diese Aufgabe ist zu lang zum Teilen."
-        }
+        },
+        "withdraw": "Zurückziehen",
+        "withdrawing": "Wird zurückgezogen...",
+        "withdrawn": "Zurückgezogen. Nicht mehr in der Bibliothek.",
+        "withdrawFailed": "Konnte nicht zurückgezogen werden. Es ist weiterhin geteilt."
       }
     },
     "publishing": {

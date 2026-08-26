@@ -5,6 +5,7 @@ import { createStripeClient } from "@/lib/stripe/server";
 import { getCreditPack } from "@/lib/billing/plans";
 import { getCreditPackPriceId } from "@/lib/billing/price-ids";
 import { logApiError } from "@/lib/log-error";
+import { mergeUserMetadata } from "@/lib/auth/user-metadata";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getSiteUrl } from "@/lib/site-url";
 
@@ -74,12 +75,19 @@ export async function POST(request: Request) {
       });
       customerId = customer.id;
 
-      const admin = createAdminClient();
-      const { error: updateError } = await admin.auth.admin.updateUserById(user.id, {
-        user_metadata: { ...user.user_metadata, stripe_customer_id: customerId },
-      });
-      if (updateError) {
-        logApiError("/api/credits/checkout", updateError, { stage: "persist_customer_id" });
+      // Merged, not replaced. This wrote `{ ...user.user_metadata,
+      // stripe_customer_id }` from a snapshot taken at the top of the
+      // request; a Stripe webhook or a team grant landing in that window was
+      // erased by it. One key is all this route means to change.
+      const merged = await mergeUserMetadata(
+        user.id,
+        { stripe_customer_id: customerId },
+        { context: "/api/credits/checkout" }
+      );
+      if (!merged) {
+        logApiError("/api/credits/checkout", new Error("merge_user_metadata failed"), {
+          stage: "persist_customer_id",
+        });
       }
     }
 

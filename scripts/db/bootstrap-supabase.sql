@@ -24,11 +24,24 @@ create table if not exists auth.users (
   -- would have worked in production, so the gap was found. The reverse —
   -- a stub with a column production lacks — is the one that ships.
   deleted_at timestamptz,
-  created_at timestamptz default now()
+  created_at timestamptz default now(),
+  -- GoTrue advances this on every admin update, and
+  -- supabase/migrations/20260910000000_merge_user_metadata.sql keeps doing
+  -- so because merge_user_metadata replaces exactly those calls and a
+  -- drop-in replacement should not quietly stop a column moving.
+  --
+  -- It was missing here for the same reason deleted_at was, and it failed
+  -- in the same safe direction: `column "updated_at" of relation "users"
+  -- does not exist` from user-metadata-merge.dbtest.mjs, against a function
+  -- that is correct on real Supabase. A stub missing a production column is
+  -- a loud test failure; a stub with a column production lacks is the one
+  -- that ships.
+  updated_at timestamptz default now()
 );
--- Added separately so an existing throwaway database from before this
--- line gains the column too.
+-- Added separately so an existing throwaway database from before these
+-- lines gains the columns too.
 alter table auth.users add column if not exists deleted_at timestamptz;
+alter table auth.users add column if not exists updated_at timestamptz default now();
 create or replace function auth.uid() returns uuid language sql stable as $$
   select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid
 $$;

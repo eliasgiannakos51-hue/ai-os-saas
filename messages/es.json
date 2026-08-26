@@ -127,13 +127,6 @@
       "formSubmissions": "Envíos de formularios",
       "routing": "Enrutado de modelos"
     },
-    "groupHints": {
-      "create": "Genera un sitio, planifica un objetivo, escribe un documento.",
-      "myBusiness": "Dinero, clientes, productos y cómo van.",
-      "operations": "Trabajo recurrente y los flujos de varios pasos.",
-      "insights": "Mira lo que has hecho y lo que la IA recuerda.",
-      "marketplace": "Comparte y descubre configuraciones — aún no está abierto."
-    },
     "hints": {
       "chat": "Pregunta lo que sea — sin vínculo a ningún módulo.",
       "create": "Describe lo que quieres en una frase; el resto lo deduce.",
@@ -163,12 +156,12 @@
       "reflection": "Un resumen semanal de tu progreso.",
       "memory": "Lo que la IA recuerda de ti.",
       "favorites": "Todo lo que has marcado.",
-      "marketplace": "Comparte y descubre configuraciones — aún no está abierto.",
+      "marketplace": "Comparte la forma de un agente como plantilla y empieza desde una que compartió otra persona.",
       "team": "Invita gente a tu espacio.",
-      "apps": "Describe una app y obtén una real. Todavía no está listo.",
-      "images": "Genera imágenes a partir de una descripción. Todavía no está listo.",
-      "videos": "Genera vídeo a partir de una descripción. Todavía no está listo.",
-      "coding": "Describe lo que necesitas y obtén código que funciona. Todavía no está listo.",
+      "apps": "Lleva el control de las apps que planeas o ya has lanzado. No las construye.",
+      "images": "Lleva el control de las imágenes que planeas o ya has hecho. No las genera.",
+      "videos": "Lleva el control de los vídeos que planeas o ya has hecho. No los genera.",
+      "coding": "Escribe, explica, corrige, convierte y prueba fragmentos de código. No ejecuta código ni abre un repositorio.",
       "presentations": "Lleva el control de las presentaciones que planeas o ya has hecho. No crea diapositivas.",
       "home": "Tu panel: actividad, estadísticas y acciones rápidas.",
       "settings": "Cuenta, facturación, idioma y preferencias.",
@@ -1667,7 +1660,11 @@
           "contains_numbers": "La tarea contiene un número largo: un teléfono, una cuenta o una referencia. Quítalo.",
           "too_short": "Lo que queda es demasiado corto para servirle a nadie.",
           "too_long": "Esa tarea es demasiado larga para compartirla."
-        }
+        },
+        "withdraw": "Retirarla",
+        "withdrawing": "Retirando...",
+        "withdrawn": "Retirada. Ya no está en la biblioteca.",
+        "withdrawFailed": "No se pudo retirar. Sigue compartida."
       }
     },
     "publishing": {

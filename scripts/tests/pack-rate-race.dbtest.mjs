@@ -75,8 +75,28 @@ function concurrent(scripts) {
 
 console.log("pack-rate-race");
 
+// ITS OWN TABLE, NOT user_credits.
+//
+// This used to `create table if not exists user_credits (user_id text, ...)`
+// and truncate it between cases. Two things went wrong with that, and the
+// second is the serious one:
+//
+//   1. `if not exists` is a NO-OP once the migrations have run, so the table
+//      this test got was the real one — whose user_id is uuid, not text. The
+//      first insert of 'u1' aborted the whole `npm run test:db` run before
+//      any later suite got to start.
+//   2. `truncate user_credits` on a shared database is other suites' data.
+//      Even when the ids happened to parse, this file was deleting rows
+//      credit-flow.dbtest.mjs had just written.
+//
+// A race about read-modify-write ordering needs a numeric column and two
+// connections; it does not need the application's table. So it gets its own,
+// dropped first so a previous crashed run cannot leave a stale shape behind
+// (the same `drop if exists` + `create if not exists` pairing the three
+// gates that caught my last probe table asked for).
+sql(`drop table if exists zz_pack_rate_race_probe`);
 sql(`
-  create table if not exists user_credits (
+  create table if not exists zz_pack_rate_race_probe (
     user_id text primary key,
     min_pack_credit_price_eur numeric(12, 8)
   );
@@ -84,13 +104,13 @@ sql(`
 
 const reset = (start) =>
   sql(
-    `truncate user_credits;
-     insert into user_credits (user_id, min_pack_credit_price_eur)
+    `truncate zz_pack_rate_race_probe;
+     insert into zz_pack_rate_race_probe (user_id, min_pack_credit_price_eur)
      values ('u1', ${start === null ? "null" : start});`
   );
 
 const stored = () =>
-  sql(`select coalesce(min_pack_credit_price_eur::text, 'NULL') from user_credits where user_id = 'u1'`);
+  sql(`select coalesce(min_pack_credit_price_eur::text, 'NULL') from zz_pack_rate_race_probe where user_id = 'u1'`);
 
 // ---------------------------------------------------------------------
 console.log("\n== 1. THE BUG: read, compute the minimum, write it back ==");
@@ -103,9 +123,9 @@ await (async () => {
   reset("0.02000000");
   const readThenWrite = (price, delayBefore, delayAfter) => `
     begin;
-    select min_pack_credit_price_eur from user_credits where user_id = 'u1';
+    select min_pack_credit_price_eur from zz_pack_rate_race_probe where user_id = 'u1';
     select pg_sleep(${delayBefore});
-    update user_credits
+    update zz_pack_rate_race_probe
        set min_pack_credit_price_eur = least(coalesce(0.02000000, ${price}), ${price})
      where user_id = 'u1';
     select pg_sleep(${delayAfter});
@@ -125,7 +145,7 @@ console.log("\n== 2. THE FIX: no read, and the WHERE clause is the comparison ==
 const guarded = (price, delay) => `
   begin;
   select pg_sleep(${delay});
-  update user_credits
+  update zz_pack_rate_race_probe
      set min_pack_credit_price_eur = ${price}
    where user_id = 'u1'
      and (min_pack_credit_price_eur is null or min_pack_credit_price_eur > ${price});
@@ -187,9 +207,13 @@ await (async () => {
   reset(null);
   const tiny = (1e-7).toFixed(8); // "0.00000010"
   check("toFixed(8) does not produce exponent notation", tiny.includes("e"), false);
-  sql(`update user_credits set min_pack_credit_price_eur = ${tiny} where user_id = 'u1'`);
+  sql(`update zz_pack_rate_race_probe set min_pack_credit_price_eur = ${tiny} where user_id = 'u1'`);
   check("numeric(12,8) stores it exactly", stored(), "0.00000010");
 })();
+
+// Left behind is left behind: three gates in this repo fail on a stray
+// table, and they were right to.
+sql(`drop table if exists zz_pack_rate_race_probe`);
 
 console.log(`\n${fail === 0 ? "PASS" : "FAIL"}  ${pass} passed, ${fail} failed`);
 pg.stop?.();

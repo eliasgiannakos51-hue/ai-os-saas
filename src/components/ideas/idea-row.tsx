@@ -18,18 +18,10 @@ import { useFormatRelativeTime } from "@/lib/use-relative-time";
 import type { LinkedEntity } from "@/lib/entity-links";
 import { useTranslations, useLocale } from "next-intl";
 import { formatDateTime } from "@/lib/format-number";
-
-function verdictClasses(verdict: string | null) {
-  const v = (verdict ?? "").toLowerCase();
-  if (v.includes("pursue") || v.includes("go") || v.includes("build")) {
-    return "border-emerald-800 bg-emerald-950/30 text-emerald-400";
-  }
-  if (v.includes("kill") || v.includes("no")) {
-    return "border-red-900 bg-red-950/30 text-red-400";
-  }
-  if (v) return "border-orange-800 bg-orange-950/30 text-orange-400";
-  return "border-border bg-input text-muted";
-}
+// The classifier lives in lib because it is a fact about ten languages,
+// not about this row. See lib/ideas/verdict.ts for what it replaced and
+// why "no-go" used to be green.
+import { verdictBadgeClasses } from "@/lib/ideas/verdict";
 
 type FormState = {
   name: string;
@@ -273,7 +265,7 @@ export function IdeaRow({
           )}
           {idea.verdict && (
             <span
-              className={`rounded-md border px-2 py-0.5 text-xs ${verdictClasses(
+              className={`rounded-md border px-2 py-0.5 text-xs ${verdictBadgeClasses(
                 idea.verdict
               )}`}
             >

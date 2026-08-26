@@ -127,13 +127,6 @@
       "formSubmissions": "Invii dei moduli",
       "routing": "Instradamento dei modelli"
     },
-    "groupHints": {
-      "create": "Genera un sito, pianifica un obiettivo, scrivi un documento.",
-      "myBusiness": "Soldi, clienti, prodotti e come stanno andando.",
-      "operations": "Lavoro ricorrente e i flussi a più passaggi.",
-      "insights": "Rivedi cosa hai fatto e cosa ricorda l'IA.",
-      "marketplace": "Condividi e scopri configurazioni — non ancora aperto."
-    },
     "hints": {
       "chat": "Chiedi qualsiasi cosa — non legato a nessun modulo.",
       "create": "Descrivi in una frase cosa vuoi; il resto lo capisce da solo.",
@@ -163,12 +156,12 @@
       "reflection": "Un riepilogo settimanale dei tuoi progressi.",
       "memory": "Cosa l'IA ricorda di te.",
       "favorites": "Tutto quello che hai messo tra i preferiti.",
-      "marketplace": "Condividi e scopri configurazioni — non ancora aperto.",
+      "marketplace": "Condividi la forma di un agente come modello e parti da uno condiviso da qualcun altro.",
       "team": "Invita persone nel tuo spazio.",
-      "apps": "Descrivi un'app e ottienila davvero. Non ancora pronto.",
-      "images": "Genera immagini da una descrizione. Non ancora pronto.",
-      "videos": "Genera video da una descrizione. Non ancora pronto.",
-      "coding": "Descrivi cosa ti serve e ottieni codice funzionante. Non ancora pronto.",
+      "apps": "Tieni traccia delle app che stai pianificando o hai già pubblicato. Non le costruisce.",
+      "images": "Tieni traccia delle immagini che stai pianificando o hai già fatto. Non le genera.",
+      "videos": "Tieni traccia dei video che stai pianificando o hai già fatto. Non li genera.",
+      "coding": "Scrivi, spiega, correggi, converti e testa frammenti di codice. Non esegue codice e non apre un repository.",
       "presentations": "Tieni traccia delle presentazioni che stai pianificando o hai già fatto. Non crea diapositive.",
       "home": "La tua dashboard: attività, statistiche e azioni rapide.",
       "settings": "Account, fatturazione, lingua e preferenze.",
@@ -1667,7 +1660,11 @@
           "contains_numbers": "Il compito contiene un numero lungo — telefono, conto o riferimento. Rimuovilo.",
           "too_short": "Quel che resta è troppo breve per essere utile ad altri.",
           "too_long": "Quel compito è troppo lungo da condividere."
-        }
+        },
+        "withdraw": "Ritiralo",
+        "withdrawing": "Ritiro in corso...",
+        "withdrawn": "Ritirato. Non è più nella libreria.",
+        "withdrawFailed": "Non è stato possibile ritirarlo. È ancora condiviso."
       }
     },
     "publishing": {

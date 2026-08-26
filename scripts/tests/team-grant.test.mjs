@@ -92,15 +92,57 @@ check(
 check("it still records who granted it", /team_owner_id: pending\.owner_id/.test(accept));
 
 console.log("\n== 4. removal revokes the grant and leaves billing alone ==");
-check("it deletes the grant", /delete nextMetadata\.team_granted_tier/.test(remove));
-check("it clears the owner link", /delete nextMetadata\.team_owner_id/.test(remove));
+// THE THREE CHECKS BELOW USED TO BE THREE LITERAL LINES:
+//
+//     /delete nextMetadata\.team_granted_tier/
+//     /delete nextMetadata\.team_owner_id/
+//     /stripe_subscription_id \?\? nextMetadata\.stripe_customer_id/
+//
+// which is a test of how the revoke happens to be SPELLED. The route now
+// removes the two keys through mergeUserMetadata's `remove` list instead of
+// deleting them from a rebuilt object — the same revoke, done atomically —
+// and all three went red without a single behaviour changing. A gate that
+// cannot survive a refactor of the thing it guards is a gate somebody
+// deletes.
+//
+// So the claims are read out of the code as VALUES: which keys the revoke
+// removes, and whether subscription_tier is written unconditionally.
+const removeList = remove.match(/remove:\s*\[([^\]]*)\]/);
+const removedKeys = removeList
+  ? [...removeList[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]).sort()
+  : // The older shape, kept so this gate still reads a checkout that
+    // predates the merge: `delete <obj>.<key>`.
+    [...remove.matchAll(/delete\s+\w+\.(\w+)/g)].map((m) => m[1]).sort();
 check(
-  "there is no unconditional downgrade left",
-  !/nextMetadata\.subscription_tier = "free";\s*\n\s*const \{ error: revokeError/.test(remove)
+  `the revoke removes exactly the two grant keys (${removedKeys.join(", ") || "none"})`,
+  JSON.stringify(removedKeys) === JSON.stringify(["team_granted_tier", "team_owner_id"]),
+  "team_granted_tier and team_owner_id, and nothing else"
 );
+
+// THE DOWNGRADE IS CONDITIONAL. Not "the old line is absent" — that passes
+// when the whole block is gone — but "every write of subscription_tier in
+// this file sits inside the paysForThemselves guard".
+//
+// READ FROM CODE, NOT FROM PROSE. The first version of this check counted
+// two writes and one of them was the sentence
+//
+//     // This used to write `subscription_tier = "free"` unconditionally —
+//
+// explaining the bug. A comment describing a defect is not the defect, and a
+// gate that cannot tell them apart makes the fix's own explanation break it.
+const removeCode = remove
+  .replace(/\/\*[\s\S]*?\*\//g, "")
+  .split("\n")
+  .filter((line) => !/^\s*(\/\/|\*)/.test(line))
+  .join("\n");
+const tierWrites = [...removeCode.matchAll(/subscription_tier\s*[=:]\s*"free"/g)];
+check(`subscription_tier is written to "free" exactly once (${tierWrites.length})`, tierWrites.length === 1);
+const guardIndex = removeCode.search(/if\s*\(!paysForThemselves/);
+check("...and only after the paysForThemselves guard", guardIndex !== -1 && tierWrites[0].index > guardIndex);
+
 check(
   "a member with a Stripe subscription is never touched",
-  /stripe_subscription_id \?\? nextMetadata\.stripe_customer_id/.test(remove)
+  /stripe_subscription_id \?\? \w+\.stripe_customer_id/.test(remove)
 );
 check(
   "...and the reason is in the file, not just here",

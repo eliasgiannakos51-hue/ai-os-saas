@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { logApiError } from "@/lib/log-error";
-import { isResearchJobStale } from "@/lib/research/research-limits";
+import { isResearchJobStale, type ResearchStatus } from "@/lib/research/research-limits";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -60,7 +60,7 @@ export async function GET(_request: Request, { params }: { params: { id: string 
       const { data: failed } = await supabase
         .from("research_reports")
         .update({
-          status: "failed",
+          status: "failed" satisfies ResearchStatus,
           error: "The report stopped before it finished. No credits were charged — please run it again.",
           completed_at: new Date().toISOString(),
         })

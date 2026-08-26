@@ -98,6 +98,38 @@ export const RESEARCH_SYNTHESIS_TIMEOUT_MS = 180_000;
  */
 export const RESEARCH_STALE_MS = 20 * 60 * 1000;
 
+/**
+ * The six values `research_reports.status` may hold.
+ *
+ * WHY THIS EXISTS. Until now these six lived only inside the CHECK
+ * constraint in the baseline schema and as bare string literals scattered
+ * across run-research.ts and four API routes. Nothing connected the two,
+ * so `status: "sythesising"` would have typechecked, been rejected by
+ * Postgres at runtime, and left the row on whatever status it already had
+ * — the exact shape of the `flagged` bug that
+ * scripts/tests/enum-schema-drift.test.mjs was written for. That gate
+ * MAPPED `ResearchStatus` to the constraint, but no such type existed, so
+ * the entry resolved to nothing and the constraint went unchecked.
+ *
+ * Declaring the union here, in the client-safe module the routes already
+ * import, gives TypeScript the ability to reject a typo and gives the gate
+ * something real to compare against the constraint.
+ *
+ *   pending      — created, not claimed
+ *   planning     — breaking the topic into research questions
+ *   researching  — running the searches
+ *   synthesising — writing the report
+ *   ready        — `sections` is populated
+ *   failed       — see `error`
+ */
+export type ResearchStatus =
+  | "pending"
+  | "planning"
+  | "researching"
+  | "synthesising"
+  | "ready"
+  | "failed";
+
 /** Pure predicate, no clock baked in, so it is directly unit-testable —
  *  same shape as isGenerationJobStale in lib/website-generation-limits.ts. */
 export function isResearchJobStale(

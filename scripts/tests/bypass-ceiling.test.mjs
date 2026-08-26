@@ -104,6 +104,17 @@ console.log(`        ${callsAiCallAllowed.length} files call checkAiCallAllowed(
 //     bypass ceiling is actually enforced, and is checked separately
 //     below).
 const EXCLUDED = ["src/lib/ai-circuit-breaker.ts"];
+// THE FLOOR, and it is the whole reason this block was rewritten. The
+// check below is `missingCeiling.length === 0`, and `missingCeiling` is a
+// FILTER of `callsAiCallAllowed`. Rename checkAiCallAllowed, or change how
+// it is imported, and that list becomes empty — at which point the filter
+// is empty, the check passes, and the count that would have shown it is
+// only console.logged. Measured today: 26 files call it.
+check(
+  `checkAiCallAllowed() is actually called somewhere (${callsAiCallAllowed.length} files)`,
+  callsAiCallAllowed.length >= 20,
+  "0 here means the check below is filtering an empty list and cannot fail"
+);
 const missingCeiling = callsAiCallAllowed
   .filter((f) => !EXCLUDED.includes(f))
   .filter((f) => !/checkBypassCeiling\(/.test(stripComments(readSrc(f))));
@@ -150,10 +161,28 @@ console.log("\n== 5. isAdmin and isBeta are never collapsed into one flag ==");
 // is_beta_tester is not supposed to happen (lib/beta.ts keeps them
 // mutually exclusive) but "never happens" is not "cannot happen".
 const callSites = SOURCES.filter((f) => /checkBypassCeiling\(/.test(stripComments(readSrc(f))));
+// SAME FLOOR, SAME REASON. Measured today: 29 files call it.
+check(
+  `checkBypassCeiling() is actually called somewhere (${callSites.length} files)`,
+  callSites.length >= 20,
+  "0 here means the collapse scan below iterates nothing"
+);
 const collapsed = [];
 for (const f of callSites) {
-  for (const m of stripComments(readSrc(f)).matchAll(/checkBypassCeiling\(\s*[^,]+,\s*([^,]+),\s*\1\s*\)/g)) {
-    collapsed.push(`${f}: checkBypassCeiling(_, ${m[1]}, ${m[1]}) — same expression in both positions`);
+  // NOT A BACKREFERENCE. The old pattern was
+  // /checkBypassCeiling\(\s*[^,]+,\s*([^,]+),\s*\1\s*\)/, which only
+  // matches when the two arguments are spelled IDENTICALLY, character for
+  // character. `checkBypassCeiling(u, isBypass, !!isBypass)` collapses the
+  // two ceilings just as thoroughly and slipped straight past it, as would
+  // any difference in whitespace. The arguments are extracted and compared
+  // after normalising instead.
+  for (const m of stripComments(readSrc(f)).matchAll(/checkBypassCeiling\(([^)]*)\)/g)) {
+    const args = m[1].split(",").map((a) => a.trim());
+    if (args.length < 3) continue;
+    const norm = (a) => a.replace(/[\s!]+/g, "").replace(/^Boolean\((.*)\)$/, "$1");
+    if (norm(args[1]) && norm(args[1]) === norm(args[2])) {
+      collapsed.push(`${f}: checkBypassCeiling(_, ${args[1]}, ${args[2]}) — the same value in both positions`);
+    }
   }
 }
 check("no call site passes the identical expression for both isAdmin and isBeta",

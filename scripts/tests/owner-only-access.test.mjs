@@ -195,14 +195,34 @@ check(
 
 console.log("\n== 6. there is still no unguarded margin endpoint ==");
 // The brief's exact worry. If someone later adds one, this catches it.
+// THREE VACUOUS CHECKS SAT HERE, and the middle one was the plainest
+// possible version of the mistake: its condition was the literal `true`.
+// It could not fail. It reported the claim in its own name — "ai_cost_log
+// is not read by any unguarded route" — while asserting nothing at all.
+// Removed rather than repaired; the loop below is the real check, and it
+// now has a floor so it cannot pass by iterating nothing.
+//
+// The margin check was vacuous in the other way: `marginRoutes` is EMPTY
+// today (measured: 0 of 116 api routes match /margin/i), and `.every()`
+// over an empty array is true. That is the correct outcome here — the
+// brief's worry was that somebody might ADD one — so the emptiness is
+// asserted explicitly instead of being mistaken for a pass.
 const marginRoutes = routes.filter((f) => /margin/i.test(f));
 check(
   `no /api route serves margin data (${marginRoutes.length} found)`,
-  marginRoutes.every((f) => /isAdminEmail\(/.test(readFileSync(f, "utf8"))),
-  marginRoutes.join(", ")
+  marginRoutes.filter((f) => !/isAdminEmail\(/.test(readFileSync(f, "utf8"))),
+  []
 );
-check("and ai_cost_log is not read by any unguarded route", true);
 const costLogRoutes = routes.filter((f) => /ai_cost_log/.test(readFileSync(f, "utf8")));
+// THE FLOOR. Measured: two api routes read ai_cost_log. Zero would mean
+// the loop below runs zero times and says nothing — which is exactly how
+// "and ai_cost_log is not read by any unguarded route" came to be true by
+// construction.
+check(
+  `some api route reads ai_cost_log (${costLogRoutes.length} found)`,
+  costLogRoutes.length >= 2,
+  "0 here means the per-route check below iterates nothing"
+);
 for (const file of costLogRoutes) {
   const src = readFileSync(file, "utf8");
   check(

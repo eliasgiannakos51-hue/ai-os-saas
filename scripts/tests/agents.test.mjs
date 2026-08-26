@@ -798,6 +798,76 @@ console.log("\n== 14. the schema ==");
   // description of it. The assertions below are unchanged; only where they
   // read from is.
   const sql = read("supabase/migrations/20260803000000_baseline_schema.sql");
+
+  // THE COLUMN CHECKS USED TO READ `sql.includes(column)` — over the WHOLE
+  // baseline, all seventy tables of it.
+  //
+  // `user_id` appears in more than fifty of those tables. `name`, `status`,
+  // `created_at`, `description` in dozens. So `user_agents has user_id`
+  // was never a statement about user_agents: dropping the column from
+  // user_agents entirely would have left every one of these fourteen
+  // assertions green, because agent_runs — or affiliate_partners, or
+  // research_reports — still has one. The RLS loop three lines below says
+  // "Scoped to these two tables" and means it; the column loop said
+  // nothing of the sort and searched the whole file.
+  //
+  // Reading the table's own body is the only version of this check that
+  // can go red. The body is delimited by the parenthesis that opens after
+  // `create table ... <name> (` and the one that closes it, counted rather
+  // than matched with a regex, because column definitions contain nested
+  // parens of their own — `check (status in (...))`, `numeric(12, 4)`,
+  // `default gen_random_uuid()`.
+  function tableBody(source, table) {
+    const opener = new RegExp(
+      `create\\s+table(?:\\s+if\\s+not\\s+exists)?\\s+(?:public\\.)?${table}\\s*\\(`,
+      "i"
+    );
+    const m = opener.exec(source);
+    if (!m) return null;
+    let depth = 0;
+    const start = m.index + m[0].length;
+    for (let i = start - 1; i < source.length; i++) {
+      const ch = source[i];
+      if (ch === "'") {
+        // Skip a quoted literal whole, so a paren inside a default value
+        // cannot unbalance the count.
+        i = source.indexOf("'", i + 1);
+        if (i === -1) return null;
+        continue;
+      }
+      if (ch === "(") depth++;
+      else if (ch === ")") {
+        depth--;
+        if (depth === 0) return source.slice(start, i);
+      }
+    }
+    return null;
+  }
+
+  const agentsBody = tableBody(sql, "user_agents");
+  const runsBody = tableBody(sql, "agent_runs");
+  checkTrue("the user_agents CREATE TABLE body was located", Boolean(agentsBody));
+  checkTrue("the agent_runs CREATE TABLE body was located", Boolean(runsBody));
+
+  // A floor on the extractor itself. If the regex above stopped matching,
+  // `tableBody` would return null, every `includes` below would be run
+  // against "" and report FALSE — loud, not silent. But if it matched too
+  // EARLY and returned a two-line slice, some checks would pass by
+  // accident. Measured on the baseline today: user_agents has 16 column
+  // lines, agent_runs 11.
+  checkTrue(
+    `the user_agents body is a whole table, not a fragment (${(agentsBody ?? "").split("\n").length} lines)`,
+    (agentsBody ?? "").split("\n").length >= 14
+  );
+  checkTrue(
+    `the agent_runs body is a whole table, not a fragment (${(runsBody ?? "").split("\n").length} lines)`,
+    (runsBody ?? "").split("\n").length >= 9
+  );
+  // And that the two bodies are genuinely different slices — a broken
+  // extractor that returned the same first table twice would otherwise
+  // satisfy both loops with one table's columns.
+  checkTrue("user_agents and agent_runs are different table bodies", agentsBody !== runsBody);
+
   for (const column of [
     "user_id",
     "name",
@@ -814,10 +884,24 @@ console.log("\n== 14. the schema ==");
     "next_run_at",
     "consecutive_failures",
   ]) {
-    checkTrue(`user_agents has ${column}`, sql.includes(column));
+    checkTrue(`user_agents has ${column}`, (agentsBody ?? "").includes(column));
   }
   for (const column of ["started_at", "finished_at", "output", "error", "credits_charged", "tokens_used"]) {
-    checkTrue(`agent_runs has ${column}`, sql.includes(column));
+    checkTrue(`agent_runs has ${column}`, (runsBody ?? "").includes(column));
+  }
+
+  // THE PROOF THAT THIS IS NOW A REAL CHECK. The old form could not fail;
+  // this asserts that the new one can. A column that belongs to a
+  // DIFFERENT table in the same file used to satisfy `sql.includes(...)`
+  // and must not satisfy the scoped read. All three below are real columns
+  // of research_reports in this very file, and none of them belongs to
+  // user_agents; `sql.includes(...)` is asserted first so a typo in this
+  // list cannot make the check pass by naming nothing.
+  for (const foreign of ["topic", "sections", "document_id"]) {
+    checkTrue(
+      `a column from another table does not count as user_agents' (${foreign})`,
+      sql.includes(foreign) && !(agentsBody ?? "").includes(foreign)
+    );
   }
   // Scoped to these two tables: the baseline holds all 70, so counting
   // every `enable row level security` in the file would be counting the

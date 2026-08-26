@@ -16,7 +16,7 @@ import { reserveCredits } from "@/lib/billing/reservations";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
 import { logApiError } from "@/lib/log-error";
 import { RESEARCH_MODEL } from "@/lib/files/file-models";
-import { RESEARCH_MAX_SEARCHES } from "@/lib/research/research-limits";
+import { RESEARCH_MAX_SEARCHES, type ResearchStatus } from "@/lib/research/research-limits";
 import { runResearchChunk, claimChunk, failChunk } from "@/lib/research/run-research";
 import type { ResearchQuestion } from "@/lib/research/research";
 
@@ -165,7 +165,7 @@ export async function POST(_request: Request, { params }: { params: { id: string
     const { data: claimed, error: claimError } = await supabase
       .from("research_reports")
       .update({
-        status: "researching",
+        status: "researching" satisfies ResearchStatus,
         processing_started_at: new Date().toISOString(),
         questions_total: questions.length,
         questions_done: 0,
@@ -199,7 +199,11 @@ export async function POST(_request: Request, { params }: { params: { id: string
       if (!reservation.ok) {
         await supabase
           .from("research_reports")
-          .update({ status: "failed", error: "Not enough credits.", processing_started_at: null })
+          .update({
+            status: "failed" satisfies ResearchStatus,
+            error: "Not enough credits.",
+            processing_started_at: null,
+          })
           .eq("id", report.id)
           .eq("user_id", user.id);
         return NextResponse.json(

@@ -125,9 +125,46 @@ check("detail is added ONLY when authorised",
   "an unauthenticated caller must never receive the provider's message");
 check("verbose is gated by checkCronAuth, which fails closed",
   /checkCronAuth\(request\)\.ok/.test(route));
-check("every detail field goes through scrubSecrets",
-  (route.match(/detail:\s*\{[\s\S]{0,400}?\}/g) ?? []).every((b) => !/code:|message:/.test(b) || /scrubSecrets\(/.test(b)),
-  "a message reaching a response without scrubbing is the whole risk");
+// THIS CHECK INSPECTED ZERO BLOCKS, and had since the day it was written.
+// It looked for `detail: { ... }`, and the route never writes that: the
+// detail is the THIRD ARGUMENT of done(), so the regex matched nothing and
+// `.every()` over an empty array is true. A check that passes because it
+// found nothing to look at is not a check.
+//
+// The property is unchanged — a provider message must not reach a response
+// unscrubbed — but it is now asserted over the call sites that actually
+// build one, and the count of them is asserted too.
+{
+  const detailArgs = [];
+  for (const m of route.matchAll(/\bdone\(/g)) {
+    // Brace-count from the call's opening paren so a nested object or a
+    // ternary inside the argument cannot end the match early.
+    let i = m.index + m[0].length;
+    let depth = 1;
+    const start = i;
+    while (i < route.length && depth > 0) {
+      if (route[i] === "(") depth++;
+      else if (route[i] === ")") depth--;
+      i++;
+    }
+    const args = route.slice(start, i - 1);
+    if (/\{[\s\S]*\b(code|message)\s*:/.test(args)) detailArgs.push(args);
+  }
+  // THE FLOOR. Measured: the route builds a detail at two call sites (the
+  // PostgREST error path and the thrown-exception path). If a refactor
+  // leaves none, this fails instead of quietly passing.
+  check(
+    `the route builds a probe detail somewhere (${detailArgs.length} call site(s))`,
+    detailArgs.length >= 2,
+    "if this is 0 the scrubbing check below is inspecting nothing"
+  );
+  const unscrubbed = detailArgs.filter((a) => {
+    const fields = [...a.matchAll(/\b(code|message)\s*:\s*([^,}]+)/g)];
+    return fields.some(([, , value]) => !/scrubSecrets\(/.test(value) && !/^\s*undefined\s*$/.test(value));
+  });
+  check("every detail field goes through scrubSecrets", unscrubbed, [],
+    "a message reaching a response without scrubbing is the whole risk");
+}
 // THE PROBE TABLE. The defect was probing the newest table in the schema.
 check("the probe reads user_onboarding, not a recently-added table",
   /const PROBE_TABLE = "user_onboarding"/.test(route));

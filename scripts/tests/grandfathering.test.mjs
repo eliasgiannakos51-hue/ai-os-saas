@@ -217,7 +217,17 @@ check(
 // degrades to "no entitlements", i.e. silently takes the allowance away.
 const legacySrc = readFileSync("src/lib/billing/legacy-entitlements.ts", "utf8");
 const selected = legacySrc.match(/\.select\(\s*"([^"]+)"/)?.[1] ?? "";
-for (const column of selected.split(",").map((c) => c.trim()).filter(Boolean)) {
+const selectedColumns = selected.split(",").map((c) => c.trim()).filter(Boolean);
+// THE FLOOR. One regex on one call site produced this list, and when it
+// stopped matching — a reformatted `.select(` spread over two lines is
+// enough — `selected` became "" and the loop below ran ZERO times while
+// reporting nothing. Measured: five columns are selected.
+check(
+  `the select() call was found and names columns (${selectedColumns.length})`,
+  selectedColumns.length >= 5,
+  "0 here means the per-column checks below run zero times"
+);
+for (const column of selectedColumns) {
   check(`selected column ${column} exists in the migration`, sql.includes(column));
 }
 

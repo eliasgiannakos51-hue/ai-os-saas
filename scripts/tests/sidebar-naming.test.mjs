@@ -86,6 +86,14 @@ check("no heading key points at a heading that does not exist", deadHeadingKeys.
 console.log("\n== 2. every ITEM the sidebar renders can be translated ==");
 const labels = [...navSrc.matchAll(/label: "([^"]+)"/g)].map((m) => m[1]);
 const unmappedItems = labels.filter((l) => !itemKeys[l] && l !== "Create Studio");
+// `labels.filter(...).length === 0` is true of an empty list, so the floor
+// is what makes the line above a statement about the sidebar rather than
+// about the regex that reads it. Forty items today.
+check(
+  `the sidebar label scan found items (${labels.length})`,
+  labels.length >= 40,
+  `the nav source yielded ${labels.length} labels`
+);
 check(`all ${labels.length} item labels have a message key`, unmappedItems.length === 0, unmappedItems.join(", "));
 
 console.log("\n== 3. NOTHING IN 'BUILD' THAT DOES NOT BUILD ==");
@@ -95,6 +103,28 @@ console.log("\n== 3. NOTHING IN 'BUILD' THAT DOES NOT BUILD ==");
 // a log, by its own file's admission.
 const trackingSlugs = [...buildModules.matchAll(/slug: "([^"]+)"/g)].map((m) => m[1]);
 console.log(`        tracking tables (no AI generation): ${trackingSlugs.join(", ")}`);
+
+// A FLOOR, BECAUSE THIS ONE ARRAY DRIVES FOUR SECTIONS OF THIS FILE.
+//
+// `offenders`, `misfiled` and `secretlyProducing` are all
+// `trackingSlugs.filter(...)`, each asserted `.length === 0`, and section 4
+// is `for (const slug of trackingSlugs)`. Every one of them is satisfied by
+// an EMPTY array — filtering nothing yields nothing, and looping over
+// nothing runs no checks at all. So a rename of `slug:` to `id:` in
+// build-modules.ts, or a move to a JSON manifest, or a switch to single
+// quotes, would take this file from 120 assertions to about 90 and print
+// ALL PASS while checking none of the thing it exists for.
+//
+// Six today: websites, apps, images, videos, presentations, campaigns.
+// If a tracking module legitimately leaves — because it grew a generator
+// and moved under Build, which section 3 is watching for — lower this
+// number in the same commit that moves it. That is the point: the move
+// should be visible, not silent.
+check(
+  `the tracking-module scan found modules (${trackingSlugs.length})`,
+  trackingSlugs.length >= 6,
+  `build-modules.ts yielded ${trackingSlugs.length} slugs — the four checks below all pass vacuously on an empty list`
+);
 const groupOf = (heading) => {
   const start = navSrc.indexOf(`heading: "${heading}"`);
   const end = navSrc.indexOf("heading: \"", start + 10);
@@ -119,6 +149,15 @@ check("and every one of them IS under Tracking", misfiled.length === 0, misfiled
 // The other direction: what is left in Build must really build.
 const buildHrefs = [...buildGroup.matchAll(/href: "([^"]+)"/g)].map((m) => m[1]);
 console.log(`        Build now holds: ${buildHrefs.join(", ")}`);
+// Same reasoning, other direction: the three `buildHrefs.includes(...)`
+// checks below would each go red on an empty list, so those are safe — but
+// the allowlist check further down is `buildHrefs.filter(...)`, which is
+// not. Six today.
+check(
+  `the Build group scan found hrefs (${buildHrefs.length})`,
+  buildHrefs.length >= 6,
+  `groupOf("Build") yielded ${buildHrefs.length} hrefs`
+);
 check("Build still holds the agent builder", buildHrefs.includes("/dashboard/agents"));
 check("...the website builder", buildHrefs.includes("/dashboard/website-builder"));
 check("...and what it published", buildHrefs.includes("/dashboard/published"));

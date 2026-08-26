@@ -26,6 +26,7 @@ import {
   RESEARCH_DEADLINE_MS,
   RESEARCH_QUESTION_BUDGET_MS,
   RESEARCH_SYNTHESIS_RESERVE_MS,
+  type ResearchStatus,
 } from "@/lib/research/research-limits";
 import {
   collateSources,
@@ -198,7 +199,7 @@ export async function runResearchChunk(params: {
       await admin
         .from("research_reports")
         .update({
-          status: "failed",
+          status: "failed" satisfies ResearchStatus,
           error: ceiling.reason,
           completed_at: new Date().toISOString(),
           chunk_running: false,
@@ -221,7 +222,10 @@ export async function runResearchChunk(params: {
   // findings ARE the record of what was answered.
   let answered = findings.length;
 
-  async function persist(extra: Record<string, unknown> = {}) {
+  // `status` is typed rather than left to Record<string, unknown>: a typo
+  // here is rejected by the CHECK constraint at runtime, after the row has
+  // already been charged, and the caller never sees it.
+  async function persist(extra: { status?: ResearchStatus } & Record<string, unknown> = {}) {
     await admin
       .from("research_reports")
       .update({
@@ -306,7 +310,7 @@ export async function runResearchChunk(params: {
     await admin
       .from("research_reports")
       .update({
-        status: "failed",
+        status: "failed" satisfies ResearchStatus,
         error: "The searches did not return anything usable on this topic.",
         credits_charged: settlement.creditsCharged,
         completed_at: new Date().toISOString(),
@@ -326,7 +330,10 @@ export async function runResearchChunk(params: {
     return { done: false, handedOff, questionsDone: answered, questionsTotal: questions.length };
   }
 
-  await admin.from("research_reports").update({ status: "synthesising" }).eq("id", reportId);
+  await admin
+    .from("research_reports")
+    .update({ status: "synthesising" satisfies ResearchStatus })
+    .eq("id", reportId);
 
   const sources = collateSources(findings);
   const synthesis = await synthesiseReport({
@@ -362,7 +369,7 @@ export async function runResearchChunk(params: {
     await admin
       .from("research_reports")
       .update({
-        status: "failed",
+        status: "failed" satisfies ResearchStatus,
         error: "The report could not be written from the findings.",
         credits_charged: settlement.creditsCharged,
         completed_at: new Date().toISOString(),
@@ -454,7 +461,7 @@ export async function runResearchChunk(params: {
   const { error: finishError } = await admin
     .from("research_reports")
     .update({
-      status: "ready",
+      status: "ready" satisfies ResearchStatus,
       sections,
       sources,
       document_id: documentId,
@@ -531,7 +538,7 @@ export async function failChunk(reportId: string, userId: string, reservationId:
   await admin
     .from("research_reports")
     .update({
-      status: "failed",
+      status: "failed" satisfies ResearchStatus,
       error: "The report stopped before it finished. No credits were charged — please run it again.",
       completed_at: new Date().toISOString(),
       chunk_running: false,

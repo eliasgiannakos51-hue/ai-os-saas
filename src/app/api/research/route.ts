@@ -24,7 +24,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { logApiError } from "@/lib/log-error";
 import { RESEARCH_MODEL } from "@/lib/files/file-models";
 import { maxResearchRunsForPlan } from "@/lib/files/limits";
-import { RESEARCH_MAX_SEARCHES } from "@/lib/research/research-limits";
+import { RESEARCH_MAX_SEARCHES, type ResearchStatus } from "@/lib/research/research-limits";
 import { planResearch, validateTopic } from "@/lib/research/research";
 import { resolveLanguage } from "@/lib/text/resolve-language";
 
@@ -247,7 +247,7 @@ export async function POST(request: Request) {
         user_id: user.id,
         topic: topicCheck.topic,
         language,
-        status: "pending",
+        status: "pending" satisfies ResearchStatus,
         questions: planned.questions,
       })
       .select("id, topic, status, questions, created_at")

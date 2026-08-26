@@ -220,10 +220,49 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true, failed: true, attemptCapReached: true });
     }
 
-    await supabase
+    // THE CLAIM. Not a status write — a compare-and-swap, and the only
+    // thing standing between this row and two paid generations.
+    //
+    // WHAT WAS WRONG. The three steps above — read status and
+    // attempt_count, refuse if the count is at the cap, write count + 1 —
+    // were three separate round trips, and this update filtered on the id
+    // alone. Two POSTs landing together both read `pending, 0`, both
+    // cleared the cap, both wrote `1`, and BOTH ran the full AI
+    // generation: one increment recorded, two Anthropic calls made, two
+    // credit settlements taken from the account.
+    //
+    // And it is not a hypothetical interleaving. This route is invoked
+    // fire-and-forget from the browser — `void fetch(...)` in
+    // website-builder-workspace.tsx — so a double-click, a second tab or
+    // a client retry produces exactly it. The comment on the cap above
+    // says the ceiling exists so that "a client bug, a double-submit
+    // race, a manually replayed request" can never push the real AI-call
+    // count past it; a double-submit race was the one case it could not
+    // stop.
+    //
+    // Both values the decision was made from are re-asserted, so the
+    // second caller matches no row. The same shape the breaker write at
+    // the top of this function already uses (`.eq("status", "pending")`)
+    // and the same shape api/websites/edit takes before editing.
+    const { data: claimed, error: claimError } = await supabase
       .from("user_websites")
       .update({ status: "processing", attempt_count: website.attempt_count + 1 })
-      .eq("id", websiteId);
+      .eq("id", websiteId)
+      .eq("status", "pending")
+      .eq("attempt_count", website.attempt_count)
+      .select("id");
+
+    if (claimError) {
+      logApiError("/api/websites/generate/process", claimError, { stage: "claim", websiteId });
+      return NextResponse.json({ ok: false, error: "Something went wrong." }, { status: 500 });
+    }
+
+    // Somebody else claimed it between the read and here. Reported the
+    // same way the status check above reports it, because it is the same
+    // thing: a duplicate call for a row already being worked on.
+    if (!claimed || claimed.length === 0) {
+      return NextResponse.json({ ok: true, alreadyHandled: true });
+    }
 
     const isAdmin = isAdminEmail(user.email);
     const bypassCredits = isAdmin || (await hasActiveBetaBypass(user));

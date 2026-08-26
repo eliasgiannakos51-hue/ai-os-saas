@@ -19,6 +19,8 @@ const ROOT = process.cwd();
 const GATE = "scripts/tests/write-guards.test.mjs";
 const CREDITS = "src/lib/billing/credits.ts";
 const OVERAGE = "src/lib/billing/overage-store.ts";
+const GENERATE = "src/app/api/websites/generate/process/route.ts";
+const DISPATCH = "src/lib/notify/dispatch.ts";
 
 let caught = 0;
 let missed = 0;
@@ -28,7 +30,9 @@ function run(name, edits, expectRed) {
   try {
     mkdirSync(path.join(dir, "scripts", "tests"), { recursive: true });
     mkdirSync(path.join(dir, "src", "lib", "billing"), { recursive: true });
-    for (const f of [GATE, CREDITS, OVERAGE]) cpSync(path.join(ROOT, f), path.join(dir, f));
+    mkdirSync(path.join(dir, "src", "lib", "notify"), { recursive: true });
+    mkdirSync(path.join(dir, "src", "app", "api", "websites", "generate", "process"), { recursive: true });
+    for (const f of [GATE, CREDITS, OVERAGE, GENERATE, DISPATCH]) cpSync(path.join(ROOT, f), path.join(dir, f));
 
     for (const [file, from, to] of edits) {
       const p = path.join(dir, file);
@@ -170,6 +174,65 @@ run(
   "CONTROL: a comment is added next to the update",
   [[CREDITS, "    const admin = createAdminClient();\n    const { error } = await admin\n      .from(\"user_credits\")", "    const admin = createAdminClient();\n    // one round trip, not two\n    const { error } = await admin\n      .from(\"user_credits\")"]],
   false
+);
+
+// ---- the website generation claim: the expensive one ----
+
+// 9. THE ORIGINAL BUG: filtered on the id alone, so two POSTs both claim.
+run(
+  "the generation claim drops both re-assertions",
+  [
+    [
+      GENERATE,
+      '      .eq("id", websiteId)\n      .eq("status", "pending")\n      .eq("attempt_count", website.attempt_count)\n      .select("id");',
+      '      .eq("id", websiteId)\n      .select("id");',
+    ],
+  ],
+  true
+);
+
+// 10. Status kept, count dropped. Two callers CAN see the same 'pending'
+//     — the cap check reads the count, so the count is the other half.
+run(
+  "the generation claim keeps status but drops attempt_count",
+  [[GENERATE, '      .eq("attempt_count", website.attempt_count)\n', ""]],
+  true
+);
+
+// 11. Claimed correctly, then the result thrown away.
+run(
+  "the empty-claim early return is removed",
+  [
+    [
+      GENERATE,
+      "    if (!claimed || claimed.length === 0) {\n      return NextResponse.json({ ok: true, alreadyHandled: true });\n    }",
+      "",
+    ],
+  ],
+  true
+);
+
+// ---- the notification group count ----
+
+// 12. Back to last-writer-wins on the burst counter.
+run(
+  "the group_count update stops re-asserting the count",
+  [[DISPATCH, '        .eq("group_count", open.groupCount)\n', ""]],
+  true
+);
+
+// 13. The retry that recomputes from the same stale number — the bug
+//     again with an extra round trip in front of it.
+run(
+  "the retry reuses the stale count instead of re-reading",
+  [
+    [
+      DISPATCH,
+      '        const { data: current } = await admin\n          .from("user_notifications")\n          .select("group_count")',
+      '        const { data: current } = await admin\n          .from("user_notifications")\n          .select("id")',
+    ],
+  ],
+  true
 );
 
 console.log(`\n${missed === 0 ? "PASS" : "FAIL"}  ${caught} correct, ${missed} wrong`);

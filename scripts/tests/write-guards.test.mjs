@@ -181,5 +181,61 @@ check(
   true
 );
 
+// ---------------------------------------------------------------------
+console.log("\n== 3. the website generation attempt is CLAIMED ==");
+// ---------------------------------------------------------------------
+// The most expensive one. Two POSTs landing together both read
+// `pending, 0`, both cleared the cap, and both ran a full paid AI
+// generation — one increment recorded, two Anthropic calls, two credit
+// settlements. The route is fired `void fetch(...)` from the browser, so
+// a double-click produces it.
+const genSrc = readFileSync(
+  path.join(ROOT, "src/app/api/websites/generate/process/route.ts"),
+  "utf8"
+);
+const genChain = updateChains(genSrc).find((c) => /attempt_count/.test(c));
+check("the attempt_count update was found", genChain !== undefined, true);
+
+const genRest = (genChain ?? "").slice((genChain ?? "").indexOf(")"));
+// BOTH values the decision was made from. The status alone is not enough:
+// two callers can see the same `pending` and the cap check reads the
+// count, so the count is half of what has to hold.
+check("it re-asserts the status it read", /\.eq\(\s*["'`]status["'`]/.test(genRest), true);
+check("it re-asserts the attempt_count it read", /\.eq\(\s*["'`]attempt_count["'`]/.test(genRest), true);
+check("it reads back whether it won", /\.select\(/.test(genRest), true);
+// And the claim has to DECIDE something. A compare-and-swap whose result
+// is discarded is an expensive no-op.
+check(
+  "an empty claim stops the generation",
+  /claimed[\s\S]{0,80}length\s*===\s*0[\s\S]{0,120}return/.test(genSrc),
+  true
+);
+
+// ---------------------------------------------------------------------
+console.log("\n== 4. the notification group count is CLAIMED ==");
+// ---------------------------------------------------------------------
+// Absorbing a burst is this function's job, so the concurrent case IS the
+// normal case: five agent runs finishing together all read the same
+// count, all write +1, and the digest tells the user two things happened
+// when five did.
+const dispatchSrc = readFileSync(path.join(ROOT, "src/lib/notify/dispatch.ts"), "utf8");
+const groupChains = updateChains(dispatchSrc).filter((c) => /group_count/.test(c));
+check("the group_count updates were found", groupChains.length >= 1, true);
+for (const [i, chain] of groupChains.entries()) {
+  const rest = chain.slice(chain.indexOf(")"));
+  check(
+    `group_count update ${i + 1} re-asserts the count it read`,
+    /\.eq\(\s*["'`]group_count["'`]/.test(rest),
+    true
+  );
+}
+// A retry that recomputes from the SAME stale number is the bug again
+// with an extra round trip in front of it.
+check(
+  "the retry re-reads the row rather than reusing the stale count",
+  /if\s*\(!bumped[\s\S]{0,200}\.select\(\s*["'`]group_count["'`]/.test(dispatchSrc),
+  true
+);
+
 console.log(`\n${fail === 0 ? "PASS" : "FAIL"}  ${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

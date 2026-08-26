@@ -99,7 +99,12 @@ console.log("\n== 4. EVERY page goes through EVERY check ==");
     ["link safety", /documents\.map\(\s*\(doc\) => makeGeneratedLinksSafe\(doc, \{ pageSlugs: generatedSlugs \}\)\.html\s*\)/],
     ["unsplash attribution", /cleaned\.map\(\(doc\) => enforceUnsplashAttribution\(doc\)\)/],
     ["script stripping", /cleaned\.map\(\(doc\) => stripDisallowedExternalScripts\(doc\)\)/],
-    ["security scan", /stripped\.flatMap\(\(doc\) => scanWebsiteHtmlForSecurityIssues\(doc\)\)/],
+    // NOT THE WHOLE CALL SPELLED OUT. This used to be
+    // /stripped\.flatMap\(\(doc\) => scanWebsiteHtmlForSecurityIssues\(doc\)\)/,
+    // which went red the moment the scan gained a second argument — the
+    // check was on the punctuation, not on the property. The property is
+    // that the scan runs over `stripped`, one call per document.
+    ["security scan", /stripped\.flatMap\(\s*\(doc\)\s*=>\s*scanWebsiteHtmlForSecurityIssues\(\s*doc\b/],
   ];
   for (const [name, re] of PER_PAGE) {
     ok(`${name} runs on every document`, re.test(gen), name);

@@ -41,6 +41,7 @@ const { loadTs } = await import("./load-ts.mjs");
 const subdomain = await loadTs("src/lib/publishing/subdomain.ts");
 const limits = await loadTs("src/lib/publishing/publish-limits.ts");
 const scan = await loadTs("src/lib/website-html-security-scan.ts");
+const publishing = await loadTs("src/lib/publishing/public-serving.ts");
 
 const read = (f) => readFileSync(f, "utf8");
 
@@ -157,9 +158,11 @@ check("live edits per day are capped", limits.MAX_LIVE_EDITS_PER_SITE_PER_DAY, 2
 // ---------------------------------------------------------------------
 console.log("\n== 3. the response headers ARE the sandbox ==");
 // ---------------------------------------------------------------------
-// Asserted against the source rather than by importing it: public-serving.ts
-// is `server-only` and pulls in node:crypto, and what matters here is the
-// literal policy text that ships.
+// Read as SOURCE for the directives that are literal text, and IMPORTED
+// for frame-src, which is no longer literal — it is built from the scan's
+// own allowlist, so the only honest way to check it is to ask the function
+// what it emits. loadTs handles the `server-only` marker and node:crypto;
+// the earlier note here said importing was impossible, which it is not.
 const serving = read("src/lib/publishing/public-serving.ts");
 
 for (const [directive, why] of [
@@ -195,10 +198,42 @@ checkTrue("the 404 is not indexed", /noindex/.test(serving));
 
 // The iframe hosts the CSP permits must be the same set the static scan
 // permits — two allowlists that disagree means one of them is decoration.
-const scanSrc = read("src/lib/website-html-security-scan.ts");
-for (const host of ["youtube", "vimeo", "google"]) {
-  checkTrue(`${host} is allowed by BOTH the scan and the CSP`, scanSrc.includes(host) && serving.includes(host));
-}
+//
+// THIS CHECK USED TO BE THE DECORATION. It asked whether the word
+// "youtube" appeared in both FILES, which two hand-written lists satisfy
+// while saying different things — and they did: the scan allowed
+// "youtube.com" with no subdomain, which this CSP's
+// https://www.youtube.com blocks. A page passed the scan, got published,
+// and failed to render its own video with no error anywhere.
+//
+// There is one list now (ALLOWED_IFRAME_EMBEDS, exported from the scan)
+// and the directive is built from it, so this asserts the SETS are equal
+// rather than that a word appears twice.
+const cspFrameSrc = (serving.match(/frame-src[^"`;]*/) ?? [""])[0];
+checkTrue(
+  "frame-src is BUILT from the scan's allowlist, not repeated by hand",
+  /frame-src \$\{ALLOWED_IFRAME_EMBEDS\.map\(/.test(serving)
+);
+checkTrue("...and nothing was hard-coded beside it", !/frame-src https:/.test(cspFrameSrc));
+// And the same equality at RUNTIME, because a template that builds the
+// wrong string is still one list disagreeing with itself.
+const embeds = scan.ALLOWED_IFRAME_EMBEDS.map((e) => `https://${e.host}`);
+const liveFrameSrc = String(
+  (publishing.publishedSiteHeaders()["Content-Security-Policy"] ?? "")
+)
+  .split(";")
+  .map((d) => d.trim())
+  .find((d) => d.startsWith("frame-src")) ?? "";
+check(
+  "every allowed embed host appears in the served frame-src",
+  embeds.filter((origin) => !liveFrameSrc.includes(origin)),
+  []
+);
+check(
+  "the served frame-src names no host the scan would flag",
+  liveFrameSrc.replace("frame-src", "").trim().split(/\s+/).filter(Boolean).filter((o) => !embeds.includes(o)),
+  []
+);
 
 // ---------------------------------------------------------------------
 console.log("\n== 4. the scan is fail-closed at publish time ==");

@@ -29,7 +29,7 @@ import {
 } from "@/lib/website-html-security-scan";
 import { reviewWebsiteContentSafety } from "@/lib/website-security-review";
 import { logSecurityCheck } from "@/lib/security-check-log";
-import { getSiteUrl } from "@/lib/site-url";
+import { getSiteUrl, getSiteHostname } from "@/lib/site-url";
 import { logApiError } from "@/lib/log-error";
 import { diagLog } from "@/lib/diag";
 import { splitGeneratedPages } from "@/lib/website-multipage";
@@ -548,7 +548,7 @@ export async function POST(request: Request) {
       });
       htmlContent = optimised[0];
       extraPages = split.pages.map((pg, i) => ({ ...pg, html: optimised[i + 1] }));
-      const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc));
+      const securityIssues = stripped.flatMap((doc) => scanWebsiteHtmlForSecurityIssues(doc, { appHost: getSiteHostname() ?? undefined }));
       // ONE AI CALL FOR THE WHOLE SITE, not one per page. The review reads
       // content for what a deterministic scan cannot see, and content is
       // content wherever it sits — four separate reviews would cost four

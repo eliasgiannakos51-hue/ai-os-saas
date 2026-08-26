@@ -14,7 +14,7 @@ import {
 } from "@/lib/website-html-security-scan";
 import { reviewWebsiteContentSafety } from "@/lib/website-security-review";
 import { logSecurityCheck } from "@/lib/security-check-log";
-import { getSiteUrl } from "@/lib/site-url";
+import { getSiteUrl, getSiteHostname } from "@/lib/site-url";
 import { nextVersionNumber } from "@/lib/website-versioning";
 import { isAdminEmail } from "@/lib/admin";
 import { hasActiveBetaBypass } from "@/lib/beta";
@@ -366,7 +366,7 @@ export async function POST(request: Request) {
       // (html_content stays unchanged, nothing charged) rather than
       // shipped with a warning.
       updatedHtml = stripDisallowedExternalScripts(updatedHtml);
-      const securityIssues = scanWebsiteHtmlForSecurityIssues(updatedHtml);
+      const securityIssues = scanWebsiteHtmlForSecurityIssues(updatedHtml, { appHost: getSiteHostname() ?? undefined });
       const contentReview = await reviewWebsiteContentSafety(apiKey, updatedHtml, costs);
       const allIssueDescriptions = [
         ...securityIssues.map(describeSecurityScanIssue),

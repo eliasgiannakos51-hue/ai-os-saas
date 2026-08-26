@@ -52,6 +52,22 @@ function sql(query) {
   }).trim();
 }
 
+/** Every non-empty line, for reading an EXPLAIN rather than a single value.
+ *  `sql` returns only what a scalar query means to return; a plan is many
+ *  lines and taking the last one would read the innermost node. */
+function sqlLines(query) {
+  const args = process.env.DATABASE_URL
+    ? ["-d", process.env.DATABASE_URL]
+    : ["-d", process.env.PGDATABASE];
+  return execFileSync("psql", [...args, "-v", "ON_ERROR_STOP=1", "-tAc", query], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  })
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean);
+}
+
 const USER = "11111111-1111-1111-1111-111111111111";
 const OTHER = "22222222-2222-2222-2222-222222222222";
 
@@ -233,20 +249,87 @@ console.log("\n== 8. speed, on more than a thousand rows ==");
   ok(`the index holds ${rows} rows`, Number(rows) >= 1200, rows);
 
   sql("analyze public.search_index");
-  // THE INDEX IS ACTUALLY USED — measured by its own scan counter, not
-  // read off a plan. search_all is a STABLE `language sql` function that
-  // Postgres does not inline here, so EXPLAIN shows a bare "Function
-  // Scan" and hides everything that matters. The counter does not care.
+
+  // THIS CHECK USED TO READ THE INDEX SCAN COUNTER AND REQUIRE IT TO MOVE,
+  // AND IT WAS PASSING FOR THE WRONG REASON.
   //
-  // A sequential scan that happens to be fast on 1,200 rows is a
-  // sequential scan that is not fast on 100,000.
-  const idxScans = () =>
-    Number(sql(`select coalesce(idx_scan, 0) from pg_stat_user_indexes
-                where indexrelname = 'search_index_document_idx'`));
-  const before = idxScans();
-  sql(`select count(*) from public.search_all('proposal item')`);
-  const after = idxScans();
-  ok("the GIN index is used, not a sequential scan", after > before, `${before} -> ${after}`);
+  // Its comment said search_all "is a STABLE `language sql` function that
+  // Postgres does not inline here, so EXPLAIN shows a bare Function Scan
+  // and hides everything that matters". That was true, and it was the BUG:
+  // the function carried `set search_path`, which is what stopped it
+  // inlining, and an un-inlined body is planned once with the parameters
+  // unknown — so the planner could not fold search_query(p_query) to a
+  // constant, could not estimate selectivity, and reached for the index
+  // by default. The counter moved because the plan was bad.
+  //
+  // Measured cost of that plan, on this schema, PostgreSQL 16:
+  //
+  //     rows in search_index   search_all   inlined   overhead
+  //              1,200            64.55ms    2.85ms    61.70ms
+  //              5,000           211.84ms    6.57ms   205.28ms
+  //             20,000           766.12ms   19.68ms   746.44ms
+  //
+  // 20260911000000_search_all_inlinable.sql removes the SET clause and
+  // qualifies every built-in with pg_catalog instead, which is a stronger
+  // guarantee than the pin was. The function inlines, and the planner now
+  // has real statistics — at which point it correctly prefers a SEQUENTIAL
+  // SCAN on this table, because 1,206 narrow rows fit in about ninety
+  // pages and a bitmap scan cannot beat reading ninety pages.
+  //
+  // So demanding the index at this size is demanding a WORSE plan. The
+  // crossover was measured rather than guessed, with 250 matching rows and
+  // growing filler:
+  //
+  //       1,166 rows  Seq Scan       2.9ms
+  //       5,166 rows  Seq Scan       3.0ms
+  //      20,166 rows  Seq Scan       8.0ms
+  //      60,166 rows  Bitmap (GIN)  10.2ms
+  //     150,166 rows  Bitmap (GIN)   9.1ms
+  //
+  // The claim worth keeping is not "the index is used today" — it is "the
+  // index can serve this query, and correctly". Forbidding a sequential
+  // scan is how that is asked without seeding sixty thousand rows.
+  // `indisvalid || ' ' || indisready` renders booleans as "true"/"false",
+  // not the "t"/"f" psql prints for a bare column — the first version of
+  // this check compared against "t t" and failed on a perfectly good index.
+  const indexRow = sql(`select indisvalid::text || ' ' || indisready::text
+                          from pg_index i join pg_class c on c.oid = i.indexrelid
+                         where c.relname = 'search_index_document_idx'`);
+  ok("the GIN index exists, is valid and is ready", indexRow === "true true", indexRow || "(no such index)");
+
+  const forcedPlan = sqlLines(
+    `set enable_seqscan = off;
+     explain select * from public.search_all('proposal item')`
+  ).find((l) => /Seq Scan|Bitmap Heap Scan|Index Scan/.test(l)) ?? "(no scan node)";
+  ok("...and with a sequential scan forbidden, the query goes through it",
+    /Bitmap Heap Scan on search_index/.test(forcedPlan),
+    forcedPlan);
+
+  // A usable index that returns different rows is worse than no index.
+  const viaSeqScan = sql(
+    `select md5(string_agg(t::text, '|' order by t::text)) from public.search_all('proposal item') t`
+  );
+  // lastLine, because `set enable_seqscan = off;` prints its own "SET"
+  // acknowledgement above the result — which is precisely what lastLine was
+  // added to this file for, and what the first version of this check forgot.
+  const viaIndex = lastLine(sql(
+    `set enable_seqscan = off;
+     select md5(string_agg(t::text, '|' order by t::text)) from public.search_all('proposal item') t`
+  ));
+  ok("...and returns exactly the same rows either way", viaSeqScan === viaIndex,
+    `${viaSeqScan} vs ${viaIndex}`);
+
+  // AND THE THING THAT ACTUALLY REGRESSED. proconfig is empty or the
+  // function is behind a Function Scan again, and every number in the table
+  // above comes back.
+  const proconfig = sql(`select coalesce(array_to_string(p.proconfig, ','), '')
+                           from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+                          where n.nspname = 'public' and p.proname = 'search_all'`);
+  ok("search_all carries no SET clause, so PostgreSQL can inline it",
+    proconfig === "", proconfig);
+  const topNode = sqlLines(`explain select * from public.search_all('proposal item')`)[0] ?? "";
+  ok("...and its plan is the query, not an opaque Function Scan",
+    !/Function Scan on search_all/.test(topNode), topNode.trim());
   // And the query really does return the rows, so a used index that
   // matches nothing cannot pass this section.
   ok("...and it finds the seeded rows",

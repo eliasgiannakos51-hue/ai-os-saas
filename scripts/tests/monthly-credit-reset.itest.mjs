@@ -104,8 +104,19 @@ try {
 
   const migration = path.join(ROOT, "supabase/migrations/20260813_monthly_credit_reset.sql");
   applyFile(migration);
-  applyFile(migration);
-  check("migration applies twice cleanly", true, true);
+  let reapplyError = null;
+  try {
+    applyFile(migration);
+  } catch (err) {
+    reapplyError = err;
+  }
+  // NOT `check(name, true, true)`. That asserted a constant: it could not
+  // fail, and its label claimed something it never verified. It carried a
+  // little signal — the file aborts if the apply throws — but only until
+  // somebody wraps the call above in a try/catch, after which the line
+  // keeps printing PASS about nothing. The second apply is caught here
+  // instead, so the check has an outcome that can be wrong.
+  check("migration applies twice cleanly", reapplyError === null, true);
 
   await sql(`insert into auth.users (id, raw_user_meta_data) values
     ('${IDS.free_spent}',              '{}'::jsonb),

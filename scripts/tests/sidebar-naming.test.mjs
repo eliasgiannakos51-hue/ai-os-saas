@@ -336,7 +336,20 @@ console.log("\n== 3b. BUILD IS PROVEN FROM THE CODE, NOT FROM A LIST ==");
   for (const href of buildHrefs) {
     const slug = href.replace("/dashboard/", "");
     if (href in DOWNSTREAM) {
-      check(`${href} is downstream of a producer: ${DOWNSTREAM[href]}`, true);
+      // AN EXEMPTION HAS TO EARN ITSELF. This was `check(name, true)` — a
+      // PASS line that printed the reason from the map and verified none
+      // of it. Two things make the exemption true, and both can rot: the
+      // page has to still be there, and it has to still be downstream
+      // (a page that grew a generator belongs with the producers above,
+      // not behind a note saying it only displays).
+      const exists = existsSync(`src/app/dashboard/${slug}/page.tsx`);
+      check(
+        `${href} is downstream of a producer: ${DOWNSTREAM[href]}`,
+        exists && !producesFor(slug),
+        !exists
+          ? `no src/app/dashboard/${slug}/page.tsx — the exemption names a page that is gone`
+          : `it reaches a model itself now, so it is a producer, not a downstream view`
+      );
       continue;
     }
     check(

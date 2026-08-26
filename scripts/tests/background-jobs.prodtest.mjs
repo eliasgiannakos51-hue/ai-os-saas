@@ -479,7 +479,12 @@ try {
 
   console.log("\n== 3. THE PAGE IS CLOSED MID-BUILD ==");
   await ctx.close();
-  check("the browser context is gone", true);
+  // NOT `check(..., true)`. That asserted a literal: it could not go red,
+  // and its label claimed something it never looked at. If `ctx.close()`
+  // ever stopped closing the page, section 3 would be testing nothing —
+  // the work would still have a live watcher and section 4 would prove
+  // nothing about detachment. Ask the page whether it is actually shut.
+  check("the browser context is gone", page.isClosed(), `page.isClosed()=${page.isClosed()}`);
   const closedAt = Date.now();
 
   // Nothing is watching now. If the work were attached to the request it

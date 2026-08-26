@@ -95,9 +95,19 @@ console.log("== 1. THE BUG: a mid-stream drop must not delete what arrived ==");
     line({ type: "delta", text: "And a bit more. " }),
   ];
   // Connection dies after 3 of the 4 chunks — mid-reply.
-  const res = await readNdjsonStream(streamOf(chunks, { errorAfter: 3 }), onEvent);
+  let readError = null;
+  const res = await readNdjsonStream(streamOf(chunks, { errorAfter: 3 }), onEvent).catch((err) => {
+    readError = err;
+    return null;
+  });
 
-  check("reading does not throw", true, true);
+  // NOT `check(name, true, true)`. That asserted a constant: it could not
+  // fail, and its label claimed something it never verified. It carried a
+  // little signal — the file aborts if the apply throws — but only until
+  // the reader stops throwing for a different reason, after which the line
+  // keeps printing PASS about nothing. The rejection is caught here
+  // instead, so the check has an outcome that can be wrong.
+  check("reading does not throw", readError === null, true);
   check("the interruption is REPORTED, not hidden", res.interrupted, true);
   // This is the assertion that fails against the old inlined code, because
   // the old code never reached its commit block at all.

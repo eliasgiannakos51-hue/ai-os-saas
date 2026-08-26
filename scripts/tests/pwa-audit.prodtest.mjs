@@ -157,13 +157,19 @@ try {
   const manifestRes = await get("/manifest.webmanifest");
   check(`/manifest.webmanifest is served (${manifestRes.status})`, manifestRes.status === 200);
   let manifest = null;
+  let manifestParseError = null;
   try {
     manifest = JSON.parse(manifestRes.body.toString("utf8"));
   } catch (err) {
-    check("it is valid JSON", false, String(err));
+    manifestParseError = err;
   }
+  // ONE CHECK, ON THE PARSE ITSELF. It was two: a FAIL in the catch and a
+  // `check("it is valid JSON", true)` in the `if (manifest)` branch. The
+  // second asserted a literal — it could not go red — and the pair left a
+  // hole between them: a body of exactly `null` parses fine, so neither
+  // branch ran and the manifest was reported on by NOTHING at all.
+  check("it is valid JSON", manifestParseError === null, manifestParseError ? String(manifestParseError) : "");
   if (manifest) {
-    check("it is valid JSON", true);
     check("has a name", typeof manifest.name === "string" && manifest.name.length > 0, manifest.name);
     check("has a short_name", typeof manifest.short_name === "string");
     check("display: standalone", manifest.display === "standalone");
@@ -299,7 +305,12 @@ try {
       })
   );
   if (bip) {
-    check("beforeinstallprompt fired in this browser", true);
+    // A NOTE, NOT A CHECK. Whether the event fires is a property of the
+    // BROWSER, not of the site: it does not fire in headless Chromium at
+    // all (see the else branch). A `check(..., true)` here was a PASS line
+    // that could not go red, sitting under a name that reads like a
+    // verified fact. The checkable part is sections 1-3.
+    note("beforeinstallprompt fired in this browser");
   } else {
     note("beforeinstallprompt did NOT fire — headless Chromium does not run the");
     note("install pipeline, so this is NOT evidence either way. What section 1-3");

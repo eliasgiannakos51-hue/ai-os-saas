@@ -29,7 +29,7 @@ const ROUTE = "src/app/api/websites/[id]/submit-form/route.ts";
 
 let pass = 0;
 let fail = 0;
-function check(name, actual, expected) {
+function check(name, actual, expected, detail = "") {
   const a = JSON.stringify(actual);
   const e = JSON.stringify(expected);
   if (a === e) {
@@ -37,7 +37,7 @@ function check(name, actual, expected) {
     console.log(`  PASS  ${name}`);
   } else {
     fail++;
-    console.log(`  FAIL  ${name}\n        expected ${e}\n        actual   ${a}`);
+    console.log(`  FAIL  ${name}\n        expected ${e}\n        actual   ${a}${detail ? `\n        ${detail}` : ""}`);
   }
 }
 
@@ -57,23 +57,45 @@ check(
   true
 );
 
-const posOf = (needle) => routeSource.indexOf(needle);
-check("the per-website cap is still there", posOf("MAX_SUBMISSIONS_PER_HOUR") > -1, true);
-check(
-  "the IP check runs BEFORE the credit check",
-  posOf('scope: "website_form_ip"') < posOf("hasEnoughCredits("),
-  true
-);
-check(
-  "the IP check runs BEFORE the AI call",
-  posOf('scope: "website_form_ip"') < posOf("classifyLeadMessage("),
-  true
-);
-check(
-  "the IP check runs BEFORE anything is written",
-  posOf('scope: "website_form_ip"') < posOf('.from("website_form_submissions").insert'),
-  true
-);
+// EVERY ANCHOR IS ASSERTED BEFORE IT IS COMPARED.
+//
+// This block used to be `posOf(a) < posOf(b)` over plain substrings. A
+// needle that stops matching returns -1, and `posOf(a) < -1` is false for
+// every a — so when Prettier wrapped
+//
+//     .from("website_form_submissions").insert({
+//
+// onto two lines, the substring `.from("website_form_submissions").insert`
+// stopped existing and the check went RED reporting "the IP check runs
+// BEFORE anything is written". The route was, and is, correct: the insert
+// sits ~80 lines below the IP check. The failure was a fact about this
+// file's own text, wearing the name of a defect in the route — and the
+// same shape with the comparison the other way round would have gone
+// permanently GREEN instead, which is worse.
+//
+// So a missing anchor now fails AS A MISSING ANCHOR, saying which one.
+const anchors = {};
+const anchor = (label, re) => {
+  const m = routeSource.match(re);
+  check(`anchor: ${label}`, m !== null, true, `no match for ${re} in ${ROUTE}`);
+  anchors[label] = m ? m.index : Number.NaN;
+  return anchors[label];
+};
+
+const ipCheck = anchor("the per-IP rate-limit call", /scope:\s*"website_form_ip"/);
+anchor("the per-website hourly cap", /MAX_SUBMISSIONS_PER_HOUR\b/);
+const creditCheck = anchor("the credit check", /\bhasEnoughCredits\(/);
+const aiCall = anchor("the AI classification call", /\bclassifyLeadMessage\(/);
+// WHITESPACE-TOLERANT, because how the formatter breaks the chain is not
+// part of the claim. And `.insert(` specifically: the FIRST mention of
+// this table in the route is a `.select("id", { count: "exact", head: true })`
+// — a read, done for the per-website cap — so a needle matching only the
+// table name would find that one and compare the wrong position.
+const insert = anchor("the submission insert", /\.from\("website_form_submissions"\)\s*\.insert\(/);
+
+check("the IP check runs BEFORE the credit check", ipCheck < creditCheck, true);
+check("the IP check runs BEFORE the AI call", ipCheck < aiCall, true);
+check("the IP check runs BEFORE anything is written", ipCheck < insert, true);
 check("a blocked request answers 429", /Too many submissions from this connection[\s\S]{0,120}429/.test(routeSource), true);
 
 // ---------------------------------------------------------------------

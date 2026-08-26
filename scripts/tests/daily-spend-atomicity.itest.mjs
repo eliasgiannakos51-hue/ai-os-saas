@@ -114,8 +114,19 @@ try {
 
   const migration = path.join(ROOT, "supabase/migrations/20260813_atomic_daily_ai_spend.sql");
   sqlSyncFile(migration);
-  sqlSyncFile(migration); // re-applied: the migration must be idempotent
-  check("migration is idempotent (applies twice cleanly)", true, true);
+  let reapplyError = null;
+  try {
+    sqlSyncFile(migration); // re-applied: the migration must be idempotent
+  } catch (err) {
+    reapplyError = err;
+  }
+  // NOT `check(name, true, true)`. That asserted a constant: it could not
+  // fail, and its label claimed something it never verified. It carried a
+  // little signal — the file aborts if the apply throws — but only until
+  // somebody wraps the call above in a try/catch, after which the line
+  // keeps printing PASS about nothing. The second apply is caught here
+  // instead, so the check has an outcome that can be wrong.
+  check("migration is idempotent (applies twice cleanly)", reapplyError === null, true);
 
   const fnExists = await sql(
     `select count(*) from pg_proc p join pg_namespace n on n.oid = p.pronamespace

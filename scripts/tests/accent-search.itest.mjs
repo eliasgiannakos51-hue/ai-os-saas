@@ -73,8 +73,19 @@ try {
 
   const migration = path.join(ROOT, "supabase/migrations/20260813_accent_insensitive_search.sql");
   applyFile(migration);
-  applyFile(migration); // must be idempotent
-  check("migration applies twice cleanly", true, true);
+  let reapplyError = null;
+  try {
+    applyFile(migration); // must be idempotent
+  } catch (err) {
+    reapplyError = err;
+  }
+  // NOT `check(name, true, true)`. That asserted a constant: it could not
+  // fail, and its label claimed something it never verified. It carried a
+  // little signal — the file aborts if the apply throws — but only until
+  // somebody wraps the call above in a try/catch, after which the line
+  // keeps printing PASS about nothing. The second apply is caught here
+  // instead, so the check has an outcome that can be wrong.
+  check("migration applies twice cleanly", reapplyError === null, true);
 
   await sql(`insert into public.ideas (name) values
     ('Καφές'), ('ΚΑΦΕΣ'), ('καφές'), ('Καφε Bar'), ('ΚΑΦΈΣ'),

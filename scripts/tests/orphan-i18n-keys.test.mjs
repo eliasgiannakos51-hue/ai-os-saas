@@ -270,6 +270,8 @@ console.log(`${literalKeys.size} literal t()-call keys, ${dynamicNamespaces.size
 // reading the code is exactly the mistake the header describes.
 const KNOWN_ORPHANS = [];
 
+check(`the message-key walk found keys (${allKeys.length})`, allKeys.length >= 2000,
+  "orphans is a filter of these — an empty walk makes the check below pass on nothing");
 const newOrphans = orphans.filter((k) => !KNOWN_ORPHANS.includes(k));
 const staleKnown = KNOWN_ORPHANS.filter((k) => !orphans.includes(k));
 

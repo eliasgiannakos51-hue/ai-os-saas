@@ -41,6 +41,7 @@ function walk(dir, out = []) {
   return out;
 }
 const SOURCES = walk("src").map((f) => f.split(path.sep).join("/"));
+check(`the SOURCES scan found ${SOURCES.length}`, SOURCES.length >= 779, "a filter of an empty list is empty, and every check below it would pass");
 const readSrc = (f) => readFileSync(f, "utf8");
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 

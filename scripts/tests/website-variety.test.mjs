@@ -85,7 +85,11 @@ check(
 );
 // The only hex values left anywhere in the prompt should be neutral
 // shadow/overlay rgba, not brand colours.
-const promptHexes = [...src.matchAll(/`[^`]*`/gs)]
+const promptLiterals = [...src.matchAll(/`[^`]*`/gs)];
+check(`the prompt template literals were found (${promptLiterals.length})`,
+  promptLiterals.length >= 5,
+  "no literals means no hex codes to find, and the check below passes on nothing");
+const promptHexes = promptLiterals
   .map((m) => m[0])
   .join("")
   .match(/#[0-9a-fA-F]{6}\b/g) ?? [];

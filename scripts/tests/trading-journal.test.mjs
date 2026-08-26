@@ -962,6 +962,7 @@ ok("an unparseable URL is refused rather than allowed",
   // The encryption module is REUSED, not reimplemented — one path for a
   // key to be mishandled rather than two.
   const financeFiles = readdirSync("src/lib/finance").map((f) => join("src/lib/finance", f));
+  ok(`the financeFiles scan found ${financeFiles.length}`, financeFiles.length >= 2, "a filter of an empty list is empty, and every check below it would pass");
   const reimplemented = financeFiles.filter((f) => /createCipheriv|aes-256/i.test(src(f)));
   ok("no second encryption implementation was written for finance",
     reimplemented.length === 0, reimplemented.join(","));
@@ -975,6 +976,7 @@ ok("an unparseable URL is refused rather than allowed",
     ...readdirSync("src/lib/trading").map((f) => join("src/lib/trading", f)),
     ...readdirSync("src/lib/finance").map((f) => join("src/lib/finance", f)),
   ];
+  ok(`the files scan found ${files.length}`, files.length >= 8, "a filter of an empty list is empty, and every check below it would pass");
   const logging = files.filter((f) => /console\.(log|info|warn)/.test(stripTs(src(f))));
   ok("no trading or finance module writes to the console",
     logging.length === 0, logging.join(","));

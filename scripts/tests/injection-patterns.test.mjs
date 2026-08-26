@@ -263,11 +263,14 @@ console.log("\n== 9. BUILD GATE: every pattern literal is in folded form ==");
     .filter((line) => !/^\s*(\/\/|\*)/.test(line))
     .join("\n");
 
+  const allLiterals = [...code.matchAll(/"((?:[^"\\]|\\.)*)"/g)];
+  check(`the pattern file yielded string literals (${allLiterals.length})`,
+    allLiterals.length >= 20, true);
   const unfolded = [];
   // `(?:[^"\\]|\\.)*` and not `[^"\\]*`: pattern fragments are full of
   // backslashes, and a class that stops at one makes the scanner pair the
   // closing quote of one literal with the opening quote of the next.
-  for (const m of code.matchAll(/"((?:[^"\\]|\\.)*)"/g)) {
+  for (const m of allLiterals) {
     const literal = m[1];
     if (literal.startsWith("@/")) continue; // import specifiers
     // Regex escapes are ASCII syntax, not text: `\p{L}` and `\S` carry

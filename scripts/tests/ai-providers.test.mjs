@@ -521,6 +521,7 @@ ok("flattenSystem joins the blocks in order, losing nothing",
     .filter((f) => typeof f === "string" && f.endsWith(".tsx"))
     .map((f) => join("src/components", f))
     .filter((f) => statSync(f).isFile());
+  ok(`the componentFiles scan found ${componentFiles.length}`, componentFiles.length >= 200, "a filter of an empty list is empty, and every check below it would pass");
   const leaking = componentFiles.filter((f) => /ai\/providers|ai\/batch/.test(readFileSync(f, "utf8")));
   ok("no component imports the provider layer — a provider name cannot reach the UI",
     leaking.length === 0, leaking.join(", "));

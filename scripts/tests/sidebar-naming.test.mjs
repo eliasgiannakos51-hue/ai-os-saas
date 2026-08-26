@@ -45,6 +45,7 @@ const buildModules = readFileSync("src/lib/build-modules.ts", "utf8");
 
 /** Every heading the sidebar actually renders. */
 const headings = [...navSrc.matchAll(/heading: "([^"]+)"/g)].map((m) => m[1]);
+check(`the headings scan found ${headings.length}`, headings.length >= 8, "a filter of an empty list is empty, and every check below it would pass");
 /** The heading -> message-key map, as the code really holds it. */
 const headingKeys = Object.fromEntries(
   keysSrc
@@ -80,6 +81,9 @@ for (const heading of headings) {
 }
 // The mirror fault: a key here that no heading uses is dead weight, and
 // dead entries are exactly what hid the four missing ones.
+check(`the heading key map was read (${Object.keys(headingKeys).length})`,
+  Object.keys(headingKeys).length >= 5,
+  "an empty key map makes the dead-key check below pass on nothing");
 const deadHeadingKeys = Object.keys(headingKeys).filter((h) => !headings.includes(h));
 check("no heading key points at a heading that does not exist", deadHeadingKeys.length === 0, deadHeadingKeys.join(", "));
 

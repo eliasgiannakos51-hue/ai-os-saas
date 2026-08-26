@@ -250,8 +250,17 @@ console.log("\n== 5. nothing writes keywords behind this gate's back ==");
 // template, or rewrites keywords, is exactly the thing this file cannot
 // see — so it fails until somebody adds it here.
 const KNOWN = new Set([SEED_FILE, FIX_FILE]);
+const MIGRATION_FILES = readdirSync(MIGRATIONS).filter((f) => f.endsWith(".sql"));
+// A FLOOR OF ONE, AND NOT MORE, DELIBERATELY. The real repository has
+// forty-plus migrations, but template-plurals.mutation.mjs runs this same
+// gate against a THREE-file fixture to prove the stray-migration scan
+// works — so a repo-sized floor fires there on a harmless change and
+// reports a false positive. One is what both contexts can promise, and it
+// still catches the failure this exists for: a scan that returns nothing,
+// after which the stray check below passes by reading no files.
+check(`the migration scan found files (${MIGRATION_FILES.length})`, MIGRATION_FILES.length >= 1, true);
 const strays = [];
-for (const f of readdirSync(MIGRATIONS).filter((f) => f.endsWith(".sql"))) {
+for (const f of MIGRATION_FILES) {
   if (KNOWN.has(f)) continue;
   const sql = stripSql(readFileSync(path.join(MIGRATIONS, f), "utf8"));
   if (!/agent_templates/.test(sql)) continue;

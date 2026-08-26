@@ -122,6 +122,7 @@ const samples = [
   "Solar market", "", "2026", "Marché",
 ];
 const returned = [...new Set(samples.map((s) => resolveLanguage(s, "en")))];
+check(`the returned scan found ${returned.length}`, returned.length >= 5, "a filter of an empty list is empty, and every check below it would pass");
 check("every value this function can return is in SUPPORTED_LOCALES",
   returned.every((l) => supported.includes(l)),
   `returned ${returned.join(", ")} · supported ${supported.join(", ")}`);
@@ -142,6 +143,7 @@ function walk(dir, out = []) {
 }
 const stripComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 const ROUTES = walk("src/app/api").map((f) => f.split(path.sep).join("/"));
+check(`the ROUTES scan found ${ROUTES.length}`, ROUTES.length >= 116, "a filter of an empty list is empty, and every check below it would pass");
 // WIDENED, not narrowed. `body.language` is the shape this check was
 // written for, but a route that renamed the field to replyLanguage or
 // outputLanguage would answer in the interface locale just as wrongly and

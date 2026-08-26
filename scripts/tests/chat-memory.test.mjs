@@ -214,6 +214,8 @@ console.log("\n== 9. Settings says WHY it is zero ==");
 
   // In every language, or a Greek user reads a raw key.
   const langs = readdirSync("messages").filter((f) => f.endsWith(".json"));
+  check(`the langs scan found ${langs.length}`, langs.length >= 10,
+    "a filter or loop over an empty list leaves every check below it passing on nothing");
   const missing = [];
   for (const f of langs) {
     const j = JSON.parse(readFileSync(`messages/${f}`, "utf8"));

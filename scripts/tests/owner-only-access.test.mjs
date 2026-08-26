@@ -133,6 +133,8 @@ console.log("\n== 4. NO API route exposes platform-wide data unguarded ==");
 const routes = walk("src/app/api", "route.ts");
 check(`the scan found the API surface (${routes.length} routes)`, routes.length >= 40);
 
+check(`the service-role route scan found ${routes.length} routes`, routes.length >= 116,
+  "the offender list below is filled by a loop over these — an empty list makes it pass on nothing");
 const offenders = [];
 for (const file of routes) {
   const src = readFileSync(file, "utf8");

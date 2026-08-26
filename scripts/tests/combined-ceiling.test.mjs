@@ -605,6 +605,8 @@ for (const [labelKey, { accessor, enforcedIn, enforcedBy }] of Object.entries(EN
 // rendered beautifully hard-coded); a row that hardcodes "/seat" renders
 // English inside a Greek page. Both forms are caught here because `text:`
 // may only ever be an expression.
+check(`the pricing rows block was found (${rowsBlock.length} chars)`, rowsBlock.length >= 500,
+  "matchAll over an empty block yields no cells, and the check below passes on nothing");
 const literalCells = [
   ...rowsBlock.matchAll(/text:\s*(?:"([^"]*)"|`([^`]*)`)/g),
 ]
@@ -649,6 +651,7 @@ check(
     !s.startsWith("Ionexa AI pricing");
 
   const quoted = [...withoutComments.matchAll(/(["'`])((?:\\.|(?!\1)[^\\])*)\1/g)].map((m) => m[2]);
+  check(`the quoted scan found ${quoted.length}`, quoted.length >= 106, "a filter of an empty list is empty, and every check below it would pass");
   const sentences = quoted.filter(isEnglishSentence);
   check(
     "no English sentence is hardcoded in the pricing page",

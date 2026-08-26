@@ -65,6 +65,8 @@ console.log("\n== 2. so no module declares a price ==");
 // are absent" — a fourth module added next month is the case this exists
 // for.
 const registries = ["src/lib/build-modules.ts", "src/lib/modules.ts"];
+check(`the registries scan found ${registries.length}`, registries.length >= 2,
+  "the loop below adds to a list asserted empty — an empty scan makes that check pass by looking at nothing");
 const priced = [];
 let slugCount = 0;
 for (const rel of registries) {

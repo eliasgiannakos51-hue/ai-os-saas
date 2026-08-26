@@ -366,6 +366,8 @@ console.log("\n== 9. nobody still reads a job's answer off the HTTP response =="
 // The rule, checked structurally so it cannot come back: a component that
 // names one of these routes must treat the reply as a JOB.
 const CONVERTED_ROUTES = ["/api/mission/plan", "/api/create", "/api/files/ask", "/api/agents/build"];
+check(`the CONVERTED_ROUTES scan found ${CONVERTED_ROUTES.length}`, CONVERTED_ROUTES.length >= 4,
+  "a filter or loop over an empty list leaves every check below it passing on nothing");
 function walk(dir) {
   const out = [];
   for (const entry of readdirSync(dir)) {

@@ -152,6 +152,7 @@ check("no img tag is created from input", !/<img/i.test(attacked));
 // outcome. What matters is that nothing from the input became markup.
 const ALLOWED_TAGS = new Set(["h2", "h3", "p", "ul", "ol", "li", "strong", "em", "a", "/h2", "/h3", "/p", "/ul", "/ol", "/li", "/strong", "/em", "/a"]);
 const tagsFound = [...attacked.matchAll(/<(\/?[a-z0-9]+)/gi)].map((m) => m[1].toLowerCase());
+check(`the tagsFound scan found ${tagsFound.length}`, tagsFound.length >= 18, "a filter of an empty list is empty, and every check below it would pass");
 check(
   "every tag in the output is from the allowlist",
   tagsFound.every((tag) => ALLOWED_TAGS.has(tag)),
@@ -160,6 +161,7 @@ check(
 // And the only attributes are the three the anchor builder writes.
 const attrsFound = [...attacked.matchAll(/<[a-z0-9]+\s+([^>]*)>/gi)]
   .flatMap((m) => [...m[1].matchAll(/([a-zA-Z-]+)=/g)].map((a) => a[1]));
+check(`the attrsFound scan found ${attrsFound.length}`, attrsFound.length >= 3, "a filter of an empty list is empty, and every check below it would pass");
 check(
   "and the only attributes are href/target/rel",
   attrsFound.every((a) => ["href", "target", "rel"].includes(a)),

@@ -187,6 +187,8 @@ for (const f of callSites) {
 }
 check("no call site passes the identical expression for both isAdmin and isBeta",
   collapsed.length === 0, collapsed.join("\n        "));
+check(`the callSites scan found ${callSites.length}`, callSites.length >= 29,
+  "the loop below adds to a list asserted empty — an empty scan makes that check pass by looking at nothing");
 
 console.log(`\n${pass} passed, ${failures.length} failed`);
 if (failures.length) {

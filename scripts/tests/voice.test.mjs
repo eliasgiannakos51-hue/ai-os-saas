@@ -340,6 +340,7 @@ const flatCss = css.replace(/\s+/g, " ");
 // app — so the check asks for each of the three classes that actually
 // move, with a boundary after the name.
 const MOVING_PARTS = ["voice-orb-globe", "voice-orb-halo", "voice-orb-ring"];
+ok(`the MOVING_PARTS scan found ${MOVING_PARTS.length}`, MOVING_PARTS.length >= 3, "a filter of an empty list is empty, and every check below it would pass");
 const namesAllParts = (text) =>
   MOVING_PARTS.every((cls) => new RegExp(`\\.${cls}\\s*(?:,|\\{)`).test(text));
 // ALL of them, then the one that names the orb. The stylesheet already
@@ -452,6 +453,7 @@ ok("a hard clip ceiling is armed on every start",
   recorderSrc.includes("MAX_CLIP_SECONDS * 1000"));
 
 const voiceSources = readdirSync("src/components/voice").map((f) => join("src/components/voice", f));
+ok(`the voiceSources scan found ${voiceSources.length}`, voiceSources.length >= 8, "a filter of an empty list is empty, and every check below it would pass");
 // COMMENTS STRIPPED FIRST. The first version of this check read the raw
 // file and went red on voice-input.tsx's comment "Not localStorage: ...",
 // i.e. on a sentence explaining that the thing is not done. An instrument

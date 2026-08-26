@@ -438,6 +438,8 @@ console.log("\n== 5. a disabled Publish button explains itself ==");
 
   // In every language, or a Greek user reads an untranslated key.
   const langs = readdirSync(path.join(ROOT, "messages")).filter((f) => f.endsWith(".json"));
+  check(`the langs scan found ${langs.length}`, langs.length >= 10,
+    true);
   const missing = [];
   for (const f of langs) {
     const j = JSON.parse(readFileSync(path.join(ROOT, "messages", f), "utf8"));

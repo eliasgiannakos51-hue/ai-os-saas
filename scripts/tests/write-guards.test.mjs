@@ -95,6 +95,11 @@ function updateChains(body) {
 function writtenColumns(chain, body) {
   const obj = chain.slice(chain.indexOf("(") + 1);
   const names = [...obj.matchAll(/(?:^|[{,\s])([a-z_][a-z0-9_]*)\s*:/gi)].map((m) => m[1]);
+  // A floor inside the helper: an update whose object parses to no column
+  // names would make every `.every()` below vacuously true.
+  if (names.length === 0 && !/\[\s*[A-Za-z_$]/.test(obj)) {
+    throw new Error(`writtenColumns parsed no columns from: ${obj.slice(0, 80)}`);
+  }
   const groups = names.map((n) => ({ label: n, accept: [n] }));
 
   const computed = [...obj.matchAll(/\[\s*([A-Za-z_$][\w$]*)\s*\]\s*:/g)].map((m) => m[1]);

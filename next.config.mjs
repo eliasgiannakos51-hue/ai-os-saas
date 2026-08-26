@@ -26,6 +26,19 @@ const nextConfig = {
     staleTimes: {
       dynamic: 0,
     },
+    // THE FONTS ARE DATA, NOT IMPORTS. Nothing in the code `import`s a .ttf —
+    // registerPdfFonts() reads them from disk by path — so Next's file
+    // tracing sees no reference and ships none of them. Without this entry
+    // every PDF route throws on the first request in production and works
+    // perfectly in development, which is the worst shape a deployment bug
+    // can have.
+    //
+    // UNDER `experimental`, because this is Next 14.2. At the top level the
+    // key is silently ignored with only a build warning — which is the same
+    // bug as having no entry at all, wearing a green build.
+    outputFileTracingIncludes: {
+      "/api/**": ["./src/lib/pdf/fonts/*.ttf"],
+    },
   },
 };
 

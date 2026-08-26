@@ -116,7 +116,13 @@ console.log("\n== every @/… path written into a gate resolves ==");
 // The first segment must START WITH A LETTER. A gate matching an email
 // regex contains `@\]\+@/.test(`, which the earlier pattern read as the
 // module specifier "@/.test".
-const SPEC = /@\\?\/[A-Za-z][A-Za-z0-9_-]*(?:\\?\/[A-Za-z0-9_.-]+)*/g;
+// AND EVERY LATER SEGMENT MUST START WITH A LETTER, DIGIT OR UNDERSCORE
+// TOO. A gate that writes the specifier inside a regex literal —
+// `/@\\/lib\\/pdf\\/render/.test(code)` — ends it with the closing delimiter
+// and a method call, and `[A-Za-z0-9_.-]+` happily read `.test` as one more
+// path segment. The reported break was "@/lib/pdf/render/.test", a module
+// nobody wrote, in a gate whose import was perfectly fine.
+const SPEC = /@\\?\/[A-Za-z][A-Za-z0-9_-]*(?:\\?\/[A-Za-z0-9_][A-Za-z0-9_.-]*)*/g;
 let checked = 0;
 const broken = [];
 for (const file of files) {

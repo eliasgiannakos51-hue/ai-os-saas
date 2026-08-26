@@ -85,7 +85,13 @@ for (const file of suites) {
   const src = readFileSync(path.join(DIR, file), "utf8");
   const code = src.replace(/\/\*[\s\S]*?\*\//g, "").split("\n").filter((l) => !/^\s*(\/\/|\*)/.test(l)).join("\n");
 
-  const checksPresence = /!\s*\w+\.includes\(\s*\w+(\.\w+)?\s*\)/.test(code);
+  // THE RECEIVER MAY BE AN EXPRESSION. This read `!identifier.includes(x)`
+  // only, so a suite that holds its originals in a Map and writes
+  // `!originals.get(file).includes(anchor)` was reported as never checking —
+  // a fact about the spelling, not about the suite. What is being asserted
+  // is that the presence of the anchor is TESTED and NEGATED, however the
+  // source is reached.
+  const checksPresence = /!\s*[\w.]+(?:\([^)]*\))?(?:\.\w+)*\.includes\(\s*[\w.]+\s*\)/.test(code);
   ok(`${name}: checks whether the anchor is still in the file`, checksPresence);
 
   // The counter the exit code reads. Every suite here spells it `missed`,

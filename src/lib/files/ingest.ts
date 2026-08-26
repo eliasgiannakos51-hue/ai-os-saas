@@ -2,7 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import type { SupabaseClient, User } from "@supabase/supabase-js";
 import { logApiError } from "@/lib/log-error";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import {
   FILE_BUCKET,

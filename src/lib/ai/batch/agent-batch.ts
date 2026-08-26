@@ -12,7 +12,7 @@ import { settleReservation } from "@/lib/billing/reservations";
 import { hasEnoughCredits, resolveEffectivePlan, getPurchasedPackCreditPriceEur } from "@/lib/billing/credits";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import {
   batchDecision,
   batchHasExpired,

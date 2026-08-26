@@ -11,7 +11,7 @@ import {
   type Plan,
   type PlanSlug,
 } from "./plans";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { clearLegacyEntitlements } from "@/lib/billing/legacy-entitlements";
 
 // The plan an account is on is resolved in lib/billing/plan-resolution.ts

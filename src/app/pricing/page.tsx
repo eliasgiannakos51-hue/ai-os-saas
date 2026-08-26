@@ -27,7 +27,7 @@ import { maxPublishedSitesForPlan } from "@/lib/publishing/publish-limits";
 import { SubscribeButton } from "@/components/billing/subscribe-button";
 import { AppBackground } from "@/components/ui/app-background";
 import { createClient } from "@/lib/supabase/server";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { formatNumber } from "@/lib/format-number";
 
 export function generateMetadata(): Promise<Metadata> {

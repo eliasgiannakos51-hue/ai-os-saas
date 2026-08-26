@@ -11,7 +11,7 @@ import {
   SEARCH_TOOL_NAME,
   MAX_TOOL_ROUNDS,
 } from "@/lib/integrations/chat-tool";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";
@@ -588,7 +588,7 @@ export async function POST(request: Request) {
 
     // Credits: 1 credit per Ionexa Chat message, deducted from user_credits
     // (see lib/billing/credits.ts), the same shared budget Create Anything
-    // draws from. Admin-listed accounts (see lib/admin.ts) and beta
+    // draws from. Admin-listed accounts (see lib/auth/admin-emails.ts) and beta
     // testers (see lib/beta.ts) skip this entirely — treated as unlimited.
     // Only a READ-ONLY check happens here (reject early, before even
     // creating/touching the conversation, if obviously insufficient); the

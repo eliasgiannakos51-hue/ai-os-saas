@@ -15,7 +15,7 @@ import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { diagLog } from "@/lib/diag";
 
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";

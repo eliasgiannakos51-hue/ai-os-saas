@@ -49,7 +49,7 @@ const CreditsContext = createContext<CreditsContextValue | null>(null);
 // gated module creation) so the displayed number updates live without a
 // full page reload.
 //
-// isAdmin is display-only here — admin-listed accounts (lib/admin.ts)
+// isAdmin is display-only here — admin-listed accounts (lib/auth/admin-emails.ts)
 // never actually have credits deducted (api/chat, api/create both skip
 // deductCredits for them), but /api/credits/balance and this row's
 // credits_remaining were never plumbed to know that, so without this flag

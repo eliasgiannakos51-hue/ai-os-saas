@@ -13,7 +13,7 @@ import {
   GenericRecordDetail,
   type RecordDetailTab,
 } from "@/components/modules/generic-record-detail";
-import { toCSV, downloadCSV, todayForFilename } from "@/lib/csv";
+import { toCSV, downloadCSV, todayForFilename } from "@/lib/download/table-csv";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";

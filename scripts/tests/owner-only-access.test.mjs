@@ -13,7 +13,7 @@
 // anything touching platform-wide data proves it checked.
 //
 // Run: node scripts/tests/owner-only-access.test.mjs
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
 
 let pass = 0;
@@ -41,7 +41,7 @@ function walk(dir, filename) {
 }
 
 console.log("== 1. the owner check itself ==");
-const admin = readFileSync("src/lib/admin.ts", "utf8");
+const admin = readFileSync("src/lib/auth/admin-emails.ts", "utf8");
 check("it is server-only", /^import "server-only";/m.test(admin));
 check("the list comes from ADMIN_EMAILS plus a hardcoded owner", /HARDCODED_ADMIN_EMAILS/.test(admin) && /process\.env\.ADMIN_EMAILS/.test(admin));
 check("comparison is case-insensitive", /toLowerCase\(\)/.test(admin));
@@ -61,11 +61,34 @@ function everyFile(dir) {
   })(dir);
   return out;
 }
-const clientFilesImportingAdmin = everyFile("src")
-  .filter((f) => /^\s*"use client";/m.test(readFileSync(f, "utf8")))
-  .filter((f) => /from "@\/lib\/admin"/.test(readFileSync(f, "utf8")));
+// THE MODULE PATH LIVES IN ONE PLACE AND IS PROVEN TO EXIST.
+//
+// This read /from "@\/lib\/admin"/ — the path spelled into a regex. The
+// file was renamed to @/lib/auth/admin-emails and the regex kept matching
+// nothing, so `clientFilesImportingAdmin.length === 0` stayed true and this
+// check passed while looking at no files at all. An assertion about the
+// ABSENCE of something is the one shape a stale path can satisfy forever.
+//
+// Two changes. The path is a constant, checked to resolve to a real file
+// before it is used; and the scan is proven non-vacuous by counting the
+// SERVER files that do import it, which must not be zero.
+const ADMIN_MODULE = "@/lib/auth/admin-emails";
+const adminModuleFile = `src/${ADMIN_MODULE.slice("@/".length)}.ts`;
+check(`${ADMIN_MODULE} resolves to a real file`, existsSync(adminModuleFile), adminModuleFile);
+
+const importsAdmin = (f) => readFileSync(f, "utf8").includes(`from "${ADMIN_MODULE}"`);
+const allImporters = everyFile("src").filter(importsAdmin);
 check(
-  "no client component imports lib/admin",
+  `the scan found files importing it (${allImporters.length})`,
+  allImporters.length >= 15,
+  "a rename would otherwise make the check below pass by looking at nothing"
+);
+
+const clientFilesImportingAdmin = allImporters.filter((f) =>
+  /^\s*"use client";/m.test(readFileSync(f, "utf8"))
+);
+check(
+  `no client component imports ${ADMIN_MODULE}`,
   clientFilesImportingAdmin.length === 0,
   clientFilesImportingAdmin.join(", ")
 );

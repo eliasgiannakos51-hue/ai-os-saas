@@ -1,3 +1,15 @@
+// Turning a table on screen into a file the browser saves.
+//
+// RENAMED FROM lib/csv.ts. There is a second csv.ts —
+// lib/data-analysis/csv.ts — and it is the opposite direction: it PARSES an
+// uploaded spreadsheet, with a delimiter detector, a row cap and a column
+// cap. Nothing is shared between them; the exports are disjoint and so are
+// the importers.
+//
+// Two live files one directory apart with the same name is how
+// cross-module-context-chat-coding.mutation.mjs came to name the wrong
+// gate — one suffix off, wrong file loaded, fourteen mutations unnoticed.
+// scripts/tests/module-name-collisions.test.mjs refuses the shape now.
 import { neutraliseFormula } from "@/lib/import/csv-parse";
 
 /**

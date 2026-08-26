@@ -1,5 +1,5 @@
 import "server-only";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { getPlan, higherPlanSlug, type Plan, type PlanSlug } from "@/lib/billing/plans";
 
 /**

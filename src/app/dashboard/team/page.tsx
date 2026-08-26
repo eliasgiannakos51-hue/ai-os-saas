@@ -9,7 +9,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { InviteForm } from "@/components/team/invite-form";
 import { TeamMembersList, type TeamMember } from "@/components/team/team-members-list";
 import { getPlan, TEAM_SEAT_PRICE, CURRENCY_SYMBOL } from "@/lib/billing/plans";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.team");
@@ -31,7 +31,7 @@ export default async function TeamPage({
     redirect("/login");
   }
 
-  // Admin-listed accounts (see lib/admin.ts) get full Enterprise-tier
+  // Admin-listed accounts (see lib/auth/admin-emails.ts) get full Enterprise-tier
   // access, including team management, without a real Stripe subscription.
   const isAdmin = isAdminEmail(user.email);
   const tier = isAdmin ? "enterprise" : (user.user_metadata?.subscription_tier as string | undefined);

@@ -283,7 +283,7 @@ console.log("\n== 2c. a normal user IS charged for a website generation ==");
 // email is a hardcoded admin. For everyone else the same EUR 0.255 costs
 // real credits, which is what this asserts.
 const REAL_COST_EUR = 0.25531762; // the exact production row
-const adminSrc = readFileSync("src/lib/admin.ts", "utf8");
+const adminSrc = readFileSync("src/lib/auth/admin-emails.ts", "utf8");
 checkTrue("the bypass is an explicit admin list, not a default", /HARDCODED_ADMIN_EMAILS = \[/.test(adminSrc));
 for (const plan of PLANS) {
   if (typeof plan.price !== "number" || plan.price <= 0) continue;

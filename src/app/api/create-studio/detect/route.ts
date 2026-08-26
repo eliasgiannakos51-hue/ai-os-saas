@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { CLASSIFIER_MODULES } from "@/lib/classifier-modules";
 import { logApiError } from "@/lib/log-error";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkAiCallAllowed, fingerprintRequest, recordAiCallForDailySpend } from "@/lib/ai-circuit-breaker";

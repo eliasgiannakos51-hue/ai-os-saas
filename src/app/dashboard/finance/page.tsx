@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { LineChart } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { pageTitle } from "@/lib/page-title";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { MetricCard } from "@/components/finance/metric-card";

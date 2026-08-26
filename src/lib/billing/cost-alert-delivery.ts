@@ -1,7 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createResendClient } from "@/lib/resend";
-import { ADMIN_EMAILS, isAdminEmail } from "@/lib/admin";
+import { ADMIN_EMAILS, isAdminEmail } from "@/lib/auth/admin-emails";
 import { createNotification } from "@/lib/notifications/store";
 import { logApiError } from "@/lib/log-error";
 import type { CostAlert } from "@/lib/billing/cost-alerts";

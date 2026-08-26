@@ -93,7 +93,7 @@ export type SelectionOptions = {
   maxItems: number;
 };
 
-export type Selection<T> = {
+export type BudgetedSelection<T> = {
   selected: T[];
   /** Characters the selected items actually contribute. */
   chars: number;
@@ -126,7 +126,7 @@ export function selectWithinBudget<T>(
   items: T[],
   textOf: (item: T) => string,
   options: SelectionOptions
-): Selection<T> {
+): BudgetedSelection<T> {
   const scored = items.map((item, index) => ({
     item,
     index,

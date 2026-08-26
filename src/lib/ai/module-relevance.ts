@@ -66,7 +66,7 @@ export function resolveSelectionConfig(): SelectionConfig {
   return { ...d, enabled };
 }
 
-export type Selection<T> = {
+export type ModuleNarrowing<T> = {
   keep: T[];
   droppedSlugs: string[];
   mode: "all" | "narrowed";
@@ -135,8 +135,8 @@ export function selectRelevantModules<T extends { slug: string; lastActivityMs?:
   summaries: T[],
   vocabulary: ModuleVocabulary[],
   config: SelectionConfig = DEFAULT_SELECTION_CONFIG
-): Selection<T> {
-  const all = (reason: string): Selection<T> => ({
+): ModuleNarrowing<T> {
+  const all = (reason: string): ModuleNarrowing<T> => ({
     keep: summaries,
     droppedSlugs: [],
     mode: "all",

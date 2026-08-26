@@ -29,7 +29,7 @@ import { InstallSection } from "@/components/pwa/install-section";
 import { NotificationSettings } from "@/components/settings/notification-settings";
 import { AchievementsSection } from "@/components/settings/achievements-section";
 import { loadUnlockedAchievements } from "@/lib/achievements";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { isBetaTester, getBetaDaysRemaining } from "@/lib/beta";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { loadSubscriptionState } from "@/lib/billing/subscription-state";

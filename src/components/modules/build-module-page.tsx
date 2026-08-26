@@ -12,7 +12,7 @@ import { loadLinkedEntities } from "@/lib/entity-links";
 import { loadFavoriteIds } from "@/lib/favorites";
 import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 
 // Shared body for every "Build" module page (/dashboard/agents, /websites,
 // /apps, /images, /videos) — same shape as dashboard/[module]/page.tsx, just

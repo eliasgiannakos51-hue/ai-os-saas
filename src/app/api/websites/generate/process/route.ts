@@ -5,7 +5,7 @@ import { pickVariation, variationDirective } from "@/lib/website-variation";
 import { MAX_REFERENCE_IMAGES, referenceImagePathBelongsToUser } from "@/lib/website-reference-image";
 import { downloadReferenceImage } from "@/lib/website-reference-image-server";
 import { FIRST_VERSION_NUMBER } from "@/lib/website-versioning";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { resolveEffectivePlan, getPurchasedPackCreditPriceEur } from "@/lib/billing/credits";

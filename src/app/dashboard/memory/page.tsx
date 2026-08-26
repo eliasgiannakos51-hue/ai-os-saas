@@ -13,7 +13,7 @@ import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 
 export function generateMetadata(): Promise<Metadata> {
   return pageTitle("sidebar.items.memory");

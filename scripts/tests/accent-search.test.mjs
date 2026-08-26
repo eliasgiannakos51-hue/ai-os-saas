@@ -143,7 +143,7 @@ for (const file of walk(path.join(ROOT, "src"))) {
   }
 }
 
-// lib/admin.ts compares an email against a configured allowlist and
+// lib/auth/admin-emails.ts compares an email against a configured allowlist and
 // lib/website-html-extract.ts finds "</html>" in generated markup — both
 // pure-ASCII by construction, and both are `X.includes(y.toLowerCase())`
 // rather than the broken shape, so neither appears here. If either ever
@@ -221,7 +221,7 @@ check("no component compares user text with toLowerCase().includes()", offenders
   //                              ("failed to fetch") — machine-generated
   //                              ASCII, not user text.
   //   lib/files/limits.ts        the literal "unlimited".
-  //   lib/admin.ts               an email against the admin allowlist —
+  //   lib/auth/admin-emails.ts               an email against the admin allowlist —
   //                              already excluded above for the chained
   //                              shape; the inline-argument shape
   //                              (`.includes(email.toLowerCase())`) is
@@ -273,7 +273,7 @@ check("no component compares user text with toLowerCase().includes()", offenders
   const ASCII_BY_CONSTRUCTION = [
     "src/lib/network/offline.ts",
     "src/lib/files/limits.ts",
-    "src/lib/admin.ts",
+    "src/lib/auth/admin-emails.ts",
     "src/components/ideas/idea-row.tsx",
     "src/lib/trading-pattern.ts",
     "src/lib/import/coerce.ts",

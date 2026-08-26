@@ -7,7 +7,7 @@ import { Plug } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { UpgradeRequired } from "@/components/billing/upgrade-required";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { listIntegrations } from "@/lib/integrations/store";
 import { maxIntegrationsForPlan } from "@/lib/integrations/limits";

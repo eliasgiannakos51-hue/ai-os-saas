@@ -298,7 +298,7 @@ checkTrue(
 
 // Formula injection. The export path is where a stored payload actually
 // executes, so the defence has to be there and not only on import.
-const csvExport = readFileSync("src/lib/csv.ts", "utf8");
+const csvExport = readFileSync("src/lib/download/table-csv.ts", "utf8");
 checkTrue("the CSV export defuses formula cells", /neutraliseFormula/.test(csvExport));
 
 // published_sites must NOT be publicly readable. The anon key is printed

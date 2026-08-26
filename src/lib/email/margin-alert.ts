@@ -1,6 +1,6 @@
 import "server-only";
 import { createResendClient } from "@/lib/resend";
-import { ADMIN_EMAILS } from "@/lib/admin";
+import { ADMIN_EMAILS } from "@/lib/auth/admin-emails";
 
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Ionexa AI <onboarding@resend.dev>";
 

@@ -15,7 +15,7 @@ import { acceptPendingTeamInvite } from "@/lib/team/accept-pending-invite";
 import { getOrInitCredits, resolveEffectivePlan, packCreditPriceEurFromRow } from "@/lib/billing/credits";
 import { effectiveCreditPriceEurForAccount } from "@/lib/billing/credit-formula";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { logApiError } from "@/lib/log-error";
 import { AmbientDots } from "@/components/ui/ambient-dots";
 import { DashboardBackground } from "@/components/dashboard/dashboard-background";

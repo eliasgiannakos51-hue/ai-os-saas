@@ -4,7 +4,7 @@ import { classifyWebsiteDescription, WEBSITE_MODEL } from "@/lib/website-builder
 import { estimateForAction } from "@/lib/billing/estimate";
 import { resolvePricingConfig } from "@/lib/billing/pricing-config";
 import { MAX_REFERENCE_IMAGES, referenceImagePathBelongsToUser } from "@/lib/website-reference-image";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import {

@@ -16,7 +16,7 @@ import { reviewWebsiteContentSafety } from "@/lib/website-security-review";
 import { logSecurityCheck } from "@/lib/security-check-log";
 import { getSiteUrl, getSiteHostname } from "@/lib/site-url";
 import { nextVersionNumber } from "@/lib/website-versioning";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import {

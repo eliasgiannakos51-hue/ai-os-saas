@@ -36,7 +36,7 @@ function checkTrue(name, cond) {
 const csv = await loadTs("src/lib/import/csv-parse.ts");
 const coerce = await loadTs("src/lib/import/coerce.ts");
 const { coerceDate, coerceNumber, normaliseDigits } = coerce;
-const exporter = await loadTs("src/lib/csv.ts");
+const exporter = await loadTs("src/lib/download/table-csv.ts");
 
 console.log("== 1. formula injection is defused on the way IN ==");
 

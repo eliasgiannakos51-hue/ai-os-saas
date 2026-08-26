@@ -61,7 +61,7 @@ const PLAIN_NUMBER = /^[+-]?(\d{1,3}([ ,.']\d{3})*|\d+)([.,]\d+)?$/;
  * cell to a server.
  *
  * Why it matters in an IMPORTER specifically: our export path
- * (lib/csv.ts) writes stored values back out. A poisoned cell imported
+ * (lib/download/table-csv.ts) writes stored values back out. A poisoned cell imported
  * today becomes a live formula in a file the user downloads and opens
  * next week — attacked by their own data, through us. So the payload is
  * defused on the way IN as well as escaped on the way OUT

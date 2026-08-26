@@ -7,7 +7,7 @@ import { getSiteUrl } from "@/lib/site-url";
 import { CostAccumulator, type CostEntry } from "@/lib/billing/cost-accumulator";
 import { settleReservation, releaseReservation } from "@/lib/billing/reservations";
 import { resolveEffectivePlan } from "@/lib/billing/credits";
-import { isAdminEmail } from "@/lib/admin";
+import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { checkBypassCeiling } from "@/lib/billing/bypass-ceiling";
 import { hasActiveBetaBypass } from "@/lib/beta";
 import { aiGeneratedNotice } from "@/lib/agents/ai-disclosure";

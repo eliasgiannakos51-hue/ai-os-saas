@@ -242,10 +242,28 @@ const MUTANTS = [
     to: "      const sessions = [...new Set(list)] as TradingSession[];",
   },
   {
+    // THE ANCHOR MOVED BECAUSE THE LINE WAS FIXED. This read
+    //     text.split(/[.;\n·]+/)
+    // which is what the file said until the decimal-point bug was
+    // corrected. A mutation whose `from` no longer exists does not fail —
+    // the harness reports the target as missing and the hole is only
+    // visible if somebody reads the summary. Re-anchored on the clause
+    // split as it is now.
     name: "the parser guesses, returning a rule for a sentence it did not understand",
     file: RULES,
-    from: "  const clauses = text.split(/[.;\\n·]+/).map((c) => c.trim()).filter(Boolean);",
-    to: "  const clauses = [text];\n  if (!text.includes(\"%\")) return [{ params: { kind: \"max_risk_percent\", percent: 2 }, matchedText: text }];",
+    from: "    .split(/[;\\n·]+|\\.(?!\\d)/)",
+    to: "    .split(/(?:)/g).slice(0, 0).concat([text]).flatMap((t) => t ? [t] : [])",
+  },
+  {
+    // THE DECIMAL POINT, WHICH IS THE DEFECT THAT MOVED THE ANCHOR ABOVE.
+    // Nothing guarded it at this level: reverting `\.(?!\d)` to a plain
+    // `.` is a one-character edit that turns "max 2.5% risk" into a FIVE
+    // percent rule — double the risk the trader wrote — while the UI shows
+    // their own sentence saying 2.5 next to it. Measured, not assumed.
+    name: "a decimal point splits a clause again, doubling the risk a trader asked for",
+    file: RULES,
+    from: "    .split(/[;\\n·]+|\\.(?!\\d)/)",
+    to: "    .split(/[.;\\n·]+/)",
   },
 
   // ------------------------------------------------------------------

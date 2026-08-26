@@ -29,10 +29,34 @@ const MUTANTS = [
   // THE DEFECT THAT WAS ACTUALLY IN THE TREE.
   // ------------------------------------------------------------------
   {
+    // The literal "max_tokens" became the named TRUNCATION_STOP_REASON so
+    // the file's two entry points could not disagree about it — and this
+    // mutation, which still spelled the literal, quietly stopped applying.
+    // "Target no longer exists" is not a failure, so the hole was only
+    // visible in the summary at the end of the run.
     name: "the stop reason stops being read (33 sites shipped severed text this way)",
     suite: TOKENS, file: TRUNC,
-    from: 'return { text, truncated: stopReason === "max_tokens", stopReason };',
+    from: "return { text, truncated: stopReason === TRUNCATION_STOP_REASON, stopReason };",
     to: "return { text, truncated: false, stopReason };",
+  },
+  {
+    // THE SECOND DOOR ONTO THE SAME RULE. modelTextFrom is what the
+    // provider layer goes through, so severing it severs the agent runner
+    // specifically while modelText keeps every gate that only exercises
+    // Anthropic's content blocks green.
+    name: "the provider path stops reading the stop reason, so only the agent runner ships severed text",
+    suite: TOKENS, file: TRUNC,
+    from: "    truncated: completion.stopReason === TRUNCATION_STOP_REASON,",
+    to: "    truncated: false,",
+  },
+  {
+    // AND THE CONSTANT ITSELF. One wrong string and BOTH doors stop
+    // recognising truncation together — the exact failure the constant was
+    // introduced to make impossible, which nothing was checking.
+    name: "the constant names a stop reason no model ever returns",
+    suite: TOKENS, file: TRUNC,
+    from: 'export const TRUNCATION_STOP_REASON = "max_tokens";',
+    to: 'export const TRUNCATION_STOP_REASON = "length";',
   },
   {
     name: "a research report goes back to a length check as its only validation",

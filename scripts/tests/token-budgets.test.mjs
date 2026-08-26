@@ -58,6 +58,41 @@ console.log("== 0. the detector itself works ==");
   ok("a missing stop_reason is not a truncation", truncation.modelText({ content: [] }).truncated === false);
   ok("non-text blocks are skipped, not stringified",
     truncation.modelText({ content: [{ type: "tool_use" }, { type: "text", text: "x" }], stop_reason: "end_turn" }).text === "x");
+
+  // THE SECOND DOOR, WHICH NOTHING HERE WAS OPENING.
+  //
+  // modelTextFrom is the entry point for the PROVIDER layer
+  // (lib/ai/providers/complete.ts), which returns { text, stopReason }
+  // rather than Anthropic's content blocks — so the agent runner goes
+  // through this function and not through modelText. Every assertion
+  // above exercised modelText only, which meant `truncated: false` could
+  // be hard-coded into modelTextFrom and this whole section stayed green
+  // while the agent runner emailed severed reports as finished ones. The
+  // mutation suite is what found it.
+  //
+  // The file's own comment says these are "a second DOOR onto the same
+  // rule, not a second rule". That is a claim, and this is the check.
+  const fromCut = truncation.modelTextFrom({ text: "The analysis shows that", stopReason: "max_tokens" });
+  ok("the provider path reports max_tokens as truncated", fromCut.truncated === true, JSON.stringify(fromCut));
+  const fromDone = truncation.modelTextFrom({ text: "Complete.", stopReason: "end_turn" });
+  ok("...and end_turn as finished", fromDone.truncated === false, JSON.stringify(fromDone));
+  ok("...with the text intact either way",
+    fromCut.text === "The analysis shows that" && fromDone.text === "Complete.");
+  ok("...and a null stop reason is not a truncation",
+    truncation.modelTextFrom({ text: "x", stopReason: null }).truncated === false);
+
+  // ONE RULE, TWO DOORS: the two must agree on every stop reason, or the
+  // drift the constant exists to prevent is back — one caller marking a
+  // severed report and another delivering it clean.
+  const disagreements = ["max_tokens", "end_turn", "stop_sequence", "tool_use", "refusal", null].filter(
+    (reason) =>
+      truncation.modelText({ content: [{ type: "text", text: "t" }], stop_reason: reason }).truncated !==
+      truncation.modelTextFrom({ text: "t", stopReason: reason }).truncated
+  );
+  ok("the two entry points agree on every stop reason", disagreements.length === 0, disagreements.join(", "));
+
+  ok("and the stop reason they compare against is the one models send",
+    truncation.TRUNCATION_STOP_REASON === "max_tokens", String(truncation.TRUNCATION_STOP_REASON));
 }
 
 console.log("\n== 1. the inventory is complete and nothing is unclassified ==");

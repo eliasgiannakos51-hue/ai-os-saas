@@ -421,6 +421,47 @@ ok("a sentence with nothing checkable in it parses to NOTHING, rather than a gue
 ok("an empty string parses to nothing", parseRulesFromText("").length === 0 && parseRulesFromText(null).length === 0);
 ok("a decimal risk is kept", parseRulesFromText("Max 0,5% risk.")[0]?.params.percent === 0.5);
 
+// A FULL STOP BETWEEN TWO DIGITS IS A DECIMAL POINT, NOT A SENTENCE END.
+//
+// The line above tested "0,5" — a COMMA. The comma was never the problem.
+// The clause splitter used to be /[.;\n·]+/ and it split on the full stop
+// INSIDE a number, which is a different defect with a much worse outcome:
+// "max 2.5% risk" became the two clauses "max 2" and "5% risk", the second
+// matched the percent branch on its own, and the stored rule was FIVE
+// percent — twice what the trader wrote — with their own sentence saying
+// 2.5 displayed beside it. A rule that silently doubles is worse than one
+// that silently fails.
+//
+// So the wrong separator was under test and the mutation suite proved it:
+// reverting the fix left every assertion in this file green. These are the
+// three cases measured against the broken splitter, before it was fixed.
+{
+  const risk = parseRulesFromText("Max 2.5% risk.");
+  ok("a full-stop decimal risk keeps its value, and does NOT double",
+    risk.length === 1 && risk[0]?.params.kind === "max_risk_percent" && risk[0]?.params.percent === 2.5,
+    JSON.stringify(risk.map((r) => r.params)));
+
+  const loss = parseRulesFromText("Max daily loss 1500.50.");
+  ok("a full-stop decimal loss keeps its cents",
+    loss[0]?.params.kind === "max_daily_loss" && loss[0]?.params.amount === 1500.5,
+    JSON.stringify(loss.map((r) => r.params)));
+
+  const size = parseRulesFromText("Max size 0.5 lots.");
+  ok("a rule whose only number is a full-stop decimal survives at all",
+    size.length === 1 && size[0]?.params.kind === "max_position_size",
+    JSON.stringify(size.map((r) => r.params)));
+
+  // AND THE SENTENCE BREAK STILL BREAKS. `\.(?!\d)` must not turn two
+  // rules into one: a stop followed by a space, and a trailing stop with
+  // nothing after it, are both real ends.
+  const two = parseRulesFromText("Max 2.5% risk. Only London.");
+  ok("a real sentence break still separates two rules",
+    two.length === 2 &&
+      two.some((r) => r.params.kind === "max_risk_percent" && r.params.percent === 2.5) &&
+      two.some((r) => r.params.kind === "allowed_sessions"),
+    JSON.stringify(two.map((r) => r.params)));
+}
+
 // THE VALIDATOR REFUSES RATHER THAN REPAIRS.
 ok("a 0% risk rule is refused — it would flag every trade",
   parseRuleParams("max_risk_percent", { percent: 0 }) === null);

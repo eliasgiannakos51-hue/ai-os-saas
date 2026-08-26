@@ -18,7 +18,20 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 
-const TARGET = "scripts/tests/cross-module-context.test.mjs";
+// THE TARGET WAS THE WRONG GATE, AND THAT IS WHY THIS SUITE CAUGHT 0 OF 14.
+//
+// It pointed at cross-module-context.test.mjs, which loads
+// src/lib/ai/context-relevance.ts and src/lib/ai/cross-module-context.ts —
+// different modules with a different API (selectRelevantModules,
+// buildModuleVocabulary). The three files mutated below are the OTHER
+// implementation: the one api/chat/route.ts and api/records/ask/route.ts
+// actually import. Every mutation applied cleanly and the gate stayed green
+// because the gate never loads the files being mutated.
+//
+// Nothing about the mutations was wrong; they had no gate. That gate is
+// scripts/tests/chat-context-selection.test.mjs now, and it exercises the
+// three modules by calling them rather than by reading them.
+const TARGET = "scripts/tests/chat-context-selection.test.mjs";
 const RELEVANCE = "src/lib/context-relevance.ts";
 const MENTIONS = "src/lib/chat/entity-mentions.ts";
 const CONVO = "src/lib/chat/record-conversation-context.ts";

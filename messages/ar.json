@@ -64,7 +64,13 @@
     "creditsUnlimited": "غير محدودة",
     "whatIsThis": "ما هذا؟",
     "examplesLabel": "جرّب:",
-    "newMessagesBelow": "رسالة جديدة بالأسفل"
+    "newMessagesBelow": "رسالة جديدة بالأسفل",
+    "downloadPdf": {
+      "label": "تنزيل PDF",
+      "preparing": "جارٍ التحضير…",
+      "failed": "تعذّر إنشاء ملف PDF",
+      "notReady": "لم ينتهِ بعد"
+    }
   },
   "sidebar": {
     "groups": {

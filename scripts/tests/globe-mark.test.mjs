@@ -388,6 +388,14 @@ const MECHANICAL = [
   // thinking, so the globe would be spent on a POST — and the mark means
   // "the model is working", which is what it exists NOT to dilute.
   "src/components/publishing/badge-removal.tsx",
+  // Downloads. Rendering a PDF is layout and font subsetting — a mechanical
+  // wait on a route that produces a file. Nothing is thinking, and spending
+  // the globe on it would make the mark read as "busy", which is exactly
+  // what it exists not to mean. The one place a download DOES wait on the
+  // model is the research report, and that page already shows the globe
+  // while the report is being written; by the time the button exists the
+  // thinking is finished.
+  "src/components/ui/download-pdf-button.tsx",
 ];
 {
   const spinning = allTsx.filter((f) => /animate-spin/.test(stripComments(readFileSync(f, "utf8")))).sort();

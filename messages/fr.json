@@ -64,7 +64,13 @@
     "creditsUnlimited": "Illimités",
     "whatIsThis": "Qu'est-ce que c'est ?",
     "examplesLabel": "Essayez :",
-    "newMessagesBelow": "Nouveau message en bas"
+    "newMessagesBelow": "Nouveau message en bas",
+    "downloadPdf": {
+      "label": "Télécharger le PDF",
+      "preparing": "Préparation…",
+      "failed": "Le PDF n’a pas pu être créé",
+      "notReady": "Ce n’est pas encore terminé"
+    }
   },
   "sidebar": {
     "groups": {

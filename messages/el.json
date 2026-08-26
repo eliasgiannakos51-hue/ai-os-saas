@@ -64,7 +64,13 @@
     "creditsUnlimited": "Απεριόριστα",
     "whatIsThis": "Τι είναι αυτό;",
     "examplesLabel": "Δοκίμασε:",
-    "newMessagesBelow": "Νέο μήνυμα παρακάτω"
+    "newMessagesBelow": "Νέο μήνυμα παρακάτω",
+    "downloadPdf": {
+      "label": "Λήψη PDF",
+      "preparing": "Προετοιμασία…",
+      "failed": "Το PDF δεν μπόρεσε να δημιουργηθεί",
+      "notReady": "Δεν έχει ολοκληρωθεί ακόμα"
+    }
   },
   "sidebar": {
     "groups": {

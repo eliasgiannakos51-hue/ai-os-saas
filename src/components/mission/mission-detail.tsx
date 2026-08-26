@@ -20,6 +20,7 @@ import { normalizeForSearch } from "@/lib/text/search-match";
 import { createClient } from "@/lib/supabase/client";
 import { StepControls, StepUndoStrip, UNDO_WINDOW_MS, type PendingUndo } from "@/components/mission/step-controls";
 import { MissionDeleteButton } from "@/components/mission/mission-delete-button";
+import { DownloadPdfButton } from "@/components/ui/download-pdf-button";
 import { EnergySuggestion } from "@/components/mission/energy-suggestion";
 import { getErrorMessage } from "@/lib/get-error-message";
 import { useToast } from "@/components/toast/toast-context";
@@ -485,6 +486,12 @@ export function MissionDetail({
           <span className="text-xs text-muted">
             {t("stepsProgress", { done: completedCount, total: steps.length })}
           </span>
+          {/* A plan is the one artefact here meant to be printed and
+              carried. The PDF carries every field the Planner filled in —
+              the outcome of each step and its estimate, not only the step
+              text — because a copy with less in it than the screen is a
+              copy nobody would take. */}
+          <DownloadPdfButton href={`/api/mission/${mission.id}/pdf`} fallbackName="mission-plan" />
           {/* On the mission's own screen as well as on its card: the
               place somebody decides a mission was a mistake is usually
               after opening it and reading the plan. */}

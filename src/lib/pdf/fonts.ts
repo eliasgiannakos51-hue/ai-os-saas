@@ -3,7 +3,15 @@ import { existsSync } from "node:fs";
 import { Font } from "@react-pdf/renderer";
 import { PDF_FACES, PDF_FONT_DIR } from "@/lib/pdf/font-stack";
 
-export { FONT_STACK, PDF_FONT_FAMILY, PDF_FACES, PDF_FONT_DIR } from "@/lib/pdf/font-stack";
+export {
+  FONT_STACK,
+  PDF_FONT_FAMILY,
+  PDF_FACES,
+  PDF_FONT_DIR,
+  PDF_WEIGHTS,
+  PDF_STYLES,
+  pdfFontFamily,
+} from "@/lib/pdf/font-stack";
 
 /**
  * Registering the faces — the side effect that font-stack.ts deliberately
@@ -30,15 +38,22 @@ let registered = false;
  */
 export function registerPdfFonts(): void {
   if (registered) return;
-  const missing = PDF_FACES.filter((f) => !existsSync(path.join(FONT_DIR, f.file))).map((f) => f.file);
+  const missing = PDF_FACES.filter(
+    (f) => !existsSync(path.join(FONT_DIR, f.file)),
+  ).map((f) => f.file);
   if (missing.length > 0) {
     throw new Error(
       `PDF fonts missing from the deployment: ${missing.join(", ")} (looked in ${FONT_DIR}). ` +
-        "Check experimental.outputFileTracingIncludes in next.config.mjs."
+        "Check experimental.outputFileTracingIncludes in next.config.mjs.",
     );
   }
   for (const face of PDF_FACES) {
-    Font.register({ family: face.family, src: path.join(FONT_DIR, face.file), fontWeight: face.weight });
+    Font.register({
+      family: face.family,
+      src: path.join(FONT_DIR, face.file),
+      fontWeight: face.weight,
+      fontStyle: face.style,
+    });
   }
   // Hyphenation off. @react-pdf hyphenates English by default and the same
   // callback runs over Arabic and Chinese, where breaking inside a word is

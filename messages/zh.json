@@ -64,7 +64,13 @@
     "creditsUnlimited": "无限制",
     "whatIsThis": "这是什么？",
     "examplesLabel": "试试：",
-    "newMessagesBelow": "下方有新消息"
+    "newMessagesBelow": "下方有新消息",
+    "downloadPdf": {
+      "label": "下载 PDF",
+      "preparing": "正在准备…",
+      "failed": "无法创建 PDF",
+      "notReady": "尚未完成"
+    }
   },
   "sidebar": {
     "groups": {

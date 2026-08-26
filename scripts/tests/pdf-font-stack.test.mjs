@@ -35,6 +35,7 @@ import { loadTs } from "./load-ts.mjs";
 const FONTS_TS = "src/lib/pdf/fonts.ts";
 const FONT_STACK_TS = "src/lib/pdf/font-stack.ts";
 const SELF = "scripts/tests/pdf-font-stack.test.mjs";
+const DOWNLOAD_BUTTON = "src/components/ui/download-pdf-button.tsx";
 const DOCUMENT_TSX = "src/lib/pdf/document.tsx";
 const RENDER_TS = "src/lib/pdf/render.ts";
 const PDF_EXTRACTOR = "src/lib/files/pdf.ts";
@@ -99,18 +100,25 @@ console.log("\n== 1. exactly one file decides the font ==");
       otherRenderers.push(file.replace(/\\/g, "/"));
       continue;
     }
-    for (const m of code.matchAll(/fontFamily\s*:\s*([^,\n}]+)/g)) {
+    // A LITERAL VALUE IS THE DEFECT, not the property name.
+    //
+    // The first version of this matched `fontFamily\s*:\s*(anything)`, which
+    // was two things at once: it reported the TYPE ANNOTATION
+    // `fontFamily: string[]` as a violation, and it stopped seeing the real
+    // usage entirely once the styles were written as the shorthand
+    // `fontFamily,`. Both directions wrong from one regex — noisy about
+    // types, blind to values.
+    //
+    // What must never appear is a font NAME: a quoted string, alone or in an
+    // array. `fontFamily,` (the shorthand) and `fontFamily: someVariable`
+    // both take their value from pdfFontFamily(), which is the point.
+    const rel = file.replace(/\\/g, "/");
+    for (const m of code.matchAll(/\bfontFamily\b\s*[:,]/g)) {
+      void m;
       occurrences++;
-      const value = m[1].trim();
-      const rel = file.replace(/\\/g, "/");
-      if (rel.endsWith(DOCUMENT_TSX) || rel.endsWith(FONTS_TS)) {
-        // Inside the two files that are allowed to, the value still has to
-        // be the shared constant — "Inter" written here is the same bug,
-        // one file further in.
-        if (!/PDF_FONT_FAMILY/.test(value)) offenders.push(`${rel}: fontFamily: ${value}`);
-        continue;
-      }
-      offenders.push(`${rel}: fontFamily: ${value}`);
+    }
+    for (const m of code.matchAll(/\bfontFamily\s*:\s*(\[[^\]]*\]|"[^"]*"|'[^']*')/g)) {
+      offenders.push(`${rel}: fontFamily: ${m[1].trim()}`);
     }
   }
   ok(
@@ -126,6 +134,13 @@ console.log("\n== 1. exactly one file decides the font ==");
   // AND THE EXEMPTION EARNS ITSELF. An empty list here would mean the
   // recogniser stopped matching, and every file it used to skip would be
   // silently back in scope — passing, because nothing was checked.
+  // AND THE ONE FILE THAT MAY DECIDE IT DERIVES IT FROM THE DOCUMENT.
+  const documentSrc = stripTs(readFileSync(DOCUMENT_TSX, "utf8"));
+  ok(
+    "the shared document derives the family from the document's own language",
+    /pdfFontFamily\s*\(\s*locale\s*\)/.test(documentSrc),
+    "a constant stack here sets every space in the wrong font for one script or another"
+  );
   ok(
     `the files skipped as another renderer really are one (${otherRenderers.length})`,
     otherRenderers.length >= 1 && otherRenderers.every((f) => /opengraph|icon|og/i.test(f)),
@@ -165,6 +180,122 @@ console.log("\n== 2. every PDF route goes through the shared renderer ==");
 }
 
 // ---------------------------------------------------------------------
+console.log("\n== 2b. every PDF route is reachable from the interface ==");
+// ---------------------------------------------------------------------
+// THE COMPLAINT THIS WHOLE FEATURE ANSWERS was "things the user can see and
+// cannot take". A route with no button is exactly that, still — it just
+// fails in a way that looks like success from the server side. So each PDF
+// route has to be named by a component, and the name has to be the route's
+// real path rather than something near it.
+{
+  const components = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (/\.tsx?$/.test(entry.name)) components.push(full);
+    }
+  };
+  walk("src/components");
+  walk("src/app");
+  const ui = components.map((f) => stripTs(readFileSync(f, "utf8"))).join("\n");
+
+  const routes = [];
+  const walkApi = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walkApi(full);
+      else if (entry.name === "route.ts") routes.push(full);
+    }
+  };
+  walkApi("src/app/api");
+  const pdfRoutes = routes.map((r) => r.replace(/\\/g, "/")).filter((r) => r.includes("/pdf/"));
+
+  // src/app/api/documents/[id]/pdf/route.ts must be called as
+  // `/api/documents/${something}/pdf`. Matched as ONE pattern rather than
+  // as a prefix and a suffix looked up separately: "/api/documents/" and
+  // "/pdf" both appear all over the interface on their own, so checking for
+  // them apart would report every route as reachable whatever was there.
+  const escape = (v) => v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const unreachable = pdfRoutes.filter((route) => {
+    const urlPath = route.replace("src/app", "").replace("/route.ts", "");
+    const pattern = new RegExp(
+      urlPath
+        .split(/\/\[[^\]]+\]/)
+        .map(escape)
+        .join("/\\$\\{[^}]+\\}")
+    );
+    return !pattern.test(ui);
+  });
+  ok(
+    `every PDF route has a button that calls it (${unreachable.length} do not)`,
+    unreachable.length === 0,
+    `${unreachable.join(", ")} — a route nothing calls is the same to the user as no route`
+  );
+  const buttons = [...ui.matchAll(/<DownloadPdfButton\b/g)].length;
+  ok(
+    `the download button is used (${buttons})`,
+    buttons >= pdfRoutes.length,
+    `${buttons} uses for ${pdfRoutes.length} routes`
+  );
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 2c. the download actually downloads ==");
+// ---------------------------------------------------------------------
+// A PDF is the worst case for this. `res.blob()` inherits application/pdf
+// from the response, Content-Disposition does not travel with a blob: URL,
+// and every browser has a PDF viewer — so a blob left at its own type opens
+// in the viewer instead of saving, on every browser, every time. That is
+// "Export All Data opens in a text editor instead of downloading" again,
+// and components/settings/export-data-button.tsx already paid for it once.
+{
+  const button = stripTs(readFileSync(DOWNLOAD_BUTTON, "utf8"));
+  ok(
+    "the blob is re-typed as application/octet-stream",
+    /new Blob\(\s*\[[^\]]*\]\s*,\s*\{\s*type:\s*"application\/octet-stream"\s*\}\s*\)/.test(button),
+    "a blob left at application/pdf opens in the browser's viewer instead of saving"
+  );
+  ok(
+    "...and the object URL is revoked on a timer, not on the next line",
+    /setTimeout\(\s*\(\)\s*=>\s*\{[\s\S]{0,200}?revokeObjectURL/.test(button),
+    "revoking synchronously after click() loses a race in Safari and Firefox"
+  );
+  // MATCHED ACROSS LINE BREAKS. `res.headers.get("Content-Disposition")` is
+  // one expression, and the formatter is free to put the call on its own
+  // line — which it did, and this check went red about a defect that was a
+  // line break. The comments are stripped above, so the phrase found here is
+  // the code's, not the documentation's.
+  ok(
+    "...and the filename comes from the route's own header",
+    /headers\s*\.?\s*[\s\S]{0,40}?get\(\s*[\s\S]{0,20}?"Content-Disposition"/.test(button),
+    "rebuilding it here would use the unsanitised title"
+  );
+  // And the routes send the header the filename is read from.
+  const routes = [];
+  const walkApi = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walkApi(full);
+      else if (entry.name === "route.ts") routes.push(full);
+    }
+  };
+  walkApi("src/app/api");
+  const renderSrc = stripTs(readFileSync(RENDER_TS, "utf8"));
+  ok(
+    "the shared renderer sends Content-Disposition: attachment",
+    /"Content-Disposition":\s*`attachment;/.test(renderSrc),
+    "without it a direct navigation to the route renders the PDF instead of saving it"
+  );
+  ok(
+    "...and does not let a download be cached across users",
+    /"Cache-Control":\s*"private, no-store"/.test(renderSrc),
+    "one user's document served to the next one"
+  );
+  void routes;
+}
+
+// ---------------------------------------------------------------------
 console.log("\n== 3. the stack and its faces, read from the source of truth ==");
 // ---------------------------------------------------------------------
 // IMPORTED, NOT PARSED. An earlier version of this file read FONT_STACK out
@@ -175,7 +306,7 @@ console.log("\n== 3. the stack and its faces, read from the source of truth ==")
 //
 // src/lib/pdf/font-stack.ts exists so this import is possible — it holds the
 // data with no imports of its own, and fonts.ts does the registration.
-const { PDF_FONT_FAMILY, PDF_FACES } = await loadTs(FONT_STACK_TS);
+const { PDF_FONT_FAMILY, PDF_FACES, pdfFontFamily } = await loadTs(FONT_STACK_TS);
 const STACK = PDF_FONT_FAMILY ?? [];
 const FACES = PDF_FACES ?? [];
 {
@@ -206,6 +337,83 @@ const FACES = PDF_FACES ?? [];
   ok(`every family in the stack has a face (${unbacked.length} do not)`, unbacked.length === 0, unbacked.join(", "));
   const bytes = FACES.reduce((a, f) => a + statSync(path.join(FONT_DIR, f.file)).size, 0);
   console.log(`        ${FACES.length} faces, ${(bytes / 1024 / 1024).toFixed(2)} MB shipped with the function`);
+}
+
+// ---------------------------------------------------------------------
+console.log("\n== 3b. the family that comes FIRST matches the document's script ==");
+// ---------------------------------------------------------------------
+// THE SPACE IS IN EVERY FONT, and @react-pdf takes the first family in the
+// list that has a glyph. So whichever family leads sets every space in the
+// document — and a space set in the wrong font cuts an Arabic line into a
+// separate shaping run at every word boundary. Measured against Chromium on
+// four Arabic lines, with the metric that survives a two-pixel offset:
+//
+//     Inter first     0.833  0.897  0.909  0.902
+//     Arabic first    0.973  0.948  0.986  0.983
+//
+// No coverage check can see this. Every character is present either way;
+// only the shapes and the spacing are wrong, which is precisely what the
+// person reading the document notices.
+{
+  const fk = await import("fontkit");
+  const fontkit = fk.default ?? fk;
+  const loaded = new Map();
+  const faceFor = (family) => {
+    if (!loaded.has(family)) {
+      const face = FACES.find((f) => f.family === family && f.weight === 400 && f.style === "normal");
+      loaded.set(family, face ? fontkit.create(readFileSync(path.join(FONT_DIR, face.file))) : null);
+    }
+    return loaded.get(family);
+  };
+
+  // One sample per locale this app ships, taken from its own message file so
+  // the check cannot drift from what the app actually renders.
+  const LOCALES = readdirSync("messages")
+    .filter((f) => f.endsWith(".json"))
+    .map((f) => f.replace(".json", ""))
+    .sort();
+  ok(`the locales were found (${LOCALES.length})`, LOCALES.length >= 10, LOCALES.join(", "));
+
+  const wrongLead = [];
+  for (const locale of LOCALES) {
+    const text = JSON.stringify(JSON.parse(readFileSync(`messages/${locale}.json`, "utf8")));
+    const letters = [...new Set([...text])].filter((c) => /\p{L}/u.test(c));
+    const stack = pdfFontFamily(locale);
+    const lead = faceFor(stack[0]);
+    if (!lead) {
+      wrongLead.push(`${locale}: leading family ${stack[0]} has no regular face`);
+      continue;
+    }
+    // The leading family must carry the SPACE (it will set every one of
+    // them) and the great majority of the locale's own letters.
+    const covered = letters.filter((c) => lead.hasGlyphForCodePoint(c.codePointAt(0))).length;
+    const share = letters.length === 0 ? 1 : covered / letters.length;
+    if (!lead.hasGlyphForCodePoint(32)) wrongLead.push(`${locale}: ${stack[0]} has no space glyph`);
+    if (share < 0.9) {
+      wrongLead.push(
+        `${locale}: ${stack[0]} leads but covers only ${(share * 100).toFixed(0)}% of its letters — ` +
+          "every space in the document would be set in a font that is not this script's"
+      );
+    }
+    // And the stack still has to be complete, whatever leads.
+    const uncovered = letters.filter(
+      (c) => !stack.some((family) => faceFor(family)?.hasGlyphForCodePoint(c.codePointAt(0)))
+    );
+    if (uncovered.length > 0) wrongLead.push(`${locale}: ${uncovered.length} letters covered by no family in the stack`);
+  }
+  ok(
+    `each locale leads with its own script's font (${wrongLead.length} do not)`,
+    wrongLead.length === 0,
+    wrongLead.join("\n        ")
+  );
+  // And the orders really are different, or the function is a constant
+  // wearing a parameter.
+  const orders = new Set(LOCALES.map((l) => pdfFontFamily(l).join(",")));
+  ok(
+    `the stack actually varies by locale (${orders.size} distinct orders)`,
+    orders.size >= 3,
+    [...orders].join(" | ")
+  );
 }
 
 // ---------------------------------------------------------------------

@@ -64,7 +64,13 @@
     "creditsUnlimited": "Ilimitados",
     "whatIsThis": "O que é isto?",
     "examplesLabel": "Experimenta:",
-    "newMessagesBelow": "Nova mensagem abaixo"
+    "newMessagesBelow": "Nova mensagem abaixo",
+    "downloadPdf": {
+      "label": "Transferir PDF",
+      "preparing": "A preparar…",
+      "failed": "Não foi possível criar o PDF",
+      "notReady": "Ainda não está concluído"
+    }
   },
   "sidebar": {
     "groups": {

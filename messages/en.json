@@ -64,7 +64,13 @@
     "creditsUnlimited": "Unlimited",
     "whatIsThis": "What is this?",
     "examplesLabel": "Try:",
-    "newMessagesBelow": "New message below"
+    "newMessagesBelow": "New message below",
+    "downloadPdf": {
+      "label": "Download PDF",
+      "preparing": "Preparing…",
+      "failed": "The PDF could not be created",
+      "notReady": "This is not finished yet"
+    }
   },
   "sidebar": {
     "groups": {

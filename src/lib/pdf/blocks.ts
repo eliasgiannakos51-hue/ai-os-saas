@@ -44,24 +44,60 @@ const ENTITIES: Record<string, string> = {
   gt: ">",
   quot: '"',
   apos: "'",
-  nbsp: " ",
+  nbsp: "\u00a0",
   "#39": "'",
-  "#160": " ",
+  "#160": "\u00a0",
+  // TYPOGRAPHIC ENTITIES, because a document can be PASTED in from
+  // somewhere that wrote them. An unrecognised entity is left as its
+  // literal characters rather than dropped, so a missing one does not fail
+  // loudly — it reads as `Churn is flat &mdash; not improving.` in a
+  // downloaded PDF, which is how this list got longer.
+  mdash: "\u2014",
+  ndash: "\u2013",
+  hellip: "\u2026",
+  lsquo: "\u2018",
+  rsquo: "\u2019",
+  ldquo: "\u201c",
+  rdquo: "\u201d",
+  laquo: "\u00ab",
+  raquo: "\u00bb",
+  bull: "\u2022",
+  middot: "\u00b7",
+  times: "\u00d7",
+  deg: "\u00b0",
+  euro: "\u20ac",
+  pound: "\u00a3",
+  copy: "\u00a9",
+  reg: "\u00ae",
+  trade: "\u2122",
+  // A soft hyphen has no business in a PDF whose line-breaker was told not
+  // to hyphenate: it renders as a visible hyphen inside a word.
+  shy: "",
+  zwj: "\u200d",
+  zwnj: "\u200c",
 };
 
 export function decodeEntities(text: string): string {
-  return text.replace(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (whole, name: string) => {
-    if (Object.prototype.hasOwnProperty.call(ENTITIES, name)) return ENTITIES[name];
-    if (name.startsWith("#x") || name.startsWith("#X")) {
-      const code = Number.parseInt(name.slice(2), 16);
-      return Number.isFinite(code) && code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : whole;
-    }
-    if (name.startsWith("#")) {
-      const code = Number.parseInt(name.slice(1), 10);
-      return Number.isFinite(code) && code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : whole;
-    }
-    return whole;
-  });
+  return text.replace(
+    /&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g,
+    (whole, name: string) => {
+      if (Object.prototype.hasOwnProperty.call(ENTITIES, name))
+        return ENTITIES[name];
+      if (name.startsWith("#x") || name.startsWith("#X")) {
+        const code = Number.parseInt(name.slice(2), 16);
+        return Number.isFinite(code) && code > 0 && code <= 0x10ffff
+          ? String.fromCodePoint(code)
+          : whole;
+      }
+      if (name.startsWith("#")) {
+        const code = Number.parseInt(name.slice(1), 10);
+        return Number.isFinite(code) && code > 0 && code <= 0x10ffff
+          ? String.fromCodePoint(code)
+          : whole;
+      }
+      return whole;
+    },
+  );
 }
 
 /** http/https only — the same rule report-to-html.ts applies on the way in. */
@@ -70,11 +106,28 @@ function safeHref(url: string): string | undefined {
   return /^https?:\/\//i.test(trimmed) ? trimmed.slice(0, 500) : undefined;
 }
 
-const BLOCK_TAGS = new Set(["p", "div", "h1", "h2", "h3", "h4", "h5", "h6", "li", "ul", "ol", "br", "hr", "blockquote"]);
+const BLOCK_TAGS = new Set([
+  "p",
+  "div",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "li",
+  "ul",
+  "ol",
+  "br",
+  "hr",
+  "blockquote",
+]);
 
 type OpenTag = { name: string; attrs: string };
 
-function parseTag(raw: string): { name: string; attrs: string; closing: boolean } | null {
+function parseTag(
+  raw: string,
+): { name: string; attrs: string; closing: boolean } | null {
   const m = raw.match(/^<\s*(\/?)\s*([a-zA-Z][a-zA-Z0-9]*)([^>]*)>$/);
   if (!m) return null;
   return { closing: m[1] === "/", name: m[2].toLowerCase(), attrs: m[3] ?? "" };
@@ -109,7 +162,9 @@ export function htmlToBlocks(html: string): PdfBlock[] {
   const hrefOf = () => {
     for (let i = stack.length - 1; i >= 0; i--) {
       if (stack[i].name === "a") {
-        const m = stack[i].attrs.match(/href\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i);
+        const m = stack[i].attrs.match(
+          /href\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i,
+        );
         const raw = m ? (m[2] ?? m[3] ?? m[4] ?? "") : "";
         return safeHref(decodeEntities(raw));
       }
@@ -127,14 +182,23 @@ export function htmlToBlocks(html: string): PdfBlock[] {
       // "**bold** text" loses the space between them.
       const trimmed = [...runs];
       while (trimmed.length && trimmed[0].text.trim() === "") trimmed.shift();
-      while (trimmed.length && trimmed[trimmed.length - 1].text.trim() === "") trimmed.pop();
+      while (trimmed.length && trimmed[trimmed.length - 1].text.trim() === "")
+        trimmed.pop();
       if (trimmed.length) {
-        trimmed[0] = { ...trimmed[0], text: trimmed[0].text.replace(/^\s+/, "") };
+        trimmed[0] = {
+          ...trimmed[0],
+          text: trimmed[0].text.replace(/^\s+/, ""),
+        };
         const last = trimmed.length - 1;
-        trimmed[last] = { ...trimmed[last], text: trimmed[last].text.replace(/\s+$/, "") };
+        trimmed[last] = {
+          ...trimmed[last],
+          text: trimmed[last].text.replace(/\s+$/, ""),
+        };
       }
-      if (pendingKind === "heading") blocks.push({ kind: "heading", level: pendingLevel, runs: trimmed });
-      else if (pendingKind === "listItem") blocks.push({ kind: "listItem", marker: pendingMarker, runs: trimmed });
+      if (pendingKind === "heading")
+        blocks.push({ kind: "heading", level: pendingLevel, runs: trimmed });
+      else if (pendingKind === "listItem")
+        blocks.push({ kind: "listItem", marker: pendingMarker, runs: trimmed });
       else blocks.push({ kind: "paragraph", runs: trimmed });
     }
     runs = [];
@@ -209,7 +273,10 @@ export function htmlToBlocks(html: string): PdfBlock[] {
 }
 
 /** A run of plain text — the common case for builders that are not parsing. */
-export function text(value: string, style?: { bold?: boolean; italic?: boolean; href?: string }): PdfRun[] {
+export function text(
+  value: string,
+  style?: { bold?: boolean; italic?: boolean; href?: string },
+): PdfRun[] {
   return [{ text: value, ...style }];
 }
 
@@ -230,7 +297,11 @@ export function markdownToBlocks(markdown: string): PdfBlock[] {
     const allBullets = lines.every((l) => /^\s*[-*•]\s+/.test(l));
     if (allBullets) {
       for (const line of lines) {
-        blocks.push({ kind: "listItem", marker: "•", runs: inlineRuns(line.replace(/^\s*[-*•]\s+/, "")) });
+        blocks.push({
+          kind: "listItem",
+          marker: "•",
+          runs: inlineRuns(line.replace(/^\s*[-*•]\s+/, "")),
+        });
       }
       continue;
     }

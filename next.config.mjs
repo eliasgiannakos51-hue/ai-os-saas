@@ -39,6 +39,23 @@ const nextConfig = {
     outputFileTracingIncludes: {
       "/api/**": ["./src/lib/pdf/fonts/*.ttf"],
     },
+    // AND WHAT MUST NEVER GO IN. registerPdfFonts reads its files through
+    // `path.join(process.cwd(), ...)`, which Next's tracer cannot resolve
+    // statically, so it falls back to including far more of the repository
+    // than the route needs. Measured on the documents PDF route: 16.4 MB of
+    // `.git/objects`, plus 1.4 MB screenshots from agent-shots/ and
+    // files-shots/ — none of which any function reads, all of which would be
+    // uploaded on every deploy.
+    outputFileTracingExcludes: {
+      "*": [
+        "./.git/**",
+        "./agent-shots/**",
+        "./files-shots/**",
+        "./scripts/**",
+        "./supabase/**",
+        "./.next/cache/**",
+      ],
+    },
   },
 };
 

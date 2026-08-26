@@ -64,7 +64,13 @@
     "creditsUnlimited": "無制限",
     "whatIsThis": "これは何ですか？",
     "examplesLabel": "例：",
-    "newMessagesBelow": "下に新しいメッセージ"
+    "newMessagesBelow": "下に新しいメッセージ",
+    "downloadPdf": {
+      "label": "PDFをダウンロード",
+      "preparing": "準備しています…",
+      "failed": "PDFを作成できませんでした",
+      "notReady": "まだ完了していません"
+    }
   },
   "sidebar": {
     "groups": {

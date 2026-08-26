@@ -33,8 +33,10 @@ const STACK_TS = "src/lib/pdf/font-stack.ts";
 const DOCUMENT = "src/lib/pdf/document.tsx";
 const RENDER = "src/lib/pdf/render.ts";
 const ROUTE = "src/app/api/documents/[id]/pdf/route.ts";
+const EDITOR = "src/components/documents/document-editor.tsx";
+const BUTTON = "src/components/ui/download-pdf-button.tsx";
 
-const TARGETS = [GATE, FONTS, STACK_TS, DOCUMENT, RENDER, ROUTE];
+const TARGETS = [GATE, FONTS, STACK_TS, DOCUMENT, RENDER, ROUTE, EDITOR, BUTTON];
 
 const MUTANTS = [
   // ---- the thing the owner asked for by name ------------------------
@@ -57,17 +59,17 @@ const MUTANTS = [
     to: 'export const FONT_STACK = ["Inter"] as const;',
   },
   {
-    name: "a family stays in the stack but its face is no longer registered",
+    name: "a family in the stack is pointed at the wrong face file",
     file: STACK_TS,
-    from: '  { family: "NotoSansSC", file: "NotoSansSC.ttf", weight: 400 },\n',
-    to: "",
+    from: '    family: "NotoSansSC",\n    file: "NotoSansSC.ttf",\n    weight: 400,\n    style: "normal",',
+    to: '    family: "NotoSansSC",\n    file: "Inter.ttf",\n    weight: 400,\n    style: "normal",',
   },
   // ---- a route that decides its own font ----------------------------
   {
     name: "the shared document sets a literal family instead of the stack",
     file: DOCUMENT,
-    from: "    fontFamily: PDF_FONT_FAMILY,\n    fontSize: 11,",
-    to: '    fontFamily: "Inter",\n    fontSize: 11,',
+    from: "      fontFamily,\n      fontSize: 11,",
+    to: '      fontFamily: "Inter",\n      fontSize: 11,',
   },
   {
     name: "a route stops rendering through pdfResponse",
@@ -130,6 +132,53 @@ const MUTANTS = [
         to: '  ok("...and neither does Arabic", true, JSON.stringify(crippled.slice(0, 120)));',
       },
     ],
+  },
+  // ---- the leading family, which sets every space -------------------
+  {
+    // The bug this whole section exists for: with Inter leading, every space
+    // in an Arabic paragraph is set in Inter and the line is cut into a
+    // separate shaping run at every word boundary. Measured against
+    // Chromium: 0.833 / 0.897 / 0.909 / 0.902, against 0.973 / 0.948 /
+    // 0.986 / 0.983 with the Arabic face leading.
+    name: "the stack stops varying by locale, so Latin leads for Arabic too",
+    file: STACK_TS,
+    from: '  const lang = String(locale ?? "")',
+    to: '  const lang = "en" || String(locale ?? "")',
+  },
+  {
+    name: "Arabic keeps the Latin face in front of its own",
+    file: STACK_TS,
+    from: '    return ["NotoSansArabic", "NotoSansSC", "Inter"];',
+    to: '    return ["Inter", "NotoSansArabic", "NotoSansSC"];',
+  },
+  {
+    name: "the shared document takes a constant stack instead of the document's language",
+    file: DOCUMENT,
+    from: "  const fontFamily = pdfFontFamily(locale);",
+    to: "  const fontFamily = pdfFontFamily(null);",
+  },
+  // ---- the download has to be reachable ----------------------------
+  {
+    name: "the documents editor loses its download button",
+    file: EDITOR,
+    from: '            <DownloadPdfButton href={`/api/documents/${doc.id}/pdf`} fallbackName="document" />\n',
+    to: "",
+  },
+  {
+    name: "a button points at a route that does not exist",
+    file: EDITOR,
+    from: "<DownloadPdfButton href={`/api/documents/${doc.id}/pdf`}",
+    to: "<DownloadPdfButton href={`/api/documents/${doc.id}/export`}",
+  },
+  {
+    // The blob keeps application/pdf, so every browser renders it in its
+    // own viewer instead of saving it — the exact "opens in a text editor
+    // instead of downloading" report that export-data-button.tsx already
+    // paid for once.
+    name: "the blob is not forced to octet-stream, so the PDF opens instead of downloading",
+    file: BUTTON,
+    from: 'const blob = new Blob([raw], { type: "application/octet-stream" });',
+    to: "const blob = raw;",
   },
   {
     name: "every file is excused as another renderer, not the one that uses one",

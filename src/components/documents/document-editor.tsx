@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { DownloadPdfButton } from "@/components/ui/download-pdf-button";
 import { Bold, Italic, Heading1, Heading2, List, ChevronLeft, Check, Loader2 } from "lucide-react";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import type { UserDocument } from "@/types/document";
@@ -140,7 +141,13 @@ export function DocumentEditor({
             {t("backToDocuments")}
           </Link>
 
-          <span className="flex items-center gap-1.5 text-xs text-muted">
+          <div className="flex items-center gap-3">
+            {/* A document that only exists inside its own editor is not a
+                document the user has. The PDF is rendered server-side from
+                the same `content.html` this editor saves, so what downloads
+                is what is stored — not what happens to be on screen. */}
+            <DownloadPdfButton href={`/api/documents/${doc.id}/pdf`} fallbackName="document" />
+            <span className="flex items-center gap-1.5 text-xs text-muted">
             {saveState === "saving" && (
               <>
                 <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
@@ -154,7 +161,8 @@ export function DocumentEditor({
               </>
             )}
             {saveState === "error" && <span className="text-red-400">{t("saveError")}</span>}
-          </span>
+            </span>
+          </div>
         </div>
 
         {/* The star pins to this block's top-right, next to the title, so

@@ -14,7 +14,7 @@ import { safeFilename } from "@/lib/pdf/blocks";
  */
 export async function pdfResponse(
   element: ReactElement,
-  options: { filename: string; fallbackName: string }
+  options: { filename: string; fallbackName: string },
 ): Promise<NextResponse> {
   registerPdfFonts();
   const buffer = await renderToBuffer(element);

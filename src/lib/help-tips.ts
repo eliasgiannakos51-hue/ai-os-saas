@@ -13,7 +13,7 @@
  * mail on their behalf, expects Integrations to be able to reply to an
  * email, expects AI Memory to hold their chat history. Every one of those
  * is a reasonable thing to assume from the name, and every one of them is
- * wrong. Presentation Notes already proved the pattern in this codebase —
+ * wrong. Presentation notes already proved the pattern in this codebase —
  * a module renamed because its name promised a generator it does not
  * contain — and `doesNot` is that lesson made routine instead of a
  * one-off rescue.

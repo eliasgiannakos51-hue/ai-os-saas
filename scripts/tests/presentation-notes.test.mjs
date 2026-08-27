@@ -74,13 +74,18 @@ check("the module still exists", Boolean(module));
 // The name now lives in the message catalogue and the config carries the
 // KEY, so this checks the thing the user actually reads — and checks it in
 // all ten languages instead of one English constant, which is strictly
-// more than the old `module.title === "Presentation Notes"` could see.
+// more than the old `module.title === "Presentation notes"` could see.
 check(
   "its name comes from the catalogue, not from a string in the registry",
   module.titleKey === "sidebar.items.presentations",
   `titleKey is ${JSON.stringify(module.titleKey)}`
 );
-check('the English name is still "Presentation Notes"', messages.en.sidebar.items.presentations === "Presentation Notes");
+// LOWERCASE n. The other five logs read "App notes", "Image notes",
+// "Video notes", "Campaign notes" and "Website plans"; this one alone
+// carried a capital, which is the kind of difference that reads as
+// "these are two different sorts of thing" to somebody scanning a nav.
+// The word that has to survive is "notes", not its capital.
+check('the English name is still "Presentation notes"', messages.en.sidebar.items.presentations === "Presentation notes");
 // The rename exists so nobody arrives expecting a slide generator. A
 // translation that says only "Presentations" reintroduces exactly that
 // expectation in that language, so every locale has to carry the
@@ -109,8 +114,8 @@ check("and the header does too", /t\(config\.titleKey\)/.test(readFileSync("src/
 // bug. What broke twice is a rename that reached English and stopped —
 // so the value is checked in English and in three other scripts.
 check(
-  'it still reads "Presentation Notes" in English',
-  messages.en.sidebar.items.presentations === "Presentation Notes"
+  'it still reads "Presentation notes" in English',
+  messages.en.sidebar.items.presentations === "Presentation notes"
 );
 for (const locale of ["el", "de", "ja"]) {
   const value = messages[locale].sidebar.items.presentations;
@@ -120,13 +125,13 @@ for (const locale of ["el", "de", "ja"]) {
 console.log("\n== 2. the sidebar label and its lookup key agree ==");
 const nav = readFileSync("src/lib/sidebar-nav.ts", "utf8");
 const labelKeys = readFileSync("src/lib/sidebar-label-keys.ts", "utf8");
-check('the nav label is "Presentation Notes"', /label: "Presentation Notes"/.test(nav));
+check('the nav label is "Presentation notes"', /label: "Presentation notes"/.test(nav));
 check("the old label is gone from the nav", !/label: "Presentations"/.test(nav));
 // If these two drift, the sidebar silently falls back to the raw English
 // string and the item stops being translated at all.
 check(
   "the label-key map is keyed on the NEW label",
-  /"Presentation Notes": "presentations"/.test(labelKeys)
+  /"Presentation notes": "presentations"/.test(labelKeys)
 );
 check("and no longer on the old one", !/^\s*Presentations: "presentations",/m.test(labelKeys));
 

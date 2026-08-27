@@ -505,8 +505,74 @@ check(
   'no tracker is still called "AI" anything',
   !Object.keys(TRACKER_NAMES).some((k) => /\bAI\b/.test(String(lookup(messages.en, `sidebar.items.${k}`))))
 );
-// Presentation Notes was already honest and must not have been churned.
-check("Presentation Notes is unchanged", lookup(messages.en, "sidebar.items.presentations") === "Presentation Notes");
+// Presentation notes was already honest and must not have been churned.
+// Only its capital N went, to match the other five logs in the same nav
+// — "App notes", "Image notes", "Video notes", "Campaign notes",
+// "Website plans". The noun is what was load-bearing, and it is intact.
+check("Presentation notes is unchanged apart from its capital", lookup(messages.en, "sidebar.items.presentations") === "Presentation notes");
+
+function walkPagesForNames(dir) {
+  const out = [];
+  for (const entry of readdirSync(dir)) {
+    const p = `${dir}/${entry}`;
+    if (statSync(p).isDirectory()) out.push(...walkPagesForNames(p));
+    else if (entry === "page.tsx") out.push(p);
+  }
+  return out;
+}
+
+console.log("\n== 4c-bis. the nav name and the page's own heading are one name ==");
+// TWO NAMES FOR ONE PAGE, IN TEN LANGUAGES, FOR TWO RELEASES.
+//
+// /dashboard/coding and /dashboard/data-analysis started life as
+// trackers — rows the user typed about code they would go and write
+// themselves — and in V4 they became the real thing: five operations that
+// write code, and an analyser that profiles a spreadsheet and answers
+// questions with queries over the real rows. Their page headings were
+// renamed with them. The SIDEBAR was not.
+//
+// So the nav read "Coding notes" and "Analysis notes" above pages whose
+// own H1 said "AI Coding" and "Data Analysis" — and because both pages
+// take their browser tab from the sidebar key, the tab said "notes" too.
+// A product that undersells itself was the complaint; this is a literal
+// instance of it, sitting in the nav where everyone looks first.
+//
+// Section 4c pins tracker names so a log never claims to generate. This
+// is the same rule pointed the other way: a tool must not be filed under
+// a note-taking name. It is derived from the pages rather than listed,
+// so a page added next year is covered on the day it is written.
+const namedPages = [];
+for (const file of walkPagesForNames("src/app/dashboard")) {
+  const src = readFileSync(file, "utf8");
+  const navKey = src.match(/pageTitle\("(sidebar\.items\.[A-Za-z]+)"\)/);
+  const namespace = src.match(/const t = await getTranslations\("([\w.]+)"\)/);
+  const rendersOwnTitle = /<PageHeader[\s\S]{0,220}?title=\{t\("title"\)\}/.test(src);
+  if (navKey && namespace && rendersOwnTitle) {
+    namedPages.push({ file, navKey: navKey[1], titleKey: `${namespace[1]}.title` });
+  }
+}
+// A DERIVATION THAT FINDS NOTHING AGREES WITH ITSELF PERFECTLY.
+check(
+  `the scan found the pages that name themselves twice (${namedPages.length})`,
+  namedPages.length >= 23,
+  `${namedPages.length} — this floor rises as pages are added, and never falls`,
+);
+for (const locale of LOCALES) {
+  const drifted = namedPages
+    .map(({ file, navKey, titleKey }) => {
+      const nav = lookup(messages[locale], navKey);
+      const heading = lookup(messages[locale], titleKey);
+      return nav === heading
+        ? null
+        : `${file}: nav ${JSON.stringify(nav)} vs heading ${JSON.stringify(heading)}`;
+    })
+    .filter(Boolean);
+  check(
+    `${locale}: the nav and the heading agree`,
+    drifted.length === 0,
+    drifted.slice(0, 4).join("\n        "),
+  );
+}
 
 console.log("\n== 4d. the browser tab is the third place the name appears ==");
 // It was the one piece of UI still in English: 31 pages declaring

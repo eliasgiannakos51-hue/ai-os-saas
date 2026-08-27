@@ -149,7 +149,7 @@ export const MAIN_SIDEBAR_GROUPS: SidebarGroupConfig[] = [
       { href: "/dashboard/videos", label: "Videos", icon: MODULE_ICONS.videos , hintKey: "videos" },
       {
         href: "/dashboard/presentations",
-        label: "Presentation Notes",
+        label: "Presentation notes",
         icon: MODULE_ICONS.presentations, hintKey: "presentations" },
       { href: "/dashboard/campaigns", label: "Campaigns", icon: MODULE_ICONS.campaigns , hintKey: "campaigns" },
     ],

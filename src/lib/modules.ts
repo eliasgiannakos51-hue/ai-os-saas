@@ -155,7 +155,7 @@ export type ModuleConfig = {
    * why and example (see EmptyStatePart above).
    *
    * REQUIRED, and required on purpose. This was `emptyKey?: string` — an
-   * optional override, added for Presentation Notes, where the shared
+   * optional override, added for Presentation notes, where the shared
    * "No entries yet" message was actively misleading. It fixed that one
    * module and left nineteen with a sentence that tells a new user
    * nothing; because it was optional, the twentieth module was always

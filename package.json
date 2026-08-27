@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/apply-function-limits.mjs && node scripts/check-i18n.js && npm run test:unit && next build",
+    "build": "node scripts/apply-function-limits.mjs && node scripts/check-mutation-markers.mjs && node scripts/check-i18n.js && npm run test:unit && next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
@@ -16,7 +16,10 @@
     "test:integration": "for f in scripts/tests/*.itest.mjs; do echo \"--- $f\"; node \"$f\" || exit 1; done",
     "test:mutation": "node scripts/tests/run-mutations.mjs",
     "limits": "node scripts/apply-function-limits.mjs",
-    "test:db": "node scripts/db/run-dbtests.mjs"
+    "test:db": "node scripts/db/run-dbtests.mjs",
+    "prepare": "node scripts/install-hooks.mjs",
+    "hooks:install": "node scripts/install-hooks.mjs",
+    "check:markers": "node scripts/check-mutation-markers.mjs"
   },
   "engines": {
     "node": "22.x"

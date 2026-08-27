@@ -98,8 +98,43 @@ const EVIDENCE = new Map([
       ],
     },
   ],
-  // Not built. Each `why` is a claim about the product, checked below where
-  // it can be.
+  // BUILT AND DARK. The code is written and the feature does not work until
+  // the deployment carries provider keys. That is neither "available" —
+  // nobody can use it — nor "future", and an unguarded third status is how
+  // an unusable feature gets sold or a written one stays hidden.
+  [
+    "voice",
+    {
+      dark: ["src/lib/voice/voice-pricing.ts", "src/app/api/voice"],
+      why: "needs the speech provider keys",
+    },
+  ],
+  [
+    "pushNotifications",
+    {
+      dark: ["src/app/api/push", "src/components/pwa"],
+      why: "needs the deployment's VAPID keys",
+    },
+  ],
+  // PLANNED. Not built, and named by the owner as what comes next. `plan`
+  // is the one field here no scan can verify, so it is marked as a claim
+  // rather than dressed up as evidence.
+  ["clarity", { produces: null, plan: "a first minute that explains itself" }],
+  [
+    "workflowBuilder",
+    { produces: null, plan: "chained steps instead of one agent per job" },
+  ],
+  ["desktopApp", { produces: null, plan: "the workspace in its own window" }],
+  [
+    "messagingChannels",
+    { produces: null, plan: "Telegram and WhatsApp delivery" },
+  ],
+  [
+    "socialPosting",
+    { produces: null, plan: "publish from here instead of copying out" },
+  ],
+  // Not built and not next. Each `why` is a claim about the product,
+  // checked below where it can be.
   [
     "mobileApps",
     {
@@ -184,6 +219,19 @@ console.log("\n== 1. the evidence table covers the page, and nothing else ==");
     unmapped.length === 0,
     unmapped.join(", ") + " — a new entry must be judged, not defaulted",
   );
+  // AN ENTRY MAY NOT CLAIM TWO THINGS AT ONCE. "Built", "dark" and
+  // "planned next" are mutually exclusive; a `plan` on something that
+  // already exists is how a shipped feature ends up advertised as coming.
+  const confused = [...EVIDENCE].filter(
+    ([, e]) =>
+      [e.produces ?? null, e.dark ?? null, e.plan ?? null].filter(Boolean)
+        .length > 1,
+  );
+  ok(
+    `no entry is both built and planned (${confused.length})`,
+    confused.length === 0,
+    confused.map(([k]) => k).join(", "),
+  );
   const stale = [...EVIDENCE.keys()].filter((k) => !allKeys.includes(k));
   ok(
     `every evidence entry names a real roadmap key (${stale.length} do not)`,
@@ -199,7 +247,7 @@ console.log("\n== 2. the evidence is real ==");
   const missing = [];
   let cited = 0;
   for (const [key, entry] of EVIDENCE) {
-    for (const path of entry.produces ?? []) {
+    for (const path of [...(entry.produces ?? []), ...(entry.dark ?? [])]) {
       cited++;
       if (!existsSync(path)) missing.push(`${key}: ${path}`);
     }
@@ -270,6 +318,36 @@ console.log("\n== 3. nothing shipped is hidden, nothing unbuilt is sold ==");
     oversold
       .map((k) => `${k} — ${EVIDENCE.get(k)?.why ?? "no evidence recorded"}`)
       .join("\n        "),
+  );
+
+  // THE THIRD STATUS, unguarded until it had contents. A feature that is
+  // written but dark belongs here and nowhere else: selling it means
+  // selling something nobody can switch on, and filing it under "future"
+  // hides work that is already done.
+  const soon = byStatus.get("soon") ?? [];
+  const dark = [...EVIDENCE].filter(([, e]) => e.dark).map(([k]) => k);
+  const misplacedDark = dark.filter((k) => !soon.includes(k));
+  ok(
+    `everything built-but-dark is filed under "soon" (${misplacedDark.length})`,
+    misplacedDark.length === 0,
+    misplacedDark
+      .map((k) => `${k} — ${EVIDENCE.get(k).why}`)
+      .join("\n        "),
+  );
+  const wrongInSoon = soon.filter((k) => {
+    const entry = EVIDENCE.get(k) ?? {};
+    return !entry.dark && !entry.plan;
+  });
+  ok(
+    `everything under "soon" is either dark or planned (${wrongInSoon.length})`,
+    wrongInSoon.length === 0,
+    wrongInSoon.join(", ") +
+      " — a roadmap section is not a place to park an item",
+  );
+  ok(
+    `"soon" is not empty (${soon.length})`,
+    soon.length > 0,
+    "the section renders only when it has items, so an empty one is invisible rather than wrong",
   );
 }
 

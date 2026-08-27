@@ -9,7 +9,13 @@ import { TradingDisclaimer } from "@/components/trading/trading-disclaimer";
 import { JournalStats } from "@/components/trading/journal-stats";
 import { RuleEditor } from "@/components/trading/rule-editor";
 import { loadJournal } from "@/lib/trading/load";
-import { computeStats, equityCurve, statsByInstrument, statsBySession, afterLossPattern } from "@/lib/trading/stats";
+import {
+  computeStats,
+  equityCurve,
+  statsByInstrument,
+  statsBySession,
+  afterLossPattern,
+} from "@/lib/trading/stats";
 import { evaluate, summarise } from "@/lib/trading/guardian";
 import { TRADING_WORKFLOW_ICON } from "@/lib/module-icons";
 
@@ -52,11 +58,15 @@ export default async function TradingJournalPage({
   if (!user) redirect("/login");
 
   const accountId = searchParams.account ?? null;
-  const { trades, rules, accounts } = await loadJournal(supabase, { accountId });
+  const { trades, rules } = await loadJournal(supabase, { accountId });
 
-  const account = accounts.find((a) => a.id === accountId) ?? null;
-  const startingBalance = account?.startingBalance ?? null;
-  const currency = account?.currency ?? "EUR";
+  // THE ACCOUNT FILTER IS GONE, and it never worked. Nothing in this
+  // application writes to trading_accounts, so the list was always empty:
+  // the nav that stood below rendered only `when accounts.length > 0` and
+  // therefore never rendered, and no link to `?account=` could exist. These
+  // two are the values every visitor already got.
+  const startingBalance: number | null = null;
+  const currency = "EUR";
 
   const stats = computeStats(trades, startingBalance);
   const curve = equityCurve(trades, startingBalance);
@@ -65,38 +75,14 @@ export default async function TradingJournalPage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
-      <PageHeader icon={TRADING_WORKFLOW_ICON} title={t("title")} description={t("subtitle")} />
+      <PageHeader
+        icon={TRADING_WORKFLOW_ICON}
+        title={t("title")}
+        description={t("subtitle")}
+      />
 
       {/* RULE 5. First thing on the page, before a single number. */}
       <TradingDisclaimer variant="block" />
-
-      {accounts.length > 0 && (
-        <nav className="mb-5 flex flex-wrap gap-2 text-xs" aria-label={t("accounts.title")}>
-          <Link
-            href="/dashboard/trading-journal"
-            className={`inline-flex min-h-[36px] items-center rounded-full border px-3 py-1.5 transition-colors ${
-              accountId === null
-                ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
-                : "border-border text-muted hover:text-foreground"
-            }`}
-          >
-            {t("accounts.all")}
-          </Link>
-          {accounts.map((a) => (
-            <Link
-              key={a.id}
-              href={`/dashboard/trading-journal?account=${encodeURIComponent(a.id)}`}
-              className={`inline-flex min-h-[36px] items-center rounded-full border px-3 py-1.5 transition-colors ${
-                accountId === a.id
-                  ? "border-orange-500/60 bg-orange-500/10 text-orange-400"
-                  : "border-border text-muted hover:text-foreground"
-              }`}
-            >
-              {a.name}
-            </Link>
-          ))}
-        </nav>
-      )}
 
       {trades.length === 0 ? (
         <p className="rounded-2xl border border-border bg-panel/60 p-5 text-sm text-muted">
@@ -132,7 +118,9 @@ export default async function TradingJournalPage({
               somebody had not earned. */}
           {guardian.uncheckable.length > 0 && (
             <p className="text-[11px] leading-relaxed text-muted">
-              {t("violations.uncheckable", { count: guardian.uncheckable.length })}
+              {t("violations.uncheckable", {
+                count: guardian.uncheckable.length,
+              })}
             </p>
           )}
         </div>

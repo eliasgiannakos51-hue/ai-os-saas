@@ -367,6 +367,34 @@
       "sync": {
         "title": "Sincronizzazione multipiattaforma",
         "description": "Un'esperienza unificata su web, mobile e desktop."
+      },
+      "clarity": {
+        "title": "Capirlo in una frase",
+        "description": "Un primo minuto che si spiega da sé: una frase che dice cos'è, la chat visibile fin dall'inizio e la configurazione conclusa in meno di due minuti."
+      },
+      "voice": {
+        "title": "Voce",
+        "description": "Parla invece di scrivere e ascolta le risposte. Il codice c'è; si attiva su un'installazione appena vengono configurate le chiavi del fornitore vocale."
+      },
+      "pushNotifications": {
+        "title": "Notifiche push",
+        "description": "Un avviso sul telefono quando un agente finisce o qualcosa ti richiede. Costruito, in attesa delle chiavi push dell'installazione."
+      },
+      "workflowBuilder": {
+        "title": "Costruttore di flussi",
+        "description": "Concatena passaggi — questo, poi quello, e solo se — invece di un agente per ogni compito."
+      },
+      "desktopApp": {
+        "title": "App desktop",
+        "description": "Lo stesso spazio di lavoro in una finestra propria, senza scheda del browser."
+      },
+      "messagingChannels": {
+        "title": "Telegram e WhatsApp",
+        "description": "Ricevi il risultato di un agente — e rispondigli — dove sei già."
+      },
+      "socialPosting": {
+        "title": "Pubblicazione sui social",
+        "description": "Prendi ciò che è stato scritto qui e pubblicalo, invece di copiarlo a mano."
       }
     },
     "metaDescription": "Cosa è già attivo oggi in Ionexa AI, cosa arriva dopo e dove stiamo andando."

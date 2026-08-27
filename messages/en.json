@@ -367,6 +367,34 @@
       "sync": {
         "title": "Cross-Platform Sync",
         "description": "A unified experience across web, mobile, and desktop."
+      },
+      "clarity": {
+        "title": "Understanding it in one sentence",
+        "description": "A first minute that explains itself: one sentence that says what this is, the chat visible from the start, and setup finished in under two minutes."
+      },
+      "voice": {
+        "title": "Voice",
+        "description": "Speak instead of typing, and have answers read back. The code is here; it goes live on a deployment once the speech provider keys are configured."
+      },
+      "pushNotifications": {
+        "title": "Push notifications",
+        "description": "A notification on your phone when an agent finishes or something needs you. Built and waiting on the deployment's push keys."
+      },
+      "workflowBuilder": {
+        "title": "Workflow builder",
+        "description": "Chain steps together — this, then that, and only if — instead of one agent per job."
+      },
+      "desktopApp": {
+        "title": "Desktop app",
+        "description": "The same workspace in its own window, without a browser tab."
+      },
+      "messagingChannels": {
+        "title": "Telegram and WhatsApp",
+        "description": "Get an agent's result — and reply to it — where you already are."
+      },
+      "socialPosting": {
+        "title": "Social posting",
+        "description": "Take what was written here and publish it, instead of copying it out by hand."
       }
     },
     "metaDescription": "What's live in Ionexa AI today, what's coming next, and where we're headed."

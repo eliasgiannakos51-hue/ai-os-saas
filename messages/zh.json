@@ -367,6 +367,34 @@
       "sync": {
         "title": "跨平台同步",
         "description": "在网页、移动端和桌面端获得统一的使用体验。"
+      },
+      "clarity": {
+        "title": "一句话就能明白",
+        "description": "让第一分钟自己说清楚：一句话说明这是什么，聊天从一开始就可见，设置在两分钟内完成。"
+      },
+      "voice": {
+        "title": "语音",
+        "description": "用说的代替打字，并让回答读出来。代码已经就位；在配置了语音服务商密钥后即可在该部署上启用。"
+      },
+      "pushNotifications": {
+        "title": "推送通知",
+        "description": "当智能体完成，或有事需要你时，在手机上收到通知。已实现，等待该部署的推送密钥。"
+      },
+      "workflowBuilder": {
+        "title": "工作流搭建",
+        "description": "把步骤串起来——先这个，再那个，满足条件才做——而不是每件事配一个智能体。"
+      },
+      "desktopApp": {
+        "title": "桌面应用",
+        "description": "同一个工作区，独立窗口，不用浏览器标签页。"
+      },
+      "messagingChannels": {
+        "title": "Telegram 和 WhatsApp",
+        "description": "在你本来就在的地方接收智能体的结果，并直接回复。"
+      },
+      "socialPosting": {
+        "title": "社交发布",
+        "description": "把这里写好的内容直接发布出去，不用手动复制。"
       }
     },
     "metaDescription": "Ionexa AI 目前已上线的功能、接下来的计划，以及我们的方向。"

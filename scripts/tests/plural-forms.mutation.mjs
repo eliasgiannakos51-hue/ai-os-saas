@@ -34,8 +34,10 @@ const GATE = "scripts/tests/plural-forms.test.mjs";
 const EN = "messages/en.json";
 const EL = "messages/el.json";
 const AR = "messages/ar.json";
+const PRICING = "src/app/pricing/page.tsx";
+const VOICE_INPUT = "src/components/voice/voice-input.tsx";
 
-const TARGETS = [GATE, EN, EL, AR];
+const TARGETS = [GATE, EN, EL, AR, PRICING, VOICE_INPUT];
 
 const EN_PAGES = '"pages": "{count, plural, one {# page} other {# pages}}"';
 const EL_PAGES = '"pages": "{count, plural, one {# σελίδα} other {# σελίδες}}"';
@@ -109,6 +111,60 @@ const MUTANTS = [
     from: EL_PAGES,
     to: '"pages": "{count} σελίδα(-α)"',
     expect: "parenthesised suffix",
+  },
+
+  // ---- the callers, which is where the bug actually shipped -----------
+  {
+    // THE REAL DEFECT, PUT BACK. This exact line rendered "NaN credits/month"
+    // on four of the five plans in production: the message became an ICU
+    // plural, the caller kept handing it formatNumber()'s string, and a
+    // plural selects its category by calling Number() on that. Every render
+    // check in the gate stayed green, because renders supply their own
+    // numbers.
+    name: "the pricing page hands the plural a formatted string again",
+    file: PRICING,
+    from: 't("features.creditsPerMonth", { count: plan.monthlyCredits })',
+    to: 't("features.creditsPerMonth", { count: formatNumber(plan.monthlyCredits, locale) })',
+    expect: "hands a plural a string",
+  },
+  {
+    // The ternary form, which is how the same page's feature list wrote it.
+    // A checker that reads only the whole expression misses the branch.
+    name: "one branch of a ternary hands it an empty string",
+    file: PRICING,
+    from: 'count: plan.monthlyCredits === "custom" ? 0 : plan.monthlyCredits,',
+    to: 'count: plan.monthlyCredits === "custom" ? "" : plan.monthlyCredits,',
+    expect: "hands a plural a string",
+  },
+  {
+    // A message with TWO selectors, so the scan has to check each variable
+    // rather than stopping at the first.
+    name: "the voice dialog formats the minutes but not the credits",
+    file: VOICE_INPUT,
+    from: "                  minutes: availability.limitMinutes,",
+    to: "                  minutes: formatNumber(availability.limitMinutes, locale),",
+    expect: "hands a plural a string",
+  },
+  {
+    name: "the call-site scan reads no files, so no caller can be wrong",
+    file: GATE,
+    from: "      else if (/\\.tsx?$/.test(entry.name)) files.push(full);",
+    to: "      else if (false) files.push(full);",
+    expect: "the source was walked",
+  },
+  {
+    // NO REDUNDANCY HERE EITHER, and the honest way to show a clause is
+    // load-bearing is to mutate it in the direction that moves something on
+    // a healthy tree. Neutering STRINGY and reverting a caller at the same
+    // time leaves the gate green — the two demonstration checks below prove
+    // the RULE, not the tree, so nothing else can notice. Widening it to
+    // match everything turns all ninety-eight honest call sites into
+    // violations, which is what proves the test is really being applied.
+    name: "the stringy test matches every expression, not just strings",
+    file: GATE,
+    from: "  const STRINGY = /^\\s*(?:formatNumber\\(|[\"'`])/;",
+    to: "  const STRINGY = /^/;",
+    expect: "hands a plural a string",
   },
 
   // ---- the gate's own clauses ----------------------------------------

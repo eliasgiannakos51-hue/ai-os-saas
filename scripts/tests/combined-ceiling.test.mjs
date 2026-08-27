@@ -651,7 +651,14 @@ check(
     !s.startsWith("Ionexa AI pricing");
 
   const quoted = [...withoutComments.matchAll(/(["'`])((?:\\.|(?!\1)[^\\])*)\1/g)].map((m) => m[2]);
-  check(`the quoted scan found ${quoted.length}`, quoted.length >= 106, "a filter of an empty list is empty, and every check below it would pass");
+  // A FLOOR ON THE SCAN, not on the page: a filter of an empty list is empty
+  // and every check below it would pass. Re-measured at 105 when the feature
+  // list stopped passing `""` for the custom plan's credit count and passed 0
+  // instead — creditsPerMonth is an ICU plural now, and a plural selects its
+  // category by calling Number() on what it is given, so a string there
+  // printed NaN in production. One literal fewer, for a reason; the scan
+  // itself is unchanged.
+  check(`the quoted scan found ${quoted.length}`, quoted.length >= 105, "a filter of an empty list is empty, and every check below it would pass");
   const sentences = quoted.filter(isEnglishSentence);
   check(
     "no English sentence is hardcoded in the pricing page",

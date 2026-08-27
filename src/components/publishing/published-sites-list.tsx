@@ -212,7 +212,7 @@ export function PublishedSitesList({
                   tags={[
                     {
                       key: "week",
-                      label: t("viewsThisWeek", { count: formatNumber(site.views_this_week, locale) }),
+                      label: t("viewsThisWeek", { count: site.views_this_week }),
                       tone: "accent",
                     },
                     {

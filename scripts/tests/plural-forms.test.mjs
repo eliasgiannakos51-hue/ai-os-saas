@@ -465,6 +465,151 @@ console.log("\n== 5. the checks can go red ==");
   );
 }
 
+// ---------------------------------------------------------------------
+console.log("\n== 6. and the callers hand it a NUMBER ==");
+// ---------------------------------------------------------------------
+// THE HALF THAT SHIPPED THE BUG. Every check above renders these messages
+// with real numbers, so all of them were green while production read
+// "NaN credits/month" on four of the five pricing plans.
+//
+// The reason is invisible to the compiler and to any test that supplies its
+// own arguments: a plural must SELECT a category before it can print
+// anything, and selecting means calling Number() on what the caller passed.
+// `{count}` on its own interpolates whatever it is given, so
+// `formatNumber(1000, locale)` — the string "1,000" — read correctly for
+// years. The moment the message became `{count, plural, ...}`, Number("1,000")
+// was NaN, no category matched, and `#` printed NaN. Only the free plan
+// survived, because "100" happens to parse.
+//
+// So this reads the CALL SITES: any variable a message pluralises must be
+// handed something that is not a string.
+{
+  const SRC_DIRS = ["src"];
+  const files = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const full = `${dir}/${entry.name}`;
+      if (entry.isDirectory()) walk(full);
+      else if (/\.tsx?$/.test(entry.name)) files.push(full);
+    }
+  };
+  for (const dir of SRC_DIRS) walk(dir);
+  ok(
+    `the source was walked (${files.length} files)`,
+    files.length >= 200,
+    `found ${files.length}`,
+  );
+
+  // Which variables each message pluralises, indexed by every suffix a
+  // caller might name it with — `t("cost")` inside a scoped translator and
+  // `t("voice.permission.cost")` are the same message.
+  const selectors = new Map();
+  for (const [key, text] of Object.entries(FLAT.en)) {
+    const variables = pluralBlocks(text).map((b) => b.variable);
+    if (variables.length === 0) continue;
+    const parts = key.split(".");
+    for (const name of [key, parts.slice(-2).join("."), parts.at(-1)]) {
+      selectors.set(
+        name,
+        new Set([...(selectors.get(name) ?? []), ...variables]),
+      );
+    }
+  }
+  ok(
+    `plural selectors were indexed (${selectors.size} names)`,
+    selectors.size >= 60,
+    `${selectors.size}`,
+  );
+
+  // `t("key", { ... })`, with one level of nesting allowed inside the object.
+  const CALL =
+    /\bt\w*\(\s*[`"']([\w.${}]+)[`"']\s*,\s*\{((?:[^{}]|\{[^{}]*\})*)\}/g;
+  // A STRING IS THE DEFECT. formatNumber() returns one; so does a literal,
+  // and so does anything template-quoted.
+  const STRINGY = /^\s*(?:formatNumber\(|["'`])/;
+  const stringy = [];
+  let callSites = 0;
+  for (const file of files) {
+    const source = readFileSync(file, "utf8");
+    for (const call of source.matchAll(CALL)) {
+      const [, key, args] = call;
+      const parts = key.split(".");
+      const variables =
+        selectors.get(key) ??
+        selectors.get(parts.slice(-2).join(".")) ??
+        selectors.get(parts.at(-1)) ??
+        // A key built from a variable (`features.${feature.textKey}`) could
+        // be any of them, so its arguments are held to the same rule.
+        (key.includes("${") ? new Set(["count"]) : null);
+      if (!variables) continue;
+      for (const variable of variables) {
+        const arg = new RegExp(
+          `\\b${variable}\\s*:\\s*((?:[^,{}]|\\([^()]*\\))*)`,
+        ).exec(args);
+        if (!arg) continue;
+        callSites++;
+        const expression = arg[1]
+          .split("\n")
+          .join(" ")
+          .replace(/\s+/g, " ")
+          .trim();
+        // A ternary is read on both sides — `x === "custom" ? "" : n` is the
+        // exact shape the pricing page shipped.
+        const branches = expression.includes("?")
+          ? expression
+              .split(/\?|:/)
+              .map((b) => b.trim())
+              .filter(Boolean)
+          : [expression];
+        if (branches.some((b) => STRINGY.test(b))) {
+          stringy.push(
+            `${file}:${source.slice(0, call.index).split("\n").length} ${key} [${variable}] = ${expression.slice(0, 70)}`,
+          );
+        }
+      }
+    }
+  }
+  ok(
+    `call sites feeding a plural were found (${callSites})`,
+    callSites >= 15,
+    `found ${callSites}`,
+  );
+  ok(
+    `no caller hands a plural a string (${stringy.length})`,
+    stringy.length === 0,
+    stringy.slice(0, 12).join("\n        ") +
+      "\n        A plural selects its category with Number(). formatNumber(1000) is" +
+      '\n        "1,000", Number("1,000") is NaN, and the message prints NaN.' +
+      "\n        Pass the number; ICU's `#` formats it for the locale itself.",
+  );
+
+  // AND THE RULE IS DEMONSTRATED, not merely asserted — this is the exact
+  // failure, reproduced.
+  {
+    const probe = createTranslator({
+      locale: "en",
+      messages: {
+        p: { n: "{count, plural, one {# credit} other {# credits}}/month" },
+      },
+      namespace: "p",
+      onError: () => {},
+    });
+    const fromNumber = probe("n", { count: 1000 });
+    const fromString = probe("n", { count: "1,000" });
+    ok(
+      "a number renders the grouped figure",
+      fromNumber === "1,000 credits/month",
+      fromNumber,
+    );
+    ok(
+      "...and the pre-formatted string renders NaN",
+      /NaN/.test(fromString),
+      fromString,
+    );
+    ok("...which is what production showed", fromNumber !== fromString);
+  }
+}
+
 console.log(
   failures.length === 0
     ? `\nALL ${pass} CHECKS PASSED`

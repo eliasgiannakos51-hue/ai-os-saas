@@ -251,23 +251,31 @@ export default async function PricingPage({
               <p className="mt-2 text-xs text-muted">
                 {plan.monthlyCredits === "custom"
                   ? t("features.customCredits")
-                  : t("features.creditsPerMonth", { count: formatNumber(plan.monthlyCredits, locale) })}
+                  : t("features.creditsPerMonth", { count: plan.monthlyCredits })}
               </p>
 
               <ul className="mt-6 flex-1 space-y-2.5 text-sm text-muted">
                 {plan.features.map((feature) => (
                   <li key={feature.textKey} className="flex items-start gap-2">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" aria-hidden="true" />
-                    {/* `count` is only consumed by the creditsPerMonth key;
-                        next-intl ignores unused params, and passing it here
-                        means the number is formatted for the reader's
-                        locale by the same code path as every other. */}
+                    {/* `count` is only consumed by the creditsPerMonth key,
+                        and next-intl ignores unused params.
+
+                        A NUMBER, NOT A FORMATTED STRING. creditsPerMonth is an
+                        ICU plural now, and a plural has to SELECT a category
+                        before it can print anything — which means calling
+                        Number() on what it is handed. formatNumber(1000) is
+                        "1,000", Number("1,000") is NaN, and four of the five
+                        plans read "NaN credits/month" in production. ICU's `#`
+                        formats for the locale itself, so there is now one
+                        formatting path here instead of two.
+
+                        The custom plan never reaches this key — it renders
+                        customCredits — but 0 is passed rather than "" so that
+                        nothing here can select on a non-number. */}
                     <span>
                       {t(`features.${feature.textKey}`, {
-                        count:
-                          plan.monthlyCredits === "custom"
-                            ? ""
-                            : formatNumber(plan.monthlyCredits, locale),
+                        count: plan.monthlyCredits === "custom" ? 0 : plan.monthlyCredits,
                       })}
                     </span>
                   </li>

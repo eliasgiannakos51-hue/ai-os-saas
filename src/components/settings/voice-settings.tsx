@@ -71,7 +71,7 @@ export function VoiceSettings() {
             </div>
             <p className="mt-1.5 text-xs text-muted">
               {remainingMinutes > 0
-                ? t("remaining", { minutes: formatNumber(remainingMinutes, locale) })
+                ? t("remaining", { minutes: remainingMinutes })
                 : t("exhausted")}
             </p>
           </div>
@@ -83,13 +83,13 @@ export function VoiceSettings() {
             <div className="rounded-xl border border-border bg-input px-3 py-2">
               <dt className="text-[11px] text-muted">{t("transcribeLabel")}</dt>
               <dd className="text-sm text-foreground">
-                {t("perMinute", { credits: formatNumber(v.creditsPerMinute.transcribe, locale) })}
+                {t("perMinute", { credits: v.creditsPerMinute.transcribe })}
               </dd>
             </div>
             <div className="rounded-xl border border-border bg-input px-3 py-2">
               <dt className="text-[11px] text-muted">{t("speakLabel")}</dt>
               <dd className="text-sm text-foreground">
-                {t("perMinute", { credits: formatNumber(v.creditsPerMinute.speak, locale) })}
+                {t("perMinute", { credits: v.creditsPerMinute.speak })}
               </dd>
             </div>
           </dl>

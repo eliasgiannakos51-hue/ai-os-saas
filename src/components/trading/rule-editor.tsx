@@ -169,7 +169,7 @@ export function RuleEditor({
                     impression of them — see lib/trading/guardian.ts. */}
                 {broken ? (
                   <p className="mt-1.5 text-xs font-medium text-amber-300">
-                    {t("violations.count", { count: formatNumber(broken.count, locale) })}
+                    {t("violations.count", { count: broken.count })}
                   </p>
                 ) : (
                   <p className="mt-1.5 text-xs text-emerald-400/90">{t("violations.none")}</p>
@@ -192,7 +192,7 @@ function describeRule(
     case "max_risk_percent":
       return t("ruleSummary.max_risk_percent", { percent: formatNumber(params.percent, locale) });
     case "max_trades_per_day":
-      return t("ruleSummary.max_trades_per_day", { count: formatNumber(params.count, locale) });
+      return t("ruleSummary.max_trades_per_day", { count: params.count });
     case "min_risk_reward":
       return t("ruleSummary.min_risk_reward", { ratio: formatNumber(Math.round(params.ratio * 100) / 100, locale) });
     case "allowed_sessions":
@@ -204,7 +204,7 @@ function describeRule(
     case "max_daily_loss":
       return t("ruleSummary.max_daily_loss", { amount: formatNumber(params.amount, locale) });
     case "no_trade_after_loss":
-      return t("ruleSummary.no_trade_after_loss", { minutes: formatNumber(params.withinMinutes, locale) });
+      return t("ruleSummary.no_trade_after_loss", { minutes: params.withinMinutes });
     case "max_position_size":
       return t("ruleSummary.max_position_size", { size: formatNumber(params.size, locale) });
     default:

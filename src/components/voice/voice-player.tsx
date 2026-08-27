@@ -170,7 +170,7 @@ export function VoicePlayer({ text, compact }: { text: string; compact?: boolean
             <Volume2 className="h-3.5 w-3.5" aria-hidden="true" />
           )}
           {/* THE PRICE, ON THE BUTTON, BEFORE IT IS PRESSED. */}
-          {playing ? t("pause") : t("listenFor", { credits: formatNumber(estimatedCredits, locale) })}
+          {playing ? t("pause") : t("listenFor", { credits: estimatedCredits })}
         </button>
 
         {!compact && (

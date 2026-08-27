@@ -288,7 +288,7 @@ export function SignupFlow() {
                     <p className="mt-1 text-xs text-muted">
                       {p.monthlyCredits === "custom"
                         ? tPricing("features.customCredits")
-                        : tPricing("features.creditsPerMonth", { count: formatNumber(p.monthlyCredits, locale) })}
+                        : tPricing("features.creditsPerMonth", { count: p.monthlyCredits })}
                     </p>
 
                     <ul className="mt-3 w-full space-y-1.5 border-t border-border pt-3">
@@ -320,11 +320,13 @@ export function SignupFlow() {
                         >
                           <Check className="mt-0.5 h-3 w-3 shrink-0 text-emerald-400" aria-hidden="true" />
                           <span>
+                            {/* A NUMBER, NOT A FORMATTED STRING — see the same
+                                note on the pricing page. creditsPerMonth is an
+                                ICU plural, and a plural selects its category by
+                                calling Number() on what it is given: "1,000"
+                                becomes NaN and the plan reads "NaN credits/month". */}
                             {tPricing(`features.${feature.textKey}`, {
-                              count:
-                                p.monthlyCredits === "custom"
-                                  ? ""
-                                  : formatNumber(p.monthlyCredits, locale),
+                              count: p.monthlyCredits === "custom" ? 0 : p.monthlyCredits,
                             })}
                           </span>
                         </li>

@@ -136,7 +136,7 @@ export function VoiceInput({
         aria-label={recorder.recording ? t("stopListening") : t("startListening")}
         title={
           availability.hasMinutes
-            ? t("costPerMinute", { credits: formatNumber(availability.creditsPerMinute.transcribe, locale) })
+            ? t("costPerMinute", { credits: availability.creditsPerMinute.transcribe })
             : t("outOfMinutes")
         }
         className={`flex ${compact ? "h-9 w-9" : "min-h-[44px] min-w-[44px]"} items-center justify-center rounded-lg border transition-colors duration-150 disabled:opacity-40 ${
@@ -173,8 +173,8 @@ export function VoiceInput({
               <li>
                 •{" "}
                 {t("permission.cost", {
-                  credits: formatNumber(availability.creditsPerMinute.transcribe, locale),
-                  minutes: formatNumber(availability.limitMinutes, locale),
+                  credits: availability.creditsPerMinute.transcribe,
+                  minutes: availability.limitMinutes,
                 })}
               </li>
             </ul>

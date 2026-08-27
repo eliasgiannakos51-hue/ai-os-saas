@@ -466,10 +466,10 @@ export function AgentsWorkspace({
         result.usage?.bypass
           ? typeof result.usage.wouldHaveCharged === "number"
             ? t("runSuccessUnlimitedCost", {
-                credits: formatNumber(result.usage.wouldHaveCharged, locale),
+                credits: result.usage.wouldHaveCharged,
               })
             : t("runSuccessUnlimited")
-          : t("runSuccess", { credits: formatNumber(result.creditsCharged ?? 0, locale) })
+          : t("runSuccess", { credits: result.creditsCharged ?? 0 })
       );
     } else {
       addToast(t("runNothingToReport"));
@@ -1034,10 +1034,8 @@ export function AgentsWorkspace({
                           picker below and leaving this line showing the
                           old figure is a quote for something else. */}
                       {t("creditsPerRun", {
-                        credits: formatNumber(
+                        credits:
                           depthFacts[previewDepth]?.credits ?? preview.estimatedCreditsPerRun ?? 0,
-                          locale
-                        ),
                       })}
                     </dd>
                   </div>
@@ -1514,7 +1512,7 @@ export function AgentsWorkspace({
                                 unlimited account saw "0 credits" against
                                 every run it had ever made. */}
                             {run.would_have_charged_credits === null
-                              ? t("runCredits", { credits: formatNumber(run.credits_charged, locale) })
+                              ? t("runCredits", { credits: run.credits_charged })
                               : t("runCreditsUnlimited", {
                                   credits: formatNumber(run.would_have_charged_credits, locale),
                                 })}

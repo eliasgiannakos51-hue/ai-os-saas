@@ -97,7 +97,7 @@ export function AiUsageSettings({
           }
           detail={
             wouldHaveUsedCredits !== null
-              ? t("wouldHaveCost", { credits: formatNumber(wouldHaveUsedCredits, locale) })
+              ? t("wouldHaveCost", { credits: wouldHaveUsedCredits })
               : undefined
           }
         />

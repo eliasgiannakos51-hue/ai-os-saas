@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
+import { headers } from "next/headers";
+import { isMarketingPath, pickNamespaces } from "@/lib/i18n/marketing-messages";
 import "@fontsource/inter/400.css";
 import "@fontsource/inter/500.css";
 import "@fontsource/inter/600.css";
@@ -94,6 +96,33 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
 
+  // HOW MUCH OF THE CATALOGUE THIS PAGE ACTUALLY NEEDS.
+  //
+  // `messages` is all 2,659 keys, and NextIntlClientProvider serialises
+  // whatever it is given into the HTML. Measured on the live home page:
+  // 209,715 characters, the catalogue starting at 57,710 — 72% of the
+  // document. In Greek, the largest catalogue and the primary market, the
+  // same page is 303,706 characters against English's 210,565.
+  //
+  // Public pages use five namespaces of the forty. Which five is derived
+  // rather than declared: scripts/tests/marketing-messages.test.mjs walks
+  // the import graph from every public entry point and fails if a client
+  // component reachable from one asks for anything else — or asks in a
+  // way no static list can bound, like useTranslations() with no
+  // namespace or a computed key.
+  //
+  // FAIL-SAFE WHEN THE PATH IS UNKNOWN. If the middleware did not run,
+  // there is no header and this sends everything. A page that is heavier
+  // than it needed to be is a cost; a page missing a string is a bug in
+  // front of a stranger.
+  //
+  // SERVER STRINGS ARE UNAFFECTED. getTranslations() reads the request's
+  // own messages and never touches this provider, so nothing rendered on
+  // the server can lose a word to this.
+  const pathname = headers().get("x-pathname");
+  const clientMessages =
+    pathname && isMarketingPath(pathname) ? pickNamespaces(messages) : messages;
+
   return (
     <html lang={locale} className="h-full" suppressHydrationWarning>
       <head>
@@ -101,7 +130,7 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: INIT_SCRIPT }} />
       </head>
       <body className="min-h-full bg-background text-foreground antialiased" suppressHydrationWarning>
-        <NextIntlClientProvider locale={locale} messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={clientMessages}>
           {children}
           <GlobalControls />
           <CookieConsentBanner />

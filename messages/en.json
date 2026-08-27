@@ -358,7 +358,7 @@
       },
       "marketplace": {
         "title": "Marketplace",
-        "description": "Buy and sell agents, automations, and templates."
+        "description": "Ready-made agent templates, shared and reused. Free — nothing is bought or sold."
       },
       "router": {
         "title": "Universal AI Router",
@@ -2818,7 +2818,7 @@
     },
     "marketplace": {
       "is": "Where people will share the agents, site templates and workflows they have built.",
-      "does": "Nothing yet. This page is a placeholder for a feature that has not been built.",
+      "does": "Shows the shared library of ready-made agent templates. Search it, pick one, say what it should be about, and it becomes an agent on your Agents screen. Free — nothing is bought or sold here.",
       "doesNot": "It is not empty because of your plan, and upgrading will not open it. The button below is disabled because there is nothing behind it."
     },
     "settings": {

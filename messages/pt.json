@@ -358,7 +358,7 @@
       },
       "marketplace": {
         "title": "Marketplace",
-        "description": "Compre e venda agentes, automações e modelos."
+        "description": "Modelos de agentes prontos a usar, partilhados e reutilizáveis. Grátis — aqui nada é comprado nem vendido."
       },
       "router": {
         "title": "Roteador de IA Universal",
@@ -2818,7 +2818,7 @@
     },
     "marketplace": {
       "is": "O sítio onde as pessoas vão partilhar os agentes, modelos de site e fluxos que criaram.",
-      "does": "Ainda nada. Esta página guarda o lugar de uma funcionalidade que não foi construída.",
+      "does": "Mostra a biblioteca partilhada de modelos de agentes prontos. Procura, escolhe um, diz sobre o que deve ser, e torna-se um agente no teu ecrã de Agentes. Grátis — aqui nada é comprado nem vendido.",
       "doesNot": "Não está vazia por causa do seu plano, e mudar de plano não a vai abrir. O botão abaixo está desativado porque não há nada por trás dele."
     },
     "settings": {

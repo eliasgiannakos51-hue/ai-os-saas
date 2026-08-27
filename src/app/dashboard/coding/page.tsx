@@ -52,7 +52,12 @@ export default async function CodingPage() {
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <PageHeader icon={MODULE_ICONS.coding} title={t("title")} description={t("description")} />
+      <PageHeader
+        icon={MODULE_ICONS.coding}
+        title={t("title")}
+        description={t("description")}
+        helpKey="help.coding"
+      />
       <CodingWorkspace sessions={sessions} folders={folders} />
     </div>
   );

@@ -23,7 +23,7 @@
 // their own copy and wait for nothing; see TODO.md.
 //
 // Run: node scripts/tests/help-tips.test.mjs
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 
 let pass = 0;
 const failures = [];
@@ -68,14 +68,53 @@ console.log("== 1. the registry describes real pages ==");
 // "Delete account" as a way to clear their records and start again.
 // 13 -> 15: trackingModule (one entry covering the six pages that render
 // through BuildModulePage, where "Images" reads as a generator) and costs.
+// 15 -> 28: the thirteen pages that had a PageHeader and no "?" — every
+// remaining one. businessModule is the second shared entry, covering the
+// twelve business modules and Ideas.
 check(
   `pages carrying a tip (${HELP_TIPS.length})`,
-  HELP_TIPS.length >= 15,
+  HELP_TIPS.length >= 28,
   `${HELP_TIPS.length} — this floor rises with each page that gains one, and never falls`,
+);
+// EVERY PAGE WITH A HEADER, or a written reason why not. The floor above
+// says the number never falls; this says the number is the right one — a
+// new dashboard page with a title and no "?" fails here on the day it is
+// written, rather than a year later when somebody counts.
+//
+// The three exemptions are the pages that render no <PageHeader> at all:
+// Chat is a full-viewport workspace, Create Studio draws its own centred
+// hero, and Overview opens with a personal greeting. They carry the "?"
+// somewhere else, and helpKey is not how they get it.
+const dashboardPages = [];
+(function walkPages(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) walkPages(full);
+    else if (entry.name === "page.tsx") dashboardPages.push(full);
+  }
+})("src/app/dashboard");
+const withHeader = dashboardPages.filter((f) =>
+  /<PageHeader\b/.test(readFileSync(f, "utf8")),
+);
+const covered = new Set(HELP_TIPS.flatMap((t) => [t.file, ...(t.alsoIn ?? [])]));
+// A SCAN THAT FINDS NOTHING PASSES EVERY CHECK BUILT ON IT. This floor is
+// what stops the walk above from going blind — a broken recursion, a
+// renamed file convention, a moved app directory — and reporting "every
+// page carries a tip" over an empty list.
+check(
+  `the scan found the dashboard pages (${dashboardPages.length} files, ${withHeader.length} with a header)`,
+  dashboardPages.length >= 38 && withHeader.length >= 28,
+  `${dashboardPages.length} pages / ${withHeader.length} headers — both floors rise, neither falls`,
+);
+checkList(
+  `every page with a header carries a tip (${withHeader.length} headers)`,
+  withHeader.filter((f) => !covered.has(f)),
 );
 checkList(
   "every entry names a file that exists",
-  HELP_TIPS.filter((t) => !existsSync(t.file)).map((t) => t.file),
+  HELP_TIPS.flatMap((t) => [t.file, ...(t.alsoIn ?? [])]).filter(
+    (f) => !existsSync(f),
+  ),
 );
 check(
   "no two entries share an id",
@@ -123,18 +162,29 @@ checkList(
   "en: every doesNot states a limit",
   noNegation.map((t) => t.id),
 );
+//
+// CONTAINMENT, NOT JUST EQUALITY. This compared the three parts with ===
+// and a mutation walked straight past it: paste the whole of `does` in
+// front of `doesNot` and the strings are not equal, while the limit has
+// been buried under a repeat of what the page already said — which is
+// precisely the failure this check exists for. One part wholly inside
+// another is the same defect as one part equal to another.
 for (const locale of LOCALES) {
   const degenerate = [];
   for (const tip of HELP_TIPS) {
-    const [is, does, doesNot] = PARTS.map((p) =>
-      lookup(messages[locale], helpTipKey(tip, p)),
-    );
-    if (is === does || is === doesNot || does === doesNot)
-      degenerate.push(tip.id);
+    const parts = PARTS.map((p) => lookup(messages[locale], helpTipKey(tip, p)));
+    for (let a = 0; a < parts.length; a++) {
+      for (let b = 0; b < parts.length; b++) {
+        if (a === b) continue;
+        if (parts[a].includes(parts[b])) {
+          degenerate.push(`${tip.id} (${PARTS[b]} is repeated inside ${PARTS[a]})`);
+        }
+      }
+    }
   }
   checkList(
     `${locale}: no tip repeats one string across its three parts`,
-    degenerate,
+    [...new Set(degenerate)],
   );
 }
 // And each page says something different from every other page.
@@ -233,6 +283,162 @@ for (const locale of LOCALES) {
   );
 }
 
+// --- the thirteen added in this batch -------------------------------------
+//
+// Same rule as above: every load-bearing number or refusal in the copy is
+// read back out of the source it describes. A "?" that lies is worse than
+// no "?" at all, and these carry more specific numbers than the first
+// fifteen did.
+const affiliateRules = readFileSync("src/lib/affiliate/rules.ts", "utf8");
+check(
+  "affiliate: commission really runs twelve months",
+  /COMMISSION_MONTHS = 12\b/.test(affiliateRules),
+);
+check(
+  "affiliate: the rate really is 25%",
+  /DEFAULT_RATE = 0\.25\b/.test(affiliateRules),
+);
+check(
+  "affiliate: the payout floor really is 20 euro",
+  /MIN_PAYOUT_CENTS = 2000\b/.test(affiliateRules),
+);
+check(
+  "affiliate: self-referral and re-referral really are refused",
+  /Refer yourself/.test(affiliateRules) &&
+    /already someone else's referral/.test(affiliateRules),
+);
+// Coding: the four refusals the tip repeats are the four the page itself
+// prints, so they cannot drift apart into two different lists.
+const codingLimits = messages.en.coding.limits;
+for (const limit of [
+  "no_repository",
+  "no_execution",
+  "no_commits",
+  "no_whole_project",
+]) {
+  check(
+    `coding: the page states ${limit}`,
+    typeof codingLimits[limit] === "string",
+  );
+}
+check(
+  "coding: and there really are five operations",
+  Object.keys(messages.en.coding.operations).length === 5,
+);
+// Data analysis: the tip promises the first 50,000 rows, by that number.
+const csv = readFileSync("src/lib/data-analysis/csv.ts", "utf8");
+check(
+  "dataAnalysis: the row cap really is 50,000",
+  /MAX_ROWS = 50_000\b/.test(csv),
+);
+check(
+  "dataAnalysis: and truncation is reported rather than hidden",
+  /truncated: truncated \|\| body\.length > MAX_ROWS/.test(csv),
+);
+// Documents: "nothing here is read for chat answers" is the claim, and it
+// is a claim about ABSENCE — which nothing but a scan of the callers can
+// establish. Every file that reads user_documents is listed; the tip is
+// true only while that list contains no chat or AI-context path.
+const documentReaders = [];
+(function walkSrc(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) walkSrc(full);
+    else if (/\.tsx?$/.test(entry.name)) {
+      if (/from\(["'`]user_documents["'`]\)/.test(readFileSync(full, "utf8"))) {
+        documentReaders.push(full);
+      }
+    }
+  }
+})("src");
+const CHAT_PATHS = /\/(chat|ai\/context|memory)\b/;
+checkList(
+  `documents: no chat or memory path reads user_documents (${documentReaders.length} readers)`,
+  documentReaders.filter((f) => CHAT_PATHS.test(f)),
+);
+// The three owner-only pages say "Owner only" in ten languages. Each one
+// has to actually refuse, and to refuse with notFound rather than a
+// message that confirms the page exists.
+for (const [id, file] of [
+  ["finance", "src/app/dashboard/finance/page.tsx"],
+  ["routing", "src/app/dashboard/routing/page.tsx"],
+  ["systemHealth", "src/app/dashboard/system-health/page.tsx"],
+]) {
+  const src = readFileSync(file, "utf8");
+  check(
+    `${id}: really is owner-only, and 404s rather than explaining`,
+    /isAdminEmail\(user\.email\)\) notFound\(\)/.test(src),
+  );
+}
+// Finance: "a metric missing an input says what it needs" — metrics.ts is
+// the authority, and the page renders MetricCard from its states.
+const metrics = readFileSync("src/lib/billing/metrics.ts", "utf8");
+check(
+  "finance: a metric without its input really reports what it needs",
+  /needs/i.test(metrics) && /computeMetrics/.test(metrics),
+);
+// Routing: the empty table says so in words rather than rendering zeros.
+check(
+  "routing: an empty table really says so instead of showing zeros",
+  /it is not showing zeros/.test(messages.en.routing.empty),
+);
+// Trading: the disclaimer is mounted and cannot be dismissed, which is
+// what lets the tip say "a record, not advice" and be checkable.
+const disclaimer = readFileSync(
+  "src/components/trading/trading-disclaimer.tsx",
+  "utf8",
+);
+check(
+  "tradingJournal: the disclaimer really is not dismissible",
+  /Neither is dismissible/.test(disclaimer) && !/onDismiss|setDismissed/.test(disclaimer),
+);
+// Trading and product workflow both claim "the same rows as the module",
+// which is true only while they read the module's own table through
+// getModule rather than a table of their own.
+//
+// THE TABLE, NOT THE SLUG. The first version of this check compared the
+// page's .from() against the module SLUG and passed for Products by
+// coincidence — products/products — while failing Trading, whose slug is
+// "trading" and whose table is "trades". Reading the table out of
+// MODULES is both correct and stricter: a page that started reading some
+// other table would now be caught whatever it was called.
+const { MODULES } = await loadTs("src/lib/modules.ts");
+for (const [id, file, slug] of [
+  ["tradingWorkflow", "src/app/dashboard/trading-workflow/page.tsx", "trading"],
+  ["productWorkflow", "src/app/dashboard/product-workflow/page.tsx", "products"],
+]) {
+  const src = readFileSync(file, "utf8");
+  const table = MODULES.find((m) => m.slug === slug)?.table;
+  check(
+    `${id}: really reads the ${slug} module's own rows (${table})`,
+    Boolean(table) &&
+      new RegExp(`getModule\\("${slug}"\\)`).test(src) &&
+      new RegExp(`from\\("${table}"\\)`).test(src),
+  );
+}
+// Reflection: "nothing here is stored" — the page has no table of its
+// own, so nothing in it may insert.
+const reflectionPage = readFileSync(
+  "src/app/dashboard/reflection/page.tsx",
+  "utf8",
+);
+check(
+  "reflection: the page really persists nothing",
+  !/\.insert\(|\.upsert\(/.test(reflectionPage),
+);
+// businessModule: one tip for twelve modules plus Ideas. If MODULES grows
+// or shrinks the copy's "one kind of work" is still true, but the two
+// files it names must stay the two that render them.
+check(
+  `businessModule: [module] really serves the business modules (${MODULES.length})`,
+  MODULES.length >= 12,
+);
+const businessTip = HELP_TIPS.find((t) => t.id === "businessModule");
+check(
+  "businessModule: and Ideas is named as the second file",
+  (businessTip?.alsoIn ?? []).includes("src/app/dashboard/page.tsx"),
+);
+
 console.log("\n== 5. the pages render it ==");
 // ON EVERY <PageHeader> THE PAGE HAS, not on one of them.
 //
@@ -246,18 +452,25 @@ console.log("\n== 5. the pages render it ==");
 //
 // Counting is what makes the claim honest: a tip on n-1 of n headers now
 // fails, and the failure names the file.
+// AND ON EVERY FILE THAT RENDERS IT. businessModule is served by two
+// separate page files with no shared body ([module] for the twelve
+// business modules, dashboard/page.tsx for Ideas), so checking `file`
+// alone would pass while Ideas quietly lost its "?" — the same shape as
+// the upgrade-wall bug above, one level up.
 for (const tip of HELP_TIPS) {
-  const src = readFileSync(tip.file, "utf8");
-  const headers = (src.match(/<PageHeader\b/g) ?? []).length;
-  const withKey = (
-    src.match(new RegExp(`helpKey="${tip.keyPrefix}"`, "g")) ?? []
-  ).length;
-  check(`${tip.id}: its page passes helpKey`, withKey > 0, tip.file);
-  check(
-    `${tip.id}: on all ${headers} of its headers, not just the upgrade wall`,
-    withKey === headers,
-    `${withKey} of ${headers} <PageHeader> carry it — ${tip.file}`,
-  );
+  for (const path of [tip.file, ...(tip.alsoIn ?? [])]) {
+    const src = readFileSync(path, "utf8");
+    const headers = (src.match(/<PageHeader\b/g) ?? []).length;
+    const withKey = (
+      src.match(new RegExp(`helpKey="${tip.keyPrefix}"`, "g")) ?? []
+    ).length;
+    check(`${tip.id}: ${path} passes helpKey`, withKey > 0, path);
+    check(
+      `${tip.id}: on all ${headers} of its headers in ${path}`,
+      withKey === headers,
+      `${withKey} of ${headers} <PageHeader> carry it — ${path}`,
+    );
+  }
 }
 const header = readFileSync("src/components/dashboard/page-header.tsx", "utf8");
 // One place, so the control never moves between pages — a help affordance
@@ -326,13 +539,17 @@ console.log("\n== 7. it answers on its own, and links on as an extra ==");
 //
 // The articles are rows in help_articles now, one per locale, and /help
 // falls back to English visibly. So the link is allowed — but only as an
-// EXTRA. The three parts still have to answer on their own, because three
-// of the thirteen pages have no article at all and because a tip that needs
-// a round trip to be useful is not a tip.
+// EXTRA. The three parts still have to answer on their own, because most
+// of these pages have no article at all — nineteen of the twenty-eight —
+// and because a tip that needs a round trip to be useful is not a tip.
 const linkedTips = HELP_TIPS.filter((t) => t.article);
+// A CEILING THAT MOVES, not an equality: writing an article for a page
+// that has none is an improvement, and this used to go red on it. What is
+// worth pinning is that a tip never claims an article that does not exist,
+// which is the check below it.
 check(
   `${linkedTips.length} of ${HELP_TIPS.length} tips link to an article`,
-  linkedTips.length === 9,
+  linkedTips.length >= 9,
 );
 check(
   "the link is an anchor on /help, not the page itself",

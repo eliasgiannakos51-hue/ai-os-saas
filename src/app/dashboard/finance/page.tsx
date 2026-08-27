@@ -58,7 +58,12 @@ export default async function FinancePage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-6">
-      <PageHeader icon={LineChart} title={t("title")} description={t("description")} />
+      <PageHeader
+        icon={LineChart}
+        title={t("title")}
+        description={t("description")}
+        helpKey="help.finance"
+      />
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {metrics.map((metric) => (

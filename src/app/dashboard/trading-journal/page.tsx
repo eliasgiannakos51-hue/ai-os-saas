@@ -79,6 +79,7 @@ export default async function TradingJournalPage({
         icon={TRADING_WORKFLOW_ICON}
         title={t("title")}
         description={t("subtitle")}
+        helpKey="help.tradingJournal"
       />
 
       {/* RULE 5. First thing on the page, before a single number. */}

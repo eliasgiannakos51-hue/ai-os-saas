@@ -112,6 +112,7 @@ export default async function SystemHealthPage() {
           icon={Activity}
           title="System Health"
           description="Production errors, deduplicated. Owner only."
+          helpKey="help.systemHealth"
         />
 
         {failed ? (

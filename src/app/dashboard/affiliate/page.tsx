@@ -38,7 +38,12 @@ export default async function AffiliatePage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={Share2} title={t("title")} description={t("description")} />
+        <PageHeader
+          icon={Share2}
+          title={t("title")}
+          description={t("description")}
+          helpKey="help.affiliate"
+        />
         <AffiliateDashboard
           code={affiliate?.code ?? null}
           status={affiliate?.status ?? null}

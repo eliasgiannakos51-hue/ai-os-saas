@@ -45,7 +45,11 @@ export default async function DashboardPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={MODULE_ICONS.ideas} title={t("items.ideas")} />
+        <PageHeader
+          icon={MODULE_ICONS.ideas}
+          title={t("items.ideas")}
+          helpKey="help.businessModule"
+        />
 
         {/* Form + list share one client boundary so pressing the worked
             example on the empty screen can fill the form — see

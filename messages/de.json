@@ -2878,6 +2878,71 @@
       "is": "Ein Notizbuch für diese Art Arbeit — kein Generator.",
       "does": "Hält Zeilen fest, die Sie selbst eintragen: was Sie planen, was Sie schon getan haben und wie es lief. Einträge lassen sich mit anderen Modulen verknüpfen und modulübergreifend durchsuchen.",
       "doesNot": "Nichts auf dieser Seite wird von der KI erzeugt. Sie baut weder die Website noch das Bild, das Video, die Präsentation oder die Kampagne — sie hält fest, was Sie anderswo erstellen. Gebaut wird im Website Builder und im Create Studio."
+    },
+    "businessModule": {
+      "is": "Eine Tabelle, die Sie selbst führen, für eine Art von Arbeit.",
+      "does": "Sie fügen Zeilen von Hand oder über Create Studio hinzu, und die KI liest sie: Chat, Suche in meinen Einträgen, Verlauf und der wöchentliche Rückblick schöpfen von hier, und jede Zeile lässt sich mit einer Zeile eines anderen Moduls verknüpfen.",
+      "doesNot": "Sie füllt sich nicht von selbst. Hier kommt nichts aus Ihrer E-Mail, Ihrer Bank oder Ihren Chats an — eine leere Tabelle ist leer, weil nichts eingetragen wurde — und wer hier eine Zeile löscht, entfernt sie überall, wo sie erscheint."
+    },
+    "documents": {
+      "is": "Ein leeres Blatt, das bei Ihrer Arbeit bleibt.",
+      "does": "Schreiben Sie hier längere Texte — ein Briefing, einen Entwurf, Besprechungsnotizen. Es speichert beim Tippen, exportiert als PDF, und fertige Rechercheberichte landen ebenfalls hier.",
+      "doesNot": "Das ist nicht die Seite Dateien. Hier wird nichts hochgeladen und nichts davon wird für Chat-Antworten gelesen: Dateien ist der Ort für ein PDF, das die KI lesen soll, Dokumente ist der Ort, an dem Sie selbst schreiben."
+    },
+    "affiliate": {
+      "is": "Ihr Empfehlungslink und was er eingebracht hat.",
+      "does": "Teilen Sie den Link: Wenn jemand, den Sie geschickt haben, ein Abo abschließt, erhalten Sie 25 % jeder seiner Zahlungen, jeden Monat, 12 Monate lang. Stripe zahlt aus, sobald Ihnen mindestens 20 € zustehen.",
+      "doesNot": "Sie können sich nicht selbst empfehlen, und wer bereits von einem anderen Partner geworben wurde, zählt nicht für Sie. Die Provision beginnt mit der ersten Zahlung, nicht mit der Anmeldung, und endet nach zwölf Monaten."
+    },
+    "coding": {
+      "is": "Ein Code-Assistent, der genau auf dem Text arbeitet, den Sie einfügen.",
+      "does": "Fünf Dinge: einen Codeausschnitt schreiben, Code erklären, Fehler finden und dabei die auslösende Eingabe benennen, zwischen Sprachen übersetzen und Tests schreiben.",
+      "doesNot": "Es hat kein Repository. Es sieht Ihre Codebasis nicht, es führt nichts aus — weder Ihren Code noch den, den es schreibt — und es macht keine Commits, Branches oder Pull Requests. Eine Funktion, eine Datei, ein Einfügen."
+    },
+    "dataAnalysis": {
+      "is": "Eine Tabelle, richtig gelesen.",
+      "does": "Laden Sie eine CSV- oder Excel-Datei bis 8 MB hoch: Jede Spalte wird profiliert, die Diagramme werden auf dem Server aus den echten Zeilen berechnet, und Ihre Frage läuft als Abfrage über diese Zeilen.",
+      "doesNot": "Es rät keine Zahl. Nichts wird aus einer Stichprobe geschätzt — und ab 50.000 Zeilen sagt es ausdrücklich, dass es die ersten 50.000 gelesen hat, statt eine Datei zu beschreiben, die es nie gelesen hat."
+    },
+    "finance": {
+      "is": "Die Zahlen des Unternehmens selbst — Umsatz, Marge, Abwanderung, Liquidität. Nur für den Inhaber.",
+      "does": "Berechnet jede Kennzahl aus echten Abo- und Kostenzeilen und fragt Sie nach den drei Werten, die keine Datenbank kennen kann: Marketingausgaben, Fixkosten, Kassenbestand.",
+      "doesNot": "Es zeigt keine Zahl, die es nicht begründen kann. Einer Kennzahl ohne Eingabe sagt, was ihr fehlt, statt aus einer Null zu rechnen, und nichts wird rückwirkend ergänzt — die Historie beginnt am Tag der Veröffentlichung."
+    },
+    "formSubmissions": {
+      "is": "Jeder Kontakt, den Ihre veröffentlichten Seiten gesammelt haben.",
+      "does": "Listet auf, was Besucher über ein Formular geschickt haben, von welcher Seite es kam, ob sie die Einwilligung gesetzt haben und ob die Benachrichtigungs-E-Mail wirklich hinausging. Alles als CSV exportierbar.",
+      "doesNot": "Es antwortet nicht für Sie und schiebt nichts in ein CRM. Und eine als unzustellbar markierte E-Mail ist kein kaputtes Formular — der Eintrag liegt sicher hier; unbestätigt ist die Absenderdomain."
+    },
+    "productWorkflow": {
+      "is": "Alles zu Ihren Produkten auf einem Bildschirm.",
+      "does": "Zeigt dieselben Produkteinträge wie das Modul Produkte, dazu ihre Verknüpfungen, ihre Historie, ein ohne KI errechnetes Muster und Direktzugänge zu Mentor und Mission.",
+      "doesNot": "Es ist kein zweiter Ort für Produkte. Es sind dieselben Zeilen wie im Modul Produkte — hier hinzugefügt, dort sichtbar — und das Muster ist Arithmetik über das, was Sie geschrieben haben, keine Prognose."
+    },
+    "reflection": {
+      "is": "Was Sie diese Woche wirklich fertig gemacht haben, gegen das, was geplant war.",
+      "does": "Zählt neue Einträge in jedem Modul für diese und die letzte Woche, zählt erledigte und offene Missionsschritte und bittet um eine kurze, ehrliche Zusammenfassung der Lücke.",
+      "doesNot": "Hier wird nichts gespeichert. Jeder Druck rechnet neu aus Ihren Live-Daten, es gibt also keine Historie früherer Rückblicke — und gezählt wird, was Sie erfasst haben, nicht was Sie außerhalb der App getan haben."
+    },
+    "routing": {
+      "is": "Welches Modell welche Anfrage bedient hat und was das Routing gekostet hat. Nur für den Inhaber.",
+      "does": "Zeigt 30 Tage Routing-Entscheidungen je Modell und Funktion: was Kunden berechnet wurde, was wir bei fehlgeschlagenen günstigen Versuchen selbst getragen haben, und die Erfolgsquoten, die der Router gelernt hat.",
+      "doesNot": "Es wählt keine Modelle für Sie aus und ändert nichts. Es ist ein Bericht — und eine leere Tabelle heißt, dass keine Entscheidungen erfasst wurden, nicht dass der Router stillsteht."
+    },
+    "systemHealth": {
+      "is": "Was gerade in der Produktion kaputt ist. Nur für den Inhaber.",
+      "does": "Listet Produktionsfehler nach Meldung zusammengefasst, ungelöste zuerst, mit Häufigkeit und Zahl der betroffenen Personen, dazu Speicherdiagnose und Verbreitung der installierten App.",
+      "doesNot": "Es überwacht die Seite nicht für Sie und löst keinen Alarm aus. Fehler stehen hier, weil die Anwendung sie erfasst hat — was nie beim Logger ankam, steht nicht hier."
+    },
+    "tradingJournal": {
+      "is": "Ihre eigenen Trades, Ihre eigenen Regeln, ausgezählt.",
+      "does": "Ermittelt Trefferquote, Profitfaktor, durchschnittlichen Gewinn und Verlust, Ihre Kapitalkurve und wie oft jede von Ihnen geschriebene Regel gebrochen wurde — alles Arithmetik über die von Ihnen erfassten Trades.",
+      "doesNot": "Das ist eine Aufzeichnung, keine Beratung. Es verbindet sich mit keinem Broker, importiert keine Trades und sagt nichts darüber, was ein Markt als Nächstes tun wird."
+    },
+    "tradingWorkflow": {
+      "is": "Alles rund ums Trading auf einem Bildschirm.",
+      "does": "Dieselben Trade-Einträge wie das Modul Trading, dazu ihre Verknüpfungen, ihre Historie, Muster nach Tag, Stunde, Symbol und Verlustserie sowie Direktzugänge zu Mentor und Mission.",
+      "doesNot": "Die Muster sind Auszählungen bereits getätigter Trades, keine Vorhersagen, und sie sind keine Anlageberatung. Es ist auch kein zweiter Satz Trades: Es sind dieselben Zeilen wie im Modul Trading."
     }
   },
   "helpCentre": {

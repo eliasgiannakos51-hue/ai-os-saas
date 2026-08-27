@@ -68,6 +68,7 @@ export default async function RoutingPage() {
         icon={Route}
         title={t("title")}
         description={t("description")}
+        helpKey="help.routing"
       />
 
       {totalDecisions === 0 ? (

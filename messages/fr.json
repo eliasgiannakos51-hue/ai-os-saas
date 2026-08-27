@@ -2878,6 +2878,71 @@
       "is": "Un carnet pour ce type de travail — pas un générateur.",
       "does": "Conserve des lignes que vous saisissez : ce que vous prévoyez, ce que vous avez déjà fait, et comment cela s'est passé. Vous pouvez relier des entrées à d'autres modules et chercher dans l'ensemble.",
       "doesNot": "Rien sur cette page n'est produit par l'IA. Elle ne fabrique ni le site, ni l'image, ni la vidéo, ni la présentation, ni la campagne : elle consigne ceux que vous créez ailleurs. La création se fait dans le Website Builder et Create Studio."
+    },
+    "businessModule": {
+      "is": "Un tableau que vous tenez vous-même, pour un type de travail.",
+      "does": "Vous ajoutez des lignes à la main ou via Create Studio, et l'IA les lit : le Chat, la recherche dans vos enregistrements, l'Historique et la réflexion hebdomadaire puisent ici, et toute ligne peut être reliée à une ligne d'un autre module.",
+      "doesNot": "Il ne se remplit pas tout seul. Rien n'arrive ici depuis votre messagerie, votre banque ou vos conversations — un tableau vide est vide parce que rien n'a été saisi — et supprimer une ligne ici la retire partout où elle apparaît."
+    },
+    "documents": {
+      "is": "Une page blanche qui reste auprès de votre travail.",
+      "does": "Écrivez du texte long ici — un brief, un brouillon, des notes de réunion. Cela s'enregistre au fil de la frappe, s'exporte en PDF, et les rapports de recherche terminés atterrissent ici aussi.",
+      "doesNot": "Ce n'est pas la page Fichiers. Rien n'est téléversé ici et rien d'ici n'est lu pour répondre dans le chat : Fichiers, c'est où va un PDF que l'IA doit lire ; Documents, c'est où vous écrivez."
+    },
+    "affiliate": {
+      "is": "Votre lien de parrainage, et ce qu'il a rapporté.",
+      "does": "Partagez le lien : quand une personne que vous avez envoyée s'abonne, vous gagnez 25 % de chacun de ses paiements, chaque mois, pendant 12 mois. Stripe vous verse la somme dès que l'on vous doit au moins 20 €.",
+      "doesNot": "Vous ne pouvez pas vous parrainer vous-même, et une personne déjà parrainée par un autre affilié ne compte pas pour vous. La commission démarre à son premier paiement, pas à l'inscription, et s'arrête après douze mois."
+    },
+    "coding": {
+      "is": "Un assistant de code qui travaille exactement sur le texte que vous collez.",
+      "does": "Cinq choses : écrire un extrait, expliquer du code, trouver des bugs en nommant l'entrée qui les déclenche, convertir d'un langage à l'autre et écrire des tests.",
+      "doesNot": "Il n'a aucun dépôt. Il ne voit pas votre base de code, il n'exécute rien — ni votre code, ni celui qu'il écrit — et il ne fait ni commit, ni branche, ni pull request. Une fonction, un fichier, un collage."
+    },
+    "dataAnalysis": {
+      "is": "Un tableur, lu correctement.",
+      "does": "Déposez un CSV ou un Excel jusqu'à 8 Mo : chaque colonne est profilée, les graphiques sont calculés sur le serveur à partir des vraies lignes, et votre question devient une requête sur ces lignes.",
+      "doesNot": "Il ne devine aucun chiffre. Rien n'est estimé à partir d'un échantillon, et au-delà de 50 000 lignes il dit clairement qu'il a lu les 50 000 premières, au lieu de décrire un fichier qu'il n'a pas lu."
+    },
+    "finance": {
+      "is": "Les chiffres de l'entreprise elle-même : revenus, marge, attrition, trésorerie. Réservé au propriétaire.",
+      "does": "Calcule chaque indicateur à partir de vraies lignes d'abonnement et de coût, et vous demande les trois chiffres qu'aucune base ne peut connaître : dépense marketing, coûts fixes, solde de trésorerie.",
+      "doesNot": "Il n'affiche aucun chiffre qu'il ne peut pas justifier. Un indicateur auquel il manque une saisie dit ce qu'il lui faut au lieu de calculer à partir d'un zéro, et rien n'est rempli rétroactivement : l'historique commence le jour de la mise en ligne."
+    },
+    "formSubmissions": {
+      "is": "Tous les contacts recueillis par vos sites publiés.",
+      "does": "Liste ce que les visiteurs ont envoyé via un formulaire, de quel site cela vient, s'ils ont coché le consentement, et si l'e-mail de notification est bien parti. Exportez le tout en CSV.",
+      "doesNot": "Il ne répond pas à votre place et n'envoie rien vers un CRM. Et un e-mail marqué non distribué n'est pas un formulaire cassé : la soumission est bien là ; c'est le domaine d'envoi qui n'est pas vérifié."
+    },
+    "productWorkflow": {
+      "is": "Tout sur vos produits sur un seul écran.",
+      "does": "Affiche les mêmes fiches produit que le module Produits, plus leurs liens, leur historique, un motif calculé sans IA, et des accès directs vers Mentor et Mission.",
+      "doesNot": "Ce n'est pas un second endroit où ranger vos produits. Ce sont les mêmes lignes que le module Produits — ajoutez-en une ici et elle apparaît là-bas — et le motif est de l'arithmétique sur ce que vous avez écrit, pas une prévision."
+    },
+    "reflection": {
+      "is": "Ce que vous avez vraiment terminé cette semaine, face à ce qui était prévu.",
+      "does": "Compte les nouvelles entrées de chaque module pour cette semaine et la précédente, compte les étapes de mission faites et restantes, et demande une synthèse courte et honnête de l'écart.",
+      "doesNot": "Rien n'est conservé ici. Chaque appui recalcule à partir de vos données en direct, il n'y a donc aucun historique des réflexions passées — et cela compte ce que vous avez consigné, pas ce que vous avez fait hors de l'application."
+    },
+    "routing": {
+      "is": "Quel modèle a servi quelle requête, et ce que le routage a coûté. Réservé au propriétaire.",
+      "does": "Montre 30 jours de décisions de routage par modèle et par fonction : ce qui a été facturé aux clients, ce que nous avons absorbé sur les tentatives bon marché échouées, et les taux de réussite appris par le routeur.",
+      "doesNot": "Il ne choisit pas les modèles à votre place et ne change rien. C'est un rapport — et un tableau vide signifie qu'aucune décision n'a été enregistrée, pas que le routeur est à l'arrêt."
+    },
+    "systemHealth": {
+      "is": "Ce qui est cassé en production en ce moment. Réservé au propriétaire.",
+      "does": "Liste les erreurs de production dédoublonnées par message, non résolues d'abord, avec le nombre d'occurrences et de personnes touchées, plus les diagnostics de stockage et l'adoption de l'application installée.",
+      "doesNot": "Il ne surveille pas le site à votre place et ne déclenche aucune alerte. Les erreurs apparaissent ici parce que l'application les a enregistrées : ce qui n'a jamais atteint le journal n'est pas ici."
+    },
+    "tradingJournal": {
+      "is": "Vos propres transactions, vos propres règles, comptées.",
+      "does": "Calcule le taux de réussite, le facteur de profit, le gain et la perte moyens, votre courbe de capital, et combien de fois chaque règle que vous avez écrite a été enfreinte — le tout par arithmétique sur les transactions que vous avez saisies.",
+      "doesNot": "C'est un relevé, pas un conseil. Il ne se connecte à aucun courtier, il n'importe aucune transaction, et il ne dit rien de ce que fera un marché."
+    },
+    "tradingWorkflow": {
+      "is": "Tout ce qui touche au trading sur un seul écran.",
+      "does": "Les mêmes transactions que le module Trading, plus leurs liens, leur historique, des motifs par jour, heure, symbole et série de pertes, et des accès directs vers Mentor et Mission.",
+      "doesNot": "Les motifs sont des comptages de transactions déjà faites, pas des prédictions, et ce ne sont pas des conseils en investissement. Ce n'est pas non plus un second jeu de transactions : ce sont les mêmes lignes que le module Trading."
     }
   },
   "helpCentre": {

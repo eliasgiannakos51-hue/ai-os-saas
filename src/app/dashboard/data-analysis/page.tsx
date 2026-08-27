@@ -127,7 +127,12 @@ export default async function DataAnalysisPage({
 
   return (
     <div className="mx-auto w-full max-w-5xl px-4 py-6">
-      <PageHeader icon={BarChart3} title={t("title")} description={t("description")} />
+      <PageHeader
+        icon={BarChart3}
+        title={t("title")}
+        description={t("description")}
+        helpKey="help.dataAnalysis"
+      />
       <AnalysisWorkspace analyses={analyses} current={current} />
     </div>
   );

@@ -106,7 +106,12 @@ export default async function ProductWorkflowPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={PRODUCT_WORKFLOW_ICON} title={t("title")} description={t("description")} />
+        <PageHeader
+          icon={PRODUCT_WORKFLOW_ICON}
+          title={t("title")}
+          description={t("description")}
+          helpKey="help.productWorkflow"
+        />
 
         <PatternInsightCard title={t("insight.title")} messages={insightMessages} />
 

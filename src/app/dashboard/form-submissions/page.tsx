@@ -101,7 +101,12 @@ export default async function FormSubmissionsPage() {
   return (
     <main className="min-h-full bg-dot-grid">
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <PageHeader icon={Inbox} title={t("title")} description={t("description")} />
+        <PageHeader
+          icon={Inbox}
+          title={t("title")}
+          description={t("description")}
+          helpKey="help.formSubmissions"
+        />
 
         {error && <ErrorMessage detail={`loading form submissions: ${error.message}`} />}
 

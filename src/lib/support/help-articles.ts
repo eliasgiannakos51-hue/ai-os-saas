@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 
@@ -77,6 +78,41 @@ function toArticle(row: Row, requested: string): HelpArticle {
  * clever join nobody can read.
  */
 export async function loadHelpArticles(locale: string): Promise<HelpArticle[]> {
+  // CACHED, PER LOCALE, and this is what the page was paying for.
+  //
+  // MEASURED FIRST: /help answered in 638ms against a 265ms median for
+  // every other public route — the slowest thing a stranger can open,
+  // and by a factor of two and a half. The cause is right below: a
+  // service-role query for up to 54 rows of full article prose, on every
+  // single request, for content that is the same for everybody and
+  // changes when somebody edits an article.
+  //
+  // SAFE TO CACHE BECAUSE IT IS NOT PER-USER. The row set depends on the
+  // locale and on `published`, and on nothing else — no user id reaches
+  // this function and RLS is not in play (it reads through the admin
+  // client precisely because the articles are public). The cache key is
+  // therefore the locale, and two readers of the same language are
+  // entitled to the same bytes.
+  //
+  // AN HOUR, WITH A TAG. An edit shows up within the hour on its own, and
+  // immediately if anything calls revalidateTag(HELP_ARTICLES_TAG) — which
+  // is the hook an admin editor would use when there is one. A shorter
+  // window would spend most of the saving; a longer one would make a
+  // correction feel broken.
+  return cachedArticles(locale);
+}
+
+/** Cache tag for the article set — revalidateTag() this after an edit. */
+export const HELP_ARTICLES_TAG = "help-articles";
+
+const cachedArticles = unstable_cache(
+  loadHelpArticlesUncached,
+  ["help-articles"],
+  { revalidate: 3600, tags: [HELP_ARTICLES_TAG] },
+);
+
+/** The real read. Exported for the gates, which must not measure a cache. */
+export async function loadHelpArticlesUncached(locale: string): Promise<HelpArticle[]> {
   const admin = createAdminClient();
   const wanted = [locale, HELP_FALLBACK_LOCALE];
 

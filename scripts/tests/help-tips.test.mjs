@@ -71,9 +71,11 @@ console.log("== 1. the registry describes real pages ==");
 // 15 -> 28: the thirteen pages that had a PageHeader and no "?" — every
 // remaining one. businessModule is the second shared entry, covering the
 // twelve business modules and Ideas.
+// 28 -> 31: Chat, Create Studio and Overview, which render no PageHeader
+// on purpose and mount the tip at a control of their own instead.
 check(
   `pages carrying a tip (${HELP_TIPS.length})`,
-  HELP_TIPS.length >= 28,
+  HELP_TIPS.length >= 31,
   `${HELP_TIPS.length} — this floor rises with each page that gains one, and never falls`,
 );
 // EVERY PAGE WITH A HEADER, or a written reason why not. The floor above
@@ -110,9 +112,44 @@ checkList(
   `every page with a header carries a tip (${withHeader.length} headers)`,
   withHeader.filter((f) => !covered.has(f)),
 );
+// AND THE PAGES THAT RENDER NO HEADER AT ALL, which is where this check
+// was blind: a page with no PageHeader was simply not in the list, so
+// Chat, Create Studio and Overview — the three a confused person opens
+// first — could have had no answer anywhere and nothing would have said
+// so.
+//
+// A page with no header is covered one of three ways, and the third is
+// the only one that is a judgement call, so it is written down with its
+// reason rather than left as an absence.
+const NO_HEADER_EXEMPT = new Map([
+  [
+    "src/app/dashboard/documents/[id]/page.tsx",
+    "one open document, not a feature: its name is whatever the person typed, and the Documents list that got them here carries the tip",
+  ],
+]);
+const noHeader = dashboardPages.filter((f) => !withHeader.includes(f));
+const routed = new Set(HELP_TIPS.map((t) => t.route).filter(Boolean));
+const uncoveredNoHeader = noHeader.filter(
+  (f) =>
+    !routed.has(f) &&
+    !/<BuildModulePage\b/.test(readFileSync(f, "utf8")) &&
+    !NO_HEADER_EXEMPT.has(f),
+);
+checkList(
+  `every page without a header is answered too (${noHeader.length} pages)`,
+  uncoveredNoHeader,
+);
+// An exemption that stops being true is worse than no exemption: it reads
+// as a decision somebody made about the page as it is now.
+checkList(
+  "no exemption is stale",
+  [...NO_HEADER_EXEMPT.keys()].filter(
+    (f) => !existsSync(f) || /<PageHeader\b/.test(readFileSync(f, "utf8")),
+  ),
+);
 checkList(
   "every entry names a file that exists",
-  HELP_TIPS.flatMap((t) => [t.file, ...(t.alsoIn ?? [])]).filter(
+  HELP_TIPS.flatMap((t) => [t.file, ...(t.alsoIn ?? []), ...(t.route ? [t.route] : [])]).filter(
     (f) => !existsSync(f),
   ),
 );
@@ -465,11 +502,25 @@ for (const tip of HELP_TIPS) {
       src.match(new RegExp(`helpKey="${tip.keyPrefix}"`, "g")) ?? []
     ).length;
     check(`${tip.id}: ${path} passes helpKey`, withKey > 0, path);
-    check(
-      `${tip.id}: on all ${headers} of its headers in ${path}`,
-      withKey === headers,
-      `${withKey} of ${headers} <PageHeader> carry it — ${path}`,
-    );
+    if (headers === 0) {
+      // A DIRECT MOUNT. Three components carry the "?" themselves because
+      // their pages render no shared header on purpose. "On all of its
+      // headers" cannot say anything about a file with none — it would
+      // read 0 === 0 and pass over a tip that had been deleted — so the
+      // claim here is the one that is actually true: mounted once, on the
+      // component, as <HelpTip>.
+      check(
+        `${tip.id}: ${path} mounts the tip itself, exactly once`,
+        withKey === 1 && /<HelpTip\b/.test(src),
+        `${withKey} occurrences, <HelpTip> ${/<HelpTip\b/.test(src) ? "present" : "ABSENT"} — ${path}`,
+      );
+    } else {
+      check(
+        `${tip.id}: on all ${headers} of its headers in ${path}`,
+        withKey === headers,
+        `${withKey} of ${headers} <PageHeader> carry it — ${path}`,
+      );
+    }
   }
 }
 const header = readFileSync("src/components/dashboard/page-header.tsx", "utf8");
@@ -488,6 +539,18 @@ console.log("\n== 6. it behaves like a popover, not a tooltip ==");
 const tip = readFileSync("src/components/ui/help-tip.tsx", "utf8");
 // Three paragraphs on a phone: hover cannot open it and moving away must
 // not close it. That means click to open, and three ways out.
+// THE 28px MARGIN BOX IS LOAD-BEARING FOR THREE PAGES.
+//
+// Chat, Create Studio and Overview mount this control inside a row that
+// already exists — a 36px control bar, a 32px heading line, a 40-61px
+// hero — and each of those pages claims "nothing moves" only because the
+// button's 44px hit area is cancelled by a negative margin on every side.
+// Drop the -m-2 and all three rows grow by 16px at once, in the three
+// places a confused person looks first.
+check(
+  "the 44px hit area is still cancelled to a 28px box",
+  /-m-2 flex h-11 w-11/.test(tip),
+);
 check("it opens on press", /onClick=\{\(\) => setOpen/.test(tip));
 check("Escape closes it", /event\.key !== "Escape"/.test(tip));
 check("a press outside closes it", /pointerdown/.test(tip));

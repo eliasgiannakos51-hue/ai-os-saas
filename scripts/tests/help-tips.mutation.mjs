@@ -33,6 +33,7 @@ const AFFILIATE = "src/lib/affiliate/rules.ts";
 const ROUTING = "src/app/dashboard/routing/page.tsx";
 const WORKFLOW = "src/app/dashboard/trading-workflow/page.tsx";
 const MESSAGES = ["en", "el", "zh", "ar"].map((l) => `messages/${l}.json`);
+const CHAT_WORKSPACE = "src/components/chat/chat-workspace.tsx";
 
 const TARGETS = [
   GATE,
@@ -43,6 +44,7 @@ const TARGETS = [
   AFFILIATE,
   ROUTING,
   WORKFLOW,
+  CHAT_WORKSPACE,
   ...MESSAGES,
 ];
 
@@ -72,6 +74,25 @@ const MUTANTS = [
     from: '    alsoIn: ["src/app/dashboard/page.tsx"],\n',
     to: "",
     expect: "every page with a header carries a tip",
+  },
+
+  // ---- the three that mount the tip themselves ----------------------
+  {
+    // The direct-mount branch. "On all of its headers" reads 0 === 0 on a
+    // component with no PageHeader, so a deleted <HelpTip> would have
+    // passed; this is the clause that replaced it.
+    name: "Chat loses the tip it mounts itself",
+    file: CHAT_WORKSPACE,
+    from: '          <HelpTip helpKey="help.chat" />\n',
+    to: "",
+    expect: "chat: src/components/chat/chat-workspace.tsx passes helpKey",
+  },
+  {
+    name: "a page with no header stops being answered anywhere",
+    file: REGISTRY,
+    from: '    route: "src/app/dashboard/create/page.tsx",\n',
+    to: "",
+    expect: "every page without a header is answered too",
   },
 
   // ---- a page appears that nobody wrote a tip for --------------------

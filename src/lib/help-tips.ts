@@ -77,6 +77,22 @@ export type HelpTip = {
    * "?" — the same shape as the bug that check was written for.
    */
   alsoIn?: string[];
+  /**
+   * The dashboard page this tip serves, when `file` is a COMPONENT rather
+   * than a page — repo-relative.
+   *
+   * Three pages render no <PageHeader> at all, and all three are
+   * deliberate: Chat is a full-viewport workspace, Create Studio draws its
+   * own centred hero, and Overview opens with a personal greeting above
+   * the largest heading in the product. Putting a PageHeader on any of
+   * them would be a second title above their own.
+   *
+   * So their "?" is mounted directly, at a control that already exists,
+   * and this names the page it belongs to — which is what lets the gate
+   * check that every dashboard page is answered somewhere, not only the
+   * ones that happen to use the shared header.
+   */
+  route?: string;
   /** Full dotted prefix; `.is`, `.does` and `.doesNot` all exist. */
   keyPrefix: string;
   /**
@@ -346,6 +362,46 @@ export const HELP_TIPS: HelpTip[] = [
     keyPrefix: "help.tradingWorkflow",
     corrects:
       "that a detected pattern is a prediction of the next trade rather than a count of past ones",
+  },
+  {
+    // NO PageHeader, AND THAT IS THE POINT. CreateStudio's own hero is a
+    // centred icon, title and subtitle in the middle of the viewport; a
+    // PageHeader above it would be a title above a title. The "?" goes
+    // beside the hero heading instead, which is where it sits on the
+    // other twenty-eight pages, so it is in the place people have already
+    // learned to look.
+    id: "create",
+    file: "src/components/create/create-studio.tsx",
+    route: "src/app/dashboard/create/page.tsx",
+    keyPrefix: "help.create",
+    corrects:
+      "that it silently guesses when it cannot tell what you meant, instead of saying so",
+  },
+  {
+    // Chat is <main className="h-[calc(100vh-4rem)]"> — full viewport, by
+    // design. Its one persistent row is the control bar at the top, which
+    // already carries the sidebar toggle and is already 44px tall, so the
+    // "?" lands in it without moving anything. It has to be THERE and not
+    // beside the conversation title: a brand new chat has no conversation
+    // yet, and a first-time visitor is exactly who needs the answer.
+    id: "chat",
+    file: "src/components/chat/chat-workspace.tsx",
+    route: "src/app/dashboard/chat/page.tsx",
+    keyPrefix: "help.chat",
+    corrects:
+      "that the assistant can act on your account — create, edit or delete records — from the conversation",
+  },
+  {
+    // The home screen opens with a greeting and one very large question.
+    // The "?" goes beside that question: it is the page's single focal
+    // point and its line box is tall enough to hold a 28px control with
+    // room to spare, so nothing below it moves.
+    id: "overview",
+    file: "src/components/overview/greeting-header.tsx",
+    route: "src/app/dashboard/overview/page.tsx",
+    keyPrefix: "help.overview",
+    corrects:
+      "that the figures come from your bank, your CRM or your inbox rather than from what you logged",
   },
 ];
 

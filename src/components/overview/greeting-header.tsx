@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { timeOfDayGreeting, displayNameFromEmail } from "@/lib/greeting";
+import { HelpTip } from "@/components/ui/help-tip";
 
 export function GreetingHeader({ email }: { email: string }) {
   // Falls back to the device's local time on first render (matches this
@@ -30,9 +31,25 @@ export function GreetingHeader({ email }: { email: string }) {
       <p className="text-sm text-muted sm:text-base" suppressHydrationWarning>
         {greeting.text}, {name} {greeting.emoji}
       </p>
-      <h1 className="hero-gradient-text mt-2 text-4xl font-bold leading-[1.12] tracking-tight sm:text-5xl lg:text-[3.4rem]">
-        {t("heroQuestion")}
-      </h1>
+      {/* THE "?" BESIDE THE PAGE'S ONE FOCAL POINT. This page renders no
+          PageHeader on purpose — a shared header above a personal
+          greeting would be a second title — so the tip is mounted here
+          instead, at the heading somebody already reads first.
+          The `mt-2` moves from the heading to the row, so the gap above
+          is unchanged, and the heading keeps every one of its own
+          classes: hero-gradient-text clips a background to the text and
+          would stop working if it were merged into a flex container.
+          The heading's line box is 40px at the base size, 54px from sm
+          and 61px from lg (leading-[1.12] on 36/48/54.4px). The control's
+          margin box is 28px — h-11 is 44px, and -m-2 takes 8px off each
+          side — so the row's height is the heading's at every breakpoint
+          and nothing below it moves. */}
+      <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+        <h1 className="hero-gradient-text text-4xl font-bold leading-[1.12] tracking-tight sm:text-5xl lg:text-[3.4rem]">
+          {t("heroQuestion")}
+        </h1>
+        <HelpTip helpKey="help.overview" />
+      </div>
     </div>
   );
 }

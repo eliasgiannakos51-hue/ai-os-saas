@@ -179,7 +179,6 @@
       "affiliate": "Your referral link, what you've earned, and how you get paid.",
       "formSubmissions": "Everything visitors sent through a form on your published sites"
     },
-    "comingSoon": "Coming soon",
     "closeMenu": "Close menu"
   },
   "landing": {
@@ -1313,13 +1312,29 @@
     },
     "marketplace": {
       "title": "Marketplace",
-      "description": "Buy and sell agents, automations, and templates — coming soon.",
-      "comingSoon": "Coming soon",
-      "publishButton": "Publish a Template",
+      "description": "Agent templates people have built and shared. Free — nothing is bought or sold here.",
       "empty": {
-        "title": "The Marketplace is not open yet",
-        "why": "The plan is to let people share the agents, website templates and workflows they have built. Nothing here is live — the button below is disabled because the feature does not exist yet, not because of your plan."
-      }
+        "title": "No templates yet",
+        "why": "Templates appear here once somebody shares one from the Agents screen. Sharing one takes a working agent you already have and strips it down to a reusable shape."
+      },
+      "searchPlaceholder": "Search templates",
+      "counted": "Showing {shown} of {total}",
+      "noMatches": "Nothing matches “{query}”.",
+      "badgeCurated": "Built in",
+      "badgeCommunity": "Shared",
+      "badgeMine": "Yours",
+      "usedTimes": "used {count} times",
+      "useThis": "Use this template",
+      "subjectLabel": "What should it be about?",
+      "subjectHelp": "The template does the work; this is the thing it does it on.",
+      "subjectPlaceholder": "our three biggest competitors",
+      "createFromTemplate": "Create the agent",
+      "adopting": "Creating…",
+      "cancel": "Cancel",
+      "adopted": "Agent created for “{subject}”.",
+      "adoptError": "The agent could not be created.",
+      "subjectRequired": "Say what it should be about first.",
+      "loadError": "The templates could not be loaded."
     },
     "automation": {
       "realizeSectionTitle": "Make an idea real",

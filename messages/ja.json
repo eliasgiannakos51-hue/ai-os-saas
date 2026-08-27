@@ -179,7 +179,6 @@
       "affiliate": "紹介リンク、これまでの報酬、受け取り方法。",
       "formSubmissions": "公開サイトのフォームから訪問者が送った内容のすべて"
     },
-    "comingSoon": "近日公開",
     "closeMenu": "メニューを閉じる"
   },
   "landing": {
@@ -1313,13 +1312,29 @@
     },
     "marketplace": {
       "title": "マーケットプレイス",
-      "description": "エージェント、オートメーション、テンプレートを売買 — 近日公開。",
-      "comingSoon": "近日公開",
-      "publishButton": "テンプレートを公開",
+      "description": "ほかの人が作って共有したエージェントのテンプレートです。無料で、ここでは何も売買しません。",
       "empty": {
-        "title": "マーケットプレイスはまだ開いていません",
-        "why": "自分で作ったエージェントやサイトのテンプレート、ワークフローを共有できるようにする構想です。まだ何も動いていません。下のボタンが押せないのは機能が未実装だからで、プランのせいではありません。"
-      }
+        "title": "まだテンプレートがありません",
+        "why": "誰かがエージェント画面から共有すると、ここに表示されます。共有は、すでに動いているエージェントを再利用できる形にします。"
+      },
+      "searchPlaceholder": "テンプレートを検索",
+      "counted": "{total} 件中 {shown} 件を表示",
+      "noMatches": "「{query}」に一致するものはありません。",
+      "badgeCurated": "標準",
+      "badgeCommunity": "共有",
+      "badgeMine": "あなたの",
+      "usedTimes": "{count} 回使用",
+      "useThis": "このテンプレートを使う",
+      "subjectLabel": "何についてですか？",
+      "subjectHelp": "作業はテンプレートが行います。ここに書くのは、その対象です。",
+      "subjectPlaceholder": "主要な競合三社",
+      "createFromTemplate": "エージェントを作成",
+      "adopting": "作成しています…",
+      "cancel": "キャンセル",
+      "adopted": "「{subject}」のエージェントを作成しました。",
+      "adoptError": "エージェントを作成できませんでした。",
+      "subjectRequired": "まず何についてかを書いてください。",
+      "loadError": "テンプレートを読み込めませんでした。"
     },
     "automation": {
       "realizeSectionTitle": "アイデアを実現する",

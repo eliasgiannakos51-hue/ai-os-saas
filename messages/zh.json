@@ -179,7 +179,6 @@
       "affiliate": "你的推广链接、已赚金额，以及如何收款。",
       "formSubmissions": "访客通过已发布网站上的表单提交的全部内容"
     },
-    "comingSoon": "即将推出",
     "closeMenu": "关闭菜单"
   },
   "landing": {
@@ -1313,13 +1312,29 @@
     },
     "marketplace": {
       "title": "市场",
-      "description": "买卖代理、自动化和模板 — 即将推出。",
-      "comingSoon": "即将推出",
-      "publishButton": "发布模板",
+      "description": "其他人构建并分享的智能体模板。免费——这里不买卖任何东西。",
       "empty": {
-        "title": "市场还没有开放",
-        "why": "计划是让大家分享自己做的 agent、网站模板和工作流。这里还没有任何东西上线——下方的按钮是灰的，因为功能还不存在，跟你的套餐无关。"
-      }
+        "title": "还没有模板",
+        "why": "当有人从智能体页面分享模板后，它们会出现在这里。分享会把一个已经在运行的智能体化为可复用的形式。"
+      },
+      "searchPlaceholder": "搜索模板",
+      "counted": "显示 {total} 个中的 {shown} 个",
+      "noMatches": "没有与“{query}”匹配的内容。",
+      "badgeCurated": "内置",
+      "badgeCommunity": "已分享",
+      "badgeMine": "你的",
+      "usedTimes": "已使用 {count} 次",
+      "useThis": "使用此模板",
+      "subjectLabel": "关于什么？",
+      "subjectHelp": "模板负责工作，这里填写它要处理的对象。",
+      "subjectPlaceholder": "我们最大的三家竞争对手",
+      "createFromTemplate": "创建智能体",
+      "adopting": "正在创建…",
+      "cancel": "取消",
+      "adopted": "已为“{subject}”创建智能体。",
+      "adoptError": "无法创建智能体。",
+      "subjectRequired": "请先说明关于什么。",
+      "loadError": "无法加载模板。"
     },
     "automation": {
       "realizeSectionTitle": "将想法变为现实",

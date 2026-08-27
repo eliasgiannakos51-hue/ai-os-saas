@@ -179,7 +179,6 @@
       "affiliate": "Tu enlace de referido, lo que has ganado y cómo cobras.",
       "formSubmissions": "Todo lo que los visitantes enviaron por un formulario en tus sitios publicados"
     },
-    "comingSoon": "Próximamente",
     "closeMenu": "Cerrar el menú"
   },
   "landing": {
@@ -1313,13 +1312,29 @@
     },
     "marketplace": {
       "title": "Mercado",
-      "description": "Compra y vende agentes, automatizaciones y plantillas — próximamente.",
-      "comingSoon": "Próximamente",
-      "publishButton": "Publicar una Plantilla",
+      "description": "Plantillas de agentes creadas y compartidas por otras personas. Gratis: aquí no se compra ni se vende nada.",
       "empty": {
-        "title": "El Marketplace aún no está abierto",
-        "why": "La idea es que la gente comparta los agentes, plantillas de sitios y flujos que ha creado. Aquí no hay nada activo: el botón de abajo está desactivado porque la función todavía no existe, no por su plan."
-      }
+        "title": "Todavía no hay plantillas",
+        "why": "Las plantillas aparecen aquí cuando alguien comparte una desde la pantalla de Agentes. Compartir toma un agente que ya funciona y lo reduce a una forma reutilizable."
+      },
+      "searchPlaceholder": "Buscar plantillas",
+      "counted": "Mostrando {shown} de {total}",
+      "noMatches": "Nada coincide con «{query}».",
+      "badgeCurated": "Incluida",
+      "badgeCommunity": "Compartida",
+      "badgeMine": "Tuya",
+      "usedTimes": "usada {count} veces",
+      "useThis": "Usar esta plantilla",
+      "subjectLabel": "¿Sobre qué debe tratar?",
+      "subjectHelp": "La plantilla hace el trabajo; esto es aquello sobre lo que lo hace.",
+      "subjectPlaceholder": "nuestros tres mayores competidores",
+      "createFromTemplate": "Crear el agente",
+      "adopting": "Creando…",
+      "cancel": "Cancelar",
+      "adopted": "Agente creado para «{subject}».",
+      "adoptError": "No se pudo crear el agente.",
+      "subjectRequired": "Di primero sobre qué debe tratar.",
+      "loadError": "No se pudieron cargar las plantillas."
     },
     "automation": {
       "realizeSectionTitle": "Hacer realidad una idea",

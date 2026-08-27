@@ -179,7 +179,6 @@
       "affiliate": "Il tuo link di invito, quanto hai guadagnato e come vieni pagato.",
       "formSubmissions": "Tutto ciò che i visitatori hanno inviato tramite un modulo sui tuoi siti pubblicati"
     },
-    "comingSoon": "In arrivo",
     "closeMenu": "Chiudi il menu"
   },
   "landing": {
@@ -1313,13 +1312,29 @@
     },
     "marketplace": {
       "title": "Mercato",
-      "description": "Compra e vendi agent, automazioni e template — in arrivo.",
-      "comingSoon": "In arrivo",
-      "publishButton": "Pubblica un Template",
+      "description": "Modelli di agenti creati e condivisi da altri. Gratis — qui non si compra né si vende nulla.",
       "empty": {
-        "title": "Il Marketplace non è ancora aperto",
-        "why": "L'idea è che si possano condividere agent, modelli di sito e flussi già costruiti. Qui non è attivo nulla: il pulsante qui sotto è disabilitato perché la funzione non esiste ancora, non per il tuo piano."
-      }
+        "title": "Ancora nessun modello",
+        "why": "I modelli compaiono qui quando qualcuno ne condivide uno dalla schermata Agenti. Condividere prende un agente che già funziona e lo riduce a una forma riutilizzabile."
+      },
+      "searchPlaceholder": "Cerca modelli",
+      "counted": "Mostrati {shown} di {total}",
+      "noMatches": "Nulla corrisponde a «{query}».",
+      "badgeCurated": "Integrato",
+      "badgeCommunity": "Condiviso",
+      "badgeMine": "Tuo",
+      "usedTimes": "usato {count} volte",
+      "useThis": "Usa questo modello",
+      "subjectLabel": "Di cosa deve occuparsi?",
+      "subjectHelp": "Il modello fa il lavoro; questo è l’oggetto su cui lo fa.",
+      "subjectPlaceholder": "i nostri tre maggiori concorrenti",
+      "createFromTemplate": "Crea l’agente",
+      "adopting": "Creazione…",
+      "cancel": "Annulla",
+      "adopted": "Agente creato per «{subject}».",
+      "adoptError": "Non è stato possibile creare l’agente.",
+      "subjectRequired": "Di’ prima di cosa deve occuparsi.",
+      "loadError": "Non è stato possibile caricare i modelli."
     },
     "automation": {
       "realizeSectionTitle": "Rendi reale un'idea",

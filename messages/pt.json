@@ -179,7 +179,6 @@
       "affiliate": "O teu link de referência, o que ganhaste e como recebes.",
       "formSubmissions": "Tudo o que os visitantes enviaram por um formulário nos seus sites publicados"
     },
-    "comingSoon": "Em breve",
     "closeMenu": "Fechar o menu"
   },
   "landing": {
@@ -1313,13 +1312,29 @@
     },
     "marketplace": {
       "title": "Mercado",
-      "description": "Compre e venda agentes, automações e templates — em breve.",
-      "comingSoon": "Em breve",
-      "publishButton": "Publicar um Template",
+      "description": "Modelos de agentes criados e partilhados por outras pessoas. Grátis — aqui nada se compra nem se vende.",
       "empty": {
-        "title": "O Marketplace ainda não abriu",
-        "why": "A ideia é deixar as pessoas partilharem os agentes, modelos de site e fluxos que criaram. Aqui não há nada ativo — o botão abaixo está desativado porque a funcionalidade ainda não existe, não por causa do seu plano."
-      }
+        "title": "Ainda sem modelos",
+        "why": "Os modelos aparecem aqui quando alguém partilha um a partir do ecrã Agentes. Partilhar pega num agente que já funciona e reduz-o a uma forma reutilizável."
+      },
+      "searchPlaceholder": "Procurar modelos",
+      "counted": "A mostrar {shown} de {total}",
+      "noMatches": "Nada corresponde a «{query}».",
+      "badgeCurated": "Incluído",
+      "badgeCommunity": "Partilhado",
+      "badgeMine": "Teu",
+      "usedTimes": "usado {count} vezes",
+      "useThis": "Usar este modelo",
+      "subjectLabel": "Sobre o que deve ser?",
+      "subjectHelp": "O modelo faz o trabalho; isto é aquilo sobre o que o faz.",
+      "subjectPlaceholder": "os nossos três maiores concorrentes",
+      "createFromTemplate": "Criar o agente",
+      "adopting": "A criar…",
+      "cancel": "Cancelar",
+      "adopted": "Agente criado para «{subject}».",
+      "adoptError": "Não foi possível criar o agente.",
+      "subjectRequired": "Diz primeiro sobre o que deve ser.",
+      "loadError": "Não foi possível carregar os modelos."
     },
     "automation": {
       "realizeSectionTitle": "Torne uma ideia real",

@@ -179,7 +179,6 @@
       "affiliate": "Votre lien de parrainage, vos gains et comment vous êtes payé.",
       "formSubmissions": "Tout ce que les visiteurs ont envoyé via un formulaire sur vos sites publiés"
     },
-    "comingSoon": "Bientôt",
     "closeMenu": "Fermer le menu"
   },
   "landing": {
@@ -1313,13 +1312,29 @@
     },
     "marketplace": {
       "title": "Place de marché",
-      "description": "Achetez et vendez des agents, automatisations et modèles — bientôt disponible.",
-      "comingSoon": "Bientôt disponible",
-      "publishButton": "Publier un Modèle",
+      "description": "Des modèles d’agents créés et partagés par d’autres. Gratuits — rien ne s’achète ni ne se vend ici.",
       "empty": {
-        "title": "La Marketplace n'est pas encore ouverte",
-        "why": "L'idée est de permettre de partager les agents, modèles de sites et workflows créés. Rien n'est actif ici : le bouton ci-dessous est désactivé parce que la fonctionnalité n'existe pas encore, pas à cause de votre formule."
-      }
+        "title": "Pas encore de modèles",
+        "why": "Les modèles apparaissent ici dès que quelqu’un en partage un depuis l’écran Agents. Partager prend un agent qui fonctionne déjà et le réduit à une forme réutilisable."
+      },
+      "searchPlaceholder": "Rechercher des modèles",
+      "counted": "{shown} sur {total} affichés",
+      "noMatches": "Rien ne correspond à « {query} ».",
+      "badgeCurated": "Intégré",
+      "badgeCommunity": "Partagé",
+      "badgeMine": "Le vôtre",
+      "usedTimes": "utilisé {count} fois",
+      "useThis": "Utiliser ce modèle",
+      "subjectLabel": "Sur quoi doit-il porter ?",
+      "subjectHelp": "Le modèle fait le travail ; ceci est ce sur quoi il le fait.",
+      "subjectPlaceholder": "nos trois plus gros concurrents",
+      "createFromTemplate": "Créer l’agent",
+      "adopting": "Création…",
+      "cancel": "Annuler",
+      "adopted": "Agent créé pour « {subject} ».",
+      "adoptError": "L’agent n’a pas pu être créé.",
+      "subjectRequired": "Dites d’abord sur quoi il doit porter.",
+      "loadError": "Les modèles n’ont pas pu être chargés."
     },
     "automation": {
       "realizeSectionTitle": "Concrétiser une idée",

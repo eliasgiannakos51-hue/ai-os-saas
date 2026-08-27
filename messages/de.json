@@ -179,7 +179,6 @@
       "affiliate": "Dein Empfehlungslink, dein Verdienst und wie du ausgezahlt wirst.",
       "formSubmissions": "Alles, was Besucher über ein Formular auf Ihren veröffentlichten Seiten gesendet haben"
     },
-    "comingSoon": "Demnächst",
     "closeMenu": "Menü schließen"
   },
   "landing": {
@@ -1313,13 +1312,29 @@
     },
     "marketplace": {
       "title": "Marktplatz",
-      "description": "Kaufe und verkaufe Agents, Automatisierungen und Vorlagen — bald verfügbar.",
-      "comingSoon": "Bald verfügbar",
-      "publishButton": "Vorlage Veröffentlichen",
+      "description": "Agentenvorlagen, die andere gebaut und geteilt haben. Kostenlos — hier wird nichts gekauft oder verkauft.",
       "empty": {
-        "title": "Der Marketplace ist noch nicht offen",
-        "why": "Geplant ist, dass Leute ihre Agents, Website-Vorlagen und Workflows teilen können. Hier läuft noch nichts — der Button unten ist deaktiviert, weil es die Funktion noch nicht gibt, nicht wegen deines Tarifs."
-      }
+        "title": "Noch keine Vorlagen",
+        "why": "Vorlagen erscheinen hier, sobald jemand eine über den Agenten-Bildschirm teilt. Beim Teilen wird ein bereits funktionierender Agent auf eine wiederverwendbare Form reduziert."
+      },
+      "searchPlaceholder": "Vorlagen durchsuchen",
+      "counted": "{shown} von {total} werden angezeigt",
+      "noMatches": "Nichts passt zu „{query}“.",
+      "badgeCurated": "Mitgeliefert",
+      "badgeCommunity": "Geteilt",
+      "badgeMine": "Deine",
+      "usedTimes": "{count} mal verwendet",
+      "useThis": "Diese Vorlage verwenden",
+      "subjectLabel": "Worum soll es gehen?",
+      "subjectHelp": "Die Vorlage macht die Arbeit; dies ist der Gegenstand, an dem sie sie macht.",
+      "subjectPlaceholder": "unsere drei größten Wettbewerber",
+      "createFromTemplate": "Agent erstellen",
+      "adopting": "Wird erstellt…",
+      "cancel": "Abbrechen",
+      "adopted": "Agent für „{subject}“ erstellt.",
+      "adoptError": "Der Agent konnte nicht erstellt werden.",
+      "subjectRequired": "Sag zuerst, worum es gehen soll.",
+      "loadError": "Die Vorlagen konnten nicht geladen werden."
     },
     "automation": {
       "realizeSectionTitle": "Eine Idee real machen",

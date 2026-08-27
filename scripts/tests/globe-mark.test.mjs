@@ -396,6 +396,15 @@ const MECHANICAL = [
   // while the report is being written; by the time the button exists the
   // thinking is finished.
   "src/components/ui/download-pdf-button.tsx",
+  // Adopting a template. The globe means "a model is working on this", and
+  // here one usually is not: the browser sends the subject the user typed,
+  // so /api/agents/templates/adopt takes the no-fill path — it copies the
+  // template's own task, cron and depth into a row and charges nothing.
+  // What the button waits on is a round trip and an insert. A globe there
+  // would promise thinking that is not happening, and the one adoption that
+  // DOES call the model is the create screen's, which shows the globe
+  // itself.
+  "src/components/marketplace/template-browser.tsx",
 ];
 {
   const spinning = allTsx.filter((f) => /animate-spin/.test(stripComments(readFileSync(f, "utf8")))).sort();

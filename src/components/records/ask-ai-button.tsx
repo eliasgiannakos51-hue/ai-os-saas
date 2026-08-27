@@ -1,9 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { AskAiModal } from "@/components/records/ask-ai-modal";
+// Deferred: the modal is a whole mini-chat and this button appears on
+// every record card and every detail panel in the product.
+const AskAiModal = dynamic(
+  () => import("@/components/records/ask-ai-modal").then((m) => m.AskAiModal),
+  { ssr: false },
+);
 import {
   recordActionClasses,
   recordActionIconClasses,
@@ -65,7 +71,7 @@ export function AskAiButton({
         <Sparkles className={recordActionIconClasses(variant)} />
         {variant !== "icon" && t("buttonLabel")}
       </button>
-      {!onOpen && (
+      {!onOpen && open && (
       <AskAiModal
         open={open}
         onClose={() => setOpen(false)}

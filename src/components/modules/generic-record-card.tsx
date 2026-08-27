@@ -1,15 +1,29 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { Pencil } from "lucide-react";
 import { iconForSlug } from "@/lib/module-icons";
 import { EntityCard } from "@/components/ui/entity-card";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { AskAiButton } from "@/components/records/ask-ai-button";
-import { AskAiModal } from "@/components/records/ask-ai-modal";
+// DEFERRED, AND GATED ON `open`. These two modals were imported at the
+// top and RENDERED UNCONDITIONALLY with open={false} — so every record
+// card on every module page shipped and mounted both of them, for a panel
+// most people never open. Both already return null while closed and both
+// reset their state on close ("every open/close cycle starts fresh", says
+// ask-ai-modal), so mounting them on demand keeps the behaviour and drops
+// them out of the first load.
+const AskAiModal = dynamic(
+  () => import("@/components/records/ask-ai-modal").then((m) => m.AskAiModal),
+  { ssr: false },
+);
 import { LinkToButton } from "@/components/entity-links/link-to-button";
-import { LinkToModal } from "@/components/entity-links/link-to-modal";
+const LinkToModal = dynamic(
+  () => import("@/components/entity-links/link-to-modal").then((m) => m.LinkToModal),
+  { ssr: false },
+);
 import { DeleteButton } from "@/components/delete-button";
 import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
@@ -130,6 +144,7 @@ export function GenericRecordCard({
         </>
       )}
     />
+    {askOpen && (
     <AskAiModal
       open={askOpen}
       onClose={() => setAskOpen(false)}
@@ -138,6 +153,8 @@ export function GenericRecordCard({
       recordId={record.id}
       recordHeadline={headline}
     />
+    )}
+    {linkOpen && (
     <LinkToModal
       open={linkOpen}
       onClose={() => setLinkOpen(false)}
@@ -145,6 +162,7 @@ export function GenericRecordCard({
       sourceId={record.id}
       sourceHeadline={headline}
     />
+    )}
     </>
   );
 }

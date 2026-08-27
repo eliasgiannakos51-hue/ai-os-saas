@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { SearchX, Download } from "lucide-react";
 import type { ModuleConfig } from "@/lib/modules";
@@ -9,10 +10,22 @@ import type { LinkedEntity } from "@/lib/entity-links";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import { GenericAddForm } from "@/components/modules/generic-add-form";
 import { GenericRecordCard } from "@/components/modules/generic-record-card";
-import {
-  GenericRecordDetail,
-  type RecordDetailTab,
-} from "@/components/modules/generic-record-detail";
+import type { RecordDetailTab } from "@/components/modules/generic-record-detail";
+// DEFERRED. The detail panel is the biggest thing in this tree — its own
+// tabs, its own edit form, the linked-entities list — and it renders only
+// after somebody presses a record. It was already gated on
+// `selectedRecord`, so nothing about when it appears changes; what
+// changes is that its code no longer arrives with the list.
+//
+// `type RecordDetailTab` stays a static import above: a type import emits
+// no runtime code, so it cannot pull the module back into the bundle.
+const GenericRecordDetail = dynamic(
+  () =>
+    import("@/components/modules/generic-record-detail").then(
+      (m) => m.GenericRecordDetail,
+    ),
+  { ssr: false },
+);
 import { toCSV, downloadCSV, todayForFilename } from "@/lib/download/table-csv";
 import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { SortToggle } from "@/components/sort-toggle";

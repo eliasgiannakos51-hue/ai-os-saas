@@ -70,7 +70,8 @@
       "preparing": "Preparando…",
       "failed": "No se pudo crear el PDF",
       "notReady": "Todavía no ha terminado"
-    }
+    },
+    "listCapped": "Se muestran las {count, number} más recientes. Las entradas más antiguas siguen guardadas: usa Buscar en mis registros para encontrarlas."
   },
   "sidebar": {
     "groups": {

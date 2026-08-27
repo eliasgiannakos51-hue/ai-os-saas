@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { pageTitle } from "@/lib/page-title";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -20,9 +21,7 @@ export function generateMetadata(): Promise<Metadata> {
 export default async function CodingPage() {
   const t = await getTranslations("coding");
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
 
   // RLS scopes this to the caller. The imported notes from the old

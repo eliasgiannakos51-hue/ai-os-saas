@@ -70,7 +70,8 @@
       "preparing": "準備しています…",
       "failed": "PDFを作成できませんでした",
       "notReady": "まだ完了していません"
-    }
+    },
+    "listCapped": "最新の {count, number} 件を表示しています。それより古い記録も保存されています——「記録の検索」から見つけられます。"
   },
   "sidebar": {
     "groups": {

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { BUSINESS_HEALTH_ICON } from "@/lib/module-icons";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -52,9 +53,7 @@ export function generateMetadata(): Promise<Metadata> {
 export default async function FinancePage() {
   const t = await getTranslations("finance");
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (!isAdminEmail(user.email)) notFound();
 

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { pageTitle } from "@/lib/page-title";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { TradingDisclaimer } from "@/components/trading/trading-disclaimer";
@@ -52,9 +53,7 @@ export default async function TradingJournalPage({
   const t = await getTranslations("dashboard.trading");
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
 
   const accountId = searchParams.account ?? null;

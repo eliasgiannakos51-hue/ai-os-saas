@@ -71,9 +71,17 @@ console.log("\n== 1. it reads the real table, under the user's own session ==");
     /createClient\(\)/.test(page) && !/createAdminClient/.test(page),
     "an admin read would make the RLS policy decorative and one forgotten filter fatal",
   );
+  // THE USER, HOWEVER IT IS OBTAINED, AND THE REDIRECT. This pinned the
+  // literal `auth.getUser()`, which stopped being how any dashboard page
+  // asks: they call lib/auth/current-user.ts's cached helper so the
+  // layout and the page share one round trip instead of making two. The
+  // claim worth pinning is unchanged — this page identifies the caller
+  // and sends an anonymous one to /login — so it is pinned against both
+  // spellings rather than the one that happened to be current.
   ok(
     "...and it signs the user in first",
-    /auth\.getUser\(\)/.test(page) && /redirect\("\/login"\)/.test(page),
+    (/auth\.getUser\(\)/.test(page) || /await getCurrentUser(Result)?\(\)/.test(page)) &&
+      /redirect\("\/login"\)/.test(page),
   );
   // MOST USED FIRST, with a tiebreak — otherwise two never-used templates
   // swap places between page loads and the list looks like it is shuffling.

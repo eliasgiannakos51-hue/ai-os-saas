@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { pageTitle } from "@/lib/page-title";
 import { notFound, redirect } from "next/navigation";
 import { Coins } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -37,9 +38,7 @@ export const fetchCache = "force-no-store";
 export default async function CostsPage() {
   const locale = await getLocale();
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (!isAdminEmail(user.email)) notFound();
 

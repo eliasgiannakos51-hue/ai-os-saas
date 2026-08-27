@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Share2 } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { AffiliateDashboard } from "@/components/affiliate/affiliate-dashboard";
@@ -27,9 +28,7 @@ export default async function AffiliatePage() {
   const t = await getTranslations("dashboard.affiliate");
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
 
   const affiliate = await getAffiliateForUser(user.id);

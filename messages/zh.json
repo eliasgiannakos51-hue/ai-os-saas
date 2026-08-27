@@ -70,7 +70,8 @@
       "preparing": "正在准备…",
       "failed": "无法创建 PDF",
       "notReady": "尚未完成"
-    }
+    },
+    "listCapped": "显示最近的 {count, number} 条。更早的记录仍然保存着——用「搜索我的记录」可以找到它们。"
   },
   "sidebar": {
     "groups": {

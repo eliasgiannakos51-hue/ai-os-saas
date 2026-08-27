@@ -2,11 +2,13 @@ import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
 import { GenericList } from "@/components/modules/generic-list";
 import { getModule } from "@/lib/modules";
+import { RECORD_CAP } from "@/lib/record-cap";
 import { MODULE_ICONS } from "@/lib/module-icons";
 import type { ModuleRecord } from "@/types/module-record";
 import { loadLinkedEntities } from "@/lib/entity-links";
@@ -45,18 +47,21 @@ export default async function ModulePage({
   const t = await getTranslations();
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");
   }
 
+  // CAPPED, AND THE PAGE SAYS SO. This read every row the account had
+  // ever created, with every column, on every visit — and then paginated
+  // in the browser, so the controls at the bottom never saved a byte.
+  // See lib/record-cap.ts for why the number is high rather than small.
   const { data: records, error } = await supabase
     .from(moduleConfig.table)
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(RECORD_CAP);
 
   const recordIds = (records as ModuleRecord[] | null)?.map((r) => r.id) ?? [];
   const [linkedEntities, favoritedIds] = await Promise.all([
@@ -74,7 +79,8 @@ export default async function ModulePage({
     const { data: automationRows } = await supabase
       .from("user_automations")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(RECORD_CAP);
     userAutomations = (automationRows as UserAutomation[] | null) ?? [];
   }
 
@@ -97,6 +103,7 @@ export default async function ModulePage({
 
         <GenericList
           module={moduleConfig}
+          cap={RECORD_CAP}
           records={(records as ModuleRecord[]) ?? []}
           linkedEntities={linkedEntities}
           favoritedIds={favoritedIds}

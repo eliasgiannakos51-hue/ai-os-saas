@@ -31,6 +31,8 @@ import { useSortAndPaginate } from "@/lib/use-sort-and-paginate";
 import { SortToggle } from "@/components/sort-toggle";
 import { PaginationControls } from "@/components/pagination-controls";
 import { EmptyState } from "@/components/empty-state";
+import { ListCappedNotice } from "@/components/ui/list-capped-notice";
+import { isCapped } from "@/lib/record-cap";
 import { ListLayout } from "@/components/ui/list-layout";
 import { CardGrid } from "@/components/ui/entity-card";
 import { matchesSearch } from "@/lib/text/search-match";
@@ -59,11 +61,19 @@ export function GenericList({
   records,
   linkedEntities = {},
   favoritedIds,
+  cap,
 }: {
   module: ModuleConfig;
   records: ModuleRecord[];
   linkedEntities?: Record<string, LinkedEntity[]>;
   favoritedIds?: Set<string>;
+  /**
+   * The server-side row limit this list was read with, when there was
+   * one. Present so the list can SAY it may be cut off — the pagination
+   * below is client-side and pages through whatever arrived, so without
+   * this it would look complete at every page.
+   */
+  cap?: number;
 }) {
   const t = useTranslations("module");
   const tKey = useTranslations();
@@ -116,6 +126,8 @@ export function GenericList({
 
   return (
     <div className="space-y-4">
+      {cap !== undefined && isCapped(records, cap) && <ListCappedNotice cap={cap} />}
+
       {selectedRecord && (
         <GenericRecordDetail
           key={selectedRecord.id}

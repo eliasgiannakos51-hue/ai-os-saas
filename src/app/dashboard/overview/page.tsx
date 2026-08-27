@@ -2,6 +2,7 @@ import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations, getLocale } from "next-intl/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { GreetingHeader } from "@/components/overview/greeting-header";
 import { InsightList, type Insight } from "@/components/onboarding/insight-list";
@@ -71,9 +72,7 @@ export default async function OverviewPage() {
   const tKey = await getTranslations();
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");

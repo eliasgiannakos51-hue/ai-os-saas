@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { pageTitle } from "@/lib/page-title";
 import { notFound, redirect } from "next/navigation";
 import { Activity } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -27,9 +28,7 @@ const PWA_WINDOW_DAYS = 30;
 export default async function SystemHealthPage() {
   const locale = await getLocale();
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) redirect("/login");
 

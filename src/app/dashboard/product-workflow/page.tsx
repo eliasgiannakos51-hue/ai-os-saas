@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ErrorMessage } from "@/components/error-message";
@@ -13,6 +14,7 @@ import { PatternInsightCard } from "@/components/trading-workflow/pattern-insigh
 import { ProductMentorButton } from "@/components/product-workflow/product-mentor-button";
 import { ProductMissionButton } from "@/components/product-workflow/product-mission-button";
 import { getModule } from "@/lib/modules";
+import { RECORD_CAP } from "@/lib/record-cap";
 import { PRODUCT_WORKFLOW_ICON } from "@/lib/module-icons";
 import { loadLinkedEntities } from "@/lib/entity-links";
 import { loadFavoriteIds } from "@/lib/favorites";
@@ -41,9 +43,7 @@ export default async function ProductWorkflowPage() {
   const t = await getTranslations("dashboard.productWorkflow");
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");
@@ -54,10 +54,13 @@ export default async function ProductWorkflowPage() {
     redirect("/dashboard/products");
   }
 
+  // Capped like the Products module page it mirrors — these are the same
+  // rows, so an uncapped read here would undo the cap there.
   const { data: products, error } = await supabase
     .from("products")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(RECORD_CAP);
 
   const productRows = (products as ModuleRecord[] | null) ?? [];
 
@@ -151,7 +154,7 @@ export default async function ProductWorkflowPage() {
           {error && <ErrorMessage detail={`loading products: ${error.message}`} />}
 
 
-          <GenericList module={productsModule} records={productRows} linkedEntities={linkedEntities} favoritedIds={favoritedIds} />
+          <GenericList module={productsModule} cap={RECORD_CAP} records={productRows} linkedEntities={linkedEntities} favoritedIds={favoritedIds} />
         </div>
       </div>
     </main>

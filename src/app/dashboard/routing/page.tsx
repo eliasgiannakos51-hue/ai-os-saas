@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getTranslations, getLocale } from "next-intl/server";
 import { Route } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
 import { pageTitle } from "@/lib/page-title";
@@ -42,9 +43,7 @@ export default async function RoutingPage() {
   // another with nothing choosing between them.
   const locale = await getLocale();
   const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
   if (!isAdminEmail(user.email)) notFound();
 

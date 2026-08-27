@@ -70,7 +70,8 @@
       "preparing": "Preparing…",
       "failed": "The PDF could not be created",
       "notReady": "This is not finished yet"
-    }
+    },
+    "listCapped": "Showing the most recent {count, number}. Older entries are still saved — use Search my records to find them."
   },
   "sidebar": {
     "groups": {

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { PwaProvider } from "@/components/pwa/pwa-provider";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { SidebarProvider } from "@/components/dashboard/sidebar-context";
@@ -29,9 +30,7 @@ export default async function DashboardLayout({
 }) {
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");

@@ -2,6 +2,7 @@ import { pageTitle } from "@/lib/page-title";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { ReflectionGenerator } from "@/components/reflection/reflection-generator";
@@ -20,9 +21,7 @@ export default async function ReflectionPage() {
   const t = await getTranslations("dashboard.reflection");
   const supabase = createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
 
   if (!user) {
     redirect("/login");

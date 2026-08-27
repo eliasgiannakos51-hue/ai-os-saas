@@ -10,6 +10,7 @@ import type { ModuleConfig } from "@/lib/modules";
 import type { ModuleRecord } from "@/types/module-record";
 import { loadLinkedEntities } from "@/lib/entity-links";
 import { loadFavoriteIds } from "@/lib/favorites";
+import { RECORD_CAP } from "@/lib/record-cap";
 import { getPlan, planMeetsMinimum } from "@/lib/billing/plans";
 import { resolveEffectivePlanSlug } from "@/lib/billing/credits";
 import { isAdminEmail } from "@/lib/auth/admin-emails";
@@ -78,10 +79,12 @@ export async function BuildModulePage({
     );
   }
 
+  // Capped like every other module list — see lib/record-cap.ts.
   const { data: records, error } = await supabase
     .from(config.table)
     .select("*")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(RECORD_CAP);
 
   const recordIds = (records as ModuleRecord[] | null)?.map((r) => r.id) ?? [];
   const [linkedEntities, favoritedIds] = await Promise.all([
@@ -100,6 +103,7 @@ export async function BuildModulePage({
 
         <GenericList
           module={config}
+          cap={RECORD_CAP}
           records={(records as ModuleRecord[]) ?? []}
           linkedEntities={linkedEntities}
           favoritedIds={favoritedIds}

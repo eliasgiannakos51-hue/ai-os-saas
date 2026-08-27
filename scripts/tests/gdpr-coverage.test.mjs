@@ -11,6 +11,11 @@
 // Run: node scripts/tests/gdpr-coverage.test.mjs
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { loadTs } from "./load-ts.mjs";
+// The same comment stripper the pre-commit marker checker uses, rather
+// than a fifth copy of it: every legacy table below is discussed at
+// length in the prose that explains WHY it is legacy, and a scan that
+// counted prose would report all six as live.
+import { stripComments } from "../check-mutation-markers.mjs";
 
 let pass = 0;
 const failures = [];
@@ -90,6 +95,92 @@ check(
 // would silently export nothing while looking covered.
 const ghosts = USER_DATA_TABLES.map((t) => t.table).filter((t) => !tablesWithUserId.has(t));
 check("no registry entry points at a table that does not exist", ghosts.length === 0, ghosts.join(", "));
+
+// THE `status` FIELD IS THE OTHER ONE THAT COULD BE ABUSED, and it was
+// written under an instruction to take six "dead" tables out of this
+// registry entirely. Two of them hold rows from replaced features, one of
+// them is written every time somebody presses Quick Start on the home
+// screen, and check 1 above would have gone red on all six — so the field
+// records the state instead of removing the table, and these checks are
+// what stop it drifting back towards being an exemption.
+const STATUSES = ["legacy", "provisioned"];
+const withStatus = USER_DATA_TABLES.filter((t) => t.status);
+check(
+  `every status is one of ${STATUSES.join("/")} and carries a reason (${withStatus.length} tables)`,
+  withStatus.every(
+    (t) => STATUSES.includes(t.status) && typeof t.statusNote === "string" && t.statusNote.length >= 60,
+  ),
+  withStatus
+    .filter((t) => !STATUSES.includes(t.status) || (t.statusNote ?? "").length < 60)
+    .map((t) => t.table)
+    .join(", "),
+);
+// A STATUS NEVER TAKES A TABLE OUT OF THE EXPORT OR THE ERASURE. Whatever
+// it says, an exportable scope is still exported and the erasure list is
+// still the erasure list. Stated as a check so "it is legacy anyway"
+// cannot become the reason somebody drops one.
+for (const t of withStatus) {
+  if (t.scope === "not_personal" || t.scope === "derived_index") continue;
+  check(
+    `${t.table}: still exported despite being ${t.status}`,
+    exportableTables().some((e) => e.table === t.table),
+  );
+}
+// AND THE CLAIM IS CHECKED AGAINST THE CODE. "legacy" means nothing
+// writes it. A table that is a live module's table, or one a workspace
+// template seeds, is not legacy — ai_coding_requests was called dead and
+// is written by the Developer template on every Quick Start.
+//
+// NAMED ANYWHERE IN src, not only in a module config. The first version
+// of this asked whether the table appeared in modules.ts,
+// build-modules.ts, classifier-modules.ts or workspace-templates.ts, and
+// four tables that are perfectly alive — ai_missions, ai_jobs,
+// ai_cost_log, ai_provider_log — went red, because they are reached by a
+// literal `.from("ai_missions")` and belong to no module at all. The
+// question is "does anything in the product name this table", so that is
+// what is asked.
+const srcFiles = [];
+(function walkSrc(dir) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) walkSrc(full);
+    else if (/\.tsx?$/.test(entry.name)) srcFiles.push(full);
+  }
+})("src");
+const SRC = srcFiles
+  .filter((f) => !f.endsWith("src/lib/gdpr/user-data-registry.ts"))
+  .map((f) => readFileSync(f, "utf8"))
+  .join("\n");
+// The two shapes a table name takes in this codebase: a direct query and
+// a module/template config entry. A mention inside a COMMENT does not
+// count — every one of the legacy tables is discussed at length in the
+// prose that explains why it is legacy, and matching that would call all
+// of them live.
+const CODE = stripComments(SRC);
+const namedInCode = (table) =>
+  new RegExp(`from\\(["'\`]${table}["'\`]\\)`).test(CODE) ||
+  new RegExp(`table: "${table}"`).test(CODE);
+const wronglyLegacy = withStatus
+  .filter((t) => t.status === "legacy")
+  .filter((t) => new RegExp(`table: "${t.table}"`).test(CODE))
+  .map((t) => t.table);
+check(
+  "no table called legacy is a live module table or seeded by a template",
+  wronglyLegacy.length === 0,
+  wronglyLegacy.join(", "),
+);
+// The reverse, which is the one that would go unnoticed: a table that
+// stopped being written and is still described as live.
+const aiTables = USER_DATA_TABLES.filter((t) => /^ai_/.test(t.table));
+const unlabelled = aiTables
+  .filter((t) => !t.status)
+  .filter((t) => !namedInCode(t.table))
+  .map((t) => t.table);
+check(
+  `every ai_* table is named in the code or labelled (${aiTables.length} found)`,
+  unlabelled.length === 0,
+  `${unlabelled.join(", ")} — nothing in src names these and no status says so`,
+);
 
 // THE "derived_index" SCOPE IS THE ONE THAT COULD BE ABUSED. It is the
 // only classification that says "personal data, deliberately NOT in the

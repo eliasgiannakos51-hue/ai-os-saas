@@ -48,6 +48,41 @@ export type UserDataTable = {
    *  needs explicit deletion. See erasureNote for why. */
   needsExplicitErasure?: boolean;
   erasureNote?: string;
+  /**
+   * Whether anything in the product still WRITES this table.
+   *
+   *   legacy       a feature that has been replaced. Nothing writes it
+   *                any more; rows from before the replacement are still
+   *                there, and are still that person's data.
+   *   provisioned  the schema exists, the feature is not wired yet. The
+   *                table is empty today.
+   *
+   * NOT A ROUTE OUT OF THE EXPORT, and this field was very nearly the
+   * opposite of that. The instruction it was written for was to take six
+   * "dead" tables OUT of this registry with a comment. Three things were
+   * wrong with that:
+   *
+   *   1. It is not a list of what the UI uses. gdpr-coverage.test.mjs
+   *      reads the SCHEMA and fails when a table with a user_id is not
+   *      classified here. Removing six would turn the build red.
+   *   2. ai_agents and ai_documents hold rows — the old Build-module
+   *      trackers, left in place on purpose when the real Agents and
+   *      Documents features replaced them. Dropping them from the
+   *      registry stops those rows being exported (Art. 15) and stops
+   *      them being deleted with the account (Art. 17). That is not a
+   *      cleanup, it is two breaches.
+   *   3. ai_coding_requests is not dead at all. The Developer workspace
+   *      template writes a row into it every time somebody presses Quick
+   *      Start on the home screen — /api/templates/apply, via
+   *      lib/workspace-templates.ts.
+   *
+   * So the table stays, the export stays, the erasure stays, and what was
+   * missing — which of these a reader can expect to be empty, and why —
+   * is written down instead.
+   */
+  status?: "legacy" | "provisioned";
+  /** Why it is in that state, in prose. Required when `status` is set. */
+  statusNote?: string;
 };
 
 // Every table carrying a user_id, classified. Ordered roughly as a person
@@ -83,7 +118,14 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "user_agents", label: "agents", scope: "user_content" },
   { table: "agent_runs", label: "agent_runs", scope: "user_content" },
   { table: "scheduled_agent_runs", label: "scheduled_agent_runs", scope: "user_content" },
-  { table: "ai_agents", label: "agent_tracker_entries", scope: "user_content" },
+  {
+    table: "ai_agents",
+    label: "agent_tracker_entries",
+    scope: "user_content",
+    status: "legacy",
+    statusNote:
+      "The Build-module tracker /dashboard/agents used to render — rows describing an agent the user would go and set up somewhere else. Real agents live in user_agents now and this table was left untouched rather than migrated, so anybody who used the tracker still has rows in it.",
+  },
   { table: "user_automations", label: "automations_scheduled", scope: "user_content" },
   { table: "user_files", label: "files", scope: "user_content" },
   { table: "file_collections", label: "file_collections", scope: "user_content" },
@@ -109,8 +151,22 @@ export const USER_DATA_TABLES: UserDataTable[] = [
   { table: "ai_apps", label: "ai_apps", scope: "user_content" },
   { table: "ai_campaigns", label: "ai_campaigns", scope: "user_content" },
   { table: "ai_coding_requests", label: "ai_coding_requests", scope: "user_content" },
-  { table: "ai_data_analysis_requests", label: "ai_data_analysis_requests", scope: "user_content" },
-  { table: "ai_documents", label: "ai_documents", scope: "user_content" },
+  {
+    table: "ai_data_analysis_requests",
+    label: "ai_data_analysis_requests",
+    scope: "user_content",
+    status: "legacy",
+    statusNote:
+      "The old Analysis tracker. /dashboard/data-analysis still READS it so those rows stay visible and searchable, and writes go to data_analyses.",
+  },
+  {
+    table: "ai_documents",
+    label: "ai_documents",
+    scope: "user_content",
+    status: "legacy",
+    statusNote:
+      "The tracker the Documents module replaced. Research reports were once inserted here and linked from /dashboard/documents/<id>, which was a guaranteed 404 because the editor reads user_documents — see lib/research/report-to-html.ts. Nothing writes it now; the rows from before are still someone's writing.",
+  },
   { table: "ai_images", label: "ai_images", scope: "user_content" },
   { table: "ai_presentations", label: "ai_presentations", scope: "user_content" },
   { table: "ai_videos", label: "ai_videos", scope: "user_content" },
@@ -177,15 +233,30 @@ export const USER_DATA_TABLES: UserDataTable[] = [
     label: "bank_connections",
     scope: "sensitive_redacted",
     redactColumns: ["access_token_encrypted"],
+    status: "provisioned",
+    statusNote:
+      "V4 #15. The schema, its read-only constraints and its secret guard exist; no provider is connected, so nothing writes this yet. Classified now rather than on the day it is wired, because that is the day it would be forgotten.",
   },
   // The transactions themselves are ordinary personal data and are
   // exported whole. There is deliberately no account number or IBAN in
   // this table to redact.
-  { table: "bank_transactions", label: "bank_transactions", scope: "user_content" },
+  {
+    table: "bank_transactions",
+    label: "bank_transactions",
+    scope: "user_content",
+    status: "provisioned",
+    statusNote: "V4 #15, same as bank_connections — schema present, nothing writes it yet.",
+  },
   // A PUBLIC address. Nothing here is secret — the schema has nowhere to
   // put a private key — so there is nothing to redact, and saying so is
   // more useful than a redactColumns list that would imply there is.
-  { table: "crypto_wallets", label: "crypto_wallets", scope: "user_content" },
+  {
+    table: "crypto_wallets",
+    label: "crypto_wallets",
+    scope: "user_content",
+    status: "provisioned",
+    statusNote: "V4 #15, same as the bank tables — a watch-only address list nothing writes yet.",
+  },
 
   // --- Notifications (V4 #18) ---
   //

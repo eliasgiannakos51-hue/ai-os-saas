@@ -4,11 +4,17 @@ Work that is known, understood and deliberately not done yet. Each entry
 says what is wrong, what it costs to leave, and what fixing it involves —
 so a decision to defer stays a decision rather than becoming an accident.
 
-## V4: Changelog, Feature requests, Affiliate
+## V4: Changelog, Feature requests
 
 Pulled out of the V3 build list on explicit instruction — not being built
 in this pass. Recorded here so "not now" stays a decision on paper rather
 than something that has to be re-remembered from a chat log.
+
+Affiliate was the third name in this heading and is no longer here: it
+shipped. See "Done: the affiliate programme" below. A deferral list that
+still names something built two releases ago is worse than no list — it
+is read as the current state of the product by whoever opens it next,
+which is exactly what this file exists to prevent.
 
 - **Changelog.** A public page (or in-app panel) listing what shipped,
   when. Nothing in the codebase produces this today — no structured
@@ -18,13 +24,30 @@ than something that has to be re-remembered from a chat log.
 - **Feature requests.** A place for users to submit and vote on what to
   build next. No submission table, no voting mechanism, no moderation
   path exist yet — this is a new subsystem, not a page.
-- **Affiliate (program).** Referral tracking, payout accounting, and
-  whatever UI a partner sees. Touches billing (payouts) and needs its own
-  data model; not a small addition on top of what exists.
 
-None of the three block anything already built or already promised on
-/roadmap or /pricing — they were never listed as shipped or as "soon"
-there. Revisit when V4 planning starts.
+Neither blocks anything already built or already promised on /roadmap or
+/pricing — they were never listed as shipped or as "soon" there. Revisit
+when V4 planning starts.
+
+## Done: the affiliate programme
+
+Listed above as "not being built in this pass", and built. What exists:
+
+- `/dashboard/affiliate` — the partner's own screen: their link, their
+  signups, what they are owed, what has been paid.
+- `/r/[code]` — the referral entry point, with attribution held in a
+  cookie until the signup that claims it.
+- `lib/affiliate/rules.ts` — the arithmetic and the four refusals, as
+  pure functions: 25% of every payment for twelve months, a €20 payout
+  floor, no self-referral, no re-referral of somebody already attributed,
+  and no paying twice for one invoice (enforced here AND by a unique
+  index, because a money rule enforced in one place is enforced until the
+  next code path).
+- Stripe Connect for payouts, and `scripts/tests/affiliate.test.mjs`
+  covering the cases an affiliate would construct deliberately.
+
+Recorded rather than deleted: the entry above was wrong for two releases
+and nobody noticed, which is worth leaving a mark for.
 
 ## Done: Help Centre migration to a table with a locale column
 

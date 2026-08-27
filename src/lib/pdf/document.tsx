@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import { pdfFontFamily } from "@/lib/pdf/font-stack";
+import { breakCjkRuns, cjkCharsPerLine } from "@/lib/pdf/cjk-wrap";
 import type { PdfBlock, PdfRun } from "@/lib/pdf/blocks";
 
 /**
@@ -49,27 +50,59 @@ import type { PdfBlock, PdfRun } from "@/lib/pdf/blocks";
  * language or push the decision out to the routes, which is the thing this
  * file exists to prevent.
  */
+// A4 in points, and the padding, as constants — because the column width is
+// derived from them and a hard-coded column would drift the day the margins
+// change. Chinese and Japanese are broken onto lines against this width (see
+// cjk-wrap.ts); nothing else needs it.
+const PAGE_WIDTH = 595.28;
+const PAGE_PADDING_X = 56;
+const COLUMN_WIDTH = PAGE_WIDTH - PAGE_PADDING_X * 2;
+/** The marker column in front of a list item, from `listMarker.width`. */
+const LIST_MARKER_WIDTH = 18;
+/** `page.fontSize`, which every block inherits unless it sets its own. */
+const BODY_SIZE = 11;
+const TITLE_SIZE = 22;
+
 function sheetFor(fontFamily: string[]) {
   return StyleSheet.create({
     page: {
       paddingTop: 56,
       paddingBottom: 64,
-      paddingHorizontal: 56,
+      paddingHorizontal: PAGE_PADDING_X,
       fontFamily,
-      fontSize: 11,
-      lineHeight: 1.55,
+      fontSize: BODY_SIZE,
       color: "#1a1a1a",
     },
-    // THE TITLE'S LINE BOX IS SIZED FOR THE TALLEST SCRIPT IT MIGHT HOLD. At
-    // lineHeight 1.25 an Arabic title overflowed its box and the subtitle was
-    // drawn across it — legible in Latin, unreadable in Arabic, and invisible
-    // to every check that reads characters rather than looking at the page.
+    // NO `lineHeight` ANYWHERE IN THIS SHEET, AND THAT IS THE POINT.
+    //
+    // One number cannot fit three scripts. What each face needs for its own
+    // line box, measured from its metrics and confirmed against Chromium at
+    // `line-height: normal`:
+    //
+    //     Inter            1.210   (Chromium: 1.182)
+    //     Noto Sans SC     1.448   (Chromium: 1.455)
+    //     Noto Sans Arabic 2.112   (Chromium: 2.091)
+    //
+    // Arabic wants nearly twice the box Latin does, because its marks sit far
+    // above and below. A title at lineHeight 1.25 overflowed and the subtitle
+    // was drawn across it; raising it to 1.6 hid the collision without fixing
+    // it — 1.6 is still well under 2.112. And a single tall value would make
+    // every English document airy for the sake of a script it does not use.
+    //
+    // With no lineHeight set, @react-pdf sizes each line from the font
+    // actually used on it, which is what a browser does and what mixed-script
+    // content needs. Measured, ink-band gaps at 14px over four lines:
+    //
+    //     no lineHeight    latin 7px   CJK 15px   arabic 26px
+    //     lineHeight 1.55  latin 17px  CJK 18px   arabic 10px  <- squeezed
+    //
+    // Vertical rhythm comes from margins instead, which do not touch the
+    // line box.
     title: {
       fontFamily,
-      fontSize: 22,
+      fontSize: TITLE_SIZE,
       fontWeight: 700,
-      marginBottom: 8,
-      lineHeight: 1.6,
+      marginBottom: 10,
     },
     subtitle: { fontFamily, fontSize: 9, color: "#6b7280", marginBottom: 22 },
     h1: {
@@ -93,8 +126,11 @@ function sheetFor(fontFamily: string[]) {
       marginTop: 12,
       marginBottom: 4,
     },
-    paragraph: { fontFamily, marginBottom: 8 },
-    listRow: { flexDirection: "row", marginBottom: 5 },
+    // The leading inside a paragraph is now the font's own, which is tighter
+    // for Latin than a styled 1.55 would be. The rhythm comes back between
+    // blocks instead, where a margin cannot squeeze anything.
+    paragraph: { fontFamily, marginBottom: 11 },
+    listRow: { flexDirection: "row", marginBottom: 7 },
     listMarker: { fontFamily, width: 18, color: "#6b7280" },
     listBody: { fontFamily, flex: 1 },
     rule: {
@@ -133,6 +169,8 @@ function runElements(
   keyPrefix: string,
   fontFamily: string[],
   styles: Sheet,
+  /** The column this text will be laid out in, for the CJK line breaker. */
+  column: { width: number; fontSize: number },
 ): React.ReactNode[] {
   return runs.map((run, i) => {
     const key = `${keyPrefix}-${i}`;
@@ -141,16 +179,24 @@ function runElements(
       fontWeight: run.bold ? (700 as const) : (400 as const),
       fontStyle: run.italic ? ("italic" as const) : ("normal" as const),
     };
+    // CHINESE AND JAPANESE ARE BROKEN ONTO LINES HERE, because the engine's
+    // breaker splits on spaces and they have none — one paragraph came out
+    // as one line running off the page. See cjk-wrap.ts for why a
+    // hyphenation callback and a zero-width space both fail.
+    const text = breakCjkRuns(
+      run.text,
+      cjkCharsPerLine(column.width, column.fontSize),
+    );
     if (run.href) {
       return (
         <Link key={key} src={run.href} style={[styles.link, style]}>
-          {run.text}
+          {text}
         </Link>
       );
     }
     return (
       <Text key={key} style={style}>
-        {run.text}
+        {text}
       </Text>
     );
   });
@@ -190,9 +236,14 @@ function blockElements(
             : block.level === 2
               ? styles.h2
               : styles.h3;
+        const fontSize =
+          block.level === 1 ? 16 : block.level === 2 ? 13 : BODY_SIZE;
         return (
           <Text key={key} style={[style, { textAlign: align }]}>
-            {runElements(block.runs, key, fontFamily, styles)}
+            {runElements(block.runs, key, fontFamily, styles, {
+              width: COLUMN_WIDTH,
+              fontSize,
+            })}
           </Text>
         );
       }
@@ -209,14 +260,20 @@ function blockElements(
               {block.marker}
             </Text>
             <Text style={[styles.listBody, { textAlign: align }]}>
-              {runElements(block.runs, key, fontFamily, styles)}
+              {runElements(block.runs, key, fontFamily, styles, {
+                width: COLUMN_WIDTH - LIST_MARKER_WIDTH,
+                fontSize: BODY_SIZE,
+              })}
             </Text>
           </View>
         );
       default:
         return (
           <Text key={key} style={[styles.paragraph, { textAlign: align }]}>
-            {runElements(block.runs, key, fontFamily, styles)}
+            {runElements(block.runs, key, fontFamily, styles, {
+              width: COLUMN_WIDTH,
+              fontSize: BODY_SIZE,
+            })}
           </Text>
         );
     }
@@ -253,7 +310,9 @@ export function PdfDocument({
   return (
     <Document title={title}>
       <Page size="A4" style={styles.page}>
-        <Text style={[styles.title, { textAlign: align }]}>{title}</Text>
+        <Text style={[styles.title, { textAlign: align }]}>
+          {breakCjkRuns(title, cjkCharsPerLine(COLUMN_WIDTH, TITLE_SIZE))}
+        </Text>
         {subtitle ? (
           <Text style={[styles.subtitle, { textAlign: align }]}>
             {subtitle}
